@@ -1,0 +1,33 @@
+[ignore]
+.*/fbjs/.*
+.*/flux/.*
+.*/react-motion/.*
+
+[include]
+
+[libs]
+
+[options]
+esproposal.class_instance_fields=enable
+module.name_mapper.extension='css' -> '<PROJECT_ROOT>/flow/stub/css-modules.js'
+module.name_mapper.extension='less' -> '<PROJECT_ROOT>/flow/stub/css-modules.js'
+module.name_mapper='.*\.\(png\|jpg\|jpeg\|gif\)$' -> '<PROJECT_ROOT>/flow/stub/url-loader.js'
+module.name_mapper='^actions\/\(.*\)$' -> '<PROJECT_ROOT>/src/actions/\1'
+module.name_mapper='^actions$' -> '<PROJECT_ROOT>/src/actions/index.js'
+module.name_mapper='^components\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/\1'
+module.name_mapper='^components$' -> '<PROJECT_ROOT>/src/components/index.js'
+module.name_mapper='^constants\/\(.*\)$' -> '<PROJECT_ROOT>/src/constants/\1'
+module.name_mapper='^constants$' -> '<PROJECT_ROOT>/src/constants/index.js'
+module.name_mapper='^helpers\/\(.*\)$' -> '<PROJECT_ROOT>/src/helpers/\1'
+module.name_mapper='^helpers$' -> '<PROJECT_ROOT>/src/helpers/index.js'
+module.name_mapper='^images\/\(.*\)$' -> '<PROJECT_ROOT>/src/images/\1'
+module.name_mapper='^init\/\(.*\)$' -> '<PROJECT_ROOT>/src/init/\1'
+module.name_mapper='^init$' -> '<PROJECT_ROOT>/src/init/index.js'
+module.name_mapper='^reducers\/\(.*\)$' -> '<PROJECT_ROOT>/src/reducers/\1'
+module.name_mapper='^reducers$' -> '<PROJECT_ROOT>/src/reducers/index.js'
+module.name_mapper='^store$' -> '<PROJECT_ROOT>/src/store/index.js'
+module.name_mapper='^styles\/\(.*\)$' -> '<PROJECT_ROOT>/src/styles/\1'
+module.name_mapper='^types\/\(.*\)$' -> '<PROJECT_ROOT>/src/types/\1'
+module.name_mapper='^types$' -> '<PROJECT_ROOT>/src/types/index.js'
+
+

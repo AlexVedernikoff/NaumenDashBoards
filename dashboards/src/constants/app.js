@@ -1,0 +1,13 @@
+// @flow
+
+const ACTION_EXAMPLE: 'ACTION_EXAMPLE' = 'ACTION_EXAMPLE';
+const UNKNOWN: 'UNKNOWN' = 'UNKNOWN';
+
+const APP_EVENTS = {
+	ACTION_EXAMPLE,
+	UNKNOWN
+};
+
+export {
+	APP_EVENTS
+};
