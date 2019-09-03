@@ -1,8 +1,8 @@
 // @flow
+import 'babel-polyfill';
 import App from 'components/App';
-// import 'babel-polyfill';
-import configureStore from 'store';
-import {defaultGetState} from 'actions/common';
+import {configureStore} from 'store';
+import {MemoryRouter} from 'react-router-dom';
 import {Provider} from 'react-redux';
 import React from 'react';
 import {render} from 'react-dom';
@@ -10,12 +10,22 @@ import {render} from 'react-dom';
 const root = document.getElementById('root');
 
 if (root) {
-	const store = configureStore(defaultGetState());
+	const store = configureStore();
 
-	render(
+	const renderApp = () => (
 		<Provider store={store}>
-			<App />
-		</Provider>,
-		root
+			<MemoryRouter>
+				<App />
+			</MemoryRouter>
+		</Provider>
 	);
+
+	render(renderApp(), root);
+
+	if (module.hot) {
+		module.hot.accept('components/App', () => {
+			require('components/App');
+			render(renderApp(), root)
+		})
+	}
 }

@@ -1,11 +1,10 @@
 // @flow
 import {applyMiddleware, createStore} from 'redux';
 import {createLogger} from 'redux-logger';
-import root from 'reducers';
-import type {State} from 'types';
+import root from './reducer';
 import thunk from 'redux-thunk';
 
-export const configureStore = (initialState: State) => {
+export const configureStore = () => {
 	const environment = process.env.NODE_ENV;
 	const middleware = [thunk];
 
@@ -13,16 +12,5 @@ export const configureStore = (initialState: State) => {
 		middleware.push(createLogger());
 	}
 
-	const store = createStore(root, initialState, applyMiddleware(...middleware));
-
-	if (module && module.hot) {
-		module.hot.accept('../reducers', () => {
-			const nextRootReducer = require('../reducers');
-			store.replaceReducer(nextRootReducer);
-		});
-	}
-
-	return store;
+	return createStore(root, applyMiddleware(...middleware));
 };
-
-export default configureStore;

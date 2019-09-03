@@ -9,7 +9,14 @@
     "url": "https://gitsd.naumen.ru/nordclan/nordclan/issues"
   },
   "contributors": [],
-  "description": "Embedded aplication 'DashBoards' for smp ",
+  "description": "Embedded application 'DashBoards' for 'SMP'",
+  "dependencies": {
+    "react-chartjs-2": "^2.7.6",
+    "react-grid-layout": "^0.16.6",
+    "react-router-dom": "^5.0.1",
+    "react-table": "^6.10.0",
+    "tiny-uuid": "^1.0.0"
+  },
   "devDependencies": {
     "autoprefixer": "^8.6.0",
     "babel-core": "^6.26.3",

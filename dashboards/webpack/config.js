@@ -10,7 +10,8 @@ const resolve = require('./resolve');
 
 module.exports = {
 	devServer: {
-		host: localIp()
+		host: localIp(),
+		historyApiFallback: true
 	},
 	entry: {
 		'index': ['babel-polyfill', './src/index.js']

@@ -6,16 +6,15 @@ const {resolve} = require('path');
 
 module.exports = {
 	alias: {
-		'actions': resolve(define.src, 'actions'),
 		'components': resolve(define.src, 'components'),
+		'containers': resolve(define.src, 'containers'),
 		'constants': resolve(define.src, 'constants'),
+		'types': resolve(define.src, 'types'),
+		'entities': resolve(define.src, 'entities'),
 		'helpers': resolve(define.src, 'helpers'),
 		'images': resolve(define.src, 'images'),
-		'init': resolve(define.src, 'init'),
-		'reducers': resolve(define.src, 'reducers'),
 		'store': resolve(define.src, 'store'),
-		'styles': resolve(define.src, 'styles'),
-		'types': resolve(define.src, 'types')
+		'styles': resolve(define.src, 'styles')
 	},
 	extensions: ['.js', '.jsx']
 };
