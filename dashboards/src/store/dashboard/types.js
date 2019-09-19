@@ -8,6 +8,15 @@ type AddWidget = {
 	payload: Widget
 };
 
+type CloseWidgetPanel = {
+	type: typeof DASHBOARD_EVENTS.CLOSE_WIDGET_PANEL
+};
+
+type EditWidget = {
+	type: typeof DASHBOARD_EVENTS.EDIT_WIDGET,
+	payload: string
+};
+
 type EditLayout = {
 	type: typeof DASHBOARD_EVENTS.EDIT_LAYOUT,
 	payload: Layout
@@ -18,12 +27,23 @@ type UnknownAction = {
 	payload: null
 };
 
+export type updateInfo = {key: string, value: string | boolean};
+
+type UpdateWidget = {
+	type: typeof DASHBOARD_EVENTS.UPDATE_WIDGET,
+	payload: updateInfo
+};
+
 export type DashboardAction =
 	| AddWidget
+	| CloseWidgetPanel
 	| EditLayout
+	| EditWidget
 	| UnknownAction
-;
+	| UpdateWidget
+	;
 
 export type DashboardState = {
-	widgets: Widget[];
+	editedWidgetId: ?string,
+	widgets: Array<Widget>
 };
