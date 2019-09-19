@@ -13,10 +13,11 @@ export class DashboardEditContainer extends Component<Props> {
 	};
 
 	render () {
-		const {widgets} = this.props;
+		const {editWidget, widgets} = this.props;
 
 		return (
 			<ResponsiveLayout
+				editWidget={editWidget}
 				onLayoutChange={this.onLayoutChange}
 				widgets={widgets}
 			/>
