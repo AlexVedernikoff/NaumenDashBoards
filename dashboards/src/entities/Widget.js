@@ -4,8 +4,11 @@ import type {LastPosition, LayoutItem} from 'types/layout';
 import uuid from 'tiny-uuid';
 
 class Widget {
+	description: string;
 	id: string;
-	name: string = 'Название графика';
+	isEditable: boolean;
+	isNameShown: boolean;
+	name: string = 'Название виджета';
 	layout: LayoutItem = {
 		i: '',
 		x: 0,

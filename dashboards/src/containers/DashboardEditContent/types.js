@@ -6,14 +6,18 @@ import type {Widget} from 'entities';
 type EditLayout = (layout: Layout) => ThunkAction;
 
 export type Props = {
-	editLayout: EditLayout;
-	widgets: Widget[];
+	editedWidgetId: string,
+	editLayout: EditLayout,
+	editWidget: () => ThunkAction,
+	widgets: Widget[]
 }
 
 export type ConnectedProps = {
-	widgets: Widget[];
+	editedWidgetId: string,
+	widgets: Widget[]
 };
 
 export type ConnectedFunctions = {
-	editLayout: EditLayout
+	editLayout: EditLayout,
+	editWidget: (id: string) => ThunkAction
 };

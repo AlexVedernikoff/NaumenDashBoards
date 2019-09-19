@@ -1,7 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {editLayout} from 'store/dashboard/actions';
+import {editLayout, editWidget} from 'store/dashboard/actions';
 import type {Layout} from 'types/layout';
 
 /**
@@ -12,13 +12,15 @@ import type {Layout} from 'types/layout';
 export const props = (state: AppState): ConnectedProps => {
 	state.dashboard.widgets.forEach(w => {
 		w.layout.static = false;
+		w.isEditable = true;
 		return w;
 	});
 	return {
 		widgets: state.dashboard.widgets
-	}
+	};
 };
 
 export const functions: ConnectedFunctions = {
-	editLayout: (layout: Layout) => editLayout(layout)
+	editLayout: (layout: Layout) => editLayout(layout),
+	editWidget: (id: string) => editWidget(id)
 };

@@ -10,9 +10,10 @@ import type {ConnectedProps} from './types';
 export const props = (state: AppState): ConnectedProps => {
 	state.dashboard.widgets.forEach(w => {
 		w.layout.static = true;
+		w.isEditable = false;
 	});
 
 	return {
 		widgets: state.dashboard.widgets
-	}
+	};
 };
