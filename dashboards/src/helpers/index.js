@@ -1,6 +1,6 @@
 // @flow
-import {getLastPosition} from './layout';
+import {getNextRow} from './layout';
 
 export {
-	getLastPosition
-}
+	getNextRow
+};

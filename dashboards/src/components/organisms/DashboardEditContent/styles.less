@@ -1,0 +1,37 @@
+@import "/styles/variables.less";
+
+@panel-width: 320px;
+
+:local {
+	.content {
+		height: calc(100% - @top-bar-height - @top-bar-horizontal-padding);
+		position: relative;
+	}
+
+	.common-props {
+		height: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+		position: absolute;
+	}
+
+	.container {
+		.common-props();
+
+		left: 0;
+		right: @panel-width;
+		top: 0;
+	}
+
+	.panel {
+		.common-props();
+
+		background-color: white;
+		right: 0;
+		width: @panel-width;
+	}
+
+	.grid {
+		height: 1200px;
+	}
+}
