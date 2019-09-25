@@ -134,13 +134,13 @@ private Collection<DataSource> mappingDataSource(def fqns)
  */
 private Collection<Attribute> mappingAttribute(def attributes)
 {
-    return api.metainfo.getMetaClass('test').attributes
-            .findAll{it.type.code in VALID_TYPE_ATTRIBUTE}
-            .collect { attribute ->
-                new Attribute(attribute.code,
-                        attribute.title,
-                        attribute.type.code,
-                        attribute.type.relatedMetaClass as String)
+    return attributes
+            .findResults{ it.type.code in VALID_TYPE_ATTRIBUTE
+                    ? new Attribute(it.code,
+                        it.title,
+                        it.type.code,
+                        it.type.relatedMetaClass?.code as String)
+                    : null
             }
 }
 //endregion
