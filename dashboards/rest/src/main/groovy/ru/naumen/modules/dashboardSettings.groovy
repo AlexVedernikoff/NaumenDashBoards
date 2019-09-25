@@ -19,7 +19,7 @@ import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
 @Field private static final String NAMESPACE = 'dashboards'
-@Field private static final String ROLE_MASTER_DASHBOARD = 'ROLE_MASTER_DASHBOARDS'
+@Field private static final String GROUP_MASTER_DASHBOARD = 'ROLE_MASTER_DASHBOARDS'
 //endregion
 
 //region КЛАССЫ
@@ -95,18 +95,14 @@ String getSettings(String classFqn, String contentCode, def user)
  */
 String createDefaultWidgetSettings(Map<String, Object> requestContent, def user)
 {
-    if(true) //TODO: Временная заглушка, проверка на мастера дашбордов
-    {
-        def request = new RequestCreateWidgetSettings(requestContent)
-        String dashboardKey = generateDashboardKey(
-                request.classFqn,
-                request.contentCode,
-                null)
-        String dashboardSettings = api.keyValue.get(NAMESPACE, dashboardKey)
-        return toJson(createWidget(request, dashboardKey, dashboardSettings, null))
-    }
-    throw new Exception(toJson('{"error":"Пользователь не является мастером дашбордов, ' +
-            'сохранение виджета по умолчанию не возможно"}'))
+    checkRightsOnDashboard(user, "создание")
+    def request = new RequestCreateWidgetSettings(requestContent)
+    String dashboardKey = generateDashboardKey(
+            request.classFqn,
+            request.contentCode,
+            null)
+    String dashboardSettings = api.keyValue.get(NAMESPACE, dashboardKey)
+    return toJson(createWidget(request, dashboardKey, dashboardSettings, null))
 }
 
 /**
@@ -117,14 +113,10 @@ String createDefaultWidgetSettings(Map<String, Object> requestContent, def user)
  */
 String editDefaultWidget(Map<String, Object> requestContent, def user)
 {
-    if(true) //TODO: Временная заглушка, проверка на мастера дашбордов
-    {
-        def request = new RequestEditWidgetSettings(requestContent)
-        api.keyValue.put(NAMESPACE, request.widgetKey, request.widgetSettings)
-        return toJson(request.widgetKey)
-    }
-    throw new Exception(toJson('{"error":"Пользователь не является мастером дашбордов, ' +
-            'редактирование виджета по умолчанию не возможно"}'))
+    checkRightsOnDashboard(user, "редактирование")
+    def request = new RequestEditWidgetSettings(requestContent)
+    api.keyValue.put(NAMESPACE, request.widgetKey, request.widgetSettings)
+    return toJson(request.widgetKey)
 }
 
 /**
@@ -216,15 +208,11 @@ String editPersonalWidgetSettings(Map<String, Object> requestContent, def user)
  */
 String deleteDefaultWidget(String classFqn, String contentCode, def user, String key)
 {
-    if(true) //TODO: Временная заглушка, проверка на мастера дашбордов
-    {
-        DashboardSettings dashboardSettings = getDashboardSetting(classFqn, contentCode, null)
-        dashboardSettings.widgetIds -= key
-        saveDashboard(classFqn, contentCode, dashboardSettings.widgetIds, null)
-        return api.keyValue.delete(NAMESPACE, key)
-    }
-    throw new Exception(toJson('{"error":"Пользователь не является мастером дашбордов, ' +
-            'удаление виджета по умолчанию не возможно"}'))
+    checkRightsOnDashboard(user, "удаление")
+    DashboardSettings dashboardSettings = getDashboardSetting(classFqn, contentCode, null)
+    dashboardSettings.widgetIds -= key
+    saveDashboard(classFqn, contentCode, dashboardSettings.widgetIds, null)
+    return api.keyValue.delete(NAMESPACE, key)
 }
 
 /**
@@ -249,6 +237,33 @@ String deleteWidget(String classFqn, String contentCode, def user, String key)
     boardSettings.widgetIds -= key
     String dashboardKey = generateDashboardKey(classFqn, contentCode, user.login)
     return api.keyValue.put(NAMESPACE, dashboardKey, toJson(boardSettings))
+}
+
+/**
+ * Сброс персонального дашборда в дашборд по умолчанию
+ * @param classFqn код типа куда выведено встроенное приложение
+ * @param contentCode код контента встроенного приложения
+ * @param user БО текущего пользователя
+ * @return успех | провал сброса
+ */
+String resetPersonalDashboard(String classFqn, String contentCode, def user)
+{
+    DashboardSettings dashboardSettings = getDashboardSetting(classFqn, contentCode, user.login)
+    dashboardSettings.widgetIds.each {
+        it.endsWith("_${user.login}") ? api.keyValue.delete(NAMESPACE, it) : null
+    }
+    return api.keyValue.delete(NAMESPACE, generateDashboardKey(classFqn, contentCode, user.login))
+}
+
+/**
+ * Есть ли группа мастер дашбордов у пользователя
+ * @param user БО текущего пользователя
+ * @return наличие | отсутствие группы
+ */
+String getAvailabilityGroupMasterDashboard(def user)
+{
+    def employee = utils.get(user.UUID)
+    return toJson(GROUP_MASTER_DASHBOARD in employee.all_Group.code[0])
 }
 //endregion
 
@@ -383,5 +398,20 @@ private String getAllWidgetsSettings(DashboardSettings dashboardSettings)
 {
     Collection<String> settings = dashboardSettings?.widgetIds?.collect { getWidgetSettings(it) }
     return settings
+}
+
+/**
+ * Проверка пользователя на наличие группы мастер дашбордов
+ * @param user БО текущего пользователя
+ * @param messageError сообщение о ошибке
+ */
+private checkRightsOnDashboard(def user, String messageError)
+{
+    def employee = utils.get(user.UUID)
+    if (!(GROUP_MASTER_DASHBOARD in employee.all_Group.code[0]))
+    {
+        throw new Exception(toJson([error: "Пользователь не является мастером дашбордов, " +
+                "${messageError} виджета по умолчанию не возможно"]))
+    }
 }
 //endregion
