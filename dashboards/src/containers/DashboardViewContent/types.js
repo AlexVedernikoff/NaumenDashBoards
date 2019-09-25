@@ -1,10 +1,11 @@
 // @flow
-import type {Widget} from 'entities';
-
-export type Props = {
-	widgets: Widget[]
-}
+import type {ChartMap} from 'store/widgets/charts/types';
+import type {WidgetMap} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
-	widgets: Widget[]
-}
+	charts: ChartMap,
+	isEditable: boolean,
+	widgets: WidgetMap
+};
+
+export type Props = ConnectedProps;

@@ -1,8 +1,8 @@
 // @flow
 export const cols = {
-	lg: 4,
-	md: 4,
-	sm: 2,
+	lg: 12,
+	md: 12,
+	sm: 12,
 	xs: 1,
 	xxs: 1
 };
@@ -15,6 +15,4 @@ export const breakpoints = {
 	xxs: 0
 };
 
-export const rowHeight = 40;
-
-export const width = 1200;
+export const rowHeight = 50;

@@ -4,6 +4,7 @@
 const Autoprefixer = require('autoprefixer');
 const define = require('./define');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const {resolve} = require('path');
 
 module.exports = {
 	rules: [
@@ -46,7 +47,10 @@ module.exports = {
 					loader: 'less-loader',
 					options: {
 						relativeUrls: true,
-						sourceMap: define.development
+						sourceMap: define.development,
+						paths: [
+							resolve(define.src)
+						]
 					}
 				}
 			]

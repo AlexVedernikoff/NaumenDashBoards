@@ -1,25 +1,18 @@
 // @flow
-import type {LastPosition} from 'types/layout';
-import type {Widget} from 'entities';
+import type {WidgetMap} from 'store/widgets/data/types';
 
 /**
- * Получаем последнюю позицию виджета на дашборде
- * @param {Widget[]} widgets - массив виджетов дашборда
- * @returns {LastPosition} - позиция последнего элемента в сетке дашборда
+ * Получаем последнюю позицию виджета по оси Y на дашборде
+ * @param {WidgetMap} widgets - виджеты дашборда
+ * @returns {number} - следующая позиция по вертикали для нового виджета
  */
-export const getLastPosition = (widgets: Widget[]): LastPosition => {
-	let lastLayout;
-	widgets.forEach(({layout}) => {
-		if (!lastLayout || (layout.y > lastLayout.y ||
-			(layout.x > lastLayout.x && layout.y >= lastLayout.y))) {
-			lastLayout = layout;
+export const getNextRow = (widgets: WidgetMap): number => {
+	let nextRow = 0;
+	Object.keys(widgets).forEach(key => {
+		if (widgets[key].layout.y > nextRow) {
+			nextRow = widgets[key].layout.y;
 		}
 	});
 
-	if (lastLayout) {
-		return {
-			x: lastLayout.x + lastLayout.w,
-			y: lastLayout.y
-		}
-	}
+	return nextRow ? nextRow.y + 1 : nextRow;
 };

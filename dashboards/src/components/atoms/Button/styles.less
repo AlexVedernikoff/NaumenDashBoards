@@ -1,0 +1,81 @@
+@import '/styles/variables';
+
+:local {
+	.btn {
+		border: 1.2px solid @grey;
+		border-radius: 2px;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 15px;
+		mix-blend-mode: normal;
+		padding: 10px 15px;
+
+		&:active {
+			background-color: darken(@grey, 10%);
+		}
+	}
+
+	.primary {
+		background-color: @primary!important;
+		border-color: @primary!important;
+		color: white!important;
+
+		&:active {
+			@darken: darken(@primary, 10%);
+			background-color: @darken!important;
+			border-color: @darken!important;
+		}
+	}
+
+	.outline-primary {
+		background-color: white!important;
+		border-color: @primary!important;
+		color: @primary!important;
+
+		&:active {
+			background-color: @primary!important;
+			border-color: @primary!important;
+			color: white;
+		}
+	}
+
+	.info {
+		background-color: @info!important;
+		border-color: @info!important;
+		color: white!important;
+
+		&:active {
+			@darken: darken(@info, 10%);
+			background-color: @darken!important;
+			border-color: @darken!important;
+		}
+	}
+
+	.outline-info {
+		background-color: white!important;
+		border-color: @info!important;
+		color: @info!important;
+
+		&:active {
+			background-color: @info!important;
+			border-color: @info!important;
+			color: white!important;
+		}
+	}
+
+	.icon {
+		border: 2px solid @grey;
+		border-radius: 50%;
+		display: inline-block;
+		mix-blend-mode: normal;
+		padding: 5px;
+		text-align: center;
+		text-decoration: none;
+		width: 35px;
+
+		&:active {
+			background-color: darken(@grey, 10%);
+		}
+	}
+}

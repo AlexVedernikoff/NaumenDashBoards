@@ -3,17 +3,11 @@ import type {AppState} from 'store/types';
 import type {ConnectedProps} from './types';
 
 /**
- * При получении виджетов, делаем их статичными, для запрета Drag'n'Drop
  * @param {AppState} state - глобальное хранилище состояния
  * @returns {ConnectedProps}
  */
-export const props = (state: AppState): ConnectedProps => {
-	state.dashboard.widgets.forEach(w => {
-		w.layout.static = true;
-		w.isEditable = false;
-	});
-
-	return {
-		widgets: state.dashboard.widgets
-	};
-};
+export const props = (state: AppState): ConnectedProps => ({
+	charts: state.widgets.charts.map,
+	isEditable: state.dashboard.isEditable,
+	widgets: state.widgets.data.map
+});

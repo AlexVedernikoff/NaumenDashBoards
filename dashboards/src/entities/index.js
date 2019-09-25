@@ -1,6 +1,6 @@
 // @flow
-import Widget from './Widget'
+import NewWidget from './NewWidget';
 
 export {
-	Widget
+	NewWidget
 };
