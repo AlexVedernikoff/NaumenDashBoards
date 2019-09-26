@@ -38,9 +38,9 @@ class DataSource
      */
     String title
     /**
-     * Количество детей 1 уровня вложенности
+     * Дети источника даннных
      */
-    int countChildren = 0
+    Collection<DataSource> children
 }
 
 /**
@@ -70,9 +70,9 @@ class Attribute
 
 //region REST-МЕТОДЫ
 /**
- * Отдает список источников данных 1 уровня
+ * Отдает список источников данных с детьми
  * @param fqnCode код метакласса
- * @return json список источников данных {заголовок, код, количество детей 1 уровня}
+ * @return json список источников данных {заголовок, код, дети}
  */
 String getDataSources(fqnCode = MAIN_FQN)
 {
@@ -123,9 +123,7 @@ private def getMetaClassChildren(String fqn)
  */
 private Collection<DataSource> mappingDataSource(def fqns)
 {
-    return fqns.collect { fqn ->
-        new DataSource(fqn.code, fqn.title, fqn.children.size())
-    }
+    return fqns.collect { new DataSource(it.code, it.title, mappingDataSource(it.children)) }
 }
 
 /**
