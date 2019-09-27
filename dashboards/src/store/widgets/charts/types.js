@@ -10,6 +10,7 @@ export type ChartData = {
 export type Chart = {
 	data?: ChartData,
 	error: boolean,
+	labels?: Array<string>,
 	loading: boolean
 };
 

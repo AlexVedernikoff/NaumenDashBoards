@@ -3,14 +3,27 @@ import type {
 	AddWidget,
 	DeleteWidget,
 	EditLayout,
-	SetCreatedWidget,
+	ReceiveWidgets,
 	SelectWidget,
+	SetCreatedWidget,
 	UpdateWidget,
+	Widget,
 	WidgetsDataState
 } from './types';
-import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetFormPanel/types';
-import type {Layout} from 'types/layout';
+import type {Layout} from 'utils/layout/types';
 import {NewWidget} from 'entities';
+
+export const setWidgets = (state: WidgetsDataState, {payload}: ReceiveWidgets) => {
+	payload.forEach(w => {
+		state.map[w.id] = w;
+	});
+
+	return {
+		...state,
+		loading: false,
+		map: {...state.map}
+	};
+};
 
 /**
  * Меняем статичность виджетов
@@ -71,7 +84,7 @@ export const addWidget = (state: WidgetsDataState, {payload}: AddWidget): Widget
 /**
  * Создаем полноценный виджет
  * @param {WidgetsDataState} state - хранилище данных виджетов
- * @param {CreateFormData} payload - данные формы создания виджета
+ * @param {Widget} payload - данные виджета
  * @returns {WidgetsDataState}
  */
 export const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidget): WidgetsDataState => {
@@ -81,6 +94,7 @@ export const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidge
 
 	return {
 		...state,
+		saveLoading: false,
 		map: {...state.map}
 	};
 };
@@ -107,13 +121,14 @@ export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): 
 /**
  * Сохраняем изменения данных виджета
  * @param {WidgetsDataState} state - хранилище данных виджетов
- * @param {SaveFormData} payload - данные формы изменения параметров виджета
+ * @param {Widget} payload - данные виджета
  * @returns {WidgetsDataState}
  */
 export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): WidgetsDataState => {
-	state.map[payload.id] = {...state.map[payload.id], ...payload.formData};
+	state.map[payload.id] = payload;
 	return {
 		...state,
+		saveLoading: false,
 		map: {...state.map}
 	};
 };
@@ -135,6 +150,7 @@ export const editLayout = (state: WidgetsDataState, {payload}: EditLayout): Widg
 
 	return {
 		...state,
+		layoutSaveLoading: false,
 		map: {...state.map}
 	};
 };

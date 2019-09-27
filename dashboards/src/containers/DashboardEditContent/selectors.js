@@ -1,21 +1,26 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {editLayout, selectWidget} from 'store/widgets/data/actions';
+import {editLayout, editWidget} from 'store/dashboard/actions';
+import type {Layout} from 'types/layout';
 
 /**
+ *При получении виджетов, отключаем статичность для использования Drag'n'Drop
  * @param {AppState} state - глобальное хранилище состояния
  * @returns {ConnectedProps}
  */
-export const props = (state: AppState): ConnectedProps => ({
-	charts: state.widgets.charts.map,
-	isEditable: state.dashboard.isEditable,
-	newWidget: state.widgets.data.newWidget,
-	selectedWidget: state.widgets.data.selectedWidget,
-	widgets: state.widgets.data.map
-});
+export const props = (state: AppState): ConnectedProps => {
+	state.dashboard.widgets.forEach(w => {
+		w.layout.static = false;
+		w.isEditable = true;
+		return w;
+	});
+	return {
+		widgets: state.dashboard.widgets
+	};
+};
 
 export const functions: ConnectedFunctions = {
-	editLayout,
-	selectWidget
+	editLayout: (layout: Layout) => editLayout(layout),
+	editWidget: (id: string) => editWidget(id)
 };

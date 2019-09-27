@@ -3,20 +3,13 @@ import 'rc-tree-select/assets/index.css';
 import type {DataSource, DataSourceMap} from 'store/sources/data/types';
 import type {Props} from 'containers/DataSourceInput/types';
 import React, {Component} from 'react';
-import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import styles from './styles.less';
-import TreeSelect, {TreeNode} from 'rc-tree-select';
 import ToggleCollapsedIcon from 'icons/form/toggle-collapsed.svg';
 import ToggleExpandedIcon from 'icons/form/toggle-expanded.svg';
+import type {TreeProps} from 'rc-tree-select';
+import TreeSelect, {TreeNode} from 'rc-tree-select';
 
 export class DataSourceInput extends Component<Props> {
-	onChange = ({label, value}: SelectValue) => this.props.onChange({label, value});
-
-	onLoadData = async (treeNode: TreeNode): Promise<void> => {
-		const {fetchDataSources} = this.props;
-		await fetchDataSources(treeNode.props.value);
-	};
-
 	renderRoot = (dataSources: DataSourceMap): TreeNode => (
 		Object.keys(dataSources)
 			.filter(key => dataSources[key].root)
@@ -40,44 +33,33 @@ export class DataSourceInput extends Component<Props> {
 
 	renderChildren = (dataSource: DataSource): TreeNode => {
 		const {dataSources} = this.props;
-		const {children, errorLoadingChildren} = dataSource;
+		const {children} = dataSource;
 
-		if (errorLoadingChildren) {
-			return this.renderChildrenError(dataSource);
-		} else if (Array.isArray(children)) {
+		if (children.length) {
 			return children.map(key => this.renderNode(dataSources[key]));
 		}
 	};
 
-	renderChildrenError = (dataSource: DataSource): TreeNode => (
-		<TreeNode
-			title="Ошибка загрузки"
-			disabled isLeaf={true}
-			value={`${dataSource.value}-error`}
-		/>
-	);
-
-	renderSwitcherIcon = ({expanded}) => {
-		const props = {
+	renderSwitcherIcon = (props: TreeProps) => {
+		const {expanded, isLeaf} = props;
+		const iconProps = {
 			className: styles.icon
 		};
 
-		if (expanded) {
-			return <ToggleExpandedIcon {...props} />;
+		if (!isLeaf) {
+			return expanded ? <ToggleExpandedIcon {...iconProps} /> : <ToggleCollapsedIcon {...iconProps} />;
 		}
-
-		return <ToggleCollapsedIcon {...props} />;
 	};
 
 	render () {
-		const {dataSources, value} = this.props;
+		const {dataSources, onChange, value} = this.props;
 
 		return (
 			<TreeSelect
 				className={styles.select}
 				labelInValue
-				loadData={this.onLoadData}
-				onChange={this.onChange}
+				onChange={onChange}
+				placeholder="Источник"
 				searchPlaceholder="Поиск..."
 				switcherIcon={this.renderSwitcherIcon}
 				treeNodeFilterProp="title"

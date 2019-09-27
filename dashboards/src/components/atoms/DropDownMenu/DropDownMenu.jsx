@@ -3,65 +3,67 @@ import AnimateHeight from 'react-animate-height';
 import ChevronDown from 'icons/form/chevron-down-bare.svg';
 import ChevronUp from 'icons/form/chevron-up-bare.svg';
 import type {Node} from 'react';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {Component, Fragment} from 'react';
-import styles from './style.less';
+import styles from './styles.less';
 
 export class DropDownMenu extends Component<Props, State> {
-    constructor (props) {
-        super(props);
+	state = {
+		height: 0
+	};
 
-        this.state = {
-          height: 0
-        };
-    }
+	toggleMenu = () => {
+		const {height} = this.state;
 
-    renderIcon = () => {
-        const {height} = this.state;
-        const icon = height ? <ChevronDown /> : <ChevronUp />;
+		this.setState({
+			height: height === 0 ? 'auto' : 0
+		});
+	};
 
-        return <div className={styles.icon}>{icon}</div>;
-    };
+	renderIcon = () => {
+		const {height} = this.state;
+		const icon = height ? <ChevronDown/> : <ChevronUp/>;
 
-    renderMenu = () => {
-        const {height} = this.state;
-        return <AnimateHeight duration={500} height={height}>{this.renderMenuItems()}</AnimateHeight>;
-    };
+		return <div className={styles.icon}>{icon}</div>;
+	};
 
-    renderMenuItem = (item: Node): Node => <li>{item}</li>;
+	renderMenuItem = (item: Node): Node => <li>{item}</li>;
 
-    renderMenuItems = (): ChildrenArray<Node> => {
-        const {children} = this.props;
-        return <ul className={styles.menu}>{children.map(this.renderMenuItem)}</ul>;
-    };
+	renderMenuItems = (): Node => {
+		const {children} = this.props;
 
-    renderName = () => {
-        const {name} = this.props;
+		return (
+			<ul className={styles.menu}>
+				{children.map(this.renderMenuItem)}
+			</ul>
+		);
+	};
 
-        return (
-            <div onClick={this.toggleMenu} className={styles.name}>
-                {name}
-                {this.renderIcon()}
-            </div>
-        );
-    };
+	renderName = () => (
+		<div onClick={this.toggleMenu} className={styles.name}>
+			{this.props.name}
+			{this.renderIcon()}
+		</div>
+	);
 
-    toggleMenu = () => {
-        const {height} = this.state;
+	renderMenu = () => {
+		const {height} = this.state;
 
-        this.setState({
-            height: height === 0 ? 'auto' : 0
-        });
-    };
+		return (
+			<AnimateHeight duration={500} height={height}>
+				{this.renderMenuItems()}
+			</AnimateHeight>
+		);
+	};
 
-    render () {
-        return (
-            <Fragment>
-                {this.renderName()}
-                {this.renderMenu()}
-            </Fragment>
-        );
-    }
+	render () {
+		return (
+			<Fragment>
+				{this.renderName()}
+				{this.renderMenu()}
+			</Fragment>
+		);
+	}
 }
 
 export default DropDownMenu;

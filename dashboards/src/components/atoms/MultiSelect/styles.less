@@ -1,60 +1,65 @@
 :local {
-    .icon {
-        color: #767676;
-        margin-right: 10px;
-    }
-    
-    .label {
-        color: #767676;
-        display: block;
-        font-size: 13px;
-        margin-bottom: 6px;
-    }
-    
-    .multiselect {
-        border: none;
-        outline: none;
-    
-        &__control {
-            border-radius: 2px !important;
-            border: 1px solid #BBBBBB;
-        }
-    
-        &__input {
-            font-size: 14px;
-        }
-    
-        &__indicators {
-            svg {
-                margin-left: 15px;
-            }
-        }
-    
-        &__single-value {
-            font-size: 14px;
-        }
-    
-        &__option {
-            font-size: 14px !important;
-    
-            &--is-focused {
-                background-color: #EBEBEB !important;
-            }
-            &--is-selected {
-                background-color: #F4F4F4 !important;
-                color: #000 !important;
-            }
-        }
-    
-        &__placeholder {
-            color: #000;
-            font-size: 13px;
-        }
-    
-        &__menu {
-            border: 1px solid #E4E4E4;
-            box-shadow: 0px 2px 12px rgba(129, 146, 161, 0.2) !important;
-            margin-top: 0 !important;
-        }
-    }
+	@color: #767676;
+	@font-size: 14px;
+
+	.icon {
+		color: @color;
+		margin-right: 10px;
+	}
+
+	.label {
+		color: @color;
+		display: block;
+		font-size: @font-size;
+		margin-bottom: 6px;
+	}
+
+	.multiselect {
+		border: none;
+		outline: none;
+	}
+
+	.multiselect__control {
+		border-radius: 2px !important;
+		border: 1px solid #BBBBBB;
+	}
+
+	.multiselect__input {
+		font-size: @font-size;
+	}
+
+	.multiselect__indicators {
+		svg {
+			margin-left: 15px;
+		}
+	}
+
+	.multiselect__single-value {
+		font-size: @font-size;
+	}
+
+	.multiselect__option {
+		font-size: @font-size !important;
+
+		&--is-focused {
+			background-color: #EBEBEB !important;
+		}
+
+		&--is-selected {
+			background-color: #F4F4F4 !important;
+			color: #000 !important;
+		}
+	}
+
+	.multiselect__placeholder {
+		color: #000;
+		font-size: @font-size;
+	}
+
+	.multiselect__menu {
+		border: 1px solid #E4E4E4;
+		box-shadow: 0px 2px 12px rgba(129, 146, 161, 0.2) !important;
+		margin-top: 0 !important;
+	}
+
 }

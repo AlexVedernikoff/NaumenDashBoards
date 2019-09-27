@@ -1,9 +1,10 @@
 // @flow
 import {CHART_SELECTS} from './selects';
-import getConfig from './core';
+import getConfig, {typeOfCircleCharts} from './core';
 
 export {
-	CHART_SELECTS
+	CHART_SELECTS,
+	typeOfCircleCharts
 };
 
 export default getConfig;

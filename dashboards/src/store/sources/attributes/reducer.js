@@ -8,20 +8,21 @@ const reducer = (state: AttributesState = initialAttributesState, action: Attrib
 		case ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES:
 			state.map[action.payload.fqn] = action.payload.attributes;
 			return {
+				...state,
 				loading: false,
-				...state
+				map: {...state.map}
 			};
 		case ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR:
 			return {
+				...state,
 				error: true,
-				loading: false,
-				...state
+				loading: false
 			};
 		case ATTRIBUTES_EVENTS.REQUEST_ATTRIBUTES:
 			return {
+				...state,
 				error: false,
-				loading: true,
-				...state
+				loading: true
 			};
 		default:
 			return state;

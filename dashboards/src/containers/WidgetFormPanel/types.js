@@ -9,14 +9,15 @@ import type {Widget} from 'store/widgets/data/types';
 export type ConnectedProps = {
 	attributes: AttributeMap,
 	isLoadingAttr: boolean,
+	saveError: boolean,
 	selectedWidget: Widget | NewWidget
 };
 
 export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
-	createWidget: (data: CreateFormData) => ThunkAction,
+	createWidget: (data: CreateFormData, asDefault: boolean) => ThunkAction,
 	fetchAttributes: (fqn: string) => ThunkAction,
-	saveWidget: (data: SaveFormData, id: string) => ThunkAction
+	saveWidget: (data: SaveFormData, asDefault: boolean) => ThunkAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions & FormikProps;

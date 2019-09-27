@@ -27,6 +27,7 @@
 			"tab"
 		],
 		"no-tabs": 0,
+		"require-atomic-updates": "off",
 		"semi": [
 			2,
 			"always"

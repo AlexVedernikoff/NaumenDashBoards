@@ -6,20 +6,59 @@ import styles from './styles.less';
 
 export class Button extends Component<Props> {
 	static defaultProps = {
+		block: false,
+		className: '',
+		disabled: false,
+		outline: false,
 		type: 'button',
 		variant: 'info'
 	};
 
-	getVariant = () => {
-		const {outline, variant} = this.props;
-		return styles[outline ? `outline-${variant}` : variant];
+	getClassNames = () => {
+		const {block, className, outline, variant} = this.props;
+		const color = styles[outline ? `outline-${variant}` : variant];
+		const mixins = [color];
+
+		if (block) {
+			mixins.push(styles.block);
+		}
+
+		if (className) {
+			mixins.push(className);
+		}
+
+		return cn([styles.btn, ...mixins]);
+	};
+
+	getMixins = () => {
+		const {block, className} = this.props;
+		const mixins = [];
+
+		if (block) {
+			mixins.push(styles.block);
+		}
+
+		if (className) {
+			mixins.push(className);
+		}
+
+		return mixins;
 	};
 
 	render () {
-		const {children, onClick, type} = this.props;
+		const {children, disabled, onClick, type} = this.props;
+
+		const className = this.getClassNames();
+		const props = {
+			children,
+			className,
+			disabled,
+			onClick,
+			type
+		};
 
 		return (
-			<button className={cn([styles.btn, this.getVariant()])} onClick={onClick} type={type}>
+			<button {...props}>
 				{children}
 			</button>
 		);

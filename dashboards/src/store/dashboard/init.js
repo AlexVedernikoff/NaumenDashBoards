@@ -3,6 +3,10 @@ import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS} from './constants';
 
 export const initialDashboardState: DashboardState = {
+	context: {
+		contentCode: '',
+		subjectUuid: ''
+	},
 	error: false,
 	isEditable: false,
 	loading: false,

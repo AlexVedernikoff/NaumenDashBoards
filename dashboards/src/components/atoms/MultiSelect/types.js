@@ -1,13 +1,17 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {OptionsType} from 'react-select/src/types';
+import type {Node} from 'react';
+import type {OptionType} from 'react-select/src/types';
 
 export type Props = {
+	getOptionLabel?: (o: OptionType) => string,
+	getOptionValue?: (o: OptionType) => string,
 	isLoading?: boolean,
 	label: string,
 	name: string,
-	onChange: (option: OptionType) => void,
-	options: OptionsType | Attribute[],
+	noOptionsMessage?: () => string | Node,
+	onChange: (name: string, value: OptionType) => void,
+	options: OptionType[] | Attribute[],
 	placeholder: string,
-	value: Attribute,
+	value: Attribute | OptionType | null
 };

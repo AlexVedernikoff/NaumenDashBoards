@@ -4,8 +4,8 @@ import Chart from 'components/molecules/Chart';
 import type {ContainerRef, Props, State} from './types';
 import type {Element} from 'react';
 import {NewWidget} from 'entities';
-import {Responsive as Grid} from 'react-grid-layout';
 import React, {Component} from 'react';
+import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
 import type {Widget} from 'store/widgets/data/types';
 

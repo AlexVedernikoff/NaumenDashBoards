@@ -1,10 +1,11 @@
 // @flow
-import type {LayoutItem} from 'types/layout';
+import type {LayoutItem} from 'utils/layout/types';
 
 class NewWidget {
 	static id: string = 'new';
 
 	aggregate: null = null;
+	breakdown: null = null;
 	chart: null = null;
 	desc: string = '';
 	group: null = null;

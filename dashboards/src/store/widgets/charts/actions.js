@@ -1,35 +1,34 @@
 // @flow
 import aggregate from 'utils/aggregate';
 import axios from 'axios';
-import {BASE_URL, KEY} from 'constants/api';
+import buildUrl from 'utils/api';
 import {CHARTS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
-import type {FormData} from 'components/organisms/WidgetFormPanel/types';
 import group from 'utils/group';
 import type {ReceiveChartPayload} from './types';
+import type {Widget} from 'store/widgets/data/types';
 
 /**
  * Получаем данные графика для конкретного виджета
- * @param {FormData} formData - данные формы редактирования\создания виджета
- * @param {string} id - id виджета
+ * @param {Widget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const fetchChartData = (formData: FormData, id: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	try {
-		const {source, xAxis, yAxis} = formData;
-		dispatch(requestChart(id));
+const fetchChartData = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(requestChart(widget.id));
 
-		const {data: fetchedData} = await axios.post(`${BASE_URL}/exec-post?func=modules.dashboards.getDataForDiagram&accessKey=${KEY}&params='${source.value}','${xAxis.code}','${yAxis.code}'`);
-		const groupType = formData.group ? formData.group.value : '';
+	try {
+		const {source, xAxis, yAxis} = widget;
+		const params = `'${source.value}','${xAxis.code}','${yAxis.code}'`;
+		const {data: fetchedData} = await axios.post(buildUrl('dashboardTestGetData', 'getDataForDiagram', params));
+		const groupType = widget.group ? widget.group.value : '';
 		const dataByGroup = group(groupType, fetchedData);
 
-		const data = aggregate(formData.aggregate.value, dataByGroup);
-
+		const data = aggregate(widget.aggregate.value, dataByGroup);
 		dispatch(
-			receiveChart({data, id})
+			receiveChart({data, id: widget.id})
 		);
 	} catch (e) {
-		dispatch(recordChartError(id));
+		dispatch(recordChartError(widget.id));
 	}
 };
 

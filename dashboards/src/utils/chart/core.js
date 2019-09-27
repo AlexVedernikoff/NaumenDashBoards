@@ -3,6 +3,7 @@ import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import type {Chart, ChartData} from 'store/widgets/charts/types';
 import {CHART_VARIANTS} from './constansts';
 import {DEFAULT_VARIANTS} from 'utils/aggregate/constansts';
+import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import type {Widget} from 'store/widgets/data/types';
 
 /**
@@ -52,7 +53,7 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
  * @param {Chart} chart - данные конкретного графика
  * @returns {ApexOptions}
  */
-const defaultChart = (chart: Chart): ApexOptions => {
+const axisChart = (chart: Chart): ApexOptions => {
 	return {
 		tooltip: {
 			x: {
@@ -66,14 +67,27 @@ const defaultChart = (chart: Chart): ApexOptions => {
 };
 
 /**
+ * Дефолтная примесь графиков (pie, donut)
+ * @param {Chart} chart - данные конкретного графика
+ * @returns {ApexOptions}
+ */
+const circleChart = (chart: Chart): ApexOptions => {
+	return {
+		labels: chart.labels
+	};
+};
+
+/**
  * Получаем ф-цию для генерации необходимой примеси опций
  * @param {string} variant - тип графика выбранный пользователем
  * @returns {Function}
  */
 const resolveMixin = (variant: string): Function => {
 	const variants = {
-		[CHART_VARIANTS.BAR]: defaultChart,
-		[CHART_VARIANTS.LINE]: defaultChart
+		[CHART_VARIANTS.BAR]: axisChart,
+		[CHART_VARIANTS.LINE]: axisChart,
+		[CHART_VARIANTS.PIE]: circleChart,
+		[CHART_VARIANTS.DONUT]: circleChart
 	};
 
 	return variants[variant];
@@ -130,6 +144,12 @@ const getOptions = (widget: Widget, chart: Chart): ApexOptions => {
  * @returns {ApexAxisChartSeries}
  */
 const getSeries = (widget: Widget, chart: Chart): ApexAxisChartSeries => {
+	if (typeOfCircleCharts(widget.chart)) {
+		return {
+			data: chart.data
+		};
+	}
+
 	return [
 		{
 			data: getAxisData(chart.data, 'yAxis'),
@@ -152,6 +172,22 @@ const getConfig = (widget: Widget, chart: Chart) => {
 		options,
 		series
 	};
+};
+
+/**
+ * Проверяем относится ли переданый селект к круговым диаграммам
+ * @param {SelectValue | null} chart - атрибут класса
+ * @returns {boolean}
+ */
+const typeOfCircleCharts = (chart: SelectValue | null) => {
+	const {PIE, DONUT} = CHART_VARIANTS;
+	const circleVariants = [PIE, DONUT];
+
+	return chart && circleVariants.includes(chart.value);
+};
+
+export {
+	typeOfCircleCharts
 };
 
 export default getConfig;

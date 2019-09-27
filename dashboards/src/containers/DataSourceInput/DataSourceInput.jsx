@@ -1,6 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
 import DataSourceInput from 'components/molecules/DataSourceInput';
-import {functions, props} from './selectors';
+import {props} from './selectors';
 
-export default connect(props, functions)(DataSourceInput);
+export default connect(props)(DataSourceInput);

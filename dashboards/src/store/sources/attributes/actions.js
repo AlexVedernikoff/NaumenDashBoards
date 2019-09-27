@@ -1,7 +1,6 @@
 // @flow
 import {ATTRIBUTES_EVENTS} from './constants';
-import axios from 'axios';
-import {BASE_URL, KEY} from 'constants/api';
+import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 
 /**
@@ -12,7 +11,7 @@ import type {Dispatch, ThunkAction} from 'store/types';
 const fetchAttributes = (payload: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(requestAttributes());
 	try {
-		const {data} = await axios.post(`${BASE_URL}/exec-post?accessKey=${KEY}&func=modules.dashboards.getAttributesDataSources&params='${payload}'`);
+		const {data} = await client.post(buildUrl('dashboards', 'getAttributesDataSources', `'${payload}'`));
 		dispatch(receiveAttributes(data, payload));
 	} catch (error) {
 		dispatch(recordAttributesError(payload));

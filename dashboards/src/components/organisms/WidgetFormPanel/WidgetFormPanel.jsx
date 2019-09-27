@@ -12,13 +12,15 @@ import {
 } from 'components/atoms';
 import type {
 	AttrSelectProps,
+	ButtonProps,
 	CheckBoxProps,
 	SelectProps,
 	SelectValue,
+	State,
 	TextAreaProps,
 	TreeSelectProps
 } from './types';
-import {CHART_SELECTS} from 'utils/chart';
+import {CHART_SELECTS, typeOfCircleCharts} from 'utils/chart';
 import DataSourceInput from 'containers/DataSourceInput';
 import {getActualAggregate, getAggregateOptions, typeOfExtendedAggregate} from 'utils/aggregate';
 import {getGroupOptions, typeOfExtendedGroups} from 'utils/group';
@@ -28,25 +30,46 @@ import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
-export class WidgetFormPanel extends Component<Props> {
+export class WidgetFormPanel extends Component<Props, State> {
+	state = {
+		attributes: []
+	};
+
+	static getDerivedStateFromProps (props: Props, state: State) {
+		const {attributes, fetchAttributes, values} = props;
+		const {source} = values;
+		let currentAttr = [];
+
+		if (source && !attributes[source.value]) {
+			fetchAttributes(source.value);
+		}
+
+		if (source && attributes[source.value]) {
+			currentAttr = attributes[source.value];
+		}
+
+		state.attributes = currentAttr;
+		return state;
+	}
+
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
-	handleSelect = (value: OptionType, name: string) => this.props.setFieldValue(name, value);
+	handleSelect = (name: string, value: OptionType) => this.props.setFieldValue(name, value);
 
-	handleSelectXAxis = (value: OptionType) => {
+	handleSelectXAxis = (name: string, value: OptionType) => {
 		const {setFieldValue} = this.props;
 
-		setFieldValue('xAxis', value);
+		setFieldValue(name, value);
 
 		if (!typeOfExtendedGroups(value)) {
 			setFieldValue('group', null);
 		}
 	};
 
-	handleSelectYAxis = (value: OptionType) => {
+	handleSelectYAxis = (name: string, value: OptionType) => {
 		const {setFieldValue, values} = this.props;
 
-		setFieldValue('yAxis', value);
+		setFieldValue(name, value);
 
 		if (!typeOfExtendedAggregate(value)) {
 			setFieldValue('aggregate', getActualAggregate(value, values.group));
@@ -57,30 +80,25 @@ export class WidgetFormPanel extends Component<Props> {
 		const {attributes, fetchAttributes, setFieldValue} = this.props;
 
 		setFieldValue('source', source);
-		['xAxis', 'yAxis', 'aggregate', 'group'].forEach(k => setFieldValue(k, null));
 
 		if (!attributes[source.value]) {
 			fetchAttributes(source.value);
 		}
 	};
 
-	renderAttrSelect = (props: AttrSelectProps) => {
-		const {isLoading, label, name, onChange, options, placeholder, value} = props;
+	handleSubmit = async (asDefault: boolean) => {
+		const {setFieldValue, submitForm} = this.props;
 
-		return (
-			<div className={styles.multiselectContainer}>
-				<AttrSelect
-					isLoading={isLoading}
-					label={label}
-					name={name}
-					onChange={onChange}
-					options={options}
-					placeholder={placeholder}
-					value={value}
-				/>
-				<ErrorMessage name={name}/>
-			</div>
-		);
+		await setFieldValue('asDefault', asDefault);
+		submitForm();
+	};
+
+	handleSave = () => {
+		this.handleSubmit(false);
+	};
+
+	handleSaveAsDefault = () => {
+		this.handleSubmit(true);
 	};
 
 	renderCheckBox = (props: CheckBoxProps) => {
@@ -99,55 +117,228 @@ export class WidgetFormPanel extends Component<Props> {
 		);
 	};
 
-	renderControlButtons = () => {
-		const {cancelForm} = this.props;
+	renderLegendField = (field: CheckBoxProps) => (
+		<div className={styles.checkboxContainerLeft}>
+			{this.renderCheckBox(field)}
+			<Divider className={styles.dividerLeft}/>
+		</div>
+	);
+
+	renderTreeSelect = (props: TreeSelectProps) => {
+		const {name, value} = props;
+
+		return (
+			<div className={styles.sourceContainer}>
+				<DataSourceInput
+					onChange={this.handleSelectSource}
+					value={value}
+				/>
+				<ErrorMessage name={name}/>
+			</div>
+		);
+	};
+
+	renderSelect = (props: SelectProps) => {
+		const {label, name, onChange, options, placeholder, value} = props;
+
+		return (
+			<div className={styles.multiselectContainer}>
+				<MultiSelect
+					label={label}
+					name={name}
+					onChange={onChange || this.handleSelect}
+					options={options}
+					placeholder={placeholder}
+					value={value}
+				/>
+				<ErrorMessage name={name}/>
+			</div>
+		);
+	};
+
+	renderAttrSelect = (props: AttrSelectProps) => {
+		const {isLoadingAttr} = this.props;
+		const {attributes} = this.state;
+		const {label, name, onChange, placeholder, value} = props;
+
+		return (
+			<div className={styles.multiselectContainer}>
+				<AttrSelect
+					isLoading={isLoadingAttr}
+					label={label}
+					name={name}
+					onChange={onChange || this.handleSelect}
+					options={attributes}
+					placeholder={placeholder}
+					value={value}
+				/>
+				<ErrorMessage name={name}/>
+			</div>
+		);
+	};
+
+	renderButton = (props: ButtonProps) => {
+		const {block, disabled, onClick, text, variant} = props;
+
+		return (
+			<div className={styles.buttonContainer}>
+				<Button className="mt-1" disabled={disabled} block={block} onClick={onClick} variant={variant}>
+					{text}
+				</Button>
+			</div>
+		);
+	};
+
+	renderTextWithIcon = (name: string) => <TextWithIcon name={name}/>;
+
+	renderTextArea = (props: TextAreaProps) => {
+		const {handleBlur, handleChange} = this.props;
+		const {label, name, placeholder, value} = props;
+
+		return (
+			<div className={styles.textareaContainer}>
+				<TextArea
+					label={label}
+					name={name}
+					onBlur={handleBlur}
+					onChange={handleChange}
+					onReset={this.handleResetTextArea}
+					placeholder={placeholder}
+					value={value}
+				/>
+				<ErrorMessage name={name}/>
+			</div>
+		);
+	};
+
+	renderVisibilityLegend = () => {
+		const {values} = this.props;
+
+		const fields = [
+			{
+				label: 'Выводить название осей',
+				name: 'areAxisesNamesShown',
+				value: values.areAxisesNamesShown
+			},
+			{
+				label: 'Выводить подписи осей',
+				name: 'areAxisesLabelsShown',
+				value: values.areAxisesLabelsShown
+			},
+			{
+				label: 'Выводить подписи значений',
+				name: 'areAxisesMeaningsShown',
+				value: values.areAxisesMeaningsShown
+			}
+		];
+
+		return (
+			<div className={styles.dropdownMenuContainer}>
+				<DropDownMenu name="Редактировать легенду">
+					{fields.map(this.renderLegendField)}
+				</DropDownMenu>
+			</div>
+		);
+	};
+
+	renderAxisInputs = () => {
+		const {values} = this.props;
+
+		const xAxis: AttrSelectProps = {
+			label: 'Ось X',
+			name: 'xAxis',
+			onChange: this.handleSelectXAxis,
+			placeholder: 'Ось X',
+			value: values.xAxis
+		};
+
+		const group: SelectProps = {
+			label: 'Группировка',
+			name: 'group',
+			options: getGroupOptions(values.xAxis),
+			placeholder: 'Группировка',
+			value: values.group
+		};
+
+		const yAxis: AttrSelectProps = {
+			label: 'Ось Y',
+			name: 'yAxis',
+			onChange: this.handleSelectYAxis,
+			placeholder: 'Ось Y',
+			value: values.yAxis
+		};
+
+		const aggregate: SelectProps = {
+			label: 'Агрегация',
+			name: 'aggregate',
+			options: getAggregateOptions(values.yAxis),
+			placeholder: 'Агрегация',
+			value: values.aggregate
+		};
 
 		return (
 			<Fragment>
-				<div className={styles.buttonContainer}>
-					<Button type="submit">Применить</Button>
-				</div>
-				<div className={styles.buttonContainer}>
-					<Button outline variant='bare' onClick={cancelForm}>Отмена</Button>
-				</div>
+				{this.renderAttrSelect(xAxis)}
+				{typeOfExtendedGroups(values.xAxis) && this.renderSelect(group)}
+				{this.renderAttrSelect(yAxis)}
+				{this.renderSelect(aggregate)}
 			</Fragment>
 		);
 	};
 
-	renderDropDown = (axisesVisibility, axisesLabelsVisibility, axisesMeaningsVisibility) => (
-		<div className={styles.dropdownMenuContainer}>
-			<DropDownMenu name="Редактировать легенду">
-				<div className={styles.checkboxContainerLeft}>
-					{this.renderCheckBox(axisesVisibility)}
-					<Divider className={styles.dividerLeft}/>
-				</div>
-				<div className={styles.checkboxContainerLeft}>
-					{this.renderCheckBox(axisesLabelsVisibility)}
-					<Divider className={styles.dividerLeft}/>
-				</div>
-				<div className={styles.checkboxContainerLeft}>
-					{this.renderCheckBox(axisesMeaningsVisibility)}
-					<Divider className={styles.dividerLeft}/>
-				</div>
-			</DropDownMenu>
-		</div>
-	);
+	renderControlButtons = () => {
+		const {cancelForm, saveLoading} = this.props;
 
-	renderFooter = () => (
-		<div className={styles.footer}>
-			{this.renderControlButtons()}
-		</div>
-	);
+		const saveAsDefault: ButtonProps = {
+			block: true,
+			disabled: saveLoading,
+			onClick: this.handleSaveAsDefault,
+			text: 'Сохранить по умолчанию'
+		};
 
-	renderForm = () => {
-		const {
-			attributes,
-			isLoadingAttr,
-			handleSubmit,
-			values
-		} = this.props;
+		const save: ButtonProps = {
+			block: true,
+			disabled: saveLoading,
+			onClick: this.handleSave,
+			text: 'Сохранить'
+		};
 
-		const attrOptions = (values.source && attributes[values.source.value]) || [];
+		const cancel: ButtonProps = {
+			block: true,
+			onClick: cancelForm,
+			text: 'Сохранить',
+			variant: 'bare'
+		};
+
+		return (
+			<Fragment>
+				{this.renderButton(saveAsDefault)}
+				{this.renderButton(save)}
+				{this.renderButton(cancel)}
+			</Fragment>
+		);
+	};
+
+	renderError = () => {
+		const {saveError} = this.props;
+
+		if (saveError) {
+			return <div className="mt-1">Ошибка сохранения</div>;
+		}
+	};
+
+	renderHeader = () => {
+		const {values} = this.props;
+
+		return (
+			<div className={styles.header}>
+				<Title className={styles.title}>{values.name}</Title>
+			</div>
+		);
+	};
+
+	renderMain = () => {
+		const {values} = this.props;
 
 		const name: TextAreaProps = {
 			label: 'Название виджета',
@@ -160,24 +351,6 @@ export class WidgetFormPanel extends Component<Props> {
 			label: 'Название виджета',
 			name: 'isNameShown',
 			value: values.isNameShown
-		};
-
-		const axisesVisibility: CheckBoxProps = {
-			label: 'Выводить название осей',
-			name: 'areAxisesNamesShown',
-			value: values.areAxisesNamesShown
-		};
-
-		const axisesLabelsVisibility: CheckBoxProps = {
-			label: 'Выводить подписи осей',
-			name: 'areAxisesLabelsShown',
-			value: values.areAxisesLabelsShown
-		};
-
-		const axisesMeaningsVisibility: CheckBoxProps = {
-			label: 'Выводить подписи значений',
-			name: 'areAxisesMeaningsShown',
-			value: values.areAxisesMeaningsShown
 		};
 
 		const desc: TextAreaProps = {
@@ -206,177 +379,69 @@ export class WidgetFormPanel extends Component<Props> {
 		};
 
 		const source: TreeSelectProps = {
+			name: 'source',
 			label: 'Источник',
-			name: 'desc',
 			value: values.source
 		};
 
 		const chart: SelectProps = {
+			label: 'Список диаграмм',
 			name: 'chart',
+			onChange: this.handleSelect,
 			options: CHART_SELECTS,
 			placeholder: 'Список диаграмм',
 			value: values.chart
 		};
 
-		const xAxis: AttrSelectProps = {
-			isLoading: isLoadingAttr,
-			label: 'Ось X',
-			name: 'xAxis',
-			onChange: this.handleSelectXAxis,
-			options: attrOptions,
-			placeholder: 'Ось X',
-			value: values.xAxis
-		};
-
-		const group: SelectProps = {
-			name: 'chart',
-			options: getGroupOptions(values.xAxis),
-			placeholder: 'Группировка',
-			value: values.group
-		};
-
-		const yAxis: AttrSelectProps = {
-			isLoading: isLoadingAttr,
-			label: 'Ось Y',
-			name: 'yAxis',
-			onChange: this.handleSelectYAxis,
-			options: attrOptions,
-			placeholder: 'Ось T',
-			value: values.yAxis
-		};
-
-		const aggregate: SelectProps = {
-			name: 'aggregate',
-			options: getAggregateOptions(values.yAxis),
-			placeholder: 'Агрегация',
-			value: values.aggregate
+		const breakdown: AttrSelectProps = {
+			label: 'Разбивка',
+			name: 'breakdown',
+			placeholder: 'Разбивка',
+			value: values.breakdown
 		};
 
 		return (
-			<form onSubmit={handleSubmit} className={styles.form}>
-				{this.renderHeader('Новый виджет')}
-				{this.renderMain(
-					aggregate,
-					axisesLabelsVisibility,
-					axisesMeaningsVisibility,
-					axisesVisibility,
-					chart,
-					desc,
-					group,
-					legendPosition,
-					legendVisibility,
-					name,
-					nameVisibility,
-					source,
-					values,
-					xAxis,
-					yAxis
-				)}
-				{this.renderFooter()}
-			</form>
+			<section className={styles.main}>
+				{this.renderTextArea(name)}
+				{this.renderTextArea(desc)}
+				<Divider />
+				{this.renderCheckBox(nameVisibility)}
+				<Divider />
+				{this.renderCheckBox(legendVisibility)}
+				{this.renderSelect(legendPosition)}
+				{this.renderVisibilityLegend()}
+				{this.renderTreeSelect(source)}
+				{this.renderSelect(chart)}
+				{!typeOfCircleCharts(values.chart) && this.renderAxisInputs()}
+				{this.renderAttrSelect(breakdown)}
+				<div className={styles.featuresContainer}>
+					<Divider />
+					{this.renderTextWithIcon('Фильтрация')}
+					<Divider />
+					{this.renderTextWithIcon('Показатель')}
+					<Divider />
+					{this.renderTextWithIcon('Параметр')}
+				</div>
+			</section>
 		);
 	};
 
-	renderHeader = (name) => (
-		<div className={styles.header}>
-			<Title className={styles.title}>{name}</Title>
+	renderFooter = () => (
+		<div className={styles.footer}>
+			{this.renderError()}
+			{this.renderControlButtons()}
 		</div>
 	);
 
-	renderMain = (
-		aggregate,
-		axisesLabelsVisibility,
-		axisesMeaningsVisibility,
-		axisesVisibility,
-		chart,
-		desc,
-		group,
-		legendPosition,
-		legendVisibility,
-		name,
-		nameVisibility,
-		source,
-		values,
-		xAxis,
-		yAxis
-	) => (
-		<section className={styles.main}>
-			{this.renderTextArea(name)}
-			{this.renderTextArea(desc)}
-			<Divider />
-			{this.renderCheckBox(nameVisibility)}
-			<Divider />
-			{this.renderCheckBox(legendVisibility)}
-			{this.renderSelect(legendPosition)}
-			{this.renderDropDown(axisesVisibility, axisesLabelsVisibility, axisesMeaningsVisibility)}
-			{this.renderTreeSelect(source)}
-			{this.renderSelect(chart)}
-			{this.renderAttrSelect(xAxis)}
-			{typeOfExtendedGroups(values.xAxis) && this.renderSelect(group)}
-			{this.renderAttrSelect(yAxis)}
-			{this.renderSelect(aggregate)}
-			<div className={styles.featuresContainer}>
-				<Divider />
-				{this.renderTextWithIcon('Фильтрация')}
-				<Divider />
-				{this.renderTextWithIcon('Показатель')}
-				<Divider />
-				{this.renderTextWithIcon('Параметр')}
-			</div>
-		</section>
-	);
-
-	renderSelect = (props: SelectProps) => {
-		const {label, name, options, placeholder, value} = props;
+	renderForm = () => {
+		const {handleSubmit} = this.props;
 
 		return (
-			<div className={styles.multiselectContainer}>
-				<MultiSelect
-					label={label}
-					name={name}
-					onChange={this.handleSelect}
-					options={options}
-					placeholder={placeholder}
-					value={value}
-				/>
-				<ErrorMessage name={name}/>
-			</div>
-		);
-	};
-
-	renderTextArea = (props: TextAreaProps) => {
-		const {handleBlur, handleChange} = this.props;
-		const {label, name, placeholder, value} = props;
-
-		return (
-			<div className={styles.textareaContainer}>
-				<TextArea
-					label={label}
-					name={name}
-					onBlur={handleBlur}
-					onChange={handleChange}
-					onReset={this.handleResetTextArea}
-					placeholder={placeholder}
-					value={value}
-				/>
-				<ErrorMessage name={name}/>
-			</div>
-		);
-	};
-
-	renderTextWithIcon = name => <TextWithIcon name={name} />;
-
-	renderTreeSelect = (props: TreeSelectProps) => {
-		const {name, value} = props;
-
-		return (
-			<div className={styles.sourceContainer}>
-				<DataSourceInput
-					onChange={this.handleSelectSource}
-					value={value}
-				/>
-				<ErrorMessage name={name}/>
-			</div>
+			<form onSubmit={handleSubmit} className={styles.form}>
+				{this.renderHeader()}
+				{this.renderMain()}
+				{this.renderFooter()}
+			</form>
 		);
 	};
 

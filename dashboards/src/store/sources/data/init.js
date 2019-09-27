@@ -3,6 +3,8 @@ import {DATA_SOURCES_EVENTS} from './constants';
 import type {DataSourcesAction, DataSourcesState} from './types';
 
 export const initialDataSourcesState: DataSourcesState = {
+	error: false,
+	loading: false,
 	map: {}
 };
 

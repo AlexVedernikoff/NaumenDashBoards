@@ -1,40 +1,45 @@
 // @flow
 import classnames from 'classnames';
-import Plus from 'icons/form/plus.svg';
 import type {Node} from 'react';
+import Plus from 'icons/form/plus.svg';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import styles from './style.less';
+import styles from './styles.less';
 
 export class TextWithIcon extends Component<Props> {
-    renderIcon = (): Node => {
-        const {handleClick} = this.props;
+	static defaultProps: {
+		className: '',
+		value: ''
+	};
 
-        return (
-            <div className={styles.icon}>
-                <Plus onClick={handleClick}/>
-            </div>
-        );
-    }
+	renderIcon = (): Node => {
+		const {handleClick} = this.props;
 
-    renderTextWithIcon = (): Node => {
-        const {className, name} = this.props;
-        const classProps: string = classnames(
-            className,
-            styles.textWithIcon
-        );
+		return (
+			<div className={styles.icon}>
+				<Plus onClick={handleClick}/>
+			</div>
+		);
+	};
 
-        return (
-            <div className={classProps}>
-                <p className={styles.name}>{name}</p>
-                {this.renderIcon()}
-            </div>
-        );
-    }
+	renderTextWithIcon = (): Node => {
+		const {className, name} = this.props;
+		const classProps: string = classnames(
+			className,
+			styles.textWithIcon
+		);
 
-    render () {
-        return this.renderTextWithIcon();
-    }
+		return (
+			<div className={classProps}>
+				<p className={styles.name}>{name}</p>
+				{this.renderIcon()}
+			</div>
+		);
+	};
+
+	render () {
+		return this.renderTextWithIcon();
+	}
 }
 
 export default TextWithIcon;

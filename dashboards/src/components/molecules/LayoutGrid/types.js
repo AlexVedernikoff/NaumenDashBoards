@@ -1,7 +1,7 @@
 // @flow
 import type {ChartMap} from 'store/widgets/charts/types';
 import type {ElementRef} from 'react';
-import type {Layout} from 'types/layout';
+import type {Layout} from 'utils/layout/types';
 import type {WidgetMap} from 'store/widgets/data/types';
 
 export type State = {

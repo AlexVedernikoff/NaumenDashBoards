@@ -1,6 +1,6 @@
 // @flow
 import DashboardRightPanel from 'components/organisms/DashboardRightPanel';
-import type {Layout} from 'types/layout';
+import type {Layout} from 'utils/layout/types';
 import LayoutGrid from 'components/molecules/LayoutGrid';
 import type {Props} from 'containers/DashboardEditContent/types';
 import React, {Component} from 'react';

@@ -2,33 +2,24 @@
 import type {
 	DataSourcesState,
 	RawDataSource,
-	ReceiveDataSources,
-	ReceiveDataSourcesPayload,
-	RecordDataSourcesError,
-	SetDataSources
+	ReceiveDataSources
 } from './types';
-
-/**
- * Устанавливаем значение ошибки получения дочерних типов в объект нужного класса\типа
- * @param {DataSourcesState} state - хранилище состояния источников данных
- * @param {string} payload - fqn класса
- * @returns {DataSourcesState}
- */
-export const setDataSourceError = (state: DataSourcesState, {payload}: RecordDataSourcesError): DataSourcesState => {
-	state.map[payload].errorLoadingChildren = true;
-
-	return {
-		...state,
-		map: {...state.map}
-	};
-};
 
 const createDataSource = (source: RawDataSource) => ({
 	title: source.title,
 	value: source.fqnCode,
 	key: source.fqnCode,
-	isLeaf: source.countChildren === 0
+	isLeaf: source.children && source.children.length === 0
 });
+
+export const setChildrenDataSources = (map: any, fqn: string, children: Array<RawDataSource>) => {
+	map[fqn].children = children.map(s => s.fqnCode);
+
+	children.forEach(s => {
+		map[s.fqnCode] = createDataSource(s);
+		setChildrenDataSources(map, s.fqnCode, s.children);
+	});
+};
 
 /**
  * Нормализуем данные классов для удобной работы с деревом
@@ -36,33 +27,18 @@ const createDataSource = (source: RawDataSource) => ({
  * @param {string} payload - fqn класса
  * @returns {DataSourcesState}
  */
-export const setRootDataSources = (state: DataSourcesState, {payload}: SetDataSources) => {
+export const setDataSources = (state: DataSourcesState, {payload}: ReceiveDataSources) => {
 	let map = {};
 
 	payload.forEach(s => {
 		map[s.fqnCode] = {...createDataSource(s), root: true};
+		map[s.fqnCode].children = [];
+		setChildrenDataSources(map, s.fqnCode, s.children);
 	});
 
 	return {
 		...state,
+		loading: false,
 		map: {...map}
-	};
-};
-
-/**
- * Нормализуем данные типов для удобной работы с деревом
- * @param {DataSourcesState} state - хранилище состояния источников данных
- * @param {ReceiveDataSourcesPayload} payload - источники данных и fqn родительского класса
- * @returns {DataSourcesState}
- */
-export const setChildrenDataSources = (state: DataSourcesState, {payload}: ReceiveDataSources) => {
-	state.map[payload.fqn].children = payload.dataSources.map(s => s.fqnCode);
-	payload.dataSources.forEach(s => {
-		state.map[s.fqnCode] = createDataSource(s);
-	});
-
-	return {
-		...state,
-		map: {...state.map}
 	};
 };
