@@ -7,11 +7,16 @@ import {WIDGETS_EVENTS} from './constants';
 
 export type Widget = {
 	aggregate: SelectValue,
+	areAxisesNamesShown: boolean,
+	areAxisesLabelsShown: boolean,
+	areAxisesMeaningsShown: boolean,
 	desc: string,
 	group: SelectValue | null,
 	id: string,
 	isNameShown: boolean,
+	isLegendShown: boolean;
 	layout: LayoutItem,
+	legendPosition: SelectValue,
 	name: string,
 	source: SelectValue,
 	chart: SelectValue,

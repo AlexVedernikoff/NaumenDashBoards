@@ -9,7 +9,11 @@ class NewWidget {
 	desc: string = '';
 	group: null = null;
 	id: string = NewWidget.id;
+	isLegendShown: boolean = false;
 	isNameShown: boolean = true;
+	areAxisesNamesShown: boolean = false;
+	areAxisesLabelsShown: boolean = false;
+	areAxisesMeaningsShown: boolean = false;
 	layout: LayoutItem = {
 		h: 3,
 		i: NewWidget.id,
@@ -17,6 +21,7 @@ class NewWidget {
 		x: 0,
 		y: 0
 	};
+	legendPosition: null = null;
 	name: string = '';
 	source: null = null;
 	xAxis: null = null;

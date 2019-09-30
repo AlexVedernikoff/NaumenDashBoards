@@ -8,10 +8,15 @@ const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
 		const {
 			aggregate,
+			areAxisesLabelsShown,
+			areAxisesMeaningsShown,
+			areAxisesNamesShown,
 			chart,
 			desc,
 			group,
+			isLegendShown,
 			isNameShown,
+			legendPosition,
 			name,
 			source,
 			xAxis,
@@ -20,10 +25,15 @@ const config: FormikConfig = {
 
 		return {
 			aggregate,
+			areAxisesLabelsShown,
+			areAxisesMeaningsShown,
+			areAxisesNamesShown,
 			chart,
 			desc,
 			group,
+			isLegendShown,
 			isNameShown,
+			legendPosition,
 			name,
 			source,
 			xAxis,

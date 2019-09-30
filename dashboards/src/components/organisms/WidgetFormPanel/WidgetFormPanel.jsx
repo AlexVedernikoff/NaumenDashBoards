@@ -1,5 +1,15 @@
 // @flow
-import {AttrSelect, Button, CheckBox, FormField, TextArea} from 'components/atoms';
+import {
+	AttrSelect,
+	Button,
+	CheckBox,
+	Divider,
+	DropDownMenu,
+	MultiSelect,
+	TextArea,
+	TextWithIcon,
+	Title
+} from 'components/atoms';
 import type {
 	AttrSelectProps,
 	CheckBoxProps,
@@ -9,20 +19,19 @@ import type {
 	TreeSelectProps
 } from './types';
 import {CHART_SELECTS} from 'utils/chart';
-import DataSourceInput from 'containers/DataSourceInput/DataSourceInput';
+import DataSourceInput from 'containers/DataSourceInput';
 import {getActualAggregate, getAggregateOptions, typeOfExtendedAggregate} from 'utils/aggregate';
 import {getGroupOptions, typeOfExtendedGroups} from 'utils/group';
 import {ErrorMessage} from 'formik';
 import type {OptionType} from 'react-select/src/types';
 import type {Props} from 'containers/WidgetFormPanel/types';
-import React, {Component} from 'react';
-import Select from 'react-select';
+import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
 export class WidgetFormPanel extends Component<Props> {
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
-	handleSelect = (value: OptionType, {name}: OptionType) => this.props.setFieldValue(name, value);
+	handleSelect = (value: OptionType, name: string) => this.props.setFieldValue(name, value);
 
 	handleSelectXAxis = (value: OptionType) => {
 		const {setFieldValue} = this.props;
@@ -55,23 +64,22 @@ export class WidgetFormPanel extends Component<Props> {
 		}
 	};
 
-	renderTextArea = (props: TextAreaProps) => {
-		const {handleBlur, handleChange} = this.props;
-		const {label, name, placeholder, value} = props;
+	renderAttrSelect = (props: AttrSelectProps) => {
+		const {isLoading, label, name, onChange, options, placeholder, value} = props;
 
 		return (
-			<FormField>
-				<TextArea
+			<div className={styles.multiselectContainer}>
+				<AttrSelect
+					isLoading={isLoading}
 					label={label}
 					name={name}
-					onBlur={handleBlur}
-					onChange={handleChange}
-					onReset={this.handleResetTextArea}
+					onChange={onChange}
+					options={options}
 					placeholder={placeholder}
 					value={value}
 				/>
 				<ErrorMessage name={name}/>
-			</FormField>
+			</div>
 		);
 	};
 
@@ -80,63 +88,14 @@ export class WidgetFormPanel extends Component<Props> {
 		const {label, name, value} = props;
 
 		return (
-			<FormField>
+			<div className={styles.checkboxContainer}>
 				<CheckBox
 					handleClick={handleChange}
 					label={label}
 					name={name}
 					value={value}
 				/>
-			</FormField>
-		);
-	};
-
-	renderTreeSelect = (props: TreeSelectProps) => {
-		const {name, value} = props;
-
-		return (
-			<FormField>
-				<DataSourceInput
-					onChange={this.handleSelectSource}
-					value={value}
-				/>
-				<ErrorMessage name={name}/>
-			</FormField>
-		);
-	};
-
-	renderSelect = (props: SelectProps) => {
-		const {name, options, placeholder, value} = props;
-
-		return (
-			<FormField>
-				<Select
-					placeholder={placeholder}
-					onChange={this.handleSelect}
-					options={options}
-					value={value}
-					name={name}
-				/>
-				<ErrorMessage name={name}/>
-			</FormField>
-		);
-	};
-
-	renderAttrSelect = (props: AttrSelectProps) => {
-		const {isLoading, name, onChange, options, placeholder, value} = props;
-
-		return (
-			<FormField>
-				<AttrSelect
-					placeholder={placeholder}
-					name={name}
-					onChange={onChange}
-					isLoading={isLoading}
-					value={value}
-					options={options}
-				/>
-				<ErrorMessage name={name}/>
-			</FormField>
+			</div>
 		);
 	};
 
@@ -144,12 +103,41 @@ export class WidgetFormPanel extends Component<Props> {
 		const {cancelForm} = this.props;
 
 		return (
-			<div className={styles.formGroup}>
-				<Button type="submit">Применить</Button>
-				<Button outline onClick={cancelForm}>Отмена</Button>
-			</div>
+			<Fragment>
+				<div className={styles.buttonContainer}>
+					<Button type="submit">Применить</Button>
+				</div>
+				<div className={styles.buttonContainer}>
+					<Button outline variant='bare' onClick={cancelForm}>Отмена</Button>
+				</div>
+			</Fragment>
 		);
 	};
+
+	renderDropDown = (axisesVisibility, axisesLabelsVisibility, axisesMeaningsVisibility) => (
+		<div className={styles.dropdownMenuContainer}>
+			<DropDownMenu name="Редактировать легенду">
+				<div className={styles.checkboxContainerLeft}>
+					{this.renderCheckBox(axisesVisibility)}
+					<Divider className={styles.dividerLeft}/>
+				</div>
+				<div className={styles.checkboxContainerLeft}>
+					{this.renderCheckBox(axisesLabelsVisibility)}
+					<Divider className={styles.dividerLeft}/>
+				</div>
+				<div className={styles.checkboxContainerLeft}>
+					{this.renderCheckBox(axisesMeaningsVisibility)}
+					<Divider className={styles.dividerLeft}/>
+				</div>
+			</DropDownMenu>
+		</div>
+	);
+
+	renderFooter = () => (
+		<div className={styles.footer}>
+			{this.renderControlButtons()}
+		</div>
+	);
 
 	renderForm = () => {
 		const {
@@ -174,13 +162,51 @@ export class WidgetFormPanel extends Component<Props> {
 			value: values.isNameShown
 		};
 
+		const axisesVisibility: CheckBoxProps = {
+			label: 'Выводить название осей',
+			name: 'areAxisesNamesShown',
+			value: values.areAxisesNamesShown
+		};
+
+		const axisesLabelsVisibility: CheckBoxProps = {
+			label: 'Выводить подписи осей',
+			name: 'areAxisesLabelsShown',
+			value: values.areAxisesLabelsShown
+		};
+
+		const axisesMeaningsVisibility: CheckBoxProps = {
+			label: 'Выводить подписи значений',
+			name: 'areAxisesMeaningsShown',
+			value: values.areAxisesMeaningsShown
+		};
+
 		const desc: TextAreaProps = {
 			label: 'Описание',
 			name: 'desc',
 			value: values.desc
 		};
 
+		const legendVisibility: CheckBoxProps = {
+			label: 'Выводить легенду',
+			name: 'isLegendShown',
+			value: values.isLegendShown
+		};
+
+		const legendPosition: SelectProps = {
+			label: 'Положение легенды',
+			name: 'legendPosition',
+			options: [
+				{value: 'right', label: 'Справа'},
+				{value: 'left', label: 'Слева'},
+				{value: 'top', label: 'Вверху'},
+				{value: 'bottom', label: 'Внизу'}
+			],
+			placeholder: '',
+			value: values.legendPosition
+		};
+
 		const source: TreeSelectProps = {
+			label: 'Источник',
 			name: 'desc',
 			value: values.source
 		};
@@ -194,6 +220,7 @@ export class WidgetFormPanel extends Component<Props> {
 
 		const xAxis: AttrSelectProps = {
 			isLoading: isLoadingAttr,
+			label: 'Ось X',
 			name: 'xAxis',
 			onChange: this.handleSelectXAxis,
 			options: attrOptions,
@@ -210,6 +237,7 @@ export class WidgetFormPanel extends Component<Props> {
 
 		const yAxis: AttrSelectProps = {
 			isLoading: isLoadingAttr,
+			label: 'Ось Y',
 			name: 'yAxis',
 			onChange: this.handleSelectYAxis,
 			options: attrOptions,
@@ -226,17 +254,129 @@ export class WidgetFormPanel extends Component<Props> {
 
 		return (
 			<form onSubmit={handleSubmit} className={styles.form}>
-				{this.renderTextArea(name)}
-				{this.renderCheckBox(nameVisibility)}
-				{this.renderTextArea(desc)}
-				{this.renderTreeSelect(source)}
-				{this.renderSelect(chart)}
-				{this.renderAttrSelect(xAxis)}
-				{typeOfExtendedGroups(values.xAxis) && this.renderSelect(group)}
-				{this.renderAttrSelect(yAxis)}
-				{this.renderSelect(aggregate)}
-				{this.renderControlButtons()}
+				{this.renderHeader('Новый виджет')}
+				{this.renderMain(
+					aggregate,
+					axisesLabelsVisibility,
+					axisesMeaningsVisibility,
+					axisesVisibility,
+					chart,
+					desc,
+					group,
+					legendPosition,
+					legendVisibility,
+					name,
+					nameVisibility,
+					source,
+					values,
+					xAxis,
+					yAxis
+				)}
+				{this.renderFooter()}
 			</form>
+		);
+	};
+
+	renderHeader = (name) => (
+		<div className={styles.header}>
+			<Title className={styles.title}>{name}</Title>
+		</div>
+	);
+
+	renderMain = (
+		aggregate,
+		axisesLabelsVisibility,
+		axisesMeaningsVisibility,
+		axisesVisibility,
+		chart,
+		desc,
+		group,
+		legendPosition,
+		legendVisibility,
+		name,
+		nameVisibility,
+		source,
+		values,
+		xAxis,
+		yAxis
+	) => (
+		<section className={styles.main}>
+			{this.renderTextArea(name)}
+			{this.renderTextArea(desc)}
+			<Divider />
+			{this.renderCheckBox(nameVisibility)}
+			<Divider />
+			{this.renderCheckBox(legendVisibility)}
+			{this.renderSelect(legendPosition)}
+			{this.renderDropDown(axisesVisibility, axisesLabelsVisibility, axisesMeaningsVisibility)}
+			{this.renderTreeSelect(source)}
+			{this.renderSelect(chart)}
+			{this.renderAttrSelect(xAxis)}
+			{typeOfExtendedGroups(values.xAxis) && this.renderSelect(group)}
+			{this.renderAttrSelect(yAxis)}
+			{this.renderSelect(aggregate)}
+			<div className={styles.featuresContainer}>
+				<Divider />
+				{this.renderTextWithIcon('Фильтрация')}
+				<Divider />
+				{this.renderTextWithIcon('Показатель')}
+				<Divider />
+				{this.renderTextWithIcon('Параметр')}
+			</div>
+		</section>
+	);
+
+	renderSelect = (props: SelectProps) => {
+		const {label, name, options, placeholder, value} = props;
+
+		return (
+			<div className={styles.multiselectContainer}>
+				<MultiSelect
+					label={label}
+					name={name}
+					onChange={this.handleSelect}
+					options={options}
+					placeholder={placeholder}
+					value={value}
+				/>
+				<ErrorMessage name={name}/>
+			</div>
+		);
+	};
+
+	renderTextArea = (props: TextAreaProps) => {
+		const {handleBlur, handleChange} = this.props;
+		const {label, name, placeholder, value} = props;
+
+		return (
+			<div className={styles.textareaContainer}>
+				<TextArea
+					label={label}
+					name={name}
+					onBlur={handleBlur}
+					onChange={handleChange}
+					onReset={this.handleResetTextArea}
+					placeholder={placeholder}
+					value={value}
+				/>
+				<ErrorMessage name={name}/>
+			</div>
+		);
+	};
+
+	renderTextWithIcon = name => <TextWithIcon name={name} />;
+
+	renderTreeSelect = (props: TreeSelectProps) => {
+		const {name, value} = props;
+
+		return (
+			<div className={styles.sourceContainer}>
+				<DataSourceInput
+					onChange={this.handleSelectSource}
+					value={value}
+				/>
+				<ErrorMessage name={name}/>
+			</div>
 		);
 	};
 
