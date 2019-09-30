@@ -58,7 +58,9 @@ class RequestEditWidgetSettings
  */
 class RequestEditWidgetsSettings
 {
-    Collection<RequestEditWidgetSettings> requestEditWidgetSettings
+    String classFqn
+    String contentCode
+    Collection<ResponseWidgetSettings> layoutsSettings
 }
 
 /**
@@ -115,7 +117,9 @@ String editDefaultWidget(Map<String, Object> requestContent, def user)
 {
     checkRightsOnDashboard(user, "редактирование")
     def request = new RequestEditWidgetSettings(requestContent)
-    api.keyValue.put(NAMESPACE, request.widgetKey, request.widgetSettings)
+    api.keyValue.put(NAMESPACE,
+            request.widgetKey,
+            setUuidInSettings(request.widgetSettings, request.widgetKey))
     return toJson(request.widgetKey)
 }
 
@@ -128,8 +132,14 @@ String editDefaultWidget(Map<String, Object> requestContent, def user)
 String bulkEditDefaultWidget(Map<String, Object> requestContent, def user)
 {
     def request = new RequestEditWidgetsSettings(requestContent)
-    return request.requestEditWidgetSettings.collect {
-        return editDefaultWidget(it, user)
+    return request.layoutsSettings.collect {
+        String widgetSettings = setLayoutInSettings(new ResponseWidgetSettings(it))
+        Map<String, Object> widget = [
+                classFqn: request.classFqn,
+                contentCode: request.contentCode,
+                widgetKey: it.key,
+                widgetSettings: widgetSettings]
+        editDefaultWidget(widget, user)
     }
 }
 
@@ -142,8 +152,14 @@ String bulkEditDefaultWidget(Map<String, Object> requestContent, def user)
 String bulkEditWidget(Map<String, Object> requestContent, def user)
 {
     def request = new RequestEditWidgetsSettings(requestContent)
-    return request.requestEditWidgetSettings.collect {
-        return editPersonalWidgetSettings(it, user)
+    return request.layoutsSettings.collect {
+        String widgetSettings = setLayoutInSettings(new ResponseWidgetSettings(it))
+        Map<String, Object> widget = [
+                classFqn: request.classFqn,
+                contentCode: request.contentCode,
+                widgetKey: it.key,
+                widgetSettings: widgetSettings]
+        editPersonalWidgetSettings(widget, user)
     }
 }
 
@@ -178,7 +194,9 @@ String editPersonalWidgetSettings(Map<String, Object> requestContent, def user)
     def request = new RequestEditWidgetSettings(requestContent)
     if(request.widgetKey.endsWith("_${user.login}"))
     {
-        api.keyValue.put(NAMESPACE, request.widgetKey, request.widgetSettings)
+        api.keyValue.put(NAMESPACE,
+                request.widgetKey,
+                setUuidInSettings(request.widgetSettings, request.widgetKey))
         return toJson(request.widgetKey)
     }
     else
@@ -300,7 +318,7 @@ private String createWidget(RequestCreateWidgetSettings request,
             ? new JsonSlurper().parseText(dashboardValue)
             : new DashboardSettings([])
     String key = generateWidgetKey(dashboardSettings.widgetIds, user?.login)
-    api.keyValue.put(NAMESPACE, key, request.widgetSettings)
+    api.keyValue.put(NAMESPACE, key, setUuidInSettings(request.widgetSettings, key))
     dashboardSettings.widgetIds << key
     api.keyValue.put(NAMESPACE, dashboardKey, toJson(dashboardSettings))
     return key
@@ -321,7 +339,7 @@ private String editWidget(RequestEditWidgetSettings request,
 {
     DashboardSettings boardSettings = new JsonSlurper().parseText(dashboardValue)
     String key = generateWidgetKey(boardSettings.widgetIds, user.login)
-    api.keyValue.put(NAMESPACE, key, request.widgetSettings)
+    api.keyValue.put(NAMESPACE, key, setUuidInSettings(request.widgetSettings, key))
     boardSettings.widgetIds << key
     boardSettings.widgetIds -= request.widgetKey
     api.keyValue.put(NAMESPACE, dashboardKey, toJson(boardSettings))
@@ -349,13 +367,14 @@ private String generateDashboardKey(String classFqn, String contentCode, String 
  */
 private String generateWidgetKey(Collection<String> keys, String login)
 {
+    def loginKeyPart = login ? "_${login}" : ''
     String uuidWidget
     while ({
-        uuidWidget = UUID.randomUUID().toString()
-        keys.contains(uuidWidget)
+        uuidWidget = "${UUID.randomUUID()}${loginKeyPart}"
+        (keys.contains(uuidWidget) &&
+        api.keyValue.get(NAMESPACE, uuidWidget))
     }()) continue
-    login = login ?: ''
-    return "${uuidWidget}${login ? '_' : ''}${login}"
+    return uuidWidget
 }
 
 /**
@@ -413,5 +432,33 @@ private checkRightsOnDashboard(def user, String messageError)
         throw new Exception(toJson([error: "Пользователь не является мастером дашбордов, " +
                 "${messageError} виджета по умолчанию не возможно"]))
     }
+}
+
+/**
+ * Пробросить сгенерированный ключ в настройки виджета
+ * @param widgetSettings настройки виджета
+ * @return настройки виджета с ключом
+ */
+private String setUuidInSettings(String widgetSettings, String key)
+{
+    def settings = new JsonSlurper().parseText(widgetSettings)
+    settings.id = key
+    settings.layout.i = key
+    return toJson(settings)
+}
+
+/**
+ * Добавить layout в настройки
+ * @param responseWidgetSettings настройки виджета в формате ResponseWidgetSettings
+ * @return настройки виджета с обновленным layout
+ */
+private String setLayoutInSettings(ResponseWidgetSettings responseWidgetSettings)
+{
+    String widgetSettings = api.keyValue.get(NAMESPACE, responseWidgetSettings.key)
+    def jsonSlurper = new JsonSlurper()
+    def settings = jsonSlurper.parseText(widgetSettings)
+    def layout = jsonSlurper.parseText(responseWidgetSettings.value)
+    settings.layout = layout
+    return toJson(settings)
 }
 //endregion
