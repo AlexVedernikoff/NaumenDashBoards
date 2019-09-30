@@ -4,7 +4,7 @@ import ChevronDown from 'icons/form/chevron-down-bare.svg';
 import ChevronUp from 'icons/form/chevron-up-bare.svg';
 import type {Node} from 'react';
 import type {Props} from './types';
-import React, {Component, Fragment} from 'React';
+import React, {Component, Fragment} from 'react';
 import styles from './style.less';
 
 export class DropDownMenu extends Component<Props, State> {

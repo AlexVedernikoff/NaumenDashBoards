@@ -57,15 +57,15 @@ export class DataSourceInput extends Component<Props> {
 		/>
 	);
 
-	renderSwitcherIcon = (TreeSelect) => {
+	renderSwitcherIcon = ({expanded}) => {
 		const props = {
 			className: styles.icon
 		};
-		  
+
 		if (expanded) {
 			return <ToggleExpandedIcon {...props} />;
 		}
-		  
+
 		return <ToggleCollapsedIcon {...props} />;
 	};
 

@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import Plus from 'icons/form/plus.svg';
 import type {Node} from 'react';
 import type {Props} from './types';
-import React, {Component} from 'React';
+import React, {Component} from 'react';
 import styles from './style.less';
 
 export class TextWithIcon extends Component<Props> {
