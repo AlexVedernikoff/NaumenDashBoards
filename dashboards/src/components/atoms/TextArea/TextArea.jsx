@@ -14,7 +14,7 @@ export class TextArea extends Component<Props> {
 
 	renderLabel = () => {
 		const {label, name} = this.props;
-		return label ? <label htmlFor={name}>{label}</label> : null;
+		return label ? <label className={styles.label} htmlFor={name}>{label}</label> : null;
 	};
 
 	renderTextArea = () => {
@@ -28,15 +28,15 @@ export class TextArea extends Component<Props> {
 
 		return (
 			<div className={styles.inputField}>
-                <textarea
-									className={styles.input}
-									id={name}
-									name={name}
-									onBlur={onBlur}
-									onChange={onChange}
-									placeholder={placeholder}
-									value={value}
-								/>
+				<textarea
+					className={styles.input}
+					id={name}
+					name={name}
+					onBlur={onBlur}
+					onChange={onChange}
+					placeholder={placeholder}
+					value={value}
+				/>
 				{this.renderClearIcon()}
 			</div>
 		);

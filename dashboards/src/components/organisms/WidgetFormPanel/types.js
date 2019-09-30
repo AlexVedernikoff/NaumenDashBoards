@@ -40,11 +40,13 @@ export type CheckBoxProps = {
 };
 
 export type TreeSelectProps = {
+	label: string,
 	name: string,
 	value: SelectValue | null
 };
 
 export type SelectProps = {
+	label?: string,
 	name: string,
 	options: Array<SelectValue>,
 	placeholder: string,

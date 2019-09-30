@@ -6,6 +6,8 @@ import React, {Component} from 'react';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import styles from './styles.less';
 import TreeSelect, {TreeNode} from 'rc-tree-select';
+import ToggleCollapsedIcon from 'icons/form/toggle-collapsed.svg';
+import ToggleExpandedIcon from 'icons/form/toggle-expanded.svg';
 
 export class DataSourceInput extends Component<Props> {
 	onChange = ({label, value}: SelectValue) => this.props.onChange({label, value});
@@ -55,6 +57,18 @@ export class DataSourceInput extends Component<Props> {
 		/>
 	);
 
+	renderSwitcherIcon = (TreeSelect) => {
+		const props = {
+			className: styles.icon
+		};
+		  
+		if (expanded) {
+			return <ToggleExpandedIcon {...props} />;
+		}
+		  
+		return <ToggleCollapsedIcon {...props} />;
+	};
+
 	render () {
 		const {dataSources, value} = this.props;
 
@@ -65,6 +79,7 @@ export class DataSourceInput extends Component<Props> {
 				loadData={this.onLoadData}
 				onChange={this.onChange}
 				searchPlaceholder="Поиск..."
+				switcherIcon={this.renderSwitcherIcon}
 				treeNodeFilterProp="title"
 				value={value}
 			>

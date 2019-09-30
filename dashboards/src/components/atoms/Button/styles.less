@@ -9,7 +9,7 @@
 		font-weight: 500;
 		line-height: 15px;
 		mix-blend-mode: normal;
-		padding: 10px 15px;
+		padding: 8px 20px;
 
 		&:active {
 			background-color: darken(@grey, 10%);
@@ -45,8 +45,14 @@
 		border-color: @info!important;
 		color: white!important;
 
-		&:active {
+		&:hover {
 			@darken: darken(@info, 10%);
+			background-color: @darken!important;
+			border-color: @darken!important;
+		}
+
+		&:active {
+			@darken: darken(@info, 15%);
 			background-color: @darken!important;
 			border-color: @darken!important;
 		}
@@ -62,6 +68,12 @@
 			border-color: @info!important;
 			color: white!important;
 		}
+	}
+
+	.outline-bare {
+		background-color: transparent;
+		border-color: transparent;
+		color: @black!important;
 	}
 
 	.icon {
