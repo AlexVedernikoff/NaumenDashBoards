@@ -3,10 +3,6 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {LayoutItem} from 'utils/layout/types';
 import type {OptionType} from 'react-select/src/types';
 
-export type State = {
-	attributes: Attribute[]
-};
-
 export type SelectValue = {
 	label: string,
 	value: string
@@ -50,14 +46,8 @@ export type CheckBoxProps = {
 	value: string
 };
 
-export type TreeSelectProps = {
-	label: string,
-	name: string,
-	value: SelectValue | null
-};
-
 type Select = {
-	label: string,
+	label?: string,
 	name: string,
 	onChange?: (name: string, option: OptionType) => void;
 	placeholder: string,
@@ -79,3 +69,15 @@ export type ButtonProps = {
 	text: string,
 	variant?: string
 };
+
+export type LabelProps = {
+	name: string,
+	onClick?: () => void,
+	icon?: string
+};
+
+export type WrappedProps = {
+	[string]: any
+};
+
+export type RenderFunction = (...fieldNames: Array<string>) => any;

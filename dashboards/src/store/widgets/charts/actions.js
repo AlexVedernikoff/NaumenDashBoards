@@ -1,10 +1,8 @@
 // @flow
-import aggregate from 'utils/aggregate';
-import axios from 'axios';
-import buildUrl from 'utils/api';
+import {buildUrl, client} from 'utils/api';
 import {CHARTS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
-import group from 'utils/group';
+import {DEFAULT_GROUP} from 'utils/group';
 import type {ReceiveChartPayload} from './types';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -17,13 +15,10 @@ const fetchChartData = (widget: Widget): ThunkAction => async (dispatch: Dispatc
 	dispatch(requestChart(widget.id));
 
 	try {
-		const {source, xAxis, yAxis} = widget;
-		const params = `'${source.value}','${xAxis.code}','${yAxis.code}'`;
-		const {data: fetchedData} = await axios.post(buildUrl('dashboardTestGetData', 'getDataForDiagram', params));
-		const groupType = widget.group ? widget.group.value : '';
-		const dataByGroup = group(groupType, fetchedData);
+		const {aggregate, source, xAxis, yAxis} = widget;
+		const params = `'${source.value}','${xAxis.code}','${yAxis.code}','${aggregate.value}','${DEFAULT_GROUP}'`;
+		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagram', params));
 
-		const data = aggregate(widget.aggregate.value, dataByGroup);
 		dispatch(
 			receiveChart({data, id: widget.id})
 		);

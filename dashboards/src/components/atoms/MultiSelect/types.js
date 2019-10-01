@@ -6,7 +6,7 @@ import type {OptionType} from 'react-select/src/types';
 export type Props = {
 	getOptionLabel?: (o: OptionType) => string,
 	getOptionValue?: (o: OptionType) => string,
-	isLoading?: boolean,
+	isLoading: boolean,
 	label: string,
 	name: string,
 	noOptionsMessage?: () => string | Node,

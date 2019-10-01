@@ -1,7 +1,7 @@
 // @flow
 export type Props = {
 	className: string,
-	handleClick?: () => void,
+	icon: string,
 	name: string,
-	value: string
+	onClick?: () => void
 };

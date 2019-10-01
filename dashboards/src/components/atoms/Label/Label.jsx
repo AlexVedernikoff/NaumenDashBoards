@@ -6,24 +6,29 @@ import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
-export class TextWithIcon extends Component<Props> {
+const icons = {
+	plus: Plus
+};
+
+export class Label extends Component<Props> {
 	static defaultProps: {
 		className: '',
-		value: ''
+		icon: ''
 	};
 
 	renderIcon = (): Node => {
-		const {handleClick} = this.props;
+		const {icon, onClick} = this.props;
+		const Icon = icons[icon];
 
 		return (
 			<div className={styles.icon}>
-				<Plus onClick={handleClick}/>
+				<Icon onClick={onClick}/>
 			</div>
 		);
 	};
 
-	renderTextWithIcon = (): Node => {
-		const {className, name} = this.props;
+	renderContent = (): Node => {
+		const {className, icon, name} = this.props;
 		const classProps: string = classnames(
 			className,
 			styles.textWithIcon
@@ -32,14 +37,14 @@ export class TextWithIcon extends Component<Props> {
 		return (
 			<div className={classProps}>
 				<p className={styles.name}>{name}</p>
-				{this.renderIcon()}
+				{icon && this.renderIcon()}
 			</div>
 		);
 	};
 
 	render () {
-		return this.renderTextWithIcon();
+		return this.renderContent();
 	}
 }
 
-export default TextWithIcon;
+export default Label;

@@ -7,7 +7,7 @@ const CHART_SELECTS = [
 		value: CHART_VARIANTS.BAR
 	},
 	{
-		label: 'Линейный график',
+		label: 'Линейная диаграмма',
 		value: CHART_VARIANTS.LINE
 	},
 	{
@@ -17,6 +17,10 @@ const CHART_SELECTS = [
 	{
 		label: 'Кольцевая диаграмма',
 		value: CHART_VARIANTS.DONUT
+	},
+	{
+		label: 'Комбинированная диаграмма',
+		value: CHART_VARIANTS.COMBO
 	}
 ];
 

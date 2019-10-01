@@ -8,7 +8,6 @@ import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
 	attributes: AttributeMap,
-	isLoadingAttr: boolean,
 	saveError: boolean,
 	selectedWidget: Widget | NewWidget
 };

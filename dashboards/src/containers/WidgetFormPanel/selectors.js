@@ -15,10 +15,10 @@ export const props = (state: AppState): ConnectedProps => {
 
 	return {
 		attributes: state.sources.attributes.map,
-		isLoadingAttr: state.sources.attributes.loading,
 		saveError: data.saveError,
 		saveLoading: data.saveLoading,
-		selectedWidget: selectedWidget === NewWidget.id && newWidget ? newWidget : data.map[selectedWidget]
+		selectedWidget: selectedWidget === NewWidget.id && newWidget ? newWidget : data.map[selectedWidget],
+		sources: state.sources.data.map
 	};
 };
 

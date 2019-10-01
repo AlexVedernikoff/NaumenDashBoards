@@ -7,7 +7,7 @@ import DropDownFiles from './DropDownFiles';
 import DropDownMenu from './DropDownMenu';
 import MultiSelect from './MultiSelect';
 import TextArea from './TextArea';
-import TextWithIcon from './TextWithIcon';
+import Label from './Label';
 import Title from './Title';
 
 export {
@@ -19,6 +19,6 @@ export {
 	DropDownMenu,
 	MultiSelect,
 	TextArea,
-	TextWithIcon,
+	Label,
 	Title
 };

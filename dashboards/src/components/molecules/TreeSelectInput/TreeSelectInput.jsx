@@ -1,7 +1,6 @@
 // @flow
 import 'rc-tree-select/assets/index.css';
-import type {DataSource, DataSourceMap} from 'store/sources/data/types';
-import type {Props} from 'containers/DataSourceInput/types';
+import type {Node, Props, SelectValue, Tree} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 import ToggleCollapsedIcon from 'icons/form/toggle-collapsed.svg';
@@ -9,14 +8,25 @@ import ToggleExpandedIcon from 'icons/form/toggle-expanded.svg';
 import type {TreeProps} from 'rc-tree-select';
 import TreeSelect, {TreeNode} from 'rc-tree-select';
 
-export class DataSourceInput extends Component<Props> {
-	renderRoot = (dataSources: DataSourceMap): TreeNode => (
+export class TreeSelectInput extends Component<Props> {
+	static defaultProps: {
+		name: '',
+		placeholder: '',
+		searchPlaceholder: ''
+	};
+
+	handleOnChange = (value: SelectValue) => {
+		const {name, onChange} = this.props;
+		onChange(name, value);
+	};
+
+	renderRoot = (dataSources: Tree): TreeNode => (
 		Object.keys(dataSources)
 			.filter(key => dataSources[key].root)
 			.map(key => this.renderNode(dataSources[key]))
 	);
 
-	renderNode = (dataSource: DataSource): TreeNode => {
+	renderNode = (dataSource: Node): TreeNode => {
 		const {isLeaf, title, value} = dataSource;
 
 		return (
@@ -31,12 +41,12 @@ export class DataSourceInput extends Component<Props> {
 		);
 	};
 
-	renderChildren = (dataSource: DataSource): TreeNode => {
-		const {dataSources} = this.props;
+	renderChildren = (dataSource: Node): TreeNode => {
+		const {tree} = this.props;
 		const {children} = dataSource;
 
 		if (children.length) {
-			return children.map(key => this.renderNode(dataSources[key]));
+			return children.map(key => this.renderNode(tree[key]));
 		}
 	};
 
@@ -52,23 +62,29 @@ export class DataSourceInput extends Component<Props> {
 	};
 
 	render () {
-		const {dataSources, onChange, value} = this.props;
+		const {
+			name,
+			placeholder,
+			tree,
+			value
+		} = this.props;
 
 		return (
 			<TreeSelect
 				className={styles.select}
 				labelInValue
-				onChange={onChange}
-				placeholder="Источник"
+				name={name}
+				onChange={this.handleOnChange}
+				placeholder={placeholder}
 				searchPlaceholder="Поиск..."
 				switcherIcon={this.renderSwitcherIcon}
 				treeNodeFilterProp="title"
 				value={value}
 			>
-				{this.renderRoot(dataSources)}
+				{this.renderRoot(tree)}
 			</TreeSelect>
 		);
 	}
 }
 
-export default DataSourceInput;
+export default TreeSelectInput;

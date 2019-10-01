@@ -14,6 +14,11 @@ const components = {
 };
 
 export class MultiSelect extends Component<Props> {
+	static defaultProps = {
+		isLoading: false,
+		label: ''
+	};
+
 	handleChange = (value: OptionType) => {
 		const {name, onChange} = this.props;
 		onChange(name, value);

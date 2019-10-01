@@ -3,8 +3,6 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {OptionType} from 'react-select/src/types';
 
 export type Props = {
-	isLoading: boolean,
-	label: string,
 	name: string,
 	onChange: (name: string, option: OptionType) => void,
 	options: Attribute[],

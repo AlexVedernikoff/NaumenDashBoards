@@ -1,6 +1,6 @@
 // @flow
 const AVERAGE: 'AVERAGE' = 'AVERAGE';
-const COUNT: 'COUNT' = 'COUNT';
+const COUNT: 'COUNT_CNT' = 'COUNT_CNT';
 const MAX: 'MAX' = 'MAX';
 const MEDIAN: 'MEDIAN' = 'MEDIAN';
 const MIN: 'MIN' = 'MIN';
