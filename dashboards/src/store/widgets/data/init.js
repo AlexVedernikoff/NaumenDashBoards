@@ -5,7 +5,6 @@ import {WIDGETS_EVENTS} from './constants';
 export const initialWidgetsState: WidgetsDataState = {
 	error: false,
 	layoutSaveError: false,
-	layoutSaveLoading: false,
 	loading: false,
 	map: {},
 	newWidget: null,

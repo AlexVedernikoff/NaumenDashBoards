@@ -2,7 +2,7 @@
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {getContext} from 'utils/api';
-import {getWidgets, switchOffStatic, switchOnStatic} from 'store/widgets/data/actions';
+import {getWidgets, resetWidget} from 'store/widgets/data/actions';
 import {push} from 'connected-react-router';
 import {getDataSources} from 'store/sources/data/actions';
 
@@ -34,7 +34,6 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
  */
 const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(setEditable());
-	dispatch(switchOffStatic());
 	dispatch(push('/edit'));
 };
 
@@ -44,7 +43,7 @@ const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
  */
 const seeDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(resetEditable());
-	dispatch(switchOnStatic());
+	dispatch(resetWidget());
 	dispatch(push('/'));
 };
 

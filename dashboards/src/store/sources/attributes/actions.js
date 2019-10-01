@@ -5,7 +5,7 @@ import type {Dispatch, ThunkAction} from 'store/types';
 
 /**
  * Получаем атрибуты конкретного класса
- * @param {string} payload - fqn класса
+ * @param {string} payload - classFqn
  * @returns {ThunkAction}
  */
 const fetchAttributes = (payload: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
@@ -23,9 +23,9 @@ const requestAttributes = () => ({
 	payload: null
 });
 
-const receiveAttributes = (attributes, fqn) => ({
+const receiveAttributes = (attributes, classFqn) => ({
 	type: ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES,
-	payload: {attributes, fqn}
+	payload: {attributes, classFqn}
 });
 
 const recordAttributesError = (payload: string) => ({
