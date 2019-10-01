@@ -1,64 +1,43 @@
 // @flow
 import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS} from './constants';
-import {defaultAction, initialDashboardState} from './init';
+import {defaultDashboardAction, initialDashboardState} from './init';
 
-/**
- * Функция сохранения изменения положения виджета
- * @param state - Текущий state
- * @param action - Вызываемый action
- * @returns {state} - Новый объект state, который включает измененные координаты найденного виджета в массиве виджетов
-*/
-const editLayout = (action: DashboardAction, state: DashboardState): DashboardState => {
-	state.widgets.forEach(w => {
-		const newLayout = action.payload.find(l => l.i === w.id);
-		if (newLayout) w.layout = newLayout;
-	});
-	return state;
-};
-
-/**
- * Функция обновления информации о редактируемом виджете
- * @param state - Текущий state
- * @param action - Вызываемый action
- * @returns {state} - Новый объект state, который включает измененные данные найденного виджета в массиве виджетов
-*/
-const updateWidget = (action: DashboardAction, state: DashboardState): DashboardState => (
-	{
-		...state,
-		widgets: state.widgets.map(w => {
-			if (w.id === state.editedWidgetId) {
-				return {
-					...w,
-					...action.payload
-				};
-			}
-			return w;
-		})
-	}
-);
-
-const reducer = (state: DashboardState = initialDashboardState, action: DashboardAction = defaultAction): DashboardState => {
+const reducer = (state: DashboardState = initialDashboardState, action: DashboardAction = defaultDashboardAction): DashboardState => {
 	switch (action.type) {
-		case DASHBOARD_EVENTS.ADD_WIDGET:
+		case DASHBOARD_EVENTS.RECEIVE_DASHBOARD:
 			return {
 				...state,
-				widgets: [...state.widgets, action.payload]
+				error: false,
+				loading: false
 			};
-		case DASHBOARD_EVENTS.CLOSE_WIDGET_PANEL:
+		case DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR:
 			return {
 				...state,
-				editedWidgetId: null
+				error: true,
+				loading: false
 			};
-		case DASHBOARD_EVENTS.EDIT_WIDGET:
+		case DASHBOARD_EVENTS.REQUEST_DASHBOARD:
 			return {
 				...state,
-				editedWidgetId: action.payload
+				error: false,
+				loading: true
 			};
-		case DASHBOARD_EVENTS.EDIT_LAYOUT:
-			return editLayout(action, state);
-		case DASHBOARD_EVENTS.UPDATE_WIDGET:
-			return updateWidget(action, state);
+		case DASHBOARD_EVENTS.RESET_EDITABLE:
+			return {
+				...state,
+				isEditable: false
+			};
+		case DASHBOARD_EVENTS.SET_CONTEXT:
+			return {
+				...state,
+				context: action.payload
+			};
+		case DASHBOARD_EVENTS.SET_EDITABLE:
+			return {
+				...state,
+				isEditable: true
+			};
 		default:
 			return state;
 	}

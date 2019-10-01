@@ -23,7 +23,7 @@ class NewWidget {
 		y: 0
 	};
 	legendPosition: null = null;
-	name: string = '';
+	name: string = 'Новый виджет';
 	source: null = null;
 	xAxis: null = null;
 	yAxis: null = null;

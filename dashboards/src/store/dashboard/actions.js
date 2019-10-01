@@ -1,72 +1,80 @@
 // @flow
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
-import type {Layout} from 'types/layout';
-import type {updateInfo} from 'types/updateInfo'
-import type {Widget} from 'entities';
+import {getContext} from 'utils/api';
+import {getWidgets, switchOffStatic, switchOnStatic} from 'store/widgets/data/actions';
+import {push} from 'connected-react-router';
+import {getDataSources} from 'store/sources/data/actions';
 
 /**
- * Добавляем новый виджет в массив дашборда
- * @param {Widget} payload - Объект добавленного виджета
+ * Получаем данные, необходимые для работы дашборда
  * @returns {ThunkAction}
  */
-const addWidget = (payload: Widget): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch({
-		type: DASHBOARD_EVENTS.ADD_WIDGET,
-		payload
-	});
+const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(requestDashboard);
+
+	try {
+		const context = getContext();
+		dispatch(setContext(context));
+
+		await Promise.all([
+			dispatch(getDataSources()),
+			dispatch(getWidgets(true))
+		]);
+
+		dispatch(receiveDashboard());
+	} catch (error) {
+		dispatch(recordDashboardError());
+	}
 };
 
 /**
- * Закрываем панель редактирования виджетов
- * @returns {ThunkAction}
-*/
-const closeWidgetPanel = (): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch({
-		type: DASHBOARD_EVENTS.CLOSE_WIDGET_PANEL
-	});
-};
-
-/**
- * Редактировать виджет
- * @param {string} payload - id редактируемого виджета
- * @returns {ThunkAction}
-*/
-const editWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch({
-		type: DASHBOARD_EVENTS.EDIT_WIDGET,
-		payload
-	});
-};
-
-/**
- * Сохраняем изменение положения виджета
- * @param {Layout} payload - массив объектов местоположения виджетов на дашборде
+ * Отключаем статичность виджетов и переходим на страницу редактирования
  * @returns {ThunkAction}
  */
-const editLayout = (payload: Layout): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch({
-		type: DASHBOARD_EVENTS.EDIT_LAYOUT,
-		payload
-	});
+const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(setEditable());
+	dispatch(switchOffStatic());
+	dispatch(push('/edit'));
 };
 
 /**
- * Обновить редактируемую информацию виджета
- * @param {object} payload - объект с ключом и значением редактируемого поля
+ * Делаем виджеты статичными и переходим на страницу просмотра
  * @returns {ThunkAction}
-*/
-const updateWidget = (payload: updateInfo): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch({
-		type: DASHBOARD_EVENTS.UPDATE_WIDGET,
-		payload
-	});
+ */
+const seeDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(resetEditable());
+	dispatch(switchOnStatic());
+	dispatch(push('/'));
 };
+
+const requestDashboard = () => ({
+	type: DASHBOARD_EVENTS.REQUEST_DASHBOARD
+});
+
+const receiveDashboard = () => ({
+	type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
+});
+
+const recordDashboardError = () => ({
+	type: DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
+});
+
+const resetEditable = () => ({
+	type: DASHBOARD_EVENTS.RESET_EDITABLE
+});
+
+const setContext = payload => ({
+	type: DASHBOARD_EVENTS.SET_CONTEXT,
+	payload
+});
+
+const setEditable = () => ({
+	type: DASHBOARD_EVENTS.SET_EDITABLE
+});
 
 export {
-	addWidget,
-	closeWidgetPanel,
-	editLayout,
-	editWidget,
-	updateWidget
+	editDashboard,
+	fetchDashboard,
+	seeDashboard
 };

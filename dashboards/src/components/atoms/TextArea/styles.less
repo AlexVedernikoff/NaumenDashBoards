@@ -1,15 +1,17 @@
 @import "/styles/variables.less";
 
 :local {
+	@color: #767676;
+
 	.label {
-		color: #767676;
+		color: @color;
 		display: block;
 		font-size: 13px;
 		margin-bottom: 6px;
 	}
 
 	.icon {
-		color: #767676;
+		color: @color;
 		cursor: pointer;
 		position: absolute;
 		right: 10px;
@@ -27,7 +29,7 @@
 		padding: 8px 24px 8px 12px;
 		resize: none;
 		width: 100%;
-	
+
 		&::placeholder {
 			color: #A4A4A4;
 		}

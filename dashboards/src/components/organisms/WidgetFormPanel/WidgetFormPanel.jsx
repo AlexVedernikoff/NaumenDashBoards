@@ -117,9 +117,9 @@ export class WidgetFormPanel extends Component<Props, State> {
 		);
 	};
 
-	renderLegendField = (field: CheckBoxProps) => (
+	renderLegendField = (checkBox: CheckBoxProps) => (
 		<div className={styles.checkboxContainerLeft}>
-			{this.renderCheckBox(field)}
+			{this.renderCheckBox(checkBox)}
 			<Divider className={styles.dividerLeft}/>
 		</div>
 	);
@@ -306,7 +306,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 		const cancel: ButtonProps = {
 			block: true,
 			onClick: cancelForm,
-			text: 'Сохранить',
+			text: 'Отмена',
 			variant: 'bare'
 		};
 

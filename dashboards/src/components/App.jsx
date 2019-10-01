@@ -1,16 +1,19 @@
 // @flow
-import '../styles/styles.less';
-import 'react-grid-layout/css/styles.css';
-import DashboardEdit from './pages/DashboardEdit/DashboardEdit';
-import DashboardView from './pages/DashboardView/DashboardView';
-import React from 'react'
+import 'styles/app.less';
+import DashboardEditContent from 'containers/DashboardEditContent';
+import DashboardHeader from 'containers/DashboardHeader';
+import DashboardViewContent from 'containers/DashboardViewContent';
+import React, {Fragment} from 'react';
 import {Route, Switch} from 'react-router-dom';
 
 export const App = () => (
-	<Switch>
-		<Route path="/" component={DashboardView} exact />
-		<Route path="/edit" component={DashboardEdit} />
-	</Switch>
+	<Fragment>
+		<DashboardHeader />
+		<Switch>
+			<Route path="/" component={DashboardViewContent} exact />
+			<Route path="/edit" component={DashboardEditContent} />
+		</Switch>
+	</Fragment>
 );
 
 export default App;

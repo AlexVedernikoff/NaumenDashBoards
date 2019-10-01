@@ -12,7 +12,7 @@ const createDataSource = (source: RawDataSource) => ({
 	isLeaf: source.children && source.children.length === 0
 });
 
-export const setChildrenDataSources = (map: any, fqn: string, children: Array<RawDataSource>) => {
+const setChildrenDataSources = (map: any, fqn: string, children: Array<RawDataSource>) => {
 	map[fqn].children = children.map(s => s.fqnCode);
 
 	children.forEach(s => {

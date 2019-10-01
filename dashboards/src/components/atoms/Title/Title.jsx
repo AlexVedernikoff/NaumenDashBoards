@@ -1,7 +1,8 @@
 // @flow
 import classnames from 'classnames';
+import type {Props} from './types';
 import React from 'react';
-import styles from './style.less';
+import styles from './styles.less';
 
 export const Title = (props: Props) => {
   const {className} = props;

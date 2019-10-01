@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {Layout, LayoutItem} from 'types/layout';
+import type {Layout, LayoutItem} from 'utils/layout/types';
 import type {NewWidget} from 'entities';
-import type {SaveFormData, SelectValue} from 'components/organisms/WidgetFormPanel/types';
+import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {WIDGETS_EVENTS} from './constants';
 
 export type Widget = {
@@ -10,6 +10,7 @@ export type Widget = {
 	areAxisesNamesShown: boolean,
 	areAxisesLabelsShown: boolean,
 	areAxisesMeaningsShown: boolean,
+	breakdown: Attribute | null,
 	desc: string,
 	group: SelectValue | null,
 	id: string,
@@ -24,11 +25,6 @@ export type Widget = {
 	yAxis: Attribute,
 };
 
-export type UpdateWidgetPayload = {
-	formData: SaveFormData,
-	id: string
-};
-
 export type AddWidget = {
 	type: typeof WIDGETS_EVENTS.ADD_WIDGET,
 	payload: number
@@ -36,7 +32,7 @@ export type AddWidget = {
 
 export type UpdateWidget = {
 	type: typeof WIDGETS_EVENTS.UPDATE_WIDGET,
-	payload: UpdateWidgetPayload
+	payload: Widget
 };
 
 export type SetCreatedWidget = {
@@ -73,6 +69,35 @@ export type ResetWidget = {
 	type: typeof WIDGETS_EVENTS.RESET_WIDGET,
 };
 
+export type RecordWidgetSaveError = {
+	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR,
+};
+
+export type RecordLayoutSaveError = {
+	type: typeof WIDGETS_EVENTS.RECORD_LAYOUT_SAVE_ERROR,
+};
+
+export type RequestLayoutSave = {
+	type: typeof WIDGETS_EVENTS.REQUEST_LAYOUT_SAVE,
+};
+
+export type RequestWidgetSave = {
+	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_SAVE,
+};
+
+export type RequestWidgets = {
+	type: typeof WIDGETS_EVENTS.REQUEST_WIDGETS
+};
+
+export type ReceiveWidgets = {
+	type: typeof WIDGETS_EVENTS.RECEIVE_WIDGETS,
+	payload: Widget[]
+};
+
+export type RecordWidgetsError = {
+	type: typeof WIDGETS_EVENTS.RECORD_WIDGETS_ERROR,
+};
+
 type UnknownWidgetsAction = {
 	type: typeof WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION,
 	payload: null
@@ -82,6 +107,13 @@ export type WidgetsAction =
 	| AddWidget
 	| DeleteWidget
 	| EditLayout
+	| ReceiveWidgets
+	| RecordLayoutSaveError
+	| RecordWidgetSaveError
+	| RecordWidgetsError
+	| RequestLayoutSave
+	| RequestWidgetSave
+	| RequestWidgets
 	| ResetWidget
 	| SelectWidget
 	| SetCreatedWidget
@@ -97,8 +129,12 @@ export type WidgetMap = {
 
 export type WidgetsDataState = {
 	error: boolean,
+	layoutSaveError: boolean,
+	layoutSaveLoading: boolean,
 	loading: boolean,
 	map: WidgetMap,
 	newWidget: NewWidget | null,
+	saveError: boolean,
+	saveLoading: boolean,
 	selectedWidget: string
 };

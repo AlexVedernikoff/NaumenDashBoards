@@ -4,6 +4,7 @@ import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetForm
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchChartData} from 'store/widgets/charts/actions';
 import type {Layout} from 'utils/layout/types';
+import {NewWidget} from 'entities';
 import type {Widget} from './types';
 import {WIDGETS_EVENTS} from './constants';
 
@@ -23,7 +24,9 @@ const getWidgets = (isInit: boolean = false): ThunkAction => async (dispatch: Di
 		if (Array.isArray(data)) {
 			const widgets = data.map(w => {
 				const widget = JSON.parse(w.value);
-				widget.id = widget.layout.i = w.key;
+				widget.id = w.key;
+				widget.layout.i = w.key;
+				widget.layout.static = true;
 				data.map[w.key] = widget;
 
 				dispatch(fetchChartData(widget));
@@ -59,13 +62,18 @@ const addWidget = (payload: number): ThunkAction => (dispatch: Dispatch): void =
  */
 const editLayout = (payload: Layout): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestLayoutSave());
+
 	try {
 		const context = getState().dashboard.context;
+		const layoutsSettings = payload.filter(l => l.i !== NewWidget.id).map(l => ({
+			key: l.i,
+			value: JSON.stringify(l)
+		}));
 
 		await client.post(buildUrl('dashboardSettings', 'bulkEditWidget', 'requestContent,user'), {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			requestEditWidgetSettings: payload
+			layoutsSettings
 		});
 		dispatch(setNewLayout(payload));
 	} catch (e) {

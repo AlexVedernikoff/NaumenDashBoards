@@ -1,48 +1,56 @@
 // @flow
+import type {Context} from 'utils/api/types';
 import {DASHBOARD_EVENTS} from './constants';
-import type {Layout} from 'types/layout';
-import type {Widget} from 'entities';
 
-type AddWidget = {
-	type: typeof DASHBOARD_EVENTS.ADD_WIDGET,
-	payload: Widget
-};
-
-type CloseWidgetPanel = {
-	type: typeof DASHBOARD_EVENTS.CLOSE_WIDGET_PANEL
-};
-
-type EditWidget = {
-	type: typeof DASHBOARD_EVENTS.EDIT_WIDGET,
-	payload: string
-};
-
-type EditLayout = {
-	type: typeof DASHBOARD_EVENTS.EDIT_LAYOUT,
-	payload: Layout
-};
-
-type UnknownAction = {
-	type: typeof DASHBOARD_EVENTS.UNKNOWN,
+type RequestDashboard = {
+	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD,
 	payload: null
 };
 
-export type updateInfo = {key: string, value: string | boolean};
+export type ReceiveDashboard = {
+	type: typeof DASHBOARD_EVENTS.RECEIVE_DASHBOARD,
+	payload: null
+};
 
-type UpdateWidget = {
-	type: typeof DASHBOARD_EVENTS.UPDATE_WIDGET,
-	payload: updateInfo
+type RecordDashboardError = {
+	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR,
+	payload: null
+};
+
+type ResetEditable = {
+	type: typeof DASHBOARD_EVENTS.RESET_EDITABLE,
+	payload: null
+};
+
+type SetContext = {
+	type: typeof DASHBOARD_EVENTS.SET_CONTEXT,
+	payload: Context
+};
+
+type SetEditable = {
+	type: typeof DASHBOARD_EVENTS.SET_EDITABLE,
+	payload: null
+};
+
+type UnknownDashboardAction = {
+	type: typeof DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION,
+	payload: null
 };
 
 export type DashboardAction =
-	| AddWidget
-	| CloseWidgetPanel
-	| EditLayout
-	| EditWidget
-	| UpdateWidget
-	;
+	| RequestDashboard
+	| ReceiveDashboard
+	| RecordDashboardError
+	| ResetEditable
+	| SetContext
+	| SetEditable
+	| UnknownDashboardAction
+;
 
 export type DashboardState = {
-	editedWidgetId: ?string,
-	widgets: Array<Widget>
+	context: Context | Object,
+	error: boolean,
+	isEditable: boolean,
+	loading: boolean,
+	name: string
 };

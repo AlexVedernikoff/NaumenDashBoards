@@ -1,5 +1,5 @@
 // @flow
-import {breakpoints, cols, rowHeight} from 'constants/layout';
+import {breakpoints, cols, rowHeight} from 'utils/layout/constants';
 import Chart from 'components/molecules/Chart';
 import type {ContainerRef, Props, State} from './types';
 import type {Element} from 'react';
@@ -75,7 +75,7 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	renderWidget = (widget: Widget): Element<any> => {
+	renderWidget = (widget: Widget): Element<'div'> => {
 		const {id, layout} = widget;
 
 		return (

@@ -1,13 +1,13 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {OnChangeSelect} from 'components/organisms/WidgetFormPanel/types';
+import type {OptionType} from 'react-select/src/types';
 
 export type Props = {
 	isLoading: boolean,
 	label: string,
 	name: string,
-	onChange: OnChangeSelect,
+	onChange: (name: string, option: OptionType) => void,
 	options: Attribute[],
 	placeholder: string,
-	value: Attribute
+	value: Attribute | null
 };

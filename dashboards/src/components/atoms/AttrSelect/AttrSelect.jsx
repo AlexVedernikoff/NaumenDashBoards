@@ -4,8 +4,8 @@ import {MultiSelect} from 'components/atoms';
 import type {Props} from './types';
 import React, {Component} from 'react';
 
-/* Компонент является декоратором для Select библиотеки react-select.
-* !!! Все props пробрасываются дальше в компонент Select.
+/* Компонент является декоратором для MultiSelect.
+* !!! Все props пробрасываются дальше в компонент MultiSelect.
 */
 export class AttrSelect extends Component<Props> {
 	attrOptionLabel = (o: Attribute) => o.title;

@@ -1,7 +1,11 @@
 // @flow
-import {Node} from 'react';
+import type {Node} from 'react';
 
 export type Props = {
-    children: Node,
-    name: string
+	children: Array<Node>,
+	name: string
 };
+
+export type State = {
+	height: number | string
+}

@@ -1,23 +1,21 @@
 // @flow
-import type {Layout} from 'types/layout';
+import type {ChartMap} from 'store/widgets/charts/types';
+import type {Layout} from 'utils/layout/types';
+import type {NewWidget} from 'entities';
 import type {ThunkAction} from 'store/types';
-import type {Widget} from 'entities';
-
-type EditLayout = (layout: Layout) => ThunkAction;
-
-export type Props = {
-	editedWidgetId: string,
-	editLayout: EditLayout,
-	editWidget: () => ThunkAction,
-	widgets: Widget[]
-}
-
-export type ConnectedProps = {
-	editedWidgetId: string,
-	widgets: Widget[]
-};
+import type {WidgetMap} from 'store/widgets/data/types';
 
 export type ConnectedFunctions = {
-	editLayout: EditLayout,
-	editWidget: (id: string) => ThunkAction
+	editLayout: (layout: Layout) => ThunkAction,
+	selectWidget: (id: string) => ThunkAction
 };
+
+export type ConnectedProps = {
+	charts: ChartMap,
+	isEditable: boolean,
+	newWidget: NewWidget | null,
+	selectedWidget: string,
+	widgets: WidgetMap
+};
+
+export type Props = ConnectedProps & ConnectedFunctions;
