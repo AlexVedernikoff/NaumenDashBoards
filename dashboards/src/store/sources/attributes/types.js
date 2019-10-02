@@ -19,7 +19,7 @@ type ReceiveAttributes = {
 	type: typeof ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES,
 	payload: {
 		attributes: Attribute[],
-		fqn: string
+		classFqn: string
 	}
 };
 
