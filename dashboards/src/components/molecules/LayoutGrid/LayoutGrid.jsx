@@ -5,6 +5,7 @@ import type {Element} from 'react';
 import {GRID_PARAMS} from 'utils/layout';
 import {NewWidget} from 'entities';
 import React, {Component} from 'react';
+import {RefContainer} from 'utils/refConatiner';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
 import type {Widget} from 'store/widgets/data/types';
@@ -54,6 +55,19 @@ export class LayoutGrid extends Component<Props, State> {
 
 		if (current) {
 			const width: number = current.clientWidth;
+
+			this.setState({width});
+
+			new RefContainer(current);
+			window.addEventListener('resize', this.reloadGrid);
+		}
+	}
+
+	reloadGrid = () => {
+		const {current} = this.container;
+
+		if (current) {
+			const width: number = current.clientWidth;
 			this.setState({width});
 		}
 	}
@@ -69,6 +83,10 @@ export class LayoutGrid extends Component<Props, State> {
 			);
 		}
 	};
+
+	componentWillUnmount () {
+		window.removeEventListener('resize', this.reloadGrid);
+	}
 
 	renderChart = (widget: Widget | NewWidget) => {
 		const {charts} = this.props;
