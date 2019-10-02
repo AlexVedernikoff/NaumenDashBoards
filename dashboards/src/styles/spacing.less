@@ -38,7 +38,7 @@
 
 .createByPositions(@abbrev, @spacer, @breakpoint) {
 	each(@positions, {
-		@positionProperty: @{spacer}-@{value};
+		@positionProperty: e("@{spacer}-@{value}");
 		.@{abbrev}@{key}-@{breakpoint} {
 			.applyProperty(@breakpoint, @positionProperty)
 		}

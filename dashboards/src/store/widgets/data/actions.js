@@ -1,10 +1,10 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
+import type {Context} from 'utils/api/types';
 import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetFormPanel/types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchChartData} from 'store/widgets/charts/actions';
 import type {Layout} from 'utils/layout/types';
-import {NewWidget} from 'entities';
 import type {Widget} from './types';
 import {WIDGETS_EVENTS} from './constants';
 
@@ -60,22 +60,33 @@ const addWidget = (payload: number): ThunkAction => (dispatch: Dispatch): void =
  * @param {Layout} payload - массив объектов местоположения виджетов на дашборде
  * @returns {ThunkAction}
  */
-const editLayout = (payload: Layout): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const editLayout = (payload: Layout): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(setNewLayout(payload));
+};
+
+/**
+ * Сохраняем новое положение виджетов
+ * @param {Context} context - контекст ВП;
+ * @param {boolean} asDefault - указывает как сохранить виджет;
+ * @returns {ThunkAction}
+ */
+const saveNewLayout = (context: Context, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	dispatch(requestLayoutSave());
 
 	try {
-		const context = getState().dashboard.context;
-		const layoutsSettings = payload.filter(l => l.i !== NewWidget.id).map(l => ({
-			key: l.i,
-			value: JSON.stringify(l)
+		const {widgets} = getState();
+		const widgetMap = widgets.data.map;
+		const method = asDefault ? 'bulkEditDefaultWidget' : 'bulkEditWidget';
+		const layoutsSettings = Object.keys(widgetMap).map(key => ({
+			key: key,
+			value: JSON.stringify(widgetMap[key].layout)
 		}));
 
-		await client.post(buildUrl('dashboardSettings', 'bulkEditWidget', 'requestContent,user'), {
+		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
 			layoutsSettings
 		});
-		dispatch(setNewLayout(payload));
 	} catch (e) {
 		dispatch(recordLayoutSaveError());
 	}
@@ -108,6 +119,7 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 			widgetSettings: JSON.stringify(formData)
 		};
 		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
+		await dispatch(saveNewLayout(context, asDefault));
 
 		dispatch(updateWidget(formData));
 		dispatch(fetchChartData(formData));
@@ -134,6 +146,7 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 			widgetSettings: JSON.stringify(formData)
 		};
 		const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
+		await dispatch(saveNewLayout(context, asDefault));
 
 		formData.layout.i = id;
 		const widget = {...formData, id};
@@ -202,14 +215,6 @@ const setNewLayout = (payload: Layout) => ({
 	payload
 });
 
-const switchOnStatic = () => ({
-	type: WIDGETS_EVENTS.SWITCH_ON_STATIC
-});
-
-const switchOffStatic = () => ({
-	type: WIDGETS_EVENTS.SWITCH_OFF_STATIC
-});
-
 const updateWidget = (payload: Widget) => ({
 	type: WIDGETS_EVENTS.UPDATE_WIDGET,
 	payload
@@ -221,8 +226,7 @@ export {
 	createWidget,
 	editLayout,
 	getWidgets,
+	resetWidget,
 	saveWidget,
-	selectWidget,
-	switchOffStatic,
-	switchOnStatic
+	selectWidget
 };

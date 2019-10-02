@@ -1,6 +1,8 @@
 // @flow
 import {getNextRow} from './core';
+import {GRID_PARAMS} from './constants';
 
 export {
-	getNextRow
+	getNextRow,
+	GRID_PARAMS
 };

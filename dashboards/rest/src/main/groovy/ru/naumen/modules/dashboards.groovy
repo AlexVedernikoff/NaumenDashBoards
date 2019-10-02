@@ -32,7 +32,7 @@ class DataSource
     /**
      * Код типа метакласса
      */
-    String fqnCode
+    String classFqn
     /**
      * Название источника данных
      */
@@ -71,23 +71,23 @@ class Attribute
 //region REST-МЕТОДЫ
 /**
  * Отдает список источников данных с детьми
- * @param fqnCode код метакласса
+ * @param classFqn код метакласса
  * @return json список источников данных {заголовок, код, дети}
  */
-String getDataSources(fqnCode = MAIN_FQN)
+String getDataSources(classFqn = MAIN_FQN)
 {
-    def children = getMetaClassChildren(fqnCode)
+    def children = getMetaClassChildren(classFqn)
     Collection<DataSource> dataSources = mappingDataSource(children)
     return toJson(dataSources)
 }
 
 /**
  * Отдает список атрибутов для источника данных
- * @param fqnCode код метакласса
+ * @param classFqn код метакласса
  * @return json список атрибутов {заголовок, код, тип атрибута}
  */
-String getAttributesDataSources(fqnCode){
-    def attributes = api.metainfo.getMetaClass(fqnCode).attributes
+String getAttributesDataSources(classFqn){
+    def attributes = api.metainfo.getMetaClass(classFqn).attributes
     Collection<Attribute> mappingAttributes = mappingAttribute(attributes)
     return toJson(mappingAttributes)
 }

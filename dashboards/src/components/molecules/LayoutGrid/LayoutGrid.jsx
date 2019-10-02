@@ -1,11 +1,10 @@
 // @flow
-import {breakpoints, cols, rowHeight} from 'utils/layout/constants';
 import Chart from 'components/molecules/Chart';
 import type {ContainerRef, Props, State} from './types';
 import type {Element} from 'react';
+import {GRID_PARAMS} from 'utils/layout';
 import {NewWidget} from 'entities';
 import React, {Component} from 'react';
-import {RefContainer} from 'utils/refConatiner';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
 import type {Widget} from 'store/widgets/data/types';
@@ -14,7 +13,6 @@ const props = {
 	autoSize: undefined,
 	breakpoint: undefined,
 	className: undefined,
-	containerPadding: undefined,
 	draggableCancel: undefined,
 	draggableHandle: undefined,
 	isDraggable: undefined,
@@ -35,6 +33,10 @@ const props = {
 };
 
 export class LayoutGrid extends Component<Props, State> {
+	static defaultProps = {
+		isEditable: false
+	};
+
 	state = {
 		width: null
 	};
@@ -48,23 +50,6 @@ export class LayoutGrid extends Component<Props, State> {
 	 * и пробросить ее в дочерний компонент, тем самым задав сетке виджетов оптимальную ширину.
 	 */
 	componentDidMount () {
-		const {current} = this.container;
-
-		if (current) {
-			const width: number = current.clientWidth;
-
-			this.setState({width});
-
-			new RefContainer(current);
-			window.addEventListener('resize', this.reloadGrid);
-		}
-	}
-
-	componentWillUnmount () {
-		window.removeEventListener('resize', this.reloadGrid);
-	}
-
-	reloadGrid = () => {
 		const {current} = this.container;
 
 		if (current) {
@@ -116,11 +101,13 @@ export class LayoutGrid extends Component<Props, State> {
 		if (width) {
 			return (
 				<Grid
+					breakpoints={GRID_PARAMS.BREAK_POINTS}
+					className={styles.grid}
+					cols={GRID_PARAMS.COLS}
+					containerPadding={GRID_PARAMS.CONTAINER_PADDING}
 					compactType={null}
-					breakpoints={breakpoints}
-					cols={cols}
 					onLayoutChange={onLayoutChange}
-					rowHeight={rowHeight}
+					rowHeight={GRID_PARAMS.ROW_HEIGHT}
 					width={width}
 					{...props}
 				>

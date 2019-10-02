@@ -76,10 +76,10 @@ export class WidgetFormPanel extends Component<Props, State> {
 		}
 	};
 
-	handleSelectSource = (source: SelectValue) => {
+	handleSelectSource = async (source: SelectValue) => {
 		const {attributes, fetchAttributes, setFieldValue} = this.props;
 
-		setFieldValue('source', source);
+		await setFieldValue('source', source);
 
 		if (!attributes[source.value]) {
 			fetchAttributes(source.value);
