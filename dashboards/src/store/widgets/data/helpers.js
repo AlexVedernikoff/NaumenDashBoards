@@ -8,18 +8,11 @@ import type {
 	SetCreatedWidget,
 	UpdateWidget,
 	Widget,
-	WidgetsDataState,
-	WidgetMap
+	WidgetsDataState
 } from './types';
 import type {Layout} from 'utils/layout/types';
 import {NewWidget} from 'entities';
 
-/**
- * Устанавливаем полученные виджеты
- * @param {WidgetsDataState} state - хранилище данных виджетов
- * @param {Widget[]} payload - массив виджетов
- * @returns {WidgetsDataState}
- */
 export const setWidgets = (state: WidgetsDataState, {payload}: ReceiveWidgets) => {
 	payload.forEach(w => {
 		state.map[w.id] = w;
@@ -34,14 +27,19 @@ export const setWidgets = (state: WidgetsDataState, {payload}: ReceiveWidgets) =
 
 /**
  * Меняем статичность виджетов
- * @param {WidgetMap} map - виджеты
+ * @param {WidgetsDataState} state - хранилище данных виджетов
  * @param {boolean} staticValue - новое значение статичности виджетов
- * @returns {void}
+ * @returns {WidgetsDataState}
  */
-export const handleStatic = (map: WidgetMap, staticValue: boolean): void => {
-	Object.keys(map).forEach(key => {
-		map[key].layout.static = staticValue;
+export const handleStatic = (state: WidgetsDataState, staticValue: boolean): WidgetsDataState => {
+	Object.keys(state.map).forEach(key => {
+		state.map[key].layout.static = staticValue;
 	});
+
+	return {
+		...state,
+		map: {...state.map}
+	};
 };
 
 /**
@@ -51,10 +49,6 @@ export const handleStatic = (map: WidgetMap, staticValue: boolean): void => {
  * @returns {WidgetsDataState}
  */
 export const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidget): WidgetsDataState => {
-	if (!state.selectedWidget) {
-		handleStatic(state.map, false);
-	}
-
 	state.selectedWidget = payload;
 	return {...state};
 };
@@ -68,14 +62,8 @@ export const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
 	if (state.selectedWidget === NewWidget.id) {
 		state.newWidget = null;
 	}
-
-	handleStatic(state.map, true);
 	state.selectedWidget = '';
-
-	return {
-		...state,
-		map: {...state.map}
-	};
+	return {...state};
 };
 
 /**
@@ -87,8 +75,6 @@ export const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
 export const addWidget = (state: WidgetsDataState, {payload}: AddWidget): WidgetsDataState => {
 	state.newWidget = new NewWidget(payload);
 	state.selectedWidget = state.newWidget.id;
-	handleStatic(state.map, false);
-
 	return {
 		...state,
 		map: {...state.map}
@@ -164,6 +150,7 @@ export const editLayout = (state: WidgetsDataState, {payload}: EditLayout): Widg
 
 	return {
 		...state,
+		layoutSaveLoading: false,
 		map: {...state.map}
 	};
 };

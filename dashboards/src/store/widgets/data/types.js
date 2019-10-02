@@ -45,6 +45,16 @@ export type DeleteWidget = {
 	payload: string
 };
 
+export type SwitchOnStatic = {
+	type: typeof WIDGETS_EVENTS.SWITCH_ON_STATIC,
+	payload: null
+};
+
+export type SwitchOffStatic = {
+	type: typeof WIDGETS_EVENTS.SWITCH_OFF_STATIC,
+	payload: null
+};
+
 export type EditLayout = {
 	type: typeof WIDGETS_EVENTS.EDIT_LAYOUT,
 	payload: Layout
@@ -107,6 +117,8 @@ export type WidgetsAction =
 	| ResetWidget
 	| SelectWidget
 	| SetCreatedWidget
+	| SwitchOnStatic
+	| SwitchOffStatic
 	| UpdateWidget
 	| UnknownWidgetsAction
 ;
@@ -118,6 +130,7 @@ export type WidgetMap = {
 export type WidgetsDataState = {
 	error: boolean,
 	layoutSaveError: boolean,
+	layoutSaveLoading: boolean,
 	loading: boolean,
 	map: WidgetMap,
 	newWidget: NewWidget | null,

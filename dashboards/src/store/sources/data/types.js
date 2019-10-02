@@ -3,7 +3,7 @@ import {DATA_SOURCES_EVENTS} from './constants';
 
 export type RawDataSource = {
 	children: Array<RawDataSource>,
-	classFqn: string,
+	fqnCode: string,
 	title: string
 };
 

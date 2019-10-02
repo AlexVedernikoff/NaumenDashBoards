@@ -7,33 +7,33 @@ import type {
 
 const createDataSource = (source: RawDataSource) => ({
 	title: source.title,
-	value: source.classFqn,
-	key: source.classFqn,
+	value: source.fqnCode,
+	key: source.fqnCode,
 	isLeaf: source.children && source.children.length === 0
 });
 
-const setChildrenDataSources = (map: any, classFqn: string, children: Array<RawDataSource>) => {
-	map[classFqn].children = children.map(source => source.classFqn);
+const setChildrenDataSources = (map: any, fqn: string, children: Array<RawDataSource>) => {
+	map[fqn].children = children.map(s => s.fqnCode);
 
-	children.forEach(source => {
-		map[source.classFqn] = createDataSource(source);
-		setChildrenDataSources(map, source.classFqn, source.children);
+	children.forEach(s => {
+		map[s.fqnCode] = createDataSource(s);
+		setChildrenDataSources(map, s.fqnCode, s.children);
 	});
 };
 
 /**
  * Нормализуем данные классов для удобной работы с деревом
  * @param {DataSourcesState} state - хранилище состояния источников данных
- * @param {string} payload - массив классов с детьми
+ * @param {string} payload - fqn класса
  * @returns {DataSourcesState}
  */
 export const setDataSources = (state: DataSourcesState, {payload}: ReceiveDataSources) => {
 	let map = {};
 
-	payload.forEach(source => {
-		map[source.classFqn] = {...createDataSource(source), root: true};
-		map[source.classFqn].children = [];
-		setChildrenDataSources(map, source.classFqn, source.children);
+	payload.forEach(s => {
+		map[s.fqnCode] = {...createDataSource(s), root: true};
+		map[s.fqnCode].children = [];
+		setChildrenDataSources(map, s.fqnCode, s.children);
 	});
 
 	return {

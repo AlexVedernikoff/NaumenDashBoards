@@ -9,12 +9,10 @@ import type {WidgetMap} from 'store/widgets/data/types';
 export const getNextRow = (widgets: WidgetMap): number => {
 	let nextRow = 0;
 	Object.keys(widgets).forEach(key => {
-		const {h, y} = widgets[key].layout;
-
-		if (y >= nextRow) {
-			nextRow = y + h;
+		if (widgets[key].layout.y > nextRow) {
+			nextRow = widgets[key].layout.y;
 		}
 	});
 
-	return nextRow;
+	return nextRow ? nextRow.y + 1 : nextRow;
 };

@@ -4,6 +4,7 @@ import {
 	createWidget,
 	deleteWidget,
 	editLayout,
+	handleStatic,
 	resetWidget,
 	setSelectedWidget,
 	setWidgets,
@@ -32,14 +33,16 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 		case WIDGETS_EVENTS.REQUEST_LAYOUT_SAVE:
 			return {
 				...state,
-				layoutSaveError: false
+				layoutSaveError: false,
+				layoutSaveLoading: true
 			};
 		case WIDGETS_EVENTS.EDIT_LAYOUT:
 			return editLayout(state, action);
 		case WIDGETS_EVENTS.RECORD_LAYOUT_SAVE_ERROR:
 			return {
 				...state,
-				layoutSaveError: true
+				layoutSaveError: true,
+				layoutSaveLoading: false
 			};
 		case WIDGETS_EVENTS.REQUEST_WIDGET_SAVE:
 			return {
@@ -57,6 +60,10 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 				saveError: true,
 				saveLoading: false
 			};
+		case WIDGETS_EVENTS.SWITCH_ON_STATIC:
+			return handleStatic(state, true);
+		case WIDGETS_EVENTS.SWITCH_OFF_STATIC:
+			return handleStatic(state, false);
 		case WIDGETS_EVENTS.SET_SELECTED_WIDGET:
 			return setSelectedWidget(state, action);
 		case WIDGETS_EVENTS.RESET_WIDGET:

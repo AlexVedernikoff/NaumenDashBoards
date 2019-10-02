@@ -1,8 +1,8 @@
 // @flow
 const DAY: 'DAY' = 'DAY';
+const WEEK: 'WEEK' = 'WEEK';
 const MONTH: 'MONTH' = 'MONTH';
 const QUARTER: 'QUARTER' = 'QUARTER';
-const WEEK: 'WEEK' = 'WEEK';
 const YEAR: 'YEAR' = 'YEAR';
 
 const INTERVAL_MINUTE: 'INTERVAL_MINUTE' = 'INTERVAL_MINUTE';
@@ -12,8 +12,6 @@ const INTERVAL_MONTH: 'INTERVAL_MONTH' = 'INTERVAL_MONTH';
 
 const DATETIME: 'dateTime' = 'dateTime';
 const DT_INTERVAL: 'dtInterval' = 'dtInterval';
-
-const DEFAULT_GROUP: 'OVERLAP' = 'OVERLAP';
 
 const DATETIME_VARIANTS = {
 	DAY,
@@ -40,7 +38,6 @@ const DATETIME_FORMAT = 'DD.MM.YYYY HH:mm';
 export {
 	DATETIME_FORMAT,
 	DATETIME_VARIANTS,
-	DEFAULT_GROUP,
 	INTERVAL_VARIANTS,
 	GROUP_TYPES
 };
