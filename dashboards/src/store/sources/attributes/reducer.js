@@ -6,7 +6,7 @@ import {defaultAttributesAction, initialAttributesState} from './init';
 const reducer = (state: AttributesState = initialAttributesState, action: AttributesAction = defaultAttributesAction): AttributesState => {
 	switch (action.type) {
 		case ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES:
-			state.map[action.payload.classFqn] = action.payload.attributes;
+			state.map[action.payload.fqn] = action.payload.attributes;
 			return {
 				...state,
 				loading: false,

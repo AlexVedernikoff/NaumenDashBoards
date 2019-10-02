@@ -1,13 +1,5 @@
 // @flow
-const BREAK_POINTS = {
-	lg: 1200,
-	md: 996,
-	sm: 768,
-	xs: 480,
-	xxs: 0
-};
-
-const COLS = {
+export const cols = {
 	lg: 12,
 	md: 12,
 	sm: 12,
@@ -15,17 +7,12 @@ const COLS = {
 	xxs: 12
 };
 
-const CONTAINER_PADDING = [20, 20];
-
-const ROW_HEIGHT = 50;
-
-const GRID_PARAMS = {
-	BREAK_POINTS,
-	COLS,
-	CONTAINER_PADDING,
-	ROW_HEIGHT
+export const breakpoints = {
+	lg: 1200,
+	md: 996,
+	sm: 768,
+	xs: 480,
+	xxs: 0
 };
 
-export {
-	GRID_PARAMS
-};
+export const rowHeight = 50;

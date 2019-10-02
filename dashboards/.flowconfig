@@ -2,6 +2,10 @@
 .*/fbjs/.*
 .*/flux/.*
 .*/react-motion/.*
+.*/tests/.*
+
+[untyped]
+.*/node_modules/*
 
 [include]
 

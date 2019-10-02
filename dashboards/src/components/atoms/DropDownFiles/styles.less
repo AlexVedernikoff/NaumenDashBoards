@@ -1,0 +1,67 @@
+@import '/styles/variables';
+
+:local {
+	.dropdownButton {
+		border: none;
+		color: @bg-color;
+		cursor: pointer;
+		font-size: 16px;
+		padding: 16px;
+
+		svg {
+			fill: @bg-color;
+		}
+	}
+	
+	.dropdown {
+		display: inline-block;
+		position: relative;
+	}
+	
+	.dropdownContent {
+		background-color: @bg-color;
+		box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+		display: none;
+		position: absolute;
+		z-index: 1;
+	}
+	
+	.dropdownContent {
+		button {
+			color: @text-color;
+			display: block;
+			margin: 0;
+			min-width: 65px;
+			padding: 12px 16px;
+			text-decoration: none;
+			width: 100%;
+		}
+	}
+	
+	.dropdownContent 
+		button {
+
+			&:hover {
+				background-color: @info;
+				color: @text-color-white;
+			}
+		}
+	
+	.dropdown{
+		&:hover {
+
+			.dropdownContent {
+				display: block;
+			}
+		}
+	}
+	
+	.dropdown {
+		&:hover {
+
+			.dropdownButton {
+				background-color: @info;
+			}
+		} 
+	}
+}

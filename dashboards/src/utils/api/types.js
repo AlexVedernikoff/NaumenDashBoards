@@ -8,7 +8,6 @@ export type Module =
 
 export type Method =
 	| 'bulkEditWidget'
-	| 'bulkEditDefaultWidget'
 	| 'createDefaultWidgetSettings'
 	| 'createPersonalWidgetSettings'
 	| 'getAttributesDataSources'

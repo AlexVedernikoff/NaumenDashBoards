@@ -1,6 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
-import DashboardViewContent from 'components/organisms/DashboardViewContent';
+import LayoutGrid from 'components/molecules/LayoutGrid/LayoutGrid';
 import {props} from './selectors';
 
-export default connect(props)(DashboardViewContent);
+export default connect(props)(LayoutGrid);

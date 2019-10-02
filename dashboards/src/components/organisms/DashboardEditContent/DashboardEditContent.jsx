@@ -39,6 +39,7 @@ export class DashboardEditContent extends Component<Props> {
 			<div className={styles.container}>
 				<LayoutGrid
 					charts={charts}
+					className={styles.grid}
 					isEditable={isEditable}
 					onSelectWidget={this.onSelectWidget}
 					onLayoutChange={this.onLayoutChange}
