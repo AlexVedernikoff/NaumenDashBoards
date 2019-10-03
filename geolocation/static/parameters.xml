@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <embeddedAppParameters> <!-- Корневой атрибут с настройками параметров -->
+     <parameters> <!-- Атрибут с перечислением параметров встроенного приложения -->
+         <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>colorDynamicActivePoint</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <string>#4D92C8</string>
+                    </default-value>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Цвет метки активной подвижной точки</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>colorDynamicInactivePoint</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <string>#828282</string>
+                    </default-value>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Цвет метки неактивной подвижной точки</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>colorStaticPoint</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <string>#EB5757</string>
+                    </default-value>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Цвет метки неподвижной точки</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>timeIntervalInactivity</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <dateTimeInterval interval="MINUTE" ms="1200000"/>
+                    </default-value>
+                    <edit-presentaion>
+                        <code>dtIntervalEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Интервал времени для определения неактивных точек</title>
+                    <type>
+                        <code>dtInterval</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="needStoreUnits">false</property>
+                        <property code="intervalAvailableUnits">null</property>
+                    </type>
+                    <view-presentaion>
+                        <code>dtIntervalView</code>
+                    </view-presentaion>
+                </parameter>               
+			</parameters> 
+</embeddedAppParameters>
