@@ -1,5 +1,5 @@
 // @flow
-import {DATETIME_VARIANTS, INTERVAL_VARIANTS} from './constansts';
+import {DATETIME_VARIANTS, DEFAULT_VARIANTS, INTERVAL_VARIANTS} from './constansts';
 
 const DATETIME_SELECTS = [
 	{
@@ -24,6 +24,13 @@ const DATETIME_SELECTS = [
 	}
 ];
 
+const DEFAULT_SELECTS = [
+	{
+		label: 'По совпадениям',
+		value: DEFAULT_VARIANTS.OVERLAP
+	}
+];
+
 const INTERVAL_SELECTS = [
 	{
 		label: 'По минутам',
@@ -45,6 +52,7 @@ const INTERVAL_SELECTS = [
 
 const GROUP_SELECTS = {
 	DATETIME_SELECTS,
+	DEFAULT_SELECTS,
 	INTERVAL_SELECTS
 };
 

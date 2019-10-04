@@ -1,6 +1,6 @@
 // @flow
 import WidgetFormPanel from './WidgetFormPanel';
-import {FIELDS} from './constancts';
+import {FIELDS} from './constants';
 import styles from './styles.less';
 
 export {

@@ -1,42 +1,77 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {AttrSelect} from 'components/atoms/AttrSelect/AttrSelect';
-import type {AttrSelectProps, SelectProps, SelectValue} from 'components/organisms/WidgetFormPanel/types';
-import {getAggregateOptions} from 'utils/aggregate';
-import {getGroupOptions, typeOfExtendedGroups} from 'utils/group';
-import {CHART_SELECTS} from 'utils/chart';
+import type {AttrSelectProps, GetRefOptions, InputProps, SelectProps, SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {ErrorMessage} from 'formik';
 import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from './FormBuilder';
+import {getAggregateOptions} from 'utils/aggregate';
+import {getGroupOptions, OVERLAP} from 'utils/group';
+import type {OptionType} from 'react-select/src/types';
 import type {Props as TreeProps} from 'components/molecules/TreeSelectInput/types';
 import React from 'react';
 import TreeSelectInput from 'components/molecules/TreeSelectInput';
 
+const defaultAttrProps = {
+	getOptionLabel: (o: Attribute) => o.title,
+	getOptionValue: (o: Attribute) => o.code,
+	noOptionsMessage: () => 'Список пуст'
+};
+
 export class DataFormBuilder extends FormBuilder {
-	getNumberFromName = (name: string) => {
-		return Number(name.split('_').pop());
+	getLabelWithIcon = (option: SelectValue) => {
+		const Icon = option.icon;
+
+		return (
+			<div className={styles.labelWithIcon}>
+				{Icon && <Icon />} <span>{option.label}</span>
+			</div>
+		);
 	};
 
-	getAttributeOptions = (name: string): Array<Attribute> => {
+	getNumberFromName = (name: string) => Number(name.split('_').pop());
+
+	createName = (num: number) => (name: string) => `${name}_${num}`;
+
+	getAttributeOptions = (name: string) => {
 		const {attributes, fetchAttributes, values} = this.props;
 		let sourceName = FIELDS.source;
 		let options = [];
 
 		if (name.includes('_')) {
-			sourceName = `${sourceName}_${this.getNumberFromName(name)}`;
+			sourceName = this.createName(this.getNumberFromName(name))(sourceName);
 		}
 
 		const source = values[sourceName];
 
 		if (source) {
-			if (!attributes[source.value]) {
-				fetchAttributes(source.value);
+			const currentAttr = attributes[source.value];
+
+			if (!currentAttr || (currentAttr.data.length === 0 && !currentAttr.loading && !currentAttr.error)) {
+				fetchAttributes(source);
 			} else {
-				options = attributes[source.value];
+				options = currentAttr.data;
 			}
 		}
 
 		return options;
+	};
+
+	createRefName = (targetName: string, baseRefName: string) => {
+		const number = this.getNumberFromName(targetName);
+		return !isNaN(number) ? this.createName(number)(baseRefName) : baseRefName;
+	};
+
+	handleSelectAxis = (baseRefName: string, getRefOptions: GetRefOptions) => (name: string, value: OptionType) => {
+		const {setFieldValue, values} = this.props;
+		const refName = this.createRefName(name, baseRefName);
+		const refValue = values[refName];
+		const refOptions = getRefOptions(value);
+
+		setFieldValue(name, value);
+
+		if (!refValue || !refOptions.filter(o => o.value === refValue.value).length) {
+			setFieldValue(refName, refOptions[0]);
+		}
 	};
 
 	handleSelectSource = async (name: string, source: SelectValue) => {
@@ -45,7 +80,7 @@ export class DataFormBuilder extends FormBuilder {
 		await setFieldValue(name, source);
 
 		if (!attributes[source.value]) {
-			fetchAttributes(source.value);
+			fetchAttributes(source);
 		}
 	};
 
@@ -61,27 +96,19 @@ export class DataFormBuilder extends FormBuilder {
 	};
 
 	renderAttrSelect = (props: AttrSelectProps) => {
-		const {name, onChange, placeholder, value} = props;
-		const options = this.getAttributeOptions(name);
+		let {name, options} = props;
 
-		return (
-			<div className={styles.field}>
-				<AttrSelect
-					name={name}
-					onChange={onChange || this.handleSelect}
-					options={options}
-					placeholder={placeholder}
-					value={value}
-				/>
-				<ErrorMessage name={name} />
-			</div>
-		);
+		if (!options) {
+			options = this.getAttributeOptions(name);
+		}
+
+		return this.renderSelect({...defaultAttrProps, ...props, options});
 	};
 
-	renderSourceInput = (name: string = FIELDS.source) => {
+	renderSourceInput = (name: string = FIELDS.source, mixin: ?InputProps) => {
 		const {values, sources} = this.props;
 
-		const source: TreeProps = {
+		let props: TreeProps = {
 			name: name,
 			onChange: this.handleSelectSource,
 			placeholder: 'Выберите источник',
@@ -89,7 +116,11 @@ export class DataFormBuilder extends FormBuilder {
 			value: values[name]
 		};
 
-		return this.renderTreeSelect(source);
+		if (mixin) {
+			props = {...props, ...mixin};
+		}
+
+		return this.renderTreeSelect(props);
 	};
 
 	renderBreakdownInput = (name: string = FIELDS.breakdown) => {
@@ -104,43 +135,58 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderAttrSelect(breakdown);
 	};
 
-	renderGroupInput = (name: string = FIELDS.group, xAxis: string = FIELDS.xAxis) => {
+	renderAggregateInput = (name: string = FIELDS.aggregate, refName: string) => {
 		const {values} = this.props;
+		const refValue = values[refName];
+		const options = getAggregateOptions(refValue);
+		const aggregate = values[name];
 
-		const group: SelectProps = {
-			name: name,
-			options: getGroupOptions(values[xAxis]),
-			placeholder: 'Группировка',
-			value: values[name]
-		};
-
-		return typeOfExtendedGroups(values[xAxis]) && this.renderSelect(group);
-	};
-
-	renderAggregateInput = (name: string = FIELDS.aggregate) => {
-		const {values} = this.props;
-
-		const aggregate: SelectProps = {
-			name: name,
-			options: getAggregateOptions(values.yAxis),
+		const props: SelectProps = {
+			name,
+			options,
 			placeholder: 'Агрегация',
-			value: values[name]
+			value: aggregate
 		};
 
-		return this.renderSelect(aggregate);
+		return this.renderSelect(props);
 	};
 
-	renderChartInput = (name: string = FIELDS.chart) => {
+	renderIndicatorInput = (name: string = FIELDS.indicator) => {
 		const {values} = this.props;
 
-		const chart: SelectProps = {
-			name: name,
-			options: CHART_SELECTS,
-			placeholder: 'Выберите диаграмму',
+		const indicator: AttrSelectProps = {
+			name,
+			placeholder: 'Показатель',
 			value: values[name]
 		};
 
-		return this.renderSelect(chart);
+		this.renderAttrSelect(indicator);
+	};
+
+	renderGroupInput = (name: string = FIELDS.group, xAxisName: string = FIELDS.xAxis, mixin: ?InputProps) => {
+		const {values} = this.props;
+		const xAxis = values[xAxisName];
+		const options = getGroupOptions(xAxis);
+		const group = values[name];
+		let isDisabled = false;
+
+		if (group && group.value === OVERLAP) {
+			isDisabled = true;
+		}
+
+		let props: SelectProps = {
+			isDisabled,
+			name,
+			options,
+			placeholder: 'Группировка',
+			value: group
+		};
+
+		if (mixin) {
+			props = {...props, ...mixin};
+		}
+
+		return this.renderSelect(props);
 	};
 }
 

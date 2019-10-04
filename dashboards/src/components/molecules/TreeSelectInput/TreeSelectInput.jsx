@@ -1,6 +1,6 @@
 // @flow
 import 'rc-tree-select/assets/index.css';
-import type {Node, Props, SelectValue, Tree} from './types';
+import type {Node, Props, Tree, TreeSelectValue} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 import ToggleCollapsedIcon from 'icons/form/toggle-collapsed.svg';
@@ -15,7 +15,7 @@ export class TreeSelectInput extends Component<Props> {
 		searchPlaceholder: ''
 	};
 
-	handleOnChange = (value: SelectValue) => {
+	handleOnChange = (value: TreeSelectValue) => {
 		const {name, onChange} = this.props;
 		onChange(name, value);
 	};
@@ -74,6 +74,7 @@ export class TreeSelectInput extends Component<Props> {
 				className={styles.select}
 				labelInValue
 				name={name}
+				notFoundContent=""
 				onChange={this.handleOnChange}
 				placeholder={placeholder}
 				searchPlaceholder="Поиск..."

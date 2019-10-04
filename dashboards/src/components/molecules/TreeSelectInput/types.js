@@ -1,5 +1,5 @@
 // @flow
-export type SelectValue = {
+export type TreeSelectValue = {
 	label: string,
 	value: string
 }
@@ -18,8 +18,8 @@ export type Tree = {
 
 export type Props = {
 	name: string,
-	onChange: (name: string, value: SelectValue) => any,
+	onChange: (name: string, value: TreeSelectValue) => any,
 	placeholder: string,
 	tree: Tree,
-	value: SelectValue | null
+	value: TreeSelectValue | null
 }

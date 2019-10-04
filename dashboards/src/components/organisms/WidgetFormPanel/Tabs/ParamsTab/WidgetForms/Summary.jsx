@@ -4,13 +4,12 @@ import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class AxisChart extends DataFormBuilder {
+export class Summary extends DataFormBuilder {
 	renderInputs = () => (
 		<Fragment>
 			{this.renderSourceInput()}
 			{this.renderIndicatorInput()}
 			{this.renderAggregateInput(FIELDS.aggregate, FIELDS.indicator)}
-			{this.renderBreakdownInput()}
 		</Fragment>
 	);
 
@@ -19,4 +18,4 @@ export class AxisChart extends DataFormBuilder {
 	}
 }
 
-export default withForm(AxisChart);
+export default withForm(Summary);

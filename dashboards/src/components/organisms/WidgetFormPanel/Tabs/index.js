@@ -1,6 +1,6 @@
 // @flow
-import DataForm from './ParamsTab';
+import ParamsTab from './ParamsTab';
 
 export {
-	DataForm
+	ParamsTab
 };

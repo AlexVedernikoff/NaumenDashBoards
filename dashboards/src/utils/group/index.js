@@ -1,13 +1,12 @@
 // @flow
-import {DEFAULT_GROUP} from './constansts';
-import group, {getGroupOptions, typeOfExtendedGroups} from './core';
+import group, {getGroupOptions} from './core';
 import {GROUP_SELECTS} from './selects';
+import {OVERLAP} from './constansts';
 
 export {
-	DEFAULT_GROUP,
 	getGroupOptions,
 	GROUP_SELECTS,
-	typeOfExtendedGroups
+	OVERLAP
 };
 
 export default group;

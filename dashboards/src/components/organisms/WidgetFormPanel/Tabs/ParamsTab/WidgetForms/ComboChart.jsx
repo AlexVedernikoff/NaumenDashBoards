@@ -1,14 +1,27 @@
 // @flow
-import {AxisFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import type {Attribute} from 'store/sources/attributes/types';
+import type {
+	AttrSelectProps,
+	InputProps,
+	LabelProps,
+	RenderFunction,
+	SelectProps,
+	SelectValue
+} from 'components/organisms/WidgetFormPanel/types';
+import {CHART_SELECTS} from 'utils/chart';
 import Cross from 'icons/form/cross.svg';
+import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import {Divider} from 'components/atoms/Divider/Divider';
 import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
+import {getAggregateOptions} from 'utils/aggregate';
+import {getGroupOptions} from 'utils/group';
 import React, {Fragment} from 'react';
-import type {RenderFunction} from 'components/organisms/WidgetFormPanel/types';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 const defaultOrder = [1, 2];
+const linkAttrTypes = ['object', 'BOLinks', 'BackBOLinks'];
 
-export class AxisChart extends AxisFormBuilder {
+export class ComboChart extends DataFormBuilder {
 	componentDidMount () {
 		const {setFieldValue, values} = this.props;
 
@@ -17,14 +30,19 @@ export class AxisChart extends AxisFormBuilder {
 		}
 	}
 
+	getBaseName = (name: string) => name.split('_').shift();
+
+	getYAxisLabel = (a: Attribute) => `${a.title} (${a.sourceName})`;
+
+	getOrder = () => this.props.values.order || defaultOrder;
+
 	addSet = () => {
 		const {setFieldValue, values} = this.props;
 		const {order} = values;
+		const nextNumber = order[order.length - 1] + 1;
 
-		setFieldValue(FIELDS.order, [...order, order[order.length - 1] + 1]);
+		setFieldValue(FIELDS.order, [...order, nextNumber]);
 	};
-
-	createName = (num: number) => (name: string) => `${name}_${num}`;
 
 	removeSet = (e: SyntheticMouseEvent<HTMLImageElement>) => {
 		const name = e.currentTarget.dataset.name;
@@ -35,30 +53,180 @@ export class AxisChart extends AxisFormBuilder {
 		if (order.length > 2) {
 			setFieldValue(FIELDS.order, order.filter(n => n !== number));
 
-			Object.keys(FIELDS).map(this.createName(number)).forEach(name => {
+			[FIELDS.source, FIELDS.xAxis, FIELDS.yAxis, FIELDS.group, FIELDS.aggregate, FIELDS.breakdown, FIELDS.chart]
+				.map(this.createName(number)).forEach(name => {
 				setFieldValue(name, null);
 			});
 		}
 	};
 
-	renderByOrder = (renderFunction: RenderFunction, ...names: Array<string>) => {
-		const {values} = this.props;
-		const order = values.order || defaultOrder;
+	setMainValue = (...names: Array<string>) => {
+		const {setFieldValue, values} = this.props;
+		const mainNumber = this.getOrder()[0];
 
-		return order.map(num => renderFunction(...names.map(this.createName(num))));
+		names.forEach(name => {
+			const mainProperty = values[this.createName(mainNumber)(this.getBaseName(name))];
+			const currentProperty = values[name];
+			const currentIsNotMain = !currentProperty
+				|| mainProperty.value !== currentProperty.value
+				|| mainProperty.code !== currentProperty.code;
+
+			if (mainProperty && currentIsNotMain) {
+				setFieldValue(name, mainProperty);
+			}
+		});
+	};
+
+	changeDependingOnMain = (number: number) => {
+		const {setFieldValue, values} = this.props;
+		const order = this.getOrder();
+		const mainNumber = order[0];
+		const mainSource = values[this.createName(mainNumber)(FIELDS.source)];
+		const currentSource = values[this.createName(number)(FIELDS.source)];
+
+		if (mainNumber !== number && mainSource && currentSource) {
+			const xAxisName = this.createName(number)(FIELDS.xAxis);
+			const groupName = this.createName(number)(FIELDS.group);
+			const currentXAxis = values[xAxisName];
+
+			if (mainSource.value === currentSource.value) {
+				this.setMainValue(xAxisName, groupName);
+			} else {
+				const mainXAxis = values[this.createName(mainNumber)(FIELDS.xAxis)];
+
+				if (mainXAxis && currentXAxis && mainXAxis.type !== currentXAxis.type) {
+					setFieldValue(xAxisName, null);
+				}
+
+				this.setMainValue(groupName);
+			}
+		}
+	};
+
+	handleSelectComboSource = async (name: string, source: SelectValue) => {
+		const number = this.getNumberFromName(name);
+
+		await this.handleSelectSource(name, source);
+		this.changeDependingOnMain(number);
+	};
+
+	handleSelectComboGroup = async (name: string, group: SelectValue) => {
+		const order = this.getOrder();
+		await this.handleSelect(name, group);
+
+		if (this.getNumberFromName(name) === order[0]) {
+			order.forEach(this.changeDependingOnMain);
+		}
+	};
+
+	handleSelectComboXAxis = async (name: string, xAxis: SelectValue) => {
+		const order = this.getOrder();
+		await this.handleSelectAxis(FIELDS.group, getGroupOptions)(name, xAxis);
+
+		if (this.getNumberFromName(name) === order[0]) {
+			order.forEach(this.changeDependingOnMain);
+		}
+	};
+
+	renderByOrder = (renderFunction: RenderFunction, ...names: Array<string>) => {
+		return this.getOrder().map(num => renderFunction(...names.map(this.createName(num))));
+	};
+
+	renderYAxisInput = (name: string = FIELDS.yAxis) => {
+		const {attributes, values} = this.props;
+		const order = this.getOrder();
+		const sources = {};
+		let options = [];
+
+		order.forEach(num => {
+			let source = values[this.createName(num)(FIELDS.source)];
+
+			if (source) {
+				sources[source.value] = source;
+			}
+		});
+
+		Object.keys(sources).forEach(key => {
+			options = [...options, ...attributes[key].data];
+		});
+
+		const yAxis: AttrSelectProps = {
+			getOptionLabel: this.getYAxisLabel,
+			handleSelect: this.handleSelectAxis(FIELDS.aggregate, getAggregateOptions),
+			name: name,
+			options,
+			placeholder: 'Ось Y',
+			value: values[name]
+		};
+
+		return this.renderAttrSelect(yAxis);
+	};
+
+	renderChartInput = (name: string = FIELDS.chart) => {
+		const {values} = this.props;
+
+		const chart: SelectProps = {
+			getOptionLabel: this.getLabelWithIcon,
+			name: name,
+			options: CHART_SELECTS.AXIS_SELECTS,
+			placeholder: 'Выберите диаграмму',
+			value: values[name]
+		};
+
+		return this.renderSelect(chart);
 	};
 
 	renderComboXAxis = (xAxis: string, group: string) => {
+		const {values} = this.props;
+		const mainNumber = this.getOrder()[0];
+		const mainSource = values[this.createName(mainNumber)(FIELDS.source)];
+		const currentNumber = this.getNumberFromName(xAxis);
+		const currentSource = values[this.createName(currentNumber)(FIELDS.source)];
+		const currentXAxis = values[xAxis];
+
+		const xAxisProps: AttrSelectProps = {
+			handleSelect: this.handleSelectComboXAxis,
+			isDisabled: false,
+			name: xAxis,
+			placeholder: 'Ось X',
+			options: undefined,
+			value: currentXAxis
+		};
+
+		const groupProps: InputProps = {
+			isDisabled: false,
+			handleSelect: this.handleSelectComboGroup
+		};
+
+		if (mainNumber !== currentNumber && mainSource && currentSource) {
+			if (mainSource.value === currentSource.value) {
+				xAxisProps.isDisabled = true;
+			} else {
+				const mainXAxis = values[this.createName(mainNumber)(FIELDS.xAxis)];
+				let xAxisOptions = this.getAttributeOptions(xAxis);
+
+				if (xAxisOptions.length > 0 && mainXAxis) {
+					xAxisOptions = xAxisOptions.filter(a => linkAttrTypes.includes(mainXAxis.type)
+						? a.property === mainXAxis.property
+						: a.type === mainXAxis.type);
+				}
+
+				xAxisProps.options = xAxisOptions;
+			}
+
+			groupProps.isDisabled = true;
+		}
+
 		return (
 			<div key={xAxis}>
-				{this.renderXAxisInput(xAxis)}
-				{this.renderGroupInput(group, xAxis)}
+				{this.renderAttrSelect(xAxisProps)}
+				{this.renderGroupInput(group, xAxis, groupProps)}
 			</div>
 		);
 	};
 
-	renderComboYAxis = (yAxis: string, chart: string) => {
-		const label = {
+	renderComboYAxis = (yAxis: string, chart: string, aggregate: string, breakdown: string) => {
+		const label: LabelProps = {
 			name: 'Ось Y'
 		};
 
@@ -67,32 +235,38 @@ export class AxisChart extends AxisFormBuilder {
 				{this.renderLabel(label)}
 				{this.renderYAxisInput(yAxis)}
 				{this.renderChartInput(chart)}
+				{this.renderAggregateInput(aggregate, yAxis)}
+				{this.renderBreakdownInput(breakdown)}
 			</div>
 		);
 	};
 
 	renderSourceWithRemove = (source: string) => {
 		const {order} = this.props.values;
-		const isShownDeleteIcon = order && order.length > 2;
+		const deletable = order && order.length > 2;
+
+		const sourceProps: InputProps = {
+			onChange: this.handleSelectComboSource
+		};
 
 		return (
 			<div className={styles.positionRelative} key={source}>
-				{isShownDeleteIcon && <Cross data-name={source} onClick={this.removeSet} className={styles.deleteSourceIcon} />}
-				{this.renderSourceInput(source)}
+				{deletable && <Cross data-name={source} onClick={this.removeSet} className={styles.deleteSourceIcon}/>}
+				{this.renderSourceInput(source, sourceProps)}
 			</div>
 		);
 	};
 
 	renderInputs = () => {
-		const {chart, group, source, xAxis, yAxis} = FIELDS;
+		const {aggregate, breakdown, chart, group, source, xAxis, yAxis} = FIELDS;
 
-		const sourceLabel = {
+		const sourceLabel: LabelProps = {
 			icon: 'plus',
 			name: 'Источник',
 			onClick: this.addSet
 		};
 
-		const xAxisLabel = {
+		const xAxisLabel: LabelProps = {
 			name: 'Ось Х'
 		};
 
@@ -100,9 +274,11 @@ export class AxisChart extends AxisFormBuilder {
 			<Fragment>
 				{this.renderLabel(sourceLabel)}
 				{this.renderByOrder(this.renderSourceWithRemove, source)}
+				<Divider />
 				{this.renderLabel(xAxisLabel)}
 				{this.renderByOrder(this.renderComboXAxis, xAxis, group)}
-				{this.renderByOrder(this.renderComboYAxis, yAxis, chart)}
+				<Divider />
+				{this.renderByOrder(this.renderComboYAxis, yAxis, chart, aggregate, breakdown)}
 			</Fragment>
 		);
 	};
@@ -112,4 +288,4 @@ export class AxisChart extends AxisFormBuilder {
 	}
 }
 
-export default withForm(AxisChart);
+export default withForm(ComboChart);
