@@ -4,7 +4,8 @@ import type {ButtonProps} from './types';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component, createContext, Fragment} from 'react';
 import styles from './styles.less';
-import ParamsTab from './Tabs/ParamsTab';
+// import ParamsTab from './Tabs/ParamsTab';
+import {Tabs} from './Tabs';
 
 export const FormContext = createContext({});
 
@@ -75,7 +76,7 @@ export class WidgetFormPanel extends Component<Props> {
 		);
 	};
 
-	renderMain = () => <ParamsTab />;
+	renderMain = () => <Tabs />;
 
 	renderFooter = () => (
 		<div className={styles.footer}>
