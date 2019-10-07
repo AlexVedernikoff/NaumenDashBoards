@@ -1,9 +1,9 @@
 // @flow
-import type {State} from './types';
 import type {Node} from 'react';
-import React, {Component, createElement} from 'react';
+import type {State, TabParams} from './types';
 import DesignTab from './DesignTab';
 import ParamsTab from './ParamsTab';
+import React, {Component} from 'react';
 import styles from './styles.less';
 
 const tabList = [
@@ -21,32 +21,35 @@ const tabList = [
 
 export class Tabs extends Component<{}, State> {
 	state = {
-		curerntTab: 0
-	}
+		currentTab: 0
+	};
 
 	toggleTab = (tab: number): void => {
 		this.setState({
-			curerntTab: tab
+			currentTab: tab
 		});
-	}
+	};
+
+	renderTabHead = (tab: TabParams) => {
+		const {currentTab} = this.state;
+
+		return <li
+			key={tab.key}
+			className={`${styles.listItem} ${currentTab === tab.key ? styles.listItemActive : ''}`}
+			onClick={() => this.toggleTab(tab.key)}>
+			{tab.title}
+		</li>;
+	};
 
 	renderTabsHead = (): Node[] => {
-		const {curerntTab} = this.state;
-		return tabList.map((tab) => {
-				return <li
-									key={tab.key}
-									className={`${styles.listItem} ${curerntTab === tab.key ? styles.listItemActive : ''}`}
-									onClick={() => this.toggleTab(tab.key)}>
-									{tab.title}
-								</li>;
-			}
-		);
-	}
+		return tabList.map((tab: TabParams) => this.renderTabHead(tab));
+	};
 
 	renderFormTabs = (): Node => {
-		const {curerntTab} = this.state;
-		return createElement(tabList[curerntTab].component);
-	}
+		const {currentTab} = this.state;
+		const Tab = tabList[currentTab].component;
+		return <Tab/>;
+	};
 
 	render () {
 		return (

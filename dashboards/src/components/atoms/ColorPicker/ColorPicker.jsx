@@ -30,28 +30,23 @@ export class ColorPicker extends Component<Props, State> {
 
   componentDidMount () {
     const {currentColor} = this.props;
-    this.setState({
-      ...this.state,
-      itemColor: currentColor
-    });
+    this.setState({itemColor: currentColor});
   }
 
   handleChangeComplete = (): void => {
     const {handleClick} = this.props;
     const {itemColor} = this.state;
     handleClick(itemColor);
-  }
+  };
 
   setColor = (color: Object): void => {
-    this.setState({
-      ...this.state,
-      itemColor: color.hex
-    });
-  }
+    this.setState({itemColor: color.hex});
+  };
 
   render () {
     const {closePicker} = this.props;
     const {itemColor, presetColors} = this.state;
+
     return (
       <div className={styles.pickerWrap}>
         <SketchPicker

@@ -1,5 +1,12 @@
 // @flow
+import type {Node} from 'react';
 
 export type State = {
-	curerntTab: number,
+	currentTab: number,
+}
+
+export type TabParams = {
+	title: string,
+	component: Node,
+	key: number
 }

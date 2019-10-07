@@ -27,7 +27,7 @@ export class DropDownMenu extends Component<Props, State> {
 		return <div className={styles.icon}>{icon}</div>;
 	};
 
-	renderMenuItem = (item: Node, index: number): Node => <li key={index}>{item}</li>;
+	renderMenuItem = (item: Node, key: number): Node => <li>{item}</li>;
 
 	renderMenuItems = (): Node => {
 		const {children} = this.props;

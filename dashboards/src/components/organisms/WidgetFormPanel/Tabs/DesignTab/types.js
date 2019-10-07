@@ -1,8 +1,8 @@
 // @flow
 
 export type State = {
-	currentColor: string,
 	colors: Array<string>,
+	currentColor: string,
 	indexColor: number,
 	pallete: boolean
 }

@@ -1,7 +1,7 @@
 // @flow
 import type {CheckBoxProps, SelectProps} from 'components/organisms/WidgetFormPanel/types';
 import type {State} from './types';
-import {ColorPicker, Divider, DropDownMenu} from 'components/atoms';
+import {ColorPicker, Divider} from 'components/atoms';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
 import styles from 'components/organisms/WidgetFormPanel/styles.less';
@@ -30,12 +30,10 @@ export class DesignTab extends FormBuilder<{}, State> {
 		],
 		indexColor: 0,
 		pallete: false
-	}
+	};
 
 	renderVisibilityLegend = () => {
 		const {values} = this.props;
-		console.log(this);
-
 		const fields = [
 			{
 				key: 0,
@@ -59,9 +57,7 @@ export class DesignTab extends FormBuilder<{}, State> {
 
 		return (
 			<div className={styles.dropdownMenuContainer}>
-				<DropDownMenu name="Редактировать легенду">
-					{fields.map(this.renderLegendField)}
-				</DropDownMenu>
+				{fields.map(this.renderLegendField)}
 			</div>
 		);
 	};
@@ -75,12 +71,11 @@ export class DesignTab extends FormBuilder<{}, State> {
 
 	openColorPicker = (color: string, index: number): void => {
 		this.setState({
-			...this.state,
 			indexColor: index,
 			currentColor: color,
 			pallete: true
 		});
-	}
+	};
 
 	changeColor = (itemColor: string): void => {
 		const {indexColor, colors} = this.state;
@@ -92,11 +87,11 @@ export class DesignTab extends FormBuilder<{}, State> {
       return state;
 		});
 		handleChange('color', colors);
-	}
+	};
 
 	closePicker = (): void => {
 		this.setState({pallete: false});
-	}
+	};
 
 	renderColorPallete = (): Fragment => {
 		const {colors} = this.state;
@@ -116,9 +111,13 @@ export class DesignTab extends FormBuilder<{}, State> {
 		);
 	};
 
+	renderColorPicker = () => {
+		const {currentColor, pallete} = this.state;
+		return pallete ? <ColorPicker handleClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/> : null;
+	};
+
 	renderInputs = () => {
 		const {values} = this.props;
-		const {pallete, currentColor} = this.state;
 
 		const nameVisibility: CheckBoxProps = {
 			key: 3,
@@ -154,10 +153,9 @@ export class DesignTab extends FormBuilder<{}, State> {
 				{this.renderCheckBox(legendVisibility)}
 				{this.renderSelect(legendPosition)}
 				{this.renderVisibilityLegend()}
-				<Divider />
 				{this.renderColorPallete()}
 				<div className={styles.palletePicker}>
-					{pallete ? <ColorPicker handleClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/> : null}
+					{this.renderColorPicker()}
 				</div>
 			</section>
 		);
