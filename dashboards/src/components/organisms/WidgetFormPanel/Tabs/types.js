@@ -4,6 +4,6 @@ export type State = {
 }
 
 export type TabParams = {
-	title: string,
-	key: string
+	key: string,
+	title: string
 }

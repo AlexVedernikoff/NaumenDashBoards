@@ -1,14 +1,13 @@
 // @flow
 import type {CheckBoxProps, SelectProps} from 'components/organisms/WidgetFormPanel/types';
-import type {Node} from 'react';
-import type {State} from './types';
 import {ColorPicker, Divider} from 'components/atoms';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import type {Node} from 'react';
 import React from 'react';
 import styles from 'components/organisms/WidgetFormPanel/styles.less';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class DesignTab extends FormBuilder<{}, State> {
+export class DesignTab extends FormBuilder {
 	state = {
 		currentColor: '#ffffff',
 		colors: [
@@ -68,21 +67,23 @@ export class DesignTab extends FormBuilder<{}, State> {
 
 	openColorPicker = (color: string, index: number): void => {
 		this.setState({
-			indexColor: index,
 			currentColor: color,
+			indexColor: index,
 			pallete: true
 		});
 	};
 
 	changeColor = (itemColor: string): void => {
-		const {indexColor, colors} = this.state;
+		const {colors, indexColor} = this.state;
 		const {handleChange} = this.props;
 
 		this.setState(state => {
 			state.colors[indexColor] = itemColor;
 			state.pallete = false;
-      return state;
+
+			return state;
 		});
+
 		handleChange('color', colors);
 	};
 
@@ -90,25 +91,28 @@ export class DesignTab extends FormBuilder<{}, State> {
 		this.setState({pallete: false});
 	};
 
+	colorPalleteItem = (color: string, index: number) => {
+		return <div
+			className={styles.itemPallete}
+			key={index}
+			onClick={(): void => this.openColorPicker(color, index)}
+			style={{background: color}}
+		/>;
+	};
+
 	renderColorPallete = (): Node => {
 		const {colors} = this.state;
+
 		return (
 			<div className={styles.colorPalleteWrap}>
-				{colors.map((color: string, index: number) => {
-					return <div
-						key={index}
-						onClick={(): void => this.openColorPicker(color, index)}
-						className={styles.itemPallete}
-						style={{background: color}}
-					/>;
-				})}
+				{colors.map(this.colorPalleteItem)}
 			</div>
 		);
 	};
 
 	renderColorPicker = () => {
 		const {currentColor, pallete} = this.state;
-		const node = pallete ? <ColorPicker handleClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/> : <div />;
+		const node = pallete ? <ColorPicker onClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/> : <div />;
 
 		return <div className={styles.palletePicker}>{node}</div>;
 	};

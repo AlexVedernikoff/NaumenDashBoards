@@ -20,3 +20,7 @@ export type ConnectedFunctions = {
 };
 
 export type Props = ConnectedProps & ConnectedFunctions & FormikProps;
+
+export type FormState = {
+	[string]: any
+}

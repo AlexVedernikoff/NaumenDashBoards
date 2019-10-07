@@ -1,14 +1,14 @@
 // @flow
-import type {Props, State} from './types';
 import {Button} from 'components/atoms';
+import type {ObjectColor, Props, State} from './types';
 import React, {Component} from 'react';
 import {SketchPicker} from 'react-color';
 import styles from './styles.less';
 
 export class ColorPicker extends Component<Props, State> {
-  state = {
-    itemColor: '',
-    presetColors: [
+	state = {
+		itemColor: '',
+		presetColors: [
 			'#EA3223',
 			'#999999',
 			'#2C6FBA',
@@ -26,41 +26,41 @@ export class ColorPicker extends Component<Props, State> {
 			'#8C4A1C',
 			'#FFFE55'
 		]
-  };
+	};
 
-  componentDidMount () {
-    const {currentColor} = this.props;
-    this.setState({itemColor: currentColor});
-  }
+	componentDidMount () {
+		const {currentColor} = this.props;
+		this.setState({itemColor: currentColor});
+	}
 
-  handleChangeComplete = (): void => {
-    const {handleClick} = this.props;
-    const {itemColor} = this.state;
-    handleClick(itemColor);
-  };
+	handleChangeComplete = (): void => {
+		const {onClick} = this.props;
+		const {itemColor} = this.state;
+		onClick(itemColor);
+	};
 
-  setColor = (color: Object): void => {
-    this.setState({itemColor: color.hex});
-  };
+	setColor = (color: ObjectColor): void => {
+		this.setState({itemColor: color.hex});
+	};
 
-  render () {
-    const {closePicker} = this.props;
-    const {itemColor, presetColors} = this.state;
+	render () {
+		const {closePicker} = this.props;
+		const {itemColor, presetColors} = this.state;
 
-    return (
-      <div className={styles.pickerWrap}>
-        <SketchPicker
-          color={itemColor}
-          presetColors={presetColors}
-          onChangeComplete={this.setColor}
-        />
-        <div className={styles.pickerActions}>
-          <Button type="button" onClick={closePicker}>Отмена</Button>
-          <Button type="button" onClick={this.handleChangeComplete}>OK</Button>
-        </div>
-      </div>
-    );
-  }
+		return (
+			<div className={styles.pickerWrap}>
+				<SketchPicker
+					color={itemColor}
+					onChangeComplete={this.setColor}
+					presetColors={presetColors}
+				/>
+				<div className={styles.pickerActions}>
+					<Button type="button" onClick={closePicker}>Отмена</Button>
+					<Button type="button" onClick={this.handleChangeComplete}>OK</Button>
+				</div>
+			</div>
+		);
+	}
 }
 
 export default ColorPicker;

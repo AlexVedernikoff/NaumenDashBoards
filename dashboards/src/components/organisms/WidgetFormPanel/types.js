@@ -55,6 +55,9 @@ export type ColorPickerProps = {
 	value: string
 };
 
+export type FormBuilderProps = any
+export type FormBuilderStore = any
+
 type Select = {
 	label?: string,
 	name: string,

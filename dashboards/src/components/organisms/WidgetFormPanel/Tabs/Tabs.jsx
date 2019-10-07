@@ -1,6 +1,7 @@
 // @flow
 import type {Node} from 'react';
 import type {State, TabParams} from './types';
+import cn from 'classnames';
 import DesignTab from './DesignTab';
 import ParamsTab from './ParamsTab';
 import React, {Component} from 'react';
@@ -11,12 +12,12 @@ const design = 'design';
 
 const tabList = [
 	{
-		title: 'Параметры',
-		key: params
+		key: params,
+		title: 'Параметры'
 	},
 	{
-		title: 'Стиль',
-		key: design
+		key: design,
+		title: 'Стиль'
 	}
 ];
 
@@ -34,23 +35,12 @@ export class Tabs extends Component<{}, State> {
 		return tabs[key];
 	};
 
+	handleClick = (tab: string) => (event: Event) => {
+		this.toggleTab(tab);
+	};
+
 	toggleTab = (currentTab: string): void => {
 		this.setState({currentTab});
-	};
-
-	renderTabHead = (tab: TabParams) => {
-		const {currentTab} = this.state;
-
-		return <li
-			key={tab.key}
-			className={`${styles.listItem} ${currentTab === tab.key ? styles.listItemActive : ''}`}
-			onClick={() => this.toggleTab(tab.key)}>
-			{tab.title}
-		</li>;
-	};
-
-	renderTabsHead = (): Node[] => {
-		return tabList.map(this.renderTabHead);
 	};
 
 	renderFormTabs = (): Node => {
@@ -59,10 +49,29 @@ export class Tabs extends Component<{}, State> {
 		return <Tab />;
 	};
 
+	renderTabHead = (tab: TabParams) => {
+		const {currentTab} = this.state;
+		const {key, title} = tab;
+		const liCN = cn({
+			[styles.listItem]: true,
+			[styles.listItemActive]: key === currentTab
+		});
+
+		return (<li key={key} className={liCN} onClick={this.handleClick(key)}>{title}</li>);
+	};
+
+	renderTabsHead = (): Node => {
+		return (
+			<ul className={styles.listWrap}>
+				{tabList.map(this.renderTabHead)}
+			</ul>
+		);
+	};
+
 	render () {
 		return (
 			<div className={styles.formWrap}>
-				<ul className={styles.listWrap}>{this.renderTabsHead()}</ul>
+				{this.renderTabsHead()}
 				{this.renderFormTabs()}
 			</div>
 		);

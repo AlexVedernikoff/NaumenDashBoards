@@ -3,11 +3,11 @@ import {CheckBox, Label, MultiSelect, TextArea} from 'components/atoms';
 import type {CheckBoxProps, LabelProps, SelectProps, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
 import {ErrorMessage} from 'formik';
 import type {OptionType} from 'react-select/src/types';
-import type {Props} from 'containers/WidgetFormPanel/types';
+import type {Props, FormState} from 'containers/WidgetFormPanel/types';
 import React, {Component} from 'react';
 import {styles} from 'components/organisms/WidgetFormPanel';
 
-export class FormBuilder<P = {}, S = {}> extends Component<Props & P, S> {
+export class FormBuilder extends Component<Props, FormState> {
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
 	handleSelect = (name: string, value: OptionType) => this.props.setFieldValue(name, value);

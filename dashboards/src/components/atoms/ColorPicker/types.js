@@ -1,9 +1,13 @@
 // @flow
 
+export type ObjectColor = {
+	hex: string
+};
+
 export type Props = {
-	currentColor: string,
 	closePicker: () => void,
-	handleClick: (string: string) => void
+	currentColor: string,
+	onClick: (string: string) => void
 };
 
 export type State = {
