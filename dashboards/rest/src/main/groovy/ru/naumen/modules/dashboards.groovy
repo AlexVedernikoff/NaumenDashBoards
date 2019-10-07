@@ -65,6 +65,15 @@ class Attribute
      * Свойство атрибута (метаклассы ссылочных атрибутов, значения элементов справочника и т.д)
      */
     String property
+    /**
+     * метакласс атрибута
+     */
+    String metaClass
+
+    /**
+     * Имя источника
+     */
+    String sourceName
 }
 //endregion
 
@@ -86,9 +95,10 @@ String getDataSources(classFqn = MAIN_FQN)
  * @param classFqn код метакласса
  * @return json список атрибутов {заголовок, код, тип атрибута}
  */
-String getAttributesDataSources(classFqn){
-    def attributes = api.metainfo.getMetaClass(classFqn).attributes
-    Collection<Attribute> mappingAttributes = mappingAttribute(attributes)
+String getAttributesDataSources(classFqn)
+{
+    def metaInfo = api.metainfo.getMetaClass(classFqn)
+    Collection<Attribute> mappingAttributes = mappingAttribute(metaInfo.attributes, metaInfo.title)
     return toJson(mappingAttributes)
 }
 //endregion
@@ -129,16 +139,20 @@ private Collection<DataSource> mappingDataSource(def fqns)
 /**
  * Маппинг из коллекция кодов всех атрибутов метакласса в Collection<Attribute>
  * Collection<fqnAttr> -> Collection<Attribute>
+ * @param attributes - атрибуты метакласа
+ * @param sourceName - название типа объекта
  */
-private Collection<Attribute> mappingAttribute(def attributes)
+private Collection<Attribute> mappingAttribute(def attributes, def sourceName)
 {
-    return attributes
-            .findResults{ it.type.code in VALID_TYPE_ATTRIBUTE
-                    ? new Attribute(it.code,
+    return attributes.findAll { it.type.code in VALID_TYPE_ATTRIBUTE }
+            .collect {
+                new Attribute(
+                        it.code,
                         it.title,
                         it.type.code,
-                        it.type.relatedMetaClass?.code as String)
-                    : null
+                        it.type.relatedMetaClass?.code,
+                        it.declaredMetaClass,
+                        sourceName)
             }
 }
 //endregion
