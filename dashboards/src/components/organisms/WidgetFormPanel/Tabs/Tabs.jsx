@@ -6,31 +6,39 @@ import ParamsTab from './ParamsTab';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
+const params = 'params';
+const design = 'design';
+
 const tabList = [
 	{
 		title: 'Параметры',
-		component: ParamsTab,
-		key: 0
+		key: params
 	},
 	{
 		title: 'Стиль',
-		component: DesignTab,
-		key: 1
+		key: design
 	}
 ];
 
 export class Tabs extends Component<{}, State> {
 	state = {
-		currentTab: 0
+		currentTab: params
 	};
 
-	toggleTab = (tab: number): void => {
-		this.setState({
-			currentTab: tab
-		});
+	getTab = (key: string) => {
+		const tabs = {
+			[params]: ParamsTab,
+			[design]: DesignTab
+		};
+
+		return tabs[key];
 	};
 
-	renderTabHead = (tab: TabParams): Node => {
+	toggleTab = (currentTab: string): void => {
+		this.setState({currentTab});
+	};
+
+	renderTabHead = (tab: TabParams) => {
 		const {currentTab} = this.state;
 
 		return <li
@@ -47,8 +55,7 @@ export class Tabs extends Component<{}, State> {
 
 	renderFormTabs = (): Node => {
 		const {currentTab} = this.state;
-		const Tab = tabList[currentTab].component;
-
+		const Tab = this.getTab(currentTab);
 		return <Tab />;
 	};
 
