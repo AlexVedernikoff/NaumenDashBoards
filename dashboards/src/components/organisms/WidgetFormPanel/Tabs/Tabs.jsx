@@ -9,11 +9,13 @@ import styles from './styles.less';
 const tabList = [
 	{
 		title: 'Параметры',
-		component: ParamsTab
+		component: ParamsTab,
+		key: 0
 	},
 	{
 		title: 'Стиль',
-		component: DesignTab
+		component: DesignTab,
+		key: 1
 	}
 ];
 
@@ -29,8 +31,14 @@ export class Tabs extends Component<{}, State> {
 	}
 
 	renderTabsHead = (): Node[] => {
-		return tabList.map((tab, index) => {
-				return <li key={`tab-${index}`} onClick={() => this.toggleTab(index)}>{tab.title}</li>;
+		const {curerntTab} = this.state;
+		return tabList.map((tab) => {
+				return <li
+									key={tab.key}
+									className={`${styles.listItem} ${curerntTab === tab.key ? styles.listItemActive : ''}`}
+									onClick={() => this.toggleTab(tab.key)}>
+									{tab.title}
+								</li>;
 			}
 		);
 	}

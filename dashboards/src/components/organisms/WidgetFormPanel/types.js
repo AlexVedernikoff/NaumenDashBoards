@@ -15,6 +15,7 @@ export type CreateFormData = {
 	areAxisesMeaningsShown: boolean,
 	breakdown: Attribute | null,
 	chart: SelectValue,
+	color: Array<string>,
 	desc: string,
 	group: SelectValue | null,
 	isLegendShown: boolean;
@@ -41,6 +42,14 @@ export type TextAreaProps = {
 };
 
 export type CheckBoxProps = {
+	key: number,
+	label: string,
+	name: string,
+	value: string
+};
+
+export type ColorPickerProps = {
+	key: number,
 	label: string,
 	name: string,
 	value: string

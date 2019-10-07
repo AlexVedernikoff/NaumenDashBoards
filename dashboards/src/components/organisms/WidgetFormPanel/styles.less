@@ -35,4 +35,30 @@
 		top: 13px;
 		z-index: 99;
 	}
+
+	.palletePicker {
+		position: absolute;
+		top: 0;
+	}
+
+	.palleteWrap {
+		position: relative;
+	}
+
+	.colorPalleteWrap {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-between;
+
+		.itemPallete {
+			border: 1px solid transparent;
+			border-radius: 3px;
+			cursor: pointer;
+			height: 32px;
+			margin-right: 4px;
+			margin-bottom: 4px;
+			width: 48px;
+		}
+	}
 }

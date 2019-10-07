@@ -7,7 +7,7 @@ import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component} from 'react';
 import {styles} from 'components/organisms/WidgetFormPanel';
 
-export class FormBuilder extends Component<Props> {
+export class FormBuilder<P = {}, S = {}> extends Component<Props & P, S> {
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
 	handleSelect = (name: string, value: OptionType) => this.props.setFieldValue(name, value);

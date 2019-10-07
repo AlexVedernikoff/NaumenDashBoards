@@ -1,3 +1,25 @@
+@import '/styles/variables';
+
 :local {
-	
+	.listItem{
+		cursor: pointer;
+		padding: 16px 9px;
+	}
+
+	.listWrap{
+		color: @text-color-gray;
+		background: @bg-gray;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		list-style: none;
+		margin: 0;
+		padding: 0 5px;
+	}
+
+	.listItemActive {
+		color: @text-color;
+		background: @bg-white;
+	}
+
 }

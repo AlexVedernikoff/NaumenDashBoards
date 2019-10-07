@@ -11,6 +11,7 @@ export type Widget = {
 	areAxisesLabelsShown: boolean,
 	areAxisesMeaningsShown: boolean,
 	breakdown: Attribute | null,
+	color?: Array<string>,
 	desc: string,
 	group: SelectValue | null,
 	id: string,
