@@ -30,7 +30,7 @@ export class Tabs extends Component<{}, State> {
 		});
 	};
 
-	renderTabHead = (tab: TabParams) => {
+	renderTabHead = (tab: TabParams): Node => {
 		const {currentTab} = this.state;
 
 		return <li
@@ -42,13 +42,14 @@ export class Tabs extends Component<{}, State> {
 	};
 
 	renderTabsHead = (): Node[] => {
-		return tabList.map((tab: TabParams) => this.renderTabHead(tab));
+		return tabList.map(this.renderTabHead);
 	};
 
 	renderFormTabs = (): Node => {
 		const {currentTab} = this.state;
 		const Tab = tabList[currentTab].component;
-		return <Tab/>;
+
+		return <Tab />;
 	};
 
 	render () {

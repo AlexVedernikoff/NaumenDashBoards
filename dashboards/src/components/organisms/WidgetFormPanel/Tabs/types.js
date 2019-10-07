@@ -6,7 +6,7 @@ export type State = {
 }
 
 export type TabParams = {
-	title: string,
 	component: Node,
-	key: number
+	key: number,
+	title: string
 }

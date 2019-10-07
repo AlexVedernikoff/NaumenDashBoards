@@ -1,9 +1,10 @@
 // @flow
 import type {CheckBoxProps, SelectProps} from 'components/organisms/WidgetFormPanel/types';
+import type {Node} from 'react';
 import type {State} from './types';
 import {ColorPicker, Divider} from 'components/atoms';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import React, {Fragment} from 'react';
+import React from 'react';
 import styles from 'components/organisms/WidgetFormPanel/styles.less';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
@@ -55,11 +56,7 @@ export class DesignTab extends FormBuilder<{}, State> {
 			}
 		];
 
-		return (
-			<div className={styles.dropdownMenuContainer}>
-				{fields.map(this.renderLegendField)}
-			</div>
-		);
+		return <div>{fields.map(this.renderLegendField)}</div>;
 	};
 
 	renderLegendField = (checkBox: CheckBoxProps) => (
@@ -93,27 +90,27 @@ export class DesignTab extends FormBuilder<{}, State> {
 		this.setState({pallete: false});
 	};
 
-	renderColorPallete = (): Fragment => {
+	renderColorPallete = (): Node => {
 		const {colors} = this.state;
 		return (
-			<Fragment>
-				<div className={styles.colorPalleteWrap}>
-					{colors.map((color: string, index: number) => {
-						return <div
-							key={index}
-							onClick={(): void => this.openColorPicker(color, index)}
-							className={styles.itemPallete}
-							style={{background: color}}
-						/>;
-					})}
-				</div>
-				</Fragment>
+			<div className={styles.colorPalleteWrap}>
+				{colors.map((color: string, index: number) => {
+					return <div
+						key={index}
+						onClick={(): void => this.openColorPicker(color, index)}
+						className={styles.itemPallete}
+						style={{background: color}}
+					/>;
+				})}
+			</div>
 		);
 	};
 
 	renderColorPicker = () => {
 		const {currentColor, pallete} = this.state;
-		return pallete ? <ColorPicker handleClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/> : null;
+		const node = pallete ? <ColorPicker handleClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/> : <div />;
+
+		return <div className={styles.palletePicker}>{node}</div>;
 	};
 
 	renderInputs = () => {
@@ -154,9 +151,7 @@ export class DesignTab extends FormBuilder<{}, State> {
 				{this.renderSelect(legendPosition)}
 				{this.renderVisibilityLegend()}
 				{this.renderColorPallete()}
-				<div className={styles.palletePicker}>
-					{this.renderColorPicker()}
-				</div>
+				{this.renderColorPicker()}
 			</section>
 		);
 	};
