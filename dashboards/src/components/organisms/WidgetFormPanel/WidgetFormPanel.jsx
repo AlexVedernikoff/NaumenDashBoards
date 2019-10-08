@@ -4,7 +4,7 @@ import ParamsTab from './Tabs/ParamsTab';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component, createContext} from 'react';
 import styles from './styles.less';
-import {Title} from 'components/atoms';
+import {Tabs} from './Tabs';
 
 export const FormContext = createContext({});
 
@@ -18,6 +18,15 @@ export class WidgetFormPanel extends Component<Props> {
 			</div>
 		);
 	};
+
+	renderMain = () => <Tabs />;
+
+	renderFooter = () => (
+		<div className={styles.footer}>
+			{this.renderError()}
+			{this.renderControlButtons()}
+		</div>
+	);
 
 	renderForm = () => {
 		const {handleSubmit} = this.props;

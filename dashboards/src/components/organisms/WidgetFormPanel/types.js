@@ -3,6 +3,10 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {LayoutItem} from 'utils/layout/types';
 import type {OptionType} from 'react-select/src/types';
 
+export type State = {
+	[string]: any
+}
+
 export type SelectValue = {
 	[string]: any
 };
@@ -22,6 +26,7 @@ export type CreateFormData = {
 	areAxisesMeaningsShown: boolean,
 	breakdown: Attribute | null,
 	chart: SelectValue,
+	color: Array<string>,
 	desc: string,
 	group: SelectValue | null,
 	isLegendShown: boolean;
@@ -48,6 +53,14 @@ export type TextAreaProps = {
 };
 
 export type CheckBoxProps = {
+	key: number,
+	label: string,
+	name: string,
+	value: string
+};
+
+export type ColorPickerProps = {
+	key: number,
 	label: string,
 	name: string,
 	value: string

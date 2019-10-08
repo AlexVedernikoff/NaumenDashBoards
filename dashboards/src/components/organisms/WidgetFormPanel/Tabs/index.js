@@ -1,6 +1,10 @@
 // @flow
-import ParamsTab from './ParamsTab';
+import DataForm from './ParamsTab';
+import DesignTab from './DesignTab';
+import Tabs from './Tabs';
 
 export {
-	ParamsTab
+	DataForm,
+	DesignTab,
+	Tabs
 };
