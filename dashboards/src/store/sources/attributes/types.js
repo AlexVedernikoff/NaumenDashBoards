@@ -3,16 +3,25 @@ import {ATTRIBUTES_EVENTS} from './constants';
 
 export type Attribute = {
 	code: string,
+	property: string,
+	sourceName: string,
 	title: string,
 	type: string,
 };
 
+export type AttributeData = {
+	data: Attribute[],
+	error: boolean,
+	loading: boolean
+}
+
 export type AttributeMap = {
-	[key: string]: Attribute[]
+	[key: string]: AttributeData
 };
 
 type RequestAttributes = {
 	type: typeof ATTRIBUTES_EVENTS.REQUEST_ATTRIBUTES,
+	payload: string
 };
 
 type ReceiveAttributes = {
@@ -41,7 +50,5 @@ export type AttributesAction =
 ;
 
 export type AttributesState = {
-	error: boolean,
-	loading: boolean,
 	map: AttributeMap
 };

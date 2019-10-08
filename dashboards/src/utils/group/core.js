@@ -98,9 +98,9 @@ const group = (variant: string, data: RawData[]): GroupedData => {
  * @returns {SelectValue[] | void}
  */
 const getGroupOptions = (xAxis: Attribute | null): SelectValue[] => {
-	if (xAxis) {
-		const {DATETIME_SELECTS, INTERVAL_SELECTS} = GROUP_SELECTS;
+	const {DATETIME_SELECTS, DEFAULT_SELECTS, INTERVAL_SELECTS} = GROUP_SELECTS;
 
+	if (xAxis) {
 		if (xAxis.type === GROUP_TYPES.DATETIME) {
 			return DATETIME_SELECTS;
 		}
@@ -110,19 +110,11 @@ const getGroupOptions = (xAxis: Attribute | null): SelectValue[] => {
 		}
 	}
 
-	return [];
+	return DEFAULT_SELECTS;
 };
 
-/**
- * Проверяем применимы ли доп. опции в переданому атрибуту
- * @param {Attribute | null} xAxis - атрибут класса
- * @returns {Attribute|boolean}
- */
-const typeOfExtendedGroups = (xAxis: Attribute | null) => xAxis && (xAxis.type === GROUP_TYPES.DATETIME || xAxis.type === GROUP_TYPES.DT_INTERVAL);
-
 export {
-	getGroupOptions,
-	typeOfExtendedGroups
+	getGroupOptions
 };
 
 export default group;

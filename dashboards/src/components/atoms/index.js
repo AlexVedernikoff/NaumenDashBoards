@@ -1,5 +1,4 @@
 // @flow
-import AttrSelect from './AttrSelect';
 import Button from './Button';
 import CheckBox from './CheckBox';
 import ColorPicker from './ColorPicker';
@@ -11,7 +10,6 @@ import Label from './Label';
 import Title from './Title';
 
 export {
-	AttrSelect,
 	Button,
 	ColorPicker,
 	CheckBox,

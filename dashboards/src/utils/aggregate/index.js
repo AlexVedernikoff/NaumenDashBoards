@@ -1,12 +1,10 @@
 // @flow
-import aggregate, {getActualAggregate, getAggregateOptions, typeOfExtendedAggregate} from './core';
+import aggregate, {getAggregateOptions} from './core';
 import {AGGREGATE_SELECTS} from './selects';
 
 export {
-	getActualAggregate,
 	AGGREGATE_SELECTS,
-	getAggregateOptions,
-	typeOfExtendedAggregate
+	getAggregateOptions
 };
 
 export default aggregate;

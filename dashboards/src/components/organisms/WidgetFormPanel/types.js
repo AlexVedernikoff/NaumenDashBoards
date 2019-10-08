@@ -8,8 +8,15 @@ export type State = {
 }
 
 export type SelectValue = {
-	label: string,
-	value: string
+	[string]: any
+};
+
+export type InputProps = {
+	[string]: any
+};
+
+export type State = {
+	[string]: any
 };
 
 export type CreateFormData = {
@@ -60,9 +67,9 @@ export type ColorPickerProps = {
 };
 
 type Select = {
-	label?: string,
+	handleSelect?: (name: string, value: OptionType) => void | Promise<void>;
+	isDisabled?: boolean,
 	name: string,
-	onChange?: (name: string, option: OptionType) => void;
 	placeholder: string,
 };
 
@@ -72,6 +79,7 @@ export type SelectProps = {
 } & Select;
 
 export type AttrSelectProps = {
+	options?: Array<Attribute>,
 	value: Attribute | null
 } & Select;
 
@@ -94,3 +102,5 @@ export type WrappedProps = {
 };
 
 export type RenderFunction = (...fieldNames: Array<string>) => any;
+
+export type GetRefOptions = (value: OptionType) => Array<OptionType>;

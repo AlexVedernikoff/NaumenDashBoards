@@ -5,6 +5,11 @@ import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
 class CheckBox extends Component<Props> {
+	handleClick = () => {
+		const {onClick, name, value} = this.props;
+		onClick(name, !value);
+	};
+
 	renderLabel = () => {
 		const {label, name, value} = this.props;
 
@@ -19,14 +24,14 @@ class CheckBox extends Component<Props> {
 	};
 
 	renderInput = () => {
-		const {handleClick, name} = this.props;
+		const {name} = this.props;
 
 		return (
 			<input
 				className={styles.input}
 				id={name}
 				name={name}
-				onChange={handleClick}
+				onChange={this.handleClick}
 				type="checkbox"
 			/>
 		);

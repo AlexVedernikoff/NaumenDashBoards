@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_VARIANTS, INTEGER_VARIANTS} from './constansts';
 
-const DEFAULT = [
+const DEFAULT_SELECTS = [
 	{
 		label: 'Количество',
 		value: DEFAULT_VARIANTS.COUNT
@@ -12,7 +12,7 @@ const DEFAULT = [
 	}
 ];
 
-const INTEGER = [
+const INTEGER_SELECTS = [
 	{
 		label: 'Сумма',
 		value: INTEGER_VARIANTS.SUM
@@ -36,8 +36,8 @@ const INTEGER = [
 ];
 
 const AGGREGATE_SELECTS = {
-	DEFAULT,
-	INTEGER
+	DEFAULT_SELECTS,
+	INTEGER_SELECTS
 };
 
 export {

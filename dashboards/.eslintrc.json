@@ -27,6 +27,7 @@
 			"tab"
 		],
 		"no-tabs": 0,
+		"operator-linebreak": ["error", "before"],
 		"require-atomic-updates": "off",
 		"semi": [
 			2,

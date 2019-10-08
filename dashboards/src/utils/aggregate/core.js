@@ -120,51 +120,16 @@ const aggregate = (variant: string, data: GroupedData): AggregatedData => {
 
 /**
  * Получаем необходимый набор опций в зависимости переданного атрибута
- * @param {Attribute} yAxis - атрибут класса
+ * @param {Attribute} refValue - атрибут класса
  * @returns {SelectValue[]}
  */
-const getAggregateOptions = (yAxis: Attribute): SelectValue[] => {
-	const {DEFAULT, INTEGER} = AGGREGATE_SELECTS;
-	return yAxis && yAxis.type === INTEGER_TYPE ? [...DEFAULT, ...INTEGER] : DEFAULT;
-};
-
-/**
- * Проверяем применимы ли доп. опции в переданому атрибуту
- * @param {Attribute | null} yAxis - атрибут класса
- * @returns {Attribute|boolean}
- */
-const typeOfExtendedAggregate = (yAxis: Attribute | null) => yAxis && yAxis.type === INTEGER_TYPE;
-
-/**
- * Проверяем принадлежит ли опция к дефолтному набору
- * @param {SelectValue} aggregate - опция агрегации
- * @returns {boolean}
- */
-const isDefault = (aggregate: SelectValue): boolean => AGGREGATE_SELECTS.DEFAULT.findIndex(s =>
-	s.value === aggregate.value) !== -1;
-
-/**
- * Проверяем доступна ли переданному атрибуту текущая опция агрегации, если нет то возвращаем дефолтную
- * @param {Attribute} yAxis - атрибут класса
- * @param {SelectValue} aggregate - текущая опция агрегации
- * @returns {{label, value}|*|SelectValue}
- */
-const getActualAggregate = (yAxis: Attribute, aggregate: SelectValue) => {
-	const {DEFAULT} = AGGREGATE_SELECTS;
-
-	if (aggregate && yAxis.type === INTEGER_TYPE) {
-		return aggregate;
-	}
-
-	if (!aggregate || !isDefault(aggregate)) {
-		return DEFAULT[0];
-	}
+const getAggregateOptions = (refValue: Attribute): SelectValue[] => {
+	const {DEFAULT_SELECTS, INTEGER_SELECTS} = AGGREGATE_SELECTS;
+	return refValue && refValue.type === INTEGER_TYPE ? [...INTEGER_SELECTS, ...DEFAULT_SELECTS] : DEFAULT_SELECTS;
 };
 
 export {
-	getActualAggregate,
-	getAggregateOptions,
-	typeOfExtendedAggregate
+	getAggregateOptions
 };
 
 export default aggregate;

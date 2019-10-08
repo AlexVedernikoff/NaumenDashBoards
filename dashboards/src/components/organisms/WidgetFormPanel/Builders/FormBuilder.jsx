@@ -12,14 +12,15 @@ export class FormBuilder extends Component<Props, State> {
 
 	handleSelect = (name: string, value: OptionType) => this.props.setFieldValue(name, value);
 
+	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
+
 	renderCheckBox = (props: CheckBoxProps) => {
-		const {handleChange} = this.props;
 		const {label, name, value} = props;
 
 		return (
 			<div className={styles.field}>
 				<CheckBox
-					handleClick={handleChange}
+					onClick={this.handleClick}
 					label={label}
 					name={name}
 					value={value}
@@ -28,23 +29,12 @@ export class FormBuilder extends Component<Props, State> {
 		);
 	};
 
-	renderSelect = (props: SelectProps) => {
-		const {label, name, onChange, options, placeholder, value} = props;
-
-		return (
-			<div className={styles.field}>
-				<MultiSelect
-					label={label}
-					name={name}
-					onChange={onChange || this.handleSelect}
-					options={options}
-					placeholder={placeholder}
-					value={value}
-				/>
-				<ErrorMessage name={name} />
-			</div>
-		);
-	};
+	renderSelect = (props: SelectProps) => (
+		<div className={styles.field}>
+			<MultiSelect onSelect={props.handleSelect || this.handleSelect} {...props} />
+			<ErrorMessage name={props.name}/>
+		</div>
+	);
 
 	renderLabel = (props: LabelProps) => (
 		<div className={styles.field}>
