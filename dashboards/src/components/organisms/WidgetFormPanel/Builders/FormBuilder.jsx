@@ -1,6 +1,6 @@
 // @flow
 import {CheckBox, Label, MultiSelect, TextArea} from 'components/atoms';
-import type {CheckBoxProps, State, LabelProps, SelectProps, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
+import type {CheckBoxProps, LabelProps, SelectProps, State, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
 import {ErrorMessage} from 'formik';
 import type {OptionType} from 'react-select/src/types';
 import type {Props} from 'containers/WidgetFormPanel/types';
