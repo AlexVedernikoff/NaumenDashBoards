@@ -1,7 +1,6 @@
 // @flow
 import type {CheckBoxProps, SelectProps} from 'components/organisms/WidgetFormPanel/types';
 import {ColorPicker, Divider} from 'components/atoms';
-import type {DomEvent} from './types';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import type {Node} from 'react';
 import React from 'react';
@@ -66,10 +65,7 @@ export class DesignTab extends FormBuilder {
 		</div>
 	);
 
-	openColorPicker = (event: DomEvent): void => {
-		const color = event.target.getAttribute('data-color');
-		const index = event.target.getAttribute('data-color-index');
-
+	openColorPicker = (color: string, index: number) => (event: Event): void => {
 		this.setState({
 			currentColor: color,
 			colorIndex: index,
@@ -99,9 +95,7 @@ export class DesignTab extends FormBuilder {
 		return <div
 			className={styles.itemPallete}
 			key={index}
-			onClick={this.openColorPicker}
-			data-color={color}
-			data-color-index={index}
+			onClick={this.openColorPicker(color, index)}
 			style={{background: color}}
 		/>;
 	};

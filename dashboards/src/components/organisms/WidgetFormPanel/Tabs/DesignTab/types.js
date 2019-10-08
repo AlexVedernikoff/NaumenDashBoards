@@ -6,9 +6,3 @@ export type State = {
 	indexColor: number,
 	pallete: boolean
 }
-
-declare type ElementEventTemplate<E> = {
-  target: E
-} & Event;
-
-export type DomEvent = ElementEventTemplate<HTMLInputElement>;
