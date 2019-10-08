@@ -37,6 +37,7 @@ class DashboardSettings
  */
 class RequestCreateWidgetSettings
 {
+    Boolean editable
     String classFqn
     String contentCode
     Map<String, Object> widgetSettings
@@ -47,6 +48,7 @@ class RequestCreateWidgetSettings
  */
 class RequestEditWidgetSettings
 {
+    Boolean editable
     String classFqn
     String contentCode
     String widgetKey
@@ -61,6 +63,16 @@ class RequestEditWidgetsSettings
     String classFqn
     String contentCode
     Collection<ResponseWidgetSettings> layoutsSettings
+}
+
+/**
+ * Модель тело запроса - удаление настроек виджетов
+ */
+class RequestDeleteWidgetSettings {
+    Boolean editable
+    String classFqn
+    String contentCode
+    String widgetKey
 }
 
 /**
@@ -101,7 +113,7 @@ String createDefaultWidgetSettings(Map<String, Object> requestContent, def user)
     RequestCreateWidgetSettings request = new RequestCreateWidgetSettings(requestContent)
     String dashboardKey = generateDashboardKey(request.classFqn, request.contentCode, null)
     String dashboardJsonSettings = loadJsonSettings(dashboardKey)
-    DashboardSettings dashboardSettings = fromJson(dashboardJsonSettings)
+    DashboardSettings dashboardSettings = getSettingsFromJson(dashboardJsonSettings)
     return toJson(createWidget(request, dashboardKey, dashboardSettings, null))
 }
 
@@ -116,12 +128,12 @@ String bulkEditDefaultWidget(Map<String, Object> requestContent, def user)
     RequestEditWidgetsSettings request = new RequestEditWidgetsSettings(requestContent)
     return request.layoutsSettings.collect {
         def widgetSettings = setLayoutInSettings(it)
-        Map<String, Object> widget = [
+        Map<String, Object> widgetRequest = [
                 classFqn: request.classFqn,
                 contentCode: request.contentCode,
                 widgetKey: it.key,
                 widgetSettings: widgetSettings]
-        editDefaultWidget(widget, user)
+        editDefaultWidget(widgetRequest, user)
     }
 }
 
@@ -152,12 +164,13 @@ String bulkEditWidget(Map<String, Object> requestContent, def user)
     RequestEditWidgetsSettings request = new RequestEditWidgetsSettings(requestContent)
     return request.layoutsSettings.collect {
         def widgetSettings = setLayoutInSettings(it)
-        Map<String, Object> widget = [
+        Map<String, Object> widgetRequest = [
+                editable: true,
                 classFqn: request.classFqn,
                 contentCode: request.contentCode,
                 widgetKey: it.key,
                 widgetSettings: widgetSettings]
-        editPersonalWidgetSettings(widget, user, true)
+        editPersonalWidgetSettings(widgetRequest, user)
     }
 }
 
@@ -165,13 +178,12 @@ String bulkEditWidget(Map<String, Object> requestContent, def user)
  * Редактирование настроек виджета
  * @param requestContent    - json в формате RequestEditWidgetSettings
  * @param user              - БО текущего пользователя или null если сохранение по умолчанию
- * @param editable          - разрешение на редактирование персональных настроек
  * @return ключ отредактированного виджета
  */
-String editPersonalWidgetSettings(Map<String, Object> requestContent, def user, Boolean editable)
+String editPersonalWidgetSettings(Map<String, Object> requestContent, def user)
 {
-    checkRightsOnEditDashboard(editable)
     RequestEditWidgetSettings request = new RequestEditWidgetSettings(requestContent)
+    checkRightsOnEditDashboard(request.editable)
     Closure<String> createDashboardKeyFromLogin = this.&generateDashboardKey.curry(request.classFqn, request.contentCode)
     if(request.widgetKey.endsWith("_${user.login}"))
     {
@@ -185,9 +197,7 @@ String editPersonalWidgetSettings(Map<String, Object> requestContent, def user, 
         String dashboardKey = createDashboardKeyFromLogin(user.login)
         String dashboardJsonSettings = loadJsonSettings(dashboardKey)
                 ?: loadJsonSettings(createDashboardKeyFromLogin(null))
-
-        DashboardSettings dashboardSettings = fromJson(dashboardJsonSettings)
-
+        DashboardSettings dashboardSettings = getSettingsFromJson(dashboardJsonSettings)
         return toJson(editWidget(request, dashboardKey, dashboardSettings, user))
     }
 }
@@ -196,18 +206,17 @@ String editPersonalWidgetSettings(Map<String, Object> requestContent, def user, 
  * Сохранение настроек виджета
  * @param requestContent    - json в формате RequestCreateWidgetSettings
  * @param user              - БО текущего пользователя или null если сохранение по умолчанию
- * @param editable          - разрешение на редактирование персональных настроек
  * @return ключ созданного виджета
  */
-String createPersonalWidgetSettings(Map<String, Object> requestContent, def user, Boolean editable)
+String createPersonalWidgetSettings(Map<String, Object> requestContent, def user)
 {
-    checkRightsOnEditDashboard(editable)
     RequestCreateWidgetSettings request = new RequestCreateWidgetSettings(requestContent)
+    checkRightsOnEditDashboard(request.editable)
     Closure createDashboardKeyFromLogin = this.&generateDashboardKey.curry(request.classFqn, request.contentCode)
     String dashboardKey = createDashboardKeyFromLogin(user.login)
     String dashboardJsonSettings = loadJsonSettings(dashboardKey)
             ?: loadJsonSettings(createDashboardKeyFromLogin(null))
-    DashboardSettings dashboardSettings = fromJson(dashboardJsonSettings)
+    DashboardSettings dashboardSettings = getSettingsFromJson(dashboardJsonSettings)
     return toJson(createWidget(request, dashboardKey, dashboardSettings, user))
 }
 
@@ -224,25 +233,23 @@ String deleteDefaultWidget(String classFqn, String contentCode, def user, String
     String widgetKey = key
     checkRightsOnDashboard(user, "удаление")
     DashboardSettings dashboardSettings = getDashboardSetting(classFqn, contentCode, null)
-    dashboardSettings.widgetIds -= widgetKey
+    dashboardSettings.widgetIds.remove(widgetKey)
     saveDashboard(classFqn, contentCode, dashboardSettings.widgetIds, null)
     return deleteJsonSettings(widgetKey)
 }
 
 /**
  * Удаление виджета
- * @param classFqn      - код типа куда выведено встроенное приложение
- * @param contentCode   - код контента встроенного приложения
- * @param user          - БО текущего пользователя
- * @param widgetKey     - ключ виджета
- * @param editable      - разрешение на редактирование персональных настроек
+ * @param requestContent    - тело запроса
  * @return успех | провал удаления
  */
-String deleteWidget(String classFqn, String contentCode, def user, String key, Boolean editable)
+String deleteWidget(Map<String, Object> requestContent, def user)
 {
-    String widgetKey = key
-    checkRightsOnEditDashboard(editable)
-    Closure<DashboardSettings> getDashboardSettingsFromLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
+    RequestDeleteWidgetSettings request = new RequestDeleteWidgetSettings(requestContent)
+    String widgetKey = request.widgetKey
+    checkRightsOnEditDashboard(request.editable)
+    Closure<DashboardSettings> getDashboardSettingsFromLogin =
+            this.&getDashboardSetting.curry(request.classFqn, request.contentCode)
     DashboardSettings dashboardSettings = getDashboardSettingsFromLogin(user.login)
     if(!dashboardSettings && !widgetKey.endsWith("_${user.login}"))
     {
@@ -252,8 +259,8 @@ String deleteWidget(String classFqn, String contentCode, def user, String key, B
     {
         deleteJsonSettings(widgetKey)
     }
-    dashboardSettings.widgetIds -= widgetKey
-    String dashboardKey = generateDashboardKey(classFqn, contentCode, user.login)
+    dashboardSettings.widgetIds.remove(widgetKey)
+    String dashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login)
     return saveJsonSettings(dashboardKey, toJson(dashboardSettings))
 }
 
@@ -341,7 +348,7 @@ private String editWidget(RequestEditWidgetSettings request,
     def widgetSettings = setUuidInSettings(request.widgetSettings, widgetKey)
     saveJsonSettings(widgetKey, toJson(widgetSettings))
     dashboardSettings.widgetIds << widgetKey
-    dashboardSettings.widgetIds -= request.widgetKey
+    dashboardSettings.widgetIds.remove(request.widgetKey)
     saveJsonSettings(dashboardKey, toJson(dashboardSettings))
     return widgetKey
 }
@@ -387,7 +394,7 @@ private String generateWidgetKey(Collection<String> keys, String login)
 private DashboardSettings getDashboardSetting(String classFqn, String contentCode, String login)
 {
     String dashboardJsonSettings = loadJsonSettings(generateDashboardKey(classFqn, contentCode, login))
-    return dashboardJsonSettings ? fromJson(dashboardJsonSettings) : null
+    return getSettingsFromJson(dashboardJsonSettings)
 }
 
 /**
@@ -410,7 +417,7 @@ private Collection<ResponseWidgetSettings> getAllWidgetsSettings(DashboardSettin
 private ResponseWidgetSettings getWidgetSettings(String widgetKey)
 {
     String widgetJsonSettings = loadJsonSettings(widgetKey)
-    def widgetSettings = fromJson(widgetJsonSettings)
+    def widgetSettings = getSettingsFromJson(widgetJsonSettings)
     return new ResponseWidgetSettings(widgetKey, widgetSettings)
 }
 
@@ -433,7 +440,7 @@ private checkRightsOnDashboard(def user, String messageError)
  * Проверка на право редактирования настроек дашборда
  * @param editable  - переменная разрешения на редактирование настроек пользователю
  */
-private checkRightsOnEditDashboard(Boolean editable)
+private checkRightsOnEditDashboard(def editable)
 {
     if (!editable) {
         throw new Exception(toJson([error: "Перональные настройки отключены!"]))
@@ -448,9 +455,11 @@ private checkRightsOnEditDashboard(Boolean editable)
  */
 private def setUuidInSettings(def widgetSettings, String key)
 {
-    widgetSettings.id = key
-    widgetSettings.layout.i = key
-    return widgetSettings
+    //widgetSettings является неизменяемым, поэтому создаём ноый объект и копируем все значения
+    def settings = [:] << (widgetSettings)
+    settings.id = key
+    settings.layout.i = key
+    return settings
 }
 
 /**
@@ -458,10 +467,11 @@ private def setUuidInSettings(def widgetSettings, String key)
  * @param responseWidgetSettings настройки виджета в формате ResponseWidgetSettings
  * @return настройки виджета с обновленным layout
  */
-private def setLayoutInSettings(ResponseWidgetSettings responseWidgetSettings)
+private def setLayoutInSettings(Map<String, Object> widgetSettings)
 {
+    ResponseWidgetSettings responseWidgetSettings = new ResponseWidgetSettings(widgetSettings)
     String widgetJsonSettings = loadJsonSettings(responseWidgetSettings.key)
-    def settings = fromJson(widgetJsonSettings)
+    def settings = getSettingsFromJson(widgetJsonSettings)
     def layout = responseWidgetSettings.value
     settings.layout = layout
     return settings
@@ -496,6 +506,16 @@ private Boolean saveJsonSettings(String key, String jsonValue)
 private Boolean deleteJsonSettings(String key)
 {
     return api.keyValue.delete(NAMESPACE, key)
+}
+
+/**
+ * Метод извлечения настроек из json объекта
+ * @param jsonSettings - настройки в формате json
+ * @return настройки или null
+ */
+private def getSettingsFromJson(String jsonSettings)
+{
+    return jsonSettings ? fromJson(jsonSettings) : null
 }
 
 /**
