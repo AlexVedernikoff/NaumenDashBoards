@@ -1,6 +1,6 @@
 // @flow
 import {Button} from 'components/atoms';
-import type {ObjectColor, Props, State} from './types';
+import type {Color, Props, State} from './types';
 import React, {Component} from 'react';
 import {SketchPicker} from 'react-color';
 import styles from './styles.less';
@@ -39,7 +39,7 @@ export class ColorPicker extends Component<Props, State> {
 		onClick(itemColor);
 	};
 
-	setColor = (color: ObjectColor): void => {
+	setColor = (color: Color): void => {
 		this.setState({itemColor: color.hex});
 	};
 

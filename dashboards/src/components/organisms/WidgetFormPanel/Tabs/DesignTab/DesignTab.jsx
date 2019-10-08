@@ -28,7 +28,7 @@ export class DesignTab extends FormBuilder {
 			'#8C4A1C',
 			'#FFFE55'
 		],
-		indexColor: 0,
+		colorIndex: 0,
 		pallete: false
 	};
 
@@ -68,17 +68,17 @@ export class DesignTab extends FormBuilder {
 	openColorPicker = (color: string, index: number): void => {
 		this.setState({
 			currentColor: color,
-			indexColor: index,
+			colorIndex: index,
 			pallete: true
 		});
 	};
 
 	changeColor = (itemColor: string): void => {
-		const {colors, indexColor} = this.state;
+		const {colors, colorIndex} = this.state;
 		const {handleChange} = this.props;
 
 		this.setState(state => {
-			state.colors[indexColor] = itemColor;
+			state.colors[colorIndex] = itemColor;
 			state.pallete = false;
 
 			return state;
@@ -91,11 +91,13 @@ export class DesignTab extends FormBuilder {
 		this.setState({pallete: false});
 	};
 
-	colorPalleteItem = (color: string, index: number) => {
+	renderColor = (color: string, index: number) => {
 		return <div
 			className={styles.itemPallete}
 			key={index}
-			onClick={(): void => this.openColorPicker(color, index)}
+			onClick={this.openColorPicker.bind(null, color, index)}
+			data-color={color}
+			data-color-index={index}
 			style={{background: color}}
 		/>;
 	};
@@ -105,14 +107,14 @@ export class DesignTab extends FormBuilder {
 
 		return (
 			<div className={styles.colorPalleteWrap}>
-				{colors.map(this.colorPalleteItem)}
+				{colors.map(this.renderColor)}
 			</div>
 		);
 	};
 
 	renderColorPicker = () => {
 		const {currentColor, pallete} = this.state;
-		const node = pallete ? <ColorPicker onClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/> : <div />;
+		const node = pallete ? <ColorPicker onClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor} /> : <div />;
 
 		return <div className={styles.palletePicker}>{node}</div>;
 	};

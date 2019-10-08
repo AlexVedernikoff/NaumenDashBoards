@@ -3,6 +3,10 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {LayoutItem} from 'utils/layout/types';
 import type {OptionType} from 'react-select/src/types';
 
+export type State = {
+	[string]: any
+}
+
 export type SelectValue = {
 	label: string,
 	value: string
@@ -54,9 +58,6 @@ export type ColorPickerProps = {
 	name: string,
 	value: string
 };
-
-export type FormBuilderProps = any
-export type FormBuilderStore = any
 
 type Select = {
 	label?: string,

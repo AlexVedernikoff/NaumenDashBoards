@@ -1,6 +1,6 @@
 // @flow
 
-export type ObjectColor = {
+export type Color = {
 	hex: string
 };
 
