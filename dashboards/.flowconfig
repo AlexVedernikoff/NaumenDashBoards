@@ -23,8 +23,6 @@ module.name_mapper='^utils\/\(.*\)$' -> '<PROJECT_ROOT>/src/utils/\1'
 module.name_mapper='^utils$' -> '<PROJECT_ROOT>/src/utils/index.js'
 module.name_mapper='^store\/\(.*\)$' -> '<PROJECT_ROOT>/src/store/\1'
 module.name_mapper='^store$' -> '<PROJECT_ROOT>/src/store/index.js'
-module.name_mapper='^entities\/\(.*\)$' -> '<PROJECT_ROOT>/src/entities/\1'
-module.name_mapper='^entities$' -> '<PROJECT_ROOT>/src/entities/index.js'
 module.name_mapper='^icons\/\(.*\)$' -> '<PROJECT_ROOT>/src/icons/\1'
 module.name_mapper='^icons$' -> '<PROJECT_ROOT>/src/icons/index.js'
 

@@ -6,7 +6,6 @@ const {resolve} = require('path');
 
 module.exports = {
 	alias: {
-		'entities': resolve(src, 'entities'),
 		'icons': resolve(src, 'icons'),
 		'images': resolve(src, 'images'),
 		'components': resolve(src, 'components'),

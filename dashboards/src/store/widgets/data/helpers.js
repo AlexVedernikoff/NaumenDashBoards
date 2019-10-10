@@ -12,7 +12,7 @@ import type {
 	WidgetMap
 } from './types';
 import type {Layout} from 'utils/layout/types';
-import {NewWidget} from 'entities';
+import {NewWidget} from 'utils/widget';
 
 /**
  * Устанавливаем полученные виджеты
@@ -56,7 +56,10 @@ export const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidg
 	}
 
 	state.selectedWidget = payload;
-	return {...state};
+	return {
+		...state,
+		map: {...state.map}
+	};
 };
 
 /**
@@ -139,7 +142,7 @@ export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): 
  * @returns {WidgetsDataState}
  */
 export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): WidgetsDataState => {
-	state.map[payload.id] = payload;
+	state.map[payload.id] = {...payload, layout: state.map[payload.id].layout};
 	return {
 		...state,
 		saveLoading: false,

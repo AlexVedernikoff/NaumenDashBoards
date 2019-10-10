@@ -1,9 +1,11 @@
 // @flow
+
 export type Module =
 	| 'dashboards'
 	| 'dashboardDataSet'
 	| 'dashboardSettings'
 	| 'dashboardTestGetData'
+	| 'DevDashboardSettings'
 ;
 
 export type Method =

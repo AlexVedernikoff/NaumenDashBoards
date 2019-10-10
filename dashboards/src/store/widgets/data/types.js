@@ -6,24 +6,23 @@ import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {WIDGETS_EVENTS} from './constants';
 
 export type Widget = {
-	aggregate: SelectValue,
-	areAxisesNamesShown: boolean,
-	areAxisesLabelsShown: boolean,
-	areAxisesMeaningsShown: boolean,
-	breakdown: Attribute | null,
-	color: Array<string>,
-	desc: string,
-	group: SelectValue | null,
+	aggregate?: SelectValue,
+	areAxisesNamesShown?: boolean,
+	areAxisesLabelsShown?: boolean,
+	areAxisesMeaningsShown?: boolean,
+	breakdown?: Attribute | null,
+	desc?: string,
+	group?: SelectValue | null,
 	id: string,
-	isNameShown: boolean,
-	isLegendShown: boolean;
+	isNameShown?: boolean,
+	isLegendShown?: boolean;
 	layout: LayoutItem,
-	legendPosition: SelectValue,
+	legendPosition?: SelectValue,
 	name: string,
-	source: SelectValue,
-	chart: SelectValue,
-	xAxis: Attribute,
-	yAxis: Attribute,
+	source?: SelectValue,
+	type: SelectValue,
+	xAxis?: Attribute,
+	yAxis?: Attribute,
 };
 
 export type AddWidget = {

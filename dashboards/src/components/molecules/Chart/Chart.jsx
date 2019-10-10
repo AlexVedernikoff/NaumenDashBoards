@@ -1,6 +1,6 @@
 // @flow
 import ApexChart from 'react-apexcharts';
-import getConfig from 'utils/chart';
+import {getChartType, getConfig} from 'utils/chart';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 
@@ -11,51 +11,36 @@ export class Chart extends Component<Props, State> {
 	};
 
 	static getDerivedStateFromProps (props: Props, state: State) {
-		if (props.data) {
+		const {categories, labels, series} = props.data;
+
+		if (Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
 			const {options, series} = getConfig(props.widget, props.data);
 
 			state.options = options;
 			state.series = series;
-		}
 
-		return state;
+			return state;
+		}
 	}
 
-	renderContent (loading: boolean) {
+	renderContent () {
 		const {options, series} = this.state;
 		const {widget} = this.props;
-
-		if (loading) {
-			return <p>Загрузка данных...</p>;
-		}
+		const type = getChartType(widget.type.value);
 
 		return (
 			<ApexChart
 				height="100%"
-				key={widget.chart.value}
+				key={type}
 				options={options}
 				series={series}
-				type={widget.chart.value}
+				type={type}
 			/>
 		);
 	}
 
-	renderError () {
-		const {data} = this.props;
-
-		if (!data || data.error) {
-			return <p>Ошибка загрузки данных...</p>;
-		}
-	}
-
 	render () {
-		const {data} = this.props;
-
-		if (data) {
-			return this.renderContent(data.loading);
-		}
-
-		return this.renderError();
+		return this.renderContent();
 	}
 }
 

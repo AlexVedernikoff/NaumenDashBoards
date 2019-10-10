@@ -15,28 +15,11 @@ export type InputProps = {
 	[string]: any
 };
 
-export type State = {
-	[string]: any
-};
-
 export type CreateFormData = {
-	aggregate: SelectValue,
-	areAxisesNamesShown: boolean,
-	areAxisesLabelsShown: boolean,
-	areAxisesMeaningsShown: boolean,
-	breakdown: Attribute | null,
-	chart: SelectValue,
-	color: Array<string>,
-	desc: string,
-	group: SelectValue | null,
-	isLegendShown: boolean;
-	isNameShown: boolean,
 	layout: LayoutItem,
-	legendPosition: SelectValue,
 	name: string,
-	source: SelectValue,
-	xAxis: Attribute,
-	yAxis: Attribute
+	type: OptionType,
+	[string]: any
 };
 
 export type SaveFormData = {
@@ -53,7 +36,6 @@ export type TextAreaProps = {
 };
 
 export type CheckBoxProps = {
-	key: number,
 	label: string,
 	name: string,
 	value: string

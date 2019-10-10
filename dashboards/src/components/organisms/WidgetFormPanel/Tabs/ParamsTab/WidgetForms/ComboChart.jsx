@@ -147,7 +147,9 @@ export class ComboChart extends DataFormBuilder {
 		});
 
 		Object.keys(sources).forEach(key => {
-			options = [...options, ...attributes[key].data];
+			if (attributes[key]) {
+				options = [...options, ...attributes[key].data];
+			}
 		});
 
 		const yAxis: AttrSelectProps = {

@@ -33,7 +33,7 @@ export class ParamsTab extends DataFormBuilder {
 
 	renderInputs = () => {
 		const {values} = this.props;
-		const {AXIS_SELECTS, CIRCLE_SELECTS, COMBO_SELECT} = CHART_SELECTS;
+		const {AXIS_HORIZONTAL_SELECTS, AXIS_SELECTS, CIRCLE_SELECTS, COMBO_SELECT} = CHART_SELECTS;
 		const currentWidgetType = values.type || AXIS_SELECTS[0];
 
 		const name: TextAreaProps = {
@@ -43,16 +43,16 @@ export class ParamsTab extends DataFormBuilder {
 			value: values.name
 		};
 
-		const desc: TextAreaProps = {
-			label: 'Описание',
-			name: 'desc',
+		const diagramName: TextAreaProps = {
+			label: 'Название диаграммы',
+			name: 'diagramName',
 			value: values.desc
 		};
 
 		const type: SelectProps = {
 			getOptionLabel: this.getLabelWithIcon,
 			name: 'type',
-			options: [...AXIS_SELECTS, ...CIRCLE_SELECTS, COMBO_SELECT, ...WIDGET_SELECTS],
+			options: [...AXIS_SELECTS, ...AXIS_HORIZONTAL_SELECTS, ...CIRCLE_SELECTS, COMBO_SELECT, ...WIDGET_SELECTS],
 			placeholder: 'Выберите тип виджета',
 			value: currentWidgetType
 		};
@@ -60,7 +60,7 @@ export class ParamsTab extends DataFormBuilder {
 		return (
 			<section className={styles.main}>
 				{this.renderTextArea(name)}
-				{this.renderTextArea(desc)}
+				{this.renderTextArea(diagramName)}
 				<Divider />
 				{this.renderSelect(type)}
 				{this.renderWidgetFields(currentWidgetType)}

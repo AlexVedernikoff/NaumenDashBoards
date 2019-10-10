@@ -3,7 +3,7 @@ import {buildUrl, client} from 'utils/api';
 import type {Context} from 'utils/api/types';
 import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetFormPanel/types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {fetchChartData} from 'store/widgets/charts/actions';
+import {fetchDiagramData} from 'store/widgets/diagrams/actions';
 import type {Layout} from 'utils/layout/types';
 import type {Widget} from './types';
 import {WIDGETS_EVENTS} from './constants';
@@ -19,17 +19,15 @@ const getWidgets = (isInit: boolean = false): ThunkAction => async (dispatch: Di
 	try {
 		const context = getState().dashboard.context;
 		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-		const {data} = await client.post(buildUrl('dashboardSettings', 'getSettings', params));
+		const {data} = await client.post(buildUrl('DevDashboardSettings', 'getSettings', params));
 
 		if (Array.isArray(data)) {
 			const widgets = data.map(w => {
-				const widget = JSON.parse(w.value);
-				widget.id = w.key;
-				widget.layout.i = w.key;
+				const widget = w.value;
 				widget.layout.static = true;
 				data.map[w.key] = widget;
 
-				dispatch(fetchChartData(widget));
+				dispatch(fetchDiagramData(widget));
 				return widget;
 			});
 			dispatch(receiveWidgets(widgets));
@@ -79,10 +77,10 @@ const saveNewLayout = (context: Context, asDefault: boolean): ThunkAction => asy
 		const method = asDefault ? 'bulkEditDefaultWidget' : 'bulkEditWidget';
 		const layoutsSettings = Object.keys(widgetMap).map(key => ({
 			key: key,
-			value: JSON.stringify(widgetMap[key].layout)
+			value: widgetMap[key].layout
 		}));
 
-		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), {
+		await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
 			layoutsSettings
@@ -116,13 +114,12 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
 			widgetKey: formData.id,
-			widgetSettings: JSON.stringify(formData)
+			widgetSettings: formData
 		};
-		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
+		await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), data);
 		await dispatch(saveNewLayout(context, asDefault));
-
 		dispatch(updateWidget(formData));
-		dispatch(fetchChartData(formData));
+		dispatch(fetchDiagramData(formData));
 	} catch (e) {
 		dispatch(recordSaveError());
 	}
@@ -143,16 +140,15 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 		const data = {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			widgetSettings: JSON.stringify(formData)
+			widgetSettings: formData
 		};
-		const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
+		const {data: id} = await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), data);
 		await dispatch(saveNewLayout(context, asDefault));
 
 		formData.layout.i = id;
 		const widget = {...formData, id};
-
 		dispatch(setCreatedWidget(widget));
-		dispatch(fetchChartData(widget));
+		dispatch(fetchDiagramData(widget));
 	} catch (e) {
 		dispatch(recordSaveError());
 	}

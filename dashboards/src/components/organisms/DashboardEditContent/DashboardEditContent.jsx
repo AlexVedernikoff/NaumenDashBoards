@@ -32,13 +32,13 @@ export class DashboardEditContent extends Component<Props> {
 	};
 
 	renderGrid = () => {
-		const {charts, isEditable} = this.props;
+		const {diagrams, isEditable} = this.props;
 		const widgets = this.getWidgets();
 
 		return (
 			<div className={styles.container}>
 				<LayoutGrid
-					charts={charts}
+					diagrams={diagrams}
 					isEditable={isEditable}
 					onSelectWidget={this.onSelectWidget}
 					onLayoutChange={this.onLayoutChange}

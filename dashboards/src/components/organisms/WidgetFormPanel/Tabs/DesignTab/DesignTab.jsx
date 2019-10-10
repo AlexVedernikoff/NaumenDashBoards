@@ -36,19 +36,16 @@ export class DesignTab extends FormBuilder {
 		const {values} = this.props;
 		const fields = [
 			{
-				key: 0,
 				label: 'Выводить название осей',
 				name: 'areAxisesNamesShown',
 				value: values.areAxisesNamesShown
 			},
 			{
-				key: 1,
 				label: 'Выводить подписи осей',
 				name: 'areAxisesLabelsShown',
 				value: values.areAxisesLabelsShown
 			},
 			{
-				key: 2,
 				label: 'Выводить подписи значений',
 				name: 'areAxisesMeaningsShown',
 				value: values.areAxisesMeaningsShown
@@ -59,7 +56,7 @@ export class DesignTab extends FormBuilder {
 	};
 
 	renderLegendField = (checkBox: CheckBoxProps) => (
-		<div key={checkBox.key} className={styles.checkboxContainerLeft}>
+		<div key={checkBox.name} className={styles.checkboxContainerLeft}>
 			{this.renderCheckBox(checkBox)}
 			<Divider className={styles.dividerLeft} />
 		</div>
@@ -121,7 +118,6 @@ export class DesignTab extends FormBuilder {
 		const {values} = this.props;
 
 		const nameVisibility: CheckBoxProps = {
-			key: 3,
 			label: 'Название виджета',
 			name: 'isNameShown',
 			value: values.isNameShown
@@ -141,7 +137,6 @@ export class DesignTab extends FormBuilder {
 		};
 
 		const legendVisibility: CheckBoxProps = {
-			key: 4,
 			label: 'Выводить легенду',
 			name: 'isLegendShown',
 			value: values.isLegendShown

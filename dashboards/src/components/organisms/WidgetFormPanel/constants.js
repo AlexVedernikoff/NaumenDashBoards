@@ -10,6 +10,7 @@ const row: 'row' = 'row';
 const source: 'source' = 'source';
 const totalColumn: 'totalColumn' = 'totalColumn';
 const totalRow: 'totalRow' = 'totalRow';
+const type: 'type' = 'type';
 const xAxis: 'xAxis' = 'xAxis';
 const yAxis: 'yAxis' = 'yAxis';
 
@@ -25,6 +26,7 @@ const FIELDS = {
 	source,
 	totalColumn,
 	totalRow,
+	type,
 	xAxis,
 	yAxis
 };

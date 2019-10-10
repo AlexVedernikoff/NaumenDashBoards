@@ -1,14 +1,16 @@
 // @flow
+import {CHART_SELECTS} from 'utils/chart';
 import type {ConnectedProps} from './types';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
-import {NewWidget} from 'entities';
+import {NewWidget} from 'utils/widget';
 
 const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
-		const {id, ...values} = selectedWidget;
+		const {id, type, ...values} = selectedWidget;
 
 		return {
 			asDefault: false,
+			type: type || CHART_SELECTS.AXIS_SELECTS[0],
 			...values
 		};
 	},
