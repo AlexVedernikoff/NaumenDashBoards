@@ -6,11 +6,11 @@ import styles from './styles.less';
 
 export class DashboardViewContent extends Component<Props> {
 	renderGrid = () => {
-		const {charts, widgets} = this.props;
+		const {diagrams, widgets} = this.props;
 
 		return (
 			<LayoutGrid
-				charts={charts}
+				diagrams={diagrams}
 				widgets={widgets}
 			/>
 		);

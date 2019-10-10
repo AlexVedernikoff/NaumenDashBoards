@@ -1,7 +1,7 @@
 // @flow
 import {Button, DropDownFiles} from 'components/atoms';
 import {createSnapshot} from 'utils/export';
-import {FILE_VARIANTS} from 'components/atoms/DropDownFiles/constansts.js';
+import {FILE_VARIANTS} from 'components/atoms/DropDownFiles/constansts';
 import IconRefrashe from 'icons/header/refresh.svg';
 import React, {Component} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
@@ -26,11 +26,11 @@ export class DashboardHeader extends Component<Props> {
 	renderButtonRefresh = () => {
 		const {fetchDashboard} = this.props;
 
-		return <Button type="button" variant="icon" onClick={fetchDashboard}><IconRefrashe /></Button>;
+		return <IconRefrashe onClick={fetchDashboard} />;
 	};
 
 	renderDropDown = () => {
-		return <DropDownFiles icon list={[{text: FILE_VARIANTS.PDF}, {text: FILE_VARIANTS.PNG}]} createDoc={this.createDocument}/>;
+		return <DropDownFiles icon list={[{text: FILE_VARIANTS.PDF}, {text: FILE_VARIANTS.PNG}]} createDoc={this.createDocument} />;
 	};
 
 	render () {
@@ -41,12 +41,12 @@ export class DashboardHeader extends Component<Props> {
 				<p className={styles.title}>Дашборд {`"${name}"`}</p>
 				<ul className={styles.nav}>
 					<li className={styles.navItem}>
-						<div className={styles.button}>
-							{this.renderDropDown()}
-						</div>
-						<div className={styles.button}>
-							{this.renderButtonRefresh()}
-						</div>
+						{this.renderDropDown()}
+					</li>
+					<li className={styles.navItem}>
+						{this.renderButtonRefresh()}
+					</li>
+					<li className={styles.navItem}>
 						{this.renderModeButton()}
 					</li>
 				</ul>

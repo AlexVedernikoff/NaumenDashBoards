@@ -3,10 +3,6 @@ import type {LayoutItem} from 'utils/layout/types';
 
 class NewWidget {
 	static id: string = 'new';
-
-	aggregate: null = null;
-	breakdown: null = null;
-	chart: null = null;
 	color: Array<string> = [
 		'#EA3223',
 		'#999999',
@@ -24,15 +20,9 @@ class NewWidget {
 		'#9BB3D4',
 		'#8C4A1C',
 		'#FFFE55'
-	]
+	];
 	desc: string = '';
-	group: null = null;
 	id: string = NewWidget.id;
-	isLegendShown: boolean = false;
-	isNameShown: boolean = true;
-	areAxisesNamesShown: boolean = false;
-	areAxisesLabelsShown: boolean = false;
-	areAxisesMeaningsShown: boolean = false;
 	layout: LayoutItem = {
 		h: 3,
 		i: NewWidget.id,
@@ -40,11 +30,7 @@ class NewWidget {
 		x: 0,
 		y: 0
 	};
-	legendPosition: null = null;
 	name: string = 'Новый виджет';
-	source: null = null;
-	xAxis: null = null;
-	yAxis: null = null;
 
 	/**
 	 * Устанавливаем начальную позицию по вертикали.

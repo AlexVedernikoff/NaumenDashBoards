@@ -7,7 +7,7 @@ import type {ConnectedProps} from './types';
  * @returns {ConnectedProps}
  */
 export const props = (state: AppState): ConnectedProps => ({
-	charts: state.widgets.charts.map,
+	diagrams: state.widgets.diagrams.map,
 	isEditable: state.dashboard.isEditable,
 	widgets: state.widgets.data.map
 });

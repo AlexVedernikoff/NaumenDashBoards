@@ -1,13 +1,16 @@
 // @flow
 import Chart from 'components/molecules/Chart';
 import type {ContainerRef, Props, State} from './types';
+import type {DiagramData} from 'store/widgets/diagrams/types';
 import type {Element} from 'react';
 import {GRID_PARAMS} from 'utils/layout';
-import {NewWidget} from 'entities';
+import {NewWidget, WIDGET_VARIANTS} from 'utils/widget';
 import React, {Component} from 'react';
 import {RefContainer} from 'utils/refConatiner';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
+import Summary from 'components/molecules/Summary';
+import Table from 'components/molecules/Table';
 import type {Widget} from 'store/widgets/data/types';
 
 const props = {
@@ -58,10 +61,12 @@ export class LayoutGrid extends Component<Props, State> {
 
 			this.setState({width});
 
-			new RefContainer(current);
+			this.createContainer(current);
 			window.addEventListener('resize', this.reloadGrid);
 		}
 	}
+
+	createContainer = (current: HTMLDivElement) => new RefContainer(current);
 
 	reloadGrid = () => {
 		const {current} = this.container;
@@ -70,7 +75,7 @@ export class LayoutGrid extends Component<Props, State> {
 			const width: number = current.clientWidth;
 			this.setState({width});
 		}
-	}
+	};
 
 	renderButton = (id: string) => {
 		const {isEditable, onSelectWidget} = this.props;
@@ -88,11 +93,41 @@ export class LayoutGrid extends Component<Props, State> {
 		window.removeEventListener('resize', this.reloadGrid);
 	}
 
-	renderChart = (widget: Widget | NewWidget) => {
-		const {charts} = this.props;
+	renderLoading = () => <p>Загрузка...</p>;
 
+	renderError = () => <p>Ошибка загрузки данных.</p>;
+
+	resolveDiagram = (widget: Widget, diagram: DiagramData) => {
+		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+
+		const renders = {
+			[SUMMARY]: Summary,
+			[TABLE]: Table
+		};
+
+		const Diagram = renders[widget.type.value] || Chart;
+
+		return <Diagram data={diagram} widget={widget} />;
+	};
+
+	renderDiagram = (widget: Widget) => {
+		const {diagrams} = this.props;
+		const {data, loading} = diagrams[widget.id];
+
+		if (loading) {
+			return this.renderLoading();
+		}
+
+		if (data) {
+			return this.resolveDiagram(widget, data);
+		}
+
+		return this.renderError();
+	};
+
+	renderWidgetByType = (widget: Widget) => {
 		if (!(widget instanceof NewWidget)) {
-			return <Chart widget={widget} data={charts[widget.id]}/>;
+			return this.renderDiagram(widget);
 		}
 	};
 
@@ -102,7 +137,7 @@ export class LayoutGrid extends Component<Props, State> {
 		return (
 			<div key={id} data-grid={layout} className={styles.widget}>
 				{this.renderButton(id)}
-				{this.renderChart(widget)}
+				{this.renderWidgetByType(widget)}
 			</div>
 		);
 	};

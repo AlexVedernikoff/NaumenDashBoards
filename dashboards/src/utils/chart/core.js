@@ -1,7 +1,7 @@
 // @flow
+import type {DiagramData} from 'store/widgets/diagrams/types';
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
-import type {Chart, ChartData} from 'store/widgets/charts/types';
-import {CHART_VARIANTS} from './constansts';
+import {CHART_TYPES, CHART_VARIANTS} from './constants';
 import {DEFAULT_VARIANTS} from 'utils/aggregate/constansts';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import type {Widget} from 'store/widgets/data/types';
@@ -12,15 +12,6 @@ import type {Widget} from 'store/widgets/data/types';
  * @returns {boolean}
  */
 const isObject = (item: any): boolean => item && typeof item === 'object' && !Array.isArray(item);
-
-/**
- * Проверяем есть ли в объекте данных графика, данные нужной оси. Если есть то возвращаем,
- * иначе возвращаем пустой массив
- * @param {?ChartData} data - объект данных графика
- * @param {string} key - ключ необходимой оси
- * @returns {Array<number>}
- */
-const getAxisData = (data: ?ChartData, key: string): Array<number> => data && data[key] ? data[key] : [];
 
 /**
  * Расширяем опции графика, объединяя объекты
@@ -50,28 +41,94 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
 
 /**
  * Дефолтная примесь графиков (bar, line)
- * @param {Chart} chart - данные конкретного графика
+ * @param {boolean} horizontal - данные конкретного графика
  * @returns {ApexOptions}
  */
-const axisChart = (chart: Chart): ApexOptions => {
+const axisChart = (horizontal: boolean = false) => (chart: DiagramData): ApexOptions => {
 	return {
 		tooltip: {
 			x: {
 				show: false
 			}
 		},
+		plotOptions: {
+			bar: {
+				horizontal
+			}
+		},
 		xaxis: {
-			categories: getAxisData(chart.data, 'xAxis')
+			categories: chart.categories
 		}
 	};
 };
 
 /**
- * Дефолтная примесь графиков (pie, donut)
- * @param {Chart} chart - данные конкретного графика
+ * Дефолтная примесь графиков (bar, line)
+ * @param {boolean} horizontal - данные конкретного графика
  * @returns {ApexOptions}
  */
-const circleChart = (chart: Chart): ApexOptions => {
+const stackedAxisChart = (horizontal: boolean = false) => (chart: DiagramData): ApexOptions => {
+	return {
+		tooltip: {
+			x: {
+				show: false
+			},
+			y: {
+				show: false
+			}
+		},
+		chart: {
+			stacked: true,
+			toolbar: {
+				show: false
+			},
+			zoom: {
+				enabled: true
+			}
+		},
+		responsive: [{
+			breakpoint: 480,
+			options: {
+				legend: {
+					offsetX: -10,
+					offsetY: 0,
+					position: 'bottom'
+				}
+			}
+		}],
+		plotOptions: {
+			bar: {
+				horizontal
+			}
+		},
+		xaxis: {
+			categories: chart.categories
+		},
+		legend: {
+			offsetY: 40,
+			position: 'right'
+		},
+		fill: {
+			opacity: 1
+		}
+	};
+};
+
+/**
+ * Дефолтная примесь графиков (combo)
+ * @param {DiagramData} chart - данные конкретного графика
+ * @returns {ApexOptions}
+ */
+const comboChart = (chart: DiagramData) => ({
+		labels: chart.labels
+});
+
+/**
+ * Дефолтная примесь графиков (pie, donut)
+ * @param {DiagramData} chart - данные конкретного графика
+ * @returns {ApexOptions}
+ */
+const circleChart = (chart: DiagramData): ApexOptions => {
 	return {
 		labels: chart.labels
 	};
@@ -83,11 +140,17 @@ const circleChart = (chart: Chart): ApexOptions => {
  * @returns {Function}
  */
 const resolveMixin = (variant: string): Function => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
+
 	const variants = {
-		[CHART_VARIANTS.BAR]: axisChart,
-		[CHART_VARIANTS.LINE]: axisChart,
-		[CHART_VARIANTS.PIE]: circleChart,
-		[CHART_VARIANTS.DONUT]: circleChart
+		[BAR]: axisChart(true),
+		[BAR_STACKED]: stackedAxisChart(true),
+		[COLUMN]: axisChart(false),
+		[COLUMN_STACKED]: stackedAxisChart(false),
+		[COMBO]: comboChart,
+		[DONUT]: circleChart,
+		[LINE]: axisChart(false),
+		[PIE]: circleChart
 	};
 
 	return variants[variant];
@@ -96,10 +159,10 @@ const resolveMixin = (variant: string): Function => {
 /**
  * Генерируем базовый набор опций и объединяем с необходимой примесью
  * @param {Widget} widget - виджет
- * @param {Chart} chart - данные графика виджета
+ * @param {DiagramData} chart - данные графика виджета
  * @returns {ApexOptions}
  */
-const getOptions = (widget: Widget, chart: Chart): ApexOptions => {
+const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 	const options: ApexOptions = {
 		chart: {
 			toolbar: {
@@ -122,7 +185,7 @@ const getOptions = (widget: Widget, chart: Chart): ApexOptions => {
 		};
 	}
 
-	if (widget.aggregate.value === DEFAULT_VARIANTS.PERCENT) {
+	if (widget.aggregate && widget.aggregate.value === DEFAULT_VARIANTS.PERCENT) {
 		options.yaxis = {
 			labels: {
 				formatter: (val) => {
@@ -134,37 +197,26 @@ const getOptions = (widget: Widget, chart: Chart): ApexOptions => {
 		};
 	}
 
-	return extend(options, resolveMixin(widget.chart.value)(chart));
+	return extend(options, resolveMixin(widget.type.value)(chart));
 };
 
 /**
  * Получаем набор данных по оси Y
  * @param {Widget} widget - виджет
- * @param {Chart} chart - данные графика виджета
+ * @param {DiagramData} chart - данные графика виджета
  * @returns {ApexAxisChartSeries}
  */
-const getSeries = (widget: Widget, chart: Chart): ApexAxisChartSeries => {
-	if (typeOfCircleCharts(widget.chart)) {
-		return {
-			data: chart.data
-		};
-	}
-
-	return [
-		{
-			data: getAxisData(chart.data, 'yAxis'),
-			name: widget.yAxis.title
-		}
-	];
+const getSeries = (widget: Widget, chart: DiagramData): ApexAxisChartSeries => {
+	return chart.series;
 };
 
 /**
  * Генерируем опции и данные осей по данным виджета и графика.
  * @param {Widget} widget - виджет
- * @param {Chart} chart - данные графика виджета
+ * @param {DiagramData} chart - данные графика виджета
  * @returns {{series: ApexAxisChartSeries, options: ApexOptions}}
  */
-const getConfig = (widget: Widget, chart: Chart) => {
+const getConfig = (widget: Widget, chart: DiagramData) => {
 	const options = getOptions(widget, chart);
 	const series = getSeries(widget, chart);
 
@@ -172,6 +224,23 @@ const getConfig = (widget: Widget, chart: Chart) => {
 		options,
 		series
 	};
+};
+
+const getChartType = (type: string) => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, DONUT, LINE, PIE} = CHART_VARIANTS;
+	const {bar, donut, line, pie} = CHART_TYPES;
+
+	const types = {
+		[BAR]: bar,
+		[BAR_STACKED]: bar,
+		[COLUMN]: bar,
+		[COLUMN_STACKED]: bar,
+		[DONUT]: donut,
+		[LINE]: line,
+		[PIE]: pie
+	};
+
+	return types[type];
 };
 
 /**
@@ -187,7 +256,7 @@ const typeOfCircleCharts = (chart: SelectValue | null) => {
 };
 
 export {
+	getChartType,
+	getConfig,
 	typeOfCircleCharts
 };
-
-export default getConfig;

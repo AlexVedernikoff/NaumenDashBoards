@@ -3,7 +3,7 @@ import type {AppState} from 'store/types';
 import {cancelForm, createWidget, saveWidget} from 'store/widgets/data/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchAttributes} from 'store/sources/attributes/actions';
-import {NewWidget} from 'entities';
+import {NewWidget} from 'utils/widget';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния

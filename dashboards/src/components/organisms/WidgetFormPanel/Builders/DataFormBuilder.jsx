@@ -6,6 +6,7 @@ import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from './FormBuilder';
 import {getAggregateOptions} from 'utils/aggregate';
 import {getGroupOptions, OVERLAP} from 'utils/group';
+import {getWidgetIcon} from 'icons/widgets';
 import type {OptionType} from 'react-select/src/types';
 import type {Props as TreeProps} from 'components/molecules/TreeSelectInput/types';
 import React from 'react';
@@ -19,7 +20,7 @@ const defaultAttrProps = {
 
 export class DataFormBuilder extends FormBuilder {
 	getLabelWithIcon = (option: SelectValue) => {
-		const Icon = option.icon;
+		const Icon = getWidgetIcon(option.value);
 
 		return (
 			<div className={styles.labelWithIcon}>
@@ -160,7 +161,7 @@ export class DataFormBuilder extends FormBuilder {
 			value: values[name]
 		};
 
-		this.renderAttrSelect(indicator);
+		return this.renderAttrSelect(indicator);
 	};
 
 	renderGroupInput = (name: string = FIELDS.group, xAxisName: string = FIELDS.xAxis, mixin: ?InputProps) => {

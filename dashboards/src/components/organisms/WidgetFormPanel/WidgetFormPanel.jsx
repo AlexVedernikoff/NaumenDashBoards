@@ -1,10 +1,10 @@
 // @flow
 import Footer from './Footer';
-import ParamsTab from './Tabs/ParamsTab';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component, createContext} from 'react';
 import styles from './styles.less';
-import {Tabs} from './Tabs';
+import Tabs from './Tabs';
+import {Title} from 'components/atoms';
 
 export const FormContext = createContext({});
 
@@ -19,22 +19,13 @@ export class WidgetFormPanel extends Component<Props> {
 		);
 	};
 
-	renderMain = () => <Tabs />;
-
-	renderFooter = () => (
-		<div className={styles.footer}>
-			{this.renderError()}
-			{this.renderControlButtons()}
-		</div>
-	);
-
 	renderForm = () => {
 		const {handleSubmit} = this.props;
 
 		return (
 			<form onSubmit={handleSubmit} className={styles.form}>
 				{this.renderHeader()}
-				<ParamsTab />
+				<Tabs />
 				<Footer />
 			</form>
 		);
@@ -43,7 +34,7 @@ export class WidgetFormPanel extends Component<Props> {
 	render () {
 		return (
 			<FormContext.Provider value={this.props}>
-					{this.renderForm()}
+				{this.renderForm()}
 			</FormContext.Provider>
 		);
 	}
