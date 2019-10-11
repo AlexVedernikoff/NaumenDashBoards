@@ -33,10 +33,9 @@ export class Footer extends Component<WrappedProps> {
 		);
 	};
 
-	renderControlButtons = () => {
-		const {cancelForm, saveLoading} = this.props;
-
-		const buttons = [
+	buttonList = (): Array<ButtonProps> => {
+		const {cancelForm, userMaster, saveLoading} = this.props;
+		const buttonsDefault = [
 			{
 				block: true,
 				disabled: saveLoading,
@@ -57,9 +56,13 @@ export class Footer extends Component<WrappedProps> {
 			}
 		];
 
+		return !userMaster ? [...buttonsDefault] : [...buttonsDefault].splice(1, buttonsDefault.length);
+	};
+
+	renderControlButtons = () => {
 		return (
 			<Fragment>
-				{buttons.map(this.renderButton)}
+				{this.buttonList().map(this.renderButton)}
 			</Fragment>
 		);
 	};
