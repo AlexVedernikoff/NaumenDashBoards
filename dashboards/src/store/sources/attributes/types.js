@@ -3,6 +3,7 @@ import {ATTRIBUTES_EVENTS} from './constants';
 
 export type Attribute = {
 	code: string,
+	metaClassFqn: string,
 	property: string,
 	sourceName: string,
 	title: string,

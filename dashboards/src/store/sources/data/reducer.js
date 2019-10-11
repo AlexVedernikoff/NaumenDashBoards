@@ -12,11 +12,6 @@ const reducer = (state: DataSourcesState = initialDataSourcesState, action: Data
 				error: false,
 				loading: true
 			};
-		case DATA_SOURCES_EVENTS.REQUEST_USER_ROLE:
-			return {
-				...state,
-				master: action.payload
-			};
 		case DATA_SOURCES_EVENTS.RECEIVE_DATA_SOURCES:
 			return setDataSources(state, action);
 		case DATA_SOURCES_EVENTS.RECORD_DATA_SOURCES_ERROR:

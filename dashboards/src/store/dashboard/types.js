@@ -12,13 +12,13 @@ export type ReceiveDashboard = {
 	payload: null
 };
 
-type RecordDashboardError = {
-	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR,
-	payload: null
+export type ReceiveRoleMaster = {
+	type: typeof DASHBOARD_EVENTS.RECEIVE_ROLE_MASTER,
+	payload: boolean
 };
 
-type ResetEditable = {
-	type: typeof DASHBOARD_EVENTS.RESET_EDITABLE,
+type RecordDashboardError = {
+	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR,
 	payload: null
 };
 
@@ -29,7 +29,7 @@ type SetContext = {
 
 type SetEditable = {
 	type: typeof DASHBOARD_EVENTS.SET_EDITABLE,
-	payload: null
+	payload: boolean
 };
 
 type UnknownDashboardAction = {
@@ -40,8 +40,8 @@ type UnknownDashboardAction = {
 export type DashboardAction =
 	| RequestDashboard
 	| ReceiveDashboard
+	| ReceiveRoleMaster
 	| RecordDashboardError
-	| ResetEditable
 	| SetContext
 	| SetEditable
 	| UnknownDashboardAction
@@ -49,8 +49,9 @@ export type DashboardAction =
 
 export type DashboardState = {
 	context: Context | Object,
+	editable: boolean,
 	error: boolean,
-	isEditable: boolean,
 	loading: boolean,
+	master: boolean,
 	name: string
 };

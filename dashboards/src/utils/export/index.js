@@ -1,6 +1,8 @@
 // @flow
 import {createSnapshot} from './core';
+import {FILE_VARIANTS} from './constants';
 
 export {
-	createSnapshot
+	createSnapshot,
+	FILE_VARIANTS
 };

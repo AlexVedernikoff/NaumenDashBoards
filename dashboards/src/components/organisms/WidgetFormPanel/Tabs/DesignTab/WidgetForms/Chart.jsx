@@ -113,7 +113,7 @@ export class Chart extends FormBuilder {
 		const legendPositionProps: SelectProps = {
 			name: legendPosition,
 			options: OPTIONS.LEGEND_POSITIONS,
-			placeholder: 'Позиция легенды',
+			placeholder: 'Расположение легенды',
 			value: values[legendPosition]
 		};
 

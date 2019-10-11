@@ -1,10 +1,10 @@
 // @flow
-import {buildUrl, client, getContext} from 'utils/api';
+import {buildUrl, client, getContext, getEditableParameter} from 'utils/api';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {getDataSources} from 'store/sources/data/actions';
 import {getWidgets, resetWidget} from 'store/widgets/data/actions';
 import {push} from 'connected-react-router';
-import {getDataSources, getUserRole} from 'store/sources/data/actions';
 
 /**
  * Получаем данные, необходимые для работы дашборда
@@ -15,11 +15,14 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 	try {
 		const context = getContext();
+		const editable = await getEditableParameter();
+
 		dispatch(setContext(context));
+		dispatch(setEditable(editable));
 
 		await Promise.all([
 			dispatch(getDataSources()),
-			dispatch(getUserRole()),
+			dispatch(getRoleMaster()),
 			dispatch(getWidgets(true))
 		]);
 
@@ -29,12 +32,20 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 	}
 };
 
+const getRoleMaster = (): ThunkAction => async (dispatch: Dispatch) => {
+	try {
+		const {data} = await client.post(buildUrl('DevDashboardSettings', 'getAvailabilityGroupMasterDashboard'));
+		dispatch(receiveRoleMaster(data));
+	} catch (e) {
+		dispatch(recordDashboardError());
+	}
+};
+
 /**
  * Отключаем статичность виджетов и переходим на страницу редактирования
  * @returns {ThunkAction}
  */
 const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(setEditable());
 	dispatch(push('/edit'));
 };
 
@@ -51,7 +62,6 @@ const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: G
 		const context = getState().dashboard.context;
 		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
 		await client.post(buildUrl('DevDashboardSettings', 'resetPersonalDashboard', params));
-		dispatch(recordDashboardError());
 	} catch (e) {
 		dispatch(recordDashboardError());
 	}
@@ -62,13 +72,17 @@ const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: G
  * @returns {ThunkAction}
  */
 const seeDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(resetEditable());
 	dispatch(resetWidget());
 	dispatch(push('/'));
 };
 
 const requestDashboard = () => ({
 	type: DASHBOARD_EVENTS.REQUEST_DASHBOARD
+});
+
+const receiveRoleMaster = payload => ({
+	type: DASHBOARD_EVENTS.RECEIVE_ROLE_MASTER,
+	payload
 });
 
 const receiveDashboard = () => ({
@@ -79,17 +93,14 @@ const recordDashboardError = () => ({
 	type: DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
 });
 
-const resetEditable = () => ({
-	type: DASHBOARD_EVENTS.RESET_EDITABLE
-});
-
 const setContext = payload => ({
 	type: DASHBOARD_EVENTS.SET_CONTEXT,
 	payload
 });
 
-const setEditable = () => ({
-	type: DASHBOARD_EVENTS.SET_EDITABLE
+const setEditable = payload => ({
+	type: DASHBOARD_EVENTS.SET_EDITABLE,
+	payload
 });
 
 export {

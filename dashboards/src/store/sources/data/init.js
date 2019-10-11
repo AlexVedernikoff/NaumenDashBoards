@@ -5,8 +5,7 @@ import type {DataSourcesAction, DataSourcesState} from './types';
 export const initialDataSourcesState: DataSourcesState = {
 	error: false,
 	loading: false,
-	map: {},
-	master: true
+	map: {}
 };
 
 export const defaultDataSourcesAction: DataSourcesAction = {

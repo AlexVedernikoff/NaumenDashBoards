@@ -116,10 +116,6 @@ const getSummaryData = (widget) => {
 
 const getTableData = (widget) => {
 	const labels = getLabels('значение');
-	const columns = labels.map(label => ({
-		Header: label,
-		accessor: label
-	}));
 	const data = [];
 
 	for (let i = 0; i < getRandomArbitrary(1, 10); i++) {
@@ -130,6 +126,32 @@ const getTableData = (widget) => {
 
 		data.push(row);
 	}
+	const totalColumn = {};
+
+	data.forEach(row => {
+		Object.keys(row).forEach(key => {
+			[key] in totalColumn ? totalColumn[key] += row[key] : totalColumn[key] = row[key];
+		});
+	});
+
+	data.forEach(row => {
+		let total = 0;
+		Object.keys(row).forEach(key => {
+			total += row[key];
+		});
+		row.total = total;
+	});
+
+	const columns = labels.map(label => ({
+		Header: label,
+		accessor: label,
+		Footer: totalColumn[label].toString()
+	}));
+
+	columns.push({
+		Header: 'Итого',
+		accessor: 'total'
+	});
 
 	return {
 		columns,

@@ -3,6 +3,7 @@
 export type Module =
 	| 'dashboards'
 	| 'dashboardDataSet'
+	| 'dashboardDrildown'
 	| 'dashboardSettings'
 	| 'dashboardTestGetData'
 	| 'DashboardsSettings'
@@ -18,6 +19,7 @@ export type Method =
 	| 'getAvailabilityGroupMasterDashboard'
 	| 'getDataForDiagram'
 	| 'getDataSources'
+	| 'getLink'
 	| 'getSettings'
 	| 'editDefaultWidget'
 	| 'editPersonalWidgetSettings'

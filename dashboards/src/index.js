@@ -11,10 +11,9 @@ import Startup from 'containers/Startup/Startup';
 
 const root = document.getElementById('root');
 export const history = createMemoryHistory();
+export const store = configureStore(history);
 
 if (root) {
-	const store = configureStore(history);
-
 	const renderApp = () => (
 		<Provider store={store}>
 			<Startup>
@@ -26,11 +25,4 @@ if (root) {
 	);
 
 	render(renderApp(), root);
-
-	if (module.hot) {
-		module.hot.accept('components/App', () => {
-			require('components/App');
-			render(renderApp(), root);
-		});
-	}
 }

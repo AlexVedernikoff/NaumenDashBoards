@@ -1,8 +1,9 @@
 // @flow
+import type {Location} from 'react-router';
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
-	isEditable: boolean,
+	editable: boolean,
 	name: string
 };
 
@@ -13,4 +14,6 @@ export type ConnectedFunctions = {
 	seeDashboard: () => ThunkAction
 };
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props = {
+	location: Location
+} & ConnectedProps & ConnectedFunctions;

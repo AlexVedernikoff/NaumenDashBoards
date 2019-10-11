@@ -1,84 +1,54 @@
 // @flow
-import {FILE_VARIANTS} from 'components/atoms/DropDownFiles/constansts.js';
+import {FILE_VARIANTS} from './constants';
 import html2canvas from 'html2canvas';
 import JsPDF from 'jspdf';
 import moment from 'moment';
-import {RefContainer} from 'utils/refConatiner';
- 
+
 window.html2canvas = html2canvas;
 
-export const createSnapshot = async (name: string, docStr: string) => {
-	const A4 = [1240, 1754]; // ppi: [1240, 1754], [595, 842], [794, 1123]
-	const clone = new RefContainer().getRef();
-	const container = clone.cloneNode(true);
-	const fileName = `${name}_${moment().format('DD-MM-YY')}`;
+const save = (uri: string, filename: string) => {
+	let {body} = document;
+
+	if (body) {
+		const link = document.createElement('a');
+		link.href = uri;
+		link.download = filename;
+
+		body.appendChild(link);
+		link.click();
+		body.removeChild(link);
+	}
+};
+
+const createImage = async (container: HTMLDivElement) => {
+	const height = container.clientHeight < window.innerHeight ? window.innerHeight : container.clientHeight;
 	const options = {
-		format: A4,
-		orientation: 'l',
-		unit: 'px'
+		height,
+		backgroundColor: '#EFF3F8'
 	};
-	const parrent = container.childNodes[0];
-	const parrentChild = [...parrent.childNodes];
 
-	// сброс стилей
-	parrent.style.background = '#EFF3F8';
-	parrent.style.display = 'flex';
-	parrent.style.flexWrap = 'wrap';
+	return (await html2canvas(container, options)).toDataURL('image/png');
+};
 
-	// сброс стилей
-	parrentChild.forEach(child => {
-		child.style.background = 'white !important';
-		child.style.boxShadow = null;
-		child.style.position = 'relative';
-		child.style.transform = null;
-	});
+const createPdf = (image: string, fileName: string) => {
+	const pdf = new JsPDF({orientation: 'l'});
+	const width = pdf.internal.pageSize.getWidth();
+	const height = pdf.internal.pageSize.getHeight();
 
-	if (container && docStr === FILE_VARIANTS.PDF) {
-		const pdf = new JsPDF(options);
-		let heigthPage: number = 0;
-		let maxHeight: number = 0;
-		let positionX: number = 0;
-		let positionY: number = 0;
+	pdf.addImage(image, 'PNG', 0, 0, width, height);
+	pdf.save(fileName);
+};
 
-		for await (const img of parrentChild) {
-			window.document.body.append(img);
+export const createSnapshot = async (container: HTMLDivElement, name: string, variant: string) => {
+	const fileName = `${name}_${moment().format('DD-MM-YY')}`;
+	const {PDF, PNG} = FILE_VARIANTS;
+	const image = await createImage(container);
 
-			const imgItem = (await html2canvas(img)).toDataURL('image/jpg');
-			const x = parseInt(img.style.width) / Math.sqrt(Math.PI);
-			const y = parseInt(img.style.height) / Math.sqrt(Math.PI);
-			maxHeight = maxHeight > y ? maxHeight : y;
+	if (variant === PNG) {
+		return save(image, fileName);
+	}
 
-			if (positionX + parseInt(img.style.width) >= A4[0]) {
-				positionX = 0;
-				positionY += maxHeight;
-				maxHeight = 0;
-			}
-
-			pdf.addImage(imgItem, 'JPG', positionX, positionY);
-			positionX += x;
-			heigthPage += y;
-
-			if (heigthPage >= A4[1]) {
-				pdf.addPage();
-				heigthPage = 0;
-			}
-
-			window.document.body.removeChild(img);
-		}
-
-		pdf.save(fileName);
-	} else if (container && docStr === FILE_VARIANTS.PNG) {
-		window.document.body.appendChild(container);
-
-		const img = (await html2canvas(container)).toDataURL('image/png');
-		const element = document.createElement('a');
-
-		element.setAttribute('href', img);
-		element.setAttribute('download', `${fileName}.png`);
-		element.style.display = 'none';
-		window.document.body.appendChild(element);
-		element.click();
-		window.document.body.removeChild(element);
-		window.document.body.removeChild(container);
+	if (variant === PDF) {
+		createPdf(image, fileName);
 	}
 };

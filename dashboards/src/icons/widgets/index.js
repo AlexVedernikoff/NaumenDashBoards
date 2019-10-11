@@ -1,7 +1,7 @@
 // @flow
 import Bar from './bar.svg';
 import BarStacked from './bar_stacked.svg';
-import {CHART_VARIANTS} from 'utils/chart';
+import {CHART_VARIANTS} from 'utils/chart/constants';
 import Column from './column.svg';
 import ColumnStacked from './column_stacked.svg';
 import Combo from './combo.svg';

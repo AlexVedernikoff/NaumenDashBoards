@@ -1,6 +1,7 @@
 // @flow
 import {Button} from 'components/atoms';
 import type {ButtonProps, WrappedProps} from './types';
+import type {Node} from 'react';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import withForm from './withForm';
@@ -33,15 +34,24 @@ export class Footer extends Component<WrappedProps> {
 		);
 	};
 
-	getButtons = (): Array<ButtonProps> => {
-		const {cancelForm, master, updating} = this.props;
-		const buttons = [
-			{
+	renderDefaultSaveButton = () => {
+		const {master} = this.props;
+
+		if (master) {
+			const props = {
 				block: true,
-				disabled: updating,
+				disabled: this.props.updating,
 				onClick: this.handleSaveAsDefault,
 				text: 'Сохранить по умолчанию'
-			},
+			};
+
+			return this.renderButton(props);
+		}
+	};
+
+	renderButtons = (): Array<Node> => {
+		const {cancelForm, updating} = this.props;
+		const buttons = [
 			{
 				block: true,
 				disabled: updating,
@@ -55,18 +65,16 @@ export class Footer extends Component<WrappedProps> {
 				variant: 'bare'
 			}
 		];
-		const start = master ? 0 : 1;
 
-		return buttons.slice(start);
+		return buttons.map(this.renderButton);
 	};
 
-	renderControlButtons = () => {
-		return (
-			<Fragment>
-				{this.getButtons().map(this.renderButton)}
-			</Fragment>
-		);
-	};
+	renderControlButtons = () => (
+		<Fragment>
+			{this.renderDefaultSaveButton()}
+			{this.renderButtons()}
+		</Fragment>
+	);
 
 	renderError = () => {
 		const {saveError} = this.props;

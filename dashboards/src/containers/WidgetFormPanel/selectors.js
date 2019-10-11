@@ -15,11 +15,11 @@ export const props = (state: AppState): ConnectedProps => {
 
 	return {
 		attributes: state.sources.attributes.map,
-		master: state.sources.data.master,
+		master: state.dashboard.master,
 		saveError: data.saveError,
-		updating: data.updating,
 		selectedWidget: selectedWidget === NewWidget.id && newWidget ? newWidget : data.map[selectedWidget],
-		sources: state.sources.data.map
+		sources: state.sources.data.map,
+		updating: data.updating
 	};
 };
 

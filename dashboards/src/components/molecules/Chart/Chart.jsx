@@ -24,7 +24,7 @@ export class Chart extends Component<Props, State> {
 		return null;
 	}
 
-	renderContent () {
+	renderChart = () => {
 		const {options, series} = this.state;
 		const {widget} = this.props;
 		const type = getChartType(widget.type.value);
@@ -38,10 +38,10 @@ export class Chart extends Component<Props, State> {
 				type={type}
 			/>
 		);
-	}
+	};
 
 	render () {
-		return this.renderContent();
+		return this.renderChart();
 	}
 }
 

@@ -8,8 +8,6 @@ import {editLayout, selectWidget} from 'store/widgets/data/actions';
  * @returns {ConnectedProps}
  */
 export const props = (state: AppState): ConnectedProps => ({
-	diagrams: state.widgets.diagrams.map,
-	isEditable: state.dashboard.isEditable,
 	newWidget: state.widgets.data.newWidget,
 	selectedWidget: state.widgets.data.selectedWidget,
 	widgets: state.widgets.data.map

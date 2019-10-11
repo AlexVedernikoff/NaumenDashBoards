@@ -1,67 +1,73 @@
 // @flow
 import {Button, DropDownFiles} from 'components/atoms';
-import {createSnapshot} from 'utils/export';
-import {FILE_VARIANTS} from 'components/atoms/DropDownFiles/constansts';
-import IconRefrashe from 'icons/header/refresh.svg';
-import type {Node} from 'react';
+import CloseIcon from 'icons/header/close.svg';
+import {createSnapshot, FILE_VARIANTS} from 'utils/export';
+import {gridRef} from 'components/molecules/LayoutGrid';
+import IconRefresh from 'icons/header/refresh.svg';
+import PrintIcon from 'icons/header/print.svg';
 import React, {Component} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
 import styles from './styles.less';
-import CloseIcon from 'icons/header/close.svg';
-import PrintIcon from 'icons/header/print.svg';
+
+const FileList = [
+	{text: FILE_VARIANTS.PDF},
+	{text: FILE_VARIANTS.PNG}
+];
 
 export class DashboardHeader extends Component<Props> {
 	createDocument = (docStr: string) => {
+		const {current} = gridRef;
 		const {name} = this.props;
-		createSnapshot(name, docStr);
+
+		if (current) {
+			createSnapshot(current, name, docStr);
+		}
 	};
 
-	resetWidgets = (): void => {
+	resetWidgets = async () => {
 		const {fetchDashboard, resetDashboard} = this.props;
 
-		resetDashboard();
+		await resetDashboard();
 		fetchDashboard();
 	};
 
-	getButton = (): Node => {
-		return (
-			<Button type="button" onClick={this.resetWidgets} >
-				<div className={styles.buttonIcon}>
-					<CloseIcon />
-					Сбросить настройки
-				</div>
-			</Button>
-		);
+	renderResetButton = () => {
+		const {editable} = this.props;
+
+		if (editable) {
+			return (
+				<Button type="button" onClick={this.resetWidgets} >
+					<div className={styles.buttonIcon}>
+						<CloseIcon />
+						Сбросить настройки
+					</div>
+				</Button>
+			);
+		}
 	};
 
-	renderResetDashBoard = () => {
-		const {isEditable} = this.props;
-
-		return isEditable ? this.getButton() : null;
-	};
-
-	renderPrintButton = () => {
-		return <Button type="button" variant="icon-info"><PrintIcon /></Button>;
-	};
+	renderPrintButton = () => <Button type="button" variant="icon-info"><PrintIcon /></Button>;
 
 	renderModeButton = () => {
-		const {editDashboard, isEditable, seeDashboard} = this.props;
+		const {editable, editDashboard, seeDashboard} = this.props;
 
-		if (isEditable) {
+		if (editable) {
+			if (location.pathname === '/') {
+				return <Button type="button" onClick={editDashboard}>Редактировать</Button>;
+			}
+
 			return <Button type="button" onClick={seeDashboard}>Просмотреть</Button>;
 		}
-
-		return <Button type="button" onClick={editDashboard} >Редактировать</Button>;
 	};
 
-	renderButtonRefresh = () => {
+	renderRefreshButton = () => {
 		const {fetchDashboard} = this.props;
 
-		return <IconRefrashe onClick={fetchDashboard} />;
+		return <IconRefresh onClick={fetchDashboard} />;
 	};
 
 	renderDropDown = () => {
-		return <DropDownFiles icon list={[{text: FILE_VARIANTS.PDF}, {text: FILE_VARIANTS.PNG}]} createDoc={this.createDocument} />;
+		return <DropDownFiles icon list={FileList} createDoc={this.createDocument} />;
 	};
 
 	render () {
@@ -75,10 +81,10 @@ export class DashboardHeader extends Component<Props> {
 						{this.renderDropDown()}
 					</li>
 					<li className={styles.navItem}>
-						{this.renderButtonRefresh()}
+						{this.renderRefreshButton()}
 					</li>
 					<li className={styles.navItem}>
-						{this.renderResetDashBoard()}
+						{this.renderResetButton()}
 					</li>
 					<li className={styles.navItem}>
 						{this.renderModeButton()}

@@ -23,10 +23,10 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				error: false,
 				loading: true
 			};
-		case DASHBOARD_EVENTS.RESET_EDITABLE:
+		case DASHBOARD_EVENTS.RECEIVE_ROLE_MASTER:
 			return {
 				...state,
-				isEditable: false
+				master: action.payload
 			};
 		case DASHBOARD_EVENTS.SET_CONTEXT:
 			return {
@@ -36,7 +36,7 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 		case DASHBOARD_EVENTS.SET_EDITABLE:
 			return {
 				...state,
-				isEditable: true
+				editable: action.payload
 			};
 		default:
 			return state;

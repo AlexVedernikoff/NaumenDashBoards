@@ -7,9 +7,10 @@ export const initialDashboardState: DashboardState = {
 		contentCode: '',
 		subjectUuid: ''
 	},
+	editable: false,
 	error: false,
-	isEditable: false,
 	loading: false,
+	master: false,
 	name: 'Новый дашборд'
 };
 

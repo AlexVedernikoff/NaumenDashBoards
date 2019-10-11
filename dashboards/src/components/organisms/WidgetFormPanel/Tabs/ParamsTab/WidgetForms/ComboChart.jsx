@@ -207,7 +207,7 @@ export class ComboChart extends DataFormBuilder {
 
 				if (xAxisOptions.length > 0 && mainXAxis) {
 					xAxisOptions = xAxisOptions.filter(a => VALUES.ATTR_TYPES.includes(mainXAxis.type)
-						? a.property === mainXAxis.property
+						? a.metaClassFqn === mainXAxis.metaClassFqn
 						: a.type === mainXAxis.type);
 				}
 

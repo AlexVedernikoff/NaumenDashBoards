@@ -1,5 +1,4 @@
 // @flow
-import type {DiagramMap} from 'store/widgets/diagrams/types';
 import type {Layout} from 'utils/layout/types';
 import type {NewWidget} from 'entities';
 import type {ThunkAction} from 'store/types';
@@ -11,8 +10,6 @@ export type ConnectedFunctions = {
 };
 
 export type ConnectedProps = {
-	diagrams: DiagramMap,
-	isEditable: boolean,
 	newWidget: NewWidget | null,
 	selectedWidget: string,
 	widgets: WidgetMap

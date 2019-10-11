@@ -1,3 +1,8 @@
 // @flow
-import LayoutGrid from './LayoutGrid';
+import LayoutGrid, {gridRef} from './LayoutGrid';
+
+export {
+	gridRef
+};
+
 export default LayoutGrid;

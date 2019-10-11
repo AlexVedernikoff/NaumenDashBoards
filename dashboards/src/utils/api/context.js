@@ -12,7 +12,7 @@ const initApi = () => top.injectJsApi(top, window);
 const getContext = () => {
 	if (process.env.NODE_ENV === 'development') {
 		return {
-			contentCode: 'Dashbord12',
+			contentCode: 'Dashbord1',
 			subjectUuid: 'root$101'
 		};
 	}
@@ -29,6 +29,19 @@ const getContext = () => {
 	};
 };
 
+const getEditableParameter = async () => {
+	if (process.env.NODE_ENV === 'development') {
+		return true;
+	}
+
+	if (!('jsApi' in window)) {
+		initApi();
+	}
+
+	return (await window.jsApi.getCurrentContentParameters()).editable;
+};
+
 export {
-	getContext
+	getContext,
+	getEditableParameter
 };

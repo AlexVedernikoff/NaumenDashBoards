@@ -1,11 +1,12 @@
 // @flow
-import type {DiagramData} from 'store/widgets/diagrams/types';
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {CHART_TYPES, CHART_VARIANTS} from './constants';
 import {DEFAULT_VARIANTS} from 'utils/aggregate/constansts';
+import type {DiagramData} from 'store/widgets/diagrams/types';
+import {goOverBySelection} from './methods';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import type {Widget} from 'store/widgets/data/types';
-import VALUES from 'components/organisms/WidgetFormPanel/constants/values';
+import {VALUES} from 'components/organisms/WidgetFormPanel';
 
 /**
  * Проверяем является ли переменная объектом
@@ -53,10 +54,20 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 		chart: {
 			stacked
 		},
+		markers: {
+			hover: {
+				size: 8
+			},
+			size: 5
+		},
 		plotOptions: {
 			bar: {
 				horizontal
 			}
+		},
+		tooltip: {
+			intersect: true,
+			shared: false
 		},
 		xaxis: {
 			categories: chart.categories
@@ -113,7 +124,21 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
  * @returns {ApexOptions}
  */
 const comboChart = (widget: Widget, chart: DiagramData) => ({
-		labels: chart.labels
+	labels: chart.labels,
+	markers: {
+		hover: {
+			size: 8
+		},
+		size: 5
+	},
+	tooltip: {
+		intersect: true,
+		shared: false
+	},
+	yaxis: {
+		max: undefined,
+		min: 0
+	}
 });
 
 /**
@@ -161,6 +186,12 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 
 	const options: ApexOptions = {
 		chart: {
+			animations: {
+				enabled: false
+			},
+			events: {
+				dataPointSelection: goOverBySelection(widget, chart)
+			},
 			toolbar: {
 				show: false
 			}
@@ -177,6 +208,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 
 	if (showName) {
 		options.title = {
+			offsetY: 25,
 			text: diagramName
 		};
 	}

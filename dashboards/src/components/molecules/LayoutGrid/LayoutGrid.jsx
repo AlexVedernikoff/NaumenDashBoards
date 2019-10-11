@@ -1,12 +1,11 @@
 // @flow
 import Chart from 'components/molecules/Chart';
-import type {ContainerRef, Props, State} from './types';
 import type {DiagramData} from 'store/widgets/diagrams/types';
 import type {Element} from 'react';
 import {GRID_PARAMS} from 'utils/layout';
 import {NewWidget, WIDGET_VARIANTS} from 'utils/widget';
-import React, {Component} from 'react';
-import {RefContainer} from 'utils/refConatiner';
+import type {Props, State} from './types';
+import React, {Component, createRef, Fragment} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
 import Summary from 'components/molecules/Summary';
@@ -36,16 +35,16 @@ const props = {
 	verticalCompact: undefined
 };
 
+export const gridRef = createRef();
+
 export class LayoutGrid extends Component<Props, State> {
 	static defaultProps = {
-		isEditable: false
+		editable: false
 	};
 
 	state = {
 		width: null
 	};
-
-	container: ContainerRef = React.createRef();
 
 	/**
 	 * Для использования адаптивности библиотеки "react-grid-layout",
@@ -54,31 +53,22 @@ export class LayoutGrid extends Component<Props, State> {
 	 * и пробросить ее в дочерний компонент, тем самым задав сетке виджетов оптимальную ширину.
 	 */
 	componentDidMount () {
-		const {current} = this.container;
+		const {current} = gridRef;
 
 		if (current) {
 			const width: number = current.clientWidth;
 
 			this.setState({width});
-
-			this.createContainer(current);
 			window.addEventListener('resize', this.reloadGrid);
 		}
 	}
 
-	componentDidUpdate () {
-		const {current} = this.container;
-
-		if (current) {
-			this.updateContainer(current);
-		}
+	componentWillUnmount () {
+		window.removeEventListener('resize', this.reloadGrid);
 	}
 
-	createContainer = (current: HTMLDivElement) => new RefContainer(current);
-	updateContainer = (current: HTMLDivElement) => new RefContainer().updatetRef(current);
-
 	reloadGrid = () => {
-		const {current} = this.container;
+		const {current} = gridRef;
 
 		if (current) {
 			const width: number = current.clientWidth;
@@ -86,21 +76,30 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	renderButton = (id: string) => {
-		const {isEditable, onSelectWidget} = this.props;
+	handleClick = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
+		const {goOver} = this.props;
+		const id = e.currentTarget.dataset.id;
 
-		if (isEditable) {
+		goOver(id);
+	};
+
+	renderGoOverButton = (id: string) => (
+		<button className={styles.goOverButton} data-id={id} type="button" onClick={this.handleClick}>
+			Перейти
+		</button>
+	);
+
+	renderEditButton = (id: string) => {
+		const {editable, onSelectWidget} = this.props;
+
+		if (editable) {
 			return (
-				<button className={styles.edit} type="button" data-id={id} onClick={onSelectWidget}>
+				<button className={styles.editButton} type="button" data-id={id} onClick={onSelectWidget}>
 					Редактировать
 				</button>
 			);
 		}
 	};
-
-	componentWillUnmount () {
-		window.removeEventListener('resize', this.reloadGrid);
-	}
 
 	renderLoading = () => <p>Загрузка...</p>;
 
@@ -136,7 +135,12 @@ export class LayoutGrid extends Component<Props, State> {
 
 	renderWidgetByType = (widget: Widget) => {
 		if (!(widget instanceof NewWidget)) {
-			return this.renderDiagram(widget);
+			return (
+				<Fragment>
+					{this.renderGoOverButton(widget.id)}
+					{this.renderDiagram(widget)}
+				</Fragment>
+			);
 		}
 	};
 
@@ -145,7 +149,7 @@ export class LayoutGrid extends Component<Props, State> {
 
 		return (
 			<div key={id} data-grid={layout} className={styles.widget}>
-				{this.renderButton(id)}
+				{this.renderEditButton(id)}
 				{this.renderWidgetByType(widget)}
 			</div>
 		);
@@ -181,7 +185,7 @@ export class LayoutGrid extends Component<Props, State> {
 
 	render () {
 		return (
-			<div ref={this.container}>
+			<div ref={gridRef}>
 				{this.renderGrid()}
 			</div>
 		);

@@ -65,10 +65,11 @@ const editLayout = (payload: Layout): ThunkAction => async (dispatch: Dispatch):
 /**
  * Сохраняем новое положение виджетов
  * @param {Context} context - контекст ВП;
+ * @param {boolean} editable - является ли дашборд редактируемым
  * @param {boolean} asDefault - указывает как сохранить виджет;
  * @returns {ThunkAction}
  */
-const saveNewLayout = (context: Context, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+const saveNewLayout = (context: Context, editable: boolean, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	dispatch(requestLayoutSave());
 
 	try {
@@ -83,6 +84,7 @@ const saveNewLayout = (context: Context, asDefault: boolean): ThunkAction => asy
 		await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
+			// TODO вернуть editable,
 			layoutsSettings
 		});
 	} catch (e) {
@@ -108,16 +110,17 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 	dispatch(requestWidgetSave());
 
 	try {
-		const context = getState().dashboard.context;
+		const {context, editable} = getState().dashboard;
 		const method = asDefault ? 'editDefaultWidget' : 'editPersonalWidgetSettings';
 		const data = {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
+			// TODO вернуть editable,
 			widgetKey: formData.id,
 			widgetSettings: formData
 		};
 		await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), data);
-		await dispatch(saveNewLayout(context, asDefault));
+		await dispatch(saveNewLayout(context, editable, asDefault));
 		dispatch(updateWidget(formData));
 		dispatch(fetchDiagramData(formData));
 	} catch (e) {
@@ -135,15 +138,16 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 	dispatch(requestWidgetSave());
 
 	try {
-		const context = getState().dashboard.context;
+		const {context, editable} = getState().dashboard;
 		const method = asDefault ? 'createDefaultWidgetSettings' : 'createPersonalWidgetSettings';
 		const data = {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
+			// TODO вернуть editable,
 			widgetSettings: formData
 		};
 		const {data: id} = await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), data);
-		await dispatch(saveNewLayout(context, asDefault));
+		await dispatch(saveNewLayout(context, editable, asDefault));
 
 		formData.layout.i = id;
 		const widget = {...formData, id};

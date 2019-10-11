@@ -10,6 +10,7 @@ module.exports = {
 		'images': resolve(src, 'images'),
 		'components': resolve(src, 'components'),
 		'containers': resolve(src, 'containers'),
+		'src': resolve(src),
 		'store': resolve(src, 'store'),
 		'styles': resolve(src, 'styles'),
 		'utils': resolve(src, 'utils')

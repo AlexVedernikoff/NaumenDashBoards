@@ -34,6 +34,13 @@ export class Table extends Component<Props, State> {
 				className={styles.table}
 				columns={columns}
 				data={data}
+				defaultPageSize={10}
+				loadingText="Загрузка данных..."
+				nextText="Следующая"
+				ofText="из"
+				pageText="Страница"
+				previousText="Предыдущая"
+				rowsText="строк"
 			/>
 		);
 	};

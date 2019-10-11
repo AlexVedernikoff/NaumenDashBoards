@@ -1,7 +1,7 @@
 // @flow
 import DashboardRightPanel from 'components/organisms/DashboardRightPanel';
 import type {Layout} from 'utils/layout/types';
-import LayoutGrid from 'components/molecules/LayoutGrid';
+import LayoutGrid from 'containers/LayoutGrid';
 import type {Props} from 'containers/DashboardEditContent/types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -32,14 +32,12 @@ export class DashboardEditContent extends Component<Props> {
 	};
 
 	renderGrid = () => {
-		const {diagrams, isEditable} = this.props;
 		const widgets = this.getWidgets();
 
 		return (
 			<div className={styles.container}>
 				<LayoutGrid
-					diagrams={diagrams}
-					isEditable={isEditable}
+					editable={true}
 					onSelectWidget={this.onSelectWidget}
 					onLayoutChange={this.onLayoutChange}
 					widgets={widgets}
