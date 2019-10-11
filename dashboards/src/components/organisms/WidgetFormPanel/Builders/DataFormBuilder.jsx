@@ -1,6 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import type {AttrSelectProps, GetRefOptions, InputProps, SelectProps, SelectValue} from 'components/organisms/WidgetFormPanel/types';
+import {createOrderName} from 'utils/widget';
 import {ErrorMessage} from 'formik';
 import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from './FormBuilder';
@@ -31,15 +32,13 @@ export class DataFormBuilder extends FormBuilder {
 
 	getNumberFromName = (name: string) => Number(name.split('_').pop());
 
-	createName = (num: number) => (name: string) => `${name}_${num}`;
-
 	getAttributeOptions = (name: string) => {
 		const {attributes, fetchAttributes, values} = this.props;
 		let sourceName = FIELDS.source;
 		let options = [];
 
 		if (name.includes('_')) {
-			sourceName = this.createName(this.getNumberFromName(name))(sourceName);
+			sourceName = createOrderName(this.getNumberFromName(name))(sourceName);
 		}
 
 		const source = values[sourceName];
@@ -59,7 +58,7 @@ export class DataFormBuilder extends FormBuilder {
 
 	createRefName = (targetName: string, baseRefName: string) => {
 		const number = this.getNumberFromName(targetName);
-		return !isNaN(number) ? this.createName(number)(baseRefName) : baseRefName;
+		return isNaN(number) ? baseRefName : createOrderName(number)(baseRefName);
 	};
 
 	handleSelectAxis = (baseRefName: string, getRefOptions: GetRefOptions) => (name: string, value: OptionType) => {
@@ -83,6 +82,17 @@ export class DataFormBuilder extends FormBuilder {
 		if (!attributes[source.value]) {
 			fetchAttributes(source);
 		}
+	};
+
+	handleSelectBreakdown = (name: string, breakdown: SelectValue) => {
+		const {setFieldValue, values} = this.props;
+		let nextValue = breakdown;
+
+		if (values[name] && values[name].value === breakdown.value) {
+			nextValue = null;
+		}
+
+		setFieldValue(name, nextValue);
 	};
 
 	renderTreeSelect = (props: TreeProps) => {
@@ -130,23 +140,24 @@ export class DataFormBuilder extends FormBuilder {
 		const breakdown: AttrSelectProps = {
 			name: name,
 			placeholder: 'Разбивка',
+			handleSelect: this.handleSelectBreakdown,
 			value: values[name]
 		};
 
 		return this.renderAttrSelect(breakdown);
 	};
 
-	renderAggregateInput = (name: string = FIELDS.aggregate, refName: string) => {
+	renderAggregateInput = (name: string = FIELDS.aggregation, refName: string) => {
 		const {values} = this.props;
 		const refValue = values[refName];
 		const options = getAggregateOptions(refValue);
-		const aggregate = values[name];
+		const aggregation = values[name];
 
 		const props: SelectProps = {
 			name,
 			options,
 			placeholder: 'Агрегация',
-			value: aggregate
+			value: aggregation
 		};
 
 		return this.renderSelect(props);

@@ -15,12 +15,13 @@ export class Chart extends Component<Props, State> {
 
 		if (Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
 			const {options, series} = getConfig(props.widget, props.data);
-
 			state.options = options;
 			state.series = series;
 
 			return state;
 		}
+
+		return null;
 	}
 
 	renderContent () {

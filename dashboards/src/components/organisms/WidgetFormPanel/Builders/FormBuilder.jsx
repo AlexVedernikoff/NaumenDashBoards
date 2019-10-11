@@ -1,5 +1,5 @@
 // @flow
-import {CheckBox, Label, MultiSelect, TextArea} from 'components/atoms';
+import {CheckBox, Divider, Label, MultiSelect, TextArea} from 'components/atoms';
 import type {CheckBoxProps, LabelProps, SelectProps, State, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
 import {ErrorMessage} from 'formik';
 import type {OptionType} from 'react-select/src/types';
@@ -15,16 +15,17 @@ export class FormBuilder extends Component<Props, State> {
 	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
 
 	renderCheckBox = (props: CheckBoxProps) => {
-		const {label, name, value} = props;
+		const {hideDivider, label, name, value} = props;
 
 		return (
-			<div className={styles.field}>
+			<div className={styles.field} key={name}>
 				<CheckBox
 					onClick={this.handleClick}
 					label={label}
 					name={name}
 					value={value}
 				/>
+				{!hideDivider && <Divider className={styles.dividerLeft} />}
 			</div>
 		);
 	};
@@ -39,6 +40,12 @@ export class FormBuilder extends Component<Props, State> {
 	renderLabel = (props: LabelProps) => (
 		<div className={styles.field}>
 			<Label {...props} />
+		</div>
+	);
+
+	renderHeader = (title: string) => (
+		<div className={styles.field}>
+			<span className={styles.header}>{title}</span>
 		</div>
 	);
 

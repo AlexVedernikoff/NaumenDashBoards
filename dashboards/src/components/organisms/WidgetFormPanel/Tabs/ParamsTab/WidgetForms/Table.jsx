@@ -17,8 +17,8 @@ export class Table extends DataFormBuilder {
 
 		const totalRow: CheckBoxProps = {
 			label: 'Подсчитывать итоги',
-			name: FIELDS.totalRow,
-			value: values[FIELDS.totalRow]
+			name: FIELDS.calcTotalRow,
+			value: values[FIELDS.calcTotalRow]
 		};
 
 		const column: AttrSelectProps = {
@@ -29,8 +29,8 @@ export class Table extends DataFormBuilder {
 
 		const totalColumn: CheckBoxProps = {
 			label: 'Подсчитывать итоги',
-			name: FIELDS.totalColumn,
-			value: values[FIELDS.totalColumn]
+			name: FIELDS.calcTotalColumn,
+			value: values[FIELDS.calcTotalColumn]
 		};
 
 		return (
@@ -39,7 +39,7 @@ export class Table extends DataFormBuilder {
 				{this.renderAttrSelect(row)}
 				{this.renderCheckBox(totalRow)}
 				{this.renderAttrSelect(column)}
-				{this.renderAggregateInput(FIELDS.aggregate, FIELDS.column)}
+				{this.renderAggregateInput(FIELDS.aggregation, FIELDS.column)}
 				{this.renderBreakdownInput()}
 				{this.renderCheckBox(totalColumn)}
 			</Fragment>
