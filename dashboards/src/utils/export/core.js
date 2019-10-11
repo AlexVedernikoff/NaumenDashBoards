@@ -8,7 +8,7 @@ import {RefContainer} from 'utils/refConatiner';
 window.html2canvas = html2canvas;
 
 export const createSnapshot = async (name: string, docStr: string) => {
-	const A4 = [1240, 1754]; // ppi: [1240, 1754],[595, 842], [794, 1123]
+	const A4 = [1240, 1754]; // ppi: [1240, 1754], [595, 842], [794, 1123]
 	const clone = new RefContainer().getRef();
 	const container = clone.cloneNode(true);
 	const fileName = `${name}_${moment().format('DD-MM-YY')}`;
@@ -62,8 +62,10 @@ export const createSnapshot = async (name: string, docStr: string) => {
 				pdf.addPage();
 				heigthPage = 0;
 			}
+
 			window.document.body.removeChild(img);
 		}
+
 		pdf.save(fileName);
 	} else if (container && docStr === FILE_VARIANTS.PNG) {
 		window.document.body.appendChild(container);
