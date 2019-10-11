@@ -9,7 +9,7 @@ export const initialWidgetsState: WidgetsDataState = {
 	map: {},
 	newWidget: null,
 	saveError: false,
-	saveLoading: false,
+	updating: false,
 	selectedWidget: ''
 };
 

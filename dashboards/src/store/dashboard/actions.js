@@ -4,7 +4,7 @@ import type {Dispatch, ThunkAction} from 'store/types';
 import {getContext} from 'utils/api';
 import {getWidgets, resetWidget} from 'store/widgets/data/actions';
 import {push} from 'connected-react-router';
-import {getDataSources} from 'store/sources/data/actions';
+import {getDataSources, getUserRole} from 'store/sources/data/actions';
 
 /**
  * Получаем данные, необходимые для работы дашборда
@@ -19,6 +19,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 		await Promise.all([
 			dispatch(getDataSources()),
+			dispatch(getUserRole()),
 			dispatch(getWidgets(true))
 		]);
 

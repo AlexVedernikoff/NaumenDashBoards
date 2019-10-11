@@ -33,19 +33,18 @@ export class Footer extends Component<WrappedProps> {
 		);
 	};
 
-	renderControlButtons = () => {
-		const {cancelForm, saveLoading} = this.props;
-
+	getButtons = (): Array<ButtonProps> => {
+		const {cancelForm, master, updating} = this.props;
 		const buttons = [
 			{
 				block: true,
-				disabled: saveLoading,
+				disabled: updating,
 				onClick: this.handleSaveAsDefault,
 				text: 'Сохранить по умолчанию'
 			},
 			{
 				block: true,
-				disabled: saveLoading,
+				disabled: updating,
 				onClick: this.handleSave,
 				text: 'Сохранить'
 			},
@@ -56,10 +55,15 @@ export class Footer extends Component<WrappedProps> {
 				variant: 'bare'
 			}
 		];
+		const start = master ? 1 : 0;
 
+		return buttons.slice(start);
+	};
+
+	renderControlButtons = () => {
 		return (
 			<Fragment>
-				{buttons.map(this.renderButton)}
+				{this.getButtons().map(this.renderButton)}
 			</Fragment>
 		);
 	};

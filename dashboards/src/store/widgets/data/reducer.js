@@ -45,7 +45,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			return {
 				...state,
 				saveError: false,
-				saveLoading: true
+				updating: true
 			};
 		case WIDGETS_EVENTS.SET_CREATED_WIDGET:
 			return createWidget(state, action);
@@ -55,7 +55,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			return {
 				...state,
 				saveError: true,
-				saveLoading: false
+				updating: false
 			};
 		case WIDGETS_EVENTS.SET_SELECTED_WIDGET:
 			return setSelectedWidget(state, action);

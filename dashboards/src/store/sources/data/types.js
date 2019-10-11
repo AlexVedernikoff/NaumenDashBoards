@@ -26,6 +26,11 @@ export type ReceiveDataSources = {
 	payload: RawDataSource[]
 };
 
+export type RequestUserRole = {
+	type: typeof DATA_SOURCES_EVENTS.REQUEST_USER_ROLE,
+	payload: boolean
+};
+
 type RecordDataSourcesError = {
 	type: typeof DATA_SOURCES_EVENTS.RECORD_DATA_SOURCES_ERROR
 };
@@ -42,11 +47,13 @@ export type DataSourcesAction =
 	| ReceiveDataSources
 	| RecordDataSourcesError
 	| RequestDataSources
+	| RequestUserRole
 	| UnknownDataSourcesAction
 ;
 
 export type DataSourcesState = {
 	error: boolean,
 	loading: boolean,
-	map: DataSourceMap
+	map: DataSourceMap,
+	master: boolean
 };

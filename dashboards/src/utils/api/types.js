@@ -14,6 +14,7 @@ export type Method =
 	| 'createDefaultWidgetSettings'
 	| 'createPersonalWidgetSettings'
 	| 'getAttributesDataSources'
+	| 'getAvailabilityGroupMasterDashboard',
 	| 'getDataForDiagram'
 	| 'getDataSources'
 	| 'getSettings'
