@@ -66,7 +66,16 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	}
 
+	componentDidUpdate () {
+		const {current} = this.container;
+
+		if (current) {
+			this.updateContainer(current);
+		}
+	}
+
 	createContainer = (current: HTMLDivElement) => new RefContainer(current);
+	updateContainer = (current: HTMLDivElement) => new RefContainer().updatetRef(current);
 
 	reloadGrid = () => {
 		const {current} = this.container;

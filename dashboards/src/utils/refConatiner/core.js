@@ -17,6 +17,10 @@ export class RefContainer {
   getRef (): Object {
     return RefContainer.ref;
   }
+
+  updatetRef (ref?: {}): void {
+    RefContainer.ref = ref || {};
+  }
 }
 
 export default RefContainer;
