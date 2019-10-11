@@ -3,14 +3,36 @@ import {Button, DropDownFiles} from 'components/atoms';
 import {createSnapshot} from 'utils/export';
 import {FILE_VARIANTS} from 'components/atoms/DropDownFiles/constansts';
 import IconRefrashe from 'icons/header/refresh.svg';
+import type {Node} from 'react';
 import React, {Component} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
 import styles from './styles.less';
+import CloseIcon from 'icons/header/close.svg';
 
 export class DashboardHeader extends Component<Props> {
 	createDocument = (docStr: string) => {
 		const {name} = this.props;
 		createSnapshot(name, docStr);
+	};
+
+	resetWidgets = (): void => {
+		const {fetchDashboard, resetDashboard} = this.props;
+
+		resetDashboard();
+		fetchDashboard();
+	};
+
+	getButton = (): Node => {
+		return <Button type="button" onClick={this.resetWidgets}>
+							<CloseIcon />
+							Сбросить настройки
+						</Button>;
+	};
+
+	renderResetDashBoard = () => {
+		const {isEditable} = this.props;
+
+		return isEditable ? this.getButton() : null;
 	};
 
 	renderModeButton = () => {
@@ -45,6 +67,9 @@ export class DashboardHeader extends Component<Props> {
 					</li>
 					<li className={styles.navItem}>
 						{this.renderButtonRefresh()}
+					</li>
+					<li className={styles.navItem}>
+						{this.renderResetDashBoard()}
 					</li>
 					<li className={styles.navItem}>
 						{this.renderModeButton()}
