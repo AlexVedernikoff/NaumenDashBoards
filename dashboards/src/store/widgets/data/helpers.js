@@ -111,7 +111,7 @@ export const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidge
 
 	return {
 		...state,
-		saveLoading: false,
+		updating: false,
 		map: {...state.map}
 	};
 };
@@ -145,7 +145,7 @@ export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): 
 	state.map[payload.id] = {...payload, layout: state.map[payload.id].layout};
 	return {
 		...state,
-		saveLoading: false,
+		updating: false,
 		map: {...state.map}
 	};
 };

@@ -34,17 +34,17 @@ export class Footer extends Component<WrappedProps> {
 	};
 
 	getButtons = (): Array<ButtonProps> => {
-		const {cancelForm, master, saveLoading} = this.props;
+		const {cancelForm, master, updating} = this.props;
 		const buttons = [
 			{
 				block: true,
-				disabled: saveLoading,
+				disabled: updating,
 				onClick: this.handleSaveAsDefault,
 				text: 'Сохранить по умолчанию'
 			},
 			{
 				block: true,
-				disabled: saveLoading,
+				disabled: updating,
 				onClick: this.handleSave,
 				text: 'Сохранить'
 			},

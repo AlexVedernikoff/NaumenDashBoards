@@ -122,6 +122,6 @@ export type WidgetsDataState = {
 	map: WidgetMap,
 	newWidget: NewWidget | null,
 	saveError: boolean,
-	saveLoading: boolean,
+	updating: boolean,
 	selectedWidget: string
 };
