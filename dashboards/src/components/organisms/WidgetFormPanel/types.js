@@ -36,6 +36,7 @@ export type TextAreaProps = {
 };
 
 export type CheckBoxProps = {
+	hideDivider?: boolean,
 	label: string,
 	name: string,
 	value: string

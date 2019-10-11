@@ -9,7 +9,7 @@ export class Summary extends DataFormBuilder {
 		<Fragment>
 			{this.renderSourceInput()}
 			{this.renderIndicatorInput()}
-			{this.renderAggregateInput(FIELDS.aggregate, FIELDS.indicator)}
+			{this.renderAggregateInput(FIELDS.aggregation, FIELDS.indicator)}
 		</Fragment>
 	);
 

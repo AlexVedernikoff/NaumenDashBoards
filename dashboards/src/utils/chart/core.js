@@ -5,6 +5,7 @@ import {CHART_TYPES, CHART_VARIANTS} from './constants';
 import {DEFAULT_VARIANTS} from 'utils/aggregate/constansts';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import type {Widget} from 'store/widgets/data/types';
+import VALUES from 'components/organisms/WidgetFormPanel/constants/values';
 
 /**
  * Проверяем является ли переменная объектом
@@ -41,15 +42,16 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
 
 /**
  * Дефолтная примесь графиков (bar, line)
- * @param {boolean} horizontal - данные конкретного графика
+ * @param {boolean} horizontal - положение графика
+ * @param {boolean} stacked - накопление данных
  * @returns {ApexOptions}
  */
-const axisChart = (horizontal: boolean = false) => (chart: DiagramData): ApexOptions => {
-	return {
-		tooltip: {
-			x: {
-				show: false
-			}
+const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (widget: Widget, chart: DiagramData): ApexOptions => {
+	const {aggregation, showXAxis, showYAxis, xAxis, yAxis} = widget;
+
+	let options: ApexOptions = {
+		chart: {
+			stacked
 		},
 		plotOptions: {
 			bar: {
@@ -58,119 +60,6 @@ const axisChart = (horizontal: boolean = false) => (chart: DiagramData): ApexOpt
 		},
 		xaxis: {
 			categories: chart.categories
-		}
-	};
-};
-
-/**
- * Дефолтная примесь графиков (bar, line)
- * @param {boolean} horizontal - данные конкретного графика
- * @returns {ApexOptions}
- */
-const stackedAxisChart = (horizontal: boolean = false) => (chart: DiagramData): ApexOptions => {
-	return {
-		tooltip: {
-			x: {
-				show: false
-			},
-			y: {
-				show: false
-			}
-		},
-		chart: {
-			stacked: true,
-			toolbar: {
-				show: false
-			},
-			zoom: {
-				enabled: true
-			}
-		},
-		responsive: [{
-			breakpoint: 480,
-			options: {
-				legend: {
-					offsetX: -10,
-					offsetY: 0,
-					position: 'bottom'
-				}
-			}
-		}],
-		plotOptions: {
-			bar: {
-				horizontal
-			}
-		},
-		xaxis: {
-			categories: chart.categories
-		},
-		legend: {
-			offsetY: 40,
-			position: 'right'
-		},
-		fill: {
-			opacity: 1
-		}
-	};
-};
-
-/**
- * Дефолтная примесь графиков (combo)
- * @param {DiagramData} chart - данные конкретного графика
- * @returns {ApexOptions}
- */
-const comboChart = (chart: DiagramData) => ({
-		labels: chart.labels
-});
-
-/**
- * Дефолтная примесь графиков (pie, donut)
- * @param {DiagramData} chart - данные конкретного графика
- * @returns {ApexOptions}
- */
-const circleChart = (chart: DiagramData): ApexOptions => {
-	return {
-		labels: chart.labels
-	};
-};
-
-/**
- * Получаем ф-цию для генерации необходимой примеси опций
- * @param {string} variant - тип графика выбранный пользователем
- * @returns {Function}
- */
-const resolveMixin = (variant: string): Function => {
-	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
-
-	const variants = {
-		[BAR]: axisChart(true),
-		[BAR_STACKED]: stackedAxisChart(true),
-		[COLUMN]: axisChart(false),
-		[COLUMN_STACKED]: stackedAxisChart(false),
-		[COMBO]: comboChart,
-		[DONUT]: circleChart,
-		[LINE]: axisChart(false),
-		[PIE]: circleChart
-	};
-
-	return variants[variant];
-};
-
-/**
- * Генерируем базовый набор опций и объединяем с необходимой примесью
- * @param {Widget} widget - виджет
- * @param {DiagramData} chart - данные графика виджета
- * @returns {ApexOptions}
- */
-const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
-	const options: ApexOptions = {
-		chart: {
-			toolbar: {
-				show: false
-			}
-		},
-		stroke: {
-			curve: 'straight'
 		},
 		yaxis: {
 			max: undefined,
@@ -178,14 +67,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 		}
 	};
 
-	if (widget.isNameShown) {
-		options.title = {
-			offsetY: 10,
-			text: widget.name
-		};
-	}
-
-	if (widget.aggregate && widget.aggregate.value === DEFAULT_VARIANTS.PERCENT) {
+	if (aggregation && aggregation.value === DEFAULT_VARIANTS.PERCENT) {
 		options.yaxis = {
 			labels: {
 				formatter: (val) => {
@@ -197,7 +79,109 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 		};
 	}
 
-	return extend(options, resolveMixin(widget.type.value)(chart));
+	if (showXAxis && xAxis) {
+		const mixin = {
+			xaxis: {
+				title: {
+					text: xAxis.title
+				}
+			}
+		};
+
+		options = extend(options, mixin);
+	}
+
+	if (showYAxis && yAxis) {
+		const mixin = {
+			yaxis: {
+				title: {
+					text: yAxis.title
+				}
+			}
+		};
+
+		options = extend(options, mixin);
+	}
+
+	return options;
+};
+
+/**
+ * Дефолтная примесь графиков (combo)
+ * @param {Widget} widget - данные виджета
+ * @param {DiagramData} chart - данные конкретного графика
+ * @returns {ApexOptions}
+ */
+const comboChart = (widget: Widget, chart: DiagramData) => ({
+		labels: chart.labels
+});
+
+/**
+ * Дефолтная примесь графиков (pie, donut)
+ * @param {Widget} widget - данные виджета
+ * @param {DiagramData} chart - данные конкретного графика
+ * @returns {ApexOptions}
+ */
+const circleChart = (widget: Widget, chart: DiagramData): ApexOptions => {
+	return {
+		labels: chart.labels
+	};
+};
+
+/**
+ * Получаем ф-цию для генерации необходимой примеси опций
+ * @param {string} type - тип графика выбранный пользователем
+ * @returns {Function}
+ */
+const resolveMixin = (type: string): Function => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
+
+	const charts = {
+		[BAR]: axisChart(true),
+		[BAR_STACKED]: axisChart(true, true),
+		[COLUMN]: axisChart(false),
+		[COLUMN_STACKED]: axisChart(false, true),
+		[COMBO]: comboChart,
+		[DONUT]: circleChart,
+		[LINE]: axisChart(false),
+		[PIE]: circleChart
+	};
+
+	return charts[type];
+};
+
+/**
+ * Генерируем базовый набор опций и объединяем с необходимой примесью
+ * @param {Widget} widget - виджет
+ * @param {DiagramData} chart - данные графика виджета
+ * @returns {ApexOptions}
+ */
+const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
+	const {colors, diagramName, legendPosition, showLegend, showName, showValue} = widget;
+
+	const options: ApexOptions = {
+		chart: {
+			toolbar: {
+				show: false
+			}
+		},
+		colors: colors || VALUES.COLORS,
+		dataLabels: {
+			enabled: showValue
+		},
+		legend: {
+			position: legendPosition ? legendPosition.value : 'bottom',
+			show: showLegend
+		}
+	};
+
+	if (showName) {
+		options.title = {
+			text: diagramName
+		};
+	}
+
+	return extend(options, resolveMixin(widget.type.value)(widget, chart));
 };
 
 /**

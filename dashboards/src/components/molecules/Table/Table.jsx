@@ -1,11 +1,16 @@
 // @flow
 import 'react-table/react-table.css';
 import type {Props, State} from './types';
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import ReactTable from 'react-table';
 import styles from './styles.less';
 
 export class Table extends Component<Props, State> {
+	state = {
+		columns: [],
+		data: []
+	};
+
 	static getDerivedStateFromProps (props: Props, state: State) {
 		const {columns, data} = props.data;
 
@@ -16,7 +21,12 @@ export class Table extends Component<Props, State> {
 		return state;
 	}
 
-	render () {
+	renderName = () => {
+		const {diagramName, showName} = this.props.widget;
+		return showName && <p className={styles.name}>{diagramName}</p>;
+	};
+
+	renderTable = () => {
 		const {columns, data} = this.state;
 
 		return (
@@ -25,6 +35,15 @@ export class Table extends Component<Props, State> {
 				columns={columns}
 				data={data}
 			/>
+		);
+	};
+
+	render () {
+		return (
+			<Fragment>
+				{this.renderName()}
+				{this.renderTable()}
+			</Fragment>
 		);
 	}
 }

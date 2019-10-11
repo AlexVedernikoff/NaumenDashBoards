@@ -20,7 +20,7 @@ export class AxisChart extends DataFormBuilder {
 		};
 
 		const yAxis: AttrSelectProps = {
-			handleSelect: this.handleSelectAxis(FIELDS.aggregate, getAggregateOptions),
+			handleSelect: this.handleSelectAxis(FIELDS.aggregation, getAggregateOptions),
 			name: FIELDS.yAxis,
 			placeholder: 'Ось Y',
 			value: values[FIELDS.yAxis]
@@ -34,7 +34,7 @@ export class AxisChart extends DataFormBuilder {
 				{this.renderGroupInput()}
 				<Divider />
 				{this.renderAttrSelect(yAxis)}
-				{this.renderAggregateInput(FIELDS.aggregate, FIELDS.yAxis)}
+				{this.renderAggregateInput(FIELDS.aggregation, FIELDS.yAxis)}
 				{this.renderBreakdownInput()}
 			</Fragment>
 		);
