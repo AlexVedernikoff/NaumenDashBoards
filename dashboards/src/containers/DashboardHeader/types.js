@@ -9,6 +9,7 @@ export type ConnectedProps = {
 export type ConnectedFunctions = {
 	editDashboard: () => ThunkAction,
 	fetchDashboard: () => ThunkAction,
+	resetDashboard: () => ThunkAction,
 	seeDashboard: () => ThunkAction
 };
 

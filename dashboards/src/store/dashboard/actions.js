@@ -1,7 +1,7 @@
 // @flow
+import {buildUrl, client, getContext} from 'utils/api';
 import {DASHBOARD_EVENTS} from './constants';
-import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext} from 'utils/api';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getWidgets, resetWidget} from 'store/widgets/data/actions';
 import {push} from 'connected-react-router';
 import {getDataSources, getUserRole} from 'store/sources/data/actions';
@@ -36,6 +36,25 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(setEditable());
 	dispatch(push('/edit'));
+};
+
+/**
+ * Сброс дашборда на дефотные настройки мастера
+ * @returns {ThunkAction}
+ */
+const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	// Модуль DevDashboardSettings или DashboardsSettings
+	// Метод resetPersonalDashboard
+	// параметры classFqn, contentCode, user
+
+	try {
+		const context = getState().dashboard.context;
+		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
+		await client.post(buildUrl('DevDashboardSettings', 'resetPersonalDashboard', params));
+		dispatch(recordDashboardError());
+	} catch (e) {
+		dispatch(recordDashboardError());
+	}
 };
 
 /**
@@ -76,5 +95,6 @@ const setEditable = () => ({
 export {
 	editDashboard,
 	fetchDashboard,
+	resetDashboard,
 	seeDashboard
 };

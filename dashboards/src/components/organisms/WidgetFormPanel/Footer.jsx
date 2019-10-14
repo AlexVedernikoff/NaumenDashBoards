@@ -55,7 +55,7 @@ export class Footer extends Component<WrappedProps> {
 				variant: 'bare'
 			}
 		];
-		const start = master ? 1 : 0;
+		const start = master ? 0 : 1;
 
 		return buttons.slice(start);
 	};

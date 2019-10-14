@@ -5,6 +5,7 @@ export type Module =
 	| 'dashboardDataSet'
 	| 'dashboardSettings'
 	| 'dashboardTestGetData'
+	| 'DashboardsSettings'
 	| 'DevDashboardSettings'
 ;
 
@@ -14,12 +15,13 @@ export type Method =
 	| 'createDefaultWidgetSettings'
 	| 'createPersonalWidgetSettings'
 	| 'getAttributesDataSources'
-	| 'getAvailabilityGroupMasterDashboard',
+	| 'getAvailabilityGroupMasterDashboard'
 	| 'getDataForDiagram'
 	| 'getDataSources'
 	| 'getSettings'
 	| 'editDefaultWidget'
 	| 'editPersonalWidgetSettings'
+	| 'resetPersonalDashboard'
 ;
 
 export type Context = {
