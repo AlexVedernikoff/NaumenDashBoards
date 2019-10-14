@@ -8,6 +8,7 @@ import React, {Component} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
 import styles from './styles.less';
 import CloseIcon from 'icons/header/close.svg';
+import PrintIcon from 'icons/header/print.svg';
 
 export class DashboardHeader extends Component<Props> {
 	createDocument = (docStr: string) => {
@@ -23,9 +24,11 @@ export class DashboardHeader extends Component<Props> {
 	};
 
 	getButton = (): Node => {
-		return <Button type="button" onClick={this.resetWidgets}>
-							<CloseIcon />
-							Сбросить настройки
+		return <Button type="button" onClick={this.resetWidgets} >
+							<div className={styles.buttonIcon}>
+								<CloseIcon />
+								Сбросить настройки
+							</div>
 						</Button>;
 	};
 
@@ -33,6 +36,10 @@ export class DashboardHeader extends Component<Props> {
 		const {isEditable} = this.props;
 
 		return isEditable ? this.getButton() : null;
+	};
+
+	renderPrintButton = () => {
+		return <Button type="button" variant="icon-info"><PrintIcon /></Button>;
 	};
 
 	renderModeButton = () => {
@@ -73,6 +80,9 @@ export class DashboardHeader extends Component<Props> {
 					</li>
 					<li className={styles.navItem}>
 						{this.renderModeButton()}
+					</li>
+					<li className={styles.navItem}>
+						{this.renderPrintButton()}
 					</li>
 				</ul>
 			</header>
