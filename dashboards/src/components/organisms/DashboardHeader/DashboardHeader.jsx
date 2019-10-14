@@ -24,12 +24,14 @@ export class DashboardHeader extends Component<Props> {
 	};
 
 	getButton = (): Node => {
-		return <Button type="button" onClick={this.resetWidgets} >
-							<div className={styles.buttonIcon}>
-								<CloseIcon />
-								Сбросить настройки
-							</div>
-						</Button>;
+		return (
+			<Button type="button" onClick={this.resetWidgets} >
+				<div className={styles.buttonIcon}>
+					<CloseIcon />
+					Сбросить настройки
+				</div>
+			</Button>
+		);
 	};
 
 	renderResetDashBoard = () => {
