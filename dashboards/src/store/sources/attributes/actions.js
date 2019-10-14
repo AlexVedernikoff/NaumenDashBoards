@@ -14,11 +14,15 @@ const fetchAttributes = (source: TreeSelectValue): ThunkAction => async (dispatc
 	dispatch(requestAttributes(classFqn));
 	try {
 		const {data} = await client.post(buildUrl('dashboards', 'getAttributesDataSources', `'${classFqn}'`));
-		data.forEach(a => {
-			a.sourceName = source.label;
-		});
+		const noBreakdown = {
+			...data[0],
+			code: '',
+			title: 'Без разбивки',
+			type: ''
+		};
+		const newData = data.reduce((acc, el) => [...acc, { ...el, sourceName: el.label }], [noBreakdown]);
 
-		dispatch(receiveAttributes(data, classFqn));
+		dispatch(receiveAttributes(newData, classFqn));
 	} catch (error) {
 		dispatch(recordAttributesError(classFqn));
 	}
