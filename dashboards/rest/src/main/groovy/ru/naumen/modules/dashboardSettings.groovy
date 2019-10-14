@@ -19,7 +19,7 @@ import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
 @Field private static final String NAMESPACE = 'dashboards'
-@Field private static final String GROUP_MASTER_DASHBOARD = 'ROLE_MASTER_DASHBOARDS'
+@Field private static final String GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
 //endregion
 
 //region КЛАССЫ
