@@ -1,6 +1,6 @@
 // @flow
 import {CHART_SELECTS} from 'utils/chart';
-import type {ConnectedProps} from './types';
+import type {ConnectedProps, ValidateType} from './types';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
 import {lazy} from 'yup';
@@ -18,7 +18,7 @@ const config: FormikConfig = {
 		};
 	},
 
-	validationSchema: prop => lazy(values => schema[values.type.value]),
+	validationSchema: prop => lazy((values: ValidateType) => schema[values.type.value]),
 
 	handleSubmit: async (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;
