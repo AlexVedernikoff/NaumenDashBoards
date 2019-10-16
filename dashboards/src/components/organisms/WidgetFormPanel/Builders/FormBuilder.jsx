@@ -33,7 +33,9 @@ export class FormBuilder extends Component<Props, State> {
 	renderSelect = (props: SelectProps) => (
 		<div className={styles.field}>
 			<MultiSelect onSelect={props.handleSelect || this.handleSelect} {...props} />
-			<ErrorMessage name={props.name}/>
+			<span className={styles.error}>
+				<ErrorMessage name={props.name}/>
+			</span>
 		</div>
 	);
 
@@ -64,7 +66,9 @@ export class FormBuilder extends Component<Props, State> {
 					placeholder={placeholder}
 					value={value}
 				/>
-				<ErrorMessage name={name} />
+				<span className={styles.error}>
+					<ErrorMessage name={name} />
+				</span>
 			</div>
 		);
 	};

@@ -101,7 +101,9 @@ export class DataFormBuilder extends FormBuilder {
 		return (
 			<div className={styles.field}>
 				<TreeSelectInput {...props} />
-				<ErrorMessage name={name} />
+				<span className={styles.error}>
+					<ErrorMessage name={name} />
+				</span>
 			</div>
 		);
 	};
@@ -111,6 +113,17 @@ export class DataFormBuilder extends FormBuilder {
 
 		if (!options) {
 			options = this.getAttributeOptions(name);
+		}
+
+		if (options.length && name === FIELDS.breakdown) {
+			const noBreakdown = {
+				...options[0],
+				code: '',
+				title: 'Без разбивки',
+				type: ''
+			};
+
+			options = [noBreakdown, ...options];
 		}
 
 		return this.renderSelect({...defaultAttrProps, ...props, options});

@@ -6,7 +6,9 @@ export type TreeSelectValue = {
 
 export type Node = {
 	children: Array<string>,
+	errorLoadingChildren?: boolean,
 	isLeaf: boolean,
+	key: string,
 	root?: boolean,
 	title: string,
 	value: string,

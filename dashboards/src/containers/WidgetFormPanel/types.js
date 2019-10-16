@@ -17,6 +17,12 @@ export type ConnectedProps = {
 	updating: boolean
 };
 
+export type ValidateType = {
+	type: {
+		value: string
+	}
+};
+
 export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
 	createWidget: (data: CreateFormData, asDefault: boolean) => ThunkAction,
