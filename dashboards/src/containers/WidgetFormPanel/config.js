@@ -4,6 +4,8 @@ import type {ConnectedProps} from './types';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
 import {NewWidget} from 'utils/widget';
+import schema from 'components/organisms/WidgetFormPanel/Validate/shemas.js';
+import * as Yup from 'yup';
 
 const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
@@ -16,7 +18,13 @@ const config: FormikConfig = {
 		};
 	},
 
-	handleSubmit: (values: FormikValues, {props}: FormikProps) => {
+	validationSchema: (prop) => {
+		return Yup.lazy((values: ConnectedProps) => {
+			return schema[values.type.value];
+		});
+	},
+
+	handleSubmit: async (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;
 		const {asDefault, ...data} = values;
 		const filteredData = filter(data);

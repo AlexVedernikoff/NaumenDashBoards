@@ -5,18 +5,18 @@ import type {Node} from 'react';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import withForm from './withForm';
-import Validate from './Validate';
 
 export class Footer extends Component<WrappedProps> {
 	handleSubmit = async (asDefault: boolean) => {
-		const {setFieldValue, setFieldError, setFieldTouched, submitForm, values} = this.props;
-		const valid = await Validate(values);
 
-		if (valid.errors) {
-			valid.inner.forEach(err => {
-				setFieldTouched(err.path, true, false);
-				setFieldError(err.path, 'обязятельный параметр');
-			});
+		const {isValid, validateForm, setFieldValue, setFieldError, setFieldTouched, submitForm, values} = this.props;
+		const errors = await validateForm(values);
+
+		if (!isValid) {
+			for (const field in errors) {
+				setFieldTouched(field, true, false);
+				setFieldError(field, errors[field]);
+			}
 		} else {
 			await setFieldValue('asDefault', asDefault);
 			submitForm();
