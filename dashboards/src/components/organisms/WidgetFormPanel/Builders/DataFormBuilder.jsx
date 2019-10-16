@@ -44,9 +44,8 @@ export class DataFormBuilder extends FormBuilder {
 		const source = values[sourceName];
 
 		if (source) {
-			
 			const currentAttr = attributes[source.value];
-			
+
 			if (!currentAttr || (currentAttr.data.length === 0 && !currentAttr.loading && !currentAttr.error)) {
 				fetchAttributes(source);
 			} else {

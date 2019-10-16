@@ -3,9 +3,9 @@ import {CHART_SELECTS} from 'utils/chart';
 import type {ConnectedProps} from './types';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
+import {lazy} from 'yup';
 import {NewWidget} from 'utils/widget';
 import schema from './shemas.js';
-import * as Yup from 'yup';
 
 const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
@@ -19,7 +19,7 @@ const config: FormikConfig = {
 	},
 
 	validationSchema: (prop) => {
-		return Yup.lazy((values: ConnectedProps) => {
+		return lazy((values: ConnectedProps) => {
 			return schema[values.type.value];
 		});
 	},

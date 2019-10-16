@@ -1,5 +1,5 @@
-import { object, string } from 'yup';
 import {CHART_VARIANTS} from 'utils/chart/constants';
+import {object, string} from 'yup';
 
 const insertAgregate = 'Укажите агрегацию';
 const insertAttrX = 'Укажите атрибут для оси X';
