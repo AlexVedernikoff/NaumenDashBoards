@@ -15,10 +15,7 @@ const fetchAttributes = (source: TreeSelectValue): ThunkAction => async (dispatc
 	try {
 		const {data} = await client.post(buildUrl('dashboards', 'getAttributesDataSources', `'${classFqn}'`));
 
-		data.forEach(el => {
-			el.sourceName = el.label;
-			return el;
-		});
+		data.forEach(el => (el.sourceName = el.label));
 
 		dispatch(receiveAttributes(data, classFqn));
 	} catch (error) {
