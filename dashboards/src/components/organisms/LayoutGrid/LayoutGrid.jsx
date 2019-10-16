@@ -1,6 +1,7 @@
 // @flow
 import {Chart, Summary, Table} from 'components/molecules';
 import type {DiagramData} from 'store/widgets/diagrams/types';
+import EditIcon from 'icons/header/edit.svg';
 import type {Element} from 'react';
 import {GRID_PARAMS} from 'utils/layout';
 import {NewWidget, WIDGET_VARIANTS} from 'utils/widget';
@@ -8,6 +9,7 @@ import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
+import UnionIcon from 'icons/header/union.svg';
 import type {Widget} from 'store/widgets/data/types';
 
 const props = {
@@ -74,29 +76,17 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
+	handleClickEdit = (event: SyntheticMouseEvent<HTMLButtonElement>): void => {
+		const {editDashboard, onWidgetSelect} = this.props;
+		editDashboard();
+		onWidgetSelect(event);
+	};
+
 	handleClick = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
 		const {goOver} = this.props;
 		const id = e.currentTarget.dataset.id;
 
 		goOver(id);
-	};
-
-	renderGoOverButton = (id: string) => (
-		<button className={styles.goOverButton} data-id={id} type="button" onClick={this.handleClick}>
-			Перейти
-		</button>
-	);
-
-	renderEditButton = (id: string) => {
-		const {editable, onSelectWidget} = this.props;
-
-		if (editable) {
-			return (
-				<button className={styles.editButton} type="button" data-id={id} onClick={onSelectWidget}>
-					Редактировать
-				</button>
-			);
-		}
 	};
 
 	renderLoading = () => <p>Загрузка...</p>;
@@ -131,12 +121,27 @@ export class LayoutGrid extends Component<Props, State> {
 		return this.renderError();
 	};
 
+	renderButtons = (widget: Widget): Element<'div'> => {
+		const {id} = widget;
+
+		return (
+			<div className={styles.widgetActions}>
+				<button className={styles.buttonAction} type="button" data-id={id} onClick={this.handleClickEdit}>
+					<EditIcon />
+				</button>
+				<button className={styles.buttonAction} type="button" data-id={id} onClick={this.handleClick}>
+					<UnionIcon />
+				</button>
+			</div>
+		);
+	};
+
 	renderWidgetByType = (widget: Widget) => {
 		if (!(widget instanceof NewWidget)) {
 			return (
 				<Fragment>
-					{this.renderGoOverButton(widget.id)}
 					{this.renderDiagram(widget)}
+					{this.renderButtons(widget)}
 				</Fragment>
 			);
 		}
@@ -147,7 +152,6 @@ export class LayoutGrid extends Component<Props, State> {
 
 		return (
 			<div key={id} data-grid={layout} className={styles.widget}>
-				{this.renderEditButton(id)}
 				{this.renderWidgetByType(widget)}
 			</div>
 		);

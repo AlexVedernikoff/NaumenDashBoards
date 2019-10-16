@@ -142,7 +142,7 @@ export class DataFormBuilder extends FormBuilder {
 			const noBreakdown = {
 				...options[0],
 				code: null,
-				title: '[Не выбрано]',
+				title: 'Без разбивки',
 				type: ''
 			};
 
@@ -160,7 +160,7 @@ export class DataFormBuilder extends FormBuilder {
 		);
 	};
 
-	renderSourceInput = (name: string = FIELDS.source) => {
+	renderSourceInput = (name: string = FIELDS.source, mixin: ?InputProps) => {
 		const {values, sources} = this.props;
 
 		let props: TreeProps = {

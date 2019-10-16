@@ -8,7 +8,8 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	goOver: (id: string, mixin: ?GoOverMixin) => ThunkAction,
+	editDashboard: () => ThunkAction,
+	goOver: (id: string, mixin: ?GoOverMixin) => ThunkAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

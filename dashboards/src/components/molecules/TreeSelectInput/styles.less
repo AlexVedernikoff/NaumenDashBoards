@@ -74,10 +74,17 @@
 }
 
 .rc-tree-select-selection--single {
-	border-radius: @input-border-radius !important;
-	border: 1px solid @input-border-color !important;
+	border-top: 0;
+	border-bottom: 2px solid #323232;
+	border-left: 0;
+	border-right: 0;
+	border-radius: 0;
 	box-shadow: none !important;
 	height: 38px !important;
+
+	&:active {
+		border-color: #323232 !important;
+	}
 }
 
 .rc-tree-select-tree {
@@ -124,4 +131,8 @@
 .rc-tree-select-tree li.filter-node > .rc-tree-select-tree-node-content-wrapper {
 	color: black !important;
 	font-weight: normal !important;
+}
+
+.rc-tree-select-enabled.rc-tree-select-focused .rc-tree-select-selection {
+	border-color: #323232 !important;
 }

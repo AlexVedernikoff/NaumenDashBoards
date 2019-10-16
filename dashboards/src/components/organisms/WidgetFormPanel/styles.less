@@ -3,6 +3,7 @@
 
 	.form {
 		background-color: #F4F4F4;
+		min-height: 100%;
 	}
 
 	.header {
@@ -11,16 +12,27 @@
 	}
 
 	.main {
-		padding: 10px 20px 20px 20px;
 		background-color: white;
+		padding: 10px 20px 20px 20px;
 	}
 
 	.field {
 		margin-top: 10px;
+		width: 100%;
 
 		.error{
 			color: red;
 			font-size: 12px;
+		}
+	}
+
+	.fieldType {
+		span.rc-tree-select-selection--single {
+			border: none;
+			border-bottom: 1px solid;
+			border-radius: 0;
+			box-shadow: none;
+			outline: none;
 		}
 	}
 
@@ -55,6 +67,12 @@
 		}
 	}
 
+	.inputWrap {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+	}
+
 	.palettePicker {
 		position: absolute;
 		top: 0;
@@ -65,11 +83,11 @@
 	}
 
 	.colorPaletteWrap {
-		margin-top: 30px;
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
 		justify-content: space-between;
+		margin-top: 30px;
 
 		.itemPalette {
 			border: 1px solid transparent;

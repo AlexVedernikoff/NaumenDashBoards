@@ -1,6 +1,8 @@
 // @flow
 const DAY: 'DAY' = 'DAY';
 const MONTH: 'MONTH' = 'MONTH';
+const ON: 'ON' = 'ON';
+const SEVEN: 'SEVEN' = 'SEVEN';
 const QUARTER: 'QUARTER' = 'QUARTER';
 const SEVEN_DAYS: 'SEVEN_DAYS' = 'SEVEN_DAYS';
 const WEEK: 'WEEK' = 'WEEK';
@@ -19,6 +21,8 @@ const DT_INTERVAL: 'dtInterval' = 'dtInterval';
 const DATETIME_VARIANTS = {
 	DAY,
 	MONTH,
+	ON,
+	SEVEN,
 	QUARTER,
 	SEVEN_DAYS,
 	WEEK,

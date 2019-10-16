@@ -1,6 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
+import {editDashboard} from 'store/dashboard/actions';
 import {goOver} from 'store/widgets/links/actions';
 
 export const props = (state: AppState): ConnectedProps => ({
@@ -8,5 +9,6 @@ export const props = (state: AppState): ConnectedProps => ({
 });
 
 export const functions: ConnectedFunctions = {
+	editDashboard,
 	goOver
 };

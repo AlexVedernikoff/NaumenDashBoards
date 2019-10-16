@@ -8,6 +8,13 @@
 	}
 
 	.buttonIcon {
+    display: inline-block;
+		padding: 16px;
+
+		&:hover {
+			background: @info;
+		}
+
 		svg {
 			margin: 0 5px -1px 0;
 		}
@@ -25,13 +32,16 @@
 	}
 
 	.nav {
+		align-items: center;
+		display: inline-flex;
+		padding: 0 15px 0 0;
+
 		li{
 			display: inline;
 		}
 	}
 
 	.navItem {
-		margin-right: 15px;
 		cursor: pointer;
 	}
 

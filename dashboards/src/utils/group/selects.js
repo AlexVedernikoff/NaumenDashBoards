@@ -3,53 +3,53 @@ import {DATETIME_VARIANTS, DEFAULT_VARIANTS, INTERVAL_VARIANTS} from './constans
 
 const DATETIME_SELECTS = [
 	{
-		label: 'По дням',
+		label: 'День',
 		value: DATETIME_VARIANTS.DAY
 	},
 	{
-		label: 'По неделям',
+		label: 'Неделя',
 		value: DATETIME_VARIANTS.WEEK
 	},
 	{
-		label: 'По 7 дням',
+		label: '7 дней',
 		value: DATETIME_VARIANTS.SEVEN_DAYS
 	},
 	{
-		label: 'По месяцам',
+		label: 'Месяц',
 		value: DATETIME_VARIANTS.MONTH
 	},
 	{
-		label: 'По кварталам',
+		label: 'Квартал',
 		value: DATETIME_VARIANTS.QUARTER
 	},
 	{
-		label: 'По годам',
+		label: 'Год',
 		value: DATETIME_VARIANTS.YEAR
 	}
 ];
 
 const DEFAULT_SELECTS = [
 	{
-		label: 'По совпадениям',
+		label: 'Совпадения',
 		value: DEFAULT_VARIANTS.OVERLAP
 	}
 ];
 
 const INTERVAL_SELECTS = [
 	{
-		label: 'По минутам',
+		label: 'Минуты',
 		value: INTERVAL_VARIANTS.INTERVAL_MINUTE
 	},
 	{
-		label: 'По часам',
+		label: 'Часы',
 		value: INTERVAL_VARIANTS.INTERVAL_HOUR
 	},
 	{
-		label: 'По дням',
+		label: 'Дни',
 		value: INTERVAL_VARIANTS.INTERVAL_DAY
 	},
 	{
-		label: 'По месяцам',
+		label: 'Месяцы',
 		value: INTERVAL_VARIANTS.INTERVAL_MONTH
 	}
 ];

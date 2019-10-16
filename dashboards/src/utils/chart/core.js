@@ -208,7 +208,6 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 
 	if (showName) {
 		options.title = {
-			offsetY: 25,
 			text: diagramName
 		};
 	}

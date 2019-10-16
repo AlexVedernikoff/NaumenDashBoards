@@ -3,34 +3,34 @@ import {DEFAULT_VARIANTS, INTEGER_VARIANTS} from './constansts';
 
 const DEFAULT_SELECTS = [
 	{
-		label: 'Количество',
+		label: 'CNT',
 		value: DEFAULT_VARIANTS.COUNT
 	},
 	{
-		label: 'Проценты',
+		label: '%',
 		value: DEFAULT_VARIANTS.PERCENT
 	}
 ];
 
 const INTEGER_SELECTS = [
 	{
-		label: 'Сумма',
+		label: 'SUM',
 		value: INTEGER_VARIANTS.SUM
 	},
 	{
-		label: 'Среднее значение',
+		label: 'AVG',
 		value: INTEGER_VARIANTS.AVERAGE
 	},
 	{
-		label: 'Максимальное значение',
+		label: 'MAX',
 		value: INTEGER_VARIANTS.MAX
 	},
 	{
-		label: 'Минимальное значение',
+		label: 'MIN',
 		value: INTEGER_VARIANTS.MIN
 	},
 	{
-		label: 'Медиана',
+		label: 'MED',
 		value: INTEGER_VARIANTS.MEDIAN
 	}
 ];

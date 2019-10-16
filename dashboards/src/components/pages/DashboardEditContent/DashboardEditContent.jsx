@@ -7,7 +7,7 @@ import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class DashboardEditContent extends Component<Props> {
-	onSelectWidget = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
+	onWidgetSelect = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
 		const {selectWidget, selectedWidget} = this.props;
 		const widgetId = e.currentTarget.dataset.id;
 
@@ -37,8 +37,8 @@ export class DashboardEditContent extends Component<Props> {
 		return (
 			<div className={styles.container}>
 				<LayoutGrid
-					editable={true}
-					onSelectWidget={this.onSelectWidget}
+					editable={false}
+					onWidgetSelect={this.onWidgetSelect}
 					onLayoutChange={this.onLayoutChange}
 					widgets={widgets}
 				/>

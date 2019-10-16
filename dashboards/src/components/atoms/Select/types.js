@@ -13,5 +13,6 @@ export type Props = {
 	noOptionsMessage?: () => string | Node,
 	options: OptionType[],
 	placeholder: string,
-	value: Attribute | OptionType | null
+	value: Attribute | OptionType | null,
+	small: boolean
 };

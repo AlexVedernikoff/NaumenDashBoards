@@ -33,7 +33,7 @@ export class ParamsTab extends DataFormBuilder {
 
 	renderInputs = () => {
 		const {values} = this.props;
-		const {name, diagramName, type} = FIELDS;
+		const {diagramName, name, type} = FIELDS;
 		const {AXIS_HORIZONTAL_SELECTS, AXIS_SELECTS, CIRCLE_SELECTS, COMBO_SELECT} = CHART_SELECTS;
 
 		const nameProps: TextAreaProps = {

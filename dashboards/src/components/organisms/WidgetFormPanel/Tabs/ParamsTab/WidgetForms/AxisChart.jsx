@@ -6,6 +6,7 @@ import {FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import {getAggregateOptions} from 'utils/aggregate';
 import {getGroupOptions} from 'utils/group';
 import React, {Fragment} from 'react';
+import styles from 'components/organisms/WidgetFormPanel/styles.less';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class AxisChart extends DataFormBuilder {
@@ -30,11 +31,15 @@ export class AxisChart extends DataFormBuilder {
 			<Fragment>
 				{this.renderSourceInput()}
 				<Divider />
-				{this.renderAttrSelect(xAxis)}
-				{this.renderGroupInput()}
+				<div className={styles.inputWrap}>
+					{this.renderGroupInput()}
+					{this.renderAttrSelect(xAxis)}
+				</div>
 				<Divider />
-				{this.renderAttrSelect(yAxis)}
-				{this.renderAggregateInput(FIELDS.aggregation, FIELDS.yAxis)}
+				<div className={styles.inputWrap}>
+					{this.renderAggregateInput(FIELDS.aggregation, FIELDS.yAxis)}
+					{this.renderAttrSelect(yAxis)}
+				</div>
 				{this.renderBreakdownInput()}
 			</Fragment>
 		);

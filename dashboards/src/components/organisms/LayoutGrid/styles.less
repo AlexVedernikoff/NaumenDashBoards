@@ -1,13 +1,37 @@
+@import '/styles/variables';
+
 :local {
 	.description {
 		margin: 0;
 	}
 
-	.editButton {
-		position: absolute;
-		right: 0;
-		top: 0;
-		z-index: 99;
+	.buttonAction {
+		border: 2px solid transparent;
+		border-radius: 50%;
+		color: @grey;
+		display: inline-block;
+		padding: 5px;
+		text-align: center;
+		text-decoration: none;
+		width: 35px;
+
+		svg {
+			fill: @grey;
+			stroke: @grey;
+		}
+
+		&:hover {
+			background-color: darken(@grey-hover, 10%);
+		}
+
+		&:active {
+			color: @black;
+
+			svg {
+				fill: @black;
+				stroke: @black;
+			}
+		}
 	}
 
 	.goOverButton {
@@ -25,11 +49,30 @@
 		position: relative;
 	}
 
+	.widgetActions {
+		background: #FFFFFF;
+		border-radius: 2px;
+    bottom: 0;
+		box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
+		left: calc(50% - 43px);
+		opacity: 0;
+		padding: 8px;
+		position: absolute;
+		transition: all .2s ease;
+	}
+
 	.widget {
 		background-color: white;
 		border-radius: 2px;
 		box-shadow: 0 2px 8px rgba(129, 146, 161, .4);
 		height: 100%;
-		overflow: hidden;
+		overflow: visible;
+
+		&:hover {
+			.widgetActions {
+				bottom: -15px;
+				opacity: 1;
+			}
+		}
 	}
 }

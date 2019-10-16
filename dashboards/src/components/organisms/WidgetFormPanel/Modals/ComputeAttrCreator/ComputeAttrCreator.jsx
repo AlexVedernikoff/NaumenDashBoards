@@ -109,7 +109,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 
 	isSource = (source: OptionType) => source && this.state.sources.find(s => s.value === source.value);
 
-	deleteSourceRefControls = async (name: string) => {
+	deleteSourceRefControls = (name: string) => {
 		this.setState(state => {
 			let {controls} = state;
 			const currentControl = controls[name];
@@ -250,8 +250,8 @@ export class ComputeAttrCreator extends Component<Props, State> {
 				}
 
 				if (type === SOURCE) {
-					const attr = next ? controls[next] : null;
-					const aggregationControl = attr && attr.next ? controls[attr.next] : null;
+					const attr = next && controls[next];
+					const aggregationControl = attr && attr.next && controls[attr.next];
 					const aggregationValue = aggregationControl && aggregationControl.value;
 
 					computeData[name] = {

@@ -36,34 +36,45 @@ export class DashboardHeader extends Component<Props> {
 
 		if (editable || master) {
 			return (
-				<Button type="button" onClick={this.resetWidgets} >
-					<div className={styles.buttonIcon}>
-						<CloseIcon />
-						Сбросить настройки
-					</div>
-				</Button>
+				<div className={styles.buttonIcon} onClick={this.resetWidgets}>
+					<CloseIcon />
+					Сбросить настройки
+				</div>
 			);
 		}
 	};
 
-	renderPrintButton = () => <Button type="button" variant="icon-info"><PrintIcon /></Button>;
+	renderPrintButton = () => <div className={styles.buttonIcon}><PrintIcon /></div>;
 
 	renderModeButton = () => {
 		const {editable, editDashboard, location, master, seeDashboard} = this.props;
 
 		if (editable || master) {
 			if (location.pathname === '/') {
-				return <Button type="button" onClick={editDashboard}>Редактировать</Button>;
+				// TODO: инлайн стили временно
+				return (
+					<div style={{padding: '0 10px'}}>
+						<Button type="button" onClick={editDashboard}>Редактировать</Button>
+					</div>
+				);
 			}
-
-			return <Button type="button" onClick={seeDashboard}>Просмотреть</Button>;
+			// TODO: инлайн стили временно
+			return (
+				<div style={{padding: '0 10px'}}>
+					<Button type="button" onClick={seeDashboard}>Просмотреть</Button>;
+				</div>
+			);
 		}
 	};
 
 	renderRefreshButton = () => {
 		const {fetchDashboard} = this.props;
 
-		return <IconRefresh onClick={fetchDashboard} />;
+		return (
+			<div className={styles.buttonIcon}>
+				<IconRefresh onClick={fetchDashboard} />
+			</div>
+		);
 	};
 
 	renderDropDown = () => {
