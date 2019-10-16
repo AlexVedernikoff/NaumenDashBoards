@@ -124,7 +124,6 @@ export class DataFormBuilder extends FormBuilder {
 			};
 
 			options = [noBreakdown, ...options];
-
 		}
 
 		return this.renderSelect({...defaultAttrProps, ...props, options});

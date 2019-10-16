@@ -12,10 +12,10 @@ export class Footer extends Component<WrappedProps> {
 		const errors = await validateForm(values);
 
 		if (!isValid) {
-			for (const field in errors) {
+			Object.keys(errors).forEach(field => {
 				setFieldTouched(field, true, false);
 				setFieldError(field, errors[field]);
-			}
+			});
 		} else {
 			await setFieldValue('asDefault', asDefault);
 			submitForm();

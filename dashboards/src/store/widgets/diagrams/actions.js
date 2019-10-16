@@ -119,6 +119,7 @@ const fetchDiagramData = (widget: Widget): ThunkAction => async (dispatch: Dispa
 	dispatch(requestDiagram(widget.id));
 
 	try {
+		// TODO: это для сборки с бэком
 		/*
 		const postData = resolvePostDataCreator(widget.type.value)(widget);
 		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagram', 'requestContent'), postData);
