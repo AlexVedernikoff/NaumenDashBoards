@@ -8,7 +8,6 @@ import withForm from './withForm';
 
 export class Footer extends Component<WrappedProps> {
 	handleSubmit = async (asDefault: boolean) => {
-
 		const {isValid, validateForm, setFieldValue, setFieldError, setFieldTouched, submitForm, values} = this.props;
 		const errors = await validateForm(values);
 

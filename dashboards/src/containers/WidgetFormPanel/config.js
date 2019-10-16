@@ -4,7 +4,7 @@ import type {ConnectedProps} from './types';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
 import {NewWidget} from 'utils/widget';
-import schema from 'components/organisms/WidgetFormPanel/Validate/shemas.js';
+import schema from './shemas.js';
 import * as Yup from 'yup';
 
 const config: FormikConfig = {
