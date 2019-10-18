@@ -116,10 +116,13 @@ const getSummaryData = (widget) => {
 
 const getTableData = (widget) => {
 	const labels = getLabels('значение');
+	const dates = getCategories();
 	const data = [];
 
 	for (let i = 0; i < getRandomArbitrary(1, 10); i++) {
-		const row = {};
+		const row = {
+			breakdownTitle: dates[i]
+		};
 		labels.forEach(label => {
 			row[label] = getRandomArbitrary(22, 333);
 		});
@@ -137,16 +140,24 @@ const getTableData = (widget) => {
 	data.forEach(row => {
 		let total = 0;
 		Object.keys(row).forEach(key => {
-			total += row[key];
+			if (typeof row[key] === 'number') {
+				total += row[key];
+			}
 		});
 		row.total = total;
 	});
 
-	const columns = labels.map(label => ({
+	let columns = labels.map(label => ({
 		Header: label,
 		accessor: label,
 		Footer: totalColumn[label].toString()
 	}));
+
+	const breakdown = {
+		accessor: 'breakdownTitle'
+	};
+
+	columns = [breakdown, ...columns];
 
 	columns.push({
 		Header: 'Итого',

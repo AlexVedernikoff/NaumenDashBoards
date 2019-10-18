@@ -22,12 +22,14 @@ const getWidgets = (isInit: boolean = false): ThunkAction => async (dispatch: Di
 		const {data} = await client.post(buildUrl('DevDashboardSettings', 'getSettings', params));
 
 		if (Array.isArray(data)) {
-			const widgets = data.map(w => {
-				const widget = w.value;
+			const widgets = data.filter(w => w.value).map(w => {
+				const {key, value: widget} = w;
+
 				widget.layout.static = true;
-				data.map[w.key] = widget;
+				data.map[key] = widget;
 
 				dispatch(fetchDiagramData(widget));
+
 				return widget;
 			});
 			dispatch(receiveWidgets(widgets));

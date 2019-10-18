@@ -1,5 +1,5 @@
 // @flow
-import Chart from 'components/molecules/Chart';
+import {Chart, Summary, Table} from 'components/molecules';
 import type {DiagramData} from 'store/widgets/diagrams/types';
 import type {Element} from 'react';
 import {GRID_PARAMS} from 'utils/layout';
@@ -8,8 +8,6 @@ import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
-import Summary from 'components/molecules/Summary';
-import Table from 'components/molecules/Table';
 import type {Widget} from 'store/widgets/data/types';
 
 const props = {

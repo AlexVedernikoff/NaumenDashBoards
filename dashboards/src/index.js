@@ -9,7 +9,7 @@ import React from 'react';
 import {render} from 'react-dom';
 import Startup from 'containers/Startup/Startup';
 
-const root = document.getElementById('root');
+export const root = document.getElementById('root');
 export const history = createMemoryHistory();
 export const store = configureStore(history);
 

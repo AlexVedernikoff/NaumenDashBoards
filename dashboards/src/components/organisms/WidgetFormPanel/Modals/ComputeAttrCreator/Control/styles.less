@@ -1,0 +1,42 @@
+:local {
+	.container {
+		margin: 5px;
+		width: 125px;
+	}
+
+	.formContainer {
+		background-color: white;
+		position: relative;
+	}
+
+	.input {
+		position: relative;
+		width: 60px;
+		z-index: 999;
+	}
+
+	.icon {
+		cursor: pointer;
+		padding: 10px;
+		position: absolute;
+		z-index: 9999;
+	}
+
+	.iconSuccess {
+		.icon();
+		color: green;
+		right: 20px;
+		top: -2px;
+	}
+
+	.iconCancel {
+		.icon();
+		color: red;
+		right: 0;
+		top: -3px;
+	}
+
+	.createConstButton {
+		margin: 10px;
+	}
+}

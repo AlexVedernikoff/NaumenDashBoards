@@ -4,9 +4,9 @@ import CheckBox from './CheckBox';
 import ColorPicker from './ColorPicker';
 import Divider from './Divider';
 import DropDownFiles from './DropDownFiles';
-import MultiSelect from './MultiSelect';
-import TextArea from './TextArea';
 import Label from './Label';
+import Select from './Select';
+import TextArea from './TextArea';
 import Title from './Title';
 
 export {
@@ -15,8 +15,8 @@ export {
 	CheckBox,
 	Divider,
 	DropDownFiles,
-	MultiSelect,
-	TextArea,
 	Label,
+	Select,
+	TextArea,
 	Title
 };

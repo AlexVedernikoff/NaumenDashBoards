@@ -1,23 +1,17 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
 import type {AttrSelectProps, GetRefOptions, InputProps, SelectProps, SelectValue} from 'components/organisms/WidgetFormPanel/types';
+import {Button} from 'components/atoms';
 import {createOrderName} from 'utils/widget';
 import {ErrorMessage} from 'formik';
-import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, SETTINGS, styles} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from './FormBuilder';
 import {getAggregateOptions} from 'utils/aggregate';
 import {getGroupOptions, OVERLAP} from 'utils/group';
 import {getWidgetIcon} from 'icons/widgets';
 import type {OptionType} from 'react-select/src/types';
 import type {Props as TreeProps} from 'components/molecules/TreeSelectInput/types';
-import React from 'react';
+import React, {Fragment} from 'react';
 import TreeSelectInput from 'components/molecules/TreeSelectInput';
-
-const defaultAttrProps = {
-	getOptionLabel: (o: Attribute) => o.title,
-	getOptionValue: (o: Attribute) => o.code,
-	noOptionsMessage: () => 'Список пуст'
-};
 
 export class DataFormBuilder extends FormBuilder {
 	getLabelWithIcon = (option: SelectValue) => {
@@ -74,25 +68,54 @@ export class DataFormBuilder extends FormBuilder {
 		}
 	};
 
-	handleSelectSource = async (name: string, source: SelectValue) => {
-		const {attributes, fetchAttributes, setFieldValue} = this.props;
-
+	baseHandleSelectSource = async (name: string, source: SelectValue) => {
+		const {attributes, fetchAttributes, setFieldValue, values} = this.props;
+		const currentSource = values[name];
 		await setFieldValue(name, source);
+
+		if (currentSource && currentSource.value !== source.value) {
+			const descriptorName = this.createRefName(name, FIELDS.descriptor);
+
+			setFieldValue(descriptorName, null);
+		}
 
 		if (!attributes[source.value]) {
 			fetchAttributes(source);
 		}
 	};
 
-	handleSelectBreakdown = (name: string, breakdown: SelectValue) => {
-		const {setFieldValue, values} = this.props;
-		let nextValue = breakdown;
+	handleSelectSource = this.baseHandleSelectSource;
 
-		if (values[name] && values[name].value === breakdown.value) {
-			nextValue = null;
+	createFilterContext = (sourceName: string) => {
+		const {context: mainContext} = this.props;
+
+		const context = {
+			cases: [],
+			clazz: sourceName,
+			contentUuid: mainContext.contentCode
+		};
+
+		if (sourceName.includes('$')) {
+			const parts = sourceName.split('$');
+			context.cases = [sourceName];
+			context.clazz = parts.shift();
 		}
 
-		setFieldValue(name, nextValue);
+		return context;
+	};
+
+	callFilterModal = (sourceFieldName: string) => async () => {
+		const {setFieldValue, values} = this.props;
+		const descriptorName = this.createRefName(sourceFieldName, FIELDS.descriptor);
+		const source = values[sourceFieldName];
+		const descriptor = values[descriptorName];
+
+		if (source) {
+			const context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
+			const {serializedContext} = await window.jsApi.commands.filterForm(context);
+
+			setFieldValue(descriptorName, serializedContext);
+		}
 	};
 
 	renderTreeSelect = (props: TreeProps) => {
@@ -118,18 +141,26 @@ export class DataFormBuilder extends FormBuilder {
 		if (options.length && name === FIELDS.breakdown) {
 			const noBreakdown = {
 				...options[0],
-				code: '',
-				title: 'Без разбивки',
+				code: null,
+				title: '[Не выбрано]',
 				type: ''
 			};
 
 			options = [noBreakdown, ...options];
 		}
 
-		return this.renderSelect({...defaultAttrProps, ...props, options});
+		return this.renderSelect({...SETTINGS.ATTR_SELECT_PROPS, ...props, options});
 	};
 
-	renderSourceInput = (name: string = FIELDS.source, mixin: ?InputProps) => {
+	renderFilterButton = (source: string) => {
+		return (
+			<Button onClick={this.callFilterModal(source)} className="mt-1">
+				Добавить фильтр
+			</Button>
+		);
+	};
+
+	renderSourceInput = (name: string = FIELDS.source) => {
 		const {values, sources} = this.props;
 
 		let props: TreeProps = {
@@ -140,11 +171,12 @@ export class DataFormBuilder extends FormBuilder {
 			value: values[name]
 		};
 
-		if (mixin) {
-			props = {...props, ...mixin};
-		}
-
-		return this.renderTreeSelect(props);
+		return (
+			<Fragment>
+				{this.renderTreeSelect(props)}
+				{this.renderFilterButton(name)}
+			</Fragment>
+		);
 	};
 
 	renderBreakdownInput = (name: string = FIELDS.breakdown) => {
@@ -153,7 +185,6 @@ export class DataFormBuilder extends FormBuilder {
 		const breakdown: AttrSelectProps = {
 			name: name,
 			placeholder: 'Разбивка',
-			handleSelect: this.handleSelectBreakdown,
 			value: values[name]
 		};
 

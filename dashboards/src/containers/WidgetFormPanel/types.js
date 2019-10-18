@@ -1,6 +1,7 @@
 // @flow
 import type {AttributeMap} from 'store/sources/attributes/types';
 import type {DataSourceMap} from 'store/sources/data/types';
+import type {Context} from 'utils/api/types';
 import {FormikProps} from 'formik';
 import {NewWidget} from 'entities';
 import type {SaveFormData, CreateFormData} from 'components/organisms/WidgetFormPanel/types';
@@ -10,6 +11,7 @@ import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
 	attributes: AttributeMap,
+	context: Context,
 	master: boolean,
 	saveError: boolean,
 	selectedWidget: Widget | NewWidget,

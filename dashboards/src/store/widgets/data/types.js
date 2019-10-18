@@ -13,6 +13,7 @@ export type Widget = {
 	chart?: SelectValue | null,
 	colors?: Array<string>,
 	column?: Attribute,
+	descriptor: ?string,
 	diagramName: string,
 	group?: SelectValue | null,
 	id: string,

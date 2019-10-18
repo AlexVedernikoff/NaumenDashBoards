@@ -4,76 +4,23 @@ import type {
 	AttrSelectProps,
 	InputProps,
 	LabelProps,
-	RenderFunction,
+	OrderAttrSelectProps,
 	SelectProps,
 	SelectValue
 } from 'components/organisms/WidgetFormPanel/types';
-import {CHART_SELECTS} from 'utils/chart';
+import {CHART_SELECTS, CHART_VARIANTS} from 'utils/chart';
+import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/constants';
 import {createOrderName} from 'utils/widget';
-import Cross from 'icons/form/cross.svg';
-import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import {Divider} from 'components/atoms/Divider/Divider';
-import {FIELDS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
 import {getAggregateOptions} from 'utils/aggregate';
 import {getGroupOptions} from 'utils/group';
+import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class ComboChart extends DataFormBuilder {
-	componentDidMount () {
-		const {setFieldValue, values} = this.props;
-
-		if (!values[FIELDS.order]) {
-			setFieldValue(FIELDS.order, VALUES.ORDER);
-		}
-	}
-
-	getBaseName = (name: string) => name.split('_').shift();
-
-	getYAxisLabel = (a: Attribute) => `${a.title} (${a.sourceName})`;
-
-	getOrder = () => this.props.values.order || VALUES.ORDER;
-
-	addSet = () => {
-		const {setFieldValue, values} = this.props;
-		const {order} = values;
-		const nextNumber = order[order.length - 1] + 1;
-
-		setFieldValue(FIELDS.order, [...order, nextNumber]);
-	};
-
-	removeSet = (e: SyntheticMouseEvent<HTMLImageElement>) => {
-		const name = e.currentTarget.dataset.name;
-		const number = this.getNumberFromName(name);
-		const {setFieldValue, values} = this.props;
-		const {order} = values;
-
-		if (order.length > 2) {
-			setFieldValue(FIELDS.order, order.filter(n => n !== number));
-
-			[FIELDS.source, FIELDS.xAxis, FIELDS.yAxis, FIELDS.group, FIELDS.aggregation, FIELDS.breakdown, FIELDS.chart]
-				.map(createOrderName(number)).forEach(name => {
-				setFieldValue(name, null);
-			});
-		}
-	};
-
-	setMainValue = (...names: Array<string>) => {
-		const {setFieldValue, values} = this.props;
-		const mainNumber = this.getOrder()[0];
-
-		names.forEach(name => {
-			const mainProperty = values[createOrderName(mainNumber)(this.getBaseName(name))];
-			const currentProperty = values[name];
-			const currentIsNotMain = !currentProperty
-				|| mainProperty.value !== currentProperty.value
-				|| mainProperty.code !== currentProperty.code;
-
-			if (mainProperty && currentIsNotMain) {
-				setFieldValue(name, mainProperty);
-			}
-		});
-	};
+export class ComboChart extends OrderFormBuilder {
+	getYAxisLabel = (a: Attribute) => a.type !== COMPUTED_ATTR ? `${a.title} (${a.sourceName})` : a.title;
 
 	changeDependingOnMain = (number: number) => {
 		const {setFieldValue, values} = this.props;
@@ -101,13 +48,6 @@ export class ComboChart extends DataFormBuilder {
 		}
 	};
 
-	handleSelectComboSource = async (name: string, source: SelectValue) => {
-		const number = this.getNumberFromName(name);
-
-		await this.handleSelectSource(name, source);
-		this.changeDependingOnMain(number);
-	};
-
 	handleSelectComboGroup = async (name: string, group: SelectValue) => {
 		const order = this.getOrder();
 		await this.handleSelect(name, group);
@@ -126,13 +66,19 @@ export class ComboChart extends DataFormBuilder {
 		}
 	};
 
-	renderByOrder = (renderFunction: RenderFunction, ...names: Array<string>) => {
-		return this.getOrder().map(num => renderFunction(...names.map(createOrderName(num))));
+	handleSelectSource = async (name: string, source: SelectValue) => {
+		await this.baseHandleSelectSource(name, source);
+
+		this.changeDependingOnMain(this.getNumberFromName(name));
 	};
 
-	renderYAxisInput = (name: string = FIELDS.yAxis) => {
+	renderYAxisInput = (yAxis: string = FIELDS.yAxis) => {
 		const {attributes, values} = this.props;
+		const {COLUMN, COLUMN_STACKED} = CHART_VARIANTS;
+		const currentNumber = this.getNumberFromName(yAxis);
+		const currentChart = values[createOrderName(currentNumber)(FIELDS.chart)];
 		const order = this.getOrder();
+		const withCreate = currentChart && (currentChart.value === COLUMN || currentChart.value === COLUMN_STACKED);
 		const sources = {};
 		let options = [];
 
@@ -150,16 +96,17 @@ export class ComboChart extends DataFormBuilder {
 			}
 		});
 
-		const yAxis: AttrSelectProps = {
+		const props: OrderAttrSelectProps = {
 			getOptionLabel: this.getYAxisLabel,
 			handleSelect: this.handleSelectAxis(FIELDS.aggregation, getAggregateOptions),
-			name: name,
+			name: yAxis,
 			options,
 			placeholder: 'Ось Y',
-			value: values[name]
+			value: values[yAxis],
+			withCreate
 		};
 
-		return this.renderAttrSelect(yAxis);
+		return this.renderAttrSelectWithCreator(props);
 	};
 
 	renderChartInput = (name: string = FIELDS.chart) => {
@@ -241,22 +188,6 @@ export class ComboChart extends DataFormBuilder {
 		);
 	};
 
-	renderSourceWithRemove = (source: string) => {
-		const {order} = this.props.values;
-		const deletable = order && order.length > 2;
-
-		const sourceProps: InputProps = {
-			onChange: this.handleSelectComboSource
-		};
-
-		return (
-			<div className={styles.positionRelative} key={source}>
-				{deletable && <Cross data-name={source} onClick={this.removeSet} className={styles.deleteSourceIcon}/>}
-				{this.renderSourceInput(source, sourceProps)}
-			</div>
-		);
-	};
-
 	renderInputs = () => {
 		const {aggregation, breakdown, chart, group, source, xAxis, yAxis} = FIELDS;
 
@@ -272,8 +203,9 @@ export class ComboChart extends DataFormBuilder {
 
 		return (
 			<Fragment>
+				{this.renderModal()}
 				{this.renderLabel(sourceLabel)}
-				{this.renderByOrder(this.renderSourceWithRemove, source)}
+				{this.renderByOrder(this.renderOrderSource, source)}
 				<Divider />
 				{this.renderLabel(xAxisLabel)}
 				{this.renderByOrder(this.renderComboXAxis, xAxis, group)}

@@ -12,6 +12,8 @@ const {
 	chart,
 	colors,
 	column,
+	computedAttrs,
+	descriptor,
 	diagramName,
 	group,
 	indicator,
@@ -35,6 +37,7 @@ const axisChartFields = {
 	aggregation,
 	breakdown,
 	colors,
+	descriptor,
 	group,
 	legendPosition,
 	order,
@@ -53,6 +56,7 @@ const circleChartFields = {
 	breakdown,
 	chart,
 	colors,
+	descriptor,
 	indicator,
 	legendPosition,
 	showLegend,
@@ -63,6 +67,7 @@ const circleChartFields = {
 const comboChartFields = (data: FormData) => {
 	const fields = {
 		colors,
+		computedAttrs,
 		legendPosition,
 		order,
 		showLegend,
@@ -71,7 +76,7 @@ const comboChartFields = (data: FormData) => {
 
 	if (Array.isArray(data[order])) {
 		data[order].forEach(num => {
-			[aggregation, breakdown, chart, group, source, xAxis, yAxis].forEach(baseName => {
+			[aggregation, breakdown, chart, descriptor, group, source, xAxis, yAxis].forEach(baseName => {
 				const name = createOrderName(num)(baseName);
 				fields[name] = name;
 			});
@@ -83,6 +88,7 @@ const comboChartFields = (data: FormData) => {
 
 const summaryFields = {
 	aggregation,
+	descriptor,
 	indicator,
 	source
 };
@@ -93,6 +99,7 @@ const tableFields = {
 	calcTotalColumn,
 	calcTotalRow,
 	column,
+	descriptor,
 	row,
 	source
 };

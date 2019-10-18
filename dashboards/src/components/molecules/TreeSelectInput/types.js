@@ -12,6 +12,7 @@ export type Node = {
 	root?: boolean,
 	title: string,
 	value: string,
+	[string]: any
 }
 
 export type Tree = {

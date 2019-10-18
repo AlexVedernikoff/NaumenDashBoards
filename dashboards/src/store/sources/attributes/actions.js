@@ -14,9 +14,8 @@ const fetchAttributes = (source: TreeSelectValue): ThunkAction => async (dispatc
 	dispatch(requestAttributes(classFqn));
 	try {
 		const {data} = await client.post(buildUrl('dashboards', 'getAttributesDataSources', `'${classFqn}'`));
-		const newData = data.map(el => ({ ...el, sourceName: el.label }));
 
-		dispatch(receiveAttributes(newData, classFqn));
+		dispatch(receiveAttributes(data, classFqn));
 	} catch (error) {
 		dispatch(recordAttributesError(classFqn));
 	}

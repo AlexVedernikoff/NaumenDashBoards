@@ -15,6 +15,7 @@ export const props = (state: AppState): ConnectedProps => {
 
 	return {
 		attributes: state.sources.attributes.map,
+		context: state.dashboard.context,
 		master: state.dashboard.master,
 		saveError: data.saveError,
 		selectedWidget: selectedWidget === NewWidget.id && newWidget ? newWidget : data.map[selectedWidget],

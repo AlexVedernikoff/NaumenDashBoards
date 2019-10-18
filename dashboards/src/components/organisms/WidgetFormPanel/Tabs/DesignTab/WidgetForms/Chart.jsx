@@ -99,7 +99,7 @@ export class Chart extends FormBuilder {
 
 		if (showPalette) {
 			return (
-				<div className={styles.palletePicker}>
+				<div className={styles.palettePicker}>
 					<ColorPicker onClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor} />
 				</div>
 			);

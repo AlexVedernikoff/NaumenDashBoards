@@ -2,6 +2,7 @@
 const DAY: 'DAY' = 'DAY';
 const MONTH: 'MONTH' = 'MONTH';
 const QUARTER: 'QUARTER' = 'QUARTER';
+const SEVEN_DAYS: 'SEVEN_DAYS' = 'SEVEN_DAYS';
 const WEEK: 'WEEK' = 'WEEK';
 const YEAR: 'YEAR' = 'YEAR';
 
@@ -19,6 +20,7 @@ const DATETIME_VARIANTS = {
 	DAY,
 	MONTH,
 	QUARTER,
+	SEVEN_DAYS,
 	WEEK,
 	YEAR
 };

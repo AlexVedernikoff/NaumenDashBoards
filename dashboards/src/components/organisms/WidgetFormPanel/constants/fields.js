@@ -6,6 +6,8 @@ const calcTotalRow: 'calcTotalRow' = 'calcTotalRow';
 const chart: 'chart' = 'chart';
 const colors: 'colors' = 'colors';
 const column: 'column' = 'column';
+const computedAttrs: 'computedAttrs' = 'computedAttrs';
+const descriptor: 'descriptor' = 'descriptor';
 const diagramName: 'diagramName' = 'diagramName';
 const group: 'group' = 'group';
 const indicator: 'indicator' = 'indicator';
@@ -32,6 +34,8 @@ const FIELDS = {
 	chart,
 	colors,
 	column,
+	computedAttrs,
+	descriptor,
 	diagramName,
 	group,
 	indicator,
