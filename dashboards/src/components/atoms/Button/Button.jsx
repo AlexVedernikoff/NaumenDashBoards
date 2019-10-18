@@ -30,21 +30,6 @@ export class Button extends Component<Props> {
 		return cn([styles.btn, ...mixins]);
 	};
 
-	getMixins = () => {
-		const {block, className} = this.props;
-		const mixins = [];
-
-		if (block) {
-			mixins.push(styles.block);
-		}
-
-		if (className) {
-			mixins.push(className);
-		}
-
-		return mixins;
-	};
-
 	render () {
 		const {children, disabled, onClick, type} = this.props;
 

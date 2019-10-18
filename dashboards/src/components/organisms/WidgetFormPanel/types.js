@@ -50,6 +50,7 @@ export type ColorPickerProps = {
 };
 
 type Select = {
+	components?: {[string]: any},
 	handleSelect?: (name: string, value: OptionType) => void | Promise<void>;
 	isDisabled?: boolean,
 	name: string,
@@ -65,6 +66,10 @@ export type AttrSelectProps = {
 	options?: Array<Attribute>,
 	value: Attribute | null
 } & Select;
+
+export type OrderAttrSelectProps = {
+	withCreate: boolean
+} & AttrSelectProps;
 
 export type ButtonProps = {
 	block?: boolean,

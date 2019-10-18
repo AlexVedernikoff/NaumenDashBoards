@@ -2,7 +2,7 @@
 import {Button, DropDownFiles} from 'components/atoms';
 import CloseIcon from 'icons/header/close.svg';
 import {createSnapshot, FILE_VARIANTS} from 'utils/export';
-import {gridRef} from 'components/molecules/LayoutGrid';
+import {gridRef} from 'components/organisms/LayoutGrid';
 import IconRefresh from 'icons/header/refresh.svg';
 import PrintIcon from 'icons/header/print.svg';
 import React, {Component} from 'react';
@@ -32,9 +32,9 @@ export class DashboardHeader extends Component<Props> {
 	};
 
 	renderResetButton = () => {
-		const {editable} = this.props;
+		const {editable, master} = this.props;
 
-		if (editable) {
+		if (editable || master) {
 			return (
 				<Button type="button" onClick={this.resetWidgets} >
 					<div className={styles.buttonIcon}>
@@ -49,9 +49,9 @@ export class DashboardHeader extends Component<Props> {
 	renderPrintButton = () => <Button type="button" variant="icon-info"><PrintIcon /></Button>;
 
 	renderModeButton = () => {
-		const {editable, editDashboard, seeDashboard} = this.props;
+		const {editable, editDashboard, location, master, seeDashboard} = this.props;
 
-		if (editable) {
+		if (editable || master) {
 			if (location.pathname === '/') {
 				return <Button type="button" onClick={editDashboard}>Редактировать</Button>;
 			}

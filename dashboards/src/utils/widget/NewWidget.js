@@ -13,6 +13,7 @@ class NewWidget {
 		y: 0
 	};
 	name: string = 'Новый виджет';
+	diagramName: string = '';
 
 	/**
 	 * Устанавливаем начальную позицию по вертикали.

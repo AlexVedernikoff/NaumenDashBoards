@@ -1,13 +1,14 @@
 // @flow
-import {CheckBox, Divider, Label, MultiSelect, TextArea} from 'components/atoms';
+import {CheckBox, Divider, Label, Select, TextArea} from 'components/atoms';
 import type {CheckBoxProps, LabelProps, SelectProps, State, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
 import {ErrorMessage} from 'formik';
+import type {FormikProps} from 'formik';
 import type {OptionType} from 'react-select/src/types';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component} from 'react';
 import {styles} from 'components/organisms/WidgetFormPanel';
 
-export class FormBuilder extends Component<Props, State> {
+export class FormBuilder extends Component<Props & FormikProps, State> {
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
 	handleSelect = (name: string, value: OptionType) => this.props.setFieldValue(name, value);
@@ -32,7 +33,7 @@ export class FormBuilder extends Component<Props, State> {
 
 	renderSelect = (props: SelectProps) => (
 		<div className={styles.field}>
-			<MultiSelect onSelect={props.handleSelect || this.handleSelect} {...props} />
+			<Select onSelect={props.handleSelect || this.handleSelect} {...props} />
 			<span className={styles.error}>
 				<ErrorMessage name={props.name}/>
 			</span>

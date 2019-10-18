@@ -9,6 +9,7 @@ import {editDashboard, fetchDashboard, seeDashboard, resetDashboard} from 'store
  */
 export const props = (state: AppState): ConnectedProps => ({
 	editable: state.dashboard.editable,
+	master: state.dashboard.master,
 	name: state.dashboard.name
 });
 

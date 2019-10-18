@@ -34,7 +34,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 const getRoleMaster = (): ThunkAction => async (dispatch: Dispatch) => {
 	try {
-		const {data} = await client.post(buildUrl('DevDashboardSettings', 'getAvailabilityGroupMasterDashboard'));
+		const {data} = await client.post(buildUrl('dashboardSettings', 'getAvailabilityGroupMasterDashboard', 'user'));
 		dispatch(receiveRoleMaster(data));
 	} catch (e) {
 		dispatch(recordDashboardError());
@@ -54,17 +54,9 @@ const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
  * @returns {ThunkAction}
  */
 const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	// Модуль DevDashboardSettings или DashboardsSettings
-	// Метод resetPersonalDashboard
-	// параметры classFqn, contentCode, user
-
-	try {
-		const context = getState().dashboard.context;
-		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-		await client.post(buildUrl('DevDashboardSettings', 'resetPersonalDashboard', params));
-	} catch (e) {
-		dispatch(recordDashboardError());
-	}
+	const context = getState().dashboard.context;
+	const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
+	await client.post(buildUrl('DevDashboardSettings', 'resetPersonalDashboard', params));
 };
 
 /**

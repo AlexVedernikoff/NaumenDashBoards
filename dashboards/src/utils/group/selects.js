@@ -11,6 +11,10 @@ const DATETIME_SELECTS = [
 		value: DATETIME_VARIANTS.WEEK
 	},
 	{
+		label: 'По 7 дням',
+		value: DATETIME_VARIANTS.SEVEN_DAYS
+	},
+	{
 		label: 'По месяцам',
 		value: DATETIME_VARIANTS.MONTH
 	},

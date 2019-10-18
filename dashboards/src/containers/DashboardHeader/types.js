@@ -4,6 +4,7 @@ import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
 	editable: boolean,
+	master: boolean,
 	name: string
 };
 

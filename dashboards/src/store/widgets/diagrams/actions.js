@@ -1,5 +1,6 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
+// TODO: это для сборки с бэком
+// import {buildUrl, client} from 'utils/api';
 import {DIAGRAMS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
@@ -13,11 +14,12 @@ import {WIDGET_VARIANTS} from 'utils/widget';
 const getValue = (option: OptionType) => option && option.value;
 
 const createAxisChartData = (widget: Widget) => {
-	const {aggregation, breakdown, group, source, type, xAxis, yAxis} = widget;
+	const {aggregation, breakdown, descriptor, group, source, type, xAxis, yAxis} = widget;
 
 	return {
 		aggregation: getValue(aggregation),
 		breakdown,
+		descriptor,
 		group: getValue(group),
 		source: getValue(source),
 		type: getValue(type),
@@ -27,11 +29,12 @@ const createAxisChartData = (widget: Widget) => {
 };
 
 const createCircleChartData = (widget: Widget) => {
-	const {aggregation, breakdown, indicator, source, type} = widget;
+	const {aggregation, breakdown, descriptor, indicator, source, type} = widget;
 
 	return {
 		aggregation: getValue(aggregation),
 		breakdown,
+		descriptor,
 		indicator,
 		source: getValue(source),
 		type: getValue(type)
@@ -42,22 +45,26 @@ const createName = (name: string, num: number) => `${name}_${num}`;
 
 const createComboChartData = (widget: Widget) => {
 	const {order} = widget;
-	const {aggregation, breakdown, chart, group, source, type, xAxis, yAxis} = FIELDS;
+	const {aggregation, breakdown, chart, descriptor, group, source, type, xAxis, yAxis} = FIELDS;
 	const data = {
-		type: getValue(widget[type])
+		type: getValue(widget[type]),
+		charts: []
 	};
 
 	if (Array.isArray(order)) {
 		order.forEach(num => {
-			[aggregation, chart, group, source].forEach(baseName => {
-				const name = createName(baseName, num);
-				data[name] = getValue(widget[name]);
+			let chartItem = {};
+			[aggregation, group, source].forEach(baseName => {
+				chartItem[baseName] = getValue(widget[createName(baseName, num)]);
 			});
 
-			[breakdown, xAxis, yAxis].forEach(baseName => {
-				const name = createName(baseName, num);
-				data[name] = widget[name];
+			[breakdown, descriptor, xAxis, yAxis].forEach(baseName => {
+				chartItem[baseName] = widget[createName(baseName, num)];
 			});
+
+			chartItem[type] = getValue(widget[createName(chart, num)]);
+
+			data.charts.push(chartItem);
 		});
 	}
 
@@ -65,10 +72,11 @@ const createComboChartData = (widget: Widget) => {
 };
 
 const createSummaryData = (widget: Widget) => {
-	const {aggregation, indicator, source, type} = widget;
+	const {aggregation, descriptor, indicator, source, type} = widget;
 
 	return {
 		aggregation: getValue(aggregation),
+		descriptor,
 		indicator,
 		source: getValue(source),
 		type: getValue(type)
@@ -76,7 +84,7 @@ const createSummaryData = (widget: Widget) => {
 };
 
 const createTableData = (widget: Widget) => {
-	const {aggregation, breakdown, calcTotalColumn, calcTotalRow, column, row, source, type} = widget;
+	const {aggregation, breakdown, calcTotalColumn, calcTotalRow, column, descriptor, row, source, type} = widget;
 
 	return {
 		aggregation: getValue(aggregation),
@@ -84,6 +92,7 @@ const createTableData = (widget: Widget) => {
 		calcTotalColumn,
 		calcTotalRow,
 		column,
+		descriptor,
 		row,
 		source: getValue(source),
 		type: getValue(type)
@@ -121,9 +130,12 @@ const fetchDiagramData = (widget: Widget): ThunkAction => async (dispatch: Dispa
 	try {
 		// TODO: это для сборки с бэком
 		/*
-		const postData = resolvePostDataCreator(widget.type.value)(widget);
-		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagram', 'requestContent'), postData);
+		const type = widget.type.value;
+		const postData = resolvePostDataCreator(type)(widget);
+		const method = type === CHART_VARIANTS.COMBO ? 'getDataForCompositeDiagram' : 'getDataForDiagram';
+		const {data} = await client.post(buildUrl('dashboardDataSet', method, 'requestContent'), postData);
 		*/
+
 		const data = generateData(widget);
 		dispatch(
 			receiveDiagram({data, id: widget.id})

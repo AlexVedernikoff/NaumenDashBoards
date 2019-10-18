@@ -1,8 +1,6 @@
 // @flow
 import type {Context} from './types';
 
-const initApi = () => top.injectJsApi(top, window);
-
 /**
  * Получаем контекст встроенного приложения.
  * subjectUuid - кода объекта куда встроенно ВП.
@@ -12,13 +10,9 @@ const initApi = () => top.injectJsApi(top, window);
 const getContext = () => {
 	if (process.env.NODE_ENV === 'development') {
 		return {
-			contentCode: 'Dashbord1',
+			contentCode: 'Dashbord12',
 			subjectUuid: 'root$101'
 		};
-	}
-
-	if (!('jsApi' in window)) {
-		initApi();
 	}
 
 	const {jsApi} = window;
@@ -34,11 +28,8 @@ const getEditableParameter = async () => {
 		return true;
 	}
 
-	if (!('jsApi' in window)) {
-		initApi();
-	}
-
-	return (await window.jsApi.getCurrentContentParameters()).editable;
+	const parameters = await window.jsApi.commands.getCurrentContentParameters();
+	return parameters && parameters.editable;
 };
 
 export {

@@ -4,6 +4,7 @@ import type {AggregatedData, NumbersYData, MixedYData, XAxis, YAxis} from './typ
 import type {Attribute} from 'store/sources/attributes/types';
 import {DEFAULT_VARIANTS, INTEGER_TYPE, INTEGER_VARIANTS} from './constansts';
 import type {GroupedData} from 'utils/group/types';
+import type {OptionType} from 'react-select/src/types';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 
 /**
@@ -123,7 +124,7 @@ const aggregate = (variant: string, data: GroupedData): AggregatedData => {
  * @param {Attribute} refValue - атрибут класса
  * @returns {SelectValue[]}
  */
-const getAggregateOptions = (refValue: Attribute): SelectValue[] => {
+const getAggregateOptions = (refValue: OptionType): SelectValue[] => {
 	const {DEFAULT_SELECTS, INTEGER_SELECTS} = AGGREGATE_SELECTS;
 	return refValue && refValue.type === INTEGER_TYPE ? [...INTEGER_SELECTS, ...DEFAULT_SELECTS] : DEFAULT_SELECTS;
 };
