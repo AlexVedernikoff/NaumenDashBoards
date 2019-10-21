@@ -18,8 +18,8 @@ import static groovy.json.JsonOutput.toJson
 //region КОНСТАНТЫ
 @Field private static final String MAIN_FQN = 'abstractBO'
 @Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
-        ['aggregate', 'object', 'dtInterval', 'date', 'dateTime', 'boLinks', 'catalogItemSet',
-         'backBOLinks', 'string', 'integer', 'catalogItem']
+        ['object', 'dtInterval', 'date', 'dateTime', 'boLinks', 'catalogItemSet',
+         'backBOLinks', 'string', 'integer', 'catalogItem', 'double']
 //endregion
 
 //region КЛАССЫ
@@ -41,39 +41,6 @@ class DataSource
      * Дети источника даннных
      */
     Collection<DataSource> children
-}
-
-/**
- * Модель для атрибута
- */
-@Immutable
-class Attribute
-{
-    /**
-     * Код атрибута
-     */
-    String code
-    /**
-     * Название атрибута
-     */
-    String title
-    /**
-     * Тип атрибута
-     */
-    String type
-    /**
-     * Свойство атрибута (метаклассы ссылочных атрибутов, значения элементов справочника и т.д)
-     */
-    String property
-    /**
-     * метакласс атрибута
-     */
-    String metaClass
-
-    /**
-     * Имя источника
-     */
-    String sourceName
 }
 //endregion
 
@@ -134,6 +101,7 @@ private def getMetaClassChildren(String fqn)
 private Collection<DataSource> mappingDataSource(def fqns)
 {
     return fqns.collect { new DataSource(it.code, it.title, mappingDataSource(it.children)) }
+            .sort{it.title}
 }
 
 /**
@@ -144,15 +112,15 @@ private Collection<DataSource> mappingDataSource(def fqns)
  */
 private Collection<Attribute> mappingAttribute(def attributes, def sourceName)
 {
-    return attributes.findAll { it.type.code in VALID_TYPE_ATTRIBUTE }
+    return attributes.findAll { it.type.code in VALID_TYPE_ATTRIBUTE && !it.computable}
             .collect {
                 new Attribute(
                         it.code,
                         it.title,
                         it.type.code,
                         it.type.relatedMetaClass?.code,
-                        it.declaredMetaClass,
+                        it.declaredMetaClass.code,
                         sourceName)
-            }
+            }.sort{it.title}
 }
 //endregion

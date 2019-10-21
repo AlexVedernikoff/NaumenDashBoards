@@ -14,30 +14,6 @@ package ru.naumen.modules
 import java.time.LocalDate
 import java.time.Year
 
-enum GroupType
-{
-    DAY,
-    WEEK,
-    MONTH,
-    QUARTER,
-    YEAR,
-    SEVEN_DAYS
-//    OVERLAP
-}
-
-enum DiagramType
-{
-    BAR,
-    BAR_STACKED,
-    COLUMN,
-    COLUMN_STACKED,
-    COMBO,
-    DONUT,
-    LINE,
-    PIE,
-    SUMMARY,
-    TABLE
-}
 //region КЛАССЫ
 /**
  * Объект помощник для формирования ссылок
