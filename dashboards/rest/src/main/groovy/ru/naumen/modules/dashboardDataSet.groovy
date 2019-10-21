@@ -101,6 +101,11 @@ class RequestGetDataForDiagram
      * Атрибут для row
      */
     Attribute row = null
+
+    /**
+     * Json дескриптор
+     */
+    String descriptor
 }
 
 /**
@@ -187,22 +192,20 @@ class SummaryDiagram
 String getDataForDiagram(Map<String, Object> requestContent)
 {
     def request = new RequestGetDataForDiagram(requestContent)
-    HCriteria criteria = HHelper.create().addSource(request.source)
-    if(request.type in [Diagram.BAR, Diagram.BAR_STACKED,
-                        Diagram.COLUMN, Diagram.COLUMN_STACKED,
-                        Diagram.LINE])
-    {
-        return toJson(getDataStandardDiagram(criteria, request))
+
+    HCriteria criteria = request.descriptor ? getQueryFromDescriptor(deserializeDescriptor(request.descriptor)) :
+            HHelper.create().addSource(request.source)
+
+    switch (request.type) {
+        case Diagram.with{[BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]} :
+            return toJson(getDataStandardDiagram(criteria, request))
+        case Diagram.with{[DONUT, PIE]} :
+            return getDataRoundDiagram(criteria, request)
+        case Diagram.SUMMARY :
+            return getDataSummaryDiagram(criteria, request)
+        default:
+            throw new Exception(toJson([error: "Not supported diagram type: ${request.type}"]))
     }
-    else if(request.type in [Diagram.DONUT, Diagram.PIE])
-    {
-        return getDataRoundDiagram(criteria, request)
-    }
-    else if(request.type == Diagram.SUMMARY)
-    {
-        return getDataSummaryDiagram(criteria, request)
-    }
-     return null
 }
 //endregion
 
@@ -315,8 +318,7 @@ private StandardDiagram getDataStandardDiagram(HCriteria criteria, RequestGetDat
     aggregation(criteria, request.aggregation, request.yAxis, request.source)
     request.breakdown ? breakdown(criteria, request.breakdown) : null
     findNotNullAttribute(criteria, request.xAxis)
-    Collection<Object> list = criteria.createQuery(beanFactory.getBean('sessionFactory')
-            .getCurrentSession()).list()
+    Collection<Object> list = getQuery(criteria).list()
     return mappingToStandardDiagram(list, request.breakdown)
 }
 
@@ -332,8 +334,7 @@ private String getDataRoundDiagram(HCriteria criteria, RequestGetDataForDiagram 
     criteria.addGroupColumn(attributeCode)
     aggregation(criteria, request.aggregation, request.indicator, request.source)
     breakdown(criteria, request.breakdown)
-    Collection<Object> list = criteria.createQuery(beanFactory.getBean('sessionFactory')
-            .getCurrentSession()).list()
+    Collection<Object> list = getQuery(criteria).list()
     return toJson(new RoundDiagram(list*.getAt(1), list*.getAt(0)))
 }
 
@@ -346,8 +347,7 @@ private String getDataRoundDiagram(HCriteria criteria, RequestGetDataForDiagram 
 private String getDataSummaryDiagram(HCriteria criteria, RequestGetDataForDiagram request)
 {
     aggregation(criteria, request.aggregation, request.indicator, request.source)
-    Collection<Object> list = criteria.createQuery(beanFactory.getBean('sessionFactory')
-            .getCurrentSession()).list()
+    Collection<Object> list = getQuery(criteria).list()
     return toJson(new SummaryDiagram(request.indicator.title, list[0]))
 }
 
@@ -397,8 +397,9 @@ private String getAttributeCodeByType(HCriteria criteria, Attribute attribute)
         case 'catalogItem':
             // TODO добавить локаль пользователя api.employee.getPersonalSettings(user.UUID)?.locale после стабилизации диаграмм
             return "${criteria.getAlias()}.${attribute.code}.title.ru"
+        default:
+            return "${criteria.getAlias()}.${attribute.code}"
     }
-    return "${criteria.getAlias()}.${attribute.code}"
 }
 
 /**
@@ -410,5 +411,47 @@ private void findNotNullAttribute(HCriteria criteria, Attribute attribute)
 {
     String attributeCode = getAttributeCodeByType(criteria, attribute)
     criteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
+}
+
+/**
+ * Создание запроса на основе дескриптора
+ * @param descriptor - сущность фильтрации
+ * @return сущность запрос
+ */
+private HCriteria getQueryFromDescriptor(def descriptor)
+{
+    return api.actionContext.createCriteria(descriptor)
+}
+
+/**
+ * Метод исполнения запросов
+ * @param criteria - запрос в базу данных
+ * @return сущность ответа
+ */
+private def getQuery(HCriteria criteria)
+{
+    criteria.addGroupColumn('id') //TODO: костыль который решит проблему ошибки при применении фильтров
+    def currentSession = beanFactory.getBean('sessionFactory').getCurrentSession()
+    return criteria.createQuery(currentSession)//TODO: в дальнейшем заменить на: api.db.query(criteria)
+}
+
+/**
+ * Метод десериализации сущности дескриптора.
+ * @param jsonString - сериализованный объект дескриптора
+ * @return сущность дескриптора
+ */
+private def deserializeDescriptor(String jsonString) //TODO: костыль. В дальнейшем будет заменено
+{
+    def context = createContext(jsonString)
+    context.clientSettings.visibleAttrCodes = new HashSet() // жёсткий костыль
+    def descriptor = ru.naumen.objectlist.shared.ListDescriptorFactory.create(context)
+    return descriptor
+}
+
+private def createContext(String json)
+{
+    def factory = com.google.web.bindery.autobean.vm.AutoBeanFactorySource.create(ru.naumen.core.shared.autobean.wrappers.AdvlistSettingsAutoBeanFactory.class)
+    def autoBean = com.google.web.bindery.autobean.shared.AutoBeanCodex.decode(factory, ru.naumen.core.shared.autobean.wrappers.IReducedListDataContextWrapper.class, json)
+    return ru.naumen.core.shared.autobean.wrappers.ReducedListDataContext.createObjectListDataContext(autoBean.as())
 }
 //endregion
