@@ -1,15 +1,17 @@
 // @flow
 import {Chart, Summary, Table} from 'components/molecules';
+import {CHART_VARIANTS} from 'utils/chart';
+import {createOrderName, NewWidget, WIDGET_VARIANTS} from 'utils/widget';
 import type {DiagramData} from 'store/widgets/diagrams/types';
-import EditIcon from 'icons/header/edit.svg';
+import {EditIcon, UnionIcon} from 'icons/form';
 import type {Element} from 'react';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {GRID_PARAMS} from 'utils/layout';
-import {NewWidget, WIDGET_VARIANTS} from 'utils/widget';
 import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
+import ReactTooltip from 'react-tooltip';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
-import UnionIcon from 'icons/header/union.svg';
 import type {Widget} from 'store/widgets/data/types';
 
 const props = {
@@ -76,17 +78,19 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	handleClickEdit = (event: SyntheticMouseEvent<HTMLButtonElement>): void => {
-		const {editDashboard, onWidgetSelect} = this.props;
-		editDashboard();
-		onWidgetSelect(event);
+	handleClickEdit = (id: string) => (): void => {
+		const {onSelectWidget} = this.props;
+		onSelectWidget(id);
 	};
 
-	handleClick = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
-		const {goOver} = this.props;
-		const id = e.currentTarget.dataset.id;
+	handleClickDrillDown = (id: string) => () => {
+		const {drillDown, widgets} = this.props;
+		drillDown(widgets[id]);
+	};
 
-		goOver(id);
+	handleClickComboDrillDown = (id: string, orderNum: number) => () => {
+		const {comboDrillDown, widgets} = this.props;
+		comboDrillDown(widgets[id], orderNum);
 	};
 
 	renderLoading = () => <p>Загрузка...</p>;
@@ -121,20 +125,79 @@ export class LayoutGrid extends Component<Props, State> {
 		return this.renderError();
 	};
 
-	renderButtons = (widget: Widget): Element<'div'> => {
-		const {id} = widget;
+	renderEditButton = (id: string) => {
+		const {editable} = this.props;
 
-		return (
-			<div className={styles.widgetActions}>
-				<button className={styles.buttonAction} type="button" data-id={id} onClick={this.handleClickEdit}>
+		if (editable) {
+			return (
+				<button
+					className={styles.buttonAction}
+					data-tip="Редактировать"
+					onClick={this.handleClickEdit(id)}
+					type="button"
+				>
 					<EditIcon />
 				</button>
-				<button className={styles.buttonAction} type="button" data-id={id} onClick={this.handleClick}>
-					<UnionIcon />
-				</button>
-			</div>
-		);
+			);
+		}
 	};
+
+	renderDrillDownButton = (id: string) => (
+		<button
+			className={styles.buttonAction}
+			data-tip="Перейти"
+			data-id={id}
+			onClick={this.handleClickDrillDown(id)}
+			type="button"
+		>
+			<UnionIcon />
+		</button>
+	);
+
+	renderDrillDownButtons = (widget: Widget) => {
+		const {id, order} = widget;
+
+		if (Array.isArray(order)) {
+			return order.map(num => {
+				const dataKey = widget[createOrderName(num)(FIELDS.dataKey)];
+				const source = widget[createOrderName(num)(FIELDS.source)];
+				let tipText = 'Перейти';
+
+				if (source) {
+					tipText = `${tipText} (${source.label})`;
+				}
+
+				return (
+					<button
+						className={styles.buttonAction}
+						data-tip={tipText} type="button"
+						data-id={id}
+						data-order={num}
+						key={dataKey}
+						onClick={this.handleClickComboDrillDown(id, num)}
+					>
+						<UnionIcon/>
+					</button>
+				);
+			});
+		}
+	};
+
+	renderDrillDownButtonByType = (widget: Widget) => {
+		if (widget.type.value === CHART_VARIANTS.COMBO) {
+			return this.renderDrillDownButtons(widget);
+		}
+
+		return this.renderDrillDownButton(widget.id);
+	};
+
+	renderButtons = (widget: Widget): Element<'div'> => (
+		<div className={styles.widgetActions}>
+			{this.renderEditButton(widget.id)}
+			{this.renderDrillDownButtonByType(widget)}
+			<ReactTooltip effect="solid" place="bottom" type="info" />
+		</div>
+	);
 
 	renderWidgetByType = (widget: Widget) => {
 		if (!(widget instanceof NewWidget)) {

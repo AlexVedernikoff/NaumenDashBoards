@@ -3,10 +3,10 @@ const aggregation: 'aggregation' = 'aggregation';
 const breakdown: 'breakdown' = 'breakdown';
 const calcTotalColumn: 'calcTotalColumn' = 'calcTotalColumn';
 const calcTotalRow: 'calcTotalRow' = 'calcTotalRow';
-const chart: 'chart' = 'chart';
 const colors: 'colors' = 'colors';
 const column: 'column' = 'column';
 const computedAttrs: 'computedAttrs' = 'computedAttrs';
+const dataKey: 'dataKey' = 'dataKey';
 const descriptor: 'descriptor' = 'descriptor';
 const diagramName: 'diagramName' = 'diagramName';
 const group: 'group' = 'group';
@@ -22,6 +22,7 @@ const showValue: 'showValue' = 'showValue';
 const showXAxis: 'showXAxis' = 'showXAxis';
 const showYAxis: 'showYAxis' = 'showYAxis';
 const source: 'source' = 'source';
+const sourceForCompute: 'sourceForCompute' = 'sourceForCompute';
 const type: 'type' = 'type';
 const xAxis: 'xAxis' = 'xAxis';
 const yAxis: 'yAxis' = 'yAxis';
@@ -31,10 +32,10 @@ const FIELDS = {
 	breakdown,
 	calcTotalColumn,
 	calcTotalRow,
-	chart,
 	colors,
 	column,
 	computedAttrs,
+	dataKey,
 	descriptor,
 	diagramName,
 	group,
@@ -50,6 +51,7 @@ const FIELDS = {
 	showXAxis,
 	showYAxis,
 	source,
+	sourceForCompute,
 	type,
 	xAxis,
 	yAxis

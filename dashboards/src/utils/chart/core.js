@@ -3,7 +3,7 @@ import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {CHART_TYPES, CHART_VARIANTS} from './constants';
 import {DEFAULT_VARIANTS} from 'utils/aggregate/constansts';
 import type {DiagramData} from 'store/widgets/diagrams/types';
-import {goOverBySelection} from './methods';
+import {drillDownBySelection} from './methods';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import type {Widget} from 'store/widgets/data/types';
 import {VALUES} from 'components/organisms/WidgetFormPanel';
@@ -190,7 +190,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 				enabled: false
 			},
 			events: {
-				dataPointSelection: goOverBySelection(widget, chart)
+				dataPointSelection: drillDownBySelection(widget, chart)
 			},
 			toolbar: {
 				show: false

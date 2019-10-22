@@ -1,9 +1,8 @@
 // @flow
-
 export type Module =
 	| 'dashboards'
 	| 'dashboardDataSet'
-	| 'dashboardDrildown'
+	| 'dashboardDrilldown'
 	| 'dashboardSettings'
 	| 'dashboardTestGetData'
 	| 'DashboardsSettings'

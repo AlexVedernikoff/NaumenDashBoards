@@ -1,17 +1,44 @@
 // @flow
-import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import type {AttrSelectProps} from 'components/organisms/WidgetFormPanel/types';
+import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class Summary extends DataFormBuilder {
-	renderInputs = () => (
-		<Fragment>
-			{this.renderSourceInput()}
-			{this.renderIndicatorInput()}
-			{this.renderAggregateInput(FIELDS.aggregation, FIELDS.indicator)}
-		</Fragment>
+export class Summary extends OrderFormBuilder {
+	defaultOrder = [1];
+
+	renderCompositeInputs = (aggregation: string, indicator: string) => this.combineInputs(
+		this.renderAggregateInput(aggregation, indicator),
+		this.renderIndicatorInput(indicator)
 	);
+
+	renderIndicatorInput = (indicator: string) => {
+		const {values} = this.props;
+
+		const props: AttrSelectProps = {
+			getOptionLabel: this.getLabelWithSource,
+			name: indicator,
+			placeholder: 'Показатель',
+			value: values[indicator],
+			withCreateButton: true
+		};
+
+		return this.renderAttrSelect(props);
+	};
+
+	renderInputs = () => {
+		const {aggregation, indicator, source} = FIELDS;
+
+		return (
+			<Fragment>
+				{this.renderModal()}
+				{this.renderAddSourceInput()}
+				{this.renderByOrder(this.renderOrderSource(false), source)}
+				{this.renderByOrder(this.renderCompositeInputs, [aggregation, indicator], true)}
+			</Fragment>
+		);
+	};
 
 	render () {
 		return this.renderInputs();

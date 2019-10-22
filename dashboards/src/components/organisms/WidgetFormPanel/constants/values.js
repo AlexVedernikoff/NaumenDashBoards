@@ -20,12 +20,9 @@ const COLORS = [
 	'#FFFE55'
 ];
 
-const ORDER = [1, 2];
-
 const VALUES = {
 	ATTR_TYPES,
-	COLORS,
-	ORDER
+	COLORS
 };
 
 export default VALUES;

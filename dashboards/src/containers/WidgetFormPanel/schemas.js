@@ -47,8 +47,7 @@ Schema[CHART_VARIANTS.COLUMN_STACKED] = object({
 
 Schema[CHART_VARIANTS.COMBO] = object({
 	diagramName: string().required(insertDiagramName),
-	name: string().required(insertName),
-	source: object().nullable().required(insertSource)
+	name: string().required(insertName)
 });
 
 Schema[CHART_VARIANTS.DONUT] = object({

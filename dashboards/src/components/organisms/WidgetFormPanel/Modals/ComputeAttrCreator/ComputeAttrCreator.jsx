@@ -1,19 +1,20 @@
 // @flow
 import {COMPUTED_ATTR, operators, TYPES} from './constants';
-import Control from './Control';
-import type {Control as ControlType} from './Control/types';
+import type {Control, Props, State} from './types';
 import {createOrderName} from 'utils/widget';
 import {getAggregateOptions} from 'utils/aggregate';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import Modal from 'components/molecules/Modal';
 import type {OptionType} from 'react-select/src/types';
-import type {Props, State} from './types';
+import {number} from 'yup';
 import React, {Component} from 'react';
+import {Select} from 'components/molecules';
 import styles from './styles.less';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 import uuid from 'tiny-uuid';
 
 const FIRST_NAME = uuid();
+const rule = number().required();
 
 export class ComputeAttrCreator extends Component<Props, State> {
 	state = {
@@ -41,11 +42,12 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		const order = values[FIELDS.order];
 		const sources = [];
 
-		if (order.length) {
+		if (order) {
 			order.forEach(num => {
-				let source = values[createOrderName(num)(FIELDS.source)];
+				const source = values[createOrderName(num)(FIELDS.source)];
 
 				if (source) {
+					source.datakey = values[createOrderName(num)(FIELDS.dataKey)];
 					sources.push({...source});
 				}
 			});
@@ -94,11 +96,11 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		return nextName;
 	};
 
-	handleCreateConstant = (name: string, constant: number) => {
+	handleCreateConstant = (name: string, value: string) => {
 		const {constants} = this.state;
 		const option = {
-			label: constant,
-			value: constant
+			label: value,
+			value
 		};
 
 		this.setState({
@@ -169,7 +171,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		}
 	};
 
-	changeControl = (name: string, control: ControlType) => {
+	changeControl = (name: string, control: Control) => {
 		this.setState(({controls}) => ({
 			controls: {
 				...controls,
@@ -256,8 +258,8 @@ export class ComputeAttrCreator extends Component<Props, State> {
 
 					computeData[name] = {
 						aggregation: aggregationValue && aggregationValue.value,
-						classFqn: value.value,
-						attr: attr && attr.value
+						attr: attr && attr.value,
+						dataKey: value.datakey
 					};
 				}
 
@@ -275,7 +277,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		});
 	};
 
-	getOptions = (control: ControlType) => {
+	getOptions = (control: Control) => {
 		const {AGGREGATION, ATTRIBUTE} = TYPES;
 		const {attributes} = this.props;
 		const {sources, constants, controls} = this.state;
@@ -287,22 +289,35 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		}
 
 		if (type === ATTRIBUTE && this.isSource(prevValue)) {
-			return prevValue ? attributes[prevValue.value].data : [];
+			return prevValue ? attributes[prevValue.value] && attributes[prevValue.value].data : [];
 		}
 
 		return [...operators, ...constants, ...sources];
 	};
 
-	renderControl = (control: ControlType) => {
+	renderControl = (control: Control) => {
 		const options = this.getOptions(control);
+		const {name, value} = control;
+		const form = {
+			onSubmit: this.handleCreateConstant,
+			rule,
+			value: 0
+		};
 
 		return (
-			<Control key={control.name} attr={control.type === TYPES.ATTRIBUTE}
-				data={control}
-				handleSelect={this.handleSelect}
-				options={options}
-				onCreateConstant={this.handleCreateConstant}
-			/>
+			<div className={styles.controlContainer} key={name}>
+				<Select
+					attr={control.type === TYPES.ATTRIBUTE}
+					form={form}
+					isSearchable={false}
+					name={name}
+					onSelect={this.handleSelect}
+					options={options}
+					placeholder="..."
+					value={value}
+					withCreateButton={true}
+				/>
+			</div>
 		);
 	};
 

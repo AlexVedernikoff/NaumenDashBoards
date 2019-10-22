@@ -1,14 +1,16 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {LINKS_EVENTS} from './constants';
 
 type Filter = {
-	code: string,
+	attr: Attribute,
+	group: ?string,
 	value: string | number
 }
 
-export type GoOverMixin = {
+export type DrillDownMixin = {
 	cases?: [],
-	classCode?: string,
+	classFqn?: string,
 	filters: Array<Filter>,
 	title: string
 }

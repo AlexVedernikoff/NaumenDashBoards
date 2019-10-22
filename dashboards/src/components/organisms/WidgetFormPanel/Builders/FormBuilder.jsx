@@ -1,11 +1,12 @@
 // @flow
-import {CheckBox, Divider, Label, Select, TextArea} from 'components/atoms';
+import {CheckBox, Divider, Label, TextArea} from 'components/atoms';
 import type {CheckBoxProps, LabelProps, SelectProps, State, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
 import {ErrorMessage} from 'formik';
 import type {FormikProps} from 'formik';
 import type {OptionType} from 'react-select/src/types';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component} from 'react';
+import {Select} from 'components/molecules';
 import {styles} from 'components/organisms/WidgetFormPanel';
 
 export class FormBuilder extends Component<Props & FormikProps, State> {
@@ -33,7 +34,7 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 
 	renderSelect = (props: SelectProps) => (
 		<div className={styles.field}>
-			<Select onSelect={props.handleSelect || this.handleSelect} {...props} />
+			<Select onSelect={props.onSelect || this.handleSelect} {...props} />
 			<span className={styles.error}>
 				<ErrorMessage name={props.name}/>
 			</span>
@@ -54,7 +55,7 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 
 	renderTextArea = (props: TextAreaProps) => {
 		const {handleBlur, handleChange} = this.props;
-		const {label, name, placeholder, size, value} = props;
+		const {label, name, placeholder, value} = props;
 
 		return (
 			<div className={styles.field}>
@@ -65,7 +66,6 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 					onChange={handleChange}
 					onReset={this.handleResetTextArea}
 					placeholder={placeholder}
-					size={size}
 					value={value}
 				/>
 				<span className={styles.error}>
