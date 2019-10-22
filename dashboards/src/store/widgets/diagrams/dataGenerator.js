@@ -1,4 +1,4 @@
-// TODO: временно, для целей демонстрации
+// TODO: временно, для разработки на фронте
 import moment from 'moment';
 import {CHART_VARIANTS, getChartType} from 'utils/chart';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
@@ -91,12 +91,12 @@ const getComboChartData = (widget) => {
 
 	widget.order.forEach(num => {
 		const source = widget[`${FIELDS.source}_${num}`];
-		const chart = widget[`${FIELDS.chart}_${num}`];
+		const type = widget[`${FIELDS.type}_${num}`];
 
-		if (source && chart)
+		if (source && type)
 		series.push({
 			name: source.label,
-			type: getChartType(chart.value),
+			type: getChartType(type.value),
 			data: getDataset()
 		});
 	});

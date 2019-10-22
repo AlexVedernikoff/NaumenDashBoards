@@ -1,5 +1,5 @@
 // @flow
-import {ColorPicker} from 'components/atoms';
+import {ColorPicker} from 'components/molecules';
 import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import type {Node} from 'react';

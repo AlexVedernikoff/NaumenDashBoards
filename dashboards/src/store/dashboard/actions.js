@@ -38,6 +38,7 @@ const getRoleMaster = (): ThunkAction => async (dispatch: Dispatch) => {
 		dispatch(receiveRoleMaster(data));
 	} catch (e) {
 		dispatch(recordDashboardError());
+		throw e;
 	}
 };
 
@@ -50,13 +51,13 @@ const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 };
 
 /**
- * Сброс дашборда на дефотные настройки мастера
+ * Сброс дашборда на дефолтные настройки мастера
  * @returns {ThunkAction}
  */
 const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const context = getState().dashboard.context;
 	const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-	await client.post(buildUrl('DevDashboardSettings', 'resetPersonalDashboard', params));
+	await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
 };
 
 /**

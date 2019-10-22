@@ -20,7 +20,7 @@ const config: FormikConfig = {
 
 	validationSchema: () => lazy((values: ValidateType) => schemas[values.type.value]),
 
-	handleSubmit: async (values: FormikValues, {props}: FormikProps) => {
+	handleSubmit: (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;
 		const {asDefault, ...data} = values;
 		const filteredData = filter(data);

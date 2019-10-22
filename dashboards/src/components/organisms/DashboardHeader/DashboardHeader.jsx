@@ -1,6 +1,6 @@
 // @flow
 import {Button, DropDownFiles} from 'components/atoms';
-import CloseIcon from 'icons/header/close.svg';
+import {CloseIcon} from 'icons/form';
 import {createSnapshot, FILE_VARIANTS} from 'utils/export';
 import {gridRef} from 'components/organisms/LayoutGrid';
 import IconRefresh from 'icons/header/refresh.svg';
@@ -61,7 +61,7 @@ export class DashboardHeader extends Component<Props> {
 			// TODO: инлайн стили временно
 			return (
 				<div style={{padding: '0 10px'}}>
-					<Button type="button" onClick={seeDashboard}>Просмотреть</Button>;
+					<Button type="button" onClick={seeDashboard}>Просмотреть</Button>
 				</div>
 			);
 		}
@@ -82,11 +82,8 @@ export class DashboardHeader extends Component<Props> {
 	};
 
 	render () {
-		const {name} = this.props;
-
 		return (
 			<header className={styles.header}>
-				<p className={styles.title}>Дашборд {`"${name}"`}</p>
 				<ul className={styles.nav}>
 					<li className={styles.navItem}>
 						{this.renderDropDown()}

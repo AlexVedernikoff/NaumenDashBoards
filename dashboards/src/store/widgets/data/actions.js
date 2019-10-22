@@ -19,7 +19,7 @@ const getWidgets = (isInit: boolean = false): ThunkAction => async (dispatch: Di
 	try {
 		const context = getState().dashboard.context;
 		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-		const {data} = await client.post(buildUrl('DevDashboardSettings', 'getSettings', params));
+		const {data} = await client.post(buildUrl('dashboardSettings', 'getSettings', params));
 
 		if (Array.isArray(data)) {
 			const widgets = data.filter(w => w.value).map(w => {
@@ -83,10 +83,10 @@ const saveNewLayout = (context: Context, editable: boolean, asDefault: boolean):
 			value: widgetMap[key].layout
 		}));
 
-		await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), {
+		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			// TODO вернуть editable,
+			editable,
 			layoutsSettings
 		});
 	} catch (e) {
@@ -117,11 +117,11 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 		const data = {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			// TODO вернуть editable,
+			editable,
 			widgetKey: formData.id,
 			widgetSettings: formData
 		};
-		await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), data);
+		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
 		await dispatch(saveNewLayout(context, editable, asDefault));
 		dispatch(updateWidget(formData));
 		dispatch(fetchDiagramData(formData));
@@ -145,10 +145,10 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 		const data = {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			// TODO вернуть editable,
+			editable,
 			widgetSettings: formData
 		};
-		const {data: id} = await client.post(buildUrl('DevDashboardSettings', method, 'requestContent,user'), data);
+		const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
 		await dispatch(saveNewLayout(context, editable, asDefault));
 
 		formData.layout.i = id;

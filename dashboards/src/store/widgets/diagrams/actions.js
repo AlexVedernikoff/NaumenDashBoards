@@ -1,13 +1,13 @@
 // @flow
-// TODO: это для сборки с бэком
-// import {buildUrl, client} from 'utils/api';
+import {buildUrl, client} from 'utils/api';
+import type {CompositeFields, ReceiveDiagramPayload} from './types';
 import {DIAGRAMS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
+// TODO: это для сборки с фронтом
 import generateData from './dataGenerator';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {OptionType} from 'react-select/src/types';
-import type {ReceiveDiagramPayload} from './types';
 import type {Widget} from 'store/widgets/data/types';
 import {WIDGET_VARIANTS} from 'utils/widget';
 
@@ -43,60 +43,63 @@ const createCircleChartData = (widget: Widget) => {
 
 const createName = (name: string, num: number) => `${name}_${num}`;
 
-const createComboChartData = (widget: Widget) => {
+const createCompositeData = ({common, deep}: CompositeFields) => (widget: Widget) => {
 	const {order} = widget;
-	const {aggregation, breakdown, chart, descriptor, group, source, type, xAxis, yAxis} = FIELDS;
 	const data = {
 		type: getValue(widget[type]),
-		charts: []
+		data: {}
 	};
 
 	if (Array.isArray(order)) {
 		order.forEach(num => {
 			let chartItem = {};
-			[aggregation, group, source].forEach(baseName => {
+
+			deep.forEach(baseName => {
 				chartItem[baseName] = getValue(widget[createName(baseName, num)]);
 			});
 
-			[breakdown, descriptor, xAxis, yAxis].forEach(baseName => {
+			common.forEach(baseName => {
 				chartItem[baseName] = widget[createName(baseName, num)];
 			});
 
-			chartItem[type] = getValue(widget[createName(chart, num)]);
-
-			data.charts.push(chartItem);
+			data.data[widget[createName(dataKey, num)]] = chartItem;
 		});
 	}
 
 	return data;
 };
 
-const createSummaryData = (widget: Widget) => {
-	const {aggregation, descriptor, indicator, source, type} = widget;
+const {
+	aggregation,
+	breakdown,
+	calcTotalColumn,
+	calcTotalRow,
+	column,
+	dataKey,
+	descriptor,
+	group,
+	indicator,
+	row,
+	source,
+	sourceForCompute,
+	type,
+	xAxis,
+	yAxis
+} = FIELDS;
 
-	return {
-		aggregation: getValue(aggregation),
-		descriptor,
-		indicator,
-		source: getValue(source),
-		type: getValue(type)
-	};
+const comboFields: CompositeFields = {
+	common: [breakdown, descriptor, sourceForCompute, xAxis, yAxis],
+	deep: [aggregation, group, source, type]
 };
 
-const createTableData = (widget: Widget) => {
-	const {aggregation, breakdown, calcTotalColumn, calcTotalRow, column, descriptor, row, source, type} = widget;
+const summaryFields: CompositeFields = {
+	common: [descriptor, indicator, sourceForCompute],
+	deep: [aggregation, source]
+};
 
-	return {
-		aggregation: getValue(aggregation),
-		breakdown,
-		calcTotalColumn,
-		calcTotalRow,
-		column,
-		descriptor,
-		row,
-		source: getValue(source),
-		type: getValue(type)
-	};
+const tableFields: CompositeFields = {
+	common: [breakdown, calcTotalColumn, calcTotalRow, column, descriptor, row, sourceForCompute],
+	deep: [aggregation, source]
 };
 
 const resolvePostDataCreator = (type: string) => {
@@ -108,12 +111,12 @@ const resolvePostDataCreator = (type: string) => {
 		[BAR_STACKED]: createAxisChartData,
 		[COLUMN]: createAxisChartData,
 		[COLUMN_STACKED]: createAxisChartData,
-		[COMBO]: createComboChartData,
+		[COMBO]: createCompositeData(comboFields),
 		[DONUT]: createCircleChartData,
 		[LINE]: createAxisChartData,
 		[PIE]: createCircleChartData,
-		[SUMMARY]: createSummaryData,
-		[TABLE]: createTableData
+		[SUMMARY]: createCompositeData(summaryFields),
+		[TABLE]: createCompositeData(tableFields)
 	};
 
 	return creators[type];
@@ -126,17 +129,16 @@ const resolvePostDataCreator = (type: string) => {
  */
 const fetchDiagramData = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(requestDiagram(widget.id));
+	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+	const {COMBO} = CHART_VARIANTS;
 
 	try {
-		// TODO: это для сборки с бэком
-		/*
 		const type = widget.type.value;
 		const postData = resolvePostDataCreator(type)(widget);
-		const method = type === CHART_VARIANTS.COMBO ? 'getDataForCompositeDiagram' : 'getDataForDiagram';
+		const method = [COMBO, SUMMARY, TABLE].includes(type) ? 'getDataForCompositeDiagram' : 'getDataForDiagram';
 		const {data} = await client.post(buildUrl('dashboardDataSet', method, 'requestContent'), postData);
-		*/
-
-		const data = generateData(widget);
+		// TODO: это для сборки с фронтом
+		//const data = generateData(widget);
 		dispatch(
 			receiveDiagram({data, id: widget.id})
 		);

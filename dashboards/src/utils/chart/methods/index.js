@@ -1,6 +1,6 @@
 // @flow
-import {goOverBySelection} from './goOverBySelection';
+import {drillDownBySelection} from './drillDownBySelection';
 
 export {
-	goOverBySelection
+	drillDownBySelection
 };

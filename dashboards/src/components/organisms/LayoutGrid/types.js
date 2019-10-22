@@ -10,6 +10,6 @@ export type State = {
 export type Props = {
 	editable: boolean,
 	onLayoutChange?: (layout: Layout) => void,
-	onWidgetSelect: (event: SyntheticMouseEvent<HTMLButtonElement>) => void,
+	onSelectWidget: (id: string) => void,
 	widgets: WidgetMap,
 } & ConnectedProps & ConnectedFunctions;

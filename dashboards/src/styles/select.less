@@ -1,0 +1,65 @@
+@color: #767676;
+@font-size: 14px;
+
+.dashboard__select {
+	border: none;
+	outline: none;
+}
+
+.dashboard__select__control {
+	border: none !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.dashboard__select__input {
+	font-size: @font-size;
+}
+
+.dashboard__select__indicators {
+	svg {
+		margin-left: 15px;
+	}
+}
+
+.dashboard__select__single-value {
+	font-size: @font-size;
+	width: 100%;
+}
+
+.dashboard__select__option {
+	font-size: @font-size !important;
+
+	&--is-focused {
+		background-color: #EBEBEB !important;
+	}
+
+	&--is-selected {
+		background-color: #F4F4F4 !important;
+		color: #000 !important;
+	}
+}
+
+.dashboard__select__placeholder {
+	color: #000;
+	font-size: @font-size;
+}
+
+.dashboard__select__menu {
+	border: 1px solid #E4E4E4;
+	border-radius: 0 !important;
+	margin-top: 0 !important;
+	z-index: 100 !important;
+}
+
+.dashboard__select__small {
+	.dashboard__select__control {
+		background: #EFF3F8;
+		border: 1px solid #EFF3F8;
+		font-size: 10px;
+	}
+
+	.dashboard__select__single-value, .dashboard__select__option, .dashboard__select__placeholder {
+		font-size: 9px  !important;
+	}
+}

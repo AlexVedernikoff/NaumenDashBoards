@@ -2,14 +2,15 @@
 import type {DiagramMap} from 'store/widgets/diagrams/types';
 import type {GoOverMixin} from 'store/widgets/links/types';
 import type {ThunkAction} from 'store/types';
+import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
 	diagrams: DiagramMap
 };
 
 export type ConnectedFunctions = {
-	editDashboard: () => ThunkAction,
-	goOver: (id: string, mixin: ?GoOverMixin) => ThunkAction
+	comboDrillDown: (widget: Widget, orderNum: number) => ThunkAction,
+	drillDown: (widget: Widget, mixin: ?GoOverMixin) => ThunkAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

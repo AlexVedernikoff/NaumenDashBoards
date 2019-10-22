@@ -1,0 +1,35 @@
+:local {
+	.container {
+		align-items: center;
+		display: flex;
+		height: 100%;
+		width: 100%;
+	}
+
+	.input {
+		width: calc(100% - 40px);
+	}
+
+	.formIcon {
+		background-color: white;
+		cursor: pointer;
+		padding: 0 5px;
+		z-index: 99;
+	}
+
+	.editIcon {
+		.formIcon();
+		right: 0;
+		top: 0;
+	}
+
+	.successIcon {
+		.formIcon();
+		color: green;
+	}
+
+	.cancelIcon {
+		.formIcon();
+		color: red;
+	}
+}

@@ -1,5 +1,4 @@
 // @flow
-import {BASE_URL} from './constants';
 import type {Method, Module} from './types';
 
 /**
@@ -10,9 +9,14 @@ import type {Method, Module} from './types';
  * @returns {string}
  */
 const buildUrl = (module: Module, method: Method, params: string = '') => {
-	let url: string = `${BASE_URL}`;
+	const dev = process.env.NODE_ENV === 'development';
+	const url = dev ? 'http://nordclan.nsd.naumen.ru/sd/services/rest' : window.jsApi.getAppRestBaseUrl();
 
-	return `${url}?func=modules.${module}.${method}&params=${params}`;
+	if (dev && module === 'dashboardSettings') {
+		module = 'DevDashboardSettings';
+	}
+
+	return `${url}/exec-post?func=modules.${module}.${method}&params=${params}`;
 };
 
 export default buildUrl;

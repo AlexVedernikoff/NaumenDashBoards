@@ -1,42 +1,34 @@
 // @flow
-import {Button} from 'components/atoms';
-import {components} from 'react-select';
-import ComputeAttrCreator from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator';
-import type {ComputedAttr} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/types';
-import {createOrderName} from 'utils/widget';
+import type {Attribute} from 'store/sources/attributes/types';
+import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/constants';
+import {createOrderName, getNumberFromName} from 'utils/widget';
 import Cross from 'icons/form/cross.svg';
 import DataFormBuilder from './DataFormBuilder';
-import {FIELDS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
-import type {OrderAttrSelectProps, RenderFunction} from 'components/organisms/WidgetFormPanel/types';
-import React, {Fragment} from 'react';
+import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
+import type {LabelProps, RenderFunction} from 'components/organisms/WidgetFormPanel/types';
+import React from 'react';
+import uuid from 'tiny-uuid';
 
 export class OrderFormBuilder extends DataFormBuilder {
-	state = {
-		showModal: false
-	};
+	defaultOrder = [1, 2];
 
-	componentDidMount () {
+	async componentDidMount () {
 		const {setFieldValue, values} = this.props;
 
 		if (!values[FIELDS.order]) {
-			setFieldValue(FIELDS.order, VALUES.ORDER);
+			this.defaultOrder.forEach(num => {
+				setFieldValue(createOrderName(num)(FIELDS.dataKey), uuid());
+			});
 		}
+
+		await setFieldValue(FIELDS.order, this.defaultOrder);
 	}
 
-	handleShowModal = (showModal: boolean) => () => this.setState({showModal});
-
-	handleCreateAttr = (attr: ComputedAttr) => {
-		const {setFieldValue, values} = this.props;
-		let computedAttrs = values[FIELDS.computedAttrs];
-		computedAttrs = Array.isArray(computedAttrs) ? [attr, ...computedAttrs] : [attr];
-
-		setFieldValue(FIELDS.computedAttrs, computedAttrs);
-		this.handleShowModal(false)();
-	};
+	getLabelWithSource = (a: Attribute) => a.type !== COMPUTED_ATTR ? `${a.title} (${a.sourceName})` : a.title;
 
 	getBaseName = (name: string) => name.split('_').shift();
 
-	getOrder = () => this.props.values.order || VALUES.ORDER;
+	getOrder = () => this.props.values.order || this.defaultOrder;
 
 	addSet = () => {
 		const {setFieldValue, values} = this.props;
@@ -44,15 +36,17 @@ export class OrderFormBuilder extends DataFormBuilder {
 		const nextNumber = order[order.length - 1] + 1;
 
 		setFieldValue(FIELDS.order, [...order, nextNumber]);
+		setFieldValue(createOrderName(nextNumber)(FIELDS.dataKey), uuid());
+		setFieldValue(createOrderName(nextNumber)(FIELDS.sourceForCompute), true);
 	};
 
 	removeSet = (e: SyntheticMouseEvent<HTMLImageElement>) => {
 		const name = e.currentTarget.dataset.name;
-		const number = this.getNumberFromName(name);
+		const number = getNumberFromName(name);
 		const {setFieldValue, values} = this.props;
 		const {order} = values;
 
-		if (order.length > 2) {
+		if (order.length > this.defaultOrder.length) {
 			setFieldValue(FIELDS.order, order.filter(n => n !== number));
 		}
 	};
@@ -74,54 +68,57 @@ export class OrderFormBuilder extends DataFormBuilder {
 		});
 	};
 
-	renderByOrder = (renderFunction: RenderFunction, ...names: Array<string>) => {
-		return this.getOrder().map(num => renderFunction(...names.map(createOrderName(num))));
+	renderByOrder = (renderFunction: RenderFunction, names: Array<string> | string, accordingSource: boolean = false) => {
+		const {values} = this.props;
+
+		return this.getOrder().map(num => {
+			const sourceForCompute = values[createOrderName(num)(FIELDS.sourceForCompute)];
+
+			if (!accordingSource || (accordingSource && !sourceForCompute)) {
+				const renderNames = Array.isArray(names) ? names.map(createOrderName(num)) : [createOrderName(num)(names)];
+				return renderFunction(...renderNames);
+			}
+		});
 	};
 
-	renderOrderSource = (source: string) => {
-		const {order} = this.props.values;
-		const deletable = order && order.length > 2;
+	renderAddSourceInput = () => {
+		const props: LabelProps = {
+			icon: 'plus',
+			name: 'Источник',
+			onClick: this.addSet
+		};
+
+		return this.renderLabel(props);
+	};
+
+	renderSourceComputeHandler = (source: string, withComputeHandler: boolean) => {
+		const order = this.getOrder();
+		const name = this.createRefName(source, FIELDS.sourceForCompute);
+		const isNotFirst = getNumberFromName(source) !== order[0];
+		const {[name]: value} = this.props.values;
+
+		if (isNotFirst && withComputeHandler) {
+			const props = {
+				label: 'Только для вычислений',
+				name,
+				value
+			};
+
+			return this.renderCheckBox(props);
+		}
+	};
+
+	renderOrderSource = (withComputeHandler: boolean) => (source: string) => {
+		const order = this.getOrder();
+		const deletable = order && order.length > this.defaultOrder.length;
 
 		return (
 			<div className={styles.positionRelative} key={source}>
 				{deletable && <Cross data-name={source} onClick={this.removeSet} className={styles.deleteSourceIcon} />}
 				{this.renderSourceInput(source)}
+				{this.renderSourceComputeHandler(source, withComputeHandler)}
 			</div>
 		);
-	};
-
-	renderModal = () => {
-		const {showModal} = this.state;
-
-		if (showModal) {
-			return <ComputeAttrCreator onSubmit={this.handleCreateAttr} onClose={this.handleShowModal(false)} />;
-		}
-	};
-
-	renderAttrListWithCreator = (props: any) => {
-		return (
-			<Fragment>
-				<components.MenuList {...props}>
-					<Button className="m-1" onClick={this.handleShowModal(true)}>Создать поле</Button>
-					{props.children}
-				</components.MenuList>
-			</Fragment>
-		);
-	};
-
-	renderAttrSelectWithCreator = (props: OrderAttrSelectProps) => {
-		const {computedAttrs} = this.props.values;
-
-		if (props.withCreate) {
-			const MenuList = this.renderAttrListWithCreator;
-			props.components = {MenuList};
-
-			if (Array.isArray(computedAttrs)) {
-				props.options = [...computedAttrs, ...props.options];
-			}
-		}
-
-		return this.renderAttrSelect(props);
 	};
 }
 

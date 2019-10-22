@@ -1,5 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import type {Form, SelectSize} from 'components/molecules/Select/types';
 import type {LayoutItem} from 'utils/layout/types';
 import type {OptionType} from 'react-select/src/types';
 
@@ -51,10 +52,15 @@ export type ColorPickerProps = {
 
 type Select = {
 	components?: {[string]: any},
-	handleSelect?: (name: string, value: OptionType) => void | Promise<void>;
+	form?: Form,
+	onClickCreateButton?: () => void,
+	onSelect?: (name: string, value: OptionType) => void | Promise<void>;
 	isDisabled?: boolean,
 	name: string,
 	placeholder: string,
+	size?: SelectSize,
+	withCreateButton?: boolean,
+	withEditIcon?: boolean,
 };
 
 export type SelectProps = {
@@ -63,13 +69,10 @@ export type SelectProps = {
 } & Select;
 
 export type AttrSelectProps = {
+	attr?: boolean,
 	options?: Array<Attribute>,
 	value: Attribute | null
 } & Select;
-
-export type OrderAttrSelectProps = {
-	withCreate: boolean
-} & AttrSelectProps;
 
 export type ButtonProps = {
 	block?: boolean,
