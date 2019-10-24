@@ -2,10 +2,10 @@ export default [
 	{
 		uuid: 'employee$1408605',
 		'geoposition': {
-			'latitude': 56.1351,
+			'latitude': 59.1351,
 			'longitude': 60.1936,
 			'accuracy': 165.0,
-			'date': '25.11.2019 13:50'
+			'date': '31.11.2019 10:50'
 		}
 	},
 	{

@@ -6,13 +6,15 @@ type OwnProps = {
 };
 
 export type ConnectedProps = {
-	marker: Point
 };
 
 export type ConnectedFunctions = {
-	marker: Point
+	openToggle: () => void
 };
 
 export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
 
-export type State = {};
+export type State = {
+	actionsShadow: boolean,
+	headerShadow: boolean
+};

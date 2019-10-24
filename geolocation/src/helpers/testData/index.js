@@ -7,7 +7,7 @@ export default [
 			latitude: 56.1351,
 			longitude: 60.2636,
 			accuracy: 1005.0,
-			date: '15.10.2019 12:15'
+			date: '15.11.2019 12:15'
 		},
 		errorMessage: '',
 		options:
@@ -23,6 +23,22 @@ export default [
 			{
 				label: 'Должность',
 				value: 'Инженер технической поддержки'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
 			}
 		],
 		actions:
@@ -98,6 +114,113 @@ export default [
 	{
 		type: 'static',
 		header: 'Заявка-14325 Нет доступа в интернет',
+		geoposition: {
+			latitude: 56.1351,
+			longitude: 60.163959
+		},
+		errorMessage: '',
+		options: [
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Контакты',
+				value: 'Петров Алексей Сергеевич, тел. +7 908 1234567'
+			}
+		],
+		actions: [
+			{
+				name: 'Перейти на карточку',
+				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:serviceCall$63322256'
+			}
+		]
+	},
+	{
+		type: 'static',
+		header: 'Заявка-14326 Нет доступа в интернет',
+		geoposition: {
+			latitude: 56.1351,
+			longitude: 60.16396
+		},
+		errorMessage: '',
+		options: [
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Контакты',
+				value: 'Петров Алексей Сергеевич, тел. +7 908 1234567'
+			}
+		],
+		actions: [
+			{
+				name: 'Перейти на карточку',
+				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:serviceCall$63322256'
+			}
+		]
+	},
+	{
+		type: 'static',
+		header: 'Заявка-14327 Нет доступа в интернет',
+		geoposition: {
+			latitude: 56.41351,
+			longitude: 60.16396
+		},
+		errorMessage: '',
+		options: [
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Клиент',
+				value: 'Кондитерская Кокос и Ананас'
+			},
+			{
+				label: 'Контакты',
+				value: 'Петров Алексей Сергеевич, тел. +7 908 1234567'
+			}
+		],
+		actions: [
+			{
+				name: 'Перейти на карточку',
+				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:serviceCall$63322256'
+			}
+		]
+	},
+	{
+		type: 'static',
+		header: 'Заявка-14327 Нет доступа в интернет',
 		geoposition: {
 			latitude: 56.1351,
 			longitude: 60.16396

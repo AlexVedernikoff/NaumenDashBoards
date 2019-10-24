@@ -1,76 +1,31 @@
 // @flow
 import {connect} from 'react-redux';
-import CircleMarker from 'components/atoms/CircleMarker';
-import {functions, props} from './selectors';
-import type {Geoposition} from 'types/geoposition';
-import {iconMarker} from 'helpers/icon';
-import {Marker} from 'react-leaflet';
+import DynamicMarker from 'components/molecules/DynamicMarker';
+import MultipleMarker from 'components/molecules/MultipleMarker';
+import type {MultiplePoint} from 'types/multiple';
 import type {Point} from 'types/point';
-import PopupMarker from 'components/atoms/PopupMarker';
 import type {Props, State} from './types';
+import {props} from './selectors';
 import React, {Component} from 'react';
-import TooltipMarker from 'components/atoms/TooltipMarker';
+import StaticMarker from 'components/molecules/StaticMarker';
 
 export class MarkersList extends Component<Props, State> {
-	checkActive = (dateMarker: string) => {
-		const {params} = this.props;
-		const dataMarker = dateMarker.split(' ');
-		let date = dataMarker[0].split('.').reverse().join('.') + ' ' + dataMarker[1];
-		const dataMarkerTimestamp = new Date(date).getTime();
-		const isActivePoint = new Date().getTime() - dataMarkerTimestamp < params.timeIntervalInactivity.length * 1000;
+	renderDynamicMarker = (marker: Point, key: number) => <DynamicMarker marker={marker} key={key} />;
 
-		return isActivePoint ? 'colorDynamicActivePoint' : 'colorDynamicInactivePoint';
-	};
+	renderMultipleMarker = (marker: MultiplePoint, key: number) => <MultipleMarker marker={marker} key={key} />;
 
-	getColor = (markerType: string) => this.props.params[markerType];
-
-	renderCircle = (geoposition: Geoposition, color: string) => (<CircleMarker geoposition={geoposition} color={color} />);
-
-	renderStaticMarker = (marker: Point, id: string) => {
-		const {geoposition, header, type} = marker;
-		const {latitude, longitude} = geoposition;
-
-		return (
-			<Marker
-				key={'marker' + id}
-				icon={iconMarker(type, this.getColor('colorStaticPoint'))}
-				position={[latitude, longitude]}
-			>
-				<TooltipMarker title={header} />
-				<PopupMarker marker={marker}/>
-			</Marker>
-		);
-	};
-
-	renderDynamicMarker = (marker: Point, id: string) => {
-		const {geoposition, header, type} = marker;
-		const {latitude, longitude} = geoposition;
-		const markerActive = this.checkActive(geoposition.date);
-		const color = this.getColor(markerActive);
-
-		return (
-			<Marker
-				key={'marker' + id}
-				icon={iconMarker(type, color)}
-				position={[latitude, longitude]}
-			>
-				{this.renderCircle(geoposition, color)}
-				<TooltipMarker title={header} />
-				<PopupMarker marker={marker}/>
-			</Marker>
-		);
-	};
-
-	renderMarkers = (marker: Point, i: string) => marker.type === 'dynamic' ? this.renderDynamicMarker(marker, i) : this.renderStaticMarker(marker, i);
+	renderStaticMarker = (marker: Point, key: number) => <StaticMarker marker={marker} key={key} />;
 
 	render () {
-		const {dataMarkers} = this.props;
+		const {dynamicMarkers, multipleMarkers, staticMarkers} = this.props;
 
 		return (
 			<div>
-				{ Object.keys(dataMarkers).map(uuid => this.renderMarkers(dataMarkers[uuid], uuid))}
+				{dynamicMarkers.length && dynamicMarkers.map((marker, key) => this.renderDynamicMarker(marker, key))}
+				{multipleMarkers.length && multipleMarkers.map((marker, key) => this.renderMultipleMarker(marker, key))}
+				{staticMarkers.length && staticMarkers.map((marker, key) => this.renderStaticMarker(marker, key))}
 			</div>
 		);
 	}
 }
-export default connect(props, functions)(MarkersList);
+export default connect(props)(MarkersList);

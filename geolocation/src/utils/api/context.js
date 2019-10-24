@@ -31,7 +31,7 @@ const getParams = async () => {
 			colorStaticPoint: '#EB5757',
 			colorDynamicActivePoint: '#4D92C8',
 			colorDynamicInactivePoint: '#828282',
-			timeIntervalInactivity: {length: '1200', interval: 'SECOND'}
+			timeIntervalInactivity: {length: 1200, interval: 'SECOND'}
 		};
 	}
 

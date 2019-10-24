@@ -15,12 +15,13 @@ export class Controls extends Component<Props, State> {
 			hover: false
 		};
 	}
-	reloadActiveMarkers = () => {
-		const {reloadGeolocation, dynamicMarkersUuids} = this.props;
-		dynamicMarkersUuids && reloadGeolocation(dynamicMarkersUuids);
-	}
 
-	toggleHover = () => this.setState({hover: !this.state.hover})
+	reloadActiveMarkers = () => {
+		const {reloadGeolocation} = this.props;
+		reloadGeolocation();
+	};
+
+	toggleHover = () => this.setState({hover: !this.state.hover});
 
 	render () {
 		return (

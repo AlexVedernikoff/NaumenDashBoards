@@ -1,6 +1,9 @@
 // @flow
 import type {Context} from 'types/api';
 import {GEOLOCATION_EVENTS} from './constants';
+import type {MultiplePoint} from 'types/multiple';
+import type {Params} from 'types/params';
+import type {Point} from 'types/point';
 
 type SetContext = {
 	type: typeof GEOLOCATION_EVENTS.SET_CONTEXT,
@@ -42,10 +45,11 @@ export type GeolocationAction =
 
 export type GeolocationState = {
 	context: Context | Object,
-	dynamicMarkers: Object,
+	dynamicMarkers: Array<Point>,
 	error: boolean,
+	multipleMarkers: Array<MultiplePoint>,
 	loading: boolean,
-	params: Object,
-	staticMarkers: Object,
+	params: Params,
+	staticMarkers: Array<Point>,
 	success: boolean
 };

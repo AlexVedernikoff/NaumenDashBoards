@@ -1,28 +1,20 @@
 // @flow
-import type {Geoposition} from 'types/geoposition';
+import type {MultiplePoint} from 'types/multiple';
 import type {Point} from 'types/point';
 
 type OwnProps = {
-	dataMarkers: Object,
-	dateMarkers: string | null,
-	geoposition: Geoposition,
-	header: string,
-	marker: Point,
-	markerActive: string,
-	markerType: string,
+	marker: Point | MultiplePoint,
 	uuid: string
 };
 
-export type ConnectedFunctions = {
-	header: string
-};
 
 export type ConnectedProps = {
-	params: Object
+	dynamicMarkers: Array<Point>,
+	multipleMarkers: Array<MultiplePoint>,
+	staticMarkers: Array<Point>
 };
 
-export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
+export type Props = ConnectedProps & OwnProps;
 
 export type State = {
-	exampleStateValue: string
 };

@@ -19,19 +19,14 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 			return {
 				...state,
 				dynamicMarkers: action.payload.dynamic,
+				multipleMarkers: action.payload.multiple,
 				staticMarkers: action.payload.static,
 				success: true
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {
 				...state,
-				dynamicMarkers: {
-					...state.dynamicMarkers,
-					[action.payload.uuid]: {
-						...state.dynamicMarkers[action.payload.uuid],
-						geoposition: action.payload.geoposition
-					}
-				}
+				dynamicMarkers: action.payload
 			};
 		case GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR:
 			return {

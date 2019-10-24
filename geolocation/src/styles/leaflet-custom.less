@@ -4,7 +4,7 @@
 
 .requestPopup .leaflet-popup-content-wrapper {
     border-radius: 0;
-    width: 321px;
+    width: 320px;
 }
 
 .requestPopup .leaflet-popup-content {
@@ -12,17 +12,24 @@
 }
 
 .requestPopup a.leaflet-popup-close-button {
-    height: 18px;
-    padding: 4px;
+    color: #5F5F5F;
+    font-weight: 100;
+    font-size: 17px;
+    height: 16px;
+    padding-top: 8px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    padding-left: 6px;
     position: absolute;
     right: 6px;
-    top: 11px;
-    width: 18px;
+    top: 8px;
+    width: 16px;
 }
 
 .requestPopup a.leaflet-popup-close-button:hover {
     background: #DBDDE1;
-    border-radius: 15px;
+    border-radius: 16px;
+    color: #323232;
 }
 
 .leaflet-touch .leaflet-bar,
@@ -49,8 +56,49 @@
     margin-left: -10px;
 }
 
-#root {
-    min-height: 600px;
+.dynamicHover {
+    margin-top: -26px;
+    margin-left: -16px;
+}
+
+.multiple {
+    margin-top: -23px;
+    margin-left: -4px;
+}
+
+.multipleHover {
+    margin-top: -23px;
+    margin-left: -4px;
+}
+
+.staticHover {
+    margin-top: -26px;
+    margin-left: -10px;
+}
+
+.countMarker {
+    color: #7F7F7F;
+    font-family: Roboto;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 13px;
+    position: absolute;
+}
+
+.multipleCount {
+    right: -5px;
+    top: -21px;
+}
+
+.multipleHoverCount {
+    right: -8px;
+    top: -21px;
+}
+
+html, body, #root {
+    height: 100%;
+    overflow: hidden;
 }
 
 .leaflet-bar a {
@@ -72,4 +120,42 @@
 
 .leaflet-control-zoom-in[title] {
     background: #ffffff;
-}   
+} 
+.leaflet-popup {
+    margin-bottom: 48px;
+}
+
+.leaflet-top.leaflet-right {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.leaflet-control {
+    margin-top: -13px;
+    padding-right: 8px;
+    position: absolute;
+}
+
+.leaflet-control-zoom.leaflet-bar.leaflet-control {
+    margin-top: -8px;
+}
+
+.leaflet-popup-content {
+    width: 320px !important;
+}
+
+.leaflet-popup-content-wrapper {
+    padding: 0;
+}
+
+ .leaflet-div-icon {
+    background: none;
+    border: none;
+}
+
+.leaflet-popup-content-wrapper, 
+.leaflet-popup-tip {
+    box-shadow: 0px 4px 16px rgba(95, 95, 95, 0.2);
+}

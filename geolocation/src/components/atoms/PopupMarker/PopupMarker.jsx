@@ -1,61 +1,52 @@
 // @flow
-import React, {Component} from 'react';
 import {Popup} from 'react-leaflet';
+import PopupActions from 'components/atoms/PopupActions';
+import PopupHeader from 'components/atoms/PopupHeader';
+import PopupOptions from 'components/atoms/PopupOptions';
 import type {Props, State} from './types';
-import styles from './PopupMarker.less';
+import React, {Component} from 'react';
 
-export class PopupMarker extends Component<Props, State> {
-	renderOption = () => (option: Object, id: number) => {
-		const {label, value} = option;
-		const key = `option_${id}`;
+class PopupMarker extends Component<Props, State> {
+	constructor (props: Props) {
+		super(props);
 
-		return (
-			<div key={key} className={styles.popupOption}>
-				{label && <span className={styles.popupOptionLeft}>{label}:</span>}
-				{value && <span className={styles.popupOptionRight}>{value}</span>}
-			</div>
-		);
-	};
+		this.state = {
+			actionsShadow: false,
+			headerShadow: false
+		};
+	}
 
-	renderOptions = () => {
-		const {marker} = this.props;
-		const {options} = marker;
+	togglePopup = () => this.props.openToggle();
 
-		return options.map(this.renderOption());
-	};
-
-	renderAction = () => (action: Object, id: number) => {
-		const {link, name} = action;
-		const key = `action_${id}`;
-
-		return (
-			<a href={link} key={key}>{name}</a>
-		);
-	};
-
-	renderActions = () => {
-		const {marker} = this.props;
-		const {actions} = marker;
-
-		return actions.map(this.renderAction());
+	setShadow = (block: 'actionsShadow' | 'headerShadow', shadow: boolean) => {
+		if (block === 'actionsShadow') {
+			shadow !== this.state.actionsShadow && this.setState({actionsShadow: shadow});
+		} else if (block === 'headerShadow') {
+			shadow !== this.state.headerShadow && this.setState({headerShadow: shadow});
+		}
 	};
 
 	render () {
 		const {marker} = this.props;
+		const {actions, header, options} = marker;
+		const {actionsShadow, headerShadow} = this.state;
 
 		return (
-			<Popup autoClose={false} className='requestPopup'>
-				<div className={styles.popupLable} >{marker.header}</div>
-				<div className={styles.popupContent}>
-					<div className={styles.popupOptions}>
-						{/* {this.renderOptions()} */}
-					</div>
-					<div className={styles.popupActions}>
-						{/* {this.renderActions()} */}
-					</div>
-				</div>
+			<Popup
+				autoClose={false}
+				autoPan={true}
+				closeButton={true}
+				className='requestPopup'
+				closeOnEscapeKey={false}
+				onOpen={this.togglePopup}
+				onClose={this.togglePopup}
+			>
+				{header && <PopupHeader header={header} classShadow={headerShadow} />}
+				{options && <PopupOptions options={options} toggleShadow={this.setShadow} />}
+				{actions && <PopupActions actions={actions} classShadow={actionsShadow} />}
 			</Popup>
 		);
 	}
 }
+
 export default PopupMarker;

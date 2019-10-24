@@ -4,11 +4,7 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {reloadGeolocation} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => {
-	const {dynamicMarkers} = state.geolocation;
-	const dynamicMarkersUuids = Object.keys(dynamicMarkers).join(',');
-
 	return ({
-		dynamicMarkersUuids
 	});
 };
 

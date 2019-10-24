@@ -10,9 +10,9 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
  */
 
 export const props = (state: AppState): ConnectedProps => {
-	const bounds = {};
-	const {dynamicMarkers, staticMarkers} = state.geolocation;
-	Object.assign(bounds, dynamicMarkers, staticMarkers);
+	const {dynamicMarkers, staticMarkers, multipleMarkers} = state.geolocation;
+	const bounds = [].concat(dynamicMarkers, staticMarkers, multipleMarkers);
+
 	return {
 		bounds: getLatLngBounds(bounds)
 	};

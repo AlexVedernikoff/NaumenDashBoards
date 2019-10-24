@@ -7,16 +7,17 @@ export const initialGeolocationState: GeolocationState = {
 		contentCode: '',
 		subjectUuid: ''
 	},
-	dynamicMarkers: {},
+	dynamicMarkers: [],
 	error: false,
 	loading: false,
+	multipleMarkers: [],
 	params: {
 		colorDynamicActivePoint: '#4D92C8',
 		colorDynamicInactivePoint: '#828282',
 		colorStaticPoint: '#EB5757',
-		timeIntervalInactivity: {length: '1200', interval: 'SECOND'}
+		timeIntervalInactivity: {length: 1200, interval: 'SECOND'}
 	},
-	staticMarkers: {},
+	staticMarkers: [],
 	success: false
 };
 
