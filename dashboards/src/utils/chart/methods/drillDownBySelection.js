@@ -15,8 +15,8 @@ import type {Widget} from 'store/widgets/data/types';
  * @param {DrillDownMixin} mixin - объект примеси
  * @param {?Attribute} attr - атрибут по которому нужно будет провести фильтрацию для получения данных
  * выбранной области.
- * @param {?string} group - значение для группировки (опционально для графиков с осями)
  * @param {string | number} value - значение атрибута
+ * @param {?string} group - значение для группировки (опционально для графиков с осями)
  */
 const addFilter = (mixin: DrillDownMixin, attr: ?Attribute, value: string | number, group: ?string) => {
 	if (attr) {
@@ -54,6 +54,7 @@ const axisChart = (widget: Widget, {categories, series}: DiagramData, config: an
 const comboChart = (widget: Widget, {labels, series}: DiagramData, config: any, mixin: DrillDownMixin) => {
 	const {dataPointIndex, seriesIndex} = config;
 	let {dataKey} = series[seriesIndex];
+
 	const currentKey = Object.keys(widget)
 		.filter(key => key.startsWith(FIELDS.dataKey))
 		.find(key => widget[key] === dataKey);
@@ -64,6 +65,7 @@ const comboChart = (widget: Widget, {labels, series}: DiagramData, config: any, 
 		const group = getValue(widget[createOrderName(currentNumber)(FIELDS.group)]);
 		const cases = [];
 		let classFqn = getValue(widget[createOrderName(currentNumber)(FIELDS.source)]);
+		mixin.classFqn = classFqn;
 
 		addFilter(mixin, xAxis, labels[dataPointIndex], group);
 

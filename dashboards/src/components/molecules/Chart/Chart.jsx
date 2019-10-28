@@ -1,10 +1,10 @@
 // @flow
 import ApexChart from 'react-apexcharts';
-import {getChartType, getConfig} from 'utils/chart';
+import {getChartType, getConfig, CHART_VARIANTS} from 'utils/chart';
 import type {Props, State} from './types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 
-export class Chart extends Component<Props, State> {
+export class Chart extends PureComponent<Props, State> {
 	state = {
 		options: {},
 		series: []
@@ -24,14 +24,28 @@ export class Chart extends Component<Props, State> {
 		return null;
 	}
 
+	getHeight = () => {
+		const {DONUT, PIE} = CHART_VARIANTS;
+		const {widget} = this.props;
+		const {type, showLegend} = widget;
+
+		return showLegend && (type.value === PIE || type.value === DONUT) ? '70%' : '100%';
+	};
+
+	getType = () => {
+		const {widget} = this.props;
+		const type = widget.type.value;
+
+		return type === CHART_VARIANTS.COMBO ? 'line' : getChartType(type);
+	};
+
 	renderChart = () => {
 		const {options, series} = this.state;
-		const {widget} = this.props;
-		const type = getChartType(widget.type.value);
+		const type = this.getType();
 
 		return (
 			<ApexChart
-				height="100%"
+				height={this.getHeight()}
 				key={type}
 				options={options}
 				series={series}

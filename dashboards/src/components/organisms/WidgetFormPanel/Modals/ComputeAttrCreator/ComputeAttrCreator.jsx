@@ -2,8 +2,7 @@
 import {COMPUTED_ATTR, operators, TYPES} from './constants';
 import type {Control, Props, State} from './types';
 import {createOrderName} from 'utils/widget';
-import {getAggregateOptions} from 'utils/aggregate';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {getAggregateOptions, FIELDS} from 'components/organisms/WidgetFormPanel';
 import Modal from 'components/molecules/Modal';
 import type {OptionType} from 'react-select/src/types';
 import {number} from 'yup';
@@ -33,12 +32,8 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		sources: []
 	};
 
-	componentDidMount () {
-		this.setSources();
-	}
-
-	setSources = () => {
-		const {values} = this.props;
+	static getDerivedStateFromProps (props: Props, state: State) {
+		const {values} = props;
 		const order = values[FIELDS.order];
 		const sources = [];
 
@@ -52,9 +47,13 @@ export class ComputeAttrCreator extends Component<Props, State> {
 				}
 			});
 
-			this.setState({sources});
+			state.sources = sources;
+
+			return state;
 		}
-	};
+
+		return null;
+	}
 
 	createName = () => {
 		const {controls} = this.state;
@@ -284,12 +283,13 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		const {prev, type} = control;
 		const prevValue = prev && controls[prev].value;
 
-		if (type === AGGREGATION) {
+		if (type === AGGREGATION && typeof prevValue === 'object') {
 			return getAggregateOptions(prevValue);
 		}
 
 		if (type === ATTRIBUTE && this.isSource(prevValue)) {
-			return prevValue ? attributes[prevValue.value] && attributes[prevValue.value].data : [];
+			const source = prevValue && prevValue.value;
+			return source ? attributes[source].data : [];
 		}
 
 		return [...operators, ...constants, ...sources];

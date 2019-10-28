@@ -1,3 +1,8 @@
 // @flow
-import DashboardEditContent from './DashboardEditContent';
+import DashboardEditContent, {editContentRef} from './DashboardEditContent';
+
+export {
+	editContentRef
+};
+
 export default DashboardEditContent;

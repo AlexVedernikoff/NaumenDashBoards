@@ -1,5 +1,4 @@
 // @flow
-import type {AttrSelectProps} from 'components/organisms/WidgetFormPanel/types';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
@@ -9,7 +8,8 @@ export class AxisChart extends DataFormBuilder {
 	renderInputs = () => {
 		const {values} = this.props;
 
-		const indicator: AttrSelectProps = {
+		const indicator = {
+			border: false,
 			name: FIELDS.indicator,
 			placeholder: 'Показатель',
 			value: values[FIELDS.indicator]
@@ -22,7 +22,7 @@ export class AxisChart extends DataFormBuilder {
 					this.renderAggregateInput(FIELDS.aggregation, FIELDS.indicator),
 					this.renderAttrSelect(indicator)
 				)}
-				{this.renderBreakdownInput()}
+				{this.renderBreakdownWithGroup(FIELDS.breakdownGroup, FIELDS.breakdown)}
 			</Fragment>
 		);
 	};

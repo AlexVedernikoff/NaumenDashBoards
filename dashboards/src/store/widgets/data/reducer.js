@@ -19,7 +19,9 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			return {
 				...state,
 				error: false,
-				loading: true
+				loading: true,
+				map: {},
+				selectedWidget: ''
 			};
 		case WIDGETS_EVENTS.RECEIVE_WIDGETS:
 			return setWidgets(state, action);

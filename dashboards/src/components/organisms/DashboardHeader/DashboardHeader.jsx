@@ -4,7 +4,6 @@ import {CloseIcon} from 'icons/form';
 import {createSnapshot, FILE_VARIANTS} from 'utils/export';
 import {gridRef} from 'components/organisms/LayoutGrid';
 import IconRefresh from 'icons/header/refresh.svg';
-import PrintIcon from 'icons/header/print.svg';
 import React, {Component} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
 import styles from './styles.less';
@@ -44,23 +43,20 @@ export class DashboardHeader extends Component<Props> {
 		}
 	};
 
-	renderPrintButton = () => <div className={styles.buttonIcon}><PrintIcon /></div>;
-
 	renderModeButton = () => {
 		const {editable, editDashboard, location, master, seeDashboard} = this.props;
 
 		if (editable || master) {
 			if (location.pathname === '/') {
-				// TODO: инлайн стили временно
 				return (
-					<div style={{padding: '0 10px'}}>
+					<div className={styles.buttonMode}>
 						<Button type="button" onClick={editDashboard}>Редактировать</Button>
 					</div>
 				);
 			}
-			// TODO: инлайн стили временно
+
 			return (
-				<div style={{padding: '0 10px'}}>
+				<div className={styles.buttonMode}>
 					<Button type="button" onClick={seeDashboard}>Просмотреть</Button>
 				</div>
 			);
@@ -77,28 +73,23 @@ export class DashboardHeader extends Component<Props> {
 		);
 	};
 
-	renderDropDown = () => {
-		return <DropDownFiles icon list={FileList} createDoc={this.createDocument} />;
-	};
+	renderDropDown = () => <DropDownFiles icon list={FileList} createDoc={this.createDocument} />;
 
 	render () {
 		return (
 			<header className={styles.header}>
 				<ul className={styles.nav}>
 					<li className={styles.navItem}>
-						{this.renderDropDown()}
+						{this.renderRefreshButton()}
 					</li>
 					<li className={styles.navItem}>
-						{this.renderRefreshButton()}
+						{this.renderDropDown()}
 					</li>
 					<li className={styles.navItem}>
 						{this.renderResetButton()}
 					</li>
 					<li className={styles.navItem}>
 						{this.renderModeButton()}
-					</li>
-					<li className={styles.navItem}>
-						{this.renderPrintButton()}
 					</li>
 				</ul>
 			</header>

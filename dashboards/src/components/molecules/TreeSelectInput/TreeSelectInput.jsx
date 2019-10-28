@@ -1,14 +1,15 @@
 // @flow
 import 'rc-tree-select/assets/index.css';
 import {CrossIcon, EditIcon, ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
+import {IconButton} from 'components/atoms';
 import {InputForm} from 'components/molecules';
 import type {Node, Props, State, Tree, TreeSelectValue} from './types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import type {TreeProps} from 'rc-tree-select';
 import TreeSelect, {TreeNode} from 'rc-tree-select';
 
-export class TreeSelectInput extends Component<Props, State> {
+export class TreeSelectInput extends PureComponent<Props, State> {
 	static defaultProps: {
 		name: '',
 		placeholder: '',
@@ -101,17 +102,25 @@ export class TreeSelectInput extends Component<Props, State> {
 		}
 	};
 
+	renderClearIcon = () => (
+		<div className={styles.clearIconContainer}>
+			<IconButton>
+				<CrossIcon />
+			</IconButton>
+		</div>
+	);
+
 	renderEditIcon = () => {
 		const {value} = this.props;
 		const {showForm} = this.state;
 
 		if (value && !showForm) {
 			return (
-				<EditIcon
-					className={styles.editIcon}
-					onMouseDown={this.stopPropagation}
-					onClick={this.handleShowForm(true)}
-				/>
+				<div className={styles.editIconContainer} onMouseDown={this.stopPropagation}>
+					<IconButton className={styles.editIcon} onClick={this.handleShowForm(true)}>
+						<EditIcon />
+					</IconButton>
+				</div>
 			);
 		}
 	};
@@ -128,7 +137,7 @@ export class TreeSelectInput extends Component<Props, State> {
 			<TreeSelect
 				allowClear
 				className={styles.select}
-				clearIcon={<CrossIcon />}
+				clearIcon={this.renderClearIcon}
 				labelInValue
 				name={name}
 				notFoundContent=""

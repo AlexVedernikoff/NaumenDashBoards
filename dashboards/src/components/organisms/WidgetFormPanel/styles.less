@@ -1,5 +1,32 @@
+@import '/styles/variables';
+
 :local {
-	@edge-padding: 15px 20px;
+	.tab {
+		background-color: white;
+		padding: 10px 20px 20px 20px;
+	}
+
+	.tabListItem {
+		cursor: pointer;
+		font-size: 13px;
+		padding: 8px 10px;
+	}
+
+	.tabList {
+		background: @bg-gray;
+		color: @text-color-gray;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		list-style: none;
+		margin: 0;
+		padding: 0 5px;
+	}
+
+	.tabListItemActive {
+		background: @bg-white;
+		color: @text-color;
+	}
 
 	.form {
 		background-color: #F4F4F4;
@@ -9,11 +36,6 @@
 	.header {
 		padding: 5px;
 		text-align: left;
-	}
-
-	.main {
-		background-color: white;
-		padding: 10px 20px 20px 20px;
 	}
 
 	.field {
@@ -26,89 +48,7 @@
 		}
 	}
 
-	.fieldType {
-		span.rc-tree-select-selection--single {
-			border: none;
-			border-bottom: 1px solid;
-			border-radius: 0;
-			box-shadow: none;
-			outline: none;
-		}
-	}
-
-	.footer {
-		padding: @edge-padding;
-	}
-
-	.positionRelative {
-		position: relative;
-	}
-
-	.deleteSourceIcon {
-		color: #767676;
-		cursor: pointer;
-		position: absolute;
-		right: 28px;
-		top: 13px;
-		z-index: 1;
-	}
-
-	.header {
-		color: #767676;
-		font-size: 13px;
-	}
-
-	.labelWithIcon {
-		align-items: center;
-		display: flex;
-
-		span {
-			padding-left: 10px;
-		}
-	}
-
-	.inputWrap {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: nowrap;
-	}
-
-	.palettePicker {
-		position: absolute;
-		top: 0;
-	}
-
-	.paletteWrap {
-		position: relative;
-	}
-
-	.colorPaletteWrap {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		margin-top: 30px;
-
-		.itemPalette {
-			border: 1px solid transparent;
-			border-radius: 3px;
-			cursor: pointer;
-			height: 32px;
-			margin: 4px 2px;
-			width: 48px;
-		}
-	}
-
-	.combineInput {
-		display: flex;
-		flex-direction: row;
-	}
-
-	.combineInputLeft {
-		width: 70px
-	}
-
-	.combineInputRight {
-		flex: auto;
+	.title {
+		padding: 0 10px;
 	}
 }

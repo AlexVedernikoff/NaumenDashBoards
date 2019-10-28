@@ -10,7 +10,7 @@ type Filter = {
 
 export type DrillDownMixin = {
 	cases?: [],
-	classFqn?: string,
+	classFqn?: string | null,
 	filters: Array<Filter>,
 	title: string
 }

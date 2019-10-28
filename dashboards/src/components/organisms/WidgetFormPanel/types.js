@@ -1,23 +1,17 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
 import type {Form, SelectSize} from 'components/molecules/Select/types';
-import type {LayoutItem} from 'utils/layout/types';
 import type {OptionType} from 'react-select/src/types';
 
 export type State = {
-	[string]: any
+	currentTab: string
 }
 
-export type SelectValue = {
-	[string]: any
-};
-
-export type InputProps = {
-	[string]: any
-};
+export type TabParams = {
+	key: string,
+	title: string
+}
 
 export type CreateFormData = {
-	layout: LayoutItem,
 	name: string,
 	type: OptionType,
 	[string]: any
@@ -29,69 +23,26 @@ export type SaveFormData = {
 
 export type FormData = SaveFormData | CreateFormData;
 
-export type TextAreaProps = {
-	label: string,
-	name: string,
-	placeholder?: string,
-	value: string
+export type SelectValue = {
+	[string]: any
 };
 
-export type CheckBoxProps = {
-	hideDivider?: boolean,
-	label: string,
-	name: string,
-	value: string
-};
-
-export type ColorPickerProps = {
-	key: number,
-	label: string,
-	name: string,
-	value: string
-};
-
-type Select = {
+export type Select = {
+	border?: boolean;
+	color?: string;
 	components?: {[string]: any},
+	createButtonText?: string,
 	form?: Form,
 	onClickCreateButton?: () => void,
 	onSelect?: (name: string, value: OptionType) => void | Promise<void>;
 	isDisabled?: boolean,
 	name: string,
-	placeholder: string,
+	placeholder?: string,
 	size?: SelectSize,
 	withCreateButton?: boolean,
 	withEditIcon?: boolean,
 };
 
-export type SelectProps = {
-	options: Array<SelectValue>,
-	value: SelectValue | null
-} & Select;
-
-export type AttrSelectProps = {
-	attr?: boolean,
-	options?: Array<Attribute>,
-	value: Attribute | null
-} & Select;
-
-export type ButtonProps = {
-	block?: boolean,
-	disabled?: boolean,
-	onClick: () => any,
-	text: string,
-	variant?: string
-};
-
-export type LabelProps = {
-	name: string,
-	onClick?: () => void,
-	icon?: string
-};
-
 export type WrappedProps = {
 	[string]: any
 };
-
-export type RenderFunction = (...fieldNames: Array<string>) => any;
-
-export type GetRefOptions = (value: OptionType) => Array<OptionType>;

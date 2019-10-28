@@ -1,5 +1,5 @@
 // @flow
-import type {OptionType} from 'react-select/src/types';
+import type {OptionType, OptionsType} from 'react-select/src/types';
 
 export type Form = {
 	onSubmit: (name: string, value: string) => any,
@@ -14,8 +14,11 @@ export type SelectSize =
 
 export type Props = {
 	attr: boolean,
+	border: boolean,
+	color: string,
 	components?: {[string]: any},
 	createButtonText: string,
+	defaultValue: OptionsType,
 	form?: Form,
 	getOptionLabel?: (o: OptionType) => string,
 	getOptionValue?: (o: OptionType) => string,

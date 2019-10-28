@@ -7,8 +7,6 @@ const DONUT: 'DONUT' = 'DONUT';
 const LINE: 'LINE' = 'LINE';
 const PIE: 'PIE' = 'PIE';
 const COMBO: 'COMBO' = 'COMBO';
-const SUMMARY: 'SUMMARY' = 'SUMMARY';
-const TABLE: 'TABLE' = 'TABLE';
 
 const CHART_VARIANTS = {
 	BAR,
@@ -18,9 +16,7 @@ const CHART_VARIANTS = {
 	COMBO,
 	DONUT,
 	LINE,
-	PIE,
-	SUMMARY,
-	TABLE
+	PIE
 };
 
 const bar: 'bar' = 'bar';

@@ -7,6 +7,7 @@ import styles from './styles.less';
 
 export class ColorPicker extends Component<Props, State> {
 	state = {
+		currentColor: '',
 		itemColor: '',
 		presetColors: [
 			'#EA3223',
@@ -28,9 +29,17 @@ export class ColorPicker extends Component<Props, State> {
 		]
 	};
 
-	componentDidMount () {
-		const {currentColor} = this.props;
-		this.setState({itemColor: currentColor});
+	static getDerivedStateFromProps (props: Props, state: State) {
+		const {currentColor} = props;
+
+		if (currentColor !== state.currentColor) {
+			state.itemColor = currentColor;
+			state.currentColor = currentColor;
+
+			return state;
+		}
+
+		return null;
 	}
 
 	handleChangeComplete = (): void => {
@@ -39,9 +48,7 @@ export class ColorPicker extends Component<Props, State> {
 		onClick(itemColor);
 	};
 
-	setColor = (color: Color): void => {
-		this.setState({itemColor: color.hex});
-	};
+	setColor = (color: Color) => this.setState(() => ({itemColor: color.hex}));
 
 	render () {
 		const {closePicker} = this.props;

@@ -1,6 +1,5 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
-import {CHART_VARIANTS} from 'utils/chart';
 import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin, ReceiveLinkPayload} from './types';
@@ -68,20 +67,17 @@ const createCompositePostData = (widget: Widget) => {
  * @returns {Function}
  */
 const drillDown = (widget: Widget, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {COMBO} = CHART_VARIANTS;
 	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 	const type = widget.type.value;
 
-	if (type !== COMBO) {
-		const creator = [SUMMARY, TABLE].includes(type) ? createCompositePostData : createCommonPostData;
-		let postData = creator(widget);
+	const creator = [SUMMARY, TABLE].includes(type) ? createCompositePostData : createCommonPostData;
+	let postData = creator(widget);
 
-		if (mixin && typeof mixin === 'object') {
-			postData = {...postData, ...mixin};
-		}
-
-		dispatch(getLink(widget.id, postData));
+	if (mixin && typeof mixin === 'object') {
+		postData = {...postData, ...mixin};
 	}
+
+	dispatch(getLink(widget.id, postData));
 };
 
 /**
@@ -113,7 +109,7 @@ const comboDrillDown = (widget: Widget, orderNum: number): ThunkAction => async 
 /**
  * Получаем ссылку по отправленным данным и открываем ее в новом окне
  * @param {string} id - индетификатор виджета
- * @param {Object} postData - данные для построения ссылки
+ * @param {object} postData - данные для построения ссылки
  * @returns {Function}
  */
 const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {

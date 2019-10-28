@@ -1,3 +1,8 @@
 // @flow
-import Tabs from './Tabs';
-export default Tabs;
+import DesignTab from './DesignTab';
+import ParamsTab from './ParamsTab';
+
+export {
+	DesignTab,
+	ParamsTab
+};

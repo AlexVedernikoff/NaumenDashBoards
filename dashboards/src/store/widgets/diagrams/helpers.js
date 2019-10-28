@@ -51,6 +51,23 @@ export const setRequestDiagram = (state: DiagramsState, {payload}: RequestDiagra
  * @returns {DiagramsState}
  */
 export const setDiagram = (state: DiagramsState, {payload}: ReceiveDiagram): DiagramsState => {
+	let {columns} = payload.data;
+
+	/*
+		На стороне бэка происходит принудительнае изменение ключей в строчный вариант.
+		Библиотека react-table же ожидает ключи Header и Footer. По этой причине преобразуем
+		массив в нужный вид.
+	 */
+	if (Array.isArray(columns)) {
+		columns.forEach(c => {
+			c.Header = c.header;
+			c.Footer = c.footer;
+
+			delete c.header;
+			delete c.footer;
+		});
+	}
+
 	state.map[payload.id] = {
 		data: payload.data,
 		error: false,

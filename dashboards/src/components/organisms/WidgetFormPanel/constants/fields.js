@@ -1,6 +1,7 @@
 // @flow
 const aggregation: 'aggregation' = 'aggregation';
 const breakdown: 'breakdown' = 'breakdown';
+const breakdownGroup: 'breakdownGroup' = 'breakdownGroup';
 const calcTotalColumn: 'calcTotalColumn' = 'calcTotalColumn';
 const calcTotalRow: 'calcTotalRow' = 'calcTotalRow';
 const colors: 'colors' = 'colors';
@@ -30,6 +31,7 @@ const yAxis: 'yAxis' = 'yAxis';
 const FIELDS = {
 	aggregation,
 	breakdown,
+	breakdownGroup,
 	calcTotalColumn,
 	calcTotalRow,
 	colors,

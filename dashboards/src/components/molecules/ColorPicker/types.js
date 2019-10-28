@@ -11,6 +11,7 @@ export type Props = {
 };
 
 export type State = {
+	currentColor: string,
 	itemColor: string,
 	presetColors: Array<string>
 };

@@ -1,6 +1,6 @@
 // @flow
 import {CheckedIcon, CloseIcon} from 'icons/form';
-import Formik from 'formik';
+import {Formik} from 'formik';
 import type {FormikProps} from 'formik';
 import {object} from 'yup';
 import type {Props, Values} from './types';
@@ -30,6 +30,7 @@ export class InputForm extends Component<Props> {
 		return (
 			<div className={styles.container}>
 				<input
+					autoComplete={false}
 					className={styles.input}
 					name={name}
 					onChange={handleChange}

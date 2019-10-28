@@ -1,19 +1,12 @@
 // @flow
-import type {
-	AttrSelectProps,
-	InputProps,
-	LabelProps,
-	SelectProps,
-	SelectValue
-} from 'components/organisms/WidgetFormPanel/types';
-import {CHART_SELECTS, CHART_VARIANTS} from 'utils/chart';
+import {CHART_SELECTS} from 'utils/chart';
 import {createOrderName, getNumberFromName} from 'utils/widget';
 import {Divider} from 'components/atoms/Divider/Divider';
-import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
-import {getAggregateOptions} from 'utils/aggregate';
-import {getGroupOptions} from 'utils/group';
+import {FIELDS, getAggregateOptions, getGroupOptions, TYPES} from 'components/organisms/WidgetFormPanel';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
+import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
+import {styles} from 'components/organisms/WidgetFormPanel/Tabs/ParamsTab';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class ComboChart extends OrderFormBuilder {
@@ -67,38 +60,17 @@ export class ComboChart extends OrderFormBuilder {
 		this.changeDependingOnMain(getNumberFromName(name));
 	};
 
-	renderYAxisInput = (yAxis: string = FIELDS.yAxis) => {
-		const {attributes, values} = this.props;
-		const {COLUMN, COLUMN_STACKED} = CHART_VARIANTS;
-		const currentNumber = getNumberFromName(yAxis);
-		const currentChart = values[createOrderName(currentNumber)(FIELDS.type)];
-		const order = this.getOrder();
-		const withCreateButton = currentChart && (currentChart.value === COLUMN || currentChart.value === COLUMN_STACKED);
-		const sources = {};
-		let options = [];
+	renderYAxisInput = (yAxis: string) => {
+		const {values} = this.props;
 
-		order.forEach(num => {
-			let source = values[createOrderName(num)(FIELDS.source)];
-
-			if (source) {
-				sources[source.value] = source;
-			}
-		});
-
-		Object.keys(sources).forEach(key => {
-			if (attributes[key]) {
-				options = [...options, ...attributes[key].data];
-			}
-		});
-
-		const props: AttrSelectProps = {
+		const props = {
+			border: false,
 			getOptionLabel: this.getLabelWithSource,
 			onSelect: this.handleSelectAxis(FIELDS.aggregation, getAggregateOptions),
 			name: yAxis,
-			options,
 			placeholder: 'Ось Y',
 			value: values[yAxis],
-			withCreateButton
+			withCreateButton: true
 		};
 
 		return this.renderAttrSelect(props);
@@ -107,15 +79,22 @@ export class ComboChart extends OrderFormBuilder {
 	renderChartInput = (name: string = FIELDS.type) => {
 		const {values} = this.props;
 
-		const chart: SelectProps = {
-			getOptionLabel: this.getLabelWithIcon,
+		const chart = {
+			defaultValue: CHART_SELECTS.AXIS_SELECTS[0],
+			getOptionLabel: this.getIconLabel,
 			name: name,
 			options: CHART_SELECTS.AXIS_SELECTS,
-			placeholder: 'Выберите диаграмму',
 			value: values[name]
 		};
 
-		return this.renderSelect(chart);
+		return (
+			<div className={styles.chartInputContainer}>
+				<div className={styles.chartInput}>
+					{this.renderSelect(chart)}
+				</div>
+				<div>Ось Y</div>
+			</div>
+		);
 	};
 
 	renderComboXAxis = (xAxis: string, group: string) => {
@@ -126,7 +105,8 @@ export class ComboChart extends OrderFormBuilder {
 		const currentSource = values[createOrderName(currentNumber)(FIELDS.source)];
 		const currentXAxis = values[xAxis];
 
-		const xAxisProps: AttrSelectProps = {
+		const xAxisProps = {
+			border: false,
 			onSelect: this.handleSelectComboXAxis,
 			isDisabled: false,
 			name: xAxis,
@@ -135,7 +115,7 @@ export class ComboChart extends OrderFormBuilder {
 			value: currentXAxis
 		};
 
-		const groupProps: InputProps = {
+		const groupProps = {
 			isDisabled: false,
 			onSelect: this.handleSelectComboGroup
 		};
@@ -148,9 +128,19 @@ export class ComboChart extends OrderFormBuilder {
 				let xAxisOptions = this.getAttributeOptions(xAxis);
 
 				if (xAxisOptions.length > 0 && mainXAxis) {
-					xAxisOptions = xAxisOptions.filter(a => VALUES.ATTR_TYPES.includes(mainXAxis.type)
-						? a.metaClassFqn === mainXAxis.metaClassFqn
-						: a.type === mainXAxis.type);
+					const {DATE, OBJECT} = TYPES;
+
+					xAxisOptions = xAxisOptions.filter(a => {
+						if (OBJECT.includes(mainXAxis.type)) {
+							return a.metaClassFqn === mainXAxis.metaClassFqn;
+						}
+
+						if (DATE.includes(mainXAxis.type)) {
+							return DATE.includes(a.type);
+						}
+
+						return false;
+					});
 				}
 
 				xAxisProps.options = xAxisOptions;
@@ -169,28 +159,23 @@ export class ComboChart extends OrderFormBuilder {
 		);
 	};
 
-	renderComboYAxis = (yAxis: string, chart: string, aggregation: string, breakdown: string) => {
-		const label: LabelProps = {
-			name: 'Ось Y'
-		};
-
+	renderComboYAxis = (yAxis: string, chart: string, aggregation: string, breakdown: string, breakdownGroup: string) => {
 		return (
 			<div key={yAxis}>
-				{this.renderLabel(label)}
 				{this.renderChartInput(chart)}
 				{this.combineInputs(
 					this.renderAggregateInput(aggregation, yAxis),
 					this.renderYAxisInput(yAxis)
 				)}
-				{this.renderBreakdownInput(breakdown)}
+				{this.renderBreakdownWithGroup(breakdownGroup, breakdown)}
 			</div>
 		);
 	};
 
 	renderInputs = () => {
-		const {aggregation, breakdown, group, source, type, xAxis, yAxis} = FIELDS;
+		const {aggregation, breakdown, breakdownGroup, group, source, type, xAxis, yAxis} = FIELDS;
 
-		const xAxisLabel: LabelProps = {
+		const xAxisLabel = {
 			name: 'Ось Х'
 		};
 
@@ -203,7 +188,7 @@ export class ComboChart extends OrderFormBuilder {
 				{this.renderLabel(xAxisLabel)}
 				{this.renderByOrder(this.renderComboXAxis, [xAxis, group], true)}
 				<Divider />
-				{this.renderByOrder(this.renderComboYAxis, [yAxis, type, aggregation, breakdown], true)}
+				{this.renderByOrder(this.renderComboYAxis, [yAxis, type, aggregation, breakdown, breakdownGroup], true)}
 			</Fragment>
 		);
 	};

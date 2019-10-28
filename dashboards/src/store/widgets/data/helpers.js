@@ -55,6 +55,10 @@ export const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidg
 		handleStatic(state.map, false);
 	}
 
+	if (state.selectedWidget === NewWidget.id) {
+		state.newWidget = null;
+	}
+
 	state.selectedWidget = payload;
 	return {
 		...state,
@@ -167,6 +171,6 @@ export const editLayout = (state: WidgetsDataState, {payload}: EditLayout): Widg
 
 	return {
 		...state,
-		map: {...state.map}
+		map: state.map
 	};
 };

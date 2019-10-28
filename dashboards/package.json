@@ -1,7 +1,7 @@
 {
   "author": {
     "email": "welcome@nordclan.com",
-    "name": "Nord Clan",
+    "name": "nordсlan",
     "url": "https://nordclan.com/"
   },
   "bugs": {
@@ -30,6 +30,7 @@
     "react-select": "^3.0.4",
     "react-table": "^6.10.3",
     "react-tooltip": "^3.11.1",
+    "smoothscroll-polyfill": "^0.4.4",
     "tiny-uuid": "^1.0.0",
     "yup": "^0.27.0"
   },
@@ -46,6 +47,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "classnames": "^2.2.6",
+    "components": "^0.1.0",
     "copy-webpack-plugin": "^4.6.0",
     "cross-env": "^5.2.1",
     "css-loader": "^0.28.11",
@@ -110,7 +112,7 @@
     "react"
   ],
   "license": "ISC",
-  "name": "boilerplate",
+  "name": "dashboard",
   "repository": {
     "type": "git",
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"
