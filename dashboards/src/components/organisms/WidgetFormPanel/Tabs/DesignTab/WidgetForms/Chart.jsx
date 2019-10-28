@@ -1,62 +1,39 @@
 // @flow
-import {ColorPicker} from 'components/molecules';
-import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
+import {ColorPalette} from 'components/molecules';
+import {Divider} from 'components/atoms';
+import {FIELDS, OPTIONS, VALUES} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import type {Node} from 'react';
+import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Fragment} from 'react';
-import type {SelectProps} from 'components/organisms/WidgetFormPanel/types';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class Chart extends FormBuilder {
-	state = {
-		colorIndex: 0,
-		currentColor: '',
-		showPalette: false
-	};
+	componentDidUpdate (props: Props) {
+		const {setFieldValue, values} = props;
+		const colors = values[FIELDS.colors];
 
-	openColorPicker = (color: string, index: number) => (): void => {
-		this.setState({
-			colorIndex: index,
-			currentColor: color,
-			showPalette: true
-		});
-	};
+		if (!colors || colors.length !== 16) {
+			setFieldValue(FIELDS.colors, VALUES.COLORS);
+		}
+	}
 
-	changeColor = (itemColor: string): void => {
-		const {colorIndex} = this.state;
-		const {setFieldValue, values} = this.props;
-		let colors = values[FIELDS.colors] || VALUES.COLORS;
+	getColors = () => this.props.values[FIELDS.colors] || VALUES.COLORS;
+
+	changeColor = (colorIndex: number, itemColor: string): void => {
+		let colors = this.getColors();
 		colors[colorIndex] = itemColor;
 
-		this.setState({
-			showPalette: false
-		});
-		setFieldValue(FIELDS.colors, colors);
+		this.props.setFieldValue(FIELDS.colors, colors);
 	};
 
-	closePicker = (): void => {
-		this.setState({showPalette: false});
-	};
+	renderColorPalette = () => <ColorPalette colors={this.getColors()} onChange={this.changeColor} />;
 
-	renderVisibilityCheckBoxes = () => {
+	renderVisibilityAxisCheckboxes = (): any => {
 		const {axis, values} = this.props;
-		const {showLegend, showValue, showXAxis, showYAxis} = FIELDS;
-		let fields = [
-			{
-				label: 'Значение',
-				name: showValue,
-				value: values[showValue]
-			},
-			{
-				hideDivider: true,
-				label: 'Легенду',
-				name: showLegend,
-				value: values[showLegend]
-			}
-		];
+		const {showXAxis, showYAxis} = FIELDS;
 
 		if (axis) {
-			const axisFields = [
+			const fields = [
 				{
 					label: 'Название оси X',
 					name: showXAxis,
@@ -68,67 +45,64 @@ export class Chart extends FormBuilder {
 					value: values[showYAxis]
 				}
 			];
-			fields = [...axisFields, ...fields];
-		}
 
-		return <div className="mb-2">{fields.map(this.renderCheckBox)}</div>;
+			return fields.map(this.renderCheckBox);
+		}
 	};
 
-	renderColor = (color: string, index: number) => (
-		<div
-			className={styles.itemPalette}
-			key={index}
-			onClick={this.openColorPicker(color, index)}
-			style={{background: color}}
-		/>
-	);
-
-	renderColorPalette = (): Node => {
+	renderValueCheckbox = (): any => {
+		const {showValue} = FIELDS;
 		const {values} = this.props;
-		const colors = values[FIELDS.colors] || VALUES.COLORS;
 
-		return (
-			<div className={styles.colorPaletteWrap}>
-				{colors.map(this.renderColor)}
-			</div>
-		);
+		const props = {
+			label: 'Значение',
+			name: showValue,
+			value: values[showValue]
+		};
+
+		return this.renderCheckBox(props);
 	};
 
-	renderColorPicker = () => {
-		const {currentColor, showPalette} = this.state;
+	renderLegendCheckbox = () => {
+		const {showLegend} = FIELDS;
+		const {values} = this.props;
 
-		if (showPalette) {
-			return (
-				<div className={styles.palettePicker}>
-					<ColorPicker onClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor} />
-				</div>
-			);
-		}
+		const props = {
+			hideDivider: true,
+			label: 'Легенду',
+			name: showLegend,
+			value: values[showLegend]
+		};
+
+		return this.renderCheckBox(props);
 	};
 
-	renderInputs = () => {
+	renderLegendPositionInput = () => {
 		const {values} = this.props;
 		const {legendPosition} = FIELDS;
 
-		const legendPositionProps: SelectProps = {
+		const legendPositionProps = {
 			name: legendPosition,
 			options: OPTIONS.LEGEND_POSITIONS,
 			placeholder: 'Расположение легенды',
 			value: values[legendPosition]
 		};
 
-		return (
-			<Fragment>
-				{this.renderVisibilityCheckBoxes()}
-				{this.renderSelect(legendPositionProps)}
-				{this.renderColorPalette()}
-				{this.renderColorPicker()}
-			</Fragment>
-		);
+		return this.renderSelect(legendPositionProps);
 	};
 
 	render () {
-		return this.renderInputs();
+		return (
+			<Fragment>
+				{this.renderValueCheckbox()}
+				{this.renderVisibilityAxisCheckboxes()}
+				{this.renderLegendCheckbox()}
+				{this.renderLegendPositionInput()}
+				<Divider />
+				{this.renderHeader('Цвета диаграммы')}
+				{this.renderColorPalette()}
+			</Fragment>
+		);
 	}
 }
 

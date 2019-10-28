@@ -1,8 +1,10 @@
 // @flow
 import LayoutGrid from 'containers/LayoutGrid';
 import type {Props} from 'containers/DashboardViewContent/types';
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import styles from './styles.less';
+
+export const viewContentRef = createRef();
 
 export class DashboardViewContent extends Component<Props> {
 	render () {
@@ -10,7 +12,7 @@ export class DashboardViewContent extends Component<Props> {
 
 		return (
 			<div className={styles.container}>
-				<div className={styles.grid}>
+				<div className={styles.grid} ref={viewContentRef}>
 					<LayoutGrid widgets={widgets}/>
 				</div>
 			</div>

@@ -1,5 +1,4 @@
 // @flow
-import type {AttrSelectProps, CheckBoxProps} from 'components/organisms/WidgetFormPanel/types';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import {FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import React, {Fragment} from 'react';
@@ -11,7 +10,7 @@ export class Table extends OrderFormBuilder {
 	renderCalcTotalInput = (name: string) => {
 		const {values} = this.props;
 
-		const totalRow: CheckBoxProps = {
+		const totalRow = {
 			label: 'Подсчитывать итоги',
 			name,
 			value: values[name]
@@ -23,7 +22,8 @@ export class Table extends OrderFormBuilder {
 	renderColumnInput = (name: string) => {
 		const {values} = this.props;
 
-		const row: AttrSelectProps = {
+		const row = {
+			border: false,
 			name,
 			placeholder: 'Столбцы',
 			value: values[name]
@@ -40,7 +40,7 @@ export class Table extends OrderFormBuilder {
 	renderRowInput = (name: string) => {
 		const {values} = this.props;
 
-		const row: AttrSelectProps = {
+		const row = {
 			name,
 			placeholder: 'Строки',
 			value: values[name],
@@ -51,7 +51,7 @@ export class Table extends OrderFormBuilder {
 	};
 
 	renderInputs = () => {
-		const {aggregation, breakdown, calcTotalRow, calcTotalColumn, column, row, source} = FIELDS;
+		const {aggregation, breakdown, breakdownGroup, calcTotalRow, calcTotalColumn, column, row, source} = FIELDS;
 
 		return (
 			<Fragment>
@@ -61,7 +61,7 @@ export class Table extends OrderFormBuilder {
 				{this.renderByOrder(this.renderRowInput, row, true)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalRow, true)}
 				{this.renderByOrder(this.renderCompositeInputs, [aggregation, column], true)}
-				{this.renderByOrder(this.renderBreakdownInput, breakdown, true)}
+				{this.renderByOrder(this.renderBreakdownWithGroup, [breakdownGroup, breakdown], true)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalColumn, true)}
 			</Fragment>
 		);

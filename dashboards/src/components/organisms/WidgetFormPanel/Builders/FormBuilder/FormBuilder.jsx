@@ -1,6 +1,6 @@
 // @flow
 import {CheckBox, Divider, Label, TextArea} from 'components/atoms';
-import type {CheckBoxProps, LabelProps, SelectProps, State, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
+import type {CheckBoxProps, LabelProps, SelectProps, State, TextAreaProps} from './types';
 import {ErrorMessage} from 'formik';
 import type {FormikProps} from 'formik';
 import type {OptionType} from 'react-select/src/types';
@@ -33,10 +33,10 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 	};
 
 	renderSelect = (props: SelectProps) => (
-		<div className={styles.field}>
+		<div className={styles.field} key={props.name}>
 			<Select onSelect={props.onSelect || this.handleSelect} {...props} />
 			<span className={styles.error}>
-				<ErrorMessage name={props.name}/>
+				{this.props.errors[props.name]}
 			</span>
 		</div>
 	);

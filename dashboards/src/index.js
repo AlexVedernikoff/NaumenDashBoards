@@ -7,7 +7,10 @@ import {createMemoryHistory} from 'history';
 import {Provider} from 'react-redux';
 import React from 'react';
 import {render} from 'react-dom';
+import smoothscroll from 'smoothscroll-polyfill';
 import Startup from 'containers/Startup/Startup';
+
+smoothscroll.polyfill();
 
 export const root = document.getElementById('root');
 export const history = createMemoryHistory();

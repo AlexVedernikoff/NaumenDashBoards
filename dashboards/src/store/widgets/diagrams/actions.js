@@ -4,9 +4,7 @@ import type {CompositeFields, ReceiveDiagramPayload} from './types';
 import {DIAGRAMS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
-// TODO: это для сборки с фронтом
-import generateData from './dataGenerator';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
 import type {OptionType} from 'react-select/src/types';
 import type {Widget} from 'store/widgets/data/types';
 import {WIDGET_VARIANTS} from 'utils/widget';
@@ -14,11 +12,24 @@ import {WIDGET_VARIANTS} from 'utils/widget';
 const getValue = (option: OptionType) => option && option.value;
 
 const createAxisChartData = (widget: Widget) => {
-	const {aggregation, breakdown, descriptor, group, source, type, xAxis, yAxis} = widget;
+	const {BAR_STACKED, COLUMN_STACKED} = CHART_VARIANTS;
+	const {COUNT, PERCENT} = VALUES.DEFAULT_AGGREGATION;
+	const {aggregation, breakdown, breakdownGroup, descriptor, group, source, type, xAxis, yAxis} = widget;
+	let aggregationValue = getValue(aggregation);
+
+	/*
+	Когда для графика с накоплением пользователь выбирает агрегацию в процентах,
+	нам нужно провести замену значения агрегации для подсчета данных на бэке т.к
+	для отображения графику необходимо все также количество.
+	*/
+	if (aggregationValue === PERCENT && (type.value === BAR_STACKED || type.value === COLUMN_STACKED)) {
+		aggregationValue = COUNT;
+	}
 
 	return {
-		aggregation: getValue(aggregation),
+		aggregation: aggregationValue,
 		breakdown,
+		breakdownGroup: getValue(breakdownGroup),
 		descriptor,
 		group: getValue(group),
 		source: getValue(source),
@@ -29,11 +40,12 @@ const createAxisChartData = (widget: Widget) => {
 };
 
 const createCircleChartData = (widget: Widget) => {
-	const {aggregation, breakdown, descriptor, indicator, source, type} = widget;
+	const {aggregation, breakdown, breakdownGroup, descriptor, indicator, source, type} = widget;
 
 	return {
 		aggregation: getValue(aggregation),
 		breakdown,
+		breakdownGroup: getValue(breakdownGroup),
 		descriptor,
 		indicator,
 		source: getValue(source),
@@ -72,6 +84,7 @@ const createCompositeData = ({common, deep}: CompositeFields) => (widget: Widget
 const {
 	aggregation,
 	breakdown,
+	breakdownGroup,
 	calcTotalColumn,
 	calcTotalRow,
 	column,
@@ -89,7 +102,7 @@ const {
 
 const comboFields: CompositeFields = {
 	common: [breakdown, descriptor, sourceForCompute, xAxis, yAxis],
-	deep: [aggregation, group, source, type]
+	deep: [aggregation, breakdownGroup, group, source, type]
 };
 
 const summaryFields: CompositeFields = {
@@ -99,7 +112,7 @@ const summaryFields: CompositeFields = {
 
 const tableFields: CompositeFields = {
 	common: [breakdown, calcTotalColumn, calcTotalRow, column, descriptor, row, sourceForCompute],
-	deep: [aggregation, source]
+	deep: [aggregation, breakdownGroup, source]
 };
 
 const resolvePostDataCreator = (type: string) => {
@@ -137,8 +150,7 @@ const fetchDiagramData = (widget: Widget): ThunkAction => async (dispatch: Dispa
 		const postData = resolvePostDataCreator(type)(widget);
 		const method = [COMBO, SUMMARY, TABLE].includes(type) ? 'getDataForCompositeDiagram' : 'getDataForDiagram';
 		const {data} = await client.post(buildUrl('dashboardDataSet', method, 'requestContent'), postData);
-		// TODO: это для сборки с фронтом
-		//const data = generateData(widget);
+
 		dispatch(
 			receiveDiagram({data, id: widget.id})
 		);

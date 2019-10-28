@@ -5,11 +5,11 @@ import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
 import {lazy} from 'yup';
 import {NewWidget} from 'utils/widget';
-import schemas from './schemas.js';
+import getSchema from './schemas.js';
 
 const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
-		const {id, type, ...values} = selectedWidget;
+		const {id, layout, type, ...values} = selectedWidget;
 
 		return {
 			asDefault: false,
@@ -18,7 +18,7 @@ const config: FormikConfig = {
 		};
 	},
 
-	validationSchema: () => lazy((values: ValidateType) => schemas[values.type.value]),
+	validationSchema: () => lazy((values: ValidateType) => getSchema(values)),
 
 	handleSubmit: (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;

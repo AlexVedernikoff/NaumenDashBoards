@@ -1,5 +1,6 @@
 // @flow
 import CrossIcon from 'icons/form/cross.svg';
+import {IconButton} from 'components/atoms';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -10,7 +11,19 @@ export class TextArea extends Component<Props> {
 		onReset(name);
 	};
 
-	renderClearIcon = () => this.props.value && <CrossIcon className={styles.icon} onClick={this.handleReset}/>;
+	renderClearIcon = () => {
+		const {value} = this.props;
+
+		if (value) {
+			return (
+				<div className={styles.icon}>
+					<IconButton>
+						<CrossIcon onClick={this.handleReset} />
+					</IconButton>
+				</div>
+			);
+		}
+	};
 
 	renderLabel = () => {
 		const {label, name} = this.props;

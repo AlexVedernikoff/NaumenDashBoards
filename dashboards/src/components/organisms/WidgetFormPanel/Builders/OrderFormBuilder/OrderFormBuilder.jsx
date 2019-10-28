@@ -1,27 +1,43 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/constants';
-import {createOrderName, getNumberFromName} from 'utils/widget';
-import Cross from 'icons/form/cross.svg';
-import DataFormBuilder from './DataFormBuilder';
-import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
-import type {LabelProps, RenderFunction} from 'components/organisms/WidgetFormPanel/types';
+import {createOrderName, getNumberFromName, WIDGET_VARIANTS} from 'utils/widget';
+import DataFormBuilder from 'components/organisms/WidgetFormPanel/Builders/DataFormBuilder';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import type {LabelProps} from 'components/organisms/WidgetFormPanel/Builders/FormBuilder/types';
 import React from 'react';
+import type {RenderFunction} from './types';
 import uuid from 'tiny-uuid';
 
 export class OrderFormBuilder extends DataFormBuilder {
 	defaultOrder = [1, 2];
 
 	async componentDidMount () {
+		const {TABLE, SUMMARY} = WIDGET_VARIANTS;
 		const {setFieldValue, values} = this.props;
+		const order = values[FIELDS.order];
+		const type = values[FIELDS.type].value;
 
-		if (!values[FIELDS.order]) {
+		if (!Array.isArray(order)) {
 			this.defaultOrder.forEach(num => {
 				setFieldValue(createOrderName(num)(FIELDS.dataKey), uuid());
 			});
-		}
 
-		await setFieldValue(FIELDS.order, this.defaultOrder);
+			await setFieldValue(FIELDS.order, this.defaultOrder);
+		} else if (order.length < this.defaultOrder.length) {
+			let diff = this.defaultOrder.length - order.length;
+
+			while (diff > 0) {
+				this.addSet();
+				diff--;
+			}
+		} else if (type === TABLE || type === SUMMARY) {
+			const additionalNumbers = order.slice(1);
+
+			additionalNumbers.forEach(num => {
+				setFieldValue(createOrderName(num)(FIELDS.sourceForCompute), true);
+			});
+		}
 	}
 
 	getLabelWithSource = (a: Attribute) => a.type !== COMPUTED_ATTR ? `${a.title} (${a.sourceName})` : a.title;
@@ -108,18 +124,12 @@ export class OrderFormBuilder extends DataFormBuilder {
 		}
 	};
 
-	renderOrderSource = (withComputeHandler: boolean) => (source: string) => {
-		const order = this.getOrder();
-		const deletable = order && order.length > this.defaultOrder.length;
-
-		return (
-			<div className={styles.positionRelative} key={source}>
-				{deletable && <Cross data-name={source} onClick={this.removeSet} className={styles.deleteSourceIcon} />}
-				{this.renderSourceInput(source)}
-				{this.renderSourceComputeHandler(source, withComputeHandler)}
-			</div>
-		);
-	};
+	renderOrderSource = (withComputeHandler: boolean) => (source: string) => (
+		<div key={source}>
+			{this.renderSourceInput(source)}
+			{this.renderSourceComputeHandler(source, withComputeHandler)}
+		</div>
+	);
 }
 
 export default OrderFormBuilder;

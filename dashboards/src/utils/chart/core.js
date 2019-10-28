@@ -1,12 +1,12 @@
 // @flow
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {CHART_TYPES, CHART_VARIANTS} from './constants';
-import {DEFAULT_VARIANTS} from 'utils/aggregate/constansts';
+import {createOrderName} from 'utils/widget';
 import type {DiagramData} from 'store/widgets/diagrams/types';
 import {drillDownBySelection} from './methods';
+import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import type {Widget} from 'store/widgets/data/types';
-import {VALUES} from 'components/organisms/WidgetFormPanel';
 
 /**
  * Проверяем является ли переменная объектом
@@ -73,45 +73,39 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			categories: chart.categories
 		},
 		yaxis: {
+			decimalsInFloat: 2,
+			forceNiceScale: true,
 			max: undefined,
 			min: 0
 		}
 	};
 
-	if (aggregation && aggregation.value === DEFAULT_VARIANTS.PERCENT) {
-		options.yaxis = {
-			labels: {
-				formatter: (val) => {
-					return `${val}%`;
+	if (aggregation && aggregation.value === VALUES.DEFAULT_AGGREGATION.PERCENT) {
+		if (stacked) {
+			options.chart.stackType = '100%';
+		} else {
+			options.yaxis.labels = {
+				formatter: (val, additionalValue) => {
+					return Number.isInteger(additionalValue) ? val : `${val}%`;
 				}
-			},
-			max: 100,
-			min: 0
-		};
+			};
+		}
 	}
 
 	if (showXAxis && xAxis) {
-		const mixin = {
-			xaxis: {
-				title: {
-					text: xAxis.title
-				}
+		options.xaxis = {
+			title: {
+				text: xAxis.title
 			}
 		};
-
-		options = extend(options, mixin);
 	}
 
 	if (showYAxis && yAxis) {
-		const mixin = {
-			yaxis: {
-				title: {
-					text: yAxis.title
-				}
+		options.yaxis = {
+			title: {
+				text: yAxis.title
 			}
 		};
-
-		options = extend(options, mixin);
 	}
 
 	return options;
@@ -123,23 +117,36 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
  * @param {DiagramData} chart - данные конкретного графика
  * @returns {ApexOptions}
  */
-const comboChart = (widget: Widget, chart: DiagramData) => ({
-	labels: chart.labels,
-	markers: {
-		hover: {
-			size: 8
-		},
-		size: 5
-	},
-	tooltip: {
-		intersect: true,
-		shared: false
-	},
-	yaxis: {
-		max: undefined,
-		min: 0
+const comboChart = (widget: Widget, chart: DiagramData) => {
+	let stacked = false;
+
+	if (Array.isArray(widget.order)) {
+		stacked = widget.order.filter(num => !widget[createOrderName(num)(FIELDS.sourceForCompute)])
+			.find(num => widget[createOrderName(num)(FIELDS.type)].value === CHART_VARIANTS.COLUMN_STACKED);
 	}
-});
+
+	return {
+		chart: {
+			stacked
+		},
+		labels: chart.labels,
+		markers: {
+			hover: {
+				size: 8
+			},
+			size: 5
+		},
+		tooltip: {
+			intersect: true,
+			shared: false
+		},
+		yaxis: {
+			forceNiceScale: true,
+			max: undefined,
+			min: 0
+		}
+	};
+};
 
 /**
  * Дефолтная примесь графиков (pie, donut)
@@ -148,9 +155,22 @@ const comboChart = (widget: Widget, chart: DiagramData) => ({
  * @returns {ApexOptions}
  */
 const circleChart = (widget: Widget, chart: DiagramData): ApexOptions => {
-	return {
+	const {aggregation} = widget;
+
+	const options = {
+		dataLabels: {},
 		labels: chart.labels
 	};
+
+	if (aggregation && aggregation.value !== VALUES.DEFAULT_AGGREGATION.PERCENT) {
+		options.dataLabels = {
+			formatter: function (val, opts) {
+				return opts.w.config.series[opts.seriesIndex];
+			}
+		};
+	}
+
+	return options;
 };
 
 /**
@@ -196,19 +216,23 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 				show: false
 			}
 		},
-		colors: colors || VALUES.COLORS,
+		colors: colors || [...VALUES.COLORS],
 		dataLabels: {
 			enabled: showValue
 		},
 		legend: {
 			position: legendPosition ? legendPosition.value : 'bottom',
-			show: showLegend
+			show: showLegend,
+			showForSingleSeries: true
 		}
 	};
 
 	if (showName) {
 		options.title = {
-			text: diagramName
+			text: diagramName,
+			style: {
+				fontSize: '20px'
+			}
 		};
 	}
 
@@ -222,7 +246,15 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
  * @returns {ApexAxisChartSeries}
  */
 const getSeries = (widget: Widget, chart: DiagramData): ApexAxisChartSeries => {
-	return chart.series;
+	const {series} = chart;
+
+	if (widget.type.value === CHART_VARIANTS.COMBO && series.length > 0) {
+		series.forEach(s => {
+			s.type = s.type === CHART_VARIANTS.LINE || s.type === CHART_TYPES.line ? CHART_TYPES.line : CHART_TYPES.bar;
+		});
+	}
+
+	return series;
 };
 
 /**

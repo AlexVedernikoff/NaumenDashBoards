@@ -1,6 +1,6 @@
 // @flow
-import {CHART_VARIANTS} from 'utils/chart';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {CHART_SELECTS, CHART_VARIANTS} from 'utils/chart';
+import {FIELDS, OPTIONS} from 'components/organisms/WidgetFormPanel';
 import type {FormData} from 'components/organisms/WidgetFormPanel/types';
 import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
 
@@ -23,6 +23,7 @@ const compositeFields = (data: FormData, {base, dynamic}) => () => {
 const {
 	aggregation,
 	breakdown,
+	breakdownGroup,
 	calcTotalColumn,
 	calcTotalRow,
 	colors,
@@ -53,6 +54,7 @@ const {
 const axisChartFields = [
 	aggregation,
 	breakdown,
+	breakdownGroup,
 	colors,
 	descriptor,
 	group,
@@ -70,6 +72,7 @@ const axisChartFields = [
 const circleChartFields = [
 	aggregation,
 	breakdown,
+	breakdownGroup,
 	colors,
 	descriptor,
 	indicator,
@@ -95,6 +98,7 @@ const comboFields = {
 	dynamic: [
 		aggregation,
 		breakdown,
+		breakdownGroup,
 		dataKey,
 		descriptor,
 		group,
@@ -123,6 +127,7 @@ const tableFields = {
 	dynamic: [
 		aggregation,
 		breakdown,
+		breakdownGroup,
 		calcTotalColumn,
 		calcTotalRow,
 		column,
@@ -141,6 +146,22 @@ const defaultFields = [
 	showName,
 	type
 ];
+
+const getDefaultValue = (key: string) => {
+	if (key.startsWith(type)) {
+		return CHART_SELECTS.AXIS_SELECTS[0];
+	}
+
+	if (key.startsWith(aggregation)) {
+		return OPTIONS.DEFAULT_AGGREGATIONS[0];
+	}
+
+	if (key.startsWith(group) || key.startsWith(breakdownGroup)) {
+		return OPTIONS.DEFAULT_GROUPS[0];
+	}
+
+	return null;
+};
 
 const filter = (data: FormData): any => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
@@ -161,9 +182,21 @@ const filter = (data: FormData): any => {
 
 	const variant = variants[data.type.value];
 	const typeFields = typeof variant === 'object' ? variant : variant();
+	const breakdownReg = new RegExp(`^${breakdown}(_.*|$)`);
 
 	[...defaultFields, ...typeFields].forEach(key => {
-		filteredData[key] = data[key] || null;
+		let value = data[key] || null;
+
+		if (!value) {
+			value = getDefaultValue(key);
+		}
+
+		// $FlowFixMe
+		if (value && breakdownReg.test(key) && !value.code) {
+			value = null;
+		}
+
+		filteredData[key] = value;
 	});
 
 	return filteredData;

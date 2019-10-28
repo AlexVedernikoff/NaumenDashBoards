@@ -1,11 +1,10 @@
 // @flow
-import {AxisChart, CircleChart, ComboChart, Summary, Table} from './WidgetForms';
+import {AxisChart, BarChart, CircleChart, ComboChart, Summary, Table} from './WidgetForms';
 import {CHART_SELECTS, CHART_VARIANTS} from 'utils/chart';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import {Divider} from 'components/atoms';
-import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
-import React from 'react';
-import type {SelectProps, TextAreaProps} from 'components/organisms/WidgetFormPanel/types';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import React, {Fragment} from 'react';
 import {WIDGET_SELECTS, WIDGET_VARIANTS} from 'utils/widget';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
@@ -15,8 +14,8 @@ export class ParamsTab extends DataFormBuilder {
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
 		const widgetsForm = {
-			[BAR]: AxisChart,
-			[BAR_STACKED]: AxisChart,
+			[BAR]: BarChart,
+			[BAR_STACKED]: BarChart,
 			[COLUMN]: AxisChart,
 			[COLUMN_STACKED]: AxisChart,
 			[COMBO]: ComboChart,
@@ -36,20 +35,20 @@ export class ParamsTab extends DataFormBuilder {
 		const {diagramName, name, type} = FIELDS;
 		const {AXIS_HORIZONTAL_SELECTS, AXIS_SELECTS, CIRCLE_SELECTS, COMBO_SELECT} = CHART_SELECTS;
 
-		const nameProps: TextAreaProps = {
+		const nameProps = {
 			label: 'Название виджета',
 			name: name,
 			placeholder: 'Постарайтесь уместить название в две строчки текста',
 			value: values[name]
 		};
 
-		const diagramNameProps: TextAreaProps = {
+		const diagramNameProps = {
 			label: 'Название диаграммы',
 			name: diagramName,
 			value: values[diagramName]
 		};
 
-		const typeProps: SelectProps = {
+		const typeProps = {
 			getOptionLabel: this.getLabelWithIcon,
 			name: type,
 			options: [...AXIS_SELECTS, ...AXIS_HORIZONTAL_SELECTS, ...CIRCLE_SELECTS, COMBO_SELECT, ...WIDGET_SELECTS],
@@ -58,13 +57,13 @@ export class ParamsTab extends DataFormBuilder {
 		};
 
 		return (
-			<section className={styles.main}>
+			<Fragment>
 				{this.renderTextArea(nameProps)}
 				{this.renderTextArea(diagramNameProps)}
 				<Divider />
 				{this.renderSelect(typeProps)}
 				{this.renderWidgetFields(values[type].value)}
-			</section>
+			</Fragment>
 		);
 	};
 

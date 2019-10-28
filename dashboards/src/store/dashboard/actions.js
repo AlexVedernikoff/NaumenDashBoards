@@ -57,7 +57,11 @@ const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const context = getState().dashboard.context;
 	const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-	await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
+	const {data} = await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
+
+	if (data) {
+		dispatch(getWidgets());
+	}
 };
 
 /**

@@ -112,19 +112,22 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 	dispatch(requestWidgetSave());
 
 	try {
-		const {context, editable} = getState().dashboard;
+		const {dashboard, widgets} = getState();
+		const {context, editable, master} = dashboard;
 		const method = asDefault ? 'editDefaultWidget' : 'editPersonalWidgetSettings';
+		const isEditable = editable || master;
+		const widget = {...formData, layout: widgets.data.map[formData.id].layout};
 		const data = {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			editable,
-			widgetKey: formData.id,
-			widgetSettings: formData
+			editable: isEditable,
+			widgetKey: widget.id,
+			widgetSettings: widget
 		};
 		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
-		await dispatch(saveNewLayout(context, editable, asDefault));
-		dispatch(updateWidget(formData));
-		dispatch(fetchDiagramData(formData));
+		await dispatch(saveNewLayout(context, isEditable, asDefault));
+		dispatch(updateWidget(widget));
+		dispatch(fetchDiagramData(widget));
 	} catch (e) {
 		dispatch(recordSaveError());
 	}
@@ -140,21 +143,27 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 	dispatch(requestWidgetSave());
 
 	try {
-		const {context, editable} = getState().dashboard;
-		const method = asDefault ? 'createDefaultWidgetSettings' : 'createPersonalWidgetSettings';
-		const data = {
-			classFqn: context.subjectUuid,
-			contentCode: context.contentCode,
-			editable,
-			widgetSettings: formData
-		};
-		const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
-		await dispatch(saveNewLayout(context, editable, asDefault));
+		const {dashboard, widgets} = getState();
+		const {context, editable, master} = dashboard;
+		const newWidget = widgets.data.newWidget;
 
-		formData.layout.i = id;
-		const widget = {...formData, id};
-		dispatch(setCreatedWidget(widget));
-		dispatch(fetchDiagramData(widget));
+		if (newWidget) {
+			const method = asDefault ? 'createDefaultWidgetSettings' : 'createPersonalWidgetSettings';
+			const isEditable = editable || master;
+			let widget = {...formData, layout: newWidget.layout};
+			const data = {
+				classFqn: context.subjectUuid,
+				contentCode: context.contentCode,
+				editable: isEditable,
+				widgetSettings: widget
+			};
+			const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
+			await dispatch(saveNewLayout(context, isEditable, asDefault));
+
+			widget = {...widget, id, layout: {...widget.layout, i: id}};
+			dispatch(setCreatedWidget(widget));
+			dispatch(fetchDiagramData(widget));
+		}
 	} catch (e) {
 		dispatch(recordSaveError());
 	}

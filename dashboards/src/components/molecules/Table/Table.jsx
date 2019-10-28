@@ -1,11 +1,11 @@
 // @flow
 import 'react-table/react-table.css';
 import type {Props, State} from './types';
-import React, {Component, Fragment} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import ReactTable from 'react-table';
 import styles from './styles.less';
 
-export class Table extends Component<Props, State> {
+export class Table extends PureComponent<Props, State> {
 	state = {
 		columns: [],
 		data: []
@@ -28,10 +28,12 @@ export class Table extends Component<Props, State> {
 
 	renderTable = () => {
 		const {columns, data} = this.state;
+		const {showName} = this.props.widget;
+		const CNTable = showName ? styles.tableWithName : styles.table;
 
 		return (
 			<ReactTable
-				className={styles.table}
+				className={CNTable}
 				columns={columns}
 				data={data}
 				defaultPageSize={10}

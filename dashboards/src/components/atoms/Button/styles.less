@@ -21,63 +21,68 @@
 	}
 
 	.primary {
-		background-color: @primary!important;
-		border-color: @primary!important;
-		color: white!important;
+		background-color: @primary;
+		border-color: @primary;
+		color: white;
 
 		&:active {
 			@darken: darken(@primary, 10%);
-			background-color: @darken!important;
-			border-color: @darken!important;
+			background-color: @darken;
+			border-color: @darken;
 		}
 	}
 
 	.outline-primary {
-		background-color: white!important;
-		border-color: @primary!important;
-		color: @primary!important;
+		background-color: white;
+		border-color: @primary;
+		color: @primary;
 
 		&:active {
-			background-color: @primary!important;
-			border-color: @primary!important;
+			background-color: @primary;
+			border-color: @primary;
 			color: white;
 		}
 	}
 
 	.info {
-		background-color: @info!important;
-		border-color: @info!important;
-		color: white!important;
+		background-color: @info;
+		border-color: @info;
+		color: white;
 
 		&:hover {
 			@darken: darken(@info, 10%);
-			background-color: @darken!important;
-			border-color: @darken!important;
+			background-color: @darken;
+			border-color: @darken;
 		}
 
 		&:active {
 			@darken: darken(@info, 15%);
-			background-color: @darken!important;
-			border-color: @darken!important;
+			background-color: @darken;
+			border-color: @darken;
 		}
 	}
 
 	.outline-info {
-		background-color: white!important;
-		border-color: @info!important;
-		color: @info!important;
+		background-color: white;
+		border-color: @info;
+		color: @info;
 
 		&:active {
-			background-color: @info!important;
-			border-color: @info!important;
-			color: white!important;
+			background-color: @info;
+			border-color: @info;
+			color: white;
 		}
 	}
 
 	.outline-bare {
 		background-color: transparent;
-		border-color: transparent;
-		color: @black!important;
+		border: none ;
+		color: @black ;
+
+		&:hover {
+			background-color: transparent;
+			color: @black;
+		}
 	}
 
 	.icon {

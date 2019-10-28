@@ -1,17 +1,18 @@
 // @flow
-import {Chart, Summary, Table} from 'components/molecules';
 import {CHART_VARIANTS} from 'utils/chart';
-import {createOrderName, NewWidget, WIDGET_VARIANTS} from 'utils/widget';
-import type {DiagramData} from 'store/widgets/diagrams/types';
+import {createOrderName, NewWidget} from 'utils/widget';
+import {Diagram} from 'components/molecules';
+import {editContentRef} from 'components/pages/DashboardEditContent';
 import {EditIcon, UnionIcon} from 'icons/form';
 import type {Element} from 'react';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {GRID_PARAMS} from 'utils/layout';
+import {IconButton} from 'components/atoms';
 import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
-import ReactTooltip from 'react-tooltip';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
+import {viewContentRef} from 'components/pages/DashboardViewContent';
 import type {Widget} from 'store/widgets/data/types';
 
 const props = {
@@ -38,6 +39,7 @@ const props = {
 };
 
 export const gridRef = createRef();
+const newWidgetRef = createRef();
 
 export class LayoutGrid extends Component<Props, State> {
 	static defaultProps = {
@@ -45,6 +47,7 @@ export class LayoutGrid extends Component<Props, State> {
 	};
 
 	state = {
+		newWidgetExists: false,
 		width: null
 	};
 
@@ -55,13 +58,26 @@ export class LayoutGrid extends Component<Props, State> {
 	 * и пробросить ее в дочерний компонент, тем самым задав сетке виджетов оптимальную ширину.
 	 */
 	componentDidMount () {
-		const {current} = gridRef;
+		const {current: gridContainer} = gridRef;
 
-		if (current) {
-			const width: number = current.clientWidth;
+		if (gridContainer) {
+			const width: number = gridContainer.clientWidth;
 
 			this.setState({width});
 			window.addEventListener('resize', this.reloadGrid);
+		}
+	}
+
+	componentDidUpdate () {
+		const {current} = newWidgetRef;
+		const {newWidgetExists} = this.state;
+
+		if (current && !newWidgetExists) {
+			this.setState(() => ({newWidgetExists: true}));
+			const content = editContentRef.current ? editContentRef.current : viewContentRef.current;
+			content && content.scrollTo(0, content.clientHeight);
+		} else if (!current && newWidgetExists) {
+			this.setState(() => ({newWidgetExists: false}));
 		}
 	}
 
@@ -93,65 +109,22 @@ export class LayoutGrid extends Component<Props, State> {
 		comboDrillDown(widgets[id], orderNum);
 	};
 
-	renderLoading = () => <p>Загрузка...</p>;
-
-	renderError = () => <p>Ошибка загрузки данных.</p>;
-
-	resolveDiagram = (widget: Widget, diagram: DiagramData) => {
-		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
-
-		const renders = {
-			[SUMMARY]: Summary,
-			[TABLE]: Table
-		};
-
-		const Diagram = renders[widget.type.value] || Chart;
-
-		return <Diagram data={diagram} widget={widget} />;
-	};
-
-	renderDiagram = (widget: Widget) => {
-		const {diagrams} = this.props;
-		const {data, loading} = diagrams[widget.id];
-
-		if (loading) {
-			return this.renderLoading();
-		}
-
-		if (data) {
-			return this.resolveDiagram(widget, data);
-		}
-
-		return this.renderError();
-	};
-
 	renderEditButton = (id: string) => {
 		const {editable} = this.props;
 
 		if (editable) {
 			return (
-				<button
-					className={styles.buttonAction}
-					data-tip="Редактировать"
-					onClick={this.handleClickEdit(id)}
-					type="button"
-				>
+				<IconButton tip="Редактировать" onClick={this.handleClickEdit(id)}>
 					<EditIcon />
-				</button>
+				</IconButton>
 			);
 		}
 	};
 
 	renderDrillDownButton = (id: string) => (
-		<button
-			className={styles.buttonAction}
-			data-tip="Перейти"
-			data-id={id}
-			onClick={this.handleClickDrillDown(id)}
-			type="button"
-		>
+		<IconButton tip="Перейти" onClick={this.handleClickDrillDown(id)}>
 			<UnionIcon />
-		</button>
+		</IconButton>
 	);
 
 	renderDrillDownButtons = (widget: Widget) => {
@@ -168,23 +141,16 @@ export class LayoutGrid extends Component<Props, State> {
 				}
 
 				return (
-					<button
-						className={styles.buttonAction}
-						data-tip={tipText} type="button"
-						data-id={id}
-						data-order={num}
-						key={dataKey}
-						onClick={this.handleClickComboDrillDown(id, num)}
-					>
-						<UnionIcon/>
-					</button>
+					<IconButton key={dataKey} tip={tipText} onClick={this.handleClickComboDrillDown(id, num)}>
+						<UnionIcon />
+					</IconButton>
 				);
 			});
 		}
 	};
 
 	renderDrillDownButtonByType = (widget: Widget) => {
-		if (widget.type.value === CHART_VARIANTS.COMBO) {
+		if (widget.type && widget.type.value === CHART_VARIANTS.COMBO) {
 			return this.renderDrillDownButtons(widget);
 		}
 
@@ -195,15 +161,16 @@ export class LayoutGrid extends Component<Props, State> {
 		<div className={styles.widgetActions}>
 			{this.renderEditButton(widget.id)}
 			{this.renderDrillDownButtonByType(widget)}
-			<ReactTooltip effect="solid" place="bottom" type="info" />
 		</div>
 	);
 
 	renderWidgetByType = (widget: Widget) => {
+		const {diagrams} = this.props;
+
 		if (!(widget instanceof NewWidget)) {
 			return (
 				<Fragment>
-					{this.renderDiagram(widget)}
+					<Diagram widget={widget} diagram={diagrams[widget.id]} />
 					{this.renderButtons(widget)}
 				</Fragment>
 			);
@@ -212,9 +179,10 @@ export class LayoutGrid extends Component<Props, State> {
 
 	renderWidget = (widget: Widget): Element<'div'> => {
 		const {id, layout} = widget;
+		const ref = id === NewWidget.id ? newWidgetRef : null;
 
 		return (
-			<div key={id} data-grid={layout} className={styles.widget}>
+			<div key={id} data-grid={layout} className={styles.widget} ref={ref}>
 				{this.renderWidgetByType(widget)}
 			</div>
 		);

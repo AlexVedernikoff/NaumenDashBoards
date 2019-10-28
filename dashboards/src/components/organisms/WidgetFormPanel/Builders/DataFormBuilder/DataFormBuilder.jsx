@@ -1,19 +1,20 @@
 // @flow
-import type {AttrSelectProps, GetRefOptions, InputProps, SelectValue} from 'components/organisms/WidgetFormPanel/types';
-import {Button, Divider} from 'components/atoms';
+import type {AttrSelectProps, GetRefOptions, MixinInputProps} from './types';
+import {Divider} from 'components/atoms';
+import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/constants';
 import type {ComputedAttr} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/types';
-import ComputeAttrCreator from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator';
+import {ComputeAttrCreator} from 'components/organisms/WidgetFormPanel/Modals';
 import {createOrderName, getNumberFromName} from 'utils/widget';
-import {ErrorMessage} from 'formik';
-import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
-import FormBuilder from './FormBuilder';
-import {getAggregateOptions} from 'utils/aggregate';
-import {getGroupOptions, OVERLAP} from 'utils/group';
+import {FIELDS, getAggregateOptions, getGroupOptions, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
+import FormBuilder from 'components/organisms/WidgetFormPanel/Builders/FormBuilder';
 import {getWidgetIcon} from 'icons/widgets';
 import type {Node} from 'react';
 import type {OptionType} from 'react-select/src/types';
+import {PlusIcon} from 'icons/form';
 import type {Props as TreeProps} from 'components/molecules/TreeSelectInput/types';
 import React, {Fragment} from 'react';
+import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
+import styles from './styles.less';
 import TreeSelectInput from 'components/molecules/TreeSelectInput';
 
 export class DataFormBuilder extends FormBuilder {
@@ -34,6 +35,16 @@ export class DataFormBuilder extends FormBuilder {
 			{withDivider && <Divider />}
 		</Fragment>
 	);
+
+	getIconLabel = (option: SelectValue) => {
+		const Icon = getWidgetIcon(option.value);
+
+		return (
+			<div className={styles.labelWithIcon}>
+				{Icon ? <Icon /> : <span>{option.label}</span>}
+			</div>
+		);
+	};
 
 	getLabelWithIcon = (option: SelectValue) => {
 		const Icon = getWidgetIcon(option.value);
@@ -82,7 +93,7 @@ export class DataFormBuilder extends FormBuilder {
 
 		setFieldValue(name, value);
 
-		if (!refValue || !refOptions.filter(o => o.value === refValue.value).length) {
+		if (!refValue || !refOptions.find(o => o.value === refValue.value)) {
 			setFieldValue(refName, refOptions[0]);
 		}
 	};
@@ -172,21 +183,17 @@ export class DataFormBuilder extends FormBuilder {
 		}
 	};
 
-	renderTreeSelect = (props: TreeProps) => {
-		const {name} = props;
-
-		return (
-			<div className={styles.field}>
-				<TreeSelectInput {...props} />
-				<span className={styles.error}>
-					<ErrorMessage name={name} />
-				</span>
-			</div>
-		);
-	};
+	renderTreeSelect = (props: TreeProps) => (
+		<div className={mainStyles.field}>
+			<TreeSelectInput {...props} />
+			<span className={mainStyles.error}>
+				{this.props.errors[props.name]}
+			</span>
+		</div>
+	);
 
 	renderAttrSelect = (props: AttrSelectProps) => {
-		const {computedAttrs} = this.props;
+		const {computedAttrs} = this.props.values;
 		let {name, options, value, withCreateButton} = props;
 		props.attr = true;
 		props.withEditIcon = true;
@@ -204,18 +211,17 @@ export class DataFormBuilder extends FormBuilder {
 
 		if (withCreateButton) {
 			props.onClickCreateButton = this.handleShowModal(true);
+			props.createButtonText = 'Создать поле';
 
 			if (Array.isArray(computedAttrs)) {
 				options = [...computedAttrs, ...options];
 			}
 		}
 
-		if (options.length && name === FIELDS.breakdown) {
+		if (options.length && name.startsWith(FIELDS.breakdown)) {
 			const noBreakdown = {
-				...options[0],
 				code: null,
-				title: 'Без разбивки',
-				type: ''
+				title: 'Без разбивки'
 			};
 
 			options = [noBreakdown, ...options];
@@ -226,13 +232,14 @@ export class DataFormBuilder extends FormBuilder {
 
 	renderFilterButton = (source: string) => {
 		return (
-			<Button onClick={this.callFilterModal(source)} className="mt-1">
-				Добавить фильтр
-			</Button>
+			<div className={styles.filterIcon}>
+				<PlusIcon onClick={this.callFilterModal(source)}/>
+				<span>Фильтр</span>
+			</div>
 		);
 	};
 
-	renderSourceInput = (name: string = FIELDS.source, mixin: ?InputProps) => {
+	renderSourceInput = (name: string = FIELDS.source) => {
 		const {values, sources} = this.props;
 		const value = values[name];
 
@@ -263,6 +270,7 @@ export class DataFormBuilder extends FormBuilder {
 		const {values} = this.props;
 
 		const breakdown: AttrSelectProps = {
+			border: false,
 			name: name,
 			placeholder: 'Разбивка',
 			value: values[name]
@@ -278,35 +286,35 @@ export class DataFormBuilder extends FormBuilder {
 		const aggregation = values[name];
 
 		const props = {
+			border: false,
+			color: 'blue',
+			defaultValue: options[0],
 			isSearchable: false,
 			name,
 			options,
-			placeholder: 'Агрегация',
-			size: 'small',
 			value: aggregation
 		};
 
-		return this.renderSelect(props);
+		if (!refValue || (refValue && refValue.type !== COMPUTED_ATTR)) {
+			return this.renderSelect(props);
+		}
 	};
 
-	renderGroupInput = (name: string = FIELDS.group, xAxisName: string = FIELDS.xAxis, mixin: ?InputProps) => {
+	renderGroupInput = (name: string = FIELDS.group, refName: string = FIELDS.xAxis, mixin: ?MixinInputProps) => {
 		const {values} = this.props;
-		const xAxis = values[xAxisName];
-		const options = getGroupOptions(xAxis);
+		const ref = values[refName];
+		const options = getGroupOptions(ref);
 		const group = values[name];
 		let isDisabled = false;
 
-		if (group && group.value === OVERLAP) {
-			isDisabled = true;
-		}
-
 		let props = {
+			border: false,
+			color: 'blue',
+			defaultValue: options[0],
 			isDisabled,
 			isSearchable: false,
 			name,
 			options,
-			placeholder: 'Группировка',
-			size: 'small',
 			value: group
 		};
 
@@ -316,6 +324,11 @@ export class DataFormBuilder extends FormBuilder {
 
 		return this.renderSelect(props);
 	};
+
+	renderBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.combineInputs(
+		this.renderGroupInput(breakdownGroup, breakdown),
+		this.renderBreakdownInput(breakdown)
+	);
 }
 
 export default DataFormBuilder;

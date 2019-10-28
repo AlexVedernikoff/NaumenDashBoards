@@ -3,8 +3,10 @@ import DashboardRightPanel from 'components/organisms/DashboardRightPanel';
 import type {Layout} from 'utils/layout/types';
 import LayoutGrid from 'containers/LayoutGrid';
 import type {Props} from 'containers/DashboardEditContent/types';
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import styles from './styles.less';
+
+export const editContentRef = createRef();
 
 export class DashboardEditContent extends Component<Props> {
 	handleWidgetSelect = (widgetId: string) => {
@@ -34,7 +36,7 @@ export class DashboardEditContent extends Component<Props> {
 		const widgets = this.getWidgets();
 
 		return (
-			<div className={styles.container}>
+			<div className={styles.container} ref={editContentRef}>
 				<LayoutGrid
 					editable={true}
 					onSelectWidget={this.handleWidgetSelect}

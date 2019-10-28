@@ -1,6 +1,5 @@
 // @flow
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import type {AttrSelectProps} from 'components/organisms/WidgetFormPanel/types';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
@@ -16,7 +15,8 @@ export class Summary extends OrderFormBuilder {
 	renderIndicatorInput = (indicator: string) => {
 		const {values} = this.props;
 
-		const props: AttrSelectProps = {
+		const props = {
+			border: false,
 			getOptionLabel: this.getLabelWithSource,
 			name: indicator,
 			placeholder: 'Показатель',

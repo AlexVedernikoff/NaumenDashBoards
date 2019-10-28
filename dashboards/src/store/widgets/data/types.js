@@ -8,6 +8,7 @@ import {WIDGETS_EVENTS} from './constants';
 export type Widget = {
 	aggregation?: SelectValue,
 	breakdown?: Attribute | null,
+	breakdownGroup?: SelectValue | null,
 	calcTotalColumn?: boolean,
 	calcTotalRow?: boolean,
 	chart?: SelectValue | null,

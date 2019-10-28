@@ -11,14 +11,17 @@
 		width: 100%;
 	}
 
-	.editIcon {
-		background-color: white;
-		color: #666;
-		cursor: pointer;
-		padding: 0 5px;
+	.editIconContainer {
 		position: absolute;
-		right: 37px;
-		top: 11px;
+		right: 47px;
+		top: 7px;
+		z-index: 99;
+	}
+
+	.clearIconContainer {
+		position: absolute;
+		right: 0;
+		top: -3px;
 		z-index: 99;
 	}
 
@@ -32,6 +35,12 @@
 	}
 }
 
+.rc-tree-select {
+	&:focus {
+		outline: none;
+	}
+}
+
 .rc-tree-select-arrow {
 	right: 5px !important;
 	top: 5px !important;
@@ -42,7 +51,6 @@
 }
 
 .rc-tree-select-search__field {
-	border-bottom: 1px solid #F4F4F4 !important;
 	border: 0 !important;
 	box-sizing: border-box !important;
 	font-size: @font-size;
@@ -71,7 +79,7 @@
 
 .rc-tree-select-selection--single {
 	border-top: 0;
-	border-bottom: 2px solid #323232;
+	border-bottom: 2px solid #333;
 	border-left: 0;
 	border-right: 0;
 	border-radius: 0;
@@ -139,4 +147,13 @@
 
 .rc-tree-select-selection__clear:after {
 	display: none !important;
+}
+
+.rc-tree-select-selection__rendered {
+	padding-left: 0 !important;
+}
+
+.rc-tree-select-selection-selected-value {
+	color: #333;
+	font-size: 14px;
 }

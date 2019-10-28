@@ -27,9 +27,9 @@ export class DropDownFiles extends Component<Props> {
 		);
 	};
 
-	renderContentItem = (l: {text: string}, i: number) => (
-		<button className="dropdownButton" key={i} onClick={this.selectMenu} data-doc-type={l.text}>
-			{l.text}
+	renderContentItem = (item: {text: string}) => (
+		<button key={item.text} onClick={this.selectMenu} data-doc-type={item.text}>
+			{item.text}
 		</button>
 	);
 
