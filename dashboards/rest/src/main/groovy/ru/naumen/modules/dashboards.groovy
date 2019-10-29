@@ -19,7 +19,7 @@ import static groovy.json.JsonOutput.toJson
 @Field private static final String MAIN_FQN = 'abstractBO'
 @Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
         ['object', 'dtInterval', 'date', 'dateTime', 'boLinks', 'catalogItemSet',
-         'backBOLinks', 'string', 'integer', 'catalogItem', 'double']
+         'backBOLinks', 'string', 'integer', 'catalogItem', 'double', 'state']
 //endregion
 
 //region КЛАССЫ
@@ -41,6 +41,38 @@ class DataSource
      * Дети источника даннных
      */
     Collection<DataSource> children
+}
+
+/**
+ * Модель для атрибута
+ */
+@Immutable
+class Attribute
+{
+    /**
+     * Код атрибута
+     */
+    String code
+    /**
+     * Название атрибута
+     */
+    String title
+    /**
+     * Тип атрибута
+     */
+    String type
+    /**
+     * Свойство атрибута (метаклассы ссылочных атрибутов, значения элементов справочника и т.д)
+     */
+    String property
+    /**
+     * метакласс атрибута
+     */
+    String metaClassFqn
+    /**
+     * Имя источника
+     */
+    String sourceName
 }
 //endregion
 

@@ -77,7 +77,16 @@ class Attribute
      * Имя источника
      */
     String sourceName
+
+    /**
+     * Функция для вычисления
+     */
+    String stringForCompute
+
+    /**
+     * Данные о переменных для вычисления
+     */
+    Map<String, Object> computeData
 }
 //endregion
-
 return

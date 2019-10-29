@@ -12,7 +12,6 @@ package ru.naumen.modules
 
 import groovy.json.JsonSlurper
 import groovy.transform.Field
-import groovy.transform.Immutable
 import groovy.transform.TupleConstructor
 
 import static groovy.json.JsonOutput.toJson
@@ -60,6 +59,7 @@ class RequestEditWidgetSettings
  */
 class RequestEditWidgetsSettings
 {
+    Boolean editable
     String classFqn
     String contentCode
     Collection<ResponseWidgetSettings> layoutsSettings
@@ -287,8 +287,7 @@ String resetPersonalDashboard(String classFqn, String contentCode, def user)
  */
 String getAvailabilityGroupMasterDashboard(def user)
 {
-    def employee = utils.get(user.UUID)
-    return toJson(GROUP_MASTER_DASHBOARD in employee.all_Group.code[0])
+    return toJson(checkUserOnMasterDashboard(user))
 }
 //endregion
 
@@ -362,8 +361,9 @@ private String editWidget(RequestEditWidgetSettings request,
  */
 private String generateDashboardKey(String classFqn, String contentCode, String login)
 {
+    String type = utils.get(classFqn)?.metaClass?.toString()
     String loginKeyPart = login ? "_${login}" : ''
-    return "${classFqn}_${contentCode}${loginKeyPart}"
+    return "${type}_${contentCode}${loginKeyPart}"
 }
 
 /**
@@ -379,7 +379,7 @@ private String generateWidgetKey(Collection<String> keys, String login)
     while ({
         uuidWidget = "${UUID.randomUUID()}${loginKeyPart}"
         (keys.contains(uuidWidget) &&
-        loadJsonSettings(uuidWidget))
+                loadJsonSettings(uuidWidget))
     }()) continue
     return uuidWidget
 }
@@ -428,12 +428,21 @@ private ResponseWidgetSettings getWidgetSettings(String widgetKey)
  */
 private checkRightsOnDashboard(def user, String messageError)
 {
-    def employee = utils.get(user.UUID)
-    if (!(GROUP_MASTER_DASHBOARD in employee.all_Group.code[0]))
+    if (!checkUserOnMasterDashboard(user))
     {
         throw new Exception(toJson([error: "Пользователь не является мастером дашбордов, " +
                 "${messageError} виджета по умолчанию не возможно"]))
     }
+}
+
+/**
+ * Метод проверки пользователя на мастера дашборда
+ * @param user
+ * @return
+ */
+private boolean checkUserOnMasterDashboard(def user)
+{
+    user?.UUID ? GROUP_MASTER_DASHBOARD in utils.get(user.UUID).all_Group*.code : false
 }
 
 /**
@@ -458,7 +467,9 @@ private def setUuidInSettings(def widgetSettings, String key)
     //widgetSettings является неизменяемым, поэтому создаём ноый объект и копируем все значения
     def settings = [:] << (widgetSettings)
     settings.id = key
-    settings.layout.i = key
+    def layout = [:] << settings.layout
+    layout.i = key
+    settings.layout = layout
     return settings
 }
 
