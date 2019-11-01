@@ -32,10 +32,10 @@ enum AggregationType
 {
     COUNT_CNT('COUNT(%s)'),
     PERCENT('cast(COUNT(%s)*100.00/%s as big_decimal)'),
-    SUM('SUM(%s)'),
-    AVG('AVG(%s)'),
-    MAX('MAX(%s)'),
-    MIN('MIN(%s)'),
+    SUM('cast(SUM(%s)*1.00 as big_decimal)'),
+    AVG('cast(AVG(%s)*1.00 as big_decimal)'),
+    MAX('cast(MAX(%s)*1.00 as big_decimal)'),
+    MIN('cast(MIN(%s)*1.00 as big_decimal)'),
     MDN('%s')
 
     AggregationType(String aggregationFormat)
@@ -455,7 +455,7 @@ private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompos
                     ? getPercentColumn(descriptor, source, attr, aggregationType)
                     : aggregationType.get(attributeCode)
         }
-        criteria.addColumn(sqlFormula) //Вставить в запрос
+        criteria.addColumn("cast(${sqlFormula}*1.00 as big_decimal)") //Вставить в запрос
     }
     else
     {
@@ -499,7 +499,7 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
                         currentData.row as Attribute)
                     : aggregationType.get(attributeCode)
         }
-        criteria.addColumn(sqlFormula)
+        criteria.addColumn("cast(${sqlFormula}*1.00 as big_decimal)")
     }
     else
     {
@@ -575,7 +575,7 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
                         }
                         return resVariable
                     }
-                    criteria.addColumn(sqlFormula)
+                    criteria.addColumn("cast(${sqlFormula}*1.00 as big_decimal)")
                 }
                 else
                 {
@@ -802,9 +802,9 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     TableDiagram tableDiagram = new TableDiagram()
     Closure<String> capriceFront = { String str -> str.replace('.', '') } // требуется для библиотеки на фронте
     tableDiagram.columns += list.toUnique { it[columnTitleIndex] }.collect { currentCell ->
-        String columnTitle = currentCell[columnTitleIndex]
+        def columnTitle = currentCell[columnTitleIndex]
         String resultValue = calcColumn ? list.findAll({ cell -> cell[columnTitleIndex] == columnTitle }).sum { it[dataIndex] as double } : ""
-        new Column(columnTitle, capriceFront(columnTitle), resultValue)
+        new Column(columnTitle as String, capriceFront(columnTitle as String), resultValue)
     }
     list.toUnique { it[rowTitleIndex] }.collectEntries {
         tableDiagram.data << [breakdownTitle: it[rowTitleIndex]]
@@ -813,7 +813,7 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
         def rowTitle = currentCell[rowTitleIndex]
         tableDiagram.data.find { cell ->
             cell["breakdownTitle"] == rowTitle
-        } << [(capriceFront(currentCell[columnTitleIndex])): currentCell[dataIndex]]
+        } << [(capriceFront(currentCell[columnTitleIndex] as String)): currentCell[dataIndex]]
     }
     if (calcRow)
     {
@@ -825,7 +825,8 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
 
     if(calcRow && calcColumn)
     {
-        double columnTotalResult = tableDiagram.columns.findResults({ it.footer != '' ? it.footer as double : null }).sum()
+        double columnTotalResult = tableDiagram.columns
+                .sum { it.footer != '' ? it.footer as double : 0 }
         String totalResult = columnTotalResult
         tableDiagram.columns.find({ it.accessor == 'total' }).footer = totalResult
     }
@@ -836,6 +837,7 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     }
     return tableDiagram
 }
+
 
 /**
  * Маппинг данных в формат для построения комбо диаграмм
