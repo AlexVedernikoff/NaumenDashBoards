@@ -25,6 +25,7 @@ export type Props = {
 	isDisabled: boolean,
 	isLoading: boolean,
 	isSearchable: boolean,
+	menuIsOpen?: boolean,
 	name: string,
 	onClickCreateButton?: () => any,
 	onSelect: (name: string, value: OptionType) => any,

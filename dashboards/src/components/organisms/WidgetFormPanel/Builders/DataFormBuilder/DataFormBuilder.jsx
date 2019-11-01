@@ -5,7 +5,7 @@ import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/Compute
 import type {ComputedAttr} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/types';
 import {ComputeAttrCreator} from 'components/organisms/WidgetFormPanel/Modals';
 import {createOrderName, getNumberFromName} from 'utils/widget';
-import {FIELDS, getAggregateOptions, getGroupOptions, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, getAggregateOptions, getGroupOptions, styles as mainStyles, TYPES} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from 'components/organisms/WidgetFormPanel/Builders/FormBuilder';
 import {getWidgetIcon} from 'icons/widgets';
 import type {Node} from 'react';
@@ -19,17 +19,18 @@ import TreeSelectInput from 'components/molecules/TreeSelectInput';
 
 export class DataFormBuilder extends FormBuilder {
 	state = {
+		fieldName: '',
 		showModal: false
 	};
 
-	combineInputs = (Left: Node, Right: Node, withDivider: boolean = true) => (
+	combineInputs = (left: Node, right: Node, withDivider: boolean = true) => (
 		<Fragment>
 			<div className={styles.combineInput}>
-				<div className={styles.combineInputLeft}>
-					{Left}
-				</div>
+				{left && <div className={styles.combineInputLeft}>
+					{left}
+				</div>}
 				<div className={styles.combineInputRight}>
-					{Right}
+					{right}
 				</div>
 			</div>
 			{withDivider && <Divider />}
@@ -85,7 +86,7 @@ export class DataFormBuilder extends FormBuilder {
 		return options;
 	};
 
-	handleSelectAxis = (baseRefName: string, getRefOptions: GetRefOptions) => (name: string, value: OptionType) => {
+	handleSelectWithRef = (baseRefName: string, getRefOptions: GetRefOptions) => (name: string, value: OptionType) => {
 		const {setFieldValue, values} = this.props;
 		const refName = this.createRefName(name, baseRefName);
 		const refValue = values[refName];
@@ -94,7 +95,8 @@ export class DataFormBuilder extends FormBuilder {
 		setFieldValue(name, value);
 
 		if (!refValue || !refOptions.find(o => o.value === refValue.value)) {
-			setFieldValue(refName, refOptions[0]);
+			const defaultIndex = /group/i.test(refName) && TYPES.DATE.includes(value.type) ? 3 : 0;
+			setFieldValue(refName, refOptions[defaultIndex]);
 		}
 	};
 
@@ -114,13 +116,14 @@ export class DataFormBuilder extends FormBuilder {
 		}
 	};
 
-	handleShowModal = (showModal: boolean) => () => this.setState({showModal});
+	handleShowModal = (showModal: boolean, fieldName?: string = '') => () => this.setState({fieldName, showModal});
 
-	handleCreateAttr = (attr: ComputedAttr) => {
+	handleCreateAttr = (name: string, attr: ComputedAttr) => {
 		const {setFieldValue, values} = this.props;
 		let computedAttrs = values[FIELDS.computedAttrs];
 		computedAttrs = Array.isArray(computedAttrs) ? [attr, ...computedAttrs] : [attr];
 
+		setFieldValue(name, attr);
 		setFieldValue(FIELDS.computedAttrs, computedAttrs);
 		this.handleShowModal(false)();
 	};
@@ -176,10 +179,16 @@ export class DataFormBuilder extends FormBuilder {
 	};
 
 	renderModal = () => {
-		const {showModal} = this.state;
+		const {fieldName, showModal} = this.state;
 
 		if (showModal) {
-			return <ComputeAttrCreator onSubmit={this.handleCreateAttr} onClose={this.handleShowModal(false)} />;
+			return (
+				<ComputeAttrCreator
+					name={fieldName}
+					onClose={this.handleShowModal(false)}
+					onSubmit={this.handleCreateAttr}
+				/>
+			);
 		}
 	};
 
@@ -210,7 +219,7 @@ export class DataFormBuilder extends FormBuilder {
 		}
 
 		if (withCreateButton) {
-			props.onClickCreateButton = this.handleShowModal(true);
+			props.onClickCreateButton = this.handleShowModal(true, name);
 			props.createButtonText = 'Создать поле';
 
 			if (Array.isArray(computedAttrs)) {
@@ -232,9 +241,11 @@ export class DataFormBuilder extends FormBuilder {
 
 	renderFilterButton = (source: string) => {
 		return (
-			<div className={styles.filterIcon}>
-				<PlusIcon onClick={this.callFilterModal(source)}/>
-				<span>Фильтр</span>
+			<div className={styles.filter}>
+				<div onClick={this.callFilterModal(source)} className={styles.container}>
+					<PlusIcon />
+				</div>
+				<div>Фильтр</div>
 			</div>
 		);
 	};
@@ -272,6 +283,7 @@ export class DataFormBuilder extends FormBuilder {
 		const breakdown: AttrSelectProps = {
 			border: false,
 			name: name,
+			onSelect: this.handleSelectWithRef(FIELDS.breakdownGroup, getGroupOptions),
 			placeholder: 'Разбивка',
 			value: values[name]
 		};

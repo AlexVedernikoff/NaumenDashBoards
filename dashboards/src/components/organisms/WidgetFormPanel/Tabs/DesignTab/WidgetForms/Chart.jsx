@@ -12,7 +12,7 @@ export class Chart extends FormBuilder {
 		const {setFieldValue, values} = props;
 		const colors = values[FIELDS.colors];
 
-		if (!colors || colors.length !== 16) {
+		if (!Array.isArray(colors)) {
 			setFieldValue(FIELDS.colors, VALUES.COLORS);
 		}
 	}

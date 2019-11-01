@@ -33,6 +33,7 @@ export class DashboardEditContent extends Component<Props> {
 	};
 
 	renderGrid = () => {
+		const {selectedWidget} = this.props;
 		const widgets = this.getWidgets();
 
 		return (
@@ -41,6 +42,7 @@ export class DashboardEditContent extends Component<Props> {
 					editable={true}
 					onSelectWidget={this.handleWidgetSelect}
 					onLayoutChange={this.onLayoutChange}
+					selectedWidget={selectedWidget}
 					widgets={widgets}
 				/>
 			</div>

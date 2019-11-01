@@ -11,9 +11,11 @@ export class Chart extends PureComponent<Props, State> {
 	};
 
 	static getDerivedStateFromProps (props: Props, state: State) {
-		const {categories, labels, series} = props.data;
+		let {categories, labels, series} = props.data;
+		// TODO убрать как на бэке начнут отфильтровывать значения с null
+		const isFailedData = series.find(s => s === null);
 
-		if (Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
+		if (!isFailedData && Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
 			const {options, series} = getConfig(props.widget, props.data);
 			state.options = options;
 			state.series = series;
@@ -23,14 +25,6 @@ export class Chart extends PureComponent<Props, State> {
 
 		return null;
 	}
-
-	getHeight = () => {
-		const {DONUT, PIE} = CHART_VARIANTS;
-		const {widget} = this.props;
-		const {type, showLegend} = widget;
-
-		return showLegend && (type.value === PIE || type.value === DONUT) ? '70%' : '100%';
-	};
 
 	getType = () => {
 		const {widget} = this.props;
@@ -45,7 +39,7 @@ export class Chart extends PureComponent<Props, State> {
 
 		return (
 			<ApexChart
-				height={this.getHeight()}
+				height="100%"
 				key={type}
 				options={options}
 				series={series}

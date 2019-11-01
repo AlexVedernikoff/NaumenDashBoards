@@ -26,7 +26,8 @@ export class Table extends OrderFormBuilder {
 			border: false,
 			name,
 			placeholder: 'Столбцы',
-			value: values[name]
+			value: values[name],
+			withCreateButton: true
 		};
 
 		return this.renderAttrSelect(row);
@@ -43,8 +44,7 @@ export class Table extends OrderFormBuilder {
 		const row = {
 			name,
 			placeholder: 'Строки',
-			value: values[name],
-			withCreateButton: true
+			value: values[name]
 		};
 
 		return this.renderAttrSelect(row);

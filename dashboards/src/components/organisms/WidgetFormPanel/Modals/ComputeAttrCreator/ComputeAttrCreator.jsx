@@ -28,6 +28,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 			}
 		},
 		first: FIRST_NAME,
+		focus: true,
 		last: FIRST_NAME,
 		sources: []
 	};
@@ -181,13 +182,17 @@ export class ComputeAttrCreator extends Component<Props, State> {
 
 	handleSelect = async (name: string, value: OptionType) => {
 		const {AGGREGATION, ATTRIBUTE, SOURCE} = TYPES;
-		const {controls} = this.state;
+		const {controls, focus} = this.state;
 		const currentControl = controls[name];
 		const {type: currentType, value: currentValue} = currentControl;
 		const isSourceValue = this.isSource(value);
 		const nextControl = currentControl.next && controls[currentControl.next];
 		const haveSourceRefType = currentType === AGGREGATION || currentType === ATTRIBUTE;
 		let valueMustDeleted = false;
+
+		if (focus) {
+			this.setState({focus: undefined});
+		}
 
 		if (!isSourceValue && !haveSourceRefType) {
 			valueMustDeleted = currentValue && currentValue.value === value.value;
@@ -229,7 +234,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 	onSubmit = () => {
 		const {AGGREGATION, ATTRIBUTE, SOURCE} = TYPES;
 		const {controls, first} = this.state;
-		const {onSubmit} = this.props;
+		const {onSubmit, name} = this.props;
 		const computeData = {};
 		let title = '';
 		let stringForCompute = '';
@@ -267,7 +272,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 			}
 		}
 
-		onSubmit({
+		onSubmit(name, {
 			code: uuid(),
 			computeData,
 			stringForCompute,
@@ -276,9 +281,25 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		});
 	};
 
+	getAttributes = (source?: string) => {
+		const {attributes, fetchAttributes} = this.props;
+		let options = [];
+
+		if (source) {
+			const currentAttr = attributes[source.value];
+
+			if (!currentAttr || (currentAttr.data.length === 0 && !currentAttr.loading && !currentAttr.error)) {
+				fetchAttributes(source);
+			} else {
+				options = currentAttr.data;
+			}
+		}
+
+		return options;
+	};
+
 	getOptions = (control: Control) => {
 		const {AGGREGATION, ATTRIBUTE} = TYPES;
-		const {attributes} = this.props;
 		const {sources, constants, controls} = this.state;
 		const {prev, type} = control;
 		const prevValue = prev && controls[prev].value;
@@ -288,14 +309,14 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		}
 
 		if (type === ATTRIBUTE && this.isSource(prevValue)) {
-			const source = prevValue && prevValue.value;
-			return source ? attributes[source].data : [];
+			return this.getAttributes(prevValue);
 		}
 
 		return [...operators, ...constants, ...sources];
 	};
 
 	renderControl = (control: Control) => {
+		const {focus} = this.state;
 		const options = this.getOptions(control);
 		const {name, value} = control;
 		const form = {
@@ -309,7 +330,8 @@ export class ComputeAttrCreator extends Component<Props, State> {
 				<Select
 					attr={control.type === TYPES.ATTRIBUTE}
 					form={form}
-					isSearchable={false}
+					isSearchable={control.type === TYPES.ATTRIBUTE}
+					menuIsOpen={focus}
 					name={name}
 					onSelect={this.handleSelect}
 					options={options}

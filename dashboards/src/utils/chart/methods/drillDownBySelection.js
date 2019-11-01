@@ -33,14 +33,12 @@ const addFilter = (mixin: DrillDownMixin, attr: ?Attribute, value: string | numb
  * @param {DrillDownMixin} mixin - объект будущей примеси
  */
 const axisChart = (widget: Widget, {categories, series}: DiagramData, config: any, mixin: DrillDownMixin) => {
-	const {breakdown, group, xAxis} = widget;
+	const {breakdown, breakdownGroup, group, xAxis} = widget;
 	const {dataPointIndex, seriesIndex} = config;
 
 	if (Array.isArray(categories) && Array.isArray(series)) {
-		const groupValue = getValue(group);
-
-		addFilter(mixin, xAxis, categories[dataPointIndex], groupValue);
-		addFilter(mixin, breakdown, series[seriesIndex].name);
+		addFilter(mixin, xAxis, categories[dataPointIndex], getValue(group));
+		addFilter(mixin, breakdown, series[seriesIndex].name, getValue(breakdownGroup));
 	}
 };
 
@@ -62,12 +60,16 @@ const comboChart = (widget: Widget, {labels, series}: DiagramData, config: any, 
 	if (currentKey) {
 		const currentNumber = getNumberFromName(currentKey);
 		const xAxis = widget[createOrderName(currentNumber)(FIELDS.xAxis)];
-		const group = getValue(widget[createOrderName(currentNumber)(FIELDS.group)]);
+		const group = widget[createOrderName(currentNumber)(FIELDS.group)];
+		const breakdown = widget[createOrderName(currentNumber)(FIELDS.breakdown)];
+		const breakdownGroup = widget[createOrderName(currentNumber)(FIELDS.breakdownGroup)];
 		const cases = [];
 		let classFqn = getValue(widget[createOrderName(currentNumber)(FIELDS.source)]);
+
 		mixin.classFqn = classFqn;
 
-		addFilter(mixin, xAxis, labels[dataPointIndex], group);
+		addFilter(mixin, xAxis, labels[dataPointIndex], getValue(group));
+		addFilter(mixin, breakdown, series[seriesIndex].breakdownValue, getValue(breakdownGroup));
 
 		if (classFqn && classFqn.includes('$')) {
 			const parts = classFqn.split('$');
@@ -87,9 +89,11 @@ const comboChart = (widget: Widget, {labels, series}: DiagramData, config: any, 
  * @param {any} config - конфиг построенного графика
  * @param {DrillDownMixin} mixin - объект будущей примеси
  */
-const circleChart = ({breakdown}: Widget, {labels}: DiagramData, {dataPointIndex}: any, mixin: DrillDownMixin) => {
+const circleChart = (widget: Widget, {labels}: DiagramData, {dataPointIndex}: any, mixin: DrillDownMixin) => {
+	const {breakdown, breakdownGroup} = widget;
+
 	if (Array.isArray(labels)) {
-		addFilter(mixin, breakdown, labels[dataPointIndex]);
+		addFilter(mixin, breakdown, labels[dataPointIndex], getValue(breakdownGroup));
 	}
 };
 

@@ -1,5 +1,6 @@
 // @flow
 import {CHART_VARIANTS} from 'utils/chart';
+import cn from 'classnames';
 import {createOrderName, NewWidget} from 'utils/widget';
 import {Diagram} from 'components/molecules';
 import {editContentRef} from 'components/pages/DashboardEditContent';
@@ -12,7 +13,6 @@ import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
 import styles from './styles.less';
-import {viewContentRef} from 'components/pages/DashboardViewContent';
 import type {Widget} from 'store/widgets/data/types';
 
 const props = {
@@ -43,7 +43,8 @@ const newWidgetRef = createRef();
 
 export class LayoutGrid extends Component<Props, State> {
 	static defaultProps = {
-		editable: false
+		editable: false,
+		selectedWidget: ''
 	};
 
 	state = {
@@ -69,15 +70,20 @@ export class LayoutGrid extends Component<Props, State> {
 	}
 
 	componentDidUpdate () {
-		const {current} = newWidgetRef;
-		const {newWidgetExists} = this.state;
+		const {editable} = this.props;
 
-		if (current && !newWidgetExists) {
-			this.setState(() => ({newWidgetExists: true}));
-			const content = editContentRef.current ? editContentRef.current : viewContentRef.current;
-			content && content.scrollTo(0, content.clientHeight);
-		} else if (!current && newWidgetExists) {
-			this.setState(() => ({newWidgetExists: false}));
+		if (editable) {
+			const {current: newWidget} = newWidgetRef;
+			const {current: grid} = gridRef;
+			const {current: content} = editContentRef;
+			const {newWidgetExists} = this.state;
+
+			if (newWidget && grid && !newWidgetExists) {
+				this.setState(() => ({newWidgetExists: true}));
+				content && content.scrollTo(0, grid.clientHeight);
+			} else if (!newWidget && newWidgetExists) {
+				this.setState(() => ({newWidgetExists: false}));
+			}
 		}
 	}
 
@@ -178,11 +184,13 @@ export class LayoutGrid extends Component<Props, State> {
 	};
 
 	renderWidget = (widget: Widget): Element<'div'> => {
+		const {selectedWidget} = this.props;
 		const {id, layout} = widget;
 		const ref = id === NewWidget.id ? newWidgetRef : null;
+		const CNWidget = id === selectedWidget ? cn([styles.widget, styles.selectedWidget]) : styles.widget;
 
 		return (
-			<div key={id} data-grid={layout} className={styles.widget} ref={ref}>
+			<div key={id} data-grid={layout} className={CNWidget} ref={ref}>
 				{this.renderWidgetByType(widget)}
 			</div>
 		);

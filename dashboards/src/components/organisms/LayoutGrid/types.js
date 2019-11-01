@@ -12,5 +12,6 @@ export type Props = {
 	editable: boolean,
 	onLayoutChange?: (layout: Layout) => void,
 	onSelectWidget: (id: string) => void,
+	selectedWidget: string,
 	widgets: WidgetMap,
 } & ConnectedProps & ConnectedFunctions;

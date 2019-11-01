@@ -11,7 +11,7 @@ export class AxisChart extends DataFormBuilder {
 
 		const xAxis = {
 			border: false,
-			handleSelect: this.handleSelectAxis(FIELDS.group, getGroupOptions),
+			onSelect: this.handleSelectWithRef(FIELDS.group, getGroupOptions),
 			name: FIELDS.xAxis,
 			placeholder: 'Ось X',
 			value: values[FIELDS.xAxis]
@@ -19,7 +19,7 @@ export class AxisChart extends DataFormBuilder {
 
 		const yAxis = {
 			border: false,
-			handleSelect: this.handleSelectAxis(FIELDS.aggregation, getAggregateOptions),
+			onSelect: this.handleSelectWithRef(FIELDS.aggregation, getAggregateOptions),
 			name: FIELDS.yAxis,
 			placeholder: 'Ось Y',
 			value: values[FIELDS.yAxis]

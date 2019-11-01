@@ -65,7 +65,7 @@ const INTEGER_AGGREGATIONS = [
 	},
 	{
 		label: 'AVG',
-		value: INTEGER_AGGREGATION.AVERAGE
+		value: INTEGER_AGGREGATION.AVG
 	},
 	{
 		label: 'MAX',
@@ -74,10 +74,6 @@ const INTEGER_AGGREGATIONS = [
 	{
 		label: 'MIN',
 		value: INTEGER_AGGREGATION.MIN
-	},
-	{
-		label: 'MED',
-		value: INTEGER_AGGREGATION.MEDIAN
 	}
 ];
 

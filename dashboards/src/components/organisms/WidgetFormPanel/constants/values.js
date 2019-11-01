@@ -48,10 +48,9 @@ const DEFAULT_GROUP = {
 };
 
 // Агрегация
-const AVERAGE: 'AVERAGE' = 'AVERAGE';
+const AVG: 'AVG' = 'AVG';
 const COUNT: 'COUNT_CNT' = 'COUNT_CNT';
 const MAX: 'MAX' = 'MAX';
-const MEDIAN: 'MEDIAN' = 'MEDIAN';
 const MIN: 'MIN' = 'MIN';
 const PERCENT: 'PERCENT' = 'PERCENT';
 const SUM: 'SUM' = 'SUM';
@@ -62,9 +61,8 @@ const DEFAULT_AGGREGATION = {
 };
 
 const INTEGER_AGGREGATION = {
-	AVERAGE,
+	AVG,
 	MAX,
-	MEDIAN,
 	MIN,
 	SUM
 };
