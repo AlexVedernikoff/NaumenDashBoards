@@ -397,12 +397,17 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
     Attribute breakdown = request.breakdown
     HCriteria criteria = createHCriteria(descriptor, source)
     group(criteria, request.group as GroupType, request.xAxis as Attribute, source, descriptor)
-    aggregation(criteria, request.aggregation as AggregationType, request.yAxis as Attribute, source, descriptor)
+    aggregation(criteria,
+            request.aggregation as AggregationType,
+            request.yAxis as Attribute,
+            source, descriptor,
+            request.xAxis,
+            request.breakdown)
     if (breakdown)
     {
         group(criteria, request.breakdownGroup as GroupType, breakdown as Attribute, source, descriptor)
     }
-    findNotNullAttribute(criteria, request.xAxis as Attribute)
+    findNotNullAttributes(criteria, request.xAxis, request.breakdown)
     Collection<Object> list = getQuery(criteria).list()
     return mappingToStandardDiagram(list, breakdown)
 }
@@ -415,8 +420,14 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
 private RoundDiagram getDataRoundDiagram(RequestGetDataForDiagram request)
 {
     HCriteria criteria = createHCriteria(request.descriptor, request.source)
-    aggregation(criteria, request.aggregation as AggregationType, request.indicator as Attribute, request.source, request.descriptor)
+    aggregation(criteria,
+            request.aggregation as AggregationType,
+            request.indicator as Attribute,
+            request.source,
+            request.descriptor,
+            request.breakdown)
     group(criteria, request.breakdownGroup as GroupType, request.breakdown as Attribute, request.source, request.descriptor)
+    findNotNullAttributes(criteria, request.breakdown)
     Collection<Object> list = getQuery(criteria).list()
     return new RoundDiagram(list*.getAt(1), list*.getAt(0))
 }
@@ -441,7 +452,7 @@ private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompos
             Attribute attr = computeData.attr
             String attributeCode = getAttributeCodeByTypeForCompute(criteria, attr)
             aggregationType == AggregationType.PERCENT
-                    ? getPercentColumn(descriptor, source, attributeCode, aggregationType)
+                    ? getPercentColumn(descriptor, source, attr, aggregationType)
                     : aggregationType.get(attributeCode)
         }
         criteria.addColumn(sqlFormula) //Вставить в запрос
@@ -480,19 +491,30 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
             Attribute attr = computeData.attr
             String attributeCode = getAttributeCodeByTypeForCompute(criteria, attr)
             aggregationType == AggregationType.PERCENT
-                    ? getPercentColumn(descriptor, source, attributeCode, aggregationType)
+                    ? getPercentColumn(descriptor,
+                        source,
+                        attr,
+                        aggregationType,
+                        currentData.breakdown as Attribute,
+                        currentData.row as Attribute)
                     : aggregationType.get(attributeCode)
         }
         criteria.addColumn(sqlFormula)
     }
     else
     {
-        aggregation(criteria, currentData.aggregation as AggregationType, currentData.column as Attribute, source, descriptor)
+        aggregation(criteria,
+                currentData.aggregation as AggregationType,
+                currentData.column as Attribute,
+                source,
+                descriptor,
+                currentData.breakdown as Attribute,
+                currentData.row as Attribute)
     }
     String rowCode = getAttributeCodeByType(criteria, currentData.row as Attribute)
-    findNotNullAttribute(criteria, currentData.row as Attribute)
     criteria.addColumn(rowCode)
     criteria.addGroupColumn(rowCode)
+    findNotNullAttributes(criteria, currentData.breakdown as Attribute, currentData.row as Attribute)
     Collection<Object> list = getQuery(criteria).list()
     return mappingToTableDiagram(list, currentData.calcTotalColumn, currentData.calcTotalRow)
 }
@@ -522,7 +544,15 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
                         if (request.data.get(computeData.dataKey).source == source)
                         {
                             String attributeCode = getAttributeCodeByTypeForCompute(criteria, attr as Attribute)
-                            resVariable = AggregationType.PERCENT ? aggregationType.get(attributeCode, source) : aggregationType.get(attributeCode)
+                            resVariable = AggregationType.PERCENT
+                                    ? getPercentColumn(
+                                        descriptor,
+                                        source,
+                                        attr as Attribute,
+                                        aggregationType,
+                                        currentData.breakdown as Attribute,
+                                        currentData.xAxis as Attribute)
+                                    : aggregationType.get(attributeCode)
                         }
                         else
                         {
@@ -531,7 +561,13 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
                             }
                             String attributeCode = getAttributeCodeByTypeForCompute(subCriteria, attr as Attribute)
                             String aggregation = AggregationType.PERCENT
-                                    ? aggregationType.get(attributeCode, source)
+                                    ? getPercentColumn(
+                                        descriptor,
+                                        source,
+                                        attr as Attribute,
+                                        aggregationType,
+                                        currentData.breakdown as Attribute,
+                                        currentData.xAxis as Attribute)
                                     : aggregationType.get(attributeCode)
                             subCriteria.addColumn(aggregation)
                             getQuery(subCriteria).list().head()
@@ -543,13 +579,25 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
                 }
                 else
                 {
-                    aggregation(criteria, currentData.aggregation as AggregationType, currentData.yAxis as Attribute, source, descriptor)
+                    aggregation(criteria,
+                            currentData.aggregation as AggregationType,
+                            currentData.yAxis as Attribute,
+                            source,
+                            descriptor,
+                            currentData.xAxis as Attribute,
+                            currentData.breakdown as Attribute)
                 }
 
                 currentData.breakdown ?
-                        group(criteria, currentData.breakdownGroup as GroupType, currentData.breakdown as Attribute, source, descriptor)
+                        group(criteria,
+                                currentData.breakdownGroup as GroupType,
+                                currentData.breakdown as Attribute,
+                                source,
+                                descriptor)
                         : null
-                findNotNullAttribute(criteria, currentData.xAxis as Attribute)
+                findNotNullAttributes(criteria,
+                        currentData.xAxis as Attribute,
+                        currentData.breakdown as Attribute)
                 return getQuery(criteria).list()
             }
     return mappingToComboDiagram(list, request)
@@ -587,11 +635,12 @@ private void aggregation(HCriteria criteria,
                          AggregationType aggregationType,
                          Attribute attribute,
                          String source,
-                         String descriptor)
+                         String descriptor,
+                         Attribute... notNullAttribute)
 {
     String attributeCode = getAttributeCodeByType(criteria, attribute)
     aggregationType == AggregationType.PERCENT
-            ? addPercentColumn(descriptor, source, attributeCode, aggregationType, criteria)
+            ? addPercentColumn(criteria, descriptor, source, attribute, aggregationType, notNullAttribute)
             : criteria.addColumn(aggregationType.get(attributeCode))
 }
 
@@ -666,7 +715,7 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
             break
         case GroupType.SEVEN_DAYS:
             def cteSource = createHCriteria(descriptor, source)
-            cteSource.addColumn("min(${cteSource.getAlias()}.${xAxis.code})", 'cteMinDate')
+            cteSource.addColumn("min(${getAttributeCodeByType(cteSource, xAxis)})", 'cteMinDate')
             HCriteria cteCriteria = criteria.addCTESource(cteSource)
             criteria.addGroupColumn("round(abs((day(${attributeCode} " +
                     "- ${cteCriteria.getProperty('cteMinDate')}) - 0.5)) / 7)")
@@ -680,32 +729,29 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
     }
 }
 
-private void addPercentColumn(String descriptor, String source, String attributeCode, AggregationType aggregationType, HCriteria criteria)
+private void addPercentColumn(HCriteria criteria,
+                              String descriptor,
+                              String source,
+                              Attribute attributeCalc,
+                              AggregationType aggregationType,
+                              Attribute... notNullAttributes)
 {
-    criteria.addColumn(getPercentColumn(descriptor, source, attributeCode, aggregationType))
+    criteria.addColumn(getPercentColumn(descriptor, source, attributeCalc, aggregationType, notNullAttributes))
 }
 
-private String getPercentColumn(String descriptor, String source, String attributeCode, AggregationType aggregationType)
+private String getPercentColumn(String descriptor,
+                                String source,
+                                Attribute attributeCalc,
+                                AggregationType aggregationType,
+                                Attribute... notNullAttributes)
 {
     HCriteria calcCriteria = createHCriteria(descriptor, source)
+    String attributeCode = getAttributeCodeByType(calcCriteria, attributeCalc)
     calcCriteria.addColumn("COUNT(${attributeCode})")
     calcCriteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
+    findNotNullAttributes(calcCriteria, notNullAttributes)
     String calcCount = getQuery(calcCriteria).list()[0]
     return aggregationType.get(attributeCode, calcCount)
-}
-
-/**
- * Разбивка данных для диаграммы
- * @param criteria HCriteria основной таблицы
- * @param breakdown атрибут для разбивки
- */
-private void breakdown(HCriteria criteria, Attribute breakdown)
-{
-    String attributeCode = getAttributeCodeByType(criteria, breakdown)
-    findNotNullAttribute(criteria, breakdown as Attribute)
-    criteria.addColumn(attributeCode)
-    criteria.addGroupColumn(attributeCode)
-    criteria.addOrder(HOrders.asc(HHelper.getColumn(attributeCode)))
 }
 
 /**
@@ -736,7 +782,7 @@ private StandardDiagram mappingToStandardDiagram(Collection<Object> list, Attrib
     }
     else
     {
-        standardDiagram.series << new Series("", list.toUnique { it[0] }*.getAt(categoryIndex))
+        standardDiagram.series << new Series("", list.toUnique { it[categoryIndex] }*.getAt(dataIndex))
     }
     return standardDiagram
 }
@@ -853,6 +899,8 @@ private String getAttributeCodeByType(HCriteria criteria, Attribute attribute)
         case 'catalogItem':
             // TODO добавить локаль пользователя api.employee.getPersonalSettings(user.UUID)?.locale после стабилизации диаграмм
             return "${criteria.getAlias()}.${attribute.code}.title.ru"
+        case 'state':
+            return "${criteria.getAlias()}.${attribute.code}"
         default:
             return "${criteria.getAlias()}.${attribute.code}"
     }
@@ -865,11 +913,13 @@ private String getAttributeCodeByTypeForCompute(HCriteria criteria, Attribute at
         case ['boLinks', 'backBOLinks']:
             return "${criteria.addInnerJoin(attribute.code).getAlias()}.title"
         case 'catalogItemSet':
-            return "${criteria.addInnerJoin(attribute.code).getAlias()}.title.ru"
+            return "${criteria.addInnerJoin(attribute.code).getAlias()}.title"
         case 'object':
             return "${criteria.addLeftJoin(attribute.code).getAlias()}.title"
         case 'catalogItem':
             return "${criteria.getAlias()}.${attribute.code}.title.ru"
+        case 'state':
+            return "${criteria.getAlias()}.${attribute.code}"
         default:
             return "${criteria.getAlias()}.${attribute.code}"
     }
@@ -880,10 +930,15 @@ private String getAttributeCodeByTypeForCompute(HCriteria criteria, Attribute at
  * @param criteria HCriteria основной таблицы
  * @param attribute атрибут для отсеивания null значений атрибута
  */
-private void findNotNullAttribute(HCriteria criteria, Attribute attribute)
+private void findNotNullAttributes(HCriteria criteria, Attribute... attributes)
 {
-    String attributeCode = getAttributeCodeByType(criteria, attribute)
-    criteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
+    attributes.each{
+        if(it)
+        {
+            String attributeCode = getAttributeCodeByType(criteria, it)
+            criteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
+        }
+    }
 }
 
 /**
