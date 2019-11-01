@@ -49,6 +49,8 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
  */
 const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (widget: Widget, chart: DiagramData): ApexOptions => {
 	const {aggregation, showXAxis, showYAxis, xAxis, yAxis} = widget;
+	let xAxisAttr = horizontal ? yAxis : xAxis;
+	let yAxisAttr = horizontal ? xAxis : yAxis;
 
 	let options: ApexOptions = {
 		chart: {
@@ -92,19 +94,15 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 		}
 	}
 
-	if (showXAxis && xAxis) {
-		options.xaxis = {
-			title: {
-				text: xAxis.title
-			}
+	if (showXAxis && xAxisAttr) {
+		options.xaxis.title = {
+			text: xAxisAttr.title
 		};
 	}
 
-	if (showYAxis && yAxis) {
-		options.yaxis = {
-			title: {
-				text: yAxis.title
-			}
+	if (showYAxis && yAxisAttr) {
+		options.yaxis.title = {
+			text: yAxisAttr.title
 		};
 	}
 
@@ -202,7 +200,8 @@ const resolveMixin = (type: string): Function => {
  * @returns {ApexOptions}
  */
 const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
-	const {colors, diagramName, legendPosition, showLegend, showName, showValue} = widget;
+	const {colors, legendPosition, showLegend, showValue} = widget;
+	const chartColors = colors || VALUES.COLORS;
 
 	const options: ApexOptions = {
 		chart: {
@@ -216,7 +215,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 				show: false
 			}
 		},
-		colors: colors || [...VALUES.COLORS],
+		colors: [...chartColors],
 		dataLabels: {
 			enabled: showValue
 		},
@@ -226,15 +225,6 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 			showForSingleSeries: true
 		}
 	};
-
-	if (showName) {
-		options.title = {
-			text: diagramName,
-			style: {
-				fontSize: '20px'
-			}
-		};
-	}
 
 	return extend(options, resolveMixin(widget.type.value)(widget, chart));
 };

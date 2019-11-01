@@ -7,6 +7,7 @@ import IconButton from './IconButton';
 import Label from './Label';
 import TextArea from './TextArea';
 import Title from './Title';
+import Tooltip from './Tooltip';
 
 export {
 	Button,
@@ -16,5 +17,6 @@ export {
 	IconButton,
 	Label,
 	TextArea,
-	Title
+	Title,
+	Tooltip
 };

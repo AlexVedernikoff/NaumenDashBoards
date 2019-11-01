@@ -86,7 +86,7 @@ const saveNewLayout = (context: Context, editable: boolean, asDefault: boolean):
 		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			editable,
+			//editable,
 			layoutsSettings
 		});
 	} catch (e) {
@@ -120,7 +120,7 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 		const data = {
 			classFqn: context.subjectUuid,
 			contentCode: context.contentCode,
-			editable: isEditable,
+			//editable: isEditable,
 			widgetKey: widget.id,
 			widgetSettings: widget
 		};
@@ -154,7 +154,7 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 			const data = {
 				classFqn: context.subjectUuid,
 				contentCode: context.contentCode,
-				editable: isEditable,
+				//editable: isEditable,
 				widgetSettings: widget
 			};
 			const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);

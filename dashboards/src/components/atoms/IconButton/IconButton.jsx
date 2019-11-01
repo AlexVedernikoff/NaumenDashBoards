@@ -1,8 +1,8 @@
 // @flow
 import type {Props} from './types';
-import React, {Fragment, PureComponent} from 'react';
-import ReactTooltip from 'react-tooltip';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import {Tooltip} from 'components/atoms';
 
 export class IconButton extends PureComponent<Props> {
 	static defaultProps = {
@@ -10,12 +10,11 @@ export class IconButton extends PureComponent<Props> {
 	};
 
 	renderButton = () => {
-		const {children, onClick, tip} = this.props;
+		const {children, onClick} = this.props;
 
 		return (
 			<button
 				className={styles.button}
-				data-tip={tip}
 				onClick={onClick}
 				type="button"
 			>
@@ -24,15 +23,15 @@ export class IconButton extends PureComponent<Props> {
 		);
 	};
 
-	renderTip = () => this.props.tip && <ReactTooltip effect="solid" type="info" />;
+	renderButtonWithTip = () => (
+		<Tooltip tooltip={this.props.tip} placement="bottom">
+			{this.renderButton()}
+		</Tooltip>
+	);
 
 	render () {
-		return (
-			<Fragment>
-				{this.renderButton()}
-				{this.renderTip()}
-			</Fragment>
-		);
+		const {tip} = this.props;
+		return tip ? this.renderButtonWithTip() : this.renderButton();
 	}
 }
 

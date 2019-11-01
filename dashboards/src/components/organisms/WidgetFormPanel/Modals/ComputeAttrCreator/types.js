@@ -11,6 +11,7 @@ export type Control = {
 }
 
 export type Props = {
+	name: string,
 	onClose: () => any
 } & ContainerProps;
 

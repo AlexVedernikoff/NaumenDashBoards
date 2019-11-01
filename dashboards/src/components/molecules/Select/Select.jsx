@@ -84,7 +84,19 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	getSelectProps = (): Object => {
-		const {attr, defaultValue, getOptionLabel, getOptionValue, isDisabled, isLoading, isSearchable, options, placeholder, value} = this.props;
+		const {
+			attr,
+			defaultValue,
+			getOptionLabel,
+			getOptionValue,
+			isDisabled,
+			isLoading,
+			isSearchable,
+			menuIsOpen,
+			options,
+			placeholder,
+			value
+		} = this.props;
 		let props = {
 			classNamePrefix: 'dashboard__select',
 			components: this.getComponents(),
@@ -94,6 +106,7 @@ export class Select extends PureComponent<Props, State> {
 			isDisabled,
 			isLoading,
 			isSearchable,
+			menuIsOpen,
 			noOptionsMessage: this.noOptionsMessage,
 			onChange: this.handleSelect,
 			options,

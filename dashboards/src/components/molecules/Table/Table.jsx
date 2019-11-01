@@ -1,7 +1,7 @@
 // @flow
 import 'react-table/react-table.css';
 import type {Props, State} from './types';
-import React, {Fragment, PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import ReactTable from 'react-table';
 import styles from './styles.less';
 
@@ -21,19 +21,12 @@ export class Table extends PureComponent<Props, State> {
 		return state;
 	}
 
-	renderName = () => {
-		const {diagramName, showName} = this.props.widget;
-		return showName && <p className={styles.name}>{diagramName}</p>;
-	};
-
 	renderTable = () => {
 		const {columns, data} = this.state;
-		const {showName} = this.props.widget;
-		const CNTable = showName ? styles.tableWithName : styles.table;
 
 		return (
 			<ReactTable
-				className={CNTable}
+				className={styles.table}
 				columns={columns}
 				data={data}
 				defaultPageSize={10}
@@ -43,17 +36,14 @@ export class Table extends PureComponent<Props, State> {
 				pageText="Страница"
 				previousText="Предыдущая"
 				rowsText="строк"
+				showPageJump={false}
+				showPageSizeOptions={false}
 			/>
 		);
 	};
 
 	render () {
-		return (
-			<Fragment>
-				{this.renderName()}
-				{this.renderTable()}
-			</Fragment>
-		);
+		return this.renderTable();
 	}
 }
 

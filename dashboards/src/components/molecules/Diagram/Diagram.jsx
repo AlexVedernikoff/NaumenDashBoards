@@ -2,30 +2,56 @@
 import {Chart, Summary, Table} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import styles from './styles.less';
 import {WIDGET_VARIANTS} from 'utils/widget';
 
 export class Diagram extends PureComponent<Props> {
-	renderDiagram = () => {
-		const {diagram, widget} = this.props;
-		const {data, loading} = diagram;
+	renderContent = () => {
+		const {widget, diagram} = this.props;
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
-
-		if (loading) {
-			return <p>Загрузка...</p>;
-		}
 
 		const types = {[SUMMARY]: Summary, [TABLE]: Table};
 		const DiagramByType = types[widget.type.value] || Chart;
 
-		return <DiagramByType data={data} widget={widget} />;
+		return (
+			<div className={styles.diagram}>
+				<DiagramByType data={diagram.data} widget={widget} />
+			</div>
+		);
+	};
+
+	renderDiagram = () => {
+		const {diagram} = this.props;
+
+		return (
+			<div className={styles.container}>
+				{this.renderName()}
+				{diagram.loading ? this.renderLoading() : this.renderContent()}
+			</div>
+		);
 	};
 
 	renderError = () => <p>Ошибка загрузки данных. Измените параметры построения.</p>;
 
-	render () {
-		const {data} = this.props.diagram;
+	renderLoading = () => <p>Загрузка...</p>;
 
-		if (data) {
+	renderName = () => {
+		const {widget} = this.props;
+		const {diagramName, showName} = widget;
+
+		if (showName) {
+			return (
+				<div className={styles.name}>
+					{diagramName}
+				</div>
+			);
+		}
+	};
+
+	render () {
+		const {data, loading} = this.props.diagram;
+
+		if (loading || data) {
 			return this.renderDiagram();
 		}
 

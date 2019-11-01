@@ -47,7 +47,7 @@ export class ComboChart extends OrderFormBuilder {
 
 	handleSelectComboXAxis = async (name: string, xAxis: SelectValue) => {
 		const order = this.getOrder();
-		await this.handleSelectAxis(FIELDS.group, getGroupOptions)(name, xAxis);
+		await this.handleSelectWithRef(FIELDS.group, getGroupOptions)(name, xAxis);
 
 		if (getNumberFromName(name) === order[0]) {
 			order.forEach(this.changeDependingOnMain);
@@ -66,7 +66,7 @@ export class ComboChart extends OrderFormBuilder {
 		const props = {
 			border: false,
 			getOptionLabel: this.getLabelWithSource,
-			onSelect: this.handleSelectAxis(FIELDS.aggregation, getAggregateOptions),
+			onSelect: this.handleSelectWithRef(FIELDS.aggregation, getAggregateOptions),
 			name: yAxis,
 			placeholder: 'Ось Y',
 			value: values[yAxis],
