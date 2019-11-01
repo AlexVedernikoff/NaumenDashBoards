@@ -826,7 +826,7 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     if(calcRow && calcColumn)
     {
         double columnTotalResult = tableDiagram.columns
-                .sum { it.footer != '' ? it.footer as double : 0 }
+                .sum { it.footer != '' ? it.footer as double : 0 } ?: 0
         String totalResult = columnTotalResult
         tableDiagram.columns.find({ it.accessor == 'total' }).footer = totalResult
     }
@@ -837,7 +837,6 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     }
     return tableDiagram
 }
-
 
 /**
  * Маппинг данных в формат для построения комбо диаграмм
