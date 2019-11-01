@@ -17,6 +17,7 @@ import java.util.regex.Pattern
 import java.util.regex.Matcher
 
 import static groovy.json.JsonOutput.toJson
+import java.text.DecimalFormat
 import ru.naumen.core.server.hquery.HCriteria;
 import ru.naumen.core.server.hquery.HHelper;
 import ru.naumen.core.server.hquery.HRestrictions
@@ -339,6 +340,10 @@ class SeriesCombo
      * Uuid набора данных
      */
     String dataKey = ""
+    /**
+     * Значение разбивки
+     */
+    String breakdownValue = ""
 }
 //endregion
 
@@ -803,7 +808,12 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     Closure<String> capriceFront = { String str -> str.replace('.', '') } // требуется для библиотеки на фронте
     tableDiagram.columns += list.toUnique { it[columnTitleIndex] }.collect { currentCell ->
         def columnTitle = currentCell[columnTitleIndex]
-        String resultValue = calcColumn ? list.findAll({ cell -> cell[columnTitleIndex] == columnTitle }).sum { it[dataIndex] as double } : ""
+        String resultValue = calcColumn
+                ? list.sum { it[columnTitleIndex] == columnTitle
+                        ? it[dataIndex]
+                        : 0
+                }
+                : ""
         new Column(columnTitle as String, capriceFront(columnTitle as String), resultValue)
     }
     list.toUnique { it[rowTitleIndex] }.collectEntries {
@@ -819,15 +829,15 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     {
         tableDiagram.columns << new Column("Итого", "total", "")
         tableDiagram.data.collect { cell ->
-            cell << [total: cell.values().tail().sum {it as double}]
+            cell << [total: cell.values().tail().sum()]
         }
     }
 
     if(calcRow && calcColumn)
     {
-        double columnTotalResult = tableDiagram.columns
-                .sum { it.footer != '' ? it.footer as double : 0 } ?: 0
-        String totalResult = columnTotalResult
+        DecimalFormat decimalFormat = new DecimalFormat("#.##")
+        String totalResult = decimalFormat.format(
+                tableDiagram.columns*.footer.sum { it != '' ? it as double : 0 })
         tableDiagram.columns.find({ it.accessor == 'total' }).footer = totalResult
     }
 
@@ -854,27 +864,29 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
     lists.eachWithIndex { resultOfQuery, index ->
         String currentKey = dataForNotCompute.keySet()[index]
         def currentSource = dataForNotCompute.values()[index]
-        Closure<SeriesCombo> buildComboDiagram = { String title, Collection<Object> resultValues ->
+        Closure<SeriesCombo> buildComboDiagram = {
+            String name, String breakdownValue, Collection<Object> resultValues ->
             Collection<Object> data = [0].multiply(comboDiagram.labels.size()) // подготавливаем почву для результата
             resultValues.each { row ->
                 int resultIndex = comboDiagram.labels.indexOf(row[labelIndex])
                 data[resultIndex] = row[dataIndex]
             }
-            new SeriesCombo(title, data, currentSource.type as String, currentKey)
+            new SeriesCombo(name, data, currentSource.type as String, currentKey, breakdownValue)
         }
         if (currentSource.breakdown)
         {
             def breakdowns = resultOfQuery.collect({ it[breakdownIndex] }).unique()
             breakdowns.each { breakdown ->
-                String title = "${currentSource.yAxis.title} ($breakdown)"
+                String name = currentSource.yAxis.title
+                String breakdownValue = breakdown
                 def resultValues = resultOfQuery.findAll { row -> row[breakdownIndex] == breakdown }
-                comboDiagram.series << buildComboDiagram(title, resultValues)
+                comboDiagram.series << buildComboDiagram(name, breakdownValue, resultValues)
             }
         }
         else
         {
             String title = "${currentSource.yAxis.title}"
-            comboDiagram.series << buildComboDiagram(title, resultOfQuery)
+            comboDiagram.series << buildComboDiagram(title, "", resultOfQuery)
         }
     }
     return comboDiagram
