@@ -1,5 +1,5 @@
 // @flow
-import {Chart} from './WidgetForms';
+import {Chart} from './WidgetFields';
 import {CHART_VARIANTS} from 'utils/chart';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';

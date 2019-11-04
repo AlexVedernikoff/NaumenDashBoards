@@ -3,6 +3,7 @@ export type Module =
 	| 'dashboards'
 	| 'dashboardDataSet'
 	| 'dashboardDrilldown'
+	| 'dashboardSendEmail'
 	| 'dashboardSettings'
 	| 'dashboardTestGetData'
 	| 'DashboardsSettings'
@@ -24,6 +25,7 @@ export type Method =
 	| 'editDefaultWidget'
 	| 'editPersonalWidgetSettings'
 	| 'resetPersonalDashboard'
+	| 'sendFileToMail'
 ;
 
 export type Context = {

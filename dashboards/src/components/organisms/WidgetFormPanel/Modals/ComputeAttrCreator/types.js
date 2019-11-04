@@ -21,6 +21,7 @@ export type State = {
 		[string]: Control
 	},
 	first: string,
+	focus: boolean,
 	last: string,
 	sources: Array<OptionType>,
 }

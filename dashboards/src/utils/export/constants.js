@@ -7,6 +7,15 @@ const FILE_VARIANTS = {
 	PNG
 };
 
+const DOWNLOAD: 'download' = 'download';
+const MAIL: 'mail' = 'mail';
+
+const EXPORT_VARIANTS = {
+	DOWNLOAD,
+	MAIL
+};
+
 export {
+	EXPORT_VARIANTS,
 	FILE_VARIANTS
 };

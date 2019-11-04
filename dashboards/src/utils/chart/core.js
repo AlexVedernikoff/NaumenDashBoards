@@ -49,10 +49,11 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
  */
 const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (widget: Widget, chart: DiagramData): ApexOptions => {
 	const {aggregation, showXAxis, showYAxis, xAxis, yAxis} = widget;
+	const stackedIsPercent = stacked && aggregation && aggregation.value === VALUES.DEFAULT_AGGREGATION.PERCENT;
 	let xAxisAttr = horizontal ? yAxis : xAxis;
 	let yAxisAttr = horizontal ? xAxis : yAxis;
 
-	let options: ApexOptions = {
+	const options: ApexOptions = {
 		chart: {
 			stacked
 		},
@@ -76,7 +77,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 		},
 		yaxis: {
 			decimalsInFloat: 2,
-			forceNiceScale: true,
+			forceNiceScale: !stackedIsPercent,
 			max: undefined,
 			min: 0
 		}
@@ -86,10 +87,16 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 		if (stacked) {
 			options.chart.stackType = '100%';
 		} else {
+			/*
+			 * Условие стоит, т.к функция форматирования применяется как для значений диаграмм, так и для значений оси Y;
+			 * В случае когда opts - объект, это значение оси Y.
+ 			 */
 			options.yaxis.labels = {
-				formatter: (val, additionalValue) => {
-					return Number.isInteger(additionalValue) ? val : `${val}%`;
-				}
+				formatter: (val: number, opts: any) => typeof opts !== 'object' ? val : `${val}%`
+			};
+
+			options.dataLabels = {
+				formatter: (val: number) => val > 0 ? `${val}%` : ''
 			};
 		}
 	}
@@ -116,14 +123,27 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
  * @returns {ApexOptions}
  */
 const comboChart = (widget: Widget, chart: DiagramData) => {
+	const {series} = chart;
 	let stacked = false;
+	let percentDataKeys = [];
 
 	if (Array.isArray(widget.order)) {
-		stacked = widget.order.filter(num => !widget[createOrderName(num)(FIELDS.sourceForCompute)])
-			.find(num => widget[createOrderName(num)(FIELDS.type)].value === CHART_VARIANTS.COLUMN_STACKED);
+		widget.order.filter(num => !widget[createOrderName(num)(FIELDS.sourceForCompute)])
+			.forEach(num => {
+				const aggregation = widget[createOrderName(num)(FIELDS.aggregation)];
+				const type = widget[createOrderName(num)(FIELDS.type)];
+
+				if (!stacked && type.value === CHART_VARIANTS.COLUMN_STACKED) {
+					stacked = true;
+				}
+
+				if (aggregation && aggregation.value === VALUES.DEFAULT_AGGREGATION.PERCENT) {
+					percentDataKeys.push(widget[createOrderName(num)(FIELDS.dataKey)]);
+				}
+			});
 	}
 
-	return {
+	const options: ApexOptions = {
 		chart: {
 			stacked
 		},
@@ -144,6 +164,20 @@ const comboChart = (widget: Widget, chart: DiagramData) => {
 			min: 0
 		}
 	};
+
+	if (percentDataKeys.length > 0) {
+		options.dataLabels = {
+			formatter (val: number, {seriesIndex}: any) {
+				if (val === 0) {
+					return '';
+				}
+
+				return percentDataKeys.includes(series[seriesIndex].dataKey) ? `${val}%` : val;
+			}
+		};
+	}
+
+	return options;
 };
 
 /**
@@ -217,7 +251,18 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 		},
 		colors: [...chartColors],
 		dataLabels: {
-			enabled: showValue
+			dropShadow: {
+				blur: 0.5,
+				enabled: true,
+				left: 1,
+				opacity: 0.9,
+				top: 1
+			},
+			enabled: showValue,
+			formatter: (val: number) => val > 0 ? val : '',
+			style: {
+				colors: ['white']
+			}
 		},
 		legend: {
 			position: legendPosition ? legendPosition.value : 'bottom',

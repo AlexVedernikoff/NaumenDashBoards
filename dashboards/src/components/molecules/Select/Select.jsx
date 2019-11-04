@@ -5,7 +5,7 @@ import {EditIcon} from 'icons/form';
 import {InputForm} from 'components/molecules';
 import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
-import React, {Fragment, PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import ReactSelect, {components} from 'react-select';
 import styles from './styles.less';
 
@@ -26,13 +26,6 @@ export class Select extends PureComponent<Props, State> {
 
 	state = {
 		showForm: false
-	};
-
-	noOptionsMessage = () => 'Список пуст';
-
-	handleSelect = (value: OptionType) => {
-		const {onSelect, name} = this.props;
-		onSelect(name, value);
 	};
 
 	getComponents = () => {
@@ -122,6 +115,13 @@ export class Select extends PureComponent<Props, State> {
 		return props;
 	};
 
+	handleSelect = (value: OptionType) => {
+		const {onSelect, name} = this.props;
+		onSelect(name, value);
+	};
+
+	handleShowForm = (showForm: boolean) => () => this.setState({showForm});
+
 	handleSubmit = (value: string) => {
 		const {name, form} = this.props;
 
@@ -132,18 +132,18 @@ export class Select extends PureComponent<Props, State> {
 		this.handleShowForm(false)();
 	};
 
+	noOptionsMessage = () => 'Список пуст';
+
 	stopPropagation = (e: SyntheticMouseEvent<HTMLElement>) => {
 		e.stopPropagation();
 	};
-
-	handleShowForm = (showForm: boolean) => () => this.setState({showForm});
 
 	renderEditIcon = () => {
 		const {withEditIcon} = this.props;
 
 		if (withEditIcon) {
 			return (
-				<div className={styles.editIconContainer} onMouseDown={this.stopPropagation} onClick={this.handleShowForm(true)}>
+				<div className={styles.editIconContainer} onClick={this.handleShowForm(true)} onMouseDown={this.stopPropagation}>
 					<IconButton>
 						<EditIcon />
 					</IconButton>
@@ -175,24 +175,16 @@ export class Select extends PureComponent<Props, State> {
 		const {createButtonText, onClickCreateButton} = this.props;
 
 		return (
-			<Fragment>
-				<components.Menu {...props}>
-					{props.children}
-					<Button className="m-1" onClick={onClickCreateButton || this.handleShowForm(true)}>
-						{createButtonText}
-					</Button>
-				</components.Menu>
-			</Fragment>
+			<components.Menu {...props}>
+				{props.children}
+				<Button className="m-1" onClick={onClickCreateButton || this.handleShowForm(true)}>
+					{createButtonText}
+				</Button>
+			</components.Menu>
 		);
 	};
 
-	renderSelect = () => {
-		const props = this.getSelectProps();
-
-		return (
-			<ReactSelect {...props} />
-		);
-	};
+	renderSelect = () => <ReactSelect {...this.getSelectProps()} />;
 
 	renderValue = ({children, ...props}: any) => (
 		<components.ValueContainer {...props}>

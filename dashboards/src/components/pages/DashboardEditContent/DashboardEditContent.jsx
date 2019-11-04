@@ -1,5 +1,6 @@
 // @flow
-import DashboardRightPanel from 'components/organisms/DashboardRightPanel';
+import WidgetAddPanel from 'containers/WidgetAddPanel';
+import WidgetFormPanel from 'containers/WidgetFormPanel';
 import type {Layout} from 'utils/layout/types';
 import LayoutGrid from 'containers/LayoutGrid';
 import type {Props} from 'containers/DashboardEditContent/types';
@@ -54,7 +55,7 @@ export class DashboardEditContent extends Component<Props> {
 
 		return (
 			<div className={styles.panel}>
-				<DashboardRightPanel selectedWidget={selectedWidget}/>
+				{selectedWidget ? <WidgetFormPanel /> : <WidgetAddPanel />}
 			</div>
 		);
 	};

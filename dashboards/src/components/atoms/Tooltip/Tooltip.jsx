@@ -1,12 +1,16 @@
 // @flow
 import 'react-popper-tooltip/dist/styles.css';
-import type {ChildrenArg, TooltipArg} from 'react-popper-tooltip/dist/types';
-import type {Props} from './types';
+import type {Props, TooltipElementProps} from './types';
 import React, {Component} from 'react';
 import TooltipTrigger from 'react-popper-tooltip';
 
 class Tooltip extends Component<Props> {
-	renderChildren = (props: ChildrenArg) => {
+	static defaultProps = {
+		hideArrow: false,
+		placement: 'bottom'
+	};
+
+	renderChildren = (props: TooltipElementProps) => {
 		const {children} = this.props;
 		const {getTriggerProps, triggerRef} = props;
 		const triggerProps = getTriggerProps({
@@ -21,7 +25,7 @@ class Tooltip extends Component<Props> {
 		);
 	};
 
-	renderTooltip = (props: TooltipArg) => {
+	renderTooltip = (props: TooltipElementProps) => {
 		const {hideArrow, tooltip} = this.props;
 		const {arrowRef, getArrowProps, getTooltipProps, placement, tooltipRef} = props;
 		const tooltipProps = getTooltipProps({

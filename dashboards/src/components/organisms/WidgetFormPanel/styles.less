@@ -3,7 +3,8 @@
 :local {
 	.tab {
 		background-color: white;
-		padding: 10px 20px 20px 20px;
+		flex: auto;
+		padding: 10px 20px 10px 20px;
 	}
 
 	.tabListItem {
@@ -30,7 +31,10 @@
 
 	.form {
 		background-color: #F4F4F4;
-		min-height: 100%;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		overflow: auto;
 	}
 
 	.header {

@@ -52,6 +52,5 @@ export type DashboardState = {
 	editable: boolean,
 	error: boolean,
 	loading: boolean,
-	master: boolean,
-	name: string
+	master: boolean
 };

@@ -286,12 +286,12 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		let options = [];
 
 		if (source) {
-			const currentAttr = attributes[source.value];
+			const currentAttr = attributes[source];
 
-			if (!currentAttr || (currentAttr.data.length === 0 && !currentAttr.loading && !currentAttr.error)) {
-				fetchAttributes(source);
-			} else {
+			if (currentAttr) {
 				options = currentAttr.data;
+			} else {
+				fetchAttributes(source);
 			}
 		}
 
@@ -308,8 +308,8 @@ export class ComputeAttrCreator extends Component<Props, State> {
 			return getAggregateOptions(prevValue);
 		}
 
-		if (type === ATTRIBUTE && this.isSource(prevValue)) {
-			return this.getAttributes(prevValue);
+		if (type === ATTRIBUTE && prevValue && this.isSource(prevValue)) {
+			return this.getAttributes(prevValue.value);
 		}
 
 		return [...operators, ...constants, ...sources];
@@ -319,6 +319,9 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		const {focus} = this.state;
 		const options = this.getOptions(control);
 		const {name, value} = control;
+		const isAttr = control.type === TYPES.ATTRIBUTE;
+		const isAggregation = control.type === TYPES.AGGREGATION;
+		const isSourceRef = isAttr || isAggregation;
 		const form = {
 			onSubmit: this.handleCreateConstant,
 			rule,
@@ -328,16 +331,16 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		return (
 			<div className={styles.controlContainer} key={name}>
 				<Select
-					attr={control.type === TYPES.ATTRIBUTE}
+					attr={isAttr}
 					form={form}
-					isSearchable={control.type === TYPES.ATTRIBUTE}
+					isSearchable={isAttr}
 					menuIsOpen={focus}
 					name={name}
 					onSelect={this.handleSelect}
 					options={options}
 					placeholder="..."
 					value={value}
-					withCreateButton={true}
+					withCreateButton={!isSourceRef}
 				/>
 			</div>
 		);

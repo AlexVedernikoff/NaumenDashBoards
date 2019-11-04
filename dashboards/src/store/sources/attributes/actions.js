@@ -2,16 +2,15 @@
 import {ATTRIBUTES_EVENTS} from './constants';
 import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
-import type {TreeSelectValue} from 'components/molecules/TreeSelectInput/types';
 
 /**
  * Получаем атрибуты конкретного класса
- * @param {TreeSelectValue} source - выбранное значение в дереве источников
+ * @param {string} classFqn - код класса
  * @returns {ThunkAction}
  */
-const fetchAttributes = (source: TreeSelectValue): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const classFqn = source.value;
+const fetchAttributes = (classFqn: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(requestAttributes(classFqn));
+
 	try {
 		const {data} = await client.post(buildUrl('dashboards', 'getAttributesDataSources', `'${classFqn}'`));
 

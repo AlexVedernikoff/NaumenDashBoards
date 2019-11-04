@@ -2,7 +2,7 @@
 import Button from './Button';
 import CheckBox from './CheckBox';
 import Divider from './Divider';
-import DropDownFiles from './DropDownFiles';
+import DropDown from './DropDown';
 import IconButton from './IconButton';
 import Label from './Label';
 import TextArea from './TextArea';
@@ -13,7 +13,7 @@ export {
 	Button,
 	CheckBox,
 	Divider,
-	DropDownFiles,
+	DropDown,
 	IconButton,
 	Label,
 	TextArea,

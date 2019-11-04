@@ -20,6 +20,13 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		showForm: false
 	};
 
+	handleOnChange = (value: TreeSelectValue) => {
+		const {name, onChange} = this.props;
+		onChange(name, value);
+	};
+
+	handleShowForm = (showForm: boolean) => () => this.setState({showForm});
+
 	handleSubmit = (value: string) => {
 		const {form, name} = this.props;
 
@@ -28,38 +35,6 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		}
 
 		this.handleShowForm(false)();
-	};
-
-	stopPropagation = (e: SyntheticMouseEvent<HTMLElement>) => {
-		e.stopPropagation();
-	};
-
-	handleShowForm = (showForm: boolean) => () => this.setState({showForm});
-
-	handleOnChange = (value: TreeSelectValue) => {
-		const {name, onChange} = this.props;
-		onChange(name, value);
-	};
-
-	renderRoot = (dataSources: Tree): TreeNode => (
-		Object.keys(dataSources)
-			.filter(key => dataSources[key].root)
-			.map(key => this.renderNode(dataSources[key]))
-	);
-
-	renderNode = (dataSource: Node): TreeNode => {
-		const {isLeaf, title, value} = dataSource;
-
-		return (
-			<TreeNode
-				isLeaf={isLeaf}
-				key={value}
-				title={title}
-				value={value}
-			>
-				{this.renderChildren(dataSource)}
-			</TreeNode>
-		);
 	};
 
 	renderChildren = (dataSource: Node): TreeNode => {
@@ -71,16 +46,13 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSwitcherIcon = (props: TreeProps) => {
-		const {expanded, isLeaf} = props;
-		const iconProps = {
-			className: styles.icon
-		};
-
-		if (!isLeaf) {
-			return expanded ? <ToggleExpandedIcon {...iconProps} /> : <ToggleCollapsedIcon {...iconProps} />;
-		}
-	};
+	renderClearIcon = () => (
+		<div className={styles.clearIconContainer}>
+			<IconButton>
+				<CrossIcon />
+			</IconButton>
+		</div>
+	);
 
 	renderEditForm = () => {
 		const {form} = this.props;
@@ -102,26 +74,50 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		}
 	};
 
-	renderClearIcon = () => (
-		<div className={styles.clearIconContainer}>
-			<IconButton>
-				<CrossIcon />
-			</IconButton>
-		</div>
-	);
-
 	renderEditIcon = () => {
 		const {value} = this.props;
 		const {showForm} = this.state;
 
 		if (value && !showForm) {
 			return (
-				<div className={styles.editIconContainer} onMouseDown={this.stopPropagation}>
+				<div className={styles.editIconContainer}>
 					<IconButton className={styles.editIcon} onClick={this.handleShowForm(true)}>
 						<EditIcon />
 					</IconButton>
 				</div>
 			);
+		}
+	};
+
+	renderNode = (dataSource: Node): TreeNode => {
+		const {isLeaf, title, value} = dataSource;
+
+		return (
+			<TreeNode
+				isLeaf={isLeaf}
+				key={value}
+				title={title}
+				value={value}
+			>
+				{this.renderChildren(dataSource)}
+			</TreeNode>
+		);
+	};
+
+	renderRoot = (dataSources: Tree): TreeNode => (
+		Object.keys(dataSources)
+			.filter(key => dataSources[key].root)
+			.map(key => this.renderNode(dataSources[key]))
+	);
+
+	renderSwitcherIcon = (props: TreeProps) => {
+		const {expanded, isLeaf} = props;
+		const iconProps = {
+			className: styles.icon
+		};
+
+		if (!isLeaf) {
+			return expanded ? <ToggleExpandedIcon {...iconProps} /> : <ToggleCollapsedIcon {...iconProps} />;
 		}
 	};
 

@@ -16,7 +16,7 @@ export class Modal extends Component<Props> {
 					<div className={styles.header}>{header}</div>
 					<div className={styles.content}>{children}</div>
 					<div className={styles.footer}>
-						<Button className="mr-1" onClick={onSubmit}>Сохранить</Button>
+						<Button className={styles.submitButton} onClick={onSubmit}>Сохранить</Button>
 						<Button outline onClick={onClose}>Отмена</Button>
 					</div>
 				</div>

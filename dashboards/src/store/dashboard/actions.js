@@ -46,7 +46,7 @@ const getRoleMaster = (): ThunkAction => async (dispatch: Dispatch) => {
  * Отключаем статичность виджетов и переходим на страницу редактирования
  * @returns {ThunkAction}
  */
-const editDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const editDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 	dispatch(push('/edit'));
 };
 
@@ -68,9 +68,28 @@ const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: G
  * Делаем виджеты статичными и переходим на страницу просмотра
  * @returns {ThunkAction}
  */
-const seeDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 	dispatch(resetWidget());
 	dispatch(push('/'));
+};
+
+/**
+ * Отправка файла на почту
+ * @param {Blob} file - файл для отправки
+ * @param {string} format - формат файла
+ * @returns {ThunkAction}
+ */
+const sendToMail = (file: Blob, format: string): ThunkAction => () => {
+	const data = new FormData();
+	data.append('fileBytes', file);
+	data.append('fileFormat', format);
+
+	client.post(buildUrl('dashboardSendEmail', 'sendFileToMail', 'user'), data, {
+		headers: {
+			'Content-Type': 'multipart/form-data',
+			timeout: 30000
+		}
+	});
 };
 
 const requestDashboard = () => ({
@@ -104,5 +123,6 @@ export {
 	editDashboard,
 	fetchDashboard,
 	resetDashboard,
-	seeDashboard
+	seeDashboard,
+	sendToMail
 };

@@ -10,8 +10,7 @@ export const initialDashboardState: DashboardState = {
 	editable: false,
 	error: false,
 	loading: false,
-	master: false,
-	name: 'Новый дашборд'
+	master: false
 };
 
 export const defaultDashboardAction: DashboardAction = {

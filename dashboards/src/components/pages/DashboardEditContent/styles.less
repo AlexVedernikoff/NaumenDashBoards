@@ -9,17 +9,17 @@
 	}
 
 	.common-props {
+		bottom: 0;
 		height: 100%;
-		overflow-x: hidden;
-		overflow-y: auto;
 		position: absolute;
 	}
 
 	.container {
 		.common-props();
 
-		bottom: 0;
 		left: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
 		right: @panel-width;
 		top: 0;
 	}
@@ -28,8 +28,8 @@
 		.common-props();
 
 		background-color: white;
-		bottom: 0;
 		box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
+		overflow: hidden;
 		right: 0;
 		width: @panel-width;
 	}

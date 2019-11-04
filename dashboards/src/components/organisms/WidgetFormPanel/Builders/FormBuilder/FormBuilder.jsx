@@ -10,11 +10,23 @@ import {Select} from 'components/molecules';
 import {styles} from 'components/organisms/WidgetFormPanel';
 
 export class FormBuilder extends Component<Props & FormikProps, State> {
+	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
+
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
 	handleSelect = (name: string, value: OptionType) => this.props.setFieldValue(name, value);
 
-	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
+	renderHeader = (title: string) => (
+		<div className={styles.field}>
+			<span className={styles.header}>{title}</span>
+		</div>
+	);
+
+	renderLabel = (props: LabelProps) => (
+		<div className={styles.field}>
+			<Label {...props} />
+		</div>
+	);
 
 	renderCheckBox = (props: CheckBoxProps) => {
 		const {hideDivider, label, name, value} = props;
@@ -38,18 +50,6 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 			<span className={styles.error}>
 				{this.props.errors[props.name]}
 			</span>
-		</div>
-	);
-
-	renderLabel = (props: LabelProps) => (
-		<div className={styles.field}>
-			<Label {...props} />
-		</div>
-	);
-
-	renderHeader = (title: string) => (
-		<div className={styles.field}>
-			<span className={styles.header}>{title}</span>
 		</div>
 	);
 

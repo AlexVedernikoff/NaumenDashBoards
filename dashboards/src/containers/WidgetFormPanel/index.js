@@ -1,3 +1,3 @@
 // @flow
-import WidgetEditingPanel from './WidgetFormPanel';
-export default WidgetEditingPanel;
+import WidgetFormPanel from './WidgetFormPanel';
+export default WidgetFormPanel;

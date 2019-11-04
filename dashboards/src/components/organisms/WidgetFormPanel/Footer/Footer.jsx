@@ -21,20 +21,6 @@ export class Footer extends Component<WrappedProps> {
 		this.handleSubmit(true);
 	};
 
-	renderDefaultSaveButton = () => {
-		const {master} = this.props;
-
-		if (master) {
-			return (
-				<div className={styles.masterButton}>
-					<button type="button" onClick={this.handleSaveAsDefault}>
-						Сохранить по умолчанию
-					</button>
-				</div>
-			);
-		}
-	};
-
 	renderButtons = () => {
 		const {cancelForm, updating} = this.props;
 
@@ -56,6 +42,20 @@ export class Footer extends Component<WrappedProps> {
 			{this.renderButtons()}
 		</Fragment>
 	);
+
+	renderDefaultSaveButton = () => {
+		const {master} = this.props;
+
+		if (master) {
+			return (
+				<div className={styles.masterButton}>
+					<button type="button" onClick={this.handleSaveAsDefault}>
+						Сохранить по умолчанию
+					</button>
+				</div>
+			);
+		}
+	};
 
 	renderError = () => {
 		const {saveError} = this.props;

@@ -1,13 +1,13 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
 import type {CompositeFields, ReceiveDiagramPayload} from './types';
+import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
 import {DIAGRAMS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
 import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
 import type {OptionType} from 'react-select/src/types';
 import type {Widget} from 'store/widgets/data/types';
-import {WIDGET_VARIANTS} from 'utils/widget';
 
 const getValue = (option: OptionType) => option && option.value;
 
@@ -53,8 +53,6 @@ const createCircleChartData = (widget: Widget) => {
 	};
 };
 
-const createName = (name: string, num: number) => `${name}_${num}`;
-
 const createCompositeData = ({common, deep}: CompositeFields) => (widget: Widget) => {
 	const {order} = widget;
 	const data = {
@@ -66,15 +64,21 @@ const createCompositeData = ({common, deep}: CompositeFields) => (widget: Widget
 		order.forEach(num => {
 			let chartItem = {};
 
-			deep.forEach(baseName => {
-				chartItem[baseName] = getValue(widget[createName(baseName, num)]);
-			});
+			if (widget[createOrderName(num)(sourceForCompute)]) {
+				chartItem.descriptor = widget[createOrderName(num)(descriptor)];
+				chartItem.source = getValue(widget[createOrderName(num)(source)]);
+				chartItem.sourceForCompute = true;
+			} else {
+				deep.forEach(baseName => {
+					chartItem[baseName] = getValue(widget[createOrderName(num)(baseName)]);
+				});
 
-			common.forEach(baseName => {
-				chartItem[baseName] = widget[createName(baseName, num)];
-			});
+				common.forEach(baseName => {
+					chartItem[baseName] = widget[createOrderName(num)(baseName)];
+				});
+			}
 
-			data.data[widget[createName(dataKey, num)]] = chartItem;
+			data.data[widget[createOrderName(num)(dataKey)]] = chartItem;
 		});
 	}
 

@@ -2,11 +2,11 @@
 import {CHART_VARIANTS} from 'utils/chart/constants';
 import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import type {FormikValues} from 'formik';
 import {object, string} from 'yup';
 
 const requiredXAxis = 'Укажите атрибут для оси X';
 const requiredYAxis = 'Укажите атрибут для оси Y';
-const requiredBreakdown = 'Укажите разбивку';
 const requiredIndicator = 'Укажите показатель';
 const requiredName = 'Укажите название виджета';
 const requiredDiagramName = 'Укажите название виджета';
@@ -14,6 +14,12 @@ const requiredSource = 'Укажите источник данных';
 
 const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
 const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+
+const requiredBreakdownRule = object().test(
+	'required-breackdown',
+	'Укажите разбивку',
+	value => value && value.code
+);
 
 const baseRules = {
 	diagramName: string().required(requiredDiagramName),
@@ -29,12 +35,12 @@ const axisChart = {
 
 const axisStackedChart = {
 	...axisChart,
-	breakdown: object().nullable().required(requiredBreakdown)
+	breakdown: requiredBreakdownRule
 };
 
 const circleChart = {
 	...baseRules,
-	breakdown: object().nullable().required(requiredBreakdown),
+	breakdown: requiredBreakdownRule,
 	indicator: object().nullable().required(requiredIndicator),
 	source: object().nullable().required(requiredSource)
 };
@@ -76,7 +82,7 @@ const table = (order) => {
 	if (existsOrder(order)) {
 		const num = order[0];
 		rules[createOrderName(num)(source)] = object().nullable().required(requiredSource);
-		rules[createOrderName(num)(breakdown)] = object().nullable().required(requiredBreakdown);
+		rules[createOrderName(num)(breakdown)] = requiredBreakdownRule;
 		rules[createOrderName(num)(column)] = object().nullable().required('Укажите атрибут для колонок');
 		rules[createOrderName(num)(row)] = object().nullable().required('Укажите атрибут для строк');
 	}
@@ -101,7 +107,11 @@ const compositeVariants = {
 	[TABLE]: table
 };
 
-const getComboValidateOrder = (values: any) => {
+/*
+	В отличии от таблицы и сводки, у комбо диаграммы набор полей для валидации может динамически
+	меняться. Данная функция возвращает актуальный набор порядка полей, к которым нужно применять правила валидации.
+ */
+const getComboValidateOrder = (values: FormikValues) => {
 	const order = values.order || [];
 	const orderForValidate = [];
 
@@ -116,12 +126,12 @@ const getComboValidateOrder = (values: any) => {
 	return orderForValidate;
 };
 
-const resolveRules = (values: any) => {
+const resolveRules = (values: FormikValues) => {
 	const type = values.type.value;
 	const order = type === COMBO ? getComboValidateOrder(values) : values.order;
 	return [COMBO, SUMMARY, TABLE].includes(type) ? compositeVariants[type](order) : commonVariants[type];
 };
 
-const getSchema = (values: any) => object(resolveRules(values));
+const getSchema = (values: FormikValues) => object(resolveRules(values));
 
 export default getSchema;

@@ -1,20 +1,18 @@
 // @flow
-import ExportIcon from 'icons/header/export.svg';
-import type {Props} from './types';
+import type {Item, Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
-export class DropDownFiles extends Component<Props> {
+export class DropDown extends Component<Props> {
 	static defaultProps = {
-		createDoc: (t: string) => t,
-		icon: false,
+		icon: null,
 		list: [],
 		title: ''
 	};
 
 	selectMenu = (event: SyntheticEvent<HTMLButtonElement>) => {
-		const doc = String(event.currentTarget.getAttribute('data-doc-type'));
-		this.props.createDoc(doc);
+		const key = String(event.currentTarget.dataset.key);
+		this.props.onClick(key);
 	};
 
 	renderButton = () => {
@@ -22,16 +20,10 @@ export class DropDownFiles extends Component<Props> {
 
 		return (
 			<button className={styles.dropdownButton}>
-				{icon ? <ExportIcon/> : title}
+				{icon || title}
 			</button>
 		);
 	};
-
-	renderContentItem = (item: {text: string}) => (
-		<button key={item.text} onClick={this.selectMenu} data-doc-type={item.text}>
-			{item.text}
-		</button>
-	);
 
 	renderContent = () => {
 		const {list} = this.props;
@@ -43,6 +35,12 @@ export class DropDownFiles extends Component<Props> {
 		);
 	};
 
+	renderContentItem = (item: Item) => (
+		<button data-key={item.key} key={item.key} onClick={this.selectMenu}>
+			{item.text}
+		</button>
+	);
+
 	render () {
 		return (
 			<div className={styles.dropdown}>
@@ -53,4 +51,4 @@ export class DropDownFiles extends Component<Props> {
 	}
 }
 
-export default DropDownFiles;
+export default DropDown;

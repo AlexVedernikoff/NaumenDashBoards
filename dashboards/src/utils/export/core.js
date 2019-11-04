@@ -4,11 +4,15 @@ import {editContentRef} from 'components/pages/DashboardEditContent';
 import {FILE_VARIANTS} from './constants';
 import html2canvas from 'html2canvas';
 import JsPDF from 'jspdf';
-import moment from 'moment';
 import {viewContentRef} from 'components/pages/DashboardViewContent';
 
 window.html2canvas = html2canvas;
 
+/**
+ * Выгружает файл в браузер
+ * @param {string} uri - путь к файлу
+ * @param {string} filename - название файла
+ */
 const save = (uri: string, filename: string) => {
 	let {body} = document;
 
@@ -22,6 +26,21 @@ const save = (uri: string, filename: string) => {
 		body.removeChild(link);
 	}
 };
+
+/**
+ * Возвращает текущую дату
+ * @returns {string}
+ */
+const getCurrentDate = () => {
+	const date = new Date();
+	return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+};
+
+/**
+ * Проверяет, является ли браузер IE или EDGE
+ * @returns {boolean}
+ */
+const isIE = () => typeof document.documentMode === 'number' || /Edge/.test(navigator.userAgent);
 
 /*
 	Браузеры типа IE и EDGE генерируют svg с невалидными, для работы html2canvas, атрибутами. Поэтому, для отображения графиков
@@ -64,18 +83,32 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 	return image;
 };
 
-const createImage = async (container: HTMLDivElement, backgroundColor: string, isIE: boolean) => {
+/**
+ * Создает canvas элемент снимка
+ * @param {HTMLDivElement} container - узел в dom-дереве, относительно которого будет создаваться снимок
+ * @param {string} backgroundColor - цвет фона
+ * @returns {Promise<Blob>}
+ */
+const createImage = async (container: HTMLDivElement, backgroundColor: string) => {
 	const height = container.clientHeight < window.innerHeight ? window.innerHeight : container.clientHeight;
 	const options = {
 		height,
 		backgroundColor
 	};
 
-	const image = isIE ? await createIEImage(container, options) : await html2canvas(container, options);
+	const image = isIE() ? await createIEImage(container, options) : await html2canvas(container, options);
 	return image;
 };
 
-const createPdf = (image: string, fileName: string, container: HTMLDivElement, isIE: boolean) => {
+/**
+ * Создает снимок в pdf формате
+ * @param {HTMLCanvasElement} image - canvas элемент готового изображения
+ * @param {string} fileName - название файла
+ * @param {HTMLDivElement} container - узел в dom-дереве, относительно которого будет создаваться pdf документ
+ * @param {boolean} toDownload - нужно ли выгружать в браузер
+ * @returns {Promise<Blob>}
+ */
+const createPdf = (image: string, fileName: string, container: HTMLDivElement, toDownload: boolean) => {
 	const orientation = container.clientWidth > container.clientHeight ? 'l' : 'p';
 	const pdf = new JsPDF({compress: true, orientation, unit: 'pt'});
 
@@ -102,38 +135,61 @@ const createPdf = (image: string, fileName: string, container: HTMLDivElement, i
 		}
 	}
 
-	if (isIE) {
-		const blob = pdf.output('blob');
-		return window.navigator.msSaveBlob(blob, `${fileName}.pdf`);
+	const blob = pdf.output('blob');
+
+	if (toDownload) {
+		isIE() ? window.navigator.msSaveBlob(blob, `${fileName}.pdf`) : pdf.save(fileName);
 	}
 
-	pdf.save(fileName);
+	return blob;
 };
 
-const createPng = (image: string, fileName: string, isIE: boolean) => {
-	if (isIE) {
-		const blob = image.msToBlob();
-		return window.navigator.msSaveBlob(blob, `${fileName}.png`);
+/**
+ * Создает снимок в png формате
+ * @param {HTMLCanvasElement} image - canvas элемент изображения
+ * @param {string} fileName - название файла
+ * @param {boolean} toDownload - нужно ли выгружать в браузер
+ * @returns {Promise<Blob>}
+ */
+const createPng = async (image: HTMLCanvasElement, fileName: string, toDownload: boolean) => {
+	let blob;
+
+	if (isIE()) {
+		// $FlowFixMe
+		blob = image.msToBlob();
+	} else {
+		blob = await new Promise(resolve => image.toBlob(resolve));
 	}
 
-	return save(image.toDataURL('image/png'), fileName);
+	if (toDownload) {
+		isIE() ? window.navigator.msSaveBlob(blob, `${fileName}.png`) : save(image.toDataURL('image/png'), fileName);
+	}
+
+	return blob;
 };
 
-export const createSnapshot = async (container: HTMLDivElement, name: string, variant: string) => {
+/**
+ * Создает снимок div-элемента
+ * @param {HTMLDivElement} container - узел в dom-дереве, относительно которого будет создаваться снимок
+ * @param {string} fileType - формат итогового файла
+ * @param {boolean} toDownload - нужно ли выгружать в браузер
+ * @param {string} name - название файла
+ * @returns {Promise<Blob>}
+ */
+export const createSnapshot = async (container: HTMLDivElement, fileType: string, toDownload: boolean, name: string) => {
 	const {PDF, PNG} = FILE_VARIANTS;
-	const fileName = `${name}_${moment().format('DD-MM-YY')}`;
-	const bgColor = variant === PNG ? '#EFF3F8' : '#FFF';
+	const fileName = `${name}_${getCurrentDate()}`;
+	const bgColor = fileType === PNG ? '#EFF3F8' : '#FFF';
 	const content = editContentRef.current ? editContentRef.current : viewContentRef.current;
-	const isIE = document.documentMode || /Edge/.test(navigator.userAgent);
 	content && content.scrollTo(0, 0);
 
-	const image = await createImage(container, bgColor, isIE);
+	const image = await createImage(container, bgColor);
 
-	if (variant === PNG) {
-		return createPng(image, fileName, isIE);
+	if (fileType === PNG) {
+		return createPng(image, fileName, toDownload);
 	}
 
-	if (variant === PDF) {
-		createPdf(image, fileName, container, isIE);
+	if (fileType === PDF) {
+		return createPdf(image, fileName, container, toDownload);
 	}
 };

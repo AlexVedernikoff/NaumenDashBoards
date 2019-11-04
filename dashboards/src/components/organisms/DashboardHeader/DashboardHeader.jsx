@@ -1,7 +1,9 @@
 // @flow
-import {Button, DropDownFiles} from 'components/atoms';
+import {Button, DropDown, Tooltip} from 'components/atoms';
 import {CloseIcon} from 'icons/form';
-import {createSnapshot, FILE_VARIANTS} from 'utils/export';
+import {createSnapshot, EXPORT_VARIANTS, FILE_VARIANTS} from 'utils/export';
+import type {ExportButtonProps} from './types';
+import {ExportIcon, MailIcon} from 'icons/header';
 import {gridRef} from 'components/organisms/LayoutGrid';
 import IconRefresh from 'icons/header/refresh.svg';
 import React, {Component} from 'react';
@@ -9,39 +11,53 @@ import type {Props} from 'containers/DashboardHeader/types';
 import styles from './styles.less';
 
 const FileList = [
-	{text: FILE_VARIANTS.PDF},
-	{text: FILE_VARIANTS.PNG}
+	{
+		key: FILE_VARIANTS.PDF,
+		text: FILE_VARIANTS.PDF
+	},
+	{
+		key: FILE_VARIANTS.PNG,
+		text: FILE_VARIANTS.PNG
+	}
 ];
 
 export class DashboardHeader extends Component<Props> {
-	createDocument = (docStr: string) => {
+	createDocument = (way: string) => async (type: string) => {
+		const {DOWNLOAD, MAIL} = EXPORT_VARIANTS;
+		const {sendToMail} = this.props;
 		const {current} = gridRef;
-		const {name} = this.props;
+		const toDownload = way === DOWNLOAD;
 
 		if (current) {
-			createSnapshot(current, name, docStr);
+			const file = await createSnapshot(current, type, toDownload, 'Дашборд');
+
+			if (way === MAIL && file) {
+				sendToMail(file, type);
+			}
 		}
 	};
 
-	resetWidgets = async () => {
-		const {fetchDashboard, resetDashboard} = this.props;
+	renderDownloadExportButton = () => this.renderExportButton({
+		icon: <ExportIcon />,
+		tip: 'Скачать',
+		way: EXPORT_VARIANTS.DOWNLOAD
+	});
 
-		await resetDashboard();
-		fetchDashboard();
+	renderExportButton = (props: ExportButtonProps) => {
+		const {icon, tip, way} = props;
+
+		return (
+			<Tooltip tooltip={tip} placement="left">
+				<DropDown icon={icon} list={FileList} onClick={this.createDocument(way)} />
+			</Tooltip>
+		);
 	};
 
-	renderResetButton = () => {
-		const {editable, master} = this.props;
-
-		if (editable || master) {
-			return (
-				<div className={styles.buttonIcon} onClick={this.resetWidgets}>
-					<CloseIcon />
-					Сбросить настройки
-				</div>
-			);
-		}
-	};
+	renderMailExportButton = () => this.renderExportButton({
+		icon: <MailIcon />,
+		tip: 'Отправить на почту',
+		way: EXPORT_VARIANTS.MAIL
+	});
 
 	renderModeButton = () => {
 		const {editable, editDashboard, location, master, seeDashboard} = this.props;
@@ -67,13 +83,26 @@ export class DashboardHeader extends Component<Props> {
 		const {fetchDashboard} = this.props;
 
 		return (
-			<div className={styles.buttonIcon}>
-				<IconRefresh onClick={fetchDashboard} />
-			</div>
+			<Tooltip tooltip="Обновить виджеты" placement="left">
+				<div className={styles.buttonIcon}>
+					<IconRefresh onClick={fetchDashboard} />
+				</div>
+			</Tooltip>
 		);
 	};
 
-	renderDropDown = () => <DropDownFiles icon list={FileList} createDoc={this.createDocument} />;
+	renderResetButton = () => {
+		const {editable, master, resetDashboard} = this.props;
+
+		if (editable || master) {
+			return (
+				<div className={styles.buttonIcon} onClick={resetDashboard}>
+					<CloseIcon />
+					Сбросить настройки
+				</div>
+			);
+		}
+	};
 
 	render () {
 		return (
@@ -83,7 +112,10 @@ export class DashboardHeader extends Component<Props> {
 						{this.renderRefreshButton()}
 					</li>
 					<li className={styles.navItem}>
-						{this.renderDropDown()}
+						{this.renderDownloadExportButton()}
+					</li>
+					<li className={styles.navItem}>
+						{this.renderMailExportButton()}
 					</li>
 					<li className={styles.navItem}>
 						{this.renderResetButton()}

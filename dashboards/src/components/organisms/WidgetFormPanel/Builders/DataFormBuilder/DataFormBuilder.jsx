@@ -5,7 +5,7 @@ import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/Compute
 import type {ComputedAttr} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/types';
 import {ComputeAttrCreator} from 'components/organisms/WidgetFormPanel/Modals';
 import {createOrderName, getNumberFromName} from 'utils/widget';
-import {FIELDS, getAggregateOptions, getGroupOptions, styles as mainStyles, TYPES} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, getAggregateOptions, getGroupOptions, styles as mainStyles, TYPES, VALUES} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from 'components/organisms/WidgetFormPanel/Builders/FormBuilder';
 import {getWidgetIcon} from 'icons/widgets';
 import type {Node} from 'react';
@@ -23,6 +23,38 @@ export class DataFormBuilder extends FormBuilder {
 		showModal: false
 	};
 
+	baseHandleSelectSource = async (name: string, source: SelectValue) => {
+		const {attributes, fetchAttributes, setFieldValue, values} = this.props;
+		const currentSource = values[name];
+		await setFieldValue(name, source);
+
+		if (currentSource && currentSource.value !== source.value) {
+			const descriptorName = this.createRefName(name, FIELDS.descriptor);
+
+			setFieldValue(descriptorName, null);
+		}
+
+		const classFqn = source.value;
+
+		if (!attributes[classFqn]) {
+			fetchAttributes(classFqn);
+		}
+	};
+
+	callFilterModal = (sourceFieldName: string) => async () => {
+		const {setFieldValue, values} = this.props;
+		const descriptorName = this.createRefName(sourceFieldName, FIELDS.descriptor);
+		const source = values[sourceFieldName];
+		const descriptor = values[descriptorName];
+
+		if (source) {
+			const context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
+			const {serializedContext} = await window.jsApi.commands.filterForm(context);
+
+			setFieldValue(descriptorName, serializedContext);
+		}
+	};
+
 	combineInputs = (left: Node, right: Node, withDivider: boolean = true) => (
 		<Fragment>
 			<div className={styles.combineInput}>
@@ -37,24 +69,22 @@ export class DataFormBuilder extends FormBuilder {
 		</Fragment>
 	);
 
-	getIconLabel = (option: SelectValue) => {
-		const Icon = getWidgetIcon(option.value);
+	createFilterContext = (sourceName: string) => {
+		const {context: mainContext} = this.props;
 
-		return (
-			<div className={styles.labelWithIcon}>
-				{Icon ? <Icon /> : <span>{option.label}</span>}
-			</div>
-		);
-	};
+		const context = {
+			cases: [],
+			clazz: sourceName,
+			contentUuid: mainContext.contentCode
+		};
 
-	getLabelWithIcon = (option: SelectValue) => {
-		const Icon = getWidgetIcon(option.value);
+		if (sourceName.includes('$')) {
+			const parts = sourceName.split('$');
+			context.cases = [sourceName];
+			context.clazz = parts.shift();
+		}
 
-		return (
-			<div className={styles.labelWithIcon}>
-				{Icon && <Icon />} <span>{option.label}</span>
-			</div>
-		);
+		return context;
 	};
 
 	createRefName = (targetName: string, baseRefName: string) => {
@@ -76,8 +106,8 @@ export class DataFormBuilder extends FormBuilder {
 		if (source) {
 			const currentAttr = attributes[source.value];
 
-			if (!currentAttr || (currentAttr.data.length === 0 && !currentAttr.loading && !currentAttr.error)) {
-				fetchAttributes(source);
+			if (!currentAttr) {
+				fetchAttributes(source.value);
 			} else {
 				options = currentAttr.data;
 			}
@@ -86,37 +116,33 @@ export class DataFormBuilder extends FormBuilder {
 		return options;
 	};
 
-	handleSelectWithRef = (baseRefName: string, getRefOptions: GetRefOptions) => (name: string, value: OptionType) => {
+	getIconLabel = (option: SelectValue) => {
+		const Icon = getWidgetIcon(option.value);
+
+		return (
+			<div className={styles.labelWithIcon}>
+				{Icon ? <Icon /> : <span>{option.label}</span>}
+			</div>
+		);
+	};
+
+	getLabelWithIcon = (option: SelectValue) => {
+		const Icon = getWidgetIcon(option.value);
+
+		return (
+			<div className={styles.labelWithIcon}>
+				{Icon && <Icon />} <span>{option.label}</span>
+			</div>
+		);
+	};
+
+	handleChangeName = (key: string) => (fieldName: string, name: string) => {
 		const {setFieldValue, values} = this.props;
-		const refName = this.createRefName(name, baseRefName);
-		const refValue = values[refName];
-		const refOptions = getRefOptions(value);
+		const value = values[fieldName];
+		value[key] = name;
 
-		setFieldValue(name, value);
-
-		if (!refValue || !refOptions.find(o => o.value === refValue.value)) {
-			const defaultIndex = /group/i.test(refName) && TYPES.DATE.includes(value.type) ? 3 : 0;
-			setFieldValue(refName, refOptions[defaultIndex]);
-		}
+		setFieldValue(fieldName, value);
 	};
-
-	baseHandleSelectSource = async (name: string, source: SelectValue) => {
-		const {attributes, fetchAttributes, setFieldValue, values} = this.props;
-		const currentSource = values[name];
-		await setFieldValue(name, source);
-
-		if (currentSource && currentSource.value !== source.value) {
-			const descriptorName = this.createRefName(name, FIELDS.descriptor);
-
-			setFieldValue(descriptorName, null);
-		}
-
-		if (!attributes[source.value]) {
-			fetchAttributes(source);
-		}
-	};
-
-	handleShowModal = (showModal: boolean, fieldName?: string = '') => () => this.setState({fieldName, showModal});
 
 	handleCreateAttr = (name: string, attr: ComputedAttr) => {
 		const {setFieldValue, values} = this.props;
@@ -128,78 +154,49 @@ export class DataFormBuilder extends FormBuilder {
 		this.handleShowModal(false)();
 	};
 
-	handleChangeAttrName = (name: string, value: string) => {
-		const {setFieldValue, values} = this.props;
-		const attr = values[name];
-		attr.title = value;
-
-		setFieldValue(name, attr);
-	};
-
-	handleChangeSourceName = (name: string, value: string) => {
-		const {setFieldValue, values} = this.props;
-		const source = values[name];
-		source.label = value;
-
-		setFieldValue(name, source);
-	};
-
 	handleSelectSource = this.baseHandleSelectSource;
 
-	createFilterContext = (sourceName: string) => {
-		const {context: mainContext} = this.props;
+	handleSelectWithRef = (baseRefName: string, getRefOptions: GetRefOptions) => (name: string, value: OptionType) => {
+		const {setFieldValue, values} = this.props;
+		const refName = this.createRefName(name, baseRefName);
+		const refOptions = getRefOptions(value);
+		const refValueCode = values[refName] && values[refName].value;
 
-		const context = {
-			cases: [],
-			clazz: sourceName,
-			contentUuid: mainContext.contentCode
+		setFieldValue(name, value);
+
+		if (!refValueCode || refOptions.find(o => o.value === refValueCode)) {
+			let refValue = refOptions[0];
+
+			if (/group/i.test(refName) && TYPES.DATE.includes(value.type)) {
+				refValue = refOptions.find(o => o.value === VALUES.DATETIME_GROUP.MONTH);
+			}
+
+			setFieldValue(refName, refValue);
+		}
+	};
+
+	handleShowModal = (showModal: boolean, fieldName?: string = '') => () => this.setState({fieldName, showModal});
+
+	renderAggregateInput = (name: string = FIELDS.aggregation, refName: string) => {
+		const {values} = this.props;
+		const refValue = values[refName];
+		const options = getAggregateOptions(refValue);
+		const value = values[name];
+
+		const props = {
+			border: false,
+			color: 'blue',
+			defaultValue: options[0],
+			isSearchable: false,
+			name,
+			options,
+			value
 		};
 
-		if (sourceName.includes('$')) {
-			const parts = sourceName.split('$');
-			context.cases = [sourceName];
-			context.clazz = parts.shift();
-		}
-
-		return context;
-	};
-
-	callFilterModal = (sourceFieldName: string) => async () => {
-		const {setFieldValue, values} = this.props;
-		const descriptorName = this.createRefName(sourceFieldName, FIELDS.descriptor);
-		const source = values[sourceFieldName];
-		const descriptor = values[descriptorName];
-
-		if (source) {
-			const context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
-			const {serializedContext} = await window.jsApi.commands.filterForm(context);
-
-			setFieldValue(descriptorName, serializedContext);
+		if (!refValue || (refValue && refValue.type !== COMPUTED_ATTR)) {
+			return this.renderSelect(props);
 		}
 	};
-
-	renderModal = () => {
-		const {fieldName, showModal} = this.state;
-
-		if (showModal) {
-			return (
-				<ComputeAttrCreator
-					name={fieldName}
-					onClose={this.handleShowModal(false)}
-					onSubmit={this.handleCreateAttr}
-				/>
-			);
-		}
-	};
-
-	renderTreeSelect = (props: TreeProps) => (
-		<div className={mainStyles.field}>
-			<TreeSelectInput {...props} />
-			<span className={mainStyles.error}>
-				{this.props.errors[props.name]}
-			</span>
-		</div>
-	);
 
 	renderAttrSelect = (props: AttrSelectProps) => {
 		const {computedAttrs} = this.props.values;
@@ -209,7 +206,7 @@ export class DataFormBuilder extends FormBuilder {
 
 		if (value) {
 			props.form = {
-				onSubmit: this.handleChangeAttrName,
+				onSubmit: this.handleChangeName('title'),
 				value: value.title
 			};
 		}
@@ -239,6 +236,25 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderSelect({...props, options});
 	};
 
+	renderBreakdownInput = (name: string = FIELDS.breakdown) => {
+		const {values} = this.props;
+
+		const breakdown: AttrSelectProps = {
+			border: false,
+			name,
+			onSelect: this.handleSelectWithRef(FIELDS.breakdownGroup, getGroupOptions),
+			placeholder: 'Разбивка',
+			value: values[name]
+		};
+
+		return this.renderAttrSelect(breakdown);
+	};
+
+	renderBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.combineInputs(
+		this.renderGroupInput(breakdownGroup, breakdown),
+		this.renderBreakdownInput(breakdown)
+	);
+
 	renderFilterButton = (source: string) => {
 		return (
 			<div className={styles.filter}>
@@ -248,68 +264,6 @@ export class DataFormBuilder extends FormBuilder {
 				<div>Фильтр</div>
 			</div>
 		);
-	};
-
-	renderSourceInput = (name: string = FIELDS.source) => {
-		const {values, sources} = this.props;
-		const value = values[name];
-
-		let props: TreeProps = {
-			name: name,
-			onChange: this.handleSelectSource,
-			placeholder: 'Выберите источник',
-			tree: sources,
-			value
-		};
-
-		if (value) {
-			props.form = {
-				onSubmit: this.handleChangeSourceName,
-				value: value.label
-			};
-		}
-
-		return (
-			<Fragment>
-				{this.renderTreeSelect(props)}
-				{this.renderFilterButton(name)}
-			</Fragment>
-		);
-	};
-
-	renderBreakdownInput = (name: string = FIELDS.breakdown) => {
-		const {values} = this.props;
-
-		const breakdown: AttrSelectProps = {
-			border: false,
-			name: name,
-			onSelect: this.handleSelectWithRef(FIELDS.breakdownGroup, getGroupOptions),
-			placeholder: 'Разбивка',
-			value: values[name]
-		};
-
-		return this.renderAttrSelect(breakdown);
-	};
-
-	renderAggregateInput = (name: string = FIELDS.aggregation, refName: string) => {
-		const {values} = this.props;
-		const refValue = values[refName];
-		const options = getAggregateOptions(refValue);
-		const aggregation = values[name];
-
-		const props = {
-			border: false,
-			color: 'blue',
-			defaultValue: options[0],
-			isSearchable: false,
-			name,
-			options,
-			value: aggregation
-		};
-
-		if (!refValue || (refValue && refValue.type !== COMPUTED_ATTR)) {
-			return this.renderSelect(props);
-		}
 	};
 
 	renderGroupInput = (name: string = FIELDS.group, refName: string = FIELDS.xAxis, mixin: ?MixinInputProps) => {
@@ -337,9 +291,54 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderSelect(props);
 	};
 
-	renderBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.combineInputs(
-		this.renderGroupInput(breakdownGroup, breakdown),
-		this.renderBreakdownInput(breakdown)
+	renderModal = () => {
+		const {fieldName, showModal} = this.state;
+
+		if (showModal) {
+			return (
+				<ComputeAttrCreator
+					name={fieldName}
+					onClose={this.handleShowModal(false)}
+					onSubmit={this.handleCreateAttr}
+				/>
+			);
+		}
+	};
+
+	renderSourceInput = (name: string = FIELDS.source) => {
+		const {values, sources} = this.props;
+		const value = values[name];
+
+		let props: TreeProps = {
+			name: name,
+			onChange: this.handleSelectSource,
+			placeholder: 'Выберите источник',
+			tree: sources,
+			value
+		};
+
+		if (value) {
+			props.form = {
+				onSubmit: this.handleChangeName('label'),
+				value: value.label
+			};
+		}
+
+		return (
+			<Fragment>
+				{this.renderTreeSelect(props)}
+				{this.renderFilterButton(name)}
+			</Fragment>
+		);
+	};
+
+	renderTreeSelect = (props: TreeProps) => (
+		<div className={mainStyles.field}>
+			<TreeSelectInput {...props} />
+			<span className={mainStyles.error}>
+				{this.props.errors[props.name]}
+			</span>
+		</div>
 	);
 }
 

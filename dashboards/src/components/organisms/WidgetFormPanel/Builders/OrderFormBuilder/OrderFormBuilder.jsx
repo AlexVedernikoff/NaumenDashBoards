@@ -40,12 +40,6 @@ export class OrderFormBuilder extends DataFormBuilder {
 		}
 	}
 
-	getLabelWithSource = (a: Attribute) => a.type !== COMPUTED_ATTR ? `${a.title} (${a.sourceName})` : a.title;
-
-	getBaseName = (name: string) => name.split('_').shift();
-
-	getOrder = () => this.props.values.order || this.defaultOrder;
-
 	addSet = () => {
 		const {setFieldValue, values} = this.props;
 		const {order} = values;
@@ -55,6 +49,12 @@ export class OrderFormBuilder extends DataFormBuilder {
 		setFieldValue(createOrderName(nextNumber)(FIELDS.dataKey), uuid());
 		setFieldValue(createOrderName(nextNumber)(FIELDS.sourceForCompute), true);
 	};
+
+	getBaseName = (name: string) => name.split('_').shift();
+
+	getLabelWithSource = (a: Attribute) => a.type !== COMPUTED_ATTR ? `${a.title} (${a.sourceName})` : a.title;
+
+	getOrder = () => this.props.values.order || this.defaultOrder;
 
 	removeSet = (e: SyntheticMouseEvent<HTMLImageElement>) => {
 		const name = e.currentTarget.dataset.name;
@@ -84,6 +84,16 @@ export class OrderFormBuilder extends DataFormBuilder {
 		});
 	};
 
+	renderAddSourceInput = () => {
+		const props: LabelProps = {
+			icon: 'plus',
+			name: 'Источник',
+			onClick: this.addSet
+		};
+
+		return this.renderLabel(props);
+	};
+
 	renderByOrder = (renderFunction: RenderFunction, names: Array<string> | string, accordingSource: boolean = false) => {
 		const {values} = this.props;
 
@@ -97,17 +107,7 @@ export class OrderFormBuilder extends DataFormBuilder {
 		});
 	};
 
-	renderAddSourceInput = () => {
-		const props: LabelProps = {
-			icon: 'plus',
-			name: 'Источник',
-			onClick: this.addSet
-		};
-
-		return this.renderLabel(props);
-	};
-
-	renderSourceComputeHandler = (source: string, withComputeHandler: boolean) => {
+	renderComputeCheckbox = (source: string, withComputeHandler: boolean) => {
 		const order = this.getOrder();
 		const name = this.createRefName(source, FIELDS.sourceForCompute);
 		const isNotFirst = getNumberFromName(source) !== order[0];
@@ -127,7 +127,7 @@ export class OrderFormBuilder extends DataFormBuilder {
 	renderOrderSource = (withComputeHandler: boolean) => (source: string) => (
 		<div key={source}>
 			{this.renderSourceInput(source)}
-			{this.renderSourceComputeHandler(source, withComputeHandler)}
+			{this.renderComputeCheckbox(source, withComputeHandler)}
 		</div>
 	);
 }

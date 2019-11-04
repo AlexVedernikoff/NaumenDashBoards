@@ -1,5 +1,5 @@
 // @flow
-import {AxisChart, BarChart, CircleChart, ComboChart, Summary, Table} from './WidgetForms';
+import {AxisChart, BarChart, CircleChart, ComboChart, Summary, Table} from './WidgetFields';
 import {CHART_SELECTS, CHART_VARIANTS} from 'utils/chart';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import {Divider} from 'components/atoms';
@@ -13,7 +13,7 @@ export class ParamsTab extends DataFormBuilder {
 		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
-		const widgetsForm = {
+		const variants = {
 			[BAR]: BarChart,
 			[BAR_STACKED]: BarChart,
 			[COLUMN]: AxisChart,
@@ -26,8 +26,8 @@ export class ParamsTab extends DataFormBuilder {
 			[TABLE]: Table
 		};
 
-		const WidgetForm = widgetsForm[type];
-		return <WidgetForm />;
+		const Fields = variants[type];
+		return <Fields />;
 	};
 
 	renderInputs = () => {
