@@ -2,6 +2,7 @@
 import {buildUrl, client, getContext, getParams} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from './constants';
+import {getTimeInSeconds} from 'helpers/time';
 import {notify} from 'helpers/notify';
 import type {Point} from 'types/point';
 import testData from 'helpers/testData';
@@ -17,7 +18,7 @@ const showNotGeoNotifications = (notGeoMarkers: Array<Point>) => {
 	const label = notGeoMarkers
 		.sort((a, b) => a.type > b.type ? -1 : a.type < b.type ? 1 : 0)
 		.map(marker => marker.header).join(', ') + '.';
-	notify(label);
+	notify('geolocation', 'info', label);
 };
 
 const getGeoMarkers = (markers: Array<Point>) => {
@@ -28,7 +29,7 @@ const getGeoMarkers = (markers: Array<Point>) => {
 		static: []
 	};
 
-	markers.forEach((marker, index) => {
+	markers.forEach((marker) => {
 		const {geoposition, header} = marker;
 
 		if (marker.hasOwnProperty('geoposition')) {
@@ -59,25 +60,43 @@ const getGeoMarkers = (markers: Array<Point>) => {
 		}
 	});
 
-	showNotGeoNotifications(notGeoMarkers);
+	notGeoMarkers.length && showNotGeoNotifications(notGeoMarkers);
 
 	return geoMarkers;
 };
 
-const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any> => {
 	try {
 		const context = getContext();
 		const params = await getParams();
+		dispatch(setContext(context));
+		dispatch(setParams(params))
+			.then(() => dispatch(fetchGeolocation()))
+			.then(() => dispatch(reloadGeolocation()))
+			.catch(error => error);
+	} catch (error) {
+		dispatch(recordGeolocationdError());
+	}
+};
+
+const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	try {
 		let markers = testData;
+		const {context, params} = getState().geolocation;
+		const {getPointsMethodName} = params;
+		const {subjectUuid} = context;
+
 		if (environment !== 'development') {
-			const {data} = await client.get(buildUrl('mapRest', 'getPoints', context.subjectUuid));
+			const query = `user,'${getPointsMethodName}','${subjectUuid}'`;
+			const {data} = await client.get(buildUrl('mapRest', 'getPoints', query));
+
 			markers = data;
 		}
+		!markers.length && notify('empty', 'empty');
 		const geoMarkers = getGeoMarkers(markers);
-		dispatch(setContext(context));
-		dispatch(setParams(params));
 		dispatch(setData(geoMarkers));
 	} catch (error) {
+		notify('error', 'error');
 		dispatch(recordGeolocationdError());
 	}
 };
@@ -85,12 +104,14 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch): Promise<
 const reloadGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let markers = testData2;
-		const {dynamicMarkers} = getState().geolocation;
+		const {dynamicMarkers, params} = getState().geolocation;
+		const dynamicMarkersUuids = dynamicMarkers.map(marker => marker.uuid).join("','");
+		const {requestCurrentLocation, locationUpdateFrequency} = params;
+		const updateFrequency = getTimeInSeconds(locationUpdateFrequency);
 
-		const dynamicMarkersUuids = dynamicMarkers.map(marker => marker.uuid).join(',');
-
-		if (environment !== 'development') {
-			const {data} = await client.get(buildUrl('mapRest', 'getCurrentGeopositions', dynamicMarkersUuids));
+		if (environment !== 'development' && dynamicMarkersUuids) {
+			const query = `user, ${requestCurrentLocation.toString()}, ${updateFrequency}, '${dynamicMarkersUuids}'`;
+			const {data} = await client.get(buildUrl('mapRest', 'getLastGeopositions', query));
 			markers = data;
 		}
 		Array.isArray(markers) && markers.map(marker => {
@@ -103,6 +124,7 @@ const reloadGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState
 		});
 		dispatch(reloadActivePoint(dynamicMarkers));
 	} catch (error) {
+		notify('error', 'error');
 		dispatch(recordGeolocationdError());
 	}
 };
@@ -112,10 +134,13 @@ const setContext = (payload: Object) => ({
 	payload
 });
 
-const setParams = (payload: Object) => ({
-	type: GEOLOCATION_EVENTS.SET_PARAMS,
-	payload
-});
+const setParams = (payload: Object) => dispatch => {
+	dispatch({
+		type: GEOLOCATION_EVENTS.SET_PARAMS,
+		payload
+	});
+	return Promise.resolve();
+};
 
 const setData = (payload: Object) => ({
 	type: GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION,
@@ -132,6 +157,7 @@ const recordGeolocationdError = () => ({
 });
 
 export {
+	getAppConfig,
 	fetchGeolocation,
 	reloadGeolocation
 };

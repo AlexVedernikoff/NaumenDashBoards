@@ -12,10 +12,15 @@ export const initialGeolocationState: GeolocationState = {
 	loading: false,
 	multipleMarkers: [],
 	params: {
+		autoUpdateLocation: true,
+		colorStaticPoint: '#EB5757',
 		colorDynamicActivePoint: '#4D92C8',
 		colorDynamicInactivePoint: '#828282',
-		colorStaticPoint: '#EB5757',
-		timeIntervalInactivity: {length: 1200, interval: 'SECOND'}
+		getPointsMethodName: 'employeesByServiceCallCustom',
+		locationUpdateFrequency: {length: 60, interval: 'SECOND'},
+		requestCurrentLocation: true,
+		timeIntervalInactivity: {length: 1200, interval: 'SECOND'},
+		updatePointsMode: 'getPoints'
 	},
 	staticMarkers: [],
 	success: false

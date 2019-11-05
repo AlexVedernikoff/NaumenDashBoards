@@ -1,7 +1,8 @@
 // @flow
+import type {LatLngBounds} from 'types/bound';
 
 export type ConnectedProps = {
-	bounds: Object
+	bounds: LatLngBounds
 };
 export type ConnectedFunctions = {
 };

@@ -17,8 +17,9 @@ export class Controls extends Component<Props, State> {
 	}
 
 	reloadActiveMarkers = () => {
-		const {reloadGeolocation} = this.props;
-		reloadGeolocation();
+		const {fetchGeolocation, reloadGeolocation, updatePointsMode} = this.props;
+
+		updatePointsMode === 'getPoints' ? fetchGeolocation() : reloadGeolocation();
 	};
 
 	toggleHover = () => this.setState({hover: !this.state.hover});

@@ -1,14 +1,14 @@
-export const defaultBounds = [
+export default [
 	{
 		geoposition: {
-			latitude: 56.1351,
-			longitude: 60.2636
+			latitude: 1,
+			longitude: 1
 		}
 	},
 	{
 		geoposition: {
-			latitude: 56.0351,
-			longitude: 60.3636
+			latitude: 80,
+			longitude: 140
 		}
 	}
 ];

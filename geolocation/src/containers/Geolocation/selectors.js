@@ -1,8 +1,9 @@
 // @flow
-import getLatLngBounds from 'helpers/bound';
-import {reloadGeolocation} from 'store/geolocation/actions';
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
+import getLatLngBounds from 'helpers/bound';
+import {getTimeInSeconds} from 'helpers/time';
+import {reloadGeolocation} from 'store/geolocation/actions';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
@@ -10,11 +11,14 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
  */
 
 export const props = (state: AppState): ConnectedProps => {
-	const {dynamicMarkers, staticMarkers, multipleMarkers} = state.geolocation;
+	const {geolocation} = state;
+	const {dynamicMarkers, staticMarkers, multipleMarkers, params} = geolocation;
+	const reloadInterval = params.autoUpdateLocation ? getTimeInSeconds(params.locationUpdateFrequency) : 0;
 	const bounds = [].concat(dynamicMarkers, staticMarkers, multipleMarkers);
 
 	return {
-		bounds: getLatLngBounds(bounds)
+		bounds: getLatLngBounds(bounds),
+		reloadInterval
 	};
 };
 

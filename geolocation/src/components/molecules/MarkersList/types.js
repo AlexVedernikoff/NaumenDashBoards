@@ -7,7 +7,6 @@ type OwnProps = {
 	uuid: string
 };
 
-
 export type ConnectedProps = {
 	dynamicMarkers: Array<Point>,
 	multipleMarkers: Array<MultiplePoint>,

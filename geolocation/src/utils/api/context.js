@@ -1,5 +1,6 @@
 // @flow
 import type {Context} from 'types/api';
+import {initialGeolocationState} from 'store/geolocation/init';
 
 const injectJsApi = () => top.injectJsApi(top, window);
 
@@ -21,24 +22,34 @@ const getContext = (): Context => {
 
 	return {
 		contentCode: jsApi.findContentCode(),
-		subjectUuid: jsApi.extractSubjectUuid()
+		subjectUuid: jsApi.extractSubjectUuid(),
+		user: jsApi.getCurrentUser()
 	};
 };
 
 const getParams = async () => {
+	const {params} = initialGeolocationState;
+
 	if (process.env.NODE_ENV === 'development') {
-		return {
-			colorStaticPoint: '#EB5757',
-			colorDynamicActivePoint: '#4D92C8',
-			colorDynamicInactivePoint: '#828282',
-			timeIntervalInactivity: {length: 1200, interval: 'SECOND'}
-		};
+		return params;
 	}
 
 	const {jsApi} = window;
-	const params = await jsApi.commands.getCurrentContentParameters().then(data => data);
+	const paramsApp = await jsApi.commands.getCurrentContentParameters().then(data => data);
+	const {requestCurrentLocation, locationUpdateFrequency} = paramsApp;
 
-	return params;
+	if (!requestCurrentLocation) {
+		paramsApp.requestCurrentLocation = params.requestCurrentLocation;
+	}
+
+	if (!locationUpdateFrequency) {
+		paramsApp.locationUpdateFrequency = params.locationUpdateFrequency;
+	}
+
+	paramsApp.autoUpdateLocation = paramsApp.autoUpdateLocation === 'true';
+	paramsApp.requestCurrentLocation = paramsApp.requestCurrentLocation === 'true';
+
+	return paramsApp;
 };
 
 export {

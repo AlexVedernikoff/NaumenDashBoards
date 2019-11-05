@@ -19,23 +19,18 @@ export class PopupOptions extends Component<Props, State> {
 
 		return (
 			<div key={key} className={styles.popupOption}>
-				{label && <span className={styles.popupOptionLeft}>{label}:</span>}
-				{value && <span className={styles[styleName]}>{value}</span>}
+				{label && <div className={styles.popupOptionLeft}>{label}:</div>}
+				{value && <div className={styles[styleName]}>{value}</div>}
 			</div>
 		);
 	};
 
-	scroll = () => {
-		const headerShadow = this.optionsRef.current.scrollTop > 10;
-
-		this.props.toggleShadow('headerShadow', headerShadow);
-	}
-
 	componentDidMount () {
 		const optionsBlock = this.optionsRef.current;
-		const actionsShadow = optionsBlock.scrollHeight !== optionsBlock.offsetHeight;
+		const shadow = optionsBlock.scrollHeight !== optionsBlock.offsetHeight;
 
-		this.props.toggleShadow('actionsShadow', actionsShadow);
+		this.props.toggleShadow('actionsShadow', shadow);
+		this.props.toggleShadow('headerShadow', shadow);
 	}
 
 	render () {
@@ -44,7 +39,6 @@ export class PopupOptions extends Component<Props, State> {
 		return (
 			<div
 				className={styles.popupOptions}
-				onScroll={this.scroll}
 				ref={this.optionsRef}
 			>
 				{options.map(this.renderOption)}

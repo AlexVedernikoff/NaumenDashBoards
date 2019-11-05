@@ -4,7 +4,7 @@ export type Module =
 
 export type Method =
 	| 'getCurrentContextObject'
-	| 'getCurrentGeopositions'
+	| 'getLastGeopositions'
 	| 'getPoints';
 
 export type Context = {

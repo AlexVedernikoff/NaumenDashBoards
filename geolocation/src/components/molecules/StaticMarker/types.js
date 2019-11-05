@@ -7,7 +7,7 @@ type OwnProps = {
 };
 
 export type ConnectedFunctions = {
-};	
+};
 
 export type ConnectedProps = {
 	color: string // '#EB5757'

@@ -1,5 +1,5 @@
 // @flow
-import {fetchGeolocation} from 'store/geolocation/actions';
+import {getAppConfig} from 'store/geolocation/actions';
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 
@@ -14,5 +14,5 @@ export const props = (state: AppState): ConnectedProps => ({
 });
 
 export const functions: ConnectedFunctions = {
-	fetchGeolocation
+	getAppConfig
 };

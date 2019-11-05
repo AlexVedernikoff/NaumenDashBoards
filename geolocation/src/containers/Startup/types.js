@@ -13,7 +13,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	fetchGeolocation: () => ThunkAction
+	getAppConfig: () => ThunkAction
 };
 
 export type Props = ReceivedProps & ConnectedProps & ConnectedFunctions;

@@ -12,7 +12,7 @@ import type {Method, Module} from 'types/api';
 const buildUrl = (module: Module, method: Method, params: string = ''): string => {
 	const url: string = `${BASE_URL}`;
 
-	return `${url}?func=modules.${module}.${method}&params='${params}'`;
+	return `${url}?func=modules.${module}.${method}&params=${params}`;
 };
 
 export default buildUrl;

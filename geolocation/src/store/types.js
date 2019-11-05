@@ -19,5 +19,5 @@ export type AppState = {
 export type GetState = () => AppState;
 export type ThunkAction = (dispatch: Dispatch, getState: GetState) => any;
 type PromiseAction = Promise<Action>;
-export type Dispatch = (action: Action | ThunkAction | PromiseAction) => void;
+export type Dispatch = (action: Action | ThunkAction | PromiseAction) => PromiseAction;
 /* eslint-enable no-use-before-define */

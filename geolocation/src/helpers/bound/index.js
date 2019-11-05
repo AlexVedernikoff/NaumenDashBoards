@@ -1,12 +1,32 @@
 // @flow
 import defaultBounds from './defaultBounds';
 import L from 'leaflet';
+import type {MultiplePoint} from 'types/multiple';
+import type {Point} from 'types/point';
 
-export const getLatLngBounds = (dataMarkers: Object) => {
-	const markers = Object.keys(dataMarkers).length !== 0 ? dataMarkers : defaultBounds;
-	const latLngs = Object.keys(markers).map(key => {
-		return L.latLng(markers[key].geoposition.latitude, markers[key].geoposition.longitude);
+const boundsOneMarker = markers => {
+	const bounds = [Object.assign({}, markers[0].geoposition), Object.assign({}, markers[0].geoposition)];
+	const zoom = 0.006;
+	bounds[0].latitude -= zoom;
+	bounds[0].longitude -= zoom;
+	bounds[1].latitude += zoom;
+	bounds[1].longitude += zoom;
+	const latLngs = bounds.map(geoposition => {
+		return L.latLng(geoposition.latitude, geoposition.longitude);
 	});
+	return L.latLngBounds(latLngs);
+};
+
+export const getLatLngBounds = (dataMarkers: Array<Point | MultiplePoint>) => {
+	if (dataMarkers.length === 1) {
+		return boundsOneMarker(dataMarkers);
+	}
+
+	const markers = dataMarkers.length >= 2 ? dataMarkers : defaultBounds;
+	const latLngs = markers.map(marker => {
+		return L.latLng(marker.geoposition.latitude, marker.geoposition.longitude);
+	});
+
 	return L.latLngBounds(latLngs);
 };
 

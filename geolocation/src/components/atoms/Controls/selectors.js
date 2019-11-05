@@ -1,14 +1,18 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {reloadGeolocation} from 'store/geolocation/actions';
+import {fetchGeolocation, reloadGeolocation} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => {
+	const {updatePointsMode} = state.geolocation.params;
+
 	return ({
+		updatePointsMode
 	});
 };
 
 const functions: ConnectedFunctions = {
+	fetchGeolocation,
 	reloadGeolocation
 };
 

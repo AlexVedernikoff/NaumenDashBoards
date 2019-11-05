@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
  <embeddedAppParameters> <!-- Корневой атрибут с настройками параметров -->
-     <parameters> <!-- Атрибут с перечислением параметров встроенного приложения -->
-         <parameter>
+     <parameters>
+                <parameter>
                     <attrs-for-date-time-restriction-script/>
                     <attrs-in-cof-script/>
-                    <code>colorDynamicActivePoint</code>
+                    <code>getPointsMethodName</code>
                     <complexRelation>false</complexRelation>
                     <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
                         <entry>
                             <key>
                                 <id>employee</id>
@@ -17,25 +22,18 @@
                                 <id>ou</id>
                             </key>
                         </entry>
-                        <entry>
-                            <key>
-                                <id>team</id>
-                            </key>
-                        </entry>
                     </complexRelationAggrAttrGroups>
                     <computable-on-form>false</computable-on-form>
                     <default-by-script>false</default-by-script>
-                    <default-value>
-                        <string>#4D92C8</string>
-                    </default-value>
+                    <description>Название метода из модуля настроек mapParams, возвращающего список точек для отображения на карте</description>
                     <edit-presentaion>
                         <code>stringEdit</code>
                     </edit-presentaion>
                     <editable>true</editable>
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
-                    <required>false</required>
-                    <title lang="ru">Цвет метки активной подвижной точки</title>
+                    <required>true</required>
+                    <title lang="ru">Название метода получения точек</title>
                     <type>
                         <code>string</code>
                         <property code="permittedTypes">[]</property>
@@ -50,9 +48,14 @@
                 <parameter>
                     <attrs-for-date-time-restriction-script/>
                     <attrs-in-cof-script/>
-                    <code>colorDynamicInactivePoint</code>
+                    <code>autoUpdateLocation</code>
                     <complexRelation>false</complexRelation>
                     <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
                         <entry>
                             <key>
                                 <id>employee</id>
@@ -63,40 +66,33 @@
                                 <id>ou</id>
                             </key>
                         </entry>
-                        <entry>
-                            <key>
-                                <id>team</id>
-                            </key>
-                        </entry>
                     </complexRelationAggrAttrGroups>
                     <computable-on-form>false</computable-on-form>
                     <default-by-script>false</default-by-script>
                     <default-value>
-                        <string>#828282</string>
+                        <bool>false</bool>
                     </default-value>
+                    <description>Включение механизма автообновления координат подвижных точек на карте. Если false,&amp;nbsp;то автообновление точек отключено.</description>
                     <edit-presentaion>
-                        <code>stringEdit</code>
+                        <code>checkbox</code>
                     </edit-presentaion>
                     <editable>true</editable>
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
                     <required>false</required>
-                    <title lang="ru">Цвет метки неактивной подвижной точки</title>
+                    <title lang="ru">Автоматически обновлять координаты подвижных точек</title>
                     <type>
-                        <code>string</code>
+                        <code>bool</code>
                         <property code="permittedTypes">[]</property>
-                        <property code="string">255</property>
-                        <property code="inputMaskMode"/>
-                        <property code="inputMask"/>
                     </type>
                     <view-presentaion>
-                        <code>stringView</code>
+                        <code>yesNo</code>
                     </view-presentaion>
                 </parameter>
                 <parameter>
                     <attrs-for-date-time-restriction-script/>
                     <attrs-in-cof-script/>
-                    <code>colorStaticPoint</code>
+                    <code>locationUpdateFrequency</code>
                     <complexRelation>false</complexRelation>
                     <complexRelationAggrAttrGroups>
                         <entry>
@@ -106,7 +102,97 @@
                         </entry>
                         <entry>
                             <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
                                 <id>ou</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <dateTimeInterval interval="SECOND"/>
+                    </default-value>
+                    <description>Параметр показывает: &lt;br&gt;- как часто обновлять координаты меток подвижных точек на карте,&lt;br&gt;- в какой интервал времени должна попадать метка геопозиции, чтобы считаться новой.</description>
+                    <edit-presentaion>
+                        <code>dtIntervalEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Частота обновления местоположения точек, в сек</title>
+                    <type>
+                        <code>dtInterval</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="needStoreUnits">false</property>
+                        <property code="intervalAvailableUnits">null</property>
+                    </type>
+                    <view-presentaion>
+                        <code>dtIntervalView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>requestCurrentLocation</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <bool>false</bool>
+                    </default-value>
+                    <description>Включение использования механизма запроса местоположения мобильного устройства через silent push.</description>
+                    <edit-presentaion>
+                        <code>checkbox</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Запрашивать текущее местоположение</title>
+                    <type>
+                        <code>bool</code>
+                        <property code="permittedTypes">[]</property>
+                    </type>
+                    <view-presentaion>
+                        <code>yesNo</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>updatePointsMode</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
                             </key>
                         </entry>
                         <entry>
@@ -118,16 +204,17 @@
                     <computable-on-form>false</computable-on-form>
                     <default-by-script>false</default-by-script>
                     <default-value>
-                        <string>#EB5757</string>
+                        <string>getLastGeoposition</string>
                     </default-value>
+                    <description>Указать режим обновления по кнопке: полностью обновлять список точек (getPoints) или обновлять только координаты подвижных точек (getLastGeoposition)</description>
                     <edit-presentaion>
                         <code>stringEdit</code>
                     </edit-presentaion>
                     <editable>true</editable>
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
-                    <required>false</required>
-                    <title lang="ru">Цвет метки неподвижной точки</title>
+                    <required>true</required>
+                    <title lang="ru">Режим обновления меток по кнопке</title>
                     <type>
                         <code>string</code>
                         <property code="permittedTypes">[]</property>
@@ -166,6 +253,7 @@
                     <default-value>
                         <dateTimeInterval interval="MINUTE" ms="1200000"/>
                     </default-value>
+                    <description>Все точки с меткой геопозиции позднее текущего времени на это значение, будут выделены как неактивные</description>
                     <edit-presentaion>
                         <code>dtIntervalEdit</code>
                     </edit-presentaion>
@@ -173,7 +261,7 @@
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
                     <required>false</required>
-                    <title lang="ru">Интервал времени для определения неактивных точек</title>
+                    <title lang="ru">Интервал времени для определения неактивных точек, в минутах</title>
                     <type>
                         <code>dtInterval</code>
                         <property code="permittedTypes">[]</property>
@@ -183,6 +271,147 @@
                     <view-presentaion>
                         <code>dtIntervalView</code>
                     </view-presentaion>
-                </parameter>               
-			</parameters> 
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>colorStaticPoint</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <string>#085896</string>
+                    </default-value>
+                    <description>в кодировке HEX</description>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Цвет метки неподвижной точки</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>colorDynamicActivePoint</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <string>#4D92C8</string>
+                    </default-value>
+                    <description>в кодировке HEX</description>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Цвет метки активной подвижной точки</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>colorDynamicInactivePoint</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+                        <string>#828282</string>
+                    </default-value>
+                    <description>в кодировке HEX</description>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Цвет метки неактивной подвижной точки</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+            </parameters>
 </embeddedAppParameters>

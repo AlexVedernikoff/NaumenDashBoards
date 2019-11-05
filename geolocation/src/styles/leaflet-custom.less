@@ -134,8 +134,6 @@ html, body, #root {
 
 .leaflet-control {
     margin-top: -13px;
-    padding-right: 8px;
-    position: absolute;
 }
 
 .leaflet-control-zoom.leaflet-bar.leaflet-control {
@@ -158,4 +156,9 @@ html, body, #root {
 .leaflet-popup-content-wrapper, 
 .leaflet-popup-tip {
     box-shadow: 0px 4px 16px rgba(95, 95, 95, 0.2);
+}
+
+.leaflet-touch-zoom > div:nth-child(3), 
+.leaflet-touch-zoom > div:nth-child(4) {
+    display: none;
 }
