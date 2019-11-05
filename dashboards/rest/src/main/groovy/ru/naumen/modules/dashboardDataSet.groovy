@@ -720,15 +720,15 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
             break
         case GroupType.SEVEN_DAYS:
             def cteSource = createHCriteria(descriptor, source)
-            cteSource.addColumn("min(${getAttributeCodeByType(cteSource, xAxis)})", 'cteMinDate')
+            cteSource.addColumn("min(CAST(${getAttributeCodeByType(cteSource, xAxis)} AS timestamp))", 'cteMinDate')
             HCriteria cteCriteria = criteria.addCTESource(cteSource)
-            criteria.addGroupColumn("round(abs((day(${attributeCode} " +
+            criteria.addGroupColumn("round(abs((day(CAST(${attributeCode} AS timestamp) " +
                     "- ${cteCriteria.getProperty('cteMinDate')}) - 0.5)) / 7)")
             criteria.addColumn("CONCAT(" +
                     "DAY(MIN(${attributeCode})), '.', CASE MONTH(MIN(${attributeCode})) ${nameDayMonth}," +
                     "'-'," +
                     "DAY(MAX(${attributeCode})), '.', CASE MONTH(MAX(${attributeCode})) ${nameDayMonth})")
-            criteria.addOrder(HOrders.asc(HHelper.getColumn("round(abs((day(${attributeCode} " +
+            criteria.addOrder(HOrders.asc(HHelper.getColumn("round(abs((DAY(${attributeCode} " +
                     "- ${cteCriteria.getProperty('cteMinDate')}) - 0.5)) / 7)")))
             break
     }
