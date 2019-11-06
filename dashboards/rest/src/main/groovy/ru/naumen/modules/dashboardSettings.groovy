@@ -109,7 +109,7 @@ String getSettings(String classFqn, String contentCode, def user)
  */
 String createDefaultWidgetSettings(Map<String, Object> requestContent, def user)
 {
-    checkRightsOnDashboard(user, "создание")
+    checkRightsOnDashboard(user, "create")
     RequestCreateWidgetSettings request = new RequestCreateWidgetSettings(requestContent)
     String dashboardKey = generateDashboardKey(request.classFqn, request.contentCode, null)
     String dashboardJsonSettings = loadJsonSettings(dashboardKey)
@@ -145,7 +145,7 @@ String bulkEditDefaultWidget(Map<String, Object> requestContent, def user)
  */
 String editDefaultWidget(Map<String, Object> requestContent, def user)
 {
-    checkRightsOnDashboard(user, "редактирование")
+    checkRightsOnDashboard(user, "edit")
     RequestEditWidgetSettings request = new RequestEditWidgetSettings(requestContent)
     String widgetKey = request.widgetKey
     def widgetSettings = setUuidInSettings(request.widgetSettings, widgetKey)
@@ -231,7 +231,7 @@ String createPersonalWidgetSettings(Map<String, Object> requestContent, def user
 String deleteDefaultWidget(String classFqn, String contentCode, def user, String key)
 {
     String widgetKey = key
-    checkRightsOnDashboard(user, "удаление")
+    checkRightsOnDashboard(user, "delete")
     DashboardSettings dashboardSettings = getDashboardSetting(classFqn, contentCode, null)
     dashboardSettings.widgetIds.remove(widgetKey)
     saveDashboard(classFqn, contentCode, dashboardSettings.widgetIds, null)
@@ -430,8 +430,8 @@ private checkRightsOnDashboard(def user, String messageError)
 {
     if (!checkUserOnMasterDashboard(user))
     {
-        throw new Exception(toJson([error: "Пользователь не является мастером дашбордов, " +
-                "${messageError} виджета по умолчанию не возможно"]))
+        throw new Exception(toJson([error: "User is not a dashboard master, " +
+                "${messageError} default widget is not possible"]))
     }
 }
 
@@ -452,7 +452,7 @@ private boolean checkUserOnMasterDashboard(def user)
 private checkRightsOnEditDashboard(def editable)
 {
     if (!editable) {
-        throw new Exception(toJson([error: "Перональные настройки отключены!"]))
+        throw new Exception(toJson([error: "Personal settings are disabled!"]))
     }
 }
 

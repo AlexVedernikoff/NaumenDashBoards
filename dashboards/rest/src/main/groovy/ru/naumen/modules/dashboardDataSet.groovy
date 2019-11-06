@@ -609,9 +609,8 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
         }
     }
 
-    Collection<Collection<Object>> list = request.data.findResults { key, data ->
-        data.sourceForCompute ? null : getResult(data as DataForCompositeDiagram)
-    }
+    Collection<Collection<Object>> list = request.data
+            .findResults { key, data -> data.sourceForCompute ? null : getResult(data as DataForCompositeDiagram) }
     return mappingToComboDiagram(list, request)
 }
 

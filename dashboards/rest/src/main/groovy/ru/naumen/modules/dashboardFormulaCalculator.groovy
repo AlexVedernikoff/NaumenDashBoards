@@ -6,7 +6,7 @@
 /**
  * Модуль для вычислений формул
  */
-//Версия: 4.10.0.15
+//Версия: 6.10.0.15
 //Категория: скриптовый модуль
 package ru.naumen.modules
 
@@ -17,15 +17,15 @@ import java.util.regex.Matcher
  */
 class FormulaCalculator
 {
-    static final private Pattern VARIABLE_REGEXP = ~/\{.+?\}/
-    static final private Pattern NUMBER_REGEXP = ~/-?\d+(?:\.?\d+|)/
+    static final private Pattern variableRegexp = ~/\{.+?\}/
+    static final private Pattern numberRegexp = ~/-?\d+(?:\.?\d+|)/
     private String formula
-    private Collection<String> reversePolishNotation
+    private Collection<String> ReversePolishNotation
 
     FormulaCalculator(String formula)
     {
         this.formula = formula
-        this.reversePolishNotation = createReversePolishNotation(formula)
+        this.ReversePolishNotation = createReversePolishNotation(formula)
     }
 
     /**
@@ -34,7 +34,7 @@ class FormulaCalculator
      */
     Collection<String> getVariableNames()
     {
-        reversePolishNotation.findResults { it.matches(VARIABLE_REGEXP) ? it.replaceAll(~/[}{]/, ''): null }
+        ReversePolishNotation.findResults { it.matches(variableRegexp) ? it.replaceAll(~/[}{]/, ''): null }
     }
 
     /**
@@ -46,8 +46,7 @@ class FormulaCalculator
     {
         def variables = getVariableNames()
 
-        if (variables)
-        {
+        if (variables) {
             Map<String, Iterator<Double>> iterators = variables.collectEntries { variable ->
                 def values = calculateVariable(variable)
                 [(variable): values.iterator()]
@@ -55,8 +54,7 @@ class FormulaCalculator
 
             Collection<Map<String, Double>> listVariablesMap = []
 
-            while (iterators.any { it.value.hasNext() })
-            {
+            while (iterators.any { it.value.hasNext() }) {
                 listVariablesMap << iterators.collectEntries { variable, iterator ->
                     [(variable): iterator.hasNext() ? iterator.next() : 0.0]
                 }
@@ -67,8 +65,9 @@ class FormulaCalculator
                     mapVariables.get(variable)
                 }
             }
+        } else {
+            return [execute ()]
         }
-        return [execute ()]
     }
 
     /**
@@ -79,7 +78,7 @@ class FormulaCalculator
     double execute(Closure<Double> calculateVariable)
     {
         try {
-            return  executeReversePolishNotation(reversePolishNotation, calculateVariable)
+            return  executeReversePolishNotation(ReversePolishNotation, calculateVariable)
         } catch(Exception ex) {
             throw new Exception(toJson([error: "error execute formula: ${formula}", causes: ex.message]))
         }
@@ -195,7 +194,7 @@ class FormulaCalculator
      * @return строку содержащее число
      */
     private String extractNumber(String str) {
-        Matcher matcher = NUMBER_REGEXP.matcher(str)
+        Matcher matcher = numberRegexp.matcher(str)
         if (matcher.find()) {
             return matcher.group(0)
         } else {
@@ -209,7 +208,7 @@ class FormulaCalculator
      * @return строку содержащее переменную
      */
     private String extractVariable(String str) {
-        Matcher matcher = VARIABLE_REGEXP.matcher(str)
+        Matcher matcher = variableRegexp.matcher(str)
         if(matcher.find()) {
             return matcher.group(0)
         } else {

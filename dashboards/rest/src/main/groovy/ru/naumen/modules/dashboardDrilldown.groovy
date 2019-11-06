@@ -60,7 +60,7 @@ class Link
      */
     int liveDays = 30
 
-    private Map<String, Integer> genitiveRussianMonth = Calendar.with {
+    private Map<String, Integer> russianMount = Calendar.with {
         [
                 'Января': JANUARY,
                 'Февраля': FEBRUARY,
@@ -77,7 +77,7 @@ class Link
         ]
     }
 
-    private Map<String, Integer> nominativeRussianMonth = Calendar.with {
+    private Map<String, Integer> exclusiveRussianMount = Calendar.with {
         [
                 'Январь': JANUARY,
                 'Февраль': FEBRUARY,
@@ -124,8 +124,7 @@ class Link
      */
     private void formatFilter(def filterBuilder)
     {
-        if(descriptor)
-        {
+        if(descriptor) {
             createContext(descriptor).listFilter.elements.each { orFilter ->
                 orFilter.elements.collect { filter ->
                     //getValue, getProperties, conditionCode
@@ -152,11 +151,9 @@ class Link
         }
     }
 
-    private getOrFilter(String type, String code, def value, def filterBuilder)
-    {
+    private getOrFilter(String type, String code, def value, def filterBuilder) {
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        switch (type)
-        {
+        switch (type) {
             case 'object':
                 return filterBuilder.OR(code, 'titleContains', value)
             case DATE_ATTRIBUTES:
@@ -177,17 +174,16 @@ class Link
         def start = Calendar.instance
         def end = Calendar.instance
 
-        switch (groupType)
-        {
+        switch (groupType) {
             case GroupType.DAY:
                 int day = (value as String).split().head() as int
-                String month = (value as String).split().tail().head()
+                String mount = (value as String).split().tail().head()
                 start.with {
-                    set(MONTH, genitiveRussianMonth.get(month))
+                    set(MONTH, russianMount.get(mount))
                     set(DAY_OF_MONTH, day)
                 }
                 end.with {
-                    set(MONTH, genitiveRussianMonth.get(month))
+                    set(MONTH, russianMount.get(mount))
                     set(DAY_OF_MONTH, day)
                 }
                 break
@@ -204,26 +200,26 @@ class Link
             case GroupType.SEVEN_DAYS:
                 String startDate = (value as String).split('-')[0]
                 int startDay = startDate.split('\\.')[0] as int
-                String startMonth = startDate.split('\\.')[1]
+                String startMount = startDate.split('\\.')[1]
                 start.with {
-                    set(MONTH, genitiveRussianMonth.get(startMonth))
+                    set(MONTH, russianMount.get(startMount))
                     set(DAY_OF_MONTH, startDay)
                 }
                 String endDate = (value as String).split('-')[1]
                 int endDay = endDate.split('\\.')[0] as int
-                String endMonth = endDate.split('\\.')[1]
+                String endMont = endDate.split('\\.')[1]
                 end.with {
-                    set(MONTH, genitiveRussianMonth.get(endMonth))
+                    set(MONTH, russianMount.get(endMont))
                     set(DAY_OF_MONTH, endDay)
                 }
                 break
             case GroupType.MONTH:
                 start.with {
-                    set(MONTH, nominativeRussianMonth.get(value as String))
+                    set(MONTH, exclusiveRussianMount.get(value as String))
                     set(DAY_OF_MONTH, 1)
                 }
                 end.with {
-                    set(MONTH, nominativeRussianMonth.get(value as String))
+                    set(MONTH, exclusiveRussianMount.get(value as String))
                     set(DAY_OF_MONTH, getActualMaximum(DAY_OF_MONTH))
                 }
                 break

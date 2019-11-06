@@ -42,38 +42,6 @@ class DataSource
      */
     Collection<DataSource> children
 }
-
-/**
- * Модель для атрибута
- */
-@Immutable
-class Attribute
-{
-    /**
-     * Код атрибута
-     */
-    String code
-    /**
-     * Название атрибута
-     */
-    String title
-    /**
-     * Тип атрибута
-     */
-    String type
-    /**
-     * Свойство атрибута (метаклассы ссылочных атрибутов, значения элементов справочника и т.д)
-     */
-    String property
-    /**
-     * метакласс атрибута
-     */
-    String metaClassFqn
-    /**
-     * Имя источника
-     */
-    String sourceName
-}
 //endregion
 
 //region REST-МЕТОДЫ
