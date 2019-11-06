@@ -12,18 +12,15 @@
 package ru.naumen.modules
 
 import groovy.transform.TupleConstructor
-
-import java.util.regex.Pattern
-import java.util.regex.Matcher
-
-import static groovy.json.JsonOutput.toJson
-import java.text.DecimalFormat
-import ru.naumen.core.server.hquery.HCriteria;
-import ru.naumen.core.server.hquery.HHelper;
-import ru.naumen.core.server.hquery.HRestrictions
+import ru.naumen.core.server.hquery.HCriteria
+import ru.naumen.core.server.hquery.HHelper
 import ru.naumen.core.server.hquery.HOrders
+import ru.naumen.core.server.hquery.HRestrictions
+
+import java.text.DecimalFormat
 
 import static Diagram.*
+import static groovy.json.JsonOutput.toJson
 
 //region enum
 /**
@@ -445,33 +442,41 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForDiagram request)
 private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompositeDiagram request)
 {
     def currentData = request.data.find({ key, value -> !(value?.indicator?.sourceForCompute) }).value
-    String source = currentData.source
-    String descriptor = currentData.descriptor
-    String formula = currentData.indicator.stringForCompute
-    HCriteria criteria = createHCriteria(descriptor, source)
-    if (formula)
+    def currentIndicator = currentData.indicator
+    Closure<Object> executeQuery = { DataForCompositeDiagram data,
+                                     Attribute attribute,
+                                     AggregationType aggregationType ->
+        String source = data.source
+        String descriptor = data.descriptor
+        HCriteria criteria = createHCriteria(descriptor, source)
+        aggregation(criteria, aggregationType, attribute, source, descriptor)
+        getQuery(criteria).list().head()
+    }
+    def result
+    String formula = currentIndicator.stringForCompute
+    if(formula)
     {
-        String sqlFormula = prepareFormula(formula) { key ->
-            def computeData = currentData.indicator.computeData.get(key)
-            AggregationType aggregationType = computeData.aggregation
-            Attribute attr = computeData.attr
-            String attributeCode = getAttributeCodeByTypeForCompute(criteria, attr)
-            aggregationType == AggregationType.PERCENT
-                    ? getPercentColumn(descriptor, source, attr, aggregationType)
-                    : aggregationType.get(attributeCode)
+        FormulaCalculator calculator = new FormulaCalculator(formula)
+        result = calculator.execute { variable ->
+            def computeData = currentIndicator.computeData.get(variable)
+            def data = request.data.get(computeData.dataKey)
+            def attribute = computeData.attr
+            executeQuery(
+                    data as DataForCompositeDiagram,
+                    attribute as Attribute,
+                    computeData.aggregation as AggregationType) as double
         }
-        criteria.addColumn("cast(${sqlFormula}*1.00 as big_decimal)") //Вставить в запрос
     }
     else
     {
-        aggregation(criteria,
-                currentData.aggregation as AggregationType,
-                currentData.indicator as Attribute,
-                currentData.source,
-                currentData.descriptor)
+        result = executeQuery(
+                currentData as DataForCompositeDiagram,
+                currentIndicator as Attribute,
+                currentData.aggregation as AggregationType)
     }
-    def res = getQuery(criteria).list().head()
-    return new SummaryDiagram(currentData.indicator.title, res)
+
+    def numberFormater = new DecimalFormat("#.##");
+    return new SummaryDiagram(currentIndicator.title as String, numberFormater.format(result))
 }
 
 /**
@@ -481,47 +486,60 @@ private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompos
  */
 private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeDiagram request)
 {
-    // предполагаем что запись только одна и единственно верная
     def currentData = request.data.find({ key, value -> !(value.sourceForCompute) }).value
-    String source = currentData.source
-    String descriptor = currentData.descriptor
-    HCriteria criteria = createHCriteria(descriptor, source)
-    group(criteria, currentData.breakdownGroup as GroupType, currentData.breakdown as Attribute, source, descriptor)
-    String formula = currentData.column.stringForCompute
-    if (formula)
+    GroupType breakdownGroup = currentData.breakdownGroup
+    Attribute breakdown = currentData.breakdown
+    Attribute currentColumn = currentData.column
+    Attribute row = currentData.row
+
+    Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
+                                                 Attribute column,
+                                                 AggregationType aggregationType ->
+        String source = data.source
+        String descriptor = data.descriptor
+        HCriteria criteria = createHCriteria(descriptor, source)
+        group(criteria, breakdownGroup, breakdown, source, descriptor)
+
+        aggregation(criteria, aggregationType, column, source, descriptor, breakdown)
+
+        String rowCode = getAttributeCodeByType(criteria, row)
+        criteria.addColumn(rowCode)
+        criteria.addGroupColumn(rowCode)
+        findNotNullAttributes(criteria, breakdown, row)
+        getQuery(criteria).list()
+    }
+
+    String formula = currentColumn.stringForCompute
+    def result
+    if(formula)
     {
-        String sqlFormula = prepareFormula(formula) { key ->
-            def computeData = currentData.column.computeData.get(key)
-            AggregationType aggregationType = computeData.aggregation
-            Attribute attr = computeData.attr
-            String attributeCode = getAttributeCodeByTypeForCompute(criteria, attr)
-            aggregationType == AggregationType.PERCENT
-                    ? getPercentColumn(descriptor,
-                        source,
-                        attr,
-                        aggregationType,
-                        currentData.breakdown as Attribute,
-                        currentData.row as Attribute)
-                    : aggregationType.get(attributeCode)
+        def lastResponse
+        FormulaCalculator calculator = new FormulaCalculator(formula)
+        Collection<Object> resValues = calculator.multipleExecute { variable ->
+            def computeData = currentColumn.computeData.get(variable)
+            def data = request.data.get(computeData.dataKey)
+            lastResponse = executeQuery(
+                    data as DataForCompositeDiagram,
+                    computeData.attr as Attribute,
+                    computeData.aggregation as AggregationType
+            )
+            lastResponse.collect { it[1] as double }
         }
-        criteria.addColumn("cast(${sqlFormula}*1.00 as big_decimal)")
+
+        result = lastResponse.eachWithIndex { entry, i ->
+            entry[1] = resValues[i]
+        }
     }
     else
     {
-        aggregation(criteria,
-                currentData.aggregation as AggregationType,
-                currentData.column as Attribute,
-                source,
-                descriptor,
-                currentData.breakdown as Attribute,
-                currentData.row as Attribute)
+        result = executeQuery(
+                currentData as DataForCompositeDiagram,
+                currentColumn,
+                currentData.aggregation as AggregationType
+        )
     }
-    String rowCode = getAttributeCodeByType(criteria, currentData.row as Attribute)
-    criteria.addColumn(rowCode)
-    criteria.addGroupColumn(rowCode)
-    findNotNullAttributes(criteria, currentData.breakdown as Attribute, currentData.row as Attribute)
-    Collection<Object> list = getQuery(criteria).list()
-    return mappingToTableDiagram(list, currentData.calcTotalColumn, currentData.calcTotalRow)
+
+    return mappingToTableDiagram(result, currentData.calcTotalColumn, currentData.calcTotalRow)
 }
 
 /**
@@ -531,101 +549,70 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
  */
 private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDiagram request)
 {
-    Collection<Collection<Object>> list = request.data
-            .findAll { key, value -> !(value.sourceForCompute) } //TODO: эта проверка много где фигурирует
-            .collect { currentKey, currentData ->
-                String source = currentData.source
-                String descriptor = currentData.descriptor
-                HCriteria criteria = createHCriteria(descriptor, source)
-                group(criteria, currentData.group as GroupType, currentData.xAxis as Attribute, source, descriptor)
-                String formula = currentData.yAxis.stringForCompute
-                if (formula)
+    Closure<Collection<Object>> getResult = { DataForCompositeDiagram currentData ->
+        Attribute currentYAxis = currentData.yAxis
+        Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
+                                                     Attribute attribute,
+                                                     AggregationType aggregationType ->
+            String source = data.source
+            String descriptor = data.descriptor
+            HCriteria criteria = createHCriteria(descriptor, source)
+
+            Attribute xAxis = data.xAxis ?: currentData.xAxis
+            Attribute breakdown = data.breakdown ?: currentData.breakdown
+            GroupType breakdownGroup = data.breakdownGroup ?: currentData.breakdownGroup
+            GroupType groupType = data.group ?: currentData.group
+
+            group(criteria, groupType, xAxis, source, descriptor)
+            aggregation(criteria, aggregationType, attribute, source, descriptor, xAxis, breakdown)
+            if (breakdown)
+                group(criteria, breakdownGroup, breakdown, source, descriptor)
+            findNotNullAttributes(criteria, xAxis, breakdown)
+            getQuery(criteria).list()
+        }
+
+        String formula = currentYAxis.stringForCompute
+        if (formula)
+        {
+            def lastResponse
+            def calculator = new FormulaCalculator(formula)
+            def resValues = calculator.multipleExecute { variable ->
+                def computeData = currentYAxis.computeData.get(variable)
+                def data = request.data.get(computeData.dataKey)
+                def res = executeQuery(
+                        data as DataForCompositeDiagram,
+                        computeData.attr as Attribute,
+                        computeData.aggregation as AggregationType
+                )
+                if (res)
                 {
-                    String sqlFormula = prepareFormula(formula) { variable ->
-                        def computeData = currentData.yAxis.computeData.get(variable)
-                        AggregationType aggregationType = computeData.aggregation
-                        def attr = computeData.attr
-                        String resVariable
-                        if (request.data.get(computeData.dataKey).source == source)
-                        {
-                            String attributeCode = getAttributeCodeByTypeForCompute(criteria, attr as Attribute)
-                            resVariable = AggregationType.PERCENT
-                                    ? getPercentColumn(
-                                        descriptor,
-                                        source,
-                                        attr as Attribute,
-                                        aggregationType,
-                                        currentData.breakdown as Attribute,
-                                        currentData.xAxis as Attribute)
-                                    : aggregationType.get(attributeCode)
-                        }
-                        else
-                        {
-                            HCriteria subCriteria = request.data.get(computeData.dataKey).with {
-                                createHCriteria(descriptor, source)
-                            }
-                            String attributeCode = getAttributeCodeByTypeForCompute(subCriteria, attr as Attribute)
-                            String aggregation = AggregationType.PERCENT
-                                    ? getPercentColumn(
-                                        descriptor,
-                                        source,
-                                        attr as Attribute,
-                                        aggregationType,
-                                        currentData.breakdown as Attribute,
-                                        currentData.xAxis as Attribute)
-                                    : aggregationType.get(attributeCode)
-                            subCriteria.addColumn(aggregation)
-                            getQuery(subCriteria).list().head()
-                            resVariable = getQuery(subCriteria).list().head() as String
-                        }
-                        return resVariable
-                    }
-                    criteria.addColumn("cast(${sqlFormula}*1.00 as big_decimal)")
+                    lastResponse = res
+                    return res.collect { it[1] as double }
                 }
                 else
                 {
-                    aggregation(criteria,
-                            currentData.aggregation as AggregationType,
-                            currentData.yAxis as Attribute,
-                            source,
-                            descriptor,
-                            currentData.xAxis as Attribute,
-                            currentData.breakdown as Attribute)
+                    return res
                 }
-
-                currentData.breakdown ?
-                        group(criteria,
-                                currentData.breakdownGroup as GroupType,
-                                currentData.breakdown as Attribute,
-                                source,
-                                descriptor)
-                        : null
-                findNotNullAttributes(criteria,
-                        currentData.xAxis as Attribute,
-                        currentData.breakdown as Attribute)
-                return getQuery(criteria).list()
             }
-    return mappingToComboDiagram(list, request)
-}
-
-/**
- * Метод преобразования формулы для отправки в БД
- * @param formula - формула с переменными
- * @param getAggregationByKey - функция замены переменной
- * @return формула готовая для отправки в запросе
- */
-private String prepareFormula(String formula, Closure<String> getAggregationByKey)
-{
-    String res = formula
-    Pattern pattern = ~/(\{.+?\})/
-    Matcher matcher = pattern.matcher(formula)
-    while (matcher.find())
-    {
-        String key = matcher.toMatchResult().group(1)
-        String data = getAggregationByKey.call(key.replaceAll(~/[}{]/, ''))
-        res = res.replace(key, data)
+            lastResponse.eachWithIndex { entry, i ->
+                entry[1] = resValues[i]
+            }
+            lastResponse
+        }
+        else
+        {
+            executeQuery(
+                    currentData as DataForCompositeDiagram,
+                    currentYAxis,
+                    currentData.aggregation as AggregationType
+            ) as Collection<Object>
+        }
     }
-    return res
+
+    Collection<Collection<Object>> list = request.data.findResults { key, data ->
+        data.sourceForCompute ? null : getResult(data as DataForCompositeDiagram)
+    }
+    return mappingToComboDiagram(list, request)
 }
 
 /**
@@ -809,10 +796,7 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     tableDiagram.columns += list.toUnique { it[columnTitleIndex] }.collect { currentCell ->
         def columnTitle = currentCell[columnTitleIndex]
         String resultValue = calcColumn
-                ? list.sum { it[columnTitleIndex] == columnTitle
-                        ? it[dataIndex]
-                        : 0
-                }
+                ? list.sum { it[columnTitleIndex] == columnTitle ? it[dataIndex] : 0 }
                 : ""
         new Column(columnTitle as String, capriceFront(columnTitle as String), resultValue)
     }
@@ -866,12 +850,12 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
         def currentSource = dataForNotCompute.values()[index]
         Closure<SeriesCombo> buildComboDiagram = {
             String name, String breakdownValue, Collection<Object> resultValues ->
-            Collection<Object> data = [0].multiply(comboDiagram.labels.size()) // подготавливаем почву для результата
-            resultValues.each { row ->
-                int resultIndex = comboDiagram.labels.indexOf(row[labelIndex])
-                data[resultIndex] = row[dataIndex]
-            }
-            new SeriesCombo(name, data, currentSource.type as String, currentKey, breakdownValue)
+                Collection<Object> data = [0].multiply(comboDiagram.labels.size()) // подготавливаем почву для результата
+                resultValues.each { row ->
+                    int resultIndex = comboDiagram.labels.indexOf(row[labelIndex])
+                    data[resultIndex] = row[dataIndex]
+                }
+                new SeriesCombo(name, data, currentSource.type as String, currentKey, breakdownValue)
         }
         if (currentSource.breakdown)
         {
@@ -945,7 +929,7 @@ private String getAttributeCodeByTypeForCompute(HCriteria criteria, Attribute at
  */
 private void findNotNullAttributes(HCriteria criteria, Attribute... attributes)
 {
-    attributes.each{
+    attributes.each {
         if(it)
         {
             String attributeCode = getAttributeCodeByType(criteria, it)
