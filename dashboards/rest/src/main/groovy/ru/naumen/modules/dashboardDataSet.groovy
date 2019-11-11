@@ -526,8 +526,9 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
             lastResponse.collect { it[1] as double }
         }
 
-        result = lastResponse.eachWithIndex { entry, i ->
+        result = lastResponse.withIndex().collect { entry, i ->
             entry[1] = resValues[i]
+            entry
         }
     }
     else
@@ -594,10 +595,11 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
                     return res
                 }
             }
-            lastResponse.eachWithIndex { entry, i ->
+
+            lastResponse.withIndex().collect { entry, i ->
                 entry[1] = resValues[i]
+                entry
             }
-            lastResponse
         }
         else
         {
