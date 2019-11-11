@@ -18,6 +18,14 @@ import ru.naumen.core.server.hquery.HOrders
 import ru.naumen.core.server.hquery.HRestrictions
 
 import java.text.DecimalFormat
+import ru.naumen.core.server.hquery.HCriteria;
+import ru.naumen.core.server.hquery.HHelper;
+import ru.naumen.core.server.hquery.HRestrictions
+import ru.naumen.core.server.hquery.HOrders
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 import static Diagram.*
 import static groovy.json.JsonOutput.toJson
@@ -411,6 +419,12 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
     }
     findNotNullAttributes(criteria, request.xAxis, request.breakdown)
     Collection<Object> list = getQuery(criteria).list()
+    list = request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 0) : list
+    list = request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 2) : list
+    list = request.xAxis.type == 'dtInterval'  ? convertMillisecondToHours(list, 0) : list
+    list = request*.breakdown*.type == 'dtInterval'  ? convertMillisecondToHours(list, 2) : list
+    list = request.xAxis.type == 'state'  ? convertCodeStatusToNameStatus(list, 0, request.source) : list
+    list = request*.breakdown*.type == 'state'  ? convertCodeStatusToNameStatus(list, 2, request.source) : list
     return mappingToStandardDiagram(list, breakdown)
 }
 
@@ -431,6 +445,9 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForDiagram request)
     group(criteria, request.breakdownGroup as GroupType, request.breakdown as Attribute, request.source, request.descriptor)
     findNotNullAttributes(criteria, request.breakdown)
     Collection<Object> list = getQuery(criteria).list()
+    list = request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 1) : list
+    list = request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(list, 1) : list
+    list = request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(list, 1, request.source) : list
     return new RoundDiagram(list*.getAt(1), list*.getAt(0))
 }
 
@@ -539,7 +556,21 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
                 currentData.aggregation as AggregationType
         )
     }
-
+    result = currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS
+            ? getPeriodSevenDays(result, 0)
+            : result
+    result = currentData.breakdown.type == 'dtInterval'
+            ? convertMillisecondToHours(result, 0)
+            : result
+    result = row.type == 'dtInterval'
+            ? convertMillisecondToHours(result, 2)
+            : result
+    result = currentData.breakdown.type == 'state'
+            ? convertCodeStatusToNameStatus(result, 0, currentData.source)
+            : result
+    result = row.type == 'state'
+            ? convertCodeStatusToNameStatus(result, 2, currentData.source)
+            : result
     return mappingToTableDiagram(result, currentData.calcTotalColumn, currentData.calcTotalRow)
 }
 
@@ -569,7 +600,22 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
             if (breakdown)
                 group(criteria, breakdownGroup, breakdown, source, descriptor)
             findNotNullAttributes(criteria, xAxis, breakdown)
-            getQuery(criteria).list()
+            Collection<Object> list = getQuery(criteria).list()
+            list = currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 0) : list
+            list = currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 2) : list
+            list = currentData.xAxis.type == 'dtInterval'
+                    ? convertMillisecondToHours(list, 0)
+                    : list
+            list = currentData*.breakdown*.type == 'dtInterval'
+                    ? convertMillisecondToHours(list, 2)
+                    : list
+            list = currentData.xAxis.type == 'state'
+                    ? convertCodeStatusToNameStatus(list, 0, source)
+                    : list
+            list = currentData*.breakdown*.type == 'state'
+                    ? convertCodeStatusToNameStatus(list, 2, source)
+                    : list
+            list
         }
 
         String formula = currentYAxis.stringForCompute
@@ -646,18 +692,18 @@ private void aggregation(HCriteria criteria,
 private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, String source, String descriptor)
 {
     String attributeCode = getAttributeCodeByType(criteria, xAxis)
-    String nameDayMonth = " WHEN '1' THEN 'Января' " +
-            " WHEN '2' THEN 'Февраля' " +
-            " WHEN '3' THEN 'Марта' " +
-            " WHEN '4' THEN 'Апреля' " +
-            " WHEN '5' THEN 'Мая' " +
-            " WHEN '6' THEN 'Июня' " +
-            " WHEN '7' THEN 'Июля' " +
-            " WHEN '8' THEN 'Августа' " +
-            " WHEN '9' THEN 'Сентября' " +
-            " WHEN '10' THEN 'Октября' " +
-            " WHEN '11' THEN 'Ноября' " +
-            " WHEN '12' THEN 'Декабря' " +
+    String nameDayMonth = " WHEN '1' THEN 'января' " +
+            " WHEN '2' THEN 'февраля' " +
+            " WHEN '3' THEN 'марта' " +
+            " WHEN '4' THEN 'апреля' " +
+            " WHEN '5' THEN 'мая' " +
+            " WHEN '6' THEN 'июня' " +
+            " WHEN '7' THEN 'июля' " +
+            " WHEN '8' THEN 'августа' " +
+            " WHEN '9' THEN 'сентября' " +
+            " WHEN '10' THEN 'октября' " +
+            " WHEN '11' THEN 'ноября' " +
+            " WHEN '12' THEN 'декабря' " +
             " END "
     String nameMonth = " WHEN '1' THEN 'Январь' " +
             " WHEN '2' THEN 'Февраль' " +
@@ -707,17 +753,20 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
             criteria.addOrder(HOrders.asc(HHelper.getColumn("YEAR(${attributeCode})")))
             break
         case GroupType.SEVEN_DAYS:
+            // Для получения минимальной даты
             def cteSource = createHCriteria(descriptor, source)
-            cteSource.addColumn("min(CAST(${getAttributeCodeByType(cteSource, xAxis)} AS timestamp))", 'cteMinDate')
+            cteSource.addColumn("MIN(CAST(${getAttributeCodeByType(cteSource, xAxis)} AS timestamp))", 'cteMinDate')
             HCriteria cteCriteria = criteria.addCTESource(cteSource)
-            criteria.addGroupColumn("round(abs((day(CAST(${attributeCode} AS timestamp) " +
-                    "- ${cteCriteria.getProperty('cteMinDate')}) - 0.5)) / 7)")
-            criteria.addColumn("CONCAT(" +
-                    "DAY(MIN(${attributeCode})), '.', CASE MONTH(MIN(${attributeCode})) ${nameDayMonth}," +
-                    "'-'," +
-                    "DAY(MAX(${attributeCode})), '.', CASE MONTH(MAX(${attributeCode})) ${nameDayMonth})")
-            criteria.addOrder(HOrders.asc(HHelper.getColumn("round(abs((DAY(${attributeCode} " +
-                    "- ${cteCriteria.getProperty('cteMinDate')}) - 0.5)) / 7)")))
+
+            // Вывод периода день.месяц-(день.месяц + 7 дней)
+            String groupFormula = "ROUND(ABS(extract(DAY from (CAST(${attributeCode} AS timestamp) " +
+                    "- ${cteCriteria.getProperty('cteMinDate')}))/ 7))"
+            String period = "concat(${cteCriteria.getProperty('cteMinDate')},'--', ${groupFormula})"
+            criteria.addColumn("MIN(${period})")
+
+            // Группировка и сортировка по 7 дней от минимальной даты
+            criteria.addGroupColumn(groupFormula)
+            criteria.addOrder(HOrders.asc(HHelper.getColumn(groupFormula)))
             break
     }
 }
@@ -899,6 +948,8 @@ private String getAttributeCodeByType(HCriteria criteria, Attribute attribute)
             return "${criteria.getAlias()}.${attribute.code}.title.ru"
         case 'state':
             return "${criteria.getAlias()}.${attribute.code}"
+        case 'dtInterval':
+            return "${criteria.getAlias()}.${attribute.code}.ms"
         default:
             return "${criteria.getAlias()}.${attribute.code}"
     }
@@ -918,6 +969,8 @@ private String getAttributeCodeByTypeForCompute(HCriteria criteria, Attribute at
             return "${criteria.getAlias()}.${attribute.code}.title.ru"
         case 'state':
             return "${criteria.getAlias()}.${attribute.code}"
+        case 'dtInterval':
+            return "${criteria.getAlias()}.${attribute.code}.ms"
         default:
             return "${criteria.getAlias()}.${attribute.code}"
     }
@@ -993,5 +1046,63 @@ private def createContext(String json)
     def factory = com.google.web.bindery.autobean.vm.AutoBeanFactorySource.create(ru.naumen.core.shared.autobean.wrappers.AdvlistSettingsAutoBeanFactory.class)
     def autoBean = com.google.web.bindery.autobean.shared.AutoBeanCodex.decode(factory, ru.naumen.core.shared.autobean.wrappers.IReducedListDataContextWrapper.class, json)
     return ru.naumen.core.shared.autobean.wrappers.ReducedListDataContext.createObjectListDataContext(autoBean.as())
+}
+
+/**
+ * Метод получения периода для группировки 7 дней
+ * @param list список из бд
+ * @param индекс столбца в бд
+ * @return list преобразованный список из бд
+ */
+private Collection<Object> getPeriodSevenDays(Collection<Object> list, int indexColumn)
+{
+    return list.collect {
+        def dataForCompute = it[indexColumn].split('--')
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+        def dateMin = sdf.parse(dataForCompute[0])
+        sdf.applyPattern("dd MMMM")
+
+        def formulaFrom = dataForCompute[1].toInteger()*7
+        Calendar dateFrom = Calendar.getInstance()
+        dateFrom.setTime(dateMin)
+        dateFrom.add(Calendar.DAY_OF_MONTH, formulaFrom)
+
+        def formulaTo = formulaFrom + 6
+        Calendar dateTo = Calendar.getInstance()
+        dateTo.setTime(dateMin)
+        dateTo.add(Calendar.DAY_OF_MONTH, formulaTo)
+
+        it[indexColumn] = "${sdf.format(dateFrom.getTime())} - ${sdf.format(dateTo.getTime())}"
+        it
+    }
+}
+
+/**
+ * Метод получения периода для группировки 7 дней
+ * @param list список из бд
+ * @param индекс столбца в бд
+ * @return list преобразованный список из бд
+ */
+private Collection<Object> convertMillisecondToHours(Collection<Object> list, int indexColumn)
+{
+    return list.collect {
+        it[indexColumn] = TimeUnit.MILLISECONDS.toHours(it[indexColumn])
+        it
+    }
+}
+
+private Collection<Object> convertCodeStatusToNameStatus(Collection<Object> list,
+                                                         int indexColumn,
+                                                         String fqn)
+{
+    Map<String, String> codeName = list.toUnique { it[indexColumn] }*.getAt(indexColumn).collectEntries {
+        [(it): api.metainfo.getStateTitle(fqn, it)]
+
+    }
+    return list.collect {
+        it[indexColumn] = codeName[it[indexColumn]]
+        it
+    }.sort{it[indexColumn]}
 }
 //endregion
