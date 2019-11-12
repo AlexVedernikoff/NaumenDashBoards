@@ -7,10 +7,12 @@ import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {LabelProps} from 'components/organisms/WidgetFormPanel/Builders/FormBuilder/types';
 import React from 'react';
 import type {RenderFunction} from './types';
+import styles from './styles.less';
 import uuid from 'tiny-uuid';
 
 export class OrderFormBuilder extends DataFormBuilder {
-	defaultOrder = [1, 2];
+	// Порядок полей по умолчанию
+	defaultOrder = [1];
 
 	async componentDidMount () {
 		const {TABLE, SUMMARY} = WIDGET_VARIANTS;
@@ -125,11 +127,24 @@ export class OrderFormBuilder extends DataFormBuilder {
 	};
 
 	renderOrderSource = (withComputeHandler: boolean) => (source: string) => (
-		<div key={source}>
+		<div key={source} className={styles.source}>
 			{this.renderSourceInput(source)}
+			{this.renderRemoveSourceButton(source)}
 			{this.renderComputeCheckbox(source, withComputeHandler)}
 		</div>
 	);
+
+	renderRemoveSourceButton = (source: string) => {
+		const order = this.getOrder();
+
+		if (order.length > this.defaultOrder.length && order[0] !== getNumberFromName(source)) {
+			return (
+				<button type="button" onClick={this.removeSet} data-name={source} className={styles.removeSourceButton}>
+					удалить
+				</button>
+			);
+		}
+	}
 }
 
 export default OrderFormBuilder;

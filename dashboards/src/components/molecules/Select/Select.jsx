@@ -5,7 +5,7 @@ import {EditIcon} from 'icons/form';
 import {InputForm} from 'components/molecules';
 import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import ReactSelect, {components} from 'react-select';
 import styles from './styles.less';
 
@@ -27,6 +27,8 @@ export class Select extends PureComponent<Props, State> {
 	state = {
 		showForm: false
 	};
+
+	ref = createRef();
 
 	getComponents = () => {
 		const {components, form, withCreateButton} = this.props;
@@ -117,6 +119,13 @@ export class Select extends PureComponent<Props, State> {
 
 	handleSelect = (value: OptionType) => {
 		const {onSelect, name} = this.props;
+		const {current} = this.ref;
+
+		// Необходимо сбивать фокус для корректной работы на IE и EDGE
+		if (current) {
+			current.blur();
+		}
+
 		onSelect(name, value);
 	};
 
@@ -184,7 +193,7 @@ export class Select extends PureComponent<Props, State> {
 		);
 	};
 
-	renderSelect = () => <ReactSelect {...this.getSelectProps()} />;
+	renderSelect = () => <ReactSelect ref={this.ref} {...this.getSelectProps()} />;
 
 	renderValue = ({children, ...props}: any) => (
 		<components.ValueContainer {...props}>

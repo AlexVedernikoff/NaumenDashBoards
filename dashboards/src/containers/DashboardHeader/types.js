@@ -12,7 +12,7 @@ export type ConnectedFunctions = {
 	fetchDashboard: () => ThunkAction,
 	resetDashboard: () => ThunkAction,
 	seeDashboard: () => ThunkAction,
-	sendToMail: (file: Blob, format: string) => ThunkAction
+	sendToMail: (file: Blob) => ThunkAction
 };
 
 export type Props = {

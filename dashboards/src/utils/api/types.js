@@ -15,6 +15,7 @@ export type Method =
 	| 'bulkEditDefaultWidget'
 	| 'createDefaultWidgetSettings'
 	| 'createPersonalWidgetSettings'
+	| 'deleteWidget'
 	| 'getAttributesDataSources'
 	| 'getAvailabilityGroupMasterDashboard'
 	| 'getDataForCompositeDiagram'

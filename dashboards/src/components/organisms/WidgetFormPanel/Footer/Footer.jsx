@@ -26,7 +26,7 @@ export class Footer extends Component<WrappedProps> {
 
 		return (
 			<div className={styles.defaultButtons}>
-				<Button className="mr-1" disabled={updating} onClick={this.handleSave}>
+				<Button disabled={updating} onClick={this.handleSave}>
 					Сохранить
 				</Button>
 				<Button onClick={cancelForm} variant="bare" outline>

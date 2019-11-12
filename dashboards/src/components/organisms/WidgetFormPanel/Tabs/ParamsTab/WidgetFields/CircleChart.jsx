@@ -5,6 +5,8 @@ import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class AxisChart extends DataFormBuilder {
+	sourceRefs = [FIELDS.breakdown, FIELDS.indicator];
+
 	renderInputs = () => {
 		const {values} = this.props;
 

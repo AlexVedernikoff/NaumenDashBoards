@@ -2,11 +2,12 @@
 import {Button, DropDown, Tooltip} from 'components/atoms';
 import {CloseIcon} from 'icons/form';
 import {createSnapshot, EXPORT_VARIANTS, FILE_VARIANTS} from 'utils/export';
-import type {ExportButtonProps} from './types';
+import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon} from 'icons/header';
 import {gridRef} from 'components/organisms/LayoutGrid';
 import IconRefresh from 'icons/header/refresh.svg';
-import React, {Component} from 'react';
+import {Modal} from 'components/molecules';
+import React, {Component, Fragment} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
 import styles from './styles.less';
 
@@ -21,7 +22,11 @@ const FileList = [
 	}
 ];
 
-export class DashboardHeader extends Component<Props> {
+export class DashboardHeader extends Component<Props, State> {
+	state = {
+		showModal: false
+	};
+
 	createDocument = (way: string) => async (type: string) => {
 		const {DOWNLOAD, MAIL} = EXPORT_VARIANTS;
 		const {sendToMail} = this.props;
@@ -32,10 +37,21 @@ export class DashboardHeader extends Component<Props> {
 			const file = await createSnapshot(current, type, toDownload, 'Дашборд');
 
 			if (way === MAIL && file) {
-				sendToMail(file, type);
+				sendToMail(file);
 			}
 		}
 	};
+
+	hideModal = () => this.setState({showModal: false});
+
+	resetDashboard = () => {
+		const {resetDashboard} = this.props;
+
+		this.hideModal();
+		resetDashboard();
+	};
+
+	showModal = () => this.setState({showModal: true});
 
 	renderDownloadExportButton = () => this.renderExportButton({
 		icon: <ExportIcon />,
@@ -58,6 +74,22 @@ export class DashboardHeader extends Component<Props> {
 		tip: 'Отправить на почту',
 		way: EXPORT_VARIANTS.MAIL
 	});
+
+	renderModal = () => {
+		const {showModal} = this.state;
+
+		if (showModal) {
+			return (
+				<Modal
+					header="Cбросить настройки?"
+					onClose={this.hideModal}
+					onSubmit={this.resetDashboard}
+					size="small"
+					submitText="Сбросить"
+				/>
+			);
+		}
+	};
 
 	renderModeButton = () => {
 		const {editable, editDashboard, location, master, seeDashboard} = this.props;
@@ -92,14 +124,17 @@ export class DashboardHeader extends Component<Props> {
 	};
 
 	renderResetButton = () => {
-		const {editable, master, resetDashboard} = this.props;
+		const {editable, master} = this.props;
 
 		if (editable || master) {
 			return (
-				<div className={styles.buttonIcon} onClick={resetDashboard}>
-					<CloseIcon />
-					Сбросить настройки
-				</div>
+				<Fragment>
+					<div className={styles.buttonIcon} onClick={this.showModal}>
+						<CloseIcon />
+						Сбросить настройки
+					</div>
+					{this.renderModal()}
+				</Fragment>
 			);
 		}
 	};

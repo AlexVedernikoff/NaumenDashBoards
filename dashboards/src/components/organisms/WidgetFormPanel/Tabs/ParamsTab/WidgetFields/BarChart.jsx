@@ -5,7 +5,9 @@ import {FIELDS, getAggregateOptions, getGroupOptions} from 'components/organisms
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class AxisChart extends DataFormBuilder {
+export class BarChart extends DataFormBuilder {
+	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
+
 	renderInputs = () => {
 		const {values} = this.props;
 
@@ -47,4 +49,4 @@ export class AxisChart extends DataFormBuilder {
 	}
 }
 
-export default withForm(AxisChart);
+export default withForm(BarChart);

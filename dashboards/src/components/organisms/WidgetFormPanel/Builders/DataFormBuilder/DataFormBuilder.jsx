@@ -23,6 +23,9 @@ export class DataFormBuilder extends FormBuilder {
 		showModal: false
 	};
 
+	// Список полей для удаления при смене источника данных
+	sourceRefs = [];
+
 	baseHandleSelectSource = async (name: string, source: SelectValue) => {
 		const {attributes, fetchAttributes, setFieldValue, values} = this.props;
 		const currentSource = values[name];
@@ -39,6 +42,8 @@ export class DataFormBuilder extends FormBuilder {
 		if (!attributes[classFqn]) {
 			fetchAttributes(classFqn);
 		}
+
+		this.clearSourceRefFields(name);
 	};
 
 	callFilterModal = (sourceFieldName: string) => async () => {
@@ -55,6 +60,19 @@ export class DataFormBuilder extends FormBuilder {
 		}
 	};
 
+	clearSourceRefFields = (name: string) => {
+		const {setFieldValue} = this.props;
+		const number = getNumberFromName(name);
+		let fields = this.sourceRefs;
+
+		if (Number.isInteger(number)) {
+			const createName = createOrderName(number);
+			fields = fields.map(createName);
+		}
+
+		fields.forEach(ref => setFieldValue(ref, null));
+	};
+
 	combineInputs = (left: Node, right: Node, withDivider: boolean = true) => (
 		<Fragment>
 			<div className={styles.combineInput}>
@@ -69,19 +87,18 @@ export class DataFormBuilder extends FormBuilder {
 		</Fragment>
 	);
 
-	createFilterContext = (sourceName: string) => {
+	createFilterContext = (classFqn: string) => {
 		const {context: mainContext} = this.props;
 
 		const context = {
 			cases: [],
-			clazz: sourceName,
+			clazz: classFqn,
 			contentUuid: mainContext.contentCode
 		};
 
-		if (sourceName.includes('$')) {
-			const parts = sourceName.split('$');
-			context.cases = [sourceName];
-			context.clazz = parts.shift();
+		if (classFqn.includes('$')) {
+			context.cases = [classFqn];
+			context.clazz = classFqn.split('$').shift();
 		}
 
 		return context;

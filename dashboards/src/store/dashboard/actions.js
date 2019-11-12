@@ -76,15 +76,13 @@ const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 /**
  * Отправка файла на почту
  * @param {Blob} file - файл для отправки
- * @param {string} format - формат файла
  * @returns {ThunkAction}
  */
-const sendToMail = (file: Blob, format: string): ThunkAction => () => {
+const sendToMail = (file: Blob): ThunkAction => () => {
 	const data = new FormData();
 	data.append('fileBytes', file);
-	data.append('fileFormat', format);
 
-	client.post(buildUrl('dashboardSendEmail', 'sendFileToMail', 'user'), data, {
+	client.post(buildUrl('dashboardSendEmail', 'sendFileToMail', 'request,user'), data, {
 		headers: {
 			'Content-Type': 'multipart/form-data',
 			timeout: 30000

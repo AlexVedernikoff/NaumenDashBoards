@@ -12,6 +12,7 @@ const descriptor: 'descriptor' = 'descriptor';
 const diagramName: 'diagramName' = 'diagramName';
 const group: 'group' = 'group';
 const indicator: 'indicator' = 'indicator';
+const isNew: 'isNew' = 'isNew';
 const layout: 'layout' = 'layout';
 const legendPosition: 'legendPosition' = 'legendPosition';
 const name: 'name' = 'name';
@@ -42,6 +43,7 @@ const FIELDS = {
 	diagramName,
 	group,
 	indicator,
+	isNew,
 	layout,
 	legendPosition,
 	name,

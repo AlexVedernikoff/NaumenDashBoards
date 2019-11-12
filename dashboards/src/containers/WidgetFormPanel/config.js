@@ -13,6 +13,7 @@ const config: FormikConfig = {
 
 		return {
 			asDefault: false,
+			isNew: id === NewWidget.id,
 			type: type || CHART_SELECTS.AXIS_SELECTS[0],
 			...values
 		};
@@ -22,14 +23,10 @@ const config: FormikConfig = {
 
 	handleSubmit: (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;
-		const {asDefault, ...data} = values;
+		const {asDefault, isNew, ...data} = values;
 		const filteredData = filter(data);
 
-		if (selectedWidget instanceof NewWidget) {
-			createWidget(filteredData, asDefault);
-		} else {
-			saveWidget({...filteredData, id: selectedWidget.id}, asDefault);
-		}
+		isNew ? createWidget(filteredData, asDefault) : saveWidget({...filteredData, id: selectedWidget.id}, asDefault);
 	},
 
 	enableReinitialize: true

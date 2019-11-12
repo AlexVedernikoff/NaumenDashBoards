@@ -111,26 +111,30 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
 const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetSave());
 
+	const {dashboard, widgets} = getState();
+	const {context, editable, master} = dashboard;
+	const method = asDefault ? 'editDefaultWidget' : 'editPersonalWidgetSettings';
+	const isEditable = editable || master;
+	const widget = {...formData, layout: widgets.data.map[formData.id].layout};
+	const data = {
+		classFqn: context.subjectUuid,
+		contentCode: context.contentCode,
+		editable: isEditable,
+		widgetKey: widget.id,
+		widgetSettings: widget
+	};
+
 	try {
-		const {dashboard, widgets} = getState();
-		const {context, editable, master} = dashboard;
-		const method = asDefault ? 'editDefaultWidget' : 'editPersonalWidgetSettings';
-		const isEditable = editable || master;
-		const widget = {...formData, layout: widgets.data.map[formData.id].layout};
-		const data = {
-			classFqn: context.subjectUuid,
-			contentCode: context.contentCode,
-			editable: isEditable,
-			widgetKey: widget.id,
-			widgetSettings: widget
-		};
-		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
-		await dispatch(saveNewLayout(context, isEditable, asDefault));
+		const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
+		widget.id = id;
+
 		dispatch(updateWidget(widget));
-		dispatch(fetchDiagramData(widget));
+		dispatch(saveNewLayout(context, isEditable, asDefault));
 	} catch (e) {
 		dispatch(recordSaveError());
 	}
+
+	dispatch(fetchDiagramData(widget));
 };
 
 /**
@@ -142,30 +146,55 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetSave());
 
-	try {
-		const {dashboard, widgets} = getState();
-		const {context, editable, master} = dashboard;
-		const newWidget = widgets.data.newWidget;
+	const {dashboard, widgets} = getState();
+	const {context, editable, master} = dashboard;
+	const newWidget = widgets.data.newWidget;
 
-		if (newWidget) {
-			const method = asDefault ? 'createDefaultWidgetSettings' : 'createPersonalWidgetSettings';
-			const isEditable = editable || master;
-			let widget = {...formData, layout: newWidget.layout};
-			const data = {
+	if (newWidget) {
+		const method = asDefault ? 'createDefaultWidgetSettings' : 'createPersonalWidgetSettings';
+		const isEditable = editable || master;
+		let widget = {...formData, layout: newWidget.layout};
+
+		try {
+			const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), {
 				classFqn: context.subjectUuid,
 				contentCode: context.contentCode,
 				editable: isEditable,
 				widgetSettings: widget
-			};
-			const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
-			await dispatch(saveNewLayout(context, isEditable, asDefault));
+			});
 
 			widget = {...widget, id, layout: {...widget.layout, i: id}};
 			dispatch(setCreatedWidget(widget));
-			dispatch(fetchDiagramData(widget));
+			dispatch(saveNewLayout(context, isEditable, asDefault));
+		} catch (e) {
+			dispatch(recordSaveError());
 		}
+
+		dispatch(fetchDiagramData(widget));
+	}
+};
+
+/**
+ * Удаляет виджет
+ * @param {string} widgetId - идентификатор виджета;
+ * @returns {ThunkAction}
+ */
+const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	dispatch(requestWidgetDelete());
+
+	try {
+		const {context, editable} = getState().dashboard;
+
+		const data = {
+			classFqn: context.subjectUuid,
+			contentCode: context.contentCode,
+			editable,
+			widgetId
+		};
+		await client.post(buildUrl('dashboardSettings', 'deleteWidget', 'requestContent,user'), data);
+		dispatch(deleteWidget(widgetId));
 	} catch (e) {
-		dispatch(recordSaveError());
+		dispatch(recordDeleteError());
 	}
 };
 
@@ -178,8 +207,18 @@ const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): voi
 	dispatch(setSelectedWidget(payload));
 };
 
-const resetWidget = () => ({
-	type: WIDGETS_EVENTS.RESET_WIDGET
+const deleteWidget = (payload: string) => ({
+	type: WIDGETS_EVENTS.DELETE_WIDGET,
+	payload
+});
+
+const receiveWidgets = (payload: Widget[]) => ({
+	type: WIDGETS_EVENTS.RECEIVE_WIDGETS,
+	payload
+});
+
+const recordDeleteError = () => ({
+	type: WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
 });
 
 const recordLayoutSaveError = () => ({
@@ -190,10 +229,6 @@ const recordSaveError = () => ({
 	type: WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR
 });
 
-const requestWidgetSave = () => ({
-	type: WIDGETS_EVENTS.REQUEST_WIDGET_SAVE
-});
-
 const recordWidgetsError = () => ({
 	type: WIDGETS_EVENTS.RECORD_WIDGETS_ERROR
 });
@@ -202,18 +237,20 @@ const requestLayoutSave = () => ({
 	type: WIDGETS_EVENTS.REQUEST_LAYOUT_SAVE
 });
 
+const requestWidgetDelete = () => ({
+	type: WIDGETS_EVENTS.REQUEST_WIDGET_DELETE
+});
+
+const requestWidgetSave = () => ({
+	type: WIDGETS_EVENTS.REQUEST_WIDGET_SAVE
+});
+
 const requestWidgets = () => ({
 	type: WIDGETS_EVENTS.REQUEST_WIDGETS
 });
 
-const receiveWidgets = (payload: Widget[]) => ({
-	type: WIDGETS_EVENTS.RECEIVE_WIDGETS,
-	payload
-});
-
-const setSelectedWidget = (payload: string) => ({
-	type: WIDGETS_EVENTS.SET_SELECTED_WIDGET,
-	payload
+const resetWidget = () => ({
+	type: WIDGETS_EVENTS.RESET_WIDGET
 });
 
 const setCreatedWidget = (payload: Widget) => ({
@@ -223,6 +260,11 @@ const setCreatedWidget = (payload: Widget) => ({
 
 const setNewLayout = (payload: Layout) => ({
 	type: WIDGETS_EVENTS.EDIT_LAYOUT,
+	payload
+});
+
+const setSelectedWidget = (payload: string) => ({
+	type: WIDGETS_EVENTS.SET_SELECTED_WIDGET,
 	payload
 });
 
@@ -237,6 +279,7 @@ export {
 	createWidget,
 	editLayout,
 	getWidgets,
+	removeWidget,
 	resetWidget,
 	saveWidget,
 	selectWidget

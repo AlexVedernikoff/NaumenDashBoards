@@ -3,6 +3,8 @@ import type {WidgetsAction, WidgetsDataState} from './types';
 import {WIDGETS_EVENTS} from './constants';
 
 export const initialWidgetsState: WidgetsDataState = {
+	deleteError: false,
+	deleting: false,
 	error: false,
 	layoutSaveError: false,
 	loading: false,

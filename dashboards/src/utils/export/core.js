@@ -62,7 +62,13 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 		svg = svg.replace(/(xmlns="http:\/\/www.w3.org\/2000\/svg"|xmlns:NS\d+=""|NS\d+:xmlns:data="ApexChartsNS")/g, '');
 		svg = svg.replace(/NS\d+:data:(innerTranslate[XY](="(.+?)")?|(startAngle|angle|strokeWidth|realIndex|pathOrig|value|longestSeries)="(.+?)")/g, '');
 
-		canvg(canvas, svg);
+		// TODO нужно для отлова ошибок на комбо-графиках
+		try {
+			canvg(canvas, svg);
+		} catch (e) {
+			console.error(e);
+		}
+
 		temp.push({
 			parent: parentNode,
 			childToRestore: chart,

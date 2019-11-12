@@ -1,10 +1,10 @@
 // @flow
 import {CHART_VARIANTS} from 'utils/chart';
 import cn from 'classnames';
+import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
 import {createOrderName, NewWidget} from 'utils/widget';
-import {Diagram} from 'components/molecules';
+import {Diagram, Modal} from 'components/molecules';
 import {editContentRef} from 'components/pages/DashboardEditContent';
-import {EditIcon, UnionIcon} from 'icons/form';
 import type {Element} from 'react';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {GRID_PARAMS} from 'utils/layout';
@@ -49,6 +49,8 @@ export class LayoutGrid extends Component<Props, State> {
 
 	state = {
 		newWidgetExists: false,
+		showModal: false,
+		widgetIdToRemove: '',
 		width: null
 	};
 
@@ -91,6 +93,8 @@ export class LayoutGrid extends Component<Props, State> {
 		window.removeEventListener('resize', this.reloadGrid);
 	}
 
+	hideModal = () => this.setState({showModal: false, widgetIdToRemove: ''});
+
 	reloadGrid = () => {
 		const {current} = gridRef;
 
@@ -115,23 +119,37 @@ export class LayoutGrid extends Component<Props, State> {
 		comboDrillDown(widgets[id], orderNum);
 	};
 
-	renderEditButton = (id: string) => {
-		const {editable} = this.props;
+	removeWidget = () => {
+		const {onRemoveWidget} = this.props;
+		const {widgetIdToRemove} = this.state;
 
-		if (editable) {
-			return (
-				<IconButton tip="Редактировать" onClick={this.handleClickEdit(id)}>
-					<EditIcon />
-				</IconButton>
-			);
-		}
+		this.hideModal();
+		onRemoveWidget(widgetIdToRemove);
 	};
+
+	showModal = (widgetIdToRemove: string) => () => this.setState({showModal: true, widgetIdToRemove});
+
+	renderButtons = (widget: Widget) => (
+		<div className={styles.widgetActions}>
+			{this.renderEditButton(widget.id)}
+			{this.renderDrillDownButtonByType(widget)}
+			{this.renderRemoveButton(widget.id)}
+		</div>
+	);
 
 	renderDrillDownButton = (id: string) => (
 		<IconButton tip="Перейти" onClick={this.handleClickDrillDown(id)}>
 			<UnionIcon />
 		</IconButton>
 	);
+
+	renderDrillDownButtonByType = (widget: Widget) => {
+		if (widget.type.value === CHART_VARIANTS.COMBO) {
+			return this.renderDrillDownButtons(widget);
+		}
+
+		return this.renderDrillDownButton(widget.id);
+	};
 
 	renderDrillDownButtons = (widget: Widget) => {
 		const {id, order} = widget;
@@ -155,20 +173,84 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	renderDrillDownButtonByType = (widget: Widget) => {
-		if (widget.type && widget.type.value === CHART_VARIANTS.COMBO) {
-			return this.renderDrillDownButtons(widget);
-		}
+	renderEditButton = (id: string) => {
+		const {editable} = this.props;
 
-		return this.renderDrillDownButton(widget.id);
+		if (editable) {
+			return (
+				<IconButton tip="Редактировать" onClick={this.handleClickEdit(id)}>
+					<EditIcon />
+				</IconButton>
+			);
+		}
 	};
 
-	renderButtons = (widget: Widget): Element<'div'> => (
-		<div className={styles.widgetActions}>
-			{this.renderEditButton(widget.id)}
-			{this.renderDrillDownButtonByType(widget)}
-		</div>
-	);
+	renderGrid = () => {
+		const {onLayoutChange} = this.props;
+		const {width} = this.state;
+
+		if (width) {
+			return (
+				<Grid
+					breakpoints={GRID_PARAMS.BREAK_POINTS}
+					className={styles.grid}
+					cols={GRID_PARAMS.COLS}
+					compactType={null}
+					containerPadding={GRID_PARAMS.CONTAINER_PADDING}
+					onLayoutChange={onLayoutChange}
+					rowHeight={GRID_PARAMS.ROW_HEIGHT}
+					width={width}
+					{...props}
+				>
+					{this.renderWidgets()}
+				</Grid>
+			);
+		}
+	};
+
+	renderModal = () => {
+		const {showModal} = this.state;
+
+		if (showModal) {
+			return (
+				<Modal
+					header="Вы точно хотите удалить виджет?"
+					onClose={this.hideModal}
+					onSubmit={this.removeWidget}
+					size="small"
+					submitText="Удалить"
+				/>
+			);
+		}
+	};
+
+	renderRemoveButton = (id: string) => {
+		const {editable} = this.props;
+
+		if (editable) {
+			return (
+				<Fragment>
+					<IconButton tip="Удалить" onClick={this.showModal(id)}>
+						<CloseIcon />
+					</IconButton>
+					{this.renderModal()}
+				</Fragment>
+			);
+		}
+	};
+
+	renderWidget = (widget: Widget) => {
+		const {selectedWidget} = this.props;
+		const {id, layout} = widget;
+		const ref = id === NewWidget.id ? newWidgetRef : null;
+		const CNWidget = id === selectedWidget ? cn([styles.widget, styles.selectedWidget]) : styles.widget;
+
+		return (
+			<div key={id} data-grid={layout} className={CNWidget} ref={ref}>
+				{this.renderWidgetByType(widget)}
+			</div>
+		);
+	};
 
 	renderWidgetByType = (widget: Widget) => {
 		const {diagrams} = this.props;
@@ -183,45 +265,10 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	renderWidget = (widget: Widget): Element<'div'> => {
-		const {selectedWidget} = this.props;
-		const {id, layout} = widget;
-		const ref = id === NewWidget.id ? newWidgetRef : null;
-		const CNWidget = id === selectedWidget ? cn([styles.widget, styles.selectedWidget]) : styles.widget;
-
-		return (
-			<div key={id} data-grid={layout} className={CNWidget} ref={ref}>
-				{this.renderWidgetByType(widget)}
-			</div>
-		);
-	};
-
 	renderWidgets = (): Array<Element<'div'>> => {
 		const {widgets} = this.props;
-		return Object.keys(widgets).map(key => this.renderWidget(widgets[key]));
-	};
-
-	renderGrid = () => {
-		const {width} = this.state;
-		const {onLayoutChange} = this.props;
-
-		if (width) {
-			return (
-				<Grid
-					breakpoints={GRID_PARAMS.BREAK_POINTS}
-					className={styles.grid}
-					cols={GRID_PARAMS.COLS}
-					containerPadding={GRID_PARAMS.CONTAINER_PADDING}
-					compactType={null}
-					onLayoutChange={onLayoutChange}
-					rowHeight={GRID_PARAMS.ROW_HEIGHT}
-					width={width}
-					{...props}
-				>
-					{this.renderWidgets()}
-				</Grid>
-			);
-		}
+		// $FlowFixMe
+		return Object.values(widgets).map(this.renderWidget);
 	};
 
 	render () {
