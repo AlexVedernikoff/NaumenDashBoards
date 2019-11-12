@@ -38,10 +38,10 @@ enum AggregationType
 {
     COUNT_CNT('COUNT(%s)'),
     PERCENT('cast(COUNT(%s)*100.00/%s as big_decimal)'),
-    SUM('cast(SUM(%s)*1.00 as big_decimal)'),
-    AVG('cast(AVG(%s)*1.00 as big_decimal)'),
-    MAX('cast(MAX(%s)*1.00 as big_decimal)'),
-    MIN('cast(MIN(%s)*1.00 as big_decimal)'),
+    SUM('cast(coalesce(SUM(%s), 0)*1.00 as big_decimal)'),
+    AVG('cast(coalesce(AVG(%s), 0)*1.00 as big_decimal)'),
+    MAX('cast(coalesce(MAX(%s), 0)*1.00 as big_decimal)'),
+    MIN('cast(coalesce(MIN(%s), 0)*1.00 as big_decimal)'),
     MDN('%s')
 
     AggregationType(String aggregationFormat)
@@ -841,12 +841,14 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     int columnTitleIndex = 0
     int dataIndex = 1
     int rowTitleIndex = 2
+    DecimalFormat decimalFormat = new DecimalFormat("#.##")
     TableDiagram tableDiagram = new TableDiagram()
     Closure<String> capriceFront = { String str -> str.replace('.', '') } // требуется для библиотеки на фронте
     tableDiagram.columns += list.toUnique { it[columnTitleIndex] }.collect { currentCell ->
         def columnTitle = currentCell[columnTitleIndex]
         String resultValue = calcColumn
-                ? list.sum { it[columnTitleIndex] == columnTitle ? it[dataIndex] : 0 }
+                ? decimalFormat.format(
+                list.sum { it[columnTitleIndex] == columnTitle ? it[dataIndex] : 0 })
                 : ""
         new Column(columnTitle as String, capriceFront(columnTitle as String), resultValue)
     }
@@ -857,21 +859,23 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
         def rowTitle = currentCell[rowTitleIndex]
         tableDiagram.data.find { cell ->
             cell["breakdownTitle"] == rowTitle
-        } << [(capriceFront(currentCell[columnTitleIndex] as String)): currentCell[dataIndex]]
+        } << [(capriceFront(currentCell[columnTitleIndex] as String)):
+                      decimalFormat.format(currentCell[dataIndex])]
     }
     if (calcRow)
     {
         tableDiagram.columns << new Column("Итого", "total", "")
         tableDiagram.data.collect { cell ->
-            cell << [total: cell.values().tail().sum()]
+            cell << [total: decimalFormat.format(cell.values().tail().sum{
+                decimalFormat.parse(it)})]
         }
     }
 
     if(calcRow && calcColumn)
     {
-        DecimalFormat decimalFormat = new DecimalFormat("#.##")
         String totalResult = decimalFormat.format(
-                tableDiagram.columns*.footer.sum { it != '' ? it as double : 0 })
+                tableDiagram.columns*.footer.sum {
+                    it != '' ? decimalFormat.parse(it) : 0 })
         tableDiagram.columns.find({ it.accessor == 'total' }).footer = totalResult
     }
 
@@ -892,6 +896,7 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
     final int labelIndex = 0
     final int dataIndex = 1
     final int breakdownIndex = 2
+    DecimalFormat decimalFormat = new DecimalFormat("#.##")
     def dataForNotCompute = request.data.findAll { key, source -> !(source.sourceForCompute) } //отбрасываем источники для вычисления
     ComboDiagram comboDiagram = new ComboDiagram()
     comboDiagram.labels = lists.collect { it*.getAt(labelIndex) }.flatten().unique()
@@ -903,7 +908,7 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
                 Collection<Object> data = [0].multiply(comboDiagram.labels.size()) // подготавливаем почву для результата
                 resultValues.each { row ->
                     int resultIndex = comboDiagram.labels.indexOf(row[labelIndex])
-                    data[resultIndex] = row[dataIndex]
+                    data[resultIndex] = decimalFormat.format(row[dataIndex] as double)
                 }
                 new SeriesCombo(name, data, currentSource.type as String, currentKey, breakdownValue)
         }
@@ -1059,7 +1064,8 @@ private Collection<Object> getPeriodSevenDays(Collection<Object> list, int index
     return list.collect {
         def dataForCompute = it[indexColumn].split('--')
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd",
+                new Locale("ru"))
         def dateMin = sdf.parse(dataForCompute[0])
         sdf.applyPattern("dd MMMM")
 
