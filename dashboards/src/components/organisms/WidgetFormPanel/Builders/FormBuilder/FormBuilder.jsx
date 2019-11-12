@@ -54,15 +54,15 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 	);
 
 	renderTextArea = (props: TextAreaProps) => {
-		const {handleBlur, handleChange} = this.props;
-		const {label, name, placeholder, value} = props;
+		const {handleBlur: formikHandleBlur, handleChange} = this.props;
+		const {handleBlur, label, name, placeholder, value} = props;
 
 		return (
 			<div className={styles.field}>
 				<TextArea
 					label={label}
 					name={name}
-					onBlur={handleBlur}
+					onBlur={handleBlur || formikHandleBlur}
 					onChange={handleChange}
 					onReset={this.handleResetTextArea}
 					placeholder={placeholder}

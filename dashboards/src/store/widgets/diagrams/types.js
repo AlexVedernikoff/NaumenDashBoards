@@ -3,8 +3,8 @@ import {DIAGRAMS_EVENTS} from './constants';
 import type {SetCreatedWidget, UpdateWidget} from 'store/widgets/data/types';
 
 export type CompositeFields = {
-	common: Array<string>,
-	deep: Array<string>
+	nested: Array<string>,
+	simple: Array<string>
 }
 
 export type DiagramData = {

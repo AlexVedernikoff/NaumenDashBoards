@@ -2,6 +2,7 @@
 import type {Select, SelectValue} from 'components/organisms/WidgetFormPanel/types';
 
 export type TextAreaProps = {
+	handleBlur?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
 	label: string,
 	name: string,
 	placeholder?: string,

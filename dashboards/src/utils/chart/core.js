@@ -57,6 +57,9 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 		chart: {
 			stacked
 		},
+		dataLabels: {
+			formatter: (val: number) => val > 0 ? val : ''
+		},
 		markers: {
 			hover: {
 				size: 8
@@ -76,7 +79,6 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			categories: chart.categories
 		},
 		yaxis: {
-			decimalsInFloat: 2,
 			forceNiceScale: !stackedIsPercent,
 			max: undefined,
 			min: 0
@@ -95,9 +97,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 				formatter: (val: number, opts: any) => typeof opts !== 'object' ? val : `${val}%`
 			};
 
-			options.dataLabels = {
-				formatter: (val: number) => val > 0 ? `${val}%` : ''
-			};
+			options.dataLabels.formatter = (val: number) => val > 0 ? `${val}%` : '';
 		}
 	}
 
@@ -147,6 +147,9 @@ const comboChart = (widget: Widget, chart: DiagramData) => {
 		chart: {
 			stacked
 		},
+		dataLabels: {
+			formatter: (val: number) => val > 0 ? val : ''
+		},
 		labels: chart.labels,
 		markers: {
 			hover: {
@@ -166,14 +169,12 @@ const comboChart = (widget: Widget, chart: DiagramData) => {
 	};
 
 	if (percentDataKeys.length > 0) {
-		options.dataLabels = {
-			formatter (val: number, {seriesIndex}: any) {
-				if (val === 0) {
-					return '';
-				}
-
-				return percentDataKeys.includes(series[seriesIndex].dataKey) ? `${val}%` : val;
+		options.dataLabels.formatter = (val: number, {seriesIndex}: any) => {
+			if (val === 0) {
+				return '';
 			}
+
+			return percentDataKeys.includes(series[seriesIndex].dataKey) ? `${val}%` : val;
 		};
 	}
 
@@ -259,7 +260,6 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 				top: 1
 			},
 			enabled: showValue,
-			formatter: (val: number) => val > 0 ? val : '',
 			style: {
 				colors: ['white']
 			}
@@ -268,6 +268,9 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 			position: legendPosition ? legendPosition.value : 'bottom',
 			show: showLegend,
 			showForSingleSeries: true
+		},
+		stroke: {
+			width: 0
 		}
 	};
 

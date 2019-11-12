@@ -9,10 +9,10 @@ const compositeFields = (data: FormData, {base, dynamic}) => () => {
 
 	if (Array.isArray(order)) {
 		order.forEach(num => {
-			const fields = data[createOrderName(num)(sourceForCompute)] ? [dataKey, descriptor, source, sourceForCompute] : dynamic;
+			const createName = createOrderName(num);
 
-			fields.forEach(baseName => {
-				base.push(createOrderName(num)(baseName));
+			dynamic.forEach(baseName => {
+				base.push(createName(baseName));
 			});
 		});
 	}

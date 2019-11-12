@@ -1,10 +1,12 @@
 // @flow
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import ReactResizeDetector from 'react-resize-detector';
 import styles from './styles.less';
 
 export class Summary extends PureComponent<Props, State> {
 	state = {
+		height: 0,
 		title: '',
 		total: 0
 	};
@@ -14,19 +16,24 @@ export class Summary extends PureComponent<Props, State> {
 		return title && total ? {title, total} : null;
 	}
 
-	renderSummary = () => {
-		const {title, total} = this.state;
+	resize = (width: number, height: number) => this.setState({height});
 
-		return (
-			<div className={styles.container}>
-				<span className={styles.title}>{title}</span>
-				<p className={styles.total}>{total}</p>
-			</div>
-		);
+	renderSummary = () => (
+		<div className={styles.container}>
+			{this.renderTotal()}
+		</div>
+	);
+
+	renderTotal = () => {
+		const {height, total} = this.state;
+		const {widget} = this.props;
+		const fontSize = height > 0 ? height : widget.layout.h;
+
+		return <span className={styles.total} style={{fontSize}}>{total}</span>;
 	};
 
 	render () {
-		return this.renderSummary();
+		return <ReactResizeDetector handleHeight onResize={this.resize} render={this.renderSummary} />;
 	}
 }
 

@@ -6,6 +6,7 @@ import type {WidgetMap} from 'store/widgets/data/types';
 
 export type ConnectedFunctions = {
 	editLayout: (layout: Layout) => ThunkAction,
+	removeWidget: (id: string) => ThunkAction,
 	selectWidget: (id: string) => ThunkAction
 };
 

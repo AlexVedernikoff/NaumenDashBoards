@@ -127,7 +127,7 @@ export const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidge
  * @returns {WidgetsDataState}
  */
 export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): WidgetsDataState => {
-	state.selectedWidget === NewWidget.id ? state.newWidget = null : delete state.map[payload];
+	delete state.map[payload];
 
 	if (state.selectedWidget === payload) {
 		state.selectedWidget = '';

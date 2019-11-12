@@ -6,3 +6,7 @@ export type ExportButtonProps = {
 	tip: string,
 	way: string
 }
+
+export type State = {
+	showModal: boolean
+};

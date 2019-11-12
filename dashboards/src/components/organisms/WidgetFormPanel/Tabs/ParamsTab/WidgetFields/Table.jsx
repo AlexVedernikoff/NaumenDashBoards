@@ -5,7 +5,7 @@ import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class Table extends OrderFormBuilder {
-	defaultOrder = [1];
+	sourceRefs = [FIELDS.breakdown, FIELDS.column, FIELDS.row];
 
 	renderCalcTotalInput = (name: string) => {
 		const {values} = this.props;
@@ -53,12 +53,17 @@ export class Table extends OrderFormBuilder {
 	renderInputs = () => {
 		const {aggregation, breakdown, breakdownGroup, calcTotalRow, calcTotalColumn, column, row, source} = FIELDS;
 
+		const rowLabel = {
+			name: 'Строки'
+		};
+
 		return (
 			<Fragment>
 				{this.renderModal()}
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(false), source)}
-				{this.renderByOrder(this.renderRowInput, row, true)}
+				{this.renderLabel(rowLabel)}
+				{this.renderByOrder(this.renderRowInput, row)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalRow, true)}
 				{this.renderByOrder(this.renderCompositeInputs, [aggregation, column], true)}
 				{this.renderByOrder(this.renderBreakdownWithGroup, [breakdownGroup, breakdown], true)}

@@ -1,7 +1,6 @@
 // @flow
 import {CHART_SELECTS} from 'utils/chart';
 import {createOrderName, getNumberFromName} from 'utils/widget';
-import {Divider} from 'components/atoms/Divider/Divider';
 import {FIELDS, getAggregateOptions, getGroupOptions, TYPES} from 'components/organisms/WidgetFormPanel';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
@@ -10,6 +9,9 @@ import {styles} from 'components/organisms/WidgetFormPanel/Tabs/ParamsTab';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class ComboChart extends OrderFormBuilder {
+	defaultOrder = [1, 2];
+	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
+
 	changeDependingOnMain = (number: number) => {
 		const {setFieldValue, values} = this.props;
 		const order = this.getOrder();
@@ -184,10 +186,8 @@ export class ComboChart extends OrderFormBuilder {
 				{this.renderModal()}
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(true), source)}
-				<Divider />
 				{this.renderLabel(xAxisLabel)}
-				{this.renderByOrder(this.renderComboXAxis, [xAxis, group], true)}
-				<Divider />
+				{this.renderByOrder(this.renderComboXAxis, [xAxis, group])}
 				{this.renderByOrder(this.renderComboYAxis, [yAxis, type, aggregation, breakdown, breakdownGroup], true)}
 			</Fragment>
 		);

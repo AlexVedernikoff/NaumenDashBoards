@@ -1,7 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {editLayout, selectWidget} from 'store/widgets/data/actions';
+import {editLayout, removeWidget, selectWidget} from 'store/widgets/data/actions';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
@@ -15,5 +15,6 @@ export const props = (state: AppState): ConnectedProps => ({
 
 export const functions: ConnectedFunctions = {
 	editLayout,
+	removeWidget,
 	selectWidget
 };

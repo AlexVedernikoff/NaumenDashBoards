@@ -81,6 +81,10 @@ export type RequestLayoutSave = {
 	type: typeof WIDGETS_EVENTS.REQUEST_LAYOUT_SAVE,
 };
 
+export type RequestWidgetDelete = {
+	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_DELETE,
+};
+
 export type RequestWidgetSave = {
 	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_SAVE,
 };
@@ -98,6 +102,10 @@ export type RecordWidgetsError = {
 	type: typeof WIDGETS_EVENTS.RECORD_WIDGETS_ERROR,
 };
 
+export type RecordWidgetDeleteError = {
+	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
+}
+
 type UnknownWidgetsAction = {
 	type: typeof WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION,
 	payload: null
@@ -109,9 +117,11 @@ export type WidgetsAction =
 	| EditLayout
 	| ReceiveWidgets
 	| RecordLayoutSaveError
+	| RecordWidgetDeleteError
 	| RecordWidgetSaveError
 	| RecordWidgetsError
 	| RequestLayoutSave
+	| RequestWidgetDelete
 	| RequestWidgetSave
 	| RequestWidgets
 	| ResetWidget
@@ -126,6 +136,8 @@ export type WidgetMap = {
 };
 
 export type WidgetsDataState = {
+	deleteError: boolean,
+	deleting: boolean,
 	error: boolean,
 	layoutSaveError: boolean,
 	loading: boolean,

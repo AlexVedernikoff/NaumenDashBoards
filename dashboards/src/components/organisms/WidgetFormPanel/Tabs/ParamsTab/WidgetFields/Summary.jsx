@@ -5,7 +5,7 @@ import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class Summary extends OrderFormBuilder {
-	defaultOrder = [1];
+	sourceRefs = [FIELDS.indicator];
 
 	renderCompositeInputs = (aggregation: string, indicator: string) => this.combineInputs(
 		this.renderAggregateInput(aggregation, indicator),

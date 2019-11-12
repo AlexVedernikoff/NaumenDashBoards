@@ -53,7 +53,8 @@ const createCircleChartData = (widget: Widget) => {
 	};
 };
 
-const createCompositeData = ({common, deep}: CompositeFields) => (widget: Widget) => {
+const createCompositeData = (fields: CompositeFields) => (widget: Widget) => {
+	const {nested, simple} = fields;
 	const {order} = widget;
 	const data = {
 		type: getValue(widget[type]),
@@ -62,23 +63,18 @@ const createCompositeData = ({common, deep}: CompositeFields) => (widget: Widget
 
 	if (Array.isArray(order)) {
 		order.forEach(num => {
+			const createName = createOrderName(num);
 			let chartItem = {};
 
-			if (widget[createOrderName(num)(sourceForCompute)]) {
-				chartItem.descriptor = widget[createOrderName(num)(descriptor)];
-				chartItem.source = getValue(widget[createOrderName(num)(source)]);
-				chartItem.sourceForCompute = true;
-			} else {
-				deep.forEach(baseName => {
-					chartItem[baseName] = getValue(widget[createOrderName(num)(baseName)]);
-				});
+			nested.forEach(baseName => {
+				chartItem[baseName] = getValue(widget[createName(baseName)]);
+			});
 
-				common.forEach(baseName => {
-					chartItem[baseName] = widget[createOrderName(num)(baseName)];
-				});
-			}
+			simple.forEach(baseName => {
+				chartItem[baseName] = widget[createName(baseName)];
+			});
 
-			data.data[widget[createOrderName(num)(dataKey)]] = chartItem;
+			data.data[widget[createName(dataKey)]] = chartItem;
 		});
 	}
 
@@ -105,18 +101,18 @@ const {
 } = FIELDS;
 
 const comboFields: CompositeFields = {
-	common: [breakdown, descriptor, sourceForCompute, xAxis, yAxis],
-	deep: [aggregation, breakdownGroup, group, source, type]
+	nested: [aggregation, breakdownGroup, group, source, type],
+	simple: [breakdown, descriptor, sourceForCompute, xAxis, yAxis]
 };
 
 const summaryFields: CompositeFields = {
-	common: [descriptor, indicator, sourceForCompute],
-	deep: [aggregation, source]
+	nested: [aggregation, source],
+	simple: [descriptor, indicator, sourceForCompute]
 };
 
 const tableFields: CompositeFields = {
-	common: [breakdown, calcTotalColumn, calcTotalRow, column, descriptor, row, sourceForCompute],
-	deep: [aggregation, breakdownGroup, source]
+	nested: [aggregation, breakdownGroup, source],
+	simple: [breakdown, calcTotalColumn, calcTotalRow, column, descriptor, row, sourceForCompute]
 };
 
 const resolvePostDataCreator = (type: string) => {
