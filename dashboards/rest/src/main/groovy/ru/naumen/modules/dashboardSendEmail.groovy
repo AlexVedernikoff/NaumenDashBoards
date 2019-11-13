@@ -25,15 +25,16 @@ String sendFileToMail(DefaultMultipartHttpServletRequest request, def user)
         utils.throwReadableException('User email is null or empty!')
     }
     String fileName = request.getFileNames().find()
-
+    String title = request.getParameter("fileName")
+    String format = request.getParameter("fileFormat")
     def file = request.getFiles(fileName).find()
     def ds = new ByteArrayDataSource(file.inputStream, file.contentType)
 
     def message = api.mail.sender.createMail()
     message.addTo(user.title, user.email)
-    message.setSubject(fileName) //установка темы сообщения
-    message.addText("${fileName}. Файл с изображением дашборда находится во вложении.") //установка текста сообщения
-    message.attachFile(ds, fileName)
+    message.setSubject(title) //установка темы сообщения
+    message.addText("${title}. Файл с изображением дашборда находится во вложении.") //установка текста сообщения
+    message.attachFile(ds, "${title}.${format}")
     return toJson(api.mail.sender.sendMail(message))
 }
 //endregion
