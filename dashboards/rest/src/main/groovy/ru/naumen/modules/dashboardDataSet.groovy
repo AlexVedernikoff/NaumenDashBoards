@@ -22,6 +22,8 @@ import ru.naumen.core.server.hquery.HCriteria;
 import ru.naumen.core.server.hquery.HHelper;
 import ru.naumen.core.server.hquery.HRestrictions
 import ru.naumen.core.server.hquery.HOrders
+
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -841,7 +843,9 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     int columnTitleIndex = 0
     int dataIndex = 1
     int rowTitleIndex = 2
-    DecimalFormat decimalFormat = new DecimalFormat("#.##")
+    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
+    otherSymbols.setDecimalSeparator('.' as char)
+    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
     TableDiagram tableDiagram = new TableDiagram()
     Closure<String> capriceFront = { String str -> str.replace('.', '') } // требуется для библиотеки на фронте
     tableDiagram.columns += list.toUnique { it[columnTitleIndex] }.collect { currentCell ->
@@ -896,7 +900,9 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
     final int labelIndex = 0
     final int dataIndex = 1
     final int breakdownIndex = 2
-    DecimalFormat decimalFormat = new DecimalFormat("#.##")
+    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
+    otherSymbols.setDecimalSeparator('.' as char)
+    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
     def dataForNotCompute = request.data.findAll { key, source -> !(source.sourceForCompute) } //отбрасываем источники для вычисления
     ComboDiagram comboDiagram = new ComboDiagram()
     comboDiagram.labels = lists.collect { it*.getAt(labelIndex) }.flatten().unique()
