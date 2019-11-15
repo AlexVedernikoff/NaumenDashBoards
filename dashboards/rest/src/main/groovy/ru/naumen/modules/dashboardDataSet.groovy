@@ -922,7 +922,7 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
         {
             def breakdowns = resultOfQuery.collect({ it[breakdownIndex] }).unique()
             breakdowns.each { breakdown ->
-                String name = currentSource.yAxis.title
+                String name = breakdown
                 String breakdownValue = breakdown
                 def resultValues = resultOfQuery.findAll { row -> row[breakdownIndex] == breakdown }
                 comboDiagram.series << buildComboDiagram(name, breakdownValue, resultValues)

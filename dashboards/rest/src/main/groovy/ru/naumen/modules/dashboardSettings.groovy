@@ -19,6 +19,7 @@ import static groovy.json.JsonOutput.toJson
 //region КОНСТАНТЫ
 @Field private static final String NAMESPACE = 'dashboards'
 @Field private static final String GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
+@Field private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
 //endregion
 
 //region КЛАССЫ
@@ -297,9 +298,20 @@ String resetPersonalDashboard(String classFqn, String contentCode, def user)
  * @param user БО текущего пользователя
  * @return наличие | отсутствие группы
  */
-String getAvailabilityGroupMasterDashboard(def user)
+String getUserRole(def user)
 {
-    return toJson(checkUserOnMasterDashboard(user))
+    if (!user)
+    {
+        return "super"
+    }
+    else if (checkUserOnMasterDashboard(user))
+    {
+        return "master"
+    }
+    else
+    {
+        return null
+    }
 }
 //endregion
 
@@ -342,7 +354,11 @@ private String createWidget(RequestCreateWidgetSettings request,
                             def user)
 {
     dashboardSettings = dashboardSettings ?: new DashboardSettings([])
-    String widgetKey = generateWidgetKey(dashboardSettings.widgetIds, user?.login as String)
+    String widgetKey = generateWidgetKey(
+            dashboardSettings.widgetIds,
+            request.classFqn,
+            request.contentCode,
+            user?.login as String)
     def widgetSettings = setUuidInSettings(request.widgetSettings, widgetKey)
     String widgetJsonSettings = toJson(widgetSettings)
     saveJsonSettings(widgetKey, widgetJsonSettings)
@@ -364,7 +380,12 @@ private String editWidget(RequestEditWidgetSettings request,
                           DashboardSettings dashboardSettings,
                           def user)
 {
-    String widgetKey = generateWidgetKey(dashboardSettings.widgetIds, user.login as String)
+    String widgetKey = generateWidgetKey(
+            dashboardSettings.widgetIds,
+            request.classFqn,
+            request.contentCode,
+            user.login as String,
+            request.widgetKey)
     def widgetSettings = setUuidInSettings(request.widgetSettings, widgetKey)
     saveJsonSettings(widgetKey, toJson(widgetSettings))
     dashboardSettings.widgetIds << widgetKey
@@ -393,12 +414,17 @@ private String generateDashboardKey(String classFqn, String contentCode, String 
  * @param login логин пользователя или пустое значение если сохранение по умолчанию
  * @return сгенированный ключ для виджета
  */
-private String generateWidgetKey(Collection<String> keys, String login)
+private String generateWidgetKey(Collection<String> keys,
+                                 String classFqn,
+                                 String contentCode,
+                                 String login = null,
+                                 String oldUuid = null)
 {
+    String type = utils.get(classFqn)?.metaClass?.toString()
     def loginKeyPart = login ? "_${login}" : ''
     String uuidWidget
     while ({
-        uuidWidget = "${UUID.randomUUID()}${loginKeyPart}"
+        uuidWidget = "${type}_${contentCode}_${oldUuid ?: UUID.randomUUID()}${loginKeyPart}"
         (keys.contains(uuidWidget) &&
                 loadJsonSettings(uuidWidget))
     }()) continue
@@ -473,7 +499,9 @@ private checkRightsOnDashboard(def user, String messageError)
  */
 private boolean checkUserOnMasterDashboard(def user)
 {
-    user?.UUID ? GROUP_MASTER_DASHBOARD in utils.get(user.UUID).all_Group*.code : false
+    user?.UUID
+        ? GROUP_MASTER_DASHBOARD in utils.get(user.UUID).all_Group*.code
+        : true
 }
 
 /**
