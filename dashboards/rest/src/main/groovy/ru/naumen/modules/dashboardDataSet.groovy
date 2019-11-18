@@ -427,7 +427,7 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
     list = request*.breakdown*.type == 'dtInterval'  ? convertMillisecondToHours(list, 2) : list
     list = request.xAxis.type == 'state'  ? convertCodeStatusToNameStatus(list, 0, request.source) : list
     list = request*.breakdown*.type == 'state'  ? convertCodeStatusToNameStatus(list, 2, request.source) : list
-    return mappingToStandardDiagram(list, breakdown)
+    return mappingToStandardDiagram(list, breakdown, request.breakdownGroup as GroupType)
 }
 
 /**
@@ -761,8 +761,9 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
             HCriteria cteCriteria = criteria.addCTESource(cteSource)
 
             // Вывод периода день.месяц-(день.месяц + 7 дней)
-            String groupFormula = "ROUND(ABS(extract(DAY from (CAST(${attributeCode} AS timestamp) " +
-                    "- ${cteCriteria.getProperty('cteMinDate')}))/ 7))"
+            String coefficientForRound = '0.6'
+            String groupFormula = "ROUND(ABS((extract(DAY from (CAST(${attributeCode} AS timestamp) " +
+                    "- ${cteCriteria.getProperty('cteMinDate')}))- ${coefficientForRound})/ 7))"
             String period = "concat(${cteCriteria.getProperty('cteMinDate')},'--', ${groupFormula})"
             criteria.addColumn("MIN(${period})")
 
@@ -804,7 +805,9 @@ private String getPercentColumn(String descriptor,
  * @param breakdown атрибут разбивки
  * @return данные для диаграммы в формате StandardDiagram
  */
-private StandardDiagram mappingToStandardDiagram(Collection<Object> list, Attribute breakdown)
+private StandardDiagram mappingToStandardDiagram(Collection<Object> list,
+                                                 Attribute breakdown,
+                                                 GroupType breakdownGroup)
 {
     int categoryIndex = 0
     int dataIndex = 1
@@ -828,6 +831,7 @@ private StandardDiagram mappingToStandardDiagram(Collection<Object> list, Attrib
     {
         standardDiagram.series << new Series("", list.toUnique { it[categoryIndex] }*.getAt(dataIndex))
     }
+    standardDiagram.series = sortSeries(standardDiagram.series, breakdownGroup)
     return standardDiagram
 }
 
@@ -934,6 +938,7 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
             comboDiagram.series << buildComboDiagram(title, "", resultOfQuery)
         }
     }
+    comboDiagram.series = sortSeries(comboDiagram.series, request)
     return comboDiagram
 }
 
@@ -1104,6 +1109,13 @@ private Collection<Object> convertMillisecondToHours(Collection<Object> list, in
     }
 }
 
+/**
+ * Метод конвертирования кода для атрибута с типом статус в название статуса
+ * @param list список из бд
+ * @param indexColumn индекс столбца в бд для изменения
+ * @param fqn Код источника данных
+ * @return list преобразованный список из бд
+ */
 private Collection<Object> convertCodeStatusToNameStatus(Collection<Object> list,
                                                          int indexColumn,
                                                          String fqn)
@@ -1116,5 +1128,58 @@ private Collection<Object> convertCodeStatusToNameStatus(Collection<Object> list
         it[indexColumn] = codeName[it[indexColumn]]
         it
     }.sort{it[indexColumn]}
+}
+
+/**
+ * Метод сортировки разбивки по name в зависимости от типа группировки для 1 диаграммы
+ * @param series список данных по y в форматах {@link Series} или {@link SeriesCombo}
+ * @param breakdownGroup Тип группировки для разбивки
+ * @return измененный список данных по y в форматах {@link Series} или {@link SeriesCombo}
+ */
+private Collection<Object> sortSeries(Collection<Object> series, GroupType breakdownGroup)
+{
+    def closureConvertStringToDate = { pattern, name ->
+        new SimpleDateFormat(pattern, new Locale("ru")).parse(name)
+    }
+    switch(breakdownGroup)
+    {
+        case [GroupType.OVERLAP, GroupType.WEEK, GroupType.QUARTER, GroupType.YEAR]:
+            series = series.sort{ it.name }
+            break
+        case GroupType.MONTH:
+            series = series.sort {
+                closureConvertStringToDate("MMMM", it.name)
+            }
+            break
+        case GroupType.DAY:
+            series = series.sort {
+                closureConvertStringToDate("dd MMMM", it.name)
+            }
+            break
+        case GroupType.SEVEN_DAYS:
+            series = series.sort {
+                closureConvertStringToDate("dd MMMM - dd MMMM", it.name)
+            }
+            break
+    }
+    return series
+}
+
+/**
+ * Метод сортировки разбивки по name в зависимости от типа группировки для combo диаграммы
+ * @param series список данных по y
+ * @param request данные для построения combo диаграммы
+ * @return измененный список данных по y
+ */
+private Collection<SeriesCombo> sortSeries(Collection<SeriesCombo> series,
+                                           RequestGetDataForCompositeDiagram request)
+{
+    Collection<SeriesCombo> seriesNew = []
+    series.dataKey.toUnique().each{ dataKey ->
+        Collection<SeriesCombo> seriesPart = series.findAll{ it.dataKey == dataKey}
+        seriesPart = sortSeries(seriesPart, request.data[dataKey].breakdownGroup as GroupType)
+        seriesNew.addAll(seriesPart)
+    }
+    return seriesNew
 }
 //endregion
