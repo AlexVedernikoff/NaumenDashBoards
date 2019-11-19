@@ -224,6 +224,7 @@ String createPersonalWidgetSettings(Map<String, Object> requestContent, def user
  * @param requestContent - тело запроса
  * @return успех | провал удаления
  */
+@Deprecated
 String deleteWidget(Map<String, Object> requestContent, def user)
 {
     RequestDeleteWidgetSettings request = new RequestDeleteWidgetSettings(requestContent)
@@ -234,7 +235,7 @@ String deleteWidget(Map<String, Object> requestContent, def user)
     Closure removeWidget = { String dashboard, String widget ->
         if (deleteJsonSettings(widget))
         {
-            removeWidgetsFromDashboard(dashboard, [widget])
+            excludeWidgetsFromDashboard(dashboard, [widget])
         }
         else
         {
@@ -251,7 +252,7 @@ String deleteWidget(Map<String, Object> requestContent, def user)
         else
         {
             getDashboardSetting(personalDashboardKey).each { dashboardSettings ->
-                saveDashboard(personalDashboardKey, dashboardSettings.widgetIds - request.widgetId)
+                saveWidgetsToDashboard(personalDashboardKey, dashboardSettings.widgetIds - request.widgetId)
             }
             return toJson(removeWidget(defaultDashboardKey, request.widgetId))
         }
@@ -265,7 +266,86 @@ String deleteWidget(Map<String, Object> requestContent, def user)
         else
         {
             def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-            return saveDashboard(personalDashboardKey, settings.widgetIds - request.widgetId)
+            return saveWidgetsToDashboard(personalDashboardKey, settings.widgetIds - request.widgetId)
+        }
+    }
+    else
+    {
+        throw new Exception("No rights on remove widget")
+    }
+}
+
+/**
+ * Метод удаления персонального виджета
+ * @param requestContent - тело запроса
+ * @param user           - пользователь
+ * @return успех | провал
+ */
+String deletePersonalWidget(Map<String, Object> requestContent, def user)
+{
+    RequestDeleteWidgetSettings request = requestContent as RequestDeleteWidgetSettings
+
+    String personalDashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login as String)
+    String defaultDashboardKey = generateDashboardKey(request.classFqn, request.contentCode)
+
+    if (checkUserOnMasterDashboard(user) || request.editable)
+    {
+        if (isPersonalWidget(request.widgetId, user))
+        {
+            Closure<String> removeWidgetFromPersonalDashboard = this.&removeWidgetFromDashboard.curry(personalDashboardKey)
+            return toJson(removeWidgetSettings(request.widgetId).with(removeWidgetFromPersonalDashboard) as boolean)
+        }
+        else
+        {
+            def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
+            def res = saveWidgetsToDashboard(personalDashboardKey, settings.widgetIds - request.widgetId)
+            if (!res)
+            {
+                throw new Exception("Widget ${request.widgetId} not removed from dashboard: $personalDashboardKey!")
+            }
+            return toJson(res)
+        }
+    }
+    else
+    {
+        throw new Exception("No rights on remove widget")
+    }
+}
+
+/**
+ * Метод удаления виджета по умолчанию
+ * @param requestContent - тело запроса
+ * @param user           - пользователь
+ * @return успех | провал
+ */
+String deleteDefaultWidget(Map<String, Object> requestContent, def user)
+{
+    RequestDeleteWidgetSettings request = requestContent as RequestDeleteWidgetSettings
+
+    String defaultDashboardKey = generateDashboardKey(request.classFqn, request.contentCode)
+    String personalDashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login as String)
+
+    if (checkUserOnMasterDashboard(user))
+    {
+        if (isPersonalWidget(request.widgetId, user))
+        {
+            String defaultWidget = request.widgetId - "_${user.login}"
+            Closure<String> removeWidgetFromPersonalDashboard =
+                    this.&removeWidgetFromDashboard.curry(personalDashboardKey)
+            Closure<String> removeWidgetFromDefaultDashboard =
+                    this.&removeWidgetFromDashboard.curry(defaultDashboardKey)
+            def personalWidgetIsRemoved = removeWidgetSettings(request.widgetId).with(removeWidgetFromPersonalDashboard)
+            def defaultWidgetIsRemoved = removeWidgetSettings(defaultWidget).with(removeWidgetFromDefaultDashboard)
+            return toJson(personalWidgetIsRemoved && defaultWidgetIsRemoved)
+        }
+        else
+        {
+            def resultOfRemoving = removeWidgetSettings(request.widgetId).with { String widgetKey ->
+                def resultOfRemovingFromPersonalDashboard = removeWidgetFromDashboard(personalDashboardKey, widgetKey)
+                def resultOfRemovingFromDefaultDashboard = removeWidgetFromDashboard(defaultDashboardKey, widgetKey)
+                resultOfRemovingFromPersonalDashboard && resultOfRemovingFromDefaultDashboard
+            }
+            return toJson(resultOfRemoving)
         }
     }
     else
@@ -317,15 +397,44 @@ String getUserRole(def user)
 
 //region ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
 /**
- * Метод удаления виджетов с дашборда
+ * Метод удаления виджета с дашборда. Бросает исключение если удаление не удалось.
+ * @param dashboardKey - уникальный идентификатор дашборда
+ * @param widgetKey    - уникальный идентификатор виджета
+ * @return уникальный идентификатор удалённого дашборда
+ */
+private String removeWidgetFromDashboard(String dashboardKey, String widgetKey)
+{
+    if (!excludeWidgetsFromDashboard(dashboardKey, [widgetKey]))
+    {
+        throw new Exception("Widget $widgetKey not removed from dashboard: $dashboardKey!")
+    }
+    return dashboardKey
+}
+
+/**
+ * Метод удаления настроек виджета. Бросает исключение если удаление не удалось.
+ * @param widgetKey - уникальный идентификатор виджета
+ * @return уникальный идентификатор удалённого виджета
+ */
+private String removeWidgetSettings(String widgetKey)
+{
+    if (!deleteJsonSettings(widgetKey))
+    {
+        throw new Exception("widget settings $widgetKey not removed!")
+    }
+    return widgetKey
+}
+
+/**
+ * Метод исключение виджетов из настрок дашборда
  * @param dashboardKey - уникальный идентификатор дашборда
  * @param widgets      - уникальные идентификаторы виджетов
  * @return успех|провал
  */
-private boolean removeWidgetsFromDashboard(String dashboardKey, Collection<String> widgets)
+private boolean excludeWidgetsFromDashboard(String dashboardKey, Collection<String> widgets)
 {
     def widgetsIds = getDashboardSetting(dashboardKey).widgetIds
-    saveDashboard(dashboardKey, widgetsIds - widgets)
+    saveWidgetsToDashboard(dashboardKey, widgetsIds - widgets)
 }
 
 /**
@@ -334,7 +443,7 @@ private boolean removeWidgetsFromDashboard(String dashboardKey, Collection<Strin
  * @param widgetKeys   - список ключей виджетов для данного дашборда
  * @return успех|провал сохранения/обновления
  */
-private boolean saveDashboard(String dashboardKey, Collection<String> widgetKeys)
+private boolean saveWidgetsToDashboard(String dashboardKey, Collection<String> widgetKeys)
 {
     String dashboardJsonSettings = toJson(new DashboardSettings(widgetKeys))
     return saveJsonSettings(dashboardKey, dashboardJsonSettings)
@@ -517,6 +626,17 @@ private void checkRightsOnEditDashboard(def editable)
 }
 
 /**
+ * Метод проверки, является ли данный виджет персональным
+ * @param widgetKey - уникальный мдентификатор виджета
+ * @param user      - пользователь
+ * @return true | false
+ */
+boolean isPersonalWidget(String widgetKey, def user)
+{
+    return widgetKey.endsWith("_${user.login}")
+}
+
+/**
  * Пробросить сгенерированный ключ в настройки виджета
  * @param widgetSettings    - настройки виджета
  * @param key               - сгенерированный uuid ключ
@@ -600,7 +720,6 @@ private def getSettingsFromJson(String jsonSettings)
 {
     return jsonSettings ? fromJson(jsonSettings) : null
 }
-
 /**
  * Метод десериализации json строки
  * @param json - сериализованный объект
