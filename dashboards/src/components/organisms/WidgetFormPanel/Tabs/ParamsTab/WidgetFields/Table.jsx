@@ -1,7 +1,9 @@
 // @flow
+import {Divider} from 'components/atoms';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import {FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import React, {Fragment} from 'react';
+import {styles} from 'components/organisms/WidgetFormPanel';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class Table extends OrderFormBuilder {
@@ -11,6 +13,7 @@ export class Table extends OrderFormBuilder {
 		const {values} = this.props;
 
 		const totalRow = {
+			hideDivider: true,
 			label: 'Подсчитывать итоги',
 			name,
 			value: values[name]
@@ -47,7 +50,11 @@ export class Table extends OrderFormBuilder {
 			value: values[name]
 		};
 
-		return this.renderAttrSelect(row);
+		return (
+			<div className={styles.field} key={name}>
+				{this.renderAttrSelect(row)}
+			</div>
+		);
 	};
 
 	renderInputs = () => {
@@ -62,8 +69,9 @@ export class Table extends OrderFormBuilder {
 				{this.renderModal()}
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(false), source)}
+				<Divider />
 				{this.renderLabel(rowLabel)}
-				{this.renderByOrder(this.renderRowInput, row)}
+				{this.renderByOrder(this.renderRowInput, row, true)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalRow, true)}
 				{this.renderByOrder(this.renderCompositeInputs, [aggregation, column], true)}
 				{this.renderByOrder(this.renderBreakdownWithGroup, [breakdownGroup, breakdown], true)}

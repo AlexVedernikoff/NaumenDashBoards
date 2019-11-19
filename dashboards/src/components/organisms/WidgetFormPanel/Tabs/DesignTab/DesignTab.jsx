@@ -1,13 +1,23 @@
 // @flow
 import {Chart} from './WidgetFields';
 import {CHART_VARIANTS} from 'utils/chart';
+import {FieldLabel} from 'components/atoms';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import React, {Fragment} from 'react';
+import React from 'react';
+import styles from './styles.less';
 import {WIDGET_VARIANTS} from 'utils/widget';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class DesignTab extends FormBuilder {
+	renderCheckboxesLabel = () => {
+		return (
+			<div className={styles.showLabel}>
+				<FieldLabel text="Показывать на диаграмме" />
+			</div>
+		);
+	};
+
 	renderWidgetFields = (type: string) => {
 		const {COMBO, DONUT, PIE} = CHART_VARIANTS;
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
@@ -30,11 +40,11 @@ export class DesignTab extends FormBuilder {
 		};
 
 		return (
-			<Fragment>
-				{this.renderHeader('Показывать на диаграмме')}
+			<div className={styles.tab}>
+				{this.renderCheckboxesLabel()}
 				{this.renderCheckBox(nameProps)}
-				{this.renderWidgetFields(values[type].value)}
-			</Fragment>
+				{this.renderWidgetFields(values[type])}
+			</div>
 		);
 	};
 

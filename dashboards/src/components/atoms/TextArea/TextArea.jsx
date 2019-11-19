@@ -25,11 +25,6 @@ export class TextArea extends Component<Props> {
 		}
 	};
 
-	renderLabel = () => {
-		const {label, name} = this.props;
-		return label ? <label className={styles.label} htmlFor={name}>{label}</label> : null;
-	};
-
 	renderTextArea = () => {
 		const {
 			name,
@@ -56,12 +51,7 @@ export class TextArea extends Component<Props> {
 	};
 
 	render () {
-		return (
-			<div>
-				{this.renderLabel()}
-				{this.renderTextArea()}
-			</div>
-		);
+		return this.renderTextArea();
 	}
 }
 

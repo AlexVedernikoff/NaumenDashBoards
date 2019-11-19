@@ -1,7 +1,7 @@
 // @flow
-import {ATTR_PROPS, DEFAULT_COMPONENTS, SELECT_SIZE} from './constants';
+import {ATTR_PROPS, DEFAULT_COMPONENTS} from './constants';
 import {Button, IconButton} from 'components/atoms';
-import {EditIcon} from 'icons/form';
+import {EditIcon, PlusIcon} from 'icons/form';
 import {InputForm} from 'components/molecules';
 import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
@@ -12,14 +12,11 @@ import styles from './styles.less';
 export class Select extends PureComponent<Props, State> {
 	static defaultProps = {
 		attr: false,
-		border: true,
-		color: 'white',
 		createButtonText: 'Создать',
 		defaultValue: null,
 		isDisabled: false,
 		isLoading: false,
 		isSearchable: true,
-		size: SELECT_SIZE.NORMAL,
 		withCreateButton: false,
 		withEditIcon: false
 	};
@@ -32,7 +29,11 @@ export class Select extends PureComponent<Props, State> {
 
 	getComponents = () => {
 		const {components, form, withCreateButton} = this.props;
-		let commonComponents = {...DEFAULT_COMPONENTS, ...components};
+		let commonComponents = {
+			SingleValue: this.renderSingleValue,
+			...DEFAULT_COMPONENTS,
+			...components
+		};
 
 		if (form) {
 			commonComponents = {...commonComponents, ValueContainer: this.renderValue};
@@ -46,33 +47,12 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	getCustomStyles = () => {
-		const {border, color} = this.props;
+		const {attr} = this.props;
 		const customStyles = {};
 
 		customStyles.control = (provided: Object) => {
-			const styles = {
-				background: 'white',
-				border: '1px solid lightgray',
-				borderRadius: 2,
-				boxShadow: 'none',
-				'&:hover': {
-					borderColor: 'gray'
-				}
-			};
-
-			if (!border) {
-				styles.border = 'none';
-				styles.borderRadius = 0;
-			}
-
-			if (color === 'blue') {
-				styles.background = '#EFF3F8';
-			}
-
-			return {
-				...provided,
-				...styles
-			};
+			provided.border = attr ? 'none' : '1px solid lightgray';
+			return provided;
 		};
 
 		return customStyles;
@@ -143,9 +123,9 @@ export class Select extends PureComponent<Props, State> {
 
 	noOptionsMessage = () => 'Список пуст';
 
-	stopPropagation = (e: SyntheticMouseEvent<HTMLElement>) => {
-		e.stopPropagation();
-	};
+	mask = (value: string) => value.length > 18 ? `${value.substring(0, 18)}...` : value;
+
+	stopPropagation = (e: SyntheticMouseEvent<HTMLElement>) => e.stopPropagation();
 
 	renderEditIcon = () => {
 		const {withEditIcon} = this.props;
@@ -187,6 +167,7 @@ export class Select extends PureComponent<Props, State> {
 			<components.Menu {...props}>
 				{props.children}
 				<Button className="m-1" onClick={onClickCreateButton || this.handleShowForm(true)}>
+					<PlusIcon className={styles.plusIcon} />
 					{createButtonText}
 				</Button>
 			</components.Menu>
@@ -194,6 +175,12 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderSelect = () => <ReactSelect ref={this.ref} {...this.getSelectProps()} />;
+
+	renderSingleValue = ({ children, ...props }: any) => (
+		<components.SingleValue {...props}>
+			{this.mask(children)}
+		</components.SingleValue>
+	);
 
 	renderValue = ({children, ...props}: any) => (
 		<components.ValueContainer {...props}>

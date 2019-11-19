@@ -28,15 +28,6 @@ const save = (uri: string, filename: string) => {
 };
 
 /**
- * Возвращает текущую дату
- * @returns {string}
- */
-const getCurrentDate = () => {
-	const date = new Date();
-	return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-};
-
-/**
  * Проверяет, является ли браузер IE или EDGE
  * @returns {boolean}
  */
@@ -184,7 +175,6 @@ const createPng = async (image: HTMLCanvasElement, fileName: string, toDownload:
  */
 export const createSnapshot = async (container: HTMLDivElement, fileType: string, toDownload: boolean, name: string) => {
 	const {PDF, PNG} = FILE_VARIANTS;
-	const fileName = `${name}_${getCurrentDate()}`;
 	const bgColor = fileType === PNG ? '#EFF3F8' : '#FFF';
 	const content = editContentRef.current ? editContentRef.current : viewContentRef.current;
 	content && content.scrollTo(0, 0);
@@ -192,10 +182,10 @@ export const createSnapshot = async (container: HTMLDivElement, fileType: string
 	const image = await createImage(container, bgColor);
 
 	if (fileType === PNG) {
-		return createPng(image, fileName, toDownload);
+		return createPng(image, name, toDownload);
 	}
 
 	if (fileType === PDF) {
-		return createPdf(image, fileName, container, toDownload);
+		return createPdf(image, name, container, toDownload);
 	}
 };

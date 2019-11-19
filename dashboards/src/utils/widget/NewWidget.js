@@ -6,7 +6,7 @@ class NewWidget {
 	desc: string = '';
 	id: string = NewWidget.id;
 	layout: LayoutItem = {
-		h: 3,
+		h: 4,
 		i: NewWidget.id,
 		w: 4,
 		x: 0,

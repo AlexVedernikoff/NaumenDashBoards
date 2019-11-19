@@ -1,6 +1,6 @@
 // @flow
-import {CHART_SELECTS, CHART_VARIANTS} from 'utils/chart';
-import {FIELDS, OPTIONS} from 'components/organisms/WidgetFormPanel';
+import {CHART_VARIANTS} from 'utils/chart';
+import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
 import type {FormData} from 'components/organisms/WidgetFormPanel/types';
 import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
 
@@ -148,16 +148,16 @@ const defaultFields = [
 ];
 
 const getDefaultValue = (key: string) => {
-	if (key.startsWith(type)) {
-		return CHART_SELECTS.AXIS_SELECTS[0];
+	if (/^type_(.*)$/.test(key)) {
+		return CHART_VARIANTS.COLUMN;
 	}
 
 	if (key.startsWith(aggregation)) {
-		return OPTIONS.DEFAULT_AGGREGATIONS[0];
+		return VALUES.DEFAULT_AGGREGATION.COUNT;
 	}
 
 	if (key.startsWith(group) || key.startsWith(breakdownGroup)) {
-		return OPTIONS.DEFAULT_GROUPS[0];
+		return VALUES.DEFAULT_GROUP.OVERLAP;
 	}
 
 	return null;
@@ -180,7 +180,7 @@ const filter = (data: FormData): any => {
 		[TABLE]: compositeFields(data, tableFields)
 	};
 
-	const variant = variants[data.type.value];
+	const variant = variants[data.type];
 	const typeFields = typeof variant === 'object' ? variant : variant();
 	const breakdownReg = new RegExp(`^${breakdown}(_.*|$)`);
 

@@ -8,7 +8,8 @@ export class Summary extends PureComponent<Props, State> {
 	state = {
 		height: 0,
 		title: '',
-		total: 0
+		total: 0,
+		width: 0
 	};
 
 	static getDerivedStateFromProps (props: Props) {
@@ -16,7 +17,7 @@ export class Summary extends PureComponent<Props, State> {
 		return title && total ? {title, total} : null;
 	}
 
-	resize = (width: number, height: number) => this.setState({height});
+	resize = (width: number, height: number) => this.setState({width, height});
 
 	renderSummary = () => (
 		<div className={styles.container}>
@@ -25,15 +26,15 @@ export class Summary extends PureComponent<Props, State> {
 	);
 
 	renderTotal = () => {
-		const {height, total} = this.state;
-		const {widget} = this.props;
-		const fontSize = height > 0 ? height : widget.layout.h;
+		const {height, total, width} = this.state;
+		const charWidth = width / total.toString().length;
+		const fontSize = charWidth > height ? height : charWidth * 1.3;
 
-		return <span className={styles.total} style={{fontSize}}>{total}</span>;
+		return <span style={{fontSize}}>{total}</span>;
 	};
 
 	render () {
-		return <ReactResizeDetector handleHeight onResize={this.resize} render={this.renderSummary} />;
+		return <ReactResizeDetector handleHeight handleWidth onResize={this.resize} render={this.renderSummary} />;
 	}
 }
 

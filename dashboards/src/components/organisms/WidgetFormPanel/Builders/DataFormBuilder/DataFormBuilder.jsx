@@ -1,13 +1,15 @@
 // @flow
-import type {AttrSelectProps, GetRefOptions, MixinInputProps} from './types';
+import type {AttrSelectProps, GetRefOptions, MiniSelectProps, MixinInputProps} from './types';
 import {Divider} from 'components/atoms';
 import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/constants';
 import type {ComputedAttr} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/types';
 import {ComputeAttrCreator} from 'components/organisms/WidgetFormPanel/Modals';
 import {createOrderName, getNumberFromName} from 'utils/widget';
+import cn from 'classnames';
 import {FIELDS, getAggregateOptions, getGroupOptions, styles as mainStyles, TYPES, VALUES} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from 'components/organisms/WidgetFormPanel/Builders/FormBuilder';
 import {getWidgetIcon} from 'icons/widgets';
+import {MiniSelect, TreeSelectInput} from 'components/molecules';
 import type {Node} from 'react';
 import type {OptionType} from 'react-select/src/types';
 import {PlusIcon} from 'icons/form';
@@ -15,7 +17,6 @@ import type {Props as TreeProps} from 'components/molecules/TreeSelectInput/type
 import React, {Fragment} from 'react';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import styles from './styles.less';
-import TreeSelectInput from 'components/molecules/TreeSelectInput';
 
 export class DataFormBuilder extends FormBuilder {
 	state = {
@@ -29,34 +30,41 @@ export class DataFormBuilder extends FormBuilder {
 	baseHandleSelectSource = async (name: string, source: SelectValue) => {
 		const {attributes, fetchAttributes, setFieldValue, values} = this.props;
 		const currentSource = values[name];
-		await setFieldValue(name, source);
 
-		if (currentSource && currentSource.value !== source.value) {
-			const descriptorName = this.createRefName(name, FIELDS.descriptor);
+		if (source) {
+			await setFieldValue(name, {...source});
 
-			setFieldValue(descriptorName, null);
-		}
+			if (currentSource && currentSource.value !== source.value) {
+				const descriptorName = this.createRefName(name, FIELDS.descriptor);
 
-		const classFqn = source.value;
+				setFieldValue(descriptorName, null);
+			}
 
-		if (!attributes[classFqn]) {
-			fetchAttributes(classFqn);
+			const classFqn = source.value;
+
+			if (!attributes[classFqn]) {
+				fetchAttributes(classFqn);
+			}
+		} else {
+			await setFieldValue(name, null);
 		}
 
 		this.clearSourceRefFields(name);
 	};
 
-	callFilterModal = (sourceFieldName: string) => async () => {
+	callFilterModal = (descriptorName: string, sourceName: string) => async () => {
 		const {setFieldValue, values} = this.props;
-		const descriptorName = this.createRefName(sourceFieldName, FIELDS.descriptor);
-		const source = values[sourceFieldName];
+		const source = values[sourceName];
 		const descriptor = values[descriptorName];
 
 		if (source) {
 			const context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
-			const {serializedContext} = await window.jsApi.commands.filterForm(context);
-
-			setFieldValue(descriptorName, serializedContext);
+			try {
+				const {serializedContext} = await window.jsApi.commands.filterForm(context);
+				setFieldValue(descriptorName, serializedContext);
+			} catch (e) {
+				console.error(e);
+			}
 		}
 	};
 
@@ -74,17 +82,13 @@ export class DataFormBuilder extends FormBuilder {
 	};
 
 	combineInputs = (left: Node, right: Node, withDivider: boolean = true) => (
-		<Fragment>
+		<div className={mainStyles.field}>
 			<div className={styles.combineInput}>
-				{left && <div className={styles.combineInputLeft}>
-					{left}
-				</div>}
-				<div className={styles.combineInputRight}>
-					{right}
-				</div>
+				{left && <div className={styles.combineInputLeft}>{left}</div>}
+				<div className={styles.combineInputRight}>{right}</div>
 			</div>
 			{withDivider && <Divider />}
-		</Fragment>
+		</div>
 	);
 
 	createFilterContext = (classFqn: string) => {
@@ -175,17 +179,17 @@ export class DataFormBuilder extends FormBuilder {
 
 	handleSelectWithRef = (baseRefName: string, getRefOptions: GetRefOptions) => (name: string, value: OptionType) => {
 		const {setFieldValue, values} = this.props;
+		const prevValue = values[name];
 		const refName = this.createRefName(name, baseRefName);
 		const refOptions = getRefOptions(value);
-		const refValueCode = values[refName] && values[refName].value;
 
-		setFieldValue(name, value);
+		setFieldValue(name, {...value});
 
-		if (!refValueCode || refOptions.find(o => o.value === refValueCode)) {
-			let refValue = refOptions[0];
+		if (!prevValue || prevValue.type !== value.type) {
+			let refValue = refOptions[0].value;
 
 			if (/group/i.test(refName) && TYPES.DATE.includes(value.type)) {
-				refValue = refOptions.find(o => o.value === VALUES.DATETIME_GROUP.MONTH);
+				refValue = VALUES.DATETIME_GROUP.MONTH;
 			}
 
 			setFieldValue(refName, refValue);
@@ -201,17 +205,13 @@ export class DataFormBuilder extends FormBuilder {
 		const value = values[name];
 
 		const props = {
-			border: false,
-			color: 'blue',
-			defaultValue: options[0],
-			isSearchable: false,
 			name,
 			options,
 			value
 		};
 
 		if (!refValue || (refValue && refValue.type !== COMPUTED_ATTR)) {
-			return this.renderSelect(props);
+			return this.renderMiniSelect(props);
 		}
 	};
 
@@ -257,7 +257,6 @@ export class DataFormBuilder extends FormBuilder {
 		const {values} = this.props;
 
 		const breakdown: AttrSelectProps = {
-			border: false,
 			name,
 			onSelect: this.handleSelectWithRef(FIELDS.breakdownGroup, getGroupOptions),
 			placeholder: 'Разбивка',
@@ -272,13 +271,24 @@ export class DataFormBuilder extends FormBuilder {
 		this.renderBreakdownInput(breakdown)
 	);
 
-	renderFilterButton = (source: string) => {
+	renderFilterButton = (sourceName: string) => {
+		const {values} = this.props;
+		const descriptorName = this.createRefName(sourceName, FIELDS.descriptor);
+		const descriptor = values[descriptorName];
+		let cnIcon = styles.filterIcon;
+		let cnText = styles.filterText;
+
+		if (descriptor) {
+			cnIcon = cn([cnIcon, styles.activeFilterIcon]);
+			cnText = cn([cnText, styles.activeFilterText]);
+		}
+
 		return (
-			<div className={styles.filter}>
-				<div onClick={this.callFilterModal(source)} className={styles.container}>
-					<PlusIcon />
+			<div className={mainStyles.field}>
+				<div className={styles.filterContainer} onClick={this.callFilterModal(descriptorName, sourceName)}>
+					<PlusIcon className={cnIcon}/>
+					<div className={cnText}>Фильтр</div>
 				</div>
-				<div>Фильтр</div>
 			</div>
 		);
 	};
@@ -291,11 +301,7 @@ export class DataFormBuilder extends FormBuilder {
 		let isDisabled = false;
 
 		let props = {
-			border: false,
-			color: 'blue',
-			defaultValue: options[0],
 			isDisabled,
-			isSearchable: false,
 			name,
 			options,
 			value: group
@@ -305,8 +311,10 @@ export class DataFormBuilder extends FormBuilder {
 			props = {...props, ...mixin};
 		}
 
-		return this.renderSelect(props);
+		return this.renderMiniSelect(props);
 	};
+
+	renderMiniSelect = (props: MiniSelectProps) => <MiniSelect onSelect={this.handleSelect} {...props} />;
 
 	renderModal = () => {
 		const {fieldName, showModal} = this.state;

@@ -23,10 +23,10 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				error: false,
 				loading: true
 			};
-		case DASHBOARD_EVENTS.RECEIVE_ROLE_MASTER:
+		case DASHBOARD_EVENTS.RECEIVE_USER_ROLE:
 			return {
 				...state,
-				master: action.payload
+				role: action.payload
 			};
 		case DASHBOARD_EVENTS.SET_CONTEXT:
 			return {

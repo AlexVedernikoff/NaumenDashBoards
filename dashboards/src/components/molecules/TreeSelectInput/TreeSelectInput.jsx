@@ -20,6 +20,19 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		showForm: false
 	};
 
+	getValue = () => {
+		let {value} = this.props;
+
+		if (value && value.label.length > 25) {
+			value = {
+				label: `${value.label.substring(0, 25)}...`,
+				value: value.value
+			};
+		}
+
+		return value;
+	};
+
 	handleOnChange = (value: TreeSelectValue) => {
 		const {name, onChange} = this.props;
 		onChange(name, value);
@@ -62,14 +75,12 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 			const {rule, value} = form;
 
 			return (
-				<div className={styles.formContainer}>
-					<InputForm
-						onClose={this.handleShowForm(false)}
-						onSubmit={this.handleSubmit}
-						rule={rule}
-						value={value}
-					/>
-				</div>
+				<InputForm
+					onClose={this.handleShowForm(false)}
+					onSubmit={this.handleSubmit}
+					rule={rule}
+					value={value}
+				/>
 			);
 		}
 	};
@@ -125,8 +136,7 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		const {
 			name,
 			placeholder,
-			tree,
-			value
+			tree
 		} = this.props;
 
 		return (
@@ -142,7 +152,7 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 				searchPlaceholder="Поиск..."
 				switcherIcon={this.renderSwitcherIcon}
 				treeNodeFilterProp="title"
-				value={value}
+				value={this.getValue()}
 			>
 				{this.renderRoot(tree)}
 			</TreeSelect>

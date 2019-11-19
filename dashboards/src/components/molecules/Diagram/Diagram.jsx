@@ -11,7 +11,7 @@ export class Diagram extends PureComponent<Props> {
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
 		const types = {[SUMMARY]: Summary, [TABLE]: Table};
-		const DiagramByType = types[widget.type.value] || Chart;
+		const DiagramByType = types[widget.type] || Chart;
 
 		return (
 			<div className={styles.diagram}>

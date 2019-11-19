@@ -48,17 +48,15 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
  * @returns {ApexOptions}
  */
 const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (widget: Widget, chart: DiagramData): ApexOptions => {
-	const {aggregation, showXAxis, showYAxis, xAxis, yAxis} = widget;
-	const stackedIsPercent = stacked && aggregation && aggregation.value === VALUES.DEFAULT_AGGREGATION.PERCENT;
+	const {aggregation, showXAxis, showYAxis, type, xAxis, yAxis} = widget;
+	const stackedIsPercent = stacked && aggregation === VALUES.DEFAULT_AGGREGATION.PERCENT;
+	const strokeWidth = type === CHART_VARIANTS.LINE ? 4 : 0;
 	let xAxisAttr = horizontal ? yAxis : xAxis;
 	let yAxisAttr = horizontal ? xAxis : yAxis;
 
 	const options: ApexOptions = {
 		chart: {
 			stacked
-		},
-		dataLabels: {
-			formatter: (val: number) => val > 0 ? val : ''
 		},
 		markers: {
 			hover: {
@@ -71,6 +69,9 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 				horizontal
 			}
 		},
+		stroke: {
+			width: strokeWidth
+		},
 		tooltip: {
 			intersect: true,
 			shared: false
@@ -79,13 +80,24 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			categories: chart.categories
 		},
 		yaxis: {
+			decimalsInFloat: 2,
 			forceNiceScale: !stackedIsPercent,
-			max: undefined,
-			min: 0
+			labels: {
+				formatter: (val: number, opts: any) => typeof opts === 'object' ? val.toFixed() : val
+			},
+			max: (max: number) => max > 0 ? Math.ceil(max) : 1,
+			min: 0,
+			tickAmount: 1
 		}
 	};
 
-	if (aggregation && aggregation.value === VALUES.DEFAULT_AGGREGATION.PERCENT) {
+	if (!stacked) {
+		options.dataLabels = {
+				formatter: (val: number) => val > 0 ? val.toFixed() : ''
+		};
+	}
+
+	if (aggregation === VALUES.DEFAULT_AGGREGATION.PERCENT) {
 		if (stacked) {
 			options.chart.stackType = '100%';
 		} else {
@@ -94,10 +106,10 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			 * В случае когда opts - объект, это значение оси Y.
  			 */
 			options.yaxis.labels = {
-				formatter: (val: number, opts: any) => typeof opts !== 'object' ? val : `${val}%`
+				formatter: (val: number, opts: any) => typeof opts !== 'object' ? val : `${val.toFixed(2)}%`
 			};
 
-			options.dataLabels.formatter = (val: number) => val > 0 ? `${val}%` : '';
+			options.dataLabels.formatter = (val: number) => val > 0 ? `${val.toFixed(2)}%` : '';
 		}
 	}
 
@@ -124,6 +136,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
  */
 const comboChart = (widget: Widget, chart: DiagramData) => {
 	const {series} = chart;
+	const strokeWidth = series.map(s => s.type === CHART_VARIANTS.LINE ? 4 : 0);
 	let stacked = false;
 	let percentDataKeys = [];
 
@@ -157,14 +170,22 @@ const comboChart = (widget: Widget, chart: DiagramData) => {
 			},
 			size: 5
 		},
+		stroke: {
+			width: strokeWidth
+		},
 		tooltip: {
 			intersect: true,
 			shared: false
 		},
 		yaxis: {
+			decimalsInFloat: 2,
 			forceNiceScale: true,
-			max: undefined,
-			min: 0
+			labels: {
+				formatter: (val: number, opts: any) => typeof opts === 'object' ? val : val.toFixed()
+			},
+			max: (max: number) => max > 0 ? Math.ceil(max) : 1,
+			min: 0,
+			tickAmount: 1
 		}
 	};
 
@@ -174,7 +195,7 @@ const comboChart = (widget: Widget, chart: DiagramData) => {
 				return '';
 			}
 
-			return percentDataKeys.includes(series[seriesIndex].dataKey) ? `${val}%` : val;
+			return percentDataKeys.includes(series[seriesIndex].dataKey) ? `${val.toFixed(2)}%` : val;
 		};
 	}
 
@@ -195,7 +216,7 @@ const circleChart = (widget: Widget, chart: DiagramData): ApexOptions => {
 		labels: chart.labels
 	};
 
-	if (aggregation && aggregation.value !== VALUES.DEFAULT_AGGREGATION.PERCENT) {
+	if (aggregation !== VALUES.DEFAULT_AGGREGATION.PERCENT) {
 		options.dataLabels = {
 			formatter: function (val, opts) {
 				return opts.w.config.series[opts.seriesIndex];
@@ -268,13 +289,10 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 			position: legendPosition ? legendPosition.value : 'bottom',
 			show: showLegend,
 			showForSingleSeries: true
-		},
-		stroke: {
-			width: 0
 		}
 	};
 
-	return extend(options, resolveMixin(widget.type.value)(widget, chart));
+	return extend(options, resolveMixin(widget.type)(widget, chart));
 };
 
 /**
@@ -286,7 +304,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 const getSeries = (widget: Widget, chart: DiagramData): ApexAxisChartSeries => {
 	const {series} = chart;
 
-	if (widget.type.value === CHART_VARIANTS.COMBO && series.length > 0) {
+	if (widget.type === CHART_VARIANTS.COMBO && series.length > 0) {
 		series.forEach(s => {
 			s.type = s.type === CHART_VARIANTS.LINE || s.type === CHART_TYPES.line ? CHART_TYPES.line : CHART_TYPES.bar;
 		});

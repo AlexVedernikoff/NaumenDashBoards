@@ -11,16 +11,7 @@ const DEFAULT_COMPONENTS = {
 	IndicatorSeparator: null
 };
 
-const NORMAL: 'normal' = 'normal';
-const SMALL: 'small' = 'small';
-
-const SELECT_SIZE = {
-	NORMAL,
-	SMALL
-};
-
 export {
 	ATTR_PROPS,
-	DEFAULT_COMPONENTS,
-	SELECT_SIZE
+	DEFAULT_COMPONENTS
 };

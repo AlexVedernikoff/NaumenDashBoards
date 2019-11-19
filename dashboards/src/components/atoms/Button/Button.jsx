@@ -27,7 +27,7 @@ export class Button extends Component<Props> {
 			mixins.push(className);
 		}
 
-		return cn([styles.btn, ...mixins]);
+		return cn([styles.button, ...mixins]);
 	};
 
 	render () {

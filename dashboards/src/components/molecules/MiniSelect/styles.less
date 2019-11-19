@@ -1,0 +1,58 @@
+:local {
+	@bg: #EFF3F8;
+
+	.caret {
+		position: absolute;
+		right: 5px;
+		top: 15px;
+	}
+
+	.disabled {
+		opacity: 0.8;
+		pointer-events: none;
+	}
+
+	.label {
+		cursor: default;
+	}
+
+	.list {
+		background-color: white;
+		box-shadow: 0 0 5px lighten(black, 70%);
+		left: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+		z-index: 1;
+	}
+
+	.option {
+		align-items: center;
+		background-color: @bg;
+		cursor: pointer;
+		display: flex;
+		height: 38px;
+		justify-content: center;
+		margin: 5px;
+
+		&:hover {
+			background-color: #D1D1D1;
+		}
+	}
+
+	.select {
+		background: @bg;
+		border-radius: 2px;
+		color: #5F5F5F;
+		font-size: 12px;
+		position: relative;
+	}
+
+	.valueContainer {
+		align-items: center;
+		display: flex;
+		height: 38px;
+		justify-content: center;
+		position: relative;
+	}
+}

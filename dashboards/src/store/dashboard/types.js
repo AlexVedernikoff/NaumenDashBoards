@@ -2,6 +2,8 @@
 import type {Context} from 'utils/api/types';
 import {DASHBOARD_EVENTS} from './constants';
 
+export type Role = 'master' | 'super' | null;
+
 type RequestDashboard = {
 	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD,
 	payload: null
@@ -13,8 +15,8 @@ export type ReceiveDashboard = {
 };
 
 export type ReceiveRoleMaster = {
-	type: typeof DASHBOARD_EVENTS.RECEIVE_ROLE_MASTER,
-	payload: boolean
+	type: typeof DASHBOARD_EVENTS.RECEIVE_USER_ROLE,
+	payload: Role
 };
 
 type RecordDashboardError = {
@@ -52,5 +54,5 @@ export type DashboardState = {
 	editable: boolean,
 	error: boolean,
 	loading: boolean,
-	master: boolean
+	role: Role
 };

@@ -1,5 +1,5 @@
 // @flow
-import {WIDGET_VARIANTS} from './constansts';
+import {WIDGET_VARIANTS} from './constants';
 
 const WIDGET_SELECTS = [
 	{

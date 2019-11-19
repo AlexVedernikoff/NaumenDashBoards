@@ -1,4 +1,5 @@
 // @flow
+import {Divider} from 'components/atoms';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
@@ -35,6 +36,7 @@ export class Summary extends OrderFormBuilder {
 				{this.renderModal()}
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(false), source)}
+				<Divider />
 				{this.renderByOrder(this.renderCompositeInputs, [aggregation, indicator], true)}
 			</Fragment>
 		);

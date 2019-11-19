@@ -11,11 +11,9 @@ export class Chart extends PureComponent<Props, State> {
 	};
 
 	static getDerivedStateFromProps (props: Props, state: State) {
-		let {categories, labels, series} = props.data;
-		// TODO убрать как на бэке начнут отфильтровывать значения с null
-		const isFailedData = series.find(s => s === null);
+		const {categories, labels, series} = props.data;
 
-		if (!isFailedData && Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
+		if (Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
 			const {options, series} = getConfig(props.widget, props.data);
 			state.options = options;
 			state.series = series;
@@ -28,7 +26,7 @@ export class Chart extends PureComponent<Props, State> {
 
 	getType = () => {
 		const {widget} = this.props;
-		const type = widget.type.value;
+		const {type} = widget;
 
 		return type === CHART_VARIANTS.COMBO ? 'line' : getChartType(type);
 	};

@@ -11,6 +11,10 @@ export class BarChart extends DataFormBuilder {
 	renderInputs = () => {
 		const {values} = this.props;
 
+		const sourceLabel = {
+			name: 'Источник'
+		};
+
 		const xAxis = {
 			border: false,
 			onSelect: this.handleSelectWithRef(FIELDS.group, getGroupOptions),
@@ -29,6 +33,7 @@ export class BarChart extends DataFormBuilder {
 
 		return (
 			<Fragment>
+				{this.renderLabel(sourceLabel)}
 				{this.renderSourceInput()}
 				<Divider />
 				{this.combineInputs(

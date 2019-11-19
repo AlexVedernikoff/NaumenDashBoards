@@ -4,6 +4,7 @@ import type {DataSourceMap} from 'store/sources/data/types';
 import type {Context} from 'utils/api/types';
 import {FormikProps} from 'formik';
 import {NewWidget} from 'entities';
+import type {Role} from 'store/dashboard/types';
 import type {SaveFormData, CreateFormData} from 'components/organisms/WidgetFormPanel/types';
 import type {ThunkAction} from 'store/types';
 import type {Widget} from 'store/widgets/data/types';
@@ -11,7 +12,7 @@ import type {Widget} from 'store/widgets/data/types';
 export type ConnectedProps = {
 	attributes: AttributeMap,
 	context: Context,
-	master: boolean,
+	role: Role,
 	saveError: boolean,
 	selectedWidget: Widget | NewWidget,
 	sources: DataSourceMap,
