@@ -144,7 +144,7 @@ export class LayoutGrid extends Component<Props, State> {
 	);
 
 	renderDrillDownButtonByType = (widget: Widget) => {
-		if (widget.type.value === CHART_VARIANTS.COMBO) {
+		if (widget.type === CHART_VARIANTS.COMBO) {
 			return this.renderDrillDownButtons(widget);
 		}
 

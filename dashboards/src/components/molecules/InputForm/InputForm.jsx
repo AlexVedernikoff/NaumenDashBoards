@@ -30,7 +30,7 @@ export class InputForm extends Component<Props> {
 		return (
 			<div className={styles.container}>
 				<input
-					autoComplete={false}
+					autoComplete="off"
 					className={styles.input}
 					name={name}
 					onChange={handleChange}

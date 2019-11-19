@@ -21,18 +21,20 @@ export class Footer extends Component<WrappedProps> {
 		this.handleSubmit(true);
 	};
 
-	renderButtons = () => {
-		const {cancelForm, updating} = this.props;
+	renderButtons = () => (
+		<Fragment>
+			{this.renderSaveButton()}
+			{this.renderCancelButton()}
+		</Fragment>
+	);
+
+	renderCancelButton = () => {
+		const {cancelForm} = this.props;
 
 		return (
-			<div className={styles.defaultButtons}>
-				<Button disabled={updating} onClick={this.handleSave}>
-					Сохранить
-				</Button>
-				<Button onClick={cancelForm} variant="bare" outline>
-					Отмена
-				</Button>
-			</div>
+			<Button onClick={cancelForm} outline variant="bare">
+				Отмена
+			</Button>
 		);
 	};
 
@@ -44,9 +46,9 @@ export class Footer extends Component<WrappedProps> {
 	);
 
 	renderDefaultSaveButton = () => {
-		const {master} = this.props;
+		const {role} = this.props;
 
-		if (master) {
+		if (role) {
 			return (
 				<div className={styles.masterButton}>
 					<button type="button" onClick={this.handleSaveAsDefault}>
@@ -62,6 +64,18 @@ export class Footer extends Component<WrappedProps> {
 
 		if (saveError) {
 			return <div className="mt-1">Ошибка сохранения</div>;
+		}
+	};
+
+	renderSaveButton = () => {
+		const {role, updating} = this.props;
+
+		if (role !== 'super') {
+			return (
+				<Button disabled={updating} onClick={this.handleSave}>
+					Сохранить
+				</Button>
+			);
 		}
 	};
 

@@ -6,9 +6,9 @@ import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {WIDGETS_EVENTS} from './constants';
 
 export type Widget = {
-	aggregation?: SelectValue,
+	aggregation?: string,
 	breakdown?: Attribute | null,
-	breakdownGroup?: SelectValue | null,
+	breakdownGroup?: string,
 	calcTotalColumn?: boolean,
 	calcTotalRow?: boolean,
 	chart?: SelectValue | null,
@@ -16,9 +16,9 @@ export type Widget = {
 	column?: Attribute,
 	descriptor: ?string,
 	diagramName: string,
-	group?: SelectValue | null,
+	group?: string,
 	id: string,
-	indicator?: SelectValue | null,
+	indicator?: Attribute | null,
 	layout: LayoutItem,
 	legendPosition?: SelectValue,
 	order?: Array<number>,
@@ -30,7 +30,7 @@ export type Widget = {
 	showXAxis?: boolean,
 	showYAxis?: boolean,
 	source?: SelectValue,
-	type: SelectValue,
+	type: string,
 	xAxis?: Attribute,
 	yAxis?: Attribute,
 };

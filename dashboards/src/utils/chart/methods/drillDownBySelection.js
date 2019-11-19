@@ -1,9 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {createOrderName, getNumberFromName, getValue} from 'utils/widget';
+import {createOrderName, getNumberFromName} from 'utils/widget';
 import {CHART_VARIANTS} from 'utils/chart/constants';
 import type {DiagramData} from 'store/widgets/diagrams/types';
-import {drillDown} from 'store/widgets/links/actions';
+import {comboDrillDown, drillDown} from 'store/widgets/links/actions';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {store} from 'src';
@@ -20,7 +20,10 @@ import type {Widget} from 'store/widgets/data/types';
  */
 const addFilter = (mixin: DrillDownMixin, attr: ?Attribute, value: string | number, group: ?string) => {
 	if (attr) {
-		mixin.title = `${mixin.title}. ${attr.title}`;
+		if (value) {
+			mixin.title = `${mixin.title}. ${value}`;
+		}
+
 		mixin.filters.push({attr, group, value});
 	}
 };
@@ -37,9 +40,11 @@ const axisChart = (widget: Widget, {categories, series}: DiagramData, config: an
 	const {dataPointIndex, seriesIndex} = config;
 
 	if (Array.isArray(categories) && Array.isArray(series)) {
-		addFilter(mixin, xAxis, categories[dataPointIndex], getValue(group));
-		addFilter(mixin, breakdown, series[seriesIndex].name, getValue(breakdownGroup));
+		addFilter(mixin, xAxis, categories[dataPointIndex], group);
+		addFilter(mixin, breakdown, series[seriesIndex].name, breakdownGroup);
 	}
+
+	store.dispatch(drillDown(widget, mixin));
 };
 
 /**
@@ -63,22 +68,11 @@ const comboChart = (widget: Widget, {labels, series}: DiagramData, config: any, 
 		const group = widget[createOrderName(currentNumber)(FIELDS.group)];
 		const breakdown = widget[createOrderName(currentNumber)(FIELDS.breakdown)];
 		const breakdownGroup = widget[createOrderName(currentNumber)(FIELDS.breakdownGroup)];
-		const cases = [];
-		let classFqn = getValue(widget[createOrderName(currentNumber)(FIELDS.source)]);
 
-		mixin.classFqn = classFqn;
+		addFilter(mixin, xAxis, labels[dataPointIndex], group);
+		addFilter(mixin, breakdown, series[seriesIndex].breakdownValue, breakdownGroup);
 
-		addFilter(mixin, xAxis, labels[dataPointIndex], getValue(group));
-		addFilter(mixin, breakdown, series[seriesIndex].breakdownValue, getValue(breakdownGroup));
-
-		if (classFqn && classFqn.includes('$')) {
-			const parts = classFqn.split('$');
-			classFqn = parts.shift();
-			cases.push(parts.pop());
-
-			mixin.classFqn = classFqn;
-			mixin.cases = cases;
-		}
+		store.dispatch(comboDrillDown(widget, currentNumber, mixin));
 	}
 };
 
@@ -93,8 +87,10 @@ const circleChart = (widget: Widget, {labels}: DiagramData, {dataPointIndex}: an
 	const {breakdown, breakdownGroup} = widget;
 
 	if (Array.isArray(labels)) {
-		addFilter(mixin, breakdown, labels[dataPointIndex], getValue(breakdownGroup));
+		addFilter(mixin, breakdown, labels[dataPointIndex], breakdownGroup);
 	}
+
+	store.dispatch(drillDown(widget, mixin));
 };
 
 /**
@@ -102,7 +98,7 @@ const circleChart = (widget: Widget, {labels}: DiagramData, {dataPointIndex}: an
  * @param {string} type - тип диаграммы
  * @returns {Function} - функция создания примеси
  */
-const resolveMixinCreator = (type: string) => {
+const resolve = (type: string) => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
 
 	const creators = {
@@ -134,8 +130,7 @@ const drillDownBySelection = (widget: Widget, chart: DiagramData) => (event: any
 		title: diagramName
 	};
 
-	resolveMixinCreator(type.value)(widget, chart, config, mixin);
-	store.dispatch(drillDown(widget, mixin));
+	resolve(type)(widget, chart, config, mixin);
 };
 
 export {

@@ -18,7 +18,7 @@ export class OrderFormBuilder extends DataFormBuilder {
 		const {TABLE, SUMMARY} = WIDGET_VARIANTS;
 		const {setFieldValue, values} = this.props;
 		const order = values[FIELDS.order];
-		const type = values[FIELDS.type].value;
+		const type = values[FIELDS.type];
 
 		if (!Array.isArray(order)) {
 			this.defaultOrder.forEach(num => {
@@ -77,8 +77,8 @@ export class OrderFormBuilder extends DataFormBuilder {
 			const mainProperty = values[createOrderName(mainNumber)(this.getBaseName(name))];
 			const currentProperty = values[name];
 			const currentIsNotMain = !currentProperty
-				|| mainProperty.value !== currentProperty.value
-				|| mainProperty.code !== currentProperty.code;
+				|| mainProperty.code !== currentProperty.code
+				|| mainProperty !== currentProperty;
 
 			if (mainProperty && currentIsNotMain) {
 				setFieldValue(name, mainProperty);

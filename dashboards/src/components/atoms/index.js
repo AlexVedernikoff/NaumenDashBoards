@@ -3,6 +3,7 @@ import Button from './Button';
 import CheckBox from './CheckBox';
 import Divider from './Divider';
 import DropDown from './DropDown';
+import FieldLabel from './FieldLabel';
 import IconButton from './IconButton';
 import Label from './Label';
 import TextArea from './TextArea';
@@ -14,6 +15,7 @@ export {
 	CheckBox,
 	Divider,
 	DropDown,
+	FieldLabel,
 	IconButton,
 	Label,
 	TextArea,

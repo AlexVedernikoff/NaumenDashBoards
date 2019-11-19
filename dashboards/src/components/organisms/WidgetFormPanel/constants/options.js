@@ -1,4 +1,18 @@
 // @flow
+import {
+	Bar,
+	BarStacked,
+	Column,
+	ColumnStacked,
+	Combo,
+	Donut,
+	Line,
+	Pie,
+	Summary,
+	Table
+} from 'icons/widgets';
+import {CHART_VARIANTS} from 'utils/chart/constants';
+import {WIDGET_VARIANTS} from 'utils/widget';
 import VALUES from './values';
 
 const {DATETIME_GROUP, DEFAULT_GROUP, DEFAULT_AGGREGATION, INTEGER_AGGREGATION} = VALUES;
@@ -77,12 +91,72 @@ const INTEGER_AGGREGATIONS = [
 	}
 ];
 
+const WIDGETS = [
+	{
+		label: Column,
+		value: CHART_VARIANTS.COLUMN
+	},
+	{
+		label: ColumnStacked,
+		value: CHART_VARIANTS.COLUMN_STACKED
+	},
+	{
+		label: Bar,
+		value: CHART_VARIANTS.BAR
+	},
+	{
+		label: BarStacked,
+		value: CHART_VARIANTS.BAR_STACKED
+	},
+	{
+		label: Line,
+		value: CHART_VARIANTS.LINE
+	},
+	{
+		label: Pie,
+		value: CHART_VARIANTS.PIE
+	},
+	{
+		label: Donut,
+		value: CHART_VARIANTS.DONUT
+	},
+	{
+		label: Combo,
+		value: CHART_VARIANTS.COMBO
+	},
+	{
+		label: Summary,
+		value: WIDGET_VARIANTS.SUMMARY
+	},
+	{
+		label: Table,
+		value: WIDGET_VARIANTS.TABLE
+	}
+];
+
+const CHARTS = [
+	{
+		label: Column,
+		value: CHART_VARIANTS.COLUMN
+	},
+	{
+		label: ColumnStacked,
+		value: CHART_VARIANTS.COLUMN_STACKED
+	},
+	{
+		label: Line,
+		value: CHART_VARIANTS.LINE
+	}
+];
+
 const OPTIONS = {
+	CHARTS,
 	DATETIME_GROUPS,
 	DEFAULT_AGGREGATIONS,
 	DEFAULT_GROUPS,
 	INTEGER_AGGREGATIONS,
-	LEGEND_POSITIONS
+	LEGEND_POSITIONS,
+	WIDGETS
 };
 
 export default OPTIONS;

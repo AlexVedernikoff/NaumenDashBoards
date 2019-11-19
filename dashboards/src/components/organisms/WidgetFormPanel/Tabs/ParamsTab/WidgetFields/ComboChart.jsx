@@ -1,7 +1,6 @@
 // @flow
-import {CHART_SELECTS} from 'utils/chart';
 import {createOrderName, getNumberFromName} from 'utils/widget';
-import {FIELDS, getAggregateOptions, getGroupOptions, TYPES} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, getAggregateOptions, getGroupOptions, OPTIONS, styles as mainStyles, TYPES} from 'components/organisms/WidgetFormPanel';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
@@ -82,19 +81,20 @@ export class ComboChart extends OrderFormBuilder {
 		const {values} = this.props;
 
 		const chart = {
-			defaultValue: CHART_SELECTS.AXIS_SELECTS[0],
-			getOptionLabel: this.getIconLabel,
 			name: name,
-			options: CHART_SELECTS.AXIS_SELECTS,
+			options: OPTIONS.CHARTS,
+			showCaret: false,
 			value: values[name]
 		};
 
 		return (
-			<div className={styles.chartInputContainer}>
-				<div className={styles.chartInput}>
-					{this.renderSelect(chart)}
+			<div className={mainStyles.field}>
+				<div className={styles.chartInputContainer}>
+					<div className={styles.chartInput}>
+						{this.renderMiniSelect(chart)}
+					</div>
+					<div>Ось Y</div>
 				</div>
-				<div>Ось Y</div>
 			</div>
 		);
 	};

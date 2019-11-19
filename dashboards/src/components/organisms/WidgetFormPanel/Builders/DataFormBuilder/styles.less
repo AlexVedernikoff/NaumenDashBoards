@@ -1,34 +1,42 @@
 :local {
-	.filter {
+	@active-filter-color: #333;
+	@default-filter-color: #bbb;
+
+	.filterContainer {
 		align-items: center;
-		color: #333;
+		cursor: pointer;
 		display: inline-flex;
-		margin-top: 10px;
 
-		.container {
-			cursor: pointer;
-		}
-
-		span {
-			display: inline-block;
-		}
-
-		svg {
-			background-color: #333;
-			border-radius: 2px;
-			color: white;
-			margin: 0 5px -1px 0;
-			position: relative;
-			z-index: 50;
-
-			&:hover {
-				background: lighten(#333, 20);
+		&:hover {
+			.filterIcon {
+				background: lighten(@active-filter-color, 20);
 			}
 
-			&:active {
-				background: darken(#333, 10);
+			.filterText {
+				color: lighten(@active-filter-color, 20);
 			}
 		}
+	}
+
+	.filterIcon {
+		background-color: @default-filter-color;
+		border-radius: 2px;
+		color: white;
+		display: inline-block;
+		margin-left: 8px;
+	}
+
+	.filterText {
+		color: @default-filter-color;
+		margin-left: 10px;
+	}
+
+	.activeFilterIcon {
+		background-color: @active-filter-color;
+	}
+
+	.activeFilterText {
+		color: @active-filter-color;
 	}
 
 	.combineInput {
@@ -37,11 +45,11 @@
 	}
 
 	.combineInputLeft {
-		width: 70px;
+		width: 80px;
 	}
 
 	.combineInputRight {
-		flex: auto;
+		width: calc(100% - 80px);
 	}
 
 	.labelWithIcon {

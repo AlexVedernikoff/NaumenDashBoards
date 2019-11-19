@@ -42,8 +42,9 @@ const createCompositePostData = (widget: Widget) => {
 
 	if (Array.isArray(order)) {
 		const firstNumber = order[0];
-		const source = widget[createOrderName(firstNumber)(FIELDS.source)];
-		const descriptor = widget[createOrderName(firstNumber)(FIELDS.descriptor)];
+		const createName = createOrderName(firstNumber);
+		const descriptor = widget[createName(FIELDS.descriptor)];
+		const source = widget[createName(FIELDS.source)];
 		const baseClassFqn = source && source.value;
 
 		const {cases, classFqn} = getPartsClassFqn(baseClassFqn);
@@ -68,9 +69,8 @@ const createCompositePostData = (widget: Widget) => {
  */
 const drillDown = (widget: Widget, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
-	const type = widget.type.value;
 
-	const creator = [SUMMARY, TABLE].includes(type) ? createCompositePostData : createCommonPostData;
+	const creator = [SUMMARY, TABLE].includes(widget.type) ? createCompositePostData : createCommonPostData;
 	let postData = creator(widget);
 
 	if (mixin && typeof mixin === 'object') {
@@ -84,23 +84,29 @@ const drillDown = (widget: Widget, mixin: ?DrillDownMixin): ThunkAction => async
  * Создание ссылки для перехода на данные комбо диаграммы
  * @param {Widget} widget - данные виджета
  * @param {number} orderNum - порядковый номер выбранного источника
+ * @param {DrillDownMixin} mixin - примесь данных (создается при выборе конкретного элемента графика)
  * @returns {Function}
  */
-const comboDrillDown = (widget: Widget, orderNum: number): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const source = widget[createOrderName(orderNum)(FIELDS.source)];
-	const descriptor = widget[createOrderName(orderNum)(FIELDS.descriptor)];
+const comboDrillDown = (widget: Widget, orderNum: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	const createName = createOrderName(orderNum);
+	const source = widget[createName(FIELDS.source)];
+	const descriptor = widget[createName(FIELDS.descriptor)];
 
 	if (source) {
 		const {label, value} = source;
 		const {cases, classFqn} = getPartsClassFqn(value);
 
-		const postData = {
+		let postData = {
 			attrCodes: null,
 			cases,
 			classFqn,
 			descriptor,
 			title: label
 		};
+
+		if (mixin && typeof mixin === 'object') {
+			postData = {...postData, ...mixin};
+		}
 
 		dispatch(getLink(widget.id, postData));
 	}

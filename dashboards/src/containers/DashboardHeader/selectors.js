@@ -9,7 +9,7 @@ import {editDashboard, fetchDashboard, resetDashboard, seeDashboard, sendToMail}
  */
 export const props = (state: AppState): ConnectedProps => ({
 	editable: state.dashboard.editable,
-	master: state.dashboard.master
+	role: state.dashboard.role
 });
 
 export const functions: ConnectedFunctions = {

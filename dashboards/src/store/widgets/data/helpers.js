@@ -146,7 +146,8 @@ export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): 
  * @returns {WidgetsDataState}
  */
 export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): WidgetsDataState => {
-	state.map[payload.id] = {...payload, layout: state.map[payload.id].layout};
+	state.map[payload.id] = payload;
+	state.selectedWidget = payload.id;
 	return {
 		...state,
 		updating: false,

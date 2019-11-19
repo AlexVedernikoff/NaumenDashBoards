@@ -1,21 +1,88 @@
+@color: #767676;
+@font-size: 14px;
+
 :local {
 	.editIconContainer {
 		background-color: white;
 		height: 100%;
+		opacity: 0;
 		padding: 0 5px;
 		position: absolute;
 		right: 0;
 		top: 3px;
 		z-index: 99;
+
+		&:hover {
+			opacity: 1;
+		}
 	}
 
 	.formContainer {
-		align-items: center;
-		display: flex;
-		height: 38px;
-		width: 100%;
+		box-sizing: border-box;
+		padding-left: 10px;
+	}
+
+	.plusIcon {
+		margin-right: 5px;
 	}
 }
+
+.dashboard__select {
+	border: none;
+	outline: none;
+}
+
+.dashboard__select__control {
+	background-color: #EFF3F8;
+	border-radius: 2px !important;
+	box-shadow: none !important;
+	height: 38px;
+
+	&:hover {
+		border-color: darkgray !important;
+	}
+}
+
+.dashboard__select__input {
+	font-size: @font-size;
+}
+
+.dashboard__select__indicators {
+	svg {
+		margin-left: 15px;
+	}
+}
+
+.dashboard__select__single-value {
+	font-size: @font-size;
+	width: 100%;
+}
+
+.dashboard__select__option {
+	font-size: @font-size !important;
+
+	&--is-focused {
+		background-color: #EBEBEB !important;
+	}
+
+	&--is-selected {
+		background-color: #F4F4F4 !important;
+		color: #000 !important;
+	}
+}
+
+.dashboard__select__placeholder {
+	color: #000;
+	font-size: @font-size;
+}
+
+.dashboard__select__menu {
+	border: 1px solid #E4E4E4;
+	border-radius: 0 !important;
+	margin-top: 0 !important;
+	z-index: 100 !important;
+}
+
 
 
 

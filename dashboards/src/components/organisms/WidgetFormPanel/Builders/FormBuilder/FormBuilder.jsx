@@ -1,11 +1,11 @@
 // @flow
-import {CheckBox, Divider, Label, TextArea} from 'components/atoms';
+import {CheckBox, Divider, FieldLabel, Label, TextArea} from 'components/atoms';
+import cn from 'classnames';
 import type {CheckBoxProps, LabelProps, SelectProps, State, TextAreaProps} from './types';
 import {ErrorMessage} from 'formik';
 import type {FormikProps} from 'formik';
-import type {OptionType} from 'react-select/src/types';
 import type {Props} from 'containers/WidgetFormPanel/types';
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import {Select} from 'components/molecules';
 import {styles} from 'components/organisms/WidgetFormPanel';
 
@@ -14,13 +14,7 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
-	handleSelect = (name: string, value: OptionType) => this.props.setFieldValue(name, value);
-
-	renderHeader = (title: string) => (
-		<div className={styles.field}>
-			<span className={styles.header}>{title}</span>
-		</div>
-	);
+	handleSelect = (name: string, value: any) => this.props.setFieldValue(name, value);
 
 	renderLabel = (props: LabelProps) => (
 		<div className={styles.field}>
@@ -32,20 +26,22 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 		const {hideDivider, label, name, value} = props;
 
 		return (
-			<div className={styles.field} key={name}>
-				<CheckBox
-					onClick={this.handleClick}
-					label={label}
-					name={name}
-					value={value}
-				/>
+			<Fragment>
+				<div className={styles.field} key={name}>
+					<CheckBox
+						label={label}
+						onClick={this.handleClick}
+						name={name}
+						value={value}
+					/>
+				</div>
 				{!hideDivider && <Divider className={styles.dividerLeft} />}
-			</div>
+			</Fragment>
 		);
 	};
 
 	renderSelect = (props: SelectProps) => (
-		<div className={styles.field} key={props.name}>
+		<div key={props.name}>
 			<Select onSelect={props.onSelect || this.handleSelect} {...props} />
 			<span className={styles.error}>
 				{this.props.errors[props.name]}
@@ -58,9 +54,9 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 		const {handleBlur, label, name, placeholder, value} = props;
 
 		return (
-			<div className={styles.field}>
+			<div className={cn([styles.field, styles.textAreaField])}>
+				<FieldLabel text={label} />
 				<TextArea
-					label={label}
 					name={name}
 					onBlur={handleBlur || formikHandleBlur}
 					onChange={handleChange}

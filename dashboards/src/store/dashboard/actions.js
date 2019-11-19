@@ -22,7 +22,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 		await Promise.all([
 			dispatch(getDataSources()),
-			dispatch(getRoleMaster()),
+			dispatch(getUserRole()),
 			dispatch(getWidgets(true))
 		]);
 
@@ -32,13 +32,12 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 	}
 };
 
-const getRoleMaster = (): ThunkAction => async (dispatch: Dispatch) => {
+const getUserRole = (): ThunkAction => async (dispatch: Dispatch) => {
 	try {
-		const {data} = await client.post(buildUrl('dashboardSettings', 'getAvailabilityGroupMasterDashboard', 'user'));
-		dispatch(receiveRoleMaster(data));
+		const {data: role} = await client.post(buildUrl('dashboardSettings', 'getUserRole', 'user'));
+		dispatch(receiveUserRole(role));
 	} catch (e) {
 		dispatch(recordDashboardError());
-		throw e;
 	}
 };
 
@@ -75,12 +74,16 @@ const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 
 /**
  * Отправка файла на почту
+ * @param {string} name - название файла
+ * @param {string} type - тип файла
  * @param {Blob} file - файл для отправки
  * @returns {ThunkAction}
  */
-const sendToMail = (file: Blob): ThunkAction => () => {
+const sendToMail = (name: string, type: string, file: Blob): ThunkAction => () => {
 	const data = new FormData();
-	data.append('fileBytes', file);
+	data.append('fileBytes', file, name);
+	data.append('fileFormat', type);
+	data.append('fileName', name);
 
 	client.post(buildUrl('dashboardSendEmail', 'sendFileToMail', 'request,user'), data, {
 		headers: {
@@ -94,8 +97,8 @@ const requestDashboard = () => ({
 	type: DASHBOARD_EVENTS.REQUEST_DASHBOARD
 });
 
-const receiveRoleMaster = payload => ({
-	type: DASHBOARD_EVENTS.RECEIVE_ROLE_MASTER,
+const receiveUserRole = payload => ({
+	type: DASHBOARD_EVENTS.RECEIVE_USER_ROLE,
 	payload
 });
 

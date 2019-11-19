@@ -1,7 +1,7 @@
 // @flow
 import {ColorPalette} from 'components/molecules';
-import {Divider} from 'components/atoms';
-import {FIELDS, OPTIONS, VALUES} from 'components/organisms/WidgetFormPanel';
+import {Divider, FieldLabel} from 'components/atoms';
+import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Fragment} from 'react';
@@ -26,7 +26,12 @@ export class Chart extends FormBuilder {
 		this.props.setFieldValue(FIELDS.colors, colors);
 	};
 
-	renderColorPalette = () => <ColorPalette colors={this.getColors()} onChange={this.changeColor} />;
+	renderColorPalette = () => (
+		<div className={styles.field}>
+			<FieldLabel text="Цвета диаграммы" />
+			<ColorPalette colors={this.getColors()} onChange={this.changeColor} />
+		</div>
+	);
 
 	renderVisibilityAxisCheckboxes = (): any => {
 		const {axis, values} = this.props;
@@ -82,13 +87,18 @@ export class Chart extends FormBuilder {
 		const {legendPosition} = FIELDS;
 
 		const legendPositionProps = {
+			isSearchable: false,
 			name: legendPosition,
 			options: OPTIONS.LEGEND_POSITIONS,
 			placeholder: 'Расположение легенды',
 			value: values[legendPosition]
 		};
 
-		return this.renderSelect(legendPositionProps);
+		return (
+			<div className={styles.field}>
+				{this.renderSelect(legendPositionProps)}
+			</div>
+		);
 	};
 
 	render () {
@@ -99,7 +109,6 @@ export class Chart extends FormBuilder {
 				{this.renderLegendCheckbox()}
 				{this.renderLegendPositionInput()}
 				<Divider />
-				{this.renderHeader('Цвета диаграммы')}
 				{this.renderColorPalette()}
 			</Fragment>
 		);

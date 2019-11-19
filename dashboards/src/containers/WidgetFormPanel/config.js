@@ -1,11 +1,22 @@
 // @flow
-import {CHART_SELECTS} from 'utils/chart';
+import {CHART_VARIANTS} from 'utils/chart';
 import type {ConnectedProps, ValidateType} from './types';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
 import {lazy} from 'yup';
 import {NewWidget} from 'utils/widget';
 import getSchema from './schemas.js';
+
+// TODO убрать как будут перенастроенны все виджеты
+const getType = (type: string) => {
+	if (type && typeof type === 'object') {
+		return type.value;
+	} else if (type) {
+		return type;
+	}
+
+	return CHART_VARIANTS.COLUMN;
+};
 
 const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
@@ -14,7 +25,7 @@ const config: FormikConfig = {
 		return {
 			asDefault: false,
 			isNew: id === NewWidget.id,
-			type: type || CHART_SELECTS.AXIS_SELECTS[0],
+			type: getType(type),
 			...values
 		};
 	},

@@ -109,7 +109,7 @@ const compositeVariants = {
 };
 
 const resolveRules = (values: FormikValues) => {
-	const type = values.type.value;
+	const {type} = values;
 	return [COMBO, SUMMARY, TABLE].includes(type) ? compositeVariants[type](values) : commonVariants[type];
 };
 

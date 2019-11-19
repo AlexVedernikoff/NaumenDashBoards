@@ -1,11 +1,12 @@
 // @flow
 import {AxisChart, BarChart, CircleChart, ComboChart, Summary, Table} from './WidgetFields';
-import {CHART_SELECTS, CHART_VARIANTS} from 'utils/chart';
+import {CHART_VARIANTS} from 'utils/chart';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import {Divider} from 'components/atoms';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {Divider, FieldLabel} from 'components/atoms';
+import {FIELDS, OPTIONS, styles} from 'components/organisms/WidgetFormPanel';
+import {OuterSelect} from 'components/molecules';
 import React, {Fragment} from 'react';
-import {WIDGET_SELECTS, WIDGET_VARIANTS} from 'utils/widget';
+import {WIDGET_VARIANTS} from 'utils/widget';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class ParamsTab extends DataFormBuilder {
@@ -44,7 +45,6 @@ export class ParamsTab extends DataFormBuilder {
 	renderInputs = () => {
 		const {values} = this.props;
 		const {diagramName, name, type} = FIELDS;
-		const {AXIS_HORIZONTAL_SELECTS, AXIS_SELECTS, CIRCLE_SELECTS, COMBO_SELECT} = CHART_SELECTS;
 
 		const nameProps = {
 			handleBlur: this.handleBlurName,
@@ -60,22 +60,31 @@ export class ParamsTab extends DataFormBuilder {
 			value: values[diagramName]
 		};
 
-		const typeProps = {
-			getOptionLabel: this.getLabelWithIcon,
-			name: type,
-			options: [...AXIS_SELECTS, ...AXIS_HORIZONTAL_SELECTS, ...CIRCLE_SELECTS, COMBO_SELECT, ...WIDGET_SELECTS],
-			placeholder: 'Выберите тип виджета',
-			value: values[type]
-		};
-
 		return (
 			<Fragment>
 				{this.renderTextArea(nameProps)}
 				{this.renderTextArea(diagramNameProps)}
 				<Divider />
-				{this.renderSelect(typeProps)}
-				{this.renderWidgetFields(values[type].value)}
+				{this.renderWidgetSelect()}
+				<Divider />
+				{this.renderWidgetFields(values[type])}
 			</Fragment>
+		);
+	};
+
+	renderWidgetSelect = () => {
+		const {values} = this.props;
+
+		return (
+			<div className={styles.field}>
+				<FieldLabel text="Тип диаграммы" />
+				<OuterSelect
+					name={FIELDS.type}
+					onSelect={this.handleSelect}
+					options={OPTIONS.WIDGETS}
+					value={values[FIELDS.type]}
+				/>
+			</div>
 		);
 	};
 

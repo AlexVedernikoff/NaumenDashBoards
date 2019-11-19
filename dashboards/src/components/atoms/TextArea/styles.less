@@ -7,15 +7,20 @@
 		color: @color;
 		display: block;
 		font-size: 13px;
-		margin-bottom: 6px;
+		margin-bottom: 5px;
 	}
 
 	.icon {
 		color: @color;
 		cursor: pointer;
+		opacity: 0;
 		position: absolute;
 		right: 2px;
 		top: 2px;
+
+		&:hover {
+			opacity: 1;
+		}
 	}
 
 	.inputField {

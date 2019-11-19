@@ -1,5 +1,5 @@
 // @flow
-import type {Form, SelectSize} from 'components/molecules/Select/types';
+import type {Form} from 'components/molecules/Select/types';
 import type {OptionType} from 'react-select/src/types';
 
 export type State = {
@@ -28,8 +28,6 @@ export type SelectValue = {
 };
 
 export type Select = {
-	border?: boolean;
-	color?: string;
 	components?: {[string]: any},
 	createButtonText?: string,
 	form?: Form,
@@ -38,7 +36,6 @@ export type Select = {
 	isDisabled?: boolean,
 	name: string,
 	placeholder?: string,
-	size?: SelectSize,
 	withCreateButton?: boolean,
 	withEditIcon?: boolean,
 };

@@ -112,9 +112,9 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 	dispatch(requestWidgetSave());
 
 	const {dashboard, widgets} = getState();
-	const {context, editable, master} = dashboard;
+	const {context, editable, role} = dashboard;
 	const method = asDefault ? 'editDefaultWidget' : 'editPersonalWidgetSettings';
-	const isEditable = editable || master;
+	const isEditable = editable || role !== null;
 	const widget = {...formData, layout: widgets.data.map[formData.id].layout};
 	const data = {
 		classFqn: context.subjectUuid,
@@ -126,7 +126,11 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 
 	try {
 		const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
-		widget.id = id;
+
+		if (widget.id !== id) {
+			dispatch(deleteWidget(widget.id));
+			widget.id = id;
+		}
 
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayout(context, isEditable, asDefault));
@@ -147,12 +151,12 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 	dispatch(requestWidgetSave());
 
 	const {dashboard, widgets} = getState();
-	const {context, editable, master} = dashboard;
+	const {context, editable, role} = dashboard;
 	const newWidget = widgets.data.newWidget;
 
 	if (newWidget) {
 		const method = asDefault ? 'createDefaultWidgetSettings' : 'createPersonalWidgetSettings';
-		const isEditable = editable || master;
+		const isEditable = editable || role !== null;
 		let widget = {...formData, layout: newWidget.layout};
 
 		try {
