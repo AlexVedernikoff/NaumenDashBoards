@@ -338,6 +338,10 @@ String deleteDefaultWidget(Map<String, Object> requestContent, def user)
 String resetPersonalDashboard(String classFqn, String contentCode, def user)
 {
     DashboardSettings dashboardSettings = getDashboardSetting(generateDashboardKey(classFqn, contentCode, user.login as String))
+    if(!dashboardSettings)
+    {
+        return "Personal dashboard not found"
+    }
     dashboardSettings.widgetIds.each {
         if (it.endsWith("_${user.login}"))
         {
@@ -499,20 +503,32 @@ private String generateDashboardKey(String classFqn, String contentCode, String 
 /**
  * Генерация ключа для сохранения настроек виджета
  * @param keys существующие ключи
+ * @param classFqn код типа куда выведено встроенное приложение
+ * @param contentCode код контента встроенного приложения
  * @param login логин пользователя или пустое значение если сохранение по умолчанию
+ * @param oldWidgetKey старый ключ виджета
  * @return сгенированный ключ для виджета
  */
 private String generateWidgetKey(Collection<String> keys,
                                  String classFqn,
                                  String contentCode,
                                  String login = null,
-                                 String oldUuid = null)
+                                 String oldWidgetKey = null)
 {
     String type = utils.get(classFqn)?.metaClass?.toString()
     def loginKeyPart = login ? "_${login}" : ''
     String uuidWidget
     while ({
-        uuidWidget = "${type}_${contentCode}_${oldUuid ?: UUID.randomUUID()}${loginKeyPart}"
+        if (oldWidgetKey)
+        {
+            uuidWidget = oldWidgetKey.endsWith(loginKeyPart)
+                    ? oldWidgetKey
+                    : "${oldWidgetKey}${loginKeyPart}"
+        }
+        else
+        {
+            uuidWidget = "${type}_${contentCode}_${UUID.randomUUID()}${loginKeyPart}"
+        }
         (keys.contains(uuidWidget) &&
                 loadJsonSettings(uuidWidget))
     }()) continue
