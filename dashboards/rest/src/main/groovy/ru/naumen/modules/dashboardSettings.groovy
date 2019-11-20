@@ -148,6 +148,26 @@ String editDefaultWidget(Map<String, Object> requestContent, def user)
     checkRightsOnDashboard(user, "edit")
     RequestEditWidgetSettings request = new RequestEditWidgetSettings(requestContent)
     String widgetKey = request.widgetKey
+    if(widgetKey.endsWith("_${user.login}"))
+    {
+        widgetKey -= "_${user.login}"
+        def closureReplaceWidgetKey = { login ->
+            String dashboardKey = generateDashboardKey(
+                    request.classFqn,
+                    request.contentCode,
+                    login)
+            DashboardSettings dashboardSettings = getDashboardSetting(dashboardKey)
+            dashboardSettings.widgetIds.remove(request.widgetKey)
+            if(!(widgetKey in dashboardSettings.widgetIds))
+            {
+                dashboardSettings.widgetIds << widgetKey
+            }
+            saveJsonSettings(dashboardKey, toJson(dashboardSettings))
+        }
+        closureReplaceWidgetKey(user.login)
+        closureReplaceWidgetKey(null)
+        deleteJsonSettings(request.widgetKey)
+    }
     def widgetSettings = setUuidInSettings(request.widgetSettings, widgetKey)
     saveJsonSettings(widgetKey, toJson(widgetSettings))
     return toJson(widgetKey)
