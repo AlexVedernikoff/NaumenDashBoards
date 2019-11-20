@@ -240,62 +240,6 @@ String createPersonalWidgetSettings(Map<String, Object> requestContent, def user
 }
 
 /**
- * Персональное удаление виджета
- * @param requestContent - тело запроса
- * @return успех | провал удаления
- */
-@Deprecated
-String deleteWidget(Map<String, Object> requestContent, def user)
-{
-    RequestDeleteWidgetSettings request = new RequestDeleteWidgetSettings(requestContent)
-
-    String personalDashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login as String)
-    String defaultDashboardKey = generateDashboardKey(request.classFqn, request.contentCode)
-
-    Closure removeWidget = { String dashboard, String widget ->
-        if (deleteJsonSettings(widget))
-        {
-            excludeWidgetsFromDashboard(dashboard, [widget])
-        }
-        else
-        {
-            throw new Exception("Widget $widget not removed from dashboard: $dashboard!")
-        }
-    }
-
-    if (checkUserOnMasterDashboard(user))
-    {
-        if (request.widgetId.endsWith("_${user.login}"))
-        {
-            return toJson(removeWidget(personalDashboardKey, request.widgetId))
-        }
-        else
-        {
-            getDashboardSetting(personalDashboardKey).each { dashboardSettings ->
-                saveWidgetsToDashboard(personalDashboardKey, dashboardSettings.widgetIds - request.widgetId)
-            }
-            return toJson(removeWidget(defaultDashboardKey, request.widgetId))
-        }
-    }
-    else if (request.editable)
-    {
-        if (request.widgetId.endsWith("_${user.login}"))
-        {
-            return toJson(removeWidget(personalDashboardKey, request.widgetId))
-        }
-        else
-        {
-            def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-            return saveWidgetsToDashboard(personalDashboardKey, settings.widgetIds - request.widgetId)
-        }
-    }
-    else
-    {
-        throw new Exception("No rights on remove widget")
-    }
-}
-
-/**
  * Метод удаления персонального виджета
  * @param requestContent - тело запроса
  * @param user           - пользователь
@@ -349,14 +293,24 @@ String deleteDefaultWidget(Map<String, Object> requestContent, def user)
     {
         if (isPersonalWidget(request.widgetId, user))
         {
-            String defaultWidget = request.widgetId - "_${user.login}"
             Closure<String> removeWidgetFromPersonalDashboard =
                     this.&removeWidgetFromDashboard.curry(personalDashboardKey)
-            Closure<String> removeWidgetFromDefaultDashboard =
-                    this.&removeWidgetFromDashboard.curry(defaultDashboardKey)
-            def personalWidgetIsRemoved = removeWidgetSettings(request.widgetId).with(removeWidgetFromPersonalDashboard)
-            def defaultWidgetIsRemoved = removeWidgetSettings(defaultWidget).with(removeWidgetFromDefaultDashboard)
-            return toJson(personalWidgetIsRemoved && defaultWidgetIsRemoved)
+            def personalWidgetIsRemoved = removeWidgetSettings(request.widgetId)
+                    .with(removeWidgetFromPersonalDashboard)
+
+            String defaultWidget = request.widgetId - "_${user.login}"
+            //По воле случая может получиться так, что виджета по умолчанию уже нет(например удалён другим мастером)
+            if (findJsonSettings(defaultWidget))
+            {
+                Closure<String> removeWidgetFromDefaultDashboard =
+                        this.&removeWidgetFromDashboard.curry(defaultDashboardKey)
+                removeWidgetSettings(defaultWidget).with(removeWidgetFromDefaultDashboard)
+            }
+            else
+            {
+                logger.warn("default widget $defaultWidget not exist")
+            }
+            return toJson(personalWidgetIsRemoved as boolean)
         }
         else
         {
@@ -453,8 +407,13 @@ private String removeWidgetSettings(String widgetKey)
  */
 private boolean excludeWidgetsFromDashboard(String dashboardKey, Collection<String> widgets)
 {
-    def widgetsIds = getDashboardSetting(dashboardKey).widgetIds
-    saveWidgetsToDashboard(dashboardKey, widgetsIds - widgets)
+    def dashboardSettings = getDashboardSetting(dashboardKey)
+    if (!dashboardSettings)
+    {
+        throw new Exception("Dashboard: $dashboardKey not found!")
+    }
+    def widgetsIds = dashboardSettings.widgetIds
+    return saveWidgetsToDashboard(dashboardKey, widgetsIds - widgets)
 }
 
 /**
@@ -695,7 +654,7 @@ private def setLayoutInSettings(Map<String, Object> widgetSettings)
  * @param predicate - метод дополнительной фильтрации
  * @return коллекцию ключей и настроек
  */
-private Map<String, String> findJsonSettings(String keyPart, Closure<Boolean> predicate)
+private Map<String, String> findJsonSettings(String keyPart, Closure<Boolean> predicate = { key, value -> true})
 {
     return api.keyValue.find(NAMESPACE, keyPart, predicate)
 }
