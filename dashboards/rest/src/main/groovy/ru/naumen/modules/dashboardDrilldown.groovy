@@ -142,7 +142,7 @@ class Link
     {
         if (descriptor)
         {
-            createContext(descriptor).listFilter.elements.collect { orFilter ->
+            DashboardMarshaller.createContext(descriptor).listFilter.elements.collect { orFilter ->
                 orFilter.elements.collect { filter ->
                     String attribute = (filter.getAttributeFqn() as String).split('@', 2).tail().head()
                     String condition = filter.getProperties().conditionCode
@@ -315,13 +315,6 @@ class Link
         }
 
         return [start.getTime(), end.getTime()]
-    }
-
-    def createContext(String json)
-    {
-        def factory = com.google.web.bindery.autobean.vm.AutoBeanFactorySource.create(ru.naumen.core.shared.autobean.wrappers.AdvlistSettingsAutoBeanFactory.class)
-        def autoBean = com.google.web.bindery.autobean.shared.AutoBeanCodex.decode(factory, ru.naumen.core.shared.autobean.wrappers.IReducedListDataContextWrapper.class, json)
-        return ru.naumen.core.shared.autobean.wrappers.ReducedListDataContext.createObjectListDataContext(autoBean.as())
     }
 }
 //endregion

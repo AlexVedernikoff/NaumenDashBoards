@@ -25,8 +25,6 @@ import ru.naumen.core.server.hquery.HOrders
 
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import static Diagram.*
@@ -1044,24 +1042,9 @@ private HCriteria getCriteriaFromDescriptor(def descriptor)
  * @param jsonString - сериализованный объект дескриптора
  * @return сущность дескриптора
  */
-private def deserializeDescriptor(String jsonString) //TODO: костыль. В дальнейшем будет заменено
+private def deserializeDescriptor(String jsonString)
 {
-    def context = createContext(jsonString)
-    context.clientSettings.visibleAttrCodes = new HashSet() // жёсткий костыль
-    def descriptor = ru.naumen.objectlist.shared.ListDescriptorFactory.create(context)
-    return descriptor
-}
-
-/**
- * Метод получение контекста из json
- * @param json - json
- * @return контекст
- */
-private def createContext(String json)
-{
-    def factory = com.google.web.bindery.autobean.vm.AutoBeanFactorySource.create(ru.naumen.core.shared.autobean.wrappers.AdvlistSettingsAutoBeanFactory.class)
-    def autoBean = com.google.web.bindery.autobean.shared.AutoBeanCodex.decode(factory, ru.naumen.core.shared.autobean.wrappers.IReducedListDataContextWrapper.class, json)
-    return ru.naumen.core.shared.autobean.wrappers.ReducedListDataContext.createObjectListDataContext(autoBean.as())
+    return DashboardMarshaller.getDescriptorFromJson(jsonString)
 }
 
 /**
