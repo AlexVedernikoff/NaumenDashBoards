@@ -1,16 +1,18 @@
 // @flow
-import type {ThunkAction} from 'store/types';
 import type {LatLngBounds} from 'types/bound';
 
 type OwnProps = {};
 
 export type ConnectedProps = {
 	bounds: LatLngBounds,
-	reloadInterval: number
+	loading: boolean
 };
 
 export type ConnectedFunctions = {
-	reloadGeolocation: () => ThunkAction
 };
 
 export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
+
+export type State = {
+	reloadBound: boolean
+};

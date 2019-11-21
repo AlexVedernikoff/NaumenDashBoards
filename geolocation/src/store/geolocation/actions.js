@@ -2,9 +2,9 @@
 import {buildUrl, client, getContext, getParams} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from './constants';
+import {getGeoMarkers} from 'helpers/marker';
 import {getTimeInSeconds} from 'helpers/time';
 import {notify} from 'helpers/notify';
-import type {Point} from 'types/point';
 import testData from 'helpers/testData';
 import testData2 from 'helpers/testData2';
 
@@ -14,65 +14,16 @@ const environment = process.env.NODE_ENV;
  * Получаем данные, необходимые для работы карты
  * @returns {ThunkAction}
  */
-const showNotGeoNotifications = (notGeoMarkers: Array<Point>) => {
-	const label = notGeoMarkers
-		.sort((a, b) => a.type > b.type ? -1 : a.type < b.type ? 1 : 0)
-		.map(marker => marker.header).join(', ') + '.';
-	notify('geolocation', 'info', label);
-};
-
-const getGeoMarkers = (markers: Array<Point>) => {
-	const notGeoMarkers = [];
-	const geoMarkers = {
-		dynamic: [],
-		multiple: [],
-		static: []
-	};
-
-	markers.forEach((marker) => {
-		const {geoposition, header} = marker;
-
-		if (marker.hasOwnProperty('geoposition')) {
-			const anotherOne = markers.find((markerTmp) =>
-				marker.type !== 'dynamic'
-				&& markerTmp.header !== marker.header
-				&& JSON.stringify(markerTmp.geoposition) === JSON.stringify(geoposition)
-			);
-
-			if (anotherOne) {
-				const multipleMarkerIndex = geoMarkers.multiple.findIndex(markerTmp => JSON.stringify(markerTmp.geoposition) === JSON.stringify(marker.geoposition));
-
-				if (multipleMarkerIndex === -1) {
-					geoMarkers.multiple.push({
-						data: [marker],
-						geoposition,
-						header,
-						type: 'multiple'
-					});
-				} else {
-					geoMarkers.multiple[multipleMarkerIndex].data.push(marker);
-				}
-			} else {
-				marker.type === 'dynamic' ? geoMarkers.dynamic.push(marker) : geoMarkers.static.push(marker);
-			}
-		} else {
-			notGeoMarkers.push(marker);
-		}
-	});
-
-	notGeoMarkers.length && showNotGeoNotifications(notGeoMarkers);
-
-	return geoMarkers;
-};
 
 const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any> => {
 	try {
 		const context = getContext();
 		const params = await getParams();
+
 		dispatch(setContext(context));
 		dispatch(setParams(params))
 			.then(() => dispatch(fetchGeolocation()))
-			.then(() => dispatch(reloadGeolocation()))
+			.then(() => dispatch(reloadGeolocation(true)))
 			.catch(error => error);
 	} catch (error) {
 		dispatch(recordGeolocationdError());
@@ -101,7 +52,7 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 	}
 };
 
-const reloadGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let markers = testData2;
 		const {dynamicMarkers, params} = getState().geolocation;
@@ -109,6 +60,15 @@ const reloadGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState
 		const {requestCurrentLocation, locationUpdateFrequency} = params;
 		const updateFrequency = getTimeInSeconds(locationUpdateFrequency);
 
+		if (dynamicMarkersUuids && firstCall) {
+			const reloadInterval = params.autoUpdateLocation ? getTimeInSeconds(params.locationUpdateFrequency) : 0;
+
+			if (reloadInterval) {
+				setInterval(() => dispatch(reloadGeolocation()), reloadInterval * 1000);
+			} else {
+				notify('common', 'info', 'Отправлен запрос на получение информации о местоположении. Обновите через пару минут.');
+			}
+		}
 		if (environment !== 'development' && dynamicMarkersUuids) {
 			const query = `user, ${requestCurrentLocation.toString()}, ${updateFrequency}, '${dynamicMarkersUuids}'`;
 			const {data} = await client.get(buildUrl('mapRest', 'getLastGeopositions', query));

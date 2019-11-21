@@ -62,18 +62,35 @@
 }
 
 .multiple {
+    display: inline-flex;
     margin-top: -23px;
     margin-left: -4px;
 }
 
 .multipleHover {
+    display: inline-flex;
     margin-top: -23px;
     margin-left: -4px;
+}
+
+.multiple img,
+.multipleHover img {
+    z-index: -1;
 }
 
 .staticHover {
     margin-top: -26px;
     margin-left: -10px;
+}
+
+.boxCount {
+    background-color:#ffffff;
+    border-radius: 20px;
+    height:14px;
+    margin-top: -2px;
+    min-width: 12px;
+    -moz-border-radius: 20px;
+    width:100%;
 }
 
 .countMarker {
@@ -82,18 +99,9 @@
     font-size: 11px;
     font-style: normal;
     font-weight: 500;
-    line-height: 13px;
-    position: absolute;
-}
-
-.multipleCount {
-    right: -5px;
-    top: -21px;
-}
-
-.multipleHoverCount {
-    right: -8px;
-    top: -21px;
+    line-height: 15px;
+    margin-left: -17px;
+    text-align: center;
 }
 
 html, body, #root {

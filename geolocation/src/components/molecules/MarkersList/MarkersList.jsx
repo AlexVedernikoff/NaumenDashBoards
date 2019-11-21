@@ -21,9 +21,9 @@ export class MarkersList extends Component<Props, State> {
 
 		return (
 			<div>
-				{dynamicMarkers.length && dynamicMarkers.map((marker, key) => this.renderDynamicMarker(marker, key))}
-				{multipleMarkers.length && multipleMarkers.map((marker, key) => this.renderMultipleMarker(marker, key))}
-				{staticMarkers.length && staticMarkers.map((marker, key) => this.renderStaticMarker(marker, key))}
+				{dynamicMarkers.length && dynamicMarkers.map(this.renderDynamicMarker)}
+				{multipleMarkers.length && multipleMarkers.map(this.renderMultipleMarker)}
+				{staticMarkers.length && staticMarkers.map(this.renderStaticMarker)}
 			</div>
 		);
 	}

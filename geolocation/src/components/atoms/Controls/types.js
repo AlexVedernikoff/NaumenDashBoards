@@ -2,7 +2,8 @@
 import type {ThunkAction} from 'store/types';
 import type {UpdatePointsMode} from 'types/helper';
 
-type OwnProps = {
+export type OwnProps = {
+	setBounds: () => void
 };
 
 export type ConnectedProps = {

@@ -1,8 +1,12 @@
 // @flow
 import React from 'react';
 import styles from './Notify.less';
-import {toast} from 'react-toastify';
+import {toast, cssTransition} from 'react-toastify';
 import type {MessageStyleType, NotifyTemplateType} from 'types/helper';
+
+const transitionToast = cssTransition({
+	duration: 10
+});
 
 const getPreparedMessage = (notifyTemplateType: NotifyTemplateType, text: string) => {
 	let message = '';
@@ -24,7 +28,7 @@ const getPreparedMessage = (notifyTemplateType: NotifyTemplateType, text: string
 			break;
 		case 'geolocation':
 			message = (
-				<div>
+				<div className={styles.textNotify}>
 					Нет информации о местоположении: <br />
 					{text}
 				</div>
@@ -32,7 +36,7 @@ const getPreparedMessage = (notifyTemplateType: NotifyTemplateType, text: string
 			break;
 		default:
 			message = (
-				<div>
+				<div className={styles.textNotify}>
 					{text}
 				</div>
 			);
@@ -49,6 +53,7 @@ export const notify = (notifyTemplateType: NotifyTemplateType, messageStyleType:
 		draggable: false,
 		hideProgressBar: true,
 		pauseOnHover: true,
-		position: 'bottom-right'
+		position: 'bottom-right',
+		transition: transitionToast
 	});
 };

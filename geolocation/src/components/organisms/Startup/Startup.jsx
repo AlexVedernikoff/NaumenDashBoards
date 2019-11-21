@@ -7,6 +7,10 @@ export class Startup extends Component<Props> {
 	componentDidMount () {
 		const {getAppConfig} = this.props;
 
+		if (window.frameElement) {
+			const height = window.frameElement.height;
+			window.frameElement.setAttribute('style', `min-height:${height}px`);
+		}
 		getAppConfig();
 	}
 

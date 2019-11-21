@@ -122,13 +122,13 @@ export default [
 		header: 'Заявка-14325 Нет доступа в интернет',
 		geoposition: {
 			latitude: 56.1351,
-			longitude: 60.163959
+			longitude: 60.16396
 		},
 		errorMessage: '',
 		options: [
 			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
+				label: 'Перейти asdasdadasd sdfadasdas  asadasd  dasdadas d sadasdasdsad.',
+				value: 'Кондитерская Кокос и vzПерейти asdasdadasd sdfadasdas  asadasd  dasdadas d sadasdasdsad. fsfsdfПерейти asdasdadasd sdfadasdas  asadasd  dasdadas d sadasdasdsad.'
 			},
 			{
 				label: 'Контакты',
@@ -171,7 +171,7 @@ export default [
 		type: 'static',
 		header: 'Заявка-14327 Нет доступа в интернет',
 		geoposition: {
-			latitude: 56.41351,
+			latitude: 56.1351,
 			longitude: 60.16396
 		},
 		errorMessage: '',

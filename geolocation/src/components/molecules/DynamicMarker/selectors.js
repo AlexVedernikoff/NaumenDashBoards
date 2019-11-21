@@ -7,7 +7,7 @@ import type {Params} from 'types/params';
 const colorActive = (dateMarker: string, params: Params) => {
 	const {timeIntervalInactivity} = params;
 	const dataMarker = dateMarker.split(' ');
-	const date = dataMarker[0].split('.').reverse().join('.') + ' ' + dataMarker[1];
+	const date = dataMarker[0].split('.').reverse().join('-') + ' ' + dataMarker[1];
 	const dataMarkerTimestamp = new Date(date).getTime();
 	const isActivePoint = new Date().getTime() - dataMarkerTimestamp < getTimeInSeconds(timeIntervalInactivity) * 1000;
 	const colorDynamic = isActivePoint ? 'colorDynamicActivePoint' : 'colorDynamicInactivePoint';

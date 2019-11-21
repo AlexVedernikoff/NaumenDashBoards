@@ -3,6 +3,7 @@ import type {Option} from 'types/option';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './PopupOptions.less';
+import Truncate from 'react-truncate';
 
 export class PopupOptions extends Component<Props, State> {
 	optionsRef: {current: any};
@@ -12,6 +13,18 @@ export class PopupOptions extends Component<Props, State> {
 		this.optionsRef = React.createRef();
 	}
 
+	renderTruncatedText = (text: string) => {
+		const ellipsis = <span>...</span>;
+		return (
+			/*
+				line-clamp работает не во всех браузерах, поэтому используем библиотеку
+			*/
+			<Truncate lines={3} ellipsis={ellipsis}>
+				{text}
+			</Truncate>
+		);
+	}
+
 	renderOption = (option: Option, id: number) => {
 		const {label, value} = option;
 		const key = `option_${id}`;
@@ -19,18 +32,26 @@ export class PopupOptions extends Component<Props, State> {
 
 		return (
 			<div key={key} className={styles.popupOption}>
-				{label && <div className={styles.popupOptionLeft}>{label}:</div>}
-				{value && <div className={styles[styleName]}>{value}</div>}
+				{label && <div className={styles.popupOptionLeft}>{this.renderTruncatedText(label)}:</div>}
+				{value && <div className={styles[styleName]}>{this.renderTruncatedText(value)}</div>}
 			</div>
 		);
 	};
 
-	componentDidMount () {
+	setShadow = () => {
 		const optionsBlock = this.optionsRef.current;
 		const shadow = optionsBlock.scrollHeight !== optionsBlock.offsetHeight;
 
 		this.props.toggleShadow('actionsShadow', shadow);
 		this.props.toggleShadow('headerShadow', shadow);
+	}
+
+	componentDidMount () {
+		this.setShadow();
+	}
+
+	componentDidUpdate () {
+		this.setShadow();
 	}
 
 	render () {

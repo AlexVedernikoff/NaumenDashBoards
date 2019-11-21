@@ -9,7 +9,7 @@ export const initialGeolocationState: GeolocationState = {
 	},
 	dynamicMarkers: [],
 	error: false,
-	loading: false,
+	loading: true,
 	multipleMarkers: [],
 	params: {
 		autoUpdateLocation: true,

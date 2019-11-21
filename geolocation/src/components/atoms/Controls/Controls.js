@@ -5,6 +5,7 @@ import {functions, props} from './selectors';
 import React, {Component} from 'react';
 import ReloadIcon from 'icons/ReloadIcon';
 import styles from './Controls.less';
+import {toast} from 'react-toastify';
 import type {Props, State} from './types';
 import {ZoomControl} from 'react-leaflet';
 
@@ -17,9 +18,18 @@ export class Controls extends Component<Props, State> {
 	}
 
 	reloadActiveMarkers = () => {
-		const {fetchGeolocation, reloadGeolocation, updatePointsMode} = this.props;
+		const {fetchGeolocation, reloadGeolocation, setBounds, updatePointsMode} = this.props;
 
-		updatePointsMode === 'getPoints' ? fetchGeolocation() : reloadGeolocation();
+		if (updatePointsMode === 'getPoints') {
+			toast.dismiss();
+			/*
+				Ждем закртыия всех toasts
+			*/
+			setTimeout(() => fetchGeolocation(), 500);
+		} else {
+			reloadGeolocation();
+		}
+		setBounds();
 	};
 
 	toggleHover = () => this.setState({hover: !this.state.hover});
@@ -33,6 +43,7 @@ export class Controls extends Component<Props, State> {
 						onClick={this.reloadActiveMarkers}
 						onMouseEnter={this.toggleHover}
 						onMouseLeave={this.toggleHover}
+						title="Обновить"
 					>
 						<ReloadIcon color={this.state.hover ? '#EBEBEB' : '#FFFFFF'} />
 					</div>

@@ -5,28 +5,33 @@ import Controls from 'components/atoms/Controls';
 import Copyright from 'components/atoms/Copyright';
 import MarkersList from 'components/molecules/MarkersList';
 import {Map as LeafletMap} from 'react-leaflet';
-import {notify} from 'helpers/notify';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './Geolocation.less';
 
-export class Geolocation extends Component<Props> {
+export class Geolocation extends Component<Props, State> {
 	mapRef: {current: any};
 
 	constructor (props: Props) {
 		super(props);
+
+		this.state = {
+			reloadBound: false
+		};
+
 		this.mapRef = React.createRef();
 	}
 
-	componentDidMount () {
-		const {reloadInterval, reloadGeolocation} = this.props;
-		reloadInterval ? setInterval(() => reloadGeolocation(), reloadInterval * 1000) : notify('common', 'info', 'Отправлен запрос на получение информации о местоположении. Обновите через пару минут.');
-	}
+	reloadBound = () => this.setState({reloadBound: true});
 
-	componentDidUpdate () {
-		const {bounds} = this.props;
+	componentDidUpdate (prevProps: Props) {
+		const {bounds, loading} = this.props;
+		const {reloadBound} = this.state;
 
-		this.mapRef.current.leafletElement.fitBounds(bounds);
+		if (prevProps.loading !== loading || reloadBound) {
+			this.mapRef.current.leafletElement.fitBounds(bounds);
+			this.setState({reloadBound: false});
+		}
 	}
 
 	render () {
@@ -38,12 +43,14 @@ export class Geolocation extends Component<Props> {
 				doubleClickZoom={true}
 				dragging={true}
 				easeLinearity={0.35}
+				maxZoom={19}
+				minZoom={2}
 				ref={this.mapRef}
 				scrollWheelZoom={true}
 				zoomControl={false}
 			>
 				<MarkersList />
-				<Controls />
+				<Controls setBounds={this.reloadBound} />
 				<Copyright />
 			</LeafletMap>
 		);

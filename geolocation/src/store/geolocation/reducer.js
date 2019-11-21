@@ -26,7 +26,8 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {
 				...state,
-				dynamicMarkers: action.payload
+				dynamicMarkers: action.payload,
+				loading: false
 			};
 		case GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR:
 			return {
