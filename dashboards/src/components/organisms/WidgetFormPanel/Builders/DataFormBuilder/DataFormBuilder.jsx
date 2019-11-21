@@ -59,11 +59,12 @@ export class DataFormBuilder extends FormBuilder {
 
 		if (source) {
 			const context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
+			console.log('Контекст окна фильтрации:  ', context);
 			try {
 				const {serializedContext} = await window.jsApi.commands.filterForm(context);
 				setFieldValue(descriptorName, serializedContext);
 			} catch (e) {
-				console.error(e);
+				console.error('Ошибка окна фильтрации: ', e);
 			}
 		}
 	};
@@ -80,16 +81,6 @@ export class DataFormBuilder extends FormBuilder {
 
 		fields.forEach(ref => setFieldValue(ref, null));
 	};
-
-	combineInputs = (left: Node, right: Node, withDivider: boolean = true) => (
-		<div className={mainStyles.field}>
-			<div className={styles.combineInput}>
-				{left && <div className={styles.combineInputLeft}>{left}</div>}
-				<div className={styles.combineInputRight}>{right}</div>
-			</div>
-			{withDivider && <Divider />}
-		</div>
-	);
 
 	createFilterContext = (classFqn: string) => {
 		const {context: mainContext} = this.props;
@@ -266,10 +257,30 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderAttrSelect(breakdown);
 	};
 
-	renderBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.combineInputs(
+	renderBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.renderCombinedInputs(
 		this.renderGroupInput(breakdownGroup, breakdown),
 		this.renderBreakdownInput(breakdown)
 	);
+
+	renderCombinedInputs = (left: Node, right: Node, withDivider: boolean = true) => (
+		<div className={mainStyles.field}>
+			{this.renderCombinedInputsByLeft(left, right)}
+			{withDivider && <Divider />}
+		</div>
+	);
+
+	renderCombinedInputsByLeft = (left: Node, right: Node) => {
+		if (left) {
+			return (
+				<div className={styles.combinedInputs}>
+					<div className={styles.combinedLeftInput}>{left}</div>
+					<div className={styles.combinedRightInput}>{right}</div>
+				</div>
+			);
+		}
+
+		return right;
+	};
 
 	renderFilterButton = (sourceName: string) => {
 		const {values} = this.props;

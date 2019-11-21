@@ -20,7 +20,7 @@ export class AxisChart extends DataFormBuilder {
 		return (
 			<Fragment>
 				{this.renderSourceInput()}
-				{this.combineInputs(
+				{this.renderCombinedInputs(
 					this.renderAggregateInput(FIELDS.aggregation, FIELDS.indicator),
 					this.renderAttrSelect(indicator)
 				)}

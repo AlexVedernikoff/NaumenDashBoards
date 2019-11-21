@@ -1,9 +1,12 @@
 // @flow
+import {addWidget, getWidgets, resetWidget} from 'store/widgets/data/actions';
 import {buildUrl, client, getContext, getEditableParameter} from 'utils/api';
+import type {Context} from 'utils/api/types';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getDataSources} from 'store/sources/data/actions';
-import {getWidgets, resetWidget} from 'store/widgets/data/actions';
+import {getNextRow} from 'utils/layout';
+import {NewWidget} from 'utils/widget';
 import {push} from 'connected-react-router';
 
 /**
@@ -26,6 +29,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 			dispatch(getWidgets(true))
 		]);
 
+		dispatch(getPassedWidget(context));
 		dispatch(receiveDashboard());
 	} catch (error) {
 		dispatch(recordDashboardError());
@@ -91,6 +95,33 @@ const sendToMail = (name: string, type: string, file: Blob): ThunkAction => () =
 			timeout: 30000
 		}
 	});
+};
+
+/**
+ * Получаем настройки, сгенерированные с adv-листа и инициализируем добавление нового виджета с этими настройками.
+ * @param {Context} context - контекст ВП
+ * @returns {ThunkAction}
+ */
+const getPassedWidget = (context: Context): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+	const {contentCode} = context;
+	const {sources, widgets} = getState();
+	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
+	const key = `widgetContext_${metaClass}_${contentCode}`;
+	const descriptorStr = localStorage.getItem(key);
+
+	if (descriptorStr) {
+		localStorage.removeItem(key);
+		const newWidget = new NewWidget(getNextRow(widgets.data.map));
+		const descriptor = JSON.parse(descriptorStr);
+		const classFqn = descriptor.clazz || descriptor.cases[0];
+		const {title: label, value} = sources.data.map[classFqn];
+		newWidget.descriptor = descriptorStr;
+		newWidget.name = '';
+		newWidget.source = {label, value};
+
+		dispatch(addWidget(newWidget));
+		dispatch(push('/edit'));
+	}
 };
 
 const requestDashboard = () => ({

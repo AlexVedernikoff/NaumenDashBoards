@@ -1,4 +1,5 @@
 // @flow
+import {Button, IconButton} from 'components/atoms';
 import {CHART_VARIANTS} from 'utils/chart';
 import cn from 'classnames';
 import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
@@ -8,7 +9,6 @@ import {editContentRef} from 'components/pages/DashboardEditContent';
 import type {Element} from 'react';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {GRID_PARAMS} from 'utils/layout';
-import {IconButton} from 'components/atoms';
 import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
@@ -44,6 +44,7 @@ const newWidgetRef = createRef();
 export class LayoutGrid extends Component<Props, State> {
 	static defaultProps = {
 		editable: false,
+		role: null,
 		selectedWidget: ''
 	};
 
@@ -119,12 +120,12 @@ export class LayoutGrid extends Component<Props, State> {
 		comboDrillDown(widgets[id], orderNum);
 	};
 
-	removeWidget = () => {
+	removeWidget = (onlyPersonal: boolean) => () => {
 		const {onRemoveWidget} = this.props;
 		const {widgetIdToRemove} = this.state;
 
 		this.hideModal();
-		onRemoveWidget(widgetIdToRemove);
+		onRemoveWidget(widgetIdToRemove, onlyPersonal);
 	};
 
 	showModal = (widgetIdToRemove: string) => () => this.setState({showModal: true, widgetIdToRemove});
@@ -208,21 +209,42 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	renderModal = () => {
+	renderDefaultModal = () => {
+		const {role} = this.props;
 		const {showModal} = this.state;
+		const onlyPersonal = role === null;
 
 		if (showModal) {
 			return (
 				<Modal
+					cancelText="Нет"
 					header="Вы точно хотите удалить виджет?"
 					onClose={this.hideModal}
-					onSubmit={this.removeWidget}
+					onSubmit={this.removeWidget(onlyPersonal)}
 					size="small"
-					submitText="Удалить"
+					submitText="Да"
 				/>
 			);
 		}
 	};
+
+	renderMasterModal = () => {
+		const {showModal} = this.state;
+
+		if (showModal) {
+			return <Modal header="Вы точно хотите удалить виджет?" renderFooter={this.renderModalFooter} />;
+		}
+	};
+
+	renderModal = () => this.props.role === 'master' ? this.renderMasterModal() : this.renderDefaultModal();
+
+	renderModalFooter = () => (
+		<Fragment>
+			<Button className={styles.modalButton} onClick={this.removeWidget(false)}>Да, все виджеты</Button>
+			<Button className={styles.modalButton} onClick={this.removeWidget(true)}>Да, только персональный виджет</Button>
+			<Button outline onClick={this.hideModal}>Нет</Button>
+		</Fragment>
+	);
 
 	renderRemoveButton = (id: string) => {
 		const {editable} = this.props;

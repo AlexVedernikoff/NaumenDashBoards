@@ -9,10 +9,12 @@ type Size =
 ;
 
 export type Props = {
+	cancelText: string,
 	children: Node,
 	header: string,
-	onClose: () => void,
-	onSubmit: () => void,
+	onClose?: () => void,
+	onSubmit?: () => void,
+	renderFooter?: () => Node,
 	size: Size,
 	submitText: string
 }

@@ -1,5 +1,6 @@
 :local {
 	@active-filter-color: #333;
+	@combined-left-with: 80px;
 	@default-filter-color: #bbb;
 
 	.filterContainer {
@@ -39,17 +40,17 @@
 		color: @active-filter-color;
 	}
 
-	.combineInput {
+	.combinedInputs {
 		display: flex;
 		flex-direction: row;
 	}
 
-	.combineInputLeft {
-		width: 80px;
+	.combinedLeftInput {
+		width: @combined-left-with;
 	}
 
-	.combineInputRight {
-		width: calc(100% - 80px);
+	.combinedRightInput {
+		width: calc(100% - @combined-left-with);
 	}
 
 	.labelWithIcon {

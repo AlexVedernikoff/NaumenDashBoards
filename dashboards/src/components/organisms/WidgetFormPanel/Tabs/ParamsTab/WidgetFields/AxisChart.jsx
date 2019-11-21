@@ -36,11 +36,11 @@ export class AxisChart extends DataFormBuilder {
 				{this.renderLabel(sourceLabel)}
 				{this.renderSourceInput()}
 				<Divider />
-				{this.combineInputs(
+				{this.renderCombinedInputs(
 					this.renderGroupInput(),
 					this.renderAttrSelect(xAxis)
 				)}
-				{this.combineInputs(
+				{this.renderCombinedInputs(
 					this.renderAggregateInput(FIELDS.aggregation, FIELDS.yAxis),
 					this.renderAttrSelect(yAxis)
 				)}

@@ -1,9 +1,8 @@
 // @flow
 import {Divider} from 'components/atoms';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import {FIELDS} from 'components/organisms/WidgetFormPanel/constants';
+import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
-import {styles} from 'components/organisms/WidgetFormPanel';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class Table extends OrderFormBuilder {
@@ -36,7 +35,7 @@ export class Table extends OrderFormBuilder {
 		return this.renderAttrSelect(row);
 	};
 
-	renderCompositeInputs = (aggregation: string, column: string) => this.combineInputs(
+	renderCompositeInputs = (aggregation: string, column: string) => this.renderCombinedInputs(
 		this.renderAggregateInput(aggregation, column),
 		this.renderColumnInput(column)
 	);

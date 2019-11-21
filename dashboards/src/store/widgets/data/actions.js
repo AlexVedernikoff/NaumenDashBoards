@@ -5,6 +5,7 @@ import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetForm
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchDiagramData} from 'store/widgets/diagrams/actions';
 import type {Layout} from 'utils/layout/types';
+import {NewWidget} from 'utils/widget';
 import type {Widget} from './types';
 import {WIDGETS_EVENTS} from './constants';
 
@@ -45,10 +46,10 @@ import {WIDGETS_EVENTS} from './constants';
 
 /**
  * Добавляем новый виджет
- * @param {number} payload - номер строки для отрисовки нового виджета
+ * @param {NewWidget} payload - объект нового виджета
  * @returns {ThunkAction}
  */
-const addWidget = (payload: number): ThunkAction => (dispatch: Dispatch): void => {
+const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch({
 		type: WIDGETS_EVENTS.ADD_WIDGET,
 		payload
@@ -181,13 +182,15 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 /**
  * Удаляет виджет
  * @param {string} widgetId - идентификатор виджета;
+ * @param {boolean} onlyPersonal - в случае "true" удаляем только персональный вариант, иначе оба (персональный и по умолчанию).
  * @returns {ThunkAction}
  */
-const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const removeWidget = (widgetId: string, onlyPersonal: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetDelete());
 
 	try {
 		const {context, editable} = getState().dashboard;
+		const method = onlyPersonal ? 'deletePersonalWidget' : 'deleteWidget';
 
 		const data = {
 			classFqn: context.subjectUuid,
@@ -195,7 +198,7 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 			editable,
 			widgetId
 		};
-		await client.post(buildUrl('dashboardSettings', 'deleteWidget', 'requestContent,user'), data);
+		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
 		dispatch(deleteWidget(widgetId));
 	} catch (e) {
 		dispatch(recordDeleteError());

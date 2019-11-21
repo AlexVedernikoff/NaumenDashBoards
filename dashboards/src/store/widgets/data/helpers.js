@@ -88,11 +88,11 @@ export const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
 /**
  * Добавляем новый виджет
  * @param  {WidgetsDataState} state - хранилище данных виджетов - состояние хранилища
- * @param {number} payload - номер новой строки
+ * @param {NewWidget} payload - объект нового виджета
  * @returns {WidgetsDataState}
  */
 export const addWidget = (state: WidgetsDataState, {payload}: AddWidget): WidgetsDataState => {
-	state.newWidget = new NewWidget(payload);
+	state.newWidget = payload;
 	state.selectedWidget = state.newWidget.id;
 	handleStatic(state.map, false);
 

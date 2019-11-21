@@ -10,17 +10,17 @@ import styles from './styles.less';
 export const editContentRef = createRef();
 
 export class DashboardEditContent extends Component<Props> {
+	handleLayoutChange = (layout: Layout) => {
+		const {editLayout} = this.props;
+		editLayout(layout);
+	};
+
 	handleWidgetSelect = (widgetId: string) => {
 		const {selectWidget, selectedWidget} = this.props;
 
 		if (widgetId !== selectedWidget) 	{
 			selectWidget(widgetId);
 		}
-	};
-
-	onLayoutChange = (layout: Layout) => {
-		const {editLayout} = this.props;
-		editLayout(layout);
 	};
 
 	getWidgets = () => {
@@ -34,16 +34,17 @@ export class DashboardEditContent extends Component<Props> {
 	};
 
 	renderGrid = () => {
-		const {removeWidget, selectedWidget} = this.props;
+		const {removeWidget, role, selectedWidget} = this.props;
 		const widgets = this.getWidgets();
 
 		return (
 			<div className={styles.container} ref={editContentRef}>
 				<LayoutGrid
 					editable={true}
-					onSelectWidget={this.handleWidgetSelect}
-					onLayoutChange={this.onLayoutChange}
+					onLayoutChange={this.handleLayoutChange}
 					onRemoveWidget={removeWidget}
+					onSelectWidget={this.handleWidgetSelect}
+					role={role}
 					selectedWidget={selectedWidget}
 					widgets={widgets}
 				/>
