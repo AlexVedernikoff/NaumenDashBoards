@@ -148,7 +148,7 @@ String editDefaultWidget(Map<String, Object> requestContent, def user)
     checkRightsOnDashboard(user, "edit")
     RequestEditWidgetSettings request = new RequestEditWidgetSettings(requestContent)
     String widgetKey = request.widgetKey
-    if(widgetKey.endsWith("_${user.login}"))
+    if(user && isPersonalWidget(request.widgetKey, user))
     {
         widgetKey -= "_${user.login}"
         def closureReplaceWidgetKey = { login ->
@@ -205,7 +205,7 @@ String editPersonalWidgetSettings(Map<String, Object> requestContent, def user)
     RequestEditWidgetSettings request = new RequestEditWidgetSettings(requestContent)
     checkRightsOnEditDashboard(request.editable)
     Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(request.classFqn, request.contentCode)
-    if (request.widgetKey.endsWith("_${user.login}"))
+    if (user && isPersonalWidget(request.widgetKey, user))
     {
         String widgetKey = request.widgetKey
         def widgetSettings = setUuidInSettings(request.widgetSettings, widgetKey)
@@ -276,19 +276,30 @@ String deletePersonalWidget(Map<String, Object> requestContent, def user)
     }
 }
 
+//TODO: метод для обратной совместимости. Удалить в дальнейшем!
+// Фронту потребовалось название deleteWidget
+String deleteDefaultWidget(Map<String, Object> requestContent, def user) {
+    return deleteWidget(requestContent, user)
+}
+
 /**
  * Метод удаления виджета по умолчанию
  * @param requestContent - тело запроса
  * @param user           - пользователь
  * @return успех | провал
  */
-String deleteDefaultWidget(Map<String, Object> requestContent, def user)
+String deleteWidget(Map<String, Object> requestContent, def user)
 {
     RequestDeleteWidgetSettings request = requestContent as RequestDeleteWidgetSettings
-
     String defaultDashboardKey = generateDashboardKey(request.classFqn, request.contentCode)
+    if (!user)
+    {
+        //значит это супер пользователь!
+        // нет персональных виджетов и персональных дашбордов
+        Closure<String> removeWidgetFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(defaultDashboardKey)
+        return removeWidgetSettings(request.widgetId).with(removeWidgetFromDefaultDashboard) as boolean
+    }
     String personalDashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login as String)
-
     if (checkUserOnMasterDashboard(user))
     {
         if (isPersonalWidget(request.widgetId, user))
