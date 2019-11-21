@@ -37,7 +37,7 @@ export type Widget = {
 
 export type AddWidget = {
 	type: typeof WIDGETS_EVENTS.ADD_WIDGET,
-	payload: number
+	payload: NewWidget
 };
 
 export type UpdateWidget = {

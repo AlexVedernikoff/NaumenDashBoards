@@ -365,7 +365,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		const {onClose} = this.props;
 
 		return (
-			<Modal header="Создать вычислимое поле" onSubmit={this.onSubmit} onClose={onClose}>
+			<Modal header="Создать вычислимое поле" onClose={onClose} onSubmit={this.onSubmit} size="large">
 				<div className={styles.container}>
 					{this.renderControls()}
 				</div>

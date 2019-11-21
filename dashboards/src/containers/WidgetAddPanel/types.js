@@ -1,4 +1,5 @@
 // @flow
+import type {NewWidget} from 'utils/widget';
 import type {ThunkAction} from 'store/types';
 import type {WidgetMap} from 'store/widgets/data/types';
 
@@ -7,7 +8,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	addWidget: (nextRow: number) => ThunkAction
+	addWidget: (widget: NewWidget) => ThunkAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

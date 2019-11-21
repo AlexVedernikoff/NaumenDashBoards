@@ -15,6 +15,7 @@ export type Method =
 	| 'bulkEditDefaultWidget'
 	| 'createDefaultWidgetSettings'
 	| 'createPersonalWidgetSettings'
+	| 'deletePersonalWidget'
 	| 'deleteWidget'
 	| 'getAttributesDataSources'
 	| 'getDataForCompositeDiagram'
@@ -30,6 +31,6 @@ export type Method =
 ;
 
 export type Context = {
-	subjectUuid: string | null,
+	subjectUuid: string,
 	contentCode: string
 };

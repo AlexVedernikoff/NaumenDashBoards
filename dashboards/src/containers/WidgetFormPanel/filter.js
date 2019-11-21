@@ -183,12 +183,18 @@ const filter = (data: FormData): any => {
 	const variant = variants[data.type];
 	const typeFields = typeof variant === 'object' ? variant : variant();
 	const breakdownReg = new RegExp(`^${breakdown}(_.*|$)`);
+	// TODO убрать после того как будут перенастроенны все виджеты
+	const oldFieldsReg = new RegExp(`^(${aggregation}(_.*|$)|${group}(_.*|$)|${breakdownGroup}(_.*|$)|${type}(_.*|$))`);
 
 	[...defaultFields, ...typeFields].forEach(key => {
 		let value = data[key] || null;
 
 		if (!value) {
 			value = getDefaultValue(key);
+		}
+
+		if (oldFieldsReg.test(key) && value && typeof value === 'object') {
+			value = value.value || null;
 		}
 
 		// $FlowFixMe

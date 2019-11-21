@@ -153,7 +153,7 @@ export class ComboChart extends OrderFormBuilder {
 
 		return (
 			<div key={xAxis}>
-				{this.combineInputs(
+				{this.renderCombinedInputs(
 					this.renderGroupInput(group, xAxis, groupProps),
 					this.renderAttrSelect(xAxisProps)
 				)}
@@ -165,7 +165,7 @@ export class ComboChart extends OrderFormBuilder {
 		return (
 			<div key={yAxis}>
 				{this.renderChartInput(chart)}
-				{this.combineInputs(
+				{this.renderCombinedInputs(
 					this.renderAggregateInput(aggregation, yAxis),
 					this.renderYAxisInput(yAxis)
 				)}

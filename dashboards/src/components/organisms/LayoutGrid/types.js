@@ -1,6 +1,7 @@
 // @flow
 import type {ConnectedFunctions, ConnectedProps} from 'containers/LayoutGrid/types';
 import type {Layout} from 'utils/layout/types';
+import type {Role} from 'store/dashboard/types';
 import type {WidgetMap} from 'store/widgets/data/types';
 
 export type State = {
@@ -13,8 +14,9 @@ export type State = {
 export type Props = {
 	editable: boolean,
 	onLayoutChange?: (layout: Layout) => void,
-	onRemoveWidget: (id: string) => void,
+	onRemoveWidget: (id: string, onlyPersonal: boolean) => void,
 	onSelectWidget: (id: string) => void,
+	role: Role,
 	selectedWidget: string,
 	widgets: WidgetMap,
 } & ConnectedProps & ConnectedFunctions;

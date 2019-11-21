@@ -1,6 +1,7 @@
 // @flow
 import {Button} from 'components/atoms';
 import {getNextRow} from 'utils/layout';
+import {NewWidget} from 'utils/widget';
 import type {Props} from 'containers/WidgetAddPanel/types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -10,7 +11,7 @@ export class WidgetAddPanel extends Component<Props> {
 		const {addWidget, widgets} = this.props;
 		const nextRow = getNextRow(widgets);
 
-		addWidget(nextRow);
+		addWidget(new NewWidget(nextRow));
 	};
 
 	render () {
