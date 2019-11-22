@@ -1,12 +1,8 @@
 // @flow
 import type {DashboardState} from './dashboard/types';
 import type {SourcesState} from './sources/types';
+import type {ToastsState} from './toasts/types';
 import type {WidgetsState} from './widgets/types';
-
-export type Error = {
-	status: number,
-	message: string
-};
 
 type Action = {
 	data?: any,
@@ -16,6 +12,7 @@ type Action = {
 export type AppState = {
 	dashboard: DashboardState,
 	sources: SourcesState,
+	toasts: ToastsState,
 	widgets: WidgetsState
 };
 

@@ -8,9 +8,10 @@ import withForm from 'components/organisms/WidgetFormPanel/withForm';
 export class Summary extends OrderFormBuilder {
 	sourceRefs = [FIELDS.indicator];
 
-	renderCompositeInputs = (aggregation: string, indicator: string) => this.renderCombinedInputs(
+	renderIndicatorWithAggregation = (aggregation: string, indicator: string) => this.renderCombinedInputs(
 		this.renderAggregateInput(aggregation, indicator),
-		this.renderIndicatorInput(indicator)
+		this.renderIndicatorInput(indicator),
+		false
 	);
 
 	renderIndicatorInput = (indicator: string) => {
@@ -37,7 +38,7 @@ export class Summary extends OrderFormBuilder {
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(false), source)}
 				<Divider />
-				{this.renderByOrder(this.renderCompositeInputs, [aggregation, indicator], true)}
+				{this.renderByOrder(this.renderIndicatorWithAggregation, [aggregation, indicator], true)}
 			</Fragment>
 		);
 	};

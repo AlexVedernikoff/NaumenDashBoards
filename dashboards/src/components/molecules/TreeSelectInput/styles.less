@@ -18,10 +18,6 @@
 		right: 47px;
 		top: 7px;
 		z-index: 99;
-
-		&:hover {
-			opacity: 1;
-		}
 	}
 
 	.clearIconContainer {
@@ -33,6 +29,12 @@
 
 	.container {
 		position: relative;
+
+		&:hover {
+			.editIconContainer {
+				opacity: 1;
+			}
+		}
 	}
 }
 

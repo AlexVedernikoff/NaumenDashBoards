@@ -35,7 +35,7 @@ export class Table extends OrderFormBuilder {
 		return this.renderAttrSelect(row);
 	};
 
-	renderCompositeInputs = (aggregation: string, column: string) => this.renderCombinedInputs(
+	renderColumnWithAggregation = (aggregation: string, column: string) => this.renderCombinedInputs(
 		this.renderAggregateInput(aggregation, column),
 		this.renderColumnInput(column)
 	);
@@ -56,12 +56,10 @@ export class Table extends OrderFormBuilder {
 		);
 	};
 
-	renderInputs = () => {
-		const {aggregation, breakdown, breakdownGroup, calcTotalRow, calcTotalColumn, column, row, source} = FIELDS;
+	renderTableBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.renderBreakdownWithGroup(breakdownGroup, breakdown, false);
 
-		const rowLabel = {
-			name: 'Строки'
-		};
+	render () {
+		const {aggregation, breakdown, breakdownGroup, calcTotalRow, calcTotalColumn, column, row, source} = FIELDS;
 
 		return (
 			<Fragment>
@@ -69,18 +67,13 @@ export class Table extends OrderFormBuilder {
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(false), source)}
 				<Divider />
-				{this.renderLabel(rowLabel)}
 				{this.renderByOrder(this.renderRowInput, row, true)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalRow, true)}
-				{this.renderByOrder(this.renderCompositeInputs, [aggregation, column], true)}
-				{this.renderByOrder(this.renderBreakdownWithGroup, [breakdownGroup, breakdown], true)}
+				{this.renderByOrder(this.renderColumnWithAggregation, [aggregation, column], true)}
+				{this.renderByOrder(this.renderTableBreakdownWithGroup, [breakdownGroup, breakdown], true)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalColumn, true)}
 			</Fragment>
 		);
-	};
-
-	render () {
-		return this.renderInputs();
 	}
 }
 

@@ -60,13 +60,30 @@ export class DataFormBuilder extends FormBuilder {
 		if (source) {
 			const context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
 			console.log('Контекст окна фильтрации:  ', context);
+			const {cases} = context;
+
+			// TODO убрать когда исправят фильтры на текущих виджетах. На старом окне дублировалось значение cases.
+			if (Array.isArray(cases) && cases.length > 0) {
+				context.cases = cases.map(this.changeInvalidCase);
+			}
+
 			try {
 				const {serializedContext} = await window.jsApi.commands.filterForm(context);
+				console.log('Полученный контекст:  ', context);
 				setFieldValue(descriptorName, serializedContext);
 			} catch (e) {
 				console.error('Ошибка окна фильтрации: ', e);
 			}
 		}
+	};
+
+	changeInvalidCase = (currentCase: string) => {
+		if (currentCase.includes('$')) {
+			const caseParts = currentCase.split('$');
+			return `${caseParts[0]}$${caseParts[1]}`;
+		}
+
+		return currentCase;
 	};
 
 	clearSourceRefFields = (name: string) => {
@@ -257,9 +274,10 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderAttrSelect(breakdown);
 	};
 
-	renderBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.renderCombinedInputs(
+	renderBreakdownWithGroup = (breakdownGroup: string, breakdown: string, withDivider: boolean = false) => this.renderCombinedInputs(
 		this.renderGroupInput(breakdownGroup, breakdown),
-		this.renderBreakdownInput(breakdown)
+		this.renderBreakdownInput(breakdown),
+		withDivider
 	);
 
 	renderCombinedInputs = (left: Node, right: Node, withDivider: boolean = true) => (

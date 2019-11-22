@@ -183,10 +183,10 @@ export class Select extends PureComponent<Props, State> {
 	);
 
 	renderValue = ({children, ...props}: any) => (
-		<components.ValueContainer {...props}>
-			<div>{children}</div>
-			{this.renderEditIcon()}
-		</components.ValueContainer>
+			<components.ValueContainer {...props} className={styles.valueContainer}>
+				<div>{children}</div>
+				{this.renderEditIcon()}
+			</components.ValueContainer>
 	);
 
 	render () {

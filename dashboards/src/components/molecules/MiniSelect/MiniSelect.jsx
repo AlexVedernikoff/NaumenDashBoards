@@ -58,7 +58,7 @@ export class MiniSelect extends PureComponent<Props, State> {
 
 		if (active) {
 			return (
-				<div className={styles.list}>
+				<div className={styles.list} onBlur={this.hideList} tabIndex={1}>
 					{this.renderValue()}
 					{this.renderOptions()}
 				</div>
@@ -87,7 +87,7 @@ export class MiniSelect extends PureComponent<Props, State> {
 		}
 
 		return (
-			<div className={cn(CNSelect)} onBlur={this.hideList} tabIndex={0}>
+			<div className={cn(CNSelect)}>
 				{this.renderValue()}
 				{this.renderList()}
 			</div>

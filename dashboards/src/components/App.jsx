@@ -5,9 +5,11 @@ import DashboardHeader from 'containers/DashboardHeader';
 import DashboardViewContent from 'containers/DashboardViewContent';
 import React, {Fragment} from 'react';
 import {Route, Switch} from 'react-router-dom';
+import ToastContainer from 'containers/Toast';
 
 export const App = () => (
 	<Fragment>
+		<ToastContainer />
 		<DashboardHeader />
 		<Switch>
 			<Route path="/" component={DashboardViewContent} exact />
