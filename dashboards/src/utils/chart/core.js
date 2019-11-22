@@ -136,7 +136,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
  */
 const comboChart = (widget: Widget, chart: DiagramData) => {
 	const {series} = chart;
-	const strokeWidth = series.map(s => s.type === CHART_VARIANTS.LINE ? 4 : 0);
+	const strokeWidth = series.find(s => s.type.toUpperCase() === CHART_VARIANTS.LINE) ? 4 : 0;
 	let stacked = false;
 	let percentDataKeys = [];
 
@@ -228,7 +228,7 @@ const circleChart = (widget: Widget, chart: DiagramData): ApexOptions => {
 };
 
 /**
- * Получаем ф-цию для генерации необходимой примеси опций
+ * Получаем функцию для генерации необходимой примеси опций
  * @param {string} type - тип графика выбранный пользователем
  * @returns {Function}
  */
@@ -306,7 +306,7 @@ const getSeries = (widget: Widget, chart: DiagramData): ApexAxisChartSeries => {
 
 	if (widget.type === CHART_VARIANTS.COMBO && series.length > 0) {
 		series.forEach(s => {
-			s.type = s.type === CHART_VARIANTS.LINE || s.type === CHART_TYPES.line ? CHART_TYPES.line : CHART_TYPES.bar;
+			s.type = s.type.toUpperCase() === CHART_VARIANTS.LINE ? CHART_TYPES.line : CHART_TYPES.bar;
 		});
 	}
 

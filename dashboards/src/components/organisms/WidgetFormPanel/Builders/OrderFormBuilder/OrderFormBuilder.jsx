@@ -15,7 +15,7 @@ export class OrderFormBuilder extends DataFormBuilder {
 	defaultOrder = [1];
 
 	async componentDidMount () {
-		const {TABLE, SUMMARY} = WIDGET_VARIANTS;
+		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 		const {setFieldValue, values} = this.props;
 		const order = values[FIELDS.order];
 		const type = values[FIELDS.type];
@@ -100,10 +100,11 @@ export class OrderFormBuilder extends DataFormBuilder {
 		const {values} = this.props;
 
 		return this.getOrder().map(num => {
-			const sourceForCompute = values[createOrderName(num)(FIELDS.sourceForCompute)];
+			const createName = createOrderName(num);
+			const sourceForCompute = values[createName(FIELDS.sourceForCompute)];
 
 			if (!accordingSource || (accordingSource && !sourceForCompute)) {
-				const renderNames = Array.isArray(names) ? names.map(createOrderName(num)) : [createOrderName(num)(names)];
+				const renderNames = Array.isArray(names) ? names.map(createName) : [createName(names)];
 				return renderFunction(...renderNames);
 			}
 		});

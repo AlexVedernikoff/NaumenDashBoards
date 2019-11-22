@@ -13,11 +13,11 @@ export class Chart extends FormBuilder {
 		const colors = values[FIELDS.colors];
 
 		if (!Array.isArray(colors)) {
-			setFieldValue(FIELDS.colors, VALUES.COLORS);
+			setFieldValue(FIELDS.colors, [...VALUES.COLORS]);
 		}
 	}
 
-	getColors = () => this.props.values[FIELDS.colors] || VALUES.COLORS;
+	getColors = () => this.props.values[FIELDS.colors] || [...VALUES.COLORS];
 
 	changeColor = (colorIndex: number, itemColor: string): void => {
 		let colors = this.getColors();

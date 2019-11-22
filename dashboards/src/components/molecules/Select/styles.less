@@ -11,10 +11,6 @@
 		right: 0;
 		top: 3px;
 		z-index: 99;
-
-		&:hover {
-			opacity: 1;
-		}
 	}
 
 	.formContainer {
@@ -24,6 +20,14 @@
 
 	.plusIcon {
 		margin-right: 5px;
+	}
+
+	.valueContainer {
+		&:hover {
+			.editIconContainer {
+				opacity: 1;
+			}
+		}
 	}
 }
 

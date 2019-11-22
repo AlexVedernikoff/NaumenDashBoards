@@ -169,7 +169,7 @@ export class ComboChart extends OrderFormBuilder {
 					this.renderAggregateInput(aggregation, yAxis),
 					this.renderYAxisInput(yAxis)
 				)}
-				{this.renderBreakdownWithGroup(breakdownGroup, breakdown)}
+				{this.renderBreakdownWithGroup(breakdownGroup, breakdown, true)}
 			</div>
 		);
 	};

@@ -8,6 +8,7 @@ import IconButton from './IconButton';
 import Label from './Label';
 import TextArea from './TextArea';
 import Title from './Title';
+import Toast from './Toast';
 import Tooltip from './Tooltip';
 
 export {
@@ -20,5 +21,6 @@ export {
 	Label,
 	TextArea,
 	Title,
+	Toast,
 	Tooltip
 };

@@ -2,6 +2,7 @@
 import {addWidget, getWidgets, resetWidget} from 'store/widgets/data/actions';
 import {buildUrl, client, getContext, getEditableParameter} from 'utils/api';
 import type {Context} from 'utils/api/types';
+import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getDataSources} from 'store/sources/data/actions';
@@ -83,18 +84,28 @@ const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
  * @param {Blob} file - файл для отправки
  * @returns {ThunkAction}
  */
-const sendToMail = (name: string, type: string, file: Blob): ThunkAction => () => {
+const sendToMail = (name: string, type: string, file: Blob): ThunkAction => async (dispatch: Dispatch) => {
 	const data = new FormData();
 	data.append('fileBytes', file, name);
 	data.append('fileFormat', type);
 	data.append('fileName', name);
 
-	client.post(buildUrl('dashboardSendEmail', 'sendFileToMail', 'request,user'), data, {
-		headers: {
-			'Content-Type': 'multipart/form-data',
-			timeout: 30000
-		}
-	});
+	try {
+		await client.post(buildUrl('dashboardSendEmail', 'sendFileToMail', 'request,user'), data, {
+			headers: {
+				'Content-Type': 'multipart/form-data',
+				timeout: 30000
+			}
+		});
+		dispatch(createToast({
+			text: 'Файл успешно отправлен'
+		}));
+	} catch (e) {
+		dispatch(createToast({
+			text: 'Ошибка отправки файла',
+			type: 'error'
+		}));
+	}
 };
 
 /**
