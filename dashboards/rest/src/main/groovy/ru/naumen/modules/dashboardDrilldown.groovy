@@ -9,7 +9,6 @@
 //Версия: 4.10.0.15
 //Категория: скриптовый модуль
 package ru.naumen.modules
-
 //region КЛАССЫ
 /**
  * Объект помощник для формирования ссылок
@@ -54,7 +53,7 @@ class Link
     /**
      * темплеит
      */
-    private String template = "DlyaDashbordov"
+    private String template
 
     /**
      * время жизни ссылки в днях
@@ -65,35 +64,35 @@ class Link
 
     private Map<String, Integer> genitiveRussianMonth = Calendar.with {
         [
-                'января': JANUARY,
-                'февраля': FEBRUARY,
-                'марта': MARCH,
-                'апреля': APRIL,
-                'мая': MAY,
-                'июня': JUNE,
-                'июля': JULY,
-                'августа': AUGUST,
+                'января'  : JANUARY,
+                'февраля' : FEBRUARY,
+                'марта'   : MARCH,
+                'апреля'  : APRIL,
+                'мая'     : MAY,
+                'июня'    : JUNE,
+                'июля'    : JULY,
+                'августа' : AUGUST,
                 'сентября': SEPTEMBER,
-                'октября': OCTOBER,
-                'ноября': NOVEMBER,
-                'декабря': DECEMBER
+                'октября' : OCTOBER,
+                'ноября'  : NOVEMBER,
+                'декабря' : DECEMBER
         ]
     }
 
     private Map<String, Integer> nominativeRussianMonth = Calendar.with {
         [
-                'январь': JANUARY,
-                'февраль': FEBRUARY,
-                'март': MARCH,
-                'апрель': APRIL,
-                'май': MAY,
-                'июнь': JUNE,
-                'июль': JULY,
-                'август': AUGUST,
+                'январь'  : JANUARY,
+                'февраль' : FEBRUARY,
+                'март'    : MARCH,
+                'апрель'  : APRIL,
+                'май'     : MAY,
+                'июнь'    : JUNE,
+                'июль'    : JULY,
+                'август'  : AUGUST,
                 'сентябрь': SEPTEMBER,
-                'октябрь': OCTOBER,
-                'ноябрь': NOVEMBER,
-                'декабрь': DECEMBER
+                'октябрь' : OCTOBER,
+                'ноябрь'  : NOVEMBER,
+                'декабрь' : DECEMBER
         ]
     }
 
@@ -102,7 +101,8 @@ class Link
      */
     private final DATE_ATTRIBUTES = ['date', 'dateTime']
 
-    Link(Map<String, Object> map, def api) {
+    Link(Map<String, Object> map, def api)
+    {
         this.api = api
         this.classFqn = map.classFqn
         this.title = map.title ?: "Список элементов ${this.classFqn}"
@@ -113,6 +113,7 @@ class Link
         this.cases = map.cases as Collection
         this.attrCodes = map.attrCodes as Collection
         this.filters = map.filters as Collection
+        this.template = 'DlyaDashbordov' //TODO: тут тоже нужна проверка
     }
 
     /**
@@ -140,6 +141,7 @@ class Link
      */
     private void formatFilter(def filterBuilder)
     {
+
         if (descriptor)
         {
             DashboardMarshaller.createContext(descriptor).listFilter.elements.collect { orFilter ->
@@ -149,34 +151,43 @@ class Link
                     def value = filter.getValue()
                     filterBuilder.OR(attribute, condition, value)
                 }
-            }.each { orFilters ->
-                filterBuilder.AND(*orFilters)
+            }.inject(filterBuilder) { first, second -> first.AND(*second) }
+        }
+
+        Closure<Map<GroupType, Collection<Object>>> createContextFromFilters = { Collection<Map<Object, Object>> filters ->
+            Map<GroupType, Collection<Object>> result = [:]
+            filters.collect { [(it.group as GroupType):[it.value]] }.each {
+                it.containsKey(GroupType.OVERLAP) && result.containsKey(GroupType.OVERLAP)
+                        ? result << [(GroupType.OVERLAP): result.get(GroupType.OVERLAP) + it.get(GroupType.OVERLAP)]
+                        : result << it
             }
+            result
         }
 
         if (filters)
         {
-            filters.groupBy {it.attr}.collect { attr, filters -> //на случай если атрибуты одинаковые
+            filters.groupBy { it.attr }.collect { def attr, Collection<Map<Object, Object>> filters ->
                 String type = attr.type
                 String code = attr.code
-                def context = filters.collect { [ (it.group as GroupType) : [it.value] ] }.inject([:]) { first, second ->
-                    GroupType.with {
-                        second.containsKey(OVERLAP) && first.containsKey(OVERLAP)
-                                ? first << [(OVERLAP) : first.get(OVERLAP) + (second.get(OVERLAP))]
-                                : first << second
-                    }
-                }
+                Collection<Collection<Object>> result = []
 
-                def simpleFilter = context.remove(GroupType.OVERLAP).collect { value ->
-                    getOrFilter(type, code, value, filterBuilder)
+                Map<GroupType, Collection<Object>> context = createContextFromFilters(filters)
+
+
+                context.remove(GroupType.OVERLAP).each { value ->
+                    //Фильтры данного типа считаем AND
+                    result << [getOrFilter(type, code, value, filterBuilder)]
                 }
 
                 if (context)
                 {
-                    simpleFilter.add(filterBuilder.OR(code, 'fromTo', getRange(context)))
+                    Closure<Date> findMinDate = this.&getMinDate.curry(code)
+                    result << getRanges(context, findMinDate).collect { range ->
+                        filterBuilder.OR(code, 'fromTo', range)
+                    }
                 }
-                simpleFilter
-            }.flatten().inject(filterBuilder) { first, second -> first.AND(second) }
+                result
+            }.each { it.inject(filterBuilder) { first, second -> first.AND(*second) }}
         }
     }
 
@@ -202,7 +213,7 @@ class Link
      * Вспомогательный метод по формированию диапазона дат
      * @return диапазон дат
      */
-    private List<Date> getRange(Map<Object, Object> context)
+    private List<List<Date>> getRanges(Map<Object, Object> context, Closure<Date> findMinimum = { null })
     {
         def year = context.get(GroupType.YEAR)?.head()
         def quarter = context.get(GroupType.QUARTER)?.head()
@@ -211,13 +222,28 @@ class Link
         def week = context.get(GroupType.WEEK)?.head()
         def day = context.get(GroupType.DAY)?.head()
 
-        def calendar = Calendar.instance
+        Collection<Calendar> calendars
 
-        def rangeMonth = [Calendar.JANUARY, Calendar.DECEMBER]
-        def rangeDay = [1, 31]
-        def rangeHour = [0, 23]
-        def rangeMinute = [0, 59]
-        def rangeSecond = [0, 59]
+        if (year)
+        {
+            def calendar = Calendar.instance
+            calendar.getTime()
+            calendar.set(Calendar.YEAR, year as int)
+            calendars = [calendar]
+        }
+        else
+        {
+            def minimumYear = Calendar.instance.with {
+                it.setTime(findMinimum())
+                it.get(YEAR)
+            }
+            int currentYear = Calendar.instance.get(Calendar.YEAR)
+            calendars = (minimumYear..currentYear).collect {
+                def calendar = Calendar.instance
+                calendar.set(Calendar.YEAR, it)
+                calendar
+            }
+        }
 
         Closure setInterval = { List oldInterval, List newInterval ->
             if (newInterval[0] > oldInterval[0])
@@ -227,94 +253,107 @@ class Link
                 oldInterval[1] = newInterval[1]
         }
 
-        if (year) 
-        { // если год не указан, считаем что текущий
-            calendar.set(Calendar.YEAR, year as int)
-        }
+        def result = calendars.collect { calendar ->
+            def rangeMonth = [Calendar.JANUARY, Calendar.DECEMBER]
+            def rangeDay = [1, 31]
+            def rangeHour = [0, 23]
+            def rangeMinute = [0, 59]
+            def rangeSecond = [0, 59]
 
-        if (quarter) {
-            int q = (quarter as String).replace(' кв-л', '') as int
-            int startMonth = (q - 1) * 3
-            int endMonth = startMonth + 2
-            setInterval(rangeMonth, [startMonth, endMonth])
+            if (quarter)
+            {
+                int q = (quarter as String).replace(' кв-л', '') as int
+                int startMonth = (q - 1) * 3
+                int endMonth = startMonth + 2
+                setInterval(rangeMonth, [startMonth, endMonth])
 
-            Calendar monthCalendar = calendar.clone()
-            int endDay = monthCalendar.with {
-                set(MONTH, endMonth)
-                getActualMaximum(DAY_OF_MONTH)
+                Calendar monthCalendar = calendar.clone()
+                int endDay = monthCalendar.with {
+                    set(MONTH, endMonth)
+                    getActualMaximum(DAY_OF_MONTH)
+                }
+                setInterval(rangeDay, [1, endDay])
             }
-            setInterval(rangeDay, [1, endDay])
-        }
 
-        if (month) 
-        {
-            int m = nominativeRussianMonth.get((month as String).toLowerCase())
-            setInterval(rangeMonth, [m, m])
+            if (month)
+            {
+                int m = nominativeRussianMonth.get((month as String).toLowerCase())
+                setInterval(rangeMonth, [m, m])
 
-            Calendar monthCalendar = calendar.clone()
-            int endDay = monthCalendar.with {
-                set(MONTH, m)
-                getActualMaximum(DAY_OF_MONTH)
+                Calendar monthCalendar = calendar.clone()
+                int endDay = monthCalendar.with {
+                    set(MONTH, m)
+                    getActualMaximum(DAY_OF_MONTH)
+                }
+                setInterval(rangeDay, [rangeDay[0], endDay])
             }
-            setInterval(rangeDay, [rangeDay[0], endDay])
-        }
 
-        if (sevenDays) 
-        {
-            def (lowerLimit, upperLimit) = (sevenDays as String).split(" - ", 2).collect { dayAndMonth ->
-                def (int d, int m) = dayAndMonth.split(" ", 2)
-                [m, d]
+            if (sevenDays)
+            {
+                def (lowerLimit, upperLimit) = (sevenDays as String).split(" - ", 2).collect { dayAndMonth ->
+                    def (int d, int m) = dayAndMonth.split(" ", 2)
+                    [m, d]
+                }
+                def (int lowerLimitMonth, int lowerLimitDay) = lowerLimit
+                def (int upperLimitMonth, int upperLimitDay) = upperLimit
+                setInterval(rangeMonth, [lowerLimitMonth, upperLimitMonth])
+                setInterval(rangeDay, [lowerLimitDay, upperLimitDay])
             }
-            def (int lowerLimitMonth, int lowerLimitDay) = lowerLimit
-            def (int upperLimitMonth, int upperLimitDay) = upperLimit
-            setInterval(rangeMonth, [lowerLimitMonth, upperLimitMonth])
-            setInterval(rangeDay, [lowerLimitDay, upperLimitDay])
-        }
 
-        if (week) 
-        {
-            Calendar weekCalendar = calendar.clone()
-            weekCalendar.set(Calendar.WEEK_OF_YEAR, week as int)
-            int currentMonth = weekCalendar.get(Calendar.MONTH)
-            def range = weekCalendar.with {
-                Calendar start = it.clone()
-                Calendar end = it.clone()
+            if (week)
+            {
+                Calendar weekCalendar = calendar.clone()
+                weekCalendar.set(Calendar.WEEK_OF_YEAR, week as int)
+                int currentMonth = weekCalendar.get(Calendar.MONTH)
+                def range = weekCalendar.with {
+                    Calendar start = it.clone()
+                    Calendar end = it.clone()
 
-                start.set(DAY_OF_WEEK, MONDAY)
-                end.set(DAY_OF_WEEK, SUNDAY)
+                    start.set(DAY_OF_WEEK, MONDAY)
+                    end.set(DAY_OF_WEEK, SUNDAY)
 
-                [start.get(DAY_OF_MONTH), end.get(DAY_OF_MONTH)]
+                    [start.get(DAY_OF_MONTH), end.get(DAY_OF_MONTH)]
+                }
+                setInterval(rangeMonth, [currentMonth, currentMonth])
+                setInterval(rangeDay, range)
             }
-            setInterval(rangeMonth, [currentMonth, currentMonth])
-            setInterval(rangeDay, range)
+
+            if (day)
+            {
+                def (String currentDay, String nameMonth) = (day as String).split()
+                int currentMonth = genitiveRussianMonth.get(nameMonth.toLowerCase())
+                setInterval(rangeMonth, [currentMonth, currentMonth])
+                setInterval(rangeDay, [currentDay as int, currentDay as int])
+            }
+
+            Calendar start = calendar.clone()
+            Calendar end = calendar.clone()
+            start.with {
+                set(MONTH, rangeMonth[0])
+                set(DAY_OF_MONTH, rangeDay[0])
+                set(HOUR_OF_DAY, rangeHour[0])
+                set(MINUTE, rangeMinute[0])
+                set(SECOND, rangeSecond[0])
+                set(MILLISECOND, -1) // Это необходимо! иначе не корректно отработают фильтры
+            }
+            end.with {
+                set(MONTH, rangeMonth[1])
+                set(DAY_OF_MONTH, rangeDay[1])
+                set(HOUR_OF_DAY, rangeHour[1])
+                set(MINUTE, rangeMinute[1])
+                set(SECOND, rangeSecond[1])
+                set(MILLISECOND, 999)
+            }
+            [start.getTime(), end.getTime()]
         }
 
-        if (day) 
-        {
-            def (int currentDay, String nameMonth) = (day as String).split()
-            int currentMonth = genitiveRussianMonth.get(nameMonth.toLowerCase())
-            setInterval(rangeMonth, [currentMonth, currentMonth])
-            setInterval(rangeDay, [currentDay, currentDay])
-        }
+        return result
+    }
 
-        Calendar start = calendar.clone()
-        Calendar end = calendar.clone()
-        start.with {
-            set(MONTH, rangeMonth[0])
-            set(DAY_OF_MONTH, rangeDay[0])
-            set(HOUR_OF_DAY, rangeHour[0])
-            set(MINUTE, rangeMinute[0])
-            set(SECOND, rangeSecond[0])
-        }
-        end.with {
-            set(MONTH, rangeMonth[1])
-            set(DAY_OF_MONTH, rangeDay[1])
-            set(HOUR_OF_DAY, rangeHour[1])
-            set(MINUTE, rangeMinute[1])
-            set(SECOND, rangeSecond[1])
-        }
-
-        return [start.getTime(), end.getTime()]
+    //TODO: Вынести в отдельный модуль
+    private Date getMinDate(String attributeCode)
+    {
+        return api.db.query("select min($attributeCode) from $classFqn").list().head() as Date
     }
 }
 //endregion
