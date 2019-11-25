@@ -1,5 +1,5 @@
 // @flow
-import type {AttributeMap} from 'store/sources/attributes/types';
+import type {Attribute, AttributeMap} from 'store/sources/attributes/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {Context} from 'utils/api/types';
 import {FormikProps} from 'formik';
@@ -12,7 +12,8 @@ import type {Widget} from 'store/widgets/data/types';
 export type ConnectedProps = {
 	attributes: AttributeMap,
 	context: Context,
-	role: Role,
+	refAttributes: AttributeMap,
+	role?: Role,
 	saveError: boolean,
 	selectedWidget: Widget | NewWidget,
 	sources: DataSourceMap,
@@ -29,6 +30,7 @@ export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
 	createWidget: (data: CreateFormData, asDefault: boolean) => ThunkAction,
 	fetchAttributes: (classFqn: string) => ThunkAction,
+	fetchRefAttributes: (refAttr: Attribute) => ThunkAction,
 	saveWidget: (data: SaveFormData, asDefault: boolean) => ThunkAction
 };
 

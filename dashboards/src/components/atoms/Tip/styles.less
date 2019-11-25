@@ -1,0 +1,27 @@
+:local {
+	.tip {
+		&:before {
+			background: black;
+			bottom: 0;
+			color: white;
+			content: attr(data-tip);
+			display: none;
+			font-size: 10px;
+			height: 24px;
+			left: 50%;
+			line-height: 24px;
+			opacity: 0;
+			padding: 0 7px;
+			position: absolute;
+			transition: opacity 0.4s ease-out;
+			white-space: nowrap;
+			z-index: 999;
+		}
+
+		&:hover:before {
+			bottom: -30px;
+			display: block;
+			opacity: 1;
+		}
+	}
+}

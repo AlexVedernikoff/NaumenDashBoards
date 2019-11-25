@@ -28,7 +28,7 @@ export type Tree = {
 export type Props = {
 	form?: Form,
 	name: string,
-	onChange: (name: string, value: TreeSelectValue) => any,
+	onChange: (name: string, value: TreeSelectValue | null) => any,
 	placeholder: string,
 	tree: Tree,
 	value: TreeSelectValue | null

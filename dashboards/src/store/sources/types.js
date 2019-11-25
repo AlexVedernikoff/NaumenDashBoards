@@ -1,8 +1,10 @@
 // @flow
 import type {AttributesState} from './attributes/types';
 import type {DataSourcesState} from './data/types';
+import type {RefAttributesState} from './refAttributes/types';
 
 export type SourcesState = {
 	attributes: AttributesState,
-	data: DataSourcesState
+	data: DataSourcesState,
+	refAttributes: RefAttributesState
 };

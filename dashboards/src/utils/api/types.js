@@ -7,7 +7,6 @@ export type Module =
 	| 'dashboardSettings'
 	| 'dashboardTestGetData'
 	| 'DashboardsSettings'
-	| 'DevDashboardSettings'
 ;
 
 export type Method =
@@ -18,6 +17,7 @@ export type Method =
 	| 'deletePersonalWidget'
 	| 'deleteWidget'
 	| 'getAttributesDataSources'
+	| 'getAttributesFromLinkAttribute'
 	| 'getDataForCompositeDiagram'
 	| 'getDataForDiagram'
 	| 'getDataSources'

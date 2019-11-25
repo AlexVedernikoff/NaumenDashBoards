@@ -16,17 +16,20 @@ export type Props = {
 	getOptionLabel?: (o: OptionType) => string,
 	getOptionValue?: (o: OptionType) => string,
 	isDisabled: boolean,
+	isEditableLabel: boolean,
 	isLoading: boolean,
+	isRemoving: boolean,
 	isSearchable: boolean,
 	menuIsOpen?: boolean,
 	name: string,
-	onClickCreateButton?: () => any,
-	onSelect: (name: string, value: OptionType) => any,
+	onClickCreateButton?: () => void,
+	onRemove?: (name: string) => void,
+	onSelect: (name: string, value: OptionType) => void | Promise<void>,
 	options: OptionType[],
 	placeholder: string,
+	showBorder: boolean,
 	value: OptionType | null,
-	withCreateButton: boolean,
-	withEditIcon: boolean
+	withCreate: boolean
 };
 
 export type State = {

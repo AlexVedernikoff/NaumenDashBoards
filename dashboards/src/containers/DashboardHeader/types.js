@@ -5,7 +5,7 @@ import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
 	editable: boolean,
-	role: Role
+	role?: Role
 };
 
 export type ConnectedFunctions = {

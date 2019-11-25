@@ -212,7 +212,6 @@ export class LayoutGrid extends Component<Props, State> {
 	renderDefaultModal = () => {
 		const {role} = this.props;
 		const {showModal} = this.state;
-		const onlyPersonal = role === null;
 
 		if (showModal) {
 			return (
@@ -220,7 +219,7 @@ export class LayoutGrid extends Component<Props, State> {
 					cancelText="Нет"
 					header="Вы точно хотите удалить виджет?"
 					onClose={this.hideModal}
-					onSubmit={this.removeWidget(onlyPersonal)}
+					onSubmit={this.removeWidget(!role)}
 					size="small"
 					submitText="Да"
 				/>

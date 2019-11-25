@@ -14,7 +14,7 @@ export type ConnectedFunctions = {
 export type ConnectedProps = {
 	newWidget: NewWidget | null,
 	selectedWidget: string,
-	role: Role,
+	role?: Role,
 	widgets: WidgetMap
 };
 

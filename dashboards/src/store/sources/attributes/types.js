@@ -5,6 +5,7 @@ export type Attribute = {
 	code: string,
 	metaClassFqn: string,
 	property: string,
+	ref: Attribute | null,
 	sourceName: string,
 	title: string,
 	type: string,

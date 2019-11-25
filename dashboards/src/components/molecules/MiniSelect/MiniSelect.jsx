@@ -1,9 +1,10 @@
 // @flow
-import {ChevronDownBareIcon as CaretIcon} from 'icons/form';
+import {CaretIcon} from 'icons/form';
 import cn from 'classnames';
 import type {Label, Option, Props, State} from './types';
 import React, {createElement, PureComponent} from 'react';
 import styles from './styles.less';
+import {Tip} from 'components/atoms';
 
 export class MiniSelect extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -58,7 +59,7 @@ export class MiniSelect extends PureComponent<Props, State> {
 
 		if (active) {
 			return (
-				<div className={styles.list} onBlur={this.hideList} tabIndex={1}>
+				<div className={styles.list}>
 					{this.renderValue()}
 					{this.renderOptions()}
 				</div>
@@ -87,8 +88,8 @@ export class MiniSelect extends PureComponent<Props, State> {
 		}
 
 		return (
-			<div className={cn(CNSelect)}>
-				{this.renderValue()}
+			<div className={cn(CNSelect)} onBlur={this.hideList} tabIndex={0}>
+				{this.renderValueWithTip()}
 				{this.renderList()}
 			</div>
 		);
@@ -104,6 +105,12 @@ export class MiniSelect extends PureComponent<Props, State> {
 			</div>
 		);
 	};
+
+	renderValueWithTip = () => (
+		<Tip text={this.props.tip}>
+			{this.renderValue()}
+		</Tip>
+	);
 
 	render () {
 		return this.renderSelect();

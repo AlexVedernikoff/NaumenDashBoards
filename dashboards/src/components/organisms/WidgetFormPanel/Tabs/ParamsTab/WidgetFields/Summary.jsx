@@ -1,5 +1,4 @@
 // @flow
-import {Divider} from 'components/atoms';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import React, {Fragment} from 'react';
@@ -8,25 +7,13 @@ import withForm from 'components/organisms/WidgetFormPanel/withForm';
 export class Summary extends OrderFormBuilder {
 	sourceRefs = [FIELDS.indicator];
 
-	renderIndicatorWithAggregation = (aggregation: string, indicator: string) => this.renderCombinedInputs(
-		this.renderAggregateInput(aggregation, indicator),
-		this.renderIndicatorInput(indicator),
-		false
-	);
-
-	renderIndicatorInput = (indicator: string) => {
-		const {values} = this.props;
-
+	renderSummaryIndicator = (indicator: string, aggregation: string) => {
 		const props = {
-			border: false,
-			getOptionLabel: this.getLabelWithSource,
-			name: indicator,
-			placeholder: 'Показатель',
-			value: values[indicator],
-			withCreateButton: true
+			withCreate: true,
+			withDivider: false
 		};
 
-		return this.renderAttrSelect(props);
+		return this.renderIndicator(indicator, aggregation, props);
 	};
 
 	renderInputs = () => {
@@ -37,8 +24,9 @@ export class Summary extends OrderFormBuilder {
 				{this.renderModal()}
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(false), source)}
-				<Divider />
-				{this.renderByOrder(this.renderIndicatorWithAggregation, [aggregation, indicator], true)}
+				{this.renderSectionDivider()}
+				{this.renderLabel('Показатель')}
+				{this.renderByOrder(this.renderSummaryIndicator, [indicator, aggregation], true)}
 			</Fragment>
 		);
 	};

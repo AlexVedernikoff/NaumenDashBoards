@@ -14,6 +14,7 @@ export type Props = {
 	onSelect: (name: string, value: string) => any,
 	options: Array<Option>,
 	showCaret: boolean,
+	tip: string,
 	value: string
 }
 

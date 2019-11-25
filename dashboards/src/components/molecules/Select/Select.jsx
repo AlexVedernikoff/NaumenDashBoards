@@ -1,7 +1,7 @@
 // @flow
 import {ATTR_PROPS, DEFAULT_COMPONENTS} from './constants';
 import {Button, IconButton} from 'components/atoms';
-import {EditIcon, PlusIcon} from 'icons/form';
+import {EditIcon, MinusIcon, PlusIcon} from 'icons/form';
 import {InputForm} from 'components/molecules';
 import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
@@ -15,10 +15,13 @@ export class Select extends PureComponent<Props, State> {
 		createButtonText: 'Создать',
 		defaultValue: null,
 		isDisabled: false,
+		isEditableLabel: true,
 		isLoading: false,
+		isRemoving: false,
 		isSearchable: true,
-		withCreateButton: false,
-		withEditIcon: false
+		placeholder: 'Выберите значение',
+		showBorder: true,
+		withCreate: false
 	};
 
 	state = {
@@ -28,30 +31,27 @@ export class Select extends PureComponent<Props, State> {
 	ref = createRef();
 
 	getComponents = () => {
-		const {components, form, withCreateButton} = this.props;
-		let commonComponents = {
-			SingleValue: this.renderSingleValue,
+		const {components, withCreate} = this.props;
+		const commonComponents = {
+			Control: this.renderControl,
+			IndicatorsContainer: this.renderIndicators,
 			...DEFAULT_COMPONENTS,
 			...components
 		};
 
-		if (form) {
-			commonComponents = {...commonComponents, ValueContainer: this.renderValue};
-		}
-
-		if (withCreateButton) {
-			commonComponents = {...commonComponents, Menu: this.renderListWithCreateButton};
+		if (withCreate) {
+			commonComponents.Menu = this.renderListWithCreateButton;
 		}
 
 		return commonComponents;
 	};
 
 	getCustomStyles = () => {
-		const {attr} = this.props;
+		const {showBorder} = this.props;
 		const customStyles = {};
 
 		customStyles.control = (provided: Object) => {
-			provided.border = attr ? 'none' : '1px solid lightgray';
+			provided.border = showBorder ? '1px solid lightgray' : 'none';
 			return provided;
 		};
 
@@ -97,6 +97,11 @@ export class Select extends PureComponent<Props, State> {
 		return props;
 	};
 
+	handleRemove = () => {
+		const {name, onRemove, onSelect} = this.props;
+		onRemove ? onRemove(name) : onSelect(name, null);
+	};
+
 	handleSelect = (value: OptionType) => {
 		const {onSelect, name} = this.props;
 		const {current} = this.ref;
@@ -123,20 +128,18 @@ export class Select extends PureComponent<Props, State> {
 
 	noOptionsMessage = () => 'Список пуст';
 
-	mask = (value: string) => value.length > 18 ? `${value.substring(0, 18)}...` : value;
-
 	stopPropagation = (e: SyntheticMouseEvent<HTMLElement>) => e.stopPropagation();
 
-	renderEditIcon = () => {
-		const {withEditIcon} = this.props;
+	renderControl = (props: any) => <components.Control {...props} className={styles.control}/>;
 
-		if (withEditIcon) {
+	renderEditIcon = () => {
+		const {isEditableLabel, value} = this.props;
+
+		if (isEditableLabel && value) {
 			return (
-				<div className={styles.editIconContainer} onClick={this.handleShowForm(true)} onMouseDown={this.stopPropagation}>
-					<IconButton>
-						<EditIcon />
-					</IconButton>
-				</div>
+				<IconButton onClick={this.handleShowForm(true)}>
+					<EditIcon />
+				</IconButton>
 			);
 		}
 	};
@@ -160,6 +163,13 @@ export class Select extends PureComponent<Props, State> {
 		}
 	};
 
+	renderIndicators = () => (
+		<div className={styles.indicatorsContainer} onMouseDown={this.stopPropagation}>
+			{this.renderEditIcon()}
+			{this.renderRemoveIcon()}
+		</div>
+	);
+
 	renderListWithCreateButton = (props: any) => {
 		const {createButtonText, onClickCreateButton} = this.props;
 
@@ -174,20 +184,19 @@ export class Select extends PureComponent<Props, State> {
 		);
 	};
 
+	renderRemoveIcon = () => {
+		const {isRemoving} = this.props;
+
+		if (isRemoving) {
+			return (
+				<IconButton onClick={this.handleRemove}>
+					<MinusIcon />
+				</IconButton>
+			);
+		}
+	};
+
 	renderSelect = () => <ReactSelect ref={this.ref} {...this.getSelectProps()} />;
-
-	renderSingleValue = ({ children, ...props }: any) => (
-		<components.SingleValue {...props}>
-			{this.mask(children)}
-		</components.SingleValue>
-	);
-
-	renderValue = ({children, ...props}: any) => (
-			<components.ValueContainer {...props} className={styles.valueContainer}>
-				<div>{children}</div>
-				{this.renderEditIcon()}
-			</components.ValueContainer>
-	);
 
 	render () {
 		const {showForm} = this.state;

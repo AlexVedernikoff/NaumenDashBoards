@@ -31,6 +31,7 @@ export type Widget = {
 	showYAxis?: boolean,
 	source?: SelectValue,
 	type: string,
+	withBreakdown: boolean,
 	xAxis?: Attribute,
 	yAxis?: Attribute,
 };

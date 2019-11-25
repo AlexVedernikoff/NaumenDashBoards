@@ -3,6 +3,7 @@ import type {AppState} from 'store/types';
 import {cancelForm, createWidget, saveWidget} from 'store/widgets/data/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchAttributes} from 'store/sources/attributes/actions';
+import {fetchRefAttributes} from 'store/sources/refAttributes/actions';
 import {NewWidget} from 'utils/widget';
 
 /**
@@ -16,6 +17,7 @@ export const props = (state: AppState): ConnectedProps => {
 	return {
 		attributes: state.sources.attributes.map,
 		context: state.dashboard.context,
+		refAttributes: state.sources.refAttributes,
 		role: state.dashboard.role,
 		saveError: data.saveError,
 		selectedWidget: selectedWidget === NewWidget.id && newWidget ? newWidget : data.map[selectedWidget],
@@ -28,5 +30,6 @@ export const functions: ConnectedFunctions = {
 	cancelForm,
 	createWidget,
 	fetchAttributes,
+	fetchRefAttributes,
 	saveWidget
 };

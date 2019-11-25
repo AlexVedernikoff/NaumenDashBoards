@@ -1,7 +1,6 @@
 // @flow
-import {Divider} from 'components/atoms';
 import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import {FIELDS, styles} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, getAggregateOptions} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
@@ -21,56 +20,47 @@ export class Table extends OrderFormBuilder {
 		return this.renderCheckBox(totalRow);
 	};
 
-	renderColumnInput = (name: string) => {
+	renderColumn = (name: string, aggregationName: string) => {
 		const {values} = this.props;
 
-		const row = {
-			border: false,
+		const props = {
 			name,
-			placeholder: 'Столбцы',
+			onSelect: this.handleSelectWithRef(aggregationName, getAggregateOptions),
+			refInput: this.renderAggregation(aggregationName, name),
 			value: values[name],
-			withCreateButton: true
+			withCreate: true
 		};
 
-		return this.renderAttrSelect(row);
+		return this.renderAttribute(props);
 	};
-
-	renderColumnWithAggregation = (aggregation: string, column: string) => this.renderCombinedInputs(
-		this.renderAggregateInput(aggregation, column),
-		this.renderColumnInput(column)
-	);
 
 	renderRowInput = (name: string) => {
 		const {values} = this.props;
 
 		const row = {
 			name,
-			placeholder: 'Строки',
-			value: values[name]
+			value: values[name],
+			withDivider: true
 		};
 
-		return (
-			<div className={styles.field} key={name}>
-				{this.renderAttrSelect(row)}
-			</div>
-		);
+		return this.renderAttribute(row);
 	};
 
-	renderTableBreakdownWithGroup = (breakdownGroup: string, breakdown: string) => this.renderBreakdownWithGroup(breakdownGroup, breakdown, false);
-
 	render () {
-		const {aggregation, breakdown, breakdownGroup, calcTotalRow, calcTotalColumn, column, row, source} = FIELDS;
+		const {aggregation, breakdown, breakdownGroup, calcTotalRow, calcTotalColumn, column, row, source, withBreakdown} = FIELDS;
 
 		return (
 			<Fragment>
 				{this.renderModal()}
 				{this.renderAddSourceInput()}
 				{this.renderByOrder(this.renderOrderSource(false), source)}
-				<Divider />
+				{this.renderSectionDivider()}
+				{this.renderLabel('Строки')}
 				{this.renderByOrder(this.renderRowInput, row, true)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalRow, true)}
-				{this.renderByOrder(this.renderColumnWithAggregation, [aggregation, column], true)}
-				{this.renderByOrder(this.renderTableBreakdownWithGroup, [breakdownGroup, breakdown], true)}
+				{this.renderLabel('Колонки')}
+				{this.renderByOrder(this.renderColumn, [column, aggregation], true)}
+				{this.renderByOrder(this.renderBreakdownWithExtend, [withBreakdown, breakdown, breakdownGroup], true)}
 				{this.renderByOrder(this.renderCalcTotalInput, calcTotalColumn, true)}
 			</Fragment>
 		);

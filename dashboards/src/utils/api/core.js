@@ -10,11 +10,7 @@ import type {Method, Module} from './types';
  */
 const buildUrl = (module: Module, method: Method, params: string = '') => {
 	const dev = process.env.NODE_ENV === 'development';
-	const url = dev ? 'http://nordclan.nsd.naumen.ru/sd/services/rest' : window.jsApi.getAppRestBaseUrl();
-
-	if (dev && module === 'dashboardSettings') {
-		module = 'DevDashboardSettings';
-	}
+	const url = dev ? 'http://nordclan-dev.nsd.naumen.ru/sd/services/rest' : window.jsApi.getAppRestBaseUrl();
 
 	return `${url}/exec-post?func=modules.${module}.${method}&params=${params}`;
 };

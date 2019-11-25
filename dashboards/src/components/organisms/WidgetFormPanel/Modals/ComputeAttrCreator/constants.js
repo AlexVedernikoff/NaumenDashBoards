@@ -13,8 +13,6 @@ const TYPES = {
 	SOURCE
 };
 
-const COMPUTED_ATTR: 'COMPUTED_ATTR' = 'COMPUTED_ATTR';
-
 const operators = [
 	{
 		label: '(',
@@ -43,7 +41,6 @@ const operators = [
 ];
 
 export {
-	COMPUTED_ATTR,
 	operators,
 	TYPES
 };

@@ -2,15 +2,8 @@
 @font-size: 14px;
 
 :local {
-	.editIconContainer {
-		background-color: white;
-		height: 100%;
-		opacity: 0;
-		padding: 0 5px;
-		position: absolute;
-		right: 0;
-		top: 3px;
-		z-index: 99;
+	.indicatorsContainer {
+		display: none;
 	}
 
 	.formContainer {
@@ -22,10 +15,10 @@
 		margin-right: 5px;
 	}
 
-	.valueContainer {
+	.control {
 		&:hover {
-			.editIconContainer {
-				opacity: 1;
+			.indicatorsContainer {
+				display: block;
 			}
 		}
 	}
@@ -81,8 +74,8 @@
 }
 
 .dashboard__select__menu {
-	border: 1px solid #E4E4E4;
-	border-radius: 0 !important;
+	border: none !important;
+	box-shadow: 0 0 4px #d9d9d9 !important;
 	margin-top: 0 !important;
 	z-index: 100 !important;
 }

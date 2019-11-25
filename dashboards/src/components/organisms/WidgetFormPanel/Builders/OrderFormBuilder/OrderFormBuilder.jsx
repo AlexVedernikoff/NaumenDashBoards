@@ -1,10 +1,9 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
-import {COMPUTED_ATTR} from 'components/organisms/WidgetFormPanel/Modals/ComputeAttrCreator/constants';
 import {createOrderName, getNumberFromName, WIDGET_VARIANTS} from 'utils/widget';
 import DataFormBuilder from 'components/organisms/WidgetFormPanel/Builders/DataFormBuilder';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {LabelProps} from 'components/organisms/WidgetFormPanel/Builders/FormBuilder/types';
+import type {OnSelectCallback} from 'components/organisms/WidgetFormPanel/Builders/DataFormBuilder/types';
 import React from 'react';
 import type {RenderFunction} from './types';
 import styles from './styles.less';
@@ -40,6 +39,8 @@ export class OrderFormBuilder extends DataFormBuilder {
 				setFieldValue(createOrderName(num)(FIELDS.sourceForCompute), true);
 			});
 		}
+
+		this.setDefaultValues();
 	}
 
 	addSet = () => {
@@ -54,8 +55,6 @@ export class OrderFormBuilder extends DataFormBuilder {
 
 	getBaseName = (name: string) => name.split('_').shift();
 
-	getLabelWithSource = (a: Attribute) => a.type !== COMPUTED_ATTR ? `${a.title} (${a.sourceName})` : a.title;
-
 	getOrder = () => this.props.values.order || this.defaultOrder;
 
 	removeSet = (e: SyntheticMouseEvent<HTMLImageElement>) => {
@@ -66,6 +65,19 @@ export class OrderFormBuilder extends DataFormBuilder {
 
 		if (order.length > this.defaultOrder.length) {
 			setFieldValue(FIELDS.order, order.filter(n => n !== number));
+		}
+	};
+
+	setDefaultValues = () => {
+		const {setFieldValue, values} = this.props;
+		const {descriptor, source} = FIELDS;
+		const mainNumber = this.getOrder()[0];
+		const createName = createOrderName(mainNumber);
+		const mainSource = createName(source);
+
+		if (!values[mainSource]) {
+			setFieldValue(mainSource, values[source]);
+			setFieldValue(createName(descriptor), values[descriptor]);
 		}
 	};
 
@@ -93,7 +105,7 @@ export class OrderFormBuilder extends DataFormBuilder {
 			onClick: this.addSet
 		};
 
-		return this.renderLabel(props);
+		return this.renderLabelWithIcon(props);
 	};
 
 	renderByOrder = (renderFunction: RenderFunction, names: Array<string> | string, accordingSource: boolean = false) => {
@@ -127,9 +139,9 @@ export class OrderFormBuilder extends DataFormBuilder {
 		}
 	};
 
-	renderOrderSource = (withComputeHandler: boolean) => (source: string) => (
+	renderOrderSource = (withComputeHandler: boolean, callback?: OnSelectCallback) => (source: string) => (
 		<div key={source} className={styles.source}>
-			{this.renderSourceInput(source)}
+			{this.renderSource(source, callback)}
 			{this.renderRemoveSourceButton(source)}
 			{this.renderComputeCheckbox(source, withComputeHandler)}
 		</div>

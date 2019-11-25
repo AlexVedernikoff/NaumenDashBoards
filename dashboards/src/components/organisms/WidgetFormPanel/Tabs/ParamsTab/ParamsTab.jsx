@@ -1,8 +1,8 @@
 // @flow
-import {AxisChart, BarChart, CircleChart, ComboChart, Summary, Table} from './WidgetFields';
+import {AxisChart, CircleChart, ComboChart, Summary, Table} from './WidgetFields';
 import {CHART_VARIANTS} from 'utils/chart';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import {Divider, FieldLabel} from 'components/atoms';
+import {FieldLabel} from 'components/atoms';
 import {FIELDS, OPTIONS, styles} from 'components/organisms/WidgetFormPanel';
 import {OuterSelect} from 'components/molecules';
 import React, {Fragment} from 'react';
@@ -26,8 +26,8 @@ export class ParamsTab extends DataFormBuilder {
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
 		const variants = {
-			[BAR]: BarChart,
-			[BAR_STACKED]: BarChart,
+			[BAR]: AxisChart,
+			[BAR_STACKED]: AxisChart,
 			[COLUMN]: AxisChart,
 			[COLUMN_STACKED]: AxisChart,
 			[COMBO]: ComboChart,
@@ -64,9 +64,9 @@ export class ParamsTab extends DataFormBuilder {
 			<Fragment>
 				{this.renderTextArea(nameProps)}
 				{this.renderTextArea(diagramNameProps)}
-				<Divider />
+				{this.renderSectionDivider()}
 				{this.renderWidgetSelect()}
-				<Divider />
+				{this.renderSectionDivider()}
 				{this.renderWidgetFields(values[type])}
 			</Fragment>
 		);

@@ -1,25 +1,21 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {Option} from 'components/molecules/MiniSelect/types';
+import type {Node} from 'react';
 import type {OptionType} from 'react-select/src/types';
-import type {Select} from 'components/organisms/WidgetFormPanel/types';
+import type {SelectProps} from 'components/organisms/WidgetFormPanel/Builders/FormBuilder/types';
 
-export type AttrSelectProps = {
-	attr?: boolean,
-	options?: Array<Attribute>,
-	value: Attribute | null
-} & Select;
+export type OnSelectCallback = (...any) => void;
 
-export type MixinInputProps = {
+export type AttrProps = {
+	onSelect?: any,
+	onSelectCallback?: OnSelectCallback,
+	parent?: Attribute,
+	refInput?: Node,
+	withDivider?: boolean
+} & SelectProps;
+
+export type SelectMixin = {
 	[string]: any
 };
-
-export type MiniSelectProps = {
-	name: string,
-	onSelect?: (name: string, value: string) => any,
-	options: Array<Option>,
-	showCaret?: boolean,
-	value: string
-}
 
 export type GetRefOptions = (value: OptionType) => Array<OptionType>;

@@ -7,27 +7,16 @@ import withForm from 'components/organisms/WidgetFormPanel/withForm';
 export class AxisChart extends DataFormBuilder {
 	sourceRefs = [FIELDS.breakdown, FIELDS.indicator];
 
-	renderInputs = () => {
-		const {values} = this.props;
-
-		const indicator = {
-			border: false,
-			name: FIELDS.indicator,
-			placeholder: 'Показатель',
-			value: values[FIELDS.indicator]
-		};
-
-		return (
-			<Fragment>
-				{this.renderSourceInput()}
-				{this.renderCombinedInputs(
-					this.renderAggregateInput(FIELDS.aggregation, FIELDS.indicator),
-					this.renderAttrSelect(indicator)
-				)}
-				{this.renderBreakdownWithGroup(FIELDS.breakdownGroup, FIELDS.breakdown)}
-			</Fragment>
-		);
-	};
+	renderInputs = () => (
+		<Fragment>
+			{this.renderLabel('Источник')}
+			{this.renderSource()}
+			{this.renderSectionDivider()}
+			{this.renderLabel('Показатель')}
+			{this.renderIndicator()}
+			{this.renderBreakdownWithExtend()}
+		</Fragment>
+	);
 
 	render () {
 		return this.renderInputs();

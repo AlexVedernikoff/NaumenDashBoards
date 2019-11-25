@@ -2,7 +2,7 @@
 import type {Context} from 'utils/api/types';
 import {DASHBOARD_EVENTS} from './constants';
 
-export type Role = 'master' | 'super' | null;
+export type Role = 'master' | 'super';
 
 type RequestDashboard = {
 	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD,
@@ -54,5 +54,5 @@ export type DashboardState = {
 	editable: boolean,
 	error: boolean,
 	loading: boolean,
-	role: Role
+	role?: Role
 };

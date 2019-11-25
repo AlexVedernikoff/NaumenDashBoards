@@ -9,8 +9,7 @@ export const initialDashboardState: DashboardState = {
 	},
 	editable: false,
 	error: false,
-	loading: false,
-	role: null
+	loading: false
 };
 
 export const defaultDashboardAction: DashboardAction = {

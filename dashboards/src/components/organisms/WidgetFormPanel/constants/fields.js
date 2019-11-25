@@ -28,6 +28,7 @@ const sourceForCompute: 'sourceForCompute' = 'sourceForCompute';
 const type: 'type' = 'type';
 const xAxis: 'xAxis' = 'xAxis';
 const yAxis: 'yAxis' = 'yAxis';
+const withBreakdown: 'withBreakdown' = 'withBreakdown';
 
 const FIELDS = {
 	aggregation,
@@ -58,7 +59,8 @@ const FIELDS = {
 	sourceForCompute,
 	type,
 	xAxis,
-	yAxis
+	yAxis,
+	withBreakdown
 };
 
 export default FIELDS;

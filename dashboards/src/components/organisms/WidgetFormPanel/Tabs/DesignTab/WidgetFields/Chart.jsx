@@ -1,6 +1,6 @@
 // @flow
 import {ColorPalette} from 'components/molecules';
-import {Divider, FieldLabel} from 'components/atoms';
+import {FieldLabel} from 'components/atoms';
 import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
 import type {Props} from 'containers/WidgetFormPanel/types';
@@ -87,6 +87,7 @@ export class Chart extends FormBuilder {
 		const {legendPosition} = FIELDS;
 
 		const legendPositionProps = {
+			isEditableLabel: false,
 			isSearchable: false,
 			name: legendPosition,
 			options: OPTIONS.LEGEND_POSITIONS,
@@ -108,7 +109,7 @@ export class Chart extends FormBuilder {
 				{this.renderVisibilityAxisCheckboxes()}
 				{this.renderLegendCheckbox()}
 				{this.renderLegendPositionInput()}
-				<Divider />
+				{this.renderSectionDivider()}
 				{this.renderColorPalette()}
 			</Fragment>
 		);

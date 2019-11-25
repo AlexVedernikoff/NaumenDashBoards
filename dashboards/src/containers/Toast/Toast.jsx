@@ -15,12 +15,12 @@ export class ToastContainer extends Component<Props> {
 	};
 
 	renderToast = () => {
-		const {removeToast, toasts} = this.props;
+		const {toasts} = this.props;
 		const toast = Object.values(toasts)[0];
 
 		if (toast) {
 			// $FlowFixMe
-			return <Toast data={toast} key={toast.id} onMount={removeToast} />;
+			return <Toast data={toast} key={toast.id} onMount={this.removeToast} />;
 		}
 
 		return null;

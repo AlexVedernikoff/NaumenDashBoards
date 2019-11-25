@@ -1,22 +1,22 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {CHART_TYPES, CHART_VARIANTS} from './constants';
 import {createOrderName} from 'utils/widget';
 import type {DiagramData} from 'store/widgets/diagrams/types';
 import {drillDownBySelection} from './methods';
 import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
-import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import type {Widget} from 'store/widgets/data/types';
 
 /**
- * Проверяем является ли переменная объектом
+ * Функция проверяет является ли переменная объектом
  * @param {any} item - проверяемая переменная
  * @returns {boolean}
  */
 const isObject = (item: any): boolean => item && typeof item === 'object' && !Array.isArray(item);
 
 /**
- * Расширяем опции графика, объединяя объекты
+ * Функция расширяет опции графика
  * @param {ApexOptions} target - основной объект опций
  * @param {ApexOptions} source - дополнительная примесь опций
  * @returns {ApexOptions}
@@ -42,7 +42,22 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
 };
 
 /**
- * Дефолтная примесь графиков (bar, line)
+ * Функция возвращает title атрибута с учетом вложенности
+ * @param {Attribute} attr - атрибут
+ * @returns {string}
+ */
+const getAttrTitle = (attr: Attribute) => {
+	let current = attr;
+
+	while (current.ref) {
+		current = current.ref;
+	}
+
+	return current.title;
+};
+
+/**
+ * Примесь графиков по умолчанию (bar, column, line)
  * @param {boolean} horizontal - положение графика
  * @param {boolean} stacked - накопление данных
  * @returns {ApexOptions}
@@ -115,13 +130,13 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 
 	if (showXAxis && xAxisAttr) {
 		options.xaxis.title = {
-			text: xAxisAttr.title
+			text: getAttrTitle(xAxisAttr)
 		};
 	}
 
 	if (showYAxis && yAxisAttr) {
 		options.yaxis.title = {
-			text: yAxisAttr.title
+			text: getAttrTitle(yAxisAttr)
 		};
 	}
 
@@ -129,7 +144,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 };
 
 /**
- * Дефолтная примесь графиков (combo)
+ * Примесь combo-графиков
  * @param {Widget} widget - данные виджета
  * @param {DiagramData} chart - данные конкретного графика
  * @returns {ApexOptions}
@@ -203,7 +218,7 @@ const comboChart = (widget: Widget, chart: DiagramData) => {
 };
 
 /**
- * Дефолтная примесь графиков (pie, donut)
+ * Примесь круговых графиков (pie, donut)
  * @param {Widget} widget - данные виджета
  * @param {DiagramData} chart - данные конкретного графика
  * @returns {ApexOptions}
@@ -228,7 +243,7 @@ const circleChart = (widget: Widget, chart: DiagramData): ApexOptions => {
 };
 
 /**
- * Получаем функцию для генерации необходимой примеси опций
+ * Функция возвращает примесь опций в зависимости от переданного типа графика
  * @param {string} type - тип графика выбранный пользователем
  * @returns {Function}
  */
@@ -250,7 +265,7 @@ const resolveMixin = (type: string): Function => {
 };
 
 /**
- * Генерируем базовый набор опций и объединяем с необходимой примесью
+ * Функция возвращет объединенный набор базовых и типовых опций
  * @param {Widget} widget - виджет
  * @param {DiagramData} chart - данные графика виджета
  * @returns {ApexOptions}
@@ -296,7 +311,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 };
 
 /**
- * Получаем набор данных по оси Y
+ * Функция преобразует набор данных в требуемый формат
  * @param {Widget} widget - виджет
  * @param {DiagramData} chart - данные графика виджета
  * @returns {ApexAxisChartSeries}
@@ -314,7 +329,7 @@ const getSeries = (widget: Widget, chart: DiagramData): ApexAxisChartSeries => {
 };
 
 /**
- * Генерируем опции и данные осей по данным виджета и графика.
+ * Функция генерирует опции и данные для построения графика.
  * @param {Widget} widget - виджет
  * @param {DiagramData} chart - данные графика виджета
  * @returns {{series: ApexAxisChartSeries, options: ApexOptions}}
@@ -346,20 +361,7 @@ const getChartType = (type: string) => {
 	return types[type];
 };
 
-/**
- * Проверяем относится ли переданый селект к круговым диаграммам
- * @param {SelectValue | null} chart - атрибут класса
- * @returns {boolean}
- */
-const typeOfCircleCharts = (chart: SelectValue | null) => {
-	const {PIE, DONUT} = CHART_VARIANTS;
-	const circleVariants = [PIE, DONUT];
-
-	return chart && circleVariants.includes(chart.value);
-};
-
 export {
 	getChartType,
-	getConfig,
-	typeOfCircleCharts
+	getConfig
 };

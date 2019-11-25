@@ -1,0 +1,41 @@
+:local {
+	@active-color: #333;
+	@default-color: #bbb;
+
+	.container {
+		align-items: center;
+		cursor: pointer;
+		display: inline-flex;
+
+		&:hover {
+			.icon {
+				background: lighten(@active-color, 20);
+			}
+
+			.text {
+				color: lighten(@active-color, 20);
+			}
+		}
+	}
+
+	.icon {
+		background-color: @default-color;
+		border-radius: 2px;
+		color: white;
+		display: inline-block;
+		margin-left: 8px;
+	}
+
+	.text {
+		color: @default-color;
+		margin-left: 10px;
+	}
+
+	.activeIcon {
+		background-color: @active-color;
+	}
+
+	.activeText {
+		color: @active-color;
+	}
+}

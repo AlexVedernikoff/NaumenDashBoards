@@ -1,11 +1,11 @@
 // @flow
-import {COMPUTED_ATTR, operators, TYPES} from './constants';
 import type {Control, Props, State} from './types';
 import {createOrderName} from 'utils/widget';
-import {getAggregateOptions, FIELDS} from 'components/organisms/WidgetFormPanel';
+import {getAggregateOptions, FIELDS, TYPES as ATTR_TYPES} from 'components/organisms/WidgetFormPanel';
 import Modal from 'components/molecules/Modal';
-import type {OptionType} from 'react-select/src/types';
 import {number} from 'yup';
+import {operators, TYPES} from './constants';
+import type {OptionType} from 'react-select/src/types';
 import React, {Component} from 'react';
 import {Select} from 'components/molecules';
 import styles from './styles.less';
@@ -277,7 +277,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 			computeData,
 			stringForCompute,
 			title,
-			type: COMPUTED_ATTR
+			type: ATTR_TYPES.COMPUTED_ATTR
 		});
 	};
 
@@ -333,6 +333,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 				<Select
 					attr={isAttr}
 					form={form}
+					isEditableLabel={false}
 					isSearchable={isAttr}
 					menuIsOpen={focus}
 					name={name}
@@ -340,7 +341,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 					options={options}
 					placeholder="..."
 					value={value}
-					withCreateButton={!isSourceRef}
+					withCreate={!isSourceRef}
 				/>
 			</div>
 		);

@@ -20,22 +20,14 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		showForm: false
 	};
 
-	getValue = () => {
-		let {value} = this.props;
-
-		if (value && value.label.length > 25) {
-			value = {
-				label: `${value.label.substring(0, 25)}...`,
-				value: value.value
-			};
-		}
-
-		return value;
-	};
-
 	handleOnChange = (value: TreeSelectValue) => {
 		const {name, onChange} = this.props;
 		onChange(name, value);
+	};
+
+	handleRemove = () => {
+		const {name, onChange} = this.props;
+		onChange(name, null);
 	};
 
 	handleShowForm = (showForm: boolean) => () => this.setState({showForm});
@@ -59,14 +51,6 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		}
 	};
 
-	renderClearIcon = () => (
-		<div className={styles.clearIconContainer}>
-			<IconButton>
-				<CrossIcon />
-			</IconButton>
-		</div>
-	);
-
 	renderEditForm = () => {
 		const {form} = this.props;
 		const {showForm} = this.state;
@@ -85,15 +69,18 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		}
 	};
 
-	renderEditIcon = () => {
+	renderIndicators = () => {
 		const {value} = this.props;
 		const {showForm} = this.state;
 
 		if (value && !showForm) {
 			return (
-				<div className={styles.editIconContainer}>
+				<div className={styles.iconContainer}>
 					<IconButton className={styles.editIcon} onClick={this.handleShowForm(true)}>
 						<EditIcon />
+					</IconButton>
+					<IconButton className={styles.removeIcon} onClick={this.handleRemove}>
+						<CrossIcon />
 					</IconButton>
 				</div>
 			);
@@ -133,17 +120,12 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 	};
 
 	renderTreeSelect = () => {
-		const {
-			name,
-			placeholder,
-			tree
-		} = this.props;
+		const {name, placeholder, tree, value} = this.props;
 
 		return (
 			<TreeSelect
 				allowClear
 				className={styles.select}
-				clearIcon={this.renderClearIcon}
 				labelInValue
 				name={name}
 				notFoundContent=""
@@ -152,7 +134,7 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 				searchPlaceholder="Поиск..."
 				switcherIcon={this.renderSwitcherIcon}
 				treeNodeFilterProp="title"
-				value={this.getValue()}
+				value={value}
 			>
 				{this.renderRoot(tree)}
 			</TreeSelect>
@@ -164,7 +146,7 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 
 		return (
 			<div className={styles.container}>
-				{this.renderEditIcon()}
+				{this.renderIndicators()}
 				{showForm ? this.renderEditForm() : this.renderTreeSelect()}
 			</div>
 		);
