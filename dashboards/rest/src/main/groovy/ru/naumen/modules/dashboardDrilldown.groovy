@@ -290,14 +290,12 @@ class Link
 
             if (sevenDays)
             {
-                def (lowerLimit, upperLimit) = (sevenDays as String).split(" - ", 2).collect { dayAndMonth ->
-                    def (int d, int m) = dayAndMonth.split(" ", 2)
-                    [m, d]
-                }
-                def (int lowerLimitMonth, int lowerLimitDay) = lowerLimit
-                def (int upperLimitMonth, int upperLimitDay) = upperLimit
-                setInterval(rangeMonth, [lowerLimitMonth, upperLimitMonth])
-                setInterval(rangeDay, [lowerLimitDay, upperLimitDay])
+                def (newRangeDay, newRangeMonth) = (sevenDays as String).split(" - ", 2).collect { dayAndMonth ->
+                    def (d, m) = dayAndMonth.split(" ", 2)
+                    [d as int, genitiveRussianMonth.get(m)]
+                }.transpose()
+                setInterval(rangeMonth, newRangeMonth)
+                setInterval(rangeDay, newRangeDay)
             }
 
             if (week)
