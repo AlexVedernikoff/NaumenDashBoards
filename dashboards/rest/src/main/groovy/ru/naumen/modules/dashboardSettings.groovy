@@ -151,7 +151,7 @@ String editDefaultWidget(Map<String, Object> requestContent, def user)
     if(user && isPersonalWidget(request.widgetKey, user))
     {
         widgetKey -= "_${user.login}"
-        def closureReplaceWidgetKey = { login ->
+        def closureReplaceWidgetKey = { String login ->
             String dashboardKey = generateDashboardKey(
                     request.classFqn,
                     request.contentCode,
@@ -164,7 +164,7 @@ String editDefaultWidget(Map<String, Object> requestContent, def user)
             }
             saveJsonSettings(dashboardKey, toJson(dashboardSettings))
         }
-        closureReplaceWidgetKey(user.login)
+        closureReplaceWidgetKey(user.login as String)
         closureReplaceWidgetKey(null)
         deleteJsonSettings(request.widgetKey)
     }
@@ -290,45 +290,45 @@ String deleteDefaultWidget(Map<String, Object> requestContent, def user) {
  */
 String deleteWidget(Map<String, Object> requestContent, def user)
 {
-    RequestDeleteWidgetSettings request = requestContent as RequestDeleteWidgetSettings
-    String defaultDashboardKey = generateDashboardKey(request.classFqn, request.contentCode)
+    def request = requestContent as RequestDeleteWidgetSettings
+    def dashboardKeyByLogin = this.&generateDashboardKey.curry(request.classFqn, request.contentCode)
     if (!user)
     {
-        //значит это супер пользователь!
+        // значит это супер пользователь!
         // нет персональных виджетов и персональных дашбордов
-        Closure<String> removeWidgetFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(defaultDashboardKey)
-        return removeWidgetSettings(request.widgetId).with(removeWidgetFromDefaultDashboard) as boolean
+        Closure<String> removeWidgetFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(dashboardKeyByLogin())
+        def resultOfRemoving = removeWidgetSettings(request.widgetId).with(removeWidgetFromDefaultDashboard) as boolean
+        return toJson(resultOfRemoving)
     }
-    String personalDashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login as String)
-    if (checkUserOnMasterDashboard(user))
+    else if (checkUserOnMasterDashboard(user))
     {
         if (isPersonalWidget(request.widgetId, user))
         {
-            Closure<String> removeWidgetFromPersonalDashboard =
-                    this.&removeWidgetFromDashboard.curry(personalDashboardKey)
-            def personalWidgetIsRemoved = removeWidgetSettings(request.widgetId)
-                    .with(removeWidgetFromPersonalDashboard)
-
+            String personalDashboardKey = dashboardKeyByLogin(user.login as String)
             String defaultWidget = request.widgetId - "_${user.login}"
-            //По воле случая может получиться так, что виджета по умолчанию уже нет(например удалён другим мастером)
+            Closure<String> removeFromPersonalDashboard = this.&removeWidgetFromDashboard.curry(personalDashboardKey)
+            def resultOfRemoving = removeWidgetSettings(request.widgetId).with(removeFromPersonalDashboard) as boolean
             if (findJsonSettings(defaultWidget))
             {
-                Closure<String> removeWidgetFromDefaultDashboard =
-                        this.&removeWidgetFromDashboard.curry(defaultDashboardKey)
-                removeWidgetSettings(defaultWidget).with(removeWidgetFromDefaultDashboard)
+                //По воле случая может получиться так, что виджета по умолчанию уже нет(например удалён другим мастером)
+                Closure<String> removeFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(dashboardKeyByLogin())
+                removeWidgetSettings(defaultWidget).with(removeFromDefaultDashboard)
             }
             else
             {
                 logger.warn("default widget $defaultWidget not exist")
             }
-            return toJson(personalWidgetIsRemoved as boolean)
+            return toJson(resultOfRemoving)
         }
         else
         {
             def resultOfRemoving = removeWidgetSettings(request.widgetId).with { String widgetKey ->
-                def resultOfRemovingFromPersonalDashboard = removeWidgetFromDashboard(personalDashboardKey, widgetKey)
-                def resultOfRemovingFromDefaultDashboard = removeWidgetFromDashboard(defaultDashboardKey, widgetKey)
-                resultOfRemovingFromPersonalDashboard && resultOfRemovingFromDefaultDashboard
+                // По возможности удалить и персональный виджет, если он есть
+                String personalDashboardKey = dashboardKeyByLogin(user.login as String)
+                if (loadJsonSettings(personalDashboardKey)) {
+                    removeWidgetFromDashboard(personalDashboardKey, widgetKey)
+                }
+                removeWidgetFromDashboard(dashboardKeyByLogin(), widgetKey) as boolean
             }
             return toJson(resultOfRemoving)
         }
@@ -348,18 +348,23 @@ String deleteWidget(Map<String, Object> requestContent, def user)
  */
 String resetPersonalDashboard(String classFqn, String contentCode, def user)
 {
-    DashboardSettings dashboardSettings = getDashboardSetting(generateDashboardKey(classFqn, contentCode, user.login as String))
-    if(!dashboardSettings)
-    {
-        return "Personal dashboard not found"
-    }
-    dashboardSettings.widgetIds.each {
-        if (it.endsWith("_${user.login}"))
+    String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
+    DashboardSettings personalDashboard = getDashboardSetting(personalDashboardKey)
+
+    return personalDashboard ? deleteJsonSettings(personalDashboardKey).with { resultOfRemoving ->
+        if (resultOfRemoving)
         {
-            deleteJsonSettings(it)
+            personalDashboard.widgetIds
+                    .findAll(this.&isPersonalWidget.ncurry(1, user))
+                    .each(this.&removeWidgetSettings)
+            return true
         }
-    }
-    return deleteJsonSettings(generateDashboardKey(classFqn, contentCode, user.login as String))
+        else
+        {
+            logger.warn("Personal dashboard: $personalDashboardKey not found!")
+            return false
+        }
+    } : true // Если персонального дашборда нет, значит сброс настроек успешен.
 }
 
 /**
@@ -639,7 +644,7 @@ private void checkRightsOnEditDashboard(def editable)
  */
 boolean isPersonalWidget(String widgetKey, def user)
 {
-    return widgetKey.endsWith("_${user.login}")
+    return user ? widgetKey.endsWith("_${user.login}") : false
 }
 
 /**
