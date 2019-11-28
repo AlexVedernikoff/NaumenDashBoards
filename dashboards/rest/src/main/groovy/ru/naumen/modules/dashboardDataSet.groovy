@@ -978,6 +978,10 @@ private String getAttributeCodeByType(HCriteria criteria, Attribute attribute)
         {
             code = "$code.$locale"
         }
+        if (code == 'UUID') // в БД нет свойства UUID
+        {
+            code = 'id'
+        }
         switch (type)
         {
             case ['boLinks', 'backBOLinks', 'catalogItemSet']:
