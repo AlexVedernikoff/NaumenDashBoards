@@ -17,9 +17,13 @@ import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
 @Field private static final String MAIN_FQN = 'abstractBO'
+@Field private static final Collection<String> VALID_LINK_TYPE_ATTRIBUTE =
+        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
+@Field private static final Collection<String> VALID_SIMPLE_TYPE_ATTRIBUTE =
+        ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state']
 @Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
-        ['object', 'dtInterval', 'date', 'dateTime', 'boLinks', 'catalogItemSet',
-         'backBOLinks', 'string', 'integer', 'catalogItem', 'double', 'state']
+        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem',
+         'dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state']
 //endregion
 
 //region КЛАССЫ
@@ -52,7 +56,7 @@ class DataSource
  */
 String getDataSources(classFqn = MAIN_FQN)
 {
-    def children = getMetaClassChildren(classFqn)
+    def children = getMetaClassChildren(classFqn as String)
     Collection<DataSource> dataSources = mappingDataSource(children)
     return toJson(dataSources)
 }
@@ -67,6 +71,38 @@ String getAttributesDataSources(classFqn)
     def metaInfo = api.metainfo.getMetaClass(classFqn)
     Collection<Attribute> mappingAttributes = mappingAttribute(metaInfo.attributes, metaInfo.title)
     return toJson(mappingAttributes)
+}
+
+/**
+ * Отдаёт список атрибутов метакласа ссылочного типа атрибута
+ * @param requestContent - Запрос на получение атрибутов
+ * @return json список атрибутов {заголовок, код, тип атрибута}
+ */
+String getAttributesFromLinkAttribute(requestContent)
+{
+    def linkAttribute = requestContent.linkAttribute as Attribute
+    if (!(linkAttribute.type in VALID_LINK_TYPE_ATTRIBUTE))
+        throw new Exception("Not supported type: ${linkAttribute.type}")
+
+    def metaInfo = api.metainfo.getMetaClass(linkAttribute.property)
+    Closure<Attribute> buildAttribute = { obj ->
+        new Attribute(
+                obj.code,
+                obj.title,
+                obj.type.code,
+                obj.type.relatedMetaClass as String,
+                obj.declaredMetaClass.code,
+                metaInfo.title)
+    }
+
+    //TODO: В дальнейшем список будет расширен до полного списка
+    def validType = ['string', 'integer', 'state', 'catalogItem', 'catalogItemSet']
+
+    Collection<Attribute> result = metaInfo.attributes
+            .findResults { !it.computable && it.type.code in validType ? buildAttribute(it) : null }
+            .sort { it.title }
+
+    return toJson(result)
 }
 //endregion
 
@@ -101,7 +137,7 @@ private def getMetaClassChildren(String fqn)
 private Collection<DataSource> mappingDataSource(def fqns)
 {
     return fqns.collect { new DataSource(it.code, it.title, mappingDataSource(it.children)) }
-            .sort{it.title}
+            .sort { it.title }
 }
 
 /**
@@ -112,15 +148,17 @@ private Collection<DataSource> mappingDataSource(def fqns)
  */
 private Collection<Attribute> mappingAttribute(def attributes, def sourceName)
 {
-    return attributes.findAll { it.type.code in VALID_TYPE_ATTRIBUTE && !it.computable}
-            .collect {
-                new Attribute(
-                        it.code,
-                        it.title,
-                        it.type.code,
-                        it.type.relatedMetaClass?.code,
-                        it.declaredMetaClass.code,
-                        sourceName)
-            }.sort{it.title}
+    Closure<Attribute> buildAttribute = {
+        new Attribute(
+                it.code,
+                it.title,
+                it.type.code,
+                it.type.relatedMetaClass as String,
+                it.declaredMetaClass.code,
+                sourceName)
+    }
+    return attributes
+            .findResults { !it.computable && it.type.code in VALID_TYPE_ATTRIBUTE ? buildAttribute(it) : null }
+            .sort { it.title }
 }
 //endregion

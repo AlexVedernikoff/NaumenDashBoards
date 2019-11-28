@@ -87,6 +87,11 @@ class Attribute
      * Данные о переменных для вычисления
      */
     Map<String, Object> computeData
+
+    /**
+     * Вложенный атрибут
+     */
+    Attribute ref
 }
 //endregion
 return
