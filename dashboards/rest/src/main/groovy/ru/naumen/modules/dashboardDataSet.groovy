@@ -12,10 +12,6 @@
 package ru.naumen.modules
 
 import groovy.transform.TupleConstructor
-import ru.naumen.core.server.hquery.HCriteria
-import ru.naumen.core.server.hquery.HHelper
-import ru.naumen.core.server.hquery.HOrders
-import ru.naumen.core.server.hquery.HRestrictions
 
 import java.text.DecimalFormat
 import ru.naumen.core.server.hquery.HCriteria;
@@ -26,6 +22,9 @@ import ru.naumen.core.server.hquery.HOrders
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
+
+import ru.naumen.modules.Attribute
+import ru.naumen.modules.DashboardMarshaller
 
 import static Diagram.*
 import static groovy.json.JsonOutput.toJson
@@ -360,7 +359,7 @@ class SeriesCombo
  */
 String getDataForDiagram(Map<String, Object> requestContent)
 {
-    def request = new RequestGetDataForDiagram(requestContent)
+    def request = requestContent as RequestGetDataForDiagram
     switch (request.type)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE] :
@@ -379,7 +378,7 @@ String getDataForDiagram(Map<String, Object> requestContent)
  */
 String getDataForCompositeDiagram(Map<String, Object> requestContent)
 {
-    def request = new RequestGetDataForCompositeDiagram(requestContent)
+    def request = requestContent as RequestGetDataForCompositeDiagram
     switch (request.type)
     {
         case SUMMARY:
@@ -418,13 +417,24 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
         group(criteria, request.breakdownGroup as GroupType, breakdown as Attribute, source, descriptor)
     }
     findNotNullAttributes(criteria, request.xAxis, request.breakdown)
+
+    def groupSevenDay = { request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 0) : it }
+    def breakdownSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 2) : it }
+
+    def groupDtInterval = { request.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it, 0) : it }
+    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it } //TODO: врядли будет работать
+
+    def groupState = { request.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it, 0, request.source) : it }
+    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it, 2, request.source) : it } //TODO: это врядли будет работать
+
     Collection<Object> list = getQuery(criteria).list()
-    list = request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 0) : list
-    list = request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 2) : list
-    list = request.xAxis.type == 'dtInterval'  ? convertMillisecondToHours(list, 0) : list
-    list = request*.breakdown*.type == 'dtInterval'  ? convertMillisecondToHours(list, 2) : list
-    list = request.xAxis.type == 'state'  ? convertCodeStatusToNameStatus(list, 0, request.source) : list
-    list = request*.breakdown*.type == 'state'  ? convertCodeStatusToNameStatus(list, 2, request.source) : list
+            .with(groupSevenDay)
+            .with(breakdownSevenDay)
+            .with(groupDtInterval)
+            .with(breakdownDtInterval)
+            .with(groupState)
+            .with(breakdownState)
+
     return mappingToStandardDiagram(list, breakdown, request.breakdownGroup as GroupType)
 }
 
@@ -444,10 +454,13 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForDiagram request)
             request.breakdown)
     group(criteria, request.breakdownGroup as GroupType, request.breakdown as Attribute, request.source, request.descriptor)
     findNotNullAttributes(criteria, request.breakdown)
-    Collection<Object> list = getQuery(criteria).list()
-    list = request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 1) : list
-    list = request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(list, 1) : list
-    list = request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(list, 1, request.source) : list
+
+    def groupSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 1) : it }
+    def groupDtInterval = { request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it, 1) : it }
+    def groupState = { request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it, 1, request.source) : it }
+
+    Collection<Object> list = getQuery(criteria).list().with(groupSevenDay).with(groupDtInterval).with(groupState)
+
     return new RoundDiagram(list*.getAt(1), list*.getAt(0))
 }
 
@@ -491,9 +504,8 @@ private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompos
                 currentIndicator as Attribute,
                 currentData.aggregation as AggregationType)
     }
-
-    def numberFormater = new DecimalFormat("#.##");
-    return new SummaryDiagram(currentIndicator.title as String, numberFormater.format(result))
+    def numberFormatter = new DecimalFormat("#.##")
+    return new SummaryDiagram(currentIndicator.title as String, numberFormatter.format(result))
 }
 
 /**
@@ -556,21 +568,21 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
                 currentData.aggregation as AggregationType
         )
     }
-    result = currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS
-            ? getPeriodSevenDays(result, 0)
-            : result
-    result = currentData.breakdown.type == 'dtInterval'
-            ? convertMillisecondToHours(result, 0)
-            : result
-    result = row.type == 'dtInterval'
-            ? convertMillisecondToHours(result, 2)
-            : result
-    result = currentData.breakdown.type == 'state'
-            ? convertCodeStatusToNameStatus(result, 0, currentData.source)
-            : result
-    result = row.type == 'state'
-            ? convertCodeStatusToNameStatus(result, 2, currentData.source)
-            : result
+
+    def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 0) : it }
+
+    def breakdownDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it, 0) : it }
+    def groupDtInterval = { row.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it }
+
+    def breakdownState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it, 0, currentData.source) : it }
+    def groupState = { row.type == 'state' ? convertCodeStatusToNameStatus(it, 2, currentData.source) : it }
+
+    result = result.with(breakdownSevenDay)
+            .with(breakdownDtInterval)
+            .with(groupDtInterval)
+            .with(breakdownState)
+            .with(groupState)
+
     return mappingToTableDiagram(result, currentData.calcTotalColumn, currentData.calcTotalRow)
 }
 
@@ -600,25 +612,27 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
             if (breakdown)
                 group(criteria, breakdownGroup, breakdown, source, descriptor)
             findNotNullAttributes(criteria, xAxis, breakdown)
-            Collection<Object> list = getQuery(criteria).list()
-            list = currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 0) : list
-            list = currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(list, 2) : list
-            list = currentData.xAxis.type == 'dtInterval'
-                    ? convertMillisecondToHours(list, 0)
-                    : list
-            list = currentData*.breakdown*.type == 'dtInterval'
-                    ? convertMillisecondToHours(list, 2)
-                    : list
-            list = currentData.xAxis.type == 'state'
-                    ? convertCodeStatusToNameStatus(list, 0, source)
-                    : list
-            list = currentData*.breakdown*.type == 'state'
-                    ? convertCodeStatusToNameStatus(list, 2, source)
-                    : list
-            list
+            getQuery(criteria).list()
+        }
+
+        Closure<Collection<Object>> postProcess = { list ->
+            def groupSevenDay = { currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 0) : it }
+            def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 2) : it }
+            def groupDtInterval = { currentData.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it, 0) : it }
+            def breakdownDtInterval = { currentData?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it }
+            def groupState = { currentData.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it, 0, source) : it }
+            def breakdownState = { currentData?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it, 2, source) : it }
+
+            list.with(groupSevenDay)
+                    .with(breakdownSevenDay)
+                    .with(groupDtInterval)
+                    .with(breakdownDtInterval)
+                    .with(groupState)
+                    .with(breakdownState)
         }
 
         String formula = currentYAxis.stringForCompute
+        def result
         if (formula)
         {
             def lastResponse
@@ -642,23 +656,25 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
                 }
             }
 
-            lastResponse.withIndex().collect { entry, i ->
+            result = lastResponse.withIndex().collect { entry, i ->
                 entry[1] = resValues[i]
                 entry
             }
         }
         else
         {
-            executeQuery(
+            result = executeQuery(
                     currentData as DataForCompositeDiagram,
                     currentYAxis,
                     currentData.aggregation as AggregationType
             ) as Collection<Object>
         }
+        result.with(postProcess)
     }
 
-    Collection<Collection<Object>> list = request.data
-            .findResults { key, data -> data.sourceForCompute ? null : getResult(data as DataForCompositeDiagram) }
+    Collection<Collection<Object>> list = request.data.findResults { key, data ->
+        data.sourceForCompute ? null : getResult(data as DataForCompositeDiagram)
+    }
     return mappingToComboDiagram(list, request)
 }
 
@@ -793,7 +809,7 @@ private String getPercentColumn(String descriptor,
     calcCriteria.addColumn("COUNT(${attributeCode})")
     calcCriteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
     findNotNullAttributes(calcCriteria, notNullAttributes)
-    String calcCount = getQuery(calcCriteria).list()[0]
+    String calcCount = getQuery(calcCriteria).list().head()
     return aggregationType.get(attributeCode, calcCount)
 }
 
@@ -948,46 +964,40 @@ private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists,
  */
 private String getAttributeCodeByType(HCriteria criteria, Attribute attribute)
 {
-    switch (attribute.type)
-    {
-        case ['boLinks', 'backBOLinks']:
-            return "${criteria.addInnerJoin(attribute.code).getAlias()}.title"
-        case 'catalogItemSet':
-            // TODO добавить локаль пользователя api.employee.getPersonalSettings(user.UUID)?.locale после стабилизации диаграмм
-            return "${criteria.addInnerJoin(attribute.code).getAlias()}.title.ru"
-        case 'object':
-            return "${criteria.getAlias()}.${attribute.code}.title"
-        case 'catalogItem':
-            // TODO добавить локаль пользователя api.employee.getPersonalSettings(user.UUID)?.locale после стабилизации диаграмм
-            return "${criteria.getAlias()}.${attribute.code}.title.ru"
-        case 'state':
-            return "${criteria.getAlias()}.${attribute.code}"
-        case 'dtInterval':
-            return "${criteria.getAlias()}.${attribute.code}.ms"
-        default:
-            return "${criteria.getAlias()}.${attribute.code}"
+    // ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem'] - типы у которых могут быть вложенности
+    // ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state'] - простые типы
+    // ['string', 'integer', 'state', 'catalogItem', 'catalogItemSet'] - типы которые будут у ссылочных типов (на этом спринте)
+    String locale = ''
+    return revelation(attribute).inject(criteria) { hColumn, attr ->
+        def (type, code) = attr
+        if (type in ['catalogItemSet', 'catalogItem'])
+        {
+            locale = 'ru' //TODO: спрашивать локаль у пользователя
+        }
+        if (code == 'title' && locale)
+        {
+            code = "$code.$locale"
+        }
+        switch (type)
+        {
+            case ['boLinks', 'backBOLinks', 'catalogItemSet']:
+                return hColumn.addInnerJoin(code)
+            case 'dtInterval':
+                return hColumn.getProperty(code).getProperty('ms') //Предполагаем после этого атрибутов не будет
+            default:
+                return hColumn.getProperty(code)
+        }
     }
 }
 
-private String getAttributeCodeByTypeForCompute(HCriteria criteria, Attribute attribute)
+/**
+ * Метод рекурсивного получения всех вложенных атрибутов
+ * @param attribute - атрибут
+ * @return Список кортежей из типа и кода атрибута
+ */
+private List<Tuple> revelation(Attribute attribute)
 {
-    switch (attribute.type)
-    {
-        case ['boLinks', 'backBOLinks']:
-            return "${criteria.addInnerJoin(attribute.code).getAlias()}.title"
-        case 'catalogItemSet':
-            return "${criteria.addInnerJoin(attribute.code).getAlias()}.title"
-        case 'object':
-            return "${criteria.addLeftJoin(attribute.code).getAlias()}.title"
-        case 'catalogItem':
-            return "${criteria.getAlias()}.${attribute.code}.title.ru"
-        case 'state':
-            return "${criteria.getAlias()}.${attribute.code}"
-        case 'dtInterval':
-            return "${criteria.getAlias()}.${attribute.code}.ms"
-        default:
-            return "${criteria.getAlias()}.${attribute.code}"
-    }
+    return attribute ? [new Tuple(attribute.type, attribute.code)] + revelation(attribute.ref) : []
 }
 
 /**
@@ -1034,7 +1044,7 @@ private HCriteria createHCriteria(String descriptor, String source)
  */
 private HCriteria getCriteriaFromDescriptor(def descriptor)
 {
-    return api.actionContext.createCriteria(descriptor)
+    return api.listdata.createCriteria(descriptor)
 }
 
 /**
@@ -1044,6 +1054,8 @@ private HCriteria getCriteriaFromDescriptor(def descriptor)
  */
 private def deserializeDescriptor(String jsonString)
 {
+    //TODO: перейти на товый метод десериализации когда он перестанет кидать NPE после добавления в критерию
+//    return api.listdata.createListDescriptor(jsonString)
     return DashboardMarshaller.getDescriptorFromJson(jsonString)
 }
 
@@ -1055,25 +1067,27 @@ private def deserializeDescriptor(String jsonString)
  */
 private Collection<Object> getPeriodSevenDays(Collection<Object> list, int indexColumn)
 {
+    def russianLocale = new Locale("ru")
+    SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
+    SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd MMMM", russianLocale)
+
     return list.collect {
-        def dataForCompute = it[indexColumn].split('--')
+        def (String firstDate, String secondDate) = (it[indexColumn] as String).split('--')
+        def minDate = standardDateFormatter.parse(firstDate)
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd",
-                new Locale("ru"))
-        def dateMin = sdf.parse(dataForCompute[0])
-        sdf.applyPattern("dd MMMM")
-
-        def formulaFrom = dataForCompute[1].toInteger()*7
-        Calendar dateFrom = Calendar.getInstance()
-        dateFrom.setTime(dateMin)
-        dateFrom.add(Calendar.DAY_OF_MONTH, formulaFrom)
-
+        def formulaFrom = secondDate.toInteger() * 7
+        Date dateFrom = Calendar.getInstance().with {
+            it.setTime(minDate)
+            it.add(DAY_OF_MONTH, formulaFrom)
+            it.getTime()
+        }
         def formulaTo = formulaFrom + 6
-        Calendar dateTo = Calendar.getInstance()
-        dateTo.setTime(dateMin)
-        dateTo.add(Calendar.DAY_OF_MONTH, formulaTo)
-
-        it[indexColumn] = "${sdf.format(dateFrom.getTime())} - ${sdf.format(dateTo.getTime())}"
+        Date dateTo = Calendar.getInstance().with {
+            it.setTime(minDate)
+            it.add(DAY_OF_MONTH, formulaTo)
+            it.getTime()
+        }
+        it[indexColumn] = "${specialDateFormatter.format(dateFrom)} - ${specialDateFormatter.format(dateTo)}"
         it
     }
 }
@@ -1103,14 +1117,14 @@ private Collection<Object> convertCodeStatusToNameStatus(Collection<Object> list
                                                          int indexColumn,
                                                          String fqn)
 {
-    Map<String, String> codeName = list.toUnique { it[indexColumn] }*.getAt(indexColumn).collectEntries {
+    Map<String, String> codeName = list*.getAt(indexColumn).toUnique().collectEntries {
         [(it): api.metainfo.getStateTitle(fqn, it)]
-
     }
     return list.collect {
+        (it as List).set(indexColumn, codeName[it[codeName]])
         it[indexColumn] = codeName[it[indexColumn]]
         it
-    }.sort{it[indexColumn]}
+    }.sort{ it[indexColumn] }
 }
 
 /**
