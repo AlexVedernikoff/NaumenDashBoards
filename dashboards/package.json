@@ -128,5 +128,5 @@
     "test:watch": "npm run test -- --watch",
     "zip": "zip -r -j \"dist-$(date +\"%d-%m-%Y %H-%M-%S\").zip\" ./dist/*"
   },
-  "version": "1.0.0"
+  "version": "1.0.1-0"
 }
