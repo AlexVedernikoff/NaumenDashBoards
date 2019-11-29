@@ -17,12 +17,10 @@ export class Copyright extends Component<Props> {
 	}
 
 	render () {
-		const tile = "&amp;copy <a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a>";
-
 		return (
 			<div>
 				<TileLayer
-					attribution={tile}
+					attribution="&amp;copy <a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a>"
 					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 					visible={false}
 					noWrap={true}

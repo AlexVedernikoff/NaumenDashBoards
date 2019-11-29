@@ -9,7 +9,7 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>team</id>
+                                <id>ou</id>
                             </key>
                         </entry>
                         <entry>
@@ -19,7 +19,7 @@
                         </entry>
                         <entry>
                             <key>
-                                <id>ou</id>
+                                <id>team</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -53,12 +53,12 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>team</id>
+                                <id>employee</id>
                             </key>
                         </entry>
                         <entry>
                             <key>
-                                <id>employee</id>
+                                <id>team</id>
                             </key>
                         </entry>
                         <entry>
@@ -114,9 +114,9 @@
                     <computable-on-form>false</computable-on-form>
                     <default-by-script>false</default-by-script>
                     <default-value>
-                        <dateTimeInterval interval="SECOND"/>
+                        <dateTimeInterval interval="SECOND" ms="300000"/>
                     </default-value>
-                    <description>Параметр показывает: &lt;br&gt;- как часто обновлять координаты меток подвижных точек на карте,&lt;br&gt;- в какой интервал времени должна попадать метка геопозиции, чтобы считаться новой.</description>
+                    <description>Параметр показывает: &lt;br&gt;- как часто обновлять координаты меток подвижных точек на карте при автообновлении,&lt;br&gt;- в какой интервал времени должна попадать метка геопозиции, чтобы считаться новой.</description>
                     <edit-presentaion>
                         <code>dtIntervalEdit</code>
                     </edit-presentaion>
@@ -124,7 +124,7 @@
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
                     <required>false</required>
-                    <title lang="ru">Частота обновления местоположения точек, в сек</title>
+                    <title lang="ru">Частота обновления местоположения точек</title>
                     <type>
                         <code>dtInterval</code>
                         <property code="permittedTypes">[]</property>
@@ -143,12 +143,12 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>employee</id>
+                                <id>ou</id>
                             </key>
                         </entry>
                         <entry>
                             <key>
-                                <id>ou</id>
+                                <id>employee</id>
                             </key>
                         </entry>
                         <entry>
@@ -204,9 +204,9 @@
                     <computable-on-form>false</computable-on-form>
                     <default-by-script>false</default-by-script>
                     <default-value>
-                        <string>getLastGeoposition</string>
+                        <string>getLastGeopositions</string>
                     </default-value>
-                    <description>Указать режим обновления по кнопке: полностью обновлять список точек (getPoints) или обновлять только координаты подвижных точек (getLastGeoposition)</description>
+                    <description>Указать режим обновления по кнопке: полностью обновлять список точек (getPoints) или обновлять только координаты подвижных точек (getLastGeopositions)</description>
                     <edit-presentaion>
                         <code>stringEdit</code>
                     </edit-presentaion>
@@ -234,17 +234,17 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
                                 <id>employee</id>
                             </key>
                         </entry>
                         <entry>
                             <key>
                                 <id>team</id>
-                            </key>
-                        </entry>
-                        <entry>
-                            <key>
-                                <id>ou</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -261,7 +261,7 @@
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
                     <required>false</required>
-                    <title lang="ru">Интервал времени для определения неактивных точек, в минутах</title>
+                    <title lang="ru">Интервал времени для определения неактивных точек</title>
                     <type>
                         <code>dtInterval</code>
                         <property code="permittedTypes">[]</property>
@@ -280,7 +280,7 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>employee</id>
+                                <id>team</id>
                             </key>
                         </entry>
                         <entry>
@@ -290,7 +290,7 @@
                         </entry>
                         <entry>
                             <key>
-                                <id>team</id>
+                                <id>employee</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
