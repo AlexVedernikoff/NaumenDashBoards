@@ -23,9 +23,6 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
-import ru.naumen.modules.Attribute
-import ru.naumen.modules.DashboardMarshaller
-
 import static Diagram.*
 import static groovy.json.JsonOutput.toJson
 
@@ -422,10 +419,10 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
     def breakdownSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 2) : it }
 
     def groupDtInterval = { request.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it, 0) : it }
-    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it } //TODO: врядли будет работать
+    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it }
 
     def groupState = { request.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it, 0, request.source) : it }
-    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it, 2, request.source) : it } //TODO: это врядли будет работать
+    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it, 2, request.source) : it }
 
     Collection<Object> list = getQuery(criteria).list()
             .with(groupSevenDay)
@@ -490,7 +487,7 @@ private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompos
         result = calculator.execute { variable ->
             def computeData = currentIndicator.computeData.get(variable)
             def data = request.data.get(computeData.dataKey)
-            def attribute = computeData.attr
+            def attribute = setTitleInLinkAttribute(computeData.attr)
             executeQuery(
                     data as DataForCompositeDiagram,
                     attribute as Attribute,
@@ -547,9 +544,10 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
         Collection<Object> resValues = calculator.multipleExecute { variable ->
             def computeData = currentColumn.computeData.get(variable)
             def data = request.data.get(computeData.dataKey)
+            def attr = setTitleInLinkAttribute(computeData.attr)
             lastResponse = executeQuery(
                     data as DataForCompositeDiagram,
-                    computeData.attr as Attribute,
+                    attr as Attribute,
                     computeData.aggregation as AggregationType
             )
             lastResponse.collect { it[1] as double }
@@ -640,9 +638,10 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
             def resValues = calculator.multipleExecute { variable ->
                 def computeData = currentYAxis.computeData.get(variable)
                 def data = request.data.get(computeData.dataKey)
+                def attr = setTitleInLinkAttribute(computeData.attr)
                 def res = executeQuery(
                         data as DataForCompositeDiagram,
-                        computeData.attr as Attribute,
+                        attr as Attribute,
                         computeData.aggregation as AggregationType
                 )
                 if (res)
@@ -1182,5 +1181,16 @@ private Collection<SeriesCombo> sortSeries(Collection<SeriesCombo> series,
         seriesNew.addAll(seriesPart)
     }
     return seriesNew
+}
+
+/**
+ * Метод добавления атирбута title для ссылочных аттрибутов.
+ * @param attr - атрибут
+ * @return атрибут
+ */
+private setTitleInLinkAttribute(def attr)
+{
+    def validTypes = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
+    return attr.type in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
 }
 //endregion
