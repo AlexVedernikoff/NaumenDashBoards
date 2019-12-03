@@ -13,6 +13,7 @@ package ru.naumen.modules
 /**
  * Объект помощник для формирования ссылок
  */
+@ru.naumen.core.server.script.api.injection.InjectApi
 class Link
 {
     /**
@@ -60,8 +61,6 @@ class Link
      */
     private int liveDays = 30
 
-    private def api
-
     private Map<String, Integer> genitiveRussianMonth = Calendar.with {
         [
                 'января'  : JANUARY,
@@ -101,9 +100,8 @@ class Link
      */
     private final DATE_ATTRIBUTES = ['date', 'dateTime']
 
-    Link(Map<String, Object> map, def api)
+    Link(Map<String, Object> map)
     {
-        this.api = api
         this.classFqn = map.classFqn
         this.title = map.title ?: "Список элементов ${this.classFqn}"
         this.attrGroup = 'forDashboards' in this.api.metainfo.getMetaClass(this.classFqn).getAttributeGroupCodes()
@@ -144,12 +142,16 @@ class Link
 
         if (descriptor)
         {
-            DashboardMarshaller.createContext(descriptor).listFilter.elements.collect { orFilter ->
+            def iDescriptor = DashboardMarshaller.createContext(descriptor)
+            iDescriptor.listFilter.elements.collect { orFilter ->
                 orFilter.elements.collect { filter ->
-                    String attribute = (filter.getAttributeFqn() as String).split('@', 2).tail().head()
+                    String attribute = filter.getAttributeFqn() as String
                     String condition = filter.getProperties().conditionCode
                     def value = filter.getValue()
-                    filterBuilder.OR(attribute, condition, value)
+
+                    condition == 'containsSubject'
+                            ? filterBuilder.OR(attribute, 'contains', utils.get(iDescriptor.clientSettings.formObjectUuid as String))
+                            : filterBuilder.OR(attribute, condition, value)
                 }
             }.inject(filterBuilder) { first, second -> first.AND(*second) }
         }
@@ -196,9 +198,7 @@ class Link
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         switch (type)
         {
-            case ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']:
-                return filterBuilder.OR(code, 'titleContains', value)
-            case 'state':
+            case ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'state']:
                 return filterBuilder.OR(code, 'titleContains', value as String)
             case DATE_ATTRIBUTES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
@@ -364,7 +364,7 @@ class Link
  */
 String getLink(Map<String, Object> requestContent)
 {
-    Link link = new Link(requestContent, api)
+    Link link = new Link(requestContent)
     def linkBuilder = link.getBuilder()
     return api.web.list(linkBuilder)
 }
