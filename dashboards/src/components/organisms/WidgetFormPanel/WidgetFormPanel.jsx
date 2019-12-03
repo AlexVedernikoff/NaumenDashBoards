@@ -72,7 +72,6 @@ export class WidgetFormPanel extends Component<Props, State> {
 	};
 
 	render () {
-		console.log(this.props.errors);
 		return (
 			<FormContext.Provider value={this.props}>
 				{this.renderForm()}

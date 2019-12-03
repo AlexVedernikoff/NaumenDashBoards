@@ -1,0 +1,41 @@
+@import '/styles/variables';
+
+:local {
+	.widget {
+		background-color: @bg-white;
+		border-radius: 2px;
+		box-shadow: 0 0 10px rgba(129, 146, 161, .4);
+		height: 100%;
+		overflow: visible;
+
+		&:hover {
+			.actionButtonsContainer {
+				display: block;
+			}
+		}
+	}
+
+	.selectedWidget {
+		box-shadow: 0 0 12px @info !important;
+	}
+
+	.actionButtonsContainer {
+		background: #FFFFFF;
+		border-radius: 2px;
+		bottom: -15px;
+		box-shadow: 0 0 10px rgba(129, 146, 161, 0.2);
+		display: none;
+		left: calc(50% - 43px);
+		padding: 8px;
+		position: absolute;
+	}
+
+	.exportItem {
+		cursor: pointer;
+		padding: 5px;
+
+		&:hover {
+			color: @primary;
+		}
+	}
+}

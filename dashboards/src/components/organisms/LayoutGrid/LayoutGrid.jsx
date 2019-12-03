@@ -1,19 +1,13 @@
 // @flow
-import {Button, IconButton} from 'components/atoms';
-import {CHART_VARIANTS} from 'utils/chart';
-import cn from 'classnames';
-import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
-import {createOrderName, NewWidget} from 'utils/widget';
-import {Diagram, Modal} from 'components/molecules';
 import {editContentRef} from 'components/pages/DashboardEditContent';
 import type {Element} from 'react';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {GRID_PARAMS} from 'utils/layout';
+import {NewWidget} from 'utils/widget';
 import type {Props, State} from './types';
-import React, {Component, createRef, Fragment} from 'react';
+import React, {Component, createRef} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
-import styles from './styles.less';
-import type {Widget} from 'store/widgets/data/types';
+import {Widget, WidgetRemovalModal} from 'components/molecules';
+import type {Widget as WidgetType} from 'store/widgets/data/types';
 
 const props = {
 	autoSize: undefined,
@@ -105,22 +99,17 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	handleClickEdit = (id: string) => (): void => {
+	handleDrillDownWidget = (widget: WidgetType, orderNum?: number) => {
+		const {comboDrillDown, drillDown} = this.props;
+		orderNum ? comboDrillDown(widget, orderNum) : drillDown(widget);
+	};
+
+	handleEditWidget = (id: string) => {
 		const {onSelectWidget} = this.props;
 		onSelectWidget(id);
 	};
 
-	handleClickDrillDown = (id: string) => () => {
-		const {drillDown, widgets} = this.props;
-		drillDown(widgets[id]);
-	};
-
-	handleClickComboDrillDown = (id: string, orderNum: number) => () => {
-		const {comboDrillDown, widgets} = this.props;
-		comboDrillDown(widgets[id], orderNum);
-	};
-
-	removeWidget = (onlyPersonal: boolean) => () => {
+	removeWidget = (onlyPersonal: boolean) => {
 		const {onRemoveWidget} = this.props;
 		const {widgetIdToRemove} = this.state;
 
@@ -128,63 +117,7 @@ export class LayoutGrid extends Component<Props, State> {
 		onRemoveWidget(widgetIdToRemove, onlyPersonal);
 	};
 
-	showModal = (widgetIdToRemove: string) => () => this.setState({showModal: true, widgetIdToRemove});
-
-	renderButtons = (widget: Widget) => (
-		<div className={styles.widgetActions}>
-			{this.renderEditButton(widget.id)}
-			{this.renderDrillDownButtonByType(widget)}
-			{this.renderRemoveButton(widget.id)}
-		</div>
-	);
-
-	renderDrillDownButton = (id: string) => (
-		<IconButton tip="Перейти" onClick={this.handleClickDrillDown(id)}>
-			<UnionIcon />
-		</IconButton>
-	);
-
-	renderDrillDownButtonByType = (widget: Widget) => {
-		if (widget.type === CHART_VARIANTS.COMBO) {
-			return this.renderDrillDownButtons(widget);
-		}
-
-		return this.renderDrillDownButton(widget.id);
-	};
-
-	renderDrillDownButtons = (widget: Widget) => {
-		const {id, order} = widget;
-
-		if (Array.isArray(order)) {
-			return order.map(num => {
-				const dataKey = widget[createOrderName(num)(FIELDS.dataKey)];
-				const source = widget[createOrderName(num)(FIELDS.source)];
-				let tipText = 'Перейти';
-
-				if (source) {
-					tipText = `${tipText} (${source.label})`;
-				}
-
-				return (
-					<IconButton key={dataKey} tip={tipText} onClick={this.handleClickComboDrillDown(id, num)}>
-						<UnionIcon />
-					</IconButton>
-				);
-			});
-		}
-	};
-
-	renderEditButton = (id: string) => {
-		const {editable} = this.props;
-
-		if (editable) {
-			return (
-				<IconButton tip="Редактировать" onClick={this.handleClickEdit(id)}>
-					<EditIcon />
-				</IconButton>
-			);
-		}
-	};
+	showRemovalModal = (widgetIdToRemove: string) => this.setState({showModal: true, widgetIdToRemove});
 
 	renderGrid = () => {
 		const {onLayoutChange} = this.props;
@@ -194,7 +127,6 @@ export class LayoutGrid extends Component<Props, State> {
 			return (
 				<Grid
 					breakpoints={GRID_PARAMS.BREAK_POINTS}
-					className={styles.grid}
 					cols={GRID_PARAMS.COLS}
 					compactType={null}
 					containerPadding={GRID_PARAMS.CONTAINER_PADDING}
@@ -209,81 +141,42 @@ export class LayoutGrid extends Component<Props, State> {
 		}
 	};
 
-	renderDefaultModal = () => {
+	renderRemovalModal = () => {
 		const {role} = this.props;
 		const {showModal} = this.state;
 
 		if (showModal) {
 			return (
-				<Modal
-					cancelText="Нет"
-					header="Вы точно хотите удалить виджет?"
+				<WidgetRemovalModal
 					onClose={this.hideModal}
-					onSubmit={this.removeWidget(!role)}
-					size="small"
-					submitText="Да"
+					onSubmit={this.removeWidget}
+					role={role}
 				/>
 			);
 		}
 	};
 
-	renderMasterModal = () => {
-		const {showModal} = this.state;
-
-		if (showModal) {
-			return <Modal header="Вы точно хотите удалить виджет?" renderFooter={this.renderModalFooter} />;
-		}
-	};
-
-	renderModal = () => this.props.role === 'master' ? this.renderMasterModal() : this.renderDefaultModal();
-
-	renderModalFooter = () => (
-		<Fragment>
-			<Button className={styles.modalButton} onClick={this.removeWidget(false)}>Да, все виджеты</Button>
-			<Button className={styles.modalButton} onClick={this.removeWidget(true)}>Да, только персональный виджет</Button>
-			<Button outline onClick={this.hideModal}>Нет</Button>
-		</Fragment>
-	);
-
-	renderRemoveButton = (id: string) => {
-		const {editable} = this.props;
-
-		if (editable) {
-			return (
-				<Fragment>
-					<IconButton tip="Удалить" onClick={this.showModal(id)}>
-						<CloseIcon />
-					</IconButton>
-					{this.renderModal()}
-				</Fragment>
-			);
-		}
-	};
-
-	renderWidget = (widget: Widget) => {
-		const {selectedWidget} = this.props;
+	renderWidget = (widget: WidgetType) => {
+		const {diagrams, editable, selectedWidget} = this.props;
 		const {id, layout} = widget;
-		const ref = id === NewWidget.id ? newWidgetRef : null;
-		const CNWidget = id === selectedWidget ? cn([styles.widget, styles.selectedWidget]) : styles.widget;
+		const isNew = id === NewWidget.id;
+		const ref = isNew ? newWidgetRef : null;
 
 		return (
-			<div key={id} data-grid={layout} className={CNWidget} ref={ref}>
-				{this.renderWidgetByType(widget)}
+			<div data-grid={layout} key={id} ref={ref}>
+				<Widget
+					data={widget}
+					diagram={diagrams[id]}
+					isEditable={editable}
+					isNew={isNew}
+					isSelected={selectedWidget === widget.id}
+					key={id}
+					onDrillDown={this.handleDrillDownWidget}
+					onEdit={this.handleEditWidget}
+					onRemove={this.showRemovalModal}
+				/>
 			</div>
 		);
-	};
-
-	renderWidgetByType = (widget: Widget) => {
-		const {diagrams} = this.props;
-
-		if (!(widget instanceof NewWidget)) {
-			return (
-				<Fragment>
-					<Diagram widget={widget} diagram={diagrams[widget.id]} />
-					{this.renderButtons(widget)}
-				</Fragment>
-			);
-		}
 	};
 
 	renderWidgets = (): Array<Element<'div'>> => {
@@ -296,6 +189,7 @@ export class LayoutGrid extends Component<Props, State> {
 		return (
 			<div ref={gridRef}>
 				{this.renderGrid()}
+				{this.renderRemovalModal()}
 			</div>
 		);
 	}

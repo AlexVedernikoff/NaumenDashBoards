@@ -1,7 +1,7 @@
 // @flow
 import {Button, DropDown, Tooltip} from 'components/atoms';
 import {CloseIcon} from 'icons/form';
-import {createSnapshot, EXPORT_VARIANTS, FILE_VARIANTS} from 'utils/export';
+import {createName, createSnapshot, EXPORT_VARIANTS, FILE_LIST} from 'utils/export';
 import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon} from 'icons/header';
 import {gridRef} from 'components/organisms/LayoutGrid';
@@ -10,17 +10,6 @@ import {Modal} from 'components/molecules';
 import React, {Component, Fragment} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
 import styles from './styles.less';
-
-const FileList = [
-	{
-		key: FILE_VARIANTS.PDF,
-		text: FILE_VARIANTS.PDF
-	},
-	{
-		key: FILE_VARIANTS.PNG,
-		text: FILE_VARIANTS.PNG
-	}
-];
 
 export class DashboardHeader extends Component<Props, State> {
 	state = {
@@ -32,38 +21,21 @@ export class DashboardHeader extends Component<Props, State> {
 		const {sendToMail} = this.props;
 		const {current} = gridRef;
 		const toDownload = way === DOWNLOAD;
-		const name = await this.createName();
+		const name = await createName();
 
 		if (current) {
-			const file = await createSnapshot(current, type, toDownload, name);
+			const file = await createSnapshot({
+				container: current,
+				fragment: false,
+				name,
+				toDownload,
+				type
+			});
 
 			if (way === MAIL && file) {
 				sendToMail(name, type, file);
 			}
 		}
-	};
-
-	createName = async () => {
-		const name = await this.getName();
-		return `${name}_${this.getCurrentDate()}`;
-	};
-
-	getCurrentDate = () => {
-		const date = new Date();
-		return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-	};
-
-	getName = async () => {
-		let name;
-
-		try {
-			const context = await window.jsApi.commands.getCurrentContextObject();
-			name = context['card_caption'];
-		} catch (e) {
-			name = 'Дашборд';
-		}
-
-		return name;
 	};
 
 	hideModal = () => this.setState({showModal: false});
@@ -88,7 +60,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 		return (
 			<Tooltip tooltip={tip} placement="left">
-				<DropDown icon={icon} list={FileList} onClick={this.createDocument(way)} />
+				<DropDown icon={icon} list={FILE_LIST} onClick={this.createDocument(way)} />
 			</Tooltip>
 		);
 	};
