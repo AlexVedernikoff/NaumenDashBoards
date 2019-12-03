@@ -276,6 +276,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 
 	const options: ApexOptions = {
 		chart: {
+			background: 'white',
 			animations: {
 				enabled: false
 			},

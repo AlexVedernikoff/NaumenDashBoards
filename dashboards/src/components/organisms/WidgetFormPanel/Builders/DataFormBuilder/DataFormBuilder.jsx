@@ -277,8 +277,8 @@ export class DataFormBuilder extends FormBuilder {
 	renderAttribute = (props: AttrProps) => {
 		const {computedAttrs} = this.props.values;
 		// $FlowFixMe
-		const {onSelectCallback, parent, refInput, withDivider, ...selectProps} = props;
-		const {name, value, withCreate} = selectProps;
+		const {onSelectCallback, parent, refInput, withCreate, withDivider, ...selectProps} = props;
+		const {name, value} = selectProps;
 		let {onSelect, options} = selectProps;
 
 		const attrSelectProps = {
@@ -334,7 +334,7 @@ export class DataFormBuilder extends FormBuilder {
 		}
 
 		onSelect = onSelect ? onSelect(parent, onSelectCallback) : this.handleSelectAttr(parent, onSelectCallback);
-		const attrInput = this.renderSelect({...attrSelectProps, onSelect, options});
+		const attrInput = this.renderSelect({...attrSelectProps, onSelect, options, withCreate});
 
 		if (refInput) {
 			return this.renderCombinedInputs(refInput, attrInput, withDivider);

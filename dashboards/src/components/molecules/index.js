@@ -11,6 +11,8 @@ import Select from './Select';
 import Summary from './Summary';
 import Table from './Table';
 import TreeSelectInput from './TreeSelectInput';
+import Widget from './Widget';
+import WidgetRemovalModal from './WidgetRemovalModal';
 
 export {
 	Chart,
@@ -24,5 +26,7 @@ export {
 	Select,
 	Summary,
 	Table,
-	TreeSelectInput
+	TreeSelectInput,
+	Widget,
+	WidgetRemovalModal
 };
