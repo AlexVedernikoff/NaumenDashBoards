@@ -99,6 +99,7 @@ class Link
      * перечень
      */
     private final DATE_ATTRIBUTES = ['date', 'dateTime']
+    private final LINK_TYPE_ATTRIBUTES = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
 
     Link(Map<String, Object> map)
     {
@@ -156,36 +157,39 @@ class Link
             }.inject(filterBuilder) { first, second -> first.AND(*second) }
         }
 
-        Closure<Map<GroupType, Collection<Object>>> createContextFromFilters = { Collection<Map<Object, Object>> filters ->
-            Map<GroupType, Collection<Object>> result = [:]
-            filters.collect { [(it.group as GroupType):[it.value]] }.each {
-                it.containsKey(GroupType.OVERLAP) && result.containsKey(GroupType.OVERLAP)
-                        ? result << [(GroupType.OVERLAP): result.get(GroupType.OVERLAP) + it.get(GroupType.OVERLAP)]
-                        : result << it
-            }
-            result
-        }
-
         if (filters)
         {
-            filters.groupBy { it.attr }.collect { def attr, Collection<Map<Object, Object>> filters ->
-                String type = attr.type
-                String code = attr.code
-                Collection<Collection<Object>> result = []
-
+            filters.groupBy { it.attr as Attribute }.collect { Attribute attr, Collection<Map<Object, Object>> filters ->
                 Map<GroupType, Collection<Object>> context = createContextFromFilters(filters)
-
-
+                Collection<Collection<Object>> result = []
+                //финт ушам. Предполагается проверить группировку OVERLAP сформировать по ней фильтр,
+                // и после удалить из контекста, чтобы потом передать его для формирования диапазонов времени
+                // Но это можно сделать за вызов одного метода
                 context.remove(GroupType.OVERLAP).each { value ->
-                    //Фильтры данного типа считаем AND
-                    result << [getOrFilter(type, code, value, filterBuilder)]
+                    if (attr.type in LINK_TYPE_ATTRIBUTES)
+                    {
+                        def objects = findObjects(attr.ref, attr.property, value)
+                        result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                    }
+                    else
+                    {
+                        result << [getOrFilter(attr.type, attr.code, value, filterBuilder)]
+                    }
                 }
 
                 if (context)
                 {
-                    Closure<Date> findMinDate = this.&getMinDate.curry(code)
-                    result << getRanges(context, findMinDate).collect { range ->
-                        filterBuilder.OR(code, 'fromTo', range)
+                    result << getRanges(context, this.&getMinDate.curry(attr.code)).collect { range ->
+                        if (attr.type in LINK_TYPE_ATTRIBUTES)
+                        {
+                            def(first, second) = range
+                            def objects = findObjects(attr.ref, attr.property, op.between(first, second))
+                            filterBuilder.OR(attr.code, 'containsInSet',objects)
+                        }
+                        else
+                        {
+                            filterBuilder.OR(attr.code, 'fromTo', range)
+                        }
                     }
                 }
                 result
@@ -198,7 +202,7 @@ class Link
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         switch (type)
         {
-            case ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'state']:
+            case 'state':
                 return filterBuilder.OR(code, 'titleContains', value as String)
             case DATE_ATTRIBUTES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
@@ -207,6 +211,34 @@ class Link
             default:
                 return filterBuilder.OR(code, 'contains', value)
         }
+    }
+
+    /**
+     * Метод поиска объектов
+     * @param attr - атрибут объекто
+     * @param fqnClass - класс объекта
+     * @param value - значение атрибута
+     * @return список объектов
+     */
+    private List<Object> findObjects(Attribute attr, String fqnClass, def value)
+    {
+        return attr.ref ? utils.find(fqnClass, [(attr.code): findObjects(attr.ref, attr.property, value)])
+                :  utils.find(fqnClass, [(attr.code): value]).collect()
+    }
+    /**
+     * Метод создания контекста из из списка фильтров сгруппированных по атрибуту
+     * @param filters - список фильтров сгруппированных по одному атрибуту
+     * @return комбинацыя типа группировки и списка значения фильтра
+     */
+    private Map<GroupType, Collection<Object>> createContextFromFilters(Collection<Map<Object, Object>> filters)
+    {
+        Map<GroupType, Collection<Object>> result = [:]
+        filters.collect { [(it.group as GroupType):[it.value]] }.each {
+            it.containsKey(GroupType.OVERLAP) && result.containsKey(GroupType.OVERLAP)
+                    ? result << [(GroupType.OVERLAP): result.get(GroupType.OVERLAP) + it.get(GroupType.OVERLAP)]
+                    : result << it
+        }
+        return result
     }
 
     /**
