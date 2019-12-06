@@ -356,6 +356,7 @@ class SeriesCombo
  */
 String getDataForDiagram(Map<String, Object> requestContent)
 {
+    //TODO: ужна постобработка для конвертирования id в uuid
     def request = requestContent as RequestGetDataForDiagram
     switch (request.type)
     {
@@ -983,7 +984,7 @@ private String getAttributeCodeByType(HCriteria criteria, Attribute attribute)
         }
         switch (type)
         {
-            case ['boLinks', 'backBOLinks', 'catalogItemSet']:
+            case ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']:
                 return hColumn.addInnerJoin(code)
             case 'dtInterval':
                 return hColumn.getProperty(code).getProperty('ms') //Предполагаем после этого атрибутов не будет
@@ -1184,7 +1185,7 @@ private Collection<SeriesCombo> sortSeries(Collection<SeriesCombo> series,
 }
 
 /**
- * Метод добавления атирбута title для ссылочных аттрибутов.
+ * Метод добавления атирбута title для ссылочных аттрибутов. Исспользовать только для вычислений формул
  * @param attr - атрибут
  * @return атрибут
  */
