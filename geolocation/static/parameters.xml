@@ -204,7 +204,7 @@
                     <computable-on-form>false</computable-on-form>
                     <default-by-script>false</default-by-script>
                     <default-value>
-                        <string>getLastGeopositions</string>
+                        <string>getPoints</string>
                     </default-value>
                     <description>Указать режим обновления по кнопке: полностью обновлять список точек (getPoints) или обновлять только координаты подвижных точек (getLastGeopositions)</description>
                     <edit-presentaion>
