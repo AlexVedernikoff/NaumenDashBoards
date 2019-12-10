@@ -11,11 +11,12 @@
 
 package ru.naumen.modules
 
+import groovy.json.JsonOutput
 import groovy.transform.TupleConstructor
 
 import java.text.DecimalFormat
-import ru.naumen.core.server.hquery.HCriteria;
-import ru.naumen.core.server.hquery.HHelper;
+import ru.naumen.core.server.hquery.HCriteria
+import ru.naumen.core.server.hquery.HHelper
 import ru.naumen.core.server.hquery.HRestrictions
 import ru.naumen.core.server.hquery.HOrders
 
@@ -350,22 +351,43 @@ class SeriesCombo
 
 //region REST-МЕТОДЫ
 /**
+ * Метод получения данных для нескольких диаграмм
+ * @param requestContent - тело запроса
+ * @return ассоциативный массив из ключа виджета и данных диаграммы
+ */
+String getDataForDiagrams(Map<String, Object> requestContent)
+{
+    Closure sendNotSupportedDiagramTypeMessage = { "Not supported diagram type: $it" }
+    Closure buildDiagram = this.&getDataForDiagramOrDefault.rcurry(sendNotSupportedDiagramTypeMessage)
+    Closure safetyCollect = { key, value ->
+        api.tx.call {
+            try {
+                return [(key): buildDiagram(value) ]
+            } catch (Exception ex) {
+                logger.error("error in widget: $key", ex)
+                return [(key): ex.message]
+            }
+        }
+    }
+    return toJson(requestContent.collectEntries(safetyCollect))
+}
+
+
+/**
  * Получение данных для диаграмм
  * @param requestContent тело запроса в формате {@link RequestGetDataForDiagram}
  * @return данные для построения диаграммы
  */
 String getDataForDiagram(Map<String, Object> requestContent)
 {
-    //TODO: ужна постобработка для конвертирования id в uuid
-    def request = requestContent as RequestGetDataForDiagram
-    switch (request.type)
+    switch (requestContent.type as Diagram)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE] :
-            return toJson(getDataStandardDiagram(request))
+            return toJson(getDataStandardDiagram(requestContent as RequestGetDataForDiagram))
         case [DONUT, PIE] :
-            return toJson(getDataRoundDiagram(request))
+            return toJson(getDataRoundDiagram(requestContent as RequestGetDataForDiagram))
         default:
-            throw new Exception(toJson([error: "Not supported diagram type: ${request.type}"]))
+            throw new Exception(toJson([error: "Not supported diagram type: ${requestContent.type}"]))
     }
 }
 
@@ -376,17 +398,16 @@ String getDataForDiagram(Map<String, Object> requestContent)
  */
 String getDataForCompositeDiagram(Map<String, Object> requestContent)
 {
-    def request = requestContent as RequestGetDataForCompositeDiagram
-    switch (request.type)
+    switch (requestContent.type as Diagram)
     {
         case SUMMARY:
-            return toJson(getCalculateDataForSummaryDiagram(request))
+            return toJson(getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram))
         case TABLE:
-            return toJson(getCalculateDataForTableDiagram(request))
+            return toJson(getCalculateDataForTableDiagram(requestContent as RequestGetDataForCompositeDiagram))
         case COMBO:
-            return toJson(getCalculationForComboDiagram(request))
+            return toJson(getCalculationForComboDiagram(requestContent as RequestGetDataForCompositeDiagram))
         default:
-            throw new Exception(toJson([error: "Not supported diagram type: ${request.type}"]))
+            throw new Exception(toJson([error: "Not supported diagram type: ${requestContent.type}"]))
     }
 }
 //endregion
@@ -416,14 +437,14 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
     }
     findNotNullAttributes(criteria, request.xAxis, request.breakdown)
 
-    def groupSevenDay = { request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 0) : it }
-    def breakdownSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 2) : it }
+    def groupSevenDay = { request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
+    def breakdownSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
 
-    def groupDtInterval = { request.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it, 0) : it }
-    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it }
+    def groupDtInterval = { request.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
+    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
 
-    def groupState = { request.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it, 0, request.source) : it }
-    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it, 2, request.source) : it }
+    def groupState = { request.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, request.source) : it }
+    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, request.source) : it }
 
     Collection<Object> list = getQuery(criteria).list()
             .with(groupSevenDay)
@@ -434,6 +455,30 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
             .with(breakdownState)
 
     return mappingToStandardDiagram(list, breakdown, request.breakdownGroup as GroupType)
+}
+
+/**
+ * Метод для построения построения диаграммы в зависимости от типа
+ * @param requestContent - тело запроса
+ * @param defaultBehavior - метод обработки на случай не предусмотренного типа диаграммы
+ * @return данные диаграммы
+ */
+private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closure defaultBehavior) {
+    switch (requestContent.type as Diagram)
+    {
+        case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE] :
+            return getDataStandardDiagram(requestContent as RequestGetDataForDiagram)
+        case [DONUT, PIE] :
+            return getDataRoundDiagram(requestContent as RequestGetDataForDiagram)
+        case SUMMARY:
+            return getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram)
+        case TABLE:
+            return getCalculateDataForTableDiagram(requestContent as RequestGetDataForCompositeDiagram)
+        case COMBO:
+            return getCalculationForComboDiagram(requestContent as RequestGetDataForCompositeDiagram)
+        default:
+            return defaultBehavior.call(requestContent.type)
+    }
 }
 
 /**
@@ -453,9 +498,9 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForDiagram request)
     group(criteria, request.breakdownGroup as GroupType, request.breakdown as Attribute, request.source, request.descriptor)
     findNotNullAttributes(criteria, request.breakdown)
 
-    def groupSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 1) : it }
-    def groupDtInterval = { request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it, 1) : it }
-    def groupState = { request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it, 1, request.source) : it }
+    def groupSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
+    def groupDtInterval = { request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it as Collection, 1) : it }
+    def groupState = { request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it as Collection, 1, request.source) : it }
 
     Collection<Object> list = getQuery(criteria).list().with(groupSevenDay).with(groupDtInterval).with(groupState)
 
@@ -568,13 +613,13 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
         )
     }
 
-    def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 0) : it }
+    def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
 
-    def breakdownDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it, 0) : it }
-    def groupDtInterval = { row.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it }
+    def breakdownDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
+    def groupDtInterval = { row.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
 
-    def breakdownState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it, 0, currentData.source) : it }
-    def groupState = { row.type == 'state' ? convertCodeStatusToNameStatus(it, 2, currentData.source) : it }
+    def breakdownState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, currentData.source) : it }
+    def groupState = { row.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, currentData.source) : it }
 
     result = result.with(breakdownSevenDay)
             .with(breakdownDtInterval)
@@ -615,12 +660,12 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
         }
 
         Closure<Collection<Object>> postProcess = { list ->
-            def groupSevenDay = { currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 0) : it }
-            def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it, 2) : it }
-            def groupDtInterval = { currentData.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it, 0) : it }
-            def breakdownDtInterval = { currentData?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it, 2) : it }
-            def groupState = { currentData.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it, 0, source) : it }
-            def breakdownState = { currentData?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it, 2, source) : it }
+            def groupSevenDay = { currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
+            def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
+            def groupDtInterval = { currentData.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
+            def breakdownDtInterval = { currentData?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
+            def groupState = { currentData.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, source) : it }
+            def breakdownState = { currentData?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, source) : it }
 
             list.with(groupSevenDay)
                     .with(breakdownSevenDay)
