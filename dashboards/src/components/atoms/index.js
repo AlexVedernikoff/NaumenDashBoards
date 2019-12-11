@@ -1,12 +1,13 @@
 // @flow
 import Button from './Button';
-import CheckBox from './CheckBox';
+import Checkbox from './Checkbox';
 import Divider from './Divider';
 import DropDown from './DropDown';
 import ExtendButton from './ExtendButton';
 import FieldLabel from './FieldLabel';
 import IconButton from './IconButton';
 import Label from './Label';
+import Popover from './Popover';
 import TextArea from './TextArea';
 import Tip from './Tip';
 import Title from './Title';
@@ -15,13 +16,14 @@ import Tooltip from './Tooltip';
 
 export {
 	Button,
-	CheckBox,
+	Checkbox,
 	Divider,
 	DropDown,
 	ExtendButton,
 	FieldLabel,
 	IconButton,
 	Label,
+	Popover,
 	TextArea,
 	Tip,
 	Title,

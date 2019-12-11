@@ -1,14 +1,14 @@
 // @flow
+import AutoUpdateForm from 'containers/AutoUpdateForm';
 import {Button, DropDown, Tooltip} from 'components/atoms';
 import {CloseIcon} from 'icons/form';
 import {createName, createSnapshot, EXPORT_VARIANTS, FILE_LIST} from 'utils/export';
 import type {ExportButtonProps, State} from './types';
-import {ExportIcon, MailIcon} from 'icons/header';
+import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
 import {gridRef} from 'components/organisms/LayoutGrid';
-import IconRefresh from 'icons/header/refresh.svg';
 import {Modal} from 'components/molecules';
-import React, {Component, Fragment} from 'react';
 import type {Props} from 'containers/DashboardHeader/types';
+import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
 export class DashboardHeader extends Component<Props, State> {
@@ -48,6 +48,17 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	showModal = () => this.setState({showModal: true});
+
+	renderAutoUpdateButton = () => {
+		return (
+			<div className={styles.autoUpdateContainer}>
+				<div className={styles.buttonIcon}>
+					<TimeIcon />
+				</div>
+				<AutoUpdateForm className={styles.autoUpdateForm} />
+			</div>
+		);
+	};
 
 	renderDownloadExportButton = () => this.renderExportButton({
 		icon: <ExportIcon />,
@@ -108,12 +119,12 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	renderRefreshButton = () => {
-		const {fetchDashboard} = this.props;
+		const {getSettings} = this.props;
 
 		return (
 			<Tooltip tooltip="Обновить виджеты" placement="left">
 				<div className={styles.buttonIcon}>
-					<IconRefresh onClick={fetchDashboard} />
+					<RefreshIcon onClick={getSettings} />
 				</div>
 			</Tooltip>
 		);
@@ -126,7 +137,7 @@ export class DashboardHeader extends Component<Props, State> {
 			return (
 				<Fragment>
 					<div className={styles.buttonIcon} onClick={this.showModal}>
-						<CloseIcon />
+						<CloseIcon className={styles.closeIcon} />
 						Сбросить настройки
 					</div>
 					{this.renderModal()}
@@ -139,6 +150,9 @@ export class DashboardHeader extends Component<Props, State> {
 		return (
 			<header className={styles.header}>
 				<ul className={styles.nav}>
+					<li className={styles.navItem}>
+						{this.renderAutoUpdateButton()}
+					</li>
 					<li className={styles.navItem}>
 						{this.renderRefreshButton()}
 					</li>

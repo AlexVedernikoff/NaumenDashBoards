@@ -1,6 +1,6 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
-import type {ReceiveDiagramPayload} from './types';
+import type {DiagramMap, ReceiveDiagramPayload} from './types';
 import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
 import {DIAGRAMS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -124,6 +124,31 @@ const resolvePostDataCreator = (type: string) => {
 };
 
 /**
+ * Получаем данные графиков для всех виджетов
+ * @param {Array<Widget>} widgets - список виджетов
+ * @returns {ThunkAction}
+ */
+const fetchDiagramsData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		let postData = {};
+
+		dispatch(requestDiagrams(widgets));
+
+		widgets.forEach(widget => {
+			const {type} = widget;
+
+			postData[widget.id] = resolvePostDataCreator(type)(widget);
+		});
+
+		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagrams', 'requestContent'), postData);
+
+		dispatch(receiveDiagrams(data));
+	} catch (e) {
+		dispatch(recordDiagramsError(widgets));
+	}
+};
+
+/**
  * Получаем данные графика для конкретного виджета
  * @param {Widget} widget - данные виджета
  * @returns {ThunkAction}
@@ -152,8 +177,18 @@ const requestDiagram = (payload: string) => ({
 	payload
 });
 
+const requestDiagrams = (payload: Array<Widget>) => ({
+	type: DIAGRAMS_EVENTS.REQUEST_DIAGRAMS,
+	payload
+});
+
 const receiveDiagram = (payload: ReceiveDiagramPayload) => ({
 	type: DIAGRAMS_EVENTS.RECEIVE_DIAGRAM,
+	payload
+});
+
+const receiveDiagrams = (payload: DiagramMap) => ({
+	type: DIAGRAMS_EVENTS.RECEIVE_DIAGRAMS,
 	payload
 });
 
@@ -162,6 +197,12 @@ const recordDiagramError = (payload: string) => ({
 	payload
 });
 
+const recordDiagramsError = (payload: Array<Widget>) => ({
+	type: DIAGRAMS_EVENTS.RECORD_DIAGRAMS_ERROR,
+	payload
+});
+
 export {
-	fetchDiagramData
+	fetchDiagramData,
+	fetchDiagramsData
 };

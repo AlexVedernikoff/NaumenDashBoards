@@ -131,7 +131,7 @@
 		}
 
 		&:hover {
-			background-color: darken(@grey-hover, 10%);
+			background-color: darken(@grey, 10%);
 		}
 
 		&:active {
@@ -140,6 +140,20 @@
 			svg {
 				stroke: @black;
 			}
+		}
+	}
+
+	.disabled {
+		background-color: @grey;
+		border-color: @grey;
+		color: @grey-dark;
+		cursor: not-allowed;
+		pointer-events: none;
+
+		&:active {
+			@darken: darken(@grey, 10%);
+			background-color: @grey;
+			border-color: @grey;
 		}
 	}
 }

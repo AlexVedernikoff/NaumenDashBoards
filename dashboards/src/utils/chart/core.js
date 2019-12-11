@@ -98,7 +98,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			decimalsInFloat: 2,
 			forceNiceScale: !stackedIsPercent,
 			labels: {
-				formatter: (val: number, opts: any) => typeof opts === 'object' ? val.toFixed() : val
+				formatter: (val: number, opts: any) => typeof opts === 'object' && !horizontal ? val.toFixed() : val
 			},
 			max: (max: number) => max > 0 ? Math.ceil(max) : 1,
 			min: 0,
@@ -283,6 +283,7 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 			events: {
 				dataPointSelection: drillDownBySelection(widget, chart)
 			},
+			parentHeightOffset: 0,
 			toolbar: {
 				show: false
 			}

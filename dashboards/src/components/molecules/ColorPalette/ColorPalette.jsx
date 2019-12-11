@@ -27,12 +27,12 @@ export class ColorPalette extends Component<Props, State> {
 		showPalette: true
 	});
 
-	renderColor = (color: string, index: number) => (
+	renderColor = (backgroundColor: string, index: number) => (
 		<div
-			className={styles.itemPalette}
+			className={styles.paletteItem}
 			key={index}
-			onClick={this.openColorPicker(color, index)}
-			style={{background: color}}
+			onClick={this.openColorPicker(backgroundColor, index)}
+			style={{backgroundColor}}
 		/>
 	);
 
@@ -40,7 +40,7 @@ export class ColorPalette extends Component<Props, State> {
 		const {colors} = this.props;
 
 		return (
-			<div className={styles.colorPaletteWrap}>
+			<div className={styles.paletteContainer}>
 				{colors.map(this.renderColor)}
 				{this.renderColorPicker()}
 			</div>

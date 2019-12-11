@@ -90,21 +90,13 @@ export type RequestWidgetSave = {
 	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_SAVE,
 };
 
-export type RequestWidgets = {
-	type: typeof WIDGETS_EVENTS.REQUEST_WIDGETS
-};
-
-export type ReceiveWidgets = {
-	type: typeof WIDGETS_EVENTS.RECEIVE_WIDGETS,
-	payload: Widget[]
-};
-
-export type RecordWidgetsError = {
-	type: typeof WIDGETS_EVENTS.RECORD_WIDGETS_ERROR,
-};
-
 export type RecordWidgetDeleteError = {
 	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
+}
+
+export type SetWidgets = {
+	type: typeof WIDGETS_EVENTS.SET_WIDGETS,
+	payload: Array<Widget>
 }
 
 type UnknownWidgetsAction = {
@@ -116,18 +108,16 @@ export type WidgetsAction =
 	| AddWidget
 	| DeleteWidget
 	| EditLayout
-	| ReceiveWidgets
 	| RecordLayoutSaveError
 	| RecordWidgetDeleteError
 	| RecordWidgetSaveError
-	| RecordWidgetsError
 	| RequestLayoutSave
 	| RequestWidgetDelete
 	| RequestWidgetSave
-	| RequestWidgets
 	| ResetWidget
 	| SelectWidget
 	| SetCreatedWidget
+	| SetWidgets
 	| UpdateWidget
 	| UnknownWidgetsAction
 ;

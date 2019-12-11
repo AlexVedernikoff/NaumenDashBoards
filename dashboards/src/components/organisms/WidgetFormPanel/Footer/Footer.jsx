@@ -63,7 +63,7 @@ export class Footer extends Component<WrappedProps> {
 		const {saveError} = this.props;
 
 		if (saveError) {
-			return <div className="mt-1">Ошибка сохранения</div>;
+			return <div className={styles.error}>Ошибка сохранения</div>;
 		}
 	};
 

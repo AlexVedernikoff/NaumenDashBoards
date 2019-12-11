@@ -1,0 +1,51 @@
+@import '/styles/variables';
+
+:local {
+	@bg-color: #4F5C70;
+	@content-width: 170px;
+	@triangle-width: 7px;
+
+	.container {
+		position: relative;
+
+		&:hover {
+			.content {
+				opacity: 1;
+				visibility: visible;
+				z-index: 10;
+			}
+		}
+	}
+
+	.content {
+		background: @bg-color;
+		border-radius: 2px;
+		box-shadow: @grey-box-shadow;
+		box-sizing: border-box;
+		color: white;
+		max-width: @content-width;
+		opacity: 0;
+		position: absolute;
+		visibility: hidden;
+		white-space: normal;
+
+		&:before {
+			border-style: solid;
+			content: '';
+			position: absolute;
+		}
+	}
+
+	.right {
+		padding: 10px 20px 10px 10px;
+		right: -(@content-width + 10px);
+		top: 0;
+
+		&:before {
+			border-color: transparent @bg-color transparent transparent;
+			border-width: @triangle-width @triangle-width @triangle-width 0;
+			left: -@triangle-width;
+			top: 5px;
+		}
+	}
+}

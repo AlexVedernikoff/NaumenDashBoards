@@ -2,9 +2,15 @@
 import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS} from './constants';
 import {defaultDashboardAction, initialDashboardState} from './init';
+import {setAutoUpdateFunction} from './helpers';
 
 const reducer = (state: DashboardState = initialDashboardState, action: DashboardAction = defaultDashboardAction): DashboardState => {
 	switch (action.type) {
+		case DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS:
+			return {
+				...state,
+				autoUpdate: {...state.autoUpdate, ...action.payload}
+			};
 		case DASHBOARD_EVENTS.RECEIVE_DASHBOARD:
 			return {
 				...state,
@@ -28,6 +34,9 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				...state,
 				role: action.payload
 			};
+		case DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION:
+			setAutoUpdateFunction(state, action.payload);
+			return state;
 		case DASHBOARD_EVENTS.SET_CONTEXT:
 			return {
 				...state,

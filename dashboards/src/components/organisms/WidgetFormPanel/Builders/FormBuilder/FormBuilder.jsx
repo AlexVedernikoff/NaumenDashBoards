@@ -1,5 +1,5 @@
 // @flow
-import {CheckBox, Divider, ExtendButton, FieldLabel, Label, TextArea} from 'components/atoms';
+import {Checkbox, Divider, ExtendButton, FieldLabel, Label, TextArea} from 'components/atoms';
 import type {CheckBoxProps, LabelProps, MiniSelectProps, SelectProps, State, TextAreaProps} from './types';
 import type {FormikProps} from 'formik';
 import {MiniSelect, Select, TreeSelectInput} from 'components/molecules';
@@ -24,7 +24,7 @@ export class FormBuilder extends Component<Props & FormikProps, State> {
 		return (
 			<Fragment>
 				<div className={mainStyles.field} key={name}>
-					<CheckBox
+					<Checkbox
 						label={label}
 						onClick={this.handleClick}
 						name={name}

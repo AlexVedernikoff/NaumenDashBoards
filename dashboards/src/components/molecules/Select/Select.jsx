@@ -176,7 +176,7 @@ export class Select extends PureComponent<Props, State> {
 		return (
 			<components.Menu {...props}>
 				{props.children}
-				<Button className="m-1" onClick={onClickCreateButton || this.handleShowForm(true)}>
+				<Button className={styles.createButton} onClick={onClickCreateButton || this.handleShowForm(true)}>
 					<PlusIcon className={styles.plusIcon} />
 					{createButtonText}
 				</Button>

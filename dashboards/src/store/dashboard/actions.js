@@ -1,10 +1,12 @@
 // @flow
-import {addWidget, getWidgets, resetWidget} from 'store/widgets/data/actions';
-import {buildUrl, client, getContext, getEditableParameter} from 'utils/api';
+import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import type {AutoUpdateRequestPayload} from './types';
+import {buildUrl, client, getContentParameters, getContext} from 'utils/api';
 import type {Context} from 'utils/api/types';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {fetchDiagramsData} from 'store/widgets/diagrams/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import {getNextRow} from 'utils/layout';
 import {NewWidget} from 'utils/widget';
@@ -19,7 +21,12 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 	try {
 		const context = getContext();
-		const editable = await getEditableParameter();
+		const {editable, autoUpdateInterval: defaultInterval} = await getContentParameters();
+
+		if (defaultInterval) {
+			dispatch(changeAutoUpdateSettings({defaultInterval}));
+			dispatch(setAutoUpdateInterval(defaultInterval));
+		}
 
 		dispatch(setContext(context));
 		dispatch(setEditable(editable));
@@ -27,13 +34,35 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		await Promise.all([
 			dispatch(getDataSources()),
 			dispatch(getUserRole()),
-			dispatch(getWidgets(true))
+			dispatch(getSettings())
 		]);
 
 		dispatch(getPassedWidget(context));
 		dispatch(receiveDashboard());
 	} catch (error) {
 		dispatch(recordDashboardError());
+	}
+};
+
+/**
+ * Получаем настройки дашборда
+ * @returns {ThunkAction}
+ */
+const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {autoUpdate: {defaultInterval}, context} = getState().dashboard;
+	const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
+	const {data: {autoUpdate, widgets}} = await client.post(buildUrl('dashboardSettings', 'getSettings', params));
+
+	dispatch(setWidgets(widgets));
+	dispatch(fetchDiagramsData(widgets));
+
+	if (autoUpdate) {
+		dispatch(changeAutoUpdateSettings(autoUpdate));
+		const {enabled, interval} = autoUpdate;
+
+		if (enabled && interval > defaultInterval) {
+			dispatch(setAutoUpdateInterval(interval));
+		}
 	}
 };
 
@@ -44,6 +73,20 @@ const getUserRole = (): ThunkAction => async (dispatch: Dispatch) => {
 	} catch (e) {
 		dispatch(recordDashboardError());
 	}
+};
+
+/**
+ * Устанавливаем интервал автообновления
+ * @param {number} interval - интервал обновления в минутах
+ * @returns {ThunkAction}
+ */
+const setAutoUpdateInterval = (interval: number): ThunkAction => (dispatch: Dispatch) => {
+	const fn = setInterval(() => dispatch(getSettings()), interval * 1000 * 60);
+
+	dispatch({
+		type: DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION,
+		payload: fn
+	});
 };
 
 /**
@@ -59,12 +102,17 @@ const editDashboard = (): ThunkAction => (dispatch: Dispatch) => {
  * @returns {ThunkAction}
  */
 const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const context = getState().dashboard.context;
-	const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-	const {data} = await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
+	try {
+		const context = getState().dashboard.context;
+		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
+		await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
 
-	if (data) {
-		dispatch(getWidgets());
+		dispatch(getSettings());
+	} catch (e) {
+		dispatch(createToast({
+			text: 'Ошибка сброса настроек',
+			type: 'error'
+		}));
 	}
 };
 
@@ -121,10 +169,16 @@ const getPassedWidget = (context: Context): ThunkAction => async (dispatch: Disp
 	const descriptorStr = localStorage.getItem(key);
 
 	if (descriptorStr) {
-		localStorage.removeItem(key);
 		const newWidget = new NewWidget(getNextRow(widgets.data.map));
 		const descriptor = JSON.parse(descriptorStr);
-		const classFqn = descriptor.clazz || descriptor.cases[0];
+		let classFqn;
+
+		if (Array.isArray(descriptor.cases) && descriptor.cases.length > 1) {
+			classFqn = descriptor.cases[0].split('$').shift();
+		} else {
+			classFqn = descriptor.clazz || descriptor.cases[0];
+		}
+
 		const {title: label, value} = sources.data.map[classFqn];
 		newWidget.descriptor = descriptorStr;
 		newWidget.name = '';
@@ -134,6 +188,27 @@ const getPassedWidget = (context: Context): ThunkAction => async (dispatch: Disp
 		dispatch(push('/edit'));
 	}
 };
+
+const saveAutoUpdateSettings = (autoUpdate: AutoUpdateRequestPayload) => async (dispatch: Dispatch) => {
+	try {
+		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {autoUpdate});
+
+		dispatch(changeAutoUpdateSettings(autoUpdate));
+		dispatch(createToast({
+			text: 'Настройки автообновления успешно изменены!'
+		}));
+	} catch (e) {
+		dispatch(createToast({
+			text: 'Ошибка сохранения данных автообновления',
+			type: 'error'
+		}));
+	}
+};
+
+const changeAutoUpdateSettings = payload => ({
+	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS,
+	payload
+});
 
 const requestDashboard = () => ({
 	type: DASHBOARD_EVENTS.REQUEST_DASHBOARD
@@ -165,7 +240,9 @@ const setEditable = payload => ({
 export {
 	editDashboard,
 	fetchDashboard,
+	getSettings,
 	resetDashboard,
+	saveAutoUpdateSettings,
 	seeDashboard,
 	sendToMail
 };

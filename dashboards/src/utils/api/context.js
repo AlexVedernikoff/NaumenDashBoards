@@ -23,16 +23,19 @@ const getContext = () => {
 	};
 };
 
-const getEditableParameter = async () => {
+const getContentParameters = async () => {
 	if (process.env.NODE_ENV === 'development') {
-		return true;
+		return {
+			editable: true,
+			autoUpdateInterval: 15
+		};
 	}
 
 	const parameters = await window.jsApi.commands.getCurrentContentParameters();
-	return parameters && parameters.editable;
+	return parameters;
 };
 
 export {
-	getContext,
-	getEditableParameter
+	getContentParameters,
+	getContext
 };

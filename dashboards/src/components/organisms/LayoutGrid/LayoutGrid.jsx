@@ -1,4 +1,5 @@
 // @flow
+import './styles.less';
 import {editContentRef} from 'components/pages/DashboardEditContent';
 import type {Element} from 'react';
 import {GRID_PARAMS} from 'utils/layout';
