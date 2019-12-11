@@ -1,23 +1,30 @@
 // @flow
 import {Chart, Summary, Table} from 'components/molecules';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {WIDGET_VARIANTS} from 'utils/widget';
 
 export class Diagram extends PureComponent<Props> {
 	renderContent = () => {
-		const {widget, diagram} = this.props;
+		const {diagram, widget} = this.props;
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
-		const types = {[SUMMARY]: Summary, [TABLE]: Table};
-		const DiagramByType = types[widget.type] || Chart;
+		if (diagram && diagram.data && !diagram.error) {
+			const types = {[SUMMARY]: Summary, [TABLE]: Table};
+			const DiagramByType = types[widget.type] || Chart;
 
-		return (
-			<div className={styles.diagram}>
-				<DiagramByType data={diagram.data} widget={widget} />
-			</div>
-		);
+			return (
+				<Fragment>
+					{this.renderName()}
+					<div className={styles.diagram}>
+						<DiagramByType data={diagram.data} widget={widget} />
+					</div>
+				</Fragment>
+			);
+		}
+
+		return this.renderError();
 	};
 
 	renderDiagram = () => {
@@ -25,7 +32,6 @@ export class Diagram extends PureComponent<Props> {
 
 		return (
 			<div className={styles.container}>
-				{this.renderName()}
 				{diagram.loading ? this.renderLoading() : this.renderContent()}
 			</div>
 		);
@@ -49,13 +55,7 @@ export class Diagram extends PureComponent<Props> {
 	};
 
 	render () {
-		const {data, loading} = this.props.diagram;
-
-		if (loading || data) {
-			return this.renderDiagram();
-		}
-
-		return this.renderError();
+		return this.renderDiagram();
 	}
 }
 

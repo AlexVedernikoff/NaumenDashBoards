@@ -75,15 +75,14 @@ export class DataFormBuilder extends FormBuilder {
 	createFilterContext = (classFqn: string) => {
 		const {context: mainContext} = this.props;
 
-		const context = {
-			cases: [],
-			clazz: classFqn,
+		const context: Object = {
 			contentUuid: mainContext.contentCode
 		};
 
 		if (classFqn.includes('$')) {
 			context.cases = [classFqn];
-			context.clazz = classFqn.split('$').shift();
+		} else {
+			context.clazz = classFqn;
 		}
 
 		return context;
@@ -217,9 +216,8 @@ export class DataFormBuilder extends FormBuilder {
 		this.applyCallback(callback, name);
 	};
 
-	handleSelectWithRef = (baseRefName: string, getRefOptions: GetRefOptions) => (parent: Attribute | null, callback?: OnSelectCallback) => (name: string, value: OptionType) => {
+	handleSelectWithRef = (refName: string, getRefOptions: GetRefOptions) => (parent: Attribute | null, callback?: OnSelectCallback) => (name: string, value: OptionType) => {
 		const {setFieldValue, values} = this.props;
-		const refName = this.createRefName(name, baseRefName);
 		const refOptions = getRefOptions(value);
 		let prevValue = values[name];
 
@@ -299,10 +297,12 @@ export class DataFormBuilder extends FormBuilder {
 			};
 
 			if (TYPES.REF.includes(value.type)) {
+				const currentOnSelect = !parent && onSelect ? onSelect : this.handleSelectAttr;
+
 				const currentProps = {
 					...attrSelectProps,
 					hideError: true,
-					onSelect: this.handleSelectAttr(parent, onSelectCallback),
+					onSelect: currentOnSelect(parent, onSelectCallback),
 					options
 				};
 

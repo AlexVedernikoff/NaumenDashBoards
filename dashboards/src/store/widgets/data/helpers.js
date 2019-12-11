@@ -3,9 +3,9 @@ import type {
 	AddWidget,
 	DeleteWidget,
 	EditLayout,
-	ReceiveWidgets,
 	SelectWidget,
 	SetCreatedWidget,
+	SetWidgets,
 	UpdateWidget,
 	Widget,
 	WidgetsDataState,
@@ -20,9 +20,11 @@ import {NewWidget} from 'utils/widget';
  * @param {Widget[]} payload - массив виджетов
  * @returns {WidgetsDataState}
  */
-export const setWidgets = (state: WidgetsDataState, {payload}: ReceiveWidgets) => {
-	payload.forEach(w => {
-		state.map[w.id] = w;
+export const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
+	payload.forEach(widget => {
+		if (widget.id !== state.selectedWidget) {
+			state.map[widget.id] = widget;
+		}
 	});
 
 	return {

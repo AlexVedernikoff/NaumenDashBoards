@@ -1,24 +1,40 @@
 // @flow
+import {ACTIVE_COLORS} from './constants';
 import CheckIcon from 'icons/form/checked.svg';
+import cn from 'classnames';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
-class CheckBox extends Component<Props> {
+class Checkbox extends Component<Props> {
+	static defaultProps = {
+		activeColor: ACTIVE_COLORS.LIGHT,
+		className: ''
+	};
+
+	upperFirst = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+	getIconClassName = () => {
+		const {activeColor, className, value} = this.props;
+		const activeCN = value && activeColor && `active${this.upperFirst(activeColor)}`;
+
+		return cn(styles.icon, styles[activeCN], className);
+	};
+
 	handleClick = () => {
 		const {onClick, name, value} = this.props;
 		onClick(name, !value);
 	};
 
-	renderLabel = () => {
+	renderIconWithLabel = () => {
 		const {label, name, value} = this.props;
 
 		return (
 			<label htmlFor={name} className={styles.label}>
-				<div className={styles.icon}>
+				<div className={this.getIconClassName()}>
 					{value && <CheckIcon/>}
 				</div>
-				<span> {label}</span>
+				<div> {label}</div>
 			</label>
 		);
 	};
@@ -40,11 +56,11 @@ class CheckBox extends Component<Props> {
 	render () {
 		return (
 			<Fragment>
-				{this.renderLabel()}
+				{this.renderIconWithLabel()}
 				{this.renderInput()}
 			</Fragment>
 		);
 	}
 }
 
-export default CheckBox;
+export default Checkbox;

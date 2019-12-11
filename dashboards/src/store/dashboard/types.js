@@ -2,7 +2,12 @@
 import type {Context} from 'utils/api/types';
 import {DASHBOARD_EVENTS} from './constants';
 
-export type Role = 'master' | 'super';
+export type Role = 'master' | 'super' | typeof undefined;
+
+type ChangeAutoUpdateSettings = {
+	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS,
+	payload: Object
+};
 
 type RequestDashboard = {
 	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD,
@@ -24,6 +29,11 @@ type RecordDashboardError = {
 	payload: null
 };
 
+type SetAutoUpdateFunction = {
+	type: typeof DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION,
+	payload: IntervalID
+};
+
 type SetContext = {
 	type: typeof DASHBOARD_EVENTS.SET_CONTEXT,
 	payload: Context
@@ -40,19 +50,35 @@ type UnknownDashboardAction = {
 };
 
 export type DashboardAction =
+	| ChangeAutoUpdateSettings
 	| RequestDashboard
 	| ReceiveDashboard
 	| ReceiveRoleMaster
 	| RecordDashboardError
+	| SetAutoUpdateFunction
 	| SetContext
 	| SetEditable
 	| UnknownDashboardAction
 ;
 
+export type AutoUpdate = {
+	defaultInterval: number,
+	enabled: boolean,
+	fn?: IntervalID,
+	interval?: number
+}
+
+export type AutoUpdateRequestPayload = {
+	enabled: boolean,
+	interval: number
+}
+
 export type DashboardState = {
+	autoUpdate: AutoUpdate,
 	context: Context | Object,
 	editable: boolean,
 	error: boolean,
 	loading: boolean,
+	reloadInterval?: number,
 	role?: Role
 };

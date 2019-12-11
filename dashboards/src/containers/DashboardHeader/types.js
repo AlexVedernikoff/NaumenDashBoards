@@ -10,7 +10,7 @@ export type ConnectedProps = {
 
 export type ConnectedFunctions = {
 	editDashboard: () => ThunkAction,
-	fetchDashboard: () => ThunkAction,
+	getSettings: () => ThunkAction,
 	resetDashboard: () => ThunkAction,
 	seeDashboard: () => ThunkAction,
 	sendToMail: (name: string, type: string, file: Blob) => ThunkAction

@@ -7,6 +7,7 @@ import ChevronUpBareIcon from './chevron-up-bare.svg';
 import CloseIcon from './close.svg';
 import CrossIcon from './cross.svg';
 import EditIcon from './edit.svg';
+import InfoIcon from './info.svg';
 import MinusIcon from './minus.svg';
 import PlusIcon from './plus.svg';
 import SearchIcon from './search.svg';
@@ -23,6 +24,7 @@ export {
 	CloseIcon,
 	CrossIcon,
 	EditIcon,
+	InfoIcon,
 	MinusIcon,
 	PlusIcon,
 	SearchIcon,

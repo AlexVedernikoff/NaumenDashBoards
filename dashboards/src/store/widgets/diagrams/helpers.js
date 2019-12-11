@@ -1,10 +1,7 @@
 // @flow
 import type {
 	DiagramsState,
-	ReceiveDiagram,
-	ReceiveDiagramPayload,
-	RecordErrorDiagram,
-	RequestDiagram
+	ReceiveDiagramPayload
 } from './types';
 import type {SetCreatedWidget, UpdateWidget, Widget} from 'store/widgets/data/types';
 
@@ -12,17 +9,12 @@ import type {SetCreatedWidget, UpdateWidget, Widget} from 'store/widgets/data/ty
  * Устанавливаем данные графика конкретного виджета
  * @param {DiagramsState} state - хранилище данных графиков
  * @param {Widget} payload - данные виджета
- * @returns {DiagramsState}
+ * @returns {void}
  */
-export const resetData = (state: DiagramsState, {payload}: SetCreatedWidget | UpdateWidget): DiagramsState => {
-	state.map[payload.id] = {
-		...state.map[payload.id],
+export const resetData = (state: DiagramsState, {payload}: SetCreatedWidget | UpdateWidget) => {
+	state[payload.id] = {
+		...state[payload.id],
 		data: null
-	};
-
-	return {
-		...state,
-		map: {...state.map}
 	};
 };
 
@@ -30,17 +22,12 @@ export const resetData = (state: DiagramsState, {payload}: SetCreatedWidget | Up
  * Устанавливаем данные графика конкретного виджета
  * @param {DiagramsState} state - хранилище данных графиков
  * @param {string} payload - id виджета
- * @returns {DiagramsState}
+ * @returns {void}
  */
-export const setRequestDiagram = (state: DiagramsState, {payload}: RequestDiagram): DiagramsState => {
-	state.map[payload] = {
+export const setRequestDiagram = (state: DiagramsState, payload: string) => {
+	state[payload] = {
 		error: false,
 		loading: true
-	};
-
-	return {
-		...state,
-		map: {...state.map}
 	};
 };
 
@@ -48,9 +35,9 @@ export const setRequestDiagram = (state: DiagramsState, {payload}: RequestDiagra
  * Устанавливаем данные графика конкретного виджета
  * @param {DiagramsState} state - хранилище данных графиков
  * @param {ReceiveDiagramPayload} payload - данные графика и id виджета
- * @returns {DiagramsState}
+ * @returns {void}
  */
-export const setDiagram = (state: DiagramsState, {payload}: ReceiveDiagram): DiagramsState => {
+export const setDiagram = (state: DiagramsState, payload: ReceiveDiagramPayload) => {
 	let {columns} = payload.data;
 
 	/*
@@ -68,15 +55,10 @@ export const setDiagram = (state: DiagramsState, {payload}: ReceiveDiagram): Dia
 		});
 	}
 
-	state.map[payload.id] = {
+	state[payload.id] = {
 		data: payload.data,
 		error: false,
 		loading: false
-	};
-
-	return {
-		...state,
-		map: {...state.map}
 	};
 };
 
@@ -84,16 +66,11 @@ export const setDiagram = (state: DiagramsState, {payload}: ReceiveDiagram): Dia
  * Устанавливаем данные графика конкретного виджета
  * @param {DiagramsState} state - хранилище данных графиков
  * @param {string} payload - id виджета
- * @returns {DiagramsState}
+ * @returns {void}
  */
-export const setDiagramError = (state: DiagramsState, {payload}: RecordErrorDiagram): DiagramsState => {
-	state.map[payload] = {
+export const setDiagramError = (state: DiagramsState, payload: string) => {
+	state[payload] = {
 		error: true,
 		loading: false
-	};
-
-	return {
-		...state,
-		map: {...state.map}
 	};
 };

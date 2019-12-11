@@ -6,10 +6,6 @@ import {fetchAttributes} from 'store/sources/attributes/actions';
 import {fetchRefAttributes} from 'store/sources/refAttributes/actions';
 import {NewWidget} from 'utils/widget';
 
-/**
- * @param {AppState} state - глобальное хранилище состояния
- * @returns {ConnectedProps}
- */
 export const props = (state: AppState): ConnectedProps => {
 	const {data} = state.widgets;
 	const {newWidget, selectedWidget} = data;

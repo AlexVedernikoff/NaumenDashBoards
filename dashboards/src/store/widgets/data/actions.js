@@ -10,41 +10,6 @@ import type {Widget} from './types';
 import {WIDGETS_EVENTS} from './constants';
 
 /**
- * Получаем все виджеты
- * @param {boolean} isInit - выполняется ли действие в процессе инициализации дашборда
- * @returns {ThunkAction}
- */
-	const getWidgets = (isInit: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	dispatch(requestWidgets());
-
-	try {
-		const context = getState().dashboard.context;
-		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-		const {data} = await client.post(buildUrl('dashboardSettings', 'getSettings', params));
-
-		if (Array.isArray(data)) {
-			const widgets = data.filter(w => w.value).map(w => {
-				const {key, value: widget} = w;
-
-				widget.layout.static = true;
-				data.map[key] = widget;
-
-				dispatch(fetchDiagramData(widget));
-
-				return widget;
-			});
-			dispatch(receiveWidgets(widgets));
-		}
-	} catch (e) {
-		dispatch(recordWidgetsError());
-
-		if (isInit) {
-			throw e;
-		}
-	}
-};
-
-/**
  * Добавляем новый виджет
  * @param {NewWidget} payload - объект нового виджета
  * @returns {ThunkAction}
@@ -219,11 +184,6 @@ const deleteWidget = (payload: string) => ({
 	payload
 });
 
-const receiveWidgets = (payload: Widget[]) => ({
-	type: WIDGETS_EVENTS.RECEIVE_WIDGETS,
-	payload
-});
-
 const recordDeleteError = () => ({
 	type: WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
 });
@@ -234,10 +194,6 @@ const recordLayoutSaveError = () => ({
 
 const recordSaveError = () => ({
 	type: WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR
-});
-
-const recordWidgetsError = () => ({
-	type: WIDGETS_EVENTS.RECORD_WIDGETS_ERROR
 });
 
 const requestLayoutSave = () => ({
@@ -252,12 +208,13 @@ const requestWidgetSave = () => ({
 	type: WIDGETS_EVENTS.REQUEST_WIDGET_SAVE
 });
 
-const requestWidgets = () => ({
-	type: WIDGETS_EVENTS.REQUEST_WIDGETS
-});
-
 const resetWidget = () => ({
 	type: WIDGETS_EVENTS.RESET_WIDGET
+});
+
+const setWidgets = (payload: Widget[]) => ({
+	type: WIDGETS_EVENTS.SET_WIDGETS,
+	payload
 });
 
 const setCreatedWidget = (payload: Widget) => ({
@@ -285,9 +242,9 @@ export {
 	cancelForm,
 	createWidget,
 	editLayout,
-	getWidgets,
 	removeWidget,
 	resetWidget,
 	saveWidget,
-	selectWidget
+	selectWidget,
+	setWidgets
 };

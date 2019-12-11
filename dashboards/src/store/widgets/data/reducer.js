@@ -21,8 +21,6 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			return deleteWidget(state, action);
 		case WIDGETS_EVENTS.EDIT_LAYOUT:
 			return editLayout(state, action);
-		case WIDGETS_EVENTS.RECEIVE_WIDGETS:
-			return setWidgets(state, action);
 		case WIDGETS_EVENTS.RECORD_LAYOUT_SAVE_ERROR:
 			return {
 				...state,
@@ -39,12 +37,6 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 				...state,
 				saveError: true,
 				updating: false
-			};
-		case WIDGETS_EVENTS.RECORD_WIDGETS_ERROR:
-			return {
-				...state,
-				error: true,
-				loading: false
 			};
 		case WIDGETS_EVENTS.REQUEST_LAYOUT_SAVE:
 			return {
@@ -63,20 +55,14 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 				saveError: false,
 				updating: true
 			};
-		case WIDGETS_EVENTS.REQUEST_WIDGETS:
-			return {
-				...state,
-				error: false,
-				loading: true,
-				map: {},
-				selectedWidget: ''
-			};
 		case WIDGETS_EVENTS.RESET_WIDGET:
 			return resetWidget(state);
 		case WIDGETS_EVENTS.SET_CREATED_WIDGET:
 			return createWidget(state, action);
 		case WIDGETS_EVENTS.SET_SELECTED_WIDGET:
 			return setSelectedWidget(state, action);
+		case WIDGETS_EVENTS.SET_WIDGETS:
+			return setWidgets(state, action);
 		case WIDGETS_EVENTS.UPDATE_WIDGET:
 			return updateWidget(state, action);
 		default:

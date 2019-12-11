@@ -1,5 +1,5 @@
 // @flow
-import canvg from './canvg';
+import Canvg from 'canvg';
 import {FILE_VARIANTS} from './constants';
 import html2canvas from 'html2canvas';
 import JsPDF from 'jspdf';
@@ -64,13 +64,16 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 	[].forEach.call(charts, (chart) => {
 		const parentNode = chart.parentNode;
 		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		let v = null;
 
 		let svg = serializer.serializeToString(chart);
 		svg = svg.replace(/(xmlns="http:\/\/www.w3.org\/2000\/svg"|xmlns:NS\d+=""|NS\d+:xmlns:data="ApexChartsNS")/g, '');
 		svg = svg.replace(/NS\d+:data:(innerTranslate[XY](="(.+?)")|(startAngle|angle|realIndex|strokeWidth|pathOrig|value|longestSeries)="(.+?)")/g, '');
 
 		try {
-			canvg(canvas, svg);
+			v = Canvg.fromString(ctx, svg);
+			v.render();
 
 			temp.push({
 				parent: parentNode,

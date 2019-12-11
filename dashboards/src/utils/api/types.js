@@ -20,6 +20,7 @@ export type Method =
 	| 'getAttributesFromLinkAttribute'
 	| 'getDataForCompositeDiagram'
 	| 'getDataForDiagram'
+	| 'getDataForDiagrams'
 	| 'getDataSources'
 	| 'getLink'
 	| 'getSettings'
@@ -27,6 +28,7 @@ export type Method =
 	| 'editDefaultWidget'
 	| 'editPersonalWidgetSettings'
 	| 'resetPersonalDashboard'
+	| 'saveAutoUpdateSettings'
 	| 'sendFileToMail'
 ;
 
