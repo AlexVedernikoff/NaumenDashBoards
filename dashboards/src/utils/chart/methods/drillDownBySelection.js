@@ -2,8 +2,8 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {createOrderName, getNumberFromName} from 'utils/widget';
 import {CHART_VARIANTS} from 'utils/chart/constants';
-import type {DiagramData} from 'store/widgets/diagrams/types';
 import {comboDrillDown, drillDown} from 'store/widgets/links/actions';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {store} from 'src';
@@ -31,11 +31,11 @@ const addFilter = (mixin: DrillDownMixin, attr: ?Attribute, value: string | numb
 /**
  * Функция создания примеси для графиков с осями
  * @param {Widget} widget - данные виджета
- * @param {DiagramData} data - данные для построение графика
+ * @param {DiagramBuildData} data - данные для построение графика
  * @param {any} config - конфиг построенного графика
  * @param {DrillDownMixin} mixin - объект будущей примеси
  */
-const axisChart = (widget: Widget, {categories, series}: DiagramData, config: any, mixin: DrillDownMixin) => {
+const axisChart = (widget: Widget, {categories, series}: DiagramBuildData, config: any, mixin: DrillDownMixin) => {
 	const {breakdown, breakdownGroup, group, xAxis} = widget;
 	const {dataPointIndex, seriesIndex} = config;
 
@@ -50,11 +50,11 @@ const axisChart = (widget: Widget, {categories, series}: DiagramData, config: an
 /**
  * Функция создания примеси для комбо графика
  * @param {Widget} widget - данные виджета
- * @param {DiagramData} data - данные для построение графика
+ * @param {DiagramBuildData} data - данные для построение графика
  * @param {any} config - конфиг построенного графика
  * @param {DrillDownMixin} mixin - объект будущей примеси
  */
-const comboChart = (widget: Widget, {labels, series}: DiagramData, config: any, mixin: DrillDownMixin) => {
+const comboChart = (widget: Widget, {labels, series}: DiagramBuildData, config: any, mixin: DrillDownMixin) => {
 	const {dataPointIndex, seriesIndex} = config;
 	let {dataKey} = series[seriesIndex];
 
@@ -79,11 +79,11 @@ const comboChart = (widget: Widget, {labels, series}: DiagramData, config: any, 
 /**
  * Функция создания примеси для круговых графиков
  * @param {Widget} widget - данные виджета
- * @param {DiagramData} data - данные для построение графика
+ * @param {DiagramBuildData} data - данные для построение графика
  * @param {any} config - конфиг построенного графика
  * @param {DrillDownMixin} mixin - объект будущей примеси
  */
-const circleChart = (widget: Widget, {labels}: DiagramData, {dataPointIndex}: any, mixin: DrillDownMixin) => {
+const circleChart = (widget: Widget, {labels}: DiagramBuildData, {dataPointIndex}: any, mixin: DrillDownMixin) => {
 	const {breakdown, breakdownGroup} = widget;
 
 	if (Array.isArray(labels)) {
@@ -120,10 +120,10 @@ const resolve = (type: string) => {
  * Определяем по типу нужную функцию для создания примеси с данными выбранной области
  * и передаем созданную примесь в функцию перехода на список объектов.
  * @param {Widget} widget - данные виджета
- * @param {DiagramData} chart - данные для построения графика
+ * @param {DiagramBuildData} chart - данные для построения графика
  * @returns {ThunkAction}
  */
-const drillDownBySelection = (widget: Widget, chart: DiagramData) => (event: any, chartContext: any, config: any) => {
+const drillDownBySelection = (widget: Widget, chart: DiagramBuildData) => (event: any, chartContext: any, config: any) => {
 	const {diagramName, type} = widget;
 	const mixin = {
 		filters: [],

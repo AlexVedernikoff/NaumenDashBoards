@@ -3,7 +3,8 @@ import {buildUrl, client} from 'utils/api';
 import type {Context} from 'utils/api/types';
 import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetFormPanel/types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {fetchDiagramData} from 'store/widgets/diagrams/actions';
+import {editDashboard} from 'store/dashboard/actions';
+import {fetchBuildData} from 'store/widgets/buildData/actions';
 import type {Layout} from 'utils/layout/types';
 import {NewWidget} from 'utils/widget';
 import type {Widget} from './types';
@@ -104,7 +105,7 @@ const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => 
 		dispatch(recordSaveError());
 	}
 
-	dispatch(fetchDiagramData(widget));
+	dispatch(fetchBuildData(widget));
 };
 
 /**
@@ -140,7 +141,7 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 			dispatch(recordSaveError());
 		}
 
-		dispatch(fetchDiagramData(widget));
+		dispatch(fetchBuildData(widget));
 	}
 };
 
@@ -177,6 +178,7 @@ const removeWidget = (widgetId: string, onlyPersonal: boolean): ThunkAction => a
  */
 const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch(setSelectedWidget(payload));
+	dispatch(editDashboard());
 };
 
 const deleteWidget = (payload: string) => ({

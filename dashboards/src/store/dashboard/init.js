@@ -5,13 +5,14 @@ import {DASHBOARD_EVENTS} from './constants';
 export const initialDashboardState: DashboardState = {
 	autoUpdate: {
 		defaultInterval: 15,
-		enabled: true
+		enabled: false
 	},
 	context: {
 		contentCode: '',
 		subjectUuid: ''
 	},
 	editable: false,
+	editMode: false,
 	error: false,
 	loading: false
 };

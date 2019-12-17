@@ -1,10 +1,22 @@
 // @flow
-import type {DiagramData} from 'store/widgets/diagrams/types';
+import type {BuildData} from 'store/widgets/buildData/types';
+import type {Node} from 'react';
 import type {Widget} from 'store/widgets/data/types';
 
+type GridProps = {
+	children?: Node,
+	className: string,
+	onMouseDown?: Function,
+	onMouseUp?: Function,
+	onTouchEnd?: Function,
+	onTouchStart?: Function,
+	style?: Object
+}
+
 export type Props = {
+	...$Exact<GridProps>,
+	buildData: BuildData,
 	data: Widget,
-	diagram: DiagramData,
 	isEditable: boolean,
 	isNew: boolean,
 	isSelected: boolean,

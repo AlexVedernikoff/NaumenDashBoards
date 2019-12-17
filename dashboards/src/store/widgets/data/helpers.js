@@ -8,8 +8,7 @@ import type {
 	SetWidgets,
 	UpdateWidget,
 	Widget,
-	WidgetsDataState,
-	WidgetMap
+	WidgetsDataState
 } from './types';
 import type {Layout} from 'utils/layout/types';
 import {NewWidget} from 'utils/widget';
@@ -35,36 +34,19 @@ export const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
 };
 
 /**
- * Меняем статичность виджетов
- * @param {WidgetMap} map - виджеты
- * @param {boolean} staticValue - новое значение статичности виджетов
- * @returns {void}
- */
-export const handleStatic = (map: WidgetMap, staticValue: boolean): void => {
-	Object.keys(map).forEach(key => {
-		map[key].layout.static = staticValue;
-	});
-};
-
-/**
  * Устанавливаем выбранный виджет
  * @param {WidgetsDataState} state - хранилище данных виджетов
  * @param {string} payload - id виджета
  * @returns {WidgetsDataState}
  */
 export const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidget): WidgetsDataState => {
-	if (!state.selectedWidget) {
-		handleStatic(state.map, false);
-	}
-
 	if (state.selectedWidget === NewWidget.id) {
 		state.newWidget = null;
 	}
 
-	state.selectedWidget = payload;
 	return {
 		...state,
-		map: {...state.map}
+		selectedWidget: payload
 	};
 };
 
@@ -78,12 +60,9 @@ export const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
 		state.newWidget = null;
 	}
 
-	handleStatic(state.map, true);
-	state.selectedWidget = '';
-
 	return {
 		...state,
-		map: {...state.map}
+		selectedWidget: ''
 	};
 };
 
@@ -96,7 +75,6 @@ export const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
 export const addWidget = (state: WidgetsDataState, {payload}: AddWidget): WidgetsDataState => {
 	state.newWidget = payload;
 	state.selectedWidget = state.newWidget.id;
-	handleStatic(state.map, false);
 
 	return {
 		...state,

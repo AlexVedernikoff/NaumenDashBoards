@@ -13,7 +13,23 @@ import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Widget extends PureComponent<Props> {
+	static defaultProps = {
+		className: ''
+	};
+
 	ref = createRef();
+
+	getClassName = () => {
+		const {className, isSelected} = this.props;
+
+		const CN = [className, styles.widget];
+
+		if (isSelected) {
+			CN.push(styles.selectedWidget);
+		}
+
+		return cn(CN);
+	};
 
 	handleClickComboDrillDownButton = (num: number) => () => {
 		const {data, onDrillDown} = this.props;
@@ -69,10 +85,10 @@ export class Widget extends PureComponent<Props> {
 	};
 
 	renderDiagram = () => {
-		const {data, diagram, isNew} = this.props;
+		const {buildData, data, isNew} = this.props;
 
-		if (!isNew && diagram) {
-			return <Diagram diagram={diagram} widget={data} />;
+		if (!isNew && buildData) {
+			return <Diagram buildData={buildData} widget={data} />;
 		}
 	};
 
@@ -159,13 +175,20 @@ export class Widget extends PureComponent<Props> {
 	};
 
 	render () {
-		const {isSelected} = this.props;
-		const widgetCN = isSelected ? cn([styles.widget, styles.selectedWidget]) : styles.widget;
+		const {children, onMouseDown, onMouseUp, onTouchEnd, onTouchStart, style} = this.props;
+		const gridProps = {
+			onMouseDown,
+			onMouseUp,
+			onTouchEnd,
+			onTouchStart,
+			style
+		};
 
 		return (
-			<div className={widgetCN} ref={this.ref}>
+			<div {...gridProps} className={this.getClassName()} ref={this.ref}>
 				{this.renderDiagram()}
 				{this.renderButtons()}
+				{children}
 			</div>
 		);
 	}

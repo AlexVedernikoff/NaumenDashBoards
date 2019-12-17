@@ -2,17 +2,15 @@
 import {applyMiddleware, createStore} from 'redux';
 import {createLogger} from 'redux-logger';
 import createRootReducer from './reducer';
-import type {History} from 'history';
-import {routerMiddleware} from 'connected-react-router';
 import thunk from 'redux-thunk';
 
-export const configureStore = (history: History) => {
+export const configureStore = () => {
 	const environment = process.env.NODE_ENV;
-	const middleware = [thunk, routerMiddleware(history)];
+	const middleware = [thunk];
 
 	if (environment === 'development') {
 		middleware.push(createLogger());
 	}
 
-	return createStore(createRootReducer(history), applyMiddleware(...middleware));
+	return createStore(createRootReducer(), applyMiddleware(...middleware));
 };

@@ -2,7 +2,7 @@
 import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS} from './constants';
 import {defaultDashboardAction, initialDashboardState} from './init';
-import {setAutoUpdateFunction} from './helpers';
+import {setAutoUpdateFunction, setRole} from './helpers';
 
 const reducer = (state: DashboardState = initialDashboardState, action: DashboardAction = defaultDashboardAction): DashboardState => {
 	switch (action.type) {
@@ -30,10 +30,8 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				loading: true
 			};
 		case DASHBOARD_EVENTS.RECEIVE_USER_ROLE:
-			return {
-				...state,
-				role: action.payload
-			};
+			setRole(state, action.payload);
+			return {...state};
 		case DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION:
 			setAutoUpdateFunction(state, action.payload);
 			return state;
@@ -42,10 +40,20 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				...state,
 				context: action.payload
 			};
-		case DASHBOARD_EVENTS.SET_EDITABLE:
+		case DASHBOARD_EVENTS.SET_EDITABLE_PARAM:
 			return {
 				...state,
 				editable: action.payload
+			};
+		case DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE:
+			return {
+				...state,
+				editMode: true
+			};
+		case DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE:
+			return {
+				...state,
+				editMode: false
 			};
 		default:
 			return state;

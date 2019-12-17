@@ -1,53 +1,82 @@
 // @flow
-import ApexChart from 'react-apexcharts';
-import {getChartType, getConfig, CHART_VARIANTS} from 'utils/chart';
-import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import './styles.less';
+import ApexCharts from 'apexcharts';
+import {getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
+import type {Props} from './types';
+import React, {createRef, PureComponent} from 'react';
+import ReactResizeDetector from 'react-resize-detector';
 
-export class Chart extends PureComponent<Props, State> {
-	state = {
-		options: {},
-		series: []
-	};
+export class Chart extends PureComponent<Props> {
+	chart = null;
+	ref = createRef();
 
-	static getDerivedStateFromProps (props: Props, state: State) {
-		const {categories, labels, series} = props.data;
+	componentDidMount () {
+		const options = this.getOptions();
 
-		if (Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
-			const {options, series} = getConfig(props.widget, props.data);
-			state.options = options;
-			state.series = series;
-
-			return state;
-		}
-
-		return null;
+		this.chart = new ApexCharts(this.ref.current, options);
+		this.chart.render();
 	}
 
-	getType = () => {
-		const {widget} = this.props;
-		const {type} = widget;
+	componentDidUpdate () {
+		const options = this.getOptions();
 
-		return type === CHART_VARIANTS.COMBO ? 'line' : getChartType(type);
+		if (this.chart) {
+			this.chart.updateOptions(options);
+		}
+	}
+
+	componentWillUnmount () {
+		if (this.chart && typeof this.chart.destroy === 'function') {
+			this.chart.destroy();
+		}
+	}
+
+	getOptions = () => {
+		const {buildData, widget} = this.props;
+		const {current} = this.ref;
+		const {categories, labels, series} = buildData;
+		let options = {};
+
+		if (current && Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
+			options = getOptions(widget, buildData, current.clientWidth);
+		}
+
+		return options;
 	};
 
-	renderChart = () => {
-		const {options, series} = this.state;
-		const type = this.getType();
+	handleResize = (width: number) => {
+		if (this.chart) {
+			this.chart.updateOptions({
+				legend: {
+					width: getLegendWidth(width)
+				}
+			});
+		}
+	};
 
-		return (
-			<ApexChart
-				height="100%"
-				key={type}
-				options={options}
-				series={series}
-				type={type}
-			/>
+	hasSideLegend = () => {
+		const {legendPosition, showLegend} = this.props.widget;
+
+		return showLegend && (!legendPosition
+			|| (legendPosition.value === LEGEND_POSITIONS.left || legendPosition.value === LEGEND_POSITIONS.right)
 		);
 	};
 
+	renderChart = () => <div ref={this.ref} />;
+
+	renderChartWithResize = () => (
+		<ReactResizeDetector
+			handleWidth
+			onResize={this.handleResize}
+			refreshMode="debounce"
+			refreshRate={500}
+			render={this.renderChart}
+			skipOnMount={true}
+		/>
+	);
+
 	render () {
-		return this.renderChart();
+		return this.hasSideLegend() ? this.renderChartWithResize() : this.renderChart();
 	}
 }
 

@@ -1,16 +1,23 @@
 // @flow
 import {Chart, Summary, Table} from 'components/molecules';
 import type {Props} from './types';
-import React, {Fragment, PureComponent} from 'react';
+import React, {Fragment, Component} from 'react';
 import styles from './styles.less';
 import {WIDGET_VARIANTS} from 'utils/widget';
 
-export class Diagram extends PureComponent<Props> {
+export class Diagram extends Component<Props> {
+	shouldComponentUpdate (nextProps: Props) {
+		const {buildData: {updateDate: nextUpdateDate, loading: nextLoading}} = nextProps;
+		const {buildData: {updateDate: prevUpdateDate, loading: prevLoading}} = this.props;
+
+		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading;
+	}
+
 	renderContent = () => {
-		const {diagram, widget} = this.props;
+		const {buildData, widget} = this.props;
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
-		if (diagram && diagram.data && !diagram.error) {
+		if (buildData.data && !buildData.error) {
 			const types = {[SUMMARY]: Summary, [TABLE]: Table};
 			const DiagramByType = types[widget.type] || Chart;
 
@@ -18,7 +25,7 @@ export class Diagram extends PureComponent<Props> {
 				<Fragment>
 					{this.renderName()}
 					<div className={styles.diagram}>
-						<DiagramByType data={diagram.data} widget={widget} />
+						<DiagramByType buildData={buildData.data} widget={widget} />
 					</div>
 				</Fragment>
 			);
@@ -28,11 +35,11 @@ export class Diagram extends PureComponent<Props> {
 	};
 
 	renderDiagram = () => {
-		const {diagram} = this.props;
+		const {buildData} = this.props;
 
 		return (
 			<div className={styles.container}>
-				{diagram.loading ? this.renderLoading() : this.renderContent()}
+				{buildData.loading ? this.renderLoading() : this.renderContent()}
 			</div>
 		);
 	};

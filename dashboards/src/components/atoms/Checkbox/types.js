@@ -11,6 +11,6 @@ export type Props = {
 	className: string,
 	label: string,
 	name: string,
-	onClick: (name: string, value: boolean) => void,
+	onClick: (name: string, value: boolean) => void | Promise<void>,
 	value: string
 };

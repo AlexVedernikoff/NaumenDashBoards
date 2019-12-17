@@ -1,5 +1,5 @@
 // @flow
-const BREAK_POINTS = {
+const BREAKPOINTS = {
 	lg: 1200,
 	md: 996,
 	sm: 768,
@@ -15,17 +15,13 @@ const COLS = {
 	xxs: 12
 };
 
-const CONTAINER_PADDING = [20, 20];
+const CONTAINER_PADDING = [25, 25];
 
 const ROW_HEIGHT = 50;
 
-const GRID_PARAMS = {
-	BREAK_POINTS,
+export {
+	BREAKPOINTS,
 	COLS,
 	CONTAINER_PADDING,
 	ROW_HEIGHT
-};
-
-export {
-	GRID_PARAMS
 };

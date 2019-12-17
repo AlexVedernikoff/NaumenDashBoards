@@ -1,9 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
-import {CHART_TYPES, CHART_VARIANTS} from './constants';
+import {CHART_TYPES, CHART_VARIANTS, LEGEND_POSITIONS} from './constants';
 import {createOrderName} from 'utils/widget';
-import type {DiagramData} from 'store/widgets/diagrams/types';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
 import type {Widget} from 'store/widgets/data/types';
@@ -62,7 +62,7 @@ const getAttrTitle = (attr: Attribute) => {
  * @param {boolean} stacked - накопление данных
  * @returns {ApexOptions}
  */
-const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (widget: Widget, chart: DiagramData): ApexOptions => {
+const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (widget: Widget, chart: DiagramBuildData): ApexOptions => {
 	const {aggregation, showXAxis, showYAxis, type, xAxis, yAxis} = widget;
 	const stackedIsPercent = stacked && aggregation === VALUES.DEFAULT_AGGREGATION.PERCENT;
 	const strokeWidth = type === CHART_VARIANTS.LINE ? 4 : 0;
@@ -98,7 +98,17 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			decimalsInFloat: 2,
 			forceNiceScale: !stackedIsPercent,
 			labels: {
-				formatter: (val: number, opts: any) => typeof opts === 'object' && !horizontal ? val.toFixed() : val
+				formatter: (val: number, opts: any) => {
+					if (typeof opts === 'object' && !horizontal && typeof val === 'number') {
+						return val.toFixed();
+					} else if (typeof val === 'string') {
+						return `${val.substring(0, 20)}...`;
+					}
+
+					return val;
+				},
+				// Если проставить значение, то уплывает название оси на легенду
+				maxWidth: undefined
 			},
 			max: (max: number) => max > 0 ? Math.ceil(max) : 1,
 			min: 0,
@@ -121,7 +131,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			 * В случае когда opts - объект, это значение оси Y.
  			 */
 			options.yaxis.labels = {
-				formatter: (val: number, opts: any) => typeof opts !== 'object' ? val : `${val.toFixed(2)}%`
+				formatter: (val: number, opts: any) => typeof val === 'string' || typeof opts !== 'object' ? val : `${val.toFixed(2)}%`
 			};
 
 			options.dataLabels.formatter = (val: number) => val > 0 ? `${val.toFixed(2)}%` : '';
@@ -146,10 +156,10 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 /**
  * Примесь combo-графиков
  * @param {Widget} widget - данные виджета
- * @param {DiagramData} chart - данные конкретного графика
+ * @param {DiagramBuildData} chart - данные конкретного графика
  * @returns {ApexOptions}
  */
-const comboChart = (widget: Widget, chart: DiagramData) => {
+const comboChart = (widget: Widget, chart: DiagramBuildData) => {
 	const {series} = chart;
 	const strokeWidth = series.find(s => s.type.toUpperCase() === CHART_VARIANTS.LINE) ? 4 : 0;
 	let stacked = false;
@@ -220,14 +230,14 @@ const comboChart = (widget: Widget, chart: DiagramData) => {
 /**
  * Примесь круговых графиков (pie, donut)
  * @param {Widget} widget - данные виджета
- * @param {DiagramData} chart - данные конкретного графика
+ * @param {DiagramBuildData} chart - данные конкретного графика
  * @returns {ApexOptions}
  */
-const circleChart = (widget: Widget, chart: DiagramData): ApexOptions => {
-	const {aggregation} = widget;
+const circleChart = (widget: Widget, chart: DiagramBuildData): ApexOptions => {
+	const {aggregation, legendPosition} = widget;
+	const legendPositionValue = legendPosition && legendPosition.value;
 
-	const options = {
-		dataLabels: {},
+	const options: Object = {
 		labels: chart.labels
 	};
 
@@ -236,6 +246,12 @@ const circleChart = (widget: Widget, chart: DiagramData): ApexOptions => {
 			formatter: function (val, opts) {
 				return opts.w.config.series[opts.seriesIndex];
 			}
+		};
+	}
+
+	if (legendPositionValue === LEGEND_POSITIONS.top || legendPositionValue === LEGEND_POSITIONS.bottom) {
+		options.chart = {
+			height: '75%'
 		};
 	}
 
@@ -267,12 +283,14 @@ const resolveMixin = (type: string): Function => {
 /**
  * Функция возвращет объединенный набор базовых и типовых опций
  * @param {Widget} widget - виджет
- * @param {DiagramData} chart - данные графика виджета
+ * @param {DiagramBuildData} chart - данные графика виджета
+ * @param {number} width - ширина графика
  * @returns {ApexOptions}
  */
-const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
-	const {colors, legendPosition, showLegend, showValue} = widget;
+const getOptions = (widget: Widget, chart: DiagramBuildData, width: number): ApexOptions => {
+	const {colors, legendPosition, showLegend, showValue, type} = widget;
 	const chartColors = colors || VALUES.COLORS;
+	const legendPositionValue = (legendPosition && legendPosition.value) || LEGEND_POSITIONS.bottom;
 
 	const options: ApexOptions = {
 		chart: {
@@ -280,13 +298,15 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 			animations: {
 				enabled: false
 			},
+			height: '100%',
 			events: {
 				dataPointSelection: drillDownBySelection(widget, chart)
 			},
-			parentHeightOffset: 0,
 			toolbar: {
 				show: false
-			}
+			},
+			type: type === CHART_VARIANTS.COMBO ? CHART_TYPES.line : getChartType(type),
+			width: '100%'
 		},
 		colors: [...chartColors],
 		dataLabels: {
@@ -303,11 +323,18 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 			}
 		},
 		legend: {
-			position: legendPosition ? legendPosition.value : 'bottom',
+			position: legendPositionValue,
 			show: showLegend,
 			showForSingleSeries: true
-		}
+		},
+		series: getSeries(widget, chart)
 	};
+
+	if (legendPositionValue === LEGEND_POSITIONS.left || legendPositionValue === LEGEND_POSITIONS.right) {
+		options.legend.width = getLegendWidth(width);
+	} else {
+		options.legend.height = 100;
+	}
 
 	return extend(options, resolveMixin(widget.type)(widget, chart));
 };
@@ -315,10 +342,10 @@ const getOptions = (widget: Widget, chart: DiagramData): ApexOptions => {
 /**
  * Функция преобразует набор данных в требуемый формат
  * @param {Widget} widget - виджет
- * @param {DiagramData} chart - данные графика виджета
+ * @param {DiagramBuildData} chart - данные графика виджета
  * @returns {ApexAxisChartSeries}
  */
-const getSeries = (widget: Widget, chart: DiagramData): ApexAxisChartSeries => {
+const getSeries = (widget: Widget, chart: DiagramBuildData): ApexAxisChartSeries => {
 	const {series} = chart;
 
 	if (widget.type === CHART_VARIANTS.COMBO && series.length > 0) {
@@ -328,22 +355,6 @@ const getSeries = (widget: Widget, chart: DiagramData): ApexAxisChartSeries => {
 	}
 
 	return series;
-};
-
-/**
- * Функция генерирует опции и данные для построения графика.
- * @param {Widget} widget - виджет
- * @param {DiagramData} chart - данные графика виджета
- * @returns {{series: ApexAxisChartSeries, options: ApexOptions}}
- */
-const getConfig = (widget: Widget, chart: DiagramData) => {
-	const options = getOptions(widget, chart);
-	const series = getSeries(widget, chart);
-
-	return {
-		options,
-		series
-	};
 };
 
 const getChartType = (type: string) => {
@@ -363,7 +374,15 @@ const getChartType = (type: string) => {
 	return types[type];
 };
 
+/**
+ * Получаем ширину легенды относительно общей ширины графика
+ * @param {number} width - ширина графика
+ * @returns {number}
+ */
+const getLegendWidth = (width: number) => width * 0.25;
+
 export {
 	getChartType,
-	getConfig
+	getLegendWidth,
+	getOptions
 };

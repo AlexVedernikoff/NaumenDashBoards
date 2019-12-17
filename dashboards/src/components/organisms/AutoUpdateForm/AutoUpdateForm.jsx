@@ -18,7 +18,15 @@ export class AutoUpdateForm extends PureComponent<Props> {
 		}
 	};
 
-	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
+	handleClick = async (name: string, value: boolean) => {
+		const {enabled, setFieldValue, submitForm} = this.props;
+
+		await setFieldValue(name, value);
+
+		if (!value && enabled) {
+			submitForm();
+		}
+	};
 
 	renderErrorIcon = () => {
 		const {defaultInterval, errors} = this.props;
@@ -71,10 +79,9 @@ export class AutoUpdateForm extends PureComponent<Props> {
 	};
 
 	renderSubmitButton = () => {
-		const {defaultInterval, errors, values} = this.props;
-		const isDisabledSubmit = defaultInterval === values.interval || !!errors.interval;
+		const {errors} = this.props;
 
-		return <Button className={styles.submit} disabled={isDisabledSubmit} type="submit">Применить</Button>;
+		return <Button className={styles.submit} disabled={errors.interval} type="submit">Применить</Button>;
 	};
 
 	renderText = () => <span className={styles.text}> минут</span>;

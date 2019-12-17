@@ -7,6 +7,17 @@ import {lazy} from 'yup';
 import {NewWidget} from 'utils/widget';
 import getSchema from './schemas.js';
 
+// TODO убрать как будут перенастроенны все виджеты
+const getType = (type: string) => {
+	if (type && typeof type === 'object') {
+		return type.value;
+	} else if (type) {
+		return type;
+	}
+
+	return CHART_VARIANTS.COLUMN;
+};
+
 const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
 		const {id, layout, type, ...values} = selectedWidget;
@@ -14,7 +25,7 @@ const config: FormikConfig = {
 		return {
 			asDefault: false,
 			isNew: id === NewWidget.id,
-			type: type || CHART_VARIANTS.COLUMN,
+			type: getType(type),
 			...values
 		};
 	},

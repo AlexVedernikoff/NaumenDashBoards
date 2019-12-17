@@ -13,7 +13,7 @@ export class Summary extends PureComponent<Props, State> {
 	};
 
 	static getDerivedStateFromProps (props: Props) {
-		const {title, total} = props.data;
+		const {title, total} = props.buildData;
 		return title && total ? {title, total} : null;
 	}
 
