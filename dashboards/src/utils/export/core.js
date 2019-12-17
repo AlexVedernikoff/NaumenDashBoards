@@ -20,7 +20,7 @@ const createName = async () => {
 		name = 'Дашборд';
 	}
 
-	return `${name}_${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`;
+	return `${name}_${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
 };
 
 window.html2canvas = html2canvas;

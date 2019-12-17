@@ -1,10 +1,11 @@
 // @flow
-import type {Location} from 'react-router';
 import type {Role} from 'store/dashboard/types';
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
+	autoUpdateEnabled: boolean,
 	editable: boolean,
+	editMode: boolean,
 	role?: Role
 };
 
@@ -16,6 +17,4 @@ export type ConnectedFunctions = {
 	sendToMail: (name: string, type: string, file: Blob) => ThunkAction
 };
 
-export type Props = {
-	location: Location
-} & ConnectedProps & ConnectedFunctions;
+export type Props = ConnectedProps & ConnectedFunctions;

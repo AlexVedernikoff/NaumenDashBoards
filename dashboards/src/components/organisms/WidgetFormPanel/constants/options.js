@@ -11,7 +11,7 @@ import {
 	Summary,
 	Table
 } from 'icons/widgets';
-import {CHART_VARIANTS} from 'utils/chart/constants';
+import {CHART_VARIANTS, LEGEND_POSITIONS as LP} from 'utils/chart/constants';
 import {WIDGET_VARIANTS} from 'utils/widget';
 import VALUES from './values';
 
@@ -19,10 +19,10 @@ const {DATETIME_GROUP, DEFAULT_GROUP, DEFAULT_AGGREGATION, INTEGER_AGGREGATION} 
 
 // Расположения легенды
 const LEGEND_POSITIONS = [
-	{value: 'right', label: 'Справа'},
-	{value: 'left', label: 'Слева'},
-	{value: 'top', label: 'Вверху'},
-	{value: 'bottom', label: 'Внизу'}
+	{value: LP.right, label: 'Справа'},
+	{value: LP.left, label: 'Слева'},
+	{value: LP.top, label: 'Вверху'},
+	{value: LP.bottom, label: 'Внизу'}
 ];
 
 // Группировки

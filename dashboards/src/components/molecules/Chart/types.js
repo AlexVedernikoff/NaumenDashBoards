@@ -1,14 +1,8 @@
 // @flow
-import type {ApexOptions} from 'apexcharts';
-import type {DiagramData} from 'store/widgets/diagrams/types';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
-	data: DiagramData,
+	buildData: DiagramBuildData,
 	widget: Widget
-};
-
-export type State = {
-	options: ApexOptions,
-	series: []
 };

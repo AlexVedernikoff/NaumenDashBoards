@@ -1,8 +1,8 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
-import type {DiagramMap, ReceiveDiagramPayload} from './types';
+import type {BuildDataMap, ReceiveBuildDataPayload} from './types';
 import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
-import {DIAGRAMS_EVENTS} from './constants';
+import {BUILD_DATA_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
 import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
@@ -103,7 +103,7 @@ const createCompositeData = (fields: Array<string>) => (widget: Widget) => {
 	return data;
 };
 
-const resolvePostDataCreator = (type: string) => {
+const resolvePostData = (type: string) => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
 	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
@@ -128,23 +128,23 @@ const resolvePostDataCreator = (type: string) => {
  * @param {Array<Widget>} widgets - список виджетов
  * @returns {ThunkAction}
  */
-const fetchDiagramsData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		let postData = {};
 
-		dispatch(requestDiagrams(widgets));
+		dispatch(requestAllBuildData(widgets));
 
 		widgets.forEach(widget => {
 			const {type} = widget;
 
-			postData[widget.id] = resolvePostDataCreator(type)(widget);
+			postData[widget.id] = resolvePostData(type)(widget);
 		});
 
 		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagrams', 'requestContent'), postData);
 
-		dispatch(receiveDiagrams(data));
+		dispatch(receiveAllBuildData(data));
 	} catch (e) {
-		dispatch(recordDiagramsError(widgets));
+		dispatch(recordAllBuildDataError(widgets));
 	}
 };
 
@@ -153,56 +153,56 @@ const fetchDiagramsData = (widgets: Array<Widget>): ThunkAction => async (dispat
  * @param {Widget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const fetchDiagramData = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(requestDiagram(widget.id));
+const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(requestBuildData(widget.id));
 	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 	const {COMBO} = CHART_VARIANTS;
 
 	try {
 		const {type} = widget;
-		const postData = resolvePostDataCreator(type)(widget);
+		const postData = resolvePostData(type)(widget);
 		const method = [COMBO, SUMMARY, TABLE].includes(type) ? 'getDataForCompositeDiagram' : 'getDataForDiagram';
 		const {data} = await client.post(buildUrl('dashboardDataSet', method, 'requestContent'), postData);
 
 		dispatch(
-			receiveDiagram({data, id: widget.id})
+			receiveBuildData({data, id: widget.id})
 		);
 	} catch (e) {
-		dispatch(recordDiagramError(widget.id));
+		dispatch(recordBuildDataError(widget.id));
 	}
 };
 
-const requestDiagram = (payload: string) => ({
-	type: DIAGRAMS_EVENTS.REQUEST_DIAGRAM,
+const receiveBuildData = (payload: ReceiveBuildDataPayload) => ({
+	type: BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA,
 	payload
 });
 
-const requestDiagrams = (payload: Array<Widget>) => ({
-	type: DIAGRAMS_EVENTS.REQUEST_DIAGRAMS,
+const receiveAllBuildData = (payload: BuildDataMap) => ({
+	type: BUILD_DATA_EVENTS.RECEIVE_ALL_BUILD_DATA,
 	payload
 });
 
-const receiveDiagram = (payload: ReceiveDiagramPayload) => ({
-	type: DIAGRAMS_EVENTS.RECEIVE_DIAGRAM,
+const recordBuildDataError = (payload: string) => ({
+	type: BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR,
 	payload
 });
 
-const receiveDiagrams = (payload: DiagramMap) => ({
-	type: DIAGRAMS_EVENTS.RECEIVE_DIAGRAMS,
+const recordAllBuildDataError = (payload: Array<Widget>) => ({
+	type: BUILD_DATA_EVENTS.RECORD_ALL_BUILD_DATA_ERROR,
 	payload
 });
 
-const recordDiagramError = (payload: string) => ({
-	type: DIAGRAMS_EVENTS.RECORD_DIAGRAM_ERROR,
+const requestBuildData = (payload: string) => ({
+	type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA,
 	payload
 });
 
-const recordDiagramsError = (payload: Array<Widget>) => ({
-	type: DIAGRAMS_EVENTS.RECORD_DIAGRAMS_ERROR,
+const requestAllBuildData = (payload: Array<Widget>) => ({
+	type: BUILD_DATA_EVENTS.REQUEST_ALL_BUILD_DATA,
 	payload
 });
 
 export {
-	fetchDiagramData,
-	fetchDiagramsData
+	fetchBuildData,
+	fetchAllBuildData
 };

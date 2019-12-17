@@ -1,8 +1,8 @@
 // @flow
-import type {DiagramData} from 'store/widgets/diagrams/types';
+import type {BuildData} from 'store/widgets/buildData/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
-	diagram: DiagramData,
+	buildData: BuildData,
 	widget: Widget
 }

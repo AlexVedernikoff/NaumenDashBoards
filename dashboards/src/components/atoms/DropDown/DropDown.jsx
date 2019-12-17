@@ -5,24 +5,12 @@ import styles from './styles.less';
 
 export class DropDown extends Component<Props> {
 	static defaultProps = {
-		icon: null,
-		list: [],
-		title: ''
+		list: []
 	};
 
 	selectMenu = (event: SyntheticEvent<HTMLButtonElement>) => {
 		const key = String(event.currentTarget.dataset.key);
 		this.props.onClick(key);
-	};
-
-	renderButton = () => {
-		const {icon, title} = this.props;
-
-		return (
-			<button className={styles.dropdownButton}>
-				{icon || title}
-			</button>
-		);
 	};
 
 	renderContent = () => {
@@ -44,7 +32,7 @@ export class DropDown extends Component<Props> {
 	render () {
 		return (
 			<div className={styles.dropdown}>
-				{this.renderButton()}
+				{this.props.children}
 				{this.renderContent()}
 			</div>
 		);

@@ -27,12 +27,25 @@
 	}
 
 	.buttonIcon {
+		align-items: center;
+		border-radius: @border-radius;
 		box-sizing: border-box;
-    display: inline-block;
-		padding: 16px;
+		display: inline-flex;
+		justify-content: center;
+		margin: 8px 0;
+		padding: 10px;
 
 		&:hover {
 			background: @info;
+		}
+	}
+
+	.enabledAutoUpdate {
+		background: @white;
+		color: @primary;
+
+		&:hover {
+			background: @white;
 		}
 	}
 

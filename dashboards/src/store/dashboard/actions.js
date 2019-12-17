@@ -6,11 +6,10 @@ import type {Context} from 'utils/api/types';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {fetchDiagramsData} from 'store/widgets/diagrams/actions';
+import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import {getNextRow} from 'utils/layout';
 import {NewWidget} from 'utils/widget';
-import {push} from 'connected-react-router';
 
 /**
  * Получаем данные, необходимые для работы дашборда
@@ -53,8 +52,10 @@ const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
 	const {data: {autoUpdate, widgets}} = await client.post(buildUrl('dashboardSettings', 'getSettings', params));
 
-	dispatch(setWidgets(widgets));
-	dispatch(fetchDiagramsData(widgets));
+	if (Array.isArray(widgets) && widgets.length > 0) {
+		dispatch(setWidgets(widgets));
+		dispatch(fetchAllBuildData(widgets));
+	}
 
 	if (autoUpdate) {
 		dispatch(changeAutoUpdateSettings(autoUpdate));
@@ -90,11 +91,13 @@ const setAutoUpdateInterval = (interval: number): ThunkAction => (dispatch: Disp
 };
 
 /**
- * Отключаем статичность виджетов и переходим на страницу редактирования
+ * Включаем режим редактирования
  * @returns {ThunkAction}
  */
 const editDashboard = (): ThunkAction => (dispatch: Dispatch) => {
-	dispatch(push('/edit'));
+	dispatch({
+		type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
+	});
 };
 
 /**
@@ -117,12 +120,14 @@ const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: G
 };
 
 /**
- * Делаем виджеты статичными и переходим на страницу просмотра
+ * Сбрасываем выбранный виджет и выключаем режим редактирования
  * @returns {ThunkAction}
  */
 const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 	dispatch(resetWidget());
-	dispatch(push('/'));
+	dispatch({
+		type: DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
+	});
 };
 
 /**
@@ -185,21 +190,27 @@ const getPassedWidget = (context: Context): ThunkAction => async (dispatch: Disp
 		newWidget.source = {label, value};
 
 		dispatch(addWidget(newWidget));
-		dispatch(push('/edit'));
+		dispatch(editDashboard());
+		localStorage.removeItem(key);
 	}
 };
 
-const saveAutoUpdateSettings = (autoUpdate: AutoUpdateRequestPayload) => async (dispatch: Dispatch) => {
+const saveAutoUpdateSettings = (autoUpdate: AutoUpdateRequestPayload) => async (dispatch: Dispatch, getState: GetState) => {
 	try {
-		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {autoUpdate});
+		const {subjectUuid: classFqn, contentCode} = getState().dashboard.context;
+		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {
+			autoUpdate,
+			classFqn,
+			contentCode
+		});
 
 		dispatch(changeAutoUpdateSettings(autoUpdate));
 		dispatch(createToast({
-			text: 'Настройки автообновления успешно изменены!'
+			text: 'Настройки успешно изменены!'
 		}));
 	} catch (e) {
 		dispatch(createToast({
-			text: 'Ошибка сохранения данных автообновления',
+			text: 'Ошибка сохранения настроек',
 			type: 'error'
 		}));
 	}
@@ -233,7 +244,7 @@ const setContext = payload => ({
 });
 
 const setEditable = payload => ({
-	type: DASHBOARD_EVENTS.SET_EDITABLE,
+	type: DASHBOARD_EVENTS.SET_EDITABLE_PARAM,
 	payload
 });
 

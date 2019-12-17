@@ -7,8 +7,7 @@ export type Item = {
 }
 
 export type Props = {
-	icon: Node,
+	children: Node,
 	list: Array<Item>,
-	onClick: (key: string) => any,
-	title: string
+	onClick: (key: string) => any
 };

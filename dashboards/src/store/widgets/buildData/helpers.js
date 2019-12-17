@@ -1,31 +1,33 @@
 // @flow
 import type {
-	DiagramsState,
-	ReceiveDiagramPayload
+	BuildDataState,
+	ReceiveBuildDataPayload
 } from './types';
 import type {SetCreatedWidget, UpdateWidget, Widget} from 'store/widgets/data/types';
 
 /**
  * Устанавливаем данные графика конкретного виджета
- * @param {DiagramsState} state - хранилище данных графиков
+ * @param {BuildDataState} state - хранилище данных графиков
  * @param {Widget} payload - данные виджета
  * @returns {void}
  */
-export const resetData = (state: DiagramsState, {payload}: SetCreatedWidget | UpdateWidget) => {
+export const resetData = (state: BuildDataState, {payload}: SetCreatedWidget | UpdateWidget) => {
 	state[payload.id] = {
 		...state[payload.id],
-		data: null
+		data: {}
 	};
 };
 
 /**
  * Устанавливаем данные графика конкретного виджета
- * @param {DiagramsState} state - хранилище данных графиков
+ * @param {BuildDataState} state - хранилище данных графиков
  * @param {string} payload - id виджета
  * @returns {void}
  */
-export const setRequestDiagram = (state: DiagramsState, payload: string) => {
+export const setRequestBuildData = (state: BuildDataState, payload: string) => {
 	state[payload] = {
+		...state[payload],
+		data: {},
 		error: false,
 		loading: true
 	};
@@ -33,13 +35,12 @@ export const setRequestDiagram = (state: DiagramsState, payload: string) => {
 
 /**
  * Устанавливаем данные графика конкретного виджета
- * @param {DiagramsState} state - хранилище данных графиков
- * @param {ReceiveDiagramPayload} payload - данные графика и id виджета
+ * @param {BuildDataState} state - хранилище данных графиков
+ * @param {ReceiveBuildDataPayload} payload - данные графика и id виджета
  * @returns {void}
  */
-export const setDiagram = (state: DiagramsState, payload: ReceiveDiagramPayload) => {
+export const setBuildData = (state: BuildDataState, payload: ReceiveBuildDataPayload) => {
 	let {columns} = payload.data;
-
 	/*
 		На стороне бэка происходит принудительнае изменение ключей в строчный вариант.
 		Библиотека react-table же ожидает ключи Header и Footer. По этой причине преобразуем
@@ -56,20 +57,23 @@ export const setDiagram = (state: DiagramsState, payload: ReceiveDiagramPayload)
 	}
 
 	state[payload.id] = {
+		...state[payload.id],
 		data: payload.data,
 		error: false,
-		loading: false
+		loading: false,
+		updateDate: new Date()
 	};
 };
 
 /**
  * Устанавливаем данные графика конкретного виджета
- * @param {DiagramsState} state - хранилище данных графиков
+ * @param {BuildDataState} state - хранилище данных графиков
  * @param {string} payload - id виджета
  * @returns {void}
  */
-export const setDiagramError = (state: DiagramsState, payload: string) => {
+export const setBuildDataError = (state: BuildDataState, payload: string) => {
 	state[payload] = {
+		...state[payload],
 		error: true,
 		loading: false
 	};

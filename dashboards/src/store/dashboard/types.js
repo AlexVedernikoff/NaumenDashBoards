@@ -40,8 +40,16 @@ type SetContext = {
 };
 
 type SetEditable = {
-	type: typeof DASHBOARD_EVENTS.SET_EDITABLE,
+	type: typeof DASHBOARD_EVENTS.SET_EDITABLE_PARAM,
 	payload: boolean
+};
+
+type SwitchOnEditMode = {
+	type: typeof DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
+};
+
+type SwitchOffEditMode = {
+	type: typeof DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
 };
 
 type UnknownDashboardAction = {
@@ -58,6 +66,8 @@ export type DashboardAction =
 	| SetAutoUpdateFunction
 	| SetContext
 	| SetEditable
+	| SwitchOnEditMode
+	| SwitchOffEditMode
 	| UnknownDashboardAction
 ;
 
@@ -77,6 +87,7 @@ export type DashboardState = {
 	autoUpdate: AutoUpdate,
 	context: Context | Object,
 	editable: boolean,
+	editMode: boolean,
 	error: boolean,
 	loading: boolean,
 	reloadInterval?: number,

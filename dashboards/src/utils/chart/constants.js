@@ -31,7 +31,20 @@ const CHART_TYPES = {
 	pie
 };
 
+const bottom: 'bottom' = 'bottom';
+const left: 'left' = 'left';
+const right: 'right' = 'right';
+const top: 'top' = 'top';
+
+const LEGEND_POSITIONS = {
+	bottom,
+	left,
+	right,
+	top
+};
+
 export {
 	CHART_TYPES,
-	CHART_VARIANTS
+	CHART_VARIANTS,
+	LEGEND_POSITIONS
 };

@@ -12,7 +12,7 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	static getDerivedStateFromProps (props: Props, state: State) {
-		const {columns, data} = props.data;
+		const {columns, data} = props.buildData;
 
 		if (Array.isArray(columns) && Array.isArray(data)) {
 			state = {columns, data};

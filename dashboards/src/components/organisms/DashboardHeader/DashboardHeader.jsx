@@ -1,11 +1,12 @@
 // @flow
 import AutoUpdateForm from 'containers/AutoUpdateForm';
 import {Button, DropDown, Tooltip} from 'components/atoms';
+import cn from 'classnames';
 import {CloseIcon} from 'icons/form';
 import {createName, createSnapshot, EXPORT_VARIANTS, FILE_LIST} from 'utils/export';
 import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
-import {gridRef} from 'components/organisms/LayoutGrid';
+import {gridRef} from 'components/organisms/DashboardContent';
 import {Modal} from 'components/molecules';
 import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component, Fragment} from 'react';
@@ -50,9 +51,12 @@ export class DashboardHeader extends Component<Props, State> {
 	showModal = () => this.setState({showModal: true});
 
 	renderAutoUpdateButton = () => {
+		const {autoUpdateEnabled} = this.props;
+		const CN = autoUpdateEnabled ? cn(styles.buttonIcon, styles.enabledAutoUpdate) : styles.buttonIcon;
+
 		return (
 			<div className={styles.autoUpdateContainer}>
-				<div className={styles.buttonIcon}>
+				<div className={CN}>
 					<TimeIcon />
 				</div>
 				<AutoUpdateForm className={styles.autoUpdateForm} />
@@ -71,7 +75,11 @@ export class DashboardHeader extends Component<Props, State> {
 
 		return (
 			<Tooltip tooltip={tip} placement="left">
-				<DropDown icon={icon} list={FILE_LIST} onClick={this.createDocument(way)} />
+				<DropDown icon={icon} list={FILE_LIST} onClick={this.createDocument(way)}>
+					<div className={styles.buttonIcon}>
+						{icon}
+					</div>
+				</DropDown>
 			</Tooltip>
 		);
 	};
@@ -99,20 +107,20 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	renderModeButton = () => {
-		const {editable, editDashboard, location, role, seeDashboard} = this.props;
+		const {editable, editDashboard, editMode, seeDashboard} = this.props;
 
-		if (editable || role) {
-			if (location.pathname === '/') {
+		if (editable) {
+			if (editMode) {
 				return (
 					<div className={styles.buttonMode}>
-						<Button type="button" onClick={editDashboard}>Редактировать</Button>
+						<Button type="button" onClick={seeDashboard}>Просмотреть</Button>
 					</div>
 				);
 			}
 
 			return (
 				<div className={styles.buttonMode}>
-					<Button type="button" onClick={seeDashboard}>Просмотреть</Button>
+					<Button type="button" onClick={editDashboard}>Редактировать</Button>
 				</div>
 			);
 		}
@@ -133,7 +141,7 @@ export class DashboardHeader extends Component<Props, State> {
 	renderResetButton = () => {
 		const {editable, role} = this.props;
 
-		if (editable || role) {
+		if (role !== 'super' && editable) {
 			return (
 				<Fragment>
 					<div className={styles.buttonIcon} onClick={this.showModal}>
