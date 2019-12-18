@@ -137,7 +137,11 @@ String getSettings(String classFqn, String contentCode, def user)
     DashboardSettings dashboardSettings = getSettingByLogin(user?.login as String) ?: getSettingByLogin(null)
     def result = [
             autoUpdate: dashboardSettings?.autoUpdate,
-            widgets   : dashboardSettings?.widgetIds?.collect(this.&getWidgetSettings)?.collect {it.value}
+            //TODO: из-за архитектурной особенности возможны ситуации при которых настройки виджета пропадут.
+            // В таких случаях просто пропускаем пустые настройки
+            // ключи виджетов с пустыми настройками будут удалены после сброса настроек.
+            // Пользователь этого даже не заметит
+            widgets   : dashboardSettings?.widgetIds?.findResults(this.&getWidgetSettings) ?: []
     ]
     return toJson(result)
 }
@@ -441,10 +445,12 @@ String deleteWidget(Map<String, Object> requestContent, def user)
  * @param classFqn    - код типа куда выведено встроенное приложение
  * @param contentCode - код контента встроенного приложения
  * @param user        - БО текущего пользователя
- * @return успех | провал сброса
+ * @return статус сообщение
  */
 String resetPersonalDashboard(String classFqn, String contentCode, def user)
 {
+    //TODO: добавить локализацию в дальнейшем
+    if (!user) throw new Exception([message: "Super-user can't reset dashboard settings!"])
     String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
     DashboardSettings personalDashboard = getDashboardSetting(personalDashboardKey)
 
@@ -454,14 +460,14 @@ String resetPersonalDashboard(String classFqn, String contentCode, def user)
             personalDashboard.widgetIds
                     .findAll(this.&isPersonalWidget.ncurry(1, user))
                     .each(this.&removeWidgetSettings)
-            return true
+            return toJson([status: "OK", message: "Установлены настройки по умолчанию"])
         }
         else
         {
             logger.warn("Personal dashboard: $personalDashboardKey not found!")
-            return false
+            return toJson([status: "ERROR", message: "Не удалось сбросить настройки. Попробуйте позже"])
         }
-    } : true // Если персонального дашборда нет, значит сброс настроек успешен.
+    } : toJson([status: "OK", message: "Установлены настройки по умолчанию"])
 }
 
 /**
@@ -676,11 +682,9 @@ private DashboardSettings getDashboardSetting(String dashboardKey)
  * ${код типа куда выведено вп}_${код контента вп}_${опционально логин}_${индентификатор виджета}*
  * @return настройки виджета
  */
-private WidgetSettings getWidgetSettings(String widgetKey)
+private Map<String, Object> getWidgetSettings(String widgetKey)
 {
-    String widgetJsonSettings = loadJsonSettings(widgetKey)
-    def widgetSettings = getSettingsFromJson(widgetJsonSettings)
-    return new WidgetSettings(widgetKey, widgetSettings as Map<String, Object>)
+    return getSettingsFromJson(loadJsonSettings(widgetKey)) as Map<String, Object>
 }
 
 /**

@@ -1103,9 +1103,7 @@ private HCriteria getCriteriaFromDescriptor(def descriptor)
  */
 private def deserializeDescriptor(String jsonString)
 {
-    //TODO: перейти на товый метод десериализации когда он перестанет кидать NPE после добавления в критерию
-//    return api.listdata.createListDescriptor(jsonString)
-    return DashboardMarshaller.getDescriptorFromJson(jsonString)
+    return api.listdata.createListDescriptor(jsonString)
 }
 
 /**
