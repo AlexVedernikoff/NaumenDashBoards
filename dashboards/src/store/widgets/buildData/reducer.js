@@ -2,8 +2,7 @@
 import type {BuildDataAction, BuildDataState} from './types';
 import {defaultAction, initialBuildDataState} from './init';
 import {BUILD_DATA_EVENTS} from './constants';
-import {resetData, setBuildData, setBuildDataError, setRequestBuildData} from './helpers';
-import {WIDGETS_EVENTS} from 'store/widgets/data/constants';
+import {setBuildData, setBuildDataError, setRequestBuildData} from './helpers';
 
 const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDataAction = defaultAction): BuildDataState => {
 	switch (action.type) {
@@ -31,10 +30,6 @@ const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDat
 			action.payload.forEach(({id}) => {
 				setBuildDataError(state, id);
 			});
-			return {...state};
-		case WIDGETS_EVENTS.UPDATE_WIDGET:
-		case WIDGETS_EVENTS.SET_CREATED_WIDGET:
-			resetData(state, action);
 			return {...state};
 		default:
 			return state;

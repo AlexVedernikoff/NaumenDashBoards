@@ -16,7 +16,7 @@ export class WidgetRemovalModal extends PureComponent<Props> {
 				cancelText="Нет"
 				header="Вы точно хотите удалить виджет?"
 				onClose={onClose}
-				onSubmit={this.handleSubmit(!!role)}
+				onSubmit={this.handleSubmit(!role)}
 				size="small"
 				submitText="Да"
 			/>
