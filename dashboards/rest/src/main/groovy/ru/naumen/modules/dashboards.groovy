@@ -20,7 +20,7 @@ import static groovy.json.JsonOutput.toJson
 @Field private static final Collection<String> VALID_LINK_TYPE_ATTRIBUTE =
         ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
 @Field private static final Collection<String> VALID_SIMPLE_TYPE_ATTRIBUTE =
-        ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state']
+        ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText']
 @Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
         ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem',
          'dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state']
@@ -96,7 +96,7 @@ String getAttributesFromLinkAttribute(requestContent)
     }
 
     //TODO: В дальнейшем список будет расширен до полного списка
-    def validType = ['string', 'integer', 'state', 'catalogItem', 'catalogItemSet']
+    def validType = ['string', 'integer', 'state', 'catalogItem', 'catalogItemSet', 'localizedText']
 
     Collection<Attribute> result = metaInfo.attributes
             .findResults { !it.computable && it.type.code in validType ? buildAttribute(it) : null }
