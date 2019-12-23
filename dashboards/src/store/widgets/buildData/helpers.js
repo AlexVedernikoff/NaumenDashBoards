@@ -3,20 +3,6 @@ import type {
 	BuildDataState,
 	ReceiveBuildDataPayload
 } from './types';
-import type {SetCreatedWidget, UpdateWidget, Widget} from 'store/widgets/data/types';
-
-/**
- * Устанавливаем данные графика конкретного виджета
- * @param {BuildDataState} state - хранилище данных графиков
- * @param {Widget} payload - данные виджета
- * @returns {void}
- */
-export const resetData = (state: BuildDataState, {payload}: SetCreatedWidget | UpdateWidget) => {
-	state[payload.id] = {
-		...state[payload.id],
-		data: {}
-	};
-};
 
 /**
  * Устанавливаем данные графика конкретного виджета

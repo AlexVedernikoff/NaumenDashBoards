@@ -35,7 +35,7 @@ export class Chart extends PureComponent<Props> {
 		const {buildData, widget} = this.props;
 		const {current} = this.ref;
 		const {categories, labels, series} = buildData;
-		let options = {};
+		let options = null;
 
 		if (current && Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
 			options = getOptions(widget, buildData, current.clientWidth);
@@ -57,8 +57,8 @@ export class Chart extends PureComponent<Props> {
 	hasSideLegend = () => {
 		const {legendPosition, showLegend} = this.props.widget;
 
-		return showLegend && (!legendPosition
-			|| (legendPosition.value === LEGEND_POSITIONS.left || legendPosition.value === LEGEND_POSITIONS.right)
+		return showLegend && (legendPosition
+			&& (legendPosition.value === LEGEND_POSITIONS.left || legendPosition.value === LEGEND_POSITIONS.right)
 		);
 	};
 

@@ -20,16 +20,18 @@ import {NewWidget} from 'utils/widget';
  * @returns {WidgetsDataState}
  */
 export const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
+	const map = {};
+
 	payload.forEach(widget => {
-		if (widget.id !== state.selectedWidget) {
-			state.map[widget.id] = widget;
+		if (typeof widget === 'object' && widget !== null) {
+			map[widget.id] = widget.id === state.selectedWidget ? state.map[state.selectedWidget] : widget;
 		}
 	});
 
 	return {
 		...state,
 		loading: false,
-		map: {...state.map}
+		map
 	};
 };
 
@@ -126,8 +128,11 @@ export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): 
  * @returns {WidgetsDataState}
  */
 export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): WidgetsDataState => {
-	state.map[payload.id] = payload;
-	state.selectedWidget = payload.id;
+	if (payload && typeof payload === 'object') {
+		state.map[payload.id] = payload;
+		state.selectedWidget = payload.id;
+	}
+
 	return {
 		...state,
 		updating: false,

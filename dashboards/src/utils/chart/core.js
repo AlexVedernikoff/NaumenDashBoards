@@ -56,6 +56,22 @@ const getAttrTitle = (attr: Attribute) => {
 	return current.title;
 };
 
+const yAxisLabelFormatter = (horizontal: boolean) => (val: number, options: any) => {
+	/**
+	 * toFixed необходимо использовать только для значений оси Y. Но т.к в библиотеке можно указать только одну
+	 * функцию форматирования значений, необходимо ориентироваться по параметру options. Только в случае когда функция
+	 * используется для значения оси, options - object.
+	 */
+
+	if (typeof options === 'object' && !horizontal && typeof val === 'number') {
+		return val.toFixed();
+	} else if (typeof val === 'string' && val.length > 25) {
+		return `${val.substring(0, 20)}...`;
+	}
+
+	return val;
+};
+
 /**
  * Примесь графиков по умолчанию (bar, column, line)
  * @param {boolean} horizontal - положение графика
@@ -98,15 +114,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			decimalsInFloat: 2,
 			forceNiceScale: !stackedIsPercent,
 			labels: {
-				formatter: (val: number, opts: any) => {
-					if (typeof opts === 'object' && !horizontal && typeof val === 'number') {
-						return val.toFixed();
-					} else if (typeof val === 'string') {
-						return `${val.substring(0, 20)}...`;
-					}
-
-					return val;
-				},
+				formatter: yAxisLabelFormatter(horizontal),
 				// Если проставить значение, то уплывает название оси на легенду
 				maxWidth: undefined
 			},
@@ -128,10 +136,10 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 		} else {
 			/*
 			 * Условие стоит, т.к функция форматирования применяется как для значений диаграмм, так и для значений оси Y;
-			 * В случае когда opts - объект, это значение оси Y.
+			 * В случае когда options - объект, это значение оси Y.
  			 */
 			options.yaxis.labels = {
-				formatter: (val: number, opts: any) => typeof val === 'string' || typeof opts !== 'object' ? val : `${val.toFixed(2)}%`
+				formatter: (val: number, options: any) => typeof val === 'string' || typeof options !== 'object' ? val : `${val.toFixed(2)}%`
 			};
 
 			options.dataLabels.formatter = (val: number) => val > 0 ? `${val.toFixed(2)}%` : '';
@@ -206,7 +214,7 @@ const comboChart = (widget: Widget, chart: DiagramBuildData) => {
 			decimalsInFloat: 2,
 			forceNiceScale: true,
 			labels: {
-				formatter: (val: number, opts: any) => typeof opts === 'object' ? val : val.toFixed()
+				formatter: yAxisLabelFormatter(false)
 			},
 			max: (max: number) => max > 0 ? Math.ceil(max) : 1,
 			min: 0,
@@ -235,7 +243,7 @@ const comboChart = (widget: Widget, chart: DiagramBuildData) => {
  */
 const circleChart = (widget: Widget, chart: DiagramBuildData): ApexOptions => {
 	const {aggregation, legendPosition} = widget;
-	const legendPositionValue = legendPosition && legendPosition.value;
+	const legendPositionValue = getLegendPositionValue(legendPosition);
 
 	const options: Object = {
 		labels: chart.labels
@@ -243,8 +251,8 @@ const circleChart = (widget: Widget, chart: DiagramBuildData): ApexOptions => {
 
 	if (aggregation !== VALUES.DEFAULT_AGGREGATION.PERCENT) {
 		options.dataLabels = {
-			formatter: function (val, opts) {
-				return opts.w.config.series[opts.seriesIndex];
+			formatter: function (val, options) {
+				return options.w.config.series[options.seriesIndex];
 			}
 		};
 	}
@@ -290,7 +298,7 @@ const resolveMixin = (type: string): Function => {
 const getOptions = (widget: Widget, chart: DiagramBuildData, width: number): ApexOptions => {
 	const {colors, legendPosition, showLegend, showValue, type} = widget;
 	const chartColors = colors || VALUES.COLORS;
-	const legendPositionValue = (legendPosition && legendPosition.value) || LEGEND_POSITIONS.bottom;
+	const legendPositionValue = getLegendPositionValue(legendPosition);
 
 	const options: ApexOptions = {
 		chart: {
@@ -323,6 +331,9 @@ const getOptions = (widget: Widget, chart: DiagramBuildData, width: number): Ape
 			}
 		},
 		legend: {
+			itemMargin: {
+				horizontal: 5
+			},
 			position: legendPositionValue,
 			show: showLegend,
 			showForSingleSeries: true
@@ -380,6 +391,8 @@ const getChartType = (type: string) => {
  * @returns {number}
  */
 const getLegendWidth = (width: number) => width * 0.25;
+
+const getLegendPositionValue = (legendPosition?: Object) => (legendPosition && legendPosition.value) || LEGEND_POSITIONS.bottom;
 
 export {
 	getChartType,
