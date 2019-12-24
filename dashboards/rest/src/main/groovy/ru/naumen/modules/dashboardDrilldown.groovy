@@ -105,7 +105,7 @@ class Link
     {
         this.classFqn = map.classFqn
         this.title = map.title ?: "Список элементов ${this.classFqn}"
-        this.attrGroup = 'forDashboards' in this.api.metainfo.getMetaClass(this.classFqn).getAttributeGroupCodes()
+        this.attrGroup = 'forDashboards' in api.metainfo.getMetaClass(this.classFqn).getAttributeGroupCodes()
                 ? 'forDashboards'
                 : 'system'
         this.descriptor = map.descriptor
@@ -394,10 +394,19 @@ class Link
  * @param requestContent - параметры запроса
  * @return ссылка на на страницу с произвольным списком объектов.
  */
-String getLink(Map<String, Object> requestContent)
+String getLink(Map<String, Object> requestContent, String cardObjectUuid)
 {
-    Link link = new Link(requestContent)
+    Link link = new Link(transformRequest(requestContent, cardObjectUuid))
     def linkBuilder = link.getBuilder()
     return api.web.list(linkBuilder)
+}
+
+private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid) {
+    Closure<Map<String, Object>> transform = { Map<String, Object> request ->
+        Map<String, Object> res = [:] << request
+        res.descriptor = DashboardMarshaller.substitutionCardObject(request.descriptor as String, cardObjectUuid)
+        return res
+    }
+    return cardObjectUuid ? transform(requestContent) : requestContent
 }
 //endregion

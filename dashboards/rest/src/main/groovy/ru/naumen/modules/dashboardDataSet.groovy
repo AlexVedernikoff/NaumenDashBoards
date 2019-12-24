@@ -13,19 +13,18 @@ package ru.naumen.modules
 
 import groovy.json.JsonOutput
 import groovy.transform.TupleConstructor
-
-import java.text.DecimalFormat
 import ru.naumen.core.server.hquery.HCriteria
 import ru.naumen.core.server.hquery.HHelper
-import ru.naumen.core.server.hquery.HRestrictions
 import ru.naumen.core.server.hquery.HOrders
+import ru.naumen.core.server.hquery.HRestrictions
 
+import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
-import static Diagram.*
 import static groovy.json.JsonOutput.toJson
+import static ru.naumen.modules.Diagram.*
 
 //region enum
 /**
@@ -357,39 +356,26 @@ class SeriesCombo
  * @param requestContent - тело запроса
  * @return ассоциативный массив из ключа виджета и данных диаграммы
  */
-String getDataForDiagrams(Map<String, Object> requestContent)
+String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectUuid)
 {
-    Closure sendNotSupportedDiagramTypeMessage = { "Not supported diagram type: $it" }
+    Closure sendNotSupportedDiagramTypeMessage = {
+        logger.warn("Not supported diagram type: $it")
+        null
+    }
     Closure buildDiagram = this.&getDataForDiagramOrDefault.rcurry(sendNotSupportedDiagramTypeMessage)
     Closure safetyCollect = { key, value ->
         api.tx.call {
+            def res
             try {
-                return [(key): buildDiagram(value) ]
+                res = buildDiagram(transformRequest(value as Map<String, Object>, cardObjectUuid))
             } catch (Exception ex) {
                 logger.error("error in widget: $key", ex)
-                return [(key): ex.message]
+                res = null
             }
+            return [(key): res]
         }
     }
     return toJson(requestContent.collectEntries(safetyCollect))
-}
-
-/**
- * Получение данных для диаграмм
- * @param requestContent тело запроса в формате {@link BasicRequest}
- * @return данные для построения диаграммы
- */
-String getDataForDiagram(Map<String, Object> requestContent)
-{
-    switch (requestContent.type as Diagram)
-    {
-        case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE] :
-            return toJson(getDataStandardDiagram(requestContent as LineDiagramRequest))
-        case [DONUT, PIE] :
-            return toJson(getDataRoundDiagram(requestContent as RoundDiagramRequest))
-        default:
-            throw new Exception(toJson([error: "Not supported diagram type: ${requestContent.type}"]))
-    }
 }
 
 /**
@@ -397,23 +383,11 @@ String getDataForDiagram(Map<String, Object> requestContent)
  * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
  * @return данные для построения диаграммы
  */
-String getDataForCompositeDiagram(Map<String, Object> requestContent)
+String getDataForCompositeDiagram(Map<String, Object> requestContent, String cardObjectUuid)
 {
-    switch (requestContent.type as Diagram)
-    {
-        case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
-            return toJson(getDataStandardDiagram(requestContent as RequestGetDataForCompositeDiagram))
-        case [DONUT, PIE]:
-            return toJson(getDataRoundDiagram(requestContent as RequestGetDataForCompositeDiagram))
-        case SUMMARY:
-            return toJson(getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram))
-        case TABLE:
-            return toJson(getCalculateDataForTableDiagram(requestContent as RequestGetDataForCompositeDiagram))
-        case COMBO:
-            return toJson(getCalculationForComboDiagram(requestContent as RequestGetDataForCompositeDiagram))
-        default:
-            throw new Exception(toJson([error: "Not supported diagram type: ${requestContent.type}"]))
-    }
+    return getDataForDiagramOrDefault(transformRequest(requestContent, cardObjectUuid)) {
+        throw new Exception(toJson([error: "Not supported diagram type: $it"]))
+    }.with(JsonOutput.&toJson)
 }
 //endregion
 
@@ -427,9 +401,9 @@ String getDataForCompositeDiagram(Map<String, Object> requestContent)
 private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closure defaultBehavior) {
     switch (requestContent.type as Diagram)
     {
-        case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE] :
+        case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
             return getDataStandardDiagram(requestContent as RequestGetDataForCompositeDiagram)
-        case [DONUT, PIE] :
+        case [DONUT, PIE]:
             return getDataRoundDiagram(requestContent as RequestGetDataForCompositeDiagram)
         case SUMMARY:
             return getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram)
@@ -1299,4 +1273,24 @@ private setTitleInLinkAttribute(def attr)
     def validTypes = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
     return attr.type in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
 }
+
+/**
+ * Метод для изменения запроса с целью подмены объекта фильтрации
+ * @param requestContent - запрос на построение диаграммы
+ * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
+ * @return изменённый запрос
+ */
+private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid) {
+    Closure<Map<String, Object>> transform = { Map<String, Object> map ->
+        def data = map.data as Map<String, Object>
+        def newData = data.collectEntries { key, value ->
+            def dataForDiagram = [:] << (value as Map<String, Object>)
+            dataForDiagram.descriptor = DashboardMarshaller.substitutionCardObject(dataForDiagram.descriptor as String, cardObjectUuid)
+            return [(key): dataForDiagram]
+        }
+        return [type: map.type, data: newData]
+    }
+    return cardObjectUuid ? transform(requestContent) : requestContent
+}
+
 //endregion
