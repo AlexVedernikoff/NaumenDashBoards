@@ -2,7 +2,7 @@
 import type {Attribute, AttributeMap} from 'store/sources/attributes/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {Context} from 'utils/api/types';
-import {FormikProps} from 'formik';
+import type {FormikProps} from 'formik';
 import {NewWidget} from 'entities';
 import type {Role} from 'store/dashboard/types';
 import type {SaveFormData, CreateFormData} from 'components/organisms/WidgetFormPanel/types';

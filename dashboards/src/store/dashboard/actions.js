@@ -174,7 +174,7 @@ const getPassedWidget = (context: Context): ThunkAction => async (dispatch: Disp
 	const descriptorStr = localStorage.getItem(key);
 
 	if (descriptorStr) {
-		const newWidget = new NewWidget(getNextRow(widgets.data.map));
+		const newWidget: Object = new NewWidget(getNextRow(widgets.data.map));
 		const descriptor = JSON.parse(descriptorStr);
 		let classFqn;
 

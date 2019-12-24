@@ -3,7 +3,7 @@ import {Chart} from './WidgetFields';
 import {CHART_VARIANTS} from 'utils/chart';
 import {FieldLabel} from 'components/atoms';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import {FormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import React from 'react';
 import styles from './styles.less';
 import {WIDGET_VARIANTS} from 'utils/widget';

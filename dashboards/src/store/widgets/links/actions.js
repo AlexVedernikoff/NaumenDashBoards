@@ -1,6 +1,6 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
-import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
+import {createOrdinalName} from 'utils/widget';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin, ReceiveLinkPayload} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
@@ -22,14 +22,12 @@ const getPartsClassFqn = (classFqn: ?string) => {
 	};
 };
 
-const createCommonPostData = (widget: Widget) => {
+const createLegacyPostData = (widget: Widget) => {
 	const {descriptor, diagramName: title, source} = widget;
 	const baseClassFqn = source && source.value;
-
 	const {cases, classFqn} = getPartsClassFqn(baseClassFqn);
 
 	return {
-		attrCodes: null,
 		cases,
 		classFqn,
 		descriptor,
@@ -37,20 +35,16 @@ const createCommonPostData = (widget: Widget) => {
 	};
 };
 
-const createCompositePostData = (widget: Widget) => {
-	const {diagramName: title, order} = widget;
+const createPostData = (widget: Widget, ordinalNumber: number) => {
+	let postData = {};
+	const source = widget[createOrdinalName(FIELDS.source, ordinalNumber)];
+	const descriptor = widget[createOrdinalName(FIELDS.descriptor, ordinalNumber)];
 
-	if (Array.isArray(order)) {
-		const firstNumber = order[0];
-		const createName = createOrderName(firstNumber);
-		const descriptor = widget[createName(FIELDS.descriptor)];
-		const source = widget[createName(FIELDS.source)];
-		const baseClassFqn = source && source.value;
+	if (source) {
+		const {label: title, value} = source;
+		const {cases, classFqn} = getPartsClassFqn(value);
 
-		const {cases, classFqn} = getPartsClassFqn(baseClassFqn);
-
-		return {
-			attrCodes: null,
+		postData = {
 			cases,
 			classFqn,
 			descriptor,
@@ -58,58 +52,29 @@ const createCompositePostData = (widget: Widget) => {
 		};
 	}
 
-	return {};
+	return postData;
 };
 
 /**
  * Создание ссылки для перехода на данные диаграммы
  * @param {Widget} widget - данные виджета
+ * @param {number} ordinalNumber - порядковый номер выбранного источника
  * @param {DrillDownMixin} mixin - примесь данных (создается при выборе конкретного элемента графика)
  * @returns {Function}
  */
-const drillDown = (widget: Widget, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
-
-	const creator = [SUMMARY, TABLE].includes(widget.type) ? createCompositePostData : createCommonPostData;
-	let postData = creator(widget);
+const drillDown = (widget: Widget, ordinalNumber?: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	let postData = ordinalNumber ? createPostData(widget, ordinalNumber) : createLegacyPostData(widget);
+	let key = widget.id;
 
 	if (mixin && typeof mixin === 'object') {
 		postData = {...postData, ...mixin};
 	}
 
-	dispatch(getLink(widget.id, postData));
-};
-
-/**
- * Создание ссылки для перехода на данные комбо диаграммы
- * @param {Widget} widget - данные виджета
- * @param {number} orderNum - порядковый номер выбранного источника
- * @param {DrillDownMixin} mixin - примесь данных (создается при выборе конкретного элемента графика)
- * @returns {Function}
- */
-const comboDrillDown = (widget: Widget, orderNum: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const createName = createOrderName(orderNum);
-	const source = widget[createName(FIELDS.source)];
-	const descriptor = widget[createName(FIELDS.descriptor)];
-
-	if (source) {
-		const {label, value} = source;
-		const {cases, classFqn} = getPartsClassFqn(value);
-
-		let postData = {
-			attrCodes: null,
-			cases,
-			classFqn,
-			descriptor,
-			title: label
-		};
-
-		if (mixin && typeof mixin === 'object') {
-			postData = {...postData, ...mixin};
-		}
-
-		dispatch(getLink(widget.id, postData));
+	if (ordinalNumber) {
+		key = `${key}_${widget[createOrdinalName(FIELDS.dataKey, ordinalNumber)]}`;
 	}
+
+	dispatch(getLink(key, postData));
 };
 
 /**
@@ -119,13 +84,15 @@ const comboDrillDown = (widget: Widget, orderNum: number, mixin: ?DrillDownMixin
  * @returns {Function}
  */
 const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {links} = getState().widgets;
+	const {dashboard, widgets} = getState();
+	const {subjectUuid} = dashboard.context;
+	const {links} = widgets;
 	let link = links[id];
 
 	if (!link) {
 		dispatch(requestLink(id));
 		try {
-			const {data} = await client.post(buildUrl('dashboardDrilldown', 'getLink', 'requestContent'), postData);
+			const {data} = await client.post(buildUrl('dashboardDrilldown', 'getLink', `requestContent,'${subjectUuid}'`), postData);
 			link = data;
 			dispatch(
 				receiveLink({link, id})
@@ -154,6 +121,5 @@ const recordLinkError = (payload: string) => ({
 });
 
 export {
-	comboDrillDown,
 	drillDown
 };

@@ -11,6 +11,22 @@ const ATTRIBUTES_EVENTS = {
 	UNKNOWN_ATTRIBUTES_ACTION
 };
 
+// Типы атрибутов
+const COMPUTED_ATTR: 'COMPUTED_ATTR' = 'COMPUTED_ATTR';
+const DATE = ['date', 'dateTime'];
+const INTEGER = ['integer', 'double'];
+const OBJECT = ['object', 'boLinks', 'backBOLinks'];
+const REF = [...OBJECT, 'catalogItemSet', 'catalogItem'];
+
+const TYPES = {
+	COMPUTED_ATTR,
+	DATE,
+	INTEGER,
+	OBJECT,
+	REF
+};
+
 export {
-	ATTRIBUTES_EVENTS
+	ATTRIBUTES_EVENTS,
+	TYPES
 };

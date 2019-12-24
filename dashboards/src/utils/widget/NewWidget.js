@@ -3,7 +3,6 @@ import type {LayoutItem} from 'utils/layout/types';
 
 class NewWidget {
 	static id: string = 'new';
-	descriptor: string = '';
 	diagramName: string = '';
 	id: string = NewWidget.id;
 	layout: LayoutItem = {
@@ -14,7 +13,6 @@ class NewWidget {
 		y: 0
 	};
 	name: string = 'Новый виджет';
-	source: any = null;
 
 	/**
 	 * Устанавливаем начальную позицию по вертикали.

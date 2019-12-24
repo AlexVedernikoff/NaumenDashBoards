@@ -16,8 +16,9 @@ export class Diagram extends Component<Props> {
 	renderContent = () => {
 		const {buildData, widget} = this.props;
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+		const {data, error} = buildData;
 
-		if (buildData.data && !buildData.error) {
+		if (data && !error) {
 			const types = {[SUMMARY]: Summary, [TABLE]: Table};
 			const DiagramByType = types[widget.type] || Chart;
 

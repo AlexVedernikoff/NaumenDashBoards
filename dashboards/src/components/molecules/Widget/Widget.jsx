@@ -1,23 +1,45 @@
 // @flow
-import {CHART_VARIANTS} from 'utils/chart';
 import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
 import cn from 'classnames';
 import {createName, createSnapshot, FILE_LIST} from 'utils/export';
-import {createOrderName} from 'utils/widget';
+import {createOrdinalName} from 'utils/widget';
 import {Diagram} from 'components/molecules';
 import {ExportIcon} from 'icons/header';
-import type {ExportItem, Props} from './types';
+import type {ExportItem, Props, State} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {IconButton} from 'components/atoms';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
-export class Widget extends PureComponent<Props> {
+export class Widget extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: ''
 	};
 
+	state = {
+		hasError: false
+	};
+
 	ref = createRef();
+
+	static getDerivedStateFromError (error: Object) {
+		window.top.console.log(error);
+
+		return {
+			hasError: true
+		};
+	}
+
+	componentDidUpdate (prevProps: Props) {
+		if (prevProps.buildData) {
+			const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}} = prevProps;
+			const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}} = this.props;
+
+			if (nextLoading !== prevLoading || nextUpdateDate !== prevUpdateDate) {
+				this.setState({hasError: false});
+			}
+		}
+	}
 
 	getClassName = () => {
 		const {className, isSelected} = this.props;
@@ -31,14 +53,9 @@ export class Widget extends PureComponent<Props> {
 		return cn(CN);
 	};
 
-	handleClickComboDrillDownButton = (num: number) => () => {
+	handleClickDrillDownButton = (num?: number) => () => {
 		const {data, onDrillDown} = this.props;
 		onDrillDown(data, num);
-	};
-
-	handleClickDrillDownButton = () => {
-		const {data, onDrillDown} = this.props;
-		onDrillDown(data);
 	};
 
 	handleClickEditButton = () => {
@@ -77,7 +94,7 @@ export class Widget extends PureComponent<Props> {
 				<div className={styles.actionButtonsContainer}>
 					{this.renderEditButton()}
 					{this.renderExportButton()}
-					{this.renderDrillDownButtonByType()}
+					{this.renderDrillDownButton()}
 					{this.renderRemoveButton()}
 				</div>
 			);
@@ -86,37 +103,28 @@ export class Widget extends PureComponent<Props> {
 
 	renderDiagram = () => {
 		const {buildData, data, isNew} = this.props;
+		const {hasError} = this.state;
 
-		if (!isNew && buildData) {
+		if (!isNew && buildData && !hasError) {
 			return <Diagram buildData={buildData} widget={data} />;
 		}
 	};
 
-	renderDrillDownButton = () => (
-		<IconButton tip="Перейти" onClick={this.handleClickDrillDownButton}>
-			<UnionIcon />
-		</IconButton>
-	);
-
-	renderDrillDownButtonByType = () => {
-		const {type} = this.props.data;
-
-		if (type === CHART_VARIANTS.COMBO) {
-			return this.renderDrillDownButtons();
-		}
-
-		return this.renderDrillDownButton();
+	renderDrillDownButton = () => {
+		const {data: widget} = this.props;
+		return Array.isArray(widget.order) ? this.renderDrillDownButtons() : this.renderLegacyDrillDownButton();
 	};
 
 	renderDrillDownButtons = () => {
-		const {data} = this.props;
-		const {order} = data;
+		const {data: widget} = this.props;
+		const {order} = widget;
 
-		if (Array.isArray(order)) {
-			return order.map(num => {
-				const createName = createOrderName(num);
-				const dataKey = data[createName(FIELDS.dataKey)];
-				const source = data[createName(FIELDS.source)];
+		return order.map(number => {
+			const sourceForCompute = widget[createOrdinalName(FIELDS.sourceForCompute, number)];
+
+			if (!sourceForCompute) {
+				const dataKey = widget[createOrdinalName(FIELDS.dataKey, number)];
+				const source = widget[createOrdinalName(FIELDS.source, number)];
 				let tipText = 'Перейти';
 
 				if (source) {
@@ -124,12 +132,12 @@ export class Widget extends PureComponent<Props> {
 				}
 
 				return (
-					<IconButton key={dataKey} onClick={this.handleClickComboDrillDownButton(num)} tip={tipText}>
+					<IconButton key={dataKey} onClick={this.handleClickDrillDownButton(number)} tip={tipText}>
 						<UnionIcon />
 					</IconButton>
 				);
-			});
-		}
+			}
+		});
 	};
 
 	renderEditButton = () => {
@@ -140,6 +148,16 @@ export class Widget extends PureComponent<Props> {
 				<IconButton onClick={this.handleClickEditButton} tip="Редактировать">
 					<EditIcon />
 				</IconButton>
+			);
+		}
+	};
+
+	renderError = () => {
+		const {hasError} = this.state;
+
+		if (hasError) {
+			return (
+				<div className={styles.error}>Ошибка построения.</div>
 			);
 		}
 	};
@@ -158,6 +176,12 @@ export class Widget extends PureComponent<Props> {
 		<div className={styles.exportItem} data-type={item.key} key={item.key} onClick={this.handleClickExportButton}>
 			{item.text}
 		</div>
+	);
+
+	renderLegacyDrillDownButton = () => (
+		<IconButton tip="Перейти" onClick={this.handleClickDrillDownButton()}>
+			<UnionIcon />
+		</IconButton>
 	);
 
 	renderRemoveButton = () => {
@@ -188,6 +212,7 @@ export class Widget extends PureComponent<Props> {
 			<div {...gridProps} className={this.getClassName()} ref={this.ref}>
 				{this.renderDiagram()}
 				{this.renderButtons()}
+				{this.renderError()}
 				{children}
 			</div>
 		);

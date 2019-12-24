@@ -4,6 +4,7 @@ import Checkbox from './Checkbox';
 import Divider from './Divider';
 import DropDown from './DropDown';
 import ExtendButton from './ExtendButton';
+import FieldError from './FieldError';
 import FieldLabel from './FieldLabel';
 import IconButton from './IconButton';
 import Label from './Label';
@@ -20,6 +21,7 @@ export {
 	Divider,
 	DropDown,
 	ExtendButton,
+	FieldError,
 	FieldLabel,
 	IconButton,
 	Label,

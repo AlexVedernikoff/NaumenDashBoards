@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {createOrderName, getNumberFromName} from 'utils/widget';
+import {createOrdinalName, getMainOrdinalNumber, getNumberFromName} from 'utils/widget';
 import {CHART_VARIANTS} from 'utils/chart/constants';
-import {comboDrillDown, drillDown} from 'store/widgets/links/actions';
+import {drillDown} from 'store/widgets/links/actions';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
@@ -36,15 +36,28 @@ const addFilter = (mixin: DrillDownMixin, attr: ?Attribute, value: string | numb
  * @param {DrillDownMixin} mixin - объект будущей примеси
  */
 const axisChart = (widget: Widget, {categories, series}: DiagramBuildData, config: any, mixin: DrillDownMixin) => {
-	const {breakdown, breakdownGroup, group, xAxis} = widget;
 	const {dataPointIndex, seriesIndex} = config;
+	let breakdown, breakdownGroup, group, mainNumber, xAxis;
+
+	if (!widget.order) {
+		xAxis = widget[FIELDS.xAxis];
+		group = widget[FIELDS.group];
+		breakdown = widget[FIELDS.breakdown];
+		breakdownGroup = widget[FIELDS.breakdownGroup];
+	} else {
+		mainNumber = getMainOrdinalNumber(widget);
+		xAxis = widget[createOrdinalName(FIELDS.xAxis, mainNumber)];
+		group = widget[createOrdinalName(FIELDS.group, mainNumber)];
+		breakdown = widget[createOrdinalName(FIELDS.breakdown, mainNumber)];
+		breakdownGroup = widget[createOrdinalName(FIELDS.breakdownGroup, mainNumber)];
+	}
 
 	if (Array.isArray(categories) && Array.isArray(series)) {
 		addFilter(mixin, xAxis, categories[dataPointIndex], group);
 		addFilter(mixin, breakdown, series[seriesIndex].name, breakdownGroup);
 	}
 
-	store.dispatch(drillDown(widget, mixin));
+	store.dispatch(drillDown(widget, mainNumber, mixin));
 };
 
 /**
@@ -64,15 +77,15 @@ const comboChart = (widget: Widget, {labels, series}: DiagramBuildData, config: 
 
 	if (currentKey) {
 		const currentNumber = getNumberFromName(currentKey);
-		const xAxis = widget[createOrderName(currentNumber)(FIELDS.xAxis)];
-		const group = widget[createOrderName(currentNumber)(FIELDS.group)];
-		const breakdown = widget[createOrderName(currentNumber)(FIELDS.breakdown)];
-		const breakdownGroup = widget[createOrderName(currentNumber)(FIELDS.breakdownGroup)];
+		const xAxis = widget[createOrdinalName(FIELDS.xAxis, currentNumber)];
+		const group = widget[createOrdinalName(FIELDS.group, currentNumber)];
+		const breakdown = widget[createOrdinalName(FIELDS.breakdown, currentNumber)];
+		const breakdownGroup = widget[createOrdinalName(FIELDS.breakdownGroup, currentNumber)];
 
 		addFilter(mixin, xAxis, labels[dataPointIndex], group);
 		addFilter(mixin, breakdown, series[seriesIndex].breakdownValue, breakdownGroup);
 
-		store.dispatch(comboDrillDown(widget, currentNumber, mixin));
+		store.dispatch(drillDown(widget, currentNumber, mixin));
 	}
 };
 
@@ -84,13 +97,22 @@ const comboChart = (widget: Widget, {labels, series}: DiagramBuildData, config: 
  * @param {DrillDownMixin} mixin - объект будущей примеси
  */
 const circleChart = (widget: Widget, {labels}: DiagramBuildData, {dataPointIndex}: any, mixin: DrillDownMixin) => {
-	const {breakdown, breakdownGroup} = widget;
+	let breakdown, breakdownGroup, mainNumber;
+
+	if (!widget.order) {
+		breakdown = widget[FIELDS.breakdown];
+		breakdownGroup = widget[FIELDS.breakdownGroup];
+	} else {
+		mainNumber = getMainOrdinalNumber(widget);
+		breakdown = widget[createOrdinalName(FIELDS.breakdown, mainNumber)];
+		breakdownGroup = widget[createOrdinalName(FIELDS.breakdownGroup, mainNumber)];
+	}
 
 	if (Array.isArray(labels)) {
 		addFilter(mixin, breakdown, labels[dataPointIndex], breakdownGroup);
 	}
 
-	store.dispatch(drillDown(widget, mixin));
+	store.dispatch(drillDown(widget, mainNumber, mixin));
 };
 
 /**

@@ -1,29 +1,17 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
 import type {Layout, LayoutItem} from 'utils/layout/types';
 import type {NewWidget} from 'entities';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {WIDGETS_EVENTS} from './constants';
 
 export type Widget = {
-	aggregation?: string,
-	breakdown?: Attribute | null,
-	breakdownGroup?: string,
-	calcTotalColumn?: boolean,
-	calcTotalRow?: boolean,
-	chart?: SelectValue | null,
 	colors?: Array<string>,
-	column?: Attribute,
-	descriptor: ?string,
 	diagramName: string,
-	group?: string,
 	id: string,
-	indicator?: Attribute | null,
 	layout: LayoutItem,
 	legendPosition?: SelectValue,
-	order?: Array<number>,
+	order: Array<number>,
 	name: string,
-	row?: Attribute,
 	showLegend?: boolean;
 	showName?: boolean,
 	showValue?: boolean,
@@ -31,9 +19,7 @@ export type Widget = {
 	showYAxis?: boolean,
 	source?: SelectValue,
 	type: string,
-	withBreakdown: boolean,
-	xAxis?: Attribute,
-	yAxis?: Attribute,
+	[string]: any
 };
 
 export type AddWidget = {

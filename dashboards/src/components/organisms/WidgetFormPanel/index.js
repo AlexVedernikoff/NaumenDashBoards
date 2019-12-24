@@ -1,17 +1,14 @@
 // @flow
-import {FIELDS, OPTIONS, TABS, TYPES, VALUES} from './constants';
-import {getAggregateOptions, getGroupOptions} from './helpers';
+import {FIELDS, OPTIONS, SETTINGS, TABS, VALUES} from './constants';
 import styles from './styles.less';
 import WidgetFormPanel from './WidgetFormPanel';
 
 export {
 	FIELDS,
-	getAggregateOptions,
-	getGroupOptions,
 	OPTIONS,
 	styles,
+	SETTINGS,
 	TABS,
-	TYPES,
 	VALUES
 };
 

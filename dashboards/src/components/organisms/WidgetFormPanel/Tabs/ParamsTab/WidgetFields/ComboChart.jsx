@@ -1,32 +1,32 @@
 // @flow
-import {createOrderName, getNumberFromName} from 'utils/widget';
-import {FIELDS, getAggregateOptions, getGroupOptions, OPTIONS, styles as mainStyles, TYPES} from 'components/organisms/WidgetFormPanel';
-import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import {createOrdinalName, createRefName, getNumberFromName} from 'utils/widget';
+import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
+import {FIELDS, OPTIONS, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {styles} from 'components/organisms/WidgetFormPanel/Tabs/ParamsTab';
+import {TYPES} from 'store/sources/attributes/constants';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class ComboChart extends OrderFormBuilder {
+export class ComboChart extends DataFormBuilder {
 	defaultOrder = [1, 2];
 	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
 
 	changeDependingOnMain = (number: number) => {
 		const {setFieldValue, values} = this.props;
-		const order = this.getOrder();
-		const mainNumber = order[0];
-		const mainSource = values[createOrderName(mainNumber)(FIELDS.source)];
-		const currentSource = values[createOrderName(number)(FIELDS.source)];
+		const mainNumber = this.getMainNumber();
+		const mainSource = values[createOrdinalName(FIELDS.source, mainNumber)];
+		const currentSource = values[createOrdinalName(FIELDS.source, number)];
 
 		if (mainNumber !== number && mainSource && currentSource) {
-			const xAxisName = createOrderName(number)(FIELDS.xAxis);
-			const groupName = createOrderName(number)(FIELDS.group);
+			const xAxisName = createOrdinalName(FIELDS.xAxis, number);
+			const groupName = createOrdinalName(FIELDS.group, number);
 			const currentXAxis = values[xAxisName];
 
 			if (mainSource.value === currentSource.value) {
 				this.setMainValue(xAxisName, groupName);
 			} else {
-				const mainXAxis = values[createOrderName(mainNumber)(FIELDS.xAxis)];
+				const mainXAxis = values[createOrdinalName(FIELDS.xAxis, mainNumber)];
 
 				if (mainXAxis && currentXAxis && mainXAxis.type !== currentXAxis.type) {
 					setFieldValue(xAxisName, null);
@@ -41,28 +41,31 @@ export class ComboChart extends OrderFormBuilder {
 
 	changeSourceRefs = (name: string) => this.changeDependingOnMain(getNumberFromName(name));
 
+	getMainNumber = () => this.getOrder()[0];
+
 	handleSelectComboGroup = async (name: string, group: SelectValue) => {
-		const order = this.getOrder();
 		await this.handleSelect(name, group);
 
-		if (getNumberFromName(name) === order[0]) {
+		if (getNumberFromName(name) === this.getMainNumber()) {
 			this.changeRefFields();
 		}
 	};
 
-	renderYAxisInput = (yAxis: string, aggregationName: string) => {
-		const {values} = this.props;
+	setMainValue = (...names: Array<string>) => {
+		const {setFieldValue, values} = this.props;
+		const mainNumber = this.getMainNumber();
 
-		const props = {
-			name: yAxis,
-			onSelect: this.handleSelectWithRef(aggregationName, getAggregateOptions),
-			placeholder: 'Ось Y',
-			refInput: this.renderAggregation(aggregationName, yAxis),
-			value: values[yAxis],
-			withCreate: true
-		};
+		names.forEach(async name => {
+			const mainProperty = values[createOrdinalName(this.getBaseName(name), mainNumber)];
+			const currentProperty = values[name];
+			const currentIsNotMain = !currentProperty
+				|| mainProperty.code !== currentProperty.code
+				|| mainProperty !== currentProperty;
 
-		return this.renderAttribute(props);
+			if (mainProperty && currentIsNotMain) {
+				setFieldValue(name, mainProperty);
+			}
+		});
 	};
 
 	renderChartInput = (name: string = FIELDS.type) => {
@@ -88,40 +91,45 @@ export class ComboChart extends OrderFormBuilder {
 		);
 	};
 
-	renderComboXAxis = (xAxisName: string, groupName: string) => {
+	renderXAxis = (name: string) => {
 		const {values} = this.props;
-		const mainNumber = this.getOrder()[0];
-		const mainSource = values[createOrderName(mainNumber)(FIELDS.source)];
-		const currentNumber = getNumberFromName(xAxisName);
-		const currentSource = values[createOrderName(currentNumber)(FIELDS.source)];
-		const currentXAxis = values[xAxisName];
+		const mainNumber = this.getMainNumber();
+		const mainSource = values[createOrdinalName(FIELDS.source, mainNumber)];
+		const currentNumber = getNumberFromName(name);
+		const currentSource = values[createOrdinalName(FIELDS.source, currentNumber)];
+		const currentGroupName = createOrdinalName(FIELDS.group, currentNumber);
+		const currentXAxis = values[name];
 		let onSelectCallback;
 
 		if (mainSource === currentSource) {
 			onSelectCallback = this.changeRefFields;
 		}
 
-		const props = {
-			isDisabled: false,
-			name: xAxisName,
-			onSelect: this.handleSelectWithRef(groupName, getGroupOptions),
-			onSelectCallback,
-			options: undefined,
-			refInput: undefined,
-			value: currentXAxis
+		const refInput = {
+			name: currentGroupName,
+			mixin: {
+				isDisabled: false,
+				onSelect: this.handleSelectComboGroup
+			},
+			type: 'group',
+			value: values[currentGroupName]
 		};
 
-		const groupMixin = {
+		const props = {
 			isDisabled: false,
-			onSelect: this.handleSelectComboGroup
+			name,
+			onSelectCallback,
+			options: undefined,
+			refInput,
+			value: currentXAxis
 		};
 
 		if (mainNumber !== currentNumber && mainSource && currentSource) {
 			if (mainSource.value === currentSource.value) {
 				props.isDisabled = true;
 			} else {
-				const mainXAxis = values[createOrderName(mainNumber)(FIELDS.xAxis)];
-				let xAxisOptions = this.getAttributeOptions(xAxisName);
+				const mainXAxis = values[createOrdinalName(FIELDS.xAxis, mainNumber)];
+				let xAxisOptions = this.getAttributeOptions(currentSource.value);
 
 				if (xAxisOptions.length > 0 && mainXAxis) {
 					const {DATE, OBJECT} = TYPES;
@@ -142,41 +150,57 @@ export class ComboChart extends OrderFormBuilder {
 				props.options = xAxisOptions;
 			}
 
-			groupMixin.isDisabled = true;
+			refInput.mixin.isDisabled = true;
 		}
-
-		props.refInput = this.renderGroup(groupName, xAxisName, groupMixin);
 
 		return this.renderAttribute(props);
 	};
 
-	renderComboYAxis = (yAxis: string, chart: string, aggregation: string, withBreakdown: string, breakdown: string, breakdownGroup: string) => {
+	renderYAxis = (name: string) => {
+		const chartName = createRefName(name, FIELDS.type);
+		const breakdownName = createRefName(name, FIELDS.breakdown);
+
 		return (
-			<div key={yAxis}>
-				{this.renderChartInput(chart)}
-				{this.renderYAxisInput(yAxis, aggregation)}
-				{this.renderBreakdownWithExtend(withBreakdown, breakdown, breakdownGroup)}
+			<div key={name}>
+				{this.renderChartInput(chartName)}
+				{this.renderYAxisInput(name)}
+				{this.renderBreakdown(breakdownName)}
 			</div>
 		);
 	};
 
-	renderInputs = () => {
-		const {aggregation, breakdown, breakdownGroup, group, source, type, xAxis, yAxis, withBreakdown} = FIELDS;
+	renderYAxisInput = (name: string) => {
+		const {values} = this.props;
+		const aggregationName = createRefName(name, FIELDS.aggregation);
 
-		return (
-			<Fragment>
-				{this.renderModal()}
-				{this.renderAddSourceInput()}
-				{this.renderByOrder(this.renderOrderSource(true, this.changeSourceRefs), source)}
-				{this.renderLabel('Ось Х')}
-				{this.renderByOrder(this.renderComboXAxis, [xAxis, group])}
-				{this.renderByOrder(this.renderComboYAxis, [yAxis, type, aggregation, withBreakdown, breakdown, breakdownGroup], true)}
-			</Fragment>
-		);
+		const refInput = {
+			name: aggregationName,
+			type: 'aggregation',
+			value: values[aggregationName]
+		};
+
+		const props = {
+			name,
+			placeholder: 'Ось Y',
+			refInput,
+			value: values[name],
+			withCreate: true
+		};
+
+		return this.renderAttribute(props);
 	};
 
 	render () {
-		return this.renderInputs();
+		const {xAxis, yAxis} = FIELDS;
+
+		return (
+			<Fragment>
+				{this.renderSourceSection(this.changeSourceRefs)}
+				{this.renderLabel('Ось Х')}
+				{this.renderByOrder(this.renderXAxis, xAxis, false)}
+				{this.renderByOrder(this.renderYAxis, yAxis)}
+			</Fragment>
+		);
 	}
 }
 

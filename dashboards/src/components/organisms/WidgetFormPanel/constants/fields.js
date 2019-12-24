@@ -63,4 +63,63 @@ const FIELDS = {
 	withBreakdown
 };
 
+const BASE_FIELDS = {
+	dataKey,
+	source,
+	sourceForCompute
+};
+
+const AXIS_FIELDS = {
+	...BASE_FIELDS,
+	aggregation,
+	breakdown,
+	breakdownGroup,
+	descriptor,
+	group,
+	xAxis,
+	yAxis
+};
+
+const CIRCLE_FIELDS = {
+	...BASE_FIELDS,
+	aggregation,
+	breakdown,
+	breakdownGroup,
+	descriptor,
+	group,
+	indicator
+};
+
+const COMBO_FIELDS = {
+	...AXIS_FIELDS,
+	type
+};
+
+const SUMMARY_FIELDS = {
+	...BASE_FIELDS,
+	aggregation,
+	descriptor,
+	indicator
+};
+
+const TABLE_FIELDS = {
+	...BASE_FIELDS,
+	aggregation,
+	breakdown,
+	breakdownGroup,
+	calcTotalColumn,
+	calcTotalRow,
+	column,
+	descriptor,
+	row
+};
+
+export {
+	AXIS_FIELDS,
+	CIRCLE_FIELDS,
+	COMBO_FIELDS,
+	SUMMARY_FIELDS,
+	TABLE_FIELDS
+};
+
 export default FIELDS;

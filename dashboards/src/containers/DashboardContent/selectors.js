@@ -1,6 +1,6 @@
 // @flow
 import type {AppState} from 'store/types';
-import {comboDrillDown, drillDown} from 'store/widgets/links/actions';
+import {drillDown} from 'store/widgets/links/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {editLayout, removeWidget, selectWidget} from 'store/widgets/data/actions';
 
@@ -23,7 +23,6 @@ export const props = (state: AppState): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
-	comboDrillDown,
 	drillDown,
 	editLayout,
 	removeWidget,

@@ -1,21 +1,21 @@
 // @flow
 import type {Control, Props, State} from './types';
-import {createOrderName} from 'utils/widget';
-import {getAggregateOptions, FIELDS, TYPES as ATTR_TYPES} from 'components/organisms/WidgetFormPanel';
+import {getAggregateOptions} from 'components/molecules/AttributeRefInput/helpers';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import Modal from 'components/molecules/Modal';
 import {number} from 'yup';
 import {operators, TYPES} from './constants';
 import type {OptionType} from 'react-select/src/types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import {Select} from 'components/molecules';
 import styles from './styles.less';
-import withForm from 'components/organisms/WidgetFormPanel/withForm';
+import {TYPES as ATTR_TYPES} from 'store/sources/attributes/constants';
 import uuid from 'tiny-uuid';
 
 const FIRST_NAME = uuid();
 const rule = number().required();
 
-export class ComputeAttrCreator extends Component<Props, State> {
+export class AttributeCreatingModal extends PureComponent<Props, State> {
 	state = {
 		constants: [],
 		controls: {
@@ -29,32 +29,8 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		},
 		first: FIRST_NAME,
 		focus: true,
-		last: FIRST_NAME,
-		sources: []
+		last: FIRST_NAME
 	};
-
-	static getDerivedStateFromProps (props: Props, state: State) {
-		const {values} = props;
-		const order = values[FIELDS.order];
-		const sources = [];
-
-		if (order) {
-			order.forEach(num => {
-				const source = values[createOrderName(num)(FIELDS.source)];
-
-				if (source) {
-					source.datakey = values[createOrderName(num)(FIELDS.dataKey)];
-					sources.push({...source});
-				}
-			});
-
-			state.sources = sources;
-
-			return state;
-		}
-
-		return null;
-	}
 
 	createName = () => {
 		const {controls} = this.state;
@@ -109,7 +85,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		this.handleSelect(name, option);
 	};
 
-	isSource = (source: OptionType) => source && this.state.sources.find(s => s.value === source.value);
+	isSource = (source: any) => source && typeof source === 'object' && this.props.sources.find(s => s.value === source.value);
 
 	deleteSourceRefControls = (name: string) => {
 		this.setState(state => {
@@ -234,7 +210,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 	onSubmit = () => {
 		const {AGGREGATION, ATTRIBUTE, SOURCE} = TYPES;
 		const {controls, first} = this.state;
-		const {onSubmit, name} = this.props;
+		const {onSubmit} = this.props;
 		const computeData = {};
 		let title = '';
 		let stringForCompute = '';
@@ -263,7 +239,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 					computeData[name] = {
 						aggregation: aggregationValue && aggregationValue.value,
 						attr: attr && attr.value,
-						dataKey: value.datakey
+						dataKey: value[FIELDS.dataKey]
 					};
 				}
 
@@ -272,7 +248,7 @@ export class ComputeAttrCreator extends Component<Props, State> {
 			}
 		}
 
-		onSubmit(name, {
+		onSubmit({
 			code: uuid(),
 			computeData,
 			stringForCompute,
@@ -281,26 +257,10 @@ export class ComputeAttrCreator extends Component<Props, State> {
 		});
 	};
 
-	getAttributes = (source?: string) => {
-		const {attributes, fetchAttributes} = this.props;
-		let options = [];
-
-		if (source) {
-			const currentAttr = attributes[source];
-
-			if (currentAttr) {
-				options = currentAttr.data;
-			} else {
-				fetchAttributes(source);
-			}
-		}
-
-		return options;
-	};
-
 	getOptions = (control: Control) => {
+		const {getAttributeOptions, sources} = this.props;
+		const {constants, controls} = this.state;
 		const {AGGREGATION, ATTRIBUTE} = TYPES;
-		const {sources, constants, controls} = this.state;
 		const {prev, type} = control;
 		const prevValue = prev && controls[prev].value;
 
@@ -308,8 +268,8 @@ export class ComputeAttrCreator extends Component<Props, State> {
 			return getAggregateOptions(prevValue);
 		}
 
-		if (type === ATTRIBUTE && prevValue && this.isSource(prevValue)) {
-			return this.getAttributes(prevValue.value);
+		if (type === ATTRIBUTE && this.isSource(prevValue)) {
+			return getAttributeOptions(prevValue);
 		}
 
 		return [...operators, ...constants, ...sources];
@@ -375,4 +335,4 @@ export class ComputeAttrCreator extends Component<Props, State> {
 	}
 }
 
-export default withForm(ComputeAttrCreator);
+export default AttributeCreatingModal;

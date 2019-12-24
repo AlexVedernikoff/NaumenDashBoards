@@ -33,6 +33,9 @@ const WIDGETS_EVENTS = {
 	UPDATE_WIDGET
 };
 
+const LIMIT = 30;
+
 export {
+	LIMIT,
 	WIDGETS_EVENTS
 };

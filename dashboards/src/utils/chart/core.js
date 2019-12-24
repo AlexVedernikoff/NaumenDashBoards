@@ -2,7 +2,8 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {CHART_TYPES, CHART_VARIANTS, LEGEND_POSITIONS} from './constants';
-import {createOrderName} from 'utils/widget';
+import {createOrdinalName, getMainOrdinalNumber} from 'utils/widget';
+import {DEFAULT_AGGREGATION} from 'components/molecules/AttributeRefInput/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
@@ -14,6 +15,13 @@ import type {Widget} from 'store/widgets/data/types';
  * @returns {boolean}
  */
 const isObject = (item: any): boolean => item && typeof item === 'object' && !Array.isArray(item);
+
+/**
+ * Функция проверяет имеет ли виджета устаревший формат
+ * @param {Widget} widget - данные виджета
+ * @returns {boolean}
+ */
+const hasLegacyFormat = (widget: Widget) => Array.isArray(widget.order);
 
 /**
  * Функция расширяет опции графика
@@ -79,8 +87,20 @@ const yAxisLabelFormatter = (horizontal: boolean) => (val: number, options: any)
  * @returns {ApexOptions}
  */
 const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (widget: Widget, chart: DiagramBuildData): ApexOptions => {
-	const {aggregation, showXAxis, showYAxis, type, xAxis, yAxis} = widget;
-	const stackedIsPercent = stacked && aggregation === VALUES.DEFAULT_AGGREGATION.PERCENT;
+	const {showXAxis, showYAxis, type} = widget;
+	let {aggregation: aggregationName, xAxis: xAxisName, yAxis: yAxisName} = FIELDS;
+
+	if (!hasLegacyFormat(widget)) {
+		const mainNumber = getMainOrdinalNumber(widget);
+		aggregationName = createOrdinalName(FIELDS.aggregation, mainNumber);
+		xAxisName = createOrdinalName(FIELDS.xAxis, mainNumber);
+		yAxisName = createOrdinalName(FIELDS.yAxis, mainNumber);
+	}
+
+	const aggregation = widget[aggregationName];
+	const xAxis = widget[xAxisName];
+	const yAxis = widget[yAxisName];
+	const stackedIsPercent = stacked && aggregation === DEFAULT_AGGREGATION.PERCENT;
 	const strokeWidth = type === CHART_VARIANTS.LINE ? 4 : 0;
 	let xAxisAttr = horizontal ? yAxis : xAxis;
 	let yAxisAttr = horizontal ? xAxis : yAxis;
@@ -130,7 +150,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 		};
 	}
 
-	if (aggregation === VALUES.DEFAULT_AGGREGATION.PERCENT) {
+	if (aggregation === DEFAULT_AGGREGATION.PERCENT) {
 		if (stacked) {
 			options.chart.stackType = '100%';
 		} else {
@@ -174,17 +194,17 @@ const comboChart = (widget: Widget, chart: DiagramBuildData) => {
 	let percentDataKeys = [];
 
 	if (Array.isArray(widget.order)) {
-		widget.order.filter(num => !widget[createOrderName(num)(FIELDS.sourceForCompute)])
-			.forEach(num => {
-				const aggregation = widget[createOrderName(num)(FIELDS.aggregation)];
-				const type = widget[createOrderName(num)(FIELDS.type)];
+		widget.order.filter(number => !widget[createOrdinalName(FIELDS.sourceForCompute, number)])
+			.forEach(number => {
+				const aggregation = widget[createOrdinalName(FIELDS.aggregation, number)];
+				const type = widget[createOrdinalName(FIELDS.type, number)];
 
 				if (!stacked && type.value === CHART_VARIANTS.COLUMN_STACKED) {
 					stacked = true;
 				}
 
-				if (aggregation && aggregation.value === VALUES.DEFAULT_AGGREGATION.PERCENT) {
-					percentDataKeys.push(widget[createOrderName(num)(FIELDS.dataKey)]);
+				if (aggregation && aggregation.value === DEFAULT_AGGREGATION.PERCENT) {
+					percentDataKeys.push(widget[createOrdinalName(FIELDS.dataKey, number)]);
 				}
 			});
 	}
@@ -242,14 +262,16 @@ const comboChart = (widget: Widget, chart: DiagramBuildData) => {
  * @returns {ApexOptions}
  */
 const circleChart = (widget: Widget, chart: DiagramBuildData): ApexOptions => {
-	const {aggregation, legendPosition} = widget;
+	const {legendPosition} = widget;
+	const aggregationName = hasLegacyFormat(widget) ? FIELDS.aggregation : createOrdinalName(FIELDS.aggregation, getMainOrdinalNumber(widget));
+	const aggregation = widget[aggregationName];
 	const legendPositionValue = getLegendPositionValue(legendPosition);
 
 	const options: Object = {
 		labels: chart.labels
 	};
 
-	if (aggregation !== VALUES.DEFAULT_AGGREGATION.PERCENT) {
+	if (aggregation !== DEFAULT_AGGREGATION.PERCENT) {
 		options.dataLabels = {
 			formatter: function (val, options) {
 				return options.w.config.series[options.seriesIndex];
@@ -390,7 +412,7 @@ const getChartType = (type: string) => {
  * @param {number} width - ширина графика
  * @returns {number}
  */
-const getLegendWidth = (width: number) => width * 0.25;
+const getLegendWidth = (width: number) => width * 0.2;
 
 const getLegendPositionValue = (legendPosition?: Object) => (legendPosition && legendPosition.value) || LEGEND_POSITIONS.bottom;
 

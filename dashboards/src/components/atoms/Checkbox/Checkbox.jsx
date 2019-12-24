@@ -16,9 +16,13 @@ class Checkbox extends Component<Props> {
 
 	getIconClassName = () => {
 		const {activeColor, className, value} = this.props;
-		const activeCN = value && activeColor && `active${this.upperFirst(activeColor)}`;
+		const CN = [styles.icon, className];
 
-		return cn(styles.icon, styles[activeCN], className);
+		if (value && activeColor) {
+			CN.push(`active${this.upperFirst(activeColor)}`);
+		}
+
+		return cn(CN);
 	};
 
 	handleClick = () => {

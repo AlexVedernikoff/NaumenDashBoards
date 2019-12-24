@@ -90,11 +90,6 @@ export class DashboardContent extends Component<Props, State> {
 		}
 	};
 
-	handleDrillDownWidget = (widget: WidgetType, orderNum?: number) => {
-		const {comboDrillDown, drillDown} = this.props;
-		orderNum ? comboDrillDown(widget, orderNum) : drillDown(widget);
-	};
-
 	removeWidget = (onlyPersonal: boolean) => {
 		const {removeWidget} = this.props;
 		const {widgetIdToRemove} = this.state;
@@ -154,7 +149,7 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderWidget = (widget: WidgetType) => {
-		const {buildData, editable, selectedWidget} = this.props;
+		const {buildData, drillDown, editable, selectedWidget} = this.props;
 		const {id, layout} = widget;
 		const isNew = id === NewWidget.id;
 		const ref = isNew ? this.newWidgetRef : null;
@@ -174,7 +169,7 @@ export class DashboardContent extends Component<Props, State> {
 				isNew={isNew}
 				isSelected={selectedWidget === widget.id}
 				key={id}
-				onDrillDown={this.handleDrillDownWidget}
+				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
 				onRemove={this.showRemovalModal}
 				ref={ref}

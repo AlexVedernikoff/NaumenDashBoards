@@ -2,7 +2,7 @@
 import {ColorPalette} from 'components/molecules';
 import {FieldLabel} from 'components/atoms';
 import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
-import {FormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import {FormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
@@ -109,7 +109,7 @@ export class Chart extends FormBuilder {
 				{this.renderVisibilityAxisCheckboxes()}
 				{this.renderLegendCheckbox()}
 				{this.renderLegendPositionInput()}
-				{this.renderSectionDivider()}
+				{this.renderDivider('section')}
 				{this.renderColorPalette()}
 			</Fragment>
 		);

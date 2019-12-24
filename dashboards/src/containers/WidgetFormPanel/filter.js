@@ -1,148 +1,88 @@
 // @flow
+import {AXIS_FIELDS, CIRCLE_FIELDS, COMBO_FIELDS, SUMMARY_FIELDS, TABLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {CHART_VARIANTS} from 'utils/chart';
-import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
+import {DEFAULT_AGGREGATION, DEFAULT_GROUP} from 'components/molecules/AttributeRefInput/constants';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {FormData} from 'components/organisms/WidgetFormPanel/types';
-import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
-
-const compositeFields = (data: FormData, {base, dynamic}) => () => {
-	const {order} = data;
-
-	if (Array.isArray(order)) {
-		order.forEach(num => {
-			const createName = createOrderName(num);
-
-			dynamic.forEach(baseName => {
-				base.push(createName(baseName));
-			});
-		});
-	}
-
-	return base;
-};
+import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
 
 const {
 	aggregation,
 	breakdown,
 	breakdownGroup,
-	calcTotalColumn,
-	calcTotalRow,
 	colors,
-	column,
 	computedAttrs,
-	dataKey,
-	descriptor,
 	diagramName,
 	group,
-	indicator,
 	layout,
 	legendPosition,
 	name,
 	order,
-	row,
 	showLegend,
 	showName,
 	showValue,
 	showXAxis,
 	showYAxis,
-	source,
-	sourceForCompute,
-	type,
-	xAxis,
-	yAxis
+	type
 } = FIELDS;
 
-const axisChartFields = [
-	aggregation,
-	breakdown,
-	breakdownGroup,
-	colors,
-	descriptor,
-	group,
-	legendPosition,
-	showLegend,
-	showName,
-	showValue,
-	showXAxis,
-	showYAxis,
-	source,
-	xAxis,
-	yAxis
-];
+const getOrdinalFields = (order: Array<number>, keys: Object) => {
+	const fields = [];
 
-const circleChartFields = [
-	aggregation,
-	breakdown,
-	breakdownGroup,
-	colors,
-	descriptor,
-	indicator,
-	legendPosition,
-	showLegend,
-	showValue,
-	source
-];
+	order.forEach(number => {
+		Object.keys(keys).forEach(key => {
+			fields.push(createOrdinalName(key, number));
+		});
+	});
 
-const orderFields = [
-	computedAttrs,
-	order
-];
+	return fields;
+};
 
-const comboFields = {
-	base: [
+const getAxisChartFields = (order: Array<number>) => {
+	const fields = [
 		colors,
 		legendPosition,
 		showLegend,
 		showValue,
-		...orderFields
-	],
-	dynamic: [
-		aggregation,
-		breakdown,
-		breakdownGroup,
-		dataKey,
-		descriptor,
-		group,
-		source,
-		sourceForCompute,
-		type,
-		xAxis,
-		yAxis
-	]
+		showXAxis,
+		showYAxis
+	];
+
+	return [...fields, ...getOrdinalFields(order, AXIS_FIELDS)];
 };
 
-const summaryFields = {
-	base: orderFields,
-	dynamic: [
-		aggregation,
-		dataKey,
-		descriptor,
-		indicator,
-		source,
-		sourceForCompute
-	]
+const getCircleChartFields = (order: Array<number>) => {
+	const fields = [
+		colors,
+		legendPosition,
+		showLegend,
+		showValue
+	];
+
+	return [...fields, ...getOrdinalFields(order, CIRCLE_FIELDS)];
 };
 
-const tableFields = {
-	base: orderFields,
-	dynamic: [
-		aggregation,
-		breakdown,
-		breakdownGroup,
-		calcTotalColumn,
-		calcTotalRow,
-		column,
-		dataKey,
-		descriptor,
-		row,
-		source,
-		sourceForCompute
-	]
+const getComboChartFields = (order: Array<number>) => {
+	const fields = [
+		colors,
+		legendPosition,
+		showLegend,
+		showValue
+	];
+
+	return [...fields, ...getOrdinalFields(order, COMBO_FIELDS)];
 };
+
+const getSummaryFields = (order: Array<number>) => getOrdinalFields(order, SUMMARY_FIELDS);
+
+const getTableFields = (order: Array<number>) => getOrdinalFields(order, TABLE_FIELDS);
 
 const defaultFields = [
+	computedAttrs,
 	diagramName,
 	layout,
 	name,
+	order,
 	showName,
 	type
 ];
@@ -153,38 +93,42 @@ const getDefaultValue = (key: string) => {
 	}
 
 	if (key.startsWith(aggregation)) {
-		return VALUES.DEFAULT_AGGREGATION.COUNT;
+		return DEFAULT_AGGREGATION.COUNT;
 	}
 
 	if (key.startsWith(group) || key.startsWith(breakdownGroup)) {
-		return VALUES.DEFAULT_GROUP.OVERLAP;
+		return DEFAULT_GROUP.OVERLAP;
 	}
 
 	return null;
 };
 
-const filter = (data: FormData): any => {
+const resolve = (type: string) => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
 	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
-	const filteredData = {};
+
 	const variants = {
-		[BAR]: axisChartFields,
-		[BAR_STACKED]: axisChartFields,
-		[COLUMN]: axisChartFields,
-		[COLUMN_STACKED]: axisChartFields,
-		[COMBO]: compositeFields(data, comboFields),
-		[DONUT]: circleChartFields,
-		[LINE]: axisChartFields,
-		[PIE]: circleChartFields,
-		[SUMMARY]: compositeFields(data, summaryFields),
-		[TABLE]: compositeFields(data, tableFields)
+		[BAR]: getAxisChartFields,
+		[BAR_STACKED]: getAxisChartFields,
+		[COLUMN]: getAxisChartFields,
+		[COLUMN_STACKED]: getAxisChartFields,
+		[COMBO]: getComboChartFields,
+		[DONUT]: getCircleChartFields,
+		[LINE]: getAxisChartFields,
+		[PIE]: getCircleChartFields,
+		[SUMMARY]: getSummaryFields,
+		[TABLE]: getTableFields
 	};
 
-	const variant = variants[data.type];
-	const typeFields = typeof variant === 'object' ? variant : variant();
+	return variants[type];
+};
+
+const filter = (data: FormData): any => {
+	const {order, type} = data;
+	const filteredData = {};
 	const breakdownReg = new RegExp(`^${breakdown}(_.*|$)`);
 
-	[...defaultFields, ...typeFields].forEach(key => {
+	[...defaultFields, ...resolve(type)(order)].forEach(key => {
 		let value = data[key] || null;
 
 		if (!value) {

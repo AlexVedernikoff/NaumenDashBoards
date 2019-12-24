@@ -1,7 +1,7 @@
 // @flow
 import {AxisChart, CircleChart, ComboChart, Summary, Table} from './WidgetFields';
 import {CHART_VARIANTS} from 'utils/chart';
-import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import {FieldLabel} from 'components/atoms';
 import {FIELDS, OPTIONS, styles} from 'components/organisms/WidgetFormPanel';
 import {OuterSelect} from 'components/molecules';
@@ -39,10 +39,26 @@ export class ParamsTab extends DataFormBuilder {
 		};
 
 		const Fields = variants[type];
-		return <Fields />;
+		return <Fields key={type} />;
 	};
 
-	renderInputs = () => {
+	renderWidgetSelect = () => {
+		const {values} = this.props;
+
+		return (
+			<div className={styles.field}>
+				<FieldLabel text="Тип диаграммы" />
+				<OuterSelect
+					name={FIELDS.type}
+					onSelect={this.handleSelect}
+					options={OPTIONS.WIDGETS}
+					value={values[FIELDS.type]}
+				/>
+			</div>
+		);
+	};
+
+	render () {
 		const {values} = this.props;
 		const {diagramName, name, type} = FIELDS;
 
@@ -64,32 +80,12 @@ export class ParamsTab extends DataFormBuilder {
 			<Fragment>
 				{this.renderTextArea(nameProps)}
 				{this.renderTextArea(diagramNameProps)}
-				{this.renderSectionDivider()}
+				{this.renderDivider('section')}
 				{this.renderWidgetSelect()}
-				{this.renderSectionDivider()}
+				{this.renderDivider('section')}
 				{this.renderWidgetFields(values[type])}
 			</Fragment>
 		);
-	};
-
-	renderWidgetSelect = () => {
-		const {values} = this.props;
-
-		return (
-			<div className={styles.field}>
-				<FieldLabel text="Тип диаграммы" />
-				<OuterSelect
-					name={FIELDS.type}
-					onSelect={this.handleSelect}
-					options={OPTIONS.WIDGETS}
-					value={values[FIELDS.type]}
-				/>
-			</div>
-		);
-	};
-
-	render () {
-		return this.renderInputs();
 	}
 }
 

@@ -10,8 +10,8 @@ import type {Context} from './types';
 const getContext = () => {
 	if (process.env.NODE_ENV === 'development') {
 		return {
-			contentCode: 'TestZhdanova',
-			subjectUuid: 'employee$2384002'
+			contentCode: 'DashbordTest12',
+			subjectUuid: 'employee$4772613'
 		};
 	}
 
