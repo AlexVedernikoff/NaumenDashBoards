@@ -4,7 +4,7 @@ import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
 
-const createRefKey = (attr: Attribute) => `${attr.metaClassFqn}$${attr.code}`;
+const createRefKey = (attribute: Attribute) => `${attribute.metaClassFqn}$${attribute.code}`;
 
 /**
  * Получаем атрибуты ссылочного атрибута

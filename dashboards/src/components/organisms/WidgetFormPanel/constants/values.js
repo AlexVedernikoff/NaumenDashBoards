@@ -1,5 +1,4 @@
 // @flow
-
 // Набор цветов по умолчанию палитры диаграмм
 const COLORS = [
 	'#EA3223',
@@ -20,59 +19,8 @@ const COLORS = [
 	'#FFFE55'
 ];
 
-// Группировка
-const DAY: 'DAY' = 'DAY';
-const MONTH: 'MONTH' = 'MONTH';
-const ON: 'ON' = 'ON';
-const SEVEN: 'SEVEN' = 'SEVEN';
-const QUARTER: 'QUARTER' = 'QUARTER';
-const SEVEN_DAYS: 'SEVEN_DAYS' = 'SEVEN_DAYS';
-const WEEK: 'WEEK' = 'WEEK';
-const YEAR: 'YEAR' = 'YEAR';
-
-const OVERLAP: 'OVERLAP' = 'OVERLAP';
-
-const DATETIME_GROUP = {
-	DAY,
-	MONTH,
-	ON,
-	SEVEN,
-	QUARTER,
-	SEVEN_DAYS,
-	WEEK,
-	YEAR
-};
-
-const DEFAULT_GROUP = {
-	OVERLAP
-};
-
-// Агрегация
-const AVG: 'AVG' = 'AVG';
-const COUNT: 'COUNT_CNT' = 'COUNT_CNT';
-const MAX: 'MAX' = 'MAX';
-const MIN: 'MIN' = 'MIN';
-const PERCENT: 'PERCENT' = 'PERCENT';
-const SUM: 'SUM' = 'SUM';
-
-const DEFAULT_AGGREGATION = {
-	COUNT,
-	PERCENT
-};
-
-const INTEGER_AGGREGATION = {
-	AVG,
-	MAX,
-	MIN,
-	SUM
-};
-
 const VALUES = {
-	COLORS,
-	DATETIME_GROUP,
-	DEFAULT_GROUP,
-	DEFAULT_AGGREGATION,
-	INTEGER_AGGREGATION
+	COLORS
 };
 
 export default VALUES;

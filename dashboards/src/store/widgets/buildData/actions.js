@@ -1,11 +1,13 @@
 // @flow
+import {AXIS_FIELDS, CIRCLE_FIELDS, COMBO_FIELDS, SUMMARY_FIELDS, TABLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {buildUrl, client} from 'utils/api';
 import type {BuildDataMap, ReceiveBuildDataPayload} from './types';
-import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
+import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
 import {BUILD_DATA_EVENTS} from './constants';
-import type {Dispatch, ThunkAction} from 'store/types';
+import {DEFAULT_AGGREGATION} from 'components/molecules/AttributeRefInput/constants';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
-import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {OptionType} from 'react-select/src/types';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -13,7 +15,7 @@ const getValue = (option: OptionType) => option && option.value;
 
 const createAxisChartData = (widget: Widget) => {
 	const {BAR_STACKED, COLUMN_STACKED} = CHART_VARIANTS;
-	const {COUNT, PERCENT} = VALUES.DEFAULT_AGGREGATION;
+	const {COUNT, PERCENT} = DEFAULT_AGGREGATION;
 	const {breakdown, breakdownGroup, descriptor, group, source, type, xAxis, yAxis} = widget;
 	let {aggregation} = widget;
 
@@ -53,71 +55,73 @@ const createCircleChartData = (widget: Widget) => {
 	};
 };
 
-const {
-	aggregation,
-	breakdown,
-	breakdownGroup,
-	calcTotalColumn,
-	calcTotalRow,
-	column,
-	dataKey,
-	descriptor,
-	group,
-	indicator,
-	row,
-	sourceForCompute,
-	type,
-	xAxis,
-	yAxis
-} = FIELDS;
-
-const comboFields = [aggregation, breakdown, breakdownGroup, descriptor, group, sourceForCompute, type, xAxis, yAxis];
-
-const summaryFields = [aggregation, descriptor, indicator, sourceForCompute];
-
-const tableFields = [aggregation, breakdown, breakdownGroup, calcTotalColumn, calcTotalRow, column, descriptor, row, sourceForCompute];
-
-const createCompositeData = (fields: Array<string>) => (widget: Widget) => {
-	const {source} = FIELDS;
-	const {order} = widget;
-	const data = {
-		data: {},
-		type: widget[type]
-	};
+const createPostData = (widget: Widget, {dataKey, ...fields}: Object) => {
+	const {aggregation, source} = FIELDS;
+	const {COUNT, PERCENT} = DEFAULT_AGGREGATION;
+	const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = CHART_VARIANTS;
+	const {order, type} = widget;
+	let data: Object = {};
 
 	if (Array.isArray(order)) {
-		order.forEach(num => {
-			const createName = createOrderName(num);
-			let chartItem = {};
+		data = {
+			data: {},
+			type
+		};
 
-			chartItem[source] = getValue(widget[createName(source)]);
+		order.forEach(number => {
+			let sourceData = {};
+			sourceData[source] = getValue(widget[createOrdinalName(source, number)]);
 
-			fields.forEach(baseName => {
-				chartItem[baseName] = widget[createName(baseName)];
+			Object.keys(fields).forEach(field => {
+				if (field === source) {
+					sourceData[field] = getValue(widget[createOrdinalName(field, number)]);
+					return;
+				}
+
+				/*
+				Когда для графика с накоплением пользователь выбирает агрегацию в процентах,
+				нам нужно провести замену значения агрегации для подсчета данных на бэке т.к
+				для отображения графику необходимо все также количество.
+				*/
+				if (field === aggregation) {
+					let aggregationValue = widget[createOrdinalName(field, number)];
+					const widgetType = widget[type];
+
+					if (aggregationValue === PERCENT && (widgetType === BAR_STACKED || widgetType === COLUMN_STACKED)) {
+						aggregationValue = COUNT;
+					}
+
+					sourceData[field] = aggregationValue;
+					return;
+				}
+
+				sourceData[field] = widget[createOrdinalName(field, number)];
 			});
 
-			data.data[widget[createName(dataKey)]] = chartItem;
+			data.data[widget[createOrdinalName(dataKey, number)]] = sourceData;
 		});
+	} else {
+		data = [DONUT, PIE].includes(type) ? createCircleChartData(widget) : createAxisChartData(widget);
 	}
 
 	return data;
 };
 
-const resolvePostData = (type: string) => {
+const resolve = (type: string) => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
 	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
 
 	const creators = {
-		[BAR]: createAxisChartData,
-		[BAR_STACKED]: createAxisChartData,
-		[COLUMN]: createAxisChartData,
-		[COLUMN_STACKED]: createAxisChartData,
-		[COMBO]: createCompositeData(comboFields),
-		[DONUT]: createCircleChartData,
-		[LINE]: createAxisChartData,
-		[PIE]: createCircleChartData,
-		[SUMMARY]: createCompositeData(summaryFields),
-		[TABLE]: createCompositeData(tableFields)
+		[BAR]: AXIS_FIELDS,
+		[BAR_STACKED]: AXIS_FIELDS,
+		[COLUMN]: AXIS_FIELDS,
+		[COLUMN_STACKED]: AXIS_FIELDS,
+		[COMBO]: COMBO_FIELDS,
+		[DONUT]: CIRCLE_FIELDS,
+		[LINE]: AXIS_FIELDS,
+		[PIE]: CIRCLE_FIELDS,
+		[SUMMARY]: SUMMARY_FIELDS,
+		[TABLE]: TABLE_FIELDS
 	};
 
 	return creators[type];
@@ -128,19 +132,20 @@ const resolvePostData = (type: string) => {
  * @param {Array<Widget>} widgets - список виджетов
  * @returns {ThunkAction}
  */
-const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let postData = {};
+		const {subjectUuid} = getState().dashboard.context;
 
 		dispatch(requestAllBuildData(widgets));
 
 		widgets.forEach(widget => {
 			const {type} = widget;
-
-			postData[widget.id] = resolvePostData(type)(widget);
+			const fields = resolve(type);
+			postData[widget.id] = createPostData(widget, fields);
 		});
 
-		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagrams', 'requestContent'), postData);
+		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagrams', `requestContent,'${subjectUuid}'`), postData);
 
 		dispatch(receiveAllBuildData(data));
 	} catch (e) {
@@ -153,16 +158,15 @@ const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispat
  * @param {Widget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestBuildData(widget.id));
-	const {SUMMARY, TABLE} = WIDGET_VARIANTS;
-	const {COMBO} = CHART_VARIANTS;
 
 	try {
 		const {type} = widget;
-		const postData = resolvePostData(type)(widget);
-		const method = [COMBO, SUMMARY, TABLE].includes(type) ? 'getDataForCompositeDiagram' : 'getDataForDiagram';
-		const {data} = await client.post(buildUrl('dashboardDataSet', method, 'requestContent'), postData);
+		const {subjectUuid} = getState().dashboard.context;
+		const fields = resolve(type);
+		const postData = createPostData(widget, fields);
+		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForCompositeDiagram', `requestContent,'${subjectUuid}'`), postData);
 
 		dispatch(
 			receiveBuildData({data, id: widget.id})

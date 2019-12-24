@@ -12,7 +12,7 @@ import LineFlexible from './line_flexible.svg';
 import Pie from './pie.svg';
 import Summary from './summary.svg';
 import Table from './table.svg';
-import {WIDGET_VARIANTS} from 'utils/widget';
+import {WIDGET_VARIANTS} from 'utils/widget/constants';
 
 const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
 const {SUMMARY, TABLE} = WIDGET_VARIANTS;

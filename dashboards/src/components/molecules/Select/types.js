@@ -18,7 +18,7 @@ export type Props = {
 	isDisabled: boolean,
 	isEditableLabel: boolean,
 	isLoading: boolean,
-	isRemoving: boolean,
+	isRemovable: boolean,
 	isSearchable: boolean,
 	menuIsOpen?: boolean,
 	name: string,

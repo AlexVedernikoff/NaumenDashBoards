@@ -12,5 +12,5 @@ export type Props = {
 	label: string,
 	name: string,
 	onClick: (name: string, value: boolean) => void | Promise<void>,
-	value: string
+	value: boolean
 };

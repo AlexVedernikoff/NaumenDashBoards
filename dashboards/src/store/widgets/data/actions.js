@@ -2,20 +2,31 @@
 import {buildUrl, client} from 'utils/api';
 import type {Context} from 'utils/api/types';
 import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetFormPanel/types';
+import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import type {Layout} from 'utils/layout/types';
+import {LIMIT, WIDGETS_EVENTS} from './constants';
 import {NewWidget} from 'utils/widget';
 import type {Widget} from './types';
-import {WIDGETS_EVENTS} from './constants';
 
 /**
  * Добавляем новый виджет
  * @param {NewWidget} payload - объект нового виджета
  * @returns {ThunkAction}
  */
-const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): void => {
+const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
+	const {map} = getState().widgets.data;
+
+	if (Object.keys(map).length >= LIMIT) {
+		return dispatch(createToast({
+			text: `На дашборд можно вывести не больше ${LIMIT} виджетов.
+			Чтобы добавить на текущий дашборд виджет, удалите один из существующих.`,
+			type: 'error'
+		}));
+	}
+
 	dispatch({
 		type: WIDGETS_EVENTS.ADD_WIDGET,
 		payload

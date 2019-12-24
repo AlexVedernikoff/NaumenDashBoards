@@ -1,32 +1,18 @@
 // @flow
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
+import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class Summary extends OrderFormBuilder {
+export class Summary extends DataFormBuilder {
 	sourceRefs = [FIELDS.indicator];
 
-	renderSummaryIndicator = (indicator: string, aggregation: string) => {
-		const props = {
-			withCreate: true,
-			withDivider: false
-		};
-
-		return this.renderIndicator(indicator, aggregation, props);
-	};
-
 	renderInputs = () => {
-		const {aggregation, indicator, source} = FIELDS;
-
 		return (
 			<Fragment>
-				{this.renderModal()}
-				{this.renderAddSourceInput()}
-				{this.renderByOrder(this.renderOrderSource(false), source)}
-				{this.renderSectionDivider()}
+				{this.renderSourceSection()}
 				{this.renderLabel('Показатель')}
-				{this.renderByOrder(this.renderSummaryIndicator, [indicator, aggregation], true)}
+				{this.renderByOrder(this.renderIndicator, FIELDS.indicator)}
 			</Fragment>
 		);
 	};

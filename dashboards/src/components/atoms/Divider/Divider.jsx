@@ -1,18 +1,25 @@
 // @flow
 import cn from 'classnames';
 import type {Props} from './types';
-import React from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import {VARIANTS} from './constants';
 
-export const Divider = (props: Props) => {
-	const {className} = props;
-	const containerCN = cn(className, styles.container);
+export class Divider extends PureComponent<Props> {
+	static defaultProps = {
+		variant: VARIANTS.FIELD
+	};
 
-	return (
-		<div className={containerCN}>
-			<div className={styles.divider} />
-		</div>
-	);
-};
+	render () {
+		const {variant} = this.props;
+		const containerCN = cn(styles[variant], styles.container);
+
+		return (
+			<div className={containerCN}>
+				<div className={styles.divider} />
+			</div>
+		);
+	}
+}
 
 export default Divider;

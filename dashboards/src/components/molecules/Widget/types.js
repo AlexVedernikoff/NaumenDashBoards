@@ -1,6 +1,7 @@
 // @flow
 import type {BuildData} from 'store/widgets/buildData/types';
 import type {Node} from 'react';
+import type {ThunkAction} from 'store/types';
 import type {Widget} from 'store/widgets/data/types';
 
 type GridProps = {
@@ -11,7 +12,7 @@ type GridProps = {
 	onTouchEnd?: Function,
 	onTouchStart?: Function,
 	style?: Object
-}
+};
 
 export type Props = {
 	...$Exact<GridProps>,
@@ -20,12 +21,16 @@ export type Props = {
 	isEditable: boolean,
 	isNew: boolean,
 	isSelected: boolean,
-	onDrillDown: (widget: Widget, orderNum?: number) => void,
+	onDrillDown: (widget: Widget, orderNum?: number) => ThunkAction,
 	onEdit: (id: string) => void,
 	onRemove: (id: string) => void
-}
+};
+
+export type State = {
+	hasError: boolean
+};
 
 export type ExportItem = {
 	key: string,
 	text: string
-}
+};

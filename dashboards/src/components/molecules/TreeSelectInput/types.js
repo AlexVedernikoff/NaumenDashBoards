@@ -1,10 +1,4 @@
 // @flow
-export type Form = {
-	onSubmit: (name: string, value: string) => any,
-	rule?: any,
-	value: string | number
-};
-
 export type TreeSelectValue = {
 	label: string,
 	value: string
@@ -26,9 +20,9 @@ export type Tree = {
 }
 
 export type Props = {
-	form?: Form,
 	name: string,
 	onChange: (name: string, value: TreeSelectValue | null) => any,
+	onChangeLabel: (name: string, value: string) => void,
 	placeholder: string,
 	tree: Tree,
 	value: TreeSelectValue | null

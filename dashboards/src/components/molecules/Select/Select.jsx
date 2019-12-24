@@ -17,7 +17,7 @@ export class Select extends PureComponent<Props, State> {
 		isDisabled: false,
 		isEditableLabel: true,
 		isLoading: false,
-		isRemoving: false,
+		isRemovable: false,
 		isSearchable: true,
 		placeholder: 'Выберите значение',
 		showBorder: true,
@@ -111,7 +111,7 @@ export class Select extends PureComponent<Props, State> {
 			current.blur();
 		}
 
-		onSelect(name, value);
+		onSelect(name, {...value});
 	};
 
 	handleShowForm = (showForm: boolean) => () => this.setState({showForm});
@@ -185,9 +185,9 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderRemoveIcon = () => {
-		const {isRemoving} = this.props;
+		const {isRemovable} = this.props;
 
-		if (isRemoving) {
+		if (isRemovable) {
 			return (
 				<IconButton onClick={this.handleRemove}>
 					<MinusIcon />

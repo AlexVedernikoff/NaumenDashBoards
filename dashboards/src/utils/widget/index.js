@@ -1,12 +1,14 @@
 // @flow
-import {createOrderName, getNumberFromName, getValue} from './core';
+import {createOrdinalName, createRefName, getNumberFromName, getMainOrdinalNumber, getValue} from './core';
 import NewWidget from './NewWidget';
 import {WIDGET_SELECTS} from './selects';
 import {WIDGET_VARIANTS} from './constants';
 
 export {
-	createOrderName,
+	createOrdinalName,
+	createRefName,
 	getNumberFromName,
+	getMainOrdinalNumber,
 	getValue,
 	NewWidget,
 	WIDGET_SELECTS,

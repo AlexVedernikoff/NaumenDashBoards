@@ -30,17 +30,19 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		onChange(name, null);
 	};
 
-	handleShowForm = (showForm: boolean) => () => this.setState({showForm});
-
 	handleSubmit = (value: string) => {
-		const {form, name} = this.props;
+		const {name, onChangeLabel} = this.props;
 
-		if (form) {
-			form.onSubmit(name, value);
+		if (onChangeLabel) {
+			onChangeLabel(name, value);
 		}
 
-		this.handleShowForm(false)();
+		this.hideForm();
 	};
+
+	hideForm = () => this.setState({showForm: false});
+
+	showForm = () => this.setState({showForm: true});
 
 	renderChildren = (dataSource: Node): TreeNode => {
 		const {tree} = this.props;
@@ -52,18 +54,17 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 	};
 
 	renderEditForm = () => {
-		const {form} = this.props;
+		const {value} = this.props;
 		const {showForm} = this.state;
 
-		if (showForm && form) {
-			const {rule, value} = form;
+		if (showForm) {
+			const label = value ? value.label : '';
 
 			return (
 				<InputForm
-					onClose={this.handleShowForm(false)}
+					onClose={this.hideForm}
 					onSubmit={this.handleSubmit}
-					rule={rule}
-					value={value}
+					value={label}
 				/>
 			);
 		}
@@ -76,7 +77,7 @@ export class TreeSelectInput extends PureComponent<Props, State> {
 		if (value && !showForm) {
 			return (
 				<div className={styles.iconContainer}>
-					<IconButton className={styles.editIcon} onClick={this.handleShowForm(true)}>
+					<IconButton className={styles.editIcon} onClick={this.showForm}>
 						<EditIcon />
 					</IconButton>
 					<IconButton className={styles.removeIcon} onClick={this.handleRemove}>

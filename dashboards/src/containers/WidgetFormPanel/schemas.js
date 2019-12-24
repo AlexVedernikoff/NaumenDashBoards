@@ -1,20 +1,21 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {CHART_VARIANTS} from 'utils/chart/constants';
-import {createOrderName, WIDGET_VARIANTS} from 'utils/widget';
-import {FIELDS, TYPES} from 'components/organisms/WidgetFormPanel';
+import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {FormikValues} from 'formik';
 import {object, string} from 'yup';
+import {TYPES} from 'store/sources/attributes/constants';
 
 const ERROR_MESSAGES = {
-	breakdown: 'Укажите атрибут для разбивки',
-	column: 'Укажите атрибут для колонок',
-	indicator: 'Укажите атрибут для показателя',
-	name: 'Укажите название виджета',
-	row: 'Укажите атрибут для строк',
-	source: 'Укажите источник данных',
-	xAxis: 'Укажите атрибут для оси X',
-	yAxis: 'Укажите атрибут для оси Y'
+	[FIELDS.breakdown]: 'Укажите атрибут для разбивки',
+	[FIELDS.column]: 'Укажите атрибут для колонок',
+	[FIELDS.indicator]: 'Укажите атрибут для показателя',
+	[FIELDS.name]: 'Укажите название виджета',
+	[FIELDS.row]: 'Укажите атрибут для строк',
+	[FIELDS.source]: 'Укажите источник данных',
+	[FIELDS.xAxis]: 'Укажите атрибут для оси X',
+	[FIELDS.yAxis]: 'Укажите атрибут для оси Y'
 };
 
 const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
@@ -59,64 +60,65 @@ const conditionBreakdownRule = (withBreakdownName: string) => object().when(with
 }).nullable();
 
 // Базовые правила для всех диаграмм
-const baseRules = {
-	diagramName: string().required(ERROR_MESSAGES[FIELDS.name]),
-	name: string().required(ERROR_MESSAGES[FIELDS.name])
+const BASE_RULES = {
+	[FIELDS.diagramName]: string().required(ERROR_MESSAGES[FIELDS.name]),
+	[FIELDS.name]: string().required(ERROR_MESSAGES[FIELDS.name])
 };
 
-// Правила для столбчатых и линейных диаграмм (column, line)
-const baseChart = {
-	...baseRules,
-	breakdown: conditionBreakdownRule(FIELDS.withBreakdown),
-	source: object().nullable().required(ERROR_MESSAGES[FIELDS.source]),
-	xAxis: requiredAttributeRule(ERROR_MESSAGES[FIELDS.xAxis]),
-	yAxis: requiredAttributeRule(ERROR_MESSAGES[FIELDS.yAxis])
-};
+/*
+	Типовые правила делятся на постоянные (permanent) и на те, что необходимо валидировать только в случаем если
+	источник используется не только для вычислений (situational).
+ */
 
-// Правила для столбчатой диаграммы с накоплением
-const columnStakedChart = {
-	...baseChart,
-	breakdown: requiredAttributeRule(ERROR_MESSAGES[FIELDS.breakdown])
-};
+// Правила для линейных графиков (кроме комбо)
+const getAxisChartRules = (conditionBreakdown: boolean) => (values: FormikValues, rules: Object) => {
+	const {xAxis, breakdown, yAxis, source, sourceForCompute, withBreakdown} = FIELDS;
+	const {order} = values;
 
-// Правила для гистограммы
-const barChart = {
-	...baseRules,
-	breakdown: conditionBreakdownRule(FIELDS.withBreakdown),
-	source: object().nullable().required(ERROR_MESSAGES[FIELDS.source]),
-	xAxis: requiredAttributeRule(ERROR_MESSAGES[FIELDS.yAxis]),
-	yAxis: requiredAttributeRule(ERROR_MESSAGES[FIELDS.xAxis])
-};
+	order.forEach(number => {
+		rules[createOrdinalName(xAxis, number)] = requiredAttributeRule(ERROR_MESSAGES[xAxis]);
+		rules[createOrdinalName(source, number)] = requiredAttributeRule(ERROR_MESSAGES[source]);
 
-// Правила для гистограммы с накоплением
-const barStackedChart = {
-	...barChart,
-	breakdown: requiredAttributeRule(ERROR_MESSAGES[FIELDS.breakdown])
+		if (!values[createOrdinalName(sourceForCompute, number)]) {
+			rules[createOrdinalName(yAxis, number)] = requiredAttributeRule(ERROR_MESSAGES[yAxis]);
+			rules[createOrdinalName(breakdown, number)] = conditionBreakdown
+				? conditionBreakdownRule(createOrdinalName(withBreakdown, number))
+				: requiredAttributeRule(ERROR_MESSAGES[breakdown]);
+		}
+	});
+
+	return rules;
 };
 
 // Правила для круговых диаграмм (pie, donut)
-const circleChart = {
-	...baseRules,
-	breakdown: requiredAttributeRule(ERROR_MESSAGES[FIELDS.breakdown]),
-	indicator: requiredAttributeRule(ERROR_MESSAGES[FIELDS.indicator]),
-	source: object().nullable().required(ERROR_MESSAGES[FIELDS.source])
+const getCircleChartRules = (values: FormikValues, rules: Object) => {
+	const {breakdown, indicator, source, sourceForCompute} = FIELDS;
+	const {order} = values;
+
+	order.forEach(number => {
+		rules[createOrdinalName(source, number)] = requiredAttributeRule(ERROR_MESSAGES[source]);
+
+		if (!values[createOrdinalName(sourceForCompute, number)]) {
+			rules[createOrdinalName(breakdown, number)] = requiredAttributeRule(ERROR_MESSAGES[breakdown]);
+			rules[createOrdinalName(indicator, number)] = requiredAttributeRule(ERROR_MESSAGES[indicator]);
+		}
+	});
+
+	return rules;
 };
 
 // Правила для комбо-диграммы
-const comboChart = (values: FormikValues) => {
-	const {breakdown, source, xAxis, yAxis, withBreakdown} = FIELDS;
-	const {order = []} = values;
-	const rules = {...baseRules};
+const getComboChartRules = (values: FormikValues, rules: Object) => {
+	const {breakdown, source, sourceForCompute, xAxis, yAxis} = FIELDS;
+	const {order} = values;
 
-	order.forEach(num => {
-		const createName = createOrderName(num);
+	order.forEach(number => {
+		rules[createOrdinalName(source, number)] = requiredAttributeRule(ERROR_MESSAGES[source]);
+		rules[createOrdinalName(xAxis, number)] = requiredAttributeRule(ERROR_MESSAGES[FIELDS.xAxis]);
 
-		rules[createName(source)] = object().nullable().required(ERROR_MESSAGES[FIELDS.source]);
-		rules[createName(xAxis)] = requiredAttributeRule(ERROR_MESSAGES[FIELDS.xAxis]);
-		rules[createName(breakdown)] = conditionBreakdownRule(createName(withBreakdown));
-
-		if (!values[createName(FIELDS.sourceForCompute)]) {
-			rules[createName(yAxis)] = requiredAttributeRule(ERROR_MESSAGES[FIELDS.yAxis]);
+		if (!values[createOrdinalName(sourceForCompute, number)]) {
+			rules[createOrdinalName(breakdown, number)] = conditionBreakdownRule(createOrdinalName(FIELDS.withBreakdown, number));
+			rules[createOrdinalName(yAxis, number)] = requiredAttributeRule(ERROR_MESSAGES[yAxis]);
 		}
 	});
 
@@ -124,55 +126,55 @@ const comboChart = (values: FormikValues) => {
 };
 
 // Правила для сводки
-const summary = ({order = []}: FormikValues) => {
-	const {indicator, source} = FIELDS;
-	const rules = {...baseRules};
+const getSummaryRules = (values: FormikValues, rules: Object) => {
+	const {indicator, source, sourceForCompute} = FIELDS;
+	const {order} = values;
 
-	const num = order[0];
-	rules[createOrderName(num)(source)] = object().nullable().required(ERROR_MESSAGES[FIELDS.source]);
-	rules[createOrderName(num)(indicator)] = requiredAttributeRule(ERROR_MESSAGES[FIELDS.indicator]);
+	order.forEach(number => {
+		rules[createOrdinalName(source, number)] = requiredAttributeRule(ERROR_MESSAGES[source]);
 
-	return rules;
-};
-
-// Правила для таблицы
-const table = (values: FormikValues) => {
-	const {breakdown, column, row, source} = FIELDS;
-	const rules = {...baseRules};
-	const {order = []} = values;
-
-	order.forEach(num => {
-		rules[createOrderName(num)(source)] = object().nullable().required(ERROR_MESSAGES[FIELDS.source]);
-		rules[createOrderName(num)(row)] = requiredAttributeRule(ERROR_MESSAGES[FIELDS.row]);
-
-		if (!values[createOrderName(num)(FIELDS.sourceForCompute)]) {
-			rules[createOrderName(num)(breakdown)] = requiredAttributeRule(ERROR_MESSAGES[FIELDS.source]);
-			rules[createOrderName(num)(column)] = requiredAttributeRule(ERROR_MESSAGES[FIELDS.column]);
+		if (!values[createOrdinalName(sourceForCompute, number)]) {
+			rules[createOrdinalName(indicator, number)] = requiredAttributeRule(ERROR_MESSAGES[indicator]);
 		}
 	});
 
 	return rules;
 };
 
-const commonVariants = {
-	[BAR]: barChart,
-	[BAR_STACKED]: barStackedChart,
-	[COLUMN]: baseChart,
-	[COLUMN_STACKED]: columnStakedChart,
-	[LINE]: baseChart,
-	[DONUT]: circleChart,
-	[PIE]: circleChart
+// Правила для таблицы
+const getTableRules = (values: FormikValues, rules: Object) => {
+	const {breakdown, column, row, source, sourceForCompute} = FIELDS;
+	const {order} = values;
+
+	order.forEach(number => {
+		rules[createOrdinalName(source, number)] = requiredAttributeRule(ERROR_MESSAGES[source]);
+		rules[createOrdinalName(row, number)] = requiredAttributeRule(ERROR_MESSAGES[row]);
+
+		if (!values[createOrdinalName(sourceForCompute, number)]) {
+			rules[createOrdinalName(breakdown, number)] = requiredAttributeRule(ERROR_MESSAGES[breakdown]);
+			rules[createOrdinalName(column, number)] = requiredAttributeRule(ERROR_MESSAGES[column]);
+		}
+	});
+
+	return rules;
 };
 
-const compositeVariants = {
-	[COMBO]: comboChart,
-	[SUMMARY]: summary,
-	[TABLE]: table
+const variants = {
+	[BAR]: getAxisChartRules(true),
+	[BAR_STACKED]: getAxisChartRules(false),
+	[COLUMN]: getAxisChartRules(true),
+	[COLUMN_STACKED]: getAxisChartRules(false),
+	[COMBO]: getComboChartRules,
+	[DONUT]: getCircleChartRules,
+	[LINE]: getAxisChartRules(true),
+	[PIE]: getCircleChartRules,
+	[SUMMARY]: getSummaryRules,
+	[TABLE]: getTableRules
 };
 
 const resolveRules = (values: FormikValues) => {
-	const {type} = values;
-	return [COMBO, SUMMARY, TABLE].includes(type) ? compositeVariants[type](values) : commonVariants[type];
+	const {order, type} = values;
+	return Array.isArray(order) ? variants[type](values, {...BASE_RULES}) : BASE_RULES;
 };
 
 const getSchema = (values: FormikValues) => object(resolveRules(values));

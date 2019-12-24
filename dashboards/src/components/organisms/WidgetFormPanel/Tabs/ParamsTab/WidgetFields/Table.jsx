@@ -1,10 +1,11 @@
 // @flow
-import {OrderFormBuilder} from 'components/organisms/WidgetFormPanel/Builders';
-import {FIELDS, getAggregateOptions} from 'components/organisms/WidgetFormPanel';
+import {createRefName} from 'utils/widget';
+import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
-export class Table extends OrderFormBuilder {
+export class Table extends DataFormBuilder {
 	sourceRefs = [FIELDS.breakdown, FIELDS.column, FIELDS.row];
 
 	renderCalcTotalInput = (name: string) => {
@@ -20,13 +21,19 @@ export class Table extends OrderFormBuilder {
 		return this.renderCheckBox(totalRow);
 	};
 
-	renderColumn = (name: string, aggregationName: string) => {
+	renderColumn = (name: string) => {
 		const {values} = this.props;
+		const aggregationName = createRefName(name, FIELDS.aggregation);
+
+		const refInput = {
+			name: aggregationName,
+			type: 'aggregation',
+			value: values[aggregationName]
+		};
 
 		const props = {
 			name,
-			onSelect: this.handleSelectWithRef(aggregationName, getAggregateOptions),
-			refInput: this.renderAggregation(aggregationName, name),
+			refInput,
 			value: values[name],
 			withCreate: true
 		};
@@ -47,21 +54,18 @@ export class Table extends OrderFormBuilder {
 	};
 
 	render () {
-		const {aggregation, breakdown, breakdownGroup, calcTotalRow, calcTotalColumn, column, row, source, withBreakdown} = FIELDS;
+		const {breakdown, calcTotalColumn, calcTotalRow, column, row} = FIELDS;
 
 		return (
 			<Fragment>
-				{this.renderModal()}
-				{this.renderAddSourceInput()}
-				{this.renderByOrder(this.renderOrderSource(false), source)}
-				{this.renderSectionDivider()}
+				{this.renderSourceSection()}
 				{this.renderLabel('Строки')}
-				{this.renderByOrder(this.renderRowInput, row, true)}
-				{this.renderByOrder(this.renderCalcTotalInput, calcTotalRow, true)}
+				{this.renderByOrder(this.renderRowInput, row, false)}
+				{this.renderByOrder(this.renderCalcTotalInput, calcTotalRow)}
 				{this.renderLabel('Колонки')}
-				{this.renderByOrder(this.renderColumn, [column, aggregation], true)}
-				{this.renderByOrder(this.renderBreakdownWithExtend, [withBreakdown, breakdown, breakdownGroup], true)}
-				{this.renderByOrder(this.renderCalcTotalInput, calcTotalColumn, true)}
+				{this.renderByOrder(this.renderColumn, column)}
+				{this.renderByOrder(this.renderBreakdown, breakdown)}
+				{this.renderByOrder(this.renderCalcTotalInput, calcTotalColumn)}
 			</Fragment>
 		);
 	}

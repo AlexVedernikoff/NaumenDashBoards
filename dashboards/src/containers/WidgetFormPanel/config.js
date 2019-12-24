@@ -1,10 +1,12 @@
 // @flow
+import {AXIS_FIELDS, CIRCLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {CHART_VARIANTS} from 'utils/chart';
 import type {ConnectedProps, ValidateType} from './types';
+import {createOrdinalName, NewWidget} from 'utils/widget';
+import {FIELDS, SETTINGS} from 'components/organisms/WidgetFormPanel';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
 import {lazy} from 'yup';
-import {NewWidget} from 'utils/widget';
 import getSchema from './schemas.js';
 
 // TODO убрать как будут перенастроенны все виджеты
@@ -18,15 +20,27 @@ const getType = (type: string) => {
 	return CHART_VARIANTS.COLUMN;
 };
 
+const transformLegacyValues = (type: string, values: FormikValues) => {
+	const {DONUT, PIE} = CHART_VARIANTS;
+	const fields = type === DONUT || type === PIE ? CIRCLE_FIELDS : AXIS_FIELDS;
+
+	Object.keys(fields).forEach(field => {
+		values[createOrdinalName(field, SETTINGS.FIRST_KEY)] = values[field];
+	});
+
+	return values;
+};
+
 const config: FormikConfig = {
 	mapPropsToValues: ({selectedWidget}: ConnectedProps) => {
 		const {id, layout, type, ...values} = selectedWidget;
+		const formValues = Object.prototype.hasOwnProperty.call(values, FIELDS.order) ? values : transformLegacyValues(type, values);
 
 		return {
 			asDefault: false,
 			isNew: id === NewWidget.id,
 			type: getType(type),
-			...values
+			...formValues
 		};
 	},
 
