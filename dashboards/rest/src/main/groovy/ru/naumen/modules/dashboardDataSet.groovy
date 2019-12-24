@@ -56,57 +56,77 @@ enum AggregationType
 //endregion
 
 //region КЛАССЫ
-/**
- * Модель тело запроса - Полученик данных для диаграммы
- */
 @TupleConstructor
-class RequestGetDataForDiagram
+abstract class BasicRequest
 {
-    /**
-     * Тип диаграммы
-     */
-    Diagram type
     /**
      * Код источника данных
      */
     String source
     /**
+     * Json дескриптор
+     */
+    String descriptor
+}
+
+@TupleConstructor
+class LineDiagramRequest extends BasicRequest
+{
+    /**
      * Атрибут по x оси
      */
-    Attribute xAxis = null
+    Attribute xAxis
     /**
      * Атрибут для y оси
      */
-    Attribute yAxis = null
+    Attribute yAxis
     /**
      * Атрибут для разбивки
      */
-    Attribute breakdown = null
-    /**
-     * Тип группировки для разбивки
-     */
-    GroupType breakdownGroup = GroupType.OVERLAP
-    /**
-     * Атрибут для показателя
-     */
-    Attribute indicator = null
-    /**
-     * Тип группировки данных
-     */
-    GroupType group = GroupType.OVERLAP
+    Attribute breakdown
     /**
      * Тип агрегации данных
      */
     AggregationType aggregation = AggregationType.COUNT_CNT
+    /**
+     * Тип группировки для разбивки
+     */
+    GroupType breakdownGroup
+    /**
+     * Тип группировки данных
+     */
+    GroupType group
 
     /**
-     * Json дескриптор
+     * Тип диаграммы
      */
-    String descriptor
+    Diagram type
+}
+
+@TupleConstructor
+class RoundDiagramRequest extends BasicRequest
+{
     /**
-     * Код источника данных
+     * Атрибут для показателя
      */
-    String sourceForCompute
+    Attribute indicator
+    /**
+     * Атрибут для разбивки
+     */
+    Attribute breakdown
+    /**
+     * Тип агрегации данных
+     */
+    AggregationType aggregation = AggregationType.COUNT_CNT
+    /**
+     * Тип группировки для разбивки
+     */
+    GroupType breakdownGroup
+
+    /**
+     * Тип диаграммы
+     */
+    Diagram type
 }
 
 /**
@@ -130,24 +150,40 @@ class RequestGetDataForCompositeDiagram
  * Модель тело запроса - Полученик данных для диаграмм
  */
 @TupleConstructor
-class DataForCompositeDiagram
+class DataForCompositeDiagram extends BasicRequest
 {
+    /**
+     * Тип диаграммы
+     */
+    Diagram type
     /**
      * Тип агрегации данных
      */
     AggregationType aggregation = AggregationType.COUNT_CNT
     /**
-     * Json дескриптор
+     * Атрибут по x оси
      */
-    String descriptor
+    Attribute xAxis = null
+    /**
+     * Атрибут для y оси
+     */
+    Attribute yAxis = null
+    /**
+     * Атрибут для разбивки
+     */
+    Attribute breakdown = null
+    /**
+     * Тип группировки для разбивки
+     */
+    GroupType breakdownGroup = GroupType.OVERLAP
     /**
      * Атрибут для показателя
      */
     Attribute indicator = null
     /**
-     * Код источника данных
+     * Тип группировки данных
      */
-    String source
+    GroupType group = GroupType.OVERLAP
     /**
      * Код источника данных
      */
@@ -168,40 +204,6 @@ class DataForCompositeDiagram
      * Атрибут для row
      */
     Attribute row = null
-    /**
-     * Атрибут для разбивки
-     */
-    Attribute breakdown = null
-    /**
-     * Тип группировки для разбивки
-     */
-    GroupType breakdownGroup = GroupType.OVERLAP
-    /**
-     * Атрибут по x оси
-     */
-    Attribute xAxis = null
-    /**
-     * Атрибут для y оси
-     */
-    Attribute yAxis = null
-    /**
-     * Тип диаграммы
-     */
-    Diagram type
-    /**
-     * Тип группировки данных
-     */
-    GroupType group = GroupType.OVERLAP
-}
-
-/**
- * Модель тело запроса - Полученик данных для диаграммы
- */
-@TupleConstructor
-class RequestGetDataForComboDiagram
-{
-    Collection<RequestGetDataForDiagram> charts
-    String type
 }
 
 /**
@@ -372,10 +374,9 @@ String getDataForDiagrams(Map<String, Object> requestContent)
     return toJson(requestContent.collectEntries(safetyCollect))
 }
 
-
 /**
  * Получение данных для диаграмм
- * @param requestContent тело запроса в формате {@link RequestGetDataForDiagram}
+ * @param requestContent тело запроса в формате {@link BasicRequest}
  * @return данные для построения диаграммы
  */
 String getDataForDiagram(Map<String, Object> requestContent)
@@ -383,9 +384,9 @@ String getDataForDiagram(Map<String, Object> requestContent)
     switch (requestContent.type as Diagram)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE] :
-            return toJson(getDataStandardDiagram(requestContent as RequestGetDataForDiagram))
+            return toJson(getDataStandardDiagram(requestContent as LineDiagramRequest))
         case [DONUT, PIE] :
-            return toJson(getDataRoundDiagram(requestContent as RequestGetDataForDiagram))
+            return toJson(getDataRoundDiagram(requestContent as RoundDiagramRequest))
         default:
             throw new Exception(toJson([error: "Not supported diagram type: ${requestContent.type}"]))
     }
@@ -400,6 +401,10 @@ String getDataForCompositeDiagram(Map<String, Object> requestContent)
 {
     switch (requestContent.type as Diagram)
     {
+        case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
+            return toJson(getDataStandardDiagram(requestContent as RequestGetDataForCompositeDiagram))
+        case [DONUT, PIE]:
+            return toJson(getDataRoundDiagram(requestContent as RequestGetDataForCompositeDiagram))
         case SUMMARY:
             return toJson(getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram))
         case TABLE:
@@ -414,50 +419,6 @@ String getDataForCompositeDiagram(Map<String, Object> requestContent)
 
 //region ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
 /**
- * Получение данных для линейных диаграмм
- * @param request параметры диаграммы
- * @return данные для диаграммы в формате StandardDiagram
- */
-private StandardDiagram getDataStandardDiagram(RequestGetDataForDiagram request)
-{
-    String descriptor = request.descriptor
-    String source = request.source
-    Attribute breakdown = request.breakdown
-    HCriteria criteria = createHCriteria(descriptor, source)
-    group(criteria, request.group as GroupType, request.xAxis as Attribute, source, descriptor)
-    aggregation(criteria,
-            request.aggregation as AggregationType,
-            request.yAxis as Attribute,
-            source, descriptor,
-            request.xAxis,
-            request.breakdown)
-    if (breakdown)
-    {
-        group(criteria, request.breakdownGroup as GroupType, breakdown as Attribute, source, descriptor)
-    }
-    findNotNullAttributes(criteria, request.xAxis, request.breakdown)
-
-    def groupSevenDay = { request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
-    def breakdownSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
-
-    def groupDtInterval = { request.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
-    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
-
-    def groupState = { request.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, request.source) : it }
-    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, request.source) : it }
-
-    Collection<Object> list = getQuery(criteria).list()
-            .with(groupSevenDay)
-            .with(breakdownSevenDay)
-            .with(groupDtInterval)
-            .with(breakdownDtInterval)
-            .with(groupState)
-            .with(breakdownState)
-
-    return mappingToStandardDiagram(list, breakdown, request.breakdownGroup as GroupType)
-}
-
-/**
  * Метод для построения построения диаграммы в зависимости от типа
  * @param requestContent - тело запроса
  * @param defaultBehavior - метод обработки на случай не предусмотренного типа диаграммы
@@ -467,9 +428,9 @@ private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closu
     switch (requestContent.type as Diagram)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE] :
-            return getDataStandardDiagram(requestContent as RequestGetDataForDiagram)
+            return getDataStandardDiagram(requestContent as RequestGetDataForCompositeDiagram)
         case [DONUT, PIE] :
-            return getDataRoundDiagram(requestContent as RequestGetDataForDiagram)
+            return getDataRoundDiagram(requestContent as RequestGetDataForCompositeDiagram)
         case SUMMARY:
             return getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram)
         case TABLE:
@@ -482,28 +443,129 @@ private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closu
 }
 
 /**
+ * Получение данных для линейных диаграмм
+ * @param request параметры диаграммы
+ * @return данные для диаграммы в формате StandardDiagram
+ */
+private StandardDiagram getDataStandardDiagram(RequestGetDataForCompositeDiagram request)
+{
+    def currentData = request.data.find {key ,value -> !value.sourceForCompute }.value
+    def yAxis = currentData.yAxis
+    Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
+                                                 Attribute attribute,
+                                                 AggregationType aggregationType ->
+        def descriptor = data.descriptor
+        def source = data.source
+        def xAxis = data.xAxis
+        def gr = data.group
+        def breakdown = data.breakdown
+        def breakdownGroup = data.breakdownGroup
+        HCriteria criteria = createHCriteria(descriptor, source)
+        group(criteria, gr, xAxis, source, descriptor)
+        aggregation(criteria, aggregationType, attribute, source, descriptor, xAxis, breakdown)
+        if (breakdown)
+        {
+            group(criteria, breakdownGroup, breakdown, source, descriptor)
+        }
+        findNotNullAttributes(criteria, xAxis, breakdown)
+        getQuery(criteria).list()
+    }
+    Closure<Collection<Object>> executeFormula = { String formula ->
+        FormulaCalculator calculator = new FormulaCalculator(formula)
+        def lastResponse
+        def resValues = calculator.multipleExecute { String variable ->
+            def computeData = yAxis.computeData[variable]
+            def attribute = computeData.attr as Attribute
+            def aggregationType = computeData.aggregation as AggregationType
+            def dataKey = computeData.dataKey as String
+            def res = executeQuery(request.data[dataKey] as DataForCompositeDiagram, attribute as Attribute, aggregationType as AggregationType)
+            if (res)
+            {
+                lastResponse = res
+                return res.collect { it[1] as double }
+            }
+            else
+            {
+                return res
+            }
+        }
+        lastResponse.withIndex().collect { entry, i ->
+            entry[1] = resValues[i]
+            entry
+        }
+    }
+    def result = yAxis.stringForCompute
+            ? executeFormula(yAxis.stringForCompute)
+            : executeQuery(currentData as DataForCompositeDiagram, yAxis as Attribute, currentData.aggregation as AggregationType)
+    def groupSevenDay = { currentData.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
+    def breakdownSevenDay = { currentData.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
+    def groupDtInterval = { currentData.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
+    def breakdownDtInterval = { currentData?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
+    def groupState = { currentData.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, currentData.source) : it }
+    def breakdownState = { currentData?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, currentData.source) : it }
+    def list = result.with(groupSevenDay)
+            .with(breakdownSevenDay)
+            .with(groupDtInterval)
+            .with(breakdownDtInterval)
+            .with(groupState)
+            .with(breakdownState)
+    return mappingToStandardDiagram(list, currentData.breakdown as Attribute, currentData.breakdownGroup as GroupType)
+}
+
+/**
  * Получение данных для круговых диаграмм
  * @param request параметры диаграммы
  * @return данные для диаграммы в формате RoundDiagram
  */
-private RoundDiagram getDataRoundDiagram(RequestGetDataForDiagram request)
+private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram request)
 {
-    HCriteria criteria = createHCriteria(request.descriptor, request.source)
-    aggregation(criteria,
-            request.aggregation as AggregationType,
-            request.indicator as Attribute,
-            request.source,
-            request.descriptor,
-            request.breakdown)
-    group(criteria, request.breakdownGroup as GroupType, request.breakdown as Attribute, request.source, request.descriptor)
-    findNotNullAttributes(criteria, request.breakdown)
+    def currentData = request.data.find { key, value -> !value.sourceForCompute}.value
+    def indicator = currentData.indicator
+    Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
+                                                 Attribute attribute,
+                                                 AggregationType aggregationType ->
 
-    def groupSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
-    def groupDtInterval = { request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it as Collection, 1) : it }
-    def groupState = { request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it as Collection, 1, request.source) : it }
-
-    Collection<Object> list = getQuery(criteria).list().with(groupSevenDay).with(groupDtInterval).with(groupState)
-
+        def source = data.source
+        def descriptor = data.descriptor
+        def breakdown = data.breakdown
+        def breakdownGroup = data.breakdownGroup
+        HCriteria criteria = createHCriteria(descriptor, source)
+        aggregation(criteria, aggregationType, attribute, source, descriptor, breakdown)
+        group(criteria, breakdownGroup, breakdown, source, descriptor)
+        findNotNullAttributes(criteria, breakdown)
+        getQuery(criteria).list()
+    }
+    Closure<Collection<Object>> executeFormula = { String formula ->
+        FormulaCalculator calculator = new FormulaCalculator(formula)
+        def lastResponse
+        def resValues = calculator.multipleExecute { String variable ->
+            def computeData = indicator.computeData[variable]
+            def attribute = computeData.attr as Attribute
+            def aggregationType = computeData.aggregation as AggregationType
+            def dataKey = computeData.dataKey as String
+            def res = executeQuery(request.data[dataKey] as DataForCompositeDiagram, attribute as Attribute, aggregationType as AggregationType)
+            if (res)
+            {
+                lastResponse = res
+                return res.collect { it[0] as double }
+            }
+            else
+            {
+                return res
+            }
+        }
+        lastResponse.withIndex().collect { entry, i ->
+            entry[1] = resValues[i]
+            entry
+        }
+    }
+    def result = indicator.stringForCompute
+            ? executeFormula(indicator.stringForCompute)
+            : executeQuery(currentData as DataForCompositeDiagram, indicator as Attribute, currentData.aggregation as AggregationType)
+    def groupSevenDay = { currentData.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
+    def groupDtInterval = { currentData.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it as Collection, 1) : it }
+    def groupState = { currentData.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it as Collection, 1, currentData.source) : it }
+    def list = result.with(groupSevenDay).with(groupDtInterval).with(groupState)
     return new RoundDiagram(list*.getAt(1), list*.getAt(0))
 }
 
