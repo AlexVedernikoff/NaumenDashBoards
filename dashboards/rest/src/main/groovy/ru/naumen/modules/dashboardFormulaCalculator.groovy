@@ -10,6 +10,8 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules
 
+import groovy.json.JsonOutput
+
 import java.util.regex.Pattern
 import java.util.regex.Matcher
 /**
@@ -80,7 +82,7 @@ class FormulaCalculator
         try {
             return  executeReversePolishNotation(ReversePolishNotation, calculateVariable)
         } catch(Exception ex) {
-            throw new Exception(toJson([error: "error execute formula: ${formula}", causes: ex.message]))
+            throw new Exception(JsonOutput.toJson([error: "error execute formula: ${formula}", causes: ex.message]))
         }
     }
 
