@@ -366,9 +366,12 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
     Closure safetyCollect = { key, value ->
         api.tx.call {
             def res
-            try {
+            try
+            {
                 res = buildDiagram(transformRequest(value as Map<String, Object>, cardObjectUuid))
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.error("error in widget: $key", ex)
                 res = null
             }
@@ -378,7 +381,6 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
     return toJson(requestContent.collectEntries(safetyCollect))
 }
 
-/**
  * Получение данных для диаграмм Summary, Table, Combo
  * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
  * @return данные для построения диаграммы
@@ -398,7 +400,8 @@ String getDataForCompositeDiagram(Map<String, Object> requestContent, String car
  * @param defaultBehavior - метод обработки на случай не предусмотренного типа диаграммы
  * @return данные диаграммы
  */
-private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closure defaultBehavior) {
+private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closure defaultBehavior)
+{
     switch (requestContent.type as Diagram)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
@@ -423,7 +426,7 @@ private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closu
  */
 private StandardDiagram getDataStandardDiagram(RequestGetDataForCompositeDiagram request)
 {
-    def currentData = request.data.find {key ,value -> !value.sourceForCompute }.value
+    def currentData = request.data.find { key, value -> !value.sourceForCompute }.value
     def yAxis = currentData.yAxis
     Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
                                                  Attribute attribute,
@@ -463,7 +466,7 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForCompositeDiagram
                 return res
             }
         }
-        lastResponse.withIndex().collect { entry, i ->
+        lastResponse?.withIndex()?.collect { entry, i ->
             entry[1] = resValues[i]
             entry
         }
@@ -493,7 +496,7 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForCompositeDiagram
  */
 private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram request)
 {
-    def currentData = request.data.find { key, value -> !value.sourceForCompute}.value
+    def currentData = request.data.find { key, value -> !value.sourceForCompute }.value
     def indicator = currentData.indicator
     Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
                                                  Attribute attribute,
@@ -528,8 +531,8 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram reque
                 return res
             }
         }
-        lastResponse.withIndex().collect { entry, i ->
-            entry[1] = resValues[i]
+        lastResponse?.withIndex()?.collect { entry, i ->
+            entry[0] = resValues[i]
             entry
         }
     }
@@ -537,8 +540,8 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram reque
             ? executeFormula(indicator.stringForCompute)
             : executeQuery(currentData as DataForCompositeDiagram, indicator as Attribute, currentData.aggregation as AggregationType)
     def groupSevenDay = { currentData.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
-    def groupDtInterval = { currentData.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it as Collection, 1) : it }
-    def groupState = { currentData.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it as Collection, 1, currentData.source) : it }
+    def groupDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 1) : it }
+    def groupState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 1, currentData.source) : it }
     def list = result.with(groupSevenDay).with(groupDtInterval).with(groupState)
     return new RoundDiagram(list*.getAt(1), list*.getAt(0))
 }
@@ -563,7 +566,7 @@ private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompos
     }
     def result
     String formula = currentIndicator.stringForCompute
-    if(formula)
+    if (formula)
     {
         FormulaCalculator calculator = new FormulaCalculator(formula)
         result = calculator.execute { variable ->
@@ -619,7 +622,7 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
 
     String formula = currentColumn.stringForCompute
     def result
-    if(formula)
+    if (formula)
     {
         def lastResponse
         FormulaCalculator calculator = new FormulaCalculator(formula)
@@ -635,7 +638,7 @@ private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeD
             lastResponse.collect { it[1] as double }
         }
 
-        result = lastResponse.withIndex().collect { entry, i ->
+        result = lastResponse?.withIndex()?.collect { entry, i ->
             entry[1] = resValues[i]
             entry
         }
@@ -737,7 +740,7 @@ private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDia
                 }
             }
 
-            result = lastResponse.withIndex().collect { entry, i ->
+            result = lastResponse?.withIndex()?.collect { entry, i ->
                 entry[1] = resValues[i]
                 entry
             }
@@ -969,16 +972,16 @@ private TableDiagram mappingToTableDiagram(Collection<Object> list,
     {
         tableDiagram.columns << new Column("Итого", "total", "")
         tableDiagram.data.collect { cell ->
-            cell << [total: decimalFormat.format(cell.values().tail().sum{
-                decimalFormat.parse(it)})]
+            cell << [total: decimalFormat.format(cell.values().tail().sum(decimalFormat.&parse))]
         }
     }
 
-    if(calcRow && calcColumn)
+    if (calcRow && calcColumn)
     {
         String totalResult = decimalFormat.format(
                 tableDiagram.columns*.footer.sum {
-                    it != '' ? decimalFormat.parse(it) : 0 })
+                    it != '' ? decimalFormat.parse(it) : 0
+                })
         tableDiagram.columns.find({ it.accessor == 'total' }).footer = totalResult
     }
 
@@ -1093,7 +1096,7 @@ private List<Tuple> revelation(Attribute attribute)
 private void findNotNullAttributes(HCriteria criteria, Attribute... attributes)
 {
     attributes.each {
-        if(it)
+        if (it)
         {
             String attributeCode = getAttributeCodeByType(criteria, it)
             criteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
@@ -1207,7 +1210,7 @@ private Collection<Object> convertCodeStatusToNameStatus(Collection<Object> list
         (it as List).set(indexColumn, codeName[it[codeName]])
         it[indexColumn] = codeName[it[indexColumn]]
         it
-    }.sort{ it[indexColumn] }
+    }.sort { it[indexColumn] }
 }
 
 /**
@@ -1221,10 +1224,10 @@ private Collection<Object> sortSeries(Collection<Object> series, GroupType break
     def closureConvertStringToDate = { pattern, name ->
         new SimpleDateFormat(pattern, new Locale("ru")).parse(name)
     }
-    switch(breakdownGroup)
+    switch (breakdownGroup)
     {
         case [GroupType.OVERLAP, GroupType.WEEK, GroupType.QUARTER, GroupType.YEAR]:
-            series = series.sort{ it.name }
+            series = series.sort { it.name }
             break
         case GroupType.MONTH:
             series = series.sort {
@@ -1255,8 +1258,8 @@ private Collection<SeriesCombo> sortSeries(Collection<SeriesCombo> series,
                                            RequestGetDataForCompositeDiagram request)
 {
     Collection<SeriesCombo> seriesNew = []
-    series.dataKey.toUnique().each{ dataKey ->
-        Collection<SeriesCombo> seriesPart = series.findAll{ it.dataKey == dataKey}
+    series.dataKey.toUnique().each { dataKey ->
+        Collection<SeriesCombo> seriesPart = series.findAll { it.dataKey == dataKey }
         seriesPart = sortSeries(seriesPart, request.data[dataKey].breakdownGroup as GroupType)
         seriesNew.addAll(seriesPart)
     }
