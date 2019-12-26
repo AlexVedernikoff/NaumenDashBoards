@@ -543,8 +543,13 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram reque
     def groupSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
     def groupDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 1) : it }
     def groupState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 1, currentData.source) : it }
-    def list = result.with(groupSevenDay).with(groupDtInterval).with(groupState)
-    return new RoundDiagram(list*.getAt(1), list*.getAt(0))
+    def list = result.with(groupSevenDay).with(groupDtInterval).with(groupState).transpose()
+
+    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
+    otherSymbols.setDecimalSeparator('.' as char)
+    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
+
+    return new RoundDiagram(list[1] as Collection, list[0].collect { decimalFormat.format(it) as Double })
 }
 
 /**
@@ -911,6 +916,9 @@ private StandardDiagram mappingToStandardDiagram(Collection<Object> list,
     int categoryIndex = 0
     int dataIndex = 1
     int breakdownIndex = 2
+    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
+    otherSymbols.setDecimalSeparator('.' as char)
+    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
     StandardDiagram standardDiagram = new StandardDiagram()
     standardDiagram.categories = list.toUnique { it[categoryIndex] }*.getAt(categoryIndex)
     if (breakdown)
@@ -922,7 +930,7 @@ private StandardDiagram mappingToStandardDiagram(Collection<Object> list,
             list.findAll { element -> element[categoryIndex] == category }.each { currentElement ->
                 standardDiagram.series
                         .find { element -> element.name == currentElement[breakdownIndex] }
-                        .data[index] = currentElement[dataIndex]
+                        .data[index] = decimalFormat.format(currentElement[dataIndex])
             }
         }
     }
