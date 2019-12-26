@@ -381,6 +381,7 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
     return toJson(requestContent.collectEntries(safetyCollect))
 }
 
+/**
  * Получение данных для диаграмм Summary, Table, Combo
  * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
  * @return данные для построения диаграммы
@@ -388,7 +389,7 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
 String getDataForCompositeDiagram(Map<String, Object> requestContent, String cardObjectUuid)
 {
     return getDataForDiagramOrDefault(transformRequest(requestContent, cardObjectUuid)) {
-        throw new Exception(toJson([error: "Not supported diagram type: $it"]))
+        utils.throwReadableExceprion("Not supported diagram type: $it")
     }.with(JsonOutput.&toJson)
 }
 //endregion
@@ -474,8 +475,8 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForCompositeDiagram
     def result = yAxis.stringForCompute
             ? executeFormula(yAxis.stringForCompute)
             : executeQuery(currentData as DataForCompositeDiagram, yAxis as Attribute, currentData.aggregation as AggregationType)
-    def groupSevenDay = { currentData.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
-    def breakdownSevenDay = { currentData.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
+    def groupSevenDay = { currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
+    def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
     def groupDtInterval = { currentData.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
     def breakdownDtInterval = { currentData?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
     def groupState = { currentData.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, currentData.source) : it }
@@ -539,7 +540,7 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram reque
     def result = indicator.stringForCompute
             ? executeFormula(indicator.stringForCompute)
             : executeQuery(currentData as DataForCompositeDiagram, indicator as Attribute, currentData.aggregation as AggregationType)
-    def groupSevenDay = { currentData.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
+    def groupSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
     def groupDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 1) : it }
     def groupState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 1, currentData.source) : it }
     def list = result.with(groupSevenDay).with(groupDtInterval).with(groupState)
