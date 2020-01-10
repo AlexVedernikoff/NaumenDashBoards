@@ -23,15 +23,29 @@ export class AttributeRefInput extends PureComponent<Props, State> {
 		};
 	}
 
+	getTip = (type: string) => {
+		const {AGGREGATION, COMPUTE, GROUP} = TYPES;
+
+		switch (type) {
+			case AGGREGATION:
+				return 'Агрегация';
+			case COMPUTE:
+				return 'Редактировать поле';
+			case GROUP:
+				return 'Группировка';
+		}
+	};
+
 	getProps = () => {
-		const {mixin, name, onSelect, type, value} = this.props;
+		const {mixin, name, onSelect, renderValue, type, value} = this.props;
 		const {options} = this.state;
-		const tip = type === TYPES.GROUP ? 'Группировка' : 'Агрегация';
+		const tip = this.getTip(type);
 
 		return {
 			name,
 			onSelect,
 			options,
+			renderValue,
 			tip,
 			value,
 			...mixin

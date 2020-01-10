@@ -1,11 +1,21 @@
 // @flow
-import {Checkbox, ExtendButton, FieldError} from 'components/atoms';
-import type {Props, SourceValue} from './types';
+import {Checkbox, ExtendButton, IconButton, FieldError} from 'components/atoms';
+import {CrossIcon, EditIcon} from 'icons/form';
+import {InputForm, SourceTree} from 'components/molecules';
+import type {Props, SourceValue, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
-import {TreeSelectInput} from 'components/molecules';
 
-export class Source extends PureComponent<Props> {
+export class Source extends PureComponent<Props, State> {
+	static defaultProps = {
+		placeholder: 'Выберите значение'
+	};
+
+	state = {
+		showForm: false,
+		showList: false
+	};
+
 	callFilterModal = async () => {
 		const {descriptor, value: source} = this.props;
 		const {name, onChange, value} = descriptor;
@@ -34,13 +44,9 @@ export class Source extends PureComponent<Props> {
 		return context;
 	};
 
-	handleChangeLabel = (name: string, label: string) => {
-		const {onChangeLabel, value} = this.props;
-
-		if (value) {
-			value.label = label;
-			onChangeLabel(name, value);
-		}
+	handleChangeLabel = (label: string) => {
+		const {onChangeLabel, name, value} = this.props;
+		onChangeLabel(name, {...value, label});
 	};
 
 	handleClickRemoveButton = () => {
@@ -48,9 +54,15 @@ export class Source extends PureComponent<Props> {
 		onRemove(name);
 	};
 
-	handleSelectSource = async (name: string, value: SourceValue | null) => {
-		const {onSelect, onSelectCallback} = this.props;
+	handleRemoveValue = () => {
+		const {name, onSelect} = this.props;
+		onSelect(name, null);
+	};
 
+	handleSelect = async (value: SourceValue) => {
+		const {name, onSelect, onSelectCallback} = this.props;
+
+		this.setState({showList: false});
 		await onSelect(name, value);
 
 		if (onSelectCallback && typeof onSelectCallback === 'function') {
@@ -58,6 +70,12 @@ export class Source extends PureComponent<Props> {
 			setTimeout(() => onSelectCallback(name, value));
 		}
 	};
+
+	handleShowList = () => this.setState({showList: !this.state.showList});
+
+	hideForm = () => this.setState({showForm: false});
+
+	showForm = () => this.setState({showForm: true});
 
 	renderComputeCheckbox = () => {
 		const {compute} = this.props;
@@ -75,23 +93,43 @@ export class Source extends PureComponent<Props> {
 		);
 	};
 
-	renderInput = () => {
-		const {error, name, sources, value} = this.props;
+	renderEditTitleForm = () => {
+		const {value} = this.props;
+		const {showForm} = this.state;
 
-		return (
-			<Fragment>
-				<TreeSelectInput
-					name={name}
-					onChange={this.handleSelectSource}
-					onChangeLabel={this.handleChangeLabel}
-					placeholder="Выберите значение"
-					tree={sources}
-					value={value}
+		if (showForm) {
+			const label = value ? value.label : '';
+
+			return (
+				<InputForm
+					onClose={this.hideForm}
+					onSubmit={this.handleChangeLabel}
+					value={label}
 				/>
-				<FieldError text={error} />
-			</Fragment>
-		);
+			);
+		}
 	};
+
+	renderError = () => <FieldError text={this.props.error} />;
+
+	renderIndicators = () => {
+		const {value} = this.props;
+
+		if (value) {
+			return (
+				<div className={styles.indicators}>
+					<IconButton onClick={this.showForm}>
+						<EditIcon />
+					</IconButton>
+					<IconButton onClick={this.handleRemoveValue}>
+						<CrossIcon />
+					</IconButton>
+				</div>
+			);
+		}
+	};
+
+	renderInput = () => this.state.showForm ? this.renderEditTitleForm() : this.renderTreeSelect();
 
 	renderFilterButton = () => {
 		const {value} = this.props.descriptor;
@@ -118,6 +156,33 @@ export class Source extends PureComponent<Props> {
 			);
 		}
 	};
+
+	renderTitle = () => {
+		const {placeholder, value} = this.props;
+		const title = value ? value.label : placeholder;
+
+		return <div className={styles.title} data-placeholder={!value} onClick={this.handleShowList}>{title}</div>;
+	};
+
+	renderTree = () => {
+		const {sources, value} = this.props;
+		const {showList} = this.state;
+
+		if (showList) {
+			return <SourceTree className={styles.list} onSelect={this.handleSelect} sources={sources} value={value} />;
+		}
+	};
+
+	renderTreeSelect = () => (
+		<Fragment>
+			<div className={styles.select}>
+				{this.renderTitle()}
+				{this.renderIndicators()}
+				{this.renderTree()}
+			</div>
+			{this.renderError()}
+		</Fragment>
+	);
 
 	render () {
 		return (

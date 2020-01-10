@@ -9,6 +9,11 @@ const getAggregateOptions = (attribute: Attribute | null) => {
 		: DEFAULT_AGGREGATION_OPTIONS;
 };
 
+const getAggregationLabel = (aggregation: string) => {
+	const value = [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS].find(o => o.value === aggregation);
+	return value ? value.label : aggregation;
+};
+
 const getGroupOptions = (attribute: Attribute | null) => {
 	if (attribute && TYPES.DATE.includes(attribute.type)) {
 		return DATETIME_GROUP_OPTIONS;
@@ -18,6 +23,7 @@ const getGroupOptions = (attribute: Attribute | null) => {
 };
 
 export {
+	getAggregationLabel,
 	getAggregateOptions,
 	getGroupOptions
 };

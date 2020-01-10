@@ -27,7 +27,7 @@ export class WidgetRemovalModal extends PureComponent<Props> {
 		<Fragment>
 			<Button className={styles.button} onClick={this.handleSubmit(false)}>Да, все виджеты</Button>
 			<Button className={styles.button} onClick={this.handleSubmit(true)}>Да, только персональный виджет</Button>
-			<Button outline onClick={this.props.onClose}>Нет</Button>
+			<Button onClick={this.props.onClose} variant="additional">Нет</Button>
 		</Fragment>
 	);
 

@@ -9,6 +9,7 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {OptionType} from 'react-select/src/types';
+import {TYPES} from 'store/sources/attributes/constants';
 import type {Widget} from 'store/widgets/data/types';
 
 const getValue = (option: OptionType) => option && option.value;
@@ -73,9 +74,17 @@ const createPostData = (widget: Widget, {dataKey, ...fields}: Object) => {
 			sourceData[source] = getValue(widget[createOrdinalName(source, number)]);
 
 			Object.keys(fields).forEach(field => {
+				let value = widget[createOrdinalName(field, number)];
+
 				if (field === source) {
-					sourceData[field] = getValue(widget[createOrdinalName(field, number)]);
-					return;
+					value = getValue(value);
+				}
+
+				/*
+					Отфильтровываем лишние значения вычисляемого атрибута
+				 */
+				if (value && typeof value === 'object' && value.type === TYPES.COMPUTED_ATTR) {
+					value = {...value, state: undefined};
 				}
 
 				/*
@@ -84,18 +93,14 @@ const createPostData = (widget: Widget, {dataKey, ...fields}: Object) => {
 				для отображения графику необходимо все также количество.
 				*/
 				if (field === aggregation) {
-					let aggregationValue = widget[createOrdinalName(field, number)];
 					const widgetType = widget[type];
 
-					if (aggregationValue === PERCENT && (widgetType === BAR_STACKED || widgetType === COLUMN_STACKED)) {
-						aggregationValue = COUNT;
+					if (value === PERCENT && (widgetType === BAR_STACKED || widgetType === COLUMN_STACKED)) {
+						value = COUNT;
 					}
-
-					sourceData[field] = aggregationValue;
-					return;
 				}
 
-				sourceData[field] = widget[createOrdinalName(field, number)];
+				sourceData[field] = value;
 			});
 
 			data.data[widget[createOrdinalName(dataKey, number)]] = sourceData;

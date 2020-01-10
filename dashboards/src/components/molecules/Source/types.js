@@ -1,10 +1,12 @@
 // @flow
 import type {DataSourceMap} from 'store/sources/data/types';
-import type {TreeSelectValue} from 'components/molecules/TreeSelectInput/types';
 
-export type OnSelectCallback = (name: string, value: TreeSelectValue) => void;
+export type SourceValue = {
+	label: string,
+	value: string
+};
 
-export type SourceValue = TreeSelectValue;
+export type OnSelectCallback = (name: string, value: SourceValue) => void;
 
 export type Compute = {
 	name: string,
@@ -28,6 +30,12 @@ export type Props = {
 	onRemove: any,
 	onSelect: (name: string, value: SourceValue | null) => void | Promise<void>,
 	onSelectCallback?: OnSelectCallback,
+	placeholder: string,
 	sources: DataSourceMap,
 	value: SourceValue | null
+};
+
+export type State = {
+	showForm: boolean,
+	showList: boolean
 };

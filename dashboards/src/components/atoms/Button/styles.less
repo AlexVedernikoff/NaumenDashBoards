@@ -3,7 +3,6 @@
 :local {
 	.button {
 		align-items: center;
-		border: 1.2px solid @grey;
 		border-radius: 2px;
 		display: inline-flex;
 		font-size: 13px;
@@ -12,10 +11,6 @@
 		justify-content: center;
 		line-height: 15px;
 		padding: 8px 20px;
-
-		&:active {
-			background-color: darken(@grey, 10%);
-		}
 	}
 
 	.block {
@@ -23,137 +18,56 @@
 		width: 100%;
 	}
 
-	.primary {
-		background-color: @primary;
-		border-color: @primary;
-		color: white;
-
-		&:active {
-			@darken: darken(@primary, 10%);
-			background-color: @darken;
-			border-color: @darken;
-		}
-	}
-
-	.outline-primary {
-		background-color: white;
-		border-color: @primary;
-		color: @primary;
-
-		&:active {
-			background-color: @primary;
-			border-color: @primary;
-			color: white;
-		}
-	}
-
 	.info {
+		.button();
 		background-color: @info;
-		border-color: @info;
-		color: white;
+		color: @white;
 
 		&:hover {
-			@darken: darken(@info, 10%);
-			background-color: @darken;
-			border-color: @darken;
-		}
-
-		&:active {
-			@darken: darken(@info, 15%);
-			background-color: @darken;
-			border-color: @darken;
-		}
-	}
-
-	.outline-info {
-		background-color: white;
-		border-color: @info;
-		color: @info;
-
-		&:active {
-			background-color: @info;
-			border-color: @info;
-			color: white;
-		}
-	}
-
-	.outline-bare {
-		background-color: transparent;
-		border: none ;
-		color: @black ;
-
-		&:hover {
-			background-color: transparent;
-			color: @black;
-		}
-	}
-
-	.icon {
-		border: 2px solid @grey;
-		border-radius: 50%;
-		display: inline-block;
-		padding: 5px;
-		text-align: center;
-		text-decoration: none;
-		width: 35px;
-
-		&:active {
-			background-color: darken(@grey, 10%);
-		}
-	}
-
-	.icon-info {
-		border: 2px solid transparent;
-		border-radius: 50%;
-		display: inline-block;
-		padding: 5px;
-		text-align: center;
-		text-decoration: none;
-		width: 35px;
-
-		&:active {
 			background-color: darken(@info, 10%);
 		}
-	}
-
-	.icon-gray {
-		color: @grey;
-		border: 2px solid transparent;
-		border-radius: 50%;
-		display: inline-block;
-		padding: 5px;
-		text-align: center;
-		text-decoration: none;
-		width: 35px;
-
-		svg {
-			stroke: @grey;
-		}
-
-		&:hover {
-			background-color: darken(@grey, 10%);
-		}
 
 		&:active {
-			color: @black;
+			background-color: darken(@info, 15%);
+		}
 
-			svg {
-				stroke: @black;
+		&:disabled {
+			background-color: @silver;
+			color: @grey;
+			cursor: not-allowed;
+			pointer-events: none;
+
+			&:active {
+				background-color: darken(@silver, 10%);
 			}
 		}
 	}
 
-	.disabled {
-		background-color: @grey;
-		border-color: @grey;
-		color: @grey-dark;
-		cursor: not-allowed;
-		pointer-events: none;
+	.additional {
+		.button();
+		color: @black;
+
+		&:hover {
+			background: @lightgrey;
+		}
 
 		&:active {
-			@darken: darken(@grey, 10%);
-			background-color: @grey;
-			border-color: @grey;
+			background-color: @silver;
+		}
+	}
+
+	.simple {
+		.button();
+		color: @info;
+
+		&:hover, :active {
+			color: @black
+		}
+
+		&:disabled {
+			color: @grey;
+			cursor: not-allowed;
+			pointer-events: none;
 		}
 	}
 }

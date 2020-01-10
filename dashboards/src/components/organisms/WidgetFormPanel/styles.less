@@ -21,9 +21,11 @@
 	}
 
 	.tabList {
-		background: @grey-light;
-		color: @grey-dark;
+		background: @gainsboro;
+		color: @darkgrey;
 		display: flex;
+		// если -webkit-box стоит перед flex, то safari использует display: flex
+		display: -webkit-box;
 		flex-direction: row;
 		flex-wrap: nowrap;
 		list-style: none;
@@ -33,7 +35,7 @@
 
 	.tabListItemActive {
 		background: @white;
-		color: @grey-dark;
+		color: @black;
 	}
 
 	.form {

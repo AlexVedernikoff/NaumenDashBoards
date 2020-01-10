@@ -2,7 +2,7 @@
 import {CaretIcon} from 'icons/form';
 import cn from 'classnames';
 import type {Label, Option, Props, State} from './types';
-import React, {createElement, PureComponent} from 'react';
+import React, {createElement, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {Tip} from 'components/atoms';
 
@@ -96,13 +96,40 @@ export class MiniSelect extends PureComponent<Props, State> {
 	};
 
 	renderValue = () => {
+		const {renderValue} = this.props;
+		const {active} = this.state;
+		const className = styles.valueContainer;
+		const children = this.renderValueContent();
+		let props = {
+			className,
+			onClick: this.handleShowList
+		};
+
+		if (renderValue) {
+			props = {
+				...props,
+				active,
+				children
+			};
+
+			return renderValue(props);
+		}
+
+		return (
+			<div {...props}>
+				{children}
+			</div>
+		);
+	};
+
+	renderValueContent = () => {
 		const {currentOption} = this.state;
 
 		return (
-			<div className={styles.valueContainer} onClick={this.handleShowList}>
+			<Fragment>
 				{this.renderLabel(currentOption.label)}
 				{this.renderCaret()}
-			</div>
+			</Fragment>
 		);
 	};
 

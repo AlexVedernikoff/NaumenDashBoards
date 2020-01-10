@@ -16,7 +16,7 @@ import {NewWidget} from 'utils/widget';
  * @returns {ThunkAction}
  */
 const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(requestDashboard);
+	dispatch(requestDashboard());
 
 	try {
 		const context = getContext();

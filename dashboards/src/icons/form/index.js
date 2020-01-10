@@ -4,6 +4,7 @@ import CheckedIcon from './checked.svg';
 import ChevronDownIcon from './chevron-down.svg';
 import ChevronDownBareIcon from './chevron-down-bare.svg';
 import ChevronUpBareIcon from './chevron-up-bare.svg';
+import ClearSquareIcon from './clear square.svg';
 import CloseIcon from './close.svg';
 import CrossIcon from './cross.svg';
 import EditIcon from './edit.svg';
@@ -21,6 +22,7 @@ export {
 	ChevronDownIcon,
 	ChevronDownBareIcon,
 	ChevronUpBareIcon,
+	ClearSquareIcon,
 	CloseIcon,
 	CrossIcon,
 	EditIcon,

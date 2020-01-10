@@ -23,7 +23,7 @@ export class DataFormBuilder extends FormBuilder {
 		setTimeout(this.init);
 	}
 
-	addSet = (count: number = 1) => {
+	addSet = (count: number) => {
 		const {setFieldValue} = this.props;
 		let order = this.getOrder();
 		let nextNumber = order[order.length - 1] + 1;
@@ -81,7 +81,7 @@ export class DataFormBuilder extends FormBuilder {
 		const sources = [];
 
 		order.forEach(number => {
-			const sourceName = values[createOrdinalName(FIELDS.source, number)];
+			const sourceName = createOrdinalName(FIELDS.source, number);
 			const sourceForComputeName = createOrdinalName(FIELDS.sourceForCompute, number);
 
 			if (values[sourceName] && !values[sourceForComputeName]) {
@@ -116,20 +116,26 @@ export class DataFormBuilder extends FormBuilder {
 		return options;
 	};
 
-	getSourcesWithDataKey = () => {
+	getAttributeModalOptions = () => {
 		const {values} = this.props;
-		const sources = [];
+		const options = [];
 
 		this.getOrder().forEach(number => {
 			const source = values[createOrdinalName(FIELDS.source, number)];
 
 			if (source) {
-				source.dataKey = values[createOrdinalName(FIELDS.dataKey, number)];
-				sources.push(source);
+				const attributes = this.getAttributeOptions(source.value);
+				const dataKey = values[createOrdinalName(FIELDS.dataKey, number)];
+
+				options.push({
+					attributes,
+					dataKey,
+					source
+				});
 			}
 		});
 
-		return sources;
+		return options;
 	};
 
 	init = () => {
@@ -210,9 +216,7 @@ export class DataFormBuilder extends FormBuilder {
 		const buildSources = this.getBuildSources(order);
 		const sourceName = createRefName(name, FIELDS.source);
 
-		if (value && buildSources.length <= this.defaultOrder.length && buildSources.includes(sourceName)) {
-			return;
-		} else if (values[FIELDS.type] !== CHART_VARIANTS.COMBO) {
+		if (!value && values[FIELDS.type] !== CHART_VARIANTS.COMBO) {
 			order.every(number => {
 				const name = createOrdinalName(FIELDS.sourceForCompute, number);
 
@@ -225,18 +229,21 @@ export class DataFormBuilder extends FormBuilder {
 			});
 		}
 
-		setFieldValue(name, value);
+		if (!value || (value && (buildSources.length > this.defaultOrder.length || !buildSources.includes(sourceName)))) {
+			setFieldValue(name, value);
+		}
 	};
+
+	handleClickAddSource = () => this.addSet(1);
 
 	handleClickExtendBreakdown = (withBreakdownName: string) => () => this.props.setFieldValue(withBreakdownName, true);
 
-	handleCreateAttribute = (name: string, attr: ComputedAttr) => {
+	handleRemoveAttribute = (name: string, code: string) => {
 		const {setFieldValue, values} = this.props;
-		let computedAttrs = values[FIELDS.computedAttrs];
-		computedAttrs = Array.isArray(computedAttrs) ? [attr, ...computedAttrs] : [attr];
+		const computedAttrs = values[FIELDS.computedAttrs];
 
-		setFieldValue(name, attr);
-		setFieldValue(FIELDS.computedAttrs, computedAttrs);
+		setFieldValue(FIELDS.computedAttrs, computedAttrs.filter(a => a.code !== code));
+		setFieldValue(name, null);
 	};
 
 	handleRemoveBreakdown = (breakdownName: string) => {
@@ -245,6 +252,26 @@ export class DataFormBuilder extends FormBuilder {
 
 		setFieldValue(breakdownName, null);
 		setFieldValue(withBreakdownName, false);
+	};
+
+	handleSaveAttribute = (name: string, newAttr: ComputedAttr) => {
+		const {setFieldValue, values} = this.props;
+		const computedAttrs = values[FIELDS.computedAttrs] || [];
+		let exists = false;
+
+		computedAttrs.forEach((attr, index) => {
+			if (attr.code === newAttr.code) {
+				computedAttrs[index] = newAttr;
+				exists = true;
+			}
+		});
+
+		if (!exists) {
+			computedAttrs.push(newAttr);
+		}
+
+		setFieldValue(name, newAttr);
+		setFieldValue(FIELDS.computedAttrs, computedAttrs);
 	};
 
 	handleSelectSource = async (name: string, nextSource: SourceValue | null) => {
@@ -282,7 +309,7 @@ export class DataFormBuilder extends FormBuilder {
 		const props = {
 			icon: 'plus',
 			name: 'Источник',
-			onClick: this.addSet
+			onClick: this.handleClickAddSource
 		};
 
 		return this.renderLabelWithIcon(props);
@@ -302,11 +329,12 @@ export class DataFormBuilder extends FormBuilder {
 					getAttributeOptions={this.getAttributeOptions}
 					getRefAttributeOptions={this.getRefAttributeOptions}
 					onChangeTitle={setFieldValue}
-					onCreateAttribute={this.handleCreateAttribute}
+					onRemoveAttribute={this.handleRemoveAttribute}
+					onSaveAttribute={this.handleSaveAttribute}
 					onSelect={setFieldValue}
 					onSelectRefInput={setFieldValue}
 					source={source}
-					sources={this.getSourcesWithDataKey()}
+					sources={this.getAttributeModalOptions()}
 					{...props}
 				/>
 			</div>

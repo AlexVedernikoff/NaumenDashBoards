@@ -1,36 +1,56 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {OptionType} from 'react-select/src/types';
-import type {SourceValue} from 'components/molecules/Source/types';
+import type {Option} from 'components/molecules/SourceControl/types';
+import {TYPES} from './constants';
+
+type SecondTemplateType =
+	| typeof TYPES.CONSTANT
+	| typeof TYPES.SOURCE
+;
+
+type ComputeData = {
+	aggregation: string,
+	attr: Attribute,
+	dataKey: string
+}
+
+type ComputeDataMap = {
+	[string]: ComputeData
+}
 
 export type ComputedAttr = {
 	code: string,
-	computeData: any,
+	computeData: ComputeDataMap,
+	state: string,
 	stringForCompute: string,
-	title: string
+	title: string,
+	type: string
 };
 
 export type Control = {
 	name: string,
-	next: string | null,
-	prev: string | null,
-	type: ?string,
+	next: string,
+	prev: string,
+	type: string,
 	value: null,
 }
 
 export type Props = {
-	getAttributeOptions: (source: any) => Array<Attribute>,
 	onClose: () => any,
+	onRemove?: (code: string) => void,
 	onSubmit: (attribute: ComputedAttr) => void,
-	sources: Array<SourceValue>,
+	sources: Array<Option>,
+	value: ComputedAttr | null
 };
 
 export type State = {
-	constants: Array<OptionType>,
 	controls: {
 		[string]: Control
 	},
 	first: string,
-	focus: boolean,
-	last: string
+	info: string,
+	last: string,
+	secondTemplateType: SecondTemplateType,
+	showRemoveInfo: boolean,
+	title: string
 }

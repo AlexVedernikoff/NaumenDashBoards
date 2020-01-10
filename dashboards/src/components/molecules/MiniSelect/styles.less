@@ -1,8 +1,8 @@
-:local {
-	@bg: #EFF3F8;
+@import '/styles/variables';
 
+:local {
 	.caret {
-		color: #BBBBBB;
+		color: @grey;
 	}
 
 	.label {
@@ -13,7 +13,7 @@
 
 	.list {
 		background-color: white;
-		box-shadow: 0 0 5px lighten(black, 70%);
+		box-shadow: @grey-box-shadow;
 		left: 0;
 		position: absolute;
 		right: 0;
@@ -23,7 +23,7 @@
 
 	.option {
 		align-items: center;
-		background-color: @bg;
+		background-color: @gainsboro;
 		cursor: pointer;
 		display: flex;
 		height: 38px;
@@ -31,14 +31,14 @@
 		margin: 5px;
 
 		&:hover {
-			background-color: #D1D1D1;
+			background-color: @silver;
 		}
 	}
 
 	.select {
-		background: @bg;
+		background: @blue;
 		border-radius: 2px;
-		color: #5F5F5F;
+		color: @dimgrey;
 		font-size: 12px;
 		outline: none;
 		position: relative;
@@ -52,8 +52,10 @@
 
 	.valueContainer {
 		align-items: center;
+		cursor: pointer;
 		display: flex;
 		height: 38px;
+		justify-content: center;
 		padding: 0 8px;
 		position: relative;
 	}

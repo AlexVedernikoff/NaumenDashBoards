@@ -12,6 +12,7 @@
 	}
 
 	.container {
+		border-radius: @border-radius;
 		margin: 5% auto;
 		width: 600px;
 	}
@@ -26,18 +27,21 @@
 
 	.header {
 		background-color: @primary;
+		border-radius: @border-radius @border-radius 0 0;
 		color: white;
+		font-weight: bold;
 		padding: 20px;
 	}
 
 	.content {
 		background-color: white;
+		border-radius: 0 0 @border-radius @border-radius;
 		min-height: 50px;
 	}
 
 	.footer {
-		background-color: @grey-light;
-		padding: 10px;
+		background-color: @blue;
+		padding: 16px 24px;
 	}
 
 	.submitButton {

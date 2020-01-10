@@ -1,0 +1,52 @@
+@import '/styles/variables';
+
+:local {
+	@height: 48px;
+
+	.container {
+		align-items: center;
+		border-radius: @border-radius;
+		cursor: pointer;
+		display: flex;
+		height: @height;
+		justify-content: center;
+	}
+
+	.form {
+		.container();
+		border: 1px solid @grey;
+		width: 110px;
+	}
+
+	.value {
+		.container();
+		background-color: #DAE4F1;
+		min-width: 58px;
+
+		&:hover {
+			background-color: #BACADE;
+		}
+	}
+
+	.input {
+		font-size: 14px;
+		font-weight: 500;
+		height: 32px;
+		width: 48px;
+	}
+
+	.icon {
+		cursor: pointer;
+		padding: 4px;
+	}
+
+	.successIcon {
+		.icon();
+		color: green;
+	}
+
+	.cancelIcon {
+		.icon();
+		color: red
+	}
+}

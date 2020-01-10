@@ -1,46 +1,82 @@
 // @flow
-const AGGREGATION: 'AGGREGATION' = 'AGGREGATION';
-const ATTRIBUTE: 'ATTRIBUTE' = 'ATTRIBUTE';
+import {BracketLeftIcon, BracketRightIcon, DivisionIcon, MinusIcon, MultiplyIcon, PlusIcon} from 'icons/controls';
+
 const CONSTANT: 'CONSTANT' = 'CONSTANT';
 const OPERATOR: 'OPERATOR' = 'OPERATOR';
 const SOURCE: 'SOURCE' = 'SOURCE';
 
 const TYPES = {
-	AGGREGATION,
-	ATTRIBUTE,
 	CONSTANT,
 	OPERATOR,
 	SOURCE
 };
 
-const operators = [
+const TEMPLATE_NAMES = {
+	CONSTANT,
+	OPERATOR,
+	SOURCE
+};
+
+const OPERATOR_TEMPLATE = {
+	name: TEMPLATE_NAMES.OPERATOR,
+	next: TEMPLATE_NAMES.SOURCE,
+	prev: '',
+	type: TYPES.OPERATOR,
+	value: null
+};
+
+const SOURCE_TEMPLATE = {
+	name: TEMPLATE_NAMES.SOURCE,
+	next: '',
+	prev: TEMPLATE_NAMES.OPERATOR,
+	type: TYPES.SOURCE,
+	value: null
+};
+
+const CONSTANT_TEMPLATE = {
+	name: TEMPLATE_NAMES.CONSTANT,
+	next: '',
+	prev: TEMPLATE_NAMES.OPERATOR,
+	type: TYPES.CONSTANT,
+	value: null
+};
+
+const TEMPLATES = {
+	CONSTANT_TEMPLATE,
+	OPERATOR_TEMPLATE,
+	SOURCE_TEMPLATE
+};
+
+const OPERATORS = [
 	{
-		label: '(',
+		icon: BracketLeftIcon,
 		value: '('
 	},
 	{
-		label: ')',
+		icon: BracketRightIcon,
 		value: ')'
 	},
 	{
-		label: '+',
+		icon: PlusIcon,
 		value: '+'
 	},
 	{
-		label: '-',
+		icon: MinusIcon,
 		value: '-'
 	},
 	{
-		label: '*',
+		icon: MultiplyIcon,
 		value: '*'
 	},
 	{
-		label: '/',
+		icon: DivisionIcon,
 		value: '/'
 	}
 ];
 
 export {
-	operators,
+	OPERATORS,
+	TEMPLATE_NAMES,
+	TEMPLATES,
 	TYPES
 };
