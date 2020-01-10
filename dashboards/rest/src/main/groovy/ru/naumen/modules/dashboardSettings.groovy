@@ -251,7 +251,7 @@ String bulkEditDefaultWidget(Map<String, Object> requestContent, def user)
  */
 String bulkEditWidget(Map<String, Object> requestContent, def user)
 {
-    RequestEditWidgetsSettings request = new RequestEditWidgetsSettings(requestContent)
+    def request = requestContent as RequestEditWidgetsSettings
     return request.layoutsSettings.collect {
         def widgetSettings = setLayoutInSettings(it)
         Map<String, Object> widgetRequest = [
