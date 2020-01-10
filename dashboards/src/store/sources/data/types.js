@@ -8,11 +8,8 @@ export type RawDataSource = {
 };
 
 export type DataSource = {
-	children: string[],
-	errorLoadingChildren?: boolean,
-	isLeaf: boolean,
-	key: string,
-	root?: boolean,
+	children: Array<string>,
+	parent: string | null,
 	title: string,
 	value: string
 };

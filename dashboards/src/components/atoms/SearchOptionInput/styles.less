@@ -1,0 +1,30 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		display: flex;
+		height: 32px;
+		padding: 12px;
+	}
+
+	.input {
+		border-bottom: 2px solid @gainsboro;
+		box-sizing: border-box;
+		height: 100%;
+		padding: 4px;
+		width: 100%;
+
+		&:focus {
+			border-color: @info;
+		}
+
+		::placeholder {
+			color: @grey;
+		}
+	}
+
+	.icon {
+		color: @dimgrey;
+		padding: 8px 8px 8px 0;
+	}
+}

@@ -21,7 +21,7 @@ const isObject = (item: any): boolean => item && typeof item === 'object' && !Ar
  * @param {Widget} widget - данные виджета
  * @returns {boolean}
  */
-const hasLegacyFormat = (widget: Widget) => Array.isArray(widget.order);
+const hasLegacyFormat = (widget: Widget) => !Array.isArray(widget.order);
 
 /**
  * Функция расширяет опции графика
@@ -262,10 +262,8 @@ const comboChart = (widget: Widget, chart: DiagramBuildData) => {
  * @returns {ApexOptions}
  */
 const circleChart = (widget: Widget, chart: DiagramBuildData): ApexOptions => {
-	const {legendPosition} = widget;
 	const aggregationName = hasLegacyFormat(widget) ? FIELDS.aggregation : createOrdinalName(FIELDS.aggregation, getMainOrdinalNumber(widget));
 	const aggregation = widget[aggregationName];
-	const legendPositionValue = getLegendPositionValue(legendPosition);
 
 	const options: Object = {
 		labels: chart.labels
@@ -276,12 +274,6 @@ const circleChart = (widget: Widget, chart: DiagramBuildData): ApexOptions => {
 			formatter: function (val, options) {
 				return options.w.config.series[options.seriesIndex];
 			}
-		};
-	}
-
-	if (legendPositionValue === LEGEND_POSITIONS.top || legendPositionValue === LEGEND_POSITIONS.bottom) {
-		options.chart = {
-			height: '75%'
 		};
 	}
 

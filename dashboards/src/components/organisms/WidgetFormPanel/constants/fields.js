@@ -86,7 +86,6 @@ const CIRCLE_FIELDS = {
 	breakdown,
 	breakdownGroup,
 	descriptor,
-	group,
 	indicator
 };
 

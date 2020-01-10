@@ -2,18 +2,20 @@
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
 import {AttributeCreatingModal, AttributeRefInput, Select} from 'components/molecules';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
-import {DATETIME_GROUP, TYPES as INPUT_TYPES} from 'components/molecules/AttributeRefInput/constants';
+import {DATETIME_GROUP} from 'components/molecules/AttributeRefInput/constants';
 import {Divider, FieldError} from 'components/atoms';
 import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
 import React, {createRef, Fragment, PureComponent} from 'react';
+import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
 import type {SourceValue} from 'components/molecules/Source/types';
 import styles from './styles.less';
 import {TYPES} from 'store/sources/attributes/constants';
 
 export class Attribute extends PureComponent<Props, State> {
 	state = {
-		showCreatingModal: false
+		showCreatingModal: false,
+		showEditingModal: false
 	};
 
 	refInput = createRef();
@@ -35,7 +37,7 @@ export class Attribute extends PureComponent<Props, State> {
 			onRemove,
 			onSelect,
 			options,
-			refInput,
+			refInputProps,
 			showBorder,
 			value,
 			withCreate,
@@ -49,7 +51,7 @@ export class Attribute extends PureComponent<Props, State> {
 			onRemove,
 			onSelect,
 			options,
-			refInput,
+			refInputProps,
 			showBorder,
 			value,
 			withCreate,
@@ -82,6 +84,12 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 	};
 
+	handleRemoveAttribute = (code: string) => {
+		const {name, onRemoveAttribute} = this.props;
+		onRemoveAttribute(name, code);
+		this.hideModal();
+	};
+
 	handleSelect = (parent?: AttributeType) => (name: string, value: OptionType) => {
 		const {onSelect, value: prevValue} = this.props;
 
@@ -96,7 +104,7 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	handleSelectWithRef = (parent: AttributeType | null) => (name: string, value: OptionType) => {
-		const {onSelect, onSelectRefInput, refInput} = this.props;
+		const {onSelect, onSelectRefInput, refInputProps} = this.props;
 		let {value: prevValue} = this.props;
 
 		if (parent) {
@@ -109,8 +117,8 @@ export class Attribute extends PureComponent<Props, State> {
 			onSelect(name, {...value});
 		}
 
-		if (refInput && this.refInput.current && (!prevValue || prevValue.type !== value.type)) {
-			const {name: refName} = refInput;
+		if (refInputProps && this.refInput.current && (!prevValue || prevValue.type !== value.type)) {
+			const {name: refName} = refInputProps;
 			const refOptions = this.refInput.current.state.options;
 			let refValue = refOptions[0].value;
 
@@ -124,14 +132,17 @@ export class Attribute extends PureComponent<Props, State> {
 		this.applyCallback(name, value);
 	};
 
-	handleSubmitModalForm = (attribute: ComputedAttr) => {
-		const {name, onCreateAttribute} = this.props;
+	handleSubmitModal = (attribute: ComputedAttr) => {
+		const {name, onSaveAttribute} = this.props;
 
-		onCreateAttribute(name, attribute);
-		this.hideCreatingModal();
+		onSaveAttribute(name, attribute);
+		this.hideModal();
 	};
 
-	hideCreatingModal = () => this.setState({showCreatingModal: false});
+	hideModal = () => this.setState({
+		showEditingModal: false,
+		showCreatingModal: false
+	});
 
 	mixinAttribute = (props: Object) => {
 		const {source, value} = this.props;
@@ -144,17 +155,17 @@ export class Attribute extends PureComponent<Props, State> {
 		return {
 			...props,
 			attr: true,
-			isEditableLabel: value && value.type !== TYPES.COMPUTED_ATTR,
+			isEditableLabel: !!value,
 			options,
 			showBorder: false
 		};
 	};
 
-	mixinCreate = (props: Object) => {
+	mixinCreate = (props: Object, parent: AttributeType | null) => {
 		const {computedAttrs} = this.props;
 		let {options} = props;
 
-		if (Array.isArray(computedAttrs)) {
+		if (!parent && Array.isArray(computedAttrs)) {
 			options = [...computedAttrs, ...options];
 		}
 
@@ -175,17 +186,9 @@ export class Attribute extends PureComponent<Props, State> {
 		return {...props, form};
 	};
 
-	shouldRenderRefInput = () => {
-		const {refInput, value} = this.props;
-
-		if (refInput) {
-			const {type} = refInput;
-
-			return type === INPUT_TYPES.GROUP || !value || value.type !== TYPES.COMPUTED_ATTR;
-		}
-	};
-
 	showCreatingModal = () => this.setState({showCreatingModal: true});
+
+	showEditingModal = () => this.setState({showEditingModal: true});
 
 	renderAttribute = (attributeProps: Object) => {
 		const {parent, refInput, ...selectProps} = attributeProps;
@@ -193,7 +196,7 @@ export class Attribute extends PureComponent<Props, State> {
 		let props = this.mixinAttribute(selectProps);
 
 		if (withCreate) {
-			props = this.mixinCreate(props);
+			props = this.mixinCreate(props, parent);
 		}
 
 		if (value) {
@@ -209,9 +212,7 @@ export class Attribute extends PureComponent<Props, State> {
 			}
 		}
 
-		return refInput && this.shouldRenderRefInput()
-			? this.renderAttributeInputWithRef(props, parent)
-			: this.renderAttributeInput(props, parent);
+		return refInput && this.renderAttributeInputWithRef(props, parent);
 	};
 
 	renderAttributeInput = (props: Object, parent: AttributeType, withRefInput: boolean = false) => {
@@ -249,6 +250,14 @@ export class Attribute extends PureComponent<Props, State> {
 		value: parent.ref
 	});
 
+	renderComputeEditButton = (props: RenderValueProps) => {
+		const {className} = props;
+
+		return (
+			<div className={className} onClick={this.showEditingModal}>f(x)</div>
+		);
+	};
+
 	renderCreatingModal = () => {
 		const {sources} = this.props;
 		const {showCreatingModal} = this.state;
@@ -256,10 +265,26 @@ export class Attribute extends PureComponent<Props, State> {
 		if (showCreatingModal) {
 			return (
 				<AttributeCreatingModal
-					getAttributeOptions={this.getOptions}
-					onClose={this.hideCreatingModal}
-					onSubmit={this.handleSubmitModalForm}
+					onClose={this.hideModal}
+					onSubmit={this.handleSubmitModal}
 					sources={sources}
+				/>
+			);
+		}
+	};
+
+	renderEditingModal = () => {
+		const {sources, value} = this.props;
+		const {showEditingModal} = this.state;
+
+		if (showEditingModal && value) {
+			return (
+				<AttributeCreatingModal
+					onClose={this.hideModal}
+					onRemove={this.handleRemoveAttribute}
+					onSubmit={this.handleSubmitModal}
+					sources={sources}
+					value={value}
 				/>
 			);
 		}
@@ -279,11 +304,23 @@ export class Attribute extends PureComponent<Props, State> {
 	);
 
 	renderRefInput = (attribute: AttributeType | null) => {
-		const {onSelectRefInput, refInput} = this.props;
+		const {onSelectRefInput} = this.props;
+		let {refInputProps} = this.props;
 
-		if (refInput) {
-			return <AttributeRefInput attribute={attribute} onSelect={onSelectRefInput} ref={this.refInput} {...refInput} />;
+		if (attribute && attribute.type === TYPES.COMPUTED_ATTR) {
+			const renderValue = this.renderComputeEditButton;
+			const type = 'compute';
+			refInputProps = {...refInputProps, renderValue, type};
 		}
+
+		return (
+			<AttributeRefInput
+				attribute={attribute}
+				onSelect={onSelectRefInput}
+				ref={this.refInput}
+				{...refInputProps}
+			/>
+		);
 	};
 
 	renderSelect = (props: Object) => {
@@ -306,6 +343,7 @@ export class Attribute extends PureComponent<Props, State> {
 			<Fragment>
 				{this.renderAttribute(props)}
 				{this.renderCreatingModal()}
+				{this.renderEditingModal()}
 			</Fragment>
 		);
 	}

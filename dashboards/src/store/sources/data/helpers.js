@@ -1,22 +1,23 @@
 // @flow
 import type {
+	DataSourceMap,
 	DataSourcesState,
 	RawDataSource,
 	ReceiveDataSources
 } from './types';
 
-const createDataSource = (source: RawDataSource) => ({
+const createDataSource = (source: RawDataSource, parent: string | null = null) => ({
+	children: [],
+	parent,
 	title: source.title,
-	value: source.classFqn,
-	key: source.classFqn,
-	isLeaf: source.children && source.children.length === 0
+	value: source.classFqn
 });
 
-const setChildrenDataSources = (map: any, classFqn: string, children: Array<RawDataSource>) => {
+const setChildrenDataSources = (map: DataSourceMap, classFqn: string, children: Array<RawDataSource>) => {
 	map[classFqn].children = children.map(source => source.classFqn);
 
 	children.forEach(source => {
-		map[source.classFqn] = createDataSource(source);
+		map[source.classFqn] = createDataSource(source, classFqn);
 		setChildrenDataSources(map, source.classFqn, source.children);
 	});
 };
@@ -31,14 +32,15 @@ export const setDataSources = (state: DataSourcesState, {payload}: ReceiveDataSo
 	let map = {};
 
 	payload.forEach(source => {
-		map[source.classFqn] = {...createDataSource(source), root: true};
-		map[source.classFqn].children = [];
-		setChildrenDataSources(map, source.classFqn, source.children);
+		const {children, classFqn} = source;
+		map[classFqn] = createDataSource(source, null);
+
+		setChildrenDataSources(map, classFqn, children);
 	});
 
 	return {
 		...state,
 		loading: false,
-		map: {...map}
+		map
 	};
 };

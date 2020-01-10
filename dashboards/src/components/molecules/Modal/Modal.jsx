@@ -40,7 +40,7 @@ export class Modal extends Component<Props> {
 		return (
 			<Fragment>
 				<Button className={styles.submitButton} onClick={onSubmit}>{submitText}</Button>
-				<Button onClick={onClose} outline>{cancelText}</Button>
+				<Button onClick={onClose} variant="additional">{cancelText}</Button>
 			</Fragment>
 		);
 	};

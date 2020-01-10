@@ -1,7 +1,7 @@
 // @flow
 import {ATTR_PROPS, DEFAULT_COMPONENTS} from './constants';
-import {Button, IconButton} from 'components/atoms';
-import {EditIcon, MinusIcon, PlusIcon} from 'icons/form';
+import {CreationPanel, IconButton} from 'components/atoms';
+import {EditIcon, MinusIcon} from 'icons/form';
 import {InputForm} from 'components/molecules';
 import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
@@ -170,16 +170,13 @@ export class Select extends PureComponent<Props, State> {
 		</div>
 	);
 
-	renderListWithCreateButton = (props: any) => {
+	renderListWithCreateButton = (props: Object) => {
 		const {createButtonText, onClickCreateButton} = this.props;
 
 		return (
 			<components.Menu {...props}>
 				{props.children}
-				<Button className={styles.createButton} onClick={onClickCreateButton || this.handleShowForm(true)}>
-					<PlusIcon className={styles.plusIcon} />
-					{createButtonText}
-				</Button>
+				<CreationPanel onClick={onClickCreateButton || this.handleShowForm(true)} text={createButtonText} />
 			</components.Menu>
 		);
 	};

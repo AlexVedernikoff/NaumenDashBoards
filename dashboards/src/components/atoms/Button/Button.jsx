@@ -15,16 +15,11 @@ export class Button extends Component<Props> {
 	};
 
 	getClassNames = () => {
-		const {block, className, disabled, outline, variant} = this.props;
-		const color = styles[outline ? `outline-${variant}` : variant];
-		const mixins = [color];
+		const {block, className, variant} = this.props;
+		const mixins = [styles[variant]];
 
 		if (block) {
 			mixins.push(styles.block);
-		}
-
-		if (disabled) {
-			mixins.push(styles.disabled);
 		}
 
 		if (className) {

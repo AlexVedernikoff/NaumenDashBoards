@@ -14,7 +14,7 @@
 
 	.dropdownButton {
 		border: none;
-		color: @grey-light;
+		color: @white;
 		cursor: pointer;
 		font-size: 16px;
 		padding: 16px;
@@ -22,21 +22,17 @@
 		&:hover {
 			background-color: @info;
 		}
-
-		svg {
-			fill: @grey-light;
-		}
 	}
 
 	.dropdownContent {
-		background-color: @grey-light;
-		box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+		background-color: @white;
+		box-shadow: @grey-box-shadow;
 		display: none;
 		position: absolute;
 		z-index: 1;
 
 		button {
-			color: @black;
+			color: @info;
 			display: block;
 			margin: 0;
 			min-width: 65px;

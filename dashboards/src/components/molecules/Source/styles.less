@@ -1,3 +1,5 @@
+@import '/styles/variables';
+
 :local {
 	.container {
 		position: relative;
@@ -13,6 +15,43 @@
 		position: absolute;
 		right: 0;
 		text-decoration: underline;
+		top: 35px;
+	}
+
+	.select {
+		align-items: center;
+		border-bottom: 2px solid @black;
+		cursor: pointer;
+		display: flex;
+		padding: 6px 0;
+		white-space: nowrap;
+
+		&:hover {
+			.indicators {
+				visibility: visible;
+			}
+		}
+	}
+
+	.indicators {
+		visibility: hidden;
+	}
+
+	.list {
+		left: 0;
+		position: absolute;
+		right: 0;
 		top: 40px;
+		z-index: 1;
+	}
+
+	.title {
+		flex: auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		&[data-placeholder=true] {
+			color: @darkgrey;
+		}
 	}
 }

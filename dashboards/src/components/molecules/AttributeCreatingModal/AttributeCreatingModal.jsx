@@ -1,36 +1,39 @@
 // @flow
+import {Button} from 'components/atoms';
+import {ClearSquareIcon, CloseIcon, CrossIcon} from 'icons/form';
+import {ConstantControl, Modal, OperatorControl, SourceControl} from 'components/molecules';
 import type {Control, Props, State} from './types';
-import {getAggregateOptions} from 'components/molecules/AttributeRefInput/helpers';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import Modal from 'components/molecules/Modal';
-import {number} from 'yup';
-import {operators, TYPES} from './constants';
-import type {OptionType} from 'react-select/src/types';
-import React, {PureComponent} from 'react';
-import {Select} from 'components/molecules';
+import {getAggregationLabel} from 'components/molecules/AttributeRefInput/helpers';
+import {OPERATORS, TEMPLATE_NAMES, TEMPLATES, TYPES} from './constants';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {TYPES as ATTR_TYPES} from 'store/sources/attributes/constants';
 import uuid from 'tiny-uuid';
 
-const FIRST_NAME = uuid();
-const rule = number().required();
-
 export class AttributeCreatingModal extends PureComponent<Props, State> {
-	state = {
-		constants: [],
-		controls: {
-			[FIRST_NAME]: {
-				name: FIRST_NAME,
-				next: null,
-				prev: null,
-				type: null,
-				value: null
-			}
-		},
-		first: FIRST_NAME,
-		focus: true,
-		last: FIRST_NAME
+	static defaultProps = {
+		value: null
 	};
+
+	state = {
+		controls: {},
+		first: '',
+		info: '',
+		last: '',
+		secondTemplateType: TYPES.SOURCE,
+		showRemoveInfo: false,
+		title: ''
+	};
+
+	componentDidMount () {
+		const {value} = this.props;
+
+		if (value) {
+			const {title, state: JSONState} = value;
+			const state = JSON.parse(JSONState);
+			this.setState({...state, title});
+		}
+	}
 
 	createName = () => {
 		const {controls} = this.state;
@@ -39,275 +42,199 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		return controls[name] ? this.createName() : name;
 	};
 
-	addControl = async (prevName: string, type: string | null) => {
-		const nextName = this.createName();
+	createNewControl = (value: any, type: string) => {
+		const name = this.createName();
+		const {controls, last} = this.state;
+		let {first} = this.state;
 
-		this.setState(state => {
-			let {controls, last} = state;
-			const prevControl = controls[prevName];
-
-			if (last === prevName) {
-				last = nextName;
-			}
-
-			return {
-				controls: {
-					...controls,
-					[prevName]: {
-						...prevControl,
-						next: nextName
-					},
-					[nextName]: {
-						name: nextName,
-						next: prevControl.next,
-						prev: prevName,
-						type,
-						value: null
-					}
-				},
-				last
-			};
-		});
-
-		return nextName;
-	};
-
-	handleCreateConstant = (name: string, value: string) => {
-		const {constants} = this.state;
-		const option = {
-			label: value,
+		const control: Control = {
+			name,
+			next: '',
+			prev: last,
+			type,
 			value
 		};
 
-		this.setState({
-			constants: [...constants, option]
-		});
-		this.handleSelect(name, option);
-	};
-
-	isSource = (source: any) => source && typeof source === 'object' && this.props.sources.find(s => s.value === source.value);
-
-	deleteSourceRefControls = (name: string) => {
-		this.setState(state => {
-			let {controls} = state;
-			const currentControl = controls[name];
-
-			const refAttrKey = currentControl.next;
-			const refAggregationKey = refAttrKey && controls[refAttrKey].next;
-
-			if (refAttrKey && refAggregationKey) {
-				const newCurrentNextKey = controls[refAggregationKey].next;
-				let newLast = currentControl.name;
-
-				if (newCurrentNextKey) {
-					const nextControl = controls[newCurrentNextKey];
-					controls[newCurrentNextKey].prev = name;
-
-					if (nextControl && !nextControl.next) {
-						newLast = nextControl.name;
-					}
-				}
-
-				delete controls[refAttrKey];
-				delete controls[refAggregationKey];
-
-				return {
-					controls: {
-						...controls,
-						[name]: {...controls[name], next: newCurrentNextKey}
-					},
-					last: newLast
-				};
-			}
-
-			return state;
-		});
-	};
-
-	deleteLastControl = (state: State) => {
-		const {controls, first, last} = state;
-		const lastControl = controls[last];
-		const {AGGREGATION, ATTRIBUTE} = TYPES;
-		const {prev, type, value} = lastControl;
-
-		if (type !== AGGREGATION && type !== ATTRIBUTE && !value && prev) {
-			const prevControl = controls[prev];
-
-			if (prevControl.name !== first) {
-				delete controls[last];
-
-				return {
-					controls: {
-						...controls,
-						[prev]: {...prevControl, next: null}
-					},
-					last: prev
-				};
-			}
+		if (!first) {
+			first = name;
 		}
-	};
 
-	changeControl = (name: string, control: Control) => {
-		this.setState(({controls}) => ({
+		if (last) {
+			controls[last].next = name;
+		}
+
+		this.setState({
 			controls: {
 				...controls,
 				[name]: control
-			}
-		}));
+			},
+			first,
+			last: name,
+			secondTemplateType: TYPES.SOURCE
+		});
 	};
 
-	handleSelect = async (name: string, value: OptionType) => {
-		const {AGGREGATION, ATTRIBUTE, SOURCE} = TYPES;
-		const {controls, focus} = this.state;
-		const currentControl = controls[name];
-		const {type: currentType, value: currentValue} = currentControl;
-		const isSourceValue = this.isSource(value);
-		const nextControl = currentControl.next && controls[currentControl.next];
-		const haveSourceRefType = currentType === AGGREGATION || currentType === ATTRIBUTE;
-		let valueMustDeleted = false;
+	handleChangeName = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {value: title} = e.currentTarget;
+		this.setState({title});
+	};
 
-		if (focus) {
-			this.setState({focus: undefined});
+	handleChangeType = (name: string) => {
+		const {controls} = this.state;
+		const control = controls[name];
+		const type = control.type === TYPES.SOURCE ? TYPES.CONSTANT : TYPES.SOURCE;
+
+		if (name in TEMPLATE_NAMES) {
+			return this.setState({secondTemplateType: type});
 		}
 
-		if (!isSourceValue && !haveSourceRefType) {
-			valueMustDeleted = currentValue && currentValue.value === value.value;
-		}
-
-		let type = null;
-
-		if (haveSourceRefType) {
-			type = currentType;
-		} else if (isSourceValue) {
-			type = SOURCE;
-		}
-
-		const nextValue = valueMustDeleted ? null : value;
-		const newControl = {...currentControl, value: nextValue, type};
-
-		this.changeControl(name, newControl);
-
-		if (valueMustDeleted && nextControl && !nextControl.next && !nextControl.value) {
-			this.setState(this.deleteLastControl);
-		}
-
-		const typeIsChangedFromSource = !isSourceValue && currentType === TYPES.SOURCE;
-
-		if (typeIsChangedFromSource) {
-			this.deleteSourceRefControls(name);
-		}
-
-		if (isSourceValue) {
-			if (!nextControl || (nextControl && nextControl.type !== ATTRIBUTE)) {
-				const attrName = await this.addControl(name, ATTRIBUTE);
-				this.addControl(attrName, AGGREGATION);
+		this.setState({
+			controls: {
+				...controls,
+				[name]: {...control, type}
 			}
-		} else if ((!nextControl && !valueMustDeleted) || typeIsChangedFromSource) {
-			this.addControl(name, null);
+		});
+	};
+
+	handleClickClearIcon = () => this.setState({title: ''});
+
+	handleClickConfirmRemoveButton = () => {
+		const {onRemove, value} = this.props;
+
+		if (onRemove && value) {
+			onRemove(value.code);
 		}
 	};
 
-	onSubmit = () => {
-		const {AGGREGATION, ATTRIBUTE, SOURCE} = TYPES;
-		const {controls, first} = this.state;
-		const {onSubmit} = this.props;
+	handleClickRemoveIcon = () => {
+		const {controls, last} = this.state;
+		const lastControl = controls[last];
+
+		if (Object.keys(controls).length === 1) {
+			return this.setState({
+				controls: {},
+				first: '',
+				last: ''
+			});
+		}
+
+		if (lastControl) {
+			const {prev} = lastControl;
+			delete controls[last];
+
+			if (prev) {
+				this.setState({
+					controls: {
+						...controls,
+						[prev]: {...controls[prev], next: ''}
+					},
+					last: prev
+				});
+			}
+		}
+	};
+
+	handleClickSaveButton = () => {
+		const {onSubmit, value} = this.props;
+		const {controls, first, last, title: customTitle} = this.state;
+		const {SOURCE} = TYPES;
+		const code = value ? value.code : uuid();
 		const computeData = {};
-		let title = '';
-		let stringForCompute = '';
+		const state = JSON.stringify({controls, first, last});
 		let controlName = first;
+		let stringForCompute = '';
+		let title = '';
 
 		while (controlName) {
 			const {name, next, type, value} = controls[controlName];
 			controlName = next;
 
 			if (value) {
-				if (type === AGGREGATION) {
-					title = `${title} (${value.label})`;
-					continue;
-				}
-
-				if (type === ATTRIBUTE) {
-					title = `${title} - ${value.title}`;
-					continue;
-				}
-
 				if (type === SOURCE) {
-					const attr = next && controls[next];
-					const aggregationControl = attr && attr.next && controls[attr.next];
-					const aggregationValue = aggregationControl && aggregationControl.value;
+					const {aggregation, attribute: attr, dataKey, source} = value;
 
 					computeData[name] = {
-						aggregation: aggregationValue && aggregationValue.value,
-						attr: attr && attr.value,
-						dataKey: value[FIELDS.dataKey]
+						aggregation,
+						attr,
+						dataKey
 					};
+
+					title = `${title} ${source.label} - ${attr.title} (${getAggregationLabel(aggregation)})`;
+				} else {
+					title = `${title} ${value}`;
 				}
 
-				stringForCompute = type === SOURCE ? `${stringForCompute}{${name}}` : `${stringForCompute}${value.value}`;
-				title = title ? `${title} ${value.label}` : value.label;
+				stringForCompute = type === SOURCE ? `${stringForCompute}{${name}}` : `${stringForCompute}${value}`;
 			}
 		}
 
 		onSubmit({
-			code: uuid(),
+			code,
 			computeData,
+			state,
 			stringForCompute,
-			title,
+			title: customTitle || title,
 			type: ATTR_TYPES.COMPUTED_ATTR
 		});
 	};
 
-	getOptions = (control: Control) => {
-		const {getAttributeOptions, sources} = this.props;
-		const {constants, controls} = this.state;
-		const {AGGREGATION, ATTRIBUTE} = TYPES;
-		const {prev, type} = control;
-		const prevValue = prev && controls[prev].value;
+	handleSubmitConstant = (name: string, value: string) => this.handleSelect(name, value, TYPES.CONSTANT);
 
-		if (type === AGGREGATION && typeof prevValue === 'object') {
-			return getAggregateOptions(prevValue);
+	handleSelect = (name: string, value: any, type: string) => {
+		const {controls} = this.state;
+
+		if (name in TEMPLATE_NAMES) {
+			return this.createNewControl(value, type);
 		}
 
-		if (type === ATTRIBUTE && this.isSource(prevValue)) {
-			return getAttributeOptions(prevValue);
-		}
-
-		return [...operators, ...constants, ...sources];
+		this.setState({
+			controls: {
+				...controls,
+				[name]: {...controls[name], value}
+			}
+		});
 	};
 
-	renderControl = (control: Control) => {
-		const {focus} = this.state;
-		const options = this.getOptions(control);
-		const {name, value} = control;
-		const isAttr = control.type === TYPES.ATTRIBUTE;
-		const isAggregation = control.type === TYPES.AGGREGATION;
-		const isSourceRef = isAttr || isAggregation;
-		const form = {
-			onSubmit: this.handleCreateConstant,
-			rule,
-			value: 0
-		};
+	handleSelectOperator = (name: string, value: string) => this.handleSelect(name, value, TYPES.OPERATOR);
+
+	handleSelectSource = (name: string, value: Object) => this.handleSelect(name, value, TYPES.SOURCE);
+
+	hideRemoveInfo = () => this.setState({showRemoveInfo: false});
+
+	resolveControlRender = (control: Control) => {
+		const {CONSTANT, OPERATOR, SOURCE} = TYPES;
+		const {type} = control;
+
+		switch (type) {
+			case CONSTANT:
+				return this.renderConstantControl(control);
+			case OPERATOR:
+				return this.renderOperatorControl(control);
+			case SOURCE:
+				return this.renderSourceControl(control);
+		}
+	};
+
+	showRemoveInfo = () => this.setState({showRemoveInfo: true});
+
+	renderConstantControl = (control: Control) => {
+		let {name, value} = control;
+
+		if (value && typeof value !== 'string') {
+			value = '';
+		}
 
 		return (
-			<div className={styles.controlContainer} key={name}>
-				<Select
-					attr={isAttr}
-					form={form}
-					isEditableLabel={false}
-					isSearchable={isAttr}
-					menuIsOpen={focus}
-					name={name}
-					onSelect={this.handleSelect}
-					options={options}
-					placeholder="..."
-					value={value}
-					withCreate={!isSourceRef}
-				/>
-			</div>
+			<ConstantControl
+				name={name}
+				onCancel={this.handleChangeType}
+				onSubmit={this.handleSubmitConstant}
+				value={value}
+			/>
 		);
 	};
 
-	renderControls = (): any => {
+	renderControls = () => {
 		const {controls, first} = this.state;
 		const items = [];
 		let controlName = first;
@@ -315,19 +242,143 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		while (controlName) {
 			const control = controls[controlName];
 			controlName = control.next;
-
-			items.push(this.renderControl(control));
+			items.push(this.renderControlByType(control));
 		}
 
-		return items;
+		return (
+			<div className={styles.controlsContainer}>
+				{items}
+				{this.renderTemplates()}
+			</div>
+		);
+	};
+
+	renderControlByType = (control: Control) => {
+		const {name} = control;
+
+		return (
+			<div className={styles.controlContainer} key={name}>
+				{this.resolveControlRender(control)}
+				{this.renderRemoveButton(name)}
+			</div>
+		);
+	};
+
+	renderFieldName = () => {
+		const {title} = this.state;
+
+		return (
+			<div className={styles.nameContainer}>
+				<div className={styles.nameLabel}>Название поля</div>
+				<CrossIcon className={styles.nameClearIcon} onClick={this.handleClickClearIcon} />
+				<input
+					className={styles.nameInput}
+					onChange={this.handleChangeName}
+					value={title}
+				/>
+			</div>
+		);
+	};
+
+	renderFooter = () => {
+		const {onClose, value} = this.props;
+
+		return (
+			<div className={styles.footer}>
+				<div>
+					<Button className={styles.saveButton} onClick={this.handleClickSaveButton}>Сохранить</Button>
+					<Button onClick={onClose} variant="additional">Отмена</Button>
+				</div>
+				<div>
+					{value && <Button variant="simple" onClick={this.showRemoveInfo}>Удалить</Button>}
+				</div>
+			</div>
+		);
+	};
+
+	renderOperatorControl = (control: Control) => {
+		const {name, value} = control;
+
+		return (
+			<OperatorControl
+				name={name}
+				onSelect={this.handleSelectOperator}
+				options={OPERATORS}
+				type={TYPES.OPERATOR}
+				value={value}
+			/>
+		);
+	};
+
+	renderRemoveButton = (name: string) => {
+		const {last} = this.state;
+
+		if (name === last) {
+			return (
+				<div className={styles.removeIcon}>
+					<ClearSquareIcon onClick={this.handleClickRemoveIcon} />
+				</div>
+			);
+		}
+	};
+
+	renderRemoveInfo = () => {
+		const {showRemoveInfo} = this.state;
+
+		if (showRemoveInfo) {
+			return (
+				<div className={styles.infoPanel}>
+					<div><b>Внимание!</b> Вычислимый атрибут будет удален без возможности восстановления. Подтвердите операцию.</div>
+					<div>
+						<button className={styles.confirmButton} onClick={this.handleClickConfirmRemoveButton}>Подтвердить</button>
+						<CloseIcon className={styles.closeIcon} onClick={this.hideRemoveInfo}/>
+					</div>
+				</div>
+			);
+		}
+	};
+
+	renderSourceControl = (control: Control) => {
+		const {sources} = this.props;
+		let {name, value} = control;
+
+		if (typeof value !== 'object') {
+			value = null;
+		}
+
+		return (
+			<SourceControl
+				name={name}
+				onClickButton={this.handleChangeType}
+				onSelect={this.handleSelectSource}
+				options={sources}
+				type={TYPES.SOURCE}
+				value={value}
+			/>
+		);
+	};
+
+	renderTemplates = () => {
+		const {secondTemplateType} = this.state;
+		const {CONSTANT_TEMPLATE, OPERATOR_TEMPLATE, SOURCE_TEMPLATE} = TEMPLATES;
+		const secondTemplate = secondTemplateType === TYPES.SOURCE
+			? this.renderControlByType(SOURCE_TEMPLATE)
+			: this.renderControlByType(CONSTANT_TEMPLATE);
+
+		return (
+			<Fragment>
+				{this.renderControlByType(OPERATOR_TEMPLATE)}
+				{secondTemplate}
+			</Fragment>
+		);
 	};
 
 	render () {
-		const {onClose} = this.props;
-
 		return (
-			<Modal header="Создать вычислимое поле" onClose={onClose} onSubmit={this.onSubmit} size="large">
+			<Modal header="Создать поле" renderFooter={this.renderFooter} size="large">
 				<div className={styles.container}>
+					{this.renderRemoveInfo()}
+					{this.renderFieldName()}
 					{this.renderControls()}
 				</div>
 			</Modal>
