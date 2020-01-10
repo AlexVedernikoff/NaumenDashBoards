@@ -388,8 +388,10 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
  */
 String getDataForCompositeDiagram(Map<String, Object> requestContent, String cardObjectUuid)
 {
-    return getDataForDiagramOrDefault(transformRequest(requestContent, cardObjectUuid)) {
-        utils.throwReadableExceprion("Not supported diagram type: $it")
+    return api.tx.call {
+        getDataForDiagramOrDefault(transformRequest(requestContent, cardObjectUuid)) {
+            utils.throwReadableExceprion("Not supported diagram type: $it")
+        }
     }.with(JsonOutput.&toJson)
 }
 //endregion
