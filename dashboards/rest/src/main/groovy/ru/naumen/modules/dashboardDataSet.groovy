@@ -382,12 +382,22 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
 }
 
 /**
- * Получение данных для диаграмм Summary, Table, Combo
+ * Получение данных для диаграмм. Нужен для обратной совместимости.
  * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
  * @return данные для построения диаграммы
  */
+@Deprecated
 String getDataForCompositeDiagram(Map<String, Object> requestContent, String cardObjectUuid)
 {
+    return getDataForDiagram(requestContent, cardObjectUuid)
+}
+
+/**
+ * Получение данных для диаграмм. С поддержкой вычислений.
+ * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
+ * @return данные для построения диаграммы
+ */
+String getDataForDiagram(Map<String, Object> requestContent, String cardObjectUuid) {
     return api.tx.call {
         getDataForDiagramOrDefault(transformRequest(requestContent, cardObjectUuid)) {
             utils.throwReadableExceprion("Not supported diagram type: $it")
@@ -1277,22 +1287,19 @@ private Collection<Object> convertMillisecondToHours(Collection<Object> list, in
 /**
  * Метод конвертирования кода для атрибута с типом статус в название статуса
  * @param list список из бд
- * @param indexColumn индекс столбца в бд для изменения
+ * @param indexStatus индекс столбца в бд для изменения
  * @param fqn Код источника данных
  * @return list преобразованный список из бд
  */
-private Collection<Object> convertCodeStatusToNameStatus(Collection<Object> list,
-                                                         int indexColumn,
-                                                         String fqn)
+private Collection<Object> convertCodeStatusToNameStatus(Collection<Collection> list, int indexStatus, String fqn)
 {
-    Map<String, String> codeName = list*.getAt(indexColumn).toUnique().collectEntries {
-        [(it): api.metainfo.getStateTitle(fqn, it)]
-    }
+    Map<String, String> codeName = list*.getAt(indexStatus).toUnique()
+            .collectEntries { [(it): api.metainfo.getStateTitle(fqn, it)] }
     return list.collect {
-        (it as List).set(indexColumn, codeName[it[codeName]])
-        it[indexColumn] = codeName[it[indexColumn]]
-        it
-    }.sort { it[indexColumn] }
+        def values = it as List
+        values[indexStatus] = codeName[values[indexStatus] as String]
+        values
+    }.sort { it[indexStatus] }
 }
 
 /**
