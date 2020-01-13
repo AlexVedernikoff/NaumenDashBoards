@@ -408,9 +408,13 @@ private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closu
     switch (requestContent.type as Diagram)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
-            return getDataStandardDiagram(requestContent as RequestGetDataForCompositeDiagram)
+            return requestContent.data
+                    ? getDataStandardDiagram(requestContent as RequestGetDataForCompositeDiagram)
+                    : getDataStandardDiagram(requestContent as LineDiagramRequest) //нужно для обратной совместимости со старыми форматами
         case [DONUT, PIE]:
-            return getDataRoundDiagram(requestContent as RequestGetDataForCompositeDiagram)
+            return requestContent.data
+                    ? getDataRoundDiagram(requestContent as RequestGetDataForCompositeDiagram)
+                    : getDataRoundDiagram(requestContent as RoundDiagramRequest) //нужно для обратной совместимости со старыми форматами
         case SUMMARY:
             return getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram)
         case TABLE:
@@ -492,6 +496,52 @@ private StandardDiagram getDataStandardDiagram(RequestGetDataForCompositeDiagram
     return mappingToStandardDiagram(list, currentData.breakdown as Attribute, currentData.breakdownGroup as GroupType)
 }
 
+
+/**
+ * Получение данных для линейных диаграмм, без поддержки вычислений.
+ * @param request параметры диаграммы
+ * @return данные для диаграммы в формате StandardDiagram
+ */
+@Deprecated
+private StandardDiagram getDataStandardDiagram(LineDiagramRequest request)
+{
+    String descriptor = request.descriptor
+    String source = request.source
+    Attribute breakdown = request.breakdown
+    HCriteria criteria = createHCriteria(descriptor, source)
+    group(criteria, request.group as GroupType, request.xAxis as Attribute, source, descriptor)
+    aggregation(criteria,
+            request.aggregation as AggregationType,
+            request.yAxis as Attribute,
+            source, descriptor,
+            request.xAxis,
+            request.breakdown)
+    if (breakdown)
+    {
+        group(criteria, request.breakdownGroup as GroupType, breakdown as Attribute, source, descriptor)
+    }
+    findNotNullAttributes(criteria, request.xAxis, request.breakdown)
+
+    def groupSevenDay = { request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
+    def breakdownSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
+
+    def groupDtInterval = { request.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
+    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
+
+    def groupState = { request.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, request.source) : it }
+    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, request.source) : it }
+
+    Collection<Object> list = getQuery(criteria).list()
+            .with(groupSevenDay)
+            .with(breakdownSevenDay)
+            .with(groupDtInterval)
+            .with(breakdownDtInterval)
+            .with(groupState)
+            .with(breakdownState)
+
+    return mappingToStandardDiagram(list, breakdown, request.breakdownGroup as GroupType)
+}
+
 /**
  * Получение данных для круговых диаграмм
  * @param request параметры диаграммы
@@ -553,6 +603,38 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram reque
 
     return new RoundDiagram(list[1] as Collection, list[0].collect { decimalFormat.format(it) as Double })
 }
+
+/**
+ * Получение данных для круговых диаграмм. Без поддержки вычислений
+ * @param request параметры диаграммы
+ * @return данные для диаграммы в формате RoundDiagram
+ */
+@Deprecated
+private RoundDiagram getDataRoundDiagram(RoundDiagramRequest request)
+{
+    HCriteria criteria = createHCriteria(request.descriptor, request.source)
+    aggregation(criteria,
+            request.aggregation as AggregationType,
+            request.indicator as Attribute,
+            request.source,
+            request.descriptor,
+            request.breakdown)
+    group(criteria, request.breakdownGroup as GroupType, request.breakdown as Attribute, request.source, request.descriptor)
+    findNotNullAttributes(criteria, request.breakdown)
+
+    def groupSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
+    def groupDtInterval = { request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it as Collection, 1) : it }
+    def groupState = { request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it as Collection, 1, request.source) : it }
+
+    Collection<Object> list = getQuery(criteria).list().with(groupSevenDay).with(groupDtInterval).with(groupState).transpose()
+
+    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
+    otherSymbols.setDecimalSeparator('.' as char)
+    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
+
+    return new RoundDiagram(list[1] as Collection, list[0].collect { decimalFormat.format(it) as Double })
+}
+
 
 /**
  * Метод построения сводки с обработкой вычеслений
@@ -800,42 +882,24 @@ private void aggregation(HCriteria criteria,
 private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, String source, String descriptor)
 {
     String attributeCode = getAttributeCodeByType(criteria, xAxis)
-    String nameDayMonth = " WHEN '1' THEN 'января' " +
-            " WHEN '2' THEN 'февраля' " +
-            " WHEN '3' THEN 'марта' " +
-            " WHEN '4' THEN 'апреля' " +
-            " WHEN '5' THEN 'мая' " +
-            " WHEN '6' THEN 'июня' " +
-            " WHEN '7' THEN 'июля' " +
-            " WHEN '8' THEN 'августа' " +
-            " WHEN '9' THEN 'сентября' " +
-            " WHEN '10' THEN 'октября' " +
-            " WHEN '11' THEN 'ноября' " +
-            " WHEN '12' THEN 'декабря' " +
-            " END "
-    String nameMonth = " WHEN '1' THEN 'Январь' " +
-            " WHEN '2' THEN 'Февраль' " +
-            " WHEN '3' THEN 'Март' " +
-            " WHEN '4' THEN 'Апрель' " +
-            " WHEN '5' THEN 'Май' " +
-            " WHEN '6' THEN 'Июнь' " +
-            " WHEN '7' THEN 'Июль' " +
-            " WHEN '8' THEN 'Август' " +
-            " WHEN '9' THEN 'Сентябрь' " +
-            " WHEN '10' THEN 'Октябрь' " +
-            " WHEN '11' THEN 'Ноябрь' " +
-            " WHEN '12' THEN 'Декабрь' " +
-            " END "
-    switch (groupType)
-    {
+
+    def nominativeRussianMonth = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
+                                  'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
+    def genitiveRussianMonth = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+                                'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+
+    String sqlCaseRussianNominativeMonthFormat = createSqlCaseFormat(nominativeRussianMonth)
+    String sqlCaseRussianGenitiveMonthFormat = createSqlCaseFormat(genitiveRussianMonth)
+
+    switch (groupType) {
         case GroupType.OVERLAP:
             criteria.addColumn(attributeCode)
             criteria.addGroupColumn(attributeCode)
             criteria.addOrder(HOrders.asc(HHelper.getColumn(attributeCode)))
             break
         case GroupType.DAY:
-            String md = "concat(" +
-                    "DAY(${attributeCode}), ' ', CASE MONTH(${attributeCode}) ${nameDayMonth})"
+            String month = String.format(sqlCaseRussianGenitiveMonthFormat, attributeCode)
+            String md = "concat(DAY(${attributeCode}), ' ', $month)"
             criteria.addColumn(md)
             criteria.addGroupColumn("MONTH(${attributeCode}), DAY(${attributeCode})")
             criteria.addOrder(HOrders.asc(HHelper.getColumn("MONTH(${attributeCode}), DAY(${attributeCode})")))
@@ -846,7 +910,7 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
             criteria.addOrder(HOrders.asc(HHelper.getColumn("extract(WEEK from ${attributeCode})")))
             break
         case GroupType.MONTH:
-            criteria.addColumn("CASE MONTH(${attributeCode}) ${nameMonth}")
+            criteria.addColumn(String.format(sqlCaseRussianNominativeMonthFormat, attributeCode))
             criteria.addGroupColumn("MONTH(${attributeCode})")
             criteria.addOrder(HOrders.asc(HHelper.getColumn("MONTH(${attributeCode})")))
             break
@@ -868,8 +932,8 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
 
             // Вывод периода день.месяц-(день.месяц + 7 дней)
             String coefficientForRound = '0.6'
-            String groupFormula = "ROUND(ABS((extract(DAY from (CAST(${attributeCode} AS timestamp) " +
-                    "- ${cteCriteria.getProperty('cteMinDate')}))- ${coefficientForRound})/ 7))"
+            String formula = "ROUND(ABS((extract(DAY from (CAST(%s AS timestamp)-%s))-$coefficientForRound)/7))"
+            String groupFormula = String.format(formula, attributeCode, cteCriteria.getProperty('cteMinDate'))
             String period = "concat(${cteCriteria.getProperty('cteMinDate')},'--', ${groupFormula})"
             criteria.addColumn("MIN(${period})")
 
@@ -878,6 +942,13 @@ private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, Str
             criteria.addOrder(HOrders.asc(HHelper.getColumn(groupFormula)))
             break
     }
+}
+
+private String createSqlCaseFormat(Collection<String> list) {
+    return list.withIndex(1).inject(new StringBuilder("CASE MONTH(%s)")) { builder, tuple ->
+        def (month, index) = tuple
+        builder.append(" WHEN $index THEN '$month'")
+    }.append(' END').toString()
 }
 
 private void addPercentColumn(HCriteria criteria,
@@ -1295,6 +1366,18 @@ private setTitleInLinkAttribute(def attr)
  * @return изменённый запрос
  */
 private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid) {
+    return requestContent.data
+            ? transformRequestWithComputation(requestContent, cardObjectUuid)
+            : transformRequestWithoutComputation(requestContent, cardObjectUuid)
+}
+
+/**
+ * Метод для изменения запроса с целью подмены объекта фильтрации в запросах с поддержкой вычислений
+ * @param requestContent - запрос на построение диаграммы
+ * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
+ * @return изменённый запрос
+ */
+private Map<String, Object> transformRequestWithComputation(Map<String, Object> requestContent, String cardObjectUuid) {
     Closure<Map<String, Object>> transform = { Map<String, Object> map ->
         def data = map.data as Map<String, Object>
         def newData = data.collectEntries { key, value ->
@@ -1307,4 +1390,18 @@ private Map<String, Object> transformRequest(Map<String, Object> requestContent,
     return cardObjectUuid ? transform(requestContent) : requestContent
 }
 
+/**
+ * Метод для изменения запроса с целью подмены объекта фильтрации в запросах без поддержки вычислений
+ * @param requestContent - запрос на построение диаграммы
+ * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
+ * @return изменённый запрос
+ */
+private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent, String cardObjectUuid) {
+    Closure<Map<String, Object>> transform = { Map<String, Object> map ->
+        def res = [:] << map
+        res.descriptor = DashboardMarshaller.substitutionCardObject(res.descriptor as String, cardObjectUuid)
+        return res
+    }
+    return cardObjectUuid ? transform(requestContent) : requestContent
+}
 //endregion
