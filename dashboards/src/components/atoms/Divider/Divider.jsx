@@ -7,7 +7,7 @@ import {VARIANTS} from './constants';
 
 export class Divider extends PureComponent<Props> {
 	static defaultProps = {
-		variant: VARIANTS.FIELD
+		variant: VARIANTS.SIMPLE
 	};
 
 	render () {

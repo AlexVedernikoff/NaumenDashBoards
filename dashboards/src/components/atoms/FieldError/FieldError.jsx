@@ -8,7 +8,7 @@ export class FieldError extends Component<Props> {
 		const {text} = this.props;
 
 		if (text) {
-			return <span className={styles.error}>{text}</span>;
+			return <div className={styles.error}>{text}</div>;
 		}
 
 		return null;

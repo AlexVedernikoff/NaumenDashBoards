@@ -25,7 +25,7 @@ export class Table extends DataFormBuilder {
 		const {values} = this.props;
 		const aggregationName = createRefName(name, FIELDS.aggregation);
 
-		const refInput = {
+		const refInputProps = {
 			name: aggregationName,
 			type: 'aggregation',
 			value: values[aggregationName]
@@ -33,7 +33,7 @@ export class Table extends DataFormBuilder {
 
 		const props = {
 			name,
-			refInput,
+			refInputProps,
 			value: values[name],
 			withCreate: true
 		};
@@ -58,6 +58,7 @@ export class Table extends DataFormBuilder {
 
 		return (
 			<Fragment>
+				{this.renderBaseInputs()}
 				{this.renderSourceSection()}
 				{this.renderLabel('Строки')}
 				{this.renderByOrder(this.renderRowInput, row, false)}

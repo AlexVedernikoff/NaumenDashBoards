@@ -178,6 +178,7 @@ export class Source extends PureComponent<Props, State> {
 			<div className={styles.select}>
 				{this.renderTitle()}
 				{this.renderIndicators()}
+				{this.renderRemoveButton()}
 				{this.renderTree()}
 			</div>
 			{this.renderError()}
@@ -188,7 +189,6 @@ export class Source extends PureComponent<Props, State> {
 		return (
 			<div className={styles.container}>
 				{this.renderInput()}
-				{this.renderRemoveButton()}
 				{this.renderComputeCheckbox()}
 				{this.renderFilterButton()}
 			</div>

@@ -13,21 +13,28 @@ export class Diagram extends Component<Props> {
 		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading;
 	}
 
-	renderContent = () => {
-		const {buildData, widget} = this.props;
+	resolveDiagram = (type: string) => {
 		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+
+		switch (type) {
+			case SUMMARY:
+				return Summary;
+			case TABLE:
+				return Table;
+			default:
+				return Chart;
+		}
+	};
+
+	renderContent = () => {
+		const {buildData} = this.props;
 		const {data, error} = buildData;
 
 		if (data && !error) {
-			const types = {[SUMMARY]: Summary, [TABLE]: Table};
-			const DiagramByType = types[widget.type] || Chart;
-
 			return (
 				<Fragment>
 					{this.renderName()}
-					<div className={styles.diagram}>
-						<DiagramByType buildData={buildData.data} widget={widget} />
-					</div>
+					{this.renderDiagramByType()}
 				</Fragment>
 			);
 		}
@@ -41,6 +48,19 @@ export class Diagram extends Component<Props> {
 		return (
 			<div className={styles.container}>
 				{buildData.loading ? this.renderLoading() : this.renderContent()}
+			</div>
+		);
+	};
+
+	renderDiagramByType = () => {
+		const {buildData, widget} = this.props;
+		const {showName, type} = widget;
+		const className = showName ? styles.diagramWithName : styles.diagram;
+		const Diagram = this.resolveDiagram(type);
+
+		return (
+			<div className={className}>
+				<Diagram buildData={buildData.data} widget={widget} />
 			</div>
 		);
 	};

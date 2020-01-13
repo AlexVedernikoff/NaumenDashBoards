@@ -105,7 +105,7 @@ export class ComboChart extends DataFormBuilder {
 			onSelectCallback = this.changeRefFields;
 		}
 
-		const refInput = {
+		const refInputProps = {
 			name: currentGroupName,
 			mixin: {
 				isDisabled: false,
@@ -120,7 +120,7 @@ export class ComboChart extends DataFormBuilder {
 			name,
 			onSelectCallback,
 			options: undefined,
-			refInput,
+			refInputProps,
 			value: currentXAxis
 		};
 
@@ -150,7 +150,7 @@ export class ComboChart extends DataFormBuilder {
 				props.options = xAxisOptions;
 			}
 
-			refInput.mixin.isDisabled = true;
+			refInputProps.mixin.isDisabled = true;
 		}
 
 		return this.renderAttribute(props);
@@ -173,7 +173,7 @@ export class ComboChart extends DataFormBuilder {
 		const {values} = this.props;
 		const aggregationName = createRefName(name, FIELDS.aggregation);
 
-		const refInput = {
+		const refInputProps = {
 			name: aggregationName,
 			type: 'aggregation',
 			value: values[aggregationName]
@@ -182,7 +182,7 @@ export class ComboChart extends DataFormBuilder {
 		const props = {
 			name,
 			placeholder: 'Ось Y',
-			refInput,
+			refInputProps,
 			value: values[name],
 			withCreate: true
 		};
@@ -195,6 +195,7 @@ export class ComboChart extends DataFormBuilder {
 
 		return (
 			<Fragment>
+				{this.renderBaseInputs()}
 				{this.renderSourceSection(this.changeSourceRefs)}
 				{this.renderLabel('Ось Х')}
 				{this.renderByOrder(this.renderXAxis, xAxis, false)}

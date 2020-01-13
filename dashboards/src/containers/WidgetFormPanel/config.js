@@ -1,13 +1,13 @@
 // @flow
 import {AXIS_FIELDS, CIRCLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {CHART_VARIANTS} from 'utils/chart';
-import type {ConnectedProps, ValidateType} from './types';
+import type {ConnectedProps} from './types';
 import {createOrdinalName, NewWidget} from 'utils/widget';
 import {FIELDS, SETTINGS} from 'components/organisms/WidgetFormPanel';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
-import {lazy} from 'yup';
 import getSchema from './schemas.js';
+import {lazy} from 'yup';
 
 // TODO убрать как будут перенастроенны все виджеты
 const getType = (type: string) => {
@@ -39,12 +39,15 @@ const config: FormikConfig = {
 		return {
 			asDefault: false,
 			isNew: id === NewWidget.id,
+			isSubmitting: false,
+			name: '',
+			diagramName: '',
 			type: getType(type),
 			...formValues
 		};
 	},
 
-	validationSchema: () => lazy((values: ValidateType) => getSchema(values)),
+	validationSchema: () => lazy((values: FormikValues) => values.isSubmitting && getSchema(values)),
 
 	handleSubmit: (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;

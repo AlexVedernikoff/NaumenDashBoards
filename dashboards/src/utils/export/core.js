@@ -26,15 +26,15 @@ const createName = async () => {
 window.html2canvas = html2canvas;
 /**
  * Выгружает файл в браузер
- * @param {string} uri - путь к файлу
+ * @param {Blob} blob - файл
  * @param {string} filename - название файла
  */
-const save = (uri: string, filename: string) => {
+const save = (blob: Blob, filename: string) => {
 	let {body} = document;
 
 	if (body) {
 		const link = document.createElement('a');
-		link.href = uri;
+		link.href = URL.createObjectURL(blob);
 		link.download = filename;
 
 		body.appendChild(link);
@@ -184,7 +184,7 @@ const createPng = async (image: HTMLCanvasElement, options) => {
 	}
 
 	if (toDownload) {
-		isIE() ? window.navigator.msSaveBlob(blob, `${name}.png`) : save(image.toDataURL('image/png'), name);
+		isIE() ? window.navigator.msSaveBlob(blob, `${name}.png`) : save(blob, name);
 	}
 
 	return blob;

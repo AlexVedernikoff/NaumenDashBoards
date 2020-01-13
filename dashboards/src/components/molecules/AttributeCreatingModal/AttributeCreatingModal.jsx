@@ -30,10 +30,34 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 		if (value) {
 			const {title, state: JSONState} = value;
-			const state = JSON.parse(JSONState);
-			this.setState({...state, title});
+			let valueProps = {title};
+
+			if (JSONState) {
+				const state = JSON.parse(JSONState);
+				valueProps = {...state, ...valueProps};
+			}
+
+			this.setState(valueProps);
 		}
 	}
+
+	changeControlType = (name: string) => {
+		const {controls} = this.state;
+		const control = controls[name];
+		const type = control.type === TYPES.SOURCE ? TYPES.CONSTANT : TYPES.SOURCE;
+
+		this.setState({
+			controls: {
+				...controls,
+				[name]: {...control, type}
+			}
+		});
+	};
+
+	changeTemplateType = (name: string) => {
+		const secondTemplateType = name === TEMPLATE_NAMES.SOURCE ? TYPES.CONSTANT : TYPES.SOURCE;
+		this.setState({secondTemplateType});
+	};
 
 	createName = () => {
 		const {controls} = this.state;
@@ -79,22 +103,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		this.setState({title});
 	};
 
-	handleChangeType = (name: string) => {
-		const {controls} = this.state;
-		const control = controls[name];
-		const type = control.type === TYPES.SOURCE ? TYPES.CONSTANT : TYPES.SOURCE;
-
-		if (name in TEMPLATE_NAMES) {
-			return this.setState({secondTemplateType: type});
-		}
-
-		this.setState({
-			controls: {
-				...controls,
-				[name]: {...control, type}
-			}
-		});
-	};
+	handleChangeType = (name: string) => name in TEMPLATE_NAMES ? this.changeTemplateType(name) : this.changeControlType(name);
 
 	handleClickClearIcon = () => this.setState({title: ''});
 

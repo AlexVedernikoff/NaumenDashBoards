@@ -10,6 +10,7 @@ export class Summary extends DataFormBuilder {
 	renderInputs = () => {
 		return (
 			<Fragment>
+				{this.renderBaseInputs()}
 				{this.renderSourceSection()}
 				{this.renderLabel('Показатель')}
 				{this.renderByOrder(this.renderIndicator, FIELDS.indicator)}

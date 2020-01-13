@@ -27,5 +27,31 @@
 				<code>yesNo</code>
 			</view-presentaion>
 		</parameter>
+		 <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>MinTimeIntervalUpdate</code>
+                    <complexRelation>false</complexRelation>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <default-value>
+					 <integer>15</integer>
+					</default-value>
+                    <edit-presentaion>
+                        <code>integerEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Минимальное допустимое значение интервала обновления, мин</title>
+                    <type>
+				           <code>integer</code>
+				           <property code="permittedTypes">[]</property>
+			        </type>
+                    <view-presentaion>
+                        <code>integerView</code>
+                    </view-presentaion>
+                </parameter>
 	</parameters>
 </embeddedAppParameters>

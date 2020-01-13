@@ -3,7 +3,7 @@ import cn from 'classnames';
 import {DesignTab, ParamsTab} from './Tabs';
 import Footer from './Footer';
 import type {Props} from 'containers/WidgetFormPanel/types';
-import React, {Component, createContext} from 'react';
+import React, {Component, createContext, createRef} from 'react';
 import type {State, TabParams} from './types';
 import styles from './styles.less';
 import {TABS} from './constants';
@@ -16,6 +16,7 @@ const tabs = {
 };
 
 export const FormContext = createContext({});
+export const formRef = createRef();
 
 export class WidgetFormPanel extends Component<Props, State> {
 	state = {
@@ -28,7 +29,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 		const {handleSubmit} = this.props;
 
 		return (
-			<form onSubmit={handleSubmit} className={styles.form}>
+			<form onSubmit={handleSubmit} className={styles.form} ref={formRef}>
 				{this.renderHeader()}
 				{this.renderTabList()}
 				{this.renderTabContent()}
@@ -39,10 +40,11 @@ export class WidgetFormPanel extends Component<Props, State> {
 
 	renderHeader = () => {
 		const {values} = this.props;
+		const name = values.name || 'Новый виджет';
 
 		return (
 			<div className={styles.header}>
-				<Title className={styles.title}>{values.name}</Title>
+				<Title className={styles.title}>{name}</Title>
 			</div>
 		);
 	};

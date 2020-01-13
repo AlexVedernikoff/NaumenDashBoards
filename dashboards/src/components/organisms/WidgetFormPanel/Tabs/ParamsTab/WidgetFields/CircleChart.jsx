@@ -12,6 +12,7 @@ export class AxisChart extends DataFormBuilder {
 
 		return (
 			<Fragment>
+				{this.renderBaseInputs()}
 				{this.renderSourceSection()}
 				{this.renderLabel('Показатель')}
 				{this.renderByOrder(this.renderIndicator, indicator)}

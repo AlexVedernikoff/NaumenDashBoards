@@ -3,7 +3,7 @@ import type {Attribute as AttributeType} from 'store/sources/attributes/types';
 import {AttributeCreatingModal, AttributeRefInput, Select} from 'components/molecules';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import {DATETIME_GROUP} from 'components/molecules/AttributeRefInput/constants';
-import {Divider, FieldError} from 'components/atoms';
+import {Divider} from 'components/atoms';
 import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
 import React, {createRef, Fragment, PureComponent} from 'react';
@@ -191,7 +191,7 @@ export class Attribute extends PureComponent<Props, State> {
 	showEditingModal = () => this.setState({showEditingModal: true});
 
 	renderAttribute = (attributeProps: Object) => {
-		const {parent, refInput, ...selectProps} = attributeProps;
+		const {parent, refInputProps, ...selectProps} = attributeProps;
 		const {value, withCreate} = selectProps;
 		let props = this.mixinAttribute(selectProps);
 
@@ -212,7 +212,8 @@ export class Attribute extends PureComponent<Props, State> {
 			}
 		}
 
-		return refInput && this.renderAttributeInputWithRef(props, parent);
+		const render = refInputProps ? this.renderAttributeInputWithRef : this.renderAttributeInput;
+		return render(props, parent);
 	};
 
 	renderAttributeInput = (props: Object, parent: AttributeType, withRefInput: boolean = false) => {
@@ -238,7 +239,7 @@ export class Attribute extends PureComponent<Props, State> {
 						{this.renderAttributeInput(selectProps, parent, true)}
 					</div>
 				</div>
-				{withDivider && this.renderFieldDivider()}
+				{withDivider && this.renderDivider()}
 			</Fragment>
 		);
 	};
@@ -290,13 +291,12 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 	};
 
-	renderFieldDivider = () => <Divider variant="field" />;
+	renderDivider = () => <Divider />;
 
 	renderParentAttribute = (props: Object, parent: AttributeType) => (
 		<div className={styles.parentInput}>
 			{this.renderSelect({
 				...props,
-				hideError: true,
 				onSelect: this.handleSelect(parent),
 				withDivider: false
 			})}
@@ -324,14 +324,12 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	renderSelect = (props: Object) => {
-		const {error} = this.props;
-		const {hideError, withDivider, ...selectProps} = props;
+		const {withDivider, ...selectProps} = props;
 
 		return (
 			<div key={props.name}>
 				<Select {...selectProps} />
-				{!hideError && <FieldError text={error} />}
-				{withDivider && this.renderFieldDivider()}
+				{withDivider && this.renderDivider()}
 			</div>
 		);
 	};

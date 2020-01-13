@@ -1,11 +1,11 @@
 @import '/styles/variables';
 
 :local {
+	@name-height: 25px;
+
 	.container {
 		background-color: @white;
 		box-sizing: border-box;
-		display: flex;
-		flex-direction: column;
 		height: 100%;
 		overflow: hidden;
 		padding: 10px;
@@ -15,9 +15,13 @@
 		height: 100%;
 	}
 
+	.diagramWithName {
+		height: calc(100% - @name-height);
+	}
+
 	.name {
 		font-size: 20px;
-		min-height: 25px;
+		min-height: @name-height;
 		overflow: hidden;
 		padding-left: 10px;
 		text-overflow: ellipsis;

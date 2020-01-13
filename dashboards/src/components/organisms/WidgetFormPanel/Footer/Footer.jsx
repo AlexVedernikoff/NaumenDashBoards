@@ -10,6 +10,9 @@ export class Footer extends Component<WrappedProps> {
 		const {setFieldValue, submitForm} = this.props;
 
 		await setFieldValue('asDefault', asDefault);
+		await setFieldValue('isSubmitting', true);
+		await setFieldValue('shouldScrollToError', true);
+
 		submitForm();
 	};
 
