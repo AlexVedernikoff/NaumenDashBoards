@@ -104,15 +104,18 @@ class Link
     Link(Map<String, Object> map)
     {
         this.classFqn = map.classFqn
-        this.title = map.title ?: "Список элементов ${this.classFqn}"
-        this.attrGroup = 'forDashboards' in api.metainfo.getMetaClass(this.classFqn).getAttributeGroupCodes()
+        def metaInfo = api.metainfo.getMetaClass(this.classFqn)
+        this.title = map.title ?: "Список элементов '${this.classFqn}'"
+        this.attrGroup = 'forDashboards' in metaInfo.getAttributeGroupCodes()
                 ? 'forDashboards'
                 : 'system'
         this.descriptor = map.descriptor
         this.cases = map.cases as Collection
         this.attrCodes = map.attrCodes as Collection
         this.filters = map.filters as Collection
-        this.template = 'DlyaDashbordov' //TODO: тут тоже нужна проверка
+        this.template = metaInfo.attributes.find { it.code == 'dashboardTemp' }?.with {
+            utils.findFirst(this.classFqn, [(it.code): op.isNotNull()]).get(it.code)
+        }
     }
 
     /**
@@ -129,7 +132,7 @@ class Link
                 .setAttrGroup(attrGroup)
                 .setAttrCodes(attrCodes)
                 .setDaysToLive(liveDays)
-                .setTemplate(template)
+        template?.with(builder.&setTemplate)
         formatFilter(builder.filter())
         return builder
     }
@@ -140,7 +143,6 @@ class Link
      */
     private void formatFilter(def filterBuilder)
     {
-
         if (descriptor)
         {
             def iDescriptor = DashboardMarshaller.createContext(descriptor)
@@ -182,9 +184,9 @@ class Link
                     result << getRanges(context, this.&getMinDate.curry(attr.code)).collect { range ->
                         if (attr.type in LINK_TYPE_ATTRIBUTES)
                         {
-                            def(first, second) = range
+                            def (first, second) = range
                             def objects = findObjects(attr.ref, attr.property, op.between(first, second))
-                            filterBuilder.OR(attr.code, 'containsInSet',objects)
+                            filterBuilder.OR(attr.code, 'containsInSet', objects)
                         }
                         else
                         {
@@ -193,7 +195,7 @@ class Link
                     }
                 }
                 result
-            }.each { it.inject(filterBuilder) { first, second -> first.AND(*second) }}
+            }.each { it.inject(filterBuilder) { first, second -> first.AND(*second) } }
         }
     }
 
@@ -223,7 +225,7 @@ class Link
     private List<Object> findObjects(Attribute attr, String fqnClass, def value)
     {
         return attr.ref ? utils.find(fqnClass, [(attr.code): findObjects(attr.ref, attr.property, value)])
-                :  utils.find(fqnClass, [(attr.code): value]).collect()
+                : utils.find(fqnClass, [(attr.code): value]).collect()
     }
     /**
      * Метод создания контекста из из списка фильтров сгруппированных по атрибуту
@@ -233,7 +235,7 @@ class Link
     private Map<GroupType, Collection<Object>> createContextFromFilters(Collection<Map<Object, Object>> filters)
     {
         Map<GroupType, Collection<Object>> result = [:]
-        filters.collect { [(it.group as GroupType):[it.value]] }.each {
+        filters.collect { [(it.group as GroupType): [it.value]] }.each {
             it.containsKey(GroupType.OVERLAP) && result.containsKey(GroupType.OVERLAP)
                     ? result << [(GroupType.OVERLAP): result.get(GroupType.OVERLAP) + it.get(GroupType.OVERLAP)]
                     : result << it
@@ -292,8 +294,7 @@ class Link
             def rangeMinute = [0, 59]
             def rangeSecond = [0, 59]
 
-            if (quarter)
-            {
+            if (quarter) {
                 int q = (quarter as String).replace(' кв-л', '') as int
                 int startMonth = (q - 1) * 3
                 int endMonth = startMonth + 2
@@ -400,8 +401,17 @@ String getLink(Map<String, Object> requestContent, String cardObjectUuid)
     def linkBuilder = link.getBuilder()
     return api.web.list(linkBuilder)
 }
+//endregion
 
-private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid) {
+//region вспомогательных методов
+/**
+ *
+ * @param requestContent
+ * @param cardObjectUuid
+ * @return
+ */
+private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid)
+{
     Closure<Map<String, Object>> transform = { Map<String, Object> request ->
         Map<String, Object> res = [:] << request
         res.descriptor = DashboardMarshaller.substitutionCardObject(request.descriptor as String, cardObjectUuid)
