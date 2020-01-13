@@ -6,15 +6,54 @@ import type {Props as FormProps} from 'containers/WidgetFormPanel/types';
 import type {Props as ExtendButtonProps} from 'components/atoms/ExtendButton/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
-import {styles as mainStyles} from 'components/organisms/WidgetFormPanel';
+import {formRef, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import type {Variant as DividerVariant} from 'components/atoms/Divider/types';
 
 export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<Props & FormProps, State> {
+	invalidInputs = {};
+
+	componentDidUpdate () {
+		const {setFieldValue, values} = this.props;
+		const {current: form} = formRef;
+		let top = this.getFirstInvalidCoordinate();
+
+		if (form && values.shouldScrollToError && top) {
+			top = form.clientHeight / form.scrollHeight * top;
+
+			form.scrollTo({behavior: 'smooth', top});
+			setFieldValue('shouldScrollToError', false);
+
+			this.invalidInputs = {};
+		}
+	}
+
+	getFirstInvalidCoordinate = () => {
+		let firstCoordinate = null;
+
+		Object.keys(this.invalidInputs).forEach(key => {
+			const input = this.invalidInputs[key];
+
+			if (!firstCoordinate || firstCoordinate > input.offsetTop) {
+				firstCoordinate = input.offsetTop;
+			}
+		});
+
+		return firstCoordinate;
+	};
+
 	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
 
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
 	handleSelect = (name: string, value: any) => this.props.setFieldValue(name, value);
+
+	setInputRef = (name: string) => (ref: any) => {
+		const {errors, values} = this.props;
+
+		if (errors[name] && values.shouldScrollToError) {
+			this.invalidInputs[name] = ref;
+		}
+	};
 
 	renderCheckBox = (props: CheckboxProps) => {
 		const {hideDivider, label, name, value} = props;
@@ -65,7 +104,7 @@ export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<P
 		const {handleBlur, label, name, placeholder, value} = props;
 
 		return (
-			<div className={mainStyles.field}>
+			<div className={mainStyles.field} ref={this.setInputRef(name)}>
 				<FieldLabel text={label} />
 				<TextArea
 					name={name}

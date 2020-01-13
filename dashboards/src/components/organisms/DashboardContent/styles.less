@@ -10,25 +10,25 @@
 
 	.common-props {
 		bottom: 0;
-		height: 100%;
-		overflow-x: hidden;
-		overflow-y: auto;
 		position: absolute;
+		top: 0;
 	}
 
 	.editModeContainer {
 		.common-props();
 		left: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
 		right: @right-panel-width;
-		top: 0;
 	}
 
 	.viewModeContainer {
 		.common-props();
 		left: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
 		padding: 20px @right-panel-width/2;
 		right: 0;
-		top: 0;
 	}
 
 	.panel {
@@ -36,7 +36,6 @@
 
 		background-color: @white;
 		box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
-		overflow: hidden;
 		right: 0;
 		width: @right-panel-width;
 	}

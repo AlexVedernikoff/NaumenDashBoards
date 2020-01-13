@@ -10,6 +10,7 @@ import {TYPES} from 'store/sources/attributes/constants';
 const ERROR_MESSAGES = {
 	[FIELDS.breakdown]: 'Укажите атрибут для разбивки',
 	[FIELDS.column]: 'Укажите атрибут для колонок',
+	[FIELDS.diagramName]: 'Укажите название диаграммы',
 	[FIELDS.indicator]: 'Укажите атрибут для показателя',
 	[FIELDS.name]: 'Укажите название виджета',
 	[FIELDS.row]: 'Укажите атрибут для строк',
@@ -61,7 +62,7 @@ const conditionBreakdownRule = (withBreakdownName: string) => object().when(with
 
 // Базовые правила для всех диаграмм
 const BASE_RULES = {
-	[FIELDS.diagramName]: string().required(ERROR_MESSAGES[FIELDS.name]),
+	[FIELDS.diagramName]: string().required(ERROR_MESSAGES[FIELDS.diagramName]),
 	[FIELDS.name]: string().required(ERROR_MESSAGES[FIELDS.name])
 };
 

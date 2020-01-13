@@ -1,11 +1,12 @@
 // @flow
-import {Attribute, Source} from 'components/molecules';
+import {Attribute, OuterSelect, Source} from 'components/molecules';
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
 import {CHART_VARIANTS} from 'utils/chart';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import {createOrdinalName, createRefName, getNumberFromName, WIDGET_VARIANTS} from 'utils/widget';
 import {createRefKey} from 'store/sources/refAttributes/actions';
-import {FIELDS, styles, SETTINGS} from 'components/organisms/WidgetFormPanel';
+import {FieldLabel} from 'components/atoms';
+import {FIELDS, OPTIONS, SETTINGS, styles} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from 'components/organisms/WidgetFormPanel/builders/FormBuilder';
 import type {OnSelectCallback as OnSelectSourceCallback, SourceValue} from 'components/molecules/Source/types';
 import React, {Fragment} from 'react';
@@ -210,6 +211,17 @@ export class DataFormBuilder extends FormBuilder {
 		});
 	};
 
+	handleBlurName = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {handleBlur, setFieldValue, values} = this.props;
+		const diagramName = values[FIELDS.diagramName];
+
+		if (values[FIELDS.isNew] && !diagramName) {
+			setFieldValue(FIELDS.diagramName, e.target.value);
+		}
+
+		handleBlur(e);
+	};
+
 	handleChangeCompute = (name: string, value: boolean) => {
 		const {setFieldValue, values} = this.props;
 		const order = this.getOrder();
@@ -316,15 +328,14 @@ export class DataFormBuilder extends FormBuilder {
 	};
 
 	renderAttribute = (props: Object) => {
-		const {errors, setFieldValue, values} = this.props;
+		const {setFieldValue, values} = this.props;
 		const {name} = props;
 		const sourceName = createOrdinalName(FIELDS.source, getNumberFromName(name));
 		const {computedAttrs, [sourceName]: source} = values;
 
 		return (
-			<div className={styles.field} key={name}>
+			<div className={styles.field} key={name} ref={this.setInputRef(name)}>
 				<Attribute
-					error={errors[name]}
 					computedAttrs={computedAttrs}
 					getAttributeOptions={this.getAttributeOptions}
 					getRefAttributeOptions={this.getRefAttributeOptions}
@@ -337,7 +348,37 @@ export class DataFormBuilder extends FormBuilder {
 					sources={this.getAttributeModalOptions()}
 					{...props}
 				/>
+				{this.renderError(name)}
 			</div>
+		);
+	};
+
+	renderBaseInputs = () => {
+		const {values} = this.props;
+		const {diagramName, name} = FIELDS;
+
+		const nameProps = {
+			handleBlur: this.handleBlurName,
+			label: 'Название виджета',
+			name,
+			placeholder: 'Постарайтесь уместить название в две строчки текста',
+			value: values[name]
+		};
+
+		const diagramNameProps = {
+			label: 'Название диаграммы',
+			name: diagramName,
+			value: values[diagramName]
+		};
+
+		return (
+			<Fragment>
+				{this.renderTextArea(nameProps)}
+				{this.renderTextArea(diagramNameProps)}
+				{this.renderDivider('section')}
+				{this.renderWidgetSelect()}
+				{this.renderDivider('section')}
+			</Fragment>
 		);
 	};
 
@@ -358,7 +399,7 @@ export class DataFormBuilder extends FormBuilder {
 		const {values} = this.props;
 		const breakdownGroupName = createRefName(name, FIELDS.breakdownGroup);
 
-		const refInput = {
+		const refInputProps = {
 			name: breakdownGroupName,
 			type: 'group',
 			value: values[breakdownGroupName]
@@ -368,7 +409,7 @@ export class DataFormBuilder extends FormBuilder {
 			isRemovable: !this.isRequiredBreakdown(),
 			name,
 			onRemove: this.handleRemoveBreakdown,
-			refInput,
+			refInputProps,
 			value: values[name],
 			withDivider: false
 		};
@@ -392,7 +433,7 @@ export class DataFormBuilder extends FormBuilder {
 		const {values} = this.props;
 		const aggregationName = createRefName(name, FIELDS.aggregation);
 
-		const refInput = {
+		const refInputProps = {
 			name: aggregationName,
 			type: 'aggregation',
 			value: values[aggregationName]
@@ -400,7 +441,7 @@ export class DataFormBuilder extends FormBuilder {
 
 		const props = {
 			name,
-			refInput,
+			refInputProps,
 			value: values[name],
 			withCreate: true
 		};
@@ -442,7 +483,7 @@ export class DataFormBuilder extends FormBuilder {
 		};
 
 		return (
-			<div className={styles.field} key={name}>
+			<div className={styles.field} key={name} ref={this.setInputRef(name)}>
 				<Source
 					error={errors[name]}
 					isRemovable={isRemovable}
@@ -467,6 +508,22 @@ export class DataFormBuilder extends FormBuilder {
 			{this.renderDivider('section')}
 		</Fragment>
 	);
+
+	renderWidgetSelect = () => {
+		const {values} = this.props;
+
+		return (
+			<div className={styles.field}>
+				<FieldLabel text="Тип диаграммы" />
+				<OuterSelect
+					name={FIELDS.type}
+					onSelect={this.handleSelect}
+					options={OPTIONS.WIDGETS}
+					value={values[FIELDS.type]}
+				/>
+			</div>
+		);
+	};
 }
 
 export default DataFormBuilder;

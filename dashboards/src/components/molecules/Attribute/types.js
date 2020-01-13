@@ -25,7 +25,6 @@ type refInputProps = {
 
 export type Props = {
 	computedAttrs?: Array<ComputedAttr>,
-	error: string,
 	getAttributeOptions: (classFqn: string) => Array<Attribute>,
 	getRefAttributeOptions: (attribute: Attribute) => Array<Attribute>,
 	isRemovable: boolean,

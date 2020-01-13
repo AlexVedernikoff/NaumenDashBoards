@@ -13,7 +13,7 @@ export class AxisChart extends DataFormBuilder {
 		const {values} = this.props;
 		const groupName = createRefName(name, FIELDS.group);
 
-		const refInput = {
+		const refInputProps = {
 			name: groupName,
 			type: 'group',
 			value: values[groupName]
@@ -21,7 +21,7 @@ export class AxisChart extends DataFormBuilder {
 
 		const props = {
 			name,
-			refInput,
+			refInputProps,
 			value: values[name],
 			withDivider
 		};
@@ -33,7 +33,7 @@ export class AxisChart extends DataFormBuilder {
 		const {values} = this.props;
 		const aggregationName = createRefName(name, FIELDS.aggregation);
 
-		const refInput = {
+		const refInputProps = {
 			name: aggregationName,
 			type: 'aggregation',
 			value: values[aggregationName]
@@ -41,7 +41,7 @@ export class AxisChart extends DataFormBuilder {
 
 		const props = {
 			name,
-			refInput,
+			refInputProps,
 			value: values[name],
 			withCreate: true,
 			withDivider
@@ -50,7 +50,7 @@ export class AxisChart extends DataFormBuilder {
 		return this.renderAttribute(props);
 	};
 
-	renderBarInputs = () => {
+	renderVerticalInputs = () => {
 		const {breakdown, xAxis, yAxis} = FIELDS;
 
 		return (
@@ -64,7 +64,7 @@ export class AxisChart extends DataFormBuilder {
 		);
 	};
 
-	renderBaseInputs = () => {
+	renderHorizontalInputs = () => {
 		const {breakdown, xAxis, yAxis} = FIELDS;
 
 		return (
@@ -82,12 +82,13 @@ export class AxisChart extends DataFormBuilder {
 		const {type} = this.props.values;
 		const {BAR, BAR_STACKED} = CHART_VARIANTS;
 
-		return [BAR, BAR_STACKED].includes(type) ? this.renderBarInputs() : this.renderBaseInputs();
+		return [BAR, BAR_STACKED].includes(type) ? this.renderVerticalInputs() : this.renderHorizontalInputs();
 	};
 
 	render () {
 		return (
 			<Fragment>
+				{this.renderBaseInputs()}
 				{this.renderSourceSection()}
 				{this.renderFieldsByType()}
 			</Fragment>
