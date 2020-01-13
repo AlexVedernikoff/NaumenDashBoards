@@ -23,7 +23,7 @@ import static groovy.json.JsonOutput.toJson
         ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText']
 @Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
         ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem',
-         'dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state']
+         'dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText']
 //endregion
 
 //region КЛАССЫ
