@@ -611,7 +611,7 @@ private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram reque
     otherSymbols.setDecimalSeparator('.' as char)
     DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
 
-    return new RoundDiagram(list[1] as Collection, list[0].collect { decimalFormat.format(it) as Double })
+    return new RoundDiagram(list[1].collect(), list[0].collect { decimalFormat.format(it) as Double })
 }
 
 /**
@@ -642,7 +642,7 @@ private RoundDiagram getDataRoundDiagram(RoundDiagramRequest request)
     otherSymbols.setDecimalSeparator('.' as char)
     DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
 
-    return new RoundDiagram(list[1] as Collection, list[0].collect { decimalFormat.format(it) as Double })
+    return new RoundDiagram(list[1].collect(), list[0].collect { decimalFormat.format(it) as Double })
 }
 
 
