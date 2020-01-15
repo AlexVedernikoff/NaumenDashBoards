@@ -114,7 +114,7 @@ class Link
         this.attrCodes = map.attrCodes as Collection
         this.filters = map.filters as Collection
         this.template = metaInfo.attributes.find { it.code == 'dashboardTemp' }?.with {
-            utils.findFirst(this.classFqn, [(it.code): op.isNotNull()]).get(it.code)
+            utils.findFirst(this.classFqn, [(it.code): op.isNotNull()])?.get(it.code)
         }
     }
 
@@ -294,7 +294,8 @@ class Link
             def rangeMinute = [0, 59]
             def rangeSecond = [0, 59]
 
-            if (quarter) {
+            if (quarter)
+            {
                 int q = (quarter as String).replace(' кв-л', '') as int
                 int startMonth = (q - 1) * 3
                 int endMonth = startMonth + 2
@@ -405,10 +406,10 @@ String getLink(Map<String, Object> requestContent, String cardObjectUuid)
 
 //region вспомогательных методов
 /**
- *
- * @param requestContent
- * @param cardObjectUuid
- * @return
+ * Метод для изменения запроса с целью подмены объекта фильтрации в запросах
+ * @param requestContent - фактическое значение идентификатора "текущего объекта"
+ * @param cardObjectUuid - запрос на построение диаграммы
+ * @return Изменённый запрос
  */
 private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid)
 {
