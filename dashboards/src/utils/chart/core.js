@@ -128,7 +128,14 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 			shared: false
 		},
 		xaxis: {
-			categories: chart.categories
+			categories: chart.categories,
+			labels: {
+				hideOverlappingLabels: true,
+				rotate: -60
+			},
+			title: {
+				offsetY: 10
+			}
 		},
 		yaxis: {
 			decimalsInFloat: 2,
@@ -167,9 +174,7 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
 	}
 
 	if (showXAxis && xAxisAttr) {
-		options.xaxis.title = {
-			text: getAttrTitle(xAxisAttr)
-		};
+		options.xaxis.title.text = getAttrTitle(xAxisAttr);
 	}
 
 	if (showYAxis && yAxisAttr) {
@@ -188,18 +193,19 @@ const axisChart = (horizontal: boolean = false, stacked: boolean = false) => (wi
  * @returns {ApexOptions}
  */
 const comboChart = (widget: Widget, chart: DiagramBuildData) => {
+	const {order} = widget;
 	const {series} = chart;
 	const strokeWidth = series.find(s => s.type.toUpperCase() === CHART_VARIANTS.LINE) ? 4 : 0;
 	let stacked = false;
 	let percentDataKeys = [];
 
-	if (Array.isArray(widget.order)) {
-		widget.order.filter(number => !widget[createOrdinalName(FIELDS.sourceForCompute, number)])
+	if (Array.isArray(order)) {
+		order.filter(number => !widget[createOrdinalName(FIELDS.sourceForCompute, number)])
 			.forEach(number => {
 				const aggregation = widget[createOrdinalName(FIELDS.aggregation, number)];
 				const type = widget[createOrdinalName(FIELDS.type, number)];
 
-				if (!stacked && type.value === CHART_VARIANTS.COLUMN_STACKED) {
+				if (!stacked && type === CHART_VARIANTS.COLUMN_STACKED) {
 					stacked = true;
 				}
 

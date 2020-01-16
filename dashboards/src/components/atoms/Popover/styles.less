@@ -1,50 +1,50 @@
 @import '/styles/variables';
 
 :local {
+	@arrow-width: 7px;
 	@bg-color: #4F5C70;
-	@content-width: 170px;
-	@triangle-width: 7px;
 
 	.container {
+		display: inline-block;
 		position: relative;
 
 		&:hover {
 			.content {
-				opacity: 1;
 				visibility: visible;
-				z-index: 10;
+				z-index: 1;
 			}
 		}
 	}
 
 	.content {
 		background: @bg-color;
-		border-radius: 2px;
+		border-radius: @border-radius;
 		box-shadow: @grey-box-shadow;
 		box-sizing: border-box;
 		color: white;
-		max-width: @content-width;
-		opacity: 0;
+		padding: 5px;
 		position: absolute;
 		visibility: hidden;
 		white-space: normal;
-
-		&:before {
-			border-style: solid;
-			content: '';
-			position: absolute;
-		}
+		width: 170px;
 	}
 
-	.right {
-		padding: 10px 20px 10px 10px;
-		right: -(@content-width + 10px);
+	.arrow {
+		border: @arrow-width solid transparent;
+		content: '';
+		position: absolute;
+	}
+
+	.contentRight {
+		left: 115%;
+		padding-right: 20px;
 		top: 0;
 
-		&:before {
-			border-color: transparent @bg-color transparent transparent;
-			border-width: @triangle-width @triangle-width @triangle-width 0;
-			left: -@triangle-width;
+		&:after {
+			.arrow();
+			border-right: @arrow-width solid @white;
+			border-left: 0;
+			left: -@arrow-width;
 			top: 5px;
 		}
 	}

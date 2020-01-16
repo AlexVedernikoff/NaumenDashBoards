@@ -36,6 +36,5 @@ export type Props = {
 	onSelectRefInput: (name: string, value: string) => void,
 	refInputProps?: refInputProps,
 	source: SourceValue,
-	sources: Array<Option>,
-	withDivider?: boolean
+	sources: Array<Option>
 } & SelectProps;

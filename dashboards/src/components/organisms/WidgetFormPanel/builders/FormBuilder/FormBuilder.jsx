@@ -73,7 +73,7 @@ export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<P
 		);
 	};
 
-	renderDivider = (variant: DividerVariant) => <Divider variant={variant} />;
+	renderDivider = (variant?: DividerVariant) => <Divider variant={variant} />;
 
 	renderError = (name: string) => <FieldError text={this.props.errors[name]} />;
 

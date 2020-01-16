@@ -1,5 +1,6 @@
 // @flow
 import {Checkbox, ExtendButton, IconButton, FieldError} from 'components/atoms';
+import cn from 'classnames';
 import {CrossIcon, EditIcon} from 'icons/form';
 import {InputForm, SourceTree} from 'components/molecules';
 import type {Props, SourceValue, State} from './types';
@@ -8,7 +9,10 @@ import styles from './styles.less';
 
 export class Source extends PureComponent<Props, State> {
 	static defaultProps = {
-		placeholder: 'Выберите значение'
+		defaultValue: {
+			label: 'Выберите значение',
+			value: ''
+		}
 	};
 
 	state = {
@@ -131,6 +135,17 @@ export class Source extends PureComponent<Props, State> {
 
 	renderInput = () => this.state.showForm ? this.renderEditTitleForm() : this.renderTreeSelect();
 
+	renderLabel = () => {
+		const {defaultValue, value} = this.props;
+		const labelCN = cn({
+			[styles.label]: true,
+			[styles.defaultLabel]: !value
+		});
+		const label = value ? value.label : defaultValue.label;
+
+		return <div className={labelCN} onClick={this.handleShowList}>{label}</div>;
+	};
+
 	renderFilterButton = () => {
 		const {value} = this.props.descriptor;
 
@@ -157,13 +172,6 @@ export class Source extends PureComponent<Props, State> {
 		}
 	};
 
-	renderTitle = () => {
-		const {placeholder, value} = this.props;
-		const title = value ? value.label : placeholder;
-
-		return <div className={styles.title} data-placeholder={!value} onClick={this.handleShowList}>{title}</div>;
-	};
-
 	renderTree = () => {
 		const {sources, value} = this.props;
 		const {showList} = this.state;
@@ -176,7 +184,7 @@ export class Source extends PureComponent<Props, State> {
 	renderTreeSelect = () => (
 		<Fragment>
 			<div className={styles.select}>
-				{this.renderTitle()}
+				{this.renderLabel()}
 				{this.renderIndicators()}
 				{this.renderRemoveButton()}
 				{this.renderTree()}

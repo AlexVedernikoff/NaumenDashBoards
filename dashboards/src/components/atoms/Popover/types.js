@@ -1,14 +1,12 @@
 // @flow
 import type {Node} from 'react';
-import {POSITIONS} from './constants';
+import {PLACEMENTS} from './constants';
 
-type Position =
-	| typeof POSITIONS.RIGHT
-;
+type Placement = $Keys<typeof PLACEMENTS>;
 
 export type Props = {
 	children: Node,
-	position: Position,
+	placement: Placement,
 	renderContent?: () => Node,
 	text: string
 }

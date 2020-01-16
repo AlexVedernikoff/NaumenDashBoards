@@ -1,21 +1,26 @@
 // @flow
 import cn from 'classnames';
-import {POSITIONS} from './constants';
+import {PLACEMENTS} from './constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Popover extends PureComponent<Props> {
 	static defaultProps = {
-		position: POSITIONS.RIGHT,
+		placement: PLACEMENTS.RIGHT,
 		text: ''
 	};
 
 	renderPopover = () => {
-		const {position, renderContent, text} = this.props;
+		const {placement, renderContent, text} = this.props;
+
+		const contentCN = cn({
+			[styles.content]: true,
+			[styles.contentRight]: placement === PLACEMENTS.RIGHT
+		});
 
 		return (
-			<div className={cn(styles.content, styles[position])}>
+			<div className={contentCN}>
 				{renderContent ? renderContent() : text}
 			</div>
 		);

@@ -3,13 +3,12 @@ import {ColorPalette} from 'components/molecules';
 import {FieldLabel} from 'components/atoms';
 import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/builders';
-import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class Chart extends FormBuilder {
-	componentDidUpdate (props: Props) {
-		const {setFieldValue, values} = props;
+	componentDidUpdate () {
+		const {setFieldValue, values} = this.props;
 		const colors = values[FIELDS.colors];
 
 		if (!Array.isArray(colors)) {

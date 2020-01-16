@@ -8,6 +8,7 @@ import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
 import {gridRef} from 'components/organisms/DashboardContent';
 import {Modal} from 'components/molecules';
+import {PLACEMENTS} from 'components/atoms/Tooltip/constants';
 import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
@@ -74,7 +75,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {icon, tip, way} = props;
 
 		return (
-			<Tooltip tooltip={tip} placement="left">
+			<Tooltip text={tip} placement={PLACEMENTS.LEFT}>
 				<DropDown icon={icon} list={FILE_LIST} onClick={this.createDocument(way)}>
 					<div className={styles.buttonIcon}>
 						{icon}
@@ -130,7 +131,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {getSettings} = this.props;
 
 		return (
-			<Tooltip tooltip="Обновить виджеты" placement="left">
+			<Tooltip text="Обновить виджеты" placement={PLACEMENTS.LEFT}>
 				<div className={styles.buttonIcon}>
 					<RefreshIcon onClick={getSettings} />
 				</div>
