@@ -1,13 +1,9 @@
 // @flow
 import type {Node} from 'react';
-
-export type TooltipElementProps = {
-	[string]: any
-};
+import {PLACEMENTS} from './constants';
 
 export type Props = {
 	children: Node,
-	hideArrow: boolean,
-	placement: string,
-	tooltip: Node | string
+	placement: $Keys<typeof PLACEMENTS>,
+	text: string | Node
 }

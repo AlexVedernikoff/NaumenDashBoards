@@ -33,6 +33,7 @@ export class DataFormBuilder extends FormBuilder {
 			order = [...order, nextNumber];
 			setFieldValue(FIELDS.order, order);
 			setFieldValue(createOrdinalName(FIELDS.dataKey, nextNumber), uuid());
+			setFieldValue(createOrdinalName(FIELDS.sourceForCompute, nextNumber), true);
 
 			nextNumber++;
 			count--;
@@ -85,7 +86,7 @@ export class DataFormBuilder extends FormBuilder {
 			const sourceName = createOrdinalName(FIELDS.source, number);
 			const sourceForComputeName = createOrdinalName(FIELDS.sourceForCompute, number);
 
-			if (values[sourceName] && !values[sourceForComputeName]) {
+			if (!values[sourceForComputeName]) {
 				sources.push(sourceName);
 			}
 		});
@@ -226,7 +227,6 @@ export class DataFormBuilder extends FormBuilder {
 		const {setFieldValue, values} = this.props;
 		const order = this.getOrder();
 		const buildSources = this.getBuildSources(order);
-		const sourceName = createRefName(name, FIELDS.source);
 
 		if (!value && values[FIELDS.type] !== CHART_VARIANTS.COMBO) {
 			order.every(number => {
@@ -241,7 +241,7 @@ export class DataFormBuilder extends FormBuilder {
 			});
 		}
 
-		if (!value || (value && (buildSources.length > this.defaultOrder.length || !buildSources.includes(sourceName)))) {
+		if (!value || (value && buildSources.length > this.defaultOrder.length)) {
 			setFieldValue(name, value);
 		}
 	};
@@ -329,7 +329,7 @@ export class DataFormBuilder extends FormBuilder {
 
 	renderAttribute = (props: Object) => {
 		const {setFieldValue, values} = this.props;
-		const {name} = props;
+		const {name, withDivider, ...inputProps} = props;
 		const sourceName = createOrdinalName(FIELDS.source, getNumberFromName(name));
 		const {computedAttrs, [sourceName]: source} = values;
 
@@ -339,6 +339,7 @@ export class DataFormBuilder extends FormBuilder {
 					computedAttrs={computedAttrs}
 					getAttributeOptions={this.getAttributeOptions}
 					getRefAttributeOptions={this.getRefAttributeOptions}
+					name={name}
 					onChangeTitle={setFieldValue}
 					onRemoveAttribute={this.handleRemoveAttribute}
 					onSaveAttribute={this.handleSaveAttribute}
@@ -346,8 +347,9 @@ export class DataFormBuilder extends FormBuilder {
 					onSelectRefInput={setFieldValue}
 					source={source}
 					sources={this.getAttributeModalOptions()}
-					{...props}
+					{...inputProps}
 				/>
+				{withDivider && this.renderDivider()}
 				{this.renderError(name)}
 			</div>
 		);

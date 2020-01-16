@@ -22,6 +22,7 @@ export type Descriptor = {
 
 export type Props = {
 	compute: Compute,
+	defaultValue: SourceValue,
 	descriptor: Descriptor,
 	error: string,
 	isRemovable: boolean,
@@ -30,7 +31,6 @@ export type Props = {
 	onRemove: any,
 	onSelect: (name: string, value: SourceValue | null) => void | Promise<void>,
 	onSelectCallback?: OnSelectCallback,
-	placeholder: string,
 	sources: DataSourceMap,
 	value: SourceValue | null
 };

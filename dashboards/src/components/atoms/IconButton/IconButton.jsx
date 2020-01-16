@@ -1,4 +1,5 @@
 // @flow
+import {PLACEMENTS} from 'components/atoms/Tooltip/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -24,7 +25,7 @@ export class IconButton extends PureComponent<Props> {
 	};
 
 	renderButtonWithTip = () => (
-		<Tooltip tooltip={this.props.tip} placement="bottom">
+		<Tooltip text={this.props.tip} placement={PLACEMENTS.BOTTOM}>
 			{this.renderButton()}
 		</Tooltip>
 	);

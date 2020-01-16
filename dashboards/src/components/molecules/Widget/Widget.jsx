@@ -8,7 +8,7 @@ import {ExportIcon} from 'icons/header';
 import type {ExportItem, Props, State} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {IconButton} from 'components/atoms';
-import React, {createRef, Fragment, PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Widget extends PureComponent<Props, State> {
@@ -189,11 +189,9 @@ export class Widget extends PureComponent<Props, State> {
 
 		if (isEditable) {
 			return (
-				<Fragment>
-					<IconButton onClick={this.handleClickRemoveButton} tip="Удалить">
-						<CloseIcon />
-					</IconButton>
-				</Fragment>
+				<IconButton onClick={this.handleClickRemoveButton} tip="Удалить">
+					<CloseIcon />
+				</IconButton>
 			);
 		}
 	};

@@ -109,9 +109,7 @@ const createImage = async (options: Options) => {
 	let config = {};
 
 	if (!fragment) {
-		const height = fragment || container.clientHeight > window.innerHeight ? container.clientHeight : window.innerHeight;
 		config = {
-			height,
 			backgroundColor
 		};
 	}

@@ -40,8 +40,7 @@ export class Attribute extends PureComponent<Props, State> {
 			refInputProps,
 			showBorder,
 			value,
-			withCreate,
-			withDivider
+			withCreate
 		} = this.props;
 
 		return {
@@ -54,8 +53,7 @@ export class Attribute extends PureComponent<Props, State> {
 			refInputProps,
 			showBorder,
 			value,
-			withCreate,
-			withDivider
+			withCreate
 		};
 	};
 
@@ -216,33 +214,21 @@ export class Attribute extends PureComponent<Props, State> {
 		return render(props, parent);
 	};
 
-	renderAttributeInput = (props: Object, parent: AttributeType, withRefInput: boolean = false) => {
-		const {withDivider, ...selectProps} = props;
+	renderAttributeInput = (props: Object, parent: AttributeType, withRefInput: boolean = false) => this.renderSelect({
+		...props,
+		onSelect: withRefInput ? this.handleSelectWithRef(parent) : this.handleSelect(parent)
+	});
 
-		return this.renderSelect({
-			...selectProps,
-			onSelect: withRefInput ? this.handleSelectWithRef(parent) : this.handleSelect(parent),
-			withDivider
-		});
-	};
-
-	renderAttributeInputWithRef = (props: Object, parent: AttributeType) => {
-		const {withDivider, ...selectProps} = props;
-
-		return (
-			<Fragment>
-				<div className={styles.combinedInputs}>
-					<div className={styles.combinedLeftInput}>
-						{this.renderRefInput(selectProps.value)}
-					</div>
-					<div className={styles.combinedRightInput}>
-						{this.renderAttributeInput(selectProps, parent, true)}
-					</div>
-				</div>
-				{withDivider && this.renderDivider()}
-			</Fragment>
-		);
-	};
+	renderAttributeInputWithRef = (props: Object, parent: AttributeType) => (
+		<div className={styles.combinedInputs}>
+			<div className={styles.combinedLeftInput}>
+				{this.renderRefInput(props.value)}
+			</div>
+			<div className={styles.combinedRightInput}>
+				{this.renderAttributeInput(props, parent, true)}
+			</div>
+		</div>
+	);
 
 	renderChildAttribute = (props: Object, parent: AttributeType) => this.renderAttribute({
 		...props,
@@ -297,8 +283,7 @@ export class Attribute extends PureComponent<Props, State> {
 		<div className={styles.parentInput}>
 			{this.renderSelect({
 				...props,
-				onSelect: this.handleSelect(parent),
-				withDivider: false
+				onSelect: this.handleSelect(parent)
 			})}
 		</div>
 	);
@@ -323,16 +308,7 @@ export class Attribute extends PureComponent<Props, State> {
 		);
 	};
 
-	renderSelect = (props: Object) => {
-		const {withDivider, ...selectProps} = props;
-
-		return (
-			<div key={props.name}>
-				<Select {...selectProps} />
-				{withDivider && this.renderDivider()}
-			</div>
-		);
-	};
+	renderSelect = (props: Object) => <Select {...props} />;
 
 	render () {
 		const props = this.getAttributeProps();

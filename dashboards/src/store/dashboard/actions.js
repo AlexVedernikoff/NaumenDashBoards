@@ -108,9 +108,12 @@ const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: G
 	try {
 		const context = getState().dashboard.context;
 		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-		await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
+		const {message} = await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
 
 		dispatch(getSettings());
+		dispatch(createToast({
+			text: message
+		}));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка сброса настроек',

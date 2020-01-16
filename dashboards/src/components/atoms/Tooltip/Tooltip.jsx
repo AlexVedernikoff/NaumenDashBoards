@@ -1,58 +1,44 @@
 // @flow
-import 'react-popper-tooltip/dist/styles.css';
-import type {Props, TooltipElementProps} from './types';
+import cn from 'classnames';
+import type {Props} from './types';
 import React, {Component} from 'react';
-import TooltipTrigger from 'react-popper-tooltip';
+import {PLACEMENTS} from './constants';
+import styles from './styles.less';
 
 class Tooltip extends Component<Props> {
 	static defaultProps = {
-		hideArrow: false,
-		placement: 'bottom'
+		placement: PLACEMENTS.RIGHT,
+		text: ''
 	};
 
-	renderChildren = (props: TooltipElementProps) => {
-		const {children} = this.props;
-		const {getTriggerProps, triggerRef} = props;
-		const triggerProps = getTriggerProps({
-			className: 'trigger',
-			ref: triggerRef
+	renderTooltip = () => {
+		const {placement, text} = this.props;
+
+		const contentCN = cn({
+			[styles.content]: true,
+			[styles.contentBottom]: placement === PLACEMENTS.BOTTOM,
+			[styles.contentLeft]: placement === PLACEMENTS.LEFT,
+			[styles.contentRight]: placement === PLACEMENTS.RIGHT,
+			[styles.contentTop]: placement === PLACEMENTS.TOP
 		});
 
-		return (
-			<span {...triggerProps}>
-				{children}
-			</span>
-		);
-	};
-
-	renderTooltip = (props: TooltipElementProps) => {
-		const {hideArrow, tooltip} = this.props;
-		const {arrowRef, getArrowProps, getTooltipProps, placement, tooltipRef} = props;
-		const tooltipProps = getTooltipProps({
-			className: 'tooltip-container',
-			ref: tooltipRef
-		});
-		const arrowProps = getArrowProps({
-			className: 'tooltip-arrow',
-			'data-placement': placement,
-			ref: arrowRef
-		});
-
-		return (
-			<div {...tooltipProps}>
-				{!hideArrow && <div {...arrowProps} />}
-				{tooltip}
-			</div>
-		);
+		if (text) {
+			return (
+				<div className={contentCN}>
+					{text}
+				</div>
+			);
+		}
 	};
 
 	render () {
-		const {children, hideArrow, tooltip, ...props} = this.props;
+		const {children} = this.props;
 
 		return (
-			<TooltipTrigger {...props} tooltip={this.renderTooltip}>
-				{this.renderChildren}
-			</TooltipTrigger>
+			<span className={styles.container}>
+				{children}
+				{this.renderTooltip()}
+			</span>
 		);
 	}
 }

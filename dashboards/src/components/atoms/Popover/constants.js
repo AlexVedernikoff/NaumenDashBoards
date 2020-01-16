@@ -1,10 +1,10 @@
 // @flow
-const RIGHT: 'right' = 'right';
+const RIGHT: 'RIGHT' = 'RIGHT';
 
-const POSITIONS = {
+const PLACEMENTS = {
 	RIGHT
 };
 
 export {
-	POSITIONS
+	PLACEMENTS
 };
