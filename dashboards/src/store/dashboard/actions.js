@@ -1,5 +1,5 @@
 // @flow
-import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import {addWidget, resetWidget, setSelectedWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateRequestPayload} from './types';
 import {buildUrl, client, getContentParameters, getContext} from 'utils/api';
 import type {Context} from 'utils/api/types';
@@ -108,8 +108,9 @@ const resetDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: G
 	try {
 		const context = getState().dashboard.context;
 		const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-		const {message} = await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
+		const {data: {message}} = await client.post(buildUrl('dashboardSettings', 'resetPersonalDashboard', params));
 
+		dispatch(setSelectedWidget(''));
 		dispatch(getSettings());
 		dispatch(createToast({
 			text: message

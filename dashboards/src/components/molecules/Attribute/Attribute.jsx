@@ -200,7 +200,7 @@ export class Attribute extends PureComponent<Props, State> {
 		if (value) {
 			props = this.mixinForm(props, value, parent);
 
-			if (TYPES.REF.includes(value.type)) {
+			if (!parent && TYPES.REF.includes(value.type)) {
 				return (
 					<Fragment>
 						{this.renderParentAttribute(props, parent)}

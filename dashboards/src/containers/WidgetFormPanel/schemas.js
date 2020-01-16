@@ -27,13 +27,9 @@ const {SUMMARY, TABLE} = WIDGET_VARIANTS;
  * @param {Attribute} value - атрибут
  * @returns {boolean}
  */
-const validateAttribute = (value: Attribute) => {
+const validateAttribute = (value: Attribute | null) => {
 	if (value && TYPES.REF.includes(value.type)) {
-		while (value.ref) {
-			value = value.ref;
-		}
-
-		return !!value && !TYPES.REF.includes(value.type);
+		value = value.ref;
 	}
 
 	return !!value;
