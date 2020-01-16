@@ -24,7 +24,7 @@ export const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
 
 	payload.forEach(widget => {
 		if (typeof widget === 'object' && widget !== null) {
-			map[widget.id] = widget.id === state.selectedWidget ? state.map[state.selectedWidget] : widget;
+			map[widget.id] = widget;
 		}
 	});
 

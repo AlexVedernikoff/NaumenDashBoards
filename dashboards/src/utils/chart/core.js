@@ -57,7 +57,7 @@ const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
 const getAttrTitle = (attr: Attribute) => {
 	let current = attr;
 
-	while (current.ref) {
+	if (current.ref) {
 		current = current.ref;
 	}
 

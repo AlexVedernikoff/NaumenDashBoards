@@ -259,5 +259,6 @@ export {
 	resetWidget,
 	saveWidget,
 	selectWidget,
+	setSelectedWidget,
 	setWidgets
 };
