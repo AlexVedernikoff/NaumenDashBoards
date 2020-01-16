@@ -96,7 +96,7 @@ String getAttributesFromLinkAttribute(requestContent)
     }
 
     //TODO: В дальнейшем список будет расширен до полного списка
-    def validType = ['string', 'integer', 'state', 'catalogItem', 'catalogItemSet', 'localizedText']
+    def validType = ['string', 'integer', 'state', 'localizedText']
 
     Collection<Attribute> result = metaInfo.attributes
             .findResults { !it.computable && it.type.code in validType ? buildAttribute(it) : null }
