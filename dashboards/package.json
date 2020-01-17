@@ -21,7 +21,6 @@
     "react-grid-layout": "git+https://github.com/getredash/react-grid-layout.git#master",
     "react-redux": "^7.1.1",
     "react-resize-detector": "^4.2.1",
-    "react-select": "^3.0.4",
     "react-table": "^6.10.3",
     "smoothscroll-polyfill": "^0.4.4",
     "tiny-uuid": "^1.0.0",

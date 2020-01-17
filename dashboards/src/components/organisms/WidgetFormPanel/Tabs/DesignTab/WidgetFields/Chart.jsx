@@ -1,8 +1,9 @@
 // @flow
-import {ColorPalette} from 'components/molecules';
+import {ColorPalette, SimpleSelect} from 'components/molecules';
 import {FieldLabel} from 'components/atoms';
 import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/builders';
+import {LEGEND_POSITIONS} from 'utils/chart/constants';
 import React, {Fragment} from 'react';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
@@ -84,19 +85,18 @@ export class Chart extends FormBuilder {
 	renderLegendPositionInput = () => {
 		const {values} = this.props;
 		const {legendPosition} = FIELDS;
-
-		const legendPositionProps = {
-			isEditableLabel: false,
-			isSearchable: false,
-			name: legendPosition,
-			options: OPTIONS.LEGEND_POSITIONS,
-			placeholder: 'Расположение легенды',
-			value: values[legendPosition]
-		};
+		const {LEGEND_POSITIONS: options} = OPTIONS;
+		const defaultValue = options.find(p => p.value === LEGEND_POSITIONS.bottom);
 
 		return (
 			<div className={styles.field}>
-				{this.renderSelect(legendPositionProps)}
+				<SimpleSelect
+					defaultValue={defaultValue}
+					name={legendPosition}
+					onSelect={this.handleSelect}
+					options={options}
+					value={values[legendPosition]}
+				/>
 			</div>
 		);
 	};

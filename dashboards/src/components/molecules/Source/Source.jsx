@@ -1,5 +1,5 @@
 // @flow
-import {Checkbox, ExtendButton, IconButton, FieldError} from 'components/atoms';
+import {Checkbox, ExtendButton, IconButton, FieldError, OutsideClickDetector} from 'components/atoms';
 import cn from 'classnames';
 import {CrossIcon, EditIcon} from 'icons/form';
 import {InputForm, SourceTree} from 'components/molecules';
@@ -57,6 +57,8 @@ export class Source extends PureComponent<Props, State> {
 		const {name, onRemove} = this.props;
 		onRemove(name);
 	};
+
+	handleClickOutside = () => this.setState({showList: false});
 
 	handleRemoveValue = () => {
 		const {name, onSelect} = this.props;
@@ -183,7 +185,7 @@ export class Source extends PureComponent<Props, State> {
 
 	renderTreeSelect = () => (
 		<Fragment>
-			<div className={styles.select}>
+			<div className={styles.select} onClick={this.handleShowList}>
 				{this.renderLabel()}
 				{this.renderIndicators()}
 				{this.renderRemoveButton()}
@@ -195,11 +197,13 @@ export class Source extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<div className={styles.container}>
-				{this.renderInput()}
-				{this.renderComputeCheckbox()}
-				{this.renderFilterButton()}
-			</div>
+			<OutsideClickDetector onClickOutside={this.handleClickOutside}>
+				<div className={styles.container}>
+					{this.renderInput()}
+					{this.renderComputeCheckbox()}
+					{this.renderFilterButton()}
+				</div>
+			</OutsideClickDetector>
 		);
 	}
 }

@@ -2,6 +2,7 @@
 import Attribute from './Attribute';
 import AttributeCreatingModal from './AttributeCreatingModal';
 import AttributeRefInput from './AttributeRefInput';
+import AttributeSelect from './AttributeSelect';
 import Chart from './Chart';
 import ColorPalette from './ColorPalette';
 import ColorPicker from './ColorPicker';
@@ -12,7 +13,8 @@ import MiniSelect from './MiniSelect';
 import Modal from './Modal';
 import OperatorControl from './OperatorControl';
 import OuterSelect from './OuterSelect';
-import Select from './Select';
+import SimpleSelect from './SimpleSelect';
+import SimpleSelectList from './SimpleSelectList';
 import Source from './Source';
 import SourceControl from './SourceControl';
 import SourceTree from './SourceTree';
@@ -25,6 +27,7 @@ export {
 	Attribute,
 	AttributeCreatingModal,
 	AttributeRefInput,
+	AttributeSelect,
 	Chart,
 	ColorPalette,
 	ColorPicker,
@@ -35,7 +38,8 @@ export {
 	Modal,
 	OperatorControl,
 	OuterSelect,
-	Select,
+	SimpleSelect,
+	SimpleSelectList,
 	Source,
 	SourceControl,
 	SourceTree,

@@ -1,0 +1,41 @@
+@import '/styles/variables';
+
+:local {
+	.list {
+		max-height: 250px;
+		min-height: 40px;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+
+	.listItem {
+		cursor: pointer;
+		padding: 8px 24px;
+
+		&:hover {
+			background-color: @lightgrey;
+		}
+	}
+
+	.foundListItem {
+		font-weight: bold;
+	}
+
+	.selectedListItem {
+		background-color: @gainsboro;
+	}
+
+	.label {
+		overflow-x: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.noOptionsMessage {
+		align-items: center;
+		display: flex;
+		color: @darkgrey;
+		justify-content: center;
+		padding: 17px 0;
+	}
+}

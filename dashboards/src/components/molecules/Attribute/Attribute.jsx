@@ -1,10 +1,9 @@
 // @flow
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
-import {AttributeCreatingModal, AttributeRefInput, Select} from 'components/molecules';
+import {AttributeCreatingModal, AttributeRefInput, AttributeSelect} from 'components/molecules';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import {DATETIME_GROUP} from 'components/molecules/AttributeRefInput/constants';
 import {Divider} from 'components/atoms';
-import type {OptionType} from 'react-select/src/types';
 import type {Props, State} from './types';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
@@ -38,7 +37,6 @@ export class Attribute extends PureComponent<Props, State> {
 			onSelect,
 			options,
 			refInputProps,
-			showBorder,
 			value,
 			withCreate
 		} = this.props;
@@ -51,7 +49,6 @@ export class Attribute extends PureComponent<Props, State> {
 			onSelect,
 			options,
 			refInputProps,
-			showBorder,
 			value,
 			withCreate
 		};
@@ -88,7 +85,7 @@ export class Attribute extends PureComponent<Props, State> {
 		this.hideModal();
 	};
 
-	handleSelect = (parent?: AttributeType) => (name: string, value: OptionType) => {
+	handleSelect = (parent?: AttributeType) => (name: string, value: AttributeType) => {
 		const {onSelect, value: prevValue} = this.props;
 
 		if (parent) {
@@ -101,7 +98,7 @@ export class Attribute extends PureComponent<Props, State> {
 		this.applyCallback(name, value);
 	};
 
-	handleSelectWithRef = (parent: AttributeType | null) => (name: string, value: OptionType) => {
+	handleSelectWithRef = (parent: AttributeType | null) => (name: string, value: AttributeType) => {
 		const {onSelect, onSelectRefInput, refInputProps} = this.props;
 		let {value: prevValue} = this.props;
 
@@ -169,19 +166,10 @@ export class Attribute extends PureComponent<Props, State> {
 
 		return {
 			...props,
-			createButtonText: 'Создать поле',
-			onClickCreateButton: this.showCreatingModal,
-			options
+			onClickCreationButton: this.showCreatingModal,
+			options,
+			showCreationButton: true
 		};
-	};
-
-	mixinForm = (props: Object, value: AttributeType, parent?: AttributeType) => {
-		const form = {
-			onSubmit: this.handleChangeTitle(parent),
-			value: value.title
-		};
-
-		return {...props, form};
 	};
 
 	showCreatingModal = () => this.setState({showCreatingModal: true});
@@ -198,7 +186,7 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 
 		if (value) {
-			props = this.mixinForm(props, value, parent);
+			props.onChangeTitle = this.handleChangeTitle(parent);
 
 			if (!parent && TYPES.REF.includes(value.type)) {
 				return (
@@ -263,21 +251,21 @@ export class Attribute extends PureComponent<Props, State> {
 	renderEditingModal = () => {
 		const {sources, value} = this.props;
 		const {showEditingModal} = this.state;
+		// $FlowFixMe
+		const attribute: ComputedAttr = value;
 
-		if (showEditingModal && value) {
+		if (showEditingModal && attribute) {
 			return (
 				<AttributeCreatingModal
 					onClose={this.hideModal}
 					onRemove={this.handleRemoveAttribute}
 					onSubmit={this.handleSubmitModal}
 					sources={sources}
-					value={value}
+					value={attribute}
 				/>
 			);
 		}
 	};
-
-	renderDivider = () => <Divider />;
 
 	renderParentAttribute = (props: Object, parent: AttributeType) => (
 		<div className={styles.parentInput}>
@@ -308,7 +296,7 @@ export class Attribute extends PureComponent<Props, State> {
 		);
 	};
 
-	renderSelect = (props: Object) => <Select {...props} />;
+	renderSelect = (props: Object) => <AttributeSelect {...props} />;
 
 	render () {
 		const props = this.getAttributeProps();

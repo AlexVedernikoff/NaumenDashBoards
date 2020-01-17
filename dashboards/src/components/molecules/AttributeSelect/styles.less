@@ -1,0 +1,57 @@
+@import '/styles/variables';
+
+:local {
+	.form {
+		box-sizing: border-box;
+		padding-left: 10px;
+	}
+
+	.indicators {
+		display: none;
+	}
+
+	.select {
+		align-items: center;
+		display: flex;
+		height: 38px;
+		justify-content: space-between;
+
+		&:hover {
+			.indicators {
+				display: flex;
+			}
+		}
+	}
+
+	.disabledSelect {
+		background: @lightgrey;
+		color: @darkgrey;
+		pointer-events: none;
+	}
+
+	.title {
+		box-sizing: border-box;
+		cursor: pointer;
+		flex: auto;
+		overflow: hidden;
+		padding: 10px 5px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.defaultTitle {
+		color: @darkgrey;
+	}
+
+	.menu {
+		background-color: @white;
+		border-radius: @border-radius;
+		box-shadow: @grey-box-shadow;
+		left: 0;
+		margin-bottom: 20px;
+		position: absolute;
+		right: 0;
+		top: calc(100% + 10px);
+		z-index: 1;
+	}
+}

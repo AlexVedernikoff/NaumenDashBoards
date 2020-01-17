@@ -16,39 +16,43 @@
 	.node {
 		align-items: center;
 		box-sizing: border-box;
-		display: flex;
 		cursor: pointer;
+		display: flex;
+		padding-left: 4px;
 		text-align: center;
 		white-space: nowrap;
-	}
-
-	.toggleIcon {
-		color: @grey;
-		padding: 4px;
-
-		&[data-invisible=true] {
-			pointer-events: none;
-			visibility: hidden;
-		}
-	}
-
-	.title {
-		color: @black;
-		flex: auto;
-		padding: 8px 4px;
-		text-align: left;
 
 		&:hover {
 			background-color: @gainsboro;
 		}
+	}
 
-		&[data-selected=true] {
-			background-color: @silver;
-		}
+	.selectedNode {
+		background-color: @silver;
+	}
 
-		&[data-found=true] {
-			font-weight: bold;
-		}
+	.foundNode {
+		font-weight: bold;
+	}
+
+	.toggleIcon {
+		align-items: center;
+		color: @grey;
+		display: flex;
+		margin: 8px;
+	}
+
+	.invisibleToggleIcon {
+		pointer-events: none;
+		visibility: hidden;
+	}
+
+	.title {
+		align-items: center;
+		color: @black;
+		display: flex;
+		flex: auto;
+		text-align: left;
 	}
 
 	.children {

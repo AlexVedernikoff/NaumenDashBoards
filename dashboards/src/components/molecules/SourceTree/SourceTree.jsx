@@ -3,7 +3,7 @@ import cn from 'classnames';
 import type {DataSource} from 'store/sources/data/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import {SearchOptionInput} from 'components/atoms';
+import {SearchSelectInput} from 'components/atoms';
 import styles from './styles.less';
 import {ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
 
@@ -111,13 +111,21 @@ export class SourceTree extends PureComponent<Props, State> {
 	};
 
 	renderNode = (source: DataSource) => {
+		const {value: currentSource} = this.props;
 		const {foundSources, searchValue} = this.state;
-		const {value} = source;
+		const {value, title} = source;
+		const isSelected = currentSource && currentSource.value === value;
+		const isFound = searchValue && title.toLowerCase().includes(searchValue.toLowerCase());
+		const nodeCN = cn({
+			[styles.node]: true,
+			[styles.selectedNode]: isSelected,
+			[styles.foundNode]: isFound
+		});
 
 		if (!searchValue || foundSources.includes(value)) {
 			return (
 				<Fragment>
-					<div className={styles.node} key={value}>
+					<div className={nodeCN} key={value}>
 						{this.renderToggleIcon(source)}
 						{this.renderTitle(source)}
 					</div>
@@ -127,31 +135,13 @@ export class SourceTree extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSearchInput = () => <SearchOptionInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
+	renderSearchInput = () => <SearchSelectInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
 
 	renderTitle = (source: DataSource) => {
-		const {value: currentSource} = this.props;
-		const {searchValue} = this.state;
 		const {title, value} = source;
-		let isSelected = false;
-		let isFound = false;
-
-		if (currentSource && currentSource.value === value) {
-			isSelected = true;
-		}
-
-		if (searchValue && title.toLowerCase().includes(searchValue.toLowerCase())) {
-			isFound = true;
-		}
 
 		return (
-			<div
-				className={styles.title}
-				data-found={isFound}
-				data-selected={isSelected}
-				data-value={value}
-				onClick={this.handleClickTitle}
-			>
+			<div className={styles.title} data-value={value} onClick={this.handleClickTitle}>
 				{title}
 			</div>
 		);
@@ -161,9 +151,13 @@ export class SourceTree extends PureComponent<Props, State> {
 		const {children, value} = source;
 		const hasNotChildren = children.length === 0;
 		const isExpanded = this.isExpanded(value);
+		const iconCN = cn({
+			[styles.toggleIcon]: true,
+			[styles.invisibleToggleIcon]: hasNotChildren
+		});
 
 		return (
-			<div className={styles.toggleIcon} data-invisible={hasNotChildren} data-value={value} onClick={this.handleClickToggleIcon}>
+			<div className={iconCN} data-value={value} onClick={this.handleClickToggleIcon}>
 				{isExpanded ? <ToggleExpandedIcon /> : <ToggleCollapsedIcon />}
 			</div>
 		);

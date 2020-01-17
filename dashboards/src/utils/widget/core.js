@@ -1,6 +1,5 @@
 // @flow
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import type {OptionType} from 'react-select/src/types';
 import type {Widget} from 'store/widgets/data/types';
 
 /**
@@ -20,10 +19,10 @@ const getNumberFromName = (name: string) => Number(name.split('_').pop());
 
 /**
  * Получает значение опции свойства виджета в случае его существованиия
- * @param {OptionType | null} option - значение свойства
+ * @param {object | null} option - значение свойства
  * @returns {string | null}
  */
-const getValue = (option: OptionType | null) => option ? option.value : null;
+const getValue = (option?: Object | null) => option ? option.value : null;
 
 /**
  * Функция создает название зависимого поля

@@ -349,7 +349,7 @@ export class DataFormBuilder extends FormBuilder {
 					sources={this.getAttributeModalOptions()}
 					{...inputProps}
 				/>
-				{withDivider && this.renderDivider()}
+				{withDivider && this.renderDivider('field')}
 				{this.renderError(name)}
 			</div>
 		);

@@ -1,6 +1,4 @@
 // @flow
-import type {OptionType} from 'react-select/src/types';
-
 export type State = {
 	currentTab: string
 }
@@ -12,7 +10,7 @@ export type TabParams = {
 
 export type CreateFormData = {
 	name: string,
-	type: OptionType,
+	type: string,
 	[string]: any
 };
 

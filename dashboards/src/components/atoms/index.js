@@ -9,8 +9,9 @@ import FieldError from './FieldError';
 import FieldLabel from './FieldLabel';
 import IconButton from './IconButton';
 import Label from './Label';
+import OutsideClickDetector from './OutsideClickDetector';
 import Popover from './Popover';
-import SearchOptionInput from './SearchOptionInput';
+import SearchSelectInput from './SearchSelectInput';
 import TextArea from './TextArea';
 import Tip from './Tip';
 import Title from './Title';
@@ -28,8 +29,9 @@ export {
 	FieldLabel,
 	IconButton,
 	Label,
+	OutsideClickDetector,
 	Popover,
-	SearchOptionInput,
+	SearchSelectInput,
 	TextArea,
 	Tip,
 	Title,

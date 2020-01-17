@@ -4,13 +4,15 @@ import React, {PureComponent} from 'react';
 import {SearchIcon} from 'icons/form';
 import styles from './styles.less';
 
-export class SearchOptionInput extends PureComponent<Props> {
+export class SearchSelectInput extends PureComponent<Props> {
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {onChange} = this.props;
 		const {value} = e.currentTarget;
 
 		onChange(value);
 	};
+
+	handleClick = (e: SyntheticInputEvent<HTMLInputElement>) => e.stopPropagation();
 
 	renderIcon = () => <SearchIcon className={styles.icon} />;
 
@@ -21,6 +23,7 @@ export class SearchOptionInput extends PureComponent<Props> {
 			<input
 				className={styles.input}
 				onChange={this.handleChange}
+				onClick={this.handleClick}
 				placeholder="Поиск"
 				value={value}
 			/>
@@ -37,4 +40,4 @@ export class SearchOptionInput extends PureComponent<Props> {
 	}
 }
 
-export default SearchOptionInput;
+export default SearchSelectInput;

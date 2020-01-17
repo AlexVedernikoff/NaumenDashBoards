@@ -2,17 +2,14 @@
 import {AXIS_FIELDS, CIRCLE_FIELDS, COMBO_FIELDS, SUMMARY_FIELDS, TABLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {buildUrl, client} from 'utils/api';
 import type {BuildDataMap, ReceiveBuildDataPayload} from './types';
-import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
+import {createOrdinalName, getValue, WIDGET_VARIANTS} from 'utils/widget';
 import {BUILD_DATA_EVENTS} from './constants';
 import {DEFAULT_AGGREGATION} from 'components/molecules/AttributeRefInput/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {CHART_VARIANTS} from 'utils/chart';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import type {OptionType} from 'react-select/src/types';
 import {TYPES} from 'store/sources/attributes/constants';
 import type {Widget} from 'store/widgets/data/types';
-
-const getValue = (option: OptionType) => option && option.value;
 
 const createAxisChartData = (widget: Widget) => {
 	const {BAR_STACKED, COLUMN_STACKED} = CHART_VARIANTS;

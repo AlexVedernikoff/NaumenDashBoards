@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import AttributeRefInput, {getAggregateOptions} from 'components/molecules/AttributeRefInput';
 import cn from 'classnames';
-import {CreationPanel, SearchOptionInput} from 'components/atoms';
+import {CreationPanel, SearchSelectInput} from 'components/atoms';
 import {MeetBallIcon} from 'icons/controls';
 import type {Option, Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -160,7 +160,7 @@ export class SourceControl extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSearch = () => <SearchOptionInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
+	renderSearch = () => <SearchSelectInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
 
 	renderSearchInfo = () => {
 		const {options} = this.props;

@@ -93,7 +93,8 @@ const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: 
 		dispatch(requestLink(id));
 		try {
 			const {data} = await client.post(buildUrl('dashboardDrilldown', 'getLink', `requestContent,'${subjectUuid}'`), postData);
-			link = data;
+			link = `${window.jsApi.getAppBaseUrl()}${data.replace(/^https?:\/\/(.+?)\//, '')}`;
+
 			dispatch(
 				receiveLink({link, id})
 			);

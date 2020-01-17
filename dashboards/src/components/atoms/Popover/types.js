@@ -2,11 +2,9 @@
 import type {Node} from 'react';
 import {PLACEMENTS} from './constants';
 
-type Placement = $Keys<typeof PLACEMENTS>;
-
 export type Props = {
 	children: Node,
-	placement: Placement,
+	placement: $Keys<typeof PLACEMENTS>,
 	renderContent?: () => Node,
 	text: string
 }
