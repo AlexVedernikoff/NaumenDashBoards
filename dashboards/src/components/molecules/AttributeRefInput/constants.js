@@ -111,9 +111,9 @@ const DATETIME_GROUP_OPTIONS = [
 ];
 
 // Типы кнопок
-const AGGREGATION: 'aggregation' = 'aggregation';
-const COMPUTE: 'compute' = 'compute';
-const GROUP: 'group' = 'group';
+const AGGREGATION: 'AGGREGATION' = 'AGGREGATION';
+const COMPUTE: 'COMPUTE' = 'COMPUTE';
+const GROUP: 'GROUP' = 'GROUP';
 
 const TYPES = {
 	AGGREGATION,

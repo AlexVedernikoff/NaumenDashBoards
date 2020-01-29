@@ -9,7 +9,7 @@ import {render} from 'react-dom';
 import smoothscroll from 'smoothscroll-polyfill';
 import Startup from 'containers/Startup/Startup';
 
-top.injectJsApi(top, window);
+top.injectJsApi && top.injectJsApi(top, window);
 smoothscroll.polyfill();
 
 export const root = document.getElementById('root');

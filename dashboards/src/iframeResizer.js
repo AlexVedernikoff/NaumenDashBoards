@@ -1,3 +1,6 @@
+/* eslint-disable */
+//! Скрипт перещещен внутрь для использования в закрытых контурах
+
 /*! iFrame Resizer (iframeSizer.contentWindow.min.js) - v3.5.16 - 2018-01-21
  *  Desc: Include this file in any page being loaded into an iframe
  *        to force the iframe to resize to the content size.

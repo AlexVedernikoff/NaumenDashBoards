@@ -8,9 +8,13 @@ import ExtendButton from './ExtendButton';
 import FieldError from './FieldError';
 import FieldLabel from './FieldLabel';
 import IconButton from './IconButton';
+import InfoPanel from './InfoPanel';
 import Label from './Label';
+import MaterialDateInput from './MaterialDateInput';
+import MaterialTextInput from './MaterialTextInput';
 import OutsideClickDetector from './OutsideClickDetector';
 import Popover from './Popover';
+import RadioButton from './RadioButton';
 import SearchSelectInput from './SearchSelectInput';
 import TextArea from './TextArea';
 import Tip from './Tip';
@@ -28,9 +32,13 @@ export {
 	FieldError,
 	FieldLabel,
 	IconButton,
+	InfoPanel,
 	Label,
+	MaterialDateInput,
+	MaterialTextInput,
 	OutsideClickDetector,
 	Popover,
+	RadioButton,
 	SearchSelectInput,
 	TextArea,
 	Tip,

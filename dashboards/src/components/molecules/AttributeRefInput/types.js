@@ -4,11 +4,7 @@ import type {Node} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
 import {TYPES} from './constants';
 
-export type RefInputType =
-	| typeof TYPES.AGGREGATION
-	| typeof TYPES.COMPUTE
-	| typeof TYPES.GROUP
-;
+export type RefInputType = $Keys<typeof TYPES>;
 
 export type Props = {
 	attribute: Attribute | null,

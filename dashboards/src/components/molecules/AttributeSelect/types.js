@@ -3,8 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 
 export type Props = {
 	defaultValue: Attribute,
-	isDisabled: boolean,
-	isRemovable: boolean,
+	disabled: boolean,
 	name: string,
 	onChangeTitle: (name: string, title: string) => void,
 	onClickCreationButton: () => void,
@@ -12,6 +11,7 @@ export type Props = {
 	onSelect: (name: string, value: Attribute | null) => void,
 	options: Array<Attribute>,
 	placeholder: string,
+	removable: boolean,
 	showCreationButton: boolean,
 	value: Attribute | null
 }

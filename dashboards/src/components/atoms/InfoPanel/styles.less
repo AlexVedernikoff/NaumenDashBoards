@@ -1,0 +1,34 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		display: flex;
+		font-size: 13px;
+		justify-content: space-between;
+		padding: 16px 24px;
+	}
+
+	.danger {
+		background-color: #F8EEEE;
+		border-left: 4px solid #F2CCCC;
+
+		.confirmButton {
+			color: #C86A6A;
+		}
+	}
+
+	.warning {
+		background-color: #FEF7E4;
+		border-left: 4px solid #EAD7A1;
+
+		.confirmButton {
+			color: #D0A62F;
+		}
+	}
+
+	.closeIcon {
+		color: @dimgrey;
+		cursor: pointer;
+		margin-left: 10px;
+	}
+}

@@ -54,7 +54,7 @@ const createCircleChartData = (widget: Widget) => {
 };
 
 const createPostData = (widget: Widget, {dataKey, ...fields}: Object) => {
-	const {aggregation, source} = FIELDS;
+	const {aggregation, group, source} = FIELDS;
 	const {COUNT, PERCENT} = DEFAULT_AGGREGATION;
 	const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = CHART_VARIANTS;
 	const {order, type} = widget;
@@ -95,6 +95,11 @@ const createPostData = (widget: Widget, {dataKey, ...fields}: Object) => {
 					if (value === PERCENT && (widgetType === BAR_STACKED || widgetType === COLUMN_STACKED)) {
 						value = COUNT;
 					}
+				}
+
+				// TODO временно, до правок на бэке
+				if (field === group && value && typeof value !== 'string') {
+					value = value.data;
 				}
 
 				sourceData[field] = value;

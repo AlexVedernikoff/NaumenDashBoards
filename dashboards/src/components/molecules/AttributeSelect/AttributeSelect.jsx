@@ -10,12 +10,12 @@ import styles from './styles.less';
 
 export class AttributeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
-		isDisabled: false,
-		isRemovable: false,
 		defaultValue: {
 			title: 'Выберите значение',
 			value: ''
 		},
+		disabled: false,
+		removable: false,
 		showCreationButton: false
 	};
 
@@ -144,9 +144,9 @@ export class AttributeSelect extends PureComponent<Props, State> {
 	};
 
 	renderRemoveIcon = () => {
-		const {isRemovable} = this.props;
+		const {removable} = this.props;
 
-		if (isRemovable) {
+		if (removable) {
 			return (
 				<IconButton onClick={this.handleClickRemoveIcon}>
 					<MinusIcon />
@@ -165,10 +165,10 @@ export class AttributeSelect extends PureComponent<Props, State> {
 	};
 
 	renderSelect = () => {
-		const {isDisabled} = this.props;
+		const {disabled} = this.props;
 		const selectCN = cn({
 			[styles.select]: true,
-			[styles.disabledSelect]: isDisabled
+			[styles.disabledSelect]: disabled
 		});
 
 		return (
