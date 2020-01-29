@@ -1,3 +1,3 @@
 // @flow
-import Attribute from './Attribute';
-export default Attribute;
+import AttributeSelect from './Attribute';
+export default AttributeSelect;

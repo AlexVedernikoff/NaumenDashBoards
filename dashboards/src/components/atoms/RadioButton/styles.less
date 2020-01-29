@@ -1,0 +1,61 @@
+@import '/styles/variables';
+
+:local {
+	@radio-width: 16px;
+
+	.container {
+		cursor: pointer;
+		display: inline-block;
+		height: @radio-width;
+		position: relative;
+		user-select: none;
+
+		input {
+			cursor: pointer;
+			opacity: 0;
+			position: absolute;
+			z-index: 1;
+		}
+	}
+
+	.checkmark {
+		border: 1px solid @grey;
+		border-radius: 50%;
+		height: @radio-width;
+		left: 0;
+		position: absolute;
+		top: 0;
+		width: @radio-width;
+	}
+
+	.container:hover input ~ .checkmark {
+		border-color: @black;
+	}
+
+	.container input:checked ~ .checkmark {
+		border-color: @primary;
+	}
+
+	.checkmark:after {
+		content: '';
+		display: none;
+		position: absolute;
+	}
+
+	.container input:checked ~ .checkmark:after {
+		display: block;
+	}
+
+	.container .checkmark:after {
+		background: @primary;
+		border-radius: 50%;
+		height: 8px;
+		left: 4px;
+		top: 4px;
+		width: 8px;
+	}
+
+	.label {
+		margin-left: calc(12px + @radio-width);
+	}
+}

@@ -1,0 +1,36 @@
+@import '/styles/variables';
+
+:local {
+	@placeholder-height: 13px;
+
+	.container {
+		border-bottom: 1px solid @grey;
+		font-size: 14px;
+		padding: 4px 0;
+		position: relative;
+		width: 100%;
+	}
+
+	.placeholder {
+		color: @darkgrey;
+		font-size: @placeholder-height;
+	}
+
+	.input {
+		width: 100%;
+
+		&::placeholder {
+			.placeholder()
+		}
+
+		&:focus {
+			border-bottom-color: @info;
+		}
+	}
+
+	.placeholder {
+		.placeholder();
+		position: absolute;
+		top: -@placeholder-height;
+	}
+}

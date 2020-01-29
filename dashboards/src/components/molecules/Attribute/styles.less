@@ -1,3 +1,5 @@
+@import "/styles/variables.less";
+
 :local {
 	@combined-left-with: 80px;
 
@@ -18,5 +20,16 @@
 	.parentInput {
 		margin-bottom: 10px;
 		position: relative;
+	}
+
+	.refButton {
+		align-items: center;
+		background-color: @blue;
+		border-radius: @border-radius;
+		cursor: pointer;
+		display: flex;
+		height: 38px;
+		justify-content: center;
+		width: 100%;
 	}
 }

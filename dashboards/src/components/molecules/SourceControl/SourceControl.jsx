@@ -8,6 +8,7 @@ import type {Option, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
 import {ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
+import {TYPES} from 'components/molecules/AttributeRefInput/constants';
 import styles from './styles.less';
 
 export class SourceControl extends PureComponent<Props, State> {
@@ -249,7 +250,7 @@ export class SourceControl extends PureComponent<Props, State> {
 						onSelect={this.handleSelectAggregation}
 						name={name}
 						renderValue={this.renderAggregationValue}
-						type="aggregation"
+						type={TYPES.AGGREGATION}
 						value={aggregation}
 					/>
 					<div className={styles.rightInput} onClick={this.handleShowList}>

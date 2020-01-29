@@ -1,0 +1,35 @@
+@import '/styles/variables';
+
+:local {
+	@offset: 24px;
+
+	.attributeNameField {
+		width: 300px;
+	}
+
+	.field {
+		padding-top: @offset;
+	}
+
+	.shortField {
+		.field();
+		width: 300px;
+	}
+
+	.radioButton {
+		padding-top: 16px;
+	}
+
+	.form {
+		padding: @offset;
+	}
+
+	.customSection {
+		border-top: 1px solid @lightgrey;
+		margin-top: @offset;
+	}
+
+	.infoPanel {
+		margin-top: @offset;
+	}
+}

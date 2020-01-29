@@ -1,0 +1,111 @@
+@import '/styles/variables';
+
+:local {
+	@padding: 24px;
+
+	.nameField {
+		padding-top: @padding;
+		width: 300px;
+	}
+
+	.condition {
+		align-items: center;
+		background-color: @gainsboro;
+		display: flex;
+		padding: @padding;
+
+		&:hover {
+			.removeButton {
+				opacity: 1;
+			}
+		}
+	}
+
+	.additionalCondition {
+		padding-top: 0;
+	}
+
+	.operand {
+		display: flex;
+		flex: auto;
+		padding: 4px 0;
+	}
+
+	.fieldOffset {
+		margin-left: 24px;
+	}
+
+	.dateField {
+		.fieldOffset();
+		width: 30%;
+	}
+
+	.numberField {
+		.fieldOffset();
+		width: 60%;
+	}
+
+	.operandSelect {
+		min-width: 300px;
+	}
+
+	.andOperator {
+		border-bottom: 2px solid @lightgrey;
+		color: @info;
+		padding: 16px @padding;
+
+		span {
+			cursor: pointer;
+		}
+	}
+
+	.disabledAndOperator {
+		color: @dimgrey;
+		pointer-events: none;
+		position: relative;
+
+		.connectionLine {
+			background-color: @dimgrey;
+			content: '';
+			height: 12px;
+			left: 28px;
+			position: absolute;
+			width: 2px;
+		}
+
+		&:before {
+			.connectionLine();
+			top: 0;
+		}
+
+		&:after {
+			.connectionLine();
+			bottom: 0;
+		}
+
+		span {
+			cursor: default;
+		}
+	}
+
+	.orOperator {
+		.fieldOffset();
+		color: @info;
+		cursor: pointer;
+		font-weight: 500;
+	}
+
+	.disabledOrOperator {
+		color: @dimgrey;
+		cursor: default;
+		pointer-events: none;
+	}
+
+	.removeButton {
+		.fieldOffset();
+		align-items: center;
+		display: flex;
+		opacity: 0;
+		width: 25px;
+	}
+}

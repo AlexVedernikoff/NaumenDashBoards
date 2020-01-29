@@ -10,8 +10,8 @@ export type Props = {
 	onSelect: (name: string, value: Option) => void,
 	options: Array<Option>,
 	value: Option | null
-}
+};
 
 export type State = {
 	showMenu: boolean
-}
+};

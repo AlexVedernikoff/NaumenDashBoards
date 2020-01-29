@@ -30,3 +30,4 @@ module.name_mapper='^icons$' -> '<PROJECT_ROOT>/src/icons/index.js'
 
 module.name_mapper='^images\/\(.*\)$' -> '<PROJECT_ROOT>/src/images/\1'
 module.name_mapper='^styles\/\(.*\)$' -> '<PROJECT_ROOT>/src/styles/\1'
+

@@ -2,7 +2,7 @@
 type Messages = {
 	noOptions?: string,
 	notFound?: string
-}
+};
 
 export type Props = {
 	getOptionLabel?: (option: Object) => string,
@@ -12,4 +12,4 @@ export type Props = {
 	onSelect: (option: Object) => void,
 	options: Array<Object>,
 	value: Object | null
-}
+};

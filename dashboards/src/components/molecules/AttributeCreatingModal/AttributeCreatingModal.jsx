@@ -1,6 +1,6 @@
 // @flow
-import {Button} from 'components/atoms';
-import {ClearSquareIcon, CloseIcon, CrossIcon} from 'icons/form';
+import {Button, InfoPanel} from 'components/atoms';
+import {ClearSquareIcon, CrossIcon} from 'icons/form';
 import {ConstantControl, Modal, OperatorControl, SourceControl} from 'components/molecules';
 import type {Control, Props, State} from './types';
 import {getAggregationLabel} from 'components/molecules/AttributeRefInput/helpers';
@@ -333,16 +333,15 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	renderRemoveInfo = () => {
 		const {showRemoveInfo} = this.state;
+		const text = 'Вычислимый атрибут будет удален без возможности восстановления. Подтвердите операцию';
 
 		if (showRemoveInfo) {
 			return (
-				<div className={styles.infoPanel}>
-					<div><b>Внимание!</b> Вычислимый атрибут будет удален без возможности восстановления. Подтвердите операцию.</div>
-					<div>
-						<button className={styles.confirmButton} onClick={this.handleClickConfirmRemoveButton}>Подтвердить</button>
-						<CloseIcon className={styles.closeIcon} onClick={this.hideRemoveInfo}/>
-					</div>
-				</div>
+				<InfoPanel
+					onClose={this.hideRemoveInfo}
+					onConfirm={this.handleClickConfirmRemoveButton}
+					text={text}
+				/>
 			);
 		}
 	};
