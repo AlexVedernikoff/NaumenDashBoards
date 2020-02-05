@@ -31,6 +31,7 @@ class DashboardSettings
 {
     AutoUpdate autoUpdate
     Collection<String> widgetIds = []
+    Collection<String> customGroupIds = []
 }
 
 /**
@@ -68,50 +69,6 @@ class AutoUpdate
     }
 }
 
-abstract class Request
-{
-    String classFqn
-    String contentCode
-}
-
-abstract class EditRequest extends Request
-{
-    Boolean editable
-}
-
-/**
- * Модель тело запроса - создание настроек виджета
- */
-class RequestCreateWidgetSettings extends EditRequest
-{
-    Map<String, Object> widgetSettings
-}
-
-/**
- * Модель тело запроса - редактирование настроек виджета
- */
-class RequestEditWidgetSettings extends EditRequest
-{
-    String widgetKey
-    Map<String, Object> widgetSettings
-}
-
-/**
- * Модель тело запроса - редактирование настроек виджетов
- */
-class RequestEditWidgetsSettings extends EditRequest
-{
-    Collection<WidgetSettings> layoutsSettings
-}
-
-/**
- * Модель тело запроса - удаление настроек виджетов
- */
-class RequestDeleteWidgetSettings extends EditRequest
-{
-    String widgetId
-}
-
 /**
  * Модель тело ответа - настроек виджета
  */
@@ -126,29 +83,40 @@ class WidgetSettings
 //region REST-МЕТОДЫ
 /**
  * Получение настроек дашборда и виджетов
- * @param classFqn    - код типа куда выведено встроенное приложение
- * @param contentCode - код контента встроенного приложения
+ * @param requestContent - параметры запроса (classFqn, contentCode, isPersonal)
  * @param user        - БО текущего пользователя
  * @return настройки автообновления вместе с настройками виджетов
  */
-String getSettings(String classFqn, String contentCode, def user)
+String getSettings(Map<String, Object> requestContent, def user)
 {
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    Boolean isPersonal = requestContent.isPersonal
+    if(isPersonal && !user?.login)
+    {
+        throw new Exception("Login is null, not found personal dashboard")
+    }
     Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
-    DashboardSettings dashboardSettings = getSettingByLogin(user?.login as String) ?: getSettingByLogin(null)
+    DashboardSettings dashboardSettings = isPersonal
+            ? getSettingByLogin(user?.login as String)
+            : getSettingByLogin(null)
     def result = [
             autoUpdate: dashboardSettings?.autoUpdate,
             //TODO: из-за архитектурной особенности возможны ситуации при которых настройки виджета пропадут.
             // В таких случаях просто пропускаем пустые настройки
             // ключи виджетов с пустыми настройками будут удалены после сброса настроек.
             // Пользователь этого даже не заметит
-            widgets   : dashboardSettings?.widgetIds?.findResults(this.&getWidgetSettings) ?: []
+            widgets      : dashboardSettings?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
+            customGroups : dashboardSettings?.customGroupIds?.collectEntries {
+                key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+            }
     ]
     return toJson(result)
 }
 
 /**
  * Метод обновления состояния автообновления
- * @param requestContent - тело запроса
+ * @param requestContent - тело запроса (classFqn, contentCode, autoUpdate)
  * @param user           - БО текущего пользователя
  * @return true|false
  */
@@ -169,7 +137,7 @@ String saveAutoUpdateSettings(Map<String, Object> requestContent, def user) {
 
 /**
  * Метод включение автообновлений дашборда
- * @param requestContent - тео запроса
+ * @param requestContent - параметры запроса (classFqn, contentCode, interval)
  * @param user           - БО текущего пользователя
  * @return true|false
  */
@@ -191,7 +159,7 @@ String enableAutoUpdate(Map<String, Object> requestContent, def user)
 
 /**
  * Метод отключения автообновлений дашборда
- * @param requestContent - тело запроса
+ * @param requestContent - параметры запроса (classFqn, contentCode)
  * @param user           - БО текущего пользователя
  * @return true|false
  */
@@ -209,162 +177,66 @@ String disableAutoUpdate(Map<String, Object> requestContent, def user)
 }
 
 /**
- * Создание виджета в дашборде по умолчанию
- * @param requestContent json в формате RequestCreateWidgetSettings
+ * Метод создания персонального дашборда.
+ * @param requestContent - тело запроса (editable, classFqn, contentCode)
+ * @param user - пользователь
+ * @return true|false
+ */
+String createPersonalDashboard(Map<String, Object> requestContent, def user)
+{
+    checkRightsOnEditDashboard(requestContent.editable)
+    if(!user?.login)
+    {
+        throw new Exception("Login or user should not be null")
+    }
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
+    String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+    def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
+    return saveJsonSettings(personalDashboardKey, toJson(settings))
+}
+
+/**
+ * Создание виджета в дашборде
+ * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
  * @param user БО текущего пользователя
  * @return ключ созданного виджета
  */
-String createDefaultWidgetSettings(Map<String, Object> requestContent, def user)
+String createWidget(Map<String, Object> requestContent, def user)
 {
-    checkRightsOnDashboard(user, "create")
-    def request = requestContent as RequestCreateWidgetSettings
-    String defaultDashboardKey = generateDashboardKey(request.classFqn, request.contentCode)
-    DashboardSettings dashboardSettings = getDashboardSetting(defaultDashboardKey) ?: new DashboardSettings()
-    def generateKey = this.&generateWidgetKey.curry(
-            dashboardSettings.widgetIds,
-            request.classFqn,
-            request.contentCode,
-            user?.login as String)
-    return saveWidgetSettings(request.widgetSettings, generateKey).with { key ->
-        dashboardSettings.widgetIds += key
-        saveJsonSettings(defaultDashboardKey, toJson(dashboardSettings))
-        toJson(key)
-    }
-}
-
-/**
- * Массовое редактирование виджетов в дашборде по умолчанию
- * @param requestContent json в формате RequestEditWidgetsSettings
- * @param user БО текущего пользователя
- * @return список ключей отредактированнных виджетов
- */
-String bulkEditDefaultWidget(Map<String, Object> requestContent, def user)
-{
-    def request = requestContent as RequestEditWidgetsSettings
-    return request.layoutsSettings.collect {
-        def widgetSettings = setLayoutInSettings(it)
-        Map<String, Object> widgetRequest = [
-                classFqn      : request.classFqn,
-                contentCode   : request.contentCode,
-                widgetKey     : it.key,
-                widgetSettings: widgetSettings]
-        editDefaultWidget(widgetRequest, user)
-    }
-}
-
-/**
- * Массовое редактирование виджетов в дашборде
- * @param requestContent json в формате RequestEditWidgetsSettings
- * @param user БО текущего пользователя
- * @return список ключей отредактированнных виджетов
- */
-String bulkEditWidget(Map<String, Object> requestContent, def user)
-{
-    def request = requestContent as RequestEditWidgetsSettings
-    return request.layoutsSettings.collect {
-        def widgetSettings = setLayoutInSettings(it)
-        Map<String, Object> widgetRequest = [
-                editable      : true,
-                classFqn      : request.classFqn,
-                contentCode   : request.contentCode,
-                widgetKey     : it.key,
-                widgetSettings: widgetSettings]
-        editPersonalWidgetSettings(widgetRequest, user)
-    }
-}
-
-/**
- * Редактирование виджета в дашборде по умолчанию
- * @param requestContent json в формате RequestEditWidgetSettings
- * @param user БО текущего пользователя
- * @return ключ отредактированного виджета
- */
-String editDefaultWidget(Map<String, Object> requestContent, def user)
-{
-    checkRightsOnDashboard(user, "edit")
-    def request = requestContent as RequestEditWidgetSettings
-    String widgetKey = request.widgetKey
-    if (user && isPersonalWidget(request.widgetKey, user))
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    def widget = requestContent.widget
+    DashboardSettings dashboardSettings = null
+    String dashboardKey = null
+    if(requestContent.isPersonal)
     {
-        widgetKey -= "_${user.login}"
-        def closureReplaceWidgetKey = { String login ->
-            String dashboardKey = generateDashboardKey(
-                    request.classFqn,
-                    request.contentCode,
-                    login)
-            DashboardSettings dashboardSettings = getDashboardSetting(dashboardKey)
-            dashboardSettings.widgetIds.remove(request.widgetKey)
-            if (!(widgetKey in dashboardSettings.widgetIds))
-            {
-                dashboardSettings.widgetIds << widgetKey
-            }
-            saveJsonSettings(dashboardKey, toJson(dashboardSettings))
+        checkRightsOnEditDashboard(requestContent.editable)
+        if(!user?.login)
+        {
+            throw new Exception("Login or user should not be null by personal widget")
         }
-        closureReplaceWidgetKey(user.login as String)
-        closureReplaceWidgetKey(null)
-        deleteJsonSettings(request.widgetKey)
-    }
-    def widgetSettings = setUuidInSettings(request.widgetSettings, widgetKey)
-    saveJsonSettings(widgetKey, toJson(widgetSettings))
-    return toJson(widgetKey)
-}
-
-/**
- * Редактирование настроек виджета
- * @param requestContent - json в формате RequestEditWidgetSettings
- * @param user - БО текущего пользователя или null если сохранение по умолчанию
- * @return ключ отредактированного виджета
- */
-String editPersonalWidgetSettings(Map<String, Object> requestContent, def user)
-{
-    def request = requestContent as RequestEditWidgetSettings
-    checkRightsOnEditDashboard(request.editable)
-    Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(request.classFqn, request.contentCode)
-    if (user && isPersonalWidget(request.widgetKey, user))
-    {
-        return saveWidgetSettings(request.widgetSettings) { request.widgetKey }
+        Closure createDashboardKeyFromLogin = this.&generateDashboardKey.curry(classFqn, contentCode)
+        dashboardKey = createDashboardKeyFromLogin(user.login as String)
+        dashboardSettings = getDashboardSetting(dashboardKey)
+                ?: getDashboardSetting(createDashboardKeyFromLogin(null))
     }
     else
     {
-        DashboardSettings dashboardSettings = getSettingByLogin(user.login as String) ?: getSettingByLogin(null)
-        String personalDashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login as String)
-        def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgetIds,
-                request.classFqn,
-                request.contentCode,
-                user.login as String,
-                request.widgetKey)
-        return saveWidgetSettings(request.widgetSettings, generateKey).with { key ->
-            dashboardSettings.widgetIds = dashboardSettings.widgetIds - request.widgetKey + key
-            if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings)))
-            {
-                throw new Exception("Widget $key not saved in dashboard $personalDashboardKey")
-            }
-            toJson(key)
-        }
+        checkRightsOnDashboard(user, "create")
+        dashboardKey = generateDashboardKey(classFqn, contentCode)
+        dashboardSettings = getDashboardSetting(dashboardKey)
+                ?: new DashboardSettings()
+
     }
-}
-
-/**
- * Сохранение настроек виджета
- * @param requestContent - json в формате RequestCreateWidgetSettings
- * @param user           - БО текущего пользователя или null если сохранение по умолчанию
- * @return ключ созданного виджета
- */
-String createPersonalWidgetSettings(Map<String, Object> requestContent, def user)
-{
-    def request = requestContent as RequestCreateWidgetSettings
-    checkRightsOnEditDashboard(request.editable)
-    Closure createDashboardKeyFromLogin = this.&generateDashboardKey.curry(request.classFqn, request.contentCode)
-    String dashboardKey = createDashboardKeyFromLogin(user.login as String)
-    def dashboardSettings = getDashboardSetting(dashboardKey)
-            ?: getDashboardSetting(createDashboardKeyFromLogin(null))
-
     def generateKey = this.&generateWidgetKey.curry(
             dashboardSettings.widgetIds,
-            request.classFqn,
-            request.contentCode,
+            classFqn,
+            contentCode,
             user?.login as String)
-    return saveWidgetSettings(request.widgetSettings, generateKey).with { key ->
+
+    return saveWidgetSettings(widget, generateKey).with { key ->
         dashboardSettings.widgetIds += key
         saveJsonSettings(dashboardKey, toJson(dashboardSettings))
         toJson(key)
@@ -372,96 +244,114 @@ String createPersonalWidgetSettings(Map<String, Object> requestContent, def user
 }
 
 /**
- * Метод удаления персонального виджета
- * @param requestContent - тело запроса
- * @param user           - пользователь
- * @return успех | провал
+ * Редактирование виджета в дашборде
+ * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
+ * @param user БО текущего пользователя
+ * @return ключ отредактированного виджета
  */
-String deletePersonalWidget(Map<String, Object> requestContent, def user)
+String editWidget(Map<String, Object> requestContent, def user)
 {
-    RequestDeleteWidgetSettings request = requestContent as RequestDeleteWidgetSettings
-
-    String personalDashboardKey = generateDashboardKey(request.classFqn, request.contentCode, user.login as String)
-    String defaultDashboardKey = generateDashboardKey(request.classFqn, request.contentCode)
-
-    if (checkUserOnMasterDashboard(user) || request.editable)
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    def widget = requestContent.widget
+    String widgetKey = widget.id
+    if(requestContent.isPersonal)
     {
-        if (isPersonalWidget(request.widgetId, user))
+        checkRightsOnEditDashboard(requestContent.editable)
+        Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
+        if (user && isPersonalWidget(widgetKey, user))
         {
-            Closure<String> removeWidgetFromPersonalDashboard = this.&removeWidgetFromDashboard.curry(personalDashboardKey)
-            return toJson(removeWidgetSettings(request.widgetId).with(removeWidgetFromPersonalDashboard) as boolean)
+            return saveWidgetSettings(widget) { widgetKey }
         }
         else
         {
-            def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-            settings.widgetIds -= request.widgetId
-            def res = saveJsonSettings(personalDashboardKey, toJson(settings))
-            if (!res)
-            {
-                throw new Exception("Widget ${request.widgetId} not removed from dashboard: $personalDashboardKey!")
+            DashboardSettings dashboardSettings = getSettingByLogin(user.login as String) ?: getSettingByLogin(null)
+            String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
+            def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgetIds,
+                    classFqn,
+                    contentCode,
+                    user.login as String,
+                    widgetKey)
+            return saveWidgetSettings(widget, generateKey).with { key ->
+                dashboardSettings.widgetIds = dashboardSettings.widgetIds - widgetKey + key
+                if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings)))
+                {
+                    throw new Exception("Widget $key not saved in dashboard $personalDashboardKey")
+                }
+                toJson(key)
             }
-            return toJson(res)
         }
     }
     else
     {
-        throw new Exception("No rights on remove widget")
+        checkRightsOnDashboard(user, "edit")
+        if (user && isPersonalWidget(widgetKey, user))
+        {
+            widgetKey -= "_${user.login}"
+            def closureReplaceWidgetKey = { String login ->
+                String dashboardKey = generateDashboardKey(
+                        classFqn,
+                        contentCode,
+                        login)
+                DashboardSettings dashboardSettings = getDashboardSetting(dashboardKey)
+                dashboardSettings.widgetIds.remove(widgetKey)
+                if (!(widgetKey in dashboardSettings.widgetIds))
+                {
+                    dashboardSettings.widgetIds << widgetKey
+                }
+                saveJsonSettings(dashboardKey, toJson(dashboardSettings))
+            }
+            closureReplaceWidgetKey(user.login as String)
+            closureReplaceWidgetKey(null)
+            deleteJsonSettings(widgetKey)
+        }
+        def widgetDb = setUuidInSettings(widget, widgetKey)
+        saveJsonSettings(widgetKey, toJson(widgetDb))
+        return toJson(widgetKey)
     }
 }
 
 /**
- * Метод удаления виджета по умолчанию
- * @param requestContent - тело запроса
+ * Массовое редактирование виджетов в дашборде
+ * @param requestContent - тело запроса ()
+ * @param user БО текущего пользователя
+ * @return список ключей отредактированнных виджетов
+ */
+String editLayouts(Map<String, Object> requestContent, def user)
+{
+    def  layouts = requestContent.layouts
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    return layouts.collect {
+        def widget = setLayoutInSettings(it)
+        Map<String, Object> widgetRequest = [
+                editable      : true,
+                classFqn      : classFqn,
+                contentCode   : contentCode,
+                widget        : widget,
+                isPersonal    : requestContent.isPersonal]
+        editWidget(widgetRequest, user)
+    }
+}
+
+/**
+ * Метод удаления виджета
+ * @param requestContent - тело запроса (classFqn, contentCode, widgetId, editable, isPersonal)
  * @param user           - пользователь
  * @return успех | провал
  */
 String deleteWidget(Map<String, Object> requestContent, def user)
 {
-    def request = requestContent as RequestDeleteWidgetSettings
-    def dashboardKeyByLogin = this.&generateDashboardKey.curry(request.classFqn, request.contentCode)
-    if (!user)
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    String widgetId = requestContent.widgetId
+    if(requestContent.isPersonal)
     {
-        // значит это супер пользователь!
-        // нет персональных виджетов и персональных дашбордов
-        Closure<String> removeWidgetFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(dashboardKeyByLogin())
-        def resultOfRemoving = removeWidgetSettings(request.widgetId).with(removeWidgetFromDefaultDashboard) as boolean
-        return toJson(resultOfRemoving)
-    }
-    else if (checkUserOnMasterDashboard(user))
-    {
-        if (isPersonalWidget(request.widgetId, user))
-        {
-            String personalDashboardKey = dashboardKeyByLogin(user.login as String)
-            String defaultWidget = request.widgetId - "_${user.login}"
-            Closure<String> removeFromPersonalDashboard = this.&removeWidgetFromDashboard.curry(personalDashboardKey)
-            def resultOfRemoving = removeWidgetSettings(request.widgetId).with(removeFromPersonalDashboard) as boolean
-            if (findJsonSettings(defaultWidget))
-            {
-                //По воле случая может получиться так, что виджета по умолчанию уже нет(например удалён другим мастером)
-                Closure<String> removeFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(dashboardKeyByLogin())
-                removeWidgetSettings(defaultWidget).with(removeFromDefaultDashboard)
-            }
-            else
-            {
-                logger.warn("default widget $defaultWidget not exist")
-            }
-            return toJson(resultOfRemoving)
-        }
-        else
-        {
-            def resultOfRemoving = removeWidgetSettings(request.widgetId).with { String widgetKey ->
-                // По возможности удалить и персональный виджет, если он есть
-                String personalDashboardKey = dashboardKeyByLogin(user.login as String)
-                loadJsonSettings(personalDashboardKey) // проверка на существование персонального дашборда
-                        ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetKey) }
-                removeWidgetFromDashboard(dashboardKeyByLogin(), widgetKey) as boolean
-            }
-            return toJson(resultOfRemoving)
-        }
+        return deletePersonalWidget(classFqn, contentCode, widgetId, requestContent.editable as Boolean, user)
     }
     else
     {
-        throw new Exception("No rights on remove widget")
+        return deleteDefaultWidget(classFqn, contentCode, widgetId, user)
     }
 }
 
@@ -472,7 +362,7 @@ String deleteWidget(Map<String, Object> requestContent, def user)
  * @param user        - БО текущего пользователя
  * @return статус сообщение
  */
-String resetPersonalDashboard(String classFqn, String contentCode, def user)
+String deletePersonalDashboard(String classFqn, String contentCode, def user)
 {
     //TODO: добавить локализацию в дальнейшем
     if (!user) throw new Exception([message: "Super-user can't reset dashboard settings!"])
@@ -495,24 +385,18 @@ String resetPersonalDashboard(String classFqn, String contentCode, def user)
 }
 
 /**
- * Есть ли группа мастер дашбордов у пользователя
+ * Получение данных о пользователе для дашборда
+ * @param requestContent - параметры запроса (classFqn, contentCode)
  * @param user БО текущего пользователя
- * @return наличие | отсутствие группы
+ * @return параметры пользователя
  */
-String getUserRole(def user)
+String getUserData(Map<String, Object> requestContent, def user)
 {
-    if (!user)
-    {
-        return "super"
-    }
-    else if (checkUserOnMasterDashboard(user))
-    {
-        return "master"
-    }
-    else
-    {
-        return null
-    }
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    String groupUser = getUserGroup(user)
+    Boolean hasPersonalDashboard = user && getDashboardSetting(classFqn, contentCode, user.login as String)
+    return toJson([groupUser: groupUser, hasPersonalDashboard: hasPersonalDashboard])
 }
 //endregion
 
@@ -798,5 +682,127 @@ private def fromJson(String json)
 {
     JsonSlurper jsonSlurper = new JsonSlurper()
     return jsonSlurper.parseText(json)
+}
+
+/**
+ * Метод получения группы пользователя
+ * @param user - пользователь
+ * @return группа
+ */
+private String getUserGroup(user)
+{
+    if (!user)
+    {
+        return "SUPER"
+    }
+    else if (checkUserOnMasterDashboard(user))
+    {
+        return "MASTER"
+    }
+    else
+    {
+        return "REGULAR"
+    }
+}
+
+/**
+ * Метод удаления персонального виджета
+ * @param classFqn - код типа куда выведено встроенное приложение
+ * @param contentCode - код контента встроенного приложения
+ * @param widgetId - код виджета
+ * @param editable - параметр редактируемости
+ * @param user - пользователь
+ * @return успех | провал
+ */
+private String deletePersonalWidget(String classFqn,
+                                    String contentCode,
+                                    String widgetId,
+                                    Boolean editable,
+                                    def user)
+{
+    if (!(checkUserOnMasterDashboard(user) || editable))
+    {
+        throw new Exception("No rights on remove widget")
+    }
+
+    String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
+    String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+
+    if (isPersonalWidget(widgetId, user))
+    {
+        Closure<String> removeWidgetFromPersonalDashboard = this.&removeWidgetFromDashboard.curry(personalDashboardKey)
+        return toJson(removeWidgetSettings(widgetId).with(removeWidgetFromPersonalDashboard) as boolean)
+    }
+    else
+    {
+        def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
+        settings.widgetIds -= widgetId
+        def res = saveJsonSettings(personalDashboardKey, toJson(settings))
+        if (!res)
+        {
+            throw new Exception("Widget ${widgetId} not removed from dashboard: $personalDashboardKey!")
+        }
+        return toJson(res)
+    }
+}
+
+/**
+ * Метод удаления виджета по умолчанию
+ * @param classFqn - код типа куда выведено встроенное приложение
+ * @param contentCode - код контента встроенного приложения
+ * @param widgetId - код виджета
+ * @param user - пользователь
+ * @return успех | провал
+ */
+private String deleteDefaultWidget(String classFqn,
+                                   String contentCode,
+                                   String widgetId,
+                                   def user)
+{
+    def dashboardKeyByLogin = this.&generateDashboardKey.curry(classFqn, contentCode)
+    if (!user)
+    {
+        // значит это супер пользователь! нет персональных виджетов и персональных дашбордов
+        Closure<String> removeWidgetFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(dashboardKeyByLogin())
+        def resultOfRemoving = removeWidgetSettings(widgetId).with(removeWidgetFromDefaultDashboard) as boolean
+        return toJson(resultOfRemoving)
+    }
+    else
+    {
+        if(!checkUserOnMasterDashboard(user))
+        {
+            throw new Exception("No rights on remove widget")
+        }
+
+        if (isPersonalWidget(widgetId, user))
+        {
+            String personalDashboardKey = dashboardKeyByLogin(user.login as String)
+            String defaultWidget = widgetId - "_${user.login}"
+            Closure<String> removeFromPersonalDashboard = this.&removeWidgetFromDashboard.curry(personalDashboardKey)
+            def resultOfRemoving = removeWidgetSettings(widgetId).with(removeFromPersonalDashboard) as boolean
+            if (findJsonSettings(defaultWidget))
+            {
+                //По воле случая может получиться так, что виджета по умолчанию уже нет(например удалён другим мастером)
+                Closure<String> removeFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(dashboardKeyByLogin())
+                removeWidgetSettings(defaultWidget).with(removeFromDefaultDashboard)
+            }
+            else
+            {
+                logger.warn("default widget $defaultWidget not exist")
+            }
+            return toJson(resultOfRemoving)
+        }
+        else
+        {
+            def resultOfRemoving = removeWidgetSettings(widgetId).with { String widgetKey ->
+                // По возможности удалить и персональный виджет, если он есть
+                String personalDashboardKey = dashboardKeyByLogin(user.login as String)
+                loadJsonSettings(personalDashboardKey) // проверка на существование персонального дашборда
+                        ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetKey) }
+                removeWidgetFromDashboard(dashboardKeyByLogin(), widgetKey) as boolean
+            }
+            return toJson(resultOfRemoving)
+        }
+    }
 }
 //endregion
