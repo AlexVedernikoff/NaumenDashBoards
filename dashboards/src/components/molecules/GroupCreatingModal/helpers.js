@@ -1,34 +1,20 @@
 // @flow
-import {OPERAND_TYPES} from 'store/customGroups/constants';
-import uuid from 'tiny-uuid';
+import {CONDITION_TYPES} from 'store/customGroups/constants';
 
-const createNewSubGroup = (id: string) => {
-	const conditionId = uuid();
+const createNewSubGroup = () => ({
+	data: [createNewAndCondition()],
+	name: ''
+});
 
-	return ({
-		conditions: {
-			first: conditionId,
-			map: {
-				[conditionId]: createNewCondition(conditionId)
-			}
-		},
-		id,
-		name: '',
-		next: ''
-	});
-};
+const createNewAndCondition = () => ([createNewOrCondition()]);
 
-const createNewCondition = (id: string, next: string = '') => ({
-	id,
-	next,
-	operand: {
-		type: OPERAND_TYPES.BETWEEN,
-		data: null
-	},
-	operator: null
+const createNewOrCondition = () => ({
+	data: null,
+	type: CONDITION_TYPES.BETWEEN
 });
 
 export {
-	createNewSubGroup,
-	createNewCondition
+	createNewAndCondition,
+	createNewOrCondition,
+	createNewSubGroup
 };

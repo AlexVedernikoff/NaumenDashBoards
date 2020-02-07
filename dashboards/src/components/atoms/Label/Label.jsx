@@ -16,17 +16,6 @@ export class Label extends Component<Props> {
 		icon: ''
 	};
 
-	renderIcon = (): Node => {
-		const {icon, onClick} = this.props;
-		const Icon = icons[icon];
-
-		return (
-			<div className={styles.icon}>
-				<Icon onClick={onClick}/>
-			</div>
-		);
-	};
-
 	renderContent = (): Node => {
 		const {className, icon, name} = this.props;
 		const classProps: string = classnames(
@@ -38,6 +27,17 @@ export class Label extends Component<Props> {
 			<div className={classProps}>
 				<p className={styles.name}>{name}</p>
 				{icon && this.renderIcon()}
+			</div>
+		);
+	};
+
+	renderIcon = (): Node => {
+		const {icon, onClick} = this.props;
+		const Icon = icons[icon];
+
+		return (
+			<div className={styles.icon}>
+				<Icon onClick={onClick} />
 			</div>
 		);
 	};

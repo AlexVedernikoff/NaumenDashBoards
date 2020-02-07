@@ -6,6 +6,14 @@ import withForm from 'components/organisms/WidgetFormPanel/withForm';
 import type {WrappedProps} from 'components/organisms/WidgetFormPanel/types';
 
 export class Footer extends Component<WrappedProps> {
+	handleSave = () => {
+		this.handleSubmit(false);
+	};
+
+	handleSaveAsDefault = () => {
+		this.handleSubmit(true);
+	};
+
 	handleSubmit = async (asDefault: boolean) => {
 		const {setFieldValue, submitForm} = this.props;
 
@@ -14,14 +22,6 @@ export class Footer extends Component<WrappedProps> {
 		await setFieldValue('shouldScrollToError', true);
 
 		submitForm();
-	};
-
-	handleSave = () => {
-		this.handleSubmit(false);
-	};
-
-	handleSaveAsDefault = () => {
-		this.handleSubmit(true);
 	};
 
 	renderButtons = () => (
@@ -47,7 +47,7 @@ export class Footer extends Component<WrappedProps> {
 		if (role) {
 			return (
 				<div className={styles.masterButton}>
-					<Button variant="simple" onClick={this.handleSaveAsDefault}>
+					<Button onClick={this.handleSaveAsDefault} variant="simple">
 						Сохранить по умолчанию
 					</Button>
 				</div>

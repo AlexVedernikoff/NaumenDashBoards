@@ -1,14 +1,14 @@
 // @flow
 import {Chart, Summary, Table} from 'components/molecules';
 import type {Props} from './types';
-import React, {Fragment, Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import {WIDGET_VARIANTS} from 'utils/widget';
 
 export class Diagram extends Component<Props> {
 	shouldComponentUpdate (nextProps: Props) {
-		const {buildData: {updateDate: nextUpdateDate, loading: nextLoading}} = nextProps;
-		const {buildData: {updateDate: prevUpdateDate, loading: prevLoading}} = this.props;
+		const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}} = nextProps;
+		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}} = this.props;
 
 		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading;
 	}

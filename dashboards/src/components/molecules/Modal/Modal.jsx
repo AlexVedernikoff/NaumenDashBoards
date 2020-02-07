@@ -45,6 +45,16 @@ export class Modal extends Component<Props> {
 		);
 	};
 
+	renderModal = () => (
+		<div className={styles.modal}>
+			<div className={this.getContainerCN()} onClick={this.prevent}>
+				{this.renderModalHeader()}
+				{this.renderModalBody()}
+				{this.renderModalFooter()}
+			</div>
+		</div>
+	);
+
 	renderModalBody = () => {
 		const {children} = this.props;
 
@@ -64,16 +74,6 @@ export class Modal extends Component<Props> {
 	};
 
 	renderModalHeader = () => <div className={styles.header}>{this.props.header}</div>;
-
-	renderModal = () => (
-		<div className={styles.modal} onClick={this.props.onClose}>
-			<div className={this.getContainerCN()} onClick={this.prevent}>
-				{this.renderModalHeader()}
-				{this.renderModalBody()}
-				{this.renderModalFooter()}
-			</div>
-		</div>
-	);
 
 	render () {
 		return root ? createPortal(this.renderModal(), root) : null;

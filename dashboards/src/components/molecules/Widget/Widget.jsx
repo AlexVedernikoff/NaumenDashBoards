@@ -179,7 +179,7 @@ export class Widget extends PureComponent<Props, State> {
 	);
 
 	renderLegacyDrillDownButton = () => (
-		<IconButton tip="Перейти" onClick={this.handleClickDrillDownButton()}>
+		<IconButton onClick={this.handleClickDrillDownButton()} tip="Перейти">
 			<UnionIcon />
 		</IconButton>
 	);

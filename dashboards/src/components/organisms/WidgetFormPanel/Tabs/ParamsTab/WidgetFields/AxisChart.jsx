@@ -9,6 +9,41 @@ import withForm from 'components/organisms/WidgetFormPanel/withForm';
 export class AxisChart extends DataFormBuilder {
 	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
 
+	renderFieldsByType = () => {
+		const {type} = this.props.values;
+		const {BAR, BAR_STACKED} = CHART_VARIANTS;
+
+		return [BAR, BAR_STACKED].includes(type) ? this.renderVerticalInputs() : this.renderHorizontalInputs();
+	};
+
+	renderHorizontalInputs = () => {
+		const {breakdown, xAxis, yAxis} = FIELDS;
+
+		return (
+			<Fragment>
+				{this.renderLabel('Ось Х')}
+				{this.renderByOrder(this.renderXAxis(true), xAxis, false)}
+				{this.renderLabel('Ось Y')}
+				{this.renderByOrder(this.renderYAxis(true), yAxis)}
+				{this.renderByOrder(this.renderBreakdown, breakdown)}
+			</Fragment>
+		);
+	};
+
+	renderVerticalInputs = () => {
+		const {breakdown, xAxis, yAxis} = FIELDS;
+
+		return (
+			<Fragment>
+				{this.renderLabel('Ось X')}
+				{this.renderByOrder(this.renderYAxis(true), yAxis)}
+				{this.renderByOrder(this.renderBreakdown, breakdown)}
+				{this.renderLabel('Ось Y')}
+				{this.renderByOrder(this.renderXAxis(false), xAxis)}
+			</Fragment>
+		);
+	};
+
 	renderXAxis = (withDivider: boolean = true) => (name: string) => {
 		const {values} = this.props;
 		const groupName = createRefName(name, FIELDS.group);
@@ -48,41 +83,6 @@ export class AxisChart extends DataFormBuilder {
 		};
 
 		return this.renderAttribute(props);
-	};
-
-	renderVerticalInputs = () => {
-		const {breakdown, xAxis, yAxis} = FIELDS;
-
-		return (
-			<Fragment>
-				{this.renderLabel('Ось X')}
-				{this.renderByOrder(this.renderYAxis(true), yAxis)}
-				{this.renderByOrder(this.renderBreakdown, breakdown)}
-				{this.renderLabel('Ось Y')}
-				{this.renderByOrder(this.renderXAxis(false), xAxis)}
-			</Fragment>
-		);
-	};
-
-	renderHorizontalInputs = () => {
-		const {breakdown, xAxis, yAxis} = FIELDS;
-
-		return (
-			<Fragment>
-				{this.renderLabel('Ось Х')}
-				{this.renderByOrder(this.renderXAxis(true), xAxis, false)}
-				{this.renderLabel('Ось Y')}
-				{this.renderByOrder(this.renderYAxis(true), yAxis)}
-				{this.renderByOrder(this.renderBreakdown, breakdown)}
-			</Fragment>
-		);
-	};
-
-	renderFieldsByType = () => {
-		const {type} = this.props.values;
-		const {BAR, BAR_STACKED} = CHART_VARIANTS;
-
-		return [BAR, BAR_STACKED].includes(type) ? this.renderVerticalInputs() : this.renderHorizontalInputs();
 	};
 
 	render () {

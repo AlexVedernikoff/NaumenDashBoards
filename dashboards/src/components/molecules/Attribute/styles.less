@@ -3,33 +3,22 @@
 :local {
 	@combined-left-with: 80px;
 
-	.combinedInputs {
+	.combinedContainer {
 		display: flex;
 		flex-direction: row;
 		position: relative;
 	}
 
-	.combinedLeftInput {
+	.combinedRef {
 		width: @combined-left-with;
 	}
 
-	.combinedRightInput {
+	.combinedAttribute {
 		width: calc(100% - @combined-left-with);
 	}
 
 	.parentInput {
 		margin-bottom: 10px;
 		position: relative;
-	}
-
-	.refButton {
-		align-items: center;
-		background-color: @blue;
-		border-radius: @border-radius;
-		cursor: pointer;
-		display: flex;
-		height: 38px;
-		justify-content: center;
-		width: 100%;
 	}
 }

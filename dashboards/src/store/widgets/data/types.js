@@ -78,12 +78,12 @@ export type RequestWidgetSave = {
 
 export type RecordWidgetDeleteError = {
 	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
-}
+};
 
 export type SetWidgets = {
 	type: typeof WIDGETS_EVENTS.SET_WIDGETS,
 	payload: Array<Widget>
-}
+};
 
 type UnknownWidgetsAction = {
 	type: typeof WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION,

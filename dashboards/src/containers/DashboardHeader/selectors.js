@@ -4,7 +4,7 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {editDashboard, getSettings, resetDashboard, seeDashboard, sendToMail} from 'store/dashboard/actions';
 
 export const props = (state: AppState): ConnectedProps => {
-	const {autoUpdate, editable, editMode, role} = state.dashboard;
+	const {autoUpdate, editMode, editable, role} = state.dashboard;
 
 	return {
 		autoUpdateEnabled: autoUpdate.enabled,

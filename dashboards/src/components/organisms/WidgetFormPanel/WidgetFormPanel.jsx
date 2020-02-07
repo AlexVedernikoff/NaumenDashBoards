@@ -29,7 +29,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 		const {handleSubmit} = this.props;
 
 		return (
-			<form onSubmit={handleSubmit} className={styles.form} ref={formRef}>
+			<form className={styles.form} onSubmit={handleSubmit} ref={formRef}>
 				{this.renderHeader()}
 				{this.renderTabList()}
 				{this.renderTabContent()}
@@ -70,7 +70,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 			[styles.tabListItemActive]: key === currentTab
 		});
 
-		return <li key={key} className={liCN} onClick={this.handleClick(key)}>{title}</li>;
+		return <li className={liCN} key={key} onClick={this.handleClick(key)}>{title}</li>;
 	};
 
 	render () {

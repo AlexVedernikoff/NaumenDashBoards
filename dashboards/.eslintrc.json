@@ -15,6 +15,8 @@
 	],
 	"parser": "babel-eslint",
 	"plugins": [
+		"eslint-plugin-local-rules",
+		"sort-destructure-keys",
 		"standard",
 		"react",
 		"promise",
@@ -26,19 +28,22 @@
 			0,
 			"tab"
 		],
+		"local-rules/sort-imports": 2,
+		"local-rules/sort-class-methods": 2,
+		"flowtype/semi": 2,
 		"no-tabs": 0,
 		"operator-linebreak": ["error", "before"],
+		"react/jsx-tag-spacing": [2, {
+			"beforeSelfClosing": "always"
+		}],
+		"react/jsx-sort-props": 2,
 		"require-atomic-updates": "off",
 		"semi": [
 			2,
 			"always"
 		],
-		"sort-vars": [
-			"error",
-			{
-				"ignoreCase": true
-			}
-		],
+		"sort-destructure-keys/sort-destructure-keys": 2,
+		"sort-vars": 2,
 		"jsdoc/newline-after-description": 0,
 		"jsdoc/require-returns-description": 0
 	},

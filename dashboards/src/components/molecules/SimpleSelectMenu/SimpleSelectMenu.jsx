@@ -38,7 +38,7 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 
 		if (creationButton) {
 			const {onClick, text} = creationButton;
-			return <CreationPanel text={text} onClick={onClick} />;
+			return <CreationPanel onClick={onClick} text={text} />;
 		}
 	};
 

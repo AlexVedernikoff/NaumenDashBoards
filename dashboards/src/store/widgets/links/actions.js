@@ -5,6 +5,7 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin, ReceiveLinkPayload} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {LINKS_EVENTS} from './constants';
+import {transformGroupFormat} from 'store/widgets/helpers';
 import type {Widget} from 'store/widgets/data/types';
 
 const getPartsClassFqn = (classFqn: ?string) => {
@@ -62,11 +63,16 @@ const createPostData = (widget: Widget, ordinalNumber: number) => {
  * @param {DrillDownMixin} mixin - примесь данных (создается при выборе конкретного элемента графика)
  * @returns {Function}
  */
-const drillDown = (widget: Widget, ordinalNumber?: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const drillDown = (widget: Widget, ordinalNumber?: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {customGroups} = getState();
 	let postData = ordinalNumber ? createPostData(widget, ordinalNumber) : createLegacyPostData(widget);
 	let key = widget.id;
 
 	if (mixin && typeof mixin === 'object') {
+		if (Array.isArray(mixin.filters)) {
+			mixin.filters.forEach(filter => transformGroupFormat(filter, customGroups));
+		}
+
 		postData = {...postData, ...mixin};
 	}
 
@@ -93,10 +99,10 @@ const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: 
 		dispatch(requestLink(id));
 		try {
 			const {data} = await client.post(buildUrl('dashboardDrilldown', 'getLink', `requestContent,'${subjectUuid}'`), postData);
-			link = `${window.jsApi.getAppBaseUrl()}${data.replace(/^https?:\/\/(.+?)\//, '')}`;
+			link = `${data.replace(/^(.+?)\?/, '/sd/operator/?')}`;
 
 			dispatch(
-				receiveLink({link, id})
+				receiveLink({id, link})
 			);
 		} catch (e) {
 			dispatch(recordLinkError(id));

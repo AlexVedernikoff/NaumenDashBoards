@@ -10,6 +10,7 @@ import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import {getNextRow} from 'utils/layout';
 import {NewWidget} from 'utils/widget';
+import {setCustomGroups} from 'store/customGroups/actions';
 
 /**
  * Получаем данные, необходимые для работы дашборда
@@ -20,7 +21,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 	try {
 		const context = getContext();
-		const {editable, autoUpdateInterval: defaultInterval} = await getContentParameters();
+		const {autoUpdateInterval: defaultInterval, editable} = await getContentParameters();
 
 		if (defaultInterval) {
 			dispatch(changeAutoUpdateSettings({defaultInterval}));
@@ -50,7 +51,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {autoUpdate: {defaultInterval}, context} = getState().dashboard;
 	const params = `'${context.subjectUuid || ''}','${context.contentCode}',user`;
-	const {data: {autoUpdate, widgets}} = await client.post(buildUrl('dashboardSettings', 'getSettings', params));
+	const {data: {autoUpdate, groups: customGroups = {}, widgets = []}} = await client.post(buildUrl('dashboardSettings', 'getSettings', params));
 
 	if (Array.isArray(widgets) && widgets.length > 0) {
 		dispatch(setWidgets(widgets));
@@ -58,13 +59,15 @@ const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	}
 
 	if (autoUpdate) {
-		dispatch(changeAutoUpdateSettings(autoUpdate));
 		const {enabled, interval} = autoUpdate;
+		dispatch(changeAutoUpdateSettings(autoUpdate));
 
 		if (enabled && interval > defaultInterval) {
 			dispatch(setAutoUpdateInterval(interval));
 		}
 	}
+
+	dispatch(setCustomGroups(customGroups));
 };
 
 const getUserRole = (): ThunkAction => async (dispatch: Dispatch) => {
@@ -201,7 +204,7 @@ const getPassedWidget = (context: Context): ThunkAction => async (dispatch: Disp
 
 const saveAutoUpdateSettings = (autoUpdate: AutoUpdateRequestPayload) => async (dispatch: Dispatch, getState: GetState) => {
 	try {
-		const {subjectUuid: classFqn, contentCode} = getState().dashboard.context;
+		const {contentCode, subjectUuid: classFqn} = getState().dashboard.context;
 		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {
 			autoUpdate,
 			classFqn,

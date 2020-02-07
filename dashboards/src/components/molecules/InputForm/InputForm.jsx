@@ -64,8 +64,8 @@ export class InputForm extends Component<Props> {
 
 		return (
 			<Formik
-				initialValues={{value}}
 				enableReinitialize={true}
+				initialValues={{value}}
 				onSubmit={this.handleSubmit}
 				render={this.renderFormContent}
 				validationSchema={schema}

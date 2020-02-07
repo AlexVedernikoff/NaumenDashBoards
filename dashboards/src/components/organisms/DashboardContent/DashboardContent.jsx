@@ -59,6 +59,16 @@ export class DashboardContent extends Component<Props, State> {
 		}
 	}
 
+	getWidgets = () => {
+		const {newWidget, widgets} = this.props;
+
+		if (newWidget) {
+			return [...widgets, newWidget];
+		}
+
+		return widgets;
+	};
+
 	handleLayoutChange = (layout: Layout) => this.props.editLayout(layout);
 
 	handleWidgetSelect = (widgetId: string) => {
@@ -70,16 +80,6 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	hideRemovalModal = () => this.setState({showRemovalModal: false, widgetIdToRemove: ''});
-
-	getWidgets = () => {
-		const {newWidget, widgets} = this.props;
-
-		if (newWidget) {
-			return [...widgets, newWidget];
-		}
-
-		return widgets;
-	};
 
 	reloadGrid = () => {
 		const {current} = gridRef;
@@ -113,8 +113,8 @@ export class DashboardContent extends Component<Props, State> {
 					cols={COLS}
 					compactType={null}
 					containerPadding={CONTAINER_PADDING}
-					isResizable={isEditable}
 					isDraggable={isEditable}
+					isResizable={isEditable}
 					onLayoutChange={this.handleLayoutChange}
 					rowHeight={ROW_HEIGHT}
 					width={width}
@@ -148,6 +148,18 @@ export class DashboardContent extends Component<Props, State> {
 		}
 	};
 
+	renderRightPanel = () => {
+		const {editMode, selectedWidget} = this.props;
+
+		if (editMode) {
+			return (
+				<div className={styles.panel}>
+					{selectedWidget ? <WidgetFormPanel /> : <WidgetAddPanel />}
+				</div>
+			);
+		}
+	};
+
 	renderWidget = (widget: WidgetType) => {
 		const {buildData, drillDown, editable, selectedWidget} = this.props;
 		const {id, layout} = widget;
@@ -162,9 +174,9 @@ export class DashboardContent extends Component<Props, State> {
 
 		return (
 			<Widget
+				buildData={buildData[id]}
 				data={widget}
 				data-grid={layout}
-				buildData={buildData[id]}
 				isEditable={editable}
 				isNew={isNew}
 				isSelected={selectedWidget === widget.id}
@@ -175,18 +187,6 @@ export class DashboardContent extends Component<Props, State> {
 				ref={ref}
 			/>
 		);
-	};
-
-	renderRightPanel = () => {
-		const {editMode, selectedWidget} = this.props;
-
-		if (editMode) {
-			return (
-				<div className={styles.panel}>
-					{selectedWidget ? <WidgetFormPanel /> : <WidgetAddPanel />}
-				</div>
-			);
-		}
 	};
 
 	render () {

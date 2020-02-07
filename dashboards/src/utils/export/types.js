@@ -5,4 +5,4 @@ export type Options = {
 	name: string,
 	toDownload: boolean,
 	type: string
-}
+};

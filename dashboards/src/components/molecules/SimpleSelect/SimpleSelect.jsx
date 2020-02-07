@@ -18,9 +18,9 @@ export class SimpleSelect extends PureComponent<Props, State> {
 		showMenu: false
 	};
 
-	handleClickOutside = () => this.setState({showMenu: false});
-
 	handleClickLabel = () => this.setState({showMenu: !this.state.showMenu});
+
+	handleClickOutside = () => this.setState({showMenu: false});
 
 	handleSelect = (value: Option) => {
 		const {name, onSelect} = this.props;

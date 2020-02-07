@@ -1,7 +1,6 @@
-:local {
-	@active-color: #333;
-	@default-color: #bbb;
+@import '/styles/variables';
 
+:local {
 	.container {
 		align-items: center;
 		cursor: pointer;
@@ -9,33 +8,33 @@
 
 		&:hover {
 			.icon {
-				background: lighten(@active-color, 20);
+				background: @black;
 			}
 
 			.text {
-				color: lighten(@active-color, 20);
+				color: @black
 			}
 		}
 	}
 
 	.icon {
-		background-color: @default-color;
-		border-radius: 2px;
-		color: white;
+		background-color: @grey;
+		border-radius: @border-radius;
+		color: @white;
 		display: inline-block;
 		margin-left: 8px;
 	}
 
 	.text {
-		color: @default-color;
+		color: @grey;
 		margin-left: 10px;
 	}
 
 	.activeIcon {
-		background-color: @active-color;
+		background-color: @black;
 	}
 
 	.activeText {
-		color: @active-color;
+		color: @black;
 	}
 }

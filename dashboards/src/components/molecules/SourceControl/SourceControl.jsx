@@ -1,15 +1,15 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import AttributeRefInput, {getAggregateOptions} from 'components/molecules/AttributeRefInput';
+import {AttributeAggregation} from 'components/molecules';
 import cn from 'classnames';
 import {CreationPanel, SearchSelectInput} from 'components/atoms';
+import {getDefaultAggregation} from 'components/molecules/AttributeAggregation/helpers';
 import {MeetBallIcon} from 'icons/controls';
 import type {Option, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
-import {ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
-import {TYPES} from 'components/molecules/AttributeRefInput/constants';
 import styles from './styles.less';
+import {ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
 
 export class SourceControl extends PureComponent<Props, State> {
 	state = {
@@ -33,6 +33,15 @@ export class SourceControl extends PureComponent<Props, State> {
 
 	countOptionAttributes = (option: Option) => option.attributes.length;
 
+	filterEmptySources = (option: Option) => option.attributes.length > 0;
+
+	filterNoMatchingAttributes = (searchValue: string) => (option: Option) => {
+		let {attributes} = option;
+		attributes = attributes.filter(a => a.title.toLowerCase().includes(searchValue.toLowerCase()));
+
+		return {...option, attributes};
+	};
+
 	handleBlurControl = (e: SyntheticFocusEvent<HTMLDivElement>) => {
 		if (e.relatedTarget === null) {
 			this.setState({active: false});
@@ -47,7 +56,7 @@ export class SourceControl extends PureComponent<Props, State> {
 	};
 
 	handleClickAttribute = (e: SyntheticMouseEvent<HTMLDivElement>) => {
-		const {name, options, onSelect} = this.props;
+		const {name, onSelect, options} = this.props;
 		const {code, key: dataKey} = e.currentTarget.dataset;
 		const option = options.find(o => o.dataKey === dataKey);
 
@@ -56,7 +65,7 @@ export class SourceControl extends PureComponent<Props, State> {
 			const attribute = attributes.find(a => a.code === code);
 
 			if (attribute) {
-				const aggregation = getAggregateOptions(attribute)[0].value;
+				const aggregation = getDefaultAggregation(attribute);
 
 				const value = {
 					aggregation,
@@ -99,16 +108,18 @@ export class SourceControl extends PureComponent<Props, State> {
 		return searchValue || expanded.includes(dataKey);
 	};
 
-	filterEmptySources = (option: Option) => option.attributes.length > 0;
-
-	filterNoMatchingAttributes = (searchValue: string) => (option: Option) => {
-		let {attributes} = option;
-		attributes = attributes.filter(a => a.title.toLowerCase().includes(searchValue.toLowerCase()));
-
-		return {...option, attributes};
-	};
-
 	reducer = (accumulator: number, currentValue: number) => accumulator + currentValue;
+
+	renderAggregationValue = (valueProps: RenderValueProps) => {
+		const {active, children, className, onClick} = valueProps;
+		const CN = active ? cn(className, styles.activeLeftInput) : cn(className, styles.leftInput);
+
+		return (
+			<div className={CN} onClick={onClick}>
+				{children}
+			</div>
+		);
+	};
 
 	renderAttribute = (dataKey: string) => (attribute: Attribute) => {
 		const {value} = this.props;
@@ -161,6 +172,24 @@ export class SourceControl extends PureComponent<Props, State> {
 		}
 	};
 
+	renderOption = (option: Option) => (
+		<div className={styles.option} key={option.dataKey}>
+			{this.renderSource(option)}
+			{this.renderAttributes(option)}
+		</div>
+	);
+
+	renderOptions = () => {
+		const {options} = this.props;
+		const {foundOptions, searchValue} = this.state;
+
+		return (
+			<div className={styles.options}>
+				{searchValue ? foundOptions.map(this.renderOption) : options.map(this.renderOption)}
+			</div>
+		);
+	};
+
 	renderSearch = () => <SearchSelectInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
 
 	renderSearchInfo = () => {
@@ -193,46 +222,17 @@ export class SourceControl extends PureComponent<Props, State> {
 		}
 	};
 
-	renderOption = (option: Option) => (
-		<div className={styles.option} key={option.dataKey}>
-			{this.renderSource(option)}
-			{this.renderAttributes(option)}
-		</div>
-	);
-
-	renderOptions = () => {
-		const {options} = this.props;
-		const {foundOptions, searchValue} = this.state;
-
-		return (
-			<div className={styles.options}>
-				{searchValue ? foundOptions.map(this.renderOption) : options.map(this.renderOption)}
-			</div>
-		);
-	};
-
 	renderSource = (option: Option) => {
 		const {dataKey, source} = option;
 		const {label, value} = source;
 		const isExpanded = this.isExpanded(dataKey);
 
 		return (
-			<div className={styles.listSource} data-key={dataKey} onClick={this.handleClickSource} key={value}>
+			<div className={styles.listSource} data-key={dataKey} key={value} onClick={this.handleClickSource}>
 				<div className={styles.sourceToggleIcon}>
 					{isExpanded ? <ToggleExpandedIcon /> : <ToggleCollapsedIcon />}
 				</div>
 				<div className={styles.listSourceLabel}>{label}</div>
-			</div>
-		);
-	};
-
-	renderAggregationValue = (valueProps: RenderValueProps) => {
-		const {active, children, className, onClick} = valueProps;
-		const CN = active ? cn(className, styles.activeLeftInput) : cn(className, styles.leftInput);
-
-		return (
-			<div className={CN} onClick={onClick}>
-				{children}
 			</div>
 		);
 	};
@@ -245,12 +245,12 @@ export class SourceControl extends PureComponent<Props, State> {
 
 			return (
 				<div className={styles.combinedInput}>
-					<AttributeRefInput
+					<AttributeAggregation
 						attribute={attribute}
-						onSelect={this.handleSelectAggregation}
 						name={name}
+						onSelect={this.handleSelectAggregation}
 						renderValue={this.renderAggregationValue}
-						type={TYPES.AGGREGATION}
+						tip="Агрегация"
 						value={aggregation}
 					/>
 					<div className={styles.rightInput} onClick={this.handleShowList}>

@@ -14,6 +14,7 @@ export type Method =
 	| 'bulkEditDefaultWidget'
 	| 'createDefaultWidgetSettings'
 	| 'createPersonalWidgetSettings'
+	| 'deleteCustomGroup'
 	| 'deletePersonalWidget'
 	| 'deleteWidget'
 	| 'getAttributesDataSources'
@@ -29,10 +30,12 @@ export type Method =
 	| 'editPersonalWidgetSettings'
 	| 'resetPersonalDashboard'
 	| 'saveAutoUpdateSettings'
+	| 'saveCustomGroup'
 	| 'sendFileToMail'
+	| 'updateCustomGroup'
 ;
 
 export type Context = {
-	subjectUuid: string,
-	contentCode: string
+	contentCode: string,
+	subjectUuid: string
 };

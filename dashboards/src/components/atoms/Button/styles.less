@@ -59,13 +59,16 @@
 	.simple {
 		.button();
 		color: @info;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 500;
 
 		&:hover, :active {
 			color: @black
 		}
 
 		&:disabled {
-			color: @grey;
+			color: @black;
 			cursor: not-allowed;
 			pointer-events: none;
 		}

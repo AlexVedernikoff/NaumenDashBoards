@@ -90,7 +90,7 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 
 	const image = await html2canvas(container, options);
 
-	temp.forEach(({parent, childToRemove, childToRestore}) => {
+	temp.forEach(({childToRemove, childToRestore, parent}) => {
 		parent.removeChild(childToRemove);
 		parent.appendChild(childToRestore);
 	});

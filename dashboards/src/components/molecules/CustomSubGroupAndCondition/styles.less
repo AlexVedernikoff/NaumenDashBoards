@@ -1,0 +1,53 @@
+@import '/styles/variables';
+
+:local {
+	@offset: 24px;
+
+	.nameField {
+		padding-top: @offset;
+		width: 300px;
+	}
+
+	.orConditionsContainer {
+		background-color: @gainsboro;
+		border-radius: @border-radius;
+		padding: @offset;
+
+		:first-child {
+			margin-top: 0;
+		}
+	}
+
+	.orCondition {
+		margin-top: @offset;
+	}
+
+	.andOperator {
+		border-bottom: 2px solid @lightgrey;
+		padding: 12px 4px;
+		position: relative;
+	}
+
+	.disabledAndOperator {
+		border-bottom: none;
+
+		.connectionLine {
+			background-color: @dimgrey;
+			content: '';
+			height: 14px;
+			left: 28px;
+			position: absolute;
+			width: 2px;
+		}
+
+		&:before {
+			.connectionLine();
+			top: 0;
+		}
+
+		&:after {
+			.connectionLine();
+			bottom: 0;
+		}
+	}
+}

@@ -1,9 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {createOrdinalName, getMainOrdinalNumber, getNumberFromName} from 'utils/widget';
 import {CHART_VARIANTS} from 'utils/chart/constants';
-import {drillDown} from 'store/widgets/links/actions';
+import {createOrdinalName, getMainOrdinalNumber, getNumberFromName} from 'utils/widget';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
+import {drillDown} from 'store/widgets/links/actions';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {store} from 'src';

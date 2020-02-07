@@ -13,16 +13,6 @@ export class SimpleSelectList extends PureComponent<Props> {
 		}
 	};
 
-	handleClickOption = (e: SyntheticMouseEvent<HTMLDivElement>) => {
-		const {onSelect, options} = this.props;
-		const {value} = e.currentTarget.dataset;
-		const option = options.find(o => this.getOptionValue(o) === value);
-
-		if (option) {
-			onSelect(option);
-		}
-	};
-
 	getMessages = () => {
 		const {messages} = this.props;
 		const defaultMessages = SimpleSelectList.defaultProps.messages;
@@ -37,6 +27,16 @@ export class SimpleSelectList extends PureComponent<Props> {
 	getOptionValue = (option: Object) => {
 		const {getOptionValue} = this.props;
 		return getOptionValue ? getOptionValue(option) : option.value;
+	};
+
+	handleClickOption = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+		const {onSelect, options} = this.props;
+		const {value} = e.currentTarget.dataset;
+		const option = options.find(o => this.getOptionValue(o) === value);
+
+		if (option) {
+			onSelect(option);
+		}
 	};
 
 	renderList = () => {

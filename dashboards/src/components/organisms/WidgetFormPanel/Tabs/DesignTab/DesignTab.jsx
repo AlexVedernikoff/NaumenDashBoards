@@ -18,17 +18,6 @@ export class DesignTab extends FormBuilder {
 		);
 	};
 
-	renderWidgetFields = (type: string) => {
-		const {COMBO, DONUT, PIE} = CHART_VARIANTS;
-		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
-
-		if (type !== SUMMARY && type !== TABLE) {
-			const axis = !(type === PIE || type === DONUT || type === COMBO);
-
-			return <Chart axis={axis} />;
-		}
-	};
-
 	renderInputs = () => {
 		const {values} = this.props;
 		const {showName, type} = FIELDS;
@@ -46,6 +35,17 @@ export class DesignTab extends FormBuilder {
 				{this.renderWidgetFields(values[type])}
 			</div>
 		);
+	};
+
+	renderWidgetFields = (type: string) => {
+		const {COMBO, DONUT, PIE} = CHART_VARIANTS;
+		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+
+		if (type !== SUMMARY && type !== TABLE) {
+			const axis = !(type === PIE || type === DONUT || type === COMBO);
+
+			return <Chart axis={axis} />;
+		}
 	};
 
 	render () {

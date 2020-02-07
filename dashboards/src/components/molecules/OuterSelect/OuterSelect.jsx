@@ -16,7 +16,7 @@ export class OuterSelect extends PureComponent<Props> {
 		if (value === selectedValue) {
 			return (
 				<div className={styles.checkedIcon}>
-					<CheckedIcon/>
+					<CheckedIcon />
 				</div>
 			);
 		}

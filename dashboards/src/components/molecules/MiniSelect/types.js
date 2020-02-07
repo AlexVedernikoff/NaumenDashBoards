@@ -8,12 +8,12 @@ export type RenderValueProps = {
 	children: Node,
 	className: string,
 	onClick: () => void
-}
+};
 
 export type Option = {
 	label: Label,
 	value: string
-}
+};
 
 export type Props = {
 	isDisabled: boolean,
@@ -24,9 +24,9 @@ export type Props = {
 	showCaret: boolean,
 	tip: string,
 	value: string
-}
+};
 
 export type State = {
 	active: boolean,
 	currentOption: Option
-}
+};

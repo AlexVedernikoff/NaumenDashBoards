@@ -1,5 +1,5 @@
 // @flow
-import {Checkbox, ExtendButton, IconButton, FieldError, OutsideClickDetector} from 'components/atoms';
+import {Checkbox, ExtendButton, FieldError, IconButton, OutsideClickDetector} from 'components/atoms';
 import cn from 'classnames';
 import {CrossIcon, EditIcon} from 'icons/form';
 import {InputForm, SourceTree} from 'components/molecules';
@@ -49,16 +49,16 @@ export class Source extends PureComponent<Props, State> {
 	};
 
 	handleChangeLabel = (label: string) => {
-		const {onChangeLabel, name, value} = this.props;
+		const {name, onChangeLabel, value} = this.props;
 		onChangeLabel(name, {...value, label});
 	};
+
+	handleClickOutside = () => this.setState({showList: false});
 
 	handleClickRemoveButton = () => {
 		const {name, onRemove} = this.props;
 		onRemove(name);
 	};
-
-	handleClickOutside = () => this.setState({showList: false});
 
 	handleRemoveValue = () => {
 		const {name, onSelect} = this.props;
@@ -118,6 +118,20 @@ export class Source extends PureComponent<Props, State> {
 
 	renderError = () => <FieldError text={this.props.error} />;
 
+	renderFilterButton = () => {
+		const {value} = this.props.descriptor;
+
+		return (
+			<div className={styles.filterContainer}>
+				<ExtendButton
+					active={!!value}
+					onClick={this.callFilterModal}
+					text="Фильтр"
+				/>
+			</div>
+		);
+	};
+
 	renderIndicators = () => {
 		const {value} = this.props;
 
@@ -146,20 +160,6 @@ export class Source extends PureComponent<Props, State> {
 		const label = value ? value.label : defaultValue.label;
 
 		return <div className={labelCN} onClick={this.handleShowList}>{label}</div>;
-	};
-
-	renderFilterButton = () => {
-		const {value} = this.props.descriptor;
-
-		return (
-			<div className={styles.filterContainer}>
-				<ExtendButton
-					active={!!value}
-					onClick={this.callFilterModal}
-					text="Фильтр"
-				/>
-			</div>
-		);
 	};
 
 	renderRemoveButton = () => {

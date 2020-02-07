@@ -1,0 +1,68 @@
+@import '/styles/variables';
+
+:local {
+	@offset: 24px;
+
+	.container {
+		align-items: center;
+		display: flex;
+
+		&:hover {
+			.removeButton {
+				opacity: 1;
+			}
+		}
+	}
+
+	.operand {
+		display: flex;
+		flex: auto;
+		padding: 4px 0;
+	}
+
+	.fieldOffset {
+		margin-left: @offset;
+	}
+
+	.dateField {
+		.fieldOffset();
+		width: 50%;
+	}
+
+	.dateFieldContainer {
+		display: flex;
+		position: relative;
+		width: 70%;
+	}
+
+	.numberField {
+		.fieldOffset();
+		width: 70%;
+	}
+
+	.operandSelect {
+		min-width: 30%;
+	}
+
+	.orOperator {
+		.fieldOffset();
+	}
+
+	.removeButtonContainer {
+		.fieldOffset();
+		align-items: center;
+		display: flex;
+		opacity: 0;
+		width: 25px;
+	}
+
+	.hiddenRemoveButton {
+		display: none;
+	}
+
+	.error {
+		left: @offset;
+		position: absolute;
+		top: 105%;
+	};
+}

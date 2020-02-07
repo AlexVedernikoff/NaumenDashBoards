@@ -1,22 +1,22 @@
 // @flow
-import {OPERAND_TYPES} from 'store/customGroups/constants';
+import {CONDITION_TYPES} from 'store/customGroups/constants';
 
 const OPERAND_OPTIONS = [
 	{
 		label: 'с ...по',
-		value: OPERAND_TYPES.BETWEEN
+		value: CONDITION_TYPES.BETWEEN
 	},
 	{
 		label: 'за последние "n" дней ',
-		value: OPERAND_TYPES.LAST
+		value: CONDITION_TYPES.LAST
 	},
 	{
 		label: 'в ближайшие "n" дней',
-		value: OPERAND_TYPES.NEAR
+		value: CONDITION_TYPES.NEAR
 	},
 	{
 		label: 'Сегодня',
-		value: OPERAND_TYPES.TODAY
+		value: CONDITION_TYPES.TODAY
 	}
 ];
 

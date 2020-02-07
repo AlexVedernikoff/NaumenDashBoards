@@ -5,6 +5,9 @@ import styles from './styles.less';
 
 export class MaterialTextInput extends PureComponent<Props> {
 	static defaultProps = {
+		forwardedRef: {
+			current: null
+		},
 		name: '',
 		onlyNumber: false,
 		placeholder: ''
@@ -20,8 +23,17 @@ export class MaterialTextInput extends PureComponent<Props> {
 	};
 
 	renderInput = () => {
-		const {placeholder, value} = this.props;
-		return <input className={styles.input} onChange={this.handleChange} placeholder={placeholder} value={value} />;
+		const {forwardedRef, placeholder, value} = this.props;
+
+		return (
+			<input
+				className={styles.input}
+				onChange={this.handleChange}
+				placeholder={placeholder}
+				ref={forwardedRef}
+				value={value}
+			/>
+		);
 	};
 
 	renderPlaceholder = () => {

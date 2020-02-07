@@ -11,18 +11,21 @@
 		width: 100%;
 	}
 
-	.calendar {
+	.calendarIcon {
 		color: @darkgrey;
+		cursor: pointer;
 	}
 
-	.input {
-		bottom: 0;
-		left: 0;
-		opacity: 0;
+	.datepickerContainer {
 		position: absolute;
 		right: 0;
-		top: 0;
-		width: 100%;
+		top: 105%;
 		z-index: 1;
+	}
+
+	.valueContainer {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 }

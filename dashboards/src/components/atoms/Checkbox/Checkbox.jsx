@@ -12,8 +12,6 @@ class Checkbox extends Component<Props> {
 		className: ''
 	};
 
-	upperFirst = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
-
 	getIconClassName = () => {
 		const {activeColor, className, value} = this.props;
 		const CN = [styles.icon, className];
@@ -26,17 +24,19 @@ class Checkbox extends Component<Props> {
 	};
 
 	handleClick = () => {
-		const {onClick, name, value} = this.props;
+		const {name, onClick, value} = this.props;
 		onClick(name, !value);
 	};
+
+	upperFirst = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
 
 	renderIconWithLabel = () => {
 		const {label, name, value} = this.props;
 
 		return (
-			<label htmlFor={name} className={styles.label}>
+			<label className={styles.label} htmlFor={name}>
 				<div className={this.getIconClassName()}>
-					{value && <CheckIcon/>}
+					{value && <CheckIcon />}
 				</div>
 				<div> {label}</div>
 			</label>

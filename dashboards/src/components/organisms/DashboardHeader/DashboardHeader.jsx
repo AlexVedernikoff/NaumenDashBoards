@@ -1,8 +1,8 @@
 // @flow
 import AutoUpdateForm from 'containers/AutoUpdateForm';
 import {Button, DropDown, Tooltip} from 'components/atoms';
-import cn from 'classnames';
 import {CloseIcon} from 'icons/form';
+import cn from 'classnames';
 import {createName, createSnapshot, EXPORT_VARIANTS, FILE_LIST} from 'utils/export';
 import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
@@ -75,7 +75,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {icon, tip, way} = props;
 
 		return (
-			<Tooltip text={tip} placement={PLACEMENTS.LEFT}>
+			<Tooltip placement={PLACEMENTS.LEFT} text={tip}>
 				<DropDown icon={icon} list={FILE_LIST} onClick={this.createDocument(way)}>
 					<div className={styles.buttonIcon}>
 						{icon}
@@ -108,20 +108,20 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	renderModeButton = () => {
-		const {editable, editDashboard, editMode, seeDashboard} = this.props;
+		const {editDashboard, editMode, editable, seeDashboard} = this.props;
 
 		if (editable) {
 			if (editMode) {
 				return (
 					<div className={styles.buttonMode}>
-						<Button type="button" onClick={seeDashboard}>Просмотреть</Button>
+						<Button onClick={seeDashboard} type="button">Просмотреть</Button>
 					</div>
 				);
 			}
 
 			return (
 				<div className={styles.buttonMode}>
-					<Button type="button" onClick={editDashboard}>Редактировать</Button>
+					<Button onClick={editDashboard} type="button">Редактировать</Button>
 				</div>
 			);
 		}
@@ -131,7 +131,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {getSettings} = this.props;
 
 		return (
-			<Tooltip text="Обновить виджеты" placement={PLACEMENTS.LEFT}>
+			<Tooltip placement={PLACEMENTS.LEFT} text="Обновить виджеты">
 				<div className={styles.buttonIcon}>
 					<RefreshIcon onClick={getSettings} />
 				</div>

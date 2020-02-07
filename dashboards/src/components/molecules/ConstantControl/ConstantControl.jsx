@@ -48,14 +48,14 @@ export class ConstantControl extends PureComponent<Props, State> {
 
 	hideForm = () => this.setState({showForm: false});
 
-	showForm = () => this.setState({showForm: true});
-
 	shouldShowForm = () => {
 		const {value} = this.props;
 		const {showForm} = this.state;
 
 		return showForm || !value;
 	};
+
+	showForm = () => this.setState({showForm: true});
 
 	renderForm = () => {
 		const {value} = this.state;

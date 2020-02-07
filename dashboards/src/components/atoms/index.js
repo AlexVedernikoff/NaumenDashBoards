@@ -2,9 +2,11 @@
 import Button from './Button';
 import Checkbox from './Checkbox';
 import CreationPanel from './CreationPanel';
+import DatepickerControl from './DatepickerControl';
 import Divider from './Divider';
 import DropDown from './DropDown';
 import ExtendButton from './ExtendButton';
+import FieldButton from './FieldButton';
 import FieldError from './FieldError';
 import FieldLabel from './FieldLabel';
 import IconButton from './IconButton';
@@ -26,9 +28,11 @@ export {
 	Button,
 	Checkbox,
 	CreationPanel,
+	DatepickerControl,
 	Divider,
 	DropDown,
 	ExtendButton,
+	FieldButton,
 	FieldError,
 	FieldLabel,
 	IconButton,

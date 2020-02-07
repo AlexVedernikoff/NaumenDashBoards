@@ -1,6 +1,6 @@
 // @flow
-import {DATA_SOURCES_EVENTS} from './constants';
 import type {DataSourcesAction, DataSourcesState} from './types';
+import {DATA_SOURCES_EVENTS} from './constants';
 
 export const initialDataSourcesState: DataSourcesState = {
 	error: false,
