@@ -208,9 +208,10 @@ String createWidget(Map<String, Object> requestContent, def user)
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
     def widget = requestContent.widget
+    boolean isPersonal = requestContent.isPersonal
     DashboardSettings dashboardSettings = null
     String dashboardKey = null
-    if(requestContent.isPersonal)
+    if(isPersonal)
     {
         checkRightsOnEditDashboard(requestContent.editable)
         if(!user?.login)
@@ -228,13 +229,13 @@ String createWidget(Map<String, Object> requestContent, def user)
         dashboardKey = generateDashboardKey(classFqn, contentCode)
         dashboardSettings = getDashboardSetting(dashboardKey)
                 ?: new DashboardSettings()
-
     }
+
     def generateKey = this.&generateWidgetKey.curry(
             dashboardSettings.widgetIds,
             classFqn,
             contentCode,
-            user?.login as String)
+            isPersonal ? user?.login as String : null)
 
     return saveWidgetSettings(widget, generateKey).with { key ->
         dashboardSettings.widgetIds += key
@@ -255,7 +256,7 @@ String editWidget(Map<String, Object> requestContent, def user)
     String contentCode = requestContent.contentCode
     def widget = requestContent.widget
     String widgetKey = widget.id
-    if(requestContent.isPersonal)
+    if(requestContent.isPersonal as boolean)
     {
         checkRightsOnEditDashboard(requestContent.editable)
         Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
