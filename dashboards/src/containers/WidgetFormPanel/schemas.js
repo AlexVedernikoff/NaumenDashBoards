@@ -69,7 +69,7 @@ const BASE_RULES = {
 
 // Правила для линейных графиков (кроме комбо)
 const getAxisChartRules = (conditionBreakdown: boolean) => (values: FormikValues, rules: Object) => {
-	const {xAxis, breakdown, yAxis, source, sourceForCompute, withBreakdown} = FIELDS;
+	const {breakdown, source, sourceForCompute, withBreakdown, xAxis, yAxis} = FIELDS;
 	const {order} = values;
 
 	order.forEach(number => {

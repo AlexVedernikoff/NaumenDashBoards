@@ -1,12 +1,12 @@
 // @flow
 import {Checkbox, Divider, ExtendButton, FieldError, FieldLabel, Label, TextArea} from 'components/atoms';
 import type {CheckboxProps, LabelProps, TextAreaProps} from './types';
+import {formRef, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import {MiniSelect} from 'components/molecules';
 import type {Props as FormProps} from 'containers/WidgetFormPanel/types';
 import type {Props as ExtendButtonProps} from 'components/atoms/ExtendButton/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
-import {formRef, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import type {Variant as DividerVariant} from 'components/atoms/Divider/types';
 
 export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<Props & FormProps, State> {
@@ -63,8 +63,8 @@ export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<P
 				<div className={mainStyles.field} key={name}>
 					<Checkbox
 						label={label}
-						onClick={this.handleClick}
 						name={name}
+						onClick={this.handleClick}
 						value={value}
 					/>
 				</div>

@@ -3,7 +3,7 @@ import {Button, InfoPanel} from 'components/atoms';
 import {ClearSquareIcon, CrossIcon} from 'icons/form';
 import {ConstantControl, Modal, OperatorControl, SourceControl} from 'components/molecules';
 import type {Control, Props, State} from './types';
-import {getAggregationLabel} from 'components/molecules/AttributeRefInput/helpers';
+import {getAggregationLabel} from 'components/molecules/AttributeAggregation/helpers';
 import {OPERATORS, TEMPLATE_NAMES, TEMPLATES, TYPES} from './constants';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
@@ -29,7 +29,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		const {value} = this.props;
 
 		if (value) {
-			const {title, state: JSONState} = value;
+			const {state: JSONState, title} = value;
 			let valueProps = {title};
 
 			if (JSONState) {
@@ -187,8 +187,6 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		});
 	};
 
-	handleSubmitConstant = (name: string, value: string) => this.handleSelect(name, value, TYPES.CONSTANT);
-
 	handleSelect = (name: string, value: any, type: string) => {
 		const {controls} = this.state;
 
@@ -208,6 +206,8 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	handleSelectSource = (name: string, value: Object) => this.handleSelect(name, value, TYPES.SOURCE);
 
+	handleSubmitConstant = (name: string, value: string) => this.handleSelect(name, value, TYPES.CONSTANT);
+
 	hideRemoveInfo = () => this.setState({showRemoveInfo: false});
 
 	resolveControlRender = (control: Control) => {
@@ -224,7 +224,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		}
 	};
 
-	showRemoveInfo = () => this.setState({showRemoveInfo: true});
+	showRemovalInfo = () => this.setState({showRemoveInfo: true});
 
 	renderConstantControl = (control: Control) => {
 		let {name, value} = control;
@@ -243,6 +243,17 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		);
 	};
 
+	renderControlByType = (control: Control) => {
+		const {name} = control;
+
+		return (
+			<div className={styles.controlContainer} key={name}>
+				{this.resolveControlRender(control)}
+				{this.renderRemoveButton(name)}
+			</div>
+		);
+	};
+
 	renderControls = () => {
 		const {controls, first} = this.state;
 		const items = [];
@@ -258,17 +269,6 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			<div className={styles.controlsContainer}>
 				{items}
 				{this.renderTemplates()}
-			</div>
-		);
-	};
-
-	renderControlByType = (control: Control) => {
-		const {name} = control;
-
-		return (
-			<div className={styles.controlContainer} key={name}>
-				{this.resolveControlRender(control)}
-				{this.renderRemoveButton(name)}
 			</div>
 		);
 	};
@@ -299,7 +299,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 					<Button onClick={onClose} variant="additional">Отмена</Button>
 				</div>
 				<div>
-					{value && <Button variant="simple" onClick={this.showRemoveInfo}>Удалить</Button>}
+					{value && <Button onClick={this.showRemovalInfo} variant="simple">Удалить</Button>}
 				</div>
 			</div>
 		);
@@ -337,11 +337,13 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 		if (showRemoveInfo) {
 			return (
-				<InfoPanel
-					onClose={this.hideRemoveInfo}
-					onConfirm={this.handleClickConfirmRemoveButton}
-					text={text}
-				/>
+				<div className={styles.infoPanel}>
+					<InfoPanel
+						onClose={this.hideRemoveInfo}
+						onConfirm={this.handleClickConfirmRemoveButton}
+						text={text}
+					/>
+				</div>
 			);
 		}
 	};

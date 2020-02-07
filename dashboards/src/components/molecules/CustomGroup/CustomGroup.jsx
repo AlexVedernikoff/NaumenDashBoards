@@ -1,14 +1,13 @@
 // @flow
-import {Button, CreationPanel, InfoPanel} from 'components/atoms';
+import {BASE_VALIDATION_SUBGROUP_PATH, IS_NEW} from 'components/molecules/GroupCreatingModal/constants';
+import {Button, CreationPanel, FieldError, InfoPanel} from 'components/atoms';
 import {createNewSubGroup} from 'components/molecules/GroupCreatingModal/helpers';
 import type {CustomGroup as CustomGroupType, SubGroup} from 'store/customGroups/types';
 import {CustomSubGroup, MaterialSelect} from 'components/molecules';
 import type {InfoPanelProps, Props, State} from './types';
-import {IS_NEW} from 'components/molecules/GroupCreatingModal/GroupCreatingModal';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
-import uuid from 'tiny-uuid';
 
 export class CustomGroup extends Component<Props, State> {
 	state = {
@@ -27,27 +26,9 @@ export class CustomGroup extends Component<Props, State> {
 
 	getGroupValue = (group: CustomGroupType) => group.id;
 
-	handleClickCreationPanel = () => {
-		const {onUpdate} = this.props;
-		const currentGroup = this.getCurrentGroup();
-
-		if (currentGroup) {
-			const subGroupId = uuid();
-			const {last, map} = currentGroup.subGroups;
-
-			onUpdate({
-				...currentGroup,
-				subGroups: {
-					...currentGroup.subGroups,
-					last: subGroupId,
-					map: {
-						...map,
-						[last]: {...map[last], next: subGroupId},
-						[subGroupId]: createNewSubGroup(subGroupId)
-					}
-				}
-			});
-		}
+	handleChangeGroupName = (groupId: string, name: string) => {
+		const {groups, onUpdate} = this.props;
+		onUpdate({...groups[groupId], name});
 	};
 
 	handleClickCreationButton = () => {
@@ -60,13 +41,24 @@ export class CustomGroup extends Component<Props, State> {
 		onCreate();
 	};
 
-	handleCloseLimitInfo = () => this.setState({showLimitInfo: false});
+	handleClickCreationPanel = () => {
+		const {onUpdate} = this.props;
+		const currentGroup = this.getCurrentGroup();
 
-	handleCloseUsedInWidgetsInfo = () => this.setState({showUseInfo: true, usedInWidgets: []});
+		if (currentGroup) {
+			const {subGroups} = currentGroup;
 
-	handleCloseRemovalInfo = () => this.setState({showRemovalInfo: false});
+			onUpdate({
+				...currentGroup,
+				subGroups: [
+					...subGroups,
+					createNewSubGroup()
+				]
+			});
+		}
+	};
 
-	handleClickRemoveButton = () => {
+	handleClickRemovalButton = () => {
 		const {selectedGroup, widgets} = this.props;
 		const usedInWidgets = [];
 
@@ -87,10 +79,11 @@ export class CustomGroup extends Component<Props, State> {
 			: this.setState({showRemovalInfo: true});
 	};
 
-	handleChangeGroupName = (groupId: string, name: string) => {
-		const {groups, onUpdate} = this.props;
-		onUpdate({...groups[groupId], name});
-	};
+	handleCloseLimitInfo = () => this.setState({showLimitInfo: false});
+
+	handleCloseRemovalInfo = () => this.setState({showRemovalInfo: false});
+
+	handleCloseUseInfo = () => this.setState({showUseInfo: false, usedInWidgets: []});
 
 	handleConfirmRemovalInfo = () => {
 		const {onRemove} = this.props;
@@ -99,52 +92,39 @@ export class CustomGroup extends Component<Props, State> {
 		onRemove();
 	};
 
-	handleRemoveSubGroup = (subGroup: SubGroup, prev: string) => {
+	handleRemoveSubGroup = (index: number) => {
 		const {onUpdate} = this.props;
-		const {id, next} = subGroup;
 		const currentGroup = this.getCurrentGroup();
 
 		if (currentGroup) {
-			let {first, last, map} = currentGroup.subGroups;
+			const {subGroups} = currentGroup;
 
-			if (first === id) {
-				first = next;
-			} else {
-				map[prev] = {...map[prev], next};
+			if (subGroups.length > 1) {
+				subGroups.splice(index, 1);
+
+				onUpdate({
+					...currentGroup,
+					subGroups
+				});
 			}
-
-			if (last === id) {
-				last = prev;
-			}
-
-			delete map[id];
-			onUpdate({
-				...currentGroup,
-				subGroups: {
-					first,
-					last,
-					map: {...map}
-				}
-			});
 		}
 	};
 
 	handleSelectGroup = (name: string, group: CustomGroupType) => this.props.onSelect(group.id);
 
-	handleUpdateSubGroup = (subGroup: SubGroup) => {
+	handleUpdateSubGroup = (index: number, subGroup: SubGroup) => {
 		const {onUpdate} = this.props;
 		const currentGroup = this.getCurrentGroup();
 
+		this.setState({showRemovalInfo: false});
+
 		if (currentGroup) {
+			const {subGroups} = currentGroup;
+			subGroups[index] = subGroup;
+
 			onUpdate({
 				...currentGroup,
-				subGroups: {
-					...currentGroup.subGroups,
-					map: {
-						...currentGroup.subGroups.map,
-						[subGroup.id]: subGroup
-					}
-				}
+				subGroups: [...subGroups]
 			});
 		}
 	};
@@ -163,16 +143,64 @@ export class CustomGroup extends Component<Props, State> {
 		}
 	};
 
+	renderGroup = () => (
+		<Fragment>
+			{this.renderSubGroups()}
+			{this.renderCreationPanel()}
+		</Fragment>
+	);
+
+	renderGroupSelect = () => {
+		const {groups} = this.props;
+		const currentGroup = this.getCurrentGroup();
+		// $FlowFixMe
+		const options: Array<CustomGroupType> = Object.values(groups);
+		// $FlowFixMe
+		const isEditingLabel = Boolean(currentGroup && currentGroup[IS_NEW]);
+
+		return (
+			<div className={mainStyles.shortField}>
+				<MaterialSelect
+					getOptionLabel={this.getGroupLabel}
+					getOptionValue={this.getGroupValue}
+					isEditingLabel={isEditingLabel}
+					isSearching={true}
+					onChangeLabel={this.handleChangeGroupName}
+					onClickCreationButton={this.handleClickCreationButton}
+					onSelect={this.handleSelectGroup}
+					options={options}
+					placeholder="Название группировки"
+					showCreationButton={true}
+					textCreationButton="Добавить группу"
+					value={currentGroup}
+				/>
+			</div>
+		);
+	};
+
+	renderGroupSelectContainer = () => (
+		<Fragment>
+			<div className={styles.groupSelectContainer}>
+				{this.renderGroupSelect()}
+				{this.renderRemovalGroupButton()}
+			</div>
+			{this.renderGroupSelectError()}
+		</Fragment>
+	);
+
+	renderGroupSelectError = () => <FieldError className={mainStyles.error} text={this.props.errors.name} />;
+
 	renderInfoPanel = (props: InfoPanelProps) => {
 		const {onClose, onConfirm, text} = props;
 
 		return (
-			<InfoPanel
-				className={styles.infoPanel}
-				onClose={onClose}
-				onConfirm={onConfirm}
-				text={text}
-			/>
+			<div className={styles.infoPanel}>
+				<InfoPanel
+					onClose={onClose}
+					onConfirm={onConfirm}
+					text={text}
+				/>
+			</div>
 		);
 	};
 
@@ -188,12 +216,29 @@ export class CustomGroup extends Component<Props, State> {
 		}
 	};
 
+	renderRemovalGroupButton = () => {
+		const {selectedGroup} = this.props;
+
+		if (selectedGroup) {
+			return (
+				<div className={mainStyles.field}>
+					<Button
+						onClick={this.handleClickRemovalButton}
+						variant="simple"
+					>
+						Удалить
+					</Button>
+				</div>
+			);
+		}
+	};
+
 	renderRemovalInfo = () => {
 		const {showRemovalInfo} = this.state;
 		const props = {
 			onClose: this.handleCloseRemovalInfo,
 			onConfirm: this.handleConfirmRemovalInfo,
-			text: 'Группировка будет удаленна без возможности восстановления.'
+			text: 'Группировка будет удалена без возможности восстановления.'
 		};
 
 		if (showRemovalInfo) {
@@ -201,93 +246,30 @@ export class CustomGroup extends Component<Props, State> {
 		}
 	};
 
-	renderSubGroup = (group: SubGroup, prevGroupId: string, isLast: boolean) => (
-		<CustomSubGroup
-			data={group}
-			isLast={isLast}
-			onRemove={this.handleRemoveSubGroup}
-			onUpdate={this.handleUpdateSubGroup}
-			prev={prevGroupId}
-		/>
-	);
+	renderSubGroup = (group: SubGroup, index: number, groups: Array<SubGroup>) => {
+		const {errors} = this.props;
+		const isLast = groups.length === 1;
+		const validationPath = `${BASE_VALIDATION_SUBGROUP_PATH}[${index}]`;
+
+		return (
+			<CustomSubGroup
+				errors={errors}
+				index={index}
+				isLast={isLast}
+				key={validationPath}
+				onRemove={this.handleRemoveSubGroup}
+				onUpdate={this.handleUpdateSubGroup}
+				subGroup={group}
+				validationPath={validationPath}
+			/>
+		);
+	};
 
 	renderSubGroups = () => {
 		const currentGroup = this.getCurrentGroup();
 
 		if (currentGroup) {
-			const {subGroups} = currentGroup;
-			const {first, map} = subGroups;
-			const isLast = Object.keys(map).length === 1;
-			const groups = [];
-			let group = map[first];
-			let prev = '';
-
-			while (group) {
-				groups.push(this.renderSubGroup(group, prev, isLast));
-				prev = group.id;
-				group = map[group.next];
-			}
-
-			return groups;
-		}
-	};
-
-	renderGroup = () => (
-		<Fragment>
-			{this.renderSubGroups()}
-			{this.renderCreationPanel()}
-		</Fragment>
-	);
-
-	renderGroupSelect = () => {
-		const {groups} = this.props;
-		// $FlowFixMe
-		const options: Array<CustomGroupType> = Object.values(groups);
-		const currentGroup = this.getCurrentGroup();
-		// $FlowFixMe
-		const isEditingLabel = Boolean(currentGroup && currentGroup[IS_NEW]);
-
-		return (
-			<div className={mainStyles.shortField}>
-				<MaterialSelect
-					isEditingLabel={isEditingLabel}
-					isSearching={true}
-					getOptionLabel={this.getGroupLabel}
-					getOptionValue={this.getGroupValue}
-					options={options}
-					onChangeLabel={this.handleChangeGroupName}
-					onSelect={this.handleSelectGroup}
-					placeholder="Название группировки"
-					onClickCreationButton={this.handleClickCreationButton}
-					showCreationButton={true}
-					textCreationButton="Добавить группу"
-					value={currentGroup}
-				/>
-			</div>
-		);
-	};
-
-	renderGroupSelectField = () => (
-		<div className={styles.groupSelectField}>
-			{this.renderGroupSelect()}
-			{this.renderRemoveGroupButton()}
-		</div>
-	);
-
-	renderRemoveGroupButton = () => {
-		const {selectedGroup} = this.props;
-
-		if (selectedGroup) {
-			return (
-				<div className={mainStyles.field}>
-					<Button
-						onClick={this.handleClickRemoveButton}
-						variant="simple"
-					>
-						Удалить
-					</Button>
-				</div>
-			);
+			return currentGroup.subGroups.map(this.renderSubGroup);
 		}
 	};
 
@@ -298,7 +280,7 @@ export class CustomGroup extends Component<Props, State> {
 
 		if (showUseInfo) {
 			const props = {
-				onClose: this.handleCloseUsedInWidgetsInfo,
+				onClose: this.handleCloseUseInfo,
 				text: `Группировка используется в виджетах: ${usedInWidgets.join(', ')}.`
 			};
 
@@ -313,7 +295,7 @@ export class CustomGroup extends Component<Props, State> {
 				{this.renderLimitInfo()}
 				{this.renderUseInfo()}
 				{this.renderTitle()}
-				{this.renderGroupSelectField()}
+				{this.renderGroupSelectContainer()}
 				{this.renderGroup()}
 			</Fragment>
 		);

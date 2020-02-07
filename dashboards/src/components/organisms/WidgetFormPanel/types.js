@@ -1,12 +1,12 @@
 // @flow
 export type State = {
 	currentTab: string
-}
+};
 
 export type TabParams = {
 	key: string,
 	title: string
-}
+};
 
 export type CreateFormData = {
 	name: string,

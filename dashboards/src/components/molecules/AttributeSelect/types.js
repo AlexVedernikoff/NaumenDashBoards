@@ -14,7 +14,7 @@ export type Props = {
 	removable: boolean,
 	showCreationButton: boolean,
 	value: Attribute | null
-}
+};
 
 export type State = {
 	foundOptions: Array<Attribute>,

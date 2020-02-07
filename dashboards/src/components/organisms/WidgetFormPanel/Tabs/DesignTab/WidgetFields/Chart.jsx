@@ -17,8 +17,6 @@ export class Chart extends FormBuilder {
 		}
 	}
 
-	getColors = () => this.props.values[FIELDS.colors] || [...VALUES.COLORS];
-
 	changeColor = (colorIndex: number, itemColor: string): void => {
 		let colors = this.getColors();
 		colors[colorIndex] = itemColor;
@@ -26,47 +24,14 @@ export class Chart extends FormBuilder {
 		this.props.setFieldValue(FIELDS.colors, colors);
 	};
 
+	getColors = () => this.props.values[FIELDS.colors] || [...VALUES.COLORS];
+
 	renderColorPalette = () => (
 		<div className={styles.field}>
 			<FieldLabel text="Цвета диаграммы" />
 			<ColorPalette colors={this.getColors()} onChange={this.changeColor} />
 		</div>
 	);
-
-	renderVisibilityAxisCheckboxes = (): any => {
-		const {axis, values} = this.props;
-		const {showXAxis, showYAxis} = FIELDS;
-
-		if (axis) {
-			const fields = [
-				{
-					label: 'Название оси X',
-					name: showXAxis,
-					value: values[showXAxis]
-				},
-				{
-					label: 'Название оси Y',
-					name: showYAxis,
-					value: values[showYAxis]
-				}
-			];
-
-			return fields.map(this.renderCheckBox);
-		}
-	};
-
-	renderValueCheckbox = (): any => {
-		const {showValue} = FIELDS;
-		const {values} = this.props;
-
-		const props = {
-			label: 'Значение',
-			name: showValue,
-			value: values[showValue]
-		};
-
-		return this.renderCheckBox(props);
-	};
 
 	renderLegendCheckbox = () => {
 		const {showLegend} = FIELDS;
@@ -99,6 +64,41 @@ export class Chart extends FormBuilder {
 				/>
 			</div>
 		);
+	};
+
+	renderValueCheckbox = (): any => {
+		const {showValue} = FIELDS;
+		const {values} = this.props;
+
+		const props = {
+			label: 'Значение',
+			name: showValue,
+			value: values[showValue]
+		};
+
+		return this.renderCheckBox(props);
+	};
+
+	renderVisibilityAxisCheckboxes = (): any => {
+		const {axis, values} = this.props;
+		const {showXAxis, showYAxis} = FIELDS;
+
+		if (axis) {
+			const fields = [
+				{
+					label: 'Название оси X',
+					name: showXAxis,
+					value: values[showXAxis]
+				},
+				{
+					label: 'Название оси Y',
+					name: showYAxis,
+					value: values[showYAxis]
+				}
+			];
+
+			return fields.map(this.renderCheckBox);
+		}
 	};
 
 	render () {

@@ -17,4 +17,4 @@ export type Props = {
 	renderFooter?: () => Node,
 	size: Size,
 	submitText: string
-}
+};

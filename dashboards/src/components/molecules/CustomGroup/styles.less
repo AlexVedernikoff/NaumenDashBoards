@@ -1,26 +1,26 @@
 @import '/styles/variables';
 
 :local {
-	@padding: 24px;
+	@offset: 24px;
 
 	.title {
 		font-weight: 500;
-		padding-top: @padding;
+		padding-top: @offset;
 	}
 
 	.creationPanel {
 		border: none;
 		margin-left: 0;
-		margin-top: 24px;
+		margin-top: @offset;
 		padding: 0;
 	}
 
-	.groupSelectField {
+	.groupSelectContainer {
 		align-items: center;
 		display: flex;
 	}
 
 	.infoPanel {
-		margin-top: 24px;
+		padding-top: @offset;
 	}
 }

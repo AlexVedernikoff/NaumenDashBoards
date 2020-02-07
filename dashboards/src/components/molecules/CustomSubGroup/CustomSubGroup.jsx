@@ -1,121 +1,101 @@
 // @flow
-import type {Condition} from 'store/customGroups/types';
-import {createNewCondition} from 'components/molecules/GroupCreatingModal/helpers';
-import {CustomSubGroupCondition} from 'components/molecules';
-import {MaterialTextInput} from 'components/atoms';
+import type {AndCondition} from 'store/customGroups/types';
+import {createNewAndCondition} from 'components/molecules/GroupCreatingModal/helpers';
+import {CustomSubGroupAndCondition} from 'components/molecules';
+import {FieldError, MaterialTextInput} from 'components/atoms';
+import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
+import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import type {Props} from './types';
-import React, {Fragment, PureComponent} from 'react';
+import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
-import uuid from 'tiny-uuid';
 
 export class CustomSubGroup extends PureComponent<Props> {
+	refName = createRef();
+
+	componentDidMount () {
+		const {current} = this.refName;
+		current && current.focus();
+	}
+
 	handleChangeName = (name: string, value: string) => {
-		const {data, onUpdate} = this.props;
-		onUpdate({...data, name: value});
+		const {index, onUpdate, subGroup} = this.props;
+		onUpdate(index, {...subGroup, name: value});
 	};
 
-	handleCreateCondition = (prevCondition: Condition) => {
-		const {data, onUpdate} = this.props;
-		const conditionId = uuid();
-		let {map} = data.conditions;
+	handleCreateAndCondition = () => {
+		const {index, onUpdate, subGroup} = this.props;
 
-		onUpdate({
-			...data,
-			conditions: {
-				...data.conditions,
-				map: {
-					...map,
-					[prevCondition.id]: {...prevCondition, next: conditionId},
-					[conditionId]: createNewCondition(conditionId, prevCondition.next)
-				}
-			}
+		onUpdate(index, {
+			...subGroup,
+			data: [
+				...subGroup.data,
+				createNewAndCondition()
+			]
 		});
 	};
 
-	handleRemoveCondition = (condition: Condition, prev: string) => {
-		const {data, isLast, onRemove, onUpdate, prev: prevSubGroupId} = this.props;
-		const {id, next, operator} = condition;
-		let {first, map} = data.conditions;
+	handleRemoveAndCondition = (index: number) => {
+		const {index: subGroupIndex, onRemove, onUpdate, subGroup} = this.props;
+		const {data} = subGroup;
+		data.splice(index, 1);
 
-		if (!isLast && Object.keys(map).length === 1) {
-			return onRemove(data, prevSubGroupId);
+		data.length === 0 ? onRemove(subGroupIndex) : onUpdate(subGroupIndex, {...subGroup, data});
+	};
+
+	handleUpdateAndCondition = (index: number, condition: AndCondition) => {
+		const {index: subGroupIndex, onUpdate, subGroup} = this.props;
+		const {data} = subGroup;
+		data[index] = condition;
+
+		onUpdate(subGroupIndex, {
+			...subGroup,
+			data: [...data]
+		});
+	};
+
+	renderAndCondition = (condition: AndCondition, index: number, conditions: Array<AndCondition>) => {
+		const {errors, isLast: isLastSubGroup, validationPath: currentPath} = this.props;
+		const hasLastPosition = conditions.length - 1 === index;
+		const isLast = isLastSubGroup && conditions.length === 1;
+		const validationPath = `${currentPath}.${FIELDS.data}[${index}]`;
+		let onCreate;
+
+		if (hasLastPosition) {
+			onCreate = this.handleCreateAndCondition;
 		}
 
-		if (first === id) {
-			first = next;
-		} else {
-			map[prev] = {...map[prev], next, operator};
-		}
-
-		delete map[id];
-		onUpdate({
-			...data,
-			conditions: {
-				first,
-				map: {...map}
-			}
-		});
-	};
-
-	handleUpdateCondition = (condition: Condition) => {
-		const {data, onUpdate} = this.props;
-
-		onUpdate({
-			...data,
-			conditions: {
-				...data.conditions,
-				map: {
-					...data.conditions.map,
-					[condition.id]: condition
-				}
-			}
-		});
-	};
-
-	renderCondition = (condition: Condition, prev: Condition | null, isLast: boolean) => {
 		return (
-			<CustomSubGroupCondition
-				data={condition}
+			<CustomSubGroupAndCondition
+				condition={condition}
+				disabled={!hasLastPosition}
+				errors={errors}
+				index={index}
 				isLast={isLast}
-				onCreate={this.handleCreateCondition}
-				onRemove={this.handleRemoveCondition}
-				onUpdate={this.handleUpdateCondition}
-				prev={prev}
+				key={validationPath}
+				onCreate={onCreate}
+				onRemove={this.handleRemoveAndCondition}
+				onUpdate={this.handleUpdateAndCondition}
+				validationPath={validationPath}
 			/>
 		);
 	};
 
-	renderConditions = () => {
-		const {data, isLast} = this.props;
-		const {first, map} = data.conditions;
-		const conditions = [];
-		const isLastCondition = isLast && Object.keys(map).length === 1;
-		let condition = map[first];
-		let prev = null;
-
-		while (condition) {
-			conditions.push(this.renderCondition(condition, prev, isLastCondition));
-			prev = condition;
-			condition = map[condition.next];
-		}
-
-		return (
-			<div className={styles.conditions}>
-				{conditions}
-			</div>
-		);
-	};
+	renderAndConditions = () => this.props.subGroup.data.map(this.renderAndCondition);
 
 	renderNameField = () => {
-		const {name} = this.props.data;
+		const {errors, subGroup, validationPath} = this.props;
+		const {name} = subGroup;
+		const errorKey = `${validationPath}.${FIELDS.name}`;
 
 		return (
 			<div className={styles.nameField}>
 				<MaterialTextInput
+					forwardedRef={this.refName}
 					onChange={this.handleChangeName}
 					placeholder="Название группы"
 					value={name}
 				/>
+				<FieldError className={mainStyles.error} text={errors[errorKey]} />
 			</div>
 		);
 	};
@@ -124,7 +104,7 @@ export class CustomSubGroup extends PureComponent<Props> {
 		return (
 			<Fragment>
 				{this.renderNameField()}
-				{this.renderConditions()}
+				{this.renderAndConditions()}
 			</Fragment>
 		);
 	}

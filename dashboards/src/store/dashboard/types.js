@@ -76,12 +76,12 @@ export type AutoUpdate = {
 	enabled: boolean,
 	fn?: IntervalID,
 	interval?: number
-}
+};
 
 export type AutoUpdateRequestPayload = {
 	enabled: boolean,
 	interval: number
-}
+};
 
 export type DashboardState = {
 	autoUpdate: AutoUpdate,

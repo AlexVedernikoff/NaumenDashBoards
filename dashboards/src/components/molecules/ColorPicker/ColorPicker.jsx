@@ -62,8 +62,8 @@ export class ColorPicker extends Component<Props, State> {
 					presetColors={presetColors}
 				/>
 				<div className={styles.pickerActions}>
-					<Button type="button" onClick={closePicker}>Отмена</Button>
-					<Button type="button" onClick={this.handleChangeComplete}>OK</Button>
+					<Button onClick={closePicker} type="button">Отмена</Button>
+					<Button onClick={this.handleChangeComplete} type="button">OK</Button>
 				</div>
 			</div>
 		);

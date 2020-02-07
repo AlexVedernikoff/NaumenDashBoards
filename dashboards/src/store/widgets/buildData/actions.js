@@ -1,13 +1,15 @@
 // @flow
 import {AXIS_FIELDS, CIRCLE_FIELDS, COMBO_FIELDS, SUMMARY_FIELDS, TABLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
-import {buildUrl, client} from 'utils/api';
-import type {BuildDataMap, ReceiveBuildDataPayload} from './types';
-import {createOrdinalName, getValue, WIDGET_VARIANTS} from 'utils/widget';
 import {BUILD_DATA_EVENTS} from './constants';
-import {DEFAULT_AGGREGATION} from 'components/molecules/AttributeRefInput/constants';
-import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import type {BuildDataMap, ReceiveBuildDataPayload} from './types';
+import {buildUrl, client} from 'utils/api';
 import {CHART_VARIANTS} from 'utils/chart';
+import {createOrdinalName, getValue, WIDGET_VARIANTS} from 'utils/widget';
+import type {CustomGroupsMap} from 'store/customGroups/types';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {transformGroupFormat} from 'store/widgets/helpers';
 import {TYPES} from 'store/sources/attributes/constants';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -53,8 +55,8 @@ const createCircleChartData = (widget: Widget) => {
 	};
 };
 
-const createPostData = (widget: Widget, {dataKey, ...fields}: Object) => {
-	const {aggregation, group, source} = FIELDS;
+const createPostData = (widget: Widget, {dataKey, ...fields}: Object, customGroups: CustomGroupsMap) => {
+	const {aggregation, source} = FIELDS;
 	const {COUNT, PERCENT} = DEFAULT_AGGREGATION;
 	const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = CHART_VARIANTS;
 	const {order, type} = widget;
@@ -97,14 +99,10 @@ const createPostData = (widget: Widget, {dataKey, ...fields}: Object) => {
 					}
 				}
 
-				// TODO временно, до правок на бэке
-				if (field === group && value && typeof value !== 'string') {
-					value = value.data;
-				}
-
 				sourceData[field] = value;
 			});
 
+			transformGroupFormat(sourceData, customGroups);
 			data.data[widget[createOrdinalName(dataKey, number)]] = sourceData;
 		});
 	} else {
@@ -142,14 +140,15 @@ const resolve = (type: string) => {
 const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let postData = {};
-		const {subjectUuid} = getState().dashboard.context;
+		const {customGroups, dashboard} = getState();
+		const {subjectUuid} = dashboard.context;
 
 		dispatch(requestAllBuildData(widgets));
 
 		widgets.forEach(widget => {
 			const {type} = widget;
 			const fields = resolve(type);
-			postData[widget.id] = createPostData(widget, fields);
+			postData[widget.id] = createPostData(widget, fields, customGroups);
 		});
 
 		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagrams', `requestContent,'${subjectUuid}'`), postData);
@@ -170,9 +169,10 @@ const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatc
 
 	try {
 		const {type} = widget;
-		const {subjectUuid} = getState().dashboard.context;
+		const {customGroups, dashboard} = getState();
+		const {subjectUuid} = dashboard.context;
 		const fields = resolve(type);
-		const postData = createPostData(widget, fields);
+		const postData = createPostData(widget, fields, customGroups);
 		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForCompositeDiagram', `requestContent,'${subjectUuid}'`), postData);
 
 		dispatch(

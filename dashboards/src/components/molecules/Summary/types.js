@@ -11,4 +11,4 @@ export type State = {
 	height: number,
 	title: string,
 	total: number
-}
+};

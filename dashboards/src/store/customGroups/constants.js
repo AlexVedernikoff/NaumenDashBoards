@@ -18,22 +18,13 @@ const CUSTOM_GROUP_TYPES = {
 	DATETIME
 };
 
-// Операторы условий подгрупп
-const AND: 'AND' = 'AND';
-const OR: 'OR' = 'OR';
-
-const OPERATORS = {
-	AND,
-	OR
-};
-
 // Типы данных операндов условий подгрупп
 const BETWEEN: 'BETWEEN' = 'BETWEEN';
 const LAST: 'LAST' = 'LAST';
 const NEAR: 'NEAR' = 'NEAR';
 const TODAY: 'TODAY' = 'TODAY';
 
-const OPERAND_TYPES = {
+const CONDITION_TYPES = {
 	BETWEEN,
 	LAST,
 	NEAR,
@@ -41,8 +32,7 @@ const OPERAND_TYPES = {
 };
 
 export {
+	CONDITION_TYPES,
 	CUSTOM_GROUP_TYPES,
-	CUSTOM_GROUPS_EVENTS,
-	OPERAND_TYPES,
-	OPERATORS
+	CUSTOM_GROUPS_EVENTS
 };

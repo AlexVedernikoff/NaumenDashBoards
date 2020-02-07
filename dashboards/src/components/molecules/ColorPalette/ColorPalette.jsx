@@ -53,7 +53,7 @@ export class ColorPalette extends Component<Props, State> {
 		if (showPalette) {
 			return (
 				<div className={styles.palettePicker}>
-					<ColorPicker onClick={this.changeColor} closePicker={this.closePicker} currentColor={currentColor}/>
+					<ColorPicker closePicker={this.closePicker} currentColor={currentColor} onClick={this.changeColor} />
 				</div>
 			);
 		}

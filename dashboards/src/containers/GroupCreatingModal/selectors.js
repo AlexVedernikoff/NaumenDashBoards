@@ -1,7 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {removeCustomGroup, saveCustomGroup} from 'store/customGroups/actions';
+import {createCustomGroup, deleteCustomGroup, updateCustomGroup} from 'store/customGroups/actions';
 import type {Widget} from 'store/widgets/data/types';
 
 export const props = (state: AppState): ConnectedProps => {
@@ -17,6 +17,7 @@ export const props = (state: AppState): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
-	removeCustomGroup,
-	saveCustomGroup
+	createCustomGroup,
+	deleteCustomGroup,
+	updateCustomGroup
 };

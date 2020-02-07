@@ -6,4 +6,4 @@ export type Props = {
 	children: Node,
 	placement: $Keys<typeof PLACEMENTS>,
 	text: string | Node
-}
+};

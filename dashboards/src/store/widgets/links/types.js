@@ -6,14 +6,14 @@ type Filter = {
 	attr: Attribute,
 	group: ?string,
 	value: string | number
-}
+};
 
 export type DrillDownMixin = {
 	cases?: [],
 	classFqn?: string | null,
 	filters: Array<Filter>,
 	title: string
-}
+};
 
 export type Link = {
 	data?: string,

@@ -30,12 +30,6 @@ export class AttributeSelect extends PureComponent<Props, State> {
 
 	getOptionValue = (attribute: Attribute) => attribute.code;
 
-	handleClickEditIcon = () => this.setState({showForm: true, showMenu: false});
-
-	handleClickOutside = () => this.setState({showMenu: false});
-
-	handleCloseForm = () => this.setState({showForm: false});
-
 	handleChangeSearchInput = (searchValue: string) => {
 		const {options} = this.props;
 		const reg = new RegExp(searchValue, 'i');
@@ -44,10 +38,16 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		this.setState({foundOptions, searchValue});
 	};
 
+	handleClickEditIcon = () => this.setState({showForm: true, showMenu: false});
+
+	handleClickOutside = () => this.setState({showMenu: false});
+
 	handleClickRemoveIcon = () => {
 		const {name, onRemove, onSelect} = this.props;
 		onRemove ? onRemove(name) : onSelect(name, null);
 	};
+
+	handleCloseForm = () => this.setState({showForm: false});
 
 	handleSelect = (value: Attribute) => {
 		const {name, onSelect} = this.props;
@@ -69,7 +69,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		const {onClickCreationButton, showCreationButton} = this.props;
 
 		if (showCreationButton) {
-			return <CreationPanel text="Cоздать поле" onClick={onClickCreationButton} />;
+			return <CreationPanel onClick={onClickCreationButton} text="Cоздать поле" />;
 		}
 	};
 

@@ -54,7 +54,7 @@ export class OperatorControl extends PureComponent<Props, State> {
 
 		return (
 			<div className={styles.option} key={value}>
-				<Icon data-value={value} onClick={this.handleClick}/>
+				<Icon data-value={value} onClick={this.handleClick} />
 			</div>
 		);
 	};

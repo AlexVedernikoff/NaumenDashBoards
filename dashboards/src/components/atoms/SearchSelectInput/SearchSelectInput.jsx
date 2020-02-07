@@ -5,6 +5,12 @@ import {SearchIcon} from 'icons/form';
 import styles from './styles.less';
 
 export class SearchSelectInput extends PureComponent<Props> {
+	static defaultProps = {
+		forwardedRef: {
+			current: null
+		}
+	};
+
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {onChange} = this.props;
 		const {value} = e.currentTarget;
@@ -17,7 +23,7 @@ export class SearchSelectInput extends PureComponent<Props> {
 	renderIcon = () => <SearchIcon className={styles.icon} />;
 
 	renderInput = () => {
-		const {value} = this.props;
+		const {forwardedRef, value} = this.props;
 
 		return (
 			<input
@@ -25,6 +31,7 @@ export class SearchSelectInput extends PureComponent<Props> {
 				onChange={this.handleChange}
 				onClick={this.handleClick}
 				placeholder="Поиск"
+				ref={forwardedRef}
 				value={value}
 			/>
 		);

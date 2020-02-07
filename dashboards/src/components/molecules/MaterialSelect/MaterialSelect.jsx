@@ -1,6 +1,6 @@
 // @flow
-import cn from 'classnames';
 import {ChevronDownIcon} from 'icons/form';
+import cn from 'classnames';
 import type {Option, Props, State} from './types';
 import {OutsideClickDetector} from 'components/atoms';
 import React, {PureComponent} from 'react';
@@ -31,6 +31,15 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		return getOptionValue ? getOptionValue(option) : option.value;
 	};
 
+	handleChangeLabel = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {onChangeLabel, value: currentValue} = this.props;
+		const {value} = e.currentTarget;
+
+		if (currentValue && onChangeLabel) {
+			onChangeLabel(this.getOptionValue(currentValue), value);
+		}
+	};
+
 	handleClickCreationButton = () => {
 		const {onClickCreationButton} = this.props;
 
@@ -42,15 +51,6 @@ export class MaterialSelect extends PureComponent<Props, State> {
 
 	handleClickValue = () => this.setState({showMenu: !this.state.showMenu});
 
-	handleChangeLabel = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {onChangeLabel, value: currentValue} = this.props;
-		const {value} = e.currentTarget;
-
-		if (currentValue && onChangeLabel) {
-			onChangeLabel(this.getOptionValue(currentValue), value);
-		}
-	};
-
 	handleSelect = (value: Option) => {
 		const {name, onSelect} = this.props;
 
@@ -59,6 +59,33 @@ export class MaterialSelect extends PureComponent<Props, State> {
 	};
 
 	renderCaret = () => <ChevronDownIcon className={styles.caret} />;
+
+	renderMenu = () => {
+		const {getOptionLabel, getOptionValue, isSearching, options, showCreationButton, textCreationButton, value} = this.props;
+		const {showMenu} = this.state;
+		let creationButton;
+
+		if (showCreationButton) {
+			creationButton = {
+				onClick: this.handleClickCreationButton,
+				text: textCreationButton
+			};
+		}
+
+		if (showMenu) {
+			return (
+				<SimpleSelectMenu
+					creationButton={creationButton}
+					getOptionLabel={getOptionLabel}
+					getOptionValue={getOptionValue}
+					isSearching={isSearching}
+					onSelect={this.handleSelect}
+					options={options}
+					value={value}
+				/>
+			);
+		}
+	};
 
 	renderPlaceholder = () => {
 		const {placeholder, value} = this.props;
@@ -101,33 +128,6 @@ export class MaterialSelect extends PureComponent<Props, State> {
 				{this.renderCaret()}
 			</div>
 		);
-	};
-
-	renderMenu = () => {
-		const {getOptionLabel, getOptionValue, isSearching, options, showCreationButton, textCreationButton, value} = this.props;
-		const {showMenu} = this.state;
-		let creationButton;
-
-		if (showCreationButton) {
-			creationButton = {
-				onClick: this.handleClickCreationButton,
-				text: textCreationButton
-			};
-		}
-
-		if (showMenu) {
-			return (
-				<SimpleSelectMenu
-					creationButton={creationButton}
-					getOptionLabel={getOptionLabel}
-					getOptionValue={getOptionValue}
-					isSearching={isSearching}
-					onSelect={this.handleSelect}
-					options={options}
-					value={value}
-				/>
-			);
-		}
 	};
 
 	render () {

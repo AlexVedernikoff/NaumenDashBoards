@@ -1,25 +1,28 @@
 // @flow
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
-import {AttributeCreatingModal, AttributeSelect, MiniSelect} from 'components/molecules';
-import {CalendarIcon, NumberIcon, TextIcon} from 'icons/form';
+import {
+	AttributeAggregation,
+	AttributeCreatingModal,
+	AttributeGroup,
+	AttributeSelect,
+	ComputedAttributeEditor
+} from 'components/molecules';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
-import {DATETIME_GROUP} from 'components/molecules/AttributeRefInput/constants';
-import {getAggregateOptions, getGroupOptions} from './helpers';
-import GroupCreatingModal from 'containers/GroupCreatingModal';
-import {GROUP_TYPES} from 'components/molecules/GroupCreatingModal/constants';
-import type {Props, RefButtonProps, RefInputProps, State} from './types';
+import {getDefaultAggregation} from 'components/molecules/AttributeAggregation/helpers';
+import {getDefaultSystemGroup} from 'components/molecules/AttributeGroup/helpers';
+import {getProcessedAttribute} from 'store/sources/attributes/helpers';
+import {isGroupKey} from 'store/widgets/helpers';
+import type {Node} from 'react';
+import type {Props, RefInputProps, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import {REF_INPUT_TYPES} from './constants';
 import type {SourceValue} from 'components/molecules/Source/types';
 import styles from './styles.less';
-import {Tip} from 'components/atoms';
 import {TYPES} from 'store/sources/attributes/constants';
 
 export class Attribute extends PureComponent<Props, State> {
 	state = {
-		showAggregationCreatingModal: false,
-		showAggregationEditingModal: false,
-		showGroupModal: false
+		showCreatingModal: false
 	};
 
 	applyCallback = (name: string, value: AttributeType | null) => {
@@ -31,34 +34,42 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 	};
 
-	createDefaultGroup = (data: string) => ({
-		data,
-		type: GROUP_TYPES.SYSTEM
-	});
-
 	getAttributeProps = () => {
 		const {
-			isDisabled,
-			isRemovable,
-			name,
-			onRemove,
+			isDisabled: disabled,
+			isRemovable: removable,
+			name, onRemove,
 			onSelect,
-			options,
-			refInputProps,
+			source,
 			value,
 			withCreate
 		} = this.props;
+		let {computedAttrs, options = this.getOptions(source)} = this.props;
+		let props = {};
+
+		if (withCreate) {
+			if (!computedAttrs) {
+				computedAttrs = [];
+			}
+
+			options = [...computedAttrs, ...options];
+
+			props = {
+				...props,
+				onClickCreationButton: this.handleClickCreationButton,
+				showCreationButton: true
+			};
+		}
 
 		return {
-			isDisabled,
-			isRemovable,
+			...props,
+			disabled,
 			name,
 			onRemove,
 			onSelect,
 			options,
-			refInputProps,
-			value,
-			withCreate
+			removable,
+			value
 		};
 	};
 
@@ -73,7 +84,22 @@ export class Attribute extends PureComponent<Props, State> {
 		return options;
 	};
 
-	handleChangeTitle = (parent?: AttributeType) => (name: string, title: string) => {
+	handleChangeGroup = (groupName: string, group: Object, attributeTitle: string) => {
+		const {name, onChangeTitle, onSelectRefInput, value} = this.props;
+
+		if (value && value.type !== TYPES.COMPUTED_ATTR && attributeTitle) {
+			const processedAttribute = value && getProcessedAttribute(value);
+
+			if (processedAttribute) {
+				processedAttribute.title = attributeTitle;
+				onChangeTitle(name, value);
+			}
+		}
+
+		onSelectRefInput(groupName, group);
+	};
+
+	handleChangeTitle = (parent: AttributeType | null) => (name: string, title: string) => {
 		const {onChangeTitle, value} = this.props;
 
 		if (value) {
@@ -87,13 +113,16 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 	};
 
-	handleRemoveAttribute = (code: string) => {
+	handleClickCreationButton = () => this.setState({showCreatingModal: true});
+
+	handleCloseCreatingModal = () => this.setState({showCreatingModal: false});
+
+	handleRemoveComputedAttribute = (code: string) => {
 		const {name, onRemoveAttribute} = this.props;
 		onRemoveAttribute(name, code);
-		this.hideAggregationModal();
 	};
 
-	handleSelect = (parent?: AttributeType) => (name: string, value: AttributeType) => {
+	handleSelect = (parent: AttributeType | null) => (name: string, value: AttributeType) => {
 		const {onSelect, value: prevValue} = this.props;
 
 		if (parent) {
@@ -122,13 +151,7 @@ export class Attribute extends PureComponent<Props, State> {
 
 		if (refInputProps && (!prevValue || prevValue.type !== value.type)) {
 			const {name: refName} = refInputProps;
-			const refOptions = [];
-			let refValue = refOptions[0].value;
-
-			if (/group/i.test(refName)) {
-				const group = TYPES.DATE.includes(value.type) ? DATETIME_GROUP.MONTH : refValue;
-				refValue = this.createDefaultGroup(group);
-			}
+			const refValue = isGroupKey(refName) ? getDefaultSystemGroup(value) : getDefaultAggregation(value);
 
 			onSelectRefInput(refName, refValue);
 		}
@@ -136,118 +159,29 @@ export class Attribute extends PureComponent<Props, State> {
 		this.applyCallback(name, value);
 	};
 
-	handleSubmitGroup = (group: Object, attributeTitle: string) => {
-		const {name, onChangeTitle, onSelectRefInput, refInputProps, value} = this.props;
+	handleSubmitCreatingModal = (attribute: ComputedAttr) => {
+		const {name, onSaveComputedAttribute} = this.props;
 
-		if (value && attributeTitle) {
-			let necessaryValue = value;
-
-			while (necessaryValue.ref) {
-				necessaryValue = necessaryValue.ref;
-			}
-
-			if (necessaryValue) {
-				// $FlowFixMe
-				necessaryValue.title = attributeTitle;
-				onChangeTitle(name, value);
-			}
-		}
-
-		if (refInputProps) {
-			onSelectRefInput(refInputProps.name, group);
-		}
-
-		this.hideGroupModal();
+		this.setState({showCreatingModal: false});
+		onSaveComputedAttribute(name, attribute);
 	};
 
-	handleSubmitModal = (attribute: ComputedAttr) => {
-		const {name, onSaveAttribute} = this.props;
-
-		onSaveAttribute(name, attribute);
-		this.hideAggregationModal();
+	saveComputedAttribute = (value: ComputedAttr) => {
+		const {name, onSaveComputedAttribute} = this.props;
+		onSaveComputedAttribute(name, value);
 	};
 
-	hideAggregationModal = () => this.setState({
-		showAggregationCreatingModal: false,
-		showAggregationEditingModal: false
-	});
-
-	hideGroupModal = () => this.setState({showGroupModal: false});
-
-	mixinCreate = (props: Object, parent: AttributeType | null) => {
-		const {computedAttrs} = this.props;
-		let {options} = props;
-
-		if (!parent && Array.isArray(computedAttrs)) {
-			options = [...computedAttrs, ...options];
-		}
-
-		return {
-			...props,
-			onClickCreationButton: this.showCreatingModal,
-			options,
-			showCreationButton: true
-		};
-	};
-
-	resolveGroupIcon = () => {
-		const {value} = this.props;
-		const type = value ? value.type : '';
-
-		if (TYPES.INTEGER.includes(type)) {
-			return <NumberIcon />;
-		}
-
-		if (TYPES.DATE.includes(type)) {
-			return <CalendarIcon />;
-		}
-
-		return <TextIcon />;
-	};
-
-	resolveRefInput = () => {
-		const {refInputProps} = this.props;
-
-		if (refInputProps && typeof refInputProps === 'object') {
-			const {type} = refInputProps;
-			const {AGGREGATION, GROUP} = REF_INPUT_TYPES;
-
-			switch (type.toUpperCase()) {
-				case AGGREGATION:
-					return this.renderAggregation(refInputProps);
-				case GROUP:
-					return this.renderGroup();
-			}
-		}
-	};
-
-	showCreatingModal = () => this.setState({showAggregationCreatingModal: true});
-
-	showEditingModal = () => this.setState({showAggregationEditingModal: true});
-
-	showGroupModal = () => {
-		const {value} = this.props;
-
-		if (value) {
-			this.setState({showGroupModal: true});
-		}
-	};
+	showCreatingModal = () => this.setState({showCreatingModal: true});
 
 	renderAggregation = (refInputProps: RefInputProps) => {
 		const {onSelectRefInput, value} = this.props;
 		const {name, value: refValue} = refInputProps;
 
-		if (value && value.type === TYPES.COMPUTED_ATTR) {
-			return this.renderComputedAggregation();
-		}
-
-		const options = getAggregateOptions(value);
-
 		return (
-			<MiniSelect
-				onSelect={onSelectRefInput}
+			<AttributeAggregation
+				attribute={value}
 				name={name}
-				options={options}
+				onSelect={onSelectRefInput}
 				tip="Агрегация"
 				value={refValue}
 			/>
@@ -255,18 +189,10 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	renderAttribute = (attributeProps: Object) => {
-		const {source} = this.props;
-		const {parent, refInputProps, ...selectProps} = attributeProps;
-		const {options, value, withCreate} = selectProps;
+		const {refInputProps} = this.props;
+		const {parent = null, ...selectProps} = attributeProps;
+		const {value} = selectProps;
 		let props = selectProps;
-
-		if (!options) {
-			props.options = this.getOptions(source);
-		}
-
-		if (withCreate) {
-			props = this.mixinCreate(props, parent);
-		}
 
 		if (value) {
 			props.onChangeTitle = this.handleChangeTitle(parent);
@@ -281,22 +207,38 @@ export class Attribute extends PureComponent<Props, State> {
 			}
 		}
 
-		const render = refInputProps ? this.renderAttributeInputWithRef : this.renderAttributeInput;
-		return render(props, parent);
+		if (refInputProps) {
+			return this.renderAttributeWithRef(
+				this.renderRefByType(refInputProps),
+				this.renderSelect({
+					...props,
+					onSelect: this.handleSelectWithRef(parent)
+				})
+			);
+		}
+
+		return this.renderSelect({
+			...props,
+			onSelect: this.handleSelect(parent)
+		});
 	};
 
-	renderAttributeInput = (props: Object, parent: AttributeType, withRefInput: boolean = false) => this.renderSelect({
-		...props,
-		onSelect: withRefInput ? this.handleSelectWithRef(parent) : this.handleSelect(parent)
-	});
+	renderAttributeByType = () => {
+		const {value} = this.props;
+		const props = this.getAttributeProps();
 
-	renderAttributeInputWithRef = (props: Object, parent: AttributeType) => (
-		<div className={styles.combinedInputs}>
-			<div className={styles.combinedLeftInput}>
-				{this.resolveRefInput()}
+		return value && value.type === TYPES.COMPUTED_ATTR
+			? this.renderComputedAttribute(props)
+			: this.renderAttribute(props);
+	};
+
+	renderAttributeWithRef = (ref: Node, attribute: Node) => (
+		<div className={styles.combinedContainer}>
+			<div className={styles.combinedRef}>
+				{ref}
 			</div>
-			<div className={styles.combinedRightInput}>
-				{this.renderAttributeInput(props, parent, true)}
+			<div className={styles.combinedAttribute}>
+				{attribute}
 			</div>
 		</div>
 	);
@@ -308,48 +250,30 @@ export class Attribute extends PureComponent<Props, State> {
 		value: parent.ref
 	});
 
-	renderComputedAggregation = () => {
-		const props = {
-			content: 'f(x)',
-			onClick: this.showEditingModal,
-			tip: 'Редактировать поле'
+	renderComputedAttribute = (props: Object) => {
+		props = {
+			...props,
+			onChangeTitle: this.handleChangeTitle(null),
+			onSelect: this.handleSelect(null)
 		};
 
-		return (
-			<Fragment>
-				{this.renderRefButton(props)}
-				{this.renderEditingModal()}
-			</Fragment>
+		return this.renderAttributeWithRef(
+			this.renderComputedAttributeEditor(),
+			this.renderSelect(props)
 		);
 	};
 
-	renderCreatingModal = () => {
-		const {sources} = this.props;
-		const {showAggregationCreatingModal} = this.state;
-
-		if (showAggregationCreatingModal) {
-			return (
-				<AttributeCreatingModal
-					onClose={this.hideAggregationModal}
-					onSubmit={this.handleSubmitModal}
-					sources={sources}
-				/>
-			);
-		}
-	};
-
-	renderEditingModal = () => {
+	renderComputedAttributeEditor = () => {
 		const {sources, value} = this.props;
-		const {showAggregationEditingModal} = this.state;
-		// $FlowFixMe
-		const attribute: ComputedAttr = value;
 
-		if (showAggregationEditingModal && attribute) {
+		if (value && value.type === TYPES.COMPUTED_ATTR) {
+			// $FlowFixMe
+			const attribute: ComputedAttr = value;
+
 			return (
-				<AttributeCreatingModal
-					onClose={this.hideAggregationModal}
-					onRemove={this.handleRemoveAttribute}
-					onSubmit={this.handleSubmitModal}
+				<ComputedAttributeEditor
+					onRemove={this.handleRemoveComputedAttribute}
+					onSubmit={this.saveComputedAttribute}
 					sources={sources}
 					value={attribute}
 				/>
@@ -357,48 +281,40 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 	};
 
-	renderGroup = () => {
-		const props = {
-			content: this.resolveGroupIcon(),
-			onClick: this.showGroupModal,
-			tip: 'Группировка'
-		};
+	renderCreatingModal = () => {
+		const {sources} = this.props;
+		const {showCreatingModal} = this.state;
 
-		return (
-			<Fragment>
-				{this.renderRefButton(props)}
-				{this.renderGroupCreatingModal()}
-			</Fragment>
-		);
-	};
-
-	renderGroupCreatingModal = () => {
-		const {refInputProps, value} = this.props;
-		const {showGroupModal} = this.state;
-
-		if (refInputProps) {
-			const systemOptions = getGroupOptions(value);
-			let {value: group} = refInputProps;
-
-			if (typeof group === 'string') {
-				group = this.createDefaultGroup(group);
-			}
-
-			if (showGroupModal) {
-				return (
-					<GroupCreatingModal
-						attribute={value}
-						onClose={this.hideGroupModal}
-						onSubmit={this.handleSubmitGroup}
-						systemOptions={systemOptions}
-						value={group}
-					/>
-				);
-			}
+		if (showCreatingModal) {
+			return (
+				<AttributeCreatingModal
+					onClose={this.handleCloseCreatingModal}
+					onSubmit={this.handleSubmitCreatingModal}
+					sources={sources}
+				/>
+			);
 		}
 	};
 
-	renderParentAttribute = (props: Object, parent: AttributeType) => (
+	renderGroup = (refInputProps: RefInputProps) => {
+		const {name, value} = refInputProps;
+		let {value: attribute} = this.props;
+
+		if (!attribute || (attribute && attribute.type !== TYPES.COMPUTED_ATTR)) {
+			attribute = attribute && getProcessedAttribute(attribute);
+
+			return (
+				<AttributeGroup
+					attribute={attribute}
+					name={name}
+					onChange={this.handleChangeGroup}
+					value={value}
+				/>
+			);
+		}
+	};
+
+	renderParentAttribute = (props: Object, parent: AttributeType | null) => (
 		<div className={styles.parentInput}>
 			{this.renderSelect({
 				...props,
@@ -407,26 +323,24 @@ export class Attribute extends PureComponent<Props, State> {
 		</div>
 	);
 
-	renderRefButton = (props: RefButtonProps) => {
-		const {content, onClick, tip} = props;
+	renderRefByType = (refInputProps: RefInputProps) => {
+		const {type} = refInputProps;
+		const {AGGREGATION, GROUP} = REF_INPUT_TYPES;
 
-		return (
-			<Tip text={tip}>
-				<div className={styles.refButton} onClick={onClick}>
-					{content}
-				</div>
-			</Tip>
-		);
+		switch (type.toUpperCase()) {
+			case AGGREGATION:
+				return this.renderAggregation(refInputProps);
+			case GROUP:
+				return this.renderGroup(refInputProps);
+		}
 	};
 
 	renderSelect = (props: Object) => <AttributeSelect {...props} />;
 
 	render () {
-		const props = this.getAttributeProps();
-
 		return (
 			<Fragment>
-				{this.renderAttribute(props)}
+				{this.renderAttributeByType()}
 				{this.renderCreatingModal()}
 			</Fragment>
 		);

@@ -1,5 +1,5 @@
 // @flow
-import {CUSTOM_GROUPS_EVENTS, CUSTOM_GROUP_TYPES, OPERAND_TYPES, OPERATORS} from './constants';
+import {CONDITION_TYPES, CUSTOM_GROUPS_EVENTS, CUSTOM_GROUP_TYPES} from './constants';
 
 export type BetweenOperandData = {
 	endDate: string,
@@ -11,53 +11,33 @@ export type OperandData =
 	| number
 ;
 
-export type Operand = {
+export type ConditionType = $Keys<typeof CONDITION_TYPES>;
+
+export type OrCondition = {
 	data: OperandData | null,
-	type: $Keys<typeof OPERAND_TYPES>
+	type: $Keys<typeof CONDITION_TYPES>
 };
 
-export type Operator = $Keys<typeof OPERATORS>;
-
-export type Condition = {
-	id: string,
-	next: string,
-	operand: Operand,
-	operator: Operator | null,
-};
-
-export type ConditionsMap = {
-	[string]: Condition
-};
+export type AndCondition = Array<OrCondition>;
 
 export type SubGroup = {
-	conditions: {
-		first: string,
-		map: ConditionsMap
-	},
-	id: string,
-	name: string,
-	next: string,
-};
-
-export type SubGroupsMap = {
-	[string]: SubGroup
+	data: Array<AndCondition>,
+	name: string
 };
 
 export type CustomGroupType = $Keys<typeof CUSTOM_GROUP_TYPES>;
 
+export type CustomGroupId = string | Symbol;
+
 export type CustomGroup = {
-	id: string,
+	id: CustomGroupId,
 	name: string,
-	subGroups: {
-		first: string,
-		last: string,
-		map: SubGroupsMap
-	},
+	subGroups: Array<SubGroup>,
 	type: CustomGroupType
 };
 
 export type CustomGroupsMap = {
-	[string]: CustomGroup
+	[CustomGroupId]: CustomGroup
 };
 
 type RemoveCustomGroup = {

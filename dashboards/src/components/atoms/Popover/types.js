@@ -7,4 +7,4 @@ export type Props = {
 	placement: $Keys<typeof PLACEMENTS>,
 	renderContent?: () => Node,
 	text: string
-}
+};

@@ -19,7 +19,7 @@ export type NewToast = {
 	text: string,
 	time?: number,
 	type?: ToastType
-}
+};
 
 export type Toast = {
 	id: string,
@@ -31,7 +31,7 @@ export type Toast = {
 
 export type ToastMap = {
 	[string]: Toast
-}
+};
 
 type AddToast = {
 	type: typeof TOASTS_EVENTS.ADD_TOAST,

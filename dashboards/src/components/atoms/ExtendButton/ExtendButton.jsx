@@ -15,7 +15,7 @@ export class ExtendButton extends PureComponent<Props> {
 
 		return (
 			<div className={styles.container} onClick={onClick}>
-				<PlusIcon className={this.getIconClassName()}/>
+				<PlusIcon className={this.getIconClassName()} />
 				<div className={this.getTextClassName()}>{text}</div>
 			</div>
 		);

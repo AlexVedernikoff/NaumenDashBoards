@@ -15,7 +15,7 @@ export type AttributeData = {
 	data: Attribute[],
 	error: boolean,
 	loading: boolean
-}
+};
 
 export type AttributeMap = {
 	[key: string]: AttributeData

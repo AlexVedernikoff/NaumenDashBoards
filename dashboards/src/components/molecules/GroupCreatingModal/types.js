@@ -1,14 +1,16 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {CustomGroupType} from 'store/customGroups/types';
-import {GROUP_TYPES} from './constants';
+import type {CustomGroupId, CustomGroupType} from 'store/customGroups/types';
+import type {GroupType} from 'components/molecules/AttributeGroup/types';
 import type {Props as ContainerProps} from 'containers/GroupCreatingModal/types';
-
-export type GroupType = $Keys<typeof GROUP_TYPES>;
 
 export type GroupValue = {
 	data: string,
 	type: GroupType
+};
+
+export type ErrorsMap = {
+	[string]: string
 };
 
 export type Props = {
@@ -22,8 +24,10 @@ export type Props = {
 export type State = {
 	attributeTitle: string,
 	customGroupType: CustomGroupType,
-	selectedCustomGroup: string,
+	errors: ErrorsMap,
+	isSubmitting: boolean,
+	selectedCustomGroup: CustomGroupId,
 	showSaveInfo: boolean,
-	systemValue: Object,
+	systemValue: Object | null,
 	type: GroupType
 };

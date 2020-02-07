@@ -2,6 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Option} from 'components/molecules/SourceControl/types';
 import {TYPES} from './constants';
+import {TYPES as ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 
 type SecondTemplateType =
 	| typeof TYPES.CONSTANT
@@ -12,11 +13,11 @@ type ComputeData = {
 	aggregation: string,
 	attr: Attribute,
 	dataKey: string
-}
+};
 
 type ComputeDataMap = {
 	[string]: ComputeData
-}
+};
 
 export type ComputedAttr = {
 	code: string,
@@ -24,7 +25,7 @@ export type ComputedAttr = {
 	state: string,
 	stringForCompute: string,
 	title: string,
-	type: string
+	type: typeof ATTRIBUTE_TYPES.COMPUTED_ATTR
 };
 
 export type Control = {
@@ -33,7 +34,7 @@ export type Control = {
 	prev: string,
 	type: string,
 	value: null,
-}
+};
 
 export type Props = {
 	onClose: () => any,
@@ -53,4 +54,4 @@ export type State = {
 	secondTemplateType: SecondTemplateType,
 	showRemoveInfo: boolean,
 	title: string
-}
+};

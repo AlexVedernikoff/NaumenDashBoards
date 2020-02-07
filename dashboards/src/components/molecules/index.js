@@ -1,15 +1,19 @@
 // @flow
 import Attribute from './Attribute';
+import AttributeAggregation from './AttributeAggregation';
 import AttributeCreatingModal from './AttributeCreatingModal';
-import AttributeRefInput from './AttributeRefInput';
+import AttributeGroup from './AttributeGroup';
 import AttributeSelect from './AttributeSelect';
 import Chart from './Chart';
 import ColorPalette from './ColorPalette';
 import ColorPicker from './ColorPicker';
+import ComputedAttributeEditor from './ComputedAttributeEditor';
 import ConstantControl from './ConstantControl';
 import CustomGroup from './CustomGroup';
 import CustomSubGroup from './CustomSubGroup';
-import CustomSubGroupCondition from './CustomSubGroupCondition';
+import CustomSubGroupAndCondition from './CustomSubGroupAndCondition';
+import CustomSubGroupOrCondition from './CustomSubGroupOrCondition';
+import Datepicker from './Datepicker';
 import Diagram from './Diagram';
 import GroupCreatingModal from './GroupCreatingModal';
 import InputForm from './InputForm';
@@ -31,16 +35,20 @@ import WidgetRemovalModal from './WidgetRemovalModal';
 
 export {
 	Attribute,
+	AttributeAggregation,
 	AttributeCreatingModal,
-	AttributeRefInput,
+	AttributeGroup,
 	AttributeSelect,
 	Chart,
 	ColorPalette,
 	ColorPicker,
+	ComputedAttributeEditor,
 	ConstantControl,
 	CustomGroup,
 	CustomSubGroup,
-	CustomSubGroupCondition,
+	CustomSubGroupAndCondition,
+	CustomSubGroupOrCondition,
+	Datepicker,
 	Diagram,
 	GroupCreatingModal,
 	InputForm,

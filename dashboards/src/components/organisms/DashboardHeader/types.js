@@ -5,7 +5,7 @@ export type ExportButtonProps = {
 	icon: Node,
 	tip: string,
 	way: string
-}
+};
 
 export type State = {
 	showModal: boolean

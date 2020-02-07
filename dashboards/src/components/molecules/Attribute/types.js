@@ -10,9 +10,7 @@ import type {SourceValue} from 'components/molecules/Source/types';
 export type OnSelectCallback = (name: string, value: Attribute) => void;
 
 export type State = {
-	showAggregationCreatingModal: boolean,
-	showAggregationEditingModal: boolean,
-	showGroupModal: boolean
+	showCreatingModal: boolean
 };
 
 export type RefInputProps = {
@@ -23,13 +21,7 @@ export type RefInputProps = {
 	value: string
 };
 
-export type RefButtonProps = {
-	content: Node,
-	onClick: () => void,
-	tip: string
-};
-
-type Option = Attribute | ComputedAttr;
+export type AttributeValue = Attribute | ComputedAttr;
 
 export type Props = {
 	computedAttrs?: Array<ComputedAttr>,
@@ -38,17 +30,17 @@ export type Props = {
 	isDisabled: boolean,
 	isRemovable: boolean,
 	name: string,
-	onChangeTitle: (name: string, value: Option) => void,
+	onChangeTitle: (name: string, value: AttributeValue) => void,
+	onRemove: (name: string) => void,
 	onRemoveAttribute: (name: string, code: string) => void,
-	onSaveAttribute: (name: string, value: ComputedAttr) => void,
-	onSelect: (name: string, value: Option | null) => void,
+	onSaveComputedAttribute: (name: string, value: ComputedAttr) => void,
+	onSelect: (name: string, value: AttributeValue | null) => void,
 	onSelectCallback?: OnSelectCallback,
 	onSelectRefInput: (name: string, value: any) => void,
+	options: Array<AttributeValue>,
 	refInputProps?: RefInputProps,
 	source: SourceValue,
 	sources: Array<SourceOption>,
-	value: Option | null,
+	value: AttributeValue | null,
 	withCreate: boolean,
-	onRemove: (name: string) => void,
-	options: Array<Option>
 };

@@ -1,6 +1,7 @@
 // @flow
-import type {CustomGroup, CustomGroupsMap} from 'store/customGroups/types';
+import type {CustomGroup, CustomGroupId, CustomGroupsMap} from 'store/customGroups/types';
 import {FormikProps} from 'formik';
+import type {ThunkAction} from 'store/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
@@ -9,8 +10,9 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	removeCustomGroup: (groupId: string) => any,
-	saveCustomGroup: (group: CustomGroup) => any
+	createCustomGroup: (group: CustomGroup) => ThunkAction,
+	deleteCustomGroup: (id: CustomGroupId) => ThunkAction,
+	updateCustomGroup: (group: CustomGroup, remote?: boolean) => ThunkAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions & FormikProps;

@@ -25,7 +25,7 @@ export class IconButton extends PureComponent<Props> {
 	};
 
 	renderButtonWithTip = () => (
-		<Tooltip text={this.props.tip} placement={PLACEMENTS.BOTTOM}>
+		<Tooltip placement={PLACEMENTS.BOTTOM} text={this.props.tip}>
 			{this.renderButton()}
 		</Tooltip>
 	);

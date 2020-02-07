@@ -1,8 +1,8 @@
 // @flow
 import cn from 'classnames';
+import {PLACEMENTS} from './constants';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import {PLACEMENTS} from './constants';
 import styles from './styles.less';
 
 class Tooltip extends Component<Props> {

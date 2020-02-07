@@ -2,7 +2,7 @@
 import cn from 'classnames';
 import type {DataSource} from 'store/sources/data/types';
 import type {Props, State} from './types';
-import React, {Fragment, PureComponent} from 'react';
+import React, {createRef, Fragment, PureComponent} from 'react';
 import {SearchSelectInput} from 'components/atoms';
 import styles from './styles.less';
 import {ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
@@ -18,8 +18,11 @@ export class SourceTree extends PureComponent<Props, State> {
 		searchValue: ''
 	};
 
+	searchInputRef = createRef();
+
 	componentDidMount () {
 		this.expandSelected();
+		this.focusOnSearchInput();
 	}
 
 	addFoundSourceParents = (foundSources: Array<string>, value: string | null) => {
@@ -56,6 +59,11 @@ export class SourceTree extends PureComponent<Props, State> {
 		}
 	};
 
+	focusOnSearchInput = () => {
+		const {current} = this.searchInputRef;
+		current && current.focus();
+	};
+
 	getClassName = () => cn(styles.container, this.props.className);
 
 	handleChangeSearchInput = (searchValue: string) => {
@@ -72,6 +80,14 @@ export class SourceTree extends PureComponent<Props, State> {
 		this.setState({foundSources, searchValue});
 	};
 
+	handleClickTitle = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+		const {onSelect, sources} = this.props;
+		const {value} = e.currentTarget.dataset;
+		const {title: label} = sources[value];
+
+		onSelect({label, value});
+	};
+
 	handleClickToggleIcon = (e: SyntheticMouseEvent<HTMLElement>) => {
 		const {value} = e.currentTarget.dataset;
 		let {expanded} = this.state;
@@ -79,14 +95,6 @@ export class SourceTree extends PureComponent<Props, State> {
 
 		e.stopPropagation();
 		this.setState({expanded});
-	};
-
-	handleClickTitle = (e: SyntheticMouseEvent<HTMLDivElement>) => {
-		const {onSelect, sources} = this.props;
-		const {value} = e.currentTarget.dataset;
-		const {title: label} = sources[value];
-
-		onSelect({value, label});
 	};
 
 	isExpanded = (value: string) => {
@@ -113,7 +121,7 @@ export class SourceTree extends PureComponent<Props, State> {
 	renderNode = (source: DataSource) => {
 		const {value: currentSource} = this.props;
 		const {foundSources, searchValue} = this.state;
-		const {value, title} = source;
+		const {title, value} = source;
 		const isSelected = currentSource && currentSource.value === value;
 		const isFound = searchValue && title.toLowerCase().includes(searchValue.toLowerCase());
 		const nodeCN = cn({
@@ -135,7 +143,13 @@ export class SourceTree extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSearchInput = () => <SearchSelectInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
+	renderSearchInput = () => (
+		<SearchSelectInput
+			forwardedRef={this.searchInputRef}
+			onChange={this.handleChangeSearchInput}
+			value={this.state.searchValue}
+		/>
+	);
 
 	renderTitle = (source: DataSource) => {
 		const {title, value} = source;

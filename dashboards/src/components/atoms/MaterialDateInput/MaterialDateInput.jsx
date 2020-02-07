@@ -1,30 +1,59 @@
 // @flow
 import {CalendarIcon} from 'icons/form';
-import type {Props} from './types';
+import {Datepicker} from 'components/molecules';
+import moment from 'moment';
+import {OutsideClickDetector} from 'components/atoms';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
-export class MaterialDateInput extends PureComponent<Props> {
-	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {name, onChange} = this.props;
-		const {value} = e.currentTarget;
-
-		onChange(name, value);
+export class MaterialDateInput extends PureComponent<Props, State> {
+	state = {
+		showDatepicker: false
 	};
 
-	renderCalendarIcon = () => <CalendarIcon className={styles.calendar} />;
+	handleClickCalendarIcon = () => this.setState({showDatepicker: !this.state.showDatepicker});
 
-	renderInput = () => <input className={styles.input} onChange={this.handleChange} type="date" />;
+	handleClickOutside = () => this.setState({showDatepicker: false});
 
-	renderValue = () => <div>{this.props.value}</div>;
+	handleSelect = (date: string) => {
+		const {name, onChange} = this.props;
+
+		this.setState({showDatepicker: false});
+		onChange(name, date);
+	};
+
+	renderCalendarIcon = () => <CalendarIcon className={styles.calendarIcon} onClick={this.handleClickCalendarIcon} />;
+
+	renderDatepicker = () => {
+		const {value} = this.props;
+		const {showDatepicker} = this.state;
+
+		if (showDatepicker) {
+			return (
+				<div className={styles.datepickerContainer}>
+					<Datepicker onSelect={this.handleSelect} value={value} />
+				</div>
+			);
+		}
+	};
+
+	renderValue = () => {
+		const {value} = this.props;
+		const date = value ? moment(value).format('DD.MM.YYYY') : '';
+
+		return <div className={styles.valueContainer}>{date}</div>;
+	};
 
 	render () {
 		return (
-			<div className={styles.container}>
-				{this.renderValue()}
-				{this.renderInput()}
-				{this.renderCalendarIcon()}
-			</div>
+			<OutsideClickDetector onClickOutside={this.handleClickOutside}>
+				<div className={styles.container}>
+					{this.renderValue()}
+					{this.renderCalendarIcon()}
+					{this.renderDatepicker()}
+				</div>
+			</OutsideClickDetector>
 		);
 	}
 }

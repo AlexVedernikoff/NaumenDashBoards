@@ -1,9 +1,9 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
+import type {Attribute} from 'store/sources/attributes/types';
 import {CHART_TYPES, CHART_VARIANTS, LEGEND_POSITIONS} from './constants';
 import {createOrdinalName, getMainOrdinalNumber} from 'utils/widget';
-import {DEFAULT_AGGREGATION} from 'components/molecules/AttributeRefInput/constants';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {FIELDS, VALUES} from 'components/organisms/WidgetFormPanel';
@@ -322,14 +322,14 @@ const getOptions = (widget: Widget, chart: DiagramBuildData, width: number): Ape
 
 	const options: ApexOptions = {
 		chart: {
-			background: 'white',
 			animations: {
 				enabled: false
 			},
-			height: '100%',
+			background: 'white',
 			events: {
 				dataPointSelection: drillDownBySelection(widget, chart)
 			},
+			height: '100%',
 			toolbar: {
 				show: false
 			},

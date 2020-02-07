@@ -1,23 +1,29 @@
 @import '/styles/variables';
 
 :local {
+	@button-size: 25px;
+	@icon-size: 16px;
+
 	.button {
-		border: 2px solid transparent;
+		align-items: center;
 		border-radius: 50%;
-		color: #666;
-		display: inline-block;
-		height: 25px;
-		padding: 2px 4px;
-		text-align: center;
-		text-decoration: none;
-		width: 25px;
+		color: @darkgrey;
+		display: inline-flex;
+		height: @button-size;
+		justify-content: center;
+		width: @button-size;
 
 		&:hover {
-			background-color: @grey;
+			background-color: @lightgrey;
 		}
 
 		&:active {
-			background-color: darken(@grey, 20%);
+			background-color: darken(@lightgrey, 20%);
+		}
+
+		svg {
+			height: @icon-size;
+			width: @icon-size;
 		}
 	}
 }

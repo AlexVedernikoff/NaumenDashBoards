@@ -1,33 +1,37 @@
 // @flow
 import {createNewSubGroup} from './helpers';
 import {CustomGroup, MaterialSelect, Modal} from 'components/molecules';
+import type {CustomGroup as CustomGroupType, CustomGroupId} from 'store/customGroups/types';
 import {CUSTOM_GROUP_TYPES} from 'store/customGroups/constants';
-import {GROUP_TYPES, TYPE_OPTIONS} from './constants';
+import {FIELDS, IS_NEW, TYPE_OPTIONS} from './constants';
+import {getProcessedAttribute} from 'store/sources/attributes/helpers';
+import {GROUP_TYPES} from 'store/widgets/constants';
 import {InfoPanel, MaterialTextInput, RadioButton} from 'components/atoms';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
+import schema from './schema';
 import styles from './styles.less';
 import {TYPES} from 'store/sources/attributes/constants';
-import uuid from 'tiny-uuid';
-
-export const IS_NEW = Symbol('new');
+import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
 export class GroupCreatingModal extends Component<Props, State> {
 	state = {
 		attributeTitle: '',
 		customGroupType: CUSTOM_GROUP_TYPES.DATETIME,
+		errors: {},
+		isSubmitting: false,
 		selectedCustomGroup: '',
 		showSaveInfo: false,
-		systemValue: {},
+		systemValue: null,
 		type: GROUP_TYPES.SYSTEM
 	};
 
 	componentDidMount () {
 		const {attribute, customGroups, systemOptions, value} = this.props;
 		const {data, type} = value;
-		const attributeTitle = attribute.title;
+		const {title: attributeTitle} = getProcessedAttribute(attribute);
 		const customGroupType = this.resolveCustomGroupType();
-		const systemValue = systemOptions.find(o => o.value === data);
+		const systemValue = systemOptions.find(o => o.value === data) || systemOptions[0];
 		const selectedCustomGroup = data in customGroups ? value.data : '';
 
 		this.setState({
@@ -39,49 +43,43 @@ export class GroupCreatingModal extends Component<Props, State> {
 		});
 	}
 
-	getModalSize = () => {
-		const {type} = this.state;
-		return type === GROUP_TYPES.SYSTEM ? 'small' : 'large';
-	};
+	getModalSize = () => this.state.type === GROUP_TYPES.SYSTEM ? 'small' : 'large';
 
 	handleChange = (name: string, value: string) => this.setState({[name]: value});
 
 	handleCloseSaveInfo = () => this.setState({showSaveInfo: false});
 
 	handleCreateCustomGroup = () => {
-		const {saveCustomGroup} = this.props;
+		const {updateCustomGroup} = this.props;
 		const {customGroupType: type} = this.state;
-		const groupId = uuid();
-		const subGroupId = uuid();
+		const groupId = Symbol('id');
 
 		this.setState({selectedCustomGroup: groupId});
-		saveCustomGroup({
+		updateCustomGroup({
 			id: groupId,
-			name: '',
-			subGroups: {
-				first: subGroupId,
-				last: subGroupId,
-				map: {
-					[subGroupId]: createNewSubGroup(subGroupId)
-				}
-			},
-			type,
 			// $FlowFixMe
-			[IS_NEW]: true
+			[IS_NEW]: true,
+			name: '',
+			subGroups: [createNewSubGroup()],
+			type
 		});
 	};
 
 	handleRemoveCustomGroup = () => {
-		const {removeCustomGroup} = this.props;
+		const {deleteCustomGroup} = this.props;
 		const {selectedCustomGroup} = this.state;
 
 		this.setState({selectedCustomGroup: ''});
-		removeCustomGroup(selectedCustomGroup);
+		deleteCustomGroup(selectedCustomGroup);
 	};
 
 	handleSelect = (name: string, value: Object) => this.setState({[name]: value});
 
-	handleSelectCustomGroup = (selectedCustomGroup: string) => this.setState({selectedCustomGroup});
+	handleSelectCustomGroup = (selectedCustomGroup: CustomGroupId) => this.setState({
+		errors: {},
+		isSubmitting: false,
+		selectedCustomGroup
+	});
 
 	handleSubmit = () => {
 		const {customGroups} = this.props;
@@ -94,43 +92,96 @@ export class GroupCreatingModal extends Component<Props, State> {
 		}
 	};
 
-	save = () => {
-		const {customGroups, onSubmit, saveCustomGroup} = this.props;
-		const {attributeTitle, selectedCustomGroup, systemValue, type} = this.state;
+	handleUpdateCustomGroup = async (customGroup: CustomGroupType) => {
+		const {updateCustomGroup} = this.props;
+		const {isSubmitting} = this.state;
 
-		if (type === GROUP_TYPES.CUSTOM) {
-			saveCustomGroup(customGroups[selectedCustomGroup]);
-
-			onSubmit({data: selectedCustomGroup, type}, attributeTitle);
-		} else {
-			const data = systemValue ? systemValue.value : '';
-
-			onSubmit({data, type}, attributeTitle);
+		if (isSubmitting) {
+			this.validateCustomGroup(customGroup);
 		}
+
+		updateCustomGroup(customGroup);
 	};
 
 	resolveCustomGroupType = () => {
-		const {type} = this.props.attribute;
+		const {attribute} = this.props;
 		const {DATETIME} = CUSTOM_GROUP_TYPES;
+		const {type} = getProcessedAttribute(attribute);
 
 		if (TYPES.DATE.includes(type)) {
 			return DATETIME;
 		}
 	};
 
+	save = async () => this.state.type === GROUP_TYPES.CUSTOM ? this.saveCustomGroup() : this.saveSystemGroup();
+
+	saveCustomGroup = async () => {
+		const {createCustomGroup, customGroups, onSubmit, updateCustomGroup} = this.props;
+		const {attributeTitle, selectedCustomGroup, type} = this.state;
+		const isValid = await this.validateCustomGroup();
+
+		if (isValid) {
+			const group = customGroups[selectedCustomGroup];
+			let data = '';
+			// $FlowFixMe
+			if (typeof selectedCustomGroup === 'symbol') {
+				data = await createCustomGroup(group);
+			} else {
+				data = group.id;
+				updateCustomGroup(group, true);
+			}
+
+			onSubmit({data: data.toString(), type}, attributeTitle);
+		}
+	};
+
+	saveSystemGroup = () => {
+		const {onSubmit} = this.props;
+		const {attributeTitle, systemValue, type} = this.state;
+		const data = systemValue ? systemValue.value : '';
+		const group = {
+			data,
+			type
+		};
+
+		onSubmit(group, attributeTitle);
+	};
+
+	validateCustomGroup = async (customGroup?: CustomGroupType) => {
+		const {customGroups} = this.props;
+		const {selectedCustomGroup} = this.state;
+		const currentCustomGroup = customGroup || customGroups[selectedCustomGroup];
+		let errors = {};
+
+		try {
+			await schema.validate(currentCustomGroup, {
+				abortEarly: false
+			});
+		} catch (e) {
+			e.inner.forEach(({message, path}) => {
+				errors[path] = message;
+			});
+		}
+
+		this.setState({errors, isSubmitting: true});
+
+		return Object.keys(errors).length === 0;
+	};
+
 	renderCustomFields = () => {
-		const {customGroups, saveCustomGroup, widgets} = this.props;
-		const {customGroupType, selectedCustomGroup, type} = this.state;
+		const {customGroups, widgets} = this.props;
+		const {customGroupType, errors, selectedCustomGroup, type} = this.state;
 
 		if (type === GROUP_TYPES.CUSTOM && customGroupType === CUSTOM_GROUP_TYPES.DATETIME) {
 			return (
 				<div className={styles.customSection}>
 					<CustomGroup
+						errors={errors}
 						groups={customGroups}
 						onCreate={this.handleCreateCustomGroup}
 						onRemove={this.handleRemoveCustomGroup}
 						onSelect={this.handleSelectCustomGroup}
-						onUpdate={saveCustomGroup}
+						onUpdate={this.handleUpdateCustomGroup}
 						selectedGroup={selectedCustomGroup}
 						type={customGroupType}
 						widgets={widgets}
@@ -138,6 +189,21 @@ export class GroupCreatingModal extends Component<Props, State> {
 				</div>
 			);
 		}
+	};
+
+	renderNameField = () => {
+		const {attributeTitle} = this.state;
+
+		return (
+			<div className={styles.attributeNameField}>
+				<MaterialTextInput
+					name={FIELDS.attributeTitle}
+					onChange={this.handleChange}
+					placeholder="Название поля"
+					value={attributeTitle}
+				/>
+			</div>
+		);
 	};
 
 	renderSaveInfo = () => {
@@ -152,25 +218,10 @@ export class GroupCreatingModal extends Component<Props, State> {
 					onClose={this.handleCloseSaveInfo}
 					onConfirm={this.save}
 					text={text}
-					variant="warning"
+					variant={VARIANTS.WARNING}
 				/>
 			);
 		}
-	};
-
-	renderNameField = () => {
-		const {attributeTitle} = this.state;
-
-		return (
-			<div className={styles.attributeNameField}>
-				<MaterialTextInput
-					name="attributeTitle"
-					onChange={this.handleChange}
-					placeholder="Название поля"
-					value={attributeTitle}
-				/>
-			</div>
-		);
 	};
 
 	renderSystemFields = () => {
@@ -181,7 +232,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 			return (
 				<div className={styles.shortField}>
 					<MaterialSelect
-						name="systemValue"
+						name={FIELDS.systemValue}
 						onSelect={this.handleSelect}
 						options={systemOptions}
 						placeholder="Форматирование"
@@ -192,7 +243,14 @@ export class GroupCreatingModal extends Component<Props, State> {
 		}
 	};
 
-	renderWayInput = (option: Object) => {
+	renderTypeField = () => (
+		<div className={styles.field}>
+			<div className={styles.fieldLabel}>Тип группировки</div>
+			{TYPE_OPTIONS.map(this.renderTypeInput)}
+		</div>
+	);
+
+	renderTypeInput = (option: Object) => {
 		const {type} = this.state;
 		const {label, value} = option;
 		const checked = type === value;
@@ -202,20 +260,13 @@ export class GroupCreatingModal extends Component<Props, State> {
 				<RadioButton
 					checked={checked}
 					label={label}
-					name="type"
+					name={FIELDS.type}
 					onChange={this.handleChange}
 					value={value}
 				/>
 			</div>
 		);
 	};
-
-	renderTypeField = () => (
-		<div className={styles.field}>
-			<div className={styles.fieldLabel}>Тип группировки</div>
-			{TYPE_OPTIONS.map(this.renderWayInput)}
-		</div>
-	);
 
 	render () {
 		const {onClose} = this.props;

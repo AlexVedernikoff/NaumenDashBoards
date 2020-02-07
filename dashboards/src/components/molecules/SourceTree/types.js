@@ -7,10 +7,10 @@ export type Props = {
 	onSelect: (value: SourceValue) => void | Promise<void>,
 	sources: DataSourceMap,
 	value: SourceValue | null,
-}
+};
 
 export type State = {
 	expanded: Array<string>,
 	foundSources: Array<string>,
 	searchValue: string
-}
+};

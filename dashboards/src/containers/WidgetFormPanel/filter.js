@@ -1,14 +1,15 @@
 // @flow
 import {AXIS_FIELDS, CIRCLE_FIELDS, COMBO_FIELDS, SUMMARY_FIELDS, TABLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {CHART_VARIANTS} from 'utils/chart';
-import {DEFAULT_AGGREGATION, DEFAULT_GROUP} from 'components/molecules/AttributeRefInput/constants';
+import {createDefaultGroup} from 'store/widgets/helpers';
+import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import {DEFAULT_SYSTEM_GROUP} from 'components/molecules/AttributeGroup/constants';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {FormData} from 'components/organisms/WidgetFormPanel/types';
-import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
 
 const {
 	aggregation,
-	breakdown,
 	breakdownGroup,
 	colors,
 	computedAttrs,
@@ -97,7 +98,7 @@ const getDefaultValue = (key: string) => {
 	}
 
 	if (key.startsWith(group) || key.startsWith(breakdownGroup)) {
-		return DEFAULT_GROUP.OVERLAP;
+		return createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
 	}
 
 	return null;
@@ -126,18 +127,12 @@ const resolve = (type: string) => {
 const filter = (data: FormData): any => {
 	const {order, type} = data;
 	const filteredData = {};
-	const breakdownReg = new RegExp(`^${breakdown}(_.*|$)`);
 
 	[...defaultFields, ...resolve(type)(order)].forEach(key => {
 		let value = data[key] || null;
 
 		if (!value) {
 			value = getDefaultValue(key);
-		}
-
-		// $FlowFixMe
-		if (value && breakdownReg.test(key) && !value.code) {
-			value = null;
 		}
 
 		filteredData[key] = value;
