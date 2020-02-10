@@ -1,13 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {GROUP_TYPES} from 'store/widgets/constants';
-
-export type GroupType = $Keys<typeof GROUP_TYPES>;
-
-export type Group = {
-	data: string,
-	type: GroupType
-};
+import type {Group} from 'store/widgets/data/types';
 
 export type Props = {
 	attribute: Attribute | null,

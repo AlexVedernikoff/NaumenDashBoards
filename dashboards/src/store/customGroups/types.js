@@ -1,5 +1,6 @@
 // @flow
-import {CONDITION_TYPES, CUSTOM_GROUPS_EVENTS, CUSTOM_GROUP_TYPES} from './constants';
+import {CONDITION_TYPES, CUSTOM_GROUPS_EVENTS} from './constants';
+import type {GroupType} from 'store/widgets/data/types';
 
 export type BetweenOperandData = {
 	endDate: string,
@@ -15,7 +16,7 @@ export type ConditionType = $Keys<typeof CONDITION_TYPES>;
 
 export type OrCondition = {
 	data: OperandData | null,
-	type: $Keys<typeof CONDITION_TYPES>
+	type: $Keys<typeof CONDITION_TYPES> | ''
 };
 
 export type AndCondition = Array<OrCondition>;
@@ -25,15 +26,13 @@ export type SubGroup = {
 	name: string
 };
 
-export type CustomGroupType = $Keys<typeof CUSTOM_GROUP_TYPES>;
-
 export type CustomGroupId = string | Symbol;
 
 export type CustomGroup = {
 	id: CustomGroupId,
 	name: string,
 	subGroups: Array<SubGroup>,
-	type: CustomGroupType
+	type: GroupType
 };
 
 export type CustomGroupsMap = {

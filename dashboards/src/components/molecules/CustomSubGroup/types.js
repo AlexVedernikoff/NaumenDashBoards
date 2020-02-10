@@ -1,5 +1,6 @@
 // @flow
 import type {ErrorsMap} from 'components/molecules/GroupCreatingModal/types';
+import type {GroupType} from 'store/widgets/data/types';
 import type {SubGroup} from 'store/customGroups/types';
 
 export type Props = {
@@ -9,5 +10,6 @@ export type Props = {
 	onRemove: (index: number) => void,
 	onUpdate: (index: number, subGroup: SubGroup) => void,
 	subGroup: SubGroup,
+	type: GroupType,
 	validationPath: string
 };

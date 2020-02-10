@@ -1,8 +1,18 @@
 // @flow
+import {GROUP_TYPES, GROUP_WAYS} from 'store/widgets/constants';
 import type {Layout, LayoutItem} from 'utils/layout/types';
 import type {NewWidget} from 'entities';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {WIDGETS_EVENTS} from './constants';
+
+export type GroupType = $Keys<typeof GROUP_TYPES>;
+
+export type GroupWay = $Keys<typeof GROUP_WAYS>;
+
+export type Group = {
+	data: string,
+	way: GroupWay
+};
 
 export type Widget = {
 	colors?: Array<string>,
@@ -10,8 +20,8 @@ export type Widget = {
 	id: string,
 	layout: LayoutItem,
 	legendPosition?: SelectValue,
-	order: Array<number>,
 	name: string,
+	order: Array<number>,
 	showLegend?: boolean;
 	showName?: boolean,
 	showValue?: boolean,
@@ -121,6 +131,6 @@ export type WidgetsDataState = {
 	map: WidgetMap,
 	newWidget: NewWidget | null,
 	saveError: boolean,
-	updating: boolean,
-	selectedWidget: string
+	selectedWidget: string,
+	updating: boolean
 };

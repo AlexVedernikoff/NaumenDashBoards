@@ -3,8 +3,7 @@ import {AXIS_FIELDS, CIRCLE_FIELDS, COMBO_FIELDS, SUMMARY_FIELDS, TABLE_FIELDS} 
 import {CHART_VARIANTS} from 'utils/chart';
 import {createDefaultGroup} from 'store/widgets/helpers';
 import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import {DEFAULT_SYSTEM_GROUP} from 'components/molecules/AttributeGroup/constants';
+import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP} from 'store/widgets/constants';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {FormData} from 'components/organisms/WidgetFormPanel/types';
 

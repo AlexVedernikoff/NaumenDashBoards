@@ -9,9 +9,8 @@ import {
 } from 'components/molecules';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import {getDefaultAggregation} from 'components/molecules/AttributeAggregation/helpers';
-import {getDefaultSystemGroup} from 'components/molecules/AttributeGroup/helpers';
+import {getDefaultSystemGroup, isGroupKey} from 'store/widgets/helpers';
 import {getProcessedAttribute} from 'store/sources/attributes/helpers';
-import {isGroupKey} from 'store/widgets/helpers';
 import type {Node} from 'react';
 import type {Props, RefInputProps, State} from './types';
 import React, {Fragment, PureComponent} from 'react';

@@ -1,18 +1,41 @@
 // @flow
 import {Button, FieldError, IconButton, MaterialDateInput, MaterialTextInput} from 'components/atoms';
 import cn from 'classnames';
-import {CONDITION_OPTIONS} from './constants';
 import {CONDITION_TYPES} from 'store/customGroups/constants';
 import {CrossIcon as RemoveIcon} from 'icons/form';
+import {DATETIME_OPTIONS, INTEGER_OPTIONS} from './constants';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
+import {GROUP_TYPES} from 'store/widgets/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MaterialSelect} from 'components/molecules';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
+import {withGroup} from 'components/molecules/GroupCreatingModal';
 
-export class CustomSubGroupOrCondition extends PureComponent<Props> {
+export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
+	state = {
+		options: []
+	};
+
+	componentDidMount () {
+		const options = this.getOptions();
+		this.setState({options});
+	}
+
+	getOptions = () => {
+		const {type} = this.props;
+		const {DATETIME, INTEGER} = GROUP_TYPES;
+
+		switch (type) {
+			case DATETIME:
+				return DATETIME_OPTIONS;
+			case INTEGER:
+				return INTEGER_OPTIONS;
+		}
+	};
+
 	handleChangeDateData = (name: string, date: string) => {
 		const {condition, index, onUpdate} = this.props;
 		let {data} = condition;
@@ -110,27 +133,42 @@ export class CustomSubGroupOrCondition extends PureComponent<Props> {
 
 	renderOperandDataByType = () => {
 		const {type} = this.props.condition;
-		const {BETWEEN, LAST, NEAR} = CONDITION_TYPES;
+		const {
+			BETWEEN,
+			EQUAL,
+			GREATER,
+			LAST,
+			LESS,
+			NEAR,
+			NOT_EQUAL,
+			NOT_EQUAL_NOT_EMPTY
+		} = CONDITION_TYPES;
 
 		switch (type) {
 			case BETWEEN:
 				return this.renderBetweenData();
+			case EQUAL:
+			case GREATER:
 			case LAST:
+			case LESS:
 			case NEAR:
+			case NOT_EQUAL:
+			case NOT_EQUAL_NOT_EMPTY:
 				return this.renderNumberData();
 		}
 	};
 
 	renderOperandSelect = () => {
 		const {condition, index} = this.props;
-		const value = CONDITION_OPTIONS.find(o => o.value === condition.type) || CONDITION_OPTIONS[0];
+		const {options} = this.state;
+		const value = options.find(o => o.value === condition.type) || options[0];
 
 		return (
 			<div className={styles.operandSelect}>
 				<MaterialSelect
 					name={index}
 					onSelect={this.handleSelectOperandType}
-					options={CONDITION_OPTIONS}
+					options={options}
 					value={value}
 				/>
 			</div>
@@ -155,11 +193,14 @@ export class CustomSubGroupOrCondition extends PureComponent<Props> {
 
 	renderRemoveButton = () => {
 		const {isLast} = this.props;
-		const removeButtonCN = isLast && styles.hiddenRemoveButton;
+		const containerCN = cn({
+			[styles.removeButtonContainer]: true,
+			[styles.hiddenRemoveButtonContainer]: isLast
+		});
 
 		return (
-			<div className={styles.removeButtonContainer}>
-				<IconButton className={removeButtonCN} onClick={this.handleClickRemoveButton}>
+			<div className={containerCN}>
+				<IconButton onClick={this.handleClickRemoveButton}>
 					<RemoveIcon />
 				</IconButton>
 			</div>
@@ -177,4 +218,4 @@ export class CustomSubGroupOrCondition extends PureComponent<Props> {
 	}
 }
 
-export default CustomSubGroupOrCondition;
+export default withGroup(CustomSubGroupOrCondition);

@@ -1,50 +1,57 @@
 // @flow
-import {createNewSubGroup} from './helpers';
+import {createNewSubGroup, getSystemGroupOptions} from './helpers';
 import {CustomGroup, MaterialSelect, Modal} from 'components/molecules';
 import type {CustomGroup as CustomGroupType, CustomGroupId} from 'store/customGroups/types';
-import {CUSTOM_GROUP_TYPES} from 'store/customGroups/constants';
 import {FIELDS, IS_NEW, TYPE_OPTIONS} from './constants';
 import {getProcessedAttribute} from 'store/sources/attributes/helpers';
-import {GROUP_TYPES} from 'store/widgets/constants';
+import {GROUP_TYPES, GROUP_WAYS} from 'store/widgets/constants';
 import {InfoPanel, MaterialTextInput, RadioButton} from 'components/atoms';
 import {isGroupKey} from 'store/widgets/helpers';
 import type {Props, State} from './types';
-import React, {Component} from 'react';
+import React, {Component, createContext} from 'react';
 import schema from './schema';
 import styles from './styles.less';
 import {TYPES} from 'store/sources/attributes/constants';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
+export const GroupContext = createContext({
+	errors: {},
+	type: GROUP_TYPES.DATETIME
+});
+
 export class GroupCreatingModal extends Component<Props, State> {
 	state = {
 		attributeTitle: '',
-		customGroupType: CUSTOM_GROUP_TYPES.DATETIME,
 		errors: {},
 		isSubmitting: false,
 		selectedCustomGroup: '',
 		showSaveInfo: false,
+		systemOptions: [],
 		systemValue: null,
-		type: GROUP_TYPES.SYSTEM
+		type: GROUP_TYPES.DATETIME,
+		way: GROUP_WAYS.SYSTEM
 	};
 
 	componentDidMount () {
-		const {attribute, customGroups, systemOptions, value} = this.props;
-		const {data, type} = value;
+		const {attribute, customGroups, value} = this.props;
+		const {data, way} = value;
 		const {title: attributeTitle} = getProcessedAttribute(attribute);
-		const customGroupType = this.resolveCustomGroupType();
-		const systemValue = systemOptions.find(o => o.value === data) || systemOptions[0];
+		const systemOptions = getSystemGroupOptions(attribute);
+		const systemValue = systemOptions.find(o => o.value === data) || systemOptions[0] || null;
 		const selectedCustomGroup = data in customGroups ? value.data : '';
+		const type = this.resolveGroupType();
 
 		this.setState({
 			attributeTitle,
-			customGroupType,
 			selectedCustomGroup,
+			systemOptions,
 			systemValue,
-			type
+			type,
+			way
 		});
 	}
 
-	getModalSize = () => this.state.type === GROUP_TYPES.SYSTEM ? 'small' : 'large';
+	getModalSize = () => this.state.way === GROUP_WAYS.SYSTEM ? 'small' : 'large';
 
 	getWidgetsUsingSelectedCutomGroup = () => {
 		const {widgets} = this.props;
@@ -75,7 +82,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleCreateCustomGroup = () => {
 		const {updateCustomGroup} = this.props;
-		const {customGroupType: type} = this.state;
+		const {type} = this.state;
 		const groupId = Symbol('id');
 
 		this.setState({selectedCustomGroup: groupId});
@@ -84,7 +91,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 			// $FlowFixMe
 			[IS_NEW]: true,
 			name: '',
-			subGroups: [createNewSubGroup()],
+			subGroups: [createNewSubGroup(type)],
 			type
 		});
 	};
@@ -106,9 +113,9 @@ export class GroupCreatingModal extends Component<Props, State> {
 	});
 
 	handleSubmit = () => {
-		const {selectedCustomGroup, type} = this.state;
+		const {selectedCustomGroup, way} = this.state;
 		// $FlowFixMe
-		if (type === GROUP_TYPES.SYSTEM) {
+		if (way === GROUP_WAYS.SYSTEM) {
 			this.saveSystemGroup();
 		} else if (selectedCustomGroup) {
 			const usedInWidgets = this.getWidgetsUsingSelectedCutomGroup();
@@ -127,19 +134,23 @@ export class GroupCreatingModal extends Component<Props, State> {
 		updateCustomGroup(customGroup);
 	};
 
-	resolveCustomGroupType = () => {
+	resolveGroupType = () => {
 		const {attribute} = this.props;
-		const {DATETIME} = CUSTOM_GROUP_TYPES;
+		const {DATETIME, INTEGER} = GROUP_TYPES;
 		const {type} = getProcessedAttribute(attribute);
 
 		if (TYPES.DATE.includes(type)) {
 			return DATETIME;
 		}
+
+		if (TYPES.INTEGER.includes(type)) {
+			return INTEGER;
+		}
 	};
 
 	saveCustomGroup = async () => {
 		const {createCustomGroup, customGroups, onSubmit, updateCustomGroup} = this.props;
-		const {attributeTitle, selectedCustomGroup, type} = this.state;
+		const {attributeTitle, selectedCustomGroup, way} = this.state;
 		const isValid = await this.validateCustomGroup();
 
 		if (isValid) {
@@ -153,17 +164,17 @@ export class GroupCreatingModal extends Component<Props, State> {
 				updateCustomGroup(group, true);
 			}
 
-			onSubmit({data: data.toString(), type}, attributeTitle);
+			onSubmit({data: data.toString(), way}, attributeTitle);
 		}
 	};
 
 	saveSystemGroup = () => {
 		const {onSubmit} = this.props;
-		const {attributeTitle, systemValue, type} = this.state;
+		const {attributeTitle, systemValue, way} = this.state;
 		const data = systemValue ? systemValue.value : '';
 		const group = {
 			data,
-			type
+			way
 		};
 
 		onSubmit(group, attributeTitle);
@@ -190,25 +201,29 @@ export class GroupCreatingModal extends Component<Props, State> {
 		return Object.keys(errors).length === 0;
 	};
 
-	renderCustomFields = () => {
+	renderCustomGroup = () => {
 		const {customGroups} = this.props;
-		const {customGroupType, errors, selectedCustomGroup, type} = this.state;
+		const {errors, selectedCustomGroup, type, way} = this.state;
+		const context = {errors, type};
+		// $FlowFixMe
+		const options = Object.values(customGroups).filter(group => group.type === type);
+		const value = customGroups[selectedCustomGroup] || null;
 
-		if (type === GROUP_TYPES.CUSTOM && customGroupType === CUSTOM_GROUP_TYPES.DATETIME) {
+		if (way === GROUP_WAYS.CUSTOM) {
 			return (
-				<div className={styles.customSection}>
-					<CustomGroup
-						errors={errors}
-						getUsingWidgets={this.getWidgetsUsingSelectedCutomGroup}
-						groups={customGroups}
-						onCreate={this.handleCreateCustomGroup}
-						onRemove={this.handleRemoveCustomGroup}
-						onSelect={this.handleSelectCustomGroup}
-						onUpdate={this.handleUpdateCustomGroup}
-						selectedGroup={selectedCustomGroup}
-						type={customGroupType}
-					/>
-				</div>
+				<GroupContext.Provider value={context}>
+					<div className={styles.customSection}>
+						<CustomGroup
+							getUsingWidgets={this.getWidgetsUsingSelectedCutomGroup}
+							onCreate={this.handleCreateCustomGroup}
+							onRemove={this.handleRemoveCustomGroup}
+							onSelect={this.handleSelectCustomGroup}
+							onUpdate={this.handleUpdateCustomGroup}
+							options={options}
+							value={value}
+						/>
+					</div>
+				</GroupContext.Provider>
 			);
 		}
 	};
@@ -246,11 +261,12 @@ export class GroupCreatingModal extends Component<Props, State> {
 		}
 	};
 
-	renderSystemFields = () => {
+	renderSystemGroup = () => {
 		const {systemOptions} = this.props;
-		const {systemValue, type} = this.state;
+		const {systemValue, type, way} = this.state;
+		const {DATETIME} = GROUP_TYPES;
 
-		if (type === GROUP_TYPES.SYSTEM) {
+		if (way === GROUP_WAYS.SYSTEM && type === DATETIME) {
 			return (
 				<div className={styles.shortField}>
 					<MaterialSelect
@@ -265,24 +281,24 @@ export class GroupCreatingModal extends Component<Props, State> {
 		}
 	};
 
-	renderTypeField = () => (
+	renderWayField = () => (
 		<div className={styles.field}>
 			<div className={styles.fieldLabel}>Тип группировки</div>
-			{TYPE_OPTIONS.map(this.renderTypeInput)}
+			{TYPE_OPTIONS.map(this.renderWayInput)}
 		</div>
 	);
 
-	renderTypeInput = (option: Object) => {
-		const {type} = this.state;
+	renderWayInput = (option: Object) => {
+		const {way} = this.state;
 		const {label, value} = option;
-		const checked = type === value;
+		const checked = way === value;
 
 		return (
 			<div className={styles.radioButton} key={value}>
 				<RadioButton
 					checked={checked}
 					label={label}
-					name={FIELDS.type}
+					name={FIELDS.way}
 					onChange={this.handleChange}
 					value={value}
 				/>
@@ -297,9 +313,9 @@ export class GroupCreatingModal extends Component<Props, State> {
 			<Modal header="Настройка группировки" onClose={onClose} onSubmit={this.handleSubmit} size={this.getModalSize()}>
 				<div className={styles.form}>
 					{this.renderNameField()}
-					{this.renderTypeField()}
-					{this.renderSystemFields()}
-					{this.renderCustomFields()}
+					{this.renderWayField()}
+					{this.renderSystemGroup()}
+					{this.renderCustomGroup()}
 					{this.renderSaveInfo()}
 				</div>
 			</Modal>

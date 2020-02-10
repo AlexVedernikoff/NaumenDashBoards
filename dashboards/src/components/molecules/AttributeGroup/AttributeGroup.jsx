@@ -3,9 +3,9 @@ import {CalendarIcon, NumberIcon, TextIcon} from 'icons/form';
 import {createDefaultGroup} from 'store/widgets/helpers';
 import {FieldButton} from 'components/atoms';
 import {getProcessedAttribute} from 'store/sources/attributes/helpers';
-import {getSystemGroupOptions} from './helpers';
-import type {Group, Props, State} from './types';
+import type {Group} from 'store/widgets/data/types';
 import GroupCreatingModal from 'containers/GroupCreatingModal';
+import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import {TYPES} from 'store/sources/attributes/constants';
 
@@ -60,7 +60,6 @@ export class AttributeGroup extends PureComponent<Props, State> {
 	renderModal = () => {
 		const {attribute, value} = this.props;
 		const {showModal} = this.state;
-		const systemOptions = getSystemGroupOptions(attribute);
 		let group = value;
 
 		if (typeof group === 'string') {
@@ -73,7 +72,6 @@ export class AttributeGroup extends PureComponent<Props, State> {
 					attribute={attribute}
 					onClose={this.handleCloseModal}
 					onSubmit={this.handleSubmitModal}
-					systemOptions={systemOptions}
 					value={group}
 				/>
 			);

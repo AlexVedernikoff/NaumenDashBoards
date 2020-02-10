@@ -8,6 +8,7 @@ import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import type {Props} from './types';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import {withGroup} from 'components/molecules/GroupCreatingModal';
 
 export class CustomSubGroup extends PureComponent<Props> {
 	refName = createRef();
@@ -23,13 +24,13 @@ export class CustomSubGroup extends PureComponent<Props> {
 	};
 
 	handleCreateAndCondition = () => {
-		const {index, onUpdate, subGroup} = this.props;
+		const {index, onUpdate, subGroup, type} = this.props;
 
 		onUpdate(index, {
 			...subGroup,
 			data: [
 				...subGroup.data,
-				createNewAndCondition()
+				createNewAndCondition(type)
 			]
 		});
 	};
@@ -54,7 +55,7 @@ export class CustomSubGroup extends PureComponent<Props> {
 	};
 
 	renderAndCondition = (condition: AndCondition, index: number, conditions: Array<AndCondition>) => {
-		const {errors, isLast: isLastSubGroup, validationPath: currentPath} = this.props;
+		const {isLast: isLastSubGroup, validationPath: currentPath} = this.props;
 		const hasLastPosition = conditions.length - 1 === index;
 		const isLast = isLastSubGroup && conditions.length === 1;
 		const validationPath = `${currentPath}.${FIELDS.data}[${index}]`;
@@ -68,7 +69,6 @@ export class CustomSubGroup extends PureComponent<Props> {
 			<CustomSubGroupAndCondition
 				condition={condition}
 				disabled={!hasLastPosition}
-				errors={errors}
 				index={index}
 				isLast={isLast}
 				key={validationPath}
@@ -110,4 +110,4 @@ export class CustomSubGroup extends PureComponent<Props> {
 	}
 }
 
-export default CustomSubGroup;
+export default withGroup(CustomSubGroup);

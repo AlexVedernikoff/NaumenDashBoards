@@ -8,14 +8,15 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
+import {withGroup} from 'components/molecules/GroupCreatingModal';
 
 export class CustomSubGroupAndCondition extends PureComponent<Props> {
 	handleCreateOrCondition = () => {
-		const {condition, index, onUpdate} = this.props;
+		const {condition, index, onUpdate, type} = this.props;
 
 		onUpdate(index, [
 			...condition,
-			createNewOrCondition()
+			createNewOrCondition(type)
 		]);
 	};
 
@@ -50,7 +51,7 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 	};
 
 	renderOrCondition = (condition: OrCondition, index: number, conditions: Array<OrCondition>) => {
-		const {errors, isLast: isLastAndCondition, validationPath: currentPath} = this.props;
+		const {isLast: isLastAndCondition, validationPath: currentPath} = this.props;
 		const hasLastPosition = conditions.length - 1 === index;
 		const isLast = isLastAndCondition && conditions.length === 1;
 		const validationPath = `${currentPath}[${index}]`;
@@ -60,7 +61,6 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 				<CustomSubGroupOrCondition
 					condition={condition}
 					disabled={!hasLastPosition}
-					errors={errors}
 					index={index}
 					isLast={isLast}
 					onCreate={this.handleCreateOrCondition}
@@ -92,4 +92,4 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 	}
 }
 
-export default CustomSubGroupAndCondition;
+export default withGroup(CustomSubGroupAndCondition);

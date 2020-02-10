@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
-import {CreationPanel, IconButton, OutsideClickDetector, SearchSelectInput} from 'components/atoms';
+import {CreationPanel, IconButton, SearchSelectInput} from 'components/atoms';
 import {EditIcon, MinusIcon} from 'icons/form';
 import {InputForm, SimpleSelectList} from 'components/molecules';
 import type {Props, State} from './types';
@@ -172,13 +172,11 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		});
 
 		return (
-			<OutsideClickDetector onClickOutside={this.handleClickOutside}>
-				<div className={selectCN}>
-					{this.renderTitle()}
-					{this.renderIndicators()}
-					{this.renderMenu()}
-				</div>
-			</OutsideClickDetector>
+			<div className={selectCN}>
+				{this.renderTitle()}
+				{this.renderIndicators()}
+				{this.renderMenu()}
+			</div>
 		);
 	};
 

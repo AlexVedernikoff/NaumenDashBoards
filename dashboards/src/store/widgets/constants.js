@@ -1,11 +1,21 @@
 // @flow
-// Типы группировок
+
+// Способы создания группировок
 const CUSTOM: 'CUSTOM' = 'CUSTOM';
 const SYSTEM: 'SYSTEM' = 'SYSTEM';
 
-const GROUP_TYPES = {
+const GROUP_WAYS = {
 	CUSTOM,
 	SYSTEM
+};
+
+// Типы группировок
+const DATETIME: 'DATETIME' = 'DATETIME';
+const INTEGER: 'INTEGER' = 'INTEGER';
+
+const GROUP_TYPES = {
+	DATETIME,
+	INTEGER
 };
 
 // Типы системных группировок
@@ -60,5 +70,6 @@ export {
 	DEFAULT_AGGREGATION,
 	DEFAULT_SYSTEM_GROUP,
 	GROUP_TYPES,
+	GROUP_WAYS,
 	INTEGER_AGGREGATION
 };

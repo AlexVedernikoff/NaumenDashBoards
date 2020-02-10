@@ -9,6 +9,7 @@ import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
+import {withGroup} from 'components/molecules/GroupCreatingModal';
 
 export class CustomGroup extends Component<Props, State> {
 	state = {
@@ -18,24 +19,19 @@ export class CustomGroup extends Component<Props, State> {
 		usedInWidgets: []
 	};
 
-	getCurrentGroup = () => {
-		const {groups, selectedGroup} = this.props;
-		return groups[selectedGroup] || null;
-	};
-
 	getGroupLabel = (group: CustomGroupType) => group.name;
 
 	getGroupValue = (group: CustomGroupType) => group.id;
 
 	handleChangeGroupName = (groupId: string, name: string) => {
-		const {groups, onUpdate} = this.props;
-		onUpdate({...groups[groupId], name});
+		const {onUpdate, value} = this.props;
+		onUpdate({...value, name});
 	};
 
 	handleClickCreationButton = () => {
-		const {groups, onCreate} = this.props;
+		const {onCreate, options} = this.props;
 
-		if (Object.keys(groups).length > 30) {
+		if (options.length > 30) {
 			return this.setState({showLimitInfo: true});
 		}
 
@@ -43,17 +39,16 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleClickCreationPanel = () => {
-		const {onUpdate} = this.props;
-		const currentGroup = this.getCurrentGroup();
+		const {onUpdate, type, value} = this.props;
 
-		if (currentGroup) {
-			const {subGroups} = currentGroup;
+		if (value) {
+			const {subGroups} = value;
 
 			onUpdate({
-				...currentGroup,
+				...value,
 				subGroups: [
 					...subGroups,
-					createNewSubGroup()
+					createNewSubGroup(type)
 				]
 			});
 		}
@@ -82,17 +77,16 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleRemoveSubGroup = (index: number) => {
-		const {onUpdate} = this.props;
-		const currentGroup = this.getCurrentGroup();
+		const {onUpdate, value} = this.props;
 
-		if (currentGroup) {
-			const {subGroups} = currentGroup;
+		if (value) {
+			const {subGroups} = value;
 
 			if (subGroups.length > 1) {
 				subGroups.splice(index, 1);
 
 				onUpdate({
-					...currentGroup,
+					...value,
 					subGroups
 				});
 			}
@@ -102,26 +96,25 @@ export class CustomGroup extends Component<Props, State> {
 	handleSelectGroup = (name: string, group: CustomGroupType) => this.props.onSelect(group.id);
 
 	handleUpdateSubGroup = (index: number, subGroup: SubGroup) => {
-		const {onUpdate} = this.props;
-		const currentGroup = this.getCurrentGroup();
+		const {onUpdate, value} = this.props;
 
 		this.setState({showRemovalInfo: false});
 
-		if (currentGroup) {
-			const {subGroups} = currentGroup;
+		if (value) {
+			const {subGroups} = value;
 			subGroups[index] = subGroup;
 
 			onUpdate({
-				...currentGroup,
+				...value,
 				subGroups: [...subGroups]
 			});
 		}
 	};
 
 	renderCreationPanel = () => {
-		const {selectedGroup} = this.props;
+		const {value} = this.props;
 
-		if (selectedGroup) {
+		if (value) {
 			return (
 				<CreationPanel
 					className={styles.creationPanel}
@@ -140,12 +133,9 @@ export class CustomGroup extends Component<Props, State> {
 	);
 
 	renderGroupSelect = () => {
-		const {groups} = this.props;
-		const currentGroup = this.getCurrentGroup();
+		const {options, value} = this.props;
 		// $FlowFixMe
-		const options: Array<CustomGroupType> = Object.values(groups);
-		// $FlowFixMe
-		const isEditingLabel = Boolean(currentGroup && currentGroup[IS_NEW]);
+		const isEditingLabel = Boolean(value && value[IS_NEW]);
 
 		return (
 			<div className={mainStyles.shortField}>
@@ -161,7 +151,7 @@ export class CustomGroup extends Component<Props, State> {
 					placeholder="Название группировки"
 					showCreationButton={true}
 					textCreationButton="Добавить группу"
-					value={currentGroup}
+					value={value}
 				/>
 			</div>
 		);
@@ -206,9 +196,9 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	renderRemovalGroupButton = () => {
-		const {selectedGroup} = this.props;
+		const {value} = this.props;
 
-		if (selectedGroup) {
+		if (value) {
 			return (
 				<div className={mainStyles.field}>
 					<Button
@@ -236,13 +226,11 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	renderSubGroup = (group: SubGroup, index: number, groups: Array<SubGroup>) => {
-		const {errors} = this.props;
 		const isLast = groups.length === 1;
 		const validationPath = `${BASE_VALIDATION_SUBGROUP_PATH}[${index}]`;
 
 		return (
 			<CustomSubGroup
-				errors={errors}
 				index={index}
 				isLast={isLast}
 				key={validationPath}
@@ -255,10 +243,10 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	renderSubGroups = () => {
-		const currentGroup = this.getCurrentGroup();
+		const {value} = this.props;
 
-		if (currentGroup) {
-			return currentGroup.subGroups.map(this.renderSubGroup);
+		if (value) {
+			return value.subGroups.map(this.renderSubGroup);
 		}
 	};
 
@@ -291,4 +279,4 @@ export class CustomGroup extends Component<Props, State> {
 	}
 }
 
-export default CustomGroup;
+export default withGroup(CustomGroup);
