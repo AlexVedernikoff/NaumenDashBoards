@@ -1,7 +1,7 @@
 // @flow
 import {applyMiddleware, createStore} from 'redux';
 import {createLogger} from 'redux-logger';
-import createRootReducer from './reducer';
+import rootReducer from './reducer';
 import thunk from 'redux-thunk';
 
 export const configureStore = () => {
@@ -12,5 +12,5 @@ export const configureStore = () => {
 		middleware.push(createLogger());
 	}
 
-	return createStore(createRootReducer(), applyMiddleware(...middleware));
+	return createStore(rootReducer, applyMiddleware(...middleware));
 };

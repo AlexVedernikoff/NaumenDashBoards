@@ -11,6 +11,7 @@ export type Group = {
 
 export type Props = {
 	attribute: Attribute | null,
+	disabled: boolean,
 	name: string,
 	onChange: (name: string, value: Group, attributeTitle: string) => void,
 	value: Group | string

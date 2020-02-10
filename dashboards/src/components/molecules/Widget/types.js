@@ -23,11 +23,12 @@ export type Props = {
 	isSelected: boolean,
 	onDrillDown: (widget: Widget, orderNum?: number) => ThunkAction,
 	onEdit: (id: string) => void,
-	onRemove: (id: string) => void
+	onRemove: (id: string) => ThunkAction
 };
 
 export type State = {
-	hasError: boolean
+	hasError: boolean,
+	showRemoveModal: boolean
 };
 
 export type ExportItem = {

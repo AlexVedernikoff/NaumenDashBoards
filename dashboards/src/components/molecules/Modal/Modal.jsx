@@ -7,6 +7,7 @@ import React, {Component, Fragment} from 'react';
 import {root} from 'src';
 import {SIZES} from './constants';
 import styles from './styles.less';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class Modal extends Component<Props> {
 	static defaultProps = {
@@ -40,7 +41,7 @@ export class Modal extends Component<Props> {
 		return (
 			<Fragment>
 				<Button className={styles.submitButton} onClick={onSubmit}>{submitText}</Button>
-				<Button onClick={onClose} variant="additional">{cancelText}</Button>
+				<Button onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>{cancelText}</Button>
 			</Fragment>
 		);
 	};

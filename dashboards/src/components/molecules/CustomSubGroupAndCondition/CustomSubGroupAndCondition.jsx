@@ -7,6 +7,7 @@ import type {OrCondition} from 'store/customGroups/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class CustomSubGroupAndCondition extends PureComponent<Props> {
 	handleCreateOrCondition = () => {
@@ -41,11 +42,7 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 
 		return (
 			<div className={andOperatorCN}>
-				<Button
-					disabled={disabled}
-					onClick={onCreate}
-					variant="simple"
-				>
+				<Button disabled={disabled} onClick={onCreate} variant={BUTTON_VARIANTS.SIMPLE}>
 					И
 				</Button>
 			</div>

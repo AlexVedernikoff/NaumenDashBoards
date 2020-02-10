@@ -1,4 +1,5 @@
 // @flow
+import type {ContextState} from './context/types';
 import type {CustomGroupsState} from './customGroups/types';
 import type {DashboardState} from './dashboard/types';
 import type {SourcesState} from './sources/types';
@@ -11,6 +12,7 @@ type Action = {
 };
 
 export type AppState = {
+	context: ContextState,
 	customGroups: CustomGroupsState,
 	dashboard: DashboardState,
 	sources: SourcesState,

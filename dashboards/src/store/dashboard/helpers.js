@@ -1,5 +1,5 @@
 // @flow
-import type {DashboardState, Role} from './types';
+import type {DashboardState} from './types';
 
 const setAutoUpdateFunction = (state: DashboardState, fn: IntervalID) => {
 	if (state.autoUpdate.fn) {
@@ -9,15 +9,6 @@ const setAutoUpdateFunction = (state: DashboardState, fn: IntervalID) => {
 	state.autoUpdate.fn = fn;
 };
 
-const setRole = (state: DashboardState, role: Role) => {
-	state.role = role;
-
-	if (!state.editable) {
-		state.editable = !!role;
-	}
-};
-
 export {
-	setAutoUpdateFunction,
-	setRole
+	setAutoUpdateFunction
 };

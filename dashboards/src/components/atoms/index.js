@@ -1,5 +1,6 @@
 // @flow
 import Button from './Button';
+import ButtonGroup from './ButtonGroup';
 import Checkbox from './Checkbox';
 import CreationPanel from './CreationPanel';
 import DatepickerControl from './DatepickerControl';
@@ -26,6 +27,7 @@ import Tooltip from './Tooltip';
 
 export {
 	Button,
+	ButtonGroup,
 	Checkbox,
 	CreationPanel,
 	DatepickerControl,

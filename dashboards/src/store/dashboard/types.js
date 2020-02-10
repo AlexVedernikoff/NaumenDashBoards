@@ -1,12 +1,33 @@
 // @flow
-import type {Context} from 'utils/api/types';
 import {DASHBOARD_EVENTS} from './constants';
-
-export type Role = 'master' | 'super' | typeof undefined;
 
 type ChangeAutoUpdateSettings = {
 	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS,
 	payload: Object
+};
+
+type CreatePersonalDashboard = {
+	type: typeof DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD
+};
+
+type CreatedPersonalDashboard = {
+	type: typeof DASHBOARD_EVENTS.CREATED_PERSONAL_DASHBOARD
+};
+
+type DeletePersonalDashboard = {
+	type: typeof DASHBOARD_EVENTS.DELETE_PERSONAL_DASHBOARD
+};
+
+type DeletedPersonalDashboard = {
+	type: typeof DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD
+};
+
+type ErrorCreatePersonalDashboard = {
+	type: typeof DASHBOARD_EVENTS.ERROR_CREATE_PERSONAL_DASHBOARD
+};
+
+type ErrorDeletePersonalDashboard = {
+	type: typeof DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
 };
 
 type RequestDashboard = {
@@ -19,11 +40,6 @@ export type ReceiveDashboard = {
 	payload: null
 };
 
-export type ReceiveRoleMaster = {
-	type: typeof DASHBOARD_EVENTS.RECEIVE_USER_ROLE,
-	payload: Role
-};
-
 type RecordDashboardError = {
 	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR,
 	payload: null
@@ -34,13 +50,13 @@ type SetAutoUpdateFunction = {
 	payload: IntervalID
 };
 
-type SetContext = {
-	type: typeof DASHBOARD_EVENTS.SET_CONTEXT,
-	payload: Context
-};
-
 type SetEditable = {
 	type: typeof DASHBOARD_EVENTS.SET_EDITABLE_PARAM,
+	payload: boolean
+};
+
+type SetPersonal = {
+	type: typeof DASHBOARD_EVENTS.SET_PERSONAL,
 	payload: boolean
 };
 
@@ -59,13 +75,18 @@ type UnknownDashboardAction = {
 
 export type DashboardAction =
 	| ChangeAutoUpdateSettings
+	| CreatePersonalDashboard
+	| CreatedPersonalDashboard
+	| DeletePersonalDashboard
+	| DeletedPersonalDashboard
+	| ErrorCreatePersonalDashboard
+	| ErrorDeletePersonalDashboard
 	| RequestDashboard
 	| ReceiveDashboard
-	| ReceiveRoleMaster
 	| RecordDashboardError
 	| SetAutoUpdateFunction
-	| SetContext
 	| SetEditable
+	| SetPersonal
 	| SwitchOnEditMode
 	| SwitchOffEditMode
 	| UnknownDashboardAction
@@ -85,11 +106,12 @@ export type AutoUpdateRequestPayload = {
 
 export type DashboardState = {
 	autoUpdate: AutoUpdate,
-	context: Context | Object,
 	editable: boolean,
 	editMode: boolean,
 	error: boolean,
 	loading: boolean,
+	personal: boolean,
+	personalCreating: boolean,
+	personalDeleting: boolean,
 	reloadInterval?: number,
-	role?: Role
 };

@@ -25,12 +25,12 @@ export type Props = {
 	defaultValue: SourceValue,
 	descriptor: Descriptor,
 	error: string,
-	isRemovable: boolean,
 	name: string,
 	onChangeLabel: (name: string, value: SourceValue) => void,
 	onRemove: any,
 	onSelect: (name: string, value: SourceValue | null) => void | Promise<void>,
 	onSelectCallback?: OnSelectCallback,
+	removable: boolean,
 	sources: DataSourceMap,
 	value: SourceValue | null
 };

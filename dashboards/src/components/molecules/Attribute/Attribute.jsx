@@ -25,21 +25,20 @@ export class Attribute extends PureComponent<Props, State> {
 		showCreatingModal: false
 	};
 
-	applyCallback = (name: string, value: AttributeType | null) => {
-		const {onSelectCallback} = this.props;
-
-		if (onSelectCallback && typeof onSelectCallback === 'function') {
+	applyCallback = (callback?: Function, name: string, value: Object) => {
+		if (callback && typeof callback === 'function') {
 			// $FlowFixMe
-			setTimeout(() => onSelectCallback(name, value));
+			setTimeout(() => callback(name, value));
 		}
 	};
 
 	getAttributeProps = () => {
 		const {
-			isDisabled: disabled,
-			isRemovable: removable,
-			name, onRemove,
+			disabled,
+			name,
+			onRemove,
 			onSelect,
+			removable,
 			source,
 			value,
 			withCreate
@@ -85,7 +84,12 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	handleChangeGroup = (groupName: string, group: Object, attributeTitle: string) => {
-		const {name, onChangeTitle, onSelectRefInput, value} = this.props;
+		const {name, onChangeTitle, onSelectRefInput, refInputProps, value} = this.props;
+		let onSelectCallback;
+
+		if (refInputProps) {
+			onSelectCallback = refInputProps.onSelectCallback;
+		}
 
 		if (value && value.type !== TYPES.COMPUTED_ATTR && attributeTitle) {
 			const processedAttribute = value && getProcessedAttribute(value);
@@ -97,6 +101,7 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 
 		onSelectRefInput(groupName, group);
+		this.applyCallback(onSelectCallback, groupName, group);
 	};
 
 	handleChangeTitle = (parent: AttributeType | null) => (name: string, title: string) => {
@@ -123,7 +128,7 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	handleSelect = (parent: AttributeType | null) => (name: string, value: AttributeType) => {
-		const {onSelect, value: prevValue} = this.props;
+		const {onSelect, onSelectCallback, value: prevValue} = this.props;
 
 		if (parent) {
 			parent.ref = value;
@@ -132,11 +137,11 @@ export class Attribute extends PureComponent<Props, State> {
 			onSelect(name, value);
 		}
 
-		this.applyCallback(name, value);
+		this.applyCallback(onSelectCallback, name, value);
 	};
 
 	handleSelectWithRef = (parent: AttributeType | null) => (name: string, value: AttributeType) => {
-		const {onSelect, onSelectRefInput, refInputProps} = this.props;
+		const {onSelect, onSelectCallback, onSelectRefInput, refInputProps} = this.props;
 		let {value: prevValue} = this.props;
 
 		if (parent) {
@@ -156,7 +161,7 @@ export class Attribute extends PureComponent<Props, State> {
 			onSelectRefInput(refName, refValue);
 		}
 
-		this.applyCallback(name, value);
+		this.applyCallback(onSelectCallback, name, value);
 	};
 
 	handleSubmitCreatingModal = (attribute: ComputedAttr) => {
@@ -217,10 +222,11 @@ export class Attribute extends PureComponent<Props, State> {
 			);
 		}
 
-		return this.renderSelect({
-			...props,
-			onSelect: this.handleSelect(parent)
-		});
+		return (
+			<div className={styles.selectContainer}>
+				{this.renderSelect({...props, onSelect: this.handleSelect(parent)})}
+			</div>
+		);
 	};
 
 	renderAttributeByType = () => {
@@ -297,8 +303,8 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	renderGroup = (refInputProps: RefInputProps) => {
-		const {name, value} = refInputProps;
 		let {value: attribute} = this.props;
+		const {disabled, name, value} = refInputProps;
 
 		if (!attribute || (attribute && attribute.type !== TYPES.COMPUTED_ATTR)) {
 			attribute = attribute && getProcessedAttribute(attribute);
@@ -306,6 +312,7 @@ export class Attribute extends PureComponent<Props, State> {
 			return (
 				<AttributeGroup
 					attribute={attribute}
+					disabled={disabled}
 					name={name}
 					onChange={this.handleChangeGroup}
 					value={value}

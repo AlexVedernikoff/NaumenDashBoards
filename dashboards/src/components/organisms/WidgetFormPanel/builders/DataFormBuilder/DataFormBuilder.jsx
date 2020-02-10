@@ -401,7 +401,7 @@ export class DataFormBuilder extends FormBuilder {
 		const {values} = this.props;
 
 		const props = {
-			active: values[withBreakdown],
+			active: values[withBreakdown] || this.isRequiredBreakdown(),
 			onClick: this.handleClickExtendBreakdown(withBreakdown),
 			text: 'Разбивка'
 		};
@@ -420,10 +420,10 @@ export class DataFormBuilder extends FormBuilder {
 		};
 
 		const props = {
-			isRemovable: !this.isRequiredBreakdown(),
 			name,
 			onRemove: this.handleRemoveBreakdown,
 			refInputProps,
+			removable: !this.isRequiredBreakdown(),
 			value: values[name],
 			withDivider: false
 		};
@@ -470,7 +470,7 @@ export class DataFormBuilder extends FormBuilder {
 		const ordinalNumber = getNumberFromName(name);
 		const computeName = createOrdinalName(FIELDS.sourceForCompute, ordinalNumber);
 		const descriptorName = createOrdinalName(FIELDS.descriptor, ordinalNumber);
-		const isRemovable = this.getOrder().length > this.defaultOrder.length;
+		const removable = this.getOrder().length > this.defaultOrder.length;
 
 		const compute = {
 			name: computeName,
@@ -490,12 +490,12 @@ export class DataFormBuilder extends FormBuilder {
 					compute={compute}
 					descriptor={descriptor}
 					error={errors[name]}
-					isRemovable={isRemovable}
 					name={name}
 					onChangeLabel={setFieldValue}
 					onRemove={this.removeSet}
 					onSelect={this.handleSelectSource}
 					onSelectCallback={callback}
+					removable={removable}
 					sources={sources}
 					value={values[name]}
 				/>

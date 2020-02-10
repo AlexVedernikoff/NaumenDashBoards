@@ -1,13 +1,13 @@
 // @flow
+import {Button, Title} from 'components/atoms';
 import cn from 'classnames';
 import {DesignTab, ParamsTab} from './Tabs';
-import Footer from './Footer';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component, createContext, createRef} from 'react';
 import type {State, TabParams} from './types';
 import styles from './styles.less';
 import {TABS} from './constants';
-import {Title} from 'components/atoms';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 const {LIST, VARIANTS} = TABS;
 const tabs = {
@@ -25,6 +25,32 @@ export class WidgetFormPanel extends Component<Props, State> {
 
 	handleClick = (currentTab: string) => () => this.setState({currentTab});
 
+	handleSubmit = async () => {
+		const {setFieldValue, submitForm} = this.props;
+
+		await setFieldValue('isSubmitting', true);
+		await setFieldValue('shouldScrollToError', true);
+
+		submitForm();
+	};
+
+	renderCancelButton = () => {
+		const {cancelForm} = this.props;
+
+		return (
+			<Button className={styles.cancelButton} onClick={cancelForm} variant={BUTTON_VARIANTS.ADDITIONAL}>
+				Отмена
+			</Button>
+		);
+	};
+
+	renderFooter = () => (
+		<div className={styles.footer}>
+			{this.renderSaveButton()}
+			{this.renderCancelButton()}
+		</div>
+	);
+
 	renderForm = () => {
 		const {handleSubmit} = this.props;
 
@@ -33,7 +59,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 				{this.renderHeader()}
 				{this.renderTabList()}
 				{this.renderTabContent()}
-				<Footer />
+				{this.renderFooter()}
 			</form>
 		);
 	};
@@ -46,6 +72,18 @@ export class WidgetFormPanel extends Component<Props, State> {
 			<div className={styles.header}>
 				<Title className={styles.title}>{name}</Title>
 			</div>
+		);
+	};
+
+	renderSaveButton = () => {
+		const {personalDashboard, updating} = this.props;
+		const {INFO, SIMPLE} = BUTTON_VARIANTS;
+		const variant = personalDashboard ? INFO : SIMPLE;
+
+		return (
+			<Button disabled={updating} onClick={this.handleSubmit} variant={variant}>
+				Сохранить
+			</Button>
 		);
 	};
 

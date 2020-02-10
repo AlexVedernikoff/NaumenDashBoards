@@ -7,7 +7,7 @@ import React, {Component, createRef} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
 import type {State} from './types';
 import styles from './styles.less';
-import {Widget, WidgetRemovalModal} from 'components/molecules';
+import {Widget} from 'components/molecules';
 import type {Widget as WidgetType} from 'store/widgets/data/types';
 import WidgetAddPanel from 'containers/WidgetAddPanel';
 import WidgetFormPanel from 'containers/WidgetFormPanel';
@@ -19,8 +19,6 @@ export class DashboardContent extends Component<Props, State> {
 	newWidgetRef = createRef();
 	state = {
 		newWidgetFocused: false,
-		showRemovalModal: false,
-		widgetIdToRemove: '',
 		width: null
 	};
 
@@ -42,21 +40,7 @@ export class DashboardContent extends Component<Props, State> {
 	}
 
 	componentDidUpdate () {
-		const {editable} = this.props;
-
-		if (editable) {
-			const {current: grid} = gridRef;
-			const {current: newWidget} = this.newWidgetRef;
-			const {current: container} = this.gridContainerRef;
-			const {newWidgetFocused} = this.state;
-
-			if (newWidget && container && grid && !newWidgetFocused) {
-				container && container.scrollTo(0, grid.clientHeight);
-				this.setState(() => ({newWidgetFocused: true}));
-			} else if (!newWidget && newWidgetFocused) {
-				this.setState(() => ({newWidgetFocused: false}));
-			}
-		}
+		this.setFocusOnNewWidget();
 	}
 
 	getWidgets = () => {
@@ -72,14 +56,12 @@ export class DashboardContent extends Component<Props, State> {
 	handleLayoutChange = (layout: Layout) => this.props.editLayout(layout);
 
 	handleWidgetSelect = (widgetId: string) => {
-		const {selectWidget, selectedWidget} = this.props;
+		const {selectedWidget, selectWidget} = this.props;
 
 		if (widgetId !== selectedWidget) 	{
 			selectWidget(widgetId);
 		}
 	};
-
-	hideRemovalModal = () => this.setState({showRemovalModal: false, widgetIdToRemove: ''});
 
 	reloadGrid = () => {
 		const {current} = gridRef;
@@ -90,18 +72,22 @@ export class DashboardContent extends Component<Props, State> {
 		}
 	};
 
-	removeWidget = (onlyPersonal: boolean) => {
-		const {removeWidget} = this.props;
-		const {widgetIdToRemove} = this.state;
+	setFocusOnNewWidget = () => {
+		const {current: grid} = gridRef;
+		const {current: newWidget} = this.newWidgetRef;
+		const {current: container} = this.gridContainerRef;
+		const {newWidgetFocused} = this.state;
 
-		this.hideRemovalModal();
-		removeWidget(widgetIdToRemove, onlyPersonal);
+		if (newWidget && container && grid && !newWidgetFocused) {
+			container && container.scrollTo(0, grid.clientHeight);
+			this.setState(() => ({newWidgetFocused: true}));
+		} else if (!newWidget && newWidgetFocused) {
+			this.setState(() => ({newWidgetFocused: false}));
+		}
 	};
 
-	showRemovalModal = (widgetIdToRemove: string) => this.setState({showRemovalModal: true, widgetIdToRemove});
-
 	renderGrid = () => {
-		const {selectedWidget} = this.props;
+		const {personalDashboard, selectedWidget} = this.props;
 		const {width} = this.state;
 		const isEditable = !!selectedWidget;
 		const widgets = this.getWidgets();
@@ -115,6 +101,7 @@ export class DashboardContent extends Component<Props, State> {
 					containerPadding={CONTAINER_PADDING}
 					isDraggable={isEditable}
 					isResizable={isEditable}
+					key={personalDashboard.toString()}
 					onLayoutChange={this.handleLayoutChange}
 					rowHeight={ROW_HEIGHT}
 					width={width}
@@ -133,19 +120,9 @@ export class DashboardContent extends Component<Props, State> {
 			<div className={containerCN} ref={this.gridContainerRef}>
 				<div ref={gridRef}>
 					{this.renderGrid()}
-					{this.renderRemovalModal()}
 				</div>
 			</div>
 		);
-	};
-
-	renderRemovalModal = () => {
-		const {role} = this.props;
-		const {showRemovalModal} = this.state;
-
-		if (showRemovalModal) {
-			return <WidgetRemovalModal onClose={this.hideRemovalModal} onSubmit={this.removeWidget} role={role} />;
-		}
 	};
 
 	renderRightPanel = () => {
@@ -161,7 +138,7 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderWidget = (widget: WidgetType) => {
-		const {buildData, drillDown, editable, selectedWidget} = this.props;
+		const {buildData, drillDown, editable, removeWidget, selectedWidget} = this.props;
 		const {id, layout} = widget;
 		const isNew = id === NewWidget.id;
 		const ref = isNew ? this.newWidgetRef : null;
@@ -183,7 +160,7 @@ export class DashboardContent extends Component<Props, State> {
 				key={id}
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
-				onRemove={this.showRemovalModal}
+				onRemove={removeWidget}
 				ref={ref}
 			/>
 		);

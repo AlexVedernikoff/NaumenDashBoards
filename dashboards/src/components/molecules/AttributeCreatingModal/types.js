@@ -52,6 +52,7 @@ export type State = {
 	info: string,
 	last: string,
 	secondTemplateType: SecondTemplateType,
+	showLegacyFormatInfo: boolean,
 	showRemoveInfo: boolean,
 	title: string
 };

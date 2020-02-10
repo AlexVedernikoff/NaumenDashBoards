@@ -1,18 +1,18 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
-import type {Context} from 'utils/api/types';
 import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetFormPanel/types';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/actions';
-import {fetchBuildData} from 'store/widgets/buildData/actions';
+import {fetchAllBuildData, fetchBuildData} from 'store/widgets/buildData/actions';
+import {getParams} from 'store/helpers';
 import type {Layout} from 'utils/layout/types';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import {NewWidget} from 'utils/widget';
 import type {Widget} from './types';
 
 /**
- * Добавляем новый виджет
+ * Добавляет новый виджет
  * @param {NewWidget} payload - объект нового виджета
  * @returns {ThunkAction}
  */
@@ -34,7 +34,7 @@ const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch, getS
 };
 
 /**
- * Сохраняем изменение положения виджетов
+ * Сохраняет локально изменение положения виджетов
  * @param {Layout} payload - массив объектов местоположения виджетов на дашборде
  * @returns {ThunkAction}
  */
@@ -43,37 +43,34 @@ const editLayout = (payload: Layout): ThunkAction => async (dispatch: Dispatch):
 };
 
 /**
- * Сохраняем новое положение виджетов
- * @param {Context} context - контекст ВП;
- * @param {boolean} editable - является ли дашборд редактируемым
- * @param {boolean} asDefault - указывает как сохранить виджет;
+ * Сохраняет в изменение положения виджетов
  * @returns {ThunkAction}
  */
-const saveNewLayout = (context: Context, editable: boolean, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+const saveNewLayout = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	dispatch(requestLayoutSave());
 
 	try {
+		const state = getState();
 		const {widgets} = getState();
 		const widgetMap = widgets.data.map;
-		const method = asDefault ? 'bulkEditDefaultWidget' : 'bulkEditWidget';
-		const layoutsSettings = Object.keys(widgetMap).map(key => ({
+		const layouts = Object.keys(widgetMap).map(key => ({
 			key: key,
 			value: widgetMap[key].layout
 		}));
+		const url = buildUrl('dashboardSettings', 'editLayouts', 'requestContent,user');
+		const params = {
+			...getParams(state),
+			layouts
+		};
 
-		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), {
-			classFqn: context.subjectUuid,
-			contentCode: context.contentCode,
-			editable,
-			layoutsSettings
-		});
+		await client.post(url, params);
 	} catch (e) {
 		dispatch(recordLayoutSaveError());
 	}
 };
 
 /**
- * Закрываем форму
+ * Сбрасывает выбранный виджет
  * @returns {ThunkAction}
  */
 const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
@@ -81,73 +78,71 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
 };
 
 /**
- * Сохраняем изменения данных виджета
+ * Сохраняет изменение данных виджета
  * @param {SaveFormData} formData - данные формы редактирования
- * @param {boolean} asDefault - указывает как сохранить виджет;
  * @returns {ThunkAction}
  */
-const saveWidget = (formData: SaveFormData, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const saveWidget = (formData: SaveFormData): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetSave());
 
-	const {dashboard, widgets} = getState();
-	const {context, editable, role} = dashboard;
-	const method = asDefault ? 'editDefaultWidget' : 'editPersonalWidgetSettings';
-	const isEditable = editable || role !== null;
-	const widget = {...formData, layout: widgets.data.map[formData.id].layout};
-	const data = {
-		classFqn: context.subjectUuid,
-		contentCode: context.contentCode,
-		editable: isEditable,
-		widgetKey: widget.id,
-		widgetSettings: widget
-	};
-
 	try {
-		const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
-
-		if (widget.id !== id) {
-			dispatch(deleteWidget(widget.id));
-			widget.id = id;
-		}
+		const state = getState();
+		const {widgets} = state;
+		const widget = {...formData, layout: widgets.data.map[formData.id].layout};
+		const url = buildUrl('dashboardSettings', 'editWidget', 'requestContent,user');
+		const params = {
+			...getParams(state),
+			widget
+		};
+		await client.post(url, params);
 
 		dispatch(updateWidget(widget));
-		dispatch(saveNewLayout(context, isEditable, asDefault));
+		dispatch(saveNewLayout());
+		dispatch(fetchBuildData(widget));
 	} catch (e) {
 		dispatch(recordSaveError());
 	}
-
-	dispatch(fetchBuildData(widget));
 };
 
 /**
- * Создаем виджет
- * @param {CreateFormData} formData - данные формы создания виджета
- * @param {boolean} asDefault - указывает какого типа создать виджет;
+ * Сохраняет массив виджетов и получает данные для построения
+ * @param { Widget[]} payload - данные формы редактирования
  * @returns {ThunkAction}
  */
-const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const setWidgets = (payload: Widget[]): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	dispatch({
+		type: WIDGETS_EVENTS.SET_WIDGETS,
+		payload
+	});
+	await dispatch(fetchAllBuildData(payload));
+};
+
+/**
+ * Создает новый виджет
+ * @param {CreateFormData} formData - данные формы создания виджета
+ * @returns {ThunkAction}
+ */
+const createWidget = (formData: CreateFormData): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetSave());
 
-	const {dashboard, widgets} = getState();
-	const {context, editable, role} = dashboard;
+	const state = getState();
+	const {widgets} = getState();
 	const newWidget = widgets.data.newWidget;
 
 	if (newWidget) {
-		const method = asDefault ? 'createDefaultWidgetSettings' : 'createPersonalWidgetSettings';
-		const isEditable = editable || role !== null;
 		let widget = {...formData, layout: newWidget.layout};
 
 		try {
-			const {data: id} = await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), {
-				classFqn: context.subjectUuid,
-				contentCode: context.contentCode,
-				editable: isEditable,
-				widgetSettings: widget
-			});
+			const url = buildUrl('dashboardSettings', 'createWidget', 'requestContent,user');
+			const params = {
+				...getParams(state),
+				widget
+			};
+			const {data: id} = await client.post(url, params);
 
 			widget = {...widget, id, layout: {...widget.layout, i: id}};
 			dispatch(setCreatedWidget(widget));
-			dispatch(saveNewLayout(context, isEditable, asDefault));
+			dispatch(saveNewLayout());
 		} catch (e) {
 			dispatch(recordSaveError());
 		}
@@ -159,23 +154,19 @@ const createWidget = (formData: CreateFormData, asDefault: boolean): ThunkAction
 /**
  * Удаляет виджет
  * @param {string} widgetId - идентификатор виджета;
- * @param {boolean} onlyPersonal - в случае "true" удаляем только персональный вариант, иначе оба (персональный и по умолчанию).
  * @returns {ThunkAction}
  */
-const removeWidget = (widgetId: string, onlyPersonal: boolean): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetDelete());
 
 	try {
-		const {context, editable} = getState().dashboard;
-		const method = onlyPersonal ? 'deletePersonalWidget' : 'deleteWidget';
-
-		const data = {
-			classFqn: context.subjectUuid,
-			contentCode: context.contentCode,
-			editable,
+		const url = buildUrl('dashboardSettings', 'deleteWidget', 'requestContent,user');
+		const params = {
+			...getParams(getState()),
 			widgetId
 		};
-		await client.post(buildUrl('dashboardSettings', method, 'requestContent,user'), data);
+
+		await client.post(url, params);
 		dispatch(deleteWidget(widgetId));
 	} catch (e) {
 		dispatch(recordDeleteError());
@@ -183,7 +174,7 @@ const removeWidget = (widgetId: string, onlyPersonal: boolean): ThunkAction => a
 };
 
 /**
- * Устанавливаем выбранный виджет для последующего редактирования
+ * Устанавливает выбранный виджет для последующего редактирования
  * @param {string} payload - id виджета
  * @returns {ThunkAction}
  */
@@ -223,11 +214,6 @@ const requestWidgetSave = () => ({
 
 const resetWidget = () => ({
 	type: WIDGETS_EVENTS.RESET_WIDGET
-});
-
-const setWidgets = (payload: Widget[]) => ({
-	type: WIDGETS_EVENTS.SET_WIDGETS,
-	payload
 });
 
 const setCreatedWidget = (payload: Widget) => ({

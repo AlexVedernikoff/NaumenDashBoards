@@ -7,6 +7,7 @@ import {FIELDS, IS_NEW, TYPE_OPTIONS} from './constants';
 import {getProcessedAttribute} from 'store/sources/attributes/helpers';
 import {GROUP_TYPES} from 'store/widgets/constants';
 import {InfoPanel, MaterialTextInput, RadioButton} from 'components/atoms';
+import {isGroupKey} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import schema from './schema';
@@ -45,6 +46,29 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	getModalSize = () => this.state.type === GROUP_TYPES.SYSTEM ? 'small' : 'large';
 
+	getWidgetsUsingSelectedCutomGroup = () => {
+		const {widgets} = this.props;
+		const {selectedCustomGroup} = this.state;
+		const usedInWidgets = [];
+
+		widgets.forEach(widget => {
+			Object.keys(widget)
+				.filter(isGroupKey)
+				.every(key => {
+					const group = widget[key];
+
+					if (group && typeof group === 'object' && group.data === selectedCustomGroup) {
+						usedInWidgets.push(widget);
+						return false;
+					}
+
+					return true;
+				});
+		});
+
+		return usedInWidgets;
+	};
+
 	handleChange = (name: string, value: string) => this.setState({[name]: value});
 
 	handleCloseSaveInfo = () => this.setState({showSaveInfo: false});
@@ -82,13 +106,13 @@ export class GroupCreatingModal extends Component<Props, State> {
 	});
 
 	handleSubmit = () => {
-		const {customGroups} = this.props;
 		const {selectedCustomGroup, type} = this.state;
 		// $FlowFixMe
-		if (type === GROUP_TYPES.SYSTEM || customGroups[selectedCustomGroup][IS_NEW]) {
-			this.save();
+		if (type === GROUP_TYPES.SYSTEM) {
+			this.saveSystemGroup();
 		} else if (selectedCustomGroup) {
-			this.setState({showSaveInfo: true});
+			const usedInWidgets = this.getWidgetsUsingSelectedCutomGroup();
+			usedInWidgets.length > 0 ? this.setState({showSaveInfo: true}) : this.saveCustomGroup();
 		}
 	};
 
@@ -112,8 +136,6 @@ export class GroupCreatingModal extends Component<Props, State> {
 			return DATETIME;
 		}
 	};
-
-	save = async () => this.state.type === GROUP_TYPES.CUSTOM ? this.saveCustomGroup() : this.saveSystemGroup();
 
 	saveCustomGroup = async () => {
 		const {createCustomGroup, customGroups, onSubmit, updateCustomGroup} = this.props;
@@ -169,7 +191,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderCustomFields = () => {
-		const {customGroups, widgets} = this.props;
+		const {customGroups} = this.props;
 		const {customGroupType, errors, selectedCustomGroup, type} = this.state;
 
 		if (type === GROUP_TYPES.CUSTOM && customGroupType === CUSTOM_GROUP_TYPES.DATETIME) {
@@ -177,6 +199,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 				<div className={styles.customSection}>
 					<CustomGroup
 						errors={errors}
+						getUsingWidgets={this.getWidgetsUsingSelectedCutomGroup}
 						groups={customGroups}
 						onCreate={this.handleCreateCustomGroup}
 						onRemove={this.handleRemoveCustomGroup}
@@ -184,7 +207,6 @@ export class GroupCreatingModal extends Component<Props, State> {
 						onUpdate={this.handleUpdateCustomGroup}
 						selectedGroup={selectedCustomGroup}
 						type={customGroupType}
-						widgets={widgets}
 					/>
 				</div>
 			);
@@ -216,7 +238,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 				<InfoPanel
 					className={styles.infoPanel}
 					onClose={this.handleCloseSaveInfo}
-					onConfirm={this.save}
+					onConfirm={this.saveCustomGroup}
 					text={text}
 					variant={VARIANTS.WARNING}
 				/>

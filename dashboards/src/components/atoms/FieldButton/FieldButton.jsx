@@ -5,14 +5,25 @@ import styles from './styles.less';
 import {Tip} from 'components/atoms';
 
 export class FieldButton extends PureComponent<Props> {
+	static defaultProps = {
+		disabled: false
+	};
+
+	handleClick = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
+		const {onClick} = this.props;
+
+		e.preventDefault();
+		onClick();
+	};
+
 	render () {
-		const {children, onClick, tip} = this.props;
+		const {children, disabled, tip} = this.props;
 
 		return (
 			<Tip text={tip}>
-				<div className={styles.button} onClick={onClick}>
+				<button className={styles.button} disabled={disabled} onClick={this.handleClick}>
 					{children}
-				</div>
+				</button>
 			</Tip>
 		);
 	}

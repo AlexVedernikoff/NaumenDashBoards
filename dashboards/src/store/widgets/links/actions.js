@@ -90,8 +90,8 @@ const drillDown = (widget: Widget, ordinalNumber?: number, mixin: ?DrillDownMixi
  * @returns {Function}
  */
 const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {dashboard, widgets} = getState();
-	const {subjectUuid} = dashboard.context;
+	const {context, widgets} = getState();
+	const {subjectUuid} = context;
 	const {links} = widgets;
 	let link = links[id];
 

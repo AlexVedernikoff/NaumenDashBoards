@@ -1,5 +1,6 @@
 // @flow
 import type {Node} from 'react';
+import {VARIANTS} from './constants';
 
 export type Props = {
 	block: boolean,
@@ -7,6 +8,7 @@ export type Props = {
 	className: string,
 	disabled: boolean,
 	onClick?: () => any,
+	outline: boolean,
 	type: string,
-	variant: string
+	variant: $Keys<typeof VARIANTS>
 };

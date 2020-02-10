@@ -4,16 +4,14 @@ import {createToast} from 'store/toasts/actions';
 import type {CustomGroup, CustomGroupId, CustomGroupsMap} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {getParams} from 'store/helpers';
 
 const createCustomGroup = (payload: CustomGroup): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<string> => {
 	let id = '';
 
 	try {
-		const {contentCode, subjectUuid: classFqn} = getState().dashboard.context;
-
 		const {data} = await client.post(buildUrl('dashboardSettings', 'saveCustomGroup', 'requestContent,user'), {
-			classFqn,
-			contentCode,
+			...getParams(getState()),
 			group: payload
 		});
 		id = data;
@@ -31,12 +29,9 @@ const createCustomGroup = (payload: CustomGroup): ThunkAction => async (dispatch
 };
 
 const deleteCustomGroup = (payload: CustomGroupId): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {contentCode, subjectUuid: classFqn} = getState().dashboard.context;
-
 	try {
 		await client.post(buildUrl('dashboardSettings', 'deleteCustomGroup', 'requestContent,user'), {
-			classFqn,
-			contentCode,
+			...getParams(getState()),
 			groupKey: payload
 		});
 
@@ -52,10 +47,8 @@ const deleteCustomGroup = (payload: CustomGroupId): ThunkAction => async (dispat
 const updateCustomGroup = (payload: CustomGroup, remote: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		if (remote) {
-			const {contentCode, subjectUuid: classFqn} = getState().dashboard.context;
 			await client.post(buildUrl('dashboardSettings', 'updateCustomGroup', 'requestContent,user'), {
-				classFqn,
-				contentCode,
+				...getParams(getState()),
 				group: payload,
 				groupKey: payload.id
 			});

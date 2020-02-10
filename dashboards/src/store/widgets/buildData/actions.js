@@ -140,8 +140,8 @@ const resolve = (type: string) => {
 const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let postData = {};
-		const {customGroups, dashboard} = getState();
-		const {subjectUuid} = dashboard.context;
+		const {context, customGroups} = getState();
+		const {subjectUuid} = context;
 
 		dispatch(requestAllBuildData(widgets));
 
@@ -169,8 +169,8 @@ const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatc
 
 	try {
 		const {type} = widget;
-		const {customGroups, dashboard} = getState();
-		const {subjectUuid} = dashboard.context;
+		const {context, customGroups} = getState();
+		const {subjectUuid} = context;
 		const fields = resolve(type);
 		const postData = createPostData(widget, fields, customGroups);
 		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForCompositeDiagram', `requestContent,'${subjectUuid}'`), postData);

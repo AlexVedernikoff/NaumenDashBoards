@@ -10,6 +10,10 @@ import React, {Fragment, PureComponent} from 'react';
 import {TYPES} from 'store/sources/attributes/constants';
 
 export class AttributeGroup extends PureComponent<Props, State> {
+	static defaultProps = {
+		disabled: false
+	};
+
 	state = {
 		showModal: false
 	};
@@ -33,7 +37,7 @@ export class AttributeGroup extends PureComponent<Props, State> {
 	};
 
 	renderButton = () => (
-		<FieldButton onClick={this.handleClickFieldButton} tip="Группировка">
+		<FieldButton disabled={this.props.disabled} onClick={this.handleClickFieldButton} tip="Группировка">
 			{this.renderIconByType()}
 		</FieldButton>
 	);

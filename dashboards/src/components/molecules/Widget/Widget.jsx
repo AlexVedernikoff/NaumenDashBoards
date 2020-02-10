@@ -3,7 +3,7 @@ import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
 import cn from 'classnames';
 import {createName, createSnapshot, FILE_LIST} from 'utils/export';
 import {createOrdinalName} from 'utils/widget';
-import {Diagram} from 'components/molecules';
+import {Diagram, Modal} from 'components/molecules';
 import {ExportIcon} from 'icons/header';
 import type {ExportItem, Props, State} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
@@ -17,7 +17,8 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	state = {
-		hasError: false
+		hasError: false,
+		showRemoveModal: false
 	};
 
 	ref = createRef();
@@ -81,8 +82,14 @@ export class Widget extends PureComponent<Props, State> {
 		}
 	};
 
-	handleClickRemoveButton = () => {
+	handleClickRemoveButton = () => this.setState({showRemoveModal: true});
+
+	handleCLoseRemoveModal = () => this.setState({showRemoveModal: false});
+
+	handleSubmitRemoveModal = () => {
 		const {data, onRemove} = this.props;
+
+		this.setState({showRemoveModal: false});
 		onRemove(data.id);
 	};
 
@@ -191,7 +198,25 @@ export class Widget extends PureComponent<Props, State> {
 			return (
 				<IconButton onClick={this.handleClickRemoveButton} tip="Удалить">
 					<CloseIcon />
+					{this.renderRemoveModal()}
 				</IconButton>
+			);
+		}
+	};
+
+	renderRemoveModal = () => {
+		const {showRemoveModal} = this.state;
+
+		if (showRemoveModal) {
+			return (
+				<Modal
+					cancelText="Нет"
+					header="Вы точно хотите удалить виджет?"
+					onClose={this.handleCLoseRemoveModal}
+					onSubmit={this.handleSubmitRemoveModal}
+					size="small"
+					submitText="Да"
+				/>
 			);
 		}
 	};

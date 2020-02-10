@@ -31,7 +31,6 @@ import SourceTree from './SourceTree';
 import Summary from './Summary';
 import Table from './Table';
 import Widget from './Widget';
-import WidgetRemovalModal from './WidgetRemovalModal';
 
 export {
 	Attribute,
@@ -65,6 +64,5 @@ export {
 	SourceTree,
 	Summary,
 	Table,
-	Widget,
-	WidgetRemovalModal
+	Widget
 };
