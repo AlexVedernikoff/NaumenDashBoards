@@ -1,6 +1,7 @@
 // @flow
 import 'babel-polyfill';
 import './iframeResizer';
+import './fakeApi';
 import App from 'components/App';
 import {configureStore} from 'store';
 import {Provider} from 'react-redux';

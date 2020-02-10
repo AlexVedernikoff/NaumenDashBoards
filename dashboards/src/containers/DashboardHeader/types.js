@@ -1,20 +1,26 @@
 // @flow
-import type {Role} from 'store/dashboard/types';
 import type {ThunkAction} from 'store/types';
+import type {UserData} from 'store/context/types';
 
 export type ConnectedProps = {
 	autoUpdateEnabled: boolean,
-	editable: boolean,
+	editableDashboard: boolean,
 	editMode: boolean,
-	role?: Role
+	personalDashboard: boolean,
+	personalDashboardCreating: boolean,
+	personalDashboardDeleting: boolean,
+	switching: boolean,
+	user: UserData
 };
 
 export type ConnectedFunctions = {
+	createPersonalDashboard: () => ThunkAction,
 	editDashboard: () => ThunkAction,
-	getSettings: () => ThunkAction,
-	resetDashboard: () => ThunkAction,
+	getSettings: (personal: boolean) => ThunkAction,
+	removePersonalDashboard: () => ThunkAction,
 	seeDashboard: () => ThunkAction,
-	sendToMail: (name: string, type: string, file: Blob) => ThunkAction
+	sendToMail: (name: string, type: string, file: Blob) => ThunkAction,
+	switchDashboard: () => ThunkAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

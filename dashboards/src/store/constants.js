@@ -1,0 +1,12 @@
+// @flow
+const RESET_STATE: 'RESET_STATE' = 'RESET_STATE';
+const SWITCH_STATE: 'SWITCH_STATE' = 'SWITCH_STATE';
+
+const ROOT_EVENTS = {
+	RESET_STATE,
+	SWITCH_STATE
+};
+
+export {
+	ROOT_EVENTS
+};

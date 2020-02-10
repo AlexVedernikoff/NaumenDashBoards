@@ -25,7 +25,7 @@ const create = context => {
 				// алфавитный порядок render-методов
 				methods.filter(node => isRender(node)).forEach((node, index, methods) => {
 					if (index < methods.length - 1 && hasAlphabetOrderError(node.key.name, methods[index + 1].key.name)) {
-						throw createError(node, 'алфавитный порядок render-методов');
+						throw createError(methods[index + 1], 'алфавитный порядок render-методов');
 					}
 				});
 			} catch (error) {

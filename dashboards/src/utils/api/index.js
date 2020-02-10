@@ -1,13 +1,10 @@
 // @flow
 import buildUrl from './core';
 import client from './client';
-import {getContentParameters, getContext} from './context';
 
 export {
 	buildUrl,
-	client,
-	getContentParameters,
-	getContext
+	client
 };
 
 export default buildUrl;

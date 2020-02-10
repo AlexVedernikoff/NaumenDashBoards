@@ -1,6 +1,16 @@
 @import '/styles/variables';
 
 :local {
+	.applyOutlineColor(@color) {
+		border: 1px solid @color;
+		color: @color;
+	}
+
+	.disabled {
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
 	.button {
 		align-items: center;
 		border-radius: 2px;
@@ -11,6 +21,13 @@
 		justify-content: center;
 		line-height: 15px;
 		padding: 8px 20px;
+
+		svg {
+			height: 10px;
+			margin: 0 5px;
+			text-align: center;
+			width: 10px;
+		}
 	}
 
 	.block {
@@ -19,7 +36,6 @@
 	}
 
 	.info {
-		.button();
 		background-color: @info;
 		color: @white;
 
@@ -32,10 +48,9 @@
 		}
 
 		&:disabled {
+			.disabled();
 			background-color: @silver;
 			color: @grey;
-			cursor: not-allowed;
-			pointer-events: none;
 
 			&:active {
 				background-color: darken(@silver, 10%);
@@ -43,8 +58,25 @@
 		}
 	}
 
+	.outlineInfo {
+		background-color: transparent;
+		color: @white;
+
+		&:hover {
+			background-color: @info;
+		}
+
+		&:active {
+			background-color: darken(@info, 15%);
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
+		}
+	};
+
 	.additional {
-		.button();
 		color: @black;
 
 		&:hover {
@@ -57,7 +89,6 @@
 	}
 
 	.simple {
-		.button();
 		color: @info;
 		font-size: 13px;
 		font-style: normal;
@@ -68,9 +99,44 @@
 		}
 
 		&:disabled {
+			.disabled();
 			color: @black;
-			cursor: not-allowed;
-			pointer-events: none;
+		}
+	}
+
+	.green {
+		background-color: #6FCF97;
+		color: @white;
+
+		&:hover {
+			background-color: #64BA88;
+		}
+
+		&:active {
+			background-color: #50956D;
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
+		}
+	}
+
+	.outlineGreen {
+		.applyOutlineColor(#6FCF97);
+		background-color: transparent;
+
+		&:hover {
+			.applyOutlineColor(#64BA88);
+		}
+
+		&:active {
+			.applyOutlineColor(#50956D);
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
 		}
 	}
 }

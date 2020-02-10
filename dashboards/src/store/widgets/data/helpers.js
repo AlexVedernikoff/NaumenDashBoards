@@ -128,15 +128,12 @@ export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): 
  * @returns {WidgetsDataState}
  */
 export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): WidgetsDataState => {
-	if (payload && typeof payload === 'object') {
-		state.map[payload.id] = payload;
-		state.selectedWidget = payload.id;
-	}
+	state.map[payload.id] = payload;
 
 	return {
 		...state,
-		updating: false,
-		map: {...state.map}
+		map: {...state.map},
+		updating: false
 	};
 };
 

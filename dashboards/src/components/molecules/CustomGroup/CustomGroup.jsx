@@ -8,6 +8,7 @@ import type {InfoPanelProps, Props, State} from './types';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class CustomGroup extends Component<Props, State> {
 	state = {
@@ -59,20 +60,8 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleClickRemovalButton = () => {
-		const {selectedGroup, widgets} = this.props;
-		const usedInWidgets = [];
-
-		widgets.forEach(widget => {
-			Object.keys(widget)
-				.filter(key => /group/i.test(key))
-				.forEach(key => {
-					const group = widget[key];
-
-					if (group && typeof group === 'object' && group.data === selectedGroup) {
-						usedInWidgets.push(widget.name);
-					}
-				});
-		});
+		const {getUsingWidgets} = this.props;
+		const usedInWidgets = getUsingWidgets.filter(widget => widget.name);
 
 		usedInWidgets.length > 0
 			? this.setState({showUseInfo: true, usedInWidgets})
@@ -224,7 +213,7 @@ export class CustomGroup extends Component<Props, State> {
 				<div className={mainStyles.field}>
 					<Button
 						onClick={this.handleClickRemovalButton}
-						variant="simple"
+						variant={BUTTON_VARIANTS.SIMPLE}
 					>
 						Удалить
 					</Button>

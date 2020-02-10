@@ -14,8 +14,9 @@ export type State = {
 };
 
 export type RefInputProps = {
-	mixin?: Object,
+	disabled?: boolean,
 	name: string,
+	onSelectCallback?: (name: string, value: Object) => void,
 	renderValue?: (props: RenderValueProps) => Node,
 	type: $Keys<typeof REF_INPUT_TYPES>,
 	value: string
@@ -25,10 +26,9 @@ export type AttributeValue = Attribute | ComputedAttr;
 
 export type Props = {
 	computedAttrs?: Array<ComputedAttr>,
+	disabled: boolean,
 	getAttributeOptions: (classFqn: string) => Array<Attribute>,
 	getRefAttributeOptions: (attribute: Attribute) => Array<Attribute>,
-	isDisabled: boolean,
-	isRemovable: boolean,
 	name: string,
 	onChangeTitle: (name: string, value: AttributeValue) => void,
 	onRemove: (name: string) => void,
@@ -39,6 +39,7 @@ export type Props = {
 	onSelectRefInput: (name: string, value: any) => void,
 	options: Array<AttributeValue>,
 	refInputProps?: RefInputProps,
+	removable: boolean,
 	source: SourceValue,
 	sources: Array<SourceOption>,
 	value: AttributeValue | null,

@@ -37,11 +37,10 @@ const config: FormikConfig = {
 		const formValues = Object.prototype.hasOwnProperty.call(values, FIELDS.order) ? values : transformLegacyValues(type, values);
 
 		return {
-			asDefault: false,
+			diagramName: '',
 			isNew: id === NewWidget.id,
 			isSubmitting: false,
 			name: '',
-			diagramName: '',
 			type: getType(type),
 			...formValues
 		};
@@ -51,10 +50,10 @@ const config: FormikConfig = {
 
 	handleSubmit: (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;
-		const {asDefault, isNew, ...data} = values;
+		const {isNew, ...data} = values;
 		const filteredData = filter(data);
 
-		isNew ? createWidget(filteredData, asDefault) : saveWidget({...filteredData, id: selectedWidget.id}, asDefault);
+		isNew ? createWidget(filteredData) : saveWidget({...filteredData, id: selectedWidget.id});
 	},
 
 	enableReinitialize: true

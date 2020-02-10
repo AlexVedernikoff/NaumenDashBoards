@@ -33,17 +33,11 @@
 		"flowtype/semi": 2,
 		"no-tabs": 0,
 		"operator-linebreak": ["error", "before"],
-		"react/jsx-tag-spacing": [2, {
-			"beforeSelfClosing": "always"
-		}],
+		"react/jsx-tag-spacing": [2, {"beforeSelfClosing": "always"}],
 		"react/jsx-sort-props": 2,
 		"require-atomic-updates": "off",
-		"semi": [
-			2,
-			"always"
-		],
-		"sort-destructure-keys/sort-destructure-keys": 2,
-		"sort-vars": 2,
+		"semi": [2, "always"],
+		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": false}],
 		"jsdoc/newline-after-description": 0,
 		"jsdoc/require-returns-description": 0
 	},

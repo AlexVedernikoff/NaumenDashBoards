@@ -7,14 +7,13 @@ export const initialDashboardState: DashboardState = {
 		defaultInterval: 15,
 		enabled: false
 	},
-	context: {
-		contentCode: '',
-		subjectUuid: ''
-	},
 	editable: false,
 	editMode: false,
 	error: false,
-	loading: false
+	loading: false,
+	personal: false,
+	personalCreating: false,
+	personalDeleting: false
 };
 
 export const defaultDashboardAction: DashboardAction = {

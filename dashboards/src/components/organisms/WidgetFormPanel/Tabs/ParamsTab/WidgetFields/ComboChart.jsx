@@ -3,7 +3,6 @@ import {createOrdinalName, createRefName, getNumberFromName} from 'utils/widget'
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import {FIELDS, OPTIONS, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
-import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {styles} from 'components/organisms/WidgetFormPanel/Tabs/ParamsTab';
 import {TYPES} from 'store/sources/attributes/constants';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
@@ -43,9 +42,7 @@ export class ComboChart extends DataFormBuilder {
 
 	getMainNumber = () => this.getOrder()[0];
 
-	handleSelectComboGroup = async (name: string, group: SelectValue) => {
-		await this.handleSelect(name, group);
-
+	handleSelectComboGroup = (name: string) => {
 		if (getNumberFromName(name) === this.getMainNumber()) {
 			this.changeRefFields();
 		}
@@ -106,17 +103,15 @@ export class ComboChart extends DataFormBuilder {
 		}
 
 		const refInputProps = {
+			disabled: false,
 			name: currentGroupName,
-			mixin: {
-				isDisabled: false,
-				onSelect: this.handleSelectComboGroup
-			},
+			onSelectCallback: this.handleSelectComboGroup,
 			type: 'group',
 			value: values[currentGroupName]
 		};
 
 		const props = {
-			isDisabled: false,
+			disabled: false,
 			name,
 			onSelectCallback,
 			options: undefined,
@@ -126,7 +121,7 @@ export class ComboChart extends DataFormBuilder {
 
 		if (mainNumber !== currentNumber && mainSource && currentSource) {
 			if (mainSource.value === currentSource.value) {
-				props.isDisabled = true;
+				props.disabled = true;
 			} else {
 				const mainXAxis = values[createOrdinalName(FIELDS.xAxis, mainNumber)];
 				let xAxisOptions = this.getAttributeOptions(currentSource.value);
@@ -150,7 +145,7 @@ export class ComboChart extends DataFormBuilder {
 				props.options = xAxisOptions;
 			}
 
-			refInputProps.mixin.isDisabled = true;
+			refInputProps.disabled = true;
 		}
 
 		return this.renderAttribute(props);

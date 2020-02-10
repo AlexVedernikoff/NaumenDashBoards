@@ -3,6 +3,7 @@ import cn from 'classnames';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
+import {VARIANTS} from './constants';
 
 export class Button extends Component<Props> {
 	static defaultProps = {
@@ -11,22 +12,23 @@ export class Button extends Component<Props> {
 		disabled: false,
 		outline: false,
 		type: 'button',
-		variant: 'info'
+		variant: VARIANTS.INFO
 	};
 
 	getClassNames = () => {
-		const {block, className, variant} = this.props;
-		const mixins = [styles[variant]];
+		const {block, className, outline, variant} = this.props;
+		const {ADDITIONAL, GREEN, INFO, SIMPLE} = VARIANTS;
 
-		if (block) {
-			mixins.push(styles.block);
-		}
-
-		if (className) {
-			mixins.push(className);
-		}
-
-		return cn([styles.button, ...mixins]);
+		return cn({
+			[styles.button]: true,
+			[styles.block]: block,
+			[styles.info]: variant === INFO && !outline,
+			[styles.outlineInfo]: variant === INFO && outline,
+			[styles.green]: variant === GREEN && !outline,
+			[styles.outlineGreen]: variant === GREEN && outline,
+			[styles.simple]: variant === SIMPLE,
+			[styles.additional]: variant === ADDITIONAL
+		}, className);
 	};
 
 	render () {

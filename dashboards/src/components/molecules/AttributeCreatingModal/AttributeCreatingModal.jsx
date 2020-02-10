@@ -9,6 +9,7 @@ import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {TYPES as ATTR_TYPES} from 'store/sources/attributes/constants';
 import uuid from 'tiny-uuid';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class AttributeCreatingModal extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -21,6 +22,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		info: '',
 		last: '',
 		secondTemplateType: TYPES.SOURCE,
+		showLegacyFormatInfo: false,
 		showRemoveInfo: false,
 		title: ''
 	};
@@ -35,6 +37,8 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			if (JSONState) {
 				const state = JSON.parse(JSONState);
 				valueProps = {...state, ...valueProps};
+			} else {
+				this.setState({showLegacyFormatInfo: true});
 			}
 
 			this.setState(valueProps);
@@ -208,6 +212,8 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	handleSubmitConstant = (name: string, value: string) => this.handleSelect(name, value, TYPES.CONSTANT);
 
+	hideLegacyFormatInfo = () => this.setState({showLegacyFormatInfo: false});
+
 	hideRemoveInfo = () => this.setState({showRemoveInfo: false});
 
 	resolveControlRender = (control: Control) => {
@@ -296,13 +302,26 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			<div className={styles.footer}>
 				<div>
 					<Button className={styles.saveButton} onClick={this.handleClickSaveButton}>Сохранить</Button>
-					<Button onClick={onClose} variant="additional">Отмена</Button>
+					<Button onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>Отмена</Button>
 				</div>
 				<div>
-					{value && <Button onClick={this.showRemovalInfo} variant="simple">Удалить</Button>}
+					{value && <Button onClick={this.showRemovalInfo} variant={BUTTON_VARIANTS.SIMPLE}>Удалить</Button>}
 				</div>
 			</div>
 		);
+	};
+
+	renderLegacyFormatInfo = () => {
+		const {showLegacyFormatInfo} = this.state;
+		const text = 'Формат данных формулы является устаревшим. Редактирование не доступно.';
+
+		if (showLegacyFormatInfo) {
+			return (
+				<div className={styles.infoPanel}>
+					<InfoPanel onClose={this.hideLegacyFormatInfo} text={text} />
+				</div>
+			);
+		}
 	};
 
 	renderOperatorControl = (control: Control) => {
@@ -338,11 +357,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		if (showRemoveInfo) {
 			return (
 				<div className={styles.infoPanel}>
-					<InfoPanel
-						onClose={this.hideRemoveInfo}
-						onConfirm={this.handleClickConfirmRemoveButton}
-						text={text}
-					/>
+					<InfoPanel onClose={this.hideRemoveInfo} onConfirm={this.handleClickConfirmRemoveButton} text={text} />
 				</div>
 			);
 		}
@@ -388,6 +403,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			<Modal header="Создать поле" renderFooter={this.renderFooter} size="large">
 				<div className={styles.container}>
 					{this.renderRemoveInfo()}
+					{this.renderLegacyFormatInfo()}
 					{this.renderFieldName()}
 					{this.renderControls()}
 				</div>

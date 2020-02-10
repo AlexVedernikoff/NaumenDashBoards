@@ -163,9 +163,9 @@ export class Source extends PureComponent<Props, State> {
 	};
 
 	renderRemoveButton = () => {
-		const {isRemovable} = this.props;
+		const {removable} = this.props;
 
-		if (isRemovable) {
+		if (removable) {
 			return (
 				<button className={styles.removeButton} onClick={this.handleClickRemoveButton} type="button">
 					удалить

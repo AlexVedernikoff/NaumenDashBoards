@@ -10,6 +10,7 @@ import {MaterialSelect} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class CustomSubGroupOrCondition extends PureComponent<Props> {
 	handleChangeDateData = (name: string, date: string) => {
@@ -144,7 +145,7 @@ export class CustomSubGroupOrCondition extends PureComponent<Props> {
 				<Button
 					disabled={disabled}
 					onClick={onCreate}
-					variant="simple"
+					variant={BUTTON_VARIANTS.SIMPLE}
 				>
 					ИЛИ
 				</Button>

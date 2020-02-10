@@ -5,19 +5,20 @@ import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetForm
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {FormikProps} from 'formik';
 import {NewWidget} from 'entities';
-import type {Role} from 'store/dashboard/types';
 import type {ThunkAction} from 'store/types';
+import type {UserData} from 'store/context/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
 	attributes: AttributeMap,
 	context: Context,
+	personalDashboard: boolean,
 	refAttributes: AttributeMap,
-	role?: Role,
 	saveError: boolean,
 	selectedWidget: Widget | NewWidget,
 	sources: DataSourceMap,
-	updating: boolean
+	updating: boolean,
+	user: UserData
 };
 
 export type ConnectedFunctions = {

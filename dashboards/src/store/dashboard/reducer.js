@@ -2,7 +2,7 @@
 import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS} from './constants';
 import {defaultDashboardAction, initialDashboardState} from './init';
-import {setAutoUpdateFunction, setRole} from './helpers';
+import {setAutoUpdateFunction} from './helpers';
 
 const reducer = (state: DashboardState = initialDashboardState, action: DashboardAction = defaultDashboardAction): DashboardState => {
 	switch (action.type) {
@@ -10,6 +10,36 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 			return {
 				...state,
 				autoUpdate: {...state.autoUpdate, ...action.payload}
+			};
+		case DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD:
+			return {
+				...state,
+				personalCreating: true
+			};
+		case DASHBOARD_EVENTS.CREATED_PERSONAL_DASHBOARD:
+			return {
+				...state,
+				personalCreating: false
+			};
+		case DASHBOARD_EVENTS.DELETE_PERSONAL_DASHBOARD:
+			return {
+				...state,
+				personalDeleting: true
+			};
+		case DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD:
+			return {
+				...state,
+				personalDeleting: false
+			};
+		case DASHBOARD_EVENTS.ERROR_CREATE_PERSONAL_DASHBOARD:
+			return {
+				...state,
+				personalCreating: false
+			};
+		case DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD:
+			return {
+				...state,
+				personalDeleting: false
 			};
 		case DASHBOARD_EVENTS.RECEIVE_DASHBOARD:
 			return {
@@ -29,21 +59,18 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				error: false,
 				loading: true
 			};
-		case DASHBOARD_EVENTS.RECEIVE_USER_ROLE:
-			setRole(state, action.payload);
-			return {...state};
 		case DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION:
 			setAutoUpdateFunction(state, action.payload);
 			return state;
-		case DASHBOARD_EVENTS.SET_CONTEXT:
-			return {
-				...state,
-				context: action.payload
-			};
 		case DASHBOARD_EVENTS.SET_EDITABLE_PARAM:
 			return {
 				...state,
 				editable: action.payload
+			};
+		case DASHBOARD_EVENTS.SET_PERSONAL:
+			return {
+				...state,
+				personal: action.payload
 			};
 		case DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE:
 			return {

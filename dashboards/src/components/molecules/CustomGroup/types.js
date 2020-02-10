@@ -5,14 +5,14 @@ import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
 	errors: ErrorsMap,
+	getUsingWidgets: () => Array<Widget>,
 	groups: CustomGroupsMap,
 	onCreate: () => void,
 	onRemove: () => void,
 	onSelect: (CustomGroupId) => void,
 	onUpdate: (group: CustomGroup) => void | Promise<void>,
 	selectedGroup: CustomGroupId,
-	type: CustomGroupType | '',
-	widgets: Array<Widget>
+	type: CustomGroupType | ''
 };
 
 export type State = {
