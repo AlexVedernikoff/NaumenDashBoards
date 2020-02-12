@@ -17,6 +17,7 @@ import Datepicker from './Datepicker';
 import Diagram from './Diagram';
 import GroupCreatingModal from './GroupCreatingModal';
 import InputForm from './InputForm';
+import MaterialMultiSelect from './MaterialMutliSelect';
 import MaterialSelect from './MaterialSelect';
 import MiniSelect from './MiniSelect';
 import Modal from './Modal';
@@ -51,6 +52,7 @@ export {
 	Diagram,
 	GroupCreatingModal,
 	InputForm,
+	MaterialMultiSelect,
 	MaterialSelect,
 	MiniSelect,
 	Modal,

@@ -1,9 +1,9 @@
 // @flow
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {CONDITION_TYPES} from 'store/customGroups/constants';
 import {DATETIME_SYSTEM_OPTIONS} from './constants';
 import type {GroupType} from 'store/widgets/data/types';
 import {GROUP_TYPES} from 'store/widgets/constants';
-import {TYPES} from 'store/sources/attributes/constants';
 
 const createNewSubGroup = (type: GroupType) => ({
 	data: [createNewAndCondition(type)],
@@ -32,7 +32,7 @@ const getDefaultConditionType = (type: GroupType) => {
 };
 
 const getSystemGroupOptions = (attribute: Object | null) => {
-	if (attribute && TYPES.DATE.includes(attribute.type)) {
+	if (attribute && ATTRIBUTE_SETS.DATE.includes(attribute.type)) {
 		return DATETIME_SYSTEM_OPTIONS;
 	}
 

@@ -12,21 +12,44 @@ const ATTRIBUTES_EVENTS = {
 };
 
 // Типы атрибутов
+const backBOLinks: 'backBOLinks' = 'backBOLinks';
+const boLinks: 'boLinks' = 'boLinks';
+const catalogItem: 'catalogItem' = 'catalogItem';
+const catalogItemSet: 'catalogItemSet' = 'catalogItemSet';
 const COMPUTED_ATTR: 'COMPUTED_ATTR' = 'COMPUTED_ATTR';
-const DATE = ['date', 'dateTime'];
-const INTEGER = ['integer', 'double'];
-const OBJECT = ['object', 'boLinks', 'backBOLinks'];
-const REF = [...OBJECT, 'catalogItemSet', 'catalogItem'];
+const date: 'date' = 'date';
+const dateTime: 'dateTime' = 'dateTime';
+const double: 'double' = 'double';
+const integer: 'integer' = 'integer';
+const object: 'object' = 'object';
 
-const TYPES = {
+const ATTRIBUTE_TYPES = {
+	backBOLinks,
+	boLinks,
+	catalogItem,
+	catalogItemSet,
 	COMPUTED_ATTR,
+	date,
+	dateTime,
+	double,
+	integer,
+	object
+};
+
+const DATE = [date, dateTime];
+const NUMBER = [integer, double];
+const OBJECT = [object, boLinks, backBOLinks];
+const REF = [...OBJECT, catalogItemSet, catalogItem];
+
+const ATTRIBUTE_SETS = {
 	DATE,
-	INTEGER,
+	NUMBER,
 	OBJECT,
 	REF
 };
 
 export {
+	ATTRIBUTE_TYPES,
 	ATTRIBUTES_EVENTS,
-	TYPES
+	ATTRIBUTE_SETS
 };

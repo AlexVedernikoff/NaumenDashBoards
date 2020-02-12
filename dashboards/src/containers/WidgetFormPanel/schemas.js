@@ -1,11 +1,11 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {CHART_VARIANTS} from 'utils/chart/constants';
 import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {FormikValues} from 'formik';
 import {object, string} from 'yup';
-import {TYPES} from 'store/sources/attributes/constants';
 
 const ERROR_MESSAGES = {
 	[FIELDS.breakdown]: 'Укажите атрибут для разбивки',
@@ -28,7 +28,7 @@ const {SUMMARY, TABLE} = WIDGET_VARIANTS;
  * @returns {boolean}
  */
 const validateAttribute = (value: Attribute | null) => {
-	if (value && TYPES.REF.includes(value.type)) {
+	if (value && ATTRIBUTE_SETS.REF.includes(value.type)) {
 		value = value.ref;
 	}
 

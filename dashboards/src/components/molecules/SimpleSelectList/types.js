@@ -4,12 +4,16 @@ type Messages = {
 	notFound?: string
 };
 
+type Option = Object;
+
 export type Props = {
-	getOptionLabel?: (option: Object) => string,
-	getOptionValue?: (option: Object) => string,
+	getOptionLabel?: (option: Option) => string,
+	getOptionValue?: (option: Option) => string,
 	isSearching: boolean,
 	messages?: Messages,
-	onSelect: (option: Object) => void,
-	options: Array<Object>,
-	value: Object | null
+	multiple: boolean,
+	onSelect: (option: Option) => void,
+	options: Array<Option>,
+	value: Option | null,
+	values: Array<Option>
 };

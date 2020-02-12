@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createNewSubGroup, getSystemGroupOptions} from './helpers';
 import {CustomGroup, MaterialSelect, Modal} from 'components/molecules';
 import type {CustomGroup as CustomGroupType, CustomGroupId} from 'store/customGroups/types';
@@ -11,7 +12,6 @@ import type {Props, State} from './types';
 import React, {Component, createContext} from 'react';
 import schema from './schema';
 import styles from './styles.less';
-import {TYPES} from 'store/sources/attributes/constants';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
 export const GroupContext = createContext({
@@ -137,13 +137,14 @@ export class GroupCreatingModal extends Component<Props, State> {
 	resolveGroupType = () => {
 		const {attribute} = this.props;
 		const {DATETIME, INTEGER} = GROUP_TYPES;
+		const {DATE, NUMBER} = ATTRIBUTE_SETS;
 		const {type} = getProcessedAttribute(attribute);
 
-		if (TYPES.DATE.includes(type)) {
+		if (DATE.includes(type)) {
 			return DATETIME;
 		}
 
-		if (TYPES.INTEGER.includes(type)) {
+		if (NUMBER.includes(type)) {
 			return INTEGER;
 		}
 	};
@@ -181,14 +182,15 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	validateCustomGroup = async (customGroup?: CustomGroupType) => {
-		const {customGroups} = this.props;
+		const {attribute, customGroups} = this.props;
 		const {selectedCustomGroup} = this.state;
 		const currentCustomGroup = customGroup || customGroups[selectedCustomGroup];
 		let errors = {};
 
 		try {
 			await schema.validate(currentCustomGroup, {
-				abortEarly: false
+				abortEarly: false,
+				attribute
 			});
 		} catch (e) {
 			e.inner.forEach(({message, path}) => {
@@ -202,9 +204,9 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderCustomGroup = () => {
-		const {customGroups} = this.props;
+		const {attribute, customGroups} = this.props;
 		const {errors, selectedCustomGroup, type, way} = this.state;
-		const context = {errors, type};
+		const context = {attribute, errors, type};
 		// $FlowFixMe
 		const options = Object.values(customGroups).filter(group => group.type === type);
 		const value = customGroups[selectedCustomGroup] || null;
@@ -262,8 +264,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderSystemGroup = () => {
-		const {systemOptions} = this.props;
-		const {systemValue, type, way} = this.state;
+		const {systemOptions, systemValue, type, way} = this.state;
 		const {DATETIME} = GROUP_TYPES;
 
 		if (way === GROUP_WAYS.SYSTEM && type === DATETIME) {

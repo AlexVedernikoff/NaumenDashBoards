@@ -7,7 +7,10 @@ import styles from './styles.less';
 
 export class SimpleSelectMenu extends PureComponent<Props, State> {
 	static defaultProps = {
-		isSearching: false
+		isSearching: false,
+		multiple: false,
+		value: null,
+		values: []
 	};
 
 	state = {
@@ -43,7 +46,7 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 	};
 
 	renderList = () => {
-		const {getOptionLabel, getOptionValue, onSelect, options, value} = this.props;
+		const {getOptionLabel, getOptionValue, multiple, onSelect, options, value, values} = this.props;
 		const {foundOptions, searchValue} = this.state;
 		const renderOptions = searchValue ? foundOptions : options;
 
@@ -52,9 +55,11 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 				getOptionLabel={getOptionLabel}
 				getOptionValue={getOptionValue}
 				isSearching={!!searchValue}
+				multiple={multiple}
 				onSelect={onSelect}
 				options={renderOptions}
 				value={value}
+				values={values}
 			/>
 		);
 	};

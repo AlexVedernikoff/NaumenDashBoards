@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {Button, FieldError, IconButton, MaterialDateInput, MaterialTextInput} from 'components/atoms';
 import cn from 'classnames';
 import {CONDITION_TYPES} from 'store/customGroups/constants';
@@ -56,9 +57,13 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		});
 	};
 
-	handleChangeNumberData = (name: string, numberData: string) => {
+	handleChangeFloatData = (name: string, data: string) => {
+		data = data.replace(/,/g, '.');
+		this.handleChangeNumberData(name, data);
+	};
+
+	handleChangeNumberData = (name: string, data: string) => {
 		const {condition, index, onUpdate} = this.props;
-		const data = numberData ? Number(numberData) : null;
 
 		onUpdate(index, {
 			...condition,
@@ -92,7 +97,7 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		}
 
 		return (
-			<div className={styles.dateFieldContainer}>
+			<div className={styles.dataContainer}>
 				{this.renderDateField(FIELDS.startDate, startDate)}
 				{this.renderDateField(FIELDS.endDate, endDate)}
 				{this.renderDataError()}
@@ -114,12 +119,28 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 	);
 
 	renderNumberData = () => {
-		const {data} = this.props.condition;
-		const value = typeof data === 'number' ? data : '';
+		const {attribute} = this.props;
+		const float = attribute.type !== ATTRIBUTE_TYPES.integer;
+
+		return (
+			<div className={styles.dataContainer}>
+				{this.renderNumberField(float)}
+				{this.renderDataError()}
+			</div>
+		);
+	};
+
+	renderNumberField = (float: boolean = false) => {
+		const onChange = float ? this.handleChangeFloatData : this.handleChangeNumberData;
+		let {data} = this.props.condition;
+
+		if (typeof data === 'object') {
+			data = '';
+		}
 
 		return (
 			<div className={styles.numberField}>
-				<MaterialTextInput onChange={this.handleChangeNumberData} onlyNumber={true} value={value} />
+				<MaterialTextInput onChange={onChange} value={data} />
 			</div>
 		);
 	};
@@ -147,11 +168,12 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		switch (type) {
 			case BETWEEN:
 				return this.renderBetweenData();
+			case LAST:
+			case NEAR:
+				return this.renderPositiveIntegerData();
 			case EQUAL:
 			case GREATER:
-			case LAST:
 			case LESS:
-			case NEAR:
 			case NOT_EQUAL:
 			case NOT_EQUAL_NOT_EMPTY:
 				return this.renderNumberData();
@@ -187,6 +209,17 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 				>
 					ИЛИ
 				</Button>
+			</div>
+		);
+	};
+
+	renderPositiveIntegerData = () => {
+		const {data} = this.props.condition;
+		const value = typeof data === 'number' ? data : '';
+
+		return (
+			<div className={styles.numberField}>
+				<MaterialTextInput onChange={this.handleChangeNumberData} onlyNumber={true} value={value} />
 			</div>
 		);
 	};

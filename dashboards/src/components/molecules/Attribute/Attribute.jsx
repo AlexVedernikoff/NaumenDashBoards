@@ -7,6 +7,7 @@ import {
 	AttributeSelect,
 	ComputedAttributeEditor
 } from 'components/molecules';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import {getDefaultAggregation} from 'components/molecules/AttributeAggregation/helpers';
 import {getDefaultSystemGroup, isGroupKey} from 'store/widgets/helpers';
@@ -17,7 +18,6 @@ import React, {Fragment, PureComponent} from 'react';
 import {REF_INPUT_TYPES} from './constants';
 import type {SourceValue} from 'components/molecules/Source/types';
 import styles from './styles.less';
-import {TYPES} from 'store/sources/attributes/constants';
 
 export class Attribute extends PureComponent<Props, State> {
 	state = {
@@ -90,7 +90,7 @@ export class Attribute extends PureComponent<Props, State> {
 			onSelectCallback = refInputProps.onSelectCallback;
 		}
 
-		if (value && value.type !== TYPES.COMPUTED_ATTR && attributeTitle) {
+		if (value && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && attributeTitle) {
 			const processedAttribute = value && getProcessedAttribute(value);
 
 			if (processedAttribute) {
@@ -201,7 +201,7 @@ export class Attribute extends PureComponent<Props, State> {
 		if (value) {
 			props.onChangeTitle = this.handleChangeTitle(parent);
 
-			if (!parent && TYPES.REF.includes(value.type)) {
+			if (!parent && ATTRIBUTE_SETS.REF.includes(value.type)) {
 				return (
 					<Fragment>
 						{this.renderParentAttribute(props, parent)}
@@ -232,7 +232,7 @@ export class Attribute extends PureComponent<Props, State> {
 		const {value} = this.props;
 		const props = this.getAttributeProps();
 
-		return value && value.type === TYPES.COMPUTED_ATTR
+		return value && value.type === ATTRIBUTE_TYPES.COMPUTED_ATTR
 			? this.renderComputedAttribute(props)
 			: this.renderAttribute(props);
 	};
@@ -271,7 +271,7 @@ export class Attribute extends PureComponent<Props, State> {
 	renderComputedAttributeEditor = () => {
 		const {sources, value} = this.props;
 
-		if (value && value.type === TYPES.COMPUTED_ATTR) {
+		if (value && value.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 			// $FlowFixMe
 			const attribute: ComputedAttr = value;
 
@@ -305,7 +305,7 @@ export class Attribute extends PureComponent<Props, State> {
 		let {value: attribute} = this.props;
 		const {disabled, name, value} = refInputProps;
 
-		if (!attribute || (attribute && attribute.type !== TYPES.COMPUTED_ATTR)) {
+		if (!attribute || (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR)) {
 			attribute = attribute && getProcessedAttribute(attribute);
 
 			return (

@@ -1,7 +1,7 @@
 // @flow
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {CustomGroupsMap} from 'store/customGroups/types';
 import {DATETIME_SYSTEM_GROUP, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from './constants';
-import {TYPES} from 'store/sources/attributes/constants';
 
 const createDefaultGroup = (data: string) => ({
 	data,
@@ -26,7 +26,7 @@ const transformGroupFormat = (object: Object, customGroups: CustomGroupsMap) => 
 	});
 };
 
-const getDefaultSystemGroup = (attribute: Object) => TYPES.DATE.includes(attribute.type)
+const getDefaultSystemGroup = (attribute: Object) => ATTRIBUTE_SETS.DATE.includes(attribute.type)
 	? createDefaultGroup(DATETIME_SYSTEM_GROUP.MONTH)
 	: createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
 

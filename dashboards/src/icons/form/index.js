@@ -5,6 +5,7 @@ import CheckedIcon from './checked.svg';
 import ChevronDownBareIcon from './chevron-down-bare.svg';
 import ChevronDownIcon from './chevron-down.svg';
 import ChevronUpBareIcon from './chevron-up-bare.svg';
+import ClearIcon from './clear.svg';
 import ClearSquareIcon from './clear square.svg';
 import CloseIcon from './close.svg';
 import CrossIcon from './cross.svg';
@@ -28,6 +29,7 @@ export {
 	ChevronDownBareIcon,
 	ChevronDownIcon,
 	ChevronUpBareIcon,
+	ClearIcon,
 	ClearSquareIcon,
 	CloseIcon,
 	CrossIcon,

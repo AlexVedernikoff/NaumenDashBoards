@@ -9,6 +9,7 @@ export type BetweenOperandData = {
 
 export type OperandData =
 	| BetweenOperandData
+	| string
 	| number
 ;
 
