@@ -97,20 +97,39 @@ String getSettings(Map<String, Object> requestContent, def user)
         throw new Exception("Login is null, not found personal dashboard")
     }
     Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
-    DashboardSettings dashboardSettings = isPersonal
-            ? getSettingByLogin(user?.login as String)
-            : getSettingByLogin(null)
-    def result = [
-            autoUpdate: dashboardSettings?.autoUpdate,
-            //TODO: из-за архитектурной особенности возможны ситуации при которых настройки виджета пропадут.
-            // В таких случаях просто пропускаем пустые настройки
-            // ключи виджетов с пустыми настройками будут удалены после сброса настроек.
-            // Пользователь этого даже не заметит
-            widgets      : dashboardSettings?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
-            customGroups : dashboardSettings?.customGroupIds?.collectEntries {
-                key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
-            }
-    ]
+
+    def defaultDashboard = getSettingByLogin()
+    def personalDashboard = getSettingByLogin(user?.login as String)
+    def result
+    if (isPersonal) {
+        result = personalDashboard ? [
+                autoUpdate   : personalDashboard?.autoUpdate,
+                widgets      : personalDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
+                customGroups : personalDashboard?.customGroupIds?.collectEntries {
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                } + defaultDashboard?.customGroupIds?.collectEntries {
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                }
+        ] : [
+                autoUpdate   : defaultDashboard?.autoUpdate,
+                widgets      : defaultDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
+                customGroups : defaultDashboard?.customGroupIds?.collectEntries {
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                }
+        ]
+    } else {
+        result = [
+                autoUpdate   : defaultDashboard?.autoUpdate,
+                //TODO: из-за архитектурной особенности возможны ситуации при которых настройки виджета пропадут.
+                // В таких случаях просто пропускаем пустые настройки
+                // ключи виджетов с пустыми настройками будут удалены после сброса настроек.
+                // Пользователь этого даже не заметит
+                widgets      : defaultDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
+                customGroups : defaultDashboard?.customGroupIds?.collectEntries {
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                }
+        ]
+    }
     return toJson(result)
 }
 
@@ -133,6 +152,106 @@ String saveAutoUpdateSettings(Map<String, Object> requestContent, def user) {
             ?: new DashboardSettings()
     settings.autoUpdate = autoUpdate
     return saveJsonSettings(personalDashboardKey, toJson(settings))
+}
+
+/**
+ * Метод сохранения настроек кастомных группировок.
+ * Сохраняет в персональный дашборд.
+ * @param requestContent - тело запроса
+ * @param user - пользователь
+ * @return ключь кастомной группировки
+ */
+String saveCustomGroup(Map<String, Object> requestContent, def user) {
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    boolean isPersonal = requestContent.isPersonal
+    def group = requestContent.group as Map<String, Object>
+    if (isPersonal && !(user.login)) throw new Exception("Login is null, not found personal dashboard")
+
+    String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+    String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+
+    String keyCustomGroup = UUID.nameUUIDFromBytes(toJson(group).bytes)
+    String jsonCustomGroup = toJson([id: keyCustomGroup] + group)
+
+    if (!saveJsonSettings(keyCustomGroup, jsonCustomGroup)) throw new Exception("Custom group settings not saved!")
+
+    Closure<String> saveDashboard = { String dashboardKey, DashboardSettings settings ->
+        if (saveJsonSettings(dashboardKey, toJson(settings))) {
+            return keyCustomGroup
+        } else {
+            throw new Exception("Dashboard settings not saved!")
+        }
+    }
+
+    if (isPersonal) {
+        def dashboard = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
+        dashboard.customGroupIds += keyCustomGroup
+        saveDashboard(personalDashboardKey, dashboard)
+    } else {
+        def dashboard = getDashboardSetting(defaultDashboardKey) ?: new DashboardSettings()
+        dashboard.customGroupIds += keyCustomGroup
+        saveDashboard(defaultDashboardKey, dashboard)
+    }
+}
+
+String updateCustomGroup(Map<String, Object> requestContent, def user) {
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    String groupKey = requestContent.groupKey
+    boolean isPersonal = requestContent.isPersonal
+    def group = requestContent.group
+    if (isPersonal && !(user.login)) throw new Exception("Login is null, not found personal dashboard")
+
+    String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+    String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+
+    def dashboard = isPersonal ? getDashboardSetting(personalDashboardKey) : getDashboardSetting(defaultDashboardKey)
+
+    if (groupKey in dashboard.customGroupIds) {
+        if (saveJsonSettings(groupKey, toJson(group))) {
+            return groupKey
+        } else {
+            throw new Exception("Custom group settings not saved!")
+        }
+    } else {
+        throw new Exception("group not contains in dashboard")
+    }
+}
+
+/**
+ * Метод удаления настроек группировки.
+ * @param requestContent - тело запроса
+ * @param user - пользователь
+ * @return ключь кастомной группировки
+ */
+String deleteCustomGroup(Map<String, Object> requestContent, def user) {
+    //TODO: изменить
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    String groupKey = requestContent.groupKey
+    boolean isPersonal = requestContent.isPersonal
+    if (isPersonal && !(user.login)) throw new Exception("Login is null, not found personal dashboard")
+
+    String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+    String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+
+    def dashboard = isPersonal ? getDashboardSetting(personalDashboardKey) : getDashboardSetting(defaultDashboardKey)
+
+    if (groupKey in dashboard.customGroupIds) {
+        if (deleteJsonSettings(groupKey)) {
+            dashboard.customGroupIds -= groupKey
+            if (saveJsonSettings(personalDashboardKey, toJson(dashboard))) {
+                return groupKey
+            } else {
+                throw new Exception("Dashboard settings not saved!")
+            }
+        } else {
+            throw new Exception("group settings not removed!")
+        }
+    } else {
+        throw new Exception("group not contains in dashboard")
+    }
 }
 
 /**
