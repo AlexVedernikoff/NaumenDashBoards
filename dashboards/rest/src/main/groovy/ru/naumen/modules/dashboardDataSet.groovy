@@ -12,199 +12,17 @@
 package ru.naumen.modules
 
 import groovy.json.JsonOutput
+import groovy.transform.Field
 import groovy.transform.TupleConstructor
-import ru.naumen.core.server.hquery.HCriteria
-import ru.naumen.core.server.hquery.HHelper
-import ru.naumen.core.server.hquery.HOrders
-import ru.naumen.core.server.hquery.HRestrictions
 
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
-import static groovy.json.JsonOutput.toJson
-import static ru.naumen.modules.Diagram.*
-
-//region enum
-/**
- * Типы агрегации даннных для диаграмм. SUM, AVG, MAX, MIN, MDN только для числовых типов
- */
-enum AggregationType
-{
-    COUNT_CNT('COUNT(%s)'),
-    PERCENT('cast(COUNT(%s)*100.00/%s as big_decimal)'),
-    SUM('cast(coalesce(SUM(%s), 0)*1.00 as big_decimal)'),
-    AVG('cast(coalesce(AVG(%s), 0)*1.00 as big_decimal)'),
-    MAX('cast(coalesce(MAX(%s), 0)*1.00 as big_decimal)'),
-    MIN('cast(coalesce(MIN(%s), 0)*1.00 as big_decimal)'),
-    MDN('%s')
-
-    AggregationType(String aggregationFormat)
-    {
-        this.aggregationFormat = aggregationFormat
-    }
-
-    String aggregationFormat
-
-    String get(String... codes)
-    {
-        return String.format(aggregationFormat, codes)
-    }
-}
-//endregion
+import static DiagramType.*
 
 //region КЛАССЫ
-@TupleConstructor
-abstract class BasicRequest
-{
-    /**
-     * Код источника данных
-     */
-    String source
-    /**
-     * Json дескриптор
-     */
-    String descriptor
-}
-
-@TupleConstructor
-class LineDiagramRequest extends BasicRequest
-{
-    /**
-     * Атрибут по x оси
-     */
-    Attribute xAxis
-    /**
-     * Атрибут для y оси
-     */
-    Attribute yAxis
-    /**
-     * Атрибут для разбивки
-     */
-    Attribute breakdown
-    /**
-     * Тип агрегации данных
-     */
-    AggregationType aggregation = AggregationType.COUNT_CNT
-    /**
-     * Тип группировки для разбивки
-     */
-    GroupType breakdownGroup
-    /**
-     * Тип группировки данных
-     */
-    GroupType group
-
-    /**
-     * Тип диаграммы
-     */
-    Diagram type
-}
-
-@TupleConstructor
-class RoundDiagramRequest extends BasicRequest
-{
-    /**
-     * Атрибут для показателя
-     */
-    Attribute indicator
-    /**
-     * Атрибут для разбивки
-     */
-    Attribute breakdown
-    /**
-     * Тип агрегации данных
-     */
-    AggregationType aggregation = AggregationType.COUNT_CNT
-    /**
-     * Тип группировки для разбивки
-     */
-    GroupType breakdownGroup
-
-    /**
-     * Тип диаграммы
-     */
-    Diagram type
-}
-
-/**
- * Модель тело запроса - Полученик данных для диаграмм
- */
-@TupleConstructor
-class RequestGetDataForCompositeDiagram
-{
-    /**
-     * Тип диаграммы
-     */
-    Diagram type
-
-    /**
-     * данные комбодиаграммы
-     */
-    Map<String, DataForCompositeDiagram> data
-}
-
-/**
- * Модель тело запроса - Полученик данных для диаграмм
- */
-@TupleConstructor
-class DataForCompositeDiagram extends BasicRequest
-{
-    /**
-     * Тип диаграммы
-     */
-    Diagram type
-    /**
-     * Тип агрегации данных
-     */
-    AggregationType aggregation = AggregationType.COUNT_CNT
-    /**
-     * Атрибут по x оси
-     */
-    Attribute xAxis = null
-    /**
-     * Атрибут для y оси
-     */
-    Attribute yAxis = null
-    /**
-     * Атрибут для разбивки
-     */
-    Attribute breakdown = null
-    /**
-     * Тип группировки для разбивки
-     */
-    GroupType breakdownGroup = GroupType.OVERLAP
-    /**
-     * Атрибут для показателя
-     */
-    Attribute indicator = null
-    /**
-     * Тип группировки данных
-     */
-    GroupType group = GroupType.OVERLAP
-    /**
-     * Код источника данных
-     */
-    String sourceForCompute
-    /**
-     * Рычаг подсчитывать итоги для column
-     */
-    Boolean calcTotalColumn = null
-    /**
-     * Рычаг подсчитывать итоги для row
-     */
-    Boolean calcTotalRow = null
-    /**
-     * Атрибут для column
-     */
-    Attribute column = null
-    /**
-     * Атрибут для row
-     */
-    Attribute row = null
-}
-
 /**
  * Модель данных для диаграмм BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE
  */
@@ -350,6 +168,18 @@ class SeriesCombo
 }
 //endregion
 
+//region КОНСТАНТЫ
+@Field private static final List<String> NOMINATIVE_RUSSIAN_MONTH = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
+                                                                     'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
+@Field private static final List<String> GENITIVE_RUSSIAN_MONTH = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+                                                                   'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+
+@Field private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormatSymbols().with {
+    setDecimalSeparator('.' as char)
+    new DecimalFormat("#.##", it)
+}
+//endregion
+
 //region REST-МЕТОДЫ
 /**
  * Метод получения данных для нескольких диаграмм
@@ -358,27 +188,19 @@ class SeriesCombo
  */
 String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectUuid)
 {
-    Closure sendNotSupportedDiagramTypeMessage = {
-        logger.warn("Not supported diagram type: $it")
-        null
-    }
-    Closure buildDiagram = this.&getDataForDiagramOrDefault.rcurry(sendNotSupportedDiagramTypeMessage)
-    Closure safetyCollect = { key, value ->
+    return requestContent.collectEntries { key, value ->
         api.tx.call {
-            def res
             try
             {
-                res = buildDiagram(transformRequest(value as Map<String, Object>, cardObjectUuid))
+                return [(key): buildDiagram(transformRequest(value as Map<String, Object>, cardObjectUuid))]
             }
             catch (Exception ex)
             {
                 logger.error("error in widget: $key", ex)
-                res = null
+                return [(key): null]
             }
-            return [(key): res]
         }
-    }
-    return toJson(requestContent.collectEntries(safetyCollect))
+    }.with(JsonOutput.&toJson)
 }
 
 /**
@@ -397,962 +219,1316 @@ String getDataForCompositeDiagram(Map<String, Object> requestContent, String car
  * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
  * @return данные для построения диаграммы
  */
-String getDataForDiagram(Map<String, Object> requestContent, String cardObjectUuid) {
+String getDataForDiagram(Map<String, Object> requestContent, String cardObjectUuid)
+{
     return api.tx.call {
-        getDataForDiagramOrDefault(transformRequest(requestContent, cardObjectUuid)) {
-            utils.throwReadableExceprion("Not supported diagram type: $it")
-        }
+        buildDiagram(transformRequest(requestContent, cardObjectUuid))
     }.with(JsonOutput.&toJson)
 }
 //endregion
 
 //region ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
 /**
- * Метод для построения построения диаграммы в зависимости от типа
- * @param requestContent - тело запроса
- * @param defaultBehavior - метод обработки на случай не предусмотренного типа диаграммы
- * @return данные диаграммы
+ * Метод построения диаграмм.
+ * @param requestContent - запрос на построение диаграмы
+ * @return Типизированниые данные для построения диаграмм
  */
-private def getDataForDiagramOrDefault(Map<String, Object> requestContent, Closure defaultBehavior)
+private def buildDiagram(Map<String, Object> requestContent)
 {
-    switch (requestContent.type as Diagram)
+    def diagramType = requestContent.type as DiagramType
+    switch (diagramType)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
-            return requestContent.data
-                    ? getDataStandardDiagram(requestContent as RequestGetDataForCompositeDiagram)
-                    : getDataStandardDiagram(requestContent as LineDiagramRequest) //нужно для обратной совместимости со старыми форматами
+            def normRequest = mappingStandardDiagramRequest(requestContent)
+            def res = getDiagramData(normRequest)
+            return mappingStandardDiagram(res)
         case [DONUT, PIE]:
-            return requestContent.data
-                    ? getDataRoundDiagram(requestContent as RequestGetDataForCompositeDiagram)
-                    : getDataRoundDiagram(requestContent as RoundDiagramRequest) //нужно для обратной совместимости со старыми форматами
+            def normRequest = mappingRoundDiagramRequest(requestContent)
+            def res = getDiagramData(normRequest)
+            return mappingRoundDiagram(res)
         case SUMMARY:
-            return getCalculateDataForSummaryDiagram(requestContent as RequestGetDataForCompositeDiagram)
+            def normRequest = mappingSummaryDiagramRequest(requestContent)
+            def res = getDiagramData(normRequest)
+            return mappingSummaryDiagram(res, normRequest.requisite.head().title)
         case TABLE:
-            return getCalculateDataForTableDiagram(requestContent as RequestGetDataForCompositeDiagram)
+            def normRequest = mappingTableDiagramRequest(requestContent)
+            def res = getDiagramData(normRequest)
+            def (totalColumn, totalRow) = requestContent.data
+                    .findResult { key, value -> !(value.sourceForCompute) ? value : null }
+                    .with { [it.calcTotalColumn, it.calcTotalRow] }
+            return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean)
         case COMBO:
-            return getCalculationForComboDiagram(requestContent as RequestGetDataForCompositeDiagram)
-        default:
-            return defaultBehavior.call(requestContent.type)
+            def normRequest = mappingComboDiagramRequest(requestContent)
+            def res = getDiagramData(normRequest)
+
+            def (firstAdditionalData, secondAdditionalData) = (requestContent.data as Map)
+                    .findAll { key, value -> !(value.sourceForCompute) }
+                    .collect { key, value ->
+                        [
+                                type     : value.type,
+                                breakdown: value.yAxis.title,
+                                name     : value.yAxis.title,
+                                dataKey  : key
+                        ]
+                    }
+            return mappingComboDiagram(res, firstAdditionalData as Map, secondAdditionalData as Map)
+        default: throw new Exception("Not supported diagram type: $diagramType")
     }
 }
 
 /**
- * Получение данных для линейных диаграмм
- * @param request параметры диаграммы
- * @return данные для диаграммы в формате StandardDiagram
+ * Метод приведения запроса на построение стандартных диаграм к единому формату
+ * @param requestContent - запрос на построеине стандатной диаграмы
+ * @return DiagramRequest
  */
-private StandardDiagram getDataStandardDiagram(RequestGetDataForCompositeDiagram request)
+private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> requestContent)
 {
-    def currentData = request.data.find { key, value -> !value.sourceForCompute }.value
-    def yAxis = currentData.yAxis
-    Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
-                                                 Attribute attribute,
-                                                 AggregationType aggregationType ->
-        def descriptor = data.descriptor
-        def source = data.source
-        def xAxis = data.xAxis
-        def gr = data.group
-        def breakdown = data.breakdown
-        def breakdownGroup = data.breakdownGroup
-        HCriteria criteria = createHCriteria(descriptor, source)
-        group(criteria, gr, xAxis, source, descriptor)
-        aggregation(criteria, aggregationType, attribute, source, descriptor, xAxis, breakdown)
-        if (breakdown)
-        {
-            group(criteria, breakdownGroup, breakdown, source, descriptor)
-        }
-        findNotNullAttributes(criteria, xAxis, breakdown)
-        getQuery(criteria).list()
-    }
-    Closure<Collection<Object>> executeFormula = { String formula ->
-        FormulaCalculator calculator = new FormulaCalculator(formula)
-        def lastResponse
-        def resValues = calculator.multipleExecute { String variable ->
-            def computeData = yAxis.computeData[variable]
-            def attribute = computeData.attr as Attribute
-            def aggregationType = computeData.aggregation as AggregationType
-            def dataKey = computeData.dataKey as String
-            def res = executeQuery(request.data[dataKey] as DataForCompositeDiagram, attribute as Attribute, aggregationType as AggregationType)
-            if (res)
-            {
-                lastResponse = res
-                return res.collect { it[1] as double }
-            }
-            else
-            {
-                return res
-            }
-        }
-        lastResponse?.withIndex()?.collect { entry, i ->
-            entry[1] = resValues[i]
-            entry
-        }
-    }
-    def result = yAxis.stringForCompute
-            ? executeFormula(yAxis.stringForCompute)
-            : executeQuery(currentData as DataForCompositeDiagram, yAxis as Attribute, currentData.aggregation as AggregationType)
-    def groupSevenDay = { currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
-    def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
-    def groupDtInterval = { currentData.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
-    def breakdownDtInterval = { currentData?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
-    def groupState = { currentData.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, currentData.source) : it }
-    def breakdownState = { currentData?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, currentData.source) : it }
-    def list = result.with(groupSevenDay)
-            .with(breakdownSevenDay)
-            .with(groupDtInterval)
-            .with(breakdownDtInterval)
-            .with(groupState)
-            .with(breakdownState)
-    return mappingToStandardDiagram(list, currentData.breakdown as Attribute, currentData.breakdownGroup as GroupType)
-}
-
-
-/**
- * Получение данных для линейных диаграмм, без поддержки вычислений.
- * @param request параметры диаграммы
- * @return данные для диаграммы в формате StandardDiagram
- */
-@Deprecated
-private StandardDiagram getDataStandardDiagram(LineDiagramRequest request)
-{
-    String descriptor = request.descriptor
-    String source = request.source
-    Attribute breakdown = request.breakdown
-    HCriteria criteria = createHCriteria(descriptor, source)
-    group(criteria, request.group as GroupType, request.xAxis as Attribute, source, descriptor)
-    aggregation(criteria,
-            request.aggregation as AggregationType,
-            request.yAxis as Attribute,
-            source, descriptor,
-            request.xAxis,
-            request.breakdown)
-    if (breakdown)
-    {
-        group(criteria, request.breakdownGroup as GroupType, breakdown as Attribute, source, descriptor)
-    }
-    findNotNullAttributes(criteria, request.xAxis, request.breakdown)
-
-    def groupSevenDay = { request.group == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
-    def breakdownSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
-
-    def groupDtInterval = { request.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
-    def breakdownDtInterval = { request?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
-
-    def groupState = { request.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, request.source) : it }
-    def breakdownState = { request?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, request.source) : it }
-
-    Collection<Object> list = getQuery(criteria).list()
-            .with(groupSevenDay)
-            .with(breakdownSevenDay)
-            .with(groupDtInterval)
-            .with(breakdownDtInterval)
-            .with(groupState)
-            .with(breakdownState)
-
-    return mappingToStandardDiagram(list, breakdown, request.breakdownGroup as GroupType)
-}
-
-/**
- * Получение данных для круговых диаграмм
- * @param request параметры диаграммы
- * @return данные для диаграммы в формате RoundDiagram
- */
-private RoundDiagram getDataRoundDiagram(RequestGetDataForCompositeDiagram request)
-{
-    def currentData = request.data.find { key, value -> !value.sourceForCompute }.value
-    def indicator = currentData.indicator
-    Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
-                                                 Attribute attribute,
-                                                 AggregationType aggregationType ->
-
-        def source = data.source
-        def descriptor = data.descriptor
-        def breakdown = data.breakdown
-        def breakdownGroup = data.breakdownGroup
-        HCriteria criteria = createHCriteria(descriptor, source)
-        aggregation(criteria, aggregationType, attribute, source, descriptor, breakdown)
-        group(criteria, breakdownGroup, breakdown, source, descriptor)
-        findNotNullAttributes(criteria, breakdown)
-        getQuery(criteria).list()
-    }
-    Closure<Collection<Object>> executeFormula = { String formula ->
-        FormulaCalculator calculator = new FormulaCalculator(formula)
-        def lastResponse
-        def resValues = calculator.multipleExecute { String variable ->
-            def computeData = indicator.computeData[variable]
-            def attribute = computeData.attr as Attribute
-            def aggregationType = computeData.aggregation as AggregationType
-            def dataKey = computeData.dataKey as String
-            def res = executeQuery(request.data[dataKey] as DataForCompositeDiagram, attribute as Attribute, aggregationType as AggregationType)
-            if (res)
-            {
-                lastResponse = res
-                return res.collect { it[0] as double }
-            }
-            else
-            {
-                return res
-            }
-        }
-        lastResponse?.withIndex()?.collect { entry, i ->
-            entry[0] = resValues[i]
-            entry
-        }
-    }
-    def result = indicator.stringForCompute
-            ? executeFormula(indicator.stringForCompute)
-            : executeQuery(currentData as DataForCompositeDiagram, indicator as Attribute, currentData.aggregation as AggregationType)
-    def groupSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
-    def groupDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 1) : it }
-    def groupState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 1, currentData.source) : it }
-    def list = result.with(groupSevenDay).with(groupDtInterval).with(groupState).transpose()
-
-    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
-    otherSymbols.setDecimalSeparator('.' as char)
-    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
-
-    return new RoundDiagram(list[1].collect(), list[0].collect { decimalFormat.format(it) as Double })
-}
-
-/**
- * Получение данных для круговых диаграмм. Без поддержки вычислений
- * @param request параметры диаграммы
- * @return данные для диаграммы в формате RoundDiagram
- */
-@Deprecated
-private RoundDiagram getDataRoundDiagram(RoundDiagramRequest request)
-{
-    HCriteria criteria = createHCriteria(request.descriptor, request.source)
-    aggregation(criteria,
-            request.aggregation as AggregationType,
-            request.indicator as Attribute,
-            request.source,
-            request.descriptor,
-            request.breakdown)
-    group(criteria, request.breakdownGroup as GroupType, request.breakdown as Attribute, request.source, request.descriptor)
-    findNotNullAttributes(criteria, request.breakdown)
-
-    def groupSevenDay = { request.breakdownGroup == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 1) : it }
-    def groupDtInterval = { request.breakdown.type == 'dtInterval'  ? convertMillisecondToHours(it as Collection, 1) : it }
-    def groupState = { request.breakdown.type == 'state'  ? convertCodeStatusToNameStatus(it as Collection, 1, request.source) : it }
-
-    Collection<Object> list = getQuery(criteria).list().with(groupSevenDay).with(groupDtInterval).with(groupState).transpose()
-
-    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
-    otherSymbols.setDecimalSeparator('.' as char)
-    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
-
-    return new RoundDiagram(list[1].collect(), list[0].collect { decimalFormat.format(it) as Double })
-}
-
-
-/**
- * Метод построения сводки с обработкой вычеслений
- * @param request - запрос на построение сводки
- * @return результат вычислений
- */
-private SummaryDiagram getCalculateDataForSummaryDiagram(RequestGetDataForCompositeDiagram request)
-{
-    def currentData = request.data.find({ key, value -> !(value?.indicator?.sourceForCompute) }).value
-    def currentIndicator = currentData.indicator
-    Closure<Object> executeQuery = { DataForCompositeDiagram data,
-                                     Attribute attribute,
-                                     AggregationType aggregationType ->
-        String source = data.source
-        String descriptor = data.descriptor
-        HCriteria criteria = createHCriteria(descriptor, source)
-        aggregation(criteria, aggregationType, attribute, source, descriptor)
-        getQuery(criteria).list().head()
-    }
-    def result
-    String formula = currentIndicator.stringForCompute
-    if (formula)
-    {
-        FormulaCalculator calculator = new FormulaCalculator(formula)
-        result = calculator.execute { variable ->
-            def computeData = currentIndicator.computeData.get(variable)
-            def data = request.data.get(computeData.dataKey)
-            def attribute = setTitleInLinkAttribute(computeData.attr)
-            executeQuery(
-                    data as DataForCompositeDiagram,
-                    attribute as Attribute,
-                    computeData.aggregation as AggregationType) as double
-        }
-    }
-    else
-    {
-        result = executeQuery(
-                currentData as DataForCompositeDiagram,
-                currentIndicator as Attribute,
-                currentData.aggregation as AggregationType)
-    }
-    def numberFormatter = new DecimalFormat("#.##")
-    return new SummaryDiagram(currentIndicator.title as String, numberFormatter.format(result))
-}
-
-/**
- * Метод построения таблицы с обработкгой вычеслений
- * @param request - запрос на построение таблицы
- * @return - результат построения таблицы
- */
-private TableDiagram getCalculateDataForTableDiagram(RequestGetDataForCompositeDiagram request)
-{
-    def currentData = request.data.find({ key, value -> !(value.sourceForCompute) }).value
-    GroupType breakdownGroup = currentData.breakdownGroup
-    Attribute breakdown = currentData.breakdown
-    Attribute currentColumn = currentData.column
-    Attribute row = currentData.row
-
-    Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
-                                                 Attribute column,
-                                                 AggregationType aggregationType ->
-        String source = data.source
-        String descriptor = data.descriptor
-        HCriteria criteria = createHCriteria(descriptor, source)
-        group(criteria, breakdownGroup, breakdown, source, descriptor)
-
-        aggregation(criteria, aggregationType, column, source, descriptor, breakdown)
-
-        String rowCode = getAttributeCodeByType(criteria, row)
-        criteria.addColumn(rowCode)
-        criteria.addGroupColumn(rowCode)
-        findNotNullAttributes(criteria, breakdown, row)
-        getQuery(criteria).list()
-    }
-
-    String formula = currentColumn.stringForCompute
-    def result
-    if (formula)
-    {
-        def lastResponse
-        FormulaCalculator calculator = new FormulaCalculator(formula)
-        Collection<Object> resValues = calculator.multipleExecute { variable ->
-            def computeData = currentColumn.computeData.get(variable)
-            def data = request.data.get(computeData.dataKey)
-            def attr = setTitleInLinkAttribute(computeData.attr)
-            lastResponse = executeQuery(
-                    data as DataForCompositeDiagram,
-                    attr as Attribute,
-                    computeData.aggregation as AggregationType
-            )
-            lastResponse.collect { it[1] as double }
-        }
-
-        result = lastResponse?.withIndex()?.collect { entry, i ->
-            entry[1] = resValues[i]
-            entry
-        }
-    }
-    else
-    {
-        result = executeQuery(
-                currentData as DataForCompositeDiagram,
-                currentColumn,
-                currentData.aggregation as AggregationType
+    def uglyRequestData = requestContent.data as Map<String, Object>
+    Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
+        def data = value as Map<String, Object>
+        def source = new Source(classFqn: data.source, descriptor: data.descriptor)
+        def yAxis = data.yAxis as Map<String, Object>
+        def aggregationParameter = new AggregationParameter(
+                title: 'yAxis',
+                type: data.aggregation as Aggregation,
+                attribute: mappingAttribute(yAxis)
         )
-    }
+        def xAxis = data.xAxis as Map<String, Object>
+        def group = data.group as Map<String, Object>
+        def groupParameter = group.way == 'SYSTEM'
+                ? new GroupParameter(title: 'xAxis', type: group.data as GroupType, attribute: mappingAttribute(xAxis))
+                : null
+        def breakdown = data.breakdown?.with {
+            def breakdownGroup = data.breakdownGroup as Map<String, Object>
+            new GroupParameter(
+                    title: 'breakdown',
+                    type: breakdownGroup.way == 'SYSTEM' ? breakdownGroup.data as GroupType : GroupType.NONE,
+                    attribute: mappingAttribute(it as Map<String, Object>)
+            )
+        }
+        def res = new RequestData(
+                source: source,
+                aggregations: [aggregationParameter],
+                groups: [groupParameter, breakdown].grep()
+        )
 
-    def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
-
-    def breakdownDtInterval = { currentData.breakdown.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
-    def groupDtInterval = { row.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
-
-    def breakdownState = { currentData.breakdown.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, currentData.source) : it }
-    def groupState = { row.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, currentData.source) : it }
-
-    result = result.with(breakdownSevenDay)
-            .with(breakdownDtInterval)
-            .with(groupDtInterval)
-            .with(breakdownState)
-            .with(groupState)
-
-    return mappingToTableDiagram(result, currentData.calcTotalColumn, currentData.calcTotalRow)
-}
-
-/**
- * Метод построения комбинированных диаграмм с применением вычислений
- * @param request - запрос на построение диаграмм
- * @return результат построения диаграмм
- */
-private ComboDiagram getCalculationForComboDiagram(RequestGetDataForCompositeDiagram request)
-{
-    Closure<Collection<Object>> getResult = { DataForCompositeDiagram currentData ->
-        Attribute currentYAxis = currentData.yAxis
-        Closure<Collection<Object>> executeQuery = { DataForCompositeDiagram data,
-                                                     Attribute attribute,
-                                                     AggregationType aggregationType ->
-            String source = data.source
-            String descriptor = data.descriptor
-            HCriteria criteria = createHCriteria(descriptor, source)
-
-            Attribute xAxis = data.xAxis ?: currentData.xAxis
-            Attribute breakdown = data.breakdown ?: currentData.breakdown
-            GroupType breakdownGroup = data.breakdownGroup ?: currentData.breakdownGroup
-            GroupType groupType = data.group ?: currentData.group
-
-            group(criteria, groupType, xAxis, source, descriptor)
-            aggregation(criteria, aggregationType, attribute, source, descriptor, xAxis, breakdown)
-            if (breakdown)
-                group(criteria, breakdownGroup, breakdown, source, descriptor)
-            findNotNullAttributes(criteria, xAxis, breakdown)
-            getQuery(criteria).list()
+        def comp = yAxis?.stringForCompute?.with {
+            [
+                    formula    : it as String,
+                    title      : yAxis.title as String,
+                    computeData: yAxis.computeData as Map<String, Object>
+            ]
         }
 
-        Closure<Collection<Object>> postProcess = { list ->
-            def groupSevenDay = { currentData.group as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 0) : it }
-            def breakdownSevenDay = { currentData.breakdownGroup as GroupType == GroupType.SEVEN_DAYS ? getPeriodSevenDays(it as Collection, 2) : it }
-            def groupDtInterval = { currentData.xAxis.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 0) : it }
-            def breakdownDtInterval = { currentData?.breakdown?.type == 'dtInterval' ? convertMillisecondToHours(it as Collection, 2) : it }
-            def groupState = { currentData.xAxis.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 0, source) : it }
-            def breakdownState = { currentData?.breakdown?.type == 'state' ? convertCodeStatusToNameStatus(it as Collection, 2, source) : it }
-
-            list.with(groupSevenDay)
-                    .with(breakdownSevenDay)
-                    .with(groupDtInterval)
-                    .with(breakdownDtInterval)
-                    .with(groupState)
-                    .with(breakdownState)
-        }
-
-        String formula = currentYAxis.stringForCompute
-        def result
-        if (formula)
+        def requisite
+        if (data.sourceForCompute)
         {
-            def lastResponse
-            def calculator = new FormulaCalculator(formula)
-            def resValues = calculator.multipleExecute { variable ->
-                def computeData = currentYAxis.computeData.get(variable)
-                def data = request.data.get(computeData.dataKey)
-                def attr = setTitleInLinkAttribute(computeData.attr)
-                def res = executeQuery(
-                        data as DataForCompositeDiagram,
-                        attr as Attribute,
-                        computeData.aggregation as AggregationType
-                )
-                if (res)
-                {
-                    lastResponse = res
-                    return res.collect { it[1] as double }
-                }
-                else
-                {
-                    return res
-                }
-            }
-
-            result = lastResponse?.withIndex()?.collect { entry, i ->
-                entry[1] = resValues[i]
-                entry
-            }
+            requisite = null
         }
         else
         {
-            result = executeQuery(
-                    currentData as DataForCompositeDiagram,
-                    currentYAxis,
-                    currentData.aggregation as AggregationType
-            ) as Collection<Object>
+            def requisiteNode = comp
+                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
-        result.with(postProcess)
+
+        def customGroup = group.way == 'CUSTOM'
+                ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
+                : null
+
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+    } as Map<String, Map>
+
+    // Первая часть запроса имеется, но не полная
+    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
+        [(key): value.requestData]
+    } as Map<String, RequestData>
+
+    // доводим запрос до совершенства/ шлифуем вычисления
+    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
+        def computeData = map.computeData as Map<String, Object>
+        def req = map.requisite as Requisite
+        def node = req.nodes.head()
+        //по идее на этом этапе у нас только один реквизит и у него одна запись
+        def formula = (node as ComputationRequisiteNode).formula
+        def keys = new FormulaCalculator(formula).variableNames
+        keys.collect { computeData[it] }.each { el ->
+            def comp = el as Map<String, Object>
+            def attribute = comp.attr as Map<String, Object>
+            def aggregationType = comp.aggregation as Aggregation
+            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
+
+            // предполагаем, что агрегация может быть только одна
+            data[dataKey].aggregations = [new AggregationParameter(title: 'yAxis', type: aggregationType, attribute: mappingAttribute(attribute))]
+        }
+        def newFormula = keys.collect { variable ->
+            [variable, (computeData[variable] as Map<String, Object>).dataKey]
+        }.inject(formula) { string, keySet ->
+            def (oldKey, newKey) = keySet
+            string.replace(oldKey as String, newKey as String)
+        }
+        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
+        map.requisite = req
     }
 
-    Collection<Collection<Object>> list = request.data.findResults { key, data ->
-        data.sourceForCompute ? null : getResult(data as DataForCompositeDiagram)
+    // Реквизиты
+    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
+        value.requisite as Requisite
     }
-    return mappingToComboDiagram(list, request)
+
+    // доводим запрос до совершенства/ шлифуем кастомную группировку
+    Map<String, List<List>> splitData = intermediateData
+            .findAll { key, value -> value.customGroup }
+            ?.collectEntries { key, value ->
+                def customGroup = value.customGroup as Map<String, Object>
+                customGroup.type // тип атрибута капсом
+                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
+                def requestData = data[key as String]
+                def attribute = customGroup.attribute as Attribute
+                List<List> dataSet = subGroups.collect { el ->
+                    def group = el as Map<String, Object>
+                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
+                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
+                    def newRequestData = requestData.clone()
+                    newRequestData.filters = filters
+                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
+                    [groupName, newKey, newRequestData]
+                }
+                [(key): dataSet]
+            }
+
+    def groupKeyMap = splitData?.collect { key, list ->
+        def newDataSet = list.collectEntries { el ->
+            def (newKey, dataSet) = el.tail()
+            [(newKey): dataSet]
+        } as Map<String, RequestData>
+        data.remove(key)
+        data.putAll(newDataSet)
+
+        list.collect { el ->
+            def (String groupName, String newKey) = el
+            [groupName, key, newKey]
+        }
+    }
+
+    Closure<RequisiteNode> mappingRequisiteNodes
+    def requisiteNode = requisite.head().nodes.head()
+    String nodeType = requisiteNode.type
+    switch (nodeType)
+    {
+        case 'COMPUTATION':
+            mappingRequisiteNodes = { String group, List<List<String>> list ->
+                String formula = (requisiteNode as ComputationRequisiteNode).formula
+                String newFormula = list.inject(formula) { string, keySet ->
+                    def (oldKey, newKey) = keySet.tail()
+                    string.replace(oldKey as String, newKey as String)
+                }
+                new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
+            }
+            break
+        case 'DEFAULT':
+            mappingRequisiteNodes = { String group, List<List<String>> list ->
+                def key = list.head()[2]
+                new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
+            }
+            break
+        default: throw new Exception("Not supported requisite type: $nodeType")
+    }
+
+    def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
+        first + second
+    }?.groupBy { it.head() }?.collect { group, list ->
+        mappingRequisiteNodes(group, list)
+    } : null
+
+    newRequisiteNodes?.with {
+        requisite = [new Requisite(title: 'partial', nodes: it)]
+    }
+
+    return new DiagramRequest(requisite: requisite, data: data)
 }
 
 /**
- * Агрегация данных для диаграммы
- * @param criteria HCriteria основной таблицы
- * @param aggregationType тип агрегации
- * @param attribute атрибут для агрегирования
- * @param source источник данных для PERCENT
- * @return данные для диаграммы в формате SummaryDiagram
+ * Метод приведения запроса на построение круговых диаграм к единому формату
+ * @param requestContent - запрос на построеине круговой диаграмы
+ * @return DiagramRequest
  */
-private void aggregation(HCriteria criteria,
-                         AggregationType aggregationType,
-                         Attribute attribute,
-                         String source,
-                         String descriptor,
-                         Attribute... notNullAttribute)
+private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestContent)
 {
-    String attributeCode = getAttributeCodeByType(criteria, attribute)
-    aggregationType == AggregationType.PERCENT
-            ? addPercentColumn(criteria, descriptor, source, attribute, aggregationType, notNullAttribute)
-            : criteria.addColumn(aggregationType.get(attributeCode))
+    def uglyRequestData = requestContent.data as Map<String, Object>
+    Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
+        def data = value as Map<String, Object>
+        def source = new Source(classFqn: data.source, descriptor: data.descriptor)
+
+        def indicator = data.indicator as Map<String, Object>
+        def aggregationParameter = new AggregationParameter(
+                title: 'indicator',
+                type: data.aggregation as Aggregation,
+                attribute: mappingAttribute(indicator)
+        )
+
+        def breakdown = data.breakdown as Map<String, Object>
+        def group = data.breakdownGroup as Map<String, Object>
+        def groupParameter = group.way == 'SYSTEM'
+                ? new GroupParameter(title: 'breakdown', type: group.data as GroupType, attribute: mappingAttribute(breakdown))
+                : null
+
+        def res = new RequestData(
+                source: source,
+                aggregations: [aggregationParameter],
+                groups: [groupParameter].grep()
+        )
+
+        def comp = indicator.stringForCompute?.with {
+            [
+                    formula    : it as String,
+                    title      : indicator.title as String,
+                    computeData: indicator.computeData as Map<String, Object>
+            ]
+        }
+
+        def requisite
+        if (data.sourceForCompute)
+        {
+            requisite = null
+        }
+        else
+        {
+            def requisiteNode = comp
+                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
+        }
+
+        def customGroup = group.way == 'CUSTOM'
+                ? [attribute: mappingAttribute(breakdown)] + (group.data as Map<String, Object>)
+                : null
+
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+    } as Map<String, Map>
+
+    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
+        [(key): value.requestData]
+    } as Map<String, RequestData>
+
+    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
+        def computeData = map.computeData as Map<String, Object>
+        def req = map.requisite as Requisite
+        def node = req.nodes.head()
+        //по идее на этом этапе у нас только один реквизит и у него одна запись
+        def formula = (node as ComputationRequisiteNode).formula
+        def keys = new FormulaCalculator(formula).variableNames
+        keys.collect { computeData[it] }.each { el ->
+            def comp = el as Map<String, Object>
+            def attribute = comp.attr as Map<String, Object>
+            def aggregationType = comp.aggregation as Aggregation
+            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
+
+            // предполагаем, что агрегация может быть только одна
+            data[dataKey].aggregations = [new AggregationParameter(title: 'indicator', type: aggregationType, attribute: mappingAttribute(attribute))]
+        }
+        def newFormula = keys.collect { variable ->
+            [variable, (computeData[variable] as Map<String, Object>).dataKey]
+        }.inject(formula) { string, keySet ->
+            def (oldKey, newKey) = keySet
+            string.replace(oldKey as String, newKey as String)
+        }
+        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
+        map.requisite = req
+    }
+
+    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
+        value.requisite as Requisite
+    }
+
+    Map<String, List<List>> splitData = intermediateData
+            .findAll { key, value -> value.customGroup }
+            ?.collectEntries { key, value ->
+                def customGroup = value.customGroup as Map<String, Object>
+                customGroup.type // тип атрибута капсом
+                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
+                def requestData = data[key as String]
+                def attribute = customGroup.attribute as Attribute
+                List<List> dataSet = subGroups.collect { el ->
+                    def group = el as Map<String, Object>
+                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
+                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
+                    def newRequestData = requestData.clone()
+                    newRequestData.filters = filters
+                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
+                    [groupName, newKey, newRequestData]
+                }
+                [(key): dataSet]
+            }
+
+    def groupKeyMap = splitData?.collect { key, list ->
+        def newDataSet = list.collectEntries { el ->
+            def (newKey, dataSet) = el.tail()
+            [(newKey): dataSet]
+        } as Map<String, RequestData>
+        data.remove(key)
+        data.putAll(newDataSet)
+
+        list.collect { el ->
+            def (String groupName, String newKey) = el
+            [groupName, key, newKey]
+        }
+    }
+
+    Closure<RequisiteNode> mappingRequisiteNodes
+    def requisiteNode = requisite.head().nodes.head()
+    String nodeType = requisiteNode.type
+    switch (nodeType)
+    {
+        case 'COMPUTATION':
+            mappingRequisiteNodes = { String group, List<List<String>> list ->
+                String formula = (requisiteNode as ComputationRequisiteNode).formula
+                String newFormula = list.inject(formula) { string, keySet ->
+                    def (oldKey, newKey) = keySet.tail()
+                    string.replace(oldKey as String, newKey as String)
+                }
+                new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
+            }
+            break
+        case 'DEFAULT':
+            mappingRequisiteNodes = { String group, List<List<String>> list ->
+                def key = list.head()[2]
+                new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
+            }
+            break
+        default: throw new Exception("Not supported requisite type: $nodeType")
+    }
+
+    def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
+        first + second
+    }?.groupBy { it.head() }?.collect { group, list ->
+        mappingRequisiteNodes(group, list)
+    } : null
+
+    newRequisiteNodes?.with {
+        requisite = [new Requisite(title: 'partial', nodes: it)]
+    }
+
+    return new DiagramRequest(requisite: requisite, data: data)
 }
 
 /**
- * Группировка данных для диаграммы
- * @param criteria HCriteria основной таблицы
- * @param groupType тип группировки
- * @param xAxis атрибут для группировки
+ * Метод приведения запроса на построение сводки к единому формату
+ * @param requestContent - запрос на построеине сводки
+ * @return DiagramRequest
  */
-private void group(HCriteria criteria, GroupType groupType, Attribute xAxis, String source, String descriptor)
+private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestContent)
 {
-    String attributeCode = getAttributeCodeByType(criteria, xAxis)
+    def uglyRequestData = requestContent.data as Map<String, Object>
+    Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
+        def data = value as Map<String, Object>
+        def source = new Source(classFqn: data.source, descriptor: data.descriptor)
 
-    def nominativeRussianMonth = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
-                                  'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
-    def genitiveRussianMonth = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-                                'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+        def indicator = data.indicator as Map<String, Object>
+        def aggregationParameter = new AggregationParameter(
+                title: 'indicator',
+                type: data.aggregation as Aggregation,
+                attribute: mappingAttribute(indicator)
+        )
+        def res = new RequestData(source: source, aggregations: [aggregationParameter])
 
-    String sqlCaseRussianNominativeMonthFormat = createSqlCaseFormat(nominativeRussianMonth)
-    String sqlCaseRussianGenitiveMonthFormat = createSqlCaseFormat(genitiveRussianMonth)
+        def comp = indicator.stringForCompute?.with {
+            [
+                    formula    : it as String,
+                    title      : indicator.title as String,
+                    computeData: indicator.computeData as Map<String, Object>
+            ]
+        }
+        String attributeTitle = indicator.title
+        def requisite
+        if (data.sourceForCompute)
+        {
+            requisite = null
+        }
+        else
+        {
+            def requisiteNode = comp
+                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: key)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
+        }
 
-    switch (groupType) {
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite: requisite]]
+    } as Map<String, Map>
+
+
+    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
+        [(key): value.requestData]
+    } as Map<String, RequestData>
+
+    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
+        def computeData = map.computeData as Map<String, Object>
+        def req = map.requisite as Requisite
+        def node = req.nodes.head()
+        //по идее на этом этапе у нас только один реквизит и у него одна запись
+        def formula = (node as ComputationRequisiteNode).formula
+        def keys = new FormulaCalculator(formula).variableNames
+        keys.collect { computeData[it] }.each { el ->
+            def comp = el as Map<String, Object>
+            def attribute = comp.attr as Map<String, Object>
+            def aggregationType = comp.aggregation as Aggregation
+            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
+
+            // предполагаем, что агрегация может быть только одна
+            data[dataKey].aggregations = [new AggregationParameter(title: 'indicator', type: aggregationType, attribute: mappingAttribute(attribute))]
+        }
+        def newFormula = keys.collect { variable ->
+            [variable, (computeData[variable] as Map<String, Object>).dataKey]
+        }.inject(formula) { string, keySet ->
+            def (oldKey, newKey) = keySet
+            string.replace(oldKey as String, newKey as String)
+        }
+        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
+        map.requisite = req
+    }
+
+    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
+        value.requisite as Requisite
+    }
+    return new DiagramRequest(requisite: requisite, data: data)
+}
+
+/**
+ * Метод приведения запроса на построение таблицы к единому формату
+ * @param requestContent - запрос на построеине таблицы
+ * @return DiagramRequest
+ */
+private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent)
+{
+    def uglyRequestData = requestContent.data as Map<String, Object>
+    Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
+        def data = value as Map<String, Object>
+        def source = new Source(classFqn: data.source, descriptor: data.descriptor)
+        def column = data.column as Map<String, Object>
+        def aggregationParameter = new AggregationParameter(
+                title: 'column',
+                type: data.aggregation as Aggregation,
+                attribute: mappingAttribute(column)
+        )
+        def row = data.row as Map<String, Object>
+
+        //в таблице группировка по строке всегда обычная.
+        def groupParameter = new GroupParameter(title: 'row', type: GroupType.OVERLAP, attribute: mappingAttribute(row))
+
+        //а вот разбивка может быть кастомной.
+        def breakdown = data.breakdown as Map<String, Object>
+        def breakdownGroup = data.breakdownGroup as Map<String, Object>
+
+        def breakdownParameter = breakdownGroup.way == 'SYSTEM' ? new GroupParameter(
+                title: 'breakdown',
+                type: breakdownGroup.data as GroupType,
+                attribute: mappingAttribute(breakdown)
+        ) : null
+
+        def res = new RequestData(
+                source: source,
+                aggregations: [aggregationParameter],
+                groups: [groupParameter, breakdownParameter].grep()
+        )
+
+        def comp = column.stringForCompute?.with {
+            [
+                    formula    : it as String,
+                    title      : column.title as String,
+                    computeData: column.computeData as Map<String, Object>
+            ]
+        }
+
+        def requisite
+        if (data.sourceForCompute)
+        {
+            requisite = null
+        }
+        else
+        {
+            def requisiteNode = comp
+                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
+        }
+
+        def customGroup = breakdownGroup.way == 'CUSTOM'
+                ? [attribute: mappingAttribute(breakdown)] + (breakdownGroup.data as Map<String, Object>)
+                : null
+
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+    } as Map<String, Map>
+
+    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
+        [(key): value.requestData]
+    } as Map<String, RequestData>
+
+    // доводим запрос до совершенства/ шлифуем вычисления
+    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
+        def computeData = map.computeData as Map<String, Object>
+        def req = map.requisite as Requisite
+        def node = req.nodes.head()
+        //по идее на этом этапе у нас только один реквизит и у него одна запись
+        def formula = (node as ComputationRequisiteNode).formula
+        def keys = new FormulaCalculator(formula).variableNames
+        keys.collect { computeData[it] }.each { el ->
+            def comp = el as Map<String, Object>
+            def attribute = comp.attr as Map<String, Object>
+            def aggregationType = comp.aggregation as Aggregation
+            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
+
+            // предполагаем, что агрегация может быть только одна
+            data[dataKey].aggregations = [new AggregationParameter(title: 'column', type: aggregationType, attribute: mappingAttribute(attribute))]
+        }
+        def newFormula = keys.collect { variable ->
+            [variable, (computeData[variable] as Map<String, Object>).dataKey]
+        }.inject(formula) { string, keySet ->
+            def (oldKey, newKey) = keySet
+            string.replace(oldKey as String, newKey as String)
+        }
+        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
+        map.requisite = req
+    }
+
+    // Реквизиты
+    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
+        value.requisite as Requisite
+    }
+
+    // доводим запрос до совершенства/ шлифуем кастомную группировку
+    Map<String, List<List>> splitData = intermediateData
+            .findAll { key, value -> value.customGroup }
+            ?.collectEntries { key, value ->
+                def customGroup = value.customGroup as Map<String, Object>
+                customGroup.type // тип атрибута капсом
+                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
+                def requestData = data[key as String]
+                def attribute = customGroup.attribute as Attribute
+                List<List> dataSet = subGroups.collect { el ->
+                    def group = el as Map<String, Object>
+                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
+                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
+                    def newRequestData = requestData.clone()
+                    newRequestData.filters = filters
+                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
+                    [groupName, newKey, newRequestData]
+                }
+                [(key): dataSet]
+            }
+
+    def groupKeyMap = splitData?.collect { key, list ->
+        def newDataSet = list.collectEntries { el ->
+            def (newKey, dataSet) = el.tail()
+            [(newKey): dataSet]
+        } as Map<String, RequestData>
+        data.remove(key)
+        data.putAll(newDataSet)
+
+        list.collect { el ->
+            def (String groupName, String newKey) = el
+            [groupName, key, newKey]
+        }
+    }
+
+    Closure<RequisiteNode> mappingRequisiteNodes
+    def requisiteNode = requisite.head().nodes.head()
+    String nodeType = requisiteNode.type
+    switch (nodeType)
+    {
+        case 'COMPUTATION':
+            mappingRequisiteNodes = { String group, List<List<String>> list ->
+                String formula = (requisiteNode as ComputationRequisiteNode).formula
+                String newFormula = list.inject(formula) { string, keySet ->
+                    def (oldKey, newKey) = keySet.tail()
+                    string.replace(oldKey as String, newKey as String)
+                }
+                new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
+            }
+            break
+        case 'DEFAULT':
+            mappingRequisiteNodes = { String group, List<List<String>> list ->
+                def key = list.head()[2]
+                new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
+            }
+            break
+        default: throw new Exception("Not supported requisite type: $nodeType")
+    }
+
+    def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
+        first + second
+    }?.groupBy { it.head() }?.collect { group, list ->
+        mappingRequisiteNodes(group, list)
+    } : null
+
+    newRequisiteNodes?.with {
+        requisite = [new Requisite(title: 'partial', nodes: it)]
+    }
+
+    return new DiagramRequest(requisite: requisite, data: data)
+}
+
+/**
+ * Метод приведения запроса на построение комбо диаграм к единому формату
+ * @param requestContent - запрос на построеине комбо диаграмы
+ * @return DiagramRequest
+ */
+private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestContent)
+{
+    def uglyRequestData = requestContent.data as Map<String, Object>
+    Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
+        def data = value as Map<String, Object>
+        def source = new Source(classFqn: data.source, descriptor: data.descriptor)
+        def yAxis = data.yAxis as Map<String, Object>
+        def aggregationParameter = new AggregationParameter(
+                title: 'yAxis',
+                type: data.aggregation as Aggregation,
+                attribute: mappingAttribute(yAxis)
+        )
+        def xAxis = data.xAxis as Map<String, Object>
+        def group = data.group as Map<String, Object>
+        def groupParameter = group.way == 'SYSTEM'
+                ? new GroupParameter(title: 'xAxis', type: group.data as GroupType, attribute: mappingAttribute(xAxis))
+                : null
+        def breakdown = data.breakdown?.with {
+            def breakdownGroup = data.breakdownGroup as Map<String, Object>
+            new GroupParameter(
+                    title: 'breakdown',
+                    type: breakdownGroup.way == 'SYSTEM' ? breakdownGroup.data as GroupType : GroupType.NONE,
+                    attribute: mappingAttribute(it as Map<String, Object>)
+            )
+        }
+        def res = new RequestData(
+                source: source,
+                aggregations: [aggregationParameter],
+                groups: [groupParameter, breakdown].grep()
+        )
+
+        def comp = yAxis.stringForCompute?.with {
+            [
+                    formula    : it as String,
+                    title      : yAxis.title as String,
+                    computeData: yAxis.computeData as Map<String, Object>
+            ]
+        }
+
+        def requisite
+        if (data.sourceForCompute)
+        {
+            requisite = null
+        }
+        else
+        {
+            def requisiteNode = comp
+                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
+        }
+
+        def customGroup = group.way == 'CUSTOM'
+                ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
+                : null
+
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+    } as Map<String, Map>
+
+    // Первая часть запроса имеется, но не полная
+    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
+        [(key): value.requestData]
+    } as Map<String, RequestData>
+
+    // доводим запрос до совершенства/ шлифуем вычисления
+    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
+        def computeData = map.computeData as Map<String, Object>
+        def req = map.requisite as Requisite
+        def node = req.nodes.head()
+        //по идее на этом этапе у нас только один реквизит и у него одна запись
+        def formula = (node as ComputationRequisiteNode).formula
+        def keys = new FormulaCalculator(formula).variableNames
+        keys.collect { computeData[it] }.each { el ->
+            def comp = el as Map<String, Object>
+            def attribute = comp.attr as Map<String, Object>
+            def aggregationType = comp.aggregation as Aggregation
+            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
+
+            // предполагаем, что агрегация может быть только одна
+            data[dataKey].aggregations = [new AggregationParameter(title: 'yAxis', type: aggregationType, attribute: mappingAttribute(attribute))]
+        }
+        def newFormula = keys.collect { variable ->
+            [variable, (computeData[variable] as Map<String, Object>).dataKey]
+        }.inject(formula) { string, keySet ->
+            def (oldKey, newKey) = keySet
+            string.replace(oldKey as String, newKey as String)
+        }
+        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
+        map.requisite = req
+    }
+
+    // Реквизиты
+    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
+        value.requisite as Requisite
+    }
+
+    // доводим запрос до совершенства/ шлифуем кастомную группировку
+    Map<String, List<List>> splitData = intermediateData
+            .findAll { key, value -> value.customGroup }
+            ?.collectEntries { key, value ->
+                def customGroup = value.customGroup as Map<String, Object>
+                customGroup.type // тип атрибута капсом
+                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
+                def requestData = data[key as String]
+                def attribute = customGroup.attribute as Attribute
+                List<List> dataSet = subGroups.collect { el ->
+                    def group = el as Map<String, Object>
+                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
+                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
+                    def newRequestData = requestData.clone()
+                    newRequestData.filters = filters
+                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
+                    [groupName, newKey, newRequestData]
+                }
+                [(key): dataSet]
+            }
+
+    def groupKeyMap = splitData?.collect { key, list ->
+        def newDataSet = list.collectEntries { el ->
+            def (newKey, dataSet) = el.tail()
+            [(newKey): dataSet]
+        } as Map<String, RequestData>
+        data.remove(key)
+        data.putAll(newDataSet)
+
+        list.collect { el ->
+            def (String groupName, String newKey) = el
+            [groupName, key, newKey]
+        }
+    }
+
+    requisite.each { req ->
+        def node = req.nodes.head()
+        String nodeType = node.type
+        Closure<RequisiteNode> mappingRequisiteNodes
+
+        switch (nodeType)
+        {
+            case 'COMPUTATION':
+                mappingRequisiteNodes = { String group, List<List<String>> list ->
+                    String formula = (node as ComputationRequisiteNode).formula
+                    String newFormula = list.inject(formula) { string, keySet ->
+                        def (oldKey, newKey) = keySet.tail()
+                        string.replace(oldKey as String, newKey as String)
+                    }
+                    new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
+                }
+                break
+            case 'DEFAULT':
+                mappingRequisiteNodes = { String group, List<List<String>> list ->
+                    def key = list.head()[2]
+                    new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
+                }
+                break
+            default: throw new Exception("Not supported requisite type: $nodeType")
+        }
+        groupKeyMap ? groupKeyMap.inject { first, second ->
+            first + second
+        }?.groupBy { it.head() }?.collect { group, list ->
+            mappingRequisiteNodes(group, list)
+        }?.with {
+            req = new Requisite(title: 'partial', nodes: it)
+        } : null
+    }
+
+    return new DiagramRequest(requisite: requisite, data: data)
+}
+
+/**
+ * Метод построения атрибута
+ * @param data - данные для атрибута
+ * @return Attribute
+ */
+private Attribute mappingAttribute(Map<String, Object> data)
+{
+    return data ? new Attribute(
+            title: data.title as String,
+            code: data.code as String,
+            type: data.type as String,
+            property: data.property as String,
+            metaClassFqn: data.metaClassFqn as String,
+            sourceName: data.sourceName as String,
+            ref: mappingAttribute(data.ref as Map<String, Object>)
+    ) : null
+}
+
+/**
+ * Метод построение фильтров группировок
+ * @param data - данные группировок
+ * @param attribute - атрибут по которому создаются условия группы
+ * @param title - название группы
+ * @return список фильтров
+ */
+private List<List<FilterParameter>> mappingFilters(List<List> data, Attribute attribute, String title)
+{
+    return data.collect { andCondition ->
+        andCondition.collect { orCondition ->
+            def condition = orCondition as Map<String, Object>
+            String conditionType = condition.type
+            switch (conditionType.toLowerCase())
+            {
+                case 'today':
+                    def start = Calendar.instance.with {
+                        set(HOUR_OF_DAY, 0)
+                        set(MINUTE, 0)
+                        set(SECOND, 0)
+                        set(MILLISECOND, 0)
+                        getTime()
+                    }
+                    def end = Calendar.instance.with {
+                        set(HOUR_OF_DAY, 23)
+                        set(MINUTE, 59)
+                        set(SECOND, 59)
+                        set(MILLISECOND, 999)
+                        getTime()
+                    }
+                    return new FilterParameter(
+                            title: title,
+                            type: 'between',
+                            attribute: attribute,
+                            value: [start, end]
+                    )
+                case 'last':
+                    def count = condition.data as int
+                    def start = Calendar.instance.with {
+                        add(DAY_OF_MONTH, -count)
+                        set(HOUR_OF_DAY, 0)
+                        set(MINUTE, 0)
+                        set(SECOND, 0)
+                        set(MILLISECOND, 0)
+                        getTime()
+                    }
+                    def end = Calendar.instance.with {
+                        set(HOUR_OF_DAY, 23)
+                        set(MINUTE, 59)
+                        set(SECOND, 59)
+                        set(MILLISECOND, 999)
+                        getTime()
+                    }
+                    return new FilterParameter(
+                            title: title,
+                            type: 'between',
+                            attribute: attribute,
+                            value: [start, end]
+                    )
+                case 'near':
+                    def count = condition.data as int
+                    def start = Calendar.instance.with {
+                        set(HOUR_OF_DAY, 0)
+                        set(MINUTE, 0)
+                        set(SECOND, 0)
+                        set(MILLISECOND, 0)
+                        getTime()
+                    }
+                    def end = Calendar.instance.with {
+                        add(DAY_OF_MONTH, count)
+                        set(HOUR_OF_DAY, 23)
+                        set(MINUTE, 59)
+                        set(SECOND, 59)
+                        set(MILLISECOND, 999)
+                        getTime()
+                    }
+                    return new FilterParameter(
+                            title: title,
+                            type: 'between',
+                            attribute: attribute,
+                            value: [start, end]
+                    )
+                case 'between':
+                    String dateFormat = 'yyyy-MM-dd'
+                    def date = condition.data as Map<String, Object> // тут будет массив дат
+                    def start = Date.parse(dateFormat, date.startDate as String)
+                    def end = Date.parse(dateFormat, date.endDate as String)
+                    return new FilterParameter(
+                            title: title,
+                            type: 'between',
+                            attribute: attribute,
+                            value: [start, end]
+                    )
+                default: throw new Exception("Not supported condition type: $conditionType")
+            }
+        }
+    }
+}
+
+/**
+ * Метод получения данных для диаграмм
+ * @param request - запрос на получение данных
+ * @return сырые данные для построения диаграм
+ */
+private def getDiagramData(DiagramRequest request)
+{
+    assert request: "Empty request!"
+    return request.requisite.collect { requisite ->
+        def result = requisite.nodes.collectEntries { node ->
+            String nodeType = node.type
+            switch (nodeType.toLowerCase())
+            {
+                case 'default':
+                    def requisiteNode = node as DefaultRequisiteNode
+                    RequestData requestData = request.data[requisiteNode.dataKey]
+                    Closure formatAggregation = this.&formatAggregationSet
+                    Closure formatGroup = this.&formatGroupSet.curry(requestData)
+                    def res = modules.dashboardQueryWrapper.getData(requestData).with(formatGroup).with(formatAggregation)
+                    return [(requisiteNode.title): res]
+                case 'computation':
+                    def requisiteNode = node as ComputationRequisiteNode
+                    def calculator = new FormulaCalculator(requisiteNode.formula)
+                    def dataSet = calculator.variableNames.collectEntries { [(it): request.data[it]] } as Map<String, RequestData>
+                    if (!checkGroupTypes(dataSet.values())) throw new Exception("Wrong group types in calculation!")
+                    def variables = dataSet.collectEntries { key, data ->
+                        Closure postProcess = this.&formatGroupSet.curry(data as RequestData)
+                        [(key): modules.dashboardQueryWrapper.getData(data as RequestData).with(postProcess)]
+                    } as Map<String, List>
+
+                    //Вычисление формулы. Выглядит немного костыльно...
+                    def res = dataSet.values().head().groups?.size() ? findUniqueGroups(variables).collect { group ->
+                        def resultCalculation = calculator.execute { variable ->
+                            (variables[variable as String].findResult { group == it.tail() ? it.head() : null } ?: 0) as Double
+                        }
+                        return [resultCalculation, group].flatten()
+                    } : [[calculator.execute { key -> variables[key as String].head().head() as Double }]]
+                    return [(node.title): formatAggregationSet(res)]
+                default: throw new Exception("Not supported requisite type: $nodeType")
+            }
+        }
+        return formatResult(result)
+    }
+}
+
+/**
+ * Метод проверки списка группировок на соответствие единому типу атрибута
+ * @param listRequest - список запросов на построение диаграмм
+ * @return true\false "соответствует"\"не соответствует"
+ */
+private boolean checkGroupTypes(Collection<RequestData> listRequest)
+{
+    def standard = listRequest.head().groups?.collect { it.type }
+    return listRequest.tail().every { el ->
+        def groups = el.groups?.collect { it.type }
+        standard?.size() == groups?.size() && standard?.containsAll(groups)
+    }
+}
+
+/**
+ * Метод получения уникальных группировок
+ * @param variables - результат выборки
+ * @return список группировок
+ */
+private Collection<Collection<String>> findUniqueGroups(def variables)
+{ // работает только с методами которые имеют группировки. В противном случае бросает исключение
+    return variables.values().collect {
+        it.transpose().tail().transpose()
+    }.inject([]) { first, second ->
+        first + second
+    }.unique() as Collection<Collection<String>>
+}
+
+/**
+ * Метод округления числовых результатов
+ * @param list - список числовых значений
+ * @return список округлённых числовых значений
+ */
+private List formatAggregationSet(List list)
+{
+    return list.collect { [DECIMAL_FORMAT.format((it as List).head() as Double), (it as List).tail()].flatten() }
+}
+
+/**
+ * Метод приведения значений группировок к читаемому для человека виду
+ * @param data - данные запроса
+ * @param list - результат выборки
+ * @return результат выборки с изменёнными значениями группировки
+ */
+private List formatGroupSet(RequestData data, List list)
+{
+    assert data.aggregations.grep().size() == 1: "Not supported data format"
+    def countGroup = data.groups.grep().size()
+    assert countGroup < 3: "Not supported data format"
+
+    // работатет только при одной агрегации и группировкам не больше 2
+    switch (countGroup)
+    {
+        case 0:
+            return list
+        case 1:
+            return list.collect { el ->
+                def (value, group) = el
+                Closure formatGroup = this.&formatGroup.curry(data.groups[0], data.source.classFqn)
+                [value, formatGroup(group as String)]
+            }
+        case 2:
+            return list.collect { el ->
+                def (value, group, breakdown) = el
+                Closure formatGroup = this.&formatGroup.curry(data.groups[0] as GroupParameter, data.source.classFqn)
+                Closure formatBreakdown = this.&formatGroup.curry(data.groups[1] as GroupParameter, data.source.classFqn)
+                [value, formatGroup(group as String), formatBreakdown(breakdown as String)]
+            }
+    }
+}
+
+/**
+ * Метод преобразования значения группировки в зависимости от типа
+ * @param parameter - тип группировки
+ * @param fqnClass - класс атрибута группировки
+ * @param value - значение группировки
+ * @return человеко читаемое значение группировки
+ */
+private String formatGroup(GroupParameter parameter, String fqnClass, String value)
+{
+    GroupType type = parameter.type
+    switch (type)
+    {
         case GroupType.OVERLAP:
-            criteria.addColumn(attributeCode)
-            criteria.addGroupColumn(attributeCode)
-            criteria.addOrder(HOrders.asc(HHelper.getColumn(attributeCode)))
-            break
+            switch (parameter.attribute.type)
+            {
+                case 'dtInterval':
+                    return TimeUnit.MILLISECONDS.toHours(value as long)
+                case 'state':
+                    return api.metainfo.getStateTitle(fqnClass, value)
+                default:
+                    return value
+            }
         case GroupType.DAY:
-            String month = String.format(sqlCaseRussianGenitiveMonthFormat, attributeCode)
-            String md = "concat(DAY(${attributeCode}), ' ', $month)"
-            criteria.addColumn(md)
-            criteria.addGroupColumn("MONTH(${attributeCode}), DAY(${attributeCode})")
-            criteria.addOrder(HOrders.asc(HHelper.getColumn("MONTH(${attributeCode}), DAY(${attributeCode})")))
-            break
-        case GroupType.WEEK:
-            criteria.addColumn("extract(WEEK from ${attributeCode})")
-            criteria.addGroupColumn("extract(WEEK from ${attributeCode})")
-            criteria.addOrder(HOrders.asc(HHelper.getColumn("extract(WEEK from ${attributeCode})")))
-            break
+            def (day, month) = value.split('/', 2)
+            String monthName = GENITIVE_RUSSIAN_MONTH[(month as int) - 1]
+            return "$day $monthName"
         case GroupType.MONTH:
-            criteria.addColumn(String.format(sqlCaseRussianNominativeMonthFormat, attributeCode))
-            criteria.addGroupColumn("MONTH(${attributeCode})")
-            criteria.addOrder(HOrders.asc(HHelper.getColumn("MONTH(${attributeCode})")))
-            break
+            return NOMINATIVE_RUSSIAN_MONTH[(value as int) - 1]
         case GroupType.QUARTER:
-            criteria.addColumn("concat(extract(QUARTER from ${attributeCode}), ' кв-л')")
-            criteria.addGroupColumn("concat(extract(QUARTER from ${attributeCode}), ' кв-л')")
-            criteria.addOrder(HOrders.asc(HHelper.getColumn("concat(extract(QUARTER from ${attributeCode}), ' кв-л')")))
-            break
-        case GroupType.YEAR:
-            criteria.addColumn("YEAR(${attributeCode})")
-            criteria.addGroupColumn("YEAR(${attributeCode})")
-            criteria.addOrder(HOrders.asc(HHelper.getColumn("YEAR(${attributeCode})")))
-            break
+            return "$value кв-л"
+        case [GroupType.WEEK, GroupType.YEAR]:
+            return value
         case GroupType.SEVEN_DAYS:
-            // Для получения минимальной даты
-            def cteSource = createHCriteria(descriptor, source)
-            cteSource.addColumn("MIN(CAST(${getAttributeCodeByType(cteSource, xAxis)} AS timestamp))", 'cteMinDate')
-            HCriteria cteCriteria = criteria.addCTESource(cteSource)
-
-            // Вывод периода день.месяц-(день.месяц + 7 дней)
-            String coefficientForRound = '0.6'
-            String formula = "ROUND(ABS((extract(DAY from (CAST(%s AS timestamp)-%s))-$coefficientForRound)/7))"
-            String groupFormula = String.format(formula, attributeCode, cteCriteria.getProperty('cteMinDate'))
-            String period = "concat(${cteCriteria.getProperty('cteMinDate')},'--', ${groupFormula})"
-            criteria.addColumn("MIN(${period})")
-
-            // Группировка и сортировка по 7 дней от минимальной даты
-            criteria.addGroupColumn(groupFormula)
-            criteria.addOrder(HOrders.asc(HHelper.getColumn(groupFormula)))
-            break
-    }
-}
-
-private String createSqlCaseFormat(Collection<String> list) {
-    return list.withIndex(1).inject(new StringBuilder("CASE MONTH(%s)")) { builder, tuple ->
-        def (month, index) = tuple
-        builder.append(" WHEN $index THEN '$month'")
-    }.append(' END').toString()
-}
-
-private void addPercentColumn(HCriteria criteria,
-                              String descriptor,
-                              String source,
-                              Attribute attributeCalc,
-                              AggregationType aggregationType,
-                              Attribute... notNullAttributes)
-{
-    criteria.addColumn(getPercentColumn(descriptor, source, attributeCalc, aggregationType, notNullAttributes))
-}
-
-private String getPercentColumn(String descriptor,
-                                String source,
-                                Attribute attributeCalc,
-                                AggregationType aggregationType,
-                                Attribute... notNullAttributes)
-{
-    HCriteria calcCriteria = createHCriteria(descriptor, source)
-    String attributeCode = getAttributeCodeByType(calcCriteria, attributeCalc)
-    calcCriteria.addColumn("COUNT(${attributeCode})")
-    calcCriteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
-    findNotNullAttributes(calcCriteria, notNullAttributes)
-    String calcCount = getQuery(calcCriteria).list().head()
-    return aggregationType.get(attributeCode, calcCount)
-}
-
-/**
- * Маппинг данных в формат для построения линейных диаграмм
- * @param list список значений
- * @param breakdown атрибут разбивки
- * @return данные для диаграммы в формате StandardDiagram
- */
-private StandardDiagram mappingToStandardDiagram(Collection<Object> list,
-                                                 Attribute breakdown,
-                                                 GroupType breakdownGroup)
-{
-    int categoryIndex = 0
-    int dataIndex = 1
-    int breakdownIndex = 2
-    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
-    otherSymbols.setDecimalSeparator('.' as char)
-    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
-    StandardDiagram standardDiagram = new StandardDiagram()
-    standardDiagram.categories = list.toUnique { it[categoryIndex] }*.getAt(categoryIndex)
-    if (breakdown)
-    {
-        list.toUnique { it[breakdownIndex] }.each {
-            standardDiagram.series << new Series(it[breakdownIndex], [0].multiply(standardDiagram.categories.size()))
-        }
-        standardDiagram.categories.eachWithIndex { category, index ->
-            list.findAll { element -> element[categoryIndex] == category }.each { currentElement ->
-                standardDiagram.series
-                        .find { element -> element.name == currentElement[breakdownIndex] }
-                        .data[index] = decimalFormat.format(currentElement[dataIndex])
+            def russianLocale = new Locale("ru")
+            SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
+            SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd MMMM", russianLocale)
+            def (star, numberWeek) = value.split("#", 2)
+            def minDate = standardDateFormatter.parse(star as String)
+            def countDays = (numberWeek as int) * 7
+            String startDate = Calendar.instance.with {
+                setTime(minDate)
+                add(DAY_OF_MONTH, countDays)
+                specialDateFormatter.format(getTime())
             }
-        }
+            String endDate = Calendar.instance.with {
+                setTime(minDate)
+                add(DAY_OF_MONTH, countDays + 6)
+                specialDateFormatter.format(getTime())
+            }
+            return "$startDate - $endDate"
+        default: throw new Exception("Not supported type: $type")
     }
-    else
-    {
-        standardDiagram.series << new Series("", list.toUnique { it[categoryIndex] }*.getAt(dataIndex))
-    }
-    standardDiagram.series = sortSeries(standardDiagram.series, breakdownGroup)
-    return standardDiagram
 }
 
 /**
- * Маппинг данных в формат для построения табличных диаграмм
- * @param list список значений
- * @return данные для диаграммы в формате StandardDiagram
+ * Метод приведения результата выборки к единой структуре
+ * @param data - результат выполнения запроса на получение данных диаграммы
+ * @return результат запроса данных диаграммы
  */
-private TableDiagram mappingToTableDiagram(Collection<Object> list,
-                                           Boolean calcColumn,
-                                           Boolean calcRow)
+private def formatResult(Map data)
 {
-    int columnTitleIndex = 0
-    int dataIndex = 1
-    int rowTitleIndex = 2
-    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
-    otherSymbols.setDecimalSeparator('.' as char)
-    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
-    TableDiagram tableDiagram = new TableDiagram()
-    Closure<String> capriceFront = { String str -> str.replace('.', '') } // требуется для библиотеки на фронте
-    tableDiagram.columns += list.toUnique { it[columnTitleIndex] }.collect { currentCell ->
-        def columnTitle = currentCell[columnTitleIndex]
-        String resultValue = calcColumn
-                ? decimalFormat.format(
-                list.sum { it[columnTitleIndex] == columnTitle ? it[dataIndex] : 0 })
-                : ""
-        new Column(columnTitle as String, capriceFront(columnTitle as String), resultValue)
-    }
-    list.toUnique { it[rowTitleIndex] }.collectEntries {
-        tableDiagram.data << [breakdownTitle: it[rowTitleIndex]]
-    }
-    list.collect { currentCell ->
-        def rowTitle = currentCell[rowTitleIndex]
-        tableDiagram.data.find { cell ->
-            cell["breakdownTitle"] == rowTitle
-        } << [(capriceFront(currentCell[columnTitleIndex] as String)):
-                      decimalFormat.format(currentCell[dataIndex])]
-    }
-    if (calcRow)
-    {
-        tableDiagram.columns << new Column("Итого", "total", "")
-        tableDiagram.data.collect { cell ->
-            cell << [total: decimalFormat.format(cell.values().tail().sum(decimalFormat.&parse))]
-        }
-    }
-
-    if (calcRow && calcColumn)
-    {
-        String totalResult = decimalFormat.format(
-                tableDiagram.columns*.footer.sum {
-                    it != '' ? decimalFormat.parse(it) : 0
-                })
-        tableDiagram.columns.find({ it.accessor == 'total' }).footer = totalResult
-    }
-
-    if (calcColumn)
-    {
-        tableDiagram.columns.find({ it.accessor == 'breakdownTitle' }).footer = 'Итого'
-    }
-    return tableDiagram
+    return data.size() > 1 ? data.collect { key, list ->
+        list.collect { [it.head() ?: 0, key, it.tail()].flatten() }
+    }.inject { first, second -> first + second } : data.values().head()
 }
 
 /**
- * Маппинг данных в формат для построения комбо диаграмм
- * @param list список результатов звпроса на построение диаграммы
- * @return данные для диаграммы в формате ComboDiagram
+ * Метод преобразования результата выборки к стандартной диаграмме
+ * @param list - данные диаграмы
+ * @return StandardDiagram
  */
-private ComboDiagram mappingToComboDiagram(Collection<Collection<Object>> lists, RequestGetDataForCompositeDiagram request)
+private StandardDiagram mappingStandardDiagram(List list)
 {
-    final int labelIndex = 0
-    final int dataIndex = 1
-    final int breakdownIndex = 2
-    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols()
-    otherSymbols.setDecimalSeparator('.' as char)
-    DecimalFormat decimalFormat = new DecimalFormat("#.##", otherSymbols)
-    def dataForNotCompute = request.data.findAll { key, source -> !(source.sourceForCompute) } //отбрасываем источники для вычисления
-    ComboDiagram comboDiagram = new ComboDiagram()
-    comboDiagram.labels = lists.collect { it*.getAt(labelIndex) }.flatten().unique()
-    lists.eachWithIndex { resultOfQuery, index ->
-        String currentKey = dataForNotCompute.keySet()[index]
-        def currentSource = dataForNotCompute.values()[index]
-        Closure<SeriesCombo> buildComboDiagram = {
-            String name, String breakdownValue, Collection<Object> resultValues ->
-                Collection<Object> data = [0].multiply(comboDiagram.labels.size()) // подготавливаем почву для результата
-                resultValues.each { row ->
-                    int resultIndex = comboDiagram.labels.indexOf(row[labelIndex])
-                    data[resultIndex] = decimalFormat.format(row[dataIndex] as double)
+    def resultDataSet = list.head() as List<List>
+    def transposeDataSet = resultDataSet.transpose()
+    switch (transposeDataSet.size())
+    {
+        case 2:
+            def (aggregationResult, groupResult) = transposeDataSet
+            def series = [new Series(name: '', data: aggregationResult as List)]
+            return new StandardDiagram(categories: groupResult as Set, series: series)
+        case 3:
+            def (groupResult, breakdownResult) = transposeDataSet.tail()
+            def categories = groupResult as Set
+            def series = (breakdownResult as Set).collect { breakdownValue ->
+                def data = categories.collect { groupValue ->
+                    (list.head() as List<List>).findResult { el ->
+                        el.tail() == [groupValue, breakdownValue] ? el.head() : null
+                    } ?: 0
                 }
-                new SeriesCombo(name, data, currentSource.type as String, currentKey, breakdownValue)
-        }
-        if (currentSource.breakdown)
-        {
-            def breakdowns = resultOfQuery.collect({ it[breakdownIndex] }).unique()
-            breakdowns.each { breakdown ->
-                String name = breakdown
-                String breakdownValue = breakdown
-                def resultValues = resultOfQuery.findAll { row -> row[breakdownIndex] == breakdown }
-                comboDiagram.series << buildComboDiagram(name, breakdownValue, resultValues)
+                new Series(name: breakdownValue, data: data)
             }
-        }
-        else
-        {
-            String title = "${currentSource.yAxis.title}"
-            comboDiagram.series << buildComboDiagram(title, "", resultOfQuery)
-        }
-    }
-    comboDiagram.series = sortSeries(comboDiagram.series, request)
-    return comboDiagram
-}
-
-/**
- * Формирование кода атрибута для выборки из бд в зависимости от его типа
- * @param criteria HCriteria основной таблицы
- * @param attribute атрибут для формирования кода
- * @return код атрибута для запроса
- */
-private String getAttributeCodeByType(HCriteria criteria, Attribute attribute)
-{
-    // ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem'] - типы у которых могут быть вложенности
-    // ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state'] - простые типы
-    // ['string', 'integer', 'state', 'catalogItem', 'catalogItemSet'] - типы которые будут у ссылочных типов (на этом спринте)
-    String locale = ''
-    return revelation(attribute).inject(criteria) { hColumn, attr ->
-        def (type, code) = attr
-        if (type in ['catalogItemSet', 'catalogItem'])
-        {
-            locale = 'ru' //TODO: спрашивать локаль у пользователя
-        }
-        if (code == 'title' && locale)
-        {
-            code = "$code.$locale"
-        }
-        if (code == 'UUID') // в БД нет свойства UUID
-        {
-            code = 'id'
-        }
-        switch (type)
-        {
-            case ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']:
-                return hColumn.addInnerJoin(code)
-            case 'dtInterval':
-                return hColumn.getProperty(code).getProperty('ms') //Предполагаем после этого атрибутов не будет
-            default:
-                return hColumn.getProperty(code)
-        }
+            return new StandardDiagram(categories: categories, series: series)
+        default: throw new Exception("Invalid format result data set")
     }
 }
 
 /**
- * Метод рекурсивного получения всех вложенных атрибутов
- * @param attribute - атрибут
- * @return Список кортежей из типа и кода атрибута
+ * Метод преобразования результата выборки к круговой диаграмме
+ * @param list - данные диаграмы
+ * @return RoundDiagram
  */
-private List<Tuple> revelation(Attribute attribute)
+private RoundDiagram mappingRoundDiagram(List list)
 {
-    return attribute ? [new Tuple(attribute.type, attribute.code)] + revelation(attribute.ref) : []
-}
-
-/**
- * Метод добавления условия отсеивания null значений атрибута
- * @param criteria HCriteria основной таблицы
- * @param attribute атрибут для отсеивания null значений атрибута
- */
-private void findNotNullAttributes(HCriteria criteria, Attribute... attributes)
-{
-    attributes.each {
-        if (it)
-        {
-            String attributeCode = getAttributeCodeByType(criteria, it)
-            criteria.add(HRestrictions.isNotNull(HHelper.getColumn(attributeCode)))
-        }
-    }
-}
-
-/**
- * Метод исполнения запросов
- * @param criteria - запрос в базу данных
- * @return сущность ответа
- */
-private def getQuery(HCriteria criteria)
-{
-    return api.db.query(criteria)
-}
-
-/**
- * Создание HCriteria
- */
-private HCriteria createHCriteria(String descriptor, String source)
-{
-    HCriteria criteria = descriptor ? getCriteriaFromDescriptor(deserializeDescriptor(descriptor)) :
-            HHelper.create().addSource(source)
-    criteria.getOrders().clear()
-    return criteria
-}
-
-/**
- * Создание запроса на основе дескриптора
- * @param descriptor - сущность фильтрации
- * @return сущность запрос
- */
-private HCriteria getCriteriaFromDescriptor(def descriptor)
-{
-    return api.listdata.createCriteria(descriptor)
-}
-
-/**
- * Метод десериализации сущности дескриптора.
- * @param jsonString - сериализованный объект дескриптора
- * @return сущность дескриптора
- */
-private def deserializeDescriptor(String jsonString)
-{
-    return api.listdata.createListDescriptor(jsonString)
-}
-
-/**
- * Метод получения периода для группировки 7 дней
- * @param list список из бд
- * @param индекс столбца в бд
- * @return list преобразованный список из бд
- */
-private Collection<Object> getPeriodSevenDays(Collection<Object> list, int indexColumn)
-{
-    def russianLocale = new Locale("ru")
-    SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
-    SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd MMMM", russianLocale)
-
-    return list.collect {
-        def (String firstDate, String secondDate) = (it[indexColumn] as String).split('--')
-        def minDate = standardDateFormatter.parse(firstDate)
-
-        def formulaFrom = secondDate.toInteger() * 7
-        Date dateFrom = Calendar.getInstance().with {
-            it.setTime(minDate)
-            it.add(DAY_OF_MONTH, formulaFrom)
-            it.getTime()
-        }
-        def formulaTo = formulaFrom + 6
-        Date dateTo = Calendar.getInstance().with {
-            it.setTime(minDate)
-            it.add(DAY_OF_MONTH, formulaTo)
-            it.getTime()
-        }
-        it[indexColumn] = "${specialDateFormatter.format(dateFrom)} - ${specialDateFormatter.format(dateTo)}"
-        it
-    }
-}
-
-/**
- * Метод получения периода для группировки 7 дней
- * @param list список из бд
- * @param индекс столбца в бд
- * @return list преобразованный список из бд
- */
-private Collection<Object> convertMillisecondToHours(Collection<Object> list, int indexColumn)
-{
-    return list.collect {
-        it[indexColumn] = TimeUnit.MILLISECONDS.toHours(it[indexColumn])
-        it
-    }
-}
-
-/**
- * Метод конвертирования кода для атрибута с типом статус в название статуса
- * @param list список из бд
- * @param indexStatus индекс столбца в бд для изменения
- * @param fqn Код источника данных
- * @return list преобразованный список из бд
- */
-private Collection<Object> convertCodeStatusToNameStatus(Collection<Collection> list, int indexStatus, String fqn)
-{
-    Map<String, String> codeName = list*.getAt(indexStatus).toUnique()
-            .collectEntries { [(it): api.metainfo.getStateTitle(fqn, it)] }
-    return list.collect {
-        def values = it as List
-        values[indexStatus] = codeName[values[indexStatus] as String]
-        values
-    }.sort { it[indexStatus] }
-}
-
-/**
- * Метод сортировки разбивки по name в зависимости от типа группировки для 1 диаграммы
- * @param series список данных по y в форматах {@link Series} или {@link SeriesCombo}
- * @param breakdownGroup Тип группировки для разбивки
- * @return измененный список данных по y в форматах {@link Series} или {@link SeriesCombo}
- */
-private Collection<Object> sortSeries(Collection<Object> series, GroupType breakdownGroup)
-{
-    def closureConvertStringToDate = { pattern, name ->
-        new SimpleDateFormat(pattern, new Locale("ru")).parse(name)
-    }
-    switch (breakdownGroup)
+    def resultDataSet = list.head() as List<List>
+    def transposeDataSet = resultDataSet.transpose()
+    switch (transposeDataSet.size())
     {
-        case [GroupType.OVERLAP, GroupType.WEEK, GroupType.QUARTER, GroupType.YEAR]:
-            series = series.sort { it.name }
-            break
-        case GroupType.MONTH:
-            series = series.sort {
-                closureConvertStringToDate("MMMM", it.name)
-            }
-            break
-        case GroupType.DAY:
-            series = series.sort {
-                closureConvertStringToDate("dd MMMM", it.name)
-            }
-            break
-        case GroupType.SEVEN_DAYS:
-            series = series.sort {
-                closureConvertStringToDate("dd MMMM - dd MMMM", it.name)
-            }
-            break
+        case 2:
+            def (aggregationResult, groupResult) = transposeDataSet
+            return new RoundDiagram(series: (aggregationResult as List).collect { it as Double }, labels: groupResult as Set)
+        default: throw new Exception("Invalid format result data set")
     }
-    return series
 }
 
 /**
- * Метод сортировки разбивки по name в зависимости от типа группировки для combo диаграммы
- * @param series список данных по y
- * @param request данные для построения combo диаграммы
- * @return измененный список данных по y
+ * Метод преобразования результата выборки к сводке
+ * @param list - данные диаграмы
+ * @return SummaryDiagram
  */
-private Collection<SeriesCombo> sortSeries(Collection<SeriesCombo> series,
-                                           RequestGetDataForCompositeDiagram request)
+private SummaryDiagram mappingSummaryDiagram(List list, String title)
 {
-    Collection<SeriesCombo> seriesNew = []
-    series.dataKey.toUnique().each { dataKey ->
-        Collection<SeriesCombo> seriesPart = series.findAll { it.dataKey == dataKey }
-        seriesPart = sortSeries(seriesPart, request.data[dataKey].breakdownGroup as GroupType)
-        seriesNew.addAll(seriesPart)
+    List<List> resultDataSet = list.head() as List<List>
+    switch (resultDataSet.size())
+    {
+        case 1:
+            def value = resultDataSet.head().head()
+            return new SummaryDiagram(title: '', total: value)
+        default: throw new Exception("Invalid format result data set")
     }
-    return seriesNew
+}
+
+/**
+ * Метод преобразования результата выборки к таблице
+ * @param list - данные диаграмы
+ * @return TableDiagram
+ */
+private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean totalRow)
+{
+    def resultDataSet = list.head() as List<List>
+    def transposeDataSet = resultDataSet.transpose()
+    switch (transposeDataSet.size())
+    {
+        case 3:
+            def (aggregationSet, breakdownSet, groupSet) = transposeDataSet
+            Collection<Column> columns = (groupSet as Set<String>).collect { group ->
+                def total = totalColumn ? resultDataSet.sum { el ->
+                    el[2] == group ? el.head() as double : 0
+                }.with(DECIMAL_FORMAT.&format) : ""
+                new Column(header: group, accessor: group.replace('.', ' '), footer: total)
+            }
+
+            columns.add(0, new Column(header: '', accessor: 'breakdownTitle', footer: ''))
+
+            List<Map<Object, Object>> data = (breakdownSet as Set<String>).collect { breakdown ->
+                def res = resultDataSet.findAll { it[1] == breakdown }.collectEntries { dataList ->
+                    def (aggregationResult, _, groupResult) = dataList
+                    def key = (groupResult as String).replace('.', ' ')
+                    [(key): aggregationResult as String]
+                }
+                [breakdownTitle: breakdown.replace('.', ' ')] + res
+            }
+
+            if (totalRow)
+            {
+                String totalResult = totalColumn
+                        ? (aggregationSet as List).sum { it as double }.with(DECIMAL_FORMAT.&format)
+                        : ''
+                columns += new Column('Итого', 'total', totalResult)
+                data.each { el ->
+                    el << [total: el.values().tail().sum(DECIMAL_FORMAT.&parse).with(DECIMAL_FORMAT.&format)]
+                }
+            }
+            return new TableDiagram(columns: columns, data: data)
+        default: throw new Exception('Invalid format result data set')
+    }
+}
+
+/**
+ * Метод преобразования результата выборки к комбо диаграме
+ * @param list - данные диаграмы
+ * @return ComboDiagram
+ */
+private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map secondAdditionalData)
+{
+    def (firstResultDataSet, secondResultDataSet) = list
+    def firstTransposeDataSet = (firstResultDataSet as List<List>).transpose()
+    def secondTransposeDataSet = (secondResultDataSet as List<List>).transpose()
+
+    if (firstTransposeDataSet.size() != secondTransposeDataSet.size())
+        throw new Exception('Invalid format result data set')
+
+    switch (firstTransposeDataSet.size())
+    {
+        case 2:
+            Set labels = firstTransposeDataSet[1] + secondTransposeDataSet[1]
+            Collection firstDataSet = labels.collect { group ->
+                (firstResultDataSet as List<List>).findResult { el ->
+                    return el[1] == group ? el[0] : null
+                } ?: '0'
+            }
+            def firstSeries = new SeriesCombo(
+                    type: firstAdditionalData.type as String,
+                    breakdownValue: firstAdditionalData.breakdown as String,
+                    data: firstDataSet,
+                    name: firstAdditionalData.name as String,
+                    dataKey: firstAdditionalData.key as String
+            )
+
+            Collection secondDataSet = labels.collect { group ->
+                (secondResultDataSet as List<List>).findResult { el ->
+                    el[1] == group ? el[0] : null
+                } ?: '0'
+            }
+            def secondSeries = new SeriesCombo(
+                    type: secondAdditionalData.type as String,
+                    breakdownValue: secondAdditionalData.breakdown as String,
+                    data: secondDataSet,
+                    name: secondAdditionalData.name as String,
+                    dataKey: secondAdditionalData.key as String
+            )
+            def series = [firstSeries, secondSeries]
+            return new ComboDiagram(labels: labels, series: series)
+        case 3:
+            Set labels = firstTransposeDataSet[1] + secondTransposeDataSet[1]
+            def firstSeries = (firstTransposeDataSet[2] as Set).collect { breakdown ->
+                def first = firstResultDataSet as List<List>
+                def data = labels.collect { group ->
+                    first.findResult { it.tail() == [group, breakdown] ? it.head() : null } ?: '0'
+                }
+                new SeriesCombo(
+                        type: firstAdditionalData.type as String,
+                        breakdownValue: breakdown as String,
+                        data: data,
+                        name: breakdown as String,
+                        dataKey: firstAdditionalData.key as String
+                )
+            }
+            def secondSeries = (secondTransposeDataSet[2] as Set).collect { breakdown ->
+                def second = secondResultDataSet as List<List>
+                def data = labels.collect { group ->
+                    second.findResult { it.tail() == [group, breakdown] ? it.head() : null } ?: '0'
+                }
+                new SeriesCombo(
+                        type: secondAdditionalData.type as String,
+                        breakdownValue: breakdown as String,
+                        data: data,
+                        name: breakdown as String,
+                        dataKey: secondAdditionalData.key as String
+                )
+            }
+            def series = firstSeries + secondSeries
+            return new ComboDiagram(labels: labels, series: series)
+        default: throw new Exception('Invalid format result data set')
+    }
 }
 
 /**
@@ -1372,7 +1548,8 @@ private setTitleInLinkAttribute(def attr)
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid) {
+private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid)
+{
     return requestContent.data
             ? transformRequestWithComputation(requestContent, cardObjectUuid)
             : transformRequestWithoutComputation(requestContent, cardObjectUuid)
@@ -1384,7 +1561,8 @@ private Map<String, Object> transformRequest(Map<String, Object> requestContent,
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequestWithComputation(Map<String, Object> requestContent, String cardObjectUuid) {
+private Map<String, Object> transformRequestWithComputation(Map<String, Object> requestContent, String cardObjectUuid)
+{
     Closure<Map<String, Object>> transform = { Map<String, Object> map ->
         def data = map.data as Map<String, Object>
         def newData = data.collectEntries { key, value ->
@@ -1403,7 +1581,8 @@ private Map<String, Object> transformRequestWithComputation(Map<String, Object> 
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent, String cardObjectUuid) {
+private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent, String cardObjectUuid)
+{
     Closure<Map<String, Object>> transform = { Map<String, Object> map ->
         def res = [:] << map
         res.descriptor = DashboardMarshaller.substitutionCardObject(res.descriptor as String, cardObjectUuid)

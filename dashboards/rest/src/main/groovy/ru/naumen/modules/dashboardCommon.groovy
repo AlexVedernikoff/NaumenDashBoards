@@ -11,28 +11,16 @@
 
 package ru.naumen.modules
 
+import groovy.transform.AutoClone
 import groovy.transform.TupleConstructor
 
 //region enum
 /**
- * Типы группировки даннных для диаграмм. DAY, WEEK, MONTH, QUARTER, YEAR, SEVEN_DAYS только для дат
- */
-enum GroupType
-{
-    DAY,
-    WEEK,
-    MONTH,
-    QUARTER,
-    YEAR,
-    SEVEN_DAYS,
-    OVERLAP
-}
-
-/**
  * Типы диаграмм
  */
-enum Diagram
+enum DiagramType
 {
+    NONE,
     BAR,
     BAR_STACKED,
     COLUMN,
@@ -43,6 +31,21 @@ enum Diagram
     PIE,
     SUMMARY,
     TABLE
+}
+
+/**
+ * Типы группировки даннных для диаграмм. DAY, WEEK, MONTH, QUARTER, YEAR, SEVEN_DAYS только для дат
+ */
+enum GroupType
+{
+    NONE,
+    DAY,
+    WEEK,
+    MONTH,
+    QUARTER,
+    YEAR,
+    SEVEN_DAYS,
+    OVERLAP
 }
 //endregion
 
@@ -92,6 +95,89 @@ class Attribute
      * Вложенный атрибут
      */
     Attribute ref
+}
+
+class DiagramRequest
+{
+    Collection<Requisite> requisite
+    Map<String, RequestData> data
+}
+
+class Requisite
+{
+    String title
+    Collection<RequisiteNode> nodes
+}
+
+class RequisiteNode
+{
+    String title
+    def type
+}
+
+class DefaultRequisiteNode extends RequisiteNode
+{
+    String dataKey
+}
+
+class ComputationRequisiteNode extends RequisiteNode
+{
+    String formula
+}
+
+@AutoClone
+class RequestData
+{
+    Source source
+    Collection<AggregationParameter> aggregations
+    Collection<GroupParameter> groups
+    Collection<Collection<FilterParameter>> filters
+}
+
+class Source
+{
+    String classFqn
+    String descriptor
+}
+
+abstract class Parameter<T>
+{
+    String title
+    T type
+    Attribute attribute
+}
+
+class AggregationParameter extends Parameter<Aggregation> {}
+
+class GroupParameter extends Parameter<GroupType> {}
+
+class FilterParameter extends Parameter<String>
+{
+    def value
+}
+
+enum Aggregation
+{
+    NONE(''),
+    COUNT_CNT('COUNT(%s)'),
+    PERCENT('COUNT(%s)*100.00/%s'),
+    SUM('SUM(%s)'),
+    AVG('AVG(%s)'),
+    MAX('MAX(%s)'),
+    MIN('MIN(%s)'),
+    MDN('%s') //TODO: Тут должна была быть медиана.
+
+    Aggregation(String aggregationFormat)
+    {
+        this.aggregationFormat = aggregationFormat
+    }
+
+    String aggregationFormat
+
+    String apply(String... codes)
+    {
+        return String.format(aggregationFormat, codes)
+    }
 }
 //endregion
 return
