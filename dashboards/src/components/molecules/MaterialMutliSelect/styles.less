@@ -1,0 +1,93 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		font-size: 13px;
+		position: relative;
+		width: 450px;
+	}
+
+	.valuesContainer {
+		align-items: center;
+		border-bottom: 1px solid @grey;
+		cursor: pointer;
+		display: flex;
+		height: 28px;
+		justify-content: space-between;
+		position: relative;
+	}
+
+	.caret {
+		color: @darkgrey;
+		margin: 0 8px;
+	}
+
+	.values {
+		display: block;
+		overflow: hidden;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.tagsContainer {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	.tagContainer {
+		align-items: center;
+		background-color: @lightgrey;
+		color: @black;
+		cursor: pointer;
+		display: flex;
+		height: 24px;
+		margin-top: 4px;
+		margin-right: 4px;
+		max-width: 150px;
+		padding: 0 8px;
+
+		&:hover {
+			background-color: @grey;
+		}
+	}
+
+	.tagLabel {
+		margin-right: 4px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.clearTagIcon {
+		color: @darkgrey;
+		height: 16px;
+		width: 16px;
+	}
+
+	.clearButtonContainer {
+		align-items: center;
+		display: flex;
+		height: 24px;
+		margin-right: 4px;
+		margin-top: 4px;
+
+		button {
+			padding: 0 4px 0 0;
+		}
+	}
+
+	.moreTagsInfoContainer {
+		margin: 4px 0;
+		padding: 4px;
+	}
+
+	.moreTagsInfo {
+		color: @darkgrey;
+		margin-right: 16px;
+	}
+
+	.moreTagsButton {
+		color: @black;
+		font-weight: 500;
+	}
+}

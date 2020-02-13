@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {Button, InfoPanel} from 'components/atoms';
 import {ClearSquareIcon, CrossIcon} from 'icons/form';
 import {ConstantControl, Modal, OperatorControl, SourceControl} from 'components/molecules';
@@ -7,7 +8,6 @@ import {getAggregationLabel} from 'components/molecules/AttributeAggregation/hel
 import {OPERATORS, TEMPLATE_NAMES, TEMPLATES, TYPES} from './constants';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
-import {TYPES as ATTR_TYPES} from 'store/sources/attributes/constants';
 import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
@@ -187,7 +187,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			state,
 			stringForCompute,
 			title: customTitle || title,
-			type: ATTR_TYPES.COMPUTED_ATTR
+			type: ATTRIBUTE_TYPES.COMPUTED_ATTR
 		});
 	};
 

@@ -1,9 +1,9 @@
 // @flow
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {DEFAULT_AGGREGATION_OPTIONS, INTEGER_AGGREGATION_OPTIONS} from './constants';
-import {TYPES} from 'store/sources/attributes/constants';
 
 const getAggregationOptions = (attribute: Object | null) => {
-	return attribute && TYPES.INTEGER.includes(attribute.type)
+	return attribute && ATTRIBUTE_SETS.NUMBER.includes(attribute.type)
 		? [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS]
 		: DEFAULT_AGGREGATION_OPTIONS;
 };

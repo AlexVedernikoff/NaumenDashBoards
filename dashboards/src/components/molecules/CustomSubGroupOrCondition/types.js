@@ -1,9 +1,11 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import type {ErrorsMap} from 'components/molecules/GroupCreatingModal/types';
 import type {GroupType} from 'store/widgets/data/types';
 import type {OrCondition} from 'store/customGroups/types';
 
 export type Props = {
+	attribute: Attribute,
 	condition: OrCondition,
 	disabled: boolean,
 	errors: ErrorsMap,

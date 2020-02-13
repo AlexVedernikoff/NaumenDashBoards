@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Option} from 'components/molecules/SourceControl/types';
 import {TYPES} from './constants';
-import {TYPES as ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 
 type SecondTemplateType =
 	| typeof TYPES.CONSTANT

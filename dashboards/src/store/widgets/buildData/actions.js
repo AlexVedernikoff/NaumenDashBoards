@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {AXIS_FIELDS, CIRCLE_FIELDS, COMBO_FIELDS, SUMMARY_FIELDS, TABLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {BUILD_DATA_EVENTS} from './constants';
 import type {BuildDataMap, ReceiveBuildDataPayload} from './types';
@@ -10,7 +11,6 @@ import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {transformGroupFormat} from 'store/widgets/helpers';
-import {TYPES} from 'store/sources/attributes/constants';
 import type {Widget} from 'store/widgets/data/types';
 
 const createAxisChartData = (widget: Widget) => {
@@ -82,7 +82,7 @@ const createPostData = (widget: Widget, {dataKey, ...fields}: Object, customGrou
 				/*
 					Отфильтровываем лишние значения вычисляемого атрибута
 				 */
-				if (value && typeof value === 'object' && value.type === TYPES.COMPUTED_ATTR) {
+				if (value && typeof value === 'object' && value.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 					value = {...value, state: undefined};
 				}
 

@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {CalendarIcon, NumberIcon, TextIcon} from 'icons/form';
 import {createDefaultGroup} from 'store/widgets/helpers';
 import {FieldButton} from 'components/atoms';
@@ -7,7 +8,6 @@ import type {Group} from 'store/widgets/data/types';
 import GroupCreatingModal from 'containers/GroupCreatingModal';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import {TYPES} from 'store/sources/attributes/constants';
 
 export class AttributeGroup extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -45,12 +45,13 @@ export class AttributeGroup extends PureComponent<Props, State> {
 	renderIconByType = () => {
 		const {attribute} = this.props;
 		const type = attribute ? attribute.type : '';
+		const {DATE, NUMBER} = ATTRIBUTE_SETS;
 
-		if (TYPES.INTEGER.includes(type)) {
+		if (NUMBER.includes(type)) {
 			return <NumberIcon />;
 		}
 
-		if (TYPES.DATE.includes(type)) {
+		if (DATE.includes(type)) {
 			return <CalendarIcon />;
 		}
 

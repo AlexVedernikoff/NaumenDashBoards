@@ -10,7 +10,10 @@ export class SimpleSelectList extends PureComponent<Props> {
 		messages: {
 			noOptions: 'Список пуст',
 			notFound: 'Ничего не найдено'
-		}
+		},
+		multiple: false,
+		value: null,
+		values: []
 	};
 
 	getMessages = () => {
@@ -54,10 +57,17 @@ export class SimpleSelectList extends PureComponent<Props> {
 	};
 
 	renderListItem = (option: Object) => {
-		const {isSearching, value} = this.props;
+		const {isSearching, multiple, value, values} = this.props;
 		const optionLabel = this.getOptionLabel(option);
 		const optionValue = this.getOptionValue(option);
-		const isSelected = value && this.getOptionValue(value) === optionValue;
+		let isSelected = false;
+
+		if (multiple) {
+			isSelected = values.find(value => this.getOptionValue(value) === optionValue);
+		} else if (value) {
+			isSelected = this.getOptionValue(value) === optionValue;
+		}
+
 		const itemCN = cn({
 			[styles.listItem]: true,
 			[styles.foundListItem]: isSearching,

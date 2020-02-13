@@ -1,10 +1,10 @@
 // @flow
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createOrdinalName, createRefName, getNumberFromName} from 'utils/widget';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import {FIELDS, OPTIONS, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
 import {styles} from 'components/organisms/WidgetFormPanel/Tabs/ParamsTab';
-import {TYPES} from 'store/sources/attributes/constants';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class ComboChart extends DataFormBuilder {
@@ -127,7 +127,7 @@ export class ComboChart extends DataFormBuilder {
 				let xAxisOptions = this.getAttributeOptions(currentSource.value);
 
 				if (xAxisOptions.length > 0 && mainXAxis) {
-					const {DATE, OBJECT} = TYPES;
+					const {DATE, OBJECT} = ATTRIBUTE_SETS;
 
 					xAxisOptions = xAxisOptions.filter(a => {
 						if (OBJECT.includes(mainXAxis.type)) {
