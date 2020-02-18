@@ -16,13 +16,14 @@ import groovy.transform.Immutable
 import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
+// TODO: добавить aggregate, responsible, metaClass,
 @Field private static final String MAIN_FQN = 'abstractBO'
 @Field private static final Collection<String> VALID_LINK_TYPE_ATTRIBUTE =
-        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
+        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'aggregate', 'responsible', 'metaClass']
 @Field private static final Collection<String> VALID_SIMPLE_TYPE_ATTRIBUTE =
         ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText']
 @Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
-        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem',
+        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'aggregate', 'responsible', 'metaClass',
          'dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText']
 //endregion
 
