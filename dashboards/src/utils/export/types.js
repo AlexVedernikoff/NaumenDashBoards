@@ -6,3 +6,18 @@ export type Options = {
 	toDownload: boolean,
 	type: string
 };
+
+export type SheetColumn = {
+	accessor: string,
+	Footer: string,
+	Header: string
+};
+
+export type SheetData = {
+	[string]: string
+};
+
+export type Sheet = {
+	columns: Array<SheetColumn>,
+	data: Array<SheetData>
+};

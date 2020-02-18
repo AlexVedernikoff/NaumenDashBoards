@@ -1,11 +1,11 @@
 // @flow
-import {createName, createSnapshot} from './core';
-import {EXPORT_VARIANTS, FILE_LIST, FILE_VARIANTS} from './constants';
+import {createSnapshot} from './core';
+import exportSheet from './xlxs';
+import {EXPORT_VARIANTS, FILE_VARIANTS} from './constants';
 
 export {
-	createName,
 	createSnapshot,
+	exportSheet,
 	EXPORT_VARIANTS,
-	FILE_LIST,
 	FILE_VARIANTS
 };

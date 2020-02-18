@@ -25,7 +25,9 @@ class Tooltip extends Component<Props> {
 		if (text) {
 			return (
 				<div className={contentCN}>
-					{text}
+					<div className={styles.textContainer}>
+						{text}
+					</div>
 				</div>
 			);
 		}

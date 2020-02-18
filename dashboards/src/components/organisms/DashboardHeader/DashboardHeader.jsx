@@ -3,9 +3,10 @@ import AutoUpdateForm from 'containers/AutoUpdateForm';
 import {Button, ButtonGroup, DropDown, Tooltip} from 'components/atoms';
 import {CloseIcon} from 'icons/form';
 import cn from 'classnames';
-import {createName, createSnapshot, EXPORT_VARIANTS, FILE_LIST} from 'utils/export';
+import {createSnapshot, EXPORT_VARIANTS} from 'utils/export';
 import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
+import {EXPORT_LIST} from './constants';
 import {gridRef} from 'components/organisms/DashboardContent';
 import {Modal} from 'components/molecules';
 import {PLACEMENTS} from 'components/atoms/Tooltip/constants';
@@ -25,7 +26,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {sendToMail} = this.props;
 		const {current} = gridRef;
 		const toDownload = way === DOWNLOAD;
-		const name = await createName();
+		const name = '';
 
 		if (current) {
 			const file = await createSnapshot({
@@ -91,7 +92,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 		return (
 			<Tooltip placement={PLACEMENTS.LEFT} text={tip}>
-				<DropDown icon={icon} list={FILE_LIST} onClick={this.createDocument(way)}>
+				<DropDown icon={icon} list={EXPORT_LIST} onClick={this.createDocument(way)}>
 					<div className={styles.buttonIcon}>
 						{icon}
 					</div>

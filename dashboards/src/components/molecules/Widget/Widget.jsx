@@ -1,11 +1,12 @@
 // @flow
 import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
 import cn from 'classnames';
-import {createName, createSnapshot, FILE_LIST} from 'utils/export';
-import {createOrdinalName} from 'utils/widget';
+import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
+import {createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
 import {Diagram, Modal} from 'components/molecules';
 import {ExportIcon} from 'icons/header';
 import type {ExportItem, Props, State} from './types';
+import {EXPORT_LIST} from './constants';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {IconButton} from 'components/atoms';
 import React, {createRef, PureComponent} from 'react';
@@ -64,12 +65,15 @@ export class Widget extends PureComponent<Props, State> {
 		onEdit(data.id);
 	};
 
-	handleClickExportButton = async (e: SyntheticMouseEvent<HTMLDivElement>) => {
-		const {data} = this.props;
+	handleClickExportButton = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+		const {buildData, data} = this.props;
+		const {name} = data;
 		const {current} = this.ref;
 		const {type} = e.currentTarget.dataset;
-		let name = await createName();
-		name = `${data.name}_${name}`;
+
+		if (type === FILE_VARIANTS.XLSX) {
+			return exportSheet(name, buildData.data);
+		}
 
 		if (current) {
 			createSnapshot({
@@ -170,10 +174,13 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderExportButton = () => {
-		const list = FILE_LIST.map(this.renderExportItem);
+		const {type} = this.props.data;
+		const list = type !== WIDGET_VARIANTS.TABLE
+			? EXPORT_LIST.filter(list => list.key !== FILE_VARIANTS.XLSX)
+			: EXPORT_LIST;
 
 		return (
-			<IconButton tip={list}>
+			<IconButton tip={list.map(this.renderExportItem)}>
 				<ExportIcon />
 			</IconButton>
 		);

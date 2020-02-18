@@ -2,52 +2,11 @@
 import Canvg from 'canvg';
 import {FILE_VARIANTS} from './constants';
 import html2canvas from 'html2canvas';
+import {isIE, save} from './helpers';
 import JsPDF from 'jspdf';
 import type {Options} from './types';
 
-/**
- * Функция создает имя файла
- * @returns {Promise<string>}
- */
-const createName = async () => {
-	const date = new Date();
-	let name;
-
-	try {
-		const context = await window.jsApi.commands.getCurrentContextObject();
-		name = context['card_caption'].replace(/(\|\||\|\|\|\|\*:|\*)/g, '');
-	} catch (e) {
-		name = 'Дашборд';
-	}
-
-	return `${name}_${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-};
-
 window.html2canvas = html2canvas;
-/**
- * Выгружает файл в браузер
- * @param {Blob} blob - файл
- * @param {string} filename - название файла
- */
-const save = (blob: Blob, filename: string) => {
-	let {body} = document;
-
-	if (body) {
-		const link = document.createElement('a');
-		link.href = URL.createObjectURL(blob);
-		link.download = filename;
-
-		body.appendChild(link);
-		link.click();
-		body.removeChild(link);
-	}
-};
-
-/**
- * Проверяет, является ли браузер IE или EDGE
- * @returns {boolean}
- */
-const isIE = () => typeof document.documentMode === 'number' || /Edge/.test(navigator.userAgent);
 
 /*
 	Браузеры типа IE и EDGE генерируют svg с невалидными, для работы html2canvas, атрибутами. Поэтому, для отображения графиков
@@ -76,9 +35,9 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 			v.render();
 
 			temp.push({
-				parent: parentNode,
+				childToRemove: canvas,
 				childToRestore: chart,
-				childToRemove: canvas
+				parent: parentNode
 			});
 
 			parentNode.removeChild(chart);
@@ -158,7 +117,7 @@ const createPdf = (image: HTMLCanvasElement, options: Options) => {
 	const blob = pdf.output('blob');
 
 	if (toDownload) {
-		isIE() ? window.navigator.msSaveBlob(blob, `${name}.pdf`) : pdf.save(name);
+		save(blob, name, 'pdf');
 	}
 
 	return blob;
@@ -182,7 +141,7 @@ const createPng = async (image: HTMLCanvasElement, options) => {
 	}
 
 	if (toDownload) {
-		isIE() ? window.navigator.msSaveBlob(blob, `${name}.png`) : save(blob, name);
+		save(blob, name, 'png');
 	}
 
 	return blob;
@@ -209,6 +168,5 @@ const createSnapshot = async (options: Options) => {
 };
 
 export {
-	createName,
 	createSnapshot
 };

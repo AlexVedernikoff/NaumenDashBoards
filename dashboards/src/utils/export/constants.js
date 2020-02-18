@@ -1,22 +1,13 @@
 // @flow
 const PNG: 'png' = 'png';
 const PDF: 'pdf' = 'pdf';
+const XLSX: 'xlsx' = 'xlsx';
 
 const FILE_VARIANTS = {
 	PDF,
-	PNG
+	PNG,
+	XLSX
 };
-
-const FILE_LIST = [
-	{
-		key: FILE_VARIANTS.PDF,
-		text: FILE_VARIANTS.PDF
-	},
-	{
-		key: FILE_VARIANTS.PNG,
-		text: FILE_VARIANTS.PNG
-	}
-];
 
 const DOWNLOAD: 'download' = 'download';
 const MAIL: 'mail' = 'mail';
@@ -28,6 +19,5 @@ const EXPORT_VARIANTS = {
 
 export {
 	EXPORT_VARIANTS,
-	FILE_LIST,
 	FILE_VARIANTS
 };
