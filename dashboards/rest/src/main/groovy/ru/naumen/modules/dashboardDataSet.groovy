@@ -249,7 +249,7 @@ private def buildDiagram(Map<String, Object> requestContent)
         case SUMMARY:
             def normRequest = mappingSummaryDiagramRequest(requestContent)
             def res = getDiagramData(normRequest)
-            return mappingSummaryDiagram(res, normRequest.requisite.head().title)
+            return mappingSummaryDiagram(res)
         case TABLE:
             def normRequest = mappingTableDiagramRequest(requestContent)
             def res = getDiagramData(normRequest)
@@ -328,8 +328,8 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
@@ -496,8 +496,8 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
@@ -748,8 +748,8 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
@@ -920,8 +920,8 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: 'main group', type: 'DEFAULT', dataKey: key)
+                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
+                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
@@ -1335,9 +1335,9 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
  */
 private def formatResult(Map data)
 {
-    return data.size() > 1 ? data.collect { key, list ->
-        list.collect { [it.head() ?: 0, key, it.tail()].flatten() }
-    }.inject { first, second -> first + second } : data.values().head()
+    return data.collect { key, list ->
+        key ? list?.collect { [it.head() ?: 0, key, it.tail()].flatten() } ?: [[0, key]] : list
+    }.inject { first, second -> first + second }
 }
 
 /**
@@ -1394,14 +1394,14 @@ private RoundDiagram mappingRoundDiagram(List list)
  * @param list - данные диаграмы
  * @return SummaryDiagram
  */
-private SummaryDiagram mappingSummaryDiagram(List list, String title)
+private SummaryDiagram mappingSummaryDiagram(List list)
 {
     List<List> resultDataSet = list.head() as List<List>
     switch (resultDataSet.size())
     {
         case 1:
-            def value = resultDataSet.head().head()
-            return new SummaryDiagram(title: '', total: value)
+            def (value, title) = resultDataSet.head()
+            return new SummaryDiagram(title: title, total: value)
         default: throw new Exception("Invalid format result data set")
     }
 }
