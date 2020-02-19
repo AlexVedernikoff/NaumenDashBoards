@@ -78,7 +78,7 @@ class QueryWrapper
             case Aggregation.values() - Aggregation.PERCENT:
                 criteria.addColumn(aggregationType.apply(code))
                 break
-            default: throw new Exception("Not support aggregation type: $aggregationType")
+            default: throw new IllegalArgumentException("Not support aggregation type: $aggregationType")
         }
     }
 
@@ -134,7 +134,7 @@ class QueryWrapper
                 criteria.addOrder(HOrders.asc(columnCode))
                 criteria.addColumn(columnCode)
                 break
-            default: throw new Exception("Not support grouping type: $type")
+            default: throw new IllegalArgumentException("Not support grouping type: $type")
         }
     }
 
@@ -168,22 +168,28 @@ class QueryWrapper
         String type = filter.type.toLowerCase()
         switch (type)
         {
-            case ['=', 'equal', 'eq']:
+            case Comparison.IS_NULL:
+                return HRestrictions.isNull(column)
+            case Comparison.NOT_NULL:
+                return HRestrictions.isNotNull(column)
+            case Comparison.NOT_EQUAL_AND_NOT_NULL:
+                return HRestrictions.not(HRestrictions.eqNullSafe(column, filter.value))
+            case Comparison.EQUAL:
                 return HRestrictions.eq(column, filter.value)
-            case ['!=', 'not equal', 'neq']:
+            case Comparison.NOT_EQUAL:
                 return HRestrictions.not(HRestrictions.eq(column, filter.value))
-            case ['>', 'greater', 'gt']:
+            case Comparison.GREATER:
                 return HRestrictions.gt(column, filter.value)
-            case ['<', 'less', 'lt']:
+            case Comparison.LESS:
                 return HRestrictions.lt(column, filter.value)
-            case ['>=', 'greater or equal', 'ge']:
+            case Comparison.GREATER_OR_EQUAL:
                 return HRestrictions.ge(column, filter.value)
-            case ['<=', 'less or equal', 'le']:
+            case Comparison.LESS_OR_EQUAL:
                 return HRestrictions.le(column, filter.value)
-            case ['<=>', 'between']:
+            case Comparison.BETWEEN:
                 def (first, second) = filter.value
                 return HRestrictions.between(column, first, second)
-            default: throw new Exception("Not supported filter type: $type!")
+            default: throw new IllegalArgumentException("Not supported filter type: $type!")
         }
     }
 
@@ -221,7 +227,7 @@ class QueryWrapper
             case LOCALIZED_TEXT:
                 return hColumn.getProperty(code).getProperty(locale)
             default:
-                throw new Exception("Not support attribute type: ${attribute.type}")
+                throw new IllegalArgumentException("Not support attribute type: ${attribute.type}")
         }
     }
 
@@ -310,13 +316,13 @@ class QueryWrapper
     private static void validate(RequestData data)
     {
         //TODO: можно перенести эти методы валидации в отдельный класс
-        if (!data) throw new Exception("Empty request data")
+        if (!data) throw new IllegalArgumentException("Empty request data")
 
         def source = data.source
         validate(source as Source)
 
         def aggregations = data.aggregations
-        if (!aggregations) throw new Exception("Empty aggregation")
+        if (!aggregations) throw new IllegalArgumentException("Empty aggregation")
         aggregations.each { validate(it as AggregationParameter) }
         data.groups.each { validate(it as GroupParameter) }
     }
@@ -328,8 +334,8 @@ class QueryWrapper
      */
     private static void validate(Source source)
     {
-        if (!source) throw new Exception("Empty source")
-        if (!(source.descriptor) && !(source.classFqn)) throw new Exception("Invalid source")
+        if (!source) throw new IllegalArgumentException("Empty source")
+        if (!(source.descriptor) && !(source.classFqn)) throw new IllegalArgumentException("Invalid source")
     }
 
     /**
@@ -342,7 +348,7 @@ class QueryWrapper
         Aggregation type = parameter.type
         String attributeType = parameter.attribute.type
         if (type in [Aggregation.MIN, Aggregation.MAX, Aggregation.SUM, Aggregation.AVG] && !(attributeType in NUMBER_TYPES))
-            throw new Exception("Not suitable aggregation type: $type and attribute type: $attributeType")
+            throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
     }
 
     /**
@@ -354,7 +360,7 @@ class QueryWrapper
         GroupType type = parameter.type
         String attributeType = parameter.attribute.type
         if (type in GroupType.values() - GroupType.OVERLAP && !(attributeType in DATE_TYPES))
-            throw new Exception("Not suitable group type: $type and attribute type: $attributeType")
+            throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
     }
 }
 
