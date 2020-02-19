@@ -47,6 +47,45 @@ enum GroupType
     SEVEN_DAYS,
     OVERLAP
 }
+
+enum Aggregation
+{
+    NONE(''),
+    COUNT_CNT('COUNT(%s)'),
+    PERCENT('COUNT(%s)*100.00/%s'),
+    SUM('SUM(%s)'),
+    AVG('AVG(%s)'),
+    MAX('MAX(%s)'),
+    MIN('MIN(%s)'),
+    MDN('%s') //TODO: Тут должна была быть медиана.
+
+    Aggregation(String aggregationFormat)
+    {
+        this.aggregationFormat = aggregationFormat
+    }
+
+    String aggregationFormat
+
+    String apply(String... codes)
+    {
+        return String.format(aggregationFormat, codes)
+    }
+}
+
+enum Comparison
+{
+    NONE,
+    IS_NULL,
+    NOT_NULL,
+    EQUAL,
+    NOT_EQUAL,
+    GREATER,
+    LESS,
+    GREATER_OR_EQUAL,
+    LESS_OR_EQUAL,
+    BETWEEN,
+    NOT_EQUAL_AND_NOT_NULL
+}
 //endregion
 
 //region КЛАССЫ
@@ -151,33 +190,10 @@ class AggregationParameter extends Parameter<Aggregation> {}
 
 class GroupParameter extends Parameter<GroupType> {}
 
-class FilterParameter extends Parameter<String>
+class FilterParameter extends Parameter<Comparison>
 {
     def value
 }
 
-enum Aggregation
-{
-    NONE(''),
-    COUNT_CNT('COUNT(%s)'),
-    PERCENT('COUNT(%s)*100.00/%s'),
-    SUM('SUM(%s)'),
-    AVG('AVG(%s)'),
-    MAX('MAX(%s)'),
-    MIN('MIN(%s)'),
-    MDN('%s') //TODO: Тут должна была быть медиана.
-
-    Aggregation(String aggregationFormat)
-    {
-        this.aggregationFormat = aggregationFormat
-    }
-
-    String aggregationFormat
-
-    String apply(String... codes)
-    {
-        return String.format(aggregationFormat, codes)
-    }
-}
 //endregion
 return

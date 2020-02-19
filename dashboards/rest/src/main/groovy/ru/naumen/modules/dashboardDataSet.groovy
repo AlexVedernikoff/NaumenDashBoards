@@ -272,7 +272,7 @@ private def buildDiagram(Map<String, Object> requestContent)
                         ]
                     }
             return mappingComboDiagram(res, firstAdditionalData as Map, secondAdditionalData as Map)
-        default: throw new Exception("Not supported diagram type: $diagramType")
+        default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
     }
 }
 
@@ -380,23 +380,7 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
     // доводим запрос до совершенства/ шлифуем кастомную группировку
     Map<String, List<List>> splitData = intermediateData
             .findAll { key, value -> value.customGroup }
-            ?.collectEntries { key, value ->
-                def customGroup = value.customGroup as Map<String, Object>
-                customGroup.type // тип атрибута капсом
-                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
-                def requestData = data[key as String]
-                def attribute = customGroup.attribute as Attribute
-                List<List> dataSet = subGroups.collect { el ->
-                    def group = el as Map<String, Object>
-                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
-                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
-                    def newRequestData = requestData.clone()
-                    newRequestData.filters = filters
-                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
-                    [groupName, newKey, newRequestData]
-                }
-                [(key): dataSet]
-            }
+            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
 
     def groupKeyMap = splitData?.collect { key, list ->
         def newDataSet = list.collectEntries { el ->
@@ -433,7 +417,7 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
                 new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
             }
             break
-        default: throw new Exception("Not supported requisite type: $nodeType")
+        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 
     def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
@@ -553,7 +537,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 List<List> dataSet = subGroups.collect { el ->
                     def group = el as Map<String, Object>
                     String groupName = group.name // название группы. Должно оказаться в записе реквизита
-                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
+                    def filters = mappingDateTypeFilters(group.data as List<List>, attribute, groupName)
                     def newRequestData = requestData.clone()
                     newRequestData.filters = filters
                     String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
@@ -597,7 +581,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
             }
             break
-        default: throw new Exception("Not supported requisite type: $nodeType")
+        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 
     def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
@@ -799,23 +783,8 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
     // доводим запрос до совершенства/ шлифуем кастомную группировку
     Map<String, List<List>> splitData = intermediateData
             .findAll { key, value -> value.customGroup }
-            ?.collectEntries { key, value ->
-                def customGroup = value.customGroup as Map<String, Object>
-                customGroup.type // тип атрибута капсом
-                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
-                def requestData = data[key as String]
-                def attribute = customGroup.attribute as Attribute
-                List<List> dataSet = subGroups.collect { el ->
-                    def group = el as Map<String, Object>
-                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
-                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
-                    def newRequestData = requestData.clone()
-                    newRequestData.filters = filters
-                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
-                    [groupName, newKey, newRequestData]
-                }
-                [(key): dataSet]
-            }
+            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
+
 
     def groupKeyMap = splitData?.collect { key, list ->
         def newDataSet = list.collectEntries { el ->
@@ -852,7 +821,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
                 new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
             }
             break
-        default: throw new Exception("Not supported requisite type: $nodeType")
+        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 
     def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
@@ -972,23 +941,7 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
     // доводим запрос до совершенства/ шлифуем кастомную группировку
     Map<String, List<List>> splitData = intermediateData
             .findAll { key, value -> value.customGroup }
-            ?.collectEntries { key, value ->
-                def customGroup = value.customGroup as Map<String, Object>
-                customGroup.type // тип атрибута капсом
-                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
-                def requestData = data[key as String]
-                def attribute = customGroup.attribute as Attribute
-                List<List> dataSet = subGroups.collect { el ->
-                    def group = el as Map<String, Object>
-                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
-                    def filters = mappingFilters(group.data as List<List>, attribute, groupName)
-                    def newRequestData = requestData.clone()
-                    newRequestData.filters = filters
-                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
-                    [groupName, newKey, newRequestData]
-                }
-                [(key): dataSet]
-            }
+            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
 
     def groupKeyMap = splitData?.collect { key, list ->
         def newDataSet = list.collectEntries { el ->
@@ -1027,7 +980,7 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
                     new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
                 }
                 break
-            default: throw new Exception("Not supported requisite type: $nodeType")
+            default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
         }
         groupKeyMap ? groupKeyMap.inject { first, second ->
             first + second
@@ -1059,6 +1012,74 @@ private Attribute mappingAttribute(Map<String, Object> data)
     ) : null
 }
 
+private Map<String, List<List>> convertCustomGroup(Closure getData, String key, Map value) {
+    def customGroup = value.customGroup as Map<String, Object>
+    Closure<Collection<Collection<FilterParameter>>> mappingFilters =
+            getMappingFilterMethodByType(customGroup.type as String)
+    def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
+    def requestData = getData.call(key as String) as RequestData
+    def attribute = customGroup.attribute as Attribute
+    List<List> dataSet = subGroups.collect { el ->
+        def group = el as Map<String, Object>
+        String groupName = group.name // название группы. Должно оказаться в записе реквизита
+        def filters = mappingFilters(group.data as List<List>, attribute, groupName)
+        def newRequestData = requestData.clone()
+        newRequestData.filters = filters
+        String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
+        [groupName, newKey, newRequestData]
+    }
+    return [(key): dataSet]
+}
+
+private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type) {
+    switch (type) {
+        case 'integer':
+            return this.&mappingNumberTypeFilters.curry({ it as long })
+        case 'double':
+            return this.&mappingNumberTypeFilters.curry({ it as double })
+        case ['date', 'dateTime']:
+            return this.&mappingDateTypeFilters
+        default:
+            throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
+    }
+}
+
+private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title) {
+    return data.collect { andCondition ->
+        andCondition.collect { orCondition ->
+            def condition = orCondition as Map<String, Object>
+            // замыкание конструктара с зафиксироваными полями
+            Closure buildFilterParameterFromCondition = { Comparison type ->
+                new FilterParameter(
+                        value: valueConverter.call(condition.data),
+                        title: title,
+                        type: type,
+                        attribute: attribute
+                )
+            }
+
+            String conditionType = condition.type
+            switch (conditionType.toLowerCase()) {
+                case 'equal':
+                    return buildFilterParameterFromCondition(Comparison.EQUAL) as FilterParameter
+                case 'not_equal_not_empty':
+                    return buildFilterParameterFromCondition(Comparison.NOT_EQUAL_AND_NOT_NULL) as FilterParameter
+                case 'not_equal':
+                    return buildFilterParameterFromCondition(Comparison.NOT_EQUAL) as FilterParameter
+                case 'greater':
+                    return buildFilterParameterFromCondition(Comparison.GREATER) as FilterParameter
+                case 'less':
+                    return buildFilterParameterFromCondition(Comparison.LESS) as FilterParameter
+                case 'empty':
+                    return buildFilterParameterFromCondition(Comparison.IS_NULL) as FilterParameter
+                case 'not_empty':
+                    return buildFilterParameterFromCondition(Comparison.NOT_NULL) as FilterParameter
+                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+            }
+        }
+    }
+}
+
 /**
  * Метод построение фильтров группировок
  * @param data - данные группировок
@@ -1066,7 +1087,7 @@ private Attribute mappingAttribute(Map<String, Object> data)
  * @param title - название группы
  * @return список фильтров
  */
-private List<List<FilterParameter>> mappingFilters(List<List> data, Attribute attribute, String title)
+private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title)
 {
     return data.collect { andCondition ->
         andCondition.collect { orCondition ->
@@ -1091,7 +1112,7 @@ private List<List<FilterParameter>> mappingFilters(List<List> data, Attribute at
                     }
                     return new FilterParameter(
                             title: title,
-                            type: 'between',
+                            type: Comparison.BETWEEN,
                             attribute: attribute,
                             value: [start, end]
                     )
@@ -1114,7 +1135,7 @@ private List<List<FilterParameter>> mappingFilters(List<List> data, Attribute at
                     }
                     return new FilterParameter(
                             title: title,
-                            type: 'between',
+                            type: Comparison.BETWEEN,
                             attribute: attribute,
                             value: [start, end]
                     )
@@ -1137,7 +1158,7 @@ private List<List<FilterParameter>> mappingFilters(List<List> data, Attribute at
                     }
                     return new FilterParameter(
                             title: title,
-                            type: 'between',
+                            type: Comparison.BETWEEN,
                             attribute: attribute,
                             value: [start, end]
                     )
@@ -1148,11 +1169,11 @@ private List<List<FilterParameter>> mappingFilters(List<List> data, Attribute at
                     def end = Date.parse(dateFormat, date.endDate as String)
                     return new FilterParameter(
                             title: title,
-                            type: 'between',
+                            type: Comparison.BETWEEN,
                             attribute: attribute,
                             value: [start, end]
                     )
-                default: throw new Exception("Not supported condition type: $conditionType")
+                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
     }
@@ -1182,7 +1203,7 @@ private def getDiagramData(DiagramRequest request)
                     def requisiteNode = node as ComputationRequisiteNode
                     def calculator = new FormulaCalculator(requisiteNode.formula)
                     def dataSet = calculator.variableNames.collectEntries { [(it): request.data[it]] } as Map<String, RequestData>
-                    if (!checkGroupTypes(dataSet.values())) throw new Exception("Wrong group types in calculation!")
+                    if (!checkGroupTypes(dataSet.values())) throw new IllegalArgumentException("Wrong group types in calculation!")
                     def variables = dataSet.collectEntries { key, data ->
                         Closure postProcess = this.&formatGroupSet.curry(data as RequestData)
                         [(key): modules.dashboardQueryWrapper.getData(data as RequestData).with(postProcess)]
@@ -1196,7 +1217,7 @@ private def getDiagramData(DiagramRequest request)
                         return [resultCalculation, group].flatten()
                     } : [[calculator.execute { key -> variables[key as String].head().head() as Double }]]
                     return [(node.title): formatAggregationSet(res)]
-                default: throw new Exception("Not supported requisite type: $nodeType")
+                default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
             }
         }
         return formatResult(result)
@@ -1324,7 +1345,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                 specialDateFormatter.format(getTime())
             }
             return "$startDate - $endDate"
-        default: throw new Exception("Not supported type: $type")
+        default: throw new IllegalArgumentException("Not supported type: $type")
     }
 }
 
@@ -1367,7 +1388,7 @@ private StandardDiagram mappingStandardDiagram(List list)
                 new Series(name: breakdownValue, data: data)
             }
             return new StandardDiagram(categories: categories, series: series)
-        default: throw new Exception("Invalid format result data set")
+        default: throw new IllegalArgumentException("Invalid format result data set")
     }
 }
 
@@ -1385,7 +1406,7 @@ private RoundDiagram mappingRoundDiagram(List list)
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
             return new RoundDiagram(series: (aggregationResult as List).collect { it as Double }, labels: groupResult as Set)
-        default: throw new Exception("Invalid format result data set")
+        default: throw new IllegalArgumentException("Invalid format result data set")
     }
 }
 
@@ -1402,7 +1423,7 @@ private SummaryDiagram mappingSummaryDiagram(List list)
         case 1:
             def (value, title) = resultDataSet.head()
             return new SummaryDiagram(title: title, total: value)
-        default: throw new Exception("Invalid format result data set")
+        default: throw new IllegalArgumentException("Invalid format result data set")
     }
 }
 
@@ -1448,7 +1469,7 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
                 }
             }
             return new TableDiagram(columns: columns, data: data)
-        default: throw new Exception('Invalid format result data set')
+        default: throw new IllegalArgumentException('Invalid format result data set')
     }
 }
 
@@ -1464,7 +1485,7 @@ private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map
     def secondTransposeDataSet = (secondResultDataSet as List<List>).transpose()
 
     if (firstTransposeDataSet.size() != secondTransposeDataSet.size())
-        throw new Exception('Invalid format result data set')
+        throw new IllegalArgumentException('Invalid format result data set')
 
     switch (firstTransposeDataSet.size())
     {
@@ -1527,7 +1548,7 @@ private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map
             }
             def series = firstSeries + secondSeries
             return new ComboDiagram(labels: labels, series: series)
-        default: throw new Exception('Invalid format result data set')
+        default: throw new IllegalArgumentException('Invalid format result data set')
     }
 }
 
