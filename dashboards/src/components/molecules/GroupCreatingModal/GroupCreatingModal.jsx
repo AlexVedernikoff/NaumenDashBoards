@@ -1,59 +1,91 @@
 // @flow
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {createNewSubGroup, getSystemGroupOptions} from './helpers';
 import {CustomGroup, MaterialSelect, Modal} from 'components/molecules';
 import type {CustomGroup as CustomGroupType, CustomGroupId} from 'store/customGroups/types';
-import {FIELDS, IS_NEW, TYPE_OPTIONS} from './constants';
-import {getProcessedAttribute} from 'store/sources/attributes/helpers';
-import {GROUP_TYPES, GROUP_WAYS} from 'store/widgets/constants';
+import {FIELDS, IS_NEW, LOCAL_PREFIX_ID, TYPE_OPTIONS} from './constants';
+import {getProcessedValue} from 'store/sources/attributes/helpers';
+import {GROUP_WAYS} from 'store/widgets/constants';
 import {InfoPanel, MaterialTextInput, RadioButton} from 'components/atoms';
 import {isGroupKey} from 'store/widgets/helpers';
 import type {Props, State} from './types';
-import React, {Component, createContext} from 'react';
+import React, {Component, createContext, Fragment} from 'react';
 import schema from './schema';
 import styles from './styles.less';
+import uuid from 'tiny-uuid';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
 export const GroupContext = createContext({
-	errors: {},
-	type: GROUP_TYPES.DATETIME
+	errors: {}
 });
 
 export class GroupCreatingModal extends Component<Props, State> {
 	state = {
 		attributeTitle: '',
 		errors: {},
+		hasError: false,
 		isSubmitting: false,
 		selectedCustomGroup: '',
 		showSaveInfo: false,
 		systemOptions: [],
 		systemValue: null,
-		type: GROUP_TYPES.DATETIME,
 		way: GROUP_WAYS.SYSTEM
 	};
+
+	static getDerivedStateFromError (error: Object) {
+		window.top.console.error(error);
+
+		return {
+			hasError: true
+		};
+	}
 
 	componentDidMount () {
 		const {attribute, customGroups, value} = this.props;
 		const {data, way} = value;
-		const {title: attributeTitle} = getProcessedAttribute(attribute);
+		const attributeTitle = getProcessedValue(attribute, 'title', '');
 		const systemOptions = getSystemGroupOptions(attribute);
 		const systemValue = systemOptions.find(o => o.value === data) || systemOptions[0] || null;
 		const selectedCustomGroup = data in customGroups ? value.data : '';
-		const type = this.resolveGroupType();
 
 		this.setState({
 			attributeTitle,
 			selectedCustomGroup,
 			systemOptions,
 			systemValue,
-			type,
 			way
 		});
 	}
 
+	getCustomGroups = () => {
+		const {attribute, customGroups} = this.props;
+		const {DATE, NUMBER, REF} = ATTRIBUTE_SETS;
+		const {metaClass, state} = ATTRIBUTE_TYPES;
+		const {type} = attribute;
+		const groups: any = Object.values(customGroups);
+
+		if (DATE.includes(type)) {
+			return groups.filter(group => DATE.includes(group.type));
+		}
+
+		if (NUMBER.includes(type)) {
+			return groups.filter(group => NUMBER.includes(group.type));
+		}
+
+		if (REF.includes(type)) {
+			return groups.filter(group => group.type === type);
+		}
+
+		if (type === state || type === metaClass) {
+			return groups.filter(group => group.type === state || group.type === metaClass);
+		}
+
+		return [];
+	};
+
 	getModalSize = () => this.state.way === GROUP_WAYS.SYSTEM ? 'small' : 'large';
 
-	getWidgetsUsingSelectedCutomGroup = () => {
+	getWidgetsUsingSelectedCustomGroup = () => {
 		const {widgets} = this.props;
 		const {selectedCustomGroup} = this.state;
 		const usedInWidgets = [];
@@ -78,12 +110,17 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleChange = (name: string, value: string) => this.setState({[name]: value});
 
+	handleChangeAttributeTitle = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {value: attributeTitle} = e.currentTarget;
+		this.setState({attributeTitle});
+	};
+
 	handleCloseSaveInfo = () => this.setState({showSaveInfo: false});
 
 	handleCreateCustomGroup = () => {
-		const {updateCustomGroup} = this.props;
-		const {type} = this.state;
-		const groupId = Symbol('id');
+		const {attribute, updateCustomGroup} = this.props;
+		const groupId = `${LOCAL_PREFIX_ID}${uuid()}`;
+		const {type} = attribute;
 
 		this.setState({selectedCustomGroup: groupId});
 		updateCustomGroup({
@@ -114,11 +151,11 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleSubmit = () => {
 		const {selectedCustomGroup, way} = this.state;
-		// $FlowFixMe
+
 		if (way === GROUP_WAYS.SYSTEM) {
 			this.saveSystemGroup();
 		} else if (selectedCustomGroup) {
-			const usedInWidgets = this.getWidgetsUsingSelectedCutomGroup();
+			const usedInWidgets = this.getWidgetsUsingSelectedCustomGroup();
 			usedInWidgets.length > 0 ? this.setState({showSaveInfo: true}) : this.saveCustomGroup();
 		}
 	};
@@ -134,21 +171,6 @@ export class GroupCreatingModal extends Component<Props, State> {
 		updateCustomGroup(customGroup);
 	};
 
-	resolveGroupType = () => {
-		const {attribute} = this.props;
-		const {DATETIME, INTEGER} = GROUP_TYPES;
-		const {DATE, NUMBER} = ATTRIBUTE_SETS;
-		const {type} = getProcessedAttribute(attribute);
-
-		if (DATE.includes(type)) {
-			return DATETIME;
-		}
-
-		if (NUMBER.includes(type)) {
-			return INTEGER;
-		}
-	};
-
 	saveCustomGroup = async () => {
 		const {createCustomGroup, customGroups, onSubmit, updateCustomGroup} = this.props;
 		const {attributeTitle, selectedCustomGroup, way} = this.state;
@@ -157,8 +179,8 @@ export class GroupCreatingModal extends Component<Props, State> {
 		if (isValid) {
 			const group = customGroups[selectedCustomGroup];
 			let data = '';
-			// $FlowFixMe
-			if (typeof selectedCustomGroup === 'symbol') {
+
+			if (selectedCustomGroup.startsWith(LOCAL_PREFIX_ID)) {
 				data = await createCustomGroup(group);
 			} else {
 				data = group.id;
@@ -204,11 +226,10 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderCustomGroup = () => {
-		const {attribute, customGroups} = this.props;
-		const {errors, selectedCustomGroup, type, way} = this.state;
-		const context = {attribute, errors, type};
-		// $FlowFixMe
-		const options = Object.values(customGroups).filter(group => group.type === type);
+		const {attribute, attributesData, customGroups, fetchAttributesData} = this.props;
+		const {errors, selectedCustomGroup, way} = this.state;
+		const context = {attribute, attributesData, errors, fetchAttributesData};
+		const options = this.getCustomGroups();
 		const value = customGroups[selectedCustomGroup] || null;
 
 		if (way === GROUP_WAYS.CUSTOM) {
@@ -216,7 +237,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 				<GroupContext.Provider value={context}>
 					<div className={styles.customSection}>
 						<CustomGroup
-							getUsingWidgets={this.getWidgetsUsingSelectedCutomGroup}
+							getUsingWidgets={this.getWidgetsUsingSelectedCustomGroup}
 							onCreate={this.handleCreateCustomGroup}
 							onRemove={this.handleRemoveCustomGroup}
 							onSelect={this.handleSelectCustomGroup}
@@ -230,6 +251,28 @@ export class GroupCreatingModal extends Component<Props, State> {
 		}
 	};
 
+	renderError = () => (
+		<InfoPanel onClose={undefined} text="Ошбика модального окна." />
+	);
+
+	renderForm = () => {
+		const {hasError} = this.state;
+
+		if (hasError) {
+			return this.renderError();
+		}
+
+		return (
+			<Fragment>
+				{this.renderNameField()}
+				{this.renderWayField()}
+				{this.renderSystemGroup()}
+				{this.renderCustomGroup()}
+				{this.renderSaveInfo()}
+			</Fragment>
+		);
+	};
+
 	renderNameField = () => {
 		const {attributeTitle} = this.state;
 
@@ -237,7 +280,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 			<div className={styles.attributeNameField}>
 				<MaterialTextInput
 					name={FIELDS.attributeTitle}
-					onChange={this.handleChange}
+					onChange={this.handleChangeAttributeTitle}
 					placeholder="Название поля"
 					value={attributeTitle}
 				/>
@@ -264,10 +307,10 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderSystemGroup = () => {
-		const {systemOptions, systemValue, type, way} = this.state;
-		const {DATETIME} = GROUP_TYPES;
+		const {attribute} = this.props;
+		const {systemOptions, systemValue, way} = this.state;
 
-		if (way === GROUP_WAYS.SYSTEM && type === DATETIME) {
+		if (way === GROUP_WAYS.SYSTEM && ATTRIBUTE_SETS.DATE.includes(attribute.type)) {
 			return (
 				<div className={styles.shortField}>
 					<MaterialSelect
@@ -313,11 +356,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 		return (
 			<Modal header="Настройка группировки" onClose={onClose} onSubmit={this.handleSubmit} size={this.getModalSize()}>
 				<div className={styles.form}>
-					{this.renderNameField()}
-					{this.renderWayField()}
-					{this.renderSystemGroup()}
-					{this.renderCustomGroup()}
-					{this.renderSaveInfo()}
+					{this.renderForm()}
 				</div>
 			</Modal>
 		);

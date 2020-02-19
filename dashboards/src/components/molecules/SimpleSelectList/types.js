@@ -12,8 +12,11 @@ export type Props = {
 	isSearching: boolean,
 	messages?: Messages,
 	multiple: boolean,
+	onClickShowMore?: () => void,
+	onClose: () => void,
 	onSelect: (option: Option) => void,
 	options: Array<Option>,
+	showMore: boolean,
 	value: Option | null,
 	values: Array<Option>
 };

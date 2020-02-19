@@ -14,20 +14,21 @@ export class MaterialTextInput extends PureComponent<Props> {
 	};
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {name, onChange, onlyNumber} = this.props;
+		const {onChange, onlyNumber} = this.props;
 		const {value} = e.currentTarget;
 
 		if (!onlyNumber || /^(\d+)?$/.test(value)) {
-			onChange(name, value);
+			onChange(e);
 		}
 	};
 
 	renderInput = () => {
-		const {forwardedRef, placeholder, value} = this.props;
+		const {forwardedRef, name, placeholder, value} = this.props;
 
 		return (
 			<input
 				className={styles.input}
+				name={name}
 				onChange={this.handleChange}
 				placeholder={placeholder}
 				ref={forwardedRef}

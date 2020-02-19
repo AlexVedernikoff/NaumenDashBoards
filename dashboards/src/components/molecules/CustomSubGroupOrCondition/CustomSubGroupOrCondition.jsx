@@ -1,14 +1,30 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {Button, FieldError, IconButton, MaterialDateInput, MaterialTextInput} from 'components/atoms';
+import {
+	BACK_BO_LINKS_OPTIONS,
+	BO_LINKS_OPTIONS,
+	CATALOG_ITEM_OPTIONS,
+	CATALOG_ITEM_SET_OPTIONS,
+	DATETIME_OPTIONS,
+	INTEGER_OPTIONS,
+	META_CLASS_AND_STATE_OPTIONS,
+	OBJECT_OPTIONS
+} from './constants';
+import {BetweenOperand, MaterialSelect, MultiSelectOperand, SelectOperand, SimpleOperand} from 'components/molecules';
+import type {
+	BetweenOperand as BetweenOperandType,
+	MultiSelectOperand as MultiSelectOperandType,
+	OrCondition,
+	SelectOperand as SelectOperandType,
+	SimpleOperand as SimpleOperandType
+} from 'store/customGroups/types';
+import {Button, FieldError, IconButton} from 'components/atoms';
 import cn from 'classnames';
-import {CONDITION_TYPES} from 'store/customGroups/constants';
+import {createNewOrCondition} from 'components/molecules/GroupCreatingModal/helpers';
 import {CrossIcon as RemoveIcon} from 'icons/form';
-import {DATETIME_OPTIONS, INTEGER_OPTIONS} from './constants';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
-import {GROUP_TYPES} from 'store/widgets/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
-import {MaterialSelect} from 'components/molecules';
+import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -21,54 +37,81 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
-		const options = this.getOptions();
-		this.setState({options});
+		this.setState({options: this.getOptions()});
 	}
 
+	getAttributesData = (actual: boolean = true) => {
+		const {attribute, attributesData, fetchAttributesData} = this.props;
+		const {actualValues, allValues, metaClasses, states} = attributesData;
+		const {metaClassFqn, property, type} = attribute;
+		const {metaClass, state} = ATTRIBUTE_TYPES;
+		let data;
+
+		if (property && actual) {
+			data = actualValues[property];
+		}
+
+		if (property && !actual) {
+			data = allValues[property];
+		}
+
+		if (type === state) {
+			data = states[metaClassFqn];
+		}
+
+		if (type === metaClass) {
+			data = metaClasses[metaClassFqn];
+		}
+
+		if (!data) {
+			fetchAttributesData(attribute, actual);
+		}
+
+		return data;
+	};
+
 	getOptions = () => {
-		const {type} = this.props;
-		const {DATETIME, INTEGER} = GROUP_TYPES;
+		const {type} = this.props.attribute;
+		const {
+			backBOLinks,
+			boLinks,
+			catalogItem,
+			catalogItemSet,
+			date,
+			dateTime,
+			double,
+			integer,
+			metaClass,
+			object,
+			state
+		} = ATTRIBUTE_TYPES;
 
 		switch (type) {
-			case DATETIME:
+			case date:
+			case dateTime:
 				return DATETIME_OPTIONS;
-			case INTEGER:
+			case double:
+			case integer:
 				return INTEGER_OPTIONS;
+			case backBOLinks:
+				return BACK_BO_LINKS_OPTIONS;
+			case boLinks:
+				return BO_LINKS_OPTIONS;
+			case catalogItem:
+				return CATALOG_ITEM_OPTIONS;
+			case catalogItemSet:
+				return CATALOG_ITEM_SET_OPTIONS;
+			case object:
+				return OBJECT_OPTIONS;
+			case metaClass:
+			case state:
+				return META_CLASS_AND_STATE_OPTIONS;
 		}
 	};
 
-	handleChangeDateData = (name: string, date: string) => {
-		const {condition, index, onUpdate} = this.props;
-		let {data} = condition;
-
-		if (!data || (data && typeof data !== 'object')) {
-			data = {
-				endDate: '',
-				startDate: ''
-			};
-		}
-
-		onUpdate(index, {
-			...condition,
-			data: {
-				...data,
-				[name]: date
-			}
-		});
-	};
-
-	handleChangeFloatData = (name: string, data: string) => {
-		data = data.replace(/,/g, '.');
-		this.handleChangeNumberData(name, data);
-	};
-
-	handleChangeNumberData = (name: string, data: string) => {
-		const {condition, index, onUpdate} = this.props;
-
-		onUpdate(index, {
-			...condition,
-			data
-		});
+	handleChangeOperandData = (condition: OrCondition) => {
+		const {index, onUpdate} = this.props;
+		onUpdate(index, condition);
 	};
 
 	handleClickRemoveButton = () => {
@@ -76,32 +119,31 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		onRemove(index);
 	};
 
-	handleSelectOperandType = (index: number, value: Object) => {
-		const {onUpdate} = this.props;
-		const {value: type} = value;
-
-		onUpdate(index, {
-			data: null,
-			type
-		});
+	handleClickShowMore = (actual: boolean) => () => {
+		const {attribute, fetchAttributesData} = this.props;
+		fetchAttributesData(attribute, actual);
 	};
 
-	renderBetweenData = () => {
-		const {data} = this.props.condition;
-		let startDate = '';
-		let endDate = '';
+	handleSelectOperandType = (name: string, value: Object) => {
+		const {index, onUpdate} = this.props;
+		const {value: type} = value;
+		const condition = createNewOrCondition(type);
 
-		if (data && typeof data === 'object') {
-			startDate = data.startDate;
-			endDate = data.endDate;
+		if (condition) {
+			onUpdate(index, condition);
 		}
+	};
+
+	hasNotArchiveType = (condition: OrCondition) => {
+		const {CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL} = OPERAND_TYPES;
+		return ![CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL].includes(condition.type);
+	};
+
+	renderBetweenOperand = (condition: BetweenOperandType) => {
+		const {data, type} = condition;
 
 		return (
-			<div className={styles.dataContainer}>
-				{this.renderDateField(FIELDS.startDate, startDate)}
-				{this.renderDateField(FIELDS.endDate, endDate)}
-				{this.renderDataError()}
-			</div>
+			<BetweenOperand data={data} onChange={this.handleChangeOperandData} type={type} />
 		);
 	};
 
@@ -112,87 +154,96 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		return <FieldError className={cn(mainStyles.error, styles.error)} text={errors[errorKey]} />;
 	};
 
-	renderDateField = (name: string, date: string) => (
-		<div className={styles.dateField}>
-			<MaterialDateInput name={name} onChange={this.handleChangeDateData} value={date} />
-		</div>
-	);
+	renderMultiSelectOperand = (condition: MultiSelectOperandType) => {
+		const {data, type} = condition;
+		const actual = this.hasNotArchiveType(condition);
+		const attributesData = this.getAttributesData(actual);
 
-	renderNumberData = () => {
-		const {attribute} = this.props;
-		const float = attribute.type !== ATTRIBUTE_TYPES.integer;
+		if (attributesData) {
+			const {data: attributes, loading, uploaded = false} = attributesData;
 
-		return (
-			<div className={styles.dataContainer}>
-				{this.renderNumberField(float)}
-				{this.renderDataError()}
-			</div>
-		);
-	};
-
-	renderNumberField = (float: boolean = false) => {
-		const onChange = float ? this.handleChangeFloatData : this.handleChangeNumberData;
-		let {data} = this.props.condition;
-
-		if (typeof data === 'object') {
-			data = '';
+			return (
+				<MultiSelectOperand
+					data={data}
+					loading={loading}
+					onChange={this.handleChangeOperandData}
+					onClickShowMore={this.handleClickShowMore(actual)}
+					options={attributes}
+					showMore={!uploaded}
+					type={type}
+				/>
+			);
 		}
-
-		return (
-			<div className={styles.numberField}>
-				<MaterialTextInput onChange={onChange} value={data} />
-			</div>
-		);
 	};
 
 	renderOperand = () => (
-		<div className={styles.operand}>
-			{this.renderOperandSelect()}
-			{this.renderOperandDataByType()}
+		<div className={styles.operandContainer}>
+			<div className={styles.operand}>
+				{this.renderOperandByType()}
+				{this.renderDataError()}
+			</div>
 		</div>
 	);
 
-	renderOperandDataByType = () => {
-		const {type} = this.props.condition;
+	renderOperandByType = () => {
+		const {condition} = this.props;
 		const {
 			BETWEEN,
+			CONTAINS,
+			CONTAINS_ANY,
+			CONTAINS_ATTR_CURRENT_OBJECT,
+			CONTAINS_INCLUDING_ARCHIVAL,
+			CONTAINS_INCLUDING_NESTED,
 			EQUAL,
+			EQUAL_ATTR_CURRENT_OBJECT,
 			GREATER,
 			LAST,
 			LESS,
 			NEAR,
+			NOT_CONTAINS,
+			NOT_CONTAINS_INCLUDING_ARCHIVAL,
 			NOT_EQUAL,
-			NOT_EQUAL_NOT_EMPTY
-		} = CONDITION_TYPES;
+			NOT_EQUAL_NOT_EMPTY,
+			TITLE_CONTAINS,
+			TITLE_NOT_CONTAINS
+		} = OPERAND_TYPES;
 
-		switch (type) {
+		switch (condition.type) {
 			case BETWEEN:
-				return this.renderBetweenData();
+				return this.renderBetweenOperand(condition);
+			case CONTAINS:
+			case CONTAINS_ATTR_CURRENT_OBJECT:
+			case CONTAINS_INCLUDING_ARCHIVAL:
+			case CONTAINS_INCLUDING_NESTED:
+			case EQUAL_ATTR_CURRENT_OBJECT:
+			case NOT_CONTAINS:
+			case NOT_CONTAINS_INCLUDING_ARCHIVAL:
+				return this.renderSelectOperand(condition);
+			case CONTAINS_ANY:
+				return this.renderMultiSelectOperand(condition);
 			case LAST:
 			case NEAR:
-				return this.renderPositiveIntegerData();
+				return this.renderSimpleOperand(condition, true, true);
 			case EQUAL:
 			case GREATER:
 			case LESS:
 			case NOT_EQUAL:
 			case NOT_EQUAL_NOT_EMPTY:
-				return this.renderNumberData();
+				return this.renderSimpleOperand(condition, true);
+			case TITLE_CONTAINS:
+			case TITLE_NOT_CONTAINS:
+				return this.renderSimpleOperand(condition);
 		}
 	};
 
 	renderOperandSelect = () => {
-		const {condition, index} = this.props;
+		const {condition} = this.props;
 		const {options} = this.state;
 		const value = options.find(o => o.value === condition.type) || options[0];
 
 		return (
 			<div className={styles.operandSelect}>
-				<MaterialSelect
-					name={index}
-					onSelect={this.handleSelectOperandType}
-					options={options}
-					value={value}
-				/>
+				<MaterialSelect onSelect={this.handleSelectOperandType} options={options} value={value} />
 			</div>
 		);
 	};
@@ -213,17 +264,6 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		);
 	};
 
-	renderPositiveIntegerData = () => {
-		const {data} = this.props.condition;
-		const value = typeof data === 'number' ? data : '';
-
-		return (
-			<div className={styles.numberField}>
-				<MaterialTextInput onChange={this.handleChangeNumberData} onlyNumber={true} value={value} />
-			</div>
-		);
-	};
-
 	renderRemoveButton = () => {
 		const {isLast} = this.props;
 		const containerCN = cn({
@@ -240,9 +280,52 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		);
 	};
 
+	renderSelectOperand = (condition: SelectOperandType) => {
+		const {data, type} = condition;
+		const actual = this.hasNotArchiveType(condition);
+		const attributesData = this.getAttributesData(actual);
+
+		if (attributesData) {
+			const {data: attributes, loading, uploaded = false} = attributesData;
+
+			return (
+				<SelectOperand
+					data={data}
+					loading={loading}
+					onChange={this.handleChangeOperandData}
+					onClickShowMore={this.handleClickShowMore(actual)}
+					options={attributes}
+					showMore={!uploaded}
+					type={type}
+				/>
+			);
+		}
+	};
+
+	renderSimpleOperand = (condition: SimpleOperandType, number: boolean = false, onlyNumber: boolean = false) => {
+		const {attribute} = this.props;
+		const {data, type} = condition;
+		let float = false;
+
+		if (number) {
+			float = attribute.type !== ATTRIBUTE_TYPES.integer;
+		}
+
+		return (
+			<SimpleOperand
+				data={data}
+				float={float}
+				onChange={this.handleChangeOperandData}
+				onlyNumber={onlyNumber}
+				type={type}
+			/>
+		);
+	};
+
 	render () {
 		return (
 			<div className={styles.container}>
+				{this.renderOperandSelect()}
 				{this.renderOperand()}
 				{this.renderOrOperator()}
 				{this.renderRemoveButton()}

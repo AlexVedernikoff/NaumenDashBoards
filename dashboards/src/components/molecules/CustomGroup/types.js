@@ -1,9 +1,11 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import type {CustomGroup, CustomGroupId} from 'store/customGroups/types';
 import type {ErrorsMap} from 'components/molecules/GroupCreatingModal/types';
-import type {GroupType, Widget} from 'store/widgets/data/types';
+import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
+	attribute: Attribute,
 	errors: ErrorsMap,
 	getUsingWidgets: () => Array<Widget>,
 	onCreate: () => void,
@@ -11,7 +13,6 @@ export type Props = {
 	onSelect: (CustomGroupId) => void,
 	onUpdate: (group: CustomGroup) => void | Promise<void>,
 	options: Array<CustomGroup>,
-	type: GroupType,
 	value: CustomGroup | null
 };
 
@@ -19,7 +20,7 @@ export type State = {
 	showLimitInfo: boolean,
 	showRemovalInfo: boolean,
 	showUseInfo: boolean,
-	usedInWidgets: []
+	usedInWidgets: Array<string>
 };
 
 export type InfoPanelProps = {

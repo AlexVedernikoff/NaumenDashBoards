@@ -1,7 +1,7 @@
 // @flow
 import {array, lazy, number, object, string} from 'yup';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {CONDITION_TYPES} from 'store/customGroups/constants';
+import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {OrCondition} from 'store/customGroups/types';
 
 const NAME_RULE = string().required('Поле должно быть заполнено');
@@ -22,9 +22,10 @@ const integerRule = () => {
 	return number().integer(message).required(message).typeError(message).nullable();
 };
 
-const resolveConditionRule = ({type}: OrCondition, context: Object) => {
+const resolveConditionRule = (condition: OrCondition, context: Object) => {
+	const {type} = condition;
 	const {attribute} = context;
-	const {BETWEEN, EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY} = CONDITION_TYPES;
+	const {BETWEEN, EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY} = OPERAND_TYPES;
 	let rule;
 
 	if (type === BETWEEN) {

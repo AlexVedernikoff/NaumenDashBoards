@@ -19,6 +19,7 @@ import OutsideClickDetector from './OutsideClickDetector';
 import Popover from './Popover';
 import RadioButton from './RadioButton';
 import SearchSelectInput from './SearchSelectInput';
+import SimpleListOption from './SimpleListOption';
 import TextArea from './TextArea';
 import Tip from './Tip';
 import Title from './Title';
@@ -46,6 +47,7 @@ export {
 	Popover,
 	RadioButton,
 	SearchSelectInput,
+	SimpleListOption,
 	TextArea,
 	Tip,
 	Title,

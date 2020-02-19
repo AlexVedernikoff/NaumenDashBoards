@@ -4,9 +4,11 @@
 	@placeholder-height: 13px;
 
 	.container {
+		align-items: center;
 		border-bottom: 1px solid @grey;
+		display: flex;
 		font-size: 14px;
-		padding: 4px 0;
+		height: 28px;
 		position: relative;
 		width: 100%;
 	}
@@ -31,6 +33,6 @@
 	.placeholder {
 		.placeholder();
 		position: absolute;
-		top: -@placeholder-height;
+		top: -10px;
 	}
 }

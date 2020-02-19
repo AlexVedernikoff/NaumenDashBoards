@@ -15,6 +15,8 @@ const TYPE_OPTIONS = [
 
 // Символьный ключ для отслеживания только что созданных группировок
 const IS_NEW = Symbol('new');
+// Префикс локального ключа для новой группировки
+const LOCAL_PREFIX_ID: 'local_' = 'local_';
 
 // название полей
 const attributeTitle: 'attributeTitle' = 'attributeTitle';
@@ -71,6 +73,7 @@ const DATETIME_SYSTEM_OPTIONS = [
 export {
 	BASE_VALIDATION_SUBGROUP_PATH,
 	DATETIME_SYSTEM_OPTIONS,
+	LOCAL_PREFIX_ID,
 	FIELDS,
 	IS_NEW,
 	TYPE_OPTIONS

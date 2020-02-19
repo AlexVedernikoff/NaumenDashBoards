@@ -8,12 +8,12 @@ import {
 	ComputedAttributeEditor
 } from 'components/molecules';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {AttributeValue, Props, RefInputProps, State} from './types';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import {getDefaultAggregation} from 'components/molecules/AttributeAggregation/helpers';
 import {getDefaultSystemGroup, isGroupKey} from 'store/widgets/helpers';
 import {getProcessedAttribute} from 'store/sources/attributes/helpers';
 import type {Node} from 'react';
-import type {Props, RefInputProps, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import {REF_INPUT_TYPES} from './constants';
 import type {SourceValue} from 'components/molecules/Source/types';
@@ -28,6 +28,17 @@ export class Attribute extends PureComponent<Props, State> {
 		if (callback && typeof callback === 'function') {
 			// $FlowFixMe
 			setTimeout(() => callback(name, value));
+		}
+	};
+
+	changeRefInputData = (prevValue: AttributeValue | null, value: AttributeValue) => {
+		const {onSelectRefInput, refInputProps} = this.props;
+
+		if (refInputProps && (!prevValue || prevValue.type !== value.type)) {
+			const {name: refName} = refInputProps;
+			const refValue = isGroupKey(refName) ? getDefaultSystemGroup(value) : getDefaultAggregation(value);
+
+			onSelectRefInput(refName, refValue);
 		}
 	};
 
@@ -126,21 +137,22 @@ export class Attribute extends PureComponent<Props, State> {
 		onRemoveAttribute(name, code);
 	};
 
-	handleSelect = (parent: AttributeType | null) => (name: string, value: AttributeType) => {
+	handleSelect = (parent: AttributeType | null) => (name: string, value: AttributeValue) => {
 		const {onSelect, onSelectCallback, value: prevValue} = this.props;
 
-		if (parent) {
+		if (parent && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 			parent.ref = value;
 			onSelect(name, prevValue);
 		} else {
 			onSelect(name, value);
 		}
 
+		this.changeRefInputData(prevValue, value);
 		this.applyCallback(onSelectCallback, name, value);
 	};
 
 	handleSelectWithRef = (parent: AttributeType | null) => (name: string, value: AttributeType) => {
-		const {onSelect, onSelectCallback, onSelectRefInput, refInputProps} = this.props;
+		const {onSelect, onSelectCallback} = this.props;
 		let {value: prevValue} = this.props;
 
 		if (parent) {
@@ -153,13 +165,7 @@ export class Attribute extends PureComponent<Props, State> {
 			onSelect(name, {...value});
 		}
 
-		if (refInputProps && (!prevValue || prevValue.type !== value.type)) {
-			const {name: refName} = refInputProps;
-			const refValue = isGroupKey(refName) ? getDefaultSystemGroup(value) : getDefaultAggregation(value);
-
-			onSelectRefInput(refName, refValue);
-		}
-
+		this.changeRefInputData(prevValue, value);
 		this.applyCallback(onSelectCallback, name, value);
 	};
 
@@ -302,12 +308,10 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	renderGroup = (refInputProps: RefInputProps) => {
-		let {value: attribute} = this.props;
+		const {value: attribute} = this.props;
 		const {disabled, name, value} = refInputProps;
 
 		if (!attribute || (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR)) {
-			attribute = attribute && getProcessedAttribute(attribute);
-
 			return (
 				<AttributeGroup
 					attribute={attribute}

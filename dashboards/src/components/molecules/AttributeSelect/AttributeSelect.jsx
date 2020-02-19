@@ -40,8 +40,6 @@ export class AttributeSelect extends PureComponent<Props, State> {
 
 	handleClickEditIcon = () => this.setState({showForm: true, showMenu: false});
 
-	handleClickOutside = () => this.setState({showMenu: false});
-
 	handleClickRemoveIcon = () => {
 		const {name, onRemove, onSelect} = this.props;
 		onRemove ? onRemove(name) : onSelect(name, null);
@@ -64,6 +62,8 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		onChangeTitle(name, title);
 		this.setState({showForm: false});
 	};
+
+	hideMenu = () => this.setState({showMenu: false});
 
 	renderCreationPanel = () => {
 		const {onClickCreationButton, showCreationButton} = this.props;
@@ -122,6 +122,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 				getOptionValue={this.getOptionValue}
 				isSearching={!!searchValue}
 				messages={messages}
+				onClose={this.hideMenu}
 				onSelect={this.handleSelect}
 				options={renderOptions}
 				value={value}

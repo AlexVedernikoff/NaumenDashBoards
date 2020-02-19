@@ -9,6 +9,7 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 	static defaultProps = {
 		isSearching: false,
 		multiple: false,
+		showMore: false,
 		value: null,
 		values: []
 	};
@@ -46,7 +47,18 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 	};
 
 	renderList = () => {
-		const {getOptionLabel, getOptionValue, multiple, onSelect, options, value, values} = this.props;
+		const {
+			getOptionLabel,
+			getOptionValue,
+			multiple,
+			onClickShowMore,
+			onClose,
+			onSelect,
+			options,
+			showMore,
+			value,
+			values
+		} = this.props;
 		const {foundOptions, searchValue} = this.state;
 		const renderOptions = searchValue ? foundOptions : options;
 
@@ -56,8 +68,11 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 				getOptionValue={getOptionValue}
 				isSearching={!!searchValue}
 				multiple={multiple}
+				onClickShowMore={onClickShowMore}
+				onClose={onClose}
 				onSelect={onSelect}
 				options={renderOptions}
+				showMore={showMore}
 				value={value}
 				values={values}
 			/>

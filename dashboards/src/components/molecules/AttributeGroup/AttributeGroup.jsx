@@ -67,10 +67,11 @@ export class AttributeGroup extends PureComponent<Props, State> {
 			group = createDefaultGroup(group);
 		}
 
-		if (showModal) {
+		if (showModal && attribute) {
 			return (
 				<GroupCreatingModal
 					attribute={attribute}
+					key={attribute.type}
 					onClose={this.handleCloseModal}
 					onSubmit={this.handleSubmitModal}
 					value={group}

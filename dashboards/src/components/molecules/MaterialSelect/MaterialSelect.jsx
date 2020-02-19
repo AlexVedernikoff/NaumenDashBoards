@@ -14,6 +14,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		name: '',
 		placeholder: 'Выберите значение',
 		showCreationButton: false,
+		showMore: false,
 		textCreationButton: 'Создать'
 	};
 
@@ -47,8 +48,6 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		onClickCreationButton && onClickCreationButton();
 	};
 
-	handleClickOutside = () => this.setState({showMenu: false});
-
 	handleClickValue = () => this.setState({showMenu: !this.state.showMenu});
 
 	handleSelect = (value: Option) => {
@@ -58,10 +57,22 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		onSelect(name, value);
 	};
 
+	hideMenu = () => this.setState({showMenu: false});
+
 	renderCaret = () => <ChevronDownIcon className={styles.caret} />;
 
 	renderMenu = () => {
-		const {getOptionLabel, getOptionValue, isSearching, options, showCreationButton, textCreationButton, value} = this.props;
+		const {
+			getOptionLabel,
+			getOptionValue,
+			isSearching,
+			onClickShowMore,
+			options,
+			showCreationButton,
+			showMore,
+			textCreationButton,
+			value
+		} = this.props;
 		const {showMenu} = this.state;
 		let creationButton;
 
@@ -79,8 +90,11 @@ export class MaterialSelect extends PureComponent<Props, State> {
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
 					isSearching={isSearching}
+					onClickShowMore={onClickShowMore}
+					onClose={this.hideMenu}
 					onSelect={this.handleSelect}
 					options={options}
+					showMore={showMore}
 					value={value}
 				/>
 			);
@@ -132,7 +146,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<OutsideClickDetector onClickOutside={this.handleClickOutside}>
+			<OutsideClickDetector onClickOutside={this.hideMenu}>
 				<div className={styles.container}>
 					{this.renderValueContainer()}
 					{this.renderMenu()}

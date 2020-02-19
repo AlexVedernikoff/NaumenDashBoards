@@ -1,8 +1,9 @@
 // @flow
-import cn from 'classnames';
+import {Button, SimpleListOption} from 'components/atoms';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class SimpleSelectList extends PureComponent<Props> {
 	static defaultProps = {
@@ -12,6 +13,7 @@ export class SimpleSelectList extends PureComponent<Props> {
 			notFound: 'Ничего не найдено'
 		},
 		multiple: false,
+		showMore: false,
 		value: null,
 		values: []
 	};
@@ -32,14 +34,16 @@ export class SimpleSelectList extends PureComponent<Props> {
 		return getOptionValue ? getOptionValue(option) : option.value;
 	};
 
-	handleClickOption = (e: SyntheticMouseEvent<HTMLDivElement>) => {
-		const {onSelect, options} = this.props;
-		const {value} = e.currentTarget.dataset;
-		const option = options.find(o => this.getOptionValue(o) === value);
+	handleClickOption = (option: Object | null) => {
+		const {onClose, onSelect} = this.props;
+		option ? onSelect(option) : onClose();
+	};
 
-		if (option) {
-			onSelect(option);
-		}
+	handleClickShowMore = (e: Event) => {
+		const {onClickShowMore} = this.props;
+
+		e.stopPropagation();
+		onClickShowMore && onClickShowMore();
 	};
 
 	renderList = () => {
@@ -52,32 +56,31 @@ export class SimpleSelectList extends PureComponent<Props> {
 		return (
 			<div className={styles.list}>
 				{options.map(this.renderListItem)}
+				{this.renderShowMoreButton()}
 			</div>
 		);
 	};
 
 	renderListItem = (option: Object) => {
-		const {isSearching, multiple, value, values} = this.props;
-		const optionLabel = this.getOptionLabel(option);
+		const {getOptionLabel, isSearching, multiple, value, values} = this.props;
 		const optionValue = this.getOptionValue(option);
-		let isSelected = false;
+		let selected = false;
 
 		if (multiple) {
-			isSelected = values.find(value => this.getOptionValue(value) === optionValue);
+			selected = values.findIndex(value => this.getOptionValue(value) === optionValue) !== -1;
 		} else if (value) {
-			isSelected = this.getOptionValue(value) === optionValue;
+			selected = this.getOptionValue(value) === optionValue;
 		}
 
-		const itemCN = cn({
-			[styles.listItem]: true,
-			[styles.foundListItem]: isSearching,
-			[styles.selectedListItem]: isSelected
-		});
-
 		return (
-			<div className={itemCN} data-value={optionValue} key={optionValue} onClick={this.handleClickOption}>
-				<div className={styles.label}>{optionLabel}</div>
-			</div>
+			<SimpleListOption
+				found={isSearching}
+				getOptionLabel={getOptionLabel}
+				key={optionValue}
+				onClick={this.handleClickOption}
+				option={option}
+				selected={selected}
+			/>
 		);
 	};
 
@@ -87,6 +90,18 @@ export class SimpleSelectList extends PureComponent<Props> {
 		const message = isSearching ? notFound : noOptions;
 
 		return <div className={styles.noOptionsMessage}>{message}</div>;
+	};
+
+	renderShowMoreButton = () => {
+		const {showMore} = this.props;
+
+		if (showMore) {
+			return (
+				<div className={styles.showMoreContainer}>
+					<Button onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>Показать еще</Button>
+				</div>
+			);
+		}
 	};
 
 	render () {

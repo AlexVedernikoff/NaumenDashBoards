@@ -4,7 +4,7 @@
 	@offset: 24px;
 
 	.container {
-		align-items: center;
+		align-items: start;
 		display: flex;
 
 		&:hover {
@@ -14,34 +14,29 @@
 		}
 	}
 
-	.operand {
-		display: flex;
-		flex: auto;
-		padding: 4px 0;
+	.operandSelect {
+		min-width: 30%;
 	}
 
 	.fieldOffset {
 		margin-left: @offset;
 	}
 
-	.dateField {
+	.operandContainer {
 		.fieldOffset();
-		width: 50%;
-	}
-
-	.dataContainer {
-		display: flex;
+		max-width: 400px;
 		position: relative;
+		width: 400px;
+	}
+
+	.operand {
 		width: 100%;
 	}
 
-	.numberField {
-		.fieldOffset();
-		width: 100%;
-	}
-
-	.operandSelect {
-		min-width: 30%;
+	.error {
+		left: 0;
+		position: absolute;
+		top: 105%;
 	}
 
 	.orOperator {
@@ -60,10 +55,4 @@
 		opacity: 0;
 		pointer-events: none;
 	}
-
-	.error {
-		left: @offset;
-		position: absolute;
-		top: 105%;
-	};
 }

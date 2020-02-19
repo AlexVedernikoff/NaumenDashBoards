@@ -7,7 +7,7 @@ export type Props = {
 	children: Node,
 	className: string,
 	disabled: boolean,
-	onClick?: () => any,
+	onClick?: (e: Event) => any,
 	outline: boolean,
 	type: string,
 	variant: $Keys<typeof VARIANTS>

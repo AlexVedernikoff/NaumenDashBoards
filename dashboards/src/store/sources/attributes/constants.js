@@ -21,7 +21,9 @@ const date: 'date' = 'date';
 const dateTime: 'dateTime' = 'dateTime';
 const double: 'double' = 'double';
 const integer: 'integer' = 'integer';
+const metaClass: 'metaClass' = 'metaClass';
 const object: 'object' = 'object';
+const state: 'state' = 'state';
 
 const ATTRIBUTE_TYPES = {
 	backBOLinks,
@@ -33,7 +35,9 @@ const ATTRIBUTE_TYPES = {
 	dateTime,
 	double,
 	integer,
-	object
+	metaClass,
+	object,
+	state
 };
 
 const DATE = [date, dateTime];
