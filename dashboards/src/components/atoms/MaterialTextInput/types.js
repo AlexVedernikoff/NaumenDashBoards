@@ -8,7 +8,7 @@ export type ForwardedRef = {
 export type Props = {
 	forwardedRef: ForwardedRef,
 	name: string,
-	onChange: (name: string, value: string) => void,
+	onChange: (event: SyntheticInputEvent<HTMLInputElement>) => void,
 	onlyNumber: boolean,
 	placeholder: string,
 	value: string | number

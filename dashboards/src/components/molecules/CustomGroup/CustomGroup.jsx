@@ -39,7 +39,7 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleClickCreationPanel = () => {
-		const {onUpdate, type, value} = this.props;
+		const {attribute, onUpdate, value} = this.props;
 
 		if (value) {
 			const {subGroups} = value;
@@ -48,7 +48,7 @@ export class CustomGroup extends Component<Props, State> {
 				...value,
 				subGroups: [
 					...subGroups,
-					createNewSubGroup(type)
+					createNewSubGroup(attribute.type)
 				]
 			});
 		}
@@ -56,7 +56,7 @@ export class CustomGroup extends Component<Props, State> {
 
 	handleClickRemovalButton = () => {
 		const {getUsingWidgets} = this.props;
-		const usedInWidgets = getUsingWidgets.filter(widget => widget.name);
+		const usedInWidgets = getUsingWidgets().map(widget => widget.name);
 
 		usedInWidgets.length > 0
 			? this.setState({showUseInfo: true, usedInWidgets})
@@ -150,7 +150,7 @@ export class CustomGroup extends Component<Props, State> {
 					options={options}
 					placeholder="Название группировки"
 					showCreationButton={true}
-					textCreationButton="Добавить группу"
+					textCreationButton="Добавить группировку"
 					value={value}
 				/>
 			</div>

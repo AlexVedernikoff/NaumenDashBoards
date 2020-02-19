@@ -1,11 +1,12 @@
 // @flow
-import {GROUP_TYPES, GROUP_WAYS} from 'store/widgets/constants';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {GROUP_WAYS} from 'store/widgets/constants';
 import type {Layout, LayoutItem} from 'utils/layout/types';
 import type {NewWidget} from 'entities';
 import type {SelectValue} from 'components/organisms/WidgetFormPanel/types';
 import {WIDGETS_EVENTS} from './constants';
 
-export type GroupType = $Keys<typeof GROUP_TYPES>;
+export type GroupType = $Keys<typeof ATTRIBUTE_TYPES>;
 
 export type GroupWay = $Keys<typeof GROUP_WAYS>;
 

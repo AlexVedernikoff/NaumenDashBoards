@@ -1,7 +1,7 @@
 // @flow
 import {Button} from 'components/atoms';
 import cn from 'classnames';
-import {createNewOrCondition} from 'components/molecules/GroupCreatingModal/helpers';
+import {createNewOrCondition, getDefaultOperandType} from 'components/molecules/GroupCreatingModal/helpers';
 import {CustomSubGroupOrCondition} from 'components/molecules';
 import type {OrCondition} from 'store/customGroups/types';
 import type {Props} from './types';
@@ -12,12 +12,15 @@ import {withGroup} from 'components/molecules/GroupCreatingModal';
 
 export class CustomSubGroupAndCondition extends PureComponent<Props> {
 	handleCreateOrCondition = () => {
-		const {condition, index, onUpdate, type} = this.props;
+		const {attribute, condition, index, onUpdate} = this.props;
+		const operandType = getDefaultOperandType(attribute.type);
 
-		onUpdate(index, [
-			...condition,
-			createNewOrCondition(type)
-		]);
+		if (operandType) {
+			onUpdate(index, [
+				...condition,
+				createNewOrCondition(operandType)
+			]);
+		}
 	};
 
 	handleRemoveOrCondition = (index: number) => {

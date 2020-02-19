@@ -4,7 +4,6 @@
 	.container {
 		font-size: 13px;
 		position: relative;
-		width: 450px;
 	}
 
 	.valuesContainer {
@@ -13,21 +12,32 @@
 		cursor: pointer;
 		display: flex;
 		height: 28px;
-		justify-content: space-between;
 		position: relative;
 	}
 
 	.caret {
 		color: @darkgrey;
-		margin: 0 8px;
+		margin-left: auto;
+		padding: 0 8px;
 	}
 
 	.values {
 		display: block;
 		overflow: hidden;
+		position: relative;
 		text-align: center;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.label {
+		color: @darkgrey;
+	}
+
+	.labelAboveValues {
+		left: 0;
+		position: absolute;
+		top: -13px;
 	}
 
 	.tagsContainer {
@@ -44,8 +54,8 @@
 		height: 24px;
 		margin-top: 4px;
 		margin-right: 4px;
-		max-width: 150px;
 		padding: 0 8px;
+		width: 110px;
 
 		&:hover {
 			background-color: @grey;
@@ -53,7 +63,6 @@
 	}
 
 	.tagLabel {
-		margin-right: 4px;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
@@ -61,6 +70,7 @@
 	.clearTagIcon {
 		color: @darkgrey;
 		height: 16px;
+		margin-left: auto;
 		width: 16px;
 	}
 

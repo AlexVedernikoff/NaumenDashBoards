@@ -1,6 +1,7 @@
 // @flow
 import {Button, OutsideClickDetector} from 'components/atoms';
 import {ChevronDownIcon, ClearIcon} from 'icons/form';
+import cn from 'classnames';
 import type {Option, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import {SimpleSelectMenu} from 'components/molecules';
@@ -9,9 +10,10 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class MaterialMultiSelect extends PureComponent<Props, State> {
 	static defaultProps = {
-		displayLimit: 6,
+		displayLimit: 8,
 		isSearching: false,
-		name: ''
+		name: '',
+		showMore: false
 	};
 
 	state = {
@@ -19,11 +21,17 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 		showMenu: false
 	};
 
-	getLabel = (option: Option) => option.label;
+	getOptionLabel = (option: Object) => {
+		const {getOptionLabel} = this.props;
+		return getOptionLabel ? getOptionLabel(option) : option.label;
+	};
+
+	getOptionValue = (option: Object) => {
+		const {getOptionValue} = this.props;
+		return getOptionValue ? getOptionValue(option) : option.value;
+	};
 
 	handleClickMoreButton = () => this.setState({showAllTags: true});
-
-	handleClickOutside = () => this.setState({showMenu: false});
 
 	handleClickTag = (e: SyntheticMouseEvent<HTMLDivElement>) => {
 		const {onRemove} = this.props;
@@ -41,6 +49,8 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 		onSelect(name, value);
 	};
 
+	hideMenu = () => this.setState({showMenu: false});
+
 	renderCaret = () => <div className={styles.caret}><ChevronDownIcon /></div>;
 
 	renderClearButton = () => (
@@ -49,17 +59,40 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 		</div>
 	);
 
+	renderLabel = () => {
+		const {values} = this.props;
+		const cnLabel = cn({
+			[styles.label]: true,
+			[styles.labelAboveValues]: values.length > 0
+		});
+
+		return <div className={cnLabel}>Выберите значение</div>;
+	};
+
 	renderMenu = () => {
-		const {isSearching, options, values} = this.props;
+		const {
+			getOptionLabel,
+			getOptionValue,
+			isSearching,
+			onClickShowMore,
+			options,
+			showMore,
+			values
+		} = this.props;
 		const {showMenu} = this.state;
 
 		if (showMenu) {
 			return (
 				<SimpleSelectMenu
+					getOptionLabel={getOptionLabel}
+					getOptionValue={getOptionValue}
 					isSearching={isSearching}
 					multiple={true}
+					onClickShowMore={onClickShowMore}
+					onClose={this.hideMenu}
 					onSelect={this.handleSelect}
 					options={options}
+					showMore={showMore}
 					values={values}
 				/>
 			);
@@ -70,7 +103,7 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 		const {displayLimit, values} = this.props;
 		const {showAllTags} = this.state;
 
-		if (!showAllTags) {
+		if (values.length > displayLimit && !showAllTags) {
 			const left = values.length - displayLimit;
 
 			return (
@@ -82,16 +115,12 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 		}
 	};
 
-	renderTag = (option: Option) => {
-		const {label, value} = option;
-
-		return (
-			<div className={styles.tagContainer} data-value={value} onClick={this.handleClickTag}>
-				<div className={styles.tagLabel}>{label}</div>
-				<ClearIcon className={styles.clearTagIcon} />
-			</div>
-		);
-	};
+	renderTag = (option: Option) => (
+		<div className={styles.tagContainer} data-value={this.getOptionValue(option)} onClick={this.handleClickTag}>
+			<div className={styles.tagLabel}>{this.getOptionLabel(option)}</div>
+			<ClearIcon className={styles.clearTagIcon} />
+		</div>
+	);
 
 	renderTags = () => {
 		const {displayLimit, values} = this.props;
@@ -109,7 +138,6 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 				<div className={styles.tagsContainer}>
 					{this.renderClearButton()}
 					{this.renderTags()}
-					{this.renderMoreTagsInfo()}
 				</div>
 			);
 		}
@@ -118,25 +146,31 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 	renderValues = () => {
 		const {values} = this.props;
 
-		return (
-			<div className={styles.values}>{values.map(this.getLabel).join(', ')}</div>
-		);
+		if (values.length > 0) {
+			return (
+				<div className={styles.values}>
+					{values.map(this.getOptionLabel).join(', ')}
+				</div>
+			);
+		}
 	};
 
 	renderValuesContainer = () => (
 		<div className={styles.valuesContainer} onClick={this.handleClickValue}>
 			{this.renderValues()}
+			{this.renderLabel()}
 			{this.renderCaret()}
+			{this.renderMenu()}
 		</div>
 	);
 
 	render () {
 		return (
-			<OutsideClickDetector onClickOutside={this.handleClickOutside}>
+			<OutsideClickDetector onClickOutside={this.hideMenu}>
 				<div className={styles.container}>
 					{this.renderValuesContainer()}
 					{this.renderTagsContainer()}
-					{this.renderMenu()}
+					{this.renderMoreTagsInfo()}
 				</div>
 			</OutsideClickDetector>
 		);

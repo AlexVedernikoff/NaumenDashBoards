@@ -9,15 +9,6 @@ const GROUP_WAYS = {
 	SYSTEM
 };
 
-// Типы группировок
-const DATETIME: 'DATETIME' = 'DATETIME';
-const INTEGER: 'INTEGER' = 'INTEGER';
-
-const GROUP_TYPES = {
-	DATETIME,
-	INTEGER
-};
-
 // Типы системных группировок
 const DAY: 'DAY' = 'DAY';
 const MONTH: 'MONTH' = 'MONTH';
@@ -69,7 +60,6 @@ export {
 	DATETIME_SYSTEM_GROUP,
 	DEFAULT_AGGREGATION,
 	DEFAULT_SYSTEM_GROUP,
-	GROUP_TYPES,
 	GROUP_WAYS,
 	INTEGER_AGGREGATION
 };

@@ -18,19 +18,21 @@ export class CustomSubGroup extends PureComponent<Props> {
 		current && current.focus();
 	}
 
-	handleChangeName = (name: string, value: string) => {
+	handleChangeName = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {index, onUpdate, subGroup} = this.props;
-		onUpdate(index, {...subGroup, name: value});
+		const {value: name} = e.currentTarget;
+
+		onUpdate(index, {...subGroup, name});
 	};
 
 	handleCreateAndCondition = () => {
-		const {index, onUpdate, subGroup, type} = this.props;
+		const {attribute, index, onUpdate, subGroup} = this.props;
 
 		onUpdate(index, {
 			...subGroup,
 			data: [
 				...subGroup.data,
-				createNewAndCondition(type)
+				createNewAndCondition(attribute.type)
 			]
 		});
 	};

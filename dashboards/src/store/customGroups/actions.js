@@ -5,6 +5,7 @@ import type {CustomGroup, CustomGroupId, CustomGroupsMap} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
+import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 
 const createCustomGroup = (payload: CustomGroup): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<string> => {
 	let id = '';
@@ -30,10 +31,12 @@ const createCustomGroup = (payload: CustomGroup): ThunkAction => async (dispatch
 
 const deleteCustomGroup = (payload: CustomGroupId): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		await client.post(buildUrl('dashboardSettings', 'deleteCustomGroup', 'requestContent,user'), {
-			...getParams(getState()),
-			groupKey: payload
-		});
+		if (!payload.startsWith(LOCAL_PREFIX_ID)) {
+			await client.post(buildUrl('dashboardSettings', 'deleteCustomGroup', 'requestContent,user'), {
+				...getParams(getState()),
+				groupKey: payload
+			});
+		}
 
 		dispatch(removeCustomGroup(payload));
 	} catch (e) {

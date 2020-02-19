@@ -1,4 +1,5 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import type {CustomGroup, CustomGroupId, CustomGroupsMap} from 'store/customGroups/types';
 import {FormikProps} from 'formik';
 import type {ThunkAction} from 'store/types';
@@ -12,6 +13,7 @@ export type ConnectedProps = {
 export type ConnectedFunctions = {
 	createCustomGroup: (group: CustomGroup) => ThunkAction,
 	deleteCustomGroup: (id: CustomGroupId) => ThunkAction,
+	fetchAttributesData: (attribute: Attribute, actual?: boolean) => ThunkAction,
 	updateCustomGroup: (group: CustomGroup, remote?: boolean) => ThunkAction
 };
 
