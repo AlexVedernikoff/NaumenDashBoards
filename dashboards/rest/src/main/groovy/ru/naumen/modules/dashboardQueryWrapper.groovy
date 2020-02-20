@@ -165,7 +165,7 @@ class QueryWrapper
     private HCriterion condition(FilterParameter filter)
     {
         HColumn column = getCriteriaColumnCode(filter.attribute)
-        String type = filter.type.toLowerCase()
+        def type = filter.type as Comparison
         switch (type)
         {
             case Comparison.IS_NULL:
