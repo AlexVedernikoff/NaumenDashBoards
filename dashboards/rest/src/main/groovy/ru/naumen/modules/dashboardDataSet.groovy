@@ -873,13 +873,13 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
                 groups: [groupParameter, breakdown].grep()
         )
 
-        def comp = yAxis.stringForCompute?.with {
+        def comp = !(data.sourceForCompute) ? yAxis.stringForCompute?.with {
             [
                     formula    : it as String,
                     title      : yAxis.title as String,
                     computeData: yAxis.computeData as Map<String, Object>
             ]
-        }
+        } : null
 
         def requisite
         if (data.sourceForCompute)
@@ -976,19 +976,22 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
                 break
             case 'DEFAULT':
                 mappingRequisiteNodes = { String group, List<List<String>> list ->
-                    def key = list.head()[2]
+                    def key = list.find { l -> l[1] == (node as DefaultRequisiteNode).dataKey }[2]
                     new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
                 }
                 break
             default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
         }
-        groupKeyMap ? groupKeyMap.inject { first, second ->
-            first + second
-        }?.groupBy { it.head() }?.collect { group, list ->
-            mappingRequisiteNodes(group, list)
-        }?.with {
-            req = new Requisite(title: 'partial', nodes: it)
-        } : null
+        if (groupKeyMap) {
+            groupKeyMap.inject { first, second ->
+                first + second
+            }.groupBy { it.head() }.collect { group, list ->
+                mappingRequisiteNodes(group, list)
+            }.with {
+                req.title = 'partial'
+                req.nodes = it
+            }
+        }
     }
 
     return new DiagramRequest(requisite: requisite, data: data)
@@ -1051,7 +1054,7 @@ private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConver
             // замыкание конструктара с зафиксироваными полями
             Closure buildFilterParameterFromCondition = { Comparison type ->
                 new FilterParameter(
-                        value: valueConverter.call(condition.data),
+                        value: condition.data?.with(valueConverter),
                         title: title,
                         type: type,
                         attribute: attribute
