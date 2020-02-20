@@ -1375,6 +1375,8 @@ private StandardDiagram mappingStandardDiagram(List list)
     def transposeDataSet = resultDataSet.transpose()
     switch (transposeDataSet.size())
     {
+        case 0: // если результирующее множество пустое
+            return new StandardDiagram()
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
             def series = [new Series(name: '', data: aggregationResult as List)]
@@ -1406,6 +1408,8 @@ private RoundDiagram mappingRoundDiagram(List list)
     def transposeDataSet = resultDataSet.transpose()
     switch (transposeDataSet.size())
     {
+        case 0: // если результирующее множество пустое
+            return new RoundDiagram()
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
             return new RoundDiagram(series: (aggregationResult as List).collect { it as Double }, labels: groupResult as Set)
@@ -1423,6 +1427,8 @@ private SummaryDiagram mappingSummaryDiagram(List list)
     List<List> resultDataSet = list.head() as List<List>
     switch (resultDataSet.size())
     {
+        case 0: // если результирующее множество пустое
+            return new SummaryDiagram()
         case 1:
             def (value, title) = resultDataSet.head()
             return new SummaryDiagram(title: title, total: value)
@@ -1441,6 +1447,8 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
     def transposeDataSet = resultDataSet.transpose()
     switch (transposeDataSet.size())
     {
+        case 0: // если результирующее множество пустое
+            return new TableDiagram()
         case 3:
             def (aggregationSet, breakdownSet, groupSet) = transposeDataSet
             Collection<Column> columns = (groupSet as Set<String>).collect { group ->
@@ -1492,6 +1500,8 @@ private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map
 
     switch (firstTransposeDataSet.size())
     {
+        case 0: // если результирующее множество пустое
+            return new ComboDiagram()
         case 2:
             Set labels = firstTransposeDataSet[1] + secondTransposeDataSet[1]
             Collection firstDataSet = labels.collect { group ->
