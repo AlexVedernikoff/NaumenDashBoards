@@ -7,6 +7,7 @@ import type {Control, Props, State} from './types';
 import {getAggregationLabel} from 'components/molecules/AttributeAggregation/helpers';
 import {OPERATORS, TEMPLATE_NAMES, TEMPLATES, TYPES} from './constants';
 import React, {Fragment, PureComponent} from 'react';
+import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import styles from './styles.less';
 import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
@@ -400,7 +401,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<Modal header="Создать поле" renderFooter={this.renderFooter} size="large">
+			<Modal header="Создать поле" renderFooter={this.renderFooter} size={MODAL_SIZES.LARGE}>
 				<div className={styles.container}>
 					{this.renderRemoveInfo()}
 					{this.renderLegacyFormatInfo()}

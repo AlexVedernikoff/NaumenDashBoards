@@ -1,11 +1,11 @@
 // @flow
+import {array, object, string} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {CHART_VARIANTS} from 'utils/chart/constants';
 import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import type {FormikValues} from 'formik';
-import {object, string} from 'yup';
 
 const ERROR_MESSAGES = {
 	[FIELDS.breakdown]: 'Укажите атрибут для разбивки',
@@ -108,6 +108,22 @@ const getCircleChartRules = (values: FormikValues, rules: Object) => {
 const getComboChartRules = (values: FormikValues, rules: Object) => {
 	const {breakdown, source, sourceForCompute, xAxis, yAxis} = FIELDS;
 	const {order} = values;
+
+	rules[FIELDS.order] = array().test(
+		'required-building-sources',
+		`Для данного типа графика необходимо использовать как минимум 2 источника для построения`,
+		order => {
+			let buildingSources = 0;
+
+			order.forEach(number => {
+				if (!values[createOrdinalName(sourceForCompute, number)]) {
+					buildingSources++;
+				}
+			});
+
+			return buildingSources >= 2;
+		}
+	);
 
 	order.forEach(number => {
 		rules[createOrdinalName(source, number)] = requiredAttributeRule(ERROR_MESSAGES[source]);

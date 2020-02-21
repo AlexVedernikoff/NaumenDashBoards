@@ -80,9 +80,9 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 	});
 	const {autoUpdate, customGroups, widgets} = data;
 
+	dispatch(setCustomGroups(customGroups));
 	dispatch(setWidgets(widgets));
 	dispatch(setAutoUpdate(autoUpdate));
-	dispatch(setCustomGroups(customGroups));
 };
 
 const setAutoUpdate = (autoUpdate?: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {

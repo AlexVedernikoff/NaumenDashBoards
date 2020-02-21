@@ -2,6 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
+import type {OnLoadCallback} from './types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
 
 const createRefKey = (attribute: Attribute) => `${attribute.metaClassFqn}$${attribute.code}`;
@@ -9,9 +10,10 @@ const createRefKey = (attribute: Attribute) => `${attribute.metaClassFqn}$${attr
 /**
  * Получаем атрибуты ссылочного атрибута
  * @param {Attribute} refAttr - ссылочный атрибут
+ * @param {OnLoadCallback?} onLoadCallback - возвращает полученные атрибуты
  * @returns {ThunkAction}
  */
-const fetchRefAttributes = (refAttr: Attribute): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const fetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	const key = createRefKey(refAttr);
 	const {ref, ...attr} = refAttr;
 
@@ -22,6 +24,7 @@ const fetchRefAttributes = (refAttr: Attribute): ThunkAction => async (dispatch:
 			linkAttribute: attr
 		});
 
+		onLoadCallback && onLoadCallback(data);
 		dispatch(receiveRefAttributes(data, key));
 	} catch (error) {
 		dispatch(recordRefAttributesError(key));

@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
-import {CreationPanel, IconButton, SearchSelectInput} from 'components/atoms';
+import {CreationPanel, IconButton, Loader, SearchSelectInput} from 'components/atoms';
 import {EditIcon, MinusIcon} from 'icons/form';
 import {InputForm, SimpleSelectList} from 'components/molecules';
 import type {Props, State} from './types';
@@ -15,6 +15,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 			value: ''
 		},
 		disabled: false,
+		loading: false,
 		removable: false,
 		showCreationButton: false
 	};
@@ -130,6 +131,8 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		);
 	};
 
+	renderLoader = () => this.props.loading ? <Loader className={styles.loader} /> : null;
+
 	renderMenu = () => {
 		const {showMenu} = this.state;
 
@@ -175,6 +178,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		return (
 			<div className={selectCN}>
 				{this.renderTitle()}
+				{this.renderLoader()}
 				{this.renderIndicators()}
 				{this.renderMenu()}
 			</div>

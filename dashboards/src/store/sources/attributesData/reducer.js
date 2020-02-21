@@ -1,6 +1,6 @@
 // @flow
-import {ATTRIBUTES_DATA_EVENTS} from './constants';
 import type {AttributesDataAction, AttributesDataState} from './types';
+import {ATTRIBUTES_DATA_EVENTS} from './constants';
 import {defaultAttributesDataAction, initialAttributesDataState} from './init';
 import {receiveData, recordError, requestData, setUploaded} from './helpers';
 

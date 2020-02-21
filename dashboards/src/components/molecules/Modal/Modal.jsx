@@ -2,10 +2,10 @@
 import {Button} from 'components/atoms';
 import cn from 'classnames';
 import {createPortal} from 'react-dom';
+import {FOOTER_POSITIONS, SIZES} from './constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import {root} from 'src';
-import {SIZES} from './constants';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
@@ -13,6 +13,7 @@ export class Modal extends Component<Props> {
 	static defaultProps = {
 		cancelText: 'Отмена',
 		children: null,
+		footerPosition: FOOTER_POSITIONS.LEFT,
 		size: SIZES.NORMAL,
 		submitText: 'Сохранить'
 	};
@@ -20,17 +21,12 @@ export class Modal extends Component<Props> {
 	getContainerCN = () => {
 		const {size} = this.props;
 		const {LARGE, SMALL} = SIZES;
-		const classNames = [styles.container];
 
-		if (size === LARGE) {
-			classNames.push(styles.largeContainer);
-		}
-
-		if (size === SMALL) {
-			classNames.push(styles.smallContainer);
-		}
-
-		return cn(classNames);
+		return cn({
+			[styles.container]: true,
+			[styles.largeContainer]: size === LARGE,
+			[styles.smallContainer]: size === SMALL
+		});
 	};
 
 	prevent = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
@@ -46,15 +42,20 @@ export class Modal extends Component<Props> {
 		);
 	};
 
-	renderModal = () => (
-		<div className={styles.modal}>
-			<div className={this.getContainerCN()} onClick={this.prevent}>
-				{this.renderModalHeader()}
-				{this.renderModalBody()}
-				{this.renderModalFooter()}
+	renderModal = () => {
+		const {size} = this.props;
+		const width = Number.isInteger(size) && size;
+
+		return (
+			<div className={styles.modal}>
+				<div className={this.getContainerCN()} onClick={this.prevent} style={{width}}>
+					{this.renderModalHeader()}
+					{this.renderModalBody()}
+					{this.renderModalFooter()}
+				</div>
 			</div>
-		</div>
-	);
+		);
+	};
 
 	renderModalBody = () => {
 		const {children} = this.props;
@@ -65,10 +66,14 @@ export class Modal extends Component<Props> {
 	};
 
 	renderModalFooter = () => {
-		const {renderFooter} = this.props;
+		const {footerPosition, renderFooter} = this.props;
+		const footerCN = cn({
+			[styles.footer]: true,
+			[styles.rightFooter]: footerPosition === FOOTER_POSITIONS.RIGHT
+		});
 
 		return (
-			<div className={styles.footer}>
+			<div className={footerCN}>
 				{renderFooter ? renderFooter() : this.renderDefaultFooter()}
 			</div>
 		);

@@ -32,6 +32,7 @@ export class Table extends PureComponent<Props, State> {
 				defaultPageSize={10}
 				loadingText="Загрузка данных..."
 				nextText="Следующая"
+				noDataText="Данные отсутствуют"
 				ofText="из"
 				pageText="Страница"
 				previousText="Предыдущая"
