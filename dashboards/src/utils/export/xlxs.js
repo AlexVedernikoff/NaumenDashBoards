@@ -14,6 +14,7 @@ class Sheet {
 	create = () => (`
 		<html xmlns:x="urn:schemas-microsoft-com:office:excel">
 			<head>
+				<meta http-equiv="content-type" content="application/csv;charset=utf-8">
 				<xml>
 					<x:ExcelWorkbook>
 						<x:ExcelWorksheets>
@@ -59,9 +60,8 @@ class Sheet {
 const exportSheet = (name: string, data: SheetType) => {
 	const sheet = (new Sheet(data)).create();
 
-	// \ufeff - BOM, символ указывающий на кодировку utf-8
-	const blob = new Blob(['\ufeff', minimize(sheet)], {
-		type: 'application/csv;charset=UTF-8'
+	const blob = new Blob([minimize(sheet)], {
+		type: 'application/csv;charset=utf-8'
 	});
 
 	save(blob, name, 'xls');

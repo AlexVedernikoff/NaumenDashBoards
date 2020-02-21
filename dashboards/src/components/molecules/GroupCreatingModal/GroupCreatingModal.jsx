@@ -11,6 +11,7 @@ import {isGroupKey} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React, {Component, createContext, Fragment} from 'react';
 import schema from './schema';
+import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import styles from './styles.less';
 import uuid from 'tiny-uuid';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
@@ -83,7 +84,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 		return [];
 	};
 
-	getModalSize = () => this.state.way === GROUP_WAYS.SYSTEM ? 'small' : 'large';
+	getModalSize = () => this.state.way === GROUP_WAYS.SYSTEM ? 360 : MODAL_SIZES.LARGE;
 
 	getWidgetsUsingSelectedCustomGroup = () => {
 		const {widgets} = this.props;
@@ -355,9 +356,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 		return (
 			<Modal header="Настройка группировки" onClose={onClose} onSubmit={this.handleSubmit} size={this.getModalSize()}>
-				<div className={styles.form}>
-					{this.renderForm()}
-				</div>
+				{this.renderForm()}
 			</Modal>
 		);
 	}

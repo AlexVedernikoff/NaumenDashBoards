@@ -7,6 +7,7 @@ import {createSnapshot, EXPORT_VARIANTS} from 'utils/export';
 import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
 import {EXPORT_LIST} from './constants';
+import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
 import {Modal} from 'components/molecules';
 import {PLACEMENTS} from 'components/atoms/Tooltip/constants';
@@ -113,12 +114,16 @@ export class DashboardHeader extends Component<Props, State> {
 		if (showModal) {
 			return (
 				<Modal
-					header="Удалить персональный дашборд?"
+					cancelText="Нет"
+					footerPosition={FOOTER_POSITIONS.RIGHT}
+					header="Подтверждение удаления"
 					onClose={this.hideModal}
 					onSubmit={this.removePersonalDashboard}
-					size="small"
-					submitText="Удалить"
-				/>
+					size={MODAL_SIZES.SMALL}
+					submitText="Да"
+				>
+					Вы действительно хотите удалить персональный дашборд?
+				</Modal>
 			);
 		}
 	};

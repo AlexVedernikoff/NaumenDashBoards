@@ -1,6 +1,8 @@
 // @flow
 import {Attribute, OuterSelect, Source} from 'components/molecules';
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {AttributeValue} from 'components/molecules/Attribute/types';
 import {CHART_VARIANTS} from 'utils/chart';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import {createOrdinalName, createRefName, getNumberFromName, WIDGET_VARIANTS} from 'utils/widget';
@@ -119,25 +121,17 @@ export class DataFormBuilder extends FormBuilder {
 	// $FlowFixMe
 	getOrder = () => this.props.values.order || this.defaultOrder;
 
-	/**
-	 * Функция возвращает список атрибутов ссылочного атрибута
-	 * @param {AttributeType} attribute - ссылочный атрибут
-	 * @returns {Array<AttributeType>}
-	 */
-	getRefAttributeOptions = (attribute: AttributeType) => {
+	getRefAttributes = (attribute: AttributeType) => () => {
 		const {fetchRefAttributes, refAttributes} = this.props;
 		const key = createRefKey(attribute);
-		let options = [];
 
-		const currentAttributes = refAttributes[key];
-
-		if (!currentAttributes) {
+		if (!refAttributes[key]) {
 			fetchRefAttributes(attribute);
-		} else {
-			options = currentAttributes.data;
 		}
+	};
 
-		return options;
+	getTitleAttribute = (attributes: Array<AttributeType>) => {
+		return attributes.find(attribute => attribute.code === 'title') || null;
 	};
 
 	handleBlurName = (e: SyntheticInputEvent<HTMLInputElement>) => {
@@ -169,7 +163,7 @@ export class DataFormBuilder extends FormBuilder {
 			});
 		}
 
-		if (!value || (value && buildSources.length > this.defaultOrder.length)) {
+		if (!value || buildSources.length > this.defaultOrder.length) {
 			setFieldValue(name, value);
 		}
 	};
@@ -212,6 +206,23 @@ export class DataFormBuilder extends FormBuilder {
 
 		setFieldValue(name, newAttr);
 		setFieldValue(FIELDS.computedAttrs, computedAttrs);
+	};
+
+	handleSelectAttribute = (name: string, value: AttributeValue | null) => {
+		const {fetchRefAttributes, refAttributes, setFieldValue} = this.props;
+
+		if (value && !value.ref && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+			const key = createRefKey(value);
+
+			if (refAttributes[key]) {
+				const ref = this.getTitleAttribute(refAttributes[key].data);
+				value = {...value, ref};
+			} else {
+				fetchRefAttributes(value, this.setAttributeWithRef(name, value));
+			}
+		}
+
+		setFieldValue(name, value);
 	};
 
 	handleSelectSource = async (name: string, nextSource: SourceValue | null) => {
@@ -260,11 +271,6 @@ export class DataFormBuilder extends FormBuilder {
 				setFieldValue(createOrdinalName(FIELDS.dataKey, num), uuid());
 			});
 			setFieldValue(FIELDS.order, order);
-		}
-
-		if (order.length < this.defaultOrder.length) {
-			const diff = this.defaultOrder.length - order.length;
-			order = this.addSet(diff);
 		}
 
 		const buildSources = this.getBuildSources(order);
@@ -317,6 +323,13 @@ export class DataFormBuilder extends FormBuilder {
 		}
 	};
 
+	setAttributeWithRef = (name: string, value: AttributeValue) => (refAttributes: Array<AttributeType>) => {
+		const {setFieldValue} = this.props;
+		const ref = this.getTitleAttribute(refAttributes);
+
+		setFieldValue(name, {...value, ref});
+	};
+
 	renderAddSourceInput = () => {
 		const props = {
 			icon: 'plus',
@@ -328,25 +341,33 @@ export class DataFormBuilder extends FormBuilder {
 	};
 
 	renderAttribute = (props: Object) => {
-		const {setFieldValue, values} = this.props;
-		const {name, withDivider, ...inputProps} = props;
+		const {refAttributes, setFieldValue, values} = this.props;
+		const {name, value, withDivider, ...inputProps} = props;
 		const sourceName = createOrdinalName(FIELDS.source, getNumberFromName(name));
 		const {computedAttrs, [sourceName]: source} = values;
+		let onClick;
+		let refAttributeData;
+
+		if (value && ATTRIBUTE_SETS.REF.includes(value.type)) {
+			onClick = this.getRefAttributes(value);
+			refAttributeData = refAttributes[createRefKey(value)];
+		}
 
 		return (
-			<div className={styles.field} key={name} ref={this.setInputRef(name)}>
+			<div className={styles.field} key={name} onClick={onClick} ref={this.setInputRef(name)}>
 				<Attribute
 					computedAttrs={computedAttrs}
 					getAttributeOptions={this.getAttributeOptions}
-					getRefAttributeOptions={this.getRefAttributeOptions}
 					name={name}
 					onChangeTitle={setFieldValue}
 					onRemoveAttribute={this.handleRemoveAttribute}
 					onSaveComputedAttribute={this.handleSaveAttribute}
-					onSelect={setFieldValue}
+					onSelect={this.handleSelectAttribute}
 					onSelectRefInput={setFieldValue}
+					refAttributeData={refAttributeData}
 					source={source}
 					sources={this.getAttributeCreatingModalOptions()}
+					value={value}
 					{...inputProps}
 				/>
 				{withDivider && this.renderDivider('field')}
@@ -465,6 +486,12 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderAttribute(props);
 	};
 
+	renderOrderError = () => (
+		<div className={styles.field}>
+			{this.renderError(FIELDS.order)}
+		</div>
+	);
+
 	renderSource = (callback?: OnSelectSourceCallback) => (name: string) => {
 		const {errors, setFieldValue, sources, values} = this.props;
 		const ordinalNumber = getNumberFromName(name);
@@ -507,6 +534,7 @@ export class DataFormBuilder extends FormBuilder {
 		<Fragment>
 			{this.renderAddSourceInput()}
 			{this.renderByOrder(this.renderSource(callback), FIELDS.source, false)}
+			{this.renderOrderError()}
 			{this.renderDivider('section')}
 		</Fragment>
 	);

@@ -13,6 +13,7 @@ import FieldLabel from './FieldLabel';
 import IconButton from './IconButton';
 import InfoPanel from './InfoPanel';
 import Label from './Label';
+import Loader from './Loader';
 import MaterialDateInput from './MaterialDateInput';
 import MaterialTextInput from './MaterialTextInput';
 import OutsideClickDetector from './OutsideClickDetector';
@@ -41,6 +42,7 @@ export {
 	IconButton,
 	InfoPanel,
 	Label,
+	Loader,
 	MaterialDateInput,
 	MaterialTextInput,
 	OutsideClickDetector,

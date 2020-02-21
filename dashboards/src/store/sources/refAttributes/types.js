@@ -2,14 +2,16 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
 
-export type AttributeData = {
-	data: Attribute[],
+export type OnLoadCallback = (Array<Attribute>) => void;
+
+export type RefAttributeData = {
+	data: Array<Attribute>,
 	error: boolean,
 	loading: boolean
 };
 
-export type AttributeMap = {
-	[key: string]: AttributeData
+export type RefAttributesMap = {
+	[key: string]: RefAttributeData
 };
 
 type RequestRefAttributes = {
@@ -41,4 +43,4 @@ export type RefAttributesAction =
 	| UnknownRefAttributesAction
 ;
 
-export type RefAttributesState = AttributeMap;
+export type RefAttributesState = RefAttributesMap;

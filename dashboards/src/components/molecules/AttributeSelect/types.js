@@ -4,6 +4,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 export type Props = {
 	defaultValue: Attribute,
 	disabled: boolean,
+	loading: boolean,
 	name: string,
 	onChangeTitle: (name: string, title: string) => void,
 	onClickCreationButton: () => void,

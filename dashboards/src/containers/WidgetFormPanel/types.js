@@ -5,6 +5,7 @@ import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetForm
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {FormikProps} from 'formik';
 import {NewWidget} from 'entities';
+import type {OnLoadCallback} from 'store/sources/refAttributes/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 import type {Widget} from 'store/widgets/data/types';
@@ -25,7 +26,7 @@ export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
 	createWidget: (data: CreateFormData, asDefault: boolean) => ThunkAction,
 	fetchAttributes: (classFqn: string) => ThunkAction,
-	fetchRefAttributes: (refAttr: Attribute) => ThunkAction,
+	fetchRefAttributes: (refAttr: Attribute, onLoadCallback?: OnLoadCallback) => ThunkAction,
 	saveWidget: (data: SaveFormData, asDefault: boolean) => ThunkAction
 };
 

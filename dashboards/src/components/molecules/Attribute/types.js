@@ -3,10 +3,10 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
 import type {Node} from 'react';
 import type {Option as SourceOption} from 'components/molecules/SourceControl/types';
+import type {RefAttributeData} from 'store/sources/refAttributes/types';
 import {REF_INPUT_TYPES} from './constants';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
 import type {SourceValue} from 'components/molecules/Source/types';
-
 export type OnSelectCallback = (name: string, value: Attribute) => void;
 
 export type State = {
@@ -28,7 +28,6 @@ export type Props = {
 	computedAttrs?: Array<ComputedAttr>,
 	disabled: boolean,
 	getAttributeOptions: (classFqn: string) => Array<Attribute>,
-	getRefAttributeOptions: (attribute: Attribute) => Array<Attribute>,
 	name: string,
 	onChangeTitle: (name: string, value: AttributeValue) => void,
 	onRemove: (name: string) => void,
@@ -38,6 +37,7 @@ export type Props = {
 	onSelectCallback?: OnSelectCallback,
 	onSelectRefInput: (name: string, value: any) => void,
 	options: Array<AttributeValue>,
+	refAttributeData: RefAttributeData,
 	refInputProps?: RefInputProps,
 	removable: boolean,
 	source: SourceValue,

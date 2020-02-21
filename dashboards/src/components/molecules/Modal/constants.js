@@ -1,7 +1,7 @@
 // @flow
-const LARGE: 'large' = 'large';
-const NORMAL: 'normal' = 'normal';
-const SMALL: 'small' = 'small';
+const LARGE: 'LARGE' = 'LARGE';
+const NORMAL: 'NORMAL' = 'NORMAL';
+const SMALL: 'SMALL' = 'SMALL';
 
 const SIZES = {
 	LARGE,
@@ -9,6 +9,15 @@ const SIZES = {
 	SMALL
 };
 
+const LEFT: 'LEFT' = 'LEFT';
+const RIGHT: 'RIGHT' = 'RIGHT';
+
+const FOOTER_POSITIONS = {
+	LEFT,
+	RIGHT
+};
+
 export {
+	FOOTER_POSITIONS,
 	SIZES
 };

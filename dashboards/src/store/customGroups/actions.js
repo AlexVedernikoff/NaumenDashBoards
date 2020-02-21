@@ -7,18 +7,18 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 
-const createCustomGroup = (payload: CustomGroup): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<string> => {
+const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<string> => {
 	let id = '';
 
 	try {
 		const {data} = await client.post(buildUrl('dashboardSettings', 'saveCustomGroup', 'requestContent,user'), {
 			...getParams(getState()),
-			group: payload
+			group: customGroupData
 		});
 		id = data;
 
-		dispatch(removeCustomGroup(payload.id));
-		dispatch(saveCustomGroup({...payload, id}));
+		dispatch(removeCustomGroup(localId));
+		dispatch(saveCustomGroup({...customGroupData, id}));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка создания группировки',

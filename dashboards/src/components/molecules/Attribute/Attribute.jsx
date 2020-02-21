@@ -20,6 +20,13 @@ import type {SourceValue} from 'components/molecules/Source/types';
 import styles from './styles.less';
 
 export class Attribute extends PureComponent<Props, State> {
+	static defaultProps = {
+		refAttributeData: {
+			data: [],
+			loading: false
+		}
+	};
+
 	state = {
 		showCreatingModal: false
 	};
@@ -138,30 +145,17 @@ export class Attribute extends PureComponent<Props, State> {
 	};
 
 	handleSelect = (parent: AttributeType | null) => (name: string, value: AttributeValue) => {
-		const {onSelect, onSelectCallback, value: prevValue} = this.props;
-
-		if (parent && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-			parent.ref = value;
-			onSelect(name, prevValue);
-		} else {
-			onSelect(name, value);
-		}
-
-		this.changeRefInputData(prevValue, value);
-		this.applyCallback(onSelectCallback, name, value);
-	};
-
-	handleSelectWithRef = (parent: AttributeType | null) => (name: string, value: AttributeType) => {
 		const {onSelect, onSelectCallback} = this.props;
 		let {value: prevValue} = this.props;
 
-		if (parent) {
+		if (parent && parent.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 			const prevRefValue = parent.ref;
 			parent.ref = {...value};
 
 			onSelect(name, prevValue);
 			prevValue = prevRefValue;
 		} else {
+			// $FlowFixMe
 			onSelect(name, {...value});
 		}
 
@@ -222,7 +216,7 @@ export class Attribute extends PureComponent<Props, State> {
 				this.renderRefByType(refInputProps),
 				this.renderSelect({
 					...props,
-					onSelect: this.handleSelectWithRef(parent)
+					onSelect: this.handleSelect(parent)
 				})
 			);
 		}
@@ -254,12 +248,17 @@ export class Attribute extends PureComponent<Props, State> {
 		</div>
 	);
 
-	renderChildAttribute = (props: Object, parent: AttributeType) => this.renderAttribute({
-		...props,
-		options: this.props.getRefAttributeOptions(parent),
-		parent,
-		value: parent.ref
-	});
+	renderChildAttribute = (props: Object, parent: AttributeType) => {
+		const {data: options, loading} = this.props.refAttributeData;
+
+		return this.renderAttribute({
+			...props,
+			loading,
+			options,
+			parent,
+			value: parent.ref
+		});
+	};
 
 	renderComputedAttribute = (props: Object) => {
 		props = {

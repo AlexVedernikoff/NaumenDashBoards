@@ -48,7 +48,7 @@ const save = async (blob: Blob, name: string, extension: string) => {
  */
 const isIE = () => typeof document.documentMode === 'number' || /Edge/.test(navigator.userAgent);
 
-const minimize = (string: string) => string.replace(/\t|\r|\n|\v|\f/g, '');
+const minimize = (string: string): string => string.replace(/\t|\r|\n|\v|\f/g, '');
 
 export {
 	isIE,

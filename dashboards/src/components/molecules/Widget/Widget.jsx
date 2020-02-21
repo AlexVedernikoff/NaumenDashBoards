@@ -8,6 +8,7 @@ import {ExportIcon} from 'icons/header';
 import type {ExportItem, Props, State} from './types';
 import {EXPORT_LIST} from './constants';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import {IconButton} from 'components/atoms';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
@@ -88,7 +89,7 @@ export class Widget extends PureComponent<Props, State> {
 
 	handleClickRemoveButton = () => this.setState({showRemoveModal: true});
 
-	handleCLoseRemoveModal = () => this.setState({showRemoveModal: false});
+	handleCloseRemoveModal = () => this.setState({showRemoveModal: false});
 
 	handleSubmitRemoveModal = () => {
 		const {data, onRemove} = this.props;
@@ -218,12 +219,15 @@ export class Widget extends PureComponent<Props, State> {
 			return (
 				<Modal
 					cancelText="Нет"
-					header="Вы точно хотите удалить виджет?"
-					onClose={this.handleCLoseRemoveModal}
+					footerPosition={FOOTER_POSITIONS.RIGHT}
+					header="Подтверждение удаления"
+					onClose={this.handleCloseRemoveModal}
 					onSubmit={this.handleSubmitRemoveModal}
-					size="small"
+					size={SIZES.SMALL}
 					submitText="Да"
-				/>
+				>
+					Вы действительно хотите удалить виджет?
+				</Modal>
 			);
 		}
 	};
