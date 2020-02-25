@@ -5,24 +5,24 @@ import React, {PureComponent} from 'react';
 
 export class SimpleOperand extends PureComponent<Props> {
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {float, onChange, type} = this.props;
+		const {float, onChange, operand} = this.props;
 		let {value: data} = e.currentTarget;
 
 		if (float) {
 			data = data.replace(/,/g, '.');
 		}
 
-		onChange({data, type});
+		onChange({...operand, data});
 	};
 
 	render () {
-		const {data, onlyNumber} = this.props;
+		const {onlyNumber, operand} = this.props;
 
 		return (
 			<MaterialTextInput
 				onChange={this.handleChange}
 				onlyNumber={onlyNumber}
-				value={data}
+				value={operand.data}
 			/>
 		);
 	}

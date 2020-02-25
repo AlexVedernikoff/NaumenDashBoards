@@ -2,15 +2,15 @@
 import {Button} from 'components/atoms';
 import cn from 'classnames';
 import {createNewOrCondition, getDefaultOperandType} from 'components/molecules/GroupCreatingModal/helpers';
-import {CustomSubGroupOrCondition} from 'components/molecules';
-import type {OrCondition} from 'store/customGroups/types';
+import {OrCondition} from 'components/molecules/CustomGroup/components';
+import type {OrCondition as OrConditionType} from 'components/molecules/CustomGroup/components/OrCondition/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import {withGroup} from 'components/molecules/GroupCreatingModal';
 
-export class CustomSubGroupAndCondition extends PureComponent<Props> {
+export class AndCondition extends PureComponent<Props> {
 	handleCreateOrCondition = () => {
 		const {attribute, condition, index, onUpdate} = this.props;
 		const operandType = getDefaultOperandType(attribute.type);
@@ -18,7 +18,7 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 		if (operandType) {
 			onUpdate(index, [
 				...condition,
-				createNewOrCondition(operandType)
+				createNewOrCondition(attribute.type, operandType)
 			]);
 		}
 	};
@@ -30,7 +30,7 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 		condition.length === 0 ? onRemove(andConditionIndex) : onUpdate(andConditionIndex, [...condition]);
 	};
 
-	handleUpdateOrCondition = (index: number, orCondition: OrCondition) => {
+	handleUpdateOrCondition = (index: number, orCondition: OrConditionType) => {
 		const {condition, index: AndConditionIndex, onUpdate} = this.props;
 		condition[index] = orCondition;
 
@@ -53,7 +53,7 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 		);
 	};
 
-	renderOrCondition = (condition: OrCondition, index: number, conditions: Array<OrCondition>) => {
+	renderOrCondition = (condition: OrConditionType, index: number, conditions: Array<OrConditionType>) => {
 		const {isLast: isLastAndCondition, validationPath: currentPath} = this.props;
 		const hasLastPosition = conditions.length - 1 === index;
 		const isLast = isLastAndCondition && conditions.length === 1;
@@ -61,7 +61,7 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 
 		return (
 			<div className={styles.orCondition} key={validationPath}>
-				<CustomSubGroupOrCondition
+				<OrCondition
 					condition={condition}
 					disabled={!hasLastPosition}
 					index={index}
@@ -95,4 +95,4 @@ export class CustomSubGroupAndCondition extends PureComponent<Props> {
 	}
 }
 
-export default withGroup(CustomSubGroupAndCondition);
+export default withGroup(AndCondition);

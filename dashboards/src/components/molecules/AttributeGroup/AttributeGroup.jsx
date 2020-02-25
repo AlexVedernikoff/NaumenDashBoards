@@ -47,11 +47,11 @@ export class AttributeGroup extends PureComponent<Props, State> {
 		const type = attribute ? attribute.type : '';
 		const {DATE, NUMBER} = ATTRIBUTE_SETS;
 
-		if (NUMBER.includes(type)) {
+		if (type in NUMBER) {
 			return <NumberIcon />;
 		}
 
-		if (DATE.includes(type)) {
+		if (type in DATE) {
 			return <CalendarIcon />;
 		}
 

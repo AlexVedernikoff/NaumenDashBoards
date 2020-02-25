@@ -1,6 +1,5 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {CustomGroupId} from 'store/customGroups/types';
 import type {GroupWay} from 'store/widgets/data/types';
 import type {Props as ContainerProps} from 'containers/GroupCreatingModal/types';
 
@@ -25,7 +24,7 @@ export type State = {
 	errors: ErrorsMap,
 	hasError: boolean,
 	isSubmitting: boolean,
-	selectedCustomGroup: CustomGroupId,
+	selectedCustomGroup: string,
 	showSaveInfo: boolean,
 	systemOptions: Array<Object>,
 	systemValue: Object | null,

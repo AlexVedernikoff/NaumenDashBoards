@@ -11,12 +11,12 @@ export class SelectOperand extends PureComponent<Props> {
 	getOptionValue = (option: Data) => option.uuid;
 
 	handleSelect = (name: string, data: SelectData) => {
-		const {onChange, type} = this.props;
-		onChange({data, type});
+		const {onChange, operand} = this.props;
+		onChange({...operand, data});
 	};
 
 	render () {
-		const {data, onClickShowMore, options, showMore} = this.props;
+		const {onClickShowMore, operand, options, showMore} = this.props;
 
 		return (
 				<MaterialSelect
@@ -26,7 +26,7 @@ export class SelectOperand extends PureComponent<Props> {
 					onSelect={this.handleSelect}
 					options={options}
 					showMore={showMore}
-					value={data}
+					value={operand.data}
 				/>
 		);
 	}

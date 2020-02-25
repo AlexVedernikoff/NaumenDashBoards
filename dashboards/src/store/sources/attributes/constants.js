@@ -20,6 +20,7 @@ const COMPUTED_ATTR: 'COMPUTED_ATTR' = 'COMPUTED_ATTR';
 const date: 'date' = 'date';
 const dateTime: 'dateTime' = 'dateTime';
 const double: 'double' = 'double';
+const dtInterval: 'dtInterval' = 'dtInterval';
 const integer: 'integer' = 'integer';
 const metaClass: 'metaClass' = 'metaClass';
 const object: 'object' = 'object';
@@ -34,6 +35,7 @@ const SOURCE_ATTRIBUTE_TYPES = {
 	date,
 	dateTime,
 	double,
+	dtInterval,
 	integer,
 	metaClass,
 	object,
@@ -46,10 +48,26 @@ const ATTRIBUTE_TYPES = {
 	COMPUTED_ATTR
 };
 
-const DATE = [date, dateTime];
-const NUMBER = [integer, double];
-const OBJECT = [object, boLinks, backBOLinks];
-const REF = [...OBJECT, catalogItemSet, catalogItem];
+const DATE = {
+	date,
+	dateTime
+};
+const NUMBER = {
+	double,
+	integer
+};
+
+const OBJECT = {
+	backBOLinks,
+	boLinks,
+	object
+};
+
+const REF = {
+	...OBJECT,
+	catalogItem,
+	catalogItemSet
+};
 
 const ATTRIBUTE_SETS = {
 	DATE,

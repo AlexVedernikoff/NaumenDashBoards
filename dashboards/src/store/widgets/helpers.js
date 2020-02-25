@@ -26,7 +26,7 @@ const transformGroupFormat = (object: Object, customGroups: CustomGroupsMap) => 
 	});
 };
 
-const getDefaultSystemGroup = (attribute: Object) => ATTRIBUTE_SETS.DATE.includes(attribute.type)
+const getDefaultSystemGroup = (attribute: Object) => attribute.type in ATTRIBUTE_SETS.DATE
 	? createDefaultGroup(DATETIME_SYSTEM_GROUP.MONTH)
 	: createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
 

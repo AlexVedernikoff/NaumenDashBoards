@@ -1,6 +1,8 @@
 // @flow
-import type {AndCondition} from 'store/customGroups/types';
 import type {Attribute} from 'store/sources/attributes/types';
+import type {OrCondition} from 'components/molecules/CustomGroup/components/OrCondition/types';
+
+export type AndCondition = Array<OrCondition>;
 
 export type Props = {
 	attribute: Attribute,

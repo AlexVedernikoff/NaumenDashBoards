@@ -203,7 +203,7 @@ export class Attribute extends PureComponent<Props, State> {
 		if (value) {
 			props.onChangeTitle = this.handleChangeTitle(parent);
 
-			if (!parent && ATTRIBUTE_SETS.REF.includes(value.type)) {
+			if (!parent && value.type in ATTRIBUTE_SETS.REF) {
 				return (
 					<Fragment>
 						{this.renderParentAttribute(props, parent)}

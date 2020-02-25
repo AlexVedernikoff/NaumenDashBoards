@@ -31,8 +31,8 @@ export class OuterSelect extends PureComponent<Props> {
 		}
 
 		return (
-			<SimpleTooltip text={tip}>
-				<div className={styles.optionContainer} key={value}>
+			<SimpleTooltip key={value} text={tip}>
+				<div className={styles.optionContainer}>
 						<div className={styles.option} data-value={value} onClick={this.handleClick}>
 							{label}
 							{this.renderCheckedIcon(value)}

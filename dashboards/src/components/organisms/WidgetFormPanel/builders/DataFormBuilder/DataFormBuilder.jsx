@@ -211,7 +211,7 @@ export class DataFormBuilder extends FormBuilder {
 	handleSelectAttribute = (name: string, value: AttributeValue | null) => {
 		const {fetchRefAttributes, refAttributes, setFieldValue} = this.props;
 
-		if (value && !value.ref && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && ATTRIBUTE_SETS.REF.includes(value.type)) {
+		if (value && !value.ref && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && value.type in ATTRIBUTE_SETS.REF) {
 			const key = createRefKey(value);
 
 			if (refAttributes[key]) {
@@ -348,7 +348,7 @@ export class DataFormBuilder extends FormBuilder {
 		let onClick;
 		let refAttributeData;
 
-		if (value && ATTRIBUTE_SETS.REF.includes(value.type)) {
+		if (value && value.type in ATTRIBUTE_SETS.REF) {
 			onClick = this.getRefAttributes(value);
 			refAttributeData = refAttributes[createRefKey(value)];
 		}

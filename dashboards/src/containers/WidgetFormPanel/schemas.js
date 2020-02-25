@@ -28,7 +28,7 @@ const {SUMMARY, TABLE} = WIDGET_VARIANTS;
  * @returns {boolean}
  */
 const validateAttribute = (value: Attribute | null) => {
-	if (value && ATTRIBUTE_SETS.REF.includes(value.type)) {
+	if (value && value.type in ATTRIBUTE_SETS) {
 		value = value.ref;
 	}
 
