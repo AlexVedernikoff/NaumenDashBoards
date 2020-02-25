@@ -6,9 +6,9 @@ import type {OperandType, OrCondition} from 'store/customGroups/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 
 const getDefaultOperandType = (type: GroupType) => {
-	const {metaClass, state} = ATTRIBUTE_TYPES;
+	const {metaClass, state, string} = ATTRIBUTE_TYPES;
 	const {DATE, NUMBER, REF} = ATTRIBUTE_SETS;
-	const {BETWEEN, CONTAINS, EQUAL} = OPERAND_TYPES;
+	const {BETWEEN, CONTAINS, EMPTY, EQUAL} = OPERAND_TYPES;
 
 	if (DATE.includes(type)) {
 		return BETWEEN;
@@ -20,6 +20,10 @@ const getDefaultOperandType = (type: GroupType) => {
 
 	if (REF.includes(type) || type === metaClass || type === state) {
 		return CONTAINS;
+	}
+
+	if (type === string) {
+		return EMPTY;
 	}
 };
 

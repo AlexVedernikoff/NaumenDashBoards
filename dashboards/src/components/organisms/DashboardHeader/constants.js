@@ -2,12 +2,12 @@ import {FILE_VARIANTS} from 'utils/export';
 
 const EXPORT_LIST = [
 	{
-		key: FILE_VARIANTS.PDF,
-		text: FILE_VARIANTS.PDF
+		label: FILE_VARIANTS.PDF,
+		value: FILE_VARIANTS.PDF
 	},
 	{
-		key: FILE_VARIANTS.PNG,
-		text: FILE_VARIANTS.PNG
+		label: FILE_VARIANTS.PNG,
+		value: FILE_VARIANTS.PNG
 	}
 ];
 

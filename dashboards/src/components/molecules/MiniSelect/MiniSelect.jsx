@@ -3,8 +3,8 @@ import {CaretIcon} from 'icons/form';
 import cn from 'classnames';
 import type {Label, Option, Props, State} from './types';
 import React, {createElement, Fragment, PureComponent} from 'react';
+import {SimpleTooltip} from 'components/atoms';
 import styles from './styles.less';
-import {Tip} from 'components/atoms';
 
 export class MiniSelect extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -134,9 +134,9 @@ export class MiniSelect extends PureComponent<Props, State> {
 	};
 
 	renderValueWithTip = () => (
-		<Tip text={this.props.tip}>
+		<SimpleTooltip text={this.props.tip}>
 			{this.renderValue()}
-		</Tip>
+		</SimpleTooltip>
 	);
 
 	render () {

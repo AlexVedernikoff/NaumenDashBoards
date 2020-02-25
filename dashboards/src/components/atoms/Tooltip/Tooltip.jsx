@@ -7,7 +7,7 @@ import styles from './styles.less';
 
 class Tooltip extends Component<Props> {
 	static defaultProps = {
-		placement: PLACEMENTS.RIGHT,
+		placement: PLACEMENTS.BOTTOM,
 		text: ''
 	};
 

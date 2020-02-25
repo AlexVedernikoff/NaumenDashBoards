@@ -69,11 +69,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 			return groups.filter(group => DATE.includes(group.type));
 		}
 
-		if (NUMBER.includes(type)) {
-			return groups.filter(group => NUMBER.includes(group.type));
-		}
-
-		if (REF.includes(type)) {
+		if (REF.includes(type) || NUMBER.includes(type)) {
 			return groups.filter(group => group.type === type);
 		}
 

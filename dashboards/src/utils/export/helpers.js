@@ -1,11 +1,11 @@
 // @flow
+import moment from 'moment';
 
 /**
  * Cоздает имя файла
  * @returns {Promise<string>}
  */
 const createContextName = async () => {
-	const date = new Date();
 	let name;
 
 	try {
@@ -15,7 +15,7 @@ const createContextName = async () => {
 		name = 'Дашборд';
 	}
 
-	return `${name}(${date.getDate()}-${date.getMonth()}-${date.getFullYear()})`;
+	return `${name}(${moment().format('DD-MM-YYYY')})`;
 };
 
 /**

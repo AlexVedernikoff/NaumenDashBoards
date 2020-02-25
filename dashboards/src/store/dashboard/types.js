@@ -92,20 +92,15 @@ export type DashboardAction =
 	| UnknownDashboardAction
 ;
 
-export type AutoUpdate = {
+export type AutoUpdateSettings = {
 	defaultInterval: number,
 	enabled: boolean,
 	fn?: IntervalID,
 	interval?: number
 };
 
-export type AutoUpdateRequestPayload = {
-	enabled: boolean,
-	interval: number
-};
-
 export type DashboardState = {
-	autoUpdate: AutoUpdate,
+	autoUpdate: AutoUpdateSettings,
 	editable: boolean,
 	editMode: boolean,
 	error: boolean,

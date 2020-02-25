@@ -1,6 +1,5 @@
 // @flow
 import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
-import type {AutoUpdateRequestPayload} from './types';
 import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
@@ -269,14 +268,16 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 
 /**
  * Сохраняет настройки автообновления
- * @param {AutoUpdateRequestPayload} autoUpdate - найстроки автообновления
+ * @param {boolean} enabled - найстроки автообновления
+ * @param {number} interval - найстроки автообновления
  * @returns {ThunkAction}
  */
-const saveAutoUpdateSettings = (autoUpdate: AutoUpdateRequestPayload) => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		const {context, dashboard} = getState();
 		const {contentCode, subjectUuid: classFqn} = context;
 		const {personal: isPersonal} = dashboard;
+		const autoUpdate = {enabled, interval};
 		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {
 			autoUpdate,
 			classFqn,

@@ -1,18 +1,16 @@
 // @flow
-import AutoUpdateForm from 'containers/AutoUpdateForm';
-import {Button, ButtonGroup, DropDown, Tooltip} from 'components/atoms';
+import {AutoUpdateForm, DropDownButton, IconButton, NavItem} from './components';
+import {Button, ButtonGroup} from 'components/atoms';
 import {CloseIcon} from 'icons/form';
-import cn from 'classnames';
 import {createSnapshot, EXPORT_VARIANTS} from 'utils/export';
-import type {ExportButtonProps, State} from './types';
 import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
 import {Modal} from 'components/molecules';
-import {PLACEMENTS} from 'components/atoms/Tooltip/constants';
 import type {Props} from 'containers/DashboardHeader/types';
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
+import type {State} from './types';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
@@ -69,44 +67,38 @@ export class DashboardHeader extends Component<Props, State> {
 	showModal = () => this.setState({showModal: true});
 
 	renderAutoUpdateButton = () => {
-		const {autoUpdateEnabled} = this.props;
-		const CN = autoUpdateEnabled ? cn(styles.buttonIcon, styles.enabledAutoUpdate) : styles.buttonIcon;
+		const {autoUpdateSettings, saveAutoUpdateSettings} = this.props;
+		const buttonCN = autoUpdateSettings.enabled ? styles.enabledAutoUpdateButton : '';
 
 		return (
-			<div className={styles.autoUpdateContainer}>
-				<div className={CN}>
+			<NavItem className={styles.autoUpdateItem}>
+				<IconButton className={buttonCN}>
 					<TimeIcon />
-				</div>
-				<AutoUpdateForm className={styles.autoUpdateForm} />
-			</div>
+				</IconButton>
+				<AutoUpdateForm
+					autoUpdateSettings={autoUpdateSettings}
+					className={styles.autoUpdateForm}
+					onSubmit={saveAutoUpdateSettings}
+				/>
+			</NavItem>
 		);
 	};
 
-	renderDownloadExportButton = () => this.renderExportButton({
-		icon: <ExportIcon />,
-		tip: 'Скачать',
-		way: EXPORT_VARIANTS.DOWNLOAD
-	});
+	renderDownloadExportButton = () => (
+		<NavItem>
+			<DropDownButton menu={EXPORT_LIST} onSelect={this.createDocument(EXPORT_VARIANTS.DOWNLOAD)} tip="Скачать">
+				<ExportIcon />
+			</DropDownButton>
+		</NavItem>
+	);
 
-	renderExportButton = (props: ExportButtonProps) => {
-		const {icon, tip, way} = props;
-
-		return (
-			<Tooltip placement={PLACEMENTS.LEFT} text={tip}>
-				<DropDown icon={icon} list={EXPORT_LIST} onClick={this.createDocument(way)}>
-					<div className={styles.buttonIcon}>
-						{icon}
-					</div>
-				</DropDown>
-			</Tooltip>
-		);
-	};
-
-	renderMailExportButton = () => this.renderExportButton({
-		icon: <MailIcon />,
-		tip: 'Отправить на почту',
-		way: EXPORT_VARIANTS.MAIL
-	});
+	renderMailExportButton = () => (
+		<NavItem>
+			<DropDownButton menu={EXPORT_LIST} onSelect={this.createDocument(EXPORT_VARIANTS.MAIL)} tip="Отправить на почту">
+				<MailIcon />
+			</DropDownButton>
+		</NavItem>
+	);
 
 	renderModal = () => {
 		const {showModal} = this.state;
@@ -132,28 +124,22 @@ export class DashboardHeader extends Component<Props, State> {
 		const {editDashboard, editMode, personalDashboard, seeDashboard, user} = this.props;
 
 		if (user.role !== USER_ROLES.REGULAR || personalDashboard) {
-			if (editMode) {
-				return (
-					<div className={styles.buttonMode}>
-						<Button onClick={seeDashboard} type="button">Просмотреть</Button>
-					</div>
-				);
-			}
-
-			return (
-				<div className={styles.buttonMode}>
-					<Button onClick={editDashboard} type="button">Редактировать</Button>
-				</div>
-			);
+			return editMode ? this.renderNavButton('Посмотреть', seeDashboard) : this.renderNavButton('Редактировать', editDashboard);
 		}
 	};
 
+	renderNavButton = (text: string, onClick: Function, disabled: boolean = false) => (
+		<NavItem>
+			<Button className={styles.navButton} disabled={disabled} onClick={onClick}>{text}</Button>
+		</NavItem>
+	);
+
 	renderRefreshButton = () => (
-		<Tooltip placement={PLACEMENTS.LEFT} text="Обновить виджеты">
-			<div className={styles.buttonIcon}>
-				<RefreshIcon onClick={this.handleClickRefreshButton} />
-			</div>
-		</Tooltip>
+		<NavItem>
+			<IconButton onClick={this.handleClickRefreshButton} tip="Обновить виджеты">
+				<RefreshIcon />
+			</IconButton>
+		</NavItem>
 	);
 
 	renderRemoveButton = () => {
@@ -161,13 +147,13 @@ export class DashboardHeader extends Component<Props, State> {
 
 		if (personalDashboard) {
 			return (
-				<Fragment>
+				<NavItem>
 					<Button disabled={personalDashboardDeleting} onClick={this.showModal} outline>
 						<CloseIcon />
 						<span>Удалить</span>
 					</Button>
 					{this.renderModal()}
-				</Fragment>
+				</NavItem>
 			);
 		}
 	};
@@ -184,11 +170,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {MASTER, SUPER} = USER_ROLES;
 
 		if (role !== SUPER && !hasPersonalDashboard && !personalDashboard && (role === MASTER || editableDashboard)) {
-			return (
-				<div className={styles.buttonMode}>
-					<Button disabled={personalDashboardCreating} onClick={createPersonalDashboard} type="button">Сохранить себе</Button>
-				</div>
-			);
+			return this.renderNavButton('Сохранить себе', createPersonalDashboard, personalDashboardCreating);
 		}
 	};
 
@@ -198,10 +180,12 @@ export class DashboardHeader extends Component<Props, State> {
 
 		if (hasPersonalDashboard) {
 			return (
-				<ButtonGroup disabled={switching}>
-					<Button onClick={this.handleClickSwitchButton(true)} outline={!personalDashboard} variant={BUTTON_VARIANTS.GREEN}>Личный</Button>
-					<Button onClick={this.handleClickSwitchButton(false)} outline={personalDashboard} variant={BUTTON_VARIANTS.GREEN}>Общий</Button>
-				</ButtonGroup>
+				<NavItem>
+					<ButtonGroup disabled={switching}>
+						<Button onClick={this.handleClickSwitchButton(true)} outline={!personalDashboard} variant={BUTTON_VARIANTS.GREEN}>Личный</Button>
+						<Button onClick={this.handleClickSwitchButton(false)} outline={personalDashboard} variant={BUTTON_VARIANTS.GREEN}>Общий</Button>
+					</ButtonGroup>
+				</NavItem>
 			);
 		}
 	};
@@ -210,32 +194,16 @@ export class DashboardHeader extends Component<Props, State> {
 		return (
 			<header className={styles.header}>
 				<ul className={styles.nav}>
-					<li className={styles.navItem}>
-						{this.renderSwitchDashboardButton()}
-					</li>
+					{this.renderSwitchDashboardButton()}
 				</ul>
 				<ul className={styles.nav}>
-					<li className={styles.navItem}>
-						{this.renderAutoUpdateButton()}
-					</li>
-					<li className={styles.navItem}>
-						{this.renderRefreshButton()}
-					</li>
-					<li className={styles.navItem}>
-						{this.renderDownloadExportButton()}
-					</li>
-					<li className={styles.navItem}>
-						{this.renderMailExportButton()}
-					</li>
-					<li className={styles.navItem}>
-						{this.renderRemoveButton()}
-					</li>
-					<li className={styles.navItem}>
-						{this.renderSaveSelfButton()}
-					</li>
-					<li className={styles.navItem}>
-						{this.renderModeButton()}
-					</li>
+					{this.renderAutoUpdateButton()}
+					{this.renderRefreshButton()}
+					{this.renderDownloadExportButton()}
+					{this.renderMailExportButton()}
+					{this.renderRemoveButton()}
+					{this.renderSaveSelfButton()}
+					{this.renderModeButton()}
 				</ul>
 			</header>
 		);

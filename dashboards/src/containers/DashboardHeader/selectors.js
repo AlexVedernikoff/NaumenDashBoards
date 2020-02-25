@@ -6,6 +6,7 @@ import {
 	editDashboard,
 	getSettings,
 	removePersonalDashboard,
+	saveAutoUpdateSettings,
 	seeDashboard,
 	sendToMail
 } from 'store/dashboard/actions';
@@ -17,7 +18,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const {switching, user} = context;
 
 	return {
-		autoUpdateEnabled: autoUpdate.enabled,
+		autoUpdateSettings: autoUpdate,
 		editableDashboard: editable,
 		editMode,
 		personalDashboard: personal,
@@ -33,6 +34,7 @@ export const functions: ConnectedFunctions = {
 	editDashboard,
 	getSettings,
 	removePersonalDashboard,
+	saveAutoUpdateSettings,
 	seeDashboard,
 	sendToMail,
 	switchDashboard
