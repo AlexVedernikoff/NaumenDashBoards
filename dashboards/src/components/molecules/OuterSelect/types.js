@@ -3,6 +3,7 @@ import type {Element} from 'react';
 
 export type Option = {
 	label: string | Element<'svg'>,
+	tip: string,
 	value: string
 };
 

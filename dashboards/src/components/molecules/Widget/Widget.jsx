@@ -9,7 +9,7 @@ import type {ExportItem, Props, State} from './types';
 import {EXPORT_LIST} from './constants';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
-import {IconButton} from 'components/atoms';
+import {IconButton, Tooltip} from 'components/atoms';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
 
@@ -181,9 +181,12 @@ export class Widget extends PureComponent<Props, State> {
 			: EXPORT_LIST;
 
 		return (
-			<IconButton tip={list.map(this.renderExportItem)}>
-				<ExportIcon />
-			</IconButton>
+			<Tooltip text={list.map(this.renderExportItem)}>
+				<IconButton tip="Выгрузить">
+					<ExportIcon />
+				</IconButton>
+			</Tooltip>
+
 		);
 	};
 

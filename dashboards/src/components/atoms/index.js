@@ -5,7 +5,6 @@ import Checkbox from './Checkbox';
 import CreationPanel from './CreationPanel';
 import DatepickerControl from './DatepickerControl';
 import Divider from './Divider';
-import DropDown from './DropDown';
 import ExtendButton from './ExtendButton';
 import FieldButton from './FieldButton';
 import FieldError from './FieldError';
@@ -21,8 +20,8 @@ import Popover from './Popover';
 import RadioButton from './RadioButton';
 import SearchSelectInput from './SearchSelectInput';
 import SimpleListOption from './SimpleListOption';
+import SimpleTooltip from './SimpleTooltip';
 import TextArea from './TextArea';
-import Tip from './Tip';
 import Title from './Title';
 import Toast from './Toast';
 import Tooltip from './Tooltip';
@@ -34,7 +33,6 @@ export {
 	CreationPanel,
 	DatepickerControl,
 	Divider,
-	DropDown,
 	ExtendButton,
 	FieldButton,
 	FieldError,
@@ -50,8 +48,8 @@ export {
 	RadioButton,
 	SearchSelectInput,
 	SimpleListOption,
+	SimpleTooltip,
 	TextArea,
-	Tip,
 	Title,
 	Toast,
 	Tooltip

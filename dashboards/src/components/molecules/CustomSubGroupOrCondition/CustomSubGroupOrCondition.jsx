@@ -8,7 +8,8 @@ import {
 	DATETIME_OPTIONS,
 	INTEGER_OPTIONS,
 	META_CLASS_AND_STATE_OPTIONS,
-	OBJECT_OPTIONS
+	OBJECT_OPTIONS,
+	STRING_OPTIONS
 } from './constants';
 import {BetweenOperand, MaterialSelect, MultiSelectOperand, SelectOperand, SimpleOperand} from 'components/molecules';
 import type {
@@ -83,7 +84,8 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 			integer,
 			metaClass,
 			object,
-			state
+			state,
+			string
 		} = ATTRIBUTE_TYPES;
 
 		switch (type) {
@@ -106,6 +108,8 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 			case metaClass:
 			case state:
 				return META_CLASS_AND_STATE_OPTIONS;
+			case string:
+				return STRING_OPTIONS;
 		}
 	};
 
@@ -194,6 +198,7 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 			CONTAINS_ATTR_CURRENT_OBJECT,
 			CONTAINS_INCLUDING_ARCHIVAL,
 			CONTAINS_INCLUDING_NESTED,
+			CONTAINS_STRING,
 			EQUAL,
 			EQUAL_ATTR_CURRENT_OBJECT,
 			GREATER,
@@ -202,6 +207,8 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 			NEAR,
 			NOT_CONTAINS,
 			NOT_CONTAINS_INCLUDING_ARCHIVAL,
+			NOT_CONTAINS_STRING,
+			NOT_CONTAINS_STRING_INCLUDING_EMPTY,
 			NOT_EQUAL,
 			NOT_EQUAL_NOT_EMPTY,
 			TITLE_CONTAINS,
@@ -230,6 +237,9 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 			case NOT_EQUAL:
 			case NOT_EQUAL_NOT_EMPTY:
 				return this.renderSimpleOperand(condition, true);
+			case CONTAINS_STRING:
+			case NOT_CONTAINS_STRING:
+			case NOT_CONTAINS_STRING_INCLUDING_EMPTY:
 			case TITLE_CONTAINS:
 			case TITLE_NOT_CONTAINS:
 				return this.renderSimpleOperand(condition);

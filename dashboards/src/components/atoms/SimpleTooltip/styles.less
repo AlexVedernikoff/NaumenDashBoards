@@ -1,0 +1,41 @@
+@import '/styles/variables';
+
+:local {
+	@vertical-offset: calc(100% + 3px);
+
+	.container {
+		position: relative;
+
+		&:hover {
+			.tooltip {
+				display: block;
+			}
+		}
+	}
+
+	.tooltip {
+		background: @white;
+		border: 1px solid @lightgrey;
+		border-radius: @border-radius;
+		box-shadow: @grey-box-shadow;
+		color: @black;
+		display: none;
+		font-size: 10px;
+		padding: 4px 8px;
+		position: absolute;
+		text-align: center;
+		transition: opacity 0.4s ease-out;
+		white-space: nowrap;
+		z-index: 999;
+	}
+
+	.tooltipTop {
+		bottom: @vertical-offset;
+		left: 0;
+	}
+
+	.tooltipBottom {
+		right: 0;
+		top: @vertical-offset;
+	}
+}

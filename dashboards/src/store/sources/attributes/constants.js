@@ -24,6 +24,7 @@ const integer: 'integer' = 'integer';
 const metaClass: 'metaClass' = 'metaClass';
 const object: 'object' = 'object';
 const state: 'state' = 'state';
+const string: 'string' = 'string';
 
 const ATTRIBUTE_TYPES = {
 	backBOLinks,
@@ -37,7 +38,8 @@ const ATTRIBUTE_TYPES = {
 	integer,
 	metaClass,
 	object,
-	state
+	state,
+	string
 };
 
 const DATE = [date, dateTime];

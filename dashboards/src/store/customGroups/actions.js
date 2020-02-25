@@ -66,6 +66,19 @@ const updateCustomGroup = (payload: CustomGroup, remote: boolean = false): Thunk
 	}
 };
 
+const setCustomGroups = (payload: CustomGroupsMap) => (dispatch: Dispatch) => {
+	Object.keys(payload).forEach(key => {
+		if (!payload[key]) {
+			delete payload[key];
+		}
+	});
+
+	dispatch({
+		type: CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS,
+		payload
+	});
+};
+
 const saveCustomGroup = (payload: CustomGroup) => ({
 	type: CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP,
 	payload
@@ -73,11 +86,6 @@ const saveCustomGroup = (payload: CustomGroup) => ({
 
 const removeCustomGroup = (payload: CustomGroupId) => ({
 	type: CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP,
-	payload
-});
-
-const setCustomGroups = (payload: CustomGroupsMap) => ({
-	type: CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS,
 	payload
 });
 

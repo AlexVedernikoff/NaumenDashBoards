@@ -25,42 +25,52 @@ const LEGEND_POSITIONS = [
 const WIDGETS = [
 	{
 		label: Column,
+		tip: 'Столбчатая',
 		value: CHART_VARIANTS.COLUMN
 	},
 	{
 		label: ColumnStacked,
+		tip: 'Столбчатая c накоплением',
 		value: CHART_VARIANTS.COLUMN_STACKED
 	},
 	{
-		label: Bar,
-		value: CHART_VARIANTS.BAR
-	},
-	{
 		label: BarStacked,
+		tip: 'Гистограмма c накоплением',
 		value: CHART_VARIANTS.BAR_STACKED
 	},
 	{
+		label: Bar,
+		tip: 'Гистограмма',
+		value: CHART_VARIANTS.BAR
+	},
+	{
 		label: Line,
+		tip: 'Линейная',
 		value: CHART_VARIANTS.LINE
 	},
 	{
 		label: Pie,
+		tip: 'Круговая',
 		value: CHART_VARIANTS.PIE
 	},
 	{
 		label: Donut,
+		tip: 'Кольцевая',
 		value: CHART_VARIANTS.DONUT
 	},
 	{
 		label: Combo,
+		tip: 'Комбо',
 		value: CHART_VARIANTS.COMBO
 	},
 	{
 		label: Summary,
+		tip: 'Сводка',
 		value: WIDGET_VARIANTS.SUMMARY
 	},
 	{
 		label: Table,
+		tip: 'Таблица',
 		value: WIDGET_VARIANTS.TABLE
 	}
 ];
