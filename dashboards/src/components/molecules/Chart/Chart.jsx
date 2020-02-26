@@ -1,6 +1,7 @@
 // @flow
 import './styles.less';
 import ApexCharts from 'apexcharts';
+import type {DivRef} from 'components/types';
 import {getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
@@ -8,7 +9,7 @@ import ReactResizeDetector from 'react-resize-detector';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
-	ref = createRef();
+	ref: DivRef = createRef();
 
 	componentDidMount () {
 		const options = this.getOptions();

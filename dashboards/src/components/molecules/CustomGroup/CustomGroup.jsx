@@ -6,6 +6,7 @@ import type {CustomGroup as CustomGroupType, SubGroup} from 'store/customGroups/
 import {CustomSubGroup, MaterialSelect} from 'components/molecules';
 import type {InfoPanelProps, Props, State} from './types';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
+import type {Node} from 'react';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
@@ -242,12 +243,10 @@ export class CustomGroup extends Component<Props, State> {
 		);
 	};
 
-	renderSubGroups = () => {
+	renderSubGroups = (): Array<Node> | null => {
 		const {value} = this.props;
 
-		if (value) {
-			return value.subGroups.map(this.renderSubGroup);
-		}
+		return value ? value.subGroups.map(this.renderSubGroup) : null;
 	};
 
 	renderTitle = () => <div className={styles.title}>Настройка пользовательской группировки</div>;

@@ -2,6 +2,7 @@
 import {Button, Title} from 'components/atoms';
 import cn from 'classnames';
 import {DesignTab, ParamsTab} from './Tabs';
+import type {FormRef} from 'components/types';
 import type {Props} from 'containers/WidgetFormPanel/types';
 import React, {Component, createContext, createRef} from 'react';
 import type {State, TabParams} from './types';
@@ -15,8 +16,8 @@ const tabs = {
 	[VARIANTS.PARAMS]: ParamsTab
 };
 
-export const FormContext = createContext({});
-export const formRef = createRef();
+export const FormContext: Object = createContext({});
+export const formRef: FormRef = createRef();
 
 export class WidgetFormPanel extends Component<Props, State> {
 	state = {

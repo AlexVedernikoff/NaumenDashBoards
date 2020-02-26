@@ -16,7 +16,7 @@ import styles from './styles.less';
 import uuid from 'tiny-uuid';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
-export const GroupContext = createContext({
+export const GroupContext: Object = createContext({
 	errors: {}
 });
 

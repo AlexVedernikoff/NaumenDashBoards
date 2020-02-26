@@ -5,6 +5,7 @@ import cn from 'classnames';
 import {CreationPanel, SearchSelectInput} from 'components/atoms';
 import {getDefaultAggregation} from 'components/molecules/AttributeAggregation/helpers';
 import {MeetBallIcon} from 'icons/controls';
+import type {Node} from 'react';
 import type {Option, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
@@ -137,13 +138,15 @@ export class SourceControl extends PureComponent<Props, State> {
 		);
 	};
 
-	renderAttributes = (option: Option) => {
+	renderAttributes = (option: Option): Array<Node> | null => {
 		const {attributes, dataKey} = option;
 		const isExpanded = this.isExpanded(dataKey);
 
 		if (isExpanded) {
 			return attributes.map(this.renderAttribute(dataKey));
 		}
+
+		return null;
 	};
 
 	renderConstantCreationButton = () => {

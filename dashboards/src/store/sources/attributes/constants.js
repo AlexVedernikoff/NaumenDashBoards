@@ -26,12 +26,11 @@ const object: 'object' = 'object';
 const state: 'state' = 'state';
 const string: 'string' = 'string';
 
-const ATTRIBUTE_TYPES = {
+const SOURCE_ATTRIBUTE_TYPES = {
 	backBOLinks,
 	boLinks,
 	catalogItem,
 	catalogItemSet,
-	COMPUTED_ATTR,
 	date,
 	dateTime,
 	double,
@@ -40,6 +39,11 @@ const ATTRIBUTE_TYPES = {
 	object,
 	state,
 	string
+};
+
+const ATTRIBUTE_TYPES = {
+	...SOURCE_ATTRIBUTE_TYPES,
+	COMPUTED_ATTR
 };
 
 const DATE = [date, dateTime];
@@ -57,5 +61,6 @@ const ATTRIBUTE_SETS = {
 export {
 	ATTRIBUTE_TYPES,
 	ATTRIBUTES_EVENTS,
-	ATTRIBUTE_SETS
+	ATTRIBUTE_SETS,
+	SOURCE_ATTRIBUTE_TYPES
 };

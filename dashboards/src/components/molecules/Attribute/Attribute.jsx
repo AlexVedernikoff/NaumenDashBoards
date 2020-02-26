@@ -23,6 +23,7 @@ export class Attribute extends PureComponent<Props, State> {
 	static defaultProps = {
 		refAttributeData: {
 			data: [],
+			error: false,
 			loading: false
 		}
 	};
@@ -150,6 +151,7 @@ export class Attribute extends PureComponent<Props, State> {
 
 		if (parent && parent.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 			const prevRefValue = parent.ref;
+			// $FlowFixMe
 			parent.ref = {...value};
 
 			onSelect(name, prevValue);
@@ -289,6 +291,8 @@ export class Attribute extends PureComponent<Props, State> {
 				/>
 			);
 		}
+
+		return null;
 	};
 
 	renderCreatingModal = () => {
@@ -321,6 +325,8 @@ export class Attribute extends PureComponent<Props, State> {
 				/>
 			);
 		}
+
+		return null;
 	};
 
 	renderParentAttribute = (props: Object, parent: AttributeType | null) => (
@@ -341,6 +347,8 @@ export class Attribute extends PureComponent<Props, State> {
 				return this.renderAggregation(refInputProps);
 			case GROUP:
 				return this.renderGroup(refInputProps);
+			default:
+				return null;
 		}
 	};
 

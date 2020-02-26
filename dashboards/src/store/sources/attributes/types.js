@@ -1,5 +1,5 @@
 // @flow
-import {ATTRIBUTE_TYPES, ATTRIBUTES_EVENTS} from './constants';
+import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES} from './constants';
 
 export type Attribute = {
 	code: string,
@@ -8,7 +8,7 @@ export type Attribute = {
 	ref: Attribute | null,
 	sourceName: string,
 	title: string,
-	type: $Keys<typeof ATTRIBUTE_TYPES>,
+	type: $Keys<typeof SOURCE_ATTRIBUTE_TYPES>,
 };
 
 export type AttributeData = {

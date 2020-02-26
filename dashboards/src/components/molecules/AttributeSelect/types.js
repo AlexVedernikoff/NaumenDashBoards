@@ -1,8 +1,13 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 
+type DefaultValue = {
+	title: string,
+	value: string
+};
+
 export type Props = {
-	defaultValue: Attribute,
+	defaultValue: DefaultValue,
 	disabled: boolean,
 	loading: boolean,
 	name: string,

@@ -4,14 +4,16 @@ import {createNewAndCondition} from 'components/molecules/GroupCreatingModal/hel
 import {CustomSubGroupAndCondition} from 'components/molecules';
 import {FieldError, MaterialTextInput} from 'components/atoms';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
+import type {InputRef} from 'components/types';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
+import type {Node} from 'react';
 import type {Props} from './types';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {withGroup} from 'components/molecules/GroupCreatingModal';
 
 export class CustomSubGroup extends PureComponent<Props> {
-	refName = createRef();
+	refName: InputRef = createRef();
 
 	componentDidMount () {
 		const {current} = this.refName;
@@ -82,7 +84,7 @@ export class CustomSubGroup extends PureComponent<Props> {
 		);
 	};
 
-	renderAndConditions = () => this.props.subGroup.data.map(this.renderAndCondition);
+	renderAndConditions = (): Array<Node> => this.props.subGroup.data.map(this.renderAndCondition);
 
 	renderNameField = () => {
 		const {errors, subGroup, validationPath} = this.props;
