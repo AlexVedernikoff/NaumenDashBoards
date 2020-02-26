@@ -72,7 +72,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	createNewControl = (value: any, type: string) => {
-		const name = this.createName();
+		const name: string = this.createName();
 		const {controls, last} = this.state;
 		let {first} = this.state;
 

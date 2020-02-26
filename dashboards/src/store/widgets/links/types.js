@@ -11,6 +11,7 @@ type Filter = {
 export type DrillDownMixin = {
 	cases?: [],
 	classFqn?: string | null,
+	descriptor?: string,
 	filters: Array<Filter>,
 	title: string
 };

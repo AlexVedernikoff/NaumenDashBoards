@@ -1,22 +1,23 @@
 // @flow
 import {BREAKPOINTS, COLS, CONTAINER_PADDING, ROW_HEIGHT} from './constants';
+import type {DivRef} from 'components/types';
 import type {Layout} from 'utils/layout/types';
 import {NewWidget} from 'utils/widget';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {Component, createRef} from 'react';
 import {Responsive as Grid} from 'react-grid-layout';
-import type {State} from './types';
+import type {State, WidgetRef} from './types';
 import styles from './styles.less';
 import {Widget} from 'components/molecules';
 import type {Widget as WidgetType} from 'store/widgets/data/types';
 import WidgetAddPanel from 'containers/WidgetAddPanel';
 import WidgetFormPanel from 'containers/WidgetFormPanel';
 
-export const gridRef = createRef();
+export const gridRef: DivRef = createRef();
 
 export class DashboardContent extends Component<Props, State> {
-	gridContainerRef = createRef();
-	newWidgetRef = createRef();
+	gridContainerRef: DivRef = createRef();
+	newWidgetRef: WidgetRef = createRef();
 	state = {
 		newWidgetFocused: false,
 		width: null

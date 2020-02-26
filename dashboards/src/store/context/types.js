@@ -27,7 +27,7 @@ type EndSwitch = {
 };
 
 type SetContext = {
-	payload: ContentContext,
+	payload: $Exact<ContentContext>,
 	type: typeof CONTEXT_EVENTS.SET_CONTEXT
 };
 

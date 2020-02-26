@@ -46,7 +46,7 @@ export type Props = {
 
 export type State = {
 	controls: {
-		[string]: Control
+		[string]: Object
 	},
 	first: string,
 	info: string,

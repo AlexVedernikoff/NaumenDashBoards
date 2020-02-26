@@ -2,6 +2,7 @@
 import {Button, OutsideClickDetector} from 'components/atoms';
 import {ChevronDownIcon, ClearIcon} from 'icons/form';
 import cn from 'classnames';
+import type {Node} from 'react';
 import type {Option, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import {SimpleSelectMenu} from 'components/molecules';
@@ -122,7 +123,7 @@ export class MaterialMultiSelect extends PureComponent<Props, State> {
 		</div>
 	);
 
-	renderTags = () => {
+	renderTags = (): Array<Node> => {
 		const {displayLimit, values} = this.props;
 		const {showAllTags} = this.state;
 		const tags = showAllTags ? values : values.slice(0, displayLimit);

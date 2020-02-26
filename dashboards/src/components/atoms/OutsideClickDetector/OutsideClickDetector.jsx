@@ -1,9 +1,10 @@
 // @flow
+import type {DivRef} from 'components/types';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 
 export class OutsideClickDetector extends PureComponent<Props> {
-	ref = createRef();
+	ref: DivRef = createRef();
 
 	componentDidMount () {
 		document.addEventListener('mousedown', this.handleClickOutside);
@@ -13,11 +14,12 @@ export class OutsideClickDetector extends PureComponent<Props> {
 		document.removeEventListener('mousedown', this.handleClickOutside);
 	}
 
-	handleClickOutside = (e: Event) => {
+	handleClickOutside = (e: MouseEvent) => {
 		const {onClickOutside} = this.props;
+		const element: any = e.target;
 		const {current} = this.ref;
 
-		if (current && !current.contains(e.target)) {
+		if (current && !current.contains(element)) {
 			onClickOutside();
 		}
 	};

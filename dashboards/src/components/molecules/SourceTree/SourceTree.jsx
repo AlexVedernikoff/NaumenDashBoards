@@ -1,6 +1,7 @@
 // @flow
 import cn from 'classnames';
 import type {DataSource} from 'store/sources/data/types';
+import type {InputRef} from 'components/types';
 import type {Props, State} from './types';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import {SearchSelectInput} from 'components/atoms';
@@ -18,7 +19,7 @@ export class SourceTree extends PureComponent<Props, State> {
 		searchValue: ''
 	};
 
-	searchInputRef = createRef();
+	searchInputRef: InputRef = createRef();
 
 	componentDidMount () {
 		this.expandSelected();

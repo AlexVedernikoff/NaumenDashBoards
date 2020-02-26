@@ -2,6 +2,7 @@
 import {CaretIcon} from 'icons/form';
 import cn from 'classnames';
 import type {Label, Option, Props, State} from './types';
+import type {Node} from 'react';
 import React, {createElement, Fragment, PureComponent} from 'react';
 import {SimpleTooltip} from 'components/atoms';
 import styles from './styles.less';
@@ -77,7 +78,7 @@ export class MiniSelect extends PureComponent<Props, State> {
 		);
 	};
 
-	renderOptions = () => this.props.options.filter(this.isNotCurrent).map(this.renderOption);
+	renderOptions = (): Array<Node> => this.props.options.filter(this.isNotCurrent).map(this.renderOption);
 
 	renderSelect = () => {
 		const {isDisabled} = this.props;

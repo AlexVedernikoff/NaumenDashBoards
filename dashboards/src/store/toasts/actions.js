@@ -4,7 +4,7 @@ import type {Dispatch} from 'store/types';
 import type {NewToast, Toast} from './types';
 import uuid from 'tiny-uuid';
 
-const createToast = (newToast: NewToast) => (dispatch: Dispatch) => {
+const createToast = (newToast: $Exact<NewToast>) => (dispatch: Dispatch) => {
 	const toast = {...DEFAULT_TOAST, ...newToast, id: uuid()};
 	dispatch(addToast(toast));
 };

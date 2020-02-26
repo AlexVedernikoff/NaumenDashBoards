@@ -100,6 +100,8 @@ export class AttributeSelect extends PureComponent<Props, State> {
 				</div>
 			);
 		}
+
+		return null;
 	};
 
 	renderIndicators = () => (
