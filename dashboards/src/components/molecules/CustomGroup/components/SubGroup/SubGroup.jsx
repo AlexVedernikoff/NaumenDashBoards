@@ -1,7 +1,7 @@
 // @flow
-import type {AndCondition} from 'store/customGroups/types';
+import {AndCondition} from 'components/molecules/CustomGroup/components';
+import type {AndCondition as AndConditionType} from 'components/molecules/CustomGroup/components/AndCondition/types';
 import {createNewAndCondition} from 'components/molecules/GroupCreatingModal/helpers';
-import {CustomSubGroupAndCondition} from 'components/molecules';
 import {FieldError, MaterialTextInput} from 'components/atoms';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
 import type {InputRef} from 'components/types';
@@ -12,7 +12,7 @@ import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {withGroup} from 'components/molecules/GroupCreatingModal';
 
-export class CustomSubGroup extends PureComponent<Props> {
+export class SubGroup extends PureComponent<Props> {
 	refName: InputRef = createRef();
 
 	componentDidMount () {
@@ -47,7 +47,7 @@ export class CustomSubGroup extends PureComponent<Props> {
 		data.length === 0 ? onRemove(subGroupIndex) : onUpdate(subGroupIndex, {...subGroup, data});
 	};
 
-	handleUpdateAndCondition = (index: number, condition: AndCondition) => {
+	handleUpdateAndCondition = (index: number, condition: AndConditionType) => {
 		const {index: subGroupIndex, onUpdate, subGroup} = this.props;
 		const {data} = subGroup;
 		data[index] = condition;
@@ -58,7 +58,7 @@ export class CustomSubGroup extends PureComponent<Props> {
 		});
 	};
 
-	renderAndCondition = (condition: AndCondition, index: number, conditions: Array<AndCondition>) => {
+	renderAndCondition = (condition: AndConditionType, index: number, conditions: Array<AndConditionType>) => {
 		const {isLast: isLastSubGroup, validationPath: currentPath} = this.props;
 		const hasLastPosition = conditions.length - 1 === index;
 		const isLast = isLastSubGroup && conditions.length === 1;
@@ -70,7 +70,7 @@ export class CustomSubGroup extends PureComponent<Props> {
 		}
 
 		return (
-			<CustomSubGroupAndCondition
+			<AndCondition
 				condition={condition}
 				disabled={!hasLastPosition}
 				index={index}
@@ -114,4 +114,4 @@ export class CustomSubGroup extends PureComponent<Props> {
 	}
 }
 
-export default withGroup(CustomSubGroup);
+export default withGroup(SubGroup);

@@ -1,8 +1,7 @@
 // @flow
 import {array, lazy, number, object, string} from 'yup';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
-import type {OrCondition} from 'store/customGroups/types';
 
 const NAME_RULE = string().required('Поле должно быть заполнено');
 
@@ -22,18 +21,33 @@ const integerRule = () => {
 	return number().integer(message).required(message).typeError(message).nullable();
 };
 
-const resolveConditionRule = (condition: OrCondition, context: Object) => {
+const intervalRule = () => object({
+	value: floatRule()
+});
+
+const resolveConditionRule = (condition: Object, context: Object) => {
 	const {type} = condition;
 	const {attribute} = context;
-	const {BETWEEN, EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY} = OPERAND_TYPES;
+	const {
+		BETWEEN,
+		EQUAL,
+		GREATER,
+		LESS,
+		NOT_EQUAL,
+		NOT_EQUAL_NOT_EMPTY
+	} = OPERAND_TYPES;
 	let rule;
 
 	if (type === BETWEEN) {
 		rule = betweenDateRule();
 	}
 
-	if ([EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY].includes(type)) {
+	if (attribute.type in ATTRIBUTE_SETS.NUMBER && [EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY].includes(type)) {
 		rule = attribute.type === ATTRIBUTE_TYPES.integer ? integerRule() : floatRule();
+	}
+
+	if (attribute.type === ATTRIBUTE_TYPES.dtInterval && [EQUAL, GREATER, LESS, NOT_EQUAL].includes(type)) {
+		rule = intervalRule();
 	}
 
 	return object({

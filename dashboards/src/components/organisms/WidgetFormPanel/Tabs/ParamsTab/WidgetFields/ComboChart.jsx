@@ -129,16 +129,16 @@ export class ComboChart extends DataFormBuilder {
 				if (xAxisOptions.length > 0 && mainXAxis) {
 					const {DATE, OBJECT} = ATTRIBUTE_SETS;
 
-					xAxisOptions = xAxisOptions.filter(a => {
-						if (OBJECT.includes(mainXAxis.type)) {
-							return a.property === mainXAxis.property;
+					xAxisOptions = xAxisOptions.filter(attribute => {
+						if (mainXAxis.type in OBJECT) {
+							return attribute.property === mainXAxis.property;
 						}
 
-						if (DATE.includes(mainXAxis.type)) {
-							return DATE.includes(a.type);
+						if (mainXAxis.type in DATE) {
+							return attribute.type in DATE;
 						}
 
-						return false;
+						return mainXAxis.type === attribute.type;
 					});
 				}
 

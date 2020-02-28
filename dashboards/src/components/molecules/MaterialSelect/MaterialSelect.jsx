@@ -104,7 +104,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 	renderPlaceholder = () => {
 		const {placeholder, value} = this.props;
 
-		if (value && this.getOptionLabel(value)) {
+		if (value && placeholder && this.getOptionLabel(value)) {
 			return <div className={styles.placeholder}>{placeholder}</div>;
 		}
 	};

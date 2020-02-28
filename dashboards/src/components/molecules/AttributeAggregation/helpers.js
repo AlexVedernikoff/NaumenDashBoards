@@ -3,7 +3,7 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {DEFAULT_AGGREGATION_OPTIONS, INTEGER_AGGREGATION_OPTIONS} from './constants';
 
 const getAggregationOptions = (attribute: Object | null) => {
-	return attribute && ATTRIBUTE_SETS.NUMBER.includes(attribute.type)
+	return attribute && attribute.type in ATTRIBUTE_SETS.NUMBER
 		? [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS]
 		: DEFAULT_AGGREGATION_OPTIONS;
 };

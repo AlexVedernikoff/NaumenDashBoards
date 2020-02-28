@@ -2,13 +2,15 @@
 import {BASE_VALIDATION_SUBGROUP_PATH, IS_NEW} from 'components/molecules/GroupCreatingModal/constants';
 import {Button, CreationPanel, FieldError, InfoPanel} from 'components/atoms';
 import {createNewSubGroup} from 'components/molecules/GroupCreatingModal/helpers';
-import type {CustomGroup as CustomGroupType, SubGroup} from 'store/customGroups/types';
-import {CustomSubGroup, MaterialSelect} from 'components/molecules';
+import type {CustomGroup as CustomGroupType} from 'store/customGroups/types';
 import type {InfoPanelProps, Props, State} from './types';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
+import {MaterialSelect} from 'components/molecules';
 import type {Node} from 'react';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import {SubGroup} from 'components/molecules/CustomGroup/components';
+import type {SubGroup as SubGroupType} from 'components/molecules/CustomGroup/components/SubGroup/types';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import {withGroup} from 'components/molecules/GroupCreatingModal';
 
@@ -96,7 +98,7 @@ export class CustomGroup extends Component<Props, State> {
 
 	handleSelectGroup = (name: string, group: CustomGroupType) => this.props.onSelect(group.id);
 
-	handleUpdateSubGroup = (index: number, subGroup: SubGroup) => {
+	handleUpdateSubGroup = (index: number, subGroup: SubGroupType) => {
 		const {onUpdate, value} = this.props;
 
 		this.setState({showRemovalInfo: false});
@@ -226,12 +228,12 @@ export class CustomGroup extends Component<Props, State> {
 		}
 	};
 
-	renderSubGroup = (group: SubGroup, index: number, groups: Array<SubGroup>) => {
+	renderSubGroup = (group: SubGroupType, index: number, groups: Array<SubGroupType>) => {
 		const isLast = groups.length === 1;
 		const validationPath = `${BASE_VALIDATION_SUBGROUP_PATH}[${index}]`;
 
 		return (
-			<CustomSubGroup
+			<SubGroup
 				index={index}
 				isLast={isLast}
 				key={validationPath}

@@ -6,18 +6,24 @@ import {
 	CATALOG_ITEM_OPTIONS,
 	CATALOG_ITEM_SET_OPTIONS,
 	DATETIME_OPTIONS,
-	INTEGER_OPTIONS,
+	INTERVAL_OPTIONS,
 	META_CLASS_AND_STATE_OPTIONS,
+	NUMBER_OPTIONS,
 	OBJECT_OPTIONS,
 	STRING_OPTIONS
 } from './constants';
-import {BetweenOperand, MaterialSelect, MultiSelectOperand, SelectOperand, SimpleOperand} from 'components/molecules';
+import {BetweenOperand, IntervalOperand, MultiSelectOperand, SelectOperand, SimpleOperand} from './components';
 import type {
 	BetweenOperand as BetweenOperandType,
+	DateOrCondition,
+	IntervalOperand as IntervalOperandType,
+	IntervalOrCondition,
 	MultiSelectOperand as MultiSelectOperandType,
-	OrCondition,
+	NumberOrCondition,
+	RefOrCondition,
 	SelectOperand as SelectOperandType,
-	SimpleOperand as SimpleOperandType
+	SimpleOperand as SimpleOperandType,
+	StringOrCondition
 } from 'store/customGroups/types';
 import {Button, FieldError, IconButton} from 'components/atoms';
 import cn from 'classnames';
@@ -25,14 +31,15 @@ import {createNewOrCondition} from 'components/molecules/GroupCreatingModal/help
 import {CrossIcon as RemoveIcon} from 'icons/form';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
+import {MaterialSelect} from 'components/molecules/index';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
-import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import type {OrCondition as OrConditionType, Props, State} from './types';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import {withGroup} from 'components/molecules/GroupCreatingModal';
 
-export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
+export class OrCondition extends PureComponent<Props, State> {
 	state = {
 		options: []
 	};
@@ -81,6 +88,7 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 			date,
 			dateTime,
 			double,
+			dtInterval,
 			integer,
 			metaClass,
 			object,
@@ -94,7 +102,7 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 				return DATETIME_OPTIONS;
 			case double:
 			case integer:
-				return INTEGER_OPTIONS;
+				return NUMBER_OPTIONS;
 			case backBOLinks:
 				return BACK_BO_LINKS_OPTIONS;
 			case boLinks:
@@ -110,10 +118,12 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 				return META_CLASS_AND_STATE_OPTIONS;
 			case string:
 				return STRING_OPTIONS;
+			case dtInterval:
+				return INTERVAL_OPTIONS;
 		}
 	};
 
-	handleChangeOperandData = (condition: OrCondition) => {
+	handleChangeOperandData = (condition: OrConditionType) => {
 		const {index, onUpdate} = this.props;
 		onUpdate(index, condition);
 	};
@@ -129,16 +139,16 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 	};
 
 	handleSelectOperandType = (name: string, value: Object) => {
-		const {index, onUpdate} = this.props;
+		const {attribute, index, onUpdate} = this.props;
 		const {value: type} = value;
-		const condition = createNewOrCondition(type);
+		const condition = createNewOrCondition(attribute.type, type);
 
 		if (condition) {
 			onUpdate(index, condition);
 		}
 	};
 
-	hasNotArchiveType = (condition: OrCondition) => {
+	hasNotArchiveType = (condition: OrConditionType) => {
 		const {CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL} = OPERAND_TYPES;
 		return ![CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL].includes(condition.type);
 	};
@@ -151,16 +161,102 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		);
 	};
 
-	renderDataError = () => {
+	renderCondition = () => (
+		<div className={styles.operandContainer}>
+			<div className={styles.operand}>
+				{this.renderConditionByAttribute()}
+				{this.renderFieldError(FIELDS.data)}
+			</div>
+		</div>
+	);
+
+	renderConditionByAttribute = () => {
+		const {attribute, condition} = this.props;
+		const {
+			backBOLinks,
+			boLinks,
+			catalogItem,
+			catalogItemSet,
+			date,
+			dateTime,
+			double,
+			dtInterval,
+			integer,
+			metaClass,
+			object,
+			state,
+			string
+		} = ATTRIBUTE_TYPES;
+
+		switch (attribute.type) {
+			case date:
+			case dateTime:
+				return this.renderDateCondition(condition);
+			case double:
+			case integer:
+				return this.renderNumberCondition(condition);
+			case dtInterval:
+				return this.renderIntervalCondition(condition);
+			case backBOLinks:
+			case boLinks:
+			case catalogItem:
+			case catalogItemSet:
+			case metaClass:
+			case object:
+			case state:
+				return this.renderRefCondition(condition);
+			case string:
+				return this.renderStringCondition(condition);
+		}
+	};
+
+	renderDateCondition = (condition: DateOrCondition) => {
+		const {BETWEEN, LAST, NEAR} = OPERAND_TYPES;
+
+		switch (condition.type) {
+			case BETWEEN:
+				return this.renderBetweenOperand(condition);
+			case LAST:
+			case NEAR:
+				return this.renderSimpleOperand(condition, true, true);
+		}
+	};
+
+	renderFieldError = (path: string) => {
 		const {errors, validationPath} = this.props;
-		const errorKey = `${validationPath}.${FIELDS.data}`;
+		const errorKey = `${validationPath}.${path}`;
 
 		return <FieldError className={cn(mainStyles.error, styles.error)} text={errors[errorKey]} />;
 	};
 
-	renderMultiSelectOperand = (condition: MultiSelectOperandType) => {
-		const {data, type} = condition;
-		const actual = this.hasNotArchiveType(condition);
+	renderIntervalCondition = (condition: IntervalOrCondition) => {
+		const {EQUAL, GREATER, LESS, NOT_EQUAL} = OPERAND_TYPES;
+
+		switch (condition.type) {
+			case EQUAL:
+			case GREATER:
+			case LESS:
+			case NOT_EQUAL:
+				return this.renderIntervalOperand(condition);
+		}
+	};
+
+	renderIntervalOperand = (operand: IntervalOperandType) => {
+		const validationPath = `${FIELDS.data}.${FIELDS.value}`;
+
+		return (
+			<Fragment>
+				<IntervalOperand
+					onChange={this.handleChangeOperandData}
+					operand={operand}
+				/>
+				{this.renderFieldError(validationPath)}
+			</Fragment>
+		);
+	};
+
+	renderMultiSelectOperand = (operand: MultiSelectOperandType) => {
+		const actual = this.hasNotArchiveType(operand);
 		const attributesData = this.getAttributesData(actual);
 
 		if (attributesData) {
@@ -168,81 +264,27 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 
 			return (
 				<MultiSelectOperand
-					data={data}
 					loading={loading}
 					onChange={this.handleChangeOperandData}
 					onClickShowMore={this.handleClickShowMore(actual)}
+					operand={operand}
 					options={attributes}
 					showMore={!uploaded}
-					type={type}
 				/>
 			);
 		}
 	};
 
-	renderOperand = () => (
-		<div className={styles.operandContainer}>
-			<div className={styles.operand}>
-				{this.renderOperandByType()}
-				{this.renderDataError()}
-			</div>
-		</div>
-	);
-
-	renderOperandByType = () => {
-		const {condition} = this.props;
-		const {
-			BETWEEN,
-			CONTAINS,
-			CONTAINS_ANY,
-			CONTAINS_ATTR_CURRENT_OBJECT,
-			CONTAINS_INCLUDING_ARCHIVAL,
-			CONTAINS_INCLUDING_NESTED,
-			CONTAINS_STRING,
-			EQUAL,
-			EQUAL_ATTR_CURRENT_OBJECT,
-			GREATER,
-			LAST,
-			LESS,
-			NEAR,
-			NOT_CONTAINS,
-			NOT_CONTAINS_INCLUDING_ARCHIVAL,
-			NOT_CONTAINS_STRING,
-			NOT_CONTAINS_STRING_INCLUDING_EMPTY,
-			NOT_EQUAL,
-			NOT_EQUAL_NOT_EMPTY,
-			TITLE_CONTAINS,
-			TITLE_NOT_CONTAINS
-		} = OPERAND_TYPES;
+	renderNumberCondition = (condition: NumberOrCondition) => {
+		const {EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY} = OPERAND_TYPES;
 
 		switch (condition.type) {
-			case BETWEEN:
-				return this.renderBetweenOperand(condition);
-			case CONTAINS:
-			case CONTAINS_ATTR_CURRENT_OBJECT:
-			case CONTAINS_INCLUDING_ARCHIVAL:
-			case CONTAINS_INCLUDING_NESTED:
-			case EQUAL_ATTR_CURRENT_OBJECT:
-			case NOT_CONTAINS:
-			case NOT_CONTAINS_INCLUDING_ARCHIVAL:
-				return this.renderSelectOperand(condition);
-			case CONTAINS_ANY:
-				return this.renderMultiSelectOperand(condition);
-			case LAST:
-			case NEAR:
-				return this.renderSimpleOperand(condition, true, true);
 			case EQUAL:
 			case GREATER:
 			case LESS:
 			case NOT_EQUAL:
 			case NOT_EQUAL_NOT_EMPTY:
 				return this.renderSimpleOperand(condition, true);
-			case CONTAINS_STRING:
-			case NOT_CONTAINS_STRING:
-			case NOT_CONTAINS_STRING_INCLUDING_EMPTY:
-			case TITLE_CONTAINS:
-			case TITLE_NOT_CONTAINS:
-				return this.renderSimpleOperand(condition);
 		}
 	};
 
@@ -274,6 +316,37 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		);
 	};
 
+	renderRefCondition= (condition: RefOrCondition) => {
+		const {
+			CONTAINS,
+			CONTAINS_ANY,
+			CONTAINS_ATTR_CURRENT_OBJECT,
+			CONTAINS_INCLUDING_ARCHIVAL,
+			CONTAINS_INCLUDING_NESTED,
+			EQUAL_ATTR_CURRENT_OBJECT,
+			NOT_CONTAINS,
+			NOT_CONTAINS_INCLUDING_ARCHIVAL,
+			TITLE_CONTAINS,
+			TITLE_NOT_CONTAINS
+		} = OPERAND_TYPES;
+
+		switch (condition.type) {
+			case CONTAINS:
+			case CONTAINS_ATTR_CURRENT_OBJECT:
+			case CONTAINS_INCLUDING_ARCHIVAL:
+			case CONTAINS_INCLUDING_NESTED:
+			case EQUAL_ATTR_CURRENT_OBJECT:
+			case NOT_CONTAINS:
+			case NOT_CONTAINS_INCLUDING_ARCHIVAL:
+				return this.renderSelectOperand(condition);
+			case CONTAINS_ANY:
+				return this.renderMultiSelectOperand(condition);
+			case TITLE_CONTAINS:
+			case TITLE_NOT_CONTAINS:
+				return this.renderSimpleOperand(condition);
+		}
+	};
+
 	renderRemoveButton = () => {
 		const {isLast} = this.props;
 		const containerCN = cn({
@@ -290,9 +363,8 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 		);
 	};
 
-	renderSelectOperand = (condition: SelectOperandType) => {
-		const {data, type} = condition;
-		const actual = this.hasNotArchiveType(condition);
+	renderSelectOperand = (operand: SelectOperandType) => {
+		const actual = this.hasNotArchiveType(operand);
 		const attributesData = this.getAttributesData(actual);
 
 		if (attributesData) {
@@ -300,21 +372,19 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 
 			return (
 				<SelectOperand
-					data={data}
 					loading={loading}
 					onChange={this.handleChangeOperandData}
 					onClickShowMore={this.handleClickShowMore(actual)}
+					operand={operand}
 					options={attributes}
 					showMore={!uploaded}
-					type={type}
 				/>
 			);
 		}
 	};
 
-	renderSimpleOperand = (condition: SimpleOperandType, number: boolean = false, onlyNumber: boolean = false) => {
+	renderSimpleOperand = (operand: SimpleOperandType, number: boolean = false, onlyNumber: boolean = false) => {
 		const {attribute} = this.props;
-		const {data, type} = condition;
 		let float = false;
 
 		if (number) {
@@ -323,20 +393,30 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 
 		return (
 			<SimpleOperand
-				data={data}
 				float={float}
 				onChange={this.handleChangeOperandData}
 				onlyNumber={onlyNumber}
-				type={type}
+				operand={operand}
 			/>
 		);
+	};
+
+	renderStringCondition = (condition: StringOrCondition) => {
+		const {CONTAINS, NOT_CONTAINS, NOT_CONTAINS_INCLUDING_EMPTY} = OPERAND_TYPES;
+
+		switch (condition.type) {
+			case CONTAINS:
+			case NOT_CONTAINS:
+			case NOT_CONTAINS_INCLUDING_EMPTY:
+				return this.renderSimpleOperand(condition);
+		}
 	};
 
 	render () {
 		return (
 			<div className={styles.container}>
 				{this.renderOperandSelect()}
-				{this.renderOperand()}
+				{this.renderCondition()}
 				{this.renderOrOperator()}
 				{this.renderRemoveButton()}
 			</div>
@@ -344,4 +424,4 @@ export class CustomSubGroupOrCondition extends PureComponent<Props, State> {
 	}
 }
 
-export default withGroup(CustomSubGroupOrCondition);
+export default withGroup(OrCondition);

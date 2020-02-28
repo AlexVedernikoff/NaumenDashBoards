@@ -11,25 +11,33 @@ const GROUP_WAYS = {
 
 // Типы системных группировок
 const DAY: 'DAY' = 'DAY';
+const HOUR: 'HOUR' = 'HOUR';
+const MINUTE: 'MINUTE' = 'MINUTE';
 const MONTH: 'MONTH' = 'MONTH';
-const ON: 'ON' = 'ON';
 const SEVEN: 'SEVEN' = 'SEVEN';
 const QUARTER: 'QUARTER' = 'QUARTER';
+const OVERLAP: 'OVERLAP' = 'OVERLAP';
+const SECOND: 'SECOND' = 'SECOND';
 const SEVEN_DAYS: 'SEVEN_DAYS' = 'SEVEN_DAYS';
 const WEEK: 'WEEK' = 'WEEK';
 const YEAR: 'YEAR' = 'YEAR';
 
-const OVERLAP: 'OVERLAP' = 'OVERLAP';
-
 const DATETIME_SYSTEM_GROUP = {
 	DAY,
 	MONTH,
-	ON,
 	QUARTER,
 	SEVEN,
 	SEVEN_DAYS,
 	WEEK,
 	YEAR
+};
+
+const INTERVAL_SYSTEM_GROUP = {
+	DAY,
+	HOUR,
+	MINUTE,
+	SECOND,
+	WEEK
 };
 
 const DEFAULT_SYSTEM_GROUP = {
@@ -61,5 +69,6 @@ export {
 	DEFAULT_AGGREGATION,
 	DEFAULT_SYSTEM_GROUP,
 	GROUP_WAYS,
-	INTEGER_AGGREGATION
+	INTEGER_AGGREGATION,
+	INTERVAL_SYSTEM_GROUP
 };

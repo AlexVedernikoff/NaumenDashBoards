@@ -1,5 +1,5 @@
 // @flow
-import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {DATETIME_SYSTEM_GROUP, GROUP_WAYS, INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
 
 // Опции выбора способа создания группировки
 const TYPE_OPTIONS = [
@@ -26,6 +26,7 @@ const name: 'name' = 'name';
 const startDate: 'startDate' = 'startDate';
 const systemValue: 'systemValue' = 'systemValue';
 const type: 'type' = 'type';
+const value: 'value' = 'value';
 const way: 'way' = 'way';
 
 const FIELDS = {
@@ -36,6 +37,7 @@ const FIELDS = {
 	startDate,
 	systemValue,
 	type,
+	value,
 	way
 };
 
@@ -70,9 +72,34 @@ const DATETIME_SYSTEM_OPTIONS = [
 	}
 ];
 
+// Опции выбора системной группировки к атрибуту типа dtInterval
+const INTERVAL_SYSTEM_OPTIONS = [
+	{
+		label: 'Секунды',
+		value: INTERVAL_SYSTEM_GROUP.SECOND
+	},
+	{
+		label: 'Минуты',
+		value: INTERVAL_SYSTEM_GROUP.MINUTE
+	},
+	{
+		label: 'Часы',
+		value: INTERVAL_SYSTEM_GROUP.HOUR
+	},
+	{
+		label: 'Дни',
+		value: INTERVAL_SYSTEM_GROUP.DAY
+	},
+	{
+		label: 'Недели',
+		value: INTERVAL_SYSTEM_GROUP.WEEK
+	}
+];
+
 export {
 	BASE_VALIDATION_SUBGROUP_PATH,
 	DATETIME_SYSTEM_OPTIONS,
+	INTERVAL_SYSTEM_OPTIONS,
 	LOCAL_PREFIX_ID,
 	FIELDS,
 	IS_NEW,

@@ -6,7 +6,7 @@ import {ATTRIBUTE_SETS} from './constants';
 	Получаем необходимый атрибут для применения группировки и агрегации
  */
 const getProcessedAttribute = (attribute: Attribute) => {
-	if (ATTRIBUTE_SETS.REF.includes(attribute.type)) {
+	if (attribute.type in ATTRIBUTE_SETS.REF) {
 		return attribute.ref;
 	}
 
@@ -16,7 +16,7 @@ const getProcessedAttribute = (attribute: Attribute) => {
 const getProcessedValue = (attribute: Attribute, key: string, defaultValue: any) => {
 	let processedAttribute = attribute;
 
-	if (ATTRIBUTE_SETS.REF.includes(attribute.type)) {
+	if (attribute.type in ATTRIBUTE_SETS.REF) {
 		processedAttribute = attribute.ref;
 	}
 

@@ -1,7 +1,12 @@
 // @flow
+import type {AndCondition} from 'components/molecules/CustomGroup/components/AndCondition/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {ErrorsMap} from 'components/molecules/GroupCreatingModal/types';
-import type {SubGroup} from 'store/customGroups/types';
+
+export type SubGroup = {
+	data: Array<AndCondition>,
+	name: string
+};
 
 export type Props = {
 	attribute: Attribute,

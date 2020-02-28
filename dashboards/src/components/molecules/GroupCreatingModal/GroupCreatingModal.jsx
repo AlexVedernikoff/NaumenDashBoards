@@ -1,8 +1,8 @@
 // @flow
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createNewSubGroup, getSystemGroupOptions} from './helpers';
 import {CustomGroup, MaterialSelect, Modal} from 'components/molecules';
-import type {CustomGroup as CustomGroupType, CustomGroupId} from 'store/customGroups/types';
+import type {CustomGroup as CustomGroupType} from 'store/customGroups/types';
 import {FIELDS, IS_NEW, LOCAL_PREFIX_ID, TYPE_OPTIONS} from './constants';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
@@ -60,24 +60,12 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	getCustomGroups = () => {
 		const {attribute, customGroups} = this.props;
-		const {DATE, NUMBER, REF} = ATTRIBUTE_SETS;
-		const {metaClass, state} = ATTRIBUTE_TYPES;
+		const {DATE} = ATTRIBUTE_SETS;
 		const {type} = attribute;
 		const groups: any = Object.values(customGroups);
 
-		if (DATE.includes(type)) {
-			return groups.filter(group => DATE.includes(group.type));
-		}
-
-		if (REF.includes(type) || NUMBER.includes(type)) {
-			return groups.filter(group => group.type === type);
-		}
-
-		if (type === state || type === metaClass) {
-			return groups.filter(group => group.type === state || group.type === metaClass);
-		}
-
-		return [];
+		return type in DATE ? groups.filter(group => group.type in DATE)
+			: groups.filter(group => group.type === type);
 	};
 
 	getModalSize = () => this.state.way === GROUP_WAYS.SYSTEM ? 360 : MODAL_SIZES.LARGE;
@@ -140,7 +128,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleSelect = (name: string, value: Object) => this.setState({[name]: value});
 
-	handleSelectCustomGroup = (selectedCustomGroup: CustomGroupId) => this.setState({
+	handleSelectCustomGroup = (selectedCustomGroup: string) => this.setState({
 		errors: {},
 		isSubmitting: false,
 		selectedCustomGroup
@@ -304,10 +292,9 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderSystemGroup = () => {
-		const {attribute} = this.props;
 		const {systemOptions, systemValue, way} = this.state;
 
-		if (way === GROUP_WAYS.SYSTEM && ATTRIBUTE_SETS.DATE.includes(attribute.type)) {
+		if (way === GROUP_WAYS.SYSTEM && systemOptions.length > 0) {
 			return (
 				<div className={styles.shortField}>
 					<MaterialSelect

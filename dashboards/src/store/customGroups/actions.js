@@ -1,7 +1,7 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
-import type {CustomGroup, CustomGroupId, CustomGroupsMap} from './types';
+import type {CustomGroup, CustomGroupsMap} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
@@ -29,7 +29,7 @@ const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): Thun
 	return id;
 };
 
-const deleteCustomGroup = (payload: CustomGroupId): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const deleteCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		if (!payload.startsWith(LOCAL_PREFIX_ID)) {
 			await client.post(buildUrl('dashboardSettings', 'deleteCustomGroup', 'requestContent,user'), {
@@ -84,7 +84,7 @@ const saveCustomGroup = (payload: CustomGroup) => ({
 	payload
 });
 
-const removeCustomGroup = (payload: CustomGroupId) => ({
+const removeCustomGroup = (payload: string) => ({
 	type: CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP,
 	payload
 });

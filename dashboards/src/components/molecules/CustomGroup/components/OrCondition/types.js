@@ -2,7 +2,8 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import type {AttributesDataState} from 'store/sources/attributesData/types';
 import type {ErrorsMap} from 'components/molecules/GroupCreatingModal/types';
-import type {OrCondition} from 'store/customGroups/types';
+
+export type OrCondition = Object;
 
 export type Props = {
 	attribute: Attribute,

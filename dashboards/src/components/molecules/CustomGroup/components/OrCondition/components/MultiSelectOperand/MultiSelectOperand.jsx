@@ -10,33 +10,34 @@ export class MultiSelectOperand extends PureComponent<Props> {
 	getOptionValue = (option: Data) => option.uuid;
 
 	handleClear = () => {
-		const {onChange, type} = this.props;
+		const {onChange, operand} = this.props;
 
 		onChange({
-			data: [],
-			type
+			...operand,
+			data: []
 		});
 	};
 
 	handleRemove = (value: string) => {
-		const {data: currentData, onChange, type} = this.props;
+		const {onChange, operand} = this.props;
+		const {data: currentData} = operand;
 		const data = currentData.filter(option => this.getOptionValue(option) !== value);
 
 		onChange({
-			data,
-			type
+			...operand,
+			data
 		});
 	};
 
 	handleSelect = (name: string, value: Data) => {
-		const {data, onChange, type} = this.props;
+		const {onChange, operand} = this.props;
 
-		data.push(value);
-		onChange({data, type});
+		operand.data.push(value);
+		onChange(operand);
 	};
 
 	render () {
-		const {data, onClickShowMore, options, showMore} = this.props;
+		const {onClickShowMore, operand, options, showMore} = this.props;
 
 		return (
 			<MaterialMultiSelect
@@ -48,7 +49,7 @@ export class MultiSelectOperand extends PureComponent<Props> {
 				onSelect={this.handleSelect}
 				options={options}
 				showMore={showMore}
-				values={data}
+				values={operand.data}
 			/>
 		);
 	}
