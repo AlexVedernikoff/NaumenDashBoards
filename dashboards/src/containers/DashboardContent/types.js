@@ -8,8 +8,9 @@ import type {Widget} from 'store/widgets/data/types';
 export type ConnectedFunctions = {
 	drillDown: (widget: Widget, ordinalNumber?: number) => ThunkAction,
 	editLayout: (layout: Layout) => ThunkAction,
-	removeWidget: (widteId: string) => ThunkAction,
-	selectWidget: (widteId: string) => ThunkAction
+	removeWidget: (widgetId: string) => ThunkAction,
+	selectWidget: (widgetId: string) => ThunkAction,
+	updateWidget: Widget => Object
 };
 
 export type ConnectedProps = {

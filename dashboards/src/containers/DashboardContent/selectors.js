@@ -2,7 +2,7 @@
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {drillDown} from 'store/widgets/links/actions';
-import {editLayout, removeWidget, selectWidget} from 'store/widgets/data/actions';
+import {editLayout, removeWidget, selectWidget, updateWidget} from 'store/widgets/data/actions';
 import {USER_ROLES} from 'store/context/constants';
 
 export const props = (state: AppState): ConnectedProps => {
@@ -28,5 +28,6 @@ export const functions: ConnectedFunctions = {
 	drillDown,
 	editLayout,
 	removeWidget,
-	selectWidget
+	selectWidget,
+	updateWidget
 };

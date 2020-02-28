@@ -53,14 +53,14 @@ export class Diagram extends Component<Props> {
 	};
 
 	renderDiagramByType = () => {
-		const {buildData, widget} = this.props;
+		const {buildData, onUpdate, widget} = this.props;
 		const {showName, type} = widget;
 		const className = showName ? styles.diagramWithName : styles.diagram;
 		const Diagram = this.resolveDiagram(type);
 
 		return (
 			<div className={className}>
-				<Diagram buildData={buildData.data} widget={widget} />
+				<Diagram buildData={buildData.data} onUpdate={onUpdate} widget={widget} />
 			</div>
 		);
 	};

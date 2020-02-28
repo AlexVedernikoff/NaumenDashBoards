@@ -82,7 +82,7 @@ const createNewAndCondition = (type: GroupType) => {
 	const operandType = getDefaultOperandType(type);
 
 	if (operandType) {
-		const orCondition = createNewOrCondition(type, operandType) || createDefaultOperand(operandType);
+		const orCondition = createNewOrCondition(type, operandType);
 		andCondition.push(orCondition);
 	}
 
@@ -98,6 +98,8 @@ const createDateCondition = type => {
 		case LAST:
 		case NEAR:
 			return createSimpleOperand(type);
+		default:
+			return createDefaultOperand(type);
 	}
 };
 
@@ -111,6 +113,8 @@ const createNumberCondition = type => {
 		case NOT_EQUAL:
 		case NOT_EQUAL_NOT_EMPTY:
 			return createSimpleOperand(type);
+		default:
+			return createDefaultOperand(type);
 	}
 };
 
@@ -123,6 +127,8 @@ const createIntervalCondition = type => {
 		case LESS:
 		case NOT_EQUAL:
 			return createIntervalOperand(type);
+		default:
+			return createDefaultOperand(type);
 	}
 };
 
@@ -154,6 +160,8 @@ const createRefCondition = type => {
 		case TITLE_CONTAINS:
 		case TITLE_NOT_CONTAINS:
 			return createSimpleOperand(type);
+		default:
+			return createDefaultOperand(type);
 	}
 };
 
@@ -165,6 +173,8 @@ const createStringCondition = type => {
 		case NOT_CONTAINS:
 		case NOT_CONTAINS_INCLUDING_EMPTY:
 			return createSimpleOperand(type);
+		default:
+			return createDefaultOperand(type);
 	}
 };
 

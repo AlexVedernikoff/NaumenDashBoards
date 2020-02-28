@@ -1,9 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
-import {CreationPanel, IconButton, Loader, SearchSelectInput} from 'components/atoms';
 import {EditIcon, MinusIcon} from 'icons/form';
-import {InputForm, SimpleSelectList} from 'components/molecules';
+import {IconButton, Loader} from 'components/atoms';
+import {InputForm, SimpleSelectMenu} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -66,14 +66,6 @@ export class AttributeSelect extends PureComponent<Props, State> {
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderCreationPanel = () => {
-		const {onClickCreationButton, showCreationButton} = this.props;
-
-		if (showCreationButton) {
-			return <CreationPanel onClick={onClickCreationButton} text="Cоздать поле" />;
-		}
-	};
-
 	renderEditIcon = () => {
 		const {value} = this.props;
 
@@ -111,40 +103,33 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		</div>
 	);
 
-	renderList = () => {
-		const {options, value} = this.props;
-		const {foundOptions, searchValue} = this.state;
-		const renderOptions = searchValue ? foundOptions : options;
-		const messages = {
-			noOptions: 'Список атрибутов пуст'
-		};
-
-		return (
-			<SimpleSelectList
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				isSearching={!!searchValue}
-				messages={messages}
-				onClose={this.hideMenu}
-				onSelect={this.handleSelect}
-				options={renderOptions}
-				value={value}
-			/>
-		);
-	};
-
 	renderLoader = () => this.props.loading ? <Loader className={styles.loader} /> : null;
 
 	renderMenu = () => {
-		const {showMenu} = this.state;
+		const {onClickCreationButton, options, showCreationButton, value} = this.props;
+		const {foundOptions, searchValue, showMenu} = this.state;
+		const renderOptions = searchValue ? foundOptions : options;
+		let creationButton;
+
+		if (showCreationButton) {
+			creationButton = {
+				onClick: onClickCreationButton,
+				text: 'Создать поле'
+			};
+		}
 
 		if (showMenu) {
 			return (
-				<div className={styles.menu}>
-					{this.renderSearchListInput()}
-					{this.renderList()}
-					{this.renderCreationPanel()}
-				</div>
+				<SimpleSelectMenu
+					creationButton={creationButton}
+					getOptionLabel={this.getOptionLabel}
+					getOptionValue={this.getOptionValue}
+					isSearching={true}
+					onClose={this.hideMenu}
+					onSelect={this.handleSelect}
+					options={renderOptions}
+					value={value}
+				/>
 			);
 		}
 	};
@@ -158,15 +143,6 @@ export class AttributeSelect extends PureComponent<Props, State> {
 					<MinusIcon />
 				</IconButton>
 			);
-		}
-	};
-
-	renderSearchListInput = () => {
-		const {options} = this.props;
-		const {searchValue} = this.state;
-
-		if (options.length > 0) {
-			return <SearchSelectInput onChange={this.handleChangeSearchInput} value={searchValue} />;
 		}
 	};
 

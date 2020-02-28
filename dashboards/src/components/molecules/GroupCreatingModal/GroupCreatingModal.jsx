@@ -3,9 +3,9 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createNewSubGroup, getSystemGroupOptions} from './helpers';
 import {CustomGroup, MaterialSelect, Modal} from 'components/molecules';
 import type {CustomGroup as CustomGroupType} from 'store/customGroups/types';
+import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS, IS_NEW, LOCAL_PREFIX_ID, TYPE_OPTIONS} from './constants';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
-import {GROUP_WAYS} from 'store/widgets/constants';
 import {InfoPanel, MaterialTextInput, RadioButton} from 'components/atoms';
 import {isGroupKey} from 'store/widgets/helpers';
 import type {Props, State} from './types';
@@ -179,7 +179,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 	saveSystemGroup = () => {
 		const {onSubmit} = this.props;
 		const {attributeTitle, systemValue, way} = this.state;
-		const data = systemValue ? systemValue.value : '';
+		const data = systemValue ? systemValue.value : DEFAULT_SYSTEM_GROUP.OVERLAP;
 		const group = {
 			data,
 			way

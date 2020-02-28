@@ -16,7 +16,7 @@ import {setCustomGroups} from 'store/customGroups/actions';
  * @returns {ThunkAction}
  */
 const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {autoUpdateInterval: defaultInterval} = await window.jsApi.commands.getCurrentContentParameters();
+	const {MinTimeIntervalUpdate: defaultInterval} = await window.jsApi.commands.getCurrentContentParameters();
 
 	if (defaultInterval) {
 		dispatch(changeAutoUpdateSettings({defaultInterval}));

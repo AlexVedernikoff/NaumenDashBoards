@@ -2,7 +2,7 @@
 import {AXIS_FIELDS, CIRCLE_FIELDS} from 'components/organisms/WidgetFormPanel/constants/fields';
 import {CHART_VARIANTS} from 'utils/chart';
 import type {ConnectedProps} from './types';
-import {createOrdinalName, NewWidget} from 'utils/widget';
+import {createOrdinalName, NewWidget, WIDGET_VARIANTS} from 'utils/widget';
 import {FIELDS, SETTINGS} from 'components/organisms/WidgetFormPanel';
 import filter from './filter';
 import type {FormikConfig, FormikProps, FormikValues} from 'formik';
@@ -51,12 +51,16 @@ const config: FormikConfig = {
 	handleSubmit: (values: FormikValues, {props}: FormikProps) => {
 		const {createWidget, saveWidget, selectedWidget} = props;
 		const {isNew, ...data} = values;
-		const filteredData = filter(data);
+		const filteredData = filter(data, selectedWidget);
+
+		if (filteredData.type === WIDGET_VARIANTS.TABLE && Array.isArray(selectedWidget.rowsWidth)) {
+			filteredData.rowsWidth = selectedWidget.rowsWidth;
+		}
 
 		isNew ? createWidget(filteredData) : saveWidget({...filteredData, id: selectedWidget.id});
 	},
 
-	enableReinitialize: true
+	enableReinitialize: false
 };
 
 export default config;

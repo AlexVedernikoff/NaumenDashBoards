@@ -18,12 +18,20 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 		}
 	};
 
+	componentDidMount () {
+		const {defaultInterval, enabled, interval} = this.props.autoUpdateSettings;
+		this.setState({values: {
+			enabled,
+			interval: interval || defaultInterval
+		}});
+	}
+
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {isSubmitting, values: currentValues} = this.state;
 		const {value: interval} = e.currentTarget;
 
 		if (/^(\d+)?$/.test(interval)) {
-			const values = {...currentValues, interval};
+			const values = {...currentValues, interval: Number(interval)};
 
 			isSubmitting && this.validate(values);
 			this.setState({values});
@@ -102,7 +110,6 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 				autoComplete="off"
 				className={inputCN}
 				name="interval"
-				onBlur={this.validate}
 				onChange={this.handleChange}
 				value={interval}
 			/>

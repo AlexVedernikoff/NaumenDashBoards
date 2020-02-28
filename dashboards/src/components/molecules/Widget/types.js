@@ -23,7 +23,8 @@ export type Props = {
 	isSelected: boolean,
 	onDrillDown: (widget: Widget, orderNum?: number) => ThunkAction,
 	onEdit: (id: string) => void,
-	onRemove: (id: string) => ThunkAction
+	onRemove: (id: string) => ThunkAction,
+	onUpdate: Widget => void,
 };
 
 export type State = {
