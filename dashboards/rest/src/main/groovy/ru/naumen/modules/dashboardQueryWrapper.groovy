@@ -173,11 +173,11 @@ class QueryWrapper
             case Comparison.NOT_NULL:
                 return HRestrictions.isNotNull(column)
             case Comparison.NOT_EQUAL_AND_NOT_NULL:
-                return HRestrictions.not(HRestrictions.eqNullSafe(column, filter.value))
+                return HRestrictions.with { not(eqNullSafe(column, filter.value)) }
             case Comparison.EQUAL:
                 return HRestrictions.eq(column, filter.value)
             case Comparison.NOT_EQUAL:
-                return HRestrictions.not(HRestrictions.eq(column, filter.value))
+                return HRestrictions.ne(column, filter.value)
             case Comparison.GREATER:
                 return HRestrictions.gt(column, filter.value)
             case Comparison.LESS:
@@ -189,6 +189,12 @@ class QueryWrapper
             case Comparison.BETWEEN:
                 def (first, second) = filter.value
                 return HRestrictions.between(column, first, second)
+            case Comparison.CONTAINS:
+                return HRestrictions.like(column, filter.value)
+            case Comparison.NOT_CONTAINS:
+                return HRestrictions.with { not(like(column, filter.value)) }
+            case Comparison.NOT_CONTAINS_AND_NOT_NULL:
+                return HRestrictions.with { and(isNotNull(column), not(like(column, filter.value)))}
             default: throw new IllegalArgumentException("Not supported filter type: $type!")
         }
     }

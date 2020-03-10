@@ -84,6 +84,9 @@ enum Comparison
     GREATER_OR_EQUAL,
     LESS_OR_EQUAL,
     BETWEEN,
+    CONTAINS,
+    NOT_CONTAINS,
+    NOT_CONTAINS_AND_NOT_NULL,
     NOT_EQUAL_AND_NOT_NULL
 }
 //endregion
