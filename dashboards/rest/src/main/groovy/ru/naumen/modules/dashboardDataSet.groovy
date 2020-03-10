@@ -528,23 +528,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
 
     Map<String, List<List>> splitData = intermediateData
             .findAll { key, value -> value.customGroup }
-            ?.collectEntries { key, value ->
-                def customGroup = value.customGroup as Map<String, Object>
-                customGroup.type // тип атрибута капсом
-                def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
-                def requestData = data[key as String]
-                def attribute = customGroup.attribute as Attribute
-                List<List> dataSet = subGroups.collect { el ->
-                    def group = el as Map<String, Object>
-                    String groupName = group.name // название группы. Должно оказаться в записе реквизита
-                    def filters = mappingDateTypeFilters(group.data as List<List>, attribute, groupName)
-                    def newRequestData = requestData.clone()
-                    newRequestData.filters = filters
-                    String newKey = UUID.randomUUID() // шанс колизии ключей очень мал
-                    [groupName, newKey, newRequestData]
-                }
-                [(key): dataSet]
-            }
+            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
 
     def groupKeyMap = splitData?.collect { key, list ->
         def newDataSet = list.collectEntries { el ->
