@@ -999,6 +999,13 @@ private Attribute mappingAttribute(Map<String, Object> data)
     ) : null
 }
 
+/**
+ * Метод преобразования кастомных группировок к формату подходящего для QueryWrapper
+ * @param getData - функция получения данных запроса по ключу
+ * @param key - ключь для получения данных запроса
+ * @param value - настройки кастомной группировки
+ * @return возвращает новую пару ключ, данные запроса
+ */
 private Map<String, List<List>> convertCustomGroup(Closure getData, String key, Map value) {
     def customGroup = value.customGroup as Map<String, Object>
     Closure<Collection<Collection<FilterParameter>>> mappingFilters =
@@ -1018,8 +1025,15 @@ private Map<String, List<List>> convertCustomGroup(Closure getData, String key, 
     return [(key): dataSet]
 }
 
+/**
+ * Метод получения функции преобразования пользовательской группировки в удобный формат
+ * @param type - тип пользовательской группировки
+ * @return функция преобразования настроек пользовательской группировки
+ */
 private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type) {
     switch (type) {
+        case 'string':
+            return this.&mappingStringTypeFilters
         case 'integer':
             return this.&mappingNumberTypeFilters.curry({ it as long })
         case 'double':
@@ -1031,137 +1045,174 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
     }
 }
 
-private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title) {
-    return data.collect { andCondition ->
-        andCondition.collect { orCondition ->
-            def condition = orCondition as Map<String, Object>
-            // замыкание конструктара с зафиксироваными полями
-            Closure buildFilterParameterFromCondition = { Comparison type ->
-                new FilterParameter(
-                        value: condition.data?.with(valueConverter),
-                        title: title,
-                        type: type,
-                        attribute: attribute
-                )
-            }
-
-            String conditionType = condition.type
-            switch (conditionType.toLowerCase()) {
-                case 'equal':
-                    return buildFilterParameterFromCondition(Comparison.EQUAL) as FilterParameter
-                case 'not_equal_not_empty':
-                    return buildFilterParameterFromCondition(Comparison.NOT_EQUAL_AND_NOT_NULL) as FilterParameter
-                case 'not_equal':
-                    return buildFilterParameterFromCondition(Comparison.NOT_EQUAL) as FilterParameter
-                case 'greater':
-                    return buildFilterParameterFromCondition(Comparison.GREATER) as FilterParameter
-                case 'less':
-                    return buildFilterParameterFromCondition(Comparison.LESS) as FilterParameter
-                case 'empty':
-                    return buildFilterParameterFromCondition(Comparison.IS_NULL) as FilterParameter
-                case 'not_empty':
-                    return buildFilterParameterFromCondition(Comparison.NOT_NULL) as FilterParameter
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
-            }
+/**
+ * Метод преодбразований настроек группировки для строковых типов
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
+ */
+private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title) {
+    return mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        Closure buildFilterParameterFromCondition = { Comparison type ->
+            new FilterParameter(
+                    value: condition.data,
+                    title: title,
+                    type: type,
+                    attribute: attribute
+            )
+        }
+        switch (conditionType.toLowerCase()) {
+            case 'contains':
+                return buildFilterParameterFromCondition(Comparison.CONTAINS)
+            case 'not_contains_not_empty':
+                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS_AND_NOT_NULL)
+            case 'not_contains':
+                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS)
+            case 'empty':
+                return buildFilterParameterFromCondition(Comparison.IS_NULL)
+            case 'not_empty':
+                return buildFilterParameterFromCondition(Comparison.NOT_NULL)
+            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }
 }
 
 /**
- * Метод построение фильтров группировок
- * @param data - данные группировок
- * @param attribute - атрибут по которому создаются условия группы
- * @param title - название группы
- * @return список фильтров
+ * Метод преодбразований настроек группировки для числовых типов
+ * @param valueConverter - функция преодразования строки в число
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
+ */
+private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title) {
+    return mappingFilter(data) { Map condition ->
+        Closure buildFilterParameterFromCondition = { Comparison type ->
+            new FilterParameter(
+                    value: condition.data?.with(valueConverter),
+                    title: title,
+                    type: type,
+                    attribute: attribute
+            )
+        }
+        String conditionType = condition.type
+        switch (conditionType.toLowerCase()) {
+            case 'equal':
+                return buildFilterParameterFromCondition(Comparison.EQUAL) as FilterParameter
+            case 'not_equal_not_empty':
+                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL_AND_NOT_NULL) as FilterParameter
+            case 'not_equal':
+                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL) as FilterParameter
+            case 'greater':
+                return buildFilterParameterFromCondition(Comparison.GREATER) as FilterParameter
+            case 'less':
+                return buildFilterParameterFromCondition(Comparison.LESS) as FilterParameter
+            case 'empty':
+                return buildFilterParameterFromCondition(Comparison.IS_NULL) as FilterParameter
+            case 'not_empty':
+                return buildFilterParameterFromCondition(Comparison.NOT_NULL) as FilterParameter
+            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
+    }
+}
+
+/**
+ * Метод преодбразований настроек группировки для dateTime типов
+ * @param valueConverter - функция преодразования строки в число
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
  */
 private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title)
 {
+    mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
+            return new FilterParameter(
+                    title: title,
+                    type: Comparison.BETWEEN,
+                    attribute: attribute,
+                    value: value
+            )
+        }
+        switch (conditionType.toLowerCase())
+        {
+            case 'today':
+                def start = Calendar.instance.with {
+                    set(HOUR_OF_DAY, 0)
+                    set(MINUTE, 0)
+                    set(SECOND, 0)
+                    set(MILLISECOND, 0)
+                    getTime()
+                }
+                def end = Calendar.instance.with {
+                    set(HOUR_OF_DAY, 23)
+                    set(MINUTE, 59)
+                    set(SECOND, 59)
+                    set(MILLISECOND, 999)
+                    getTime()
+                }
+                return buildFilterParameterFromCondition([start, end])
+            case 'last':
+                def count = condition.data as int
+                def start = Calendar.instance.with {
+                    add(DAY_OF_MONTH, -count)
+                    set(HOUR_OF_DAY, 0)
+                    set(MINUTE, 0)
+                    set(SECOND, 0)
+                    set(MILLISECOND, 0)
+                    getTime()
+                }
+                def end = Calendar.instance.with {
+                    set(HOUR_OF_DAY, 23)
+                    set(MINUTE, 59)
+                    set(SECOND, 59)
+                    set(MILLISECOND, 999)
+                    getTime()
+                }
+            return buildFilterParameterFromCondition([start, end])
+            case 'near':
+                def count = condition.data as int
+                def start = Calendar.instance.with {
+                    set(HOUR_OF_DAY, 0)
+                    set(MINUTE, 0)
+                    set(SECOND, 0)
+                    set(MILLISECOND, 0)
+                    getTime()
+                }
+                def end = Calendar.instance.with {
+                    add(DAY_OF_MONTH, count)
+                    set(HOUR_OF_DAY, 23)
+                    set(MINUTE, 59)
+                    set(SECOND, 59)
+                    set(MILLISECOND, 999)
+                    getTime()
+                }
+            return buildFilterParameterFromCondition([start, end])
+            case 'between':
+                String dateFormat = 'yyyy-MM-dd'
+                def date = condition.data as Map<String, Object> // тут будет массив дат
+                def start = Date.parse(dateFormat, date.startDate as String)
+                def end = Date.parse(dateFormat, date.endDate as String)
+            return buildFilterParameterFromCondition([start, end])
+            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
+    }
+}
+
+/**
+ * Метод обхода настроек пользовательской группировки
+ * @param data - настройки пользовательской группировки
+ * @param mapFilter - функция преобразования данных в удобный формат
+ * @return настройки группировки в удобном формате
+ */
+private List<List<FilterParameter>> mappingFilter(List<List> data, Closure<FilterParameter> mapFilter) {
     return data.collect { andCondition ->
         andCondition.collect { orCondition ->
-            def condition = orCondition as Map<String, Object>
-            String conditionType = condition.type
-            switch (conditionType.toLowerCase())
-            {
-                case 'today':
-                    def start = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 0)
-                        set(MINUTE, 0)
-                        set(SECOND, 0)
-                        set(MILLISECOND, 0)
-                        getTime()
-                    }
-                    def end = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 23)
-                        set(MINUTE, 59)
-                        set(SECOND, 59)
-                        set(MILLISECOND, 999)
-                        getTime()
-                    }
-                    return new FilterParameter(
-                            title: title,
-                            type: Comparison.BETWEEN,
-                            attribute: attribute,
-                            value: [start, end]
-                    )
-                case 'last':
-                    def count = condition.data as int
-                    def start = Calendar.instance.with {
-                        add(DAY_OF_MONTH, -count)
-                        set(HOUR_OF_DAY, 0)
-                        set(MINUTE, 0)
-                        set(SECOND, 0)
-                        set(MILLISECOND, 0)
-                        getTime()
-                    }
-                    def end = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 23)
-                        set(MINUTE, 59)
-                        set(SECOND, 59)
-                        set(MILLISECOND, 999)
-                        getTime()
-                    }
-                    return new FilterParameter(
-                            title: title,
-                            type: Comparison.BETWEEN,
-                            attribute: attribute,
-                            value: [start, end]
-                    )
-                case 'near':
-                    def count = condition.data as int
-                    def start = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 0)
-                        set(MINUTE, 0)
-                        set(SECOND, 0)
-                        set(MILLISECOND, 0)
-                        getTime()
-                    }
-                    def end = Calendar.instance.with {
-                        add(DAY_OF_MONTH, count)
-                        set(HOUR_OF_DAY, 23)
-                        set(MINUTE, 59)
-                        set(SECOND, 59)
-                        set(MILLISECOND, 999)
-                        getTime()
-                    }
-                    return new FilterParameter(
-                            title: title,
-                            type: Comparison.BETWEEN,
-                            attribute: attribute,
-                            value: [start, end]
-                    )
-                case 'between':
-                    String dateFormat = 'yyyy-MM-dd'
-                    def date = condition.data as Map<String, Object> // тут будет массив дат
-                    def start = Date.parse(dateFormat, date.startDate as String)
-                    def end = Date.parse(dateFormat, date.endDate as String)
-                    return new FilterParameter(
-                            title: title,
-                            type: Comparison.BETWEEN,
-                            attribute: attribute,
-                            value: [start, end]
-                    )
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
-            }
+            mapFilter(orCondition as Map<String, Object>)
         }
     }
 }
