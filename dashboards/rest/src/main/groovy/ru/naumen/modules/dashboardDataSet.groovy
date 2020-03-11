@@ -1032,6 +1032,8 @@ private Map<String, List<List>> convertCustomGroup(Closure getData, String key, 
  */
 private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type) {
     switch (type) {
+        case 'dtInterval':
+            return this.&mappingDTIntervalTypeFilters
         case 'string':
             return this.&mappingStringTypeFilters
         case 'integer':
@@ -1042,6 +1044,39 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
             return this.&mappingDateTypeFilters
         default:
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
+    }
+}
+
+private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title) {
+    return mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type ->
+            def interval = condition.data as Map // тут будет лежать значение временного интервала
+            String intervalType = interval.type
+            long length = interval.value as long
+            new FilterParameter(
+                    //Важный момент. Обязательно извлекать милисекунды, так как критерия не может это сделать сама.
+                    value: api.types.newDateTimeInterval(length, intervalType).toMiliseconds(),
+                    title: title,
+                    type: type,
+                    attribute: attribute
+            )
+        }
+        switch (conditionType.toLowerCase()) {
+            case 'empty':
+                return buildFilterParameterFromCondition(Comparison.IS_NULL)
+            case 'not_empty':
+                return buildFilterParameterFromCondition(Comparison.NOT_NULL)
+            case 'equal':
+                return buildFilterParameterFromCondition(Comparison.EQUAL)
+            case 'not_equal':
+                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL)
+            case 'greater':
+                return buildFilterParameterFromCondition(Comparison.GREATER)
+            case 'less':
+                return buildFilterParameterFromCondition(Comparison.LESS)
+            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
     }
 }
 
@@ -1284,7 +1319,7 @@ private boolean checkGroupTypes(Collection<RequestData> listRequest)
 private Collection<Collection<String>> findUniqueGroups(def variables)
 { // работает только с методами которые имеют группировки. В противном случае бросает исключение
     return variables.values().collect {
-        it.transpose().tail().transpose()
+        it.transpose()?.tail()?.transpose() ?: []
     }.inject([]) { first, second ->
         first + second
     }.unique() as Collection<Collection<String>>
