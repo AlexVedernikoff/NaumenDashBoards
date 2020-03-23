@@ -1,7 +1,8 @@
 // @flow
 import {CreationPanel, SearchSelectInput} from 'components/atoms';
+import type {InputRef} from 'src/components/types';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import {SimpleSelectList} from 'components/molecules';
 import styles from './styles.less';
 
@@ -14,10 +15,17 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 		values: []
 	};
 
+	searchInputRef: InputRef = createRef();
+
 	state = {
 		foundOptions: [],
 		searchValue: ''
 	};
+
+	componentDidMount () {
+		const {current} = this.searchInputRef;
+		current && current.focus();
+	}
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
@@ -84,7 +92,13 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 		const {searchValue} = this.state;
 
 		if (isSearching) {
-			return <SearchSelectInput onChange={this.handleChangeSearchInput} value={searchValue} />;
+			return (
+				<SearchSelectInput
+					forwardedRef={this.searchInputRef}
+					onChange={this.handleChangeSearchInput}
+					value={searchValue}
+				/>
+			);
 		}
 	};
 

@@ -1,7 +1,7 @@
 /* eslint-disable */
 const getCurrentContentParameters = async () => await ({
 	editable: true,
-	autoUpdateInterval: 15
+	MinTimeIntervalUpdate: 15
 });
 
 const getCurrentContextObject = async () => await ({

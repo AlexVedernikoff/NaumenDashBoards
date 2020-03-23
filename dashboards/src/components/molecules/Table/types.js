@@ -4,10 +4,10 @@ import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
 	buildData: DiagramBuildData,
+	onUpdate: Widget => void,
 	widget: Widget
 };
 
 export type State = {
-	columns: [],
-	data: []
+	width: null | number
 };

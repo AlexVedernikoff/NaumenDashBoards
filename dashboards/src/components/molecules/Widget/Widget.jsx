@@ -114,11 +114,11 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderDiagram = () => {
-		const {buildData, data, isNew} = this.props;
+		const {buildData, data, isNew, onUpdate} = this.props;
 		const {hasError} = this.state;
 
 		if (!isNew && buildData && !hasError) {
-			return <Diagram buildData={buildData} widget={data} />;
+			return <Diagram buildData={buildData} onUpdate={onUpdate} widget={data} />;
 		}
 	};
 

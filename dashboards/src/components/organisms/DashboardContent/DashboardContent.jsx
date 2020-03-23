@@ -132,14 +132,14 @@ export class DashboardContent extends Component<Props, State> {
 		if (editMode) {
 			return (
 				<div className={styles.panel}>
-					{selectedWidget ? <WidgetFormPanel /> : <WidgetAddPanel />}
+					{selectedWidget ? <WidgetFormPanel key={selectedWidget} /> : <WidgetAddPanel />}
 				</div>
 			);
 		}
 	};
 
 	renderWidget = (widget: WidgetType) => {
-		const {buildData, drillDown, editable, removeWidget, selectedWidget} = this.props;
+		const {buildData, drillDown, editable, removeWidget, selectedWidget, updateWidget} = this.props;
 		const {id, layout} = widget;
 		const isNew = id === NewWidget.id;
 		const ref = isNew ? this.newWidgetRef : null;
@@ -162,6 +162,7 @@ export class DashboardContent extends Component<Props, State> {
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
 				onRemove={removeWidget}
+				onUpdate={updateWidget}
 				ref={ref}
 			/>
 		);

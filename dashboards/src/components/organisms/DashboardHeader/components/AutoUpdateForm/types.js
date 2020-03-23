@@ -14,7 +14,7 @@ type ErrorsMap = {
 
 export type Values = {
 	enabled: boolean,
-	interval: string | number
+	interval: number
 };
 
 export type State = {

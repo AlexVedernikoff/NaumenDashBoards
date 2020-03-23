@@ -11,7 +11,7 @@ const client = axios.create({
 
 if (process.env.NODE_ENV === 'development') {
 	const handleConfig = (config: AxiosRequestConfig) => {
-		config.url = `${config.url}&accessKey=8b78f934-5f8a-4e54-b3d6-08b013cb4297`;
+		config.url = `${config.url}&accessKey=d78635da-31cd-4f11-95de-454d7a8aca29`;
 		config.withCredentials = true;
 		return config;
 	};
