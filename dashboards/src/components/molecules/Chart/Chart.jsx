@@ -33,13 +33,12 @@ export class Chart extends PureComponent<Props> {
 	}
 
 	getOptions = () => {
-		const {buildData, widget} = this.props;
+		const {data, widget} = this.props;
 		const {current} = this.ref;
-		const {categories, labels, series} = buildData;
-		let options = null;
+		let options = {};
 
-		if (current && Array.isArray(series) && (Array.isArray(categories) || Array.isArray(labels))) {
-			options = getOptions(widget, buildData, current.clientWidth);
+		if (current) {
+			options = getOptions(widget, data, current.clientWidth);
 		}
 
 		return options;
@@ -59,7 +58,7 @@ export class Chart extends PureComponent<Props> {
 		const {legendPosition, showLegend} = this.props.widget;
 
 		return showLegend && (legendPosition
-			&& (legendPosition.value === LEGEND_POSITIONS.left || legendPosition.value === LEGEND_POSITIONS.right)
+			&& (legendPosition === LEGEND_POSITIONS.left || legendPosition === LEGEND_POSITIONS.right)
 		);
 	};
 

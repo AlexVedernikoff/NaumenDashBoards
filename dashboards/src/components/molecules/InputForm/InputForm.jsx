@@ -1,18 +1,27 @@
 // @flow
 import {CheckedIcon, CloseIcon} from 'icons/form';
-import {Formik} from 'formik';
-import type {FormikProps} from 'formik';
-import {object} from 'yup';
-import type {Props, Values} from './types';
+import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
-const name = 'value';
+export class InputForm extends Component<Props, State> {
+	state = {
+		value: ''
+	};
 
-export class InputForm extends Component<Props> {
-	handleSubmit = (values: Values) => {
+	componentDidMount () {
+		const {value} = this.props;
+		this.setState({value: value.toString()});
+	}
+
+	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {value} = e.currentTarget;
+		this.setState({value});
+	};
+
+	handleClickCheckedIcon = () => {
 		const {onSubmit} = this.props;
-		const value = values[name];
+		const {value} = this.state;
 
 		if (value) {
 			onSubmit(value);
@@ -23,24 +32,23 @@ export class InputForm extends Component<Props> {
 		e.stopPropagation();
 	};
 
-	renderFormContent = (props: FormikProps) => {
-		const {handleChange, handleSubmit, values} = props;
+	render () {
 		const {onClose} = this.props;
+		const {value} = this.state;
 
 		return (
 			<div className={styles.container}>
 				<input
 					autoComplete="off"
 					className={styles.input}
-					name={name}
-					onChange={handleChange}
+					onChange={this.handleChange}
 					required
 					type="text"
-					value={values[name]}
+					value={value}
 				/>
 				<CheckedIcon
 					className={styles.successIcon}
-					onClick={handleSubmit}
+					onClick={this.handleClickCheckedIcon}
 					onMouseDown={this.stopPropagation}
 				/>
 				<CloseIcon
@@ -49,27 +57,6 @@ export class InputForm extends Component<Props> {
 					onMouseDown={this.stopPropagation}
 				/>
 			</div>
-		);
-	};
-
-	render () {
-		const {rule, value} = this.props;
-		let schema;
-
-		if (rule) {
-			schema = object().shape({
-				value: rule
-			});
-		}
-
-		return (
-			<Formik
-				enableReinitialize={true}
-				initialValues={{value}}
-				onSubmit={this.handleSubmit}
-				render={this.renderFormContent}
-				validationSchema={schema}
-			/>
 		);
 	}
 }

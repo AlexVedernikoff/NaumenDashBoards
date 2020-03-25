@@ -1,6 +1,5 @@
 // @flow
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import {createOrdinalName, createRefName, getNumberFromName} from 'utils/widget';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import {FIELDS, OPTIONS, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
@@ -8,72 +7,64 @@ import {styles} from 'components/organisms/WidgetFormPanel/Tabs/ParamsTab';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class ComboChart extends DataFormBuilder {
-	defaultOrder = [1, 2];
+	minCountBuildingSources = 2;
 	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
 
-	changeDependingOnMain = (number: number) => {
-		const {setFieldValue, values} = this.props;
-		const mainNumber = this.getMainNumber();
-		const mainSource = values[createOrdinalName(FIELDS.source, mainNumber)];
-		const currentSource = values[createOrdinalName(FIELDS.source, number)];
+	changeDependingOnMain = (index: number) => {
+		const {setFieldValue} = this.props;
+		const {key: currentKey, source: currentSource, xAxis: currentXAxis} = this.getSet(index);
+		const {key: mainKey, source: mainSource, xAxis: mainXAxis} = this.getMainSet();
 
-		if (mainNumber !== number && mainSource && currentSource) {
-			const xAxisName = createOrdinalName(FIELDS.xAxis, number);
-			const groupName = createOrdinalName(FIELDS.group, number);
-			const currentXAxis = values[xAxisName];
-
+		if (currentKey !== mainKey && mainSource && currentSource) {
 			if (mainSource.value === currentSource.value) {
-				this.setMainValue(xAxisName, groupName);
+				this.setMainValue(index, FIELDS.xAxis, FIELDS.group);
 			} else {
-				const mainXAxis = values[createOrdinalName(FIELDS.xAxis, mainNumber)];
-
 				if (mainXAxis && currentXAxis && mainXAxis.type !== currentXAxis.type) {
-					setFieldValue(xAxisName, null);
+					setFieldValue(FIELDS.xAxis, null);
 				}
 
-				this.setMainValue(groupName);
+				this.setMainValue(index, FIELDS.group);
 			}
 		}
 	};
 
-	changeRefFields = () => this.getOrder().forEach(this.changeDependingOnMain);
+	changeRefFields = () => this.props.values.data.forEach(this.changeDependingOnMain);
 
-	changeSourceRefs = (name: string) => this.changeDependingOnMain(getNumberFromName(name));
+	changeSourceRefs = (index: number) => () => this.changeDependingOnMain(index);
 
-	getMainNumber = () => this.getOrder()[0];
-
-	handleSelectComboGroup = (name: string) => {
-		if (getNumberFromName(name) === this.getMainNumber()) {
+	handleSelectComboGroup = (index: number) => {
+		if (this.getSet(index).key === this.getMainSet().key) {
 			this.changeRefFields();
 		}
 	};
 
-	setMainValue = (...names: Array<string>) => {
-		const {setFieldValue, values} = this.props;
-		const mainNumber = this.getMainNumber();
+	setMainValue = (index: number, ...names: Array<string>) => {
+		const {setDataFieldValue} = this.props;
+		const set = this.getSet(index);
+		const mainSet = this.getMainSet();
 
-		names.forEach(async name => {
-			const mainProperty = values[createOrdinalName(this.getBaseName(name), mainNumber)];
-			const currentProperty = values[name];
+		names.forEach(name => {
+			const mainProperty = mainSet[name];
+			const currentProperty = set[name];
 			const currentIsNotMain = !currentProperty
 				|| mainProperty.code !== currentProperty.code
 				|| mainProperty !== currentProperty;
 
 			if (mainProperty && currentIsNotMain) {
-				setFieldValue(name, mainProperty);
+				setDataFieldValue(index)(name, mainProperty);
 			}
 		});
 	};
 
-	renderChartInput = (name: string = FIELDS.type) => {
-		const {values} = this.props;
+	renderChartInput = (index: number) => {
+		const set = this.getSet(index);
 
 		const chart = {
-			name: name,
+			name: FIELDS.type,
 			options: OPTIONS.CHARTS,
 			showCaret: false,
 			tip: 'Тип графика',
-			value: values[name]
+			value: set[FIELDS.type]
 		};
 
 		return (
@@ -88,14 +79,12 @@ export class ComboChart extends DataFormBuilder {
 		);
 	};
 
-	renderXAxis = (name: string) => {
-		const {values} = this.props;
-		const mainNumber = this.getMainNumber();
-		const mainSource = values[createOrdinalName(FIELDS.source, mainNumber)];
-		const currentNumber = getNumberFromName(name);
-		const currentSource = values[createOrdinalName(FIELDS.source, currentNumber)];
-		const currentGroupName = createOrdinalName(FIELDS.group, currentNumber);
-		const currentXAxis = values[name];
+	renderXAxis = (index: number) => {
+		const set = this.getSet(index);
+		const mainSet = this.getMainSet();
+		const mainSource = mainSet[FIELDS.source];
+		const currentSource = set[FIELDS.source];
+		const currentXAxis = set[FIELDS.xAxis];
 		let onSelectCallback;
 
 		if (mainSource === currentSource) {
@@ -104,26 +93,26 @@ export class ComboChart extends DataFormBuilder {
 
 		const refInputProps = {
 			disabled: false,
-			name: currentGroupName,
+			name: FIELDS.group,
 			onSelectCallback: this.handleSelectComboGroup,
 			type: 'group',
-			value: values[currentGroupName]
+			value: set[FIELDS.group]
 		};
 
 		const props = {
 			disabled: false,
-			name,
+			name: FIELDS.xAxis,
 			onSelectCallback,
 			options: undefined,
 			refInputProps,
 			value: currentXAxis
 		};
 
-		if (mainNumber !== currentNumber && mainSource && currentSource) {
+		if (set.key !== mainSet.key && mainSource && currentSource) {
 			if (mainSource.value === currentSource.value) {
 				props.disabled = true;
 			} else {
-				const mainXAxis = values[createOrdinalName(FIELDS.xAxis, mainNumber)];
+				const mainXAxis = mainSet[FIELDS.xAxis];
 				let xAxisOptions = this.getAttributeOptions(currentSource.value);
 
 				if (xAxisOptions.length > 0 && mainXAxis) {
@@ -148,53 +137,45 @@ export class ComboChart extends DataFormBuilder {
 			refInputProps.disabled = true;
 		}
 
-		return this.renderAttribute(props);
+		return this.renderAttribute(index, props);
 	};
 
-	renderYAxis = (name: string) => {
-		const chartName = createRefName(name, FIELDS.type);
-		const breakdownName = createRefName(name, FIELDS.breakdown);
+	renderYAxis = (index: number) => (
+		<div>
+			{this.renderChartInput(index)}
+			{this.renderYAxisInput(index)}
+			{this.renderBreakdown(index)}
+		</div>
+	);
 
-		return (
-			<div key={name}>
-				{this.renderChartInput(chartName)}
-				{this.renderYAxisInput(name)}
-				{this.renderBreakdown(breakdownName)}
-			</div>
-		);
-	};
-
-	renderYAxisInput = (name: string) => {
-		const {values} = this.props;
-		const aggregationName = createRefName(name, FIELDS.aggregation);
+	renderYAxisInput = (index: number) => {
+		const set = this.getSet(index);
 
 		const refInputProps = {
-			name: aggregationName,
+			name: FIELDS.aggregation,
 			type: 'aggregation',
-			value: values[aggregationName]
+			value: set[FIELDS.aggregation]
 		};
 
 		const props = {
-			name,
+			name: FIELDS.yAxis,
 			placeholder: 'Ось Y',
 			refInputProps,
-			value: values[name],
+			value: set[FIELDS.yAxis],
 			withCreate: true
 		};
 
-		return this.renderAttribute(props);
+		return this.renderAttribute(index, props);
 	};
 
 	render () {
-		const {xAxis, yAxis} = FIELDS;
-
 		return (
 			<Fragment>
 				{this.renderBaseInputs()}
 				{this.renderSourceSection(this.changeSourceRefs)}
 				{this.renderLabel('Ось Х')}
-				{this.renderByOrder(this.renderXAxis, xAxis, false)}
-				{this.renderByOrder(this.renderYAxis, yAxis)}
+				{this.renderByOrder(this.renderXAxis, false)}
+				{this.renderByOrder(this.renderYAxis)}
 			</Fragment>
 		);
 	}

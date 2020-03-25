@@ -3,7 +3,7 @@ import {Chart, Summary, Table} from 'components/molecules';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
-import {WIDGET_VARIANTS} from 'utils/widget';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Diagram extends Component<Props> {
 	shouldComponentUpdate (nextProps: Props) {
@@ -13,61 +13,68 @@ export class Diagram extends Component<Props> {
 		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading;
 	}
 
-	resolveDiagram = (type: string) => {
-		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+	resolveDiagram = () => {
+		const {buildData, onUpdate, widget} = this.props;
+		const {data} = buildData;
+		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
 
-		switch (type) {
+		switch (widget.type) {
+			case BAR:
+			case BAR_STACKED:
+			case COLUMN:
+			case COLUMN_STACKED:
+			case COMBO:
+			case DONUT:
+			case LINE:
+			case PIE:
+				return <Chart data={data} widget={widget} />;
 			case SUMMARY:
-				return Summary;
+				return <Summary data={data} widget={widget} />;
 			case TABLE:
-				return Table;
-			default:
-				return Chart;
+				return <Table data={data} onUpdate={onUpdate} widget={widget} />;
 		}
 	};
 
 	renderContent = () => {
 		const {buildData} = this.props;
-		const {data, error} = buildData;
+		const {data, error, loading} = buildData;
 
-		if (data && !error) {
+		if (data && !loading && !error) {
 			return (
 				<Fragment>
 					{this.renderName()}
-					{this.renderDiagramByType()}
+					{this.renderDiagram()}
 				</Fragment>
 			);
 		}
-
-		return this.renderError();
 	};
 
 	renderDiagram = () => {
-		const {buildData} = this.props;
-
-		return (
-			<div className={styles.container}>
-				{buildData.loading ? this.renderLoading() : this.renderContent()}
-			</div>
-		);
-	};
-
-	renderDiagramByType = () => {
-		const {buildData, onUpdate, widget} = this.props;
-		const {showName, type} = widget;
+		const {showName} = this.props.widget;
 		const className = showName ? styles.diagramWithName : styles.diagram;
-		const Diagram = this.resolveDiagram(type);
 
 		return (
 			<div className={className}>
-				<Diagram buildData={buildData.data} onUpdate={onUpdate} widget={widget} />
+				{this.resolveDiagram()}
 			</div>
 		);
 	};
 
-	renderError = () => <p>Ошибка загрузки данных. Измените параметры построения.</p>;
+	renderError = () => {
+		const {error} = this.props.buildData;
 
-	renderLoading = () => <p>Загрузка...</p>;
+		if (error) {
+			return <p>Ошибка загрузки данных. Измените параметры построения.</p>;
+		}
+	};
+
+	renderLoading = () => {
+		const {loading} = this.props.buildData;
+
+		if (loading) {
+			return <p>Загрузка...</p>;
+		}
+	};
 
 	renderName = () => {
 		const {widget} = this.props;
@@ -83,7 +90,13 @@ export class Diagram extends Component<Props> {
 	};
 
 	render () {
-		return this.renderDiagram();
+		return (
+			<div className={styles.container}>
+				{this.renderLoading()}
+				{this.renderError()}
+				{this.renderContent()}
+			</div>
+		);
 	}
 }
 

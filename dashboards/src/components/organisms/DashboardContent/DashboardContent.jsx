@@ -88,7 +88,7 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderGrid = () => {
-		const {personalDashboard, selectedWidget} = this.props;
+		const {selectedWidget} = this.props;
 		const {width} = this.state;
 		const isEditable = !!selectedWidget;
 		const widgets = this.getWidgets();
@@ -102,7 +102,6 @@ export class DashboardContent extends Component<Props, State> {
 					containerPadding={CONTAINER_PADDING}
 					isDraggable={isEditable}
 					isResizable={isEditable}
-					key={personalDashboard.toString()}
 					onLayoutChange={this.handleLayoutChange}
 					rowHeight={ROW_HEIGHT}
 					width={width}
@@ -139,6 +138,7 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderWidget = (widget: WidgetType) => {
+		// $FlowFixMe
 		const {buildData, drillDown, editable, removeWidget, selectedWidget, updateWidget} = this.props;
 		const {id, layout} = widget;
 		const isNew = id === NewWidget.id;

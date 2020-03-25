@@ -1,11 +1,9 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
-import {createOrdinalName} from 'utils/widget';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin, ReceiveLinkPayload} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {LINKS_EVENTS} from './constants';
-import {transformGroupFormat} from 'store/widgets/helpers';
 import type {Widget} from 'store/widgets/data/types';
 
 const getPartsClassFqn = (classFqn: ?string) => {
@@ -23,23 +21,11 @@ const getPartsClassFqn = (classFqn: ?string) => {
 	};
 };
 
-const createLegacyPostData = (widget: Widget) => {
-	const {descriptor, diagramName: title, source} = widget;
-	const baseClassFqn = source && source.value;
-	const {cases, classFqn} = getPartsClassFqn(baseClassFqn);
-
-	return {
-		cases,
-		classFqn,
-		descriptor,
-		title
-	};
-};
-
-const createPostData = (widget: Widget, ordinalNumber: number) => {
+const createPostData = (widget: Widget, index: number) => {
 	let postData = {};
-	const source = widget[createOrdinalName(FIELDS.source, ordinalNumber)];
-	const descriptor = widget[createOrdinalName(FIELDS.descriptor, ordinalNumber)];
+	const set = widget.data[index];
+	const source = set[FIELDS.source];
+	const descriptor = set[FIELDS.descriptor];
 
 	if (source) {
 		const {label: title, value} = source;
@@ -59,25 +45,20 @@ const createPostData = (widget: Widget, ordinalNumber: number) => {
 /**
  * Создание ссылки для перехода на данные диаграммы
  * @param {Widget} widget - данные виджета
- * @param {number} ordinalNumber - порядковый номер выбранного источника
+ * @param {number} index - индекс набора данных массива data виджета
  * @param {DrillDownMixin} mixin - примесь данных (создается при выборе конкретного элемента графика)
  * @returns {Function}
  */
-const drillDown = (widget: Widget, ordinalNumber?: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {customGroups} = getState();
-	let postData = ordinalNumber ? createPostData(widget, ordinalNumber) : createLegacyPostData(widget);
+const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	let postData = createPostData(widget, index);
 	let key = widget.id;
 
 	if (mixin && typeof mixin === 'object') {
-		if (Array.isArray(mixin.filters)) {
-			mixin.filters.forEach(filter => transformGroupFormat(filter, customGroups));
-		}
-
 		postData = {...postData, ...mixin};
 	}
 
-	if (ordinalNumber) {
-		key = `${key}_${widget[createOrdinalName(FIELDS.dataKey, ordinalNumber)]}`;
+	if (index) {
+		key = `${key}_${widget.data[index][FIELDS.dataKey]}`;
 	}
 
 	dispatch(getLink(key, postData));

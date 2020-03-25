@@ -1,5 +1,5 @@
 // @flow
-import {FIELDS, OPTIONS, SETTINGS, TABS, VALUES} from './constants';
+import {FIELDS, OPTIONS, TABS} from './constants';
 import styles from './styles.less';
 import WidgetFormPanel, {formRef} from './WidgetFormPanel';
 
@@ -8,9 +8,7 @@ export {
 	formRef,
 	OPTIONS,
 	styles,
-	SETTINGS,
-	TABS,
-	VALUES
+	TABS
 };
 
 export default WidgetFormPanel;

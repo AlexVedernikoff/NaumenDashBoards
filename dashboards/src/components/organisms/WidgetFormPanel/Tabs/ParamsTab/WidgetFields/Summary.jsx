@@ -7,19 +7,15 @@ import withForm from 'components/organisms/WidgetFormPanel/withForm';
 export class Summary extends DataFormBuilder {
 	sourceRefs = [FIELDS.indicator];
 
-	renderInputs = () => {
+	render () {
 		return (
 			<Fragment>
 				{this.renderBaseInputs()}
 				{this.renderSourceSection()}
 				{this.renderLabel('Показатель')}
-				{this.renderByOrder(this.renderIndicator, FIELDS.indicator)}
+				{this.renderByOrder(this.renderIndicator)}
 			</Fragment>
 		);
-	};
-
-	render () {
-		return this.renderInputs();
 	}
 }
 

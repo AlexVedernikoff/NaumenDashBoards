@@ -2,70 +2,64 @@
 import {Attribute, OuterSelect, Source} from 'components/molecules';
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {AttributeValue} from 'components/molecules/Attribute/types';
-import {CHART_VARIANTS} from 'utils/chart';
-import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
-import {createOrdinalName, createRefName, getNumberFromName, WIDGET_VARIANTS} from 'utils/widget';
+import type {ComputedAttr, Source as SourceType} from 'store/widgets/data/types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import {FieldLabel} from 'components/atoms';
-import {FIELDS, OPTIONS, SETTINGS, styles} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, OPTIONS, styles} from 'components/organisms/WidgetFormPanel';
 import FormBuilder from 'components/organisms/WidgetFormPanel/builders/FormBuilder';
-import type {OnSelectCallback as OnSelectSourceCallback, SourceValue} from 'components/molecules/Source/types';
+import type {OnSelectCallback as OnSelectSourceCallback} from 'components/molecules/Source/types';
 import React, {Fragment} from 'react';
 import type {RenderFunction} from './types';
 import uuid from 'tiny-uuid';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class DataFormBuilder extends FormBuilder {
 	// Список полей для удаления при смене источника данных
-	sourceRefs = [];
+	sourceRefs: Array<string> = [];
 
-	// Порядок полей по умолчанию
-	defaultOrder = [SETTINGS.FIRST_KEY];
+	// Минимальное необходимое количество источников для построения
+	minCountBuildingSources = 1;
 
 	componentDidMount () {
 		setTimeout(this.init);
 	}
 
-	addSet = (count: number) => {
-		const {setFieldValue} = this.props;
-		let order = this.getOrder();
-		let nextNumber = order[order.length - 1] + 1;
+	addSet = (count: number = 1) => {
+		const {setFieldValue, values} = this.props;
+		const set = {
+			[FIELDS.dataKey]: uuid(),
+			[FIELDS.sourceForCompute]: true
+		};
+		const data = values[FIELDS.data];
 
 		while (count > 0) {
-			order = [...order, nextNumber];
-			setFieldValue(FIELDS.order, order);
-			setFieldValue(createOrdinalName(FIELDS.dataKey, nextNumber), uuid());
-			setFieldValue(createOrdinalName(FIELDS.sourceForCompute, nextNumber), true);
-
-			nextNumber++;
+			data.push(set);
+			setFieldValue(FIELDS.data, data);
 			count--;
 		}
 
-		return order;
+		return data;
 	};
 
 	/**
 	 * Функция очищает зависимые от источника поля
-	 * @param {string} name - название поля источника
+	 * @param {string} index - индекс набора данных источника
 	 */
-	clearSourceRefFields = (name: string) => {
-		const {setFieldValue} = this.props;
-		const number = getNumberFromName(name);
-
-		this.sourceRefs.map(field => createOrdinalName(field, number))
-			.forEach(field => setFieldValue(field, null));
+	clearSourceRefFields = (index: number) => {
+		const {setDataFieldValue} = this.props;
+		this.sourceRefs.forEach(field => setDataFieldValue(index)(field, undefined));
 	};
 
 	getAttributeCreatingModalOptions = () => {
 		const {values} = this.props;
 		const options = [];
 
-		this.getOrder().forEach(number => {
-			const source = values[createOrdinalName(FIELDS.source, number)];
+		values[FIELDS.data].forEach(set => {
+			const source = set[FIELDS.source];
 
 			if (source) {
 				const attributes = this.getAttributeOptions(source.value);
-				const dataKey = values[createOrdinalName(FIELDS.dataKey, number)];
+				const dataKey = set[FIELDS.dataKey];
 
 				options.push({
 					attributes,
@@ -100,26 +94,21 @@ export class DataFormBuilder extends FormBuilder {
 		return options;
 	};
 
-	getBaseName = (name: string) => name.split('_').shift();
+	getBuildSets = (data: Array<Object>) => {
+		const sets = [];
 
-	getBuildSources = (order: Array<number>) => {
-		const {values} = this.props;
-		const sources = [];
-
-		order.forEach(number => {
-			const sourceName = createOrdinalName(FIELDS.source, number);
-			const sourceForComputeName = createOrdinalName(FIELDS.sourceForCompute, number);
-
-			if (!values[sourceForComputeName]) {
-				sources.push(sourceName);
+		data.forEach((set, index) => {
+			if (!set[FIELDS.sourceForCompute]) {
+				sets.push(index);
 			}
 		});
 
-		return sources;
+		return sets;
 	};
 
-	// $FlowFixMe
-	getOrder = () => this.props.values.order || this.defaultOrder;
+	getErrorName = (index: number, name: string) => `data[${index}].${name}`;
+
+	getMainSet = (): Object => this.props.values.data.find(set => !set[FIELDS.sourceForCompute]);
 
 	getRefAttributes = (attribute: AttributeType) => () => {
 		const {fetchRefAttributes, refAttributes} = this.props;
@@ -130,32 +119,29 @@ export class DataFormBuilder extends FormBuilder {
 		}
 	};
 
+	getSet = (index: number) => this.props.values[FIELDS.data][index];
+
 	getTitleAttribute = (attributes: Array<AttributeType>) => {
 		return attributes.find(attribute => attribute.code === 'title') || null;
 	};
 
 	handleBlurName = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {handleBlur, setFieldValue, values} = this.props;
-		const diagramName = values[FIELDS.diagramName];
+		const {setFieldValue, values} = this.props;
 
-		if (values[FIELDS.isNew] && !diagramName) {
+		if (!values[FIELDS.diagramName]) {
 			setFieldValue(FIELDS.diagramName, e.target.value);
 		}
-
-		handleBlur(e);
 	};
 
-	handleChangeCompute = (name: string, value: boolean) => {
-		const {setFieldValue, values} = this.props;
-		const order = this.getOrder();
-		const buildSources = this.getBuildSources(order);
+	handleChangeCompute = (index: number) => (name: string, value: boolean) => {
+		const {setDataFieldValue, values} = this.props;
+		const data = values[FIELDS.data];
+		const buildSets = this.getBuildSets(data);
 
-		if (!value && values[FIELDS.type] !== CHART_VARIANTS.COMBO) {
-			order.every(number => {
-				const name = createOrdinalName(FIELDS.sourceForCompute, number);
-
-				if (!values[name]) {
-					setFieldValue(name, true);
+		if (!value && values[FIELDS.type] !== WIDGET_TYPES.COMBO) {
+			data.every((set, setIndex) => {
+				if (!set[FIELDS.sourceForCompute]) {
+					setDataFieldValue(setIndex)(name, true);
 					return false;
 				}
 
@@ -163,29 +149,30 @@ export class DataFormBuilder extends FormBuilder {
 			});
 		}
 
-		if (!value || buildSources.length > this.defaultOrder.length) {
-			setFieldValue(name, value);
+		if (!value || buildSets.length > this.minCountBuildingSources) {
+			setDataFieldValue(index)(name, value);
 		}
 	};
 
 	handleClickAddSource = () => this.addSet(1);
 
-	handleClickExtendBreakdown = (withBreakdownName: string) => () => this.props.setFieldValue(withBreakdownName, true);
+	handleClickBreakdownExtendButton = (index: number) => () => this.props.setDataFieldValue(index)(FIELDS.withBreakdown, true);
 
-	handleRemoveAttribute = (name: string, code: string) => {
+	handleRemoveBreakdown = (index: number) => () => {
+		const {setDataFieldValues} = this.props;
+
+		setDataFieldValues(index)({
+			[FIELDS.breakdown]: null,
+			[FIELDS.withBreakdown]: false
+		});
+	};
+
+	handleRemoveComputedAttribute = (name: string, code: string) => {
 		const {setFieldValue, values} = this.props;
 		const computedAttrs = values[FIELDS.computedAttrs];
 
 		setFieldValue(FIELDS.computedAttrs, computedAttrs.filter(a => a.code !== code));
 		setFieldValue(name, null);
-	};
-
-	handleRemoveBreakdown = (breakdownName: string) => {
-		const {setFieldValue} = this.props;
-		const withBreakdownName = createRefName(breakdownName, FIELDS.withBreakdown);
-
-		setFieldValue(breakdownName, null);
-		setFieldValue(withBreakdownName, false);
 	};
 
 	handleSaveAttribute = (name: string, newAttr: ComputedAttr) => {
@@ -208,8 +195,8 @@ export class DataFormBuilder extends FormBuilder {
 		setFieldValue(FIELDS.computedAttrs, computedAttrs);
 	};
 
-	handleSelectAttribute = (name: string, value: AttributeValue | null) => {
-		const {fetchRefAttributes, refAttributes, setFieldValue} = this.props;
+	handleSelectAttribute = (index: number) => (name: string, value: AttributeType | null) => {
+		const {fetchRefAttributes, refAttributes, setDataFieldValue} = this.props;
 
 		if (value && !value.ref && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && value.type in ATTRIBUTE_SETS.REF) {
 			const key = createRefKey(value);
@@ -218,91 +205,80 @@ export class DataFormBuilder extends FormBuilder {
 				const ref = this.getTitleAttribute(refAttributes[key].data);
 				value = {...value, ref};
 			} else {
-				fetchRefAttributes(value, this.setAttributeWithRef(name, value));
+				fetchRefAttributes(value, this.setAttributeWithRef(index, name, value));
 			}
 		}
 
-		setFieldValue(name, value);
+		setDataFieldValue(index)(name, value);
 	};
 
-	handleSelectSource = async (name: string, nextSource: SourceValue | null) => {
-		const {setFieldValue, values} = this.props;
+	handleSelectSource = (index: number) => (name: string, nextSource: SourceType | null) => {
+		const {setDataFieldValue, values} = this.props;
 		const prevSource = values[name];
 
 		if (nextSource) {
-			await setFieldValue(name, {...nextSource});
+			setDataFieldValue(index)(name, {...nextSource});
 			this.getAttributeOptions(nextSource.value);
 		} else {
-			await setFieldValue(name, null);
+			setDataFieldValue(index)(name, null);
 		}
 
 		if ((prevSource && !nextSource) || (nextSource && prevSource && prevSource.value !== nextSource.value)) {
-			setFieldValue(createRefName(name, FIELDS.descriptor), null);
+			setDataFieldValue(index)(FIELDS.descriptor, '');
 		}
 
-		this.clearSourceRefFields(name);
+		this.clearSourceRefFields(index);
 	};
 
-	increaseBuildSources = (order: Array<number>) => {
-		const {setFieldValue, values} = this.props;
-		let countBuildSources = 0;
+	increaseBuildSources = (data: Array<Object>) => {
+		const {setDataFieldValue} = this.props;
+		let countBuildSets = 0;
 
-		order.every(number => {
-			const name = createOrdinalName(FIELDS.sourceForCompute, number);
-			const value = values[name];
-
-			if (value) {
-				setFieldValue(name, false);
-				countBuildSources++;
+		data.every((set, index) => {
+			if (set[FIELDS.sourceForCompute]) {
+				setDataFieldValue(index)(FIELDS.sourceForCompute, false);
+				countBuildSets++;
 			}
 
-			return countBuildSources === this.defaultOrder.length;
+			return countBuildSets === this.minCountBuildingSources;
 		});
 	};
 
 	init = () => {
-		const {setFieldValue, values} = this.props;
-		let order = values[FIELDS.order];
+		const {values} = this.props;
+		let data = values[FIELDS.data];
 
-		if (!Array.isArray(order)) {
-			order = this.defaultOrder;
-
-			order.forEach(num => {
-				setFieldValue(createOrdinalName(FIELDS.dataKey, num), uuid());
-			});
-			setFieldValue(FIELDS.order, order);
+		if (data.length < this.minCountBuildingSources) {
+			const diff = this.minCountBuildingSources - data.length;
+			data = this.addSet(diff);
 		}
 
-		const buildSources = this.getBuildSources(order);
+		const buildSets = this.getBuildSets(data);
 
-		if (values[FIELDS.type] !== CHART_VARIANTS.COMBO && buildSources.length > this.defaultOrder.length) {
-			this.reduceBuildSources(order);
+		if (values[FIELDS.type] !== WIDGET_TYPES.COMBO && buildSets.length > this.minCountBuildingSources) {
+			this.reduceBuildSources(data);
 		}
 
-		if (buildSources.length < this.defaultOrder.length) {
-			this.increaseBuildSources(order);
+		if (buildSets.length < this.minCountBuildingSources) {
+			this.increaseBuildSources(data);
 		}
 	};
 
 	isRequiredBreakdown = () => {
 		const {type} = this.props.values;
-		const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = CHART_VARIANTS;
-		const {TABLE} = WIDGET_VARIANTS;
+		const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE, TABLE} = WIDGET_TYPES;
 
 		return [BAR_STACKED, COLUMN_STACKED, DONUT, PIE, TABLE].includes(type);
 	};
 
-	reduceBuildSources = (order: Array<number>) => {
-		const {setFieldValue, values} = this.props;
+	reduceBuildSources = (data: Array<Object>) => {
+		const {setDataFieldValue} = this.props;
 		let countBuildSources = 0;
 
-		order.forEach(number => {
-			const name = createOrdinalName(FIELDS.sourceForCompute, number);
-			const value = values[name];
-
-			if (!value) {
-				if (countBuildSources === this.defaultOrder.length) {
-					setFieldValue(name, true);
+		data.forEach((set, index) => {
+			if (!set[FIELDS.sourceForCompute]) {
+				if (countBuildSources === this.minCountBuildingSources) {
+					setDataFieldValue(index)(FIELDS.sourceForCompute, true);
 				} else {
 					countBuildSources++;
 				}
@@ -310,24 +286,23 @@ export class DataFormBuilder extends FormBuilder {
 		});
 	};
 
-	removeSet = (name: string) => {
+	removeSet = (index: number) => () => {
 		const {setFieldValue, values} = this.props;
-		const number = getNumberFromName(name);
-		const {order} = values;
+		const data = values[FIELDS.data];
 
-		if (order.length > this.defaultOrder.length) {
-			const newOrder = order.filter(n => n !== number);
+		if (data.length > this.minCountBuildingSources) {
+			data.splice(index, 1);
 
-			setFieldValue(FIELDS.order, newOrder);
-			this.increaseBuildSources(newOrder);
+			setFieldValue(FIELDS.data, data);
+			this.increaseBuildSources(data);
 		}
 	};
 
-	setAttributeWithRef = (name: string, value: AttributeValue) => (refAttributes: Array<AttributeType>) => {
-		const {setFieldValue} = this.props;
+	setAttributeWithRef = (index: number, name: string, value: AttributeType) => (refAttributes: Array<AttributeType>) => {
+		const {setDataFieldValue} = this.props;
 		const ref = this.getTitleAttribute(refAttributes);
 
-		setFieldValue(name, {...value, ref});
+		setDataFieldValue(index)(name, {...value, ref});
 	};
 
 	renderAddSourceInput = () => {
@@ -340,11 +315,12 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderLabelWithIcon(props);
 	};
 
-	renderAttribute = (props: Object) => {
-		const {refAttributes, setFieldValue, values} = this.props;
+	renderAttribute = (index: number, props: Object) => {
+		const {refAttributes, setDataFieldValue, values} = this.props;
 		const {name, value, withDivider, ...inputProps} = props;
-		const sourceName = createOrdinalName(FIELDS.source, getNumberFromName(name));
-		const {computedAttrs, [sourceName]: source} = values;
+		const {computedAttrs} = values;
+		const set = this.getSet(index);
+		const source = set[FIELDS.source];
 		let onClick;
 		let refAttributeData;
 
@@ -359,11 +335,11 @@ export class DataFormBuilder extends FormBuilder {
 					computedAttrs={computedAttrs}
 					getAttributeOptions={this.getAttributeOptions}
 					name={name}
-					onChangeTitle={setFieldValue}
-					onRemoveAttribute={this.handleRemoveAttribute}
+					onChangeTitle={setDataFieldValue(index)}
+					onRemoveComputedAttribute={this.handleRemoveComputedAttribute}
 					onSaveComputedAttribute={this.handleSaveAttribute}
-					onSelect={this.handleSelectAttribute}
-					onSelectRefInput={setFieldValue}
+					onSelect={this.handleSelectAttribute(index)}
+					onSelectRefInput={setDataFieldValue(index)}
 					refAttributeData={refAttributeData}
 					source={source}
 					sources={this.getAttributeCreatingModalOptions()}
@@ -371,7 +347,7 @@ export class DataFormBuilder extends FormBuilder {
 					{...inputProps}
 				/>
 				{withDivider && this.renderDivider('field')}
-				{this.renderError(name)}
+				{this.renderError(this.getErrorName(index, name))}
 			</div>
 		);
 	};
@@ -405,126 +381,117 @@ export class DataFormBuilder extends FormBuilder {
 		);
 	};
 
-	renderBreakdown = (name: string) => {
+	renderBreakdown = (index: number) => {
 		const {values} = this.props;
-		const withBreakdownName = createRefName(name, FIELDS.withBreakdown);
-		const showBreakdown = values[withBreakdownName] || values[name] || this.isRequiredBreakdown();
+		const set = values[FIELDS.data][index];
+		const showBreakdown = set[FIELDS.withBreakdown] || set[FIELDS.breakdown] || this.isRequiredBreakdown();
 
 		return (
 			<Fragment>
-				{this.renderBreakdownExtendButton(withBreakdownName)}
-				{showBreakdown && this.renderBreakdownInput(name)}
+				{this.renderBreakdownExtendButton(index)}
+				{showBreakdown && this.renderBreakdownInput(index)}
 			</Fragment>
 		);
 	};
 
-	renderBreakdownExtendButton = (withBreakdown: string) => {
-		const {values} = this.props;
+	renderBreakdownExtendButton = (index: number) => {
+		const set = this.getSet(index);
 
 		const props = {
-			active: values[withBreakdown] || this.isRequiredBreakdown(),
-			onClick: this.handleClickExtendBreakdown(withBreakdown),
+			active: set[FIELDS.breakdown] || set[FIELDS.withBreakdown] || this.isRequiredBreakdown(),
+			name: FIELDS.withBreakdown,
+			onClick: this.handleClickBreakdownExtendButton(index),
 			text: 'Разбивка'
 		};
 
 		return this.renderExtendButton(props);
 	};
 
-	renderBreakdownInput = (name: string) => {
-		const {values} = this.props;
-		const breakdownGroupName = createRefName(name, FIELDS.breakdownGroup);
+	renderBreakdownInput = (index: number) => {
+		const set = this.getSet(index);
 
 		const refInputProps = {
-			name: breakdownGroupName,
+			name: FIELDS.breakdownGroup,
 			type: 'group',
-			value: values[breakdownGroupName]
+			value: set[FIELDS.breakdownGroup]
 		};
 
 		const props = {
-			name,
-			onRemove: this.handleRemoveBreakdown,
+			name: FIELDS.breakdown,
+			onRemove: this.handleRemoveBreakdown(index),
 			refInputProps,
 			removable: !this.isRequiredBreakdown(),
-			value: values[name],
+			value: set[FIELDS.breakdown],
 			withDivider: false
 		};
 
-		return this.renderAttribute(props);
+		return this.renderAttribute(index, props);
 	};
 
-	renderByOrder = (renderFunction: RenderFunction, name: string, accordingSource: boolean = true) => {
-		const {values} = this.props;
-
-		return this.getOrder().map(number => {
-			const sourceForCompute = values[createOrdinalName(FIELDS.sourceForCompute, number)];
-
-			if (!accordingSource || !sourceForCompute) {
-				return renderFunction(
-					createOrdinalName(name, number)
-				);
+	renderByOrder = (renderFunction: RenderFunction, accordingSource: boolean = true) => {
+		return this.props.values.data.map((set, index) => {
+			if (!(accordingSource && set[FIELDS.sourceForCompute])) {
+				return renderFunction(index);
 			}
 		});
 	};
 
-	renderIndicator = (name: string) => {
-		const {values} = this.props;
-		const aggregationName = createRefName(name, FIELDS.aggregation);
+	renderIndicator = (index: number) => {
+		const set = this.getSet(index);
 
 		const refInputProps = {
-			name: aggregationName,
+			name: FIELDS.aggregation,
 			type: 'aggregation',
-			value: values[aggregationName]
+			value: set[FIELDS.aggregation]
 		};
 
 		const props = {
-			name,
+			name: FIELDS.indicator,
 			refInputProps,
-			value: values[name],
+			value: set[FIELDS.indicator],
 			withCreate: true
 		};
 
-		return this.renderAttribute(props);
+		return this.renderAttribute(index, props);
 	};
 
-	renderOrderError = () => (
-		<div className={styles.field}>
-			{this.renderError(FIELDS.order)}
-		</div>
-	);
+	renderSource = (callback?: OnSelectSourceCallback) => (index: number) => {
+		const {errors, setDataFieldValue, sources, values} = this.props;
+		const removable = values[FIELDS.data].length > this.minCountBuildingSources;
+		const set = this.getSet(index);
+		const errorName = this.getErrorName(index, FIELDS.source);
 
-	renderSource = (callback?: OnSelectSourceCallback) => (name: string) => {
-		const {errors, setFieldValue, sources, values} = this.props;
-		const ordinalNumber = getNumberFromName(name);
-		const computeName = createOrdinalName(FIELDS.sourceForCompute, ordinalNumber);
-		const descriptorName = createOrdinalName(FIELDS.descriptor, ordinalNumber);
-		const removable = this.getOrder().length > this.defaultOrder.length;
+		if (callback) {
+			// $FlowFixMe
+			callback = callback(index);
+		}
 
 		const compute = {
-			name: computeName,
-			onChange: this.handleChangeCompute,
-			value: values[computeName]
+			name: FIELDS.sourceForCompute,
+			onChange: this.handleChangeCompute(index),
+			value: set[FIELDS.sourceForCompute]
 		};
 
 		const descriptor = {
-			name: descriptorName,
-			onChange: setFieldValue,
-			value: values[descriptorName]
+			name: FIELDS.descriptor,
+			onChange: setDataFieldValue(index),
+			value: set[FIELDS.descriptor]
 		};
 
 		return (
-			<div className={styles.field} key={name} ref={this.setInputRef(name)}>
+			<div className={styles.field} key={errorName} ref={this.setInputRef(errorName)}>
 				<Source
 					compute={compute}
 					descriptor={descriptor}
-					error={errors[name]}
-					name={name}
-					onChangeLabel={setFieldValue}
-					onRemove={this.removeSet}
-					onSelect={this.handleSelectSource}
+					error={errors[errorName]}
+					name={FIELDS.source}
+					onChangeLabel={setDataFieldValue(index)}
+					onRemove={this.removeSet(index)}
+					onSelect={this.handleSelectSource(index)}
 					onSelectCallback={callback}
 					removable={removable}
 					sources={sources}
-					value={values[name]}
+					value={set[FIELDS.source]}
 				/>
 			</div>
 		);
@@ -533,8 +500,7 @@ export class DataFormBuilder extends FormBuilder {
 	renderSourceSection = (callback?: OnSelectSourceCallback) => (
 		<Fragment>
 			{this.renderAddSourceInput()}
-			{this.renderByOrder(this.renderSource(callback), FIELDS.source, false)}
-			{this.renderOrderError()}
+			{this.renderByOrder(this.renderSource(callback), false)}
 			{this.renderDivider('section')}
 		</Fragment>
 	);

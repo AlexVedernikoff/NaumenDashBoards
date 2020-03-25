@@ -1,6 +1,5 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
-import type {CreateFormData, SaveFormData} from 'components/organisms/WidgetFormPanel/types';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/actions';
@@ -9,6 +8,7 @@ import {getParams} from 'store/helpers';
 import type {Layout} from 'utils/layout/types';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import {NewWidget} from 'utils/widget';
+import normalizer from 'utils/normalizer';
 import type {Widget} from './types';
 
 /**
@@ -79,16 +79,14 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
 
 /**
  * Сохраняет изменение данных виджета
- * @param {SaveFormData} formData - данные формы редактирования
+ * @param {Widget} widget - данные формы редактирования
  * @returns {ThunkAction}
  */
-const saveWidget = (formData: SaveFormData): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetSave());
 
 	try {
 		const state = getState();
-		const {widgets} = state;
-		const widget = {...formData, layout: widgets.data.map[formData.id].layout};
 		const url = buildUrl('dashboardSettings', 'editWidget', 'requestContent,user');
 		const params = {
 			...getParams(state),
@@ -106,10 +104,12 @@ const saveWidget = (formData: SaveFormData): ThunkAction => async (dispatch: Dis
 
 /**
  * Сохраняет массив виджетов и получает данные для построения
- * @param { Widget[]} payload - данные формы редактирования
+ * @param {Array<object>} payload - данные формы редактирования
  * @returns {ThunkAction}
  */
-const setWidgets = (payload: Widget[]): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const setWidgets = (payload: Array<Object>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	payload = payload.map(normalizer.widget);
+
 	dispatch({
 		type: WIDGETS_EVENTS.SET_WIDGETS,
 		payload
@@ -119,36 +119,29 @@ const setWidgets = (payload: Widget[]): ThunkAction => async (dispatch: Dispatch
 
 /**
  * Создает новый виджет
- * @param {CreateFormData} formData - данные формы создания виджета
+ * @param {Widget} widget - данные формы создания виджета
  * @returns {ThunkAction}
  */
-const createWidget = (formData: CreateFormData): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestWidgetSave());
 
-	const state = getState();
-	const {widgets} = getState();
-	const newWidget = widgets.data.newWidget;
+	try {
+		const state = getState();
+		const url = buildUrl('dashboardSettings', 'createWidget', 'requestContent,user');
+		const params = {
+			...getParams(state),
+			widget
+		};
+		const {data: id} = await client.post(url, params);
 
-	if (newWidget) {
-		let widget = {...formData, layout: newWidget.layout};
-
-		try {
-			const url = buildUrl('dashboardSettings', 'createWidget', 'requestContent,user');
-			const params = {
-				...getParams(state),
-				widget
-			};
-			const {data: id} = await client.post(url, params);
-
-			widget = {...widget, id, layout: {...widget.layout, i: id}};
-			dispatch(setCreatedWidget(widget));
-			dispatch(saveNewLayout());
-		} catch (e) {
-			dispatch(recordSaveError());
-		}
-
-		dispatch(fetchBuildData(widget));
+		widget = {...widget, id, layout: {...widget.layout, i: id}};
+		dispatch(setCreatedWidget(widget));
+		dispatch(saveNewLayout());
+	} catch (e) {
+		dispatch(recordSaveError());
 	}
+
+	dispatch(fetchBuildData(widget));
 };
 
 /**

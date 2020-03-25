@@ -1,12 +1,8 @@
 // @flow
 import type {DataSourceMap} from 'store/sources/data/types';
+import type {Source} from 'store/widgets/data/types';
 
-export type SourceValue = {
-	label: string,
-	value: string
-};
-
-export type OnSelectCallback = (name: string, value: SourceValue) => void;
+export type OnSelectCallback = (index: number) => () => void;
 
 export type Compute = {
 	name: string,
@@ -22,17 +18,17 @@ export type Descriptor = {
 
 export type Props = {
 	compute: Compute,
-	defaultValue: SourceValue,
+	defaultValue: Source,
 	descriptor: Descriptor,
 	error: string,
 	name: string,
-	onChangeLabel: (name: string, value: SourceValue) => void,
+	onChangeLabel: (name: string, value: Source) => void,
 	onRemove: any,
-	onSelect: (name: string, value: SourceValue | null) => void | Promise<void>,
-	onSelectCallback?: OnSelectCallback,
+	onSelect: (name: string, value: Source | null) => void | Promise<void>,
+	onSelectCallback?: () => void,
 	removable: boolean,
 	sources: DataSourceMap,
-	value: SourceValue | null
+	value: Source | null
 };
 
 export type State = {

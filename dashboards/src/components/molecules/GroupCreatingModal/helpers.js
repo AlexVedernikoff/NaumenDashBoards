@@ -1,4 +1,5 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DATETIME_SYSTEM_OPTIONS, INTERVAL_SYSTEM_OPTIONS} from './constants';
 import type {GroupType} from 'store/widgets/data/types';
@@ -27,13 +28,15 @@ const getDefaultOperandType = (type: GroupType) => {
 	}
 };
 
-const getSystemGroupOptions = (attribute: Object | null) => {
+const getSystemGroupOptions = (attribute: Attribute | null) => {
 	if (attribute) {
-		if (attribute.type in ATTRIBUTE_SETS.DATE) {
+		const {type} = attribute;
+
+		if (type in ATTRIBUTE_SETS.DATE) {
 			return DATETIME_SYSTEM_OPTIONS;
 		}
 
-		if (attribute.type === ATTRIBUTE_TYPES.dtInterval) {
+		if (type === ATTRIBUTE_TYPES.dtInterval) {
 			return INTERVAL_SYSTEM_OPTIONS;
 		}
 	}

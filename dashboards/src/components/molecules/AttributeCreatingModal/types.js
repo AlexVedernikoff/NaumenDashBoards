@@ -1,38 +1,15 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {ComputedAttr} from 'store/widgets/data/types';
+import {CONTROL_TYPES} from './constants';
 import type {Option} from 'components/molecules/SourceControl/types';
-import {TYPES} from './constants';
 
-type SecondTemplateType =
-	| typeof TYPES.CONSTANT
-	| typeof TYPES.SOURCE
-;
-
-type ComputeData = {
-	aggregation: string,
-	attr: Attribute,
-	dataKey: string
-};
-
-type ComputeDataMap = {
-	[string]: ComputeData
-};
-
-export type ComputedAttr = {
-	code: string,
-	computeData: ComputeDataMap,
-	state: string,
-	stringForCompute: string,
-	title: string,
-	type: typeof ATTRIBUTE_TYPES.COMPUTED_ATTR
-};
+export type ControlType = $Keys<typeof CONTROL_TYPES>;
 
 export type Control = {
 	name: string,
 	next: string,
 	prev: string,
-	type: string,
+	type: ControlType,
 	value: null,
 };
 
@@ -51,7 +28,7 @@ export type State = {
 	first: string,
 	info: string,
 	last: string,
-	secondTemplateType: SecondTemplateType,
+	secondTemplateType: ControlType,
 	showLegacyFormatInfo: boolean,
 	showRemoveInfo: boolean,
 	title: string

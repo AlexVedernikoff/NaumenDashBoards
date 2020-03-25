@@ -1,10 +1,11 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import type {Group} from 'store/widgets/data/types';
 import {LINKS_EVENTS} from './constants';
 
 type Filter = {
-	attr: Attribute,
-	group: ?string,
+	attribute: Attribute,
+	group: Group | null,
 	value: string | number
 };
 

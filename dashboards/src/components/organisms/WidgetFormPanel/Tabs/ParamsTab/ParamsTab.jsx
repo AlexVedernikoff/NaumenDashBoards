@@ -1,15 +1,13 @@
 // @flow
 import {AxisChart, CircleChart, ComboChart, Summary, Table} from './WidgetFields';
-import {CHART_VARIANTS} from 'utils/chart';
-import type {Props} from 'containers/WidgetFormPanel/types';
+import type {Props} from 'components/organisms/WidgetFormPanel/types';
 import React, {Component} from 'react';
-import {WIDGET_VARIANTS} from 'utils/widget';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class ParamsTab extends Component<Props> {
 	resolve = (type: string) => {
-		const {COMBO, DONUT, PIE} = CHART_VARIANTS;
-		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+		const {COMBO, DONUT, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
 
 		switch (type) {
 			case COMBO:

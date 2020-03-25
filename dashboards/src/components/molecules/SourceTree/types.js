@@ -1,12 +1,12 @@
 // @flow
 import type {DataSourceMap} from 'store/sources/data/types';
-import type {SourceValue} from 'components/molecules/Source/types';
+import type {Source} from 'store/widgets/data/types';
 
 export type Props = {
 	className: string,
-	onSelect: (value: SourceValue) => void | Promise<void>,
+	onSelect: (value: Source) => void | Promise<void>,
 	sources: DataSourceMap,
-	value: SourceValue | null,
+	value: Source | null,
 };
 
 export type State = {

@@ -11,8 +11,8 @@ import {
 	Summary,
 	Table
 } from 'icons/widgets';
-import {CHART_VARIANTS, LEGEND_POSITIONS as LP} from 'utils/chart/constants';
-import {WIDGET_VARIANTS} from 'utils/widget/constants';
+import {LEGEND_POSITIONS as LP} from 'utils/chart/constants';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 // Расположения легенды
 const LEGEND_POSITIONS = [
@@ -26,67 +26,67 @@ const WIDGETS = [
 	{
 		label: Column,
 		tip: 'Столбчатая',
-		value: CHART_VARIANTS.COLUMN
+		value: WIDGET_TYPES.COLUMN
 	},
 	{
 		label: ColumnStacked,
 		tip: 'Столбчатая c накоплением',
-		value: CHART_VARIANTS.COLUMN_STACKED
+		value: WIDGET_TYPES.COLUMN_STACKED
 	},
 	{
 		label: BarStacked,
 		tip: 'Гистограмма c накоплением',
-		value: CHART_VARIANTS.BAR_STACKED
+		value: WIDGET_TYPES.BAR_STACKED
 	},
 	{
 		label: Bar,
 		tip: 'Гистограмма',
-		value: CHART_VARIANTS.BAR
+		value: WIDGET_TYPES.BAR
 	},
 	{
 		label: Line,
 		tip: 'Линейная',
-		value: CHART_VARIANTS.LINE
+		value: WIDGET_TYPES.LINE
 	},
 	{
 		label: Pie,
 		tip: 'Круговая',
-		value: CHART_VARIANTS.PIE
+		value: WIDGET_TYPES.PIE
 	},
 	{
 		label: Donut,
 		tip: 'Кольцевая',
-		value: CHART_VARIANTS.DONUT
+		value: WIDGET_TYPES.DONUT
 	},
 	{
 		label: Combo,
 		tip: 'Комбо',
-		value: CHART_VARIANTS.COMBO
+		value: WIDGET_TYPES.COMBO
 	},
 	{
 		label: Summary,
 		tip: 'Сводка',
-		value: WIDGET_VARIANTS.SUMMARY
+		value: WIDGET_TYPES.SUMMARY
 	},
 	{
 		label: Table,
 		tip: 'Таблица',
-		value: WIDGET_VARIANTS.TABLE
+		value: WIDGET_TYPES.TABLE
 	}
 ];
 
 const CHARTS = [
 	{
 		label: Column,
-		value: CHART_VARIANTS.COLUMN
+		value: WIDGET_TYPES.COLUMN
 	},
 	{
 		label: ColumnStacked,
-		value: CHART_VARIANTS.COLUMN_STACKED
+		value: WIDGET_TYPES.COLUMN_STACKED
 	},
 	{
 		label: Line,
-		value: CHART_VARIANTS.LINE
+		value: WIDGET_TYPES.LINE
 	}
 ];
 

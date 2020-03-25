@@ -5,7 +5,7 @@ const CONSTANT: 'CONSTANT' = 'CONSTANT';
 const OPERATOR: 'OPERATOR' = 'OPERATOR';
 const SOURCE: 'SOURCE' = 'SOURCE';
 
-const TYPES = {
+const CONTROL_TYPES = {
 	CONSTANT,
 	OPERATOR,
 	SOURCE
@@ -21,7 +21,7 @@ const OPERATOR_TEMPLATE = {
 	name: TEMPLATE_NAMES.OPERATOR,
 	next: TEMPLATE_NAMES.SOURCE,
 	prev: '',
-	type: TYPES.OPERATOR,
+	type: CONTROL_TYPES.OPERATOR,
 	value: null
 };
 
@@ -29,7 +29,7 @@ const SOURCE_TEMPLATE = {
 	name: TEMPLATE_NAMES.SOURCE,
 	next: '',
 	prev: TEMPLATE_NAMES.OPERATOR,
-	type: TYPES.SOURCE,
+	type: CONTROL_TYPES.SOURCE,
 	value: null
 };
 
@@ -37,7 +37,7 @@ const CONSTANT_TEMPLATE = {
 	name: TEMPLATE_NAMES.CONSTANT,
 	next: '',
 	prev: TEMPLATE_NAMES.OPERATOR,
-	type: TYPES.CONSTANT,
+	type: CONTROL_TYPES.CONSTANT,
 	value: null
 };
 
@@ -75,8 +75,8 @@ const OPERATORS = [
 ];
 
 export {
+	CONTROL_TYPES,
 	OPERATORS,
 	TEMPLATE_NAMES,
-	TEMPLATES,
-	TYPES
+	TEMPLATES
 };

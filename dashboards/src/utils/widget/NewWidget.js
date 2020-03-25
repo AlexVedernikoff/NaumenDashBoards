@@ -1,9 +1,14 @@
 // @flow
+import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
 import type {LayoutItem} from 'utils/layout/types';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 class NewWidget {
 	static id: string = 'new';
 	diagramName: string = '';
+	data: Array<Object> = [{
+		[FIELDS.sourceForCompute]: false
+	}];
 	id: string = NewWidget.id;
 	layout: LayoutItem = {
 		h: 4,
@@ -13,6 +18,7 @@ class NewWidget {
 		y: 0
 	};
 	name: string = '';
+	type: string = WIDGET_TYPES.COLUMN;
 
 	/**
 	 * Устанавливаем начальную позицию по вертикали.

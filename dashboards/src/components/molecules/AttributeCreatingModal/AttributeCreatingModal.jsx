@@ -3,9 +3,9 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {Button, InfoPanel} from 'components/atoms';
 import {ClearSquareIcon, CrossIcon} from 'icons/form';
 import {ConstantControl, Modal, OperatorControl, SourceControl} from 'components/molecules';
-import type {Control, Props, State} from './types';
+import type {Control, ControlType, Props, State} from './types';
+import {CONTROL_TYPES, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
 import {getAggregationLabel} from 'components/molecules/AttributeAggregation/helpers';
-import {OPERATORS, TEMPLATE_NAMES, TEMPLATES, TYPES} from './constants';
 import React, {Fragment, PureComponent} from 'react';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import styles from './styles.less';
@@ -22,7 +22,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		first: '',
 		info: '',
 		last: '',
-		secondTemplateType: TYPES.SOURCE,
+		secondTemplateType: CONTROL_TYPES.SOURCE,
 		showLegacyFormatInfo: false,
 		showRemoveInfo: false,
 		title: ''
@@ -49,7 +49,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	changeControlType = (name: string) => {
 		const {controls} = this.state;
 		const control = controls[name];
-		const type = control.type === TYPES.SOURCE ? TYPES.CONSTANT : TYPES.SOURCE;
+		const type = control.type === CONTROL_TYPES.SOURCE ? CONTROL_TYPES.CONSTANT : CONTROL_TYPES.SOURCE;
 
 		this.setState({
 			controls: {
@@ -60,18 +60,18 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	changeTemplateType = (name: string) => {
-		const secondTemplateType = name === TEMPLATE_NAMES.SOURCE ? TYPES.CONSTANT : TYPES.SOURCE;
+		const secondTemplateType = name === TEMPLATE_NAMES.SOURCE ? CONTROL_TYPES.CONSTANT : CONTROL_TYPES.SOURCE;
 		this.setState({secondTemplateType});
 	};
 
-	createName = () => {
+	createName = (): string => {
 		const {controls} = this.state;
 		const name = uuid();
 
 		return controls[name] ? this.createName() : name;
 	};
 
-	createNewControl = (value: any, type: string) => {
+	createNewControl = (value: any, type: ControlType) => {
 		const name: string = this.createName();
 		const {controls, last} = this.state;
 		let {first} = this.state;
@@ -99,7 +99,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			},
 			first,
 			last: name,
-			secondTemplateType: TYPES.SOURCE
+			secondTemplateType: CONTROL_TYPES.SOURCE
 		});
 	};
 
@@ -134,13 +134,14 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 		if (lastControl) {
 			const {prev} = lastControl;
+			const prevControl = controls[prev];
 			delete controls[last];
 
-			if (prev) {
+			if (prevControl) {
 				this.setState({
 					controls: {
 						...controls,
-						[prev]: {...controls[prev], next: ''}
+						[prev]: {...prevControl, next: ''}
 					},
 					last: prev
 				});
@@ -151,7 +152,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	handleClickSaveButton = () => {
 		const {onSubmit, value} = this.props;
 		const {controls, first, last, title: customTitle} = this.state;
-		const {SOURCE} = TYPES;
+		const {SOURCE} = CONTROL_TYPES;
 		const code = value ? value.code : uuid();
 		const computeData = {};
 		const state = JSON.stringify({controls, first, last});
@@ -192,7 +193,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		});
 	};
 
-	handleSelect = (name: string, value: any, type: string) => {
+	handleSelect = (name: string, value: any, type: ControlType) => {
 		const {controls} = this.state;
 
 		if (name in TEMPLATE_NAMES) {
@@ -207,18 +208,18 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		});
 	};
 
-	handleSelectOperator = (name: string, value: string) => this.handleSelect(name, value, TYPES.OPERATOR);
+	handleSelectOperator = (name: string, value: string) => this.handleSelect(name, value, CONTROL_TYPES.OPERATOR);
 
-	handleSelectSource = (name: string, value: Object) => this.handleSelect(name, value, TYPES.SOURCE);
+	handleSelectSource = (name: string, value: Object) => this.handleSelect(name, value, CONTROL_TYPES.SOURCE);
 
-	handleSubmitConstant = (name: string, value: string) => this.handleSelect(name, value, TYPES.CONSTANT);
+	handleSubmitConstant = (name: string, value: string) => this.handleSelect(name, value, CONTROL_TYPES.CONSTANT);
 
 	hideLegacyFormatInfo = () => this.setState({showLegacyFormatInfo: false});
 
 	hideRemoveInfo = () => this.setState({showRemoveInfo: false});
 
 	resolveControlRender = (control: Control) => {
-		const {CONSTANT, OPERATOR, SOURCE} = TYPES;
+		const {CONSTANT, OPERATOR, SOURCE} = CONTROL_TYPES;
 		const {type} = control;
 
 		switch (type) {
@@ -333,7 +334,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 				name={name}
 				onSelect={this.handleSelectOperator}
 				options={OPERATORS}
-				type={TYPES.OPERATOR}
+				type={CONTROL_TYPES.OPERATOR}
 				value={value}
 			/>
 		);
@@ -378,7 +379,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 				onClickButton={this.handleChangeType}
 				onSelect={this.handleSelectSource}
 				options={sources}
-				type={TYPES.SOURCE}
+				type={CONTROL_TYPES.SOURCE}
 				value={value}
 			/>
 		);
@@ -387,7 +388,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	renderTemplates = () => {
 		const {secondTemplateType} = this.state;
 		const {CONSTANT_TEMPLATE, OPERATOR_TEMPLATE, SOURCE_TEMPLATE} = TEMPLATES;
-		const secondTemplate = secondTemplateType === TYPES.SOURCE
+		const secondTemplate = secondTemplateType === CONTROL_TYPES.SOURCE
 			? this.renderControlByType(SOURCE_TEMPLATE)
 			: this.renderControlByType(CONSTANT_TEMPLATE);
 

@@ -19,7 +19,7 @@ import {NewWidget} from 'utils/widget';
  * @param {Widget[]} payload - массив виджетов
  * @returns {WidgetsDataState}
  */
-export const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
+const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
 	const map = {};
 
 	payload.forEach(widget => {
@@ -41,7 +41,7 @@ export const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
  * @param {string} payload - id виджета
  * @returns {WidgetsDataState}
  */
-export const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidget): WidgetsDataState => {
+const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidget): WidgetsDataState => {
 	if (state.selectedWidget === NewWidget.id) {
 		state.newWidget = null;
 	}
@@ -57,7 +57,7 @@ export const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidg
  * @param {WidgetsDataState} state - хранилище данных виджетов
  * @returns {WidgetsDataState}
  */
-export const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
+const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
 	if (state.selectedWidget === NewWidget.id) {
 		state.newWidget = null;
 	}
@@ -74,7 +74,7 @@ export const resetWidget = (state: WidgetsDataState): WidgetsDataState => {
  * @param {NewWidget} payload - объект нового виджета
  * @returns {WidgetsDataState}
  */
-export const addWidget = (state: WidgetsDataState, {payload}: AddWidget): WidgetsDataState => {
+const addWidget = (state: WidgetsDataState, {payload}: AddWidget): WidgetsDataState => {
 	state.newWidget = payload;
 	state.selectedWidget = state.newWidget.id;
 
@@ -90,7 +90,7 @@ export const addWidget = (state: WidgetsDataState, {payload}: AddWidget): Widget
  * @param {Widget} payload - данные виджета
  * @returns {WidgetsDataState}
  */
-export const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidget): WidgetsDataState => {
+const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidget): WidgetsDataState => {
 	state.map[payload.id] = payload;
 	state.selectedWidget = payload.id;
 	state.newWidget = null;
@@ -108,7 +108,7 @@ export const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidge
  * @param {string} payload - id виджета
  * @returns {WidgetsDataState}
  */
-export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): WidgetsDataState => {
+const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): WidgetsDataState => {
 	delete state.map[payload];
 
 	if (state.selectedWidget === payload) {
@@ -127,7 +127,7 @@ export const deleteWidget = (state: WidgetsDataState, {payload}: DeleteWidget): 
  * @param {Widget} payload - данные виджета
  * @returns {WidgetsDataState}
  */
-export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): WidgetsDataState => {
+const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): WidgetsDataState => {
 	state.map[payload.id] = payload;
 
 	return {
@@ -143,7 +143,7 @@ export const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): 
  * @param {Layout} payload - массив объектов положений виджетов на дашборде
  * @returns {WidgetsDataState}
  */
-export const editLayout = (state: WidgetsDataState, {payload}: EditLayout): WidgetsDataState => {
+const editLayout = (state: WidgetsDataState, {payload}: EditLayout): WidgetsDataState => {
 	payload.forEach(l => {
 		if (l.i === NewWidget.id && state.newWidget) {
 			state.newWidget.layout = l;
@@ -156,4 +156,19 @@ export const editLayout = (state: WidgetsDataState, {payload}: EditLayout): Widg
 		...state,
 		map: state.map
 	};
+};
+
+// $FlowFixMe
+const getBuildSet = (widget: Widget) => widget.data.find(set => !set.sourceForCompute);
+
+export {
+	getBuildSet,
+	setWidgets,
+	setSelectedWidget,
+	updateWidget,
+	editLayout,
+	addWidget,
+	createWidget,
+	deleteWidget,
+	resetWidget
 };

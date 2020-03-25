@@ -1,9 +1,8 @@
 // @flow
-import {CHART_VARIANTS} from 'utils/chart';
-import {createRefName} from 'utils/widget';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import React, {Fragment} from 'react';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class AxisChart extends DataFormBuilder {
@@ -11,78 +10,68 @@ export class AxisChart extends DataFormBuilder {
 
 	renderFieldsByType = () => {
 		const {type} = this.props.values;
-		const {BAR, BAR_STACKED} = CHART_VARIANTS;
+		const {BAR, BAR_STACKED} = WIDGET_TYPES;
 
 		return [BAR, BAR_STACKED].includes(type) ? this.renderVerticalInputs() : this.renderHorizontalInputs();
 	};
 
-	renderHorizontalInputs = () => {
-		const {breakdown, xAxis, yAxis} = FIELDS;
+	renderHorizontalInputs = () => (
+		<Fragment>
+			{this.renderLabel('Ось Х')}
+			{this.renderByOrder(this.renderXAxis(true), false)}
+			{this.renderLabel('Ось Y')}
+			{this.renderByOrder(this.renderYAxis(true))}
+			{this.renderByOrder(this.renderBreakdown)}
+		</Fragment>
+	);
 
-		return (
-			<Fragment>
-				{this.renderLabel('Ось Х')}
-				{this.renderByOrder(this.renderXAxis(true), xAxis, false)}
-				{this.renderLabel('Ось Y')}
-				{this.renderByOrder(this.renderYAxis(true), yAxis)}
-				{this.renderByOrder(this.renderBreakdown, breakdown)}
-			</Fragment>
-		);
-	};
+	renderVerticalInputs = () => (
+		<Fragment>
+			{this.renderLabel('Ось X')}
+			{this.renderByOrder(this.renderYAxis(true))}
+			{this.renderByOrder(this.renderBreakdown)}
+			{this.renderLabel('Ось Y')}
+			{this.renderByOrder(this.renderXAxis(false))}
+		</Fragment>
+	);
 
-	renderVerticalInputs = () => {
-		const {breakdown, xAxis, yAxis} = FIELDS;
-
-		return (
-			<Fragment>
-				{this.renderLabel('Ось X')}
-				{this.renderByOrder(this.renderYAxis(true), yAxis)}
-				{this.renderByOrder(this.renderBreakdown, breakdown)}
-				{this.renderLabel('Ось Y')}
-				{this.renderByOrder(this.renderXAxis(false), xAxis)}
-			</Fragment>
-		);
-	};
-
-	renderXAxis = (withDivider: boolean = true) => (name: string) => {
-		const {values} = this.props;
-		const groupName = createRefName(name, FIELDS.group);
+	renderXAxis = (withDivider: boolean = true) => (index: number) => {
+		const set = this.getSet(index);
 
 		const refInputProps = {
-			name: groupName,
+			name: FIELDS.group,
 			type: 'group',
-			value: values[groupName]
+			value: set[FIELDS.group]
 		};
 
 		const props = {
-			name,
+			name: FIELDS.xAxis,
 			refInputProps,
-			value: values[name],
+			value: set[FIELDS.xAxis],
 			withDivider
 		};
 
-		return this.renderAttribute(props);
+		return this.renderAttribute(index, props);
 	};
 
-	renderYAxis = (withDivider: boolean = true) => (name: string) => {
-		const {values} = this.props;
-		const aggregationName = createRefName(name, FIELDS.aggregation);
+	renderYAxis = (withDivider: boolean = true) => (index: number) => {
+		const set = this.getSet(index);
 
 		const refInputProps = {
-			name: aggregationName,
+			name: FIELDS.aggregation,
 			type: 'aggregation',
-			value: values[aggregationName]
+			value: set[FIELDS.aggregation]
 		};
 
 		const props = {
-			name,
+			name: FIELDS.yAxis,
 			refInputProps,
-			value: values[name],
+			value: set[FIELDS.yAxis],
 			withCreate: true,
 			withDivider
 		};
 
-		return this.renderAttribute(props);
+		return this.renderAttribute(index, props);
 	};
 
 	render () {

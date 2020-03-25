@@ -1,23 +1,18 @@
 // @flow
 import {Button, Title} from 'components/atoms';
 import cn from 'classnames';
-import {DesignTab, ParamsTab} from './Tabs';
-import type {FormRef} from 'components/types';
-import type {Props} from 'containers/WidgetFormPanel/types';
+import {DesignTab as StyleTab, ParamsTab} from './Tabs';
+import type {DivRef} from 'components/types';
+import type {Props, State, TabParams} from './types';
 import React, {Component, createContext, createRef} from 'react';
-import type {State, TabParams} from './types';
 import styles from './styles.less';
 import {TABS} from './constants';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 const {LIST, VARIANTS} = TABS;
-const tabs = {
-	[VARIANTS.DESIGN]: DesignTab,
-	[VARIANTS.PARAMS]: ParamsTab
-};
 
 export const FormContext: Object = createContext({});
-export const formRef: FormRef = createRef();
+export const formRef: DivRef = createRef();
 
 export class WidgetFormPanel extends Component<Props, State> {
 	state = {
@@ -25,15 +20,6 @@ export class WidgetFormPanel extends Component<Props, State> {
 	};
 
 	handleClick = (currentTab: string) => () => this.setState({currentTab});
-
-	handleSubmit = async () => {
-		const {setFieldValue, submitForm} = this.props;
-
-		await setFieldValue('isSubmitting', true);
-		await setFieldValue('shouldScrollToError', true);
-
-		submitForm();
-	};
 
 	renderCancelButton = () => {
 		const {cancelForm} = this.props;
@@ -53,15 +39,15 @@ export class WidgetFormPanel extends Component<Props, State> {
 	);
 
 	renderForm = () => {
-		const {handleSubmit} = this.props;
+		const {onSubmit} = this.props;
 
 		return (
-			<form className={styles.form} onSubmit={handleSubmit} ref={formRef}>
+			<div className={styles.form} onSubmit={onSubmit} ref={formRef}>
 				{this.renderHeader()}
 				{this.renderTabList()}
 				{this.renderTabContent()}
 				{this.renderFooter()}
-			</form>
+			</div>
 		);
 	};
 
@@ -77,12 +63,12 @@ export class WidgetFormPanel extends Component<Props, State> {
 	};
 
 	renderSaveButton = () => {
-		const {personalDashboard, updating} = this.props;
+		const {onSubmit, personalDashboard, updating} = this.props;
 		const {INFO, SIMPLE} = BUTTON_VARIANTS;
 		const variant = personalDashboard ? INFO : SIMPLE;
 
 		return (
-			<Button disabled={updating} onClick={this.handleSubmit} variant={variant}>
+			<Button disabled={updating} onClick={onSubmit} variant={variant}>
 				Сохранить
 			</Button>
 		);
@@ -90,13 +76,9 @@ export class WidgetFormPanel extends Component<Props, State> {
 
 	renderTabContent = () => {
 		const {currentTab} = this.state;
-		const Tab = tabs[currentTab];
+		const tab = currentTab === VARIANTS.PARAMS ? <ParamsTab /> : <StyleTab />;
 
-		return (
-			<div className={styles.tab}>
-				<Tab />
-			</div>
-		);
+		return <div className={styles.tab}>{tab}</div>;
 	};
 
 	renderTabList = () => <ul className={styles.tabList}>{LIST.map(this.renderTabListItem)}</ul>;

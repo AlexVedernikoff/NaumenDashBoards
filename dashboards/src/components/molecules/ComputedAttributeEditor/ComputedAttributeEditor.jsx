@@ -1,6 +1,6 @@
 // @flow
 import {AttributeCreatingModal} from 'components/molecules';
-import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
+import type {ComputedAttr} from 'store/widgets/data/types';
 import {FieldButton} from 'components/atoms';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';

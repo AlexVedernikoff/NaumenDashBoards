@@ -11,6 +11,7 @@ export type CheckboxProps = {
 	hideDivider?: boolean,
 	label: string,
 	name: string,
+	onClick?: () => void,
 	value: boolean
 };
 
