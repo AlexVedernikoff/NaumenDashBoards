@@ -8,7 +8,8 @@ type ReceivedProps = {
 
 export type ConnectedProps = {
 	error: boolean,
-	loading: boolean
+	loading: boolean,
+	personal: boolean
 };
 
 export type ConnectedFunctions = {

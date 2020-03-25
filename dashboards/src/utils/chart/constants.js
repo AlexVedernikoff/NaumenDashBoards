@@ -1,24 +1,4 @@
 // @flow
-const BAR: 'BAR' = 'BAR';
-const BAR_STACKED: 'BAR_STACKED' = 'BAR_STACKED';
-const COLUMN: 'COLUMN' = 'COLUMN';
-const COLUMN_STACKED: 'COLUMN_STACKED' = 'COLUMN_STACKED';
-const DONUT: 'DONUT' = 'DONUT';
-const LINE: 'LINE' = 'LINE';
-const PIE: 'PIE' = 'PIE';
-const COMBO: 'COMBO' = 'COMBO';
-
-const CHART_VARIANTS = {
-	BAR,
-	BAR_STACKED,
-	COLUMN,
-	COLUMN_STACKED,
-	COMBO,
-	DONUT,
-	LINE,
-	PIE
-};
-
 const bar: 'bar' = 'bar';
 const donut: 'donut' = 'donut';
 const line: 'line' = 'line';
@@ -43,8 +23,27 @@ const LEGEND_POSITIONS = {
 	top
 };
 
+const DEFAULT_COLORS = [
+	'#EA3223',
+	'#999999',
+	'#2C6FBA',
+	'#4EAD5B',
+	'#DE5D30',
+	'#67369A',
+	'#F6C142',
+	'#4CAEEA',
+	'#A1BA66',
+	'#B02318',
+	'#536130',
+	'#DCA5A2',
+	'#928A5B',
+	'#9BB3D4',
+	'#8C4A1C',
+	'#FFFE55'
+];
+
 export {
 	CHART_TYPES,
-	CHART_VARIANTS,
+	DEFAULT_COLORS,
 	LEGEND_POSITIONS
 };

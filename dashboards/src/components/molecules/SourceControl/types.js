@@ -1,18 +1,18 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {SourceValue} from 'components/molecules/Source/types';
+import type {Source} from 'store/widgets/data/types';
 
 export type Option = {
 	attributes: Array<Attribute>,
 	dataKey: string,
-	source: SourceValue
+	source: Source
 };
 
 export type Value = {
 	aggregation: string,
 	attribute: Attribute,
 	dataKey: string,
-	source: SourceValue
+	source: Source
 };
 
 export type Props = {

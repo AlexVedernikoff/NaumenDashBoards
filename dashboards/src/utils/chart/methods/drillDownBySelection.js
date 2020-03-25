@@ -1,158 +1,174 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
-import {CHART_VARIANTS} from 'utils/chart/constants';
-import {createOrdinalName, getMainOrdinalNumber, getNumberFromName} from 'utils/widget';
+import type {AddFilterProps, AddFiltersProps} from './types';
+import type {AxisWidget, Chart, CircleWidget, ComboWidget} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
-import type {DrillDownMixin} from 'store/widgets/links/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {store} from 'src';
 import type {ThunkAction} from 'store/types';
-import type {Widget} from 'store/widgets/data/types';
+import {transformGroupFormat} from 'store/widgets/helpers';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
- * Добавляем данные фильтра в объект примеси
- * @param {DrillDownMixin} mixin - объект примеси
- * @param {?Attribute} attr - атрибут по которому нужно будет провести фильтрацию для получения данных
- * выбранной области.
- * @param {string | number} value - значение атрибута
- * @param {?string} group - значение для группировки (опционально для графиков с осями)
+ * Добавляет фильтр
+ * @param {AddFilterProps} props - данные для нового фильтра
  */
-const addFilter = (mixin: DrillDownMixin, attr: ?Attribute, value: string | number, group: ?string) => {
-	if (attr) {
+const addFilter = (props: AddFilterProps) => {
+	const {attribute, group, mixin, value} = props;
+
+	if (attribute && group) {
 		if (value) {
 			mixin.title = `${mixin.title}. ${value}`;
 		}
 
-		mixin.filters.push({attr, group, value});
+		mixin.filters.push({attribute, group, value});
 	}
 };
 
 /**
  * Функция создания примеси для графиков с осями
- * @param {Widget} widget - данные виджета
- * @param {DiagramBuildData} data - данные для построение графика
- * @param {any} config - конфиг построенного графика
- * @param {DrillDownMixin} mixin - объект будущей примеси
+ * @param {AxisWidget} widget - данные виджета
+ * @param {AddFiltersProps} props - данные для добавления фильтров
+ * @returns {number} index - индекс набора данных массива data виджета
  */
-const axisChart = (widget: Widget, {categories, series}: DiagramBuildData, config: any, mixin: DrillDownMixin) => {
+const addAxisChartFilters = (widget: AxisWidget, props: AddFiltersProps) => {
+	const {buildData, config, mixin} = props;
+	const {categories, series} = buildData;
 	const {dataPointIndex, seriesIndex} = config;
-	let breakdown, breakdownGroup, group, mainNumber, xAxis;
+	const {data} = widget;
+	const index = data.findIndex(set => !set.sourceForCompute);
 
-	if (!widget.order) {
-		xAxis = widget[FIELDS.xAxis];
-		group = widget[FIELDS.group];
-		breakdown = widget[FIELDS.breakdown];
-		breakdownGroup = widget[FIELDS.breakdownGroup];
-	} else {
-		mainNumber = getMainOrdinalNumber(widget);
-		xAxis = widget[createOrdinalName(FIELDS.xAxis, mainNumber)];
-		group = widget[createOrdinalName(FIELDS.group, mainNumber)];
-		breakdown = widget[createOrdinalName(FIELDS.breakdown, mainNumber)];
-		breakdownGroup = widget[createOrdinalName(FIELDS.breakdownGroup, mainNumber)];
+	if (index !== -1) {
+		const set = data[index];
+
+		addFilter({
+			attribute: set[FIELDS.xAxis],
+			group: transformGroupFormat(set[FIELDS.group]),
+			mixin,
+			value: categories[dataPointIndex]
+		});
+
+		addFilter({
+			attribute: set[FIELDS.breakdown],
+			group: transformGroupFormat(set[FIELDS.breakdownGroup]),
+			mixin,
+			value: series[seriesIndex].name
+		});
 	}
 
-	if (Array.isArray(categories) && Array.isArray(series)) {
-		addFilter(mixin, xAxis, categories[dataPointIndex], group);
-		addFilter(mixin, breakdown, series[seriesIndex].name, breakdownGroup);
-	}
-
-	store.dispatch(drillDown(widget, mainNumber, mixin));
+	return index;
 };
 
 /**
  * Функция создания примеси для комбо графика
- * @param {Widget} widget - данные виджета
- * @param {DiagramBuildData} data - данные для построение графика
- * @param {any} config - конфиг построенного графика
- * @param {DrillDownMixin} mixin - объект будущей примеси
+ * @param {ComboWidget} widget - данные виджета
+ * @param {AddFiltersProps} props - данные для добавления фильтров
+ * @returns {number} index - индекс набора данных массива data виджета
  */
-const comboChart = (widget: Widget, {labels, series}: DiagramBuildData, config: any, mixin: DrillDownMixin) => {
+const addComboChartFilters = (widget: ComboWidget, props: AddFiltersProps) => {
+	const {buildData, config, mixin} = props;
+	const {labels, series} = buildData;
 	const {dataPointIndex, seriesIndex} = config;
-	let {dataKey} = series[seriesIndex];
+	const {data} = widget;
+	const index = data.findIndex(set => set.dataKey === buildData.series[config.seriesIndex].dataKey);
 
-	const currentKey = Object.keys(widget)
-		.filter(key => key.startsWith(FIELDS.dataKey))
-		.find(key => widget[key] === dataKey);
+	if (index !== -1) {
+		const set = widget.data[index];
 
-	if (currentKey) {
-		const currentNumber = getNumberFromName(currentKey);
-		const xAxis = widget[createOrdinalName(FIELDS.xAxis, currentNumber)];
-		const group = widget[createOrdinalName(FIELDS.group, currentNumber)];
-		const breakdown = widget[createOrdinalName(FIELDS.breakdown, currentNumber)];
-		const breakdownGroup = widget[createOrdinalName(FIELDS.breakdownGroup, currentNumber)];
+		addFilter({
+			attribute: set[FIELDS.xAxis],
+			group: transformGroupFormat(set[FIELDS.group]),
+			mixin,
+			value: labels[dataPointIndex]
+		});
 
-		addFilter(mixin, xAxis, labels[dataPointIndex], group);
-		addFilter(mixin, breakdown, series[seriesIndex].breakdownValue, breakdownGroup);
-
-		store.dispatch(drillDown(widget, currentNumber, mixin));
+		addFilter({
+			attribute: set[FIELDS.breakdown],
+			group: transformGroupFormat(set[FIELDS.breakdownGroup]),
+			mixin,
+			value: series[seriesIndex].name
+		});
 	}
+
+	return index;
 };
 
 /**
- * Функция создания примеси для круговых графиков
- * @param {Widget} widget - данные виджета
- * @param {DiagramBuildData} data - данные для построение графика
- * @param {any} config - конфиг построенного графика
- * @param {DrillDownMixin} mixin - объект будущей примеси
+ * Добавляет фильтр для круговых графиков
+ * @param {CircleWidget} widget - данные виджета-графика
+ * @param {AddFiltersProps} props - данные для добавления фильтров
+ * @returns {number} index - индекс набора данных массива data виджета
  */
-const circleChart = (widget: Widget, {labels}: DiagramBuildData, {dataPointIndex}: any, mixin: DrillDownMixin) => {
-	let breakdown, breakdownGroup, mainNumber;
+const addCircleChartFilters = (widget, props: AddFiltersProps) => {
+	const {buildData, config, mixin} = props;
+	const {dataPointIndex} = config;
+	const {data} = widget;
+	const index = data.findIndex(set => !set.sourceForCompute);
 
-	if (!widget.order) {
-		breakdown = widget[FIELDS.breakdown];
-		breakdownGroup = widget[FIELDS.breakdownGroup];
-	} else {
-		mainNumber = getMainOrdinalNumber(widget);
-		breakdown = widget[createOrdinalName(FIELDS.breakdown, mainNumber)];
-		breakdownGroup = widget[createOrdinalName(FIELDS.breakdownGroup, mainNumber)];
+	if (index !== -1) {
+		const set = data[index];
+
+		addFilter({
+			attribute: set[FIELDS.breakdown],
+			group: transformGroupFormat(set[FIELDS.breakdownGroup]),
+			mixin,
+			value: buildData.labels[dataPointIndex]
+		});
 	}
 
-	if (Array.isArray(labels)) {
-		addFilter(mixin, breakdown, labels[dataPointIndex], breakdownGroup);
-	}
-
-	store.dispatch(drillDown(widget, mainNumber, mixin));
+	return index;
 };
 
 /**
- * В зависимости от типа диаграммы выбираем функцию создания примеси
- * @param {string} type - тип диаграммы
- * @returns {Function} - функция создания примеси
+ * В зависимости от типа диаграммы вызывается необходимая функция для добавления фильтров
+ * @param {Chart} widget - данные виджета-графика
+ * @param {AddFiltersProps} props - данные для добавления фильтров
+ * @returns {number} index - индекс набора данных массива data виджета
  */
-const resolve = (type: string) => {
-	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = CHART_VARIANTS;
+const addFilters = (widget: Chart, props: AddFiltersProps) => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = WIDGET_TYPES;
 
-	const creators = {
-		[BAR]: axisChart,
-		[BAR_STACKED]: axisChart,
-		[COLUMN]: axisChart,
-		[COLUMN_STACKED]: axisChart,
-		[COMBO]: comboChart,
-		[DONUT]: circleChart,
-		[LINE]: axisChart,
-		[PIE]: circleChart
-	};
-
-	return creators[type];
+	switch (widget.type) {
+		case BAR:
+		case BAR_STACKED:
+		case COLUMN:
+		case COLUMN_STACKED:
+		case LINE:
+			return addAxisChartFilters(widget, props);
+		case COMBO:
+			return addComboChartFilters(widget, props);
+		case DONUT:
+		case PIE:
+			return addCircleChartFilters(widget, props);
+		default:
+			return -1;
+	}
 };
 
 /**
  * Обработчик для события выбора конкретной части диаграммы.
- * Определяем по типу нужную функцию для создания примеси с данными выбранной области
- * и передаем созданную примесь в функцию перехода на список объектов.
- * @param {Widget} widget - данные виджета
- * @param {DiagramBuildData} chart - данные для построения графика
+ * Добавляет фильтры для перехода на список построения
+ * @param {Chart} widget - данные виджета
+ * @param {DiagramBuildData} buildData - данные для построения графика
  * @returns {ThunkAction}
  */
-const drillDownBySelection = (widget: Widget, chart: DiagramBuildData) => (event: any, chartContext: any, config: any) => {
-	const {diagramName, type} = widget;
+const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) =>
+	(event: Object, chartContext: Object, config: Object) => {
+	const {diagramName} = widget;
 	const mixin = {
 		filters: [],
 		title: diagramName
 	};
 
-	resolve(type)(widget, chart, config, mixin);
+	const index = addFilters(widget, {
+		buildData,
+		config,
+		mixin
+	});
+
+	if (index !== -1) {
+		store.dispatch(drillDown(widget, index, mixin));
+	}
 };
 
 export {

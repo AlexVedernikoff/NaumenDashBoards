@@ -26,8 +26,8 @@ export class Table extends PureComponent<Props, State> {
 	}
 
 	handleResize = (rows: Array<Object>) => {
-		const {buildData, onUpdate, widget} = this.props;
-		const {columns} = buildData;
+		const {data, onUpdate, widget} = this.props;
+		const {columns} = data;
 		const {current} = this.ref;
 
 		if (current) {
@@ -46,9 +46,8 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	setColumnWidth = (width: number) => {
-		const {buildData, widget} = this.props;
-		const {columns} = buildData;
-
+		const {data, widget} = this.props;
+		const {columns} = data;
 		const {rowsWidth} = widget;
 
 		if (Array.isArray(rowsWidth)) {
@@ -59,7 +58,7 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderTable = () => {
-		const {columns, data} = this.props.buildData;
+		const {columns, data} = this.props.data;
 		const {width} = this.state;
 
 		if (width) {

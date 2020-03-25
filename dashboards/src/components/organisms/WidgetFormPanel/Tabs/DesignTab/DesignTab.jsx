@@ -1,12 +1,11 @@
 // @flow
 import {Chart} from './WidgetFields';
-import {CHART_VARIANTS} from 'utils/chart';
 import {FieldLabel} from 'components/atoms';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import React from 'react';
 import styles from './styles.less';
-import {WIDGET_VARIANTS} from 'utils/widget';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class DesignTab extends FormBuilder {
@@ -38,13 +37,10 @@ export class DesignTab extends FormBuilder {
 	};
 
 	renderWidgetFields = (type: string) => {
-		const {COMBO, DONUT, PIE} = CHART_VARIANTS;
-		const {SUMMARY, TABLE} = WIDGET_VARIANTS;
+		const {SUMMARY, TABLE} = WIDGET_TYPES;
 
 		if (type !== SUMMARY && type !== TABLE) {
-			const axis = !(type === PIE || type === DONUT || type === COMBO);
-
-			return <Chart axis={axis} />;
+			return <Chart />;
 		}
 	};
 

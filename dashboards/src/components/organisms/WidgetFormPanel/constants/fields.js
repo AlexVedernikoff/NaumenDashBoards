@@ -7,6 +7,7 @@ const calcTotalRow: 'calcTotalRow' = 'calcTotalRow';
 const colors: 'colors' = 'colors';
 const column: 'column' = 'column';
 const computedAttrs: 'computedAttrs' = 'computedAttrs';
+const data: 'data' = 'data';
 const dataKey: 'dataKey' = 'dataKey';
 const descriptor: 'descriptor' = 'descriptor';
 const diagramName: 'diagramName' = 'diagramName';
@@ -16,8 +17,8 @@ const isNew: 'isNew' = 'isNew';
 const layout: 'layout' = 'layout';
 const legendPosition: 'legendPosition' = 'legendPosition';
 const name: 'name' = 'name';
-const order: 'order' = 'order';
 const row: 'row' = 'row';
+const rowsWidth: 'rowsWidth' = 'rowsWidth';
 const showLegend: 'showLegend' = 'showLegend';
 const showName: 'showName' = 'showName';
 const showValue: 'showValue' = 'showValue';
@@ -39,6 +40,7 @@ const FIELDS = {
 	colors,
 	column,
 	computedAttrs,
+	data,
 	dataKey,
 	descriptor,
 	diagramName,
@@ -48,8 +50,8 @@ const FIELDS = {
 	layout,
 	legendPosition,
 	name,
-	order,
 	row,
+	rowsWidth,
 	showLegend,
 	showName,
 	showValue,
@@ -58,67 +60,9 @@ const FIELDS = {
 	source,
 	sourceForCompute,
 	type,
-	xAxis,
-	yAxis,
-	withBreakdown
-};
-
-const BASE_FIELDS = {
-	dataKey,
-	source,
-	sourceForCompute
-};
-
-const AXIS_FIELDS = {
-	...BASE_FIELDS,
-	aggregation,
-	breakdown,
-	breakdownGroup,
-	descriptor,
-	group,
+	withBreakdown,
 	xAxis,
 	yAxis
-};
-
-const CIRCLE_FIELDS = {
-	...BASE_FIELDS,
-	aggregation,
-	breakdown,
-	breakdownGroup,
-	descriptor,
-	indicator
-};
-
-const COMBO_FIELDS = {
-	...AXIS_FIELDS,
-	type
-};
-
-const SUMMARY_FIELDS = {
-	...BASE_FIELDS,
-	aggregation,
-	descriptor,
-	indicator
-};
-
-const TABLE_FIELDS = {
-	...BASE_FIELDS,
-	aggregation,
-	breakdown,
-	breakdownGroup,
-	calcTotalColumn,
-	calcTotalRow,
-	column,
-	descriptor,
-	row
-};
-
-export {
-	AXIS_FIELDS,
-	CIRCLE_FIELDS,
-	COMBO_FIELDS,
-	SUMMARY_FIELDS,
-	TABLE_FIELDS
 };
 
 export default FIELDS;

@@ -1,17 +1,18 @@
 // @flow
 import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
 import cn from 'classnames';
-import {createOrdinalName, WIDGET_VARIANTS} from 'utils/widget';
 import {createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
 import {Diagram, Modal} from 'components/molecules';
+import type {DivRef} from 'components/types';
 import {ExportIcon} from 'icons/header';
 import type {ExportItem, Props, State} from './types';
 import {EXPORT_LIST} from './constants';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import {IconButton, Tooltip} from 'components/atoms';
+import type {Node} from 'react';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Widget extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -23,7 +24,7 @@ export class Widget extends PureComponent<Props, State> {
 		showRemoveModal: false
 	};
 
-	ref = createRef();
+	ref: DivRef = createRef();
 
 	static getDerivedStateFromError (error: Object) {
 		window.top.console.log(error);
@@ -56,9 +57,9 @@ export class Widget extends PureComponent<Props, State> {
 		return cn(CN);
 	};
 
-	handleClickDrillDownButton = (num?: number) => () => {
+	handleClickDrillDownButton = (index: number) => () => {
 		const {data, onDrillDown} = this.props;
-		onDrillDown(data, num);
+		onDrillDown(data, index);
 	};
 
 	handleClickEditButton = () => {
@@ -106,11 +107,13 @@ export class Widget extends PureComponent<Props, State> {
 				<div className={styles.actionButtonsContainer}>
 					{this.renderEditButton()}
 					{this.renderExportButton()}
-					{this.renderDrillDownButton()}
+					{this.renderDrillDownButtons()}
 					{this.renderRemoveButton()}
 				</div>
 			);
 		}
+
+		return null;
 	};
 
 	renderDiagram = () => {
@@ -122,21 +125,14 @@ export class Widget extends PureComponent<Props, State> {
 		}
 	};
 
-	renderDrillDownButton = () => {
+	renderDrillDownButtons = (): Array<Node> => {
 		const {data: widget} = this.props;
-		return Array.isArray(widget.order) ? this.renderDrillDownButtons() : this.renderLegacyDrillDownButton();
-	};
 
-	renderDrillDownButtons = () => {
-		const {data: widget} = this.props;
-		const {order} = widget;
-
-		return order.map(number => {
-			const sourceForCompute = widget[createOrdinalName(FIELDS.sourceForCompute, number)];
+		// $FlowFixMe
+		return widget.data.map((set, index) => {
+			const {dataKey, source, sourceForCompute} = set;
 
 			if (!sourceForCompute) {
-				const dataKey = widget[createOrdinalName(FIELDS.dataKey, number)];
-				const source = widget[createOrdinalName(FIELDS.source, number)];
 				let tipText = 'Перейти';
 
 				if (source) {
@@ -144,7 +140,7 @@ export class Widget extends PureComponent<Props, State> {
 				}
 
 				return (
-					<IconButton key={dataKey} onClick={this.handleClickDrillDownButton(number)} tip={tipText}>
+					<IconButton key={dataKey} onClick={this.handleClickDrillDownButton(index)} tip={tipText}>
 						<UnionIcon />
 					</IconButton>
 				);
@@ -162,6 +158,8 @@ export class Widget extends PureComponent<Props, State> {
 				</IconButton>
 			);
 		}
+
+		return null;
 	};
 
 	renderError = () => {
@@ -176,7 +174,7 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderExportButton = () => {
 		const {type} = this.props.data;
-		const list = type !== WIDGET_VARIANTS.TABLE
+		const list = type !== WIDGET_TYPES.TABLE
 			? EXPORT_LIST.filter(list => list.key !== FILE_VARIANTS.XLSX)
 			: EXPORT_LIST;
 
@@ -186,7 +184,6 @@ export class Widget extends PureComponent<Props, State> {
 					<ExportIcon />
 				</IconButton>
 			</Tooltip>
-
 		);
 	};
 
@@ -194,12 +191,6 @@ export class Widget extends PureComponent<Props, State> {
 		<div className={styles.exportItem} data-type={item.key} key={item.key} onClick={this.handleClickExportButton}>
 			{item.text}
 		</div>
-	);
-
-	renderLegacyDrillDownButton = () => (
-		<IconButton onClick={this.handleClickDrillDownButton()} tip="Перейти">
-			<UnionIcon />
-		</IconButton>
 	);
 
 	renderRemoveButton = () => {
@@ -213,6 +204,8 @@ export class Widget extends PureComponent<Props, State> {
 				</IconButton>
 			);
 		}
+
+		return null;
 	};
 
 	renderRemoveModal = () => {

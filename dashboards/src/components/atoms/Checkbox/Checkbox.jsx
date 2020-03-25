@@ -3,7 +3,7 @@ import {ACTIVE_COLORS} from './constants';
 import CheckIcon from 'icons/form/checked.svg';
 import cn from 'classnames';
 import type {Props} from './types';
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import styles from './styles.less';
 
 class Checkbox extends Component<Props> {
@@ -30,39 +30,16 @@ class Checkbox extends Component<Props> {
 
 	upperFirst = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
 
-	renderIconWithLabel = () => {
-		const {label, name, value} = this.props;
+	render () {
+		const {label, value} = this.props;
 
 		return (
-			<label className={styles.label} htmlFor={name}>
+			<label className={styles.label} onClick={this.handleClick}>
 				<div className={this.getIconClassName()}>
 					{value && <CheckIcon />}
 				</div>
-				<div> {label}</div>
+				<div>{label}</div>
 			</label>
-		);
-	};
-
-	renderInput = () => {
-		const {name} = this.props;
-
-		return (
-			<input
-				className={styles.input}
-				id={name}
-				name={name}
-				onChange={this.handleClick}
-				type="checkbox"
-			/>
-		);
-	};
-
-	render () {
-		return (
-			<Fragment>
-				{this.renderIconWithLabel()}
-				{this.renderInput()}
-			</Fragment>
 		);
 	}
 }

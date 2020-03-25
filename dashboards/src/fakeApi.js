@@ -1,7 +1,7 @@
 /* eslint-disable */
 const getCurrentContentParameters = async () => await ({
 	editable: true,
-	MinTimeIntervalUpdate: 15
+	MinTimeIntervalUpdate: 3
 });
 
 const getCurrentContextObject = async () => await ({
@@ -13,7 +13,7 @@ const commands = {
 	getCurrentContextObject
 };
 const extractSubjectUuid = () => 'employee$2384002';
-const findContentCode = () => 'TestZhdanovaasdasd';
+const findContentCode = () => 'DashbordTest12';
 
 const jsApi = {
 	commands,

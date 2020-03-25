@@ -1,6 +1,7 @@
 // @flow
 import type {Props} from 'containers/Startup/types';
 import React, {Component} from 'react';
+import styles from './styles.less';
 
 export class Startup extends Component<Props> {
 	componentDidMount () {
@@ -10,7 +11,7 @@ export class Startup extends Component<Props> {
 	}
 
 	render () {
-		const {children, error, loading} = this.props;
+		const {children, error, loading, personal} = this.props;
 
 		if (error) {
 			return <p>Ошибка загрузки дашборда</p>;
@@ -20,7 +21,11 @@ export class Startup extends Component<Props> {
 			return <p>Загрузка...</p>;
 		}
 
-		return children;
+		return (
+			<div className={styles.container} key={personal.toString()}>
+				{children}
+			</div>
+		);
 	}
 }
 

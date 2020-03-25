@@ -9,14 +9,13 @@ import {
 } from 'components/molecules';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {AttributeValue, Props, RefInputProps, State} from './types';
-import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
+import type {ComputedAttr, Source} from 'store/widgets/data/types';
 import {getDefaultAggregation} from 'components/molecules/AttributeAggregation/helpers';
 import {getDefaultSystemGroup, isGroupKey} from 'store/widgets/helpers';
 import {getProcessedAttribute} from 'store/sources/attributes/helpers';
 import type {Node} from 'react';
 import React, {Fragment, PureComponent} from 'react';
 import {REF_INPUT_TYPES} from './constants';
-import type {SourceValue} from 'components/molecules/Source/types';
 import styles from './styles.less';
 
 export class Attribute extends PureComponent<Props, State> {
@@ -90,7 +89,7 @@ export class Attribute extends PureComponent<Props, State> {
 		};
 	};
 
-	getOptions = (source: SourceValue | null) => {
+	getOptions = (source: Source | null) => {
 		const {getAttributeOptions} = this.props;
 		let options = [];
 
@@ -141,8 +140,8 @@ export class Attribute extends PureComponent<Props, State> {
 	handleCloseCreatingModal = () => this.setState({showCreatingModal: false});
 
 	handleRemoveComputedAttribute = (code: string) => {
-		const {name, onRemoveAttribute} = this.props;
-		onRemoveAttribute(name, code);
+		const {name, onRemoveComputedAttribute} = this.props;
+		onRemoveComputedAttribute(name, code);
 	};
 
 	handleSelect = (parent: AttributeType | null) => (name: string, value: AttributeValue) => {

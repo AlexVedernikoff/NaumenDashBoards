@@ -1,6 +1,11 @@
 // @flow
 import {BUILD_DATA_EVENTS} from './constants';
-import type {SetCreatedWidget, UpdateWidget, Widget} from 'store/widgets/data/types';
+import type {SetCreatedWidget, UpdateWidget, Widget, WidgetType} from 'store/widgets/data/types';
+
+export type PostData = {
+	data: Object,
+	type: WidgetType
+};
 
 export type DiagramBuildData = {
 	[string]: any

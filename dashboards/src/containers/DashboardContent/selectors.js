@@ -17,7 +17,6 @@ export const props = (state: AppState): ConnectedProps => {
 		editable,
 		editMode,
 		newWidget,
-		personalDashboard,
 		selectedWidget,
 		// $FlowFixMe
 		widgets: Object.values(data.map)

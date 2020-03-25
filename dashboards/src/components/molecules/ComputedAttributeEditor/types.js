@@ -1,5 +1,5 @@
 // @flow
-import type {ComputedAttr} from 'components/molecules/AttributeCreatingModal/types';
+import type {ComputedAttr} from 'store/widgets/data/types';
 import type {Option as SourceOption} from 'components/molecules/SourceControl/types';
 
 export type Props = {

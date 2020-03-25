@@ -45,7 +45,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 		const {attribute, customGroups, value} = this.props;
 		const {data, way} = value;
 		const attributeTitle = getProcessedValue(attribute, 'title', '');
-		const systemOptions = getSystemGroupOptions(attribute);
+		const systemOptions: Array<Object> = getSystemGroupOptions(attribute);
 		const systemValue = systemOptions.find(o => o.value === data) || systemOptions[0] || null;
 		const selectedCustomGroup = data in customGroups ? value.data : '';
 
@@ -79,6 +79,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 			Object.keys(widget)
 				.filter(isGroupKey)
 				.every(key => {
+					// $FlowFixMe
 					const group = widget[key];
 
 					if (group && typeof group === 'object' && group.data === selectedCustomGroup) {
@@ -108,6 +109,8 @@ export class GroupCreatingModal extends Component<Props, State> {
 		const {type} = attribute;
 
 		this.setState({selectedCustomGroup: groupId});
+
+		// $FlowFixMe
 		updateCustomGroup({
 			id: groupId,
 			// $FlowFixMe

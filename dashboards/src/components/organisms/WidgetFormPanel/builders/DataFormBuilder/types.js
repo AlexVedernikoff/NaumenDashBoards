@@ -1,4 +1,4 @@
 // @flow
 import type {Node} from 'react';
 
-export type RenderFunction = (name: string) => Node;
+export type RenderFunction = (index: number) => Node;

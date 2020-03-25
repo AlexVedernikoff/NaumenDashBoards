@@ -19,11 +19,13 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
-		const {defaultInterval, enabled, interval} = this.props.autoUpdateSettings;
-		this.setState({values: {
-			enabled,
-			interval: interval || defaultInterval
-		}});
+		this.updateValues();
+	}
+
+	componentDidUpdate (prevProps: Props) {
+		if (this.props.autoUpdateSettings !== prevProps.autoUpdateSettings) {
+			this.updateValues();
+		}
 	}
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
@@ -63,6 +65,17 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 
 			onSubmit(enabled, interval);
 		}
+	};
+
+	updateValues = () => {
+		const {defaultInterval, enabled, interval} = this.props.autoUpdateSettings;
+
+		this.setState({
+			values: {
+				enabled,
+				interval: interval || defaultInterval
+			}
+		});
 	};
 
 	validate = async (newValues?: Values) => {

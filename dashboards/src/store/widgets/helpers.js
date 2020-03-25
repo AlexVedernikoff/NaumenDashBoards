@@ -1,32 +1,41 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import type {CustomGroupsMap} from 'store/customGroups/types';
 import {DATETIME_SYSTEM_GROUP, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from './constants';
+import type {Group} from './data/types';
+import {store} from 'src';
 
-const createDefaultGroup = (data: string) => ({
-	data,
-	way: GROUP_WAYS.SYSTEM
-});
+const createDefaultGroup = (data: string, attribute?: Attribute) => {
+	if (!data || typeof data !== 'string') {
+		return getDefaultSystemGroup(attribute);
+	}
 
-const isGroupKey = (key: string) => /group/i.test(key);
-
-const transformGroupFormat = (object: Object, customGroups: CustomGroupsMap) => {
-	Object.keys(object).filter(isGroupKey).forEach(key => {
-		let value = object[key];
-
-		if (typeof value === 'string') {
-			value = createDefaultGroup(value);
-		}
-
-		if (value && typeof value === 'object' && value.way === GROUP_WAYS.CUSTOM) {
-			value = {...value, data: customGroups[value.data]};
-		}
-
-		object[key] = value;
+	return ({
+		data,
+		way: GROUP_WAYS.SYSTEM
 	});
 };
 
-const getDefaultSystemGroup = (attribute: Object) => attribute.type in ATTRIBUTE_SETS.DATE
+const isGroupKey = (key: string) => /group/i.test(key);
+
+const transformGroupFormat = (group: Group | null) => {
+	if (typeof group === 'string') {
+		group = createDefaultGroup(group);
+	}
+
+	if (group && typeof group === 'object' && group.way === GROUP_WAYS.CUSTOM) {
+		const {customGroups} = store.getState();
+
+		group = {
+			...group,
+			data: customGroups[group.data]
+		};
+	}
+
+	return group;
+};
+
+const getDefaultSystemGroup = (attribute: Object) => attribute && typeof attribute === 'object' && attribute.type in ATTRIBUTE_SETS.DATE
 	? createDefaultGroup(DATETIME_SYSTEM_GROUP.MONTH)
 	: createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
 

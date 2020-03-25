@@ -1,22 +1,14 @@
 // @flow
 import {ColorPalette, SimpleSelect} from 'components/molecules';
+import {DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
 import {FieldLabel} from 'components/atoms';
-import {FIELDS, OPTIONS, styles, VALUES} from 'components/organisms/WidgetFormPanel';
+import {FIELDS, OPTIONS, styles} from 'components/organisms/WidgetFormPanel';
 import {FormBuilder} from 'components/organisms/WidgetFormPanel/builders';
-import {LEGEND_POSITIONS} from 'utils/chart/constants';
 import React, {Fragment} from 'react';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
 
 export class Chart extends FormBuilder {
-	componentDidUpdate () {
-		const {setFieldValue, values} = this.props;
-		const colors = values[FIELDS.colors];
-
-		if (!Array.isArray(colors)) {
-			setFieldValue(FIELDS.colors, [...VALUES.COLORS]);
-		}
-	}
-
 	changeColor = (colorIndex: number, itemColor: string): void => {
 		let colors = this.getColors();
 		colors[colorIndex] = itemColor;
@@ -24,7 +16,7 @@ export class Chart extends FormBuilder {
 		this.props.setFieldValue(FIELDS.colors, colors);
 	};
 
-	getColors = () => this.props.values[FIELDS.colors] || [...VALUES.COLORS];
+	getColors = () => this.props.values[FIELDS.colors] || [...DEFAULT_COLORS];
 
 	renderColorPalette = () => (
 		<div className={styles.field}>
@@ -80,10 +72,12 @@ export class Chart extends FormBuilder {
 	};
 
 	renderVisibilityAxisCheckboxes = (): any => {
-		const {axis, values} = this.props;
+		const {values} = this.props;
 		const {showXAxis, showYAxis} = FIELDS;
+		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE} = WIDGET_TYPES;
+		const isAxisChart = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE].includes(values.type);
 
-		if (axis) {
+		if (isAxisChart) {
 			const fields = [
 				{
 					label: 'Название оси X',

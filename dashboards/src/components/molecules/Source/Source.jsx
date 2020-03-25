@@ -3,8 +3,9 @@ import {Checkbox, ExtendButton, FieldError, IconButton, OutsideClickDetector} fr
 import cn from 'classnames';
 import {CrossIcon, EditIcon} from 'icons/form';
 import {InputForm, SourceTree} from 'components/molecules';
-import type {Props, SourceValue, State} from './types';
+import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import type {Source as SourceValue} from 'store/widgets/data/types';
 import styles from './styles.less';
 
 export class Source extends PureComponent<Props, State> {

@@ -8,15 +8,13 @@ export class AxisChart extends DataFormBuilder {
 	sourceRefs = [FIELDS.breakdown, FIELDS.indicator];
 
 	render () {
-		const {breakdown, indicator} = FIELDS;
-
 		return (
 			<Fragment>
 				{this.renderBaseInputs()}
 				{this.renderSourceSection()}
 				{this.renderLabel('Показатель')}
-				{this.renderByOrder(this.renderIndicator, indicator)}
-				{this.renderByOrder(this.renderBreakdown, breakdown)}
+				{this.renderByOrder(this.renderIndicator)}
+				{this.renderByOrder(this.renderBreakdown)}
 			</Fragment>
 		);
 	}

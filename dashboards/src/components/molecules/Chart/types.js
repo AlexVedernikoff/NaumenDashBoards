@@ -1,8 +1,8 @@
 // @flow
+import type {Chart} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
-	buildData: DiagramBuildData,
-	widget: Widget
+	data: DiagramBuildData,
+	widget: Chart
 };

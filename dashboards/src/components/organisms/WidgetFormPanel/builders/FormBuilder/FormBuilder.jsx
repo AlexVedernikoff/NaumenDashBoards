@@ -3,13 +3,13 @@ import {Checkbox, Divider, ExtendButton, FieldError, FieldLabel, Label, TextArea
 import type {CheckboxProps, LabelProps, TextAreaProps} from './types';
 import {formRef, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
 import {MiniSelect} from 'components/molecules';
-import type {Props as FormProps} from 'containers/WidgetFormPanel/types';
+import type {Props as FormProps} from 'components/organisms/WidgetFormPanel/types';
 import type {Props as ExtendButtonProps} from 'components/atoms/ExtendButton/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import type {Variant as DividerVariant} from 'components/atoms/Divider/types';
 
-export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<Props & FormProps, State> {
+export class FormBuilder extends Component<FormProps> {
 	invalidInputs = {};
 
 	componentDidUpdate () {
@@ -41,6 +41,13 @@ export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<P
 		return firstCoordinate;
 	};
 
+	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {setFieldValue} = this.props;
+		const {name, value} = e.currentTarget;
+
+		setFieldValue(name, value);
+	};
+
 	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
 
 	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
@@ -56,15 +63,15 @@ export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<P
 	};
 
 	renderCheckBox = (props: CheckboxProps) => {
-		const {hideDivider, label, name, value} = props;
+		const {hideDivider, label, name, onClick, value} = props;
 
 		return (
 			<Fragment>
-				<div className={mainStyles.field} key={name}>
+				<div className={mainStyles.field}>
 					<Checkbox
 						label={label}
 						name={name}
-						onClick={this.handleClick}
+						onClick={onClick || this.handleClick}
 						value={value}
 					/>
 				</div>
@@ -98,7 +105,6 @@ export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<P
 	renderMiniSelect = (props: Object) => <MiniSelect onSelect={this.handleSelect} {...props} />;
 
 	renderTextArea = (props: TextAreaProps) => {
-		const {handleBlur: formikHandleBlur, handleChange} = this.props;
 		const {handleBlur, label, name, placeholder, value} = props;
 
 		return (
@@ -106,8 +112,8 @@ export class FormBuilder<Props: ?{} = {}, State: ?{} = null> extends Component<P
 				<FieldLabel text={label} />
 				<TextArea
 					name={name}
-					onBlur={handleBlur || formikHandleBlur}
-					onChange={handleChange}
+					onBlur={handleBlur}
+					onChange={this.handleChange}
 					onReset={this.handleResetTextArea}
 					placeholder={placeholder}
 					value={value}

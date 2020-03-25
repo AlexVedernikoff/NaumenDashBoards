@@ -7,10 +7,15 @@ import {fetchDashboard} from 'store/dashboard/actions';
  * @param {AppState} state - глобальное хранилище состояния
  * @returns {ConnectedProps}
  */
-export const props = (state: AppState): ConnectedProps => ({
-	error: state.dashboard.error,
-	loading: state.dashboard.loading
-});
+export const props = (state: AppState): ConnectedProps => {
+	const {error, loading, personal} = state.dashboard;
+
+	return {
+		error,
+		loading,
+		personal
+	};
+};
 
 export const functions: ConnectedFunctions = {
 	fetchDashboard

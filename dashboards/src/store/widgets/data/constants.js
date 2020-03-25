@@ -33,9 +33,65 @@ const WIDGETS_EVENTS = {
 	UPDATE_WIDGET
 };
 
+// Лимит виджетов на дашборде
 const LIMIT = 30;
 
+// Типы виджетов
+const BAR: 'BAR' = 'BAR';
+const BAR_STACKED: 'BAR_STACKED' = 'BAR_STACKED';
+const COLUMN: 'COLUMN' = 'COLUMN';
+const COLUMN_STACKED: 'COLUMN_STACKED' = 'COLUMN_STACKED';
+const DONUT: 'DONUT' = 'DONUT';
+const LINE: 'LINE' = 'LINE';
+const PIE: 'PIE' = 'PIE';
+const COMBO: 'COMBO' = 'COMBO';
+const SUMMARY: 'SUMMARY' = 'SUMMARY';
+const TABLE: 'TABLE' = 'TABLE';
+
+const WIDGET_TYPES = {
+	BAR,
+	BAR_STACKED,
+	COLUMN,
+	COLUMN_STACKED,
+	COMBO,
+	DONUT,
+	LINE,
+	PIE,
+	SUMMARY,
+	TABLE
+};
+
+// Возможные подтипы комбо-графика
+const COMBO_TYPES = {
+	COLUMN,
+	COLUMN_STACKED,
+	LINE
+};
+
+// Графики строящиеся по осям
+const AXIS = {
+	BAR,
+	BAR_STACKED,
+	COLUMN,
+	COLUMN_STACKED,
+	LINE
+};
+
+// Груговые графики
+const CIRCLE = {
+	DONUT,
+	PIE
+};
+
+const WIDGET_SETS = {
+	AXIS,
+	CIRCLE
+};
+
 export {
+	COMBO_TYPES,
 	LIMIT,
-	WIDGETS_EVENTS
+	WIDGETS_EVENTS,
+	WIDGET_SETS,
+	WIDGET_TYPES
 };
