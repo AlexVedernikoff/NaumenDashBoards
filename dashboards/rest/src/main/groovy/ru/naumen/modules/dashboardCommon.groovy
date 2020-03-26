@@ -45,7 +45,12 @@ enum GroupType
     QUARTER,
     YEAR,
     SEVEN_DAYS,
-    OVERLAP
+    OVERLAP,
+    SECOND_INTERVAL,
+    MINUTE_INTERVAL,
+    HOUR_INTERVAL,
+    DAY_INTERVAL,
+    WEEK_INTERVAL
 }
 
 enum Aggregation
@@ -84,10 +89,13 @@ enum Comparison
     GREATER_OR_EQUAL,
     LESS_OR_EQUAL,
     BETWEEN,
+    IN,
     CONTAINS,
     NOT_CONTAINS,
     NOT_CONTAINS_AND_NOT_NULL,
-    NOT_EQUAL_AND_NOT_NULL
+    NOT_EQUAL_AND_NOT_NULL,
+    EQUAL_REMOVED,
+    NOT_EQUAL_REMOVED
 }
 //endregion
 
@@ -124,19 +132,32 @@ class Attribute
     String sourceName
 
     /**
-     * Функция для вычисления
-     */
-    String stringForCompute
-
-    /**
-     * Данные о переменных для вычисления
-     */
-    Map<String, Object> computeData
-
-    /**
      * Вложенный атрибут
      */
     Attribute ref
+
+    List<Attribute> revelation() {
+        return this.ref ? [this] + this.ref.revelation() : [this]
+    }
+
+    Attribute deepClone() {
+        return new Attribute(
+                code: this.code,
+                title: this.title,
+                type: this.type,
+                property: this.property,
+                metaClassFqn: this.metaClassFqn,
+                sourceName: this.sourceName,
+                ref: this.ref?.deepClone())
+    }
+
+    void addLast(Attribute attribute) {
+        if (this.ref) {
+            this.ref.addLast(attribute)
+        } else {
+            this.ref = attribute
+        }
+    }
 }
 
 class DiagramRequest

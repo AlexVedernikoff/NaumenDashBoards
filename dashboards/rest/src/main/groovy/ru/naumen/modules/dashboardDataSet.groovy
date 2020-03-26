@@ -295,16 +295,9 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         )
         def xAxis = data.xAxis as Map<String, Object>
         def group = data.group as Map<String, Object>
-        def groupParameter = group.way == 'SYSTEM'
-                ? new GroupParameter(title: 'xAxis', type: group.data as GroupType, attribute: mappingAttribute(xAxis))
-                : null
+        def groupParameter = buildSystemGroup(group, xAxis)
         def breakdown = data.breakdown?.with {
-            def breakdownGroup = data.breakdownGroup as Map<String, Object>
-            new GroupParameter(
-                    title: 'breakdown',
-                    type: breakdownGroup.way == 'SYSTEM' ? breakdownGroup.data as GroupType : GroupType.NONE,
-                    attribute: mappingAttribute(it as Map<String, Object>)
-            )
+            buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
         }
         def res = new RequestData(
                 source: source,
@@ -339,98 +332,7 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
-
-    // Первая часть запроса имеется, но не полная
-    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
-        [(key): value.requestData]
-    } as Map<String, RequestData>
-
-    // доводим запрос до совершенства/ шлифуем вычисления
-    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
-        def computeData = map.computeData as Map<String, Object>
-        def req = map.requisite as Requisite
-        def node = req.nodes.head()
-        //по идее на этом этапе у нас только один реквизит и у него одна запись
-        def formula = (node as ComputationRequisiteNode).formula
-        def keys = new FormulaCalculator(formula).variableNames
-        keys.collect { computeData[it] }.each { el ->
-            def comp = el as Map<String, Object>
-            def attribute = comp.attr as Map<String, Object>
-            def aggregationType = comp.aggregation as Aggregation
-            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
-
-            // предполагаем, что агрегация может быть только одна
-            data[dataKey].aggregations = [new AggregationParameter(title: 'yAxis', type: aggregationType, attribute: mappingAttribute(attribute))]
-        }
-        def newFormula = keys.collect { variable ->
-            [variable, (computeData[variable] as Map<String, Object>).dataKey]
-        }.inject(formula) { string, keySet ->
-            def (oldKey, newKey) = keySet
-            string.replace(oldKey as String, newKey as String)
-        }
-        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
-        map.requisite = req
-    }
-
-    // Реквизиты
-    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
-        value.requisite as Requisite
-    }
-
-    // доводим запрос до совершенства/ шлифуем кастомную группировку
-    Map<String, List<List>> splitData = intermediateData
-            .findAll { key, value -> value.customGroup }
-            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
-
-    def groupKeyMap = splitData?.collect { key, list ->
-        def newDataSet = list.collectEntries { el ->
-            def (newKey, dataSet) = el.tail()
-            [(newKey): dataSet]
-        } as Map<String, RequestData>
-        data.remove(key)
-        data.putAll(newDataSet)
-
-        list.collect { el ->
-            def (String groupName, String newKey) = el
-            [groupName, key, newKey]
-        }
-    }
-
-    Closure<RequisiteNode> mappingRequisiteNodes
-    def requisiteNode = requisite.head().nodes.head()
-    String nodeType = requisiteNode.type
-    switch (nodeType)
-    {
-        case 'COMPUTATION':
-            mappingRequisiteNodes = { String group, List<List<String>> list ->
-                String formula = (requisiteNode as ComputationRequisiteNode).formula
-                String newFormula = list.inject(formula) { string, keySet ->
-                    def (oldKey, newKey) = keySet.tail()
-                    string.replace(oldKey as String, newKey as String)
-                }
-                new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
-            }
-            break
-        case 'DEFAULT':
-            mappingRequisiteNodes = { String group, List<List<String>> list ->
-                def key = list.head()[2]
-                new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
-            }
-            break
-        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
-    }
-
-    def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
-        first + second
-    }?.groupBy { it.head() }?.collect { group, list ->
-        mappingRequisiteNodes(group, list)
-    } : null
-
-    newRequisiteNodes?.with {
-        requisite = [new Requisite(title: 'partial', nodes: it)]
-    }
-
-    return new DiagramRequest(requisite: requisite, data: data)
+    return buildDiagramRequest(intermediateData)
 }
 
 /**
@@ -454,9 +356,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
 
         def breakdown = data.breakdown as Map<String, Object>
         def group = data.breakdownGroup as Map<String, Object>
-        def groupParameter = group.way == 'SYSTEM'
-                ? new GroupParameter(title: 'breakdown', type: group.data as GroupType, attribute: mappingAttribute(breakdown))
-                : null
+        def groupParameter = buildSystemGroup(group, breakdown)
 
         def res = new RequestData(
                 source: source,
@@ -491,94 +391,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
-
-    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
-        [(key): value.requestData]
-    } as Map<String, RequestData>
-
-    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
-        def computeData = map.computeData as Map<String, Object>
-        def req = map.requisite as Requisite
-        def node = req.nodes.head()
-        //по идее на этом этапе у нас только один реквизит и у него одна запись
-        def formula = (node as ComputationRequisiteNode).formula
-        def keys = new FormulaCalculator(formula).variableNames
-        keys.collect { computeData[it] }.each { el ->
-            def comp = el as Map<String, Object>
-            def attribute = comp.attr as Map<String, Object>
-            def aggregationType = comp.aggregation as Aggregation
-            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
-
-            // предполагаем, что агрегация может быть только одна
-            data[dataKey].aggregations = [new AggregationParameter(title: 'indicator', type: aggregationType, attribute: mappingAttribute(attribute))]
-        }
-        def newFormula = keys.collect { variable ->
-            [variable, (computeData[variable] as Map<String, Object>).dataKey]
-        }.inject(formula) { string, keySet ->
-            def (oldKey, newKey) = keySet
-            string.replace(oldKey as String, newKey as String)
-        }
-        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
-        map.requisite = req
-    }
-
-    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
-        value.requisite as Requisite
-    }
-
-    Map<String, List<List>> splitData = intermediateData
-            .findAll { key, value -> value.customGroup }
-            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
-
-    def groupKeyMap = splitData?.collect { key, list ->
-        def newDataSet = list.collectEntries { el ->
-            def (newKey, dataSet) = el.tail()
-            [(newKey): dataSet]
-        } as Map<String, RequestData>
-        data.remove(key)
-        data.putAll(newDataSet)
-
-        list.collect { el ->
-            def (String groupName, String newKey) = el
-            [groupName, key, newKey]
-        }
-    }
-
-    Closure<RequisiteNode> mappingRequisiteNodes
-    def requisiteNode = requisite.head().nodes.head()
-    String nodeType = requisiteNode.type
-    switch (nodeType)
-    {
-        case 'COMPUTATION':
-            mappingRequisiteNodes = { String group, List<List<String>> list ->
-                String formula = (requisiteNode as ComputationRequisiteNode).formula
-                String newFormula = list.inject(formula) { string, keySet ->
-                    def (oldKey, newKey) = keySet.tail()
-                    string.replace(oldKey as String, newKey as String)
-                }
-                new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
-            }
-            break
-        case 'DEFAULT':
-            mappingRequisiteNodes = { String group, List<List<String>> list ->
-                def key = list.head()[2]
-                new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
-            }
-            break
-        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
-    }
-
-    def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
-        first + second
-    }?.groupBy { it.head() }?.collect { group, list ->
-        mappingRequisiteNodes(group, list)
-    } : null
-
-    newRequisiteNodes?.with {
-        requisite = [new Requisite(title: 'partial', nodes: it)]
-    }
-
-    return new DiagramRequest(requisite: requisite, data: data)
+    return buildDiagramRequest(intermediateData)
 }
 
 /**
@@ -624,42 +437,7 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite: requisite]]
     } as Map<String, Map>
-
-
-    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
-        [(key): value.requestData]
-    } as Map<String, RequestData>
-
-    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
-        def computeData = map.computeData as Map<String, Object>
-        def req = map.requisite as Requisite
-        def node = req.nodes.head()
-        //по идее на этом этапе у нас только один реквизит и у него одна запись
-        def formula = (node as ComputationRequisiteNode).formula
-        def keys = new FormulaCalculator(formula).variableNames
-        keys.collect { computeData[it] }.each { el ->
-            def comp = el as Map<String, Object>
-            def attribute = comp.attr as Map<String, Object>
-            def aggregationType = comp.aggregation as Aggregation
-            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
-
-            // предполагаем, что агрегация может быть только одна
-            data[dataKey].aggregations = [new AggregationParameter(title: 'indicator', type: aggregationType, attribute: mappingAttribute(attribute))]
-        }
-        def newFormula = keys.collect { variable ->
-            [variable, (computeData[variable] as Map<String, Object>).dataKey]
-        }.inject(formula) { string, keySet ->
-            def (oldKey, newKey) = keySet
-            string.replace(oldKey as String, newKey as String)
-        }
-        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
-        map.requisite = req
-    }
-
-    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
-        value.requisite as Requisite
-    }
-    return new DiagramRequest(requisite: requisite, data: data)
+    return buildDiagramRequest(intermediateData)
 }
 
 /**
@@ -688,11 +466,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
         def breakdown = data.breakdown as Map<String, Object>
         def breakdownGroup = data.breakdownGroup as Map<String, Object>
 
-        def breakdownParameter = breakdownGroup.way == 'SYSTEM' ? new GroupParameter(
-                title: 'breakdown',
-                type: breakdownGroup.data as GroupType,
-                attribute: mappingAttribute(breakdown)
-        ) : null
+        def breakdownParameter = buildSystemGroup(breakdownGroup, breakdown)
 
         def res = new RequestData(
                 source: source,
@@ -727,98 +501,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
-
-    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
-        [(key): value.requestData]
-    } as Map<String, RequestData>
-
-    // доводим запрос до совершенства/ шлифуем вычисления
-    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
-        def computeData = map.computeData as Map<String, Object>
-        def req = map.requisite as Requisite
-        def node = req.nodes.head()
-        //по идее на этом этапе у нас только один реквизит и у него одна запись
-        def formula = (node as ComputationRequisiteNode).formula
-        def keys = new FormulaCalculator(formula).variableNames
-        keys.collect { computeData[it] }.each { el ->
-            def comp = el as Map<String, Object>
-            def attribute = comp.attr as Map<String, Object>
-            def aggregationType = comp.aggregation as Aggregation
-            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
-
-            // предполагаем, что агрегация может быть только одна
-            data[dataKey].aggregations = [new AggregationParameter(title: 'column', type: aggregationType, attribute: mappingAttribute(attribute))]
-        }
-        def newFormula = keys.collect { variable ->
-            [variable, (computeData[variable] as Map<String, Object>).dataKey]
-        }.inject(formula) { string, keySet ->
-            def (oldKey, newKey) = keySet
-            string.replace(oldKey as String, newKey as String)
-        }
-        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
-        map.requisite = req
-    }
-
-    // Реквизиты
-    Collection<Requisite> requisite = intermediateData.findResults { key, value ->
-        value.requisite as Requisite
-    }
-
-    // доводим запрос до совершенства/ шлифуем кастомную группировку
-    Map<String, List<List>> splitData = intermediateData
-            .findAll { key, value -> value.customGroup }
-            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
-
-
-    def groupKeyMap = splitData?.collect { key, list ->
-        def newDataSet = list.collectEntries { el ->
-            def (newKey, dataSet) = el.tail()
-            [(newKey): dataSet]
-        } as Map<String, RequestData>
-        data.remove(key)
-        data.putAll(newDataSet)
-
-        list.collect { el ->
-            def (String groupName, String newKey) = el
-            [groupName, key, newKey]
-        }
-    }
-
-    Closure<RequisiteNode> mappingRequisiteNodes
-    def requisiteNode = requisite.head().nodes.head()
-    String nodeType = requisiteNode.type
-    switch (nodeType)
-    {
-        case 'COMPUTATION':
-            mappingRequisiteNodes = { String group, List<List<String>> list ->
-                String formula = (requisiteNode as ComputationRequisiteNode).formula
-                String newFormula = list.inject(formula) { string, keySet ->
-                    def (oldKey, newKey) = keySet.tail()
-                    string.replace(oldKey as String, newKey as String)
-                }
-                new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
-            }
-            break
-        case 'DEFAULT':
-            mappingRequisiteNodes = { String group, List<List<String>> list ->
-                def key = list.head()[2]
-                new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
-            }
-            break
-        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
-    }
-
-    def newRequisiteNodes = groupKeyMap ? groupKeyMap.inject { first, second ->
-        first + second
-    }?.groupBy { it.head() }?.collect { group, list ->
-        mappingRequisiteNodes(group, list)
-    } : null
-
-    newRequisiteNodes?.with {
-        requisite = [new Requisite(title: 'partial', nodes: it)]
-    }
-
-    return new DiagramRequest(requisite: requisite, data: data)
+    return buildDiagramRequest(intermediateData)
 }
 
 /**
@@ -840,16 +523,10 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         )
         def xAxis = data.xAxis as Map<String, Object>
         def group = data.group as Map<String, Object>
-        def groupParameter = group.way == 'SYSTEM'
-                ? new GroupParameter(title: 'xAxis', type: group.data as GroupType, attribute: mappingAttribute(xAxis))
-                : null
+
+        def groupParameter = buildSystemGroup(group, xAxis)
         def breakdown = data.breakdown?.with {
-            def breakdownGroup = data.breakdownGroup as Map<String, Object>
-            new GroupParameter(
-                    title: 'breakdown',
-                    type: breakdownGroup.way == 'SYSTEM' ? breakdownGroup.data as GroupType : GroupType.NONE,
-                    attribute: mappingAttribute(it as Map<String, Object>)
-            )
+            buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
         }
         def res = new RequestData(
                 source: source,
@@ -872,6 +549,8 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         }
         else
         {
+            //TODO: Важный момент. Названия записей специально заполнены нулами.
+            // На названиях подвязана логика работы с кастомными группировками
             def requisiteNode = comp
                     ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
                     : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
@@ -884,38 +563,50 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
+    return buildDiagramRequest(intermediateData)
+}
 
-    // Первая часть запроса имеется, но не полная
-    Map<String, RequestData> data = intermediateData.collectEntries { key, value ->
-        [(key): value.requestData]
-    } as Map<String, RequestData>
+private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr) {
+    return groupType.way == 'SYSTEM' ? new GroupParameter(
+            title: 'breakdown',
+            type: attr.type == 'dtInterval'
+                    ? getDTIntervalGroupType(groupType.data as String)
+                    : groupType.data as GroupType,
+            attribute: mappingAttribute(attr)
+    ) : null
+}
 
-    // доводим запрос до совершенства/ шлифуем вычисления
-    intermediateData.findAll { key, value -> value.computeData }?.each { key, map ->
-        def computeData = map.computeData as Map<String, Object>
-        def req = map.requisite as Requisite
-        def node = req.nodes.head()
-        //по идее на этом этапе у нас только один реквизит и у него одна запись
-        def formula = (node as ComputationRequisiteNode).formula
-        def keys = new FormulaCalculator(formula).variableNames
-        keys.collect { computeData[it] }.each { el ->
-            def comp = el as Map<String, Object>
-            def attribute = comp.attr as Map<String, Object>
-            def aggregationType = comp.aggregation as Aggregation
-            def dataKey = comp.dataKey as String // этот ключь должен заменить старый в формуле
-
-            // предполагаем, что агрегация может быть только одна
-            data[dataKey].aggregations = [new AggregationParameter(title: 'yAxis', type: aggregationType, attribute: mappingAttribute(attribute))]
-        }
-        def newFormula = keys.collect { variable ->
-            [variable, (computeData[variable] as Map<String, Object>).dataKey]
-        }.inject(formula) { string, keySet ->
-            def (oldKey, newKey) = keySet
-            string.replace(oldKey as String, newKey as String)
-        }
-        req.nodes = [new ComputationRequisiteNode(title: node.title, type: node.type, formula: newFormula)]
-        map.requisite = req
+private GroupType getDTIntervalGroupType(String groupType) {
+    switch (groupType.toLowerCase()) {
+        case 'overlap':
+            return GroupType.OVERLAP
+        case 'second':
+            return GroupType.SECOND_INTERVAL
+        case 'minute':
+            return GroupType.MINUTE_INTERVAL
+        case 'hour':
+            return GroupType.HOUR_INTERVAL
+        case 'day':
+            return GroupType.DAY_INTERVAL
+        case 'week':
+            return GroupType.WEEK_INTERVAL
+        default:
+            throw new IllegalArgumentException("Not supported group type in dateTimeInterval attribute: $groupType")
     }
+}
+
+private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData) {
+    // доводим запрос до совершенства/ шлифуем вычисления
+    Closure getRequestData = { String key -> intermediateData[key].requestData }
+    def computationDataRequest = intermediateData
+            .findResults { key, value -> value.computeData ? value : null }
+            ?.collectEntries(this.&produceComputationData.curry(getRequestData)) ?: [:]
+
+    def defaultDataRequest = intermediateData.findResults { key, map ->
+        map.requisite && !(map.computeData) ? [(key): map.requestData] : null
+    }?.collectEntries() ?: [:]
+
+    def resultRequestData = (defaultDataRequest + computationDataRequest) as Map<String, RequestData>
 
     // Реквизиты
     Collection<Requisite> requisite = intermediateData.findResults { key, value ->
@@ -925,15 +616,15 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
     // доводим запрос до совершенства/ шлифуем кастомную группировку
     Map<String, List<List>> splitData = intermediateData
             .findAll { key, value -> value.customGroup }
-            ?.collectEntries(this.&convertCustomGroup.curry(data.&get))
+            ?.collectEntries(this.&convertCustomGroup.curry(getRequestData))
 
     def groupKeyMap = splitData?.collect { key, list ->
         def newDataSet = list.collectEntries { el ->
             def (newKey, dataSet) = el.tail()
             [(newKey): dataSet]
         } as Map<String, RequestData>
-        data.remove(key)
-        data.putAll(newDataSet)
+        resultRequestData.remove(key)
+        resultRequestData.putAll(newDataSet)
 
         list.collect { el ->
             def (String groupName, String newKey) = el
@@ -977,8 +668,36 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
             }
         }
     }
+    return new DiagramRequest(requisite: requisite, data: resultRequestData)
+}
 
-    return new DiagramRequest(requisite: requisite, data: data)
+private Map<String, RequestData> produceComputationData(Closure getData, Map map) {
+    def computeData = map.computeData as Map<String, Object>
+    // делаем предположение. Если есть вычисление значит реквизиты точно есть
+    def req = map.requisite as Requisite
+    //в записи лежит формула
+    def node = req.nodes.head()
+    //по идее на этом этапе у нас только один реквизит и у него одна запись
+    def formula = (node as ComputationRequisiteNode).formula
+    def variableNames = new FormulaCalculator(formula).variableNames
+
+    variableNames.collectEntries { variableName ->
+        def comp = computeData[variableName] as Map<String, Object>
+
+        def attribute = comp.attr as Map<String, Object>
+        def aggregationType = comp.aggregation as Aggregation
+        def dataKey = comp.dataKey as String // этот ключь указывает на источник вместе с группировками
+
+        def requestData = getData(dataKey) as RequestData
+        def aggregationParameter = new AggregationParameter(
+                title: 'aggregation',
+                type: aggregationType,
+                attribute: mappingAttribute(attribute)
+        )
+        //TODO: в дальнейшем придётся тут обрабатывать ещё и разбивку
+        requestData.aggregations = [aggregationParameter]
+        [(variableName): requestData]
+    }
 }
 
 /**
@@ -1042,25 +761,185 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
             return this.&mappingNumberTypeFilters.curry({ it as double })
         case ['date', 'dateTime']:
             return this.&mappingDateTypeFilters
+        case 'state':
+            return this.&mappingSateTypeFilters
+        case ['boLinks', 'backBOLinks', 'object']:
+            return this.&mappingLinkTypeFilters
+        case ['catalogItem', 'catalogItemSet']:
+            return this.&mappingCatalogItemTypeFilters
+        case 'metaClass':
+            //TODO: тут с этим не так всё просто. В критерии нет поля метакласс
+            throw new IllegalArgumentException("Still not supported attribute type: $type in custom group")
         default:
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
     }
 }
 
+private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> data, Attribute attribute, String title) {
+    return mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        switch (conditionType.toLowerCase()) {
+            case 'empty':
+                return new FilterParameter(value: null, title: title, type: Comparison.IS_NULL, attribute: attribute)
+            case 'not_empty':
+                return new FilterParameter(value: null, title: title, type: Comparison.NOT_NULL, attribute: attribute)
+            case 'contains':
+                String uuid = condition.data.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                long id = uuid.split('\\$', 2)[1] as long
+                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+            case 'not_contains':
+                String uuid = condition.data.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                long id = uuid.split('\\$', 2)[1] as long
+                return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
+            case 'contains_any':
+                def uuidSet = condition.data*.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                def ids = uuidSet.collect { (it as String).split('\\$', 2)[1] as long }
+                return new FilterParameter(value: ids, title: title, type: Comparison.IN, attribute: tempAttribute)
+            case 'title_contains':
+                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(titleAttribute)
+                return new FilterParameter(value: condition.data, title: title, type: Comparison.CONTAINS, attribute: tempAttribute)
+            case 'title_not_contains':
+                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(titleAttribute)
+                return new FilterParameter(value: condition.data, title: title, type: Comparison.NOT_CONTAINS, attribute: tempAttribute)
+            case 'contains_current_object':
+                String uuid = condition.data.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                long ids = uuid.split('\\$', 2)[1] as long
+                return new FilterParameter(value: ids, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+            case 'contains_attr_current_object':
+                def object = api.utils.get(condition.data.uuid)
+                def subjectAttribute = condition.data.attr
+                def value = object[subjectAttribute.code as String] // это может быть как примитив, так и объект
+                String subjectAttributeType = subjectAttribute.type
+                if (subjectAttributeType == attribute.type) {
+                    def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                    def tempAttribute = attribute.deepClone()
+                    tempAttribute.addLast(idAttribute)
+                    String uuid = value.UUID
+                    long id = uuid.split('$',2)[1] as long
+                    return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+                } else {
+                    throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
+                }
+            default:
+                throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
+    }
+}
+
+private List<List<FilterParameter>> mappingLinkTypeFilters(List<List> data, Attribute attribute, String title) {
+    return mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        switch (conditionType.toLowerCase()) {
+            case 'empty':
+                return new FilterParameter(value: null, title: title, type: Comparison.IS_NULL, attribute: attribute)
+            case 'not_empty':
+                return new FilterParameter(value: null, title: title, type: Comparison.NOT_NULL, attribute: attribute)
+            case 'contains':
+                String uuid = condition.data.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                long id = uuid.split('\\$', 2)[1] as long
+                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+            case 'not_contains':
+                String uuid = condition.data.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                long id = uuid.split('\\$', 2)[1] as long
+                return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
+            case 'in':
+                String uuidSet = condition.data*.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                Set<Long> idSet = uuidSet.collect { it.split('\\$', 2)[1] as long }
+                return new FilterParameter(value: idSet, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
+            case 'title_contains':
+                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(titleAttribute)
+                return new FilterParameter(value: condition.data, title: title, type: Comparison.CONTAINS, attribute: tempAttribute)
+            case 'title_not_contains':
+                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(titleAttribute)
+                return new FilterParameter(value: condition.data, title: title, type: Comparison.NOT_CONTAINS, attribute: tempAttribute)
+            case 'contains_including_archival':
+                String uuid = condition.data.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                long id = uuid.split('\\$', 2)[1] as long
+                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL_REMOVED, attribute: tempAttribute)
+            case 'not_contains_including_archival':
+                String uuid = condition.data.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                long id = uuid.split('\\$', 2)[1] as long
+                return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL_REMOVED, attribute: tempAttribute)
+            case ['contains_current_object', 'equal_current_object']:
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                String uuid = condition.data.uuid
+                long id = uuid.split('$',2)[1] as long
+                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+            case 'contains_attr_current_object':
+                def object = api.utils.get(condition.data.uuid)
+                def subjectAttribute = condition.data.attr
+                def value = object[subjectAttribute.code as String] // это может быть как примитив, так и объект
+                String subjectAttributeType = subjectAttribute.type
+                if (subjectAttributeType == attribute.type) {
+                    def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                    def tempAttribute = attribute.deepClone()
+                    tempAttribute.addLast(idAttribute)
+                    String uuid = value.UUID
+                    long id = uuid.split('$',2)[1] as long
+                    return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+                } else {
+                    throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
+                }
+            default:
+                throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
+    }
+}
+
+/**
+ * Метод преодбразований настроек группировки для временных интервалов
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
+ */
 private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title) {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type ->
             def interval = condition.data as Map // тут будет лежать значение временного интервала
-            String intervalType = interval.type
-            long length = interval.value as long
-            new FilterParameter(
-                    //Важный момент. Обязательно извлекать милисекунды, так как критерия не может это сделать сама.
-                    value: api.types.newDateTimeInterval(length, intervalType).toMiliseconds(),
-                    title: title,
-                    type: type,
-                    attribute: attribute
-            )
+            def value = interval
+                    ? api.types.newDateTimeInterval([interval.value as long, interval.type as String]).toMiliseconds()
+                    : null
+            //Важный момент. Обязательно извлекать милисекунды, так как критерия не может это сделать сама.
+            new FilterParameter(value: value, title: title, type: type, attribute: attribute)
         }
         switch (conditionType.toLowerCase()) {
             case 'empty':
@@ -1091,12 +970,7 @@ private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, At
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison type ->
-            new FilterParameter(
-                    value: condition.data,
-                    title: title,
-                    type: type,
-                    attribute: attribute
-            )
+            new FilterParameter(value: condition.data, title: title, type: type, attribute: attribute)
         }
         switch (conditionType.toLowerCase()) {
             case 'contains':
@@ -1166,12 +1040,7 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
     mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
-            return new FilterParameter(
-                    title: title,
-                    type: Comparison.BETWEEN,
-                    attribute: attribute,
-                    value: value
-            )
+            return new FilterParameter(title: title, type: Comparison.BETWEEN, attribute: attribute, value: value)
         }
         switch (conditionType.toLowerCase())
         {
@@ -1238,6 +1107,41 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
     }
 }
 
+private List<List<FilterParameter>> mappingSateTypeFilters(List<List> data, Attribute attribute, String title) {
+    mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
+            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
+        }
+        switch (conditionType.toLowerCase()) {
+            case 'contains':
+                return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data.uuid)
+            case 'not_contains':
+                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, attribute, condition.data.uuid)
+            case 'contains_any':
+                return buildFilterParameterFromCondition(Comparison.IN, attribute, condition.data.uuid)
+            case 'title_contains':
+                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(titleAttribute)
+                return buildFilterParameterFromCondition(Comparison.CONTAINS, tempAttribute, condition.data)
+            case 'title_not_contains':
+                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(titleAttribute)
+                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, tempAttribute, condition.data)
+            case 'equal_subject_attribute':
+                def object = api.utils.get(condition.data.uuid)
+                if (!object.keySet().find('state'.&equals))
+                    throw new IllegalArgumentException("object ${condition.data} not contain attribute: 'state'")
+                return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, object.state)
+            case 'equal_attr_current_object':
+                throw new IllegalArgumentException("Not supported condition type: $conditionType")
+            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
+    }
+}
+
 /**
  * Метод обхода настроек пользовательской группировки
  * @param data - настройки пользовательской группировки
@@ -1259,6 +1163,7 @@ private List<List<FilterParameter>> mappingFilter(List<List> data, Closure<Filte
  */
 private def getDiagramData(DiagramRequest request)
 {
+    //TODO: уже сверхкостыльно получается. Нужно придумать решение по лучше
     assert request: "Empty request!"
     return request.requisite.collect { requisite ->
         def result = requisite.nodes.collectEntries { node ->
@@ -1318,8 +1223,8 @@ private boolean checkGroupTypes(Collection<RequestData> listRequest)
  */
 private Collection<Collection<String>> findUniqueGroups(def variables)
 { // работает только с методами которые имеют группировки. В противном случае бросает исключение
-    return variables.values().collect {
-        it.transpose()?.tail()?.transpose() ?: []
+    return variables.values().collect { el ->
+        el ? el.transpose().tail().transpose() : []
     }.inject([]) { first, second ->
         first + second
     }.unique() as Collection<Collection<String>>
@@ -1354,16 +1259,16 @@ private List formatGroupSet(RequestData data, List list)
             return list
         case 1:
             return list.collect { el ->
-                def (value, group) = el
+                def (value, String group) = el
                 Closure formatGroup = this.&formatGroup.curry(data.groups[0], data.source.classFqn)
-                [value, formatGroup(group as String)]
+                [value, formatGroup(group)]
             }
         case 2:
             return list.collect { el ->
-                def (value, group, breakdown) = el
+                def (value, String group, String breakdown) = el
                 Closure formatGroup = this.&formatGroup.curry(data.groups[0] as GroupParameter, data.source.classFqn)
                 Closure formatBreakdown = this.&formatGroup.curry(data.groups[1] as GroupParameter, data.source.classFqn)
-                [value, formatGroup(group as String), formatBreakdown(breakdown as String)]
+                [value, formatGroup(group), formatBreakdown(breakdown)]
             }
     }
 }
@@ -1562,8 +1467,8 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
 private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map secondAdditionalData)
 {
     def (firstResultDataSet, secondResultDataSet) = list
-    def firstTransposeDataSet = (firstResultDataSet as List<List>).transpose()
-    def secondTransposeDataSet = (secondResultDataSet as List<List>).transpose()
+    def firstTransposeDataSet = (firstResultDataSet as List<List>)?.transpose()?:[]
+    def secondTransposeDataSet = (secondResultDataSet as List<List>)?.transpose()?:[]
 
     if (firstTransposeDataSet.size() != secondTransposeDataSet.size())
         throw new IllegalArgumentException('Invalid format result data set')
