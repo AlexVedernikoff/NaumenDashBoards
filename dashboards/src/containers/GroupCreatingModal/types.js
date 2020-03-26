@@ -7,19 +7,21 @@ import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
 
-export type AttributeGroupProps = {
+export type AttributeGroupProps = {|
 	attribute: Attribute,
 	customGroups: Array<CustomGroup>,
 	renderModal: (attrCustomProps: AttrCustomProps, attrSystemProps?: AttrSystemProps) => Node
-};
+|};
 
 export type ConnectedProps = {|
 	customGroups: Array<CustomGroup>,
 	widgets: Array<Widget>
 |};
 
+type onCreateCallback = (id: string) => void;
+
 export type ConnectedFunctions = {|
-	createCustomGroup: (group: CustomGroup) => ThunkAction,
+	createCustomGroup: (group: CustomGroup, callback: onCreateCallback) => ThunkAction,
 	deleteCustomGroup: (id: string) => ThunkAction,
 	updateCustomGroup: (group: CustomGroup, remote?: boolean) => ThunkAction
 |};
@@ -31,8 +33,8 @@ export type ModalProps = {|
 	onSubmit: (value: Group, attributeTitle: string) => void
 |};
 
-export type Props = {
+export type Props = {|
 	...ModalProps,
 	...ConnectedProps,
 	...ConnectedFunctions
-};
+|};

@@ -1,10 +1,10 @@
 // @flow
 import {CustomGroup, SystemGroup} from './components';
 import type {CustomGroupRef, Props, State, SystemGroupRef} from './types';
+import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS, TYPE_OPTIONS} from './constants';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {Group} from 'store/widgets/data/types';
-import {GROUP_WAYS} from 'store/widgets/constants';
 import {MaterialTextInput, RadioButton} from 'components/atoms';
 import {Modal} from 'components/molecules';
 import React, {Component, createRef} from 'react';
@@ -12,6 +12,13 @@ import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import styles from './styles.less';
 
 export class GroupCreatingModal extends Component<Props, State> {
+	static defaultProps = {
+		attrSystemProps: {
+			defaultValue: DEFAULT_SYSTEM_GROUP.OVERLAP,
+			options: []
+		}
+	};
+
 	state = {
 		attributeTitle: '',
 		way: GROUP_WAYS.SYSTEM

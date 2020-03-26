@@ -321,6 +321,7 @@ export class DataFormBuilder extends FormBuilder {
 		const {computedAttrs} = values;
 		const set = this.getSet(index);
 		const source = set[FIELDS.source];
+		const key = `${name}.${index}`;
 		let onClick;
 		let refAttributeData;
 
@@ -330,7 +331,7 @@ export class DataFormBuilder extends FormBuilder {
 		}
 
 		return (
-			<div className={styles.field} key={name} onClick={onClick} ref={this.setInputRef(name)}>
+			<div className={styles.field} key={key} onClick={onClick} ref={this.setInputRef(name)}>
 				<Attribute
 					computedAttrs={computedAttrs}
 					getAttributeOptions={this.getAttributeOptions}

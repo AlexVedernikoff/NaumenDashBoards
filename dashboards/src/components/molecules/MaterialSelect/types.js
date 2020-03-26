@@ -6,17 +6,20 @@ export type Option = Object;
 type Name = any;
 
 export type Props = {
+	async: boolean,
 	focusOnSearch: boolean,
 	forwardedLabelInputRef?: InputRef,
 	getOptionLabel?: (option: Option) => string,
 	getOptionValue?: (option: Option) => any,
 	isEditingLabel: boolean,
 	isSearching: boolean,
+	loading: boolean,
 	multiple: boolean,
 	name: Name,
 	onChangeLabel?: (name: Name, label: string) => void,
 	onClear?: () => void,
 	onClickCreationButton?: () => void,
+	onLoadOptions?: () => void,
 	onRemove?: (value: string) => void,
 	onSelect: (name: Name, value: Option) => void,
 	options: Array<Option>,
@@ -28,5 +31,6 @@ export type Props = {
 };
 
 export type State = {
+	optionsLoaded: boolean,
 	showMenu: boolean
 };

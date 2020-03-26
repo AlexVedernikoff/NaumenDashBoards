@@ -8,9 +8,11 @@ import styles from './styles.less';
 
 export class MaterialSelect extends PureComponent<Props, State> {
 	static defaultProps = {
+		async: false,
 		focusOnSearch: false,
 		isEditingLabel: false,
 		isSearching: false,
+		loading: false,
 		multiple: false,
 		name: '',
 		placeholder: 'Выберите значение',
@@ -22,6 +24,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 	};
 
 	state = {
+		optionsLoaded: false,
 		showMenu: false
 	};
 
@@ -63,7 +66,17 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		onClickCreationButton && onClickCreationButton();
 	};
 
-	handleClickValue = () => this.setState({showMenu: !this.state.showMenu});
+	handleClickValue = () => {
+		const {async, onLoadOptions, options} = this.props;
+		const {optionsLoaded, showMenu} = this.state;
+
+		if (async && !optionsLoaded && options.length === 0 && onLoadOptions) {
+			this.setState({optionsLoaded: true});
+			onLoadOptions();
+		}
+
+		this.setState({showMenu: !showMenu});
+	};
 
 	handleSelect = (value: Option) => {
 		const {multiple, name, onSelect} = this.props;
