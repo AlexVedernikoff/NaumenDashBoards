@@ -17,6 +17,7 @@ import groovy.transform.TupleConstructor
 import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
+//TODO: хорошему нужно разделить на несколько пространств для настроек: виджетов, кастомных группировок, дашбордов
 @Field private static final String NAMESPACE = 'dashboards'
 @Field private static final String GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
 @Field private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
@@ -172,7 +173,7 @@ String saveCustomGroup(Map<String, Object> requestContent, def user) {
     String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
 
     String keyCustomGroup = UUID.nameUUIDFromBytes(toJson(group).bytes)
-    String jsonCustomGroup = toJson([id: keyCustomGroup] + group)
+    String jsonCustomGroup = toJson(group + [id: keyCustomGroup])
 
     if (!saveJsonSettings(keyCustomGroup, jsonCustomGroup)) throw new Exception("Custom group settings not saved!")
 
@@ -202,6 +203,7 @@ String updateCustomGroup(Map<String, Object> requestContent, def user) {
     boolean isPersonal = requestContent.isPersonal
     def group = requestContent.group
     if (isPersonal && !(user.login)) throw new Exception("Login is null, not found personal dashboard")
+    if (!group) throw new IllegalArgumentException("Group settings is null!")
 
     String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
     String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)

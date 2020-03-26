@@ -28,7 +28,7 @@ class QueryWrapper
     private final static NUMBER_TYPES = ['integer', 'double']
     private final static DATE_TYPES = ['date', 'dateTime']
     private final static LINK_TYPES = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
-    private final static SIMPLE_TYPES = ['date', 'dateTime', 'string', 'integer', 'double', 'state']
+    private final static SIMPLE_TYPES = ['date', 'dateTime', 'string', 'integer', 'double', 'state'] //TODO: расширить набор типов
     private final static DATE_TIME_INTERVAL = 'dtInterval'
     private final static LOCALIZED_TEXT = 'localizedText'
 
@@ -40,7 +40,7 @@ class QueryWrapper
         criteria = buildCriteria(data.source)
         data.aggregations.each { aggregation(it as AggregationParameter) }
         data.groups.each { grouping(it as GroupParameter) }
-        data.filters?.with(this.&filtering)
+        data.filters ? filtering(data.filters) : filteringRemoved()
     }
 
     /**
@@ -112,7 +112,7 @@ class QueryWrapper
                 break
             case GroupType.SEVEN_DAYS:
                 HCriteria cteSource = buildCriteria(data.source)
-                HColumn cteColumn = revelation(parameter.attribute)
+                HColumn cteColumn = parameter.attribute.revelation()
                         .inject(cteSource, this.&addAttributeInCriteria) as HColumn
                 cteSource.addColumn("MIN(CAST($cteColumn AS timestamp))", 'cteMinDate')
                 HCriteria cteCriteria = criteria.addCTESource(cteSource)
@@ -134,8 +134,52 @@ class QueryWrapper
                 criteria.addOrder(HOrders.asc(columnCode))
                 criteria.addColumn(columnCode)
                 break
+            case GroupType.SECOND_INTERVAL:
+                def secondInterval = 1000
+                def code = columnCode.with { "$it/$secondInterval" }
+                criteria.add(HRestrictions.isNotNull(columnCode))
+                criteria.addGroupColumn(code)
+                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
+                criteria.addColumn(code)
+                break
+            case GroupType.MINUTE_INTERVAL:
+                def minuteInterval = 1000 * 60
+                def code = columnCode.with { "$it/$minuteInterval" }
+                criteria.add(HRestrictions.isNotNull(columnCode))
+                criteria.addGroupColumn(code)
+                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
+                criteria.addColumn(code)
+                break
+            case GroupType.HOUR_INTERVAL:
+                def hourInterval = 1000 * 60 * 60
+                def code = columnCode.with { "$it/$hourInterval" }
+                criteria.add(HRestrictions.isNotNull(columnCode))
+                criteria.addGroupColumn(code)
+                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
+                criteria.addColumn(code)
+                break
+            case GroupType.DAY_INTERVAL:
+                def dayInterval = 1000 * 60 * 60 * 24
+                def code = columnCode.with { "$it/$dayInterval" }
+                criteria.add(HRestrictions.isNotNull(columnCode))
+                criteria.addGroupColumn(code)
+                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
+                criteria.addColumn(code)
+                break
+            case GroupType.WEEK_INTERVAL:
+                def weekInterval = 1000 * 60 * 60 * 24 * 7
+                def code = columnCode.with { "$it/$weekInterval" }
+                criteria.add(HRestrictions.isNotNull(columnCode))
+                criteria.addGroupColumn(code)
+                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
+                criteria.addColumn(code)
+                break
             default: throw new IllegalArgumentException("Not support grouping type: $type")
         }
+    }
+
+    private void filteringRemoved() {
+        HRestrictions.eq(criteria.getProperty('removed'), false).with(criteria.&add)
     }
 
     /**
@@ -166,37 +210,89 @@ class QueryWrapper
     {
         HColumn column = getCriteriaColumnCode(filter.attribute)
         def type = filter.type as Comparison
+        def removedFalse = HRestrictions.eq(criteria.getProperty('removed'), false)
         switch (type)
         {
             case Comparison.IS_NULL:
-                return HRestrictions.isNull(column)
+                def condition = HRestrictions.isNull(column)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.NOT_NULL:
-                return HRestrictions.isNotNull(column)
+                def condition = HRestrictions.isNotNull(column)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.NOT_EQUAL_AND_NOT_NULL:
-                return HRestrictions.with { not(eqNullSafe(column, filter.value)) }
+                def condition = HRestrictions.eqNullSafe(column, filter.value).with(HRestrictions.&not)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.EQUAL:
-                return HRestrictions.eq(column, filter.value)
+                def condition = HRestrictions.eq(column, filter.value)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.NOT_EQUAL:
-                return HRestrictions.ne(column, filter.value)
+                def condition = HRestrictions.ne(column, filter.value)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.GREATER:
-                return HRestrictions.gt(column, filter.value)
+                def condition = HRestrictions.gt(column, filter.value)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.LESS:
-                return HRestrictions.lt(column, filter.value)
+                def condition = HRestrictions.lt(column, filter.value)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.GREATER_OR_EQUAL:
-                return HRestrictions.ge(column, filter.value)
+                def condition = HRestrictions.ge(column, filter.value)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.LESS_OR_EQUAL:
-                return HRestrictions.le(column, filter.value)
+                def condition = HRestrictions.le(column, filter.value)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.BETWEEN:
                 def (first, second) = filter.value
-                return HRestrictions.between(column, first, second)
+                def condition = HRestrictions.between(column, first, second)
+                return HRestrictions.and(condition, removedFalse)
+            case Comparison.IN:
+                def condition = HRestrictions.in(column, filter.value as Collection)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.CONTAINS:
-                return HRestrictions.like(column, filter.value)
+                def condition = HRestrictions.like(column, filter.value.with { "%$it%" })
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.NOT_CONTAINS:
-                return HRestrictions.with { not(like(column, filter.value)) }
+                def condition = HRestrictions.like(column, filter.value.with { "%$it%" }).with(HRestrictions.&not)
+                return HRestrictions.and(condition, removedFalse)
             case Comparison.NOT_CONTAINS_AND_NOT_NULL:
-                return HRestrictions.with { and(isNotNull(column), not(like(column, filter.value)))}
+                def notNull = HRestrictions.isNotNull(column)
+                def condition = HRestrictions.like(column, filter.value.with { "%$it%" }).with(HRestrictions.&not)
+                return HRestrictions.and(condition, notNull, removedFalse)
+            case Comparison.EQUAL_REMOVED:
+                return HRestrictions.eq(column, filter.value)
+            case Comparison.NOT_EQUAL_REMOVED:
+                return HRestrictions.ne(column, filter.value)
             default: throw new IllegalArgumentException("Not supported filter type: $type!")
         }
+    }
+
+    /**
+     * Метод получения количества количества записей в БД.
+     * @return количество записей в БД.
+     */
+    private int getTotalCount()
+    {
+        return data.with {
+            Attribute[] attributes = groups*.attribute + aggregations.attribute
+            buildTotalCriteria(source, attributes).with(this.&execute).head()
+        }
+    }
+
+    /**
+     * Создание запроса на получения общего количества записей.
+     * @param source - источник
+     * @param attributes - атрибут по ктоторому отфильтровываются пустые значения
+     * @return HCriteria
+     */
+    private HCriteria buildTotalCriteria(Source source, Attribute... attributes)
+    {
+        HCriteria totalCriteria = buildCriteria(source)
+        attributes.each { attribute ->
+            (attribute.revelation().inject(totalCriteria, this.&addAttributeInCriteria) as String)
+                    .with(HHelper.&getColumn)
+                    .with(HRestrictions.&isNotNull)
+                    .with(totalCriteria.&add)
+        }
+        return totalCriteria.addColumn(Aggregation.COUNT_CNT.apply(totalCriteria.getAlias() as String))
     }
 
     /**
@@ -207,7 +303,7 @@ class QueryWrapper
     private HColumn getCriteriaColumnCode(Attribute attribute)
     {
         assert attribute: "Empty attribute"
-        return revelation(attribute).inject(criteria, this.&addAttributeInCriteria)
+        return attribute.revelation().inject(criteria, this.&addAttributeInCriteria)
     }
 
     /**
@@ -238,58 +334,16 @@ class QueryWrapper
     }
 
     /**
-     * Метод получения количества количества записей в БД.
-     * @return количество записей в БД.
-     */
-    private int getTotalCount()
-    {
-        return data.with {
-            Attribute[] attributes = groups*.attribute + aggregations.attribute
-            buildTotalCriteria(source, attributes).with(this.&execute).head()
-        }
-    }
-
-    /**
-     * Создание запроса на получения общего количества записей.
-     * @param source - источник
-     * @param attributes - атрибут по ктоторому отфильтровываются пустые значения
-     * @return HCriteria
-     */
-    private HCriteria buildTotalCriteria(Source source, Attribute... attributes)
-    {
-        return attributes.grep().inject(buildCriteria(source) as HCriteria)
-        { criteria, attribute ->
-            getColumnCode(criteria, attribute)
-                    .with(HHelper.&getColumn)
-                    .with(HRestrictions.&isNotNull)
-                    .with(criteria.&add)
-        }.with { criteria ->
-            criteria.addColumn(Aggregation.COUNT_CNT.apply(criteria.getAlias() as String))
-        }
-    }
-
-    /**
-     * Метод преобрадования вложенностей атрибута в список
-     * @param attribute - атрибут
-     * @return список вложеных атрибутов.
-     */
-    private static List<Attribute> revelation(Attribute attribute)
-    {
-        //TODO: метод стоит перенести в класс Attribute
-        return attribute ? [attribute] + revelation(attribute.ref) : []
-    }
-
-    /**
      * Метод создания критерии по источнику даных
      * @param source - источник данных
      * @return HCriteria
      */
     private HCriteria buildCriteria(Source source)
     {
-        HCriteria criteria = source.descriptor
-                ?.with(api.listdata.&createListDescriptor)
-                ?.with(api.listdata.&createCriteria)
-                ?: HHelper.create().addSource(source.classFqn)
+        HCriteria criteria = source.descriptor ? source.descriptor
+                .with(api.listdata.&createListDescriptor)
+                .with(api.listdata.&createCriteria)
+                : HHelper.create().addSource(source.classFqn)
         criteria.getOrders().clear()
         return criteria
     }
@@ -364,7 +418,9 @@ class QueryWrapper
     private static def validate(GroupParameter parameter)
     {
         GroupType type = parameter.type
-        String attributeType = parameter.attribute.type
+        //Смотрим на тип последнего вложенного атрибута
+        String attributeType = parameter.attribute.revelation().last().type
+
         if (type in GroupType.values() - GroupType.OVERLAP && !(attributeType in DATE_TYPES))
             throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
     }
