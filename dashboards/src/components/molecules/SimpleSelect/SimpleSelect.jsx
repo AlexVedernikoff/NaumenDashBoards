@@ -11,7 +11,8 @@ export class SimpleSelect extends PureComponent<Props, State> {
 		defaultValue: {
 			label: 'Выберите значение',
 			value: ''
-		}
+		},
+		value: null
 	};
 
 	state = {
