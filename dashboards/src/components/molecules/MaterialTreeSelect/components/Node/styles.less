@@ -1,0 +1,68 @@
+@import '/styles/variables';
+
+:local {
+	@height: 32px;
+
+	.foundNode {
+		font-weight: bold;
+	}
+
+	.loader {
+		height: 16px;
+		padding: 8px;
+		width: 16px;
+	}
+
+	.toggleIcon {
+		align-items: center;
+		color: @grey;
+		display: flex;
+		height: @height;
+		padding: 8px;
+	}
+
+	.invisibleToggleIcon {
+		pointer-events: none;
+		visibility: hidden;
+	}
+
+	.labelContainer {
+		align-items: center;
+		cursor: pointer;
+		display: flex;
+		height: @height;
+		text-align: center;
+		white-space: nowrap;
+
+		&:hover {
+			background-color: @gainsboro;
+		}
+	}
+
+	.selectedNode {
+		background-color: @silver;
+		border-top: 1px solid white;
+		border-bottom: 1px solid white;
+
+		&:hover {
+			background-color: @silver;
+		}
+	}
+
+	.label {
+		align-items: center;
+		color: @black;
+		display: flex;
+		flex: auto;
+		height: 100%;
+		text-align: left;
+	}
+
+	.childrenContainer {
+		margin-left: 8px;
+	}
+
+	.showMoreButton {
+		margin: 4px;
+	}
+}

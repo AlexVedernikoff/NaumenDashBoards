@@ -101,6 +101,8 @@ export class GroupCreatingModal extends Component<Props, State> {
 		this.setState({attributeTitle});
 	};
 
+	handleChangeWay = ({value: way}: Object) => this.setState({way});
+
 	handleCloseSaveInfo = () => this.setState({showSaveInfo: false});
 
 	handleCreateCustomGroup = () => {
@@ -330,7 +332,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 					checked={checked}
 					label={label}
 					name={FIELDS.way}
-					onChange={this.handleChange}
+					onChange={this.handleChangeWay}
 					value={value}
 				/>
 			</div>

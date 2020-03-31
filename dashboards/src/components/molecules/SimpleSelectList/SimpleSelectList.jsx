@@ -97,9 +97,7 @@ export class SimpleSelectList extends PureComponent<Props> {
 
 		if (showMore) {
 			return (
-				<div className={styles.showMoreContainer}>
-					<Button onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>Показать еще</Button>
-				</div>
+				<Button className={styles.showMoreButton} onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>Показать еще</Button>
 			);
 		}
 	};

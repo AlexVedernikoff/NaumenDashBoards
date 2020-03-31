@@ -1,6 +1,6 @@
 // @flow
 import type {Data} from 'store/sources/attributesData/types';
-import {MaterialMultiSelect} from 'components/molecules';
+import {MaterialSelect} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 
@@ -40,7 +40,7 @@ export class MultiSelectOperand extends PureComponent<Props> {
 		const {onClickShowMore, operand, options, showMore} = this.props;
 
 		return (
-			<MaterialMultiSelect
+			<MaterialSelect
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
 				onClear={this.handleClear}

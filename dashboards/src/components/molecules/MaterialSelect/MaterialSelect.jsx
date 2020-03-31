@@ -1,6 +1,5 @@
 // @flow
-import {ChevronDownIcon} from 'icons/form';
-import cn from 'classnames';
+import {MultiValueContainer, ValueContainer} from './components';
 import type {Option, Props, State} from './types';
 import {OutsideClickDetector} from 'components/atoms';
 import React, {PureComponent} from 'react';
@@ -9,13 +8,17 @@ import styles from './styles.less';
 
 export class MaterialSelect extends PureComponent<Props, State> {
 	static defaultProps = {
+		focusOnSearch: false,
 		isEditingLabel: false,
 		isSearching: false,
+		multiple: false,
 		name: '',
 		placeholder: 'Выберите значение',
 		showCreationButton: false,
 		showMore: false,
-		textCreationButton: 'Создать'
+		textCreationButton: 'Создать',
+		value: null,
+		values: []
 	};
 
 	state = {
@@ -24,12 +27,24 @@ export class MaterialSelect extends PureComponent<Props, State> {
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
-		return getOptionLabel ? getOptionLabel(option) : option.label;
+		let label = '';
+
+		if (option) {
+			label = getOptionLabel ? getOptionLabel(option) : option.label;
+		}
+
+		return label;
 	};
 
 	getOptionValue = (option: Object) => {
 		const {getOptionValue} = this.props;
-		return getOptionValue ? getOptionValue(option) : option.value;
+		let value = '';
+
+		if (option) {
+			value = getOptionValue ? getOptionValue(option) : option.value;
+		}
+
+		return value;
 	};
 
 	handleChangeLabel = (e: SyntheticInputEvent<HTMLInputElement>) => {
@@ -51,27 +66,29 @@ export class MaterialSelect extends PureComponent<Props, State> {
 	handleClickValue = () => this.setState({showMenu: !this.state.showMenu});
 
 	handleSelect = (value: Option) => {
-		const {name, onSelect} = this.props;
+		const {multiple, name, onSelect} = this.props;
 
-		this.setState({showMenu: false});
+		if (!multiple) {
+			this.setState({showMenu: false});
+		}
+
 		onSelect(name, value);
 	};
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderCaret = () => <ChevronDownIcon className={styles.caret} />;
-
 	renderMenu = () => {
 		const {
+			focusOnSearch,
 			getOptionLabel,
 			getOptionValue,
 			isSearching,
-			onClickShowMore,
+			multiple,
 			options,
 			showCreationButton,
-			showMore,
 			textCreationButton,
-			value
+			value,
+			values
 		} = this.props;
 		const {showMenu} = this.state;
 		let creationButton;
@@ -86,63 +103,57 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		if (showMenu) {
 			return (
 				<SimpleSelectMenu
+					className={styles.menu}
 					creationButton={creationButton}
+					focusOnSearch={focusOnSearch}
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
 					isSearching={isSearching}
-					onClickShowMore={onClickShowMore}
+					multiple={multiple}
 					onClose={this.hideMenu}
 					onSelect={this.handleSelect}
 					options={options}
-					showMore={showMore}
 					value={value}
+					values={values}
 				/>
 			);
 		}
 	};
 
-	renderPlaceholder = () => {
-		const {placeholder, value} = this.props;
-
-		if (value && placeholder && this.getOptionLabel(value)) {
-			return <div className={styles.placeholder}>{placeholder}</div>;
-		}
-	};
-
-	renderValue = () => {
-		const {isEditingLabel, placeholder, value} = this.props;
-		const label = value ? this.getOptionLabel(value) : '';
-		const inputCN = cn({
-			[styles.input]: true,
-			[styles.editableInput]: isEditingLabel
-		});
+	renderMultiValueContainer = () => {
+		const {onClear, onRemove, values} = this.props;
 
 		return (
-			<input
-				className={inputCN}
-				onChange={this.handleChangeLabel}
-				placeholder={placeholder}
-				readOnly={!isEditingLabel}
-				value={label}
+			<MultiValueContainer
+				getOptionLabel={this.getOptionLabel}
+				getOptionValue={this.getOptionValue}
+				onClear={onClear}
+				onClick={this.handleClickValue}
+				onRemove={onRemove}
+				values={values}
 			/>
 		);
 	};
 
-	renderValueContainer = () => {
-		const {isEditingLabel} = this.props;
-		const containerCN = cn({
-			[styles.valueContainer]: true,
-			[styles.editableValueContainer]: isEditingLabel
-		});
+	renderSimpleValueContainer = () => {
+		const {forwardedLabelInputRef, isEditingLabel, placeholder, value} = this.props;
 
 		return (
-			<div className={containerCN} onClick={this.handleClickValue}>
-				{this.renderPlaceholder()}
-				{this.renderValue()}
-				{this.renderCaret()}
-			</div>
+			<ValueContainer
+				editableLabel={isEditingLabel}
+				forwardedInputRef={forwardedLabelInputRef}
+				getOptionLabel={this.getOptionLabel}
+				getOptionValue={this.getOptionValue}
+				label={this.getOptionLabel(value)}
+				onChangeLabel={this.handleChangeLabel}
+				onClick={this.handleClickValue}
+				placeholder={placeholder}
+				value={value}
+			/>
 		);
 	};
+
+	renderValueContainer = () => this.props.multiple ? this.renderMultiValueContainer() : this.renderSimpleValueContainer();
 
 	render () {
 		return (

@@ -5,7 +5,9 @@ type CreationButton = {
 };
 
 export type Props = {
+	className: string,
 	creationButton?: CreationButton,
+	focusOnSearch: boolean,
 	getOptionLabel?: (option: Object) => string,
 	getOptionValue?: (option: Object) => string,
 	isSearching: boolean,

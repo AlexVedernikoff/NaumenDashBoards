@@ -8,6 +8,8 @@ import styles from './styles.less';
 
 export class SimpleSelectMenu extends PureComponent<Props, State> {
 	static defaultProps = {
+		className: '',
+		focusOnSearch: true,
 		isSearching: false,
 		multiple: false,
 		showMore: false,
@@ -23,8 +25,12 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
+		const {focusOnSearch} = this.props;
 		const {current} = this.searchInputRef;
-		current && current.focus();
+
+		if (focusOnSearch && current) {
+			current.focus();
+		}
 	}
 
 	getOptionLabel = (option: Object) => {
@@ -103,8 +109,11 @@ export class SimpleSelectMenu extends PureComponent<Props, State> {
 	};
 
 	render () {
+		const {className} = this.props;
+		const menuCN = className || styles.menu;
+
 		return (
-			<div className={styles.menu}>
+			<div className={menuCN}>
 				{this.renderSearchInput()}
 				{this.renderList()}
 				{this.renderCreationPanel()}

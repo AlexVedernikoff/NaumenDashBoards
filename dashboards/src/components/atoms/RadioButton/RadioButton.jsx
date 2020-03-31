@@ -4,9 +4,13 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class RadioButton extends PureComponent<Props> {
+	static defaultProps = {
+		name: ''
+	};
+
 	handleClick = () => {
 		const {name, onChange, value} = this.props;
-		onChange(name, value);
+		onChange({name, value});
 	};
 
 	render () {
