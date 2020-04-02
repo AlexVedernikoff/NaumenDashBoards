@@ -105,7 +105,7 @@ const getComboChartRules = () => {
 
 	return {
 		data: array().of(object({
-			[breakdown]: conditionalComputeRule(breakdown),
+			[breakdown]: conditionalBreakdownRule,
 			[source]: object().required(getErrorMessage(source)).nullable(),
 			[xAxis]: requiredAttributeRule(getErrorMessage(xAxis)),
 			[yAxis]: conditionalComputeRule(yAxis)

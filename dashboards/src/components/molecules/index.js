@@ -9,12 +9,13 @@ import ColorPalette from './ColorPalette';
 import ColorPicker from './ColorPicker';
 import ComputedAttributeEditor from './ComputedAttributeEditor';
 import ConstantControl from './ConstantControl';
-import CustomGroup from './CustomGroup';
 import Datepicker from './Datepicker';
 import Diagram from './Diagram';
 import GroupCreatingModal from './GroupCreatingModal';
 import InputForm from './InputForm';
 import MaterialSelect from './MaterialSelect';
+import MaterialSimpleTreeSelect from './MaterialSimpleTreeSelect';
+import MaterialTreeSelect from './MaterialTreeSelect';
 import MiniSelect from './MiniSelect';
 import Modal from './Modal';
 import OperatorControl from './OperatorControl';
@@ -40,12 +41,13 @@ export {
 	ColorPicker,
 	ComputedAttributeEditor,
 	ConstantControl,
-	CustomGroup,
 	Datepicker,
 	Diagram,
 	GroupCreatingModal,
 	InputForm,
 	MaterialSelect,
+	MaterialSimpleTreeSelect,
+	MaterialTreeSelect,
 	MiniSelect,
 	Modal,
 	OperatorControl,
