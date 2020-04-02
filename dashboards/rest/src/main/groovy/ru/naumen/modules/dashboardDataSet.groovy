@@ -184,15 +184,17 @@ class SeriesCombo
 /**
  * Метод получения данных для нескольких диаграмм
  * @param requestContent - тело запроса
+ * @param cardObjectUuid - идентификатор "текущего объекта"
  * @return ассоциативный массив из ключа виджета и данных диаграммы
  */
 String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectUuid)
 {
+    //TODO: прокинуть uuid внутрь метода
     return requestContent.collectEntries { key, value ->
         api.tx.call {
             try
             {
-                return [(key): buildDiagram(transformRequest(value as Map<String, Object>, cardObjectUuid))]
+                return [(key): buildDiagram(transformRequest(value as Map<String, Object>, cardObjectUuid), cardObjectUuid)]
             }
             catch (Exception ex)
             {
@@ -206,6 +208,7 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
 /**
  * Получение данных для диаграмм. Нужен для обратной совместимости.
  * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
+ * @param cardObjectUuid - идентификатор "текущего объекта"
  * @return данные для построения диаграммы
  */
 @Deprecated
@@ -217,12 +220,13 @@ String getDataForCompositeDiagram(Map<String, Object> requestContent, String car
 /**
  * Получение данных для диаграмм. С поддержкой вычислений.
  * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
+ * @param cardObjectUuid - идентификатор "текущего объекта"
  * @return данные для построения диаграммы
  */
 String getDataForDiagram(Map<String, Object> requestContent, String cardObjectUuid)
 {
     return api.tx.call {
-        buildDiagram(transformRequest(requestContent, cardObjectUuid))
+        buildDiagram(transformRequest(requestContent, cardObjectUuid), cardObjectUuid)
     }.with(JsonOutput.&toJson)
 }
 //endregion
@@ -231,34 +235,35 @@ String getDataForDiagram(Map<String, Object> requestContent, String cardObjectUu
 /**
  * Метод построения диаграмм.
  * @param requestContent - запрос на построение диаграмы
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return Типизированниые данные для построения диаграмм
  */
-private def buildDiagram(Map<String, Object> requestContent)
+private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
 {
     def diagramType = requestContent.type as DiagramType
     switch (diagramType)
     {
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
-            def normRequest = mappingStandardDiagramRequest(requestContent)
+            def normRequest = mappingStandardDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             return mappingStandardDiagram(res)
         case [DONUT, PIE]:
-            def normRequest = mappingRoundDiagramRequest(requestContent)
+            def normRequest = mappingRoundDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             return mappingRoundDiagram(res)
         case SUMMARY:
-            def normRequest = mappingSummaryDiagramRequest(requestContent)
+            def normRequest = mappingSummaryDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             return mappingSummaryDiagram(res)
         case TABLE:
-            def normRequest = mappingTableDiagramRequest(requestContent)
+            def normRequest = mappingTableDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             def (totalColumn, totalRow) = requestContent.data
                     .findResult { key, value -> !(value.sourceForCompute) ? value : null }
                     .with { [it.calcTotalColumn, it.calcTotalRow] }
             return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean)
         case COMBO:
-            def normRequest = mappingComboDiagramRequest(requestContent)
+            def normRequest = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
 
             def (firstAdditionalData, secondAdditionalData) = (requestContent.data as Map)
@@ -279,9 +284,10 @@ private def buildDiagram(Map<String, Object> requestContent)
 /**
  * Метод приведения запроса на построение стандартных диаграм к единому формату
  * @param requestContent - запрос на построеине стандатной диаграмы
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> requestContent)
+private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -332,15 +338,16 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
-    return buildDiagramRequest(intermediateData)
+    return buildDiagramRequest(intermediateData, subjectUUID)
 }
 
 /**
  * Метод приведения запроса на построение круговых диаграм к единому формату
  * @param requestContent - запрос на построеине круговой диаграмы
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestContent)
+private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -391,15 +398,16 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
-    return buildDiagramRequest(intermediateData)
+    return buildDiagramRequest(intermediateData, subjectUUID)
 }
 
 /**
  * Метод приведения запроса на построение сводки к единому формату
  * @param requestContent - запрос на построеине сводки
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestContent)
+private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -437,15 +445,16 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite: requisite]]
     } as Map<String, Map>
-    return buildDiagramRequest(intermediateData)
+    return buildDiagramRequest(intermediateData, subjectUUID)
 }
 
 /**
  * Метод приведения запроса на построение таблицы к единому формату
  * @param requestContent - запрос на построеине таблицы
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent)
+private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -501,15 +510,16 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
-    return buildDiagramRequest(intermediateData)
+    return buildDiagramRequest(intermediateData, subjectUUID)
 }
 
 /**
  * Метод приведения запроса на построение комбо диаграм к единому формату
  * @param requestContent - запрос на построеине комбо диаграмы
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestContent)
+private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -563,9 +573,15 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
     } as Map<String, Map>
-    return buildDiagramRequest(intermediateData)
+    return buildDiagramRequest(intermediateData, subjectUUID)
 }
 
+/**
+ * Метод создания параметра группировки основанного только на системных группировках
+ * @param groupType - объект описывающий группировку
+ * @param attr - атрибут
+ * @return параметр группировки
+ */
 private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr) {
     return groupType.way == 'SYSTEM' ? new GroupParameter(
             title: 'breakdown',
@@ -576,6 +592,11 @@ private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<Strin
     ) : null
 }
 
+/**
+ * Метод определения типа группировки для атрибута типа "временной интервал"
+ * @param groupType - декларируемая группировка временного интервала
+ * @return фактическая группировка временного интервала
+ */
 private GroupType getDTIntervalGroupType(String groupType) {
     switch (groupType.toLowerCase()) {
         case 'overlap':
@@ -595,7 +616,16 @@ private GroupType getDTIntervalGroupType(String groupType) {
     }
 }
 
-private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData) {
+
+/**
+ * Метод создания запроса для QueryWrapper
+ * @param intermediateData - промежуточные данные сгруппированые по первичному признаку
+ * @param subjectUUID - идентификатор "текущего объекта"
+ * @return
+ */
+private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, String subjectUUID) {
+    //TODO: пропихнуть этот параметр в фильтры
+
     // доводим запрос до совершенства/ шлифуем вычисления
     Closure getRequestData = { String key -> intermediateData[key].requestData }
     def computationDataRequest = intermediateData
@@ -616,7 +646,7 @@ private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData) {
     // доводим запрос до совершенства/ шлифуем кастомную группировку
     Map<String, List<List>> splitData = intermediateData
             .findAll { key, value -> value.customGroup }
-            ?.collectEntries(this.&convertCustomGroup.curry(getRequestData))
+            ?.collectEntries(this.&convertCustomGroup.curry(getRequestData, subjectUUID))
 
     def groupKeyMap = splitData?.collect { key, list ->
         def newDataSet = list.collectEntries { el ->
@@ -671,6 +701,12 @@ private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData) {
     return new DiagramRequest(requisite: requisite, data: resultRequestData)
 }
 
+/**
+ * Метод обработки вычислений
+ * @param getData - функция получения источника данных по ключю
+ * @param map - данные для вычислений
+ * @return сгруппированные данные по названию переменной и источнику данных
+ */
 private Map<String, RequestData> produceComputationData(Closure getData, Map map) {
     def computeData = map.computeData as Map<String, Object>
     // делаем предположение. Если есть вычисление значит реквизиты точно есть
@@ -723,12 +759,14 @@ private Attribute mappingAttribute(Map<String, Object> data)
  * @param getData - функция получения данных запроса по ключу
  * @param key - ключь для получения данных запроса
  * @param value - настройки кастомной группировки
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return возвращает новую пару ключ, данные запроса
  */
-private Map<String, List<List>> convertCustomGroup(Closure getData, String key, Map value) {
+private Map<String, List<List>> convertCustomGroup(Closure getData, String subjectUUID, String key, Map value) {
+    //TODO: сюда прокинуть uuid объекта
     def customGroup = value.customGroup as Map<String, Object>
     Closure<Collection<Collection<FilterParameter>>> mappingFilters =
-            getMappingFilterMethodByType(customGroup.type as String)
+            getMappingFilterMethodByType(customGroup.type as String, subjectUUID)
     def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
     def requestData = getData.call(key as String) as RequestData
     def attribute = customGroup.attribute as Attribute
@@ -747,9 +785,10 @@ private Map<String, List<List>> convertCustomGroup(Closure getData, String key, 
 /**
  * Метод получения функции преобразования пользовательской группировки в удобный формат
  * @param type - тип пользовательской группировки
+ * @param subjectUUID - идентификатор "текущего объекта"
  * @return функция преобразования настроек пользовательской группировки
  */
-private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type) {
+private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID) {
     switch (type) {
         case 'dtInterval':
             return this.&mappingDTIntervalTypeFilters
@@ -764,7 +803,7 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
         case 'state':
             return this.&mappingSateTypeFilters
         case ['boLinks', 'backBOLinks', 'object']:
-            return this.&mappingLinkTypeFilters
+            return this.&mappingLinkTypeFilters.curry(subjectUUID)
         case ['catalogItem', 'catalogItemSet']:
             return this.&mappingCatalogItemTypeFilters
         case 'metaClass':
@@ -831,7 +870,7 @@ private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> dat
                     def tempAttribute = attribute.deepClone()
                     tempAttribute.addLast(idAttribute)
                     String uuid = value.UUID
-                    long id = uuid.split('$',2)[1] as long
+                    long id = uuid.split('\\$',2)[1] as long
                     return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
                 } else {
                     throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
@@ -842,7 +881,7 @@ private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> dat
     }
 }
 
-private List<List<FilterParameter>> mappingLinkTypeFilters(List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         switch (conditionType.toLowerCase()) {
@@ -899,8 +938,11 @@ private List<List<FilterParameter>> mappingLinkTypeFilters(List<List> data, Attr
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                String uuid = condition.data.uuid
-                long id = uuid.split('$',2)[1] as long
+                long id = subjectUUID.split('\\$',2)[1] as long
+                //TODO: нужна проверка на соответствие типов
+                String subjectType = api.utils.get(subjectUUID).metaClass
+                if (subjectType != attribute.property)
+                    throw new IllegalArgumentException("Does not match subject type: $subjectType")
                 return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
             case 'contains_attr_current_object':
                 def object = api.utils.get(condition.data.uuid)
@@ -912,7 +954,7 @@ private List<List<FilterParameter>> mappingLinkTypeFilters(List<List> data, Attr
                     def tempAttribute = attribute.deepClone()
                     tempAttribute.addLast(idAttribute)
                     String uuid = value.UUID
-                    long id = uuid.split('$',2)[1] as long
+                    long id = uuid.split('\\$',2)[1] as long
                     return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
                 } else {
                     throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
@@ -966,7 +1008,7 @@ private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingStringTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison type ->
@@ -1130,7 +1172,7 @@ private List<List<FilterParameter>> mappingSateTypeFilters(List<List> data, Attr
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(titleAttribute)
                 return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, tempAttribute, condition.data)
-            case 'equal_subject_attribute':
+            case ['equal_subject_attribute', 'equal_attr_current_object']:
                 def object = api.utils.get(condition.data.uuid)
                 if (!object.keySet().find('state'.&equals))
                     throw new IllegalArgumentException("object ${condition.data} not contain attribute: 'state'")
