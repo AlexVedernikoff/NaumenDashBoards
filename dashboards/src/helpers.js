@@ -15,6 +15,16 @@ function debounce (func: Function, ms: number) {
 	};
 }
 
+/**
+ * Функция для обхода ошибки flow о несоответсвии типов при использовании Object.values
+ * @param {object} map - объект
+ * @returns {Array<any>} - массив значений объекта
+ */
+function getMapValues<T> (map: ({[string]: T})): Array<T> {
+	return Object.keys(map).map(key => map[key]);
+}
+
 export {
-	debounce
+	debounce,
+	getMapValues
 };

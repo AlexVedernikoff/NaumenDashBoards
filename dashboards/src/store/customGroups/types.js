@@ -3,6 +3,8 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {CUSTOM_GROUPS_EVENTS, OPERAND_SETS, OPERAND_TYPES} from './constants';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
 
+export type OperandType = $Keys<typeof OPERAND_TYPES>;
+
 export type StringSimpleOperand = {|
 	data: string,
 	type: $Keys<typeof OPERAND_SETS.STRING>

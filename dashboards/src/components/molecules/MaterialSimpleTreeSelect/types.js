@@ -1,13 +1,16 @@
 // @flow
 export type Option = Object;
 
-type Name = any;
+type Event = {
+	name: string,
+	value: Option
+};
 
 export type Props = {
 	getOptionLabel?: (option: Option) => string,
 	getOptionValue?: (option: Option) => any,
-	name: Name,
-	onSelect: (name: Name, value: Option) => void,
+	name: string,
+	onSelect: Event => void,
 	options: Array<Option>,
 	placeholder: string,
 	value: Option | null

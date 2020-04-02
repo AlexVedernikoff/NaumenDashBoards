@@ -45,7 +45,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		const {name, onSelect} = this.props;
 
 		this.setState({showTree: false});
-		onSelect(name, value);
+		onSelect({name, value});
 	};
 
 	hideMenu = () => this.setState({showTree: false});

@@ -20,5 +20,6 @@ module.name_mapper.extension='less' -> '<PROJECT_ROOT>/flow/stub/css-modules.js'
 module.name_mapper='.*\.\(png\|jpg\|jpeg\|gif\)$' -> '<PROJECT_ROOT>/flow/stub/url-loader.js'
 module.name_mapper='^src\/\(.*\)$' -> '<PROJECT_ROOT>/src/\1'
 module.name_mapper='^src$' -> '<PROJECT_ROOT>/src/index.js'
-
+module.name_mapper='^CustomGroup\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/molecules/GroupCreatingModal/components/CustomGroup/\1'
+module.name_mapper='^CustomGroup' -> '<PROJECT_ROOT>/src/components/molecules/GroupCreatingModal/components/CustomGroup/index.js'
 

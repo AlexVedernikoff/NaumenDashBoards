@@ -1,36 +1,30 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
+import type {AttrCustomProps} from './components/CustomGroup/types';
+import type {AttrSystemProps} from './components/SystemGroup/types';
+import {CustomGroup, SystemGroup} from './components';
+import type {ElementRef} from 'react';
 import type {GroupWay} from 'store/widgets/data/types';
 import type {Props as ContainerProps} from 'containers/GroupCreatingModal/types';
 
-export type GroupValue = {
-	data: string,
-	way: GroupWay
+export type CustomGroupRef = {
+	current: null | ElementRef<typeof CustomGroup>
 };
 
-export type ErrorsMap = {
-	[string]: string
+export type SystemGroupRef = {
+	current: null | ElementRef<typeof SystemGroup>
 };
 
-export type Props = {
-	attribute: Attribute,
-	onClose: () => void,
-	onSubmit: (value: GroupValue, attributeTitle: string) => void,
-	value: GroupValue
-} & ContainerProps;
+type ModalProps = {|
+	attrCustomProps: AttrCustomProps,
+	attrSystemProps: AttrSystemProps,
+|};
+
+export type Props = {|
+	...ModalProps,
+	...ContainerProps
+|};
 
 export type State = {
 	attributeTitle: string,
-	errors: ErrorsMap,
-	hasError: boolean,
-	isSubmitting: boolean,
-	selectedCustomGroup: string,
-	showSaveInfo: boolean,
-	systemOptions: Array<Object>,
-	systemValue: Object | null,
 	way: GroupWay
-};
-
-export type Context = {
-	errors: ErrorsMap
 };

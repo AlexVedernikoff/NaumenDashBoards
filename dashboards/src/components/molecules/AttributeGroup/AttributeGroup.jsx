@@ -71,10 +71,10 @@ export class AttributeGroup extends PureComponent<Props, State> {
 			return (
 				<GroupCreatingModal
 					attribute={attribute}
+					group={group}
 					key={attribute.type}
 					onClose={this.handleCloseModal}
 					onSubmit={this.handleSubmitModal}
-					value={group}
 				/>
 			);
 		}

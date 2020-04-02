@@ -1,5 +1,5 @@
 // @flow
-import {DATETIME_SYSTEM_GROUP, GROUP_WAYS, INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
+import {GROUP_WAYS} from 'store/widgets/constants';
 
 // Опции выбора способа создания группировки
 const TYPE_OPTIONS = [
@@ -41,65 +41,7 @@ const FIELDS = {
 	way
 };
 
-// Базовый путь валидации кастомных группировок
-const BASE_VALIDATION_SUBGROUP_PATH = 'subGroups';
-
-// Опции выбора системной группировки к атрибуту типа дата\время
-const DATETIME_SYSTEM_OPTIONS = [
-	{
-		label: 'День',
-		value: DATETIME_SYSTEM_GROUP.DAY
-	},
-	{
-		label: 'Неделя',
-		value: DATETIME_SYSTEM_GROUP.WEEK
-	},
-	{
-		label: '7 дней',
-		value: DATETIME_SYSTEM_GROUP.SEVEN_DAYS
-	},
-	{
-		label: 'Месяц',
-		value: DATETIME_SYSTEM_GROUP.MONTH
-	},
-	{
-		label: 'Квартал',
-		value: DATETIME_SYSTEM_GROUP.QUARTER
-	},
-	{
-		label: 'Год',
-		value: DATETIME_SYSTEM_GROUP.YEAR
-	}
-];
-
-// Опции выбора системной группировки к атрибуту типа dtInterval
-const INTERVAL_SYSTEM_OPTIONS = [
-	{
-		label: 'Секунды',
-		value: INTERVAL_SYSTEM_GROUP.SECOND
-	},
-	{
-		label: 'Минуты',
-		value: INTERVAL_SYSTEM_GROUP.MINUTE
-	},
-	{
-		label: 'Часы',
-		value: INTERVAL_SYSTEM_GROUP.HOUR
-	},
-	{
-		label: 'Дни',
-		value: INTERVAL_SYSTEM_GROUP.DAY
-	},
-	{
-		label: 'Недели',
-		value: INTERVAL_SYSTEM_GROUP.WEEK
-	}
-];
-
 export {
-	BASE_VALIDATION_SUBGROUP_PATH,
-	DATETIME_SYSTEM_OPTIONS,
-	INTERVAL_SYSTEM_OPTIONS,
 	LOCAL_PREFIX_ID,
 	FIELDS,
 	IS_NEW,
