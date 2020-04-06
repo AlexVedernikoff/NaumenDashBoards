@@ -1,5 +1,5 @@
 // @flow
-import type {CustomGroup as StoreCustomGroup, OperandType} from 'store/customGroups/types';
+import type {CustomGroup as StoreCustomGroup, CustomGroupsMap, OperandType} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
@@ -46,6 +46,7 @@ export type AttrCustomProps = {|
 export type Props = {
 	className: string,
 	group: Group,
+	map: CustomGroupsMap,
 	onCreate: (customGroup: StoreCustomGroup, onCreateCallback: Function) => ThunkAction,
 	onRemove: (groupId: string) => ThunkAction,
 	onSubmit: Group => void,
@@ -62,7 +63,7 @@ export type ErrorsMap = {
 export type State = {
 	errors: ErrorsMap,
 	isSubmitting: boolean,
-	selectedGroup: CustomGroup | null,
+	selectedGroup: string,
 	showLimitInfo: boolean,
 	showRemovalInfo: boolean,
 	showSaveInfo: boolean,

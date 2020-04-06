@@ -24,7 +24,7 @@ export class CustomGroup extends Component<Props, State> {
 	state = {
 		errors: {},
 		isSubmitting: false,
-		selectedGroup: null,
+		selectedGroup: '',
 		showLimitInfo: false,
 		showRemovalInfo: false,
 		showSaveInfo: false,
@@ -33,17 +33,23 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {group, groups} = this.props;
-		const selectedGroup = groups.find(customGroup => customGroup.id === group.data);
+		const {group, map} = this.props;
 
-		if (selectedGroup) {
-			this.setState({selectedGroup});
+		if (group.data in map) {
+			this.setState({selectedGroup: group.data});
 		}
 	}
 
 	getGroupLabel = (group: CustomGroupType) => group.name;
 
 	getGroupValue = (group: CustomGroupType) => group.id;
+
+	getSelectedGroup = () => {
+		const {map} = this.props;
+		const {selectedGroup} = this.state;
+
+		return map[selectedGroup];
+	};
 
 	getUsingWidgets = () => {
 		const {widgets} = this.props;
@@ -70,17 +76,18 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleChangeGroupName = (groupId: string, name: string) => {
-		const {selectedGroup} = this.state;
+		const selectedGroup = this.getSelectedGroup();
 		selectedGroup && this.update({...selectedGroup, name});
 	};
 
 	handleClickCreationButton = () => {
 		const {createCondition, groups, type} = this.props;
 		const {current: groupNameInput} = this.groupNameRef;
+		const id = `${LOCAL_PREFIX_ID}${uuid()}`;
 
 		if (groups.length < 30) {
 			const group = {
-				id: `${LOCAL_PREFIX_ID}${uuid()}`,
+				id,
 				// $FlowFixMe
 				[IS_NEW]: true,
 				name: '',
@@ -90,6 +97,7 @@ export class CustomGroup extends Component<Props, State> {
 				type
 			};
 
+			this.setState({selectedGroup: id});
 			this.update(group);
 			groupNameInput && setTimeout(() => groupNameInput.focus());
 		} else {
@@ -118,33 +126,38 @@ export class CustomGroup extends Component<Props, State> {
 		const {selectedGroup} = this.state;
 
 		if (selectedGroup) {
-			this.setState({selectedGroup: null, showRemovalInfo: false});
-			onRemove(selectedGroup.id);
+			this.setState({selectedGroup: '', showRemovalInfo: false});
+			onRemove(selectedGroup);
 		}
 	};
 
 	handleSelectGroup = (name: string, group: CustomGroupType) => this.setState({
 		errors: {},
 		isSubmitting: false,
-		selectedGroup: group
+		selectedGroup: group.id
 	});
 
 	handleUpdate = (subGroups: Array<SubGroup>) => {
-		const {selectedGroup} = this.state;
+		const selectedGroup = this.getSelectedGroup();
 
 		selectedGroup && this.update({...selectedGroup, subGroups});
+	};
+
+	onCreateCallBack = (id: string) => {
+		this.setState({selectedGroup: id});
+		this.onSubmit(id);
 	};
 
 	onSubmit = (data: string) => this.props.onSubmit({data, way: GROUP_WAYS.CUSTOM});
 
 	save = async () => {
 		const {onCreate, onUpdate} = this.props;
-		const {selectedGroup} = this.state;
+		const selectedGroup = this.getSelectedGroup();
 		const isValid = await this.validate();
 
 		if (selectedGroup && isValid) {
 			if (selectedGroup.id.startsWith(LOCAL_PREFIX_ID)) {
-				onCreate(selectedGroup, this.onSubmit);
+				onCreate(selectedGroup, this.onCreateCallBack);
 			} else {
 				onUpdate(selectedGroup, true);
 				this.onSubmit(selectedGroup.id);
@@ -170,13 +183,12 @@ export class CustomGroup extends Component<Props, State> {
 			this.validate(customGroup);
 		}
 
-		this.setState({selectedGroup: customGroup});
 		onUpdate(customGroup);
 	};
 
 	validate = async (customGroup?: CustomGroupType) => {
 		const {resolveConditionRule} = this.props;
-		const {selectedGroup} = this.state;
+		const selectedGroup = this.getSelectedGroup();
 		const currentCustomGroup = customGroup || selectedGroup;
 		let errors = {};
 
@@ -198,7 +210,7 @@ export class CustomGroup extends Component<Props, State> {
 
 	renderGroupSelect = () => {
 		const {groups} = this.props;
-		const {selectedGroup} = this.state;
+		const selectedGroup = this.getSelectedGroup();
 		// $FlowFixMe
 		const isEditingLabel = Boolean(selectedGroup && selectedGroup[IS_NEW]);
 
@@ -304,7 +316,8 @@ export class CustomGroup extends Component<Props, State> {
 
 	renderSubGroupSection = () => {
 		const {createCondition, options, renderCondition, updateDate} = this.props;
-		const {errors, selectedGroup} = this.state;
+		const {errors} = this.state;
+		const selectedGroup = this.getSelectedGroup();
 		const context = {createCondition, errors, options, renderCondition, updateDate};
 
 		if (selectedGroup) {
