@@ -21,8 +21,8 @@ export class SimpleListOption extends PureComponent<Props> {
 	};
 
 	handleClick = () => {
-		const {onClick, option, selected} = this.props;
-		selected ? onClick(null) : onClick(option);
+		const {onClick, option} = this.props;
+		onClick(option);
 	};
 
 	render () {

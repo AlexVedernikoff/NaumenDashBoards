@@ -7,15 +7,14 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 
-const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<string> => {
-	let id = '';
-
+const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callback: Function): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		const {data} = await client.post(buildUrl('dashboardSettings', 'saveCustomGroup', 'requestContent,user'), {
+		const {data: id} = await client.post(buildUrl('dashboardSettings', 'saveCustomGroup', 'requestContent,user'), {
 			...getParams(getState()),
 			group: customGroupData
 		});
-		id = data;
+		callback(id);
 
 		dispatch(removeCustomGroup(localId));
 		dispatch(saveCustomGroup({...customGroupData, id}));
@@ -25,8 +24,6 @@ const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): Thun
 			type: 'error'
 		}));
 	}
-
-	return id;
 };
 
 const deleteCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {

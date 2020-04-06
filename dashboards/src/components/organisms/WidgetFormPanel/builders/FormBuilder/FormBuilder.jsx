@@ -54,6 +54,8 @@ export class FormBuilder extends Component<FormProps> {
 
 	handleSelect = (name: string, value: any) => this.props.setFieldValue(name, value);
 
+	handleSelectLegend = (name: string, {value}: Object) => this.props.setFieldValue(name, value);
+
 	setInputRef = (name: string) => (ref: any) => {
 		const {errors, values} = this.props;
 

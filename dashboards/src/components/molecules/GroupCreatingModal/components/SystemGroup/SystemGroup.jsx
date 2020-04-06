@@ -1,15 +1,10 @@
 // @flow
-import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {GROUP_WAYS} from 'store/widgets/constants';
 import {MaterialSelect} from 'components/molecules/index';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 
 export class SystemGroup extends PureComponent<Props, State> {
-	static defaultProps = {
-		defaultValue: DEFAULT_SYSTEM_GROUP.OVERLAP,
-		options: []
-	};
-
 	state = {
 		value: ''
 	};

@@ -13,7 +13,7 @@ const commands = {
 	getCurrentContextObject
 };
 const extractSubjectUuid = () => 'employee$2384002';
-const findContentCode = () => 'DashbordTest12';
+const findContentCode = () => 'TestZhdanovaasdasd';
 
 const jsApi = {
 	commands,

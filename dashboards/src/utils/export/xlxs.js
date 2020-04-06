@@ -1,6 +1,7 @@
 // @flow
-import {minimize, save} from './helpers';
+import {save} from './helpers';
 import type {Sheet as SheetType, SheetColumn, SheetData} from './types';
+import XLSX from 'xlsx';
 
 class Sheet {
 	columns = [];
@@ -11,28 +12,12 @@ class Sheet {
 		this.data = data;
 	}
 
-	create = () => (`
-		<html xmlns:x="urn:schemas-microsoft-com:office:excel">
-			<head>
-				<meta http-equiv="content-type" content="application/csv;charset=utf-8">
-				<xml>
-					<x:ExcelWorkbook>
-						<x:ExcelWorksheets>
-							<x:ExcelWorksheet>
-								<x:Name />
-								<x:WorksheetOptions>
-									<x:Panes />
-								</x:WorksheetOptions>
-							</x:ExcelWorksheet>
-						</x:ExcelWorksheets>
-					</x:ExcelWorkbook>
-				</xml>
-			</head>
-			<body>
-				${this.createTable()}
-			</body>
-		</html>
-	`);
+	create = () => {
+		const container = document.createElement('div');
+		container.innerHTML = this.createTable().trim();
+
+		return container.firstChild;
+	};
 
 	createFooter = () => `<tr>${this.columns.map(this.createFooterColumn).join('')}</tr>`;
 
@@ -57,14 +42,30 @@ class Sheet {
 	`);
 }
 
-const exportSheet = (name: string, data: SheetType) => {
-	const sheet = (new Sheet(data)).create();
+const stringToArrayBuffer = (s: string) => {
+	const buf = new ArrayBuffer(s.length);
+	const view = new Uint8Array(buf);
 
-	const blob = new Blob([minimize(sheet)], {
-		type: 'application/csv;charset=utf-8'
+	for (let i = 0; i < s.length; i++) {
+		view[i] = s.charCodeAt(i) & 0xFF;
+	}
+
+	return buf;
+};
+
+const exportSheet = (name: string, data: SheetType) => {
+	const table = (new Sheet(data)).create();
+	const workbook = XLSX.utils.book_new();
+	const sheet = XLSX.utils.table_to_sheet(table);
+
+	XLSX.utils.book_append_sheet(workbook, sheet, name);
+
+	const file = XLSX.write(workbook, {bookType: 'xlsx', type: 'binary'});
+	const blob = new Blob([stringToArrayBuffer(file)], {
+		type: 'application/octet-stream;charset=utf-8'
 	});
 
-	save(blob, name, 'xls');
+	save(blob, name, 'xlsx');
 };
 
 export default exportSheet;

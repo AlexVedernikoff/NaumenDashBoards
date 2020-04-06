@@ -3,6 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {CustomGroup as StoreCustomGroup, OperandType} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
+import type {ThunkAction} from 'store/types';
 
 export type OrCondition = Object;
 
@@ -13,12 +14,12 @@ export type SubGroup = {
 	name: string
 };
 
-export type CustomGroup = {
+export type CustomGroup = {|
 	id: string,
 	name: string,
 	subGroups: Array<SubGroup>,
-	type: string
-};
+	type: any
+|};
 
 export type OnChangeOperandData = (condition: OrCondition) => void;
 
@@ -33,25 +34,27 @@ type Option = {
 	value: string
 };
 
-export type AttrCustomProps = {
+export type AttrCustomProps = {|
 	createCondition: CreateCondition,
 	groups: Array<StoreCustomGroup>,
 	options: Array<Option>,
 	renderCondition: RenderCondition,
-	resolveConditionRule: ResolveConditionRule
-};
+	resolveConditionRule: ResolveConditionRule,
+	updateDate?: Date
+|};
 
 export type Props = {
 	attribute: Attribute,
 	className: string,
 	group: Group,
-	onCreate: CustomGroup => string,
-	onRemove: (groupId: string) => void,
+	onCreate: (customGroup: StoreCustomGroup, onCreateCallback: Function) => ThunkAction,
+	onRemove: (groupId: string) => ThunkAction,
 	onSubmit: Group => void,
-	onUpdate: (group: CustomGroup, remote?: boolean) => void,
+	onUpdate: (customGroup: StoreCustomGroup, remote?: boolean) => ThunkAction,
 	show: boolean,
-	widgets: Array<Widget>
-} & AttrCustomProps;
+	widgets: Array<Widget>,
+	...AttrCustomProps
+};
 
 export type ErrorsMap = {
 	[string]: string
@@ -78,5 +81,6 @@ export type ContextProps = {
 	createCondition: CreateCondition,
 	errors: ErrorsMap,
 	options: Array<Object>,
-	renderCondition: RenderCondition
+	renderCondition: RenderCondition,
+	updateDate: Date
 };

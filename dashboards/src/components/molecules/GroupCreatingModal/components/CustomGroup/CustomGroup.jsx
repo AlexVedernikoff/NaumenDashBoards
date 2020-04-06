@@ -37,7 +37,6 @@ export class CustomGroup extends Component<Props, State> {
 		const selectedGroup = groups.find(customGroup => customGroup.id === group.data);
 
 		if (selectedGroup) {
-			// $FlowFixMe
 			this.setState({selectedGroup});
 		}
 	}
@@ -137,22 +136,20 @@ export class CustomGroup extends Component<Props, State> {
 		selectedGroup && this.update({...selectedGroup, subGroups});
 	};
 
+	onSubmit = (data: string) => this.props.onSubmit({data, way: GROUP_WAYS.CUSTOM});
+
 	save = async () => {
-		const {onCreate, onSubmit, onUpdate} = this.props;
+		const {onCreate, onUpdate} = this.props;
 		const {selectedGroup} = this.state;
 		const isValid = await this.validate();
 
 		if (selectedGroup && isValid) {
-			let data = '';
-
 			if (selectedGroup.id.startsWith(LOCAL_PREFIX_ID)) {
-				data = await onCreate(selectedGroup);
+				onCreate(selectedGroup, this.onSubmit);
 			} else {
 				onUpdate(selectedGroup, true);
-				data = selectedGroup.id;
+				this.onSubmit(selectedGroup.id);
 			}
-
-			onSubmit({data, way: GROUP_WAYS.CUSTOM});
 		}
 	};
 
@@ -307,9 +304,9 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	renderSubGroupSection = () => {
-		const {createCondition, options, renderCondition} = this.props;
+		const {createCondition, options, renderCondition, updateDate} = this.props;
 		const {errors, selectedGroup} = this.state;
-		const context = {createCondition, errors, options, renderCondition};
+		const context = {createCondition, errors, options, renderCondition, updateDate};
 
 		if (selectedGroup) {
 			return (

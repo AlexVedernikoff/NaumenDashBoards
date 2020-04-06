@@ -34,11 +34,6 @@ export class SimpleSelectList extends PureComponent<Props> {
 		return getOptionValue ? getOptionValue(option) : option.value;
 	};
 
-	handleClickOption = (option: Object | null) => {
-		const {onClose, onSelect} = this.props;
-		option ? onSelect(option) : onClose();
-	};
-
 	handleClickShowMore = (e: Event) => {
 		const {onClickShowMore} = this.props;
 
@@ -62,7 +57,7 @@ export class SimpleSelectList extends PureComponent<Props> {
 	};
 
 	renderListItem = (option: Object) => {
-		const {getOptionLabel, isSearching, multiple, value, values} = this.props;
+		const {getOptionLabel, isSearching, multiple, onSelect, value, values} = this.props;
 		const optionValue = this.getOptionValue(option);
 		let selected = false;
 
@@ -77,7 +72,7 @@ export class SimpleSelectList extends PureComponent<Props> {
 				found={isSearching}
 				getOptionLabel={getOptionLabel}
 				key={optionValue}
-				onClick={this.handleClickOption}
+				onClick={onSelect}
 				option={option}
 				selected={selected}
 			/>

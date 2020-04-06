@@ -43,6 +43,7 @@ export class Chart extends FormBuilder {
 		const {values} = this.props;
 		const {legendPosition} = FIELDS;
 		const {LEGEND_POSITIONS: options} = OPTIONS;
+		const value = options.find(p => p.value === values[legendPosition]);
 		const defaultValue = options.find(p => p.value === LEGEND_POSITIONS.bottom);
 
 		return (
@@ -50,9 +51,9 @@ export class Chart extends FormBuilder {
 				<SimpleSelect
 					defaultValue={defaultValue}
 					name={legendPosition}
-					onSelect={this.handleSelect}
+					onSelect={this.handleSelectLegend}
 					options={options}
-					value={values[legendPosition]}
+					value={value}
 				/>
 			</div>
 		);

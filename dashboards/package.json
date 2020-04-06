@@ -24,6 +24,7 @@
     "react-table": "^6.10.3",
     "smoothscroll-polyfill": "^0.4.4",
     "tiny-uuid": "^1.0.0",
+    "xlsx": "^0.15.6",
     "yup": "^0.27.0"
   },
   "devDependencies": {
