@@ -1,15 +1,14 @@
 // @flow
+import type {Node} from 'react';
 import type {SelectData, SelectOperand} from 'store/customGroups/types';
 
-type Data = {
-	error: boolean,
-	items: Array<SelectData>,
-	loading: boolean
-};
+export type RenderProps = {|
+	onSelect: (name: string, value: SelectData) => void,
+	value: Object | null
+|};
 
 export type Props = {
-	data: Data,
 	onChange: SelectOperand => void,
-	onLoadData: () => void,
-	operand: SelectOperand
+	operand: SelectOperand,
+	render: (props: RenderProps) => Node
 };

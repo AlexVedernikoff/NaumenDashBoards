@@ -20,7 +20,6 @@ const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Pro
 
 	if (defaultInterval) {
 		dispatch(changeAutoUpdateSettings({defaultInterval}));
-		dispatch(setAutoUpdateInterval(defaultInterval));
 	}
 };
 

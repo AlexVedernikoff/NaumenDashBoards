@@ -50,13 +50,13 @@ export class Tree extends Component<Props, State> {
 	};
 
 	handleClickNodeToggleIcon = (value: string) => {
-		const {onLoadNode, options} = this.props;
+		const {onLoad, options} = this.props;
 		const {expandedValues} = this.state;
 		const expanded = expandedValues.includes(value);
 		const {children} = options[value];
 
 		if (!expanded && Array.isArray(children) && children.length === 0) {
-			onLoadNode(value);
+			onLoad(value);
 		}
 
 		this.setState({
@@ -64,7 +64,7 @@ export class Tree extends Component<Props, State> {
 		});
 	};
 
-	handleClickShowMore = () => this.props.onLoadMore(null, this.getRoots().length);
+	handleClickShowMore = () => this.props.onLoad(null, this.getRoots().length);
 
 	isExpanded = (value: string) => {
 		const {expandedValues, searchValue} = this.state;
@@ -105,7 +105,7 @@ export class Tree extends Component<Props, State> {
 	};
 
 	renderNode = (node: NodeType) => {
-		const {getOptionLabel, getOptionValue, multiple, onLoadMore, onSelect, value, values} = this.props;
+		const {getOptionLabel, getOptionValue, multiple, onLoad, onSelect, value, values} = this.props;
 		const {foundValues, searchValue} = this.state;
 		const {children, error, loading, uploaded} = node;
 		const showMoreChildren = children && !(loading || uploaded || error);
@@ -124,7 +124,7 @@ export class Tree extends Component<Props, State> {
 					getOptionValue={getOptionValue}
 					onClick={onSelect}
 					onClickToggleIcon={this.handleClickNodeToggleIcon}
-					onLoadMoreChildren={onLoadMore}
+					onLoadMoreChildren={onLoad}
 					selected={Boolean(selected)}
 					showMoreChildren={Boolean(showMoreChildren)}
 					value={node}

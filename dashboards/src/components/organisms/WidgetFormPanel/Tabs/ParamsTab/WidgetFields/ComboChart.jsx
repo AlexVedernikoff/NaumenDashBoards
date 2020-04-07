@@ -11,16 +11,16 @@ export class ComboChart extends DataFormBuilder {
 	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
 
 	changeDependingOnMain = (index: number) => {
-		const {setFieldValue} = this.props;
-		const {key: currentKey, source: currentSource, xAxis: currentXAxis} = this.getSet(index);
-		const {key: mainKey, source: mainSource, xAxis: mainXAxis} = this.getMainSet();
+		const {setDataFieldValue} = this.props;
+		const {dataKey: currentKey, source: currentSource, xAxis: currentXAxis} = this.getSet(index);
+		const {dataKey: mainKey, source: mainSource, xAxis: mainXAxis} = this.getMainSet();
 
 		if (currentKey !== mainKey && mainSource && currentSource) {
 			if (mainSource.value === currentSource.value) {
 				this.setMainValue(index, FIELDS.xAxis, FIELDS.group);
 			} else {
 				if (mainXAxis && currentXAxis && mainXAxis.type !== currentXAxis.type) {
-					setFieldValue(FIELDS.xAxis, null);
+					setDataFieldValue(index)(FIELDS.xAxis, null);
 				}
 
 				this.setMainValue(index, FIELDS.group);
@@ -28,12 +28,12 @@ export class ComboChart extends DataFormBuilder {
 		}
 	};
 
-	changeRefFields = () => this.props.values.data.forEach(this.changeDependingOnMain);
+	changeRefFields = () => this.props.values.data.forEach((set, index) => this.changeDependingOnMain(index));
 
 	changeSourceRefs = (index: number) => () => this.changeDependingOnMain(index);
 
-	handleSelectComboGroup = (index: number) => {
-		if (this.getSet(index).key === this.getMainSet().key) {
+	handleSelectComboGroup = (index: number) => () => {
+		if (this.getSet(index).dataKey === this.getMainSet().dataKey) {
 			this.changeRefFields();
 		}
 	};
@@ -87,14 +87,14 @@ export class ComboChart extends DataFormBuilder {
 		const currentXAxis = set[FIELDS.xAxis];
 		let onSelectCallback;
 
-		if (mainSource === currentSource) {
+		if (mainSource && currentSource && mainSource.value === currentSource.value) {
 			onSelectCallback = this.changeRefFields;
 		}
 
 		const refInputProps = {
 			disabled: false,
 			name: FIELDS.group,
-			onSelectCallback: this.handleSelectComboGroup,
+			onSelectCallback: this.handleSelectComboGroup(index),
 			type: 'group',
 			value: set[FIELDS.group]
 		};
@@ -108,7 +108,7 @@ export class ComboChart extends DataFormBuilder {
 			value: currentXAxis
 		};
 
-		if (set.key !== mainSet.key && mainSource && currentSource) {
+		if (set.dataKey !== mainSet.dataKey && mainSource && currentSource) {
 			if (mainSource.value === currentSource.value) {
 				props.disabled = true;
 			} else {

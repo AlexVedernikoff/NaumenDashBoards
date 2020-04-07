@@ -10,7 +10,7 @@ import type {
 } from 'store/customGroups/types';
 import {CUSTOM_OPTIONS} from './constants';
 import {FLOAT_RULE, INTEGER_RULE} from 'CustomGroup/schema';
-import type {OnChangeOperandData} from 'CustomGroup/types';
+import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
 import {SimpleOperand} from 'CustomGroup/components';
@@ -41,7 +41,8 @@ export class NumberGroup extends Component<AttributeGroupProps> {
 		groups: this.getCustomGroups(),
 		options: CUSTOM_OPTIONS,
 		renderCondition: this.renderCustomCondition,
-		resolveConditionRule: this.resolveConditionRule
+		resolveConditionRule: this.resolveConditionRule,
+		type: this.props.attribute.type
 	});
 
 	resolveConditionRule = (condition: NumberOrCondition) => {
@@ -58,7 +59,7 @@ export class NumberGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderCustomCondition = (condition: NumberOrCondition, onChange: OnChangeOperandData) => {
+	renderCustomCondition = (condition: NumberOrCondition, onChange: OnChangeOperand) => {
 		const {EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY} = OPERAND_TYPES;
 
 		switch (condition.type) {
@@ -71,7 +72,7 @@ export class NumberGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperandData) => {
+	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperand) => {
 		const {attribute} = this.props;
 		const float = attribute.type === ATTRIBUTE_TYPES.double;
 

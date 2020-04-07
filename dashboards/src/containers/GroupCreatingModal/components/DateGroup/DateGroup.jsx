@@ -13,7 +13,7 @@ import {BETWEEN_RULE, INTEGER_RULE} from 'CustomGroup/schema';
 import {createBetweenOperand, createDefaultOperand, createSimpleOperand} from 'CustomGroup/helpers';
 import {CUSTOM_OPTIONS, SYSTEM_OPTIONS} from './constants';
 import {DATETIME_SYSTEM_GROUP} from 'store/widgets/constants';
-import type {OnChangeOperandData} from 'CustomGroup/types';
+import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
 
@@ -44,7 +44,8 @@ export class DateGroup extends Component<AttributeGroupProps> {
 		groups: this.getCustomGroups(),
 		options: CUSTOM_OPTIONS,
 		renderCondition: this.renderCustomCondition,
-		resolveConditionRule: this.resolveConditionRule
+		resolveConditionRule: this.resolveConditionRule,
+		type: this.props.attribute.type
 	});
 
 	getSystemProps = () => ({
@@ -64,11 +65,11 @@ export class DateGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderBetweenOperand = (operand: BetweenOperandType, onChange: OnChangeOperandData) => (
+	renderBetweenOperand = (operand: BetweenOperandType, onChange: OnChangeOperand) => (
 		<BetweenOperand onChange={onChange} operand={operand} />
 	);
 
-	renderCustomCondition = (condition: DateOrCondition, onChange: OnChangeOperandData) => {
+	renderCustomCondition = (condition: DateOrCondition, onChange: OnChangeOperand) => {
 		const {BETWEEN, LAST, NEAR} = OPERAND_TYPES;
 
 		switch (condition.type) {
@@ -80,7 +81,7 @@ export class DateGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperandData) => (
+	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperand) => (
 		<SimpleOperand onChange={onChange} onlyNumber={true} operand={operand} />
 	);
 

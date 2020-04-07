@@ -7,10 +7,12 @@ import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
 
+export type RenderModal = (attrCustomProps: AttrCustomProps, attrSystemProps?: AttrSystemProps) => Node;
+
 export type AttributeGroupProps = {|
 	attribute: Attribute,
 	customGroups: Array<CustomGroup>,
-	renderModal: (attrCustomProps: AttrCustomProps, attrSystemProps?: AttrSystemProps) => Node
+	renderModal: RenderModal
 |};
 
 export type ConnectedProps = {|

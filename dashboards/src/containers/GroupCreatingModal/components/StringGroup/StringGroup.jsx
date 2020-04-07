@@ -9,7 +9,7 @@ import type {
 	StringOrCondition
 } from 'store/customGroups/types';
 import {CUSTOM_OPTIONS} from './constants';
-import type {OnChangeOperandData} from 'CustomGroup/types';
+import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
 import {SimpleOperand} from 'CustomGroup/components';
@@ -36,7 +36,8 @@ export class StringGroup extends Component<AttributeGroupProps> {
 		groups: this.getCustomGroups(),
 		options: CUSTOM_OPTIONS,
 		renderCondition: this.renderCustomCondition,
-		resolveConditionRule: this.resolveConditionRule
+		resolveConditionRule: this.resolveConditionRule,
+		type: ATTRIBUTE_TYPES.string
 	});
 
 	resolveConditionRule = (condition: StringOrCondition) => {
@@ -50,7 +51,7 @@ export class StringGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderCustomCondition = (condition: StringOrCondition, onChange: OnChangeOperandData) => {
+	renderCustomCondition = (condition: StringOrCondition, onChange: OnChangeOperand) => {
 		const {CONTAINS, NOT_CONTAINS, NOT_CONTAINS_INCLUDING_EMPTY} = OPERAND_TYPES;
 
 		switch (condition.type) {
@@ -61,7 +62,7 @@ export class StringGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperandData) => (
+	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperand) => (
 		<SimpleOperand onChange={onChange} operand={operand} />
 	);
 

@@ -7,7 +7,7 @@ import {CUSTOM_OPTIONS, SYSTEM_OPTIONS} from './constants';
 import {IntervalOperand} from 'CustomGroup/components';
 import {INTERVAL_RULE} from 'CustomGroup/schema';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
-import type {OnChangeOperandData} from 'CustomGroup/types';
+import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
 
@@ -34,7 +34,8 @@ export class IntervalGroup extends Component<AttributeGroupProps> {
 		groups: this.getCustomGroups(),
 		options: CUSTOM_OPTIONS,
 		renderCondition: this.renderCustomCondition,
-		resolveConditionRule: this.resolveConditionRule
+		resolveConditionRule: this.resolveConditionRule,
+		type: this.props.attribute.type
 	});
 
 	getSystemProps = () => ({
@@ -54,7 +55,7 @@ export class IntervalGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderCustomCondition = (condition: IntervalOrCondition, onChange: OnChangeOperandData) => {
+	renderCustomCondition = (condition: IntervalOrCondition, onChange: OnChangeOperand) => {
 		const {EQUAL, GREATER, LESS, NOT_EQUAL} = OPERAND_TYPES;
 
 		switch (condition.type) {
@@ -66,7 +67,7 @@ export class IntervalGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	renderIntervalOperand = (operand: IntervalOperandType, onChange: OnChangeOperandData) => (
+	renderIntervalOperand = (operand: IntervalOperandType, onChange: OnChangeOperand) => (
 		<IntervalOperand onChange={onChange} operand={operand} />
 	);
 

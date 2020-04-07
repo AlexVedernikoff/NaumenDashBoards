@@ -67,14 +67,13 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderCustomGroup = () => {
-		const {attrCustomProps, attribute, createCustomGroup, deleteCustomGroup, group, updateCustomGroup, widgets} = this.props;
+		const {attrCustomProps, createCustomGroup, deleteCustomGroup, group, updateCustomGroup, widgets} = this.props;
 		const {way} = this.state;
 		const show = way === GROUP_WAYS.CUSTOM;
 
 		return (
 			<CustomGroup
 				{...attrCustomProps}
-				attribute={attribute}
 				className={styles.customSection}
 				group={group}
 				onCreate={createCustomGroup}
