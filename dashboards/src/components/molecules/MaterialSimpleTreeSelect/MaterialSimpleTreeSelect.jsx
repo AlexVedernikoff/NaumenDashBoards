@@ -8,12 +8,14 @@ import {ValueContainer} from 'components/molecules/MaterialSelect/components';
 
 export class MaterialSelect extends PureComponent<Props, State> {
 	static defaultProps = {
+		async: false,
 		name: '',
 		placeholder: 'Выберите значение',
 		value: null
 	};
 
 	state = {
+		optionsLoaded: false,
 		showTree: false
 	};
 
@@ -39,13 +41,23 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		return value;
 	};
 
-	handleClickValue = () => this.setState({showTree: !this.state.showTree});
+	handleClickValue = () => {
+		const {async, onLoadOptions, options} = this.props;
+		const {optionsLoaded, showTree} = this.state;
+
+		if (async && !optionsLoaded && options.length === 0 && onLoadOptions) {
+			this.setState({optionsLoaded: true});
+			onLoadOptions();
+		}
+
+		this.setState({showTree: !showTree});
+	};
 
 	handleSelect = (value: Option) => {
 		const {name, onSelect} = this.props;
 
 		this.setState({showTree: false});
-		onSelect({name, value});
+		onSelect(name, value);
 	};
 
 	hideMenu = () => this.setState({showTree: false});

@@ -1,22 +1,9 @@
 // @flow
-import {MaterialSelect} from 'components/molecules/index';
+import {Component} from 'react';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
 import type {SelectData} from 'store/customGroups/types';
 
-export class SelectOperand extends PureComponent<Props> {
-	static defaultProps = {
-		data: {
-			error: false,
-			items: [],
-			loading: true
-		}
-	};
-
-	getOptionLabel = (option: SelectData) => option.title;
-
-	getOptionValue = (option: SelectData) => option.uuid;
-
+export class SelectOperand extends Component<Props> {
 	handleSelect = (name: string, {title, uuid}: SelectData) => {
 		const {onChange, operand} = this.props;
 		const data = {
@@ -28,21 +15,12 @@ export class SelectOperand extends PureComponent<Props> {
 	};
 
 	render () {
-		const {data, onLoadData, operand} = this.props;
-		const {items, loading} = data;
+		const {operand, render} = this.props;
 
-		return (
-			<MaterialSelect
-				async={true}
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				loading={loading}
-				onLoadOptions={onLoadData}
-				onSelect={this.handleSelect}
-				options={items}
-				value={operand.data}
-			/>
-		);
+		return render({
+			onSelect: this.handleSelect,
+			value: operand.data
+		});
 	}
 }
 

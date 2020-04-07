@@ -1,22 +1,9 @@
 // @flow
-import {MaterialSelect} from 'components/molecules/index';
+import {Component} from 'react';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
 import type {SelectData} from 'store/customGroups/types';
 
-export class MultiSelectOperand extends PureComponent<Props> {
-	static defaultProps = {
-		data: {
-			error: false,
-			items: [],
-			loading: true
-		}
-	};
-
-	getOptionLabel = (option: Object) => option.title;
-
-	getOptionValue = (option: Object) => option.uuid;
-
+export class MultiSelectOperand extends Component<Props> {
 	handleClear = () => {
 		const {onChange, operand} = this.props;
 
@@ -27,9 +14,9 @@ export class MultiSelectOperand extends PureComponent<Props> {
 	};
 
 	handleRemove = (value: string) => {
-		const {onChange, operand} = this.props;
+		const {getOptionValue, onChange, operand} = this.props;
 		const {data: currentData} = operand;
-		const data = currentData.filter(option => this.getOptionValue(option) !== value);
+		const data = currentData.filter(option => getOptionValue(option) !== value);
 
 		onChange({
 			...operand,
@@ -51,24 +38,14 @@ export class MultiSelectOperand extends PureComponent<Props> {
 	};
 
 	render () {
-		const {data, onLoadData, operand} = this.props;
-		const {items, loading} = data;
+		const {operand, render} = this.props;
 
-		return (
-			<MaterialSelect
-				async={true}
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				loading={loading}
-				multiple={true}
-				onClear={this.handleClear}
-				onLoadOptions={onLoadData}
-				onRemove={this.handleRemove}
-				onSelect={this.handleSelect}
-				options={items}
-				values={operand.data}
-			/>
-		);
+		return render({
+			onClear: this.handleClear,
+			onRemove: this.handleRemove,
+			onSelect: this.handleSelect,
+			values: operand.data
+		});
 	}
 }
 

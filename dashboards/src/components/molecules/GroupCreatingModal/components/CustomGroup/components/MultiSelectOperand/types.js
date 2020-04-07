@@ -1,15 +1,17 @@
 // @flow
 import type {MultiSelectOperand, SelectData} from 'store/customGroups/types';
+import type {Node} from 'react';
 
-type Data = {
-	error: boolean,
-	items: Array<SelectData>,
-	loading: boolean
-};
+export type RenderProps = {|
+	onClear: () => void,
+	onRemove: (value: string) => void,
+	onSelect: (name: string, value: Object) => void,
+	values: Array<SelectData>
+|};
 
 export type Props = {
-	data: Data,
+	getOptionValue: (option: Object) => string,
 	onChange: MultiSelectOperand => void,
-	onLoadData: () => void,
-	operand: MultiSelectOperand
+	operand: MultiSelectOperand,
+	render: (props: RenderProps) => Node
 };

@@ -75,9 +75,8 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleClickCreationButton = () => {
-		const {attribute, createCondition, groups} = this.props;
+		const {createCondition, groups, type} = this.props;
 		const {current: groupNameInput} = this.groupNameRef;
-		const {type} = attribute;
 
 		if (groups.length < 30) {
 			const group = {

@@ -119,7 +119,7 @@ export class DataFormBuilder extends FormBuilder {
 		}
 	};
 
-	getSet = (index: number) => this.props.values[FIELDS.data][index];
+	getSet = (index: number) => this.props.values[FIELDS.data][index] || {};
 
 	getTitleAttribute = (attributes: Array<AttributeType>) => {
 		return attributes.find(attribute => attribute.code === 'title') || null;
@@ -175,8 +175,8 @@ export class DataFormBuilder extends FormBuilder {
 		setFieldValue(name, null);
 	};
 
-	handleSaveAttribute = (name: string, newAttr: ComputedAttr) => {
-		const {setFieldValue, values} = this.props;
+	handleSaveComputedAttribute = (index: number) => (name: string, newAttr: ComputedAttr) => {
+		const {setDataFieldValue, setFieldValue, values} = this.props;
 		const computedAttrs = values[FIELDS.computedAttrs] || [];
 		let exists = false;
 
@@ -191,7 +191,7 @@ export class DataFormBuilder extends FormBuilder {
 			computedAttrs.push(newAttr);
 		}
 
-		setFieldValue(name, newAttr);
+		setDataFieldValue(index)(name, newAttr);
 		setFieldValue(FIELDS.computedAttrs, computedAttrs);
 	};
 
@@ -338,7 +338,7 @@ export class DataFormBuilder extends FormBuilder {
 					name={name}
 					onChangeTitle={setDataFieldValue(index)}
 					onRemoveComputedAttribute={this.handleRemoveComputedAttribute}
-					onSaveComputedAttribute={this.handleSaveAttribute}
+					onSaveComputedAttribute={this.handleSaveComputedAttribute(index)}
 					onSelect={this.handleSelectAttribute(index)}
 					onSelectRefInput={setDataFieldValue(index)}
 					refAttributeData={refAttributeData}
@@ -429,10 +429,10 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderAttribute(index, props);
 	};
 
-	renderByOrder = (renderFunction: RenderFunction, accordingSource: boolean = true) => {
+	renderByOrder = (renderFunction: RenderFunction, accordingSource: boolean = true, ...params: Array<any>) => {
 		return this.props.values.data.map((set, index) => {
 			if (!(accordingSource && set[FIELDS.sourceForCompute])) {
-				return renderFunction(index);
+				return renderFunction(index, ...params);
 			}
 		});
 	};
@@ -456,7 +456,7 @@ export class DataFormBuilder extends FormBuilder {
 		return this.renderAttribute(index, props);
 	};
 
-	renderSource = (callback?: OnSelectSourceCallback) => (index: number) => {
+	renderSource = (index: number, callback?: OnSelectSourceCallback) => {
 		const {errors, setDataFieldValue, sources, values} = this.props;
 		const removable = values[FIELDS.data].length > this.minCountBuildingSources;
 		const set = this.getSet(index);
@@ -501,7 +501,7 @@ export class DataFormBuilder extends FormBuilder {
 	renderSourceSection = (callback?: OnSelectSourceCallback) => (
 		<Fragment>
 			{this.renderAddSourceInput()}
-			{this.renderByOrder(this.renderSource(callback), false)}
+			{this.renderByOrder(this.renderSource, false, callback)}
 			{this.renderDivider('section')}
 		</Fragment>
 	);

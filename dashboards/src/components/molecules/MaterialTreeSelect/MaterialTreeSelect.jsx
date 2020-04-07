@@ -45,12 +45,12 @@ export class MaterialTreeSelect extends Component<Props, State> {
 	};
 
 	handleClickValueContainer = () => {
-		const {async, onLoadOptions} = this.props;
+		const {async, onLoad} = this.props;
 		const {optionsLoaded, showMenu} = this.state;
 
 		if (async && !optionsLoaded) {
 			this.setState({optionsLoaded: true});
-			onLoadOptions();
+			onLoad(null);
 		}
 
 		this.setState({showMenu: !showMenu});
@@ -69,7 +69,7 @@ export class MaterialTreeSelect extends Component<Props, State> {
 	hideMenu = () => this.setState({showMenu: false});
 
 	renderMenu = () => {
-		const {multiple, onLoadMore, onLoadNode, options, showMore, value, values} = this.props;
+		const {multiple, onLoad, options, showMore, value, values} = this.props;
 		const {showMenu} = this.state;
 
 		return (
@@ -78,8 +78,7 @@ export class MaterialTreeSelect extends Component<Props, State> {
 					getOptionLabel={this.getOptionLabel}
 					getOptionValue={this.getOptionValue}
 					multiple={multiple}
-					onLoadMore={onLoadMore}
-					onLoadNode={onLoadNode}
+					onLoad={onLoad}
 					onSelect={this.handleSelect}
 					options={options}
 					show={showMenu}

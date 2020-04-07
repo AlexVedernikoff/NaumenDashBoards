@@ -1,5 +1,4 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
 import type {CustomGroup as StoreCustomGroup, OperandType} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
@@ -21,9 +20,9 @@ export type CustomGroup = {|
 	type: any
 |};
 
-export type OnChangeOperandData = (condition: OrCondition) => void;
+export type OnChangeOperand = (condition: OrCondition) => void;
 
-type RenderCondition = (condition: OrCondition, onChange: OnChangeOperandData) => Node | void;
+type RenderCondition = (condition: OrCondition, onChange: OnChangeOperand) => Node | void;
 
 type ResolveConditionRule = (condition: OrCondition) => Object | void;
 
@@ -40,11 +39,11 @@ export type AttrCustomProps = {|
 	options: Array<Option>,
 	renderCondition: RenderCondition,
 	resolveConditionRule: ResolveConditionRule,
+	type: string,
 	updateDate?: Date
 |};
 
 export type Props = {
-	attribute: Attribute,
 	className: string,
 	group: Group,
 	onCreate: (customGroup: StoreCustomGroup, onCreateCallback: Function) => ThunkAction,
