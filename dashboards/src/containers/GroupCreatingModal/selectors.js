@@ -10,7 +10,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const widgets = getMapValues(map).filter(widget => widget.id !== selectedWidget);
 
 	return {
-		customGroups: getMapValues(customGroups),
+		customGroups,
 		widgets
 	};
 };

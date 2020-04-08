@@ -2,7 +2,7 @@
 import type {AttrCustomProps} from 'components/molecules/GroupCreatingModal/components/CustomGroup/types';
 import type {AttrSystemProps} from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
 import type {Attribute} from 'store/sources/attributes/types';
-import type {CustomGroup} from 'store/customGroups/types';
+import type {CustomGroup, CustomGroupsMap} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
@@ -16,7 +16,7 @@ export type AttributeGroupProps = {|
 |};
 
 export type ConnectedProps = {|
-	customGroups: Array<CustomGroup>,
+	customGroups: CustomGroupsMap,
 	widgets: Array<Widget>
 |};
 

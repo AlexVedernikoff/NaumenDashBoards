@@ -5,6 +5,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {CatalogItemGroup, CatalogItemSetGroup, DateGroup, IntervalGroup, MetaClassGroup, NumberGroup, ObjectGroup, StateGroup, StringGroup} from './components';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
+import {getMapValues} from 'src/helpers';
 import {GroupCreatingModal} from 'components/molecules';
 import type {Props} from './types';
 import React, {Component} from 'react';
@@ -68,7 +69,7 @@ export class GroupCreatingModalContainer extends Component<Props> {
 		if (AttributeGroup) {
 			const {attribute, customGroups} = this.props;
 
-			return <AttributeGroup attribute={attribute} customGroups={customGroups} renderModal={this.renderModal} />;
+			return <AttributeGroup attribute={attribute} customGroups={getMapValues(customGroups)} renderModal={this.renderModal} />;
 		}
 
 		return null;

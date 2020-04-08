@@ -6,7 +6,7 @@ const createCustomGroupType = (...keys: Array<string>) => {
 	if (keys.length > 1) {
 		keys.forEach((key, index) => {
 			if (index > 0) {
-				type = `${type}${key}`;
+				type = `${type}$${key}`;
 			}
 		});
 	}
