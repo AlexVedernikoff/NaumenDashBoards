@@ -2,7 +2,6 @@
 import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS} from './constants';
 import {defaultDashboardAction, initialDashboardState} from './init';
-import {setAutoUpdateFunction} from './helpers';
 
 const reducer = (state: DashboardState = initialDashboardState, action: DashboardAction = defaultDashboardAction): DashboardState => {
 	switch (action.type) {
@@ -59,9 +58,6 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				error: false,
 				loading: true
 			};
-		case DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION:
-			setAutoUpdateFunction(state, action.payload);
-			return state;
 		case DASHBOARD_EVENTS.SET_EDITABLE_PARAM:
 			return {
 				...state,

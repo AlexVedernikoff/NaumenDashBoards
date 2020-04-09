@@ -45,11 +45,6 @@ type RecordDashboardError = {
 	payload: null
 };
 
-type SetAutoUpdateFunction = {
-	type: typeof DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION,
-	payload: IntervalID
-};
-
 type SetEditable = {
 	type: typeof DASHBOARD_EVENTS.SET_EDITABLE_PARAM,
 	payload: boolean
@@ -84,7 +79,6 @@ export type DashboardAction =
 	| RequestDashboard
 	| ReceiveDashboard
 	| RecordDashboardError
-	| SetAutoUpdateFunction
 	| SetEditable
 	| SetPersonal
 	| SwitchOnEditMode
@@ -96,7 +90,7 @@ export type AutoUpdateSettings = {
 	defaultInterval: number,
 	enabled: boolean,
 	fn?: IntervalID,
-	interval?: number
+	interval: number
 };
 
 export type DashboardState = {

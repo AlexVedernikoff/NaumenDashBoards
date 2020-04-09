@@ -2,7 +2,7 @@
 import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EVENTS} from './constants';
+import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getContext, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
@@ -19,7 +19,10 @@ const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Pro
 	const {MinTimeIntervalUpdate: defaultInterval} = await window.jsApi.commands.getCurrentContentParameters();
 
 	if (defaultInterval) {
-		dispatch(changeAutoUpdateSettings({defaultInterval}));
+		dispatch(changeAutoUpdateSettings({
+			defaultInterval,
+			interval: defaultInterval
+		}));
 	}
 };
 
@@ -78,35 +81,36 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 	});
 	const {autoUpdate, customGroups, widgets} = data;
 
-	dispatch(setCustomGroups(customGroups));
-	dispatch(setWidgets(widgets));
-	dispatch(setAutoUpdate(autoUpdate));
-};
-
-const setAutoUpdate = (autoUpdate?: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	if (autoUpdate) {
-		const {autoUpdate: {defaultInterval}} = getState().dashboard;
-		const {enabled, interval} = autoUpdate;
-		dispatch(changeAutoUpdateSettings(autoUpdate));
-
-		if (enabled && interval > defaultInterval) {
-			dispatch(setAutoUpdateInterval(interval));
-		}
+	if (customGroups !== null) {
+		dispatch(setCustomGroups(customGroups));
 	}
+
+	if (autoUpdate !== null) {
+		dispatch(setAutoUpdate(autoUpdate));
+	}
+
+	dispatch(setWidgets(widgets));
 };
 
-/**
- * Устанавливает интервал автообновления
- * @param {number} interval - интервал обновления в минутах
- * @returns {ThunkAction}
- */
-const setAutoUpdateInterval = (interval: number): ThunkAction => (dispatch: Dispatch) => {
-	const fn = setInterval(() => dispatch(getSettings()), interval * 1000 * 60);
+const setAutoUpdate = (autoUpdate: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {
+		autoUpdate: {
+			fn: currentUpdateFunction
+		}
+	} = getState().dashboard;
+	const {enabled = false, interval = DEFAULT_INTERVAL} = autoUpdate;
+	let updateFunction;
 
-	dispatch({
-		type: DASHBOARD_EVENTS.SET_AUTO_UPDATE_FUNCTION,
-		payload: fn
-	});
+	clearInterval(currentUpdateFunction);
+
+	if (enabled) {
+		updateFunction = setInterval(() => dispatch(getSettings()), interval * 1000 * 60);
+	}
+
+	dispatch(changeAutoUpdateSettings({
+		...autoUpdate,
+		fn: updateFunction
+	}));
 };
 
 /**
@@ -284,7 +288,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 			isPersonal
 		});
 
-		dispatch(changeAutoUpdateSettings(autoUpdate));
+		dispatch(setAutoUpdate(autoUpdate));
 		dispatch(createToast({
 			text: 'Настройки успешно изменены!'
 		}));
