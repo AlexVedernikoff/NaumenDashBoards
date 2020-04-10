@@ -265,7 +265,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
         case COMBO:
             def normRequest = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
-
+            //TODO: требуется вариативность в наличии разбивок в источниках
             def (firstAdditionalData, secondAdditionalData) = (requestContent.data as Map)
                     .findAll { key, value -> !(value.sourceForCompute) }
                     .collect { key, value ->
@@ -763,10 +763,11 @@ private Attribute mappingAttribute(Map<String, Object> data)
  * @return возвращает новую пару ключ, данные запроса
  */
 private Map<String, List<List>> convertCustomGroup(Closure getData, String subjectUUID, String key, Map value) {
-    //TODO: сюда прокинуть uuid объекта
     def customGroup = value.customGroup as Map<String, Object>
+    String attributeCompositeType = customGroup.type
+    String attributeType = attributeCompositeType.split('\\$', 2).head()
     Closure<Collection<Collection<FilterParameter>>> mappingFilters =
-            getMappingFilterMethodByType(customGroup.type as String, subjectUUID)
+            getMappingFilterMethodByType(attributeType, subjectUUID)
     def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
     def requestData = getData.call(key as String) as RequestData
     def attribute = customGroup.attribute as Attribute
@@ -827,21 +828,21 @@ private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> dat
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long id = uuid.split('\\$', 2)[1] as long
+                long id = extractIDFromUUID(uuid)
                 return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
             case 'not_contains':
                 String uuid = condition.data.uuid
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long id = uuid.split('\\$', 2)[1] as long
+                long id = extractIDFromUUID(uuid)
                 return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
             case 'contains_any':
                 def uuidSet = condition.data*.uuid
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                def ids = uuidSet.collect { (it as String).split('\\$', 2)[1] as long }
+                def ids = uuidSet.collect {  extractIDFromUUID(it as String) }
                 return new FilterParameter(value: ids, title: title, type: Comparison.IN, attribute: tempAttribute)
             case 'title_contains':
                 def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
@@ -858,7 +859,7 @@ private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> dat
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long ids = uuid.split('\\$', 2)[1] as long
+                long ids = extractIDFromUUID(uuid)
                 return new FilterParameter(value: ids, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
             case 'contains_attr_current_object':
                 def object = api.utils.get(condition.data.uuid)
@@ -894,21 +895,21 @@ private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, L
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long id = uuid.split('\\$', 2)[1] as long
+                long id = extractIDFromUUID(uuid)
                 return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
             case 'not_contains':
                 String uuid = condition.data.uuid
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long id = uuid.split('\\$', 2)[1] as long
+                long id = extractIDFromUUID(uuid)
                 return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
             case 'in':
                 String uuidSet = condition.data*.uuid
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                Set<Long> idSet = uuidSet.collect { it.split('\\$', 2)[1] as long }
+                Set<Long> idSet = uuidSet.collect(this.&extractIDFromUUID)
                 return new FilterParameter(value: idSet, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
             case 'title_contains':
                 def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
@@ -925,24 +926,30 @@ private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, L
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long id = uuid.split('\\$', 2)[1] as long
+                long id = extractIDFromUUID(uuid)
                 return new FilterParameter(value: id, title: title, type: Comparison.EQUAL_REMOVED, attribute: tempAttribute)
             case 'not_contains_including_archival':
                 String uuid = condition.data.uuid
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long id = uuid.split('\\$', 2)[1] as long
+                long id = extractIDFromUUID(uuid)
                 return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL_REMOVED, attribute: tempAttribute)
+            case 'contains_any':
+                def uuidSet = condition.data*.uuid
+                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+                def tempAttribute = attribute.deepClone()
+                tempAttribute.addLast(idAttribute)
+                def ids = uuidSet.collect { extractIDFromUUID(it as String) }
+                return new FilterParameter(value: ids, title: title, type: Comparison.IN, attribute: tempAttribute)
             case ['contains_current_object', 'equal_current_object']:
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
                 long id = subjectUUID.split('\\$',2)[1] as long
-                //TODO: нужна проверка на соответствие типов
                 String subjectType = api.utils.get(subjectUUID).metaClass
                 if (subjectType != attribute.property)
-                    throw new IllegalArgumentException("Does not match subject type: $subjectType")
+                    throw new IllegalArgumentException("Does not match subject type: $subjectType and attribute type: ${tempAttribute.type}")
                 return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
             case 'contains_attr_current_object':
                 def object = api.utils.get(condition.data.uuid)
@@ -1008,7 +1015,7 @@ private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingStringTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title) {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison type ->
@@ -1325,6 +1332,7 @@ private List formatGroupSet(RequestData data, List list)
 private String formatGroup(GroupParameter parameter, String fqnClass, String value)
 {
     GroupType type = parameter.type
+    //TODO: дополнить новыми типами группировки
     switch (type)
     {
         case GroupType.OVERLAP:
@@ -1365,6 +1373,12 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                 specialDateFormatter.format(getTime())
             }
             return "$startDate - $endDate"
+        case GroupType.SECOND_INTERVAL:
+        case GroupType.MINUTE_INTERVAL:
+        case GroupType.HOUR_INTERVAL:
+        case GroupType.DAY_INTERVAL:
+        case GroupType.WEEK_INTERVAL:
+            return value
         default: throw new IllegalArgumentException("Not supported type: $type")
     }
 }
@@ -1512,74 +1526,45 @@ private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map
     def firstTransposeDataSet = (firstResultDataSet as List<List>)?.transpose()?:[]
     def secondTransposeDataSet = (secondResultDataSet as List<List>)?.transpose()?:[]
 
-    if (firstTransposeDataSet.size() != secondTransposeDataSet.size())
-        throw new IllegalArgumentException('Invalid format result data set')
+    Set labels = (firstTransposeDataSet[1] ?: []) + (secondTransposeDataSet[1] ?: [])
 
-    switch (firstTransposeDataSet.size())
-    {
-        case 0: // если результирующее множество пустое
-            return new ComboDiagram()
-        case 2:
-            Set labels = firstTransposeDataSet[1] + secondTransposeDataSet[1]
-            Collection firstDataSet = labels.collect { group ->
-                (firstResultDataSet as List<List>).findResult { el ->
-                    return el[1] == group ? el[0] : null
-                } ?: '0'
-            }
-            def firstSeries = new SeriesCombo(
-                    type: firstAdditionalData.type as String,
-                    breakdownValue: firstAdditionalData.breakdown as String,
-                    data: firstDataSet,
-                    name: firstAdditionalData.name as String,
-                    dataKey: firstAdditionalData.key as String
-            )
-
-            Collection secondDataSet = labels.collect { group ->
-                (secondResultDataSet as List<List>).findResult { el ->
-                    el[1] == group ? el[0] : null
-                } ?: '0'
-            }
-            def secondSeries = new SeriesCombo(
-                    type: secondAdditionalData.type as String,
-                    breakdownValue: secondAdditionalData.breakdown as String,
-                    data: secondDataSet,
-                    name: secondAdditionalData.name as String,
-                    dataKey: secondAdditionalData.key as String
-            )
-            def series = [firstSeries, secondSeries]
-            return new ComboDiagram(labels: labels, series: series)
-        case 3:
-            Set labels = firstTransposeDataSet[1] + secondTransposeDataSet[1]
-            def firstSeries = (firstTransposeDataSet[2] as Set).collect { breakdown ->
-                def first = firstResultDataSet as List<List>
-                def data = labels.collect { group ->
-                    first.findResult { it.tail() == [group, breakdown] ? it.head() : null } ?: '0'
+    Closure getsSeries = { Set labelSet, List<List> dataSet, Map additionalData ->
+        def transposeData = dataSet?.transpose() ?: []
+        switch (transposeData.size()) {
+            case 0:
+                return []
+            case 2:
+                Collection data = labelSet.collect { group ->
+                    dataSet.findResult { it[1] == group ? it[0] : null } ?: '0'
                 }
-                new SeriesCombo(
-                        type: firstAdditionalData.type as String,
-                        breakdownValue: breakdown as String,
+                def result =  new SeriesCombo(
+                        type: additionalData.type as String,
+                        breakdownValue: additionalData.breakdown as String,
                         data: data,
-                        name: breakdown as String,
-                        dataKey: firstAdditionalData.key as String
+                        name: additionalData.name as String,
+                        dataKey: additionalData.dataKey as String
                 )
-            }
-            def secondSeries = (secondTransposeDataSet[2] as Set).collect { breakdown ->
-                def second = secondResultDataSet as List<List>
-                def data = labels.collect { group ->
-                    second.findResult { it.tail() == [group, breakdown] ? it.head() : null } ?: '0'
+                return [result]
+            case 3:
+                return (transposeData[2] as Set).collect { breakdown ->
+                    new SeriesCombo(
+                            type: additionalData.type as String,
+                            breakdownValue: breakdown as String,
+                            data: labelSet.collect { group ->
+                                dataSet.findResult { it.tail() == [group, breakdown] ? it.head() : null } ?: '0'
+                            },
+                            name: breakdown as String,
+                            dataKey: additionalData.dataKey as String
+                    )
                 }
-                new SeriesCombo(
-                        type: secondAdditionalData.type as String,
-                        breakdownValue: breakdown as String,
-                        data: data,
-                        name: breakdown as String,
-                        dataKey: secondAdditionalData.key as String
-                )
-            }
-            def series = firstSeries + secondSeries
-            return new ComboDiagram(labels: labels, series: series)
-        default: throw new IllegalArgumentException('Invalid format result data set')
+            default: throw new IllegalArgumentException('Invalid format result data set')
+        }
     }
+
+    def firstSeries = getsSeries(labels, firstResultDataSet as List<List>, firstAdditionalData)
+    def secondSeries = getsSeries(labels, secondResultDataSet as List<List>, secondAdditionalData)
+
+    return new ComboDiagram(labels: labels, series: firstSeries + secondSeries)
 }
 
 /**
@@ -1591,6 +1576,15 @@ private setTitleInLinkAttribute(def attr)
 {
     def validTypes = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
     return attr.type in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
+}
+
+/**
+ * Метод извлечение id из uuid объекта
+ * @param uuid - уникальный идетнификатор
+ * @return id
+ */
+private long extractIDFromUUID(String uuid) {
+    return uuid.split('\\$', 2)[1] as long
 }
 
 /**
