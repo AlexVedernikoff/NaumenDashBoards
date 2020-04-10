@@ -2,6 +2,7 @@
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
 import {FIELDS, OPTIONS, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
+import {MiniSelect} from 'components/molecules';
 import React, {Fragment} from 'react';
 import {styles} from 'components/organisms/WidgetFormPanel/Tabs/ParamsTab';
 import withForm from 'components/organisms/WidgetFormPanel/withForm';
@@ -57,21 +58,21 @@ export class ComboChart extends DataFormBuilder {
 	};
 
 	renderChartInput = (index: number) => {
+		const {setDataFieldValue} = this.props;
 		const set = this.getSet(index);
-
-		const chart = {
-			name: FIELDS.type,
-			options: OPTIONS.CHARTS,
-			showCaret: false,
-			tip: 'Тип графика',
-			value: set[FIELDS.type]
-		};
 
 		return (
 			<div className={mainStyles.field}>
 				<div className={styles.chartInputContainer}>
 					<div className={styles.chartInput}>
-						{this.renderMiniSelect(chart)}
+						<MiniSelect
+							name={FIELDS.type}
+							onSelect={setDataFieldValue(index)}
+							options={OPTIONS.CHARTS}
+							showCaret={false}
+							tip="Тип графика"
+							value={set[FIELDS.type]}
+						/>
 					</div>
 					<div>Ось Y</div>
 				</div>

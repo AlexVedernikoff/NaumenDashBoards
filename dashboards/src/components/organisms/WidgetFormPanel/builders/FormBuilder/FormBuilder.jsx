@@ -2,7 +2,6 @@
 import {Checkbox, Divider, ExtendButton, FieldError, FieldLabel, Label, TextArea} from 'components/atoms';
 import type {CheckboxProps, LabelProps, TextAreaProps} from './types';
 import {formRef, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
-import {MiniSelect} from 'components/molecules';
 import type {Props as FormProps} from 'components/organisms/WidgetFormPanel/types';
 import type {Props as ExtendButtonProps} from 'components/atoms/ExtendButton/types';
 import React, {Component, Fragment} from 'react';
@@ -103,8 +102,6 @@ export class FormBuilder extends Component<FormProps> {
 			<Label {...props} />
 		</div>
 	);
-
-	renderMiniSelect = (props: Object) => <MiniSelect onSelect={this.handleSelect} {...props} />;
 
 	renderTextArea = (props: TextAreaProps) => {
 		const {handleBlur, label, name, placeholder, value} = props;
