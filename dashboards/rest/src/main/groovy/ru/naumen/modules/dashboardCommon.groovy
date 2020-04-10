@@ -136,6 +136,19 @@ class Attribute
      */
     Attribute ref
 
+    static Attribute fromMap(Map<String, Object> data)
+    {
+        return data ? new Attribute(
+                title: data.title as String,
+                code: data.code as String,
+                type: data.type as String,
+                property: data.property as String,
+                metaClassFqn: data.metaClassFqn as String,
+                sourceName: data.sourceName as String,
+                ref: fromMap(data.ref as Map<String, Object>)
+        ) : null
+    }
+
     List<Attribute> revelation() {
         return this.ref ? [this] + this.ref.revelation() : [this]
     }

@@ -743,15 +743,7 @@ private Map<String, RequestData> produceComputationData(Closure getData, Map map
  */
 private Attribute mappingAttribute(Map<String, Object> data)
 {
-    return data ? new Attribute(
-            title: data.title as String,
-            code: data.code as String,
-            type: data.type as String,
-            property: data.property as String,
-            metaClassFqn: data.metaClassFqn as String,
-            sourceName: data.sourceName as String,
-            ref: mappingAttribute(data.ref as Map<String, Object>)
-    ) : null
+    return Attribute.fromMap(data)
 }
 
 /**
@@ -802,7 +794,7 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
         case ['date', 'dateTime']:
             return this.&mappingDateTypeFilters
         case 'state':
-            return this.&mappingSateTypeFilters
+            return this.&mappingStateTypeFilters
         case ['boLinks', 'backBOLinks', 'object']:
             return this.&mappingLinkTypeFilters.curry(subjectUUID)
         case ['catalogItem', 'catalogItemSet']:
@@ -1156,7 +1148,7 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
     }
 }
 
-private List<List<FilterParameter>> mappingSateTypeFilters(List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingStateTypeFilters(List<List> data, Attribute attribute, String title) {
     mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
@@ -1184,8 +1176,6 @@ private List<List<FilterParameter>> mappingSateTypeFilters(List<List> data, Attr
                 if (!object.keySet().find('state'.&equals))
                     throw new IllegalArgumentException("object ${condition.data} not contain attribute: 'state'")
                 return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, object.state)
-            case 'equal_attr_current_object':
-                throw new IllegalArgumentException("Not supported condition type: $conditionType")
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }

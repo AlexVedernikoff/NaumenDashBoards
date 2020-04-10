@@ -133,16 +133,18 @@ class Link
                 .setAttrCodes(attrCodes)
                 .setDaysToLive(liveDays)
         template?.with(builder.&setTemplate)
-        formatFilter(builder.filter())
+        def filterBuilder = builder.filter()
+        addDescriptorInFilter(filterBuilder, descriptor)
+        formatFilter(filterBuilder)
         return builder
     }
 
     /**
-     * Вспомогательный метод для формирования фильтра
+     * Применение дескриптора в фильтре
      * @param filterBuilder - билдер для фильтра
+     * @param descriptor - объект фильтрации
      */
-    private void formatFilter(def filterBuilder)
-    {
+    private void addDescriptorInFilter(def filterBuilder, String descriptor) {
         if (descriptor)
         {
             def iDescriptor = DashboardMarshaller.createContext(descriptor)
@@ -151,51 +153,202 @@ class Link
                     String attribute = filter.getAttributeFqn() as String
                     String condition = filter.getProperties().conditionCode
                     def value = filter.getValue()
-
-                    condition == 'containsSubject'
-                            ? filterBuilder.OR(attribute, 'contains', utils.get(iDescriptor.clientSettings.formObjectUuid as String))
-                            : filterBuilder.OR(attribute, condition, value)
+                    if (condition == 'containsSubject') { // костыль. так как дескриптор статичный, а условие должно быть динамичным
+                        def uuidSubject = utils.get(iDescriptor.clientSettings.formObjectUuid as String)
+                        filterBuilder.OR(attribute, 'contains', uuidSubject)
+                    } else {
+                        filterBuilder.OR(attribute, condition, value)
+                    }
                 }
             }.inject(filterBuilder) { first, second -> first.AND(*second) }
         }
+    }
 
+    /**
+     * Вспомогательный метод для формирования фильтра
+     * @param filterBuilder - билдер для фильтра
+     */
+    private void formatFilter(def filterBuilder)
+    {
         if (filters)
         {
-            filters.groupBy { it.attr as Attribute }.collect { Attribute attr, Collection<Map<Object, Object>> filters ->
-                Map<GroupType, Collection<Object>> context = createContextFromFilters(filters)
-                Collection<Collection<Object>> result = []
-                //финт ушам. Предполагается проверить группировку OVERLAP сформировать по ней фильтр,
-                // и после удалить из контекста, чтобы потом передать его для формирования диапазонов времени
-                // Но это можно сделать за вызов одного метода
-                context.remove(GroupType.OVERLAP).each { value ->
-                    if (attr.type in LINK_TYPE_ATTRIBUTES)
-                    {
-                        def objects = findObjects(attr.ref, attr.property, value)
-                        result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
-                    }
-                    else
-                    {
-                        result << [getOrFilter(attr.type, attr.code, value, filterBuilder)]
+            filters.groupBy { Attribute.fromMap(it.attribute as Map) }.collect { Attribute attr, Collection<Map> filter ->
+                Collection<Collection> result = []
+                def contextValue = filter.findResults { map ->
+                    def group = map.group as Map
+                    def value = map.value
+                    String groupWay = group.way
+                    GroupType groupType = groupWay.toLowerCase() == 'system'
+                            ? attr.type == 'dtInterval' ? getDTIntervalGroupType(group.data as String) : group.data as GroupType
+                            : null
+                    groupType ? [(groupType): [value]] : null
+                }
+
+                //Тут находим нужную подгруппу пользовательской группировки
+                def customSubGroupSet = filter.findResults { map ->
+                    def group = map.group as Map
+                    String value = map.value
+                    if (group.way == 'custom') {
+                        def customGroup = group.data as Map
+                        def subGroupSet = customGroup.subGroups as Collection
+                        return subGroupSet.findResult {
+                            def subgroup = it as Map
+                            subgroup.name == value ? subgroup.data as Collection<Collection<Map>> : null
+                        }
+                    } else {
+                        return null
                     }
                 }
 
-                if (context)
-                {
+                def context = createContext(contextValue)
+                context.remove(GroupType.OVERLAP).each { value ->
+                    if (attr.type in LINK_TYPE_ATTRIBUTES) {
+                        def objects = findObjects(attr.ref, attr.property, value)
+                        result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                    } else {
+                        result << [getOrFilter(attr.type, attr.code, value, filterBuilder)]
+                    }
+                }
+                if (context) {
                     result << getRanges(context, this.&getMinDate.curry(attr.code)).collect { range ->
-                        if (attr.type in LINK_TYPE_ATTRIBUTES)
-                        {
+                        if (attr.type in LINK_TYPE_ATTRIBUTES) {
                             def (first, second) = range
                             def objects = findObjects(attr.ref, attr.property, op.between(first, second))
                             filterBuilder.OR(attr.code, 'containsInSet', objects)
-                        }
-                        else
-                        {
+                        } else {
                             filterBuilder.OR(attr.code, 'fromTo', range)
                         }
                     }
                 }
+                for (customSubGroupCondition in customSubGroupSet) {
+                    switch (attr.type) {
+                        case 'dtInterval':
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    String condition = getFilterCondition(it.type as String)
+                                    def interval = it.data as Map
+                                    def value = interval
+                                            ? api.types.newDateTimeInterval([interval.value as long, interval.type as String]).toMiliseconds()
+                                            : null
+                                    filterBuilder.OR(attr.code, condition, value)
+                                }
+                            }
+                            break
+                        case 'string':
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    String condition = getFilterCondition(it.type as String)
+                                    String value = it.data
+                                    filterBuilder.OR(attr.code, condition, value)
+                                }
+                            }
+                            break
+                        case 'integer':
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    String condition = getFilterCondition(it.type as String)
+                                    def value = it.data ? it.data as int : null
+                                    filterBuilder.OR(attr.code, condition, value)
+                                }
+                            }
+                            break
+                        case 'double':
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    String condition = getFilterCondition(it.type as String)
+                                    def value = it.data ? it.data as double : null
+                                    filterBuilder.OR(attr.code, condition, value)
+                                }
+                            }
+                            break
+                        case ['date', 'dateTime']:
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    switch (it.type as String) {
+                                        case 'today':
+                                            return filterBuilder.OR(attr.code, 'today', null)
+                                        case 'last':
+                                            return filterBuilder.OR(attr.code, 'lastN', it.data as int)
+                                        case 'near':
+                                            return filterBuilder.OR(attr.code, 'nextN', it.data as int)
+                                        case 'between':
+                                            String dateFormat = 'yyyy-MM-dd'
+                                            def date = it.data as Map<String, Object> // тут будет массив дат
+                                            def start = Date.parse(dateFormat, date.startDate as String)
+                                            def end = Date.parse(dateFormat, date.endDate as String)
+                                            return filterBuilder.OR(attr.code, 'fromTo', [start, end])
+                                        default: throw new IllegalArgumentException("Not supported")
+                                    }
+                                }
+                            }
+                            break
+                        case 'state':
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    switch (it.type as String) {
+                                        case 'contains':
+                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                        case 'not_contains':
+                                            return filterBuilder.OR(attr.code, 'notContains', it.data.uuid)
+                                        case 'contains_any':
+                                            return filterBuilder.OR(attr.code, 'containsInSet', it.data*.uuid)
+                                        case 'title_contains':
+                                            return filterBuilder.OR(attr.code, 'titleContains', it.data)
+                                        case 'title_not_contains':
+                                            return filterBuilder.OR(attr.code, 'titleNotContains', it.data)
+                                        case ['equal_subject_attribute', 'equal_attr_current_object']:
+                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                        default: throw new IllegalArgumentException("Not supported condition type: ${it.type}")
+                                    }
+                                }
+                            }
+                            break
+                        case ['boLinks', 'backBOLinks', 'object']: break
+                        case ['catalogItem', 'catalogItemSet']: break
+                        default: throw new IllegalArgumentException("Not supported attribute type: ${attr.type}")
+                    }
+                }
                 result
-            }.each { it.inject(filterBuilder) { first, second -> first.AND(*second) } }
+            }.each { it ->
+                it.inject(filterBuilder) { first, second -> first.AND(*second) }
+            }
+        }
+    }
+
+    private String getFilterCondition(String condition) {
+        switch (condition) {
+            case 'empty':
+                return 'null'
+            case 'not_empty':
+                return 'notNull'
+            case ['equal', 'contains']:
+                return 'contains'
+            case ['not_contains', 'not_equal', 'not_contains_not_empty']:
+                return 'notContains'
+            case 'greater':
+                return 'greater'
+            case 'less':
+                return 'less'
+            default: throw new IllegalArgumentException("Not Supported condition type $condition")
+        }
+    }
+
+    private GroupType getDTIntervalGroupType(String groupType) {
+        switch (groupType.toLowerCase()) {
+            case 'overlap':
+                return GroupType.OVERLAP
+            case 'second':
+                return GroupType.SECOND_INTERVAL
+            case 'minute':
+                return GroupType.MINUTE_INTERVAL
+            case 'hour':
+                return GroupType.HOUR_INTERVAL
+            case 'day':
+                return GroupType.DAY_INTERVAL
+            case 'week':
+                return GroupType.WEEK_INTERVAL
+            default:
+                throw new IllegalArgumentException("Not supported group type in dateTimeInterval attribute: $groupType")
         }
     }
 
@@ -230,12 +383,17 @@ class Link
     /**
      * Метод создания контекста из из списка фильтров сгруппированных по атрибуту
      * @param filters - список фильтров сгруппированных по одному атрибуту
-     * @return комбинацыя типа группировки и списка значения фильтра
+     * @return комбинация типа группировки и списка значения фильтра
      */
-    private Map<GroupType, Collection<Object>> createContextFromFilters(Collection<Map<Object, Object>> filters)
+    private Map<GroupType, Collection> createContextFromFilters(Collection<Map> filters)
     {
-        Map<GroupType, Collection<Object>> result = [:]
-        filters.collect { [(it.group as GroupType): [it.value]] }.each {
+        def data = filters.collect { [(it.group.data as GroupType): [it.value]] }
+        return createContext(data)
+    }
+
+    private Map<GroupType, Collection> createContext(Collection<Map<GroupType, Object>> data) {
+        Map<GroupType, Collection> result = [:]
+        data.each {
             it.containsKey(GroupType.OVERLAP) && result.containsKey(GroupType.OVERLAP)
                     ? result << [(GroupType.OVERLAP): result.get(GroupType.OVERLAP) + it.get(GroupType.OVERLAP)]
                     : result << it
