@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
 import {EditIcon, MinusIcon} from 'icons/form';
-import {IconButton, Loader} from 'components/atoms';
+import {IconButton, Loader, OutsideClickDetector} from 'components/atoms';
 import {InputForm, SimpleSelectMenu} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -154,12 +154,14 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		});
 
 		return (
-			<div className={selectCN}>
-				{this.renderTitle()}
-				{this.renderLoader()}
-				{this.renderIndicators()}
-				{this.renderMenu()}
-			</div>
+			<OutsideClickDetector onClickOutside={this.hideMenu}>
+				<div className={selectCN}>
+					{this.renderTitle()}
+					{this.renderLoader()}
+					{this.renderIndicators()}
+					{this.renderMenu()}
+				</div>
+			</OutsideClickDetector>
 		);
 	};
 
