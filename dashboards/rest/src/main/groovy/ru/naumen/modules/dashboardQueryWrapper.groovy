@@ -421,8 +421,27 @@ class QueryWrapper
         //Смотрим на тип последнего вложенного атрибута
         String attributeType = parameter.attribute.revelation().last().type
 
-        if (type in GroupType.values() - GroupType.OVERLAP && !(attributeType in DATE_TYPES))
-            throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+        switch (attributeType) {
+            case DATE_TIME_INTERVAL:
+                def groupTypeSet = GroupType.with {
+                    [OVERLAP, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL, DAY_INTERVAL, WEEK_INTERVAL]
+                }
+                if (!(type in groupTypeSet)) {
+                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                }
+                break
+            case DATE_TYPES:
+                def groupTypeSet = GroupType.with { [OVERLAP, DAY, SEVEN_DAYS, WEEK, MONTH, QUARTER, YEAR] }
+                if(!(type in groupTypeSet)) {
+                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                }
+                break
+            default:
+                if (type != GroupType.OVERLAP) {
+                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                }
+                break
+        }
     }
 }
 
