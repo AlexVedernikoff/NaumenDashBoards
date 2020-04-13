@@ -259,9 +259,15 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 		}
 
 		const {title: label, value} = sources.data.map[classFqn];
-		newWidget.descriptor = descriptorStr;
 		newWidget.name = '';
-		newWidget.source = {label, value};
+		newWidget.data[0] = {
+			...newWidget.data[0],
+			descriptor: descriptorStr,
+			source: {
+				label,
+				value
+			}
+		};
 
 		dispatch(addWidget(newWidget));
 		dispatch(editDashboard());

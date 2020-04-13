@@ -317,6 +317,7 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 			},
 			background: 'white',
 			events: {
+				click: event => event.stopPropagation(),
 				dataPointSelection: drillDownBySelection(widget, data)
 			},
 			height: '100%',
