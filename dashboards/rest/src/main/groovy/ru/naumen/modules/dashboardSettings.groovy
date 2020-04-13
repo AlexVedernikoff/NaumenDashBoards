@@ -144,15 +144,14 @@ String saveAutoUpdateSettings(Map<String, Object> requestContent, def user) {
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
     def autoUpdate = requestContent.autoUpdate as AutoUpdate
-
+    boolean isPersonal = requestContent.isPersonal
     String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
     String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
-
     def settings = getDashboardSetting(personalDashboardKey)
             ?: getDashboardSetting(defaultDashboardKey)
             ?: new DashboardSettings()
     settings.autoUpdate = autoUpdate
-    return saveJsonSettings(personalDashboardKey, toJson(settings))
+    return saveJsonSettings(isPersonal ? personalDashboardKey : defaultDashboardKey, toJson(settings))
 }
 
 /**
@@ -441,19 +440,34 @@ String editWidget(Map<String, Object> requestContent, def user)
  */
 String editLayouts(Map<String, Object> requestContent, def user)
 {
-    def  layouts = requestContent.layouts
+    def  layouts = requestContent.layouts as List
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
-    return layouts.collect {
-        def widget = setLayoutInSettings(it)
-        Map<String, Object> widgetRequest = [
-                editable      : true,
-                classFqn      : classFqn,
-                contentCode   : contentCode,
-                widget        : widget,
-                isPersonal    : requestContent.isPersonal]
-        editWidget(widgetRequest, user)
+    boolean isPersonal = requestContent.isPersonal
+
+    String dashboardKey = isPersonal
+            ? generateDashboardKey(classFqn, contentCode, user.login as String)
+            : generateDashboardKey(classFqn, contentCode)
+    def settings = getDashboardSetting(dashboardKey)
+
+    def widgetKeySet = layouts.collect { layoutSetting ->
+        String widgetKey = layoutSetting.key
+        def value = layoutSetting.value
+        if (widgetKey in settings.widgetIds) {
+            def widgetLayoutSettings = value as WidgetSettings
+            def widgetSettings = getWidgetSettings(widgetKey)
+            widgetSettings.layout = widgetLayoutSettings.value
+            if (saveJsonSettings(widgetKey, toJson(widgetSettings))) {
+                return widgetKey
+            } else {
+                throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
+            }
+        } else {
+            logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
+            return null
+        }
     }
+    return widgetKeySet
 }
 
 /**
@@ -721,27 +735,14 @@ boolean isPersonalWidget(String widgetKey, def user)
 private def setUuidInSettings(def widgetSettings, String key)
 {
     //widgetSettings является неизменяемым, поэтому создаём ноый объект и копируем все значения
-    def settings = [:] << (widgetSettings)
+    //Преобразоване в LinkedHashMap необходимо так как, не у всех реализаций интерфейса Map реализован метод клоне
+    def settings = (widgetSettings as LinkedHashMap).clone() as Map
     settings.id = key
     //так как копирование было не глубокое, копируем ещё
-    def layout = [:] << settings.layout
+    def layout = (settings.layout as LinkedHashMap).clone() as Map
     layout.i = key
     settings.layout = layout
     return settings
-}
-
-/**
- * Добавить layout в настройки
- * @param responseWidgetSettings настройки виджета в формате ResponseWidgetSettings
- * @return настройки виджета с обновленным layout
- */
-private def setLayoutInSettings(Map<String, Object> settings)
-{ //TODO: а зачем вообще нужен этот метод?
-    WidgetSettings widgetSettings = settings as WidgetSettings
-    def newSettings = getSettingsFromJson(loadJsonSettings(widgetSettings.key))
-    newSettings.layout = widgetSettings.value
-    return newSettings
-
 }
 
 /**
