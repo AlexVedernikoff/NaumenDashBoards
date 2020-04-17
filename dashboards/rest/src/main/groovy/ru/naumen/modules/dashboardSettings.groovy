@@ -440,7 +440,7 @@ String editWidget(Map<String, Object> requestContent, def user)
  */
 String editLayouts(Map<String, Object> requestContent, def user)
 {
-    def  layouts = requestContent.layouts as List
+    def  layouts = requestContent.layouts as List<Map>
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
     boolean isPersonal = requestContent.isPersonal
@@ -450,21 +450,26 @@ String editLayouts(Map<String, Object> requestContent, def user)
             : generateDashboardKey(classFqn, contentCode)
     def settings = getDashboardSetting(dashboardKey)
 
-    def widgetKeySet = layouts.collect { layoutSetting ->
+    def widgetKeySet = layouts.collect { Map layoutSetting ->
         String widgetKey = layoutSetting.key
         def value = layoutSetting.value
-        if (widgetKey in settings.widgetIds) {
-            def widgetLayoutSettings = value as WidgetSettings
-            def widgetSettings = getWidgetSettings(widgetKey)
-            widgetSettings.layout = widgetLayoutSettings.value
-            if (saveJsonSettings(widgetKey, toJson(widgetSettings))) {
-                return widgetKey
+        if (value) {
+            if (widgetKey in settings.widgetIds) {
+                def widgetSettings = getWidgetSettings(widgetKey)
+                widgetSettings.layout = value
+                if (saveJsonSettings(widgetKey, toJson(widgetSettings))) {
+                    return widgetKey
+                } else {
+                    throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
+                }
             } else {
-                throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
+                logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
+                return null
             }
         } else {
-            logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
-            return null
+            String message = "Empty layout settings from widget: $widgetKey"
+            logger.error(message)
+            throw new IllegalArgumentException(message)
         }
     }
     return widgetKeySet
