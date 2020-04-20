@@ -22,10 +22,10 @@ import static groovy.json.JsonOutput.toJson
 @Field private static final Collection<String> VALID_LINK_TYPE_ATTRIBUTE =
         ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'metaClass']
 @Field private static final Collection<String> VALID_SIMPLE_TYPE_ATTRIBUTE =
-        ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText']
+        ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText', 'timer', 'backTimer']
 @Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
-        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'metaClass',
-         'dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText']
+        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'metaClass', 'dtInterval',
+         'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText', 'timer', 'backTimer']
 //endregion
 
 //region КЛАССЫ
@@ -128,7 +128,7 @@ String getAttributeObject(Map requestContent) {
                         .collect { it*.code as Set }
                         .inject { first, second -> first + second }
                         .collect { api.utils.count(it, [parent: el.UUID]) as int }
-                        .inject(0) {first, second -> first + second}
+                        .inject(0) {first, second -> first + second }
         ]
     }
     return toJson(result)
@@ -200,6 +200,18 @@ String getStates(String classFqn)
             ?.sort { it.title }
             ?.collect { [title: it.title, uuid: it.code] } ?: []
     return toJson(result)
+}
+
+
+String getTimerStatuses() {
+    //TODO: по хорошему эти значение нужно запрашивать у системы
+    def res = [
+            [title: 'Ожидает начала', uuid: '?'],
+            [title: 'Активен', uuid: 'a'],
+            [title: 'Приостановлен', uuid: 'p'],
+            [title: 'Кончился запас времени', uuid: 'e']
+    ]
+    return res
 }
 
 /**

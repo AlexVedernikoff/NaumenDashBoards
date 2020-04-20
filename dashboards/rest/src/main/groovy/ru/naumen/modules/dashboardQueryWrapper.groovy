@@ -13,18 +13,46 @@ package ru.naumen.modules
 
 import ru.naumen.core.server.hquery.*
 
+@ru.naumen.core.server.script.api.injection.InjectApi
+trait CriteriaWrapper {
+    HCriteria buildCriteria(Source source) {
+        return source.descriptor ? source.descriptor
+                .with(api.listdata.&createListDescriptor)
+                .with(api.listdata.&createCriteria) as HCriteria
+                : HHelper.create().addSource(source.classFqn) as HCriteria
+    }
+
+    HColumn getCriteriaColumn(HCriteria criteria, Attribute attribute) {
+        return attribute.revelation().inject(criteria as HColumn) { column, attr ->
+            addAttributeInCriteria(column, attr)
+        }
+    }
+
+    abstract HColumn addAttributeInCriteria(HColumn column, Attribute attribute)
+
+    List execute(HCriteria criteria) {
+        return api.db.query(criteria).list()
+    }
+
+    String showQuery(HCriteria criteria) { //TODO: в дальнейшем удалить
+        return criteria.getDelegate().generateHQL(beanFactory.getBean('sessionFactory').getCurrentSession())
+    }
+}
+
 /**
  * Класс обёртка над HCriteria.
  * Класс бля получений из бд данных диаграмм.
  */
 @ru.naumen.core.server.script.api.injection.InjectApi
-class QueryWrapper
+class QueryWrapper implements CriteriaWrapper
 {
     private RequestData data // данные тут нужны только из-за подсчёта процентов
     private HCriteria criteria
     private List result
     private String locale
 
+    //TODO: Придётся переписывать весь модуль для возможности кастомизировать его костылями.
+    private final static TIMER_TYPE = ['timer', 'backTimer']
     private final static NUMBER_TYPES = ['integer', 'double']
     private final static DATE_TYPES = ['date', 'dateTime']
     private final static LINK_TYPES = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
@@ -63,16 +91,55 @@ class QueryWrapper
     }
 
     /**
+     * Метод добавления кода атрибута в цепочку кодов. Нужен для работы с ссылочными атрибутами
+     * @param hColumn   - цепочка кодов атрибутов.
+     * @param attribute - атрибут.
+     * @return HColumn
+     */
+    @Override
+    private HColumn addAttributeInCriteria(HColumn column, Attribute attribute) {
+        String code = attribute.code == 'UUID' ? 'id' : attribute.code // Костыль.
+        // В БД нет 'UUID' есть только 'id'
+        // Неприятности могут возникнуть в модуле drilldown только в случае,
+        // если пользователь построит диаграмму с разбивкой по уникальному идентификатору. Но это лишено смысла.
+        switch (attribute.type)
+        {
+            case LINK_TYPES:
+                return column.addInnerJoin(code)
+            case SIMPLE_TYPES:
+                return column.getProperty(code)
+            case DATE_TIME_INTERVAL:
+                return column.getProperty(code).getProperty('ms')
+            case LOCALIZED_TEXT:
+                return column.getProperty(code).getProperty(locale)
+            case TIMER_TYPE:
+                return column.getProperty(code)//.getProperty('statusCode') // у таймера нас интересует только его статус
+                // не совсем
+            default:
+                throw new IllegalArgumentException("Not support attribute type: ${attribute.type}")
+        }
+    }
+
+    /**
      * Метод применения агрегации.
      * @param parameter - атрибут и тип агрегации.
      */
     private void aggregation(AggregationParameter parameter)
     {
         Aggregation aggregationType = parameter.type
+
+        parameter.attribute.revelation().last().with { //костыль, если попался таймер, то нас интересует его статус
+            if (it.type in TIMER_TYPE) {
+                it.ref = new Attribute(title: 'статус', code: 'statusCode', type: 'string')
+            }
+        }
+
         String code = getCriteriaColumnCode(parameter.attribute)
         switch (aggregationType)
         {
             case Aggregation.PERCENT:
+                //TODO: имеется проблема при вычислении процента в пустом множестве.
+                // результатом является неопределённость (0/0)
                 criteria.addColumn(aggregationType.apply(code, getTotalCount() as String))
                 break
             case Aggregation.values() - Aggregation.PERCENT:
@@ -88,6 +155,11 @@ class QueryWrapper
      */
     private void grouping(GroupParameter parameter)
     {
+        parameter.attribute.revelation().last().with { //костыль, если попался таймер, то нас интересует его статус
+            if (it.type in TIMER_TYPE) {
+                it.ref = new Attribute(title: 'статус', code: 'statusCode', type: 'string')
+            }
+        }
         HColumn columnCode = getCriteriaColumnCode(parameter.attribute)
         GroupType type = parameter.type
         switch (type)
@@ -287,12 +359,13 @@ class QueryWrapper
     {
         HCriteria totalCriteria = buildCriteria(source)
         attributes.each { attribute ->
-            (attribute.revelation().inject(totalCriteria, this.&addAttributeInCriteria) as String)
-                    .with(HHelper.&getColumn)
+            getCriteriaColumn(totalCriteria, attribute)
                     .with(HRestrictions.&isNotNull)
                     .with(totalCriteria.&add)
         }
-        return totalCriteria.addColumn(Aggregation.COUNT_CNT.apply(totalCriteria.getAlias() as String))
+        def countColumn = Aggregation.COUNT_CNT.apply(totalCriteria.getAlias() as String)
+        totalCriteria.addColumn(countColumn)
+        return totalCriteria
     }
 
     /**
@@ -303,70 +376,9 @@ class QueryWrapper
     private HColumn getCriteriaColumnCode(Attribute attribute)
     {
         assert attribute: "Empty attribute"
-        return attribute.revelation().inject(criteria, this.&addAttributeInCriteria)
+        return getCriteriaColumn(criteria, attribute)
     }
 
-    /**
-     * Метод добавления кода атрибута в цепочку кодов. Нужен для работы с сылочными атрибутами
-     * @param hColumn   - цепочка кодов атрибутов.
-     * @param attribute - атрибут.
-     * @return HColumn
-     */
-    private HColumn addAttributeInCriteria(HColumn hColumn, Attribute attribute)
-    {
-        String code = attribute.code == 'UUID' ? 'id' : attribute.code // Костыль.
-        // В БД нет 'UUID' есть только 'id'
-        // Неприятности могут возникнуть в модуле drilldown только в случае,
-        // если пользователь построит диаграмму с разбивкой по уникальному идентификатору. Но это лишено смысла.
-        switch (attribute.type)
-        {
-            case LINK_TYPES:
-                return hColumn.addInnerJoin(code)
-            case SIMPLE_TYPES:
-                return hColumn.getProperty(code)
-            case DATE_TIME_INTERVAL:
-                return hColumn.getProperty(code).getProperty('ms')
-            case LOCALIZED_TEXT:
-                return hColumn.getProperty(code).getProperty(locale)
-            default:
-                throw new IllegalArgumentException("Not support attribute type: ${attribute.type}")
-        }
-    }
-
-    /**
-     * Метод создания критерии по источнику даных
-     * @param source - источник данных
-     * @return HCriteria
-     */
-    private HCriteria buildCriteria(Source source)
-    {
-        HCriteria criteria = source.descriptor ? source.descriptor
-                .with(api.listdata.&createListDescriptor)
-                .with(api.listdata.&createCriteria)
-                : HHelper.create().addSource(source.classFqn)
-        criteria.getOrders().clear()
-        return criteria
-    }
-
-    /**
-     * Метод исполнения запроса
-     * @param criteria - запрос
-     * @return результат запроса
-     */
-    private execute(HCriteria criteria)
-    {
-        return api.db.query(criteria).list()
-    }
-
-    /**
-     * Метод получения HQL запроса из критерии
-     * @param criteria - запрос
-     * @return HQL запроса
-     */
-    private showQuery(HCriteria criteria)
-    { //TODO: в дальнейшем удалить
-        criteria.getDelegate().generateHQL(beanFactory.getBean('sessionFactory').getCurrentSession())
-    }
 
     /**
      * Метод проверки данных запроса.
@@ -403,12 +415,20 @@ class QueryWrapper
      * Бросает исключение.
      * @param parameter - параметр агрегации
      */
-    private static def validate(AggregationParameter parameter)
+    private static def validate(AggregationParameter parameter) throws IllegalArgumentException
     {
         Aggregation type = parameter.type
         String attributeType = parameter.attribute.type
-        if (type in [Aggregation.MIN, Aggregation.MAX, Aggregation.SUM, Aggregation.AVG] && !(attributeType in NUMBER_TYPES))
-            throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+        switch (attributeType) {
+            case NUMBER_TYPES:
+                if (!(type in Aggregation.with { [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT] }))
+                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+                break
+            default:
+                if (!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT]))
+                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+                break
+        }
     }
 
     /**
