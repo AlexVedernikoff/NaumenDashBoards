@@ -11,3 +11,17 @@ export type FormRef = {
 export type InputRef = {
 	current: null | HTMLInputElement
 };
+
+export type InputValue = string | number | boolean;
+
+export type OnChangeInputEvent = {
+	name: string,
+	value: InputValue
+};
+
+export type SelectValue = string | null | Object;
+
+export type OnSelectEvent = {
+	name: string,
+	value: SelectValue
+};
