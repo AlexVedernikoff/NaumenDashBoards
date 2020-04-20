@@ -189,7 +189,6 @@ class SeriesCombo
  */
 String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectUuid)
 {
-    //TODO: прокинуть uuid внутрь метода
     return requestContent.collectEntries { key, value ->
         api.tx.call {
             try
@@ -794,20 +793,30 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
         case ['date', 'dateTime']:
             return this.&mappingDateTypeFilters
         case 'state':
-            return this.&mappingStateTypeFilters
+            return this.&mappingStateTypeFilters.curry(subjectUUID)
         case ['boLinks', 'backBOLinks', 'object']:
             return this.&mappingLinkTypeFilters.curry(subjectUUID)
         case ['catalogItem', 'catalogItemSet']:
-            return this.&mappingCatalogItemTypeFilters
+            return this.&mappingCatalogItemTypeFilters.curry(subjectUUID)
         case 'metaClass':
             //TODO: тут с этим не так всё просто. В критерии нет поля метакласс
             throw new IllegalArgumentException("Still not supported attribute type: $type in custom group")
+        case ['timer', 'backTimer']:
+            return this.&mappingTimerTypeFilters//TODO: реализовать
         default:
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
     }
 }
 
-private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> data, Attribute attribute, String title) {
+/**
+ * Метод преодбразований настроек группировки для каталогов
+ * @param subjectUUID - идентификатор "текущего объекта"
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
+ */
+private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         switch (conditionType.toLowerCase()) {
@@ -847,23 +856,22 @@ private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> dat
                 tempAttribute.addLast(titleAttribute)
                 return new FilterParameter(value: condition.data, title: title, type: Comparison.NOT_CONTAINS, attribute: tempAttribute)
             case 'contains_current_object':
-                String uuid = condition.data.uuid
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long ids = extractIDFromUUID(uuid)
-                return new FilterParameter(value: ids, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+                long id = extractIDFromUUID(subjectUUID)
+                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
             case 'contains_attr_current_object':
-                def object = api.utils.get(condition.data.uuid)
-                def subjectAttribute = condition.data.attr
-                def value = object[subjectAttribute.code as String] // это может быть как примитив, так и объект
+                def object = api.utils.get(subjectUUID)
+                def subjectAttribute = condition.data
+                def subjectAttributeValue = object[subjectAttribute.code as String] // это может быть как примитив, так и объект
                 String subjectAttributeType = subjectAttribute.type
                 if (subjectAttributeType == attribute.type) {
                     def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                     def tempAttribute = attribute.deepClone()
                     tempAttribute.addLast(idAttribute)
-                    String uuid = value.UUID
-                    long id = uuid.split('\\$',2)[1] as long
+                    String uuid = subjectAttributeValue.UUID
+                    long id = extractIDFromUUID(uuid)
                     return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
                 } else {
                     throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
@@ -874,6 +882,14 @@ private List<List<FilterParameter>> mappingCatalogItemTypeFilters(List<List> dat
     }
 }
 
+/**
+ * Метод преодбразований настроек группировки для ссылочных типов
+ * @param subjectUUID - идентификатор "текущего объекта"
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
+ */
 private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
@@ -938,22 +954,22 @@ private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, L
                 def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(idAttribute)
-                long id = subjectUUID.split('\\$',2)[1] as long
+                long id = extractIDFromUUID(subjectUUID)
                 String subjectType = api.utils.get(subjectUUID).metaClass
                 if (subjectType != attribute.property)
                     throw new IllegalArgumentException("Does not match subject type: $subjectType and attribute type: ${tempAttribute.type}")
                 return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
             case 'contains_attr_current_object':
-                def object = api.utils.get(condition.data.uuid)
-                def subjectAttribute = condition.data.attr
-                def value = object[subjectAttribute.code as String] // это может быть как примитив, так и объект
+                def subject = api.utils.get(subjectUUID)
+                def subjectAttribute = condition.data
+                def subjectAttributeValue = subject[subjectAttribute.code as String] // это может быть как примитив, так и объект
                 String subjectAttributeType = subjectAttribute.type
                 if (subjectAttributeType == attribute.type) {
                     def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
                     def tempAttribute = attribute.deepClone()
                     tempAttribute.addLast(idAttribute)
-                    String uuid = value.UUID
-                    long id = uuid.split('\\$',2)[1] as long
+                    String uuid = subjectAttributeValue.UUID
+                    long id = extractIDFromUUID(uuid)
                     return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
                 } else {
                     throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
@@ -1139,16 +1155,24 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
             return buildFilterParameterFromCondition([start, end])
             case 'between':
                 String dateFormat = 'yyyy-MM-dd'
-                def date = condition.data as Map<String, Object> // тут будет массив дат
-                def start = Date.parse(dateFormat, date.startDate as String)
-                def end = Date.parse(dateFormat, date.endDate as String)
+                def dateSet = condition.data as Map<String, Object> // тут будет массив дат
+                def start = Date.parse(dateFormat, dateSet.startDate as String)
+                def end = Date.parse(dateFormat, dateSet.endDate as String)
             return buildFilterParameterFromCondition([start, end])
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }
 }
 
-private List<List<FilterParameter>> mappingStateTypeFilters(List<List> data, Attribute attribute, String title) {
+/**
+ * Метод преодбразований настроек группировки для статусов
+ * @param subjectUUID - идентификатор "текущего объекта"
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
+ */
+private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
     mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
@@ -1172,10 +1196,46 @@ private List<List<FilterParameter>> mappingStateTypeFilters(List<List> data, Att
                 tempAttribute.addLast(titleAttribute)
                 return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, tempAttribute, condition.data)
             case ['equal_subject_attribute', 'equal_attr_current_object']:
-                def object = api.utils.get(condition.data.uuid)
+                def object = api.utils.get(subjectUUID)
                 if (!object.keySet().find('state'.&equals))
                     throw new IllegalArgumentException("object ${condition.data} not contain attribute: 'state'")
                 return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, object.state)
+            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
+    }
+}
+
+/**
+ * Метод преодбразований настроек группировки для таймеров
+ * @param data - настройки группировки
+ * @param attribute - атрибут к которому привязана группировки
+ * @param title - название группировки
+ * @return настройки группировки в удобном формате
+ */
+private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title) {
+    mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
+            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
+        }
+        switch (conditionType.toLowerCase()) {
+            case 'status_contains':
+                def temAttribute = attribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
+                return buildFilterParameterFromCondition(Comparison.EQUAL, temAttribute, condition.data.uuid)
+            case 'status_not_contains':
+                def temAttribute = attribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
+                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, temAttribute, condition.data.uuid)
+            case 'elapsed_contains':
+                def temAttribute = attribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
+                def comparison = condition.data == 'EXCEED' ? Comparison.EQUAL : Comparison.NOT_EQUAL
+                return buildFilterParameterFromCondition(comparison, temAttribute, 'e')
+            case 'end_date_between': // Время окончания в диапазоне
+                def temAttribute = attribute.addLast(new Attribute(title: 'время окончания', code: 'deadLineTime', type: 'integer'))
+                String dateFormat = 'yyyy-MM-dd'
+                def dateSet = condition.data as Map<String, Object> // тут будет массив дат
+                def start = Date.parse(dateFormat, dateSet.startDate as String)
+                def end = Date.parse(dateFormat, dateSet.endDate as String)
+                return buildFilterParameterFromCondition(Comparison.BETWEEN, temAttribute, [start.getTime(), end.getTime()])
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }
