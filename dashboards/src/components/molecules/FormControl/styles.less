@@ -1,0 +1,17 @@
+@import '/styles/variables';
+
+:local {
+	.label {
+		color: @darkgrey;
+		font-size: 13px;
+		margin-bottom: 8px;
+	}
+
+	.row {
+		display: flex;
+
+		& > :nth-child(n+2) {
+			margin-left: 8px;
+		}
+	}
+}

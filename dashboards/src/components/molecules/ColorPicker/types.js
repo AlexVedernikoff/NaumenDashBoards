@@ -5,9 +5,9 @@ export type Color = {
 };
 
 export type Props = {
-	closePicker: () => void,
-	currentColor: string,
-	onClick: (string: string) => void
+	onChange: (color: string) => void,
+	onClose: () => void,
+	value: string
 };
 
 export type State = {

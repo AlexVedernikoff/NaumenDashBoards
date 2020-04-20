@@ -1,5 +1,5 @@
 // @flow
-import {Button} from 'components/atoms';
+import Button, {VARIANTS} from 'components/atoms/Button';
 import type {Color, Props, State} from './types';
 import React, {Component} from 'react';
 import {SketchPicker} from 'react-color';
@@ -30,11 +30,11 @@ export class ColorPicker extends Component<Props, State> {
 	};
 
 	static getDerivedStateFromProps (props: Props, state: State) {
-		const {currentColor} = props;
+		const {value} = props;
 
-		if (currentColor !== state.currentColor) {
-			state.itemColor = currentColor;
-			state.currentColor = currentColor;
+		if (value !== state.currentColor) {
+			state.itemColor = value;
+			state.currentColor = value;
 
 			return state;
 		}
@@ -43,27 +43,30 @@ export class ColorPicker extends Component<Props, State> {
 	}
 
 	handleChangeComplete = (): void => {
-		const {onClick} = this.props;
+		const {onChange} = this.props;
 		const {itemColor} = this.state;
-		onClick(itemColor);
+		onChange(itemColor);
 	};
 
 	setColor = (color: Color) => this.setState(() => ({itemColor: color.hex}));
 
 	render () {
-		const {closePicker} = this.props;
+		const {onClose} = this.props;
 		const {itemColor, presetColors} = this.state;
 
 		return (
-			<div className={styles.pickerWrap}>
-				<SketchPicker
-					color={itemColor}
-					onChangeComplete={this.setColor}
-					presetColors={presetColors}
-				/>
-				<div className={styles.pickerActions}>
-					<Button onClick={closePicker} type="button">Отмена</Button>
-					<Button onClick={this.handleChangeComplete} type="button">OK</Button>
+			<div className={styles.container}>
+				<div className={styles.pickerContainer}>
+					<SketchPicker
+						className={styles.picker}
+						color={itemColor}
+						onChangeComplete={this.setColor}
+						presetColors={presetColors}
+					/>
+				</div>
+				<div className={styles.buttonsContainer}>
+					<Button onClick={this.handleChangeComplete} type="button">Применить</Button>
+					<Button className={styles.cancelButton} onClick={onClose} type="button" variant={VARIANTS.ADDITIONAL}>Отмена</Button>
 				</div>
 			</div>
 		);

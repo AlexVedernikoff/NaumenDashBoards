@@ -1,9 +1,10 @@
 // @flow
+import type {InputValue, OnChangeInputEvent} from 'components/types';
+
 export type Props = {
 	name: string,
 	onBlur?: (e: any) => void,
-	onChange: (e: any) => void,
-	onReset: (name: string) => void,
-	placeholder?: string,
-	value: any
+	onChange: OnChangeInputEvent => void,
+	placeholder: string,
+	value: InputValue
 };

@@ -1,17 +1,17 @@
 // @flow
+import {Children, cloneElement, createRef, PureComponent} from 'react';
 import type {DivRef} from 'components/types';
 import type {Props} from './types';
-import React, {createRef, PureComponent} from 'react';
 
 export class OutsideClickDetector extends PureComponent<Props> {
 	ref: DivRef = createRef();
 
 	componentDidMount () {
-		document.addEventListener('mousedown', this.handleClickOutside);
+		document.addEventListener('click', this.handleClickOutside);
 	}
 
 	componentWillUnmount () {
-		document.removeEventListener('mousedown', this.handleClickOutside);
+		document.removeEventListener('click', this.handleClickOutside);
 	}
 
 	handleClickOutside = (e: MouseEvent) => {
@@ -25,13 +25,16 @@ export class OutsideClickDetector extends PureComponent<Props> {
 	};
 
 	render () {
-		const {children} = this.props;
+		const child = Children.only(this.props.children);
 
-		return (
-			<div ref={this.ref}>
-				{children}
-			</div>
-		);
+		if (child.ref) {
+			this.ref = child.ref;
+		}
+
+		return cloneElement(child, {
+			...child.props,
+			ref: this.ref
+		});
 	}
 }
 

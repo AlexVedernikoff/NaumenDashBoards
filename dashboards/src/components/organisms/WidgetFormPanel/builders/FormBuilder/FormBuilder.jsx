@@ -2,6 +2,7 @@
 import {Checkbox, Divider, ExtendButton, FieldError, FieldLabel, Label, TextArea} from 'components/atoms';
 import type {CheckboxProps, LabelProps, TextAreaProps} from './types';
 import {formRef, styles as mainStyles} from 'components/organisms/WidgetFormPanel';
+import type {OnChangeInputEvent} from 'components/types';
 import type {Props as FormProps} from 'components/organisms/WidgetFormPanel/types';
 import type {Props as ExtendButtonProps} from 'components/atoms/ExtendButton/types';
 import React, {Component, Fragment} from 'react';
@@ -40,16 +41,14 @@ export class FormBuilder extends Component<FormProps> {
 		return firstCoordinate;
 	};
 
-	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
+	handleChange = (event: OnChangeInputEvent) => {
 		const {setFieldValue} = this.props;
-		const {name, value} = e.currentTarget;
+		const {name, value} = event;
 
 		setFieldValue(name, value);
 	};
 
 	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
-
-	handleResetTextArea = (name: string) => this.props.setFieldValue(name, '');
 
 	handleSelect = (name: string, value: any) => this.props.setFieldValue(name, value);
 
@@ -113,7 +112,6 @@ export class FormBuilder extends Component<FormProps> {
 					name={name}
 					onBlur={handleBlur}
 					onChange={this.handleChange}
-					onReset={this.handleResetTextArea}
 					placeholder={placeholder}
 					value={value}
 				/>

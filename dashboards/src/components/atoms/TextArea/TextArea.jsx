@@ -1,14 +1,25 @@
 // @flow
-import CrossIcon from 'icons/form/cross.svg';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {IconButton} from 'components/atoms';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class TextArea extends Component<Props> {
-	handleReset = () => {
-		const {name, onReset} = this.props;
-		onReset(name);
+	static defaultProps = {
+		placeholder: ''
+	};
+
+	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {name, onChange} = this.props;
+		const {value} = e.currentTarget;
+
+		onChange({name, value});
+	};
+
+	handleClear = () => {
+		const {name, onChange} = this.props;
+		onChange({name, value: ''});
 	};
 
 	renderClearIcon = () => {
@@ -18,40 +29,29 @@ export class TextArea extends Component<Props> {
 			return (
 				<div className={styles.icon}>
 					<IconButton>
-						<CrossIcon onClick={this.handleReset} />
+						<Icon name={ICON_NAMES.CLOSE} onClick={this.handleClear} />
 					</IconButton>
 				</div>
 			);
 		}
 	};
 
-	renderTextArea = () => {
-		const {
-			name,
-			onBlur,
-			onChange,
-			placeholder,
-			value
-		} = this.props;
+	render () {
+		const {name, onBlur, placeholder, value} = this.props;
 
 		return (
-			<div className={styles.inputField}>
+			<div className={styles.container}>
 				<textarea
 					className={styles.input}
-					id={name}
 					name={name}
 					onBlur={onBlur}
-					onChange={onChange}
+					onChange={this.handleChange}
 					placeholder={placeholder}
 					value={value}
 				/>
 				{this.renderClearIcon()}
 			</div>
 		);
-	};
-
-	render () {
-		return this.renderTextArea();
 	}
 }
 
