@@ -1,13 +1,9 @@
 // @flow
-type Event = {
-	name: string,
-	value: string
-};
+import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Props = {
 	checked: boolean,
-	label: string,
 	name: string,
-	onChange: Event => void,
-	value: string
+	onChange: OnChangeInputEvent => void,
+	value: InputValue
 };

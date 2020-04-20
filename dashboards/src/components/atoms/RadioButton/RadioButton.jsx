@@ -1,28 +1,22 @@
 // @flow
+import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class RadioButton extends PureComponent<Props> {
-	static defaultProps = {
-		name: ''
-	};
-
 	handleClick = () => {
 		const {name, onChange, value} = this.props;
 		onChange({name, value});
 	};
 
-	render () {
-		const {checked, label, name, value} = this.props;
+	renderCheckedIcon = () => <Icon className={cn(styles.icon, styles.checkedIcon)} name={ICON_NAMES.RADIO_CHECKED} />;
 
-		return (
-			<div className={styles.container} onClick={this.handleClick}>
-				<input checked={checked} name={name} type="radio" value={value} />
-				<span className={styles.label}>{label}</span>
-				<div className={styles.checkmark} />
-			</div>
-		);
+	renderIcon = () => <Icon className={styles.icon} name={ICON_NAMES.RADIO} onClick={this.handleClick} />;
+
+	render () {
+		return this.props.checked ? this.renderCheckedIcon() : this.renderIcon();
 	}
 }
 

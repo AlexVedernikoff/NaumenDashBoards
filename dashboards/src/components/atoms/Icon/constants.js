@@ -19,6 +19,8 @@ import {
 	PositionLeft,
 	PositionRight,
 	PositionTop,
+	Radio,
+	RadioChecked,
 	Underline,
 	Wrap
 } from 'icons';
@@ -42,6 +44,8 @@ const POSITION_BOTTOM: 'POSITION_BOTTOM' = 'POSITION_BOTTOM';
 const POSITION_LEFT: 'POSITION_LEFT' = 'POSITION_LEFT';
 const POSITION_RIGHT: 'POSITION_RIGHT' = 'POSITION_RIGHT';
 const POSITION_TOP: 'POSITION_TOP' = 'POSITION_TOP';
+const RADIO: 'RADIO' = 'RADIO';
+const RADIO_CHECKED: 'RADIO_CHECKED' = 'RADIO_CHECKED';
 const UNDERLINE: 'UNDERLINE' = 'UNDERLINE';
 const WRAP: 'WRAP' = 'WRAP';
 
@@ -65,6 +69,8 @@ const ICON_NAMES = {
 	POSITION_LEFT,
 	POSITION_RIGHT,
 	POSITION_TOP,
+	RADIO,
+	RADIO_CHECKED,
 	UNDERLINE,
 	WRAP
 };
@@ -89,6 +95,8 @@ const ICONS = {
 	[POSITION_LEFT]: PositionLeft,
 	[POSITION_RIGHT]: PositionRight,
 	[POSITION_TOP]: PositionTop,
+	[RADIO]: Radio,
+	[RADIO_CHECKED]: RadioChecked,
 	[UNDERLINE]: Underline,
 	[WRAP]: Wrap
 };

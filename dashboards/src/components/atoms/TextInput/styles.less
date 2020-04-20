@@ -1,0 +1,32 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		position: relative;
+
+		&:hover {
+			.icon {
+				opacity: 1;
+			}
+		}
+	}
+
+	.icon {
+		cursor: pointer;
+		opacity: 0;
+		position: absolute;
+		right: 10px;
+		top: 8px;
+	}
+
+	.input {
+		border: 1px solid @grey;
+		border-radius: @border-radius;
+		padding: 8px 12px;
+		width: 100%;
+
+		&:focus {
+			border: 1px solid @info;
+		}
+	}
+}

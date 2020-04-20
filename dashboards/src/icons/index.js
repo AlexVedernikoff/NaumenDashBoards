@@ -18,6 +18,8 @@ import PositionBottom from './position-bottom.svg';
 import PositionLeft from './position-left.svg';
 import PositionRight from './position-right.svg';
 import PositionTop from './position-top.svg';
+import Radio from './radio.svg';
+import RadioChecked from './radio-checked.svg';
 import Underline from './underline.svg';
 import Wrap from './wrap.svg';
 
@@ -41,6 +43,8 @@ export {
 	PositionLeft,
 	PositionRight,
 	PositionTop,
+	Radio,
+	RadioChecked,
 	Underline,
 	Wrap
 };

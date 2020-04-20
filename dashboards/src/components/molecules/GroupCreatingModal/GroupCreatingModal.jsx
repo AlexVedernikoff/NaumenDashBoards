@@ -137,6 +137,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 				<RadioButton
 					checked={checked}
 					label={label}
+					name={FIELDS.way}
 					onChange={this.handleChangeWay}
 					value={value}
 				/>

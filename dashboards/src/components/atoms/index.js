@@ -1,6 +1,7 @@
 // @flow
 import Button from './Button';
 import ButtonGroup from './ButtonGroup';
+import CheckIconButton from './CheckIconButton';
 import Checkbox from './Checkbox';
 import CreationPanel from './CreationPanel';
 import DatepickerControl from './DatepickerControl';
@@ -9,6 +10,7 @@ import ExtendButton from './ExtendButton';
 import FieldButton from './FieldButton';
 import FieldError from './FieldError';
 import FieldLabel from './FieldLabel';
+import Icon from './Icon';
 import IconButton from './IconButton';
 import InfoPanel from './InfoPanel';
 import Label from './Label';
@@ -24,11 +26,13 @@ import SimpleTooltip from './SimpleTooltip';
 import TextArea from './TextArea';
 import Title from './Title';
 import Toast from './Toast';
+import Toggle from './Toggle';
 import Tooltip from './Tooltip';
 
 export {
 	Button,
 	ButtonGroup,
+	CheckIconButton,
 	Checkbox,
 	CreationPanel,
 	DatepickerControl,
@@ -37,6 +41,7 @@ export {
 	FieldButton,
 	FieldError,
 	FieldLabel,
+	Icon,
 	IconButton,
 	InfoPanel,
 	Label,
@@ -52,5 +57,6 @@ export {
 	TextArea,
 	Title,
 	Toast,
+	Toggle,
 	Tooltip
 };
