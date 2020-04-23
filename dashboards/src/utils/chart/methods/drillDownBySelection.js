@@ -154,10 +154,10 @@ const addFilters = (widget: Chart, props: AddFiltersProps) => {
  */
 const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) =>
 	(event: Object, chartContext: Object, config: Object) => {
-	const {diagramName} = widget;
+	const {header} = widget;
 	const mixin = {
 		filters: [],
-		title: diagramName
+		title: header.name
 	};
 
 	const index = addFilters(widget, {

@@ -1,8 +1,73 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
+import type {AxisIndicator, AxisParameter, ChartSorting, DataLabels, Header, Legend} from 'store/widgets/data/types';
 import {createDefaultGroup} from 'store/widgets/helpers';
 import type {CreateFunction, Fields, LegacyWidget} from './types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import {DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
+import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
+import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
+import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
+import {getProcessedValue} from 'store/sources/attributes/helpers';
+
+/**
+ * Возвращает настройки сортировки данных графика
+ * @param {object} widget - виджет
+ * @param {boolean} circle - сообщает, является ли график круговым
+ * @returns {object}
+ */
+const chartSorting = (widget: Object, circle: boolean = false): ChartSorting => {
+	let {sorting = {}} = widget;
+	const defaultSettings = circle ? DEFAULT_CIRCLE_SORTING_SETTINGS : DEFAULT_AXIS_SORTING_SETTINGS;
+
+	sorting = {
+		...defaultSettings,
+		...sorting
+	};
+
+	return sorting;
+};
+
+/**
+ * Преобразует данные к текущему формату настроек отображения оси Y на графике
+ * @param {object} widget - виджет
+ * @param {Attribute} attribute - атрибут по оси Y
+ * @returns {object}
+ */
+const axisIndicator = (widget: Object, attribute: Attribute): AxisIndicator => {
+	const {indicator = {}, showYAxis} = widget;
+	const {
+		name = getProcessedValue(attribute, 'title'),
+		showName = Boolean(showYAxis)
+	} = indicator;
+
+	return {
+		...DEFAULT_CHART_SETTINGS.yAxis,
+		...indicator,
+		name,
+		showName
+	};
+};
+
+/**
+ * Преобразует данные к текущему формату настроек отображения оси X на графике
+ * @param {object} widget - виджет
+ * @param {Attribute} attribute - атрибут по оси X
+ * @returns {object}
+ */
+const axisParameter = (widget: Object, attribute: Attribute): AxisParameter => {
+	const {parameter = {}, showXAxis} = widget;
+	const {
+		name = getProcessedValue(attribute, 'title'),
+		showName = Boolean(showXAxis)
+	} = parameter;
+
+	return {
+		...DEFAULT_CHART_SETTINGS.xAxis,
+		...parameter,
+		name,
+		showName
+	};
+};
 
 /**
  * Преобразует устаревший формат агрегации
@@ -55,16 +120,74 @@ const colors = (colors?: Array<string>) => Array.isArray(colors) ? colors : [...
 const array = <T>(array?: Array<T>): Array<T> => Array.isArray(array) ? array : [];
 
 /**
+ * Преобразует данные к текущему формату настроек меток данных графика
+ * @param {object} widget - виджет
+ * @returns {object}
+ */
+const dataLabels = (widget: Object): DataLabels => {
+	const {dataLabels = {}, showValue} = widget;
+	const {
+		show = Boolean(showValue)
+	} = dataLabels;
+
+	return {
+		...DEFAULT_CHART_SETTINGS.dataLabels,
+		...dataLabels,
+		show
+	};
+};
+
+/**
+ * Преобразует данные к текущему формату настроек отображения заголовка виджета
+ * @param {object} widget - виджет
+ * @returns {object}
+ */
+const header = (widget: Object): Header => {
+	const {diagramName = '', header = {}, showName} = widget;
+	const {
+		name = diagramName,
+		show = Boolean(showName)
+	} = header;
+
+	return {
+		...DEFAULT_HEADER_SETTINGS,
+		...header,
+		name,
+		show
+	};
+};
+
+/**
  * Преобразует устаревший формат положения легенды
  * @param {any} position - позиция легенды виджета
  * @returns {string}
  */
-const legendPosition = (position: any) => {
+const getLegendPosition = (position: any) => {
 	if (typeof position !== 'string') {
 		position = position && typeof position === 'object' ? position.value : LEGEND_POSITIONS.bottom;
 	}
 
 	return position;
+};
+
+/**
+ * Преобразует данные к текущему формату настроек отображения легенды графика
+ * @param {object} widget - виджет
+ * @returns {object}
+ */
+const legend = (widget: Object): Legend => {
+	const {legend = {}, showLegend, legendPosition} = widget;
+	const {
+		position = getLegendPosition(legendPosition),
+		show = Boolean(showLegend)
+	} = legend;
+
+	return {
+		...DEFAULT_CHART_SETTINGS.legend,
+		...legend,
+		position,
+		show
+	};
 };
 
 /**
@@ -108,14 +231,27 @@ const getOrdinalData = (widget: LegacyWidget, fields: Fields, createFunction: Cr
 	return data;
 };
 
+/**
+ * Возвращает главный набор данных виджета
+ * @param {Array<object>} data - массив данных виджета
+ * @returns {object}
+ */
+const getMainDataSet = (data: Array<Object>): Object => data.find(set => !set.sourceForCompute) || {};
+
 export {
 	aggregation,
 	array,
+	axisIndicator,
+	axisParameter,
+	chartSorting,
 	colors,
+	dataLabels,
 	group,
+	getMainDataSet,
 	getOrdinalData,
 	hasOrdinalFormat,
-	legendPosition,
+	header,
+	legend,
 	object,
 	string
 };

@@ -2,7 +2,7 @@
 import './styles.less';
 import ApexCharts from 'apexcharts';
 import type {DivRef} from 'components/types';
-import {getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
+import {getLegendCroppingFormatter, getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ReactResizeDetector from 'react-resize-detector';
@@ -46,20 +46,25 @@ export class Chart extends PureComponent<Props> {
 
 	handleResize = (width: number) => {
 		if (this.chart) {
+			const {fontSize} = this.props.widget.legend;
+			const legendWidth = getLegendWidth(width);
+
+			// $FlowFixMe
 			this.chart.updateOptions({
 				legend: {
-					width: getLegendWidth(width)
+					formatter: getLegendCroppingFormatter(legendWidth, fontSize),
+					width: legendWidth
 				}
 			});
 		}
 	};
 
 	hasSideLegend = () => {
-		const {legendPosition, showLegend} = this.props.widget;
+		const {legend} = this.props.widget;
+		const {position, show} = legend;
+		const {left, right} = LEGEND_POSITIONS;
 
-		return showLegend && (legendPosition
-			&& (legendPosition === LEGEND_POSITIONS.left || legendPosition === LEGEND_POSITIONS.right)
-		);
+		return show && (position === left || position === right);
 	};
 
 	renderChart = () => <div ref={this.ref} />;

@@ -1,5 +1,5 @@
 // @flow
-import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
+import {FIELDS} from 'WidgetFormPanel/constants';
 import type {LayoutItem} from 'utils/layout/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 

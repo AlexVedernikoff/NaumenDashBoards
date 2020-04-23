@@ -1,8 +1,23 @@
 // @flow
-import {aggregation, array, colors, getOrdinalData, group, legendPosition, object, string} from './helpers';
+import {
+	aggregation,
+	array,
+	axisIndicator,
+	axisParameter,
+	chartSorting,
+	colors,
+	dataLabels,
+	getMainDataSet,
+	getOrdinalData,
+	group,
+	header,
+	legend,
+	object,
+	string
+} from './helpers';
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
 import {COMBO_TYPES} from 'store/widgets/data/constants';
-import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
+import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
 
@@ -75,21 +90,28 @@ const createData = (widget: Object, fields: Object): ComboData => {
 };
 
 const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
-	const {id, layout, type} = widget;
 	const dataFields = getDataFields();
+	const {
+		data = getOrdinalData(widget, dataFields, createData),
+		id,
+		layout,
+		type
+	} = widget;
+	const set = getMainDataSet(data);
 
 	return {
 		colors: colors(widget[FIELDS.colors]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data: getOrdinalData(widget, dataFields, createData),
-		diagramName: string(widget[FIELDS.diagramName]),
+		data,
+		dataLabels: dataLabels(widget),
+		header: header(widget),
 		id,
+		indicator: axisIndicator(widget, set[FIELDS.yAxis]),
 		layout,
-		legendPosition: legendPosition(widget[FIELDS.legendPosition]),
+		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
-		showLegend: Boolean(widget[FIELDS.showLegend]),
-		showName: Boolean(widget[FIELDS.showName]),
-		showValue: Boolean(widget[FIELDS.showValue]),
+		parameter: axisParameter(widget, set[FIELDS.xAxis]),
+		sorting: chartSorting(widget),
 		type
 	};
 };

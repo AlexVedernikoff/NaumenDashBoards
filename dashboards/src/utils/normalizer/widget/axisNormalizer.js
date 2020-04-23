@@ -1,7 +1,23 @@
 // @flow
-import {aggregation, array, colors, getOrdinalData, group, hasOrdinalFormat, legendPosition, object, string} from './helpers';
+import {
+	aggregation,
+	array,
+	axisIndicator,
+	axisParameter,
+	chartSorting,
+	colors,
+	dataLabels,
+	getMainDataSet,
+	getOrdinalData,
+	group,
+	hasOrdinalFormat,
+	header,
+	legend,
+	object,
+	string
+} from './helpers';
 import type {AxisWidget} from 'store/widgets/data/types';
-import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
+import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
 
@@ -64,24 +80,29 @@ const createData = (widget: Object, fields: Object) => {
 const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 	const {id, layout, type} = widget;
 	const dataFields = getDataFields();
-	const data = hasOrdinalFormat(widget)
-		? getOrdinalData(widget, dataFields, createData)
-		: [createData(widget, dataFields)];
+	let {data} = widget;
+
+	if (!data) {
+		data = hasOrdinalFormat(widget)
+			? getOrdinalData(widget, dataFields, createData)
+			: [createData(widget, dataFields)];
+	}
+
+	const set = getMainDataSet(data);
 
 	return {
 		colors: colors(widget[FIELDS.colors]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data,
-		diagramName: string(widget[FIELDS.diagramName]),
+		dataLabels: dataLabels(widget),
+		header: header(widget),
 		id,
+		indicator: axisIndicator(widget, set[FIELDS.yAxis]),
 		layout,
-		legendPosition: legendPosition(widget[FIELDS.legendPosition]),
+		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
-		showLegend: Boolean(widget[FIELDS.showLegend]),
-		showName: Boolean(widget[FIELDS.showName]),
-		showValue: Boolean(widget[FIELDS.showValue]),
-		showXAxis: Boolean(widget[FIELDS.showXAxis]),
-		showYAxis: Boolean(widget[FIELDS.showYAxis]),
+		parameter: axisParameter(widget, set[FIELDS.xAxis]),
+		sorting: chartSorting(widget),
 		type
 	};
 };

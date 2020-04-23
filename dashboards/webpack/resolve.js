@@ -7,7 +7,8 @@ const {src} = require('./define');
 module.exports = {
 	alias: {
 		CustomGroup: resolve(src, 'components/molecules/GroupCreatingModal/components/CustomGroup'),
-		src
+		src,
+		WidgetFormPanel: resolve(src, 'components/organisms/WidgetFormPanel')
 	},
 	extensions: ['.js', '.jsx'],
 	modules: ['node_modules', 'src']

@@ -1,76 +1,104 @@
 // @flow
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
-import type {Attribute} from 'store/sources/attributes/types';
-import type {AxisWidget, Chart, CircleWidget, ComboWidget, MixedAttribute} from 'store/widgets/data/types';
+import type {
+	AxisIndicator,
+	AxisParameter,
+	AxisWidget,
+	Chart,
+	CircleWidget,
+	ComboWidget,
+	DataLabels,
+	Legend
+} from 'store/widgets/data/types';
 import {CHART_TYPES, DEFAULT_COLORS, LEGEND_POSITIONS} from './constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
+import {extend} from 'src/helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
+import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
-/**
- * Функция проверяет является ли переменная объектом
- * @param {any} item - проверяемая переменная
- * @returns {boolean}
- */
-const isObject = (item: any): boolean => item && typeof item === 'object' && !Array.isArray(item);
-
-/**
- * Функция расширяет опции графика
- * @param {ApexOptions} target - основной объект опций
- * @param {ApexOptions} source - дополнительная примесь опций
- * @returns {ApexOptions}
- */
-const extend = (target: ApexOptions, source: ApexOptions): ApexOptions => {
-	let output = {...target};
-
-	if (isObject(target) && isObject(source)) {
-		Object.keys(source).forEach(key => {
-			if (isObject(source[key])) {
-				if (!(key in target)) {
-					output = {...output, [key]: source[key]};
-				} else {
-					output[key] = extend(target[key], source[key]);
-				}
-			} else {
-				output = {...output, [key]: source[key]};
-			}
-		});
-	}
-
-	return output;
-};
-
-/**
- * Функция возвращает title атрибута с учетом вложенности
- * @param {Attribute} attr - атрибут
- * @returns {string}
- */
-const getAttrTitle = (attr: MixedAttribute) => {
-	let current = attr;
-
-	if (current.ref) {
-		current = current.ref;
-	}
-
-	return current.title;
-};
-
-const yAxisLabelFormatter = (horizontal: boolean) => (val: number, options: any) => {
+const yAxisLabelFormatter = (showPercent: boolean) => (val: number | string, param?: Object | number) => {
 	/**
 	 * toFixed необходимо использовать только для значений оси Y. Но т.к в библиотеке можно указать только одну
-	 * функцию форматирования значений, необходимо ориентироваться по параметру options. Только в случае когда функция
-	 * используется для значения оси, options - object.
+	 * функцию форматирования значений, необходимо ориентироваться по параметру param. Только в случае когда функция
+	 * используется для значения оси, param - не undefined.
 	 */
+	if (param && typeof val === 'number') {
+		if (!Number.isInteger(val)) {
+			val = val.toFixed(2);
+		}
 
-	if (typeof options === 'object' && !horizontal && typeof val === 'number') {
-		return val.toFixed();
-	} else if (typeof val === 'string' && val.length > 25) {
-		return `${val.substring(0, 20)}...`;
+		if (showPercent) {
+			val = `${val}%`;
+		}
+	}
+
+	if (typeof val === 'string' && val.length > 25) {
+		val = `${val.substring(0, 20)}...`;
 	}
 
 	return val;
+};
+
+const getXAxisOptions = (parameter: AxisParameter, categories: Array<string> = []) => {
+	const {name, show, showName} = parameter;
+
+	const options: Object = {
+		categories,
+		labels: {
+			hideOverlappingLabels: true,
+			rotate: -60,
+			show
+		},
+		title: {
+			offsetY: 10
+		}
+	};
+
+	if (showName) {
+		options.title.text = name;
+	}
+
+	return options;
+};
+
+const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation?: string) => {
+	const {max, min, name, show, showName, tickAmount} = indicator;
+	const forceNiceScale = !(stacked && aggregation === DEFAULT_AGGREGATION.PERCENT);
+	const showPercent = aggregation === DEFAULT_AGGREGATION.PERCENT && !stacked;
+
+	const options: Object = {
+		decimalsInFloat: 2,
+		forceNiceScale,
+		labels: {
+			formatter: yAxisLabelFormatter(showPercent),
+			// Если проставить значение, то уплывает название оси на легенду
+			maxWidth: undefined
+		},
+		max: (currentMax: number) => {
+			if (max) {
+				currentMax = Number(max);
+			}
+
+			if (min && min > currentMax) {
+				currentMax = min + 1;
+			}
+
+			return currentMax > 0 ? Math.ceil(currentMax) : 1;
+		},
+		min: Number(min) || 0,
+		show,
+		tickAmount: tickAmount || 1
+	};
+
+	if (showName) {
+		options.title = {
+			text: name
+		};
+	}
+
+	return options;
 };
 
 /**
@@ -80,15 +108,13 @@ const yAxisLabelFormatter = (horizontal: boolean) => (val: number, options: any)
  * @returns {ApexOptions}
  */
 const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) => (widget: AxisWidget, chart: DiagramBuildData): ApexOptions => {
-	const {showXAxis, showYAxis, type} = widget;
+	const {indicator, parameter, type} = widget;
 	const set = getBuildSet(widget);
+	let {tickAmount: yTickAmount} = indicator;
 
 	if (set) {
-		const {aggregation, xAxis, yAxis} = set;
-		const stackedIsPercent = stacked && aggregation === DEFAULT_AGGREGATION.PERCENT;
+		const {aggregation} = set;
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
-		let xAxisAttr = horizontal ? yAxis : xAxis;
-		let yAxisAttr = horizontal ? xAxis : yAxis;
 
 		const options: ApexOptions = {
 			chart: {
@@ -112,60 +138,20 @@ const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) 
 				intersect: true,
 				shared: false
 			},
-			xaxis: {
-				categories: chart.categories,
-				labels: {
-					hideOverlappingLabels: true,
-					rotate: -60
-				},
-				title: {
-					offsetY: 10
-				}
-			},
-			yaxis: {
-				decimalsInFloat: 2,
-				forceNiceScale: !stackedIsPercent,
-				labels: {
-					formatter: yAxisLabelFormatter(horizontal),
-					// Если проставить значение, то уплывает название оси на легенду
-					maxWidth: undefined
-				},
-				max: (max: number) => max > 0 ? Math.ceil(max) : 1,
-				min: 0,
-				tickAmount: 1
-			}
+			xaxis: getXAxisOptions(parameter, chart.categories),
+			yaxis: getYAxisOptions(indicator, stacked, aggregation)
 		};
 
-		if (!stacked) {
-			options.dataLabels = {
-				formatter: (val: number) => val > 0 ? val.toFixed() : ''
-			};
+		if (horizontal) {
+			options.xaxis.tickAmount = yTickAmount;
 		}
 
 		if (aggregation === DEFAULT_AGGREGATION.PERCENT) {
 			if (stacked) {
 				options.chart.stackType = '100%';
 			} else {
-				/*
-				 * Условие стоит, т.к функция форматирования применяется как для значений диаграмм, так и для значений оси Y;
-				 * В случае когда options - объект, это значение оси Y.
-					*/
-				options.yaxis.labels = {
-					formatter: (val: number, options: any) => typeof val === 'string' || typeof options !== 'object' ? val : `${val.toFixed(2)}%`
-				};
-
 				options.dataLabels.formatter = (val: number) => val > 0 ? `${val.toFixed(2)}%` : '';
 			}
-		}
-
-		if (showXAxis && xAxisAttr) {
-			options.xaxis.title.text = getAttrTitle(xAxisAttr);
-		}
-
-		if (showYAxis && yAxisAttr) {
-			options.yaxis.title = {
-				text: getAttrTitle(yAxisAttr)
-			};
 		}
 
 		return options;
@@ -179,7 +165,8 @@ const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) 
  * @returns {ApexOptions}
  */
 const createComboMixin = (widget: ComboWidget, chart: DiagramBuildData) => {
-	const {series} = chart;
+	const {indicator, parameter} = widget;
+	const {labels, series} = chart;
 	const strokeWidth = series.find(s => s.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 	let stacked = false;
 	let percentDataKeys = [];
@@ -205,7 +192,7 @@ const createComboMixin = (widget: ComboWidget, chart: DiagramBuildData) => {
 		dataLabels: {
 			formatter: (val: number) => val > 0 ? val : ''
 		},
-		labels: chart.labels,
+		labels,
 		markers: {
 			hover: {
 				size: 8
@@ -219,16 +206,8 @@ const createComboMixin = (widget: ComboWidget, chart: DiagramBuildData) => {
 			intersect: true,
 			shared: false
 		},
-		yaxis: {
-			decimalsInFloat: 2,
-			forceNiceScale: true,
-			labels: {
-				formatter: yAxisLabelFormatter(false)
-			},
-			max: (max: number) => max > 0 ? Math.ceil(max) : 1,
-			min: 0,
-			tickAmount: 1
-		}
+		xaxis: getXAxisOptions(parameter),
+		yaxis: getYAxisOptions(indicator, stacked)
 	};
 
 	if (percentDataKeys.length > 0) {
@@ -299,6 +278,96 @@ const resolveMixin = (widget: Chart, data: DiagramBuildData): Function => {
 	}
 };
 
+const getLegendCroppingFormatter = (width: number, fontSize: number) => {
+	const length = Math.round(width / fontSize);
+
+	return function (legend: string) {
+		if (legend) {
+			return legend.length > length ? `${legend.substr(0, length)}...` : legend;
+		}
+
+		return '';
+	};
+};
+
+const getLegendOptions = (settings: Legend, widgetWidth: number) => {
+	const {fontFamily, fontSize, position, show, textHandler} = settings;
+	const {bottom, top} = LEGEND_POSITIONS;
+	const options = {
+		fontFamily,
+		fontSize,
+		itemMargin: {
+			horizontal: 5
+		},
+		position,
+		show,
+		showForSingleSeries: true
+	};
+	let formatter;
+	let height;
+	let width;
+
+	if (position === bottom || position === top) {
+		width = widgetWidth;
+		height = 100;
+	} else {
+		width = getLegendWidth(widgetWidth);
+	}
+
+	if (textHandler === TEXT_HANDLERS.CROP) {
+		formatter = getLegendCroppingFormatter(width, fontSize);
+	}
+
+	return {
+		...options,
+		formatter,
+		height,
+		width
+	};
+};
+
+const getDataLabelsOptions = (settings: DataLabels) => {
+	const {fontColor, fontFamily, fontSize, show, showShadow} = settings;
+	const options: Object = {
+		enabled: show,
+		style: {
+			colors: [fontColor],
+			fontFamily,
+			fontSize
+		}
+	};
+
+	if (showShadow) {
+		options.dropShadow = {
+			blur: 0.5,
+			enabled: true,
+			left: 1,
+			opacity: 0.9,
+			top: 1
+		};
+	}
+
+	return options;
+};
+
+/**
+ * Функция преобразует набор данных в требуемый формат
+ * @param {Chart} widget - виджет
+ * @param {DiagramBuildData} data - данные графика виджета
+ * @returns {ApexAxisChartSeries}
+ */
+const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries => {
+	const {series} = data;
+
+	if (widget.type === WIDGET_TYPES.COMBO && series.length > 0) {
+		series.forEach(s => {
+			s.type = s.type.toUpperCase() === WIDGET_TYPES.LINE ? CHART_TYPES.line : CHART_TYPES.bar;
+		});
+	}
+
+	return series;
+};
+
 /**
  * Функция возвращет объединенный набор базовых и типовых опций
  * @param {Chart} widget - виджет
@@ -307,8 +376,9 @@ const resolveMixin = (widget: Chart, data: DiagramBuildData): Function => {
  * @returns {ApexOptions}
  */
 const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexOptions => {
-	const {colors, legendPosition, showLegend, showValue, type} = widget;
+	const {colors, type} = widget;
 	const chartColors = colors || DEFAULT_COLORS;
+	const {dataLabels, legend} = widget;
 
 	const options: ApexOptions = {
 		chart: {
@@ -328,55 +398,12 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 			width: '100%'
 		},
 		colors: [...chartColors],
-		dataLabels: {
-			dropShadow: {
-				blur: 0.5,
-				enabled: true,
-				left: 1,
-				opacity: 0.9,
-				top: 1
-			},
-			enabled: showValue,
-			style: {
-				colors: ['white']
-			}
-		},
-		legend: {
-			itemMargin: {
-				horizontal: 5
-			},
-			position: legendPosition,
-			show: showLegend,
-			showForSingleSeries: true
-		},
+		dataLabels: getDataLabelsOptions(dataLabels),
+		legend: getLegendOptions(legend, width),
 		series: getSeries(widget, data)
 	};
 
-	if (legendPosition === LEGEND_POSITIONS.left || legendPosition === LEGEND_POSITIONS.right) {
-		options.legend.width = getLegendWidth(width);
-	} else {
-		options.legend.height = 100;
-	}
-
 	return extend(options, resolveMixin(widget, data));
-};
-
-/**
- * Функция преобразует набор данных в требуемый формат
- * @param {Chart} widget - виджет
- * @param {DiagramBuildData} data - данные графика виджета
- * @returns {ApexAxisChartSeries}
- */
-const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries => {
-	const {series} = data;
-
-	if (widget.type === WIDGET_TYPES.COMBO && series.length > 0) {
-		series.forEach(s => {
-			s.type = s.type.toUpperCase() === WIDGET_TYPES.LINE ? CHART_TYPES.line : CHART_TYPES.bar;
-		});
-	}
-
-	return series;
 };
 
 const getChartType = (type: string) => {
@@ -404,6 +431,7 @@ const getLegendWidth = (width: number) => width * 0.2;
 
 export {
 	getChartType,
+	getLegendCroppingFormatter,
 	getLegendWidth,
 	getOptions
 };

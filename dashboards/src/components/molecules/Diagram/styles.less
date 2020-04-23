@@ -7,24 +7,37 @@
 		background-color: @white;
 		box-sizing: border-box;
 		height: 100%;
-		overflow: hidden;
+		overflow-y: hidden;
 		padding: 10px;
 	}
 
 	.diagram {
-		height: 100%;
-	}
-
-	.diagramWithName {
-		height: calc(100% - @name-height);
+		height: 90%;
 	}
 
 	.name {
-		font-size: 20px;
-		min-height: @name-height;
+		height: 10%;
+	}
+
+	.bold {
+		font-weight: 500;
+	}
+
+	.italic {
+		font-style: italic;
+	}
+
+	.underline {
+		text-decoration: underline;
+	}
+
+	.crop {
 		overflow: hidden;
-		padding-left: 10px;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.wrap {
+		word-wrap: break-word;
 	}
 }
