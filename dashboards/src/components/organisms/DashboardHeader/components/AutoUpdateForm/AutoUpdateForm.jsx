@@ -1,5 +1,5 @@
 // @flow
-import {Button, Checkbox, Popover} from 'components/atoms';
+import {Button, LegacyCheckbox as Checkbox, Popover} from 'components/atoms';
 import cn from 'classnames';
 import {InfoIcon} from 'icons/form';
 import {MAX_INTERVAL} from './constants';

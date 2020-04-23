@@ -2,10 +2,10 @@
 import {Attribute, FormBox, FormControl, FormField, OuterSelect, Source} from 'components/molecules';
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {Checkbox, ExtendButton, FieldError, IconButton, TextArea} from 'components/atoms';
 import type {CheckboxProps, RenderFunction, TextAreaProps} from './types';
 import type {ComputedAttr, Source as SourceType} from 'store/widgets/data/types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
+import {ExtendButton, FieldError, IconButton, LegacyCheckbox as Checkbox, TextArea} from 'components/atoms';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {formRef} from 'WidgetFormPanel';
 import {getProcessedValue} from 'store/sources/attributes/helpers';

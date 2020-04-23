@@ -6,12 +6,14 @@ import AttributeCreatingModal from './AttributeCreatingModal';
 import AttributeGroup from './AttributeGroup';
 import AttributeSelect from './AttributeSelect';
 import Chart from './Chart';
-import ColorPalette from './ColorPalette';
+import CheckIconButtonGroup from './CheckIconButtonGroup';
+import ColorInput from './ColorInput';
 import ColorPicker from './ColorPicker';
 import ComputedAttributeEditor from './ComputedAttributeEditor';
 import ConstantControl from './ConstantControl';
 import Datepicker from './Datepicker';
 import Diagram from './Diagram';
+import DisableableBox from './DisablableBox';
 import FormBox from './FormBox';
 import FormCheckControl from './FormCheckControl';
 import FormControl from './FormControl';
@@ -33,6 +35,7 @@ import SourceControl from './SourceControl';
 import SourceTree from './SourceTree';
 import Summary from './Summary';
 import Table from './Table';
+import ToggableFormBox from './ToggableFormBox';
 import Widget from './Widget';
 
 export {
@@ -43,12 +46,14 @@ export {
 	AttributeGroup,
 	AttributeSelect,
 	Chart,
-	ColorPalette,
+	CheckIconButtonGroup,
+	ColorInput,
 	ColorPicker,
 	ComputedAttributeEditor,
 	ConstantControl,
 	Datepicker,
 	Diagram,
+	DisableableBox,
 	FormBox,
 	FormCheckControl,
 	FormControl,
@@ -70,5 +75,6 @@ export {
 	SourceTree,
 	Summary,
 	Table,
+	ToggableFormBox,
 	Widget
 };

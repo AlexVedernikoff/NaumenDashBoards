@@ -1,46 +1,26 @@
 // @flow
-import {ACTIVE_COLORS} from './constants';
-import CheckIcon from 'icons/form/checked.svg';
 import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
-class Checkbox extends Component<Props> {
-	static defaultProps = {
-		activeColor: ACTIVE_COLORS.LIGHT,
-		className: ''
-	};
-
-	getIconClassName = () => {
-		const {activeColor, className, value} = this.props;
-		const CN = [styles.icon, className];
-
-		if (value && activeColor) {
-			CN.push(`active${this.upperFirst(activeColor)}`);
-		}
-
-		return cn(CN);
-	};
-
+export class Checkbox extends PureComponent<Props> {
 	handleClick = () => {
-		const {name, onClick, value} = this.props;
-		onClick(name, !value);
+		const {name, onChange, value} = this.props;
+		onChange({name, value});
 	};
-
-	upperFirst = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
 
 	render () {
-		const {label, value} = this.props;
+		const {checked} = this.props;
+		const {CHECKBOX, CHECKBOX_CHECKED} = ICON_NAMES;
+		const name = checked ? CHECKBOX_CHECKED : CHECKBOX;
+		const iconCN = cn({
+			[styles.icon]: true,
+			[styles.checked]: checked
+		});
 
-		return (
-			<label className={styles.label} onClick={this.handleClick}>
-				<div className={this.getIconClassName()}>
-					{value && <CheckIcon />}
-				</div>
-				<div>{label}</div>
-			</label>
-		);
+		return <Icon className={iconCN} name={name} onClick={this.handleClick} />;
 	}
 }
 

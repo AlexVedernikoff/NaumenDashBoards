@@ -1,0 +1,39 @@
+@import '/styles/variables';
+
+:local {
+	.icon {
+		align-items: center;
+		border: 1px solid @grey;
+		display: flex;
+		height: 16px;
+		justify-content: center;
+		margin-right: 12px;
+		width: 16px;
+
+		&:hover {
+			border-color: @darkgrey;
+		}
+	}
+
+	.activeInfo {
+		background-color: @info;
+		border-color: @info;
+		color: white;
+
+		&:hover {
+			border-color: @info;
+		}
+	}
+
+	.input {
+		display: none;
+	}
+
+	.label {
+		align-items: center;
+		color: @black;
+		cursor: pointer;
+		display: flex;
+		font-size: 14px;
+	}
+}

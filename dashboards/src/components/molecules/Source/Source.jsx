@@ -1,7 +1,7 @@
 // @flow
-import {Checkbox, ExtendButton, FieldError, IconButton, OutsideClickDetector} from 'components/atoms';
 import cn from 'classnames';
 import {CrossIcon, EditIcon} from 'icons/form';
+import {ExtendButton, FieldError, IconButton, LegacyCheckbox as Checkbox, OutsideClickDetector} from 'components/atoms';
 import {InputForm, SourceTree} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';

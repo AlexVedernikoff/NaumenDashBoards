@@ -2,43 +2,19 @@
 
 :local {
 	.icon {
-		align-items: center;
-		border: 1px solid @grey;
-		display: flex;
-		height: 16px;
-		justify-content: center;
-		margin-right: 12px;
-		width: 16px;
-
-		&:hover {
-			border-color: @darkgrey;
-		}
-
-		svg {
-			height: 12px;
-			width: 12px;
-		}
-	}
-
-	.activeInfo {
-		background-color: @info;
-		border-color: @info;
-		color: white;
-
-		&:hover {
-			border-color: @info;
-		}
-	}
-
-	.input {
-		display: none;
-	}
-
-	.label {
-		align-items: center;
-		color: @black;
+		border-radius: @border-radius;
+		color: @grey;
 		cursor: pointer;
-		display: flex;
-		font-size: 14px;
+		padding: 4px;
+
+		&:hover,
+		&:active {
+			background-color: @silver;
+			color: @black;
+		}
+	}
+
+	.checked {
+		color: @info;
 	}
 }
