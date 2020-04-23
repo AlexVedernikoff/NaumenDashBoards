@@ -1,4 +1,21 @@
 // @flow
-import type {Node} from 'react';
+import type {OnChangeInputEvent} from 'components/types';
 
-export type RenderFunction = (index: number, ...otherProps: Array<any>) => Node;
+export type TextAreaProps = {
+	errorPath?: string,
+	handleBlur?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
+	handleChange: OnChangeInputEvent => void,
+	label: string,
+	name: string,
+	placeholder?: string,
+	value: string
+};
+
+export type CheckboxProps = {
+	label: string,
+	name: string,
+	onClick?: () => void,
+	value: boolean
+};
+
+export type RenderFunction = (index: number, ...otherProps: Array<any>) => React$Node;

@@ -1,6 +1,7 @@
 // @flow
-import {aggregation, array, getOrdinalData, group, object, string} from './helpers';
-import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
+import {aggregation, array, getOrdinalData, group, header, object, string} from './helpers';
+import {DEFAULT_TABLE_SETTINGS} from 'components/molecules/Table/constants';
+import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
 import type {TableData, TableWidget} from 'store/widgets/data/types';
 import uuid from 'tiny-uuid';
@@ -66,18 +67,23 @@ const createData = (widget: Object, fields: Object): TableData => {
 };
 
 const tableNormalizer = (widget: LegacyWidget): TableWidget => {
-	const {id, layout, type} = widget;
 	const dataFields = getDataFields();
+	const {
+		data = getOrdinalData(widget, dataFields, createData),
+		id,
+		layout,
+		type
+	} = widget;
 
 	return {
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data: getOrdinalData(widget, dataFields, createData),
-		diagramName: string(widget[FIELDS.diagramName]),
+		data,
+		header: header(widget),
 		id,
 		layout,
 		name: string(widget[FIELDS.name]),
 		rowsWidth: array(widget[FIELDS.rowsWidth]),
-		showName: Boolean(widget[FIELDS.showName]),
+		table: DEFAULT_TABLE_SETTINGS,
 		type
 	};
 };

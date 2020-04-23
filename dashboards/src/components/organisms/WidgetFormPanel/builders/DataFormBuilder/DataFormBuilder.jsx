@@ -1,27 +1,50 @@
 // @flow
-import {Attribute, OuterSelect, Source} from 'components/molecules';
+import {Attribute, FormBox, FormControl, FormField, OuterSelect, Source} from 'components/molecules';
 import type {Attribute as AttributeType} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {Checkbox, ExtendButton, FieldError, IconButton, TextArea} from 'components/atoms';
+import type {CheckboxProps, RenderFunction, TextAreaProps} from './types';
 import type {ComputedAttr, Source as SourceType} from 'store/widgets/data/types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
-import {FieldLabel} from 'components/atoms';
-import {FIELDS, OPTIONS, styles} from 'components/organisms/WidgetFormPanel';
-import FormBuilder from 'components/organisms/WidgetFormPanel/builders/FormBuilder';
+import {FIELDS} from 'WidgetFormPanel/constants';
+import {formRef} from 'WidgetFormPanel';
+import {getProcessedValue} from 'store/sources/attributes/helpers';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import type {OnChangeInputEvent} from 'components/types';
 import type {OnSelectCallback as OnSelectSourceCallback} from 'components/molecules/Source/types';
-import React, {Fragment} from 'react';
-import type {RenderFunction} from './types';
+import type {ParamsTabProps} from 'components/organisms/WidgetFormPanel/types';
+import type {Props as ExtendButtonProps} from 'components/atoms/ExtendButton/types';
+import React, {Component, Fragment} from 'react';
 import uuid from 'tiny-uuid';
+import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
-export class DataFormBuilder extends FormBuilder {
+export class DataFormBuilder extends Component<ParamsTabProps> {
 	// Список полей для удаления при смене источника данных
 	sourceRefs: Array<string> = [];
+
+	invalidInputs = {};
 
 	// Минимальное необходимое количество источников для построения
 	minCountBuildingSources = 1;
 
 	componentDidMount () {
 		setTimeout(this.init);
+	}
+
+	componentDidUpdate () {
+		const {setFieldValue, values} = this.props;
+		const {current: form} = formRef;
+		let top = this.getFirstInvalidCoordinate();
+
+		if (form && values.shouldScrollToError && top) {
+			top = form.clientHeight / form.scrollHeight * top;
+
+			form.scrollTo({behavior: 'smooth', top});
+			setFieldValue('shouldScrollToError', false);
+
+			this.invalidInputs = {};
+		}
 	}
 
 	addSet = (count: number = 1) => {
@@ -108,6 +131,20 @@ export class DataFormBuilder extends FormBuilder {
 
 	getErrorName = (index: number, name: string) => `data[${index}].${name}`;
 
+	getFirstInvalidCoordinate = () => {
+		let firstCoordinate = null;
+
+		Object.keys(this.invalidInputs).forEach(key => {
+			const input = this.invalidInputs[key];
+
+			if (!firstCoordinate || firstCoordinate > input.offsetTop) {
+				firstCoordinate = input.offsetTop;
+			}
+		});
+
+		return firstCoordinate;
+	};
+
 	getMainSet = (): Object => this.props.values.data.find(set => !set[FIELDS.sourceForCompute]);
 
 	getRefAttributes = (attribute: AttributeType) => () => {
@@ -127,10 +164,21 @@ export class DataFormBuilder extends FormBuilder {
 
 	handleBlurName = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {setFieldValue, values} = this.props;
+		const {[FIELDS.header]: header} = values;
 
-		if (!values[FIELDS.diagramName]) {
-			setFieldValue(FIELDS.diagramName, e.target.value);
+		if (!header[FIELDS.name]) {
+			setFieldValue(FIELDS.header, {
+				...header,
+				[FIELDS.name]: e.target.value
+			});
 		}
+	};
+
+	handleChange = (e: OnChangeInputEvent) => {
+		const {setFieldValue} = this.props;
+		const {name, value} = e;
+
+		setFieldValue(name, value);
 	};
 
 	handleChangeCompute = (index: number) => (name: string, value: boolean) => {
@@ -153,6 +201,18 @@ export class DataFormBuilder extends FormBuilder {
 			setDataFieldValue(index)(name, value);
 		}
 	};
+
+	handleChangeDiagramName = (e: OnChangeInputEvent) => {
+		const {setFieldValue, values} = this.props;
+		const {value} = e;
+
+		setFieldValue(FIELDS.header, {
+			...values[FIELDS.header],
+			[FIELDS.name]: value
+		});
+	};
+
+	handleClick = (name: string, value: boolean) => this.props.setFieldValue(name, value);
 
 	handleClickAddSource = () => this.addSet(1);
 
@@ -195,7 +255,9 @@ export class DataFormBuilder extends FormBuilder {
 		setFieldValue(FIELDS.computedAttrs, computedAttrs);
 	};
 
-	handleSelectAttribute = (index: number) => (name: string, value: AttributeType | null) => {
+	handleSelect = (name: string, value: any) => this.props.setFieldValue(name, value);
+
+	handleSelectAttribute = (index: number) => (name: string, value: AttributeType) => {
 		const {fetchRefAttributes, refAttributes, setDataFieldValue} = this.props;
 
 		if (value && !value.ref && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && value.type in ATTRIBUTE_SETS.REF) {
@@ -209,6 +271,7 @@ export class DataFormBuilder extends FormBuilder {
 			}
 		}
 
+		this.updateStyleName(index, name, value);
 		setDataFieldValue(index)(name, value);
 	};
 
@@ -301,23 +364,53 @@ export class DataFormBuilder extends FormBuilder {
 	setAttributeWithRef = (index: number, name: string, value: AttributeType) => (refAttributes: Array<AttributeType>) => {
 		const {setDataFieldValue} = this.props;
 		const ref = this.getTitleAttribute(refAttributes);
+		value = {...value, ref};
 
-		setDataFieldValue(index)(name, {...value, ref});
+		this.updateStyleName(index, name, value);
+		setDataFieldValue(index)(name, value);
 	};
 
-	renderAddSourceInput = () => {
-		const props = {
-			icon: 'plus',
-			name: 'Источник',
-			onClick: this.handleClickAddSource
-		};
+	setInputRef = (name: string) => (ref: any) => {
+		const {errors, values} = this.props;
 
-		return this.renderLabelWithIcon(props);
+		if (errors[name] && values.shouldScrollToError) {
+			this.invalidInputs[name] = ref;
+		}
 	};
+
+	updateStyleName = (index: number, name: string, value: AttributeType) => {
+		const {setFieldValue, values} = this.props;
+		const mainSet = this.getMainSet();
+		const currentSet = this.getSet(index);
+
+		if (mainSet[FIELDS.dataKey] === currentSet[FIELDS.dataKey]) {
+			const {indicator, parameter} = values;
+
+			if (name === FIELDS.xAxis || name === FIELDS.row) {
+				setFieldValue(FIELDS.parameter, {
+					...parameter,
+					name: getProcessedValue(value, 'title')
+				});
+			}
+
+			if (name === FIELDS.yAxis || name === FIELDS.column) {
+				setFieldValue(FIELDS.indicator, {
+					...indicator,
+					name: getProcessedValue(value, 'title')
+				});
+			}
+		}
+	}
+
+	renderAddSourceInput = () => (
+		<IconButton onClick={this.handleClickAddSource}>
+			<Icon name={ICON_NAMES.PLUS} />
+		</IconButton>
+	);
 
 	renderAttribute = (index: number, props: Object) => {
 		const {refAttributes, setDataFieldValue, values} = this.props;
-		const {name, value, withDivider, ...inputProps} = props;
+		const {name, value, ...inputProps} = props;
 		const {computedAttrs} = values;
 		const set = this.getSet(index);
 		const source = set[FIELDS.source];
@@ -331,7 +424,7 @@ export class DataFormBuilder extends FormBuilder {
 		}
 
 		return (
-			<div className={styles.field} key={key} onClick={onClick} ref={this.setInputRef(name)}>
+			<FormField key={key} onClick={onClick} ref={this.setInputRef(name)}>
 				<Attribute
 					computedAttrs={computedAttrs}
 					getAttributeOptions={this.getAttributeOptions}
@@ -347,18 +440,17 @@ export class DataFormBuilder extends FormBuilder {
 					value={value}
 					{...inputProps}
 				/>
-				{withDivider && this.renderDivider('field')}
 				{this.renderError(this.getErrorName(index, name))}
-			</div>
+			</FormField>
 		);
 	};
 
 	renderBaseInputs = () => {
 		const {values} = this.props;
-		const {diagramName, name} = FIELDS;
-
+		const {header, name} = FIELDS;
 		const nameProps = {
 			handleBlur: this.handleBlurName,
+			handleChange: this.handleChange,
 			label: 'Название виджета',
 			name,
 			placeholder: 'Постарайтесь уместить название в две строчки текста',
@@ -366,18 +458,22 @@ export class DataFormBuilder extends FormBuilder {
 		};
 
 		const diagramNameProps = {
+			errorPath: `${header}.${name}`,
+			handleChange: this.handleChangeDiagramName,
 			label: 'Название диаграммы',
-			name: diagramName,
-			value: values[diagramName]
+			name,
+			value: values[header][name]
 		};
 
 		return (
 			<Fragment>
-				{this.renderTextArea(nameProps)}
-				{this.renderTextArea(diagramNameProps)}
-				{this.renderDivider('section')}
-				{this.renderWidgetSelect()}
-				{this.renderDivider('section')}
+				<FormBox>
+					{this.renderTextArea(nameProps)}
+					{this.renderTextArea(diagramNameProps)}
+				</FormBox>
+				<FormBox>
+					{this.renderWidgetSelect()}
+				</FormBox>
 			</Fragment>
 		);
 	};
@@ -422,8 +518,7 @@ export class DataFormBuilder extends FormBuilder {
 			onRemove: this.handleRemoveBreakdown(index),
 			refInputProps,
 			removable: !this.isRequiredBreakdown(),
-			value: set[FIELDS.breakdown],
-			withDivider: false
+			value: set[FIELDS.breakdown]
 		};
 
 		return this.renderAttribute(index, props);
@@ -436,6 +531,29 @@ export class DataFormBuilder extends FormBuilder {
 			}
 		});
 	};
+
+	renderCheckBox = (props: CheckboxProps) => {
+		const {label, name, onClick, value} = props;
+
+		return (
+			<FormField>
+				<Checkbox
+					label={label}
+					name={name}
+					onClick={onClick || this.handleClick}
+					value={value}
+				/>
+			</FormField>
+		);
+	};
+
+	renderError = (name: string) => <FieldError text={this.props.errors[name]} />;
+
+	renderExtendButton = (props: ExtendButtonProps) => (
+		<FormField>
+			<ExtendButton {...props} />
+		</FormField>
+	);
 
 	renderIndicator = (index: number) => {
 		const set = this.getSet(index);
@@ -480,7 +598,7 @@ export class DataFormBuilder extends FormBuilder {
 		};
 
 		return (
-			<div className={styles.field} key={errorName} ref={this.setInputRef(errorName)}>
+			<FormField key={errorName} ref={this.setInputRef(errorName)}>
 				<Source
 					compute={compute}
 					descriptor={descriptor}
@@ -494,31 +612,49 @@ export class DataFormBuilder extends FormBuilder {
 					sources={sources}
 					value={set[FIELDS.source]}
 				/>
-			</div>
+			</FormField>
 		);
 	};
 
 	renderSourceSection = (callback?: OnSelectSourceCallback) => (
-		<Fragment>
-			{this.renderAddSourceInput()}
+		<FormBox rightControl={this.renderAddSourceInput()} title="Источник">
 			{this.renderByOrder(this.renderSource, false, callback)}
-			{this.renderDivider('section')}
-		</Fragment>
+		</FormBox>
 	);
+
+	renderTextArea = (props: TextAreaProps) => {
+		const {errorPath, handleBlur, handleChange, label, name, placeholder, value} = props;
+
+		return (
+			<FormField ref={this.setInputRef(name)}>
+				<FormControl label={label}>
+					<TextArea
+						name={name}
+						onBlur={handleBlur}
+						onChange={handleChange}
+						placeholder={placeholder}
+						value={value}
+					/>
+					{this.renderError(errorPath || props.name)}
+				</FormControl>
+			</FormField>
+		);
+	};
 
 	renderWidgetSelect = () => {
 		const {values} = this.props;
 
 		return (
-			<div className={styles.field}>
-				<FieldLabel text="Тип диаграммы" />
-				<OuterSelect
-					name={FIELDS.type}
-					onSelect={this.handleSelect}
-					options={OPTIONS.WIDGETS}
-					value={values[FIELDS.type]}
-				/>
-			</div>
+			<FormField>
+				<FormControl label="Тип диаграммы">
+					<OuterSelect
+						name={FIELDS.type}
+						onSelect={this.handleSelect}
+						options={WIDGET_OPTIONS}
+						value={values[FIELDS.type]}
+					/>
+				</FormControl>
+			</FormField>
 		);
 	};
 }

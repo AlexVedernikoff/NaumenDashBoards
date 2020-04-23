@@ -1,37 +1,25 @@
 // @flow
 import {connect} from 'react-redux';
-import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
+import {FIELDS} from 'WidgetFormPanel';
 import Form from 'components/organisms/WidgetFormPanel';
 import {functions, props} from './selectors';
 import {NewWidget} from 'utils/widget';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import schema from './schema';
-import update from './update';
+import type {UpdateWidget} from 'WidgetFormPanel/types';
 
 class WidgetFormPanel extends PureComponent<Props, State> {
 	state = {
-		currentId: '',
 		errors: {},
 		isSubmitting: false,
-		values: {}
+		schema: null,
+		values: {},
+		valuesSet: false
 	};
 
-	static getDerivedStateFromProps (props: Props, state: State) {
-		const {widget} = props;
-		const {currentId} = state;
-		const {id, layout, ...values} = widget;
-
-		if (id !== currentId) {
-			return {
-				currentId: id,
-				errors: {},
-				isSubmitting: false,
-				values
-			};
-		}
-
-		return state;
+	componentDidMount () {
+		const {id, layout, ...values} = this.props.widget;
+		this.setState({values, valuesSet: true});
 	}
 
 	componentDidCatch () {
@@ -44,13 +32,13 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 		cancelForm();
 	}
 
-	handleSubmit = async () => {
+	handleSubmit = async (updateWidget: UpdateWidget) => {
 		const {createWidget, saveWidget, widget} = this.props;
 		const {values} = this.state;
 		const isValid = await this.validate();
 
 		if (isValid) {
-			const updatedWidget = update(widget, values);
+			const updatedWidget = updateWidget(widget, values);
 			this.isNew() ? createWidget(updatedWidget) : saveWidget(updatedWidget);
 		}
 	};
@@ -70,30 +58,38 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 		this.setFieldValue(FIELDS.data, data);
 	};
 
-	setFieldValue = (name: string, value: any) => {
-		const {isSubmitting, values: prevValues} = this.state;
-
+	setFieldValue = (name: string, value: any) => this.setState(({isSubmitting, values: prevValues}) => {
 		const values = {
 			...prevValues,
 			[name]: value
 		};
 
 		isSubmitting && this.validate(values);
-		this.setState({values});
-	};
+
+		return {
+			values
+		};
+	});
+
+	setSchema = (schema: Object) => this.setState({schema});
 
 	validate = async (values?: Object) => {
-		const {values: stateValues} = this.state;
+		const {schema, values: stateValues} = this.state;
 		let errors = {};
 
-		try {
-			await schema.validate(values || stateValues, {
-				abortEarly: false
-			});
-		} catch (e) {
-			e.inner.forEach(({message, path}) => {
-				errors[path] = message;
-			});
+		if (schema) {
+			try {
+				const validateValues = values || stateValues;
+
+				await schema.validate(validateValues, {
+					abortEarly: false,
+					values: validateValues
+				});
+			} catch (e) {
+				e.inner.forEach(({message, path}) => {
+					errors[path] = message;
+				});
+			}
 		}
 
 		this.setState({errors, isSubmitting: true});
@@ -114,30 +110,34 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			updating,
 			user
 		} = this.props;
-		const {errors, isSubmitting, values} = this.state;
+		const {errors, values, valuesSet} = this.state;
 
-		return (
-			<Form
-				attributes={attributes}
-				cancelForm={cancelForm}
-				context={context}
-				errors={errors}
-				fetchAttributes={fetchAttributes}
-				fetchRefAttributes={fetchRefAttributes}
-				isNew={this.isNew()}
-				isSubmitting={isSubmitting}
-				onSubmit={this.handleSubmit}
-				personalDashboard={personalDashboard}
-				refAttributes={refAttributes}
-				setDataFieldValue={this.setDataFieldValue}
-				setDataFieldValues={this.setDataFieldValues}
-				setFieldValue={this.setFieldValue}
-				sources={sources}
-				updating={updating}
-				user={user}
-				values={values}
-			/>
-		);
+		if (valuesSet) {
+			return (
+				<Form
+					attributes={attributes}
+					cancelForm={cancelForm}
+					context={context}
+					errors={errors}
+					fetchAttributes={fetchAttributes}
+					fetchRefAttributes={fetchRefAttributes}
+					isNew={this.isNew()}
+					onSubmit={this.handleSubmit}
+					personalDashboard={personalDashboard}
+					refAttributes={refAttributes}
+					setDataFieldValue={this.setDataFieldValue}
+					setDataFieldValues={this.setDataFieldValues}
+					setFieldValue={this.setFieldValue}
+					setSchema={this.setSchema}
+					sources={sources}
+					updating={updating}
+					user={user}
+					values={values}
+				/>
+			);
+		}
+
+		return null;
 	}
 }
 

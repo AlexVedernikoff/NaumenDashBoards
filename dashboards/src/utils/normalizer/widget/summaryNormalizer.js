@@ -1,6 +1,7 @@
 // @flow
-import {aggregation, array, getOrdinalData, object, string} from './helpers';
-import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
+import {aggregation, array, getOrdinalData, header, object, string} from './helpers';
+import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
+import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
 import type {SummaryData, SummaryWidget} from 'store/widgets/data/types';
 import uuid from 'tiny-uuid';
@@ -32,17 +33,23 @@ const createData = (widget: Object, fields: Object): SummaryData => {
 };
 
 const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
-	const {id, layout, type} = widget;
 	const dataFields = getDataFields();
+	const {
+		id,
+		data = getOrdinalData(widget, dataFields, createData),
+		indicator = DEFAULT_SUMMARY_SETTINGS.indicator,
+		layout,
+		type
+	} = widget;
 
 	return {
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data: getOrdinalData(widget, dataFields, createData),
-		diagramName: string(widget[FIELDS.diagramName]),
+		data,
+		header: header(widget),
 		id,
+		indicator,
 		layout,
 		name: string(widget[FIELDS.name]),
-		showName: Boolean(widget[FIELDS.showName]),
 		type
 	};
 };

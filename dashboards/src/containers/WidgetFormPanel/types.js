@@ -12,10 +12,11 @@ import type {Widget} from 'store/widgets/data/types';
 export type Values = Object;
 
 export type State = {
-	currentId: '',
 	errors: Object,
 	isSubmitting: boolean,
-	values: Values
+	schema: null | Object,
+	values: Values,
+	valuesSet: boolean
 };
 
 export type ConnectedProps = {

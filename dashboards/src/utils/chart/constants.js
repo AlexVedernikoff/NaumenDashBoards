@@ -1,4 +1,7 @@
 // @flow
+import type {DefaultChartSettings} from './types';
+import {FONT_FAMILIES, TEXT_HANDLERS} from 'store/widgets/data/constants';
+
 const bar: 'bar' = 'bar';
 const donut: 'donut' = 'donut';
 const line: 'line' = 'line';
@@ -42,8 +45,42 @@ const DEFAULT_COLORS = [
 	'#FFFE55'
 ];
 
+const DEFAULT_DATA_LABEL_COLOR = 'white';
+
+const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
+	dataLabels: {
+		fontColor: DEFAULT_DATA_LABEL_COLOR,
+		fontFamily: FONT_FAMILIES[0],
+		fontSize: 14,
+		show: true,
+		showShadow: true
+	},
+	legend: {
+		fontFamily: FONT_FAMILIES[0],
+		fontSize: 14,
+		position: LEGEND_POSITIONS.right,
+		show: true,
+		textHandler: TEXT_HANDLERS.CROP
+	},
+	xAxis: {
+		name: '',
+		show: true,
+		showName: false
+	},
+	yAxis: {
+		max: undefined,
+		min: undefined,
+		name: '',
+		show: true,
+		showName: false,
+		tickAmount: undefined
+	}
+};
+
 export {
 	CHART_TYPES,
 	DEFAULT_COLORS,
+	DEFAULT_CHART_SETTINGS,
+	DEFAULT_DATA_LABEL_COLOR,
 	LEGEND_POSITIONS
 };

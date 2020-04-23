@@ -14,6 +14,8 @@ import Datepicker from './Datepicker';
 import Diagram from './Diagram';
 import FormBox from './FormBox';
 import FormCheckControl from './FormCheckControl';
+import FormControl from './FormControl';
+import FormField from './FormField';
 import GroupCreatingModal from './GroupCreatingModal';
 import InputForm from './InputForm';
 import MaterialSelect from './MaterialSelect';
@@ -49,6 +51,8 @@ export {
 	Diagram,
 	FormBox,
 	FormCheckControl,
+	FormControl,
+	FormField,
 	GroupCreatingModal,
 	InputForm,
 	MaterialSelect,

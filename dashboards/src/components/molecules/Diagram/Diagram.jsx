@@ -1,9 +1,10 @@
 // @flow
 import {Chart, Summary, Table} from 'components/molecules';
+import cn from 'classnames';
+import {FONT_STYLES, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Diagram extends Component<Props> {
 	shouldComponentUpdate (nextProps: Props) {
@@ -32,6 +33,8 @@ export class Diagram extends Component<Props> {
 				return <Summary data={data} widget={widget} />;
 			case TABLE:
 				return <Table data={data} onUpdate={onUpdate} widget={widget} />;
+			default:
+				return null;
 		}
 	};
 
@@ -49,16 +52,11 @@ export class Diagram extends Component<Props> {
 		}
 	};
 
-	renderDiagram = () => {
-		const {showName} = this.props.widget;
-		const className = showName ? styles.diagramWithName : styles.diagram;
-
-		return (
-			<div className={className}>
-				{this.resolveDiagram()}
-			</div>
-		);
-	};
+	renderDiagram = () => (
+		<div className={styles.diagram}>
+			{this.resolveDiagram()}
+		</div>
+	);
 
 	renderError = () => {
 		const {error} = this.props.buildData;
@@ -77,16 +75,29 @@ export class Diagram extends Component<Props> {
 	};
 
 	renderName = () => {
-		const {widget} = this.props;
-		const {diagramName, showName} = widget;
+		const {header} = this.props.widget;
+		const {fontColor, fontFamily, fontSize, fontStyle, name, show, textAlign, textHandler} = header;
 
-		if (showName) {
+		if (show) {
+			const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
+			const {CROP, WRAP} = TEXT_HANDLERS;
+			const nameCN = cn({
+				[styles.name]: true,
+				[styles.bold]: fontStyle === BOLD,
+				[styles.italic]: fontStyle === ITALIC,
+				[styles.underline]: fontStyle === UNDERLINE,
+				[styles.crop]: textHandler === CROP,
+				[styles.wrap]: textHandler === WRAP
+			});
+
 			return (
-				<div className={styles.name}>
-					{diagramName}
+				<div className={nameCN} style={{color: fontColor, fontFamily, fontSize: Number(fontSize), textAlign}}>
+					{name}
 				</div>
 			);
 		}
+
+		return null;
 	};
 
 	render () {

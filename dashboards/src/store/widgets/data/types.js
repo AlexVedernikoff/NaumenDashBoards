@@ -1,13 +1,27 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {COMBO_TYPES, WIDGET_SETS, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
+import {
+	COMBO_TYPES,
+	FONT_STYLES,
+	SORTING_TYPES,
+	SORTING_VALUES,
+	TEXT_ALIGNS,
+	TEXT_HANDLERS,
+	WIDGET_SETS,
+	WIDGET_TYPES,
+	WIDGETS_EVENTS
+} from './constants';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import type {Layout, LayoutItem} from 'utils/layout/types';
 import {LEGEND_POSITIONS} from 'utils/chart';
 import type {NewWidget} from 'entities';
 
-type LegendPosition = $Keys<typeof LEGEND_POSITIONS>;
+type FontStyle = $Keys<typeof FONT_STYLES>;
+
+type TextAlign = $Keys<typeof TEXT_ALIGNS>;
+
+type TextHandler = $Keys<typeof TEXT_HANDLERS>;
 
 type ComputeData = {
 	aggregation: string,
@@ -46,11 +60,74 @@ export type Group = {
 	way: GroupWay
 };
 
+// Общие параметры всех виджетов
+
 type BaseData = {
 	dataKey: string,
 	descriptor: string,
 	source: Source,
 	sourceForCompute: boolean,
+};
+
+export type Header = {
+	fontColor: string,
+	fontFamily: string,
+	fontSize: number,
+	fontStyle?: FontStyle,
+	name: string,
+	show: boolean,
+	textAlign: TextAlign,
+	textHandler: TextHandler
+};
+
+type BaseWidget = {|
+	computedAttrs: Array<ComputedAttr>,
+	header: Header,
+	id: string,
+	layout: LayoutItem,
+	name: string
+|};
+
+// Общие параметры графиков
+
+type LegendPosition = $Keys<typeof LEGEND_POSITIONS>;
+
+export type Legend = {
+	fontFamily: string,
+	fontSize: number,
+	position: LegendPosition,
+	show: boolean,
+	textHandler: TextHandler
+};
+
+export type ChartSorting = {
+	type: $Keys<typeof SORTING_TYPES>,
+	value: $Keys<typeof SORTING_VALUES>
+};
+
+export type DataLabels = {
+	fontColor: string,
+	fontFamily: string,
+	fontSize: number,
+	show: boolean,
+	showShadow: boolean
+};
+
+// График с осями
+
+export type AxisIndicator = {
+	max?: number,
+	min?: number,
+	name: string,
+	show: boolean,
+	showName: boolean,
+	tickAmount?: number
+};
+
+export type AxisParameter = {
+	name: string,
+	show: boolean,
+	showName: boolean
 };
 
 export type AxisData = {
@@ -63,12 +140,19 @@ export type AxisData = {
 	yAxis: MixedAttribute
 };
 
-type ComboType = $Keys<typeof COMBO_TYPES>;
-
-export type ComboData = {
-	...AxisData,
-	type: ComboType
+export type AxisWidget = {
+	...BaseWidget,
+	colors: Array<string>,
+	data: Array<AxisData>,
+	dataLabels: DataLabels,
+	indicator: AxisIndicator,
+	legend: Legend,
+	parameter: AxisParameter,
+	sorting: ChartSorting,
+	type: $Keys<typeof WIDGET_SETS.AXIS>
 };
+
+// Круговой график
 
 export type CircleData = {
 	...BaseData,
@@ -78,11 +162,60 @@ export type CircleData = {
 	indicator: MixedAttribute
 };
 
+export type CircleWidget = {
+	...BaseWidget,
+	colors: Array<string>,
+	data: Array<CircleData>,
+	dataLabels: DataLabels,
+	legend: Legend,
+	sorting: ChartSorting,
+	type: $Keys<typeof WIDGET_SETS.CIRCLE>
+};
+
+// Комбо график
+
+type ComboType = $Keys<typeof COMBO_TYPES>;
+
+export type ComboData = {
+	...AxisData,
+	type: ComboType
+};
+
+export type ComboWidget = {
+	...BaseWidget,
+	colors: Array<string>,
+	data: Array<ComboData>,
+	dataLabels: DataLabels,
+	indicator: AxisIndicator,
+	legend: Legend,
+	parameter: AxisParameter,
+	sorting: ChartSorting,
+	type: typeof WIDGET_TYPES.COMBO,
+};
+
+// Сводка
+
 export type SummaryData = {
 	...BaseData,
 	aggregation: string,
 	indicator: MixedAttribute
 };
+
+export type SummaryIndicator = {
+	fontColor: string,
+	fontFamily: string,
+	fontSize: number,
+	fontStyle?: FontStyle
+};
+
+export type SummaryWidget = {
+	...BaseWidget,
+	data: Array<SummaryData>,
+	indicator: SummaryIndicator,
+	type: typeof WIDGET_TYPES.SUMMARY
+};
+
+// Таблица
 
 export type TableData = {
 	...BaseData,
@@ -95,61 +228,28 @@ export type TableData = {
 	row: Attribute
 };
 
-type BaseWidget = {|
-	computedAttrs: Array<ComputedAttr>,
-	diagramName: string,
-	id: string,
-	layout: LayoutItem,
-	name: string,
-|};
-
-export type AxisWidget = {
-	...BaseWidget,
-	colors: Array<string>,
-	data: Array<AxisData>,
-	legendPosition: LegendPosition,
-	showLegend: boolean;
-	showName: boolean,
-	showValue: boolean,
-	showXAxis: boolean,
-	showYAxis: boolean,
-	type: $Keys<typeof WIDGET_SETS.AXIS>,
-};
-
-export type CircleWidget = {
-	...BaseWidget,
-	colors: Array<string>,
-	data: Array<CircleData>,
-	legendPosition: LegendPosition,
-	showLegend: boolean;
-	showName: boolean,
-	showValue: boolean,
-	type: $Keys<typeof WIDGET_SETS.CIRCLE>
-};
-
-export type ComboWidget = {
-	...BaseWidget,
-	colors: Array<string>,
-	data: Array<ComboData>,
-	legendPosition: LegendPosition,
-	showLegend: boolean;
-	showName: boolean,
-	showValue: boolean,
-	type: typeof WIDGET_TYPES.COMBO,
-};
-
-export type SummaryWidget = {
-	...BaseWidget,
-	data: Array<SummaryData>,
-	showName: boolean,
-	type: typeof WIDGET_TYPES.SUMMARY
+export type Table = {
+	body: {
+		emptyData: Object,
+		showRowNum: boolean,
+		textAlign: TextAlign,
+		textHandler: TextHandler
+	},
+	columnHeader: {
+		fontColor: string,
+		fontStyle?: FontStyle
+	},
+	rowHeader: {
+		fontColor: string,
+		fontStyle?: FontStyle
+	}
 };
 
 export type TableWidget = {
 	...BaseWidget,
 	data: Array<TableData>,
 	rowsWidth: Array<number>,
-	showName: boolean,
+	table: Table,
 	type: typeof WIDGET_TYPES.TABLE
 };
 
@@ -249,7 +349,7 @@ export type WidgetsAction =
 	| SetWidgets
 	| UpdateWidget
 	| UnknownWidgetsAction
-;
+	;
 
 export type WidgetMap = {
 	[key: string]: Widget;

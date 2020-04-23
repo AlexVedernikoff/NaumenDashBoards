@@ -2,7 +2,7 @@
 import axisNormalizer from './axisNormalizer';
 import circleNormalizer from './circleNormalizer';
 import comboNormalizer from './comboNormalizer';
-import FIELDS from 'components/organisms/WidgetFormPanel/constants/fields';
+import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
 import summaryNormalizer from './summaryNormalizer';
 import tableNormalizer from './tableNormalizer';
@@ -20,26 +20,22 @@ const transformType = (widget: LegacyWidget) => {
 };
 
 const widgetNormalizer = (widget: Object): Widget => {
-	if (!(FIELDS.data in widget)) {
-		const {COMBO, DONUT, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
-		transformType(widget);
+	const {COMBO, DONUT, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
+	transformType(widget);
 
-		switch (widget[FIELDS.type]) {
-			case DONUT:
-			case PIE:
-				return circleNormalizer(widget);
-			case COMBO:
-				return comboNormalizer(widget);
-			case SUMMARY:
-				return summaryNormalizer(widget);
-			case TABLE:
-				return tableNormalizer(widget);
-			default:
-				return axisNormalizer(widget);
-		}
+	switch (widget[FIELDS.type]) {
+		case DONUT:
+		case PIE:
+			return circleNormalizer(widget);
+		case COMBO:
+			return comboNormalizer(widget);
+		case SUMMARY:
+			return summaryNormalizer(widget);
+		case TABLE:
+			return tableNormalizer(widget);
+		default:
+			return axisNormalizer(widget);
 	}
-
-	return widget;
 };
 
 export default widgetNormalizer;
