@@ -5,25 +5,38 @@
 		position: relative;
 	}
 
-	.label {
+	.valueContainer {
 		align-items: center;
 		border: 1px solid @grey;
 		border-radius: @border-radius;
 		cursor: pointer;
 		display: flex;
-		height: 32px;
 		justify-content: space-between;
-		padding: 0 12px;
+		padding: 8px 10px 8px 12px;
+
+		&:focus-within {
+			border: 1px solid @info;
+		}
 	}
 
 	.menu {
 		background-color: @white;
+		border-radius: @border-radius;
 		box-shadow: @grey-box-shadow;
 		left: 0;
+		margin-bottom: 20px;
 		right: 0;
-		padding: 5px 0;
 		position: absolute;
 		top: 100%;
 		z-index: 1;
+	}
+
+	.input {
+		height: 100%;
+		width: 100%;
+	}
+
+	.caret {
+		margin-left: auto;
 	}
 }

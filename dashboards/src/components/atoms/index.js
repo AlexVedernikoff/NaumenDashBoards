@@ -5,15 +5,13 @@ import CheckIconButton from './CheckIconButton';
 import Checkbox from './Checkbox';
 import CreationPanel from './CreationPanel';
 import DatepickerControl from './DatepickerControl';
-import Divider from './Divider';
 import ExtendButton from './ExtendButton';
 import FieldButton from './FieldButton';
 import FieldError from './FieldError';
-import FieldLabel from './FieldLabel';
 import Icon from './Icon';
 import IconButton from './IconButton';
 import InfoPanel from './InfoPanel';
-import Label from './Label';
+import LegacyCheckbox from './LegacyCheckbox';
 import Loader from './Loader';
 import MaterialDateInput from './MaterialDateInput';
 import MaterialTextInput from './MaterialTextInput';
@@ -24,7 +22,7 @@ import SearchSelectInput from './SearchSelectInput';
 import SimpleListOption from './SimpleListOption';
 import SimpleTooltip from './SimpleTooltip';
 import TextArea from './TextArea';
-import Title from './Title';
+import TextInput from './TextInput';
 import Toast from './Toast';
 import Toggle from './Toggle';
 import Tooltip from './Tooltip';
@@ -36,15 +34,13 @@ export {
 	Checkbox,
 	CreationPanel,
 	DatepickerControl,
-	Divider,
 	ExtendButton,
 	FieldButton,
 	FieldError,
-	FieldLabel,
 	Icon,
 	IconButton,
 	InfoPanel,
-	Label,
+	LegacyCheckbox,
 	Loader,
 	MaterialDateInput,
 	MaterialTextInput,
@@ -55,7 +51,7 @@ export {
 	SimpleListOption,
 	SimpleTooltip,
 	TextArea,
-	Title,
+	TextInput,
 	Toast,
 	Toggle,
 	Tooltip

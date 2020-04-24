@@ -1,16 +1,9 @@
 // @flow
-import {ACTIVE_COLORS} from './constants';
-
-type ActiveColor =
-	| typeof ACTIVE_COLORS.INFO
-	| typeof ACTIVE_COLORS.LIGHT
-;
+import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Props = {
-	activeColor: ActiveColor,
-	className: string,
-	label: string,
+	checked: boolean,
 	name: string,
-	onClick: (name: string, value: boolean) => void | Promise<void>,
-	value: boolean
+	onChange: OnChangeInputEvent => void,
+	value: InputValue
 };
