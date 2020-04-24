@@ -5,7 +5,7 @@ import type {DivRef} from 'components/types';
 import {getLegendCroppingFormatter, getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
-import ReactResizeDetector from 'react-resize-detector';
+import {ResizeDetector} from 'components/molecules';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -70,14 +70,9 @@ export class Chart extends PureComponent<Props> {
 	renderChart = () => <div ref={this.ref} />;
 
 	renderChartWithResize = () => (
-		<ReactResizeDetector
-			handleWidth
-			onResize={this.handleResize}
-			refreshMode="debounce"
-			refreshRate={500}
-			render={this.renderChart}
-			skipOnMount={true}
-		/>
+		<ResizeDetector onResize={this.handleResize} skipOnMount={true}>
+			<div ref={this.ref} />
+		</ResizeDetector>
 	);
 
 	render () {

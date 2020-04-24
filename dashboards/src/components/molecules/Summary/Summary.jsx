@@ -1,36 +1,29 @@
 // @flow
+import cn from 'classnames';
+import {FONT_STYLES} from 'store/widgets/data/constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import ReactResizeDetector from 'react-resize-detector';
+import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
 
 export class Summary extends PureComponent<Props, State> {
-	state = {
-		height: 0,
-		title: '',
-		total: 0
-	};
-
-	static getDerivedStateFromProps (props: Props) {
-		const {title, total} = props.data;
-		return title && total ? {title, total} : null;
-	}
-
-	resize = (width: number, height: number) => this.setState({height});
-
-	renderSummary = () => (
-		<div className={styles.container}>
-			{this.renderTotal()}
-		</div>
-	);
-
-	renderTotal = () => {
-		const {height: fontSize, total} = this.state;
-		return <span style={{fontSize}}>{total}</span>;
-	};
-
 	render () {
-		return <ReactResizeDetector handleHeight onResize={this.resize} render={this.renderSummary} />;
+		const {data, widget} = this.props;
+		const {fontColor, fontFamily, fontSize, fontStyle} = widget.indicator;
+		const {total} = data;
+		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
+		const containerCN = cn({
+			[styles.container]: true,
+			[settingsStyles.bold]: fontStyle === BOLD,
+			[settingsStyles.italic]: fontStyle === ITALIC,
+			[settingsStyles.underline]: fontStyle === UNDERLINE
+		});
+
+		return (
+			<div className={containerCN} style={{color: fontColor, fontFamily, fontSize: Number(fontSize)}}>
+				{total}
+			</div>
+		);
 	}
 }
 

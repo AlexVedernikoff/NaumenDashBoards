@@ -4,6 +4,7 @@ import cn from 'classnames';
 import {FONT_STYLES, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
+import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
 
 export class Diagram extends Component<Props> {
@@ -83,11 +84,11 @@ export class Diagram extends Component<Props> {
 			const {CROP, WRAP} = TEXT_HANDLERS;
 			const nameCN = cn({
 				[styles.name]: true,
-				[styles.bold]: fontStyle === BOLD,
-				[styles.italic]: fontStyle === ITALIC,
-				[styles.underline]: fontStyle === UNDERLINE,
-				[styles.crop]: textHandler === CROP,
-				[styles.wrap]: textHandler === WRAP
+				[settingsStyles.bold]: fontStyle === BOLD,
+				[settingsStyles.italic]: fontStyle === ITALIC,
+				[settingsStyles.underline]: fontStyle === UNDERLINE,
+				[settingsStyles.crop]: textHandler === CROP,
+				[settingsStyles.wrap]: textHandler === WRAP
 			});
 
 			return (
