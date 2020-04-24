@@ -1,6 +1,8 @@
 @import '/styles/variables';
 
 :local {
+	@height: 28px;
+
 	.container {
 		position: relative;
 	}
@@ -15,7 +17,7 @@
 		position: absolute;
 		right: 0;
 		text-decoration: underline;
-		top: 40px;
+		top: @height;
 	}
 
 	.select {
@@ -24,7 +26,7 @@
 		box-sizing: border-box;
 		cursor: pointer;
 		display: flex;
-		height: 40px;
+		height: @height;
 		position: relative;
 		white-space: nowrap;
 
@@ -43,14 +45,14 @@
 		left: 0;
 		position: absolute;
 		right: 0;
-		top: 40px;
+		top: @height;
 		z-index: 1;
 	}
 
 	.label {
 		flex: auto;
 		overflow: hidden;
-		padding: 6px 0;
+		padding-bottom: 6px;
 		text-overflow: ellipsis;
 	}
 

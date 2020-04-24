@@ -3,10 +3,11 @@ import {CustomGroup, SystemGroup} from './components';
 import type {CustomGroupRef, Props, State, SystemGroupRef} from './types';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS, TYPE_OPTIONS} from './constants';
+import {FormCheckControl, FormControl, Modal} from 'components/molecules';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {Group} from 'store/widgets/data/types';
 import {MaterialTextInput, RadioButton} from 'components/atoms';
-import {Modal} from 'components/molecules';
+import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, createRef} from 'react';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import styles from './styles.less';
@@ -44,12 +45,12 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	getModalSize = () => this.state.way === GROUP_WAYS.SYSTEM ? 360 : MODAL_SIZES.LARGE;
 
+	handleChange = ({name, value}: OnChangeInputEvent) => this.setState({[name]: value});
+
 	handleChangeAttributeTitle = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {value: attributeTitle} = e.currentTarget;
 		this.setState({attributeTitle});
 	};
-
-	handleChangeWay = ({value}: Object) => this.setState({way: value});
 
 	handleSubmit = () => {
 		const {current: group} = this.state.way === GROUP_WAYS.SYSTEM ? this.systemGroupRef : this.customGroupRef;
@@ -121,10 +122,9 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderWayField = () => (
-		<div className={styles.field}>
-			<div>Тип группировки</div>
+		<FormControl className={styles.field} label="Тип группировки">
 			{TYPE_OPTIONS.map(this.renderWayInput)}
-		</div>
+		</FormControl>
 	);
 
 	renderWayInput = (option: Object) => {
@@ -133,14 +133,15 @@ export class GroupCreatingModal extends Component<Props, State> {
 		const checked = way === value;
 
 		return (
-			<div className={styles.radioButton} key={value}>
-				<RadioButton
-					checked={checked}
-					label={label}
-					name={FIELDS.way}
-					onChange={this.handleChangeWay}
-					value={value}
-				/>
+			<div className={styles.radioField}>
+				<FormCheckControl label={label}>
+					<RadioButton
+						checked={checked}
+						name={FIELDS.way}
+						onChange={this.handleChange}
+						value={value}
+					/>
+				</FormCheckControl>
 			</div>
 		);
 	};
