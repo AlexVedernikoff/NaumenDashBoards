@@ -1,5 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
+import {deepClone} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
 import Form from 'components/organisms/WidgetFormPanel';
 import {functions, props} from './selectors';
@@ -19,7 +20,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 
 	componentDidMount () {
 		const {id, layout, ...values} = this.props.widget;
-		this.setState({values, valuesSet: true});
+		this.setState({values: deepClone(values), valuesSet: true});
 	}
 
 	componentDidCatch () {

@@ -1,7 +1,6 @@
 // @flow
 import {Component} from 'react';
-import type {Props} from './types';
-import type {SelectData} from 'store/customGroups/types';
+import type {Props, Value} from './types';
 
 export class MultiSelectOperand extends Component<Props> {
 	handleClear = () => {
@@ -24,12 +23,16 @@ export class MultiSelectOperand extends Component<Props> {
 		});
 	};
 
-	handleSelect = (name: string, {title, uuid}: SelectData) => {
-		const {onChange, operand} = this.props;
-		const index = operand.data.findIndex(i => i.uuid === uuid);
+	handleSelect = (name: string, value: Value) => {
+		const {convert, getOptionValue, onChange, operand} = this.props;
+		const index = operand.data.findIndex(currentValue => getOptionValue(currentValue) === getOptionValue(value));
 		let {data} = operand;
 
-		index > -1 ? data.splice(index, 1) : data.push({title, uuid});
+		if (convert) {
+			value = convert(value);
+		}
+
+		index > -1 ? data.splice(index, 1) : data.push(value);
 
 		onChange({
 			...operand,

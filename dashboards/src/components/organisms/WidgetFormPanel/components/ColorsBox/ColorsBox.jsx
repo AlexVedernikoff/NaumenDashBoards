@@ -2,7 +2,6 @@
 import {AbsolutePortal, ColorPicker, ToggableFormBox} from 'components/molecules';
 import {DEFAULT_COLORS} from 'utils/chart/constants';
 import type {DivRef} from 'components/types';
-import {formRef} from 'WidgetFormPanel';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
@@ -45,7 +44,7 @@ export class ColorsBox extends PureComponent<Props, State> {
 		});
 	}
 
-	handleClosePicker = () => this.setState({showPicker: false});
+	hidePicker = () => this.setState({showPicker: false});
 
 	renderColor = (backgroundColor: string, index: number) => (
 		<div className={styles.paletteItem} key={index} onClick={this.handleClickColor(index)} style={{backgroundColor}} />
@@ -54,16 +53,14 @@ export class ColorsBox extends PureComponent<Props, State> {
 	renderColorPicker = () => {
 		const {data} = this.props;
 		const {colorIndex, showPicker} = this.state;
-		const {current: element} = this.ref;
-		const {current: container} = formRef;
 
-		if (showPicker && element && container) {
+		if (showPicker) {
 			return (
-				<AbsolutePortal container={container} elem={element}>
+				<AbsolutePortal elementRef={this.ref} onClickOutside={this.hidePicker}>
 					<div className={styles.picker}>
 						<ColorPicker
 							onChange={this.changeColor}
-							onClose={this.handleClosePicker}
+							onClose={this.hidePicker}
 							value={data[colorIndex]}
 						/>
 					</div>

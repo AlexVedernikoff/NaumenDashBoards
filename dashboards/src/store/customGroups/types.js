@@ -1,5 +1,5 @@
 // @flow
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {CUSTOM_GROUPS_EVENTS, OPERAND_SETS, OPERAND_TYPES} from './constants';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
 
@@ -100,7 +100,7 @@ export type BetweenData = {
 
 export type BetweenOperand = {|
 	data: BetweenData,
-	type: typeof OPERAND_TYPES.BETWEEN
+	type: typeof OPERAND_TYPES.BETWEEN | typeof OPERAND_TYPES.EXPIRES_BETWEEN
 |};
 
 export type DateOrCondition =
@@ -123,10 +123,7 @@ export type DateCustomGroup = {|
 |};
 
 // Группировка для ссылочных атрибутов
-export type SelectData = {
-	title: string,
-	uuid: string
-};
+export type SelectData = Object;
 
 export type SelectOperand = {|
 	data: SelectData | null,
@@ -158,12 +155,33 @@ export type RefCustomGroup = {|
 	type: $Keys<typeof ATTRIBUTE_SETS.REF>
 |};
 
+// Группировка для счетчиков
+export type TimerOrCondition =
+	| BetweenOperand
+	| SelectOperand
+;
+
+export type TimerAndCondition = Array<TimerOrCondition>;
+
+export type TimerSubGroup = {
+	data: Array<TimerAndCondition>,
+	name: string
+};
+
+export type TimerCustomGroup = {|
+	id: string,
+	name: string,
+	subGroups: Array<TimerSubGroup>,
+	type: typeof ATTRIBUTE_TYPES.backTimer | typeof ATTRIBUTE_TYPES.timer
+|};
+
 export type CustomGroup =
 	| DateCustomGroup
 	| IntervalCustomGroup
 	| NumberCustomGroup
 	| RefCustomGroup
 	| StringCustomGroup
+	| TimerCustomGroup
 ;
 
 export type CustomGroupsMap = {

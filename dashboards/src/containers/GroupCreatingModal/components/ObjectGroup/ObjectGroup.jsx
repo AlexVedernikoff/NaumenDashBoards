@@ -50,6 +50,11 @@ export class ObjectGroup extends Component<Props, State> {
 		}
 	}
 
+	convertOperandData = ({title, uuid}: Object) => ({
+		title,
+		uuid
+	});
+
 	createCustomCondition = (type: OperandType = OPERAND_TYPES.CONTAINS) => {
 		const {CONTAINS_ANY, TITLE_CONTAINS, TITLE_NOT_CONTAINS} = OPERAND_TYPES;
 
@@ -194,6 +199,7 @@ export class ObjectGroup extends Component<Props, State> {
 
 		return (
 			<MultiSelectOperand
+				convert={this.convertOperandData}
 				getOptionValue={this.getOptionValue}
 				onChange={onChange}
 				operand={operand}
@@ -217,7 +223,12 @@ export class ObjectGroup extends Component<Props, State> {
 		const actual = this.hasActualType(operand);
 
 		return (
-			<SelectOperand onChange={onChange} operand={operand} render={this.renderSelect(actual)} />
+			<SelectOperand
+				convert={this.convertOperandData}
+				onChange={onChange}
+				operand={operand}
+				render={this.renderSelect(actual)}
+			/>
 		);
 	};
 

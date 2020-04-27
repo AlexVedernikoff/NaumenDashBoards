@@ -2,7 +2,18 @@
 import type {AttrCustomProps} from 'components/molecules/GroupCreatingModal/components/CustomGroup/types';
 import type {AttrSystemProps} from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {CatalogItemGroup, CatalogItemSetGroup, DateGroup, IntervalGroup, MetaClassGroup, NumberGroup, ObjectGroup, StateGroup, StringGroup} from './components';
+import {
+	CatalogItemGroup,
+	CatalogItemSetGroup,
+	DateGroup,
+	IntervalGroup,
+	MetaClassGroup,
+	NumberGroup,
+	ObjectGroup,
+	StateGroup,
+	StringGroup,
+	TimerGroup
+} from './components';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import {getMapValues} from 'src/helpers';
@@ -15,6 +26,7 @@ export class GroupCreatingModalContainer extends Component<Props> {
 		const {attribute} = this.props;
 		const {
 			backBOLinks,
+			backTimer,
 			boLinks,
 			catalogItem,
 			catalogItemSet,
@@ -26,7 +38,8 @@ export class GroupCreatingModalContainer extends Component<Props> {
 			metaClass,
 			object,
 			state,
-			string
+			string,
+			timer
 		} = ATTRIBUTE_TYPES;
 
 		switch (attribute.type) {
@@ -52,6 +65,9 @@ export class GroupCreatingModalContainer extends Component<Props> {
 				return StateGroup;
 			case string:
 				return StringGroup;
+			case backTimer:
+			case timer:
+				return TimerGroup;
 		}
 	};
 

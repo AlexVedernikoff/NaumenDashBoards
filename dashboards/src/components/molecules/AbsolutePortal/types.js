@@ -1,13 +1,16 @@
 // @flow
+import type {Ref} from 'components/types';
+
 export type Props = {
 	children: React$Node,
-	container: HTMLElement | null,
-	elem: HTMLElement
+	elementRef: Ref<any>,
+	minOffset: number,
+	onClickOutside: () => void
 };
 
 export type State = {
-	height: number,
-	left: number,
-	top: number,
-	width: number
+	childPosition?: {
+		left: number,
+		top: number
+	}
 };
