@@ -9,6 +9,7 @@ import ObjectGroup from './ObjectGroup';
 import RefGroup from './RefGroup';
 import StateGroup from './StateGroup';
 import StringGroup from './StringGroup';
+import TimerGroup from './TimerGroup';
 
 export {
 	CatalogItemGroup,
@@ -20,5 +21,6 @@ export {
 	ObjectGroup,
 	RefGroup,
 	StateGroup,
-	StringGroup
+	StringGroup,
+	TimerGroup
 };

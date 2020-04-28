@@ -1,11 +1,10 @@
 // @flow
 import {AbsolutePortal, ColorPicker} from 'components/molecules';
 import cn from 'classnames';
-import type {DivRef} from 'components/types';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {OutsideClickDetector} from 'components/atoms';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import styles from './styles.less';
 
 export class ColorInput extends PureComponent<Props, State> {
@@ -15,7 +14,7 @@ export class ColorInput extends PureComponent<Props, State> {
 		value: '#4F5C70'
 	};
 
-	ref: DivRef = createRef();
+	ref: Ref<'div'> = createRef();
 
 	state = {
 		showPicker: false
@@ -63,16 +62,12 @@ export class ColorInput extends PureComponent<Props, State> {
 	};
 
 	renderPortablePicker = () => {
-		const {container} = this.props;
 		const {showPicker} = this.state;
-		const {current: element} = this.ref;
 
-		if (showPicker && element) {
+		if (showPicker) {
 			return (
-				<AbsolutePortal container={container} elem={element}>
-					<OutsideClickDetector onClickOutside={this.hidePicker}>
-						{this.renderPicker()}
-					</OutsideClickDetector>
+				<AbsolutePortal elementRef={this.ref} onClickOutside={this.hidePicker}>
+					{this.renderPicker()}
 				</AbsolutePortal>
 			);
 		}

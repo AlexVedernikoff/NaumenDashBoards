@@ -1,15 +1,14 @@
 // @flow
 import {Component} from 'react';
-import type {Props} from './types';
-import type {SelectData} from 'store/customGroups/types';
+import type {Props, Value} from './types';
 
 export class SelectOperand extends Component<Props> {
-	handleSelect = (name: string, {title, uuid}: SelectData) => {
-		const {onChange, operand} = this.props;
-		const data = {
-			title,
-			uuid
-		};
+	handleSelect = (name: string, data: Value) => {
+		const {convert, onChange, operand} = this.props;
+
+		if (convert) {
+			data = convert(data);
+		}
 
 		onChange({...operand, data});
 	};

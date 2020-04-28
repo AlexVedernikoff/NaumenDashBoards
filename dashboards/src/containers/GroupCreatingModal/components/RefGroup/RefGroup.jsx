@@ -39,6 +39,11 @@ export class RefGroup extends Component<Props, State> {
 		}
 	}
 
+	convertOperandData = ({title, uuid}: Object) => ({
+		title,
+		uuid
+	});
+
 	createCustomCondition = (type: OperandType = OPERAND_TYPES.CONTAINS) => {
 		const {CONTAINS_ANY, TITLE_CONTAINS, TITLE_NOT_CONTAINS} = OPERAND_TYPES;
 
@@ -122,6 +127,7 @@ export class RefGroup extends Component<Props, State> {
 
 	renderMultiSelectOperand = (operand: MultiSelectOperandType, onChange: OnChangeOperand) => (
 		<MultiSelectOperand
+			convert={this.convertOperandData}
 			getOptionValue={this.getOptionValue}
 			onChange={onChange}
 			operand={operand}
@@ -136,7 +142,7 @@ export class RefGroup extends Component<Props, State> {
 	);
 
 	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperand) => (
-		<SimpleOperand onChange={onChange} operand={operand} />
+		<SimpleOperand convert={this.convertOperandData} onChange={onChange} operand={operand} />
 	);
 
 	render () {

@@ -13,6 +13,7 @@ const ATTRIBUTES_EVENTS = {
 
 // Типы атрибутов
 const backBOLinks: 'backBOLinks' = 'backBOLinks';
+const backTimer: 'backTimer' = 'backTimer';
 const boLinks: 'boLinks' = 'boLinks';
 const catalogItem: 'catalogItem' = 'catalogItem';
 const catalogItemSet: 'catalogItemSet' = 'catalogItemSet';
@@ -26,9 +27,11 @@ const metaClass: 'metaClass' = 'metaClass';
 const object: 'object' = 'object';
 const state: 'state' = 'state';
 const string: 'string' = 'string';
+const timer: 'timer' = 'timer';
 
 const SOURCE_ATTRIBUTE_TYPES = {
 	backBOLinks,
+	backTimer,
 	boLinks,
 	catalogItem,
 	catalogItemSet,
@@ -40,7 +43,8 @@ const SOURCE_ATTRIBUTE_TYPES = {
 	metaClass,
 	object,
 	state,
-	string
+	string,
+	timer
 };
 
 const ATTRIBUTE_TYPES = {

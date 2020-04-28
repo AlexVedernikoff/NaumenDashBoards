@@ -52,6 +52,11 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 		}
 	}
 
+	convertOperandData = ({title, uuid}: Object) => ({
+		title,
+		uuid
+	});
+
 	createCustomCondition = (type: OperandType = OPERAND_TYPES.CONTAINS) => {
 		const {TITLE_CONTAINS, TITLE_NOT_CONTAINS} = OPERAND_TYPES;
 
@@ -129,7 +134,7 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 	};
 
 	renderSelectOperand = (operand: SelectOperandType, onChange: OnChangeOperand) => (
-		<SelectOperand onChange={onChange} operand={operand} render={this.renderSelect} />
+		<SelectOperand convert={this.convertOperandData} onChange={onChange} operand={operand} render={this.renderSelect} />
 	);
 
 	renderSimpleOperand = (operand: SimpleOperandType, onChange: OnChangeOperand) => (

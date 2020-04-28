@@ -1,9 +1,18 @@
 :local {
+	.container {
+		bottom: 0;
+		left: 0;
+		position: fixed;
+		right: 0;
+		top: 0;
+		z-index: 100;
+	}
+
 	.portal {
 		pointer-events: none;
 		position: absolute;
 
-		& > :nth-child(n)  {
+		> :nth-child(n)  {
 			pointer-events: all;
 		}
 	}

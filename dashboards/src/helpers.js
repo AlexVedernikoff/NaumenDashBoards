@@ -57,8 +57,16 @@ const extend = (target: Object, source: Object): Object => {
 	return output;
 };
 
+/**
+ * Реализует глубокое копирование объекта
+ * @param {object} object - исходный объект
+ * @returns {object}
+ */
+const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
+
 export {
 	debounce,
+	deepClone,
 	extend,
 	getMapValues,
 	isObject

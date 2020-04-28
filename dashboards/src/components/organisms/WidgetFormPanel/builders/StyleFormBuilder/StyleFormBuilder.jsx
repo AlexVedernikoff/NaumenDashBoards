@@ -9,7 +9,6 @@ import {
 	TEXT_ALIGNS,
 	TEXT_HANDLERS
 } from 'store/widgets/data/constants';
-import {formRef} from 'WidgetFormPanel';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {InputProps, OnChangeEvent, Props} from './types';
 import type {OnChangeInputEvent} from 'components/types';
@@ -63,11 +62,9 @@ export class StyleFormBuilder extends Component<Props> {
 			onChange = this.handleChange,
 			value = data[FIELDS.fontColor]
 		} = props;
-		const {current: container} = formRef;
 
 		return (
 			<ColorInput
-				container={container}
 				name={name}
 				onChange={onChange}
 				portable={true}
