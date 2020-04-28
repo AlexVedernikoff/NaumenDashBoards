@@ -1,16 +1,11 @@
 // @flow
-
-export type DivRef = {
-	current: null | HTMLDivElement
+export type Ref<ElementType: React$ElementType> = {
+	current: null | React$ElementRef<ElementType>
 };
 
-export type FormRef = {
-	current: null | HTMLFormElement
-};
+export type DivRef = Ref<'div'>;
 
-export type InputRef = {
-	current: null | HTMLInputElement
-};
+export type InputRef = Ref<'input'>;
 
 export type InputValue = string | number | boolean;
 

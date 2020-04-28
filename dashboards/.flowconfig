@@ -24,3 +24,5 @@ module.name_mapper='^CustomGroup\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/mol
 module.name_mapper='^CustomGroup' -> '<PROJECT_ROOT>/src/components/molecules/GroupCreatingModal/components/CustomGroup/index.js'
 module.name_mapper='^WidgetFormPanel\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/WidgetFormPanel/\1'
 module.name_mapper='^WidgetFormPanel' -> '<PROJECT_ROOT>/src/components/organisms/WidgetFormPanel/index.js'
+module.name_mapper='^Table\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/Table/\1'
+module.name_mapper='^Table' -> '<PROJECT_ROOT>/src/components/organisms/Table/index.js'

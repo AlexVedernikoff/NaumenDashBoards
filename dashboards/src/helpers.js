@@ -60,5 +60,6 @@ const extend = (target: Object, source: Object): Object => {
 export {
 	debounce,
 	extend,
-	getMapValues
+	getMapValues,
+	isObject
 };

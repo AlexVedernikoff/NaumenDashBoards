@@ -1,0 +1,27 @@
+@import '/styles/variables';
+
+:local {
+	.cell {
+		cursor: pointer;
+		position: relative;
+	}
+
+	.sortAsc {
+		box-shadow: inset 0 3px 0 0 @dimgrey;
+	}
+
+	.sortDesc {
+		box-shadow: inset 0 -3px 0 0 @dimgrey;
+	}
+
+	.resizer {
+		bottom: 0;
+		cursor: col-resize;
+		position: absolute;
+		right: -15px;
+		top: 0;
+		width: 30px;
+
+		z-index: 1;
+	}
+}

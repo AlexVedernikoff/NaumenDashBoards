@@ -1,18 +1,19 @@
 // @flow
-import {Chart, Summary, Table} from 'components/molecules';
+import {Chart, Summary} from 'components/molecules';
 import cn from 'classnames';
 import {FONT_STYLES, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
+import {Table} from 'components/organisms';
 
 export class Diagram extends Component<Props> {
 	shouldComponentUpdate (nextProps: Props) {
-		const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}} = nextProps;
-		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}} = this.props;
+		const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}, widget: nextWidget} = nextProps;
+		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}, widget: prevWidget} = this.props;
 
-		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading;
+		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading || nextWidget !== prevWidget;
 	}
 
 	resolveDiagram = () => {
@@ -41,9 +42,9 @@ export class Diagram extends Component<Props> {
 
 	renderContent = () => {
 		const {buildData} = this.props;
-		const {data, error, loading} = buildData;
+		const {error, loading} = buildData;
 
-		if (data && !loading && !error) {
+		if (!(loading || error)) {
 			return (
 				<Fragment>
 					{this.renderName()}
@@ -51,6 +52,8 @@ export class Diagram extends Component<Props> {
 				</Fragment>
 			);
 		}
+
+		return null;
 	};
 
 	renderDiagram = () => (

@@ -8,6 +8,7 @@ module.exports = {
 	alias: {
 		CustomGroup: resolve(src, 'components/molecules/GroupCreatingModal/components/CustomGroup'),
 		src,
+		Table: resolve(src, 'components/organisms/Table'),
 		WidgetFormPanel: resolve(src, 'components/organisms/WidgetFormPanel')
 	},
 	extensions: ['.js', '.jsx'],

@@ -1,0 +1,40 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		align-items: stretch;
+		border-top: 1x solid @grey;
+		box-shadow: 0 0 10px 0 @silver;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		padding: 3px;
+	}
+
+	.button {
+		appearance: none;
+		background: @silver;
+		border: 0;
+		border-radius: 3px;
+		color: @dimgrey;
+		cursor: pointer;
+		display: block;
+		flex: 1;
+		outline-width: 0;
+		padding: 5px;
+		transition: all .1s ease;
+
+		&:disabled {
+			opacity: 0.5;
+			pointer-events: none;
+		}
+	}
+
+	.center {
+		flex: 1.5;
+		padding: 5px;
+		text-align: center;
+		user-select: none;
+		white-space: nowrap;
+	}
+}

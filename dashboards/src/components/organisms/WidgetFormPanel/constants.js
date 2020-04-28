@@ -8,13 +8,14 @@ const calcTotalRow: 'calcTotalRow' = 'calcTotalRow';
 const colors: 'colors' = 'colors';
 const column: 'column' = 'column';
 const columnHeader: 'columnHeader' = 'columnHeader';
+const columnsRatioWidth: 'columnsRatioWidth' = 'columnsRatioWidth';
 const computedAttrs: 'computedAttrs' = 'computedAttrs';
 const data: 'data' = 'data';
 const dataLabels: 'dataLabels' = 'dataLabels';
 const dataKey: 'dataKey' = 'dataKey';
+const defaultValue: 'defaultValue' = 'defaultValue';
 const descriptor: 'descriptor' = 'descriptor';
 const diagramName: 'diagramName' = 'diagramName';
-const emptyData: 'emptyData' = 'emptyData';
 const tickAmount: 'tickAmount' = 'tickAmount';
 const fontColor: 'fontColor' = 'fontColor';
 const fontFamily: 'fontFamily' = 'fontFamily';
@@ -33,7 +34,6 @@ const parameter: 'parameter' = 'parameter';
 const position: 'position' = 'position';
 const row: 'row' = 'row';
 const rowHeader: 'rowHeader' = 'rowHeader';
-const rowsWidth: 'rowsWidth' = 'rowsWidth';
 const show: 'show' = 'show';
 const showName: 'showName' = 'showName';
 const showRowNum: 'showRowNum' = 'showRowNum';
@@ -60,13 +60,14 @@ const FIELDS = {
 	colors,
 	column,
 	columnHeader,
+	columnsRatioWidth,
 	computedAttrs,
 	data,
 	dataKey,
 	dataLabels,
+	defaultValue,
 	descriptor,
 	diagramName,
-	emptyData,
 	fontColor,
 	fontFamily,
 	fontSize,
@@ -84,7 +85,6 @@ const FIELDS = {
 	position,
 	row,
 	rowHeader,
-	rowsWidth,
 	show,
 	showName,
 	showRowNum,

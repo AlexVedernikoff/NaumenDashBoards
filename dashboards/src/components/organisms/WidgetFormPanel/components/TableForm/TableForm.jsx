@@ -1,12 +1,12 @@
 // @flow
 import {array, object} from 'yup';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import {DEFAULT_TABLE_SETTINGS} from 'components/molecules/Table/constants';
+import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
-import {ParamsTab} from './components';
-import type {ParamsTabProps, TypedFormProps} from 'WidgetFormPanel/types';
+import {ParamsTab, StyleTab} from './components';
+import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
 import type {TableData, TableWidget, Widget} from 'store/widgets/data/types';
 import uuid from 'tiny-uuid';
@@ -31,7 +31,14 @@ export class TableForm extends Component<TypedFormProps> {
 
 	updateWidget = (widget: Widget, values: Values): TableWidget => {
 		const {id, layout} = widget;
-		const rowsWidth = widget.type === WIDGET_TYPES.TABLE ? widget.rowsWidth : [];
+		let columnsRatioWidth = [];
+		let sorting = DEFAULT_TABLE_SORTING;
+
+		if (widget.type === WIDGET_TYPES.TABLE) {
+			columnsRatioWidth = widget.columnsRatioWidth;
+			sorting = widget.sorting;
+		}
+
 		const {
 			computedAttrs = [],
 			data = [],
@@ -42,13 +49,14 @@ export class TableForm extends Component<TypedFormProps> {
 		} = values;
 
 		return {
+			columnsRatioWidth,
 			computedAttrs,
 			data: data.map(this.updateWidgetData),
 			header,
 			id,
 			layout,
 			name,
-			rowsWidth,
+			sorting,
 			table: extend(DEFAULT_TABLE_SETTINGS, table),
 			type
 		};
@@ -86,7 +94,7 @@ export class TableForm extends Component<TypedFormProps> {
 
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
-	renderStyleTab = () => null;
+	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
 		return this.props.render({

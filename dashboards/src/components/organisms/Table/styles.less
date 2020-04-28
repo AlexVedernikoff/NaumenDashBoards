@@ -1,0 +1,34 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		height: 100%;
+	}
+
+	.table {
+		border: 1px solid @silver;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		font-weight: 400;
+		overflow: auto;
+		position: relative;
+		width: 100%;
+
+		* {
+			box-sizing: border-box;
+		}
+	}
+
+	.noData {
+		background-color: @white;
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		transition: all 0.3s ease;
+		padding: 20px;
+		pointer-events: none;
+		z-index: 1;
+	}
+}

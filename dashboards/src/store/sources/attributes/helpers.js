@@ -13,14 +13,20 @@ const getProcessedAttribute = (attribute: Attribute) => {
 	return attribute;
 };
 
-const getProcessedValue = (attribute: Attribute, key: string, defaultValue: any) => {
-	let processedAttribute = attribute;
+const getProcessedValue = (attribute: Attribute | null, key: string, defaultValue: any = '') => {
+	if (attribute) {
+		let processedAttribute = attribute;
 
-	if (attribute.type in ATTRIBUTE_SETS.REF) {
-		processedAttribute = attribute.ref;
+		if (attribute.type in ATTRIBUTE_SETS.REF) {
+			processedAttribute = attribute.ref;
+		}
+
+		if (processedAttribute && typeof processedAttribute === 'object') {
+			return processedAttribute[key];
+		}
 	}
 
-	return processedAttribute && typeof processedAttribute === 'object' ? processedAttribute[key] : defaultValue;
+	return defaultValue;
 };
 
 export {

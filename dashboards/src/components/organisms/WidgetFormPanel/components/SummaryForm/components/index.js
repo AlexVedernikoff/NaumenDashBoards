@@ -1,6 +1,10 @@
 // @flow
+import IndicatorBox from './IndicatorBox';
 import ParamsTab from './ParamsTab';
+import StyleTab from './StyleTab';
 
 export {
-	ParamsTab
+	IndicatorBox,
+	ParamsTab,
+	StyleTab
 };

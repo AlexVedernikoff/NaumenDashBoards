@@ -11,8 +11,8 @@ export const initialWidgetsState: WidgetsDataState = {
 	map: {},
 	newWidget: null,
 	saveError: false,
-	updating: false,
-	selectedWidget: ''
+	selectedWidget: '',
+	updating: false
 };
 
 export const defaultAction: WidgetsAction = {

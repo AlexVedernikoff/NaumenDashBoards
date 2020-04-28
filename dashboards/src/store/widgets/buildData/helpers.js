@@ -26,28 +26,12 @@ export const setRequestBuildData = (state: BuildDataState, payload: string) => {
  * @returns {void}
  */
 export const setBuildData = (state: BuildDataState, payload: ReceiveBuildDataPayload) => {
-	if (payload.data && typeof payload.data === 'object') {
-		let {columns} = payload.data;
-		/*
-			На стороне бэка происходит принудительнае изменение ключей в строчный вариант.
-			Библиотека react-table же ожидает ключи Header и Footer. По этой причине преобразуем
-			массив в нужный вид.
-		 */
-		if (Array.isArray(columns)) {
-			columns.forEach(c => {
-				c.Header = c.header;
-				c.Footer = c.footer;
+	const {data, id} = payload;
 
-				delete c.header;
-				delete c.footer;
-			});
-		}
-	}
-
-	state[payload.id] = {
-		...state[payload.id],
-		data: payload.data,
-		error: false,
+	state[id] = {
+		...state[id],
+		data,
+		error: !data,
 		loading: false,
 		updateDate: new Date()
 	};
