@@ -9,8 +9,9 @@ import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
 import {ParamsTab} from './components';
-import type {ParamsTabProps, TypedFormProps} from 'WidgetFormPanel/types';
+import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
+import {StyleTab} from 'WidgetFormPanel/components/AxisChartForm/components';
 import uuid from 'tiny-uuid';
 import type {Values} from 'containers/WidgetFormPanel/types';
 
@@ -95,7 +96,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
-	renderStyleTab = () => null;
+	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
 		return this.props.render({

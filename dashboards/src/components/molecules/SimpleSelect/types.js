@@ -3,7 +3,7 @@ import type {OnChangeInputEvent} from 'components/types';
 
 export type Option = {
 	label: string,
-	value: string
+	value: any
 };
 
 export type Value = Option | string | number | null;

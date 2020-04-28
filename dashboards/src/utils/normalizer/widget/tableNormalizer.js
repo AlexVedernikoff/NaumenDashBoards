@@ -1,6 +1,7 @@
 // @flow
 import {aggregation, array, getOrdinalData, group, header, object, string} from './helpers';
-import {DEFAULT_TABLE_SETTINGS} from 'components/molecules/Table/constants';
+import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
+import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
 import type {TableData, TableWidget} from 'store/widgets/data/types';
@@ -72,18 +73,21 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		data = getOrdinalData(widget, dataFields, createData),
 		id,
 		layout,
+		sorting = DEFAULT_TABLE_SORTING,
+		table,
 		type
 	} = widget;
 
 	return {
+		columnsRatioWidth: array(widget[FIELDS.columnsRatioWidth]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data,
 		header: header(widget),
 		id,
 		layout,
 		name: string(widget[FIELDS.name]),
-		rowsWidth: array(widget[FIELDS.rowsWidth]),
-		table: DEFAULT_TABLE_SETTINGS,
+		sorting,
+		table: extend(DEFAULT_TABLE_SETTINGS, table),
 		type
 	};
 };

@@ -3,6 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
 	COMBO_TYPES,
+	DEFAULT_TABLE_VALUE,
 	FONT_STYLES,
 	SORTING_TYPES,
 	SORTING_VALUES,
@@ -17,11 +18,13 @@ import type {Layout, LayoutItem} from 'utils/layout/types';
 import {LEGEND_POSITIONS} from 'utils/chart';
 import type {NewWidget} from 'entities';
 
-type FontStyle = $Keys<typeof FONT_STYLES>;
+export type FontStyle = $Keys<typeof FONT_STYLES>;
 
-type TextAlign = $Keys<typeof TEXT_ALIGNS>;
+export type TextAlign = $Keys<typeof TEXT_ALIGNS>;
 
-type TextHandler = $Keys<typeof TEXT_HANDLERS>;
+export type TextHandler = $Keys<typeof TEXT_HANDLERS>;
+
+export type SortingType = $Keys<typeof SORTING_TYPES>;
 
 type ComputeData = {
 	aggregation: string,
@@ -217,6 +220,18 @@ export type SummaryWidget = {
 
 // Таблица
 
+export type DefaultTableValue = $Keys<typeof DEFAULT_TABLE_VALUE>;
+
+export type TableSorting = {
+	column: number | null,
+	type: SortingType
+};
+
+export type TableColumnHeader = {
+	fontColor: string,
+	fontStyle?: FontStyle
+};
+
 export type TableData = {
 	...BaseData,
 	aggregation: string,
@@ -230,15 +245,15 @@ export type TableData = {
 
 export type Table = {
 	body: {
-		emptyData: Object,
+		defaultValue: {
+			label: string,
+			value: DefaultTableValue
+		},
 		showRowNum: boolean,
 		textAlign: TextAlign,
 		textHandler: TextHandler
 	},
-	columnHeader: {
-		fontColor: string,
-		fontStyle?: FontStyle
-	},
+	columnHeader: TableColumnHeader,
 	rowHeader: {
 		fontColor: string,
 		fontStyle?: FontStyle
@@ -247,8 +262,9 @@ export type Table = {
 
 export type TableWidget = {
 	...BaseWidget,
+	columnsRatioWidth: Array<number>,
 	data: Array<TableData>,
-	rowsWidth: Array<number>,
+	sorting: TableSorting,
 	table: Table,
 	type: typeof WIDGET_TYPES.TABLE
 };

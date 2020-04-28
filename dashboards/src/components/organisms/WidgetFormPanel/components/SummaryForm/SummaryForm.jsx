@@ -5,8 +5,8 @@ import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
-import {ParamsTab} from './components';
-import type {ParamsTabProps, TypedFormProps} from 'WidgetFormPanel/types';
+import {ParamsTab, StyleTab} from './components';
+import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
 import type {SummaryData, SummaryWidget, Widget} from 'store/widgets/data/types';
 import uuid from 'tiny-uuid';
@@ -71,7 +71,7 @@ export class SummaryForm extends Component<TypedFormProps> {
 
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
-	renderStyleTab = () => null;
+	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
 		return this.props.render({

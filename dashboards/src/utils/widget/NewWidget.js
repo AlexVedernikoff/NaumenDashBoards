@@ -1,14 +1,15 @@
 // @flow
-import {FIELDS} from 'WidgetFormPanel/constants';
+import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
+import {FIELDS} from 'WidgetFormPanel';
 import type {LayoutItem} from 'utils/layout/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 class NewWidget {
 	static id: string = 'new';
-	diagramName: string = '';
 	data: Array<Object> = [{
 		[FIELDS.sourceForCompute]: false
 	}];
+	header = DEFAULT_HEADER_SETTINGS;
 	id: string = NewWidget.id;
 	layout: LayoutItem = {
 		h: 4,
@@ -25,7 +26,7 @@ class NewWidget {
 	 * @param {number} nextRow - следующая строка на которой должен быть размещен виджет
 	 */
 	constructor (nextRow: number) {
-		this.setRow(nextRow);
+			this.setRow(nextRow);
 	}
 
 	/**

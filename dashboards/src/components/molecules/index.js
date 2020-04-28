@@ -35,7 +35,6 @@ import Source from './Source';
 import SourceControl from './SourceControl';
 import SourceTree from './SourceTree';
 import Summary from './Summary';
-import Table from './Table';
 import ToggableFormBox from './ToggableFormBox';
 import Widget from './Widget';
 
@@ -76,7 +75,6 @@ export {
 	SourceControl,
 	SourceTree,
 	Summary,
-	Table,
 	ToggableFormBox,
 	Widget
 };
