@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
 import {EditIcon, MinusIcon} from 'icons/form';
-import {IconButton, Loader, OutsideClickDetector} from 'components/atoms';
+import {IconButton, Label, Loader, OutsideClickDetector} from 'components/atoms';
 import {InputForm, SimpleSelectMenu} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -10,12 +10,9 @@ import styles from './styles.less';
 
 export class AttributeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
-		defaultValue: {
-			title: 'Выберите значение',
-			value: ''
-		},
 		disabled: false,
 		loading: false,
+		placeholder: 'Выберите значение',
 		removable: false,
 		showCreationButton: false
 	};
@@ -134,6 +131,12 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		}
 	};
 
+	renderPlaceholder = () => (
+		<div className={styles.placeholder} onClick={this.handleShowMenu}>
+			{this.props.placeholder}
+		</div>
+	);
+
 	renderRemoveIcon = () => {
 		const {removable} = this.props;
 
@@ -156,7 +159,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		return (
 			<OutsideClickDetector onClickOutside={this.hideMenu}>
 				<div className={selectCN}>
-					{this.renderTitle()}
+					{this.renderValue()}
 					{this.renderLoader()}
 					{this.renderIndicators()}
 					{this.renderMenu()}
@@ -166,15 +169,25 @@ export class AttributeSelect extends PureComponent<Props, State> {
 	};
 
 	renderTitle = () => {
-		const {defaultValue, value} = this.props;
-		const title = value ? value.title : defaultValue.title;
+		const {note, value} = this.props;
 		const titleCN = cn({
-			[styles.title]: true,
-			[styles.defaultTitle]: !value
+			[styles.title]: true
 		});
+		let title = '';
 
-		return <div className={titleCN} onClick={this.handleShowMenu}>{title}</div>;
+		if (value) {
+			title = value.title;
+		}
+
+		return (
+			<div className={styles.titleContainer} onClick={this.handleShowMenu}>
+				<Label text={note} />
+				<Label className={titleCN} text={title} />
+			</div>
+		);
 	};
+
+	renderValue = () => this.props.value ? this.renderTitle() : this.renderPlaceholder();
 
 	render () {
 		return this.state.showForm ? this.renderForm() : this.renderSelect();

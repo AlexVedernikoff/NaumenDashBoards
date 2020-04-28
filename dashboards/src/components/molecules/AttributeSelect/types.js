@@ -1,16 +1,11 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 
-type DefaultValue = {
-	title: string,
-	value: string
-};
-
 export type Props = {
-	defaultValue: DefaultValue,
 	disabled: boolean,
 	loading: boolean,
 	name: string,
+	note: string,
 	onChangeTitle: (name: string, title: string) => void,
 	onClickCreationButton: () => void,
 	onRemove: (name: string) => void,

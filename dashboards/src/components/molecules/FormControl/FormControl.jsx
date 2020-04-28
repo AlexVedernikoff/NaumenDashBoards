@@ -1,5 +1,6 @@
 // @flow
 import cn from 'classnames';
+import {Label} from 'components/atoms';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -26,7 +27,7 @@ export class FormControl extends PureComponent<Props> {
 
 	renderLabel = () => {
 		const {label} = this.props;
-		return label ? <div className={styles.label}>{label}</div> : null;
+		return label ? <Label className={styles.label} text={label} /> : null;
 	}
 
 	render () {

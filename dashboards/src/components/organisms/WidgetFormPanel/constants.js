@@ -103,6 +103,9 @@ const FIELDS = {
 	yAxis
 };
 
+const MAX_TEXT_LENGTH = 60;
+
 export {
-	FIELDS
+	FIELDS,
+	MAX_TEXT_LENGTH
 };

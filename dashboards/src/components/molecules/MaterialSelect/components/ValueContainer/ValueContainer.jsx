@@ -8,6 +8,7 @@ import styles from './styles.less';
 export class ValueContainer extends Component<Props> {
 	static defaultProps = {
 		editableLabel: false,
+		maxLabelLength: NaN,
 		placeholder: ''
 	};
 
@@ -22,7 +23,7 @@ export class ValueContainer extends Component<Props> {
 	};
 
 	renderValue = () => {
-		const {editableLabel, forwardedInputRef, getOptionLabel, onChangeLabel, placeholder, value} = this.props;
+		const {editableLabel, forwardedInputRef, getOptionLabel, maxLabelLength, onChangeLabel, placeholder, value} = this.props;
 		const inputCN = cn({
 			[styles.input]: true,
 			[styles.editableInput]: editableLabel
@@ -31,6 +32,7 @@ export class ValueContainer extends Component<Props> {
 		return (
 			<input
 				className={inputCN}
+				maxLength={maxLabelLength}
 				onChange={onChangeLabel}
 				placeholder={placeholder}
 				readOnly={!editableLabel}

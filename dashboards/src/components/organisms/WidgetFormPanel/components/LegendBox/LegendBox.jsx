@@ -13,18 +13,22 @@ export class LegendBox extends PureComponent<Props> {
 		const icons = [
 			{
 				name: ICON_NAMES.POSITION_LEFT,
+				title: 'Слева',
 				value: LEGEND_POSITIONS.left
 			},
 			{
 				name: ICON_NAMES.POSITION_TOP,
+				title: 'Вверху',
 				value: LEGEND_POSITIONS.top
 			},
 			{
 				name: ICON_NAMES.POSITION_RIGHT,
+				title: 'Справа',
 				value: LEGEND_POSITIONS.right
 			},
 			{
 				name: ICON_NAMES.POSITION_BOTTOM,
+				title: 'Внизу',
 				value: LEGEND_POSITIONS.bottom
 			}
 		];

@@ -6,6 +6,7 @@ import styles from './styles.less';
 
 export class TextInput extends PureComponent<Props> {
 	static defaultProps = {
+		maxLength: NaN,
 		onlyNumber: false,
 		placeholder: '',
 		value: ''
@@ -26,11 +27,11 @@ export class TextInput extends PureComponent<Props> {
 	};
 
 	render () {
-		const {placeholder, value} = this.props;
+		const {maxLength, placeholder, value} = this.props;
 
 		return (
 			<div className={styles.container}>
-				<input className={styles.input} onChange={this.handleChange} placeholder={placeholder} value={value} />
+				<input className={styles.input} maxLength={maxLength} onChange={this.handleChange} placeholder={placeholder} value={value} />
 				<Icon className={styles.icon} name={ICON_NAMES.CLOSE} onClick={this.handleClear} />
 			</div>
 		);

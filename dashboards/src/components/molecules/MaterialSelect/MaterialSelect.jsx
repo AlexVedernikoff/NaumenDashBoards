@@ -13,6 +13,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		isEditingLabel: false,
 		isSearching: false,
 		loading: false,
+		maxLabelLength: NaN,
 		multiple: false,
 		name: '',
 		placeholder: 'Выберите значение',
@@ -149,7 +150,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 	};
 
 	renderSimpleValueContainer = () => {
-		const {forwardedLabelInputRef, isEditingLabel, placeholder, value} = this.props;
+		const {forwardedLabelInputRef, isEditingLabel, maxLabelLength, placeholder, value} = this.props;
 
 		return (
 			<ValueContainer
@@ -158,6 +159,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
 				label={this.getOptionLabel(value)}
+				maxLabelLength={maxLabelLength}
 				onChangeLabel={this.handleChangeLabel}
 				onClick={this.handleClickValue}
 				placeholder={placeholder}

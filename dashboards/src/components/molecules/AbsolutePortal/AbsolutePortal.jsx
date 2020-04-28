@@ -12,7 +12,7 @@ export class AbsolutePortal extends Component<Props, State> {
 	}
 
 	childRef: Ref<any> = createRef();
-	container: HTMLDivElement;
+	container: HTMLDivElement | null;
 
 	state = {};
 
@@ -21,7 +21,7 @@ export class AbsolutePortal extends Component<Props, State> {
 	}
 
 	componentWillUnmount () {
-		if (document.body !== null) {
+		if (document.body !== null && this.container) {
 			document.body.removeChild(this.container);
 		}
 
@@ -126,7 +126,7 @@ export class AbsolutePortal extends Component<Props, State> {
 		if (!this.container) {
 			this.container = this.createContainer();
 		}
-
+		// $FlowFixMe
 		return createPortal(this.renderPortal(), this.container);
 	}
 }

@@ -6,7 +6,7 @@ import type {CheckboxProps, RenderFunction, TextAreaProps} from './types';
 import type {ComputedAttr, Source as SourceType} from 'store/widgets/data/types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import {ExtendButton, FieldError, IconButton, LegacyCheckbox as Checkbox, TextArea} from 'components/atoms';
-import {FIELDS} from 'WidgetFormPanel/constants';
+import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import {formRef} from 'WidgetFormPanel';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
@@ -461,6 +461,7 @@ export class DataFormBuilder extends Component<ParamsTabProps> {
 			errorPath: `${header}.${name}`,
 			handleChange: this.handleChangeDiagramName,
 			label: 'Название диаграммы',
+			maxLength: MAX_TEXT_LENGTH,
 			name,
 			value: values[header][name]
 		};
@@ -623,12 +624,13 @@ export class DataFormBuilder extends Component<ParamsTabProps> {
 	);
 
 	renderTextArea = (props: TextAreaProps) => {
-		const {errorPath, handleBlur, handleChange, label, name, placeholder, value} = props;
+		const {errorPath, handleBlur, handleChange, label, maxLength, name, placeholder, value} = props;
 
 		return (
 			<FormField ref={this.setInputRef(name)}>
 				<FormControl label={label}>
 					<TextArea
+						maxLength={maxLength}
 						name={name}
 						onBlur={handleBlur}
 						onChange={handleChange}

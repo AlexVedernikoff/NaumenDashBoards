@@ -4,6 +4,7 @@ import type {AndCondition as AndConditionType} from 'CustomGroup/types';
 import {FieldError, MaterialTextInput} from 'components/atoms';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
+import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import type {Node} from 'react';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
@@ -85,6 +86,7 @@ export class SubGroup extends PureComponent<Props> {
 		return (
 			<div className={styles.nameField}>
 				<MaterialTextInput
+					maxLength={MAX_TEXT_LENGTH}
 					onChange={this.handleChangeName}
 					placeholder="Название группы"
 					value={name}

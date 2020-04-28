@@ -8,6 +8,7 @@ import {isGroupKey} from 'store/widgets/helpers';
 import {IS_NEW, LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MaterialSelect} from 'components/molecules/index';
+import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import React, {Component, createContext, createRef, Fragment} from 'react';
 import schema from './schema';
 import styles from './styles.less';
@@ -222,6 +223,7 @@ export class CustomGroup extends Component<Props, State> {
 					getOptionValue={this.getGroupValue}
 					isEditingLabel={isEditingLabel}
 					isSearching={true}
+					maxLabelLength={MAX_TEXT_LENGTH}
 					onChangeLabel={this.handleChangeGroupName}
 					onClickCreationButton={this.handleClickCreationButton}
 					onSelect={this.handleSelectGroup}

@@ -1,6 +1,6 @@
 // @flow
 import {Checkbox, TextInput} from 'components/atoms';
-import {FIELDS} from 'components/organisms/WidgetFormPanel/constants';
+import {FIELDS, MAX_TEXT_LENGTH} from 'components/organisms/WidgetFormPanel/constants';
 import {FormCheckControl, FormControl, FormField, ToggableFormBox} from 'components/molecules';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
@@ -35,7 +35,7 @@ export class IndicatorBox extends PureComponent<Props> {
 					</FormCheckControl>
 				</FormField>
 				<FormField small>
-					<TextInput name={FIELDS.name} onChange={handleChange} value={name} />
+					<TextInput maxLength={MAX_TEXT_LENGTH} name={FIELDS.name} onChange={handleChange} value={name} />
 				</FormField>
 				<FormField row>
 					<FormControl className={styles.textControl} label="Min деление">

@@ -7,6 +7,7 @@ import styles from './styles.less';
 
 export class TextArea extends Component<Props> {
 	static defaultProps = {
+		maxLength: NaN,
 		placeholder: ''
 	};
 
@@ -37,12 +38,13 @@ export class TextArea extends Component<Props> {
 	};
 
 	render () {
-		const {name, onBlur, placeholder, value} = this.props;
+		const {maxLength, name, onBlur, placeholder, value} = this.props;
 
 		return (
 			<div className={styles.container}>
 				<textarea
 					className={styles.input}
+					maxLength={maxLength}
 					name={name}
 					onBlur={onBlur}
 					onChange={this.handleChange}

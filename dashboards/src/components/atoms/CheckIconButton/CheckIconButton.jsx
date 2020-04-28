@@ -7,7 +7,8 @@ import styles from './styles.less';
 export class CheckIconButton extends PureComponent<Props> {
 	static defaultProps = {
 		checked: false,
-		name: ''
+		name: '',
+		title: ''
 	};
 
 	handleClick = () => {
@@ -16,13 +17,13 @@ export class CheckIconButton extends PureComponent<Props> {
 	};
 
 	render () {
-		const {checked, children} = this.props;
+		const {checked, children, title} = this.props;
 		const buttonCN = cn({
 			[styles.button]: true,
 			[styles.checked]: checked
 		});
 
-		return <button className={buttonCN} onClick={this.handleClick}>{children}</button>;
+		return <button className={buttonCN} onClick={this.handleClick} title={title}>{children}</button>;
 	}
 }
 
