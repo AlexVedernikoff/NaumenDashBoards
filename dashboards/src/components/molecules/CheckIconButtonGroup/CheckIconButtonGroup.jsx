@@ -12,13 +12,14 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 
 	renderIcon = (option: IconType) => {
 		const {name, onChange, value: currentValue} = this.props;
-		const {name: iconName, value} = option;
+		const {name: iconName, title, value} = option;
 
 		return (
 			<CheckIconButton
 				checked={value === currentValue}
 				name={name}
 				onChange={onChange}
+				title={title}
 				value={value}
 			>
 				<Icon name={iconName} />

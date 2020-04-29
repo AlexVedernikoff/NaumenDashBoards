@@ -2,7 +2,6 @@
 import {CheckedIcon} from 'icons/form';
 import type {Option, Props} from './types';
 import React, {createElement, PureComponent} from 'react';
-import {SimpleTooltip} from 'components/atoms';
 import styles from './styles.less';
 
 export class OuterSelect extends PureComponent<Props> {
@@ -31,18 +30,16 @@ export class OuterSelect extends PureComponent<Props> {
 		}
 
 		return (
-			<SimpleTooltip key={value} text={tip}>
-				<div className={styles.optionContainer}>
-						<div className={styles.option} data-value={value} onClick={this.handleClick}>
-							{label}
-							{this.renderCheckedIcon(value)}
-						</div>
-				</div>
-			</SimpleTooltip>
+			<div className={styles.optionContainer} title={tip}>
+					<div className={styles.option} data-value={value} onClick={this.handleClick}>
+						{label}
+						{this.renderCheckedIcon(value)}
+					</div>
+			</div>
 		);
 	};
 
-	renderSelect = () => {
+	render () {
 		const {options} = this.props;
 
 		return (
@@ -50,10 +47,6 @@ export class OuterSelect extends PureComponent<Props> {
 				{options.map(this.renderOption)}
 			</div>
 		);
-	};
-
-	render () {
-		return this.renderSelect();
 	}
 }
 

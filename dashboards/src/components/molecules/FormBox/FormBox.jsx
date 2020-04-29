@@ -44,7 +44,10 @@ export class FormBox extends PureComponent<Props> {
 		return rightControl ? <div className={styles.rightControl}>{rightControl}</div> : null;
 	};
 
-	renderTitle = () => <div className={styles.title}>{this.props.title}</div>;
+	renderTitle = () => {
+		const {title} = this.props;
+		return <div className={styles.title} title={title}>{title}</div>;
+	}
 
 	render () {
 		return (

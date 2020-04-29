@@ -1,7 +1,6 @@
 // @flow
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {SimpleTooltip} from 'components/atoms';
 import styles from './styles.less';
 
 export class IconButton extends PureComponent<Props> {
@@ -9,28 +8,19 @@ export class IconButton extends PureComponent<Props> {
 		tip: ''
 	};
 
-	renderButton = () => {
-		const {children, onClick} = this.props;
+	render () {
+		const {children, onClick, tip} = this.props;
 
 		return (
 			<button
 				className={styles.button}
 				onClick={onClick}
+				title={tip}
 				type="button"
 			>
 				{children}
 			</button>
 		);
-	};
-
-	renderButtonWithTip = () => (
-		<SimpleTooltip className={styles.tooltip} text={this.props.tip}>
-			{this.renderButton()}
-		</SimpleTooltip>
-	);
-
-	render () {
-		return this.props.tip ? this.renderButtonWithTip() : this.renderButton();
 	}
 }
 

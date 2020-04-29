@@ -1,7 +1,6 @@
 // @flow
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {SimpleTooltip} from 'components/atoms';
 import styles from './styles.less';
 
 export class FieldButton extends PureComponent<Props> {
@@ -20,11 +19,9 @@ export class FieldButton extends PureComponent<Props> {
 		const {children, disabled, tip} = this.props;
 
 		return (
-			<SimpleTooltip text={tip}>
-				<button className={styles.button} disabled={disabled} onClick={this.handleClick}>
-					{children}
-				</button>
-			</SimpleTooltip>
+			<button className={styles.button} disabled={disabled} onClick={this.handleClick} title={tip}>
+				{children}
+			</button>
 		);
 	}
 }

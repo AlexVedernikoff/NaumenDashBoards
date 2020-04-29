@@ -1,6 +1,6 @@
 // @flow
 import {Checkbox, TextInput} from 'components/atoms';
-import {FIELDS} from 'WidgetFormPanel/constants';
+import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import {FormCheckControl, FormField, ToggableFormBox} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -28,7 +28,7 @@ export class ParameterBox extends PureComponent<Props> {
 					</FormCheckControl>
 				</FormField>
 				<FormField small={true}>
-					<TextInput name={FIELDS.name} onChange={handleChange} value={name} />
+					<TextInput maxLength={MAX_TEXT_LENGTH} name={FIELDS.name} onChange={handleChange} value={name} />
 				</FormField>
 			</ToggableFormBox>
 		);

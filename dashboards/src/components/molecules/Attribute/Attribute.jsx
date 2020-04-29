@@ -351,7 +351,16 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSelect = (props: Object) => <AttributeSelect {...props} />;
+	renderSelect = (props: Object) => {
+		const {source} = this.props;
+		let note;
+
+		if (source) {
+			note = source.label;
+		}
+
+		return <AttributeSelect note={note} {...props} />;
+	}
 
 	render () {
 		return (

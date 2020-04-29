@@ -113,14 +113,17 @@ export class StyleFormBuilder extends Component<Props> {
 		const icons = [
 			{
 				name: ICON_NAMES.BOLD,
+				title: 'Жирный',
 				value: FONT_STYLES.BOLD
 			},
 			{
 				name: ICON_NAMES.ITALIC,
+				title: 'Курсив',
 				value: FONT_STYLES.ITALIC
 			},
 			{
 				name: ICON_NAMES.UNDERLINE,
+				title: 'Подчеркнутый',
 				value: FONT_STYLES.UNDERLINE
 			}
 		];
@@ -133,10 +136,12 @@ export class StyleFormBuilder extends Component<Props> {
 		const icons = [
 			{
 				name: ICON_NAMES.DESC,
+				title: 'По убыванию',
 				value: SORTING_TYPES.DESC
 			},
 			{
 				name: ICON_NAMES.ASC,
+				title: 'По возрастанию',
 				value: SORTING_TYPES.ASC
 			}
 		];
@@ -154,14 +159,17 @@ export class StyleFormBuilder extends Component<Props> {
 		const icons = [
 			{
 				name: ICON_NAMES.ALIGN_LEFT,
+				title: 'По левому краю',
 				value: TEXT_ALIGNS.left
 			},
 			{
 				name: ICON_NAMES.ALIGN_CENTER,
+				title: 'По центру',
 				value: TEXT_ALIGNS.center
 			},
 			{
 				name: ICON_NAMES.ALIGN_RIGHT,
+				title: 'По правому краю',
 				value: TEXT_ALIGNS.right
 			}
 		];
@@ -179,10 +187,12 @@ export class StyleFormBuilder extends Component<Props> {
 		const icons = [
 			{
 				name: ICON_NAMES.CROP,
+				title: 'Обрезать текст',
 				value: TEXT_HANDLERS.CROP
 			},
 			{
 				name: ICON_NAMES.WRAP,
+				title: 'Переносить по словам',
 				value: TEXT_HANDLERS.WRAP
 			}
 		];

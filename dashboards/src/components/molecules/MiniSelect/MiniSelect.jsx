@@ -4,7 +4,6 @@ import cn from 'classnames';
 import type {Label, Option, Props, State} from './types';
 import type {Node} from 'react';
 import React, {createElement, Fragment, PureComponent} from 'react';
-import {SimpleTooltip} from 'components/atoms';
 import styles from './styles.less';
 
 export class MiniSelect extends PureComponent<Props, State> {
@@ -90,14 +89,14 @@ export class MiniSelect extends PureComponent<Props, State> {
 
 		return (
 			<div className={cn(CNSelect)} onBlur={this.hideList} tabIndex={0}>
-				{this.renderValueWithTip()}
+				{this.renderValue()}
 				{this.renderList()}
 			</div>
 		);
 	};
 
 	renderValue = () => {
-		const {renderValue} = this.props;
+		const {renderValue, tip} = this.props;
 		const {active} = this.state;
 		const className = styles.valueContainer;
 		const children = this.renderValueContent();
@@ -117,7 +116,7 @@ export class MiniSelect extends PureComponent<Props, State> {
 		}
 
 		return (
-			<div {...props}>
+			<div {...props} title={tip}>
 				{children}
 			</div>
 		);
@@ -133,12 +132,6 @@ export class MiniSelect extends PureComponent<Props, State> {
 			</Fragment>
 		);
 	};
-
-	renderValueWithTip = () => (
-		<SimpleTooltip text={this.props.tip}>
-			{this.renderValue()}
-		</SimpleTooltip>
-	);
 
 	render () {
 		return this.renderSelect();

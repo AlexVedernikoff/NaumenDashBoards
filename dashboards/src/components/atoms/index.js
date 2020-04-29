@@ -11,6 +11,7 @@ import FieldError from './FieldError';
 import Icon from './Icon';
 import IconButton from './IconButton';
 import InfoPanel from './InfoPanel';
+import Label from './Label';
 import LegacyCheckbox from './LegacyCheckbox';
 import Loader from './Loader';
 import MaterialDateInput from './MaterialDateInput';
@@ -20,7 +21,6 @@ import Popover from './Popover';
 import RadioButton from './RadioButton';
 import SearchSelectInput from './SearchSelectInput';
 import SimpleListOption from './SimpleListOption';
-import SimpleTooltip from './SimpleTooltip';
 import TextArea from './TextArea';
 import TextInput from './TextInput';
 import Toast from './Toast';
@@ -40,6 +40,7 @@ export {
 	Icon,
 	IconButton,
 	InfoPanel,
+	Label,
 	LegacyCheckbox,
 	Loader,
 	MaterialDateInput,
@@ -49,7 +50,6 @@ export {
 	RadioButton,
 	SearchSelectInput,
 	SimpleListOption,
-	SimpleTooltip,
 	TextArea,
 	TextInput,
 	Toast,

@@ -4,6 +4,7 @@ import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Icon = {
 	name: IconName,
+	title: string,
 	value: string
 };
 

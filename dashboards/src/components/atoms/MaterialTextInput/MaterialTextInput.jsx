@@ -8,6 +8,7 @@ export class MaterialTextInput extends PureComponent<Props> {
 		forwardedRef: {
 			current: null
 		},
+		maxLength: NaN,
 		name: '',
 		onlyNumber: false,
 		placeholder: ''
@@ -23,11 +24,12 @@ export class MaterialTextInput extends PureComponent<Props> {
 	};
 
 	renderInput = () => {
-		const {forwardedRef, name, placeholder, value} = this.props;
+		const {forwardedRef, maxLength, name, placeholder, value} = this.props;
 
 		return (
 			<input
 				className={styles.input}
+				maxLength={maxLength}
 				name={name}
 				onChange={this.handleChange}
 				placeholder={placeholder}

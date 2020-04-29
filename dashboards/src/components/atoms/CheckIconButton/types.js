@@ -7,5 +7,6 @@ export type Props = {
 	children: Node,
 	name: string,
 	onChange: OnChangeInputEvent => void,
+	title: string,
 	value: string
 };

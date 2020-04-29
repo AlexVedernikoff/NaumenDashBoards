@@ -6,6 +6,7 @@ export type TextAreaProps = {
 	handleBlur?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
 	handleChange: OnChangeInputEvent => void,
 	label: string,
+	maxLength?: number,
 	name: string,
 	placeholder?: string,
 	value: string

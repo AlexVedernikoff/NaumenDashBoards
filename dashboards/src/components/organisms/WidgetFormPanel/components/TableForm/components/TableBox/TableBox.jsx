@@ -1,8 +1,8 @@
 // @flow
 import {Checkbox} from 'components/atoms';
+import {EMPTY_DATA_OPTIONS} from './constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormCheckControl, FormControl, FormField, SimpleSelect, ToggableFormBox} from 'components/molecules';
-import {EMPTY_DATA_OPTIONS} from './constants';
 import type {OnChangeEvent, Props} from './types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {PureComponent} from 'react';

@@ -12,6 +12,7 @@ export type Props = {
 	forwardedInputRef?: InputRef,
 	getOptionLabel: (option: Option) => string,
 	getOptionValue: (option: Option) => string,
+	maxLabelLength: number,
 	onChangeLabel?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
 	onClick: () => void,
 	placeholder: string,

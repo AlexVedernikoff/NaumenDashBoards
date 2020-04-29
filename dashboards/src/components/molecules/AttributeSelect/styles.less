@@ -13,7 +13,7 @@
 	.select {
 		align-items: center;
 		display: flex;
-		height: 38px;
+		height: @form-field-height;
 		justify-content: space-between;
 
 		&:hover {
@@ -29,18 +29,18 @@
 		pointer-events: none;
 	}
 
-	.title {
+	.titleContainer {
 		box-sizing: border-box;
 		cursor: pointer;
+		display: flex;
 		flex: auto;
+		flex-direction: column;
+		height: 100%;
+		justify-content: space-between;
 		overflow: hidden;
-		padding: 10px 5px;
+		padding: 0 5px;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-	}
-
-	.defaultTitle {
-		color: @darkgrey;
 	}
 
 	.loader {
@@ -51,5 +51,23 @@
 		justify-content: center;
 		padding: 10px;
 		width: 38px;
+	}
+
+	.placeholder {
+		box-sizing: border-box;
+		color: @darkgrey;
+		cursor: pointer;
+		overflow: hidden;
+		padding: 12px 5px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.title {
+		color: @black;
+	}
+
+	.defaultTitle {
+		color: @darkgrey;
 	}
 }

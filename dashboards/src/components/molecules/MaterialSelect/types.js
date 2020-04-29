@@ -14,6 +14,7 @@ export type Props = {
 	isEditingLabel: boolean,
 	isSearching: boolean,
 	loading: boolean,
+	maxLabelLength: number,
 	multiple: boolean,
 	name: Name,
 	onChangeLabel?: (name: Name, label: string) => void,
