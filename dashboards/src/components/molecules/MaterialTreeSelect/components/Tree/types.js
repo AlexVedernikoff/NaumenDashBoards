@@ -21,7 +21,7 @@ export type Props = {
 	getOptionLabel: (option: Node | null) => string,
 	getOptionValue: (option: Node | null) => string,
 	multiple: boolean,
-	onLoad: (value: string | null, offset?: number) => void,
+	onLoad?: (value: string | null, offset?: number) => void,
 	onSelect: SelectValue => void,
 	options: Tree,
 	show: boolean,

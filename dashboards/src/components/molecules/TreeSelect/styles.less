@@ -1,0 +1,63 @@
+@import '/styles/variables';
+
+:local {
+	@height: 28px;
+
+	.container {
+		height: @height;
+		padding: 5px 0;
+	}
+
+	.select {
+		align-items: center;
+		border-bottom: 2px solid @black;
+		box-sizing: border-box;
+		cursor: pointer;
+		display: flex;
+		height: 100%;
+		position: relative;
+
+		&:hover {
+			.indicators {
+				visibility: visible;
+			}
+		}
+	}
+
+	.indicators {
+		margin-left: auto;
+		visibility: hidden;
+	}
+
+	.list {
+		left: 0;
+		position: absolute;
+		right: 0;
+		top: @height;
+		z-index: 1;
+	}
+
+	.valueContainer {
+		flex: auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.value {
+		align-items: center;
+		display: flex;
+	}
+
+	.label {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.placeholder {
+		align-items: center;
+		display: flex;
+		height: 24px;
+		color: @darkgrey;
+	}
+}

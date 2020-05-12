@@ -5,7 +5,7 @@ import {DATETIME_SYSTEM_GROUP, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from './constan
 import type {Group} from './data/types';
 import {store} from 'src';
 
-const createDefaultGroup = (data: string, attribute?: Attribute) => {
+const createDefaultGroup = (data: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
 		return getDefaultSystemGroup(attribute);
 	}

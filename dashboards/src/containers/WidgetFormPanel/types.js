@@ -5,14 +5,28 @@ import type {DataSourceMap} from 'store/sources/data/types';
 import type {NewToast} from 'store/toasts/types';
 import {NewWidget} from 'entities';
 import type {OnLoadCallback} from 'store/sources/refAttributes/types';
+import type {Source, Widget} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
-import type {Widget} from 'store/widgets/data/types';
+
+export type SetFieldValue = (name: string, value: any) => void;
+
+export type SetDataFieldValue = (index: number, name: string, value: any, callback?: Function) => void;
+
+export type DataSet = {
+	source: Source,
+	sourceForCompute: boolean,
+	[string]: any
+};
 
 export type Values = Object;
 
+export type ErrorsMap = {
+	[key: string]: string
+};
+
 export type State = {
-	errors: Object,
+	errors: ErrorsMap,
 	isSubmitting: boolean,
 	schema: null | Object,
 	values: Values,
