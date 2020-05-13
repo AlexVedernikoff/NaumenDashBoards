@@ -36,6 +36,8 @@ import SourceControl from './SourceControl';
 import SourceTree from './SourceTree';
 import Summary from './Summary';
 import ToggableFormBox from './ToggableFormBox';
+import TransparentSelect from './TransparentSelect';
+import TreeSelect from './TreeSelect';
 import Widget from './Widget';
 
 export {
@@ -76,5 +78,7 @@ export {
 	SourceTree,
 	Summary,
 	ToggableFormBox,
+	TransparentSelect,
+	TreeSelect,
 	Widget
 };

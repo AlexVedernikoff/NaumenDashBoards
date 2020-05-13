@@ -2,11 +2,13 @@
 import type {Attribute, AttributeMap} from 'store/sources/attributes/types';
 import type {Context} from 'utils/api/types';
 import type {DataSourceMap} from 'store/sources/data/types';
+import type {Group, Widget} from 'store/widgets/data/types';
+import type {GroupAttributeField} from './components/AttributeGroupField/types';
 import type {Node} from 'react';
+import type {OnChangeLabelEvent, OnSelectEvent} from 'components/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 import type {Values} from 'containers/WidgetFormPanel/types';
-import type {Widget} from 'store/widgets/data/types';
 
 export type UpdateWidget = (widget: Widget, values: Values) => Widget;
 
@@ -65,3 +67,17 @@ export type Props = {|
 export type State = {
 	rendered: boolean
 };
+
+export type OnSelectAttributeEvent = {
+	parent: Attribute | null,
+	...$Exact<OnSelectEvent>
+};
+
+export type OnChangeAttributeLabelEvent = {
+	parent: Attribute | null,
+	...$Exact<OnChangeLabelEvent>
+};
+
+export type OnChangeGroup = (index: number, name: string, group: Group, field: GroupAttributeField) => void;
+
+export type TransformAttribute = (event: OnSelectAttributeEvent, callback: Function, ...rest: Array<any>) => Attribute;

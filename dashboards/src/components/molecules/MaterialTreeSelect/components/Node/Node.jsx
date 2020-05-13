@@ -25,7 +25,7 @@ export class Node extends PureComponent<Props> {
 
 	handleClickShowMore = () => {
 		const {children, getOptionValue, onLoadMoreChildren, value} = this.props;
-		onLoadMoreChildren(getOptionValue(value), Children.count(children));
+		onLoadMoreChildren && onLoadMoreChildren(getOptionValue(value), Children.count(children));
 	};
 
 	handleClickToggleIcon = () => {

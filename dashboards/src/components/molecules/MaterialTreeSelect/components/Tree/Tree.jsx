@@ -13,7 +13,9 @@ export class Tree extends Component<Props, State> {
 	static defaultProps = {
 		className: '',
 		multiple: false,
-		value: ''
+		showMore: false,
+		value: '',
+		values: []
 	};
 
 	state = {
@@ -55,7 +57,7 @@ export class Tree extends Component<Props, State> {
 		const expanded = expandedValues.includes(value);
 		const {children} = options[value];
 
-		if (!expanded && Array.isArray(children) && children.length === 0) {
+		if (onLoad && !expanded && Array.isArray(children) && children.length === 0) {
 			onLoad(value);
 		}
 
@@ -64,7 +66,10 @@ export class Tree extends Component<Props, State> {
 		});
 	};
 
-	handleClickShowMore = () => this.props.onLoad(null, this.getRoots().length);
+	handleClickShowMore = () => {
+		const {onLoad} = this.props;
+		onLoad && onLoad(null, this.getRoots().length);
+	}
 
 	isExpanded = (value: string) => {
 		const {expandedValues, searchValue} = this.state;

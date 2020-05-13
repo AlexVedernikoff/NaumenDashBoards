@@ -14,9 +14,14 @@ export type OnChangeInputEvent = {
 	value: InputValue
 };
 
-export type SelectValue = string | null | Object;
+export type SelectValue = any;
 
 export type OnSelectEvent = {
 	name: string,
 	value: SelectValue
+};
+
+export type OnChangeLabelEvent = {
+	label: string,
+	name: string
 };
