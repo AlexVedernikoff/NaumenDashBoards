@@ -29,7 +29,12 @@ export class StringGroup extends Component<AttributeGroupProps> {
 		}
 	};
 
-	getCustomGroups = (): Array<CustomGroup> => this.props.customGroups.filter(({type}) => type === ATTRIBUTE_TYPES.string);
+	getCustomGroups = (): Array<CustomGroup> => {
+		const {customGroups} = this.props;
+		const {localizedText, string} = ATTRIBUTE_TYPES;
+
+		return customGroups.filter(({type}) => type === string || type === localizedText);
+	};
 
 	getCustomProps = () => ({
 		createCondition: this.createCustomCondition,

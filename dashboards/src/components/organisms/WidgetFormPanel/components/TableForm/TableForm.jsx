@@ -1,15 +1,14 @@
 // @flow
 import {array, object} from 'yup';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
+import {normalizeDataSet} from 'utils/normalizer/widget/tableNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
-import type {TableData, TableWidget, Widget} from 'store/widgets/data/types';
-import uuid from 'tiny-uuid';
+import type {TableWidget, Widget} from 'store/widgets/data/types';
 import type {Values} from 'containers/WidgetFormPanel/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -55,7 +54,7 @@ export class TableForm extends Component<TypedFormProps> {
 			calcTotalRow,
 			columnsRatioWidth,
 			computedAttrs,
-			data: data.map(this.updateWidgetData),
+			data: data.map(normalizeDataSet),
 			header,
 			id,
 			layout,
@@ -63,36 +62,6 @@ export class TableForm extends Component<TypedFormProps> {
 			sorting,
 			table: extend(DEFAULT_TABLE_SETTINGS, table),
 			type
-		};
-	};
-
-	updateWidgetData = (set: Values): TableData => {
-		const {
-			aggregation = DEFAULT_AGGREGATION.COUNT,
-			breakdown,
-			breakdownGroup,
-			calcTotalColumn = false,
-			calcTotalRow = false,
-			column,
-			descriptor = '',
-			dataKey = uuid(),
-			row,
-			source,
-			sourceForCompute = false
-		} = set;
-
-		return {
-			aggregation,
-			breakdown,
-			breakdownGroup,
-			calcTotalColumn,
-			calcTotalRow,
-			column,
-			dataKey,
-			descriptor,
-			row,
-			source,
-			sourceForCompute
 		};
 	};
 

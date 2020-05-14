@@ -38,13 +38,13 @@ export class SourceDataBox extends Component<Props> {
 
 	addSet = (count: number = 1) => {
 		const {data, setFieldValue} = this.props;
-		const set = {
-			[FIELDS.dataKey]: uuid(),
-			[FIELDS.sourceForCompute]: true
-		};
 
 		while (count > 0) {
-			data.push(set);
+			data.push({
+				[FIELDS.dataKey]: uuid(),
+				[FIELDS.descriptor]: '',
+				[FIELDS.sourceForCompute]: true
+			});
 			setFieldValue(FIELDS.data, data);
 			count--;
 		}

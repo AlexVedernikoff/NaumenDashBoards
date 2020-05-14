@@ -112,7 +112,7 @@ const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) 
 	const set = getBuildSet(widget);
 	let {tickAmount: yTickAmount} = indicator;
 
-	if (set) {
+	if (set && !set.sourceForCompute) {
 		const {aggregation} = set;
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
 
@@ -171,9 +171,8 @@ const createComboMixin = (widget: ComboWidget, chart: DiagramBuildData) => {
 	let stacked = false;
 	let percentDataKeys = [];
 
-	widget.data
-		.filter(set => !set.sourceForCompute)
-		.forEach(set => {
+	widget.data.forEach(set => {
+		if (!set.sourceForCompute) {
 			const {aggregation, type} = set;
 
 			if (!stacked && type === WIDGET_TYPES.COLUMN_STACKED) {
@@ -183,7 +182,8 @@ const createComboMixin = (widget: ComboWidget, chart: DiagramBuildData) => {
 			if (aggregation && aggregation === DEFAULT_AGGREGATION.PERCENT) {
 				percentDataKeys.push(set.dataKey);
 			}
-		});
+		}
+	});
 
 	const options: ApexOptions = {
 		chart: {
@@ -232,7 +232,7 @@ const createComboMixin = (widget: ComboWidget, chart: DiagramBuildData) => {
 const createCircleMixin = (widget: CircleWidget, chart: DiagramBuildData): ApexOptions => {
 	const set = getBuildSet(widget);
 
-	if (set) {
+	if (set && !set.sourceForCompute) {
 		const {aggregation} = set;
 		const options: ApexOptions = {
 			labels: chart.labels

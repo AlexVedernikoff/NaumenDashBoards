@@ -18,7 +18,7 @@ const createDefaultGroup = (data: string | null, attribute?: Attribute) => {
 
 const isGroupKey = (key: string) => /group/i.test(key);
 
-const transformGroupFormat = (group: Group | null) => {
+const transformGroupFormat = (group?: Group) => {
 	if (typeof group === 'string') {
 		group = createDefaultGroup(group);
 	}

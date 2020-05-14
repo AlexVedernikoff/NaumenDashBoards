@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import type {AxisIndicator, AxisParameter, ChartSorting, DataLabels, Header, Legend} from 'store/widgets/data/types';
-import {createDefaultGroup} from 'store/widgets/helpers';
+import {createDefaultGroup, getDefaultSystemGroup, transformGroupFormat} from 'store/widgets/helpers';
 import type {CreateFunction, Fields, LegacyWidget} from './types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
@@ -238,6 +238,26 @@ const getOrdinalData = (widget: LegacyWidget, fields: Fields, createFunction: Cr
  */
 const getMainDataSet = (data: Array<Object>): Object => data.find(set => !set.sourceForCompute) || {};
 
+/**
+ * В зависимости от наличия разбивки в исходном объекте, добавляет ее вместе с группировкой в таргет объект
+ * @param {object} source - исходный объект
+ * @param {object} target - таргет объект
+ * @returns {object} - таргет объект
+ */
+const mixinBreakdown = (source: Object, target: Object) => {
+	const {breakdown, breakdownGroup} = source;
+
+	if (breakdown) {
+		target = {
+			...target,
+			breakdown,
+			breakdownGroup: breakdownGroup ? transformGroupFormat(breakdownGroup) : getDefaultSystemGroup(breakdown)
+		};
+	}
+
+	return target;
+};
+
 export {
 	aggregation,
 	array,
@@ -252,6 +272,7 @@ export {
 	hasOrdinalFormat,
 	header,
 	legend,
+	mixinBreakdown,
 	object,
 	string
 };

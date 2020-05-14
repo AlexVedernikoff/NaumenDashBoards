@@ -74,8 +74,7 @@ export type ComputedBreakdown = Array<{
 type BaseData = {
 	dataKey: string,
 	descriptor: string,
-	source: Source,
-	sourceForCompute: boolean,
+	source: Source
 };
 
 export type Header = {
@@ -139,15 +138,25 @@ export type AxisParameter = {
 	showName: boolean
 };
 
-export type AxisData = {
+export type ComputeAxisData = {
+	...BaseData,
+	group: Group,
+	sourceForCompute: true,
+	xAxis: Attribute,
+};
+
+export type BuildAxisData = {
 	...BaseData,
 	aggregation: string,
-	breakdown: Attribute | ComputedBreakdown | null,
-	breakdownGroup: Group | null,
+	breakdown?: Attribute | ComputedBreakdown,
+	breakdownGroup?: Group,
 	group: Group,
+	sourceForCompute: false,
 	xAxis: Attribute,
 	yAxis: MixedAttribute
 };
+
+export type AxisData = ComputeAxisData | BuildAxisData;
 
 export type AxisWidget = {
 	...BaseWidget,
@@ -163,13 +172,21 @@ export type AxisWidget = {
 
 // Круговой график
 
-export type CircleData = {
+export type BuildCircleData = {
 	...BaseData,
 	aggregation: string,
 	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
-	indicator: MixedAttribute
+	indicator: MixedAttribute,
+	sourceForCompute: false
 };
+
+type ComputeCircleData = {
+	...BaseData,
+	sourceForCompute: true
+};
+
+export type CircleData = BuildCircleData | ComputeCircleData;
 
 export type CircleWidget = {
 	...BaseWidget,
@@ -185,10 +202,12 @@ export type CircleWidget = {
 
 type ComboType = $Keys<typeof COMBO_TYPES>;
 
-export type ComboData = {
-	...AxisData,
+export type BuildComboData = {
+	...BuildAxisData,
 	type: ComboType
 };
+
+export type ComboData = ComputeAxisData | BuildComboData;
 
 export type ComboWidget = {
 	...BaseWidget,
@@ -204,11 +223,19 @@ export type ComboWidget = {
 
 // Сводка
 
-export type SummaryData = {
+type BuildSummaryData = {
 	...BaseData,
 	aggregation: string,
-	indicator: MixedAttribute
+	indicator: MixedAttribute,
+	sourceForCompute: false
 };
+
+type ComputeSummaryData = {
+	...BaseData,
+	sourceForCompute: true
+};
+
+export type SummaryData = BuildSummaryData | ComputeSummaryData;
 
 export type SummaryIndicator = {
 	fontColor: string,
@@ -238,14 +265,23 @@ export type TableColumnHeader = {
 	fontStyle?: FontStyle
 };
 
-export type TableData = {
+type BuildTableData = {
 	...BaseData,
 	aggregation: string,
 	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
 	column: MixedAttribute,
-	row: Attribute
+	row: Attribute,
+	sourceForCompute: false
 };
+
+type ComputeTableData = {
+	...BaseData,
+	row: Attribute,
+	sourceForCompute: true
+};
+
+export type TableData = BuildTableData | ComputeTableData;
 
 export type Table = {
 	body: {

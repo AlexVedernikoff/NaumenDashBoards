@@ -1,6 +1,6 @@
 // @flow
 import {
-	aggregation,
+	aggregation as aggregationFilter,
 	array,
 	axisIndicator,
 	axisParameter,
@@ -13,11 +13,13 @@ import {
 	hasOrdinalFormat,
 	header,
 	legend,
+	mixinBreakdown,
 	object,
 	string
 } from './helpers';
 import type {AxisWidget} from 'store/widgets/data/types';
 import {FIELDS} from 'WidgetFormPanel';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
 
@@ -49,9 +51,34 @@ const getDataFields = () => {
 	};
 };
 
+const normalizeDataSet = (set: Object) => {
+	const {dataKey, descriptor, group, source, xAxis} = set;
+	let resultSet = {
+		dataKey,
+		descriptor,
+		group: group || getDefaultSystemGroup(xAxis),
+		source,
+		sourceForCompute: true,
+		xAxis
+	};
+
+	if (!set.sourceForCompute) {
+		const {aggregation, yAxis} = set;
+		resultSet = {
+			...resultSet,
+			aggregation: aggregationFilter(aggregation),
+			sourceForCompute: false,
+			yAxis
+		};
+		resultSet = mixinBreakdown(set, resultSet);
+	}
+
+	return resultSet;
+};
+
 const createData = (widget: Object, fields: Object) => {
 	const {
-		aggregation: aggregationName,
+		aggregation,
 		breakdown,
 		breakdownGroup,
 		dataKey,
@@ -64,7 +91,7 @@ const createData = (widget: Object, fields: Object) => {
 	} = fields;
 
 	return {
-		aggregation: aggregation(widget[aggregationName]),
+		aggregation: aggregationFilter(widget[aggregation]),
 		breakdown: object(widget[breakdown], null),
 		breakdownGroup: widget[breakdown] ? group(widget[breakdownGroup]) : null,
 		dataKey: string(widget[dataKey], uuid()),
@@ -93,7 +120,7 @@ const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 	return {
 		colors: colors(widget[FIELDS.colors]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data,
+		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
 		header: header(widget),
 		id,
@@ -105,6 +132,10 @@ const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 		sorting: chartSorting(widget),
 		type
 	};
+};
+
+export {
+	normalizeDataSet
 };
 
 export default axisNormalizer;

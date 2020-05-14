@@ -1,18 +1,16 @@
 // @flow
 import {array, object} from 'yup';
-import type {ComboData, ComboWidget, Widget} from 'store/widgets/data/types';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import type {ComboWidget, Widget} from 'store/widgets/data/types';
+import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
+import {normalizeDataSet} from 'utils/normalizer/widget/comboNormalizer';
 import {ParamsTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
 import {StyleTab} from 'WidgetFormPanel/components/AxisChartForm/components';
-import uuid from 'tiny-uuid';
 import type {Values} from 'containers/WidgetFormPanel/types';
 
 export class ComboChartForm extends Component<TypedFormProps> {
@@ -50,7 +48,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 		return {
 			colors,
 			computedAttrs,
-			data: data.map(this.updateWidgetData),
+			data: data.map(normalizeDataSet),
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),
 			header,
 			id,
@@ -61,36 +59,6 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),
 			type
-		};
-	};
-
-	updateWidgetData = (set: Values): ComboData => {
-		const {
-			aggregation = DEFAULT_AGGREGATION.COUNT,
-			breakdown = null,
-			breakdownGroup = null,
-			group = getDefaultSystemGroup(set.xAxis),
-			descriptor = '',
-			dataKey = uuid(),
-			source,
-			sourceForCompute = false,
-			type = WIDGET_TYPES.COLUMN,
-			xAxis,
-			yAxis
-		} = set;
-
-		return {
-			aggregation,
-			breakdown,
-			breakdownGroup,
-			dataKey,
-			descriptor,
-			group,
-			source,
-			sourceForCompute,
-			type,
-			xAxis,
-			yAxis
 		};
 	};
 

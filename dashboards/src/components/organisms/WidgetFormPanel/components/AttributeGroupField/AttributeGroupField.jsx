@@ -57,7 +57,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 	renderModal = () => {
 		const {field, value} = this.props;
 		const {showModal} = this.state;
-		const {value: attribute} = field;
+		const {parent, value: attribute} = field;
 		let group = value;
 
 		if (!group) {
@@ -67,7 +67,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 		if (showModal && attribute) {
 			return (
 				<GroupCreatingModal
-					attribute={attribute}
+					attribute={parent || attribute}
 					group={group}
 					key={attribute.type}
 					onClose={this.handleCloseModal}

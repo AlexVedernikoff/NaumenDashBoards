@@ -59,30 +59,26 @@ const createAxisData = (widget: AxisWidget) => {
 	const data: Object = {};
 
 	widget.data.forEach(set => {
-		const {
-			aggregation,
-			breakdown,
-			breakdownGroup,
-			dataKey,
-			descriptor,
-			group,
-			source,
-			sourceForCompute,
-			xAxis,
-			yAxis
-		} = set;
+		const {dataKey, descriptor, group, source, sourceForCompute, xAxis} = set;
 
 		data[dataKey] = {
-			aggregation: transformAggregation(aggregation, type),
-			breakdown,
-			breakdownGroup: transformGroupFormat(breakdownGroup),
 			descriptor,
 			group: transformGroupFormat(group),
 			source: getSourceValue(source),
 			sourceForCompute,
-			xAxis,
-			yAxis: resetComputedAttributeState(yAxis)
+			xAxis
 		};
+
+		if (!set.sourceForCompute) {
+			const {aggregation, breakdown, breakdownGroup, yAxis} = set;
+			data[dataKey] = {
+				...data[dataKey],
+				aggregation: transformAggregation(aggregation, type),
+				breakdown,
+				breakdownGroup: transformGroupFormat(breakdownGroup),
+				yAxis: resetComputedAttributeState(yAxis)
+			};
+		}
 	});
 
 	return {
@@ -97,25 +93,28 @@ const createCircleData = (widget: CircleWidget) => {
 
 	widget.data.forEach(set => {
 		const {
-			aggregation,
-			breakdown,
-			breakdownGroup,
 			dataKey,
 			descriptor,
-			indicator,
-			source,
-			sourceForCompute
+			source
 		} = set;
 
 		data[dataKey] = {
-			aggregation,
-			breakdown,
-			breakdownGroup: transformGroupFormat(breakdownGroup),
 			descriptor,
-			indicator: resetComputedAttributeState(indicator),
 			source: getSourceValue(source),
-			sourceForCompute
+			sourceForCompute: true
 		};
+
+		if (!set.sourceForCompute) {
+			const {aggregation, breakdown, breakdownGroup, indicator} = set;
+			data[dataKey] = {
+				...data[dataKey],
+				aggregation,
+				breakdown,
+				breakdownGroup: transformGroupFormat(breakdownGroup),
+				indicator: resetComputedAttributeState(indicator),
+				sourceForCompute: false
+			};
+		}
 	});
 
 	return {
@@ -129,32 +128,27 @@ const createComboData = (widget: ComboWidget) => {
 	const data: Object = {};
 
 	widget.data.forEach(set => {
-		const {
-			aggregation,
-			breakdown,
-			breakdownGroup,
-			dataKey,
-			descriptor,
-			group,
-			source,
-			sourceForCompute,
-			type,
-			xAxis,
-			yAxis
-		} = set;
+		const {dataKey, descriptor, group, source, sourceForCompute, xAxis} = set;
 
 		data[dataKey] = {
-			aggregation: transformAggregation(aggregation, type),
-			breakdown,
-			breakdownGroup: transformGroupFormat(breakdownGroup),
 			descriptor,
 			group: transformGroupFormat(group),
 			source: getSourceValue(source),
 			sourceForCompute,
-			type,
-			xAxis,
-			yAxis: resetComputedAttributeState(yAxis)
+			xAxis
 		};
+
+		if (!set.sourceForCompute) {
+			const {aggregation, breakdown, breakdownGroup, type, yAxis} = set;
+			data[dataKey] = {
+				...data[dataKey],
+				aggregation: transformAggregation(aggregation, type),
+				breakdown,
+				breakdownGroup: transformGroupFormat(breakdownGroup),
+				type,
+				yAxis: resetComputedAttributeState(yAxis)
+			};
+		}
 	});
 
 	return {
@@ -168,22 +162,23 @@ const createSummaryData = (widget: SummaryWidget) => {
 	const data: Object = {};
 
 	widget.data.forEach(set => {
-		const {
-			aggregation,
-			dataKey,
-			descriptor,
-			indicator,
-			source,
-			sourceForCompute
-		} = set;
+		const {dataKey, descriptor, source} = set;
 
 		data[dataKey] = {
-			aggregation,
 			descriptor,
-			indicator: resetComputedAttributeState(indicator),
 			source: getSourceValue(source),
-			sourceForCompute
+			sourceForCompute: true
 		};
+
+		if (!set.sourceForCompute) {
+			const {aggregation, indicator} = set;
+			data[dataKey] = {
+				...data[dataKey],
+				aggregation: transformAggregation(aggregation, type),
+				indicator: resetComputedAttributeState(indicator),
+				sourceForCompute: false
+			};
+		}
 	});
 
 	return {
@@ -197,30 +192,29 @@ const createTableData = (widget: TableWidget) => {
 	const data: Object = {};
 
 	widget.data.forEach(set => {
-		const {
-			aggregation,
-			breakdown,
-			breakdownGroup,
-			column,
-			dataKey,
-			descriptor,
-			row,
-			source,
-			sourceForCompute
-		} = set;
+		const {dataKey, descriptor, row, source} = set;
 
 		data[dataKey] = {
-			aggregation,
-			breakdown,
-			breakdownGroup: transformGroupFormat(breakdownGroup),
-			calcTotalColumn,
-			calcTotalRow,
-			column,
 			descriptor,
 			row: resetComputedAttributeState(row),
 			source: getSourceValue(source),
-			sourceForCompute
+			sourceForCompute: true
 		};
+
+		if (!set.sourceForCompute) {
+			const {aggregation, breakdown, breakdownGroup, column, dataKey} = set;
+
+			data[dataKey] = {
+				...data[dataKey],
+				aggregation,
+				breakdown,
+				breakdownGroup: transformGroupFormat(breakdownGroup),
+				calcTotalColumn,
+				calcTotalRow,
+				column: resetComputedAttributeState(column),
+				sourceForCompute: false
+			};
+		}
 	});
 
 	return {

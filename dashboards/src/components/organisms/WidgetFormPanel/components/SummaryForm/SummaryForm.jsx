@@ -1,15 +1,14 @@
 // @flow
 import {array, object} from 'yup';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
+import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
-import type {SummaryData, SummaryWidget, Widget} from 'store/widgets/data/types';
-import uuid from 'tiny-uuid';
+import type {SummaryWidget, Widget} from 'store/widgets/data/types';
 import type {Values} from 'containers/WidgetFormPanel/types';
 
 export class SummaryForm extends Component<TypedFormProps> {
@@ -39,33 +38,13 @@ export class SummaryForm extends Component<TypedFormProps> {
 
 		return {
 			computedAttrs,
-			data: data.map(this.updateWidgetData),
+			data: data.map(normalizeDataSet),
 			header,
 			id,
 			indicator: extend(DEFAULT_SUMMARY_SETTINGS.indicator, indicator),
 			layout,
 			name,
 			type
-		};
-	};
-
-	updateWidgetData = (set: Values): SummaryData => {
-		const {
-			aggregation = DEFAULT_AGGREGATION.COUNT,
-			descriptor = '',
-			dataKey = uuid(),
-			indicator,
-			source,
-			sourceForCompute = false
-		} = set;
-
-		return {
-			aggregation,
-			dataKey,
-			descriptor,
-			indicator,
-			source,
-			sourceForCompute
 		};
 	};
 

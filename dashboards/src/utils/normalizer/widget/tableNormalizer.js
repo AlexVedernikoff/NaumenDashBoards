@@ -1,5 +1,14 @@
 // @flow
-import {aggregation, array, getOrdinalData, group, header, object, string} from './helpers';
+import {
+	aggregation as aggregationFilter,
+	array,
+	getOrdinalData,
+	group,
+	header,
+	mixinBreakdown,
+	object,
+	string
+} from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
@@ -37,9 +46,33 @@ const getDataFields = () => {
 	};
 };
 
-const createData = (widget: Object, fields: Object): TableData => {
+const normalizeDataSet = (set: Object): TableData => {
+	const {dataKey, descriptor, row, source} = set;
+	let resultSet = {
+		dataKey,
+		descriptor,
+		row,
+		source,
+		sourceForCompute: true
+	};
+
+	if (!set.sourceForCompute) {
+		const {aggregation, column} = set;
+		resultSet = {
+			...resultSet,
+			aggregation: aggregationFilter(aggregation),
+			column,
+			sourceForCompute: false
+		};
+		resultSet = mixinBreakdown(set, resultSet);
+	}
+
+	return resultSet;
+};
+
+const createData = (widget: Object, fields: Object) => {
 	const {
-		aggregation: aggregationName,
+		aggregation,
 		breakdown,
 		breakdownGroup,
 		calcTotalColumn,
@@ -53,7 +86,7 @@ const createData = (widget: Object, fields: Object): TableData => {
 	} = fields;
 
 	return {
-		aggregation: aggregation(widget[aggregationName]),
+		aggregation: aggregationFilter(widget[aggregation]),
 		breakdown: object(widget[breakdown]),
 		breakdownGroup: group(widget[breakdownGroup]),
 		calcTotalColumn: Boolean(widget[calcTotalColumn]),
@@ -85,7 +118,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		calcTotalRow,
 		columnsRatioWidth: array(widget[FIELDS.columnsRatioWidth]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data,
+		data: data.map(normalizeDataSet),
 		header: header(widget),
 		id,
 		layout,
@@ -94,6 +127,10 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		table: extend(DEFAULT_TABLE_SETTINGS, table),
 		type
 	};
+};
+
+export {
+	normalizeDataSet
 };
 
 export default tableNormalizer;
