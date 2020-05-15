@@ -47,7 +47,7 @@ export class Table extends PureComponent<Props, State> {
 	handleChangeSorting = (sorting: TableSorting) => {
 		const {onUpdate, widget} = this.props;
 		onUpdate({...widget, sorting});
-	}
+	};
 
 	handleFinishedChangeColumnWidth = (index: number) => {
 		const {onUpdate, widget} = this.props;
@@ -64,7 +64,7 @@ export class Table extends PureComponent<Props, State> {
 			columnsRatioWidth[index] = Number((width / container.clientWidth).toFixed(2));
 			onUpdate({...widget, columnsRatioWidth});
 		}
-	}
+	};
 
 	handleNextClick = () => this.setState({page: this.state.page + 1});
 
@@ -101,14 +101,14 @@ export class Table extends PureComponent<Props, State> {
 				width={width}
 			/>
 		);
-	}
+	};
 
 	renderFooter = () => {
 		const {columns, columnsWidth, width} = this.state;
 		const hasFooter = columns.find(i => i.footer);
 
 		return hasFooter ? <Footer columns={columns} columnsWidth={columnsWidth} width={width} /> : null;
-	}
+	};
 
 	renderHeader = () => {
 		const {sorting, table} = this.props.widget;
@@ -128,12 +128,12 @@ export class Table extends PureComponent<Props, State> {
 				width={width}
 			/>
 		);
-	}
+	};
 
 	renderNoData = () => {
 		const {data} = this.props.data;
 		return data.length === 0 ? <div className={styles.noData}>Данные отсутсвуют</div> : null;
-	}
+	};
 
 	renderPagination = () => {
 		const {data} = this.props.data;
@@ -150,7 +150,7 @@ export class Table extends PureComponent<Props, State> {
 				/>
 			);
 		}
-	}
+	};
 
 	renderTable = () => {
 		const {width} = this.state;

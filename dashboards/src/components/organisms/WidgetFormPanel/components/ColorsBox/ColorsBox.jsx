@@ -42,7 +42,7 @@ export class ColorsBox extends PureComponent<Props, State> {
 			colorIndex: index,
 			showPicker
 		});
-	}
+	};
 
 	hidePicker = () => this.setState({showPicker: false});
 

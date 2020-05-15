@@ -23,12 +23,12 @@ export class FormField extends PureComponent<Props> {
 				{children}
 			</div>
 		);
-	}
+	};
 
 	renderLabel = () => {
 		const {label} = this.props;
 		return label ? <div className={styles.label}>{label}</div> : null;
-	}
+	};
 
 	render () {
 		const {className, small} = this.props;

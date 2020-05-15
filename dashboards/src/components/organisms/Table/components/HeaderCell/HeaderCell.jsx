@@ -37,7 +37,7 @@ export class HeaderCell extends PureComponent<Props> {
 	handleClick = () => {
 		const {index, onClick} = this.props;
 		onClick(index);
-	}
+	};
 
 	handleClickResizer = (event: SyntheticMouseEvent<HTMLDivElement>) => event.stopPropagation();
 
@@ -48,7 +48,7 @@ export class HeaderCell extends PureComponent<Props> {
 		this.dragStart = true;
 
 		event.stopPropagation();
-	}
+	};
 
 	mouseMove = (event: MouseEvent) => {
 		if (this.dragStart) {
@@ -57,7 +57,7 @@ export class HeaderCell extends PureComponent<Props> {
 
 			onChangeWidth(newWidth, index);
 		}
-	}
+	};
 
 	mouseUp = () => {
 		const {index, onFinishedChangeWidth} = this.props;
@@ -66,7 +66,7 @@ export class HeaderCell extends PureComponent<Props> {
 			this.dragStart = false;
 			onFinishedChangeWidth(index);
 		}
-	}
+	};
 
 	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.ref} />;
 

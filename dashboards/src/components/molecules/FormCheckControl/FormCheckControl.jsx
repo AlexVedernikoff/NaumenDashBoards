@@ -8,7 +8,7 @@ export class FormCheckControl extends PureComponent<Props> {
 	static defaultProps = {
 		className: '',
 		reverse: false
-	}
+	};
 
 	render () {
 		const {children, className, label, reverse} = this.props;

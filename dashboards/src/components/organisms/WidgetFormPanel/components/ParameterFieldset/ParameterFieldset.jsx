@@ -21,7 +21,7 @@ export class ParameterFieldset extends Component<Props> {
 		}
 
 		return options;
-	}
+	};
 
 	getAttributeOptions = (attribute: Attribute) => this.filter(this.props.getAttributeOptions(attribute));
 
@@ -35,7 +35,7 @@ export class ParameterFieldset extends Component<Props> {
 	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
 		const {index, onChangeLabel} = this.props;
 		onChangeLabel(event, index);
-	}
+	};
 
 	handleSelect = (event: OnSelectAttributeEvent) => {
 		const {index, mainSet, onSelect, set} = this.props;
@@ -48,7 +48,7 @@ export class ParameterFieldset extends Component<Props> {
 		const currentSource = currentSet[FIELDS.source];
 
 		return mainSet !== currentSet && mainSource && currentSource && mainSource.value === currentSource.value;
-	}
+	};
 
 	renderGroup = (props: Object) => {
 		const {name, set: currentSet} = this.props;

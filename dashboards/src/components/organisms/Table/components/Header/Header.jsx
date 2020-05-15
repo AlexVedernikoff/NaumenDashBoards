@@ -17,7 +17,7 @@ export class Header extends PureComponent<Props> {
 		}
 
 		onChangeSorting({column, type});
-	}
+	};
 
 	renderColumn = (column: Column, index: number) => {
 		const {columnSettings, columnsWidth, onChangeColumnWidth, onFinishedChangeColumnWidth, sorting} = this.props;

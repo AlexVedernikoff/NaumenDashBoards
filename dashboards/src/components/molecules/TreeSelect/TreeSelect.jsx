@@ -16,7 +16,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 	state = {
 		showForm: false,
 		showList: false
-	}
+	};
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
@@ -96,7 +96,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 	renderLabel = () => {
 		const label = this.getOptionLabel(this.props.value);
 		return <div className={styles.label} title={label}>{label}</div>;
-	}
+	};
 
 	renderLabelEditingForm = () => {
 		const {value} = this.props;

@@ -12,7 +12,7 @@ import styles from './styles.less';
 export class StyleTab extends Component<StyleTabProps> {
 	getData = (defaultData: Object, data?: Object) => {
 		return data && typeof data === 'object' ? {...defaultData, ...data} : defaultData;
-	}
+	};
 
 	handleChange = (name: string, data: Object) => {
 		const {setFieldValue} = this.props;

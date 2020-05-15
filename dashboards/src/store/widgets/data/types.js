@@ -26,7 +26,23 @@ export type TextHandler = $Keys<typeof TEXT_HANDLERS>;
 
 export type SortingType = $Keys<typeof SORTING_TYPES>;
 
-type ComputeData = {
+export type GroupType = string;
+
+export type GroupWay = $Keys<typeof GROUP_WAYS>;
+
+export type WidgetType = $Keys<typeof WIDGET_TYPES>;
+
+export type Source = {
+	label: string,
+	value: string
+};
+
+export type Group = {
+	data: string,
+	way: GroupWay
+};
+
+export type ComputeData = {
 	aggregation: string,
 	attr: Attribute,
 	dataKey: string
@@ -47,21 +63,11 @@ export type ComputedAttr = {|
 
 export type MixedAttribute = ComputedAttr | Attribute;
 
-export type GroupType = string;
-
-export type GroupWay = $Keys<typeof GROUP_WAYS>;
-
-export type WidgetType = $Keys<typeof WIDGET_TYPES>;
-
-export type Source = {
-	label: string,
-	value: string
-};
-
-export type Group = {
-	data: string,
-	way: GroupWay
-};
+export type ComputedBreakdown = Array<{
+	dataKey: string,
+	group: Group | null,
+	value: Attribute | null
+}>;
 
 // Общие параметры всех виджетов
 

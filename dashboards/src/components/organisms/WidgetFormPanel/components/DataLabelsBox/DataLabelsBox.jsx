@@ -18,7 +18,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 				<span className={styles.shadowInputLabel}>Тень</span>
 			</div>
 		);
-	}
+	};
 
 	render () {
 		const {data, handleBoolChange, renderColorInput, renderFontFamilySelect, renderFontSizeSelect} = this.props;

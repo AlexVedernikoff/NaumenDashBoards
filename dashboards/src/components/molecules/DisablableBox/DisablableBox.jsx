@@ -18,7 +18,7 @@ export class DisableableBox extends PureComponent<Props> {
 				{children}
 			</div>
 		);
-	}
+	};
 
 	renderToggleForm = () => {
 		const {handleChange, label, name, value} = this.props;
@@ -28,7 +28,7 @@ export class DisableableBox extends PureComponent<Props> {
 				<Toggle checked={value} name={name} onChange={handleChange} value={value} />
 			</FormCheckControl>
 		);
-	}
+	};
 
 	render () {
 		return (

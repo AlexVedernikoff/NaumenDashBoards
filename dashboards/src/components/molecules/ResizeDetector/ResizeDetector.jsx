@@ -13,7 +13,7 @@ export class ResizeDetector extends PureComponent<Props, State> {
 
 	state = {
 		mounted: false
-	}
+	};
 
 	observer: Object;
 	ref: DivRef = createRef();
@@ -40,7 +40,7 @@ export class ResizeDetector extends PureComponent<Props, State> {
 		}
 
 		onResize(width);
-	}
+	};
 
 	render () {
 		const child = Children.only(this.props.children);

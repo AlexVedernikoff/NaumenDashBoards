@@ -1,0 +1,87 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		min-height: 300px;
+	}
+
+	.controlsContainer {
+		display: flex;
+		flex-flow: row wrap;
+	}
+
+	.controlContainer {
+		margin-right: 5px;
+		margin-bottom: 5px;
+		position: relative;
+
+		&:hover {
+			.removeIcon {
+				display: block;
+			};
+		}
+	}
+
+	.removeIcon {
+		border-radius: @border-radius;
+		color: @dimgrey;
+		cursor: pointer;
+		display: none;
+		position: absolute;
+		right: 0;
+		top: 0;
+
+		& :hover {
+			background-color: rgba(0, 0, 0, 0.2);
+		}
+	}
+
+	.nameContainer {
+		margin-bottom: 24px;
+		position: relative;
+		width: 100%;
+
+		&:hover {
+			.nameClearIcon {
+				display: block;
+			}
+		}
+	}
+
+	.nameLabel {
+		color: @darkgrey;
+		font-size: 13px;
+		margin-bottom: 5px;
+	}
+
+	.nameInput {
+		border: 1px solid @grey;
+		border-radius: @border-radius;
+		box-sizing: border-box;
+		padding: 8px 12px;
+		width: 100%;
+	}
+
+	.nameClearIcon {
+		color: @dimgrey;
+		cursor: pointer;
+		display: none;
+		height: 14px;
+		position: absolute;
+		right: 8px;
+		top: 30px;
+		width: 14px;
+	}
+
+	.footerRemoveButton {
+		margin-left: auto;
+	}
+
+	.saveButton {
+		margin-right: 10px;
+	}
+
+	.infoPanel {
+		margin-bottom: 24px;
+	}
+}

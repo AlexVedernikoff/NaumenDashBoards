@@ -360,7 +360,7 @@ export class Attribute extends PureComponent<Props, State> {
 		}
 
 		return <AttributeSelect note={note} {...props} />;
-	}
+	};
 
 	render () {
 		return (

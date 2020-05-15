@@ -73,7 +73,7 @@ export class ColorInput extends PureComponent<Props, State> {
 		}
 
 		return null;
-	}
+	};
 
 	renderValue = () => {
 		const {value: backgroundColor} = this.props;

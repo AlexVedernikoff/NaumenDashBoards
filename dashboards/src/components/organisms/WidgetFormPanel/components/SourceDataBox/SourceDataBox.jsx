@@ -15,7 +15,7 @@ export class SourceDataBox extends Component<Props> {
 		minCountBuildingSources: 1,
 		parameterName: '',
 		sourceRefFields: []
-	}
+	};
 
 	componentDidMount () {
 		let {data, minCountBuildingSources, type} = this.props;
@@ -88,7 +88,7 @@ export class SourceDataBox extends Component<Props> {
 
 	handleClickAddSource = () => {
 		this.addSet(1);
-	}
+	};
 
 	handleSelectSource = (index: number, event: OnSelectEvent) => {
 		const {data, onSelectCallback, parameterName, setDataFieldValue, sourceRefFields, type} = this.props;

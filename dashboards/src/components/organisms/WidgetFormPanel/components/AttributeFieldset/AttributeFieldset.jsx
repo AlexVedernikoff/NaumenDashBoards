@@ -28,17 +28,17 @@ export class AttributeFieldset extends Component<Props> {
 		}
 
 		return options;
-	}
+	};
 
 	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
 		const {index, onChangeLabel} = this.props;
 		onChangeLabel(event, index);
-	}
+	};
 
 	handleSelect = (event: OnSelectAttributeEvent) => {
 		const {index, onSelect} = this.props;
 		onSelect(event, index);
-	}
+	};
 
 	renderAttributeField = (props: Object) => {
 		const {renderRefField} = this.props;
@@ -112,7 +112,7 @@ export class AttributeFieldset extends Component<Props> {
 		}
 
 		return <AttributeSelect note={note} {...props} />;
-	}
+	};
 
 	render () {
 		const {

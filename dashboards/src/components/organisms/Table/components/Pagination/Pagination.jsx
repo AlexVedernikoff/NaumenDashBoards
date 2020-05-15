@@ -23,7 +23,7 @@ export class Pagination extends PureComponent<Props> {
 				Следующая
 			</button>
 		);
-	}
+	};
 
 	renderPrevButton = () => {
 		const {onPrevClick, page} = this.props;
@@ -34,7 +34,7 @@ export class Pagination extends PureComponent<Props> {
 				Предыдущая
 			</button>
 		);
-	}
+	};
 
 	render () {
 		return (
