@@ -12,7 +12,7 @@ export class ParamsTab extends DataFormBuilder {
 			{this.renderIndicator(index)}
 			{this.renderBreakdown(index)}
 		</Fragment>
-	)
+	);
 
 	renderIndicatorSection = () => (
 		<FormBox title="Показатель">

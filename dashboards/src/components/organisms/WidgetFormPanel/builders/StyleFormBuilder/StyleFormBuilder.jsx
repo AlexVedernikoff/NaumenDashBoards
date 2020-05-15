@@ -42,7 +42,7 @@ export class StyleFormBuilder extends Component<Props> {
 		if (/^(\d+)?$/.test(value.toString())) {
 			this.handleChange({name, value});
 		}
-	}
+	};
 
 	handleConditionChange = (event: OnChangeInputEvent) => {
 		const {data} = this.props;
@@ -129,7 +129,7 @@ export class StyleFormBuilder extends Component<Props> {
 		];
 
 		return <CheckIconButtonGroup icons={icons} name={name} onChange={onChange} value={value} />;
-	}
+	};
 
 	renderSortingButtons = () => {
 		const {type} = this.props.data;
@@ -198,7 +198,7 @@ export class StyleFormBuilder extends Component<Props> {
 		];
 
 		return <CheckIconButtonGroup icons={icons} name={name} onChange={onChange} value={value} />;
-	}
+	};
 
 	render () {
 		return this.props.render({

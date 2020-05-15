@@ -11,7 +11,7 @@ export const formRef: DivRef = createRef();
 export class WidgetFormPanel extends Component<Props, State> {
 	state: {
 		rendered: false
-	}
+	};
 
 	componentDidMount (): * {
 		this.setState({rendered: true});
@@ -49,7 +49,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 		if (TypedWidgetForm && container) {
 			return <TypedWidgetForm render={this.renderForm} />;
 		}
-	}
+	};
 
 	render () {
 		return (

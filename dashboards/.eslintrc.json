@@ -15,6 +15,7 @@
 	],
 	"parser": "babel-eslint",
 	"plugins": [
+		"babel",
 		"eslint-plugin-local-rules",
 		"sort-destructure-keys",
 		"standard",
@@ -37,6 +38,7 @@
 		"react/jsx-sort-props": 2,
 		"require-atomic-updates": "off",
 		"semi": [2, "always"],
+		"babel/semi": [2, "always"],
 		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": false}],
 		"jsdoc/newline-after-description": 0,
 		"jsdoc/require-returns-description": 0

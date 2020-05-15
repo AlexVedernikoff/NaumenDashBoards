@@ -69,7 +69,7 @@ export class Tree extends Component<Props, State> {
 	handleClickShowMore = () => {
 		const {onLoad} = this.props;
 		onLoad && onLoad(null, this.getRoots().length);
-	}
+	};
 
 	isExpanded = (value: string) => {
 		const {expandedValues, searchValue} = this.state;

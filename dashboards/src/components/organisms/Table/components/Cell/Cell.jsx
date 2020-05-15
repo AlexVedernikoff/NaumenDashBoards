@@ -38,7 +38,7 @@ export class Cell extends PureComponent<Props> {
 			default:
 				return '\u00A0';
 		}
-	}
+	};
 
 	render () {
 		const {body, children, className, fontColor, fontStyle, onClick, textAlign, textHandler, width} = this.props;

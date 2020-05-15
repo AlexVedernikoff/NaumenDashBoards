@@ -25,7 +25,7 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 				<Icon name={iconName} />
 			</CheckIconButton>
 		);
-	}
+	};
 
 	render () {
 		const {className, icons} = this.props;

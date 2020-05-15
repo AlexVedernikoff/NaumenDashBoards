@@ -400,7 +400,7 @@ export class DataFormBuilder extends Component<ParamsTabProps> {
 				});
 			}
 		}
-	}
+	};
 
 	renderAddSourceInput = () => (
 		<IconButton onClick={this.handleClickAddSource}>

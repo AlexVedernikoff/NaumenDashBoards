@@ -41,7 +41,7 @@ export class SourceFieldset extends PureComponent<Props> {
 	handleChangeCompute = (name: string, value: boolean) => {
 		const {index, onChangeCompute} = this.props;
 		onChangeCompute(index, {name, value});
-	}
+	};
 
 	handleChangeSourceLabel = (event: OnChangeLabelEvent) => {
 		const {index, onChange, set} = this.props;
@@ -53,7 +53,7 @@ export class SourceFieldset extends PureComponent<Props> {
 
 			onChange(index, name, source);
 		}
-	}
+	};
 
 	handleClickRemoveButton = () => {
 		const {index, onRemove} = this.props;
@@ -123,7 +123,7 @@ export class SourceFieldset extends PureComponent<Props> {
 	renderSourceError = () => {
 		const {errors, index} = this.props;
 		return <FieldError text={errors[getDataErrorKey(index, FIELDS.source)]} />;
-	}
+	};
 
 	renderSourceSelect = () => {
 		const {set, sources} = this.props;

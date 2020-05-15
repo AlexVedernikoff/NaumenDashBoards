@@ -16,7 +16,7 @@ export class IndicatorBox extends PureComponent<Props> {
 		if (value.toString().length < 3) {
 			handleChange(event);
 		}
-	}
+	};
 
 	render () {
 		const {data, handleBoolChange, handleChange} = this.props;

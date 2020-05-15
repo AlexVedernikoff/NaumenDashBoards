@@ -13,7 +13,7 @@ export class TableBox extends PureComponent<Props> {
 	handleBoolChange = (fieldName: string) => (event: OnChangeInputEvent) => {
 		const {name, value} = event;
 		this.handleChange(fieldName)({name, value: !value});
-	}
+	};
 
 	handleChange = (fieldName: string) => (event: OnChangeEvent) => {
 		const {data, name, onChange} = this.props;
@@ -26,7 +26,7 @@ export class TableBox extends PureComponent<Props> {
 				[key]: value
 			}
 		});
-	}
+	};
 
 	handleConditionChange = (fieldName: string) => (event: OnChangeInputEvent) => {
 		const {data} = this.props;
@@ -37,9 +37,9 @@ export class TableBox extends PureComponent<Props> {
 		}
 
 		this.handleChange(fieldName)({name, value});
-	}
+	};
 
-	renderFieldDivider = () => <div className={styles.fieldDivider}><hr /></div>
+	renderFieldDivider = () => <div className={styles.fieldDivider}><hr /></div>;
 
 	renderHeader = (name: string, label: string) => {
 		const {data, renderColorInput, renderFontStyleButtons} = this.props;
@@ -104,7 +104,7 @@ export class TableBox extends PureComponent<Props> {
 				</FormField>
 			</FormField>
 		);
-	}
+	};
 
 	render () {
 		return (

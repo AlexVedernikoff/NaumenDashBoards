@@ -36,7 +36,7 @@ export class SimpleSelect extends PureComponent<Props, State> {
 		const {value} = e.currentTarget;
 
 		onChangeLabel && onChangeLabel({name, value});
-	}
+	};
 
 	handleClick = () => this.setState({showMenu: !this.state.showMenu});
 
@@ -62,7 +62,7 @@ export class SimpleSelect extends PureComponent<Props, State> {
 		}
 
 		return label;
-	}
+	};
 
 	renderMenu = () => {
 		const {options, value} = this.props;

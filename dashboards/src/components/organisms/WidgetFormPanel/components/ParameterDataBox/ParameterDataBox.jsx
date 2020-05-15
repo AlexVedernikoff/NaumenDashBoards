@@ -12,7 +12,7 @@ import type {Props, State} from './types';
 import React, {Component} from 'react';
 
 export class ParameterDataBox extends Component<Props, State> {
-	state = {}
+	state = {};
 
 	static getDerivedStateFromProps (props: Props) {
 		const {data} = props.values;
@@ -54,14 +54,16 @@ export class ParameterDataBox extends Component<Props, State> {
 	renderParameterFieldset = (set: DataSet, index: number) => {
 		const {errors, getAttributeOptions, getSourceOptions, name, onChangeGroup, onChangeLabel, useGroup} = this.props;
 		const {mainSet} = this.state;
+		const errorKey = getDataErrorKey(index, name);
 
 		if (mainSet) {
 			return (
 				<ParameterFieldset
-					error={errors[getDataErrorKey(index, name)]}
+					error={errors[errorKey]}
 					getAttributeOptions={getAttributeOptions}
 					getSourceOptions={getSourceOptions}
 					index={index}
+					key={errorKey}
 					mainSet={mainSet}
 					name={name}
 					onChangeGroup={onChangeGroup}
@@ -74,7 +76,7 @@ export class ParameterDataBox extends Component<Props, State> {
 		}
 
 		return null;
-	}
+	};
 
 	render () {
 		const {children, values} = this.props;

@@ -9,7 +9,7 @@ import styles from './styles.less';
 export class AbsolutePortal extends Component<Props, State> {
 	static defaultProps = {
 		minOffset: 25
-	}
+	};
 
 	childRef: Ref<any> = createRef();
 	container: HTMLDivElement | null;
@@ -37,12 +37,12 @@ export class AbsolutePortal extends Component<Props, State> {
 		}
 
 		return div;
-	}
+	};
 
 	getElementRect = () => {
 		const {current: element} = this.props.elementRef;
 		return element && element.getBoundingClientRect();
-	}
+	};
 
 	getRelativePosition = (parentPosition: number, position: number, additionalPosition: number, additionalLimit: number) => {
 		const {minOffset} = this.props;
@@ -73,7 +73,7 @@ export class AbsolutePortal extends Component<Props, State> {
 				top: this.getRelativePosition(elementTop, childTop, childBottom, window.innerHeight)
 			}});
 		}
-	}
+	};
 
 	renderContent = () => {
 		const {children, onClickOutside} = this.props;

@@ -57,7 +57,7 @@ export class ParamsTab extends DataFormBuilder {
 			{this.renderRowInput(index)}
 			{this.renderCalcTotalRow(index)}
 		</Fragment>
-	)
+	);
 
 	renderRowInput = (index: number) => {
 		const set = this.getSet(index);
@@ -73,7 +73,7 @@ export class ParamsTab extends DataFormBuilder {
 		<FormBox title="Параметр">
 			{this.renderByOrder(this.renderRowField, false)}
 		</FormBox>
-	)
+	);
 
 	render () {
 		return (

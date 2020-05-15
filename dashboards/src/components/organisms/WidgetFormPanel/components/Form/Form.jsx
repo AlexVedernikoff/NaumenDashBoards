@@ -74,7 +74,7 @@ export class Form extends Component<Props, State> {
 		});
 
 		return this.renderTabContent(content, TABS.PARAMS);
-	}
+	};
 
 	renderSaveButton = () => {
 		const {personalDashboard, updating} = this.props;
@@ -96,7 +96,7 @@ export class Form extends Component<Props, State> {
 		});
 
 		return this.renderTabContent(content, TABS.STYLE);
-	}
+	};
 
 	renderTab = (title: string, key: Tab) => {
 		const {tab} = this.state;
@@ -120,7 +120,7 @@ export class Form extends Component<Props, State> {
 				{content}
 			</div>
 		);
-	}
+	};
 
 	renderTabs = () => (
 		<ul className={styles.tabs}>

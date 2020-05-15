@@ -27,7 +27,7 @@ export class SortingBox extends PureComponent<Props> {
 				</FormField>
 			</Fragment>
 		);
-	}
+	};
 
 	renderCircleFields = () => {
 		const {INDICATOR} = SORTING_VALUES;
@@ -38,7 +38,7 @@ export class SortingBox extends PureComponent<Props> {
 				{this.renderSortingButtons()}
 			</FormField>
 		);
-	}
+	};
 
 	renderFields = () => this.props.circle ? this.renderCircleFields() : this.renderAxisFields();
 

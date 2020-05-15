@@ -39,7 +39,7 @@ export class Body extends PureComponent<Props> {
 			default:
 				return this.renderDataCell(value, width, accessor);
 		}
-	}
+	};
 
 	renderDataCell = (value: string, width: number, key: string) => {
 		const {body} = this.props.settings;
@@ -55,7 +55,7 @@ export class Body extends PureComponent<Props> {
 				width={width}
 			/>
 		);
-	}
+	};
 
 	renderHeaderCell = (value: string, width: number, key: string) => {
 		const {fontColor, fontStyle} = this.props.settings.rowHeader;
@@ -69,12 +69,12 @@ export class Body extends PureComponent<Props> {
 				width={width}
 			/>
 		);
-	}
+	};
 
 	renderRow = (row: RowType, index: number) => {
 		const {columns} = this.props;
 		return <Row>{columns.map(this.renderCell(row, index))}</Row>;
-	}
+	};
 
 	renderRowNumCell = (num: number, width: number, key: string) => {
 		const {page, pageSize} = this.props;
@@ -88,7 +88,7 @@ export class Body extends PureComponent<Props> {
 				width={width}
 			/>
 		);
-	}
+	};
 
 	render () {
 		const {columns, data, page, pageSize, sorting, width} = this.props;
