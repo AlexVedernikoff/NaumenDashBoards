@@ -53,7 +53,6 @@ export class Form extends Component<Props, State> {
 			refAttributes,
 			renderParamsTab,
 			setDataFieldValue,
-			setDataFieldValues,
 			setFieldValue,
 			sources,
 			values
@@ -67,7 +66,6 @@ export class Form extends Component<Props, State> {
 			isNew,
 			refAttributes,
 			setDataFieldValue,
-			setDataFieldValues,
 			setFieldValue,
 			sources,
 			values

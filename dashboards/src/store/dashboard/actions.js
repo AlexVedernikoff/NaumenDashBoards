@@ -31,8 +31,9 @@ const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Pro
  * @returns {ThunkAction}
  */
 const getEditableParam = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {editable} = await window.jsApi.commands.getCurrentContentParameters();
-	dispatch(setEditable(editable || editable === undefined));
+	const {editable = true} = await window.jsApi.commands.getCurrentContentParameters();
+	// В части случаев значение приходит строкой
+	dispatch(setEditable(editable.toString() === 'true'));
 };
 
 /**
@@ -258,7 +259,7 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 			classFqn = descriptor.clazz || descriptor.cases[0];
 		}
 
-		const {title: label, value} = sources.data.map[classFqn];
+		const {label, value} = sources.data.map[classFqn];
 		newWidget.name = '';
 		newWidget.data[0] = {
 			...newWidget.data[0],

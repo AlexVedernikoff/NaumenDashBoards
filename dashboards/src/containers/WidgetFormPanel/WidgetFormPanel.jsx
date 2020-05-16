@@ -46,20 +46,17 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 
 	isNew = () => this.props.widget.id === NewWidget.id;
 
-	setDataFieldValue = (index: number) => (name: string, value: any) => {
-		let {data} = this.state.values;
-		data[index][name] = value;
+	setDataFieldValue = (index: number, name: string, value: any, callback?: Function) => {
+		const {data} = this.state.values;
+		data[index] = {
+			...data[index],
+			[name]: value
+		};
 
-		this.setFieldValue(FIELDS.data, data);
+		this.setFieldValue(FIELDS.data, data, callback);
 	};
 
-	setDataFieldValues = (index: number) => (values: Object) => {
-		let {data} = this.state.values;
-		data[index] = {...data[index], ...values};
-		this.setFieldValue(FIELDS.data, data);
-	};
-
-	setFieldValue = (name: string, value: any) => this.setState(({isSubmitting, values: prevValues}) => {
+	setFieldValue = (name: string, value: any, callback?: Function) => this.setState(({isSubmitting, values: prevValues}) => {
 		const values = {
 			...prevValues,
 			[name]: value
@@ -70,7 +67,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 		return {
 			values
 		};
-	});
+	}, callback);
 
 	setSchema = (schema: Object) => this.setState({schema});
 
@@ -127,7 +124,6 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					personalDashboard={personalDashboard}
 					refAttributes={refAttributes}
 					setDataFieldValue={this.setDataFieldValue}
-					setDataFieldValues={this.setDataFieldValues}
 					setFieldValue={this.setFieldValue}
 					setSchema={this.setSchema}
 					sources={sources}

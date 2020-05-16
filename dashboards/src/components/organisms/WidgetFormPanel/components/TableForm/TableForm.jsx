@@ -40,6 +40,8 @@ export class TableForm extends Component<TypedFormProps> {
 		}
 
 		const {
+			calcTotalColumn = true,
+			calcTotalRow = true,
 			computedAttrs = [],
 			data = [],
 			header,
@@ -49,6 +51,8 @@ export class TableForm extends Component<TypedFormProps> {
 		} = values;
 
 		return {
+			calcTotalColumn,
+			calcTotalRow,
 			columnsRatioWidth,
 			computedAttrs,
 			data: data.map(this.updateWidgetData),

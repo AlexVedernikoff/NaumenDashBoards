@@ -2,11 +2,14 @@
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import type {LayoutItem} from 'utils/layout/types';
+import uuid from 'tiny-uuid';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 class NewWidget {
 	static id: string = 'new';
+	computedAttrs = [];
 	data: Array<Object> = [{
+		[FIELDS.dataKey]: uuid(),
 		[FIELDS.sourceForCompute]: false
 	}];
 	header = DEFAULT_HEADER_SETTINGS;

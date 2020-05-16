@@ -2,7 +2,6 @@
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {BreakdownFieldset, ComputedBreakdownFieldset, ExtendingFieldset, IndicatorFieldset} from 'WidgetFormPanel/components';
 import type {ComputedAttr, MixedAttribute} from 'store/widgets/data/types';
-import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'WidgetFormPanel/helpers';
@@ -16,6 +15,8 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class IndicatorDataBox extends Component<Props, State> {
 	static defaultProps = {
+		children: null,
+		name: FIELDS.indicator,
 		useBreakdown: true
 	};
 
@@ -156,13 +157,13 @@ export class IndicatorDataBox extends Component<Props, State> {
 		return this.requiredBreakdown() || set[FIELDS.withBreakdown] || set[FIELDS.breakdown];
 	};
 
-	renderBreakdownFieldSet = (set: DataSet, index: number, data: Array<DataSet>) => {
-		const {name, useBreakdown} = this.props;
+	renderBreakdownFieldSet = () => {
+		const {index, name, set, useBreakdown} = this.props;
 		const indicator = set[name];
 		const show = this.showBreakdown(index);
 		const field = indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR
-			? this.renderComputedBreakdownFieldSet(set, index, data)
-			: this.renderDefaultBreakdownFieldSet(set, index);
+			? this.renderComputedBreakdownFieldSet()
+			: this.renderDefaultBreakdownFieldSet();
 
 		if (useBreakdown) {
 			return (
@@ -173,12 +174,12 @@ export class IndicatorDataBox extends Component<Props, State> {
 		}
 	};
 
-	renderComputedBreakdownFieldSet = (set: DataSet, index: number, data: Array<DataSet>) => {
-		const {errors, getAttributeOptions, getSourceOptions, setDataFieldValue, transformAttribute} = this.props;
+	renderComputedBreakdownFieldSet = () => {
+		const {errors, getAttributeOptions, getSourceOptions, index, set, setDataFieldValue, transformAttribute, values} = this.props;
 
 		return (
 			<ComputedBreakdownFieldset
-				data={data}
+				data={values.data}
 				errors={errors}
 				getAttributeOptions={getAttributeOptions}
 				getSourceOptions={getSourceOptions}
@@ -194,8 +195,8 @@ export class IndicatorDataBox extends Component<Props, State> {
 		);
 	};
 
-	renderDefaultBreakdownFieldSet = (set: DataSet, index: number) => {
-		const {errors, getAttributeOptions, getSourceOptions, onChangeGroup, onChangeLabel} = this.props;
+	renderDefaultBreakdownFieldSet = () => {
+		const {errors, getAttributeOptions, getSourceOptions, index, onChangeGroup, onChangeLabel, set} = this.props;
 		const errorKey = getDataErrorKey(FIELDS.breakdown, index);
 
 		return (
@@ -216,25 +217,8 @@ export class IndicatorDataBox extends Component<Props, State> {
 		);
 	};
 
-	renderIndicatorBox = (set: DataSet, index: number, data: Array<DataSet>) => {
-		if (!set[FIELDS.sourceForCompute]) {
-			const {children, renderLeftControl} = this.props;
-			const control = renderLeftControl && renderLeftControl(set, index);
-
-			return (
-				<FormBox leftControl={control} title="Показатель">
-					{this.renderIndicatorFieldSet(set, index)}
-					{this.renderBreakdownFieldSet(set, index, data)}
-					{children}
-				</FormBox>
-			);
-		}
-
-		return null;
-	};
-
-	renderIndicatorFieldSet = (set: DataSet, index: number) => {
-		const {errors, getAttributeOptions, getSourceOptions, name, onChangeLabel, setDataFieldValue, values} = this.props;
+	renderIndicatorFieldSet = () => {
+		const {errors, getAttributeOptions, getSourceOptions, index, name, onChangeLabel, set, setDataFieldValue, values} = this.props;
 		const {sources} = this.state;
 		const {computedAttrs} = values;
 
@@ -259,9 +243,17 @@ export class IndicatorDataBox extends Component<Props, State> {
 		);
 	};
 
-	render (): Array<React$Node> {
-		const {values} = this.props;
-		return values.data.map(this.renderIndicatorBox);
+	render () {
+		const {children, index, renderLeftControl, set} = this.props;
+		const control = renderLeftControl && renderLeftControl(set, index);
+
+		return (
+			<FormBox leftControl={control} title="Показатель">
+				{this.renderIndicatorFieldSet()}
+				{this.renderBreakdownFieldSet()}
+				{children}
+			</FormBox>
+		);
 	}
 }
 

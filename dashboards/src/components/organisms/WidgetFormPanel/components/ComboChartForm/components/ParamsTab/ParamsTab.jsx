@@ -1,188 +1,73 @@
 // @flow
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {CHART_OPTIONS} from './constants';
-import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
+import type {DataBuilderProps} from 'WidgetFormPanel/builders/DataFormBuilder/types';
+import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {FormBox, MiniSelect} from 'components/molecules';
-import React, {Fragment} from 'react';
+import {MiniSelect} from 'components/molecules';
+import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 
-export class ParamsTab extends DataFormBuilder {
-	minCountBuildingSources = 2;
-	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
+export class ParamsTab extends Component<DataBuilderProps> {
+	sourceRefFields = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
 
-	changeDependingOnMain = (index: number) => {
-		const {setDataFieldValue} = this.props;
-		const {dataKey: currentKey, source: currentSource, xAxis: currentXAxis} = this.getSet(index);
-		const {dataKey: mainKey, source: mainSource, xAxis: mainXAxis} = this.getMainSet();
+	handleSelectChartType = (index: number) => (name: string, value: string) => this.props.setDataFieldValue(index, name, value);
 
-		if (currentKey !== mainKey && mainSource && currentSource) {
-			if (mainSource.value === currentSource.value) {
-				this.setMainValue(index, FIELDS.xAxis, FIELDS.group);
-			} else {
-				if (mainXAxis && currentXAxis && mainXAxis.type !== currentXAxis.type) {
-					setDataFieldValue(index)(FIELDS.xAxis, null);
-				}
-
-				this.setMainValue(index, FIELDS.group);
-			}
-		}
-	};
-
-	changeRefFields = () => this.props.values.data.forEach((set, index) => this.changeDependingOnMain(index));
-
-	changeSourceRefs = (index: number) => () => this.changeDependingOnMain(index);
-
-	handleSelectComboGroup = (index: number) => () => {
-		if (this.getSet(index).dataKey === this.getMainSet().dataKey) {
-			this.changeRefFields();
-		}
-	};
-
-	setMainValue = (index: number, ...names: Array<string>) => {
-		const {setDataFieldValue} = this.props;
-		const set = this.getSet(index);
-		const mainSet = this.getMainSet();
-
-		names.forEach(name => {
-			const mainProperty = mainSet[name];
-			const currentProperty = set[name];
-			const currentIsNotMain = !currentProperty
-				|| mainProperty.code !== currentProperty.code
-				|| mainProperty !== currentProperty;
-
-			if (mainProperty && currentIsNotMain) {
-				setDataFieldValue(index)(name, mainProperty);
-			}
-		});
-	};
-
-	renderChartInput = (index: number) => {
-		const {setDataFieldValue} = this.props;
-		const set = this.getSet(index);
-
-		return (
-			<div className={styles.chartInput}>
-				<MiniSelect
-					name={FIELDS.type}
-					onSelect={setDataFieldValue(index)}
-					options={CHART_OPTIONS}
-					showCaret={false}
-					tip="Тип графика"
-					value={set[FIELDS.type]}
-				/>
-			</div>
-		);
-	};
-
-	renderXAxis = (index: number) => {
-		const set = this.getSet(index);
-		const mainSet = this.getMainSet();
-		const mainSource = mainSet[FIELDS.source];
-		const currentSource = set[FIELDS.source];
-		const currentXAxis = set[FIELDS.xAxis];
-		let onSelectCallback;
-
-		if (mainSource && currentSource && mainSource.value === currentSource.value) {
-			onSelectCallback = this.changeRefFields;
-		}
-
-		const refInputProps = {
-			disabled: false,
-			name: FIELDS.group,
-			onSelectCallback: this.handleSelectComboGroup(index),
-			type: 'group',
-			value: set[FIELDS.group]
-		};
-
-		const props = {
-			disabled: false,
-			name: FIELDS.xAxis,
-			onSelectCallback,
-			options: undefined,
-			refInputProps,
-			value: currentXAxis
-		};
-
-		if (set.dataKey !== mainSet.dataKey && mainSource && currentSource) {
-			if (mainSource.value === currentSource.value) {
-				props.disabled = true;
-			} else {
-				const mainXAxis = mainSet[FIELDS.xAxis];
-				let xAxisOptions = this.getAttributeOptions(currentSource.value);
-
-				if (xAxisOptions.length > 0 && mainXAxis) {
-					const {DATE, OBJECT} = ATTRIBUTE_SETS;
-
-					xAxisOptions = xAxisOptions.filter(attribute => {
-						if (mainXAxis.type in OBJECT) {
-							return attribute.property === mainXAxis.property;
-						}
-
-						if (mainXAxis.type in DATE) {
-							return attribute.type in DATE;
-						}
-
-						return mainXAxis.type === attribute.type;
-					});
-				}
-
-				props.options = xAxisOptions;
-			}
-
-			refInputProps.disabled = true;
-		}
-
-		return this.renderAttribute(index, props);
-	};
-
-	renderXAxisSection = () => (
-		<FormBox title="Параметр">
-			{this.renderByOrder(this.renderXAxis, false)}
-		</FormBox>
+	renderChartInput = (set: DataSet, index: number) => (
+		<div className={styles.chartInput}>
+			<MiniSelect
+				name={FIELDS.type}
+				onSelect={this.handleSelectChartType(index)}
+				options={CHART_OPTIONS}
+				showCaret={false}
+				tip="Тип графика"
+				value={set[FIELDS.type]}
+			/>
+		</div>
 	);
 
-	renderYAxis= (index: number) => {
-		const set = this.getSet(index);
-
-		const refInputProps = {
-			name: FIELDS.aggregation,
-			type: 'aggregation',
-			value: set[FIELDS.aggregation]
-		};
-
+	renderIndicatorBoxes = () => {
+		const {renderIndicatorBoxes} = this.props;
 		const props = {
 			name: FIELDS.yAxis,
-			placeholder: 'Ось Y',
-			refInputProps,
-			value: set[FIELDS.yAxis],
-			withCreate: true
+			renderLeftControl: this.renderChartInput
 		};
 
-		return (
-			<Fragment>
-				{this.renderAttribute(index, props)}
-				{this.renderBreakdown(index)}
-			</Fragment>
-		);
+		return renderIndicatorBoxes(props);
 	};
 
-	renderYAxisSection = (index: number) => (
-		<FormBox leftControl={this.renderChartInput(index)} title="Показатель">
-			{this.renderYAxis(index)}
-		</FormBox>
-	);
+	renderParameterBox = () => {
+		const {renderParameterBox} = this.props;
+		const props = {
+			name: FIELDS.xAxis
+		};
+
+		return renderParameterBox(props);
+	};
+
+	renderSourceBox = () => {
+		const {renderSourceBox} = this.props;
+		const props = {
+			minCountBuildingSources: 2,
+			parameterName: FIELDS.xAxis,
+			sourceRefFields: this.sourceRefFields
+		};
+
+		return renderSourceBox(props);
+	};
 
 	render () {
+		const {renderBaseBoxes} = this.props;
+
 		return (
 			<Fragment>
-				{this.renderBaseInputs()}
-				{this.renderSourceSection(this.changeSourceRefs)}
-				{this.renderXAxisSection()}
-				{this.renderByOrder(this.renderYAxisSection)}
+				{renderBaseBoxes()}
+				{this.renderSourceBox()}
+				{this.renderParameterBox()}
+				{this.renderIndicatorBoxes()}
 			</Fragment>
 		);
 	}
 }
 
-export default ParamsTab;
+export default withDataFormBuilder(ParamsTab);

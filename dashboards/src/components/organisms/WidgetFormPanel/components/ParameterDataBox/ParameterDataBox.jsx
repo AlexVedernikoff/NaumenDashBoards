@@ -12,6 +12,12 @@ import type {Props, State} from './types';
 import React, {Component} from 'react';
 
 export class ParameterDataBox extends Component<Props, State> {
+	static defaultProps = {
+		children: null,
+		name: FIELDS.parameter,
+		useGroup: true
+	};
+
 	state = {};
 
 	static getDerivedStateFromProps (props: Props) {
