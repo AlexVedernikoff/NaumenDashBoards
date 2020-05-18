@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import type {DataSource} from 'store/sources/data/types';
+import type {DataSource} from 'components/molecules/Source/types';
 import type {InputRef} from 'components/types';
 import type {Props, State} from './types';
 import React, {createRef, Fragment, PureComponent} from 'react';

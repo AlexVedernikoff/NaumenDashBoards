@@ -6,9 +6,9 @@ import type {Group, Widget} from 'store/widgets/data/types';
 import type {GroupAttributeField} from './components/AttributeGroupField/types';
 import type {Node} from 'react';
 import type {OnChangeLabelEvent, OnSelectEvent} from 'components/types';
+import type {SetDataFieldValue, SetFieldValue, Values} from 'containers/WidgetFormPanel/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
-import type {Values} from 'containers/WidgetFormPanel/types';
 
 export type UpdateWidget = (widget: Widget, values: Values) => Widget;
 
@@ -20,9 +20,8 @@ export type ParamsTabProps = {|
 	fetchRefAttributes: (refAttr: Attribute, callback: Function) => ThunkAction,
 	isNew: boolean,
 	refAttributes: AttributeMap,
-	setDataFieldValue: (index: number) => Function,
-	setDataFieldValues: (index: number) => Function,
-	setFieldValue: (name: string, value: any) => void,
+	setDataFieldValue: SetDataFieldValue,
+	setFieldValue: SetFieldValue,
 	sources: DataSourceMap,
 	values: Values
 |};
@@ -54,9 +53,8 @@ export type Props = {|
 	onSubmit: (func: UpdateWidget) => Promise<void>,
 	personalDashboard: boolean,
 	refAttributes: AttributeMap,
-	setDataFieldValue: (index: number) => Function,
-	setDataFieldValues: (index: number) => Function,
-	setFieldValue: (name: string, value: any) => void,
+	setDataFieldValue: SetDataFieldValue,
+	setFieldValue: SetFieldValue,
 	setSchema: (schema: Object) => void,
 	sources: DataSourceMap,
 	updating: boolean,

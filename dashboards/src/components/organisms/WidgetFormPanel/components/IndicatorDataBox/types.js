@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {ErrorsMap, SetDataFieldValue, SetFieldValue, Values} from 'containers/WidgetFormPanel/types';
+import type {DataSet, ErrorsMap, SetDataFieldValue, SetFieldValue, Values} from 'containers/WidgetFormPanel/types';
 import type {Group} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, TransformAttribute} from 'WidgetFormPanel/types';
@@ -11,10 +11,12 @@ export type Props = {
 	errors: ErrorsMap,
 	getAttributeOptions: (attribute: Attribute) => Array<Attribute>,
 	getSourceOptions: (classFqn: string) => Array<Attribute>,
+	index: number,
 	name: string,
 	onChangeGroup: (index: number, name: string, group: Group, field: GroupAttributeField) => void,
 	onChangeLabel: (event: OnChangeAttributeLabelEvent, index: number) => void,
-	renderLeftControl: Function,
+	renderLeftControl?: (set: DataSet, index: number) => React$Node,
+	set: DataSet,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,
 	transformAttribute: TransformAttribute,

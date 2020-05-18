@@ -1,8 +1,8 @@
 // @flow
-import DataFormBuilder from './DataFormBuilder';
+import {withDataFormBuilder} from './DataFormBuilder';
 import {withStyleFormBuilder} from './StyleFormBuilder';
 
 export {
-	DataFormBuilder,
+	withDataFormBuilder,
 	withStyleFormBuilder
 };

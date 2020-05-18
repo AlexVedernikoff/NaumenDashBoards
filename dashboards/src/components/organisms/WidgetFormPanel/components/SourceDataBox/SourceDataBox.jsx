@@ -91,8 +91,7 @@ export class SourceDataBox extends Component<Props> {
 	};
 
 	handleSelectSource = (index: number, event: OnSelectEvent) => {
-		const {data, onSelectCallback, parameterName, setDataFieldValue, sourceRefFields, type} = this.props;
-		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE, TABLE} = WIDGET_TYPES;
+		const {data, onSelectCallback, parameterName, setDataFieldValue, sourceRefFields} = this.props;
 		const {name, value: nextSource} = event;
 		const prevSource = data[index][name];
 
@@ -101,7 +100,7 @@ export class SourceDataBox extends Component<Props> {
 		if (nextSource) {
 			let callback;
 
-			if (type in {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO, TABLE}) {
+			if (parameterName) {
 				callback = onSelectCallback(parameterName);
 			}
 

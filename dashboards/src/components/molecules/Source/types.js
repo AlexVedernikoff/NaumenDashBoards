@@ -1,8 +1,16 @@
 // @flow
-import type {DataSourceMap} from 'store/sources/data/types';
 import type {Source} from 'store/widgets/data/types';
 
-export type OnSelectCallback = (index: number) => () => void;
+export type DataSource = {
+	children: Array<string>,
+	parent: string | null,
+	title: string,
+	value: string
+};
+
+export type DataSourceMap = {
+	string: DataSource
+};
 
 export type Compute = {
 	name: string,

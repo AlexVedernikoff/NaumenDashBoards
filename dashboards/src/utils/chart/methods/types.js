@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import type {ComputedBreakdown, Group} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
-import type {Group} from 'store/widgets/data/types';
 
 export type AddFiltersProps = {
 	buildData: DiagramBuildData,
@@ -11,7 +11,7 @@ export type AddFiltersProps = {
 };
 
 export type AddFilterProps = {
-	attribute?: Attribute | null,
+	attribute?: Attribute | ComputedBreakdown | null,
 	group?: Group | null,
 	mixin: DrillDownMixin,
 	value: string | number

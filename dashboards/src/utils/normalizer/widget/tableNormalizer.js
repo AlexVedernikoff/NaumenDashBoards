@@ -70,6 +70,8 @@ const createData = (widget: Object, fields: Object): TableData => {
 const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 	const dataFields = getDataFields();
 	const {
+		calcTotalColumn = false,
+		calcTotalRow = false,
 		data = getOrdinalData(widget, dataFields, createData),
 		id,
 		layout,
@@ -79,6 +81,8 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 	} = widget;
 
 	return {
+		calcTotalColumn,
+		calcTotalRow,
 		columnsRatioWidth: array(widget[FIELDS.columnsRatioWidth]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data,

@@ -142,7 +142,7 @@ export type AxisParameter = {
 export type AxisData = {
 	...BaseData,
 	aggregation: string,
-	breakdown: Attribute | null,
+	breakdown: Attribute | ComputedBreakdown | null,
 	breakdownGroup: Group | null,
 	group: Group,
 	xAxis: Attribute,
@@ -166,7 +166,7 @@ export type AxisWidget = {
 export type CircleData = {
 	...BaseData,
 	aggregation: string,
-	breakdown: Attribute,
+	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
 	indicator: MixedAttribute
 };
@@ -241,10 +241,8 @@ export type TableColumnHeader = {
 export type TableData = {
 	...BaseData,
 	aggregation: string,
-	breakdown: Attribute,
+	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
-	calcTotalColumn: boolean,
-	calcTotalRow: boolean,
 	column: MixedAttribute,
 	row: Attribute
 };
@@ -268,6 +266,8 @@ export type Table = {
 
 export type TableWidget = {
 	...BaseWidget,
+	calcTotalColumn: boolean,
+	calcTotalRow: boolean,
 	columnsRatioWidth: Array<number>,
 	data: Array<TableData>,
 	sorting: TableSorting,

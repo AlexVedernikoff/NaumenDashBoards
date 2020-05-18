@@ -1,74 +1,52 @@
 // @flow
-import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {FormBox} from 'components/molecules';
-import React, {Fragment} from 'react';
+import type {DataBuilderProps} from 'WidgetFormPanel/builders/DataFormBuilder/types';
+import {FIELDS} from 'WidgetFormPanel';
+import React, {Component, Fragment} from 'react';
+import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 
-export class ParamsTab extends DataFormBuilder {
-	sourceRefs = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
+export class ParamsTab extends Component<DataBuilderProps> {
+	sourceRefFields = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
 
-	renderFields = () => (
-		<Fragment>
-			<FormBox title="Параметр">
-				{this.renderByOrder(this.renderXAxis, false)}
-			</FormBox>
-			<FormBox title="Показатель">
-				{this.renderByOrder(this.renderYAxis)}
-			</FormBox>
-		</Fragment>
-	);
-
-	renderXAxis = (index: number) => {
-		const set = this.getSet(index);
-
-		const refInputProps = {
-			name: FIELDS.group,
-			type: 'group',
-			value: set[FIELDS.group]
-		};
-
+	renderIndicatorBoxes = () => {
+		const {renderIndicatorBoxes} = this.props;
 		const props = {
-			name: FIELDS.xAxis,
-			refInputProps,
-			value: set[FIELDS.xAxis]
+			name: FIELDS.yAxis
 		};
 
-		return this.renderAttribute(index, props);
+		return renderIndicatorBoxes(props);
 	};
 
-	renderYAxis = (index: number) => {
-		const set = this.getSet(index);
-
-		const refInputProps = {
-			name: FIELDS.aggregation,
-			type: 'aggregation',
-			value: set[FIELDS.aggregation]
-		};
-
+	renderParameterBox = () => {
+		const {renderParameterBox} = this.props;
 		const props = {
-			name: FIELDS.yAxis,
-			refInputProps,
-			value: set[FIELDS.yAxis],
-			withCreate: true
+			name: FIELDS.xAxis
 		};
 
-		return (
-			<Fragment>
-				{this.renderAttribute(index, props)}
-				{this.renderBreakdown(index)}
-			</Fragment>
-		);
+		return renderParameterBox(props);
+	};
+
+	renderSourceBox = () => {
+		const {renderSourceBox} = this.props;
+		const props = {
+			parameterName: FIELDS.xAxis,
+			sourceRefFields: this.sourceRefFields
+		};
+
+		return renderSourceBox(props);
 	};
 
 	render () {
+		const {renderBaseBoxes} = this.props;
+
 		return (
 			<Fragment>
-				{this.renderBaseInputs()}
-				{this.renderSourceSection()}
-				{this.renderFields()}
+				{renderBaseBoxes()}
+				{this.renderSourceBox()}
+				{this.renderParameterBox()}
+				{this.renderIndicatorBoxes()}
 			</Fragment>
 		);
 	}
 }
 
-export default ParamsTab;
+export default withDataFormBuilder(ParamsTab);

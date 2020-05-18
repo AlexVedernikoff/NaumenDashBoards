@@ -11,10 +11,10 @@ import type {
 	WidgetType
 } from 'store/widgets/data/types';
 import {BUILD_DATA_EVENTS} from './constants';
-import type {BuildDataMap, PostData, ReceiveBuildDataPayload} from './types';
 import {buildUrl, client} from 'utils/api';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import type {PostData, ReceiveBuildDataPayload} from './types';
 import {transformGroupFormat} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -193,7 +193,7 @@ const createSummaryData = (widget: SummaryWidget) => {
 };
 
 const createTableData = (widget: TableWidget) => {
-	const {type} = widget;
+	const {calcTotalColumn, calcTotalRow, type} = widget;
 	const data: Object = {};
 
 	widget.data.forEach(set => {
@@ -201,8 +201,6 @@ const createTableData = (widget: TableWidget) => {
 			aggregation,
 			breakdown,
 			breakdownGroup,
-			calcTotalColumn,
-			calcTotalRow,
 			column,
 			dataKey,
 			descriptor,
@@ -258,23 +256,8 @@ const createPostData = (widget: Widget): PostData | void => {
  * @param {Array<Widget>} widgets - список виджетов
  * @returns {ThunkAction}
  */
-const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	try {
-		let postData = {};
-		const {subjectUuid} = getState().context;
-
-		dispatch(requestAllBuildData(widgets));
-
-		widgets.forEach(widget => {
-			postData[widget.id] = createPostData(widget);
-		});
-
-		const {data} = await client.post(buildUrl('dashboardDataSet', 'getDataForDiagrams', `requestContent,'${subjectUuid}'`), postData);
-
-		dispatch(receiveAllBuildData(data));
-	} catch (e) {
-		dispatch(recordAllBuildDataError(widgets));
-	}
+const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	widgets.forEach(widget => dispatch(fetchBuildData(widget)));
 };
 
 /**
@@ -304,28 +287,13 @@ const receiveBuildData = (payload: ReceiveBuildDataPayload) => ({
 	payload
 });
 
-const receiveAllBuildData = (payload: BuildDataMap) => ({
-	type: BUILD_DATA_EVENTS.RECEIVE_ALL_BUILD_DATA,
-	payload
-});
-
 const recordBuildDataError = (payload: string) => ({
 	type: BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR,
 	payload
 });
 
-const recordAllBuildDataError = (payload: Array<Widget>) => ({
-	type: BUILD_DATA_EVENTS.RECORD_ALL_BUILD_DATA_ERROR,
-	payload
-});
-
 const requestBuildData = (payload: string) => ({
 	type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA,
-	payload
-});
-
-const requestAllBuildData = (payload: Array<Widget>) => ({
-	type: BUILD_DATA_EVENTS.REQUEST_ALL_BUILD_DATA,
 	payload
 });
 

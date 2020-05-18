@@ -1,90 +1,72 @@
 // @flow
-import {DataFormBuilder} from 'components/organisms/WidgetFormPanel/builders';
+import type {DataBuilderProps} from 'WidgetFormPanel/builders/DataFormBuilder/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {FormBox} from 'components/molecules';
-import React, {Fragment} from 'react';
+import {FormField} from 'components/molecules';
+import {LegacyCheckbox as Checkbox} from 'components/atoms';
+import React, {Component, Fragment} from 'react';
+import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 
-export class ParamsTab extends DataFormBuilder {
-	sourceRefs = [FIELDS.breakdown, FIELDS.column, FIELDS.row];
+export class ParamsTab extends Component<DataBuilderProps> {
+	sourceRefFields = [FIELDS.breakdown, FIELDS.column, FIELDS.row];
 
-	renderCalcTotalColumn = (index: number) => this.renderCalcTotalInput(index, FIELDS.calcTotalColumn);
+	renderCalcTotalField = (name: string) => {
+		const {setFieldValue, values} = this.props;
 
-	renderCalcTotalInput = (index: number, name: string) => {
-		const {setDataFieldValue} = this.props;
-		const set = this.getSet(index);
-
-		const props = {
-			label: 'Подсчитывать итоги',
-			name,
-			onClick: setDataFieldValue(index),
-			value: set[name]
-		};
-
-		return this.renderCheckBox(props);
+		return (
+			<FormField>
+				<Checkbox
+					label="Подсчитывать итоги"
+					name={name}
+					onClick={setFieldValue}
+					value={values[name]}
+				/>
+			</FormField>
+		);
 	};
 
-	renderCalcTotalRow = (index: number) => this.renderCalcTotalInput(index, FIELDS.calcTotalRow);
-
-	renderColumnInput = (index: number) => {
-		const set = this.getSet(index);
-
-		const refInputProps = {
-			name: FIELDS.aggregation,
-			type: 'aggregation',
-			value: set[FIELDS.aggregation]
-		};
-
+	renderIndicatorBoxes = () => {
+		const {renderIndicatorBoxes} = this.props;
 		const props = {
-			name: FIELDS.column,
-			refInputProps,
-			value: set[FIELDS.column],
-			withCreate: true
+			children: this.renderCalcTotalField(FIELDS.calcTotalColumn),
+			name: FIELDS.column
 		};
 
-		return this.renderAttribute(index, props);
+		return renderIndicatorBoxes(props);
 	};
 
-	renderColumnSection = (index: number) => (
-		<FormBox title="Показатель">
-			{this.renderColumnInput(index)}
-			{this.renderBreakdown(index)}
-			{this.renderCalcTotalColumn(index)}
-		</FormBox>
-	);
-
-	renderRowField = (index: number) => (
-		<Fragment>
-			{this.renderRowInput(index)}
-			{this.renderCalcTotalRow(index)}
-		</Fragment>
-	);
-
-	renderRowInput = (index: number) => {
-		const set = this.getSet(index);
+	renderParameterBox = () => {
+		const {renderParameterBox} = this.props;
 		const props = {
+			children: this.renderCalcTotalField(FIELDS.calcTotalRow),
 			name: FIELDS.row,
-			value: set[FIELDS.row]
+			useGroup: false
 		};
 
-		return this.renderAttribute(index, props);
+		return renderParameterBox(props);
 	};
 
-	renderRowSection = () => (
-		<FormBox title="Параметр">
-			{this.renderByOrder(this.renderRowField, false)}
-		</FormBox>
-	);
+	renderSourceBox = () => {
+		const {renderSourceBox} = this.props;
+		const props = {
+			parameterName: FIELDS.row,
+			sourceRefFields: this.sourceRefFields
+		};
+
+		return renderSourceBox(props);
+	};
 
 	render () {
+		const {renderBaseBoxes} = this.props;
+
 		return (
 			<Fragment>
-				{this.renderBaseInputs()}
-				{this.renderSourceSection()}
-				{this.renderRowSection()}
-				{this.renderByOrder(this.renderColumnSection)}
+				{renderBaseBoxes()}
+				{this.renderSourceBox()}
+				{this.renderParameterBox()}
+				{this.renderIndicatorBoxes()}
 			</Fragment>
 		);
 	}
 }
 
-export default ParamsTab;
+export default withDataFormBuilder(ParamsTab);

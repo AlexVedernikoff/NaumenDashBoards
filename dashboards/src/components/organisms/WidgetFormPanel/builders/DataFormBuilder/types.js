@@ -1,5 +1,7 @@
 // @flow
+import type {DataSet, SetDataFieldValue, SetFieldValue, Values} from 'containers/WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
+import type {ParamsTabProps} from 'WidgetFormPanel/types';
 
 export type TextAreaProps = {
 	errorPath?: string,
@@ -12,11 +14,36 @@ export type TextAreaProps = {
 	value: string
 };
 
-export type CheckboxProps = {
-	label: string,
+export type IndicatorBoxProps = $Shape<{|
+	children: React$Node,
 	name: string,
-	onClick?: () => void,
-	value: boolean
+	renderLeftControl: (set: DataSet, index: number) => React$Node,
+	useBreakdown?: boolean
+|}>;
+
+export type ParameterBoxProps = $Shape<{|
+	children: React$Node,
+	name: string,
+	useGroup: boolean
+|}>;
+
+export type SourceBoxProps = $Shape<{|
+	minCountBuildingSources: number,
+	parameterName: string,
+	sourceRefFields: Array<string>
+|}>;
+
+export type DataBuilderProps = {
+	renderBaseBoxes: () => React$Node,
+	renderIndicatorBoxes: (props?: IndicatorBoxProps) => React$Node,
+	renderParameterBox: (props: ParameterBoxProps) => React$Node,
+	renderSourceBox: (props: SourceBoxProps) => React$Node,
+	setDataFieldValue: SetDataFieldValue,
+	setFieldValue: SetFieldValue,
+	values: Values
 };
 
-export type RenderFunction = (index: number, ...otherProps: Array<any>) => React$Node;
+export type Props = {
+	render: (props: DataBuilderProps) => React$Node,
+	...ParamsTabProps
+};

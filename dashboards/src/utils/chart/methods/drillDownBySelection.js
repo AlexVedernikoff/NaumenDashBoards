@@ -20,7 +20,7 @@ const addFilter = (props: AddFilterProps) => {
 		if (value) {
 			mixin.title = `${mixin.title}. ${value}`;
 		}
-
+		// $FlowFixMe
 		mixin.filters.push({attribute, group, value});
 	}
 };
@@ -153,7 +153,7 @@ const addFilters = (widget: Chart, props: AddFiltersProps) => {
  * @returns {ThunkAction}
  */
 const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) =>
-	(event: Object, chartContext: Object, config: Object) => {
+	(event: MouseEvent, chartContext: Object, config: Object) => {
 	const {header} = widget;
 	const mixin = {
 		filters: [],
@@ -165,6 +165,8 @@ const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) =>
 		config,
 		mixin
 	});
+
+	event.stopPropagation();
 
 	if (index !== -1) {
 		store.dispatch(drillDown(widget, index, mixin));

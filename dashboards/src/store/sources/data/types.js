@@ -8,9 +8,10 @@ export type RawDataSource = {
 };
 
 export type DataSource = {
-	children: Array<string>,
-	parent: string | null,
-	title: string,
+	children: Array<string> | null,
+	label: string,
+	root: boolean,
+	uploaded: true,
 	value: string
 };
 
