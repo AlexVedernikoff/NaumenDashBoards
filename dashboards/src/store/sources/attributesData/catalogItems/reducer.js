@@ -10,7 +10,7 @@ const reducer = (state: CatalogItemsState = initialCatalogItemsState, action: Ca
 				...state,
 				[action.payload.property]: {
 					...state[action.payload.property],
-					data: action.payload.data,
+					items: action.payload.data,
 					loading: false
 				}
 			};
@@ -27,7 +27,7 @@ const reducer = (state: CatalogItemsState = initialCatalogItemsState, action: Ca
 			return {
 				...state,
 				[action.payload]: {
-					data: [],
+					items: [],
 					error: false,
 					loading: true
 				}

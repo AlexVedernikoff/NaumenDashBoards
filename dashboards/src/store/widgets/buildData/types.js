@@ -1,6 +1,6 @@
 // @flow
 import {BUILD_DATA_EVENTS} from './constants';
-import type {SetCreatedWidget, UpdateWidget, Widget, WidgetType} from 'store/widgets/data/types';
+import type {SetCreatedWidget, UpdateWidget, WidgetType} from 'store/widgets/data/types';
 
 export type PostData = {
 	data: Object,
@@ -32,21 +32,9 @@ export type RequestBuildData = {
 	payload: string
 };
 
-export type RequestAllBuildData = {
-	type: typeof BUILD_DATA_EVENTS.REQUEST_ALL_BUILD_DATA,
-	payload: Array<Widget>
-};
-
 export type ReceiveBuildData = {
 	type: typeof BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA,
 	payload: ReceiveBuildDataPayload
-};
-
-export type ReceiveAllBuildData = {
-	type: typeof BUILD_DATA_EVENTS.RECEIVE_ALL_BUILD_DATA,
-	payload: {
-		[string]: DiagramBuildData
-	}
 };
 
 export type RecordErrorBuildData = {
@@ -54,21 +42,13 @@ export type RecordErrorBuildData = {
 	payload: string
 };
 
-export type RecordErrorAllBuildData = {
-	type: typeof BUILD_DATA_EVENTS.RECORD_ALL_BUILD_DATA_ERROR,
-	payload: Array<Widget>
-};
-
 type UnknownBuildDataAction = {
 	type: typeof BUILD_DATA_EVENTS.UNKNOWN_BUILD_DATA_ACTION
 };
 
 export type BuildDataAction =
-	| ReceiveAllBuildData
 	| ReceiveBuildData
-	| RecordErrorAllBuildData
 	| RecordErrorBuildData
-	| RequestAllBuildData
 	| RequestBuildData
 	| SetCreatedWidget
 	| UpdateWidget

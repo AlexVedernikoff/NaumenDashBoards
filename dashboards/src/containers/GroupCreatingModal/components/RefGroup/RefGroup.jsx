@@ -21,6 +21,7 @@ import {STRING_RULE} from 'CustomGroup/schema';
 export class RefGroup extends Component<Props, State> {
 	static defaultProps = {
 		selectData: {
+			error: false,
 			items: [],
 			loading: false
 		}

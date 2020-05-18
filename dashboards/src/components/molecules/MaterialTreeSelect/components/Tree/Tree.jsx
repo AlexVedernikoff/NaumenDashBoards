@@ -26,8 +26,13 @@ export class Tree extends Component<Props, State> {
 
 	searchInputRef: InputRef = createRef();
 
-	componentDidMount () {
-		this.focusOnSearchInput();
+	componentDidUpdate (prevProps: Props) {
+		const {show: prevShow} = prevProps;
+		const {show: nextShow} = this.props;
+
+		if (nextShow && nextShow !== prevShow) {
+			this.focusOnSearchInput();
+		}
 	}
 
 	focusOnSearchInput = () => {

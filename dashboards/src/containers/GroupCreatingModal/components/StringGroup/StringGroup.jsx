@@ -1,7 +1,7 @@
 // @flow
 import type {AttributeGroupProps} from 'containers/GroupCreatingModal/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {createDefaultOperand, createIntervalOperand} from 'CustomGroup/helpers';
+import {createDefaultOperand, createSimpleOperand} from 'CustomGroup/helpers';
 import type {
 	CustomGroup,
 	OperandType,
@@ -16,14 +16,14 @@ import {SimpleOperand} from 'CustomGroup/components';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class StringGroup extends Component<AttributeGroupProps> {
-	createCustomCondition = (type: OperandType = OPERAND_TYPES.EQUAL) => {
+	createCustomCondition = (type: OperandType = OPERAND_TYPES.CONTAINS) => {
 		const {CONTAINS, NOT_CONTAINS, NOT_CONTAINS_INCLUDING_EMPTY} = OPERAND_TYPES;
 
 		switch (type) {
 			case CONTAINS:
 			case NOT_CONTAINS:
 			case NOT_CONTAINS_INCLUDING_EMPTY:
-				return createIntervalOperand(type);
+				return createSimpleOperand(type);
 			default:
 				return createDefaultOperand(type);
 		}

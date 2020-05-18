@@ -2,8 +2,10 @@
 import type {CustomGroup} from 'store/customGroups/types';
 import type {RenderModal} from 'containers/GroupCreatingModal/types';
 
-type DataMap = {
-	[string]: Object
+type SelectData = {
+	error: boolean,
+	items: Array<Object>,
+	loading: boolean
 };
 
 export type Props = {
@@ -12,7 +14,7 @@ export type Props = {
 	customType: string,
 	onLoadData: () => void,
 	renderModal: RenderModal,
-	selectData: DataMap
+	selectData: SelectData
 };
 
 export type State = {
