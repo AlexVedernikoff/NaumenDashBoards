@@ -7,7 +7,7 @@ export type Data = {
 };
 
 export type CatalogItemData = {
-	data: Array<Data>,
+	items: Array<Data>,
 	error: boolean,
 	loading: boolean
 };

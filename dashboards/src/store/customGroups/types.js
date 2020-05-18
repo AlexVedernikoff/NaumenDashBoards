@@ -127,7 +127,7 @@ export type SelectData = Object;
 
 export type SelectOperand = {|
 	data: SelectData | null,
-	type: $Keys<typeof OPERAND_SETS.REF>
+	type: $Keys<typeof OPERAND_SETS.REF> | $Keys<typeof OPERAND_SETS.TIMER>
 |};
 
 export type MultiSelectOperand = {|
