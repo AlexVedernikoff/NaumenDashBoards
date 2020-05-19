@@ -1,6 +1,6 @@
 // @flow
 import {
-	aggregation,
+	aggregation as aggregationFilter,
 	array,
 	chartSorting,
 	colors,
@@ -10,6 +10,7 @@ import {
 	hasOrdinalFormat,
 	header,
 	legend,
+	mixinBreakdown,
 	object,
 	string
 } from './helpers';
@@ -33,9 +34,32 @@ const getDataFields = () => {
 	};
 };
 
-const createData = (widget: Object, fields: Object): CircleData => {
+const normalizeDataSet = (set: Object): CircleData => {
+	const {dataKey, descriptor, source} = set;
+	let resultSet = {
+		dataKey,
+		descriptor,
+		source,
+		sourceForCompute: true
+	};
+
+	if (!set.sourceForCompute) {
+		const {aggregation, indicator} = set;
+		resultSet = {
+			...set,
+			aggregation: aggregationFilter(aggregation),
+			indicator,
+			sourceForCompute: false
+		};
+		resultSet = mixinBreakdown(set, resultSet);
+	}
+
+	return resultSet;
+};
+
+const createData = (widget: Object, fields: Object) => {
 	const {
-		aggregation: aggregationName,
+		aggregation,
 		breakdown,
 		breakdownGroup,
 		dataKey,
@@ -46,7 +70,7 @@ const createData = (widget: Object, fields: Object): CircleData => {
 	} = fields;
 
 	return {
-		aggregation: aggregation(widget[aggregationName]),
+		aggregation: aggregationFilter(widget[aggregation]),
 		breakdown: object(widget[breakdown]),
 		breakdownGroup: group(widget[breakdownGroup]),
 		dataKey: string(widget[dataKey], uuid()),
@@ -69,7 +93,7 @@ const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
 	return {
 		colors: colors(widget[FIELDS.colors]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data,
+		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
 		header: header(widget),
 		id,
@@ -79,6 +103,10 @@ const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
 		sorting: chartSorting(widget, true),
 		type
 	};
+};
+
+export {
+	normalizeDataSet
 };
 
 export default circleNormalizer;

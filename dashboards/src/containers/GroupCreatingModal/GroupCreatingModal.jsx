@@ -35,6 +35,7 @@ export class GroupCreatingModalContainer extends Component<Props> {
 			double,
 			dtInterval,
 			integer,
+			localizedText,
 			metaClass,
 			object,
 			state,
@@ -63,6 +64,7 @@ export class GroupCreatingModalContainer extends Component<Props> {
 				return ObjectGroup;
 			case state:
 				return StateGroup;
+			case localizedText:
 			case string:
 				return StringGroup;
 			case backTimer:

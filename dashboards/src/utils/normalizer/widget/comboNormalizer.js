@@ -1,6 +1,6 @@
 // @flow
 import {
-	aggregation,
+	aggregation as aggregationFilter,
 	array,
 	axisIndicator,
 	axisParameter,
@@ -12,12 +12,14 @@ import {
 	group,
 	header,
 	legend,
+	mixinBreakdown,
 	object,
 	string
 } from './helpers';
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
-import {COMBO_TYPES} from 'store/widgets/data/constants';
+import {COMBO_TYPES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {FIELDS} from 'WidgetFormPanel';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
 
@@ -27,6 +29,32 @@ const type = (type: any) => {
 	}
 
 	return type && type in COMBO_TYPES ? type : COMBO_TYPES.COLUMN;
+};
+
+const normalizeDataSet = (set: Object): ComboData => {
+	const {dataKey, descriptor, group, source, xAxis} = set;
+	let resultSet = {
+		dataKey,
+		descriptor,
+		group: group || getDefaultSystemGroup(xAxis),
+		source,
+		sourceForCompute: true,
+		xAxis
+	};
+
+	if (!set.sourceForCompute) {
+		const {aggregation, type = WIDGET_TYPES.COLUMN, yAxis} = set;
+		resultSet = {
+			...resultSet,
+			aggregation: aggregationFilter(aggregation),
+			sourceForCompute: false,
+			type,
+			yAxis
+		};
+		resultSet = mixinBreakdown(set, resultSet);
+	}
+
+	return resultSet;
 };
 
 const getDataFields = () => {
@@ -59,9 +87,9 @@ const getDataFields = () => {
 	};
 };
 
-const createData = (widget: Object, fields: Object): ComboData => {
+const createData = (widget: Object, fields: Object) => {
 	const {
-		aggregation: aggregationName,
+		aggregation,
 		breakdown,
 		breakdownGroup,
 		dataKey,
@@ -75,7 +103,7 @@ const createData = (widget: Object, fields: Object): ComboData => {
 	} = fields;
 
 	return {
-		aggregation: aggregation(widget[aggregationName]),
+		aggregation: aggregationFilter(widget[aggregation]),
 		breakdown: object(widget[breakdown], null),
 		breakdownGroup: widget[breakdown] ? group(widget[breakdownGroup]) : null,
 		dataKey: string(widget[dataKey], uuid()),
@@ -102,7 +130,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 	return {
 		colors: colors(widget[FIELDS.colors]),
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data,
+		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
 		header: header(widget),
 		id,
@@ -114,6 +142,10 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		sorting: chartSorting(widget),
 		type
 	};
+};
+
+export {
+	normalizeDataSet
 };
 
 export default comboNormalizer;

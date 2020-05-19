@@ -48,12 +48,14 @@ const addAxisChartFilters = (widget: AxisWidget, props: AddFiltersProps) => {
 			value: categories[dataPointIndex]
 		});
 
-		addFilter({
-			attribute: set[FIELDS.breakdown],
-			group: transformGroupFormat(set[FIELDS.breakdownGroup]),
-			mixin,
-			value: series[seriesIndex].name
-		});
+		if (!set.sourceForCompute) {
+			addFilter({
+				attribute: set[FIELDS.breakdown],
+				group: transformGroupFormat(set[FIELDS.breakdownGroup]),
+				mixin,
+				value: series[seriesIndex].name
+			});
+		}
 	}
 
 	return index;
@@ -82,12 +84,14 @@ const addComboChartFilters = (widget: ComboWidget, props: AddFiltersProps) => {
 			value: labels[dataPointIndex]
 		});
 
-		addFilter({
-			attribute: set[FIELDS.breakdown],
-			group: transformGroupFormat(set[FIELDS.breakdownGroup]),
-			mixin,
-			value: series[seriesIndex].name
-		});
+		if (!set.sourceForCompute) {
+			addFilter({
+				attribute: set[FIELDS.breakdown],
+				group: transformGroupFormat(set[FIELDS.breakdownGroup]),
+				mixin,
+				value: series[seriesIndex].name
+			});
+		}
 	}
 
 	return index;
@@ -108,12 +112,14 @@ const addCircleChartFilters = (widget, props: AddFiltersProps) => {
 	if (index !== -1) {
 		const set = data[index];
 
-		addFilter({
-			attribute: set[FIELDS.breakdown],
-			group: transformGroupFormat(set[FIELDS.breakdownGroup]),
-			mixin,
-			value: buildData.labels[dataPointIndex]
-		});
+		if (!set.sourceForCompute) {
+			addFilter({
+				attribute: set[FIELDS.breakdown],
+				group: transformGroupFormat(set[FIELDS.breakdownGroup]),
+				mixin,
+				value: buildData.labels[dataPointIndex]
+			});
+		}
 	}
 
 	return index;

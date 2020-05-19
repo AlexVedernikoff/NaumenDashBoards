@@ -115,14 +115,23 @@ export class DataFormBuilder extends Component<Props> {
 
 	handleChangeAttributeTitle = (event: OnChangeAttributeLabelEvent, index: number) => {
 		const {setDataFieldValue, values} = this.props;
-		const {label, name, parent} = event;
+		const {label: title, name, parent} = event;
 		let value = values.data[index][name];
 
 		if (value) {
 			if (parent) {
-				value.ref.title = label;
+				value = {
+					...value,
+					ref: {
+						...value.ref,
+						title
+					}
+				};
 			} else {
-				value.title = label;
+				value = {
+					...value,
+					title
+				};
 			}
 
 			setDataFieldValue(index, name, value);

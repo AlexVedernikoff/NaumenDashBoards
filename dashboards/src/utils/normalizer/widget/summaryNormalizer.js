@@ -1,5 +1,12 @@
 // @flow
-import {aggregation, array, getOrdinalData, header, object, string} from './helpers';
+import {
+	aggregation as aggregationFilter,
+	array,
+	getOrdinalData,
+	header,
+	object,
+	string
+} from './helpers';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
@@ -19,11 +26,33 @@ const getDataFields = () => {
 	};
 };
 
-const createData = (widget: Object, fields: Object): SummaryData => {
-	const {aggregation: aggregationName, dataKey, descriptor, indicator, source, sourceForCompute} = fields;
+const normalizeDataSet = (set: Object): SummaryData => {
+	const {dataKey, descriptor, source} = set;
+	let resultSet = {
+		dataKey,
+		descriptor,
+		source,
+		sourceForCompute: true
+	};
+
+	if (!set.sourceForCompute) {
+		const {aggregation, indicator} = set;
+		resultSet = {
+			...resultSet,
+			aggregation: aggregationFilter(aggregation),
+			indicator,
+			sourceForCompute: false
+		};
+	}
+
+	return resultSet;
+};
+
+const createData = (widget: Object, fields: Object) => {
+	const {aggregation, dataKey, descriptor, indicator, source, sourceForCompute} = fields;
 
 	return {
-		aggregation: aggregation(widget[aggregationName]),
+		aggregation: aggregationFilter(widget[aggregation]),
 		dataKey: string(widget[dataKey], uuid()),
 		descriptor: string(widget[descriptor]),
 		indicator: object(widget[indicator]),
@@ -44,7 +73,7 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 
 	return {
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
-		data,
+		data: data.map(normalizeDataSet),
 		header: header(widget),
 		id,
 		indicator,
@@ -52,6 +81,10 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 		name: string(widget[FIELDS.name]),
 		type
 	};
+};
+
+export {
+	normalizeDataSet
 };
 
 export default summaryNormalizer;

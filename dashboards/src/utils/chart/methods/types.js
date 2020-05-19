@@ -11,8 +11,8 @@ export type AddFiltersProps = {
 };
 
 export type AddFilterProps = {
-	attribute?: Attribute | ComputedBreakdown | null,
-	group?: Group | null,
+	attribute?: Attribute | ComputedBreakdown,
+	group?: Group,
 	mixin: DrillDownMixin,
 	value: string | number
 };

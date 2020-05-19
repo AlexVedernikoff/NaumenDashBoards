@@ -1,18 +1,16 @@
 // @flow
-import {array, lazy, object} from 'yup';
+import {array, lazy, mixed, object} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
-import type {AxisData, AxisWidget, Widget} from 'store/widgets/data/types';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import type {AxisWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
-import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getErrorMessage, rules} from 'WidgetFormPanel/schema';
+import {normalizeDataSet} from 'utils/normalizer/widget/axisNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
-import uuid from 'tiny-uuid';
 import type {Values} from 'containers/WidgetFormPanel/types';
 
 export class AxisChartForm extends Component<TypedFormProps> {
@@ -23,7 +21,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 		return object({
 			...base,
 			data: array().of(object({
-				[breakdown]: object().when(sourceForCompute, {
+				[breakdown]: mixed().when(sourceForCompute, {
 					is: false,
 					then: lazy(this.resolveBreakdownRule)
 				}),
@@ -62,7 +60,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 		return {
 			colors,
 			computedAttrs,
-			data: data.map(this.updateWidgetData),
+			data: data.map(normalizeDataSet),
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),
 			header,
 			id,
@@ -73,34 +71,6 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),
 			type
-		};
-	};
-
-	updateWidgetData = (set: Values): AxisData => {
-		const {
-			aggregation = DEFAULT_AGGREGATION.COUNT,
-			breakdown = null,
-			breakdownGroup = null,
-			group = getDefaultSystemGroup(set.xAxis),
-			descriptor = '',
-			dataKey = uuid(),
-			source,
-			sourceForCompute = false,
-			xAxis,
-			yAxis
-		} = set;
-
-		return {
-			aggregation,
-			breakdown,
-			breakdownGroup,
-			dataKey,
-			descriptor,
-			group,
-			source,
-			sourceForCompute,
-			xAxis,
-			yAxis
 		};
 	};
 

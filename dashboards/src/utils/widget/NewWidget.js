@@ -8,10 +8,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 class NewWidget {
 	static id: string = 'new';
 	computedAttrs = [];
-	data: Array<Object> = [{
-		[FIELDS.dataKey]: uuid(),
-		[FIELDS.sourceForCompute]: false
-	}];
+	data: Array<Object> = [];
 	header = DEFAULT_HEADER_SETTINGS;
 	id: string = NewWidget.id;
 	layout: LayoutItem = {
@@ -29,6 +26,11 @@ class NewWidget {
 	 * @param {number} nextRow - следующая строка на которой должен быть размещен виджет
 	 */
 	constructor (nextRow: number) {
+			this.data.push({
+				[FIELDS.dataKey]: uuid(),
+				[FIELDS.descriptor]: '',
+				[FIELDS.sourceForCompute]: false
+			});
 			this.setRow(nextRow);
 	}
 

@@ -1,16 +1,15 @@
 // @flow
 import {array, object} from 'yup';
-import type {CircleData, CircleWidget, Widget} from 'store/widgets/data/types';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import type {CircleWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
+import {normalizeDataSet} from 'utils/normalizer/widget/circleNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
-import uuid from 'tiny-uuid';
 import type {Values} from 'containers/WidgetFormPanel/types';
 
 export class CircleChartForm extends Component<TypedFormProps> {
@@ -45,7 +44,7 @@ export class CircleChartForm extends Component<TypedFormProps> {
 		return {
 			colors,
 			computedAttrs,
-			data: data.map(this.updateWidgetData),
+			data: data.map(normalizeDataSet),
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),
 			header,
 			id,
@@ -54,30 +53,6 @@ export class CircleChartForm extends Component<TypedFormProps> {
 			name,
 			sorting: extend(DEFAULT_CIRCLE_SORTING_SETTINGS, sorting),
 			type
-		};
-	};
-
-	updateWidgetData = (set: Values): CircleData => {
-		const {
-			aggregation = DEFAULT_AGGREGATION.COUNT,
-			breakdown,
-			breakdownGroup,
-			descriptor = '',
-			dataKey = uuid(),
-			indicator,
-			source,
-			sourceForCompute = false
-		} = set;
-
-		return {
-			aggregation,
-			breakdown,
-			breakdownGroup,
-			dataKey,
-			descriptor,
-			indicator,
-			source,
-			sourceForCompute
 		};
 	};
 

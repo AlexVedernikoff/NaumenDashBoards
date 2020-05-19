@@ -23,6 +23,7 @@ const dateTime: 'dateTime' = 'dateTime';
 const double: 'double' = 'double';
 const dtInterval: 'dtInterval' = 'dtInterval';
 const integer: 'integer' = 'integer';
+const localizedText: 'localizedText' = 'localizedText';
 const metaClass: 'metaClass' = 'metaClass';
 const object: 'object' = 'object';
 const state: 'state' = 'state';
@@ -40,6 +41,7 @@ const SOURCE_ATTRIBUTE_TYPES = {
 	double,
 	dtInterval,
 	integer,
+	localizedText,
 	metaClass,
 	object,
 	state,
