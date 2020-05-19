@@ -14,6 +14,6 @@ export type Props = {
 	onChange: (index: number, name: string, value: ComputedBreakdown) => void,
 	onRemove: (index: number) => void,
 	removable: boolean,
-	set: DataSet,
-	transformAttribute: TransformAttribute
+	transformAttribute: TransformAttribute,
+	value: ComputedBreakdown
 };

@@ -167,7 +167,7 @@ export class SourceDataBox extends Component<Props> {
 		const removable = data.length > minCountBuildingSources;
 
 		return (
-			<FormField>
+			<FormField key={index}>
 				<SourceFieldset
 					errors={errors}
 					index={index}

@@ -1,8 +1,8 @@
 // @flow
+import {array, lazy, mixed, object, string} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {FIELDS} from './constants';
-import {object, string} from 'yup';
 
 const getErrorMessage = (key: string) => {
 	const messages = {
@@ -52,28 +52,55 @@ const requiredAttribute = (text: string) => object().test(
 ).nullable();
 
 /**
- * Правило валидации разбвивки в зависимости от ее динамического добавления
+ * Правило для валидации разбивки
+ * @param {string} indicatorName - наименование поля индикатора
  * @returns {object}
  */
-const conditionalBreakdown = object().when(FIELDS.withBreakdown, {
+const requiredBreakdown = (indicatorName: string) => (value: mixed, context: Object) => {
+	const message = getErrorMessage(FIELDS.breakdown);
+	const indicator = context.parent[indicatorName];
+
+	if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+		return array().of(object({
+			value: requiredAttribute(message)
+		}));
+	}
+
+	return requiredAttribute(message);
+};
+
+/**
+ * Правило валидации разбвивки в зависимости от ее динамического добавления
+ * @param {string} indicatorName - наименование поля индикатора
+ * @returns {object}
+ */
+const conditionalBreakdown = (indicatorName: string) => mixed().when(FIELDS.withBreakdown, {
 	is: true,
-	then: requiredAttribute(getErrorMessage(FIELDS.breakdown))
-}).nullable();
+	then: lazy(requiredBreakdown(indicatorName))
+});
 
 /**
  * Правило валидации атрибута только в случае если источник не для вычислений
  * @param {string} key - название поля
+ * @param {object} rule - правило
  * @returns {object}
  */
-const requiredByCompute = (key: string) => object().when(FIELDS.sourceForCompute, {
-	is: false,
-	then: requiredAttribute(getErrorMessage(key))
-}).nullable();
+const requiredByCompute = (key: string, rule: Object) => {
+	if (!rule) {
+		rule = requiredAttribute(getErrorMessage(key));
+	}
+
+	return mixed().when(FIELDS.sourceForCompute, {
+		is: false,
+		then: rule
+	}).nullable();
+};
 
 const rules = {
 	base,
 	conditionalBreakdown,
 	requiredAttribute,
+	requiredBreakdown,
 	requiredByCompute
 };
 

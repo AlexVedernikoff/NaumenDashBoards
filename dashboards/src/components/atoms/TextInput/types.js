@@ -2,7 +2,7 @@
 import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Props = {
-	maxLength: number,
+	maxLength: number | null,
 	name: string,
 	onChange: OnChangeInputEvent => void,
 	onlyNumber: boolean,

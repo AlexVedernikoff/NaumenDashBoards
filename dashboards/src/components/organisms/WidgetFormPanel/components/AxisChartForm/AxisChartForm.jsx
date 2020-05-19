@@ -16,15 +16,12 @@ import type {Values} from 'containers/WidgetFormPanel/types';
 export class AxisChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
 		const {base, requiredAttribute, requiredByCompute} = rules;
-		const {breakdown, source, sourceForCompute, xAxis, yAxis} = FIELDS;
+		const {breakdown, source, xAxis, yAxis} = FIELDS;
 
 		return object({
 			...base,
 			data: array().of(object({
-				[breakdown]: mixed().when(sourceForCompute, {
-					is: false,
-					then: lazy(this.resolveBreakdownRule)
-				}),
+				[breakdown]: requiredByCompute(breakdown, lazy(this.resolveBreakdownRule)),
 				[source]: object().required(getErrorMessage(source)).nullable(),
 				[xAxis]: requiredAttribute(getErrorMessage(xAxis)),
 				[yAxis]: requiredByCompute(yAxis)
@@ -33,12 +30,12 @@ export class AxisChartForm extends Component<TypedFormProps> {
 	};
 
 	resolveBreakdownRule = (attribute: Attribute | null, context: Object) => {
-		const {conditionalBreakdown, requiredAttribute} = rules;
+		const {conditionalBreakdown, requiredBreakdown} = rules;
 		const {BAR, COLUMN, LINE} = WIDGET_TYPES;
 		const {type} = context.values;
 		const hasConditionalBreakdown = type === BAR || type === COLUMN || type === LINE;
 
-		return hasConditionalBreakdown ? conditionalBreakdown : requiredAttribute(getErrorMessage(FIELDS.breakdown));
+		return hasConditionalBreakdown ? conditionalBreakdown(FIELDS.yAxis) : requiredBreakdown(FIELDS.yAxis);
 	};
 
 	updateWidget = (widget: Widget, values: Values): AxisWidget => {

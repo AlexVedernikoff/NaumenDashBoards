@@ -7,7 +7,7 @@ import styles from './styles.less';
 
 export class TextArea extends Component<Props> {
 	static defaultProps = {
-		maxLength: NaN,
+		maxLength: null,
 		placeholder: ''
 	};
 

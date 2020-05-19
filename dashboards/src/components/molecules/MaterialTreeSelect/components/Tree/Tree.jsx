@@ -132,6 +132,7 @@ export class Tree extends Component<Props, State> {
 					found={Boolean(searchValue)}
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
+					key={nodeValue}
 					onClick={onSelect}
 					onClickToggleIcon={this.handleClickNodeToggleIcon}
 					onLoadMoreChildren={onLoad}

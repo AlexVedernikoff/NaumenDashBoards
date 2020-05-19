@@ -14,8 +14,8 @@ import React, {PureComponent} from 'react';
 export class ComputedBreakdownFieldset extends PureComponent<Props> {
 	filter = (options: Array<Attribute>, index: number): Array<Attribute> => {
 		if (index > 0) {
-			const {name, set} = this.props;
-			const mainParameter = set[name][0][FIELDS.value];
+			const {value} = this.props;
+			const mainParameter = value[0][FIELDS.value];
 
 			if (mainParameter) {
 				options = filterByAttribute(options, mainParameter);
@@ -30,8 +30,8 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 	getComputedSourceOptions = (classFqn: string, index: number) => this.filter(this.props.getSourceOptions(classFqn), index);
 
 	handleChangeGroup = (name: string, group: Group, field: GroupAttributeField) => {
-		const {index, name: breakdownName, onChange, set} = this.props;
-		let breakdown = set[breakdownName];
+		const {index, name: breakdownName, onChange} = this.props;
+		let {value: breakdown} = this.props;
 		let {parent, value} = field;
 
 		if (parent) {
@@ -58,12 +58,12 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 	};
 
 	handleChangeLabel = (event: OnChangeAttributeLabelEvent, breakdownIndex: number) => {
-		const {index, name, onChange, set} = this.props;
+		const {index, name, onChange} = this.props;
 		const {label: title, parent} = event;
-		let breakdown = set[name];
+		let {value: breakdown} = this.props;
 		let value = breakdown[breakdownIndex].value;
 
-		if (parent) {
+		if (parent && value && value.ref) {
 			value = {
 				...value,
 				ref: {
@@ -92,11 +92,10 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 	};
 
 	handleSelect = (event: OnSelectAttributeEvent, breakdownIndex: number) => {
-		const {index, name, onChange, set, transformAttribute} = this.props;
-		const breakdown = set[name];
-		breakdown[breakdownIndex][FIELDS.value] = transformAttribute(event, this.handleSelect, breakdownIndex);
+		const {index, name, onChange, transformAttribute, value} = this.props;
+		value[breakdownIndex][FIELDS.value] = transformAttribute(event, this.handleSelect, breakdownIndex);
 
-		onChange(index, name, breakdown);
+		onChange(index, name, value);
 	};
 
 	renderField = (breakdownSet: Object, breakdownIndex: number) => {
@@ -106,7 +105,7 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 
 		if (dataSet) {
 			return (
-				<FormField>
+				<FormField key={index}>
 					<AttributeFieldset
 						getAttributeOptions={this.getComputedAttributeOptions}
 						getSourceOptions={this.getComputedSourceOptions}
@@ -149,9 +148,8 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 		);
 	};
 
-	render () {
-		const {name, set} = this.props;
-		return set[name].map(this.renderField);
+	render (): Array<React$Node> {
+		return this.props.value.map(this.renderField);
 	}
 }
 

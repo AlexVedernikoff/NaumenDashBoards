@@ -14,13 +14,13 @@ import type {Values} from 'containers/WidgetFormPanel/types';
 
 export class CircleChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredByCompute} = rules;
+		const {base, requiredBreakdown, requiredByCompute} = rules;
 		const {breakdown, indicator, source} = FIELDS;
 
 		return object({
 			...base,
 			data: array().of(object({
-				[breakdown]: requiredByCompute(breakdown),
+				[breakdown]: requiredByCompute(breakdown, requiredBreakdown(FIELDS.indicator)),
 				[indicator]: requiredByCompute(indicator),
 				[source]: object().required(getErrorMessage(source)).nullable()
 			}))

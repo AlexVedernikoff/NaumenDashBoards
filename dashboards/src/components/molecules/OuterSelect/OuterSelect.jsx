@@ -30,7 +30,7 @@ export class OuterSelect extends PureComponent<Props> {
 		}
 
 		return (
-			<div className={styles.optionContainer} title={tip}>
+			<div className={styles.optionContainer} key={value} title={tip}>
 					<div className={styles.option} data-value={value} onClick={this.handleClick}>
 						{label}
 						{this.renderCheckedIcon(value)}
