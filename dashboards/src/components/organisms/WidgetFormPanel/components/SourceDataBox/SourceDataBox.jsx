@@ -1,8 +1,8 @@
 // @flow
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox, FormField} from 'components/molecules';
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {IconButton} from 'components/atoms';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Component} from 'react';
@@ -156,11 +156,7 @@ export class SourceDataBox extends Component<Props> {
 		}
 	};
 
-	renderAddSourceInput = () => (
-		<IconButton onClick={this.handleClickAddSource}>
-			<Icon name={ICON_NAMES.PLUS} />
-		</IconButton>
-	);
+	renderAddSourceInput = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddSource} />;
 
 	renderSource = (set: Object, index: number) => {
 		const {data, errors, minCountBuildingSources, setDataFieldValue, sources} = this.props;

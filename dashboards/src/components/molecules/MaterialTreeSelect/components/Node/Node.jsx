@@ -1,10 +1,10 @@
 // @flow
 import {Button, Loader} from 'components/atoms';
 import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {Children, PureComponent} from 'react';
 import styles from './styles.less';
-import {ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class Node extends PureComponent<Props> {
@@ -88,15 +88,17 @@ export class Node extends PureComponent<Props> {
 
 	renderToggleIcon = () => {
 		const {expanded, value} = this.props;
+		const {TOGGLE_COLLAPSED, TOGGLE_EXPANDED} = ICON_NAMES;
+		const name = expanded ? TOGGLE_EXPANDED : TOGGLE_COLLAPSED;
 		const iconCN = cn({
-			[styles.toggleIcon]: true,
-			[styles.invisibleToggleIcon]: value.children === null
+			[styles.toggleIconContainer]: true,
+			[styles.invisibleContainer]: value.children === null
 		});
 
 		if (!value.loading) {
 			return (
 				<div className={iconCN} onClick={this.handleClickToggleIcon}>
-					{expanded ? <ToggleExpandedIcon /> : <ToggleCollapsedIcon />}
+					<Icon className={styles.toggleIcon} name={name} />
 				</div>
 			);
 		}

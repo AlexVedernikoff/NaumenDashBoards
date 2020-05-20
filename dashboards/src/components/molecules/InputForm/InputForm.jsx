@@ -1,5 +1,5 @@
 // @flow
-import {CheckedIcon, CloseIcon} from 'icons/form';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -19,7 +19,7 @@ export class InputForm extends Component<Props, State> {
 		this.setState({value});
 	};
 
-	handleClickCheckedIcon = () => {
+	handleClick = () => {
 		const {onSubmit} = this.props;
 		const {value} = this.state;
 
@@ -46,15 +46,15 @@ export class InputForm extends Component<Props, State> {
 					type="text"
 					value={value}
 				/>
-				<CheckedIcon
+				<Icon
 					className={styles.successIcon}
-					onClick={this.handleClickCheckedIcon}
-					onMouseDown={this.stopPropagation}
+					name={ICON_NAMES.ACCEPT}
+					onClick={this.handleClick}
 				/>
-				<CloseIcon
+				<Icon
 					className={styles.cancelIcon}
+					name={ICON_NAMES.CANCEL}
 					onClick={onClose}
-					onMouseDown={this.stopPropagation}
 				/>
 			</div>
 		);

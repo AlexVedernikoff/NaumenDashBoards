@@ -1,4 +1,5 @@
 // @flow
+import {Icon} from 'components/atoms';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -9,7 +10,7 @@ export class IconButton extends PureComponent<Props> {
 	};
 
 	render () {
-		const {children, onClick, tip} = this.props;
+		const {icon, onClick, tip} = this.props;
 
 		return (
 			<button
@@ -18,7 +19,7 @@ export class IconButton extends PureComponent<Props> {
 				title={tip}
 				type="button"
 			>
-				{children}
+				<Icon name={icon} />
 			</button>
 		);
 	}

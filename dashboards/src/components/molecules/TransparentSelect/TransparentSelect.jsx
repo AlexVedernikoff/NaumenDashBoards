@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {IconButton, Label, Loader, OutsideClickDetector} from 'components/atoms';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import {InputForm as LabelEditingForm, SimpleSelectMenu} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -64,11 +64,7 @@ export class TransparentSelect extends PureComponent<Props, State> {
 		const {value} = this.props;
 
 		if (value) {
-			return (
-				<IconButton onClick={this.handleClickEditIcon}>
-					<Icon name={ICON_NAMES.EDIT} />
-				</IconButton>
-			);
+			return <IconButton icon={ICON_NAMES.EDIT} onClick={this.handleClickEditIcon} />;
 		}
 	};
 
@@ -147,9 +143,7 @@ export class TransparentSelect extends PureComponent<Props, State> {
 
 		if (removable) {
 			return (
-				<IconButton onClick={this.handleClickRemoveIcon}>
-					<Icon name={ICON_NAMES.MINUS} />
-				</IconButton>
+				<IconButton icon={ICON_NAMES.MINUS} onClick={this.handleClickRemoveIcon} />
 			);
 		}
 	};

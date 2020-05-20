@@ -1,55 +1,55 @@
 // @flow
-import {Bar, BarStacked, Column, ColumnStacked, Combo, Donut, Line, Pie, Summary, Table} from 'icons/widgets';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const WIDGET_OPTIONS = [
 	{
-		label: Column,
+		icon: ICON_NAMES.COLUMN_CHART,
 		tip: 'Столбчатая',
 		value: WIDGET_TYPES.COLUMN
 	},
 	{
-		label: ColumnStacked,
+		icon: ICON_NAMES.STACKED_COLUMN_CHART,
 		tip: 'Столбчатая c накоплением',
 		value: WIDGET_TYPES.COLUMN_STACKED
 	},
 	{
-		label: BarStacked,
+		icon: ICON_NAMES.STACKED_BAR_CHART,
 		tip: 'Гистограмма c накоплением',
 		value: WIDGET_TYPES.BAR_STACKED
 	},
 	{
-		label: Bar,
+		icon: ICON_NAMES.BAR_CHART,
 		tip: 'Гистограмма',
 		value: WIDGET_TYPES.BAR
 	},
 	{
-		label: Line,
+		icon: ICON_NAMES.LINE_CHART,
 		tip: 'Линейная',
 		value: WIDGET_TYPES.LINE
 	},
 	{
-		label: Pie,
+		icon: ICON_NAMES.PIE_CHART,
 		tip: 'Круговая',
 		value: WIDGET_TYPES.PIE
 	},
 	{
-		label: Donut,
+		icon: ICON_NAMES.DONUT_CHART,
 		tip: 'Кольцевая',
 		value: WIDGET_TYPES.DONUT
 	},
 	{
-		label: Combo,
+		icon: ICON_NAMES.COMBO_CHART,
 		tip: 'Комбо',
 		value: WIDGET_TYPES.COMBO
 	},
 	{
-		label: Summary,
+		icon: ICON_NAMES.SUMMARY,
 		tip: 'Сводка',
 		value: WIDGET_TYPES.SUMMARY
 	},
 	{
-		label: Table,
+		icon: ICON_NAMES.TABLE,
 		tip: 'Таблица',
 		value: WIDGET_TYPES.TABLE
 	}

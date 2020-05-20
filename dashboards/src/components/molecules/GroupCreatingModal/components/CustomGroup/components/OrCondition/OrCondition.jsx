@@ -1,8 +1,8 @@
 // @flow
 import {Button, FieldError, IconButton} from 'components/atoms';
 import cn from 'classnames';
-import {CrossIcon as RemoveIcon} from 'icons/form';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MaterialSelect} from 'components/molecules/index';
 import type {OrCondition as OrConditionType} from 'CustomGroup/types';
@@ -82,9 +82,7 @@ export class OrCondition extends PureComponent<Props> {
 
 		return (
 			<div className={containerCN}>
-				<IconButton onClick={this.handleClickRemoveButton}>
-					<RemoveIcon />
-				</IconButton>
+				<IconButton icon={ICON_NAMES.REMOVE} onClick={this.handleClickRemoveButton} />
 			</div>
 		);
 	};
