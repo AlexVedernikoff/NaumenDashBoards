@@ -1,6 +1,6 @@
 // @flow
-import {CloseIcon} from 'icons/form';
 import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -23,7 +23,7 @@ export class InfoPanel extends PureComponent<Props> {
 		}, className);
 	};
 
-	renderCloseIcon = () => <CloseIcon className={styles.closeIcon} onClick={this.props.onClose} />;
+	renderCloseIcon = () => <Icon className={styles.closeIcon} name={ICON_NAMES.CANCEL} onClick={this.props.onClose} />;
 
 	renderConfirmButton = () => {
 		const {onConfirm} = this.props;

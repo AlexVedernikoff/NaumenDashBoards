@@ -1,4 +1,5 @@
 // @flow
+import {Icon} from 'components/atoms';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -10,11 +11,11 @@ export class Option extends PureComponent<Props> {
 	};
 
 	render () {
-		const {icon: Icon} = this.props;
+		const {icon} = this.props;
 
 		return (
 			<div className={styles.option}>
-				<Icon onClick={this.handleClick} />
+				<Icon name={icon} onClick={this.handleClick} />
 			</div>
 		);
 	}

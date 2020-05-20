@@ -1,5 +1,5 @@
 // @flow
-import {MeetBallIcon} from 'icons/controls';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {Option} from './components';
 import type {Option as OptionType, Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -9,7 +9,7 @@ export class OperatorControl extends PureComponent<Props, State> {
 	state = {
 		active: false,
 		currentOption: {
-			icon: MeetBallIcon,
+			icon: ICON_NAMES.ELLIPSIS,
 			value: ''
 		}
 	};
@@ -57,11 +57,11 @@ export class OperatorControl extends PureComponent<Props, State> {
 	};
 
 	renderValue = () => {
-		const {icon: Icon} = this.state.currentOption;
+		const {icon} = this.state.currentOption;
 
 		return (
 			<div className={styles.value} onClick={this.handleShowList}>
-				<Icon />
+				<Icon name={icon} />
 			</div>
 		);
 	};

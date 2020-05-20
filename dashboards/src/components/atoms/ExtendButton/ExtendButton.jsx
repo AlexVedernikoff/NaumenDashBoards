@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {PlusIcon} from 'icons/form';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -15,7 +15,7 @@ export class ExtendButton extends PureComponent<Props> {
 
 		return (
 			<div className={styles.container} onClick={onClick}>
-				<PlusIcon className={this.getIconClassName()} />
+				<Icon className={this.getIconClassName()} name={ICON_NAMES.PLUS} />
 				<div className={this.getTextClassName()}>{text}</div>
 			</div>
 		);

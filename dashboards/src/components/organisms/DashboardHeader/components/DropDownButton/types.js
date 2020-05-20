@@ -1,5 +1,5 @@
 // @flow
-import type {Node} from 'react';
+import type {IconName} from 'components/atoms/Icon/types';
 
 export type MenuItem = {
 	label: string,
@@ -7,7 +7,7 @@ export type MenuItem = {
 };
 
 export type Props = {
-	children: Node,
+	name: IconName,
 	menu: Array<MenuItem>,
 	onSelect: (value: string) => Promise<void> | void,
 	tip: string

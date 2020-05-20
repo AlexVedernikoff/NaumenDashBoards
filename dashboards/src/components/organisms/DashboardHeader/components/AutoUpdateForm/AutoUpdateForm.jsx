@@ -1,7 +1,7 @@
 // @flow
 import {Button, LegacyCheckbox as Checkbox, Popover} from 'components/atoms';
 import cn from 'classnames';
-import {InfoIcon} from 'icons/form';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {MAX_INTERVAL} from './constants';
 import {number, object} from 'yup';
 import type {Props, State, Values} from './types';
@@ -108,7 +108,7 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 
 		return (
 			<Popover text={text}>
-				<InfoIcon className={iconCN} />
+				<Icon className={iconCN} name={ICON_NAMES.INFO} />
 			</Popover>
 		);
 	};

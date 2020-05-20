@@ -1,5 +1,5 @@
 // @flow
-import {CheckedIcon, CloseIcon} from 'icons/form';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -68,12 +68,14 @@ export class ConstantControl extends PureComponent<Props, State> {
 					onChange={this.handleChange}
 					value={value}
 				/>
-				<CheckedIcon
+				<Icon
 					className={styles.successIcon}
+					name={ICON_NAMES.ACCEPT}
 					onClick={this.handleClickSuccessIcon}
 				/>
-				<CloseIcon
+				<Icon
 					className={styles.cancelIcon}
+					name={ICON_NAMES.CANCEL}
 					onClick={this.handleClickCancelIcon}
 				/>
 			</div>

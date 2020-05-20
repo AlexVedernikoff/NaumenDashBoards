@@ -1,9 +1,9 @@
 // @flow
-import type {Node} from 'react';
+import type {IconName} from 'components/atoms/Icon/types';
 
 export type Props = {
-	children: Node,
 	className: string,
 	onClick?: () => void,
+	name: IconName,
 	tip: string
 };

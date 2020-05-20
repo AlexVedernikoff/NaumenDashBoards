@@ -1,11 +1,11 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {Button, InfoPanel} from 'components/atoms';
-import {ClearSquareIcon, CrossIcon} from 'icons/form';
 import {ConstantControl, OperatorControl, SourceControl} from './components';
 import type {Control, ControlType, Props, State} from './types';
 import {CONTROL_TYPES, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
 import {getAggregationLabel} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {isObject} from 'src/helpers';
 import {Modal} from 'components/molecules';
 import React, {PureComponent} from 'react';
@@ -237,7 +237,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		return (
 			<div className={styles.nameContainer}>
 				<div className={styles.nameLabel}>Название поля</div>
-				<CrossIcon className={styles.nameClearIcon} onClick={this.handleClickClearIcon} />
+				<Icon className={styles.nameClearIcon} name={ICON_NAMES.REMOVE} onClick={this.handleClickClearIcon} />
 				<input
 					className={styles.nameInput}
 					onChange={this.handleChangeName}
@@ -308,7 +308,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		if (index === controls.length - 1 && !(control.name in TEMPLATE_NAMES)) {
 			return (
 				<div className={styles.removeIcon}>
-					<ClearSquareIcon onClick={this.handleClickRemoveIcon} />
+					<Icon name={ICON_NAMES.SQUARE_REMOVE} onClick={this.handleClickRemoveIcon} />
 				</div>
 			);
 		}
