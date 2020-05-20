@@ -1,12 +1,11 @@
 // @flow
 import {AutoUpdateForm, DropDownButton, IconButton, NavItem} from './components';
 import {Button, ButtonGroup} from 'components/atoms';
-import {CloseIcon} from 'icons/form';
 import {createSnapshot, EXPORT_VARIANTS} from 'utils/export';
-import {ExportIcon, MailIcon, RefreshIcon, TimeIcon} from 'icons/header';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {Modal} from 'components/molecules';
 import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component} from 'react';
@@ -72,9 +71,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 		return (
 			<NavItem className={styles.autoUpdateItem}>
-				<IconButton className={buttonCN}>
-					<TimeIcon />
-				</IconButton>
+				<IconButton className={buttonCN} name={ICON_NAMES.TIMER} />
 				<AutoUpdateForm
 					autoUpdateSettings={autoUpdateSettings}
 					className={styles.autoUpdateForm}
@@ -86,17 +83,23 @@ export class DashboardHeader extends Component<Props, State> {
 
 	renderDownloadExportButton = () => (
 		<NavItem>
-			<DropDownButton menu={EXPORT_LIST} onSelect={this.createDocument(EXPORT_VARIANTS.DOWNLOAD)} tip="Скачать">
-				<ExportIcon />
-			</DropDownButton>
+			<DropDownButton
+				menu={EXPORT_LIST}
+				name={ICON_NAMES.DOWNLOAD}
+				onSelect={this.createDocument(EXPORT_VARIANTS.DOWNLOAD)}
+				tip="Скачать"
+			/>
 		</NavItem>
 	);
 
 	renderMailExportButton = () => (
 		<NavItem>
-			<DropDownButton menu={EXPORT_LIST} onSelect={this.createDocument(EXPORT_VARIANTS.MAIL)} tip="Отправить на почту">
-				<MailIcon />
-			</DropDownButton>
+			<DropDownButton
+				menu={EXPORT_LIST}
+				name={ICON_NAMES.MAIL}
+				onSelect={this.createDocument(EXPORT_VARIANTS.MAIL)}
+				tip="Отправить на почту"
+			/>
 		</NavItem>
 	);
 
@@ -136,9 +139,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 	renderRefreshButton = () => (
 		<NavItem>
-			<IconButton onClick={this.handleClickRefreshButton} tip="Обновить виджеты">
-				<RefreshIcon />
-			</IconButton>
+			<IconButton name={ICON_NAMES.REFRESH} onClick={this.handleClickRefreshButton} tip="Обновить виджеты" />
 		</NavItem>
 	);
 
@@ -149,7 +150,7 @@ export class DashboardHeader extends Component<Props, State> {
 			return (
 				<NavItem>
 					<Button disabled={personalDashboardDeleting} onClick={this.showModal} outline>
-						<CloseIcon />
+						<Icon name={ICON_NAMES.REMOVE} />
 						<span>Удалить</span>
 					</Button>
 					{this.renderModal()}

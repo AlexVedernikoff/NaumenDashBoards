@@ -1,7 +1,7 @@
 // @flow
 import {ACTIVE_COLORS} from './constants';
-import CheckIcon from 'icons/form/checked.svg';
 import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -36,7 +36,7 @@ class LegacyCheckbox extends Component<Props> {
 		return (
 			<label className={styles.label} onClick={this.handleClick}>
 				<div className={this.getIconClassName()}>
-					{value && <CheckIcon />}
+					{value && <Icon name={ICON_NAMES.ACCEPT} />}
 				</div>
 				<div>{label}</div>
 			</label>

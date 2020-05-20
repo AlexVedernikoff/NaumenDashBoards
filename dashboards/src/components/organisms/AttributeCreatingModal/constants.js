@@ -1,5 +1,5 @@
 // @flow
-import {BracketLeftIcon, BracketRightIcon, DivisionIcon, MinusIcon, MultiplyIcon, PlusIcon} from 'icons/controls';
+import {ICON_NAMES} from 'components/atoms/Icon';
 
 const CONSTANT: 'CONSTANT' = 'CONSTANT';
 const OPERATOR: 'OPERATOR' = 'OPERATOR';
@@ -43,27 +43,27 @@ const TEMPLATES = {
 
 const OPERATORS = [
 	{
-		icon: BracketLeftIcon,
+		icon: ICON_NAMES.BRACKET_LEFT,
 		value: '('
 	},
 	{
-		icon: BracketRightIcon,
+		icon: ICON_NAMES.BRACKET_RIGHT,
 		value: ')'
 	},
 	{
-		icon: PlusIcon,
+		icon: ICON_NAMES.PLUS,
 		value: '+'
 	},
 	{
-		icon: MinusIcon,
+		icon: ICON_NAMES.MINUS,
 		value: '-'
 	},
 	{
-		icon: MultiplyIcon,
+		icon: ICON_NAMES.MULTIPLY,
 		value: '*'
 	},
 	{
-		icon: DivisionIcon,
+		icon: ICON_NAMES.DIVISION,
 		value: '/'
 	}
 ];

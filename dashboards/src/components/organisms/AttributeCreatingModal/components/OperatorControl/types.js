@@ -1,8 +1,9 @@
 // @flow
 import type {ControlType} from 'components/organisms/AttributeCreatingModal/types';
+import type {IconName} from 'components/atoms/Icon/types';
 
 export type Option = {
-	icon: string,
+	icon: IconName,
 	value: string
 };
 

@@ -1,6 +1,6 @@
 // @flow
-import {CalendarIcon} from 'icons/form';
 import {Datepicker} from 'components/molecules';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import moment from 'moment';
 import {OutsideClickDetector} from 'components/atoms';
 import type {Props, State} from './types';
@@ -23,7 +23,7 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 		onChange(name, date);
 	};
 
-	renderCalendarIcon = () => <CalendarIcon className={styles.calendarIcon} onClick={this.handleClickCalendarIcon} />;
+	renderCalendarIcon = () => <Icon className={styles.calendarIcon} name={ICON_NAMES.CALENDAR} onClick={this.handleClickCalendarIcon} />;
 
 	renderDatepicker = () => {
 		const {value} = this.props;

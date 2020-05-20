@@ -1,7 +1,7 @@
 // @flow
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {SearchIcon} from 'icons/form';
 import styles from './styles.less';
 
 export class SearchSelectInput extends PureComponent<Props> {
@@ -20,7 +20,7 @@ export class SearchSelectInput extends PureComponent<Props> {
 
 	handleClick = (e: SyntheticInputEvent<HTMLInputElement>) => e.stopPropagation();
 
-	renderIcon = () => <SearchIcon className={styles.icon} />;
+	renderIcon = () => <Icon className={styles.icon} name={ICON_NAMES.SEARCH} />;
 
 	renderInput = () => {
 		const {forwardedRef, value} = this.props;

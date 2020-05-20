@@ -4,14 +4,13 @@ import {AttributeAggregationField} from 'WidgetFormPanel/components';
 import cn from 'classnames';
 import {CreationPanel, SearchSelectInput} from 'components/atoms';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
-import {MeetBallIcon} from 'icons/controls';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
 import type {SourceOption} from 'components/organisms/AttributeCreatingModal/types';
 import styles from './styles.less';
-import {ToggleCollapsedIcon, ToggleExpandedIcon} from 'icons/form';
 
 export class SourceControl extends PureComponent<Props, State> {
 	state = {
@@ -228,13 +227,15 @@ export class SourceControl extends PureComponent<Props, State> {
 
 	renderSource = (option: SourceOption) => {
 		const {dataKey, source} = option;
+		const {TOGGLE_COLLAPSED, TOGGLE_EXPANDED} = ICON_NAMES;
 		const {label, value} = source;
 		const isExpanded = this.isExpanded(dataKey);
+		const name = isExpanded ? TOGGLE_EXPANDED : TOGGLE_COLLAPSED;
 
 		return (
 			<div className={styles.listSource} data-key={dataKey} key={value} onClick={this.handleClickSource}>
 				<div className={styles.sourceToggleIcon}>
-					{isExpanded ? <ToggleExpandedIcon /> : <ToggleCollapsedIcon />}
+					<Icon name={name} />
 				</div>
 				<div className={styles.listSourceLabel}>{label}</div>
 			</div>
@@ -269,7 +270,7 @@ export class SourceControl extends PureComponent<Props, State> {
 
 		return (
 			<div className={styles.emptyInput} onClick={this.handleShowList}>
-				<MeetBallIcon className={styles.icon} />
+				<Icon name={ICON_NAMES.ELLIPSIS} />
 			</div>
 		);
 	};

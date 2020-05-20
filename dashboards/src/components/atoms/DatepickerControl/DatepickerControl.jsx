@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {LeftAngleIcon, RightAngleIcon} from 'icons/form';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -16,11 +16,11 @@ export class DatepickerControl extends PureComponent<Props> {
 		return (
 			<div className={panelCN}>
 				<div className={styles.iconContainer}>
-					<LeftAngleIcon onClick={onPrevClick} />
+					<Icon name={ICON_NAMES.LEFT_ANGLE} onClick={onPrevClick} />
 				</div>
 				<div className={styles.valueContainer}>{value}</div>
 				<div className={styles.iconContainer}>
-					<RightAngleIcon onClick={onNextClick} />
+					<Icon name={ICON_NAMES.RIGHT_ANGLE} onClick={onNextClick} />
 				</div>
 			</div>
 		);

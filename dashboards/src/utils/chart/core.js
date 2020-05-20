@@ -150,7 +150,9 @@ const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) 
 			if (stacked) {
 				options.chart.stackType = '100%';
 			} else {
-				options.dataLabels.formatter = (val: number) => val > 0 ? `${val.toFixed(2)}%` : '';
+				options.dataLabels = {
+					formatter: (val: number) => val > 0 ? `${val.toFixed(2)}%` : ''
+				};
 			}
 		}
 
