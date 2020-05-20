@@ -111,7 +111,7 @@ export class AttributeFieldset extends Component<Props> {
 			note = source.label;
 		}
 
-		return <AttributeSelect note={note} {...props} />;
+		return <AttributeSelect className={styles.select} note={note} {...props} />;
 	};
 
 	render () {

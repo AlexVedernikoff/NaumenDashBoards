@@ -17,6 +17,7 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 		return (
 			<CheckIconButton
 				checked={value === currentValue}
+				key={value}
 				name={name}
 				onChange={onChange}
 				title={title}

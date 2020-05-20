@@ -6,7 +6,7 @@ import styles from './styles.less';
 
 export class TextInput extends PureComponent<Props> {
 	static defaultProps = {
-		maxLength: NaN,
+		maxLength: null,
 		onlyNumber: false,
 		placeholder: '',
 		value: ''

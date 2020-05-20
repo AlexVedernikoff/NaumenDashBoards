@@ -2,7 +2,7 @@
 import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Props = {
-	maxLength: number,
+	maxLength: number | null,
 	name: string,
 	onBlur?: (e: any) => void,
 	onChange: OnChangeInputEvent => void,

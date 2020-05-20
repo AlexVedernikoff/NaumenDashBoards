@@ -121,7 +121,7 @@ export class IndicatorDataBox extends Component<Props, State> {
 			});
 		}
 
-		value = transformAttribute(event, this.handleSelectIndicator);
+		value = transformAttribute(event, this.handleSelectIndicator, index);
 
 		if (value && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!currentValue || currentValue.type !== value.type)) {
 			setDataFieldValue(index, FIELDS.aggregation, getDefaultAggregation(value));
@@ -162,7 +162,7 @@ export class IndicatorDataBox extends Component<Props, State> {
 		const indicator = set[name];
 		const show = this.showBreakdown(index);
 		const field = indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR
-			? this.renderComputedBreakdownFieldSet()
+			? this.renderComputedBreakdownFieldSet(indicator)
 			: this.renderDefaultBreakdownFieldSet();
 
 		if (useBreakdown) {
@@ -174,12 +174,19 @@ export class IndicatorDataBox extends Component<Props, State> {
 		}
 	};
 
-	renderComputedBreakdownFieldSet = () => {
+	renderComputedBreakdownFieldSet = (indicator: ComputedAttr) => {
 		const {errors, getAttributeOptions, getSourceOptions, index, set, setDataFieldValue, transformAttribute, values} = this.props;
+		const {data} = values;
+		let {breakdown} = set;
+
+		if (!Array.isArray(breakdown)) {
+			breakdown = this.createComputedBreakdown(indicator);
+		}
 
 		return (
 			<ComputedBreakdownFieldset
-				data={values.data}
+				createDefaultValue={this.createComputedBreakdown}
+				data={data}
 				errors={errors}
 				getAttributeOptions={getAttributeOptions}
 				getSourceOptions={getSourceOptions}
@@ -189,15 +196,15 @@ export class IndicatorDataBox extends Component<Props, State> {
 				onChange={setDataFieldValue}
 				onRemove={this.handleRemoveBreakdown}
 				removable={!this.requiredBreakdown()}
-				set={set}
 				transformAttribute={transformAttribute}
+				value={breakdown}
 			/>
 		);
 	};
 
 	renderDefaultBreakdownFieldSet = () => {
 		const {errors, getAttributeOptions, getSourceOptions, index, onChangeGroup, onChangeLabel, set} = this.props;
-		const errorKey = getDataErrorKey(FIELDS.breakdown, index);
+		const errorKey = getDataErrorKey(index, FIELDS.breakdown);
 
 		return (
 			<BreakdownFieldset

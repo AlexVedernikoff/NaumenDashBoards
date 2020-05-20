@@ -244,6 +244,7 @@ export class DataFormBuilder extends Component<Props> {
 					getAttributeOptions={this.getAttributeOptions}
 					getSourceOptions={this.getSourceOptions}
 					index={index}
+					key={index}
 					onChangeGroup={this.handleChangeGroup}
 					onChangeLabel={this.handleChangeAttributeTitle}
 					set={set}
