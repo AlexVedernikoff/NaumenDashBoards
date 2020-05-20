@@ -1,17 +1,17 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {AttributeFieldset, AttributeGroupField} from 'WidgetFormPanel/components';
-import {FieldError} from 'components/atoms';
+import {AttributeFieldset, AttributeGroupField, FormField} from 'WidgetFormPanel/components';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {filterByAttribute, getDataErrorKey} from 'WidgetFormPanel/helpers';
-import {FormField} from 'components/molecules';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {Group} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 
-export class ComputedBreakdownFieldset extends PureComponent<Props> {
+export class ComputedBreakdownFieldset extends Component<Props> {
 	filter = (options: Array<Attribute>, index: number): Array<Attribute> => {
 		if (index > 0) {
 			const {value} = this.props;
@@ -92,20 +92,43 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 	};
 
 	handleSelect = (event: OnSelectAttributeEvent, breakdownIndex: number) => {
-		const {index, name, onChange, transformAttribute, value} = this.props;
-		value[breakdownIndex][FIELDS.value] = transformAttribute(event, this.handleSelect, breakdownIndex);
+		const {index, name, onChange, transformAttribute, value: breakdown} = this.props;
+		const prevValue = breakdown[breakdownIndex][FIELDS.value];
+		const value = transformAttribute(event, this.handleSelect, breakdownIndex);
+		const isMain = breakdownIndex === 0;
+		const typeIsChanged = prevValue && prevValue.type !== value.type;
+		const defaultGroup = getDefaultSystemGroup(value);
 
-		onChange(index, name, value);
+		if (isMain && typeIsChanged) {
+			breakdown.forEach((set, index) => {
+				if (index > 0) {
+					breakdown[index] = {
+						...breakdown[index],
+						group: defaultGroup,
+						value: null
+					};
+				}
+			});
+		}
+
+		if (!prevValue || typeIsChanged) {
+			breakdown[breakdownIndex][FIELDS.group] = defaultGroup;
+		}
+
+		breakdown[breakdownIndex][FIELDS.value] = value;
+
+		onChange(index, name, breakdown);
 	};
 
 	renderField = (breakdownSet: Object, breakdownIndex: number) => {
 		const {data, errors, index, removable} = this.props;
 		const {dataKey, group, value} = breakdownSet;
 		const dataSet = data.find(set => set.dataKey === dataKey);
+		const error = errors[getDataErrorKey(index, FIELDS.breakdown, breakdownIndex, FIELDS.value)];
 
 		if (dataSet) {
 			return (
-				<FormField key={index}>
+				<FormField error={error} key={index}>
 					<AttributeFieldset
 						getAttributeOptions={this.getComputedAttributeOptions}
 						getSourceOptions={this.getComputedSourceOptions}
@@ -115,11 +138,10 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 						onRemove={this.handleRemove}
 						onSelect={this.handleSelect}
 						removable={removable}
-						renderRefField={this.renderGroup(group, breakdownIndex !== 0)}
+						renderRefField={this.renderGroup(group, breakdownIndex)}
 						source={dataSet[FIELDS.source]}
 						value={value}
 					/>
-					<FieldError text={errors[getDataErrorKey(index, FIELDS.breakdown, breakdownIndex, FIELDS.value)]} />
 				</FormField>
 			);
 		}
@@ -127,9 +149,13 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 		return null;
 	};
 
-	renderGroup = (group: Group | null, isNotMain: boolean) => (props: Object) => {
-		const {name} = this.props;
-		const {disabled, parent, value} = props;
+	renderGroup = (group: Group | null, breakdownIndex: number) => (props: Object) => {
+		const {name, value: breakdown} = this.props;
+		const {disabled: selectDisabled, parent, value} = props;
+		const breakdownValue = breakdown[breakdownIndex].value;
+		const isNotMain = breakdownIndex !== 0;
+		const isNotRefAttr = breakdownValue && !(breakdownValue.type in ATTRIBUTE_SETS.REF);
+		const disabled = selectDisabled || (isNotMain && isNotRefAttr);
 		const field = {
 			name,
 			parent,
@@ -138,7 +164,7 @@ export class ComputedBreakdownFieldset extends PureComponent<Props> {
 
 		return (
 			<AttributeGroupField
-				disabled={disabled || isNotMain}
+				disabled={disabled}
 				field={field}
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup}

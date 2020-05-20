@@ -1,6 +1,7 @@
 // @flow
-import {ExtendButton, FieldError, LegacyCheckbox as Checkbox} from 'components/atoms';
+import {ExtendButton, LegacyCheckbox as Checkbox} from 'components/atoms';
 import {FIELDS} from 'WidgetFormPanel/constants';
+import {FormField} from 'WidgetFormPanel/components';
 import {getDataErrorKey} from 'WidgetFormPanel/helpers';
 import type {OnChangeLabelEvent, OnRemoveEvent} from 'components/molecules/TreeSelect/types';
 import type {OnSelectEvent} from 'components/types';
@@ -87,14 +88,12 @@ export class SourceFieldset extends PureComponent<Props> {
 		const {sourceForCompute} = set;
 
 		return (
-			<div className={styles.checkboxContainer}>
-				<Checkbox
-					label="Только для вычислений"
-					name={FIELDS.sourceForCompute}
-					onClick={this.handleChangeCompute}
-					value={sourceForCompute}
-				/>
-			</div>
+			<Checkbox
+				label="Только для вычислений"
+				name={FIELDS.sourceForCompute}
+				onClick={this.handleChangeCompute}
+				value={sourceForCompute}
+			/>
 		);
 	};
 
@@ -120,25 +119,22 @@ export class SourceFieldset extends PureComponent<Props> {
 		}
 	};
 
-	renderSourceError = () => {
-		const {errors, index} = this.props;
-		return <FieldError text={errors[getDataErrorKey(index, FIELDS.source)]} />;
-	};
-
 	renderSourceSelect = () => {
-		const {set, sources} = this.props;
+		const {errors, index, set, sources} = this.props;
 		const {source} = set;
 
 		return (
-			<TreeSelect
-				name={FIELDS.source}
-				onChangeLabel={this.handleChangeSourceLabel}
-				onRemove={this.handleRemoveSource}
-				onSelect={this.handleSelect}
-				options={sources}
-				removable={true}
-				value={source}
-			/>
+			<FormField error={errors[getDataErrorKey(index, FIELDS.source)]}>
+				<TreeSelect
+					name={FIELDS.source}
+					onChangeLabel={this.handleChangeSourceLabel}
+					onRemove={this.handleRemoveSource}
+					onSelect={this.handleSelect}
+					options={sources}
+					removable={true}
+					value={source}
+				/>
+			</FormField>
 		);
 	};
 
@@ -146,7 +142,6 @@ export class SourceFieldset extends PureComponent<Props> {
 		return (
 			<div className={styles.container}>
 				{this.renderSourceSelect()}
-				{this.renderSourceError()}
 				{this.renderRemoveButton()}
 				{this.renderComputeCheckbox()}
 				{this.renderFilterButton()}

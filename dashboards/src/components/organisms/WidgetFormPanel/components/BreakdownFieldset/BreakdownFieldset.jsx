@@ -1,15 +1,13 @@
 // @flow
-import {AttributeFieldset, AttributeGroupField} from 'WidgetFormPanel/components';
-import {FieldError} from 'components/atoms';
+import {AttributeFieldset, AttributeGroupField, FormField} from 'WidgetFormPanel/components';
 import {FIELDS} from 'WidgetFormPanel/constants';
-import {FormField} from 'components/molecules';
 import type {Group} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 
-export class BreakdownFieldset extends PureComponent<Props> {
+export class BreakdownFieldset extends Component<Props> {
 	handleChangeGroup = (name: string, value: Group, field: GroupAttributeField) => {
 		const {index, onChangeGroup} = this.props;
 		onChangeGroup(index, name, value, field);
@@ -55,7 +53,7 @@ export class BreakdownFieldset extends PureComponent<Props> {
 		const {error, getAttributeOptions, getSourceOptions, name, removable, set: currentSet} = this.props;
 
 		return (
-			<FormField>
+			<FormField error={error}>
 				<AttributeFieldset
 					getAttributeOptions={getAttributeOptions}
 					getSourceOptions={getSourceOptions}
@@ -68,7 +66,6 @@ export class BreakdownFieldset extends PureComponent<Props> {
 					source={currentSet[FIELDS.source]}
 					value={currentSet[name]}
 				/>
-				<FieldError text={error} />
 			</FormField>
 		);
 	}

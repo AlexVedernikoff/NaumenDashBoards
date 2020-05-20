@@ -2,13 +2,15 @@
 import {AxisChartForm, CircleChartForm, ComboChartForm, Form, SummaryForm, TableForm} from './components';
 import type {DivRef} from 'components/types';
 import type {Props, RenderFormProps, State} from './types';
-import React, {Component, createRef} from 'react';
+import React, {Component, createContext, createRef} from 'react';
 import styles from './styles.less';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export const formRef: DivRef = createRef();
+export const FormContext: React$Context<Object> = createContext({});
 
 export class WidgetFormPanel extends Component<Props, State> {
+	fieldErrorRefs = [];
 	state: {
 		rendered: false
 	};
@@ -16,6 +18,35 @@ export class WidgetFormPanel extends Component<Props, State> {
 	componentDidMount (): * {
 		this.setState({rendered: true});
 	}
+
+	componentDidUpdate () {
+		this.focusOnError();
+	}
+
+	addFieldErrorRef = (ref: DivRef) => this.fieldErrorRefs.push(ref);
+
+	focusOnError = () => {
+		const {current: form} = formRef;
+
+		if (this.fieldErrorRefs.length > 0 && form) {
+			const offsets = this.fieldErrorRefs.map(({current}) => {
+				let top = 0;
+
+				if (current) {
+					top = current.getBoundingClientRect().top;
+				}
+
+				return top;
+			});
+			const top = Math.min(...offsets) - form.getBoundingClientRect().top;
+
+			form.scrollTo({top: Math.max(top, 0), behavior: 'smooth'});
+		}
+	};
+
+	getContextValue = () => ({
+		addFieldErrorRef: this.addFieldErrorRef
+	});
 
 	resolve = () => {
 		const {type} = this.props.values;
@@ -47,11 +78,17 @@ export class WidgetFormPanel extends Component<Props, State> {
 		const {current: container} = formRef;
 
 		if (TypedWidgetForm && container) {
-			return <TypedWidgetForm render={this.renderForm} />;
+			return (
+				<FormContext.Provider value={this.getContextValue()}>
+					<TypedWidgetForm render={this.renderForm} />
+				</FormContext.Provider>
+			);
 		}
 	};
 
 	render () {
+		this.fieldErrorRefs = [];
+
 		return (
 			<div className={styles.form} ref={formRef}>
 				{this.renderTypedForm()}

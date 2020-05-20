@@ -7,6 +7,15 @@ import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 export class ParamsTab extends Component<DataBuilderProps> {
 	sourceRefFields = [FIELDS.indicator];
 
+	renderIndicatorBoxes = () => {
+		const {renderIndicatorBoxes} = this.props;
+		const props = {
+			useBreakdown: false
+		};
+
+		return renderIndicatorBoxes(props);
+	};
+
 	renderSourceBox = () => {
 		const {renderSourceBox} = this.props;
 		const props = {
@@ -17,13 +26,13 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	};
 
 	render () {
-		const {renderBaseBoxes, renderIndicatorBoxes} = this.props;
+		const {renderBaseBoxes} = this.props;
 
 		return (
 			<Fragment>
 				{renderBaseBoxes()}
 				{this.renderSourceBox()}
-				{renderIndicatorBoxes()}
+				{this.renderIndicatorBoxes()}
 			</Fragment>
 		);
 	}

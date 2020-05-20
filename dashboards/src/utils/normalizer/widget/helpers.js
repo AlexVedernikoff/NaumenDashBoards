@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {AxisIndicator, AxisParameter, ChartSorting, DataLabels, Header, Legend} from 'store/widgets/data/types';
-import {createDefaultGroup, getDefaultSystemGroup, transformGroupFormat} from 'store/widgets/helpers';
+import {createDefaultGroup, transformGroupFormat} from 'store/widgets/helpers';
 import type {CreateFunction, Fields, LegacyWidget} from './types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
@@ -237,22 +237,23 @@ const getOrdinalData = (widget: LegacyWidget, fields: Fields, createFunction: Cr
  * @param {Array<object>} data - массив данных виджета
  * @returns {object}
  */
-const getMainDataSet = (data: Array<Object>): Object => data.find(set => !set.sourceForCompute) || {};
+const getMainDataSet = (data: Array<Object>): Object => data[0];
 
 /**
  * В зависимости от наличия разбивки в исходном объекте, добавляет ее вместе с группировкой в таргет объект
  * @param {object} source - исходный объект
  * @param {object} target - таргет объект
+ * @param {boolean} extendCustom - сообщает нужно ли проводить замену значения пользовательской группировки
  * @returns {object} - таргет объект
  */
-const mixinBreakdown = (source: Object, target: Object) => {
+const mixinBreakdown = (source: Object, target: Object, extendCustom: boolean = false) => {
 	const {breakdown, breakdownGroup} = source;
 
 	if (breakdown) {
 		target.breakdown = breakdown;
 
 		if (breakdown.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-			target.breakdownGroup = breakdownGroup ? transformGroupFormat(breakdownGroup) : getDefaultSystemGroup(breakdown);
+			target.breakdownGroup = transformGroupFormat(breakdownGroup, extendCustom);
 		}
 	}
 
