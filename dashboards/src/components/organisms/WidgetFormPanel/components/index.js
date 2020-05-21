@@ -13,6 +13,7 @@ import ComputedBreakdownFieldset from './ComputedBreakdownFieldset';
 import DataLabelsBox from './DataLabelsBox';
 import ExtendingFieldset from './ExtendingFieldset';
 import Form from './Form';
+import FormField from './FormField';
 import HeaderBox from './HeaderBox';
 import IndicatorDataBox from './IndicatorDataBox';
 import IndicatorFieldset from './IndicatorFieldset';
@@ -40,6 +41,7 @@ export {
 	DataLabelsBox,
 	ExtendingFieldset,
 	Form,
+	FormField,
 	HeaderBox,
 	IndicatorDataBox,
 	IndicatorFieldset,

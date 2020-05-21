@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
@@ -6,6 +7,8 @@ import {getDataErrorKey} from 'WidgetFormPanel/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
+import type {Group} from 'store/widgets/data/types';
+import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import {ParameterFieldset} from 'WidgetFormPanel/components';
 import type {Props, State} from './types';
@@ -27,6 +30,17 @@ export class ParameterDataBox extends Component<Props, State> {
 			mainSet: getMainDataSet(data)
 		};
 	}
+
+	handleChangeGroup = (index: number, name: string, value: Group, field: GroupAttributeField) => {
+		const {name: parameterName, onChangeGroup, setDataFieldValue, values} = this.props;
+		const parameter = values.data[index][parameterName];
+
+		if (index === 0 && !(parameter.type in ATTRIBUTE_SETS.REF)) {
+			values.data.forEach((set, index) => setDataFieldValue(index, name, value));
+		}
+
+		onChangeGroup(index, name, value, field);
+	};
 
 	handleSelect = (event: OnSelectAttributeEvent, index: number) => {
 		const {name, onSelectCallback, setDataFieldValue, setFieldValue, transformAttribute, useGroup, values} = this.props;
@@ -58,7 +72,7 @@ export class ParameterDataBox extends Component<Props, State> {
 	};
 
 	renderParameterFieldset = (set: DataSet, index: number) => {
-		const {errors, getAttributeOptions, getSourceOptions, name, onChangeGroup, onChangeLabel, useGroup} = this.props;
+		const {errors, getAttributeOptions, getSourceOptions, name, onChangeLabel, useGroup} = this.props;
 		const {mainSet} = this.state;
 		const errorKey = getDataErrorKey(index, name);
 
@@ -72,7 +86,7 @@ export class ParameterDataBox extends Component<Props, State> {
 					key={errorKey}
 					mainSet={mainSet}
 					name={name}
-					onChangeGroup={onChangeGroup}
+					onChangeGroup={this.handleChangeGroup}
 					onChangeLabel={onChangeLabel}
 					onSelect={this.handleSelect}
 					set={set}

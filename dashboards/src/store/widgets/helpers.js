@@ -18,12 +18,12 @@ const createDefaultGroup = (data: string | null, attribute?: Attribute) => {
 
 const isGroupKey = (key: string) => /group/i.test(key);
 
-const transformGroupFormat = (group?: Group) => {
+const transformGroupFormat = (group?: Group, extendCustom: boolean = true) => {
 	if (typeof group === 'string') {
 		group = createDefaultGroup(group);
 	}
 
-	if (group && typeof group === 'object' && group.way === GROUP_WAYS.CUSTOM) {
+	if (extendCustom && group && typeof group === 'object' && group.way === GROUP_WAYS.CUSTOM) {
 		const {customGroups} = store.getState();
 
 		group = {

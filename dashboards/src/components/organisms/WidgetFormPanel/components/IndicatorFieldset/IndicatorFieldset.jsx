@@ -1,16 +1,14 @@
 // @flow
-import {AttributeAggregationField, AttributeFieldset, ComputedAttributeEditor} from 'WidgetFormPanel/components';
+import {AttributeAggregationField, AttributeFieldset, ComputedAttributeEditor, FormField} from 'WidgetFormPanel/components';
 import {AttributeCreatingModal} from 'components/organisms';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {ComputedAttr} from 'store/widgets/data/types';
-import {FieldError} from 'components/atoms';
 import {FIELDS} from 'WidgetFormPanel/constants';
-import {FormField} from 'components/molecules';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 
-export class IndicatorFieldset extends PureComponent<Props, State> {
+export class IndicatorFieldset extends Component<Props, State> {
 	state = {
 		showCreatingModal: false
 	};
@@ -114,7 +112,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const value = currentSet[name];
 
 		return (
-			<FormField>
+			<FormField error={error}>
 				<AttributeFieldset
 					getAttributeOptions={getAttributeOptions}
 					getSourceOptions={this.getSourceOptions}
@@ -127,7 +125,6 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 					source={currentSource}
 					value={value}
 				/>
-				<FieldError text={error} />
 				{this.renderCreatingModal()}
 			</FormField>
 		);

@@ -3,16 +3,16 @@ import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
-import {FieldError, TextArea} from 'components/atoms';
 import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
-import {FormBox, FormControl, FormField, OuterSelect} from 'components/molecules';
+import {FormBox, FormControl, OuterSelect} from 'components/molecules';
+import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import type {Group} from 'store/widgets/data/types';
 import type {IndicatorBoxProps, ParameterBoxProps, Props, SourceBoxProps, TextAreaProps} from './types';
-import {IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
+import {TextArea} from 'components/atoms';
 import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -231,8 +231,6 @@ export class DataFormBuilder extends Component<Props> {
 		);
 	};
 
-	renderError = (name: string) => <FieldError text={this.props.errors[name]} />;
-
 	renderIndicatorBox = (props: IndicatorBoxProps) =>
 		(set: DataSet, index: number) => {
 		const {errors, setDataFieldValue, setFieldValue, values} = this.props;
@@ -304,10 +302,12 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	renderTextArea = (props: TextAreaProps) => {
+		const {errors} = this.props;
 		const {errorPath, handleBlur, handleChange, label, maxLength, name, placeholder, value} = props;
+		const error = errors[errorPath || name];
 
 		return (
-			<FormField>
+			<FormField error={error}>
 				<FormControl label={label}>
 					<TextArea
 						maxLength={maxLength}
@@ -317,7 +317,6 @@ export class DataFormBuilder extends Component<Props> {
 						placeholder={placeholder}
 						value={value}
 					/>
-					{this.renderError(errorPath || props.name)}
 				</FormControl>
 			</FormField>
 		);

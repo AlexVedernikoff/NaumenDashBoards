@@ -14,6 +14,7 @@ import {BUILD_DATA_EVENTS} from './constants';
 import {buildUrl, client} from 'utils/api';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {mixinBreakdown} from 'utils/normalizer/widget/helpers';
 import type {PostData, ReceiveBuildDataPayload} from './types';
 import {transformGroupFormat} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -70,14 +71,14 @@ const createAxisData = (widget: AxisWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, breakdown, breakdownGroup, yAxis} = set;
+			const {aggregation, yAxis} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation: transformAggregation(aggregation, type),
-				breakdown,
-				breakdownGroup: transformGroupFormat(breakdownGroup),
 				yAxis: resetComputedAttributeState(yAxis)
 			};
+
+			data[dataKey] = mixinBreakdown(set, data[dataKey], true);
 		}
 	});
 
@@ -106,15 +107,15 @@ const createCircleData = (widget: CircleWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, breakdown, breakdownGroup, indicator} = set;
+			const {aggregation, indicator} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation,
-				breakdown,
-				breakdownGroup: transformGroupFormat(breakdownGroup),
 				indicator: resetComputedAttributeState(indicator),
 				sourceForCompute: false
 			};
+
+			data[dataKey] = mixinBreakdown(set, data[dataKey], true);
 		}
 	});
 
@@ -141,15 +142,15 @@ const createComboData = (widget: ComboWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, breakdown, breakdownGroup, type, yAxis} = set;
+			const {aggregation, type, yAxis} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation: transformAggregation(aggregation, type),
-				breakdown,
-				breakdownGroup: transformGroupFormat(breakdownGroup),
 				type,
 				yAxis: resetComputedAttributeState(yAxis)
 			};
+
+			data[dataKey] = mixinBreakdown(set, data[dataKey], true);
 		}
 	});
 
@@ -205,18 +206,18 @@ const createTableData = (widget: TableWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, breakdown, breakdownGroup, column, dataKey} = set;
+			const {aggregation, column, dataKey} = set;
 
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation,
-				breakdown,
-				breakdownGroup: transformGroupFormat(breakdownGroup),
 				calcTotalColumn,
 				calcTotalRow,
 				column: resetComputedAttributeState(column),
 				sourceForCompute: false
 			};
+
+			data[dataKey] = mixinBreakdown(set, data[dataKey], true);
 		}
 	});
 

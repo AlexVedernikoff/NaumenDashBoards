@@ -56,7 +56,7 @@ const requiredAttribute = (text: string) => object().test(
  * @param {string} indicatorName - наименование поля индикатора
  * @returns {object}
  */
-const requiredBreakdown = (indicatorName: string) => (value: mixed, context: Object) => {
+const requiredBreakdown = (indicatorName: string) => lazy((value: mixed, context: Object) => {
 	const message = getErrorMessage(FIELDS.breakdown);
 	const indicator = context.parent[indicatorName];
 
@@ -67,7 +67,7 @@ const requiredBreakdown = (indicatorName: string) => (value: mixed, context: Obj
 	}
 
 	return requiredAttribute(message);
-};
+});
 
 /**
  * Правило валидации разбвивки в зависимости от ее динамического добавления
@@ -76,7 +76,7 @@ const requiredBreakdown = (indicatorName: string) => (value: mixed, context: Obj
  */
 const conditionalBreakdown = (indicatorName: string) => mixed().when(FIELDS.withBreakdown, {
 	is: true,
-	then: lazy(requiredBreakdown(indicatorName))
+	then: requiredBreakdown(indicatorName)
 });
 
 /**

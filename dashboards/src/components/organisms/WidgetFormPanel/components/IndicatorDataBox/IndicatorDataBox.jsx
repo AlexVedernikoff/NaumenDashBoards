@@ -102,7 +102,7 @@ export class IndicatorDataBox extends Component<Props, State> {
 	handleSelectBreakdown = (event: OnSelectAttributeEvent, index: number) => {
 		const {setDataFieldValue, transformAttribute} = this.props;
 		const {name} = event;
-		const value = transformAttribute(event, this.handleSelectBreakdown);
+		const value = transformAttribute(event, this.handleSelectBreakdown, index);
 
 		setDataFieldValue(index, name, value);
 	};

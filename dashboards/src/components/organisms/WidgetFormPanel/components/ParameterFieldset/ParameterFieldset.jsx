@@ -1,10 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {AttributeFieldset, AttributeGroupField} from 'WidgetFormPanel/components';
-import {FieldError} from 'components/atoms';
+import {AttributeFieldset, AttributeGroupField, FormField} from 'WidgetFormPanel/components';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {filterByAttribute} from 'WidgetFormPanel/helpers';
-import {FormField} from 'components/molecules';
 import type {Group} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
@@ -51,9 +50,12 @@ export class ParameterFieldset extends Component<Props> {
 	};
 
 	renderGroup = (props: Object) => {
-		const {name, set: currentSet} = this.props;
-		const {disabled, parent, value} = props;
+		const {index, name, set: currentSet} = this.props;
+		const {disabled: selectDisabled, parent, value} = props;
+		const parameter = currentSet[name];
+		const disabled = selectDisabled || (index !== 0 && parameter && !(parameter.type in ATTRIBUTE_SETS.REF));
 		const field = {
+			disabled,
 			name,
 			parent,
 			value
@@ -83,7 +85,7 @@ export class ParameterFieldset extends Component<Props> {
 		}
 
 		return (
-			<FormField>
+			<FormField error={error}>
 				<AttributeFieldset
 					disabled={disabled}
 					getAttributeOptions={this.getAttributeOptions}
@@ -95,7 +97,6 @@ export class ParameterFieldset extends Component<Props> {
 					source={currentSource}
 					value={value}
 				/>
-				<FieldError text={error} />
 			</FormField>
 		);
 	}

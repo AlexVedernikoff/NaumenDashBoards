@@ -7,8 +7,8 @@
 		position: relative;
 	}
 
-	.checkboxContainer, .filterContainer {
-		margin-top: 10px;
+	.filterContainer {
+		margin-top: 8px;
 	}
 
 	.removeButton {
@@ -17,46 +17,6 @@
 		position: absolute;
 		right: 0;
 		text-decoration: underline;
-		top: calc(@height + 6px);
-	}
-
-	.select {
-		align-items: center;
-		border-bottom: 2px solid @black;
-		box-sizing: border-box;
-		cursor: pointer;
-		display: flex;
-		height: @height;
-		position: relative;
-		white-space: nowrap;
-
-		&:hover {
-			.indicators {
-				visibility: visible;
-			}
-		}
-	}
-
-	.indicators {
-		visibility: hidden;
-	}
-
-	.list {
-		left: 0;
-		position: absolute;
-		right: 0;
-		top: @height;
-		z-index: 1;
-	}
-
-	.label {
-		flex: auto;
-		overflow: hidden;
-		padding-bottom: 6px;
-		text-overflow: ellipsis;
-	}
-
-	.defaultLabel {
-		color: @darkgrey;
+		top: calc(@height + 12px);
 	}
 }

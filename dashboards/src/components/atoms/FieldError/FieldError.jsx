@@ -9,19 +9,11 @@ export class FieldError extends Component<Props> {
 		className: ''
 	};
 
-	renderError = () => {
+	render () {
 		const {className, text} = this.props;
 		const errorCN = cn(styles.error, className);
 
-		if (text) {
-			return <div className={errorCN}>{text}</div>;
-		}
-
-		return null;
-	};
-
-	render () {
-		return this.renderError();
+		return <div className={errorCN}>{text}</div>;
 	}
 }
 
