@@ -1,6 +1,6 @@
 // @flow
-import {CrossIcon, EditIcon} from 'icons/form';
 import {IconButton, OutsideClickDetector} from 'components/atoms';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import {InputForm as LabelEditingForm} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -82,12 +82,8 @@ export class TreeSelect extends PureComponent<Props, State> {
 		if (value) {
 			return (
 				<div className={styles.indicators} onClick={this.handleClickIndicators}>
-					<IconButton onClick={this.showForm}>
-						<EditIcon />
-					</IconButton>
-					<IconButton onClick={this.handleRemoveValue}>
-						<CrossIcon />
-					</IconButton>
+					<IconButton icon={ICON_NAMES.EDIT} onClick={this.showForm} />
+					<IconButton icon={ICON_NAMES.REMOVE} onClick={this.handleRemoveValue} />
 				</div>
 			);
 		}

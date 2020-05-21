@@ -1,7 +1,7 @@
 // @flow
-import {CheckedIcon} from 'icons/form';
+import Icon, {ICON_NAMES, ICON_SIZES} from 'components/atoms/Icon';
 import type {Option, Props} from './types';
-import React, {createElement, PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class OuterSelect extends PureComponent<Props> {
@@ -16,23 +16,19 @@ export class OuterSelect extends PureComponent<Props> {
 		if (value === selectedValue) {
 			return (
 				<div className={styles.checkedIcon}>
-					<CheckedIcon />
+					<Icon name={ICON_NAMES.ACCEPT} />
 				</div>
 			);
 		}
 	};
 
 	renderOption = (option: Option) => {
-		let {label, tip, value} = option;
-
-		if (typeof label === 'function') {
-			label = createElement(label);
-		}
+		let {icon, tip, value} = option;
 
 		return (
 			<div className={styles.optionContainer} key={value} title={tip}>
 					<div className={styles.option} data-value={value} onClick={this.handleClick}>
-						{label}
+						<Icon name={icon} size={ICON_SIZES.LARGE} />
 						{this.renderCheckedIcon(value)}
 					</div>
 			</div>

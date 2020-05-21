@@ -1,8 +1,8 @@
 // @flow
-import type {Element} from 'react';
+import type {IconName} from 'components/atoms/Icon/types';
 
 export type Option = {
-	label: string | Element<'svg'>,
+	icon: IconName,
 	tip: string,
 	value: string
 };

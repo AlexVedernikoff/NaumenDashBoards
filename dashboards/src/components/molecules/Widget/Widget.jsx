@@ -1,16 +1,15 @@
 // @flow
-import {CloseIcon, EditIcon, UnionIcon} from 'icons/form';
 import cn from 'classnames';
 import {createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
 import {Diagram, Modal} from 'components/molecules';
 import type {DivRef} from 'components/types';
-import {ExportIcon} from 'icons/header';
 import type {ExportItem, Props, State} from './types';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import {IconButton, Tooltip} from 'components/atoms';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
-import React, {createRef, PureComponent} from 'react';
+import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -140,9 +139,7 @@ export class Widget extends PureComponent<Props, State> {
 				}
 
 				return (
-					<IconButton key={dataKey} onClick={this.handleClickDrillDownButton(index)} tip={tipText}>
-						<UnionIcon />
-					</IconButton>
+					<IconButton icon={ICON_NAMES.DATA} key={dataKey} onClick={this.handleClickDrillDownButton(index)} tip={tipText} />
 				);
 			}
 		});
@@ -153,9 +150,7 @@ export class Widget extends PureComponent<Props, State> {
 
 		if (isEditable) {
 			return (
-				<IconButton onClick={this.handleClickEditButton} tip="Редактировать">
-					<EditIcon />
-				</IconButton>
+				<IconButton icon={ICON_NAMES.EDIT} onClick={this.handleClickEditButton} tip="Редактировать" />
 			);
 		}
 
@@ -180,9 +175,7 @@ export class Widget extends PureComponent<Props, State> {
 
 		return (
 			<Tooltip text={list.map(this.renderExportItem)}>
-				<IconButton tip="Выгрузить">
-					<ExportIcon />
-				</IconButton>
+				<IconButton icon={ICON_NAMES.DOWNLOAD} tip="Выгрузить" />
 			</Tooltip>
 		);
 	};
@@ -198,10 +191,10 @@ export class Widget extends PureComponent<Props, State> {
 
 		if (isEditable) {
 			return (
-				<IconButton onClick={this.handleClickRemoveButton} tip="Удалить">
-					<CloseIcon />
+				<Fragment>
+					<IconButton icon={ICON_NAMES.CLOSE} onClick={this.handleClickRemoveButton} tip="Удалить" />
 					{this.renderRemoveModal()}
-				</IconButton>
+				</Fragment>
 			);
 		}
 

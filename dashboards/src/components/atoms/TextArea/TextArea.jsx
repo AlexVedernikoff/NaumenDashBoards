@@ -1,6 +1,6 @@
 // @flow
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {IconButton} from 'components/atoms';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -29,9 +29,7 @@ export class TextArea extends Component<Props> {
 		if (value) {
 			return (
 				<div className={styles.icon}>
-					<IconButton>
-						<Icon name={ICON_NAMES.CLOSE} onClick={this.handleClear} />
-					</IconButton>
+					<IconButton icon={ICON_NAMES.REMOVE} onClick={this.handleClear} />
 				</div>
 			);
 		}

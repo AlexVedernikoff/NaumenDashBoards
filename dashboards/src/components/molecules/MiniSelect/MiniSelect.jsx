@@ -1,9 +1,9 @@
 // @flow
-import {CaretIcon} from 'icons/form';
 import cn from 'classnames';
-import type {Label, Option, Props, State} from './types';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
-import React, {createElement, Fragment, PureComponent} from 'react';
+import type {Option, Props, State} from './types';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
 export class MiniSelect extends PureComponent<Props, State> {
@@ -44,11 +44,13 @@ export class MiniSelect extends PureComponent<Props, State> {
 
 	isNotCurrent = (option: Option) => option.value !== this.state.currentOption.value;
 
-	renderCaret = () => this.props.showCaret && <CaretIcon className={styles.caret} />;
+	renderCaret = () => this.props.showCaret && <Icon name={ICON_NAMES.CHEVRON} />;
 
-	renderLabel = (label: Label) => {
-		if (typeof label === 'function') {
-			label = createElement(label);
+	renderLabel = (label: string) => {
+		const {renderLabel} = this.props;
+
+		if (renderLabel && typeof renderLabel === 'function') {
+			return renderLabel(label);
 		}
 
 		return <div className={styles.label}>{label}</div>;

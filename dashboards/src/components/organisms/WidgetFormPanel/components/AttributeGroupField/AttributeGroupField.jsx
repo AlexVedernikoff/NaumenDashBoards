@@ -1,10 +1,10 @@
 // @flow
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import {CalendarIcon, NumberIcon, TextIcon} from 'icons/form';
 import {createDefaultGroup} from 'store/widgets/helpers';
 import {FieldButton} from 'components/atoms';
 import type {Group} from 'store/widgets/data/types';
 import GroupCreatingModal from 'containers/GroupCreatingModal';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 
@@ -15,6 +15,23 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 
 	state = {
 		showModal: false
+	};
+
+	getIconName = () => {
+		const {value: attribute} = this.props.field;
+		const type = attribute ? attribute.type : '';
+		const {DATE, NUMBER} = ATTRIBUTE_SETS;
+		const {TOUCH_CALENDAR, TOUCH_NUMBER, TOUCH_TEXT} = ICON_NAMES;
+
+		if (type in NUMBER) {
+			return TOUCH_NUMBER;
+		}
+
+		if (type in DATE) {
+			return TOUCH_CALENDAR;
+		}
+
+		return TOUCH_TEXT;
 	};
 
 	handleClickFieldButton = () => this.setState({showModal: true});
@@ -34,25 +51,9 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 
 	renderButton = () => (
 		<FieldButton disabled={this.props.disabled} onClick={this.handleClickFieldButton} tip="Группировка">
-			{this.renderIconByType()}
+			<Icon name={this.getIconName()} />
 		</FieldButton>
 	);
-
-	renderIconByType = () => {
-		const {value: attribute} = this.props.field;
-		const type = attribute ? attribute.type : '';
-		const {DATE, NUMBER} = ATTRIBUTE_SETS;
-
-		if (type in NUMBER) {
-			return <NumberIcon />;
-		}
-
-		if (type in DATE) {
-			return <CalendarIcon />;
-		}
-
-		return <TextIcon />;
-	};
 
 	renderModal = () => {
 		const {field, value} = this.props;

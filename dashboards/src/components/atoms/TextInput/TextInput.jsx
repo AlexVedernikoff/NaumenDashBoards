@@ -32,7 +32,7 @@ export class TextInput extends PureComponent<Props> {
 		return (
 			<div className={styles.container}>
 				<input className={styles.input} maxLength={maxLength} onChange={this.handleChange} placeholder={placeholder} value={value} />
-				<Icon className={styles.icon} name={ICON_NAMES.CLOSE} onClick={this.handleClear} />
+				<Icon className={styles.icon} name={ICON_NAMES.REMOVE} onClick={this.handleClear} />
 			</div>
 		);
 	}

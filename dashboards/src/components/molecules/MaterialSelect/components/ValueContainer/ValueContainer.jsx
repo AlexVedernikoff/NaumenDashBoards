@@ -1,6 +1,6 @@
 // @flow
-import {ChevronDownIcon} from 'icons/form';
 import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -12,7 +12,7 @@ export class ValueContainer extends Component<Props> {
 		placeholder: ''
 	};
 
-	renderCaret = () => <ChevronDownIcon className={styles.caret} />;
+	renderCaret = () => <Icon className={styles.caret} name={ICON_NAMES.CARET} />;
 
 	renderPlaceholder = () => {
 		const {getOptionLabel, placeholder, value} = this.props;

@@ -1,17 +1,13 @@
 // @flow
-import type {Element, Node} from 'react';
-
-export type Label = string | Element<'svg'>;
-
 export type RenderValueProps = {
 	active: boolean,
-	children: Node,
+	children: React$Node,
 	className: string,
 	onClick: () => void
 };
 
 export type Option = {
-	label: Label,
+	label: string,
 	value: string
 };
 
@@ -20,7 +16,8 @@ export type Props = {
 	name: string,
 	onSelect: (name: string, value: string) => any,
 	options: Array<Option>,
-	renderValue?: (props: RenderValueProps) => Node,
+	renderLabel?: (label: string) => React$Node,
+	renderValue?: (props: RenderValueProps) => React$Node,
 	showCaret: boolean,
 	tip: string,
 	value: string

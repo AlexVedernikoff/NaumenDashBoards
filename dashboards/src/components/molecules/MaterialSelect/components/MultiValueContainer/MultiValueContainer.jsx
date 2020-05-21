@@ -1,7 +1,7 @@
 // @flow
 import {Button} from 'components/atoms';
-import {ChevronDownIcon, ClearIcon} from 'icons/form';
 import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
 import type {Option, Props, State} from './types';
 import React, {Component, Fragment} from 'react';
@@ -26,7 +26,7 @@ export class MultiValueContainer extends Component<Props, State> {
 		onRemove && onRemove(value);
 	};
 
-	renderCaret = () => <div className={styles.caret}><ChevronDownIcon /></div>;
+	renderCaret = () => <div className={styles.caret}><Icon name={ICON_NAMES.CARET} /></div>;
 
 	renderClearButton = () => (
 		<div className={styles.clearButtonContainer}>
@@ -66,7 +66,7 @@ export class MultiValueContainer extends Component<Props, State> {
 		return (
 			<div className={styles.tagContainer} data-value={getOptionValue(option)} onClick={this.handleClickTag}>
 				<div className={styles.tagLabel}>{getOptionLabel(option)}</div>
-				<ClearIcon className={styles.clearTagIcon} />
+				<Icon className={styles.clearTagIcon} name={ICON_NAMES.REMOVE} />
 			</div>
 		);
 	};
