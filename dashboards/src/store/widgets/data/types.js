@@ -128,8 +128,7 @@ export type AxisIndicator = {
 	min?: number,
 	name: string,
 	show: boolean,
-	showName: boolean,
-	tickAmount?: number
+	showName: boolean
 };
 
 export type AxisParameter = {

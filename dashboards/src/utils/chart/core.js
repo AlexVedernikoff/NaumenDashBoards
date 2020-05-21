@@ -64,7 +64,7 @@ const getXAxisOptions = (parameter: AxisParameter, categories: Array<string> = [
 };
 
 const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation?: string) => {
-	const {max, min, name, show, showName, tickAmount} = indicator;
+	const {max, min, name, show, showName} = indicator;
 	const forceNiceScale = !(stacked && aggregation === DEFAULT_AGGREGATION.PERCENT);
 	const showPercent = aggregation === DEFAULT_AGGREGATION.PERCENT && !stacked;
 
@@ -88,8 +88,7 @@ const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation
 			return currentMax > 0 ? Math.ceil(currentMax) : 1;
 		},
 		min: Number(min) || 0,
-		show,
-		tickAmount: tickAmount || 1
+		show
 	};
 
 	if (showName) {
@@ -110,7 +109,6 @@ const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation
 const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) => (widget: AxisWidget, chart: DiagramBuildData): ApexOptions => {
 	const {indicator, parameter, type} = widget;
 	const set = getBuildSet(widget);
-	let {tickAmount: yTickAmount} = indicator;
 
 	if (set && !set.sourceForCompute) {
 		const {aggregation} = set;
@@ -141,10 +139,6 @@ const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) 
 			xaxis: getXAxisOptions(parameter, chart.categories),
 			yaxis: getYAxisOptions(indicator, stacked, aggregation)
 		};
-
-		if (horizontal) {
-			options.xaxis.tickAmount = yTickAmount;
-		}
 
 		if (aggregation === DEFAULT_AGGREGATION.PERCENT) {
 			if (stacked) {

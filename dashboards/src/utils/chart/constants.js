@@ -72,8 +72,7 @@ const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 		min: undefined,
 		name: '',
 		show: true,
-		showName: false,
-		tickAmount: undefined
+		showName: false
 	}
 };
 

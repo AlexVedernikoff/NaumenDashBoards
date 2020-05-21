@@ -20,7 +20,7 @@ export class IndicatorBox extends PureComponent<Props> {
 
 	render () {
 		const {data, handleBoolChange, handleChange} = this.props;
-		const {max, min, name, show, showName, tickAmount} = data;
+		const {max, min, name, show, showName} = data;
 
 		return (
 			<ToggableFormBox title="Показатель">
@@ -54,17 +54,6 @@ export class IndicatorBox extends PureComponent<Props> {
 							onlyNumber={true}
 							placeholder="auto"
 							value={max}
-						/>
-					</FormControl>
-				</FormField>
-				<FormField row={true}>
-					<FormControl className={styles.textControl} label="Шаг делений">
-						<TextInput
-							name={FIELDS.tickAmount}
-							onChange={this.handleChangeTickAmount}
-							onlyNumber={true}
-							placeholder="auto"
-							value={tickAmount}
 						/>
 					</FormControl>
 				</FormField>
