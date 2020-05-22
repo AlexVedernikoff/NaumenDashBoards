@@ -17,15 +17,7 @@ import groovy.transform.Immutable
 import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
-// TODO: добавить aggregate, responsible, metaClass,
 @Field private static final String MAIN_FQN = 'abstractBO'
-@Field private static final Collection<String> VALID_LINK_TYPE_ATTRIBUTE =
-        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'metaClass']
-@Field private static final Collection<String> VALID_SIMPLE_TYPE_ATTRIBUTE =
-        ['dtInterval', 'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText', 'timer', 'backTimer']
-@Field private static final Collection<String> VALID_TYPE_ATTRIBUTE =
-        ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem', 'metaClass', 'dtInterval',
-         'date', 'dateTime', 'string', 'integer', 'double', 'state', 'localizedText', 'timer', 'backTimer']
 //endregion
 
 //region КЛАССЫ
@@ -84,29 +76,20 @@ String getAttributesFromLinkAttribute(requestContent)
 {
     def linkAttribute = requestContent.linkAttribute as Map
     String attributeType = linkAttribute.type
-    if (!(attributeType in VALID_LINK_TYPE_ATTRIBUTE))
+    if (!((attributeType as AttributeType) in AttributeType.getLinkTypes()))
         throw new Exception("Not supported type: ${attributeType}")
 
     String attributeClassFqn = linkAttribute.property
     def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
-    Closure<Attribute> buildAttribute = { obj ->
-        new Attribute(
-                code: obj.code,
-                title: obj.title,
-                type: obj.type.code,
-                property: obj.type.relatedMetaClass as String,
-                metaClassFqn: obj.declaredMetaClass.code,
-                sourceName: metaInfo.title)
-    }
-
     Collection<Attribute> result = metaInfo.attributes
-            .findResults { !it.computable && it.type.code in VALID_TYPE_ATTRIBUTE ? buildAttribute(it) : null }
+            .findResults { !it.computable ? buildAttribute(it) : null }
             .sort { it.title }
 
     return toJson(result)
 }
 
-String getAttributeObject(Map requestContent) {
+String getAttributeObject(Map requestContent)
+{
     String uuid = requestContent.parentUUID
     boolean removed = requestContent.removed
     String classFqn = requestContent.property
@@ -134,7 +117,8 @@ String getAttributeObject(Map requestContent) {
     return toJson(result)
 }
 
-String getCatalogObject(Map requestContent) {
+String getCatalogObject(Map requestContent)
+{
     String uuid = requestContent.parentUUID
     String classFqn = requestContent.property
     def count = requestContent.count
@@ -164,7 +148,8 @@ String getCatalogObject(Map requestContent) {
     return toJson(result)
 }
 
-String getCatalogItemObject(Map requestContent) {
+String getCatalogItemObject(Map requestContent)
+{
     String uuid = requestContent.parentUUID
     String classFqn = requestContent.property
     def count = requestContent.count
@@ -203,15 +188,12 @@ String getStates(String classFqn)
 }
 
 
-String getTimerStatuses() {
+String getTimerStatuses()
+{
     //TODO: по хорошему эти значение нужно запрашивать у системы
-    def res = [
-            [title: 'Ожидает начала', uuid: '?'],
-            [title: 'Активен', uuid: 'a'],
-            [title: 'Приостановлен', uuid: 'p'],
-            [title: 'Кончился запас времени', uuid: 'e']
-    ]
-    return res
+    return ru.naumen.core.shared.timer.Status.values().collect {
+        [title: it.name(), uuid: it.code]
+    }
 }
 
 /**
@@ -230,16 +212,18 @@ String getMetaClasses(String classFqn)
 //endregion
 
 //region ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-private List getTop(String classFqn, Map condition) {
+private List getTop(String classFqn, Map condition)
+{
     return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn)).collect { metaClass ->
         def parentMetaInfo = getAttributeParent(metaClass)
         def additionalCondition = parentMetaInfo ? [parent: op.isNull()] : [:]
-        int count = utils.count(metaClass.code, condition + additionalCondition)
+        int count = api.utils.count(metaClass.code, condition + additionalCondition)
         [metaClass.code, condition + additionalCondition, count]
     }
 }
 
-private List getChildren(String classFqn, String uuid, Map condition) {
+private List getChildren(String classFqn, String uuid, Map condition)
+{
     def parentType = api.utils.get(uuid).metaClass
     return getAllInheritanceChains().findAll { it*.code.contains(classFqn) }.collect { set ->
         set.iterator()
@@ -370,19 +354,43 @@ private Collection<DataSource> mappingDataSource(def fqns)
  * @param attributes - атрибуты метакласа
  * @param sourceName - название типа объекта
  */
-private Collection<Attribute> mappingAttribute(def attributes, def sourceName)
+private Collection<Attribute> mappingAttribute(List attributes, String sourceName)
 {
-    Closure<Attribute> buildAttribute = {
-        new Attribute(
-                code: it.code,
-                title: it.title,
-                type: it.type.code,
-                property: it.type.relatedMetaClass as String,
-                metaClassFqn: it.declaredMetaClass.code,
-                sourceName: sourceName)
+    return attributes.findResults {!it.computable ? buildAttribute(it, sourceName) : null }.sort { it.title }
+}
+
+private Attribute buildAttribute(def value, String sourceName)
+{
+    return new Attribute(
+            code: value.code,
+            title: value.title,
+            type: getAttributeType(value.type.code as String),
+            property: value.type.relatedMetaClass as String,
+            metaClassFqn: value.declaredMetaClass.code,
+            sourceName: sourceName)
+}
+
+private AttributeType getAttributeType(String lowerCaseName)
+{
+    switch (lowerCaseName)
+    {
+        case 'string': return AttributeType.STRING
+        case 'integer': return AttributeType.INTEGER
+        case 'double': return AttributeType.DOUBLE
+        case 'object': return AttributeType.OBJECT
+        case 'boLinks': return AttributeType.BO_LINKS
+        case 'backBoLinks': return AttributeType.BACK_BO_LINKS
+        case 'catalogItem': return AttributeType.CATALOG_ITEM
+        case 'catalogItemSet': return AttributeType.CATALOG_ITEM_SET
+        case 'date': return AttributeType.DATE
+        case 'dateTime': return AttributeType.DATE_TIME
+        case 'dtInterval': return AttributeType.DT_INTERVAL
+        case 'state': return AttributeType.STATE
+        case 'localizedText': return AttributeType.LOCALIZED_TEXT
+        case 'metaClass': return AttributeType.META_CLASS
+        case 'timer': return AttributeType.TIMER
+        case 'backTimer': return AttributeType.BACK_TIMER
+        default: throw new IllegalArgumentException("Not supported attribute type: $lowerCaseName")
     }
-    return attributes
-            .findResults { !it.computable && it.type.code in VALID_TYPE_ATTRIBUTE ? buildAttribute(it) : null }
-            .sort { it.title }
 }
 //endregion

@@ -6,462 +6,261 @@
 /**
  * Модуль получения данных для диаграмм
  */
-//Версия: 1.0
+//Версия: 1.1
 //Категория: скриптовый модуль
 
 package ru.naumen.modules
 
-import ru.naumen.core.server.hquery.*
+import ru.naumen.core.server.script.api.criteria.*
+import java.sql.Timestamp
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper {
-    HCriteria buildCriteria(Source source) {
+    ApiCriteria buildCriteria(Source source) {
         return source.descriptor ? source.descriptor
                 .with(api.listdata.&createListDescriptor)
-                .with(api.listdata.&createCriteria) as HCriteria
-                : HHelper.create().addSource(source.classFqn) as HCriteria
+                .with(api.listdata.&createCriteria) as ApiCriteria
+                : api.db.createCriteria().addSource(source.classFqn) as ApiCriteria
     }
 
-    HColumn getCriteriaColumn(HCriteria criteria, Attribute attribute) {
-        return attribute.revelation().inject(criteria as HColumn) { column, attr ->
-            addAttributeInCriteria(column, attr)
-        }
-    }
-
-    abstract HColumn addAttributeInCriteria(HColumn column, Attribute attribute)
-
-    List execute(HCriteria criteria) {
-        return api.db.query(criteria).list()
-    }
-
-    String showQuery(HCriteria criteria) { //TODO: в дальнейшем удалить
-        return criteria.getDelegate().generateHQL(beanFactory.getBean('sessionFactory').getCurrentSession())
+    List execute(ApiCriteria criteria) {
+        return api.db.query(criteria).setMaxResults(100).list()
     }
 }
 
-/**
- * Класс обёртка над HCriteria.
- * Класс бля получений из бд данных диаграмм.
- */
-@ru.naumen.core.server.script.api.injection.InjectApi
-class QueryWrapper implements CriteriaWrapper
-{
-    private RequestData data // данные тут нужны только из-за подсчёта процентов
-    private HCriteria criteria
-    private List result
-    private String locale
+class QueryWrapper implements CriteriaWrapper {
+    private ApiCriteria criteria
 
-    //TODO: Придётся переписывать весь модуль для возможности кастомизировать его костылями.
-    private final static TIMER_TYPE = ['timer', 'backTimer']
-    private final static NUMBER_TYPES = ['integer', 'double']
-    private final static DATE_TYPES = ['date', 'dateTime']
-    private final static LINK_TYPES = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
-    private final static SIMPLE_TYPES = ['date', 'dateTime', 'string', 'integer', 'double', 'state'] //TODO: расширить набор типов
-    private final static DATE_TIME_INTERVAL = 'dtInterval'
-    private final static LOCALIZED_TEXT = 'localizedText'
-
-    QueryWrapper(RequestData data, String locale = 'ru')
-    {
-        validate(data)
-        this.locale = locale
-        this.data = data
-        criteria = buildCriteria(data.source)
-        data.aggregations.each { aggregation(it as AggregationParameter) }
-        data.groups.each { grouping(it as GroupParameter) }
-        data.filters ? filtering(data.filters) : filteringRemoved()
+    protected QueryWrapper(Source source) {
+        this.criteria = buildCriteria(source)
     }
 
-    /**
-     * Метод выполнения запроса.
-     * @return this
-     */
-    QueryWrapper executeQuery()
-    {
-        result = execute(criteria).collect()
+    static QueryWrapper build(Source source) {
+        return new QueryWrapper(source)
+    }
+
+    QueryWrapper aggregate(AggregationParameter parameter) {
+        Aggregation aggregationType = parameter.type
+        Closure aggregation = getAggregation(aggregationType)
+        String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        IApiCriteriaColumn column = api.selectClause.property(attributeCodes)
+        column.with(aggregation).with(criteria.&addColumn)
         return this
     }
 
-    /**
-     * Метод получения результата.
-     * @return список данных
-     */
-    def getResult()
-    {
-        return result
+    //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
+    QueryWrapper percentAggregate(Attribute attribute, int totalCount) {
+        def sc = api.selectClause
+        String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        if (totalCount <= 0) {
+            //Всё плохо. Процент невозможно вычислить!
+            criteria.addColumn(sc.constant(0))
+        } else {
+            sc.property(attributeCodes)
+                    .with(sc.&count)
+                    .with(sc.&columnMultiply.rcurry(sc.constant(100.00)))
+                    .with(sc.&columnDivide.rcurry(sc.constant(totalCount)))
+                    .with(criteria.&addColumn)
+        }
+        return this
     }
 
-    /**
-     * Метод добавления кода атрибута в цепочку кодов. Нужен для работы с ссылочными атрибутами
-     * @param hColumn   - цепочка кодов атрибутов.
-     * @param attribute - атрибут.
-     * @return HColumn
-     */
-    @Override
-    private HColumn addAttributeInCriteria(HColumn column, Attribute attribute) {
-        String code = attribute.code == 'UUID' ? 'id' : attribute.code // Костыль.
-        // В БД нет 'UUID' есть только 'id'
-        // Неприятности могут возникнуть в модуле drilldown только в случае,
-        // если пользователь построит диаграмму с разбивкой по уникальному идентификатору. Но это лишено смысла.
-        switch (attribute.type)
-        {
-            case LINK_TYPES:
-                return column.addInnerJoin(code)
-            case SIMPLE_TYPES:
-                return column.getProperty(code)
-            case DATE_TIME_INTERVAL:
-                return column.getProperty(code).getProperty('ms')
-            case LOCALIZED_TEXT:
-                return column.getProperty(code).getProperty(locale)
-            case TIMER_TYPE:
-                return column.getProperty(code)//.getProperty('statusCode') // у таймера нас интересует только его статус
-                // не совсем
-            default:
-                throw new IllegalArgumentException("Not support attribute type: ${attribute.type}")
-        }
-    }
-
-    /**
-     * Метод применения агрегации.
-     * @param parameter - атрибут и тип агрегации.
-     */
-    private void aggregation(AggregationParameter parameter)
-    {
-        Aggregation aggregationType = parameter.type
-
-        parameter.attribute.revelation().last().with { //костыль, если попался таймер, то нас интересует его статус
-            if (it.type in TIMER_TYPE) {
-                it.ref = new Attribute(title: 'статус', code: 'statusCode', type: 'string')
-            }
-        }
-
-        String code = getCriteriaColumnCode(parameter.attribute)
-        switch (aggregationType)
-        {
-            case Aggregation.PERCENT:
-                //TODO: имеется проблема при вычислении процента в пустом множестве.
-                // результатом является неопределённость (0/0)
-                criteria.addColumn(aggregationType.apply(code, getTotalCount() as String))
-                break
-            case Aggregation.values() - Aggregation.PERCENT:
-                criteria.addColumn(aggregationType.apply(code))
-                break
-            default: throw new IllegalArgumentException("Not support aggregation type: $aggregationType")
-        }
-    }
-
-    /**
-     * Метод применения группировок.
-     * @param parameter - атрибут и тип группировки.
-     */
-    private void grouping(GroupParameter parameter)
-    {
-        parameter.attribute.revelation().last().with { //костыль, если попался таймер, то нас интересует его статус
-            if (it.type in TIMER_TYPE) {
-                it.ref = new Attribute(title: 'статус', code: 'statusCode', type: 'string')
-            }
-        }
-        HColumn columnCode = getCriteriaColumnCode(parameter.attribute)
-        GroupType type = parameter.type
-        switch (type)
-        {
-            case GroupType.DAY:
-                def day = HHelper.getColumn("extract(DAY from $columnCode)")
-                def month = HHelper.getColumn("extract(MONTH from $columnCode)")
-                criteria.add(HRestrictions.isNotNull(month))
-                criteria.add(HRestrictions.isNotNull(day))
-                criteria.addGroupColumn(month as String)
-                criteria.addGroupColumn(day as String)
-                criteria.addOrder(HOrders.asc(month))
-                criteria.addOrder(HOrders.asc(day))
-                criteria.addColumn("concat($day, '/', $month)")
-                break
-            case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
-                def column = HHelper.getColumn("extract($type from $columnCode)")
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(column as String)
-                criteria.addOrder(HOrders.asc(column))
+    QueryWrapper group(GroupParameter parameter) {
+        def sc = api.selectClause
+        GroupType groupType = parameter.type
+        String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        IApiCriteriaColumn column = sc.property(attributeCodes)
+        switch (groupType) {
+            case GroupType.OVERLAP:
+                criteria.addGroupColumn(column)
                 criteria.addColumn(column)
                 break
-            case GroupType.SEVEN_DAYS:
-                HCriteria cteSource = buildCriteria(data.source)
-                HColumn cteColumn = parameter.attribute.revelation()
-                        .inject(cteSource, this.&addAttributeInCriteria) as HColumn
-                cteSource.addColumn("MIN(CAST($cteColumn AS timestamp))", 'cteMinDate')
-                HCriteria cteCriteria = criteria.addCTESource(cteSource)
-
-                // Вывод периода день.месяц-(день.месяц + 7 дней)
-                HColumn startDate = cteCriteria.getProperty('cteMinDate')
-                String weekNumber = "ROUND(ABS((extract(DAY from (CAST($columnCode AS timestamp)-$startDate))-0.6)/7))"
-
-                // Группировка и сортировка по 7 дней от минимальной даты
-
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(weekNumber)
-                criteria.addOrder(HOrders.asc(HHelper.getColumn(weekNumber)))
-                criteria.addColumn("MIN(concat($startDate,'#', $weekNumber))")
+            case GroupType.DAY:
+                IApiCriteriaColumn dayColumn = sc.day(column)
+                IApiCriteriaColumn monthColumn = sc.month(column)
+                criteria.addGroupColumn(dayColumn)
+                criteria.addGroupColumn(monthColumn)
+                criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
+                criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
+                criteria.addColumn(sc.concat(dayColumn, sc.constant('/'), monthColumn))
                 break
-            case GroupType.OVERLAP:
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(columnCode as String)
-                criteria.addOrder(HOrders.asc(columnCode))
-                criteria.addColumn(columnCode)
+            case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
+                IApiCriteriaColumn groupColumn = sc.extract(column, groupType as String)
+                criteria.addGroupColumn(groupColumn)
+                criteria.addColumn(groupColumn)
+                criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
                 break
             case GroupType.SECOND_INTERVAL:
                 def secondInterval = 1000
-                def code = columnCode.with { "$it/$secondInterval" }
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(code)
-                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
-                criteria.addColumn(code)
+                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(secondInterval))
+                criteria.addGroupColumn(groupColumn)
+                criteria.addColumn(groupColumn)
+                criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
                 break
             case GroupType.MINUTE_INTERVAL:
                 def minuteInterval = 1000 * 60
-                def code = columnCode.with { "$it/$minuteInterval" }
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(code)
-                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
-                criteria.addColumn(code)
+                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(minuteInterval))
+                criteria.addGroupColumn(groupColumn)
+                criteria.addColumn(groupColumn)
+                criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
                 break
             case GroupType.HOUR_INTERVAL:
                 def hourInterval = 1000 * 60 * 60
-                def code = columnCode.with { "$it/$hourInterval" }
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(code)
-                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
-                criteria.addColumn(code)
+                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(hourInterval))
+                criteria.addGroupColumn(groupColumn)
+                criteria.addColumn(groupColumn)
+                criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
                 break
             case GroupType.DAY_INTERVAL:
                 def dayInterval = 1000 * 60 * 60 * 24
-                def code = columnCode.with { "$it/$dayInterval" }
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(code)
-                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
-                criteria.addColumn(code)
+                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(dayInterval))
+                criteria.addGroupColumn(groupColumn)
+                criteria.addColumn(groupColumn)
+                criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
                 break
             case GroupType.WEEK_INTERVAL:
                 def weekInterval = 1000 * 60 * 60 * 24 * 7
-                def code = columnCode.with { "$it/$weekInterval" }
-                criteria.add(HRestrictions.isNotNull(columnCode))
-                criteria.addGroupColumn(code)
-                criteria.addOrder(HOrders.asc(HHelper.getColumn(code)))
-                criteria.addColumn(code)
+                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(weekInterval))
+                criteria.addGroupColumn(groupColumn)
+                criteria.addColumn(groupColumn)
+                criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
                 break
-            default: throw new IllegalArgumentException("Not support grouping type: $type")
+            default: throw new IllegalArgumentException("Not supported group type: $groupType")
         }
+        return this
     }
 
-    private void filteringRemoved() {
-        HRestrictions.eq(criteria.getProperty('removed'), false).with(criteria.&add)
+    //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
+    QueryWrapper sevenDaysGroup(Attribute attribute, Date minStartDate) {
+        def sc = api.selectClause
+        String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        String minDate = new Timestamp(minStartDate.time) // преобразуем дату в понятный ормат для БД
+        IApiCriteriaColumn weekNumberColumn = sc.property(attributeCodes)
+                .with(sc.&cast.rcurry('timestamp')) // водим к формату даты
+                .with(sc.&columnSubtract.rcurry(sc.constant("'$minDate'"))) // Вычитаем значение минимальной даты
+                .with(sc.&extract.rcurry('DAY')) // извлекаем количество дней
+                .with(sc.&columnSubtract.rcurry(sc.constant(0.6))) // вычистаем кофециент округления
+                .with(sc.&columnDivide.rcurry(sc.constant(7))) // делим на семь дней
+                .with(sc.&abs)
+                .with(sc.&round)
+        criteria.addGroupColumn(weekNumberColumn)
+        criteria.addColumn(sc.concat(sc.constant("'$minDate'"), sc.constant('#'), weekNumberColumn))
+        return this
     }
 
-    /**
-     * Метод примменения устовий фильтрации через условие "И".
-     * @param filters - условия фильтрации
-     */
-    private void filtering(Collection<Collection<FilterParameter>> filters)
-    {
-        filters.collect(this.&orCondition).with(HRestrictions.&and).with(criteria.&add)
+    QueryWrapper filtering(List<FilterParameter> filters) {
+        filters.collect { parameter ->
+            String columnCode = parameter.attribute
+                    .attrChains()*.code
+                    .with(this.&replaceMetaClassCode)
+                    .inject { first, second -> "${first}.${second}".toString() }
+
+            Comparison type = parameter.type
+            switch (type) {
+                case Comparison.IS_NULL:
+                    return api.filters.isNull(columnCode)
+                case Comparison.NOT_NULL:
+                    return api.filters.isNotNull(columnCode)
+                case Comparison.EQUAL:
+                    return api.filters.attrContains(columnCode, parameter.value, false, false)
+                case Comparison.NOT_EQUAL:
+                    return api.filters.attrContains(columnCode, parameter.value, false, false)
+                            .with(api.filters.&not)
+                case Comparison.NOT_EQUAL_AND_NOT_NULL:
+                    def notNullFilter = api.filters.attrContains.isNotNull(columnCode)
+                    def notEqualFilter = api.filters.attrContains(columnCode, parameter.value, false, false)
+                            .with(api.filters.&not)
+                    return api.filters.and(notEqualFilter, notNullFilter)
+                case Comparison.GREATER:
+                    return api.filters.inequality(columnCode, '>', parameter.value)
+                case Comparison.LESS:
+                    return api.filters.inequality(columnCode, '<', parameter.value)
+                case Comparison.GREATER_OR_EQUAL:
+                    return api.filters.inequality(columnCode, '>=', parameter.value)
+                case Comparison.LESS_OR_EQUAL:
+                    return api.filters.inequality(columnCode, '<=', parameter.value)
+                case Comparison.BETWEEN:
+                    def (first, second) = parameter.value
+                    return api.filters.between(columnCode, first, second)
+                case Comparison.IN:
+                    return api.filters.attrValueIn(columnCode, parameter.value as Collection, false)
+                case Comparison.CONTAINS:
+                    return api.filters.attrContains(columnCode, parameter.value.with { "%$it%" }, false, false)
+                case Comparison.NOT_CONTAINS:
+                    return api.filters.attrContains(columnCode, parameter.value.with { "%$it%" }, false, false)
+                            .with(api.filters.&not)
+                case Comparison.NOT_CONTAINS_AND_NOT_NULL:
+                    def notNullFilter = api.filters.isNotNull(columnCode)
+                    def notContainsFilter = api.filters.attrContains(columnCode, parameter.value.with { "%$it%" }, false, false)
+                            .with(api.filters.&not)
+                    return api.filters.and(notContainsFilter, notNullFilter)
+                case Comparison.EQUAL_REMOVED:
+                    return api.filters.attrContains(columnCode, parameter.value, false, false)
+                case Comparison.NOT_EQUAL_REMOVED:
+                    return api.filters.attrContains(columnCode, parameter.value, false, false)
+                            .with(api.filters.&not)
+                default: throw new IllegalArgumentException("Not supported filter type: $type!")
+
+            }
+        }.with {
+            api.filters.or(*it)
+        }.with(criteria.&add)
+        return this
     }
 
-    /**
-     * Добавление условия "ИЛИ" в критерию
-     * @param list - условия фильтрации
-     * @return HCriterion
-     */
-    private HCriterion orCondition(Collection<FilterParameter> list)
-    {
-        return list.collect { condition(it as FilterParameter) }.with(HRestrictions.&or)
-    }
+    QueryWrapper ordering(Map parameter) {
+        String orderType = parameter.type
+        def attribute = parameter.attribute as Attribute
+        String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
 
-    /**
-     * Добавление условия "ИЛИ" в критерию
-     * @param list - условия фильтрации
-     * @return HCriterion
-     */
-    private HCriterion condition(FilterParameter filter)
-    {
-        HColumn column = getCriteriaColumnCode(filter.attribute)
-        def type = filter.type as Comparison
-        def removedFalse = HRestrictions.eq(criteria.getProperty('removed'), false)
-        switch (type)
-        {
-            case Comparison.IS_NULL:
-                def condition = HRestrictions.isNull(column)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.NOT_NULL:
-                def condition = HRestrictions.isNotNull(column)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.NOT_EQUAL_AND_NOT_NULL:
-                def condition = HRestrictions.eqNullSafe(column, filter.value).with(HRestrictions.&not)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.EQUAL:
-                def condition = HRestrictions.eq(column, filter.value)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.NOT_EQUAL:
-                def condition = HRestrictions.ne(column, filter.value)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.GREATER:
-                def condition = HRestrictions.gt(column, filter.value)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.LESS:
-                def condition = HRestrictions.lt(column, filter.value)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.GREATER_OR_EQUAL:
-                def condition = HRestrictions.ge(column, filter.value)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.LESS_OR_EQUAL:
-                def condition = HRestrictions.le(column, filter.value)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.BETWEEN:
-                def (first, second) = filter.value
-                def condition = HRestrictions.between(column, first, second)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.IN:
-                def condition = HRestrictions.in(column, filter.value as Collection)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.CONTAINS:
-                def condition = HRestrictions.like(column, filter.value.with { "%$it%" })
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.NOT_CONTAINS:
-                def condition = HRestrictions.like(column, filter.value.with { "%$it%" }).with(HRestrictions.&not)
-                return HRestrictions.and(condition, removedFalse)
-            case Comparison.NOT_CONTAINS_AND_NOT_NULL:
-                def notNull = HRestrictions.isNotNull(column)
-                def condition = HRestrictions.like(column, filter.value.with { "%$it%" }).with(HRestrictions.&not)
-                return HRestrictions.and(condition, notNull, removedFalse)
-            case Comparison.EQUAL_REMOVED:
-                return HRestrictions.eq(column, filter.value)
-            case Comparison.NOT_EQUAL_REMOVED:
-                return HRestrictions.ne(column, filter.value)
-            default: throw new IllegalArgumentException("Not supported filter type: $type!")
-        }
-    }
-
-    /**
-     * Метод получения количества количества записей в БД.
-     * @return количество записей в БД.
-     */
-    private int getTotalCount()
-    {
-        return data.with {
-            Attribute[] attributes = groups*.attribute + aggregations.attribute
-            buildTotalCriteria(source, attributes).with(this.&execute).head()
-        }
-    }
-
-    /**
-     * Создание запроса на получения общего количества записей.
-     * @param source - источник
-     * @param attributes - атрибут по ктоторому отфильтровываются пустые значения
-     * @return HCriteria
-     */
-    private HCriteria buildTotalCriteria(Source source, Attribute... attributes)
-    {
-        HCriteria totalCriteria = buildCriteria(source)
-        attributes.each { attribute ->
-            getCriteriaColumn(totalCriteria, attribute)
-                    .with(HRestrictions.&isNotNull)
-                    .with(totalCriteria.&add)
-        }
-        def countColumn = Aggregation.COUNT_CNT.apply(totalCriteria.getAlias() as String)
-        totalCriteria.addColumn(countColumn)
-        return totalCriteria
-    }
-
-    /**
-     * Метод получения кода атрибута у критериию Добаляет
-     * @param attribute - атрибут
-     * @return HColumn
-     */
-    private HColumn getCriteriaColumnCode(Attribute attribute)
-    {
-        assert attribute: "Empty attribute"
-        return getCriteriaColumn(criteria, attribute)
-    }
-
-
-    /**
-     * Метод проверки данных запроса.
-     * Выбрасывает исключение.
-     * @param data - данные запроса
-     */
-    private static void validate(RequestData data)
-    {
-        //TODO: можно перенести эти методы валидации в отдельный класс
-        if (!data) throw new IllegalArgumentException("Empty request data")
-
-        def source = data.source
-        validate(source as Source)
-
-        def aggregations = data.aggregations
-        if (!aggregations) throw new IllegalArgumentException("Empty aggregation")
-        aggregations.each { validate(it as AggregationParameter) }
-        data.groups.each { validate(it as GroupParameter) }
-    }
-
-    /**
-     * Метод проверки источника.
-     * Бросает исключение.
-     * @param source - источник
-     */
-    private static void validate(Source source)
-    {
-        if (!source) throw new IllegalArgumentException("Empty source")
-        if (!(source.descriptor) && !(source.classFqn)) throw new IllegalArgumentException("Invalid source")
-    }
-
-    /**
-     * Метод проверки параметра агрегации.
-     * Бросает исключение.
-     * @param parameter - параметр агрегации
-     */
-    private static def validate(AggregationParameter parameter) throws IllegalArgumentException
-    {
-        Aggregation type = parameter.type
-        String attributeType = parameter.attribute.type
-        switch (attributeType) {
-            case NUMBER_TYPES:
-                if (!(type in Aggregation.with { [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT] }))
-                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+        switch (orderType.toLowerCase()) {
+            case 'asc':
+                api.selectClause.property(attributeCodes)
+                        .with(ApiCriteriaOrders.&asc)
+                        .with(criteria.&addOrder)
                 break
-            default:
-                if (!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT]))
-                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+            case 'desc':
+                api.selectClause.property(attributeCodes)
+                        .with(ApiCriteriaOrders.&desc)
+                        .with(criteria.&addOrder)
                 break
+            default: throw new IllegalArgumentException("Not supported ordering type: $orderType")
+        }
+        return this
+    }
+
+    List<List> getResult() {
+        return execute(criteria).collect { it.collect() as List }
+    }
+
+    private Closure getAggregation(Aggregation type) {
+        switch(type) {
+            case Aggregation.COUNT_CNT:
+                return api.selectClause.&count
+            case Aggregation.SUM:
+                return api.selectClause.&sum
+            case Aggregation.AVG:
+                return api.selectClause.&avg
+            case Aggregation.MAX:
+                return api.selectClause.&max
+            case Aggregation.MIN:
+                return api.selectClause.&min
+            case Aggregation.PERCENT:
+                throw new IllegalArgumentException("Still not supported aggregation type: $type")
+            case Aggregation.MDN:
+                throw new IllegalArgumentException("Still not supported aggregation type: $type")
+            default: throw new IllegalArgumentException("Not supported aggregation type: $type")
         }
     }
 
     /**
-     * Метод проверки параметра группировки
-     * @param parameter - параметр группировки
+     * Метод подменяющий код атрибута metaClass на metaClassFqn
+     * @param list - список кодов
+     * @return Список кодов
      */
-    private static def validate(GroupParameter parameter)
+    private List<String> replaceMetaClassCode(List<String> list)
     {
-        GroupType type = parameter.type
-        //Смотрим на тип последнего вложенного атрибута
-        String attributeType = parameter.attribute.revelation().last().type
-
-        switch (attributeType) {
-            case DATE_TIME_INTERVAL:
-                def groupTypeSet = GroupType.with {
-                    [OVERLAP, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL, DAY_INTERVAL, WEEK_INTERVAL]
-                }
-                if (!(type in groupTypeSet)) {
-                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
-                }
-                break
-            case DATE_TYPES:
-                def groupTypeSet = GroupType.with { [OVERLAP, DAY, SEVEN_DAYS, WEEK, MONTH, QUARTER, YEAR] }
-                if(!(type in groupTypeSet)) {
-                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
-                }
-                break
-            default:
-                if (type != GroupType.OVERLAP) {
-                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
-                }
-                break
-        }
+        return 'metaClass' in list ? (list - 'metaClass' + 'metaClassFqn') : list
     }
 }
 
@@ -472,7 +271,137 @@ class QueryWrapper implements CriteriaWrapper
  */
 List<List> getData(RequestData requestData)
 {
-    QueryWrapper query = new QueryWrapper(requestData)
-    def result = query.executeQuery().getResult()
-    return requestData.groups?.size() ? result : [result] //приводим к единому формату данных
+    validate(requestData)
+    validate(requestData.source)
+    def wrapper = QueryWrapper.build(requestData.source)
+
+    requestData.aggregations.each { validate(it as AggregationParameter) }
+    requestData.aggregations.each {
+        AggregationParameter parameter = it as AggregationParameter
+        if (parameter.type == Aggregation.PERCENT) {
+            def totalAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+            def totalParameter = new AggregationParameter(
+                    title: 'totalCount',
+                    type: Aggregation.COUNT_CNT,
+                    attribute: totalAttribute)
+            int totalCount = QueryWrapper.build(requestData.source)
+                    .aggregate(totalParameter)//TODO: возможно тут должны применяться фильтры от основного источника
+                    .result.head().head()
+            wrapper.percentAggregate(parameter.attribute, totalCount)
+        } else {
+            wrapper.aggregate(parameter)
+        }
+    }
+
+    //TODO: Нужна возможность получать начало отсчёта из вне
+    requestData.groups.each { validate(it as GroupParameter) }
+    requestData.groups.each {
+        GroupParameter parameter = it as GroupParameter
+        if (parameter.type == GroupType.SEVEN_DAYS) {
+            def minDateParameter = new AggregationParameter(
+                    title: 'min',
+                    type: Aggregation.MIN,
+                    attribute: parameter.attribute)
+            Date startMinDate = QueryWrapper.build(requestData.source)
+                    .aggregate(minDateParameter)
+                    .result.head().head()
+            wrapper.sevenDaysGroup(parameter.attribute, startMinDate)
+        } else {
+            wrapper.group(parameter)
+        }
+    }
+
+    requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
+
+    //Фильтрация по непустым атрибутам
+    Set attributeSet = requestData.aggregations*.attribute + requestData.groups*.attribute
+    attributeSet.findResults { it }.collect { attr ->
+        new FilterParameter(title: 'не пусто', type: Comparison.NOT_NULL, attribute: attr, value: null)
+    }.each {
+        wrapper.filtering([it])
+    }
+
+    return wrapper.result
+}
+
+/**
+ * Метод проверки данных запроса.
+ * Выбрасывает исключение.
+ * @param data - данные запроса
+ */
+private void validate(RequestData data)
+{
+    if (!data) throw new IllegalArgumentException("Empty request data")
+
+    def source = data.source
+    validate(source as Source)
+
+    def aggregations = data.aggregations
+    if (!aggregations) throw new IllegalArgumentException("Empty aggregation")
+    aggregations.each { validate(it as AggregationParameter) }
+    data.groups.each { validate(it as GroupParameter) }
+}
+
+/**
+ * Метод проверки источника.
+ * Бросает исключение.
+ * @param source - источник
+ */
+private void validate(Source source)
+{
+    if (!source) throw new IllegalArgumentException("Empty source")
+    if (!(source.descriptor) && !(source.classFqn)) throw new IllegalArgumentException("Invalid source")
+}
+
+/**
+ * Метод проверки параметра агрегации.
+ * Бросает исключение.
+ * @param parameter - параметр агрегации
+ */
+private static def validate(AggregationParameter parameter) throws IllegalArgumentException
+{
+    Aggregation type = parameter.type
+    String attributeType = parameter.attribute.type
+    switch (attributeType) {
+        case AttributeType.getNumberTypes():
+            if (!(type in Aggregation.with { [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT] }))
+                throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+            break
+        default:
+            if (!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT]))
+                throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+            break
+    }
+}
+
+/**
+ * Метод проверки параметра группировки
+ * @param parameter - параметр группировки
+ */
+private static def validate(GroupParameter parameter)
+{
+    GroupType type = parameter.type
+    //Смотрим на тип последнего вложенного атрибута
+    String attributeType = parameter.attribute.attrChains().last().type
+    switch (attributeType as AttributeType) {
+        case AttributeType.DT_INTERVAL:
+            def groupTypeSet = GroupType.with {
+                [OVERLAP, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL, DAY_INTERVAL, WEEK_INTERVAL]
+            }
+            if (!(type in groupTypeSet)) {
+                throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+            }
+            break
+        case AttributeType.getDateTypes():
+            def groupTypeSet = GroupType.with { [OVERLAP, DAY, SEVEN_DAYS, WEEK, MONTH, QUARTER, YEAR] }
+            if(!(type in groupTypeSet)) {
+                throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+            }
+            break
+        default:
+            if (type != GroupType.OVERLAP) {
+                throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+            }
+            break
+    }
 }

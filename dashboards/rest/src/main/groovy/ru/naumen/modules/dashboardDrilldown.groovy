@@ -114,7 +114,7 @@ class Link
         this.attrCodes = map.attrCodes as Collection
         this.filters = map.filters as Collection
         this.template = metaInfo.attributes.find { it.code == 'dashboardTemp' }?.with {
-            utils.findFirst(this.classFqn, [(it.code): op.isNotNull()])?.get(it.code)
+            api.utils.findFirst(this.classFqn, [(it.code): op.isNotNull()])?.get(it.code)
         }
     }
 
@@ -144,7 +144,8 @@ class Link
      * @param filterBuilder - билдер для фильтра
      * @param descriptor - объект фильтрации
      */
-    private void addDescriptorInFilter(def filterBuilder, String descriptor) {
+    private void addDescriptorInFilter(def filterBuilder, String descriptor)
+    {
         if (descriptor)
         {
             def iDescriptor = DashboardMarshaller.createContext(descriptor)
@@ -153,10 +154,13 @@ class Link
                     String attribute = filter.getAttributeFqn() as String
                     String condition = filter.getProperties().conditionCode
                     def value = filter.getValue()
-                    if (condition == 'containsSubject') { // костыль. так как дескриптор статичный, а условие должно быть динамичным
-                        def uuidSubject = utils.get(iDescriptor.clientSettings.formObjectUuid as String)
+                    if (condition == 'containsSubject')
+                    { // костыль. так как дескриптор статичный, а условие должно быть динамичным
+                        def uuidSubject = api.utils.get(iDescriptor.clientSettings.formObjectUuid as String)
                         filterBuilder.OR(attribute, 'contains', uuidSubject)
-                    } else {
+                    }
+                    else
+                    {
                         filterBuilder.OR(attribute, condition, value)
                     }
                 }
@@ -188,40 +192,52 @@ class Link
                 def customSubGroupSet = filter.findResults { map ->
                     def group = map.group as Map
                     String value = map.value
-                    if (group.way == 'custom') {
+                    if (group.way == 'custom')
+                    {
                         def customGroup = group.data as Map
                         def subGroupSet = customGroup.subGroups as Collection
                         return subGroupSet.findResult {
                             def subgroup = it as Map
                             subgroup.name == value ? subgroup.data as Collection<Collection<Map>> : null
                         }
-                    } else {
+                    }
+                    else
+                    {
                         return null
                     }
                 }
 
                 def context = createContext(contextValue)
                 context.remove(GroupType.OVERLAP).each { value ->
-                    if (attr.type in LINK_TYPE_ATTRIBUTES) {
+                    if (attr.type in LINK_TYPE_ATTRIBUTES)
+                    {
                         def objects = findObjects(attr.ref, attr.property, value)
                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
-                    } else {
+                    }
+                    else
+                    {
                         result << [getOrFilter(attr.type, attr.code, value, filterBuilder)]
                     }
                 }
-                if (context) {
+                if (context)
+                {
                     result << getRanges(context, this.&getMinDate.curry(attr.code)).collect { range ->
-                        if (attr.type in LINK_TYPE_ATTRIBUTES) {
+                        if (attr.type in LINK_TYPE_ATTRIBUTES)
+                        {
                             def (first, second) = range
                             def objects = findObjects(attr.ref, attr.property, op.between(first, second))
                             filterBuilder.OR(attr.code, 'containsInSet', objects)
-                        } else {
+                        }
+                        else
+                        {
                             filterBuilder.OR(attr.code, 'fromTo', range)
                         }
                     }
                 }
-                for (customSubGroupCondition in customSubGroupSet) {
-                    switch (attr.type) {
+                for (customSubGroupCondition in customSubGroupSet)
+                {
+                    switch (attr.type)
+                    {
                         case 'dtInterval':
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
@@ -264,7 +280,8 @@ class Link
                         case ['date', 'dateTime']:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
-                                    switch (it.type as String) {
+                                    switch (it.type as String)
+                                    {
                                         case 'today':
                                             return filterBuilder.OR(attr.code, 'today', null)
                                         case 'last':
@@ -285,7 +302,8 @@ class Link
                         case 'state':
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
-                                    switch (it.type as String) {
+                                    switch (it.type as String)
+                                    {
                                         case 'contains':
                                             return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
                                         case 'not_contains':
@@ -315,8 +333,10 @@ class Link
         }
     }
 
-    private String getFilterCondition(String condition) {
-        switch (condition) {
+    private String getFilterCondition(String condition)
+    {
+        switch (condition)
+        {
             case 'empty':
                 return 'null'
             case 'not_empty':
@@ -333,8 +353,10 @@ class Link
         }
     }
 
-    private GroupType getDTIntervalGroupType(String groupType) {
-        switch (groupType.toLowerCase()) {
+    private GroupType getDTIntervalGroupType(String groupType)
+    {
+        switch (groupType.toLowerCase())
+        {
             case 'overlap':
                 return GroupType.OVERLAP
             case 'second':
@@ -377,8 +399,8 @@ class Link
      */
     private List<Object> findObjects(Attribute attr, String fqnClass, def value)
     {
-        return attr.ref ? utils.find(fqnClass, [(attr.code): findObjects(attr.ref, attr.property, value)])
-                : utils.find(fqnClass, [(attr.code): value]).collect()
+        return attr.ref ? api.utils.find(fqnClass, [(attr.code): findObjects(attr.ref, attr.property, value)])
+                : api.utils.find(fqnClass, [(attr.code): value]).collect()
     }
     /**
      * Метод создания контекста из из списка фильтров сгруппированных по атрибуту
@@ -391,7 +413,8 @@ class Link
         return createContext(data)
     }
 
-    private Map<GroupType, Collection> createContext(Collection<Map<GroupType, Object>> data) {
+    private Map<GroupType, Collection> createContext(Collection<Map<GroupType, Object>> data)
+    {
         Map<GroupType, Collection> result = [:]
         data.each {
             it.containsKey(GroupType.OVERLAP) && result.containsKey(GroupType.OVERLAP)

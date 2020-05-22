@@ -120,7 +120,7 @@ class Column
     /**
      * Итого по Column
      */
-    String footer
+    Double footer
 }
 
 /**
@@ -245,7 +245,9 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
         case [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]:
             def normRequest = mappingStandardDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
-            return mappingStandardDiagram(res)
+            String key = normRequest.data.keySet().head()
+            String legend = normRequest.data[key].aggregations.attribute.sourceName.head()
+            return mappingStandardDiagram(res, legend)
         case [DONUT, PIE]:
             def normRequest = mappingRoundDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
@@ -370,7 +372,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 groups: [groupParameter].grep()
         )
 
-        def comp = indicator.stringForCompute?.with {
+        def comp = indicator?.stringForCompute?.with {
             [
                     formula    : it as String,
                     title      : indicator.title as String,
@@ -391,7 +393,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
-        def customGroup = group.way == 'CUSTOM'
+        def customGroup = group?.way == 'CUSTOM'
                 ? [attribute: mappingAttribute(breakdown)] + (group.data as Map<String, Object>)
                 : null
 
@@ -421,14 +423,14 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
         )
         def res = new RequestData(source: source, aggregations: [aggregationParameter])
 
-        def comp = indicator.stringForCompute?.with {
+        def comp = indicator?.stringForCompute?.with {
             [
                     formula    : it as String,
                     title      : indicator.title as String,
                     computeData: indicator.computeData as Map<String, Object>
             ]
         }
-        String attributeTitle = indicator.title
+        String attributeTitle = indicator?.title
         def requisite
         if (data.sourceForCompute)
         {
@@ -482,7 +484,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
                 groups: [groupParameter, breakdownParameter].grep()
         )
 
-        def comp = column.stringForCompute?.with {
+        def comp = column?.stringForCompute?.with {
             [
                     formula    : it as String,
                     title      : column.title as String,
@@ -503,7 +505,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
-        def customGroup = breakdownGroup.way == 'CUSTOM'
+        def customGroup = breakdownGroup?.way == 'CUSTOM'
                 ? [attribute: mappingAttribute(breakdown)] + (breakdownGroup.data as Map<String, Object>)
                 : null
 
@@ -582,7 +584,7 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
  * @return параметр группировки
  */
 private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr) {
-    return groupType.way == 'SYSTEM' ? new GroupParameter(
+    return groupType?.way == 'SYSTEM' ? new GroupParameter(
             title: 'breakdown',
             type: attr.type == 'dtInterval'
                     ? getDTIntervalGroupType(groupType.data as String)
@@ -781,27 +783,27 @@ private Map<String, List<List>> convertCustomGroup(Closure getData, String subje
  * @return функция преобразования настроек пользовательской группировки
  */
 private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID) {
-    switch (type) {
-        case 'dtInterval':
+    switch (type as AttributeType) {
+        case AttributeType.DT_INTERVAL:
             return this.&mappingDTIntervalTypeFilters
-        case 'string':
+        case AttributeType.STRING:
             return this.&mappingStringTypeFilters
-        case 'integer':
+        case AttributeType.INTEGER:
             return this.&mappingNumberTypeFilters.curry({ it as long })
-        case 'double':
+        case AttributeType.DOUBLE:
             return this.&mappingNumberTypeFilters.curry({ it as double })
-        case ['date', 'dateTime']:
+        case AttributeType.getDateTypes():
             return this.&mappingDateTypeFilters
-        case 'state':
-            return this.&mappingStateTypeFilters.curry(subjectUUID)
-        case ['boLinks', 'backBOLinks', 'object']:
+        case AttributeType.STATE:
+            return this.&mappingStateTypeFilters
+        case [AttributeType.BO_LINKS, AttributeType.BACK_BO_LINKS, AttributeType.OBJECT]:
             return this.&mappingLinkTypeFilters.curry(subjectUUID)
-        case ['catalogItem', 'catalogItemSet']:
-            return this.&mappingCatalogItemTypeFilters.curry(subjectUUID)
-        case 'metaClass':
+        case [AttributeType.CATALOG_ITEM, AttributeType.CATALOG_ITEM_SET]:
+            return this.&mappingCatalogItemTypeFilters
+        case AttributeType.META_CLASS:
             //TODO: тут с этим не так всё просто. В критерии нет поля метакласс
             throw new IllegalArgumentException("Still not supported attribute type: $type in custom group")
-        case ['timer', 'backTimer']:
+        case AttributeType.timerTypes:
             return this.&mappingTimerTypeFilters//TODO: реализовать
         default:
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
@@ -1134,7 +1136,7 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
                     set(MILLISECOND, 999)
                     getTime()
                 }
-            return buildFilterParameterFromCondition([start, end])
+                return buildFilterParameterFromCondition([start, end])
             case 'near':
                 def count = condition.data as int
                 def start = Calendar.instance.with {
@@ -1152,13 +1154,13 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
                     set(MILLISECOND, 999)
                     getTime()
                 }
-            return buildFilterParameterFromCondition([start, end])
+                return buildFilterParameterFromCondition([start, end])
             case 'between':
                 String dateFormat = 'yyyy-MM-dd'
                 def dateSet = condition.data as Map<String, Object> // тут будет массив дат
                 def start = Date.parse(dateFormat, dateSet.startDate as String)
                 def end = Date.parse(dateFormat, dateSet.endDate as String)
-            return buildFilterParameterFromCondition([start, end])
+                return buildFilterParameterFromCondition([start, end])
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }
@@ -1386,11 +1388,11 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
     switch (type)
     {
         case GroupType.OVERLAP:
-            switch (parameter.attribute.type)
+            switch (parameter.attribute.type as AttributeType)
             {
-                case 'dtInterval':
+                case AttributeType.DT_INTERVAL:
                     return TimeUnit.MILLISECONDS.toHours(value as long)
-                case 'state':
+                case AttributeType.STATE:
                     return api.metainfo.getStateTitle(fqnClass, value)
                 default:
                     return value
@@ -1450,7 +1452,7 @@ private def formatResult(Map data)
  * @param list - данные диаграмы
  * @return StandardDiagram
  */
-private StandardDiagram mappingStandardDiagram(List list)
+private StandardDiagram mappingStandardDiagram(List list, String legendName)
 {
     def resultDataSet = list.head() as List<List>
     def transposeDataSet = resultDataSet.transpose()
@@ -1460,7 +1462,7 @@ private StandardDiagram mappingStandardDiagram(List list)
             return new StandardDiagram()
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
-            def series = [new Series(name: '', data: aggregationResult as List)]
+            def series = [new Series(name: legendName, data: aggregationResult as List)]
             return new StandardDiagram(categories: groupResult as Set, series: series)
         case 3:
             def (groupResult, breakdownResult) = transposeDataSet.tail()
@@ -1533,13 +1535,13 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
         case 3:
             def (aggregationSet, breakdownSet, groupSet) = transposeDataSet
             Collection<Column> columns = (groupSet as Set<String>).collect { group ->
-                def total = totalColumn ? resultDataSet.sum { el ->
+                Double total = totalColumn ? resultDataSet.sum { el ->
                     el[2] == group ? el.head() as double : 0
-                }.with(DECIMAL_FORMAT.&format) : ""
+                }.with(DECIMAL_FORMAT.&format) as Double : 0
                 new Column(header: group, accessor: group.replace('.', ' '), footer: total)
             }
 
-            columns.add(0, new Column(header: '', accessor: 'breakdownTitle', footer: ''))
+            columns.add(0, new Column(header: '', accessor: 'breakdownTitle', footer: 0))
 
             List<Map<Object, Object>> data = (breakdownSet as Set<String>).collect { breakdown ->
                 def res = resultDataSet.findAll { it[1] == breakdown }.collectEntries { dataList ->
@@ -1552,12 +1554,12 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
 
             if (totalRow)
             {
-                String totalResult = totalColumn
-                        ? (aggregationSet as List).sum { it as double }.with(DECIMAL_FORMAT.&format)
-                        : ''
+                Double totalResult = totalColumn
+                        ? (aggregationSet as List).sum { it as double }.with(DECIMAL_FORMAT.&format) as Double
+                        : 0
                 columns += new Column('Итого', 'total', totalResult)
                 data.each { el ->
-                    el << [total: el.values().tail().sum(DECIMAL_FORMAT.&parse).with(DECIMAL_FORMAT.&format)]
+                    el << [total: el.values().tail().sum(DECIMAL_FORMAT.&parse).with(DECIMAL_FORMAT.&format) as Double]
                 }
             }
             return new TableDiagram(columns: columns, data: data)
@@ -1624,8 +1626,8 @@ private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map
  */
 private setTitleInLinkAttribute(def attr)
 {
-    def validTypes = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
-    return attr.type in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
+    AttributeType[] validTypes = AttributeType.getLinkTypes()
+    return (attr.type as AttributeType) in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
 }
 
 /**

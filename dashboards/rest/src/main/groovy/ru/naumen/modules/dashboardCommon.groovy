@@ -97,6 +97,58 @@ enum Comparison
     EQUAL_REMOVED,
     NOT_EQUAL_REMOVED
 }
+
+enum AttributeType
+{
+    STRING,
+    INTEGER,
+    DOUBLE,
+
+    OBJECT,
+    BO_LINKS,
+    BACK_BO_LINKS,
+    CATALOG_ITEM,
+    CATALOG_ITEM_SET,
+
+    DATE,
+    DATE_TIME,
+    DT_INTERVAL,
+
+    STATE,
+    LOCALIZED_TEXT,
+
+    META_CLASS,
+
+    TIMER,
+    BACK_TIMER
+
+    static List<AttributeType> getLinkTypes()
+    {
+        return [
+                OBJECT,
+                BO_LINKS,
+                CATALOG_ITEM_SET,
+                BACK_BO_LINKS,
+                CATALOG_ITEM
+        ]
+    }
+
+    static List<AttributeType> getNumberTypes()
+    {
+        return [INTEGER, DOUBLE]
+    }
+
+    static List<AttributeType> getDateTypes()
+    {
+        return [DATE, DATE_TIME]
+    }
+
+    static AttributeType[] getTimerTypes()
+    {
+        return [TIMER, BACK_TIMER]
+    }
+}
+
 //endregion
 
 //region КЛАССЫ
@@ -117,7 +169,7 @@ class Attribute
     /**
      * Тип атрибута
      */
-    String type
+    AttributeType type
     /**
      * Свойство атрибута (метаклассы ссылочных атрибутов, значения элементов справочника и т.д)
      */
@@ -141,7 +193,7 @@ class Attribute
         return data ? new Attribute(
                 title: data.title as String,
                 code: data.code as String,
-                type: data.type as String,
+                type: data.type as AttributeType,
                 property: data.property as String,
                 metaClassFqn: data.metaClassFqn as String,
                 sourceName: data.sourceName as String,
@@ -149,11 +201,21 @@ class Attribute
         ) : null
     }
 
-    List<Attribute> revelation() {
-        return this.ref ? [this] + this.ref.revelation() : [this]
+    /**
+     * Метод получения цепочки атрибутов списком
+     * @return Список атрибутов.
+     */
+    List<Attribute> attrChains()
+    {
+        return this.ref ? [this] + this.ref.attrChains() : [this]
     }
 
-    Attribute deepClone() {
+    /**
+     * Полное копирование атрибута включая вложенные
+     * @return
+     */
+    Attribute deepClone()
+    {
         return new Attribute(
                 code: this.code,
                 title: this.title,
@@ -164,8 +226,14 @@ class Attribute
                 ref: this.ref?.deepClone())
     }
 
-    void addLast(Attribute attribute) {
-        if (this.ref) {
+    /**
+     * Добавление атрибута последним в цепочке
+     * @param attribute - атрибут
+     */
+    void addLast(Attribute attribute)
+    {
+        if (this.ref)
+        {
             this.ref.addLast(attribute)
         } else {
             this.ref = attribute

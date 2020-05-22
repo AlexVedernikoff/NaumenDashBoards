@@ -18,7 +18,9 @@ import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
 //TODO: хорошему нужно разделить на несколько пространств для настроек: виджетов, кастомных группировок, дашбордов
-@Field private static final String NAMESPACE = 'dashboards'
+@Field private static final String DASHBOARD_NAMESPACE = 'dashboards'
+@Field private static final String CUSTOM_GROUP_NAMESPACE = 'custom_groups'
+@Field private static final String WIDGET_NAMESPACE = 'widgets'
 @Field private static final String GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
 @Field private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
 //endregion
@@ -107,15 +109,15 @@ String getSettings(Map<String, Object> requestContent, def user)
                 autoUpdate   : personalDashboard?.autoUpdate,
                 widgets      : personalDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
                 customGroups : personalDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE) )]
                 } + defaultDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
                 }
         ] : [
                 autoUpdate   : defaultDashboard?.autoUpdate,
                 widgets      : defaultDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
                 customGroups : defaultDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
                 }
         ]
     } else {
@@ -127,7 +129,7 @@ String getSettings(Map<String, Object> requestContent, def user)
                 // Пользователь этого даже не заметит
                 widgets      : defaultDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
                 customGroups : defaultDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key))]
+                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
                 }
         ]
     }
@@ -151,7 +153,7 @@ String saveAutoUpdateSettings(Map<String, Object> requestContent, def user) {
             ?: getDashboardSetting(defaultDashboardKey)
             ?: new DashboardSettings()
     settings.autoUpdate = autoUpdate
-    return saveJsonSettings(isPersonal ? personalDashboardKey : defaultDashboardKey, toJson(settings))
+    return saveJsonSettings(isPersonal ? personalDashboardKey : defaultDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
 }
 
 /**
@@ -174,10 +176,10 @@ String saveCustomGroup(Map<String, Object> requestContent, def user) {
     String keyCustomGroup = UUID.nameUUIDFromBytes(toJson(group).bytes)
     String jsonCustomGroup = toJson(group + [id: keyCustomGroup])
 
-    if (!saveJsonSettings(keyCustomGroup, jsonCustomGroup)) throw new Exception("Custom group settings not saved!")
+    if (!saveJsonSettings(keyCustomGroup, jsonCustomGroup, CUSTOM_GROUP_NAMESPACE)) throw new Exception("Custom group settings not saved!")
 
     Closure<String> saveDashboard = { String dashboardKey, DashboardSettings settings ->
-        if (saveJsonSettings(dashboardKey, toJson(settings))) {
+        if (saveJsonSettings(dashboardKey, toJson(settings), DASHBOARD_NAMESPACE)) {
             return keyCustomGroup
         } else {
             throw new Exception("Dashboard settings not saved!")
@@ -210,7 +212,7 @@ String updateCustomGroup(Map<String, Object> requestContent, def user) {
     def dashboard = isPersonal ? getDashboardSetting(personalDashboardKey) : getDashboardSetting(defaultDashboardKey)
 
     if (groupKey in dashboard.customGroupIds) {
-        if (saveJsonSettings(groupKey, toJson(group))) {
+        if (saveJsonSettings(groupKey, toJson(group), CUSTOM_GROUP_NAMESPACE)) {
             return groupKey
         } else {
             throw new Exception("Custom group settings not saved!")
@@ -240,9 +242,9 @@ String deleteCustomGroup(Map<String, Object> requestContent, def user) {
     def dashboard = isPersonal ? getDashboardSetting(personalDashboardKey) : getDashboardSetting(defaultDashboardKey)
 
     if (groupKey in dashboard.customGroupIds) {
-        if (deleteJsonSettings(groupKey)) {
+        if (deleteJsonSettings(groupKey, CUSTOM_GROUP_NAMESPACE)) {
             dashboard.customGroupIds -= groupKey
-            if (saveJsonSettings(personalDashboardKey, toJson(dashboard))) {
+            if (saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE)) {
                 return groupKey
             } else {
                 throw new Exception("Dashboard settings not saved!")
@@ -274,7 +276,7 @@ String enableAutoUpdate(Map<String, Object> requestContent, def user)
             ?: new DashboardSettings()
     //Этой настройки может и не быть
     settings.autoUpdate = new AutoUpdate(interval)
-    return saveJsonSettings(personalDashboardKey, toJson(settings))
+    return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
 }
 
 /**
@@ -293,7 +295,7 @@ String disableAutoUpdate(Map<String, Object> requestContent, def user)
     def settings = getDashboardSetting(personalDashboardKey)?: getDashboardSetting(defaultDashboardKey)
     if (!settings) throw new Exception("Not found dashboard settings: $defaultDashboardKey")
     settings.autoUpdate?.disable()
-    return saveJsonSettings(personalDashboardKey, toJson(settings))
+    return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
 }
 
 /**
@@ -314,7 +316,7 @@ String createPersonalDashboard(Map<String, Object> requestContent, def user)
     String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
     String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
     def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-    return saveJsonSettings(personalDashboardKey, toJson(settings))
+    return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
 }
 
 /**
@@ -359,7 +361,7 @@ String createWidget(Map<String, Object> requestContent, def user)
 
     return saveWidgetSettings(widget, generateKey).with { key ->
         dashboardSettings.widgetIds += key
-        saveJsonSettings(dashboardKey, toJson(dashboardSettings))
+        saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
         toJson(key)
     }
 }
@@ -395,7 +397,7 @@ String editWidget(Map<String, Object> requestContent, def user)
                     widgetKey)
             return saveWidgetSettings(widget, generateKey).with { key ->
                 dashboardSettings.widgetIds = dashboardSettings.widgetIds - widgetKey + key
-                if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings)))
+                if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE))
                 {
                     throw new Exception("Widget $key not saved in dashboard $personalDashboardKey")
                 }
@@ -420,14 +422,14 @@ String editWidget(Map<String, Object> requestContent, def user)
                 {
                     dashboardSettings.widgetIds << widgetKey
                 }
-                saveJsonSettings(dashboardKey, toJson(dashboardSettings))
+                saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
             }
             closureReplaceWidgetKey(user.login as String)
             closureReplaceWidgetKey(null)
-            deleteJsonSettings(widgetKey)
+            deleteJsonSettings(widgetKey, WIDGET_NAMESPACE)
         }
         def widgetDb = setUuidInSettings(widget, widgetKey)
-        saveJsonSettings(widgetKey, toJson(widgetDb))
+        saveJsonSettings(widgetKey, toJson(widgetDb), WIDGET_NAMESPACE)
         return toJson(widgetKey)
     }
 }
@@ -457,7 +459,7 @@ String editLayouts(Map<String, Object> requestContent, def user)
             if (widgetKey in settings.widgetIds) {
                 def widgetSettings = getWidgetSettings(widgetKey)
                 widgetSettings.layout = value
-                if (saveJsonSettings(widgetKey, toJson(widgetSettings))) {
+                if (saveJsonSettings(widgetKey, toJson(widgetSettings), WIDGET_NAMESPACE)) {
                     return widgetKey
                 } else {
                     throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
@@ -509,12 +511,12 @@ String deletePersonalDashboard(String classFqn, String contentCode, def user)
     if (!user) throw new Exception([message: "Super-user can't reset dashboard settings!"])
     String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
     DashboardSettings personalDashboard = getDashboardSetting(personalDashboardKey)
-    return personalDashboard ? deleteJsonSettings(personalDashboardKey).with { resultOfRemoving ->
+    return personalDashboard ? deleteJsonSettings(personalDashboardKey, DASHBOARD_NAMESPACE).with { resultOfRemoving ->
         if (resultOfRemoving)
         {
             personalDashboard.widgetIds
                     .findAll(this.&isPersonalWidget.ncurry(1, user))
-                    .each(this.&deleteJsonSettings)
+                    .each(this.&deleteJsonSettings.ncurry(1, WIDGET_NAMESPACE))
             return toJson([status: "OK", message: "Установлены настройки по умолчанию"])
         }
         else
@@ -564,7 +566,7 @@ private String removeWidgetFromDashboard(String dashboardKey, String widgetKey)
  */
 private String removeWidgetSettings(String widgetKey)
 {
-    if (!deleteJsonSettings(widgetKey))
+    if (!deleteJsonSettings(widgetKey, WIDGET_NAMESPACE))
     {
         throw new Exception("widget settings $widgetKey not removed!")
     }
@@ -585,7 +587,7 @@ private boolean excludeWidgetsFromDashboard(String dashboardKey, Collection<Stri
         throw new Exception("Dashboard: $dashboardKey not found!")
     }
     dashboardSettings.widgetIds -= widgets
-    return saveJsonSettings(dashboardKey, toJson(dashboardSettings))
+    return saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
 }
 
 /**
@@ -596,7 +598,7 @@ private boolean excludeWidgetsFromDashboard(String dashboardKey, Collection<Stri
  */
 private String saveWidgetSettings(Map settings, Closure<String> generateCode) {
     String key = generateCode()
-    if(!saveJsonSettings(key, toJson(setUuidInSettings(settings, key)))) {
+    if(!saveJsonSettings(key, toJson(setUuidInSettings(settings, key)), WIDGET_NAMESPACE)) {
         throw new Exception("Widget $key not saved!")
     }
     return key
@@ -617,7 +619,7 @@ private String generateWidgetKey(Collection<String> keys,
                                  String login = null,
                                  String oldWidgetKey = null)
 {
-    String type = utils.get(classFqn)?.metaClass?.toString()
+    String type = api.utils.get(classFqn)?.metaClass?.toString()
     def loginKeyPart = login ? "_${login}" : ''
     String uuidWidget
     while ({
@@ -632,7 +634,7 @@ private String generateWidgetKey(Collection<String> keys,
             uuidWidget = "${type}_${contentCode}_${UUID.randomUUID()}${loginKeyPart}"
         }
         (keys.contains(uuidWidget) &&
-                loadJsonSettings(uuidWidget))
+                loadJsonSettings(uuidWidget, WIDGET_NAMESPACE))
     }()) continue
     return uuidWidget
 }
@@ -658,7 +660,7 @@ private DashboardSettings getDashboardSetting(String classFqn, String contentCod
  */
 private String generateDashboardKey(String classFqn, String contentCode, String login = null)
 {
-    String type = utils.get(classFqn)?.metaClass?.toString()
+    String type = api.utils.get(classFqn)?.metaClass?.toString()
     String loginKeyPart = login ? "_${login}" : ''
     return "${type}_${contentCode}${loginKeyPart}"
 }
@@ -670,7 +672,7 @@ private String generateDashboardKey(String classFqn, String contentCode, String 
  */
 private DashboardSettings getDashboardSetting(String dashboardKey)
 {
-    return getSettingsFromJson(loadJsonSettings(dashboardKey)) as DashboardSettings
+    return getSettingsFromJson(loadJsonSettings(dashboardKey, DASHBOARD_NAMESPACE)) as DashboardSettings
 }
 
 /**
@@ -681,7 +683,7 @@ private DashboardSettings getDashboardSetting(String dashboardKey)
  */
 private Map<String, Object> getWidgetSettings(String widgetKey)
 {
-    return getSettingsFromJson(loadJsonSettings(widgetKey)) as Map<String, Object>
+    return getSettingsFromJson(loadJsonSettings(widgetKey, WIDGET_NAMESPACE)) as Map<String, Object>
 }
 
 /**
@@ -705,7 +707,7 @@ private checkRightsOnDashboard(def user, String messageError)
  */
 private boolean checkUserOnMasterDashboard(def user)
 {
-    user?.UUID ? GROUP_MASTER_DASHBOARD in utils.get(user.UUID).all_Group*.code : true
+    user?.UUID ? GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code : true
 }
 
 /**
@@ -756,9 +758,9 @@ private def setUuidInSettings(def widgetSettings, String key)
  * @param predicate - метод дополнительной фильтрации
  * @return коллекцию ключей и настроек
  */
-private Map<String, String> findJsonSettings(String keyPart, Closure<Boolean> predicate = { key, value -> true })
+private Map<String, String> findJsonSettings(String keyPart, String namespace, Closure<Boolean> predicate = { key, value -> true })
 {
-    return api.keyValue.find(NAMESPACE, keyPart, predicate)
+    return api.keyValue.find(namespace, keyPart, predicate)
 }
 
 /**
@@ -766,9 +768,9 @@ private Map<String, String> findJsonSettings(String keyPart, Closure<Boolean> pr
  * @param key - уникальный идентификатор объекта
  * @return сериализованные настройки объекта
  */
-private String loadJsonSettings(String key)
+private String loadJsonSettings(String key, String namespace)
 {
-    return api.keyValue.get(NAMESPACE, key)
+    return api.keyValue.get(namespace, key)
 }
 
 /**
@@ -777,9 +779,9 @@ private String loadJsonSettings(String key)
  * @param jsonValue - ыериализованные настройки объекта
  * @return true/false успешное/провалльное сохранение
  */
-private Boolean saveJsonSettings(String key, String jsonValue)
+private Boolean saveJsonSettings(String key, String jsonValue, String namespace)
 {
-    return api.keyValue.put(NAMESPACE, key, jsonValue)
+    return api.keyValue.put(namespace, key, jsonValue)
 }
 
 /**
@@ -787,9 +789,9 @@ private Boolean saveJsonSettings(String key, String jsonValue)
  * @param key - уникальный идентификатор объекта
  * @return true/false успешное/провалльное удаление
  */
-private Boolean deleteJsonSettings(String key)
+private Boolean deleteJsonSettings(String key, String namespace)
 {
-    return api.keyValue.delete(NAMESPACE, key)
+    return api.keyValue.delete(namespace, key)
 }
 
 /**
@@ -865,7 +867,7 @@ private String deletePersonalWidget(String classFqn,
     {
         def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
         settings.widgetIds -= widgetId
-        def res = saveJsonSettings(personalDashboardKey, toJson(settings))
+        def res = saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
         if (!res)
         {
             throw new Exception("Widget ${widgetId} not removed from dashboard: $personalDashboardKey!")
@@ -908,7 +910,7 @@ private String deleteDefaultWidget(String classFqn,
             String defaultWidget = widgetId - "_${user.login}"
             Closure<String> removeFromPersonalDashboard = this.&removeWidgetFromDashboard.curry(personalDashboardKey)
             def resultOfRemoving = removeWidgetSettings(widgetId).with(removeFromPersonalDashboard) as boolean
-            if (findJsonSettings(defaultWidget))
+            if (findJsonSettings(defaultWidget, WIDGET_NAMESPACE))
             {
                 //По воле случая может получиться так, что виджета по умолчанию уже нет(например удалён другим мастером)
                 Closure<String> removeFromDefaultDashboard = this.&removeWidgetFromDashboard.curry(dashboardKeyByLogin())
@@ -925,7 +927,7 @@ private String deleteDefaultWidget(String classFqn,
             def resultOfRemoving = removeWidgetSettings(widgetId).with { String widgetKey ->
                 // По возможности удалить и персональный виджет, если он есть
                 String personalDashboardKey = dashboardKeyByLogin(user.login as String)
-                loadJsonSettings(personalDashboardKey) // проверка на существование персонального дашборда
+                loadJsonSettings(personalDashboardKey, DASHBOARD_NAMESPACE) // проверка на существование персонального дашборда
                         ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetKey) }
                 removeWidgetFromDashboard(dashboardKeyByLogin(), widgetKey) as boolean
             }
