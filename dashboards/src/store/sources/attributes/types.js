@@ -6,6 +6,7 @@ export type Attribute = {
 	metaClassFqn: string,
 	property: string,
 	ref: Attribute | null,
+	sourceCode: string,
 	sourceName: string,
 	title: string,
 	type: $Keys<typeof SOURCE_ATTRIBUTE_TYPES>,

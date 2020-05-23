@@ -19,18 +19,18 @@ export class Node extends PureComponent<Props> {
 	};
 
 	handleClick = () => {
-		const {onClick, value} = this.props;
-		onClick(value);
+		const {data, onClick} = this.props;
+		onClick(data);
 	};
 
 	handleClickShowMore = () => {
-		const {children, getOptionValue, onLoadMoreChildren, value} = this.props;
-		onLoadMoreChildren && onLoadMoreChildren(getOptionValue(value), Children.count(children));
+		const {children, data, getOptionValue, onLoadMoreChildren} = this.props;
+		onLoadMoreChildren && onLoadMoreChildren(getOptionValue(data.value), Children.count(children));
 	};
 
 	handleClickToggleIcon = () => {
-		const {getOptionValue, onClickToggleIcon, value} = this.props;
-		onClickToggleIcon(getOptionValue(value));
+		const {data, onClickToggleIcon} = this.props;
+		onClickToggleIcon(data);
 	};
 
 	renderChildren = () => {
@@ -49,11 +49,15 @@ export class Node extends PureComponent<Props> {
 	};
 
 	renderLabel = () => {
-		const {getOptionLabel, value} = this.props;
+		const {data, disabled, getOptionLabel} = this.props;
+		const labelCN = cn({
+			[styles.label]: true,
+			[styles.disabledLabel]: disabled
+		});
 
 		return (
-			<div className={styles.label} onClick={this.handleClick}>
-				{getOptionLabel(value)}
+			<div className={labelCN} onClick={this.handleClick}>
+				{getOptionLabel(data.value)}
 			</div>
 		);
 	};
@@ -67,7 +71,7 @@ export class Node extends PureComponent<Props> {
 	);
 
 	renderLoader = () => {
-		const {loading} = this.props.value;
+		const {loading} = this.props.data;
 
 		if (loading) {
 			return <Loader className={styles.loader} />;
@@ -87,15 +91,15 @@ export class Node extends PureComponent<Props> {
 	};
 
 	renderToggleIcon = () => {
-		const {expanded, value} = this.props;
+		const {data, expanded} = this.props;
 		const {TOGGLE_COLLAPSED, TOGGLE_EXPANDED} = ICON_NAMES;
 		const name = expanded ? TOGGLE_EXPANDED : TOGGLE_COLLAPSED;
 		const iconCN = cn({
 			[styles.toggleIconContainer]: true,
-			[styles.invisibleContainer]: value.children === null
+			[styles.invisibleContainer]: data.children === null
 		});
 
-		if (!value.loading) {
+		if (!data.loading) {
 			return (
 				<div className={iconCN} onClick={this.handleClickToggleIcon}>
 					<Icon className={styles.toggleIcon} name={name} />

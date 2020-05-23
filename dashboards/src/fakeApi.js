@@ -5,7 +5,7 @@ const getCurrentContentParameters = async () => await ({
 });
 
 const getCurrentContextObject = async () => await ({
-	metaClass: 'asdasd'
+	metaClass: 'employee$employee'
 });
 
 const commands = {

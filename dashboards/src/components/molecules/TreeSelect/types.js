@@ -17,6 +17,7 @@ export type OnRemoveEvent = {
 export type Props = {
 	getOptionLabel?: (option: SelectValue) => string,
 	getOptionValue?: (option: SelectValue) => any,
+	initialSelected: Array<string>,
 	name: string,
 	onChangeLabel: OnChangeLabelEvent => void,
 	onRemove: OnRemoveEvent => void,

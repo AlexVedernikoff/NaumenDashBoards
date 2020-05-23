@@ -1,6 +1,5 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {AxisIndicator, AxisParameter, ChartSorting, DataLabels, Header, Legend} from 'store/widgets/data/types';
 import {createDefaultGroup, transformGroupFormat} from 'store/widgets/helpers';
 import type {CreateFunction, Fields, LegacyWidget} from './types';
@@ -254,7 +253,7 @@ const mixinBreakdown = (source: Object, target: Object, extendCustom: boolean = 
 	if (breakdown) {
 		target.breakdown = breakdown;
 
-		if (breakdown.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+		if (!Array.isArray(breakdown)) {
 			target.breakdownGroup = transformGroupFormat(breakdownGroup, extendCustom);
 		}
 	}

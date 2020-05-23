@@ -1,18 +1,17 @@
 // @flow
-import type {Tree} from './components/Tree/types';
+import type {NodeValue, Tree} from './components/Tree/types';
 
 export type Value = Object;
 
-export type Option = Object;
-
 export type Props = {
 	async: boolean,
-	getOptionLabel?: (option: Option) => string,
-	getOptionValue?: (option: Option) => any,
+	getOptionLabel?: (option: NodeValue) => string,
+	getOptionValue?: (option: NodeValue) => any,
+	isDisabled?: NodeValue => boolean,
 	multiple: boolean,
 	name: string,
 	onClear?: () => void,
-	onLoad: (value: string | null, offset?: number) => void,
+	onLoad: (value: NodeValue | null, offset?: number) => void,
 	onRemove?: (value: string) => void,
 	onSelect: (name: string, value: Value) => void,
 	options: Tree,

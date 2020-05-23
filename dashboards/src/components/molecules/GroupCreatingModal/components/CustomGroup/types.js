@@ -36,11 +36,11 @@ type Option = {
 export type AttrCustomProps = {|
 	createCondition: CreateCondition,
 	groups: Array<StoreCustomGroup>,
+	operandData?: Object,
 	options: Array<Option>,
 	renderCondition: RenderCondition,
 	resolveConditionRule: ResolveConditionRule,
 	type: string,
-	updateDate?: Date
 |};
 
 export type Props = {
@@ -80,7 +80,7 @@ export type InfoPanelProps = {
 export type ContextProps = {
 	createCondition: CreateCondition,
 	errors: ErrorsMap,
+	operandData?: Object,
 	options: Array<Object>,
-	renderCondition: RenderCondition,
-	updateDate: Date
+	renderCondition: RenderCondition
 };

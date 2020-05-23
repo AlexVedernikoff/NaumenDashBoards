@@ -1,5 +1,6 @@
 // @flow
 import {DATA_SOURCES_EVENTS} from './constants';
+import type {TreeNode} from 'components/types';
 
 export type RawDataSource = {
 	children: Array<RawDataSource>,
@@ -7,13 +8,12 @@ export type RawDataSource = {
 	title: string
 };
 
-export type DataSource = {
-	children: Array<string> | null,
+type Source = {
 	label: string,
-	root: boolean,
-	uploaded: true,
-	value: string
+	value: string,
 };
+
+export type DataSource = TreeNode<Source>;
 
 export type DataSourceMap = {
 	[key: string]: DataSource

@@ -1,37 +1,33 @@
 // @flow
-import type {Value as SelectValue} from 'components/molecules/MaterialTreeSelect/types';
+import type {TreeNode} from 'components/types';
 
-export type Node = {
-	children: Array<string> | null,
-	error: boolean,
-	loading: boolean,
-	root: boolean,
-	uploaded: boolean,
-	[string]: string
-};
+export type NodeValue = Object;
+
+export type Node = TreeNode<Object>;
 
 export type Tree = {
 	[string]: Node
 };
 
-export type Value = Object;
-
 export type Props = {
 	className: string,
 	getOptionLabel: (option: Node | null) => string,
 	getOptionValue: (option: Node | null) => string,
+	initialSelected: Array<string>,
+	isDisabled?: NodeValue => boolean,
 	multiple: boolean,
-	onLoad?: (value: string | null, offset?: number) => void,
-	onSelect: SelectValue => void,
+	onLoad?: (value: NodeValue | null, offset?: number) => void,
+	onSelect: Node => void,
 	options: Tree,
 	show: boolean,
 	showMore: boolean,
-	value: Value | null,
-	values: Array<Value>
+	value: NodeValue | null,
+	values: Array<NodeValue>
 };
 
 export type State = {
-	expandedValues: Array<string>,
-	foundValues: Array<string>,
-	searchValue: string
+	expandedNodes: Array<string>,
+	foundIds: Array<string>,
+	searchValue: string,
+	selectedIds: Array<string>
 };

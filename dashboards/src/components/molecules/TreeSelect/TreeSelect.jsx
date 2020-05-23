@@ -2,14 +2,15 @@
 import {IconButton, OutsideClickDetector} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {InputForm as LabelEditingForm} from 'components/molecules';
+import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import type {Source as SourceValue} from 'store/widgets/data/types';
 import styles from './styles.less';
 import {Tree} from 'components/molecules/MaterialTreeSelect/components';
 
 export class TreeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
+		initialSelected: [],
 		placeholder: 'Выберите значение'
 	};
 
@@ -61,11 +62,11 @@ export class TreeSelect extends PureComponent<Props, State> {
 		onSelect({name, value: null});
 	};
 
-	handleSelect = (value: SourceValue) => {
+	handleSelect = (node: Node) => {
 		const {name, onSelect} = this.props;
 
 		this.setState({showList: false});
-		onSelect({name, value});
+		onSelect({name, value: node.value});
 	};
 
 	handleShowList = () => this.setState({showList: !this.state.showList});
@@ -127,7 +128,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 	);
 
 	renderTree = () => {
-		const {options, value} = this.props;
+		const {initialSelected, options, value} = this.props;
 		const {showList} = this.state;
 
 		return (
@@ -135,6 +136,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 				className={styles.list}
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
+				initialSelected={initialSelected}
 				onSelect={this.handleSelect}
 				options={options}
 				show={showList}

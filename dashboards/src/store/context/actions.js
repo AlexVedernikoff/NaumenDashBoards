@@ -10,9 +10,13 @@ const getContext = (): ThunkAction => (dispatch: Dispatch) => {
 	const {jsApi} = window;
 	const contentCode = jsApi.findContentCode();
 	const subjectUuid = jsApi.extractSubjectUuid();
-	const context = {contentCode, subjectUuid};
 
-	dispatch(setContext(context));
+	dispatch(setContext({contentCode, subjectUuid}));
+};
+
+const getMetaCLass = (): ThunkAction => async (dispatch: Dispatch) => {
+	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
+	dispatch(setContext({metaClass}));
 };
 
 const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
@@ -84,6 +88,7 @@ const startSwitch = () => ({
 
 export {
 	getContext,
+	getMetaCLass,
 	getUserData,
 	setTemp,
 	setUserData,

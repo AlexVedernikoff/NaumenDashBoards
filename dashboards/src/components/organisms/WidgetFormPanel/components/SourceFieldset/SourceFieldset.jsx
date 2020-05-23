@@ -122,10 +122,16 @@ export class SourceFieldset extends PureComponent<Props> {
 	renderSourceSelect = () => {
 		const {errors, index, set, sources} = this.props;
 		const {source} = set;
+		let initialSelected;
+
+		if (source) {
+			initialSelected = [source.value];
+		}
 
 		return (
 			<FormField error={errors[getDataErrorKey(index, FIELDS.source)]} small>
 				<TreeSelect
+					initialSelected={initialSelected}
 					name={FIELDS.source}
 					onChangeLabel={this.handleChangeSourceLabel}
 					onRemove={this.handleRemoveSource}

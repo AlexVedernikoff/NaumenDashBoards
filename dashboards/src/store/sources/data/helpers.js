@@ -6,13 +6,22 @@ import type {
 	ReceiveDataSources
 } from './types';
 
-const createDataSource = (source: RawDataSource, root: boolean = false) => ({
-	children: null,
-	root,
-	label: source.title,
-	value: source.classFqn,
-	uploaded: true
-});
+const createDataSource = (source: RawDataSource, parent: string | null) => {
+	const {classFqn: value, title: label} = source;
+
+	return {
+		children: null,
+		error: false,
+		id: value,
+		loading: false,
+		parent,
+		value: {
+			label,
+			value
+		},
+		uploaded: true
+	};
+};
 
 const setChildrenDataSources = (map: DataSourceMap, classFqn: string, children: Array<RawDataSource>) => {
 	if (children.length > 0) {
@@ -20,7 +29,7 @@ const setChildrenDataSources = (map: DataSourceMap, classFqn: string, children: 
 	}
 
 	children.forEach(source => {
-		map[source.classFqn] = createDataSource(source);
+		map[source.classFqn] = createDataSource(source, classFqn);
 		setChildrenDataSources(map, source.classFqn, source.children);
 	});
 };
@@ -36,7 +45,7 @@ export const setDataSources = (state: DataSourcesState, {payload}: ReceiveDataSo
 
 	payload.forEach(source => {
 		const {children, classFqn} = source;
-		map[classFqn] = createDataSource(source, true);
+		map[classFqn] = createDataSource(source, null);
 
 		setChildrenDataSources(map, classFqn, children);
 	});

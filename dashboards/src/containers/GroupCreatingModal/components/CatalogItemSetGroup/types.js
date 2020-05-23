@@ -1,14 +1,17 @@
 // @flow
-import type {AttributeGroupProps} from 'containers/GroupCreatingModal/types';
+import type {AttributeGroupProps, FetchCurrentObjectAttributes} from 'containers/GroupCreatingModal/types';
 import type {CatalogItemSetData} from 'store/sources/attributesData/catalogItemSets/types';
 import type {ThunkAction} from 'store/types';
+import type {TypeData} from 'store/sources/currentObject/types';
 
 export type ConnectedProps = {|
+	currentObject: TypeData,
 	selectData: CatalogItemSetData,
 |};
 
 export type ConnectedFunctions = {|
-	fetchCatalogItemSetData: (property: string) => ThunkAction
+	fetchCatalogItemSetData: (property: string) => ThunkAction,
+	fetchCurrentObjectAttributes: FetchCurrentObjectAttributes
 |};
 
 export type Props = {|
@@ -18,6 +21,5 @@ export type Props = {|
 |};
 
 export type State = {
-	customType: string,
-	updateDate: Date
+	customType: string
 };
