@@ -266,7 +266,6 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
         case COMBO:
             def normRequest = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
-            //TODO: требуется вариативность в наличии разбивок в источниках
             def (firstAdditionalData, secondAdditionalData) = (requestContent.data as Map)
                     .findAll { key, value -> !(value.sourceForCompute) }
                     .collect { key, value ->
@@ -303,9 +302,31 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         def xAxis = data.xAxis as Map<String, Object>
         def group = data.group as Map<String, Object>
         def groupParameter = buildSystemGroup(group, xAxis)
-        def breakdown = data.breakdown?.with {
-            buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+
+        def mayBeBreakdown = data.breakdown
+        def breakdownMap = [:]
+        def breakdown = null
+
+        if (mayBeBreakdown instanceof Collection) {
+            def groupTypes = data.breakdown*.group as Set
+            // Это список типов группировок.
+            // По хорошему они должны быть одинаковыми.
+            // Не знаю почему фронт шлёт их на каждый атрибут...
+            if (groupTypes.size() == 1) {
+                //Группировка одного типа можно продолжать
+                breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
+                }
+            } else {
+                throw new IllegalArgumentException("Does not match group types: $groupTypes")
+            }
+        } else {
+            //это обычная разбивка... Ну или кастомная
+            breakdown = mayBeBreakdown?.with {
+                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+            }
         }
+
         def res = new RequestData(
                 source: source,
                 aggregations: [aggregationParameter],
@@ -313,10 +334,20 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         )
 
         def comp = yAxis?.stringForCompute?.with {
+            def compData = yAxis.computeData as Map
             [
                     formula    : it as String,
                     title      : yAxis.title as String,
-                    computeData: yAxis.computeData as Map<String, Object>
+                    computeData: compData.collectEntries { k, v ->
+                        String dataKey = v.dataKey
+                        def br = breakdownMap[dataKey] as GroupParameter
+                        def aggr = new AggregationParameter(
+                                title: 'aggregation',
+                                type: v.aggregation as Aggregation,
+                                attribute: mappingAttribute(v.attr as Map)
+                        )
+                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                    }
             ]
         }
 
@@ -362,21 +393,53 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 attribute: mappingAttribute(indicator)
         )
 
-        def breakdown = data.breakdown as Map<String, Object>
-        def group = data.breakdownGroup as Map<String, Object>
-        def groupParameter = buildSystemGroup(group, breakdown)
+        def mayBeBreakdown = data.breakdown
+        def breakdownMap = [:]
+        GroupParameter breakdown = null
+
+        if (mayBeBreakdown instanceof Collection) {
+            def groupTypes = data.breakdown*.group as Set
+            // Это список типов группировок.
+            // По хорошему они должны быть одинаковыми.
+            // Не знаю почему фронт шлёт их на каждый атрибут...
+            if (groupTypes.size() == 1) {
+                //Группировка одного типа можно продолжать
+                breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
+                }
+            } else {
+                throw new IllegalArgumentException("Does not match group types: $groupTypes")
+            }
+        } else {
+            //это обычная разбивка... Ну или кастомная
+            breakdown = mayBeBreakdown?.with {
+                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+            }
+        }
 
         def res = new RequestData(
                 source: source,
                 aggregations: [aggregationParameter],
-                groups: [groupParameter].grep()
+                groups: [breakdown].grep()
         )
 
         def comp = indicator?.stringForCompute?.with {
+            def compData = indicator.computeData as Map
             [
-                    formula    : it as String,
-                    title      : indicator.title as String,
-                    computeData: indicator.computeData as Map<String, Object>
+                    [
+                            formula    : it as String,
+                            title      : yAxis.title as String,
+                            computeData: compData.collectEntries { k, v ->
+                                String dataKey = v.dataKey
+                                def br = breakdownMap[dataKey] as GroupParameter
+                                def aggr = new AggregationParameter(
+                                        title: 'aggregation',
+                                        type: v.aggregation as Aggregation,
+                                        attribute: mappingAttribute(v.attr as Map)
+                                )
+                                [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                            }
+                    ]
             ]
         }
 
@@ -393,8 +456,8 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
-        def customGroup = group?.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(breakdown)] + (group.data as Map<String, Object>)
+        def customGroup = data.breakdownGroup?.way == 'CUSTOM'
+                ? [attribute: mappingAttribute(breakdown)] + (data.breakdownGroup.data as Map<String, Object>)
                 : null
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
@@ -424,10 +487,19 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
         def res = new RequestData(source: source, aggregations: [aggregationParameter])
 
         def comp = indicator?.stringForCompute?.with {
+            def compData = indicator.computeData as Map
             [
                     formula    : it as String,
                     title      : indicator.title as String,
-                    computeData: indicator.computeData as Map<String, Object>
+                    computeData: compData.collectEntries { k, v ->
+                        String dataKey = v.dataKey
+                        def aggr = new AggregationParameter(
+                                title: 'aggregation',
+                                type: v.aggregation as Aggregation,
+                                attribute: mappingAttribute(v.attr as Map)
+                        )
+                        [(k): [aggregation: aggr, dataKey: dataKey]]
+                    }
             ]
         }
         String attributeTitle = indicator?.title
@@ -473,10 +545,29 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
         def groupParameter = new GroupParameter(title: 'row', type: GroupType.OVERLAP, attribute: mappingAttribute(row))
 
         //а вот разбивка может быть кастомной.
-        def breakdown = data.breakdown as Map<String, Object>
-        def breakdownGroup = data.breakdownGroup as Map<String, Object>
+        def mayBeBreakdown = data.breakdown
+        def breakdownMap = [:]
+        def breakdownParameter = null
 
-        def breakdownParameter = buildSystemGroup(breakdownGroup, breakdown)
+        if (mayBeBreakdown instanceof Collection) {
+            def groupTypes = data.breakdown*.group as Set
+            // Это список типов группировок.
+            // По хорошему они должны быть одинаковыми.
+            // Не знаю почему фронт шлёт их на каждый атрибут...
+            if (groupTypes.size() == 1) {
+                //Группировка одного типа можно продолжать
+                breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
+                }
+            } else {
+                throw new IllegalArgumentException("Does not match group types: $groupTypes")
+            }
+        } else {
+            //это обычная разбивка... Ну или кастомная
+            breakdownParameter = mayBeBreakdown?.with {
+                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+            }
+        }
 
         def res = new RequestData(
                 source: source,
@@ -485,10 +576,20 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
         )
 
         def comp = column?.stringForCompute?.with {
+            def compData = column.computeData as Map
             [
                     formula    : it as String,
                     title      : column.title as String,
-                    computeData: column.computeData as Map<String, Object>
+                    computeData: compData.collectEntries { k, v ->
+                        String dataKey = v.dataKey
+                        def br = breakdownMap[dataKey] as GroupParameter
+                        def aggr = new AggregationParameter(
+                                title: 'aggregation',
+                                type: v.aggregation as Aggregation,
+                                attribute: mappingAttribute(v.attr as Map)
+                        )
+                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                    }
             ]
         }
 
@@ -505,8 +606,8 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
-        def customGroup = breakdownGroup?.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(breakdown)] + (breakdownGroup.data as Map<String, Object>)
+        def customGroup = data.breakdownGroup?.way == 'CUSTOM'
+                ? [attribute: mappingAttribute(breakdownParameter)] + (data.breakdownGroup.data as Map<String, Object>)
                 : null
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
@@ -536,9 +637,30 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         def group = data.group as Map<String, Object>
 
         def groupParameter = buildSystemGroup(group, xAxis)
-        def breakdown = data.breakdown?.with {
-            buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+        def mayBeBreakdown = data.breakdown
+        def breakdownMap = [:]
+        def breakdown = null
+
+        if (mayBeBreakdown instanceof Collection) {
+            def groupTypes = data.breakdown*.group as Set
+            // Это список типов группировок.
+            // По хорошему они должны быть одинаковыми.
+            // Не знаю почему фронт шлёт их на каждый атрибут...
+            if (groupTypes.size() == 1) {
+                //Группировка одного типа можно продолжать
+                breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
+                }
+            } else {
+                throw new IllegalArgumentException("Does not match group types: $groupTypes")
+            }
+        } else {
+            //это обычная разбивка... Ну или кастомная
+            breakdown = mayBeBreakdown?.with {
+                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+            }
         }
+
         def res = new RequestData(
                 source: source,
                 aggregations: [aggregationParameter],
@@ -546,10 +668,20 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         )
 
         def comp = !(data.sourceForCompute) ? yAxis.stringForCompute?.with {
+            def compData = yAxis.computeData as Map
             [
                     formula    : it as String,
                     title      : yAxis.title as String,
-                    computeData: yAxis.computeData as Map<String, Object>
+                    computeData: compData.collectEntries { k, v ->
+                        String dataKey = v.dataKey
+                        def br = breakdownMap[dataKey] as GroupParameter
+                        def aggr = new AggregationParameter(
+                                title: 'aggregation',
+                                type: v.aggregation as Aggregation,
+                                attribute: mappingAttribute(v.attr as Map)
+                        )
+                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                    }
             ]
         } : null
 
@@ -625,8 +757,6 @@ private GroupType getDTIntervalGroupType(String groupType) {
  * @return
  */
 private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, String subjectUUID) {
-    //TODO: пропихнуть этот параметр в фильтры
-
     // доводим запрос до совершенства/ шлифуем вычисления
     Closure getRequestData = { String key -> intermediateData[key].requestData }
     def computationDataRequest = intermediateData
@@ -720,19 +850,12 @@ private Map<String, RequestData> produceComputationData(Closure getData, Map map
 
     variableNames.collectEntries { variableName ->
         def comp = computeData[variableName] as Map<String, Object>
-
-        def attribute = comp.attr as Map<String, Object>
-        def aggregationType = comp.aggregation as Aggregation
         def dataKey = comp.dataKey as String // этот ключь указывает на источник вместе с группировками
-
         def requestData = getData(dataKey) as RequestData
-        def aggregationParameter = new AggregationParameter(
-                title: 'aggregation',
-                type: aggregationType,
-                attribute: mappingAttribute(attribute)
-        )
-        //TODO: в дальнейшем придётся тут обрабатывать ещё и разбивку
-        requestData.aggregations = [aggregationParameter]
+        def group = computeData.group as GroupParameter
+        def aggregation = computeData.aggregation as AggregationParameter
+        requestData.aggregations = [aggregation] // предполагаем что количество агрегаций будет не больше одной
+        requestData.groups = (requestData.groups + group).grep() // группировку нужно будет добавить к существующим
         [(variableName): requestData]
     }
 }
@@ -792,19 +915,20 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
             return this.&mappingNumberTypeFilters.curry({ it as long })
         case AttributeType.DOUBLE:
             return this.&mappingNumberTypeFilters.curry({ it as double })
-        case AttributeType.getDateTypes():
+        case AttributeType.dateTypes:
             return this.&mappingDateTypeFilters
         case AttributeType.STATE:
             return this.&mappingStateTypeFilters
         case [AttributeType.BO_LINKS, AttributeType.BACK_BO_LINKS, AttributeType.OBJECT]:
             return this.&mappingLinkTypeFilters.curry(subjectUUID)
         case [AttributeType.CATALOG_ITEM, AttributeType.CATALOG_ITEM_SET]:
-            return this.&mappingCatalogItemTypeFilters
+            return this.&mappingCatalogItemTypeFilters.curry(subjectUUID)
         case AttributeType.META_CLASS:
-            //TODO: тут с этим не так всё просто. В критерии нет поля метакласс
+            //TODO: Реализовать.
+            // В критерии нет поля metaClass, но есть metaClassFqn
             throw new IllegalArgumentException("Still not supported attribute type: $type in custom group")
         case AttributeType.timerTypes:
-            return this.&mappingTimerTypeFilters//TODO: реализовать
+            return this.&mappingTimerTypeFilters
         default:
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
     }
@@ -1096,7 +1220,7 @@ private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConver
  */
 private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title)
 {
-    mappingFilter(data) { Map condition ->
+    return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
             return new FilterParameter(title: title, type: Comparison.BETWEEN, attribute: attribute, value: value)
@@ -1175,7 +1299,7 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
  * @return настройки группировки в удобном формате
  */
 private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
-    mappingFilter(data) { Map condition ->
+    return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
             return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
@@ -1215,7 +1339,7 @@ private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, 
  * @return настройки группировки в удобном формате
  */
 private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title) {
-    mappingFilter(data) { Map condition ->
+    return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
             return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
@@ -1384,7 +1508,6 @@ private List formatGroupSet(RequestData data, List list)
 private String formatGroup(GroupParameter parameter, String fqnClass, String value)
 {
     GroupType type = parameter.type
-    //TODO: дополнить новыми типами группировки
     switch (type)
     {
         case GroupType.OVERLAP:
