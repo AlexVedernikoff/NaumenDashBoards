@@ -100,9 +100,11 @@ enum Comparison
 
 enum AttributeType
 {
-    STRING,
+    BOOL,
     INTEGER,
     DOUBLE,
+    STRING,
+    LOCALIZED_TEXT,
 
     OBJECT,
     BO_LINKS,
@@ -110,15 +112,12 @@ enum AttributeType
     CATALOG_ITEM,
     CATALOG_ITEM_SET,
 
+    STATE,
+    META_CLASS,
+
     DATE,
     DATE_TIME,
     DT_INTERVAL,
-
-    STATE,
-    LOCALIZED_TEXT,
-
-    META_CLASS,
-
     TIMER,
     BACK_TIMER
 

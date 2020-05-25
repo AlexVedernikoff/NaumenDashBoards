@@ -76,7 +76,7 @@ String getAttributesFromLinkAttribute(requestContent)
 {
     def linkAttribute = requestContent.linkAttribute as Map
     String attributeType = linkAttribute.type
-    if (!((attributeType as AttributeType) in AttributeType.getLinkTypes()))
+    if (!((attributeType as AttributeType) in AttributeType.linkTypes))
         throw new Exception("Not supported type: ${attributeType}")
 
     String attributeClassFqn = linkAttribute.property
@@ -101,16 +101,16 @@ String getAttributeObject(Map requestContent)
             ? getChildren(classFqn, uuid, condition + [parent: uuid])
             : getTop(classFqn, condition)
 
-    def result = getObjects(intermediateData, count, offset).collect { el ->
+    def result = getObjects(intermediateData, count, offset).collect { object ->
         [
-                title   : el.title,
-                uuid    : el.UUID,
-                property: el.metaClass as String,
+                title   : object.title,
+                uuid    : object.UUID,
+                property: object.metaClass as String,
                 children: getAllInheritanceChains()
-                        .findAll { it*.code.contains(el.metaClass as String) }
+                        .findAll { it*.code.contains(object.metaClass as String) }
                         .collect { it*.code as Set }
                         .inject { first, second -> first + second }
-                        .collect { api.utils.count(it, [parent: el.UUID]) as int }
+                        .collect { api.utils.count(it, [parent: object.UUID]) as int }
                         .inject(0) {first, second -> first + second }
         ]
     }
@@ -163,10 +163,10 @@ String getCatalogItemObject(Map requestContent)
     count?.with { searchParameter.limit(it as int) }
     offset?.with { searchParameter.offset(offset as int) }
 
-    def result = api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect { el ->
+    def result = api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect {
         [
-                title   : el.title,
-                uuid    : el.UUID
+                title   : it.title,
+                uuid    : it.UUID
         ]
     }
     return toJson(result)
@@ -188,9 +188,7 @@ String getStates(String classFqn)
 }
 
 
-String getTimerStatuses()
-{
-    //TODO: по хорошему эти значение нужно запрашивать у системы
+String getTimerStatuses() {
     return ru.naumen.core.shared.timer.Status.values().collect {
         [title: it.name(), uuid: it.code]
     }
@@ -374,22 +372,26 @@ private AttributeType getAttributeType(String lowerCaseName)
 {
     switch (lowerCaseName)
     {
-        case 'string': return AttributeType.STRING
+        case 'bool': return AttributeType.BOOL
         case 'integer': return AttributeType.INTEGER
         case 'double': return AttributeType.DOUBLE
+        case 'string': return AttributeType.STRING
+        case 'localizedText': return AttributeType.LOCALIZED_TEXT
+
         case 'object': return AttributeType.OBJECT
         case 'boLinks': return AttributeType.BO_LINKS
         case 'backBoLinks': return AttributeType.BACK_BO_LINKS
         case 'catalogItem': return AttributeType.CATALOG_ITEM
         case 'catalogItemSet': return AttributeType.CATALOG_ITEM_SET
+
         case 'date': return AttributeType.DATE
         case 'dateTime': return AttributeType.DATE_TIME
         case 'dtInterval': return AttributeType.DT_INTERVAL
-        case 'state': return AttributeType.STATE
-        case 'localizedText': return AttributeType.LOCALIZED_TEXT
-        case 'metaClass': return AttributeType.META_CLASS
         case 'timer': return AttributeType.TIMER
         case 'backTimer': return AttributeType.BACK_TIMER
+
+        case 'state': return AttributeType.STATE
+        case 'metaClass': return AttributeType.META_CLASS
         default: throw new IllegalArgumentException("Not supported attribute type: $lowerCaseName")
     }
 }
