@@ -928,7 +928,9 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
             // В критерии нет поля metaClass, но есть metaClassFqn
             throw new IllegalArgumentException("Still not supported attribute type: $type in custom group")
         case AttributeType.timerTypes:
-            return this.&mappingTimerTypeFilters
+            return this.&mappingTimerTypeFilters//TODO: реализовать
+        case AttributeType.BOOL: // Кастомная группировка не поддерживается
+            throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
         default:
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
     }
@@ -1366,6 +1368,23 @@ private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Att
         }
     }
 }
+
+private List<List<FilterParameter>> mappingBooleanTypeFilters(List<List> data, Attribute attribute, String title) {
+    return mappingFilter(data) { Map condition ->
+        String conditionType = condition.type
+        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
+            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
+        }
+        switch (conditionType) {
+            case 'contains':
+                return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data)
+            case 'not_contains':
+                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, attribute, condition.data)
+            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+        }
+    }
+}
+
 
 /**
  * Метод обхода настроек пользовательской группировки
