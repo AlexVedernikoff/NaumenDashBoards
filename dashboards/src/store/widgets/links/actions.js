@@ -6,8 +6,9 @@ import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {LINKS_EVENTS} from './constants';
 import type {Widget} from 'store/widgets/data/types';
 
-const getPartsClassFqn = (classFqn: ?string) => {
+const getPartsClassFqn = (code?: string) => {
 	const cases = [];
+	let classFqn = code;
 
 	if (classFqn && classFqn.includes('$')) {
 		const parts = classFqn.split('$');

@@ -6,6 +6,7 @@ import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'WidgetFormPanel/helpers';
 import {getDefaultAggregation} from '../AttributeAggregationField/helpers';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'src/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {OnSelectAttributeEvent} from 'WidgetFormPanel/types';
@@ -100,11 +101,16 @@ export class IndicatorDataBox extends Component<Props, State> {
 	};
 
 	handleSelectBreakdown = (event: OnSelectAttributeEvent, index: number) => {
-		const {setDataFieldValue, transformAttribute} = this.props;
+		const {setDataFieldValue, transformAttribute, values} = this.props;
 		const {name} = event;
-		const value = transformAttribute(event, this.handleSelectBreakdown, index);
+		const {[name]: prevValue} = values.data[index];
+		const nextValue = transformAttribute(event, this.handleSelectBreakdown, index);
 
-		setDataFieldValue(index, name, value);
+		if (nextValue.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!prevValue || prevValue.type !== nextValue.type)) {
+			setDataFieldValue(index, FIELDS.breakdownGroup, getDefaultSystemGroup(nextValue));
+		}
+
+		setDataFieldValue(index, name, nextValue);
 	};
 
 	handleSelectIndicator = (event: OnSelectAttributeEvent, index: number) => {

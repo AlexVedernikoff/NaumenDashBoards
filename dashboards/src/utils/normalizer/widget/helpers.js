@@ -160,10 +160,12 @@ const header = (widget: Object): Header => {
 
 /**
  * Преобразует устаревший формат положения легенды
- * @param {any} position - позиция легенды виджета
+ * @param {any} value - позиция легенды виджета
  * @returns {string}
  */
-const getLegendPosition = (position: any) => {
+const getLegendPosition = (value: any) => {
+	let position = value;
+
 	if (typeof position !== 'string') {
 		position = position && typeof position === 'object' ? position.value : LEGEND_POSITIONS.bottom;
 	}

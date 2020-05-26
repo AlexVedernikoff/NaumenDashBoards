@@ -19,26 +19,28 @@ import {getBuildSet} from 'store/widgets/data/helpers';
 import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const yAxisLabelFormatter = (showPercent: boolean) => (val: number | string, param?: Object | number) => {
+	let label = val;
+
 	/**
 	 * toFixed необходимо использовать только для значений оси Y. Но т.к в библиотеке можно указать только одну
 	 * функцию форматирования значений, необходимо ориентироваться по параметру param. Только в случае когда функция
 	 * используется для значения оси, param - не undefined.
 	 */
-	if (param && typeof val === 'number') {
-		if (!Number.isInteger(val)) {
-			val = val.toFixed(2);
+	if (label && typeof label === 'number') {
+		if (!Number.isInteger(label)) {
+			label = label.toFixed(2);
 		}
 
 		if (showPercent) {
-			val = `${val}%`;
+			label = `${val}%`;
 		}
 	}
 
-	if (typeof val === 'string' && val.length > 25) {
-		val = `${val.substring(0, 20)}...`;
+	if (typeof label === 'string' && label.length > 25) {
+		label = `${label.substring(0, 20)}...`;
 	}
 
-	return val;
+	return label;
 };
 
 const getXAxisOptions = (parameter: AxisParameter, categories: Array<string> = []) => {
@@ -77,15 +79,17 @@ const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation
 			maxWidth: undefined
 		},
 		max: (currentMax: number) => {
+			let totalMax = currentMax;
+
 			if (max) {
-				currentMax = Number(max);
+				totalMax = Number(max);
 			}
 
 			if (min && min > currentMax) {
-				currentMax = min + 1;
+				totalMax = min + 1;
 			}
 
-			return currentMax > 0 ? Math.ceil(currentMax) : 1;
+			return totalMax > 0 ? Math.ceil(totalMax) : 1;
 		},
 		min: Number(min) || 0,
 		show

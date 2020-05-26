@@ -1,10 +1,11 @@
 // @flow
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createDefaultGroup} from 'store/widgets/helpers';
-import {FieldButton} from 'components/atoms';
+import {FieldButton, Icon} from 'components/atoms';
 import type {Group} from 'store/widgets/data/types';
 import GroupCreatingModal from 'containers/GroupCreatingModal';
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import {GROUP_WAYS} from 'store/widgets/constants';
+import {ICONS} from './constants';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 
@@ -18,20 +19,23 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 	};
 
 	getIconName = () => {
-		const {value: attribute} = this.props.field;
-		const type = attribute ? attribute.type : '';
+		const {field, value} = this.props;
+		const {CUSTOM, SYSTEM} = GROUP_WAYS;
 		const {DATE, NUMBER} = ATTRIBUTE_SETS;
-		const {TOUCH_CALENDAR, TOUCH_NUMBER, TOUCH_TEXT} = ICON_NAMES;
+		const {value: attribute} = field;
+		const type = attribute ? attribute.type : '';
+		const way = value && typeof value === 'object' && value.way === CUSTOM ? CUSTOM : SYSTEM;
+		const {calendar, number, text} = ICONS[way];
 
 		if (type in NUMBER) {
-			return TOUCH_NUMBER;
+			return number;
 		}
 
 		if (type in DATE) {
-			return TOUCH_CALENDAR;
+			return calendar;
 		}
 
-		return TOUCH_TEXT;
+		return text;
 	};
 
 	handleClickFieldButton = () => this.setState({showModal: true});

@@ -32,6 +32,7 @@
 		"local-rules/sort-imports": 2,
 		"local-rules/sort-class-methods": 2,
 		"flowtype/semi": 2,
+		"no-param-reassign": 2,
 		"no-tabs": 0,
 		"operator-linebreak": ["error", "before"],
 		"react/jsx-tag-spacing": [2, {"beforeSelfClosing": "always"}],

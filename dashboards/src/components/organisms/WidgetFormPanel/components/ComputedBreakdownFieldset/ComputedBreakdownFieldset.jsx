@@ -18,7 +18,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 			const mainParameter = value[0][FIELDS.value];
 
 			if (mainParameter) {
-				options = filterByAttribute(options, mainParameter);
+				return filterByAttribute(options, mainParameter);
 			}
 		}
 
@@ -42,16 +42,16 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		}
 
 		breakdown = breakdown.map((set, index) => {
-			set = {
+			const updatedSet = {
 				...set,
 				group
 			};
 
 			if (index === 0) {
-				set[FIELDS.value] = value;
+				updatedSet[FIELDS.value] = value;
 			}
 
-			return set;
+			return updatedSet;
 		});
 
 		onChange(index, breakdownName, breakdown);

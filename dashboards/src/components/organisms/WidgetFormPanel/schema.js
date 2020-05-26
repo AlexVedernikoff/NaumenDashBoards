@@ -26,11 +26,13 @@ const getErrorMessage = (key: string) => {
  * @returns {boolean}
  */
 const validateAttribute = (value: Attribute | null) => {
-	if (value && value.type in ATTRIBUTE_SETS.REF) {
-		value = value.ref;
+	let attribute = value;
+
+	if (attribute && attribute.type in ATTRIBUTE_SETS.REF) {
+		attribute = attribute.ref;
 	}
 
-	return !!value;
+	return !!attribute;
 };
 
 const base = {
@@ -86,13 +88,15 @@ const conditionalBreakdown = (indicatorName: string) => mixed().when(FIELDS.with
  * @returns {object}
  */
 const requiredByCompute = (key: string, rule: Object) => {
-	if (!rule) {
-		rule = requiredAttribute(getErrorMessage(key));
+	let computeRule = rule;
+
+	if (!computeRule) {
+		computeRule = requiredAttribute(getErrorMessage(key));
 	}
 
 	return mixed().when(FIELDS.sourceForCompute, {
 		is: false,
-		then: rule
+		then: computeRule
 	}).nullable();
 };
 

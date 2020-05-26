@@ -189,8 +189,8 @@ export class DataFormBuilder extends Component<Props> {
 					ref: this.getTitleAttribute(refAttributes[key].data)
 				};
 			} else {
-				event = {...event, parent, value};
-				fetchRefAttributes(value, this.onLoadRefAttributes(event, callback, ...rest));
+				const callbackEvent = {...event, parent, value};
+				fetchRefAttributes(value, this.onLoadRefAttributes(callbackEvent, callback, ...rest));
 			}
 		}
 
