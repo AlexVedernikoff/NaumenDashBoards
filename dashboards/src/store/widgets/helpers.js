@@ -5,7 +5,7 @@ import {DATETIME_SYSTEM_GROUP, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from './constan
 import type {Group} from './data/types';
 import {store} from 'src';
 
-const createDefaultGroup = (data: string | null, attribute?: Attribute) => {
+const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
 		return getDefaultSystemGroup(attribute);
 	}
@@ -19,20 +19,20 @@ const createDefaultGroup = (data: string | null, attribute?: Attribute) => {
 const isGroupKey = (key: string) => /group/i.test(key);
 
 const transformGroupFormat = (group?: Group, extendCustom: boolean = true) => {
-	if (typeof group === 'string') {
-		group = createDefaultGroup(group);
-	}
+	let resultGroup = group;
 
-	if (extendCustom && group && typeof group === 'object' && group.way === GROUP_WAYS.CUSTOM) {
+	if (!group || typeof group !== 'object') {
+		resultGroup = createDefaultGroup(group);
+	} else if (extendCustom && group.way === GROUP_WAYS.CUSTOM) {
 		const {customGroups} = store.getState();
 
-		group = {
+		resultGroup = {
 			...group,
 			data: customGroups[group.data]
 		};
 	}
 
-	return group;
+	return resultGroup;
 };
 
 const getDefaultSystemGroup = (attribute: Object) => attribute && typeof attribute === 'object' && attribute.type in ATTRIBUTE_SETS.DATE

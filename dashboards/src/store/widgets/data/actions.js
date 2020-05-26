@@ -104,11 +104,11 @@ const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, g
 
 /**
  * Сохраняет массив виджетов и получает данные для построения
- * @param {Array<object>} payload - данные формы редактирования
+ * @param {Array<object>} widgets - данные формы редактирования
  * @returns {ThunkAction}
  */
-const setWidgets = (payload: Array<Object>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	payload = payload.map(normalizer.widget);
+const setWidgets = (widgets: Array<Object>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	const payload = widgets.map(normalizer.widget);
 
 	dispatch({
 		type: WIDGETS_EVENTS.SET_WIDGETS,
@@ -134,14 +134,13 @@ const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch,
 		};
 		const {data: id} = await client.post(url, params);
 
-		widget = {...widget, id, layout: {...widget.layout, i: id}};
-		dispatch(setCreatedWidget(widget));
+		const createdWidget = {...widget, id, layout: {...widget.layout, i: id}};
+		dispatch(setCreatedWidget(createdWidget));
+		dispatch(fetchBuildData(createdWidget));
 		dispatch(saveNewLayout());
 	} catch (e) {
 		dispatch(recordSaveError());
 	}
-
-	dispatch(fetchBuildData(widget));
 };
 
 /**

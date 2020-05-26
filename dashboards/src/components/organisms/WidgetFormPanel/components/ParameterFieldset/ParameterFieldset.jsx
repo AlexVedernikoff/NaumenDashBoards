@@ -16,7 +16,7 @@ export class ParameterFieldset extends Component<Props> {
 		const mainParameter = mainSet[name];
 
 		if (currentSet !== mainSet && !this.isDisabled() && mainParameter) {
-			options = filterByAttribute(options, mainParameter);
+			return filterByAttribute(options, mainParameter);
 		}
 
 		return options;

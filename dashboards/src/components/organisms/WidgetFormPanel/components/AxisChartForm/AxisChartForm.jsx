@@ -1,5 +1,5 @@
 // @flow
-import {array, lazy, mixed, object} from 'yup';
+import {array, lazy, object} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {AxisWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';

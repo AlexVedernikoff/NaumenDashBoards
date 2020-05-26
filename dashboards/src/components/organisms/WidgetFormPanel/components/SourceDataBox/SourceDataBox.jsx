@@ -1,6 +1,6 @@
 // @flow
 import {FIELDS} from 'WidgetFormPanel/constants';
-import {FormBox, FormField} from 'components/molecules';
+import {FormBox} from 'components/molecules';
 import {IconButton} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
@@ -38,15 +38,16 @@ export class SourceDataBox extends Component<Props> {
 
 	addSet = (count: number = 1) => {
 		const {data, setFieldValue} = this.props;
+		let currentCount = count;
 
-		while (count > 0) {
+		while (currentCount > 0) {
 			data.push({
 				[FIELDS.dataKey]: uuid(),
 				[FIELDS.descriptor]: '',
 				[FIELDS.sourceForCompute]: true
 			});
 			setFieldValue(FIELDS.data, data);
-			count--;
+			currentCount--;
 		}
 
 		return data;
@@ -163,20 +164,19 @@ export class SourceDataBox extends Component<Props> {
 		const removable = data.length > minCountBuildingSources;
 
 		return (
-			<FormField key={index}>
-				<SourceFieldset
-					errors={errors}
-					index={index}
-					name={FIELDS.source}
-					onChange={setDataFieldValue}
-					onChangeCompute={this.handleChangeCompute}
-					onRemove={this.removeSet}
-					onSelectSource={this.handleSelectSource}
-					removable={removable}
-					set={set}
-					sources={sources}
-				/>
-			</FormField>
+			<SourceFieldset
+				errors={errors}
+				index={index}
+				key={index}
+				name={FIELDS.source}
+				onChange={setDataFieldValue}
+				onChangeCompute={this.handleChangeCompute}
+				onRemove={this.removeSet}
+				onSelectSource={this.handleSelectSource}
+				removable={removable}
+				set={set}
+				sources={sources}
+			/>
 		);
 	};
 

@@ -27,12 +27,13 @@ export class MultiSelectOperand extends Component<Props> {
 		const {convert, getOptionValue, onChange, operand} = this.props;
 		const index = operand.data.findIndex(currentValue => getOptionValue(currentValue) === getOptionValue(value));
 		let {data} = operand;
+		let dataValue = value;
 
 		if (convert) {
-			value = convert(value);
+			dataValue = convert(value);
 		}
 
-		index > -1 ? data.splice(index, 1) : data.push(value);
+		index > -1 ? data.splice(index, 1) : data.push(dataValue);
 
 		onChange({
 			...operand,

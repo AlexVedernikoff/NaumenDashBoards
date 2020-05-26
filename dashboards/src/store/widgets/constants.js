@@ -43,7 +43,7 @@ const INTERVAL_SYSTEM_GROUP = {
 };
 
 // Счетчик
-const ACTIVE: 'ACTIVE:' = 'ACTIVE:';
+const ACTIVE: 'ACTIVE' = 'ACTIVE';
 const EXCEED: 'EXCEED' = 'EXCEED';
 const NOT_STARTED: 'NOT_STARTED' = 'NOT_STARTED';
 const PAUSED: 'PAUSED' = 'PAUSED';

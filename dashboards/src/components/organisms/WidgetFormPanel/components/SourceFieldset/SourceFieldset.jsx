@@ -124,7 +124,7 @@ export class SourceFieldset extends PureComponent<Props> {
 		const {source} = set;
 
 		return (
-			<FormField error={errors[getDataErrorKey(index, FIELDS.source)]}>
+			<FormField error={errors[getDataErrorKey(index, FIELDS.source)]} small>
 				<TreeSelect
 					name={FIELDS.source}
 					onChangeLabel={this.handleChangeSourceLabel}

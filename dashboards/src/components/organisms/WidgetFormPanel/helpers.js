@@ -6,7 +6,7 @@ import {FIELDS} from './constants';
 const filterByAttribute = (options: Array<Attribute>, attribute: Attribute): Array<Attribute> => {
 	const {DATE, OBJECT} = ATTRIBUTE_SETS;
 
-	options = options.filter(option => {
+	return options.filter(option => {
 		if (attribute.type in OBJECT) {
 			return option.property === attribute.property;
 		}
@@ -17,8 +17,6 @@ const filterByAttribute = (options: Array<Attribute>, attribute: Attribute): Arr
 
 		return option.type === attribute.type;
 	});
-
-	return options;
 };
 
 const getDataErrorKey = (...keys: Array<string | number>) => {

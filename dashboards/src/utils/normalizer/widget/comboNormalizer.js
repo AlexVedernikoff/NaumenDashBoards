@@ -24,11 +24,13 @@ import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
 
 const type = (type: any) => {
-	if (type && typeof type === 'object') {
-		type = type.value;
+	let resultType = type;
+
+	if (resultType && typeof resultType === 'object') {
+		resultType = resultType.value;
 	}
 
-	return type && type in COMBO_TYPES ? type : COMBO_TYPES.COLUMN;
+	return resultType && resultType in COMBO_TYPES ? resultType : COMBO_TYPES.COLUMN;
 };
 
 const normalizeDataSet = (set: Object): ComboData => {
