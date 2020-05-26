@@ -12,9 +12,13 @@ const fetchAttributes = (classFqn: string): ThunkAction => async (dispatch: Disp
 	dispatch(requestAttributes(classFqn));
 
 	try {
-		const {data} = await client.post(buildUrl('dashboards', 'getAttributesDataSources', `'${classFqn}'`));
+		const url = buildUrl('dashboards', 'getAttributesDataSources', 'requestContent');
+		const data = {
+			classFqn
+		};
+		const {data: attributes} = await client.post(url, data);
 
-		dispatch(receiveAttributes(data, classFqn));
+		dispatch(receiveAttributes(attributes, classFqn));
 	} catch (error) {
 		dispatch(recordAttributesError(classFqn));
 	}

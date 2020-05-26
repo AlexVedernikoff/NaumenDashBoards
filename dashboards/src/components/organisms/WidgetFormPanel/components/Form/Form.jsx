@@ -75,12 +75,10 @@ export class Form extends Component<Props, State> {
 	};
 
 	renderSaveButton = () => {
-		const {personalDashboard, updating} = this.props;
-		const {INFO, SIMPLE} = BUTTON_VARIANTS;
-		const variant = personalDashboard ? INFO : SIMPLE;
+		const {updating} = this.props;
 
 		return (
-			<Button disabled={updating} onClick={this.handleClickSaveButton} variant={variant}>
+			<Button disabled={updating} onClick={this.handleClickSaveButton} variant={BUTTON_VARIANTS.SIMPLE}>
 				Сохранить
 			</Button>
 		);

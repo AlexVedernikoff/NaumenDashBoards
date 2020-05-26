@@ -8,7 +8,7 @@ import {fetchRefAttributes} from 'store/sources/refAttributes/actions';
 import {NewWidget} from 'utils/widget';
 
 export const props = (state: AppState): ConnectedProps => {
-	const {context, dashboard, sources, widgets} = state;
+	const {context, sources, widgets} = state;
 	const {data} = widgets;
 	const {newWidget, selectedWidget} = data;
 	const {contentCode, subjectUuid, user} = context;
@@ -18,7 +18,6 @@ export const props = (state: AppState): ConnectedProps => {
 	return {
 		attributes: sources.attributes.map,
 		context: contentContext,
-		personalDashboard: dashboard.personal,
 		refAttributes: sources.refAttributes,
 		saveError: data.saveError,
 		sources: sources.data.map,

@@ -15,13 +15,13 @@ const createRefKey = (attribute: Attribute) => `${attribute.metaClassFqn}$${attr
  */
 const fetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	const key = createRefKey(refAttr);
-	const {ref, ...attr} = refAttr;
+	const {ref, ...attribute} = refAttr;
 
 	dispatch(requestRefAttributes(key));
 
 	try {
 		const {data} = await client.post(buildUrl('dashboards', 'getAttributesFromLinkAttribute', 'requestContent'), {
-			linkAttribute: attr
+			attribute
 		});
 
 		onLoadCallback && onLoadCallback(data);

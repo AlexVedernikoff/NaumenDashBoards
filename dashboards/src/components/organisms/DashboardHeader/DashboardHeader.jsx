@@ -150,7 +150,7 @@ export class DashboardHeader extends Component<Props, State> {
 			return (
 				<NavItem>
 					<Button disabled={personalDashboardDeleting} onClick={this.showModal} outline>
-						<Icon name={ICON_NAMES.REMOVE} />
+						<Icon className={styles.removeIcon} name={ICON_NAMES.CLOSE} />
 						<span>Удалить</span>
 					</Button>
 					{this.renderModal()}
@@ -168,9 +168,9 @@ export class DashboardHeader extends Component<Props, State> {
 			user
 		} = this.props;
 		const {hasPersonalDashboard, role} = user;
-		const {MASTER, SUPER} = USER_ROLES;
+		const {SUPER} = USER_ROLES;
 
-		if (role !== SUPER && !hasPersonalDashboard && !personalDashboard && (role === MASTER || editableDashboard)) {
+		if (role !== SUPER && !hasPersonalDashboard && !personalDashboard && editableDashboard) {
 			return this.renderNavButton('Сохранить себе', createPersonalDashboard, personalDashboardCreating);
 		}
 	};
