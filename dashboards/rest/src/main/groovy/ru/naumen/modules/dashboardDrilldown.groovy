@@ -100,9 +100,11 @@ class Link
      */
     private final DATE_ATTRIBUTES = ['date', 'dateTime']
     private final LINK_TYPE_ATTRIBUTES = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
+    private String subjectUUID
 
-    Link(Map<String, Object> map)
+    Link(Map<String, Object> map, String cardObjectUuid)
     {
+        this.subjectUUID = cardObjectUuid
         this.classFqn = map.classFqn
         def metaInfo = api.metainfo.getMetaClass(this.classFqn)
         this.title = map.title ?: "Список элементов '${this.classFqn}'"
@@ -140,7 +142,7 @@ class Link
     }
 
     /**
-     * Применение дескриптора в фильтре
+     * Применеине дескриптора в фильтре
      * @param filterBuilder - билдер для фильтра
      * @param descriptor - объект фильтрации
      */
@@ -178,6 +180,7 @@ class Link
         {
             filters.groupBy { Attribute.fromMap(it.attribute as Map) }.collect { Attribute attr, Collection<Map> filter ->
                 Collection<Collection> result = []
+
                 def contextValue = filter.findResults { map ->
                     def group = map.group as Map
                     def value = map.value
@@ -192,12 +195,12 @@ class Link
                 def customSubGroupSet = filter.findResults { map ->
                     def group = map.group as Map
                     String value = map.value
-                    if (group.way == 'custom')
+                    if (group.way.toLowerCase() == 'custom')
                     {
                         def customGroup = group.data as Map
                         def subGroupSet = customGroup.subGroups as Collection
-                        return subGroupSet.findResult {
-                            def subgroup = it as Map
+                        return subGroupSet.findResult { el ->
+                            def subgroup = el as Map
                             subgroup.name == value ? subgroup.data as Collection<Collection<Map>> : null
                         }
                     }
@@ -246,6 +249,7 @@ class Link
                                     def value = interval
                                             ? api.types.newDateTimeInterval([interval.value as long, interval.type as String]).toMiliseconds()
                                             : null
+                                    //TODO: до конца не уверен. Нужно ли извлекать милисекунды или нет
                                     filterBuilder.OR(attr.code, condition, value)
                                 }
                             }
@@ -280,7 +284,7 @@ class Link
                         case ['date', 'dateTime']:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
-                                    switch (it.type as String)
+                                    switch (it.type.toLowerCase())
                                     {
                                         case 'today':
                                             return filterBuilder.OR(attr.code, 'today', null)
@@ -302,7 +306,7 @@ class Link
                         case 'state':
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
-                                    switch (it.type as String)
+                                    switch (it.type.toLowerCase())
                                     {
                                         case 'contains':
                                             return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
@@ -321,8 +325,69 @@ class Link
                                 }
                             }
                             break
-                        case ['boLinks', 'backBOLinks', 'object']: break
-                        case ['catalogItem', 'catalogItemSet']: break
+                        case ['boLinks', 'backBOLinks', 'object']:
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    def value = it.data.uuid
+                                    switch(it.type.toLowerCase())
+                                    {
+                                        case 'empty':
+                                            return filterBuilder.OR(attr.code, 'null', null)
+                                        case 'not_empty':
+                                            return filterBuilder.OR(attr.code, 'notNull', null)
+                                        case 'contains':
+                                            return filterBuilder.OR(attr.code, 'contains', [value])
+                                        case 'not_contains':
+                                            return filterBuilder.OR(attr.code, 'notContains', [value])
+                                        case 'title_contains':
+                                            return filterBuilder.OR(attr.code, 'titleContains', value)
+                                        case 'title_not_contains':
+                                            return filterBuilder.OR(attr.code, 'titleNotContains', value)
+                                        case 'contains_including_archival':
+                                            return filterBuilder.OR(attr.code, 'containsWithRemoved', [value])
+                                        case 'not_contains_including_archival':
+                                            return filterBuilder.OR(attr.code, 'notContainsWithRemoved', [value])
+                                        case 'contains_any':
+                                            return filterBuilder.OR(attr.code, 'contains', value)
+                                        case ['contains_current_object', 'equal_current_object']:
+                                            return filterBuilder.OR(attr.code, 'contains', subjectUUID)
+                                        case 'contains_attr_current_object':
+                                            //TODO: На фронте идёт работа по формирования формата  этого условия
+                                            break: throw new IllegalArgumentException("Not supported condition type: ${it.type}")
+                                    }
+                                }
+                            }
+                            break
+                        case ['catalogItem', 'catalogItemSet']:
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    def value = it.data.uuid
+                                    switch(it.type.toLowerCase())
+                                    {
+                                        case 'empty':
+                                            return filterBuilder.OR(attr.code, 'null', null)
+                                        case 'not_empty':
+                                            return filterBuilder.OR(attr.code, 'notNull', null)
+                                        case 'contains':
+                                            return filterBuilder.OR(attr.code, 'contains', [value])
+                                        case 'not_contains':
+                                            return filterBuilder.OR(attr.code, 'notContains', [value])
+                                        case 'contains_any':
+                                            return filterBuilder.OR(attr.code, 'contains', value)
+                                        case 'title_contains':
+                                            return filterBuilder.OR(attr.code, 'titleContains', value)
+                                        case 'title_not_contains':
+                                            return filterBuilder.OR(attr.code, 'titleNotContains', value)
+                                        case 'contains_current_object':
+                                            return filterBuilder.OR(attr.code, 'contains', subjectUUID)
+                                        case 'contains_attr_current_object':
+                                    //TODO: На фронте идёт работа по формирования формата  этого условия
+                                        default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                                    }
+
+                                }
+                            }
+                            break
                         default: throw new IllegalArgumentException("Not supported attribute type: ${attr.type}")
                     }
                 }
@@ -335,7 +400,7 @@ class Link
 
     private String getFilterCondition(String condition)
     {
-        switch (condition)
+        switch (condition.toLowerCase())
         {
             case 'empty':
                 return 'null'
@@ -405,7 +470,7 @@ class Link
     /**
      * Метод создания контекста из из списка фильтров сгруппированных по атрибуту
      * @param filters - список фильтров сгруппированных по одному атрибуту
-     * @return комбинация типа группировки и списка значения фильтра
+     * @return комбинацыя типа группировки и списка значения фильтра
      */
     private Map<GroupType, Collection> createContextFromFilters(Collection<Map> filters)
     {
@@ -579,7 +644,7 @@ class Link
  */
 String getLink(Map<String, Object> requestContent, String cardObjectUuid)
 {
-    Link link = new Link(transformRequest(requestContent, cardObjectUuid))
+    Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid)
     def linkBuilder = link.getBuilder()
     return api.web.list(linkBuilder)
 }
