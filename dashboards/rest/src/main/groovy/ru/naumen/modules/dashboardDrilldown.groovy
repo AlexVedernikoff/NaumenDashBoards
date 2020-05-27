@@ -98,8 +98,6 @@ class Link
     /**
      * перечень
      */
-    private final DATE_ATTRIBUTES = ['date', 'dateTime']
-    private final LINK_TYPE_ATTRIBUTES = ['object', 'boLinks', 'catalogItemSet', 'backBOLinks', 'catalogItem']
     private String subjectUUID
 
     Link(Map<String, Object> map, String cardObjectUuid)
@@ -180,13 +178,14 @@ class Link
         {
             filters.groupBy { Attribute.fromMap(it.attribute as Map) }.collect { Attribute attr, Collection<Map> filter ->
                 Collection<Collection> result = []
+                def attributeType = attr.type as AttributeType
 
                 def contextValue = filter.findResults { map ->
                     def group = map.group as Map
                     def value = map.value
                     String groupWay = group.way
                     GroupType groupType = groupWay.toLowerCase() == 'system'
-                            ? attr.type == 'dtInterval' ? getDTIntervalGroupType(group.data as String) : group.data as GroupType
+                            ? attributeType == AttributeType.DT_INTERVAL ? getDTIntervalGroupType(group.data as String) : group.data as GroupType
                             : null
                     groupType ? [(groupType): [value]] : null
                 }
@@ -212,20 +211,21 @@ class Link
 
                 def context = createContext(contextValue)
                 context.remove(GroupType.OVERLAP).each { value ->
-                    if (attr.type in LINK_TYPE_ATTRIBUTES)
+                    if (attributeType in AttributeType.linkTypes)
                     {
                         def objects = findObjects(attr.ref, attr.property, value)
                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
                     }
                     else
                     {
-                        result << [getOrFilter(attr.type, attr.code, value, filterBuilder)]
+                        result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
                     }
                 }
                 if (context)
                 {
+                    //Тут обработка только группировок по датам
                     result << getRanges(context, this.&getMinDate.curry(attr.code)).collect { range ->
-                        if (attr.type in LINK_TYPE_ATTRIBUTES)
+                        if (attributeType in AttributeType.linkTypes)
                         {
                             def (first, second) = range
                             def objects = findObjects(attr.ref, attr.property, op.between(first, second))
@@ -239,9 +239,9 @@ class Link
                 }
                 for (customSubGroupCondition in customSubGroupSet)
                 {
-                    switch (attr.type)
+                    switch (attributeType)
                     {
-                        case 'dtInterval':
+                        case AttributeType.DT_INTERVAL:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     String condition = getFilterCondition(it.type as String)
@@ -254,7 +254,7 @@ class Link
                                 }
                             }
                             break
-                        case 'string':
+                        case AttributeType.STRING:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     String condition = getFilterCondition(it.type as String)
@@ -263,7 +263,7 @@ class Link
                                 }
                             }
                             break
-                        case 'integer':
+                        case AttributeType.INTEGER:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     String condition = getFilterCondition(it.type as String)
@@ -272,7 +272,7 @@ class Link
                                 }
                             }
                             break
-                        case 'double':
+                        case AttributeType.DOUBLE:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     String condition = getFilterCondition(it.type as String)
@@ -281,7 +281,7 @@ class Link
                                 }
                             }
                             break
-                        case ['date', 'dateTime']:
+                        case AttributeType.dateTypes:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     switch (it.type.toLowerCase())
@@ -303,7 +303,7 @@ class Link
                                 }
                             }
                             break
-                        case 'state':
+                        case AttributeType.STATE:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     switch (it.type.toLowerCase())
@@ -325,7 +325,7 @@ class Link
                                 }
                             }
                             break
-                        case ['boLinks', 'backBOLinks', 'object']:
+                        case [AttributeType.BO_LINKS , AttributeType.BACK_BO_LINKS, AttributeType.OBJECT]:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     def value = it.data.uuid
@@ -353,12 +353,12 @@ class Link
                                             return filterBuilder.OR(attr.code, 'contains', subjectUUID)
                                         case 'contains_attr_current_object':
                                             //TODO: На фронте идёт работа по формирования формата  этого условия
-                                            break: throw new IllegalArgumentException("Not supported condition type: ${it.type}")
+                                        default: throw new IllegalArgumentException("Not supported condition type: ${it.type}")
                                     }
                                 }
                             }
                             break
-                        case ['catalogItem', 'catalogItemSet']:
+                        case [AttributeType.CATALOG_ITEM_SET, AttributeType.CATALOG_ITEM]:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     def value = it.data.uuid
@@ -382,13 +382,35 @@ class Link
                                             return filterBuilder.OR(attr.code, 'contains', subjectUUID)
                                         case 'contains_attr_current_object':
                                     //TODO: На фронте идёт работа по формирования формата  этого условия
-                                        default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                                        default: throw new IllegalArgumentException("Not supported condition type: ${it.type}")
                                     }
 
                                 }
                             }
                             break
-                        default: throw new IllegalArgumentException("Not supported attribute type: ${attr.type}")
+                        case AttributeType.timerTypes:
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    switch(it.type.toLowerCase())
+                                    {
+                                        case 'status_contains':
+                                            return filterBuilder.OR(attr.code, 'timerStatusContains', [it.data.uuid])
+                                        case 'status_not_contains':
+                                            return filterBuilder.OR(attr.code, 'timerStatusNotContains', [it.data.uuid])
+                                        case 'end_date_between':
+                                            String dateFormat = 'yyyy-MM-dd'
+                                            def dateSet = it.data as Map
+                                            def start = Date.parse(dateFormat, dateSet.startDate as String)
+                                            def end = Date.parse(dateFormat, dateSet.endDate as String)
+                                            return filterBuilder.OR(attr.code, 'backTimerDeadLineFromTo', [start, end])
+                                        case 'elapsed_contains':
+                                            return filterBuilder.OR(attr.code, 'timerStatusContains', ['e'])
+                                        default: throw new IllegalArgumentException("Not supported condition type: ${it.type}")
+                                    }
+                                }
+                            }
+                            break
+                        default: throw new IllegalArgumentException("Not supported attribute type: ${attributeType}")
                     }
                 }
                 result
@@ -439,17 +461,26 @@ class Link
         }
     }
 
-    private def getOrFilter(String type, String code, def value, def filterBuilder)
+    private def getOrFilter(AttributeType type, String code, def value, def filterBuilder)
     {
+        //TODO: хорошему нужно вынести все эти методы в enum. Можно прям в этом модуле
+        // Список доступных условий фильтрации: "notContainsIncludeEmpty", "nextN", "containsInSet",
+        // "beforeUserAttribute", "beforeSubjectAttribute", "afterUserAttribute", "afterSubjectAttribute",
+        // "containsWithNested", "incorrect", "contains", "notContains", "null", "notNull", "greater", "less",
+        // "fromTo", "lastN", "today", "timerStatusContains", "timerStatusNotContains", "backTimerDeadLineFromTo",
+        // "backTimerDeadLineContains", "titleContains", "titleNotContains", "containsWithRemoved",
+        // "notContainsWithRemoved", "containsUser", "containsSubject", "containsUserAttribute", "containsSubjectAttribute"
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         switch (type)
         {
-            case 'state':
+            case AttributeType.STATE:
                 return filterBuilder.OR(code, 'titleContains', value as String)
-            case DATE_ATTRIBUTES:
+            case AttributeType.dateTypes:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
-            case 'dtInterval':
+            case AttributeType.DT_INTERVAL:
                 return filterBuilder.OR(code, 'contains', api.types.newDateTimeInterval(value as int, "HOUR"))
+            case AttributeType.timerTypes:
+                return filterBuilder.OR(code, 'timerStatusContains', [value]) // при условии что в тут будет код статус
             default:
                 return filterBuilder.OR(code, 'contains', value)
         }
@@ -469,15 +500,9 @@ class Link
     }
     /**
      * Метод создания контекста из из списка фильтров сгруппированных по атрибуту
-     * @param filters - список фильтров сгруппированных по одному атрибуту
+     * @param data - список фильтров сгруппированных по одному атрибуту
      * @return комбинацыя типа группировки и списка значения фильтра
      */
-    private Map<GroupType, Collection> createContextFromFilters(Collection<Map> filters)
-    {
-        def data = filters.collect { [(it.group.data as GroupType): [it.value]] }
-        return createContext(data)
-    }
-
     private Map<GroupType, Collection> createContext(Collection<Map<GroupType, Object>> data)
     {
         Map<GroupType, Collection> result = [:]

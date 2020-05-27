@@ -928,7 +928,7 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
             // В критерии нет поля metaClass, но есть metaClassFqn
             throw new IllegalArgumentException("Still not supported attribute type: $type in custom group")
         case AttributeType.timerTypes:
-            return this.&mappingTimerTypeFilters//TODO: реализовать
+            return this.&mappingTimerTypeFilters
         case AttributeType.BOOL: // Кастомная группировка не поддерживается
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
         default:
