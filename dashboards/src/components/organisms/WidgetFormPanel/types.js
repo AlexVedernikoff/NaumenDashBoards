@@ -55,7 +55,6 @@ export type Props = {|
 	fetchRefAttributes: (refAttr: Attribute, callback: Function) => ThunkAction,
 	isNew: boolean,
 	onSubmit: (func: UpdateWidget) => Promise<void>,
-	personalDashboard: boolean,
 	refAttributes: AttributeMap,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,

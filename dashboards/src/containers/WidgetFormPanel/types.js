@@ -36,7 +36,6 @@ export type State = {
 export type ConnectedProps = {
 	attributes: AttributeMap,
 	context: Context,
-	personalDashboard: boolean,
 	refAttributes: AttributeMap,
 	sources: DataSourceMap,
 	updating: boolean,
