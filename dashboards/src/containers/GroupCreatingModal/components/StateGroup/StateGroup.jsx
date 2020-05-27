@@ -21,6 +21,7 @@ export class StateGroup extends Component<Props> {
 
 		return (
 			<RefGroup
+				attribute={attribute}
 				customGroups={customGroups}
 				customOptions={CUSTOM_OPTIONS}
 				customType={customType}

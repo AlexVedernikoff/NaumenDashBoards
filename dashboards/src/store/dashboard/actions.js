@@ -4,7 +4,7 @@ import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {getContext, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
+import {getContext, getMetaCLass, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import {getNextRow} from 'utils/layout';
 import {NewWidget} from 'utils/widget';
@@ -47,6 +47,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 	try {
 		dispatch(getContext());
+		dispatch(getMetaCLass());
 		dispatch(getAutoUpdateSettings());
 		dispatch(getEditableParam());
 
@@ -259,7 +260,7 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 			classFqn = descriptor.clazz || descriptor.cases[0];
 		}
 
-		const {label, value} = sources.data.map[classFqn];
+		const {label, value} = sources.data.map[classFqn].value;
 		newWidget.name = '';
 		newWidget.data[0] = {
 			...newWidget.data[0],

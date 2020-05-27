@@ -8,6 +8,7 @@ export type UserRole = $Keys<typeof USER_ROLES>;
 
 type ContentContext = {
 	contentCode: string,
+	metaClass: string,
 	subjectUuid: string
 };
 
@@ -60,6 +61,7 @@ export type ContextAction =
 
 export type ContextState = {
 	contentCode: string,
+	metaClass: string,
 	subjectUuid: string,
 	switching: boolean,
 	temp: null | Temp,

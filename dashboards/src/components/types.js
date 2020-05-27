@@ -25,3 +25,13 @@ export type OnChangeLabelEvent = {
 	label: string,
 	name: string
 };
+
+export type TreeNode<V> = {
+	children: Array<string> | null,
+	error: boolean,
+	id: string,
+	loading: boolean,
+	parent: string | null,
+	uploaded: boolean,
+	value: V
+};

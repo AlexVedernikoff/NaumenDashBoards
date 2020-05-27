@@ -317,10 +317,10 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	renderSubGroupSection = () => {
-		const {createCondition, options, renderCondition, updateDate} = this.props;
+		const {createCondition, operandData, options, renderCondition} = this.props;
 		const {errors} = this.state;
 		const selectedGroup = this.getSelectedGroup();
-		const context = {createCondition, errors, options, renderCondition, updateDate};
+		const context = {createCondition, errors, operandData, options, renderCondition};
 
 		if (selectedGroup) {
 			return (

@@ -1,7 +1,8 @@
 // @flow
 import {MultiValueContainer, ValueContainer} from 'components/molecules/MaterialSelect/components';
+import type {Node} from './components/Tree/types';
 import {OutsideClickDetector} from 'components/atoms';
-import type {Props, State, Value} from './types';
+import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 import {Tree} from './components';
@@ -56,20 +57,20 @@ export class MaterialTreeSelect extends Component<Props, State> {
 		this.setState({showMenu: !showMenu});
 	};
 
-	handleSelect = (value: Value) => {
+	handleSelect = (node: Node) => {
 		const {multiple, name, onSelect} = this.props;
 
 		if (!multiple) {
 			this.setState({showMenu: false});
 		}
 
-		onSelect(name, value);
+		onSelect(name, node.value);
 	};
 
 	hideMenu = () => this.setState({showMenu: false});
 
 	renderMenu = () => {
-		const {multiple, onLoad, options, showMore, value, values} = this.props;
+		const {isDisabled, multiple, onLoad, options, showMore, value, values} = this.props;
 		const {showMenu} = this.state;
 
 		return (
@@ -77,6 +78,7 @@ export class MaterialTreeSelect extends Component<Props, State> {
 				<Tree
 					getOptionLabel={this.getOptionLabel}
 					getOptionValue={this.getOptionValue}
+					isDisabled={isDisabled}
 					multiple={multiple}
 					onLoad={onLoad}
 					onSelect={this.handleSelect}

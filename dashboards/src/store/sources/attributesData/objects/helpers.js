@@ -40,11 +40,14 @@ const createObjectDataItem = (data: RawObjectData, root: boolean) => {
 	return {
 		children: children > 0 ? [] : null,
 		error: false,
+		id: uuid,
 		loading: false,
 		root,
-		title,
 		uploaded: false,
-		uuid
+		value: {
+			title,
+			uuid
+		}
 	};
 };
 

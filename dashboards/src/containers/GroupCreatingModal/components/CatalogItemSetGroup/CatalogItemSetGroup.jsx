@@ -2,6 +2,7 @@
 import {connect} from 'react-redux';
 import {createCustomGroupType} from 'containers/GroupCreatingModal/helpers';
 import {createDefaultOperand, createSimpleOperand} from 'CustomGroup/helpers';
+import {CurrentObjectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
 import type {
 	CustomGroup,
 	OperandType,
@@ -17,7 +18,6 @@ import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
-import {SelectOperand, SimpleOperand} from 'CustomGroup/components';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class CatalogItemSetGroup extends Component<Props, State> {
@@ -30,8 +30,7 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 	};
 
 	state = {
-		customType: '',
-		updateDate: new Date()
+		customType: ''
 	};
 
 	componentDidMount () {
@@ -41,15 +40,6 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 		this.setState({
 			customType: createCustomGroupType(type, property)
 		});
-	}
-
-	componentDidUpdate (prevProps: Props) {
-		const {selectData: nextData} = this.props;
-		const {selectData: prevData} = prevProps;
-
-		if (nextData !== prevData) {
-			this.setState({updateDate: new Date()});
-		}
 	}
 
 	convertOperandData = ({title, uuid}: Object) => ({
@@ -73,16 +63,21 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 		.filter(({type}) => type === this.state.customType);
 
 	getCustomProps = () => {
-		const {customType: type, updateDate} = this.state;
+		const {currentObject, selectData} = this.props;
+		const {customType: type} = this.state;
+		const operandData = {
+			currentObject,
+			selectData
+		};
 
 		return {
 			createCondition: this.createCustomCondition,
 			groups: this.getCustomGroups(),
+			operandData,
 			options: CUSTOM_OPTIONS,
 			renderCondition: this.renderCustomCondition,
 			resolveConditionRule: this.resolveConditionRule,
-			type,
-			updateDate
+			type
 		};
 	};
 
@@ -105,13 +100,29 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 		}
 	};
 
+	renderCurrentObjectOperand = (operand: SelectOperandType, onChange: OnChangeOperand) => {
+		const {attribute, currentObject, fetchCurrentObjectAttributes} = this.props;
+
+		return (
+			<CurrentObjectOperand
+				attribute={attribute}
+				data={currentObject}
+				fetch={fetchCurrentObjectAttributes}
+				onChange={onChange}
+				operand={operand}
+			/>
+		);
+	};
+
 	renderCustomCondition = (condition: RefOrCondition, onChange: OnChangeOperand) => {
-		const {CONTAINS, NOT_CONTAINS, TITLE_CONTAINS, TITLE_NOT_CONTAINS} = OPERAND_TYPES;
+		const {CONTAINS, CONTAINS_ATTR_CURRENT_OBJECT, NOT_CONTAINS, TITLE_CONTAINS, TITLE_NOT_CONTAINS} = OPERAND_TYPES;
 
 		switch (condition.type) {
 			case CONTAINS:
 			case NOT_CONTAINS:
 				return this.renderSelectOperand(condition, onChange);
+			case CONTAINS_ATTR_CURRENT_OBJECT:
+				return this.renderCurrentObjectOperand(condition, onChange);
 			case TITLE_CONTAINS:
 			case TITLE_NOT_CONTAINS:
 				return this.renderSimpleOperand(condition, onChange);

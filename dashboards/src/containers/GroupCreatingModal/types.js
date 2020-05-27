@@ -4,10 +4,13 @@ import type {AttrSystemProps} from 'components/molecules/GroupCreatingModal/comp
 import type {Attribute} from 'store/sources/attributes/types';
 import type {CustomGroup, CustomGroupsMap} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
+import type {Item} from 'store/sources/currentObject/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
 
 export type RenderModal = (attrCustomProps: AttrCustomProps, attrSystemProps?: AttrSystemProps) => Node;
+
+export type FetchCurrentObjectAttributes = (parent: Item | null, attribute: Attribute) => ThunkAction;
 
 export type AttributeGroupProps = {|
 	attribute: Attribute,

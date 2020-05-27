@@ -1,5 +1,6 @@
 // @flow
 import {OBJECTS_EVENTS} from './constants';
+import type {TreeNode} from 'components/types';
 
 export type RawObjectData = {
 	children: number,
@@ -7,18 +8,13 @@ export type RawObjectData = {
 	uuid: string
 };
 
-export type Item = {
-	children: Array<string> | null,
-	error: boolean,
-	loading: boolean,
-	root: boolean,
+type ItemValue = {
 	title: string,
-	uploaded: boolean,
 	uuid: string
 };
 
 export type ItemsMap = {
-	[string]: Item
+	[string]: TreeNode<ItemValue>
 };
 
 export type ObjectData = {

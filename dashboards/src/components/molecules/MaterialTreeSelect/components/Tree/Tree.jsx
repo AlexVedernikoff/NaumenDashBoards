@@ -4,7 +4,7 @@ import cn from 'classnames';
 import type {InputRef} from 'components/types';
 import {Node} from 'components/molecules/MaterialTreeSelect/components';
 import type {Node as ReactNode} from 'react';
-import type {Node as NodeType, Props, State} from './types';
+import type {Node as NodeType, NodeValue, Props, State} from './types';
 import React, {Component, createRef} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
@@ -12,6 +12,7 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 export class Tree extends Component<Props, State> {
 	static defaultProps = {
 		className: '',
+		initialSelected: [],
 		multiple: false,
 		showMore: false,
 		value: '',
@@ -19,12 +20,18 @@ export class Tree extends Component<Props, State> {
 	};
 
 	state = {
-		expandedValues: [],
-		foundValues: [],
-		searchValue: ''
+		expandedNodes: [],
+		foundIds: [],
+		searchValue: '',
+		selectedIds: []
 	};
 
 	searchInputRef: InputRef = createRef();
+
+	componentDidMount (): * {
+		const {initialSelected: selectedIds} = this.props;
+		selectedIds.length > 0 && this.setState({selectedIds});
+	}
 
 	componentDidUpdate (prevProps: Props) {
 		const {show: prevShow} = prevProps;
@@ -47,27 +54,43 @@ export class Tree extends Component<Props, State> {
 
 	handleChangeSearchInput = (searchValue: string) => {
 		const reg = new RegExp(searchValue, 'i');
-		const foundValues = [];
+		const foundIds = [];
 
 		this.getRoots().forEach(node => {
-			foundValues.push(...this.search(node, reg));
+			foundIds.push(...this.search(node, reg));
 		});
 
-		this.setState({foundValues, searchValue});
+		this.setState({foundIds, searchValue});
 	};
 
-	handleClickNodeToggleIcon = (value: string) => {
-		const {onLoad, options} = this.props;
-		const {expandedValues} = this.state;
-		const expanded = expandedValues.includes(value);
-		const {children} = options[value];
+	handleClick = (node: NodeType) => {
+		const {multiple, onSelect} = this.props;
+		let {selectedIds} = this.state;
+
+		if (!multiple) {
+			selectedIds = [];
+		}
+
+		if (!selectedIds.includes(node.id)) {
+			selectedIds.push(node.id);
+		}
+
+		this.setState({selectedIds});
+		onSelect(node);
+	};
+
+	handleClickNodeToggleIcon = (node: NodeType) => {
+		const {onLoad} = this.props;
+		const {expandedNodes} = this.state;
+		const {children, id} = node;
+		const expanded = expandedNodes.includes(id);
 
 		if (onLoad && !expanded && Array.isArray(children) && children.length === 0) {
-			onLoad(value);
+			onLoad(node);
 		}
 
 		this.setState({
-			expandedValues: expanded ? expandedValues.filter(v => v !== value) : [...expandedValues, value]
+			expandedNodes: expanded ? expandedNodes.filter(v => v !== id) : [...expandedNodes, id]
 		});
 	};
 
@@ -76,18 +99,28 @@ export class Tree extends Component<Props, State> {
 		onLoad && onLoad(null, this.getRoots().length);
 	};
 
-	isExpanded = (value: string) => {
-		const {expandedValues, searchValue} = this.state;
-		return Boolean(searchValue) || expandedValues.includes(value);
+	isDisabled = (value: NodeValue) => {
+		const {isDisabled} = this.props;
+		let disabled = false;
+
+		if (isDisabled) {
+			disabled = isDisabled(value);
+		}
+
+		return disabled;
 	};
 
-	isRoot = (node: NodeType) => node.root;
+	isExpanded = (nodeId: string) => {
+		const {expandedNodes, searchValue} = this.state;
+		return Boolean(searchValue) || expandedNodes.includes(nodeId);
+	};
+
+	isRoot = (node: NodeType) => !node.parent;
 
 	search = (node: NodeType, reg: RegExp) => {
-		const {getOptionLabel, getOptionValue, options} = this.props;
-		const {children} = node;
-		const label = getOptionLabel(node);
-		const value = getOptionValue(node);
+		const {getOptionLabel, options} = this.props;
+		const {children, id, value: nodeValue} = node;
+		const label = getOptionLabel(nodeValue);
 		const foundedValues = [];
 
 		if (Array.isArray(children) && children.length > 0) {
@@ -97,7 +130,7 @@ export class Tree extends Component<Props, State> {
 		}
 
 		if (reg.test(label) || foundedValues.length > 0) {
-			foundedValues.push(value);
+			foundedValues.push(id);
 		}
 
 		return foundedValues;
@@ -108,37 +141,38 @@ export class Tree extends Component<Props, State> {
 		const {children} = node;
 
 		if (expanded && Array.isArray(children) && children.length > 0) {
-			return children.map(id => this.renderNode(options[id]));
+			return children.map(id => options[id] && this.renderNode(options[id]));
 		}
 
 		return null;
 	};
 
 	renderNode = (node: NodeType) => {
-		const {getOptionLabel, getOptionValue, multiple, onLoad, onSelect, value, values} = this.props;
-		const {foundValues, searchValue} = this.state;
-		const {children, error, loading, uploaded} = node;
+		const {getOptionLabel, getOptionValue, onLoad} = this.props;
+		const {selectedIds} = this.state;
+		const {foundIds, searchValue} = this.state;
+		const {children, error, id, loading, uploaded} = node;
 		const showMoreChildren = children && !(loading || uploaded || error);
-		const nodeValue = getOptionValue(node);
-		const expanded = this.isExpanded(nodeValue);
-		const selected = multiple
-			? values.find(value => getOptionValue(value) === nodeValue)
-			: getOptionValue(value) === nodeValue;
+		const nodeValue = getOptionValue(node.value);
+		const expanded = this.isExpanded(id);
+		const disabled = this.isDisabled(node.value);
+		const selected = selectedIds.includes(id);
 
-		if (!searchValue || foundValues.includes(nodeValue)) {
+		if (!searchValue || foundIds.includes(id)) {
 			return (
 				<Node
+					data={node}
+					disabled={disabled}
 					expanded={expanded}
 					found={Boolean(searchValue)}
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
 					key={nodeValue}
-					onClick={onSelect}
+					onClick={this.handleClick}
 					onClickToggleIcon={this.handleClickNodeToggleIcon}
 					onLoadMoreChildren={onLoad}
 					selected={Boolean(selected)}
 					showMoreChildren={Boolean(showMoreChildren)}
-					value={node}
 				>
 					{this.renderChildren(node, expanded)}
 				</Node>

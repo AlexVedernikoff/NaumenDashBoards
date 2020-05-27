@@ -3,6 +3,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {connect} from 'react-redux';
 import {createCustomGroupType} from 'containers/GroupCreatingModal/helpers';
 import {createDefaultOperand, createMultiSelectOperand, createSimpleOperand} from 'CustomGroup/helpers';
+import {CurrentObjectOperand, MultiSelectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
 import {CUSTOM_BACK_BO_LINKS_OPTIONS, CUSTOM_BO_LINKS_OPTIONS, CUSTOM_OBJECT_OPTIONS} from './constants';
 import type {
 	CustomGroup,
@@ -14,7 +15,6 @@ import type {
 } from 'store/customGroups/types';
 import {functions, props} from './selectors';
 import {MaterialTreeSelect} from 'components/molecules';
-import {MultiSelectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
@@ -25,8 +25,7 @@ import {STRING_RULE} from 'CustomGroup/schema';
 
 export class ObjectGroup extends Component<Props, State> {
 	state = {
-		customType: '',
-		updateDate: new Date()
+		customType: ''
 	};
 
 	componentDidMount () {
@@ -36,18 +35,6 @@ export class ObjectGroup extends Component<Props, State> {
 		this.setState({
 			customType: createCustomGroupType(type, property)
 		});
-	}
-
-	componentDidUpdate (prevProps: Props) {
-		const {attribute, objects: nextData} = this.props;
-		const {objects: prevData} = prevProps;
-		const {property} = attribute;
-		const actualDataUpdated = nextData.actual[property] !== prevData.actual[property];
-		const allDataUpdated = nextData.all[property] !== prevData.all[property];
-
-		if (actualDataUpdated || allDataUpdated) {
-			this.setState({updateDate: new Date()});
-		}
 	}
 
 	convertOperandData = ({title, uuid}: Object) => ({
@@ -72,16 +59,43 @@ export class ObjectGroup extends Component<Props, State> {
 	getCustomGroups = (): Array<CustomGroup> => this.props.customGroups.filter(({type}) => type === this.state.customType);
 
 	getCustomProps = () => {
-		const {customType: type, updateDate} = this.state;
+		const {currentObject, objects} = this.props;
+		const {customType: type} = this.state;
+		const operandData = {
+			currentObject,
+			objects
+		};
 
 		return {
 			createCondition: this.createCustomCondition,
 			groups: this.getCustomGroups(),
+			operandData,
 			options: this.getOptions(),
 			renderCondition: this.renderCustomCondition,
 			resolveConditionRule: this.resolveConditionRule,
-			updateDate,
 			type
+		};
+	};
+
+	getObjectSelectProps = (actual: boolean) => {
+		const {attribute, objects} = this.props;
+		const map = actual ? objects.actual : objects.all;
+
+		const {[attribute.property]: data = {
+			error: false,
+			items: {},
+			loading: true,
+			uploaded: false
+		}} = map;
+		const {error, items: options, loading, uploaded} = data;
+		const showMore = !(loading || uploaded || error);
+
+		return {
+			async: true,
+			key: actual.toString(),
+			onLoad: this.handleLoadData(actual),
+			options,
+			showMore
 		};
 	};
 
@@ -105,30 +119,9 @@ export class ObjectGroup extends Component<Props, State> {
 		}
 	};
 
-	getSelectProps = (actual: boolean) => {
-		const {attribute, objects} = this.props;
-		const map = actual ? objects.actual : objects.all;
-
-		const {[attribute.property]: data = {
-			error: false,
-			items: {},
-			loading: true,
-			uploaded: false
-		}} = map;
-		const {error, items: options, loading, uploaded} = data;
-		const showMore = !(loading || uploaded || error);
-
-		return {
-			async: true,
-			key: actual.toString(),
-			onLoad: this.handleLoadData(actual),
-			options,
-			showMore
-		};
-	};
-
-	handleLoadData = (actual: boolean) => (parentUUID: string | null, offset?: number = 0) => {
+	handleLoadData = (actual: boolean) => (node?: Object, offset?: number = 0) => {
 		const {attribute, fetchObjectData} = this.props;
+		const parentUUID = node ? node.id : null;
 
 		fetchObjectData({
 			actual,
@@ -153,6 +146,20 @@ export class ObjectGroup extends Component<Props, State> {
 		}
 	};
 
+	renderCurrentObjectOperand = (operand: SelectOperandType, onChange: OnChangeOperand) => {
+		const {attribute, currentObject, fetchCurrentObjectAttributes} = this.props;
+
+		return (
+			<CurrentObjectOperand
+				attribute={attribute}
+				data={currentObject}
+				fetch={fetchCurrentObjectAttributes}
+				onChange={onChange}
+				operand={operand}
+			/>
+		);
+	};
+
 	renderCustomCondition = (condition: RefOrCondition, onChange: OnChangeOperand) => {
 		const {
 			CONTAINS,
@@ -169,10 +176,8 @@ export class ObjectGroup extends Component<Props, State> {
 
 		switch (condition.type) {
 			case CONTAINS:
-			case CONTAINS_ATTR_CURRENT_OBJECT:
 			case CONTAINS_INCLUDING_ARCHIVAL:
 			case CONTAINS_INCLUDING_NESTED:
-			case EQUAL_ATTR_CURRENT_OBJECT:
 			case NOT_CONTAINS:
 			case NOT_CONTAINS_INCLUDING_ARCHIVAL:
 				return this.renderSelectOperand(condition, onChange);
@@ -181,6 +186,9 @@ export class ObjectGroup extends Component<Props, State> {
 			case TITLE_CONTAINS:
 			case TITLE_NOT_CONTAINS:
 				return this.renderSimpleOperand(condition, onChange);
+			case CONTAINS_ATTR_CURRENT_OBJECT:
+			case EQUAL_ATTR_CURRENT_OBJECT:
+				return this.renderCurrentObjectOperand(condition, onChange);
 		}
 	};
 
@@ -189,7 +197,7 @@ export class ObjectGroup extends Component<Props, State> {
 			getOptionLabel={this.getOptionLabel}
 			getOptionValue={this.getOptionValue}
 			multiple={true}
-			{...this.getSelectProps(actual)}
+			{...this.getObjectSelectProps(actual)}
 			{...props}
 		/>
 	);
@@ -208,16 +216,14 @@ export class ObjectGroup extends Component<Props, State> {
 		);
 	};
 
-	renderSelect = (actual: boolean) => (props: SelectRenderProps) => {
-		return (
-			<MaterialTreeSelect
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				{...this.getSelectProps(actual)}
-				{...props}
-			/>
-		);
-	};
+	renderSelect = (actual: boolean) => (props: SelectRenderProps) => (
+		<MaterialTreeSelect
+			getOptionLabel={this.getOptionLabel}
+			getOptionValue={this.getOptionValue}
+			{...this.getObjectSelectProps(actual)}
+			{...props}
+		/>
+	);
 
 	renderSelectOperand = (operand: SelectOperandType, onChange: OnChangeOperand) => {
 		const actual = this.hasActualType(operand);

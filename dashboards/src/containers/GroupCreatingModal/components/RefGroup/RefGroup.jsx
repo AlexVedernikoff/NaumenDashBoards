@@ -1,5 +1,7 @@
 // @flow
+import {connect} from 'react-redux';
 import {createDefaultOperand, createMultiSelectOperand, createSimpleOperand} from 'CustomGroup/helpers';
+import {CurrentObjectOperand, MultiSelectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
 import type {
 	CustomGroup,
 	MultiSelectOperand as MultiSelectOperandType,
@@ -8,17 +10,17 @@ import type {
 	SelectOperand as SelectOperandType,
 	SimpleOperand as SimpleOperandType
 } from 'store/customGroups/types';
+import {functions, props} from './selectors';
 import {MaterialSelect} from 'components/molecules';
-import {MultiSelectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
 import type {RenderProps as MultiSelectRenderProps} from 'CustomGroup/components/MultiSelectOperand/types';
 import {STRING_RULE} from 'CustomGroup/schema';
 
-export class RefGroup extends Component<Props, State> {
+export class RefGroup extends Component<Props> {
 	static defaultProps = {
 		selectData: {
 			error: false,
@@ -26,19 +28,6 @@ export class RefGroup extends Component<Props, State> {
 			loading: false
 		}
 	};
-
-	state = {
-		updateDate: new Date()
-	};
-
-	componentDidUpdate (prevProps: Props) {
-		const {selectData: nextSelectData} = this.props;
-		const {selectData: prevSelectData} = prevProps;
-
-		if (nextSelectData !== prevSelectData) {
-			this.setState({updateDate: new Date()});
-		}
-	}
 
 	convertOperandData = ({title, uuid}: Object) => ({
 		title,
@@ -65,17 +54,20 @@ export class RefGroup extends Component<Props, State> {
 	};
 
 	getCustomProps = () => {
-		const {customOptions, customType} = this.props;
-		const {updateDate} = this.state;
+		const {currentObject, customOptions, customType, selectData} = this.props;
+		const operandData = {
+			currentObject,
+			selectData
+		};
 
 		return {
 			createCondition: this.createCustomCondition,
 			groups: this.getCustomGroups(),
+			operandData,
 			options: customOptions,
 			renderCondition: this.renderCustomCondition,
 			resolveConditionRule: this.resolveConditionRule,
-			type: customType,
-			updateDate
+			type: customType
 		};
 	};
 
@@ -107,8 +99,30 @@ export class RefGroup extends Component<Props, State> {
 		}
 	};
 
+	renderCurrentObjectOperand = (operand: SelectOperandType, onChange: OnChangeOperand) => {
+		const {attribute, currentObject, fetchCurrentObjectAttributes} = this.props;
+
+		return (
+			<CurrentObjectOperand
+				attribute={attribute}
+				data={currentObject}
+				fetch={fetchCurrentObjectAttributes}
+				onChange={onChange}
+				operand={operand}
+			/>
+		);
+	};
+
 	renderCustomCondition = (condition: RefOrCondition, onChange: OnChangeOperand) => {
-		const {CONTAINS, CONTAINS_ANY, NOT_CONTAINS, TITLE_CONTAINS, TITLE_NOT_CONTAINS} = OPERAND_TYPES;
+		const {
+			CONTAINS,
+			CONTAINS_ANY,
+			CONTAINS_ATTR_CURRENT_OBJECT,
+			EQUAL_ATTR_CURRENT_OBJECT,
+			NOT_CONTAINS,
+			TITLE_CONTAINS,
+			TITLE_NOT_CONTAINS
+		} = OPERAND_TYPES;
 
 		switch (condition.type) {
 			case CONTAINS:
@@ -119,6 +133,9 @@ export class RefGroup extends Component<Props, State> {
 			case TITLE_CONTAINS:
 			case TITLE_NOT_CONTAINS:
 				return this.renderSimpleOperand(condition, onChange);
+			case CONTAINS_ATTR_CURRENT_OBJECT:
+			case EQUAL_ATTR_CURRENT_OBJECT:
+				return this.renderCurrentObjectOperand(condition, onChange);
 		}
 	};
 
@@ -151,4 +168,4 @@ export class RefGroup extends Component<Props, State> {
 	}
 }
 
-export default RefGroup;
+export default connect(props, functions)(RefGroup);
