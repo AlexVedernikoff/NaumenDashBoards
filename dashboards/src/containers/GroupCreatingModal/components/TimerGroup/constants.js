@@ -52,9 +52,21 @@ const SYSTEM_BACK_TIMER_OPTIONS = [
 	}
 ];
 
+const EXCEED_OPTIONS = [
+	{
+		label: 'Просрочен',
+		value: BACK_TIMER_SYSTEM_GROUP.EXCEED
+	},
+	{
+		label: 'Не просрочен',
+		value: BACK_TIMER_SYSTEM_GROUP.NOT_EXCEED
+	}
+];
+
 export {
 	CUSTOM_BACK_TIMER_OPTIONS,
 	CUSTOM_TIMER_OPTIONS,
+	EXCEED_OPTIONS,
 	SYSTEM_TIMER_OPTIONS,
 	SYSTEM_BACK_TIMER_OPTIONS
 };

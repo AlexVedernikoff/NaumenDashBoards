@@ -11,7 +11,13 @@ import type {
 } from 'store/customGroups/types';
 import {BETWEEN_RULE} from 'CustomGroup/schema';
 import {createBetweenOperand, createDefaultOperand} from 'CustomGroup/helpers';
-import {CUSTOM_BACK_TIMER_OPTIONS, CUSTOM_TIMER_OPTIONS, SYSTEM_BACK_TIMER_OPTIONS, SYSTEM_TIMER_OPTIONS} from './constants';
+import {
+	CUSTOM_BACK_TIMER_OPTIONS,
+	CUSTOM_TIMER_OPTIONS,
+	EXCEED_OPTIONS,
+	SYSTEM_BACK_TIMER_OPTIONS,
+	SYSTEM_TIMER_OPTIONS
+} from './constants';
 import {MaterialSelect} from 'components/molecules';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
@@ -82,18 +88,19 @@ export class TimerGroup extends Component<Props> {
 
 		switch (condition.type) {
 			case EXPIRATION_CONTAINS:
+				return this.renderSelectOperand(condition, onChange, EXCEED_OPTIONS);
 			case STATUS_CONTAINS:
 			case STATUS_NOT_CONTAINS:
-				return this.renderSelectOperand(condition, onChange);
+				return this.renderSelectOperand(condition, onChange, this.getSystemOptions());
 			case EXPIRES_BETWEEN:
 				return this.renderBetweenOperand(condition, onChange);
 		}
 	};
 
-	renderSelect = (props: SelectRenderProps) => <MaterialSelect options={this.getSystemOptions()} {...props} />;
+	renderSelect = (options: Array<Object>) => (props: SelectRenderProps) => <MaterialSelect options={options} {...props} />;
 
-	renderSelectOperand = (operand: SelectOperandType, onChange: OnChangeOperand) => (
-		<SelectOperand onChange={onChange} operand={operand} render={this.renderSelect} />
+	renderSelectOperand = (operand: SelectOperandType, onChange: OnChangeOperand, options: Array<Object>) => (
+		<SelectOperand onChange={onChange} operand={operand} render={this.renderSelect(options)} />
 	);
 
 	render () {
