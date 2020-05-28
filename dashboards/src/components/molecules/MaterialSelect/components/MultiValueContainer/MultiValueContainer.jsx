@@ -62,10 +62,11 @@ export class MultiValueContainer extends Component<Props, State> {
 
 	renderTag = (option: Option) => {
 		const {getOptionLabel, getOptionValue} = this.props;
+		const label = getOptionLabel(option);
 
 		return (
-			<div className={styles.tagContainer} data-value={getOptionValue(option)} onClick={this.handleClickTag}>
-				<div className={styles.tagLabel}>{getOptionLabel(option)}</div>
+			<div className={styles.tagContainer} data-value={getOptionValue(option)} onClick={this.handleClickTag} title={label}>
+				<div className={styles.tagLabel}>{label}</div>
 				<Icon className={styles.clearTagIcon} name={ICON_NAMES.REMOVE} />
 			</div>
 		);

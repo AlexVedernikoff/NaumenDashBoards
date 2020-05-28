@@ -17,3 +17,5 @@ flow-typed/npm
 
 #smpsync
 rest/stand.json
+
+.env

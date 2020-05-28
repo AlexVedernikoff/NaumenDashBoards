@@ -13,8 +13,6 @@ const TYPE_OPTIONS = [
 	}
 ];
 
-// Символьный ключ для отслеживания только что созданных группировок
-const IS_NEW = Symbol('new');
 // Префикс локального ключа для новой группировки
 const LOCAL_PREFIX_ID: 'local_' = 'local_';
 
@@ -44,6 +42,5 @@ const FIELDS = {
 export {
 	LOCAL_PREFIX_ID,
 	FIELDS,
-	IS_NEW,
 	TYPE_OPTIONS
 };

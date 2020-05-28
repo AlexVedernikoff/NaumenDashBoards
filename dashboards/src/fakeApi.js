@@ -5,15 +5,15 @@ const getCurrentContentParameters = async () => await ({
 });
 
 const getCurrentContextObject = async () => await ({
-	metaClass: 'employee$employee'
+	metaClass: process.env.CONTEXT_OBJECT_META_CLASS
 });
 
 const commands = {
 	getCurrentContentParameters,
 	getCurrentContextObject
 };
-const extractSubjectUuid = () => 'employee$2384002';
-const findContentCode = () => 'TestZhdanovaasdasd';
+const extractSubjectUuid = () => process.env.SUBJECT_UUID;
+const findContentCode = () => process.env.CONTENT_CODE;
 
 const jsApi = {
 	commands,

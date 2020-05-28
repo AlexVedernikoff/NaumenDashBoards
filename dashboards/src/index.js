@@ -1,5 +1,6 @@
 // @flow
 import 'babel-polyfill';
+import 'dom4';
 import './iframeResizer';
 import './fakeApi';
 import App from 'components/App';

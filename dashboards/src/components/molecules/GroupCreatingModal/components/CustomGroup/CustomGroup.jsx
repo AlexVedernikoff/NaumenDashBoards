@@ -2,10 +2,10 @@
 import {Button, FieldError, InfoPanel} from 'components/atoms';
 import {createNewSubGroup} from './helpers';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import type {InputRef} from 'src/components/types';
-import {isGroupKey} from 'store/widgets/helpers';
-import {IS_NEW, LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
+import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MaterialSelect} from 'components/molecules/index';
 import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
@@ -52,28 +52,9 @@ export class CustomGroup extends Component<Props, State> {
 		return map[selectedGroup];
 	};
 
-	getUsingWidgets = () => {
+	getUsingWidgets = (): Array<string> => {
 		const {widgets} = this.props;
-		const {selectedGroup} = this.state;
-		const usedInWidgets = [];
-
-		widgets.forEach(widget => {
-			Object.keys(widget)
-				.filter(isGroupKey)
-				.every(key => {
-					// $FlowFixMe
-					const group = widget[key];
-
-					if (group && typeof group === 'object' && group.data === selectedGroup) {
-						usedInWidgets.push(widget);
-						return false;
-					}
-
-					return true;
-				});
-		});
-
-		return usedInWidgets;
+		return widgets.filter(this.isUsingCurrentGroup).map(widget => widget.name);
 	};
 
 	handleChangeGroupName = (groupId: string, name: string) => {
@@ -89,8 +70,6 @@ export class CustomGroup extends Component<Props, State> {
 		if (groups.length < 30) {
 			const group = {
 				id,
-				// $FlowFixMe
-				[IS_NEW]: true,
 				name: '',
 				subGroups: [createNewSubGroup(
 					createCondition()
@@ -107,7 +86,7 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleClickRemovalButton = () => {
-		const usedInWidgets = this.getUsingWidgets().map(widget => widget.name);
+		const usedInWidgets = this.getUsingWidgets();
 
 		usedInWidgets.length > 0
 			? this.setState({showUseInfo: true, usedInWidgets})
@@ -144,6 +123,11 @@ export class CustomGroup extends Component<Props, State> {
 		selectedGroup && this.update({...selectedGroup, subGroups});
 	};
 
+	isUsingCurrentGroup = (widget: Object) => !!widget.data.find(set => {
+		const {breakdownGroup, group} = FIELDS;
+		return this.testFieldAtUsingGroup(set, group) || this.testFieldAtUsingGroup(set, breakdownGroup);
+	});
+
 	onCreateCallBack = (id: string) => {
 		this.setState({selectedGroup: id});
 		this.onSubmit(id);
@@ -174,6 +158,13 @@ export class CustomGroup extends Component<Props, State> {
 
 			usedInWidgets.length > 0 ? this.setState({showSaveInfo: true}) : this.save();
 		}
+	};
+
+	testFieldAtUsingGroup = (set: Object, key: string) => {
+		const {selectedGroup} = this.state;
+		const group = set[key];
+
+		return group && typeof group === 'object' && group.data === selectedGroup;
 	};
 
 	update = async (customGroup: CustomGroupType) => {
@@ -212,8 +203,7 @@ export class CustomGroup extends Component<Props, State> {
 	renderGroupSelect = () => {
 		const {groups} = this.props;
 		const selectedGroup = this.getSelectedGroup();
-		// $FlowFixMe
-		const isEditingLabel = Boolean(selectedGroup && selectedGroup[IS_NEW]);
+		const isEditingLabel = !!selectedGroup;
 
 		return (
 			<div className={mainStyles.shortField}>
@@ -308,7 +298,7 @@ export class CustomGroup extends Component<Props, State> {
 				<InfoPanel
 					className={styles.infoPanel}
 					onClose={this.handleCloseSaveInfo}
-					onConfirm={this.submit}
+					onConfirm={this.save}
 					text={text}
 					variant={VARIANTS.WARNING}
 				/>
@@ -352,6 +342,7 @@ export class CustomGroup extends Component<Props, State> {
 		if (show) {
 			return (
 				<div className={className}>
+					{this.renderSaveInfo()}
 					{this.renderRemovalInfo()}
 					{this.renderLimitInfo()}
 					{this.renderUseInfo()}
