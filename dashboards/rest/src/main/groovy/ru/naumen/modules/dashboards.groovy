@@ -10,13 +10,13 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules
 
-
 import groovy.transform.Field
 import groovy.transform.Immutable
 
 import static groovy.json.JsonOutput.toJson
 
 //region КОНСТАНТЫ
+// TODO: добавить aggregate, responsible,
 @Field private static final String MAIN_FQN = 'abstractBO'
 //endregion
 
@@ -57,13 +57,38 @@ String getDataSources(classFqn = MAIN_FQN)
 
 /**
  * Отдает список атрибутов для источника данных
- * @param classFqn код метакласса
+ * @param requestContent запрос с кодом метакласса и типами атрибутов
  * @return json список атрибутов {заголовок, код, тип атрибута}
  */
-String getAttributesDataSources(classFqn)
+@Deprecated
+String getAttributesDataSources(requestContent)
 {
+    String classFqn = requestContent.classFqn.toString()
+    List<String> types = requestContent?.types
     def metaInfo = api.metainfo.getMetaClass(classFqn)
-    Collection<Attribute> mappingAttributes = mappingAttribute(metaInfo.attributes, metaInfo.title)
+    def attributes = types ? metaInfo.attributes.findResults {
+        it.type.code in types ? it : null
+    } : metaInfo.attributes
+    Collection<Attribute> mappingAttributes =
+        mappingAttribute(attributes, metaInfo.title, metaInfo.code)
+    return toJson(mappingAttributes)
+}
+
+/**
+ * Отдает список атрибутов для источника данных
+ * @param requestContent запрос с кодом метакласса и типами атрибутов
+ * @return json список атрибутов {заголовок, код, тип атрибута}
+ */
+String getDataSourceAttributes(requestContent)
+{
+    String classFqn = requestContent.classFqn.toString()
+    List<String> types = requestContent?.types
+    def metaInfo = api.metainfo.getMetaClass(classFqn)
+    def attributes = types ? metaInfo.attributes.findResults {
+        it.type.code in types ? it : null
+    } : metaInfo.attributes
+    Collection<Attribute> mappingAttributes =
+        mappingAttribute(attributes, metaInfo.title, metaInfo.code)
     return toJson(mappingAttributes)
 }
 
@@ -74,16 +99,65 @@ String getAttributesDataSources(classFqn)
  */
 String getAttributesFromLinkAttribute(requestContent)
 {
-    def linkAttribute = requestContent.linkAttribute as Map
+    def linkAttribute = requestContent.attribute as Map
     String attributeType = linkAttribute.type
-    if (!((attributeType as AttributeType) in AttributeType.linkTypes))
-        throw new Exception("Not supported type: ${attributeType}")
+    if (!(attributeType in AttributeType.LINK_TYPES))
+    {
+        throw new Exception( "Not supported type: ${ attributeType }" )
+    }
 
     String attributeClassFqn = linkAttribute.property
+    boolean deep = requestContent?.deep
+    List<String> types = requestContent?.types
+
     def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
-    Collection<Attribute> result = metaInfo.attributes
-            .findResults { !it.computable ? buildAttribute(it) : null }
-            .sort { it.title }
+    Collection<Attribute> result = types
+        ? metaInfo.attributes
+                  .findResults {
+                      !it.computable && it.type.code in types ? buildAttribute(it) : null
+                  }
+                  .sort {
+                      it.title
+                  }
+        : metaInfo.attributes
+                  .findResults {
+                      !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it) :
+                          null
+                  }
+                  .sort {
+                      it.title
+                  }
+
+    if (deep)
+    {
+        List childrenClasses = []
+        List parentClasses = []
+        parentClasses.add(attributeClassFqn)
+        childrenClasses = getListOfClasses(childrenClasses, parentClasses)
+
+        Collection<Attribute> attributeList = []
+        childrenClasses.each {
+            def metainfo = api.metainfo.getMetaClass(it)
+            def attributes = metainfo?.attributes
+            attributeList += types
+                ? attributes ? attributes.findResults {
+                !result*.code.find { x -> x == it.code
+                } && !attributeList*.code.find { x -> x == it.code
+                } && !it.computable && it.type.code in types
+                    ? buildAttribute(it) : null
+            } : []
+                : attributes ? attributes.findResults {
+                !result*.code.find { x -> x == it.code
+                } && !attributeList*.code.find { x -> x == it.code
+                } && !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it) :
+                    null
+            } : []
+        }
+        result += attributeList
+        result.sort {
+            it.title
+        }
+    }
 
     return toJson(result)
 }
@@ -98,20 +172,28 @@ String getAttributeObject(Map requestContent)
     def condition = removed ? [:] : [removed: false]
 
     def intermediateData = uuid
-            ? getChildren(classFqn, uuid, condition + [parent: uuid])
-            : getTop(classFqn, condition)
+        ? getChildren(classFqn, uuid, condition + [parent: uuid])
+        : getTop(classFqn, condition)
 
     def result = getObjects(intermediateData, count, offset).collect { object ->
         [
-                title   : object.title,
-                uuid    : object.UUID,
-                property: object.metaClass as String,
-                children: getAllInheritanceChains()
-                        .findAll { it*.code.contains(object.metaClass as String) }
-                        .collect { it*.code as Set }
-                        .inject { first, second -> first + second }
-                        .collect { api.utils.count(it, [parent: object.UUID]) as int }
-                        .inject(0) {first, second -> first + second }
+            title   : object.title,
+            uuid    : object.UUID,
+            property: object.metaClass as String,
+            children: getAllInheritanceChains()
+                .findAll {
+                    it*.code.contains(object.metaClass as String)
+                }
+                .collect {
+                    it*.code as Set
+                }
+                .inject { first, second -> first + second
+                }
+                .collect {
+                    api.utils.count(it, [parent: object.UUID]) as int
+                }
+                .inject(0) { first, second -> first + second
+                }
         ]
     }
     return toJson(result)
@@ -131,20 +213,25 @@ String getCatalogObject(Map requestContent)
     //C каталогами не будет такой свистопляски в наследовании как с объектами BO
     // наследорвание тут происходит в пределах одного класса
     def searchParameter = sp.createInstance()
-    count?.with { searchParameter.limit(it as int) }
-    offset?.with { searchParameter.offset(offset as int) }
-    def result = api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect { el ->
-        [
+    count?.with {
+        searchParameter.limit(it as int)
+    }
+    offset?.with {
+        searchParameter.offset(offset as int)
+    }
+    def result =
+        api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect { el ->
+            [
                 title   : el.title,
                 uuid    : el.UUID,
                 children: api.utils.find(classFqn, removeCondition + [parent: el.UUID]).collect {
                     [
-                            title   : it.title,
-                            uuid    : it.UUID,
+                        title: it.title,
+                        uuid : it.UUID,
                     ]
                 }
-        ]
-    }
+            ]
+        }
     return toJson(result)
 }
 
@@ -160,16 +247,41 @@ String getCatalogItemObject(Map requestContent)
     def parentCondition = uuid ? [parent: uuid] : [parent: op.isNull()]
 
     def searchParameter = sp.createInstance()
-    count?.with { searchParameter.limit(it as int) }
-    offset?.with { searchParameter.offset(offset as int) }
-
-    def result = api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect {
-        [
-                title   : it.title,
-                uuid    : it.UUID
-        ]
+    count?.with {
+        searchParameter.limit(it as int)
     }
+    offset?.with {
+        searchParameter.offset(offset as int)
+    }
+
+    def result =
+        api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect {
+            [
+                title: it.title,
+                uuid : it.UUID
+            ]
+        }
     return toJson(result)
+}
+
+/**
+ * Получение списка подклассов у классов атрибута
+ * @param resultList - итоговый список
+ * @param parentList - список родительских классов
+ * @return список подклассов у классов атрибута
+ */
+List<String> getListOfClasses(List<String> resultList, List<String> parentList)
+{
+    parentList.each {
+        def metaInfo = api.metainfo.getMetaClass(it)
+        List<String> childrenClasses = metaInfo?.children?.collect { x -> x.toString() }
+        if (childrenClasses)
+        {
+            resultList += childrenClasses
+            resultList = getListOfClasses(resultList, childrenClasses)
+        }
+    }
+    resultList
 }
 
 /**
@@ -180,15 +292,19 @@ String getCatalogItemObject(Map requestContent)
 String getStates(String classFqn)
 {
     def result = api.metainfo.getMetaClass(classFqn)
-            ?.workflow
-            ?.states
-            ?.sort { it.title }
-            ?.collect { [title: it.title, uuid: it.code] } ?: []
+                    ?.workflow
+                    ?.states
+                    ?.sort {
+                        it.title
+                    }
+                    ?.collect {
+                        [title: it.title, uuid: it.code]
+                    } ?: []
     return toJson(result)
 }
 
-
-String getTimerStatuses() {
+String getTimerStatuses()
+{
     return ru.naumen.core.shared.timer.Status.values().collect {
         [title: it.name(), uuid: it.code]
     }
@@ -202,9 +318,11 @@ String getTimerStatuses() {
 String getMetaClasses(String classFqn)
 {
     def result = api.metainfo.getMetaClass(classFqn)
-            ?.with(this.&getChildrenMetaClass)
-            ?.flatten()
-            ?.collect { [title: it.title, uuid: it.code] } ?: []
+                    ?.with(this.&getChildrenMetaClass)
+                    ?.flatten()
+                    ?.collect {
+                        [title: it.title, uuid: it.code]
+                    } ?: []
     return toJson(result)
 }
 //endregion
@@ -223,10 +341,18 @@ private List getTop(String classFqn, Map condition)
 private List getChildren(String classFqn, String uuid, Map condition)
 {
     def parentType = api.utils.get(uuid).metaClass
-    return getAllInheritanceChains().findAll { it*.code.contains(classFqn) }.collect { set ->
+    return getAllInheritanceChains().findAll {
+        it*.code.contains(classFqn)
+    }.collect { set ->
         set.iterator()
-                .dropWhile { it.code != classFqn }.reverse()
-                .dropWhile { it.code != parentType.code }.collect { it.code }
+           .dropWhile {
+               it.code != classFqn
+           }.reverse()
+           .dropWhile {
+               it.code != parentType.code
+           }.collect {
+            it.code
+        }
     }.flatten().collect { clazz ->
         int count = api.utils.count(clazz, condition)
         [clazz, condition, count]
@@ -240,10 +366,10 @@ private List getChildren(String classFqn, String uuid, Map condition)
 private Collection getAllInheritanceChains(String classFqn = MAIN_FQN)
 {
     return api.metainfo.getMetaClass(classFqn)
-            ?.with(this.&getChildrenMetaClass)
-            ?.findAll(this.&getAttributeParent)
-            ?.collect(this.&getPossibleParentTypes)
-            ?.with(this.&getUniqueTypeSet) ?: []
+              ?.with(this.&getChildrenMetaClass)
+              ?.findAll(this.&getAttributeParent)
+              ?.collect(this.&getPossibleParentTypes)
+              ?.with(this.&getUniqueTypeSet) ?: []
 }
 
 /**
@@ -255,14 +381,28 @@ private Collection getAllInheritanceChains(String classFqn = MAIN_FQN)
  */
 private List getObjects(List data, int requiredCount, int requiredOffset)
 {
-    if (!data) return []
-    if (!requiredCount) return []
+    if (!data)
+    {
+        return []
+    }
+    if (!requiredCount)
+    {
+        return []
+    }
     def (classFqn, condition, int count) = data.head()
-    int mainCount = (count - requiredOffset).with { it < 0 ? 0 : it }
+    int mainCount = (count - requiredOffset).with {
+        it < 0 ? 0 : it
+    }
     int remainCount = requiredCount - mainCount
-    int remainOffset = (requiredOffset - count).with { it < 0 ? 0 : it }
+    int remainOffset = (requiredOffset - count).with {
+        it < 0 ? 0 : it
+    }
     int realCount = requiredCount < mainCount ? requiredCount : mainCount
-    def result = mainCount ? api.utils.find(classFqn, condition, sp.limit(realCount).offset(requiredOffset)) : []
+    def result = mainCount ? api.utils.find(
+        classFqn, condition, sp.limit(realCount).offset(
+        requiredOffset
+    )
+    ) : []
     return result + getObjects(data.tail(), remainCount, remainOffset)
 }
 
@@ -298,10 +438,14 @@ private Set getPossibleParentTypes(def classFqn)
 private Collection getUniqueTypeSet(Collection chains)
 {
     if (!chains)
+    {
         return chains
+    }
     def set = chains.head() as Set
     def other = chains.tail().with(this.&getUniqueTypeSet)
-    return other.any { it*.code.containsAll(set*.code) } ? other : [set] + other
+    return other.any {
+        it*.code.containsAll(set*.code)
+    } ? other : [set] + other
 }
 
 /**
@@ -311,7 +455,9 @@ private Collection getUniqueTypeSet(Collection chains)
  */
 private def getAttributeParent(def metaClass)
 {
-    return metaClass?.attributes?.find { (it.code == 'parent') }
+    return metaClass?.attributes?.find {
+        (it.code == 'parent')
+    }
 }
 /**
  * Временное решение для получения списка метаклассов и типов
@@ -342,8 +488,9 @@ private def getMetaClassChildren(String fqn)
  */
 private Collection<DataSource> mappingDataSource(def fqns)
 {
-    return fqns.collect { new DataSource(it.code, it.title, mappingDataSource(it.children)) }
-            .sort { it.title }
+    return fqns.collect {
+        new DataSource(it.code, it.title, mappingDataSource(it.children))
+    }.sort { it.title }
 }
 
 /**
@@ -351,48 +498,25 @@ private Collection<DataSource> mappingDataSource(def fqns)
  * Collection<fqnAttr> -> Collection<Attribute>
  * @param attributes - атрибуты метакласа
  * @param sourceName - название типа объекта
+ * @param sourceCode - код типа объекта
  */
-private Collection<Attribute> mappingAttribute(List attributes, String sourceName)
+private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
 {
-    return attributes.findResults {!it.computable ? buildAttribute(it, sourceName) : null }.sort { it.title }
+    return attributes.findResults {
+        !it.computable ? buildAttribute(it, sourceName, sourceCode) : null
+    }.sort { it.title }
 }
 
-private Attribute buildAttribute(def value, String sourceName)
+private Attribute buildAttribute(def value, String sourceName, String sourceCode)
 {
     return new Attribute(
-            code: value.code,
-            title: value.title,
-            type: getAttributeType(value.type.code as String),
-            property: value.type.relatedMetaClass as String,
-            metaClassFqn: value.declaredMetaClass.code,
-            sourceName: sourceName)
-}
-
-private AttributeType getAttributeType(String lowerCaseName)
-{
-    switch (lowerCaseName)
-    {
-        case 'bool': return AttributeType.BOOL
-        case 'integer': return AttributeType.INTEGER
-        case 'double': return AttributeType.DOUBLE
-        case 'string': return AttributeType.STRING
-        case 'localizedText': return AttributeType.LOCALIZED_TEXT
-
-        case 'object': return AttributeType.OBJECT
-        case 'boLinks': return AttributeType.BO_LINKS
-        case 'backBoLinks': return AttributeType.BACK_BO_LINKS
-        case 'catalogItem': return AttributeType.CATALOG_ITEM
-        case 'catalogItemSet': return AttributeType.CATALOG_ITEM_SET
-
-        case 'date': return AttributeType.DATE
-        case 'dateTime': return AttributeType.DATE_TIME
-        case 'dtInterval': return AttributeType.DT_INTERVAL
-        case 'timer': return AttributeType.TIMER
-        case 'backTimer': return AttributeType.BACK_TIMER
-
-        case 'state': return AttributeType.STATE
-        case 'metaClass': return AttributeType.META_CLASS
-        default: throw new IllegalArgumentException("Not supported attribute type: $lowerCaseName")
-    }
+        code: value.code,
+        title: value.title,
+        type: value.type.code as String,
+        property: value.type.relatedMetaClass as String,
+        metaClassFqn: value.declaredMetaClass.code,
+        sourceName: sourceName,
+        sourceCode: sourceCode
+    )
 }
 //endregion
