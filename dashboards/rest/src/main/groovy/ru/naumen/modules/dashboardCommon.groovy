@@ -50,7 +50,23 @@ enum GroupType
     MINUTE_INTERVAL,
     HOUR_INTERVAL,
     DAY_INTERVAL,
-    WEEK_INTERVAL
+    WEEK_INTERVAL,
+    ACTIVE,
+    NOT_STARTED,
+    PAUSED,
+    STOPPED,
+    EXCEED
+
+    static List<GroupType> getTimerTypes()
+    {
+        return [
+            ACTIVE,
+            NOT_STARTED,
+            PAUSED,
+            STOPPED,
+            EXCEED
+        ]
+    }
 }
 
 enum Aggregation
@@ -97,60 +113,55 @@ enum Comparison
     EQUAL_REMOVED,
     NOT_EQUAL_REMOVED
 }
-
-enum AttributeType
-{
-    BOOL,
-    INTEGER,
-    DOUBLE,
-    STRING,
-    LOCALIZED_TEXT,
-
-    OBJECT,
-    BO_LINKS,
-    BACK_BO_LINKS,
-    CATALOG_ITEM,
-    CATALOG_ITEM_SET,
-
-    STATE,
-    META_CLASS,
-
-    DATE,
-    DATE_TIME,
-    DT_INTERVAL,
-    TIMER,
-    BACK_TIMER
-
-    static List<AttributeType> getLinkTypes()
-    {
-        return [
-                OBJECT,
-                BO_LINKS,
-                CATALOG_ITEM_SET,
-                BACK_BO_LINKS,
-                CATALOG_ITEM
-        ]
-    }
-
-    static List<AttributeType> getNumberTypes()
-    {
-        return [INTEGER, DOUBLE]
-    }
-
-    static List<AttributeType> getDateTypes()
-    {
-        return [DATE, DATE_TIME]
-    }
-
-    static AttributeType[] getTimerTypes()
-    {
-        return [TIMER, BACK_TIMER]
-    }
-}
-
 //endregion
 
 //region КЛАССЫ
+/**
+ * Типы атрибутов даннных для диаграмм
+ */
+class AttributeType {
+
+    static final Collection<String> ALL_ATTRIBUTE_TYPES = [OBJECT_TYPE, TIMER_TYPE, BACK_TIMER_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE,
+                                                           CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, META_CLASS_TYPE, DT_INTERVAL_TYPE, DATE_TYPE,
+                                                           DATE_TIME_TYPE, STRING_TYPE, INTEGER_TYPE, DOUBLE_TYPE, STATE_TYPE,
+                                                           LOCALIZED_TEXT_TYPE, BOOL_TYPE].asImmutable()
+
+    static final Collection<String> TIMER_TYPES = [TIMER_TYPE, BACK_TIMER_TYPE].asImmutable()
+
+    static final Collection<String> LINK_TYPES = [OBJECT_TYPE,  CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
+
+
+    static final Collection<String> SIMPLE_TYPES = [ DT_INTERVAL_TYPE, DATE_TYPE, DATE_TIME_TYPE, STRING_TYPE, INTEGER_TYPE, STATE_TYPE,
+                                                     DOUBLE_TYPE, BOOL_TYPE, TIMER_TYPE, BACK_TIMER_TYPE, LOCALIZED_TEXT_TYPE].asImmutable()
+
+    static final Collection<String> NUMBER_TYPES = [INTEGER_TYPE, DOUBLE_TYPE].asImmutable()
+
+    static final Collection<String> DATE_TYPES = [DATE_TYPE, DATE_TIME_TYPE].asImmutable()
+
+
+    static final String OBJECT_TYPE = 'object'
+
+    static final String TIMER_TYPE ='timer'
+    static final String BACK_TIMER_TYPE ='backTimer'
+    static final String BO_LINKS_TYPE = 'boLinks'
+    static final String CATALOG_ITEM_SET_TYPE ='catalogItemSet'
+
+    static final String BACK_BO_LINKS_TYPE ='backBOLinks'
+    static final String CATALOG_ITEM_TYPE ='catalogItem'
+    static final String META_CLASS_TYPE = 'metaClass'
+    static final String DT_INTERVAL_TYPE = 'dtInterval'
+
+    static final String DATE_TYPE = 'date'
+    static final String DATE_TIME_TYPE ='dateTime'
+    static final String STRING_TYPE ='string'
+    static final String INTEGER_TYPE ='integer'
+
+    static final String DOUBLE_TYPE ='double'
+    static final String STATE_TYPE ='state'
+    static final String LOCALIZED_TEXT_TYPE ='localizedText'
+    static final String BOOL_TYPE = 'bool'
+}
+
 /**
  * Модель для атрибута
  */
@@ -168,7 +179,7 @@ class Attribute
     /**
      * Тип атрибута
      */
-    AttributeType type
+    String type
     /**
      * Свойство атрибута (метаклассы ссылочных атрибутов, значения элементов справочника и т.д)
      */
@@ -181,6 +192,10 @@ class Attribute
      * Имя источника
      */
     String sourceName
+    /**
+     * Код источника
+     */
+    String sourceCode
 
     /**
      * Вложенный атрибут
@@ -190,13 +205,14 @@ class Attribute
     static Attribute fromMap(Map<String, Object> data)
     {
         return data ? new Attribute(
-                title: data.title as String,
-                code: data.code as String,
-                type: data.type as AttributeType,
-                property: data.property as String,
-                metaClassFqn: data.metaClassFqn as String,
-                sourceName: data.sourceName as String,
-                ref: fromMap(data.ref as Map<String, Object>)
+            title: data.title as String,
+            code: data.code as String,
+            type: data.type as String,
+            property: data.property as String,
+            metaClassFqn: data.metaClassFqn as String,
+            sourceName: data.sourceName as String,
+            sourceCode: data.sourceCode as String,
+            ref: fromMap(data.ref as Map<String, Object>)
         ) : null
     }
 
@@ -216,13 +232,15 @@ class Attribute
     Attribute deepClone()
     {
         return new Attribute(
-                code: this.code,
-                title: this.title,
-                type: this.type,
-                property: this.property,
-                metaClassFqn: this.metaClassFqn,
-                sourceName: this.sourceName,
-                ref: this.ref?.deepClone())
+            code: this.code,
+            title: this.title,
+            type: this.type,
+            property: this.property,
+            metaClassFqn: this.metaClassFqn,
+            sourceName: this.sourceName,
+            sourceCode: this.sourceCode,
+            ref: this.ref?.deepClone()
+        )
     }
 
     /**
@@ -234,7 +252,9 @@ class Attribute
         if (this.ref)
         {
             this.ref.addLast(attribute)
-        } else {
+        }
+        else
+        {
             this.ref = attribute
         }
     }
@@ -288,6 +308,7 @@ abstract class Parameter<T>
     String title
     T type
     Attribute attribute
+    String sortingType
 }
 
 class AggregationParameter extends Parameter<Aggregation> {}

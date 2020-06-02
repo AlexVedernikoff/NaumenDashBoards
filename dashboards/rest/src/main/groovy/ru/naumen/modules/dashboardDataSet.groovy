@@ -193,7 +193,9 @@ String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectU
         api.tx.call {
             try
             {
-                return [(key): buildDiagram(transformRequest(value as Map<String, Object>, cardObjectUuid), cardObjectUuid)]
+                return [(key): buildDiagram(
+                    transformRequest(value as Map<String, Object>, cardObjectUuid), cardObjectUuid
+                )]
             }
             catch (Exception ex)
             {
@@ -260,22 +262,28 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             def normRequest = mappingTableDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             def (totalColumn, totalRow) = requestContent.data
-                    .findResult { key, value -> !(value.sourceForCompute) ? value : null }
-                    .with { [it.calcTotalColumn, it.calcTotalRow] }
+                                                        .findResult { key, value
+                                                            ->
+                                                            !(value.sourceForCompute) ? value : null
+                                                        }
+                                                        .with {
+                                                            [it.calcTotalColumn, it.calcTotalRow]
+                                                        }
             return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean)
         case COMBO:
             def normRequest = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             def (firstAdditionalData, secondAdditionalData) = (requestContent.data as Map)
-                    .findAll { key, value -> !(value.sourceForCompute) }
-                    .collect { key, value ->
-                        [
-                                type     : value.type,
-                                breakdown: value.yAxis.title,
-                                name     : value.yAxis.title,
-                                dataKey  : key
-                        ]
-                    }
+                .findAll { key, value -> !(value.sourceForCompute)
+                }
+                .collect { key, value ->
+                    [
+                        type     : value.type,
+                        breakdown: value.yAxis.title,
+                        name     : value.yAxis.title,
+                        dataKey  : key
+                    ]
+                }
             return mappingComboDiagram(res, firstAdditionalData as Map, secondAdditionalData as Map)
         default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
     }
@@ -287,67 +295,80 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
+private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> requestContent,
+                                                     String subjectUUID)
 {
+    def demoSorting = requestContent.sorting as Map<String, Object>
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
         def data = value as Map<String, Object>
         def source = new Source(classFqn: data.source, descriptor: data.descriptor)
         def yAxis = data.yAxis as Map<String, Object>
         def aggregationParameter = new AggregationParameter(
-                title: 'yAxis',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(yAxis)
+            title: 'yAxis',
+            type: data.aggregation as Aggregation,
+            attribute: mappingAttribute(yAxis),
+            sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
         )
         def xAxis = data.xAxis as Map<String, Object>
         def group = data.group as Map<String, Object>
         def groupParameter = buildSystemGroup(group, xAxis)
+        groupParameter?.sortingType = demoSorting.value == 'PARAMETER' ? demoSorting.type : null
 
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         def breakdown = null
 
-        if (mayBeBreakdown instanceof Collection) {
+        if (mayBeBreakdown instanceof Collection)
+        {
             def groupTypes = data.breakdown*.group as Set
             // Это список типов группировок.
             // По хорошему они должны быть одинаковыми.
             // Не знаю почему фронт шлёт их на каждый атрибут...
-            if (groupTypes.size() == 1) {
+            if (groupTypes.size() == 1)
+            {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
-            } else {
+            }
+            else
+            {
                 throw new IllegalArgumentException("Does not match group types: $groupTypes")
             }
-        } else {
+        }
+        else
+        {
             //это обычная разбивка... Ну или кастомная
             breakdown = mayBeBreakdown?.with {
-                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+                buildSystemGroup(
+                    data.breakdownGroup as Map<String, Object>,
+                    it as Map<String, Object>
+                )
             }
         }
-
         def res = new RequestData(
-                source: source,
-                aggregations: [aggregationParameter],
-                groups: [groupParameter, breakdown].grep()
+            source: source,
+            aggregations: [aggregationParameter],
+            groups: [groupParameter, breakdown].grep()
         )
 
         def comp = yAxis?.stringForCompute?.with {
             def compData = yAxis.computeData as Map
             [
-                    formula    : it as String,
-                    title      : yAxis.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def br = breakdownMap[dataKey] as GroupParameter
-                        def aggr = new AggregationParameter(
-                                title: 'aggregation',
-                                type: v.aggregation as Aggregation,
-                                attribute: mappingAttribute(v.attr as Map)
-                        )
-                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
-                    }
+                formula    : it as String,
+                title      : yAxis.title as String,
+                computeData: compData.collectEntries { k, v ->
+                    String dataKey = v.dataKey
+                    def br = breakdownMap[dataKey] as GroupParameter
+                    def aggr = new AggregationParameter(
+                        title: 'aggregation',
+                        type: v.aggregation as Aggregation,
+                        attribute: mappingAttribute(v.attr as Map),
+                        sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
+                    )
+                    [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                }
             ]
         }
 
@@ -359,16 +380,21 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
+                ? new ComputationRequisiteNode(
+                title: null,
+                type: 'COMPUTATION',
+                formula: comp.formula
+            )
+                : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
         def customGroup = group.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
-                : null
+            ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
+            : null
 
-        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+        [(key): [requestData      : res, computeData: comp?.computeData, customGroup:
+            customGroup, requisite: requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
 }
@@ -379,8 +405,10 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
+private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestContent,
+                                                  String subjectUUID)
 {
+    def demoSorting = requestContent.sorting as Map<String, Object>
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
         def data = value as Map<String, Object>
@@ -388,58 +416,67 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
 
         def indicator = data.indicator as Map<String, Object>
         def aggregationParameter = new AggregationParameter(
-                title: 'indicator',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(indicator)
+            title: 'indicator',
+            type: data.aggregation as Aggregation,
+            attribute: mappingAttribute(indicator),
+            sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
         )
 
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         GroupParameter breakdown = null
 
-        if (mayBeBreakdown instanceof Collection) {
+        if (mayBeBreakdown instanceof Collection)
+        {
             def groupTypes = data.breakdown*.group as Set
             // Это список типов группировок.
             // По хорошему они должны быть одинаковыми.
             // Не знаю почему фронт шлёт их на каждый атрибут...
-            if (groupTypes.size() == 1) {
+            if (groupTypes.size() == 1)
+            {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
-            } else {
+            }
+            else
+            {
                 throw new IllegalArgumentException("Does not match group types: $groupTypes")
             }
-        } else {
+        }
+        else
+        {
             //это обычная разбивка... Ну или кастомная
             breakdown = mayBeBreakdown?.with {
-                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+                buildSystemGroup(
+                    data.breakdownGroup as Map<String, Object>,
+                    it as Map<String, Object>
+                )
             }
         }
 
         def res = new RequestData(
-                source: source,
-                aggregations: [aggregationParameter],
-                groups: [breakdown].grep()
+            source: source,
+            aggregations: [aggregationParameter],
+            groups: [breakdown].grep()
         )
 
         def comp = indicator?.stringForCompute?.with {
             def compData = indicator.computeData as Map
             [
-                    [
-                            formula    : it as String,
-                            title      : yAxis.title as String,
-                            computeData: compData.collectEntries { k, v ->
-                                String dataKey = v.dataKey
-                                def br = breakdownMap[dataKey] as GroupParameter
-                                def aggr = new AggregationParameter(
-                                        title: 'aggregation',
-                                        type: v.aggregation as Aggregation,
-                                        attribute: mappingAttribute(v.attr as Map)
-                                )
-                                [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
-                            }
-                    ]
+                formula    : it as String,
+                title      : indicator.title as String,
+                computeData: compData.collectEntries { k, v ->
+                    String dataKey = v.dataKey
+                    def br = breakdownMap[dataKey] as GroupParameter
+                    def aggr = new AggregationParameter(
+                        title: 'aggregation',
+                        type: v.aggregation as Aggregation,
+                        attribute: mappingAttribute(v.attr as Map),
+                        sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
+                    )
+                    [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                }
             ]
         }
 
@@ -451,16 +488,22 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
+                ? new ComputationRequisiteNode(
+                title: null,
+                type: 'COMPUTATION',
+                formula: comp.formula
+            )
+                : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
         def customGroup = data.breakdownGroup?.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(breakdown)] + (data.breakdownGroup.data as Map<String, Object>)
-                : null
+            ? [attribute: mappingAttribute(mayBeBreakdown)] + (
+            data.breakdownGroup.data as Map<String, Object>)
+            : null
 
-        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+        [(key): [requestData      : res, computeData: comp?.computeData, customGroup:
+            customGroup, requisite: requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
 }
@@ -471,7 +514,8 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
+private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestContent,
+                                                    String subjectUUID)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -480,26 +524,26 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
 
         def indicator = data.indicator as Map<String, Object>
         def aggregationParameter = new AggregationParameter(
-                title: 'indicator',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(indicator)
+            title: 'indicator',
+            type: data.aggregation as Aggregation,
+            attribute: mappingAttribute(indicator)
         )
         def res = new RequestData(source: source, aggregations: [aggregationParameter])
 
         def comp = indicator?.stringForCompute?.with {
             def compData = indicator.computeData as Map
             [
-                    formula    : it as String,
-                    title      : indicator.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def aggr = new AggregationParameter(
-                                title: 'aggregation',
-                                type: v.aggregation as Aggregation,
-                                attribute: mappingAttribute(v.attr as Map)
-                        )
-                        [(k): [aggregation: aggr, dataKey: dataKey]]
-                    }
+                formula    : it as String,
+                title      : indicator.title as String,
+                computeData: compData.collectEntries { k, v ->
+                    String dataKey = v.dataKey
+                    def aggr = new AggregationParameter(
+                        title: 'aggregation',
+                        type: v.aggregation as Aggregation,
+                        attribute: mappingAttribute(v.attr as Map)
+                    )
+                    [(k): [aggregation: aggr, dataKey: dataKey]]
+                }
             ]
         }
         String attributeTitle = indicator?.title
@@ -511,12 +555,17 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: comp.title, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: key)
+                ? new ComputationRequisiteNode(
+                title: comp.title,
+                type: 'COMPUTATION',
+                formula: comp.formula
+            )
+                : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
-        [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite: requisite]]
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite:
+            requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
 }
@@ -527,7 +576,8 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
+private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent,
+                                                  String subjectUUID)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -535,61 +585,74 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
         def source = new Source(classFqn: data.source, descriptor: data.descriptor)
         def column = data.column as Map<String, Object>
         def aggregationParameter = new AggregationParameter(
-                title: 'column',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(column)
+            title: 'column',
+            type: data.aggregation as Aggregation,
+            attribute: mappingAttribute(column)
         )
         def row = data.row as Map<String, Object>
 
         //в таблице группировка по строке всегда обычная.
-        def groupParameter = new GroupParameter(title: 'row', type: GroupType.OVERLAP, attribute: mappingAttribute(row))
+        def groupParameter = new GroupParameter(
+            title: 'row',
+            type: GroupType.OVERLAP,
+            attribute: mappingAttribute(row)
+        )
 
         //а вот разбивка может быть кастомной.
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         def breakdownParameter = null
 
-        if (mayBeBreakdown instanceof Collection) {
+        if (mayBeBreakdown instanceof Collection)
+        {
             def groupTypes = data.breakdown*.group as Set
             // Это список типов группировок.
             // По хорошему они должны быть одинаковыми.
             // Не знаю почему фронт шлёт их на каждый атрибут...
-            if (groupTypes.size() == 1) {
+            if (groupTypes.size() == 1)
+            {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
-            } else {
+            }
+            else
+            {
                 throw new IllegalArgumentException("Does not match group types: $groupTypes")
             }
-        } else {
+        }
+        else
+        {
             //это обычная разбивка... Ну или кастомная
             breakdownParameter = mayBeBreakdown?.with {
-                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+                buildSystemGroup(
+                    data.breakdownGroup as Map<String, Object>,
+                    it as Map<String, Object>
+                )
             }
         }
 
         def res = new RequestData(
-                source: source,
-                aggregations: [aggregationParameter],
-                groups: [groupParameter, breakdownParameter].grep()
+            source: source,
+            aggregations: [aggregationParameter],
+            groups: [groupParameter, breakdownParameter].grep()
         )
 
         def comp = column?.stringForCompute?.with {
             def compData = column.computeData as Map
             [
-                    formula    : it as String,
-                    title      : column.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def br = breakdownMap[dataKey] as GroupParameter
-                        def aggr = new AggregationParameter(
-                                title: 'aggregation',
-                                type: v.aggregation as Aggregation,
-                                attribute: mappingAttribute(v.attr as Map)
-                        )
-                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
-                    }
+                formula    : it as String,
+                title      : column.title as String,
+                computeData: compData.collectEntries { k, v ->
+                    String dataKey = v.dataKey
+                    def br = breakdownMap[dataKey] as GroupParameter
+                    def aggr = new AggregationParameter(
+                        title: 'aggregation',
+                        type: v.aggregation as Aggregation,
+                        attribute: mappingAttribute(v.attr as Map)
+                    )
+                    [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                }
             ]
         }
 
@@ -601,16 +664,22 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
         else
         {
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
+                ? new ComputationRequisiteNode(
+                title: null,
+                type: 'COMPUTATION',
+                formula: comp.formula
+            )
+                : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
         def customGroup = data.breakdownGroup?.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(breakdownParameter)] + (data.breakdownGroup.data as Map<String, Object>)
-                : null
+            ? [attribute: mappingAttribute(mayBeBreakdown)] + (
+            data.breakdownGroup.data as Map<String, Object>)
+            : null
 
-        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+        [(key): [requestData      : res, computeData: comp?.computeData, customGroup:
+            customGroup, requisite: requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
 }
@@ -621,67 +690,81 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return DiagramRequest
  */
-private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestContent, String subjectUUID)
+private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestContent,
+                                                  String subjectUUID)
 {
+    def demoSorting = requestContent.sorting as Map<String, Object>
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
         def data = value as Map<String, Object>
         def source = new Source(classFqn: data.source, descriptor: data.descriptor)
         def yAxis = data.yAxis as Map<String, Object>
         def aggregationParameter = new AggregationParameter(
-                title: 'yAxis',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(yAxis)
+            title: 'yAxis',
+            type: data.aggregation as Aggregation,
+            attribute: mappingAttribute(yAxis),
+            sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
         )
         def xAxis = data.xAxis as Map<String, Object>
         def group = data.group as Map<String, Object>
 
         def groupParameter = buildSystemGroup(group, xAxis)
+        groupParameter?.sortingType = demoSorting.value == 'PARAMETER' ? demoSorting.type : null
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         def breakdown = null
 
-        if (mayBeBreakdown instanceof Collection) {
+        if (mayBeBreakdown instanceof Collection)
+        {
             def groupTypes = data.breakdown*.group as Set
             // Это список типов группировок.
             // По хорошему они должны быть одинаковыми.
             // Не знаю почему фронт шлёт их на каждый атрибут...
-            if (groupTypes.size() == 1) {
+            if (groupTypes.size() == 1)
+            {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
-            } else {
+            }
+            else
+            {
                 throw new IllegalArgumentException("Does not match group types: $groupTypes")
             }
-        } else {
+        }
+        else
+        {
             //это обычная разбивка... Ну или кастомная
             breakdown = mayBeBreakdown?.with {
-                buildSystemGroup(data.breakdownGroup as Map<String, Object>, it as Map<String, Object>)
+                buildSystemGroup(
+                    data.breakdownGroup as Map<String, Object>,
+                    it as Map<String, Object>
+                )
             }
         }
 
         def res = new RequestData(
-                source: source,
-                aggregations: [aggregationParameter],
-                groups: [groupParameter, breakdown].grep()
+            source: source,
+            aggregations: [aggregationParameter],
+            groups: [groupParameter, breakdown].grep()
         )
 
         def comp = !(data.sourceForCompute) ? yAxis.stringForCompute?.with {
             def compData = yAxis.computeData as Map
             [
-                    formula    : it as String,
-                    title      : yAxis.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def br = breakdownMap[dataKey] as GroupParameter
-                        def aggr = new AggregationParameter(
-                                title: 'aggregation',
-                                type: v.aggregation as Aggregation,
-                                attribute: mappingAttribute(v.attr as Map)
-                        )
-                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
-                    }
+                formula    : it as String,
+                title      : yAxis.title as String,
+                computeData: compData.collectEntries { k, v ->
+                    String dataKey = v.dataKey
+                    def br = breakdownMap[dataKey] as GroupParameter
+                    def aggr = new AggregationParameter(
+                        title: 'aggregation',
+                        type: v.aggregation as Aggregation,
+                        attribute: mappingAttribute(v.attr as Map),
+                        sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
+                    )
+                    [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                }
             ]
         } : null
 
@@ -695,16 +778,21 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
             //TODO: Важный момент. Названия записей специально заполнены нулами.
             // На названиях подвязана логика работы с кастомными группировками
             def requisiteNode = comp
-                    ? new ComputationRequisiteNode(title: null, type: 'COMPUTATION', formula: comp.formula)
-                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
+                ? new ComputationRequisiteNode(
+                title: null,
+                type: 'COMPUTATION',
+                formula: comp.formula
+            )
+                : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode])
         }
 
         def customGroup = group.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
-                : null
+            ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
+            : null
 
-        [(key): [requestData: res, computeData: comp?.computeData, customGroup: customGroup, requisite: requisite]]
+        [(key): [requestData      : res, computeData: comp?.computeData, customGroup:
+            customGroup, requisite: requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
 }
@@ -715,13 +803,14 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
  * @param attr - атрибут
  * @return параметр группировки
  */
-private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr) {
+private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr)
+{
     return groupType?.way == 'SYSTEM' ? new GroupParameter(
-            title: 'breakdown',
-            type: attr.type == 'dtInterval'
-                    ? getDTIntervalGroupType(groupType.data as String)
-                    : groupType.data as GroupType,
-            attribute: mappingAttribute(attr)
+        title: 'breakdown',
+        type: attr.type == AttributeType.DT_INTERVAL_TYPE
+            ? getDTIntervalGroupType(groupType.data as String)
+            : groupType.data as GroupType,
+        attribute: mappingAttribute(attr)
     ) : null
 }
 
@@ -730,8 +819,10 @@ private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<Strin
  * @param groupType - декларируемая группировка временного интервала
  * @return фактическая группировка временного интервала
  */
-private GroupType getDTIntervalGroupType(String groupType) {
-    switch (groupType.toLowerCase()) {
+private GroupType getDTIntervalGroupType(String groupType)
+{
+    switch (groupType.toLowerCase())
+    {
         case 'overlap':
             return GroupType.OVERLAP
         case 'second':
@@ -749,25 +840,28 @@ private GroupType getDTIntervalGroupType(String groupType) {
     }
 }
 
-
 /**
  * Метод создания запроса для QueryWrapper
  * @param intermediateData - промежуточные данные сгруппированые по первичному признаку
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return
  */
-private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, String subjectUUID) {
+private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, String subjectUUID)
+{
     // доводим запрос до совершенства/ шлифуем вычисления
-    Closure getRequestData = { String key -> intermediateData[key].requestData }
+    Closure getRequestData = { String key -> intermediateData[key].requestData
+    }
     def computationDataRequest = intermediateData
-            .findResults { key, value -> value.computeData ? value : null }
-            ?.collectEntries(this.&produceComputationData.curry(getRequestData)) ?: [:]
+        .findResults { key, value -> value.computeData ? value : null
+        }
+        ?.collectEntries(this.&produceComputationData.curry(getRequestData)) ?: [:]
 
     def defaultDataRequest = intermediateData.findResults { key, map ->
         map.requisite && !(map.computeData) ? [(key): map.requestData] : null
     }?.collectEntries() ?: [:]
 
-    def resultRequestData = (defaultDataRequest + computationDataRequest) as Map<String, RequestData>
+    def resultRequestData = (
+        defaultDataRequest + computationDataRequest) as Map<String, RequestData>
 
     // Реквизиты
     Collection<Requisite> requisite = intermediateData.findResults { key, value ->
@@ -776,8 +870,9 @@ private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, St
 
     // доводим запрос до совершенства/ шлифуем кастомную группировку
     Map<String, List<List>> splitData = intermediateData
-            .findAll { key, value -> value.customGroup }
-            ?.collectEntries(this.&convertCustomGroup.curry(getRequestData, subjectUUID))
+        .findAll { key, value -> value.customGroup
+        }
+        ?.collectEntries(this.&convertCustomGroup.curry(getRequestData, subjectUUID))
 
     def groupKeyMap = splitData?.collect { key, list ->
         def newDataSet = list.collectEntries { el ->
@@ -807,21 +902,29 @@ private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, St
                         def (oldKey, newKey) = keySet.tail()
                         string.replace(oldKey as String, newKey as String)
                     }
-                    new ComputationRequisiteNode(title: group, type: 'COMPUTATION', formula: newFormula)
+                    new ComputationRequisiteNode(
+                        title: group,
+                        type: 'COMPUTATION',
+                        formula: newFormula
+                    )
                 }
                 break
             case 'DEFAULT':
                 mappingRequisiteNodes = { String group, List<List<String>> list ->
-                    def key = list.find { l -> l[1] == (node as DefaultRequisiteNode).dataKey }[2]
+                    def key = list.find { l -> l[1] == (node as DefaultRequisiteNode).dataKey
+                    }[2]
                     new DefaultRequisiteNode(title: group, type: 'DEFAULT', dataKey: key)
                 }
                 break
             default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
         }
-        if (groupKeyMap) {
+        if (groupKeyMap)
+        {
             groupKeyMap.inject { first, second ->
                 first + second
-            }.groupBy { it.head() }.collect { group, list ->
+            }.groupBy {
+                it.head()
+            }.collect { group, list ->
                 mappingRequisiteNodes(group, list)
             }.with {
                 req.title = 'partial'
@@ -838,7 +941,8 @@ private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, St
  * @param map - данные для вычислений
  * @return сгруппированные данные по названию переменной и источнику данных
  */
-private Map<String, RequestData> produceComputationData(Closure getData, Map map) {
+private Map<String, RequestData> produceComputationData(Closure getData, Map map)
+{
     def computeData = map.computeData as Map<String, Object>
     // делаем предположение. Если есть вычисление значит реквизиты точно есть
     def req = map.requisite as Requisite
@@ -848,14 +952,29 @@ private Map<String, RequestData> produceComputationData(Closure getData, Map map
     def formula = (node as ComputationRequisiteNode).formula
     def variableNames = new FormulaCalculator(formula).variableNames
 
-    variableNames.collectEntries { variableName ->
+    variableNames.collectEntries { variableName
+        ->
         def comp = computeData[variableName] as Map<String, Object>
-        def dataKey = comp.dataKey as String // этот ключь указывает на источник вместе с группировками
+
+        def attribute = comp?.aggregation?.attribute
+        def attributeType = attribute?.type
+        if (attributeType in AttributeType.LINK_TYPES)
+        {
+            attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
+        }
+
+        def dataKey = comp.dataKey as String
+        // этот ключь указывает на источник вместе с группировками
+
         def requestData = getData(dataKey) as RequestData
-        def group = computeData.group as GroupParameter
-        def aggregation = computeData.aggregation as AggregationParameter
-        requestData.aggregations = [aggregation] // предполагаем что количество агрегаций будет не больше одной
-        requestData.groups = (requestData.groups + group).grep() // группировку нужно будет добавить к существующим
+        def group = comp.group as GroupParameter
+        def aggregation = comp.aggregation as AggregationParameter
+        requestData.aggregations = [aggregation]
+        // предполагаем что количество агрегаций будет не больше одной
+        requestData.groups = (requestData.groups || group) ? (requestData.groups + group).grep() :
+            null
+        // группировку нужно будет добавить к существующим
+        requestData.groups = requestData.groups as Set
         [(variableName): requestData]
     }
 }
@@ -878,12 +997,16 @@ private Attribute mappingAttribute(Map<String, Object> data)
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return возвращает новую пару ключ, данные запроса
  */
-private Map<String, List<List>> convertCustomGroup(Closure getData, String subjectUUID, String key, Map value) {
+private Map<String, List<List>> convertCustomGroup(Closure getData,
+                                                   String subjectUUID,
+                                                   String key,
+                                                   Map value)
+{
     def customGroup = value.customGroup as Map<String, Object>
     String attributeCompositeType = customGroup.type
     String attributeType = attributeCompositeType.split('\\$', 2).head()
     Closure<Collection<Collection<FilterParameter>>> mappingFilters =
-            getMappingFilterMethodByType(attributeType, subjectUUID)
+        getMappingFilterMethodByType(attributeType, subjectUUID)
     def subGroups = customGroup.subGroups as Collection // интересующие нас группы.
     def requestData = getData.call(key as String) as RequestData
     def attribute = customGroup.attribute as Attribute
@@ -905,32 +1028,39 @@ private Map<String, List<List>> convertCustomGroup(Closure getData, String subje
  * @param subjectUUID - идентификатор "текущего объекта"
  * @return функция преобразования настроек пользовательской группировки
  */
-private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID) {
-    switch (type as AttributeType) {
-        case AttributeType.DT_INTERVAL:
+private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type,
+                                                                                      String subjectUUID)
+{
+    switch (type)
+    {
+        case AttributeType.DT_INTERVAL_TYPE:
             return this.&mappingDTIntervalTypeFilters
-        case AttributeType.STRING:
+        case AttributeType.STRING_TYPE:
             return this.&mappingStringTypeFilters
-        case AttributeType.INTEGER:
-            return this.&mappingNumberTypeFilters.curry({ it as long })
-        case AttributeType.DOUBLE:
-            return this.&mappingNumberTypeFilters.curry({ it as double })
-        case AttributeType.dateTypes:
+        case AttributeType.INTEGER_TYPE:
+            return this.&mappingNumberTypeFilters.curry(
+                {
+                    it as long
+                }
+            )
+        case AttributeType.DOUBLE_TYPE:
+            return this.&mappingNumberTypeFilters.curry(
+                {
+                    it as double
+                }
+            )
+        case AttributeType.DATE_TYPES:
             return this.&mappingDateTypeFilters
-        case AttributeType.STATE:
+        case AttributeType.STATE_TYPE:
             return this.&mappingStateTypeFilters
-        case [AttributeType.BO_LINKS, AttributeType.BACK_BO_LINKS, AttributeType.OBJECT]:
+        case [AttributeType.BO_LINKS_TYPE, AttributeType.BACK_BO_LINKS_TYPE, AttributeType.OBJECT_TYPE]:
             return this.&mappingLinkTypeFilters.curry(subjectUUID)
-        case [AttributeType.CATALOG_ITEM, AttributeType.CATALOG_ITEM_SET]:
+        case [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE]:
             return this.&mappingCatalogItemTypeFilters.curry(subjectUUID)
-        case AttributeType.META_CLASS:
-            //TODO: Реализовать.
-            // В критерии нет поля metaClass, но есть metaClassFqn
-            throw new IllegalArgumentException("Still not supported attribute type: $type in custom group")
-        case AttributeType.timerTypes:
+        case AttributeType.META_CLASS_TYPE:
+            return this.&mappingMetaClassTypeFilters.curry(subjectUUID)
+        case AttributeType.TIMER_TYPES:
             return this.&mappingTimerTypeFilters
-        case AttributeType.BOOL: // Кастомная группировка не поддерживается
-            throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
         default:
             throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
     }
@@ -944,66 +1074,118 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID,
+                                                                  List<List> data,
+                                                                  Attribute attribute,
+                                                                  String title)
+{
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        switch (conditionType.toLowerCase()) {
+        switch (conditionType.toLowerCase())
+        {
             case 'empty':
-                return new FilterParameter(value: null, title: title, type: Comparison.IS_NULL, attribute: attribute)
+                return new FilterParameter(
+                    value: null,
+                    title: title,
+                    type: Comparison.IS_NULL,
+                    attribute: attribute
+                )
             case 'not_empty':
-                return new FilterParameter(value: null, title: title, type: Comparison.NOT_NULL, attribute: attribute)
+                return new FilterParameter(
+                    value: null,
+                    title: title,
+                    type: Comparison.NOT_NULL,
+                    attribute: attribute
+                )
             case 'contains':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
                 String uuid = condition.data.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(uuid)
-                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+                def value = api.utils.get(uuid)
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL,
+                    attribute: attribute
+                )
             case 'not_contains':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
                 String uuid = condition.data.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(uuid)
-                return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
+                def value = api.utils.get(uuid)
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.NOT_EQUAL,
+                    attribute: attribute
+                )
             case 'contains_any':
-                def uuidSet = condition.data*.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                def ids = uuidSet.collect {  extractIDFromUUID(it as String) }
-                return new FilterParameter(value: ids, title: title, type: Comparison.IN, attribute: tempAttribute)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                def uuids = condition.data*.uuid
+                def values = uuids.collect { uuid -> api.utils.get(uuid)
+                }
+                return new FilterParameter(
+                    value: values,
+                    title: title,
+                    type: Comparison.IN,
+                    attribute: attribute
+                )
             case 'title_contains':
-                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(titleAttribute)
-                return new FilterParameter(value: condition.data, title: title, type: Comparison.CONTAINS, attribute: tempAttribute)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                return new FilterParameter(
+                    value: condition.data,
+                    title: title,
+                    type: Comparison.CONTAINS,
+                    attribute: attribute
+                )
             case 'title_not_contains':
-                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(titleAttribute)
-                return new FilterParameter(value: condition.data, title: title, type: Comparison.NOT_CONTAINS, attribute: tempAttribute)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                return new FilterParameter(
+                    value: condition.data,
+                    title: title,
+                    type: Comparison.NOT_CONTAINS,
+                    attribute: attribute
+                )
             case 'contains_current_object':
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(subjectUUID)
-                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
-            case 'contains_attr_current_object':
-                def object = api.utils.get(subjectUUID)
+                def value = api.utils.get(subjectUUID)
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL,
+                    attribute: attribute
+                )
+            case ['contains_attr_current_object', 'equal_attr_current_object']:
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                def code = condition.data.code
+                def value = api.utils.get(subjectUUID)[code]
                 def subjectAttribute = condition.data
-                def subjectAttributeValue = object[subjectAttribute.code as String] // это может быть как примитив, так и объект
-                String subjectAttributeType = subjectAttribute.type
-                if (subjectAttributeType == attribute.type) {
-                    def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                    def tempAttribute = attribute.deepClone()
-                    tempAttribute.addLast(idAttribute)
-                    String uuid = subjectAttributeValue.UUID
-                    long id = extractIDFromUUID(uuid)
-                    return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
-                } else {
+                def subjectAttributeType = subjectAttribute.type
+                if (subjectAttributeType != attribute.type)
+                {
                     throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
                 }
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL,
+                    attribute: attribute
+                )
             default:
                 throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
@@ -1018,90 +1200,167 @@ private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subject
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID,
+                                                           List<List> data,
+                                                           Attribute attribute,
+                                                           String title)
+{
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        switch (conditionType.toLowerCase()) {
+        switch (conditionType.toLowerCase())
+        {
             case 'empty':
-                return new FilterParameter(value: null, title: title, type: Comparison.IS_NULL, attribute: attribute)
+                return new FilterParameter(
+                    value: null,
+                    title: title,
+                    type: Comparison.IS_NULL,
+                    attribute: attribute
+                )
             case 'not_empty':
-                return new FilterParameter(value: null, title: title, type: Comparison.NOT_NULL, attribute: attribute)
+                return new FilterParameter(
+                    value: null,
+                    title: title,
+                    type: Comparison.NOT_NULL,
+                    attribute: attribute
+                )
             case 'contains':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
                 String uuid = condition.data.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(uuid)
-                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
+                def value = api.utils.get(uuid)
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL,
+                    attribute: attribute
+                )
             case 'not_contains':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
                 String uuid = condition.data.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(uuid)
-                return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
+                def value = api.utils.get(uuid)
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.NOT_EQUAL,
+                    attribute: attribute
+                )
             case 'in':
-                String uuidSet = condition.data*.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                Set<Long> idSet = uuidSet.collect(this.&extractIDFromUUID)
-                return new FilterParameter(value: idSet, title: title, type: Comparison.NOT_EQUAL, attribute: tempAttribute)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                def uuids = condition.data*.uuid
+                def values = uuids.collect { uuid -> api.utils.get(uuid)
+                }
+                return new FilterParameter(
+                    value: values,
+                    title: title,
+                    type: Comparison.IN,
+                    attribute: attribute
+                )
             case 'title_contains':
-                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(titleAttribute)
-                return new FilterParameter(value: condition.data, title: title, type: Comparison.CONTAINS, attribute: tempAttribute)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                return new FilterParameter(
+                    value: condition.data,
+                    title: title,
+                    type: Comparison.CONTAINS,
+                    attribute: attribute
+                )
             case 'title_not_contains':
-                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(titleAttribute)
-                return new FilterParameter(value: condition.data, title: title, type: Comparison.NOT_CONTAINS, attribute: tempAttribute)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                return new FilterParameter(
+                    value: condition.data,
+                    title: title,
+                    type: Comparison.NOT_CONTAINS,
+                    attribute: attribute
+                )
             case 'contains_including_archival':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
                 String uuid = condition.data.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(uuid)
-                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL_REMOVED, attribute: tempAttribute)
+                def value = api.utils.get(uuid)
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL_REMOVED,
+                    attribute: attribute
+                )
             case 'not_contains_including_archival':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
                 String uuid = condition.data.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(uuid)
-                return new FilterParameter(value: id, title: title, type: Comparison.NOT_EQUAL_REMOVED, attribute: tempAttribute)
+                def value = api.utils.get(uuid)
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.NOT_EQUAL_REMOVED,
+                    attribute: attribute
+                )
             case 'contains_any':
-                def uuidSet = condition.data*.uuid
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                def ids = uuidSet.collect { extractIDFromUUID(it as String) }
-                return new FilterParameter(value: ids, title: title, type: Comparison.IN, attribute: tempAttribute)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                def uuids = condition.data*.uuid
+                def values = uuids.collect { uuid -> api.utils.get(uuid)
+                }
+                return new FilterParameter(
+                    value: values,
+                    title: title,
+                    type: Comparison.IN,
+                    attribute: attribute
+                )
             case ['contains_current_object', 'equal_current_object']:
-                def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(idAttribute)
-                long id = extractIDFromUUID(subjectUUID)
-                String subjectType = api.utils.get(subjectUUID).metaClass
-                if (subjectType != attribute.property)
-                    throw new IllegalArgumentException("Does not match subject type: $subjectType and attribute type: ${tempAttribute.type}")
-                return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
-            case 'contains_attr_current_object':
-                def subject = api.utils.get(subjectUUID)
+                def value = api.utils.get(subjectUUID)
+                String metaClass = value.metaClass
+                String subjectType = metaClass.takeWhile { ch -> ch != '$'
+                }
+                String attributeType = attribute.property?.takeWhile { ch -> ch != '$'
+                }
+                if (subjectType != attributeType)
+                {
+                    throw new IllegalArgumentException( "Does not match subject type: $subjectType and attribute type: ${ attribute.property }" )
+                }
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL,
+                    attribute: attribute
+                )
+            case ['equal_attr_current_object', 'contains_attr_current_object']:
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                def code = condition.data.code
+                def value = api.utils.get(subjectUUID)[code]
                 def subjectAttribute = condition.data
-                def subjectAttributeValue = subject[subjectAttribute.code as String] // это может быть как примитив, так и объект
-                String subjectAttributeType = subjectAttribute.type
-                if (subjectAttributeType == attribute.type) {
-                    def idAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-                    def tempAttribute = attribute.deepClone()
-                    tempAttribute.addLast(idAttribute)
-                    String uuid = subjectAttributeValue.UUID
-                    long id = extractIDFromUUID(uuid)
-                    return new FilterParameter(value: id, title: title, type: Comparison.EQUAL, attribute: tempAttribute)
-                } else {
+                def subjectAttributeType = subjectAttribute.type
+                if (subjectAttributeType != attribute.type)
+                {
                     throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
                 }
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL,
+                    attribute: attribute
+                )
             default:
                 throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
@@ -1115,18 +1374,24 @@ private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, L
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data,
+                                                                 Attribute attribute,
+                                                                 String title)
+{
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type ->
-            def interval = condition.data as Map // тут будет лежать значение временного интервала
+        Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type
+            ->
+            def interval = condition.data as Map
+            // тут будет лежать значение временного интервала
             def value = interval
-                    ? api.types.newDateTimeInterval([interval.value as long, interval.type as String]).toMiliseconds()
-                    : null
+                ? api.types.newDateTimeInterval([interval.value as long, interval.type as String])
+                : null
             //Важный момент. Обязательно извлекать милисекунды, так как критерия не может это сделать сама.
             new FilterParameter(value: value, title: title, type: type, attribute: attribute)
         }
-        switch (conditionType.toLowerCase()) {
+        switch (conditionType.toLowerCase())
+        {
             case 'empty':
                 return buildFilterParameterFromCondition(Comparison.IS_NULL)
             case 'not_empty':
@@ -1151,13 +1416,22 @@ private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data,
+                                                             Attribute attribute,
+                                                             String title)
+{
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure buildFilterParameterFromCondition = { Comparison type ->
-            new FilterParameter(value: condition.data, title: title, type: type, attribute: attribute)
+            new FilterParameter(
+                value: condition.data,
+                title: title,
+                type: type,
+                attribute: attribute
+            )
         }
-        switch (conditionType.toLowerCase()) {
+        switch (conditionType.toLowerCase())
+        {
             case 'contains':
                 return buildFilterParameterFromCondition(Comparison.CONTAINS)
             case 'not_contains_not_empty':
@@ -1181,22 +1455,29 @@ private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, At
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter,
+                                                             List<List> data,
+                                                             Attribute attribute,
+                                                             String title)
+{
     return mappingFilter(data) { Map condition ->
         Closure buildFilterParameterFromCondition = { Comparison type ->
             new FilterParameter(
-                    value: condition.data?.with(valueConverter),
-                    title: title,
-                    type: type,
-                    attribute: attribute
+                value: condition.data?.with(valueConverter),
+                title: title,
+                type: type,
+                attribute: attribute
             )
         }
         String conditionType = condition.type
-        switch (conditionType.toLowerCase()) {
+        switch (conditionType.toLowerCase())
+        {
             case 'equal':
                 return buildFilterParameterFromCondition(Comparison.EQUAL) as FilterParameter
             case 'not_equal_not_empty':
-                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL_AND_NOT_NULL) as FilterParameter
+                return buildFilterParameterFromCondition(
+                    Comparison.NOT_EQUAL_AND_NOT_NULL
+                ) as FilterParameter
             case 'not_equal':
                 return buildFilterParameterFromCondition(Comparison.NOT_EQUAL) as FilterParameter
             case 'greater':
@@ -1225,7 +1506,12 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
         Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
-            return new FilterParameter(title: title, type: Comparison.BETWEEN, attribute: attribute, value: value)
+            return new FilterParameter(
+                title: title,
+                type: Comparison.BETWEEN,
+                attribute: attribute,
+                value: value
+            )
         }
         switch (conditionType.toLowerCase())
         {
@@ -1300,33 +1586,59 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
+{
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
-            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
+        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value
+            ->
+            return new FilterParameter(
+                title: title,
+                type: comparison,
+                attribute: attr,
+                value: value
+            )
         }
-        switch (conditionType.toLowerCase()) {
+        switch (conditionType.toLowerCase())
+        {
             case 'contains':
-                return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data.uuid)
+                return
+                buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data.uuid)
             case 'not_contains':
-                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, attribute, condition.data.uuid)
+                return buildFilterParameterFromCondition(
+                    Comparison.NOT_EQUAL,
+                    attribute,
+                    condition.data.uuid
+                )
             case 'contains_any':
-                return buildFilterParameterFromCondition(Comparison.IN, attribute, condition.data.uuid)
+                return
+                buildFilterParameterFromCondition(Comparison.IN, attribute, condition.data.uuid)
             case 'title_contains':
                 def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(titleAttribute)
-                return buildFilterParameterFromCondition(Comparison.CONTAINS, tempAttribute, condition.data)
+                return buildFilterParameterFromCondition(
+                    Comparison.CONTAINS,
+                    tempAttribute,
+                    condition.data
+                )
             case 'title_not_contains':
                 def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(titleAttribute)
-                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, tempAttribute, condition.data)
+                return buildFilterParameterFromCondition(
+                    Comparison.NOT_CONTAINS,
+                    tempAttribute,
+                    condition.data
+                )
             case ['equal_subject_attribute', 'equal_attr_current_object']:
                 def object = api.utils.get(subjectUUID)
                 if (!object.keySet().find('state'.&equals))
-                    throw new IllegalArgumentException("object ${condition.data} not contain attribute: 'state'")
+                {
+                    throw new IllegalArgumentException(
+                        "object ${ condition.data } not contain attribute: 'state'"
+                    )
+                }
                 return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, object.state)
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
@@ -1340,51 +1652,165 @@ private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, 
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data,
+                                                            Attribute attribute,
+                                                            String title)
+{
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
-            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
+        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value
+            ->
+            return new FilterParameter(
+                title: title,
+                type: comparison,
+                attribute: attr,
+                value: value
+            )
         }
-        switch (conditionType.toLowerCase()) {
+        switch (conditionType.toLowerCase())
+        {
             case 'status_contains':
-                def temAttribute = attribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
-                return buildFilterParameterFromCondition(Comparison.EQUAL, temAttribute, condition.data.uuid)
+                def status = condition.data.value.toString()
+                String value = status.toLowerCase().charAt(0)
+                def temAttribute = attribute.deepClone()
+                temAttribute.
+                    addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
+                return buildFilterParameterFromCondition(Comparison.CONTAINS, temAttribute, value)
             case 'status_not_contains':
-                def temAttribute = attribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
-                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, temAttribute, condition.data.uuid)
-            case 'elapsed_contains':
-                def temAttribute = attribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
-                def comparison = condition.data == 'EXCEED' ? Comparison.EQUAL : Comparison.NOT_EQUAL
+                def status = condition.data.value.toString()
+                String value = status.toLowerCase().charAt(0)
+                def temAttribute = attribute.deepClone()
+                temAttribute.
+                    addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
+                return
+                buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, temAttribute, value)
+            case 'expiration_contains':
+                def comparison =
+                    condition.data.value == 'EXCEED' ? Comparison.CONTAINS : Comparison.NOT_CONTAINS
+                def temAttribute = attribute.deepClone()
+                temAttribute.
+                    addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
                 return buildFilterParameterFromCondition(comparison, temAttribute, 'e')
-            case 'end_date_between': // Время окончания в диапазоне
-                def temAttribute = attribute.addLast(new Attribute(title: 'время окончания', code: 'deadLineTime', type: 'integer'))
+            case 'expires_between': // Время окончания в диапазоне
+                def temAttribute = attribute.deepClone()
+                temAttribute.addLast(
+                    new Attribute(
+                        title: 'время окончания',
+                        code: 'deadLineTime',
+                        type: 'integer'
+                    )
+                )
                 String dateFormat = 'yyyy-MM-dd'
                 def dateSet = condition.data as Map<String, Object> // тут будет массив дат
                 def start = Date.parse(dateFormat, dateSet.startDate as String)
                 def end = Date.parse(dateFormat, dateSet.endDate as String)
-                return buildFilterParameterFromCondition(Comparison.BETWEEN, temAttribute, [start.getTime(), end.getTime()])
+                return buildFilterParameterFromCondition(
+                    Comparison.BETWEEN,
+                    temAttribute,
+                    [start.getTime(), end.getTime()]
+                )
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }
 }
 
-private List<List<FilterParameter>> mappingBooleanTypeFilters(List<List> data, Attribute attribute, String title) {
+private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID,
+                                                                List<List> data,
+                                                                Attribute attribute,
+                                                                String title)
+{
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
-            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
-        }
-        switch (conditionType) {
+        switch (conditionType.toLowerCase())
+        {
             case 'contains':
-                return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data)
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                String uuid = condition.data.uuid
+                return new FilterParameter(
+                    value: uuid,
+                    title: title,
+                    type: Comparison.CONTAINS,
+                    attribute: attribute
+                )
             case 'not_contains':
-                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, attribute, condition.data)
-            default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                String uuid = condition.data.uuid
+                //def value = api.utils.get(uuid)
+                return new FilterParameter(
+                    value: uuid,
+                    title: title,
+                    type: Comparison.NOT_CONTAINS,
+                    attribute: attribute
+                )
+            case 'contains_any':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                def uuids = condition.data*.uuid
+                return new FilterParameter(
+                    value: uuids,
+                    title: title,
+                    type: Comparison.CONTAINS,
+                    attribute: attribute
+                )
+            case 'title_contains':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                attribute.attrChains().last().ref = new Attribute(
+                    title: 'Название',
+                    code: 'title',
+                    type: 'string'
+                )
+                return new FilterParameter(
+                    value: condition.data,
+                    title: title,
+                    type: Comparison.CONTAINS,
+                    attribute: attribute
+                )
+            case 'title_not_contains':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                return new FilterParameter(
+                    value: condition.data,
+                    title: title,
+                    type: Comparison.NOT_CONTAINS,
+                    attribute: attribute
+                )
+            case 'equal_attr_current_object':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                def code = condition.data.code
+                def value = api.utils.get(subjectUUID)[code]
+                def subjectAttribute = condition.data
+                def subjectAttributeType = subjectAttribute.type
+                if (subjectAttributeType != attribute.type)
+                {
+                    throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
+                }
+                return new FilterParameter(
+                    value: value,
+                    title: title,
+                    type: Comparison.EQUAL,
+                    attribute: attribute
+                )
+            default:
+                throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }
 }
-
 
 /**
  * Метод обхода настроек пользовательской группировки
@@ -1392,7 +1818,9 @@ private List<List<FilterParameter>> mappingBooleanTypeFilters(List<List> data, A
  * @param mapFilter - функция преобразования данных в удобный формат
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingFilter(List<List> data, Closure<FilterParameter> mapFilter) {
+private List<List<FilterParameter>> mappingFilter(List<List> data,
+                                                  Closure<FilterParameter> mapFilter)
+{
     return data.collect { andCondition ->
         andCondition.collect { orCondition ->
             mapFilter(orCondition as Map<String, Object>)
@@ -1419,25 +1847,38 @@ private def getDiagramData(DiagramRequest request)
                     RequestData requestData = request.data[requisiteNode.dataKey]
                     Closure formatAggregation = this.&formatAggregationSet
                     Closure formatGroup = this.&formatGroupSet.curry(requestData)
-                    def res = modules.dashboardQueryWrapper.getData(requestData).with(formatGroup).with(formatAggregation)
-                    return [(requisiteNode.title): res]
+                    def res = modules.dashboardQueryWrapper.getData(requestData).with(formatGroup).
+                        with(formatAggregation)
+                    return res ? [(requisiteNode.title): res] : [:]
                 case 'computation':
                     def requisiteNode = node as ComputationRequisiteNode
                     def calculator = new FormulaCalculator(requisiteNode.formula)
-                    def dataSet = calculator.variableNames.collectEntries { [(it): request.data[it]] } as Map<String, RequestData>
-                    if (!checkGroupTypes(dataSet.values())) throw new IllegalArgumentException("Wrong group types in calculation!")
+                    def dataSet = calculator.variableNames.collectEntries {
+                        [(it): request.data[it]]
+                    } as Map<String, RequestData>
+                    if (!checkGroupTypes(dataSet.values()))
+                    {
+                        throw new IllegalArgumentException("Wrong group types in calculation!")
+                    }
                     def variables = dataSet.collectEntries { key, data ->
                         Closure postProcess = this.&formatGroupSet.curry(data as RequestData)
-                        [(key): modules.dashboardQueryWrapper.getData(data as RequestData).with(postProcess)]
+                        [(key): modules.dashboardQueryWrapper.getData(data as RequestData).with(
+                            postProcess
+                        )]
                     } as Map<String, List>
 
                     //Вычисление формулы. Выглядит немного костыльно...
-                    def res = dataSet.values().head().groups?.size() ? findUniqueGroups(variables).collect { group ->
-                        def resultCalculation = calculator.execute { variable ->
-                            (variables[variable as String].findResult { group == it.tail() ? it.head() : null } ?: 0) as Double
-                        }
-                        return [resultCalculation, group].flatten()
-                    } : [[calculator.execute { key -> variables[key as String].head().head() as Double }]]
+                    def res = dataSet.values().head().groups?.size() ?
+                        findUniqueGroups(variables).collect { group ->
+                            def resultCalculation = calculator.execute { variable ->
+                                (variables[variable as String].findResult {
+                                    group == it.tail() ? it.head() : null
+                                } ?: 0) as Double
+                            }
+                            return [resultCalculation, group].flatten()
+                        } : [[calculator.
+                        execute { key -> variables[key as String].head().head() as Double
+                        }]]
                     return [(node.title): formatAggregationSet(res)]
                 default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
             }
@@ -1453,9 +1894,13 @@ private def getDiagramData(DiagramRequest request)
  */
 private boolean checkGroupTypes(Collection<RequestData> listRequest)
 {
-    def standard = listRequest.head().groups?.collect { it.type }
+    def standard = listRequest.head().groups?.collect {
+        it.type
+    }
     return listRequest.tail().every { el ->
-        def groups = el.groups?.collect { it.type }
+        def groups = el.groups?.collect {
+            it.type
+        }
         standard?.size() == groups?.size() && standard?.containsAll(groups)
     }
 }
@@ -1481,7 +1926,9 @@ private Collection<Collection<String>> findUniqueGroups(def variables)
  */
 private List formatAggregationSet(List list)
 {
-    return list.collect { [DECIMAL_FORMAT.format((it as List).head() as Double), (it as List).tail()].flatten() }
+    return list.collect {
+        [DECIMAL_FORMAT.format((it as List).head() as Double), (it as List).tail()].flatten()
+    }
 }
 
 /**
@@ -1510,8 +1957,10 @@ private List formatGroupSet(RequestData data, List list)
         case 2:
             return list.collect { el ->
                 def (value, String group, String breakdown) = el
-                Closure formatGroup = this.&formatGroup.curry(data.groups[0] as GroupParameter, data.source.classFqn)
-                Closure formatBreakdown = this.&formatGroup.curry(data.groups[1] as GroupParameter, data.source.classFqn)
+                Closure formatGroup =
+                    this.&formatGroup.curry(data.groups[0] as GroupParameter, data.source.classFqn)
+                Closure formatBreakdown =
+                    this.&formatGroup.curry(data.groups[1] as GroupParameter, data.source.classFqn)
                 [value, formatGroup(group), formatBreakdown(breakdown)]
             }
     }
@@ -1527,17 +1976,20 @@ private List formatGroupSet(RequestData data, List list)
 private String formatGroup(GroupParameter parameter, String fqnClass, String value)
 {
     GroupType type = parameter.type
+    //TODO: дополнить новыми типами группировки
     switch (type)
     {
         case GroupType.OVERLAP:
-            switch (parameter.attribute.type as AttributeType)
+            switch (parameter.attribute.type)
             {
-                case AttributeType.DT_INTERVAL:
+                case AttributeType.DT_INTERVAL_TYPE:
                     return TimeUnit.MILLISECONDS.toHours(value as long)
-                case AttributeType.STATE:
+                case AttributeType.STATE_TYPE:
                     return api.metainfo.getStateTitle(fqnClass, value)
+                case AttributeType.META_CLASS_TYPE:
+                    return api.metainfo.getMetaClass(value).title
                 default:
-                    return value
+                    return parameter.attribute?.code == 'UUID' ? value.split('\\$', 2)[1] : value
             }
         case GroupType.DAY:
             def (day, month) = value.split('/', 2)
@@ -1551,7 +2003,10 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
             return value
         case GroupType.SEVEN_DAYS:
             def russianLocale = new Locale("ru")
-            SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
+            SimpleDateFormat standardDateFormatter = new SimpleDateFormat(
+                "yyyy-MM-dd",
+                russianLocale
+            )
             SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd MMMM", russianLocale)
             def (star, numberWeek) = value.split("#", 2)
             def minDate = standardDateFormatter.parse(star as String)
@@ -1572,6 +2027,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
         case GroupType.HOUR_INTERVAL:
         case GroupType.DAY_INTERVAL:
         case GroupType.WEEK_INTERVAL:
+        case GroupType.getTimerTypes():
             return value
         default: throw new IllegalArgumentException("Not supported type: $type")
     }
@@ -1584,9 +2040,12 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
  */
 private def formatResult(Map data)
 {
-    return data.collect { key, list ->
-        key ? list?.collect { [it.head() ?: 0, key, it.tail()].flatten() } ?: [[0, key]] : list
-    }.inject { first, second -> first + second }
+    return data ? data.collect { key, list ->
+        key ? list?.collect {
+            [it.head() ?: 0, key, it.tail()].flatten()
+        } ?: [[0, key]] : list
+    }.inject { first, second -> first + second
+    } : []
 }
 
 /**
@@ -1637,7 +2096,11 @@ private RoundDiagram mappingRoundDiagram(List list)
             return new RoundDiagram()
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
-            return new RoundDiagram(series: (aggregationResult as List).collect { it as Double }, labels: groupResult as Set)
+            return new RoundDiagram(
+                series: (aggregationResult as List).collect {
+                    it as Double
+                }, labels: groupResult as Set
+            )
         default: throw new IllegalArgumentException("Invalid format result data set")
     }
 }
@@ -1686,7 +2149,9 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
             columns.add(0, new Column(header: '', accessor: 'breakdownTitle', footer: 0))
 
             List<Map<Object, Object>> data = (breakdownSet as Set<String>).collect { breakdown ->
-                def res = resultDataSet.findAll { it[1] == breakdown }.collectEntries { dataList ->
+                def res = resultDataSet.findAll {
+                    it[1] == breakdown
+                }.collectEntries { dataList ->
                     def (aggregationResult, _, groupResult) = dataList
                     def key = (groupResult as String).replace('.', ' ')
                     [(key): aggregationResult as String]
@@ -1697,11 +2162,15 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
             if (totalRow)
             {
                 Double totalResult = totalColumn
-                        ? (aggregationSet as List).sum { it as double }.with(DECIMAL_FORMAT.&format) as Double
-                        : 0
+                    ? (aggregationSet as List).sum {
+                    it as double
+                }.with(DECIMAL_FORMAT.&format) as Double
+                    : 0
                 columns += new Column('Итого', 'total', totalResult)
                 data.each { el ->
-                    el << [total: el.values().tail().sum(DECIMAL_FORMAT.&parse).with(DECIMAL_FORMAT.&format) as Double]
+                    el << [total: el.values().tail().sum(DECIMAL_FORMAT.&parse).with(
+                        DECIMAL_FORMAT.&format
+                    ) as Double]
                 }
             }
             return new TableDiagram(columns: columns, data: data)
@@ -1714,41 +2183,48 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
  * @param list - данные диаграмы
  * @return ComboDiagram
  */
-private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map secondAdditionalData)
+private ComboDiagram mappingComboDiagram(List list,
+                                         Map firstAdditionalData,
+                                         Map secondAdditionalData)
 {
     def (firstResultDataSet, secondResultDataSet) = list
-    def firstTransposeDataSet = (firstResultDataSet as List<List>)?.transpose()?:[]
-    def secondTransposeDataSet = (secondResultDataSet as List<List>)?.transpose()?:[]
+    def firstTransposeDataSet = (firstResultDataSet as List<List>)?.transpose() ?: []
+    def secondTransposeDataSet = (secondResultDataSet as List<List>)?.transpose() ?: []
 
     Set labels = (firstTransposeDataSet[1] ?: []) + (secondTransposeDataSet[1] ?: [])
 
     Closure getsSeries = { Set labelSet, List<List> dataSet, Map additionalData ->
         def transposeData = dataSet?.transpose() ?: []
-        switch (transposeData.size()) {
+        switch (transposeData.size())
+        {
             case 0:
                 return []
             case 2:
                 Collection data = labelSet.collect { group ->
-                    dataSet.findResult { it[1] == group ? it[0] : null } ?: '0'
+                    dataSet.findResult {
+                        it[1] == group ? it[0] : null
+                    } ?: '0'
                 }
-                def result =  new SeriesCombo(
-                        type: additionalData.type as String,
-                        breakdownValue: additionalData.breakdown as String,
-                        data: data,
-                        name: additionalData.name as String,
-                        dataKey: additionalData.dataKey as String
+                def result = new SeriesCombo(
+                    type: additionalData.type as String,
+                    breakdownValue: additionalData.breakdown as String,
+                    data: data,
+                    name: additionalData.name as String,
+                    dataKey: additionalData.dataKey as String
                 )
                 return [result]
             case 3:
                 return (transposeData[2] as Set).collect { breakdown ->
                     new SeriesCombo(
-                            type: additionalData.type as String,
-                            breakdownValue: breakdown as String,
-                            data: labelSet.collect { group ->
-                                dataSet.findResult { it.tail() == [group, breakdown] ? it.head() : null } ?: '0'
-                            },
-                            name: breakdown as String,
-                            dataKey: additionalData.dataKey as String
+                        type: additionalData.type as String,
+                        breakdownValue: breakdown as String,
+                        data: labelSet.collect { group ->
+                            dataSet.findResult {
+                                it.tail() == [group, breakdown] ? it.head() : null
+                            } ?: '0'
+                        },
+                        name: breakdown as String,
+                        dataKey: additionalData.dataKey as String
                     )
                 }
             default: throw new IllegalArgumentException('Invalid format result data set')
@@ -1768,8 +2244,8 @@ private ComboDiagram mappingComboDiagram(List list, Map firstAdditionalData, Map
  */
 private setTitleInLinkAttribute(def attr)
 {
-    AttributeType[] validTypes = AttributeType.getLinkTypes()
-    return (attr.type as AttributeType) in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
+    def validTypes = AttributeType.LINK_TYPES
+    return attr.type in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
 }
 
 /**
@@ -1777,7 +2253,8 @@ private setTitleInLinkAttribute(def attr)
  * @param uuid - уникальный идетнификатор
  * @return id
  */
-private long extractIDFromUUID(String uuid) {
+private long extractIDFromUUID(String uuid)
+{
     return uuid.split('\\$', 2)[1] as long
 }
 
@@ -1787,11 +2264,12 @@ private long extractIDFromUUID(String uuid) {
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequest(Map<String, Object> requestContent, String cardObjectUuid)
+private Map<String, Object> transformRequest(Map<String, Object> requestContent,
+                                             String cardObjectUuid)
 {
     return requestContent.data
-            ? transformRequestWithComputation(requestContent, cardObjectUuid)
-            : transformRequestWithoutComputation(requestContent, cardObjectUuid)
+        ? transformRequestWithComputation(requestContent, cardObjectUuid)
+        : transformRequestWithoutComputation(requestContent, cardObjectUuid)
 }
 
 /**
@@ -1800,16 +2278,19 @@ private Map<String, Object> transformRequest(Map<String, Object> requestContent,
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequestWithComputation(Map<String, Object> requestContent, String cardObjectUuid)
+private Map<String, Object> transformRequestWithComputation(Map<String, Object> requestContent,
+                                                            String cardObjectUuid)
 {
     Closure<Map<String, Object>> transform = { Map<String, Object> map ->
         def data = map.data as Map<String, Object>
         def newData = data.collectEntries { key, value ->
             def dataForDiagram = [:] << (value as Map<String, Object>)
-            dataForDiagram.descriptor = DashboardMarshaller.substitutionCardObject(dataForDiagram.descriptor as String, cardObjectUuid)
+            dataForDiagram.descriptor = DashboardMarshaller.substitutionCardObject(
+                dataForDiagram.descriptor as String, cardObjectUuid
+            )
             return [(key): dataForDiagram]
         }
-        return [type: map.type, data: newData]
+        return [type: map.type, data: newData, sorting: map.sorting]
     }
     return cardObjectUuid ? transform(requestContent) : requestContent
 }
@@ -1820,11 +2301,13 @@ private Map<String, Object> transformRequestWithComputation(Map<String, Object> 
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent, String cardObjectUuid)
+private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent,
+                                                               String cardObjectUuid)
 {
     Closure<Map<String, Object>> transform = { Map<String, Object> map ->
         def res = [:] << map
-        res.descriptor = DashboardMarshaller.substitutionCardObject(res.descriptor as String, cardObjectUuid)
+        res.descriptor =
+            DashboardMarshaller.substitutionCardObject(res.descriptor as String, cardObjectUuid)
         return res
     }
     return cardObjectUuid ? transform(requestContent) : requestContent
