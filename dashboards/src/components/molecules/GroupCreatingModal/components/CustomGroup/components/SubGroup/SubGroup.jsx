@@ -4,7 +4,7 @@ import type {AndCondition as AndConditionType} from 'CustomGroup/types';
 import cn from 'classnames';
 import {FieldError, TextInput} from 'components/atoms';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
-import {FormControl} from 'components/molecules';
+import {FormField} from 'components/molecules/GroupCreatingModal/components';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
@@ -102,14 +102,14 @@ export class SubGroup extends PureComponent<Props> {
 		const errorKey = `${validationPath}.${FIELDS.name}`;
 
 		return (
-			<FormControl className={mainStyles.shortField} label="Название группы">
+			<FormField className={mainStyles.shortField} label="Название группы">
 				<TextInput
 					maxLength={MAX_TEXT_LENGTH}
 					onChange={this.handleChangeName}
 					value={name}
 				/>
 				<FieldError className={mainStyles.error} text={errors[errorKey]} />
-			</FormControl>
+			</FormField>
 		);
 	};
 

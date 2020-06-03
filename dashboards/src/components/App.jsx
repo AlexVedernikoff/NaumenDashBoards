@@ -2,15 +2,16 @@
 import 'styles/app.less';
 import DashboardContent from 'containers/DashboardContent';
 import DashboardHeader from 'containers/DashboardHeader';
-import React, {Fragment} from 'react';
+import React from 'react';
+import Startup from 'containers/Startup';
 import ToastContainer from 'containers/Toast';
 
 export const App = () => (
-	<Fragment>
+	<Startup>
 		<ToastContainer />
 		<DashboardHeader />
 		<DashboardContent />
-	</Fragment>
+	</Startup>
 );
 
 export default App;

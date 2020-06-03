@@ -4,7 +4,7 @@ import cn from 'classnames';
 import {createNewSubGroup} from './helpers';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {FormControl, Select} from 'components/molecules';
+import {FormField} from 'components/molecules/GroupCreatingModal/components';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {InputRef} from 'src/components/types';
@@ -14,6 +14,7 @@ import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import React, {Component, createContext, createRef, Fragment} from 'react';
 import schema from './schema';
+import {Select} from 'components/molecules';
 import styles from './styles.less';
 import {SubGroupSection} from './components';
 import {TEXT_TYPES} from 'components/atoms/Text/constants';
@@ -214,7 +215,7 @@ export class CustomGroup extends Component<Props, State> {
 		const editable = !!selectedGroup;
 
 		return (
-			<FormControl className={styles.nameField} label="Название группировки">
+			<FormField className={styles.nameField} label="Название группировки">
 				<Select
 					editable={editable}
 					forwardedLabelInputRef={this.groupNameRef}
@@ -230,7 +231,7 @@ export class CustomGroup extends Component<Props, State> {
 					tip="Подпись группы для отображения на оси"
 					value={selectedGroup}
 				/>
-			</FormControl>
+			</FormField>
 		);
 	};
 
