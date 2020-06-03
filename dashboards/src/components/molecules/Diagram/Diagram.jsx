@@ -109,9 +109,9 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	renderName = () => {
-		const {header} = this.props.widget;
+		const {header, name: widgetName} = this.props.widget;
 		const {nameRendered} = this.state;
-		const {fontColor, fontFamily, fontSize, fontStyle, name, show, textAlign, textHandler} = header;
+		const {fontColor, fontFamily, fontSize, fontStyle, name, show, textAlign, textHandler, useName} = header;
 
 		if (show) {
 			const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
@@ -127,7 +127,7 @@ export class Diagram extends Component<Props, State> {
 
 			return (
 				<div className={nameCN} ref={this.nameRef} style={{color: fontColor, fontFamily, fontSize: Number(fontSize), textAlign}}>
-					{name}
+					{useName ? widgetName : name}
 				</div>
 			);
 		}

@@ -14,6 +14,13 @@ export type TextAreaProps = {
 	value: string
 };
 
+export type CheckboxProps = {
+	label: string,
+	name: string,
+	onChange: OnChangeInputEvent => void,
+	value: boolean,
+};
+
 export type IndicatorBoxProps = $Shape<{|
 	children: React$Node,
 	name: string,
