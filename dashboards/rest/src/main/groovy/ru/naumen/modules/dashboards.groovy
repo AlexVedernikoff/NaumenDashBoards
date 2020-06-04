@@ -66,9 +66,9 @@ String getAttributesDataSources(requestContent)
     String classFqn = requestContent.classFqn.toString()
     List<String> types = requestContent?.types
     def metaInfo = api.metainfo.getMetaClass(classFqn)
-    def attributes = types ? metaInfo.attributes.findResults {
+    List attributes = types ? metaInfo.attributes.findResults {
         it.type.code in types ? it : null
-    } : metaInfo.attributes
+    } : metaInfo.attributes.toList()
     Collection<Attribute> mappingAttributes =
         mappingAttribute(attributes, metaInfo.title, metaInfo.code)
     return toJson(mappingAttributes)
@@ -84,9 +84,9 @@ String getDataSourceAttributes(requestContent)
     String classFqn = requestContent.classFqn.toString()
     List<String> types = requestContent?.types
     def metaInfo = api.metainfo.getMetaClass(classFqn)
-    def attributes = types ? metaInfo.attributes.findResults {
+    List attributes = types ? metaInfo.attributes.findResults {
         it.type.code in types ? it : null
-    } : metaInfo.attributes
+    } : metaInfo.attributes.toList()
     Collection<Attribute> mappingAttributes =
         mappingAttribute(attributes, metaInfo.title, metaInfo.code)
     return toJson(mappingAttributes)
@@ -114,14 +114,14 @@ String getAttributesFromLinkAttribute(requestContent)
     Collection<Attribute> result = types
         ? metaInfo.attributes
                   .findResults {
-                      !it.computable && it.type.code in types ? buildAttribute(it) : null
+                      !it.computable && it.type.code in types ? buildAttribute(it, metaInfo.title, metaInfo.code) : null
                   }
                   .sort {
                       it.title
                   }
         : metaInfo.attributes
                   .findResults {
-                      !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it) :
+                      !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, metaInfo.title, metaInfo.code) :
                           null
                   }
                   .sort {
@@ -144,12 +144,12 @@ String getAttributesFromLinkAttribute(requestContent)
                 !result*.code.find { x -> x == it.code
                 } && !attributeList*.code.find { x -> x == it.code
                 } && !it.computable && it.type.code in types
-                    ? buildAttribute(it) : null
+                    ? buildAttribute(it, metaInfo.title, metaInfo.code) : null
             } : []
                 : attributes ? attributes.findResults {
                 !result*.code.find { x -> x == it.code
                 } && !attributeList*.code.find { x -> x == it.code
-                } && !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it) :
+                } && !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, metaInfo.title, metaInfo.code) :
                     null
             } : []
         }
@@ -181,19 +181,11 @@ String getAttributeObject(Map requestContent)
             uuid    : object.UUID,
             property: object.metaClass as String,
             children: getAllInheritanceChains()
-                .findAll {
-                    it*.code.contains(object.metaClass as String)
-                }
-                .collect {
-                    it*.code as Set
-                }
-                .inject { first, second -> first + second
-                }
-                .collect {
-                    api.utils.count(it, [parent: object.UUID]) as int
-                }
-                .inject(0) { first, second -> first + second
-                }
+                .findAll { it*.code.contains(object.metaClass as String) }
+                .collect { it*.code as Set }
+                .inject([]) { first, second -> first + second }
+                .collect { api.utils.count(it, [parent: object.UUID]) as int }
+                .inject(0) { first, second -> first + second }
         ]
     }
     return toJson(result)
@@ -503,7 +495,7 @@ private Collection<DataSource> mappingDataSource(def fqns)
 private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
 {
     return attributes.findResults {
-        !it.computable ? buildAttribute(it, sourceName, sourceCode) : null
+        !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, sourceName, sourceCode) : null
     }.sort { it.title }
 }
 

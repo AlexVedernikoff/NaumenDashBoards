@@ -96,7 +96,7 @@ class TableDiagram
     /**
      * Список значений Column
      */
-    Collection<Column> columns = [new Column("", "breakdownTitle", "")]
+    Collection<Column> columns = [new Column("", "breakdownTitle", 0)]
     /**
      * Список значений строки
      */
@@ -1052,7 +1052,7 @@ private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodB
         case AttributeType.DATE_TYPES:
             return this.&mappingDateTypeFilters
         case AttributeType.STATE_TYPE:
-            return this.&mappingStateTypeFilters
+            return this.&mappingStateTypeFilters.curry(subjectUUID)
         case [AttributeType.BO_LINKS_TYPE, AttributeType.BACK_BO_LINKS_TYPE, AttributeType.OBJECT_TYPE]:
             return this.&mappingLinkTypeFilters.curry(subjectUUID)
         case [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE]:
@@ -1586,60 +1586,43 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
  * @param title - название группировки
  * @return настройки группировки в удобном формате
  */
-private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
-{
+private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title) {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value
-            ->
-            return new FilterParameter(
-                title: title,
-                type: comparison,
-                attribute: attr,
-                value: value
-            )
+        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
+            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
         }
-        switch (conditionType.toLowerCase())
-        {
+        switch (conditionType.toLowerCase()) {
             case 'contains':
-                return
-                buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data.uuid)
+                return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data.uuid)
             case 'not_contains':
-                return buildFilterParameterFromCondition(
-                    Comparison.NOT_EQUAL,
-                    attribute,
-                    condition.data.uuid
-                )
+                return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, attribute, condition.data.uuid)
             case 'contains_any':
-                return
-                buildFilterParameterFromCondition(Comparison.IN, attribute, condition.data.uuid)
+                return buildFilterParameterFromCondition(Comparison.IN, attribute, condition.data.uuid)
             case 'title_contains':
                 def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(titleAttribute)
-                return buildFilterParameterFromCondition(
-                    Comparison.CONTAINS,
-                    tempAttribute,
-                    condition.data
-                )
+                return buildFilterParameterFromCondition(Comparison.CONTAINS, tempAttribute, condition.data)
             case 'title_not_contains':
                 def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
                 def tempAttribute = attribute.deepClone()
                 tempAttribute.addLast(titleAttribute)
-                return buildFilterParameterFromCondition(
-                    Comparison.NOT_CONTAINS,
-                    tempAttribute,
-                    condition.data
-                )
+                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, tempAttribute, condition.data)
             case ['equal_subject_attribute', 'equal_attr_current_object']:
-                def object = api.utils.get(subjectUUID)
-                if (!object.keySet().find('state'.&equals))
+                if (!condition.data)
                 {
-                    throw new IllegalArgumentException(
-                        "object ${ condition.data } not contain attribute: 'state'"
-                    )
+                    throw new IllegalArgumentException("Condition data is null or empty")
                 }
-                return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, object.state)
+                def code = condition.data.code
+                def value = api.utils.get(subjectUUID)[code]
+                def subjectAttribute = condition.data
+                def subjectAttributeType = subjectAttribute.type
+                if (subjectAttributeType != attribute.type)
+                {
+                    throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
+                }
+                return new FilterParameter(value: value, title: title, type: Comparison.EQUAL, attribute: attribute)
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
     }
@@ -1658,14 +1641,8 @@ private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data,
 {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value
-            ->
-            return new FilterParameter(
-                title: title,
-                type: comparison,
-                attribute: attr,
-                value: value
-            )
+        Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
+            return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
         }
         switch (conditionType.toLowerCase())
         {

@@ -9,6 +9,8 @@
 //Версия: 4.10.0.15
 //Категория: Консольный скрипт
 
+import static groovy.json.JsonOutput.toJson
+
 //region КОНСТАНТЫ
 String DASHBOARD_NAMESPACE = 'dashboards'
 String CUSTOM_GROUP_NAMESPACE = 'custom_groups'
@@ -28,9 +30,9 @@ List getObjectKeys(String objName, String namespace)
 
     return api.keyValue.find(namespace, '') { key, value ->
         def settings = slurper.parseText(value)
-        settings.containsKey(objName)
+        return settings != null && settings.containsKey(objName)
     }.values().collectMany { el ->
-        return slurper.parseText(el).get(objName)
+        return el ? slurper.parseText(el)?.get(objName) : null
     }
 }
 
@@ -67,6 +69,8 @@ def getMapForObject(List objKeys, String namespace)
 //endregion
 
 //region ОСНОВНОЙ БЛОК
+
+//TODO: добавить бекап настроек перед удалением
 //CREATING WIDGETS' AND GROUPS' MAPS
 List keysForWidgets = getObjectKeys("widgetIds", DASHBOARD_NAMESPACE)
 def widgtesMap = getMapForObject(keysForWidgets, DASHBOARD_NAMESPACE)

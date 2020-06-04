@@ -301,20 +301,15 @@ class Link
                                         case 'today':
                                             return filterBuilder.OR(attr.code, 'today', null)
                                         case 'last':
-                                            return
-                                            filterBuilder.OR(attr.code, 'lastN', it.data as int)
+                                            return filterBuilder.OR(attr.code, 'lastN', it.data as int)
                                         case 'near':
-                                            return
-                                            filterBuilder.OR(attr.code, 'nextN', it.data as int)
+                                            return filterBuilder.OR(attr.code, 'nextN', it.data as int)
                                         case 'between':
                                             String dateFormat = 'yyyy-MM-dd'
-                                            def date = it.
-                                                data as Map<String, Object> // тут будет массив дат
-                                            def start =
-                                                Date.parse(dateFormat, date.startDate as String)
+                                            def date = it. data as Map<String, Object> // тут будет массив дат
+                                            def start = Date.parse(dateFormat, date.startDate as String)
                                             def end = Date.parse(dateFormat, date.endDate as String)
-                                            return
-                                            filterBuilder.OR(attr.code, 'fromTo', [start, end])
+                                            return filterBuilder.OR(attr.code, 'fromTo', [start, end])
                                         default: throw new IllegalArgumentException("Not supported")
                                     }
                                 }
@@ -326,23 +321,17 @@ class Link
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
                                         case 'not_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'notContains', it.data.uuid)
+                                            return filterBuilder.OR(attr.code, 'notContains', it.data.uuid)
                                         case 'contains_any':
-                                            return filterBuilder.
-                                                OR(attr.code, 'containsInSet', it.data*.uuid)
+                                            return filterBuilder.OR(attr.code, 'containsInSet', it.data*.uuid)
                                         case 'title_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'titleContains', it.data)
+                                            return filterBuilder.OR(attr.code, 'titleContains', it.data)
                                         case 'title_not_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'titleNotContains', it.data)
+                                            return filterBuilder.OR(attr.code, 'titleNotContains', it.data)
                                         case ['equal_subject_attribute', 'equal_attr_current_object']:
-                                            return
-                                            filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
                                         default: throw new IllegalArgumentException(
                                             "Not supported condition type: ${ it.type }"
                                         )
@@ -363,25 +352,19 @@ class Link
                                         case 'contains':
                                             return filterBuilder.OR(attr.code, 'contains', [value])
                                         case 'not_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'notContains', [value])
+                                            return filterBuilder.OR(attr.code, 'notContains', [value])
                                         case 'title_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'titleContains', value)
+                                            return filterBuilder.OR(attr.code, 'titleContains', value)
                                         case 'title_not_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'titleNotContains', value)
+                                            return filterBuilder.OR(attr.code, 'titleNotContains', value)
                                         case 'contains_including_archival':
-                                            return filterBuilder.
-                                                OR(attr.code, 'containsWithRemoved', [value])
+                                            return filterBuilder.OR(attr.code, 'containsWithRemoved', [value])
                                         case 'not_contains_including_archival':
-                                            return filterBuilder.
-                                                OR(attr.code, 'notContainsWithRemoved', [value])
+                                            return filterBuilder.OR(attr.code, 'notContainsWithRemoved', [value])
                                         case 'contains_any':
                                             return filterBuilder.OR(attr.code, 'contains', value)
                                         case ['contains_current_object', 'equal_current_object']:
-                                            return
-                                            filterBuilder.OR(attr.code, 'contains', subjectUUID)
+                                            return filterBuilder.OR(attr.code, 'contains', subjectUUID)
                                         case 'contains_attr_current_object':
                                     //TODO: На фронте идёт работа по формирования формата  этого условия
                                         default: throw new IllegalArgumentException(
@@ -404,19 +387,15 @@ class Link
                                         case 'contains':
                                             return filterBuilder.OR(attr.code, 'contains', [value])
                                         case 'not_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'notContains', [value])
+                                            return filterBuilder.OR(attr.code, 'notContains', [value])
                                         case 'contains_any':
                                             return filterBuilder.OR(attr.code, 'contains', value)
                                         case 'title_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'titleContains', value)
+                                            return filterBuilder.OR(attr.code, 'titleContains', value)
                                         case 'title_not_contains':
-                                            return
-                                            filterBuilder.OR(attr.code, 'titleNotContains', value)
+                                            return filterBuilder.OR(attr.code, 'titleNotContains', value)
                                         case 'contains_current_object':
-                                            return
-                                            filterBuilder.OR(attr.code, 'contains', subjectUUID)
+                                            return filterBuilder.OR(attr.code, 'contains', subjectUUID)
                                         case 'contains_attr_current_object':
                                     //TODO: На фронте идёт работа по формирования формата  этого условия
                                         default: throw new IllegalArgumentException(
@@ -433,8 +412,7 @@ class Link
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'status_contains':
-                                            return filterBuilder.
-                                                OR(attr.code, 'timerStatusContains', [it.data.uuid])
+                                            return filterBuilder.OR(attr.code, 'timerStatusContains', [it.data.uuid])
                                         case 'status_not_contains':
                                             return filterBuilder.OR(
                                                 attr.code,
@@ -454,8 +432,7 @@ class Link
                                                 [start, end]
                                             )
                                         case 'elapsed_contains':
-                                            return filterBuilder.
-                                                OR(attr.code, 'timerStatusContains', ['e'])
+                                            return filterBuilder.OR(attr.code, 'timerStatusContains', ['e'])
                                         default: throw new IllegalArgumentException(
                                             "Not supported condition type: ${ it.type }"
                                         )
@@ -529,22 +506,14 @@ class Link
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         switch (type)
         {
-            case AttributeType.STATE_TYPE:
+            case [AttributeType.STATE_TYPE, AttributeType.META_CLASS_TYPE]:
                 return filterBuilder.OR(code, 'titleContains', value as String)
             case AttributeType.DATE_TYPES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
             case AttributeType.DT_INTERVAL_TYPE:
-                return filterBuilder.OR(
-                    code, 'contains', api.types.newDateTimeInterval(
-                    value as int, "HOUR"
-                )
-                )
+                return filterBuilder.OR(code, 'contains', api.types.newDateTimeInterval(value as int, "HOUR"))
             case AttributeType.TIMER_TYPES:
-                return filterBuilder.OR(
-                    code,
-                    'timerStatusContains',
-                    [value]
-                ) // при условии что в тут будет код статус
+                return filterBuilder.OR(code, 'timerStatusContains', [value]) // при условии что в тут будет код статус
             default:
                 return filterBuilder.OR(code, 'contains', value)
         }
@@ -668,8 +637,8 @@ class Link
             if (sevenDays)
             {
                 def (newRangeDay, newRangeMonth) = (sevenDays as String).split(" - ", 2).collect { dayAndMonth ->
-                        def (d, m) = dayAndMonth.split(" ", 2)
-                        [d as int, genitiveRussianMonth.get(m)]
+                    def (d, m) = dayAndMonth.split(" ", 2)
+                    [d as int, genitiveRussianMonth.get(m)]
                 }.transpose()
                 setInterval(rangeMonth, newRangeMonth)
                 setInterval(rangeDay, newRangeDay)
