@@ -16,7 +16,7 @@ import ru.naumen.core.server.script.api.criteria.*
 import java.sql.Timestamp
 
 //region КОНСТАНТЫ
-@Field private final static UUID = 'UUID'
+@Field private static final String UUID_CODE = 'UUID'
 //endregion
 
 @ru.naumen.core.server.script.api.injection.InjectApi
@@ -283,13 +283,17 @@ class QueryWrapper implements CriteriaWrapper
                                          .inject { first, second ->
                                              "${ first }.${ second }".toString()
                                          }
+            String code = parameter.attribute.code
             if (columnCode == 'id')
             {
-                columnCode = 'UUID'
+                columnCode = modules.dashboardQueryWrapper.UUID_CODE
             }
-            String code = parameter.attribute.code
+            //TODO: возможно, будут изменения для атрибутов типа `атрибут связанного объекта`
+            if(code == 'headFilial')
+            {
+                columnCode = code
+            }
             Comparison type = parameter.type
-
             switch (type)
             {
                 case Comparison.IS_NULL:
@@ -658,7 +662,7 @@ private static  def prepareAttribute(Attribute attribute) {
             }
             break
     }
-    if (attributeCode == UUID)
+    if (attributeCode == UUID_CODE)
     {
         attribute.attrChains().last().code = 'id'
     }
