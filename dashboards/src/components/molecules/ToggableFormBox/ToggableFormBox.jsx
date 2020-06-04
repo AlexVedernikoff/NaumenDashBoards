@@ -7,7 +7,7 @@ import styles from './styles.less';
 
 export class ToggableFormBox extends PureComponent<Props, State> {
 	state = {
-		showContent: true
+		showContent: false
 	};
 
 	handleClick = () => this.setState({showContent: !this.state.showContent});

@@ -66,7 +66,7 @@ const getXAxisOptions = (parameter: AxisParameter, categories: Array<string> = [
 };
 
 const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation?: string) => {
-	const {max, min, name, show, showName} = indicator;
+	const {name, show, showName} = indicator;
 	const forceNiceScale = !(stacked && aggregation === DEFAULT_AGGREGATION.PERCENT);
 	const showPercent = aggregation === DEFAULT_AGGREGATION.PERCENT && !stacked;
 
@@ -78,20 +78,6 @@ const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation
 			// Если проставить значение, то уплывает название оси на легенду
 			maxWidth: undefined
 		},
-		max: (currentMax: number) => {
-			let totalMax = currentMax;
-
-			if (max) {
-				totalMax = Number(max);
-			}
-
-			if (min && min > currentMax) {
-				totalMax = min + 1;
-			}
-
-			return totalMax > 0 ? Math.ceil(totalMax) : 1;
-		},
-		min: Number(min) || 0,
 		show
 	};
 

@@ -12,6 +12,7 @@ export const FormContext: React$Context<Object> = createContext({});
 export class WidgetFormPanel extends Component<Props, State> {
 	fieldErrorRefs = [];
 	state: {
+		// $FlowFixMe
 		rendered: false
 	};
 

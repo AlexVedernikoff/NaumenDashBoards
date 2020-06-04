@@ -68,8 +68,6 @@ const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 		showName: false
 	},
 	yAxis: {
-		max: undefined,
-		min: undefined,
 		name: '',
 		show: true,
 		showName: false

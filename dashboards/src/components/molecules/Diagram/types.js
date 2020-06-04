@@ -7,3 +7,7 @@ export type Props = {
 	onUpdate: Widget => void,
 	widget: Widget
 };
+
+export type State = {
+	nameRendered: boolean
+};
