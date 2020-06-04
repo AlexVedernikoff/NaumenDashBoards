@@ -124,8 +124,6 @@ export type DataLabels = {
 // График с осями
 
 export type AxisIndicator = {
-	max?: number,
-	min?: number,
 	name: string,
 	show: boolean,
 	showName: boolean

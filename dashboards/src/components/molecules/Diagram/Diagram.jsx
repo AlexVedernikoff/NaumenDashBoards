@@ -1,20 +1,34 @@
 // @flow
 import {Chart, Summary} from 'components/molecules';
 import cn from 'classnames';
+import type {DivRef} from 'components/types';
 import {FONT_STYLES, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import type {Props} from './types';
-import React, {Component, Fragment} from 'react';
+import type {Props, State} from './types';
+import React, {Component, createRef, Fragment} from 'react';
 import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
 import {Table} from 'components/organisms';
 
-export class Diagram extends Component<Props> {
-	shouldComponentUpdate (nextProps: Props) {
+export class Diagram extends Component<Props, State> {
+	ref: DivRef = createRef();
+	nameRef: DivRef = createRef();
+
+	state = {
+		nameRendered: false
+	};
+
+	componentDidUpdate (prevProps: Props) {
+		if (this.nameRef.current && this.isUpdated(prevProps, this.props)) {
+			this.setState({nameRendered: true});
+		}
+	}
+
+	isUpdated = (prevProps: Props, nextProps: Props) => {
+		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}, widget: prevWidget} = prevProps;
 		const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}, widget: nextWidget} = nextProps;
-		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}, widget: prevWidget} = this.props;
 
 		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading || nextWidget !== prevWidget;
-	}
+	};
 
 	resolveDiagram = () => {
 		const {buildData, onUpdate, widget} = this.props;
@@ -56,11 +70,23 @@ export class Diagram extends Component<Props> {
 		return null;
 	};
 
-	renderDiagram = () => (
-		<div className={styles.diagram}>
-			{this.resolveDiagram()}
-		</div>
-	);
+	renderDiagram = () => {
+		const {show} = this.props.widget.header;
+		const {nameRendered} = this.state;
+		const {current: container} = this.ref;
+		const {current: nameContainer} = this.nameRef;
+
+		if (!show || (nameRendered && container && nameContainer)) {
+			// $FlowFixMe
+			const height = container.clientHeight - nameContainer.clientHeight;
+
+			return (
+				<div style={{height}}>
+					{this.resolveDiagram()}
+				</div>
+			);
+		}
+	};
 
 	renderError = () => {
 		const {error} = this.props.buildData;
@@ -80,13 +106,14 @@ export class Diagram extends Component<Props> {
 
 	renderName = () => {
 		const {header} = this.props.widget;
+		const {nameRendered} = this.state;
 		const {fontColor, fontFamily, fontSize, fontStyle, name, show, textAlign, textHandler} = header;
 
 		if (show) {
 			const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 			const {CROP, WRAP} = TEXT_HANDLERS;
 			const nameCN = cn({
-				[styles.name]: true,
+				[styles.hideName]: !nameRendered,
 				[settingsStyles.bold]: fontStyle === BOLD,
 				[settingsStyles.italic]: fontStyle === ITALIC,
 				[settingsStyles.underline]: fontStyle === UNDERLINE,
@@ -95,7 +122,7 @@ export class Diagram extends Component<Props> {
 			});
 
 			return (
-				<div className={nameCN} style={{color: fontColor, fontFamily, fontSize: Number(fontSize), textAlign}}>
+				<div className={nameCN} ref={this.nameRef} style={{color: fontColor, fontFamily, fontSize: Number(fontSize), textAlign}}>
 					{name}
 				</div>
 			);
@@ -106,7 +133,7 @@ export class Diagram extends Component<Props> {
 
 	render () {
 		return (
-			<div className={styles.container}>
+			<div className={styles.container} ref={this.ref}>
 				{this.renderLoading()}
 				{this.renderError()}
 				{this.renderContent()}

@@ -1,11 +1,10 @@
 // @flow
 import {Checkbox, TextInput} from 'components/atoms';
 import {FIELDS, MAX_TEXT_LENGTH} from 'components/organisms/WidgetFormPanel/constants';
-import {FormCheckControl, FormControl, FormField, ToggableFormBox} from 'components/molecules';
+import {FormCheckControl, FormField, ToggableFormBox} from 'components/molecules';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import styles from './styles.less';
 import {withStyleFormBuilder} from 'WidgetFormPanel/builders';
 
 export class IndicatorBox extends PureComponent<Props> {
@@ -20,7 +19,7 @@ export class IndicatorBox extends PureComponent<Props> {
 
 	render () {
 		const {data, handleBoolChange, handleChange} = this.props;
-		const {max, min, name, show, showName} = data;
+		const {name, show, showName} = data;
 
 		return (
 			<ToggableFormBox title="Показатель">
@@ -36,26 +35,6 @@ export class IndicatorBox extends PureComponent<Props> {
 				</FormField>
 				<FormField small>
 					<TextInput maxLength={MAX_TEXT_LENGTH} name={FIELDS.name} onChange={handleChange} value={name} />
-				</FormField>
-				<FormField row>
-					<FormControl className={styles.textControl} label="Min деление">
-						<TextInput
-							name={FIELDS.min}
-							onChange={handleChange}
-							onlyNumber={true}
-							placeholder="auto"
-							value={min}
-						/>
-					</FormControl>
-					<FormControl className={styles.textControl} label="Max деление">
-						<TextInput
-							name={FIELDS.max}
-							onChange={handleChange}
-							onlyNumber={true}
-							placeholder="auto"
-							value={max}
-						/>
-					</FormControl>
 				</FormField>
 			</ToggableFormBox>
 		);
