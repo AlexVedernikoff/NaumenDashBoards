@@ -21,11 +21,12 @@ export class Cell extends PureComponent<Props> {
 	};
 
 	renderValue = () => {
-		const {defaultValue, value} = this.props;
+		const {defaultValue, renderValue, value} = this.props;
 		const {DASH, NULL, ZERO} = DEFAULT_TABLE_VALUE;
+		let displayValue = value;
 
-		if (value) {
-			return value;
+		if (displayValue) {
+			return renderValue ? renderValue(value) : displayValue;
 		}
 
 		switch (defaultValue) {

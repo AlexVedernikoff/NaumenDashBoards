@@ -1,7 +1,7 @@
 // @flow
 import {Cell, Row} from 'Table/components';
 import type {Column, Row as RowType} from 'Table/types';
-import type {Props} from './types';
+import type {Props, RenderCellProps} from './types';
 import React, {PureComponent} from 'react';
 import {ROW_HEADER_ACCESSOR, ROW_NUM_ACCESSOR} from 'Table/constants';
 import {SORTING_TYPES, TEXT_ALIGNS} from 'store/widgets/data/constants';
@@ -30,43 +30,47 @@ export class Body extends PureComponent<Props> {
 		const width = this.props.columnsWidth[index];
 		const {accessor} = column;
 		const value = row[accessor];
+		const props = {
+			key: accessor,
+			width
+		};
 
 		switch (accessor) {
 			case ROW_HEADER_ACCESSOR:
-				return this.renderHeaderCell(value, width, accessor);
+				return this.renderHeaderCell(value, props);
 			case ROW_NUM_ACCESSOR:
-				return this.renderRowNumCell(rowIndex, width, accessor);
+				return this.renderRowNumCell(rowIndex, props);
 			default:
-				return this.renderDataCell(value, width, accessor);
+				return this.renderDataCell(value, props);
 		}
 	};
 
-	renderDataCell = (value: string, width: number, key: string) => {
-		const {body} = this.props.settings;
+	renderDataCell = (value: string, props: RenderCellProps) => {
+		const {renderValue, settings} = this.props;
+		const {body} = settings;
 		const {defaultValue, textAlign, textHandler} = body;
 
 		return (
 			<Cell
 				defaultValue={defaultValue.value}
-				key={key}
+				renderValue={renderValue}
 				textAlign={textAlign}
 				textHandler={textHandler}
 				value={value}
-				width={width}
+				{...props}
 			/>
 		);
 	};
 
-	renderHeaderCell = (value: string, width: number, key: string) => {
+	renderHeaderCell = (value: string, props: RenderCellProps) => {
 		const {fontColor, fontStyle} = this.props.settings.rowHeader;
 
 		return (
 			<Cell
 				fontColor={fontColor}
 				fontStyle={fontStyle}
-				key={key}
 				value={value}
-				width={width}
+				{...props}
 			/>
 		);
 	};
@@ -76,16 +80,15 @@ export class Body extends PureComponent<Props> {
 		return <Row>{columns.map(this.renderCell(row, index))}</Row>;
 	};
 
-	renderRowNumCell = (num: number, width: number, key: string) => {
+	renderRowNumCell = (num: number, props: RenderCellProps) => {
 		const {page, pageSize} = this.props;
 		const value = `${pageSize * (page - 1) + num + 1}.`;
 
 		return (
 			<Cell
-				key={key}
 				textAlign={TEXT_ALIGNS.center}
 				value={value}
-				width={width}
+				{...props}
 			/>
 		);
 	};

@@ -1,6 +1,9 @@
 // @flow
 import {Body, Footer, Header, Pagination} from './components';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
+import {FIELDS} from 'WidgetFormPanel/constants';
+import {getBuildSet} from 'store/widgets/data/helpers';
+import {hasMSInterval, parseMSInterval} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
@@ -18,6 +21,7 @@ export class Table extends PureComponent<Props, State> {
 		data: [],
 		page: 1,
 		pageSize: 10,
+		usesMSInterval: false,
 		width: NaN
 	};
 
@@ -32,7 +36,8 @@ export class Table extends PureComponent<Props, State> {
 		return {
 			...state,
 			columns,
-			data
+			data,
+			usesMSInterval: hasMSInterval(getBuildSet(widget), FIELDS.column)
 		};
 	}
 
@@ -96,6 +101,7 @@ export class Table extends PureComponent<Props, State> {
 				data={data}
 				page={page}
 				pageSize={pageSize}
+				renderValue={this.renderValue}
 				settings={table}
 				sorting={sorting}
 				width={width}
@@ -107,7 +113,7 @@ export class Table extends PureComponent<Props, State> {
 		const {columns, columnsWidth, width} = this.state;
 		const hasFooter = columns.find(i => i.footer);
 
-		return hasFooter ? <Footer columns={columns} columnsWidth={columnsWidth} width={width} /> : null;
+		return hasFooter ? <Footer columns={columns} columnsWidth={columnsWidth} renderValue={this.renderValue} width={width} /> : null;
 	};
 
 	renderHeader = () => {
@@ -165,6 +171,11 @@ export class Table extends PureComponent<Props, State> {
 				</table>
 			);
 		}
+	};
+
+	renderValue = (value: number | string) => {
+		const {usesMSInterval} = this.state;
+		return usesMSInterval ? parseMSInterval(Number(value)) : value;
 	};
 
 	render () {

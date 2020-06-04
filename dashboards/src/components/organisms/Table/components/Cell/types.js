@@ -1,5 +1,6 @@
 // @flow
 import type {DefaultTableValue, FontStyle, TextAlign, TextHandler} from 'store/widgets/data/types';
+import type {RenderValue} from 'Table/types';
 
 export type Props = {
 	body: boolean,
@@ -9,6 +10,7 @@ export type Props = {
 	fontColor: string,
 	fontStyle?: FontStyle,
 	onClick?: () => void,
+	renderValue?: RenderValue,
 	textAlign: TextAlign,
 	textHandler: TextHandler,
 	value: string,

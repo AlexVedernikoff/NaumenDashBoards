@@ -1,11 +1,22 @@
 // @flow
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DEFAULT_AGGREGATION_OPTIONS, INTEGER_AGGREGATION_OPTIONS} from './constants';
 
 const getAggregationOptions = (attribute: Object | null) => {
-	return attribute && attribute.type in ATTRIBUTE_SETS.NUMBER
-		? [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS]
-		: DEFAULT_AGGREGATION_OPTIONS;
+	const {double, dtInterval, integer} = ATTRIBUTE_TYPES;
+
+	if (attribute) {
+		const {type} = attribute;
+
+		switch (type) {
+			case double:
+			case dtInterval:
+			case integer:
+				return [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS];
+		}
+	}
+
+	return DEFAULT_AGGREGATION_OPTIONS;
 };
 
 const getAggregationLabel = (aggregation: string) => {

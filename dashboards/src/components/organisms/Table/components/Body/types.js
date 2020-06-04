@@ -1,5 +1,5 @@
 // @flow
-import type {Column, Row} from 'Table/types';
+import type {Column, RenderValue, Row} from 'Table/types';
 import type {Table, TableSorting} from 'store/widgets/data/types';
 
 export type Props = {
@@ -8,7 +8,13 @@ export type Props = {
 	data: Array<Row>,
 	page: number,
 	pageSize: number,
+	renderValue: RenderValue,
 	settings: Table,
 	sorting: TableSorting,
 	width: number
 };
+
+export type RenderCellProps = {|
+	key: string,
+	width: number
+|};

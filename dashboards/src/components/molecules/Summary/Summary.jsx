@@ -1,6 +1,8 @@
 // @flow
 import cn from 'classnames';
 import {FONT_STYLES} from 'store/widgets/data/constants';
+import {getBuildSet} from 'store/widgets/data/helpers';
+import {hasMSInterval, parseMSInterval} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import settingsStyles from 'styles/settings.less';
@@ -18,10 +20,11 @@ export class Summary extends PureComponent<Props, State> {
 			[settingsStyles.italic]: fontStyle === ITALIC,
 			[settingsStyles.underline]: fontStyle === UNDERLINE
 		});
+		const value = hasMSInterval(getBuildSet(widget)) ? parseMSInterval(total) : total;
 
 		return (
 			<div className={containerCN} style={{color: fontColor, fontFamily, fontSize: Number(fontSize)}}>
-				{total}
+				{value}
 			</div>
 		);
 	}
