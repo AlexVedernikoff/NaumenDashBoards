@@ -1,6 +1,13 @@
 // @flow
 import type {AttributeGroupProps as Props} from 'containers/GroupCreatingModal/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {
+	BACK_TIMER_STATUS_OPTIONS,
+	CUSTOM_BACK_TIMER_OPTIONS,
+	CUSTOM_TIMER_OPTIONS,
+	EXCEED_OPTIONS,
+	TIMER_STATUS_OPTIONS
+} from './constants';
 import {BetweenOperand, SelectOperand} from 'CustomGroup/components';
 import type {
 	BetweenOperand as BetweenOperandType,
@@ -11,19 +18,11 @@ import type {
 } from 'store/customGroups/types';
 import {BETWEEN_RULE} from 'CustomGroup/schema';
 import {createBetweenOperand, createDefaultOperand} from 'CustomGroup/helpers';
-import {
-	CUSTOM_BACK_TIMER_OPTIONS,
-	CUSTOM_TIMER_OPTIONS,
-	EXCEED_OPTIONS,
-	SYSTEM_BACK_TIMER_OPTIONS,
-	SYSTEM_TIMER_OPTIONS
-} from './constants';
 import {MaterialSelect} from 'components/molecules';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
-import {TIMER_SYSTEM_GROUP} from 'store/widgets/constants';
 
 export class TimerGroup extends Component<Props> {
 	createCustomCondition = (type: OperandType = OPERAND_TYPES.STATUS_CONTAINS) => {
@@ -60,15 +59,10 @@ export class TimerGroup extends Component<Props> {
 		};
 	};
 
-	getSystemOptions = () => {
+	getStatusOptions = () => {
 		const {attribute} = this.props;
-		return attribute.type === ATTRIBUTE_TYPES.timer ? SYSTEM_TIMER_OPTIONS : SYSTEM_BACK_TIMER_OPTIONS;
+		return attribute.type === ATTRIBUTE_TYPES.timer ? TIMER_STATUS_OPTIONS : BACK_TIMER_STATUS_OPTIONS;
 	};
-
-	getSystemProps = () => ({
-		defaultValue: TIMER_SYSTEM_GROUP.ACTIVE,
-		options: this.getSystemOptions()
-	});
 
 	resolveConditionRule = (condition: TimerOrCondition) => {
 		const {EXPIRES_BETWEEN} = OPERAND_TYPES;
@@ -91,7 +85,7 @@ export class TimerGroup extends Component<Props> {
 				return this.renderSelectOperand(condition, onChange, EXCEED_OPTIONS);
 			case STATUS_CONTAINS:
 			case STATUS_NOT_CONTAINS:
-				return this.renderSelectOperand(condition, onChange, this.getSystemOptions());
+				return this.renderSelectOperand(condition, onChange, this.getStatusOptions());
 			case EXPIRES_BETWEEN:
 				return this.renderBetweenOperand(condition, onChange);
 		}
@@ -104,7 +98,7 @@ export class TimerGroup extends Component<Props> {
 	);
 
 	render () {
-		return this.props.renderModal(this.getCustomProps(), this.getSystemProps());
+		return this.props.renderModal(this.getCustomProps());
 	}
 }
 

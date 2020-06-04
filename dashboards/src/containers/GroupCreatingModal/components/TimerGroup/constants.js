@@ -1,5 +1,5 @@
 // @flow
-import {BACK_TIMER_SYSTEM_GROUP, TIMER_SYSTEM_GROUP} from 'store/widgets/constants';
+import {BACK_TIMER_EXCEED_STATUSES, TIMER_STATUSES} from 'store/widgets/constants';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 
 const CUSTOM_TIMER_OPTIONS = [
@@ -25,41 +25,41 @@ const CUSTOM_BACK_TIMER_OPTIONS = [
 	}
 ];
 
-const SYSTEM_TIMER_OPTIONS = [
+const TIMER_STATUS_OPTIONS = [
 	{
 		label: 'Ожидает начала ',
-		value: TIMER_SYSTEM_GROUP.NOT_STARTED
+		value: TIMER_STATUSES.NOT_STARTED
 	},
 	{
 		label: 'Активен',
-		value: TIMER_SYSTEM_GROUP.ACTIVE
+		value: TIMER_STATUSES.ACTIVE
 	},
 	{
 		label: 'Приостановлен',
-		value: TIMER_SYSTEM_GROUP.PAUSED
+		value: TIMER_STATUSES.PAUSED
 	},
 	{
 		label: 'Остановлен',
-		value: TIMER_SYSTEM_GROUP.STOPPED
+		value: TIMER_STATUSES.STOPPED
 	}
 ];
 
-const SYSTEM_BACK_TIMER_OPTIONS = [
-	...SYSTEM_TIMER_OPTIONS,
+const BACK_TIMER_STATUS_OPTIONS = [
+	...TIMER_STATUS_OPTIONS,
 	{
 		label: 'Кончился запас времени',
-		value: BACK_TIMER_SYSTEM_GROUP.EXCEED
+		value: BACK_TIMER_EXCEED_STATUSES.EXCEED
 	}
 ];
 
 const EXCEED_OPTIONS = [
 	{
 		label: 'Просрочен',
-		value: BACK_TIMER_SYSTEM_GROUP.EXCEED
+		value: BACK_TIMER_EXCEED_STATUSES.EXCEED
 	},
 	{
 		label: 'Не просрочен',
-		value: BACK_TIMER_SYSTEM_GROUP.NOT_EXCEED
+		value: BACK_TIMER_EXCEED_STATUSES.NOT_EXCEED
 	}
 ];
 
@@ -67,6 +67,6 @@ export {
 	CUSTOM_BACK_TIMER_OPTIONS,
 	CUSTOM_TIMER_OPTIONS,
 	EXCEED_OPTIONS,
-	SYSTEM_TIMER_OPTIONS,
-	SYSTEM_BACK_TIMER_OPTIONS
+	BACK_TIMER_STATUS_OPTIONS,
+	TIMER_STATUS_OPTIONS
 };

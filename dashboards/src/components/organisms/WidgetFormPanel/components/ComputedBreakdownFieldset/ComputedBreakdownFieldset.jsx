@@ -96,23 +96,18 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		const prevValue = breakdown[breakdownIndex][FIELDS.value];
 		const value = transformAttribute(event, this.handleSelect, breakdownIndex);
 		const isMain = breakdownIndex === 0;
-		const typeIsChanged = prevValue && prevValue.type !== value.type;
-		const defaultGroup = getDefaultSystemGroup(value);
+		const typeIsChanged = !prevValue || (prevValue && prevValue.type !== value.type);
 
 		if (isMain && typeIsChanged) {
+			const defaultGroup = getDefaultSystemGroup(value);
+
 			breakdown.forEach((set, index) => {
+				breakdown[index][FIELDS.group] = defaultGroup;
+
 				if (index > 0) {
-					breakdown[index] = {
-						...breakdown[index],
-						group: defaultGroup,
-						value: null
-					};
+					breakdown[index][FIELDS.value] = null;
 				}
 			});
-		}
-
-		if (!prevValue || typeIsChanged) {
-			breakdown[breakdownIndex][FIELDS.group] = defaultGroup;
 		}
 
 		breakdown[breakdownIndex][FIELDS.value] = value;

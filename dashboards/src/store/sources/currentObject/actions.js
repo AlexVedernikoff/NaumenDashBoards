@@ -21,7 +21,7 @@ const fetchRoots = (attribute: Attribute) => async (dispatch: Dispatch, getState
 	});
 
 	try {
-		const url = buildUrl('dashboards', 'getAttributesDataSources', 'requestContent');
+		const url = buildUrl('dashboards', 'getDataSourceAttributes', 'requestContent');
 		const data = {
 			classFqn: metaClass,
 			types: getTypes(attribute)
