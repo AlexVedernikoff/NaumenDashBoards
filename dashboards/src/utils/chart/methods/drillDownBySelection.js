@@ -25,6 +25,30 @@ const addFilter = (props: AddFilterProps) => {
 	}
 };
 
+const addBreakdownFilter = (set: Object, value: number, mixin: Object) => {
+	const breakdown = set[FIELDS.breakdown];
+
+	if (Array.isArray(breakdown)) {
+		const breakdownSet = breakdown.find(attrSet => attrSet[FIELDS.dataKey] === set.dataKey);
+
+		if (breakdownSet) {
+			addFilter({
+				attribute: breakdownSet.value,
+				group: transformGroupFormat(breakdownSet.group),
+				mixin,
+				value
+			});
+		}
+	} else {
+		addFilter({
+			attribute: breakdown,
+			group: transformGroupFormat(set[FIELDS.breakdownGroup]),
+			mixin,
+			value
+		});
+	}
+};
+
 /**
  * Функция создания примеси для графиков с осями
  * @param {AxisWidget} widget - данные виджета
@@ -48,14 +72,7 @@ const addAxisChartFilters = (widget: AxisWidget, props: AddFiltersProps) => {
 			value: categories[dataPointIndex]
 		});
 
-		if (!set.sourceForCompute) {
-			addFilter({
-				attribute: set[FIELDS.breakdown],
-				group: transformGroupFormat(set[FIELDS.breakdownGroup]),
-				mixin,
-				value: series[seriesIndex].name
-			});
-		}
+		addBreakdownFilter(set, series[seriesIndex].name, mixin);
 	}
 
 	return index;
@@ -84,14 +101,7 @@ const addComboChartFilters = (widget: ComboWidget, props: AddFiltersProps) => {
 			value: labels[dataPointIndex]
 		});
 
-		if (!set.sourceForCompute) {
-			addFilter({
-				attribute: set[FIELDS.breakdown],
-				group: transformGroupFormat(set[FIELDS.breakdownGroup]),
-				mixin,
-				value: series[seriesIndex].name
-			});
-		}
+		addBreakdownFilter(set, series[seriesIndex].name, mixin);
 	}
 
 	return index;
@@ -110,16 +120,7 @@ const addCircleChartFilters = (widget, props: AddFiltersProps) => {
 	const index = data.findIndex(set => !set.sourceForCompute);
 
 	if (index !== -1) {
-		const set = data[index];
-
-		if (!set.sourceForCompute) {
-			addFilter({
-				attribute: set[FIELDS.breakdown],
-				group: transformGroupFormat(set[FIELDS.breakdownGroup]),
-				mixin,
-				value: buildData.labels[dataPointIndex]
-			});
-		}
+		addBreakdownFilter(data[index], buildData.labels[dataPointIndex], mixin);
 	}
 
 	return index;

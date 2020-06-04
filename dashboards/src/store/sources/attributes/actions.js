@@ -12,7 +12,7 @@ const fetchAttributes = (classFqn: string): ThunkAction => async (dispatch: Disp
 	dispatch(requestAttributes(classFqn));
 
 	try {
-		const url = buildUrl('dashboards', 'getAttributesDataSources', 'requestContent');
+		const url = buildUrl('dashboards', 'getDataSourceAttributes', 'requestContent');
 		const data = {
 			classFqn
 		};
