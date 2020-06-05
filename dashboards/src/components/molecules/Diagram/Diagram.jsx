@@ -73,12 +73,15 @@ export class Diagram extends Component<Props, State> {
 	renderDiagram = () => {
 		const {show} = this.props.widget.header;
 		const {nameRendered} = this.state;
-		const {current: container} = this.ref;
-		const {current: nameContainer} = this.nameRef;
 
-		if (!show || (nameRendered && container && nameContainer)) {
-			// $FlowFixMe
-			const height = container.clientHeight - nameContainer.clientHeight;
+		if (!show || nameRendered) {
+			const {current: container} = this.ref;
+			const {current: nameContainer} = this.nameRef;
+			let height = '100%';
+
+			if (show && container && nameContainer) {
+				height = container.clientHeight - nameContainer.clientHeight;
+			}
 
 			return (
 				<div style={{height}}>
