@@ -393,7 +393,11 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
             ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
             : null
 
-        [(key): [requestData      : res, computeData: comp?.computeData, customGroup:
+        if (!customGroup && data.breakdownGroup?.way == 'CUSTOM')
+        {
+            customGroup = [attribute: mappingAttribute(mayBeBreakdown)] + (data.breakdownGroup.data as Map<String, Object>)
+        }
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             customGroup, requisite: requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
@@ -791,7 +795,11 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
             ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
             : null
 
-        [(key): [requestData      : res, computeData: comp?.computeData, customGroup:
+        if (!customGroup && data.breakdownGroup?.way == 'CUSTOM')
+        {
+            customGroup = [attribute: mappingAttribute(mayBeBreakdown)] + (data.breakdownGroup.data as Map<String, Object>)
+        }
+        [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             customGroup, requisite: requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
