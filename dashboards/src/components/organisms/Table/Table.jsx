@@ -132,7 +132,7 @@ export class Table extends PureComponent<Props, State> {
 
 	renderNoData = () => {
 		const {data} = this.props.data;
-		return data.length === 0 ? <div className={styles.noData}>Данные отсутсвуют</div> : null;
+		return data.length === 0 ? <div className={styles.noData}>Данные отсутствуют</div> : null;
 	};
 
 	renderPagination = () => {
