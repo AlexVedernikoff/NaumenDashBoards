@@ -288,11 +288,7 @@ class QueryWrapper implements CriteriaWrapper
             {
                 columnCode = modules.dashboardQueryWrapper.UUID_CODE
             }
-            //TODO: возможно, будут изменения для атрибутов типа `атрибут связанного объекта`
-            if(code == 'headFilial')
-            {
-                columnCode = code
-            }
+
             Comparison type = parameter.type
             switch (type)
             {
@@ -567,7 +563,7 @@ private static def validate(AggregationParameter parameter) throws IllegalArgume
         throw new IllegalArgumentException("Attribute is null or empty!")
     }
     Aggregation type = parameter.type
-    String attributeType = parameter.attribute.type
+    String attributeType = parameter.attribute.attrChains().last().type
     switch (attributeType)
     {
         case AttributeType.NUMBER_TYPES:
