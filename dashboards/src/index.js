@@ -5,6 +5,7 @@ import './iframeResizer';
 import './fakeApi';
 import App from 'components/App';
 import {configureStore} from 'store';
+import {fixInitialHeight} from './helpers';
 import {Provider} from 'react-redux';
 import React from 'react';
 import {render} from 'react-dom';
@@ -13,6 +14,7 @@ import Startup from 'containers/Startup/Startup';
 
 top.injectJsApi && top.injectJsApi(top, window);
 smoothscroll.polyfill();
+fixInitialHeight();
 
 export const root = document.getElementById('root');
 export const store = configureStore();

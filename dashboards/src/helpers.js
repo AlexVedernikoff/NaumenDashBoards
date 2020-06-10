@@ -25,6 +25,20 @@ function getMapValues<T> (map: ({[string]: T})): Array<T> {
 }
 
 /**
+ * При переключении вкладок стенда теряется высота приложения. Данная функция устанавливает body минимальную высоту,
+ * полученную при инициализации.
+ */
+const fixInitialHeight = () => {
+	document.addEventListener('DOMContentLoaded', () => {
+		const {body} = document;
+
+		if (body) {
+			body.style.minHeight = `${window.innerHeight}px`;
+		}
+	});
+};
+
+/**
  * Функция проверяет является ли переменная объектом
  * @param {any} item - проверяемая переменная
  * @returns {boolean}
@@ -68,6 +82,7 @@ export {
 	debounce,
 	deepClone,
 	extend,
+	fixInitialHeight,
 	getMapValues,
 	isObject
 };
