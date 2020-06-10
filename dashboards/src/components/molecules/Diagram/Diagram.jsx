@@ -3,6 +3,7 @@ import {Chart, Summary} from 'components/molecules';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
 import {FONT_STYLES, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {PADDING} from './constants';
 import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
 import settingsStyles from 'styles/settings.less';
@@ -80,7 +81,7 @@ export class Diagram extends Component<Props, State> {
 			let height = '100%';
 
 			if (show && container && nameContainer) {
-				height = container.clientHeight - nameContainer.clientHeight;
+				height = container.clientHeight - nameContainer.clientHeight - (PADDING * 2);
 			}
 
 			return (
@@ -136,7 +137,7 @@ export class Diagram extends Component<Props, State> {
 
 	render () {
 		return (
-			<div className={styles.container} ref={this.ref}>
+			<div className={styles.container} ref={this.ref} style={{padding: PADDING}}>
 				{this.renderLoading()}
 				{this.renderError()}
 				{this.renderContent()}
