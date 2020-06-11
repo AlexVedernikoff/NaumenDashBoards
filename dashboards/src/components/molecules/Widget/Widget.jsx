@@ -210,6 +210,7 @@ export class Widget extends PureComponent<Props, State> {
 					cancelText="Нет"
 					footerPosition={FOOTER_POSITIONS.RIGHT}
 					header="Подтверждение удаления"
+					notice={true}
 					onClose={this.handleCloseRemoveModal}
 					onSubmit={this.handleSubmitRemoveModal}
 					size={SIZES.SMALL}

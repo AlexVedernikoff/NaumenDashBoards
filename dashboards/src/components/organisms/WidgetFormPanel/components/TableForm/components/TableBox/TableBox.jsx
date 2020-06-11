@@ -2,7 +2,7 @@
 import {Checkbox} from 'components/atoms';
 import {EMPTY_DATA_OPTIONS} from './constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
-import {FormCheckControl, FormControl, FormField, SimpleSelect, ToggableFormBox} from 'components/molecules';
+import {FormCheckControl, FormControl, FormField, Select, ToggableFormBox} from 'components/molecules';
 import type {OnChangeEvent, Props} from './types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {PureComponent} from 'react';
@@ -86,7 +86,7 @@ export class TableBox extends PureComponent<Props> {
 				</FormField>
 				<FormField>
 					<FormControl label="Отсутсвуют данные">
-						<SimpleSelect
+						<Select
 							name={FIELDS.defaultValue}
 							onSelect={this.handleChange(name)}
 							options={EMPTY_DATA_OPTIONS}

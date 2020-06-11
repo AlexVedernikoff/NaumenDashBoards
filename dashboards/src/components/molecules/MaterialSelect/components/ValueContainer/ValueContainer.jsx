@@ -8,7 +8,7 @@ import styles from './styles.less';
 export class ValueContainer extends Component<Props> {
 	static defaultProps = {
 		editableLabel: false,
-		maxLabelLength: NaN,
+		maxLabelLength: null,
 		placeholder: ''
 	};
 

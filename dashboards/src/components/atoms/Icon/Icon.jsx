@@ -1,5 +1,6 @@
 // @flow
 import './icons';
+import cn from 'classnames';
 import {ICON_PROPS, ICON_SIZES} from './constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -13,9 +14,13 @@ export class Icon extends PureComponent<Props> {
 
 	render () {
 		const {className, name, onClick, size} = this.props;
+		const svgCN = cn({
+			[className]: true,
+			[styles.icon]: true
+		});
 
 		return (
-			<svg className={className || styles.icon} fill="currentColor" onClick={onClick} {...ICON_PROPS[size]}>
+			<svg className={svgCN} fill="currentColor" onClick={onClick} {...ICON_PROPS[size]}>
 				<use xlinkHref={`#${name}`} />
 			</svg>
 		);

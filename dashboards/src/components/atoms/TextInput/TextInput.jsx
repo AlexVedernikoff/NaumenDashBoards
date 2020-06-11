@@ -8,6 +8,7 @@ export class TextInput extends PureComponent<Props> {
 	static defaultProps = {
 		maxLength: null,
 		onlyNumber: false,
+		name: '',
 		placeholder: '',
 		value: ''
 	};

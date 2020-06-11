@@ -1,10 +1,7 @@
 // @flow
 import type {OnChangeInputEvent} from 'components/types';
 
-export type Option = {
-	label: string,
-	value: any
-};
+export type Option = Object;
 
 export type Value = Option | string | number | null;
 
@@ -16,10 +13,15 @@ export type SelectEvent = {
 export type Props = {
 	className: string,
 	editable: boolean,
+	getOptionLabel?: (option: Option) => string,
+	getOptionValue?: (option: Option) => any,
 	name: string,
 	onChangeLabel?: OnChangeInputEvent => void,
+	onClickCreationButton?: () => void,
 	onSelect: SelectEvent => void,
 	options: Array<Option> | Array<string | number>,
+	showCreationButton: boolean,
+	textCreationButton: string,
 	value: Value
 };
 

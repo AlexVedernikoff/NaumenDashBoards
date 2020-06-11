@@ -21,6 +21,7 @@ import Popover from './Popover';
 import RadioButton from './RadioButton';
 import SearchSelectInput from './SearchSelectInput';
 import SimpleListOption from './SimpleListOption';
+import Text from './Text';
 import TextArea from './TextArea';
 import TextInput from './TextInput';
 import Toast from './Toast';
@@ -50,6 +51,7 @@ export {
 	RadioButton,
 	SearchSelectInput,
 	SimpleListOption,
+	Text,
 	TextArea,
 	TextInput,
 	Toast,

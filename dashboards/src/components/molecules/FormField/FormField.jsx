@@ -17,15 +17,7 @@ export class FormField extends PureComponent<Props> {
 
 	renderChildren = () => {
 		const {children, row} = this.props;
-		const childrenCN = cn({
-			[styles.row]: row
-		});
-
-		return (
-			<div className={childrenCN}>
-				{children}
-			</div>
-		);
+		return row ? <div className={styles.row}>{children}</div> : children;
 	};
 
 	renderError = () => {

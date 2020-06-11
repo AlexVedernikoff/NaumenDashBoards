@@ -8,7 +8,7 @@ export class MaterialTextInput extends PureComponent<Props> {
 		forwardedRef: {
 			current: null
 		},
-		maxLength: NaN,
+		maxLength: null,
 		name: '',
 		onlyNumber: false,
 		placeholder: ''

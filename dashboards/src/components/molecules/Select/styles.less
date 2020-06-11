@@ -3,14 +3,22 @@
 :local {
 	.container {
 		position: relative;
+
+		&:hover {
+			.clearLabelIcon {
+				display: block;
+			}
+		}
 	}
 
 	.valueContainer {
 		align-items: center;
 		border: 1px solid @grey;
 		border-radius: @border-radius;
+		box-sizing: border-box;
 		cursor: pointer;
 		display: flex;
+		height: 32px;
 		justify-content: space-between;
 		padding: 8px 10px 8px 12px;
 
@@ -36,7 +44,13 @@
 		width: 100%;
 	}
 
-	.caret {
+	.indicatorsContainer {
+		align-items: center;
+		display: flex;
 		margin-left: auto;
+	}
+
+	.clearLabelIcon {
+		display: none;
 	}
 }

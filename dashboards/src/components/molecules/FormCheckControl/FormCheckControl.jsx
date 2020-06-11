@@ -3,6 +3,7 @@ import cn from 'classnames';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import {Text} from 'components/atoms';
 
 export class FormCheckControl extends PureComponent<Props> {
 	static defaultProps = {
@@ -21,7 +22,7 @@ export class FormCheckControl extends PureComponent<Props> {
 		return (
 			<div className={containerCN}>
 				{children}
-				<span className={styles.label}>{label}</span>
+				<Text className={styles.label}>{label}</Text>
 			</div>
 		);
 	}

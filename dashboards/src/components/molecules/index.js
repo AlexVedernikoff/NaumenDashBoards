@@ -20,7 +20,7 @@ import MiniSelect from './MiniSelect';
 import Modal from './Modal';
 import OuterSelect from './OuterSelect';
 import ResizeDetector from './ResizeDetector';
-import SimpleSelect from './SimpleSelect';
+import Select from './Select';
 import SimpleSelectList from './SimpleSelectList';
 import SimpleSelectMenu from './SimpleSelectMenu';
 import Summary from './Summary';
@@ -51,7 +51,7 @@ export {
 	Modal,
 	OuterSelect,
 	ResizeDetector,
-	SimpleSelect,
+	Select,
 	SimpleSelectList,
 	SimpleSelectMenu,
 	Summary,

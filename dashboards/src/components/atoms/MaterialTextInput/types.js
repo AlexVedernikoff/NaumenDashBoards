@@ -7,7 +7,7 @@ export type ForwardedRef = {
 
 export type Props = {
 	forwardedRef: ForwardedRef,
-	maxLength: number,
+	maxLength: number | null,
 	name: string,
 	onChange: (event: SyntheticInputEvent<HTMLInputElement>) => void,
 	onlyNumber: boolean,

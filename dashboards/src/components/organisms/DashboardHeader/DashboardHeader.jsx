@@ -112,6 +112,7 @@ export class DashboardHeader extends Component<Props, State> {
 					cancelText="Нет"
 					footerPosition={FOOTER_POSITIONS.RIGHT}
 					header="Подтверждение удаления"
+					notice={true}
 					onClose={this.hideModal}
 					onSubmit={this.removePersonalDashboard}
 					size={MODAL_SIZES.SMALL}

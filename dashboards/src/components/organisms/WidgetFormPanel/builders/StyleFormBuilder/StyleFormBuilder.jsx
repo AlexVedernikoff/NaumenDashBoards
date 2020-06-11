@@ -1,5 +1,5 @@
 // @flow
-import {CheckIconButtonGroup, ColorInput, SimpleSelect} from 'components/molecules';
+import {CheckIconButtonGroup, ColorInput, Select} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {
 	FONT_FAMILIES,
@@ -77,7 +77,7 @@ export class StyleFormBuilder extends Component<Props> {
 		const {[FIELDS.fontFamily]: value} = this.props.data;
 
 		return (
-			<SimpleSelect
+			<Select
 				className={styles.fontFamily}
 				name={FIELDS.fontFamily}
 				onSelect={this.handleChange}
@@ -91,7 +91,7 @@ export class StyleFormBuilder extends Component<Props> {
 		const {[FIELDS.fontSize]: value} = this.props.data;
 
 		return (
-			<SimpleSelect
+			<Select
 				className={styles.fontSize}
 				editable={true}
 				name={FIELDS.fontSize}

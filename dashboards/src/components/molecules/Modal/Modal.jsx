@@ -13,16 +13,19 @@ export class Modal extends Component<Props> {
 	static defaultProps = {
 		cancelText: 'Отмена',
 		children: null,
+		className: '',
 		footerPosition: FOOTER_POSITIONS.LEFT,
+		notice: false,
 		size: SIZES.NORMAL,
 		submitText: 'Сохранить'
 	};
 
 	getContainerCN = () => {
-		const {size} = this.props;
+		const {className, size} = this.props;
 		const {LARGE, SMALL} = SIZES;
 
 		return cn({
+			[className]: true,
 			[styles.container]: true,
 			[styles.largeContainer]: size === LARGE,
 			[styles.smallContainer]: size === SMALL
@@ -58,10 +61,14 @@ export class Modal extends Component<Props> {
 	};
 
 	renderModalBody = () => {
-		const {children} = this.props;
+		const {children, notice} = this.props;
+		const contentCN = cn({
+			[styles.content]: true,
+			[styles.noticeContent]: notice
+		});
 
 		if (children) {
-			return <div className={styles.content}>{children}</div>;
+			return <div className={contentCN}>{children}</div>;
 		}
 	};
 

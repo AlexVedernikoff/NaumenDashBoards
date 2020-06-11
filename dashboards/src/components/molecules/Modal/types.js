@@ -9,8 +9,10 @@ type FooterPosition = $Keys<typeof FOOTER_POSITIONS>;
 export type Props = {
 	cancelText: string,
 	children: Node,
+	className: string,
 	footerPosition: FooterPosition,
 	header: string,
+	notice: boolean,
 	onClose?: () => void,
 	onSubmit?: () => void,
 	renderFooter?: () => Node,

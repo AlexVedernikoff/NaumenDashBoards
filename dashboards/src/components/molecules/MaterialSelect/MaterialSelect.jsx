@@ -13,7 +13,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		isEditingLabel: false,
 		isSearching: false,
 		loading: false,
-		maxLabelLength: NaN,
+		maxLabelLength: null,
 		multiple: false,
 		name: '',
 		placeholder: 'Выберите значение',
@@ -94,8 +94,6 @@ export class MaterialSelect extends PureComponent<Props, State> {
 	renderMenu = () => {
 		const {
 			focusOnSearch,
-			getOptionLabel,
-			getOptionValue,
 			isSearching,
 			multiple,
 			options,
@@ -120,8 +118,8 @@ export class MaterialSelect extends PureComponent<Props, State> {
 					className={styles.menu}
 					creationButton={creationButton}
 					focusOnSearch={focusOnSearch}
-					getOptionLabel={getOptionLabel}
-					getOptionValue={getOptionValue}
+					getOptionLabel={this.getOptionLabel}
+					getOptionValue={this.getOptionValue}
 					isSearching={isSearching}
 					multiple={multiple}
 					onClose={this.hideMenu}

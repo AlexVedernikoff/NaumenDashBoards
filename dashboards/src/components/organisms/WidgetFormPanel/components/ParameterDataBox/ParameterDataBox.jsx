@@ -64,7 +64,7 @@ export class ParameterDataBox extends PureComponent<Props, State> {
 
 		value = transformAttribute(event, this.handleSelect, index);
 
-		if (useGroup && (!currentValue || currentValue.type !== value.type)) {
+		if (useGroup && index === 0 && (!currentValue || currentValue.type !== value.type)) {
 			setDataFieldValue(index, FIELDS.group, getDefaultSystemGroup(value));
 		}
 
