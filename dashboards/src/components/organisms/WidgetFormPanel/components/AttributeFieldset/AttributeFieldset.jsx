@@ -2,12 +2,14 @@
 import type {Attribute, Props} from './types';
 import {AttributeSelect} from 'WidgetFormPanel/components';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props as SelectProps} from 'WidgetFormPanel/components/AttributeSelect/types';
-import React, {Component, Fragment} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import withForm from 'WidgetFormPanel/withForm';
 
-export class AttributeFieldset extends Component<Props> {
+export class AttributeFieldset extends PureComponent<Props> {
 	static defaultProps = {
 		disabled: false,
 		index: 0,
@@ -15,19 +17,62 @@ export class AttributeFieldset extends Component<Props> {
 		showCreationButton: false
 	};
 
+	fetchAttributes = (classFqn: string) => () => this.props.fetchAttributes(classFqn);
+
+	fetchRefAttributes = (parent: Attribute) => () => this.props.fetchRefAttributes(parent);
+
+	getAttributeOptions = (attributes: Array<Attribute>) => {
+		const {getAttributeOptions, index} = this.props;
+		return getAttributeOptions ? getAttributeOptions(attributes, index) : attributes;
+	};
+
+	getAttributeSelectProps = (parent: Attribute): $Shape<SelectProps> => {
+		const {refAttributes} = this.props;
+		const key = createRefKey(parent);
+		const {[key]: data = this.getDefaultMapData()} = refAttributes;
+
+		return {
+			...data,
+			fetchOptions: this.fetchRefAttributes(parent),
+			options: this.getAttributeOptions(data.options)
+		};
+	};
+
+	getDefaultMapData = () => ({
+		error: false,
+		loading: false,
+		options: [],
+		uploaded: false
+	});
+
 	getOptionLabel = (attribute: Attribute | null) => attribute ? attribute.title : '';
 
 	getOptionValue = (attribute: Attribute | null) => attribute ? attribute.code : '';
 
-	getSourceOptions = () => {
-		const {getSourceOptions, index, source} = this.props;
-		let options = [];
+	getSourceOptions = (attributes: Array<Attribute>) => {
+		const {getSourceOptions, index} = this.props;
+		return getSourceOptions ? getSourceOptions(attributes, index) : attributes;
+	};
+
+	getSourceSelectProps = () => {
+		const {attributes, source} = this.props;
+		let data = {
+			fetchOptions: source && this.fetchAttributes(source.value)
+		};
 
 		if (source) {
-			options = getSourceOptions(source.value, index);
+			const {[source.value]: sourceData = this.getDefaultMapData()} = attributes;
+
+			if (sourceData) {
+				data = {
+					...sourceData,
+					...data,
+					options: this.getSourceOptions(sourceData.options)
+				};
+			}
 		}
 
-		return options;
+		return data;
 	};
 
 	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
@@ -82,13 +127,12 @@ export class AttributeFieldset extends Component<Props> {
 	};
 
 	renderChildAttributeField = (props: SelectProps) => {
-		const {getAttributeOptions, index} = this.props;
 		const {parent} = props;
 
 		if (parent) {
 			return this.renderAttributeField({
 				...props,
-				options: getAttributeOptions(parent, index),
+				...this.getAttributeSelectProps(parent),
 				parent,
 				value: parent.ref
 			});
@@ -126,6 +170,8 @@ export class AttributeFieldset extends Component<Props> {
 		} = this.props;
 
 		return this.renderAttributeField({
+			...this.getSourceSelectProps(),
+			async: true,
 			disabled,
 			getOptionLabel: this.getOptionLabel,
 			getOptionValue: this.getOptionValue,
@@ -134,7 +180,6 @@ export class AttributeFieldset extends Component<Props> {
 			onClickCreationButton,
 			onRemove,
 			onSelect: this.handleSelect,
-			options: this.getSourceOptions(),
 			removable,
 			showCreationButton,
 			value
@@ -142,4 +187,4 @@ export class AttributeFieldset extends Component<Props> {
 	}
 }
 
-export default AttributeFieldset;
+export default withForm(AttributeFieldset);

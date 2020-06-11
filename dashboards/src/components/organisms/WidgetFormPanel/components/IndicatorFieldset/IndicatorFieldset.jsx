@@ -1,4 +1,5 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {AttributeAggregationField, AttributeFieldset, ComputedAttributeEditor, FormField} from 'WidgetFormPanel/components';
 import {AttributeCreatingModal} from 'components/organisms';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
@@ -6,17 +7,48 @@ import type {ComputedAttr} from 'store/widgets/data/types';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props, State} from './types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
+import withForm from 'WidgetFormPanel/withForm';
 
-export class IndicatorFieldset extends Component<Props, State> {
+export class IndicatorFieldset extends PureComponent<Props, State> {
 	state = {
 		showCreatingModal: false
 	};
 
-	getSourceOptions = (classFqn: string) => {
-		const {computedAttrs, getSourceOptions} = this.props;
-		return [...computedAttrs, ...getSourceOptions(classFqn)];
+	getModalSources = () => {
+		const {attributes: map, fetchAttributes, values} = this.props;
+		const sources = [];
+
+		values.data.forEach(set => {
+			const source = set[FIELDS.source];
+
+			if (source) {
+				const dataKey = set[FIELDS.dataKey];
+				const classFqn = source.value;
+				let {[classFqn]: sourceData = {
+					error: false,
+					loading: false,
+					options: [],
+					uploaded: false
+				}} = map;
+				const {error, loading, options: attributes, uploaded} = sourceData;
+
+				if ((error || loading || uploaded) === false) {
+					fetchAttributes(classFqn);
+				}
+
+				sources.push({
+					attributes,
+					dataKey,
+					source
+				});
+			}
+		});
+
+		return sources;
 	};
+
+	getSourceOptions = (options: Array<Attribute>) => [...this.props.values.computedAttrs, ...options];
 
 	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
 		const {index, onChangeLabel} = this.props;
@@ -68,21 +100,20 @@ export class IndicatorFieldset extends Component<Props, State> {
 	};
 
 	renderComputedAttributeEditor = () => {
-		const {name, set, sources} = this.props;
+		const {name, set} = this.props;
 		const attribute: ComputedAttr = set[name];
 
 		return (
 			<ComputedAttributeEditor
 				onRemove={this.handleRemoveComputedAttribute}
 				onSubmit={this.saveComputedAttribute}
-				sources={sources}
+				sources={this.getModalSources()}
 				value={attribute}
 			/>
 		);
 	};
 
 	renderCreatingModal = () => {
-		const {sources} = this.props;
 		const {showCreatingModal} = this.state;
 
 		if (showCreatingModal) {
@@ -90,7 +121,7 @@ export class IndicatorFieldset extends Component<Props, State> {
 				<AttributeCreatingModal
 					onClose={this.handleCloseCreatingModal}
 					onSubmit={this.handleSubmitCreatingModal}
-					sources={sources}
+					sources={this.getModalSources()}
 				/>
 			);
 		}
@@ -107,14 +138,13 @@ export class IndicatorFieldset extends Component<Props, State> {
 	};
 
 	render () {
-		const {error, getAttributeOptions, name, set: currentSet} = this.props;
+		const {error, name, set: currentSet} = this.props;
 		const currentSource = currentSet[FIELDS.source];
 		const value = currentSet[name];
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
-					getAttributeOptions={getAttributeOptions}
 					getSourceOptions={this.getSourceOptions}
 					name={name}
 					onChangeLabel={this.handleChangeLabel}
@@ -131,4 +161,4 @@ export class IndicatorFieldset extends Component<Props, State> {
 	}
 }
 
-export default IndicatorFieldset;
+export default withForm(IndicatorFieldset);

@@ -10,12 +10,16 @@ import styles from './styles.less';
 
 export class TransparentSelect extends PureComponent<Props, State> {
 	static defaultProps = {
+		async: false,
 		className: '',
 		disabled: false,
+		error: false,
 		loading: false,
+		options: [],
 		placeholder: 'Выберите значение',
 		removable: false,
-		showCreationButton: false
+		showCreationButton: false,
+		uploaded: false
 	};
 
 	state = {
@@ -96,7 +100,19 @@ export class TransparentSelect extends PureComponent<Props, State> {
 	renderLoader = () => this.props.loading ? <Loader className={styles.loader} /> : null;
 
 	renderMenu = () => {
-		const {getOptionLabel, getOptionValue, onClickCreationButton, options, showCreationButton, value} = this.props;
+		const {
+			async,
+			error,
+			fetchOptions,
+			getOptionLabel,
+			getOptionValue,
+			loading,
+			onClickCreationButton,
+			options,
+			showCreationButton,
+			uploaded,
+			value
+		} = this.props;
 		const {foundOptions, searchValue, showMenu} = this.state;
 		const renderOptions = searchValue ? foundOptions : options;
 		let creationButton;
@@ -109,6 +125,10 @@ export class TransparentSelect extends PureComponent<Props, State> {
 		}
 
 		if (showMenu) {
+			if (async && typeof fetchOptions === 'function' && (error || loading || uploaded) === false) {
+				fetchOptions();
+			}
+
 			return (
 				<OutsideClickDetector onClickOutside={this.hideMenu}>
 					<SimpleSelectMenu

@@ -1,15 +1,11 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
 import type {ComputedAttr} from 'store/widgets/data/types';
+import type {ContextProps, OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {DataSet, SetDataFieldValue} from 'containers/WidgetFormPanel/types';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
-import type {SourceOption} from 'components/organisms/AttributeCreatingModal/types';
 
 export type Props = {
-	computedAttrs: Array<ComputedAttr>,
+	...ContextProps,
 	error: string,
-	getAttributeOptions: (attribute: Attribute) => Array<Attribute>,
-	getSourceOptions: (classFqn: string) => Array<Attribute>,
 	index: number,
 	name: string,
 	onChangeLabel: (event: OnChangeAttributeLabelEvent, index: number) => void,
@@ -17,8 +13,7 @@ export type Props = {
 	onSaveComputedAttribute: (index: number, name: string, attribute: ComputedAttr) => void,
 	onSelect: (event: OnSelectAttributeEvent, index: number) => void,
 	onSelectAggregation: SetDataFieldValue,
-	set: DataSet,
-	sources: Array<SourceOption>
+	set: DataSet
 };
 
 export type State = {

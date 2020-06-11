@@ -8,9 +8,9 @@ import type {Group} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props} from './types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 
-export class ParameterFieldset extends Component<Props> {
+export class ParameterFieldset extends PureComponent<Props> {
 	filter = (options: Array<Attribute>): Array<Attribute> => {
 		const {mainSet, name, set: currentSet} = this.props;
 		const mainParameter = mainSet[name];
@@ -21,10 +21,6 @@ export class ParameterFieldset extends Component<Props> {
 
 		return options;
 	};
-
-	getAttributeOptions = (attribute: Attribute) => this.filter(this.props.getAttributeOptions(attribute));
-
-	getSourceOptions = (classFqn: string) => this.filter(this.props.getSourceOptions(classFqn));
 
 	handleChangeGroup = (name: string, value: Group, field: GroupAttributeField) => {
 		const {index, onChangeGroup} = this.props;
@@ -88,8 +84,8 @@ export class ParameterFieldset extends Component<Props> {
 			<FormField error={error}>
 				<AttributeFieldset
 					disabled={disabled}
-					getAttributeOptions={this.getAttributeOptions}
-					getSourceOptions={this.getSourceOptions}
+					getAttributeOptions={this.filter}
+					getSourceOptions={this.filter}
 					name={name}
 					onChangeLabel={this.handleChangeLabel}
 					onSelect={this.handleSelect}

@@ -16,7 +16,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const widget = selectedWidget === NewWidget.id && newWidget ? newWidget : data.map[selectedWidget];
 
 	return {
-		attributes: sources.attributes.map,
+		attributes: sources.attributes,
 		context: contentContext,
 		refAttributes: sources.refAttributes,
 		saveError: data.saveError,

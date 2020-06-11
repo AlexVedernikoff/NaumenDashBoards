@@ -5,9 +5,9 @@ import type {Group} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props} from './types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 
-export class BreakdownFieldset extends Component<Props> {
+export class BreakdownFieldset extends PureComponent<Props> {
 	handleChangeGroup = (name: string, value: Group, field: GroupAttributeField) => {
 		const {index, onChangeGroup} = this.props;
 		onChangeGroup(index, name, value, field);
@@ -50,13 +50,11 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	render () {
-		const {error, getAttributeOptions, getSourceOptions, name, removable, set: currentSet} = this.props;
+		const {error, name, removable, set: currentSet} = this.props;
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
-					getAttributeOptions={getAttributeOptions}
-					getSourceOptions={getSourceOptions}
 					name={name}
 					onChangeLabel={this.handleChangeLabel}
 					onRemove={this.handleRemove}

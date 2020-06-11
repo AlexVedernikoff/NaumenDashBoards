@@ -1,4 +1,5 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
 import {IconButton} from 'components/atoms';
@@ -12,6 +13,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class SourceDataBox extends Component<Props> {
 	static defaultProps = {
+		indicatorName: FIELDS.indicator,
 		minCountBuildingSources: 1,
 		parameterName: '',
 		sourceRefFields: []
@@ -92,7 +94,7 @@ export class SourceDataBox extends Component<Props> {
 	};
 
 	handleSelectSource = (index: number, event: OnSelectEvent) => {
-		const {data, onSelectCallback, parameterName, setDataFieldValue, sourceRefFields} = this.props;
+		const {data, fetchAttributes, onSelectCallback, parameterName, setDataFieldValue, sourceRefFields} = this.props;
 		const {name, value: nextSource} = event;
 		const prevSource = data[index][name];
 
@@ -105,6 +107,7 @@ export class SourceDataBox extends Component<Props> {
 				callback = onSelectCallback(parameterName);
 			}
 
+			fetchAttributes(nextSource.value, this.setDefaultIndicator(index));
 			setDataFieldValue(index, name, nextSource, callback);
 		} else {
 			setDataFieldValue(index, name, null);
@@ -155,6 +158,13 @@ export class SourceDataBox extends Component<Props> {
 			setFieldValue(FIELDS.data, data);
 			this.increaseBuildSources(data);
 		}
+	};
+
+	setDefaultIndicator = (index: number) => (attributes: Array<Attribute>) => {
+		const {indicatorName, setDataFieldValue} = this.props;
+		const indicator = attributes.find(attribute => attribute.code === 'UUID');
+
+		indicator && setDataFieldValue(index, indicatorName, indicator);
 	};
 
 	renderAddSourceInput = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddSource} />;

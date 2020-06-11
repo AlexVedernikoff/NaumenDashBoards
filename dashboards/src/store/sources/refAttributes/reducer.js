@@ -8,8 +8,9 @@ const reducer = (state: RefAttributesState = initialRefAttributesState, action: 
 		case REF_ATTRIBUTES_EVENTS.RECEIVE_REF_ATTRIBUTES:
 			state[action.payload.refCode] = {
 				...state[action.payload.refCode],
-				data: action.payload.refAttributes,
-				loading: false
+				options: action.payload.refAttributes,
+				loading: false,
+				uploaded: true
 			};
 			return {...state};
 		case REF_ATTRIBUTES_EVENTS.RECORD_REF_ATTRIBUTES_ERROR:
@@ -21,9 +22,10 @@ const reducer = (state: RefAttributesState = initialRefAttributesState, action: 
 			return {...state};
 		case REF_ATTRIBUTES_EVENTS.REQUEST_REF_ATTRIBUTES:
 			state[action.payload] = {
-				data: [],
 				error: false,
-				loading: true
+				loading: true,
+				options: [],
+				uploaded: false
 			};
 			return {...state};
 		default:

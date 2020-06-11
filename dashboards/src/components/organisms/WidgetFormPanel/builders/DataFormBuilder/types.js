@@ -28,6 +28,7 @@ export type ParameterBoxProps = $Shape<{|
 |}>;
 
 export type SourceBoxProps = $Shape<{|
+	indicatorName: string,
 	minCountBuildingSources: number,
 	parameterName: string,
 	sourceRefFields: Array<string>

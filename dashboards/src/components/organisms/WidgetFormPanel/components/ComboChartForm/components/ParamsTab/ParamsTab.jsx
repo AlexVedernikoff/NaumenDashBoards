@@ -52,6 +52,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	renderSourceBox = () => {
 		const {renderSourceBox} = this.props;
 		const props = {
+			indicatorName: FIELDS.yAxis,
 			minCountBuildingSources: 2,
 			parameterName: FIELDS.xAxis,
 			sourceRefFields: this.sourceRefFields

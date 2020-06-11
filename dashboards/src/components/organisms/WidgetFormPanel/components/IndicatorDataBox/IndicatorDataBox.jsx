@@ -10,44 +10,16 @@ import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'src/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {OnSelectAttributeEvent} from 'WidgetFormPanel/types';
-import type {Props, State} from './types';
-import React, {Component} from 'react';
+import type {Props} from './types';
+import React, {PureComponent} from 'react';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
-export class IndicatorDataBox extends Component<Props, State> {
+export class IndicatorDataBox extends PureComponent<Props> {
 	static defaultProps = {
 		children: null,
 		name: FIELDS.indicator,
 		useBreakdown: true
 	};
-
-	state = {
-		sources: []
-	};
-
-	static getDerivedStateFromProps (props: Props) {
-		const {getSourceOptions, values} = props;
-		const sources = [];
-
-		values.data.forEach(set => {
-			const source = set[FIELDS.source];
-
-			if (source) {
-				const attributes = getSourceOptions(source.value);
-				const dataKey = set[FIELDS.dataKey];
-
-				sources.push({
-					attributes,
-					dataKey,
-					source
-				});
-			}
-		});
-
-		return {
-			sources
-		};
-	}
 
 	createComputedBreakdown = (indicator: ComputedAttr) => {
 		const {values} = this.props;
@@ -181,7 +153,7 @@ export class IndicatorDataBox extends Component<Props, State> {
 	};
 
 	renderComputedBreakdownFieldSet = (indicator: ComputedAttr) => {
-		const {errors, getAttributeOptions, getSourceOptions, index, set, setDataFieldValue, transformAttribute, values} = this.props;
+		const {errors, index, set, setDataFieldValue, transformAttribute, values} = this.props;
 		const {data} = values;
 		let {breakdown} = set;
 
@@ -194,8 +166,6 @@ export class IndicatorDataBox extends Component<Props, State> {
 				createDefaultValue={this.createComputedBreakdown}
 				data={data}
 				errors={errors}
-				getAttributeOptions={getAttributeOptions}
-				getSourceOptions={getSourceOptions}
 				index={index}
 				key={getDataErrorKey(FIELDS.breakdown, index)}
 				name={FIELDS.breakdown}
@@ -209,14 +179,12 @@ export class IndicatorDataBox extends Component<Props, State> {
 	};
 
 	renderDefaultBreakdownFieldSet = () => {
-		const {errors, getAttributeOptions, getSourceOptions, index, onChangeGroup, onChangeLabel, set} = this.props;
+		const {errors, index, onChangeGroup, onChangeLabel, set} = this.props;
 		const errorKey = getDataErrorKey(index, FIELDS.breakdown);
 
 		return (
 			<BreakdownFieldset
 				error={errors[errorKey]}
-				getAttributeOptions={getAttributeOptions}
-				getSourceOptions={getSourceOptions}
 				index={index}
 				key={errorKey}
 				name={FIELDS.breakdown}
@@ -231,16 +199,13 @@ export class IndicatorDataBox extends Component<Props, State> {
 	};
 
 	renderIndicatorFieldSet = () => {
-		const {errors, getAttributeOptions, getSourceOptions, index, name, onChangeLabel, set, setDataFieldValue, values} = this.props;
-		const {sources} = this.state;
+		const {errors, index, name, onChangeLabel, set, setDataFieldValue, values} = this.props;
 		const {computedAttrs} = values;
 
 		return (
 			<IndicatorFieldset
 				computedAttrs={computedAttrs}
 				error={errors[getDataErrorKey(index, name)]}
-				getAttributeOptions={getAttributeOptions}
-				getSourceOptions={getSourceOptions}
 				index={index}
 				key={this.getKey(name, index)}
 				name={name}
@@ -251,7 +216,6 @@ export class IndicatorDataBox extends Component<Props, State> {
 				onSelect={this.handleSelectIndicator}
 				onSelectAggregation={setDataFieldValue}
 				set={set}
-				sources={sources}
 			/>
 		);
 	};

@@ -1,18 +1,6 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
+import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
-
-export type OnLoadCallback = (Array<Attribute>) => void;
-
-export type RefAttributeData = {
-	data: Array<Attribute>,
-	error: boolean,
-	loading: boolean
-};
-
-export type RefAttributesMap = {
-	[key: string]: RefAttributeData
-};
 
 type RequestRefAttributes = {
 	type: typeof REF_ATTRIBUTES_EVENTS.REQUEST_REF_ATTRIBUTES,
@@ -43,4 +31,4 @@ export type RefAttributesAction =
 	| UnknownRefAttributesAction
 ;
 
-export type RefAttributesState = RefAttributesMap;
+export type RefAttributesState = AttributesMap;

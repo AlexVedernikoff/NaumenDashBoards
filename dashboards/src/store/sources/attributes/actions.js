@@ -2,13 +2,15 @@
 import {ATTRIBUTES_EVENTS} from './constants';
 import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
+import type {OnLoadCallback} from 'store/sources/types';
 
 /**
  * Получаем атрибуты конкретного класса
  * @param {string} classFqn - код класса
+ * @param {OnLoadCallback} callback - колбэк-функция
  * @returns {ThunkAction}
  */
-const fetchAttributes = (classFqn: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const fetchAttributes = (classFqn: string, callback?: OnLoadCallback): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(requestAttributes(classFqn));
 
 	try {
@@ -18,6 +20,7 @@ const fetchAttributes = (classFqn: string): ThunkAction => async (dispatch: Disp
 		};
 		const {data: attributes} = await client.post(url, data);
 
+		callback && callback(attributes);
 		dispatch(receiveAttributes(attributes, classFqn));
 	} catch (error) {
 		dispatch(recordAttributesError(classFqn));

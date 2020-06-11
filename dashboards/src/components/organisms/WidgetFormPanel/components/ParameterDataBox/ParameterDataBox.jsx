@@ -12,9 +12,9 @@ import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGrou
 import type {OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import {ParameterFieldset} from 'WidgetFormPanel/components';
 import type {Props, State} from './types';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 
-export class ParameterDataBox extends Component<Props, State> {
+export class ParameterDataBox extends PureComponent<Props, State> {
 	static defaultProps = {
 		children: null,
 		name: FIELDS.parameter,
@@ -72,7 +72,7 @@ export class ParameterDataBox extends Component<Props, State> {
 	};
 
 	renderParameterFieldset = (set: DataSet, index: number) => {
-		const {errors, getAttributeOptions, getSourceOptions, name, onChangeLabel, useGroup} = this.props;
+		const {errors, name, onChangeLabel, useGroup} = this.props;
 		const {mainSet} = this.state;
 		const errorKey = getDataErrorKey(index, name);
 
@@ -80,8 +80,6 @@ export class ParameterDataBox extends Component<Props, State> {
 			return (
 				<ParameterFieldset
 					error={errors[errorKey]}
-					getAttributeOptions={getAttributeOptions}
-					getSourceOptions={getSourceOptions}
 					index={index}
 					key={errorKey}
 					mainSet={mainSet}

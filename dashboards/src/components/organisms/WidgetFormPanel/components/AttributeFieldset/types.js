@@ -1,5 +1,5 @@
 // @flow
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
+import type {ContextProps, OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 
 export type Attribute = Object;
 
@@ -9,9 +9,10 @@ export type Source = {
 };
 
 export type Props = {
+	...ContextProps,
 	disabled: boolean,
-	getAttributeOptions: (attribute: Attribute, index: number) => Array<Attribute>,
-	getSourceOptions: (classFqn: string, index: number) => Array<Attribute>,
+	getAttributeOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
+	getSourceOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
 	index: number,
 	name: string,
 	onChangeLabel: (event: OnChangeAttributeLabelEvent, index: number) => void,

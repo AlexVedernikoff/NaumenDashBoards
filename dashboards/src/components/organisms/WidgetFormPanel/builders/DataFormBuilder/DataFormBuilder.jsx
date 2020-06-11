@@ -46,50 +46,6 @@ export class DataFormBuilder extends Component<Props> {
 		});
 	};
 
-	/*
-	 * Функция возвращает список атрибутов ссылочного атрибута
-	 * @param {Attribute} Attribute - ссылочный атрибут
-	 * @returns {Array<Attribute>}
-	 */
-	getAttributeOptions = (attribute: Attribute | null) => {
-		const {fetchRefAttributes, refAttributes} = this.props;
-		let options = [];
-
-		if (attribute && attribute.type in ATTRIBUTE_SETS.REF) {
-			const key = createRefKey(attribute);
-
-			if (key in refAttributes) {
-				options = refAttributes[key].data;
-			} else {
-				fetchRefAttributes(attribute);
-			}
-		}
-
-		return options;
-	};
-
-	/**
-	 * Функция возвращает список атрибутов источника данных
-	 * @param {string} classFqn - classFqn исчтоника данных
-	 * @returns {Array<Attribute>}
-	 */
-	getSourceOptions = (classFqn: string) => {
-		const {attributes, fetchAttributes} = this.props;
-		let options = [];
-
-		if (classFqn) {
-			const currentAttributes = attributes[classFqn];
-
-			if (!currentAttributes) {
-				fetchAttributes(classFqn);
-			} else {
-				options = currentAttributes.data;
-			}
-		}
-
-		return options;
-	};
-
 	getTitleAttribute = (attributes: Array<Attribute>) => {
 		return attributes.find(attribute => attribute.code === 'title') || null;
 	};
@@ -101,7 +57,7 @@ export class DataFormBuilder extends Component<Props> {
 		if (!header[FIELDS.name]) {
 			setFieldValue(FIELDS.header, {
 				...header,
-				[FIELDS.name]: e.target.value
+				[FIELDS.name]: e.target.value.substr(0, MAX_TEXT_LENGTH)
 			});
 		}
 	};
@@ -186,7 +142,7 @@ export class DataFormBuilder extends Component<Props> {
 			if (refAttributes[key]) {
 				value = {
 					...value,
-					ref: this.getTitleAttribute(refAttributes[key].data)
+					ref: this.getTitleAttribute(refAttributes[key].options)
 				};
 			} else {
 				const callbackEvent = {...event, parent, value};
@@ -239,8 +195,6 @@ export class DataFormBuilder extends Component<Props> {
 			return (
 				<IndicatorDataBox
 					errors={errors}
-					getAttributeOptions={this.getAttributeOptions}
-					getSourceOptions={this.getSourceOptions}
 					index={index}
 					key={index}
 					onChangeGroup={this.handleChangeGroup}
@@ -269,8 +223,6 @@ export class DataFormBuilder extends Component<Props> {
 		return (
 			<ParameterDataBox
 				errors={errors}
-				getAttributeOptions={this.getAttributeOptions}
-				getSourceOptions={this.getSourceOptions}
 				onChangeGroup={this.handleChangeGroup}
 				onChangeLabel={this.handleChangeAttributeTitle}
 				onSelectCallback={this.changeAdditionalParameterFields}
@@ -284,13 +236,14 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	renderSourceBox = (props: SourceBoxProps) => {
-		const {errors, setDataFieldValue, setFieldValue, sources, values} = this.props;
+		const {errors, fetchAttributes, setDataFieldValue, setFieldValue, sources, values} = this.props;
 		const {data, type} = values;
 
 		return (
 			<SourceDataBox
 				data={data}
 				errors={errors}
+				fetchAttributes={fetchAttributes}
 				onSelectCallback={this.changeAdditionalParameterFields}
 				setDataFieldValue={setDataFieldValue}
 				setFieldValue={setFieldValue}

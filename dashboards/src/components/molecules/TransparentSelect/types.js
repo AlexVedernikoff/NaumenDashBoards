@@ -3,9 +3,12 @@ import type {OnChangeLabelEvent, OnSelectEvent, SelectValue} from 'components/ty
 
 export type Option = any;
 
-export type Props = {
+export type Props = {|
+	async: boolean,
 	className: string,
 	disabled: boolean,
+	error: boolean,
+	fetchOptions?: () => any,
 	getOptionLabel: (option: Option) => string,
 	getOptionValue: (option: Option) => string,
 	loading: boolean,
@@ -19,8 +22,9 @@ export type Props = {
 	placeholder: string,
 	removable: boolean,
 	showCreationButton: boolean,
+	uploaded: boolean,
 	value: SelectValue
-};
+|};
 
 export type State = {
 	foundOptions: Array<Option>,

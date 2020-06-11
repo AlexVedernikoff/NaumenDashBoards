@@ -12,14 +12,15 @@ export type Attribute = {
 	type: $Keys<typeof SOURCE_ATTRIBUTE_TYPES>,
 };
 
-export type AttributeData = {
-	data: Attribute[],
+export type MapData = {
+	options: Attribute[],
 	error: boolean,
-	loading: boolean
+	loading: boolean,
+	uploaded: boolean
 };
 
-export type AttributeMap = {
-	[key: string]: AttributeData
+export type AttributesMap = {
+	[key: string]: MapData
 };
 
 type RequestAttributes = {
@@ -52,6 +53,4 @@ export type AttributesAction =
 	| UnknownAttributesAction
 ;
 
-export type AttributesState = {
-	map: AttributeMap
-};
+export type AttributesState = AttributesMap;

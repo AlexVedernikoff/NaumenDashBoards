@@ -45,9 +45,18 @@ export class WidgetFormPanel extends Component<Props, State> {
 		}
 	};
 
-	getContextValue = () => ({
-		addFieldErrorRef: this.addFieldErrorRef
-	});
+	getContextValue = () => {
+		const {attributes, fetchAttributes, fetchRefAttributes, refAttributes, values} = this.props;
+
+		return {
+			addFieldErrorRef: this.addFieldErrorRef,
+			attributes,
+			fetchAttributes: fetchAttributes,
+			fetchRefAttributes: fetchRefAttributes,
+			refAttributes,
+			values
+		};
+	};
 
 	resolve = () => {
 		const {type} = this.props.values;

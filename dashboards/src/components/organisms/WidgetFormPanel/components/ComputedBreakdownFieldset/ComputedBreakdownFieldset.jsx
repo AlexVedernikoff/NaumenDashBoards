@@ -25,10 +25,6 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		return options;
 	};
 
-	getComputedAttributeOptions = (attribute: Attribute, index: number) => this.filter(this.props.getAttributeOptions(attribute), index);
-
-	getComputedSourceOptions = (classFqn: string, index: number) => this.filter(this.props.getSourceOptions(classFqn), index);
-
 	handleChangeGroup = (name: string, group: Group, field: GroupAttributeField) => {
 		const {index, name: breakdownName, onChange} = this.props;
 		let {value: breakdown} = this.props;
@@ -125,8 +121,8 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 			return (
 				<FormField error={error} key={index}>
 					<AttributeFieldset
-						getAttributeOptions={this.getComputedAttributeOptions}
-						getSourceOptions={this.getComputedSourceOptions}
+						getAttributeOptions={this.filter}
+						getSourceOptions={this.filter}
 						index={breakdownIndex}
 						name={FIELDS.value}
 						onChangeLabel={this.handleChangeLabel}

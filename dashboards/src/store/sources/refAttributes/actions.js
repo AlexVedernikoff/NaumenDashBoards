@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
-import type {OnLoadCallback} from './types';
+import type {OnLoadCallback} from 'store/sources/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
 
 const createRefKey = (attribute: Attribute) => `${attribute.metaClassFqn}$${attribute.code}`;
