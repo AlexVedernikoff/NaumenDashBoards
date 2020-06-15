@@ -2,6 +2,7 @@
 import {array, lazy, mixed, object, string} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from './constants';
 
 const getErrorMessage = (key: string) => {
@@ -54,21 +55,83 @@ const requiredAttribute = (text: string) => object().test(
 ).nullable();
 
 /**
+ * Добавляет правило валидации с учетом возможности использования группировки относительно других наборов данных
+ * @param {object} rule - основное правило
+ * @param {string} field - наименование поля атрибута
+ * @param {Array<object>} data - набор данных, относительно которого проверяется возможность использования текущей группировки
+ * @param {object} parent - объект данных, в контексте которого находится атрибут
+ * @returns {object}
+ */
+const mixinGroupRule = (rule: Object, field, data: Array<Object>, parent) => rule.test(
+	'grouped-attribute',
+	'Группировка данного атрибута не применима к другим полям',
+	attribute => {
+		const {DAY, HOURS, MINUTES} = DATETIME_SYSTEM_GROUP;
+		const {dateTime} = ATTRIBUTE_TYPES;
+		const isMain = parent === data[0];
+		const group = parent[FIELDS.group];
+
+		if (isMain && attribute && attribute.type === dateTime && group.way === GROUP_WAYS.SYSTEM) {
+			const {data: groupData, format} = group;
+			const useTime = groupData === HOURS || groupData === MINUTES || (groupData === DAY && format && format.includes('hh'));
+
+			if (useTime) {
+				return data.findIndex(set => set[field] && set[field].type !== ATTRIBUTE_TYPES.dateTime) === -1;
+			}
+		}
+
+		return true;
+	}
+);
+
+/**
+ * Правило для параметров
+ * @param {string} field - наименование поля параметра
+ * @returns {object}
+ */
+const parameterRule = (field: string) => lazy((attribute: Attribute | null, ctx: Object) => {
+	const {parent, values} = ctx;
+	const {data} = values;
+	const isMain = parent === data[0];
+	const rule = requiredAttribute(getErrorMessage(field));
+
+	return isMain ? mixinGroupRule(rule, field, data, parent) : rule;
+});
+
+/**
+ * Правило для разбивки вычисляемого атрибута
+ * @param {any} value - значение разбивки
+ * @returns {object}
+ */
+const computedBreakdownRule = (value: any) => lazy((attribute: Attribute | null, ctx: Object) => {
+	const {parent} = ctx;
+	let data = value;
+
+	if (!Array.isArray(data)) {
+		data = [];
+	}
+
+	const isMain = parent === data[0];
+	const rule = requiredAttribute(getErrorMessage(FIELDS.breakdown));
+
+	return isMain ? mixinGroupRule(rule, FIELDS.value, data, parent) : rule;
+});
+
+/**
  * Правило для валидации разбивки
  * @param {string} indicatorName - наименование поля индикатора
  * @returns {object}
  */
 const requiredBreakdown = (indicatorName: string) => lazy((value: mixed, context: Object) => {
-	const message = getErrorMessage(FIELDS.breakdown);
 	const indicator = context.parent[indicatorName];
 
 	if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 		return array().of(object({
-			value: requiredAttribute(message)
+			value: computedBreakdownRule(value)
 		}));
 	}
 
-	return requiredAttribute(message);
+	return requiredAttribute(getErrorMessage(FIELDS.breakdown));
 });
 
 /**
@@ -103,6 +166,7 @@ const requiredByCompute = (key: string, rule: Object) => {
 const rules = {
 	base,
 	conditionalBreakdown,
+	parameterRule,
 	requiredAttribute,
 	requiredBreakdown,
 	requiredByCompute

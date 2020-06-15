@@ -1,14 +1,24 @@
 // @flow
 import type {AttrCustomProps} from 'components/molecules/GroupCreatingModal/components/CustomGroup/types';
-import type {AttrSystemProps} from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
+import type {
+	AttrSystemProps,
+	Props as SystemProps
+} from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {CustomGroup, CustomGroupsMap} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Item} from 'store/sources/currentObject/types';
-import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
 
-export type RenderModal = (attrCustomProps: AttrCustomProps, attrSystemProps?: AttrSystemProps) => Node;
+export type RenderSystemGroup = (props: $Shape<SystemProps>) => React$Node;
+
+export type AttrModalProps = {|
+	customProps: AttrCustomProps,
+	renderSystemGroup?: RenderSystemGroup,
+	systemProps?: AttrSystemProps
+|};
+
+export type RenderModal = (props: AttrModalProps) => React$Node;
 
 export type FetchCurrentObjectAttributes = (parent: Item | null, attribute: Attribute) => ThunkAction;
 

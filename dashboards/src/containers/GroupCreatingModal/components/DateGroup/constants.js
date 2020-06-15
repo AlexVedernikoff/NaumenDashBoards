@@ -29,6 +29,18 @@ const SYSTEM_OPTIONS = [
 	}
 ];
 
+const DATETIME_SYSTEM_OPTIONS = [
+	{
+		label: 'Минуты',
+		value: DATETIME_SYSTEM_GROUP.MINUTES
+	},
+	{
+		label: 'Часы',
+		value: DATETIME_SYSTEM_GROUP.HOURS
+	},
+	...SYSTEM_OPTIONS
+];
+
 const CUSTOM_OPTIONS = [
 	{
 		label: 'с ...по',
@@ -50,5 +62,6 @@ const CUSTOM_OPTIONS = [
 
 export {
 	CUSTOM_OPTIONS,
+	DATETIME_SYSTEM_OPTIONS,
 	SYSTEM_OPTIONS
 };

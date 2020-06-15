@@ -39,6 +39,7 @@ export type Source = {
 
 export type Group = {
 	data: string,
+	format?: string,
 	way: GroupWay
 };
 

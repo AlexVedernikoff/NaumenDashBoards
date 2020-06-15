@@ -1,18 +1,20 @@
 // @flow
-import {Button, FieldError, InfoPanel} from 'components/atoms';
+import {Button, FieldError, InfoPanel, Text} from 'components/atoms';
 import {createNewSubGroup} from './helpers';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FormControl, Select} from 'components/molecules';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import type {InputRef} from 'src/components/types';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
-import {MaterialSelect} from 'components/molecules/index';
 import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
+import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import React, {Component, createContext, createRef, Fragment} from 'react';
 import schema from './schema';
 import styles from './styles.less';
 import {SubGroupSection} from './components';
+import {TEXT_TYPES} from 'components/atoms/Text/constants';
 import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
@@ -34,11 +36,13 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {group, map} = this.props;
+		const {group, map, setSubmit} = this.props;
 
 		if (group.data in map) {
 			this.setState({selectedGroup: group.data});
 		}
+
+		setSubmit(this.submit);
 	}
 
 	getGroupLabel = (group: CustomGroupType) => group.name;
@@ -57,9 +61,9 @@ export class CustomGroup extends Component<Props, State> {
 		return widgets.filter(this.isUsingCurrentGroup).map(widget => widget.name);
 	};
 
-	handleChangeGroupName = (groupId: string, name: string) => {
+	handleChangeGroupName = (event: OnChangeInputEvent) => {
 		const selectedGroup = this.getSelectedGroup();
-		selectedGroup && this.update({...selectedGroup, name});
+		selectedGroup && this.update({...selectedGroup, name: String(event.value)});
 	};
 
 	handleClickCreationButton = () => {
@@ -111,10 +115,10 @@ export class CustomGroup extends Component<Props, State> {
 		}
 	};
 
-	handleSelectGroup = (name: string, group: CustomGroupType) => this.setState({
+	handleSelectGroup = ({value}: OnSelectEvent) => this.setState({
 		errors: {},
 		isSubmitting: false,
-		selectedGroup: group.id
+		selectedGroup: this.getGroupValue(value)
 	});
 
 	handleUpdate = (subGroups: Array<SubGroup>) => {
@@ -200,30 +204,30 @@ export class CustomGroup extends Component<Props, State> {
 		return Object.keys(errors).length === 0;
 	};
 
+	renderDivider = () => <div className={styles.divider} />;
+
 	renderGroupSelect = () => {
 		const {groups} = this.props;
 		const selectedGroup = this.getSelectedGroup();
-		const isEditingLabel = !!selectedGroup;
+		const editable = !!selectedGroup;
 
 		return (
-			<div className={mainStyles.shortField}>
-				<MaterialSelect
+			<FormControl className={styles.nameField} label="Название группировки">
+				<Select
+					editable={editable}
 					forwardedLabelInputRef={this.groupNameRef}
 					getOptionLabel={this.getGroupLabel}
 					getOptionValue={this.getGroupValue}
-					isEditingLabel={isEditingLabel}
-					isSearching={true}
 					maxLabelLength={MAX_TEXT_LENGTH}
 					onChangeLabel={this.handleChangeGroupName}
 					onClickCreationButton={this.handleClickCreationButton}
 					onSelect={this.handleSelectGroup}
 					options={groups}
-					placeholder="Название группировки"
 					showCreationButton={true}
 					textCreationButton="Добавить группировку"
 					value={selectedGroup}
 				/>
-			</div>
+			</FormControl>
 		);
 	};
 
@@ -266,7 +270,7 @@ export class CustomGroup extends Component<Props, State> {
 
 		if (selectedGroup) {
 			return (
-				<div className={mainStyles.field}>
+				<div className={styles.removeNameButton}>
 					<Button onClick={this.handleClickRemovalButton} variant={BUTTON_VARIANTS.SIMPLE}>
 						Удалить
 					</Button>
@@ -321,7 +325,7 @@ export class CustomGroup extends Component<Props, State> {
 		}
 	};
 
-	renderTitle = () => <div className={styles.title}>Настройка пользовательской группировки</div>;
+	renderTitle = () => <Text className={styles.title} type={TEXT_TYPES.TITLE}>Настройка пользовательской группировки</Text>;
 
 	renderUseInfo = () => {
 		const {showUseInfo, usedInWidgets} = this.state;
@@ -337,11 +341,12 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	render () {
-		const {className, show} = this.props;
+		const {show} = this.props;
 
 		if (show) {
 			return (
-				<div className={className}>
+				<Fragment>
+					{this.renderDivider()}
 					{this.renderSaveInfo()}
 					{this.renderRemovalInfo()}
 					{this.renderLimitInfo()}
@@ -349,7 +354,7 @@ export class CustomGroup extends Component<Props, State> {
 					{this.renderTitle()}
 					{this.renderGroupSelectContainer()}
 					{this.renderSubGroupSection()}
-				</div>
+				</Fragment>
 			);
 		}
 

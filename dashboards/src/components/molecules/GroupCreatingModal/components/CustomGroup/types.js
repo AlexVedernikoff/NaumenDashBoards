@@ -2,6 +2,7 @@
 import type {CustomGroup as StoreCustomGroup, CustomGroupsMap, OperandType} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
+import type {SetSubmit} from 'components/molecules/GroupCreatingModal/types';
 import type {ThunkAction} from 'store/types';
 
 export type OrCondition = Object;
@@ -44,13 +45,13 @@ export type AttrCustomProps = {|
 |};
 
 export type Props = {
-	className: string,
 	group: Group,
 	map: CustomGroupsMap,
 	onCreate: (customGroup: StoreCustomGroup, onCreateCallback: Function) => ThunkAction,
 	onRemove: (groupId: string) => ThunkAction,
 	onSubmit: Group => void,
 	onUpdate: (customGroup: StoreCustomGroup, remote?: boolean) => ThunkAction,
+	setSubmit: SetSubmit,
 	show: boolean,
 	widgets: Array<Widget>,
 	...AttrCustomProps

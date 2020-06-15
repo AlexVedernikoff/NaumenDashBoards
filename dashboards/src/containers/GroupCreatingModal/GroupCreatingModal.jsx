@@ -1,6 +1,5 @@
 // @flow
-import type {AttrCustomProps} from 'components/molecules/GroupCreatingModal/components/CustomGroup/types';
-import type {AttrSystemProps} from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
+import type {AttrModalProps, Props} from './types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
 	CatalogItemGroup,
@@ -18,7 +17,6 @@ import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import {getMapValues} from 'src/helpers';
 import {GroupCreatingModal} from 'components/molecules';
-import type {Props} from './types';
 import React, {Component} from 'react';
 
 export class GroupCreatingModalContainer extends Component<Props> {
@@ -73,13 +71,7 @@ export class GroupCreatingModalContainer extends Component<Props> {
 		}
 	};
 
-	renderModal = (attrCustomProps: AttrCustomProps, attrSystemProps?: AttrSystemProps) => (
-		<GroupCreatingModal
-			attrCustomProps={attrCustomProps}
-			attrSystemProps={attrSystemProps}
-			{...this.props}
-		/>
-	);
+	renderModal = (props: AttrModalProps) => <GroupCreatingModal {...props} {...this.props} />;
 
 	render () {
 		const AttributeGroup = this.resolve();

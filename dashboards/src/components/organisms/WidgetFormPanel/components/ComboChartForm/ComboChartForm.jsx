@@ -15,7 +15,7 @@ import type {Values} from 'containers/WidgetFormPanel/types';
 
 export class ComboChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute} = rules;
+		const {base, conditionalBreakdown, parameterRule, requiredByCompute} = rules;
 		const {breakdown, source, xAxis, yAxis} = FIELDS;
 
 		return object({
@@ -23,7 +23,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			data: array().of(object({
 				[breakdown]: requiredByCompute(breakdown, conditionalBreakdown(FIELDS.yAxis)),
 				[source]: object().required(getErrorMessage(source)).nullable(),
-				[xAxis]: requiredAttribute(getErrorMessage(xAxis)),
+				[xAxis]: parameterRule(xAxis),
 				[yAxis]: requiredByCompute(yAxis)
 			}))
 		});

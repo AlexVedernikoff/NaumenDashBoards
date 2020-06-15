@@ -12,7 +12,9 @@ const GROUP_WAYS = {
 // Типы системных группировок
 const DAY: 'DAY' = 'DAY';
 const HOUR: 'HOUR' = 'HOUR';
+const HOURS: 'HOURS' = 'HOURS';
 const MINUTE: 'MINUTE' = 'MINUTE';
+const MINUTES: 'MINUTES' = 'MINUTES';
 const MONTH: 'MONTH' = 'MONTH';
 const SEVEN: 'SEVEN' = 'SEVEN';
 const QUARTER: 'QUARTER' = 'QUARTER';
@@ -25,6 +27,8 @@ const YEAR: 'YEAR' = 'YEAR';
 // Дата
 const DATETIME_SYSTEM_GROUP = {
 	DAY,
+	HOURS,
+	MINUTES,
 	MONTH,
 	QUARTER,
 	SEVEN,

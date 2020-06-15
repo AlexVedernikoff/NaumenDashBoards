@@ -72,7 +72,10 @@ export class IntervalGroup extends Component<AttributeGroupProps> {
 	);
 
 	render () {
-		return this.props.renderModal(this.getCustomProps(), this.getSystemProps());
+		return this.props.renderModal({
+			customProps: this.getCustomProps(),
+			systemProps: this.getSystemProps()
+		});
 	}
 }
 

@@ -15,7 +15,7 @@ import type {Values} from 'containers/WidgetFormPanel/types';
 
 export class AxisChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredAttribute, requiredByCompute} = rules;
+		const {base, parameterRule, requiredByCompute} = rules;
 		const {breakdown, source, xAxis, yAxis} = FIELDS;
 
 		return object({
@@ -23,7 +23,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			data: array().of(object({
 				[breakdown]: requiredByCompute(breakdown, lazy(this.resolveBreakdownRule)),
 				[source]: object().required(getErrorMessage(source)).nullable(),
-				[xAxis]: requiredAttribute(getErrorMessage(xAxis)),
+				[xAxis]: parameterRule(xAxis),
 				[yAxis]: requiredByCompute(yAxis)
 			}))
 		});

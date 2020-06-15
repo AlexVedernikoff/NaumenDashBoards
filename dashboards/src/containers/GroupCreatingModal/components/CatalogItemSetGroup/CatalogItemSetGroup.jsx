@@ -153,7 +153,9 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 	);
 
 	render () {
-		return this.props.renderModal(this.getCustomProps());
+		return this.props.renderModal({
+			customProps: this.getCustomProps()
+		});
 	}
 }
 

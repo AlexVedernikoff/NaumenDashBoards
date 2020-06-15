@@ -1,11 +1,17 @@
 @import '/styles/variables';
 
 :local {
-	@offset: 24px;
-
 	.title {
-		font-weight: 500;
-		padding-top: @offset;
+		padding: 12px 0;
+	}
+
+	.nameField {
+		margin-top: 8px;
+		width: 300px;
+	}
+
+	.removeNameButton {
+		margin-top: auto;
 	}
 
 	.groupSelectContainer {
@@ -14,6 +20,12 @@
 	}
 
 	.infoPanel {
-		margin-top: @offset;
+		margin-top: 16px;
+	}
+
+	.divider {
+		background-color: @lightgrey;
+		height: 1px;
+		margin: 8px 0;
 	}
 }

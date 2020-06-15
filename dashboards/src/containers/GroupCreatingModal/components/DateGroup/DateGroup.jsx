@@ -11,10 +11,12 @@ import type {
 } from 'store/customGroups/types';
 import {BETWEEN_RULE, INTEGER_RULE} from 'CustomGroup/schema';
 import {createBetweenOperand, createDefaultOperand, createSimpleOperand} from 'CustomGroup/helpers';
-import {CUSTOM_OPTIONS, SYSTEM_OPTIONS} from './constants';
+import {CUSTOM_OPTIONS, DATETIME_SYSTEM_OPTIONS, SYSTEM_OPTIONS} from './constants';
+import {DateSystemGroup} from 'components/molecules/GroupCreatingModal/components';
 import {DATETIME_SYSTEM_GROUP} from 'store/widgets/constants';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
+import type {Props as SystemGroupProps} from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
 import React, {Component} from 'react';
 
 export class DateGroup extends Component<AttributeGroupProps> {
@@ -48,10 +50,9 @@ export class DateGroup extends Component<AttributeGroupProps> {
 		type: this.props.attribute.type
 	});
 
-	getSystemProps = () => ({
-		defaultValue: DATETIME_SYSTEM_GROUP.MONTH,
-		options: SYSTEM_OPTIONS
-	});
+	getSystemOptions = () => {
+		return this.props.attribute.type === ATTRIBUTE_TYPES.dateTime ? DATETIME_SYSTEM_OPTIONS : SYSTEM_OPTIONS;
+	};
 
 	resolveConditionRule = (condition: DateOrCondition) => {
 		const {BETWEEN, LAST, NEAR} = OPERAND_TYPES;
@@ -85,8 +86,24 @@ export class DateGroup extends Component<AttributeGroupProps> {
 		<SimpleOperand onChange={onChange} onlyNumber={true} operand={operand} />
 	);
 
+	renderSystemGroup = (props: $Shape<SystemGroupProps>) => {
+		const {attribute} = this.props;
+
+		return (
+			<DateSystemGroup
+				{...props}
+				attribute={attribute}
+				defaultValue={DATETIME_SYSTEM_GROUP.MONTH}
+				options={this.getSystemOptions()}
+			/>
+		);
+	};
+
 	render () {
-		return this.props.renderModal(this.getCustomProps(), this.getSystemProps());
+		return this.props.renderModal({
+			customProps: this.getCustomProps(),
+			renderSystemGroup: this.renderSystemGroup
+		});
 	}
 }
 

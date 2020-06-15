@@ -1,20 +1,20 @@
 // @flow
 import {CustomGroup, SystemGroup} from './components';
-import type {CustomGroupRef, Props, State, SystemGroupRef} from './types';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS, TYPE_OPTIONS} from './constants';
 import {FormCheckControl, FormControl, Modal} from 'components/molecules';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
-import type {Group} from 'store/widgets/data/types';
-import {MaterialTextInput, RadioButton} from 'components/atoms';
+import type {Group, GroupWay} from 'store/widgets/data/types';
 import type {OnChangeInputEvent} from 'components/types';
-import React, {Component, createRef} from 'react';
-import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
+import type {Props, State} from './types';
+import type {Props as SystemProps} from './components/SystemGroup/types';
+import {RadioButton, TextInput} from 'components/atoms';
+import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class GroupCreatingModal extends Component<Props, State> {
 	static defaultProps = {
-		attrSystemProps: {
+		systemProps: {
 			defaultValue: DEFAULT_SYSTEM_GROUP.OVERLAP,
 			options: []
 		}
@@ -25,8 +25,8 @@ export class GroupCreatingModal extends Component<Props, State> {
 		way: GROUP_WAYS.SYSTEM
 	};
 
-	customGroupRef: CustomGroupRef = createRef();
-	systemGroupRef: SystemGroupRef = createRef();
+	customGroupSubmit: Function;
+	systemGroupSubmit: Function;
 
 	componentDidMount () {
 		const {attribute, group} = this.props;
@@ -43,21 +43,16 @@ export class GroupCreatingModal extends Component<Props, State> {
 		this.props.onClose();
 	}
 
-	getModalSize = () => this.state.way === GROUP_WAYS.SYSTEM ? 360 : MODAL_SIZES.LARGE;
-
 	handleChange = ({name, value}: OnChangeInputEvent) => this.setState({[name]: value});
 
-	handleChangeAttributeTitle = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {value: attributeTitle} = e.currentTarget;
-		this.setState({attributeTitle});
+	handleChangeAttributeTitle = (e: OnChangeInputEvent) => {
+		const {value} = e;
+		this.setState({attributeTitle: String(value)});
 	};
 
 	handleSubmit = () => {
-		const {current: group} = this.state.way === GROUP_WAYS.SYSTEM ? this.systemGroupRef : this.customGroupRef;
-
-		if (group) {
-			group.submit();
-		}
+		const submit = this.state.way === GROUP_WAYS.SYSTEM ? this.systemGroupSubmit : this.customGroupSubmit;
+		submit && submit();
 	};
 
 	handleSubmitGroup = (group: Group) => {
@@ -67,62 +62,67 @@ export class GroupCreatingModal extends Component<Props, State> {
 		onSubmit(group, attributeTitle);
 	};
 
+	setSubmit = (way: GroupWay) => (submit: Function) => {
+		way === GROUP_WAYS.CUSTOM ? this.customGroupSubmit = submit : this.systemGroupSubmit = submit;
+	};
+
 	renderCustomGroup = () => {
-		const {attrCustomProps, createCustomGroup, customGroups, deleteCustomGroup, group, updateCustomGroup, widgets} = this.props;
+		const {createCustomGroup, customGroups, customProps, deleteCustomGroup, group, updateCustomGroup, widgets} = this.props;
 		const {way} = this.state;
 		const show = way === GROUP_WAYS.CUSTOM;
 
 		return (
 			<CustomGroup
-				{...attrCustomProps}
-				className={styles.customSection}
+				{...customProps}
 				group={group}
 				map={customGroups}
 				onCreate={createCustomGroup}
 				onRemove={deleteCustomGroup}
 				onSubmit={this.handleSubmitGroup}
 				onUpdate={updateCustomGroup}
-				ref={this.customGroupRef}
+				setSubmit={this.setSubmit(GROUP_WAYS.CUSTOM)}
 				show={show}
 				widgets={widgets}
 			/>
 		);
 	};
 
+	renderDefaultSystemGroup = (props: $Shape<SystemProps>) => {
+		const {systemProps} = this.props;
+		return systemProps && <SystemGroup {...systemProps} {...props} />;
+	};
+
 	renderNameField = () => {
 		const {attributeTitle} = this.state;
 
 		return (
-			<div className={styles.attributeNameField}>
-				<MaterialTextInput
+			<FormControl className={styles.fieldSize} label="Название поля">
+				<TextInput
 					name={FIELDS.attributeTitle}
 					onChange={this.handleChangeAttributeTitle}
-					placeholder="Название поля"
 					value={attributeTitle}
 				/>
-			</div>
+			</FormControl>
 		);
 	};
 
 	renderSystemGroup = () => {
-		const {attrSystemProps, group} = this.props;
+		const {group, renderSystemGroup} = this.props;
 		const {way} = this.state;
 		const show = way === GROUP_WAYS.SYSTEM;
+		const props = {
+			className: styles.shortField,
+			group,
+			onSubmit: this.handleSubmitGroup,
+			setSubmit: this.setSubmit(GROUP_WAYS.SYSTEM),
+			show
+		};
 
-		return (
-			<SystemGroup
-				{...attrSystemProps}
-				className={styles.shortField}
-				group={group}
-				onSubmit={this.handleSubmitGroup}
-				ref={this.systemGroupRef}
-				show={show}
-			/>
-		);
+		return renderSystemGroup ? renderSystemGroup(props) : this.renderDefaultSystemGroup(props);
 	};
 
 	renderWayField = () => (
-		<FormControl className={styles.field} label="Тип группировки">
+		<FormControl className={styles.shortField} label="Тип группировки">
 			{TYPE_OPTIONS.map(this.renderWayInput)}
 		</FormControl>
 	);
@@ -133,7 +133,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 		const checked = way === value;
 
 		return (
-			<div className={styles.radioField}>
+			<div className={styles.radioField} key={value}>
 				<FormCheckControl label={label}>
 					<RadioButton
 						checked={checked}
@@ -150,11 +150,13 @@ export class GroupCreatingModal extends Component<Props, State> {
 		const {onClose} = this.props;
 
 		return (
-			<Modal header="Настройка группировки" onClose={onClose} onSubmit={this.handleSubmit} size={this.getModalSize()}>
-				{this.renderNameField()}
-				{this.renderWayField()}
-				{this.renderSystemGroup()}
-				{this.renderCustomGroup()}
+			<Modal className={styles.modal} header="Настройка группировки" onClose={onClose} onSubmit={this.handleSubmit} size={920}>
+				<div className={styles.content}>
+					{this.renderNameField()}
+					{this.renderWayField()}
+					{this.renderSystemGroup()}
+					{this.renderCustomGroup()}
+				</div>
 			</Modal>
 		);
 	}

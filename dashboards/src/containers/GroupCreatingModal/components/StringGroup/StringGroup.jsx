@@ -72,7 +72,9 @@ export class StringGroup extends Component<AttributeGroupProps> {
 	);
 
 	render () {
-		return this.props.renderModal(this.getCustomProps());
+		return this.props.renderModal({
+			customProps: this.getCustomProps()
+		});
 	}
 }
 

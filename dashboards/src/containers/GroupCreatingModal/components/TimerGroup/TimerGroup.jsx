@@ -98,7 +98,9 @@ export class TimerGroup extends Component<Props> {
 	);
 
 	render () {
-		return this.props.renderModal(this.getCustomProps());
+		return this.props.renderModal({
+			customProps: this.getCustomProps()
+		});
 	}
 }
 

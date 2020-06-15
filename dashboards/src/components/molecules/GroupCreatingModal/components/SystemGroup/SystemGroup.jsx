@@ -1,6 +1,6 @@
 // @flow
+import {FormControl, Select} from 'components/molecules/index';
 import {GROUP_WAYS} from 'store/widgets/constants';
-import {MaterialSelect} from 'components/molecules/index';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 
@@ -10,7 +10,7 @@ export class SystemGroup extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
-		const {defaultValue, group, options} = this.props;
+		const {defaultValue, group, onSelect, options, setSubmit} = this.props;
 		let value = defaultValue;
 
 		if (options.findIndex(o => o.value === group.data) > -1) {
@@ -18,9 +18,17 @@ export class SystemGroup extends PureComponent<Props, State> {
 		}
 
 		this.setState({value});
+		onSelect && onSelect(value);
+		setSubmit(this.submit);
 	}
 
-	handleSelect = (name: string, {value}: Object) => this.setState({value});
+	handleSelect = ({value: selectValue}: Object) => {
+		const {onSelect} = this.props;
+		const {value} = selectValue;
+
+		this.setState({value});
+		onSelect && onSelect(value);
+	};
 
 	submit = () => {
 		const {defaultValue, onSubmit} = this.props;
@@ -36,14 +44,14 @@ export class SystemGroup extends PureComponent<Props, State> {
 			const value = options.find(o => o.value === this.state.value) || null;
 
 			return (
-				<div className={className}>
-					<MaterialSelect
+				<FormControl className={className} label="Форматирование">
+					<Select
 						onSelect={this.handleSelect}
 						options={options}
 						placeholder="Форматирование"
 						value={value}
 					/>
-				</div>
+				</FormControl>
 			);
 		}
 

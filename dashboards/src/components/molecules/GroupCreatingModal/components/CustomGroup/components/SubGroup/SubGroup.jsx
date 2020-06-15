@@ -1,22 +1,22 @@
 // @flow
 import {AndCondition} from 'CustomGroup/components';
 import type {AndCondition as AndConditionType} from 'CustomGroup/types';
-import {FieldError, MaterialTextInput} from 'components/atoms';
+import {FieldError, TextInput} from 'components/atoms';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
-import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
+import {FormControl} from 'components/molecules';
 import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
-import type {Node} from 'react';
+import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import styles from './styles.less';
+import styles from 'components/molecules/GroupCreatingModal/styles.less';
 import withCustomGroup from 'CustomGroup/withCustomGroup';
 
 export class SubGroup extends PureComponent<Props> {
-	handleChangeName = (e: SyntheticInputEvent<HTMLInputElement>) => {
+	handleChangeName = (e: OnChangeInputEvent) => {
 		const {index, onUpdate, subGroup} = this.props;
-		const {value: name} = e.currentTarget;
+		const {value} = e;
 
-		onUpdate(index, {...subGroup, name});
+		onUpdate(index, {...subGroup, name: String(value)});
 	};
 
 	handleCreateAndCondition = () => {
@@ -76,7 +76,11 @@ export class SubGroup extends PureComponent<Props> {
 		);
 	};
 
-	renderAndConditions = (): Array<Node> => this.props.subGroup.data.map(this.renderAndCondition);
+	renderAndConditions = () => (
+		<div className={styles.field}>
+			{this.props.subGroup.data.map(this.renderAndCondition)}
+		</div>
+	);
 
 	renderNameField = () => {
 		const {errors, subGroup, validationPath} = this.props;
@@ -84,15 +88,14 @@ export class SubGroup extends PureComponent<Props> {
 		const errorKey = `${validationPath}.${FIELDS.name}`;
 
 		return (
-			<div className={styles.nameField}>
-				<MaterialTextInput
+			<FormControl className={styles.shortField} label="Название группы">
+				<TextInput
 					maxLength={MAX_TEXT_LENGTH}
 					onChange={this.handleChangeName}
-					placeholder="Название группы"
 					value={name}
 				/>
-				<FieldError className={mainStyles.error} text={errors[errorKey]} />
-			</div>
+				<FieldError className={styles.error} text={errors[errorKey]} />
+			</FormControl>
 		);
 	};
 

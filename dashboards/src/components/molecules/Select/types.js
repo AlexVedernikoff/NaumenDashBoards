@@ -19,7 +19,7 @@ export type Props = {
 	onChangeLabel?: OnChangeInputEvent => void,
 	onClickCreationButton?: () => void,
 	onSelect: SelectEvent => void,
-	options: Array<Option> | Array<string | number>,
+	options: Array<Option>,
 	showCreationButton: boolean,
 	textCreationButton: string,
 	value: Value
