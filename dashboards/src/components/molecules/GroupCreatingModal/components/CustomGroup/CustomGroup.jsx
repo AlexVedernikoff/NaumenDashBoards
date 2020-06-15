@@ -1,10 +1,12 @@
 // @flow
 import {Button, FieldError, InfoPanel, Text} from 'components/atoms';
+import cn from 'classnames';
 import {createNewSubGroup} from './helpers';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {FormControl, Select} from 'components/molecules';
 import {GROUP_WAYS} from 'store/widgets/constants';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {InputRef} from 'src/components/types';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
@@ -225,6 +227,7 @@ export class CustomGroup extends Component<Props, State> {
 					options={groups}
 					showCreationButton={true}
 					textCreationButton="Добавить группировку"
+					tip="Подпись группы для отображения на оси"
 					value={selectedGroup}
 				/>
 			</FormControl>
@@ -235,6 +238,7 @@ export class CustomGroup extends Component<Props, State> {
 		<Fragment>
 			<div className={styles.groupSelectContainer}>
 				{this.renderGroupSelect()}
+				{this.renderInfoIcon()}
 				{this.renderRemovalGroupButton()}
 			</div>
 			{this.renderGroupSelectError()}
@@ -242,6 +246,18 @@ export class CustomGroup extends Component<Props, State> {
 	);
 
 	renderGroupSelectError = () => <FieldError className={mainStyles.error} text={this.state.errors.name} />;
+
+	renderInfoIcon = () => {
+		const iconCN = cn(mainStyles.infoIcon, styles.infoIcon);
+
+		return (
+			<Icon
+				className={iconCN}
+				name={ICON_NAMES.INFO}
+				title="Подпись группы для отображения на оси"
+			/>
+		);
+	};
 
 	renderInfoPanel = (props: InfoPanelProps) => {
 		const {onClose, onConfirm, text} = props;

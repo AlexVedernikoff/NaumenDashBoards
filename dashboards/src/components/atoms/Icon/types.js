@@ -12,5 +12,6 @@ export type Props = {
 	className: string,
 	name: IconName,
 	onClick?: () => void,
-	size: $Keys<typeof ICON_SIZES>
+	size: $Keys<typeof ICON_SIZES>,
+	title: string
 };
