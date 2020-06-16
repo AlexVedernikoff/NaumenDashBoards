@@ -24,10 +24,10 @@ export class OrCondition extends PureComponent<Props> {
 	};
 
 	handleSelectOperandType = (name: string, value: Object) => {
-		const {createCondition, index, onUpdate} = this.props;
+		const {condition, createCondition, index, onUpdate} = this.props;
 		const {value: type} = value;
 
-		onUpdate(index, createCondition(type));
+		onUpdate(index, createCondition(type, condition));
 	};
 
 	renderCondition = () => {

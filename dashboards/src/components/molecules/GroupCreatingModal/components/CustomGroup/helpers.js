@@ -28,8 +28,8 @@ const createMultiSelectOperand = (type: string) => ({
 	type
 });
 
-const createSimpleOperand = (type: string) => ({
-	data: '',
+const createSimpleOperand = (type: string, data?: string) => ({
+	data: data || '',
 	type
 });
 

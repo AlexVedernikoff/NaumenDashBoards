@@ -27,7 +27,7 @@ type RenderCondition = (condition: OrCondition, onChange: OnChangeOperand) => No
 
 type ResolveConditionRule = (condition: OrCondition) => Object | void;
 
-type CreateCondition = (type?: OperandType) => Object;
+type CreateCondition = (type?: OperandType, condition?: OrCondition) => Object;
 
 type Option = {
 	label: string,
