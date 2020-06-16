@@ -90,6 +90,35 @@ const INTEGER_AGGREGATION = {
 	SUM
 };
 
+// Периоды атрибута типа dtInterval
+const INTERVALS = [
+	{
+		max: 60000,
+		min: 1000,
+		label: 'сек.'
+	},
+	{
+		max: 36e5,
+		min: 60000,
+		label: 'мин.'
+	},
+	{
+		max: 864e5,
+		min: 36e5,
+		label: 'час.'
+	},
+	{
+		max: 6048e5,
+		min: 864e5,
+		label: 'дн.'
+	},
+	{
+		max: Infinity,
+		min: 6048e5,
+		label: 'нед.'
+	}
+];
+
 export {
 	BACK_TIMER_EXCEED_STATUSES,
 	DATETIME_SYSTEM_GROUP,
@@ -98,5 +127,6 @@ export {
 	GROUP_WAYS,
 	INTEGER_AGGREGATION,
 	INTERVAL_SYSTEM_GROUP,
+	INTERVALS,
 	TIMER_STATUSES
 };

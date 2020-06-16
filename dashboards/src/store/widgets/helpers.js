@@ -1,7 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import {DATETIME_SYSTEM_GROUP, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from './constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {DATETIME_SYSTEM_GROUP, DEFAULT_SYSTEM_GROUP, GROUP_WAYS, INTEGER_AGGREGATION, INTERVALS} from './constants';
+import {FIELDS} from 'WidgetFormPanel/constants';
 import type {Group} from './data/types';
 import {store} from 'src';
 
@@ -39,9 +40,39 @@ const getDefaultSystemGroup = (attribute: Object) => attribute && typeof attribu
 	? createDefaultGroup(DATETIME_SYSTEM_GROUP.MONTH)
 	: createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
 
+/**
+ * Сообщает используется ли в наборе данных виджета агрегация, по которой возвращается интервал в миллисекундах
+ * @param {object} set - набор данных виджета
+ * @param {string} field - наименования поля показателя виджета
+ * @returns {boolean}
+ */
+const hasMSInterval = (set: Object, field: string = FIELDS.indicator) => {
+	const {aggregation, [field]: indicator} = set;
+	return indicator.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION;
+};
+
+/**
+ * Преобразует интервал из миллисекунд в понятный для пользователя вид
+ * @param {number} ms - значение интервала в миллисекундах
+ * @returns {string}
+ */
+const parseMSInterval = (ms: number) => {
+	const intervalData = INTERVALS.find(({max, min}) => ms > min && ms < max);
+
+	if (intervalData) {
+		const {label, min} = intervalData;
+		const formattedValue = Math.round(ms / min);
+		return `${formattedValue} ${label}`;
+	}
+
+	return ms;
+};
+
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
+	hasMSInterval,
 	isGroupKey,
+	parseMSInterval,
 	transformGroupFormat
 };

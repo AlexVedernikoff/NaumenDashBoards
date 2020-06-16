@@ -29,5 +29,8 @@ export type State = {
 	data: Array<Row>,
 	page: number,
 	pageSize: number,
+	usesMSInterval: boolean,
 	width: number
 };
+
+export type RenderValue = (value: number | string) => number | string;

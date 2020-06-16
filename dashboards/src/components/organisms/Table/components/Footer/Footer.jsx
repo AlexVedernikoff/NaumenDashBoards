@@ -7,10 +7,10 @@ import styles from './styles.less';
 
 export class Header extends PureComponent<Props> {
 	renderColumn = (column: Column, index: number) => {
-		const {columnsWidth} = this.props;
+		const {columnsWidth, renderValue} = this.props;
 		const {accessor, footer} = column;
 
-		return <Cell key={accessor} value={footer} width={columnsWidth[index]} />;
+		return <Cell key={accessor} renderValue={renderValue} value={footer} width={columnsWidth[index]} />;
 	};
 
 	render () {

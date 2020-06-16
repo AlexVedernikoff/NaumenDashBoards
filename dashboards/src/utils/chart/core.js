@@ -1,240 +1,12 @@
 // @flow
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
-import type {
-	AxisIndicator,
-	AxisParameter,
-	AxisWidget,
-	Chart,
-	CircleWidget,
-	ComboWidget,
-	DataLabels,
-	Legend
-} from 'store/widgets/data/types';
+import {axisMixin, circleMixin, comboMixin} from './mixins';
+import type {Chart, DataLabels, Legend} from 'store/widgets/data/types';
 import {CHART_TYPES, DEFAULT_COLORS, LEGEND_POSITIONS} from './constants';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'src/helpers';
-import {getBuildSet} from 'store/widgets/data/helpers';
 import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
-
-const yAxisLabelFormatter = (showPercent: boolean) => (val: number | string, param?: Object | number) => {
-	let label = val;
-
-	/**
-	 * toFixed необходимо использовать только для значений оси Y. Но т.к в библиотеке можно указать только одну
-	 * функцию форматирования значений, необходимо ориентироваться по параметру param. Только в случае когда функция
-	 * используется для значения оси, param - не undefined.
-	 */
-	if (label && typeof label === 'number') {
-		if (!Number.isInteger(label)) {
-			label = label.toFixed(2);
-		}
-
-		if (showPercent) {
-			label = `${val}%`;
-		}
-	}
-
-	if (typeof label === 'string' && label.length > 25) {
-		label = `${label.substring(0, 20)}...`;
-	}
-
-	return label;
-};
-
-const getXAxisOptions = (parameter: AxisParameter, categories: Array<string> = []) => {
-	const {name, show, showName} = parameter;
-
-	const options: Object = {
-		categories,
-		labels: {
-			hideOverlappingLabels: true,
-			rotate: -60,
-			show
-		},
-		title: {
-			offsetY: 10
-		}
-	};
-
-	if (showName) {
-		options.title.text = name;
-	}
-
-	return options;
-};
-
-const getYAxisOptions = (indicator: AxisIndicator, stacked: boolean, aggregation?: string) => {
-	const {name, show, showName} = indicator;
-	const forceNiceScale = !(stacked && aggregation === DEFAULT_AGGREGATION.PERCENT);
-	const showPercent = aggregation === DEFAULT_AGGREGATION.PERCENT && !stacked;
-
-	const options: Object = {
-		decimalsInFloat: 2,
-		forceNiceScale,
-		labels: {
-			formatter: yAxisLabelFormatter(showPercent),
-			// Если проставить значение, то уплывает название оси на легенду
-			maxWidth: undefined
-		},
-		show
-	};
-
-	if (showName) {
-		options.title = {
-			text: name
-		};
-	}
-
-	return options;
-};
-
-/**
- * Примесь графиков по умолчанию (bar, column, line)
- * @param {boolean} horizontal - положение графика
- * @param {boolean} stacked - накопление данных
- * @returns {ApexOptions}
- */
-const createAxisMixin = (horizontal: boolean = false, stacked: boolean = false) => (widget: AxisWidget, chart: DiagramBuildData): ApexOptions => {
-	const {indicator, parameter, type} = widget;
-	const set = getBuildSet(widget);
-
-	if (set && !set.sourceForCompute) {
-		const {aggregation} = set;
-		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
-
-		const options: ApexOptions = {
-			chart: {
-				stacked
-			},
-			markers: {
-				hover: {
-					size: 8
-				},
-				size: 5
-			},
-			plotOptions: {
-				bar: {
-					horizontal
-				}
-			},
-			stroke: {
-				width: strokeWidth
-			},
-			tooltip: {
-				intersect: true,
-				shared: false
-			},
-			xaxis: getXAxisOptions(parameter, chart.categories),
-			yaxis: getYAxisOptions(indicator, stacked, aggregation)
-		};
-
-		if (aggregation === DEFAULT_AGGREGATION.PERCENT) {
-			if (stacked) {
-				options.chart.stackType = '100%';
-			} else {
-				options.dataLabels = {
-					formatter: (val: number) => val > 0 ? `${val.toFixed(2)}%` : ''
-				};
-			}
-		}
-
-		return options;
-	}
-};
-
-/**
- * Примесь combo-графиков
- * @param {ComboWidget} widget - данные виджета
- * @param {DiagramBuildData} chart - данные конкретного графика
- * @returns {ApexOptions}
- */
-const createComboMixin = (widget: ComboWidget, chart: DiagramBuildData) => {
-	const {indicator, parameter} = widget;
-	const {labels, series} = chart;
-	const strokeWidth = series.find(s => s.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
-	let stacked = false;
-	let percentDataKeys = [];
-
-	widget.data.forEach(set => {
-		if (!set.sourceForCompute) {
-			const {aggregation, type} = set;
-
-			if (!stacked && type === WIDGET_TYPES.COLUMN_STACKED) {
-				stacked = true;
-			}
-
-			if (aggregation && aggregation === DEFAULT_AGGREGATION.PERCENT) {
-				percentDataKeys.push(set.dataKey);
-			}
-		}
-	});
-
-	const options: ApexOptions = {
-		chart: {
-			stacked
-		},
-		dataLabels: {
-			formatter: (val: number) => val > 0 ? val : ''
-		},
-		labels,
-		markers: {
-			hover: {
-				size: 8
-			},
-			size: 5
-		},
-		stroke: {
-			width: strokeWidth
-		},
-		tooltip: {
-			intersect: true,
-			shared: false
-		},
-		xaxis: getXAxisOptions(parameter),
-		yaxis: getYAxisOptions(indicator, stacked)
-	};
-
-	if (percentDataKeys.length > 0) {
-		options.dataLabels.formatter = (val: number, {seriesIndex}: any) => {
-			if (val === 0) {
-				return '';
-			}
-
-			return percentDataKeys.includes(series[seriesIndex].dataKey) ? `${val.toFixed(2)}%` : val;
-		};
-	}
-
-	return options;
-};
-
-/**
- * Примесь круговых графиков (pie, donut)
- * @param {CircleWidget} widget - данные виджета
- * @param {DiagramBuildData} chart - данные конкретного графика
- * @returns {ApexOptions}
- */
-const createCircleMixin = (widget: CircleWidget, chart: DiagramBuildData): ApexOptions => {
-	const set = getBuildSet(widget);
-
-	if (set && !set.sourceForCompute) {
-		const {aggregation} = set;
-		const options: ApexOptions = {
-			labels: chart.labels
-		};
-
-		if (aggregation !== DEFAULT_AGGREGATION.PERCENT) {
-			options.dataLabels = {
-				formatter: function (val, options) {
-					return options.w.config.series[options.seriesIndex];
-				}
-			};
-		}
-
-		return options;
-	}
-};
 
 /**
  * Функция возвращает примесь опций в зависимости от переданного типа графика
@@ -247,20 +19,20 @@ const resolveMixin = (widget: Chart, data: DiagramBuildData): Function => {
 
 	switch (widget.type) {
 		case BAR:
-			return createAxisMixin(true)(widget, data);
+			return axisMixin(true)(widget, data);
 		case BAR_STACKED:
-			return createAxisMixin(true, true)(widget, data);
+			return axisMixin(true, true)(widget, data);
 		case COLUMN:
-			return createAxisMixin(false)(widget, data);
+			return axisMixin(false)(widget, data);
 		case COLUMN_STACKED:
-			return createAxisMixin(false, true)(widget, data);
+			return axisMixin(false, true)(widget, data);
 		case COMBO:
-			return createComboMixin(widget, data);
+			return comboMixin(widget, data);
 		case DONUT:
 		case PIE:
-			return createCircleMixin(widget, data);
+			return circleMixin(widget, data);
 		case LINE:
-			return createAxisMixin(false)(widget, data);
+			return axisMixin(false)(widget, data);
 	}
 };
 
