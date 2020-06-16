@@ -5,12 +5,13 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {createToast} from 'store/toasts/actions';
 import {fetchAttributes} from 'store/sources/attributes/actions';
 import {fetchRefAttributes} from 'store/sources/refAttributes/actions';
+import {getMapValues} from 'src/helpers';
 import {NewWidget} from 'utils/widget';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, sources, widgets} = state;
 	const {data} = widgets;
-	const {newWidget, selectedWidget} = data;
+	const {map, newWidget, selectedWidget} = data;
 	const {contentCode, subjectUuid, user} = context;
 	const contentContext = {contentCode, subjectUuid};
 	const widget = selectedWidget === NewWidget.id && newWidget ? newWidget : data.map[selectedWidget];
@@ -23,7 +24,8 @@ export const props = (state: AppState): ConnectedProps => {
 		sources: sources.data.map,
 		updating: data.updating,
 		user,
-		widget
+		widget,
+		widgets: getMapValues(map).filter(({id}) => id !== selectedWidget)
 	};
 };
 

@@ -46,6 +46,7 @@ const textAlign: 'textAlign' = 'textAlign';
 const textHandler: 'textHandler' = 'textHandler';
 const type: 'type' = 'type';
 const value: 'value' = 'value';
+const useName: 'useName' = 'useName';
 const xAxis: 'xAxis' = 'xAxis';
 const yAxis: 'yAxis' = 'yAxis';
 const withBreakdown: 'withBreakdown' = 'withBreakdown';
@@ -97,6 +98,7 @@ const FIELDS = {
 	textHandler,
 	tickAmount,
 	type,
+	useName,
 	value,
 	withBreakdown,
 	xAxis,

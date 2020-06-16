@@ -5,6 +5,7 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/actions';
 import {fetchAllBuildData, fetchBuildData} from 'store/widgets/buildData/actions';
 import {getParams} from 'store/helpers';
+import {isObject} from 'src/helpers';
 import type {Layout} from 'utils/layout/types';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import {NewWidget} from 'utils/widget';
@@ -83,6 +84,8 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
  * @returns {ThunkAction}
  */
 const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	let validationErrors;
+
 	dispatch(requestWidgetSave());
 
 	try {
@@ -98,8 +101,12 @@ const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, g
 		dispatch(saveNewLayout());
 		dispatch(fetchBuildData(widget));
 	} catch (e) {
+		validationErrors = getValidationErrors(e);
+
 		dispatch(recordSaveError());
 	}
+
+	return validationErrors;
 };
 
 /**
@@ -123,6 +130,8 @@ const setWidgets = (widgets: Array<Object>): ThunkAction => async (dispatch: Dis
  * @returns {ThunkAction}
  */
 const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	let validationErrors;
+
 	dispatch(requestWidgetSave());
 
 	try {
@@ -139,8 +148,12 @@ const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch,
 		dispatch(fetchBuildData(createdWidget));
 		dispatch(saveNewLayout());
 	} catch (e) {
+		validationErrors = getValidationErrors(e);
+
 		dispatch(recordSaveError());
 	}
+
+	return validationErrors;
 };
 
 /**
@@ -173,6 +186,21 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch(setSelectedWidget(payload));
 	dispatch(editDashboard());
+};
+
+const getValidationErrors = (error: Object) => {
+	const {response} = error;
+	let errors;
+
+	if (response && response.status === 500) {
+		const data = JSON.parse(response.data.split('error:')[1]);
+
+		if (isObject(data) && isObject(data.errors)) {
+			errors = data.errors;
+		}
+	}
+
+	return errors;
 };
 
 const deleteWidget = (payload: string) => ({

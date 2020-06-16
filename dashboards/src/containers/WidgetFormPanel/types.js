@@ -41,6 +41,7 @@ export type ConnectedProps = {
 	updating: boolean,
 	user: UserData,
 	widget: Widget | NewWidget,
+	widgets: Array<Widget>,
 };
 
 export type FetchAttributes = (classFqn: string, onLoadCallback?: OnLoadCallback) => ThunkAction;
@@ -50,10 +51,10 @@ export type FetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCal
 export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
 	createToast: (newToast: $Exact<NewToast>) => ThunkAction,
-	createWidget: Widget => ThunkAction,
+	createWidget: Widget => Object | void,
 	fetchAttributes: FetchAttributes,
 	fetchRefAttributes: FetchRefAttributes,
-	saveWidget: Widget => ThunkAction
+	saveWidget: Widget => Object | void
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

@@ -40,7 +40,12 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 
 		if (isValid) {
 			const updatedWidget = updateWidget(widget, values);
-			this.isNew() ? createWidget(updatedWidget) : saveWidget(updatedWidget);
+			const method = this.isNew() ? createWidget : saveWidget;
+			const errors = await method(updatedWidget);
+
+			if (errors) {
+				this.setState({errors});
+			}
 		}
 	};
 
@@ -72,6 +77,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 	setSchema = (schema: Object) => this.setState({schema});
 
 	validate = async (values?: Object) => {
+		const {widgets} = this.props;
 		const {schema, values: stateValues} = this.state;
 		let errors = {};
 
@@ -81,7 +87,8 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 
 				await schema.validate(validateValues, {
 					abortEarly: false,
-					values: validateValues
+					values: validateValues,
+					widgets
 				});
 			} catch (e) {
 				e.inner.forEach(({message, path}) => {

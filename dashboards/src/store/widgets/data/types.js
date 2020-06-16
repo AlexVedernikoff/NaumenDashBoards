@@ -86,7 +86,8 @@ export type Header = {
 	name: string,
 	show: boolean,
 	textAlign: TextAlign,
-	textHandler: TextHandler
+	textHandler: TextHandler,
+	useName: boolean
 };
 
 type BaseWidget = {|

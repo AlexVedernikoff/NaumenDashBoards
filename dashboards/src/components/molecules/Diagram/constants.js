@@ -10,7 +10,8 @@ const DEFAULT_HEADER_SETTINGS: Header = {
 	name: '',
 	show: true,
 	textAlign: TEXT_ALIGNS.left,
-	textHandler: TEXT_HANDLERS.CROP
+	textHandler: TEXT_HANDLERS.CROP,
+	useName: true
 };
 
 const PADDING = 10;
