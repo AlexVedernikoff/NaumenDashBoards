@@ -9,11 +9,12 @@ import styles from './styles.less';
 export class Icon extends PureComponent<Props> {
 	static defaultProps = {
 		className: '',
-		size: ICON_SIZES.NORMAL
+		size: ICON_SIZES.NORMAL,
+		title: ''
 	};
 
 	render () {
-		const {className, name, onClick, size} = this.props;
+		const {className, name, onClick, size, title} = this.props;
 		const svgCN = cn({
 			[className]: true,
 			[styles.icon]: true
@@ -21,6 +22,7 @@ export class Icon extends PureComponent<Props> {
 
 		return (
 			<svg className={svgCN} fill="currentColor" onClick={onClick} {...ICON_PROPS[size]}>
+				{title && <title>{title}</title>}
 				<use xlinkHref={`#${name}`} />
 			</svg>
 		);

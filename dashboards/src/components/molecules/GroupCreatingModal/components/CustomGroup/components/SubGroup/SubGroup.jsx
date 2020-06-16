@@ -1,14 +1,17 @@
 // @flow
 import {AndCondition} from 'CustomGroup/components';
 import type {AndCondition as AndConditionType} from 'CustomGroup/types';
+import cn from 'classnames';
 import {FieldError, TextInput} from 'components/atoms';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
 import {FormControl} from 'components/molecules';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import styles from 'components/molecules/GroupCreatingModal/styles.less';
+import styles from './styles.less';
 import withCustomGroup from 'CustomGroup/withCustomGroup';
 
 export class SubGroup extends PureComponent<Props> {
@@ -77,10 +80,25 @@ export class SubGroup extends PureComponent<Props> {
 	};
 
 	renderAndConditions = () => (
-		<div className={styles.field}>
+		<div className={mainStyles.field}>
 			{this.props.subGroup.data.map(this.renderAndCondition)}
 		</div>
 	);
+
+	renderGroupInputContainer = () => (
+		<div className={styles.rowContainer}>
+			{this.renderNameField()}
+			{this.renderInfoIcon()}
+		</div>
+	);
+
+	renderInfoIcon = () => {
+		const iconCN = cn(mainStyles.infoIcon, styles.infoIcon);
+
+		return (
+			<Icon className={iconCN} name={ICON_NAMES.INFO} title="Название для сохранения группировки" />
+		);
+	};
 
 	renderNameField = () => {
 		const {errors, subGroup, validationPath} = this.props;
@@ -88,13 +106,13 @@ export class SubGroup extends PureComponent<Props> {
 		const errorKey = `${validationPath}.${FIELDS.name}`;
 
 		return (
-			<FormControl className={styles.shortField} label="Название группы">
+			<FormControl className={mainStyles.shortField} label="Название группы">
 				<TextInput
 					maxLength={MAX_TEXT_LENGTH}
 					onChange={this.handleChangeName}
 					value={name}
 				/>
-				<FieldError className={styles.error} text={errors[errorKey]} />
+				<FieldError className={mainStyles.error} text={errors[errorKey]} />
 			</FormControl>
 		);
 	};
@@ -102,7 +120,7 @@ export class SubGroup extends PureComponent<Props> {
 	render () {
 		return (
 			<Fragment>
-				{this.renderNameField()}
+				{this.renderGroupInputContainer()}
 				{this.renderAndConditions()}
 			</Fragment>
 		);
