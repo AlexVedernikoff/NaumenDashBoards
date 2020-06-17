@@ -1,7 +1,14 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {DATETIME_SYSTEM_GROUP, DEFAULT_SYSTEM_GROUP, GROUP_WAYS, INTEGER_AGGREGATION, INTERVALS} from './constants';
+import {
+	DATETIME_SYSTEM_GROUP,
+	DEFAULT_AGGREGATION,
+	DEFAULT_SYSTEM_GROUP,
+	GROUP_WAYS,
+	INTEGER_AGGREGATION,
+	INTERVALS
+} from './constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import type {Group} from './data/types';
 import {store} from 'src';
@@ -41,6 +48,13 @@ const getDefaultSystemGroup = (attribute: Object) => attribute && typeof attribu
 	: createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
 
 /**
+ * Сообщает используется ли в наборе данных виджета агрегация в процентах
+ * @param {object} set - набор данных виджета
+ * @returns {boolean}
+ */
+const hasPercent = (set: Object) => set.aggregation === DEFAULT_AGGREGATION.PERCENT;
+
+/**
  * Сообщает используется ли в наборе данных виджета агрегация, по которой возвращается интервал в миллисекундах
  * @param {object} set - набор данных виджета
  * @param {string} field - наименования поля показателя виджета
@@ -61,8 +75,10 @@ const parseMSInterval = (ms: number) => {
 
 	if (intervalData) {
 		const {label, min} = intervalData;
-		const formattedValue = Math.round(ms / min);
-		return `${formattedValue} ${label}`;
+		let intervalValue = ms / min;
+		intervalValue = ms > INTERVALS[INTERVALS.length - 1].min ? intervalValue.toFixed(2) : Math.round(intervalValue);
+
+		return `${intervalValue} ${label}`;
 	}
 
 	return ms;
@@ -72,6 +88,7 @@ export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
 	hasMSInterval,
+	hasPercent,
 	isGroupKey,
 	parseMSInterval,
 	transformGroupFormat

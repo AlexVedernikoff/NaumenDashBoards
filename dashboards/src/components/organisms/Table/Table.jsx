@@ -3,7 +3,7 @@ import {Body, Footer, Header, Pagination} from './components';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, parseMSInterval} from 'store/widgets/helpers';
+import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
@@ -21,12 +21,14 @@ export class Table extends PureComponent<Props, State> {
 		data: [],
 		page: 1,
 		pageSize: 10,
+		usesPercent: false,
 		usesMSInterval: false,
 		width: NaN
 	};
 
 	static getDerivedStateFromProps (props: Props, state: State) {
 		const {data: buildData, widget} = props;
+		const buildSet = getBuildSet(widget);
 		let {columns, data} = buildData;
 
 		if (widget.table.body.showRowNum) {
@@ -37,7 +39,8 @@ export class Table extends PureComponent<Props, State> {
 			...state,
 			columns,
 			data,
-			usesMSInterval: hasMSInterval(getBuildSet(widget), FIELDS.column)
+			usesMSInterval: hasMSInterval(buildSet, FIELDS.column),
+			usesPercent: hasPercent(buildSet)
 		};
 	}
 
@@ -174,8 +177,17 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderValue = (value: number | string) => {
-		const {usesMSInterval} = this.state;
-		return usesMSInterval ? parseMSInterval(Number(value)) : value;
+		const {usesMSInterval, usesPercent} = this.state;
+
+		if (usesMSInterval) {
+			return parseMSInterval(Number(value));
+		}
+
+		if (usesPercent) {
+			return `${value}%`;
+		}
+
+		return value;
 	};
 
 	render () {

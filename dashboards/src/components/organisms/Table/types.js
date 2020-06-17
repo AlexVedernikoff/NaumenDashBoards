@@ -30,6 +30,7 @@ export type State = {
 	page: number,
 	pageSize: number,
 	usesMSInterval: boolean,
+	usesPercent: boolean,
 	width: number
 };
 
