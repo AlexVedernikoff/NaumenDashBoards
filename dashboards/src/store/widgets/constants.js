@@ -95,27 +95,27 @@ const INTERVALS = [
 	{
 		max: 60000,
 		min: 1000,
-		label: 'сек.'
+		label: 'c'
 	},
 	{
 		max: 36e5,
 		min: 60000,
-		label: 'мин.'
+		label: 'мин'
 	},
 	{
 		max: 864e5,
 		min: 36e5,
-		label: 'час.'
+		label: 'ч'
 	},
 	{
 		max: 6048e5,
 		min: 864e5,
-		label: 'дн.'
+		label: 'д'
 	},
 	{
 		max: Infinity,
 		min: 6048e5,
-		label: 'нед.'
+		label: 'нед'
 	}
 ];
 
