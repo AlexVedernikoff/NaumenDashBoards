@@ -16,14 +16,19 @@ import {SimpleOperand} from 'CustomGroup/components';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class StringGroup extends Component<AttributeGroupProps> {
-	createCustomCondition = (type: OperandType = OPERAND_TYPES.CONTAINS) => {
+	createCustomCondition = (type: OperandType = OPERAND_TYPES.CONTAINS, currentCondition?: StringOrCondition) => {
 		const {CONTAINS, NOT_CONTAINS, NOT_CONTAINS_INCLUDING_EMPTY} = OPERAND_TYPES;
+		let data = '';
+
+		if (currentCondition) {
+			({data} = currentCondition);
+		}
 
 		switch (type) {
 			case CONTAINS:
 			case NOT_CONTAINS:
 			case NOT_CONTAINS_INCLUDING_EMPTY:
-				return createSimpleOperand(type);
+				return createSimpleOperand(type, data);
 			default:
 				return createDefaultOperand(type);
 		}
