@@ -1832,8 +1832,7 @@ private def getDiagramData(DiagramRequest request)
                     RequestData requestData = request.data[requisiteNode.dataKey]
                     Closure formatAggregation = this.&formatAggregationSet
                     Closure formatGroup = this.&formatGroupSet.curry(requestData)
-                    def res = modules.dashboardQueryWrapper.getData(requestData).with(formatGroup).
-                        with(formatAggregation)
+                    def res = modules.dashboardQueryWrapper.getData(requestData).with(formatGroup).with(formatAggregation)
                     return res ? [(requisiteNode.title): res] : [:]
                 case 'computation':
                     def requisiteNode = node as ComputationRequisiteNode
@@ -1911,9 +1910,7 @@ private Collection<Collection<String>> findUniqueGroups(def variables)
  */
 private List formatAggregationSet(List list)
 {
-    return list.collect {
-        [DECIMAL_FORMAT.format((it as List).head() as Double), (it as List).tail()].flatten()
-    }
+    return list.collect { [DECIMAL_FORMAT.format((it as List).head() as Double), (it as List).tail()].flatten() }
 }
 
 /**
@@ -2286,8 +2283,7 @@ private Map<String, Object> transformRequestWithComputation(Map<String, Object> 
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent,
-                                                               String cardObjectUuid)
+private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent, String cardObjectUuid)
 {
     Closure<Map<String, Object>> transform = { Map<String, Object> map ->
         def res = [:] << map

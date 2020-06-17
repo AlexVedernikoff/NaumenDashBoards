@@ -342,7 +342,6 @@ class Link
                         case [AttributeType.BO_LINKS_TYPE, AttributeType.BACK_BO_LINKS_TYPE, AttributeType.OBJECT_TYPE]:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
-                                    def value = it.data.uuid
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'empty':
@@ -350,23 +349,69 @@ class Link
                                         case 'not_empty':
                                             return filterBuilder.OR(attr.code, 'notNull', null)
                                         case 'contains':
-                                            return filterBuilder.OR(attr.code, 'contains', [value])
-                                        case 'not_contains':
-                                            return filterBuilder.OR(attr.code, 'notContains', [value])
-                                        case 'title_contains':
-                                            return filterBuilder.OR(attr.code, 'titleContains', value)
-                                        case 'title_not_contains':
-                                            return filterBuilder.OR(attr.code, 'titleNotContains', value)
-                                        case 'contains_including_archival':
-                                            return filterBuilder.OR(attr.code, 'containsWithRemoved', [value])
-                                        case 'not_contains_including_archival':
-                                            return filterBuilder.OR(attr.code, 'notContainsWithRemoved', [value])
-                                        case 'contains_any':
+                                            def value = api.utils.get(it.data.uuid)
                                             return filterBuilder.OR(attr.code, 'contains', value)
+                                        case 'not_contains':
+                                            def value = api.utils.get(it.data.uuid)
+                                            return filterBuilder.OR(attr.code, 'notContains', value)
+                                        case 'title_contains':
+                                            def value = it.data
+                                            return filterBuilder.OR(
+                                                attr.code,
+                                                'titleContains',
+                                                value
+                                            )
+                                        case 'title_not_contains':
+                                            def value = it.data
+                                            return filterBuilder.OR(
+                                                attr.code,
+                                                'titleNotContains',
+                                                value
+                                            )
+                                        case 'contains_including_archival':
+                                            def value = api.utils.get(it.data.uuid)
+                                            return filterBuilder.OR(
+                                                attr.code,
+                                                'containsWithRemoved',
+                                                value
+                                            )
+                                        case 'not_contains_including_archival':
+                                            def value = api.utils.get(it.data.uuid)
+                                            return filterBuilder.OR(
+                                                attr.code,
+                                                'notContainsWithRemoved',
+                                                value
+                                            )
+                                        case 'contains_any':
+                                            def uuids = it.data*.uuid
+                                            def values = uuids.collect { uuid ->
+                                                api.utils.get(uuid)
+                                            }
+                                            return filterBuilder.OR(
+                                                attr.code,
+                                                'containsInSet',
+                                                values
+                                            )
                                         case ['contains_current_object', 'equal_current_object']:
-                                            return filterBuilder.OR(attr.code, 'contains', subjectUUID)
-                                        case 'contains_attr_current_object':
-                                    //TODO: На фронте идёт работа по формирования формата  этого условия
+                                            return filterBuilder.OR(
+                                                attr.code,
+                                                'contains',
+                                                subjectUUID
+                                            )
+                                        case ['contains_attr_current_object',
+                                              'equal_attr_current_object']:
+                                            def subjectAttribute = it.data
+                                            def code = subjectAttribute.code
+                                            def subjectType = subjectAttribute.type
+                                            if (subjectType != attributeType)
+                                            {
+                                                throw new IllegalArgumentException(
+                                                    "Does not match attribute type: " +
+                                                    "$subjectType and $attributeType"
+                                                )
+                                            }
+                                            def value = api.utils.get(subjectUUID)[code]
+                                            return filterBuilder.OR(attr.code, 'contains', value)
                                         default: throw new IllegalArgumentException(
                                             "Not supported condition type: ${ it.type }"
                                         )
