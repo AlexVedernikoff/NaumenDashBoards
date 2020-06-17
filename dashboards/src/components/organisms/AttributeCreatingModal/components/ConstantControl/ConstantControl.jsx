@@ -19,9 +19,9 @@ export class ConstantControl extends PureComponent<Props, State> {
 	}
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {value} = e.currentTarget;
+		const value = e.currentTarget.value.replace(',', '.');
 
-		if (!value || /^\d+$/.test(value)) {
+		if (!value || /^(\d+)(\.)?(\d+)?$/.test(value)) {
 			this.setState({value});
 		}
 	};
@@ -38,9 +38,9 @@ export class ConstantControl extends PureComponent<Props, State> {
 
 	handleClickSuccessIcon = () => {
 		const {index, name, onSubmit, type} = this.props;
-		const {value} = this.state;
+		const value = parseFloat(this.state.value);
 
-		if (value && Number(value) !== 0) {
+		if (value && value !== 0) {
 			this.hideForm();
 			onSubmit(index, name, value, type);
 		}

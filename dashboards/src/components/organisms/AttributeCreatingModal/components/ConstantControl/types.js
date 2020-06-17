@@ -5,7 +5,7 @@ export type Props = {
 	index: number,
 	name: string,
 	onCancel: (index: number, name: string) => void,
-	onSubmit: (index: number, name: string, value: string, type: ControlType) => void,
+	onSubmit: (index: number, name: string, value: number, type: ControlType) => void,
 	type: ControlType,
 	value: string | null
 };
