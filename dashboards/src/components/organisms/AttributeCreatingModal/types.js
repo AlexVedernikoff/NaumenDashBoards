@@ -28,6 +28,7 @@ export type Props = {
 export type State = {
 	controls: Array<Control>,
 	info: string,
+	showFormulaError: boolean,
 	showLegacyFormatInfo: boolean,
 	showRemoveInfo: boolean,
 	templates: Array<Control>,

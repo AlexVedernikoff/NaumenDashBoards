@@ -22,6 +22,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	state = {
 		controls: [],
 		info: '',
+		showFormulaError: false,
 		showLegacyFormatInfo: false,
 		showRemoveInfo: false,
 		templates: [TEMPLATES.OPERATOR_TEMPLATE, TEMPLATES.SOURCE_TEMPLATE],
@@ -119,6 +120,53 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	handleClickSaveButton = () => {
+		const {controls} = this.state;
+		const {OPERATOR} = CONTROL_TYPES;
+		const isLastChildOperator = controls[controls.length - 1].type === OPERATOR;
+
+		if (isLastChildOperator) {
+			return this.setState({showFormulaError: true});
+		}
+
+		this.saveAttribute();
+	};
+
+	handleSelect = (index: number, name: string, value: any, type: ControlType) => {
+		const {controls} = this.state;
+
+		if (name in TEMPLATE_NAMES) {
+			return this.createNewControl(value, type);
+		}
+
+		controls[index] = {
+			...controls[index],
+			value
+		};
+
+		this.setState({controls: [...controls]});
+	};
+
+	hideFormulaError = () => this.setState({showFormulaError: false});
+
+	hideLegacyFormatInfo = () => this.setState({showLegacyFormatInfo: false});
+
+	hideRemoveInfo = () => this.setState({showRemoveInfo: false});
+
+	resolveControlRender = (control: Control, index: number) => {
+		const {CONSTANT, OPERATOR, SOURCE} = CONTROL_TYPES;
+		const {type} = control;
+
+		switch (type) {
+			case CONSTANT:
+				return this.renderConstantControl(control, index);
+			case OPERATOR:
+				return this.renderOperatorControl(control, index);
+			case SOURCE:
+				return this.renderSourceControl(control, index);
+		}
+	};
+
+	saveAttribute = () => {
 		const {onSubmit, value} = this.props;
 		const {controls, title: customTitle} = this.state;
 		const {SOURCE} = CONTROL_TYPES;
@@ -157,39 +205,6 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			title: customTitle || title,
 			type: ATTRIBUTE_TYPES.COMPUTED_ATTR
 		});
-	};
-
-	handleSelect = (index: number, name: string, value: any, type: ControlType) => {
-		const {controls} = this.state;
-
-		if (name in TEMPLATE_NAMES) {
-			return this.createNewControl(value, type);
-		}
-
-		controls[index] = {
-			...controls[index],
-			value
-		};
-
-		this.setState({controls: [...controls]});
-	};
-
-	hideLegacyFormatInfo = () => this.setState({showLegacyFormatInfo: false});
-
-	hideRemoveInfo = () => this.setState({showRemoveInfo: false});
-
-	resolveControlRender = (control: Control, index: number) => {
-		const {CONSTANT, OPERATOR, SOURCE} = CONTROL_TYPES;
-		const {type} = control;
-
-		switch (type) {
-			case CONSTANT:
-				return this.renderConstantControl(control, index);
-			case OPERATOR:
-				return this.renderOperatorControl(control, index);
-			case SOURCE:
-				return this.renderSourceControl(control, index);
-		}
 	};
 
 	showRemovalInfo = () => this.setState({showRemoveInfo: true});
@@ -249,10 +264,11 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	renderFooter = () => {
 		const {onClose} = this.props;
+		const {showFormulaError} = this.state;
 
 		return (
 			<div className={styles.footer}>
-				<Button className={styles.saveButton} onClick={this.handleClickSaveButton}>Сохранить</Button>
+				<Button className={styles.saveButton} disabled={showFormulaError} onClick={this.handleClickSaveButton}>Сохранить</Button>
 				<Button onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>Отмена</Button>
 				{this.renderFooterRemoveButton()}
 			</div>
@@ -270,6 +286,19 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 					variant={BUTTON_VARIANTS.SIMPLE}>
 					Удалить
 				</Button>
+			);
+		}
+	};
+
+	renderFormulaError = () => {
+		const {showFormulaError} = this.state;
+		const text = 'Формула введена некорректно';
+
+		if (showFormulaError) {
+			return (
+				<div className={styles.infoPanel}>
+					<InfoPanel onClose={this.hideFormulaError} text={text} />
+				</div>
 			);
 		}
 	};
@@ -352,6 +381,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		return (
 			<Modal header="Создать поле" renderFooter={this.renderFooter} size={MODAL_SIZES.LARGE}>
 				<div className={styles.container}>
+					{this.renderFormulaError()}
 					{this.renderRemoveInfo()}
 					{this.renderLegacyFormatInfo()}
 					{this.renderFieldName()}
