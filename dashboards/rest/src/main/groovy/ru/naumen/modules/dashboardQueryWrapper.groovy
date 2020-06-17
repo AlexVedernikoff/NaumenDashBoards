@@ -130,9 +130,7 @@ class QueryWrapper implements CriteriaWrapper
                     sortColumn.with(sorting).with(criteria.&addOrder)
                 }
                 break
-            case GroupType.with {
-                [WEEK, MONTH, QUARTER, YEAR]
-            }:
+            case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
                 IApiCriteriaColumn groupColumn = sc.extract(column, groupType as String)
                 criteria.addGroupColumn(groupColumn)
                 criteria.addColumn(groupColumn)
@@ -288,7 +286,6 @@ class QueryWrapper implements CriteriaWrapper
             {
                 columnCode = modules.dashboardQueryWrapper.UUID_CODE
             }
-
             Comparison type = parameter.type
             switch (type)
             {
@@ -308,8 +305,7 @@ class QueryWrapper implements CriteriaWrapper
                         parameter.value,
                         false,
                         false
-                    )
-                                            .with(api.filters.&not)
+                    ).with(api.filters.&not)
                     return api.filters.and(notEqualFilter, notNullFilter)
                 case Comparison.GREATER:
                     return api.filters.inequality(columnCode, '>', parameter.value)
@@ -334,10 +330,8 @@ class QueryWrapper implements CriteriaWrapper
                     def notContainsFilter = api.filters.attrContains(
                         columnCode,
                         parameter.value,
-                        false,
-                        false
-                    )
-                                               .with(api.filters.&not)
+                        false, false
+                    ).with(api.filters.&not)
                     return api.filters.and(notContainsFilter, notNullFilter)
                 case Comparison.EQUAL_REMOVED:
                     return api.filters.attrContains(columnCode, parameter.value, false, false)
@@ -566,11 +560,9 @@ private static def validate(AggregationParameter parameter) throws IllegalArgume
     String attributeType = parameter.attribute.attrChains().last().type
     switch (attributeType)
     {
+        case AttributeType.DT_INTERVAL_TYPE:
         case AttributeType.NUMBER_TYPES:
-            if (!(type in Aggregation.with {
-                [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT]
-            }))
-            {
+            if (!(type in Aggregation.with { [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT] })) {
                 throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
             }
             break
