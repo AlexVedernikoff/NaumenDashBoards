@@ -197,7 +197,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	renderConstantControl = (control: Control, index: number) => {
 		let {name, value} = control;
 
-		if (value && typeof value !== 'string') {
+		if (value && typeof value === 'object') {
 			value = '';
 		}
 
