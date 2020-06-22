@@ -1,17 +1,4 @@
 // @flow
-import {GROUP_WAYS} from 'store/widgets/constants';
-
-// Опции выбора способа создания группировки
-const TYPE_OPTIONS = [
-	{
-		label: 'Системная',
-		value: GROUP_WAYS.SYSTEM
-	},
-	{
-		label: 'Пользовательская',
-		value: GROUP_WAYS.CUSTOM
-	}
-];
 
 // Префикс локального ключа для новой группировки
 const LOCAL_PREFIX_ID: 'local_' = 'local_';
@@ -41,6 +28,5 @@ const FIELDS = {
 
 export {
 	LOCAL_PREFIX_ID,
-	FIELDS,
-	TYPE_OPTIONS
+	FIELDS
 };

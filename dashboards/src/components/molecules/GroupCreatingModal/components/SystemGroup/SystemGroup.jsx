@@ -38,9 +38,9 @@ export class SystemGroup extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {className, options, show} = this.props;
+		const {className, options} = this.props;
 
-		if (show && options.length > 0) {
+		if (options.length > 0) {
 			const value = options.find(o => o.value === this.state.value) || null;
 
 			return (

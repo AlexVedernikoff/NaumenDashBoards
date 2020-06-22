@@ -10,6 +10,7 @@ import styles from './styles.less';
 export class Select extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
+		disabled: false,
 		editable: false,
 		name: '',
 		showCreationButton: false,
@@ -150,11 +151,16 @@ export class Select extends PureComponent<Props, State> {
 	);
 
 	render () {
-		const {className} = this.props;
+		const {className, disabled} = this.props;
+		const selectCN = cn({
+			[styles.container]: true,
+			[styles.disabledContainer]: disabled,
+			[className]: true
+		});
 
 		return (
 			<OutsideClickDetector onClickOutside={this.hideMenu}>
-				<div className={cn(styles.container, className)}>
+				<div className={selectCN}>
 					{this.renderValueContainer()}
 					{this.renderMenu()}
 				</div>

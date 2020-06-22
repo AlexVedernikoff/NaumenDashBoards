@@ -4,9 +4,12 @@ import {
 	DATETIME_DAY_FORMATS,
 	DAY_FORMATS,
 	HOURS_FORMATS,
+	MINUTES_FORMATS,
 	MONTH_FORMATS,
 	QUARTER_FORMATS,
-	WEEK_FORMATS
+	SEVEN_DAYS_FORMATS,
+	WEEK_FORMATS,
+	YEAR_FORMATS
 } from './constants';
 import {DATETIME_SYSTEM_GROUP} from 'store/widgets/constants';
 import {FormControl, Select} from 'components/molecules/index';
@@ -30,9 +33,11 @@ export class DateSystemGroup extends PureComponent<Props, State> {
 	getFormatOptions = (group: string) => {
 		const {attribute} = this.props;
 		const {type} = attribute;
-		const {DAY, HOURS, MONTH, QUARTER, WEEK} = DATETIME_SYSTEM_GROUP;
+		const {DAY, HOURS, MINUTES, MONTH, QUARTER, SEVEN_DAYS, WEEK, YEAR} = DATETIME_SYSTEM_GROUP;
 
 		switch (group) {
+			case MINUTES:
+				return MINUTES_FORMATS;
 			case HOURS:
 				return HOURS_FORMATS;
 			case DAY:
@@ -43,16 +48,13 @@ export class DateSystemGroup extends PureComponent<Props, State> {
 				return MONTH_FORMATS;
 			case QUARTER:
 				return QUARTER_FORMATS;
+			case SEVEN_DAYS:
+				return SEVEN_DAYS_FORMATS;
+			case YEAR:
+				return YEAR_FORMATS;
 			default:
 				return [];
 		}
-	};
-
-	groupUsesFormatting = () => {
-		const {group} = this.state;
-		const {DAY, HOURS, MONTH, QUARTER, WEEK} = DATETIME_SYSTEM_GROUP;
-
-		return [DAY, HOURS, MONTH, QUARTER, WEEK].includes(group);
 	};
 
 	handleSelectFormat = ({value}: Object) => {
@@ -75,22 +77,20 @@ export class DateSystemGroup extends PureComponent<Props, State> {
 		const {onSubmit} = this.props;
 		const {format} = this.state;
 
-		this.groupUsesFormatting() ? onSubmit({...group, format}) : onSubmit(group);
+		onSubmit({...group, format});
 	};
 
 	renderFormat = () => {
-		const {className, show} = this.props;
+		const {className} = this.props;
 		const {format, options} = this.state;
+		const value = options.find(o => o.value === format) || null;
+		const disabled = options.length === 1;
 
-		if (show && this.groupUsesFormatting()) {
-			const value = options.find(o => o.value === format) || null;
-
-			return (
-				<FormControl className={className} label="Выберете значение">
-					<Select onSelect={this.handleSelectFormat} options={options} value={value} />
-				</FormControl>
-			);
-		}
+		return (
+			<FormControl className={className} label="Выберите значение">
+				<Select disabled={disabled} onSelect={this.handleSelectFormat} options={options} value={value} />
+			</FormControl>
+		);
 	};
 
 	renderGroup = () => {

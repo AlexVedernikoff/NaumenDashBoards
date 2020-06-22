@@ -80,7 +80,7 @@ export class SubGroup extends PureComponent<Props> {
 	};
 
 	renderAndConditions = () => (
-		<div className={mainStyles.field}>
+		<div className={styles.box}>
 			{this.props.subGroup.data.map(this.renderAndCondition)}
 		</div>
 	);

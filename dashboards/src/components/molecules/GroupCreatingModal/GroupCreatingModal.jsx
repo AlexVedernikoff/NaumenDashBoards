@@ -1,7 +1,7 @@
 // @flow
 import {CustomGroup, SystemGroup} from './components';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
-import {FIELDS, TYPE_OPTIONS} from './constants';
+import {FIELDS} from './constants';
 import {FormControl, Modal} from 'components/molecules';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
@@ -9,7 +9,7 @@ import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import type {Props as SystemProps} from './components/SystemGroup/types';
 import {RadioField, TextInput} from 'components/atoms';
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
 export class GroupCreatingModal extends Component<Props, State> {
@@ -89,14 +89,14 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	renderDefaultSystemGroup = (props: $Shape<SystemProps>) => {
 		const {systemProps} = this.props;
-		return systemProps && <SystemGroup {...systemProps} {...props} />;
+		return systemProps ? <SystemGroup {...systemProps} {...props} /> : null;
 	};
 
 	renderNameField = () => {
 		const {attributeTitle} = this.state;
 
 		return (
-			<FormControl className={styles.fieldSize} label="Название поля">
+			<FormControl className={styles.field} label="Название поля">
 				<TextInput
 					name={FIELDS.attributeTitle}
 					onChange={this.handleChangeAttributeTitle}
@@ -108,40 +108,39 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	renderSystemGroup = () => {
 		const {group, renderSystemGroup} = this.props;
-		const {way} = this.state;
-		const show = way === GROUP_WAYS.SYSTEM;
 		const props = {
 			className: styles.shortField,
 			group,
 			onSubmit: this.handleSubmitGroup,
-			setSubmit: this.setSubmit(GROUP_WAYS.SYSTEM),
-			show
+			setSubmit: this.setSubmit(GROUP_WAYS.SYSTEM)
 		};
 
 		return renderSystemGroup ? renderSystemGroup(props) : this.renderDefaultSystemGroup(props);
 	};
 
-	renderWayField = () => (
-		<FormControl className={styles.shortField} label="Тип группировки">
-			{TYPE_OPTIONS.map(this.renderWayInput)}
+	renderWayControl = () => (
+		<FormControl className={styles.wayControl} label="Тип группировки">
+			{this.renderWayField(GROUP_WAYS.SYSTEM, 'Системная', this.renderSystemGroup())}
+			{this.renderWayField(GROUP_WAYS.CUSTOM, 'Пользовательская', this.renderCustomGroup())}
 		</FormControl>
 	);
 
-	renderWayInput = (option: Object) => {
+	renderWayField = (value: GroupWay, label: string, children: React$Node) => {
 		const {way} = this.state;
-		const {label, value} = option;
 		const checked = way === value;
 
 		return (
-			<div className={styles.radioField} key={value}>
-				<RadioField
-					checked={checked}
-					label={label}
-					name={FIELDS.way}
-					onChange={this.handleChange}
-					value={value}
-				/>
-			</div>
+			<Fragment>
+					<RadioField
+						checked={checked}
+						className={styles.radioField}
+						label={label}
+						name={FIELDS.way}
+						onChange={this.handleChange}
+						value={value}
+					/>
+				{children}
+			</Fragment>
 		);
 	};
 
@@ -152,9 +151,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 			<Modal className={styles.modal} header="Настройка группировки" onClose={onClose} onSubmit={this.handleSubmit} size={920}>
 				<div className={styles.content}>
 					{this.renderNameField()}
-					{this.renderWayField()}
-					{this.renderSystemGroup()}
-					{this.renderCustomGroup()}
+					{this.renderWayControl()}
 				</div>
 			</Modal>
 		);

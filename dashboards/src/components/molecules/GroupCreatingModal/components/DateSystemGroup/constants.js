@@ -1,4 +1,11 @@
 // @flow
+const MINUTES_FORMATS = [
+	{
+		label: 'мм (15 мин)',
+		value: 'ii'
+	}
+];
+
 const HOURS_FORMATS = [
 	{
 		label: 'чч:мм (11:11)',
@@ -78,6 +85,13 @@ const MONTH_FORMATS = [
 	}
 ];
 
+const SEVEN_DAYS_FORMATS = [
+	{
+		label: 'ДД ММ - ДД ММ (2 января - 8 января)',
+		value: 'dd mm - dd mm'
+	}
+];
+
 const QUARTER_FORMATS = [
 	{
 		label: 'Квартал (1 кв-л)',
@@ -89,11 +103,21 @@ const QUARTER_FORMATS = [
 	}
 ];
 
+const YEAR_FORMATS = [
+	{
+		label: 'ГГГГ (2020)',
+		value: 'yyyy'
+	}
+];
+
 export {
 	DATETIME_DAY_FORMATS,
-	HOURS_FORMATS,
 	DAY_FORMATS,
-	WEEK_FORMATS,
+	HOURS_FORMATS,
+	MINUTES_FORMATS,
 	MONTH_FORMATS,
-	QUARTER_FORMATS
+	QUARTER_FORMATS,
+	SEVEN_DAYS_FORMATS,
+	WEEK_FORMATS,
+	YEAR_FORMATS
 };

@@ -12,6 +12,7 @@ export type SelectEvent = {
 
 export type Props = {
 	className: string,
+	disabled: boolean,
 	editable: boolean,
 	getOptionLabel?: (option: Option) => string,
 	getOptionValue?: (option: Option) => any,

@@ -41,36 +41,57 @@ const TEMPLATES = {
 	SOURCE_TEMPLATE
 };
 
+const PLUS = '+';
+const MINUS = '-';
+const MULTIPLICATION = '*';
+const DIVISION = '/';
+
+const MATH_OPERATORS = {
+  DIVISION,
+  MINUS,
+  MULTIPLICATION,
+  PLUS
+};
+
+const LEFT_BRACKET = '(';
+const RIGHT_BRACKET = ')';
+
+const BRACKETS = {
+	LEFT_BRACKET,
+	RIGHT_BRACKET
+};
+
 const OPERATORS = [
 	{
 		icon: ICON_NAMES.BRACKET_LEFT,
-		value: '('
+		value: BRACKETS.LEFT_BRACKET
 	},
 	{
 		icon: ICON_NAMES.BRACKET_RIGHT,
-		value: ')'
+		value: BRACKETS.RIGHT_BRACKET
 	},
 	{
 		icon: ICON_NAMES.PLUS,
-		value: '+'
+		value: MATH_OPERATORS.PLUS
 	},
 	{
 		icon: ICON_NAMES.MINUS,
-		value: '-'
+		value: MATH_OPERATORS.MINUS
 	},
 	{
 		icon: ICON_NAMES.MULTIPLY,
-		value: '*'
+		value: MATH_OPERATORS.MULTIPLICATION
 	},
 	{
 		icon: ICON_NAMES.DIVISION,
-		value: '/'
+		value: MATH_OPERATORS.DIVISION
 	}
 ];
 
 export {
-	CONTROL_TYPES,
-	OPERATORS,
-	TEMPLATE_NAMES,
-	TEMPLATES
+  CONTROL_TYPES,
+  MATH_OPERATORS,
+  OPERATORS,
+  TEMPLATE_NAMES,
+  TEMPLATES
 };

@@ -12,10 +12,10 @@ export class RadioField extends PureComponent<Props> {
 	handleSetTrigger = (trigger: Function) => (this.trigger = trigger);
 
 	render () {
-		const {label, ...radioButtonProps} = this.props;
+		const {className, label, ...radioButtonProps} = this.props;
 
 		return (
-			<FormCheckControl label={label} onClickLabel={this.handleClickLabel} >
+			<FormCheckControl className={className} label={label} onClickLabel={this.handleClickLabel} >
 				<RadioButton {...radioButtonProps} setTrigger={this.handleSetTrigger} />
 			</FormCheckControl>
 		);

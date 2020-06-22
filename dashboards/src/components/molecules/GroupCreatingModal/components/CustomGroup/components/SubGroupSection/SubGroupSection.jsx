@@ -42,7 +42,7 @@ export class SubGroupSection extends Component<Props> {
 	};
 
 	renderCreateButton = () => (
-		<Button className={styles.creationPanel} onClick={this.handleClickCreateButton} variant={BUTTON_VARIANTS.GRAY}>
+		<Button className={styles.createButton} onClick={this.handleClickCreateButton} variant={BUTTON_VARIANTS.GRAY}>
 			<Icon name={ICON_NAMES.PLUS} />
 			Добавить группу
 		</Button>

@@ -3,10 +3,10 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {Button, InfoPanel} from 'components/atoms';
 import {ConstantControl, OperatorControl, SourceControl} from './components';
 import type {Control, ControlType, Props, State} from './types';
-import {CONTROL_TYPES, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
+import {CONTROL_TYPES, MATH_OPERATORS, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
 import {getAggregationLabel} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
+import {getMapValues, isObject} from 'src/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {isObject} from 'src/helpers';
 import {Modal} from 'components/molecules';
 import React, {PureComponent} from 'react';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
@@ -121,10 +121,10 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	handleClickSaveButton = () => {
 		const {controls} = this.state;
-		const {OPERATOR} = CONTROL_TYPES;
-		const isLastChildOperator = controls[controls.length - 1].type === OPERATOR;
+		const lastControl = controls[controls.length - 1];
+		const {type, value} = lastControl;
 
-		if (isLastChildOperator) {
+		if (type === CONTROL_TYPES.OPERATOR && getMapValues(MATH_OPERATORS).includes(value)) {
 			return this.setState({showFormulaError: true});
 		}
 

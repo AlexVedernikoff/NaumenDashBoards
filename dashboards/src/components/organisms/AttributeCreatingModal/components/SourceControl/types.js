@@ -21,8 +21,8 @@ export type Props = {
 };
 
 export type State = {
-	active: boolean,
 	expanded: Array<string>,
 	foundOptions: Array<SourceOption>,
-	searchValue: string
+	searchValue: string,
+	showList: boolean
 };

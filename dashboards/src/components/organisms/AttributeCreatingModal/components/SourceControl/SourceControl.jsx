@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {AttributeAggregationField} from 'WidgetFormPanel/components';
 import cn from 'classnames';
-import {CreationPanel, SearchSelectInput} from 'components/atoms';
+import {CreationPanel, OutsideClickDetector, SearchSelectInput} from 'components/atoms';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
@@ -14,10 +14,10 @@ import styles from './styles.less';
 
 export class SourceControl extends PureComponent<Props, State> {
 	state = {
-		active: false,
 		expanded: [],
 		foundOptions: [],
-		searchValue: ''
+		searchValue: '',
+		showList: false
 	};
 
 	componentDidMount () {
@@ -41,12 +41,6 @@ export class SourceControl extends PureComponent<Props, State> {
 		attributes = attributes.filter(a => a.title.toLowerCase().includes(searchValue.toLowerCase()));
 
 		return {...option, attributes};
-	};
-
-	handleBlurControl = (e: SyntheticFocusEvent<HTMLDivElement>) => {
-		if (e.relatedTarget === null) {
-			this.setState({active: false});
-		}
 	};
 
 	handleChangeSearchInput = (searchValue: string) => {
@@ -79,7 +73,7 @@ export class SourceControl extends PureComponent<Props, State> {
 			}
 		}
 
-		this.setState({active: false});
+		this.setState({showList: false});
 	};
 
 	handleClickButton = () => {
@@ -101,7 +95,9 @@ export class SourceControl extends PureComponent<Props, State> {
 		onSelect(index, name, {...value, aggregation}, type);
 	};
 
-	handleShowList = () => this.setState(state => ({active: !state.active}));
+	handleShowList = () => this.setState(state => ({showList: !state.showList}));
+
+	hideList = () => this.setState({showList: false});
 
 	isExpanded = (dataKey: string) => {
 		const {expanded, searchValue} = this.state;
@@ -160,9 +156,9 @@ export class SourceControl extends PureComponent<Props, State> {
 	};
 
 	renderList = () => {
-		const {active} = this.state;
+		const {showList} = this.state;
 
-		if (active) {
+		if (showList) {
 			return (
 				<div className={styles.list}>
 					{this.renderSearch()}
@@ -277,10 +273,12 @@ export class SourceControl extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<div className={styles.control} onBlur={this.handleBlurControl} tabIndex={0}>
-				{this.renderValue()}
-				{this.renderList()}
-			</div>
+			<OutsideClickDetector onClickOutside={this.hideList}>
+				<div className={styles.control}>
+					{this.renderValue()}
+					{this.renderList()}
+				</div>
+			</OutsideClickDetector>
 		);
 	}
 }

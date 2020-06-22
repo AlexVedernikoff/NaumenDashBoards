@@ -2,6 +2,7 @@
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {Option} from './components';
 import type {Option as OptionType, Props, State} from './types';
+import {OutsideClickDetector} from 'components/atoms';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
@@ -68,10 +69,12 @@ export class OperatorControl extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<div className={styles.control} onBlur={this.hideList} tabIndex={0}>
-				{this.renderValue()}
-				{this.renderList()}
-			</div>
+			<OutsideClickDetector onClickOutside={this.hideList}>
+				<div className={styles.control}>
+					{this.renderValue()}
+					{this.renderList()}
+				</div>
+			</OutsideClickDetector>
 		);
 	}
 }
