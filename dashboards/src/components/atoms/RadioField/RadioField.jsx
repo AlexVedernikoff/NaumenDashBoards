@@ -5,6 +5,10 @@ import {RadioButton} from 'components/atoms';
 import React, {PureComponent} from 'react';
 
 export class RadioField extends PureComponent<Props> {
+	static defaultProps = {
+		className: ''
+	};
+
 	trigger: Function;
 
 	handleClickLabel = () => this.trigger && this.trigger();
