@@ -11,8 +11,13 @@ export class FormCheckControl extends PureComponent<Props> {
 		reverse: false
 	};
 
+	renderLabel = () => {
+		const {label, onClickLabel} = this.props;
+		return <Text className={styles.label} onClick={onClickLabel}>{label}</Text>;
+	};
+
 	render () {
-		const {children, className, label, reverse} = this.props;
+		const {children, className, reverse} = this.props;
 		const containerCN = cn({
 			[styles.container]: true,
 			[styles.reverseContainer]: reverse,
@@ -22,7 +27,7 @@ export class FormCheckControl extends PureComponent<Props> {
 		return (
 			<div className={containerCN}>
 				{children}
-				<Text className={styles.label}>{label}</Text>
+				{this.renderLabel()}
 			</div>
 		);
 	}

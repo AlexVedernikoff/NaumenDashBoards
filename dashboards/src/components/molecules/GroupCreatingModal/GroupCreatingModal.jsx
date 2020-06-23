@@ -2,13 +2,13 @@
 import {CustomGroup, SystemGroup} from './components';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS, TYPE_OPTIONS} from './constants';
-import {FormCheckControl, FormControl, Modal} from 'components/molecules';
+import {FormControl, Modal} from 'components/molecules';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import type {Props as SystemProps} from './components/SystemGroup/types';
-import {RadioButton, TextInput} from 'components/atoms';
+import {RadioField, TextInput} from 'components/atoms';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
@@ -134,14 +134,13 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 		return (
 			<div className={styles.radioField} key={value}>
-				<FormCheckControl label={label}>
-					<RadioButton
-						checked={checked}
-						name={FIELDS.way}
-						onChange={this.handleChange}
-						value={value}
-					/>
-				</FormCheckControl>
+				<RadioField
+					checked={checked}
+					label={label}
+					name={FIELDS.way}
+					onChange={this.handleChange}
+					value={value}
+				/>
 			</div>
 		);
 	};

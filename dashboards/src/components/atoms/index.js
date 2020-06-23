@@ -19,6 +19,7 @@ import MaterialTextInput from './MaterialTextInput';
 import OutsideClickDetector from './OutsideClickDetector';
 import Popover from './Popover';
 import RadioButton from './RadioButton';
+import RadioField from './RadioField';
 import SearchSelectInput from './SearchSelectInput';
 import SimpleListOption from './SimpleListOption';
 import Text from './Text';
@@ -49,6 +50,7 @@ export {
 	OutsideClickDetector,
 	Popover,
 	RadioButton,
+	RadioField,
 	SearchSelectInput,
 	SimpleListOption,
 	Text,

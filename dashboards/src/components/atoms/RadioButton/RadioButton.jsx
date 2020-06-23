@@ -6,6 +6,11 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class RadioButton extends PureComponent<Props> {
+	componentDidMount () {
+		const {setTrigger} = this.props;
+		setTrigger && setTrigger(this.handleClick);
+	}
+
 	handleClick = () => {
 		const {name, onChange, value} = this.props;
 		onChange({name, value});

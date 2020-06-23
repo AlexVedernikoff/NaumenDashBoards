@@ -24,8 +24,9 @@ export class Text extends PureComponent<Props> {
 	};
 
 	render () {
-		const {children, elementType} = this.props;
+		const {children, elementType, ...rest} = this.props;
 		const props = {
+			...rest,
 			children,
 			className: this.getClassName()
 		};

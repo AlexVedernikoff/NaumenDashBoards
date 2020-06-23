@@ -1,8 +1,8 @@
 // @flow
 import {FIELDS} from 'WidgetFormPanel/constants';
-import {FormCheckControl, FormField, ToggableFormBox} from 'components/molecules';
+import {FormField, ToggableFormBox} from 'components/molecules';
 import type {Props} from './types';
-import {RadioButton} from 'components/atoms';
+import {RadioField} from 'components/atoms';
 import React, {Fragment, PureComponent} from 'react';
 import {SORTING_VALUES} from 'store/widgets/data/constants';
 import styles from './styles.less';
@@ -48,9 +48,13 @@ export class SortingBox extends PureComponent<Props> {
 		const checked = currentValue === value;
 
 		return (
-			<FormCheckControl label={label}>
-				<RadioButton checked={checked} name={FIELDS.value} onChange={handleChange} value={value} />
-			</FormCheckControl>
+			<RadioField
+				checked={checked}
+				label={label}
+				name={FIELDS.value}
+				onChange={handleChange}
+				value={value}
+			/>
 		);
 	};
 
