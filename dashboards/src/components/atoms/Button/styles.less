@@ -97,6 +97,29 @@
 		}
 	}
 
+	.gray {
+		background-color: @gainsboro;
+		color: @dimgrey;
+		padding: 4px 12px;
+
+		svg {
+			margin-right: 4px;
+		}
+
+		&:hover {
+			background-color: @silver;
+		}
+
+		&:active {
+			background-color: @presedgrey;
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
+		}
+	}
+
 	.green {
 		background-color: #6FCF97;
 		color: @white;

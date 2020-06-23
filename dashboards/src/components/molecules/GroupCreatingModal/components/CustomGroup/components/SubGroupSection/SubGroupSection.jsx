@@ -1,17 +1,19 @@
 // @flow
 import {BASE_VALIDATION_PATH} from './constants';
+import {Button} from 'components/atoms';
 import {createNewSubGroup} from 'CustomGroup/helpers';
-import {CreationPanel} from 'components/atoms';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import type {SubGroup as SubGroupType} from 'CustomGroup/types';
 import {SubGroup} from 'CustomGroup/components';
+import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import withCustomGroup from 'CustomGroup/withCustomGroup';
 
 export class SubGroupSection extends Component<Props> {
-	handleClickCreationPanel = () => {
+	handleClickCreateButton = () => {
 		const {createCondition, onUpdate, subGroups} = this.props;
 
 		onUpdate([
@@ -39,12 +41,11 @@ export class SubGroupSection extends Component<Props> {
 		onUpdate([...subGroups]);
 	};
 
-	renderCreationPanel = () => (
-		<CreationPanel
-			className={styles.creationPanel}
-			onClick={this.handleClickCreationPanel}
-			text="Добавить группу"
-		/>
+	renderCreateButton = () => (
+		<Button className={styles.creationPanel} onClick={this.handleClickCreateButton} variant={BUTTON_VARIANTS.GRAY}>
+			<Icon name={ICON_NAMES.PLUS} />
+			Добавить группу
+		</Button>
 	);
 
 	renderSubGroup = (group: SubGroupType, index: number, groups: Array<SubGroupType>) => {
@@ -70,7 +71,7 @@ export class SubGroupSection extends Component<Props> {
 		return (
 			<Fragment>
 				{this.renderSubGroups()}
-				{this.renderCreationPanel()}
+				{this.renderCreateButton()}
 			</Fragment>
 		);
 	}

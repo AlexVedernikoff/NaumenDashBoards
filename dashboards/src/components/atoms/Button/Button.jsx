@@ -17,11 +17,12 @@ export class Button extends Component<Props> {
 
 	getClassNames = () => {
 		const {block, className, outline, variant} = this.props;
-		const {ADDITIONAL, GREEN, INFO, SIMPLE} = VARIANTS;
+		const {ADDITIONAL, GRAY, GREEN, INFO, SIMPLE} = VARIANTS;
 
 		return cn({
 			[styles.button]: true,
 			[styles.block]: block,
+			[styles.gray]: variant === GRAY && !outline,
 			[styles.info]: variant === INFO && !outline,
 			[styles.outlineInfo]: variant === INFO && outline,
 			[styles.green]: variant === GREEN && !outline,
