@@ -23,7 +23,7 @@ export class Icon extends PureComponent<Props> {
 		return (
 			<svg className={svgCN} fill="currentColor" onClick={onClick} {...ICON_PROPS[size]}>
 				{title && <title>{title}</title>}
-				<use xlinkHref={`#${name}`} />
+				<use className={styles.use} xlinkHref={`#${name}`} />
 			</svg>
 		);
 	}
