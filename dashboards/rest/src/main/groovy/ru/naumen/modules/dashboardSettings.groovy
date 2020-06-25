@@ -327,6 +327,7 @@ String createPersonalDashboard(Map<String, Object> requestContent, def user)
  */
 String createWidget(Map<String, Object> requestContent, def user)
 {
+    validateName(requestContent)
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
     def widget = requestContent.widget
@@ -374,10 +375,11 @@ String createWidget(Map<String, Object> requestContent, def user)
  */
 String editWidget(Map<String, Object> requestContent, def user)
 {
-    String classFqn = requestContent.classFqn
-    String contentCode = requestContent.contentCode
     def widget = requestContent.widget
     String widgetKey = widget.id
+    validateName(requestContent, widgetKey)
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
     if(requestContent.isPersonal as boolean)
     {
         checkRightsOnEditDashboard(requestContent.editable)
@@ -933,6 +935,71 @@ private String deleteDefaultWidget(String classFqn,
             }
             return toJson(resultOfRemoving)
         }
+    }
+}
+
+/**
+ * Метод получения ключей и значений необходимых объектов
+ * @param objKeys - список ключей объекта
+ * @param namespace - название неймспейса
+ * @return ассоциативный массив из ключей и значений необходимых объектов
+ */
+private def getMapForObject(List objKeys, String namespace)
+{
+    return objKeys.collectEntries { key ->
+        def value = api.keyValue.get(namespace, key)
+        return value ? [ (key) : value ] : Collections.emptyMap()
+    }
+}
+
+/**
+ * Метод получения ключей необходимых объектов
+ * @param namespace - название неймспейса
+ * @param dashboardKey - ключ дашборда для поиска
+ * @param objToFind - код объекта для поиска
+ * @return массив из ключей объектов
+ */
+private def getObjectIdsFromDashboard(String namespace, String dashboardKey, String objToFind)
+{
+    def dashboard =  api.keyValue.get(namespace, dashboardKey)
+    return dashboard ? fromJson(dashboard)?.get(objToFind) : null
+}
+
+/**
+ * Метод получения названий всех виджетов
+ * @param widgets - ассоциативный массив из ключей и значений виджетов
+ * @return список названий виджетов
+ */
+private List<String> getWidgetNames(Map<String, Object> widgets)
+{
+    return widgets.values().collect {
+        def widget = fromJson(it as String)
+        return widget.name.toString()
+    }.toList()
+}
+
+/**
+ * Метод проверки уникальности названия виджета в рамках текущего дашборда
+ * @param requestContent - запрос на построение/редактирование виджета
+ * @param widgetKey - ключ виджета (нужен при редактировании виджета)
+ * @return список названий виджетов
+ */
+private void validateName(Map<String, Object> requestContent, String widgetKey = null) {
+    String name = requestContent.widget.name.toString()
+    String dashKey = generateDashboardKey(requestContent.classFqn, requestContent.contentCode)
+    def  widgetIds = getObjectIdsFromDashboard(DASHBOARD_NAMESPACE, dashKey, 'widgetIds')
+    widgetIds = widgetKey ? (widgetIds - widgetKey) : widgetIds
+    def widgets = getMapForObject(widgetIds, WIDGET_NAMESPACE)
+    List<String> widgetsNames = getWidgetNames(widgets as Map<String, Object>)
+    if (name in widgetsNames)
+    {
+        throw new Exception(
+            toJson([
+                errors: [
+                    "name" : "Виджет с названием \"$name\" не может быть сохранен. " +
+                            "Название виджета должно быть уникально в рамках дашборда."]
+            ])
+        )
     }
 }
 //endregion
