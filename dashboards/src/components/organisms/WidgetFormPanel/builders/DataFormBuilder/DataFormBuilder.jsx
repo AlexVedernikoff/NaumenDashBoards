@@ -1,20 +1,15 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import {Checkbox, TextArea} from 'components/atoms';
 import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceBoxProps, TextAreaProps} from './types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
-import {
-  FormBox,
-  FormCheckControl,
-  FormControl,
-  OuterSelect
-} from 'components/molecules';
+import {FormBox, FormControl, OuterSelect} from 'components/molecules';
 import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import type {Group} from 'store/widgets/data/types';
+import {Label, LegacyCheckbox, TextArea} from 'components/atoms';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
@@ -122,12 +117,12 @@ export class DataFormBuilder extends Component<Props> {
 		setDataFieldValue(index, name, value);
 	};
 
-	handleChangeUseName = (event: OnChangeInputEvent) => {
+	handleChangeUseName = (name: string, value: boolean) => {
 		const {setFieldValue, values} = this.props;
 
 		setFieldValue(FIELDS.header, {
 			...values[FIELDS.header],
-			useName: !event.value
+			[name]: value
 		});
 	};
 
@@ -180,9 +175,9 @@ export class DataFormBuilder extends Component<Props> {
 			value: values[name]
 		};
 
-		const diagramNameCheckbox = {
+		const useNameCheckbox = {
 			label: 'Использовать название виджета в качестве заголовка диаграммы',
-			name,
+			name: FIELDS.useName,
 			onChange: this.handleChangeUseName,
 			value: useName
 		};
@@ -191,7 +186,7 @@ export class DataFormBuilder extends Component<Props> {
 			<Fragment>
 				<FormBox>
 					{this.renderTextArea(nameProps)}
-					{this.renderCheckbox(diagramNameCheckbox)}
+					{this.renderCheckbox(useNameCheckbox)}
 					{this.renderDiagramNameTextArea()}
 				</FormBox>
 				<FormBox>
@@ -205,18 +200,18 @@ export class DataFormBuilder extends Component<Props> {
 		const {label, name, onChange, value} = props;
 
 		return (
-			<FormField>
-				<FormCheckControl label={label}>
-					<Checkbox
-						checked={value}
-						name={name}
-						onChange={onChange}
-						value={value}
-					/>
-				</FormCheckControl>
-			</FormField>
+			<LegacyCheckbox
+				checked={value}
+				label={label}
+				name={name}
+				onClick={onChange}
+				renderLabel={this.renderCheckboxLabel}
+				value={value}
+			/>
 		);
 	};
+
+	renderCheckboxLabel = (label: string) => <Label text={label} />;
 
 	renderDiagramNameTextArea = () => {
 		const {values} = this.props;
