@@ -195,7 +195,10 @@ class Link
                         getDTIntervalGroupType(group.data as String) : group.data as GroupType
                         : null
                     String format =  group.format
-                    groupType ? [(groupType): [value, format]] : null
+                    groupType ? [(groupType): attr.type in AttributeType.DATE_TYPES
+                        ? [value, format]
+                        : [value]
+                    ] : null
                 }
 
                 //Тут находим нужную подгруппу пользовательской группировки
@@ -560,6 +563,11 @@ class Link
                 return filterBuilder.OR(code, 'contains', api.types.newDateTimeInterval(value as int, "HOUR"))
             case AttributeType.TIMER_TYPES:
                 return filterBuilder.OR(code, 'timerStatusContains', [value]) // при условии что в тут будет код статус
+            case AttributeType.BOOL_TYPE:
+                if (!value.isInteger()) {
+                    value = value.toLowerCase() == 'да' ? '1' : '0'
+                }
+                return filterBuilder.OR(code, 'contains', value)
             default:
                 return filterBuilder.OR(code, 'contains', value)
         }
