@@ -99,8 +99,8 @@ class QueryWrapper implements CriteriaWrapper
     {
         def sc = api.selectClause
         GroupType groupType = parameter.type
-        String[] attributeCodes =
-            parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        String[] attributeCodes = parameter.attribute.attrChains()*.code
+                                           .with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
         switch (groupType)
         {
@@ -114,35 +114,191 @@ class QueryWrapper implements CriteriaWrapper
                     column.with(sorting).with(criteria.&addOrder)
                 }
                 break
-            case GroupType.DAY:
-                IApiCriteriaColumn dayColumn = sc.day(column)
-                IApiCriteriaColumn monthColumn = sc.month(column)
-                criteria.addGroupColumn(dayColumn)
-                criteria.addGroupColumn(monthColumn)
-                criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
-                criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
-                def sortColumn = sc.concat(dayColumn, sc.constant('/'), monthColumn)
-                criteria.addColumn(sortColumn)
-                String sortingType = parameter.sortingType
-                if (sortingType)
-                {
-                    Closure sorting = getSorting(sortingType)
-                    sortColumn.with(sorting).with(criteria.&addOrder)
-                }
-                break
-            case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
-                IApiCriteriaColumn groupColumn = sc.extract(column, groupType as String)
-                criteria.addGroupColumn(groupColumn)
+            case GroupType.MINUTES:
+                def groupColumn = sc.extract(column, 'MINUTE')
                 criteria.addColumn(groupColumn)
+                criteria.addGroupColumn(groupColumn)
                 String sortingType = parameter.sortingType
-                if (sortingType)
-                {
+                if (sortingType) {
                     Closure sorting = getSorting(sortingType)
                     groupColumn.with(sorting).with(criteria.&addOrder)
                 }
-                else
-                {
-                    criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
+                break
+            case GroupType.DAY:
+                String format = parameter.format
+                switch (format) {
+                    case 'dd':
+                        def dayColumn = sc.day(column)
+                        criteria.addColumn(dayColumn)
+                        criteria.addGroupColumn(dayColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            dayColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
+                        }
+                        break
+                    case 'dd.mm.YY':
+                        def dayColumn = sc.day(column)
+                        def monthColumn = sc.month(column)
+                        def yearColumn = sc.year(column)
+
+                        criteria.addColumn(sc.concat(dayColumn,sc.constant('.'),
+                                                     monthColumn, sc.constant('.'),
+                                                     yearColumn))
+
+                        criteria.addGroupColumn(yearColumn)
+                        criteria.addGroupColumn(monthColumn)
+                        criteria.addGroupColumn(dayColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            yearColumn.with(sorting).with(criteria.&addOrder)
+                            monthColumn.with(sorting).with(criteria.&addOrder)
+                            dayColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
+                        }
+                        break
+                    case 'dd.mm.YY hh':
+                        IApiCriteriaColumn hourColumn = sc.extract(column, 'HOUR')
+                        IApiCriteriaColumn dayColumn = sc.day(column)
+                        IApiCriteriaColumn monthColumn = sc.month(column)
+                        IApiCriteriaColumn yearColumn = sc.year(column)
+
+                        criteria.addColumn(sc.concat(dayColumn,sc.constant('.'),
+                                                     monthColumn, sc.constant('.'),
+                                                     yearColumn, sc.constant(', '),
+                                                     hourColumn))
+
+                        criteria.addGroupColumn(yearColumn)
+                        criteria.addGroupColumn(monthColumn)
+                        criteria.addGroupColumn(dayColumn)
+                        criteria.addGroupColumn(hourColumn)
+
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            yearColumn.with(sorting).with(criteria.&addOrder)
+                            monthColumn.with(sorting).with(criteria.&addOrder)
+                            dayColumn.with(sorting).with(criteria.&addOrder)
+                            hourColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(hourColumn))
+                        }
+                        break
+                    case 'dd.mm.YY hh:ii':
+                        criteria.addGroupColumn(column)
+                        criteria.addColumn(column)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            column.with(sorting).with(criteria.&addOrder)
+                        }
+                        break
+                    case 'WD':
+                        def weekColumn = sc.dayOfWeek(column)
+                        criteria.addColumn(weekColumn)
+                        criteria.addGroupColumn(weekColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            weekColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(weekColumn))
+                        }
+                        break
+                    default:
+                        IApiCriteriaColumn dayColumn = sc.day(column)
+                        IApiCriteriaColumn monthColumn = sc.month(column)
+                        criteria.addGroupColumn(dayColumn)
+                        criteria.addGroupColumn(monthColumn)
+                        def sortColumn = sc.concat(dayColumn, sc.constant('/'), monthColumn)
+                        criteria.addColumn(sortColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            monthColumn.with(sorting).with(criteria.&addOrder)
+                            dayColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
+                        }
+                }
+                break
+            case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
+                String format = parameter.format
+                switch (format) {
+                    case 'WW YY':
+                        def weekColumn = sc.extract(column, 'WEEK')
+                        def yearColumn = sc.year(column)
+                        criteria.addColumn(sc.concat(weekColumn,
+                                                     sc.constant(' неделя '),
+                                                     yearColumn))
+                        criteria.addGroupColumn(yearColumn)
+                        criteria.addGroupColumn(weekColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            yearColumn.with(sorting).with(criteria.&addOrder)
+                            weekColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(weekColumn))
+                        }
+                        break
+                    case 'MM YY':
+                        def monthColumn = sc.month(column)
+                        def yearColumn = sc.year(column)
+                        criteria.addColumn(sc.concat(monthColumn, sc.constant('/') , yearColumn))
+                        criteria.addGroupColumn(yearColumn)
+                        criteria.addGroupColumn(monthColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            yearColumn.with(sorting).with(criteria.&addOrder)
+                            monthColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
+                        }
+                        break
+                    case 'QQ YY':
+                        def quarterColumn = sc.extract(column, 'QUARTER')
+                        def yearColumn = sc.year(column)
+                        criteria.addColumn(sc.concat(quarterColumn, sc.constant(' кв-л '),
+                                                     yearColumn))
+                        criteria.addGroupColumn(yearColumn)
+                        criteria.addGroupColumn(quarterColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            yearColumn.with(sorting).with(criteria.&addOrder)
+                            quarterColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(quarterColumn))
+                        }
+                        break
+                    default:
+                        IApiCriteriaColumn groupColumn = sc.extract(column, groupType as String)
+                        criteria.addGroupColumn(groupColumn)
+                        criteria.addColumn(groupColumn)
+                        String sortingType = parameter.sortingType
+                        if (sortingType) {
+                            Closure sorting = getSorting(sortingType)
+                            groupColumn.with(sorting).with(criteria.&addOrder)
+                        }
+                        else
+                        {
+                            criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
+                        }
                 }
                 break
             case GroupType.SECOND_INTERVAL:
@@ -241,6 +397,39 @@ class QueryWrapper implements CriteriaWrapper
                 criteria.addColumn(column)
                 criteria.addGroupColumn(column)
                 break
+            case GroupType.HOURS:
+                String format = parameter.format
+                IApiCriteriaColumn hourColumn = sc.extract(column, 'HOUR')
+                switch (format) {
+                    case 'hh':
+                        criteria.addGroupColumn(hourColumn)
+                        criteria.addColumn(hourColumn)
+                        String sortingType = parameter.sortingType
+                        if(sortingType){
+                            Closure sorting = getSorting(sortingType)
+                            hourColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(hourColumn))
+                        }
+                        break
+                    case 'hh:ii':
+                        IApiCriteriaColumn minuteColumn = sc.extract(column, 'MINUTE')
+                        criteria.addColumn(sc.concat(hourColumn,  sc.constant(':'), minuteColumn))
+                        criteria.addGroupColumn(hourColumn)
+                        criteria.addGroupColumn(minuteColumn)
+                        String sortingType = parameter.sortingType
+                        if(sortingType){
+                            Closure sorting = getSorting(sortingType)
+                            hourColumn.with(sorting).with(criteria.&addOrder)
+                            minuteColumn.with(sorting).with(criteria.&addOrder)
+                        } else {
+                            criteria.addOrder(ApiCriteriaOrders.asc(hourColumn))
+                            criteria.addOrder(ApiCriteriaOrders.asc(minuteColumn))
+                        }
+                        break
+                    default: throw new IllegalArgumentException("Not supported format: $format")
+                }
+                break
             default: throw new IllegalArgumentException("Not supported group type: $groupType")
         }
         return this
@@ -286,6 +475,7 @@ class QueryWrapper implements CriteriaWrapper
             {
                 columnCode = modules.dashboardQueryWrapper.UUID_CODE
             }
+
             Comparison type = parameter.type
             switch (type)
             {
@@ -562,7 +752,10 @@ private static def validate(AggregationParameter parameter) throws IllegalArgume
     {
         case AttributeType.DT_INTERVAL_TYPE:
         case AttributeType.NUMBER_TYPES:
-            if (!(type in Aggregation.with { [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT] })) {
+            if (!(type in Aggregation.with {
+                [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT]
+            }))
+            {
                 throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
             }
             break
@@ -601,7 +794,7 @@ private static def validate(GroupParameter parameter)
             break
         case AttributeType.DATE_TYPES:
             def groupTypeSet = GroupType.with {
-                [OVERLAP, DAY, SEVEN_DAYS, WEEK, MONTH, QUARTER, YEAR]
+                [OVERLAP, DAY, SEVEN_DAYS, WEEK, MONTH, QUARTER, YEAR, HOURS, MINUTES]
             }
             if (!(type in groupTypeSet))
             {

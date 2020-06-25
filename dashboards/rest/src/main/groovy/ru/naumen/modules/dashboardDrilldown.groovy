@@ -194,7 +194,8 @@ class Link
                         ? attributeType == AttributeType.DT_INTERVAL_TYPE ?
                         getDTIntervalGroupType(group.data as String) : group.data as GroupType
                         : null
-                    groupType ? [(groupType): [value]] : null
+                    String format =  group.format
+                    groupType ? [(groupType): [value, format]] : null
                 }
 
                 //Тут находим нужную подгруппу пользовательской группировки
@@ -232,8 +233,8 @@ class Link
                 if (context)
                 {
                     //Тут обработка только группировок по датам
-                    result << getRanges(context, this.&getMinDate.curry(attr.code)).collect { range
-                        ->
+                    result << getRanges(context, this.&getMinDate.curry(attr.code)).collect {
+                        range ->
                         if (attributeType in AttributeType.LINK_TYPES)
                         {
                             def (first, second) = range
@@ -609,6 +610,9 @@ class Link
         def week = context.get(GroupType.WEEK)?.head()
         def day = context.get(GroupType.DAY)?.head()
 
+        def dayFormat = context.get(GroupType.DAY)?.last()
+        def weekFormat = context.get(GroupType.WEEK)?.last()
+
         Collection<Calendar> calendars
 
         if (year)
@@ -653,13 +657,17 @@ class Link
 
             if (quarter)
             {
-                int q = (quarter as String).replace(' кв-л', '') as int
-                int startMonth = (q - 1) * 3
+                def q = (quarter as String).replace(' кв-л', '').split(' ')
+                int startMonth = ((q[0] as int) - 1) * 3
                 int endMonth = startMonth + 2
+                int necessaryYear = q.size() > 1 ? q[1] as int : null
                 setInterval(rangeMonth, [startMonth, endMonth])
 
                 Calendar monthCalendar = calendar.clone()
                 int endDay = monthCalendar.with {
+                    if (necessaryYear) {
+                        set(Calendar.YEAR, necessaryYear)
+                    }
                     set(MONTH, endMonth)
                     getActualMaximum(DAY_OF_MONTH)
                 }
@@ -668,11 +676,15 @@ class Link
 
             if (month)
             {
-                int m = nominativeRussianMonth.get((month as String).toLowerCase())
+                String[] monthValue = month.split()
+                int m = nominativeRussianMonth.get((monthValue[0] as String).toLowerCase())
                 setInterval(rangeMonth, [m, m])
 
                 Calendar monthCalendar = calendar.clone()
                 int endDay = monthCalendar.with {
+                    if (monthValue.size() > 1) {
+                        set(YEAR, monthValue[1] as int)
+                    }
                     set(MONTH, m)
                     getActualMaximum(DAY_OF_MONTH)
                 }
@@ -691,28 +703,91 @@ class Link
 
             if (week)
             {
+                def weekValue = (week as String).contains('-я')
+                    ? week.replace('-я', '').split()
+                    : week.replace(' неделя', '').split()
+                if (weekFormat == 'WW YY') {
+                    int necessaryYear = weekValue[1] as int
+                    calendar.set(Calendar.YEAR, necessaryYear)
+                }
                 Calendar weekCalendar = calendar.clone()
-                weekCalendar.set(Calendar.WEEK_OF_YEAR, week as int)
+
+                weekCalendar.set(Calendar.WEEK_OF_YEAR, weekValue[0] as int)
                 int currentMonth = weekCalendar.get(Calendar.MONTH)
                 def range = weekCalendar.with {
                     Calendar start = it.clone()
                     Calendar end = it.clone()
+                    if (weekFormat == 'WW YY') {
+                        weekCalendar.set(Calendar.YEAR, weekValue[1] as int)
+                    }
 
                     start.set(DAY_OF_WEEK, MONDAY)
                     end.set(DAY_OF_WEEK, SUNDAY)
 
                     [start.get(DAY_OF_MONTH), end.get(DAY_OF_MONTH)]
                 }
+                calendar.set(Calendar.WEEK_OF_YEAR, weekValue[0] as int)
                 setInterval(rangeMonth, [currentMonth, currentMonth])
                 setInterval(rangeDay, range)
             }
 
             if (day)
             {
-                def (String currentDay, String nameMonth) = (day as String).split()
-                int currentMonth = genitiveRussianMonth.get(nameMonth.toLowerCase())
-                setInterval(rangeMonth, [currentMonth, currentMonth])
-                setInterval(rangeDay, [currentDay as int, currentDay as int])
+                switch (dayFormat) {
+                    case 'dd.mm.YY':
+                        List<String> splitDate = (day as String).replace('.', '/').split('/')
+
+                        int dateDay =  splitDate[0] as int
+                        int dateMonth =  splitDate[1] as int
+                        int dateYear = splitDate[2] as int
+
+                        calendar.set(Calendar.YEAR, dateYear)
+                        setInterval(rangeMonth, [dateMonth - 1, dateMonth - 1])
+                        setInterval(rangeDay, [dateDay, dateDay])
+                        break
+                    case 'dd.mm.YY hh':
+                        List<String> fullDate = (day as String).replace('ч', '')
+                                                               .replace(',', '')
+                                                               .split()
+                        String date = fullDate[0]
+                        String[] splitDate = date.replace('.', '/').split('/')
+
+                        int dateDay =  splitDate[0] as int
+                        int dateMonth =  splitDate[1] as int
+                        int dateYear = splitDate[2] as int
+
+                        int dateHour = fullDate[1] as int
+                        calendar.set(Calendar.YEAR, dateYear)
+
+                        setInterval(rangeMonth, [dateMonth - 1, dateMonth - 1])
+                        setInterval(rangeDay, [dateDay, dateDay])
+                        setInterval(rangeHour, [dateHour, dateHour])
+                        break
+                    case 'dd.mm.YY hh:ii':
+                        List<String> fullDate = (day as String).split()
+                        String date = fullDate[0]
+                        String[] splitDate = date.replace('.', '/').split('/')
+
+                        int dateDay =  splitDate[0] as int
+                        int dateMonth =  splitDate[1] as int
+                        int dateYear = splitDate[2] as int
+
+                        String[] dateTime = fullDate[1].split(':')
+                        int dateHour = dateTime[0] as int
+                        int dateMinute = dateTime[1] as int
+                        calendar.set(Calendar.YEAR, dateYear)
+
+                        setInterval(rangeMonth, [dateMonth-1, dateMonth-1])
+                        setInterval(rangeDay, [dateDay, dateDay])
+                        setInterval(rangeHour, [dateHour, dateHour])
+                        setInterval(rangeMinute, [dateMinute, dateMinute])
+                        break
+                    default:
+                        def (String currentDay, String nameMonth) = (day as String).split()
+                        int currentMonth = genitiveRussianMonth.get(nameMonth.toLowerCase())
+                        setInterval(rangeMonth, [currentMonth, currentMonth])
+                        setInterval(rangeDay, [currentDay as int, currentDay as int])
+                }
             }
 
             Calendar start = calendar.clone()

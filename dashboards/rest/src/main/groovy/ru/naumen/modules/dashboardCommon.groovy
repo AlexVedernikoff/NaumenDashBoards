@@ -46,16 +46,21 @@ enum GroupType
     YEAR,
     SEVEN_DAYS,
     OVERLAP,
+
     SECOND_INTERVAL,
     MINUTE_INTERVAL,
     HOUR_INTERVAL,
     DAY_INTERVAL,
     WEEK_INTERVAL,
+
     ACTIVE,
     NOT_STARTED,
     PAUSED,
     STOPPED,
-    EXCEED
+    EXCEED,
+
+    HOURS,
+    MINUTES
 
     static List<GroupType> getTimerTypes()
     {
@@ -313,7 +318,10 @@ abstract class Parameter<T>
 
 class AggregationParameter extends Parameter<Aggregation> {}
 
-class GroupParameter extends Parameter<GroupType> {}
+class GroupParameter extends Parameter<GroupType>
+{
+    String format
+}
 
 class FilterParameter extends Parameter<Comparison>
 {
