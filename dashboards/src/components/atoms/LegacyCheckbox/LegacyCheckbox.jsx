@@ -1,44 +1,35 @@
 // @flow
-import {ACTIVE_COLORS} from './constants';
-import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
 class LegacyCheckbox extends Component<Props> {
-	static defaultProps = {
-		activeColor: ACTIVE_COLORS.LIGHT,
-		className: ''
-	};
-
-	getIconClassName = () => {
-		const {activeColor, className, value} = this.props;
-		const CN = [styles.icon, className];
-
-		if (value && activeColor) {
-			CN.push(`active${this.upperFirst(activeColor)}`);
-		}
-
-		return cn(CN);
-	};
-
 	handleClick = () => {
 		const {name, onClick, value} = this.props;
 		onClick(name, !value);
 	};
 
-	upperFirst = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
-
-	render () {
-		const {label, value} = this.props;
+	renderCheckbox = () => {
+		const {value} = this.props;
 
 		return (
-			<label className={styles.label} onClick={this.handleClick}>
-				<div className={this.getIconClassName()}>
-					{value && <Icon name={ICON_NAMES.ACCEPT} />}
-				</div>
-				<div>{label}</div>
+			<div className={styles.icon}>
+				{value && <Icon name={ICON_NAMES.ACCEPT} />}
+			</div>
+		);
+	};
+
+	renderLabel = () => {
+		const {label, renderLabel} = this.props;
+		return renderLabel ? renderLabel(label) : <div>{label}</div>;
+	};
+
+	render () {
+		return (
+			<label className={styles.container} onClick={this.handleClick}>
+				{this.renderCheckbox()}
+				{this.renderLabel()}
 			</label>
 		);
 	}

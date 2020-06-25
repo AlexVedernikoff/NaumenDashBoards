@@ -143,12 +143,6 @@ export class DashboardContent extends Component<Props, State> {
 		const {id, layout} = widget;
 		const isNew = id === NewWidget.id;
 		const ref = isNew ? this.newWidgetRef : null;
-		/*
-			Раньше использовалось свойство static, для включения\отключения drag`n`drop, но у него наблюдаются проблемы с
-			динамическим изменением значения. Поэтому теперь используются 2 свойства - isResizable и isDraggable. Свойство static
-			необходимо удалять, т.к оно перебивает значения isResizable и isDraggable.
-		 */
-		delete layout.static;
 
 		return (
 			<Widget
