@@ -262,8 +262,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             def normRequest = mappingTableDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             def (totalColumn, totalRow) = requestContent.data
-                                                        .findResult { key, value
-                                                            ->
+                                                        .findResult { key, value ->
                                                             !(value.sourceForCompute) ? value : null
                                                         }
                                                         .with {
@@ -395,7 +394,8 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
 
         if (!customGroup && data.breakdownGroup?.way == 'CUSTOM')
         {
-            customGroup = [attribute: mappingAttribute(mayBeBreakdown)] + (data.breakdownGroup.data as Map<String, Object>)
+            customGroup = [attribute: mappingAttribute(mayBeBreakdown)]
+                        + (data.breakdownGroup.data as Map<String, Object>)
         }
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             customGroup, requisite: requisite]]
@@ -797,7 +797,8 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
 
         if (!customGroup && data.breakdownGroup?.way == 'CUSTOM')
         {
-            customGroup = [attribute: mappingAttribute(mayBeBreakdown)] + (data.breakdownGroup.data as Map<String, Object>)
+            customGroup = [attribute: mappingAttribute(mayBeBreakdown)]
+                        + (data.breakdownGroup.data as Map<String, Object>)
         }
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             customGroup, requisite: requisite]]
@@ -818,7 +819,8 @@ private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<Strin
         type: attr.type == AttributeType.DT_INTERVAL_TYPE
             ? getDTIntervalGroupType(groupType.data as String)
             : groupType.data as GroupType,
-        attribute: mappingAttribute(attr)
+        attribute: mappingAttribute(attr),
+        format: groupType.format
     ) : null
 }
 
@@ -960,8 +962,7 @@ private Map<String, RequestData> produceComputationData(Closure getData, Map map
     def formula = (node as ComputationRequisiteNode).formula
     def variableNames = new FormulaCalculator(formula).variableNames
 
-    variableNames.collectEntries { variableName
-        ->
+    variableNames.collectEntries { variableName ->
         def comp = computeData[variableName] as Map<String, Object>
 
         def attribute = comp?.aggregation?.attribute
@@ -1388,8 +1389,7 @@ private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data
 {
     return mappingFilter(data) { Map condition ->
         String conditionType = condition.type
-        Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type
-            ->
+        Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type ->
             def interval = condition.data as Map
             // тут будет лежать значение временного интервала
             def value = interval
@@ -1973,22 +1973,61 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                 default:
                     return parameter.attribute?.code == 'UUID' ? value.split('\\$', 2)[1] : value
             }
-        case GroupType.DAY:
-            def (day, month) = value.split('/', 2)
-            String monthName = GENITIVE_RUSSIAN_MONTH[(month as int) - 1]
-            return "$day $monthName"
+    case GroupType.DAY:
+        String format = parameter.format
+        switch (format) {
+            case 'dd':
+                return value + '-й'
+            case 'dd.mm.YY':
+                value = value.tokenize('./')*.padLeft(2, '0').join('.')
+                return value
+            case 'dd.mm.YY hh':
+                String[] dateParts = value.split(', ')
+                dateParts[0] = dateParts[0].tokenize('./')*.padLeft(2, '0').join('.')
+                dateParts[1] = dateParts[1].padLeft(2, '0')
+                return "${dateParts[0]}, ${dateParts[1]}ч"
+            case 'dd.mm.YY hh:ii':
+                return value
+            case 'WD':
+                String[] weekDayNames = ['понедельник', 'вторник', 'среда',
+                                         'четверг', 'пятница', 'суббота', 'воскресенье']
+                return weekDayNames[(value as int) - 1]
+            default:
+                def (day, month) = value.split('/', 2)
+                String monthName = GENITIVE_RUSSIAN_MONTH[(month as int) - 1]
+                return "$day $monthName"
+        }
+        break
         case GroupType.MONTH:
-            return NOMINATIVE_RUSSIAN_MONTH[(value as int) - 1]
+            String format = parameter.format
+            switch(format) {
+                case 'MM YY':
+                    String[] date = value.split('/')
+                    String monthNum = date[0]
+                    value = NOMINATIVE_RUSSIAN_MONTH[(monthNum as int) - 1] + ' ' + date[1]
+                    return value
+                default:
+                    return NOMINATIVE_RUSSIAN_MONTH[(value as int) - 1]
+            }
         case GroupType.QUARTER:
-            return "$value кв-л"
+            String format = parameter.format
+            switch(format) {
+                case 'QQ YY':
+                    return value
+                default:
+                    return "$value кв-л"
+            }
         case [GroupType.WEEK, GroupType.YEAR]:
-            return value
+            String format = parameter.format
+            switch (format) {
+                case 'ww':
+                    return value + '-я'
+                default:
+                    return value
+            }
         case GroupType.SEVEN_DAYS:
             def russianLocale = new Locale("ru")
-            SimpleDateFormat standardDateFormatter = new SimpleDateFormat(
-                "yyyy-MM-dd",
-                russianLocale
-            )
+            SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
             SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd MMMM", russianLocale)
             def (star, numberWeek) = value.split("#", 2)
             def minDate = standardDateFormatter.parse(star as String)
@@ -2004,6 +2043,11 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                 specialDateFormatter.format(getTime())
             }
             return "$startDate - $endDate"
+        case GroupType.MINUTES:
+            return value.padLeft(2, '0')
+        case GroupType.HOURS:
+            value = value.tokenize(':/')*.padLeft(2, '0').join(':')
+            return value
         case GroupType.SECOND_INTERVAL:
         case GroupType.MINUTE_INTERVAL:
         case GroupType.HOUR_INTERVAL:
@@ -2078,11 +2122,9 @@ private RoundDiagram mappingRoundDiagram(List list)
             return new RoundDiagram()
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
-            return new RoundDiagram(
-                series: (aggregationResult as List).collect {
-                    it as Double
-                }, labels: groupResult as Set
-            )
+            return new RoundDiagram(series: (aggregationResult as List).collect {
+                it as Double
+            }, labels: groupResult as Set)
         default: throw new IllegalArgumentException("Invalid format result data set")
     }
 }
@@ -2227,7 +2269,9 @@ private ComboDiagram mappingComboDiagram(List list,
 private setTitleInLinkAttribute(def attr)
 {
     def validTypes = AttributeType.LINK_TYPES
-    return attr.type in validTypes ? attr + [ref: [code: 'title', type: 'string', title: 'Название']] : attr
+    return attr.type in validTypes
+        ? attr + [ref: [code: 'title', type: 'string', title: 'Название']]
+        : attr
 }
 
 /**
