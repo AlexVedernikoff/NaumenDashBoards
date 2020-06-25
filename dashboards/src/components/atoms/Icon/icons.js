@@ -158,7 +158,7 @@ sprite.add(ICON_NAMES.LINE_CHART, `
 `);
 
 sprite.add(ICON_NAMES.LEFT_ANGLE, `
-	<path fill-rule="evenodd" clip-rule="evenodd" d="M0 4L6 0V8L0 4Z" />
+	<path fill-rule="evenodd" clip-rule="evenodd" d="M5 8L10 4V12L5 8Z" />
 `);
 
 sprite.add(ICON_NAMES.NUMBER, `
@@ -232,7 +232,7 @@ sprite.add(ICON_NAMES.REMOVE, `
 `);
 
 sprite.add(ICON_NAMES.RIGHT_ANGLE, `
-	<path fill-rule="evenodd" clip-rule="evenodd" d="M6 4L0 8L1.14479e-07 0L6 4Z" />
+	<path fill-rule="evenodd" clip-rule="evenodd" d="M11 8L6 12L6 4L11 8Z" />
 `);
 
 sprite.add(ICON_NAMES.STACKED_BAR_CHART, `
