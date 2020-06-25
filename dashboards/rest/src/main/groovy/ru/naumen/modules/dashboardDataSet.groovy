@@ -1970,6 +1970,15 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                     return api.metainfo.getStateTitle(fqnClass, value)
                 case AttributeType.META_CLASS_TYPE:
                     return api.metainfo.getMetaClass(value).title
+                case AttributeType.BOOL_TYPE:
+                    String viewMode = api.metainfo.getMetaClass(fqnClass)
+                                         .getAttribute(parameter.attribute.code)
+                                         .viewPresentation
+                    if (viewMode == "Presentation 'yesNo'") {
+                        return api.utils.formatters.yesNoFormatter(value.toBoolean())
+                    } else {
+                        return api.utils.formatters.oneZeroFormatter(value.toBoolean())
+                    }
                 default:
                     return parameter.attribute?.code == 'UUID' ? value.split('\\$', 2)[1] : value
             }
