@@ -189,18 +189,18 @@ export type CustomGroupsMap = {
 };
 
 type RemoveCustomGroup = {
-	type: typeof CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP,
-	payload: string
+	payload: string,
+	type: typeof CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP
 };
 
 type SaveCustomGroup = {
-	type: typeof CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP,
-	payload: CustomGroup
+	payload: CustomGroup,
+	type: typeof CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP
 };
 
 type SetCustomGroups = {
-	type: typeof CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS,
-	payload: CustomGroupsMap
+	payload: CustomGroupsMap,
+	type: typeof CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS
 };
 
 type UnknownCustomGroupsAction = {

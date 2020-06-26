@@ -20,8 +20,8 @@ export type DataSourceMap = {
 };
 
 export type ReceiveDataSources = {
-	type: typeof DATA_SOURCES_EVENTS.RECEIVE_DATA_SOURCES,
-	payload: RawDataSource[]
+	payload: RawDataSource[],
+	type: typeof DATA_SOURCES_EVENTS.RECEIVE_DATA_SOURCES
 };
 
 type RecordDataSourcesError = {

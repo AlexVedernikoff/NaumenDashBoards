@@ -9,8 +9,8 @@ export type Options = {
 
 export type SheetColumn = {
 	accessor: string,
-	Footer: string,
-	Header: string
+	footer: string,
+	header: string
 };
 
 export type SheetData = {

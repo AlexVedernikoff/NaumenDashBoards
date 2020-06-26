@@ -323,33 +323,33 @@ export type Widget =
 ;
 
 export type AddWidget = {
-	type: typeof WIDGETS_EVENTS.ADD_WIDGET,
-	payload: NewWidget
+	payload: NewWidget,
+	type: typeof WIDGETS_EVENTS.ADD_WIDGET
 };
 
 export type UpdateWidget = {
-	type: typeof WIDGETS_EVENTS.UPDATE_WIDGET,
-	payload: Widget
+	payload: Widget,
+	type: typeof WIDGETS_EVENTS.UPDATE_WIDGET
 };
 
 export type SetCreatedWidget = {
-	type: typeof WIDGETS_EVENTS.SET_CREATED_WIDGET,
-	payload: Widget
+	payload: Widget,
+	type: typeof WIDGETS_EVENTS.SET_CREATED_WIDGET
 };
 
 export type DeleteWidget = {
-	type: typeof WIDGETS_EVENTS.DELETE_WIDGET,
-	payload: string
+	payload: string,
+	type: typeof WIDGETS_EVENTS.DELETE_WIDGET
 };
 
 export type EditLayout = {
-	type: typeof WIDGETS_EVENTS.EDIT_LAYOUT,
-	payload: Layout
+	payload: Layout,
+	type: typeof WIDGETS_EVENTS.EDIT_LAYOUT
 };
 
 export type SelectWidget = {
-	type: typeof WIDGETS_EVENTS.SET_SELECTED_WIDGET,
-	payload: string
+	payload: string,
+	type: typeof WIDGETS_EVENTS.SET_SELECTED_WIDGET
 };
 
 export type ResetWidget = {
@@ -381,13 +381,13 @@ export type RecordWidgetDeleteError = {
 };
 
 export type SetWidgets = {
-	type: typeof WIDGETS_EVENTS.SET_WIDGETS,
-	payload: Array<Widget>
+	payload: Array<Widget>,
+	type: typeof WIDGETS_EVENTS.SET_WIDGETS
 };
 
 type UnknownWidgetsAction = {
-	type: typeof WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION,
-	payload: null
+	payload: null,
+	type: typeof WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION
 };
 
 export type WidgetsAction =

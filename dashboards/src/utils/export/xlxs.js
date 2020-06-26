@@ -21,11 +21,11 @@ class Sheet {
 
 	createFooter = () => `<tr>${this.columns.map(this.createFooterColumn).join('')}</tr>`;
 
-	createFooterColumn = ({Footer}: SheetColumn) => `<td>${Footer}</td>`;
+	createFooterColumn = ({footer}: SheetColumn) => `<td>${footer}</td>`;
 
 	createHead = () => `<tr>${this.columns.map(this.createHeadColumn).join('')}</tr>`;
 
-	createHeadColumn = ({Header}: SheetColumn) => `<th>${Header}</th>`;
+	createHeadColumn = ({header}: SheetColumn) => `<th>${header}</th>`;
 
 	createRow = (row) => `<tr>${this.columns.map(column => this.createRowColumn(column, row)).join('')}</tr>`;
 

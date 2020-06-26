@@ -4,8 +4,8 @@ import {ICON_NAMES, ICON_SIZES} from './constants';
 export type IconName = $Keys<typeof ICON_NAMES>;
 
 export type Symbol = {
-	id: IconName,
-	content: string
+	content: string,
+	id: IconName
 };
 
 export type Props = {

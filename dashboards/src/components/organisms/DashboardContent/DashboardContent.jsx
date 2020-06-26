@@ -57,7 +57,7 @@ export class DashboardContent extends Component<Props, State> {
 	handleLayoutChange = (layout: Layout) => this.props.editLayout(layout);
 
 	handleWidgetSelect = (widgetId: string) => {
-		const {selectedWidget, selectWidget} = this.props;
+		const {selectWidget, selectedWidget} = this.props;
 
 		if (widgetId !== selectedWidget) 	{
 			selectWidget(widgetId);

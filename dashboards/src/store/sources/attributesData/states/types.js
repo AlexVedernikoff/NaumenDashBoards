@@ -7,8 +7,8 @@ export type Data = {
 };
 
 export type StateData = {
-	items: Array<Data>,
 	error: boolean,
+	items: Array<Data>,
 	loading: boolean
 };
 
@@ -22,18 +22,18 @@ export type ReceivePayload = {
 };
 
 type ReceiveStateData = {
-	type: typeof STATES_EVENTS.RECEIVE_META_CLASS_STATES,
-	payload: ReceivePayload
+	payload: ReceivePayload,
+	type: typeof STATES_EVENTS.RECEIVE_META_CLASS_STATES
 };
 
 type RecordStateDataError = {
-	type: typeof STATES_EVENTS.RECORD_META_CLASS_STATES_ERROR,
-	payload: string
+	payload: string,
+	type: typeof STATES_EVENTS.RECORD_META_CLASS_STATES_ERROR
 };
 
 type RequestStateData = {
-	type: typeof STATES_EVENTS.REQUEST_META_CLASS_STATES,
-	payload: string
+	payload: string,
+	type: typeof STATES_EVENTS.REQUEST_META_CLASS_STATES
 };
 
 type UnknownStatesAction = {

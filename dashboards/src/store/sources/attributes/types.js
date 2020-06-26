@@ -13,9 +13,9 @@ export type Attribute = {
 };
 
 export type MapData = {
-	options: Attribute[],
 	error: boolean,
 	loading: boolean,
+	options: Attribute[],
 	uploaded: boolean
 };
 
@@ -24,26 +24,26 @@ export type AttributesMap = {
 };
 
 type RequestAttributes = {
-	type: typeof ATTRIBUTES_EVENTS.REQUEST_ATTRIBUTES,
-	payload: string
+	payload: string,
+	type: typeof ATTRIBUTES_EVENTS.REQUEST_ATTRIBUTES
 };
 
 type ReceiveAttributes = {
-	type: typeof ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES,
 	payload: {
 		attributes: Attribute[],
 		classFqn: string
-	}
+	},
+	type: typeof ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES
 };
 
 type RecordAttributesError = {
-	type: typeof ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR,
-	payload: string
+	payload: string,
+	type: typeof ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR
 };
 
 type UnknownAttributesAction = {
-	type: typeof ATTRIBUTES_EVENTS.UNKNOWN_ATTRIBUTES_ACTION,
-	payload: null
+	payload: null,
+	type: typeof ATTRIBUTES_EVENTS.UNKNOWN_ATTRIBUTES_ACTION
 };
 
 export type AttributesAction =

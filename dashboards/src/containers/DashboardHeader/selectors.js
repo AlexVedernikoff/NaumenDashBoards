@@ -14,7 +14,7 @@ import {switchDashboard} from 'store/context/actions';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard} = state;
-	const {autoUpdate, editable, editMode, personal, personalCreating, personalDeleting} = dashboard;
+	const {autoUpdate, editMode, editable, personal, personalCreating, personalDeleting} = dashboard;
 	const {switching, user} = context;
 
 	return {
