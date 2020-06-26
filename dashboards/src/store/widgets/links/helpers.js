@@ -2,7 +2,6 @@
 import type {
 	LinksState,
 	ReceiveLink,
-	ReceiveLinkPayload,
 	RecordErrorLink,
 	RequestLink
 } from './types';
@@ -28,12 +27,11 @@ export const setRequestLink = (state: LinksState, {payload}: RequestLink): Links
 /**
  * Устанавливаем полученную ссылку по id
  * @param {LinksState} state - хранилище ссылок на данные диаграмм
- * @param {ReceiveLinkPayload} payload - ссылка и индетификатор ссылки
+ * @param {string} payload - id виджета
  * @returns {LinksState}
  */
 export const setLink = (state: LinksState, {payload}: ReceiveLink): LinksState => {
-	state.map[payload.id] = {
-		data: payload.link,
+	state.map[payload] = {
 		error: false,
 		loading: false
 	};
@@ -47,7 +45,7 @@ export const setLink = (state: LinksState, {payload}: ReceiveLink): LinksState =
 /**
  * Фиксируем ошибку в случае неудачного получения ссылки
  * @param {LinksState} state - хранилище ссылок на данные диаграмм
- * @param {string} payload - id ссылки
+ * @param {string} payload - id виджета
  * @returns {LinksState}
  */
 export const setLinkError = (state: LinksState, {payload}: RecordErrorLink): LinksState => {
