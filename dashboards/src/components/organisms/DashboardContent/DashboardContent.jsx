@@ -1,5 +1,5 @@
 // @flow
-import {BREAKPOINTS, COLS, CONTAINER_PADDING, ROW_HEIGHT} from './constants';
+import {BREAKPOINTS, COLS, ROW_HEIGHT} from './constants';
 import type {DivRef} from 'components/types';
 import type {Layout} from 'utils/layout/types';
 import {NewWidget} from 'utils/widget';
@@ -56,6 +56,15 @@ export class DashboardContent extends Component<Props, State> {
 
 	handleLayoutChange = (layout: Layout) => this.props.editLayout(layout);
 
+	handleShowGrid = () => {
+		const {current: grid} = gridRef;
+
+		if (grid) {
+			// $FlowFixMe
+			grid.firstChild.classList.toggle(styles.drawnGrid);
+		}
+	};
+
 	handleWidgetSelect = (widgetId: string) => {
 		const {selectWidget, selectedWidget} = this.props;
 
@@ -99,9 +108,10 @@ export class DashboardContent extends Component<Props, State> {
 					breakpoints={BREAKPOINTS}
 					cols={COLS}
 					compactType={null}
-					containerPadding={CONTAINER_PADDING}
 					isDraggable={isEditable}
 					isResizable={isEditable}
+					onDragStart={this.handleShowGrid}
+					onDragStop={this.handleShowGrid}
 					onLayoutChange={this.handleLayoutChange}
 					rowHeight={ROW_HEIGHT}
 					width={width}
@@ -118,7 +128,7 @@ export class DashboardContent extends Component<Props, State> {
 
 		return (
 			<div className={containerCN} ref={this.gridContainerRef}>
-				<div ref={gridRef}>
+				<div className={styles.grid} ref={gridRef}>
 					{this.renderGrid()}
 				</div>
 			</div>

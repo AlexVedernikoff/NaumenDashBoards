@@ -4,6 +4,7 @@ import type {OnChangeInputEvent} from 'components/types';
 import type {ParamsTabProps} from 'WidgetFormPanel/types';
 
 export type TextAreaProps = {
+	className?: string,
 	errorPath?: string,
 	handleBlur?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
 	handleChange: OnChangeInputEvent => void,

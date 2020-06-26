@@ -13,13 +13,10 @@ const COLS = {
 	xs: 1
 };
 
-const CONTAINER_PADDING = [25, 25];
-
 const ROW_HEIGHT = 50;
 
 export {
 	BREAKPOINTS,
 	COLS,
-	CONTAINER_PADDING,
 	ROW_HEIGHT
 };
