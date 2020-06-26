@@ -343,7 +343,7 @@ class Link
                                 }
                             }
                             break
-                        case [AttributeType.BO_LINKS_TYPE, AttributeType.BACK_BO_LINKS_TYPE, AttributeType.OBJECT_TYPE]:
+                        case AttributeType.LINK_TYPES:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     switch (it.type.toLowerCase())
@@ -420,38 +420,6 @@ class Link
                                             "Not supported condition type: ${ it.type }"
                                         )
                                     }
-                                }
-                            }
-                            break
-                        case [AttributeType.CATALOG_ITEM_SET_TYPE, AttributeType.CATALOG_ITEM_TYPE]:
-                            result += customSubGroupCondition.collect { orCondition ->
-                                orCondition.collect {
-                                    def value = it.data.uuid
-                                    switch (it.type.toLowerCase())
-                                    {
-                                        case 'empty':
-                                            return filterBuilder.OR(attr.code, 'null', null)
-                                        case 'not_empty':
-                                            return filterBuilder.OR(attr.code, 'notNull', null)
-                                        case 'contains':
-                                            return filterBuilder.OR(attr.code, 'contains', [value])
-                                        case 'not_contains':
-                                            return filterBuilder.OR(attr.code, 'notContains', [value])
-                                        case 'contains_any':
-                                            return filterBuilder.OR(attr.code, 'contains', value)
-                                        case 'title_contains':
-                                            return filterBuilder.OR(attr.code, 'titleContains', value)
-                                        case 'title_not_contains':
-                                            return filterBuilder.OR(attr.code, 'titleNotContains', value)
-                                        case 'contains_current_object':
-                                            return filterBuilder.OR(attr.code, 'contains', subjectUUID)
-                                        case 'contains_attr_current_object':
-                                    //TODO: На фронте идёт работа по формирования формата  этого условия
-                                        default: throw new IllegalArgumentException(
-                                            "Not supported condition type: ${ it.type }"
-                                        )
-                                    }
-
                                 }
                             }
                             break

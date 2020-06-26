@@ -635,11 +635,23 @@ List<List> getData(RequestData requestData)
                 type: Aggregation.COUNT_CNT,
                 attribute: totalAttribute
             )
-            int totalCount = QueryWrapper.build(requestData.source)
-                                         .aggregate(
-                                             totalParameter
-                                         )//TODO: возможно тут должны применяться фильтры от основного источника
-                                         .result.head().head()
+
+            def filterAttribute = requestData?.groups?.find()?.attribute
+            def filterParameter = filterAttribute
+                ? new FilterParameter(
+                title: 'filter',
+                type: Comparison.NOT_NULL,
+                attribute: filterAttribute)
+                : null
+
+            def wrappedQuery = QueryWrapper.build(requestData.source)
+            if (filterParameter)
+            {
+                wrappedQuery.filtering([filterParameter])
+            }
+            int totalCount = wrappedQuery.aggregate(totalParameter)
+                                    .result.head().head()
+
             wrapper.percentAggregate(parameter, totalCount)
         }
         else
