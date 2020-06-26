@@ -30,6 +30,7 @@ enum DiagramType
     LINE,
     PIE,
     SUMMARY,
+    SPEEDOMETER,
     TABLE
 }
 

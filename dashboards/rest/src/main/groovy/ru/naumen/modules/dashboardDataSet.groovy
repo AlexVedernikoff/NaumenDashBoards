@@ -255,7 +255,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             def normRequest = mappingRoundDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             return mappingRoundDiagram(res)
-        case SUMMARY:
+        case [SUMMARY, SPEEDOMETER]:
             def normRequest = mappingSummaryDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
             return mappingSummaryDiagram(res)
