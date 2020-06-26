@@ -18,18 +18,12 @@ export type DrillDownMixin = {
 };
 
 export type Link = {
-	data?: string,
 	error: boolean,
 	loading: boolean
 };
 
 export type LinkMap = {
 	[key: string]: Link
-};
-
-export type ReceiveLinkPayload = {
-	id: string,
-	link: string
 };
 
 export type RequestLink = {
@@ -39,7 +33,7 @@ export type RequestLink = {
 
 export type ReceiveLink = {
 	type: typeof LINKS_EVENTS.RECEIVE_LINK,
-	payload: ReceiveLinkPayload
+	payload: string
 };
 
 export type RecordErrorLink = {

@@ -1,7 +1,7 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import type {DrillDownMixin, ReceiveLinkPayload} from './types';
+import type {DrillDownMixin} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {LINKS_EVENTS} from './constants';
 import type {Widget} from 'store/widgets/data/types';
@@ -52,17 +52,12 @@ const createPostData = (widget: Widget, index: number) => {
  */
 const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let postData = createPostData(widget, index);
-	let key = widget.id;
 
 	if (mixin && typeof mixin === 'object') {
 		postData = {...postData, ...mixin};
 	}
 
-	if (index) {
-		key = `${key}_${widget.data[index][FIELDS.dataKey]}`;
-	}
-
-	dispatch(getLink(key, postData));
+	dispatch(getLink(widget.id, postData));
 };
 
 /**
@@ -72,26 +67,19 @@ const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): Thunk
  * @returns {Function}
  */
 const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {context, widgets} = getState();
+	const {context} = getState();
 	const {subjectUuid} = context;
-	const {links} = widgets;
-	let link = links[id];
 
-	if (!link) {
-		dispatch(requestLink(id));
-		try {
-			const {data} = await client.post(buildUrl('dashboardDrilldown', 'getLink', `requestContent,'${subjectUuid}'`), postData);
-			link = `${data.replace(/^(.+?)\?/, '/sd/operator/?')}`;
+	dispatch(requestLink(id));
+	try {
+		const {data} = await client.post(buildUrl('dashboardDrilldown', 'getLink', `requestContent,'${subjectUuid}'`), postData);
+		const link = `${data.replace(/^(.+?)\?/, '/sd/operator/?')}`;
 
-			dispatch(
-				receiveLink({id, link})
-			);
-		} catch (e) {
-			dispatch(recordLinkError(id));
-		}
+		window.open(link);
+		dispatch(receiveLink(id));
+	} catch (e) {
+		dispatch(recordLinkError(id));
 	}
-
-	link && window.open(link);
 };
 
 const requestLink = (payload: string) => ({
@@ -99,7 +87,7 @@ const requestLink = (payload: string) => ({
 	payload
 });
 
-const receiveLink = (payload: ReceiveLinkPayload) => ({
+const receiveLink = (payload: string) => ({
 	type: LINKS_EVENTS.RECEIVE_LINK,
 	payload
 });
