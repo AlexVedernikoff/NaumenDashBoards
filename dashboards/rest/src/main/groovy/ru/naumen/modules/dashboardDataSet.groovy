@@ -1444,8 +1444,8 @@ private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data,
         {
             case 'contains':
                 return buildFilterParameterFromCondition(Comparison.CONTAINS)
-            case 'not_contains_not_empty':
-                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS_AND_NOT_NULL)
+            case 'not_contains_including_empty':
+                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS_INCLUDING_EMPTY)
             case 'not_contains':
                 return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS)
             case 'empty':
@@ -1943,10 +1943,14 @@ private List formatGroupSet(RequestData data, List list)
         case 2:
             return list.collect { el ->
                 def (value, String group, String breakdown) = el
-                Closure formatGroup =
-                    this.&formatGroup.curry(data.groups[0] as GroupParameter, data.source.classFqn)
-                Closure formatBreakdown =
-                    this.&formatGroup.curry(data.groups[1] as GroupParameter, data.source.classFqn)
+                Closure formatGroup = this.&formatGroup.curry(
+                    data.groups[0] as GroupParameter,
+                    data.source.classFqn
+                )
+                Closure formatBreakdown = this.&formatGroup.curry(
+                    data.groups[1] as GroupParameter,
+                    data.source.classFqn
+                )
                 [value, formatGroup(group), formatBreakdown(breakdown)]
             }
     }

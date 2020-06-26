@@ -489,14 +489,10 @@ class QueryWrapper implements CriteriaWrapper
                     return api.filters.attrValueEq(code, parameter.value)
                               .with(api.filters.&not)
                 case Comparison.NOT_EQUAL_AND_NOT_NULL:
-                    def notNullFilter = api.filters.attrContains.isNotNull(columnCode)
-                    def notEqualFilter = api.filters.attrContains(
-                        columnCode,
-                        parameter.value,
-                        false,
-                        false
-                    ).with(api.filters.&not)
-                    return api.filters.and(notEqualFilter, notNullFilter)
+                    def nullFilter = api.filters.isNull(columnCode)
+                    def notEqualFilter = api.filters.attrValueEq(columnCode, parameter.value)
+                                            .with(api.filters.&not)
+                    return api.filters.or(notEqualFilter, nullFilter)
                 case Comparison.GREATER:
                     return api.filters.inequality(columnCode, '>', parameter.value)
                 case Comparison.LESS:
@@ -515,14 +511,13 @@ class QueryWrapper implements CriteriaWrapper
                 case Comparison.NOT_CONTAINS:
                     return api.filters.attrContains(columnCode, parameter.value, false, false)
                               .with(api.filters.&not)
-                case Comparison.NOT_CONTAINS_AND_NOT_NULL:
-                    def notNullFilter = api.filters.isNotNull(columnCode)
+                case Comparison.NOT_CONTAINS_INCLUDING_EMPTY:
+                    def nullFilter = api.filters.isNull(columnCode)
                     def notContainsFilter = api.filters.attrContains(
-                        columnCode,
-                        parameter.value,
+                        columnCode, parameter.value,
                         false, false
                     ).with(api.filters.&not)
-                    return api.filters.and(notContainsFilter, notNullFilter)
+                    return api.filters.or(notContainsFilter, nullFilter)
                 case Comparison.EQUAL_REMOVED:
                     return api.filters.attrContains(columnCode, parameter.value, false, false)
                 case Comparison.NOT_EQUAL_REMOVED:

@@ -482,6 +482,8 @@ class Link
                 return 'contains'
             case ['not_contains', 'not_equal', 'not_contains_not_empty']:
                 return 'notContains'
+            case ['not_contains_including_empty', 'not_equal_not_empty']:
+                return 'notContainsIncludeEmpty'
             case 'greater':
                 return 'greater'
             case 'less':
@@ -824,8 +826,10 @@ private Map<String, Object> transformRequest(Map<String, Object> requestContent,
 {
     Closure<Map<String, Object>> transform = { Map<String, Object> request ->
         Map<String, Object> res = [:] << request
-        res.descriptor =
-            DashboardMarshaller.substitutionCardObject(request.descriptor as String, cardObjectUuid)
+        res.descriptor = DashboardMarshaller.substitutionCardObject(
+            request.descriptor as String,
+            cardObjectUuid
+        )
         return res
     }
     return cardObjectUuid ? transform(requestContent) : requestContent
