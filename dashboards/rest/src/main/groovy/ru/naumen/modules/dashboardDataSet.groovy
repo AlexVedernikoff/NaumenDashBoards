@@ -249,7 +249,8 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             def res = getDiagramData(normRequest)
             String key = normRequest.data.keySet().head()
             String legend = normRequest.data[key].aggregations.attribute.sourceName.head()
-            return mappingStandardDiagram(res, legend)
+            boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
+            return mappingStandardDiagram(res, legend, reverseGroups)
         case [DONUT, PIE]:
             def normRequest = mappingRoundDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
@@ -283,7 +284,8 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                         dataKey  : key
                     ]
                 }
-            return mappingComboDiagram(res, firstAdditionalData as Map, secondAdditionalData as Map)
+            boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
+            return mappingComboDiagram(res, firstAdditionalData as Map, secondAdditionalData as Map, reverseGroups)
         default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
     }
 }
@@ -1832,7 +1834,9 @@ private def getDiagramData(DiagramRequest request)
                     RequestData requestData = request.data[requisiteNode.dataKey]
                     Closure formatAggregation = this.&formatAggregationSet
                     Closure formatGroup = this.&formatGroupSet.curry(requestData)
-                    def res = modules.dashboardQueryWrapper.getData(requestData).with(formatGroup).with(formatAggregation)
+                    def res = modules.dashboardQueryWrapper.getData(requestData)
+                                     .with(formatGroup)
+                                     .with(formatAggregation)
                     return res ? [(requisiteNode.title): res] : [:]
                 case 'computation':
                     def requisiteNode = node as ComputationRequisiteNode
@@ -2088,7 +2092,7 @@ private def formatResult(Map data)
  * @param list - данные диаграмы
  * @return StandardDiagram
  */
-private StandardDiagram mappingStandardDiagram(List list, String legendName)
+private StandardDiagram mappingStandardDiagram(List list, String legendName, boolean reverseGroups)
 {
     def resultDataSet = list.head() as List<List>
     def transposeDataSet = resultDataSet.transpose()
@@ -2103,15 +2107,35 @@ private StandardDiagram mappingStandardDiagram(List list, String legendName)
         case 3:
             def (groupResult, breakdownResult) = transposeDataSet.tail()
             def categories = groupResult as Set
-            def series = (breakdownResult as Set).collect { breakdownValue ->
-                def data = categories.collect { groupValue ->
-                    (list.head() as List<List>).findResult { el ->
-                        el.tail() == [groupValue, breakdownValue] ? el.head() : null
-                    } ?: 0
+            StandardDiagram standardDiagram = new StandardDiagram()
+            if (reverseGroups) {
+                def series = (breakdownResult as Set)
+                def categoriesForDiagram = breakdownResult as Set
+                def seriesForDiagram = categories.collect { categoriesValue ->
+                    def data = series.collect {
+                        seriesValue ->
+                            (list.head() as List<List>).findResult { el->
+                                el.tail() == [categoriesValue, seriesValue] ? el.head() : null
+                            } ?: 0
+                    }
+                    new Series(name: categoriesValue, data: data)
                 }
-                new Series(name: breakdownValue, data: data)
+                standardDiagram = new StandardDiagram(
+                    categories: categoriesForDiagram,
+                    series: seriesForDiagram
+                )
+            } else {
+                def series = (breakdownResult as Set).collect { breakdownValue ->
+                    def data = categories.collect { groupValue ->
+                        (list.head() as List<List>).findResult { el ->
+                            el.tail() == [groupValue, breakdownValue] ? el.head() : null
+                        } ?: 0
+                    }
+                    new Series(name: breakdownValue, data: data)
+                }
+                standardDiagram = new StandardDiagram(categories: categories, series: series)
             }
-            return new StandardDiagram(categories: categories, series: series)
+            return standardDiagram
         default: throw new IllegalArgumentException("Invalid format result data set")
     }
 }
@@ -2218,25 +2242,28 @@ private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean
  */
 private ComboDiagram mappingComboDiagram(List list,
                                          Map firstAdditionalData,
-                                         Map secondAdditionalData)
+                                         Map secondAdditionalData,
+                                         boolean reverseGroups)
 {
     def (firstResultDataSet, secondResultDataSet) = list
     def firstTransposeDataSet = (firstResultDataSet as List<List>)?.transpose() ?: []
     def secondTransposeDataSet = (secondResultDataSet as List<List>)?.transpose() ?: []
 
     Set labels = (firstTransposeDataSet[1] ?: []) + (secondTransposeDataSet[1] ?: [])
+    Set diagramLabels = (firstTransposeDataSet[2] ?: []) + (secondTransposeDataSet[2] ?: [])
 
-    Closure getsSeries = { Set labelSet, List<List> dataSet, Map additionalData ->
+    Closure getsSeries = { Set labelSet,
+                           List<List> dataSet,
+                           Map additionalData,
+                           Set labelDiagramSet,
+                           boolean customGroupFromBreak ->
         def transposeData = dataSet?.transpose() ?: []
-        switch (transposeData.size())
-        {
+        switch (transposeData.size()) {
             case 0:
                 return []
             case 2:
                 Collection data = labelSet.collect { group ->
-                    dataSet.findResult {
-                        it[1] == group ? it[0] : null
-                    } ?: '0'
+                    dataSet.findResult { it[1] == group ? it[0] : null } ?: '0'
                 }
                 def result = new SeriesCombo(
                     type: additionalData.type as String,
@@ -2247,27 +2274,59 @@ private ComboDiagram mappingComboDiagram(List list,
                 )
                 return [result]
             case 3:
-                return (transposeData[2] as Set).collect { breakdown ->
-                    new SeriesCombo(
-                        type: additionalData.type as String,
-                        breakdownValue: breakdown as String,
-                        data: labelSet.collect { group ->
-                            dataSet.findResult {
-                                it.tail() == [group, breakdown] ? it.head() : null
-                            } ?: '0'
-                        },
-                        name: breakdown as String,
-                        dataKey: additionalData.dataKey as String
-                    )
+                if (customGroupFromBreak) {
+                    return labelSet.collect { label ->
+                        new SeriesCombo(
+                            type: additionalData.type as String,
+                            breakdownValue: label as String,
+                            data: labelDiagramSet.collect { group ->
+                                dataSet.findResult {
+                                    it.tail() == [label, group] ? it.head() : null
+                                } ?: '0'
+                            },
+                            name: label as String,
+                            dataKey: additionalData.dataKey as String
+                        )
+                    }
+                } else {
+                    return (transposeData[2] as Set).collect { breakdown ->
+                        new SeriesCombo(
+                            type: additionalData.type as String,
+                            breakdownValue: breakdown as String,
+                            data: labelSet.collect { group ->
+                                dataSet.findResult {
+                                    it.tail() == [group, breakdown] ? it.head() : null
+                                } ?: '0'
+                            },
+                            name: breakdown as String,
+                            dataKey: additionalData.dataKey as String
+                        )
+                    }
                 }
             default: throw new IllegalArgumentException('Invalid format result data set')
         }
     }
 
-    def firstSeries = getsSeries(labels, firstResultDataSet as List<List>, firstAdditionalData)
-    def secondSeries = getsSeries(labels, secondResultDataSet as List<List>, secondAdditionalData)
-
-    return new ComboDiagram(labels: labels, series: firstSeries + secondSeries)
+    def firstSeries = getsSeries(
+        labels,
+        firstResultDataSet as List<List>,
+        firstAdditionalData,
+        diagramLabels,
+        reverseGroups
+    )
+    def secondSeries = getsSeries(
+        labels,
+        secondResultDataSet as List<List>,
+        secondAdditionalData,
+        diagramLabels,
+        reverseGroups
+    )
+    return new ComboDiagram(
+        labels: reverseGroups == true
+            ? diagramLabels
+            : labels,
+        series: firstSeries + secondSeries
+    )
 }
 
 /**
@@ -2345,5 +2404,17 @@ private Map<String, Object> transformRequestWithoutComputation(Map<String, Objec
         return res
     }
     return cardObjectUuid ? transform(requestContent) : requestContent
+}
+
+private boolean isCustomGroupFromBreakdown(Map<String, Object> requestContent){
+    def requestData = requestContent.data as Map<String, Object>
+    return requestData.findResult { key, value ->
+        def data = value as Map<String, Object>
+        def group = data.group as Map<String, Object>
+        def isSystemParameterGroup = group?.way == 'SYSTEM'
+        def isCustomBreakdownGroup = data.breakdownGroup?.way == 'CUSTOM'
+        boolean sourceForCompute = data.sourceForCompute
+        sourceForCompute == false ? isSystemParameterGroup && isCustomBreakdownGroup : null
+    }
 }
 //endregion
