@@ -28,18 +28,18 @@ export type ReceiveBuildDataPayload = {
 };
 
 export type RequestBuildData = {
-	type: typeof BUILD_DATA_EVENTS.REQUEST_BUILD_DATA,
-	payload: string
+	payload: string,
+	type: typeof BUILD_DATA_EVENTS.REQUEST_BUILD_DATA
 };
 
 export type ReceiveBuildData = {
-	type: typeof BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA,
-	payload: ReceiveBuildDataPayload
+	payload: ReceiveBuildDataPayload,
+	type: typeof BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA
 };
 
 export type RecordErrorBuildData = {
-	type: typeof BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR,
-	payload: string
+	payload: string,
+	type: typeof BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
 };
 
 type UnknownBuildDataAction = {

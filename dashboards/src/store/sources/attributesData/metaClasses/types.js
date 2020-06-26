@@ -7,8 +7,8 @@ export type Item = {
 };
 
 export type MetaClassData = {
-	items: Array<Item>,
 	error: boolean,
+	items: Array<Item>,
 	loading: boolean
 };
 
@@ -22,18 +22,18 @@ export type ReceivePayload = {
 };
 
 type ReceiveMetaClassData = {
-	type: typeof META_CLASSES_EVENTS.RECEIVE_META_CLASS_DATA,
-	payload: ReceivePayload
+	payload: ReceivePayload,
+	type: typeof META_CLASSES_EVENTS.RECEIVE_META_CLASS_DATA
 };
 
 type RecordMetaClassDataError = {
-	type: typeof META_CLASSES_EVENTS.RECORD_META_CLASS_DATA_ERROR,
-	payload: string
+	payload: string,
+	type: typeof META_CLASSES_EVENTS.RECORD_META_CLASS_DATA_ERROR
 };
 
 type RequestMetaClassData = {
-	type: typeof META_CLASSES_EVENTS.REQUEST_META_CLASS_DATA,
-	payload: string
+	payload: string,
+	type: typeof META_CLASSES_EVENTS.REQUEST_META_CLASS_DATA
 };
 
 type UnknownMetaClassesAction = {

@@ -32,33 +32,33 @@ export type ReceiveRootsPayload = {
 };
 
 type ReceiveNodes = {
-	type: typeof CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_NODES,
-	payload: ReceiveNodesPayload
+	payload: ReceiveNodesPayload,
+	type: typeof CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_NODES
 };
 
 type ReceiveRoots = {
-	type: typeof CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_ROOTS,
-	payload: ReceiveRootsPayload
+	payload: ReceiveRootsPayload,
+	type: typeof CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_ROOTS
 };
 
 type RecordNodesError = {
-	type: typeof CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_NODES_ERROR,
-	payload: NodePayload
+	payload: NodePayload,
+	type: typeof CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_NODES_ERROR
 };
 
 type RecordRootsError = {
-	type: typeof CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_ROOTS_ERROR,
-	payload: string
+	payload: string,
+	type: typeof CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_ROOTS_ERROR
 };
 
 type RequestNodes = {
-	type: typeof CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_NODES,
-	payload: NodePayload
+	payload: NodePayload,
+	type: typeof CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_NODES
 };
 
 type RequestRoots = {
-	type: typeof CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_ROOTS,
-	payload: string
+	payload: string,
+	type: typeof CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_ROOTS
 };
 
 type UnknownAction = {

@@ -34,13 +34,13 @@ export type ToastMap = {
 };
 
 type AddToast = {
-	type: typeof TOASTS_EVENTS.ADD_TOAST,
-	payload: Toast
+	payload: Toast,
+	type: typeof TOASTS_EVENTS.ADD_TOAST
 };
 
 type RemoveToast = {
-	type: typeof TOASTS_EVENTS.REMOVE_TOAST,
-	payload: string
+	payload: string,
+	type: typeof TOASTS_EVENTS.REMOVE_TOAST
 };
 
 type UnknownToastsAction = {

@@ -7,8 +7,8 @@ export type Data = {
 };
 
 export type CatalogItemData = {
-	items: Array<Data>,
 	error: boolean,
+	items: Array<Data>,
 	loading: boolean
 };
 
@@ -22,18 +22,18 @@ export type ReceivePayload = {
 };
 
 type ReceiveCatalogItemData = {
-	type: typeof CATALOG_ITEMS_EVENTS.RECEIVE_CATALOG_ITEM_DATA,
-	payload: ReceivePayload
+	payload: ReceivePayload,
+	type: typeof CATALOG_ITEMS_EVENTS.RECEIVE_CATALOG_ITEM_DATA
 };
 
 type RecordCatalogItemDataError = {
-	type: typeof CATALOG_ITEMS_EVENTS.RECORD_CATALOG_ITEM_DATA_ERROR,
-	payload: string
+	payload: string,
+	type: typeof CATALOG_ITEMS_EVENTS.RECORD_CATALOG_ITEM_DATA_ERROR
 };
 
 type RequestCatalogItemData = {
-	type: typeof CATALOG_ITEMS_EVENTS.REQUEST_CATALOG_ITEM_DATA,
-	payload: string
+	payload: string,
+	type: typeof CATALOG_ITEMS_EVENTS.REQUEST_CATALOG_ITEM_DATA
 };
 
 type UnknownCatalogItemsAction = {

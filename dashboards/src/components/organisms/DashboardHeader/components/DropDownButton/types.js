@@ -7,8 +7,8 @@ export type MenuItem = {
 };
 
 export type Props = {
-	name: IconName,
 	menu: Array<MenuItem>,
+	name: IconName,
 	onSelect: (value: string) => Promise<void> | void,
 	tip: string
 };

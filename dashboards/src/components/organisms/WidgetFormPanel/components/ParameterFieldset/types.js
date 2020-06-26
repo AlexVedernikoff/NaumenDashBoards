@@ -5,8 +5,8 @@ import type {OnChangeAttributeLabelEvent, OnChangeGroup, OnSelectAttributeEvent}
 export type Props = {
 	error: string,
 	index: number,
-	name: string,
 	mainSet: DataSet,
+	name: string,
 	onChangeGroup: OnChangeGroup,
 	onChangeLabel: (event: OnChangeAttributeLabelEvent, index: number) => void,
 	onSelect: (event: OnSelectAttributeEvent, index: number, mainSet: boolean) => void,

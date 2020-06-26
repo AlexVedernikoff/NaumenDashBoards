@@ -2,8 +2,8 @@
 type Option = Object;
 
 export type Props = {
-	getOptionLabel?: Option => string,
 	found: boolean,
+	getOptionLabel?: Option => string,
 	onClick: (Option | null) => void,
 	option: Option,
 	selected: boolean

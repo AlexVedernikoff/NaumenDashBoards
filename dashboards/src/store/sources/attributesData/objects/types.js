@@ -47,33 +47,33 @@ export type ReceivePayload = {
 };
 
 type ReceiveActualObjectData = {
-	type: typeof OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA,
-	payload: ReceivePayload
+	payload: ReceivePayload,
+	type: typeof OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA
 };
 
 type ReceiveAllObjectData = {
-	type: typeof OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA,
-	payload: ReceivePayload
+	payload: ReceivePayload,
+	type: typeof OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA
 };
 
 type RecordActualObjectDataError = {
-	type: typeof OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR,
-	payload: Payload
+	payload: Payload,
+	type: typeof OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR
 };
 
 type RecordAllObjectDataError = {
-	type: typeof OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR,
-	payload: Payload
+	payload: Payload,
+	type: typeof OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR
 };
 
 type RequestActualObjectData = {
-	type: typeof OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA,
-	payload: Payload
+	payload: Payload,
+	type: typeof OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA
 };
 
 type RequestAllObjectData = {
-	type: typeof OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA,
-	payload: Payload
+	payload: Payload,
+	type: typeof OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA
 };
 
 type UnknownObjectsAction = {

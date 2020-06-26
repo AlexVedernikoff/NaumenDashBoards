@@ -15,8 +15,8 @@ export type ConnectedFunctions = {
 
 export type ConnectedProps = {
 	buildData: BuildDataMap,
-	editable: boolean,
 	editMode: boolean,
+	editable: boolean,
 	newWidget: NewWidget | null,
 	selectedWidget: string,
 	widgets: Array<Widget>

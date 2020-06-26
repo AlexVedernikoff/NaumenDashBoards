@@ -2,8 +2,8 @@
 import {DASHBOARD_EVENTS} from './constants';
 
 type ChangeAutoUpdateSettings = {
-	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS,
-	payload: Object
+	payload: Object,
+	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
 };
 
 type CreatePersonalDashboard = {
@@ -31,28 +31,28 @@ type ErrorDeletePersonalDashboard = {
 };
 
 type RequestDashboard = {
-	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD,
-	payload: null
+	payload: null,
+	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD
 };
 
 export type ReceiveDashboard = {
-	type: typeof DASHBOARD_EVENTS.RECEIVE_DASHBOARD,
-	payload: null
+	payload: null,
+	type: typeof DASHBOARD_EVENTS.RECEIVE_DASHBOARD
 };
 
 type RecordDashboardError = {
-	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR,
-	payload: null
+	payload: null,
+	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
 };
 
 type SetEditable = {
-	type: typeof DASHBOARD_EVENTS.SET_EDITABLE_PARAM,
-	payload: boolean
+	payload: boolean,
+	type: typeof DASHBOARD_EVENTS.SET_EDITABLE_PARAM
 };
 
 type SetPersonal = {
-	type: typeof DASHBOARD_EVENTS.SET_PERSONAL,
-	payload: boolean
+	payload: boolean,
+	type: typeof DASHBOARD_EVENTS.SET_PERSONAL
 };
 
 type SwitchOnEditMode = {
@@ -64,8 +64,8 @@ type SwitchOffEditMode = {
 };
 
 type UnknownDashboardAction = {
-	type: typeof DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION,
-	payload: null
+	payload: null,
+	type: typeof DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION
 };
 
 export type DashboardAction =
@@ -95,8 +95,8 @@ export type AutoUpdateSettings = {
 
 export type DashboardState = {
 	autoUpdate: AutoUpdateSettings,
-	editable: boolean,
 	editMode: boolean,
+	editable: boolean,
 	error: boolean,
 	loading: boolean,
 	personal: boolean,

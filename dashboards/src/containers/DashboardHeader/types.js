@@ -5,8 +5,8 @@ import type {UserData} from 'store/context/types';
 
 export type ConnectedProps = {
 	autoUpdateSettings: AutoUpdateSettings,
-	editableDashboard: boolean,
 	editMode: boolean,
+	editableDashboard: boolean,
 	personalDashboard: boolean,
 	personalDashboardCreating: boolean,
 	personalDashboardDeleting: boolean,

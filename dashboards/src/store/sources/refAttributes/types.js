@@ -3,21 +3,21 @@ import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
 
 type RequestRefAttributes = {
-	type: typeof REF_ATTRIBUTES_EVENTS.REQUEST_REF_ATTRIBUTES,
-	payload: string
+	payload: string,
+	type: typeof REF_ATTRIBUTES_EVENTS.REQUEST_REF_ATTRIBUTES
 };
 
 type ReceiveRefAttributes = {
-	type: typeof REF_ATTRIBUTES_EVENTS.RECEIVE_REF_ATTRIBUTES,
 	payload: {
 		refAttributes: Attribute[],
 		refCode: string
-	}
+	},
+	type: typeof REF_ATTRIBUTES_EVENTS.RECEIVE_REF_ATTRIBUTES
 };
 
 type RecordRefAttributesError = {
-	type: typeof REF_ATTRIBUTES_EVENTS.RECORD_REF_ATTRIBUTES_ERROR,
-	payload: string
+	payload: string,
+	type: typeof REF_ATTRIBUTES_EVENTS.RECORD_REF_ATTRIBUTES_ERROR
 };
 
 type UnknownRefAttributesAction = {

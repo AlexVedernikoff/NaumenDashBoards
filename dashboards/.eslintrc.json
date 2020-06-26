@@ -32,6 +32,7 @@
 		"local-rules/sort-imports": 2,
 		"local-rules/sort-class-methods": 2,
 		"flowtype/semi": 2,
+		"flowtype/sort-keys": [2, "asc", {"caseSensitive": true}],
 		"no-param-reassign": 2,
 		"no-tabs": 0,
 		"operator-linebreak": ["error", "before"],
@@ -40,7 +41,8 @@
 		"require-atomic-updates": "off",
 		"semi": [2, "always"],
 		"babel/semi": [2, "always"],
-		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": false}],
+		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": true}],
+		"sort-vars": [2, {"ignoreCase": false}],
 		"jsdoc/newline-after-description": 0,
 		"jsdoc/require-returns-description": 0
 	},

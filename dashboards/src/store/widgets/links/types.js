@@ -33,18 +33,18 @@ export type ReceiveLinkPayload = {
 };
 
 export type RequestLink = {
-	type: typeof LINKS_EVENTS.REQUEST_LINK,
-	payload: string
+	payload: string,
+	type: typeof LINKS_EVENTS.REQUEST_LINK
 };
 
 export type ReceiveLink = {
-	type: typeof LINKS_EVENTS.RECEIVE_LINK,
-	payload: ReceiveLinkPayload
+	payload: ReceiveLinkPayload,
+	type: typeof LINKS_EVENTS.RECEIVE_LINK
 };
 
 export type RecordErrorLink = {
-	type: typeof LINKS_EVENTS.RECORD_LINK_ERROR,
-	payload: string
+	payload: string,
+	type: typeof LINKS_EVENTS.RECORD_LINK_ERROR
 };
 
 type UnknownLinksAction = {
