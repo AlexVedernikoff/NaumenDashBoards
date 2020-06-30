@@ -79,11 +79,7 @@ export class SubGroup extends PureComponent<Props> {
 		);
 	};
 
-	renderAndConditions = () => (
-		<div className={styles.box}>
-			{this.props.subGroup.data.map(this.renderAndCondition)}
-		</div>
-	);
+	renderAndConditions = (): Array<React$Node> => this.props.subGroup.data.map(this.renderAndCondition);
 
 	renderGroupInputContainer = () => (
 		<div className={styles.rowContainer}>

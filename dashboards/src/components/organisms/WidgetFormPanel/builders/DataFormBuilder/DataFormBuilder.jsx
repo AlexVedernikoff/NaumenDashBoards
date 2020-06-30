@@ -13,6 +13,7 @@ import {Label, LegacyCheckbox, TextArea} from 'components/atoms';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
+import styles from './styles.less';
 import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -167,6 +168,7 @@ export class DataFormBuilder extends Component<Props> {
 		const {useName} = values.header;
 		const {name} = FIELDS;
 		const nameProps = {
+			className: styles.nameField,
 			handleBlur: this.handleBlurName,
 			handleChange: this.handleChange,
 			label: 'Название виджета',
@@ -303,12 +305,12 @@ export class DataFormBuilder extends Component<Props> {
 
 	renderTextArea = (props: TextAreaProps) => {
 		const {errors} = this.props;
-		const {errorPath, handleBlur, handleChange, label, maxLength, name, placeholder, value} = props;
+		const {className, errorPath, handleBlur, handleChange, label, maxLength, name, placeholder, value} = props;
 		const error = errors[errorPath || name];
 
 		return (
 			<FormField error={error}>
-				<FormControl label={label}>
+				<FormControl className={className} label={label}>
 					<TextArea
 						maxLength={maxLength}
 						name={name}
