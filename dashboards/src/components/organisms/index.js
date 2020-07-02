@@ -2,6 +2,8 @@
 import AttributeCreatingModal from './AttributeCreatingModal';
 import DashboardContent from './DashboardContent';
 import DashboardHeader from './DashboardHeader';
+import Speedometer from './Speedometer';
+import SpeedometerWidget from './SpeedometerWidget';
 import Startup from './Startup';
 import Table from './Table';
 import WidgetAddPanel from './WidgetAddPanel';
@@ -11,6 +13,8 @@ export {
 	AttributeCreatingModal,
 	DashboardContent,
 	DashboardHeader,
+	Speedometer,
+	SpeedometerWidget,
 	Startup,
 	Table,
 	WidgetAddPanel,

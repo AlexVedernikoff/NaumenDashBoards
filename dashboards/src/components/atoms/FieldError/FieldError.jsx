@@ -13,7 +13,7 @@ export class FieldError extends Component<Props> {
 		const {className, text} = this.props;
 		const errorCN = cn(styles.error, className);
 
-		return <div className={errorCN}>{text}</div>;
+		return <div className={errorCN} tip={text}>{text}</div>;
 	}
 }
 

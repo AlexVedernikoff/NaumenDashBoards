@@ -33,13 +33,13 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	handleResize = (entries: Array<ResizeObserverEntry>) => {
 		const {onResize, skipOnMount} = this.props;
 		const {mounted} = this.state;
-		const {width} = entries[0].contentRect;
+		const {height, width} = entries[0].contentRect;
 
 		if (!mounted && skipOnMount) {
 			return this.setState({mounted: true});
 		}
 
-		onResize(width);
+		onResize(width, height);
 	};
 
 	render () {

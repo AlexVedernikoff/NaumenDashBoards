@@ -1,40 +1,28 @@
 @import '/styles/variables';
 
 :local {
-	.container {
-		align-items: center;
-		cursor: pointer;
-		display: inline-flex;
+	.activeContainer {
+		color: @black;
 
-		&:hover {
-			.icon {
-				background: @black;
-			}
-
-			.text {
-				color: @black
-			}
+		svg {
+			fill: @black;
 		}
 	}
 
-	.icon {
-		background-color: @grey;
-		border-radius: @border-radius;
-		color: @white;
-		display: inline-block;
-		margin-left: 8px;
+	.container {
+		align-items: center;
+		color: #5F5F5F;
+		cursor: pointer;
+		display: flex;
+		padding: 12px 24px;
+
+		&:hover {
+			.activeContainer();
+			background-color: @gainsboro;
+		}
 	}
 
 	.text {
-		color: @grey;
-		margin-left: 10px;
-	}
-
-	.activeIcon {
-		background-color: @black;
-	}
-
-	.activeText {
-		color: @black;
+		margin-left: 18px;
 	}
 }

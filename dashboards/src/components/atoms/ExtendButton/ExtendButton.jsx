@@ -6,17 +6,22 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class ExtendButton extends PureComponent<Props> {
-	getIconClassName = () => this.props.active ? cn([styles.icon, styles.activeIcon]) : styles.icon;
-
-	getTextClassName = () => this.props.active ? cn([styles.text, styles.activeText]) : styles.text;
+	static defaultProps = {
+		className: ''
+	};
 
 	render () {
-		const {onClick, text} = this.props;
+		const {active, className, onClick, text} = this.props;
+		const containerCN = cn({
+			[styles.container]: true,
+			[styles.activeContainer]: active,
+			[className]: true
+		});
 
 		return (
-			<div className={styles.container} onClick={onClick}>
-				<Icon className={this.getIconClassName()} name={ICON_NAMES.PLUS} />
-				<div className={this.getTextClassName()}>{text}</div>
+			<div className={containerCN} onClick={onClick}>
+				<Icon name={ICON_NAMES.PLUS} />
+				<div className={styles.text}>{text}</div>
 			</div>
 		);
 	}

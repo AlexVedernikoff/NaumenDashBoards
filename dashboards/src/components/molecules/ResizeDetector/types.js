@@ -4,7 +4,7 @@ import type {Node} from 'react';
 export type Props = {
 	children: Node,
 	debounceRate: number,
-	onResize: (width: number) => void,
+	onResize: (width: number, height: number) => void,
 	skipOnMount: boolean
 };
 

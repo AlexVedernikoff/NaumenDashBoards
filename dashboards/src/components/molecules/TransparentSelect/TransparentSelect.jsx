@@ -189,8 +189,8 @@ export class TransparentSelect extends PureComponent<Props, State> {
 		if (value) {
 			return (
 				<div className={styles.labelContainer} onClick={this.handleShowMenu}>
-					<Label text={note} />
-					<Label className={styles.label} text={getOptionLabel(value)} />
+					<Label>{note}</Label>
+					<Label className={styles.label}>{getOptionLabel(value)}</Label>
 				</div>
 			);
 		}
