@@ -1,11 +1,15 @@
 // @flow
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import cn from 'classnames';
+import {IconButton} from 'components/atoms';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class TextInput extends PureComponent<Props> {
 	static defaultProps = {
+		className: '',
+		disabled: false,
 		maxLength: null,
 		onlyNumber: false,
 		name: '',
@@ -28,12 +32,17 @@ export class TextInput extends PureComponent<Props> {
 	};
 
 	render () {
-		const {maxLength, placeholder, value} = this.props;
+		const {className, disabled, maxLength, placeholder, value} = this.props;
+		const containerCN = cn({
+			[styles.container]: true,
+			[className]: true,
+			[styles.disabled]: disabled
+		});
 
 		return (
-			<div className={styles.container}>
+			<div className={containerCN}>
 				<input className={styles.input} maxLength={maxLength} onChange={this.handleChange} placeholder={placeholder} value={value} />
-				<Icon className={styles.icon} name={ICON_NAMES.REMOVE} onClick={this.handleClear} />
+				<IconButton className={styles.icon} icon={ICON_NAMES.REMOVE} onClick={this.handleClear} />
 			</div>
 		);
 	}

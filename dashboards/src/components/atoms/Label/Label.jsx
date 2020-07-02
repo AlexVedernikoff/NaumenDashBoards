@@ -10,10 +10,10 @@ export class Label extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, text} = this.props;
+		const {children, className} = this.props;
 		const labelCN = cn(styles.label, className);
 
-		return <div className={labelCN} title={text}>{text}</div>;
+		return <div className={labelCN} title={children}>{children}</div>;
 	}
 }
 

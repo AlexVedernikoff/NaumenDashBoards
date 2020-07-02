@@ -213,7 +213,7 @@ export class DataFormBuilder extends Component<Props> {
 		);
 	};
 
-	renderCheckboxLabel = (label: string) => <Label text={label} />;
+	renderCheckboxLabel = (label: string) => <Label>{label}</Label>;
 
 	renderDiagramNameTextArea = () => {
 		const {values} = this.props;

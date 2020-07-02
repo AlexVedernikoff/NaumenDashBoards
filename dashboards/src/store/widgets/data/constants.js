@@ -45,6 +45,7 @@ const DONUT: 'DONUT' = 'DONUT';
 const LINE: 'LINE' = 'LINE';
 const PIE: 'PIE' = 'PIE';
 const COMBO: 'COMBO' = 'COMBO';
+const SPEEDOMETER: 'SPEEDOMETER' = 'SPEEDOMETER';
 const SUMMARY: 'SUMMARY' = 'SUMMARY';
 const TABLE: 'TABLE' = 'TABLE';
 
@@ -57,6 +58,7 @@ const WIDGET_TYPES = {
 	DONUT,
 	LINE,
 	PIE,
+	SPEEDOMETER,
 	SUMMARY,
 	TABLE
 };
@@ -169,6 +171,15 @@ const DEFAULT_TABLE_VALUE = {
 
 /* Конец данных вкладки стиль */
 
+// типы диапазонов спидометра
+const ABSOLUTE: 'ABSOLUTE' = 'ABSOLUTE';
+const PERCENT: 'PERCENT' = 'PERCENT';
+
+const RANGES_TYPES = {
+	ABSOLUTE,
+	PERCENT
+};
+
 export {
 	COMBO_TYPES,
 	DEFAULT_AXIS_SORTING_SETTINGS,
@@ -178,6 +189,7 @@ export {
 	FONT_SIZE_OPTIONS,
 	FONT_STYLES,
 	LIMIT,
+	RANGES_TYPES,
 	SORTING_TYPES,
 	SORTING_VALUES,
 	TEXT_ALIGNS,

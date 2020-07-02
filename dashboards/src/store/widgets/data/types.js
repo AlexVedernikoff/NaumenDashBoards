@@ -5,6 +5,7 @@ import {
 	COMBO_TYPES,
 	DEFAULT_TABLE_VALUE,
 	FONT_STYLES,
+	RANGES_TYPES,
 	SORTING_TYPES,
 	SORTING_VALUES,
 	TEXT_ALIGNS,
@@ -248,6 +249,34 @@ export type SummaryWidget = {
 	data: Array<SummaryData>,
 	indicator: SummaryIndicator,
 	type: typeof WIDGET_TYPES.SUMMARY
+};
+
+// Спидометр
+export type Range = {
+	color: string,
+	from: string | number,
+	to: string | number
+};
+
+export type Borders = {
+	max: string,
+	min: string
+};
+
+export type RangesType = $Keys<typeof RANGES_TYPES>;
+
+export type Ranges = {
+	data: Array<Range>,
+	type: RangesType,
+	use: boolean
+};
+
+export type SpeedometerWidget = {
+	...BaseWidget,
+	borders: Borders,
+	data: Array<SummaryData>,
+	ranges: Ranges,
+	type: typeof WIDGET_TYPES.SPEEDOMETER
 };
 
 // Таблица

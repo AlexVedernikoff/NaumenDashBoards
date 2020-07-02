@@ -27,7 +27,7 @@ export class FormControl extends PureComponent<Props> {
 
 	renderLabel = () => {
 		const {label} = this.props;
-		return label ? <Label className={styles.label} text={label} /> : null;
+		return label ? <Label className={styles.label}>{label}</Label> : null;
 	};
 
 	render () {
