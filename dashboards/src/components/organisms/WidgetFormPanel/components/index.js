@@ -12,6 +12,7 @@ import ComputedAttributeEditor from './ComputedAttributeEditor';
 import ComputedBreakdownFieldset from './ComputedBreakdownFieldset';
 import DataLabelsBox from './DataLabelsBox';
 import ExtendingFieldset from './ExtendingFieldset';
+import FieldDivider from './FieldDivider';
 import Form from './Form';
 import FormField from './FormField';
 import HeaderBox from './HeaderBox';
@@ -23,6 +24,7 @@ import ParameterFieldset from './ParameterFieldset';
 import SortingBox from './SortingBox';
 import SourceDataBox from './SourceDataBox';
 import SourceFieldset from './SourceFieldset';
+import SpeedometerForm from './SpeedometerForm';
 import SummaryForm from './SummaryForm';
 import TableForm from './TableForm';
 
@@ -40,6 +42,7 @@ export {
 	ComputedBreakdownFieldset,
 	DataLabelsBox,
 	ExtendingFieldset,
+	FieldDivider,
 	Form,
 	FormField,
 	HeaderBox,
@@ -51,6 +54,7 @@ export {
 	SortingBox,
 	SourceDataBox,
 	SourceFieldset,
+	SpeedometerForm,
 	SummaryForm,
 	TableForm
 };

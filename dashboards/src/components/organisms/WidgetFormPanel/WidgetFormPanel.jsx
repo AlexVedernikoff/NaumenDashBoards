@@ -1,6 +1,8 @@
 // @flow
-import {AxisChartForm, CircleChartForm, ComboChartForm, Form, SummaryForm, TableForm} from './components';
+import {AxisChartForm, CircleChartForm, ComboChartForm, Form, SpeedometerForm, SummaryForm, TableForm} from './components';
+import cn from 'classnames';
 import type {DivRef} from 'components/types';
+import {isIE} from 'utils/export/helpers';
 import type {Props, RenderFormProps, State} from './types';
 import React, {Component, createContext, createRef} from 'react';
 import styles from './styles.less';
@@ -60,7 +62,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 
 	resolve = () => {
 		const {type} = this.props.values;
-		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
+		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
 		switch (type) {
 			case BAR:
@@ -74,6 +76,8 @@ export class WidgetFormPanel extends Component<Props, State> {
 			case DONUT:
 			case PIE:
 				return CircleChartForm;
+			case SPEEDOMETER:
+				return SpeedometerForm;
 			case SUMMARY:
 				return SummaryForm;
 			case TABLE:
@@ -98,9 +102,13 @@ export class WidgetFormPanel extends Component<Props, State> {
 
 	render () {
 		this.fieldErrorRefs = [];
+		const formCN = cn({
+			[styles.form]: true,
+			[styles.ieForm]: isIE()
+		});
 
 		return (
-			<div className={styles.form} ref={formRef}>
+			<div className={formCN} ref={formRef}>
 				{this.renderTypedForm()}
 			</div>
 		);

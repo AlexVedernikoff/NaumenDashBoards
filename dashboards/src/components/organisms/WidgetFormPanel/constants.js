@@ -1,10 +1,12 @@
 // @flow
 const aggregation: 'aggregation' = 'aggregation';
 const body: 'body' = 'body';
+const borders: 'borders' = 'borders';
 const breakdown: 'breakdown' = 'breakdown';
 const breakdownGroup: 'breakdownGroup' = 'breakdownGroup';
 const calcTotalColumn: 'calcTotalColumn' = 'calcTotalColumn';
 const calcTotalRow: 'calcTotalRow' = 'calcTotalRow';
+const color: 'color' = 'color';
 const colors: 'colors' = 'colors';
 const column: 'column' = 'column';
 const columnHeader: 'columnHeader' = 'columnHeader';
@@ -32,6 +34,7 @@ const max: 'max' = 'max';
 const min: 'min' = 'min';
 const parameter: 'parameter' = 'parameter';
 const position: 'position' = 'position';
+const ranges: 'ranges' = 'ranges';
 const row: 'row' = 'row';
 const rowHeader: 'rowHeader' = 'rowHeader';
 const show: 'show' = 'show';
@@ -46,6 +49,7 @@ const textAlign: 'textAlign' = 'textAlign';
 const textHandler: 'textHandler' = 'textHandler';
 const type: 'type' = 'type';
 const value: 'value' = 'value';
+const use: 'use' = 'use';
 const useName: 'useName' = 'useName';
 const xAxis: 'xAxis' = 'xAxis';
 const yAxis: 'yAxis' = 'yAxis';
@@ -54,10 +58,12 @@ const withBreakdown: 'withBreakdown' = 'withBreakdown';
 const FIELDS = {
 	aggregation,
 	body,
+	borders,
 	breakdown,
 	breakdownGroup,
 	calcTotalColumn,
 	calcTotalRow,
+	color,
 	colors,
 	column,
 	columnHeader,
@@ -84,6 +90,7 @@ const FIELDS = {
 	name,
 	parameter,
 	position,
+	ranges,
 	row,
 	rowHeader,
 	show,
@@ -98,6 +105,7 @@ const FIELDS = {
 	textHandler,
 	tickAmount,
 	type,
+	use,
 	useName,
 	value,
 	withBreakdown,

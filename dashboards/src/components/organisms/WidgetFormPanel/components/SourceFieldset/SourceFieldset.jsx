@@ -99,12 +99,7 @@ export class SourceFieldset extends PureComponent<Props> {
 
 	renderFilterButton = () => {
 		const {descriptor} = this.props.set;
-
-		return (
-			<div className={styles.filterContainer}>
-				<ExtendButton active={!!descriptor} onClick={this.callFilterModal} text="Фильтр" />
-			</div>
-		);
+		return <ExtendButton active={!!descriptor} onClick={this.callFilterModal} text="Фильтр" />;
 	};
 
 	renderRemoveButton = () => {

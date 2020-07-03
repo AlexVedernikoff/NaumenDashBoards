@@ -1,6 +1,5 @@
 // @flow
 import {ExtendButton} from 'components/atoms';
-import {FormField} from 'components/molecules';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 
@@ -21,11 +20,7 @@ export class ExtendingFieldset extends PureComponent<Props> {
 	renderExtendButton = () => {
 		const {show, text} = this.props;
 
-		return (
-			<FormField>
-				<ExtendButton active={show} onClick={this.handleClick} text={text} />
-			</FormField>
-		);
+		return <ExtendButton active={show} onClick={this.handleClick} text={text} />;
 	};
 
 	render () {

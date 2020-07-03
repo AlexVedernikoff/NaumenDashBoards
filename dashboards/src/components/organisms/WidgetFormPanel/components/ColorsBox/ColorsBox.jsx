@@ -1,5 +1,5 @@
 // @flow
-import {AbsolutePortal, ColorPicker, ToggableFormBox} from 'components/molecules';
+import {AbsolutePortal, ColorPicker, FormField, ToggableFormBox} from 'components/molecules';
 import {DEFAULT_COLORS} from 'utils/chart/constants';
 import type {DivRef} from 'components/types';
 import type {Props, State} from './types';
@@ -73,10 +73,12 @@ export class ColorsBox extends PureComponent<Props, State> {
 		const {data} = this.props;
 
 		return (
-			<div className={styles.paletteContainer} ref={this.ref}>
-				{data.map(this.renderColor)}
-				{this.renderColorPicker()}
-			</div>
+			<FormField>
+				<div className={styles.paletteContainer} ref={this.ref}>
+					{data.map(this.renderColor)}
+					{this.renderColorPicker()}
+				</div>
+			</FormField>
 		);
 	};
 

@@ -5,7 +5,7 @@ import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceB
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
-import {FormBox, FormControl, OuterSelect} from 'components/molecules';
+import {FormBox, OuterSelect} from 'components/molecules';
 import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import type {Group} from 'store/widgets/data/types';
@@ -309,17 +309,15 @@ export class DataFormBuilder extends Component<Props> {
 		const error = errors[errorPath || name];
 
 		return (
-			<FormField error={error}>
-				<FormControl className={className} label={label}>
-					<TextArea
-						maxLength={maxLength}
-						name={name}
-						onBlur={handleBlur}
-						onChange={handleChange}
-						placeholder={placeholder}
-						value={value}
-					/>
-				</FormControl>
+			<FormField className={className} error={error} label={label}>
+				<TextArea
+					maxLength={maxLength}
+					name={name}
+					onBlur={handleBlur}
+					onChange={handleChange}
+					placeholder={placeholder}
+					value={value}
+				/>
 			</FormField>
 		);
 	};
@@ -328,23 +326,22 @@ export class DataFormBuilder extends Component<Props> {
 		const {setFieldValue, values} = this.props;
 
 		return (
-			<FormField>
-				<FormControl label="Тип диаграммы">
-					<OuterSelect
-						name={FIELDS.type}
-						onSelect={setFieldValue}
-						options={WIDGET_OPTIONS}
-						value={values[FIELDS.type]}
-					/>
-				</FormControl>
+			<FormField label="Тип диаграммы">
+				<OuterSelect
+					name={FIELDS.type}
+					onSelect={setFieldValue}
+					options={WIDGET_OPTIONS}
+					value={values[FIELDS.type]}
+				/>
 			</FormField>
 		);
 	};
 
 	render () {
-		const {render, setDataFieldValue, setFieldValue, values} = this.props;
+		const {errors, render, setDataFieldValue, setFieldValue, values} = this.props;
 
 		return render({
+			errors,
 			renderBaseBoxes: this.renderBaseBoxes,
 			renderIndicatorBoxes: this.renderIndicatorBoxes,
 			renderParameterBox: this.renderParameterBox,
