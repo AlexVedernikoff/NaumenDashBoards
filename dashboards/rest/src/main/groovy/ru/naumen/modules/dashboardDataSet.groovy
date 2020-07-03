@@ -396,8 +396,8 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
 
         if (!customGroup && data.breakdownGroup?.way == 'CUSTOM')
         {
-            customGroup = [attribute: mappingAttribute(mayBeBreakdown)]
-                        + (data.breakdownGroup.data as Map<String, Object>)
+            customGroup = [attribute: mappingAttribute(mayBeBreakdown)] +
+                          (data.breakdownGroup.data as Map<String, Object>)
         }
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             customGroup, requisite: requisite]]
@@ -799,8 +799,8 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
 
         if (!customGroup && data.breakdownGroup?.way == 'CUSTOM')
         {
-            customGroup = [attribute: mappingAttribute(mayBeBreakdown)]
-                        + (data.breakdownGroup.data as Map<String, Object>)
+            customGroup = [attribute: mappingAttribute(mayBeBreakdown)] +
+                          (data.breakdownGroup.data as Map<String, Object>)
         }
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             customGroup, requisite: requisite]]
