@@ -1,8 +1,8 @@
 // @flow
 import cn from 'classnames';
-import {FieldError} from 'components/atoms';
+import {FieldError, Label} from 'components/atoms';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
 export class FormField extends PureComponent<Props> {
@@ -15,35 +15,40 @@ export class FormField extends PureComponent<Props> {
 		small: false
 	};
 
-	renderChildren = () => {
-		const {children, row} = this.props;
-		return row ? <div className={styles.row}>{children}</div> : children;
-	};
-
 	renderError = () => {
 		const {error} = this.props;
 		return error ? <FieldError text={error} /> : null;
 	};
 
-	renderLabel = () => {
-		const {label} = this.props;
-		return label ? <div className={styles.label}>{label}</div> : null;
-	};
-
-	render () {
-		const {className, forwardedRef, small} = this.props;
+	renderField = () => {
+		const {children, className, forwardedRef, label, row, small} = this.props;
 		const containerCN = cn({
 			[styles.field]: true,
+			[styles.fieldWithLabel]: !!label,
 			[styles.small]: small,
+			[styles.row]: row,
 			[className]: true
 		});
 
 		return (
 			<div className={containerCN} ref={forwardedRef}>
-				{this.renderLabel()}
-				{this.renderChildren()}
+				{children}
 				{this.renderError()}
 			</div>
+		);
+	};
+
+	renderLabel = () => {
+		const {label} = this.props;
+		return label ? <Label className={styles.label}>{label}</Label> : null;
+	};
+
+	render () {
+		return (
+			<Fragment>
+				{this.renderLabel()}
+				{this.renderField()}
+			</Fragment>
 		);
 	}
 }

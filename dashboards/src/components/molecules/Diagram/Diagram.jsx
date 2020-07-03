@@ -7,8 +7,8 @@ import {PADDING} from './constants';
 import type {Props, State} from './types';
 import React, {Component, createRef, Fragment} from 'react';
 import settingsStyles from 'styles/settings.less';
+import {SpeedometerWidget, Table} from 'components/organisms';
 import styles from './styles.less';
-import {Table} from 'components/organisms';
 
 export class Diagram extends Component<Props, State> {
 	ref: DivRef = createRef();
@@ -34,7 +34,7 @@ export class Diagram extends Component<Props, State> {
 	resolveDiagram = () => {
 		const {buildData, onUpdate, widget} = this.props;
 		const {data} = buildData;
-		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
+		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
 		switch (widget.type) {
 			case BAR:
@@ -46,6 +46,8 @@ export class Diagram extends Component<Props, State> {
 			case LINE:
 			case PIE:
 				return <Chart data={data} widget={widget} />;
+			case SPEEDOMETER:
+				return <SpeedometerWidget data={data} widget={widget} />;
 			case SUMMARY:
 				return <Summary data={data} widget={widget} />;
 			case TABLE:

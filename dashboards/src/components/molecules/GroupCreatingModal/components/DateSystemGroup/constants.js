@@ -8,12 +8,12 @@ const MINUTES_FORMATS = [
 
 const HOURS_FORMATS = [
 	{
-		label: 'чч:мм (11:11)',
-		value: 'hh:ii'
-	},
-	{
 		label: 'чч (11)',
 		value: 'hh'
+	},
+	{
+		label: 'чч:мм (11:11)',
+		value: 'hh:ii'
 	}
 ];
 

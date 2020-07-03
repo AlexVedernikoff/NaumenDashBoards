@@ -5,6 +5,7 @@ import type {
 	CircleWidget,
 	ComboWidget,
 	MixedAttribute,
+	SpeedometerWidget,
 	SummaryWidget,
 	TableWidget,
 	Widget,
@@ -161,7 +162,7 @@ const createComboData = (widget: ComboWidget) => {
 	};
 };
 
-const createSummaryData = (widget: SummaryWidget) => {
+const createSummaryData = (widget: SummaryWidget | SpeedometerWidget) => {
 	const {type} = widget;
 	const data: Object = {};
 
@@ -228,7 +229,7 @@ const createTableData = (widget: TableWidget) => {
 };
 
 const createPostData = (widget: Widget): PostData | void => {
-	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
 	switch (widget.type) {
 		case BAR:
@@ -242,6 +243,7 @@ const createPostData = (widget: Widget): PostData | void => {
 		case DONUT:
 		case PIE:
 			return createCircleData(widget);
+		case SPEEDOMETER:
 		case SUMMARY:
 			return createSummaryData(widget);
 		case TABLE:

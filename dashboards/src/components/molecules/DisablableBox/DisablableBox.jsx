@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {FormCheckControl} from 'components/molecules';
+import {FormCheckControl, FormField} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -24,9 +24,11 @@ export class DisableableBox extends PureComponent<Props> {
 		const {handleChange, label, name, value} = this.props;
 
 		return (
-			<FormCheckControl label={label} reverse>
-				<Toggle checked={value} name={name} onChange={handleChange} value={value} />
-			</FormCheckControl>
+			<FormField>
+				<FormCheckControl label={label} reverse>
+					<Toggle checked={value} name={name} onChange={handleChange} value={value} />
+				</FormCheckControl>
+			</FormField>
 		);
 	};
 

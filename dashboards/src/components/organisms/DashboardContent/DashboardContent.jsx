@@ -56,12 +56,12 @@ export class DashboardContent extends Component<Props, State> {
 
 	handleLayoutChange = (layout: Layout) => this.props.editLayout(layout);
 
-	handleShowGrid = () => {
+	handleShowGrid = (show: boolean) => () => {
 		const {current: grid} = gridRef;
 
 		if (grid) {
 			// $FlowFixMe
-			grid.firstChild.classList.toggle(styles.drawnGrid);
+			grid.firstChild.classList.toggle(styles.drawnGrid, show);
 		}
 	};
 
@@ -110,8 +110,8 @@ export class DashboardContent extends Component<Props, State> {
 					compactType={null}
 					isDraggable={isEditable}
 					isResizable={isEditable}
-					onDragStart={this.handleShowGrid}
-					onDragStop={this.handleShowGrid}
+					onDragStart={this.handleShowGrid(true)}
+					onDragStop={this.handleShowGrid(false)}
 					onLayoutChange={this.handleLayoutChange}
 					rowHeight={ROW_HEIGHT}
 					width={width}

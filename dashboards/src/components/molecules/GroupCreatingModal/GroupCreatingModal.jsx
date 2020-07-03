@@ -1,14 +1,14 @@
 // @flow
-import {CustomGroup, SystemGroup} from './components';
+import {CustomGroup, FormField, SystemGroup} from './components';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from './constants';
-import {FormControl, Modal} from 'components/molecules';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
+import {Label, RadioField, TextInput} from 'components/atoms';
+import {Modal} from 'components/molecules';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import type {Props as SystemProps} from './components/SystemGroup/types';
-import {RadioField, TextInput} from 'components/atoms';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
@@ -96,13 +96,13 @@ export class GroupCreatingModal extends Component<Props, State> {
 		const {attributeTitle} = this.state;
 
 		return (
-			<FormControl className={styles.field} label="Название поля">
+			<FormField label="Название поля">
 				<TextInput
 					name={FIELDS.attributeTitle}
 					onChange={this.handleChangeAttributeTitle}
 					value={attributeTitle}
 				/>
-			</FormControl>
+			</FormField>
 		);
 	};
 
@@ -119,10 +119,11 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderWayControl = () => (
-		<FormControl className={styles.wayControl} label="Тип группировки">
+		<Fragment>
+			<Label className={styles.wayLabel}>Тип группировки</Label>
 			{this.renderWayField(GROUP_WAYS.SYSTEM, 'Системная', this.renderSystemGroup())}
 			{this.renderWayField(GROUP_WAYS.CUSTOM, 'Пользовательская', this.renderCustomGroup())}
-		</FormControl>
+		</Fragment>
 	);
 
 	renderWayField = (value: GroupWay, label: string, children: React$Node) => {

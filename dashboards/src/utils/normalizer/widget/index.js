@@ -4,6 +4,7 @@ import circleNormalizer from './circleNormalizer';
 import comboNormalizer from './comboNormalizer';
 import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
+import speedometerNormalizer from './speedometerNormalizer';
 import summaryNormalizer from './summaryNormalizer';
 import tableNormalizer from './tableNormalizer';
 import type {Widget} from 'store/widgets/data/types';
@@ -20,7 +21,7 @@ const transformType = (widget: LegacyWidget) => {
 };
 
 const widgetNormalizer = (widget: Object): Widget => {
-	const {COMBO, DONUT, PIE, SUMMARY, TABLE} = WIDGET_TYPES;
+	const {COMBO, DONUT, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 	transformType(widget);
 
 	switch (widget[FIELDS.type]) {
@@ -29,6 +30,8 @@ const widgetNormalizer = (widget: Object): Widget => {
 			return circleNormalizer(widget);
 		case COMBO:
 			return comboNormalizer(widget);
+		case SPEEDOMETER:
+			return speedometerNormalizer(widget);
 		case SUMMARY:
 			return summaryNormalizer(widget);
 		case TABLE:

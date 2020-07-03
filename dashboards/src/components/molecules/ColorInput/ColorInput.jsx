@@ -1,7 +1,7 @@
 // @flow
 import {AbsolutePortal, ColorPicker} from 'components/molecules';
 import cn from 'classnames';
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import {Input} from './components';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
@@ -10,6 +10,8 @@ import styles from './styles.less';
 export class ColorInput extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
+		components: {},
+		name: '',
 		portable: true,
 		value: '#4F5C70'
 	};
@@ -33,18 +35,18 @@ export class ColorInput extends PureComponent<Props, State> {
 
 	hidePicker = () => this.setState({showPicker: false});
 
-	renderButton = () => (
-		<button className={styles.button}>
-			<Icon name={ICON_NAMES.CARET} />
-		</button>
-	);
+	renderInput = () => {
+		const {components, value} = this.props;
+		const {Input: CustomInput} = components;
+		const props = {
+			onClick: this.handleClick,
+			forwardedRef: this.ref,
+			value
+		};
+		const Component = CustomInput || Input;
 
-	renderInput = () => (
-		<div className={styles.input} onClick={this.handleClick} ref={this.ref}>
-			{this.renderValue()}
-			{this.renderButton()}
-		</div>
-	);
+		return <Component {...props} />;
+	};
 
 	renderPicker = () => {
 		const {value} = this.props;

@@ -12,11 +12,11 @@ import {
 	YEAR_FORMATS
 } from './constants';
 import {DATETIME_SYSTEM_GROUP} from 'store/widgets/constants';
-import {FormControl, Select} from 'components/molecules/index';
+import {FormField, SystemGroup} from 'components/molecules/GroupCreatingModal/components';
 import type {Group} from 'store/widgets/data/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import {SystemGroup} from 'components/molecules/GroupCreatingModal/components';
+import {Select} from 'components/molecules/index';
 
 export class DateSystemGroup extends PureComponent<Props, State> {
 	state = {
@@ -87,9 +87,9 @@ export class DateSystemGroup extends PureComponent<Props, State> {
 		const disabled = options.length === 1;
 
 		return (
-			<FormControl className={className} label="Выберите значение">
+			<FormField className={className} label="Выберите значение">
 				<Select disabled={disabled} onSelect={this.handleSelectFormat} options={options} value={value} />
-			</FormControl>
+			</FormField>
 		);
 	};
 

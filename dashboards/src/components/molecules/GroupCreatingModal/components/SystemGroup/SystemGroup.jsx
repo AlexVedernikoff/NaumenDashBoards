@@ -1,8 +1,9 @@
 // @flow
-import {FormControl, Select} from 'components/molecules/index';
+import {FormField} from 'components/molecules/GroupCreatingModal/components';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import {Select} from 'components/molecules/index';
 
 export class SystemGroup extends PureComponent<Props, State> {
 	state = {
@@ -44,14 +45,14 @@ export class SystemGroup extends PureComponent<Props, State> {
 			const value = options.find(o => o.value === this.state.value) || null;
 
 			return (
-				<FormControl className={className} label="Форматирование">
+				<FormField className={className} label="Форматирование">
 					<Select
 						onSelect={this.handleSelect}
 						options={options}
 						placeholder="Форматирование"
 						value={value}
 					/>
-				</FormControl>
+				</FormField>
 			);
 		}
 
