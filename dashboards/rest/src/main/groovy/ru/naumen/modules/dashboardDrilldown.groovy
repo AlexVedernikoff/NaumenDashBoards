@@ -191,14 +191,29 @@ class Link
                     def value = map.value
                     String groupWay = group.way
                     GroupType groupType = groupWay.toLowerCase() == 'system'
-                        ? attributeType == AttributeType.DT_INTERVAL_TYPE ?
-                        getDTIntervalGroupType(group.data as String) : group.data as GroupType
+                        ? attributeType == AttributeType.DT_INTERVAL_TYPE ? GroupType.OVERLAP :
+                        group.data as GroupType
                         : null
-                    String format =  group.format
-                    groupType ? [(groupType): attr.type in AttributeType.DATE_TYPES
-                        ? [value, format]
-                        : [value]
-                    ] : null
+                    String format =
+                        attributeType == AttributeType.DT_INTERVAL_TYPE ? group.data : group.format
+                    def returnValue = null
+                    if (groupType)
+                    {
+                        if (attributeType in AttributeType.DATE_TYPES
+                              || attributeType == AttributeType.DT_INTERVAL_TYPE)
+                        {
+                            returnValue = [(groupType):
+                                               attributeType == AttributeType.DT_INTERVAL_TYPE
+                                                   ? [[value, format]]
+                                                   : [value, format]
+                            ]
+                        }
+                        else
+                        {
+                            returnValue = [(groupType): [value]]
+                        }
+                    }
+                    returnValue
                 }
 
                 //Тут находим нужную подгруппу пользовательской группировки
@@ -261,9 +276,8 @@ class Link
                                     String condition = getFilterCondition(it.type as String)
                                     def interval = it.data as Map
                                     def value = interval
-                                        ? api.types.newDateTimeInterval(
-                                        [interval.value as long, interval.type as String]
-                                    ).toMiliseconds()
+                                        ? api.types.newDateTimeInterval([interval.value as long,
+                                                                         interval.type as String])
                                         : null
                                     //TODO: до конца не уверен. Нужно ли извлекать милисекунды или нет
                                     filterBuilder.OR(attr.code, condition, value)
@@ -530,7 +544,11 @@ class Link
             case AttributeType.DATE_TYPES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
             case AttributeType.DT_INTERVAL_TYPE:
-                return filterBuilder.OR(code, 'contains', api.types.newDateTimeInterval(value as int, "HOUR"))
+            def (intervalValue, intervalType) = value
+            return filterBuilder.OR(
+                code, 'contains', api.types.newDateTimeInterval(
+                [intervalValue as long, intervalType as String])
+            )
             case AttributeType.TIMER_TYPES:
                 return filterBuilder.OR(code, 'timerStatusContains', [value]) // при условии что в тут будет код статус
             case AttributeType.BOOL_TYPE:

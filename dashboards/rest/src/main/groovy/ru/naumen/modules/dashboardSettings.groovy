@@ -946,7 +946,7 @@ private String deleteDefaultWidget(String classFqn,
  */
 private def getMapForObject(List objKeys, String namespace)
 {
-    return objKeys.collectEntries { key ->
+    return objKeys?.collectEntries { key ->
         def value = api.keyValue.get(namespace, key)
         return value ? [ (key) : value ] : Collections.emptyMap()
     }
@@ -990,7 +990,7 @@ private void validateName(Map<String, Object> requestContent, String widgetKey =
     def  widgetIds = getObjectIdsFromDashboard(DASHBOARD_NAMESPACE, dashKey, 'widgetIds')
     widgetIds = widgetKey ? (widgetIds - widgetKey) : widgetIds
     def widgets = getMapForObject(widgetIds, WIDGET_NAMESPACE)
-    List<String> widgetsNames = getWidgetNames(widgets as Map<String, Object>)
+    List<String> widgetsNames = widgets ? getWidgetNames(widgets as Map<String, Object>) : null
     if (name in widgetsNames)
     {
         throw new Exception(
