@@ -1,5 +1,5 @@
 // @flow
-import {DisableableBox, FormControl, FormField, ToggableFormBox} from 'components/molecules';
+import {DisableableBox, FormField, ToggableFormBox} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -21,11 +21,9 @@ export class HeaderBox extends PureComponent<Props> {
 		return (
 			<ToggableFormBox title="Заголовок">
 				<DisableableBox handleChange={handleBoolChange} label="Показывать на диаграмме" name={FIELDS.show} value={data.show}>
-					<FormField>
-						<FormControl label="Шрифт" row>
-							{renderFontFamilySelect()}
-							{renderFontSizeSelect()}
-						</FormControl>
+					<FormField label="Шрифт" row>
+						{renderFontFamilySelect()}
+						{renderFontSizeSelect()}
 					</FormField>
 					<FormField row>
 						{renderFontStyleButtons()}

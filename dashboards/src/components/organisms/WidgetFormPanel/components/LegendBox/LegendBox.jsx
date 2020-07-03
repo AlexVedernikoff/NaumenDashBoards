@@ -1,5 +1,5 @@
 // @flow
-import {CheckIconButtonGroup, DisableableBox, FormControl, FormField, ToggableFormBox} from 'components/molecules';
+import {CheckIconButtonGroup, DisableableBox, FormField, ToggableFormBox} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {LEGEND_POSITIONS} from 'utils/chart/constants';
@@ -42,11 +42,9 @@ export class LegendBox extends PureComponent<Props> {
 		return (
 			<ToggableFormBox title="Легенда">
 				<DisableableBox handleChange={handleBoolChange} label="Показывать на диаграмме" name={FIELDS.show} value={data.show}>
-					<FormField>
-						<FormControl label="Шрифт" row>
-							{renderFontFamilySelect()}
-							{renderFontSizeSelect()}
-						</FormControl>
+					<FormField label="Шрифт" row>
+						{renderFontFamilySelect()}
+						{renderFontSizeSelect()}
 					</FormField>
 					<FormField row>
 						{this.renderLegendPositionButtons()}

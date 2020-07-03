@@ -1,11 +1,11 @@
 // @flow
-import {Checkbox} from 'components/atoms';
+import {Checkbox, Label} from 'components/atoms';
 import {EMPTY_DATA_OPTIONS} from './constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
-import {FormCheckControl, FormControl, FormField, Select, ToggableFormBox} from 'components/molecules';
+import {FormCheckControl, FormField, Select, ToggableFormBox} from 'components/molecules';
 import type {OnChangeEvent, Props} from './types';
 import type {OnChangeInputEvent} from 'components/types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {withStyleFormBuilder} from 'WidgetFormPanel/builders';
 
@@ -65,7 +65,8 @@ export class TableBox extends PureComponent<Props> {
 		const name = FIELDS.body;
 
 		return (
-			<FormField label="Тело таблицы">
+			<Fragment>
+				<Label className={styles.label}>Тело таблицы</Label>
 				<FormField>
 					<FormCheckControl label="Отображать номер строки">
 						<Checkbox
@@ -76,33 +77,27 @@ export class TableBox extends PureComponent<Props> {
 						/>
 					</FormCheckControl>
 				</FormField>
-				<FormField>
-					<FormControl label="Перенос слов">
-						{renderTextHandlerButtons({
-							onChange: this.handleChange(name),
-							value: textHandler
-						})}
-					</FormControl>
+				<FormField label="Перенос слов">
+					{renderTextHandlerButtons({
+						onChange: this.handleChange(name),
+						value: textHandler
+					})}
 				</FormField>
-				<FormField>
-					<FormControl label="Отсутсвуют данные">
-						<Select
-							name={FIELDS.defaultValue}
-							onSelect={this.handleChange(name)}
-							options={EMPTY_DATA_OPTIONS}
-							value={defaultValue}
-						/>
-					</FormControl>
+				<FormField label="Отсутсвуют данные">
+					<Select
+						name={FIELDS.defaultValue}
+						onSelect={this.handleChange(name)}
+						options={EMPTY_DATA_OPTIONS}
+						value={defaultValue}
+					/>
 				</FormField>
-				<FormField>
-					<FormControl label="Выравнивание данных в таблице">
-						{renderTextAlignButtons({
-							onChange: this.handleChange(name),
-							value: textAlign
-						})}
-					</FormControl>
+				<FormField label="Выравнивание данных в таблице">
+					{renderTextAlignButtons({
+						onChange: this.handleChange(name),
+						value: textAlign
+					})}
 				</FormField>
-			</FormField>
+			</Fragment>
 		);
 	};
 

@@ -1,5 +1,5 @@
 // @flow
-import {FormControl, FormField, ToggableFormBox} from 'components/molecules';
+import {FormField, ToggableFormBox} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {withStyleFormBuilder} from 'WidgetFormPanel/builders';
@@ -10,11 +10,9 @@ export class IndicatorBox extends PureComponent<Props> {
 
 		return (
 			<ToggableFormBox title="Показатель">
-				<FormField>
-					<FormControl label="Шрифт" row>
-						{renderFontFamilySelect()}
-						{renderFontSizeSelect()}
-					</FormControl>
+				<FormField label="Шрифт" row>
+					{renderFontFamilySelect()}
+					{renderFontSizeSelect()}
 				</FormField>
 				<FormField row>
 					{renderFontStyleButtons()}

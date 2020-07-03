@@ -1,5 +1,5 @@
 // @flow
-import type {DataSet, SetDataFieldValue, SetFieldValue, Values} from 'containers/WidgetFormPanel/types';
+import type {DataSet, ErrorsMap, SetDataFieldValue, SetFieldValue, Values} from 'containers/WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import type {ParamsTabProps} from 'WidgetFormPanel/types';
 
@@ -43,6 +43,7 @@ export type SourceBoxProps = $Shape<{|
 |}>;
 
 export type DataBuilderProps = {
+	errors: ErrorsMap,
 	renderBaseBoxes: () => React$Node,
 	renderIndicatorBoxes: (props?: IndicatorBoxProps) => React$Node,
 	renderParameterBox: (props: ParameterBoxProps) => React$Node,

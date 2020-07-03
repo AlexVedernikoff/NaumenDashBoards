@@ -52,6 +52,11 @@ const WIDGET_OPTIONS = [
 		icon: ICON_NAMES.TABLE,
 		tip: 'Таблица',
 		value: WIDGET_TYPES.TABLE
+	},
+	{
+		icon: ICON_NAMES.SPEEDOMETER,
+		tip: 'Спидометр',
+		value: WIDGET_TYPES.SPEEDOMETER
 	}
 ];
 

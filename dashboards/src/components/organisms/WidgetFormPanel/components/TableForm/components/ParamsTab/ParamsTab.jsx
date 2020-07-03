@@ -1,7 +1,6 @@
 // @flow
 import type {DataBuilderProps} from 'WidgetFormPanel/builders/DataFormBuilder/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {FormField} from 'components/molecules';
 import {LegacyCheckbox as Checkbox} from 'components/atoms';
 import React, {Component, Fragment} from 'react';
 import {withDataFormBuilder} from 'WidgetFormPanel/builders';
@@ -13,14 +12,12 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const {setFieldValue, values} = this.props;
 
 		return (
-			<FormField>
-				<Checkbox
-					label="Подсчитывать итоги"
-					name={name}
-					onClick={setFieldValue}
-					value={values[name]}
-				/>
-			</FormField>
+			<Checkbox
+				label="Подсчитывать итоги"
+				name={name}
+				onClick={setFieldValue}
+				value={values[name]}
+			/>
 		);
 	};
 

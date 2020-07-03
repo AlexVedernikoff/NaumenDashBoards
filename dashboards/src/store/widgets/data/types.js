@@ -347,6 +347,7 @@ export type Chart =
 
 export type Widget =
 	| Chart
+	| SpeedometerWidget
 	| SummaryWidget
 	| TableWidget
 ;
