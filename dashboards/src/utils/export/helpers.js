@@ -51,6 +51,7 @@ const isIE = () => typeof document.documentMode === 'number' || /Edge/.test(navi
 const minimize = (string: string): string => string.replace(/\t|\r|\n|\v|\f/g, '');
 
 export {
+	createContextName,
 	isIE,
 	minimize,
 	save
