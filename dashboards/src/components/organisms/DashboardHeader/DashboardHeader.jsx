@@ -1,6 +1,7 @@
 // @flow
 import {AutoUpdateForm, DropDownButton, IconButton, NavItem} from './components';
 import {Button, ButtonGroup} from 'components/atoms';
+import {createContextName} from 'utils/export/helpers';
 import {createSnapshot, EXPORT_VARIANTS} from 'utils/export';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
@@ -24,7 +25,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {sendToMail} = this.props;
 		const {current} = gridRef;
 		const toDownload = way === DOWNLOAD;
-		const name = '';
+		const name = await createContextName();
 
 		if (current) {
 			const file = await createSnapshot({

@@ -18,6 +18,12 @@ export class Diagram extends Component<Props, State> {
 		nameRendered: false
 	};
 
+	componentDidMount () {
+		if (this.nameRef.current) {
+			this.setState({nameRendered: true});
+		}
+	}
+
 	componentDidUpdate (prevProps: Props) {
 		if (this.nameRef.current && this.isUpdated(prevProps, this.props)) {
 			this.setState({nameRendered: true});

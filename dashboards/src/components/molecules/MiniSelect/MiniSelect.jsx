@@ -3,6 +3,7 @@ import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
 import type {Option, Props, State} from './types';
+import {OutsideClickDetector} from 'components/atoms';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
@@ -90,10 +91,12 @@ export class MiniSelect extends PureComponent<Props, State> {
 		}
 
 		return (
-			<div className={cn(CNSelect)} onBlur={this.hideList} tabIndex={0}>
-				{this.renderValue()}
-				{this.renderList()}
-			</div>
+			<OutsideClickDetector onClickOutside={this.hideList}>
+				<div className={cn(CNSelect)}>
+					{this.renderValue()}
+					{this.renderList()}
+				</div>
+			</OutsideClickDetector>
 		);
 	};
 
