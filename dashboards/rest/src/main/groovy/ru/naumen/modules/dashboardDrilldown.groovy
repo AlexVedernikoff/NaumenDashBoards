@@ -443,14 +443,14 @@ class Link
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'status_contains':
-                                            return filterBuilder.OR(attr.code, 'timerStatusContains', [it.data.uuid])
+                                            String code = it.data.value?.toLowerCase()?.take(1)
+                                            return filterBuilder.
+                                                OR(attr.code, 'timerStatusContains', [code])
                                         case 'status_not_contains':
-                                            return filterBuilder.OR(
-                                                attr.code,
-                                                'timerStatusNotContains',
-                                                [it.data.uuid]
-                                            )
-                                        case 'end_date_between':
+                                            String code = it.data.value?.toLowerCase()?.take(1)
+                                            return filterBuilder.
+                                                OR(attr.code, 'timerStatusNotContains', [code])
+                                        case 'expires_between':
                                             String dateFormat = 'yyyy-MM-dd'
                                             def dateSet = it.data as Map
                                             def start =
@@ -462,8 +462,11 @@ class Link
                                                 'backTimerDeadLineFromTo',
                                                 [start, end]
                                             )
-                                        case 'elapsed_contains':
-                                            return filterBuilder.OR(attr.code, 'timerStatusContains', ['e'])
+                                        case 'expiration_contains':
+                                            String conditionType = it.data.value == 'EXCEED'
+                                                ? 'timerStatusContains'
+                                                : 'timerStatusNotContains'
+                                            return filterBuilder.OR(attr.code, conditionType, ['e'])
                                         default: throw new IllegalArgumentException(
                                             "Not supported condition type: ${ it.type }"
                                         )

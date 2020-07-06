@@ -110,8 +110,6 @@ String getSettings(Map<String, Object> requestContent, def user)
                 widgets      : personalDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
                 customGroups : personalDashboard?.customGroupIds?.collectEntries {
                     key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE) )]
-                } + defaultDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
                 }
         ] : [
                 autoUpdate   : defaultDashboard?.autoUpdate,
@@ -149,11 +147,13 @@ String saveAutoUpdateSettings(Map<String, Object> requestContent, def user) {
     boolean isPersonal = requestContent.isPersonal
     String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
     String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
-    def settings = getDashboardSetting(personalDashboardKey)
-            ?: getDashboardSetting(defaultDashboardKey)
-            ?: new DashboardSettings()
+    def settings = getDashboardSetting(isPersonal ? personalDashboardKey : defaultDashboardKey)
     settings.autoUpdate = autoUpdate
-    return saveJsonSettings(isPersonal ? personalDashboardKey : defaultDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
+    return saveJsonSettings(
+        isPersonal ? personalDashboardKey : defaultDashboardKey,
+        toJson(settings ?: new DashboardSettings()),
+        DASHBOARD_NAMESPACE
+    )
 }
 
 /**
