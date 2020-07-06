@@ -1660,23 +1660,39 @@ private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data,
                 def status = condition.data.value.toString()
                 String value = status.toLowerCase().charAt(0)
                 def temAttribute = attribute.deepClone()
-                temAttribute.
-                    addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
+                temAttribute.addLast(
+                    new Attribute(
+                        title: 'статус',
+                        code: 'statusCode',
+                        type: 'string'
+                    )
+                )
                 return buildFilterParameterFromCondition(Comparison.CONTAINS, temAttribute, value)
             case 'status_not_contains':
                 def status = condition.data.value.toString()
                 String value = status.toLowerCase().charAt(0)
                 def temAttribute = attribute.deepClone()
-                temAttribute.
-                    addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
-                return
-                buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, temAttribute, value)
+                temAttribute.addLast(
+                    new Attribute(
+                        title: 'статус',
+                        code: 'statusCode',
+                        type: 'string'
+                    )
+                )
+                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS,
+                                                         temAttribute, value)
             case 'expiration_contains':
-                def comparison =
-                    condition.data.value == 'EXCEED' ? Comparison.CONTAINS : Comparison.NOT_CONTAINS
+                def comparison = condition.data.value == 'EXCEED'
+                    ? Comparison.CONTAINS
+                    : Comparison.NOT_CONTAINS
                 def temAttribute = attribute.deepClone()
-                temAttribute.
-                    addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
+                temAttribute.addLast(
+                    new Attribute(
+                        title: 'статус',
+                        code: 'statusCode',
+                        type: 'string'
+                    )
+                )
                 return buildFilterParameterFromCondition(comparison, temAttribute, 'e')
             case 'expires_between': // Время окончания в диапазоне
                 def temAttribute = attribute.deepClone()
