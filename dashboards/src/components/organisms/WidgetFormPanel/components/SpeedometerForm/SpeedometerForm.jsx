@@ -5,7 +5,6 @@ import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/con
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
-import {INTEGER_AGGREGATION} from 'store/widgets/constants';
 import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
@@ -21,14 +20,11 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 		return object({
 			...base,
 			data: array().of(object({
-				[indicator]: requiredByCompute(indicator).when(FIELDS.aggregation, {
-					is: aggregation => aggregation in INTEGER_AGGREGATION,
-					then: object().test(
-						'valid-attribute',
-						'Выбранный показатель не может быть использован с агрегациями [AVG, MAX, MIN, SUM] на текущем типе виджета',
-						indicator => !indicator || indicator.type !== ATTRIBUTE_TYPES.dtInterval
-					)
-				}),
+				[indicator]: requiredByCompute(indicator).test(
+					'valid-attribute',
+					'Выбранный показатель не может быть использован на текущем типе виджета',
+					indicator => !indicator || indicator.type !== ATTRIBUTE_TYPES.dtInterval
+				),
 				[source]: object().required(getErrorMessage(source)).nullable()
 			})),
 			[borders]: object().test(

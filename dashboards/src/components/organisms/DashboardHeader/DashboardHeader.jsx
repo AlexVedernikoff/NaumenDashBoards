@@ -127,10 +127,11 @@ export class DashboardHeader extends Component<Props, State> {
 
 	renderModeButton = () => {
 		const {editDashboard, editMode, personalDashboard, seeDashboard, user} = this.props;
+		const disabledEditButton = user.role === USER_ROLES.REGULAR && !personalDashboard;
 
-		if (user.role !== USER_ROLES.REGULAR || personalDashboard) {
-			return editMode ? this.renderNavButton('Просмотреть', seeDashboard) : this.renderNavButton('Редактировать', editDashboard);
-		}
+		return editMode
+			? this.renderNavButton('Просмотреть', seeDashboard)
+			: this.renderNavButton('Редактировать', editDashboard, disabledEditButton);
 	};
 
 	renderNavButton = (text: string, onClick: Function, disabled: boolean = false) => (
