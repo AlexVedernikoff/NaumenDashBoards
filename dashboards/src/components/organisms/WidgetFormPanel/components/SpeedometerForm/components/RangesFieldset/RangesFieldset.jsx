@@ -39,7 +39,7 @@ export class RangesFieldset extends PureComponent<Props> {
 
 	handleChangeType = ({name, value}: OnChangeInputEvent) => {
 		const {onChange, ranges} = this.props;
-		onChange({...ranges, [name]: value, data: [...DEFAULT_SPEEDOMETER_SETTINGS.ranges.data]});
+		onChange({...ranges, data: [...DEFAULT_SPEEDOMETER_SETTINGS.ranges.data], [name]: value});
 	};
 
 	handleChangeUse = ({name, value}: OnChangeInputEvent) => {

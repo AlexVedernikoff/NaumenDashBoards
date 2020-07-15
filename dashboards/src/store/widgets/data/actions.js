@@ -29,8 +29,8 @@ const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch, getS
 	}
 
 	dispatch({
-		type: WIDGETS_EVENTS.ADD_WIDGET,
-		payload
+		payload,
+		type: WIDGETS_EVENTS.ADD_WIDGET
 	});
 };
 
@@ -118,8 +118,8 @@ const setWidgets = (widgets: Array<Object>): ThunkAction => async (dispatch: Dis
 	const payload = widgets.map(normalizer.widget);
 
 	dispatch({
-		type: WIDGETS_EVENTS.SET_WIDGETS,
-		payload
+		payload,
+		type: WIDGETS_EVENTS.SET_WIDGETS
 	});
 	await dispatch(fetchAllBuildData(payload));
 };
@@ -204,8 +204,8 @@ const getValidationErrors = (error: Object) => {
 };
 
 const deleteWidget = (payload: string) => ({
-	type: WIDGETS_EVENTS.DELETE_WIDGET,
-	payload
+	payload,
+	type: WIDGETS_EVENTS.DELETE_WIDGET
 });
 
 const recordDeleteError = () => ({
@@ -237,23 +237,23 @@ const resetWidget = () => ({
 });
 
 const setCreatedWidget = (payload: Widget) => ({
-	type: WIDGETS_EVENTS.SET_CREATED_WIDGET,
-	payload
+	payload,
+	type: WIDGETS_EVENTS.SET_CREATED_WIDGET
 });
 
 const setNewLayout = (payload: Layout) => ({
-	type: WIDGETS_EVENTS.EDIT_LAYOUT,
-	payload
+	payload,
+	type: WIDGETS_EVENTS.EDIT_LAYOUT
 });
 
 const setSelectedWidget = (payload: string) => ({
-	type: WIDGETS_EVENTS.SET_SELECTED_WIDGET,
-	payload
+	payload,
+	type: WIDGETS_EVENTS.SET_SELECTED_WIDGET
 });
 
 const updateWidget = (payload: Widget) => ({
-	type: WIDGETS_EVENTS.UPDATE_WIDGET,
-	payload
+	payload,
+	type: WIDGETS_EVENTS.UPDATE_WIDGET
 });
 
 export {

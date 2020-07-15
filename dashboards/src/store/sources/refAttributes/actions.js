@@ -32,18 +32,18 @@ const fetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback)
 };
 
 const requestRefAttributes = (payload: string) => ({
-	type: REF_ATTRIBUTES_EVENTS.REQUEST_REF_ATTRIBUTES,
-	payload
+	payload,
+	type: REF_ATTRIBUTES_EVENTS.REQUEST_REF_ATTRIBUTES
 });
 
 const receiveRefAttributes = (refAttributes: Array<Attribute>, refCode: string) => ({
-	type: REF_ATTRIBUTES_EVENTS.RECEIVE_REF_ATTRIBUTES,
-	payload: {refAttributes, refCode}
+	payload: {refAttributes, refCode},
+	type: REF_ATTRIBUTES_EVENTS.RECEIVE_REF_ATTRIBUTES
 });
 
 const recordRefAttributesError = (payload: string) => ({
-	type: REF_ATTRIBUTES_EVENTS.RECORD_REF_ATTRIBUTES_ERROR,
-	payload
+	payload,
+	type: REF_ATTRIBUTES_EVENTS.RECORD_REF_ATTRIBUTES_ERROR
 });
 
 export {

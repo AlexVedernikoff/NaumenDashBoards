@@ -26,10 +26,10 @@ const circleMixin = (widget: CircleWidget, chart: DiagramBuildData): ApexOptions
 		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
 
 		return {
-			labels: chart.labels,
 			dataLabels: {
 				formatter: dataLabelsFormatter(usesMSInterval, usesPercent)
 			},
+			labels: chart.labels,
 			tooltip: {
 				y: {
 					formatter: valueFormatter(usesMSInterval, usesPercent)

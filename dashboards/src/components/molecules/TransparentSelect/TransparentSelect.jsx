@@ -58,7 +58,7 @@ export class TransparentSelect extends PureComponent<Props, State> {
 	handleSubmitForm = (label: string) => {
 		const {name, onChangeLabel} = this.props;
 
-		onChangeLabel({name, label});
+		onChangeLabel({label, name});
 		this.setState({showForm: false});
 	};
 

@@ -27,8 +27,8 @@ const reducer = (state: StatesState = initialStatesState, action: StatesAction =
 			return {
 				...state,
 				[action.payload]: {
-					items: [],
 					error: false,
+					items: [],
 					loading: true
 				}
 			};

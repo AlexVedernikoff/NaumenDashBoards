@@ -99,10 +99,10 @@ const ICON_NAMES = {
 	ITALIC,
 	LEFT_ANGLE,
 	LINE_CHART,
-	NUMBER,
 	MAIL,
 	MINUS,
 	MULTIPLY,
+	NUMBER,
 	PIE_CHART,
 	PLUS,
 	POSITION_BOTTOM,
@@ -117,9 +117,9 @@ const ICON_NAMES = {
 	RIGHT_ANGLE,
 	SEARCH,
 	SPEEDOMETER,
+	SQUARE_REMOVE,
 	STACKED_BAR_CHART,
 	STACKED_COLUMN_CHART,
-	SQUARE_REMOVE,
 	SUMMARY,
 	TABLE,
 	TEXT,
@@ -137,20 +137,20 @@ const NORMAL: 'NORMAL' = 'NORMAL';
 const LARGE: 'LARGE' = 'LARGE';
 
 const ICON_SIZES = {
-	NORMAL,
-	LARGE
+	LARGE,
+	NORMAL
 };
 
 const ICON_PROPS = {
-	[NORMAL]: {
-		height: 16,
-		width: 16,
-		viewBox: '0 0 16 16'
-	},
 	[LARGE]: {
 		height: 24,
-		width: 24,
-		viewBox: '0 0 24 24'
+		viewBox: '0 0 24 24',
+		width: 24
+	},
+	[NORMAL]: {
+		height: 16,
+		viewBox: '0 0 16 16',
+		width: 16
 	}
 };
 

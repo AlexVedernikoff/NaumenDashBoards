@@ -27,7 +27,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		const arrData = getMapValues(indicator.computeData);
 		values.data.map(set => set.dataKey)
 			.filter(dataKey => arrData.find(set => set.dataKey === dataKey))
-			.forEach(dataKey => breakdown.push({dataKey, value: null, group: null}));
+			.forEach(dataKey => breakdown.push({dataKey, group: null, value: null}));
 
 		return breakdown;
 	};

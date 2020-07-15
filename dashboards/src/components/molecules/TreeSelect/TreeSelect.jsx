@@ -45,7 +45,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 		const {name, onChangeLabel} = this.props;
 
 		this.hideForm();
-		onChangeLabel({name, label});
+		onChangeLabel({label, name});
 	};
 
 	handleClick = () => this.setState({showList: true});

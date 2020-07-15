@@ -23,18 +23,18 @@ const fetchCatalogItemData = (property: string): ThunkAction => async (dispatch:
 };
 
 const requestCatalogItemData = (payload: string) => ({
-	type: CATALOG_ITEMS_EVENTS.REQUEST_CATALOG_ITEM_DATA,
-	payload
+	payload,
+	type: CATALOG_ITEMS_EVENTS.REQUEST_CATALOG_ITEM_DATA
 });
 
 const recordCatalogItemDataError = (payload: string) => ({
-	type: CATALOG_ITEMS_EVENTS.RECORD_CATALOG_ITEM_DATA_ERROR,
-	payload
+	payload,
+	type: CATALOG_ITEMS_EVENTS.RECORD_CATALOG_ITEM_DATA_ERROR
 });
 
 const receiveCatalogItemData = (payload: ReceivePayload) => ({
-	type: CATALOG_ITEMS_EVENTS.RECEIVE_CATALOG_ITEM_DATA,
-	payload
+	payload,
+	type: CATALOG_ITEMS_EVENTS.RECEIVE_CATALOG_ITEM_DATA
 });
 
 export {

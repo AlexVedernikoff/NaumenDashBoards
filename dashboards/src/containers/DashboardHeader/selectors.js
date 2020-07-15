@@ -19,8 +19,8 @@ export const props = (state: AppState): ConnectedProps => {
 
 	return {
 		autoUpdateSettings: autoUpdate,
-		editableDashboard: editable,
 		editMode,
+		editableDashboard: editable,
 		personalDashboard: personal,
 		personalDashboardCreating: personalCreating,
 		personalDashboardDeleting: personalDeleting,

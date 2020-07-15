@@ -112,8 +112,11 @@ const YEAR_FORMATS = [
 
 const UNSUPPORTED_DRILL_DOWN_FORMATS = ['ii', 'hh', 'hh:ii', 'WD', 'dd'];
 
+const DATETIME_FORMATS = ['dd.mm.YY hh:ii', 'dd.mm.YY hh', 'dd.mm.YY', 'MM YY', 'yyyy'];
+
 export {
 	DATETIME_DAY_FORMATS,
+	DATETIME_FORMATS,
 	DAY_FORMATS,
 	HOURS_FORMATS,
 	MINUTES_FORMATS,

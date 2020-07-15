@@ -5,11 +5,11 @@ import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
 export const initialDashboardState: DashboardState = {
 	autoUpdate: {
 		defaultInterval: DEFAULT_INTERVAL,
-		interval: DEFAULT_INTERVAL,
-		enabled: false
+		enabled: false,
+		interval: DEFAULT_INTERVAL
 	},
-	editable: false,
 	editMode: false,
+	editable: false,
 	error: false,
 	loading: false,
 	personal: false,
@@ -18,6 +18,6 @@ export const initialDashboardState: DashboardState = {
 };
 
 export const defaultDashboardAction: DashboardAction = {
-	type: DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION,
-	payload: null
+	payload: null,
+	type: DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION
 };

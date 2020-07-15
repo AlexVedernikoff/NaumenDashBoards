@@ -7,14 +7,14 @@ const DEFAULT_SPEEDOMETER_SETTINGS = {
 		min: 0
 	},
 	ranges: {
-		use: false,
-		type: RANGES_TYPES.ABSOLUTE,
 		data: [{
 			// использовать шестнадцатеричное представление, т.к. по нему рассчитывается яркость
 			color: '#ffffff',
 			from: 0,
 			to: 100
-		}]
+		}],
+		type: RANGES_TYPES.ABSOLUTE,
+		use: false
 	}
 };
 

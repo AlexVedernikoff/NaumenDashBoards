@@ -39,8 +39,8 @@ export class ColorInput extends PureComponent<Props, State> {
 		const {components, value} = this.props;
 		const {Input: CustomInput} = components;
 		const props = {
-			onClick: this.handleClick,
 			forwardedRef: this.ref,
+			onClick: this.handleClick,
 			value
 		};
 		const Component = CustomInput || Input;

@@ -16,8 +16,8 @@ const fetchRoots = (attribute: Attribute) => async (dispatch: Dispatch, getState
 	const {type} = attribute;
 
 	dispatch({
-		type: CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_ROOTS,
-		payload: type
+		payload: type,
+		type: CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_ROOTS
 	});
 
 	try {
@@ -33,13 +33,13 @@ const fetchRoots = (attribute: Attribute) => async (dispatch: Dispatch, getState
 		};
 
 		dispatch({
-			type: CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_ROOTS,
-			payload
+			payload,
+			type: CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_ROOTS
 		});
 	} catch (error) {
 		dispatch({
-			type: CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_ROOTS_ERROR,
-			payload: type
+			payload: type,
+			type: CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_ROOTS_ERROR
 		});
 	}
 };
@@ -59,8 +59,8 @@ const fetchNodes = (attribute: Attribute, node: Item) => async (dispatch: Dispat
 	};
 
 	dispatch({
-		type: CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_NODES,
-		payload
+		payload,
+		type: CURRENT_OBJECT_EVENTS.REQUEST_CURRENT_OBJECT_NODES
 	});
 
 	try {
@@ -73,16 +73,16 @@ const fetchNodes = (attribute: Attribute, node: Item) => async (dispatch: Dispat
 		const {data: attributes} = await client.post(url, data);
 
 		dispatch({
-			type: CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_NODES,
 			payload: {
 				...payload,
 				attributes
-			}
+			},
+			type: CURRENT_OBJECT_EVENTS.RECEIVE_CURRENT_OBJECT_NODES
 		});
 	} catch (error) {
 		dispatch({
-			type: CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_NODES_ERROR,
-			payload
+			payload,
+			type: CURRENT_OBJECT_EVENTS.RECORD_CURRENT_OBJECT_NODES_ERROR
 		});
 	}
 };

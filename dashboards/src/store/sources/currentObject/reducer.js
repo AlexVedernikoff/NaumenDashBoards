@@ -41,9 +41,9 @@ const reducer = (state: CurrentObjectState = initialCurrentObjectState, action: 
 			return {
 				...state,
 				[action.payload]: {
+					error: false,
 					items: {},
-					loading: true,
-					error: false
+					loading: true
 				}
 			};
 		default:

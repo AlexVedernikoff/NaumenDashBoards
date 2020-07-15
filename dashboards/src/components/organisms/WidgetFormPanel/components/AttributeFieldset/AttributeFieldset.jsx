@@ -103,8 +103,8 @@ export class AttributeFieldset extends PureComponent<Props> {
 		if (renderRefField) {
 			const refProps = {
 				disabled,
-				value,
-				parent
+				parent,
+				value
 			};
 
 			return (

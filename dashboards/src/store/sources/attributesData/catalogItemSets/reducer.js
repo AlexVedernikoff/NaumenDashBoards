@@ -27,8 +27,8 @@ const reducer = (state: CatalogItemSetsState = initialCatalogItemSetsState, acti
 			return {
 				...state,
 				[action.payload]: {
-					items: [],
 					error: false,
+					items: [],
 					loading: true
 				}
 			};

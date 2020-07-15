@@ -21,7 +21,8 @@
 		"standard",
 		"react",
 		"promise",
-		"flowtype"
+		"flowtype",
+		"sort-keys-fix"
 	],
 	"rules": {
 		"curly": 0,
@@ -42,6 +43,7 @@
 		"semi": [2, "always"],
 		"babel/semi": [2, "always"],
 		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": true}],
+		"sort-keys": [2, "asc", {"caseSensitive": true}],
 		"sort-vars": [2, {"ignoreCase": false}],
 		"jsdoc/newline-after-description": 0,
 		"jsdoc/require-returns-description": 0

@@ -16,6 +16,6 @@ export const initialWidgetsState: WidgetsDataState = {
 };
 
 export const defaultAction: WidgetsAction = {
-	type: WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION,
-	payload: null
+	payload: null,
+	type: WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION
 };

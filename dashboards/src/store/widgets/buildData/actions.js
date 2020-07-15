@@ -283,18 +283,18 @@ const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatc
 };
 
 const receiveBuildData = (payload: ReceiveBuildDataPayload) => ({
-	type: BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA,
-	payload
+	payload,
+	type: BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA
 });
 
 const recordBuildDataError = (payload: string) => ({
-	type: BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR,
-	payload
+	payload,
+	type: BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
 });
 
 const requestBuildData = (payload: string) => ({
-	type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA,
-	payload
+	payload,
+	type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA
 });
 
 export {

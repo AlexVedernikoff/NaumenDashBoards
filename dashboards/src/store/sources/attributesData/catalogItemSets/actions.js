@@ -23,18 +23,18 @@ const fetchCatalogItemSetData = (property: string): ThunkAction => async (dispat
 };
 
 const requestCatalogItemSetData = (payload: string) => ({
-	type: CATALOG_ITEM_SETS_EVENTS.REQUEST_CATALOG_ITEM_SET_DATA,
-	payload
+	payload,
+	type: CATALOG_ITEM_SETS_EVENTS.REQUEST_CATALOG_ITEM_SET_DATA
 });
 
 const recordCatalogItemSetDataError = (payload: string) => ({
-	type: CATALOG_ITEM_SETS_EVENTS.RECORD_CATALOG_ITEM_SET_DATA_ERROR,
-	payload
+	payload,
+	type: CATALOG_ITEM_SETS_EVENTS.RECORD_CATALOG_ITEM_SET_DATA_ERROR
 });
 
 const receiveCatalogItemSetData = (payload: ReceivePayload) => ({
-	type: CATALOG_ITEM_SETS_EVENTS.RECEIVE_CATALOG_ITEM_SET_DATA,
-	payload
+	payload,
+	type: CATALOG_ITEM_SETS_EVENTS.RECEIVE_CATALOG_ITEM_SET_DATA
 });
 
 export {

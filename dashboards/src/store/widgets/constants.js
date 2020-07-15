@@ -93,29 +93,29 @@ const INTEGER_AGGREGATION = {
 // Периоды атрибута типа dtInterval
 const INTERVALS = [
 	{
+		label: 'c',
 		max: 60000,
-		min: 1000,
-		label: 'c'
+		min: 1000
 	},
 	{
+		label: 'мин',
 		max: 36e5,
-		min: 60000,
-		label: 'мин'
+		min: 60000
 	},
 	{
+		label: 'ч',
 		max: 864e5,
-		min: 36e5,
-		label: 'ч'
+		min: 36e5
 	},
 	{
+		label: 'д',
 		max: 6048e5,
-		min: 864e5,
-		label: 'д'
+		min: 864e5
 	},
 	{
+		label: 'нед',
 		max: Infinity,
-		min: 6048e5,
-		label: 'нед'
+		min: 6048e5
 	}
 ];
 

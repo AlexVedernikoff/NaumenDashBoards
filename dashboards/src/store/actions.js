@@ -6,8 +6,8 @@ const resetState = () => ({
 });
 
 const switchState = (payload: Object) => ({
-	type: ROOT_EVENTS.SWITCH_STATE,
-	payload
+	payload,
+	type: ROOT_EVENTS.SWITCH_STATE
 });
 
 export {

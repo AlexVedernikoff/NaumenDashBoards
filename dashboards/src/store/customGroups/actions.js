@@ -71,19 +71,19 @@ const setCustomGroups = (payload: CustomGroupsMap) => (dispatch: Dispatch) => {
 	});
 
 	dispatch({
-		type: CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS,
-		payload
+		payload,
+		type: CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS
 	});
 };
 
 const saveCustomGroup = (payload: CustomGroup) => ({
-	type: CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP,
-	payload
+	payload,
+	type: CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP
 });
 
 const removeCustomGroup = (payload: string) => ({
-	type: CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP,
-	payload
+	payload,
+	type: CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP
 });
 
 export {
