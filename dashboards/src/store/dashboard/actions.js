@@ -321,18 +321,18 @@ const createPersonalState = () => async (dispatch: Dispatch) => {
 };
 
 const changeAutoUpdateSettings = payload => ({
-	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS,
-	payload
+	payload,
+	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
 });
 
 const setEditable = (payload: boolean) => ({
-	type: DASHBOARD_EVENTS.SET_EDITABLE_PARAM,
-	payload
+	payload,
+	type: DASHBOARD_EVENTS.SET_EDITABLE_PARAM
 });
 
 const setPersonal = payload => ({
-	type: DASHBOARD_EVENTS.SET_PERSONAL,
-	payload
+	payload,
+	type: DASHBOARD_EVENTS.SET_PERSONAL
 });
 
 export {

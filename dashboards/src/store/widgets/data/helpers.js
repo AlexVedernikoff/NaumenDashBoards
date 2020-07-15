@@ -97,8 +97,8 @@ const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidget): Wid
 
 	return {
 		...state,
-		updating: false,
-		map: {...state.map}
+		map: {...state.map},
+		updating: false
 	};
 };
 

@@ -58,6 +58,19 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 };
 
 /**
+ * Управляет отображением панели зума на графике при создании изображения
+ * @param {HTMLDivElement} container - элемент по которому создается изображение
+ * @param {boolean} show - значение указывает о необходимости скрыть\показать панель зума
+ */
+const handleShowToolbar = (container: HTMLDivElement, show: boolean) => {
+	const toolbars = container.querySelectorAll('.apexcharts-toolbar');
+
+	toolbars.forEach(toolbar => {
+		toolbar.style.visibility = show ? 'visible' : 'hidden';
+	});
+};
+
+/**
  * Создает canvas элемент снимка
  * @param {Options} options - параметры создаваемого файла
  * @returns {Promise<Blob>}
@@ -73,7 +86,11 @@ const createImage = async (options: Options) => {
 		};
 	}
 
+	handleShowToolbar(container, false);
+
 	const image = isIE() ? await createIEImage(container, config) : await html2canvas(container, config);
+
+	handleShowToolbar(container, true);
 
 	return image;
 };

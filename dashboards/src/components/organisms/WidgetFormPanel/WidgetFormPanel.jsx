@@ -43,7 +43,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 			});
 			const top = Math.min(...offsets) - form.getBoundingClientRect().top;
 
-			form.scrollTo({top: Math.max(top, 0), behavior: 'smooth'});
+			form.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
 		}
 	};
 

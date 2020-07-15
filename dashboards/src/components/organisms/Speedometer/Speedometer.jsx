@@ -8,15 +8,15 @@ import styles from './styles.less';
 
 export class Speedometer extends PureComponent<Props, State> {
 	static defaultProps = {
-		ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges,
 		max: 100,
-		min: 0
+		min: 0,
+		ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges
 	};
 
 	state = {
+		arcWidth: 0,
 		arcX: 0,
 		arcY: 0,
-		arcWidth: 0,
 		fontSizeScale: 0,
 		height: 0,
 		radius: 0,
@@ -57,7 +57,7 @@ export class Speedometer extends PureComponent<Props, State> {
 		const arcX = Math.round(width / 2);
 		const arcY = Math.round(height / 2 + radius / 3);
 
-		this.setState({arcX, arcY, arcWidth, fontSizeScale, height, radius, width});
+		this.setState({arcWidth, arcX, arcY, fontSizeScale, height, radius, width});
 	};
 
 	polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {

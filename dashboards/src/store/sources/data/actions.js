@@ -16,8 +16,8 @@ const getDataSources = (): ThunkAction => async (dispatch: Dispatch) => {
 };
 
 const receiveDataSources = (payload: RawDataSource[]) => ({
-	type: DATA_SOURCES_EVENTS.RECEIVE_DATA_SOURCES,
-	payload
+	payload,
+	type: DATA_SOURCES_EVENTS.RECEIVE_DATA_SOURCES
 });
 
 const recordErrorDataSources = () => ({

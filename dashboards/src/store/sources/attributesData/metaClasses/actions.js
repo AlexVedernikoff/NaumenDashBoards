@@ -21,18 +21,18 @@ const fetchMetaClassData = (metaClassFqn: string): ThunkAction => async (dispatc
 };
 
 const requestMetaClassData = (payload: string) => ({
-	type: META_CLASSES_EVENTS.REQUEST_META_CLASS_DATA,
-	payload
+	payload,
+	type: META_CLASSES_EVENTS.REQUEST_META_CLASS_DATA
 });
 
 const recordMetaClassDataError = (payload: string) => ({
-	type: META_CLASSES_EVENTS.RECORD_META_CLASS_DATA_ERROR,
-	payload
+	payload,
+	type: META_CLASSES_EVENTS.RECORD_META_CLASS_DATA_ERROR
 });
 
 const receiveMetaClassData = (payload: ReceivePayload) => ({
-	type: META_CLASSES_EVENTS.RECEIVE_META_CLASS_DATA,
-	payload
+	payload,
+	type: META_CLASSES_EVENTS.RECEIVE_META_CLASS_DATA
 });
 
 export {

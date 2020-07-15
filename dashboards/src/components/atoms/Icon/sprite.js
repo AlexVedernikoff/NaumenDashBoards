@@ -28,7 +28,7 @@ class Sprite {
 	stringify = (string: string) => string.replace(/\n|\r|\t|\v/gi, '');
 
 	add (id: IconName, content: string) {
-		this.symbols.push({id, content});
+		this.symbols.push({content, id});
 	}
 
 	render () {

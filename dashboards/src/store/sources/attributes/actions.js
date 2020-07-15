@@ -28,18 +28,18 @@ const fetchAttributes = (classFqn: string, callback?: OnLoadCallback): ThunkActi
 };
 
 const requestAttributes = (payload: string) => ({
-	type: ATTRIBUTES_EVENTS.REQUEST_ATTRIBUTES,
-	payload
+	payload,
+	type: ATTRIBUTES_EVENTS.REQUEST_ATTRIBUTES
 });
 
 const receiveAttributes = (attributes, classFqn) => ({
-	type: ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES,
-	payload: {attributes, classFqn}
+	payload: {attributes, classFqn},
+	type: ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES
 });
 
 const recordAttributesError = (payload: string) => ({
-	type: ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR,
-	payload
+	payload,
+	type: ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR
 });
 
 export {

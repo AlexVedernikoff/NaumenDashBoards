@@ -11,8 +11,8 @@ export class TextInput extends PureComponent<Props> {
 		className: '',
 		disabled: false,
 		maxLength: null,
-		onlyNumber: false,
 		name: '',
+		onlyNumber: false,
 		placeholder: '',
 		value: ''
 	};

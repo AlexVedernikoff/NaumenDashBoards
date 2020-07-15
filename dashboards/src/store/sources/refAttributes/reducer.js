@@ -8,8 +8,8 @@ const reducer = (state: RefAttributesState = initialRefAttributesState, action: 
 		case REF_ATTRIBUTES_EVENTS.RECEIVE_REF_ATTRIBUTES:
 			state[action.payload.refCode] = {
 				...state[action.payload.refCode],
-				options: action.payload.refAttributes,
 				loading: false,
+				options: action.payload.refAttributes,
 				uploaded: true
 			};
 			return {...state};

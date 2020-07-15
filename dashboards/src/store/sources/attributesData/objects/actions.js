@@ -47,33 +47,33 @@ const fetchObjectData = (params: FetchParams) => params.actual
 	: fetch(requestAllData, receiveAllObjectData, recordAllObjectDataError)(params);
 
 const requestActualData = (payload: Payload) => ({
-	type: OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA,
-	payload
+	payload,
+	type: OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA
 });
 
 const requestAllData = (payload: Payload) => ({
-	type: OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA,
-	payload
+	payload,
+	type: OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA
 });
 
 const recordActualDataError = (payload: Payload) => ({
-	type: OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR,
-	payload
+	payload,
+	type: OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR
 });
 
 const recordAllObjectDataError = (payload: Payload) => ({
-	type: OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR,
-	payload
+	payload,
+	type: OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR
 });
 
 const receiveActualData = (payload: ReceivePayload) => ({
-	type: OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA,
-	payload
+	payload,
+	type: OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA
 });
 
 const receiveAllObjectData = (payload: ReceivePayload) => ({
-	type: OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA,
-	payload
+	payload,
+	type: OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA
 });
 
 export {

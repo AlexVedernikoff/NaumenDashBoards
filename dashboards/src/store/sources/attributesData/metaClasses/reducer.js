@@ -27,8 +27,8 @@ const reducer = (state: MetaClassesState = initialMetaClassesState, action: Meta
 			return {
 				...state,
 				[action.payload]: {
-					items: [],
 					error: false,
+					items: [],
 					loading: true
 				}
 			};

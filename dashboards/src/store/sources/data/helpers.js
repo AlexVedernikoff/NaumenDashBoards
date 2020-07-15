@@ -15,11 +15,11 @@ const createDataSource = (source: RawDataSource, parent: string | null) => {
 		id: value,
 		loading: false,
 		parent,
+		uploaded: true,
 		value: {
 			label,
 			value
-		},
-		uploaded: true
+		}
 	};
 };
 

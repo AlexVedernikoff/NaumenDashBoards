@@ -19,14 +19,6 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 
 		return object({
 			...base,
-			data: array().of(object({
-				[indicator]: requiredByCompute(indicator).test(
-					'valid-attribute',
-					'Выбранный показатель не может быть использован на текущем типе виджета',
-					indicator => !indicator || indicator.type !== ATTRIBUTE_TYPES.dtInterval
-				),
-				[source]: object().required(getErrorMessage(source)).nullable()
-			})),
 			[borders]: object().test(
 				'compared-borders',
 				'Значение min должно быть меньше max',
@@ -35,7 +27,15 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 				'required-borders',
 				'Укажите границы шкал',
 				borders => borders && Number.isInteger(parseInt(borders.min)) && Number.isInteger(parseInt(borders.max))
-			)
+			),
+			data: array().of(object({
+				[indicator]: requiredByCompute(indicator).test(
+					'valid-attribute',
+					'Выбранный показатель не может быть использован на текущем типе виджета',
+					indicator => !indicator || indicator.type !== ATTRIBUTE_TYPES.dtInterval
+				),
+				[source]: object().required(getErrorMessage(source)).nullable()
+			}))
 		});
 	};
 

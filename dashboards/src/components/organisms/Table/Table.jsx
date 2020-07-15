@@ -21,8 +21,8 @@ export class Table extends PureComponent<Props, State> {
 		data: [],
 		page: 1,
 		pageSize: 10,
-		usesPercent: false,
 		usesMSInterval: false,
+		usesPercent: false,
 		width: NaN
 	};
 

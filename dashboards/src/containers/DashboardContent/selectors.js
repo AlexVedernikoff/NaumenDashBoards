@@ -14,8 +14,8 @@ export const props = (state: AppState): ConnectedProps => {
 
 	return {
 		buildData,
-		editable,
 		editMode,
+		editable,
 		newWidget,
 		selectedWidget,
 		// $FlowFixMe

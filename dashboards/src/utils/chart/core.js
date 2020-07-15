@@ -2,7 +2,7 @@
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, Legend} from 'store/widgets/data/types';
-import {CHART_TYPES, DEFAULT_COLORS, LEGEND_POSITIONS} from './constants';
+import {CHART_TYPES, DEFAULT_COLORS, LEGEND_POSITIONS, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'src/helpers';
@@ -88,6 +88,9 @@ const getLegendOptions = (settings: Legend, widgetWidth: number) => {
 const getDataLabelsOptions = (settings: DataLabels) => {
 	const {fontColor, fontFamily, fontSize, show, showShadow} = settings;
 	const options: Object = {
+		background: {
+			enabled: false
+		},
 		enabled: show,
 		style: {
 			colors: [fontColor],
@@ -146,12 +149,17 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 				enabled: false
 			},
 			background: 'white',
+			defaultLocale: 'ru',
 			events: {
 				dataPointSelection: isSupportedDrillDown ? drillDownBySelection(widget, data) : undefined
 			},
 			height: '100%',
+			locales: LOCALES,
 			toolbar: {
-				show: false
+				show: true,
+				tools: {
+					download: false
+				}
 			},
 			type: type === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(type),
 			width: '100%'

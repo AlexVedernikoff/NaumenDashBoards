@@ -83,18 +83,18 @@ const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: 
 };
 
 const requestLink = (payload: string) => ({
-	type: LINKS_EVENTS.REQUEST_LINK,
-	payload
+	payload,
+	type: LINKS_EVENTS.REQUEST_LINK
 });
 
 const receiveLink = (payload: string) => ({
-	type: LINKS_EVENTS.RECEIVE_LINK,
-	payload
+	payload,
+	type: LINKS_EVENTS.RECEIVE_LINK
 });
 
 const recordLinkError = (payload: string) => ({
-	type: LINKS_EVENTS.RECORD_LINK_ERROR,
-	payload
+	payload,
+	type: LINKS_EVENTS.RECORD_LINK_ERROR
 });
 
 export {

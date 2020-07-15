@@ -68,18 +68,18 @@ const endSwitch = () => ({
 });
 
 const setContext = payload => ({
-	type: CONTEXT_EVENTS.SET_CONTEXT,
-	payload
+	payload,
+	type: CONTEXT_EVENTS.SET_CONTEXT
 });
 
 const setUserData = (payload: UserData) => ({
-	type: CONTEXT_EVENTS.SET_USER_DATA,
-	payload
+	payload,
+	type: CONTEXT_EVENTS.SET_USER_DATA
 });
 
 const setTemp = (payload: Object | null) => ({
-	type: CONTEXT_EVENTS.SET_TEMP,
-	payload
+	payload,
+	type: CONTEXT_EVENTS.SET_TEMP
 });
 
 const startSwitch = () => ({

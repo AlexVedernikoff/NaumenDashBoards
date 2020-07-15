@@ -10,13 +10,13 @@ const createToast = (newToast: $Exact<NewToast>) => (dispatch: Dispatch) => {
 };
 
 const removeToast = (payload: string) => (dispatch: Dispatch) => dispatch({
-	type: TOASTS_EVENTS.REMOVE_TOAST,
-	payload
+	payload,
+	type: TOASTS_EVENTS.REMOVE_TOAST
 });
 
 const addToast = (payload: Toast) => ({
-	type: TOASTS_EVENTS.ADD_TOAST,
-	payload
+	payload,
+	type: TOASTS_EVENTS.ADD_TOAST
 });
 
 export {

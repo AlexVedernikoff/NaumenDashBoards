@@ -95,8 +95,8 @@ const receiveNodes = (state: CurrentObjectState, payload: ReceiveNodesPayload) =
 				...items,
 				[parent]: {
 					...state[type].items[parent],
-					loading: false,
-					children: childrenIds
+					children: childrenIds,
+					loading: false
 				}
 			}
 		}

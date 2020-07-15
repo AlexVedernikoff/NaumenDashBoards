@@ -9,6 +9,6 @@ export const initialDataSourcesState: DataSourcesState = {
 };
 
 export const defaultDataSourcesAction: DataSourcesAction = {
-	type: DATA_SOURCES_EVENTS.UNKNOWN_DATA_SOURCES_ACTION,
-	payload: null
+	payload: null,
+	type: DATA_SOURCES_EVENTS.UNKNOWN_DATA_SOURCES_ACTION
 };
