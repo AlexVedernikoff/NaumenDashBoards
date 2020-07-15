@@ -2003,6 +2003,8 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                     } else {
                         return api.utils.formatters.oneZeroFormatter(value.toBoolean())
                     }
+                case AttrtibuteType.TIMER_TYPES:
+                    return (value as TimerStatus).getRussianName()
                 default:
                     return parameter.attribute?.code == 'UUID' ? value.split('\\$', 2)[1] : value
             }
@@ -2081,12 +2083,13 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
         case GroupType.HOURS:
             value = value.tokenize(':/')*.padLeft(2, '0').join(':')
             return value
+        case GroupType.getTimerTypes():
+            return (value as TimerStatus).getRussianName()
         case GroupType.SECOND_INTERVAL:
         case GroupType.MINUTE_INTERVAL:
         case GroupType.HOUR_INTERVAL:
         case GroupType.DAY_INTERVAL:
         case GroupType.WEEK_INTERVAL:
-        case GroupType.getTimerTypes():
             return value
         default: throw new IllegalArgumentException("Not supported type: $type")
     }
