@@ -553,7 +553,8 @@ class Link
                 [intervalValue as long, intervalType as String])
             )
             case AttributeType.TIMER_TYPES:
-                return filterBuilder.OR(code, 'timerStatusContains', [value]) // при условии что в тут будет код статус
+                String statusCode = TimerStatus.getByName(value)
+                return filterBuilder.OR(code, 'timerStatusContains', [statusCode])
             case AttributeType.BOOL_TYPE:
                 if (!value.isInteger()) {
                     value = value.toLowerCase() == 'да' ? '1' : '0'

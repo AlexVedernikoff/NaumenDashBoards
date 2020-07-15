@@ -120,6 +120,27 @@ enum Comparison
     EQUAL_REMOVED,
     NOT_EQUAL_REMOVED
 }
+/**
+ * Типы статусов для атрибутов типа счётчик и обратный счётчик
+ */
+enum TimerStatus
+{
+    a('Активен'),
+    p('Приостановлен'),
+    s('Остановлен'),
+    n('Ожидает начала'),
+    e('Кончился запас времени')
+
+    String russianName
+
+    TimerStatus(String russianName) {
+        this.russianName = russianName
+    }
+
+    static TimerStatus getByName(String russianName) {
+        return values().find { it.russianName == russianName }
+    }
+}
 //endregion
 
 //region КЛАССЫ
