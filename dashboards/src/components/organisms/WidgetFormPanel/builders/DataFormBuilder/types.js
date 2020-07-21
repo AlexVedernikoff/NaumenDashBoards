@@ -18,7 +18,7 @@ export type TextAreaProps = {
 export type CheckboxProps = {
 	label: string,
 	name: string,
-	onChange: (name: string, value: boolean) => void,
+	onChange: OnChangeInputEvent => void,
 	value: boolean,
 };
 

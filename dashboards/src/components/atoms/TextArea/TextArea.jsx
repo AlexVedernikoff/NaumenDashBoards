@@ -1,14 +1,13 @@
 // @flow
-import {IconButton} from 'components/atoms';
-import {ICON_NAMES} from 'components/atoms/Icon';
+import {Label} from 'components/atoms';
 import type {Props} from './types';
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 
 export class TextArea extends Component<Props> {
 	static defaultProps = {
 		maxLength: null,
-		placeholder: ''
+		placeholder: 'Введите текст...'
 	};
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
@@ -23,34 +22,48 @@ export class TextArea extends Component<Props> {
 		onChange({name, value: ''});
 	};
 
-	renderClearIcon = () => {
+	renderClearButton = () => {
 		const {value} = this.props;
 
-		if (value) {
-			return (
-				<div className={styles.icon}>
-					<IconButton icon={ICON_NAMES.REMOVE} onClick={this.handleClear} />
-				</div>
-			);
-		}
+		return (
+			<button className={styles.clearButton} disabled={!value} onClick={this.handleClear}>Очистить</button>
+		);
 	};
 
-	render () {
+	renderLabel = () => <Label>{this.props.label}</Label>;
+
+	renderLabelContainer = () => {
+		return (
+			<div className={styles.labelContainer}>
+				{this.renderLabel()}
+				{this.renderClearButton()}
+			</div>
+		);
+	};
+
+	renderTextArea = () => {
 		const {maxLength, name, onBlur, placeholder, value} = this.props;
 
 		return (
-			<div className={styles.container}>
-				<textarea
-					className={styles.input}
-					maxLength={maxLength}
-					name={name}
-					onBlur={onBlur}
-					onChange={this.handleChange}
-					placeholder={placeholder}
-					value={value}
-				/>
-				{this.renderClearIcon()}
-			</div>
+			<textarea
+				className={styles.input}
+				maxLength={maxLength}
+				name={name}
+				onBlur={onBlur}
+				onChange={this.handleChange}
+				placeholder={placeholder}
+				rows={1}
+				value={value}
+			/>
+		);
+	};
+
+	render () {
+		return (
+			<Fragment>
+				{this.renderLabelContainer()}
+				{this.renderTextArea()}
+			</Fragment>
 		);
 	}
 }

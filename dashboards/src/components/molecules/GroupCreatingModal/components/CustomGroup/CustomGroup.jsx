@@ -1,6 +1,5 @@
 // @flow
 import {Button, FieldError, InfoPanel, Text} from 'components/atoms';
-import cn from 'classnames';
 import {createNewSubGroup} from './helpers';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
@@ -215,50 +214,44 @@ export class CustomGroup extends Component<Props, State> {
 		const editable = !!selectedGroup;
 
 		return (
-			<FormField className={styles.nameField} label="Название группировки">
-				<Select
-					editable={editable}
-					forwardedLabelInputRef={this.groupNameRef}
-					getOptionLabel={this.getGroupLabel}
-					getOptionValue={this.getGroupValue}
-					maxLabelLength={MAX_TEXT_LENGTH}
-					onChangeLabel={this.handleChangeGroupName}
-					onClickCreationButton={this.handleClickCreationButton}
-					onSelect={this.handleSelectGroup}
-					options={groups}
-					showCreationButton={true}
-					textCreationButton="Добавить группировку"
-					tip="Подпись группы для отображения на оси"
-					value={selectedGroup}
-				/>
-			</FormField>
+			<Select
+				className={styles.groupSelect}
+				editable={editable}
+				forwardedLabelInputRef={this.groupNameRef}
+				getOptionLabel={this.getGroupLabel}
+				getOptionValue={this.getGroupValue}
+				maxLabelLength={MAX_TEXT_LENGTH}
+				onChangeLabel={this.handleChangeGroupName}
+				onClickCreationButton={this.handleClickCreationButton}
+				onSelect={this.handleSelectGroup}
+				options={groups}
+				showCreationButton={true}
+				textCreationButton="Добавить группировку"
+				value={selectedGroup}
+			/>
 		);
 	};
 
-	renderGroupSelectContainer = () => (
+	renderGroupSelectError = () => <FieldError className={mainStyles.error} text={this.state.errors.name} />;
+
+	renderGroupSelectField = () => (
 		<Fragment>
-			<div className={styles.groupSelectContainer}>
-				{this.renderGroupSelect()}
-				{this.renderInfoIcon()}
-				{this.renderRemovalGroupButton()}
-			</div>
+			<FormField className={styles.groupSelectField} label="Название группировки">
+				<div className={styles.groupSelectContainer}>
+					{this.renderGroupSelect()}
+					{this.renderInfoIcon()}
+					{this.renderRemovalGroupButton()}
+				</div>
+			</FormField>
 			{this.renderGroupSelectError()}
 		</Fragment>
 	);
 
-	renderGroupSelectError = () => <FieldError className={mainStyles.error} text={this.state.errors.name} />;
-
-	renderInfoIcon = () => {
-		const iconCN = cn(mainStyles.infoIcon, styles.infoIcon);
-
-		return (
-			<Icon
-				className={iconCN}
-				name={ICON_NAMES.INFO}
-				title="Подпись группы для отображения на оси"
-			/>
-		);
-	};
+	renderInfoIcon = () => (
+		<div title="Название для сохранения группировки">
+			<Icon className={mainStyles.infoIcon} name={ICON_NAMES.INFO} />
+		</div>
+	);
 
 	renderInfoPanel = (props: InfoPanelProps) => {
 		const {onClose, onConfirm, text} = props;
@@ -287,11 +280,9 @@ export class CustomGroup extends Component<Props, State> {
 
 		if (selectedGroup) {
 			return (
-				<div className={styles.removeNameButton}>
-					<Button onClick={this.handleClickRemovalButton} variant={BUTTON_VARIANTS.SIMPLE}>
-						Удалить
-					</Button>
-				</div>
+				<Button onClick={this.handleClickRemovalButton} variant={BUTTON_VARIANTS.SIMPLE}>
+					Удалить
+				</Button>
 			);
 		}
 	};
@@ -369,7 +360,7 @@ export class CustomGroup extends Component<Props, State> {
 					{this.renderLimitInfo()}
 					{this.renderUseInfo()}
 					{this.renderTitle()}
-					{this.renderGroupSelectContainer()}
+					{this.renderGroupSelectField()}
 					{this.renderSubGroupSection()}
 				</Fragment>
 			);
