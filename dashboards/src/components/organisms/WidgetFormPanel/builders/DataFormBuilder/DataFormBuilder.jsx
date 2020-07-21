@@ -1,18 +1,19 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {Checkbox, TextArea} from 'components/atoms';
 import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceBoxProps, TextAreaProps} from './types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
-import {FormBox, OuterSelect} from 'components/molecules';
+import {FormBox, FormCheckControl, OuterSelect} from 'components/molecules';
 import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import type {Group} from 'store/widgets/data/types';
-import {Label, LegacyCheckbox, TextArea} from 'components/atoms';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
+import styles from './styles.less';
 import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -117,12 +118,12 @@ export class DataFormBuilder extends Component<Props> {
 		setDataFieldValue(index, name, value);
 	};
 
-	handleChangeUseName = (name: string, value: boolean) => {
+	handleChangeUseName = ({name, value}: OnChangeInputEvent) => {
 		const {setFieldValue, values} = this.props;
 
 		setFieldValue(FIELDS.header, {
 			...values[FIELDS.header],
-			[name]: value
+			[name]: !value
 		});
 	};
 
@@ -171,12 +172,11 @@ export class DataFormBuilder extends Component<Props> {
 			handleChange: this.handleChange,
 			label: 'Название виджета',
 			name,
-			placeholder: 'Постарайтесь уместить название в две строчки текста',
 			value: values[name]
 		};
 
 		const useNameCheckbox = {
-			label: 'Использовать название виджета в качестве заголовка диаграммы',
+			label: 'Использовать для заголовка диаграммы',
 			name: FIELDS.useName,
 			onChange: this.handleChangeUseName,
 			value: useName
@@ -200,18 +200,11 @@ export class DataFormBuilder extends Component<Props> {
 		const {label, name, onChange, value} = props;
 
 		return (
-			<LegacyCheckbox
-				checked={value}
-				label={label}
-				name={name}
-				onClick={onChange}
-				renderLabel={this.renderCheckboxLabel}
-				value={value}
-			/>
+			<FormCheckControl className={styles.checkbox} label={label}>
+				<Checkbox checked={value} name={name} onChange={onChange} value={value} />
+			</FormCheckControl>
 		);
 	};
-
-	renderCheckboxLabel = (label: string) => <Label>{label}</Label>;
 
 	renderDiagramNameTextArea = () => {
 		const {values} = this.props;
@@ -307,8 +300,9 @@ export class DataFormBuilder extends Component<Props> {
 		const error = errors[errorPath || name];
 
 		return (
-			<FormField className={className} error={error} label={label}>
+			<FormField className={className} error={error}>
 				<TextArea
+					label={label}
 					maxLength={maxLength}
 					name={name}
 					onBlur={handleBlur}

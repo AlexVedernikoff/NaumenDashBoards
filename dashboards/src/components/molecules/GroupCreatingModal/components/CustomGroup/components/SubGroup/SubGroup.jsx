@@ -1,7 +1,6 @@
 // @flow
 import {AndCondition} from 'CustomGroup/components';
 import type {AndCondition as AndConditionType} from 'CustomGroup/types';
-import cn from 'classnames';
 import {FieldError, TextInput} from 'components/atoms';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
 import {FormField} from 'components/molecules/GroupCreatingModal/components';
@@ -79,44 +78,54 @@ export class SubGroup extends PureComponent<Props> {
 		);
 	};
 
-	renderAndConditions = (): Array<React$Node> => this.props.subGroup.data.map(this.renderAndCondition);
-
-	renderGroupInputContainer = () => (
-		<div className={styles.rowContainer}>
-			{this.renderNameField()}
-			{this.renderInfoIcon()}
+	renderAndConditions = () => (
+		<div className={styles.conditionsContainer}>
+			{this.props.subGroup.data.map(this.renderAndCondition)}
 		</div>
 	);
 
-	renderInfoIcon = () => {
-		const iconCN = cn(mainStyles.infoIcon, styles.infoIcon);
+	renderInfoIcon = () => (
+		<div title="Подпись группы для отображения на оси" >
+			<Icon className={mainStyles.infoIcon} name={ICON_NAMES.INFO} />
+		</div>
+	);
 
-		return (
-			<Icon className={iconCN} name={ICON_NAMES.INFO} title="Название для сохранения группировки" />
-		);
-	};
-
-	renderNameField = () => {
-		const {errors, subGroup, validationPath} = this.props;
-		const {name} = subGroup;
+	renderNameError = () => {
+		const {errors, validationPath} = this.props;
 		const errorKey = `${validationPath}.${FIELDS.name}`;
 
-		return (
-			<FormField className={mainStyles.shortField} label="Название группы">
-				<TextInput
-					maxLength={MAX_TEXT_LENGTH}
-					onChange={this.handleChangeName}
-					value={name}
-				/>
-				<FieldError className={mainStyles.error} text={errors[errorKey]} />
+		return <FieldError className={mainStyles.error} text={errors[errorKey]} />;
+	};
+
+	renderNameField = () => (
+		<Fragment>
+			<FormField className={styles.nameField} label="Название группы">
+				<div className={styles.nameInputContainer}>
+					{this.renderNameTextInput()}
+					{this.renderInfoIcon()}
+				</div>
 			</FormField>
+			{this.renderNameError()}
+		</Fragment>
+	);
+
+	renderNameTextInput = () => {
+		const {name} = this.props.subGroup;
+
+		return (
+			<TextInput
+				className={styles.nameInput}
+				maxLength={MAX_TEXT_LENGTH}
+				onChange={this.handleChangeName}
+				value={name}
+			/>
 		);
 	};
 
 	render () {
 		return (
 			<Fragment>
-				{this.renderGroupInputContainer()}
+				{this.renderNameField()}
 				{this.renderAndConditions()}
 			</Fragment>
 		);

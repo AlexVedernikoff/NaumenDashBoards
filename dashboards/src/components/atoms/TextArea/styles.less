@@ -24,14 +24,31 @@
 		border: 1px solid @grey;
 		border-radius: @border-radius;
 		box-sizing: border-box;
+		max-width: 100%;
+		min-width: 100%;
 		overflow: auto;
 		padding: 8px 12px;
-		resize: none;
-		width: 100%;
 
 		&::placeholder {
 			color: @grey;
 			font-size: 13px;
+		}
+	}
+
+	.labelContainer {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	.clearButton {
+		color: @black;
+		font-size: 13px;
+		padding: 0;
+
+		&:disabled {
+			color: @grey
 		}
 	}
 }
