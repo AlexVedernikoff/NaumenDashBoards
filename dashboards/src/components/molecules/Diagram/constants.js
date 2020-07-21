@@ -14,7 +14,7 @@ const DEFAULT_HEADER_SETTINGS: Header = {
 	useName: true
 };
 
-const PADDING = 10;
+const PADDING = 16;
 
 export {
 	DEFAULT_HEADER_SETTINGS,

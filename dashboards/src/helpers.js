@@ -16,7 +16,7 @@ function debounce (func: Function, ms: number) {
 }
 
 /**
- * Функция для обхода ошибки flow о несоответсвии типов при использовании Object.values
+ * Функция для обхода ошибки flow о несоответствии типов при использовании Object.values
  * @param {object} map - объект
  * @returns {Array<any>} - массив значений объекта
  */
@@ -78,10 +78,17 @@ const extend = (target: Object, source: Object): Object => {
  */
 const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
 
+/**
+ * Проверяет относится ли операционная система пользователя к семейству MasOS
+ * @returns {boolean}
+ */
+const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platform);
+
 export {
 	debounce,
 	deepClone,
 	extend,
+	isMacOS,
 	fixInitialHeight,
 	getMapValues,
 	isObject

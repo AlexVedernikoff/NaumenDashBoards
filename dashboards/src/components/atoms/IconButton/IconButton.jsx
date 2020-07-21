@@ -7,16 +7,24 @@ import styles from './styles.less';
 
 export class IconButton extends PureComponent<Props> {
 	static defaultProps = {
+		active: false,
 		className: '',
+		round: true,
 		tip: ''
 	};
 
 	render () {
-		const {className, icon, onClick, tip} = this.props;
+		const {active, className, icon, onClick, round, tip} = this.props;
+		const buttonCN = cn({
+			[styles.button]: true,
+			[styles.round]: round,
+			[styles.active]: active,
+			[className]: true
+		});
 
 		return (
 			<button
-				className={cn(styles.button, className)}
+				className={buttonCN}
 				onClick={onClick}
 				title={tip}
 				type="button"
