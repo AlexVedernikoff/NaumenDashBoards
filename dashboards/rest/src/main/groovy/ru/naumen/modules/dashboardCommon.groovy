@@ -298,6 +298,7 @@ class Requisite
 {
     String title
     Collection<RequisiteNode> nodes
+    Collection<FilterList> filterList
 }
 
 class RequisiteNode
@@ -350,6 +351,13 @@ class FilterParameter extends Parameter<Comparison>
 {
     def value
 }
-
+/**
+ * Список всех фильтров для реквизита
+ */
+class FilterList
+{
+    Collection<Collection<FilterParameter>> filters
+    String place
+}
 //endregion
 return
