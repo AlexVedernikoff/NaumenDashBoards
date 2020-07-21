@@ -52,22 +52,47 @@ const parseToDatetime = (format?: string) => (value: string) => {
  */
 const getDatetimeFormatter = (format?: string) => {
 	switch (format) {
-		case 'MM YY':
+		case 'dd.mm.YY hh:ii':
 			return {
-				day: 'dd MMMM',
-				hour: 'dd hч',
-				minute: 'h:mm',
-				month: 'MMMM yyyy',
-				year: 'yyyy'
-			};
-		default:
-			return {
-				day: 'dd.MM',
-				hour: 'dd hч',
-				minute: 'h:mm',
+				day: 'dd.MM.yyyy',
+				hour: 'dd.MM.yyyy hч',
+				minute: 'dd.MM.yyyy hh:mm',
 				month: 'MM.yyyy',
 				year: 'yyyy'
 			};
+		case 'dd.mm.YY hh':
+			return {
+				day: 'dd.MM.yyyy',
+				hour: 'dd.MM.yyyy hч',
+				minute: '',
+				month: 'MM.yyyy',
+				year: 'yyyy'
+			};
+		case 'dd.mm.YY':
+			return {
+				day: 'dd.MM.yyyy',
+				hour: '',
+				minute: '',
+				month: 'MM.yyyy',
+				year: 'yyyy'
+			};
+		case 'MM YY':
+			return {
+				day: '',
+				hour: '',
+				minute: '',
+				month: 'MMMM yyyy',
+				year: 'yyyy'
+			};
+		case 'yyyy': {
+			return {
+				day: '',
+				hour: '',
+				minute: '',
+				month: '',
+				year: 'yyyy'
+			};
+		}
 	}
 };
 
@@ -148,10 +173,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 				}
 			},
 			xaxis: extend(xaxis, getXAxisOptions(parameter)),
-			yaxis: extend(yaxis, getYAxisOptions(indicator)),
-			zoom: {
-				enabled: true
-			}
+			yaxis: extend(yaxis, getYAxisOptions(indicator))
 		};
 	}
 };

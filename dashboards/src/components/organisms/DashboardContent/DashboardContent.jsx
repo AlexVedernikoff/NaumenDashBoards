@@ -18,6 +18,7 @@ export const gridRef: DivRef = createRef();
 export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
 	newWidgetRef: WidgetRef = createRef();
+	onDragged: boolean = false;
 	state = {
 		newWidgetFocused: false,
 		width: null
@@ -58,10 +59,15 @@ export class DashboardContent extends Component<Props, State> {
 
 	handleShowGrid = (show: boolean) => () => {
 		const {current: grid} = gridRef;
+		this.onDragged = show;
 
 		if (grid) {
-			// $FlowFixMe
-			grid.firstChild.classList.toggle(styles.drawnGrid, show);
+			setTimeout(() => {
+				if (this.onDragged === show) {
+					// $FlowFixMe
+					grid.firstChild.classList.toggle(styles.drawnGrid, show);
+				}
+			}, 150);
 		}
 	};
 

@@ -96,10 +96,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions =
 			shared: false
 		},
 		xaxis: extend(xaxis, getXAxisOptions(parameter)),
-		yaxis: series.map((s, i) => getYAxis(s, i, series, widget)),
-		zoom: {
-			enabled: true
-		}
+		yaxis: series.map((s, i) => getYAxis(s, i, series, widget))
 	};
 };
 

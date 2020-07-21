@@ -46,7 +46,8 @@
 		"sort-keys": [2, "asc", {"caseSensitive": true}],
 		"sort-vars": [2, {"ignoreCase": false}],
 		"jsdoc/newline-after-description": 0,
-		"jsdoc/require-returns-description": 0
+		"jsdoc/require-returns-description": 0,
+		"sort-keys-fix/sort-keys-fix": "warn"
 	},
 	"settings": {
 		"react": {
