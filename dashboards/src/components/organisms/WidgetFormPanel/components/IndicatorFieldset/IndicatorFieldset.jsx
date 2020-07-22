@@ -85,8 +85,14 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	renderAggregation = (props: Object) => {
-		const {set} = this.props;
-		const {value} = props;
+		const {name, set} = this.props;
+		const {[name]: indicator} = set;
+		const {catalogItem} = ATTRIBUTE_TYPES;
+		let {value} = props;
+
+		if (indicator && indicator.type === catalogItem) {
+			value = indicator;
+		}
 
 		return (
 			<AttributeAggregationField
