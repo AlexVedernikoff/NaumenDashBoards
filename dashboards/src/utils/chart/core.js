@@ -7,7 +7,6 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'src/helpers';
 import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {usesUnsupportedDrillDownGroup} from 'store/widgets/helpers';
 
 /**
  * Функция возвращает примесь опций в зависимости от переданного типа графика
@@ -141,7 +140,6 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 	const {colors, type} = widget;
 	const chartColors = colors || DEFAULT_COLORS;
 	const {dataLabels, legend} = widget;
-	const isSupportedDrillDown = !usesUnsupportedDrillDownGroup(widget);
 
 	const options: ApexOptions = {
 		chart: {
@@ -151,7 +149,7 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 			background: 'white',
 			defaultLocale: 'ru',
 			events: {
-				dataPointSelection: isSupportedDrillDown ? drillDownBySelection(widget, data) : undefined
+				dataPointSelection: drillDownBySelection(widget, data)
 			},
 			height: '100%',
 			locales: LOCALES,

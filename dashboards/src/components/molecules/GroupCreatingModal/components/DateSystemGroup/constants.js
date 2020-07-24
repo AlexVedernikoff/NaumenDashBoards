@@ -110,8 +110,6 @@ const YEAR_FORMATS = [
 	}
 ];
 
-const UNSUPPORTED_DRILL_DOWN_FORMATS = ['ii', 'hh', 'hh:ii', 'WD', 'dd'];
-
 const DATETIME_FORMATS = ['dd.mm.YY hh:ii', 'dd.mm.YY hh', 'dd.mm.YY', 'MM YY', 'yyyy'];
 
 export {
@@ -123,7 +121,6 @@ export {
 	MONTH_FORMATS,
 	QUARTER_FORMATS,
 	SEVEN_DAYS_FORMATS,
-	UNSUPPORTED_DRILL_DOWN_FORMATS,
 	WEEK_FORMATS,
 	YEAR_FORMATS
 };
