@@ -10,6 +10,7 @@ import {getNextRow} from 'utils/layout';
 import {NewWidget} from 'utils/widget';
 import {resetState, switchState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
+import {setDynamicGroups} from 'store/sources/dynamicGroups/actions';
 
 /**
  * Получает и устанавливает настройки автообновления
@@ -81,7 +82,7 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 		contentCode,
 		isPersonal
 	});
-	const {autoUpdate, customGroups, widgets} = data;
+	const {autoUpdate, customGroups, dynamicGroups, widgets} = data;
 
 	if (customGroups !== null) {
 		dispatch(setCustomGroups(customGroups));
@@ -89,6 +90,10 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 
 	if (autoUpdate !== null) {
 		dispatch(setAutoUpdate(autoUpdate));
+	}
+
+	if (dynamicGroups) {
+		dispatch(setDynamicGroups(dynamicGroups));
 	}
 
 	dispatch(setWidgets(widgets));

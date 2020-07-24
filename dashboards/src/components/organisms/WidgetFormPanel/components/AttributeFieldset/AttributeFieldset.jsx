@@ -1,20 +1,29 @@
 // @flow
-import type {Attribute, Props} from './types';
-import {AttributeSelect} from 'WidgetFormPanel/components';
+import type {Attribute, Props, State} from './types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createRefKey} from 'store/sources/refAttributes/actions';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
-import type {Props as SelectProps} from 'WidgetFormPanel/components/AttributeSelect/types';
+import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
+import {FormCheckControl, TransparentSelect} from 'components/molecules';
+import {List} from 'components/molecules/Select/components';
+import type {OnChangeInputEvent, OnChangeLabelEvent, OnSelectEvent, TreeNode} from 'components/types';
+import type {Props as SelectProps} from 'components/molecules/TransparentSelect/types';
+import type {Props as ListProps} from 'components/molecules/Select/components/List/types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import {Toggle} from 'components/atoms';
+import {Tree as TreeList} from 'components/molecules/MaterialTreeSelect/components';
 import withForm from 'WidgetFormPanel/withForm';
 
-export class AttributeFieldset extends PureComponent<Props> {
+export class AttributeFieldset extends PureComponent<Props, State> {
 	static defaultProps = {
 		disabled: false,
 		index: 0,
 		removable: false,
 		showCreationButton: false
+	};
+
+	state = {
+		showDynamicAttributes: false
 	};
 
 	fetchAttributes = (classFqn: string) => () => this.props.fetchAttributes(classFqn);
@@ -75,30 +84,46 @@ export class AttributeFieldset extends PureComponent<Props> {
 		return data;
 	};
 
-	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
+	handleChangeLabel = (parent: Attribute | null = null) => (event: OnChangeLabelEvent) => {
 		const {index, onChangeLabel} = this.props;
-		onChangeLabel(event, index);
+		onChangeLabel({...event, parent}, index);
 	};
 
-	handleSelect = (event: OnSelectAttributeEvent) => {
+	handleChangeShowDynamicAttributes = ({value}: OnChangeInputEvent) => {
+		this.setState({showDynamicAttributes: !value});
+	};
+
+	handleLoadDynamicAttributes = (node: DynamicGroupsNode | null) => {
+		const {fetchGroupDynamicAttributes, source} = this.props;
+
+		if (node && source) {
+			fetchGroupDynamicAttributes(source.value, this.getOptionValue(node.value));
+		}
+	};
+
+	handleSelect = (parent: Attribute | null = null) => (event: OnSelectEvent) => {
 		const {index, onSelect} = this.props;
-		onSelect(event, index);
+		onSelect({...event, parent}, index);
 	};
 
-	renderAttributeField = (props: Object) => {
+	handleSelectDynAttr = (onSelect: Function) => ({value}: DynamicGroupsNode) => onSelect(value);
+
+	isEnabledDynamicNode = (node: TreeNode<Object>) => !!node.parent;
+
+	renderAttributeField = (props: Object, parent: Attribute | null = null) => {
 		const {renderRefField} = this.props;
-		const {disabled, parent, value} = props;
+		const {disabled, value} = props;
 
 		if (!parent && value && value.type in ATTRIBUTE_SETS.REF) {
 			return (
 				<Fragment>
 					{this.renderParentAttributeField(props)}
-					{this.renderChildAttributeField({...props, parent: value})}
+					{this.renderChildAttributeField({...props}, value)}
 				</Fragment>
 			);
 		}
 
-		const select = this.renderSelect(props);
+		const select = this.renderSelect(props, parent);
 
 		if (renderRefField) {
 			const refProps = {
@@ -126,20 +151,52 @@ export class AttributeFieldset extends PureComponent<Props> {
 		);
 	};
 
-	renderChildAttributeField = (props: SelectProps) => {
-		const {parent} = props;
-
+	renderChildAttributeField = (props: SelectProps, parent: Attribute | null = null) => {
 		if (parent) {
 			return this.renderAttributeField({
 				...props,
 				...this.getAttributeSelectProps(parent),
-				parent,
+				onChangeLabel: this.handleChangeLabel(parent),
+				onSelect: this.handleSelect(parent),
 				value: parent.ref
-			});
+			}, parent);
 		}
 
 		return null;
 	};
+
+	renderList = (props: ListProps) => {
+		const {dynamicGroups} = this.props;
+		const {showDynamicAttributes} = this.state;
+
+		if (showDynamicAttributes) {
+			const {onSelect, searchValue, value} = props;
+			const initialSelected = [this.getOptionValue(value)];
+
+			return (
+				<TreeList
+					getOptionLabel={this.getOptionLabel}
+					getOptionValue={this.getOptionValue}
+					initialSelected={initialSelected}
+					isEnabledNode={this.isEnabledDynamicNode}
+					onLoad={this.handleLoadDynamicAttributes}
+					onSelect={this.handleSelectDynAttr(onSelect)}
+					options={dynamicGroups}
+					searchValue={searchValue}
+					value={value}
+				/>
+			);
+		}
+
+		return <List {...props} />;
+	};
+
+	renderListContainer = (props: ListProps) => (
+		<Fragment>
+			{this.renderToggleShowingDynAttr()}
+			{this.renderList(props)}
+		</Fragment>
+	);
 
 	renderParentAttributeField = (props: SelectProps) => (
 		<div className={styles.parentInput}>
@@ -147,15 +204,36 @@ export class AttributeFieldset extends PureComponent<Props> {
 		</div>
 	);
 
-	renderSelect = (props: SelectProps) => {
+	renderSelect = (props: SelectProps, parent: Attribute | null = null) => {
 		const {source} = this.props;
+		let components;
 		let note;
+
+		if (!parent) {
+			components = {
+				List: this.renderListContainer
+			};
+		}
 
 		if (source) {
 			note = source.label;
 		}
 
-		return <AttributeSelect className={styles.select} note={note} {...props} />;
+		return <TransparentSelect className={styles.select} components={components} note={note} {...props} />;
+	};
+
+	renderToggleShowingDynAttr = () => {
+		const {showDynamicAttributes} = this.state;
+
+		return (
+			<FormCheckControl className={styles.dynamicAttributesShowHandler} label="Динамические атрибуты">
+				<Toggle
+					checked={showDynamicAttributes}
+					onChange={this.handleChangeShowDynamicAttributes}
+					value={showDynamicAttributes}
+				/>
+			</FormCheckControl>
+		);
 	};
 
 	render () {
@@ -176,10 +254,10 @@ export class AttributeFieldset extends PureComponent<Props> {
 			getOptionLabel: this.getOptionLabel,
 			getOptionValue: this.getOptionValue,
 			name,
-			onChangeLabel: this.handleChangeLabel,
+			onChangeLabel: this.handleChangeLabel(),
 			onClickCreationButton,
 			onRemove,
-			onSelect: this.handleSelect,
+			onSelect: this.handleSelect(),
 			removable,
 			showCreationButton,
 			value

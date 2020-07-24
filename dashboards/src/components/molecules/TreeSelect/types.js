@@ -30,5 +30,5 @@ export type Props = {
 
 export type State = {
 	showForm: boolean,
-	showList: boolean
+	showMenu: boolean
 };

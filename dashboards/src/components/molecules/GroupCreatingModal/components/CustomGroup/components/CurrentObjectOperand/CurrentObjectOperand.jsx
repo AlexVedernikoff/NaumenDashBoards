@@ -5,6 +5,7 @@ import {MaterialTreeSelect} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import type {SelectData} from 'store/customGroups/types';
+import type {TreeNode} from 'components/types';
 
 export class CurrentObjectOperand extends PureComponent<Props> {
 	static defaultProps = {
@@ -44,7 +45,7 @@ export class CurrentObjectOperand extends PureComponent<Props> {
 		onChange({...operand, data: value});
 	};
 
-	isDisabled = (value: Attribute) => this.props.attribute.property !== value.property;
+	isEnabledNode = (node: TreeNode<Attribute>) => this.props.attribute.property === node.value.property;
 
 	render () {
 		const {operand} = this.props;
@@ -54,7 +55,7 @@ export class CurrentObjectOperand extends PureComponent<Props> {
 				async={true}
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
-				isDisabled={this.isDisabled}
+				isEnabledNode={this.isEnabledNode}
 				onLoad={this.handleLoad}
 				onSelect={this.handleSelect}
 				options={this.getOptions()}

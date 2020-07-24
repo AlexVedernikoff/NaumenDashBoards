@@ -2,6 +2,7 @@
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {Context} from 'utils/api/types';
 import type {DataSourceMap} from 'store/sources/data/types';
+import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {NewToast} from 'store/toasts/types';
 import {NewWidget} from 'entities';
 import type {OnLoadCallback} from 'store/sources/types';
@@ -36,6 +37,7 @@ export type State = {
 export type ConnectedProps = {
 	attributes: AttributesMap,
 	context: Context,
+	dynamicGroups: DynamicGroupsMap,
 	refAttributes: AttributesMap,
 	sources: DataSourceMap,
 	updating: boolean,
@@ -46,6 +48,8 @@ export type ConnectedProps = {
 
 export type FetchAttributes = (classFqn: string, onLoadCallback?: OnLoadCallback) => ThunkAction;
 
+export type FetchGroupDynamicAttributes = (classFqn: string, groupCode: string) => ThunkAction;
+
 export type FetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback) => ThunkAction;
 
 export type ConnectedFunctions = {
@@ -53,6 +57,7 @@ export type ConnectedFunctions = {
 	createToast: (newToast: $Exact<NewToast>) => ThunkAction,
 	createWidget: Widget => Object | void,
 	fetchAttributes: FetchAttributes,
+	fetchGroupDynamicAttributes: FetchGroupDynamicAttributes,
 	fetchRefAttributes: FetchRefAttributes,
 	saveWidget: Widget => Object | void
 };

@@ -1,10 +1,10 @@
 // @flow
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import {List, Menu} from './components';
 import type {Option, Props, State} from './types';
 import {OutsideClickDetector} from 'components/atoms';
 import React, {PureComponent} from 'react';
-import {SimpleSelectMenu} from 'components/molecules';
 import styles from './styles.less';
 
 export class Select extends PureComponent<Props, State> {
@@ -110,13 +110,23 @@ export class Select extends PureComponent<Props, State> {
 		return label;
 	};
 
+	renderList = (searchValue: string) => {
+		const {options, value} = this.props;
+
+		return (
+			<List
+				getOptionLabel={this.getOptionLabel}
+				getOptionValue={this.getOptionValue}
+				onSelect={this.handleSelect}
+				options={options}
+				searchValue={searchValue}
+				value={value}
+			/>
+		);
+	};
+
 	renderMenu = () => {
-		const {
-			options,
-			showCreationButton,
-			textCreationButton,
-			value
-		} = this.props;
+		const {showCreationButton, textCreationButton} = this.props;
 		const {showMenu} = this.state;
 		let creationButton;
 
@@ -127,20 +137,7 @@ export class Select extends PureComponent<Props, State> {
 			};
 		}
 
-		if (showMenu) {
-			return (
-				<SimpleSelectMenu
-					className={styles.menu}
-					creationButton={creationButton}
-					getOptionLabel={this.getOptionLabel}
-					getOptionValue={this.getOptionValue}
-					onClose={this.hideMenu}
-					onSelect={this.handleSelect}
-					options={options}
-					value={value}
-				/>
-			);
-		}
+		return showMenu && <Menu className={styles.menu} creationButton={creationButton} renderList={this.renderList} />;
 	};
 
 	renderValueContainer = () => (

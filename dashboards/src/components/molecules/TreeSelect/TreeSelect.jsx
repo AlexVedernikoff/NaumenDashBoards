@@ -2,6 +2,7 @@
 import {IconButton, OutsideClickDetector} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {InputForm as LabelEditingForm} from 'components/molecules';
+import {Menu} from 'components/molecules/Select/components';
 import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -16,7 +17,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	state = {
 		showForm: false,
-		showList: false
+		showMenu: false
 	};
 
 	getOptionLabel = (option: Object) => {
@@ -48,7 +49,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 		onChangeLabel({label, name});
 	};
 
-	handleClick = () => this.setState({showList: true});
+	handleClick = () => this.setState({showMenu: true});
 
 	handleClickIndicators = (e: Event) => e.stopPropagation();
 
@@ -65,15 +66,15 @@ export class TreeSelect extends PureComponent<Props, State> {
 	handleSelect = (node: Node) => {
 		const {name, onSelect} = this.props;
 
-		this.setState({showList: false});
+		this.setState({showMenu: false});
 		onSelect({name, value: node.value});
 	};
 
-	handleShowList = () => this.setState({showList: !this.state.showList});
+	handleToggleList = () => this.setState({showMenu: !this.state.showMenu});
 
 	hideForm = () => this.setState({showForm: false});
 
-	hideTree = () => this.setState({showList: false});
+	hideTree = () => this.setState({showMenu: false});
 
 	showForm = () => this.setState({showForm: true});
 
@@ -112,6 +113,27 @@ export class TreeSelect extends PureComponent<Props, State> {
 		}
 	};
 
+	renderList = (searchValue: string) => {
+		const {initialSelected, options, value} = this.props;
+
+		return (
+			<Tree
+				getOptionLabel={this.getOptionLabel}
+				getOptionValue={this.getOptionValue}
+				initialSelected={initialSelected}
+				onSelect={this.handleSelect}
+				options={options}
+				searchValue={searchValue}
+				value={value}
+			/>
+		);
+	};
+
+	renderMenu = () => {
+		const {showMenu} = this.state;
+		return showMenu && <Menu className={styles.list} renderList={this.renderList} />;
+	};
+
 	renderPlaceholder = () => (
 		<div className={styles.placeholder}>
 			{this.props.placeholder}
@@ -122,28 +144,10 @@ export class TreeSelect extends PureComponent<Props, State> {
 		<OutsideClickDetector onClickOutside={this.hideTree}>
 			<div className={styles.select}>
 				{this.renderValueContainer()}
-				{this.renderTree()}
+				{this.renderMenu()}
 			</div>
 		</OutsideClickDetector>
 	);
-
-	renderTree = () => {
-		const {initialSelected, options, value} = this.props;
-		const {showList} = this.state;
-
-		return (
-			<Tree
-				className={styles.list}
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				initialSelected={initialSelected}
-				onSelect={this.handleSelect}
-				options={options}
-				show={showList}
-				value={value}
-			/>
-		);
-	};
 
 	renderValue = () => (
 		<div className={styles.value}>
@@ -156,7 +160,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 		const {value} = this.props;
 		const content = value ? this.renderValue() : this.renderPlaceholder();
 
-		return <div className={styles.valueContainer} onClick={this.handleShowList}>{content}</div>;
+		return <div className={styles.valueContainer} onClick={this.handleToggleList}>{content}</div>;
 	};
 
 	render () {

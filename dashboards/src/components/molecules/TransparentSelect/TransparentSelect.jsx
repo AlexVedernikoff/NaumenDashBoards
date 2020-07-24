@@ -3,7 +3,8 @@ import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
 import {IconButton, Label, Loader, OutsideClickDetector} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {InputForm as LabelEditingForm, SimpleSelectMenu} from 'components/molecules';
+import {InputForm as LabelEditingForm} from 'components/molecules';
+import {List, Menu} from 'components/molecules/Select/components';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -12,6 +13,7 @@ export class TransparentSelect extends PureComponent<Props, State> {
 	static defaultProps = {
 		async: false,
 		className: '',
+		components: {},
 		disabled: false,
 		error: false,
 		loading: false,
@@ -23,18 +25,16 @@ export class TransparentSelect extends PureComponent<Props, State> {
 	};
 
 	state = {
-		foundOptions: [],
-		searchValue: '',
 		showForm: false,
 		showMenu: false
 	};
 
-	handleChangeSearchInput = (searchValue: string) => {
-		const {getOptionLabel, options} = this.props;
-		const reg = new RegExp(searchValue, 'i');
-		const foundOptions = options.filter(o => reg.test(getOptionLabel(o)));
+	fetchOptions = () => {
+		const {async, error, fetchOptions, loading, uploaded} = this.props;
 
-		this.setState({foundOptions, searchValue});
+		if (async && typeof fetchOptions === 'function' && (error || loading || uploaded) === false) {
+			fetchOptions();
+		}
 	};
 
 	handleClickEditIcon = () => this.setState({showForm: true, showMenu: false});
@@ -97,24 +97,27 @@ export class TransparentSelect extends PureComponent<Props, State> {
 		return null;
 	};
 
+	renderList = (searchValue: string) => {
+		const {components, getOptionLabel, getOptionValue, options, value} = this.props;
+		const {List: Component = List} = components;
+
+		return (
+			<Component
+				getOptionLabel={getOptionLabel}
+				getOptionValue={getOptionValue}
+				onSelect={this.handleSelect}
+				options={options}
+				searchValue={searchValue}
+				value={value}
+			/>
+		);
+	};
+
 	renderLoader = () => this.props.loading ? <Loader className={styles.loader} /> : null;
 
 	renderMenu = () => {
-		const {
-			async,
-			error,
-			fetchOptions,
-			getOptionLabel,
-			getOptionValue,
-			loading,
-			onClickCreationButton,
-			options,
-			showCreationButton,
-			uploaded,
-			value
-		} = this.props;
-		const {foundOptions, searchValue, showMenu} = this.state;
-		const renderOptions = searchValue ? foundOptions : options;
+		const {onClickCreationButton, showCreationButton} = this.props;
+		const {showMenu} = this.state;
 		let creationButton;
 
 		if (showCreationButton) {
@@ -125,22 +128,11 @@ export class TransparentSelect extends PureComponent<Props, State> {
 		}
 
 		if (showMenu) {
-			if (async && typeof fetchOptions === 'function' && (error || loading || uploaded) === false) {
-				fetchOptions();
-			}
+			this.fetchOptions();
 
 			return (
 				<OutsideClickDetector onClickOutside={this.hideMenu}>
-					<SimpleSelectMenu
-						creationButton={creationButton}
-						getOptionLabel={getOptionLabel}
-						getOptionValue={getOptionValue}
-						isSearching={true}
-						onClose={this.hideMenu}
-						onSelect={this.handleSelect}
-						options={renderOptions}
-						value={value}
-					/>
+					<Menu creationButton={creationButton} isSearching={true} renderList={this.renderList} />
 				</OutsideClickDetector>
 			);
 		}

@@ -25,6 +25,7 @@ export type Method =
 	| 'getDataForDiagrams'
 	| 'getDataSourceAttributes'
 	| 'getDataSources'
+	| 'getGroupDynamicAttributes'
 	| 'getLink'
 	| 'getMetaClasses'
 	| 'getSettings'

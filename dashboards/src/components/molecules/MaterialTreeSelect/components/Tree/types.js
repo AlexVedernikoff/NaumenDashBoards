@@ -10,15 +10,15 @@ export type Tree = {
 };
 
 export type Props = {
-	className: string,
 	getOptionLabel: (option: Node | null) => string,
 	getOptionValue: (option: Node | null) => string,
 	initialSelected: Array<string>,
-	isDisabled?: NodeValue => boolean,
+	isEnabledNode?: NodeValue => boolean,
 	multiple: boolean,
 	onLoad?: (value: NodeValue | null, offset?: number) => void,
 	onSelect: Node => void,
 	options: Tree,
+	searchValue: string,
 	show: boolean,
 	showMore: boolean,
 	value: NodeValue | null,
@@ -28,6 +28,5 @@ export type Props = {
 export type State = {
 	expandedNodes: Array<string>,
 	foundIds: Array<string>,
-	searchValue: string,
 	selectedIds: Array<string>
 };

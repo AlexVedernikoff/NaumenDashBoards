@@ -10,3 +10,7 @@ export type Props = {
 	onChange: (value: string) => void,
 	value: string
 };
+
+export type State = {
+	value: string
+};

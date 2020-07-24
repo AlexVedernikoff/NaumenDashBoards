@@ -26,7 +26,8 @@ export type OnChangeLabelEvent = {
 	name: string
 };
 
-export type TreeNode<V> = {
+export type TreeNode<V, R = {}> = {
+	...R,
 	children: Array<string> | null,
 	error: boolean,
 	id: string,

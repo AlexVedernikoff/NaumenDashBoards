@@ -1,11 +1,17 @@
 // @flow
 import type {OnChangeLabelEvent, OnSelectEvent, SelectValue} from 'components/types';
+import type {Props as ListProps} from 'components/molecules/Select/components/List/types';
 
 export type Option = any;
+
+export type Components = $Shape<{
+	List: $Shape<ListProps> => React$Node
+}>;
 
 export type Props = {|
 	async: boolean,
 	className: string,
+	components: Components,
 	disabled: boolean,
 	error: boolean,
 	fetchOptions?: () => any,
@@ -27,8 +33,6 @@ export type Props = {|
 |};
 
 export type State = {
-	foundOptions: Array<Option>,
-	searchValue: string,
 	showForm: boolean,
 	showMenu: boolean
 };

@@ -2,7 +2,6 @@
 import AttributeAggregationField from './AttributeAggregationField';
 import AttributeFieldset from './AttributeFieldset';
 import AttributeGroupField from './AttributeGroupField';
-import AttributeSelect from './AttributeSelect';
 import AxisChartForm from './AxisChartForm';
 import BreakdownFieldset from './BreakdownFieldset';
 import CircleChartForm from './CircleChartForm';
@@ -32,7 +31,6 @@ export {
 	AttributeAggregationField,
 	AttributeFieldset,
 	AttributeGroupField,
-	AttributeSelect,
 	AxisChartForm,
 	BreakdownFieldset,
 	CircleChartForm,

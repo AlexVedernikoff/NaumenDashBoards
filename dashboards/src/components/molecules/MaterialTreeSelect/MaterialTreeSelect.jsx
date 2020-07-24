@@ -1,4 +1,5 @@
 // @flow
+import {Menu} from 'components/molecules/Select/components';
 import {MultiValueContainer, ValueContainer} from 'components/molecules/MaterialSelect/components';
 import type {Node} from './components/Tree/types';
 import {OutsideClickDetector} from 'components/atoms';
@@ -69,27 +70,29 @@ export class MaterialTreeSelect extends Component<Props, State> {
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderMenu = () => {
-		const {isDisabled, multiple, onLoad, options, showMore, value, values} = this.props;
-		const {showMenu} = this.state;
+	renderList = (searchValue: string) => {
+		const {isEnabledNode, multiple, onLoad, options, showMore, value, values} = this.props;
 
 		return (
-			<div className={styles.tree}>
-				<Tree
-					getOptionLabel={this.getOptionLabel}
-					getOptionValue={this.getOptionValue}
-					isDisabled={isDisabled}
-					multiple={multiple}
-					onLoad={onLoad}
-					onSelect={this.handleSelect}
-					options={options}
-					show={showMenu}
-					showMore={showMore}
-					value={value}
-					values={values}
-				/>
-			</div>
+			<Tree
+				getOptionLabel={this.getOptionLabel}
+				getOptionValue={this.getOptionValue}
+				isEnabledNode={isEnabledNode}
+				multiple={multiple}
+				onLoad={onLoad}
+				onSelect={this.handleSelect}
+				options={options}
+				searchValue={searchValue}
+				showMore={showMore}
+				value={value}
+				values={values}
+			/>
 		);
+	};
+
+	renderMenu = () => {
+		const {showMenu} = this.state;
+		return showMenu && <Menu className={styles.tree} renderList={this.renderList} />;
 	};
 
 	renderMultiValueContainer = () => {

@@ -107,7 +107,9 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			attributes,
 			cancelForm,
 			context,
+			dynamicGroups,
 			fetchAttributes,
+			fetchGroupDynamicAttributes,
 			fetchRefAttributes,
 			refAttributes,
 			sources,
@@ -122,8 +124,10 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					attributes={attributes}
 					cancelForm={cancelForm}
 					context={context}
+					dynamicGroups={dynamicGroups}
 					errors={errors}
 					fetchAttributes={fetchAttributes}
+					fetchGroupDynamicAttributes={fetchGroupDynamicAttributes}
 					fetchRefAttributes={fetchRefAttributes}
 					isNew={this.isNew()}
 					onSubmit={this.handleSubmit}

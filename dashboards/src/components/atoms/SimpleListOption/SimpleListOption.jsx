@@ -26,9 +26,12 @@ export class SimpleListOption extends PureComponent<Props> {
 	};
 
 	render () {
+		const {style} = this.props;
+		const label = this.getOptionLabel();
+
 		return (
-			<div className={this.getClassName()} onClick={this.handleClick}>
-				<div className={styles.label}>{this.getOptionLabel()}</div>
+			<div className={this.getClassName()} onClick={this.handleClick} style={style}>
+				<div className={styles.label} title={label}>{label}</div>
 			</div>
 		);
 	}

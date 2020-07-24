@@ -19,8 +19,8 @@ export class Node extends PureComponent<Props> {
 	};
 
 	handleClick = () => {
-		const {data, onClick} = this.props;
-		onClick(data);
+		const {data, enabled, onClick} = this.props;
+		enabled && onClick(data);
 	};
 
 	handleClickShowMore = () => {
@@ -49,15 +49,16 @@ export class Node extends PureComponent<Props> {
 	};
 
 	renderLabel = () => {
-		const {data, disabled, getOptionLabel} = this.props;
+		const {data, enabled, getOptionLabel} = this.props;
 		const labelCN = cn({
 			[styles.label]: true,
-			[styles.disabledLabel]: disabled
+			[styles.disabledLabel]: !enabled
 		});
+		const label = getOptionLabel(data.value);
 
 		return (
-			<div className={labelCN} onClick={this.handleClick}>
-				{getOptionLabel(data.value)}
+			<div className={labelCN} onClick={this.handleClick} title={label}>
+				{label}
 			</div>
 		);
 	};
