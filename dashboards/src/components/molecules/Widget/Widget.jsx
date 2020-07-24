@@ -11,7 +11,6 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
-import {usesUnsupportedDrillDownGroup} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Widget extends PureComponent<Props, State> {
@@ -127,33 +126,25 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderDrillDownButtons = (): Array<Node> | null => {
 		const {data: widget} = this.props;
-		const isSupportedDrillDown = !usesUnsupportedDrillDownGroup(widget);
 
-		if (isSupportedDrillDown) {
-			// $FlowFixMe
-			return widget.data.map((set, index) => {
-				const {dataKey, source, sourceForCompute} = set;
+		// $FlowFixMe
+		return widget.data.filter(set => !set.sourceForCompute).map((set, index) => {
+			const {dataKey, source} = set;
+			let tipText = 'Перейти';
 
-				if (!sourceForCompute) {
-					let tipText = 'Перейти';
+			if (source) {
+				tipText = `${tipText} (${source.label})`;
+			}
 
-					if (source) {
-						tipText = `${tipText} (${source.label})`;
-					}
-
-					return (
-						<IconButton
-							icon={ICON_NAMES.DATA}
-							key={dataKey}
-							onClick={this.handleClickDrillDownButton(index)}
-							tip={tipText}
-						/>
-					);
-				}
-			});
-		}
-
-		return null;
+			return (
+				<IconButton
+					icon={ICON_NAMES.DATA}
+					key={dataKey}
+					onClick={this.handleClickDrillDownButton(index)}
+					tip={tipText}
+				/>
+			);
+		});
 	};
 
 	renderEditButton = () => {

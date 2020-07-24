@@ -10,10 +10,8 @@ import {
 	INTERVALS
 } from './constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
-import {getBuildSet} from 'store/widgets/data/helpers';
-import type {Group, Widget} from './data/types';
+import type {Group} from './data/types';
 import {store} from 'src';
-import {UNSUPPORTED_DRILL_DOWN_FORMATS} from 'components/molecules/GroupCreatingModal/components/DateSystemGroup/constants';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
@@ -68,22 +66,6 @@ const hasMSInterval = (set: Object, field: string = FIELDS.indicator) => {
 };
 
 /**
- * Функция проверяет имеет ли группировка не поддерживаемый, для перехода на список данных, формат
- * @param {Group} group - группировка атрибута
- * @returns {boolean}
- */
-const hasUnsupportedDrillDownFormat = (group: Group) => {
-	let unsupported = false;
-
-	if (group) {
-		const {format, way} = group;
-		unsupported = way === GROUP_WAYS.SYSTEM && format && UNSUPPORTED_DRILL_DOWN_FORMATS.includes(format);
-	}
-
-	return unsupported;
-};
-
-/**
  * Преобразует интервал из миллисекунд в понятный для пользователя вид
  * @param {number} ms - значение интервала в миллисекундах
  * @returns {string}
@@ -102,13 +84,6 @@ const parseMSInterval = (ms: number) => {
 	return ms;
 };
 
-const usesUnsupportedDrillDownGroup = (data: Widget) => {
-	const buildSet: Object = getBuildSet(data);
-	const {breakdownGroup, group} = buildSet;
-
-	return hasUnsupportedDrillDownFormat(group) || hasUnsupportedDrillDownFormat(breakdownGroup);
-};
-
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
@@ -116,6 +91,5 @@ export {
 	hasPercent,
 	isGroupKey,
 	parseMSInterval,
-	transformGroupFormat,
-	usesUnsupportedDrillDownGroup
+	transformGroupFormat
 };
