@@ -21,6 +21,7 @@
     "react-color": "^2.17.3",
     "react-grid-layout": "git+https://github.com/getredash/react-grid-layout.git#master",
     "react-redux": "^7.1.1",
+    "react-window": "^1.8.5",
     "smoothscroll-polyfill": "^0.4.4",
     "tiny-uuid": "^1.0.0",
     "xlsx": "^0.15.6",

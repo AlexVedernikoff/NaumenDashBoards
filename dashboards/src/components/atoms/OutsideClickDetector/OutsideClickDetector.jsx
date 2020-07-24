@@ -10,8 +10,11 @@ export class OutsideClickDetector extends PureComponent<Props> {
 
 	componentDidMount () {
 		document.addEventListener('mousedown', this.handleClickOutside);
-		// eslint-disable-next-line react/no-find-dom-node
-		this.node = findDOMNode(this);
+		this.setNode();
+	}
+
+	componentDidUpdate () {
+		this.setNode();
 	}
 
 	componentWillUnmount () {
@@ -27,6 +30,11 @@ export class OutsideClickDetector extends PureComponent<Props> {
 				once: true
 			});
 		}
+	};
+
+	setNode = () => {
+		// eslint-disable-next-line react/no-find-dom-node
+		this.node = findDOMNode(this);
 	};
 
 	render () {

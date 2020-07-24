@@ -20,8 +20,6 @@ import Modal from './Modal';
 import OuterSelect from './OuterSelect';
 import ResizeDetector from './ResizeDetector';
 import Select from './Select';
-import SimpleSelectList from './SimpleSelectList';
-import SimpleSelectMenu from './SimpleSelectMenu';
 import Summary from './Summary';
 import ToggableFormBox from './ToggableFormBox';
 import TransparentSelect from './TransparentSelect';
@@ -50,8 +48,6 @@ export {
 	OuterSelect,
 	ResizeDetector,
 	Select,
-	SimpleSelectList,
-	SimpleSelectMenu,
 	Summary,
 	ToggableFormBox,
 	TransparentSelect,

@@ -7,11 +7,12 @@ import type {
 } from './types';
 
 const createDataSource = (source: RawDataSource, parent: string | null) => {
-	const {classFqn: value, title: label} = source;
+	const {classFqn: value, hasDynamic, title: label} = source;
 
 	return {
 		children: null,
 		error: false,
+		hasDynamic,
 		id: value,
 		loading: false,
 		parent,

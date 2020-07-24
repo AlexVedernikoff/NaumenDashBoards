@@ -6,5 +6,6 @@ export type Props = {
 	getOptionLabel?: Option => string,
 	onClick: (Option | null) => void,
 	option: Option,
-	selected: boolean
+	selected: boolean,
+	style: Object
 };

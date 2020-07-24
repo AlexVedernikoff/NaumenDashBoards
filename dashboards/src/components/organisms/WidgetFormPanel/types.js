@@ -3,8 +3,10 @@ import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {Context} from 'utils/api/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DivRef, OnChangeLabelEvent, OnSelectEvent} from 'components/types';
+import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {
 	FetchAttributes,
+	FetchGroupDynamicAttributes,
 	FetchRefAttributes,
 	SetDataFieldValue,
 	SetFieldValue,
@@ -19,7 +21,9 @@ import type {UserData} from 'store/context/types';
 export type ContextProps = {|
 	addFieldErrorRef: DivRef => void,
 	attributes: AttributesMap,
+	dynamicGroups: DynamicGroupsMap,
 	fetchAttributes: FetchAttributes,
+	fetchGroupDynamicAttributes: FetchGroupDynamicAttributes,
 	fetchRefAttributes: FetchRefAttributes,
 	refAttributes: AttributesMap,
 	values: Values
@@ -32,6 +36,7 @@ export type ParamsTabProps = {|
 	context: Context,
 	errors: Object,
 	fetchAttributes: FetchAttributes,
+	fetchGroupDynamicAttributes: FetchGroupDynamicAttributes,
 	fetchRefAttributes: FetchRefAttributes,
 	isNew: boolean,
 	refAttributes: AttributesMap,
@@ -61,9 +66,11 @@ export type Props = {|
 	attributes: AttributesMap,
 	cancelForm: () => ThunkAction,
 	context: Context,
+	dynamicGroups: DynamicGroupsMap,
 	errors: Object,
-	fetchAttributes: (classFqn: string) => ThunkAction,
-	fetchRefAttributes: (refAttr: Attribute, callback: Function) => ThunkAction,
+	fetchAttributes: FetchAttributes,
+	fetchGroupDynamicAttributes: FetchGroupDynamicAttributes,
+	fetchRefAttributes: FetchRefAttributes,
 	isNew: boolean,
 	onSubmit: (func: UpdateWidget) => Promise<void>,
 	refAttributes: AttributesMap,

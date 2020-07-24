@@ -1,11 +1,9 @@
 // @flow
-import {Button, SearchSelectInput} from 'components/atoms';
-import cn from 'classnames';
-import type {InputRef} from 'components/types';
+import {Button} from 'components/atoms';
 import {Node} from 'components/molecules/MaterialTreeSelect/components';
 import type {Node as ReactNode} from 'react';
-import type {Node as NodeType, NodeValue, Props, State} from './types';
-import React, {Component, createRef} from 'react';
+import type {Node as NodeType, Props, State} from './types';
+import React, {Component} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
@@ -14,6 +12,7 @@ export class Tree extends Component<Props, State> {
 		className: '',
 		initialSelected: [],
 		multiple: false,
+		show: true,
 		showMore: false,
 		value: '',
 		values: []
@@ -22,46 +21,25 @@ export class Tree extends Component<Props, State> {
 	state = {
 		expandedNodes: [],
 		foundIds: [],
-		searchValue: '',
 		selectedIds: []
 	};
 
-	searchInputRef: InputRef = createRef();
-
-	componentDidMount (): * {
+	componentDidMount () {
 		const {initialSelected: selectedIds} = this.props;
 		selectedIds.length > 0 && this.setState({selectedIds});
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {show: prevShow} = prevProps;
-		const {show: nextShow} = this.props;
+		const {searchValue: prevSearchValue} = prevProps;
+		const {searchValue: nextSearchValue} = this.props;
 
-		if (nextShow && nextShow !== prevShow) {
-			this.focusOnSearchInput();
+		if (prevSearchValue !== nextSearchValue) {
+			this.setFoundIds(nextSearchValue);
 		}
 	}
 
-	focusOnSearchInput = () => {
-		const {current} = this.searchInputRef;
-		current && current.focus();
-	};
-
-	getContainerClassName = () => cn(styles.container, this.props.className);
-
 	// $FlowFixMe
 	getRoots = (): Array<NodeType> => Object.values(this.props.options).filter(this.isRoot);
-
-	handleChangeSearchInput = (searchValue: string) => {
-		const reg = new RegExp(searchValue, 'i');
-		const foundIds = [];
-
-		this.getRoots().forEach(node => {
-			foundIds.push(...this.search(node, reg));
-		});
-
-		this.setState({foundIds, searchValue});
-	};
 
 	handleClick = (node: NodeType) => {
 		const {multiple, onSelect} = this.props;
@@ -99,19 +77,21 @@ export class Tree extends Component<Props, State> {
 		onLoad && onLoad(null, this.getRoots().length);
 	};
 
-	isDisabled = (value: NodeValue) => {
-		const {isDisabled} = this.props;
-		let disabled = false;
+	isEnabledNode = (node: NodeType) => {
+		const {isEnabledNode} = this.props;
+		let enabled = true;
 
-		if (isDisabled) {
-			disabled = isDisabled(value);
+		if (isEnabledNode) {
+			enabled = isEnabledNode(node);
 		}
 
-		return disabled;
+		return enabled;
 	};
 
 	isExpanded = (nodeId: string) => {
-		const {expandedNodes, searchValue} = this.state;
+		const {searchValue} = this.props;
+		const {expandedNodes} = this.state;
+
 		return Boolean(searchValue) || expandedNodes.includes(nodeId);
 	};
 
@@ -136,6 +116,17 @@ export class Tree extends Component<Props, State> {
 		return foundedValues;
 	};
 
+	setFoundIds = (searchValue: string) => {
+		const reg = new RegExp(searchValue, 'i');
+		const foundIds = [];
+
+		this.getRoots().forEach(node => {
+			foundIds.push(...this.search(node, reg));
+		});
+
+		this.setState({foundIds});
+	};
+
 	renderChildren = (node: NodeType, expanded: boolean): ReactNode => {
 		const {options} = this.props;
 		const {children} = node;
@@ -148,21 +139,20 @@ export class Tree extends Component<Props, State> {
 	};
 
 	renderNode = (node: NodeType) => {
-		const {getOptionLabel, getOptionValue, onLoad} = this.props;
-		const {selectedIds} = this.state;
-		const {foundIds, searchValue} = this.state;
+		const {getOptionLabel, getOptionValue, onLoad, searchValue} = this.props;
+		const {foundIds, selectedIds} = this.state;
 		const {children, error, id, loading, uploaded} = node;
 		const showMoreChildren = children && !(loading || uploaded || error);
 		const nodeValue = getOptionValue(node.value);
 		const expanded = this.isExpanded(id);
-		const disabled = this.isDisabled(node.value);
+		const enabled = this.isEnabledNode(node);
 		const selected = selectedIds.includes(id);
 
 		if (!searchValue || foundIds.includes(id)) {
 			return (
 				<Node
 					data={node}
-					disabled={disabled}
+					enabled={enabled}
 					expanded={expanded}
 					found={Boolean(searchValue)}
 					getOptionLabel={getOptionLabel}
@@ -180,39 +170,29 @@ export class Tree extends Component<Props, State> {
 		}
 	};
 
-	renderSearchInput = () => (
-		<SearchSelectInput
-			forwardedRef={this.searchInputRef}
-			onChange={this.handleChangeSearchInput}
-			value={this.state.searchValue}
-		/>
-	);
-
 	renderShowMoreButton = () => {
 		const {showMore} = this.props;
 
 		if (showMore) {
 			return (
-				<Button className={styles.showMoreButton} onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>Показать еще</Button>
+				<Button
+					className={styles.showMoreButton}
+					onClick={this.handleClickShowMore}
+					variant={BUTTON_VARIANTS.SIMPLE}>
+					Показать еще
+				</Button>
 			);
 		}
 	};
-
-	renderTree = () => (
-		<div className={styles.tree}>
-			{this.getRoots().map(this.renderNode)}
-			{this.renderShowMoreButton()}
-		</div>
-	);
 
 	render () {
 		const {show} = this.props;
 
 		if (show) {
 			return (
-				<div className={this.getContainerClassName()}>
-					{this.renderSearchInput()}
-					{this.renderTree()}
+				<div className={styles.tree}>
+					{this.getRoots().map(this.renderNode)}
+					{this.renderShowMoreButton()}
 				</div>
 			);
 		}

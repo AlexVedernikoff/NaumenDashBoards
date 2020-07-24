@@ -25,3 +25,7 @@ export type Props = {
 	source: Source,
 	value: Attribute | null
 };
+
+export type State = {
+	showDynamicAttributes: boolean
+};

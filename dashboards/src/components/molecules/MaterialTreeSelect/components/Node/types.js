@@ -7,7 +7,7 @@ type Option = Object;
 export type Props = {
 	children: ReactNode,
 	data: Node,
-	disabled: boolean,
+	enabled: boolean,
 	expanded: boolean,
 	found: boolean,
 	getOptionLabel: (option: Option) => string,

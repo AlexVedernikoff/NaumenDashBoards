@@ -5,6 +5,7 @@ import type {TreeNode} from 'components/types';
 export type RawDataSource = {
 	children: Array<RawDataSource>,
 	classFqn: string,
+	hasDynamic: boolean,
 	title: string
 };
 
@@ -13,7 +14,7 @@ type Source = {
 	value: string,
 };
 
-export type DataSource = TreeNode<Source>;
+export type DataSource = TreeNode<Source, {hasDynamic: boolean}>;
 
 export type DataSourceMap = {
 	[key: string]: DataSource

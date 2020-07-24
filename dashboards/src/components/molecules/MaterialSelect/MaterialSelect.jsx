@@ -1,9 +1,9 @@
 // @flow
+import {List, Menu} from 'components/molecules/Select/components';
 import {MultiValueContainer, ValueContainer} from './components';
 import type {Option, Props, State} from './types';
 import {OutsideClickDetector} from 'components/atoms';
 import React, {PureComponent} from 'react';
-import {SimpleSelectMenu} from 'components/molecules';
 import styles from './styles.less';
 
 export class MaterialSelect extends PureComponent<Props, State> {
@@ -91,10 +91,8 @@ export class MaterialSelect extends PureComponent<Props, State> {
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderMenu = () => {
+	renderList = (searchValue: string) => {
 		const {
-			focusOnSearch,
-			isSearching,
 			multiple,
 			options,
 			showCreationButton,
@@ -102,7 +100,6 @@ export class MaterialSelect extends PureComponent<Props, State> {
 			value,
 			values
 		} = this.props;
-		const {showMenu} = this.state;
 		let creationButton;
 
 		if (showCreationButton) {
@@ -112,23 +109,35 @@ export class MaterialSelect extends PureComponent<Props, State> {
 			};
 		}
 
+		const props = {
+			creationButton,
+			getOptionLabel: this.getOptionLabel,
+			getOptionValue: this.getOptionValue,
+			multiple,
+			onClose: this.hideMenu,
+			onSelect: this.handleSelect,
+			options,
+			searchValue,
+			value,
+			values
+		};
+
+		return <List {...props} />;
+	};
+
+	renderMenu = () => {
+		const {focusOnSearch, isSearching} = this.props;
+		const {showMenu} = this.state;
+
 		if (showMenu) {
-			return (
-				<SimpleSelectMenu
-					className={styles.menu}
-					creationButton={creationButton}
-					focusOnSearch={focusOnSearch}
-					getOptionLabel={this.getOptionLabel}
-					getOptionValue={this.getOptionValue}
-					isSearching={isSearching}
-					multiple={multiple}
-					onClose={this.hideMenu}
-					onSelect={this.handleSelect}
-					options={options}
-					value={value}
-					values={values}
-				/>
-			);
+			const props = {
+				className: styles.menu,
+				focusOnSearch,
+				isSearching,
+				renderList: this.renderList
+			};
+
+			return <Menu {...props} />;
 		}
 	};
 

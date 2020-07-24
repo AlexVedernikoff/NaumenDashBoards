@@ -1,11 +1,12 @@
 // @flow
 import {Button, SimpleListOption} from 'components/atoms';
-import type {Props} from './types';
+import {FixedSizeList} from 'react-window';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
-export class SimpleSelectList extends PureComponent<Props> {
+export class List extends PureComponent<Props, State> {
 	static defaultProps = {
 		isSearching: false,
 		messages: {
@@ -18,9 +19,34 @@ export class SimpleSelectList extends PureComponent<Props> {
 		values: []
 	};
 
+	state = {
+		options: [],
+		searchValue: ''
+	};
+
+	static getDerivedStateFromProps (props: Props, state: State) {
+		const {getOptionLabel, searchValue} = props;
+		const {searchValue: stateSearchValue} = state;
+		let {options} = props;
+
+		if (searchValue !== stateSearchValue) {
+			const reg = new RegExp(searchValue, 'ig');
+			// $FlowFixMe
+			options = options.filter(o => {
+				const label = getOptionLabel ? getOptionLabel(o) : o.label;
+				return reg.test(label);
+			});
+		}
+
+		return {
+			options,
+			searchValue
+		};
+	}
+
 	getMessages = () => {
 		const {messages} = this.props;
-		const defaultMessages = SimpleSelectList.defaultProps.messages;
+		const defaultMessages = List.defaultProps.messages;
 		return messages ? {...defaultMessages, ...messages} : defaultMessages;
 	};
 
@@ -41,23 +67,11 @@ export class SimpleSelectList extends PureComponent<Props> {
 		onClickShowMore && onClickShowMore();
 	};
 
-	renderList = () => {
-		const {options} = this.props;
-
-		if (options.length === 0) {
-			return this.renderNoOptionsMessage();
-		}
-
-		return (
-			<div className={styles.list}>
-				{options.map(this.renderListItem)}
-				{this.renderShowMoreButton()}
-			</div>
-		);
-	};
-
-	renderListItem = (option: Object) => {
-		const {getOptionLabel, isSearching, multiple, onSelect, value, values} = this.props;
+	renderListItem = (data: Object) => {
+		const {getOptionLabel, multiple, onSelect, searchValue, value, values} = this.props;
+		const {options} = this.state;
+		const {index, style} = data;
+		const option = options[index];
 		const optionValue = this.getOptionValue(option);
 		let selected = false;
 
@@ -69,20 +83,21 @@ export class SimpleSelectList extends PureComponent<Props> {
 
 		return (
 			<SimpleListOption
-				found={isSearching}
+				found={!!searchValue}
 				getOptionLabel={getOptionLabel}
 				key={optionValue}
 				onClick={onSelect}
 				option={option}
 				selected={selected}
+				style={style}
 			/>
 		);
 	};
 
 	renderNoOptionsMessage = () => {
-		const {isSearching} = this.props;
+		const {searchValue} = this.props;
 		const {noOptions, notFound} = this.getMessages();
-		const message = isSearching ? notFound : noOptions;
+		const message = searchValue ? notFound : noOptions;
 
 		return <div className={styles.noOptionsMessage}>{message}</div>;
 	};
@@ -97,9 +112,35 @@ export class SimpleSelectList extends PureComponent<Props> {
 		}
 	};
 
+	renderVertualizedList = () => {
+		const {options} = this.state;
+
+		return (
+			<FixedSizeList
+				height={200}
+				itemCount={options.length}
+				itemSize={32}
+				width="100%"
+			>
+				{this.renderListItem}
+			</FixedSizeList>
+		);
+	};
+
 	render () {
-		return this.renderList();
+		const {options} = this.state;
+
+		if (options.length === 0) {
+			return this.renderNoOptionsMessage();
+		}
+
+		return (
+			<div className={styles.list}>
+				{this.renderVertualizedList()}
+				{this.renderShowMoreButton()}
+			</div>
+		);
 	}
 }
 
-export default SimpleSelectList;
+export default List;

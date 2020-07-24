@@ -18,6 +18,7 @@ const reducer = (state: AttributesState = initialAttributesState, action: Attrib
 			return {
 				...state,
 				[action.payload]: {
+					...state[action.payload],
 					error: true,
 					loading: false
 				}
