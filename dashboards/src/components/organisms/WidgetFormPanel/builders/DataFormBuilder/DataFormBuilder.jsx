@@ -10,11 +10,12 @@ import {FormBox, FormCheckControl, OuterSelect, Select} from 'components/molecul
 import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import type {Group} from 'store/widgets/data/types';
-import {LAYOUT_MODE_OPTIONS, WIDGET_OPTIONS} from './constants';
+import {LAYOUT_MODE_OPTIONS} from 'components/molecules/Widget/constants';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class DataFormBuilder extends Component<Props> {
