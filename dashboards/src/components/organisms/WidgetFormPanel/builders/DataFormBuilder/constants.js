@@ -1,22 +1,6 @@
 // @flow
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
-
-const LAYOUT_MODE_OPTIONS = [
-	{
-		label: 'Только в WEB',
-		value: LAYOUT_MODE.WEB
-	},
-	{
-		label: 'Только в WEB и MK',
-		value: LAYOUT_MODE.WEB_MK
-	},
-	{
-		label: 'Только в MK',
-		value: LAYOUT_MODE.MK
-	}
-];
 
 const WIDGET_OPTIONS = [
 	{
@@ -77,6 +61,5 @@ const WIDGET_OPTIONS = [
 ];
 
 export {
-	LAYOUT_MODE_OPTIONS,
 	WIDGET_OPTIONS
 };

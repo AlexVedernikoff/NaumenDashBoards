@@ -19,15 +19,15 @@ const EXPORT_LIST = [
 
 const LAYOUT_MODE_OPTIONS = [
 	{
-		label: 'Только в WEB-интерфейс',
+		label: 'Web приложение',
 		value: LAYOUT_MODE.WEB
 	},
 	{
-		label: 'в WEB и MK',
+		label: 'Везде',
 		value: LAYOUT_MODE.WEB_MK
 	},
 	{
-		label: 'Только в MK',
+		label: 'Мобильное приложение',
 		value: LAYOUT_MODE.MK
 	}
 ];
