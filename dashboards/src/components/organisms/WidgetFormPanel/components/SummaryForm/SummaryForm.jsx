@@ -30,8 +30,10 @@ export class SummaryForm extends Component<TypedFormProps> {
 		const {
 			computedAttrs = [],
 			data = [],
+			displayMode,
 			header,
 			indicator,
+			mkLayout,
 			name = '',
 			type
 		} = values;
@@ -39,10 +41,12 @@ export class SummaryForm extends Component<TypedFormProps> {
 		return {
 			computedAttrs,
 			data: data.map(normalizeDataSet),
+			displayMode,
 			header,
 			id,
 			indicator: extend(DEFAULT_SUMMARY_SETTINGS.indicator, indicator),
 			layout,
+			mkLayout,
 			name,
 			type
 		};

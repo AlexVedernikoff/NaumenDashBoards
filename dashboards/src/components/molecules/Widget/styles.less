@@ -21,7 +21,7 @@
 		&:hover {
 			z-index: 1;
 
-			.actionButtonsContainer {
+			.actionButtonsContainer, .actionHeaderButtonsContainer {
 				visibility: visible;
 			}
 		}
@@ -43,12 +43,28 @@
 		visibility: hidden;
 	}
 
+	.actionHeaderButtonsContainer {
+		background-color: @white;
+		border-radius: @border-radius;
+		padding: 8px;
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		visibility: hidden;
+	}
+
 	.exportItem {
 		cursor: pointer;
 		padding: 5px;
 
 		&:hover {
 			color: @primary;
+		}
+	}
+
+	.markerIcon {
+		svg {
+			color: @info;
 		}
 	}
 }

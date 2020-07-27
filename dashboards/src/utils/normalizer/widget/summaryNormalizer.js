@@ -66,18 +66,22 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 	const {
 		id,
 		data = getOrdinalData(widget, dataFields, createData),
+		displayMode,
 		indicator = DEFAULT_SUMMARY_SETTINGS.indicator,
 		layout,
+		mkLayout,
 		type
 	} = widget;
 
 	return {
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data: data.map(normalizeDataSet),
+		displayMode,
 		header: header(widget),
 		id,
 		indicator,
 		layout,
+		mkLayout,
 		name: string(widget[FIELDS.name]),
 		type
 	};

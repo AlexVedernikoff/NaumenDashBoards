@@ -1,7 +1,11 @@
 // @flow
 import {BREAKPOINTS, COLS, ROW_HEIGHT} from './constants';
+import cn from 'classnames';
 import type {DivRef} from 'components/types';
+import {getLayoutWidgets} from 'src/store/widgets/helpers';
+import isMobile from 'ismobilejs';
 import type {Layout} from 'utils/layout/types';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 import {NewWidget} from 'utils/widget';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {Component, createRef} from 'react';
@@ -45,6 +49,16 @@ export class DashboardContent extends Component<Props, State> {
 		this.setFocusOnNewWidget();
 	}
 
+	getContainerClassName = () => {
+		const {editMode} = this.props;
+
+		return cn({
+			[styles.editModeContainer]: editMode,
+			[styles.viewModeContainer]: !editMode,
+			[styles.containerMk]: this.isDesktopMK()
+		});
+	};
+
 	getWidgets = () => {
 		const {newWidget, widgets} = this.props;
 
@@ -55,7 +69,10 @@ export class DashboardContent extends Component<Props, State> {
 		return widgets;
 	};
 
-	handleLayoutChange = (layout: Layout) => this.props.editLayout(layout);
+	handleLayoutChange = (layout: Layout) => {
+		const {editLayout, layoutMode} = this.props;
+		editLayout(layout, layoutMode);
+	};
 
 	handleShowGrid = (show: boolean) => () => {
 		const {current: grid} = gridRef;
@@ -77,6 +94,11 @@ export class DashboardContent extends Component<Props, State> {
 		if (widgetId !== selectedWidget) 	{
 			selectWidget(widgetId);
 		}
+	};
+
+	isDesktopMK = () => {
+		const {layoutMode} = this.props;
+		return !isMobile().any && layoutMode === LAYOUT_MODE.MK;
 	};
 
 	reloadGrid = () => {
@@ -103,10 +125,12 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderGrid = () => {
-		const {selectedWidget} = this.props;
+		const {layoutMode, selectedWidget} = this.props;
 		const {width} = this.state;
 		const isEditable = !!selectedWidget;
-		const widgets = this.getWidgets();
+		const containerPadding = this.isDesktopMK() ? [16, 20] : [10, 10];
+		const containerWidth = this.isDesktopMK() ? 320 : width;
+		const widgets = getLayoutWidgets(this.getWidgets(), layoutMode);
 
 		if (width) {
 			return (
@@ -114,13 +138,15 @@ export class DashboardContent extends Component<Props, State> {
 					breakpoints={BREAKPOINTS}
 					cols={COLS}
 					compactType={null}
+					containerPadding={containerPadding}
 					isDraggable={isEditable}
 					isResizable={isEditable}
+					key={layoutMode}
 					onDragStart={this.handleShowGrid(true)}
 					onDragStop={this.handleShowGrid(false)}
 					onLayoutChange={this.handleLayoutChange}
 					rowHeight={ROW_HEIGHT}
-					width={width}
+					width={containerWidth}
 				>
 					{widgets.map(this.renderWidget)}
 				</Grid>
@@ -129,11 +155,8 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderGridWithContainer = () => {
-		const {editMode} = this.props;
-		const containerCN = editMode ? styles.editModeContainer : styles.viewModeContainer;
-
 		return (
-			<div className={containerCN} ref={this.gridContainerRef}>
+			<div className={this.getContainerClassName()} ref={this.gridContainerRef}>
 				<div className={styles.grid} ref={gridRef}>
 					{this.renderGrid()}
 				</div>
@@ -154,26 +177,50 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderWidget = (widget: WidgetType) => {
-		// $FlowFixMe
-		const {buildData, drillDown, editable, removeWidget, selectedWidget, updateWidget} = this.props;
-		const {id, layout} = widget;
+		const {
+			buildData,
+			drillDown,
+			editWidgetChunkData,
+			editable,
+			fetchBuildData,
+			layoutMode,
+			personalDashboard,
+			removeWidget,
+			selectedWidget,
+			updateWidget,
+			user
+		} = this.props;
+		const {displayMode, id, layout, mkLayout} = widget;
 		const isNew = id === NewWidget.id;
 		const ref = isNew ? this.newWidgetRef : null;
+		const sortedLayout = layoutMode === LAYOUT_MODE.MK ? mkLayout : layout;
+		/*
+			Раньше использовалось свойство static, для включения\отключения drag`n`drop, но у него наблюдаются проблемы с
+			динамическим изменением значения. Поэтому теперь используются 2 свойства - isResizable и isDraggable. Свойство static
+			необходимо удалять, т.к оно перебивает значения isResizable и isDraggable.
+		 */
+		delete layout.static;
 
 		return (
 			<Widget
 				buildData={buildData[id]}
 				data={widget}
-				data-grid={layout}
+				data-grid={sortedLayout}
+				displayMode={displayMode}
+				editWidgetChunkData={editWidgetChunkData}
+				fetchBuildData={fetchBuildData}
 				isEditable={editable}
 				isNew={isNew}
 				isSelected={selectedWidget === widget.id}
 				key={id}
+				layoutMode={layoutMode}
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
 				onRemove={removeWidget}
 				onUpdate={updateWidget}
+				personalDashboard={personalDashboard}
 				ref={ref}
+				user={user}
 			/>
 		);
 	};

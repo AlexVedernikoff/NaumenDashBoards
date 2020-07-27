@@ -7,6 +7,8 @@ import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import isMobile from 'ismobilejs';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 import {Modal} from 'components/molecules';
 import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component} from 'react';
@@ -14,6 +16,7 @@ import type {State} from './types';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
+import {VARIANTS as ICON_BUTTON_VARIANTS} from './components/IconButton/constants';
 
 export class DashboardHeader extends Component<Props, State> {
 	state = {
@@ -40,6 +43,12 @@ export class DashboardHeader extends Component<Props, State> {
 				sendToMail(name, type, file);
 			}
 		}
+	};
+
+	handleChangeDisplayMode = () => {
+		const {changeDisplayMode, layoutMode} = this.props;
+		const name = layoutMode === LAYOUT_MODE.WEB ? LAYOUT_MODE.MK : LAYOUT_MODE.WEB;
+		changeDisplayMode(name);
 	};
 
 	handleClickRefreshButton = () => {
@@ -80,6 +89,29 @@ export class DashboardHeader extends Component<Props, State> {
 				/>
 			</NavItem>
 		);
+	};
+
+	renderDisplayModeButton = () => {
+		const {layoutMode, personalDashboard, user} = this.props;
+		const isDesktop = !isMobile().any;
+		const isMK = layoutMode === LAYOUT_MODE.MK;
+		const customTip = isMK ? 'Переключиться в WEB представление' : 'Переключиться в мобильное представление';
+
+		if (isDesktop && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+			return (
+				<div className={styles.displayModeContainer}>
+					<IconButton
+						name={isMK ? ICON_NAMES.MOBILE : ICON_NAMES.WEB}
+						onClick={this.handleChangeDisplayMode}
+						outline
+						tip={customTip}
+						variant={ICON_BUTTON_VARIANTS.GREEN}
+					/>
+				</div>
+			);
+		}
+
+		return null;
 	};
 
 	renderDownloadExportButton = () => (
@@ -200,6 +232,7 @@ export class DashboardHeader extends Component<Props, State> {
 				<ul className={styles.nav}>
 					{this.renderSwitchDashboardButton()}
 				</ul>
+				{this.renderDisplayModeButton()}
 				<ul className={styles.nav}>
 					{this.renderAutoUpdateButton()}
 					{this.renderRefreshButton()}

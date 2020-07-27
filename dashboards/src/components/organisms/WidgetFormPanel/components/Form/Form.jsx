@@ -46,11 +46,13 @@ export class Form extends Component<Props, State> {
 		const {
 			attributes,
 			context,
+			displayMode,
 			errors,
 			fetchAttributes,
 			fetchGroupDynamicAttributes,
 			fetchRefAttributes,
 			isNew,
+			layoutMode,
 			refAttributes,
 			renderParamsTab,
 			setDataFieldValue,
@@ -58,14 +60,17 @@ export class Form extends Component<Props, State> {
 			sources,
 			values
 		} = this.props;
+
 		const content = renderParamsTab({
 			attributes,
 			context,
+			displayMode,
 			errors,
 			fetchAttributes,
 			fetchGroupDynamicAttributes,
 			fetchRefAttributes,
 			isNew,
+			layoutMode,
 			refAttributes,
 			setDataFieldValue,
 			setFieldValue,

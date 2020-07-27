@@ -26,13 +26,14 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	};
 
 	render () {
-		const {renderBaseBoxes} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect} = this.props;
 
 		return (
 			<Fragment>
 				{renderBaseBoxes()}
 				{this.renderSourceBox()}
 				{this.renderIndicatorBoxes()}
+				{renderDisplayModeSelect()}
 			</Fragment>
 		);
 	}

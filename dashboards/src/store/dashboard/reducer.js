@@ -78,6 +78,11 @@ const reducer = (state: DashboardState = initialDashboardState, action: Dashboar
 				...state,
 				editMode: false
 			};
+		case DASHBOARD_EVENTS.SET_DISPLAY_MODE:
+			return {
+				...state,
+				layoutMode: action.payload
+			};
 		default:
 			return state;
 	}

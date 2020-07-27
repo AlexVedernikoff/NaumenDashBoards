@@ -6,15 +6,15 @@ import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceB
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
-import {FormBox, FormCheckControl, OuterSelect} from 'components/molecules';
+import {FormBox, FormCheckControl, OuterSelect, Select} from 'components/molecules';
 import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import type {Group} from 'store/widgets/data/types';
+import {LAYOUT_MODE_OPTIONS, WIDGET_OPTIONS} from './constants';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
-import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class DataFormBuilder extends Component<Props> {
@@ -103,6 +103,13 @@ export class DataFormBuilder extends Component<Props> {
 			...values[FIELDS.header],
 			[FIELDS.name]: value
 		});
+	};
+
+	handleChangeDisplayMode = ({value}: Object) => {
+		const {setFieldValue} = this.props;
+		const {value: modeValue} = value;
+
+		setFieldValue(FIELDS.displayMode, modeValue);
 	};
 
 	handleChangeGroup = (index: number, name: string, value: Group, field: Object) => {
@@ -227,6 +234,24 @@ export class DataFormBuilder extends Component<Props> {
 		return null;
 	};
 
+	renderDisplayModeSelect = () => {
+		const {displayMode} = this.props;
+		const value = LAYOUT_MODE_OPTIONS.find(item => item.value === displayMode) || LAYOUT_MODE_OPTIONS[0];
+
+		return (
+			<FormBox title="Область отображения">
+				<FormField>
+					<Select
+						onSelect={this.handleChangeDisplayMode}
+						options={LAYOUT_MODE_OPTIONS}
+						placeholder="Отображение виджета в мобильной версии"
+						value={value}
+					/>
+				</FormField>
+			</FormBox>
+		);
+	};
+
 	renderIndicatorBox = (props: IndicatorBoxProps) =>
 		(set: DataSet, index: number) => {
 		const {errors, setDataFieldValue, setFieldValue, values} = this.props;
@@ -335,6 +360,7 @@ export class DataFormBuilder extends Component<Props> {
 		return render({
 			errors,
 			renderBaseBoxes: this.renderBaseBoxes,
+			renderDisplayModeSelect: this.renderDisplayModeSelect,
 			renderIndicatorBoxes: this.renderIndicatorBoxes,
 			renderParameterBox: this.renderParameterBox,
 			renderSourceBox: this.renderSourceBox,

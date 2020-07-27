@@ -3,14 +3,17 @@ import cn from 'classnames';
 import {createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
 import {Diagram, Modal} from 'components/molecules';
 import type {DivRef} from 'components/types';
+import DropDownButton from './components/DropDownButton';
 import type {ExportItem, Props, State} from './types';
-import {EXPORT_LIST} from './constants';
+import {EXPORT_LIST, LAYOUT_MODE_OPTIONS} from './constants';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import {IconButton, Tooltip} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 import type {Node} from 'react';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import {USER_ROLES} from 'store/context/constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Widget extends PureComponent<Props, State> {
@@ -20,7 +23,9 @@ export class Widget extends PureComponent<Props, State> {
 
 	state = {
 		hasError: false,
-		showRemoveModal: false
+		layoutModeValue: this.props.displayMode,
+		showRemoveModal: false,
+		showReplaceSubmenu: false
 	};
 
 	ref: DivRef = createRef();
@@ -31,6 +36,13 @@ export class Widget extends PureComponent<Props, State> {
 		return {
 			hasError: true
 		};
+	}
+
+	componentDidMount () {
+		const {buildData, data, fetchBuildData} = this.props;
+		if (!buildData) {
+			fetchBuildData(data);
+		}
 	}
 
 	componentDidUpdate (prevProps: Props) {
@@ -54,6 +66,24 @@ export class Widget extends PureComponent<Props, State> {
 		}
 
 		return cn(CN);
+	};
+
+	getDisplayMode = () => {
+		const {displayMode} = this.props;
+
+		switch (displayMode) {
+			case LAYOUT_MODE.WEB:
+				return ICON_NAMES.WEB;
+			case LAYOUT_MODE.MK:
+				return ICON_NAMES.MOBILE;
+			default:
+				return ICON_NAMES.WEB_MK;
+		}
+	};
+
+	handleChangeDisplayMode = ({value}: Object) => {
+		const {data, editWidgetChunkData} = this.props;
+		editWidgetChunkData(data, {displayMode: value});
 	};
 
 	handleClickDrillDownButton = (index: number) => () => {
@@ -113,6 +143,22 @@ export class Widget extends PureComponent<Props, State> {
 		}
 
 		return null;
+	};
+
+	renderChangeDisplayModeButton = () => {
+		const {displayMode} = this.props;
+		const value = LAYOUT_MODE_OPTIONS.find(item => item.value === displayMode) || LAYOUT_MODE_OPTIONS[0];
+
+		return (
+			<DropDownButton
+				className={styles.markerIcon}
+				menu={LAYOUT_MODE_OPTIONS}
+				name={this.getDisplayMode()}
+				onSelect={this.handleChangeDisplayMode}
+				tip={`Отображается ${value.label}`}
+				value={value}
+			/>
+		);
 	};
 
 	renderDiagram = () => {
@@ -188,6 +234,20 @@ export class Widget extends PureComponent<Props, State> {
 		</div>
 	);
 
+	renderHeaderButtons = () => {
+		const {isNew, personalDashboard, user} = this.props;
+
+		if (!isNew && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+			return (
+				<div className={styles.actionHeaderButtonsContainer}>
+					{this.renderChangeDisplayModeButton()}
+				</div>
+			);
+		}
+
+		return null;
+	};
+
 	renderRemoveButton = () => {
 		const {isEditable} = this.props;
 
@@ -238,6 +298,7 @@ export class Widget extends PureComponent<Props, State> {
 			<div {...gridProps} className={this.getClassName()} ref={this.ref}>
 				{this.renderDiagram()}
 				{this.renderButtons()}
+				{this.renderHeaderButtons()}
 				{this.renderError()}
 				{children}
 			</div>

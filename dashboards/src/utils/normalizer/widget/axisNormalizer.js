@@ -105,7 +105,7 @@ const createData = (widget: Object, fields: Object) => {
 };
 
 const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
-	const {id, layout, type} = widget;
+	const {displayMode, id, layout, mkLayout, type} = widget;
 	const dataFields = getDataFields();
 	let {data} = widget;
 
@@ -122,11 +122,13 @@ const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
+		displayMode,
 		header: header(widget),
 		id,
 		indicator: axisIndicator(widget, set[FIELDS.yAxis]),
 		layout,
 		legend: legend(widget),
+		mkLayout,
 		name: string(widget[FIELDS.name]),
 		parameter: axisParameter(widget, set[FIELDS.xAxis]),
 		sorting: chartSorting(widget),

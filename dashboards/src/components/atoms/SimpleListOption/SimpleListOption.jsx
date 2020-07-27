@@ -1,10 +1,15 @@
 // @flow
 import cn from 'classnames';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class SimpleListOption extends PureComponent<Props> {
+	static defaultProps = {
+		showSelectedIcon: false
+	};
+
 	getClassName = () => {
 		const {found, selected} = this.props;
 
@@ -25,13 +30,20 @@ export class SimpleListOption extends PureComponent<Props> {
 		onClick(option);
 	};
 
+	renderSelectedIcon = () => {
+		const {selected, showSelectedIcon} = this.props;
+		return showSelectedIcon && selected ? <Icon name={ICON_NAMES.DONE} /> : null;
+	};
+
 	render () {
 		const {style} = this.props;
-		const label = this.getOptionLabel();
 
 		return (
 			<div className={this.getClassName()} onClick={this.handleClick} style={style}>
-				<div className={styles.label} title={label}>{label}</div>
+				<div className={styles.label}>
+					{this.getOptionLabel()}
+					{this.renderSelectedIcon()}
+				</div>
 			</div>
 		);
 	}
