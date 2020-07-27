@@ -15,6 +15,7 @@ import {BUILD_DATA_EVENTS} from './constants';
 import {buildUrl, client} from 'utils/api';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 import {mixinBreakdown} from 'utils/normalizer/widget/helpers';
 import type {PostData, ReceiveBuildDataPayload} from './types';
 import {transformGroupFormat} from 'store/widgets/helpers';
@@ -256,8 +257,11 @@ const createPostData = (widget: Widget): PostData | void => {
  * @param {Array<Widget>} widgets - список виджетов
  * @returns {ThunkAction}
  */
-const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	widgets.forEach(widget => dispatch(fetchBuildData(widget)));
+const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {layoutMode} = getState().dashboard;
+	const filteredWidgets = widgets.filter(item => (item.displayMode === layoutMode || item.displayMode === LAYOUT_MODE.WEB_MK));
+
+	filteredWidgets.forEach(widget => dispatch(fetchBuildData(widget)));
 };
 
 /**

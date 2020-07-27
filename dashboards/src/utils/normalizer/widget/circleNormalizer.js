@@ -82,7 +82,7 @@ const createData = (widget: Object, fields: Object) => {
 };
 
 const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
-	const {id, layout, type} = widget;
+	const {displayMode, id, layout, mkLayout, type} = widget;
 	const dataFields = getDataFields();
 	let {data} = widget;
 
@@ -95,10 +95,12 @@ const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
+		displayMode,
 		header: header(widget),
 		id,
 		layout,
 		legend: legend(widget),
+		mkLayout,
 		name: string(widget[FIELDS.name]),
 		sorting: chartSorting(widget, true),
 		type

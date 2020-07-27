@@ -7,8 +7,10 @@ const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => 
 	const {
 		borders,
 		data,
+		displayMode,
 		id,
 		layout,
+		mkLayout,
 		ranges,
 		type
 	} = widget;
@@ -17,9 +19,11 @@ const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => 
 		borders,
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data,
+		displayMode,
 		header: header(widget),
 		id,
 		layout,
+		mkLayout,
 		name: string(widget[FIELDS.name]),
 		ranges,
 		type

@@ -1,5 +1,5 @@
 // @flow
-import type {AutoUpdateSettings} from 'store/dashboard/types';
+import type {AutoUpdateSettings, DisplayMode} from 'store/dashboard/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 
@@ -7,6 +7,7 @@ export type ConnectedProps = {
 	autoUpdateSettings: AutoUpdateSettings,
 	editMode: boolean,
 	editableDashboard: boolean,
+	layoutMode: string,
 	personalDashboard: boolean,
 	personalDashboardCreating: boolean,
 	personalDashboardDeleting: boolean,
@@ -15,6 +16,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
+	changeDisplayMode: (name: DisplayMode) => ThunkAction,
 	createPersonalDashboard: () => ThunkAction,
 	editDashboard: () => ThunkAction,
 	getSettings: (personal: boolean) => ThunkAction,

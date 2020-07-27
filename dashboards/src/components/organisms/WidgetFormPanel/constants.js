@@ -18,6 +18,7 @@ const dataKey: 'dataKey' = 'dataKey';
 const defaultValue: 'defaultValue' = 'defaultValue';
 const descriptor: 'descriptor' = 'descriptor';
 const diagramName: 'diagramName' = 'diagramName';
+const displayMode: 'displayMode' = 'displayMode';
 const tickAmount: 'tickAmount' = 'tickAmount';
 const fontColor: 'fontColor' = 'fontColor';
 const fontFamily: 'fontFamily' = 'fontFamily';
@@ -28,6 +29,7 @@ const header: 'header' = 'header';
 const indicator: 'indicator' = 'indicator';
 const isNew: 'isNew' = 'isNew';
 const layout: 'layout' = 'layout';
+const mkLayout: 'mkLayout' = 'mkLayout';
 const legend: 'legend' = 'legend';
 const name: 'name' = 'name';
 const max: 'max' = 'max';
@@ -75,6 +77,7 @@ const FIELDS = {
 	defaultValue,
 	descriptor,
 	diagramName,
+	displayMode,
 	fontColor,
 	fontFamily,
 	fontSize,
@@ -87,6 +90,7 @@ const FIELDS = {
 	legend,
 	max,
 	min,
+	mkLayout,
 	name,
 	parameter,
 	position,

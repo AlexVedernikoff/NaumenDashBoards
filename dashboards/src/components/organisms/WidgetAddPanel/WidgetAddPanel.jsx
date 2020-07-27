@@ -8,10 +8,10 @@ import styles from './styles.less';
 
 export class WidgetAddPanel extends Component<Props> {
 	addWidgetOnNewRow = () => {
-		const {addWidget, widgets} = this.props;
+		const {addWidget, layoutMode, widgets} = this.props;
 		const nextRow = getNextRow(widgets);
 
-		addWidget(new NewWidget(nextRow));
+		addWidget(new NewWidget(nextRow, layoutMode));
 	};
 
 	render () {

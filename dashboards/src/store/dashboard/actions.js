@@ -7,6 +7,7 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getContext, getMetaCLass, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import {getNextRow} from 'utils/layout';
+import isMobile from 'ismobilejs';
 import {NewWidget} from 'utils/widget';
 import {resetState, switchState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
@@ -77,9 +78,11 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {context} = getState();
 	const {contentCode, subjectUuid: classFqn} = context;
-	const {data} = await client.post(buildUrl('dashboardSettings', 'getSettings', 'requestContent,user'), {
+	// $FlowFixMe
+	const {data} = await client.post(buildUrl('testDashboardSettings', 'getSettings', 'requestContent,user'), {
 		classFqn,
 		contentCode,
+		isMk: isMobile().any,
 		isPersonal
 	});
 	const {autoUpdate, customGroups, dynamicGroups, widgets} = data;
@@ -340,7 +343,20 @@ const setPersonal = payload => ({
 	type: DASHBOARD_EVENTS.SET_PERSONAL
 });
 
+/**
+ * Переключает режим отображения
+ * @param {string} payload - название режима отображения
+ * @returns {ThunkAction}
+ */
+const changeDisplayMode = (payload: string): ThunkAction => (dispatch: Dispatch) => {
+	dispatch({
+		payload,
+		type: DASHBOARD_EVENTS.SET_DISPLAY_MODE
+	});
+};
+
 export {
+	changeDisplayMode,
 	createPersonalDashboard,
 	createPersonalState,
 	editDashboard,

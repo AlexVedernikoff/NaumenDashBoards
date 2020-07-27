@@ -38,6 +38,7 @@ export type ConnectedProps = {
 	attributes: AttributesMap,
 	context: Context,
 	dynamicGroups: DynamicGroupsMap,
+	layoutMode: string,
 	refAttributes: AttributesMap,
 	sources: DataSourceMap,
 	updating: boolean,
@@ -54,6 +55,7 @@ export type FetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCal
 
 export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
+	changeDisplayMode: (name: string) => ThunkAction,
 	createToast: (newToast: $Exact<NewToast>) => ThunkAction,
 	createWidget: Widget => Object | void,
 	fetchAttributes: FetchAttributes,

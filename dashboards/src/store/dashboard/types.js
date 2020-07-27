@@ -1,9 +1,14 @@
 // @flow
-import {DASHBOARD_EVENTS} from './constants';
+import {DASHBOARD_EVENTS, LAYOUT_MODE} from './constants';
 
 type ChangeAutoUpdateSettings = {
 	payload: Object,
 	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
+};
+
+type ChangeDisplayMode = {
+	payload: string,
+	type: typeof DASHBOARD_EVENTS.SET_DISPLAY_MODE,
 };
 
 type CreatePersonalDashboard = {
@@ -70,6 +75,7 @@ type UnknownDashboardAction = {
 
 export type DashboardAction =
 	| ChangeAutoUpdateSettings
+	| ChangeDisplayMode
 	| CreatePersonalDashboard
 	| CreatedPersonalDashboard
 	| DeletePersonalDashboard
@@ -98,9 +104,12 @@ export type DashboardState = {
 	editMode: boolean,
 	editable: boolean,
 	error: boolean,
+	layoutMode: string,
 	loading: boolean,
 	personal: boolean,
 	personalCreating: boolean,
 	personalDeleting: boolean,
 	reloadInterval?: number,
 };
+
+export type DisplayMode = $Keys<typeof LAYOUT_MODE>;

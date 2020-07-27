@@ -1,9 +1,12 @@
 // @flow
 import type {IconName} from 'components/atoms/Icon/types';
+import {VARIANTS} from './constants';
 
 export type Props = {
 	className: string,
 	name: IconName,
 	onClick?: () => void,
-	tip: string
+	outline: boolean,
+	tip: string,
+	variant: $Keys<typeof VARIANTS>
 };

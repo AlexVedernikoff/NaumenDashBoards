@@ -10,7 +10,8 @@ import {
 	INTERVALS
 } from './constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
-import type {Group} from './data/types';
+import type {Group, Widget} from './data/types';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 import {store} from 'src';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
@@ -46,6 +47,16 @@ const transformGroupFormat = (group?: Group, extendCustom: boolean = true) => {
 const getDefaultSystemGroup = (attribute: Object) => attribute && typeof attribute === 'object' && attribute.type in ATTRIBUTE_SETS.DATE
 	? createDefaultGroup(DATETIME_SYSTEM_GROUP.MONTH)
 	: createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
+
+/**
+ * Фильтрует виджеты по режиму отображения
+ * @param {Array<Widget>} widgets - список виджетов
+ * @param {string} mode - режим отображения
+ * @returns {Array<Widget>}
+ */
+const	getLayoutWidgets = (widgets: Array<Widget>, mode: string): Array<Widget> => {
+	return widgets.filter(item => (item.displayMode === mode || item.displayMode === LAYOUT_MODE.WEB_MK));
+};
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация в процентах
@@ -87,6 +98,7 @@ const parseMSInterval = (ms: number) => {
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
+	getLayoutWidgets,
 	hasMSInterval,
 	hasPercent,
 	isGroupKey,

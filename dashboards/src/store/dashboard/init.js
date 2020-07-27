@@ -1,6 +1,7 @@
 // @flow
 import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
+import {getLayoutMode} from 'src/helpers';
 
 export const initialDashboardState: DashboardState = {
 	autoUpdate: {
@@ -11,6 +12,7 @@ export const initialDashboardState: DashboardState = {
 	editMode: false,
 	editable: false,
 	error: false,
+	layoutMode: getLayoutMode(),
 	loading: false,
 	personal: false,
 	personalCreating: false,

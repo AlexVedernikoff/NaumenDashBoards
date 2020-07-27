@@ -28,12 +28,13 @@ export class CircleChartForm extends Component<TypedFormProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): CircleWidget => {
-		const {id, layout} = widget;
+		const {id, layout, mkLayout} = widget;
 		const {
 			colors = DEFAULT_COLORS,
 			computedAttrs = [],
 			data = [],
 			dataLabels,
+			displayMode,
 			header,
 			legend,
 			name = '',
@@ -46,10 +47,12 @@ export class CircleChartForm extends Component<TypedFormProps> {
 			computedAttrs,
 			data: data.map(normalizeDataSet),
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),
+			displayMode,
 			header,
 			id,
 			layout,
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
+			mkLayout,
 			name,
 			sorting: extend(DEFAULT_CIRCLE_SORTING_SETTINGS, sorting),
 			type

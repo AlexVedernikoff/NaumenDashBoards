@@ -33,6 +33,7 @@ export type Method =
 	| 'getUserData'
 	| 'editLayouts'
 	| 'editWidget'
+	| 'editWidgetChunkData'
 	| 'saveAutoUpdateSettings'
 	| 'saveCustomGroup'
 	| 'sendFileToMail'

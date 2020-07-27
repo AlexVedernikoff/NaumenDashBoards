@@ -11,6 +11,7 @@ import type {
 	WidgetsDataState
 } from './types';
 import type {Layout} from 'utils/layout/types';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 import {NewWidget} from 'utils/widget';
 
 /**
@@ -144,11 +145,14 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
  * @returns {WidgetsDataState}
  */
 const editLayout = (state: WidgetsDataState, {payload}: EditLayout): WidgetsDataState => {
-	payload.forEach(l => {
+	const {layoutMode, layouts} = payload;
+	const isMk = layoutMode === LAYOUT_MODE.MK;
+
+	layouts.forEach(l => {
 		if (l.i === NewWidget.id && state.newWidget) {
-			state.newWidget.layout = l;
+			isMk ? state.newWidget.mkLayout = l : state.newWidget.layout = l;
 		} else {
-			state.map[l.i].layout = l;
+			isMk ? state.map[l.i].mkLayout = l : state.map[l.i].layout = l;
 		}
 	});
 

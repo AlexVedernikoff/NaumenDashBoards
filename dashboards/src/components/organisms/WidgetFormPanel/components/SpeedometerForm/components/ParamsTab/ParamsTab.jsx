@@ -101,13 +101,14 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	renderTextInputLabel = (label: string) => <div className={styles.textInputLabel}>{label}</div>;
 
 	render () {
-		const {renderBaseBoxes} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect} = this.props;
 
 		return (
 			<Fragment>
 				{renderBaseBoxes()}
 				{this.renderSourceBox()}
 				{this.renderIndicatorBoxes()}
+				{renderDisplayModeSelect()}
 			</Fragment>
 		);
 	}

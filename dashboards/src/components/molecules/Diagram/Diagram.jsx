@@ -93,7 +93,7 @@ export class Diagram extends Component<Props, State> {
 			}
 
 			return (
-				<div style={{height}}>
+				<div className={styles.diagramContainer} style={{height}}>
 					{this.resolveDiagram()}
 				</div>
 			);

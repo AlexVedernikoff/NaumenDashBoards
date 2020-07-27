@@ -4,9 +4,10 @@ import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/actions';
 import {fetchAllBuildData, fetchBuildData} from 'store/widgets/buildData/actions';
+import {getMapValues, isObject} from 'src/helpers';
 import {getParams} from 'store/helpers';
-import {isObject} from 'src/helpers';
 import type {Layout} from 'utils/layout/types';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import {NewWidget} from 'utils/widget';
 import normalizer from 'utils/normalizer';
@@ -36,11 +37,13 @@ const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch, getS
 
 /**
  * Сохраняет локально изменение положения виджетов
- * @param {Layout} payload - массив объектов местоположения виджетов на дашборде
+ * @param {Layout} layouts - массив объектов местоположения виджетов на дашборде
+ * @param {string} layoutMode - режим отображения дашборда
  * @returns {ThunkAction}
  */
-const editLayout = (payload: Layout): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(setNewLayout(payload));
+const editLayout = (layouts: Array<Layout>, layoutMode: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(setNewLayout({layoutMode, layouts}));
+	localStorage.setItem('layoutMode', layoutMode);
 };
 
 /**
@@ -52,15 +55,15 @@ const saveNewLayout = (): ThunkAction => async (dispatch: Dispatch, getState: Ge
 
 	try {
 		const state = getState();
-		const {widgets} = getState();
+		const {dashboard, widgets} = getState();
+		const isMk = dashboard.layoutMode === LAYOUT_MODE.MK;
 		const widgetMap = widgets.data.map;
-		const layouts = Object.keys(widgetMap).map(key => ({
-			key: key,
-			value: widgetMap[key].layout
-		}));
-		const url = buildUrl('dashboardSettings', 'editLayouts', 'requestContent,user');
+		const layouts = getMapValues(widgetMap).map(widget => (isMk ? widget.mkLayout : widget.layout));
+		// $FlowFixMe
+		const url = buildUrl('testDashboardSettings', 'editLayouts', 'requestContent,user');
 		const params = {
 			...getParams(state),
+			isMk,
 			layouts
 		};
 
@@ -110,6 +113,36 @@ const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, g
 };
 
 /**
+ * Сохраняет изменение части данных виджета
+ * @param {Widget} widget - данные виджета
+ * @param {object} chunkData - данные которые нужно изменить
+ * @returns {ThunkAction}
+ */
+const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	try {
+		const state = getState();
+		// $FlowFixMe
+		const url = buildUrl('testDashboardSettings', 'editWidgetChunkData', 'requestContent,user');
+		const params = {
+			...getParams(state),
+			chunkData,
+			id: widget.id
+		};
+		const updatedWidgetData = {
+			...widget,
+			...chunkData
+		};
+
+		await client.post(url, params);
+
+		dispatch(updateWidget(updatedWidgetData));
+		dispatch(fetchBuildData(updatedWidgetData));
+	} catch (e) {
+		dispatch(recordSaveError());
+	}
+};
+
+/**
  * Сохраняет массив виджетов и получает данные для построения
  * @param {Array<object>} widgets - данные формы редактирования
  * @returns {ThunkAction}
@@ -143,7 +176,7 @@ const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch,
 		};
 		const {data: id} = await client.post(url, params);
 
-		const createdWidget = {...widget, id, layout: {...widget.layout, i: id}};
+		const createdWidget = {...widget, id, layout: {...widget.layout, i: id}, mkLayout: {...widget.mkLayout, i: id}};
 		dispatch(setCreatedWidget(createdWidget));
 		dispatch(fetchBuildData(createdWidget));
 		dispatch(saveNewLayout());
@@ -261,6 +294,7 @@ export {
 	cancelForm,
 	createWidget,
 	editLayout,
+	editWidgetChunkData,
 	removeWidget,
 	resetWidget,
 	saveWidget,

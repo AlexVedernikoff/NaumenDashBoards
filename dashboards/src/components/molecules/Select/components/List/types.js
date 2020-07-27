@@ -12,10 +12,12 @@ export type Props = {
 	messages?: Messages,
 	multiple: boolean,
 	onClickShowMore?: () => void,
+	onClose?: () => void,
 	onSelect: (option: Option) => void,
 	options: Array<Option>,
 	searchValue: string,
 	showMore: boolean,
+	showSelectedIcon?: boolean,
 	value: Option | null,
 	values: Array<Option>
 };

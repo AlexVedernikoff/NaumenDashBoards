@@ -34,14 +34,17 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 	}
 
 	handleSubmit = async (updateWidget: UpdateWidget) => {
-		const {createWidget, saveWidget, widget} = this.props;
+		const {changeDisplayMode, createWidget, saveWidget, widget} = this.props;
 		const {values} = this.state;
 		const isValid = await this.validate();
+		const {displayMode} = values;
 
 		if (isValid) {
 			const updatedWidget = updateWidget(widget, values);
 			const method = this.isNew() ? createWidget : saveWidget;
 			const errors = await method(updatedWidget);
+
+			changeDisplayMode(displayMode);
 
 			if (errors) {
 				this.setState({errors});
@@ -111,12 +114,14 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			fetchAttributes,
 			fetchGroupDynamicAttributes,
 			fetchRefAttributes,
+			layoutMode,
 			refAttributes,
 			sources,
 			updating,
 			user
 		} = this.props;
 		const {errors, values, valuesSet} = this.state;
+		const {displayMode} = values;
 
 		if (valuesSet) {
 			return (
@@ -124,12 +129,14 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					attributes={attributes}
 					cancelForm={cancelForm}
 					context={context}
+					displayMode={displayMode}
 					dynamicGroups={dynamicGroups}
 					errors={errors}
 					fetchAttributes={fetchAttributes}
 					fetchGroupDynamicAttributes={fetchGroupDynamicAttributes}
 					fetchRefAttributes={fetchRefAttributes}
 					isNew={this.isNew()}
+					layoutMode={layoutMode}
 					onSubmit={this.handleSubmit}
 					refAttributes={refAttributes}
 					setDataFieldValue={this.setDataFieldValue}

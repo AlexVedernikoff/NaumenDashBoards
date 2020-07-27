@@ -1,4 +1,6 @@
 // @flow
+import isMobile from 'ismobilejs';
+import {LAYOUT_MODE} from 'store/dashboard/constants';
 
 /**
  * Возвращает функцию, которая не будет срабатывать, пока продолжает вызываться
@@ -84,12 +86,23 @@ const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
  */
 const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platform);
 
+/**
+ * Возвращает нужный режим отображения с учётом localStorage
+ * @returns {string}
+ */
+const getLayoutMode = () => {
+ const localStorageLayoutMode = localStorage.getItem('layoutMode') || LAYOUT_MODE.WEB;
+
+ return isMobile().any ? LAYOUT_MODE.MK : localStorageLayoutMode;
+};
+
 export {
 	debounce,
 	deepClone,
 	extend,
 	isMacOS,
 	fixInitialHeight,
+	getLayoutMode,
 	getMapValues,
 	isObject
 };

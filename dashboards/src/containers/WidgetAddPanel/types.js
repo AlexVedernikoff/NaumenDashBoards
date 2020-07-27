@@ -4,6 +4,7 @@ import type {ThunkAction} from 'store/types';
 import type {WidgetMap} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
+	layoutMode: string,
 	widgets: WidgetMap
 };
 

@@ -45,6 +45,7 @@ export type SourceBoxProps = $Shape<{|
 export type DataBuilderProps = {
 	errors: ErrorsMap,
 	renderBaseBoxes: () => React$Node,
+	renderDisplayModeSelect: () => React$Node,
 	renderIndicatorBoxes: (props?: IndicatorBoxProps) => React$Node,
 	renderParameterBox: (props: ParameterBoxProps) => React$Node,
 	renderSourceBox: (props: SourceBoxProps) => React$Node,

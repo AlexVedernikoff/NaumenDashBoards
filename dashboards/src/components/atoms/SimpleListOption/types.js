@@ -7,5 +7,6 @@ export type Props = {
 	onClick: (Option | null) => void,
 	option: Option,
 	selected: boolean,
+	showSelectedIcon: boolean,
 	style: Object
 };

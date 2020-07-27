@@ -96,6 +96,7 @@ type BaseWidget = {|
 	header: Header,
 	id: string,
 	layout: LayoutItem,
+	mkLayout: LayoutItem,
 	name: string
 |};
 
@@ -163,6 +164,7 @@ export type AxisWidget = {
 	colors: Array<string>,
 	data: Array<AxisData>,
 	dataLabels: DataLabels,
+	displayMode: string,
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
@@ -193,6 +195,7 @@ export type CircleWidget = {
 	colors: Array<string>,
 	data: Array<CircleData>,
 	dataLabels: DataLabels,
+	displayMode: string,
 	legend: Legend,
 	sorting: ChartSorting,
 	type: $Keys<typeof WIDGET_SETS.CIRCLE>
@@ -214,6 +217,7 @@ export type ComboWidget = {
 	colors: Array<string>,
 	data: Array<ComboData>,
 	dataLabels: DataLabels,
+	displayMode: string,
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
@@ -247,6 +251,7 @@ export type SummaryIndicator = {
 export type SummaryWidget = {
 	...BaseWidget,
 	data: Array<SummaryData>,
+	displayMode: string,
 	indicator: SummaryIndicator,
 	type: typeof WIDGET_TYPES.SUMMARY
 };
@@ -275,6 +280,7 @@ export type SpeedometerWidget = {
 	...BaseWidget,
 	borders: Borders,
 	data: Array<SummaryData>,
+	displayMode: string,
 	ranges: Ranges,
 	type: typeof WIDGET_TYPES.SPEEDOMETER
 };
@@ -334,6 +340,7 @@ export type TableWidget = {
 	calcTotalRow: boolean,
 	columnsRatioWidth: Array<number>,
 	data: Array<TableData>,
+	displayMode: string,
 	sorting: TableSorting,
 	table: Table,
 	type: typeof WIDGET_TYPES.TABLE
