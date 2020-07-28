@@ -1,8 +1,8 @@
 // @flow
 import {AbsolutePortal} from 'components/molecules';
-import {List} from 'components/molecules/Select/components';
 import type {DivRef} from 'components/types';
 import {IconButton, OutsideClickDetector} from 'components/atoms';
+import {List} from 'components/molecules/Select/components';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';

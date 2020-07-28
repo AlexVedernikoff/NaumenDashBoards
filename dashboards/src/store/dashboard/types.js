@@ -101,8 +101,8 @@ export type AutoUpdateSettings = {
 
 export type DashboardState = {
 	autoUpdate: AutoUpdateSettings,
-	editMode: boolean,
 	editable: boolean,
+	editMode: boolean,
 	error: boolean,
 	layoutMode: string,
 	loading: boolean,

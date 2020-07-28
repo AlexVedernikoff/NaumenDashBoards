@@ -33,7 +33,7 @@
 		"local-rules/sort-imports": 2,
 		"local-rules/sort-class-methods": 2,
 		"flowtype/semi": 2,
-		"flowtype/sort-keys": [2, "asc", {"caseSensitive": true}],
+		"flowtype/sort-keys": [2, "asc", {"caseSensitive": true, "natural": true}],
 		"no-param-reassign": 2,
 		"no-tabs": 0,
 		"operator-linebreak": ["error", "before"],

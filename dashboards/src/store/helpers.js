@@ -1,13 +1,12 @@
 // @flow
-import type {AppState} from 'store/types';
+import {store} from 'src';
 
 /**
  * Формирует параметры для запросов изменения данных дашборда
- * @param {AppState} state - состояние приложения
  * @returns {void}
  */
-const getParams = (state: AppState) => {
-	const {context, dashboard} = state;
+const getParams = () => {
+	const {context, dashboard} = store.getState();
 	const {contentCode, subjectUuid: classFqn} = context;
 	const {editable, personal: isPersonal} = dashboard;
 
