@@ -1992,6 +1992,7 @@ private List getTwoFilterListDiagramData(def node,
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 }
+
 /**
  * Метод проверки списка группировок на соответствие единому типу атрибута
  * @param listRequest - список запросов на построение диаграмм
@@ -2534,7 +2535,8 @@ private Map<String, Object> transformRequestWithoutComputation(Map<String, Objec
     return cardObjectUuid ? transform(requestContent) : requestContent
 }
 
-private boolean isCustomGroupFromBreakdown(Map<String, Object> requestContent){
+private boolean isCustomGroupFromBreakdown(Map<String, Object> requestContent)
+{
     def requestData = requestContent.data as Map<String, Object>
     return requestData.findResult { key, value ->
         def data = value as Map<String, Object>

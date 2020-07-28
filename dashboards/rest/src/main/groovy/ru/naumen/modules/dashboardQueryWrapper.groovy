@@ -57,6 +57,18 @@ class QueryWrapper implements CriteriaWrapper
         String[] attributeCodes =
             parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = api.selectClause.property(attributeCodes)
+        if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
+            aggregationType == Aggregation.AVG)
+        {
+            parameter?.attribute?.ref = new Attribute(
+                code: 'code',
+                title: "Код элемента справочника",
+                type: "string"
+            )
+            attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+            column = api.selectClause.property(attributeCodes)
+            column = column.with(api.selectClause.&cast.rcurry('integer'))
+        }
         column.with(aggregation).with(criteria.&addColumn)
         String sortingType = parameter.sortingType
         if (sortingType)
@@ -767,7 +779,10 @@ private static def validate(AggregationParameter parameter) throws IllegalArgume
             }
             break
         default:
-            if (!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT]))
+            if ((!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT]) &&
+                  parameter.attribute.type != AttributeType.CATALOG_ITEM_TYPE) ||
+                 (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
+                  !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT] })))
             {
                 throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
             }
