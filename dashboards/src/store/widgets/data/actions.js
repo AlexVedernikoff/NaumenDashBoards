@@ -54,7 +54,6 @@ const saveNewLayout = (): ThunkAction => async (dispatch: Dispatch, getState: Ge
 	dispatch(requestLayoutSave());
 
 	try {
-		const state = getState();
 		const {dashboard, widgets} = getState();
 		const isMk = dashboard.layoutMode === LAYOUT_MODE.MK;
 		const widgetMap = widgets.data.map;
@@ -62,7 +61,7 @@ const saveNewLayout = (): ThunkAction => async (dispatch: Dispatch, getState: Ge
 		// $FlowFixMe
 		const url = buildUrl('testDashboardSettings', 'editLayouts', 'requestContent,user');
 		const params = {
-			...getParams(state),
+			...getParams(),
 			isMk,
 			layouts
 		};
@@ -92,10 +91,9 @@ const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, g
 	dispatch(requestWidgetSave());
 
 	try {
-		const state = getState();
 		const url = buildUrl('dashboardSettings', 'editWidget', 'requestContent,user');
 		const params = {
-			...getParams(state),
+			...getParams(),
 			widget
 		};
 		await client.post(url, params);
@@ -118,13 +116,11 @@ const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, g
  * @param {object} chunkData - данные которые нужно изменить
  * @returns {ThunkAction}
  */
-const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const state = getState();
-		// $FlowFixMe
-		const url = buildUrl('testDashboardSettings', 'editWidgetChunkData', 'requestContent,user');
+		const url = buildUrl('dashboardSettings', 'editWidgetChunkData', 'requestContent,user');
 		const params = {
-			...getParams(state),
+			...getParams(),
 			chunkData,
 			id: widget.id
 		};
@@ -162,16 +158,15 @@ const setWidgets = (widgets: Array<Object>): ThunkAction => async (dispatch: Dis
  * @param {Widget} widget - данные формы создания виджета
  * @returns {ThunkAction}
  */
-const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
 
 	try {
-		const state = getState();
 		const url = buildUrl('dashboardSettings', 'createWidget', 'requestContent,user');
 		const params = {
-			...getParams(state),
+			...getParams(),
 			widget
 		};
 		const {data: id} = await client.post(url, params);
@@ -194,13 +189,13 @@ const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch,
  * @param {string} widgetId - идентификатор виджета;
  * @returns {ThunkAction}
  */
-const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch(requestWidgetDelete());
 
 	try {
 		const url = buildUrl('dashboardSettings', 'deleteWidget', 'requestContent,user');
 		const params = {
-			...getParams(getState()),
+			...getParams(),
 			widgetId
 		};
 

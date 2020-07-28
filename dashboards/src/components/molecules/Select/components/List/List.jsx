@@ -9,11 +9,14 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 export class List extends PureComponent<Props, State> {
 	static defaultProps = {
 		isSearching: false,
+		itemSize: 32,
+		maxHeight: 250,
 		messages: {
 			noOptions: 'Список пуст',
 			notFound: 'Ничего не найдено'
 		},
 		multiple: false,
+		searchValue: '',
 		showMore: false,
 		value: null,
 		values: []
@@ -129,13 +132,15 @@ export class List extends PureComponent<Props, State> {
 	};
 
 	renderVertualizedList = () => {
+		const {itemSize, maxHeight} = this.props;
 		const {options} = this.state;
+		const height = Math.min(itemSize * options.length, maxHeight);
 
 		return (
 			<FixedSizeList
-				height={200}
+				height={height}
 				itemCount={options.length}
-				itemSize={32}
+				itemSize={itemSize}
 				width="100%"
 			>
 				{this.renderListItem}

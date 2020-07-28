@@ -6,8 +6,8 @@ import type {ObjectsState} from './objects/types';
 import type {StatesState} from './states/types';
 
 export type AttributesDataState = {
-	catalogItemSets: CatalogItemSetsState,
 	catalogItems: CatalogItemsState,
+	catalogItemSets: CatalogItemSetsState,
 	metaClasses: MetaClassesState,
 	objects: ObjectsState,
 	states: StatesState

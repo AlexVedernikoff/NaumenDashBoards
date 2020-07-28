@@ -137,7 +137,7 @@ export class Select extends PureComponent<Props, State> {
 			};
 		}
 
-		return showMenu && <Menu className={styles.menu} creationButton={creationButton} renderList={this.renderList} />;
+		return showMenu && <Menu className={styles.menu} creationButton={creationButton} isSearching={false} renderList={this.renderList} />;
 	};
 
 	renderValueContainer = () => (

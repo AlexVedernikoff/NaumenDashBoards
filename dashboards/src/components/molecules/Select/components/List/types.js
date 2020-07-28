@@ -9,6 +9,8 @@ type Option = Object;
 export type Props = {
 	getOptionLabel?: (option: Option) => string,
 	getOptionValue?: (option: Option) => string,
+	itemSize: number,
+	maxHeight: number,
 	messages?: Messages,
 	multiple: boolean,
 	onClickShowMore?: () => void,

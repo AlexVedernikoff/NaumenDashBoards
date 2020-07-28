@@ -3,8 +3,8 @@ import type {Column, Row} from 'Table/types';
 import type {TableColumnHeader, TableSorting} from 'store/widgets/data/types';
 
 export type Props = {
-	columnSettings: TableColumnHeader,
 	columns: Array<Column>,
+	columnSettings: TableColumnHeader,
 	columnsWidth: Array<number>,
 	data: Array<Row>,
 	onChangeColumnWidth: (width: number, index: number) => void,
