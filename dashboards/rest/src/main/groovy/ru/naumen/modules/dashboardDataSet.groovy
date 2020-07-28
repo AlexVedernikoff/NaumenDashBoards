@@ -2002,7 +2002,8 @@ private boolean checkGroupTypes(Collection<RequestData> listRequest)
     def standard = listRequest.head().groups?.collect {
         it.type
     }
-    return listRequest.tail().every { el ->
+    def  noGroupsAnywhere = !(standard.any() && listRequest.tail()*.groups?.any())
+    return noGroupsAnywhere ?: listRequest.tail().every { el ->
         def groups = el.groups?.collect {
             it.type
         }
