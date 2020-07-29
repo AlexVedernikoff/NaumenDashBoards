@@ -141,6 +141,12 @@ enum TimerStatus
         return values().find { it.russianName == russianName }
     }
 }
+
+enum MCDisplayMode
+{
+    MOBILE,
+    ANY
+}
 //endregion
 
 //region КЛАССЫ

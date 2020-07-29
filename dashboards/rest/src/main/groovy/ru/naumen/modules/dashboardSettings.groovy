@@ -35,6 +35,8 @@ class DashboardSettings
     AutoUpdate autoUpdate
     Collection<String> widgetIds = []
     Collection<String> customGroupIds = []
+    Map<String, Object> layouts = null
+    Map<String, Object> mobileLayouts = null
 }
 
 /**
@@ -95,40 +97,59 @@ String getSettings(Map<String, Object> requestContent, def user)
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
     Boolean isPersonal = requestContent.isPersonal
-    if(isPersonal && !user?.login)
+    Boolean isMobile = requestContent.isMobile
+    if (isPersonal && !user?.login)
     {
         throw new Exception("Login is null, not found personal dashboard")
     }
-    Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
+    Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(
+        classFqn, contentCode
+    )
 
     def defaultDashboard = getSettingByLogin()
     def personalDashboard = getSettingByLogin(user?.login as String)
     def result
-    if (isPersonal) {
+    if (isPersonal)
+    {
         result = personalDashboard ? [
-                autoUpdate   : personalDashboard?.autoUpdate,
-                widgets      : personalDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
-                customGroups : personalDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE) )]
-                }
+            autoUpdate  : personalDashboard?.autoUpdate,
+            widgets     : personalDashboard?.widgetIds?.findResults(
+                this.&getWidgetSettings.rcurry(isMobile)
+            ) ?: [],
+            customGroups: personalDashboard?.customGroupIds?.collectEntries {
+                key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
+            },
+            mobileLayouts: personalDashboard?.mobileLayouts,
+            layouts: isMobile ? null : personalDashboard?.layouts
+
         ] : [
-                autoUpdate   : defaultDashboard?.autoUpdate,
-                widgets      : defaultDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
-                customGroups : defaultDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
-                }
+            autoUpdate  : defaultDashboard?.autoUpdate,
+            widgets     : defaultDashboard?.widgetIds?.findResults(
+                this.&getWidgetSettings.rcurry(isMobile)
+            ) ?: [],
+            customGroups: defaultDashboard?.customGroupIds?.collectEntries {
+                key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
+            },
+            mobileLayouts: defaultDashboard?.mobileLayouts,
+            layouts: isMobile ? null : defaultDashboard?.layouts
         ]
-    } else {
+    }
+    else
+    {
         result = [
-                autoUpdate   : defaultDashboard?.autoUpdate,
-                //TODO: из-за архитектурной особенности возможны ситуации при которых настройки виджета пропадут.
-                // В таких случаях просто пропускаем пустые настройки
-                // ключи виджетов с пустыми настройками будут удалены после сброса настроек.
-                // Пользователь этого даже не заметит
-                widgets      : defaultDashboard?.widgetIds?.findResults(this.&getWidgetSettings) ?: [],
-                customGroups : defaultDashboard?.customGroupIds?.collectEntries {
-                    key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
-                }
+            autoUpdate  : defaultDashboard?.autoUpdate,
+            //TODO: из-за архитектурной особенности возможны ситуации при которых настройки виджета пропадут.
+            // В таких случаях просто пропускаем пустые настройки
+            // ключи виджетов с пустыми настройками будут удалены после сброса настроек.
+            // Пользователь этого даже не заметит
+            widgets     : defaultDashboard?.widgetIds?.findResults(
+                this.&getWidgetSettings.rcurry(isMobile)
+            ) ?: [],
+            customGroups: defaultDashboard?.customGroupIds?.collectEntries {
+                key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
+            },
+            mobileLayouts: defaultDashboard?.mobileLayouts,
+            layouts: isMobile ? null : defaultDashboard?.layouts
         ]
     }
     return toJson(result)
@@ -444,39 +465,25 @@ String editWidget(Map<String, Object> requestContent, def user)
  */
 String editLayouts(Map<String, Object> requestContent, def user)
 {
-    def  layouts = requestContent.layouts as List<Map>
-    String classFqn = requestContent.classFqn
-    String contentCode = requestContent.contentCode
-    boolean isPersonal = requestContent.isPersonal
+    def layouts = requestContent.layouts as Map<String, Object>
+    def mobileLayouts = requestContent.mobileLayouts as Map<String, Object>
 
-    String dashboardKey = isPersonal
-            ? generateDashboardKey(classFqn, contentCode, user.login as String)
-            : generateDashboardKey(classFqn, contentCode)
-    def settings = getDashboardSetting(dashboardKey)
+    Map<String, Object> dashboardRequestSettings = getDashboardSettingsFromRequest(requestContent, user)
+    String dashboardKey = dashboardRequestSettings.dashboardKey
+    DashboardSettings dashboardSettings = getDashboardSetting(dashboardKey)
 
-    def widgetKeySet = layouts.collect { Map layoutSetting ->
-        String widgetKey = layoutSetting.key
-        def value = layoutSetting.value
-        if (value) {
-            if (widgetKey in settings.widgetIds) {
-                def widgetSettings = getWidgetSettings(widgetKey)
-                widgetSettings.layout = value
-                if (saveJsonSettings(widgetKey, toJson(widgetSettings), WIDGET_NAMESPACE)) {
-                    return widgetKey
-                } else {
-                    throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
-                }
-            } else {
-                logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
-                return null
-            }
-        } else {
-            String message = "Empty layout settings from widget: $widgetKey"
-            logger.error(message)
-            throw new IllegalArgumentException(message)
-        }
+    if (layouts) {
+        dashboardSettings.mobileLayouts = mobileLayouts
+        dashboardSettings.layouts = layouts
+        saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
     }
-    return widgetKeySet
+    else
+    {
+        String message = "Empty layout settings from dashboard: $dashboardKey"
+        logger.error(message)
+        throw new IllegalArgumentException(message)
+    }
+    return dashboardKey
 }
 
 /**
@@ -674,7 +681,14 @@ private String generateDashboardKey(String classFqn, String contentCode, String 
  */
 private DashboardSettings getDashboardSetting(String dashboardKey)
 {
-    return getSettingsFromJson(loadJsonSettings(dashboardKey, DASHBOARD_NAMESPACE)) as DashboardSettings
+    def dashboardSettings = getSettingsFromJson(loadJsonSettings(dashboardKey, DASHBOARD_NAMESPACE))
+    return new DashboardSettings(
+        autoUpdate      : dashboardSettings.autoUpdate,
+        widgetIds       : dashboardSettings.widgetIds,
+        customGroupIds  : dashboardSettings.customGroupIds,
+        layouts         : dashboardSettings.layouts,
+        mobileLayouts   : dashboardSettings.mobileLayouts
+    )
 }
 
 /**
@@ -683,9 +697,17 @@ private DashboardSettings getDashboardSetting(String dashboardKey)
  * ${код типа куда выведено вп}_${код контента вп}_${опционально логин}_${индентификатор виджета}*
  * @return настройки виджета
  */
-private Map<String, Object> getWidgetSettings(String widgetKey)
+private Map<String, Object> getWidgetSettings(String widgetKey, boolean isMobile = false)
 {
-    return getSettingsFromJson(loadJsonSettings(widgetKey, WIDGET_NAMESPACE)) as Map<String, Object>
+    def settings = getSettingsFromJson(
+        loadJsonSettings(widgetKey, WIDGET_NAMESPACE)
+    ) as Map<String, Object>
+
+    if (settings && isMobile)
+    {
+        settings = settings.displayMode in MCDisplayMode.values()*.name() ? settings : null
+    }
+    return settings
 }
 
 /**
@@ -747,10 +769,6 @@ private def setUuidInSettings(def widgetSettings, String key)
     //Преобразоване в LinkedHashMap необходимо так как, не у всех реализаций интерфейса Map реализован метод клоне
     def settings = (widgetSettings as LinkedHashMap).clone() as Map
     settings.id = key
-    //так как копирование было не глубокое, копируем ещё
-    def layout = (settings.layout as LinkedHashMap).clone() as Map
-    layout.i = key
-    settings.layout = layout
     return settings
 }
 
@@ -1000,6 +1018,52 @@ private void validateName(Map<String, Object> requestContent, String widgetKey =
                             "Название виджета должно быть уникально в рамках дашборда."]
             ])
         )
+    }
+}
+
+private Map getDashboardSettingsFromRequest(Map<String, Object> requestContent, def user) {
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    boolean isPersonal = requestContent.isPersonal
+
+    String dashboardKey = isPersonal
+        ? generateDashboardKey(classFqn, contentCode, user.login as String)
+        : generateDashboardKey(classFqn, contentCode)
+
+    def settings = getDashboardSetting(dashboardKey)
+    return [dashboardKey: dashboardKey, widgetIds: settings.widgetIds ]
+}
+
+/**
+ * Редактирование отдельных полей в виджете
+ * @param requestContent - тело запроса ()
+ * @param user БО текущего пользователя
+ * @return ключ отредактированного виджета
+ */
+String editWidgetChunkData(Map<String, Object> requestContent, def user) {
+    Map<String, Object> dashboardSettings = getDashboardSettingsFromRequest(requestContent, user)
+
+    String dashboardKey = dashboardSettings.dashboardKey
+    String widgetKey = requestContent.id
+    if(widgetKey in dashboardSettings.widgetIds) {
+        def chunkData = requestContent.chunkData as Map<String, Object>
+        def fieldsToChange = chunkData.keySet()
+
+        def widgetSettings = getWidgetSettings(widgetKey)
+        fieldsToChange.each { field ->
+            widgetSettings.put(field, chunkData[field])
+        }
+
+        if (saveJsonSettings(widgetKey, toJson(widgetSettings), WIDGET_NAMESPACE)) {
+            return widgetKey
+        } else {
+            throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
+        }
+    }
+    else
+    {
+        logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
+        return null
     }
 }
 //endregion
