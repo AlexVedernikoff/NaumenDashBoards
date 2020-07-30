@@ -1,14 +1,14 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {fetchDashboard} from 'store/dashboard/actions';
+import {fetchDashboard} from 'store/dashboard/settings/actions';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
  * @returns {ConnectedProps}
  */
 export const props = (state: AppState): ConnectedProps => {
-	const {error, loading, personal} = state.dashboard;
+	const {error, loading, personal} = state.dashboard.settings;
 
 	return {
 		error,

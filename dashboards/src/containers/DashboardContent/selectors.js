@@ -1,36 +1,38 @@
 // @flow
 import type {AppState} from 'store/types';
+import {changeLayouts} from 'store/dashboard/layouts/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {drillDown} from 'store/widgets/links/actions';
-import {editLayout, editWidgetChunkData, removeWidget, selectWidget, updateWidget} from 'store/widgets/data/actions';
+import {editWidgetChunkData, removeWidget, selectWidget, updateWidget} from 'store/widgets/data/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
+import {getMapValues} from 'src/helpers';
 import {USER_ROLES} from 'store/context/constants';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard, widgets} = state;
-	const {editMode, layoutMode, personal: personalDashboard} = dashboard;
+	const {layouts: dashboardLayouts, settings} = dashboard;
+	const {editMode, layoutMode, personal: personalDashboard} = settings;
 	const {buildData, data} = widgets;
-	const {newWidget, selectedWidget} = data;
-	const editable = context.user.role !== USER_ROLES.REGULAR || personalDashboard;
+	const {selectedWidget} = data;
 	const {user} = context;
+	const editable = context.user.role !== USER_ROLES.REGULAR || personalDashboard;
 
 	return {
 		buildData,
 		editMode,
 		editable,
 		layoutMode,
-		newWidget,
+		layouts: dashboardLayouts[layoutMode],
 		personalDashboard,
 		selectedWidget,
 		user,
-		// $FlowFixMe
-		widgets: Object.values(data.map)
+		widgets: getMapValues(data.map)
 	};
 };
 
 export const functions: ConnectedFunctions = {
+	changeLayouts,
 	drillDown,
-	editLayout,
 	editWidgetChunkData,
 	fetchBuildData,
 	removeWidget,

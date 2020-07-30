@@ -1,10 +1,11 @@
 // @flow
-import type {NewWidget} from 'utils/widget';
+import type {LayoutMode} from 'store/dashboard/settings/types';
+import type NewWidget from 'store/widgets/data/NewWidget';
 import type {ThunkAction} from 'store/types';
 import type {WidgetMap} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
-	layoutMode: string,
+	layoutMode: LayoutMode,
 	widgets: WidgetMap
 };
 

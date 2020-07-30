@@ -1,9 +1,9 @@
 // @flow
-import type {DashboardAction, DashboardState} from './types';
 import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
 import {getLayoutMode} from 'src/helpers';
+import type {SettingsAction, SettingsState} from './types';
 
-export const initialDashboardState: DashboardState = {
+export const initialDashboardState: SettingsState = {
 	autoUpdate: {
 		defaultInterval: DEFAULT_INTERVAL,
 		enabled: false,
@@ -19,7 +19,7 @@ export const initialDashboardState: DashboardState = {
 	personalDeleting: false
 };
 
-export const defaultDashboardAction: DashboardAction = {
+export const defaultDashboardAction: SettingsAction = {
 	payload: null,
 	type: DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION
 };

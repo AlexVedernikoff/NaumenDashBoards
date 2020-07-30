@@ -5,12 +5,12 @@ import {Checkbox, TextArea} from 'components/atoms';
 import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceBoxProps, TextAreaProps} from './types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
+import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import {FormBox, FormCheckControl, OuterSelect, Select} from 'components/molecules';
 import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
 import {getMainDataSet} from 'utils/normalizer/widget/helpers';
 import type {Group} from 'store/widgets/data/types';
-import {LAYOUT_MODE_OPTIONS} from 'components/molecules/Widget/constants';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
@@ -236,15 +236,15 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	renderDisplayModeSelect = () => {
-		const {displayMode} = this.props;
-		const value = LAYOUT_MODE_OPTIONS.find(item => item.value === displayMode) || LAYOUT_MODE_OPTIONS[0];
+		const {displayMode} = this.props.values;
+		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 
 		return (
 			<FormBox title="Область отображения">
 				<FormField>
 					<Select
 						onSelect={this.handleChangeDisplayMode}
-						options={LAYOUT_MODE_OPTIONS}
+						options={DISPLAY_MODE_OPTIONS}
 						placeholder="Отображение виджета в мобильной версии"
 						value={value}
 					/>

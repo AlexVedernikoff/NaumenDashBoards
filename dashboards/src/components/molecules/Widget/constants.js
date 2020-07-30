@@ -1,6 +1,5 @@
 // @flow
 import {FILE_VARIANTS} from 'utils/export';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
 
 const EXPORT_LIST = [
 	{
@@ -17,22 +16,6 @@ const EXPORT_LIST = [
 	}
 ];
 
-const LAYOUT_MODE_OPTIONS = [
-	{
-		label: 'Web приложение',
-		value: LAYOUT_MODE.WEB
-	},
-	{
-		label: 'Везде',
-		value: LAYOUT_MODE.WEB_MK
-	},
-	{
-		label: 'Мобильное приложение',
-		value: LAYOUT_MODE.MK
-	}
-];
-
 export {
-	EXPORT_LIST,
-	LAYOUT_MODE_OPTIONS
+	EXPORT_LIST
 };

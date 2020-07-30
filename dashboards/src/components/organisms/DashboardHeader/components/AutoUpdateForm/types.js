@@ -1,5 +1,5 @@
 // @flow
-import type {AutoUpdateSettings} from 'store/dashboard/types';
+import type {AutoUpdateSettings} from 'store/dashboard/settings/types';
 import type {ThunkAction} from 'store/types';
 
 export type Props = {

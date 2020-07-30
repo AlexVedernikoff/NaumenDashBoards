@@ -10,6 +10,7 @@ import {
 	string
 } from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
+import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
@@ -106,10 +107,8 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		calcTotalColumn = false,
 		calcTotalRow = false,
 		data = getOrdinalData(widget, dataFields, createData),
-		displayMode,
+		displayMode = DISPLAY_MODE.WEB,
 		id,
-		layout,
-		mkLayout,
 		sorting = DEFAULT_TABLE_SORTING,
 		table,
 		type
@@ -124,8 +123,6 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		displayMode,
 		header: header(widget),
 		id,
-		layout,
-		mkLayout,
 		name: string(widget[FIELDS.name]),
 		sorting,
 		table: extend(DEFAULT_TABLE_SETTINGS, table),

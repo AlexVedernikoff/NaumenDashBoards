@@ -8,7 +8,7 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
  * @returns {ConnectedProps}
  */
 export const props = (state: AppState): ConnectedProps => ({
-	layoutMode: state.dashboard.layoutMode,
+	layoutMode: state.dashboard.settings.layoutMode,
 	widgets: state.widgets.data.map
 });
 

@@ -1,18 +1,19 @@
 // @flow
-import {BREAKPOINTS, COLS, ROW_HEIGHT} from './constants';
 import cn from 'classnames';
+import {debounce} from 'src/helpers';
 import type {DivRef} from 'components/types';
 import {getLayoutWidgets} from 'src/store/widgets/helpers';
+import {GRID_PROPS} from './constants';
 import isMobile from 'ismobilejs';
-import type {Layout} from 'utils/layout/types';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
-import {NewWidget} from 'utils/widget';
+import type {Layout, Layouts} from 'store/dashboard/layouts/types';
+import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
+import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {Component, createRef} from 'react';
+import {ResizeDetector, Widget} from 'components/molecules';
 import {Responsive as Grid} from 'react-grid-layout';
 import type {State, WidgetRef} from './types';
 import styles from './styles.less';
-import {Widget} from 'components/molecules';
 import type {Widget as WidgetType} from 'store/widgets/data/types';
 import WidgetAddPanel from 'containers/WidgetAddPanel';
 import WidgetFormPanel from 'containers/WidgetFormPanel';
@@ -22,70 +23,30 @@ export const gridRef: DivRef = createRef();
 export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
 	newWidgetRef: WidgetRef = createRef();
-	onDragged: boolean = false;
 	state = {
 		newWidgetFocused: false,
 		width: null
 	};
 
-	/**
-	 * Для использования адаптивности библиотеки "react-grid-layout",
-	 * необходимо указать точную ширину рабочей области. Обернув компонент Layout
-	 * в обычный div, у нас появляется возможность, после первичного рендера, взять его ширину
-	 * и пробросить ее в дочерний компонент, тем самым задав сетке виджетов оптимальную ширину.
-	 */
-	componentDidMount () {
-		const {current: gridContainer} = gridRef;
-
-		if (gridContainer) {
-			const width: number = gridContainer.clientWidth;
-
-			this.setState({width});
-			window.addEventListener('resize', this.reloadGrid);
-		}
-	}
-
 	componentDidUpdate () {
 		this.setFocusOnNewWidget();
 	}
 
-	getContainerClassName = () => {
-		const {editMode} = this.props;
-
-		return cn({
-			[styles.editModeContainer]: editMode,
-			[styles.viewModeContainer]: !editMode,
-			[styles.containerMk]: this.isDesktopMK()
-		});
-	};
-
-	getWidgets = () => {
-		const {newWidget, widgets} = this.props;
-
-		if (newWidget) {
-			return [...widgets, newWidget];
-		}
-
-		return widgets;
-	};
-
-	handleLayoutChange = (layout: Layout) => {
-		const {editLayout, layoutMode} = this.props;
-		editLayout(layout, layoutMode);
-	};
-
-	handleShowGrid = (show: boolean) => () => {
+	handleGridToggle = (show: boolean) => () => {
 		const {current: grid} = gridRef;
-		this.onDragged = show;
 
 		if (grid) {
-			setTimeout(() => {
-				if (this.onDragged === show) {
-					// $FlowFixMe
-					grid.firstChild.classList.toggle(styles.drawnGrid, show);
-				}
-			}, 150);
+			grid.classList.toggle(styles.drawnGrid, show);
 		}
+	};
+
+	handleLayoutChange = (layout: Layout, layouts: Layouts) => {
+		const {changeLayouts, layoutMode} = this.props;
+
+		changeLayouts({
+			layoutMode,
+			layouts
+		});
 	};
 
 	handleWidgetSelect = (widgetId: string) => {
@@ -98,16 +59,7 @@ export class DashboardContent extends Component<Props, State> {
 
 	isDesktopMK = () => {
 		const {layoutMode} = this.props;
-		return !isMobile().any && layoutMode === LAYOUT_MODE.MK;
-	};
-
-	reloadGrid = () => {
-		const {current} = gridRef;
-
-		if (current) {
-			const width: number = current.clientWidth;
-			this.setState({width});
-		}
+		return !isMobile().any && layoutMode === LAYOUT_MODE.MOBILE;
 	};
 
 	setFocusOnNewWidget = () => {
@@ -124,43 +76,58 @@ export class DashboardContent extends Component<Props, State> {
 		}
 	};
 
+	setGridWidth = () => {
+		const {current} = this.gridContainerRef;
+
+		if (current) {
+			const {paddingLeft, paddingRight} = getComputedStyle(current);
+			const width: number = Math.round(current.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight));
+
+			this.setState({width});
+		}
+	};
+
 	renderGrid = () => {
-		const {layoutMode, selectedWidget} = this.props;
+		const {layoutMode, layouts, selectedWidget, widgets} = this.props;
 		const {width} = this.state;
-		const isEditable = !!selectedWidget;
-		const containerPadding = this.isDesktopMK() ? [16, 20] : [10, 10];
-		const containerWidth = this.isDesktopMK() ? 320 : width;
-		const widgets = getLayoutWidgets(this.getWidgets(), layoutMode);
 
 		if (width) {
+			const isEditable = !!selectedWidget;
+			const containerWidth = this.isDesktopMK() ? 320 : width;
+			const layoutWidgets = getLayoutWidgets(widgets, layoutMode);
+
 			return (
 				<Grid
-					breakpoints={BREAKPOINTS}
-					cols={COLS}
-					compactType={null}
-					containerPadding={containerPadding}
+					innerRef={gridRef}
 					isDraggable={isEditable}
 					isResizable={isEditable}
-					key={layoutMode}
-					onDragStart={this.handleShowGrid(true)}
-					onDragStop={this.handleShowGrid(false)}
-					onLayoutChange={this.handleLayoutChange}
-					rowHeight={ROW_HEIGHT}
+					layouts={layouts}
+					onDrag={this.handleGridToggle(true)}
+					onDragStop={this.handleGridToggle(false)}
+					onLayoutChange={debounce(this.handleLayoutChange, 1000)}
 					width={containerWidth}
+					{...GRID_PROPS[layoutMode]}
 				>
-					{widgets.map(this.renderWidget)}
+					{layoutWidgets.map(this.renderWidget)}
 				</Grid>
 			);
 		}
 	};
 
 	renderGridWithContainer = () => {
+		const {editMode} = this.props;
+		const containerCN = cn({
+			[styles.editModeContainer]: editMode,
+			[styles.viewModeContainer]: !editMode,
+			[styles.containerMk]: this.isDesktopMK()
+		});
+
 		return (
-			<div className={this.getContainerClassName()} ref={this.gridContainerRef}>
-				<div className={styles.grid} ref={gridRef}>
+			<ResizeDetector onResize={this.setGridWidth}>
+				<div className={containerCN} ref={this.gridContainerRef}>
 					{this.renderGrid()}
 				</div>
-			</div>
+			</ResizeDetector>
 		);
 	};
 
@@ -190,22 +157,14 @@ export class DashboardContent extends Component<Props, State> {
 			updateWidget,
 			user
 		} = this.props;
-		const {displayMode, id, layout, mkLayout} = widget;
+		const {displayMode, id} = widget;
 		const isNew = id === NewWidget.id;
 		const ref = isNew ? this.newWidgetRef : null;
-		const sortedLayout = layoutMode === LAYOUT_MODE.MK ? mkLayout : layout;
-		/*
-			Раньше использовалось свойство static, для включения\отключения drag`n`drop, но у него наблюдаются проблемы с
-			динамическим изменением значения. Поэтому теперь используются 2 свойства - isResizable и isDraggable. Свойство static
-			необходимо удалять, т.к оно перебивает значения isResizable и isDraggable.
-		 */
-		delete layout.static;
 
 		return (
 			<Widget
 				buildData={buildData[id]}
 				data={widget}
-				data-grid={sortedLayout}
 				displayMode={displayMode}
 				editWidgetChunkData={editWidgetChunkData}
 				fetchBuildData={fetchBuildData}

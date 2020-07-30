@@ -1,7 +1,7 @@
 // @flow
 import {buildUrl, client} from 'utils/api';
 import {CONTEXT_EVENTS, USER_ROLES} from './constants';
-import {createPersonalState, setEditable} from 'store/dashboard/actions';
+import {createPersonalState, setEditable} from 'store/dashboard/settings/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {switchState} from 'store/actions';
 import type {UserData} from './types';

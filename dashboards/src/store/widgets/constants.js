@@ -1,4 +1,5 @@
 // @flow
+import {DISPLAY_MODE} from './data/constants';
 
 // Способы создания группировок
 const CUSTOM: 'CUSTOM' = 'CUSTOM';
@@ -119,11 +120,28 @@ const INTERVALS = [
 	}
 ];
 
+// Режимы отображения виджета
+const DISPLAY_MODE_OPTIONS = [
+	{
+		label: 'Web приложение',
+		value: DISPLAY_MODE.WEB
+	},
+	{
+		label: 'Везде',
+		value: DISPLAY_MODE.ANY
+	},
+	{
+		label: 'Мобильное приложение',
+		value: DISPLAY_MODE.MOBILE
+	}
+];
+
 export {
 	BACK_TIMER_EXCEED_STATUSES,
 	DATETIME_SYSTEM_GROUP,
 	DEFAULT_AGGREGATION,
 	DEFAULT_SYSTEM_GROUP,
+	DISPLAY_MODE_OPTIONS,
 	GROUP_WAYS,
 	INTEGER_AGGREGATION,
 	INTERVAL_SYSTEM_GROUP,

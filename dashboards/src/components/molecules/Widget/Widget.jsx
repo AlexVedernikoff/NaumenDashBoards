@@ -2,19 +2,20 @@
 import cn from 'classnames';
 import {createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
 import {Diagram, Modal} from 'components/molecules';
+import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {DivRef} from 'components/types';
 import DropDownButton from './components/DropDownButton';
 import type {ExportItem, Props, State} from './types';
-import {EXPORT_LIST, LAYOUT_MODE_OPTIONS} from './constants';
+import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import {IconButton, Tooltip} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
+import NewWidget from 'store/widgets/data/NewWidget';
 import type {Node} from 'react';
 import React, {createRef, Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Widget extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -40,7 +41,8 @@ export class Widget extends PureComponent<Props, State> {
 
 	componentDidMount () {
 		const {buildData, data, fetchBuildData} = this.props;
-		if (!buildData) {
+
+		if (data.id !== NewWidget.id && !buildData) {
 			fetchBuildData(data);
 		}
 	}
@@ -72,9 +74,9 @@ export class Widget extends PureComponent<Props, State> {
 		const {displayMode} = this.props;
 
 		switch (displayMode) {
-			case LAYOUT_MODE.WEB:
+			case DISPLAY_MODE.WEB:
 				return ICON_NAMES.WEB;
-			case LAYOUT_MODE.MK:
+			case DISPLAY_MODE.MOBILE:
 				return ICON_NAMES.MOBILE;
 			default:
 				return ICON_NAMES.WEB_MK;
@@ -147,12 +149,12 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderChangeDisplayModeButton = () => {
 		const {displayMode} = this.props;
-		const value = LAYOUT_MODE_OPTIONS.find(item => item.value === displayMode) || LAYOUT_MODE_OPTIONS[0];
+		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 
 		return (
 			<DropDownButton
 				className={styles.markerIcon}
-				menu={LAYOUT_MODE_OPTIONS}
+				menu={DISPLAY_MODE_OPTIONS}
 				name={this.getDisplayMode()}
 				onSelect={this.handleChangeDisplayMode}
 				tip={`Отображается ${value.label}`}

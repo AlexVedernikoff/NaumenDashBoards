@@ -15,6 +15,7 @@ import {
 	string
 } from './helpers';
 import type {CircleData, CircleWidget} from 'store/widgets/data/types';
+import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
@@ -82,7 +83,7 @@ const createData = (widget: Object, fields: Object) => {
 };
 
 const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
-	const {displayMode, id, layout, mkLayout, type} = widget;
+	const {displayMode = DISPLAY_MODE.WEB, id, type} = widget;
 	const dataFields = getDataFields();
 	let {data} = widget;
 
@@ -98,9 +99,7 @@ const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
 		displayMode,
 		header: header(widget),
 		id,
-		layout,
 		legend: legend(widget),
-		mkLayout,
 		name: string(widget[FIELDS.name]),
 		sorting: chartSorting(widget, true),
 		type

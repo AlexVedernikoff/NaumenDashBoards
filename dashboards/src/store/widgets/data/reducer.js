@@ -3,7 +3,6 @@ import {
 	addWidget,
 	createWidget,
 	deleteWidget,
-	editLayout,
 	resetWidget,
 	setSelectedWidget,
 	setWidgets,
@@ -19,13 +18,6 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			return addWidget(state, action);
 		case WIDGETS_EVENTS.DELETE_WIDGET:
 			return deleteWidget(state, action);
-		case WIDGETS_EVENTS.EDIT_LAYOUT:
-			return editLayout(state, action);
-		case WIDGETS_EVENTS.RECORD_LAYOUT_SAVE_ERROR:
-			return {
-				...state,
-				layoutSaveError: true
-			};
 		case WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR:
 			return {
 				...state,
@@ -37,11 +29,6 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 				...state,
 				saveError: true,
 				updating: false
-			};
-		case WIDGETS_EVENTS.REQUEST_LAYOUT_SAVE:
-			return {
-				...state,
-				layoutSaveError: false
 			};
 		case WIDGETS_EVENTS.REQUEST_WIDGET_DELETE:
 			return {

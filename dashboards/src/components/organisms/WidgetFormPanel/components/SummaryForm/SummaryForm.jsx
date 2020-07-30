@@ -26,14 +26,13 @@ export class SummaryForm extends Component<TypedFormProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): SummaryWidget => {
-		const {id, layout} = widget;
+		const {id} = widget;
 		const {
 			computedAttrs = [],
 			data = [],
 			displayMode,
 			header,
 			indicator,
-			mkLayout,
 			name = '',
 			type
 		} = values;
@@ -45,8 +44,6 @@ export class SummaryForm extends Component<TypedFormProps> {
 			header,
 			id,
 			indicator: extend(DEFAULT_SUMMARY_SETTINGS.indicator, indicator),
-			layout,
-			mkLayout,
 			name,
 			type
 		};

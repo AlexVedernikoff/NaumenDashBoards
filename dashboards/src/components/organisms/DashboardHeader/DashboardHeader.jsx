@@ -8,7 +8,7 @@ import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal
 import {gridRef} from 'components/organisms/DashboardContent';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import isMobile from 'ismobilejs';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
+import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import {Modal} from 'components/molecules';
 import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component} from 'react';
@@ -46,9 +46,10 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	handleChangeDisplayMode = () => {
-		const {changeDisplayMode, layoutMode} = this.props;
-		const name = layoutMode === LAYOUT_MODE.WEB ? LAYOUT_MODE.MK : LAYOUT_MODE.WEB;
-		changeDisplayMode(name);
+		const {changeLayoutMode, layoutMode} = this.props;
+		const mode = layoutMode === LAYOUT_MODE.WEB ? LAYOUT_MODE.MOBILE : LAYOUT_MODE.WEB;
+
+		changeLayoutMode(mode);
 	};
 
 	handleClickRefreshButton = () => {
@@ -94,14 +95,14 @@ export class DashboardHeader extends Component<Props, State> {
 	renderDisplayModeButton = () => {
 		const {layoutMode, personalDashboard, user} = this.props;
 		const isDesktop = !isMobile().any;
-		const isMK = layoutMode === LAYOUT_MODE.MK;
-		const customTip = isMK ? 'Переключиться в WEB представление' : 'Переключиться в мобильное представление';
+		const isMobileLayoutMode = layoutMode === LAYOUT_MODE.MOBILE;
+		const customTip = isMobileLayoutMode ? 'Переключиться в WEB представление' : 'Переключиться в мобильное представление';
 
 		if (isDesktop && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
 			return (
 				<div className={styles.displayModeContainer}>
 					<IconButton
-						name={isMK ? ICON_NAMES.MOBILE : ICON_NAMES.WEB}
+						name={isMobileLayoutMode ? ICON_NAMES.MOBILE : ICON_NAMES.WEB}
 						onClick={this.handleChangeDisplayMode}
 						outline
 						tip={customTip}
