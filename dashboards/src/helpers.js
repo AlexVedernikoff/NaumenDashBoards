@@ -1,6 +1,7 @@
 // @flow
 import isMobile from 'ismobilejs';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
+import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
+import type {LayoutMode} from './store/dashboard/settings/types';
 
 /**
  * Возвращает функцию, которая не будет срабатывать, пока продолжает вызываться
@@ -22,7 +23,7 @@ function debounce (func: Function, ms: number) {
  * @param {object} map - объект
  * @returns {Array<any>} - массив значений объекта
  */
-function getMapValues<T> (map: ({[string]: T})): Array<T> {
+function getMapValues<K, T> (map: ({[K]: T})): Array<T> {
 	return Object.keys(map).map(key => map[key]);
 }
 
@@ -91,9 +92,9 @@ const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platfo
  * @returns {string}
  */
 const getLayoutMode = () => {
- const localStorageLayoutMode = localStorage.getItem('layoutMode') || LAYOUT_MODE.WEB;
-
- return isMobile().any ? LAYOUT_MODE.MK : localStorageLayoutMode;
+	// $FlowFixMe
+	const localStorageLayoutMode: LayoutMode = localStorage.getItem('layoutMode') || LAYOUT_MODE.WEB;
+	return isMobile().any ? LAYOUT_MODE.MOBILE : localStorageLayoutMode;
 };
 
 export {

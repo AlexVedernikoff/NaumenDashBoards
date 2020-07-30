@@ -2,7 +2,6 @@
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {Context} from 'utils/api/types';
 import type {DataSourceMap} from 'store/sources/data/types';
-import type {DisplayMode} from 'store/dashboard/types';
 import type {DivRef, OnChangeLabelEvent, OnSelectEvent} from 'components/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {
@@ -15,6 +14,7 @@ import type {
 } from 'containers/WidgetFormPanel/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {GroupAttributeField} from './components/AttributeGroupField/types';
+import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
@@ -35,13 +35,12 @@ export type UpdateWidget = (widget: Widget, values: Values) => Widget;
 export type ParamsTabProps = {|
 	attributes: AttributesMap,
 	context: Context,
-	displayMode: DisplayMode,
 	errors: Object,
 	fetchAttributes: FetchAttributes,
 	fetchGroupDynamicAttributes: FetchGroupDynamicAttributes,
 	fetchRefAttributes: FetchRefAttributes,
 	isNew: boolean,
-	layoutMode: string,
+	layoutMode: LayoutMode,
 	refAttributes: AttributesMap,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,
@@ -69,14 +68,13 @@ export type Props = {|
 	attributes: AttributesMap,
 	cancelForm: () => ThunkAction,
 	context: Context,
-	displayMode: DisplayMode,
 	dynamicGroups: DynamicGroupsMap,
 	errors: Object,
 	fetchAttributes: FetchAttributes,
 	fetchGroupDynamicAttributes: FetchGroupDynamicAttributes,
 	fetchRefAttributes: FetchRefAttributes,
 	isNew: boolean,
-	layoutMode: string,
+	layoutMode: LayoutMode,
 	onSubmit: (func: UpdateWidget) => Promise<void>,
 	refAttributes: AttributesMap,
 	setDataFieldValue: SetDataFieldValue,

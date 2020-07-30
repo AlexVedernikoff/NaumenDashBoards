@@ -18,6 +18,7 @@ import {
 	string
 } from './helpers';
 import type {AxisWidget} from 'store/widgets/data/types';
+import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
@@ -105,7 +106,7 @@ const createData = (widget: Object, fields: Object) => {
 };
 
 const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
-	const {displayMode, id, layout, mkLayout, type} = widget;
+	const {displayMode = DISPLAY_MODE.WEB, id, type} = widget;
 	const dataFields = getDataFields();
 	let {data} = widget;
 
@@ -126,9 +127,7 @@ const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 		header: header(widget),
 		id,
 		indicator: axisIndicator(widget, set[FIELDS.yAxis]),
-		layout,
 		legend: legend(widget),
-		mkLayout,
 		name: string(widget[FIELDS.name]),
 		parameter: axisParameter(widget, set[FIELDS.xAxis]),
 		sorting: chartSorting(widget),

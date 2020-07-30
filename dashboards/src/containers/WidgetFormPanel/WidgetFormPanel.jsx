@@ -1,11 +1,11 @@
 // @flow
 import {connect} from 'react-redux';
 import {deepClone} from 'src/helpers';
+import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import Form from 'components/organisms/WidgetFormPanel';
 import {functions, props} from './selectors';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
-import {NewWidget} from 'utils/widget';
+import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {UpdateWidget} from 'WidgetFormPanel/types';
@@ -20,7 +20,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
-		const {id, layout, ...values} = this.props.widget;
+		const {id, ...values} = this.props.widget;
 		this.setState({values: deepClone(values), valuesSet: true});
 	}
 
@@ -35,18 +35,19 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 	}
 
 	handleSubmit = async (updateWidget: UpdateWidget) => {
-		const {changeDisplayMode, createWidget, saveWidget, widget} = this.props;
+		const {changeLayoutMode, createWidget, layoutMode, saveWidget, widget} = this.props;
 		const {values} = this.state;
 		const isValid = await this.validate();
 		const {displayMode} = values;
-		const isNotWebMk = displayMode !== LAYOUT_MODE.WEB_MK;
 
 		if (isValid) {
 			const updatedWidget = updateWidget(widget, values);
 			const method = this.isNew() ? createWidget : saveWidget;
 			const errors = await method(updatedWidget);
 
-			isNotWebMk && changeDisplayMode(displayMode);
+			if (layoutMode !== displayMode && displayMode !== DISPLAY_MODE.ANY) {
+				changeLayoutMode(displayMode);
+			}
 
 			if (errors) {
 				this.setState({errors});
@@ -123,7 +124,6 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			user
 		} = this.props;
 		const {errors, values, valuesSet} = this.state;
-		const {displayMode} = values;
 
 		if (valuesSet) {
 			return (
@@ -131,7 +131,6 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					attributes={attributes}
 					cancelForm={cancelForm}
 					context={context}
-					displayMode={displayMode}
 					dynamicGroups={dynamicGroups}
 					errors={errors}
 					fetchAttributes={fetchAttributes}

@@ -17,7 +17,7 @@ import {
 	string
 } from './helpers';
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
-import {COMBO_TYPES, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {COMBO_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
@@ -123,10 +123,8 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 	const dataFields = getDataFields();
 	const {
 		data = getOrdinalData(widget, dataFields, createData),
-		displayMode,
+		displayMode = DISPLAY_MODE.WEB,
 		id,
-		layout,
-		mkLayout,
 		type
 	} = widget;
 	const set = getMainDataSet(data);
@@ -140,9 +138,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		header: header(widget),
 		id,
 		indicator: axisIndicator(widget, set[FIELDS.yAxis]),
-		layout,
 		legend: legend(widget),
-		mkLayout,
 		name: string(widget[FIELDS.name]),
 		parameter: axisParameter(widget, set[FIELDS.xAxis]),
 		sorting: chartSorting(widget),

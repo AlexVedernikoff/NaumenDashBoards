@@ -8,7 +8,7 @@ import {store} from 'src';
 const getParams = () => {
 	const {context, dashboard} = store.getState();
 	const {contentCode, subjectUuid: classFqn} = context;
-	const {editable, personal: isPersonal} = dashboard;
+	const {editable, personal: isPersonal} = dashboard.settings;
 
 	return {
 		classFqn,

@@ -39,7 +39,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): AxisWidget => {
-		const {id, layout, mkLayout} = widget;
+		const {id} = widget;
 		const {
 			colors = DEFAULT_COLORS,
 			computedAttrs = [],
@@ -64,9 +64,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			header,
 			id,
 			indicator: extend(DEFAULT_CHART_SETTINGS.yAxis, indicator),
-			layout,
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
-			mkLayout,
 			name,
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),

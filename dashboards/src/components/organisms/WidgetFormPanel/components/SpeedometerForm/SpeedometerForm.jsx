@@ -40,7 +40,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): SpeedometerWidget => {
-		const {id, layout, mkLayout} = widget;
+		const {id} = widget;
 		const {
 			borders,
 			computedAttrs = [],
@@ -59,8 +59,6 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 			displayMode,
 			header,
 			id,
-			layout,
-			mkLayout,
 			name,
 			ranges: extend(DEFAULT_SPEEDOMETER_SETTINGS.ranges, ranges),
 			type

@@ -1,7 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import {
-	changeDisplayMode,
+	changeLayoutMode,
 	createPersonalDashboard,
 	editDashboard,
 	getSettings,
@@ -9,13 +9,13 @@ import {
 	saveAutoUpdateSettings,
 	seeDashboard,
 	sendToMail
-} from 'store/dashboard/actions';
+} from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {switchDashboard} from 'store/context/actions';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard} = state;
-	const {autoUpdate, editMode, editable, layoutMode, personal, personalCreating, personalDeleting} = dashboard;
+	const {autoUpdate, editMode, editable, layoutMode, personal, personalCreating, personalDeleting} = dashboard.settings;
 	const {switching, user} = context;
 
 	return {
@@ -32,7 +32,7 @@ export const props = (state: AppState): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
-	changeDisplayMode,
+	changeLayoutMode,
 	createPersonalDashboard,
 	editDashboard,
 	getSettings,

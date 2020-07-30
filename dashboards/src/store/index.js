@@ -1,6 +1,7 @@
 // @flow
 import {applyMiddleware, createStore} from 'redux';
 import {createLogger} from 'redux-logger';
+import {enableBatching} from 'redux-batched-actions';
 import rootReducer from './reducer';
 import thunk from 'redux-thunk';
 
@@ -12,5 +13,5 @@ export const configureStore = () => {
 		middleware.push(createLogger());
 	}
 
-	return createStore(rootReducer, applyMiddleware(...middleware));
+	return createStore(enableBatching(rootReducer), applyMiddleware(...middleware));
 };

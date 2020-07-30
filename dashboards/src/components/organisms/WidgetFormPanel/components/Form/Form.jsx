@@ -46,7 +46,6 @@ export class Form extends Component<Props, State> {
 		const {
 			attributes,
 			context,
-			displayMode,
 			errors,
 			fetchAttributes,
 			fetchGroupDynamicAttributes,
@@ -64,7 +63,6 @@ export class Form extends Component<Props, State> {
 		const content = renderParamsTab({
 			attributes,
 			context,
-			displayMode,
 			errors,
 			fetchAttributes,
 			fetchGroupDynamicAttributes,

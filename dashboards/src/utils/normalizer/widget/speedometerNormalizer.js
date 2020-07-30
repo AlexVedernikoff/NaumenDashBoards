@@ -1,5 +1,6 @@
 // @flow
 import {array, header, string} from './helpers';
+import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import type {SpeedometerWidget} from 'store/widgets/data/types';
 
@@ -7,10 +8,8 @@ const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => 
 	const {
 		borders,
 		data,
-		displayMode,
+		displayMode = DISPLAY_MODE.WEB,
 		id,
-		layout,
-		mkLayout,
 		ranges,
 		type
 	} = widget;
@@ -22,8 +21,6 @@ const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => 
 		displayMode,
 		header: header(widget),
 		id,
-		layout,
-		mkLayout,
 		name: string(widget[FIELDS.name]),
 		ranges,
 		type

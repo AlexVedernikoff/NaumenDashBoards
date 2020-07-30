@@ -9,7 +9,6 @@ export const initialWidgetsState: WidgetsDataState = {
 	layoutSaveError: false,
 	loading: false,
 	map: {},
-	newWidget: null,
 	saveError: false,
 	selectedWidget: '',
 	updating: false

@@ -1,4 +1,5 @@
 // @flow
+import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
 import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
@@ -6,9 +7,9 @@ import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getContext, getMetaCLass, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
-import {getNextRow} from 'utils/layout';
 import isMobile from 'ismobilejs';
-import {NewWidget} from 'utils/widget';
+import type {LayoutMode} from './types';
+import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState, switchState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
 import {setDynamicGroups} from 'store/sources/dynamicGroups/actions';
@@ -78,14 +79,13 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {context} = getState();
 	const {contentCode, subjectUuid: classFqn} = context;
-	// $FlowFixMe
-	const {data} = await client.post(buildUrl('testDashboardSettings', 'getSettings', 'requestContent,user'), {
+	const {data} = await client.post(buildUrl('dashboardSettings', 'getSettings', 'requestContent,user'), {
 		classFqn,
 		contentCode,
-		isMk: isMobile().any,
+		isMobile: isMobile().any,
 		isPersonal
 	});
-	const {autoUpdate, customGroups, dynamicGroups, widgets} = data;
+	const {autoUpdate, customGroups, dynamicGroups, layouts, mobileLayouts, widgets} = data;
 
 	if (customGroups !== null) {
 		dispatch(setCustomGroups(customGroups));
@@ -100,6 +100,8 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 	}
 
 	dispatch(setWidgets(widgets));
+	dispatch(setWebLayouts(widgets, layouts));
+	dispatch(setMobileLayouts(widgets, mobileLayouts));
 };
 
 const setAutoUpdate = (autoUpdate: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
@@ -107,7 +109,7 @@ const setAutoUpdate = (autoUpdate: Object): ThunkAction => async (dispatch: Disp
 		autoUpdate: {
 			fn: currentUpdateFunction
 		}
-	} = getState().dashboard;
+	} = getState().dashboard.settings;
 	const {enabled = false, interval = DEFAULT_INTERVAL} = autoUpdate;
 	let updateFunction;
 
@@ -145,7 +147,7 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		const {context, dashboard} = getState();
 		const {contentCode, subjectUuid: classFqn, user} = context;
-		const {editable} = dashboard;
+		const {editable} = dashboard.settings;
 		await client.post(buildUrl('dashboardSettings', 'createPersonalDashboard', 'requestContent,user'), {
 			classFqn,
 			contentCode,
@@ -251,14 +253,14 @@ const sendToMail = (name: string, type: string, file: Blob): ThunkAction => asyn
  * @returns {ThunkAction}
  */
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
-	const {context, sources, widgets} = getState();
+	const {context, sources} = getState();
 	const {contentCode} = context;
 	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
 	const key = `widgetContext_${metaClass}_${contentCode}`;
 	const descriptorStr = localStorage.getItem(key);
 
 	if (descriptorStr) {
-		const newWidget: Object = new NewWidget(getNextRow(widgets.data.map));
+		const newWidget: Object = new NewWidget();
 		const descriptor = JSON.parse(descriptorStr);
 		let classFqn;
 
@@ -279,6 +281,7 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 			}
 		};
 
+		dispatch(addLayouts(NewWidget.id));
 		dispatch(addWidget(newWidget));
 		dispatch(editDashboard());
 		localStorage.removeItem(key);
@@ -295,7 +298,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 	try {
 		const {context, dashboard} = getState();
 		const {contentCode, subjectUuid: classFqn} = context;
-		const {personal: isPersonal} = dashboard;
+		const {personal: isPersonal} = dashboard.settings;
 		const autoUpdate = {enabled, interval};
 		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {
 			autoUpdate,
@@ -328,6 +331,20 @@ const createPersonalState = () => async (dispatch: Dispatch) => {
 	await dispatch(getSettings(true));
 };
 
+/**
+ * Переключает режим отображения
+ * @param {string} payload - название режима отображения
+ * @returns {ThunkAction}
+ */
+const changeLayoutMode = (payload: LayoutMode): ThunkAction => (dispatch: Dispatch) => {
+	localStorage.setItem('layoutMode', payload);
+
+	dispatch({
+		payload,
+		type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
+	});
+};
+
 const changeAutoUpdateSettings = payload => ({
 	payload,
 	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
@@ -343,20 +360,8 @@ const setPersonal = payload => ({
 	type: DASHBOARD_EVENTS.SET_PERSONAL
 });
 
-/**
- * Переключает режим отображения
- * @param {string} payload - название режима отображения
- * @returns {ThunkAction}
- */
-const changeDisplayMode = (payload: string): ThunkAction => (dispatch: Dispatch) => {
-	dispatch({
-		payload,
-		type: DASHBOARD_EVENTS.SET_DISPLAY_MODE
-	});
-};
-
 export {
-	changeDisplayMode,
+	changeLayoutMode,
 	createPersonalDashboard,
 	createPersonalState,
 	editDashboard,

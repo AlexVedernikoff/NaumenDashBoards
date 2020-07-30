@@ -4,6 +4,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
 	COMBO_TYPES,
 	DEFAULT_TABLE_VALUE,
+	DISPLAY_MODE,
 	FONT_STYLES,
 	RANGES_TYPES,
 	SORTING_TYPES,
@@ -15,9 +16,10 @@ import {
 	WIDGETS_EVENTS
 } from './constants';
 import {GROUP_WAYS} from 'store/widgets/constants';
-import type {Layout, LayoutItem} from 'utils/layout/types';
 import {LEGEND_POSITIONS} from 'utils/chart';
-import type {NewWidget} from 'entities';
+import NewWidget from './NewWidget';
+
+export type DisplayMode = $Keys<typeof DISPLAY_MODE>;
 
 export type FontStyle = $Keys<typeof FONT_STYLES>;
 
@@ -93,10 +95,9 @@ export type Header = {
 
 type BaseWidget = {|
 	computedAttrs: Array<ComputedAttr>,
+	displayMode: DisplayMode,
 	header: Header,
 	id: string,
-	layout: LayoutItem,
-	mkLayout: LayoutItem,
 	name: string
 |};
 
@@ -164,7 +165,6 @@ export type AxisWidget = {
 	colors: Array<string>,
 	data: Array<AxisData>,
 	dataLabels: DataLabels,
-	displayMode: string,
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
@@ -195,7 +195,6 @@ export type CircleWidget = {
 	colors: Array<string>,
 	data: Array<CircleData>,
 	dataLabels: DataLabels,
-	displayMode: string,
 	legend: Legend,
 	sorting: ChartSorting,
 	type: $Keys<typeof WIDGET_SETS.CIRCLE>
@@ -217,7 +216,6 @@ export type ComboWidget = {
 	colors: Array<string>,
 	data: Array<ComboData>,
 	dataLabels: DataLabels,
-	displayMode: string,
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
@@ -251,7 +249,6 @@ export type SummaryIndicator = {
 export type SummaryWidget = {
 	...BaseWidget,
 	data: Array<SummaryData>,
-	displayMode: string,
 	indicator: SummaryIndicator,
 	type: typeof WIDGET_TYPES.SUMMARY
 };
@@ -280,7 +277,6 @@ export type SpeedometerWidget = {
 	...BaseWidget,
 	borders: Borders,
 	data: Array<SummaryData>,
-	displayMode: string,
 	ranges: Ranges,
 	type: typeof WIDGET_TYPES.SPEEDOMETER
 };
@@ -340,7 +336,6 @@ export type TableWidget = {
 	calcTotalRow: boolean,
 	columnsRatioWidth: Array<number>,
 	data: Array<TableData>,
-	displayMode: string,
 	sorting: TableSorting,
 	table: Table,
 	type: typeof WIDGET_TYPES.TABLE
@@ -379,11 +374,6 @@ export type DeleteWidget = {
 	type: typeof WIDGETS_EVENTS.DELETE_WIDGET
 };
 
-export type EditLayout = {
-	payload: Layout,
-	type: typeof WIDGETS_EVENTS.EDIT_LAYOUT
-};
-
 export type SelectWidget = {
 	payload: string,
 	type: typeof WIDGETS_EVENTS.SET_SELECTED_WIDGET
@@ -395,14 +385,6 @@ export type ResetWidget = {
 
 export type RecordWidgetSaveError = {
 	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR,
-};
-
-export type RecordLayoutSaveError = {
-	type: typeof WIDGETS_EVENTS.RECORD_LAYOUT_SAVE_ERROR,
-};
-
-export type RequestLayoutSave = {
-	type: typeof WIDGETS_EVENTS.REQUEST_LAYOUT_SAVE,
 };
 
 export type RequestWidgetDelete = {
@@ -430,11 +412,8 @@ type UnknownWidgetsAction = {
 export type WidgetsAction =
 	| AddWidget
 	| DeleteWidget
-	| EditLayout
-	| RecordLayoutSaveError
 	| RecordWidgetDeleteError
 	| RecordWidgetSaveError
-	| RequestLayoutSave
 	| RequestWidgetDelete
 	| RequestWidgetSave
 	| ResetWidget
@@ -443,7 +422,7 @@ export type WidgetsAction =
 	| SetWidgets
 	| UpdateWidget
 	| UnknownWidgetsAction
-	;
+;
 
 export type WidgetMap = {
 	[key: string]: Widget;
@@ -453,10 +432,8 @@ export type WidgetsDataState = {
 	deleteError: boolean,
 	deleting: boolean,
 	error: boolean,
-	layoutSaveError: boolean,
 	loading: boolean,
 	map: WidgetMap,
-	newWidget: NewWidget | null,
 	saveError: boolean,
 	selectedWidget: string,
 	updating: boolean

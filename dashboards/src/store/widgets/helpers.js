@@ -9,9 +9,10 @@ import {
 	INTEGER_AGGREGATION,
 	INTERVALS
 } from './constants';
+import {DISPLAY_MODE} from './data/constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import type {Group, Widget} from './data/types';
-import {LAYOUT_MODE} from 'store/dashboard/constants';
+import type {LayoutMode} from 'store/dashboard/settings/types';
 import {store} from 'src';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
@@ -51,11 +52,11 @@ const getDefaultSystemGroup = (attribute: Object) => attribute && typeof attribu
 /**
  * Фильтрует виджеты по режиму отображения
  * @param {Array<Widget>} widgets - список виджетов
- * @param {string} mode - режим отображения
+ * @param {LayoutMode} mode - режим отображения
  * @returns {Array<Widget>}
  */
-const	getLayoutWidgets = (widgets: Array<Widget>, mode: string): Array<Widget> => {
-	return widgets.filter(item => (item.displayMode === mode || item.displayMode === LAYOUT_MODE.WEB_MK));
+const	getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widget> => {
+	return widgets.filter(item => item.displayMode === mode || item.displayMode === DISPLAY_MODE.ANY);
 };
 
 /**

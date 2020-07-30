@@ -1,14 +1,14 @@
 // @flow
 import type {BuildDataMap} from 'store/widgets/buildData/types';
-import type {Layout} from 'utils/layout/types';
-import type {NewWidget} from 'entities';
+import type {LayoutMode} from 'store/dashboard/settings/types';
+import type {Layouts, LayoutsPayloadForChange} from 'store/dashboard/layouts/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedFunctions = {
+	changeLayouts: (payload: LayoutsPayloadForChange) => Object,
 	drillDown: (widget: Widget, index: number) => ThunkAction,
-	editLayout: (layout: Layout, layoutMode: string) => ThunkAction,
 	editWidgetChunkData: (widget: Widget, chunkData: Object) => ThunkAction,
 	fetchBuildData: (widget: Widget) => ThunkAction,
 	removeWidget: (widgetId: string) => ThunkAction,
@@ -20,8 +20,8 @@ export type ConnectedProps = {
 	buildData: BuildDataMap,
 	editable: boolean,
 	editMode: boolean,
-	layoutMode: string,
-	newWidget: NewWidget | null,
+	layoutMode: LayoutMode,
+	layouts: Layouts,
 	personalDashboard: boolean,
 	selectedWidget: string,
 	user: UserData,
