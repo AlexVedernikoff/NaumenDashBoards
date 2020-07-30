@@ -134,6 +134,12 @@ class Link
                          .setAttrGroup(attrGroup)
                          .setAttrCodes(attrCodes)
                          .setDaysToLive(liveDays)
+        if (descriptor)
+        {
+            def slurper = new groovy.json.JsonSlurper()
+            def UUID = slurper.parseText(descriptor).cardObjectUuid
+            builder.setUuid(UUID)
+        }
         template?.with(builder.&setTemplate)
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, descriptor)
@@ -164,6 +170,13 @@ class Link
                     }
                     else
                     {
+                        if (condition.toLowerCase().contains('subject'))
+                        {
+                            def (metaClass, subjectAttribute) = value?.getUUID()?.split('@')
+                            value = api.metainfo.getMetaClass(metaClass)
+                                       .getAttribute(subjectAttribute)
+                                       .getAttributeFqn()
+                        }
                         filterBuilder.OR(attribute, condition, value)
                     }
                 }
