@@ -33,11 +33,23 @@ export class ZoomPanel extends PureComponent<Props> {
 
 		return (
 			<div className={styles.container}>
-				<IconButton icon={MINUS} onClick={this.handleClickZoomOut} round={false} />
-				<IconButton icon={PLUS} onClick={this.handleClickZoomIn} round={false} />
-				<IconButton icon={ONE_TO_ONE} onClick={this.handleClickZoomReset} round={false} />
-				<IconButton active={zoomMode === ZOOM_MODES.ZOOM} icon={ZOOM} onClick={this.handleClickZoom} round={false} />
-				<IconButton active={zoomMode === ZOOM_MODES.PAN} icon={PAN} onClick={this.handleClickPan} round={false} />
+				<IconButton icon={MINUS} onClick={this.handleClickZoomOut} round={false} tip="Уменьшить" />
+				<IconButton icon={PLUS} onClick={this.handleClickZoomIn} round={false} tip="Увеличить" />
+				<IconButton icon={ONE_TO_ONE} onClick={this.handleClickZoomReset} round={false} tip="Масштаб по умолчанию" />
+				<IconButton
+					active={zoomMode === ZOOM_MODES.ZOOM}
+					icon={ZOOM}
+					onClick={this.handleClickZoom}
+					round={false}
+					tip="Выделение области"
+				/>
+				<IconButton
+					active={zoomMode === ZOOM_MODES.PAN}
+					icon={PAN}
+					onClick={this.handleClickPan}
+					round={false}
+					tip="Перемещение по оси"
+				/>
 			</div>
 		);
 	}

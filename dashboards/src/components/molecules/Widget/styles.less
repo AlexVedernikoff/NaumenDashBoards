@@ -1,13 +1,19 @@
 @import '/styles/variables';
 
 :local {
+	.shadow (@color) {
+		box-shadow: 0 0 12px @color;
+	}
+
 	.error {
 		background-color: @white;
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+		overflow: hidden;
 		padding: 10px;
+		text-overflow: ellipsis;
 	}
 
 	.widget {
@@ -27,8 +33,12 @@
 		}
 	}
 
+	.focusedWidget {
+		.shadow(green);
+	}
+
 	.selectedWidget {
-		box-shadow: 0 0 12px @info !important;
+		.shadow(@info);
 	}
 
 	.actionButtonsContainer {

@@ -7,9 +7,9 @@ export type MenuItem = {
 };
 
 export type Props = {
+	buttonIcon: IconName,
 	className: string,
 	menu: Array<MenuItem>,
-	name: IconName,
 	onSelect: (value: string) => void,
 	round: boolean,
 	tip: string,

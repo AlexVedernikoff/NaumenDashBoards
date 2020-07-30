@@ -23,7 +23,22 @@ const ZOOM_MODES = {
 	ZOOM
 };
 
+const MINUS = 189;
+const PAGE_UP = 33;
+const PAGE_DOWN = 34;
+const PLUS = 187;
+const ZERO = 48;
+
+const KEYS = {
+	MINUS,
+	PAGE_DOWN,
+	PAGE_UP,
+	PLUS,
+	ZERO
+};
+
 export {
+	KEYS,
 	TOOLBAR_HANDLERS,
 	ZOOM_MODES
 };

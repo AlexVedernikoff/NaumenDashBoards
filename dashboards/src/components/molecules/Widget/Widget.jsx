@@ -24,9 +24,7 @@ export class Widget extends PureComponent<Props, State> {
 
 	state = {
 		hasError: false,
-		layoutModeValue: this.props.displayMode,
-		showRemoveModal: false,
-		showReplaceSubmenu: false
+		showRemoveModal: false
 	};
 
 	ref: DivRef = createRef();
@@ -59,18 +57,17 @@ export class Widget extends PureComponent<Props, State> {
 	}
 
 	getClassName = () => {
-		const {className, isSelected} = this.props;
+		const {className, focused, isSelected} = this.props;
 
-		const CN = [className, styles.widget];
-
-		if (isSelected) {
-			CN.push(styles.selectedWidget);
-		}
-
-		return cn(CN);
+		return cn({
+			[styles.widget]: true,
+			[styles.focusedWidget]: focused,
+			[styles.selectedWidget]: isSelected,
+			[className]: true
+		});
 	};
 
-	getDisplayMode = () => {
+	getDisplayModeIcon = () => {
 		const {displayMode} = this.props;
 
 		switch (displayMode) {
@@ -86,6 +83,13 @@ export class Widget extends PureComponent<Props, State> {
 	handleChangeDisplayMode = ({value}: Object) => {
 		const {data, editWidgetChunkData} = this.props;
 		editWidgetChunkData(data, {displayMode: value});
+	};
+
+	handleClick = (e: MouseEvent) => {
+		const {data, onClick} = this.props;
+
+		e.stopPropagation();
+		onClick(data.id);
 	};
 
 	handleClickDrillDownButton = (index: number) => () => {
@@ -153,9 +157,9 @@ export class Widget extends PureComponent<Props, State> {
 
 		return (
 			<DropDownButton
+				buttonIcon={this.getDisplayModeIcon()}
 				className={styles.markerIcon}
 				menu={DISPLAY_MODE_OPTIONS}
-				name={this.getDisplayMode()}
 				onSelect={this.handleChangeDisplayMode}
 				tip={`Отображается ${value.label}`}
 				value={value}
@@ -164,11 +168,11 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderDiagram = () => {
-		const {buildData, data, isNew, onUpdate} = this.props;
+		const {buildData, data, focused, isNew, onUpdate} = this.props;
 		const {hasError} = this.state;
 
 		if (!isNew && buildData && !hasError) {
-			return <Diagram buildData={buildData} onUpdate={onUpdate} widget={data} />;
+			return <Diagram buildData={buildData} focused={focused} onUpdate={onUpdate} widget={data} />;
 		}
 	};
 
@@ -209,10 +213,11 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderError = () => {
 		const {hasError} = this.state;
+		const message = 'Ошибка построения.';
 
 		if (hasError) {
 			return (
-				<div className={styles.error}>Ошибка построения.</div>
+				<div className={styles.error} title={message}>{message}</div>
 			);
 		}
 	};
@@ -297,7 +302,7 @@ export class Widget extends PureComponent<Props, State> {
 		};
 
 		return (
-			<div {...gridProps} className={this.getClassName()} ref={this.ref}>
+			<div {...gridProps} className={this.getClassName()} onClick={this.handleClick} ref={this.ref}>
 				{this.renderDiagram()}
 				{this.renderButtons()}
 				{this.renderHeaderButtons()}
