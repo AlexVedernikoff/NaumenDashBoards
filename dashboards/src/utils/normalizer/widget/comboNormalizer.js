@@ -4,6 +4,7 @@ import {
 	array,
 	axisIndicator,
 	axisParameter,
+	breakdown,
 	chartSorting,
 	colors,
 	dataLabels,
@@ -33,7 +34,7 @@ const type = (type: any) => {
 	return resultType && resultType in COMBO_TYPES ? resultType : COMBO_TYPES.COLUMN;
 };
 
-const normalizeDataSet = (set: Object): ComboData => {
+const normalizeDataSet = (set: Object, index: number, data: Array<Object>): ComboData => {
 	const {dataKey, descriptor, group, source, xAxis} = set;
 	let resultSet = {
 		dataKey,
@@ -53,7 +54,7 @@ const normalizeDataSet = (set: Object): ComboData => {
 			type,
 			yAxis
 		};
-		resultSet = mixinBreakdown(set, resultSet);
+		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data, FIELDS.yAxis)}, resultSet);
 	}
 
 	return resultSet;

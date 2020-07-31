@@ -2,6 +2,7 @@
 import {
 	aggregation as aggregationFilter,
 	array,
+	breakdown,
 	getOrdinalData,
 	group,
 	header,
@@ -47,7 +48,7 @@ const getDataFields = () => {
 	};
 };
 
-const normalizeDataSet = (set: Object): TableData => {
+const normalizeDataSet = (set: Object, index: number, data: Array<Object>): TableData => {
 	const {dataKey, descriptor, row, source} = set;
 	let resultSet = {
 		dataKey,
@@ -65,7 +66,7 @@ const normalizeDataSet = (set: Object): TableData => {
 			column,
 			sourceForCompute: false
 		};
-		resultSet = mixinBreakdown(set, resultSet);
+		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data, FIELDS.column)}, resultSet);
 	}
 
 	return resultSet;

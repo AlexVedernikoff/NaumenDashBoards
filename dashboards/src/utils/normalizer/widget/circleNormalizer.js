@@ -2,6 +2,7 @@
 import {
 	aggregation as aggregationFilter,
 	array,
+	breakdown,
 	chartSorting,
 	colors,
 	dataLabels,
@@ -35,7 +36,7 @@ const getDataFields = () => {
 	};
 };
 
-const normalizeDataSet = (set: Object): CircleData => {
+const normalizeDataSet = (set: Object, index: number, data: Array<Object>): CircleData => {
 	const {dataKey, descriptor, source} = set;
 	let resultSet = {
 		dataKey,
@@ -52,7 +53,7 @@ const normalizeDataSet = (set: Object): CircleData => {
 			indicator,
 			sourceForCompute: false
 		};
-		resultSet = mixinBreakdown(set, resultSet);
+		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data)}, resultSet);
 	}
 
 	return resultSet;
