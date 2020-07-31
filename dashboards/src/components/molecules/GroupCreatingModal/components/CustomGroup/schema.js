@@ -1,8 +1,9 @@
 // @flow
 import {array, lazy, number, object, string} from 'yup';
+import {isObject} from 'src/helpers';
 
 const messages = {
-	float: 'Поле должно содержать вещетсвенное число',
+	float: 'Поле должно содержать вещественное число',
 	integer: 'Поле должно содержать целое число'
 };
 
@@ -10,8 +11,17 @@ const NAME_RULE = string().required('Поле должно быть заполн
 
 const BETWEEN_RULE = object().test(
 	'between-condition',
-	'Поля должны содержать 2 даты, первая дата должна быть не больше второй',
-	(value) => value && typeof value === 'object' && new Date(value.startDate) < new Date(value.endDate)
+	'Поля должны содержать даты, первая дата должна быть не больше второй',
+	value => {
+		let valid = false;
+
+		if (isObject(value)) {
+			const {endDate, startDate} = value;
+			valid = (startDate && !endDate) || (!startDate && endDate) || new Date(startDate) < new Date(endDate);
+		}
+
+		return valid;
+	}
 ).nullable();
 
 const FLOAT_RULE = number().required(messages.float).typeError(messages.float);

@@ -254,9 +254,7 @@ const mixinBreakdown = (source: Object, target: Object, extendCustom: boolean = 
 		target.breakdown = breakdown;
 
 		if (Array.isArray(breakdown)) {
-			target.breakdown.forEach(set => {
-				set.group = transformGroupFormat(set.group, extendCustom);
-			});
+			target.breakdown = target.breakdown.map(set => ({...set, group: transformGroupFormat(set.group, extendCustom)}));
 		} else {
 			target.breakdownGroup = transformGroupFormat(breakdownGroup, extendCustom);
 		}

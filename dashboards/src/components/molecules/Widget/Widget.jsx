@@ -5,7 +5,7 @@ import {Diagram, Modal} from 'components/molecules';
 import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {DivRef} from 'components/types';
-import DropDownButton from './components/DropDownButton';
+import {DropDownButton} from './components';
 import type {ExportItem, Props, State} from './types';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
