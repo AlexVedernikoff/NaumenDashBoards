@@ -38,7 +38,7 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	resolveDiagram = () => {
-		const {buildData, onUpdate, widget} = this.props;
+		const {buildData, focused, onUpdate, widget} = this.props;
 		const {data} = buildData;
 		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
@@ -51,7 +51,7 @@ export class Diagram extends Component<Props, State> {
 			case DONUT:
 			case LINE:
 			case PIE:
-				return <Chart data={data} widget={widget} />;
+				return <Chart data={data} focused={focused} widget={widget} />;
 			case SPEEDOMETER:
 				return <SpeedometerWidget data={data} widget={widget} />;
 			case SUMMARY:
@@ -102,9 +102,10 @@ export class Diagram extends Component<Props, State> {
 
 	renderError = () => {
 		const {error} = this.props.buildData;
+		const message = 'Ошибка загрузки данных. Измените параметры построения.';
 
 		if (error) {
-			return <p>Ошибка загрузки данных. Измените параметры построения.</p>;
+			return <div className={styles.error} title={message}>{message}</div>;
 		}
 	};
 

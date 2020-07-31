@@ -153,9 +153,6 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 			},
 			height: '100%',
 			locales: LOCALES,
-			toolbar: {
-				show: false
-			},
 			type: type === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(type),
 			width: '100%'
 		},

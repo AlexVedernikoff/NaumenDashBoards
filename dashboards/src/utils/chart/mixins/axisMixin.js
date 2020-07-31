@@ -118,12 +118,15 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 
 		if (usesDatetime) {
 			const {format} = group;
+			const datetimeCategories = categories.map(parseToDatetime(format));
 
 			xaxis = {
-				categories: categories.map(parseToDatetime(format)),
+				categories: datetimeCategories,
 				labels: {
 					datetimeFormatter: getDatetimeFormatter(format)
 				},
+				max: new Date(datetimeCategories[datetimeCategories.length - 1]).getTime(),
+				min: new Date(datetimeCategories[0]).getTime(),
 				type: 'datetime'
 			};
 		} else {

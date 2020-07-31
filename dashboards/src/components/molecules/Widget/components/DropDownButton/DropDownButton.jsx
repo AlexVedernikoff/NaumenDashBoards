@@ -31,7 +31,7 @@ export class DropDownButton extends PureComponent<Props, State> {
 	hideMenu = () => this.setState({showMenu: false});
 
 	renderButton = () => {
-		const {className, name, round} = this.props;
+		const {buttonIcon, className, round} = this.props;
 		const {showMenu} = this.state;
 		let {tip} = this.props;
 
@@ -40,7 +40,7 @@ export class DropDownButton extends PureComponent<Props, State> {
 		}
 
 		return (
-			<IconButton className={className} icon={name} onClick={this.handleClickButton} round={round} tip={tip} />
+			<IconButton className={className} icon={buttonIcon} onClick={this.handleClickButton} round={round} tip={tip} />
 		);
 	};
 

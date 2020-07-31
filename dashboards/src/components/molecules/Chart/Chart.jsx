@@ -4,17 +4,16 @@ import cn from 'classnames';
 import type {DivRef} from 'components/types';
 import {getLegendCroppingFormatter, getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
 import {isMacOS} from 'src/helpers';
+import {KEYS, TOOLBAR_HANDLERS, ZOOM_MODES} from './constants';
 import type {Props, State, ToolbarHandler, ZoomMode} from './types';
 import React, {createRef, PureComponent} from 'react';
 import {ResizeDetector} from 'components/molecules';
 import styles from './styles.less';
-import {TOOLBAR_HANDLERS, ZOOM_MODES} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import {ZoomPanel} from './components';
 
 export class Chart extends PureComponent<Props, State> {
 	chart = null;
-	hotkeyHeldDown = false;
 	ref: DivRef = createRef();
 
 	state = {
@@ -22,24 +21,19 @@ export class Chart extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
-		const {current: chartContainer} = this.ref;
 		const options = this.getOptions();
-
-		if (chartContainer) {
-			window.addEventListener('keydown', this.handleKeydown);
-			window.addEventListener('keyup', this.handleKeyup);
-			chartContainer.addEventListener('wheel', this.handleWheel);
-		}
+		window.addEventListener('keydown', this.handleKeydown);
 
 		this.chart = new ApexCharts(this.ref.current, options);
 		this.chart.render();
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const options = this.getOptions();
+		const {data: currentData} = this.props;
+		const {data: prevData} = prevProps;
 
-		if (this.chart && this.props !== prevProps) {
-			this.chart.updateOptions(options);
+		if (this.chart && currentData !== prevData) {
+			this.chart.updateOptions(this.getOptions());
 		}
 	}
 
@@ -47,6 +41,8 @@ export class Chart extends PureComponent<Props, State> {
 		if (this.chart && typeof this.chart.destroy === 'function') {
 			this.chart.destroy();
 		}
+
+		window.removeEventListener('keydown', this.handleKeydown);
 	}
 
 	getOptions = () => {
@@ -64,19 +60,26 @@ export class Chart extends PureComponent<Props, State> {
 	handleChangeZoomMode = (zoomMode: ZoomMode) => this.setState({zoomMode});
 
 	handleKeydown = (e: SyntheticKeyboardEvent<*>) => {
+		const {focused} = this.props;
 		const {ctrlKey, keyCode, metaKey} = e;
+		const hotkeyHeldDown = (isMacOS() && metaKey) || ctrlKey;
 
-		if (ctrlKey || (isMacOS() && metaKey)) {
-			this.hotkeyHeldDown = true;
+		if (focused && hotkeyHeldDown) {
+			const {MINUS, PAGE_DOWN, PAGE_UP, PLUS, ZERO} = KEYS;
+			e.preventDefault();
+
+			if (keyCode === ZERO) {
+				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_RESET);
+			}
+
+			if (keyCode === PLUS || keyCode === PAGE_UP) {
+				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_IN);
+			}
+
+			if (keyCode === MINUS || keyCode === PAGE_DOWN) {
+				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_OUT);
+			}
 		}
-
-		if (ctrlKey && keyCode === 48) {
-			this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_RESET);
-		}
-	};
-
-	handleKeyup = () => {
-		this.hotkeyHeldDown = false;
 	};
 
 	// От нажатия кнопки мыши срабатывает onDrag виджета, что ведет к некорректной работе зума
@@ -94,17 +97,6 @@ export class Chart extends PureComponent<Props, State> {
 					width: legendWidth
 				}
 			});
-		}
-	};
-
-	handleWheel = (e: WheelEvent) => {
-		if (this.hotkeyHeldDown) {
-			// $FlowFixMe
-			const delta = e.deltaY || e.detail || e.wheelDelta;
-			const {ZOOM_IN, ZOOM_OUT} = TOOLBAR_HANDLERS;
-
-			delta > 0 ? this.toolbarHandler(ZOOM_OUT) : this.toolbarHandler(ZOOM_IN);
-			e.preventDefault();
 		}
 	};
 

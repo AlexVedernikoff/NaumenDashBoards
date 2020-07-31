@@ -24,13 +24,27 @@ export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
 	newWidgetRef: WidgetRef = createRef();
 	state = {
+		focusedWidget: '',
 		newWidgetFocused: false,
 		width: null
 	};
 
 	componentDidUpdate () {
 		this.setFocusOnNewWidget();
+		window.addEventListener('blur', this.resetFocus);
 	}
+
+	componentDidUnmount () {
+		window.removeEventListener('blur', this.resetFocus);
+	}
+
+	handleClick = (focusedWidget: string) => {
+		const {focusedWidget: currentFocusedWidget} = this.state;
+
+		if (currentFocusedWidget !== focusedWidget) {
+			this.setState({focusedWidget});
+		}
+	};
 
 	handleGridToggle = (show: boolean) => () => {
 		const {current: grid} = gridRef;
@@ -61,6 +75,8 @@ export class DashboardContent extends Component<Props, State> {
 		const {layoutMode} = this.props;
 		return !isMobile().any && layoutMode === LAYOUT_MODE.MOBILE;
 	};
+
+	resetFocus = () => this.state.focusedWidget && this.setState({focusedWidget: ''});
 
 	setFocusOnNewWidget = () => {
 		const {current: grid} = gridRef;
@@ -124,7 +140,7 @@ export class DashboardContent extends Component<Props, State> {
 
 		return (
 			<ResizeDetector onResize={this.setGridWidth}>
-				<div className={containerCN} ref={this.gridContainerRef}>
+				<div className={containerCN} onClick={this.resetFocus} ref={this.gridContainerRef}>
 					{this.renderGrid()}
 				</div>
 			</ResizeDetector>
@@ -157,8 +173,10 @@ export class DashboardContent extends Component<Props, State> {
 			updateWidget,
 			user
 		} = this.props;
+		const {focusedWidget} = this.state;
 		const {displayMode, id} = widget;
 		const isNew = id === NewWidget.id;
+		const focused = focusedWidget === widget.id;
 		const ref = isNew ? this.newWidgetRef : null;
 
 		return (
@@ -168,11 +186,13 @@ export class DashboardContent extends Component<Props, State> {
 				displayMode={displayMode}
 				editWidgetChunkData={editWidgetChunkData}
 				fetchBuildData={fetchBuildData}
+				focused={focused}
 				isEditable={editable}
 				isNew={isNew}
 				isSelected={selectedWidget === widget.id}
 				key={id}
 				layoutMode={layoutMode}
+				onClick={this.handleClick}
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
 				onRemove={removeWidget}
