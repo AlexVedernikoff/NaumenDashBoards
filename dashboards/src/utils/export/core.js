@@ -2,7 +2,7 @@
 import Canvg from 'canvg';
 import {FILE_VARIANTS} from './constants';
 import html2canvas from 'html2canvas';
-import {isIE, save} from './helpers';
+import {isLegacyBrowser, save} from './helpers';
 import JsPDF from 'jspdf';
 import type {Options} from './types';
 
@@ -88,7 +88,7 @@ const createImage = async (options: Options) => {
 
 	handleShowToolbar(container, false);
 
-	const image = isIE() ? await createIEImage(container, config) : await html2canvas(container, config);
+	const image = isLegacyBrowser(false) ? await createIEImage(container, config) : await html2canvas(container, config);
 
 	handleShowToolbar(container, true);
 
@@ -150,7 +150,7 @@ const createPng = async (image: HTMLCanvasElement, options) => {
 	const {name, toDownload} = options;
 	let blob;
 
-	if (isIE()) {
+	if (isLegacyBrowser()) {
 		// $FlowFixMe
 		blob = image.msToBlob();
 	} else {

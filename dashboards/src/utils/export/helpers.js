@@ -29,7 +29,7 @@ const save = async (blob: Blob, subName: string, extension: string) => {
 	const contextName = await createContextName();
 	const name = subName ? `${subName}_${contextName}.${extension}` : `${contextName}.${extension}`;
 
-	if (isIE()) {
+	if (isLegacyBrowser()) {
 		window.navigator.msSaveBlob(blob, name);
 	} else if (body) {
 		const link = document.createElement('a');
@@ -43,16 +43,19 @@ const save = async (blob: Blob, subName: string, extension: string) => {
 };
 
 /**
- * Проверяет, является ли браузер IE или EDGE
- * @returns {boolean}
+ * Проверяет, использует ли браузер `Trident` или `EdgeHTML`
+ * @param {boolean} includeEdge - включить в проверку `Edge`.
+ * @returns {boolean} - возвращает `true`, если используется браузер `IE` или `Edge`.
  */
-const isIE = () => typeof document.documentMode === 'number' || /Edge/.test(navigator.userAgent);
+const isLegacyBrowser = (includeEdge: boolean = true) => {
+	return typeof document.documentMode === 'number' || (includeEdge && /Edge/.test(navigator.userAgent));
+};
 
 const minimize = (string: string): string => string.replace(/\t|\r|\n|\v|\f/g, '');
 
 export {
 	createContextName,
-	isIE,
+	isLegacyBrowser,
 	minimize,
 	save
 };

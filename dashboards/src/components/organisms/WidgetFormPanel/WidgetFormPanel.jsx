@@ -2,7 +2,7 @@
 import {AxisChartForm, CircleChartForm, ComboChartForm, Form, SpeedometerForm, SummaryForm, TableForm} from './components';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
-import {isIE} from 'utils/export/helpers';
+import {isLegacyBrowser} from 'utils/export/helpers';
 import type {Props, RenderFormProps, State} from './types';
 import React, {Component, createContext, createRef} from 'react';
 import styles from './styles.less';
@@ -114,7 +114,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 		this.fieldErrorRefs = [];
 		const formCN = cn({
 			[styles.form]: true,
-			[styles.ieForm]: isIE()
+			[styles.ieForm]: isLegacyBrowser(false)
 		});
 
 		return (
