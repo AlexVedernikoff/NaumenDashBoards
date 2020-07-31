@@ -146,8 +146,8 @@ const requiredBreakdown = (indicatorName: string) => lazy((value: mixed, context
  * @param {string} indicatorName - наименование поля индикатора
  * @returns {object}
  */
-const conditionalBreakdown = (indicatorName: string) => mixed().when(FIELDS.withBreakdown, {
-	is: true,
+const conditionalBreakdown = (indicatorName: string) => mixed().when([FIELDS.withBreakdown, FIELDS.breakdown], {
+	is: (withBreakdown, breakdown) => Boolean(withBreakdown || breakdown),
 	then: requiredBreakdown(indicatorName)
 });
 

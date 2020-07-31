@@ -18,9 +18,10 @@ export class Datepicker extends PureComponent<Props, State> {
 
 	componentDidMount () {
 		const {value} = this.props;
+		const date = (moment(value));
 
-		if (value) {
-			this.setState({currentDate: moment(value)});
+		if (date.isValid()) {
+			this.setState({currentDate: date});
 		}
 	}
 

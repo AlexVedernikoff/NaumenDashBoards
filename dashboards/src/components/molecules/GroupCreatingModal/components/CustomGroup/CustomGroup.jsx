@@ -130,8 +130,15 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	isUsingCurrentGroup = (widget: Object) => !!widget.data.find(set => {
-		const {breakdownGroup, group} = FIELDS;
-		return this.testFieldAtUsingGroup(set, group) || this.testFieldAtUsingGroup(set, breakdownGroup);
+		const {breakdown, breakdownGroup, group} = FIELDS;
+		const usesInGroup = this.testFieldAtUsingGroup(set[group]) || this.testFieldAtUsingGroup(set[breakdownGroup]);
+		let usesInComputedBreakdown = false;
+
+		if (Array.isArray(set[breakdown])) {
+			usesInComputedBreakdown = set[breakdown].findIndex(breakdownSet => this.testFieldAtUsingGroup(breakdownSet[group])) !== -1;
+		}
+
+		return usesInComputedBreakdown || usesInGroup;
 	});
 
 	onCreateCallBack = (id: string) => {
@@ -166,10 +173,8 @@ export class CustomGroup extends Component<Props, State> {
 		}
 	};
 
-	testFieldAtUsingGroup = (set: Object, key: string) => {
+	testFieldAtUsingGroup = (group: any) => {
 		const {selectedGroup} = this.state;
-		const group = set[key];
-
 		return group && typeof group === 'object' && group.data === selectedGroup;
 	};
 

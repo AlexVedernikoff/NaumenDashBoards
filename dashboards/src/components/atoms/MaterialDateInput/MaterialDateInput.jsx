@@ -12,6 +12,11 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 		showDatepicker: false
 	};
 
+	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {name, onChange} = this.props;
+		onChange(name, e.currentTarget.value);
+	};
+
 	handleClickCalendarIcon = () => this.setState({showDatepicker: !this.state.showDatepicker});
 
 	handleClickOutside = () => this.setState({showDatepicker: false});
@@ -40,9 +45,14 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 
 	renderValue = () => {
 		const {value} = this.props;
-		const date = value ? moment(value).format('DD.MM.YYYY') : '';
+		const date = moment(value);
+		const inputValue = date.isValid() ? date.format('DD.MM.YYYY') : value;
 
-		return <div className={styles.valueContainer}>{date}</div>;
+		return (
+			<div className={styles.valueContainer}>
+				<input onChange={this.handleChange} value={inputValue} />
+			</div>
+		);
 	};
 
 	render () {
