@@ -1,13 +1,18 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {AxisIndicator, AxisParameter, ChartSorting, DataLabels, Header, Legend} from 'store/widgets/data/types';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {AxisIndicator, AxisParameter, ChartSorting, ComputedBreakdown, DataLabels, Header, Legend} from 'store/widgets/data/types';
 import {createDefaultGroup, transformGroupFormat} from 'store/widgets/helpers';
 import type {CreateFunction, Fields, LegacyWidget} from './types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
+import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
+import {isObject} from 'src/helpers';
+
+const mock = Object.freeze({});
 
 /**
  * Возвращает настройки сортировки данных графика
@@ -234,11 +239,35 @@ const getOrdinalData = (widget: LegacyWidget, fields: Fields, createFunction: Cr
 };
 
 /**
- * Возвращает главный набор данных виджета
+ * Возвращает главный набор данных для построения виджета
  * @param {Array<object>} data - массив данных виджета
- * @returns {object}
+ * @returns {object} - при наличии, возвращает главный набор данных для построения, иначе mock-объект
  */
-const getMainDataSet = (data: Array<Object>): Object => data[0];
+const getMainDataSet = (data: Array<Object>): Object => data.find(set => !set.sourceForCompute) || mock;
+
+/**
+ * Нормализует данные разбивки
+ * @param {number} index - индекс набора данных разбивки
+ * @param {Array<object>} data - массив набора данных виджета
+ * @param {string} indicatorKey - наименование поля индикатора
+ * @returns {Attribute | ComputedBreakdown | undefined} - при наличии, возвращает экземпляр разбивки
+ */
+const breakdown = (index: number, data: Array<Object>, indicatorKey: string = FIELDS.indicator): Object | Array<Object> => {
+	const {breakdown: value, breakdownGroup, [indicatorKey]: indicator} = getMainDataSet(data);
+	let {breakdown} = data[index];
+
+	if (indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR && isObject(breakdown)) {
+		breakdown = data.map(({dataKey}) => {
+			return {
+				dataKey,
+				group: transformGroupFormat(breakdownGroup),
+				value
+			};
+		});
+	}
+
+	return breakdown;
+};
 
 /**
  * В зависимости от наличия разбивки в исходном объекте, добавляет ее вместе с группировкой в таргет объект
@@ -268,6 +297,7 @@ export {
 	array,
 	axisIndicator,
 	axisParameter,
+	breakdown,
 	chartSorting,
 	colors,
 	dataLabels,

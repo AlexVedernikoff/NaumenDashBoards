@@ -4,6 +4,7 @@ import {
 	array,
 	axisIndicator,
 	axisParameter,
+	breakdown,
 	chartSorting,
 	colors,
 	dataLabels,
@@ -52,7 +53,7 @@ const getDataFields = () => {
 	};
 };
 
-const normalizeDataSet = (set: Object) => {
+const normalizeDataSet = (set: Object, index: number, data: Array<Object>) => {
 	const {dataKey, descriptor, group, source, xAxis} = set;
 	let resultSet = {
 		dataKey,
@@ -71,7 +72,7 @@ const normalizeDataSet = (set: Object) => {
 			sourceForCompute: false,
 			yAxis
 		};
-		resultSet = mixinBreakdown(set, resultSet);
+		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data, FIELDS.yAxis)}, resultSet);
 	}
 
 	return resultSet;
