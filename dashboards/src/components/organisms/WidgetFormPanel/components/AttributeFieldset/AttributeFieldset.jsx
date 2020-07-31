@@ -64,7 +64,8 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	};
 
 	getSourceSelectProps = () => {
-		const {attributes, source} = this.props;
+		const {attributes, dataSet} = this.props;
+		const {source} = dataSet;
 		let data = {
 			fetchOptions: source && this.fetchAttributes(source.value)
 		};
@@ -90,14 +91,21 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	};
 
 	handleChangeShowDynamicAttributes = ({value}: OnChangeInputEvent) => {
+		const {dataSet, dynamicGroups, fetchDynamicAttributeGroups} = this.props;
+		const {dataKey, descriptor} = dataSet;
+
+		if (descriptor && !value && !dynamicGroups[dataKey]) {
+			fetchDynamicAttributeGroups(dataKey, descriptor);
+		}
+
 		this.setState({showDynamicAttributes: !value});
 	};
 
 	handleLoadDynamicAttributes = (node: DynamicGroupsNode | null) => {
-		const {fetchGroupDynamicAttributes, source} = this.props;
+		const {dataSet, fetchDynamicAttributes} = this.props;
 
-		if (node && source) {
-			fetchGroupDynamicAttributes(source.value, this.getOptionValue(node.value));
+		if (node) {
+			fetchDynamicAttributes(dataSet.dataKey, this.getOptionValue(node.value));
 		}
 	};
 
@@ -166,12 +174,15 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	};
 
 	renderList = (props: ListProps) => {
-		const {dynamicGroups} = this.props;
+		const {dataSet, dynamicGroups} = this.props;
 		const {showDynamicAttributes} = this.state;
 
 		if (showDynamicAttributes) {
 			const {onSelect, searchValue, value} = props;
 			const initialSelected = [this.getOptionValue(value)];
+			const {[dataSet.dataKey]: sourceData = {
+				data: {}
+			}} = dynamicGroups;
 
 			return (
 				<TreeList
@@ -181,7 +192,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 					isEnabledNode={this.isEnabledDynamicNode}
 					onLoad={this.handleLoadDynamicAttributes}
 					onSelect={this.handleSelectDynAttr(onSelect)}
-					options={dynamicGroups}
+					options={sourceData.data}
 					searchValue={searchValue}
 					value={value}
 				/>
@@ -205,7 +216,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	);
 
 	renderSelect = (props: SelectProps, parent: Attribute | null = null) => {
-		const {source} = this.props;
+		const {source} = this.props.dataSet;
 		let components;
 		let note;
 
@@ -223,12 +234,25 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	};
 
 	renderToggleShowingDynAttr = () => {
+		const {descriptor} = this.props.dataSet;
 		const {showDynamicAttributes} = this.state;
+		let disabled, tip;
+
+		if (!descriptor) {
+			disabled = true;
+			tip = 'Необходимо уточнить условия фильтрации';
+		}
 
 		return (
-			<FormCheckControl className={styles.dynamicAttributesShowHandler} label="Динамические атрибуты">
+			<FormCheckControl
+				className={styles.dynamicAttributesShowHandler}
+				disabled={disabled}
+				label="Динамические атрибуты"
+				tip={tip}
+			>
 				<Toggle
 					checked={showDynamicAttributes}
+					disabled={disabled}
 					onChange={this.handleChangeShowDynamicAttributes}
 					value={showDynamicAttributes}
 				/>

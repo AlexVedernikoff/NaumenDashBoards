@@ -70,9 +70,8 @@ export class ParameterFieldset extends PureComponent<Props> {
 	};
 
 	render () {
-		const {error, name, set: currentSet, useGroup} = this.props;
-		const currentSource = currentSet[FIELDS.source];
-		const value = currentSet[name];
+		const {error, name, set, useGroup} = this.props;
+		const {[name]: value} = set;
 		const disabled = this.isDisabled();
 		let renderRefField;
 
@@ -83,6 +82,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
+					dataSet={set}
 					disabled={disabled}
 					getAttributeOptions={this.filter}
 					getSourceOptions={this.filter}
@@ -90,7 +90,6 @@ export class ParameterFieldset extends PureComponent<Props> {
 					onChangeLabel={this.handleChangeLabel}
 					onSelect={this.handleSelect}
 					renderRefField={renderRefField}
-					source={currentSource}
 					value={value}
 				/>
 			</FormField>

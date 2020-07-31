@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {Checkbox, TextArea} from 'components/atoms';
-import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceBoxProps, TextAreaProps} from './types';
+import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, TextAreaProps} from './types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
@@ -14,6 +14,7 @@ import type {Group} from 'store/widgets/data/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
+import type {SourceRefFields} from 'WidgetFormPanel/components/SourceDataBox/types';
 import styles from './styles.less';
 import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -301,7 +302,7 @@ export class DataFormBuilder extends Component<Props> {
 		);
 	};
 
-	renderSourceBox = (props: SourceBoxProps) => {
+	renderSourceBox = (sourceRefFields: SourceRefFields, minCountBuildingSources: number = 1) => {
 		const {errors, fetchAttributes, setDataFieldValue, setFieldValue, sources, values} = this.props;
 		const {data, type} = values;
 
@@ -310,12 +311,13 @@ export class DataFormBuilder extends Component<Props> {
 				data={data}
 				errors={errors}
 				fetchAttributes={fetchAttributes}
+				minCountBuildingSources={minCountBuildingSources}
 				onSelectCallback={this.changeAdditionalParameterFields}
 				setDataFieldValue={setDataFieldValue}
 				setFieldValue={setFieldValue}
+				sourceRefFields={sourceRefFields}
 				sources={sources}
 				type={type}
-				{...props}
 			/>
 		);
 	};

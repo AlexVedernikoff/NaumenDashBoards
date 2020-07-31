@@ -6,6 +6,7 @@ import styles from './styles.less';
 
 export class Toggle extends PureComponent<Props> {
 	static defaultProps = {
+		disabled: false,
 		name: ''
 	};
 
@@ -15,10 +16,11 @@ export class Toggle extends PureComponent<Props> {
 	};
 
 	render () {
-		const {checked} = this.props;
+		const {checked, disabled} = this.props;
 		const toggleCN = cn({
 			[styles.toggle]: true,
-			[styles.checked]: checked
+			[styles.checked]: checked,
+			[styles.disabled]: disabled
 		});
 
 		return <span className={toggleCN} onClick={this.handleClick} />;

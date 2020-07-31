@@ -12,7 +12,6 @@ import type {LayoutMode} from './types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState, switchState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
-import {setDynamicGroups} from 'store/sources/dynamicGroups/actions';
 
 /**
  * Получает и устанавливает настройки автообновления
@@ -85,7 +84,7 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 		isMobile: isMobile().any,
 		isPersonal
 	});
-	const {autoUpdate, customGroups, dynamicGroups, layouts, mobileLayouts, widgets} = data;
+	const {autoUpdate, customGroups, layouts, mobileLayouts, widgets} = data;
 
 	if (customGroups !== null) {
 		dispatch(setCustomGroups(customGroups));
@@ -93,10 +92,6 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 
 	if (autoUpdate !== null) {
 		dispatch(setAutoUpdate(autoUpdate));
-	}
-
-	if (dynamicGroups) {
-		dispatch(setDynamicGroups(dynamicGroups));
 	}
 
 	dispatch(setWidgets(widgets));

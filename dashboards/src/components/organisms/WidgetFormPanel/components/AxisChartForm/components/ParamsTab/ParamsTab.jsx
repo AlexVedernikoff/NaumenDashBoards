@@ -5,8 +5,6 @@ import React, {Component, Fragment} from 'react';
 import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {
-	sourceRefFields = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
-
 	renderIndicatorBoxes = () => {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
@@ -27,13 +25,13 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderSourceBox = () => {
 		const {renderSourceBox} = this.props;
-		const props = {
-			indicatorName: FIELDS.yAxis,
-			parameterName: FIELDS.xAxis,
-			sourceRefFields: this.sourceRefFields
+		const sourceRefFields = {
+			breakdown: FIELDS.breakdown,
+			indicator: FIELDS.yAxis,
+			parameter: FIELDS.xAxis
 		};
 
-		return renderSourceBox(props);
+		return renderSourceBox(sourceRefFields);
 	};
 
 	render () {

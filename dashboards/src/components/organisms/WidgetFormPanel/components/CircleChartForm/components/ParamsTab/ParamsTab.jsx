@@ -5,15 +5,15 @@ import React, {Component, Fragment} from 'react';
 import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {
-	sourceRefFields = [FIELDS.breakdown, FIELDS.indicator];
-
 	renderSourceBox = () => {
 		const {renderSourceBox} = this.props;
-		const props = {
-			sourceRefFields: this.sourceRefFields
+		const {breakdown, indicator} = FIELDS;
+		const sourceRefFields = {
+			breakdown,
+			indicator
 		};
 
-		return renderSourceBox(props);
+		return renderSourceBox(sourceRefFields);
 	};
 
 	render () {

@@ -10,8 +10,6 @@ import styles from './styles.less';
 import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {
-	sourceRefFields = [FIELDS.breakdown, FIELDS.xAxis, FIELDS.yAxis];
-
 	handleSelectChartType = (index: number) => (name: string, value: string) => this.props.setDataFieldValue(index, name, value);
 
 	renderChartFieldLabel = (icon: any) => <Icon name={icon} size={ICON_SIZES.LARGE} />;
@@ -51,14 +49,13 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderSourceBox = () => {
 		const {renderSourceBox} = this.props;
-		const props = {
-			indicatorName: FIELDS.yAxis,
-			minCountBuildingSources: 2,
-			parameterName: FIELDS.xAxis,
-			sourceRefFields: this.sourceRefFields
+		const sourceRefFields = {
+			breakdown: FIELDS.breakdown,
+			indicator: FIELDS.yAxis,
+			parameter: FIELDS.xAxis
 		};
 
-		return renderSourceBox(props);
+		return renderSourceBox(sourceRefFields, 2);
 	};
 
 	render () {

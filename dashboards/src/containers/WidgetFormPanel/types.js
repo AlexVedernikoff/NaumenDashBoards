@@ -50,7 +50,9 @@ export type ConnectedProps = {
 
 export type FetchAttributes = (classFqn: string, onLoadCallback?: OnLoadCallback) => ThunkAction;
 
-export type FetchGroupDynamicAttributes = (classFqn: string, groupCode: string) => ThunkAction;
+export type FetchDynamicAttributeGroups = (dataKey: string, descriptor: string) => ThunkAction;
+
+export type FetchDynamicAttributes = (dataKey: string, groupCode: string) => ThunkAction;
 
 export type FetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback) => ThunkAction;
 
@@ -60,7 +62,8 @@ export type ConnectedFunctions = {
 	createToast: (newToast: $Exact<NewToast>) => ThunkAction,
 	createWidget: Widget => Object | void,
 	fetchAttributes: FetchAttributes,
-	fetchGroupDynamicAttributes: FetchGroupDynamicAttributes,
+	fetchDynamicAttributeGroups: FetchDynamicAttributeGroups,
+	fetchDynamicAttributes: FetchDynamicAttributes,
 	fetchRefAttributes: FetchRefAttributes,
 	saveWidget: Widget => Object | void
 };

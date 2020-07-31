@@ -8,8 +8,15 @@ export type Source = {
 	value: string
 };
 
+type DataSet = {
+	dataKey: string,
+	descriptor: string,
+	source: Source
+};
+
 export type Props = {
 	...ContextProps,
+	dataSet: DataSet,
 	disabled: boolean,
 	getAttributeOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
 	getSourceOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
@@ -22,7 +29,6 @@ export type Props = {
 	removable: boolean,
 	renderRefField?: (parent: Attribute | null) => React$Node,
 	showCreationButton: boolean,
-	source: Source,
 	value: Attribute | null
 };
 

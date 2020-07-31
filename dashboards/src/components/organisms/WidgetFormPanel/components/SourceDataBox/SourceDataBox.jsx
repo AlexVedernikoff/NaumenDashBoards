@@ -1,7 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
+import {getMapValues} from 'src/helpers';
 import {IconButton} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
@@ -13,10 +15,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class SourceDataBox extends Component<Props> {
 	static defaultProps = {
-		indicatorName: FIELDS.indicator,
-		minCountBuildingSources: 1,
-		parameterName: '',
-		sourceRefFields: []
+		minCountBuildingSources: 1
 	};
 
 	componentDidMount () {
@@ -94,17 +93,18 @@ export class SourceDataBox extends Component<Props> {
 	};
 
 	handleSelectSource = (index: number, event: OnSelectEvent) => {
-		const {data, fetchAttributes, onSelectCallback, parameterName, setDataFieldValue, sourceRefFields} = this.props;
+		const {data, fetchAttributes, onSelectCallback, setDataFieldValue, sourceRefFields} = this.props;
 		const {name, value: nextSource} = event;
 		const prevSource = data[index][name];
+		const {parameter} = sourceRefFields;
 
-		sourceRefFields.forEach(name => setDataFieldValue(index, name, undefined));
+		getMapValues(sourceRefFields).forEach(name => setDataFieldValue(index, name, undefined));
 
 		if (nextSource) {
 			let callback;
 
-			if (parameterName) {
-				callback = onSelectCallback(parameterName);
+			if (parameter) {
+				callback = onSelectCallback(parameter);
 			}
 
 			fetchAttributes(nextSource.value, this.setDefaultIndicator(index));
@@ -160,11 +160,30 @@ export class SourceDataBox extends Component<Props> {
 		}
 	};
 
+	resetDynamicAttributes = (index: number) => {
+		const {data, setDataFieldValue, sourceRefFields} = this.props;
+		const set = data[index];
+
+		getMapValues(sourceRefFields).forEach(name => {
+			let value = set[name];
+
+			if (name === FIELDS.breakdown && Array.isArray(value)) {
+				value = value.map(breakdownSet => {
+					return breakdownSet.value && breakdownSet.value === DYNAMIC_ATTRIBUTE_PROPERTY ? null : breakdownSet;
+				});
+
+				setDataFieldValue(index, name, value);
+			} else if (value && set[name].property === DYNAMIC_ATTRIBUTE_PROPERTY) {
+				setDataFieldValue(index, name, undefined);
+			}
+		});
+	};
+
 	setDefaultIndicator = (index: number) => (attributes: Array<Attribute>) => {
-		const {indicatorName, setDataFieldValue} = this.props;
+		const {setDataFieldValue, sourceRefFields} = this.props;
 		const indicator = attributes.find(attribute => attribute.code === 'UUID');
 
-		indicator && setDataFieldValue(index, indicatorName, indicator);
+		indicator && setDataFieldValue(index, sourceRefFields.indicator, indicator);
 	};
 
 	renderAddSourceInput = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddSource} />;
@@ -184,6 +203,7 @@ export class SourceDataBox extends Component<Props> {
 				onRemove={this.removeSet}
 				onSelectSource={this.handleSelectSource}
 				removable={removable}
+				resetDynamicAttributes={this.resetDynamicAttributes}
 				set={set}
 				sources={sources}
 			/>

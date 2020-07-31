@@ -8,7 +8,9 @@ import {Text} from 'components/atoms';
 export class FormCheckControl extends PureComponent<Props> {
 	static defaultProps = {
 		className: '',
-		reverse: false
+		disabled: false,
+		reverse: false,
+		tip: ''
 	};
 
 	renderLabel = () => {
@@ -17,15 +19,16 @@ export class FormCheckControl extends PureComponent<Props> {
 	};
 
 	render () {
-		const {children, className, reverse} = this.props;
+		const {children, className, disabled, reverse, tip} = this.props;
 		const containerCN = cn({
 			[styles.container]: true,
 			[styles.reverseContainer]: reverse,
+			[styles.disabled]: disabled,
 			[className]: true
 		});
 
 		return (
-			<div className={containerCN}>
+			<div className={containerCN} title={tip}>
 				{children}
 				{this.renderLabel()}
 			</div>

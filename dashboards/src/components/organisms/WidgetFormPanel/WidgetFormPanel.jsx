@@ -52,7 +52,8 @@ export class WidgetFormPanel extends Component<Props, State> {
 			attributes,
 			dynamicGroups,
 			fetchAttributes,
-			fetchGroupDynamicAttributes,
+			fetchDynamicAttributeGroups,
+			fetchDynamicAttributes,
 			fetchRefAttributes,
 			refAttributes,
 			values
@@ -63,7 +64,8 @@ export class WidgetFormPanel extends Component<Props, State> {
 			attributes,
 			dynamicGroups,
 			fetchAttributes: fetchAttributes,
-			fetchGroupDynamicAttributes,
+			fetchDynamicAttributeGroups,
+			fetchDynamicAttributes,
 			fetchRefAttributes: fetchRefAttributes,
 			refAttributes,
 			values
