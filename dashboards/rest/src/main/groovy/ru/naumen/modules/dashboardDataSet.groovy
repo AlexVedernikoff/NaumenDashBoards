@@ -311,14 +311,26 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
             attribute: mappingAttribute(yAxis),
             sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
         )
+        def dynamicGroup = null
         def xAxis = data.xAxis as Map<String, Object>
+        boolean dynamicInAggregation = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        if (dynamicInAggregation)
+        {
+            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(yAxis))
+        }
         def group = data.group as Map<String, Object>
         def groupParameter = buildSystemGroup(group, xAxis)
         groupParameter?.sortingType = demoSorting.value == 'PARAMETER' ? demoSorting.type : null
+        boolean dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        if (dynamicInParameter)
+        {
+            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(xAxis))
+        }
 
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         def breakdown = null
+        boolean dynamicInBreakdown = false
 
         if (mayBeBreakdown instanceof Collection)
         {
@@ -330,6 +342,11 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
             {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                    if(dynamicInBreakdown)
+                    {
+                        dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
+                    }
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
             }
@@ -347,6 +364,12 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
                     it as Map<String, Object>
                 )
             }
+            dynamicInBreakdown = breakdown?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            if (dynamicInBreakdown)
+            {
+                dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
+            }
+
         }
         def res = new RequestData(
             source: source,
@@ -376,14 +399,52 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         def parameterCustomGroup = group.way == 'CUSTOM'
             ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
             : null
-
+        if (dynamicInParameter)
+        {
+            parameterCustomGroup = dynamicGroup
+        }
         FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter')
 
-        def breakdownCustomGroup = data.breakdownGroup?.way == 'CUSTOM'
-            ? [attribute: mappingAttribute(mayBeBreakdown)] + ( data.breakdownGroup.data as Map<String, Object>)
+        def breakdownAttribute
+        def breakdownGroupData
+        boolean isBreakdownGroupCustom = false
+        if(mayBeBreakdown instanceof Collection) {
+            breakdownAttribute = mayBeBreakdown?.value.find()
+            breakdownGroupData = mayBeBreakdown?.group?.data.find()
+            isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == 'CUSTOM'
+        }
+        else {
+            breakdownAttribute = mayBeBreakdown
+            breakdownGroupData = data?.breakdownGroup?.data
+            isBreakdownGroupCustom = data?.breakdownGroup?.way == 'CUSTOM'
+        }
+        def breakdownCustomGroup =  isBreakdownGroupCustom
+            ? [attribute: mappingAttribute(breakdownAttribute), *: breakdownGroupData]
             : null
+        if (dynamicInBreakdown)
+        {
+            breakdownCustomGroup =  dynamicGroup
+        }
         FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
 
+        if (dynamicInAggregation) {
+
+            dynamicFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
+            if(!parameterFilter?.filters) {
+                parameterFilter?.filters = dynamicFilter.filters
+            } else if (parameterFilter?.filters) {
+                //Если у нас есть фильтры в параметре и при этом есть дин. атрибут в агрегации,
+                // необходимо его фильтр так же объединить с исходными фильтрами. Для этого переходим на
+                // второй уровень вложенности и производим сложение условий через операцию и.
+                parameterFilter?.filters = parameterFilter?.filters.collectMany {
+                    [it.collectMany { [it, dynamicFilter.filters[0][0]] }]
+                }
+            }
+            else if(!breakdownFilter?.filters) {
+                breakdownFilter?.filters = dynamicFilter.filters
+            }
+
+        }
         def requisite
         if (data.sourceForCompute)
         {
@@ -402,34 +463,9 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
-            parameterCustomGroup ? parameterCustomGroup : breakdownCustomGroup, requisite: requisite]]
+            null, requisite: requisite]]
     } as Map<String, Map>
     return buildDiagramRequest(intermediateData, subjectUUID)
-}
-
-/**
- * Метод формирования и получения фильтров из кастомных группировок запроса
- * @param customGroup - кастомная группировка из запрос
- * @param subjectUUID - идентификатор "текущего объекта"
- * @param place - место, откуда пришла группировка
- * @return объект типа FilterList со списком фильтров и местом использования кастомной группировки
- */
-private FilterList getFilterList(def customGroup, String subjectUUID, String place) {
-    def filterList = customGroup?.subGroups?.collect { subGroup ->
-        Closure<Collection<Collection<FilterParameter>>> mappingFilters =
-            getMappingFilterMethodByType(customGroup.attribute.type, subjectUUID)
-        String groupName = subGroup.name
-        def filters = mappingFilters(
-            subGroup.data as List<List>,
-            customGroup.attribute,
-            groupName
-        )
-        return filters
-    }
-    return new FilterList(
-        filters: filterList,
-        place: place
-    )
 }
 
 /**
@@ -454,10 +490,17 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
             attribute: mappingAttribute(indicator),
             sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
         )
+        def dynamicGroup
+        boolean dynamicInAggregation = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        if (dynamicInAggregation)
+        {
+            dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(indicator))
+        }
 
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         GroupParameter breakdown = null
+        boolean dynamicInBreakdown = false
 
         if (mayBeBreakdown instanceof Collection)
         {
@@ -469,6 +512,10 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
             {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                    if(dynamicInBreakdown) {
+                        dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
+                    }
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
             }
@@ -485,6 +532,11 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                     data.breakdownGroup as Map<String, Object>,
                     it as Map<String, Object>
                 )
+            }
+            dynamicInBreakdown = breakdown?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            if (dynamicInBreakdown)
+            {
+                dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
             }
         }
 
@@ -513,11 +565,25 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
             ]
         }
 
-        def breakdownCustomGroup = data.breakdownGroup?.way == 'CUSTOM'
-            ? [attribute: mappingAttribute(mayBeBreakdown)] + ( data.breakdownGroup.data as Map<String, Object>)
-            : null
-        FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
 
+        def breakdownCustomGroup
+        if(dynamicInBreakdown)
+        {
+            breakdownCustomGroup = dynamicGroup
+        }
+        else
+        {
+            breakdownCustomGroup = data.breakdownGroup?.way == 'CUSTOM'
+                ? [attribute: mappingAttribute(mayBeBreakdown), *: data.breakdownGroup.data]
+                : null
+        }
+
+        FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
+        FilterList aggregationFilter = null
+        if (dynamicInAggregation)
+        {
+            aggregationFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
+        }
         def requisite
         if (data.sourceForCompute)
         {
@@ -532,7 +598,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter])
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, aggregationFilter])
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
@@ -561,6 +627,12 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
             type: data.aggregation as Aggregation,
             attribute: mappingAttribute(indicator)
         )
+        def dynamicGroup
+        if (aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
+        {
+            dynamicGroup = mappingDynamicAttributeCustomGroup(aggregationParameter.attribute)
+            dynamicGroup.subGroups*.name = aggregationParameter.attribute.title
+        }
         def res = new RequestData(source: source, aggregations: [aggregationParameter])
 
         def comp = indicator?.stringForCompute?.with {
@@ -580,6 +652,7 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
             ]
         }
         String attributeTitle = indicator?.title
+        FilterList dynamicFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
         def requisite
         if (data.sourceForCompute)
         {
@@ -594,7 +667,7 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [])
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [dynamicFilter])
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite:
@@ -622,6 +695,12 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             type: data.aggregation as Aggregation,
             attribute: mappingAttribute(column)
         )
+        def dynamicGroup = null
+        boolean dynamicInAggregate = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        if (dynamicInAggregate)
+        {
+            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(column))
+        }
         def row = data.row as Map<String, Object>
 
         //в таблице группировка по строке всегда обычная.
@@ -630,11 +709,16 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             type: GroupType.OVERLAP,
             attribute: mappingAttribute(row)
         )
+        boolean dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        if (dynamicInParameter) {
+            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(row))
+        }
 
         //а вот разбивка может быть кастомной.
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         def breakdownParameter = null
+        boolean dynamicInBreakdown = false
 
         if (mayBeBreakdown instanceof Collection)
         {
@@ -646,6 +730,11 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                    if(dynamicInBreakdown)
+                    {
+                        dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
+                    }
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
             }
@@ -662,6 +751,11 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
                     data.breakdownGroup as Map<String, Object>,
                     it as Map<String, Object>
                 )
+            }
+            dynamicInBreakdown = breakdownParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            if (dynamicInBreakdown)
+            {
+                dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
             }
         }
 
@@ -689,10 +783,33 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             ]
         }
 
-        def breakdownCustomGroup = data.breakdownGroup?.way == 'CUSTOM'
-            ? [attribute: mappingAttribute(mayBeBreakdown)] + ( data.breakdownGroup.data as Map<String, Object>)
+        def breakdownAttribute
+        def breakdownGroupData
+        boolean isBreakdownGroupCustom = false
+        if(mayBeBreakdown instanceof Collection)
+        {
+            breakdownAttribute = mayBeBreakdown?.value.find()
+            breakdownGroupData = mayBeBreakdown?.group?.data.find()
+            isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == 'CUSTOM'
+        }
+        else {
+            breakdownAttribute = mayBeBreakdown
+            breakdownGroupData = data?.breakdownGroup?.data
+            isBreakdownGroupCustom = data?.breakdownGroup?.way == 'CUSTOM'
+        }
+        def breakdownCustomGroup =  isBreakdownGroupCustom
+            ? [attribute: mappingAttribute(breakdownAttribute), *: breakdownGroupData]
             : null
+        if (dynamicInBreakdown)
+        {
+            breakdownCustomGroup =  dynamicGroup
+        }
         FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
+        FilterList parameterFilter = null
+        if (dynamicInAggregate || dynamicInParameter)
+        {
+            parameterFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
+        }
 
         def requisite
         if (data.sourceForCompute)
@@ -708,7 +825,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter])
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, parameterFilter])
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
@@ -740,12 +857,25 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         )
         def xAxis = data.xAxis as Map<String, Object>
         def group = data.group as Map<String, Object>
+        def dynamicGroup = null
+        boolean dynamicInAggregation = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        if (dynamicInAggregation)
+        {
+            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(yAxis))
+        }
 
         def groupParameter = buildSystemGroup(group, xAxis)
         groupParameter?.sortingType = demoSorting.value == 'PARAMETER' ? demoSorting.type : null
+        boolean dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        if (dynamicInParameter)
+        {
+            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(xAxis))
+        }
+
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         def breakdown = null
+        boolean dynamicInBreakdown = false
 
         if (mayBeBreakdown instanceof Collection)
         {
@@ -757,6 +887,11 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
             {
                 //Группировка одного типа можно продолжать
                 breakdownMap = mayBeBreakdown.collectEntries { el ->
+                    dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                    if (dynamicInBreakdown)
+                    {
+                        dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
+                    }
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
             }
@@ -773,6 +908,11 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
                     data.breakdownGroup as Map<String, Object>,
                     it as Map<String, Object>
                 )
+            }
+            dynamicInBreakdown = breakdown?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            if (dynamicInBreakdown)
+            {
+                dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
             }
         }
 
@@ -804,14 +944,58 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         def parameterCustomGroup = group.way == 'CUSTOM'
             ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
             : null
+        if (dynamicInParameter)
+        {
+            parameterCustomGroup = dynamicGroup
+        }
 
         FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter')
 
-        def breakdownCustomGroup = data.breakdownGroup?.way == 'CUSTOM'
-            ? [attribute: mappingAttribute(mayBeBreakdown)] + ( data.breakdownGroup.data as Map<String, Object>)
+        def breakdownAttribute
+        def breakdownGroupData
+        boolean isBreakdownGroupCustom = false
+        if (mayBeBreakdown instanceof Collection)
+        {
+            breakdownAttribute = mayBeBreakdown?.value.find()
+            breakdownGroupData = mayBeBreakdown?.group?.data.find()
+            isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == 'CUSTOM'
+        }
+        else
+        {
+            breakdownAttribute = mayBeBreakdown
+            breakdownGroupData = data?.breakdownGroup?.data
+            isBreakdownGroupCustom = data?.breakdownGroup?.way == 'CUSTOM'
+        }
+        def breakdownCustomGroup =  isBreakdownGroupCustom
+            ? [attribute: mappingAttribute(breakdownAttribute), *: breakdownGroupData]
             : null
+        if (dynamicInBreakdown)
+        {
+            breakdownCustomGroup = dynamicGroup
+        }
         FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
 
+        if (dynamicInAggregation) {
+
+            dynamicFilter = modules.dashboardDataSet.getFilterList(dynamicGroup, subjectUUID, 'parameter')
+            if (!parameterFilter?.filters)
+            {
+                parameterFilter?.filters = dynamicFilter.filters
+            }
+            else if (parameterFilter?.filters)
+            {
+                //Если у нас есть фильтры в параметре и при этом есть дин. атрибут в агрегации,
+                // необходимо его фильтр так же объединить с исходными фильтрами. Для этого переходим на
+                // второй уровень вложенности и производим сложение условий через операцию и.
+                parameterFilter?.filters = parameterFilter?.filters.collectMany {
+                    [it.collectMany { [it, dynamicFilter.filters[0][0]] }]
+                }
+            }
+            else if (!breakdownFilter?.filters)
+            {
+                breakdownFilter?.filters = dynamicFilter.filters
+            }
+        }
         def requisite
         if (data.sourceForCompute)
         {
@@ -1831,169 +2015,6 @@ private def getDiagramData(DiagramRequest request)
 }
 
 /**
- * Метод получения данных для диаграмм без списков фильтров
- * @param node - нода реквизита запроса
- * @param request - запрос
- * @return сырые данные для построения диаграм
- */
-private List getNoFilterListDiagramData(def node, DiagramRequest request)
-{
-    String nodeType = node.type
-    switch (nodeType.toLowerCase())
-    {
-        case 'default':
-            def requisiteNode = node as DefaultRequisiteNode
-            RequestData requestData = request.data[requisiteNode.dataKey]
-            Closure formatAggregation = this.&formatAggregationSet
-            Closure formatGroup = this.&formatGroupSet.curry(requestData)
-            def res = modules.dashboardQueryWrapper.getData(requestData)
-                             .with(formatGroup).with(formatAggregation)
-            def total = res ? [(requisiteNode.title): res] : [:]
-            return formatResult(total)
-        case 'computation':
-            def requisiteNode = node as ComputationRequisiteNode
-            def calculator = new FormulaCalculator(requisiteNode.formula)
-            def dataSet = calculator.variableNames.collectEntries {
-                [(it): request.data[it]]
-            } as Map<String, RequestData>
-            if (!checkGroupTypes(dataSet.values()))
-            {
-                throw new IllegalArgumentException(
-                    "Wrong group types in calculation!"
-                )
-            }
-            def variables = dataSet.collectEntries { key, data ->
-                Closure postProcess =
-                    this.&formatGroupSet.curry(data as RequestData)
-                [(key): modules.dashboardQueryWrapper.getData(data as RequestData).
-                    with(postProcess)]
-            } as Map<String, List>
-
-            //Вычисление формулы. Выглядит немного костыльно...
-            def res = dataSet.values().head().groups?.size() ?
-                findUniqueGroups(variables).collect { group ->
-                    def resultCalculation = calculator.execute { variable ->
-                        (variables[variable as String].findResult {
-                            group == it.tail() ? it.head() : null
-                        } ?: 0) as Double
-                    }
-                    return [resultCalculation, group].flatten()
-                } : [[calculator.execute { key ->
-                variables[key as String].head().head() as Double
-            }]]
-            def total = [(node.title): formatAggregationSet(res)]
-            return formatResult(total)
-        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
-    }
-}
-
-/**
- * Метод получения данных для диаграмм с одним списком фильтров
- * @param node - нода реквизита запроса
- * @param request - запрос
- * @param parameterFilters - список фильтров из параметра
- * @param breakdownFilters - список фильтров из разбивки
- * @return сырые данные для построения диаграм
- */
-private List getOneFilterListDiagramData(def node, DiagramRequest request,
-                                        def parameterFilters, def breakdownFilters)
-{
-    String nodeType = node.type
-    def filtering = parameterFilters ? parameterFilters : breakdownFilters
-    switch (nodeType.toLowerCase())
-    {
-        case 'default':
-            def requisiteNode = node as DefaultRequisiteNode
-            RequestData requestData = request.data[requisiteNode.dataKey]
-            RequestData newRequestData = requestData.clone()
-            Closure formatAggregation = this.&formatAggregationSet
-            Closure formatGroup = this.&formatGroupSet.curry(requestData)
-            return filtering*.get(0).collectMany {
-                newRequestData.filters = [it]
-                def res = modules.dashboardQueryWrapper.getData(newRequestData)
-                                 .with(formatGroup).with(formatAggregation)
-                Map partial = res ? [(it.title as Set): res] : [:]
-                return formatResult(partial)
-            }
-        case 'computation':
-            def requisiteNode = node as ComputationRequisiteNode
-            def calculator = new FormulaCalculator(requisiteNode.formula)
-            def dataSet = calculator.variableNames.collectEntries {
-                RequestData newRequestData = request.data[it].clone()
-                newRequestData.filters = filtering*.get(0)
-                [(it): newRequestData]
-            } as Map<String, RequestData>
-
-            if (!checkGroupTypes(dataSet.values()))
-            {
-                throw new IllegalArgumentException(
-                    "Wrong group types in calculation!"
-                )
-            }
-            def variables = dataSet.collectEntries { key, data ->
-                [(key): modules.dashboardQueryWrapper.getData(data as RequestData)]
-            } as Map<String, List>
-
-            def res = dataSet.values().head().groups?.size() ?
-                findUniqueGroups(variables).collect { group ->
-                    def resultCalculation = calculator.execute { variable ->
-                        (variables[variable as String].findResult {
-                            group == it.tail() ? it.head() : null
-                        } ?: 0) as Double
-                    }
-                    return [resultCalculation, group].flatten()
-                } : [[calculator.execute { key ->
-                variables[key as String].head().head() as Double
-            }]]
-            Map total = [(filtering*.get(0).title as Set): formatAggregationSet(res)]
-            return formatResult(total)
-        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
-    }
-}
-
-/**
- * Метод получения данных для диаграмм с двумя списками фильтров
- * @param node - нода реквизита запроса
- * @param request - запрос
- * @param parameterFilters - список фильтров из параметра
- * @param breakdownFilters - список фильтров из разбивки
- * @return сырые данные для построения диаграм
- */
-private List getTwoFilterListDiagramData(def node,
-                                        DiagramRequest request,
-                                        def parameterFilters,
-                                        def breakdownFilters)
-{
-    String nodeType = node.type
-    switch (nodeType.toLowerCase())
-    {
-        case 'default':
-            def pareFilters = parameterFilters.collectMany { parameterFilter ->
-                breakdownFilters.collect {
-                    [parameterFilter, it]
-                }
-            }
-            return pareFilters.collectMany { condition ->
-                def requisiteNode = node as DefaultRequisiteNode
-                RequestData requestData = request.data[requisiteNode.dataKey]
-                RequestData newRequestData = requestData.clone()
-                //объединяем попарно фильтр-условие из параметра и группировки
-                newRequestData.filters = condition.inject { first, second ->
-                    first + second
-                }
-                Closure formatAggregation = this.&formatAggregationSet
-                Closure formatGroup = this.&formatGroupSet.curry(newRequestData)
-                def res = modules.dashboardQueryWrapper.getData(newRequestData)
-                                 .with(formatGroup)
-                                 .with(formatAggregation)
-                def total = res ? [(condition.title.flatten() as Set): res] : null
-                formatResult(total)
-            }
-        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
-    }
-}
-
-/**
  * Метод проверки списка группировок на соответствие единому типу атрибута
  * @param listRequest - список запросов на построение диаграмм
  * @return true\false "соответствует"\"не соответствует"
@@ -2094,9 +2115,14 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
             switch (parameter.attribute.type)
             {
                 case AttributeType.DT_INTERVAL_TYPE:
+                    if (parameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)) {
+                        return value
+                    }
                     return TimeUnit.MILLISECONDS.toHours(value as long)
                 case AttributeType.STATE_TYPE:
-                    return api.metainfo.getStateTitle(fqnClass, value)
+                    def (stateValue, stateCase) = value.tokenize('$')
+                    String totalFqn = "${fqnClass}\$${stateCase}"
+                    return api.metainfo.getStateTitle(totalFqn, stateValue)
                 case AttributeType.META_CLASS_TYPE:
                     return api.metainfo.getMetaClass(value).title
                 case AttributeType.BOOL_TYPE:
@@ -2111,7 +2137,12 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                 case AttrtibuteType.TIMER_TYPES:
                     return (value as TimerStatus).getRussianName()
                 default:
-                    return parameter.attribute?.code == 'UUID' ? value.split('\\$', 2)[1] : value
+                    //прийти в качестве значения может, как UUID, так и просто id
+                    if (parameter.attribute?.code == 'UUID')
+                    {
+                        value = value.split('\\$', 2).last() ?: value
+                    }
+                    return value.replaceAll("\\<.*?>","")
             }
     case GroupType.DAY:
         String format = parameter.format
@@ -2195,7 +2226,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
         case GroupType.HOUR_INTERVAL:
         case GroupType.DAY_INTERVAL:
         case GroupType.WEEK_INTERVAL:
-            return value
+            return value.replaceAll("\\<.*?>","")
         default: throw new IllegalArgumentException("Not supported type: $type")
     }
 }
@@ -2523,8 +2554,7 @@ private Map<String, Object> transformRequestWithComputation(Map<String, Object> 
  * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
  * @return изменённый запрос
  */
-private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent,
-                                                               String cardObjectUuid)
+private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent, String cardObjectUuid)
 {
     Closure<Map<String, Object>> transform = { Map<String, Object> map ->
         def res = [:] << map
@@ -2542,9 +2572,272 @@ private boolean isCustomGroupFromBreakdown(Map<String, Object> requestContent)
         def data = value as Map<String, Object>
         def group = data.group as Map<String, Object>
         def isSystemParameterGroup = group?.way == 'SYSTEM'
-        def isCustomBreakdownGroup = data.breakdownGroup?.way == 'CUSTOM'
+        def isCustomBreakdownGroup = data.breakdownGroup?.way == 'CUSTOM' ||
+                                     data.breakdown?.group?.way.find() == 'CUSTOM'
         boolean sourceForCompute = data.sourceForCompute
         sourceForCompute == false ? isSystemParameterGroup && isCustomBreakdownGroup : null
+    }
+}
+
+/**
+ * Метод для создания кастомной группировки для динамического атрибута
+ * @param dynamicAttribute - динамический атрибут
+ * @return кастомная группировка для динамического атрибута
+ */
+Map<String, Object> mappingDynamicAttributeCustomGroup(Attribute dynamicAttribute)
+{
+    if (dynamicAttribute?.property == AttributeType.TOTAL_VALUE_TYPE)
+    {
+        def (dynAttrCode, uuidForTemplate) = dynamicAttribute.code.split('_', 2)
+        dynamicAttribute.code = dynAttrCode
+        def groupType = 'object'
+        def groupName = 'totalValueGroup'
+        dynamicAttribute.attrChains().head().type = AttributeType.OBJECT_TYPE
+        dynamicAttribute.attrChains().last().ref = new Attribute(code: 'linkTemplate', type: 'string')
+
+        def subGroupsData = [[data: [title: 'Шаблон атрибута',
+                                     uuid: uuidForTemplate],
+                              type: 'CONTAINS']]
+        def subGroups = [data: [subGroupsData], name: '']
+
+        return [attribute: dynamicAttribute, name: groupName,
+                subGroups: [subGroups], type: groupType, id: ''] as Map<String, Object>
+    }
+    return [:] as Map<String, Object>
+}
+
+/**
+ * Метод получения списка фильтров
+ * @param customGroup - кастомная группировка для построения фильтра
+ * @param subjectUUID - идентификатор "текущего объекта"
+ * @param place - место, откуда была создана кастомная группировка
+ * @return - список фильтров
+ */
+private FilterList getFilterList(Map<String, Object> customGroup, String subjectUUID, String place) {
+    def filterList = customGroup?.subGroups?.collect { subGroup ->
+        String attributeType = customGroup.attribute.type.split('\\$', 2).head()
+        customGroup.attribute.type = attributeType
+        Closure<Collection<Collection<FilterParameter>>> mappingFilters =
+            getMappingFilterMethodByType(attributeType, subjectUUID)
+        String groupName = subGroup.name
+        def filters = mappingFilters(
+            subGroup.data as List<List>,
+            customGroup.attribute,
+            groupName
+        )
+        return filters
+    }
+    FilterList filter = new FilterList(
+        filters: filterList,
+        place: place
+    )
+    return filter
+}
+
+/**
+ * Метод получения данных для диаграмм без списков фильтров
+ * @param node - нода реквизита запроса
+ * @param request - запрос
+ * @return сырые данные для построения диаграм
+ */
+private List getNoFilterListDiagramData(def node, DiagramRequest request)
+{
+    String nodeType = node.type
+    switch (nodeType.toLowerCase())
+    {
+        case 'default':
+            def requisiteNode = node as DefaultRequisiteNode
+            RequestData requestData = request.data[requisiteNode.dataKey]
+            Closure formatAggregation = this.&formatAggregationSet
+            Closure formatGroup = this.&formatGroupSet.curry(requestData)
+            def res = modules.dashboardQueryWrapper.getData(requestData)
+                             .with(formatGroup)
+                             .with(formatAggregation)
+            def total = res ? [(requisiteNode.title): res] : [:]
+            return formatResult(total)
+        case 'computation':
+            def requisiteNode = node as ComputationRequisiteNode
+            def calculator = new FormulaCalculator(requisiteNode.formula)
+            def dataSet = calculator.variableNames.collectEntries {
+                [(it): request.data[it]]
+            } as Map<String, RequestData>
+            if (!checkGroupTypes(dataSet.values()))
+            {
+                throw new IllegalArgumentException(
+                    "Wrong group types in calculation!"
+                )
+            }
+            def variables = dataSet.collectEntries { key, data ->
+                Closure postProcess =
+                    this.&formatGroupSet.curry(data as RequestData)
+                [(key): modules.dashboardQueryWrapper.getData(data as RequestData).
+                    with(postProcess)]
+            } as Map<String, List>
+
+            //Вычисление формулы. Выглядит немного костыльно...
+            def res = dataSet.values().head().groups?.size() ?
+                findUniqueGroups(variables).collect { group ->
+                    def resultCalculation = calculator.execute { variable ->
+                        (variables[variable as String].findResult {
+                            group == it.tail() ? it.head() : null
+                        } ?: 0) as Double
+                    }
+                    return [resultCalculation, group].flatten()
+                } : [[calculator.execute { key ->
+                variables[key as String].head().head() as Double
+            }]]
+            def total = [(node.title): formatAggregationSet(res)]
+            return formatResult(total)
+        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
+    }
+}
+
+/**
+ * Метод получения данных для диаграмм с одним списком фильтров
+ * @param node - нода реквизита запроса
+ * @param request - запрос
+ * @param parameterFilters - список фильтров из параметра
+ * @param breakdownFilters - список фильтров из разбивки
+ * @return сырые данные для построения диаграм
+ */
+private List getOneFilterListDiagramData(def node,
+                                         DiagramRequest request,
+                                         List parameterFilters,
+                                         List breakdownFilters)
+{
+    String nodeType = node.type
+    def filtering = parameterFilters ? parameterFilters : breakdownFilters
+    switch (nodeType.toLowerCase())
+    {
+        case 'default':
+            def requisiteNode = node as DefaultRequisiteNode
+            RequestData requestData = request.data[requisiteNode.dataKey]
+            RequestData newRequestData = requestData.clone()
+            Closure formatAggregation = this.&formatAggregationSet
+            Closure formatGroup = this.&formatGroupSet.curry(requestData)
+            return filtering*.get(0)?.collectMany {
+                newRequestData.filters = [it]
+                def res = modules.dashboardQueryWrapper.getData(newRequestData)
+                                 .with(formatGroup)
+                                 .with(formatAggregation)
+                Map partial = res ? [(it.title.grep() as Set): res] : [:]
+                return formatResult(partial)
+            }
+        case 'computation':
+            def requisiteNode = node as ComputationRequisiteNode
+            def calculator = new FormulaCalculator(requisiteNode.formula)
+            def dataSet = calculator.variableNames.collectEntries {
+                [(it): request.data[it]]
+            } as Map<String, RequestData>
+
+            def variables = dataSet.collectMany { key, data ->
+                RequestData newData = data.clone()
+                return filtering*.get(0).collect {
+                    newData.filters = [it]
+                    Closure postProcess =
+                        this.&formatGroupSet.curry(data as RequestData)
+                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData)
+                    [(key): res.with(postProcess)]  as Map<String, List>
+                }
+            }
+            int i = 0
+            return variables.collectMany { totalVar ->
+                def res = dataSet.values().head().groups?.size() ?
+                    findUniqueGroups(totalVar).collect { group ->
+                        def resultCalculation = calculator.execute { variable ->
+                            (totalVar[variable as String].findResult {
+                                group == it.tail() ? it.head() : null
+                            } ?: 0) as Double
+                        }
+                        return [resultCalculation, group].flatten()
+                    } : [[calculator.execute { key ->
+                    totalVar[key as String].head().head() as Double
+                }]]
+                def title = filtering*.get(0).title.grep()
+                Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): formatAggregationSet(res)]
+                return formatResult(total)
+            }
+
+        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
+    }
+}
+
+/**
+ * Метод получения данных для диаграмм с двумя списками фильтров
+ * @param node - нода реквизита запроса
+ * @param request - запрос
+ * @param parameterFilters - список фильтров из параметра
+ * @param breakdownFilters - список фильтров из разбивки
+ * @return сырые данные для построения диаграм
+ */
+private List getTwoFilterListDiagramData(def node,
+                                         DiagramRequest request,
+                                         List parameterFilters,
+                                         List breakdownFilters)
+{
+    String nodeType = node.type
+    def pareFilters = parameterFilters.collectMany { parameterFilter ->
+        breakdownFilters.collect {
+            [parameterFilter, it]
+        }
+    }
+    switch (nodeType.toLowerCase())
+    {
+        case 'default':
+
+            return pareFilters.collectMany { condition ->
+                def requisiteNode = node as DefaultRequisiteNode
+                RequestData requestData = request.data[requisiteNode.dataKey]
+                RequestData newRequestData = requestData.clone()
+                //объединяем попарно фильтр-условие из параметра и группировки
+                newRequestData.filters = condition.inject { first, second ->
+                    first + second
+                }
+                Closure formatAggregation = this.&formatAggregationSet
+                Closure formatGroup = this.&formatGroupSet.curry(newRequestData)
+                def res = modules.dashboardQueryWrapper.getData(newRequestData)
+                                 .with(formatGroup)
+                                 .with(formatAggregation)
+                def total = res ? [(condition.title.flatten().grep() as Set): res] : null
+                formatResult(total)
+            }
+        case 'computation':
+            def requisiteNode = node as ComputationRequisiteNode
+            def calculator = new FormulaCalculator(requisiteNode.formula)
+            def dataSet = calculator.variableNames.collectEntries {
+                [(it): request.data[it]]
+            } as Map<String, RequestData>
+
+            def variables = dataSet.collectMany { key, data ->
+                RequestData newData = data.clone()
+                return pareFilters.collect { condition ->
+                    newData.filters = condition.inject { first, second ->
+                        first + second
+                    }
+                    Closure postProcess =
+                        this.&formatGroupSet.curry(data as RequestData)
+                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData)
+                    [(key): res.with(postProcess)]  as Map<String, List>
+                }
+            }
+            int i = 0
+            return variables.collectMany { totalVar ->
+                def res = dataSet.values().head().groups?.size() ?
+                    findUniqueGroups(totalVar).collect { group ->
+                        def resultCalculation = calculator.execute { variable ->
+                            (totalVar[variable as String].findResult {
+                                group == it.tail() ? it.head() : null
+                            } ?: 0) as Double
+                        }
+                        return [resultCalculation, group].flatten()
+                    } : [[calculator.execute { key ->
+                    totalVar[key as String].head().head() as Double
+                }]]
+                def title = pareFilters*.title.flatten().grep() as Set
+                Map total = [( title.any {it[0] != ''} ? title[i++] : ''): formatAggregationSet(res)]
+                return formatResult(total)
+            }
+        default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 }
 //endregion

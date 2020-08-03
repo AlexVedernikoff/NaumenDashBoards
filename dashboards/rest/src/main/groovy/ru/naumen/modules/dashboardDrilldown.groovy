@@ -251,14 +251,29 @@ class Link
 
                 def context = createContext(contextValue)
                 context.remove(GroupType.OVERLAP).each { value ->
-                    if (attributeType in AttributeType.LINK_TYPES)
+                    if (attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
                     {
+                        attr.code = AttributeType.TOTAL_VALUE_TYPE
+                        result << [filterBuilder.OR(attr.code, 'notNull', null)]
+                        attr.ref = new Attribute(
+                            code: 'textValue',
+                            type: 'string',
+                            property: AttributeType.TOTAL_VALUE_TYPE
+                        )
                         def objects = findObjects(attr.ref, attr.property, value)
                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
                     }
                     else
                     {
-                        result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
+                        if (attributeType in AttributeType.LINK_TYPES)
+                        {
+                            def objects = findObjects(attr.ref, attr.property, value)
+                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                        }
+                        else
+                        {
+                            result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
+                        }
                     }
                 }
                 if (context)
@@ -560,11 +575,11 @@ class Link
             case AttributeType.DATE_TYPES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
             case AttributeType.DT_INTERVAL_TYPE:
-            def (intervalValue, intervalType) = value
-            return filterBuilder.OR(
-                code, 'contains', api.types.newDateTimeInterval(
-                [intervalValue as long, intervalType as String])
-            )
+                def (intervalValue, intervalType) = value
+                return filterBuilder.OR(
+                    code, 'contains', api.types.newDateTimeInterval(
+                    [intervalValue as long, intervalType as String])
+                )
             case AttributeType.TIMER_TYPES:
                 String statusCode = TimerStatus.getByName(value)
                 return filterBuilder.OR(code, 'timerStatusContains', [statusCode])

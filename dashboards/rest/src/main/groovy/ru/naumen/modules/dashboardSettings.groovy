@@ -524,8 +524,8 @@ String deletePersonalDashboard(String classFqn, String contentCode, def user)
         if (resultOfRemoving)
         {
             personalDashboard.widgetIds
-                    .findAll(this.&isPersonalWidget.ncurry(1, user))
-                    .each(this.&deleteJsonSettings.ncurry(1, WIDGET_NAMESPACE))
+                             .findAll(this.&isPersonalWidget.ncurry(1, user))
+                             .each(this.&deleteJsonSettings.ncurry(1, WIDGET_NAMESPACE))
             return toJson([status: "OK", message: "Установлены настройки по умолчанию"])
         }
         else
@@ -642,8 +642,8 @@ private String generateWidgetKey(Collection<String> keys,
         {
             uuidWidget = "${type}_${contentCode}_${UUID.randomUUID()}${loginKeyPart}"
         }
-        (keys.contains(uuidWidget) &&
-                loadJsonSettings(uuidWidget, WIDGET_NAMESPACE))
+        (keys?.contains(uuidWidget) &&
+         loadJsonSettings(uuidWidget, WIDGET_NAMESPACE))
     }()) continue
     return uuidWidget
 }
@@ -683,11 +683,11 @@ private DashboardSettings getDashboardSetting(String dashboardKey)
 {
     def dashboardSettings = getSettingsFromJson(loadJsonSettings(dashboardKey, DASHBOARD_NAMESPACE))
     return new DashboardSettings(
-        autoUpdate      : dashboardSettings.autoUpdate,
-        widgetIds       : dashboardSettings.widgetIds,
-        customGroupIds  : dashboardSettings.customGroupIds,
-        layouts         : dashboardSettings.layouts,
-        mobileLayouts   : dashboardSettings.mobileLayouts
+        autoUpdate      : dashboardSettings?.autoUpdate,
+        widgetIds       : dashboardSettings?.widgetIds ?: [],
+        customGroupIds  : dashboardSettings?.customGroupIds ?: [],
+        layouts         : dashboardSettings?.layouts,
+        mobileLayouts   : dashboardSettings?.mobileLayouts
     )
 }
 
@@ -948,7 +948,7 @@ private String deleteDefaultWidget(String classFqn,
                 // По возможности удалить и персональный виджет, если он есть
                 String personalDashboardKey = dashboardKeyByLogin(user.login as String)
                 loadJsonSettings(personalDashboardKey, DASHBOARD_NAMESPACE) // проверка на существование персонального дашборда
-                        ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetKey) }
+                    ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetKey) }
                 removeWidgetFromDashboard(dashboardKeyByLogin(), widgetKey) as boolean
             }
             return toJson(resultOfRemoving)

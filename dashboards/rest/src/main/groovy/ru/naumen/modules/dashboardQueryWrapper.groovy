@@ -50,13 +50,14 @@ class QueryWrapper implements CriteriaWrapper
         return new QueryWrapper(source)
     }
 
-    QueryWrapper aggregate(AggregationParameter parameter)
+    QueryWrapper aggregate(AggregationParameter parameter, boolean fromSevenDays = false)
     {
         Aggregation aggregationType = parameter.type
+        def sc = api.selectClause
+        def attribute = parameter.attribute
         Closure aggregation = getAggregation(aggregationType)
-        String[] attributeCodes =
-            parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
-        IApiCriteriaColumn column = api.selectClause.property(attributeCodes)
+        String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        IApiCriteriaColumn column = sc.property(attributeCodes)
         if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
             aggregationType == Aggregation.AVG)
         {
@@ -66,9 +67,17 @@ class QueryWrapper implements CriteriaWrapper
                 type: "string"
             )
             attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
-            column = api.selectClause.property(attributeCodes)
-            column = column.with(api.selectClause.&cast.rcurry('integer'))
+            column = sc.property(attributeCodes)
+            column = column.with(sc.&cast.rcurry('integer'))
         }
+
+        if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
+        {
+            String linkTemplateUuid = attribute.attrChains().last().title ?: ''
+            column = castDynamicToType(attribute, column)
+            criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
+        }
+
         column.with(aggregation).with(criteria.&addColumn)
         String sortingType = parameter.sortingType
         if (sortingType)
@@ -107,6 +116,24 @@ class QueryWrapper implements CriteriaWrapper
         return this
     }
 
+    /**
+     * Метод преобразования динамического типа атрибута к конкретному типу даты
+     * @param attribute - динамический атрибут
+     * @param column - преобразованная колонка для запроса
+     * @return готовка для запроса колонка
+     */
+    private IApiCriteriaColumn castDynamicToType(Attribute attribute, def column)
+    {
+        if (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) &&
+            (attribute.type in AttributeType.DATE_TYPES))
+        {
+            String typeToCast = attribute.type == AttributeType.DATE_TIME_TYPE ? 'timestamp' : attribute.type
+            def sc = api.selectClause
+            return sc.cast(column, typeToCast)
+        }
+        return column
+    }
+
     QueryWrapper group(GroupParameter parameter)
     {
         def sc = api.selectClause
@@ -114,11 +141,23 @@ class QueryWrapper implements CriteriaWrapper
         String[] attributeCodes = parameter.attribute.attrChains()*.code
                                            .with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
+        column = castDynamicToType(parameter.attribute, column)
         switch (groupType)
         {
             case GroupType.OVERLAP:
-                criteria.addGroupColumn(column)
-                criteria.addColumn(column)
+                if (attributeCodes.any {it == 'state'})
+                {
+                    column = sc.concat(sc.property('state'),
+                                       sc.constant('$'),
+                                       sc.max(sc.property('metaCaseId')))
+                    criteria.addGroupColumn(sc.property('state'))
+                    criteria.addColumn(column)
+                }
+                else
+                {
+                    criteria.addGroupColumn(column)
+                    criteria.addColumn(column)
+                }
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
@@ -131,23 +170,28 @@ class QueryWrapper implements CriteriaWrapper
                 criteria.addColumn(groupColumn)
                 criteria.addGroupColumn(groupColumn)
                 String sortingType = parameter.sortingType
-                if (sortingType) {
+                if (sortingType)
+                {
                     Closure sorting = getSorting(sortingType)
                     groupColumn.with(sorting).with(criteria.&addOrder)
                 }
                 break
             case GroupType.DAY:
                 String format = parameter.format
-                switch (format) {
+                switch (format)
+                {
                     case 'dd':
                         def dayColumn = sc.day(column)
                         criteria.addColumn(dayColumn)
                         criteria.addGroupColumn(dayColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             dayColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
                         }
                         break
@@ -155,21 +199,27 @@ class QueryWrapper implements CriteriaWrapper
                         def dayColumn = sc.day(column)
                         def monthColumn = sc.month(column)
                         def yearColumn = sc.year(column)
-
-                        criteria.addColumn(sc.concat(dayColumn,sc.constant('.'),
-                                                     monthColumn, sc.constant('.'),
-                                                     yearColumn))
+                        criteria.addColumn(
+                            sc.concat(
+                                dayColumn, sc.constant('.'),
+                                monthColumn, sc.constant('.'),
+                                yearColumn
+                            )
+                        )
 
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(monthColumn)
                         criteria.addGroupColumn(dayColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             yearColumn.with(sorting).with(criteria.&addOrder)
                             monthColumn.with(sorting).with(criteria.&addOrder)
                             dayColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
@@ -192,13 +242,16 @@ class QueryWrapper implements CriteriaWrapper
                         criteria.addGroupColumn(hourColumn)
 
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             yearColumn.with(sorting).with(criteria.&addOrder)
                             monthColumn.with(sorting).with(criteria.&addOrder)
                             dayColumn.with(sorting).with(criteria.&addOrder)
                             hourColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
@@ -209,7 +262,8 @@ class QueryWrapper implements CriteriaWrapper
                         criteria.addGroupColumn(column)
                         criteria.addColumn(column)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             column.with(sorting).with(criteria.&addOrder)
                         }
@@ -219,10 +273,13 @@ class QueryWrapper implements CriteriaWrapper
                         criteria.addColumn(weekColumn)
                         criteria.addGroupColumn(weekColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             weekColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(weekColumn))
                         }
                         break
@@ -234,11 +291,14 @@ class QueryWrapper implements CriteriaWrapper
                         def sortColumn = sc.concat(dayColumn, sc.constant('/'), monthColumn)
                         criteria.addColumn(sortColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             monthColumn.with(sorting).with(criteria.&addOrder)
                             dayColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(dayColumn))
                         }
@@ -246,7 +306,8 @@ class QueryWrapper implements CriteriaWrapper
                 break
             case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
                 String format = parameter.format
-                switch (format) {
+                switch (format)
+                {
                     case 'WW YY':
                         def weekColumn = sc.extract(column, 'WEEK')
                         def yearColumn = sc.year(column)
@@ -256,11 +317,14 @@ class QueryWrapper implements CriteriaWrapper
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(weekColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             yearColumn.with(sorting).with(criteria.&addOrder)
                             weekColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(weekColumn))
                         }
@@ -268,15 +332,18 @@ class QueryWrapper implements CriteriaWrapper
                     case 'MM YY':
                         def monthColumn = sc.month(column)
                         def yearColumn = sc.year(column)
-                        criteria.addColumn(sc.concat(monthColumn, sc.constant('/') , yearColumn))
+                        criteria.addColumn(sc.concat(monthColumn, sc.constant('/'), yearColumn))
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(monthColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             yearColumn.with(sorting).with(criteria.&addOrder)
                             monthColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(monthColumn))
                         }
@@ -289,11 +356,14 @@ class QueryWrapper implements CriteriaWrapper
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(quarterColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             yearColumn.with(sorting).with(criteria.&addOrder)
                             quarterColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(yearColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(quarterColumn))
                         }
@@ -303,7 +373,8 @@ class QueryWrapper implements CriteriaWrapper
                         criteria.addGroupColumn(groupColumn)
                         criteria.addColumn(groupColumn)
                         String sortingType = parameter.sortingType
-                        if (sortingType) {
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             groupColumn.with(sorting).with(criteria.&addOrder)
                         }
@@ -412,29 +483,36 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.HOURS:
                 String format = parameter.format
                 IApiCriteriaColumn hourColumn = sc.extract(column, 'HOUR')
-                switch (format) {
+                switch (format)
+                {
                     case 'hh':
                         criteria.addGroupColumn(hourColumn)
                         criteria.addColumn(hourColumn)
                         String sortingType = parameter.sortingType
-                        if(sortingType){
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             hourColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(hourColumn))
                         }
                         break
                     case 'hh:ii':
                         IApiCriteriaColumn minuteColumn = sc.extract(column, 'MINUTE')
-                        criteria.addColumn(sc.concat(hourColumn,  sc.constant(':'), minuteColumn))
+                        criteria.addColumn(sc.concat(hourColumn, sc.constant(':'), minuteColumn))
                         criteria.addGroupColumn(hourColumn)
                         criteria.addGroupColumn(minuteColumn)
                         String sortingType = parameter.sortingType
-                        if(sortingType){
+                        if (sortingType)
+                        {
                             Closure sorting = getSorting(sortingType)
                             hourColumn.with(sorting).with(criteria.&addOrder)
                             minuteColumn.with(sorting).with(criteria.&addOrder)
-                        } else {
+                        }
+                        else
+                        {
                             criteria.addOrder(ApiCriteriaOrders.asc(hourColumn))
                             criteria.addOrder(ApiCriteriaOrders.asc(minuteColumn))
                         }
@@ -486,6 +564,10 @@ class QueryWrapper implements CriteriaWrapper
             if (columnCode == 'id')
             {
                 columnCode = modules.dashboardQueryWrapper.UUID_CODE
+            }
+            if (code == AttributeType.TOTAL_VALUE_TYPE)
+            {
+                code = columnCode
             }
 
             Comparison type = parameter.type
@@ -631,8 +713,8 @@ List<List> getData(RequestData requestData)
     def wrapper = QueryWrapper.build(requestData.source)
 
     requestData.aggregations.each { validate(it as AggregationParameter) }
-    requestData.aggregations.each { prepareAttribute(it.attribute as Attribute) }
     requestData.aggregations.each {
+        prepareAttribute(it.attribute as Attribute)
         AggregationParameter parameter = it as AggregationParameter
         if (parameter.type == Aggregation.PERCENT)
         {
@@ -657,7 +739,7 @@ List<List> getData(RequestData requestData)
                 wrappedQuery.filtering([filterParameter])
             }
             int totalCount = wrappedQuery.aggregate(totalParameter)
-                                    .result.head().head()
+                                         .result.head().head()
 
             wrapper.percentAggregate(parameter, totalCount)
         }
@@ -669,8 +751,17 @@ List<List> getData(RequestData requestData)
 
     //TODO: Нужна возможность получать начало отсчёта из вне
     requestData.groups.each { validate(it as GroupParameter) }
-    requestData.groups.each { prepareAttribute(it.attribute as Attribute) }
-    requestData.groups.each {
+    def clonedGroups = requestData.groups.collect {
+        new GroupParameter(
+            title: it.title,
+            type: it.type,
+            attribute: it.attribute.deepClone(),
+            sortingType: it.sortingType,
+            format: it.format
+        )
+    }
+    clonedGroups.each {
+        prepareAttribute(it.attribute as Attribute)
         GroupParameter parameter = it as GroupParameter
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
@@ -679,9 +770,9 @@ List<List> getData(RequestData requestData)
                 type: Aggregation.MIN,
                 attribute: parameter.attribute
             )
-            Date startMinDate = QueryWrapper.build(requestData.source)
-                                            .aggregate(minDateParameter)
-                                            .result.head().head()
+            Date startMinDate =  QueryWrapper.build(requestData.source)
+                                             .aggregate(minDateParameter, true)
+                                             .result.head().head()
             wrapper.sevenDaysGroup(parameter, startMinDate)
         }
         else
@@ -693,7 +784,7 @@ List<List> getData(RequestData requestData)
     requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
 
     //Фильтрация по непустым атрибутам
-    Set attributeSet = requestData.aggregations*.attribute + requestData.groups*.attribute
+    Set attributeSet = requestData.aggregations*.attribute + clonedGroups*.attribute
     attributeSet.findResults {
         it
     }.collect { attr ->
@@ -762,7 +853,8 @@ private void validate(Source source)
  */
 private static def validate(AggregationParameter parameter) throws IllegalArgumentException
 {
-    if (!parameter.attribute.attrChains()) {
+    if (!parameter.attribute.attrChains())
+    {
         throw new IllegalArgumentException("Attribute is null or empty!")
     }
     Aggregation type = parameter.type
@@ -796,7 +888,8 @@ private static def validate(AggregationParameter parameter) throws IllegalArgume
  */
 private static def validate(GroupParameter parameter)
 {
-    if (!parameter.attribute.attrChains()) {
+    if (!parameter.attribute.attrChains())
+    {
         throw new IllegalArgumentException("Attribute is null or empty!")
     }
     GroupType type = parameter.type
@@ -845,15 +938,20 @@ private static def validate(GroupParameter parameter)
  * Метод подготовки полей атрибута
  * @param parameter - параметр агрегации
  */
-private static  def prepareAttribute(Attribute attribute) {
+private static def prepareAttribute(Attribute attribute)
+{
     String attributeType = attribute.attrChains().last().type
     String attributeCode = attribute.attrChains().last().code
-    switch (attributeType) {
+    switch (attributeType)
+    {
         case AttributeType.LOCALIZED_TEXT_TYPE:
-           attribute.attrChains().last().ref = new Attribute(code: 'ru', type: 'string')
+            attribute.attrChains().last().ref = new Attribute(code: 'ru', type: 'string')
             break
         case AttributeType.DT_INTERVAL_TYPE:
-           attribute.attrChains().last().ref = new Attribute(code: 'ms', type: 'long')
+            if (!(attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
+            {
+                attribute.attrChains().last().ref = new Attribute(code: 'ms', type: 'long')
+            }
             break
         case AttributeType.TIMER_TYPES:
             attribute.attrChains().last().ref = new Attribute(code: 'statusCode', type: 'string')
@@ -868,5 +966,15 @@ private static  def prepareAttribute(Attribute attribute) {
     if (attributeCode == UUID_CODE)
     {
         attribute.attrChains().last().code = 'id'
+    }
+    if (attributeCode.contains(AttributeType.TOTAL_VALUE_TYPE))
+    {
+        def (dynAttrCode, templateUUID) = attribute.code.split('_', 2)
+        attribute.code = dynAttrCode
+        attribute.attrChains().last().ref = new Attribute(
+            code: 'textValue',
+            type: 'string',
+            title: templateUUID
+        )
     }
 }
