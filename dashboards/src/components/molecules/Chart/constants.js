@@ -24,8 +24,8 @@ const ZOOM_MODES = {
 };
 
 const MINUS = 189;
-const PAGE_UP = 33;
-const PAGE_DOWN = 34;
+const PAGE_UP = 107;
+const PAGE_DOWN = 109;
 const PLUS = 187;
 const ZERO = 48;
 
