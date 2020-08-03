@@ -13,7 +13,7 @@ const GRID_PROPS = {
 			sm: 1
 		},
 		compactType: null,
-		containerPadding: [10, 10],
+		containerPadding: [20, 20],
 		rowHeight: 50
 	},
 	[LAYOUT_MODE.MOBILE]: {
@@ -23,7 +23,7 @@ const GRID_PROPS = {
 		cols: {
 			sm: 1
 		},
-		containerPadding: isMobile.any ? [16, 20] : [10, 10],
+		containerPadding: isMobile.any ? [16, 20] : [20, 20],
 		rowHeight: 50
 	}
 
