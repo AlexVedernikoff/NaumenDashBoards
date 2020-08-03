@@ -18,11 +18,11 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderSourceBox = () => {
 		const {renderSourceBox} = this.props;
-		const props = {
-			sourceRefFields: this.sourceRefFields
+		const sourceRefFields = {
+			indicator: FIELDS.indicator
 		};
 
-		return renderSourceBox(props);
+		return renderSourceBox(sourceRefFields);
 	};
 
 	render () {

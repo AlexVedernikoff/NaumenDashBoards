@@ -155,6 +155,7 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 		await client.post(url, params);
 		dispatch(removeLayouts(widgetId));
 		dispatch(deleteWidget(widgetId));
+		dispatch(saveNewLayouts());
 	} catch (e) {
 		dispatch(recordDeleteError());
 	}

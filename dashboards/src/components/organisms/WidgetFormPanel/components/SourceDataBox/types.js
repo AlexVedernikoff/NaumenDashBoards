@@ -8,17 +8,21 @@ import type {
 } from 'containers/WidgetFormPanel/types';
 import type {WidgetType} from 'store/widgets/data/types';
 
+export type SourceRefFields = $Shape<{
+	breakdown: string,
+	indicator: string,
+	parameter: string
+}>;
+
 export type Props = {
 	data: Array<Object>,
 	errors: ErrorsMap,
 	fetchAttributes: FetchAttributes,
-	indicatorName: string,
 	minCountBuildingSources: number,
 	onSelectCallback: (parameterName: string) => () => void,
-	parameterName: string,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,
-	sourceRefFields: Array<string>,
+	sourceRefFields: SourceRefFields,
 	sources: DataSourceMap,
 	type: WidgetType
 };

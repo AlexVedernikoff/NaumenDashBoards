@@ -5,7 +5,7 @@ import {changeLayoutMode} from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {createToast} from 'store/toasts/actions';
 import {fetchAttributes} from 'store/sources/attributes/actions';
-import {fetchGroupDynamicAttributes} from 'store/sources/dynamicGroups/actions';
+import {fetchDynamicAttributeGroups, fetchDynamicAttributes} from 'store/sources/dynamicGroups/actions';
 import {fetchRefAttributes} from 'store/sources/refAttributes/actions';
 import {getMapValues} from 'src/helpers';
 
@@ -40,7 +40,8 @@ export const functions: ConnectedFunctions = {
 	createToast,
 	createWidget,
 	fetchAttributes,
-	fetchGroupDynamicAttributes,
+	fetchDynamicAttributeGroups,
+	fetchDynamicAttributes,
 	fetchRefAttributes,
 	saveWidget
 };

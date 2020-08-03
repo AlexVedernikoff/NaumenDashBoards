@@ -9,18 +9,25 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {TreeSelect} from 'components/molecules';
+import withForm from 'WidgetFormPanel/withForm';
 
 export class SourceFieldset extends PureComponent<Props> {
 	callFilterModal = async () => {
-		const {index, onChange, set} = this.props;
-		const {descriptor, source} = set;
+		const {fetchDynamicAttributeGroups, index, onChange, resetDynamicAttributes, set} = this.props;
+		const {dataKey, descriptor, source} = set;
 
 		if (source) {
 			let context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
 
 			try {
 				const {serializedContext} = await window.jsApi.commands.filterForm(context);
+
+				if (serializedContext) {
+					fetchDynamicAttributeGroups(dataKey, serializedContext);
+				}
+
 				onChange(index, FIELDS.descriptor, serializedContext);
+				resetDynamicAttributes(index);
 			} catch (e) {
 				console.error('Ошибка окна фильтрации: ', e);
 			}
@@ -151,4 +158,4 @@ export class SourceFieldset extends PureComponent<Props> {
 	}
 }
 
-export default SourceFieldset;
+export default withForm(SourceFieldset);

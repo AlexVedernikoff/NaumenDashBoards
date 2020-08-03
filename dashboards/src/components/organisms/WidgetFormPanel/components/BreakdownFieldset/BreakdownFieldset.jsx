@@ -50,19 +50,19 @@ export class BreakdownFieldset extends PureComponent<Props> {
 	};
 
 	render () {
-		const {error, name, removable, set: currentSet} = this.props;
+		const {error, name, removable, set} = this.props;
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
+					dataSet={set}
 					name={name}
 					onChangeLabel={this.handleChangeLabel}
 					onRemove={this.handleRemove}
 					onSelect={this.handleSelect}
 					removable={removable}
 					renderRefField={this.renderGroup}
-					source={currentSet[FIELDS.source]}
-					value={currentSet[name]}
+					value={set[name]}
 				/>
 			</FormField>
 		);

@@ -91,11 +91,12 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderSourceBox = () => {
 		const {renderSourceBox} = this.props;
-		const props = {
-			sourceRefFields: this.sourceRefFields
+		const {indicator} = FIELDS;
+		const sourceRefFields = {
+			indicator
 		};
 
-		return renderSourceBox(props);
+		return renderSourceBox(sourceRefFields);
 	};
 
 	renderTextInputLabel = (label: string) => <div className={styles.textInputLabel}>{label}</div>;

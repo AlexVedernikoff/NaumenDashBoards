@@ -121,6 +121,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 			return (
 				<FormField error={error} key={index}>
 					<AttributeFieldset
+						dataSet={dataSet}
 						getAttributeOptions={this.filter}
 						getSourceOptions={this.filter}
 						index={breakdownIndex}
@@ -130,7 +131,6 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 						onSelect={this.handleSelect}
 						removable={removable}
 						renderRefField={this.renderGroup(group, breakdownIndex)}
-						source={dataSet[FIELDS.source]}
 						value={value}
 					/>
 				</FormField>

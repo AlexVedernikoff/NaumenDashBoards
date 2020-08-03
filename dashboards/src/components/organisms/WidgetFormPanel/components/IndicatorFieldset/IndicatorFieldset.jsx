@@ -144,13 +144,12 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {error, name, set: currentSet} = this.props;
-		const currentSource = currentSet[FIELDS.source];
-		const value = currentSet[name];
+		const {error, name, set} = this.props;
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
+					dataSet={set}
 					getSourceOptions={this.getSourceOptions}
 					name={name}
 					onChangeLabel={this.handleChangeLabel}
@@ -158,8 +157,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 					onSelect={this.handleSelectIndicator}
 					renderRefField={this.renderRefField}
 					showCreationButton={true}
-					source={currentSource}
-					value={value}
+					value={set[name]}
 				/>
 				{this.renderCreatingModal()}
 			</FormField>

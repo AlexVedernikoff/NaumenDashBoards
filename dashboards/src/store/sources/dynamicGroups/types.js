@@ -13,7 +13,13 @@ export type DynamicGroup = {
 export type DynamicGroupsNode = TreeNode<DynamicGroup | Attribute>;
 
 export type DynamicGroupsMap = {
-	[key: string]: DynamicGroupsNode
+	[dataKey: string]: {
+		data: {
+			[key: string]: DynamicGroupsNode
+		},
+		error: boolean,
+		loading: boolean
+	}
 };
 
 type RequestDynamicAttributes = {
@@ -21,9 +27,15 @@ type RequestDynamicAttributes = {
 	type: typeof DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTES
 };
 
+type RequestDynamicAttributeGroups = {
+	payload: string,
+	type: typeof DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTE_GROUPS
+};
+
 export type ReceiveDynamicAttributesPayload = {
 	attributes: Attribute[],
-	code: string
+	dataKey: string,
+	groupCode: string
 };
 
 type ReceiveDynamicAttributes = {
@@ -31,14 +43,24 @@ type ReceiveDynamicAttributes = {
 	type: typeof DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTES
 };
 
+export type ReceiveDynamicAttributeGroupsPayload = {
+	dataKey: string,
+	groups: Array<DynamicGroup>
+};
+
+type ReceiveDynamicAttributeGroups = {
+	payload: ReceiveDynamicAttributeGroupsPayload,
+	type: typeof DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTE_GROUPS
+};
+
 type RecordDynamicAttributesError = {
 	payload: string,
 	type: typeof DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTES_ERROR
 };
 
-type SetDynamicGroups = {
-	payload: Array<DynamicGroup>,
-	type: typeof DYNAMIC_GROUPS_EVENTS.SET_DYNAMIC_GROUPS
+type RecordDynamicAttributeGroupsError = {
+	payload: string,
+	type: typeof DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTE_GROUPS_ERROR
 };
 
 type UnknownDynamicAttributesAction = {
@@ -47,9 +69,11 @@ type UnknownDynamicAttributesAction = {
 
 export type DynamicGroupsAction =
 	| ReceiveDynamicAttributes
+	| ReceiveDynamicAttributeGroups
 	| RecordDynamicAttributesError
+	| RecordDynamicAttributeGroupsError
+	| RequestDynamicAttributeGroups
 	| RequestDynamicAttributes
-	| SetDynamicGroups
 	| UnknownDynamicAttributesAction
 ;
 

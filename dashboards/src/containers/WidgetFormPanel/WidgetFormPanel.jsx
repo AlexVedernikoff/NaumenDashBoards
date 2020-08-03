@@ -115,7 +115,8 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			context,
 			dynamicGroups,
 			fetchAttributes,
-			fetchGroupDynamicAttributes,
+			fetchDynamicAttributeGroups,
+			fetchDynamicAttributes,
 			fetchRefAttributes,
 			layoutMode,
 			refAttributes,
@@ -134,7 +135,8 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					dynamicGroups={dynamicGroups}
 					errors={errors}
 					fetchAttributes={fetchAttributes}
-					fetchGroupDynamicAttributes={fetchGroupDynamicAttributes}
+					fetchDynamicAttributeGroups={fetchDynamicAttributeGroups}
+					fetchDynamicAttributes={fetchDynamicAttributes}
 					fetchRefAttributes={fetchRefAttributes}
 					isNew={this.isNew()}
 					layoutMode={layoutMode}
