@@ -172,6 +172,7 @@ class AttributeType {
 
     static final Collection<String> DATE_TYPES = [DATE_TYPE, DATE_TIME_TYPE].asImmutable()
 
+    static final Collection<String> DYNAMIC_ATTRIBUTE_TYPES = [DATE_TYPE, DATE_TIME_TYPE, DT_INTERVAL_TYPE, STRING_TYPE].asImmutable()
 
     static final String OBJECT_TYPE = 'object'
 
@@ -194,6 +195,7 @@ class AttributeType {
     static final String STATE_TYPE ='state'
     static final String LOCALIZED_TEXT_TYPE ='localizedText'
     static final String BOOL_TYPE = 'bool'
+    static final String TOTAL_VALUE_TYPE = 'totalValue'
 }
 
 /**
@@ -294,6 +296,18 @@ class Attribute
     }
 }
 
+class DynamicGroup
+{
+    /**
+     * UUID группы
+     */
+    String code
+    /**
+     * Название группы
+     */
+    String title
+}
+
 class DiagramRequest
 {
     Collection<Requisite> requisite
@@ -357,6 +371,7 @@ class FilterParameter extends Parameter<Comparison>
 {
     def value
 }
+
 /**
  * Список всех фильтров для реквизита
  */

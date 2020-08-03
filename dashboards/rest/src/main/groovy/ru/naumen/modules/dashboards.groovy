@@ -39,6 +39,11 @@ class DataSource
      * Дети источника даннных
      */
     Collection<DataSource> children
+    /**
+     * Наличие динамических атрибутов
+     */
+    boolean hasDynamic
+
 }
 //endregion
 
@@ -111,6 +116,20 @@ String getAttributesFromLinkAttribute(requestContent)
     List<String> types = requestContent?.types
 
     def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
+
+    if (attributeClassFqn == AttributeType.TOTAL_VALUE_TYPE) {
+        Attribute attribute = new Attribute(
+            code: 'textValue',
+            title: metaInfo.getAttribute('textValue').title,
+            type: 'string',
+            property: AttributeType.TOTAL_VALUE_TYPE,
+            metaClassFqn: metaInfo.getAttribute('textValue').getMetaClass(),
+            sourceName: metaInfo.title,
+            sourceCode: AttributeType.TOTAL_VALUE_TYPE
+        )
+        return toJson([attribute])
+    }
+
     Collection<Attribute> result = types
         ? metaInfo.attributes
                   .findResults {
@@ -481,7 +500,12 @@ private def getMetaClassChildren(String fqn)
 private Collection<DataSource> mappingDataSource(def fqns)
 {
     return fqns.collect {
-        new DataSource(it.code, it.title, mappingDataSource(it.children))
+        new DataSource(
+            it.code,
+            it.title,
+            mappingDataSource(it.children),
+            checkForDynamicAttributes(it.code)
+        )
     }.sort { it.title }
 }
 
@@ -510,5 +534,164 @@ private Attribute buildAttribute(def value, String sourceName, String sourceCode
         sourceName: sourceName,
         sourceCode: sourceCode
     )
+}
+
+/**
+ * Метод получения динамических атрибутов
+ * @param requestContent - тело запроса
+ * @return список динамических атрибутов в JSON-формате
+ */
+String getDynamicAttributes(requestContent)
+{
+    String groupUUID = requestContent.uuid
+    List<String> templateUUIDS = getUUIDSForTemplates(groupUUID)
+    List<Attribute> attributes = templateUUIDS?.collect { templateUUID ->
+        return getDynamicAttributeType(templateUUID) ? new Attribute(
+            code: "${AttributeType.TOTAL_VALUE_TYPE}_${templateUUID}",
+            title: api.utils.get(templateUUID).title,
+            type: getDynamicAttributeType(templateUUID),
+            property: AttributeType.TOTAL_VALUE_TYPE,
+            metaClassFqn: AttributeType.TOTAL_VALUE_TYPE,
+            sourceName: api.utils.get(groupUUID).title,
+            sourceCode: groupUUID
+        ) : null
+    }?.grep().toList()
+
+    return toJson(attributes ?: [])
+}
+
+/**
+ * Метод получения UUID-ов для шаблонов динамических атрибутов
+ * @param groupUUID - уникальный идентификатор группы
+ * @return список уникальных идентификаторов шаблонов атрибутов
+ */
+List<String> getUUIDSForTemplates(String groupUUID)
+{
+    return groupUUID ? api.utils.get(groupUUID).listTempAttr*.UUID : null
+}
+
+/**
+ * Метод получения типа динамического атрибута
+ * @param templateUUID - уникальный идентификатор шаблона атрибута
+ * @return тип представления динамического атрибута (может быть один из AttributeType)
+ */
+String getDynamicAttributeType(String templateUUID)
+{
+    def template = api.utils.get(templateUUID)
+    String attrFormatToFind = template.visor
+        ? "${template.metaClass}_${template.visor.code}"
+        : "${template.metaClass}"
+    attrFormatToFind = attrFormatToFind.replace('_unitsLinks', '')
+    String totalValueFormatKey = modules.dynamicFields.getAttrToTotalValueMap()[attrFormatToFind]
+
+    String dinType = api.metainfo.getMetaClass(totalValueFormatKey)
+                        ?.attributes.findResult { it.code == 'value' ? it : null}
+                        ?.getType()
+    dinType = dinType?.replace("'", '')?.replace('AttributeType', '')?.trim()
+    dinType = replaceDynamicAttributeType(dinType)
+    return (dinType in AttributeType.DYNAMIC_ATTRIBUTE_TYPES)
+        ? dinType
+        : null
+}
+
+/**
+ * Получение групп динамических атрибутов по условию фильтрации (дескриптора)
+ * @param descriptor - условия фильтрации (дескриптор)
+ * @return - список групп динамических атрибутов
+ */
+List getDescriptorGroups(descriptor)
+{
+    return descriptor?.filters?.collectMany { filter ->
+        if (filter['properties'].attrTypeCode.find() in AttributeType.LINK_TYPES) {
+            def metaClasses = [metaInfo: filter.dtObjectWrapper.fqn.find(),
+                               uuid: filter.dtObjectWrapper.uuid.find()]
+            boolean hasAttribute = api.metainfo.getMetaClass(metaClasses.metaInfo)?.attributes.any {
+                it.code == 'additAttrsG'
+            }
+            if (hasAttribute) {
+                return api.utils.get(metaClasses.uuid).additAttrsG
+            }
+        }
+    }
+}
+
+/**
+ * Метод подмены дополнительных типов динамических атрибутов на стандартные типы
+ * @param currentType - текущий тип динамического атрибута
+ * @return корректный тип динамического атрибута
+ */
+String replaceDynamicAttributeType(String currentType)
+{
+    return (currentType in ['richtext', 'hyperlink', 'dtInterval']) ? AttributeType.STRING_TYPE : currentType
+}
+
+/**
+ * Метод получения источника группы динамических атрибутов
+ * @param group - группа динамических атрибутов
+ * @return ассоциативный массив их названия и UUID-а источника динамической группы
+ */
+Map<String, Object> getDynamicGroupSource(def group)
+{
+    def routeSource = group.formInRoute.find()
+    def serviceSource = group.formInService.find()
+    def compSource = group.formInUserCat.find()
+    if (routeSource)
+    {
+        return [name: api.metainfo.getMetaClass(routeSource?.metaClass).title, code:
+            routeSource?.UUID]
+    }
+    else if (serviceSource)
+    {
+        return [name: api.metainfo.getMetaClass(serviceSource?.metaClass).title, code:
+            serviceSource?.UUID]
+    }
+    else if (compSource)
+    {
+        return [name: api.metainfo.getMetaClass(compSource?.metaClass).title, code:
+            compSource?.UUID]
+    }
+    return null
+}
+
+/**
+ * Метод получения групп динамических атрибутов
+ * @param requestContent - тело запроса
+ * @param aggregateToJson - флаг возврата данных в JSON-формате
+ * @return список групп динамических атрибутов
+ */
+def getDynamicAttributeGroups(requestContent, boolean aggregateToJson = true)
+{
+    def slurper = new groovy.json.JsonSlurper()
+    def descriptor = slurper.parseText(requestContent.descriptor)
+    List<DynamicGroup> groups = getDescriptorGroups(descriptor)?.collect {
+        def dynamicSource = getDynamicGroupSource(it)
+        def templateUUIDS = getUUIDSForTemplates(it.UUID)
+        boolean anyAttributes = templateUUIDS.any { getDynamicAttributeType(it) }
+        if (dynamicSource && anyAttributes) {
+            return new DynamicGroup(
+                code: it.UUID,
+                title: "${it.title} (${dynamicSource?.name})"
+            )
+        }
+    }?.grep()?.toList()
+
+    return aggregateToJson ? toJson(groups ?: []) : groups ?: []
+}
+
+/**
+ * Метод проверки наличия динамических атрибутов
+ * @param fqn - код метакласса для проверки
+ * @return флаг на наличие динамических атрибутов
+ */
+boolean checkForDynamicAttributes(String fqn)
+{
+    List types = api.metainfo.getTypes(fqn).toList()
+
+    List typesWithDynamic = types.collect {
+        it.attributes.any {
+            it.code == AttributeType.TOTAL_VALUE_TYPE
+        }
+    }
+    return typesWithDynamic.any { it == true }
 }
 //endregion
