@@ -27,7 +27,7 @@
 		&:hover {
 			z-index: 1;
 
-			.actionButtonsContainer, .actionHeaderButtonsContainer {
+			.actionHeaderButtonsContainer {
 				visibility: visible;
 			}
 		}
@@ -41,35 +41,23 @@
 		.shadow(@info);
 	}
 
-	.actionButtonsContainer {
-		background-color: @white;
-		border-radius: @border-radius;
-		bottom: -15px;
-		box-shadow: @grey-box-shadow;
-		left: 50%;
-		padding: 8px;
-		position: absolute;
-		transform: translateX(-50%);
-		visibility: hidden;
-	}
-
 	.actionHeaderButtonsContainer {
 		background-color: @white;
 		border-radius: @border-radius;
+		display: flex;
 		padding: 8px;
 		position: absolute;
 		right: 10px;
 		top: 10px;
 		visibility: hidden;
+		
+		> * {
+			margin-right: 2px;
+		}
 	}
 
 	.exportItem {
 		cursor: pointer;
-		padding: 5px;
-
-		&:hover {
-			color: @primary;
-		}
 	}
 
 	.markerIcon {

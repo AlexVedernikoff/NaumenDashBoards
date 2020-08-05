@@ -10,6 +10,7 @@ export type ZoomMode = $Values<typeof ZOOM_MODES>;
 export type Props = {
 	data: DiagramBuildData,
 	focused: boolean,
+	showSubmenu: boolean,
 	widget: Chart
 };
 
