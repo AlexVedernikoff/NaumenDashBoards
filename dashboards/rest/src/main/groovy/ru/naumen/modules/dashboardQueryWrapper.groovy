@@ -956,6 +956,9 @@ private static def prepareAttribute(Attribute attribute)
         case AttributeType.TIMER_TYPES:
             attribute.attrChains().last().ref = new Attribute(code: 'statusCode', type: 'string')
             break
+        case AttributeType.LINK_TYPES:
+            attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
+            break
         default:
             if (!(attributeType in AttributeType.ALL_ATTRIBUTE_TYPES))
             {
