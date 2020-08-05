@@ -95,6 +95,17 @@ class Link
         ]
     }
 
+    private Map<String, Integer> russianWeekDay =
+        [
+            'понедельник': 1,
+            'вторник'    : 2,
+            'среда'      : 3,
+            'четверг'    : 4,
+            'пятница'    : 5,
+            'суббота'    : 6,
+            'воскресенье': 7
+        ]
+
     /**
      * перечень
      */
@@ -279,19 +290,11 @@ class Link
                 if (context)
                 {
                     //Тут обработка только группировок по датам
-                    result << getRanges(context, this.&getMinDate.curry(attr.code)).collect {
-                        range ->
-                        if (attributeType in AttributeType.LINK_TYPES)
-                        {
-                            def (first, second) = range
-                            def objects =
-                                findObjects(attr.ref, attr.property, op.between(first, second))
-                            filterBuilder.OR(attr.code, 'containsInSet', objects)
-                        }
-                        else
-                        {
-                            filterBuilder.OR(attr.code, 'fromTo', range)
-                        }
+                    context.keySet().each { groupType ->
+                        def value = context.get(groupType)
+                        def format = value.last()
+                        String stringValue = value.head()
+                        getDateFilters(groupType, format, stringValue, filterBuilder, attr)
                     }
                 }
                 for (customSubGroupCondition in customSubGroupSet)
@@ -576,10 +579,8 @@ class Link
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
             case AttributeType.DT_INTERVAL_TYPE:
                 def (intervalValue, intervalType) = value
-                return filterBuilder.OR(
-                    code, 'contains', api.types.newDateTimeInterval(
-                    [intervalValue as long, intervalType as String])
-                )
+                def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
+                return filterBuilder.OR(code, 'contains', interval)
             case AttributeType.TIMER_TYPES:
                 String statusCode = TimerStatus.getByName(value)
                 return filterBuilder.OR(code, 'timerStatusContains', [statusCode])
@@ -846,6 +847,299 @@ class Link
     private Date getMinDate(String attributeCode)
     {
         return api.db.query("select min($attributeCode) from $classFqn").list().head() as Date
+    }
+
+    /**
+     * Метод получения фильтров по дате
+     * @param groupType - тип системной группировки по дате
+     * @param format - формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getDateFilters(GroupType groupType, String format, String value,
+                       def filterBuilder, Attribute attr)
+    {
+        if(attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
+        {
+            attr.code = AttributeType.TOTAL_VALUE_TYPE
+            filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
+            attr.ref = new Attribute(code: 'textValue',
+                                     type: 'string',
+                                     property: AttributeType.TOTAL_VALUE_TYPE)
+            def objects = findObjects(attr.ref, attr.property, value)
+            filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', objects))
+        }
+        switch (groupType) {
+            case GroupType.DAY:
+                return getDayFilters(format, value, filterBuilder, attr)
+            case GroupType.WEEK:
+                return getWeekFilters(format, value, filterBuilder, attr)
+            case GroupType.MONTH:
+                return getMonthFilters(format, value, filterBuilder, attr)
+            case GroupType.QUARTER:
+                return getQuarterFilters(format, value, filterBuilder, attr)
+            case GroupType.YEAR:
+                return getYearFilters(format, value, filterBuilder, attr)
+            case GroupType.SEVEN_DAYS:
+                return getSevenDaysFilters(format, value, filterBuilder, attr)
+            case GroupType.HOURS:
+                return getHourFilters(format, value, filterBuilder, attr)
+            case GroupType.MINUTES:
+                return getMinuteFilters(format, value, filterBuilder, attr)
+            default: throw new IllegalArgumentException("Not supported group type: $groupType")
+        }
+    }
+
+    /**
+     * Метод получения фильтра по дням
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getDayFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case 'dd':
+                def datePoint = api.date.createDateTimePoint("DAY", value.replace('-й', '') as int)
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+            case 'WD':
+                def datePoint = api.date.createDateTimePoint("WEEKDAY", russianWeekDay.get(value))
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+            case 'dd.mm.YY':
+                List<String> splitDate = value.replace('.', '/').split('/')
+                def (day, month, year) = splitDate
+
+                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
+                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
+                def datePointYear = api.date.createDateTimePoint("YEAR", year as int)
+
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
+
+            case 'dd.mm.YY hh':
+                List<String> fullDate = value.replace('ч', '').replace(',', '').split()
+                def (date, hour) = fullDate
+                String[] splitDate = date.replace('.', '/').split('/')
+                def (day, month, year) = splitDate
+
+                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
+                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
+                def datePointYear = api.date.createDateTimePoint("YEAR", year as int)
+                def datePointHour = api.date.createDateTimePoint("HOUR", hour as int)
+
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointHour, datePointHour]))
+            case 'dd.mm.YY hh:ii':
+                List<String> fullDate = value.split()
+                def(date, dateTime) = fullDate
+                String[] splitDate = date.replace('.', '/').split('/')
+                def (day, month, year) = splitDate
+                def(hour, minute) = dateTime.split(':')
+
+                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
+                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
+                def datePointYear = api.date.createDateTimePoint("YEAR", year as int)
+                def datePointHour = api.date.createDateTimePoint("HOUR", hour as int)
+                def datePointMinute = api.date.createDateTimePoint("MINUTE", minute as int)
+
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointHour, datePointHour]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMinute, datePointMinute]))
+
+            case 'dd MM':
+            default:
+                def (String day, String monthName) = value.split()
+                int month = genitiveRussianMonth.get(monthName.toLowerCase()) + 1
+                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
+                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
+                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
+        }
+    }
+
+    /**
+     * Метод получения фильтра по неделям
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getWeekFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case ['ww', 'WW YY']:
+            default:
+                def weekValue = value.contains('-я')
+                    ? value.replace('-я', '').split()
+                    : value.replace(' неделя', '').split()
+                def week = weekValue[0] as int
+                def year = weekValue.size() > 1 ? weekValue[1] as int : null
+                def datePointWeek = api.date.createDateTimePoint("WEEK", week)
+                def datePointYear = year ? api.date.createDateTimePoint("YEAR", year) : null
+                def filters = year
+                    ? filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointWeek, datePointWeek]))
+                                   .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
+                    : filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointWeek, datePointWeek]))
+                return filters
+        }
+    }
+
+    /**
+     * Метод получения фильтра по месяцам
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getMonthFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case ['MM', 'MM YY']:
+            default:
+                def monthValue = value.split(' ')
+                def month = nominativeRussianMonth.get(monthValue[0]) + 1
+                def year = monthValue.size() > 1 ? monthValue[1] as int : null
+                def datePointMonth = api.date.createDateTimePoint("MONTH", month)
+                def datePointYear = year ? api.date.createDateTimePoint("YEAR", year) : null
+                def filters = year
+                    ? filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
+                                   .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
+                    : filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
+                return filters
+        }
+    }
+
+    /**
+     * Метод получения фильтра по кварталам
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getQuarterFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case ['QQ', 'QQ YY']:
+            default:
+                def quarterValue = value.replace(' кв-л', '').split(' ')
+                def quarter = quarterValue[0] as int
+                def year = quarterValue.size() > 1 ? quarterValue[1] as int : null
+                def datePointQuarter = api.date.createDateTimePoint("QUARTER", quarter)
+                def datePointYear = year ? api.date.createDateTimePoint("YEAR", year) : null
+                def filters = year
+                    ? filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointQuarter, datePointQuarter]))
+                                   .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
+                    : filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointQuarter, datePointQuarter]))
+                return filters
+        }
+    }
+
+    /**
+     * Метод получения фильтра по годам
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getYearFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case 'yyyy':
+                def datePoint = api.date.createDateTimePoint("YEAR", value as int)
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+            default: throw new IllegalArgumentException("Not supported year format: $format")
+        }
+    }
+
+    /**
+     * Метод получения фильтра по 7 дней
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getSevenDaysFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case 'dd mm - dd mm':
+            default:
+                def (day, month) = value.split(" - ", 2).collect { dayAndMonth ->
+                    def (d, m) = dayAndMonth.split(" ", 2)
+                    [d as int, genitiveRussianMonth.get(m) + 1]
+                }.transpose()
+                def datePointStartDay = api.date.createDateTimePoint("DAY", day[0])
+                def datePointEndDay = api.date.createDateTimePoint("DAY", day[1])
+                def datePointStartMonth = api.date.createDateTimePoint("MONTH", month[0])
+                def datePointEndMonth = api.date.createDateTimePoint("MONTH", month[1])
+                filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointStartDay, datePointEndDay]))
+                             .AND(filterBuilder.OR(attr.code,'fromToDatePoint',[datePointStartMonth, datePointEndMonth]))
+                return filterBuilder
+        }
+    }
+
+    /**
+     * Метод получения фильтра по часам
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getHourFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case 'hh:ii':
+                def hoursANDmins = value.tokenize(':/')
+                def datePointHour = api.date.createDateTimePoint("HOUR", hoursANDmins[0] as int)
+                def datePointMin = api.date.createDateTimePoint("MINUTE", hoursANDmins[1] as int)
+                filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointHour, datePointHour]))
+                             .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMin, datePointMin]))
+                return filterBuilder
+            case 'hh':
+            default:
+                def datePoint = api.date.createDateTimePoint("HOUR", value as int)
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+        }
+    }
+
+    /**
+     * Метод получения фильтра по минутам
+     * @param format -  формат отображения данных
+     * @param value - значение для фильтра
+     * @param filterBuilder - конструктор фильтра
+     * @param attr - атрибут фильтрации
+     * @return - готовые фильтры по дате в Дриллдаун
+     */
+    def getMinuteFilters(String format, String value, def filterBuilder, Attribute attr)
+    {
+        switch (format)
+        {
+            case 'ii':
+            default:
+                def datePoint = api.date.createDateTimePoint("MINUTE", value as int)
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+        }
     }
 }
 //endregion
