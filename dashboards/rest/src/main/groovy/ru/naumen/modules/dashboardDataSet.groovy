@@ -1119,18 +1119,19 @@ private Map<String, RequestData> produceComputationData(Closure getData, Map map
         }
 
         def dataKey = comp.dataKey as String
-        // этот ключь указывает на источник вместе с группировками
+        // этот ключ указывает на источник вместе с группировками
 
         def requestData = getData(dataKey) as RequestData
+        def newRequestData = requestData.clone()
         def group = comp.group as GroupParameter
         def aggregation = comp.aggregation as AggregationParameter
-        requestData.aggregations = [aggregation]
+        newRequestData.aggregations = [aggregation]
         // предполагаем что количество агрегаций будет не больше одной
-        requestData.groups = (requestData.groups || group) ? (requestData.groups + group).grep() :
+        newRequestData.groups = (newRequestData.groups || group) ? (newRequestData.groups + group).grep() :
             null
         // группировку нужно будет добавить к существующим
-        requestData.groups = requestData.groups as Set
-        [(variableName): requestData]
+        newRequestData.groups = newRequestData.groups as Set
+        [(variableName): newRequestData]
     }
 }
 
@@ -2134,7 +2135,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                     } else {
                         return api.utils.formatters.oneZeroFormatter(value.toBoolean())
                     }
-                case AttrtibuteType.TIMER_TYPES:
+                case AttributeType.TIMER_TYPES:
                     return (value as TimerStatus).getRussianName()
                 default:
                     //прийти в качестве значения может, как UUID, так и просто id
