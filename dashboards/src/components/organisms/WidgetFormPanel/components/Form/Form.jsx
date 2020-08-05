@@ -53,11 +53,13 @@ export class Form extends Component<Props, State> {
 			fetchRefAttributes,
 			isNew,
 			layoutMode,
+			personalDashboard,
 			refAttributes,
 			renderParamsTab,
 			setDataFieldValue,
 			setFieldValue,
 			sources,
+			user,
 			values
 		} = this.props;
 
@@ -71,10 +73,12 @@ export class Form extends Component<Props, State> {
 			fetchRefAttributes,
 			isNew,
 			layoutMode,
+			personalDashboard,
 			refAttributes,
 			setDataFieldValue,
 			setFieldValue,
 			sources,
+			user,
 			values
 		});
 
