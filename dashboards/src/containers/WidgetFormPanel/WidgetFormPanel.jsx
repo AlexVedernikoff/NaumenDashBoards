@@ -119,6 +119,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			fetchDynamicAttributes,
 			fetchRefAttributes,
 			layoutMode,
+			personalDashboard,
 			refAttributes,
 			sources,
 			updating,
@@ -141,6 +142,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					isNew={this.isNew()}
 					layoutMode={layoutMode}
 					onSubmit={this.handleSubmit}
+					personalDashboard={personalDashboard}
 					refAttributes={refAttributes}
 					setDataFieldValue={this.setDataFieldValue}
 					setFieldValue={this.setFieldValue}

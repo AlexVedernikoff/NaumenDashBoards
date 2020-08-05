@@ -44,10 +44,12 @@ export type ParamsTabProps = {|
 	fetchRefAttributes: FetchRefAttributes,
 	isNew: boolean,
 	layoutMode: LayoutMode,
+	personalDashboard: boolean,
 	refAttributes: AttributesMap,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,
 	sources: DataSourceMap,
+	user: UserData,
 	values: Values
 |};
 
@@ -80,6 +82,7 @@ export type Props = {|
 	isNew: boolean,
 	layoutMode: LayoutMode,
 	onSubmit: (func: UpdateWidget) => Promise<void>,
+	personalDashboard: boolean,
 	refAttributes: AttributesMap,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,

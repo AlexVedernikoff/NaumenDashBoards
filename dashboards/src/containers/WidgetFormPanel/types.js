@@ -40,6 +40,7 @@ export type ConnectedProps = {
 	context: Context,
 	dynamicGroups: DynamicGroupsMap,
 	layoutMode: LayoutMode,
+	personalDashboard: boolean,
 	refAttributes: AttributesMap,
 	sources: DataSourceMap,
 	updating: boolean,

@@ -16,6 +16,7 @@ import type {OnChangeInputEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
 import type {SourceRefFields} from 'WidgetFormPanel/components/SourceDataBox/types';
 import styles from './styles.less';
+import {USER_ROLES} from 'store/context/constants';
 import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -237,21 +238,26 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	renderDisplayModeSelect = () => {
+		const {isNew, personalDashboard, user} = this.props;
 		const {displayMode} = this.props.values;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 
-		return (
-			<FormBox title="Область отображения">
-				<FormField>
-					<Select
-						onSelect={this.handleChangeDisplayMode}
-						options={DISPLAY_MODE_OPTIONS}
-						placeholder="Отображение виджета в мобильной версии"
-						value={value}
-					/>
-				</FormField>
-			</FormBox>
-		);
+		if (!isNew && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+			return (
+				<FormBox title="Область отображения">
+					<FormField>
+						<Select
+							onSelect={this.handleChangeDisplayMode}
+							options={DISPLAY_MODE_OPTIONS}
+							placeholder="Отображение виджета в мобильной версии"
+							value={value}
+						/>
+					</FormField>
+				</FormBox>
+			);
+		}
+
+		return null;
 	};
 
 	renderIndicatorBox = (props: IndicatorBoxProps) =>

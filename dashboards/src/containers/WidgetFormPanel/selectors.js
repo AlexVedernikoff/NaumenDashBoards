@@ -11,7 +11,7 @@ import {getMapValues} from 'src/helpers';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard, sources, widgets} = state;
-	const {layoutMode} = dashboard.settings;
+	const {layoutMode, personal: personalDashboard} = dashboard.settings;
 	const {data} = widgets;
 	const {map, selectedWidget} = data;
 	const {contentCode, subjectUuid, user} = context;
@@ -24,6 +24,7 @@ export const props = (state: AppState): ConnectedProps => {
 		context: contentContext,
 		dynamicGroups,
 		layoutMode,
+		personalDashboard,
 		refAttributes: sources.refAttributes,
 		saveError: data.saveError,
 		sources: sources.data.map,
