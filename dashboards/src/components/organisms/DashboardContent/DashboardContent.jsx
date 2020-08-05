@@ -29,12 +29,15 @@ export class DashboardContent extends Component<Props, State> {
 		width: null
 	};
 
-	componentDidUpdate () {
-		this.setFocusOnNewWidget();
+	componentDidMount () {
 		window.addEventListener('blur', this.resetFocus);
 	}
 
-	componentDidUnmount () {
+	componentDidUpdate () {
+		this.setFocusOnNewWidget();
+	}
+
+	componentWillUnmount () {
 		window.removeEventListener('blur', this.resetFocus);
 	}
 
@@ -128,6 +131,8 @@ export class DashboardContent extends Component<Props, State> {
 				</Grid>
 			);
 		}
+
+		return null;
 	};
 
 	renderGridWithContainer = () => {
@@ -139,10 +144,8 @@ export class DashboardContent extends Component<Props, State> {
 		});
 
 		return (
-			<ResizeDetector onResize={this.setGridWidth}>
-				<div className={containerCN} onClick={this.resetFocus} ref={this.gridContainerRef}>
-					{this.renderGrid()}
-				</div>
+			<ResizeDetector className={containerCN} forwardedRef={this.gridContainerRef} onClick={this.resetFocus} onResize={this.setGridWidth}>
+				{this.renderGrid()}
 			</ResizeDetector>
 		);
 	};

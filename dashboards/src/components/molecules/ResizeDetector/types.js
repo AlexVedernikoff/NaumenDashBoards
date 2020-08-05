@@ -1,10 +1,13 @@
 // @flow
 import type {Node} from 'react';
+import type {Ref} from 'components/types';
 
 export type Props = {
 	children: Node,
+	className: string,
 	debounceRate: number,
-	onResize: (width: number, height: number) => void,
+	forwardedRef?: Ref<'div'>,
+	onResize?: (width: number, height: number) => void,
 	skipOnMount: boolean
 };
 

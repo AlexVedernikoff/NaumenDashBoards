@@ -33,7 +33,7 @@ export class List extends PureComponent<Props, State> {
 		let {options} = props;
 
 		if (searchValue !== stateSearchValue) {
-			const reg = new RegExp(searchValue, 'ig');
+			const reg = new RegExp(searchValue, 'i');
 			// $FlowFixMe
 			options = options.filter(o => {
 				const label = getOptionLabel ? getOptionLabel(o) : o.label;

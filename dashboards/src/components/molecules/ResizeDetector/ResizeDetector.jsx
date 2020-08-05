@@ -1,12 +1,13 @@
 // @flow
-import {Children, cloneElement, createRef, PureComponent} from 'react';
 import {debounce} from 'src/helpers';
 import type {DivRef} from 'components/types';
 import type {Props, State} from './types';
+import React, {createRef, PureComponent} from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
 export class ResizeDetector extends PureComponent<Props, State> {
 	static defaultProps = {
+		className: '',
 		debounceRate: 500,
 		skipOnMount: false
 	};
@@ -20,7 +21,7 @@ export class ResizeDetector extends PureComponent<Props, State> {
 
 	componentDidMount () {
 		const {debounceRate} = this.props;
-		const {current: element} = this.ref;
+		const {current: element} = this.getRef();
 		this.observer = new ResizeObserver(debounce(this.handleResize, debounceRate));
 
 		element && this.observer.observe(element);
@@ -29,6 +30,8 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	componentWillUnmount () {
 		this.observer.disconnect();
 	}
+
+	getRef = () => this.props.forwardedRef || this.ref;
 
 	handleResize = (entries: Array<ResizeObserverEntry>) => {
 		const {onResize, skipOnMount} = this.props;
@@ -39,20 +42,17 @@ export class ResizeDetector extends PureComponent<Props, State> {
 			return this.setState({mounted: true});
 		}
 
-		onResize(width, height);
+		onResize && onResize(width, height);
 	};
 
 	render () {
-		const child = Children.only(this.props.children);
+		const {children, className} = this.props;
 
-		if (child.ref) {
-			this.ref = child.ref;
-		}
-
-		return cloneElement(child, {
-			...child.props,
-			ref: this.ref
-		});
+		return (
+			<div className={className} ref={this.getRef()}>
+				{children}
+			</div>
+		);
 	}
 }
 

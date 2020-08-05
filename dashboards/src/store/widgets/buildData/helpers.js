@@ -10,14 +10,14 @@ import type {
  * @param {string} payload - id виджета
  * @returns {void}
  */
-export const setRequestBuildData = (state: BuildDataState, payload: string) => {
-	state[payload] = {
-		...state[payload],
+export const setRequestBuildData = (state: BuildDataState, payload: string) => ({
+	...state,
+	[payload]: {
 		data: {},
 		error: false,
 		loading: true
-	};
-};
+	}
+});
 
 /**
  * Устанавливаем данные графика конкретного виджета
@@ -28,12 +28,15 @@ export const setRequestBuildData = (state: BuildDataState, payload: string) => {
 export const setBuildData = (state: BuildDataState, payload: ReceiveBuildDataPayload) => {
 	const {data, id} = payload;
 
-	state[id] = {
-		...state[id],
-		data,
-		error: !data,
-		loading: false,
-		updateDate: new Date()
+	return {
+		...state,
+		[id]: {
+			...state[id],
+			data,
+			error: !data,
+			loading: false,
+			updateDate: new Date()
+		}
 	};
 };
 
@@ -43,10 +46,11 @@ export const setBuildData = (state: BuildDataState, payload: ReceiveBuildDataPay
  * @param {string} payload - id виджета
  * @returns {void}
  */
-export const setBuildDataError = (state: BuildDataState, payload: string) => {
-	state[payload] = {
+export const setBuildDataError = (state: BuildDataState, payload: string) => ({
+	...state,
+	[payload]: {
 		...state[payload],
 		error: true,
 		loading: false
-	};
-};
+	}
+});

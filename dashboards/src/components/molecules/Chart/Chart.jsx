@@ -1,13 +1,14 @@
 // @flow
+import type {AbsoluteElementProps} from 'components/molecules/DynamicRelativeContainer/types';
 import ApexCharts from 'apexcharts/dist/apexcharts';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
+import {DynamicRelativeContainer, ResizeDetector} from 'components/molecules';
 import {getLegendCroppingFormatter, getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
 import {isMacOS} from 'src/helpers';
-import {KEYS, TOOLBAR_HANDLERS, ZOOM_MODES} from './constants';
+import {KEY_CODES, TOOLBAR_HANDLERS, ZOOM_MODES} from './constants';
 import type {Props, State, ToolbarHandler, ZoomMode} from './types';
 import React, {createRef, PureComponent} from 'react';
-import {ResizeDetector} from 'components/molecules';
 import styles from './styles.less';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import {ZoomPanel} from './components';
@@ -61,22 +62,23 @@ export class Chart extends PureComponent<Props, State> {
 
 	handleKeydown = (e: SyntheticKeyboardEvent<*>) => {
 		const {focused} = this.props;
-		const {ctrlKey, keyCode, metaKey} = e;
+		// $FlowFixMe
+		const {code, ctrlKey, metaKey} = e;
 		const hotkeyHeldDown = (isMacOS() && metaKey) || ctrlKey;
 
 		if (focused && hotkeyHeldDown) {
-			const {MINUS, PAGE_DOWN, PAGE_UP, PLUS, ZERO} = KEYS;
+			const {MINUS, NUM_DOWN, NUM_PLUS, NUM_ZERO, PLUS, ZERO} = KEY_CODES;
 			e.preventDefault();
 
-			if (keyCode === ZERO) {
+			if (code === ZERO || code === NUM_ZERO) {
 				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_RESET);
 			}
 
-			if (keyCode === PLUS || keyCode === PAGE_UP) {
+			if (code === PLUS || code === NUM_PLUS) {
 				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_IN);
 			}
 
-			if (keyCode === MINUS || keyCode === PAGE_DOWN) {
+			if (code === MINUS || code === NUM_DOWN) {
 				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_OUT);
 			}
 		}
@@ -115,13 +117,13 @@ export class Chart extends PureComponent<Props, State> {
 		return [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE].includes(widget.type);
 	};
 
-	toolbarHandler = (handler: ToolbarHandler) => {
-		if (this.chart && this.chart.toolbar && typeof this.chart.toolbar[handler] === 'function') {
-			this.chart.toolbar[handler]();
-		}
-	};
+	mixinResize = (chart: React$Node) => (
+		<ResizeDetector className={styles.container} onResize={this.handleResize} skipOnMount={true}>
+			{chart}
+		</ResizeDetector>
+	);
 
-	renderChart = () => {
+	mixinZoom = (chart: React$Node) => {
 		const {zoomMode} = this.state;
 		const {PAN, ZOOM} = ZOOM_MODES;
 		const hasZoom = this.hasZoom();
@@ -132,26 +134,30 @@ export class Chart extends PureComponent<Props, State> {
 		});
 
 		return (
-			<div className={chartCN} onMouseDown={this.handleMouseDown}>
-				<div ref={this.ref} />
-				{this.renderZoomPanel()}
-			</div>
+			<DynamicRelativeContainer
+				className={chartCN}
+				onMouseDown={this.handleMouseDown}
+				renderAbsoluteElement={this.renderZoomPanel}
+			>
+				{chart}
+			</DynamicRelativeContainer>
 		);
 	};
 
-	renderChartWithResize = () => (
-		<ResizeDetector onResize={this.handleResize} skipOnMount={true}>
-			{this.renderChart()}
-		</ResizeDetector>
-	);
+	toolbarHandler = (handler: ToolbarHandler) => {
+		if (this.chart && this.chart.toolbar && typeof this.chart.toolbar[handler] === 'function') {
+			this.chart.toolbar[handler]();
+		}
+	};
 
-	renderZoomPanel = () => {
+	renderZoomPanel = (props: AbsoluteElementProps) => {
 		const {zoomMode} = this.state;
 		const {showSubmenu} = this.props;
+		const {className, ref, top} = props;
 
-		if (this.hasZoom() && !showSubmenu) {
+		if (!showSubmenu) {
 			return (
-				<div className={styles.zoomPanel}>
+				<div className={cn(styles.zoomPanel, className)} ref={ref} style={{top}}>
 					<ZoomPanel
 						onChangeIcon={this.handleChangeZoomMode}
 						toolbarHandler={this.toolbarHandler}
@@ -160,10 +166,22 @@ export class Chart extends PureComponent<Props, State> {
 				</div>
 			);
 		}
+
+		return null;
 	};
 
 	render () {
-		return this.hasSideLegend() ? this.renderChartWithResize() : this.renderChart();
+		let chart = <div ref={this.ref} />;
+
+		if (this.hasZoom()) {
+			chart = this.mixinZoom(chart);
+		}
+
+		if (this.hasSideLegend()) {
+			chart = this.mixinResize(chart);
+		}
+
+		return chart;
 	}
 }
 
