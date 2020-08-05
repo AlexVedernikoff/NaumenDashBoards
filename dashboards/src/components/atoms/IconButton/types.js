@@ -1,5 +1,6 @@
 // @flow
 import type {IconName} from 'components/atoms/Icon/types';
+import {VARIANTS} from './constants';
 
 export type Props = {
 	active: boolean,
@@ -7,5 +8,6 @@ export type Props = {
 	icon: IconName,
 	onClick?: (event: SyntheticMouseEvent<HTMLButtonElement>) => void,
 	round: boolean,
-	tip: React$Node
+	tip: React$Node,
+	variant: $Keys<typeof VARIANTS>
 };

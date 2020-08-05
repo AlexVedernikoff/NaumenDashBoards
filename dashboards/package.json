@@ -19,6 +19,7 @@
     "ismobilejs": "^1.1.1",
     "jspdf": "^1.5.3",
     "moment": "^2.24.0",
+    "rc-menu": "^8.5.0",
     "react-color": "^2.17.3",
     "react-grid-layout": "^1.0.0",
     "react-redux": "^7.1.1",

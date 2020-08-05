@@ -147,8 +147,9 @@ export class Chart extends PureComponent<Props, State> {
 
 	renderZoomPanel = () => {
 		const {zoomMode} = this.state;
+		const {showSubmenu} = this.props;
 
-		if (this.hasZoom()) {
+		if (this.hasZoom() && !showSubmenu) {
 			return (
 				<div className={styles.zoomPanel}>
 					<ZoomPanel

@@ -6,16 +6,18 @@ import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {DivRef} from 'components/types';
 import {DropDownButton} from './components';
+import {DropdownMenu, IconButton} from 'components/atoms';
 import type {ExportItem, Props, State} from './types';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
-import {IconButton, Tooltip} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
+import {Item as MenuItem, SubMenu} from 'rc-menu';
 import NewWidget from 'store/widgets/data/NewWidget';
 import type {Node} from 'react';
-import React, {createRef, Fragment, PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
+import {VARIANTS as ICON_BUTTON_VARIANTS} from 'components/atoms/IconButton/constants';
 
 export class Widget extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -24,7 +26,9 @@ export class Widget extends PureComponent<Props, State> {
 
 	state = {
 		hasError: false,
-		showRemoveModal: false
+		layoutModeValue: this.props.displayMode,
+		showRemoveModal: false,
+		showSubmenu: false
 	};
 
 	ref: DivRef = createRef();
@@ -127,6 +131,8 @@ export class Widget extends PureComponent<Props, State> {
 
 	handleCloseRemoveModal = () => this.setState({showRemoveModal: false});
 
+	handleCloseSubMenu = () => this.setState({showSubmenu: false});
+
 	handleSubmitRemoveModal = () => {
 		const {data, onRemove} = this.props;
 
@@ -134,22 +140,7 @@ export class Widget extends PureComponent<Props, State> {
 		onRemove(data.id);
 	};
 
-	renderButtons = () => {
-		const {isNew} = this.props;
-
-		if (!isNew) {
-			return (
-				<div className={styles.actionButtonsContainer}>
-					{this.renderEditButton()}
-					{this.renderExportButton()}
-					{this.renderDrillDownButtons()}
-					{this.renderRemoveButton()}
-				</div>
-			);
-		}
-
-		return null;
-	};
+	handleToogleSubMenu = () => this.setState({showSubmenu: !this.state.showSubmenu});
 
 	renderChangeDisplayModeButton = () => {
 		const {displayMode} = this.props;
@@ -169,32 +160,24 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderDiagram = () => {
 		const {buildData, data, focused, isNew, onUpdate} = this.props;
-		const {hasError} = this.state;
+		const {hasError, showSubmenu} = this.state;
 
 		if (!isNew && buildData && !hasError) {
-			return <Diagram buildData={buildData} focused={focused} onUpdate={onUpdate} widget={data} />;
+			return <Diagram buildData={buildData} focused={focused} onUpdate={onUpdate} showSubmenu={showSubmenu} widget={data} />;
 		}
 	};
 
-	renderDrillDownButtons = (): Array<Node> | null => {
+	renderDrillDownItems = (): Array<Node> | null => {
 		const {data: widget} = this.props;
 
 		// $FlowFixMe
 		return widget.data.filter(set => !set.sourceForCompute).map((set, index) => {
 			const {dataKey, source} = set;
-			let tipText = 'Перейти';
-
-			if (source) {
-				tipText = `${tipText} (${source.label})`;
-			}
 
 			return (
-				<IconButton
-					icon={ICON_NAMES.DATA}
-					key={dataKey}
-					onClick={this.handleClickDrillDownButton(index)}
-					tip={tipText}
-				/>
+				<MenuItem key={dataKey} onClick={this.handleClickDrillDownButton(index)}>
+					{source.label}
+				</MenuItem>
 			);
 		});
 	};
@@ -204,7 +187,7 @@ export class Widget extends PureComponent<Props, State> {
 
 		if (isEditable) {
 			return (
-				<IconButton icon={ICON_NAMES.EDIT} onClick={this.handleClickEditButton} tip="Редактировать" />
+				<IconButton icon={ICON_NAMES.EDIT} onClick={this.handleClickEditButton} round={false} tip="Редактировать" />
 			);
 		}
 
@@ -222,24 +205,25 @@ export class Widget extends PureComponent<Props, State> {
 		}
 	};
 
-	renderExportButton = () => {
-		const {type} = this.props.data;
-		const list = type !== WIDGET_TYPES.TABLE
-			? EXPORT_LIST.filter(list => list.key !== FILE_VARIANTS.XLSX)
-			: EXPORT_LIST;
-
-		return (
-			<Tooltip text={list.map(this.renderExportItem)}>
-				<IconButton icon={ICON_NAMES.DOWNLOAD} tip="Выгрузить" />
-			</Tooltip>
-		);
-	};
-
 	renderExportItem = (item: ExportItem) => (
-		<div className={styles.exportItem} data-type={item.key} key={item.key} onClick={this.handleClickExportButton}>
-			{item.text}
-		</div>
+		<MenuItem key={item.key}>
+			<div className={styles.exportItem} data-type={item.key} onClick={this.handleClickExportButton}>
+				{item.text}
+			</div>
+		</MenuItem>
 	);
+
+	renderFilterButton = () => {
+		const {isEditable} = this.props;
+
+		if (isEditable) {
+			return (
+				<IconButton icon={ICON_NAMES.FILTER} onClick={() => console.log('renderFilterButton')} round={false} tip="Фильтрация" />
+			);
+		}
+
+		return null;
+	};
 
 	renderHeaderButtons = () => {
 		const {isNew, personalDashboard, user} = this.props;
@@ -248,6 +232,11 @@ export class Widget extends PureComponent<Props, State> {
 			return (
 				<div className={styles.actionHeaderButtonsContainer}>
 					{this.renderChangeDisplayModeButton()}
+					{this.renderEditButton()}
+					{/* Данный функционал на время отключен
+					{this.renderFilterButton()}
+					{this.renderSquareButton()} */}
+					{this.renderKebabButton()}
 				</div>
 			);
 		}
@@ -255,19 +244,25 @@ export class Widget extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderRemoveButton = () => {
+	renderKebabButton = () => {
+		const {showSubmenu} = this.state;
 		const {isEditable} = this.props;
 
 		if (isEditable) {
 			return (
-				<Fragment>
-					<IconButton icon={ICON_NAMES.CLOSE} onClick={this.handleClickRemoveButton} tip="Удалить" />
-					{this.renderRemoveModal()}
-				</Fragment>
+				<div>
+					<IconButton 
+						active={showSubmenu} 
+						icon={ICON_NAMES.KEBAB} 
+						onClick={this.handleToogleSubMenu} 
+						round={false} 
+						tip="Меню" 
+						variant={ICON_BUTTON_VARIANTS.GRAY} 
+					/>
+					{this.renderSubmenu()}
+				</div>
 			);
 		}
-
-		return null;
 	};
 
 	renderRemoveModal = () => {
@@ -291,6 +286,45 @@ export class Widget extends PureComponent<Props, State> {
 		}
 	};
 
+	renderSquareButton = () => {
+		const {isEditable} = this.props;
+
+		if (isEditable) {
+			return (
+				<IconButton icon={ICON_NAMES.SQUARE} onClick={() => console.log('renderSquareButton')} round={false} tip="Таблица данных" />
+			);
+		}
+
+		return null;
+	};
+
+	renderSubmenu = () => {
+		const {showSubmenu} = this.state;
+		const {type} = this.props.data;
+		const list = type !== WIDGET_TYPES.TABLE
+			? EXPORT_LIST.filter(list => list.key !== FILE_VARIANTS.XLSX)
+			: EXPORT_LIST;
+
+		if (showSubmenu) {
+			return (
+				<DropdownMenu onSelect={this.handleCloseSubMenu} onToogle={this.handleCloseSubMenu}>
+					<SubMenu popupClassName="popupSubmenu" title="Источники">
+						{this.renderDrillDownItems()}
+					</SubMenu>
+					<SubMenu popupClassName="popupSubmenu" title="Экспорт">
+						{list.map(this.renderExportItem)}
+					</SubMenu>
+					<MenuItem onClick={this.handleClickRemoveButton}>
+						Удалить виджет
+						{this.renderRemoveModal()}
+					</MenuItem>
+				</DropdownMenu>
+			);
+		}
+
+		return null;
+	};
+
 	render () {
 		const {children, onMouseDown, onMouseUp, onTouchEnd, onTouchStart, style} = this.props;
 		const gridProps = {
@@ -304,7 +338,6 @@ export class Widget extends PureComponent<Props, State> {
 		return (
 			<div {...gridProps} className={this.getClassName()} onClick={this.handleClick} ref={this.ref}>
 				{this.renderDiagram()}
-				{this.renderButtons()}
 				{this.renderHeaderButtons()}
 				{this.renderError()}
 				{children}

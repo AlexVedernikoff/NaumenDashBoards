@@ -5,6 +5,7 @@ import CheckIconButton from './CheckIconButton';
 import Checkbox from './Checkbox';
 import CreationPanel from './CreationPanel';
 import DatepickerControl from './DatepickerControl';
+import DropdownMenu from './DropdownMenu';
 import ExtendButton from './ExtendButton';
 import FieldButton from './FieldButton';
 import FieldError from './FieldError';
@@ -36,6 +37,7 @@ export {
 	Checkbox,
 	CreationPanel,
 	DatepickerControl,
+	DropdownMenu,
 	ExtendButton,
 	FieldButton,
 	FieldError,

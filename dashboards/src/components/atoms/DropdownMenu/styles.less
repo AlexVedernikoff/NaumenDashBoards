@@ -1,0 +1,51 @@
+@import '/styles/variables';
+
+:local {
+	.submenu {
+		background-color: @white;
+		border: none !important;
+		box-shadow: @box-shadow !important;
+		color: @black !important;
+		font-size: 13px;
+		margin-top: 6px;
+		min-width: 240px;
+		padding: 6px 0 !important;
+		position: absolute;
+
+		li {
+			> div {
+				display: flex;
+				padding: 8px 12px 9px 12px !important;
+				justify-content: space-between;
+			}
+		}
+	}
+}
+
+.rc-menu {
+	> .rc-menu-item {
+		padding: 8px 36px 9px 12px !important;
+	}
+
+	> .rc-menu-submenu-active .rc-menu-submenu-title, 
+		.rc-menu-item-active {
+			background-color: @silver;
+	}
+}
+
+.rc-menu-item {
+	cursor: pointer;
+}
+
+.popupSubmenu {
+	min-width: 240px !important;
+	padding: 6px 0 !important;
+
+	> ul {
+		border: none !important;
+		box-shadow: @box-shadow !important;
+		color: @black !important;
+		font-size: 13px;
+		margin-left: -4px;
+	}
+}

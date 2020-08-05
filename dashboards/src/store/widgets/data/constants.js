@@ -103,7 +103,7 @@ const FONT_STYLES = {
 };
 
 // Достопная размерность шрифтов
-const FONT_SIZE_OPTIONS = [13, 14, 15, 17];
+const FONT_SIZE_OPTIONS = [13, 14, 15, 16, 17];
 
 // Позиция текста
 const center: 'center' = 'center';

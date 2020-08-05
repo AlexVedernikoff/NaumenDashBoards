@@ -38,7 +38,9 @@ export type Props = {
 
 export type State = {
 	hasError: boolean,
-	showRemoveModal: boolean
+	layoutModeValue: string,
+	showRemoveModal: boolean,
+	showSubmenu: boolean
 };
 
 export type ExportItem = {

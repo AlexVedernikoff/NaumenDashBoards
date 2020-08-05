@@ -6,6 +6,7 @@ export type Props = {
 	buildData: BuildData,
 	focused: boolean,
 	onUpdate: Widget => void,
+	showSubmenu: boolean,
 	widget: Widget
 };
 
