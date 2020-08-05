@@ -9,10 +9,10 @@ import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_CIRCLE_SORTING_SETTINGS} from 'st
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {getMapValues, isObject} from 'src/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
-import {isObject} from 'src/helpers';
 
-const mock = Object.freeze({});
+const mock: Object = Object.freeze({});
 
 /**
  * Возвращает настройки сортировки данных графика
@@ -253,17 +253,27 @@ const getMainDataSet = (data: Array<Object>): Object => data.find(set => !set.so
  * @returns {Attribute | ComputedBreakdown | undefined} - при наличии, возвращает экземпляр разбивки
  */
 const breakdown = (index: number, data: Array<Object>, indicatorKey: string = FIELDS.indicator): Object | Array<Object> => {
-	const {breakdown: value, breakdownGroup, [indicatorKey]: indicator} = getMainDataSet(data);
+	const {breakdown: value, breakdownGroup, [indicatorKey]: indicator, source} = getMainDataSet(data);
 	let {breakdown} = data[index];
 
 	if (indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR && isObject(breakdown)) {
-		breakdown = data.map(({dataKey}) => {
-			return {
-				dataKey,
-				group: transformGroupFormat(breakdownGroup),
-				value
-			};
-		});
+		const usesDataSets = getMapValues(indicator.computeData).map(set => set.dataKey)
+			.filter((key, i, keys) => keys.indexOf(key) === i);
+
+		breakdown = data
+			.filter(({dataKey}) => usesDataSets.includes(dataKey))
+			.map(({dataKey}) => {
+				const {source: currentSource} = data.find(set => set.dataKey === dataKey) || mock;
+				const mainClassFqn = source.value.split('$')[0];
+				const currentClassFqn = currentSource && currentSource.value.split('$')[0];
+				const currentValue = mainClassFqn === currentClassFqn ? value : null;
+
+				return {
+					dataKey,
+					group: transformGroupFormat(breakdownGroup),
+					value: currentValue
+				};
+			});
 	}
 
 	return breakdown;

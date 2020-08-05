@@ -224,10 +224,8 @@ export class Speedometer extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<ResizeDetector onResize={this.handleResize}>
-				<div className={styles.container}>
-					{this.renderSpeedometer()}
-				</div>
+			<ResizeDetector className={styles.container} onResize={this.handleResize}>
+				{this.renderSpeedometer()}
 			</ResizeDetector>
 		);
 	}

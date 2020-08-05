@@ -1,6 +1,7 @@
 // @flow
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import {LAYOUTS_EVENTS} from './constants';
+import type {Widget} from 'store/widgets/data/types';
 
 export type Layout = {
 	h: number,
@@ -14,8 +15,13 @@ export type Layouts = {
 	[breakpoint: string]: Array<Layout>
 };
 
+export type LayoutsPayloadForAdd = {
+	widgetId: string,
+	widgets: Array<Widget>
+};
+
 type AddLayouts = {
-	payload: string,
+	payload: LayoutsPayloadForAdd,
 	type: typeof LAYOUTS_EVENTS.ADD_LAYOUTS
 };
 

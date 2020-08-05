@@ -1,16 +1,25 @@
 // @flow
 import {deepClone} from 'src/helpers';
 import {GRID_PROPS} from 'components/organisms/DashboardContent/constants';
-import type {Layout, Layouts, LayoutsPayloadForChange, LayoutsState, ReplaceLayoutsIdPayload} from './types';
+import type {Layout, Layouts, LayoutsPayloadForAdd, LayoutsPayloadForChange, LayoutsState, ReplaceLayoutsIdPayload} from './types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import type {Widget} from 'store/widgets/data/types';
 
 /**
  * Возвращает последнюю высоту по оси Y относительно всех остальных виджетов
  * @param {Array<Layout>} layouts - массив положений виджетов
+ * @param {Array<string>} whitelist - список идентификаторов виджетов, которые нужно использовать для вычисления
  * @returns {number}
  */
-const getLastY = (layouts: Array<Layout>): number => Math.max(...layouts.map(({h, y}) => y + h), 0);
+const getLastY = (layouts: Array<Layout>, whitelist?: Array<string>): number => {
+	let computationLayouts = layouts;
+
+	if (whitelist) {
+		computationLayouts = layouts.filter(({i}) => whitelist.includes(i));
+	}
+
+	return Math.max(...computationLayouts.map(({h, y}) => y + h), 0);
+};
 
 /**
  * Создает экземпляр положения виджета
@@ -48,32 +57,36 @@ const filterLayouts = (layouts: Layouts, widgetIds: Array<string>): Layouts => {
  * @param {Array<Widget>} widgets - массив виджетов
  * @returns {Array<Layout>}
  */
-const getLegacyLayouts = (widgets: Array<Object>): Array<Layout> => widgets.map(widget => {
-	const {id, layout} = widget;
-	const existsLayouts = widgets.map(widget => widget.layout).filter(layout => !!layout);
-	const y = getLastY(existsLayouts);
+const getLegacyLayouts = (widgets: Array<Object>): Array<Layout> => {
+	const layouts = widgets.map(widget => widget.layout).filter(layout => !!layout);
 
-	return layout || createLayout(id, y);
-});
+	return widgets.map(widget => {
+		const {id, layout} = widget;
+		return layout || createLayout(id, getLastY(layouts));
+	});
+};
 
 /**
  * Добавляет новое положение виджета
  * @param {LayoutsState} state - состояние положений виджетов
- * @param {string} widgetId - идентификатор виджета
+ * @param {LayoutsPayloadForAdd} payload - идентификатор виджета
  * @returns {LayoutsState}
  */
-const addLayouts = (state: LayoutsState, widgetId: string): LayoutsState => {
+const addLayouts = (state: LayoutsState, payload: LayoutsPayloadForAdd): LayoutsState => {
+	const {widgetId, widgets} = payload;
 	const {MOBILE, WEB} = LAYOUT_MODE;
 	const {[MOBILE]: mobileLayouts, [WEB]: webLayouts} = state;
+	const mobileIds = widgets.filter(widget => widget.displayMode !== WEB).map(widget => widget.id);
+	const webIds = widgets.filter(widget => widget.displayMode !== MOBILE).map(widget => widget.id);
 
 	return {
 		...state,
 		[MOBILE]: {
-			sm: [...state[MOBILE].sm, createLayout(widgetId, getLastY(mobileLayouts.sm), GRID_PROPS[MOBILE].cols.sm)]
+			sm: [...state[MOBILE].sm, createLayout(widgetId, getLastY(mobileLayouts.sm, mobileIds), GRID_PROPS[MOBILE].cols.sm)]
 		},
 		[WEB]: {
-			lg: [...state[WEB].lg, createLayout(widgetId, getLastY(webLayouts.lg))],
-			sm: [...state[WEB].sm, createLayout(widgetId, getLastY(webLayouts.sm), GRID_PROPS[WEB].cols.sm)]
+			lg: [...state[WEB].lg, createLayout(widgetId, getLastY(webLayouts.lg, webIds))],
+			sm: [...state[WEB].sm, createLayout(widgetId, getLastY(webLayouts.sm, webIds), GRID_PROPS[WEB].cols.sm)]
 		}
 	};
 };

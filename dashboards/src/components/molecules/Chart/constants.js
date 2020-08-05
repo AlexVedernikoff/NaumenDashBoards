@@ -23,22 +23,24 @@ const ZOOM_MODES = {
 	ZOOM
 };
 
-const MINUS = 189;
-const PAGE_UP = 107;
-const PAGE_DOWN = 109;
-const PLUS = 187;
-const ZERO = 48;
+const MINUS = 'Minus';
+const NUM_PLUS = 'NumpadAdd';
+const NUM_DOWN = 'NumpadSubtract';
+const NUM_ZERO = 'Numpad0';
+const PLUS = 'Equal';
+const ZERO = 'Digit0';
 
-const KEYS = {
+const KEY_CODES = {
 	MINUS,
-	PAGE_DOWN,
-	PAGE_UP,
+	NUM_DOWN,
+	NUM_PLUS,
+	NUM_ZERO,
 	PLUS,
 	ZERO
 };
 
 export {
-	KEYS,
+	KEY_CODES,
 	TOOLBAR_HANDLERS,
 	ZOOM_MODES
 };

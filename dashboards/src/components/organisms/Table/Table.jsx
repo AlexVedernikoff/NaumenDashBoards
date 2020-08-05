@@ -192,11 +192,9 @@ export class Table extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<ResizeDetector onResize={this.handleResize}>
-				<div className={styles.container} ref={this.ref}>
-					{this.renderTable()}
-					{this.renderPagination()}
-				</div>
+			<ResizeDetector className={styles.container} forwardedRef={this.ref} onResize={this.handleResize}>
+				{this.renderTable()}
+				{this.renderPagination()}
 			</ResizeDetector>
 		);
 	}

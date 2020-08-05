@@ -8,7 +8,7 @@ import NewWidget from 'store/widgets/data/NewWidget';
 const reducer = (state: LayoutsState = initialLayoutsState, action: LayoutsAction = defaultLayoutsAction): LayoutsState => {
 	switch (action.type) {
 		case LAYOUTS_EVENTS.ADD_LAYOUTS:
-			return addLayouts(removeLayouts(state, NewWidget.id), NewWidget.id);
+			return addLayouts(removeLayouts(state, NewWidget.id), action.payload);
 		case LAYOUTS_EVENTS.CHANGE_LAYOUTS:
 			return changeLayouts(state, action.payload);
 		case LAYOUTS_EVENTS.REMOVE_LAYOUTS:

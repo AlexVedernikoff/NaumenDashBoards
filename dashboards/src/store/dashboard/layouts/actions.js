@@ -2,6 +2,7 @@
 import {buildUrl, client} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {filterLayouts, getLegacyLayouts} from './helpers';
+import {getMapValues} from 'src/helpers';
 import {getParams} from 'store/helpers';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
@@ -89,17 +90,24 @@ const saveNewLayouts = (): ThunkAction => async (dispatch: Dispatch, getState: G
 	}
 };
 
+const addLayouts = (widgetId: string) => (dispatch: Dispatch, getState: GetState) => {
+	const {map} = getState().widgets.data;
+
+	dispatch({
+		payload: {
+			widgetId,
+			widgets: getMapValues(map)
+		},
+		type: LAYOUTS_EVENTS.ADD_LAYOUTS
+	});
+};
+
 const replaceLayoutsId = (from: string, to: string) => ({
 	payload: {
 		from,
 		to
 	},
 	type: LAYOUTS_EVENTS.REPLACE_LAYOUTS_ID
-});
-
-const addLayouts = (payload: string) => ({
-	payload,
-	type: LAYOUTS_EVENTS.ADD_LAYOUTS
 });
 
 const changeLayouts = (payload: LayoutsPayloadForChange) => ({

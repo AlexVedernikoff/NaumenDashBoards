@@ -7,6 +7,7 @@ import ColorPicker from './ColorPicker';
 import Datepicker from './Datepicker';
 import Diagram from './Diagram';
 import DisableableBox from './DisablableBox';
+import DynamicRelativeContainer from './DynamicRelativeContainer';
 import FormBox from './FormBox';
 import FormCheckControl from './FormCheckControl';
 import FormField from './FormField';
@@ -35,6 +36,7 @@ export {
 	Datepicker,
 	Diagram,
 	DisableableBox,
+	DynamicRelativeContainer,
 	FormBox,
 	FormCheckControl,
 	FormField,
