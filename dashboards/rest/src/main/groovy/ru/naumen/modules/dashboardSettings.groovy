@@ -682,13 +682,15 @@ private String generateDashboardKey(String classFqn, String contentCode, String 
 private DashboardSettings getDashboardSetting(String dashboardKey)
 {
     def dashboardSettings = getSettingsFromJson(loadJsonSettings(dashboardKey, DASHBOARD_NAMESPACE))
-    return new DashboardSettings(
-        autoUpdate      : dashboardSettings?.autoUpdate,
-        widgetIds       : dashboardSettings?.widgetIds ?: [],
-        customGroupIds  : dashboardSettings?.customGroupIds ?: [],
-        layouts         : dashboardSettings?.layouts,
-        mobileLayouts   : dashboardSettings?.mobileLayouts
-    )
+    return dashboardSettings ?
+        new DashboardSettings
+            (
+                autoUpdate: dashboardSettings?.autoUpdate,
+                widgetIds: dashboardSettings?.widgetIds ?: [],
+                customGroupIds: dashboardSettings?.customGroupIds ?: [],
+                layouts: dashboardSettings?.layouts,
+                mobileLayouts: dashboardSettings?.mobileLayouts
+            ) : null
 }
 
 /**
