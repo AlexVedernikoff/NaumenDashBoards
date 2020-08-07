@@ -355,9 +355,26 @@ class Link
                                             return filterBuilder.OR(attr.code, 'nextN', it.data as int)
                                         case 'between':
                                             String dateFormat = 'yyyy-MM-dd'
-                                            def date = it. data as Map<String, Object> // тут будет массив дат
-                                            def start = Date.parse(dateFormat, date.startDate as String)
-                                            def end = Date.parse(dateFormat, date.endDate as String)
+                                            def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
+                                            def start
+                                            if(dateSet.startDate)
+                                            {
+                                                start = Date.parse(dateFormat, dateSet.startDate as String)
+                                            }
+                                            else
+                                            {
+                                                Date minDate = attr.getMinDate()
+                                                start = new Date(minDate.time).clearTime()
+                                            }
+                                            def end
+                                            if (dateSet.endDate)
+                                            {
+                                                end = Date.parse(dateFormat, dateSet.endDate as String)
+                                            }
+                                            else
+                                            {
+                                                end = new Date().clearTime()
+                                            }
                                             return filterBuilder.OR(attr.code, 'fromTo', [start, end])
                                         default: throw new IllegalArgumentException("Not supported")
                                     }
@@ -841,12 +858,6 @@ class Link
         }
 
         return result
-    }
-
-    //TODO: Вынести в отдельный модуль
-    private Date getMinDate(String attributeCode)
-    {
-        return api.db.query("select min($attributeCode) from $classFqn").list().head() as Date
     }
 
     /**

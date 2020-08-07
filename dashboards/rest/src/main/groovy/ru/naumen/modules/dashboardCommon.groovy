@@ -202,6 +202,7 @@ class AttributeType {
  * Модель для атрибута
  */
 @TupleConstructor
+@ru.naumen.core.server.script.api.injection.InjectApi
 class Attribute
 {
     /**
@@ -293,6 +294,16 @@ class Attribute
         {
             this.ref = attribute
         }
+    }
+
+
+/**
+ * Метод получения минимальной даты из Бд
+ * @return - минимальная дата по данному атрибуту
+ */
+    Date getMinDate()
+    {
+        return api.db.query("select min(${this.code}) from ${this.sourceCode}").list().head() as Date
     }
 }
 
