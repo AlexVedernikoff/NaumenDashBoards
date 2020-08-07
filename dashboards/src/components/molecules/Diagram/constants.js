@@ -3,9 +3,9 @@ import {FONT_FAMILIES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/cons
 import type {Header} from 'store/widgets/data/types';
 
 const DEFAULT_HEADER_SETTINGS: Header = {
-	fontColor: '#4F5C70',
+	fontColor: '#323232',
 	fontFamily: FONT_FAMILIES[0],
-	fontSize: 14,
+	fontSize: 16,
 	fontStyle: undefined,
 	name: '',
 	show: true,
