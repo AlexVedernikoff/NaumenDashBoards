@@ -1724,9 +1724,26 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
                 return buildFilterParameterFromCondition([start, end])
             case 'between':
                 String dateFormat = 'yyyy-MM-dd'
-                def dateSet = condition.data as Map<String, Object> // тут будет массив дат
-                def start = Date.parse(dateFormat, dateSet.startDate as String)
-                def end = Date.parse(dateFormat, dateSet.endDate as String)
+                def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
+                def start
+                if(dateSet.startDate)
+                {
+                    start = Date.parse(dateFormat, dateSet.startDate as String)
+                }
+                else
+                {
+                    Date minDate = attribute.getMinDate()
+                    start = new Date(minDate.time).clearTime()
+                }
+                def end
+                if (dateSet.endDate)
+                {
+                    end = Date.parse(dateFormat, dateSet.endDate as String)
+                }
+                else
+                {
+                    end = new Date().clearTime()
+                }
                 return buildFilterParameterFromCondition([start, end])
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
