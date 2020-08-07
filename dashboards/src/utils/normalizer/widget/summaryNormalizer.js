@@ -68,6 +68,7 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 		id,
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
+		hasDynamic,
 		indicator = DEFAULT_SUMMARY_SETTINGS.indicator,
 		type
 	} = widget;
@@ -76,6 +77,7 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data: data.map(normalizeDataSet),
 		displayMode,
+		hasDynamic,
 		header: header(widget),
 		id,
 		indicator,

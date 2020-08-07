@@ -238,11 +238,11 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	renderDisplayModeSelect = () => {
-		const {isNew, personalDashboard, user} = this.props;
+		const {personalDashboard, user} = this.props;
 		const {displayMode} = this.props.values;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 
-		if (!isNew && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
 			return (
 				<FormBox title="Область отображения">
 					<FormField>

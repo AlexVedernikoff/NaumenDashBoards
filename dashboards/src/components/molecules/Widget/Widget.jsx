@@ -89,7 +89,7 @@ export class Widget extends PureComponent<Props, State> {
 
 		return cn({
 			[styles.actionHeaderButtonsContainer]: true,
-			[styles.showHeaderButtons]: showSubmenu,
+			[styles.showHeaderButtons]: showSubmenu
 		});
 	};
 
@@ -239,16 +239,22 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderHeaderButtons = () => {
-		return (
-			<div className={this.getHeaderButtonClassName()}>
-				{this.renderChangeDisplayModeButton()}
-				{this.renderEditButton()}
-				{/* Данный функционал на время отключен
-				{this.renderFilterButton()}
-				{this.renderSquareButton()} */}
-				{this.renderKebabButton()}
-			</div>
-		);
+		const {isNew} = this.props;
+
+		if (!isNew) {
+			return (
+				<div className={this.getHeaderButtonClassName()}>
+					{this.renderChangeDisplayModeButton()}
+					{this.renderEditButton()}
+					{/* Данный функционал на время отключен
+					{this.renderFilterButton()}
+					{this.renderSquareButton()} */}
+					{this.renderKebabButton()}
+				</div>
+			);
+		}
+
+		return null;
 	};
 
 	renderKebabButton = () => {
@@ -258,13 +264,13 @@ export class Widget extends PureComponent<Props, State> {
 		if (isEditable) {
 			return (
 				<div>
-					<IconButton 
-						active={showSubmenu} 
-						icon={ICON_NAMES.KEBAB} 
-						onClick={this.handleToogleSubMenu} 
-						round={false} 
-						tip="Меню" 
-						variant={ICON_BUTTON_VARIANTS.GRAY} 
+					<IconButton
+						active={showSubmenu}
+						icon={ICON_NAMES.KEBAB}
+						onClick={this.handleToogleSubMenu}
+						round={false}
+						tip="Меню"
+						variant={ICON_BUTTON_VARIANTS.GRAY}
 					/>
 					{this.renderSubmenu()}
 				</div>

@@ -125,6 +125,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 	const {
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
+		hasDynamic,
 		id,
 		type
 	} = widget;
@@ -136,6 +137,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
 		displayMode,
+		hasDynamic,
 		header: header(widget),
 		id,
 		indicator: axisIndicator(widget, set[FIELDS.yAxis]),

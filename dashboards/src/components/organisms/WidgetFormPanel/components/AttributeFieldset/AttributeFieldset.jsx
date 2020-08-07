@@ -236,6 +236,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	renderToggleShowingDynAttr = () => {
 		const {descriptor} = this.props.dataSet;
 		const {showDynamicAttributes} = this.state;
+		const {hasDynamic} = this.props.values;
 		let disabled, tip;
 
 		if (!descriptor) {
@@ -243,21 +244,25 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 			tip = 'Необходимо уточнить условия фильтрации';
 		}
 
-		return (
-			<FormCheckControl
-				className={styles.dynamicAttributesShowHandler}
-				disabled={disabled}
-				label="Динамические атрибуты"
-				tip={tip}
-			>
-				<Toggle
-					checked={showDynamicAttributes}
+		if (hasDynamic) {
+			return (
+				<FormCheckControl
+					className={styles.dynamicAttributesShowHandler}
 					disabled={disabled}
-					onChange={this.handleChangeShowDynamicAttributes}
-					value={showDynamicAttributes}
-				/>
-			</FormCheckControl>
-		);
+					label="Динамические атрибуты"
+					tip={tip}
+				>
+					<Toggle
+						checked={showDynamicAttributes}
+						disabled={disabled}
+						onChange={this.handleChangeShowDynamicAttributes}
+						value={showDynamicAttributes}
+					/>
+				</FormCheckControl>
+			);
+		}
+
+		return null;
 	};
 
 	render () {
