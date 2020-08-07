@@ -84,6 +84,15 @@ export class Widget extends PureComponent<Props, State> {
 		}
 	};
 
+	getHeaderButtonClassName = () => {
+		const {showSubmenu} = this.state;
+
+		return cn({
+			[styles.actionHeaderButtonsContainer]: true,
+			[styles.showHeaderButtons]: showSubmenu,
+		});
+	};
+
 	handleChangeDisplayMode = ({value}: Object) => {
 		const {data, editWidgetChunkData} = this.props;
 		editWidgetChunkData(data, {displayMode: value});
@@ -143,19 +152,23 @@ export class Widget extends PureComponent<Props, State> {
 	handleToogleSubMenu = () => this.setState({showSubmenu: !this.state.showSubmenu});
 
 	renderChangeDisplayModeButton = () => {
-		const {displayMode} = this.props;
+		const {displayMode, user} = this.props;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
+		
+		if (user.role !== USER_ROLES.REGULAR) {
+			return (
+				<DropDownButton
+					buttonIcon={this.getDisplayModeIcon()}
+					className={styles.markerIcon}
+					menu={DISPLAY_MODE_OPTIONS}
+					onSelect={this.handleChangeDisplayMode}
+					tip={`Отображается ${value.label}`}
+					value={value}
+				/>
+			);
+		}
 
-		return (
-			<DropDownButton
-				buttonIcon={this.getDisplayModeIcon()}
-				className={styles.markerIcon}
-				menu={DISPLAY_MODE_OPTIONS}
-				onSelect={this.handleChangeDisplayMode}
-				tip={`Отображается ${value.label}`}
-				value={value}
-			/>
-		);
+		return null;
 	};
 
 	renderDiagram = () => {
@@ -208,7 +221,7 @@ export class Widget extends PureComponent<Props, State> {
 	renderExportItem = (item: ExportItem) => (
 		<MenuItem key={item.key}>
 			<div className={styles.exportItem} data-type={item.key} onClick={this.handleClickExportButton}>
-				{item.text}
+				{item.text.toUpperCase()}
 			</div>
 		</MenuItem>
 	);
@@ -226,22 +239,16 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderHeaderButtons = () => {
-		const {isNew, personalDashboard, user} = this.props;
-
-		if (!isNew && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
-			return (
-				<div className={styles.actionHeaderButtonsContainer}>
-					{this.renderChangeDisplayModeButton()}
-					{this.renderEditButton()}
-					{/* Данный функционал на время отключен
-					{this.renderFilterButton()}
-					{this.renderSquareButton()} */}
-					{this.renderKebabButton()}
-				</div>
-			);
-		}
-
-		return null;
+		return (
+			<div className={this.getHeaderButtonClassName()}>
+				{this.renderChangeDisplayModeButton()}
+				{this.renderEditButton()}
+				{/* Данный функционал на время отключен
+				{this.renderFilterButton()}
+				{this.renderSquareButton()} */}
+				{this.renderKebabButton()}
+			</div>
+		);
 	};
 
 	renderKebabButton = () => {
@@ -300,6 +307,7 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderSubmenu = () => {
 		const {showSubmenu} = this.state;
+		const {isEditable} = this.props;
 		const {type} = this.props.data;
 		const list = type !== WIDGET_TYPES.TABLE
 			? EXPORT_LIST.filter(list => list.key !== FILE_VARIANTS.XLSX)
@@ -308,16 +316,16 @@ export class Widget extends PureComponent<Props, State> {
 		if (showSubmenu) {
 			return (
 				<DropdownMenu onSelect={this.handleCloseSubMenu} onToogle={this.handleCloseSubMenu}>
-					<SubMenu popupClassName="popupSubmenu" title="Источники">
+					<SubMenu popupClassName="popupSubmenu" title={<span>Источники</span>}>
 						{this.renderDrillDownItems()}
 					</SubMenu>
-					<SubMenu popupClassName="popupSubmenu" title="Экспорт">
+					<SubMenu popupClassName="popupSubmenu" title={<span>Экспорт</span>}>
 						{list.map(this.renderExportItem)}
 					</SubMenu>
-					<MenuItem onClick={this.handleClickRemoveButton}>
+					{isEditable && <MenuItem onClick={this.handleClickRemoveButton}>
 						Удалить виджет
 						{this.renderRemoveModal()}
-					</MenuItem>
+					</MenuItem>}
 				</DropdownMenu>
 			);
 		}
