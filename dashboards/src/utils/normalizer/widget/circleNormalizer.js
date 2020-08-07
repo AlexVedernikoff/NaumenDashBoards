@@ -84,7 +84,7 @@ const createData = (widget: Object, fields: Object) => {
 };
 
 const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
-	const {displayMode = DISPLAY_MODE.WEB, id, type} = widget;
+	const {displayMode = DISPLAY_MODE.WEB, hasDynamic, id, type} = widget;
 	const dataFields = getDataFields();
 	let {data} = widget;
 
@@ -98,6 +98,7 @@ const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
 		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
 		displayMode,
+		hasDynamic,
 		header: header(widget),
 		id,
 		legend: legend(widget),

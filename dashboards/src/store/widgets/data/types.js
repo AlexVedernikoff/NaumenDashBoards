@@ -96,6 +96,7 @@ export type Header = {
 type BaseWidget = {|
 	computedAttrs: Array<ComputedAttr>,
 	displayMode: DisplayMode,
+	hasDynamic: boolean,
 	header: Header,
 	id: string,
 	name: string

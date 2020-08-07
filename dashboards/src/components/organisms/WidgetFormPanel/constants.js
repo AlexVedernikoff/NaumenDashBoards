@@ -25,6 +25,7 @@ const fontFamily: 'fontFamily' = 'fontFamily';
 const fontSize: 'fontSize' = 'fontSize';
 const fontStyle: 'fontStyle' = 'fontStyle';
 const group: 'group' = 'group';
+const hasDynamic: 'hasDynamic' = 'hasDynamic';
 const header: 'header' = 'header';
 const indicator: 'indicator' = 'indicator';
 const isNew: 'isNew' = 'isNew';
@@ -83,6 +84,7 @@ const FIELDS = {
 	fontSize,
 	fontStyle,
 	group,
+	hasDynamic,
 	header,
 	indicator,
 	isNew,
