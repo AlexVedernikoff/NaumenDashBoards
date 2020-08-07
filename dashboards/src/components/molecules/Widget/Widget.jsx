@@ -259,23 +259,19 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderKebabButton = () => {
 		const {showSubmenu} = this.state;
-		const {isEditable} = this.props;
-
-		if (isEditable) {
-			return (
-				<div>
-					<IconButton
-						active={showSubmenu}
-						icon={ICON_NAMES.KEBAB}
-						onClick={this.handleToogleSubMenu}
-						round={false}
-						tip="Меню"
-						variant={ICON_BUTTON_VARIANTS.GRAY}
-					/>
-					{this.renderSubmenu()}
-				</div>
-			);
-		}
+		return (
+			<div>
+				<IconButton
+					active={showSubmenu}
+					icon={ICON_NAMES.KEBAB}
+					onClick={this.handleToogleSubMenu}
+					round={false}
+					tip="Меню"
+					variant={ICON_BUTTON_VARIANTS.GRAY}
+				/>
+				{this.renderSubmenu()}
+			</div>
+		);
 	};
 
 	renderRemoveModal = () => {
