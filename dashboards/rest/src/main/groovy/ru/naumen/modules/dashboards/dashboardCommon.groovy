@@ -149,6 +149,19 @@ enum MCDisplayMode
 }
 //endregion
 
+//region МЕТОДЫ
+
+/**
+ * Метод получения минимальной даты из Бд
+ * @return - минимальная дата по данному атрибуту
+ */
+Date getMinDate(String code, String classFqn)
+{
+    return api.db.query("select min(${code}) from ${classFqn}").list().head() as Date
+}
+
+//endregion
+
 //region КЛАССЫ
 /**
  * Типы атрибутов даннных для диаграмм
@@ -202,7 +215,6 @@ class AttributeType {
  * Модель для атрибута
  */
 @TupleConstructor
-@ru.naumen.core.server.script.api.injection.InjectApi
 class Attribute
 {
     /**
@@ -294,15 +306,6 @@ class Attribute
         {
             this.ref = attribute
         }
-    }
-
-    /**
-     * Метод получения минимальной даты из Бд
-     * @return - минимальная дата по данному атрибуту
-     */
-    Date getMinDate()
-    {
-        return api.db.query("select min(${this.code}) from ${this.sourceCode}").list().head() as Date
     }
 }
 

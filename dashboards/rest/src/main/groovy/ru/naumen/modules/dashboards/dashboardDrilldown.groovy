@@ -363,7 +363,10 @@ class Link
                                             }
                                             else
                                             {
-                                                Date minDate = attr.getMinDate()
+                                                Date minDate = modules.dashboardCommon.getMinDate(
+                                                    attr.code,
+                                                    attr.sourceCode
+                                                )
                                                 start = new Date(minDate.time).clearTime()
                                             }
                                             def end
