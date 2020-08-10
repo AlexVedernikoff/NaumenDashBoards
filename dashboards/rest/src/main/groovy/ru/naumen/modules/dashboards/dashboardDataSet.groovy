@@ -9,7 +9,7 @@
 //Версия: 4.10.0.15
 //Категория: скриптовый модуль
 
-package ru.naumen.modules
+package ru.naumen.modules.dashboards
 
 import groovy.json.JsonOutput
 import groovy.transform.Field
