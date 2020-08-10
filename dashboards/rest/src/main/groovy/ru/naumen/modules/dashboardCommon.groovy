@@ -296,11 +296,10 @@ class Attribute
         }
     }
 
-
-/**
- * Метод получения минимальной даты из Бд
- * @return - минимальная дата по данному атрибуту
- */
+    /**
+     * Метод получения минимальной даты из Бд
+     * @return - минимальная дата по данному атрибуту
+     */
     Date getMinDate()
     {
         return api.db.query("select min(${this.code}) from ${this.sourceCode}").list().head() as Date

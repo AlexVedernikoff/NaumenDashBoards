@@ -603,13 +603,17 @@ List getDescriptorGroups(descriptor)
 {
     return descriptor?.filters?.collectMany { filter ->
         if (filter['properties'].attrTypeCode.find() in AttributeType.LINK_TYPES) {
-            def metaClasses = [metaInfo: filter.dtObjectWrapper.fqn.find(),
-                               uuid: filter.dtObjectWrapper.uuid.find()]
-            boolean hasAttribute = api.metainfo.getMetaClass(metaClasses.metaInfo)?.attributes.any {
-                it.code == 'additAttrsG'
-            }
-            if (hasAttribute) {
-                return api.utils.get(metaClasses.uuid).additAttrsG
+            def metaClasses = filter.dtObjectWrapper.collect { [metaInfo: it?.fqn, uuid: it?.uuid] }
+            return metaClasses?.collectMany { metaClass ->
+                boolean hasAttribute = api.metainfo.getMetaClass(metaClass.metaInfo)?.attributes.any {
+                    it.code == 'additAttrsG'
+                }
+                if (hasAttribute)
+                {
+                    return api.utils.get(metaClass.uuid).additAttrsG?.findResults {
+                        it.state == 'active' ? it : null
+                    }
+                }
             }
         }
     }
