@@ -699,7 +699,7 @@ private DashboardSettings getDashboardSetting(String dashboardKey)
  * ${код типа куда выведено вп}_${код контента вп}_${опционально логин}_${индентификатор виджета}*
  * @return настройки виджета
  */
-private Map<String, Object> getWidgetSettings(String widgetKey, boolean isMobile = false)
+private Map<String, Object> getWidgetSettings(String widgetKey, Boolean isMobile = false)
 {
     def settings = getSettingsFromJson(
         loadJsonSettings(widgetKey, WIDGET_NAMESPACE)
