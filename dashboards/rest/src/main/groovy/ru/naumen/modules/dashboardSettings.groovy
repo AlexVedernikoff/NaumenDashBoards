@@ -685,11 +685,11 @@ private DashboardSettings getDashboardSetting(String dashboardKey)
     return dashboardSettings ?
         new DashboardSettings
             (
-                autoUpdate: dashboardSettings?.autoUpdate,
-                widgetIds: dashboardSettings?.widgetIds ?: [],
-                customGroupIds: dashboardSettings?.customGroupIds ?: [],
-                layouts: dashboardSettings?.layouts,
-                mobileLayouts: dashboardSettings?.mobileLayouts
+                autoUpdate      : dashboardSettings?.autoUpdate,
+                widgetIds       : dashboardSettings?.widgetIds ?: [],
+                customGroupIds  : dashboardSettings?.customGroupIds ?: [],
+                layouts         : dashboardSettings?.layouts,
+                mobileLayouts   : dashboardSettings?.mobileLayouts
             ) : null
 }
 
