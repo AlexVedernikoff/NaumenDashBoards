@@ -177,7 +177,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {dataSet, dynamicGroups} = this.props;
 		const {showDynamicAttributes} = this.state;
 
-		if (showDynamicAttributes) {
+		if (dataSet.descriptor && showDynamicAttributes) {
 			const {onSelect, searchValue, value} = props;
 			const initialSelected = [this.getOptionValue(value)];
 			const {[dataSet.dataKey]: sourceData = {
@@ -237,28 +237,28 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {descriptor} = this.props.dataSet;
 		const {showDynamicAttributes} = this.state;
 		const {hasDynamic} = this.props.values;
-		let disabled, tip;
+		let tip;
 
-		if (!descriptor) {
-			disabled = true;
-			tip = 'Необходимо уточнить условия фильтрации';
+		if (!descriptor && showDynamicAttributes) {
+			tip = 'Для отображения списка, установите, пожалуйста, параметры фильтрации';
 		}
 
 		if (hasDynamic) {
 			return (
-				<FormCheckControl
-					className={styles.dynamicAttributesShowHandler}
-					disabled={disabled}
-					label="Динамические атрибуты"
-					tip={tip}
-				>
-					<Toggle
-						checked={showDynamicAttributes}
-						disabled={disabled}
-						onChange={this.handleChangeShowDynamicAttributes}
-						value={showDynamicAttributes}
-					/>
-				</FormCheckControl>
+				<Fragment>
+					<FormCheckControl
+						className={styles.dynamicAttributesShowHandler}
+						label="Динамические атрибуты"
+						tip={tip}
+					>
+						<Toggle
+							checked={showDynamicAttributes}
+							onChange={this.handleChangeShowDynamicAttributes}
+							value={showDynamicAttributes}
+						/>
+					</FormCheckControl>
+					<div className={styles.dynamicError}>{tip}</div>
+				</Fragment>
 			);
 		}
 
