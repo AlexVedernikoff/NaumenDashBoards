@@ -1732,7 +1732,10 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
                 }
                 else
                 {
-                    Date minDate = attribute.getMinDate()
+                    Date minDate = modules.dashboardCommon.getMinDate(
+                        attribute.code,
+                        attribute.sourceCode
+                    )
                     start = new Date(minDate.time).clearTime()
                 }
                 def end
