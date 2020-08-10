@@ -8,7 +8,7 @@
  */
 //Версия: 6.10.0.15
 //Категория: скриптовый модуль
-package ru.naumen.modules
+package ru.naumen.modules.dashboards
 
 import groovy.json.JsonOutput
 

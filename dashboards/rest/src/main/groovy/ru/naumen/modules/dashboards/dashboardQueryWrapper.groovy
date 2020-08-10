@@ -9,7 +9,7 @@
 //Версия: 1.1
 //Категория: скриптовый модуль
 
-package ru.naumen.modules
+package ru.naumen.modules.dashboards
 
 import groovy.transform.Field
 import ru.naumen.core.server.script.api.criteria.*

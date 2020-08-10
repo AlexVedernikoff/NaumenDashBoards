@@ -9,7 +9,7 @@
 //Версия: 4.10.0.15
 //Категория: скриптовый модуль
 
-package ru.naumen.modules
+package ru.naumen.modules.dashboards
 
 import org.apache.poi.util.IOUtils
 import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest
