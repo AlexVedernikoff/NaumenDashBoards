@@ -63,22 +63,36 @@ export class Chart extends PureComponent<Props, State> {
 	handleKeydown = (e: SyntheticKeyboardEvent<*>) => {
 		const {focused} = this.props;
 		// $FlowFixMe
-		const {code, ctrlKey, metaKey} = e;
+		const {code, ctrlKey, keyCode, metaKey} = e;
+
 		const hotkeyHeldDown = (isMacOS() && metaKey) || ctrlKey;
 
 		if (focused && hotkeyHeldDown) {
-			const {MINUS, NUM_DOWN, NUM_PLUS, NUM_ZERO, PLUS, ZERO} = KEY_CODES;
+			const {
+				MINUS,
+				MINUS_KEY,
+				NUM_DOWN,
+				NUM_DOWN_KEY,
+				NUM_PLUS,
+				NUM_PLUS_KEY,
+				NUM_ZERO,
+				NUM_ZERO_KEY,
+				PLUS,
+				PLUS_KEY,
+				ZERO,
+				ZERO_KEY
+			} = KEY_CODES;
 			e.preventDefault();
 
-			if (code === ZERO || code === NUM_ZERO) {
+			if (code === ZERO || code === NUM_ZERO || keyCode === ZERO_KEY || keyCode === NUM_ZERO_KEY) {
 				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_RESET);
 			}
 
-			if (code === PLUS || code === NUM_PLUS) {
+			if (code === PLUS || code === NUM_PLUS || keyCode === PLUS_KEY || keyCode === NUM_PLUS_KEY) {
 				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_IN);
 			}
 
-			if (code === MINUS || code === NUM_DOWN) {
+			if (code === MINUS || code === NUM_DOWN || keyCode === MINUS_KEY || keyCode === NUM_DOWN_KEY) {
 				this.toolbarHandler(TOOLBAR_HANDLERS.ZOOM_OUT);
 			}
 		}
