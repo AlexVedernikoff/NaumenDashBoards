@@ -173,7 +173,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderList = (props: ListProps) => {
+	renderDynamicAttributeList = (props: ListProps) => {
 		const {dataSet, dynamicGroups} = this.props;
 		const {showDynamicAttributes} = this.state;
 
@@ -199,12 +199,15 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 			);
 		}
 
-		return <List {...props} />;
+		return null;
 	};
+
+	renderList = (props: ListProps) => <List {...props} />;
 
 	renderListContainer = (props: ListProps) => (
 		<Fragment>
 			{this.renderToggleShowingDynAttr()}
+			{this.renderDynamicAttributeList(props)}
 			{this.renderList(props)}
 		</Fragment>
 	);
@@ -237,27 +240,21 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {descriptor} = this.props.dataSet;
 		const {showDynamicAttributes} = this.state;
 		const {hasDynamic} = this.props.values;
-		let tip;
-
-		if (!descriptor && showDynamicAttributes) {
-			tip = 'Для отображения списка, установите, пожалуйста, параметры фильтрации';
-		}
+		const isFilterEmty = !descriptor && showDynamicAttributes;
+		const tipText = "Для отображения списка, установите, пожалуйста, параметры фильтрации";
+		const tip = isFilterEmty ? <div className={styles.dynamicError}>{tipText}</div> : null;
 
 		if (hasDynamic) {
 			return (
 				<Fragment>
-					<FormCheckControl
-						className={styles.dynamicAttributesShowHandler}
-						label="Динамические атрибуты"
-						tip={tip}
-					>
+					<FormCheckControl className={styles.dynamicAttributesShowHandler} label="Динамические атрибуты">
 						<Toggle
 							checked={showDynamicAttributes}
 							onChange={this.handleChangeShowDynamicAttributes}
 							value={showDynamicAttributes}
 						/>
 					</FormCheckControl>
-					<div className={styles.dynamicError}>{tip}</div>
+					{tip}
 				</Fragment>
 			);
 		}

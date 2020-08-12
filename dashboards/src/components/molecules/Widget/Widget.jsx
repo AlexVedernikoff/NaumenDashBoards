@@ -154,7 +154,7 @@ export class Widget extends PureComponent<Props, State> {
 	renderChangeDisplayModeButton = () => {
 		const {displayMode, user} = this.props;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
-		
+
 		if (user.role !== USER_ROLES.REGULAR) {
 			return (
 				<DropDownButton
