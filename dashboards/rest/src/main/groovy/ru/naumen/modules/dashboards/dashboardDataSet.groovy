@@ -2142,7 +2142,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                     return TimeUnit.MILLISECONDS.toHours(value as long)
                 case AttributeType.STATE_TYPE:
                     def (stateValue, stateCase) = value.tokenize('$')
-                    String totalFqn = "${fqnClass}\$${stateCase}"
+                    String totalFqn = fqnClass.contains('$') ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
                     return api.metainfo.getStateTitle(totalFqn, stateValue)
                 case AttributeType.META_CLASS_TYPE:
                     return api.metainfo.getMetaClass(value).title
@@ -2283,7 +2283,7 @@ private StandardDiagram mappingStandardDiagram(List list, String legendName, boo
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
             def series = [new Series(name: legendName, data: aggregationResult as List)]
-            return new StandardDiagram(categories: groupResult as Set, series: series)
+            return new StandardDiagram(categories: groupResult, series: series)
         case 3:
             def (groupResult, breakdownResult) = transposeDataSet.tail()
             def categories = groupResult as Set
@@ -2337,7 +2337,7 @@ private RoundDiagram mappingRoundDiagram(List list)
             def (aggregationResult, groupResult) = transposeDataSet
             return new RoundDiagram(series: (aggregationResult as List).collect {
                 it as Double
-            }, labels: groupResult as Set)
+            }, labels: groupResult)
         default: throw new IllegalArgumentException("Invalid format result data set")
     }
 }
