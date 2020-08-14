@@ -152,10 +152,10 @@ export class Widget extends PureComponent<Props, State> {
 	handleToogleSubMenu = () => this.setState({showSubmenu: !this.state.showSubmenu});
 
 	renderChangeDisplayModeButton = () => {
-		const {displayMode, user} = this.props;
+		const {displayMode, personalDashboard, user} = this.props;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 
-		if (user.role !== USER_ROLES.REGULAR) {
+		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
 			return (
 				<DropDownButton
 					buttonIcon={this.getDisplayModeIcon()}
