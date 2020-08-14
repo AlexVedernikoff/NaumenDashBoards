@@ -58,12 +58,12 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 };
 
 /**
- * Управляет отображением панели зума на графике при создании изображения
+ * Управляет отображением панели зума и других элементов на графике при создании изображения
  * @param {HTMLDivElement} container - элемент по которому создается изображение
- * @param {boolean} show - значение указывает о необходимости скрыть\показать панель зума
+ * @param {boolean} show - значение указывает о необходимости скрыть\показать элемент
  */
 const handleShowToolbar = (container: HTMLDivElement, show: boolean) => {
-	const toolbars = container.querySelectorAll('.apexcharts-toolbar');
+	const toolbars = container.querySelectorAll('.apexcharts-toolbar, .rc-menu, .header-submenu');
 
 	toolbars.forEach(toolbar => {
 		toolbar.style.visibility = show ? 'visible' : 'hidden';
