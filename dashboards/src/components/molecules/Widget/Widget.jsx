@@ -260,7 +260,7 @@ export class Widget extends PureComponent<Props, State> {
 	renderKebabButton = () => {
 		const {showSubmenu} = this.state;
 		return (
-			<div>
+			<div className="header-submenu">
 				<IconButton
 					active={showSubmenu}
 					icon={ICON_NAMES.KEBAB}
