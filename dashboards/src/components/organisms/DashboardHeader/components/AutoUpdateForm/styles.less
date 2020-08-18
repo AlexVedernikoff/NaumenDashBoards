@@ -1,6 +1,18 @@
 @import '/styles/variables';
 
 :local {
+	.enabledAutoUpdateButton {
+		background: @info;
+
+		svg {
+			color: @white;
+		}
+
+		&:hover {
+			background: @info;
+		}
+	}
+	
 	.checkbox {
 		border-radius: @border-radius;
 	}

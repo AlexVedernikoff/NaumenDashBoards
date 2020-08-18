@@ -2,6 +2,7 @@
 import {Button, LegacyCheckbox as Checkbox, Popover} from 'components/atoms';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import {IconButton, TimerButton} from 'components/organisms/DashboardHeader/components';
 import {MAX_INTERVAL} from './constants';
 import {number, object} from 'yup';
 import type {Props, State, Values} from './types';
@@ -158,6 +159,27 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 
 	renderText = () => <span className={styles.text}> минут</span>;
 
+	renderTimerButton = () => {
+		const {isSubmitting, values} = this.state;
+		const {autoUpdateSettings} = this.props;
+		const buttonCN = autoUpdateSettings.enabled ? styles.enabledAutoUpdateButton : '';
+
+		if (isSubmitting && values.enabled) {
+			return (
+				<TimerButton duration={autoUpdateSettings.interval} tip="Автообновление включено" />
+			);
+		}
+
+		return (
+			<IconButton
+				className={buttonCN}
+				name={ICON_NAMES.TIMER_OFF}
+				outline
+				tip="Автообновление выключено"
+			/>
+		);
+	};
+
 	renderTitle = () => {
 		const {values} = this.state;
 
@@ -179,10 +201,13 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 		const {className} = this.props;
 
 		return (
-			<form className={cn([styles.form, className])} onSubmit={this.handleSubmit}>
-				{this.renderTitle()}
-				{this.renderSettings()}
-			</form>
+			<Fragment>
+				{this.renderTimerButton()}
+				<form className={cn([styles.form, className])} onSubmit={this.handleSubmit}>
+					{this.renderTitle()}
+					{this.renderSettings()}
+				</form>
+			</Fragment>
 		);
 	}
 }

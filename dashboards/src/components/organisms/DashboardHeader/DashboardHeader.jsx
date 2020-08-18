@@ -86,11 +86,9 @@ export class DashboardHeader extends Component<Props, State> {
 
 	renderAutoUpdateButton = () => {
 		const {autoUpdateSettings, saveAutoUpdateSettings} = this.props;
-		const buttonCN = autoUpdateSettings.enabled ? styles.enabledAutoUpdateButton : '';
 
 		return (
 			<NavItem className={styles.autoUpdateItem}>
-				<IconButton className={buttonCN} name={ICON_NAMES.TIMER} />
 				<AutoUpdateForm
 					autoUpdateSettings={autoUpdateSettings}
 					className={styles.autoUpdateForm}
@@ -202,7 +200,7 @@ export class DashboardHeader extends Component<Props, State> {
 			);
 		}
 	};
-	
+
 	renderSaveSelfButton = () => {
 		const {
 			createPersonalDashboard,
