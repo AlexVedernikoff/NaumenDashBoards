@@ -39,7 +39,7 @@ const getXAxisOptions = (parameter: AxisParameter) => {
 
 	const options: Object = {
 		labels: {
-			hideOverlappingLabels: true,
+			hideOverlappingLabels: false,
 			rotate: -60,
 			show
 		},

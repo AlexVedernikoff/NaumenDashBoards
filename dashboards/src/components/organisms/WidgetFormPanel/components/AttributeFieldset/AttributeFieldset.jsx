@@ -23,7 +23,8 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	};
 
 	state = {
-		showDynamicAttributes: false
+		showDynamicAttributes: false,
+		showDynamicAttributesError: false
 	};
 
 	fetchAttributes = (classFqn: string) => () => this.props.fetchAttributes(classFqn);
@@ -90,15 +91,19 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		onChangeLabel({...event, parent}, index);
 	};
 
-	handleChangeShowDynamicAttributes = ({value}: OnChangeInputEvent) => {
+	handleChangeShowDynamicAttributes = ({value: show}: OnChangeInputEvent) => {
 		const {dataSet, dynamicGroups, fetchDynamicAttributeGroups} = this.props;
 		const {dataKey, descriptor} = dataSet;
 
-		if (descriptor && !value && !dynamicGroups[dataKey]) {
-			fetchDynamicAttributeGroups(dataKey, descriptor);
-		}
+		if (descriptor || show) {
+			if (!show && !dynamicGroups[dataKey]) {
+				fetchDynamicAttributeGroups(dataKey, descriptor);
+			}
 
-		this.setState({showDynamicAttributes: !value});
+			this.setState({showDynamicAttributes: !show});
+		} else {
+			this.setState({showDynamicAttributesError: true});
+		}
 	};
 
 	handleLoadDynamicAttributes = (node: DynamicGroupsNode | null) => {
@@ -202,6 +207,19 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		return null;
 	};
 
+	renderDynamicAttributesError = () => {
+		const {descriptor} = this.props.dataSet;
+		const {showDynamicAttributesError} = this.state;
+
+		if (!descriptor && showDynamicAttributesError) {
+			return (
+				<div className={styles.dynamicError}>
+					Для отображения списка, установите, пожалуйста, параметры фильтрации
+				</div>
+			);
+		}
+	};
+
 	renderList = (props: ListProps) => <List {...props} />;
 
 	renderListContainer = (props: ListProps) => (
@@ -237,12 +255,10 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	};
 
 	renderToggleShowingDynAttr = () => {
-		const {descriptor} = this.props.dataSet;
+		const {dataSet, sources} = this.props;
 		const {showDynamicAttributes} = this.state;
-		const {hasDynamic} = this.props.values;
-		const isFilterEmty = !descriptor && showDynamicAttributes;
-		const tipText = "Для отображения списка, установите, пожалуйста, параметры фильтрации";
-		const tip = isFilterEmty ? <div className={styles.dynamicError}>{tipText}</div> : null;
+		const {source} = dataSet;
+		const hasDynamic = source && sources[source.value].hasDynamic;
 
 		if (hasDynamic) {
 			return (
@@ -254,7 +270,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 							value={showDynamicAttributes}
 						/>
 					</FormCheckControl>
-					{tip}
+					{this.renderDynamicAttributesError()}
 				</Fragment>
 			);
 		}

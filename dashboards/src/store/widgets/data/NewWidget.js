@@ -12,9 +12,7 @@ class NewWidget {
 	computedAttrs: Array<Attribute> = [];
 	data: Array<Object> = [];
 	displayMode: LayoutMode = LAYOUT_MODE.WEB;
-	hasDynamic: boolean = false;
 	header = DEFAULT_HEADER_SETTINGS;
-	hasDynamic = false;
 	id: string = NewWidget.id;
 	name: string = '';
 	type: string = WIDGET_TYPES.COLUMN;

@@ -93,7 +93,7 @@ export class SourceDataBox extends Component<Props> {
 	};
 
 	handleSelectSource = (index: number, event: OnSelectEvent) => {
-		const {data, fetchAttributes, onSelectCallback, setDataFieldValue, setFieldValue, sourceRefFields, sources} = this.props;
+		const {data, fetchAttributes, onSelectCallback, setDataFieldValue, sourceRefFields} = this.props;
 		const {name, value: nextSource} = event;
 		const prevSource = data[index][name];
 		const {parameter} = sourceRefFields;
@@ -101,7 +101,6 @@ export class SourceDataBox extends Component<Props> {
 		getMapValues(sourceRefFields).forEach(name => setDataFieldValue(index, name, undefined));
 
 		if (nextSource) {
-			const hasDynamic = sources[nextSource.value].hasDynamic;
 			let callback;
 
 			if (parameter) {
@@ -110,7 +109,6 @@ export class SourceDataBox extends Component<Props> {
 
 			fetchAttributes(nextSource.value, this.setDefaultIndicator(index));
 			setDataFieldValue(index, name, nextSource, callback);
-			setFieldValue(FIELDS.hasDynamic, hasDynamic);
 		} else {
 			setDataFieldValue(index, name, null);
 		}

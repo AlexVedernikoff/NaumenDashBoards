@@ -107,7 +107,7 @@ const createData = (widget: Object, fields: Object) => {
 };
 
 const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
-	const {displayMode = DISPLAY_MODE.WEB, hasDynamic, id, type} = widget;
+	const {displayMode = DISPLAY_MODE.WEB, id, type} = widget;
 	const dataFields = getDataFields();
 	let {data} = widget;
 
@@ -125,7 +125,6 @@ const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 		data: data.map(normalizeDataSet),
 		dataLabels: dataLabels(widget),
 		displayMode,
-		hasDynamic,
 		header: header(widget),
 		id,
 		indicator: axisIndicator(widget, set[FIELDS.yAxis]),
