@@ -17,6 +17,9 @@ import java.sql.Timestamp
 
 //region КОНСТАНТЫ
 @Field private static final String UUID_CODE = 'UUID'
+@Field private static final Double ACCURACY = 0.9
+@Field private static final Double ROUNDING = 0.6
+@Field private static final Integer WEEKDAY_COUNT = 7
 //endregion
 
 @ru.naumen.core.server.script.api.injection.InjectApi
@@ -533,13 +536,14 @@ class QueryWrapper implements CriteriaWrapper
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         String minDate = new Timestamp(minStartDate.time)// преобразуем дату в понятный ормат для БД
         IApiCriteriaColumn weekNumberColumn = sc.property(attributeCodes)
-            .with(sc.&cast.rcurry('timestamp')) // водим к формату даты
-            .with(sc.&columnSubtract.rcurry(sc.constant("'$minDate'"))) // Вычитаем значение минимальной даты
-            .with(sc.&extract.rcurry('DAY')) // извлекаем количество дней
-            .with(sc.&columnSubtract.rcurry(sc.constant(0.6))) // вычистаем кофециент округления
-            .with(sc.&columnDivide.rcurry(sc.constant(7))) // делим на семь дней
-            .with(sc.&abs)
-            .with(sc.&round)
+                                                .with(sc.&cast.rcurry('timestamp')) // приводим к формату даты
+                                                .with(sc.&columnSubtract.rcurry(sc.constant("'$minDate'"))) // Вычитаем значение минимальной даты
+                                                .with(sc.&extract.rcurry('DAY')) // извлекаем количество дней
+                                                .with(sc.&columnSum.rcurry(sc.constant(modules.dashboardQueryWrapper.ACCURACY))) //прибавляем для точности данных
+                                                .with(sc.&columnDivide.rcurry(sc.constant(modules.dashboardQueryWrapper.WEEKDAY_COUNT))) // делим на семь дней
+                                                .with(sc.&columnSubtract.rcurry(sc.constant(modules.dashboardQueryWrapper.ROUNDING))) // вычитаем коэффициент округления
+                                                .with(sc.&abs)
+                                                .with(sc.&round)
         criteria.addGroupColumn(weekNumberColumn)
         def column = sc.concat(sc.constant("'$minDate'"), sc.constant('#'), weekNumberColumn)
         criteria.addColumn(column)
@@ -765,14 +769,11 @@ List<List> getData(RequestData requestData)
         GroupParameter parameter = it as GroupParameter
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
-            def minDateParameter = new AggregationParameter(
-                title: 'min',
-                type: Aggregation.MIN,
-                attribute: parameter.attribute
+            Date startMinDate = modules.dashboardCommon.getMinDate(
+                parameter.attribute.code,
+                parameter.attribute.sourceCode
             )
-            Date startMinDate =  QueryWrapper.build(requestData.source)
-                                             .aggregate(minDateParameter, true)
-                                             .result.head().head()
+            startMinDate = new Date(startMinDate.time).clearTime()
             wrapper.sevenDaysGroup(parameter, startMinDate)
         }
         else
