@@ -31,6 +31,7 @@ export class Header extends PureComponent<Props> {
 
 		return (
 			<HeaderCell
+				column={column}
 				columnIndex={index}
 				components={components}
 				fontColor={fontColor}

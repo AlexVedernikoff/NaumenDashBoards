@@ -1,7 +1,7 @@
 // @flow
 import cn from 'classnames';
 import {DEFAULT_COLUMN_WIDTH} from './constants';
-import type {DefaultProps, Props} from './types';
+import type {DefaultProps, Props, ValueProps} from './types';
 import {DEFAULT_TABLE_VALUE, FONT_STYLES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import React, {PureComponent} from 'react';
 import settingsStyles from 'styles/settings.less';
@@ -9,25 +9,35 @@ import styles from './styles.less';
 
 export class Cell extends PureComponent<Props> {
 	static defaultProps: DefaultProps = {
-		body: true,
 		children: null,
 		className: '',
 		defaultValue: DEFAULT_TABLE_VALUE.EMPTY_ROW,
 		fontColor: '',
-		rowIndex: 0,
+		row: null,
 		textAlign: TEXT_ALIGNS.left,
 		textHandler: TEXT_HANDLERS.CROP,
+		tip: '',
 		value: '',
 		width: DEFAULT_COLUMN_WIDTH
 	};
 
+	components = {
+		Value: this.ValueComponent
+	};
+
+	ValueComponent (props: ValueProps) {
+		return props.value;
+	}
+
+	getComponents = () => this.props.components || this.components;
+
 	handleClick = (e: MouseEvent) => {
-		const {columnIndex, onClick, rowIndex, value} = this.props;
+		const {column, onClick, row, value} = this.props;
 
 		if (onClick) {
 			const props = {
-				columnIndex,
-				rowIndex,
+				column,
+				row,
 				value
 			};
 
@@ -35,15 +45,9 @@ export class Cell extends PureComponent<Props> {
 		}
 	};
 
-	renderValue = () => {
-		const {columnIndex, components, defaultValue, value} = this.props;
+	renderDefaultValue = () => {
+		const {defaultValue} = this.props;
 		const {DASH, NULL, ZERO} = DEFAULT_TABLE_VALUE;
-		const {Value} = components;
-		let displayValue = value;
-
-		if (displayValue) {
-			return <Value columnIndex={columnIndex} value={displayValue} />;
-		}
 
 		switch (defaultValue) {
 			case DASH:
@@ -57,13 +61,19 @@ export class Cell extends PureComponent<Props> {
 		}
 	};
 
+	renderValue = () => {
+		const {value} = this.props;
+		const {Value} = this.getComponents();
+
+		return value ? <Value value={value} /> : this.renderDefaultValue();
+	};
+
 	render () {
-		const {body, children, className, fontColor, fontStyle, textAlign, textHandler, width} = this.props;
+		const {children, className, fontColor, fontStyle, textAlign, textHandler, tip, width} = this.props;
 		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 		const {CROP, WRAP} = TEXT_HANDLERS;
 		const cellCN = cn({
 			[styles.cell]: true,
-			[styles.bodyCell]: body,
 			[settingsStyles.bold]: fontStyle === BOLD,
 			[settingsStyles.italic]: fontStyle === ITALIC,
 			[settingsStyles.underline]: fontStyle === UNDERLINE,
@@ -73,7 +83,7 @@ export class Cell extends PureComponent<Props> {
 		});
 
 		return (
-			<td className={cellCN} onClick={this.handleClick} style={{color: fontColor, textAlign}} width={width}>
+			<td className={cellCN} onClick={this.handleClick} style={{color: fontColor, height: 32, textAlign}} title={tip} width={width}>
 				{this.renderValue()}
 				{children}
 			</td>

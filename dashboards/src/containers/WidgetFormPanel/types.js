@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {ChangingState, ThunkAction} from 'store/types';
-import type {Context} from 'utils/api/types';
+import type {Context, UserData} from 'store/context/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
@@ -10,7 +10,6 @@ import type {NewToast} from 'store/toasts/types';
 import {NewWidget} from 'entities';
 import type {OnLoadCallback} from 'store/sources/types';
 import type {Source, Widget} from 'store/widgets/data/types';
-import type {UserData} from 'store/context/types';
 
 export type SetFieldValue = (name: string, value: any) => void;
 

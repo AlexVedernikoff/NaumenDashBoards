@@ -1,5 +1,6 @@
 // @flow
 import {Body, Cell, Footer, Header, HeaderCell, Pagination, Row} from './components';
+import cn from 'classnames';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
@@ -9,17 +10,17 @@ import styles from './styles.less';
 
 export class Table extends PureComponent<Props, State> {
 	components = {
-		Cell,
+		BodyCell: Cell,
+		FooterCell: Cell,
 		HeaderCell,
-		Row,
-		Value: this.renderDisplayValue
+		Row
 	};
 	ref: Ref<'div'> = createRef();
 
 	state = {
 		columnsWidth: [],
 		page: 1,
-		pageSize: 30,
+		pageSize: 20,
 		width: NaN
 	};
 
@@ -84,7 +85,7 @@ export class Table extends PureComponent<Props, State> {
 				columnsWidth={columnsWidth}
 				components={this.getComponents()}
 				data={data}
-				onClickDataCell={onClickDataCell}
+				onClickCell={onClickDataCell}
 				page={page}
 				pageSize={pageSize}
 				settings={settings}
@@ -93,10 +94,6 @@ export class Table extends PureComponent<Props, State> {
 			/>
 		);
 	};
-
-	renderDisplayValue (props: Object) {
-		return props.value;
-	}
 
 	renderFooter = () => {
 		const {columns} = this.props;
@@ -153,6 +150,7 @@ export class Table extends PureComponent<Props, State> {
 					onPrevClick={this.handlePrevClick}
 					page={page}
 					total={total}
+					width={width}
 				/>
 			);
 		}
@@ -168,16 +166,20 @@ export class Table extends PureComponent<Props, State> {
 					{this.renderBody()}
 					{this.renderFooter()}
 					{this.renderNoData()}
+					{this.renderPagination()}
 				</table>
 			);
 		}
+
+		return null;
 	};
 
 	render () {
+		const {className} = this.props;
+
 		return (
-			<ResizeDetector className={styles.container} forwardedRef={this.ref} onResize={this.handleResize}>
+			<ResizeDetector className={cn(styles.container, className)} forwardedRef={this.ref} onResize={this.handleResize}>
 				{this.renderTable()}
-				{this.renderPagination()}
 			</ResizeDetector>
 		);
 	}

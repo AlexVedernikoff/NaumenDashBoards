@@ -1,4 +1,5 @@
 // @flow
+import {Cell} from 'components/organisms/Table/components';
 import cn from 'classnames';
 import {MIN_WIDTH} from './constants';
 import type {Props} from './types';
@@ -65,8 +66,7 @@ export class HeaderCell extends PureComponent<Props> {
 	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.ref} />;
 
 	render () {
-		const {columnIndex, components, fontColor, fontStyle, sorting, value, width} = this.props;
-		const {Cell, Value} = components;
+		const {column, fontColor, fontStyle, sorting, value, width} = this.props;
 		const {ASC, DESC} = SORTING_TYPES;
 		const cellCN = cn({
 			[styles.cell]: true,
@@ -78,12 +78,12 @@ export class HeaderCell extends PureComponent<Props> {
 			<Cell
 				body={false}
 				className={cellCN}
-				columnIndex={columnIndex}
-				components={{Value}}
+				column={column}
 				fontColor={fontColor}
 				fontStyle={fontStyle}
 				onClick={this.handleClick}
 				textAlign={TEXT_ALIGNS.center}
+				tip={value}
 				value={value}
 				width={width}
 			>

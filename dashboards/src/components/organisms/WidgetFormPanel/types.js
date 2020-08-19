@@ -2,7 +2,7 @@
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {ChangingState, ThunkAction} from 'store/types';
 import type {ComputedAttr, Group, Widget} from 'store/widgets/data/types';
-import type {Context} from 'utils/api/types';
+import type {Context, UserData} from 'store/context/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DivRef, OnChangeLabelEvent, OnSelectEvent} from 'components/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
@@ -21,7 +21,6 @@ import type {GroupAttributeField} from './components/AttributeGroupField/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {LinkedDataSourceMap} from 'store/sources/linkedData/types';
 import type {Node} from 'react';
-import type {UserData} from 'store/context/types';
 
 export type OnSelectAttributeEvent = {
 	parent: Attribute | null,

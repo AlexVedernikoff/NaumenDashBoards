@@ -2,11 +2,9 @@
 import {
 	aggregation as aggregationFilter,
 	array,
-	breakdown,
 	getOrdinalData,
 	group,
 	header,
-	mixinBreakdown,
 	object,
 	string,
 	templateName
@@ -15,6 +13,7 @@ import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organism
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
 import type {TableData, TableWidget} from 'store/widgets/data/types';
 import uuid from 'tiny-uuid';
@@ -50,24 +49,23 @@ const getDataFields = () => {
 };
 
 const normalizeDataSet = (set: Object, index: number, data: Array<Object>): TableData => {
-	const {dataKey, descriptor, row, source} = set;
+	const {dataKey, descriptor, indicators, parameters, row, source, sourceForCompute} = set;
 	let resultSet = {
 		dataKey,
 		descriptor,
-		row,
+		parameters: parameters || [{attribute: row, group: getDefaultSystemGroup(row)}],
 		source,
-		sourceForCompute: true
+		sourceForCompute
 	};
 
 	if (!set.sourceForCompute) {
-		const {aggregation, column} = set;
+		const {aggregation, breakdown, breakdownGroup, column} = set;
 		resultSet = {
 			...resultSet,
-			aggregation: aggregationFilter(aggregation),
-			column,
-			sourceForCompute: false
+			breakdown,
+			breakdownGroup,
+			indicators: indicators || [{aggregation: aggregationFilter(aggregation), attribute: column}]
 		};
-		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data, FIELDS.column)}, resultSet);
 	}
 
 	return resultSet;
@@ -78,8 +76,6 @@ const createData = (widget: Object, fields: Object) => {
 		aggregation,
 		breakdown,
 		breakdownGroup,
-		calcTotalColumn,
-		calcTotalRow,
 		column,
 		dataKey,
 		descriptor,
@@ -92,8 +88,6 @@ const createData = (widget: Object, fields: Object) => {
 		aggregation: aggregationFilter(widget[aggregation]),
 		breakdown: object(widget[breakdown]),
 		breakdownGroup: group(widget[breakdownGroup]),
-		calcTotalColumn: Boolean(widget[calcTotalColumn]),
-		calcTotalRow: Boolean(widget[calcTotalRow]),
 		column: object(widget[column]),
 		dataKey: string(widget[dataKey], uuid()),
 		descriptor: string(widget[descriptor]),
@@ -111,7 +105,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
 		id,
-		showEmptyData,
+		showEmptyData = true,
 		sorting = DEFAULT_TABLE_SORTING,
 		table,
 		type
@@ -127,7 +121,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		header: header(widget),
 		id,
 		name: string(widget[FIELDS.name]),
-		showEmptyData: Boolean(showEmptyData),
+		showEmptyData,
 		sorting,
 		table: extend(DEFAULT_TABLE_SETTINGS, table),
 		templateName: templateName(widget),

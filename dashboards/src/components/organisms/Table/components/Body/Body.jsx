@@ -2,10 +2,12 @@
 import type {Column, Row as RowType} from 'Table/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import {ROW_HEIGHT} from 'Table/constants';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
+import styles from './styles.less';
 
 export class Body extends PureComponent<Props> {
-	getSortValue = (value: string = '') => Number(value) || value;
+	getSortValue = (value: string | number): number => typeof value === 'string' ? Number(value) : value;
 
 	sort = (data: Array<RowType>, accessor: string, asc: boolean): Array<RowType> => data.sort((row1, row2) => {
 		// TODO убрать, когда начнут приходить данные числами
@@ -25,19 +27,19 @@ export class Body extends PureComponent<Props> {
 	});
 
 	renderCell = (row: RowType, rowIndex: number) => (column: Column, columnIndex: number) => {
-		const {components, onClickDataCell, settings} = this.props;
+		const {components, onClickCell, settings} = this.props;
 		const {defaultValue, textAlign, textHandler} = settings.body;
 		const width = this.props.columnsWidth[columnIndex];
-		const {Cell, Value} = components;
+		const {BodyCell} = components;
 		const {accessor} = column;
 
 		return (
-			<Cell
-				columnIndex={columnIndex}
-				components={{Value}}
+			<BodyCell
+				column={column}
 				defaultValue={defaultValue.value}
 				key={accessor}
-				onClick={onClickDataCell}
+				onClick={onClickCell}
+				row={row}
 				rowIndex={rowIndex}
 				textAlign={textAlign}
 				textHandler={textHandler}
@@ -59,14 +61,18 @@ export class Body extends PureComponent<Props> {
 		const {column, type} = sorting;
 		const start = pageSize * (page - 1);
 		let rows = data;
+		let height;
 
 		if (column !== null && columns[column]) {
 			rows = this.sort(data, columns[column].accessor, type === SORTING_TYPES.ASC);
 		}
 
+		rows = rows.slice(start, start + pageSize);
+		height = rows.length * ROW_HEIGHT;
+
 		return (
-			<tbody style={{minWidth: width}}>
-				{rows.slice(start, start + pageSize).map(this.renderRow)}
+			<tbody className={styles.container} style={{height, minWidth: width}}>
+				{rows.map(this.renderRow)}
 			</tbody>
 		);
 	}

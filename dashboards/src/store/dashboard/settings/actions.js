@@ -235,7 +235,7 @@ const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 const uploadFile = async (file: Blob, name: string) => {
 	const formData = new FormData();
 	formData.append('file', file, name);
-
+	// $FlowFixMe
 	const csrf = Array.from(window.top.document.head.getElementsByTagName('meta')).find(m => m.name === '_csrf').content;
 	const response = await fetch(`/sd/operator/upload?_csrf=${csrf}`, {
 		body: formData,

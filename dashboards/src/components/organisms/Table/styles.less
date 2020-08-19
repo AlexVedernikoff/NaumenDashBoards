@@ -3,18 +3,16 @@
 :local {
 	.container {
 		height: 100%;
-		overflow: auto;
+		overflow: hidden;
 	}
 
 	.table {
-		border: 1px solid @silver;
-		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		font-weight: 400;
-		overflow: auto;
+		height: 100%;
+		overflow-x: auto;
 		position: relative;
-		width: 100%;
 
 		* {
 			box-sizing: border-box;

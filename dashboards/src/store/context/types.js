@@ -6,6 +6,11 @@ import type {WidgetsState} from 'store/widgets/types';
 
 export type UserRole = $Keys<typeof USER_ROLES>;
 
+export type Context = {
+	contentCode: string,
+	subjectUuid: string
+};
+
 type ContentContext = {
 	contentCode: string,
 	metaClass: string,
