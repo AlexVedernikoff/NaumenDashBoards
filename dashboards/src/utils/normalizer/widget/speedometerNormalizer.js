@@ -9,7 +9,6 @@ const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => 
 		borders,
 		data,
 		displayMode = DISPLAY_MODE.WEB,
-		hasDynamic,
 		id,
 		ranges,
 		type
@@ -20,7 +19,6 @@ const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => 
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data,
 		displayMode,
-		hasDynamic,
 		header: header(widget),
 		id,
 		name: string(widget[FIELDS.name]),

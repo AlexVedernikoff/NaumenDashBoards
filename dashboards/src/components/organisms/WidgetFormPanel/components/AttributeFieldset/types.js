@@ -33,5 +33,6 @@ export type Props = {
 };
 
 export type State = {
-	showDynamicAttributes: boolean
+	showDynamicAttributes: boolean,
+	showDynamicAttributesError: boolean
 };

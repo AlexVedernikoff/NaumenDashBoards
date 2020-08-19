@@ -29,6 +29,7 @@ export type ContextProps = {|
 	fetchDynamicAttributes: FetchDynamicAttributes,
 	fetchRefAttributes: FetchRefAttributes,
 	refAttributes: AttributesMap,
+	sources: DataSourceMap,
 	values: Values
 |};
 

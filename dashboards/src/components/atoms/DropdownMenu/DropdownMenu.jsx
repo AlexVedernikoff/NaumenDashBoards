@@ -14,13 +14,13 @@ export class DropdownMenu extends PureComponent<Props> {
 	};
 
 	render () {
-		const {children, className, onSelect, onToogle, selectable} = this.props;
+		const {children, className, onSelect, onToggle, selectable} = this.props;
 
 		return (
-			<OutsideClickDetector onClickOutside={onToogle}>
+			<OutsideClickDetector onClickOutside={onToggle}>
 				<Menu
 					className={className}
-					expandIcon={<Icon name={ICON_NAMES.EXPANED_ICON} />}
+					expandIcon={<Icon name={ICON_NAMES.EXPAND} />}
 					mode="vertical-right"
 					onSelect={onSelect}
 					selectable={selectable}

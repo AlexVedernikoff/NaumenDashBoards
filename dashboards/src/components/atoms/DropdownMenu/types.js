@@ -5,6 +5,6 @@ export type Props = {
 	children: Node,
 	className: string,
 	onSelect: () => void,
-	onToogle: () => void,
+	onToggle: () => void,
 	selectable: boolean,
 };

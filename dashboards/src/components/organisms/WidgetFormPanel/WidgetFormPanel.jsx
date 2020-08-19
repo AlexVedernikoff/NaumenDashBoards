@@ -56,6 +56,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 			fetchDynamicAttributes,
 			fetchRefAttributes,
 			refAttributes,
+			sources,
 			values
 		} = this.props;
 
@@ -68,6 +69,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 			fetchDynamicAttributes,
 			fetchRefAttributes: fetchRefAttributes,
 			refAttributes,
+			sources,
 			values
 		};
 	};

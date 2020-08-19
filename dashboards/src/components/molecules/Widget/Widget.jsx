@@ -300,7 +300,11 @@ export class Widget extends PureComponent<Props, State> {
 
 		if (isEditable) {
 			return (
-				<IconButton icon={ICON_NAMES.SQUARE} onClick={() => console.log('renderSquareButton')} round={false} tip="Таблица данных" />
+				<IconButton
+					icon={ICON_NAMES.SQUARE}
+					onClick={() => console.log('renderSquareButton')}
+					round={false} tip="Таблица данных"
+				/>
 			);
 		}
 
@@ -317,7 +321,7 @@ export class Widget extends PureComponent<Props, State> {
 
 		if (showSubmenu) {
 			return (
-				<DropdownMenu onSelect={this.handleCloseSubMenu} onToogle={this.handleCloseSubMenu}>
+				<DropdownMenu onSelect={this.handleCloseSubMenu} onToggle={this.handleCloseSubMenu}>
 					<SubMenu popupClassName="popupSubmenu" title={<span>Источники</span>}>
 						{this.renderDrillDownItems()}
 					</SubMenu>
