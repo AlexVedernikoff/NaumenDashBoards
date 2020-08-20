@@ -15,7 +15,8 @@ import {
 	legend,
 	mixinBreakdown,
 	object,
-	string
+	string,
+	templateName
 } from './helpers';
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
 import {COMBO_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -143,6 +144,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		name: string(widget[FIELDS.name]),
 		parameter: axisParameter(widget, set[FIELDS.xAxis]),
 		sorting: chartSorting(widget),
+		templateName: templateName(widget),
 		type
 	};
 };

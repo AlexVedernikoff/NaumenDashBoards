@@ -9,6 +9,7 @@ const DEFAULT_HEADER_SETTINGS: Header = {
 	fontStyle: undefined,
 	name: '',
 	show: true,
+	template: '',
 	textAlign: TEXT_ALIGNS.left,
 	textHandler: TEXT_HANDLERS.CROP,
 	useName: true

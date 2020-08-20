@@ -46,10 +46,10 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
 
 /**
  * Сохраняет изменение данных виджета
- * @param {Widget} widget - данные формы редактирования
+ * @param {Widget} settings - данные формы редактирования
  * @returns {ThunkAction}
  */
-const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const saveWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
@@ -58,9 +58,9 @@ const saveWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, g
 		const url = buildUrl('dashboardSettings', 'editWidget', 'requestContent,user');
 		const params = {
 			...getParams(),
-			widget
+			widget: settings
 		};
-		await client.post(url, params);
+		const {data: widget} = await client.post(url, params);
 
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayouts());
@@ -104,10 +104,10 @@ const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => 
 
 /**
  * Создает новый виджет
- * @param {Widget} widget - данные формы создания виджета
+ * @param {Widget} settings - данные формы создания виджета
  * @returns {ThunkAction}
  */
-const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
@@ -116,16 +116,15 @@ const createWidget = (widget: Widget): ThunkAction => async (dispatch: Dispatch,
 		const url = buildUrl('dashboardSettings', 'createWidget', 'requestContent,user');
 		const params = {
 			...getParams(),
-			widget
+			widget: settings
 		};
-		const {data: id} = await client.post(url, params);
-		const createdWidget = {...widget, id};
+		const {data: widget} = await client.post(url, params);
 
 		dispatch(batchActions([
 			deleteWidget(NewWidget.id),
-			replaceLayoutsId(NewWidget.id, id),
-			setCreatedWidget(createdWidget),
-			fetchBuildData(createdWidget)
+			replaceLayoutsId(NewWidget.id, widget.id),
+			setCreatedWidget(widget),
+			fetchBuildData(widget)
 		]));
 		dispatch(saveNewLayouts());
 	} catch (e) {

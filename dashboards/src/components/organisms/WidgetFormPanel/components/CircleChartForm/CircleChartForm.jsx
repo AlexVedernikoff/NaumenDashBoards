@@ -39,6 +39,7 @@ export class CircleChartForm extends Component<TypedFormProps> {
 			legend,
 			name = '',
 			sorting,
+			templateName,
 			type
 		} = values;
 
@@ -53,6 +54,7 @@ export class CircleChartForm extends Component<TypedFormProps> {
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
 			name,
 			sorting: extend(DEFAULT_CIRCLE_SORTING_SETTINGS, sorting),
+			templateName,
 			type
 		};
 	};

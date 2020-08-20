@@ -137,8 +137,8 @@ export class Form extends Component<Props, State> {
 	);
 
 	renderTitle = () => {
-		const {values} = this.props;
-		const name = values.name || 'Новый виджет';
+		const {widget} = this.props;
+		const name = widget.name || 'Новый виджет';
 
 		return (
 			<div className={styles.titleContainer}>

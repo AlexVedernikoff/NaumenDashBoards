@@ -91,7 +91,8 @@ export type Props = {|
 	sources: DataSourceMap,
 	updating: boolean,
 	user: UserData,
-	values: Values
+	values: Values,
+	widget: Widget
 |};
 
 export type State = {

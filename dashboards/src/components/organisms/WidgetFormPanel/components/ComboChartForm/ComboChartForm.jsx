@@ -43,6 +43,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			parameter,
 			name = '',
 			sorting,
+			templateName,
 			type
 		} = values;
 
@@ -59,6 +60,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			name,
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),
+			templateName,
 			type
 		};
 	};

@@ -8,7 +8,8 @@ import {
 	header,
 	mixinBreakdown,
 	object,
-	string
+	string,
+	templateName
 } from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
@@ -127,6 +128,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		name: string(widget[FIELDS.name]),
 		sorting,
 		table: extend(DEFAULT_TABLE_SETTINGS, table),
+		templateName: templateName(widget),
 		type
 	};
 };
