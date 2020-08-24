@@ -113,9 +113,10 @@ String getSettings(Map<String, Object> requestContent, def user)
     {
         result = personalDashboard ? [
             autoUpdate  : personalDashboard?.autoUpdate,
-            widgets     : personalDashboard?.widgetIds?.findResults(
-                this.&getWidgetSettings.rcurry(isMobile)
-            ) ?: [],
+            widgets     : personalDashboard?.widgetIds?.findResults{ widgetKey ->
+                def widget = getWidgetSettings(widgetKey, isMobile)
+                return changeTotalWidgetName(widget, classFqn)
+            } ?: [],
             customGroups: personalDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
             },
@@ -124,9 +125,10 @@ String getSettings(Map<String, Object> requestContent, def user)
 
         ] : [
             autoUpdate  : defaultDashboard?.autoUpdate,
-            widgets     : defaultDashboard?.widgetIds?.findResults(
-                this.&getWidgetSettings.rcurry(isMobile)
-            ) ?: [],
+            widgets     : defaultDashboard?.widgetIds?.findResults{ widgetKey ->
+                def widget = getWidgetSettings(widgetKey, isMobile)
+                return changeTotalWidgetName(widget, classFqn)
+            } ?: [],
             customGroups: defaultDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
             },
@@ -142,9 +144,10 @@ String getSettings(Map<String, Object> requestContent, def user)
             // В таких случаях просто пропускаем пустые настройки
             // ключи виджетов с пустыми настройками будут удалены после сброса настроек.
             // Пользователь этого даже не заметит
-            widgets     : defaultDashboard?.widgetIds?.findResults(
-                this.&getWidgetSettings.rcurry(isMobile)
-            ) ?: [],
+            widgets     : defaultDashboard?.widgetIds?.findResults{ widgetKey ->
+                def widget = getWidgetSettings(widgetKey, isMobile)
+                return changeTotalWidgetName(widget, classFqn)
+            } ?: [],
             customGroups: defaultDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
             },
@@ -153,6 +156,55 @@ String getSettings(Map<String, Object> requestContent, def user)
         ]
     }
     return toJson(result)
+}
+
+/**
+ * Метод точечного изменения названия виджета
+ * @param widgetName - название виджета
+ * @param classFqn - uuid текущего объекта
+ * @return итоговое название виджета
+ */
+private String replaceWidgetName(String widgetName, def classFqn)
+{
+    if (widgetName?.contains('subject'))
+    {
+        def subject = api.utils.get(classFqn)
+        try
+        {
+            //пользователь может написать несуществующее поле у subject-а
+            return api.utils.processTemplate(widgetName, [subject: subject])
+        }
+        catch (Exception ex)
+        {
+            //оставляем название в исходном виде
+            return widgetName
+        }
+    }
+    return widgetName
+}
+
+/**
+ * Метод полноценного изменения названия виджета
+ * @param widgetSettings - настройки виджета
+ * @param classFqn - uuid текущего объекта
+ * @return итоговые настройки виджета
+ */
+private Map changeTotalWidgetName(Map widgetSettings, String classFqn)
+{
+    if (widgetSettings)
+    {
+        def widget = (widgetSettings as LinkedHashMap).clone() as Map
+        widget?.name = widget?.templateName
+            ? replaceWidgetName(widget?.templateName, classFqn)
+            : widget?.name
+        def header = (widget?.header as LinkedHashMap).clone() as Map
+        header?.name = header?.template
+            ? replaceWidgetName(header?.template, classFqn)
+            : header?.name
+        widget?.header = header
+        return widget
+    }
+    return widgetSettings
 }
 
 /**
@@ -352,6 +404,7 @@ String createWidget(Map<String, Object> requestContent, def user)
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
     def widget = requestContent.widget
+    def widgetWithCorrectName = changeTotalWidgetName(widget, classFqn)
     boolean isPersonal = requestContent.isPersonal
     DashboardSettings dashboardSettings = null
     String dashboardKey = null
@@ -381,10 +434,11 @@ String createWidget(Map<String, Object> requestContent, def user)
             contentCode,
             isPersonal ? user?.login as String : null)
 
-    return saveWidgetSettings(widget, generateKey).with { key ->
+    return saveWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
+        def key = totalWidget.id
         dashboardSettings.widgetIds += key
         saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
-        toJson(key)
+        toJson(totalWidget)
     }
 }
 
@@ -396,10 +450,12 @@ String createWidget(Map<String, Object> requestContent, def user)
  */
 String editWidget(Map<String, Object> requestContent, def user)
 {
+    String classFqn = requestContent.classFqn
     def widget = requestContent.widget
     String widgetKey = widget.id
     validateName(requestContent, widgetKey)
-    String classFqn = requestContent.classFqn
+
+    def widgetWithCorrectName = changeTotalWidgetName(widget, classFqn)
     String contentCode = requestContent.contentCode
     if(requestContent.isPersonal as boolean)
     {
@@ -407,7 +463,7 @@ String editWidget(Map<String, Object> requestContent, def user)
         Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
         if (user && isPersonalWidget(widgetKey, user))
         {
-            return saveWidgetSettings(widget) { widgetKey }
+            return saveWidgetSettings(widgetWithCorrectName) { widgetKey }
         }
         else
         {
@@ -418,13 +474,14 @@ String editWidget(Map<String, Object> requestContent, def user)
                     contentCode,
                     user.login as String,
                     widgetKey)
-            return saveWidgetSettings(widget, generateKey).with { key ->
+            return saveWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
+                def key = totalWidget.id
                 dashboardSettings.widgetIds = dashboardSettings.widgetIds - widgetKey + key
                 if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE))
                 {
                     throw new Exception("Widget $key not saved in dashboard $personalDashboardKey")
                 }
-                toJson(key)
+                toJson(totalWidget)
             }
         }
     }
@@ -451,9 +508,9 @@ String editWidget(Map<String, Object> requestContent, def user)
             closureReplaceWidgetKey(null)
             deleteJsonSettings(widgetKey, WIDGET_NAMESPACE)
         }
-        def widgetDb = setUuidInSettings(widget, widgetKey)
+        def widgetDb = setUuidInSettings(widgetWithCorrectName, widgetKey)
         saveJsonSettings(widgetKey, toJson(widgetDb), WIDGET_NAMESPACE)
-        return toJson(widgetKey)
+        return toJson(widgetDb)
     }
 }
 
@@ -605,12 +662,13 @@ private boolean excludeWidgetsFromDashboard(String dashboardKey, Collection<Stri
  * @param generateCode - метод генерации ключа виджета
  * @return сгенерированнй ключ нового виджета
  */
-private String saveWidgetSettings(Map settings, Closure<String> generateCode) {
+private Map saveWidgetSettings(Map settings, Closure<String> generateCode) {
     String key = generateCode()
-    if(!saveJsonSettings(key, toJson(setUuidInSettings(settings, key)), WIDGET_NAMESPACE)) {
+    def widgetSettings = setUuidInSettings(settings, key)
+    if(!saveJsonSettings(key, toJson(widgetSettings), WIDGET_NAMESPACE)) {
         throw new Exception("Widget $key not saved!")
     }
-    return key
+    return widgetSettings
 }
 
 /**
