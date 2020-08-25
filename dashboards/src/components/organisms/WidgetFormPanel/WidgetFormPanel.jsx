@@ -1,11 +1,8 @@
 // @flow
 import {AxisChartForm, CircleChartForm, ComboChartForm, Form, SpeedometerForm, SummaryForm, TableForm} from './components';
-import cn from 'classnames';
 import type {DivRef} from 'components/types';
-import {isLegacyBrowser} from 'utils/export/helpers';
 import type {Props, RenderFormProps, State} from './types';
 import React, {Component, createContext, createRef} from 'react';
-import styles from './styles.less';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export const formRef: DivRef = createRef();
@@ -76,15 +73,9 @@ export class WidgetFormPanel extends Component<Props, State> {
 
 	resolve = () => {
 		const {type} = this.props.values;
-		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
+		const {COMBO, DONUT, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
 		switch (type) {
-			case BAR:
-			case BAR_STACKED:
-			case COLUMN:
-			case COLUMN_STACKED:
-			case LINE:
-				return AxisChartForm;
 			case COMBO:
 				return ComboChartForm;
 			case DONUT:
@@ -96,36 +87,26 @@ export class WidgetFormPanel extends Component<Props, State> {
 				return SummaryForm;
 			case TABLE:
 				return TableForm;
+			default:
+				return AxisChartForm;
 		}
 	};
 
-	renderForm = (props: RenderFormProps) => <Form {...this.props} {...props} />;
+	renderForm = (props: RenderFormProps) => <Form forwardedRef={formRef} {...this.props} {...props} />;
 
 	renderTypedForm = () => {
-		const TypedWidgetForm = this.resolve();
-		const {current: container} = formRef;
+		const Form = this.resolve();
 
-		if (TypedWidgetForm && container) {
-			return (
-				<FormContext.Provider value={this.getContextValue()}>
-					<TypedWidgetForm render={this.renderForm} />
-				</FormContext.Provider>
-			);
-		}
+		return (
+			<FormContext.Provider value={this.getContextValue()}>
+				<Form render={this.renderForm} />
+			</FormContext.Provider>
+		);
 	};
 
 	render () {
 		this.fieldErrorRefs = [];
-		const formCN = cn({
-			[styles.form]: true,
-			[styles.ieForm]: isLegacyBrowser(false)
-		});
-
-		return (
-			<div className={formCN} ref={formRef}>
-				{this.renderTypedForm()}
-			</div>
-		);
+		return this.renderTypedForm();
 	}
 }
 

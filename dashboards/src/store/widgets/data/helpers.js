@@ -28,7 +28,6 @@ const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
 
 	return {
 		...state,
-		loading: false,
 		map
 	};
 };
@@ -91,8 +90,11 @@ const createWidget = (state: WidgetsDataState, {payload}: SetCreatedWidget): Wid
 			...state.map,
 			[payload.id]: payload
 		},
-		selectedWidget: payload.id,
-		updating: false
+		saving: {
+			...state.saving,
+			loading: false
+		},
+		selectedWidget: payload.id
 	};
 };
 
@@ -127,7 +129,10 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
 	return {
 		...state,
 		map: {...state.map},
-		updating: false
+		saving: {
+			...state.saving,
+			loading: false
+		}
 	};
 };
 

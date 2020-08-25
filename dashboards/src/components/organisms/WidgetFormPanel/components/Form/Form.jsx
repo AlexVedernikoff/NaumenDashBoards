@@ -1,12 +1,11 @@
 // @flow
-import {Button} from 'components/atoms';
 import cn from 'classnames';
 import type {Node} from 'react';
 import type {Props, State, Tab} from './types';
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import styles from './styles.less';
 import {TABS} from './constants';
-import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
+import {WidgetForm} from 'components/templates';
 
 export class Form extends Component<Props, State> {
 	state = {
@@ -20,27 +19,10 @@ export class Form extends Component<Props, State> {
 
 	handleClick = (tab: Tab) => () => this.setState({tab});
 
-	handleClickSaveButton = () => {
+	handleSubmit = () => {
 		const {onSubmit, updateWidget} = this.props;
 		onSubmit(updateWidget);
 	};
-
-	renderCancelButton = () => {
-		const {cancelForm} = this.props;
-
-		return (
-			<Button className={styles.cancelButton} onClick={cancelForm} variant={BUTTON_VARIANTS.ADDITIONAL}>
-				Отмена
-			</Button>
-		);
-	};
-
-	renderFooter = () => (
-		<div className={styles.footer}>
-			{this.renderSaveButton()}
-			{this.renderCancelButton()}
-		</div>
-	);
 
 	renderParamsTabContent = () => {
 		const {
@@ -85,16 +67,6 @@ export class Form extends Component<Props, State> {
 		return this.renderTabContent(content, TABS.PARAMS);
 	};
 
-	renderSaveButton = () => {
-		const {updating} = this.props;
-
-		return (
-			<Button disabled={updating} onClick={this.handleClickSaveButton} variant={BUTTON_VARIANTS.SIMPLE}>
-				Сохранить
-			</Button>
-		);
-	};
-
 	renderStyleTabContent = () => {
 		const {renderStyleTab, setFieldValue, values} = this.props;
 		const content = renderStyleTab({
@@ -136,26 +108,21 @@ export class Form extends Component<Props, State> {
 		</ul>
 	);
 
-	renderTitle = () => {
-		const {widget} = this.props;
-		const name = widget.name || 'Новый виджет';
-
-		return (
-			<div className={styles.titleContainer}>
-				<div className={styles.title}>{name}</div>
-			</div>
-		);
-	};
-
 	render () {
+		const {cancelForm, forwardedRef, saving, widget} = this.props;
+
 		return (
-			<Fragment>
-				{this.renderTitle()}
+			<WidgetForm
+				forwardedRef={forwardedRef}
+				onCancel={cancelForm}
+				onSubmit={this.handleSubmit}
+				title={widget.name}
+				updating={saving.loading}
+			>
 				{this.renderTabs()}
 				{this.renderParamsTabContent()}
 				{this.renderStyleTabContent()}
-				{this.renderFooter()}
-			</Fragment>
+			</WidgetForm>
 		);
 	}
 }

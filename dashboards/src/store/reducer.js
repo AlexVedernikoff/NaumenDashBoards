@@ -3,6 +3,7 @@ import {combineReducers} from 'redux';
 import context from './context/reducer';
 import customGroups from './customGroups/reducer';
 import dashboard from './dashboard/reducer';
+import dashboards from './dashboards/reducer';
 import {ROOT_EVENTS} from './constants';
 import sources from './sources/reducer';
 import toasts from './toasts/reducer';
@@ -12,6 +13,7 @@ const appReducer = combineReducers({
 	context,
 	customGroups,
 	dashboard,
+	dashboards,
 	sources,
 	toasts,
 	widgets

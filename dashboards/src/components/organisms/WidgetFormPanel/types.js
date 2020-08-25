@@ -1,5 +1,6 @@
 // @flow
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
+import type {ChangingState, ThunkAction} from 'store/types';
 import type {Context} from 'utils/api/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DivRef, OnChangeLabelEvent, OnSelectEvent} from 'components/types';
@@ -17,7 +18,6 @@ import type {Group, Widget} from 'store/widgets/data/types';
 import type {GroupAttributeField} from './components/AttributeGroupField/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {Node} from 'react';
-import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 
 export type ContextProps = {|
@@ -85,11 +85,11 @@ export type Props = {|
 	onSubmit: (func: UpdateWidget) => Promise<void>,
 	personalDashboard: boolean,
 	refAttributes: AttributesMap,
+	saving: ChangingState,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,
 	setSchema: (schema: Object) => void,
 	sources: DataSourceMap,
-	updating: boolean,
 	user: UserData,
 	values: Values,
 	widget: Widget

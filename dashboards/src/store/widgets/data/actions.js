@@ -137,6 +137,40 @@ const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatc
 };
 
 /**
+ * Копирует виджет
+ * @param {string} widgetId - идентификатор виджета
+ * @returns {ThunkAction}
+ */
+const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	dispatch({
+		type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
+	});
+
+	try {
+		const url = buildUrl('dashboardSettings', 'copyWidgetToDashboard', 'requestContent');
+		const data = {
+			...getParams(),
+			widgetKey: widgetId
+		};
+		const {data: widget} = await client.post(url, data);
+
+		dispatch(batchActions([
+			setCreatedWidget(widget),
+			addLayouts(widget.id),
+			fetchBuildData(widget)
+		]));
+		dispatch(saveNewLayouts());
+		dispatch({
+			type: WIDGETS_EVENTS.RESPONSE_WIDGET_COPY
+		});
+	} catch (e) {
+		dispatch({
+			type: WIDGETS_EVENTS.RECORD_WIDGET_COPY_ERROR
+		});
+	}
+};
+
+/**
  * Удаляет виджет
  * @param {string} widgetId - идентификатор виджета;
  * @returns {ThunkAction}
@@ -185,6 +219,40 @@ const getValidationErrors = (error: Object) => {
 	return errors;
 };
 
+/**
+ * Проверяет является ли выбранный виджет валидным для копирования
+ * @param {string} widgetKey - id виджета
+ * @returns {ThunkAction}
+ */
+const validateWidgetToCopy = (widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<boolean> => {
+	let isValid = false;
+
+	dispatch({
+		type: WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY
+	});
+
+	try {
+		const url = buildUrl('dashboardSettings', 'widgetIsBadToCopy', 'requestContent');
+		const data = {
+			...getParams(),
+			widgetKey
+		};
+
+		const {data: result} = await client.post(url, data);
+		isValid = !result;
+
+		dispatch({
+			type: WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY
+		});
+	} catch (e) {
+		dispatch({
+			type: WIDGETS_EVENTS.RECORD_VALIDATE_TO_COPY_ERROR
+		});
+	}
+
+	return isValid;
+};
+
 const deleteWidget = (payload: string) => ({
 	payload,
 	type: WIDGETS_EVENTS.DELETE_WIDGET
@@ -220,10 +288,26 @@ const setSelectedWidget = (payload: string) => ({
 	type: WIDGETS_EVENTS.SET_SELECTED_WIDGET
 });
 
-const setWidgets = (payload: Array<Widget>): Object => ({
-	payload: payload.map(normalizer.widget),
-	type: WIDGETS_EVENTS.SET_WIDGETS
-});
+const setWidgets = (widgets: Array<Widget>): Object => {
+	const payload = widgets
+		.map(rawWidget => {
+			let widget;
+
+			try {
+				widget = normalizer.widget(rawWidget);
+			} catch (e) {
+				widget = null;
+			}
+
+			return widget;
+		})
+		.filter(widget => widget);
+
+	return ({
+		payload,
+		type: WIDGETS_EVENTS.SET_WIDGETS
+	});
+};
 
 const updateWidget = (payload: Widget) => ({
 	payload,
@@ -233,6 +317,7 @@ const updateWidget = (payload: Widget) => ({
 export {
 	addWidget,
 	cancelForm,
+	copyWidget,
 	createWidget,
 	editWidgetChunkData,
 	removeWidget,
@@ -241,5 +326,6 @@ export {
 	selectWidget,
 	setSelectedWidget,
 	setWidgets,
-	updateWidget
+	updateWidget,
+	validateWidgetToCopy
 };

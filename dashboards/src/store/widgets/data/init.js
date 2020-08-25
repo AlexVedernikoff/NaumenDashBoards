@@ -3,15 +3,24 @@ import type {WidgetsAction, WidgetsDataState} from './types';
 import {WIDGETS_EVENTS} from './constants';
 
 export const initialWidgetsState: WidgetsDataState = {
-	deleteError: false,
-	deleting: false,
-	error: false,
-	layoutSaveError: false,
-	loading: false,
+	copying: {
+		error: false,
+		loading: false
+	},
+	deleting: {
+		error: false,
+		loading: false
+	},
 	map: {},
-	saveError: false,
+	saving: {
+		error: false,
+		loading: false
+	},
 	selectedWidget: '',
-	updating: false
+	validatingToCopy: {
+		error: false,
+		loading: false
+	}
 };
 
 export const defaultAction: WidgetsAction = {
