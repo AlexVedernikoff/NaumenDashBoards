@@ -47,6 +47,8 @@ const sorting: 'sorting' = 'sorting';
 const source: 'source' = 'source';
 const sourceForCompute: 'sourceForCompute' = 'sourceForCompute';
 const table: 'table' = 'table';
+const template: 'template' = 'template';
+const templateName: 'templateName' = 'templateName';
 const textAlign: 'textAlign' = 'textAlign';
 const textHandler: 'textHandler' = 'textHandler';
 const type: 'type' = 'type';
@@ -105,6 +107,8 @@ const FIELDS = {
 	source,
 	sourceForCompute,
 	table,
+	template,
+	templateName,
 	textAlign,
 	textHandler,
 	tickAmount,

@@ -16,7 +16,8 @@ import {
 	legend,
 	mixinBreakdown,
 	object,
-	string
+	string,
+	templateName
 } from './helpers';
 import type {AxisWidget} from 'store/widgets/data/types';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
@@ -132,6 +133,7 @@ const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 		name: string(widget[FIELDS.name]),
 		parameter: axisParameter(widget, set[FIELDS.xAxis]),
 		sorting: chartSorting(widget),
+		templateName: templateName(widget),
 		type
 	};
 };

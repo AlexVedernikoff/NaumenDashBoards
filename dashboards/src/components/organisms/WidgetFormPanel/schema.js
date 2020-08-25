@@ -38,12 +38,12 @@ const validateAttribute = (value: Attribute | null) => {
 
 const base = {
 	[FIELDS.header]: object({
-		[FIELDS.name]: string().when(FIELDS.useName, {
+		[FIELDS.template]: string().when(FIELDS.useName, {
 			is: false,
 			then: string().required(getErrorMessage(FIELDS.diagramName))
 		})
 	}),
-	[FIELDS.name]: lazy((value: string, context: Object) => string().test(
+	[FIELDS.templateName]: lazy((value: string, context: Object) => string().test(
 		'name-rule',
 		`Виджет с названием "${value}" не может быть сохранен. Название виджета должно быть уникально в рамках дашборда`,
 		name => context.widgets.findIndex(widget => widget.name === name) === -1

@@ -1,5 +1,5 @@
 // @flow
-import {array, header, string} from './helpers';
+import {array, header, string, templateName} from './helpers';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'WidgetFormPanel';
 import type {SpeedometerWidget} from 'store/widgets/data/types';
@@ -23,6 +23,7 @@ const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => 
 		id,
 		name: string(widget[FIELDS.name]),
 		ranges,
+		templateName: templateName(widget),
 		type
 	};
 };

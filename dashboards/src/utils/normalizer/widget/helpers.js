@@ -151,14 +151,16 @@ const header = (widget: Object): Header => {
 	const {diagramName = '', header = {}, showName} = widget;
 	const {
 		name = diagramName,
-		show = Boolean(showName)
+		show = Boolean(showName),
+		template
 	} = header;
 
 	return {
 		...DEFAULT_HEADER_SETTINGS,
 		...header,
 		name,
-		show
+		show,
+		template: template || name
 	};
 };
 
@@ -302,6 +304,16 @@ const mixinBreakdown = (source: Object, target: Object, extendCustom: boolean = 
 	return target;
 };
 
+/**
+ * Возвращает шаблон названия виджета
+ * @param {Object} widget - виджет
+ * @returns {string} - шаблон названия
+ */
+const templateName = (widget: Object) => {
+	const {name, templateName} = widget;
+	return templateName || name;
+};
+
 export {
 	aggregation,
 	array,
@@ -319,5 +331,6 @@ export {
 	legend,
 	mixinBreakdown,
 	object,
-	string
+	string,
+	templateName
 };

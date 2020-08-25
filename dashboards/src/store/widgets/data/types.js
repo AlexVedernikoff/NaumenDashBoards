@@ -88,6 +88,7 @@ export type Header = {
 	fontStyle?: FontStyle,
 	name: string,
 	show: boolean,
+	template: string,
 	textAlign: TextAlign,
 	textHandler: TextHandler,
 	useName: boolean
@@ -98,7 +99,8 @@ type BaseWidget = {|
 	displayMode: DisplayMode,
 	header: Header,
 	id: string,
-	name: string
+	name: string,
+	templateName: string
 |};
 
 // Общие параметры графиков

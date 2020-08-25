@@ -47,6 +47,7 @@ export class TableForm extends Component<TypedFormProps> {
 			header,
 			name = '',
 			table,
+			templateName,
 			type
 		} = values;
 
@@ -62,6 +63,7 @@ export class TableForm extends Component<TypedFormProps> {
 			name,
 			sorting,
 			table: extend(DEFAULT_TABLE_SETTINGS, table),
+			templateName,
 			type
 		};
 	};

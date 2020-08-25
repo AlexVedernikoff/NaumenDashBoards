@@ -123,7 +123,8 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			refAttributes,
 			sources,
 			updating,
-			user
+			user,
+			widget
 		} = this.props;
 		const {errors, values, valuesSet} = this.state;
 
@@ -151,6 +152,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					updating={updating}
 					user={user}
 					values={values}
+					widget={widget}
 				/>
 			);
 		}

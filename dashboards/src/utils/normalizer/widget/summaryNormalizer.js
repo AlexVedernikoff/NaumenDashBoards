@@ -5,7 +5,8 @@ import {
 	getOrdinalData,
 	header,
 	object,
-	string
+	string,
+	templateName
 } from './helpers';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
@@ -80,6 +81,7 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 		id,
 		indicator,
 		name: string(widget[FIELDS.name]),
+		templateName: templateName(widget),
 		type
 	};
 };

@@ -13,7 +13,8 @@ import {
 	legend,
 	mixinBreakdown,
 	object,
-	string
+	string,
+	templateName
 } from './helpers';
 import type {CircleData, CircleWidget} from 'store/widgets/data/types';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
@@ -103,6 +104,7 @@ const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
 		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
 		sorting: chartSorting(widget, true),
+		templateName: templateName(widget),
 		type
 	};
 };

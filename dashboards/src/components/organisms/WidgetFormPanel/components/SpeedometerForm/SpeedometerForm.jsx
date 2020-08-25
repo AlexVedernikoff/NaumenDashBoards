@@ -49,6 +49,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 			header,
 			name = '',
 			ranges,
+			templateName,
 			type
 		} = values;
 
@@ -61,6 +62,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 			id,
 			name,
 			ranges: extend(DEFAULT_SPEEDOMETER_SETTINGS.ranges, ranges),
+			templateName,
 			type
 		};
 	};

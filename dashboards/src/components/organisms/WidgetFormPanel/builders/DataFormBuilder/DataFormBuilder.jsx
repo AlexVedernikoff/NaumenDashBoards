@@ -104,7 +104,7 @@ export class DataFormBuilder extends Component<Props> {
 
 		setFieldValue(FIELDS.header, {
 			...values[FIELDS.header],
-			[FIELDS.name]: value
+			[FIELDS.template]: value
 		});
 	};
 
@@ -176,13 +176,12 @@ export class DataFormBuilder extends Component<Props> {
 	renderBaseBoxes = () => {
 		const {values} = this.props;
 		const {useName} = values.header;
-		const {name} = FIELDS;
 		const nameProps = {
 			handleBlur: this.handleBlurName,
 			handleChange: this.handleChange,
 			label: 'Название виджета',
-			name,
-			value: values[name]
+			name: FIELDS.templateName,
+			value: values[FIELDS.templateName]
 		};
 
 		const useNameCheckbox = {
@@ -218,17 +217,17 @@ export class DataFormBuilder extends Component<Props> {
 
 	renderDiagramNameTextArea = () => {
 		const {values} = this.props;
-		const {useName} = values.header;
-		const {header, name} = FIELDS;
+		const {template: templateName, useName} = values.header;
+		const {header, template} = FIELDS;
 
 		if (!useName) {
 			const diagramNameProps = {
-				errorPath: `${header}.${name}`,
+				errorPath: `${header}.${template}`,
 				handleChange: this.handleChangeDiagramName,
 				label: 'Заголовок диаграммы',
 				maxLength: MAX_TEXT_LENGTH,
-				name,
-				value: values[header][name]
+				name: template,
+				value: templateName
 			};
 
 			return this.renderTextArea(diagramNameProps);
