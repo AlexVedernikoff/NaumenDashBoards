@@ -42,6 +42,7 @@ export type DataBuilderProps = {
 	renderDisplayModeSelect: () => React$Node,
 	renderIndicatorBoxes: (props?: IndicatorBoxProps) => React$Node,
 	renderParameterBox: (props: ParameterBoxProps) => React$Node,
+	renderShowEmptyDataCheckbox: () => React$Node,
 	renderSourceBox: (sourceRefFields: SourceRefFields, minCountBuildingSources?: number) => React$Node,
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,

@@ -127,6 +127,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
 		id,
+		showEmptyData,
 		type
 	} = widget;
 	const set = getMainDataSet(data);
@@ -143,6 +144,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
 		parameter: axisParameter(widget, set[FIELDS.xAxis]),
+		showEmptyData: Boolean(showEmptyData),
 		sorting: chartSorting(widget),
 		templateName: templateName(widget),
 		type

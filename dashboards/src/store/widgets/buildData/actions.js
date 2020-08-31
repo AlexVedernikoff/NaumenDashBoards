@@ -57,7 +57,7 @@ const resetComputedAttributeState = (attribute: MixedAttribute) => {
 };
 
 const createAxisData = (widget: AxisWidget) => {
-	const {sorting, type} = widget;
+	const {showEmptyData, sorting, type} = widget;
 	const data: Object = {};
 
 	widget.data.forEach(set => {
@@ -85,6 +85,7 @@ const createAxisData = (widget: AxisWidget) => {
 
 	return {
 		data,
+		showEmptyData,
 		sorting,
 		type
 	};
@@ -128,7 +129,7 @@ const createCircleData = (widget: CircleWidget) => {
 };
 
 const createComboData = (widget: ComboWidget) => {
-	const {sorting, type} = widget;
+	const {showEmptyData, sorting, type} = widget;
 	const data: Object = {};
 
 	widget.data.forEach(set => {
@@ -157,6 +158,7 @@ const createComboData = (widget: ComboWidget) => {
 
 	return {
 		data,
+		showEmptyData,
 		sorting,
 		type
 	};
@@ -193,7 +195,7 @@ const createSummaryData = (widget: SummaryWidget | SpeedometerWidget) => {
 };
 
 const createTableData = (widget: TableWidget) => {
-	const {calcTotalColumn, calcTotalRow, type} = widget;
+	const {calcTotalColumn, calcTotalRow, showEmptyData, type} = widget;
 	const data: Object = {};
 
 	widget.data.forEach(set => {
@@ -224,6 +226,7 @@ const createTableData = (widget: TableWidget) => {
 
 	return {
 		data,
+		showEmptyData,
 		type
 	};
 };

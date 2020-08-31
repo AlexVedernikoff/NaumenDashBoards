@@ -170,6 +170,7 @@ export type AxisWidget = {
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
+	showEmptyData: boolean,
 	sorting: ChartSorting,
 	type: $Keys<typeof WIDGET_SETS.AXIS>
 };
@@ -221,6 +222,7 @@ export type ComboWidget = {
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
+	showEmptyData: boolean,
 	sorting: ChartSorting,
 	type: typeof WIDGET_TYPES.COMBO,
 };
@@ -338,6 +340,7 @@ export type TableWidget = {
 	calcTotalRow: boolean,
 	columnsRatioWidth: Array<number>,
 	data: Array<TableData>,
+	showEmptyData: boolean,
 	sorting: TableSorting,
 	table: Table,
 	type: typeof WIDGET_TYPES.TABLE
