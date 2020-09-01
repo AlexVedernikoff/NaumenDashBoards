@@ -111,6 +111,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
 		id,
+		showEmptyData,
 		sorting = DEFAULT_TABLE_SORTING,
 		table,
 		type
@@ -126,6 +127,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		header: header(widget),
 		id,
 		name: string(widget[FIELDS.name]),
+		showEmptyData: Boolean(showEmptyData),
 		sorting,
 		table: extend(DEFAULT_TABLE_SETTINGS, table),
 		templateName: templateName(widget),

@@ -40,6 +40,7 @@ const ranges: 'ranges' = 'ranges';
 const row: 'row' = 'row';
 const rowHeader: 'rowHeader' = 'rowHeader';
 const show: 'show' = 'show';
+const showEmptyData: 'showEmptyData' = 'showEmptyData';
 const showName: 'showName' = 'showName';
 const showRowNum: 'showRowNum' = 'showRowNum';
 const showShadow: 'showShadow' = 'showShadow';
@@ -100,6 +101,7 @@ const FIELDS = {
 	row,
 	rowHeader,
 	show,
+	showEmptyData,
 	showName,
 	showRowNum,
 	showShadow,

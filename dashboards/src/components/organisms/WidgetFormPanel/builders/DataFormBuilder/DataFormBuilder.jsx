@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import {Checkbox, TextArea} from 'components/atoms';
+import {Checkbox, TextArea, Toggle} from 'components/atoms';
 import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, TextAreaProps} from './types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
@@ -135,6 +135,13 @@ export class DataFormBuilder extends Component<Props> {
 			...values[FIELDS.header],
 			[name]: !value
 		});
+	};
+
+	handleToggleShowEmptyData = (event: OnChangeInputEvent) => {
+		const {setFieldValue} = this.props;
+		const {name, value} = event;
+
+		setFieldValue(name, !value);
 	};
 
 	onLoadRefAttributes = (event: OnSelectAttributeEvent, callback: Function, ...rest: Array<any>) =>
@@ -307,6 +314,23 @@ export class DataFormBuilder extends Component<Props> {
 		);
 	};
 
+	renderShowEmptyDataCheckbox = () => {
+		const {showEmptyData} = this.props.values;
+
+		return (
+			<FormField>
+				<FormCheckControl label="Отображать нулевые значения" reverse>
+					<Toggle
+						checked={showEmptyData}
+						name={FIELDS.showEmptyData}
+						onChange={this.handleToggleShowEmptyData}
+						value={showEmptyData}
+					/>
+				</FormCheckControl>
+			</FormField>
+		);
+	};
+
 	renderSourceBox = (sourceRefFields: SourceRefFields, minCountBuildingSources: number = 1) => {
 		const {errors, fetchAttributes, setDataFieldValue, setFieldValue, sources, values} = this.props;
 		const {data, type} = values;
@@ -371,6 +395,7 @@ export class DataFormBuilder extends Component<Props> {
 			renderDisplayModeSelect: this.renderDisplayModeSelect,
 			renderIndicatorBoxes: this.renderIndicatorBoxes,
 			renderParameterBox: this.renderParameterBox,
+			renderShowEmptyDataCheckbox: this.renderShowEmptyDataCheckbox,
 			renderSourceBox: this.renderSourceBox,
 			setDataFieldValue,
 			setFieldValue,

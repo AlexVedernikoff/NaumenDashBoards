@@ -46,6 +46,7 @@ export class TableForm extends Component<TypedFormProps> {
 			displayMode,
 			header,
 			name = '',
+			showEmptyData,
 			table,
 			templateName,
 			type
@@ -61,6 +62,7 @@ export class TableForm extends Component<TypedFormProps> {
 			header,
 			id,
 			name,
+			showEmptyData,
 			sorting,
 			table: extend(DEFAULT_TABLE_SETTINGS, table),
 			templateName,
