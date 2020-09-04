@@ -7,18 +7,26 @@ export const initialGeolocationState: GeolocationState = {
 		contentCode: '',
 		subjectUuid: ''
 	},
+	controls: {
+		filterOpen: false,
+		panelOpen: false,
+	},
 	dynamicMarkers: [],
 	error: false,
 	loading: true,
 	multipleMarkers: [],
 	params: {
 		autoUpdateLocation: true,
+		dynamicPointsListName: "dynamicPointsListName",
+		groupingMethodName: "groupingMethodName",
+		command: "getCurrentContentParameters",
 		colorStaticPoint: '#EB5757',
 		colorDynamicActivePoint: '#4D92C8',
 		colorDynamicInactivePoint: '#828282',
-		getPointsMethodName: 'employeesByServiceCallCustom',
+		pointsMethodName: 'pointsMethodName',
 		locationUpdateFrequency: {length: 60, interval: 'SECOND'},
 		requestCurrentLocation: true,
+		staticPointsListName: "staticPointsListName",
 		timeIntervalInactivity: {length: 1200, interval: 'SECOND'},
 		updatePointsMode: 'getPoints'
 	},

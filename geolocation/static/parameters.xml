@@ -4,14 +4,9 @@
                 <parameter>
                     <attrs-for-date-time-restriction-script/>
                     <attrs-in-cof-script/>
-                    <code>getPointsMethodName</code>
+                    <code>pointsMethodName</code>
                     <complexRelation>false</complexRelation>
                     <complexRelationAggrAttrGroups>
-                        <entry>
-                            <key>
-                                <id>ou</id>
-                            </key>
-                        </entry>
                         <entry>
                             <key>
                                 <id>employee</id>
@@ -20,6 +15,11 @@
                         <entry>
                             <key>
                                 <id>team</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -48,7 +48,7 @@
                 <parameter>
                     <attrs-for-date-time-restriction-script/>
                     <attrs-in-cof-script/>
-                    <code>autoUpdateLocation</code>
+                    <code>staticPointsListName</code>
                     <complexRelation>false</complexRelation>
                     <complexRelationAggrAttrGroups>
                         <entry>
@@ -64,6 +64,138 @@
                         <entry>
                             <key>
                                 <id>ou</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <description>Название списка с неподвижными точками в боковой панели.</description>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>true</required>
+                    <title lang="ru">Название списка неподвижных точек</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>dynamicPointsListName</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <description>Название списка с подвижными точками в боковой панели</description>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>true</required>
+                    <title lang="ru">Название списка подвижных точек</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>groupingMethodName</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                    </complexRelationAggrAttrGroups>
+                    <computable-on-form>false</computable-on-form>
+                    <default-by-script>false</default-by-script>
+                    <description>Название метода из модуля настроек mapParams, в котором происходит группировка неподвижных точек.</description>
+                    <edit-presentaion>
+                        <code>stringEdit</code>
+                    </edit-presentaion>
+                    <editable>true</editable>
+                    <is-filtered-by-script>false</is-filtered-by-script>
+                    <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+                    <required>false</required>
+                    <title lang="ru">Название метода группировки неподвижных точек</title>
+                    <type>
+                        <code>string</code>
+                        <property code="permittedTypes">[]</property>
+                        <property code="string">255</property>
+                        <property code="inputMaskMode"/>
+                        <property code="inputMask"/>
+                    </type>
+                    <view-presentaion>
+                        <code>stringView</code>
+                    </view-presentaion>
+                </parameter>
+                <parameter>
+                    <attrs-for-date-time-restriction-script/>
+                    <attrs-in-cof-script/>
+                    <code>autoUpdateLocation</code>
+                    <complexRelation>false</complexRelation>
+                    <complexRelationAggrAttrGroups>
+                        <entry>
+                            <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>team</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
+                                <id>employee</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -97,17 +229,17 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
+                                <id>ou</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
                                 <id>team</id>
                             </key>
                         </entry>
                         <entry>
                             <key>
                                 <id>employee</id>
-                            </key>
-                        </entry>
-                        <entry>
-                            <key>
-                                <id>ou</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -124,7 +256,7 @@
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
                     <required>false</required>
-                    <title lang="ru">Частота обновления местоположения точек</title>
+                    <title lang="ru">Частота обновления местоположения точек, в сек</title>
                     <type>
                         <code>dtInterval</code>
                         <property code="permittedTypes">[]</property>
@@ -143,7 +275,7 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>ou</id>
+                                <id>team</id>
                             </key>
                         </entry>
                         <entry>
@@ -153,7 +285,7 @@
                         </entry>
                         <entry>
                             <key>
-                                <id>team</id>
+                                <id>ou</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -187,12 +319,12 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>ou</id>
+                                <id>team</id>
                             </key>
                         </entry>
                         <entry>
                             <key>
-                                <id>team</id>
+                                <id>ou</id>
                             </key>
                         </entry>
                         <entry>
@@ -204,9 +336,9 @@
                     <computable-on-form>false</computable-on-form>
                     <default-by-script>false</default-by-script>
                     <default-value>
-                        <string>getPoints</string>
+                        <string>getLastGeopositions</string>
                     </default-value>
-                    <description>Указать режим обновления по кнопке: полностью обновлять список точек (getPoints) или обновлять только координаты подвижных точек (getLastGeopositions)</description>
+                    <description>Указать режим обновления по кнопке: полностью обновлять список точек на карте и в панели (getMap) или обновлять только координаты подвижных точек (getLastGeopositions)</description>
                     <edit-presentaion>
                         <code>stringEdit</code>
                     </edit-presentaion>
@@ -234,7 +366,7 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>ou</id>
+                                <id>team</id>
                             </key>
                         </entry>
                         <entry>
@@ -244,7 +376,7 @@
                         </entry>
                         <entry>
                             <key>
-                                <id>team</id>
+                                <id>ou</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -261,7 +393,7 @@
                     <is-filtered-by-script>false</is-filtered-by-script>
                     <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
                     <required>false</required>
-                    <title lang="ru">Интервал времени для определения неактивных точек</title>
+                    <title lang="ru">Интервал времени для определения неактивных точек, в минутах</title>
                     <type>
                         <code>dtInterval</code>
                         <property code="permittedTypes">[]</property>
@@ -285,12 +417,12 @@
                         </entry>
                         <entry>
                             <key>
-                                <id>ou</id>
+                                <id>employee</id>
                             </key>
                         </entry>
                         <entry>
                             <key>
-                                <id>employee</id>
+                                <id>ou</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -327,7 +459,7 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
-                                <id>ou</id>
+                                <id>team</id>
                             </key>
                         </entry>
                         <entry>
@@ -337,7 +469,7 @@
                         </entry>
                         <entry>
                             <key>
-                                <id>team</id>
+                                <id>ou</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>
@@ -374,17 +506,17 @@
                     <complexRelationAggrAttrGroups>
                         <entry>
                             <key>
+                                <id>employee</id>
+                            </key>
+                        </entry>
+                        <entry>
+                            <key>
                                 <id>ou</id>
                             </key>
                         </entry>
                         <entry>
                             <key>
                                 <id>team</id>
-                            </key>
-                        </entry>
-                        <entry>
-                            <key>
-                                <id>employee</id>
                             </key>
                         </entry>
                     </complexRelationAggrAttrGroups>

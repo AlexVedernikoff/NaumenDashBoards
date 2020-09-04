@@ -1,5 +1,6 @@
 // @flow
 import type {Context} from 'types/api';
+import type {Controls} from 'types/controls';
 import {GEOLOCATION_EVENTS} from './constants';
 import type {MultiplePoint} from 'types/multiple';
 import type {Params} from 'types/params';
@@ -29,6 +30,14 @@ type ReloadActivePoint = {
 	payload: Object
 };
 
+type TogglePanel = {
+	type: typeof GEOLOCATION_EVENTS.TOGGLE_PANEL,
+};
+
+type ToggleFilter = {
+	type: typeof GEOLOCATION_EVENTS.TOGGLE_FILTER,
+};
+
 type UnknownGeolocationAction = {
 	type: typeof GEOLOCATION_EVENTS.UNKNOWN_GEOLOCATION_ACTION,
 	payload: null
@@ -40,11 +49,14 @@ export type GeolocationAction =
 	| SetContext
 	| SetParams
 	| SetDataGeolocation
+	| ToggleFilter
+	| TogglePanel
 	| UnknownGeolocationAction
 ;
 
 export type GeolocationState = {
 	context: Context | Object,
+	controls: Controls,
 	dynamicMarkers: Array<Point>,
 	error: boolean,
 	multipleMarkers: Array<MultiplePoint>,

@@ -29,6 +29,22 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				dynamicMarkers: action.payload,
 				loading: false
 			};
+		case GEOLOCATION_EVENTS.TOGGLE_FILTER:
+			return {
+				...state,
+				controls: {
+					...state.controls,
+					filterOpen: !state.controls.filterOpen
+				}
+			};
+		case GEOLOCATION_EVENTS.TOGGLE_PANEL:
+			return {
+				...state,
+				controls: {
+					...state.controls,
+					panelOpen: !state.controls.panelOpen
+				}
+			};
 		case GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR:
 			return {
 				...state,

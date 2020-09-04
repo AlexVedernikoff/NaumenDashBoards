@@ -34,11 +34,11 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 	try {
 		let markers = testData;
 		const {context, params} = getState().geolocation;
-		const {getPointsMethodName} = params;
+		const {pointsMethodName} = params;
 		const {subjectUuid} = context;
 
 		if (environment !== 'development') {
-			const query = `user,'${getPointsMethodName}','${subjectUuid}'`;
+			const query = `user,'${pointsMethodName}','${subjectUuid}'`;
 			const {data} = await client.get(buildUrl('mapRest', 'getPoints', query));
 
 			markers = data;
@@ -116,8 +116,18 @@ const recordGeolocationdError = () => ({
 	type: GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR
 });
 
+const togglePanel = () => ({
+	type: GEOLOCATION_EVENTS.TOGGLE_PANEL,
+});
+
+const toggleFilter = () => ({
+	type: GEOLOCATION_EVENTS.TOGGLE_FILTER,
+});
+
 export {
 	getAppConfig,
 	fetchGeolocation,
-	reloadGeolocation
+	reloadGeolocation,
+	toggleFilter,
+	togglePanel,
 };
