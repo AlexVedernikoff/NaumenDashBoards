@@ -1,6 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {ChangingState} from 'store/types';
 import {
 	COMBO_TYPES,
 	DEFAULT_TABLE_VALUE,
@@ -388,8 +389,24 @@ export type ResetWidget = {
 	type: typeof WIDGETS_EVENTS.RESET_WIDGET,
 };
 
+export type RecordValidateToCopyError = {
+	type: typeof WIDGETS_EVENTS.RECORD_VALIDATE_TO_COPY_ERROR,
+};
+
+export type RecordWidgetCopyError = {
+	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_COPY_ERROR,
+};
+
 export type RecordWidgetSaveError = {
 	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR,
+};
+
+export type RequestValidateToCopy = {
+	type: typeof WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY,
+};
+
+export type RequestWidgetCopy = {
+	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_COPY,
 };
 
 export type RequestWidgetDelete = {
@@ -398,6 +415,14 @@ export type RequestWidgetDelete = {
 
 export type RequestWidgetSave = {
 	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_SAVE,
+};
+
+export type ResponseValidateToCopy = {
+	type: typeof WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY,
+};
+
+export type ResponseWidgetCopy = {
+	type: typeof WIDGETS_EVENTS.RESPONSE_WIDGET_COPY,
 };
 
 export type RecordWidgetDeleteError = {
@@ -417,11 +442,17 @@ type UnknownWidgetsAction = {
 export type WidgetsAction =
 	| AddWidget
 	| DeleteWidget
+	| RecordValidateToCopyError
+	| RecordWidgetCopyError
 	| RecordWidgetDeleteError
 	| RecordWidgetSaveError
+	| RequestValidateToCopy
+	| RequestWidgetCopy
 	| RequestWidgetDelete
 	| RequestWidgetSave
 	| ResetWidget
+	| ResponseValidateToCopy
+	| ResponseWidgetCopy
 	| SelectWidget
 	| SetCreatedWidget
 	| SetWidgets
@@ -434,12 +465,10 @@ export type WidgetMap = {
 };
 
 export type WidgetsDataState = {
-	deleteError: boolean,
-	deleting: boolean,
-	error: boolean,
-	loading: boolean,
+	copying: ChangingState,
+	deleting: ChangingState,
 	map: WidgetMap,
-	saveError: boolean,
+	saving: ChangingState,
 	selectedWidget: string,
-	updating: boolean
+	validatingToCopy: ChangingState
 };

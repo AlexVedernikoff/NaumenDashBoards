@@ -121,8 +121,8 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			layoutMode,
 			personalDashboard,
 			refAttributes,
+			saving,
 			sources,
-			updating,
 			user,
 			widget
 		} = this.props;
@@ -145,11 +145,11 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					onSubmit={this.handleSubmit}
 					personalDashboard={personalDashboard}
 					refAttributes={refAttributes}
+					saving={saving}
 					setDataFieldValue={this.setDataFieldValue}
 					setFieldValue={this.setFieldValue}
 					setSchema={this.setSchema}
 					sources={sources}
-					updating={updating}
 					user={user}
 					values={values}
 					widget={widget}

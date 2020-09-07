@@ -14,7 +14,7 @@ class NewWidget {
 	displayMode: LayoutMode = LAYOUT_MODE.WEB;
 	header = DEFAULT_HEADER_SETTINGS;
 	id: string = NewWidget.id;
-	name: string = '';
+	name: string = 'Новый виджет';
 	type: string = WIDGET_TYPES.COLUMN;
 
 	constructor (layoutMode: LayoutMode = LAYOUT_MODE.WEB) {

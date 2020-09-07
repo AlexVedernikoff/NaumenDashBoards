@@ -113,7 +113,7 @@ export class TransparentSelect extends PureComponent<Props, State> {
 		);
 	};
 
-	renderLoader = () => this.props.loading ? <Loader className={styles.loader} /> : null;
+	renderLoader = () => this.props.loading ? <Loader /> : null;
 
 	renderMenu = () => {
 		const {onClickCreationButton, showCreationButton} = this.props;

@@ -26,9 +26,8 @@ export const props = (state: AppState): ConnectedProps => {
 		layoutMode,
 		personalDashboard,
 		refAttributes: sources.refAttributes,
-		saveError: data.saveError,
+		saving: data.saving,
 		sources: sources.data.map,
-		updating: data.updating,
 		user,
 		widget,
 		widgets: getMapValues(map).filter(({id}) => id !== selectedWidget)

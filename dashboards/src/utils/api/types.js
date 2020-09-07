@@ -10,6 +10,7 @@ export type Module =
 ;
 
 export type Method =
+	| 'copyWidgetToDashboard'
 	| 'createPersonalDashboard'
 	| 'createWidget'
 	| 'deleteCustomGroup'
@@ -20,6 +21,7 @@ export type Method =
 	| 'getAttributeObject'
 	| 'getCatalogItemObject'
 	| 'getCatalogObject'
+	| 'getDashboardsAndWidgetsTree'
 	| 'getDataForCompositeDiagram'
 	| 'getDataForDiagram'
 	| 'getDataForDiagrams'
@@ -39,6 +41,7 @@ export type Method =
 	| 'saveCustomGroup'
 	| 'sendFileToMail'
 	| 'updateCustomGroup'
+	| 'widgetIsBadToCopy'
 ;
 
 export type Context = {
