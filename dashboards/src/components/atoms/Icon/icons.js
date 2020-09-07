@@ -72,6 +72,14 @@ sprite.add(ICON_NAMES.CARET, `
 	<path fill-rule="evenodd" clip-rule="evenodd" d="M8 11L4 6H12L8 11Z" />
 `);
 
+sprite.add(ICON_NAMES.CARET_DOWN, `
+	<path d="M13 6L12 5C11.4 5.6 8 9 8 9L4 5 3 6 8 11 13 6Z" />
+`);
+
+sprite.add(ICON_NAMES.CARET_UP, `
+	<path d="M3 10L4 11C4.6 10.4 8 7 8 7L12 11 13 10 8 5 3 10Z" />
+`);
+
 sprite.add(ICON_NAMES.CHECKBOX, `
 	<path fill-rule="evenodd" clip-rule="evenodd" d="M14 1H2C1.4 1 1 1.4 1 2V14C1 14.6 1.4 15 2 15H14C14.6 15 15 14.6 15 14V2C15 1.4 14.6 1 14 1ZM2 0C0.9 0 0 0.9 0 2V14C0 15.1 0.9 16 2 16H14C15.1 16 16 15.1 16 14V2C16 0.9 15.1 0 14 0H2Z"  />
 `);

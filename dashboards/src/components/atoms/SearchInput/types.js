@@ -6,6 +6,7 @@ export type ForwardedRef = {
 };
 
 export type Props = {
+	className: string,
 	forwardedRef: ForwardedRef,
 	onChange: (value: string) => void,
 	value: string

@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {AttributeAggregationField} from 'WidgetFormPanel/components';
 import cn from 'classnames';
-import {CreationPanel, OutsideClickDetector, SearchSelectInput} from 'components/atoms';
+import {CreationPanel, OutsideClickDetector, SearchInput} from 'components/atoms';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
@@ -189,7 +189,7 @@ export class SourceControl extends PureComponent<Props, State> {
 		);
 	};
 
-	renderSearch = () => <SearchSelectInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
+	renderSearch = () => <SearchInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
 
 	renderSearchInfo = () => {
 		const {options} = this.props;

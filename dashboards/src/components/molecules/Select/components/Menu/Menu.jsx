@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {CreationPanel, SearchSelectInput} from 'components/atoms';
+import {CreationPanel, SearchInput} from 'components/atoms';
 import {debounce} from 'src/helpers';
 import type {InputRef} from 'src/components/types';
 import type {Props, State} from './types';
@@ -53,7 +53,7 @@ export class Menu extends Component<Props, State> {
 
 		if (isSearching) {
 			return (
-				<SearchSelectInput
+				<SearchInput
 					forwardedRef={this.searchInputRef}
 					onChange={debounce(this.handleChangeSearchInput, 500)}
 					value={searchValue}

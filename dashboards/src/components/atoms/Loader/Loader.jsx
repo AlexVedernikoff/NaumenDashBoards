@@ -1,16 +1,16 @@
 // @flow
-import cn from 'classnames';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Loader extends PureComponent<Props> {
+	static defaultProps = {
+		size: 25
+	};
+
 	render () {
-		return (
-			<div className={cn(this.props.className, styles.container)}>
-				<div className={styles.loader} />
-			</div>
-		);
+		const {size} = this.props;
+		return <div className={styles.loader} style={{height: size, width: size}} />;
 	}
 }
 

@@ -1,14 +1,17 @@
 // @flow
+import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
-export class SearchSelectInput extends PureComponent<Props, State> {
+export class SearchInput extends PureComponent<Props, State> {
 	static defaultProps = {
+		className: '',
 		forwardedRef: {
 			current: null
-		}
+		},
+		value: ''
 	};
 
 	state = {
@@ -53,8 +56,10 @@ export class SearchSelectInput extends PureComponent<Props, State> {
 	};
 
 	render () {
+		const {className} = this.props;
+
 		return (
-			<div className={styles.container}>
+			<div className={cn(styles.container, className)}>
 				{this.renderIcon()}
 				{this.renderInput()}
 			</div>
@@ -62,4 +67,4 @@ export class SearchSelectInput extends PureComponent<Props, State> {
 	}
 }
 
-export default SearchSelectInput;
+export default SearchInput;

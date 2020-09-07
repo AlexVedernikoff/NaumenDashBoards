@@ -7,6 +7,7 @@ import ColorPicker from './ColorPicker';
 import Datepicker from './Datepicker';
 import Diagram from './Diagram';
 import DisableableBox from './DisablableBox';
+import DropDownList from './DropDownList';
 import DynamicRelativeContainer from './DynamicRelativeContainer';
 import FormBox from './FormBox';
 import FormCheckControl from './FormCheckControl';
@@ -18,6 +19,7 @@ import MaterialSimpleTreeSelect from './MaterialSimpleTreeSelect';
 import MaterialTreeSelect from './MaterialTreeSelect';
 import MiniSelect from './MiniSelect';
 import Modal from './Modal';
+import MultiDropDownList from './MultiDropDownList';
 import OuterSelect from './OuterSelect';
 import ResizeDetector from './ResizeDetector';
 import Select from './Select';
@@ -36,6 +38,7 @@ export {
 	Datepicker,
 	Diagram,
 	DisableableBox,
+	DropDownList,
 	DynamicRelativeContainer,
 	FormBox,
 	FormCheckControl,
@@ -47,6 +50,7 @@ export {
 	MaterialTreeSelect,
 	MiniSelect,
 	Modal,
+	MultiDropDownList,
 	OuterSelect,
 	ResizeDetector,
 	Select,
