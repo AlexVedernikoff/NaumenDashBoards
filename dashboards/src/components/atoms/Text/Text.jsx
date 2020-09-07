@@ -14,12 +14,13 @@ export class Text extends PureComponent<Props> {
 
 	getClassName = () => {
 		const {className, type} = this.props;
-		const {REGULAR, TITLE} = TEXT_TYPES;
+		const {REGULAR, SMALL, TITLE} = TEXT_TYPES;
 
 		return cn({
-			[className]: true,
 			[styles.regular]: type === REGULAR,
-			[styles.title]: type === TITLE
+			[styles.small]: type === SMALL,
+			[styles.title]: type === TITLE,
+			[className]: true
 		});
 	};
 

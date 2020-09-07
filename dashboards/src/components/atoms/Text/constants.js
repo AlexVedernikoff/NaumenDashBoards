@@ -8,10 +8,12 @@ const ELEMENT_TYPES = {
 };
 
 const REGULAR: 'REGULAR' = 'REGULAR';
+const SMALL: 'SMALL' = 'SMALL';
 const TITLE: 'TITLE' = 'TITLE';
 
 const TEXT_TYPES = {
 	REGULAR,
+	SMALL,
 	TITLE
 };
 
