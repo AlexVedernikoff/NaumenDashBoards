@@ -83,6 +83,25 @@ class WidgetSettings
     String key
     Map<String, Object> value
 }
+
+/**
+ * Информация о дашборде (для дерева)
+ */
+class DashboardInfo
+{
+    String label
+    String value
+    List<WidgetInfo> children
+}
+
+/**
+ * Информация о виджете (для дерева)
+ */
+class WidgetInfo
+{
+    String label
+    String value
+}
 //endregion
 
 //region REST-МЕТОДЫ
@@ -1063,7 +1082,7 @@ private List<String> getWidgetNames(Map<String, Object> widgets)
  * @return список названий виджетов
  */
 private void validateName(Map<String, Object> requestContent, String widgetKey = null) {
-    String name = requestContent.widget.name.toString()
+    String name = requestContent.widget.templateName ?: requestContent.widget.name
     String dashKey = generateDashboardKey(requestContent.classFqn, requestContent.contentCode)
     def  widgetIds = getObjectIdsFromDashboard(DASHBOARD_NAMESPACE, dashKey, 'widgetIds')
     widgetIds = widgetKey ? (widgetIds - widgetKey) : widgetIds
@@ -1125,5 +1144,181 @@ String editWidgetChunkData(Map<String, Object> requestContent, def user) {
         logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
         return null
     }
+}
+
+/**
+ * Метод получения итогового списка uuid-ов и названий дашбордов
+ * @return список ассоциативных массивов
+ */
+List<Map<String, String>> getDashboardsUUIDAndTitle()
+{
+    def root = api.utils.findFirst('root', [:])
+    if (root.hasProperty('dashboardCode') && root.dashboardCode)
+    {
+        def appCode = root.dashboardCode
+        def contents = api.apps.listContents(appCode)
+        return contents.collect {
+            [uuid: ("${it.subjectFqn}_${it.contentUuid}".toString()) , title: it.contentTitle]
+        }
+    }
+    else
+    {
+        throw new IllegalStateException('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
+    }
+}
+
+/**
+ * Метод получения информации о виджете (для дерева)
+ * @param widgetKey - ключ виджета
+ * @return WidgetInfo
+ */
+WidgetInfo getWidgetInfo(String widgetKey)
+{
+    def widgetSettings = getWidgetSettings(widgetKey)
+    return widgetSettings ? new WidgetInfo(value: widgetKey ,label: widgetSettings.name) : null
+}
+
+/**
+ * Метод получения дерева из информации о дашбордах и виджетах
+ * @param convertToJson - флаг на преобразование результата в json
+ * @return json или List<DashboardInfo>
+ */
+def getDashboardsAndWidgetsTree(Boolean convertToJson = true)
+{
+    List<DashboardInfo> dashboardsInfo = getDashboardsUUIDAndTitle().findResults {
+        String dashboardUUID = it.uuid
+        String dashboardTitle = it.title
+
+        List widgetIds = getDashboardSetting(dashboardUUID)?.widgetIds
+        List<WidgetInfo> widgets = widgetIds
+            ? widgetIds.findResults { widgetKey ->
+                return getWidgetInfo(widgetKey) }
+            : []
+        return new DashboardInfo(label: dashboardTitle, value: dashboardUUID, children: widgets)
+    }
+    return convertToJson ? toJson(dashboardsInfo) : dashboardsInfo
+}
+
+/**
+ * Метод копирования виджета в другой дашборд
+ * @param requestContent - тело запроса
+ * @return ключ скопированного виджета
+ */
+String copyWidgetToDashboard(requestContent)
+{
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    String widgetKey = requestContent.widgetKey
+
+    Map<String, Object> widgetSettings = getWidgetSettings(widgetKey)
+
+    String destinationDashboardKey = generateDashboardKey(classFqn, contentCode)
+    DashboardSettings dashboardSettings = getDashboardSetting(destinationDashboardKey)
+    List<String> currentWidgetIds = dashboardSettings.widgetIds
+
+    Closure<String> generateKey = this.&generateWidgetKey.curry(currentWidgetIds, classFqn, contentCode)
+    Map<String, Object> newWidgetSettings = editWidgetDescriptor(widgetSettings, destinationDashboardKey)
+    return saveWidgetSettings(newWidgetSettings, generateKey).with { widget ->
+        def key = widget.id
+        dashboardSettings.widgetIds += key
+        saveJsonSettings(destinationDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
+        return toJson(widget)
+    }
+}
+
+/**
+ * Метод проверки виджета для возможности копирования
+ * @param requestContent - тело запроса
+ * @return флаг на возможность полного копирования
+ */
+Boolean widgetIsBadToCopy(requestContent)
+{
+    String classFqn = requestContent.classFqn
+    String contentCode = requestContent.contentCode
+    String widgetKey = requestContent.widgetKey
+    Map<String, Object> widgetSettings = getWidgetSettings(widgetKey)
+
+    String dashboardKey = generateDashboardKey(classFqn, contentCode)
+
+    if (widgetSettings)
+    {
+        def filtersHasSubject = []
+        widgetSettings.data.collect { dataValue ->
+            def descriptor = dataValue.descriptor
+            if (descriptor)
+            {
+                def slurper = new groovy.json.JsonSlurper()
+                def descriptorMap  = slurper.parseText(descriptor)
+                def filters = descriptorMap.filters
+                filtersHasSubject += filters.collectMany { filterValue ->
+                    def conditionCodes = filterValue*.properties.conditionCode
+                    conditionCodes.collect { conditionCode ->
+                        if (conditionCode.toLowerCase().contains('subject'))
+                        {
+                            if (dashboardKey.tokenize('_').find() != widgetKey.tokenize('_').find())
+                            {
+                                return true
+                            }
+                        }
+                    }
+                }.grep()
+            }
+        }
+        return filtersHasSubject.any { it == true }
+    }
+    else
+    {
+        throw new Exception("Widget settings are empty!")
+    }
+}
+
+
+/**
+ * Метод проверки и изменения фильтрации, если необходимо
+ * @param widgetSettings - настройки виджета
+ * @param dashboardKey - ключ дашборда, на который хотим отправить виджет
+ * @return итоговые настройки виджета
+ */
+private Map<String, Object> editWidgetDescriptor(Map<String, Object> widgetSettings, String dashboardKey)
+{
+    if (widgetSettings)
+    {
+        Map<String, Object> widget = (widgetSettings as LinkedHashMap).clone() as Map<String, Object>
+        widget.templateName += '_копия'
+        widget?.header?.template += '_копия'
+
+        String widgetKey = widget.id
+        List newWidgetData = widget.data.collect { dataValue ->
+            def descriptor = dataValue.descriptor
+            if (descriptor)
+            {
+                def slurper = new groovy.json.JsonSlurper()
+                def descriptorMap  = slurper.parseText(descriptor)
+                def filters = descriptorMap.filters
+                def valuesToRemove = filters.collectMany { filterValue ->
+                    def conditionCodes = filterValue*.properties.conditionCode
+                    conditionCodes.collect { conditionCode ->
+                        if (conditionCode.toLowerCase().contains('subject'))
+                        {
+                            if (dashboardKey.tokenize('_').find() != widgetKey.tokenize('_').find())
+                            {
+                                return filterValue
+                            }
+                        }
+                    }
+                }.grep()
+                filters -= valuesToRemove
+                descriptorMap.filters = filters
+                descriptor = toJson(descriptorMap)
+                dataValue.descriptor = descriptor
+            }
+            return dataValue
+        }
+        widget.data = newWidgetData
+        return widget
+    }
+    widgetSettings?.templateName += '_копия'
+    widgetSettings?.header?.template += '_копия'
+    return widgetSettings
 }
 //endregion
