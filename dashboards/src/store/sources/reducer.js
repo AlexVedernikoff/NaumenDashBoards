@@ -5,6 +5,7 @@ import {combineReducers} from 'redux';
 import currentObject from './currentObject/reducer';
 import data from './data/reducer';
 import dynamicGroups from './dynamicGroups/reducer';
+import linkedData from './linkedData/reducer';
 import refAttributes from './refAttributes/reducer';
 
 const sourcesReducer = combineReducers({
@@ -13,6 +14,7 @@ const sourcesReducer = combineReducers({
 	currentObject,
 	data,
 	dynamicGroups,
+	linkedData,
 	refAttributes
 });
 

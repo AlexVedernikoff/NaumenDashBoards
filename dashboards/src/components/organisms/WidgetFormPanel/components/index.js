@@ -20,6 +20,7 @@ import IndicatorFieldset from './IndicatorFieldset';
 import LegendBox from './LegendBox';
 import ParameterDataBox from './ParameterDataBox';
 import ParameterFieldset from './ParameterFieldset';
+import SortableList from './SortableList';
 import SortingBox from './SortingBox';
 import SourceDataBox from './SourceDataBox';
 import SourceFieldset from './SourceFieldset';
@@ -49,6 +50,7 @@ export {
 	LegendBox,
 	ParameterDataBox,
 	ParameterFieldset,
+	SortableList,
 	SortingBox,
 	SourceDataBox,
 	SourceFieldset,

@@ -1,8 +1,14 @@
 // @flow
-import type {DataSet, ErrorsMap, SetDataFieldValue, SetFieldValue, Values} from 'containers/WidgetFormPanel/types';
+import type {ContextProps, ParamsTabProps} from 'WidgetFormPanel/types';
+import type {DataSet} from 'containers/WidgetFormPanel/types';
+import type {DataSourceMap} from 'store/sources/data/types';
 import type {OnChangeInputEvent} from 'components/types';
-import type {ParamsTabProps} from 'WidgetFormPanel/types';
-import type {SourceRefFields} from 'WidgetFormPanel/components/SourceDataBox/types';
+
+export type SourceRefFields = $Shape<{
+	breakdown: string,
+	indicator: string,
+	parameter: string
+}>;
 
 export type TextAreaProps = {
 	className?: string,
@@ -36,20 +42,34 @@ export type ParameterBoxProps = $Shape<{|
 	useGroup: boolean
 |}>;
 
+export type SourceInjectedProps = {|
+	renderAddSourceInput: () => React$Node,
+	renderSourceFieldset: (sourceRefFields: Object) => (set: Object, index: number) => React$Node,
+	...Object
+|};
+
+export type RenderSourceFieldsetProps = $Shape<{
+	onSelectCallback: (index: number, sourceRefFields: SourceRefFields) => Function,
+	sourceRefFields: SourceRefFields,
+	sources: DataSourceMap,
+	useFilter: boolean
+}>;
+
 export type DataBuilderProps = {
-	errors: ErrorsMap,
+	...ParamsTabProps,
+	...ContextProps,
+	...SourceInjectedProps,
 	renderBaseBoxes: () => React$Node,
 	renderDisplayModeSelect: () => React$Node,
 	renderIndicatorBoxes: (props?: IndicatorBoxProps) => React$Node,
 	renderParameterBox: (props: ParameterBoxProps) => React$Node,
 	renderShowEmptyDataCheckbox: () => React$Node,
-	renderSourceBox: (sourceRefFields: SourceRefFields, minCountBuildingSources?: number) => React$Node,
-	setDataFieldValue: SetDataFieldValue,
-	setFieldValue: SetFieldValue,
-	values: Values
+	renderSourceBox: (sourceRefFields: SourceRefFields, minCountBuildingSources?: number) => React$Node
 };
 
 export type Props = {
 	render: (props: DataBuilderProps) => React$Node,
-	...ParamsTabProps
+	...ParamsTabProps,
+	...ContextProps,
+	...SourceInjectedProps
 };

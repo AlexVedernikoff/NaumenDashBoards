@@ -26,42 +26,20 @@ export class Form extends Component<Props, State> {
 
 	renderParamsTabContent = () => {
 		const {
-			attributes,
 			context,
-			errors,
-			fetchAttributes,
-			fetchDynamicAttributeGroups,
-			fetchDynamicAttributes,
-			fetchRefAttributes,
 			isNew,
 			layoutMode,
 			personalDashboard,
-			refAttributes,
 			renderParamsTab,
-			setDataFieldValue,
-			setFieldValue,
-			sources,
-			user,
-			values
+			user
 		} = this.props;
 
 		const content = renderParamsTab({
-			attributes,
 			context,
-			errors,
-			fetchAttributes,
-			fetchDynamicAttributeGroups,
-			fetchDynamicAttributes,
-			fetchRefAttributes,
 			isNew,
 			layoutMode,
 			personalDashboard,
-			refAttributes,
-			setDataFieldValue,
-			setFieldValue,
-			sources,
-			user,
-			values
+			user
 		});
 
 		return this.renderTabContent(content, TABS.PARAMS);
