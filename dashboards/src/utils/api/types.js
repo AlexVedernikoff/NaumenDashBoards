@@ -30,6 +30,7 @@ export type Method =
 	| 'getDynamicAttributes'
 	| 'getDynamicAttributeGroups'
 	| 'getLink'
+	| 'getLinkedDataSources'
 	| 'getMetaClasses'
 	| 'getSettings'
 	| 'getStates'

@@ -9,10 +9,11 @@ import {getDefaultAggregation} from '../AttributeAggregationField/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'src/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
-import type {OnSelectAttributeEvent} from 'WidgetFormPanel/types';
+import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
+import withForm from 'WidgetFormPanel/withForm';
 
 export class IndicatorDataBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -34,7 +35,15 @@ export class IndicatorDataBox extends PureComponent<Props> {
 
 	getKey = (name: string, index: number) => `${name}$${index};`;
 
-	handleExtendBreakdown = (index: number) => {
+	handleChangeAttributeTitle = (event: OnChangeAttributeLabelEvent, index: number) => {
+		const {changeAttributeTitle, setDataFieldValue, values} = this.props;
+		const {label, name, parent} = event;
+		const parameter = values.data[index][name];
+
+		setDataFieldValue(index, name, changeAttributeTitle(parameter, parent, label));
+	};
+
+	handleExtendBreakdown = (index: number) => () => {
 		const {name, setDataFieldValue, values} = this.props;
 		const indicator = values.data[index][name];
 
@@ -49,27 +58,19 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		setDataFieldValue(index, FIELDS.withBreakdown, false);
 	};
 
-	handleRemoveComputedAttribute = (index: number, name: string, code: string) => {
-		const {setDataFieldValue, setFieldValue, values} = this.props;
+	handleRemoveComputedAttribute = (index: number, name: string, value: ComputedAttr) => {
+		const {removeComputedAttribute, setDataFieldValue} = this.props;
 
-		setFieldValue(FIELDS.computedAttrs, values.computedAttrs.filter(a => a.code !== code));
+		removeComputedAttribute(value);
 		setDataFieldValue(index, name, null);
 	};
 
-	handleSaveComputedAttribute = (index: number, name: string, newAttr: ComputedAttr) => {
-		const {setDataFieldValue, setFieldValue, values} = this.props;
-		const {computedAttrs} = values;
-		const attrIndex = computedAttrs.findIndex(attr => attr.code === newAttr.code);
+	handleSaveComputedAttribute = (index: number, name: string, attribute: ComputedAttr) => {
+		const {saveComputedAttribute, setDataFieldValue} = this.props;
 
-		if (attrIndex !== -1) {
-			computedAttrs[attrIndex] = newAttr;
-		} else {
-			computedAttrs.push(newAttr);
-		}
-
-		setFieldValue(FIELDS.computedAttrs, computedAttrs);
-		setDataFieldValue(index, name, newAttr);
-		this.showBreakdown(index) && this.setDefaultBreakdown(index, newAttr);
+		saveComputedAttribute(attribute);
+		setDataFieldValue(index, name, attribute);
+		this.showBreakdown(index) && this.setDefaultBreakdown(index, attribute);
 	};
 
 	handleSelectBreakdown = (event: OnSelectAttributeEvent, index: number) => {
@@ -111,9 +112,9 @@ export class IndicatorDataBox extends PureComponent<Props> {
 
 	requiredBreakdown = () => {
 		const {values} = this.props;
-		const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE, TABLE} = WIDGET_TYPES;
+		const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = WIDGET_TYPES;
 
-		return [BAR_STACKED, COLUMN_STACKED, DONUT, PIE, TABLE].includes(values.type);
+		return [BAR_STACKED, COLUMN_STACKED, DONUT, PIE].includes(values.type);
 	};
 
 	setDefaultBreakdown = (index: number, indicator: MixedAttribute | null) => {
@@ -138,14 +139,15 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	renderBreakdownFieldSet = () => {
 		const {index, name, set, useBreakdown} = this.props;
 		const indicator = set[name];
-		const show = this.showBreakdown(index);
-		const field = indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR
-			? this.renderComputedBreakdownFieldSet(indicator)
-			: this.renderDefaultBreakdownFieldSet();
 
 		if (useBreakdown) {
+			const show = this.showBreakdown(index);
+			const field = indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR
+				? this.renderComputedBreakdownFieldSet(indicator)
+				: this.renderDefaultBreakdownFieldSet();
+
 			return (
-				<ExtendingFieldset index={index} onClick={this.handleExtendBreakdown} show={show} text="Разбивка">
+				<ExtendingFieldset index={index} onClick={this.handleExtendBreakdown(index)} show={show} text="Разбивка">
 					{field}
 				</ExtendingFieldset>
 			);
@@ -179,7 +181,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	renderDefaultBreakdownFieldSet = () => {
-		const {errors, index, onChangeGroup, onChangeLabel, set} = this.props;
+		const {errors, handleChangeGroup, index, set} = this.props;
 		const errorKey = getDataErrorKey(index, FIELDS.breakdown);
 
 		return (
@@ -188,8 +190,8 @@ export class IndicatorDataBox extends PureComponent<Props> {
 				index={index}
 				key={errorKey}
 				name={FIELDS.breakdown}
-				onChangeGroup={onChangeGroup}
-				onChangeLabel={onChangeLabel}
+				onChangeGroup={handleChangeGroup}
+				onChangeLabel={this.handleChangeAttributeTitle}
 				onRemove={this.handleRemoveBreakdown}
 				onSelect={this.handleSelectBreakdown}
 				removable={!this.requiredBreakdown()}
@@ -199,23 +201,25 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	renderIndicatorFieldSet = () => {
-		const {errors, index, name, onChangeLabel, set, setDataFieldValue, values} = this.props;
+		const {errors, index, name, set, setDataFieldValue, values} = this.props;
 		const {computedAttrs} = values;
 
 		return (
 			<IndicatorFieldset
+				aggregation={set[FIELDS.aggregation]}
 				computedAttrs={computedAttrs}
 				error={errors[getDataErrorKey(index, name)]}
 				index={index}
 				key={this.getKey(name, index)}
 				name={name}
 				onChangeAggregation={setDataFieldValue}
-				onChangeLabel={onChangeLabel}
+				onChangeLabel={this.handleChangeAttributeTitle}
 				onRemoveComputedAttribute={this.handleRemoveComputedAttribute}
 				onSaveComputedAttribute={this.handleSaveComputedAttribute}
 				onSelect={this.handleSelectIndicator}
 				onSelectAggregation={setDataFieldValue}
 				set={set}
+				value={set[name]}
 			/>
 		);
 	};
@@ -234,4 +238,4 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	}
 }
 
-export default IndicatorDataBox;
+export default withForm(IndicatorDataBox);

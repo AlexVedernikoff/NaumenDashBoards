@@ -117,8 +117,10 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			fetchAttributes,
 			fetchDynamicAttributeGroups,
 			fetchDynamicAttributes,
+			fetchLinkedDataSources,
 			fetchRefAttributes,
 			layoutMode,
+			linkedSources,
 			personalDashboard,
 			refAttributes,
 			saving,
@@ -139,9 +141,11 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					fetchAttributes={fetchAttributes}
 					fetchDynamicAttributeGroups={fetchDynamicAttributeGroups}
 					fetchDynamicAttributes={fetchDynamicAttributes}
+					fetchLinkedDataSources={fetchLinkedDataSources}
 					fetchRefAttributes={fetchRefAttributes}
 					isNew={this.isNew()}
 					layoutMode={layoutMode}
+					linkedSources={linkedSources}
 					onSubmit={this.handleSubmit}
 					personalDashboard={personalDashboard}
 					refAttributes={refAttributes}

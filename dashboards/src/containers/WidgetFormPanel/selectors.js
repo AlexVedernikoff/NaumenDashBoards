@@ -6,6 +6,7 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {createToast} from 'store/toasts/actions';
 import {fetchAttributes} from 'store/sources/attributes/actions';
 import {fetchDynamicAttributeGroups, fetchDynamicAttributes} from 'store/sources/dynamicGroups/actions';
+import {fetchLinkedDataSources} from 'store/sources/linkedData/actions';
 import {fetchRefAttributes} from 'store/sources/refAttributes/actions';
 import {getMapValues} from 'src/helpers';
 
@@ -15,7 +16,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const {data} = widgets;
 	const {map, selectedWidget} = data;
 	const {contentCode, subjectUuid, user} = context;
-	const {attributes, dynamicGroups} = sources;
+	const {attributes, data: attributeSources, dynamicGroups, linkedData: linkedSources} = sources;
 	const contentContext = {contentCode, subjectUuid};
 	const widget = data.map[selectedWidget];
 
@@ -24,10 +25,11 @@ export const props = (state: AppState): ConnectedProps => {
 		context: contentContext,
 		dynamicGroups,
 		layoutMode,
+		linkedSources,
 		personalDashboard,
 		refAttributes: sources.refAttributes,
 		saving: data.saving,
-		sources: sources.data.map,
+		sources: attributeSources.map,
 		user,
 		widget,
 		widgets: getMapValues(map).filter(({id}) => id !== selectedWidget)
@@ -42,6 +44,7 @@ export const functions: ConnectedFunctions = {
 	fetchAttributes,
 	fetchDynamicAttributeGroups,
 	fetchDynamicAttributes,
+	fetchLinkedDataSources,
 	fetchRefAttributes,
 	saveWidget
 };

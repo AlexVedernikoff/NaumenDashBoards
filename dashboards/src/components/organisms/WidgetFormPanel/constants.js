@@ -1,5 +1,6 @@
 // @flow
 const aggregation: 'aggregation' = 'aggregation';
+const attribute: 'attribute' = 'attribute';
 const body: 'body' = 'body';
 const borders: 'borders' = 'borders';
 const breakdown: 'breakdown' = 'breakdown';
@@ -27,6 +28,7 @@ const fontStyle: 'fontStyle' = 'fontStyle';
 const group: 'group' = 'group';
 const header: 'header' = 'header';
 const indicator: 'indicator' = 'indicator';
+const indicators: 'indicators' = 'indicators';
 const isNew: 'isNew' = 'isNew';
 const layout: 'layout' = 'layout';
 const mkLayout: 'mkLayout' = 'mkLayout';
@@ -35,6 +37,7 @@ const name: 'name' = 'name';
 const max: 'max' = 'max';
 const min: 'min' = 'min';
 const parameter: 'parameter' = 'parameter';
+const parameters: 'parameters' = 'parameters';
 const position: 'position' = 'position';
 const ranges: 'ranges' = 'ranges';
 const row: 'row' = 'row';
@@ -62,6 +65,7 @@ const withBreakdown: 'withBreakdown' = 'withBreakdown';
 
 const FIELDS = {
 	aggregation,
+	attribute,
 	body,
 	borders,
 	breakdown,
@@ -88,6 +92,7 @@ const FIELDS = {
 	group,
 	header,
 	indicator,
+	indicators,
 	isNew,
 	layout,
 	legend,
@@ -96,6 +101,7 @@ const FIELDS = {
 	mkLayout,
 	name,
 	parameter,
+	parameters,
 	position,
 	ranges,
 	row,

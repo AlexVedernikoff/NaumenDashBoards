@@ -5,6 +5,7 @@ import type {Context} from 'utils/api/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
+import type {LinkedDataSourceMap} from 'store/sources/linkedData/types';
 import type {NewToast} from 'store/toasts/types';
 import {NewWidget} from 'entities';
 import type {OnLoadCallback} from 'store/sources/types';
@@ -40,6 +41,7 @@ export type ConnectedProps = {
 	context: Context,
 	dynamicGroups: DynamicGroupsMap,
 	layoutMode: LayoutMode,
+	linkedSources: LinkedDataSourceMap,
 	personalDashboard: boolean,
 	refAttributes: AttributesMap,
 	saving: ChangingState,
@@ -57,6 +59,8 @@ export type FetchDynamicAttributes = (dataKey: string, groupCode: string) => Thu
 
 export type FetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback) => ThunkAction;
 
+export type FetchLinkedDataSources = (classFqn: string) => ThunkAction;
+
 export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
 	changeLayoutMode: (mode: LayoutMode) => ThunkAction,
@@ -65,6 +69,7 @@ export type ConnectedFunctions = {
 	fetchAttributes: FetchAttributes,
 	fetchDynamicAttributeGroups: FetchDynamicAttributeGroups,
 	fetchDynamicAttributes: FetchDynamicAttributes,
+	fetchLinkedDataSources: FetchLinkedDataSources,
 	fetchRefAttributes: FetchRefAttributes,
 	saveWidget: Widget => Object | void
 };

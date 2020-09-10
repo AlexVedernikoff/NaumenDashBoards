@@ -1,59 +1,20 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {Checkbox, TextArea, Toggle} from 'components/atoms';
-import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, TextAreaProps} from './types';
-import {createRefKey} from 'store/sources/refAttributes/actions';
+import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceRefFields, TextAreaProps} from './types';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import {FIELDS, MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
 import {FormBox, FormCheckControl, OuterSelect, Select} from 'components/molecules';
-import {FormField, IndicatorDataBox, ParameterDataBox, SourceDataBox} from 'WidgetFormPanel/components';
-import {getMainDataSet} from 'utils/normalizer/widget/helpers';
-import type {Group} from 'store/widgets/data/types';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
-import type {OnChangeInputEvent} from 'components/types';
+import {FormField, IndicatorDataBox, ParameterDataBox} from 'WidgetFormPanel/components';
+import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
-import type {SourceRefFields} from 'WidgetFormPanel/components/SourceDataBox/types';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
 import {WIDGET_OPTIONS} from './constants';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
+import withForm from 'WidgetFormPanel/withForm';
+import withSource from './withSource';
 
 export class DataFormBuilder extends Component<Props> {
-	/**
-	 * Функция изменяет значения параметров и группировок параметров дополнительных источников
-	 * относительного главного.
-	 * @param {string} parameterName - наименование поля параметра
-	 * @returns {Function}
-	 */
-	changeAdditionalParameterFields = (parameterName: string) => () => {
-		const {setDataFieldValue, values} = this.props;
-		const {data, type} = values;
-		const mainSet = getMainDataSet(data);
-
-		data.forEach((currentSet, index) => {
-			const {group: mainGroup, source: mainSource, [parameterName]: mainParameter} = mainSet;
-			const {source: currentSource, [parameterName]: currentParameter} = currentSet;
-
-			if (mainSet !== currentSet && mainSource && currentSource) {
-				if (mainSource.value === currentSource.value) {
-					setDataFieldValue(index, parameterName, mainParameter);
-				} else if (mainParameter && currentParameter && mainParameter.type !== currentParameter.type) {
-					setDataFieldValue(index, parameterName, null);
-				}
-
-				if (type !== WIDGET_TYPES.TABLE) {
-					setDataFieldValue(index, FIELDS.group, mainGroup);
-				}
-			}
-		});
-	};
-
-	getTitleAttribute = (attributes: Array<Attribute>) => {
-		return attributes.find(attribute => attribute.code === 'title') || null;
-	};
-
 	handleBlurName = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {setFieldValue, values} = this.props;
 		const {[FIELDS.header]: header} = values;
@@ -73,31 +34,6 @@ export class DataFormBuilder extends Component<Props> {
 		setFieldValue(name, value);
 	};
 
-	handleChangeAttributeTitle = (event: OnChangeAttributeLabelEvent, index: number) => {
-		const {setDataFieldValue, values} = this.props;
-		const {label: title, name, parent} = event;
-		let value = values.data[index][name];
-
-		if (value) {
-			if (parent) {
-				value = {
-					...value,
-					ref: {
-						...value.ref,
-						title
-					}
-				};
-			} else {
-				value = {
-					...value,
-					title
-				};
-			}
-
-			setDataFieldValue(index, name, value);
-		}
-	};
-
 	handleChangeDiagramName = (e: OnChangeInputEvent) => {
 		const {setFieldValue, values} = this.props;
 		const {value} = e;
@@ -108,24 +44,11 @@ export class DataFormBuilder extends Component<Props> {
 		});
 	};
 
-	handleChangeDisplayMode = ({value}: Object) => {
+	handleChangeDisplayMode = ({value}: OnSelectEvent) => {
 		const {setFieldValue} = this.props;
 		const {value: modeValue} = value;
 
 		setFieldValue(FIELDS.displayMode, modeValue);
-	};
-
-	handleChangeGroup = (index: number, name: string, value: Group, field: Object) => {
-		const {setDataFieldValue} = this.props;
-		const {name: fieldName, parent, value: attribute} = field;
-		const event = {
-			label: attribute.title,
-			name: fieldName,
-			parent
-		};
-
-		this.handleChangeAttributeTitle(event, index);
-		setDataFieldValue(index, name, value);
 	};
 
 	handleChangeUseName = ({name, value}: OnChangeInputEvent) => {
@@ -140,44 +63,20 @@ export class DataFormBuilder extends Component<Props> {
 	handleToggleShowEmptyData = (event: OnChangeInputEvent) => {
 		const {setFieldValue} = this.props;
 		const {name, value} = event;
-
 		setFieldValue(name, !value);
 	};
 
-	onLoadRefAttributes = (event: OnSelectAttributeEvent, callback: Function, ...rest: Array<any>) =>
-	(refAttributes: Array<Attribute>) => {
-		event.value = {...event.value, ref: this.getTitleAttribute(refAttributes)};
-		callback(event, ...rest);
-	};
+	setMainSourceValues = (index: number, sourceRefFields: SourceRefFields) => () => {
+		const {setDataFieldValue, values} = this.props;
+		const {data} = values;
+		const mainSet = data[0];
+		const mainSource = mainSet.source;
+		const currentSource = data[index].source;
 
-	transformAttribute = (event: OnSelectAttributeEvent, callback: Function, ...rest: Array<any>) => {
-		const {fetchRefAttributes, refAttributes} = this.props;
-		let {parent, value} = event;
-
-		if (parent) {
-			value = {
-				...parent,
-				ref: value
-			};
-
-			parent = null;
+		if (index > 0 && mainSource && currentSource && mainSource.value === currentSource.value) {
+			setDataFieldValue(index, sourceRefFields.parameter, mainSet[sourceRefFields.parameter]);
+			setDataFieldValue(index, FIELDS.group, mainSet[FIELDS.group]);
 		}
-
-		if (value && value.type in ATTRIBUTE_SETS.REF && !value.ref) {
-			const key = createRefKey(value);
-
-			if (refAttributes[key]) {
-				value = {
-					...value,
-					ref: this.getTitleAttribute(refAttributes[key].options)
-				};
-			} else {
-				const callbackEvent = {...event, parent, value};
-				fetchRefAttributes(value, this.onLoadRefAttributes(callbackEvent, callback, ...rest));
-			}
-		}
-
-		return value;
 	};
 
 	renderBaseBoxes = () => {
@@ -266,26 +165,9 @@ export class DataFormBuilder extends Component<Props> {
 		return null;
 	};
 
-	renderIndicatorBox = (props: IndicatorBoxProps) =>
-		(set: DataSet, index: number) => {
-		const {errors, setDataFieldValue, setFieldValue, values} = this.props;
-
+	renderIndicatorBox = (props: IndicatorBoxProps) => (set: DataSet, index: number) => {
 		if (!set[FIELDS.sourceForCompute]) {
-			return (
-				<IndicatorDataBox
-					errors={errors}
-					index={index}
-					key={index}
-					onChangeGroup={this.handleChangeGroup}
-					onChangeLabel={this.handleChangeAttributeTitle}
-					set={set}
-					setDataFieldValue={setDataFieldValue}
-					setFieldValue={setFieldValue}
-					transformAttribute={this.transformAttribute}
-					values={values}
-					{...props}
-				/>
-			);
+			return <IndicatorDataBox index={index} set={set} {...props} />;
 		}
 
 		return null;
@@ -296,23 +178,7 @@ export class DataFormBuilder extends Component<Props> {
 		return values.data.map(this.renderIndicatorBox(props));
 	};
 
-	renderParameterBox = (props: ParameterBoxProps) => {
-		const {errors, setDataFieldValue, setFieldValue, values} = this.props;
-
-		return (
-			<ParameterDataBox
-				errors={errors}
-				onChangeGroup={this.handleChangeGroup}
-				onChangeLabel={this.handleChangeAttributeTitle}
-				onSelectCallback={this.changeAdditionalParameterFields}
-				setDataFieldValue={setDataFieldValue}
-				setFieldValue={setFieldValue}
-				transformAttribute={this.transformAttribute}
-				values={values}
-				{...props}
-			/>
-		);
-	};
+	renderParameterBox = (props: ParameterBoxProps) => <ParameterDataBox name={props.name} />;
 
 	renderShowEmptyDataCheckbox = () => {
 		const {showEmptyData} = this.props.values;
@@ -331,23 +197,17 @@ export class DataFormBuilder extends Component<Props> {
 		);
 	};
 
-	renderSourceBox = (sourceRefFields: SourceRefFields, minCountBuildingSources: number = 1) => {
-		const {errors, fetchAttributes, setDataFieldValue, setFieldValue, sources, values} = this.props;
-		const {data, type} = values;
+	renderSourceBox = (sourceRefFields: SourceRefFields) => {
+		const {renderAddSourceInput, renderSourceFieldset, values} = this.props;
+		const props = {
+			onSelectCallback: this.setMainSourceValues,
+			sourceRefFields
+		};
 
 		return (
-			<SourceDataBox
-				data={data}
-				errors={errors}
-				fetchAttributes={fetchAttributes}
-				minCountBuildingSources={minCountBuildingSources}
-				onSelectCallback={this.changeAdditionalParameterFields}
-				setDataFieldValue={setDataFieldValue}
-				setFieldValue={setFieldValue}
-				sourceRefFields={sourceRefFields}
-				sources={sources}
-				type={type}
-			/>
+			<FormBox rightControl={renderAddSourceInput()} title="Источник">
+				{values.data.map(renderSourceFieldset(props))}
+			</FormBox>
 		);
 	};
 
@@ -387,21 +247,18 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	render () {
-		const {errors, render, setDataFieldValue, setFieldValue, values} = this.props;
+		const {render, ...props} = this.props;
 
 		return render({
-			errors,
+			...props,
 			renderBaseBoxes: this.renderBaseBoxes,
 			renderDisplayModeSelect: this.renderDisplayModeSelect,
 			renderIndicatorBoxes: this.renderIndicatorBoxes,
 			renderParameterBox: this.renderParameterBox,
 			renderShowEmptyDataCheckbox: this.renderShowEmptyDataCheckbox,
-			renderSourceBox: this.renderSourceBox,
-			setDataFieldValue,
-			setFieldValue,
-			values
+			renderSourceBox: this.renderSourceBox
 		});
 	}
 }
 
-export default DataFormBuilder;
+export default withForm(withSource(DataFormBuilder));

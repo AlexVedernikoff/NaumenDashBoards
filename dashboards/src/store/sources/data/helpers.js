@@ -1,10 +1,5 @@
 // @flow
-import type {
-	DataSourceMap,
-	DataSourcesState,
-	RawDataSource,
-	ReceiveDataSources
-} from './types';
+import type {DataSourceMap, RawDataSource} from './types';
 
 const createDataSource = (source: RawDataSource, parent: string | null) => {
 	const {classFqn: value, hasDynamic, title: label} = source;
@@ -37,23 +32,18 @@ const setChildrenDataSources = (map: DataSourceMap, classFqn: string, children: 
 
 /**
  * Нормализуем данные классов для удобной работы с деревом
- * @param {DataSourcesState} state - хранилище состояния источников данных
- * @param {string} payload - массив классов с детьми
- * @returns {DataSourcesState}
+ * @param {Array<RawDataSource>} sources - массив классов с типами и подтипами
+ * @returns {DataSourceMap}
  */
-export const setDataSources = (state: DataSourcesState, {payload}: ReceiveDataSources) => {
+export const getDataSourceMap = (sources: Array<RawDataSource>) => {
 	let map = {};
 
-	payload.forEach(source => {
+	sources.forEach(source => {
 		const {children, classFqn} = source;
 		map[classFqn] = createDataSource(source, null);
 
 		setChildrenDataSources(map, classFqn, children);
 	});
 
-	return {
-		...state,
-		loading: false,
-		map
-	};
+	return map;
 };
