@@ -3,8 +3,20 @@ import {DASHBOARD_EVENTS, LAYOUT_MODE} from './constants';
 
 export type LayoutMode = $Keys<typeof LAYOUT_MODE>;
 
+export type AutoUpdateSettings = {
+	defaultInterval: number,
+	enabled: boolean,
+	interval: number,
+	remainder: number
+};
+
+type ChangeIntervalReminder = {
+	payload: number,
+	type: typeof DASHBOARD_EVENTS.CHANGE_INTERVAL_REMINDER
+};
+
 type ChangeAutoUpdateSettings = {
-	payload: Object,
+	payload: $Shape<AutoUpdateSettings>,
 	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
 };
 
@@ -77,6 +89,7 @@ type UnknownDashboardAction = {
 
 export type SettingsAction =
 	| ChangeAutoUpdateSettings
+	| ChangeIntervalReminder
 	| ChangeLayoutMode
 	| CreatePersonalDashboard
 	| CreatedPersonalDashboard
@@ -93,13 +106,6 @@ export type SettingsAction =
 	| SwitchOffEditMode
 	| UnknownDashboardAction
 ;
-
-export type AutoUpdateSettings = {
-	defaultInterval: number,
-	enabled: boolean,
-	fn?: IntervalID,
-	interval: number
-};
 
 export type SettingsState = {
 	autoUpdate: AutoUpdateSettings,

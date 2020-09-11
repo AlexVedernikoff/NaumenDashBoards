@@ -1,5 +1,6 @@
 // @flow
 import AttributeCreatingModal from './AttributeCreatingModal';
+import AutoUpdateButton from './AutoUpdateButton';
 import DashboardContent from './DashboardContent';
 import DashboardHeader from './DashboardHeader';
 import Speedometer from './Speedometer';
@@ -11,6 +12,7 @@ import WidgetFormPanel from './WidgetFormPanel';
 
 export {
 	AttributeCreatingModal,
+	AutoUpdateButton,
 	DashboardContent,
 	DashboardHeader,
 	Speedometer,

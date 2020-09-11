@@ -26,6 +26,7 @@ import SimpleListOption from './SimpleListOption';
 import Text from './Text';
 import TextArea from './TextArea';
 import TextInput from './TextInput';
+import TimerButton from './TimerButton';
 import Toast from './Toast';
 import Toggle from './Toggle';
 import Tooltip from './Tooltip';
@@ -58,6 +59,7 @@ export {
 	Text,
 	TextArea,
 	TextInput,
+	TimerButton,
 	Toast,
 	Toggle,
 	Tooltip

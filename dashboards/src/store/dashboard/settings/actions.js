@@ -1,14 +1,14 @@
 // @flow
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
 import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import type {AutoUpdateSettings, LayoutMode} from './types';
 import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
+import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getContext, getMetaCLass, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import isMobile from 'ismobilejs';
-import type {LayoutMode} from './types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState, switchState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
@@ -72,17 +72,16 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 /**
  * Получает настройки дашборда
- * @param {boolean} isPersonal - указаывает настройки какого типа необходимо получить
  * @returns {ThunkAction}
  */
-const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {context} = getState();
+const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {context, dashboard} = getState();
 	const {contentCode, subjectUuid: classFqn} = context;
 	const {data} = await client.post(buildUrl('dashboardSettings', 'getSettings', 'requestContent,user'), {
 		classFqn,
 		contentCode,
 		isMobile: isMobile().any,
-		isPersonal
+		isPersonal: dashboard.settings.personal
 	});
 	const {autoUpdate, customGroups, layouts, mobileLayouts, widgets} = data;
 
@@ -91,7 +90,7 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 	}
 
 	if (autoUpdate !== null) {
-		dispatch(setAutoUpdate(autoUpdate));
+		dispatch(setAutoUpdateSettings(autoUpdate));
 	}
 
 	dispatch(setWidgets(widgets));
@@ -99,25 +98,33 @@ const getSettings = (isPersonal: boolean = false): ThunkAction => async (dispatc
 	dispatch(setMobileLayouts(widgets, mobileLayouts));
 };
 
-const setAutoUpdate = (autoUpdate: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {
-		autoUpdate: {
-			fn: currentUpdateFunction
-		}
-	} = getState().dashboard.settings;
-	const {enabled = false, interval = DEFAULT_INTERVAL} = autoUpdate;
-	let updateFunction;
+/**
+ * Устанавливает настройки автообновления
+ * @param {AutoUpdateSettings} settings - настройки автообновления
+ * @returns {ThunkAction}
+ */
+const setAutoUpdateSettings = (settings: $Shape<AutoUpdateSettings>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {defaultInterval} = getState().dashboard.settings.autoUpdate;
+	const {interval = defaultInterval} = settings;
+	const remainder = interval * 60;
 
-	clearInterval(currentUpdateFunction);
+	dispatch(changeAutoUpdateSettings({...settings, remainder}));
+};
 
-	if (enabled) {
-		updateFunction = setInterval(() => dispatch(getSettings()), interval * 1000 * 60);
+/**
+ * Изменяет остаток времени автообновления
+ * @param {number} remainder - отстаток времени
+ * @returns {ThunkAction}
+ */
+const changeIntervalRemainder = (remainder: number): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	if (remainder === 0) {
+		dispatch(getSettings());
 	}
 
-	dispatch(changeAutoUpdateSettings({
-		...autoUpdate,
-		fn: updateFunction
-	}));
+	dispatch({
+		payload: remainder,
+		type: DASHBOARD_EVENTS.CHANGE_INTERVAL_REMINDER
+	});
 };
 
 /**
@@ -294,15 +301,15 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 		const {context, dashboard} = getState();
 		const {contentCode, subjectUuid: classFqn} = context;
 		const {personal: isPersonal} = dashboard.settings;
-		const autoUpdate = {enabled, interval};
+		const autoUpdateSetting = {enabled, interval: Number(interval)};
 		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {
-			autoUpdate,
+			autoUpdate: autoUpdateSetting,
 			classFqn,
 			contentCode,
 			isPersonal
 		});
 
-		dispatch(setAutoUpdate(autoUpdate));
+		dispatch(setAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({
 			text: 'Настройки успешно изменены!'
 		}));
@@ -323,7 +330,7 @@ const createPersonalState = () => async (dispatch: Dispatch) => {
 	dispatch(getAutoUpdateSettings());
 	dispatch(setEditable(true));
 	dispatch(setPersonal(true));
-	await dispatch(getSettings(true));
+	await dispatch(getSettings());
 };
 
 /**
@@ -356,6 +363,7 @@ const setPersonal = payload => ({
 });
 
 export {
+	changeIntervalRemainder,
 	changeLayoutMode,
 	createPersonalDashboard,
 	createPersonalState,

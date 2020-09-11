@@ -1,15 +1,15 @@
 // @flow
-import {Button, LegacyCheckbox as Checkbox, Popover} from 'components/atoms';
+import {Button, LegacyCheckbox as Checkbox, Popover, TimerButton} from 'components/atoms';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {IconButton, TimerButton} from 'components/organisms/DashboardHeader/components';
+import {IconButton} from 'components/organisms/DashboardHeader/components';
 import {MAX_INTERVAL} from './constants';
 import {number, object} from 'yup';
 import type {Props, State, Values} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
-export class AutoUpdateForm extends PureComponent<Props, State> {
+export class AutoUpdateButton extends PureComponent<Props, State> {
 	state = {
 		errors: {},
 		isSubmitting: false,
@@ -24,7 +24,7 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		if (this.props.autoUpdateSettings !== prevProps.autoUpdateSettings) {
+		if (this.props.settings !== prevProps.settings) {
 			this.updateValues();
 		}
 	}
@@ -42,18 +42,18 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 	};
 
 	handleClick = async (name: string, value: boolean) => {
-		const {autoUpdateSettings, onSubmit} = this.props;
+		const {onSaveSettings, settings} = this.props;
 		const {values} = this.state;
 
 		this.setState({values: {...values, enabled: value}});
 
-		if (!value && autoUpdateSettings.enabled) {
-			onSubmit(value, values.interval);
+		if (!value && settings.enabled) {
+			onSaveSettings(value, values.interval);
 		}
 	};
 
 	handleSubmit = async (e: Event) => {
-		const {onSubmit} = this.props;
+		const {onSaveSettings} = this.props;
 		const {values} = this.state;
 
 		e.preventDefault();
@@ -64,12 +64,12 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 		if (isValid) {
 			const {enabled, interval} = values;
 
-			onSubmit(enabled, interval);
+			onSaveSettings(enabled, interval);
 		}
 	};
 
 	updateValues = () => {
-		const {defaultInterval, enabled, interval} = this.props.autoUpdateSettings;
+		const {defaultInterval, enabled, interval} = this.props.settings;
 
 		this.setState({
 			values: {
@@ -80,7 +80,7 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 	};
 
 	validate = async (newValues?: Values) => {
-		const {defaultInterval} = this.props.autoUpdateSettings;
+		const {defaultInterval} = this.props.settings;
 		const values = newValues || this.state.values;
 		const errors = {};
 
@@ -102,7 +102,7 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 	};
 
 	renderErrorIcon = () => {
-		const {defaultInterval} = this.props.autoUpdateSettings;
+		const {defaultInterval} = this.props.settings;
 		const {errors} = this.state;
 		const text = `Необходимо задать целое число минут от ${defaultInterval} до ${MAX_INTERVAL}`;
 		const iconCN = errors.interval ? cn(styles.infoIcon, styles.iconError) : styles.infoIcon;
@@ -160,13 +160,13 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 	renderText = () => <span className={styles.text}> минут</span>;
 
 	renderTimerButton = () => {
-		const {isSubmitting, values} = this.state;
-		const {autoUpdateSettings} = this.props;
-		const buttonCN = autoUpdateSettings.enabled ? styles.enabledAutoUpdateButton : '';
+		const {onChangeRemainder, settings} = this.props;
+		const {enabled, remainder} = settings;
+		const buttonCN = enabled ? styles.enabledAutoUpdateButton : '';
 
-		if (isSubmitting && values.enabled) {
+		if (enabled) {
 			return (
-				<TimerButton duration={autoUpdateSettings.interval} tip="Автообновление включено" />
+				<TimerButton duration={remainder} onChangeDuration={onChangeRemainder} tip="Автообновление включено" />
 			);
 		}
 
@@ -212,4 +212,4 @@ export class AutoUpdateForm extends PureComponent<Props, State> {
 	}
 }
 
-export default AutoUpdateForm;
+export default AutoUpdateButton;
