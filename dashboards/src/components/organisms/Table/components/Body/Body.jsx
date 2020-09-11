@@ -1,10 +1,8 @@
 // @flow
-import {Cell, Row} from 'Table/components';
 import type {Column, Row as RowType} from 'Table/types';
-import type {Props, RenderCellProps} from './types';
+import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {ROW_HEADER_ACCESSOR, ROW_NUM_ACCESSOR} from 'Table/constants';
-import {SORTING_TYPES, TEXT_ALIGNS} from 'store/widgets/data/constants';
+import {SORTING_TYPES} from 'store/widgets/data/constants';
 
 export class Body extends PureComponent<Props> {
 	getSortValue = (value: string = '') => Number(value) || value;
@@ -26,82 +24,44 @@ export class Body extends PureComponent<Props> {
 		return 0;
 	});
 
-	renderCell = (row: RowType, rowIndex: number) => (column: Column, index: number) => {
-		const width = this.props.columnsWidth[index];
+	renderCell = (row: RowType, rowIndex: number) => (column: Column, columnIndex: number) => {
+		const {components, onClickDataCell, settings} = this.props;
+		const {defaultValue, textAlign, textHandler} = settings.body;
+		const width = this.props.columnsWidth[columnIndex];
+		const {Cell, Value} = components;
 		const {accessor} = column;
-		const value = row[accessor];
-		const props = {
-			key: accessor,
-			width
-		};
-
-		switch (accessor) {
-			case ROW_HEADER_ACCESSOR:
-				return this.renderHeaderCell(value, props);
-			case ROW_NUM_ACCESSOR:
-				return this.renderRowNumCell(rowIndex, props);
-			default:
-				return this.renderDataCell(value, props);
-		}
-	};
-
-	renderDataCell = (value: string, props: RenderCellProps) => {
-		const {renderValue, settings} = this.props;
-		const {body} = settings;
-		const {defaultValue, textAlign, textHandler} = body;
 
 		return (
 			<Cell
+				columnIndex={columnIndex}
+				components={{Value}}
 				defaultValue={defaultValue.value}
-				renderValue={renderValue}
+				key={accessor}
+				onClick={onClickDataCell}
+				rowIndex={rowIndex}
 				textAlign={textAlign}
 				textHandler={textHandler}
-				value={value}
-				{...props}
-			/>
-		);
-	};
-
-	renderHeaderCell = (value: string, props: RenderCellProps) => {
-		const {fontColor, fontStyle} = this.props.settings.rowHeader;
-
-		return (
-			<Cell
-				fontColor={fontColor}
-				fontStyle={fontStyle}
-				value={value}
-				{...props}
+				value={row[accessor]}
+				width={width}
 			/>
 		);
 	};
 
 	renderRow = (row: RowType, index: number) => {
-		const {columns} = this.props;
+		const {columns, components} = this.props;
+		const {Row} = components;
+
 		return <Row>{columns.map(this.renderCell(row, index))}</Row>;
-	};
-
-	renderRowNumCell = (num: number, props: RenderCellProps) => {
-		const {page, pageSize} = this.props;
-		const value = `${pageSize * (page - 1) + num + 1}.`;
-
-		return (
-			<Cell
-				textAlign={TEXT_ALIGNS.center}
-				value={value}
-				{...props}
-			/>
-		);
 	};
 
 	render () {
 		const {columns, data, page, pageSize, sorting, width} = this.props;
+		const {column, type} = sorting;
 		const start = pageSize * (page - 1);
 		let rows = data;
 
-		if (sorting.column) {
-			const {column, type} = sorting;
-			const accessor = columns[column].accessor;
-			rows = this.sort(data, accessor, type === SORTING_TYPES.ASC);
+		if (column !== null && columns[column]) {
+			rows = this.sort(data, columns[column].accessor, type === SORTING_TYPES.ASC);
 		}
 
 		return (

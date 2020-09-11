@@ -35,6 +35,7 @@
 		"flowtype/semi": 2,
 		"flowtype/sort-keys": [2, "asc", {"caseSensitive": true, "natural": true}],
 		"no-param-reassign": 2,
+		"import/no-relative-parent-imports": 2,
 		"no-tabs": 0,
 		"operator-linebreak": ["error", "before"],
 		"react/jsx-tag-spacing": [2, {"beforeSelfClosing": "always"}],

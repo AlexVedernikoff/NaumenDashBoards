@@ -6,6 +6,7 @@ import Speedometer from './Speedometer';
 import SpeedometerWidget from './SpeedometerWidget';
 import Startup from './Startup';
 import Table from './Table';
+import TableWidget from './TableWidget';
 import WidgetAddPanel from './WidgetAddPanel';
 import WidgetFormPanel from './WidgetFormPanel';
 
@@ -17,6 +18,7 @@ export {
 	SpeedometerWidget,
 	Startup,
 	Table,
+	TableWidget,
 	WidgetAddPanel,
 	WidgetFormPanel
 };

@@ -1,5 +1,4 @@
 // @flow
-import {Cell} from 'components/organisms/Table/components/index';
 import cn from 'classnames';
 import {MIN_WIDTH} from './constants';
 import type {Props} from './types';
@@ -35,8 +34,8 @@ export class HeaderCell extends PureComponent<Props> {
 	}
 
 	handleClick = () => {
-		const {index, onClick} = this.props;
-		onClick(index);
+		const {columnIndex, onClick} = this.props;
+		onClick(columnIndex);
 	};
 
 	handleClickResizer = (event: SyntheticMouseEvent<HTMLDivElement>) => event.stopPropagation();
@@ -52,26 +51,22 @@ export class HeaderCell extends PureComponent<Props> {
 
 	mouseMove = (event: MouseEvent) => {
 		if (this.dragStart) {
-			const {index, onChangeWidth} = this.props;
+			const {columnIndex, onChangeWidth} = this.props;
 			const newWidth = Math.floor(Math.max(this.resizerOffset + event.pageX - this.cursorStart, MIN_WIDTH));
 
-			onChangeWidth(newWidth, index);
+			onChangeWidth(newWidth, columnIndex);
 		}
 	};
 
 	mouseUp = () => {
-		const {index, onFinishedChangeWidth} = this.props;
-
-		if (this.dragStart) {
-			this.dragStart = false;
-			onFinishedChangeWidth(index);
-		}
+		this.dragStart = false;
 	};
 
 	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.ref} />;
 
 	render () {
-		const {fontColor, fontStyle, sorting, value, width} = this.props;
+		const {columnIndex, components, fontColor, fontStyle, sorting, value, width} = this.props;
+		const {Cell, Value} = components;
 		const {ASC, DESC} = SORTING_TYPES;
 		const cellCN = cn({
 			[styles.cell]: true,
@@ -83,6 +78,8 @@ export class HeaderCell extends PureComponent<Props> {
 			<Cell
 				body={false}
 				className={cellCN}
+				columnIndex={columnIndex}
+				components={{Value}}
 				fontColor={fontColor}
 				fontStyle={fontStyle}
 				onClick={this.handleClick}

@@ -1,37 +1,55 @@
 // @flow
-import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import {ROW_HEADER_ACCESSOR, ROW_NUM_ACCESSOR} from './constants';
-import type {TableWidget} from 'store/widgets/data/types';
-
-export type Props = {
-	data: DiagramBuildData,
-	onUpdate: TableWidget => void,
-	widget: TableWidget
-};
-
-type Accessor = typeof ROW_HEADER_ACCESSOR | typeof ROW_NUM_ACCESSOR | string;
+import type {DefaultProps as DefaultCellProps, Props as CellProps} from './components/Cell/types';
+import type {Props as HeaderProps} from './components/HeaderCell/types';
+import type {Props as RowProps} from './components/Row/types';
+import type {Table, TableSorting} from 'store/widgets/data/types';
 
 export type Column = {
-	accessor: Accessor,
+	accessor: string,
 	footer: string,
-	header: string
+	header: string,
+	[string]: any
 };
 
 export type Row = {
-	[accessor: Accessor]: string
+	[accessor: string]: string
 };
 
-export type Data = Array<Row>;
+export type ValueProps = {
+	columnIndex: number,
+	value: string | number
+};
+
+export type Components = $Shape<{
+	Cell: React$ComponentType<React$Config<CellProps, DefaultCellProps>>,
+	HeaderCell: React$ComponentType<HeaderProps>,
+	Row: React$ComponentType<RowProps>,
+	Value: React$ComponentType<ValueProps>
+}>;
+
+export type OnClickCellProps = {
+	columnIndex: number,
+	rowIndex: number,
+	value: number | string
+};
+
+export type OnClickDataCell = (event: MouseEvent, props: OnClickCellProps) => void;
+
+export type Props = {
+	columns: Array<Column>,
+	columnsRatioWidth: Array<number>,
+	components: Components,
+	data: Array<Row>,
+	onChangeColumnWidth: (columnsWidth: Array<number>) => void,
+	onChangeSorting: (sorting: TableSorting) => void,
+	onClickDataCell: OnClickDataCell,
+	settings: Table,
+	sorting: TableSorting
+};
 
 export type State = {
-	columns: Array<Column>,
 	columnsWidth: Array<number>,
-	data: Array<Row>,
 	page: number,
 	pageSize: number,
-	usesMSInterval: boolean,
-	usesPercent: boolean,
 	width: number
 };
-
-export type RenderValue = (value: number | string) => number | string;

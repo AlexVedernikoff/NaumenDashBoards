@@ -26,20 +26,7 @@ const DEFAULT_TABLE_SORTING = {
 	type: SORTING_TYPES.ASC
 };
 
-const ROW_HEADER_ACCESSOR = 'breakdownTitle';
-
-const ROW_NUM_ACCESSOR = 'rowNum';
-
-const ROW_NUM_COLUMN = {
-	accessor: ROW_NUM_ACCESSOR,
-	footer: '',
-	header: ''
-};
-
 export {
 	DEFAULT_TABLE_SETTINGS,
-	DEFAULT_TABLE_SORTING,
-	ROW_HEADER_ACCESSOR,
-	ROW_NUM_COLUMN,
-	ROW_NUM_ACCESSOR
+	DEFAULT_TABLE_SORTING
 };

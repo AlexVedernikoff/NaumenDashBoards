@@ -1,6 +1,7 @@
 // @flow
 import type {AddFilterProps, AddFiltersProps} from './types';
 import type {AxisWidget, Chart, CircleWidget, ComboWidget} from 'store/widgets/data/types';
+import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
@@ -161,11 +162,7 @@ const addFilters = (widget: Chart, props: AddFiltersProps) => {
  */
 const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) =>
 	(event: MouseEvent, chartContext: Object, config: Object) => {
-	const {header} = widget;
-	const mixin = {
-		filters: [],
-		title: header.name
-	};
+	const mixin = createDrillDownMixin(widget);
 
 	const index = addFilters(widget, {
 		buildData,
