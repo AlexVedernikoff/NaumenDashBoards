@@ -1,18 +1,24 @@
 // @flow
+import type {Components, OnClickDataCell} from 'Table/types';
 import type {DefaultTableValue, FontStyle, TextAlign, TextHandler} from 'store/widgets/data/types';
-import type {RenderValue} from 'Table/types';
 
-export type Props = {
+export type DefaultProps = {|
 	body: boolean,
 	children: React$Node,
 	className: string,
 	defaultValue: DefaultTableValue,
 	fontColor: string,
-	fontStyle?: FontStyle,
-	onClick?: () => void,
-	renderValue?: RenderValue,
+	rowIndex: number,
 	textAlign: TextAlign,
 	textHandler: TextHandler,
 	value: string,
 	width: number
+|};
+
+export type Props = {
+	...DefaultProps,
+	columnIndex: number,
+	components: Components,
+	fontStyle?: FontStyle,
+	onClick?: OnClickDataCell
 };

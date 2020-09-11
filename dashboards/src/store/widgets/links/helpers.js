@@ -1,10 +1,12 @@
 // @flow
 import type {
+	DrillDownMixin,
 	LinksState,
 	ReceiveLink,
 	RecordErrorLink,
 	RequestLink
 } from './types';
+import type {Widget} from 'store/widgets/data/types';
 
 /**
  * Устанавливаем момент получения ссылки на данные
@@ -58,4 +60,23 @@ export const setLinkError = (state: LinksState, {payload}: RecordErrorLink): Lin
 		...state,
 		map: {...state.map}
 	};
+};
+
+/**
+ * Создает примесь для формирования списка данных
+ * @param {Widget} widget - виджет
+ * @returns {DrillDownMixin}
+ */
+const createDrillDownMixin = (widget: Widget) => {
+	const {header, name} = widget;
+	const {name: headerName, useName} = header;
+
+	return {
+		filters: [],
+		title: useName ? name : headerName
+	};
+};
+
+export {
+	createDrillDownMixin
 };

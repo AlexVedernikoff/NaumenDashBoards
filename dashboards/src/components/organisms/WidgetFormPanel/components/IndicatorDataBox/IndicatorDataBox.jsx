@@ -5,7 +5,7 @@ import type {ComputedAttr, MixedAttribute} from 'store/widgets/data/types';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'WidgetFormPanel/helpers';
-import {getDefaultAggregation} from '../AttributeAggregationField/helpers';
+import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'src/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';

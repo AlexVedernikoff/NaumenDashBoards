@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from '../attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {CurrentObjectState, ItemsMap, ReceiveNodesPayload, ReceiveRootsPayload} from './types';
 import {NESTED_LEVEL_LIMIT} from './constants';
 

@@ -1,9 +1,9 @@
 // @flow
-import type {Column, RenderValue} from 'Table/types';
+import type {Column, Components} from 'Table/types';
 
 export type Props = {
 	columns: Array<Column>,
 	columnsWidth: Array<number>,
-	renderValue: RenderValue,
+	components: Components,
 	width: number
 };

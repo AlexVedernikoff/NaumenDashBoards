@@ -1,7 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {Group} from 'store/widgets/data/types';
+import type {Group, Widget} from 'store/widgets/data/types';
 import {LINKS_EVENTS} from './constants';
+import type {ThunkAction} from 'store/types';
 
 type Filter = {
 	attribute: Attribute,
@@ -25,6 +26,8 @@ export type Link = {
 export type LinkMap = {
 	[key: string]: Link
 };
+
+export type DrillDown = (widget: Widget, index: number, mixin?: DrillDownMixin) => ThunkAction;
 
 export type RequestLink = {
 	payload: string,
