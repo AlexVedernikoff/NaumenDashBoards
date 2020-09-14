@@ -1,11 +1,9 @@
 // @flow
-import type {AutoUpdateSettings} from 'store/dashboard/settings/types';
-import type {ThunkAction} from 'store/types';
+import type {Props as ContainerProps} from 'containers/AutoUpdateButton/types';
 
 export type Props = {
-	autoUpdateSettings: AutoUpdateSettings,
+	...ContainerProps,
 	className: string,
-	onSubmit: (enabled: boolean, interval: number | string) => ThunkAction,
 };
 
 type ErrorsMap = {

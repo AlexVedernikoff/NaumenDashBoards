@@ -1,8 +1,9 @@
 // @flow
-import {AutoUpdateForm, DropDownButton, IconButton, NavItem} from './components';
+import AutoUpdateButton from 'containers/AutoUpdateButton';
 import {Button, ButtonGroup} from 'components/atoms';
 import {createContextName} from 'utils/export/helpers';
 import {createSnapshot, EXPORT_VARIANTS} from 'utils/export';
+import {DropDownButton, IconButton, NavItem} from './components';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
@@ -84,19 +85,11 @@ export class DashboardHeader extends Component<Props, State> {
 
 	showModal = () => this.setState({showModal: true});
 
-	renderAutoUpdateButton = () => {
-		const {autoUpdateSettings, saveAutoUpdateSettings} = this.props;
-
-		return (
-			<NavItem className={styles.autoUpdateItem}>
-				<AutoUpdateForm
-					autoUpdateSettings={autoUpdateSettings}
-					className={styles.autoUpdateForm}
-					onSubmit={saveAutoUpdateSettings}
-				/>
-			</NavItem>
-		);
-	};
+	renderAutoUpdateButton = () => (
+		<NavItem className={styles.autoUpdateItem}>
+			<AutoUpdateButton className={styles.autoUpdateForm} />
+		</NavItem>
+	);
 
 	renderDisplayModeButton = () => {
 		const {layoutMode, personalDashboard, user} = this.props;

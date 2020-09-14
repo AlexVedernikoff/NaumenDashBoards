@@ -16,19 +16,19 @@ export class TimerButton extends PureComponent<Props> {
 	ref: DivRef = createRef();
 
 	componentDidMount () {
-		this.interval = this.startTime(this.props.duration, this.ref);
+		this.interval = this.startTime();
 	}
 
 	componentDidUpdate (prevProps: Props) {
 		if (this.props.duration !== prevProps.duration) {
 			clearInterval(this.interval);
-			this.interval = this.startTime(this.props.duration, this.ref);
+			this.interval = this.startTime();
 		}
 	}
 
-	startTime = (duration: number, divRef: DivRef) => {
-		const formateTime = 60 * duration;
-		let timer = formateTime;
+	startTime = () => {
+		const {duration, onChangeDuration} = this.props;
+		let timer = duration;
 		let minutes;
 		let seconds;
 
@@ -39,15 +39,21 @@ export class TimerButton extends PureComponent<Props> {
 			minutes = minutes < 10 ? '0' + minutes : minutes;
 			seconds = seconds < 10 ? '0' + seconds : seconds;
 
-			if (divRef.current) {
-				divRef.current.textContent = minutes + ':' + seconds;
+			if (this.ref.current) {
+				this.ref.current.textContent = minutes + ':' + seconds;
 			}
 
 			if (--timer < 0) {
-					timer = formateTime;
+					timer = duration;
 			}
+
+			onChangeDuration(timer);
 		}, 1000);
 	};
+
+	componentWillUnmount () {
+		clearInterval(this.interval);
+	}
 
 	render () {
 		const {onClick, tip} = this.props;
