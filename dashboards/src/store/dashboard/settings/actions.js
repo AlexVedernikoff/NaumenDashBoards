@@ -6,6 +6,7 @@ import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getContext, getMetaCLass, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import isMobile from 'ismobilejs';
@@ -94,6 +95,7 @@ const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	}
 
 	dispatch(setWidgets(widgets));
+	dispatch(fetchAllBuildData(widgets));
 	dispatch(setWebLayouts(widgets, layouts));
 	dispatch(setMobileLayouts(widgets, mobileLayouts));
 };

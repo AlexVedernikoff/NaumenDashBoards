@@ -30,6 +30,7 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	componentDidMount () {
+		window.addEventListener('resize', this.setGridWidth);
 		window.addEventListener('blur', this.resetFocus);
 	}
 
