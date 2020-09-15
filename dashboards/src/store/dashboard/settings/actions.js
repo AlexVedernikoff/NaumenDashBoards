@@ -2,7 +2,6 @@
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
 import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateSettings, LayoutMode} from './types';
-import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
@@ -78,13 +77,19 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {context, dashboard} = getState();
 	const {contentCode, subjectUuid: classFqn} = context;
-	const {data} = await client.post(buildUrl('dashboardSettings', 'getSettings', 'requestContent,user'), {
+	const payload = {
 		classFqn,
 		contentCode,
 		isMobile: isMobile().any,
 		isPersonal: dashboard.settings.personal
-	});
-	const {autoUpdate, customGroups, layouts, mobileLayouts, widgets} = data;
+	};
+	const {
+		autoUpdate,
+		customGroups,
+		layouts,
+		mobileLayouts,
+		widgets
+	} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
 
 	if (customGroups !== null) {
 		dispatch(setCustomGroups(customGroups));
@@ -152,11 +157,12 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		const {context, dashboard} = getState();
 		const {contentCode, subjectUuid: classFqn, user} = context;
 		const {editable} = dashboard.settings;
-		await client.post(buildUrl('dashboardSettings', 'createPersonalDashboard', 'requestContent,user'), {
+		const payload = {
 			classFqn,
 			contentCode,
 			editable
-		});
+		};
+		await window.jsApi.restCallModule('dashboardSettings', 'createPersonalDashboard', payload);
 
 		dispatch(setUserData({...user, hasPersonalDashboard: true}));
 		dispatch({
@@ -187,8 +193,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		const {context} = getState();
 		const {contentCode, subjectUuid, temp, user} = context;
-		const params = `'${subjectUuid || ''}','${contentCode}',user`;
-		await client.post(buildUrl('dashboardSettings', 'deletePersonalDashboard', params));
+		await window.jsApi.restCallModule('dashboardSettings', 'deletePersonalDashboard', subjectUuid, contentCode);
 
 		if (temp) {
 			dispatch(setTemp(null));
@@ -222,6 +227,29 @@ const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 };
 
 /**
+ * Загружает файл на сервер
+ * @param {Blob} file - файл
+ * @param {string} name - имя файла
+ * @returns {string} key - ключ файла, для обращения на сервере
+ */
+const uploadFile = async (file: Blob, name: string) => {
+	const formData = new FormData();
+	formData.append('file', file, name);
+
+	const csrf = Array.from(window.top.document.head.getElementsByTagName('meta')).find(m => m.name === '_csrf').content;
+	const response = await fetch(`/sd/operator/upload?_csrf=${csrf}`, {
+		body: formData,
+		method: 'POST'
+	});
+
+	let key = await response.text();
+	key = key.split('::')[1];
+	key = key.substr(0, key.length - 1);
+
+	return key;
+};
+
+/**
  * Отправка файла на почту
  * @param {string} name - название файла
  * @param {string} type - тип файла
@@ -229,18 +257,10 @@ const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
  * @returns {ThunkAction}
  */
 const sendToMail = (name: string, type: string, file: Blob): ThunkAction => async (dispatch: Dispatch) => {
-	const data = new FormData();
-	data.append('fileBytes', file, name);
-	data.append('fileFormat', type);
-	data.append('fileName', name);
-
 	try {
-		await client.post(buildUrl('dashboardSendEmail', 'sendFileToMail', 'request,user'), data, {
-			headers: {
-				'Content-Type': 'multipart/form-data',
-				timeout: 30000
-			}
-		});
+		const key = uploadFile(file, name);
+		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type);
+
 		dispatch(createToast({
 			text: 'Файл успешно отправлен'
 		}));
@@ -304,12 +324,13 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 		const {contentCode, subjectUuid: classFqn} = context;
 		const {personal: isPersonal} = dashboard.settings;
 		const autoUpdateSetting = {enabled, interval: Number(interval)};
-		await client.post(buildUrl('dashboardSettings', 'saveAutoUpdateSettings', 'requestContent,user'), {
+		const payload = {
 			autoUpdate: autoUpdateSetting,
 			classFqn,
 			contentCode,
 			isPersonal
-		});
+		};
+		await window.jsApi.restCallModule('dashboardSettings', 'saveAutoUpdateSettings', payload);
 
 		dispatch(setAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({

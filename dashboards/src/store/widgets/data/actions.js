@@ -1,9 +1,8 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import {batchActions} from 'redux-batched-actions';
-import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
-import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getParams} from 'store/helpers';
@@ -55,18 +54,17 @@ const saveWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch,
 	dispatch(requestWidgetSave());
 
 	try {
-		const url = buildUrl('dashboardSettings', 'editWidget', 'requestContent,user');
-		const params = {
+		const payload = {
 			...getParams(),
 			widget: settings
 		};
-		const {data: widget} = await client.post(url, params);
+		const widget = await window.jsApi.restCallModule('dashboardSettings', 'editWidget', payload);
 
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayouts());
 		dispatch(fetchBuildData(widget));
 	} catch (e) {
-		validationErrors = getValidationErrors(e);
+		validationErrors = getErrors(e);
 
 		dispatch(recordSaveError());
 	}
@@ -80,10 +78,9 @@ const saveWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch,
  * @param {object} chunkData - данные которые нужно изменить
  * @returns {ThunkAction}
  */
-const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const url = buildUrl('dashboardSettings', 'editWidgetChunkData', 'requestContent,user');
-		const params = {
+		const payload = {
 			...getParams(),
 			chunkData,
 			id: widget.id
@@ -93,7 +90,7 @@ const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => 
 			...chunkData
 		};
 
-		await client.post(url, params);
+		await window.jsApi.restCallModule('dashboardSettings', 'editWidgetChunkData', payload);
 
 		dispatch(updateWidget(updatedWidgetData));
 		dispatch(fetchBuildData(updatedWidgetData));
@@ -107,18 +104,17 @@ const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => 
  * @param {Widget} settings - данные формы создания виджета
  * @returns {ThunkAction}
  */
-const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
 
 	try {
-		const url = buildUrl('dashboardSettings', 'createWidget', 'requestContent,user');
-		const params = {
+		const payload = {
 			...getParams(),
 			widget: settings
 		};
-		const {data: widget} = await client.post(url, params);
+		const widget = await window.jsApi.restCallModule('dashboardSettings', 'createWidget', payload);
 
 		dispatch(batchActions([
 			deleteWidget(NewWidget.id),
@@ -128,8 +124,7 @@ const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatc
 		]));
 		dispatch(saveNewLayouts());
 	} catch (e) {
-		validationErrors = getValidationErrors(e);
-
+		validationErrors = getErrors(e);
 		dispatch(recordSaveError());
 	}
 
@@ -147,12 +142,11 @@ const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch,
 	});
 
 	try {
-		const url = buildUrl('dashboardSettings', 'copyWidgetToDashboard', 'requestContent');
-		const data = {
+		const payload = {
 			...getParams(),
 			widgetKey: widgetId
 		};
-		const {data: widget} = await client.post(url, data);
+		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
 
 		dispatch(batchActions([
 			setCreatedWidget(widget),
@@ -179,13 +173,12 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 	dispatch(requestWidgetDelete());
 
 	try {
-		const url = buildUrl('dashboardSettings', 'deleteWidget', 'requestContent,user');
-		const params = {
+		const payload = {
 			...getParams(),
 			widgetId
 		};
 
-		await client.post(url, params);
+		await window.jsApi.restCallModule('dashboardSettings', 'deleteWidget', payload);
 		dispatch(removeLayouts(widgetId));
 		dispatch(deleteWidget(widgetId));
 		dispatch(saveNewLayouts());
@@ -204,14 +197,39 @@ const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): voi
 	dispatch(editDashboard());
 };
 
-const getValidationErrors = (error: Object) => {
-	const {response} = error;
+/**
+ * Парсит текст серверной ошибки
+ * @param {string} text - текст ошибки
+ * @returns {Object | string}
+ */
+const parseResponseErrorText = (text: string) => {
+	let data = text.split('njava.lang.Exception:')[1];
+	data = data.substr(0, data.length - 2).trim();
+	let result;
+
+	try {
+		result = JSON.parse(JSON.parse(`"${data}"`));
+	} catch (e) {
+		result = data;
+	}
+
+	return result;
+};
+
+/**
+ * Возвращает объект ошибок из ответа сервера
+ * @param {ResponseError} error - серверная ошибка
+ * @returns {Object | void}
+ */
+const getErrors = (error: ResponseError) => {
+	const {responseText, status} = error;
 	let errors;
 
-	if (response && response.status === 500) {
-		const data = JSON.parse(response.data.split('error:')[1]);
+	if (status === 500) {
+		const data = parseResponseErrorText(responseText);
 
-		if (isObject(data) && isObject(data.errors)) {
+		if (isObject(data)) {
+			// $FlowFixMe
 			errors = data.errors;
 		}
 	}
@@ -232,13 +250,12 @@ const validateWidgetToCopy = (widgetKey: string): ThunkAction => async (dispatch
 	});
 
 	try {
-		const url = buildUrl('dashboardSettings', 'widgetIsBadToCopy', 'requestContent');
-		const data = {
+		const payload = {
 			...getParams(),
 			widgetKey
 		};
 
-		const {data: result} = await client.post(url, data);
+		const {result} = await window.jsApi.restCallModule('dashboardSettings', 'widgetIsBadToCopy', payload);
 		isValid = !result;
 
 		dispatch({

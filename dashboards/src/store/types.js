@@ -12,6 +12,12 @@ export type ChangingState = {
 	loading: boolean
 };
 
+export type ResponseError = {
+	responseText: string,
+	status: number,
+	statusText: string
+};
+
 type Action = {
 	data?: any,
 	type: string

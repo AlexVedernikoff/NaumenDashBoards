@@ -12,7 +12,6 @@ import type {
 	WidgetType
 } from 'store/widgets/data/types';
 import {BUILD_DATA_EVENTS} from './constants';
-import {buildUrl, client} from 'utils/api';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -276,9 +275,8 @@ const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatc
 
 	try {
 		const {subjectUuid} = getState().context;
-		const postData = createPostData(widget);
-		const url = buildUrl('dashboardDataSet', 'getDataForCompositeDiagram', `requestContent,'${subjectUuid}'`);
-		const {data} = await client.post(url, postData);
+		const payload = createPostData(widget);
+		const data = await window.jsApi.restCallModule('dashboardDataSet', 'getDataForCompositeDiagram', payload, subjectUuid);
 
 		dispatch(
 			receiveBuildData({data, id: widget.id})

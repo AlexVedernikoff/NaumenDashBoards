@@ -1,6 +1,5 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {buildUrl, client} from 'utils/api';
 import {CURRENT_OBJECT_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getTypes} from './helpers';
@@ -21,12 +20,11 @@ const fetchRoots = (attribute: Attribute) => async (dispatch: Dispatch, getState
 	});
 
 	try {
-		const url = buildUrl('dashboards', 'getDataSourceAttributes', 'requestContent');
-		const data = {
+		const requestPayload = {
 			classFqn: metaClass,
 			types: getTypes(attribute)
 		};
-		let {data: attributes} = await client.post(url, data);
+		const attributes = await window.jsApi.restCallModule('dashboards', 'getDataSourceAttributes', requestPayload);
 		const payload = {
 			attributes,
 			type
@@ -64,13 +62,12 @@ const fetchNodes = (attribute: Attribute, node: Item) => async (dispatch: Dispat
 	});
 
 	try {
-		const url = buildUrl('dashboards', 'getAttributesFromLinkAttribute', 'requestContent');
-		const data = {
+		const requestPayload = {
 			attribute: value,
 			deep: true,
 			types: getTypes(attribute)
 		};
-		const {data: attributes} = await client.post(url, data);
+		const attributes = await window.jsApi.restCallModule('dashboards', 'getAttributesFromLinkAttribute', requestPayload);
 
 		dispatch({
 			payload: {

@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import {CONTEXT_EVENTS, USER_ROLES} from './constants';
 import {createPersonalState, setEditable} from 'store/dashboard/settings/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
@@ -21,17 +20,14 @@ const getMetaCLass = (): ThunkAction => async (dispatch: Dispatch) => {
 
 const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	const {contentCode, subjectUuid: classFqn} = getState().context;
-	const url = buildUrl('dashboardSettings', 'getUserData', 'requestContent,user');
-	const params = {
+	const payload = {
 		classFqn,
 		contentCode
 	};
-	const result = await client.post(url, params);
-
-	const {data: {
+	const {
 		groupUser: role,
 		hasPersonalDashboard
-	}} = result;
+	} = await window.jsApi.restCallModule('dashboardSettings', 'getUserData', payload);
 
 	if (role !== USER_ROLES.REGULAR) {
 		dispatch(setEditable(true));

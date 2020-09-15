@@ -1,6 +1,5 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {OnLoadCallback} from 'store/sources/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
@@ -20,9 +19,7 @@ const fetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback)
 	dispatch(requestRefAttributes(key));
 
 	try {
-		const {data} = await client.post(buildUrl('dashboards', 'getAttributesFromLinkAttribute', 'requestContent'), {
-			attribute
-		});
+		const data = await window.jsApi.restCallModule('dashboards', 'getAttributesFromLinkAttribute', {attribute});
 
 		onLoadCallback && onLoadCallback(data);
 		dispatch(receiveRefAttributes(data, key));

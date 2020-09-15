@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import {DATA_SOURCES_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {RawDataSource} from './types';
@@ -8,7 +7,8 @@ const getDataSources = (): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch(requestDataSources());
 
 	try {
-		const {data} = await client.post(buildUrl('dashboards', 'getDataSources'));
+		const data = await window.jsApi.restCallModule('dashboards', 'getDataSources');
+
 		dispatch(receiveDataSources(data));
 	} catch (e) {
 		dispatch(recordErrorDataSources());

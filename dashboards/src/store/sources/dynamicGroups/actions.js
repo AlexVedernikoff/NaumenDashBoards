@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {DYNAMIC_GROUPS_EVENTS} from './constants';
 
@@ -16,8 +15,7 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string): Thunk
 	});
 
 	try {
-		const url = buildUrl('dashboards', 'getDynamicAttributeGroups', 'requestContent');
-		const {data: groups} = await client.post(url, {descriptor});
+		const groups = await window.jsApi.restCallModule('dashboards', 'getDynamicAttributeGroups', descriptor);
 
 		dispatch({
 			payload: {
@@ -47,11 +45,7 @@ const fetchDynamicAttributes = (dataKey: string, groupCode: string): ThunkAction
 	});
 
 	try {
-		const url = buildUrl('dashboards', 'getDynamicAttributes', 'requestContent');
-		const data = {
-			uuid: groupCode
-		};
-		const {data: attributes} = await client.post(url, data);
+		const attributes = await window.jsApi.restCallModule('dashboards', 'getDynamicAttributes', groupCode);
 
 		dispatch({
 			payload: {

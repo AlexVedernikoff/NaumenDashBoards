@@ -1,5 +1,4 @@
 // @flow
-import buildUrl, {client} from 'utils/api';
 import {DASHBOARDS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 
@@ -13,8 +12,7 @@ const fetchDashboards = () => async (dispatch: Dispatch) => {
 	});
 
 	try {
-		const url = buildUrl('dashboardSettings', 'getDashboardsAndWidgetsTree');
-		const {data: dashboards} = await client.post(url);
+		const dashboards = await window.jsApi.restCallModule('dashboardSettings', 'getDashboardsAndWidgetsTree');
 
 		dispatch({
 			payload: dashboards,

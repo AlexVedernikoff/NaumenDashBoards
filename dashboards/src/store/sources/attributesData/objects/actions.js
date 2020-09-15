@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {FetchParams, Payload, ReceivePayload} from './types';
 import {LIMIT, OBJECTS_EVENTS} from './constants';
@@ -26,14 +25,14 @@ const fetch = (request, receive, recordError) => (params: FetchParams): ThunkAct
 	dispatch(request(payload));
 
 	try {
-		const params = {
+		const requestPayload = {
 			count: LIMIT,
 			offset,
 			parentUUID,
 			property,
 			removed: !actual
 		};
-		const {data} = await client.post(buildUrl('dashboards', 'getAttributeObject', 'requestContent'), params);
+		const data = await window.jsApi.restCallModule('dashboards', 'getAttributeObject', requestPayload);
 		const uploaded = data.length < LIMIT;
 
 		dispatch(receive({...payload, data, uploaded}));

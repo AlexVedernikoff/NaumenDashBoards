@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
@@ -63,17 +62,17 @@ const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): Thunk
 /**
  * Получаем ссылку по отправленным данным и открываем ее в новом окне
  * @param {string} id - индетификатор виджета
- * @param {object} postData - данные для построения ссылки
+ * @param {object} payload - данные для построения ссылки
  * @returns {Function}
  */
-const getLink = (id: string, postData: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const getLink = (id: string, payload: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {context} = getState();
 	const {subjectUuid} = context;
 
 	dispatch(requestLink(id));
 	try {
-		const {data} = await client.post(buildUrl('dashboardDrilldown', 'getLink', `requestContent,'${subjectUuid}'`), postData);
-		const link = `${data.replace(/^(.+?)\?/, '/sd/operator/?')}`;
+		let {link} = await window.jsApi.restCallModule('dashboardDrilldown', 'getLink', payload, subjectUuid);
+		link = `${link.replace(/^(.+?)\?/, '/sd/operator/?')}`;
 
 		window.open(link);
 		dispatch(receiveLink(id));
