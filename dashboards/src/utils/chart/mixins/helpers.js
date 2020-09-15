@@ -41,6 +41,7 @@ const getXAxisOptions = (parameter: AxisParameter) => {
 		labels: {
 			hideOverlappingLabels: false,
 			rotate: -60,
+			rotateAlways: true,
 			show
 		},
 		title: {

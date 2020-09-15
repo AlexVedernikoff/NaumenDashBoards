@@ -33,10 +33,16 @@ function getMapValues<K, T> (map: ({[K]: T})): Array<T> {
  */
 const fixInitialHeight = () => {
 	document.addEventListener('DOMContentLoaded', () => {
+		const {top} = window;
 		const {body} = document;
+		let minHeight = '100%';
+
+		if (top) {
+			minHeight = `${top.innerHeight}px`;
+		}
 
 		if (body) {
-			body.style.minHeight = `${window.innerHeight}px`;
+			body.style.minHeight = minHeight;
 		}
 	});
 };

@@ -6,7 +6,7 @@ const client = axios.create({
 	headers: {
 		'Accept-Language': 'ru-RU'
 	},
-	timeout: 8000
+	timeout: 60000
 });
 
 if (process.env.NODE_ENV === 'development') {

@@ -185,7 +185,7 @@ export class Chart extends PureComponent<Props, State> {
 	};
 
 	render () {
-		let chart = <div ref={this.ref} />;
+		let chart = <div className={styles.chart} ref={this.ref} />;
 
 		if (this.hasZoom()) {
 			chart = this.mixinZoom(chart);
