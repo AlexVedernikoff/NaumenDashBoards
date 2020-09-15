@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
-import {batchActions} from 'redux-batched-actions';
+import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
@@ -116,12 +116,12 @@ const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatc
 		};
 		const widget = await window.jsApi.restCallModule('dashboardSettings', 'createWidget', payload);
 
-		dispatch(batchActions([
-			deleteWidget(NewWidget.id),
-			replaceLayoutsId(NewWidget.id, widget.id),
-			setCreatedWidget(widget),
-			fetchBuildData(widget)
-		]));
+		batch([
+			dispatch(deleteWidget(NewWidget.id)),
+			dispatch(replaceLayoutsId(NewWidget.id, widget.id)),
+			dispatch(setCreatedWidget(widget)),
+			dispatch(fetchBuildData(widget))
+		]);
 		dispatch(saveNewLayouts());
 	} catch (e) {
 		validationErrors = getErrors(e);
@@ -148,11 +148,11 @@ const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch,
 		};
 		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
 
-		dispatch(batchActions([
-			setCreatedWidget(widget),
-			addLayouts(widget.id),
-			fetchBuildData(widget)
-		]));
+		batch([
+			dispatch(setCreatedWidget(widget)),
+			dispatch(addLayouts(widget.id)),
+			dispatch(fetchBuildData(widget))
+		]);
 		dispatch(saveNewLayouts());
 		dispatch({
 			type: WIDGETS_EVENTS.RESPONSE_WIDGET_COPY

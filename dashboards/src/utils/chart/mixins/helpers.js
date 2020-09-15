@@ -42,7 +42,8 @@ const getXAxisOptions = (parameter: AxisParameter) => {
 			hideOverlappingLabels: false,
 			rotate: -60,
 			rotateAlways: true,
-			show
+			show,
+			trim: true
 		},
 		title: {
 			offsetY: 10

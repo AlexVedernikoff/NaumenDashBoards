@@ -2,7 +2,7 @@
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, Legend} from 'store/widgets/data/types';
-import {CHART_TYPES, DEFAULT_COLORS, LEGEND_POSITIONS, LOCALES} from './constants';
+import {CHART_TYPES, DATA_LABELS_LIMIT, DEFAULT_COLORS, LEGEND_POSITIONS, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'src/helpers';
@@ -84,13 +84,21 @@ const getLegendOptions = (settings: Legend, widgetWidth: number) => {
 	};
 };
 
-const getDataLabelsOptions = (settings: DataLabels) => {
+const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAxisChart: boolean) => {
 	const {fontColor, fontFamily, fontSize, show, showShadow} = settings;
+	const {series} = data;
+	let dataLabelsLimitIsExceeded = false;
+
+	if (isAxisChart) {
+		const sumDataValues = series.reduce((sum, s) => sum + s.data.length, 0);
+		dataLabelsLimitIsExceeded = sumDataValues > DATA_LABELS_LIMIT;
+	}
+
 	const options: Object = {
 		background: {
 			enabled: false
 		},
-		enabled: show,
+		enabled: show && !dataLabelsLimitIsExceeded,
 		style: {
 			colors: [fontColor],
 			fontFamily,
@@ -137,9 +145,12 @@ const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries =
  * @returns {ApexOptions}
  */
 const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexOptions => {
-	const {colors, type} = widget;
+	const {colors, type: widgetType} = widget;
+	const type = widgetType === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(widgetType);
 	const chartColors = colors || DEFAULT_COLORS;
+	const {bar, line} = CHART_TYPES;
 	const {dataLabels, legend} = widget;
+	const isAxisChart = type === bar || type === line;
 
 	const options: ApexOptions = {
 		chart: {
@@ -153,11 +164,12 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 			},
 			height: '100%',
 			locales: LOCALES,
-			type: type === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(type),
+			parentHeightOffset: 0,
+			type,
 			width: '100%'
 		},
 		colors: [...chartColors],
-		dataLabels: getDataLabelsOptions(dataLabels),
+		dataLabels: getDataLabelsOptions(dataLabels, data, isAxisChart),
 		legend: getLegendOptions(legend, width),
 		series: getSeries(widget, data)
 	};
