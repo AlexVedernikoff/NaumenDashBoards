@@ -5,9 +5,13 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 
 export class AttributeAggregationField extends PureComponent<Props> {
+	static defaultProps = {
+		usesNotApplicableAggregation: false
+	};
+
 	render () {
-		const {attribute, name, onSelect, renderValue, value} = this.props;
-		const options = getAggregationOptions(attribute);
+		const {attribute, name, onSelect, renderValue, usesNotApplicableAggregation, value} = this.props;
+		const options = getAggregationOptions(attribute, usesNotApplicableAggregation);
 
 		return (
 			<MiniSelect

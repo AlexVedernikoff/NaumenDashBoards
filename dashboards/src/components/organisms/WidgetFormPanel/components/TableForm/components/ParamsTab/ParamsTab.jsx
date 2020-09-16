@@ -1,67 +1,177 @@
 // @flow
+import {BreakdownFieldset, ExtendingFieldset} from 'WidgetFormPanel/components';
 import type {DataBuilderProps} from 'WidgetFormPanel/builders/DataFormBuilder/types';
+import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {LegacyCheckbox as Checkbox} from 'components/atoms';
+import {FormBox} from 'components/molecules';
+import {getDataErrorKey} from 'WidgetFormPanel/helpers';
+import {IconButton} from 'components/atoms';
+import {ICON_NAMES} from 'components/atoms/Icon';
+import {IndicatorsBox, ParametersBox} from './components';
+import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
+import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
 import React, {Component, Fragment} from 'react';
+import styles from './styles.less';
 import {withDataFormBuilder} from 'WidgetFormPanel/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {
 	sourceRefFields = [FIELDS.breakdown, FIELDS.column, FIELDS.row];
+	mainIndex: number = 0;
 
-	renderCalcTotalField = (name: string) => {
-		const {setFieldValue, values} = this.props;
+	getDataSetSources = (index: number) => {
+		let {fetchLinkedDataSources, linkedSources, sources, values} = this.props;
+
+		if (index > 0) {
+			const mainSource = values.data[0].source;
+			const classFqn = mainSource && mainSource.value;
+
+			if (classFqn) {
+				const linkData = linkedSources[classFqn];
+
+				if (linkData) {
+					sources = linkData.map;
+				} else {
+					fetchLinkedDataSources(classFqn);
+				}
+			} else {
+				sources = {};
+			}
+		}
+
+		return sources;
+	};
+
+	handleChangeAttributeTitle = (event: OnChangeAttributeLabelEvent, index: number) => {
+		const {changeAttributeTitle, setDataFieldValue, values} = this.props;
+		const {label, name, parent} = event;
+		const parameter = values.data[index][name];
+
+		setDataFieldValue(index, name, changeAttributeTitle(parameter, parent, label));
+	};
+
+	handleExtendBreakdown = (index: number) => () => {
+		const {setDataFieldValue} = this.props;
+		setDataFieldValue(index, FIELDS.withBreakdown, true);
+	};
+
+	handleRemoveBreakdown = (index: number) => {
+		const {setDataFieldValue} = this.props;
+
+		setDataFieldValue(index, FIELDS.breakdown, null);
+		setDataFieldValue(index, FIELDS.withBreakdown, false);
+	};
+
+	handleSelectBreakdown = (event: OnSelectAttributeEvent, index: number) => {
+		const {setDataFieldValue, transformAttribute} = this.props;
+		const {name} = event;
+		const nextValue = transformAttribute(event, this.handleSelectBreakdown, index);
+
+		setDataFieldValue(index, name, nextValue);
+	};
+
+	renderAddInput = (props: $Shape<IconButtonProps>) => <IconButton {...props} icon={ICON_NAMES.PLUS} round={false} />;
+
+	renderBreakdownFieldSet = () => {
+		const {errors, handleChangeGroup, values} = this.props;
+		const set = values.data[this.mainIndex];
+		const show = set[FIELDS.withBreakdown] || set[FIELDS.breakdown];
+		const errorKey = getDataErrorKey(this.mainIndex, FIELDS.breakdown);
 
 		return (
-			<Checkbox
-				label="Подсчитывать итоги"
-				name={name}
-				onClick={setFieldValue}
-				value={values[name]}
-			/>
+			<ExtendingFieldset
+				className={styles.breakdownField}
+				index={this.mainIndex}
+				onClick={this.handleExtendBreakdown(this.mainIndex)}
+				show={show} text="Разбивка"
+			>
+				<BreakdownFieldset
+					error={errors[errorKey]}
+					index={this.mainIndex}
+					key={errorKey}
+					name={FIELDS.breakdown}
+					onChangeGroup={handleChangeGroup}
+					onChangeLabel={this.handleChangeAttributeTitle}
+					onRemove={this.handleRemoveBreakdown}
+					onSelect={this.handleSelectBreakdown}
+					removable={true}
+					set={set}
+				/>
+			</ExtendingFieldset>
 		);
 	};
 
-	renderIndicatorBoxes = () => {
-		const {renderIndicatorBoxes} = this.props;
-		const props = {
-			children: this.renderCalcTotalField(FIELDS.calcTotalColumn),
-			name: FIELDS.column
-		};
+	renderDataSet = (set: DataSet, index: number) => {
+		const {values} = this.props;
+		const {calcTotalColumn, calcTotalRow} = values;
 
-		return renderIndicatorBoxes(props);
+		return (
+			<Fragment>
+				{this.renderSourceBox(set, index)}
+				{this.renderParametersBox(set, index, calcTotalRow)}
+				{this.renderIndicatorsBox(set, index, calcTotalColumn)}
+			</Fragment>
+		);
 	};
 
-	renderParameterBox = () => {
-		const {renderParameterBox} = this.props;
-		const props = {
-			children: this.renderCalcTotalField(FIELDS.calcTotalRow),
-			name: FIELDS.row,
-			useGroup: false
-		};
+	renderIndicatorsBox = (set: DataSet, index: number, calcTotalColumn: boolean) => {
+		if (!set.sourceForCompute) {
+			return (
+				<IndicatorsBox
+					calcTotalColumn={calcTotalColumn}
+					index={index}
+					renderAddInput={this.renderAddInput}
+					renderSumInput={this.renderSumInput}
+					set={set}
+				/>
+			);
+		}
 
-		return renderParameterBox(props);
+		return null;
 	};
 
-	renderSourceBox = () => {
-		const {renderSourceBox} = this.props;
-		const {column, row} = FIELDS;
+	renderParametersBox = (set: DataSet, index: number, calcTotalRow: boolean) => (
+		<ParametersBox
+			calcTotalRow={calcTotalRow}
+			index={index}
+			renderAddInput={this.renderAddInput}
+			renderSumInput={this.renderSumInput}
+			set={set} />
+	);
+
+	renderSourceBox = (set: DataSet, index: number) => {
+		const {renderAddSourceInput, renderSourceFieldset} = this.props;
 		const sourceRefFields = {
-			indicator: column,
-			parameter: row
+			breakdown: FIELDS.breakdown,
+			indicator: FIELDS.indicators,
+			parameter: FIELDS.parameters
+		};
+		const isMainSource = index === 0;
+		const props = {
+			sourceRefFields,
+			sources: this.getDataSetSources(index),
+			useFilter: isMainSource
 		};
 
-		return renderSourceBox(sourceRefFields);
+		return (
+			<FormBox rightControl={renderAddSourceInput()} title="Источник">
+				{renderSourceFieldset(props)(set, index)}
+			</FormBox>
+		);
 	};
+
+	renderSumInput = (props: $Shape<IconButtonProps>) => (
+		<IconButton{...props} className={styles.sumInput} icon={ICON_NAMES.SUM} round={false} />
+	);
 
 	render () {
-		const {renderBaseBoxes, renderDisplayModeSelect, renderShowEmptyDataCheckbox} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect, renderShowEmptyDataCheckbox, values} = this.props;
+		const {data} = values;
 
 		return (
 			<Fragment>
 				{renderBaseBoxes()}
-				{this.renderSourceBox()}
-				{this.renderParameterBox()}
-				{this.renderIndicatorBoxes()}
+				{data.map(this.renderDataSet)}
+				{this.renderBreakdownFieldSet()}
 				{renderShowEmptyDataCheckbox()}
 				{renderDisplayModeSelect()}
 			</Fragment>

@@ -14,15 +14,19 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class TableForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredAttribute, requiredBreakdown, requiredByCompute} = rules;
-		const {breakdown, column, row, source} = FIELDS;
+		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute} = rules;
+		const {breakdown, indicator, indicators, parameter, parameters, source} = FIELDS;
 
 		return object({
 			...base,
 			data: array().of(object({
-				[breakdown]: requiredByCompute(breakdown, requiredBreakdown(FIELDS.column)),
-				[column]: requiredByCompute(column),
-				[row]: requiredAttribute(getErrorMessage(row)),
+				[breakdown]: requiredByCompute(breakdown, conditionalBreakdown(indicators)),
+				[indicators]: array(object({
+					attribute: requiredAttribute(getErrorMessage(indicator))
+				})),
+				[parameters]: array(object({
+					attribute: requiredAttribute(getErrorMessage(parameter))
+				})),
 				[source]: object().required(getErrorMessage(source)).nullable()
 			}))
 		});

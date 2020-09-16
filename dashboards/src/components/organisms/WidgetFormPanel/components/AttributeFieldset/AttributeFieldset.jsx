@@ -114,6 +114,11 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		}
 	};
 
+	handleRemove = () => {
+		const {index, onRemove} = this.props;
+		onRemove && onRemove(index);
+	};
+
 	handleSelect = (parent: Attribute | null = null) => (event: OnSelectEvent) => {
 		const {index, onSelect} = this.props;
 		onSelect({...event, parent}, index);
@@ -258,7 +263,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {dataSet, sources} = this.props;
 		const {showDynamicAttributes} = this.state;
 		const {source} = dataSet;
-		const hasDynamic = source && sources[source.value].hasDynamic;
+		const hasDynamic = source && sources[source.value] && sources[source.value].hasDynamic;
 
 		if (hasDynamic) {
 			return (
@@ -283,7 +288,6 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 			disabled,
 			name,
 			onClickCreationButton,
-			onRemove,
 			removable,
 			showCreationButton,
 			value
@@ -298,7 +302,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 			name,
 			onChangeLabel: this.handleChangeLabel(),
 			onClickCreationButton,
-			onRemove,
+			onRemove: this.handleRemove,
 			onSelect: this.handleSelect(),
 			removable,
 			showCreationButton,

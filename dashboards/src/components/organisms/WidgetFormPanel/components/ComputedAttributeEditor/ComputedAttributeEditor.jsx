@@ -14,11 +14,11 @@ export class ComputedAttributeEditor extends PureComponent<Props, State> {
 
 	handleCloseModal = () => this.setState({showModal: false});
 
-	handleRemove = (id: string) => {
+	handleRemove = (value: ComputedAttr) => {
 		const {onRemove} = this.props;
 
 		this.setState({showModal: false});
-		onRemove(id);
+		onRemove(value);
 	};
 
 	handleSubmit = (value: ComputedAttr) => {

@@ -11,6 +11,10 @@ import React, {PureComponent} from 'react';
 import withForm from 'WidgetFormPanel/withForm';
 
 export class IndicatorFieldset extends PureComponent<Props, State> {
+	static defaultProps = {
+		usesNotApplicableAggregation: false
+	};
+
 	state = {
 		showCreatingModal: false
 	};
@@ -59,9 +63,9 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	handleCloseCreatingModal = () => this.setState({showCreatingModal: false});
 
-	handleRemoveComputedAttribute = (code: string) => {
+	handleRemoveComputedAttribute = (value: ComputedAttr) => {
 		const {index, name, onRemoveComputedAttribute} = this.props;
-		onRemoveComputedAttribute(index, name, code);
+		onRemoveComputedAttribute(index, name, value);
 	};
 
 	handleSelectAggregation = (name: string, value: string) => {
@@ -85,8 +89,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	renderAggregation = (props: Object) => {
-		const {name, set} = this.props;
-		const {[name]: indicator} = set;
+		const {aggregation, usesNotApplicableAggregation, value: indicator} = this.props;
 		const {catalogItem} = ATTRIBUTE_TYPES;
 		let {value} = props;
 
@@ -100,23 +103,25 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 				name={FIELDS.aggregation}
 				onSelect={this.handleSelectAggregation}
 				tip="Агрегация"
-				value={set[FIELDS.aggregation]}
+				usesNotApplicableAggregation={usesNotApplicableAggregation}
+				value={aggregation}
 			/>
 		);
 	};
 
 	renderComputedAttributeEditor = () => {
-		const {name, set} = this.props;
-		const attribute: ComputedAttr = set[name];
+		const {value} = this.props;
 
-		return (
-			<ComputedAttributeEditor
-				onRemove={this.handleRemoveComputedAttribute}
-				onSubmit={this.saveComputedAttribute}
-				sources={this.getModalSources()}
-				value={attribute}
-			/>
-		);
+		if (value) {
+			return (
+				<ComputedAttributeEditor
+					onRemove={this.handleRemoveComputedAttribute}
+					onSubmit={this.saveComputedAttribute}
+					sources={this.getModalSources()}
+					value={value}
+				/>
+			);
+		}
 	};
 
 	renderCreatingModal = () => {
@@ -144,20 +149,23 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {error, name, set} = this.props;
+		const {error, index, name, onRemove, removable, set, value} = this.props;
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
 					dataSet={set}
 					getSourceOptions={this.getSourceOptions}
+					index={index}
 					name={name}
 					onChangeLabel={this.handleChangeLabel}
 					onClickCreationButton={this.handleClickCreationButton}
+					onRemove={onRemove}
 					onSelect={this.handleSelectIndicator}
+					removable={removable}
 					renderRefField={this.renderRefField}
 					showCreationButton={true}
-					value={set[name]}
+					value={value}
 				/>
 				{this.renderCreatingModal()}
 			</FormField>

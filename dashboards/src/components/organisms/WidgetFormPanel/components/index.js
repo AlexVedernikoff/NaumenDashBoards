@@ -22,7 +22,6 @@ import ParameterDataBox from './ParameterDataBox';
 import ParameterFieldset from './ParameterFieldset';
 import SortableList from './SortableList';
 import SortingBox from './SortingBox';
-import SourceDataBox from './SourceDataBox';
 import SourceFieldset from './SourceFieldset';
 import SpeedometerForm from './SpeedometerForm';
 import SummaryForm from './SummaryForm';
@@ -52,7 +51,6 @@ export {
 	ParameterFieldset,
 	SortableList,
 	SortingBox,
-	SourceDataBox,
 	SourceFieldset,
 	SpeedometerForm,
 	SummaryForm,

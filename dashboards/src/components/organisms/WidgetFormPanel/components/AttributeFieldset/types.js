@@ -24,7 +24,7 @@ export type Props = {
 	name: string,
 	onChangeLabel: (event: OnChangeAttributeLabelEvent, index: number) => void,
 	onClickCreationButton?: () => void,
-	onRemove?: () => void,
+	onRemove?: (index: number) => void,
 	onSelect: (event: OnSelectAttributeEvent, index: number) => void,
 	removable: boolean,
 	renderRefField?: (parent: Attribute | null) => React$Node,

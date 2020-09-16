@@ -127,7 +127,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 				onSelectAggregation={this.handleSelectAggregation}
 				removable={true}
 				set={set}
-				useNAAggregation={true}
+				usesNotApplicableAggregation={true}
 				value={attribute}
 			/>
 		);
