@@ -76,11 +76,13 @@ const AVG: 'AVG' = 'AVG';
 const COUNT: 'COUNT_CNT' = 'COUNT_CNT';
 const MAX: 'MAX' = 'MAX';
 const MIN: 'MIN' = 'MIN';
+const NOT_APPLICABLE: 'NOT_APPLICABLE' = 'NOT_APPLICABLE';
 const PERCENT: 'PERCENT' = 'PERCENT';
 const SUM: 'SUM' = 'SUM';
 
 const DEFAULT_AGGREGATION = {
 	COUNT,
+	NOT_APPLICABLE,
 	PERCENT
 };
 

@@ -195,28 +195,30 @@ const createSummaryData = (widget: SummaryWidget | SpeedometerWidget) => {
 };
 
 const createTableData = (widget: TableWidget) => {
-	const {calcTotalColumn, calcTotalRow, showEmptyData, type} = widget;
+	const {calcTotalColumn, calcTotalRow, showEmptyData, table, type} = widget;
+	const {showRowNum} = table.body;
 	const data: Object = {};
 
 	widget.data.forEach(set => {
-		const {dataKey, descriptor, row, source} = set;
+		const {dataKey, descriptor, parameters, source} = set;
 
 		data[dataKey] = {
 			descriptor,
-			row: resetComputedAttributeState(row),
+			parameters: parameters.map(parameter => ({...parameter, group: transformGroupFormat(parameter.group)})),
 			source: getSourceValue(source),
 			sourceForCompute: true
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, column, dataKey} = set;
+			const {dataKey, indicators} = set;
 
 			data[dataKey] = {
 				...data[dataKey],
-				aggregation,
-				calcTotalColumn,
-				calcTotalRow,
-				column: resetComputedAttributeState(column),
+				indicators: indicators.map(indicator => ({
+						...indicator,
+						attribute: resetComputedAttributeState(indicator.attribute)
+					})
+				),
 				sourceForCompute: false
 			};
 
@@ -225,8 +227,11 @@ const createTableData = (widget: TableWidget) => {
 	});
 
 	return {
+		calcTotalColumn,
+		calcTotalRow,
 		data,
 		showEmptyData,
+		showRowNum,
 		type
 	};
 };

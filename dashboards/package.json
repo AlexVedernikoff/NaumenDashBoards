@@ -23,6 +23,7 @@
     "react-color": "^2.17.3",
     "react-grid-layout": "^1.0.0",
     "react-redux": "^7.1.1",
+    "react-sortablejs": "^2.0.11",
     "react-window": "^1.8.5",
     "redux-batched-actions": "^0.5.0",
     "smoothscroll-polyfill": "^0.4.4",
@@ -123,6 +124,7 @@
   "scripts": {
     "build": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
     "clear": "rm -rf ./dist/*",
+    "clear-zip": "rm *.zip",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./webpack/config.js",
     "flow": "flow",
     "lint": "./node_modules/.bin/eslint --ext .js,.jsx ./src",

@@ -1,21 +1,33 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {DEFAULT_AGGREGATION_OPTIONS, INTEGER_AGGREGATION_OPTIONS, REF_AGGREGATION_OPTIONS} from './constants';
+import {
+	DEFAULT_AGGREGATION_OPTIONS,
+	INTEGER_AGGREGATION_OPTIONS,
+	NOT_APPLICABLE_OPTION,
+	REF_AGGREGATION_OPTIONS
+} from './constants';
 
-const getAggregationOptions = (attribute: Object | null) => {
+const getAggregationOptions = (attribute: Attribute | null, withNotApplicableAggregation: boolean = false) => {
+	let options = DEFAULT_AGGREGATION_OPTIONS;
+
 	if (attribute) {
 		const {type} = attribute;
 
 		if (type in ATTRIBUTE_SETS.NUMBER || type === ATTRIBUTE_TYPES.dtInterval) {
-			return [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS];
+			options = [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS];
 		}
 
 		if (type === ATTRIBUTE_TYPES.catalogItem) {
-			return REF_AGGREGATION_OPTIONS;
+			options = REF_AGGREGATION_OPTIONS;
 		}
 	}
 
-	return DEFAULT_AGGREGATION_OPTIONS;
+	if (withNotApplicableAggregation) {
+		options = [...options, NOT_APPLICABLE_OPTION];
+	}
+
+	return options;
 };
 
 const getAggregationLabel = (aggregation: string) => {

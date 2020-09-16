@@ -8,5 +8,6 @@ export type Props = {
 	name: string,
 	onSelect: (name: string, value: string) => void,
 	renderValue?: (props: RenderValueProps) => Node,
+	usesNotApplicableAggregation: boolean,
 	value: string
 };

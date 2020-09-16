@@ -300,19 +300,29 @@ export type TableColumnHeader = {
 	fontStyle?: FontStyle
 };
 
+export type Parameter = {
+	attribute: Attribute,
+	group: Group
+};
+
+export type Indicator = {
+	aggregation: string,
+	attribute: Attribute
+};
+
 type BuildTableData = {
 	...BaseData,
-	aggregation: string,
 	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
-	column: MixedAttribute,
-	row: Attribute,
+	indicators: Array<Indicator>,
+	parameters: Array<Parameter>,
+	showEmpty: boolean,
 	sourceForCompute: false
 };
 
 type ComputeTableData = {
 	...BaseData,
-	row: Attribute,
+	parameters: Array<Parameter>,
 	sourceForCompute: true
 };
 

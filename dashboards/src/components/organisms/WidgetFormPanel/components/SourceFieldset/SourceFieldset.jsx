@@ -2,32 +2,29 @@
 import {ExtendButton, LegacyCheckbox as Checkbox} from 'components/atoms';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormField} from 'WidgetFormPanel/components';
-import {getDataErrorKey} from 'WidgetFormPanel/helpers';
 import type {OnChangeLabelEvent, OnRemoveEvent} from 'components/molecules/TreeSelect/types';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 import styles from './styles.less';
 import {TreeSelect} from 'components/molecules';
-import withForm from 'WidgetFormPanel/withForm';
 
-export class SourceFieldset extends PureComponent<Props> {
+export class SourceFieldset extends Component<Props> {
+	static defaultProps = {
+		removable: true,
+		useFilter: true
+	};
+
 	callFilterModal = async () => {
-		const {fetchDynamicAttributeGroups, index, onChange, resetDynamicAttributes, set} = this.props;
-		const {dataKey, descriptor, source} = set;
+		const {index, onChangeDescriptor, set} = this.props;
+		const {descriptor, source} = set;
 
 		if (source) {
 			let context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
 
 			try {
 				const {serializedContext} = await window.jsApi.commands.filterForm(context);
-
-				if (serializedContext) {
-					fetchDynamicAttributeGroups(dataKey, serializedContext);
-				}
-
-				onChange(index, FIELDS.descriptor, serializedContext);
-				resetDynamicAttributes(index);
+				onChangeDescriptor(index, serializedContext);
 			} catch (e) {
 				console.error('Ошибка окна фильтрации: ', e);
 			}
@@ -76,7 +73,7 @@ export class SourceFieldset extends PureComponent<Props> {
 	};
 
 	handleSelect = (event: OnSelectEvent) => {
-		const {index, onSelectSource} = this.props;
+		const {index, onSelectSource, sourceRefFields} = this.props;
 		const {name, value: source} = event;
 		let value = null;
 
@@ -87,7 +84,7 @@ export class SourceFieldset extends PureComponent<Props> {
 			};
 		}
 
-		onSelectSource(index, {name, value});
+		onSelectSource(index, {name, value}, sourceRefFields);
 	};
 
 	renderComputeCheckbox = () => {
@@ -105,8 +102,10 @@ export class SourceFieldset extends PureComponent<Props> {
 	};
 
 	renderFilterButton = () => {
-		const {descriptor} = this.props.set;
-		return <ExtendButton active={!!descriptor} onClick={this.callFilterModal} text="Фильтр" />;
+		const {set, useFilter} = this.props;
+		const active = !!set.descriptor;
+
+		return useFilter && <ExtendButton active={active} onClick={this.callFilterModal} text="Фильтр" />;
 	};
 
 	renderRemoveButton = () => {
@@ -122,7 +121,7 @@ export class SourceFieldset extends PureComponent<Props> {
 	};
 
 	renderSourceSelect = () => {
-		const {errors, index, set, sources} = this.props;
+		const {error, set, sources} = this.props;
 		const {source} = set;
 		let initialSelected;
 
@@ -131,7 +130,7 @@ export class SourceFieldset extends PureComponent<Props> {
 		}
 
 		return (
-			<FormField error={errors[getDataErrorKey(index, FIELDS.source)]} small>
+			<FormField error={error} small>
 				<TreeSelect
 					initialSelected={initialSelected}
 					name={FIELDS.source}
@@ -158,4 +157,4 @@ export class SourceFieldset extends PureComponent<Props> {
 	}
 }
 
-export default withForm(SourceFieldset);
+export default SourceFieldset;

@@ -1,8 +1,9 @@
 // @flow
 export type Props = {
 	children: React$Node,
+	className: string,
 	index: number,
-	onClick: (index: number) => void,
+	onClick: () => void,
 	show: boolean,
 	text: string
 };

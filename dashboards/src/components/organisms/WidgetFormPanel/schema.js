@@ -8,11 +8,10 @@ import {FIELDS} from './constants';
 const getErrorMessage = (key: string) => {
 	const messages = {
 		[FIELDS.breakdown]: 'Укажите атрибут для разбивки',
-		[FIELDS.column]: 'Укажите атрибут для колонок',
 		[FIELDS.diagramName]: 'Укажите название диаграммы',
 		[FIELDS.indicator]: 'Укажите атрибут для показателя',
 		[FIELDS.name]: 'Укажите название виджета',
-		[FIELDS.row]: 'Укажите атрибут для строк',
+		[FIELDS.parameter]: 'Укажите атрибут для параметра',
 		[FIELDS.source]: 'Укажите источник данных',
 		[FIELDS.xAxis]: 'Укажите атрибут для оси X',
 		[FIELDS.yAxis]: 'Укажите атрибут для оси Y'

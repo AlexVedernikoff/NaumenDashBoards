@@ -108,7 +108,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		const {onRemove, value} = this.props;
 
 		if (onRemove && value) {
-			onRemove(value.code);
+			onRemove(value);
 		}
 	};
 

@@ -19,7 +19,7 @@ export type Control = {
 
 export type Props = {
 	onClose: () => any,
-	onRemove?: (code: string) => void,
+	onRemove?: (attribute: ComputedAttr) => void,
 	onSubmit: (attribute: ComputedAttr) => void,
 	sources: Array<SourceOption>,
 	value: ComputedAttr | null
