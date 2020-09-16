@@ -1,9 +1,9 @@
 // @flow
-import type {MultiplePoint} from 'types/multiple';
+import type {StaticPoint} from 'types/point';
 import type {Point} from 'types/point';
 
 type OwnProps = {
-	marker: MultiplePoint
+	marker: StaticPoint
 };
 
 export type ConnectedProps = {

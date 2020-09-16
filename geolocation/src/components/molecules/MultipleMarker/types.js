@@ -1,9 +1,9 @@
 // @flow
 import type {IconName} from 'types/helper';
-import type {MultiplePoint} from 'types/multiple';
+import type {StaticPoint} from 'types/point';
 
 export type OwnProps = {
-	marker: MultiplePoint
+	marker: StaticPoint
 };
 
 export type ConnectedFunctions = {

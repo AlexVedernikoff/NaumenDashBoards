@@ -26,6 +26,7 @@ export class StaticMarker extends Component<Props, State> {
 
 	render () {
 		const {color, marker} = this.props;
+		const {data} = marker;
 		const {type} = this.state;
 		const icon = iconMarker(type, color);
 
@@ -36,8 +37,8 @@ export class StaticMarker extends Component<Props, State> {
 				icon={icon}
 				position={[marker.geoposition.latitude, marker.geoposition.longitude]}
 			>
-				<TooltipMarker title={marker.header} />
-				<PopupMarker marker={marker} openToggle={this.openPopup} />
+				<TooltipMarker title={data[0].header} />
+				<PopupMarker marker={data[0]} openToggle={this.openPopup} />
 			</Marker>
 		);
 	}

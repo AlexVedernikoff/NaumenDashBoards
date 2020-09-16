@@ -1,295 +1,190 @@
-export default [
-	{
-		type: 'dynamic',
-		uuid: 'employee$752501',
-		header: 'Колмогорцев Александр Тимофеевич',
-		geoposition: {
-			latitude: 56.1351,
-			longitude: 60.2636,
-			accuracy: 1005.0,
-			date: '15.11.2019 12:15'
+export default {
+	staticPoints:
+	[
+		{
+			geoposition:
+			{
+				latitude : 46.5663,
+				longitude : 60.7702
+			},
+			data: [
+			{
+					type : 'static',
+					uuid : 'serviceCall$2309393',
+					header : 'Инцидент nextQuestion',
+					group : 'white',
+					options :
+					[
+						{
+							label : 'Клиент',
+							value : 'Оргтехника66',
+							presentation : 'right_of_label'
+						},
+						{
+							label : 'Описание',
+							value : null,
+							presentation : 'full_length'
+						},
+						{
+							label : 'Адрес',
+							value : 'г. Екатеринбург, ул. Фрунзе 12, подъезд 3',
+							presentation : 'under_label'
+						}
+					],
+					actions :
+					[
+					]
+				},
+					{
+						type : 'static',
+						uuid : 'serviceCall$2309393',
+						header : 'Инцидент 123 Инцидент-125ОЧЕНЬ СРОЧНО поменять картридж в принтере. Нужно сделать до 29.sdfsd08',
+						group : 'white',
+						options :
+						[
+							{
+								label : 'Клиент',
+								value : 'Оргтехника66',
+								presentation : 'right_of_label'
+							},
+							{
+								label : 'Описание',
+								value : null,
+								presentation : 'full_length'
+							},
+							{
+								label : 'Адрес',
+								value : 'г. Екатеринбург, ул. Фрунзе 12, подъезд 3',
+								presentation : 'under_label'
+							}
+						],
+						actions :
+						[
+							{
+								type : 'open_link',
+								name : 'Перейти на карточку',
+								link : 'http://map-dev.nsd.naumen.ru/sd/operator/?anchor=uuid:serviceCall$2309303',
+								inPlace : false
+							},
+							{
+								type : 'change_responsible',
+								name : 'Сменить ответственного'
+							},
+							{
+								type : 'change_state',
+								name : 'Сменить статус',
+								states : [
+										'waitClientAnswer', 'resolved', 'deffered'
+								]
+						}
+				]
+			}
+			]
 		},
-		errorMessage: '',
-		options:
-		[
+		{
+			geoposition:
 			{
-				label: '',
-				value: '25.09.2019 13:50, (56.8351, 60.5636)'
+				latitude : 56.5633,
+				longitude : 60.7202
 			},
+			data: [
 			{
-				label: '',
-				value: 'Занят до 16:20'
-			},
-			{
-				label: 'Должность',
-				value: 'Колмогорцев Александр Тимофеевич (телефон не указан, почта не указана, длинный текст, длинный текст, длинный текст, длинный текст, длинный текст)'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			}
-		],
-		actions:
-		[
-			{
-				name: 'Перейти на карточку',
-				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:employee$1488605'
-			}
-		]
-	},
-	{
-		type: 'dynamic',
-		uuid: 'employee$1482606',
-		header: 'Колмогорцев Александр Тимофеевич',
-		errorMessage: '',
-		geoposition: {
-			latitude: 56.4511,
-			longitude: 60.5756,
-			accuracy: 65.0,
-			date: '11.10.2019 12:15'
+					type : 'static',
+					uuid : 'serviceCall$2309393',
+					header : 'Инцидент 123',
+					group : 'white',
+					options :
+					[
+						{
+							label : 'Клиент',
+							value : 'Оргтехника66',
+							presentation : 'right_of_label'
+						},
+						{
+							label : 'Описание',
+							value : null,
+							presentation : 'full_length'
+						},
+						{
+							label : 'Адрес',
+							value : 'г. Екатеринбург, ул. Фрунзе 12, подъезд 3',
+							presentation : 'under_label'
+						}
+					],
+					actions :
+					[
+						{
+							type : 'open_link',
+							name : 'Перейти на карточку',
+							link : 'http://map-dev.nsd.naumen.ru/sd/operator/?anchor=uuid:serviceCall$2309303',
+							inPlace : false
+						},
+						{
+							type : 'change_responsible',
+							name : 'Сменить  ответственно гоответственного ответственного '
+						},
+						{
+							type : 'change_state',
+							name : 'Сменить статус',
+							states : [ 'waitClientAnswer', 'resolved', 'deffered']
+						}
+					]
+				}
+			]
+		}
+	],
+	staticGroups : [
+		{
+			name : 'Красная',
+			color : 'FA1010',
+			code : 'red'
 		},
-		options:
-		[
+		{
+			name : 'Белая',
+			color : 'FFFFFF',
+			code : 'white'
+		}
+	],
+	dynamicPoints : [
+		{
+			type: 'dynamic',
+			uuid: 'employee$752501',
+			header: 'Администратор',
+			geoposition:
 			{
-				label: '',
-				value: '25.09.2019 13:50, (56.8351, 60.5636)'
+					latitude : 166.5863,
+					longitude : 20.870,
+					accuracy: 65.0,
+					date: '11.10.2020 12:15'
 			},
-			{
-				label: '',
-				value: 'Занят до 16:20'
-			},
-			{
-				label: 'Должность',
-				value: 'Инженер технической поддержки'
-			}
-		],
-		actions:
-		[
-			{
-				name: 'Перейти на карточку',
-				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:employee$1488605'
-			}
-		]
-	},
-	{
-		type: 'dynamic',
-		uuid: 'employee$1458306',
-		header: 'Колмогорцев Александр Тимофеевич',
-		geoposition: {
-			latitude: 56.1511,
-			longitude: 60.2756,
-			accuracy: 65.0,
-			date: '11.10.2019 12:15'
-		},
-		errorMessage: '',
-		options:
-		[
-			{
-				label: '',
-				value: '25.09.2019 13:50, (56.8351, 60.5636)'
-			},
-			{
-				label: '',
-				value: 'Занят до 16:20'
-			},
-			{
-				label: 'Должность',
-				value: 'Инженер технической поддержки'
-			}
-		],
-		actions:
-		[
-			{
-				name: 'Перейти на карточку',
-				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:employee$1488605'
-			}
-		]
-	},
-	{
-		type: 'static',
-		header: 'Заявка-14325 Нет доступа в интернет',
-		geoposition: {
-			latitude: 56.1351,
-			longitude: 60.16396
-		},
-		errorMessage: '',
-		options: [
-			{
-				label: 'Перейти asdasdadasd sdfadasdas  asadasd  dasdadas d sadasdasdsad.',
-				value: 'Кондитерская Кокос и vzПерейти asdasdadasd sdfadasdas  asadasd  dasdadas d sadasdasdsad. fsfsdfПерейти asdasdadasd sdfadasdas  asadasd  dasdadas d sadasdasdsad.'
-			},
-			{
-				label: 'Контакты',
-				value: 'Петров Алексей Сергеевич, тел. +7 908 1234567'
-			}
-		],
-		actions: [
-			{
-				name: 'Перейти на карточку',
-				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:serviceCall$63322256'
-			}
-		]
-	},
-	{
-		type: 'static',
-		header: 'Заявка-14326 Нет доступа в интернет',
-		geoposition: {
-			latitude: 56.1351,
-			longitude: 60.16396
-		},
-		errorMessage: '',
-		options: [
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Контакты',
-				value: 'Петров Алексей Сергеевич, тел. +7 908 1234567'
-			}
-		],
-		actions: [
-			{
-				name: 'Перейти на карточку',
-				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:serviceCall$63322256'
-			}
-		]
-	},
-	{
-		type: 'static',
-		header: 'Заявка-14327 Нет доступа в интернет',
-		geoposition: {
-			latitude: 56.1351,
-			longitude: 60.16396
-		},
-		errorMessage: '',
-		options: [
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Контакты',
-				value: 'Петров Алексей Сергеевич, тел. +7 908 1234567'
-			}
-		],
-		actions: [
-			{
-				name: 'Перейти на карточку',
-				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:serviceCall$63322256'
-			}
-		]
-	},
-	{
-		type: 'static',
-		header: 'Заявка-14327 Нет доступа в интернет',
-		geoposition: {
-			latitude: 56.1351,
-			longitude: 60.16396
-		},
-		errorMessage: '',
-		options: [
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Клиент',
-				value: 'Кондитерская Кокос и Ананас'
-			},
-			{
-				label: 'Контакты',
-				value: 'Петров Алексей Сергеевич, тел. +7 908 1234567'
-			}
-		],
-		actions: [
-			{
-				name: 'Перейти на карточку',
-				link: 'https://tp.clientdomain.ru/sd/operator/#uuid:serviceCall$63322256'
-			}
-		]
-	},
-	{
-		type: 'dynamic',
-		uuid: 'employee$1428670',
-		header: 'Петров Алексей Сергеевич',
-		geoposition: {
-			latitude: 56.1351,
-			longitude: 60.2836,
-			accuracy: 65.0,
-			date: '11.10.2019 12:15'
-		},
-		options: [
-			{
-				label: '',
-				value: '25.09.2019 13:50, (56.8351, 60.5636)'
-			}
-		],
-		actions: [
-			{
-				'name': 'Перейти на карточку',
-				'link': 'http://map-dev.nsd.naumen.ru/sd/operator/#uuid:employee$1488605'
-			}
-		]
-	}
-];
+			options:
+			[
+				{
+					label : 'Мобильный телефон',
+					value: 83436657809,
+					presentation: 'right_of_label'
+				},
+				{
+					label : 'Компетенции',
+					value: 'Wi-fi, оргтехника, сетевые технологии',
+					presentation: 'under_label'
+				},
+				{
+					label : 'Компетенции',
+					value: 'Wi-fi, оргтехника, сетевые технологии',
+					presentation: 'full_length'
+				}
+			],
+			actions:
+			[
+				{
+					type : 'open_link',
+					name : 'Перейти на карточку',
+					link : 'http://map-dev.nsd.naumen.ru/sd/operator/#uuid:employee$2283702',
+					inPlace : false
+				}
+			]
+		}
+	],
+	errors : []
+}

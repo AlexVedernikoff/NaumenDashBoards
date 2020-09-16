@@ -6,7 +6,7 @@ import Copyright from 'components/atoms/Copyright';
 import Filter from 'components/atoms/Filter';
 import MarkersList from 'components/molecules/MarkersList';
 import {Map as LeafletMap} from 'react-leaflet';
-import Panel from 'components/molecules/Panel';
+import Panel from 'components/organisms/Panel';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './Geolocation.less';
@@ -38,25 +38,27 @@ export class Geolocation extends Component<Props, State> {
 
 	render () {
 		return (
-			<LeafletMap
-				animate={true}
-				className={styles.leafletContainer}
-				closePopupOnClick={false}
-				doubleClickZoom={true}
-				dragging={true}
-				easeLinearity={0.35}
-				maxZoom={19}
-				minZoom={2}
-				ref={this.mapRef}
-				scrollWheelZoom={true}
-				zoomControl={false}
-			>
-				<MarkersList />
-				<Controls setBounds={this.reloadBound} />
-				<Filter />
+			<div className={styles.mainContainer}>
+				<LeafletMap
+					animate={true}
+					className={styles.leafletContainer}
+					closePopupOnClick={false}
+					doubleClickZoom={true}
+					dragging={true}
+					easeLinearity={0.35}
+					maxZoom={19}
+					minZoom={2}
+					ref={this.mapRef}
+					scrollWheelZoom={true}
+					zoomControl={false}
+				>
+					<MarkersList />
+					<Controls setBounds={this.reloadBound} />
+					<Filter />
+					<Copyright />
+				</LeafletMap>
 				<Panel />
-				<Copyright />
-			</LeafletMap>
+			</div>
 		);
 	}
 }

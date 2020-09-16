@@ -11,8 +11,8 @@ import {reloadGeolocation} from 'store/geolocation/actions';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {dynamicMarkers, loading, multipleMarkers, staticMarkers} = geolocation;
-	const bounds = [].concat(dynamicMarkers, multipleMarkers, staticMarkers);
+	const {dynamicPoints, loading, staticPoints} = geolocation;
+	const bounds = [].concat(dynamicPoints, staticPoints);
 
 	return {
 		bounds: getLatLngBounds(bounds),

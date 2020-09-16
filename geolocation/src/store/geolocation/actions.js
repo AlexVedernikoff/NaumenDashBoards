@@ -1,10 +1,11 @@
 // @flow
-import {buildUrl, client, getContext, getParams} from 'utils/api';
+import {getContext, getParams, getMap, getLastGeopositions} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from './constants';
 import {getGeoMarkers} from 'helpers/marker';
 import {getTimeInSeconds} from 'helpers/time';
 import {notify} from 'helpers/notify';
+import type {PanelShow} from 'types/helper';
 import testData from 'helpers/testData';
 import testData2 from 'helpers/testData2';
 
@@ -33,18 +34,15 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any>
 const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let markers = testData;
-		const {context, params} = getState().geolocation;
-		const {pointsMethodName} = params;
+		const {context} = getState().geolocation;
 		const {subjectUuid} = context;
 
 		if (environment !== 'development') {
-			const query = `user,'${pointsMethodName}','${subjectUuid}'`;
-			const {data} = await client.get(buildUrl('mapRest', 'getPoints', query));
-
-			markers = data;
+			markers = await getMap(subjectUuid)
 		}
-		!markers.length && notify('empty', 'empty');
+
 		const geoMarkers = getGeoMarkers(markers);
+
 		dispatch(setData(geoMarkers));
 	} catch (error) {
 		notify('error', 'error');
@@ -54,14 +52,14 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 
 const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		let markers = testData2;
-		const {dynamicMarkers, params} = getState().geolocation;
-		const dynamicMarkersUuids = dynamicMarkers.map(marker => marker.uuid).join("','");
-		const {requestCurrentLocation, locationUpdateFrequency} = params;
-		const updateFrequency = getTimeInSeconds(locationUpdateFrequency);
+		let refreshDada = testData2;
+		const {dynamicPoints, context, params} = getState().geolocation;
+		const dynamicPointsUuids = dynamicPoints.map(marker => marker.uuid);
+		const {subjectUuid} = context;
+		const {autoUpdateLocation, locationUpdateFrequency} = params;
 
-		if (dynamicMarkersUuids && firstCall) {
-			const reloadInterval = params.autoUpdateLocation ? getTimeInSeconds(params.locationUpdateFrequency) : 0;
+		if (dynamicPointsUuids && firstCall) {
+			const reloadInterval = autoUpdateLocation ? getTimeInSeconds(locationUpdateFrequency) : 0;
 
 			if (reloadInterval) {
 				setInterval(() => dispatch(reloadGeolocation()), reloadInterval * 1000);
@@ -69,20 +67,25 @@ const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (di
 				notify('common', 'info', 'Отправлен запрос на получение информации о местоположении. Обновите через пару минут.');
 			}
 		}
-		if (environment !== 'development' && dynamicMarkersUuids) {
-			const query = `user, ${requestCurrentLocation.toString()}, ${updateFrequency}, '${dynamicMarkersUuids}'`;
-			const {data} = await client.get(buildUrl('mapRest', 'getLastGeopositions', query));
-			markers = data;
+		if (environment !== 'development' && dynamicPointsUuids) {
+			refreshDada = await getLastGeopositions(subjectUuid, dynamicPointsUuids);
 		}
-		Array.isArray(markers) && markers.map(marker => {
+		const {geopositions, errors} = refreshDada;
+
+		if (errors.length) {
+			const label = errors.join(', ') + '.';
+
+			notify('dynamic', 'info', label);
+		}
+		Array.isArray(geopositions) && geopositions.map(marker => {
 			if (marker.hasOwnProperty('geoposition')) {
-				const index = dynamicMarkers.findIndex(markerTmp => markerTmp.uuid === marker.uuid);
+				const index = dynamicPoints.findIndex(markerTmp => markerTmp.uuid === marker.uuid);
 				if (index !== -1) {
-					dynamicMarkers[index].geoposition = marker.geoposition;
+					dynamicPoints[index].geoposition = marker.geoposition;
 				}
 			}
 		});
-		dispatch(reloadActivePoint(dynamicMarkers));
+		dispatch(reloadActivePoint(dynamicPoints));
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError());
@@ -116,6 +119,11 @@ const recordGeolocationdError = () => ({
 	type: GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR
 });
 
+const setTab = (payload: PanelShow) => ({
+	type: GEOLOCATION_EVENTS.SET_TAB,
+	payload
+});
+
 const togglePanel = () => ({
 	type: GEOLOCATION_EVENTS.TOGGLE_PANEL,
 });
@@ -128,6 +136,7 @@ export {
 	getAppConfig,
 	fetchGeolocation,
 	reloadGeolocation,
+	setTab,
 	toggleFilter,
 	togglePanel,
 };

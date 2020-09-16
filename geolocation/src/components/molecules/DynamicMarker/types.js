@@ -1,10 +1,10 @@
 // @flow
 import type {Geoposition} from 'types/geoposition';
 import type {IconName} from 'types/helper';
-import type {Point} from 'types/point';
+import type {DynamicPoint} from 'types/point';
 
 export type OwnProps = {
-	marker: Point
+	marker: DynamicPoint
 };
 
 export type ConnectedFunctions = {

@@ -26,10 +26,18 @@ const getPreparedMessage = (notifyTemplateType: NotifyTemplateType, text: string
 				</div>
 			);
 			break;
-		case 'geolocation':
+		case 'static':
 			message = (
 				<div className={styles.textNotify}>
-					Нет информации о местоположении: <br />
+					Нет информации о местоположении неподвижных меток: <br />
+					{text}
+				</div>
+			);
+			break;
+		case 'dynamic':
+			message = (
+				<div className={styles.textNotify}>
+					Нет информации о местоположении подвижных меток: <br />
 					{text}
 				</div>
 			);
@@ -53,7 +61,7 @@ export const notify = (notifyTemplateType: NotifyTemplateType, messageStyleType:
 		draggable: false,
 		hideProgressBar: true,
 		pauseOnHover: true,
-		position: 'bottom-right',
+		position: 'bottom-left',
 		transition: transitionToast
 	});
 };

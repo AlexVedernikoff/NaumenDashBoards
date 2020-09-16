@@ -36,7 +36,15 @@ const getParams = async () => {
 
 	const {jsApi} = window;
 	const paramsApp = await jsApi.commands.getCurrentContentParameters().then(data => data);
-	const {requestCurrentLocation, locationUpdateFrequency} = paramsApp;
+	const {dynamicPointsListName, locationUpdateFrequency, requestCurrentLocation, staticPointsListName} = paramsApp;
+
+	if (!dynamicPointsListName) {
+		paramsApp.dynamicPointsListName = params.dynamicPointsListName;
+	}
+
+	if (!staticPointsListName) {
+		paramsApp.staticPointsListName = params.staticPointsListName;
+	}
 
 	if (!requestCurrentLocation) {
 		paramsApp.requestCurrentLocation = params.requestCurrentLocation;
@@ -52,8 +60,40 @@ const getParams = async () => {
 	return paramsApp;
 };
 
+const getMap = async (subjectUuid: string) => {
+	const {jsApi} = window;
+	const data = await jsApi.restCallModule('mapRest', 'getMap', subjectUuid, 'OtvetstvennyePoZayavke');
+
+	return data;
+};
+
+const getLastGeopositions = async (subjectUuid: string, dynamicPointsUuids: any) => {
+	const {jsApi} = window;
+	const data = await jsApi.restCallModule('mapRest', 'getLastGeopositions', subjectUuid, 'OtvetstvennyePoZayavke', dynamicPointsUuids);
+
+	return data;
+};
+
+const changeState = async (uuid: string, states: Array<any>) => {
+	const {jsApi} = window;
+	const response = await jsApi.forms.changeState(uuid, states);
+
+	return response;
+}
+
+const changeResponsible = async (uuid: string) => {
+	const {jsApi} = window;
+	const response = await jsApi.forms.changeResponsible(uuid);
+
+	return response;
+};
+
 export {
+	changeResponsible,
+	changeState,
 	getContext,
+	getMap,
+	getLastGeopositions,
 	getParams,
 	injectJsApi
 };

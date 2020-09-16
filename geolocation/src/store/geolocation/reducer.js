@@ -16,17 +16,19 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				params: action.payload
 			};
 		case GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION:
+			const {dynamicPoints, staticGroups, staticPoints} = action.payload;
+
 			return {
 				...state,
-				dynamicMarkers: action.payload.dynamic,
-				multipleMarkers: action.payload.multiple,
-				staticMarkers: action.payload.static,
+				dynamicPoints,
+				staticPoints,
+				staticGroups,
 				success: true
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {
 				...state,
-				dynamicMarkers: action.payload,
+				dynamicPoints: action.payload,
 				loading: false
 			};
 		case GEOLOCATION_EVENTS.TOGGLE_FILTER:
@@ -34,7 +36,8 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				...state,
 				controls: {
 					...state.controls,
-					filterOpen: !state.controls.filterOpen
+					filterOpen: !state.controls.filterOpen,
+					panelOpen: false
 				}
 			};
 		case GEOLOCATION_EVENTS.TOGGLE_PANEL:
@@ -44,6 +47,11 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					...state.controls,
 					panelOpen: !state.controls.panelOpen
 				}
+			};
+		case GEOLOCATION_EVENTS.SET_TAB:
+			return {
+				...state,
+				panelShow: action.payload,
 			};
 		case GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR:
 			return {

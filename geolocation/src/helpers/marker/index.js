@@ -1,54 +1,66 @@
 // @flow
+import type {FetchResponse, Point} from 'types/point';
+import {getTimeInSeconds} from 'helpers/time';
+import type {NotifyTemplateType} from 'types/helper';
 import {notify} from 'helpers/notify';
-import type {Point} from 'types/point';
+import type {Params} from 'types/params';
+import type {StaticGroup} from 'types/point';
 
-const showNotGeoNotifications = (notGeoMarkers: Array<Point>) => {
-	const label = notGeoMarkers
-		.sort((a, b) => a.type > b.type ? -1 : a.type < b.type ? 1 : 0)
-		.map(marker => marker.header).join(', ') + '.';
-	notify('geolocation', 'info', label);
+/**
+ * Returns the color of dynamic point
+ * @constructor
+ * @param {string} date - The last date of dynamic point in format - dd.mmm.yyyyy hh:mm.
+ * @param {Params} params - The context of app.
+ * @returns {string} - Color of dynamic point
+*/
+export const colorActive = (date: string, params: Params): string => {
+	const {timeIntervalInactivity} = params;
+	const splitted = date.split(' ');
+	const dateRightFormat = splitted[0].split('.').reverse().join('-') + ' ' + splitted[1];
+	const timestamp = new Date(dateRightFormat).getTime();
+	const isActivePoint = new Date().getTime() - timestamp < getTimeInSeconds(timeIntervalInactivity) * 1000;
+
+	return isActivePoint ? params.colorDynamicActivePoint : params.colorDynamicInactivePoint;
 };
+/**
+ * Returns the color of dynamic point
+ * @constructor
+ * @param {string} group - The group code of static point - .
+ * @param {Array<StaticGroup>} staticGroups - The array of static groups for static points.
+ * @returns {string} - Color of group for static point
+*/
+export const colorGroup = (group: string, staticGroups: Array<StaticGroup>): string => {
+	const found = staticGroups.find(item => item.code === group);
 
-export const getGeoMarkers = (markers: Array<Point>) => {
-	const notGeoMarkers = [];
+	return found ? found.color : '';
+}
+
+export const getGeoMarkers = (markers: FetchResponse) => {
+	const {dynamicPoints, errors, staticGroups, staticPoints } = markers;
 	const geoMarkers = {
-		dynamic: [],
-		multiple: [],
-		static: []
+		dynamicPoints: [],
+		staticGroups,
+		staticPoints: []
 	};
 
-	markers.forEach((marker) => {
-		const {geoposition, header} = marker;
-
-		if (marker.hasOwnProperty('geoposition')) {
-			const anotherOne = markers.find((markerTmp) =>
-				marker.type !== 'dynamic'
-				&& markerTmp.header !== marker.header
-				&& JSON.stringify(markerTmp.geoposition) === JSON.stringify(geoposition)
-			);
-
-			if (anotherOne) {
-				const multipleMarkerIndex = geoMarkers.multiple.findIndex(markerTmp => JSON.stringify(markerTmp.geoposition) === JSON.stringify(marker.geoposition));
-
-				if (multipleMarkerIndex === -1) {
-					geoMarkers.multiple.push({
-						data: [marker],
-						geoposition,
-						header,
-						type: 'multiple'
-					});
-				} else {
-					geoMarkers.multiple[multipleMarkerIndex].data.push(marker);
-				}
-			} else {
-				marker.type === 'dynamic' ? geoMarkers.dynamic.push(marker) : geoMarkers.static.push(marker);
-			}
-		} else {
-			notGeoMarkers.push(marker);
+	if(!staticPoints.length && !dynamicPoints.length ) {
+		notify('empty', 'empty');
+	}
+	staticPoints.forEach((marker) => {
+		if (marker.geoposition !== null ) {
+			geoMarkers.staticPoints.push(marker)
+		}
+	});
+	dynamicPoints.forEach((marker) => {
+		if (marker.geoposition !== null ) {
+			geoMarkers.dynamicPoints.push(marker);
 		}
 	});
 
-	notGeoMarkers.length && showNotGeoNotifications(notGeoMarkers);
+	if (errors.length) {
+		const label = errors.join(', ') + '.';
+		notify('static', 'info', label);
+	}
 
 	return geoMarkers;
 };

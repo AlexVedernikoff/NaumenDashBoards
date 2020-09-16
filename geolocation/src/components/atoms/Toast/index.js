@@ -11,7 +11,7 @@ export class Toast extends Component<Props> {
 		return (
 			<div className='toastMap'>
 				<ToastContainer
-					position="bottom-right"
+					position="bottom-left"
 					closeButton={<ToastClose type='default'/>}
 					className={styles.toastContainer}
 					hideProgressBar

@@ -1,16 +1,14 @@
 // @flow
-import type {MultiplePoint} from 'types/multiple';
+import type {DynamicPoint, StaticPoint} from 'types/point';
 import type {Point} from 'types/point';
 
 type OwnProps = {
-	marker: Point | MultiplePoint,
-	uuid: string
+	marker: DynamicPoint | StaticPoint
 };
 
 export type ConnectedProps = {
-	dynamicMarkers: Array<Point>,
-	multipleMarkers: Array<MultiplePoint>,
-	staticMarkers: Array<Point>
+	dynamicPoints: Array<DynamicPoint>,
+	staticPoints: Array<StaticPoint>
 };
 
 export type Props = ConnectedProps & OwnProps;

@@ -1,15 +1,14 @@
-export default [
+export default {
+	geopositions: [
 	{
 		geoposition: {
-			latitude: 1.0,
-			longitude: 1.0,
-			accuracy: 10.0,
-			date: '01.01.2018 00:00:00'
+			latitude: 56.8367692,
+			longitude: 60.5635457,
+			accuracy: 106,
+			date: "02.12.2019 18:00:45"
 		},
-		uuid: 'employee$752501'
-	},
-	{
-		uuid: 'employee$1488605',
-		'errorMessage': 'Нет данных о местоположении'
-	}
-];
+		uuid: "employee$752501"
+	}],
+	errors: []
+};
+

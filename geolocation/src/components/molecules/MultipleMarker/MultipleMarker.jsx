@@ -26,6 +26,7 @@ export class MultipleMarker extends Component<Props, State> {
 
 	render () {
 		const {color, count, marker} = this.props;
+		const {data} = marker;
 		const {type} = this.state;
 		const icon = divIconMarker(type, color, count);
 
@@ -36,8 +37,8 @@ export class MultipleMarker extends Component<Props, State> {
 				icon={icon}
 				position={[marker.geoposition.latitude, marker.geoposition.longitude]}
 			>
-				<TooltipMarker title={marker.header} />
-				<PopupMultipleMarker marker={marker} openToggle={this.openPopup} />
+				<TooltipMarker title={data[0].header} />
+				{/* <PopupMultipleMarker marker={data} openToggle={this.openPopup} /> */}
 			</Marker>
 		);
 	}

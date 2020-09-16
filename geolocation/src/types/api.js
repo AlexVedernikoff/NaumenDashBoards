@@ -5,7 +5,7 @@ export type Module =
 export type Method =
 	| 'getCurrentContextObject'
 	| 'getLastGeopositions'
-	| 'getPoints';
+	| 'getMap';
 
 export type Context = {
 	contentCode: string,
