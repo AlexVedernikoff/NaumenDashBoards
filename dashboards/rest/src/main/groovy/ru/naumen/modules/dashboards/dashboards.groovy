@@ -149,10 +149,7 @@ String getAttributesFromLinkAttribute(requestContent)
 
     if (deep)
     {
-        List childrenClasses = []
-        List parentClasses = []
-        parentClasses.add(attributeClassFqn)
-        childrenClasses = getListOfClasses(childrenClasses, parentClasses)
+        List childrenClasses = api.metainfo.getTypes(attributeClassFqn)?.toList()
 
         Collection<Attribute> attributeList = []
         childrenClasses.each {
@@ -273,26 +270,6 @@ String getCatalogItemObject(Map requestContent)
             ]
         }
     return toJson(result)
-}
-
-/**
- * Получение списка подклассов у классов атрибута
- * @param resultList - итоговый список
- * @param parentList - список родительских классов
- * @return список подклассов у классов атрибута
- */
-List<String> getListOfClasses(List<String> resultList, List<String> parentList)
-{
-    parentList.each {
-        def metaInfo = api.metainfo.getMetaClass(it)
-        List<String> childrenClasses = metaInfo?.children?.collect { x -> x.toString() }
-        if (childrenClasses)
-        {
-            resultList += childrenClasses
-            resultList = getListOfClasses(resultList, childrenClasses)
-        }
-    }
-    resultList
 }
 
 /**

@@ -118,7 +118,9 @@ enum Comparison
     NOT_EQUAL_AND_NOT_NULL,
     NOT_CONTAINS_INCLUDING_EMPTY,
     EQUAL_REMOVED,
-    NOT_EQUAL_REMOVED
+    NOT_EQUAL_REMOVED,
+    STATE_TITLE_CONTAINS,
+    STATE_TITLE_NOT_CONTAINS
 }
 /**
  * Типы статусов для атрибутов типа счётчик и обратный счётчик

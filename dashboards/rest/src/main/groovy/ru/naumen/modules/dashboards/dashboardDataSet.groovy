@@ -1775,15 +1775,9 @@ private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,L
             case 'contains_any':
                 return buildFilterParameterFromCondition(Comparison.IN, attribute, condition.data.uuid)
             case 'title_contains':
-                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(titleAttribute)
-                return buildFilterParameterFromCondition(Comparison.CONTAINS, tempAttribute, condition.data)
+                return buildFilterParameterFromCondition(Comparison.STATE_TITLE_CONTAINS, attribute, condition.data)
             case 'title_not_contains':
-                def titleAttribute = new Attribute(title: 'название', code: 'title', type: 'string')
-                def tempAttribute = attribute.deepClone()
-                tempAttribute.addLast(titleAttribute)
-                return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, tempAttribute, condition.data)
+                return buildFilterParameterFromCondition(Comparison.STATE_TITLE_NOT_CONTAINS, attribute, condition.data)
             case ['equal_subject_attribute', 'equal_attr_current_object']:
                 if (!condition.data)
                 {
@@ -2220,7 +2214,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
         case GroupType.SEVEN_DAYS:
             def russianLocale = new Locale("ru")
             SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
-            SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd MMMM", russianLocale)
+            SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd.MM.yy", russianLocale)
             def (star, numberWeek) = value.split("#", 2)
             def minDate = standardDateFormatter.parse(star as String)
             def countDays = (numberWeek as int) * 7
