@@ -565,6 +565,7 @@ class QueryWrapper implements CriteriaWrapper
                                              "${ first }.${ second }".toString()
                                          }
             String code = parameter.attribute.code
+            String parameterFqn = parameter.attribute.metaClassFqn
             if (columnCode == 'id')
             {
                 columnCode = modules.dashboardQueryWrapper.UUID_CODE
@@ -621,6 +622,12 @@ class QueryWrapper implements CriteriaWrapper
                 case Comparison.NOT_EQUAL_REMOVED:
                     return api.filters.attrContains(columnCode, parameter.value, false, false)
                               .with(api.filters.&not)
+                case Comparison.STATE_TITLE_CONTAINS:
+                    List fqns = getFqns(parameterFqn)
+                    return api.filters.stateTitleLike(fqns, parameter.value)
+                case Comparison.STATE_TITLE_NOT_CONTAINS:
+                    List fqns = getFqns(parameterFqn)
+                    return api.filters.stateTitleLike(fqns, parameter.value).with(api.filters.&not)
                 default: throw new IllegalArgumentException("Not supported filter type: $type!")
 
             }
@@ -628,6 +635,19 @@ class QueryWrapper implements CriteriaWrapper
             api.filters.or(*it)
         }.with(criteria.&add)
         return this
+    }
+
+    /**
+     * Метод получения fqn-ов для типов, которые должны попасть в результаты выборки
+     * @param parameterFqn - fqn класса параметра
+     * @return список fqn-ов типов
+     */
+    List getFqns(String parameterFqn)
+    {
+        List total = api.metainfo.getTypes(parameterFqn)?.toList()
+        return total.collect {
+            api.types.newClassFqn(it as String)
+        }
     }
 
     QueryWrapper ordering(Map parameter)

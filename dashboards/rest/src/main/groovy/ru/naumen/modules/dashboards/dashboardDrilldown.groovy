@@ -9,6 +9,8 @@
 //Версия: 4.10.0.15
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
+
+import java.text.SimpleDateFormat
 //region КЛАССЫ
 /**
  * Объект помощник для формирования ссылок
@@ -885,24 +887,27 @@ class Link
             def objects = findObjects(attr.ref, attr.property, value)
             filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', objects))
         }
-        switch (groupType) {
-            case GroupType.DAY:
-                return getDayFilters(format, value, filterBuilder, attr)
-            case GroupType.WEEK:
-                return getWeekFilters(format, value, filterBuilder, attr)
-            case GroupType.MONTH:
-                return getMonthFilters(format, value, filterBuilder, attr)
-            case GroupType.QUARTER:
-                return getQuarterFilters(format, value, filterBuilder, attr)
-            case GroupType.YEAR:
-                return getYearFilters(format, value, filterBuilder, attr)
-            case GroupType.SEVEN_DAYS:
-                return getSevenDaysFilters(format, value, filterBuilder, attr)
-            case GroupType.HOURS:
-                return getHourFilters(format, value, filterBuilder, attr)
-            case GroupType.MINUTES:
-                return getMinuteFilters(format, value, filterBuilder, attr)
-            default: throw new IllegalArgumentException("Not supported group type: $groupType")
+        else
+        {
+            switch (groupType) {
+                case GroupType.DAY:
+                    return getDayFilters(format, value, filterBuilder, attr)
+                case GroupType.WEEK:
+                    return getWeekFilters(format, value, filterBuilder, attr)
+                case GroupType.MONTH:
+                    return getMonthFilters(format, value, filterBuilder, attr)
+                case GroupType.QUARTER:
+                    return getQuarterFilters(format, value, filterBuilder, attr)
+                case GroupType.YEAR:
+                    return getYearFilters(format, value, filterBuilder, attr)
+                case GroupType.SEVEN_DAYS:
+                    return getSevenDaysFilters(format, value, filterBuilder, attr)
+                case GroupType.HOURS:
+                    return getHourFilters(format, value, filterBuilder, attr)
+                case GroupType.MINUTES:
+                    return getMinuteFilters(format, value, filterBuilder, attr)
+                default: throw new IllegalArgumentException("Not supported group type: $groupType")
+            }
         }
     }
 
@@ -919,65 +924,56 @@ class Link
         switch (format)
         {
             case 'dd':
-                def datePoint = api.date.createDateTimePoint("DAY", value.replace('-й', '') as int)
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+                int intValue = value.replace('-й', '') as int
+                def datePoint = api.date.createDateTimePointPredicates(['DAY', intValue, 'EQ'], ['DAY', intValue, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             case 'WD':
-                def datePoint = api.date.createDateTimePoint("WEEKDAY", russianWeekDay.get(value))
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+                int intValue = russianWeekDay.get(value)
+                def datePoint = api.date.createDateTimePointPredicates(['WEEKDAY', intValue, 'EQ'], ['WEEKDAY', intValue, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             case 'dd.mm.YY':
                 List<String> splitDate = value.replace('.', '/').split('/')
                 def (day, month, year) = splitDate
-
-                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
-                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
-                def datePointYear = api.date.createDateTimePoint("YEAR", year as int)
-
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
-
+                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                       ['MONTH', month as int, 'EQ'],
+                                                                       ['YEAR', year as int, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             case 'dd.mm.YY hh':
                 List<String> fullDate = value.replace('ч', '').replace(',', '').split()
+
                 def (date, hour) = fullDate
                 String[] splitDate = date.replace('.', '/').split('/')
                 def (day, month, year) = splitDate
 
-                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
-                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
-                def datePointYear = api.date.createDateTimePoint("YEAR", year as int)
-                def datePointHour = api.date.createDateTimePoint("HOUR", hour as int)
-
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointHour, datePointHour]))
+                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                       ['MONTH', month as int, 'EQ'],
+                                                                       ['YEAR', year as int, 'EQ'],
+                                                                       ['HOUR', hour as int, 'EQ']
+                )
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             case 'dd.mm.YY hh:ii':
                 List<String> fullDate = value.split()
                 def(date, dateTime) = fullDate
                 String[] splitDate = date.replace('.', '/').split('/')
                 def (day, month, year) = splitDate
+
                 def(hour, minute) = dateTime.split(':')
 
-                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
-                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
-                def datePointYear = api.date.createDateTimePoint("YEAR", year as int)
-                def datePointHour = api.date.createDateTimePoint("HOUR", hour as int)
-                def datePointMinute = api.date.createDateTimePoint("MINUTE", minute as int)
-
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointHour, datePointHour]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMinute, datePointMinute]))
+                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                       ['MONTH', month as int, 'EQ'],
+                                                                       ['YEAR', year as int, 'EQ'],
+                                                                       ['HOUR', hour as int, 'EQ'],
+                                                                       ['MINUTE', minute as int, 'EQ']
+                )
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
 
             case 'dd MM':
             default:
                 def (String day, String monthName) = value.split()
                 int month = genitiveRussianMonth.get(monthName.toLowerCase()) + 1
-                def datePointDay = api.date.createDateTimePoint("DAY", day as int)
-                def datePointMonth = api.date.createDateTimePoint("MONTH", month as int)
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointDay, datePointDay]))
-                                    .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
+                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                       ['MONTH', month as int, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
 
@@ -1000,13 +996,10 @@ class Link
                     : value.replace(' неделя', '').split()
                 def week = weekValue[0] as int
                 def year = weekValue.size() > 1 ? weekValue[1] as int : null
-                def datePointWeek = api.date.createDateTimePoint("WEEK", week)
-                def datePointYear = year ? api.date.createDateTimePoint("YEAR", year) : null
-                def filters = year
-                    ? filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointWeek, datePointWeek]))
-                                   .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
-                    : filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointWeek, datePointWeek]))
-                return filters
+                def datePoint = year ? api.date.createDateTimePointPredicates(['WEEK', week, 'EQ'],
+                                                                              ['YEAR', year, 'EQ'])
+                    : api.date.createDateTimePointPredicates(['WEEK', week, 'EQ'], ['WEEK', week, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
 
@@ -1027,13 +1020,10 @@ class Link
                 def monthValue = value.split(' ')
                 def month = nominativeRussianMonth.get(monthValue[0]) + 1
                 def year = monthValue.size() > 1 ? monthValue[1] as int : null
-                def datePointMonth = api.date.createDateTimePoint("MONTH", month)
-                def datePointYear = year ? api.date.createDateTimePoint("YEAR", year) : null
-                def filters = year
-                    ? filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
-                                   .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
-                    : filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMonth, datePointMonth]))
-                return filters
+                def datePoint = year ? api.date.createDateTimePointPredicates(['MONTH', month as int, 'EQ'],
+                                                                              ['YEAR', year, 'EQ'])
+                    : api.date.createDateTimePointPredicates(['MONTH', month as int, 'EQ'], ['MONTH', month as int, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
 
@@ -1054,13 +1044,10 @@ class Link
                 def quarterValue = value.replace(' кв-л', '').split(' ')
                 def quarter = quarterValue[0] as int
                 def year = quarterValue.size() > 1 ? quarterValue[1] as int : null
-                def datePointQuarter = api.date.createDateTimePoint("QUARTER", quarter)
-                def datePointYear = year ? api.date.createDateTimePoint("YEAR", year) : null
-                def filters = year
-                    ? filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointQuarter, datePointQuarter]))
-                                   .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointYear, datePointYear]))
-                    : filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointQuarter, datePointQuarter]))
-                return filters
+                def datePoint = year ? api.date.createDateTimePointPredicates(['QUARTER', quarter, 'EQ'],
+                                                                              ['YEAR', year as int, 'EQ'])
+                    : api.date.createDateTimePointPredicates(['QUARTER', quarter, 'EQ'], ['QUARTER', quarter, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
 
@@ -1077,8 +1064,8 @@ class Link
         switch (format)
         {
             case 'yyyy':
-                def datePoint = api.date.createDateTimePoint("YEAR", value as int)
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+                def datePoint = api.date.createDateTimePointPredicates(['YEAR', value as int, 'EQ'], ['YEAR', value as int, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             default: throw new IllegalArgumentException("Not supported year format: $format")
         }
     }
@@ -1097,16 +1084,28 @@ class Link
         {
             case 'dd mm - dd mm':
             default:
-                def (day, month) = value.split(" - ", 2).collect { dayAndMonth ->
-                    def (d, m) = dayAndMonth.split(" ", 2)
-                    [d as int, genitiveRussianMonth.get(m) + 1]
+                def russianLocale = new Locale('ru')
+                def (day,month, year) = value.tokenize('-').collect { dayAndMonth ->
+                    SimpleDateFormat parser = new SimpleDateFormat('dd.MM.yy', russianLocale)
+                    parser.parse(dayAndMonth)
+                    SimpleDateFormat formatter = new SimpleDateFormat('dd.MM.yyyy')
+                    dayAndMonth = formatter.format(parser.parse(dayAndMonth))
+                    def (d, m, y) = dayAndMonth.tokenize('.')
+                    [d as int, m as int, y as int]
                 }.transpose()
-                def datePointStartDay = api.date.createDateTimePoint("DAY", day[0])
-                def datePointEndDay = api.date.createDateTimePoint("DAY", day[1])
-                def datePointStartMonth = api.date.createDateTimePoint("MONTH", month[0])
-                def datePointEndMonth = api.date.createDateTimePoint("MONTH", month[1])
-                filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointStartDay, datePointEndDay]))
-                             .AND(filterBuilder.OR(attr.code,'fromToDatePoint',[datePointStartMonth, datePointEndMonth]))
+                def datePointStart = api.date.createDateTimePointPredicates(['DAY',  day[0], 'GE'], ['MONTH', month[0], 'EQ'], ['YEAR', year[0], 'EQ'])
+                def datePointEnd = api.date.createDateTimePointPredicates(['DAY',  day[1], 'LE'], ['MONTH',  month[1], 'EQ'], ['YEAR', year[1], 'EQ'])
+
+                if (day[0] > day[1])
+                {
+                    filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointStart),
+                                      filterBuilder.OR(attr.code,'fromToDatePoint', datePointEnd))
+                }
+                else
+                {
+                    filterBuilder.AND(filterBuilder.OR('creationDate', 'fromToDatePoint', datePointStart))
+                                 .AND(filterBuilder.OR('creationDate', 'fromToDatePoint', datePointEnd))
+                }
                 return filterBuilder
         }
     }
@@ -1125,15 +1124,13 @@ class Link
         {
             case 'hh:ii':
                 def hoursANDmins = value.tokenize(':/')
-                def datePointHour = api.date.createDateTimePoint("HOUR", hoursANDmins[0] as int)
-                def datePointMin = api.date.createDateTimePoint("MINUTE", hoursANDmins[1] as int)
-                filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointHour, datePointHour]))
-                             .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePointMin, datePointMin]))
-                return filterBuilder
+                def datePoint = api.date.createDateTimePointPredicates(['HOUR', hoursANDmins[0] as int, 'EQ'],
+                                                                       ['MINUTE', hoursANDmins[1] as int, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             case 'hh':
             default:
-                def datePoint = api.date.createDateTimePoint("HOUR", value as int)
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+                def datePoint = api.date.createDateTimePointPredicates(['HOUR', value as int, 'EQ'], ['HOUR', value as int, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
 
@@ -1151,8 +1148,8 @@ class Link
         {
             case 'ii':
             default:
-                def datePoint = api.date.createDateTimePoint("MINUTE", value as int)
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', [datePoint, datePoint]))
+                def datePoint = api.date.createDateTimePointPredicates(['MINUTE', value as int, 'EQ'], ['MINUTE', value as int, 'EQ'])
+                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
 }
