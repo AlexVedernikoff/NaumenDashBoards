@@ -12,7 +12,6 @@
   "description": "Embedded application 'DashBoards' for 'SMP'",
   "dependencies": {
     "apexcharts": "^3.19.3",
-    "axios": "^0.19.0",
     "canvg": "^3.0.2",
     "dom4": "^2.1.5",
     "html2canvas": "^1.0.0-rc.5",

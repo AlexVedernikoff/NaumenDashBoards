@@ -1,6 +1,5 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {LINKED_DATA_SOURCES_EVENTS} from './constants';
 import type {RawDataSource} from './types';
@@ -15,12 +14,11 @@ const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatc
 
 	try {
 		const {backBOLinks, boLinks, object} = ATTRIBUTE_TYPES;
-		const url = buildUrl('dashboards', 'getLinkedDataSources', 'requestContent');
-		const data = {
+		const payload = {
 			classFqn,
 			types: [backBOLinks, boLinks, object]
 		};
-		const {data: sources} = await client.post(url, data);
+		const sources = await window.jsApi.restCallModule('dashboards', 'getLinkedDataSources', payload);
 
 		dispatch(receiveDataSources(classFqn, sources));
 	} catch (e) {

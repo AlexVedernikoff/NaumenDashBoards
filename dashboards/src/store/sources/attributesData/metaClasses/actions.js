@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {META_CLASSES_EVENTS} from './constants';
 import type {ReceivePayload} from './types';
@@ -13,7 +12,7 @@ const fetchMetaClassData = (metaClassFqn: string): ThunkAction => async (dispatc
 	dispatch(requestMetaClassData(metaClassFqn));
 
 	try {
-		const {data} = await client.post(buildUrl('dashboards', 'getMetaClasses', `'${metaClassFqn}'`));
+		const data = await window.jsApi.restCallModule('dashboards', 'getMetaClasses', metaClassFqn);
 		dispatch(receiveMetaClassData({data, metaClassFqn}));
 	} catch (error) {
 		dispatch(recordMetaClassDataError(metaClassFqn));

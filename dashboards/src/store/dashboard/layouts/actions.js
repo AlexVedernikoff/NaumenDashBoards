@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {filterLayouts, getLegacyLayouts} from './helpers';
 import {getMapValues} from 'src/helpers';
@@ -71,14 +70,13 @@ const saveNewLayouts = (): ThunkAction => async (dispatch: Dispatch, getState: G
 		const {layouts} = dashboard;
 		const widgetIds = Object.keys(widgets.data.map).filter(id => id !== NewWidget.id);
 		const {MOBILE, WEB} = LAYOUT_MODE;
-		const url = buildUrl('dashboardSettings', 'editLayouts', 'requestContent,user');
-		const params = {
+		const payload = {
 			...getParams(),
 			layouts: filterLayouts(layouts[WEB], widgetIds),
 			mobileLayouts: filterLayouts(layouts[MOBILE], widgetIds)
 		};
 
-		await client.post(url, params);
+		await window.jsApi.restCallModule('dashboardSettings', 'editLayouts', payload);
 
 		dispatch({
 			type: LAYOUTS_EVENTS.RESPONSE_SAVE_LAYOUTS

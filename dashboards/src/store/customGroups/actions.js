@@ -1,5 +1,4 @@
 // @flow
-import {buildUrl, client} from 'utils/api';
 import {createToast} from 'store/toasts/actions';
 import type {CustomGroup, CustomGroupsMap} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
@@ -10,10 +9,11 @@ import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants
 const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callback: Function): ThunkAction =>
 	async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const {data: id} = await client.post(buildUrl('dashboardSettings', 'saveCustomGroup', 'requestContent,user'), {
+		const payload = {
 			...getParams(),
 			group: customGroupData
-		});
+		};
+		const {id} = await window.jsApi.restCallModule('dashboardSettings', 'saveCustomGroup', payload);
 		callback(id);
 
 		dispatch(removeCustomGroup(localId));
@@ -26,16 +26,17 @@ const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callb
 	}
 };
 
-const deleteCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const deleteCustomGroup = (groupKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		if (!payload.startsWith(LOCAL_PREFIX_ID)) {
-			await client.post(buildUrl('dashboardSettings', 'deleteCustomGroup', 'requestContent,user'), {
+		if (!groupKey.startsWith(LOCAL_PREFIX_ID)) {
+			const payload = {
 				...getParams(),
-				groupKey: payload
-			});
+				groupKey
+			};
+			await window.jsApi.restCallModule('dashboardSettings', 'deleteCustomGroup', payload);
 		}
 
-		dispatch(removeCustomGroup(payload));
+		dispatch(removeCustomGroup(groupKey));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка удаления группировки',
@@ -44,17 +45,17 @@ const deleteCustomGroup = (payload: string): ThunkAction => async (dispatch: Dis
 	}
 };
 
-const updateCustomGroup = (payload: CustomGroup, remote: boolean = false): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const updateCustomGroup = (group: CustomGroup, remote: boolean = false): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		if (remote) {
-			await client.post(buildUrl('dashboardSettings', 'updateCustomGroup', 'requestContent,user'), {
+			const payload = {
 				...getParams(),
-				group: payload,
-				groupKey: payload.id
-			});
+				group
+			};
+			await window.jsApi.restCallModule('dashboardSettings', 'updateCustomGroup', payload);
 		}
 
-		dispatch(saveCustomGroup(payload));
+		dispatch(saveCustomGroup(group));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка сохранения группировки',

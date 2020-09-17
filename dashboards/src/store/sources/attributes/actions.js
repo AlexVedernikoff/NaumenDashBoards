@@ -1,6 +1,5 @@
 // @flow
 import {ATTRIBUTES_EVENTS} from './constants';
-import {buildUrl, client} from 'utils/api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {OnLoadCallback} from 'store/sources/types';
 
@@ -14,11 +13,7 @@ const fetchAttributes = (classFqn: string, callback?: OnLoadCallback): ThunkActi
 	dispatch(requestAttributes(classFqn));
 
 	try {
-		const url = buildUrl('dashboards', 'getDataSourceAttributes', 'requestContent');
-		const data = {
-			classFqn
-		};
-		const {data: attributes} = await client.post(url, data);
+		const attributes = await window.jsApi.restCallModule('dashboards', 'getDataSourceAttributes', {classFqn});
 
 		callback && callback(attributes);
 		dispatch(receiveAttributes(attributes, classFqn));
