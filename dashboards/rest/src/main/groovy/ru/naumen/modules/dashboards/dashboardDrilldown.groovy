@@ -11,6 +11,7 @@
 package ru.naumen.modules.dashboards
 
 import java.text.SimpleDateFormat
+import static groovy.json.JsonOutput.toJson
 //region КЛАССЫ
 /**
  * Объект помощник для формирования ссылок
@@ -1159,13 +1160,14 @@ class Link
 /**
  * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
  * @param requestContent - параметры запроса
- * @return ссылка на на страницу с произвольным списком объектов.
+ * @return ссылка на на страницу с произвольным списком объектов в json-формате.
  */
 String getLink(Map<String, Object> requestContent, String cardObjectUuid)
 {
     Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid)
     def linkBuilder = link.getBuilder()
-    return api.web.list(linkBuilder)
+    def webLink = api.web.list(linkBuilder)
+    return toJson([link: webLink])
 }
 //endregion
 
