@@ -12,22 +12,25 @@
 package ru.naumen.modules.dashboards
 
 import org.apache.poi.util.IOUtils
-import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest
 import javax.mail.util.ByteArrayDataSource
 import static groovy.json.JsonOutput.toJson
 
 
 //region REST-МЕТОДЫ
-String sendFileToMail(DefaultMultipartHttpServletRequest request, def user)
+/**
+ * Метод отправки сообщений на почту
+ * @param tokenKey - ключ на файл в хранилище
+ * @param format - формат файла
+ * @return успех/провал
+ */
+String sendFileToMail(String tokenKey, String format)
 {
     if (!user?.email)
     {
         utils.throwReadableException('User email is null or empty!')
     }
-    String fileName = request.getFileNames().find()
-    String title = request.getParameter("fileName")
-    String format = request.getParameter("fileFormat")
-    def file = request.getFiles(fileName).find()
+    def file = utils.uploadService.get(tokenKey)
+    String title = file?.name
     def ds = new ByteArrayDataSource(file.inputStream, file.contentType)
 
     def message = api.mail.sender.createMail()

@@ -84,7 +84,7 @@ String getAttributesDataSources(requestContent)
  * @param requestContent запрос с кодом метакласса и типами атрибутов
  * @return json список атрибутов {заголовок, код, тип атрибута}
  */
-String getDataSourceAttributes(requestContent)
+def getDataSourceAttributes(requestContent, Boolean parseToJson = true)
 {
     String classFqn = requestContent.classFqn.toString()
     List<String> types = requestContent?.types
@@ -94,7 +94,7 @@ String getDataSourceAttributes(requestContent)
     } : metaInfo.attributes.toList()
     Collection<Attribute> mappingAttributes =
         mappingAttribute(attributes, metaInfo.title, metaInfo.code)
-    return toJson(mappingAttributes)
+    return parseToJson ? toJson(mappingAttributes) : mappingAttributes
 }
 
 /**
@@ -515,12 +515,11 @@ private Attribute buildAttribute(def value, String sourceName, String sourceCode
 
 /**
  * Метод получения динамических атрибутов
- * @param requestContent - тело запроса
+ * @param groupUUID - уникальный идентификатор группы
  * @return список динамических атрибутов в JSON-формате
  */
-String getDynamicAttributes(requestContent)
+String getDynamicAttributes(String groupUUID)
 {
-    String groupUUID = requestContent.uuid
     List<String> templateUUIDS = getUUIDSForTemplates(groupUUID)
     List<Attribute> attributes = templateUUIDS?.collect { templateUUID ->
         return getDynamicAttributeType(templateUUID) ? new Attribute(
@@ -636,14 +635,14 @@ Map<String, Object> getDynamicGroupSource(def group)
 
 /**
  * Метод получения групп динамических атрибутов
- * @param requestContent - тело запроса
+ * @param descriptor - дескриптор из виджета
  * @param aggregateToJson - флаг возврата данных в JSON-формате
  * @return список групп динамических атрибутов
  */
-def getDynamicAttributeGroups(requestContent, boolean aggregateToJson = true)
+def getDynamicAttributeGroups(def descriptor, boolean aggregateToJson = true)
 {
     def slurper = new groovy.json.JsonSlurper()
-    def descriptor = slurper.parseText(requestContent.descriptor)
+    descriptor = slurper.parseText(descriptor)
     List<DynamicGroup> groups = getDescriptorGroups(descriptor)?.collect {
         def dynamicSource = getDynamicGroupSource(it)
         def templateUUIDS = getUUIDSForTemplates(it.UUID)
