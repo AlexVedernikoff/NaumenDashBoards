@@ -1,6 +1,7 @@
 // @flow
 import 'babel-polyfill';
 import 'dom4';
+import 'whatwg-fetch';
 import './iframeResizer';
 import './fakeApi';
 import App from 'components/App';

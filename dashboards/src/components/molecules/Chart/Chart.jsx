@@ -23,18 +23,22 @@ export class Chart extends PureComponent<Props, State> {
 
 	componentDidMount () {
 		const options = this.getOptions();
-		window.addEventListener('keydown', this.handleKeydown);
 
-		this.chart = new ApexCharts(this.ref.current, options);
-		this.chart.render();
+		if (options) {
+			window.addEventListener('keydown', this.handleKeydown);
+
+			this.chart = new ApexCharts(this.ref.current, options);
+			this.chart.render();
+		}
 	}
 
 	componentDidUpdate (prevProps: Props) {
 		const {data: currentData} = this.props;
 		const {data: prevData} = prevProps;
 
-		if (this.chart && currentData !== prevData) {
-			this.chart.updateOptions(this.getOptions());
+		if (currentData !== prevData) {
+			const options = this.getOptions();
+			options && this.chart && this.chart.updateOptions(options);
 		}
 	}
 
@@ -49,7 +53,7 @@ export class Chart extends PureComponent<Props, State> {
 	getOptions = () => {
 		const {data, widget} = this.props;
 		const {current} = this.ref;
-		let options = {};
+		let options;
 
 		if (current) {
 			options = getOptions(widget, data, current.clientWidth);
@@ -165,8 +169,8 @@ export class Chart extends PureComponent<Props, State> {
 	};
 
 	renderZoomPanel = (props: AbsoluteElementProps) => {
-		const {zoomMode} = this.state;
 		const {showSubmenu} = this.props;
+		const {zoomMode} = this.state;
 		const {className, ref, top} = props;
 
 		if (!showSubmenu) {

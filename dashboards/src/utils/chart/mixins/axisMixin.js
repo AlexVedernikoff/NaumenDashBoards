@@ -154,6 +154,11 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 			dataLabels: {
 				formatter: valueFormatter(usesMSInterval, usesPercent, false)
 			},
+			grid: {
+				padding: {
+					bottom: 20
+				}
+			},
 			markers: {
 				hover: {
 					size: 8

@@ -14,6 +14,8 @@ const CHART_TYPES = {
 	pie
 };
 
+const DATA_LABELS_LIMIT = 500;
+
 const bottom: 'bottom' = 'bottom';
 const left: 'left' = 'left';
 const right: 'right' = 'right';
@@ -94,6 +96,7 @@ const LOCALES = [{
 
 export {
 	CHART_TYPES,
+	DATA_LABELS_LIMIT,
 	DEFAULT_COLORS,
 	DEFAULT_CHART_SETTINGS,
 	DEFAULT_DATA_LABEL_COLOR,

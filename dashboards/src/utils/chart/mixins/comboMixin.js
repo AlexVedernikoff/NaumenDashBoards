@@ -29,15 +29,14 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 const getYAxis = (seriesItem: Object, index: number, series: Array<Object>, widget: ComboWidget) => {
 	const {indicator} = widget;
 	const {dataKey} = seriesItem;
-	const seriesMainItem = series.find(s => s.dataKey === dataKey);
 	const set = widget.data.find(set => set.dataKey === dataKey);
 	let options = {};
 
-	if (seriesMainItem && set && !set.sourceForCompute) {
+	if (set && !set.sourceForCompute) {
 		const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
 		const usesPercent = set.aggregation === DEFAULT_AGGREGATION.PERCENT;
 		const customOptions = getYAxisOptions(indicator);
-		const show = index === 0 && customOptions.show;
+		const {show} = customOptions;
 		options = {
 			labels: {
 				formatter: valueFormatter(usesMSInterval, usesPercent)
@@ -48,6 +47,7 @@ const getYAxis = (seriesItem: Object, index: number, series: Array<Object>, widg
 		if (show) {
 			options = {
 				...extend(options, customOptions),
+				opposite: index > 0,
 				show
 			};
 		}
@@ -80,6 +80,11 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions =
 		},
 		dataLabels: {
 			formatter: dataLabelsFormatter(widget, false)
+		},
+		grid: {
+			padding: {
+				bottom: 20
+			}
 		},
 		labels,
 		markers: {
