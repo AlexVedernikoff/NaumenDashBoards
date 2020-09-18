@@ -236,7 +236,7 @@ class QueryWrapper implements CriteriaWrapper
 
                         criteria.addColumn(sc.concat(dayColumn,sc.constant('.'),
                                                      monthColumn, sc.constant('.'),
-                                                     yearColumn, sc.constant(', '),
+                                                     yearColumn, sc.constant(' '),
                                                      hourColumn))
 
                         criteria.addGroupColumn(yearColumn)

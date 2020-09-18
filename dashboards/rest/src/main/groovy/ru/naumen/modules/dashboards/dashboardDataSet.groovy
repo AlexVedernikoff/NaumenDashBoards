@@ -2093,13 +2093,13 @@ private List formatGroupSet(RequestData data, List list)
             return list
         case 1:
             return list.collect { el ->
-                def (value, String group) = el
+                def (value, group) = el
                 Closure formatGroup = this.&formatGroup.curry(data.groups[0], data.source.classFqn)
                 [value, formatGroup(group)]
             }
         case 2:
             return list.collect { el ->
-                def (value, String group, String breakdown) = el
+                def (value, group, breakdown) = el
                 Closure formatGroup = this.&formatGroup.curry(
                     data.groups[0] as GroupParameter,
                     data.source.classFqn
@@ -2120,7 +2120,7 @@ private List formatGroupSet(RequestData data, List list)
  * @param value - значение группировки
  * @return человеко читаемое значение группировки
  */
-private String formatGroup(GroupParameter parameter, String fqnClass, String value)
+private String formatGroup(GroupParameter parameter, String fqnClass, def value)
 {
     GroupType type = parameter.type
     //TODO: дополнить новыми типами группировки
@@ -2168,12 +2168,12 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
                 value = value.tokenize('./')*.padLeft(2, '0').join('.')
                 return value
             case 'dd.mm.YY hh':
-                String[] dateParts = value.split(', ')
+                String[] dateParts = value.split()
                 dateParts[0] = dateParts[0].tokenize('./')*.padLeft(2, '0').join('.')
                 dateParts[1] = dateParts[1].padLeft(2, '0')
                 return "${dateParts[0]}, ${dateParts[1]}ч"
             case 'dd.mm.YY hh:ii':
-                return value
+                return value.format('dd.MM.yyyy hh:mm')
             case 'WD':
                 String[] weekDayNames = ['понедельник', 'вторник', 'среда',
                                          'четверг', 'пятница', 'суббота', 'воскресенье']
@@ -2241,7 +2241,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, String val
         case GroupType.HOUR_INTERVAL:
         case GroupType.DAY_INTERVAL:
         case GroupType.WEEK_INTERVAL:
-            return value.replaceAll("\\<.*?>","")
+            return value.toString().replaceAll("\\<.*?>","")
         default: throw new IllegalArgumentException("Not supported type: $type")
     }
 }
