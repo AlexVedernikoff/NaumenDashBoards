@@ -1,5 +1,5 @@
 // @flow
-import type { GeolocationAction} from 'store/geolocation/types';
+import type {GeolocationAction} from 'store/geolocation/types';
 import type {ThunkAction} from 'store/types';
 import type {UpdatePointsMode} from 'types/helper';
 

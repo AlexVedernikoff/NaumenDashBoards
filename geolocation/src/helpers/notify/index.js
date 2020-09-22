@@ -42,6 +42,14 @@ const getPreparedMessage = (notifyTemplateType: NotifyTemplateType, text: string
 				</div>
 			);
 			break;
+		case 'single':
+			message = (
+				<div className={styles.textNotify}>
+					Нет информации о местоположении объекта: <br />
+					{text}
+				</div>
+			);
+			break;
 		default:
 			message = (
 				<div className={styles.textNotify}>

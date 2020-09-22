@@ -60,16 +60,16 @@ const getParams = async () => {
 	return paramsApp;
 };
 
-const getMap = async (subjectUuid: string) => {
+const getMap = async (contentCode: string, subjectUuid: string) => {
 	const {jsApi} = window;
-	const data = await jsApi.restCallModule('mapRest', 'getMap', subjectUuid, 'OtvetstvennyePoZayavke');
+	const data = await jsApi.restCallModule('mapRest', 'getMap', subjectUuid, contentCode);
 
 	return data;
 };
 
-const getLastGeopositions = async (subjectUuid: string, dynamicPointsUuids: any) => {
+const getLastGeopositions = async (contentCode: string, subjectUuid: string, dynamicPointsUuids: any) => {
 	const {jsApi} = window;
-	const data = await jsApi.restCallModule('mapRest', 'getLastGeopositions', subjectUuid, 'OtvetstvennyePoZayavke', dynamicPointsUuids);
+	const data = await jsApi.restCallModule('mapRest', 'getLastGeopositions', subjectUuid, contentCode, dynamicPointsUuids);
 
 	return data;
 };

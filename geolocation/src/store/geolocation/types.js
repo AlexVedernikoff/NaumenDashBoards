@@ -3,8 +3,8 @@ import type {Context} from 'types/api';
 import type {Controls} from 'types/controls';
 import {GEOLOCATION_EVENTS} from './constants';
 import type {Params} from 'types/params';
-import type {DynamicPoint, StaticGroup, StaticPoint} from 'types/point';
-import type {PanelShow} from 'types/helper';
+import type {Point, StaticGroup} from 'types/point';
+import type {PointType} from 'types/point';
 
 type SetContext = {
 	type: typeof GEOLOCATION_EVENTS.SET_CONTEXT,
@@ -32,7 +32,16 @@ type ReloadActivePoint = {
 
 type SetTab = {
 	type: typeof GEOLOCATION_EVENTS.SET_TAB,
-	payload: PanelShow
+	payload: PointType
+};
+
+type setSinglePoint = {
+	type: typeof GEOLOCATION_EVENTS.SET_SINGLE_POINT,
+	payload: Point
+};
+
+type resetSinglePoint = {
+	type: typeof GEOLOCATION_EVENTS.RESET_SINGLE_POINT
 };
 
 type TogglePanel = {
@@ -51,9 +60,11 @@ type UnknownGeolocationAction = {
 export type GeolocationAction =
 	| ReloadActivePoint
 	| RecordGeolocationError
+	| resetSinglePoint
 	| SetContext
 	| SetDataGeolocation
 	| SetParams
+	| setSinglePoint
 	| SetTab
 	| ToggleFilter
 	| TogglePanel
@@ -63,12 +74,14 @@ export type GeolocationAction =
 export type GeolocationState = {
 	context: Context | Object,
 	controls: Controls,
-	dynamicPoints: Array<DynamicPoint>,
+	dynamicPoints: Array<Point>,
 	error: boolean,
 	loading: boolean,
-	panelShow: PanelShow,
+	panelShow: PointType,
 	params: Params,
+	showSinglePoint: boolean,
+	singlePoint: Point | null,
 	staticGroups: Array<StaticGroup>,
-	staticPoints: Array<StaticPoint>,
+	staticPoints: Array<Point>,
 	success: boolean
 };

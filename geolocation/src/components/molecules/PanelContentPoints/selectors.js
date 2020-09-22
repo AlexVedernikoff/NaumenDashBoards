@@ -4,10 +4,11 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {showSinglePoint} = geolocation;
+	const {dynamicPoints, panelShow, showSinglePoint, singlePoint, staticPoints} = geolocation;
+	const points = panelShow === 'dynamic' ? dynamicPoints : staticPoints;
 
 	return {
-		showSinglePoint
+		points: (showSinglePoint && singlePoint) ? [singlePoint] : points
 	};
 };
 

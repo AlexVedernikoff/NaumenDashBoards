@@ -4,7 +4,8 @@ import 'styles/styles.less';
 import Controls from 'components/atoms/Controls';
 import Copyright from 'components/atoms/Copyright';
 import Filter from 'components/atoms/Filter';
-import MarkersList from 'components/molecules/MarkersList';
+import L from 'leaflet';
+import PointsList from 'components/molecules/PointsList';
 import {Map as LeafletMap} from 'react-leaflet';
 import Panel from 'components/organisms/Panel';
 import type {Props, State} from './types';
@@ -26,9 +27,29 @@ export class Geolocation extends Component<Props, State> {
 
 	reloadBound = () => this.setState({reloadBound: true});
 
+	centerOnSinglePoint() {
+		const {singlePoint} = this.props;
+		const {geoposition} = singlePoint;
+		const {latitude, longitude} = geoposition;
+
+		this.mapRef.current.leafletElement.panTo(new L.LatLng(latitude, longitude));
+	};
+
+	resetSinglePoint = () => () => {
+		const {resetSinglePoint} = this.props;
+
+		resetSinglePoint();
+	};
+
 	componentDidUpdate (prevProps: Props) {
-		const {bounds, loading} = this.props;
+		const {bounds, loading, showSinglePoint} = this.props;
 		const {reloadBound} = this.state;
+
+		if(showSinglePoint) {
+			this.centerOnSinglePoint();
+		} else {
+			this.mapRef.current.leafletElement.fitBounds(bounds);
+		}
 
 		if (prevProps.loading !== loading || reloadBound) {
 			this.mapRef.current.leafletElement.fitBounds(bounds);
@@ -48,11 +69,12 @@ export class Geolocation extends Component<Props, State> {
 					easeLinearity={0.35}
 					maxZoom={19}
 					minZoom={2}
+					onClick={this.resetSinglePoint()}
 					ref={this.mapRef}
 					scrollWheelZoom={true}
 					zoomControl={false}
 				>
-					<MarkersList />
+					<PointsList />
 					<Controls setBounds={this.reloadBound} />
 					<Filter />
 					<Copyright />

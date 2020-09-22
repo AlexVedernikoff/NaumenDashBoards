@@ -1,10 +1,9 @@
 // @flow
-import type {FetchResponse, Point} from 'types/point';
+import type {FetchResponse} from 'types/point';
 import {getTimeInSeconds} from 'helpers/time';
-import type {NotifyTemplateType} from 'types/helper';
 import {notify} from 'helpers/notify';
 import type {Params} from 'types/params';
-import type {StaticGroup} from 'types/point';
+import type {Point, StaticGroup} from 'types/point';
 
 /**
  * Returns the color of dynamic point
@@ -33,6 +32,13 @@ export const colorGroup = (group: string, staticGroups: Array<StaticGroup>): str
 	const found = staticGroups.find(item => item.code === group);
 
 	return found ? found.color : '';
+}
+
+export const checkActivePoint = (point: Point, singlePoint: Point) => {
+	const {data} = point;
+	const found = data.find(item => item.uuid === singlePoint.data[0].uuid) ? true : false;
+
+	return found;
 }
 
 export const getGeoMarkers = (markers: FetchResponse) => {

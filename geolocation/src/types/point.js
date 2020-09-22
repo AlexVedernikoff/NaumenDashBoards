@@ -3,22 +3,22 @@ import type {Action} from './action';
 import type {Geoposition} from './geoposition';
 import type {Option} from './option';
 
+export type PointType = 'dynamic' | 'static';
+
 export type Point = {
+	data: Array<PointData>,
+	geoposition: Geoposition,
+	type: PointType
+};
+
+export type PointData = {
 	actions?: Array<Action>,
 	errorMessage?: string,
-	geoposition: Geoposition,
 	group: string,
 	header: string,
 	options?: Array<Option>,
 	type: 'dynamic' | 'static',
 	uuid?: string
-};
-
-export type DynamicPoint = Point
-
-export type StaticPoint = {
-	geoposition: Geoposition,
-	data: Array<Point>
 };
 
 export type StaticGroup = {
@@ -28,9 +28,9 @@ export type StaticGroup = {
 };
 
 export type FetchResponse = {
-	dynamicPoints: Array<DynamicPoint>,
+	dynamicPoints: Array<Point>,
 	errors: Array<string>,
 	staticGroups: Array<StaticGroup>,
-	staticPoints: Array<StaticPoint>
+	staticPoints: Array<Point>
 }
 

@@ -1,18 +1,23 @@
 // @flow
-import type {Action} from 'types/action';
-import type {Option} from 'types/option';
+import type {GeolocationAction} from 'store/geolocation/types';
+import type {Geoposition} from 'types/geoposition';
+import type {Point, PointData, PointType} from 'types/point';
 
-type OwnProps = {};
-
-export type ConnectedProps = {
-	actions: Array<Action>,
-	header: string,
-	options: Array<Option>,
-	statusColor: string,
-	uuid: string
+export type OwnProps = {
+	geoposition: Geoposition,
+	pointData: PointData,
+	showSinglePoint: boolean,
+	type: PointType
 };
 
-export type ConnectedFunctions = {};
+export type ConnectedProps = {
+	showSinglePoint: boolean,
+	statusColor: string
+};
+
+export type ConnectedFunctions = {
+	setSinglePoint: (point: Point) => GeolocationAction
+};
 
 export type Props = OwnProps & ConnectedProps & ConnectedFunctions;
 

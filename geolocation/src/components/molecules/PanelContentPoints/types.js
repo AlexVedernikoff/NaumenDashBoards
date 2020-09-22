@@ -1,11 +1,10 @@
 // @flow
-import type {Params} from 'types/params';
-import type {Point, StaticGroup} from 'types/point';
+import type {Point} from 'types/point';
 
 type OwnProps = {};
 
 export type ConnectedProps = {
-	showSinglePoint: boolean
+	points: Array<Point>
 };
 
 export type ConnectedFunctions = {};

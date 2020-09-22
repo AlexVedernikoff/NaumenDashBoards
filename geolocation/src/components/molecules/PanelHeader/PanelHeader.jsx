@@ -2,7 +2,7 @@
 import {connect} from 'react-redux';
 import type {Props, State} from './types';
 import {functions, props} from './selectors';
-import type {PanelShow} from 'types/helper';
+import type {PointType} from 'types/point';
 import React, {Component} from 'react';
 import styles from './PanelHeader.less';
 import Truncate from 'react-truncate';
@@ -18,20 +18,20 @@ export class PanelHeader extends Component<Props, State> {
 		);
 	};
 
-	renderTab = (type: PanelShow, label: string) => {
+	renderTab = (type: PointType, label: string) => {
 		const {panelShow, setTab} = this.props;
-		let labelClass = styles.inActiveLable;
-		let active = '';
 
 		if(type === panelShow) {
-			labelClass = styles.lable
-			active = <div className={styles.active} />
+			return (
+				<div>
+					<div className={styles.lable} >{this.renderTruncatedText(label)}</div>
+					<div className={styles.active} />
+				</div>
+			);
 		}
-
 		return (
 			<div onClick={() => setTab(type)}>
-				<div className={labelClass} >{this.renderTruncatedText(label)}</div>
-				{active}
+				<div className={styles.inActiveLable} >{this.renderTruncatedText(label)}</div>
 			</div>
 		);
 	};

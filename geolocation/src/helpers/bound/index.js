@@ -1,7 +1,7 @@
 // @flow
 import defaultBounds from './defaultBounds';
 import L from 'leaflet';
-import type {DynamicPoint, StaticPoint} from 'types/point';
+import type {Point} from 'types/point';
 
 const boundsOneMarker = markers => {
 	const bounds = [Object.assign({}, markers[0].geoposition), Object.assign({}, markers[0].geoposition)];
@@ -16,7 +16,7 @@ const boundsOneMarker = markers => {
 	return L.latLngBounds(latLngs);
 };
 
-export const getLatLngBounds = (dataMarkers: Array<DynamicPoint | StaticPoint>) => {
+export const getLatLngBounds = (dataMarkers: Array<Point>) => {
 	if (dataMarkers.length === 1) {
 		return boundsOneMarker(dataMarkers);
 	}

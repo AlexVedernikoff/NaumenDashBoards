@@ -5,7 +5,7 @@ import {GEOLOCATION_EVENTS} from './constants';
 import {getGeoMarkers} from 'helpers/marker';
 import {getTimeInSeconds} from 'helpers/time';
 import {notify} from 'helpers/notify';
-import type {PanelShow} from 'types/helper';
+import type {Point, PointType} from 'types/point';
 import testData from 'helpers/testData';
 import testData2 from 'helpers/testData2';
 
@@ -35,10 +35,10 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 	try {
 		let markers = testData;
 		const {context} = getState().geolocation;
-		const {subjectUuid} = context;
+		const {contentCode, subjectUuid} = context;
 
 		if (environment !== 'development') {
-			markers = await getMap(subjectUuid)
+			markers = await getMap(contentCode, subjectUuid)
 		}
 
 		const geoMarkers = getGeoMarkers(markers);
@@ -54,8 +54,8 @@ const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (di
 	try {
 		let refreshDada = testData2;
 		const {dynamicPoints, context, params} = getState().geolocation;
-		const dynamicPointsUuids = dynamicPoints.map(marker => marker.uuid);
-		const {subjectUuid} = context;
+		const dynamicPointsUuids = dynamicPoints.map(marker => marker.data[0].uuid);
+		const {contentCode, subjectUuid} = context;
 		const {autoUpdateLocation, locationUpdateFrequency} = params;
 
 		if (dynamicPointsUuids && firstCall) {
@@ -68,7 +68,7 @@ const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (di
 			}
 		}
 		if (environment !== 'development' && dynamicPointsUuids) {
-			refreshDada = await getLastGeopositions(subjectUuid, dynamicPointsUuids);
+			refreshDada = await getLastGeopositions(contentCode, subjectUuid, dynamicPointsUuids);
 		}
 		const {geopositions, errors} = refreshDada;
 
@@ -79,7 +79,7 @@ const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (di
 		}
 		Array.isArray(geopositions) && geopositions.map(marker => {
 			if (marker.hasOwnProperty('geoposition')) {
-				const index = dynamicPoints.findIndex(markerTmp => markerTmp.uuid === marker.uuid);
+				const index = dynamicPoints.findIndex(markerTmp => markerTmp.data[0].uuid === marker.uuid);
 				if (index !== -1) {
 					dynamicPoints[index].geoposition = marker.geoposition;
 				}
@@ -119,9 +119,18 @@ const recordGeolocationdError = () => ({
 	type: GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR
 });
 
-const setTab = (payload: PanelShow) => ({
+const setTab = (payload: PointType) => ({
 	type: GEOLOCATION_EVENTS.SET_TAB,
 	payload
+});
+
+const setSinglePoint = (data: Point) => ({
+	type: GEOLOCATION_EVENTS.SET_SINGLE_POINT,
+	payload: data
+});
+
+const resetSinglePoint = () => ({
+	type: GEOLOCATION_EVENTS.RESET_SINGLE_POINT,
 });
 
 const togglePanel = () => ({
@@ -136,6 +145,8 @@ export {
 	getAppConfig,
 	fetchGeolocation,
 	reloadGeolocation,
+	resetSinglePoint,
+	setSinglePoint,
 	setTab,
 	toggleFilter,
 	togglePanel,

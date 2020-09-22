@@ -32,6 +32,8 @@ export const initialGeolocationState: GeolocationState = {
 	},
 	staticGroups: [],
 	staticPoints: [],
+	showSinglePoint: false,
+	singlePoint: null,
 	success: false
 };
 
