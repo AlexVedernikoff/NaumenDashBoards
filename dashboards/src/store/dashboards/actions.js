@@ -1,6 +1,8 @@
 // @flow
+import {createToast} from 'store/toasts/actions';
 import {DASHBOARDS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
+import {parseResponseErrorText} from 'store/helpers';
 
 /**
  * Получает список всех дашбордов с наборами виджетов
@@ -19,6 +21,16 @@ const fetchDashboards = () => async (dispatch: Dispatch) => {
 			type: DASHBOARDS_EVENTS.RESPONSE_DASHBOARDS
 		});
 	} catch (e) {
+		const errorText = parseResponseErrorText(e.responseText);
+
+		if (errorText) {
+			dispatch(createToast({
+				text: errorText,
+				time: 5000,
+				type: 'error'
+			}));
+		}
+
 		dispatch({
 			type: DASHBOARDS_EVENTS.RECORD_DASHBOARDS_ERROR
 		});

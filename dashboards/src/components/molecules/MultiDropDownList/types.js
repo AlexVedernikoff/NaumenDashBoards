@@ -12,11 +12,10 @@ export type Item = {
 };
 
 export type Props = {
-	fetch: () => any,
 	items: Array<Item>,
 	loading: boolean,
-	onSelect: (child: Child) => any,
-	uploaded: boolean
+	onFocusSearchInput: (e: SyntheticInputEvent<HTMLInputElement>) => void,
+	onSelect: (child: Child) => any
 };
 
 export type State = {

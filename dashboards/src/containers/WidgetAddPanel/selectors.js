@@ -11,6 +11,7 @@ import {fetchDashboards} from 'store/dashboards/actions';
 export const props = (state: AppState): ConnectedProps => ({
 	dashboards: state.dashboards,
 	layoutMode: state.dashboard.settings.layoutMode,
+	personalDashboard: state.dashboard.settings.personal,
 	user: state.context.user,
 	widgets: state.widgets.data.map
 });
