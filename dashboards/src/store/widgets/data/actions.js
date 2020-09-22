@@ -5,7 +5,7 @@ import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
-import {getParams} from 'store/helpers';
+import {getParams, parseResponseErrorText} from 'store/helpers';
 import {isObject} from 'src/helpers';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -195,25 +195,6 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch(setSelectedWidget(payload));
 	dispatch(editDashboard());
-};
-
-/**
- * Парсит текст серверной ошибки
- * @param {string} text - текст ошибки
- * @returns {Object | string}
- */
-const parseResponseErrorText = (text: string) => {
-	let data = text.split('njava.lang.Exception:')[1];
-	data = data.substr(0, data.length - 2).trim();
-	let result;
-
-	try {
-		result = JSON.parse(JSON.parse(`"${data}"`));
-	} catch (e) {
-		result = data;
-	}
-
-	return result;
 };
 
 /**

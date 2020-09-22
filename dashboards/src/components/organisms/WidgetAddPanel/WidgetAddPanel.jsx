@@ -5,7 +5,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import {Modal, MultiDropDownList} from 'components/molecules';
 import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/WidgetAddPanel/types';
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import {SIZES} from 'components/molecules/Modal/constants';
 import type {State} from './types';
 import styles from './styles.less';
@@ -21,6 +21,11 @@ export class WidgetAddPanel extends Component<Props, State> {
 	};
 
 	handleCloseModal = () => this.setState({invalidWidgetId: ''});
+
+	handleFocusSearchInput = () => {
+		const {dashboards, fetchDashboards} = this.props;
+		!dashboards.uploaded && fetchDashboards();
+	};
 
 	handleSelect = async (item: Object) => {
 		const {copyWidget, validateWidgetToCopy} = this.props;
@@ -50,18 +55,22 @@ export class WidgetAddPanel extends Component<Props, State> {
 	renderCancelButton = () => null;
 
 	renderDashboardsList = () => {
-		const {dashboards, fetchDashboards, user} = this.props;
-		const {items, loading, uploaded} = dashboards;
+		const {dashboards, personalDashboard, user} = this.props;
+		const {items, loading} = dashboards;
 
-		if (user.role !== USER_ROLES.REGULAR) {
+		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
 			return (
-				<MultiDropDownList
-					fetch={fetchDashboards}
-					items={items}
-					loading={loading}
-					onSelect={this.handleSelect}
-					uploaded={uploaded}
-				/>
+				<Fragment>
+					<Text className={styles.field} type={TEXT_TYPES.SMALL}>
+						Или выберите виджет из существующих вариантов для копирования
+					</Text>
+					<MultiDropDownList
+						items={items}
+						loading={loading}
+						onFocusSearchInput={this.handleFocusSearchInput}
+						onSelect={this.handleSelect}
+					/>
+				</Fragment>
 			);
 		}
 	};
@@ -108,11 +117,8 @@ export class WidgetAddPanel extends Component<Props, State> {
 		};
 
 		return (
-			<WidgetForm components={components} onSubmit={this.handleSubmit} title="Добавление виджета">
+			<WidgetForm components={components} onSubmit={this.handleSubmit} title="Добавить виджет">
 				<div className={styles.content}>
-					<Text className={styles.field} type={TEXT_TYPES.SMALL}>
-						Выберите виджет из существующих вариантов или создайте новый.
-					</Text>
 					{this.renderDashboardsList()}
 					{this.renderModal()}
 				</div>

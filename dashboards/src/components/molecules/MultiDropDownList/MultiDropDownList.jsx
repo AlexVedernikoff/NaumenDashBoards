@@ -11,11 +11,6 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 		searchValue: ''
 	};
 
-	componentDidMount () {
-		const {fetch, uploaded} = this.props;
-		!uploaded && fetch();
-	}
-
 	getItems = (): Array<Object> => {
 		const {items} = this.props;
 		const {searchValue} = this.state;
@@ -26,7 +21,7 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 				...item,
 				children: item.children.filter(child => reg.test(child.label)
 				)}))
-			.filter(item => item.children.length !== 0);
+			.filter(({children, label}) => reg.test(label) && children.length !== 0);
 	};
 
 	handleSearch = (searchValue: string) => this.setState({searchValue});
@@ -66,7 +61,10 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSearchInput = () => <SearchInput className={styles.field} onChange={this.handleSearch} />;
+	renderSearchInput = () => {
+		const {onFocusSearchInput} = this.props;
+		return <SearchInput className={styles.field} onChange={this.handleSearch} onFocus={onFocusSearchInput} />;
+	};
 
 	render () {
 		return (

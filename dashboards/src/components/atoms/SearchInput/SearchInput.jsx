@@ -37,10 +37,10 @@ export class SearchInput extends PureComponent<Props, State> {
 
 	handleClick = (e: SyntheticInputEvent<HTMLInputElement>) => e.stopPropagation();
 
-	renderIcon = () => <Icon className={styles.icon} name={ICON_NAMES.SEARCH} />;
+	handleClickRemoveIcon = () => this.props.onChange('');
 
 	renderInput = () => {
-		const {forwardedRef} = this.props;
+		const {forwardedRef, onFocus} = this.props;
 		const {value} = this.state;
 
 		return (
@@ -48,6 +48,7 @@ export class SearchInput extends PureComponent<Props, State> {
 				className={styles.input}
 				onChange={this.handleChange}
 				onClick={this.handleClick}
+				onFocus={onFocus}
 				placeholder="Поиск"
 				ref={forwardedRef}
 				value={value}
@@ -55,13 +56,28 @@ export class SearchInput extends PureComponent<Props, State> {
 		);
 	};
 
+	renderInputContainer = () => (
+		<div className={styles.inputContainer}>
+			{this.renderInput()}
+			{this.renderRemoveIcon()}
+		</div>
+	);
+
+	renderRemoveIcon = () => (
+		<div className={styles.removeIconContainer}>
+			<Icon name={ICON_NAMES.REMOVE} onClick={this.handleClickRemoveIcon} />
+		</div>
+	);
+
+	renderSearchIcon = () => <Icon className={styles.searchIcon} name={ICON_NAMES.SEARCH} />;
+
 	render () {
 		const {className} = this.props;
 
 		return (
 			<div className={cn(styles.container, className)}>
-				{this.renderIcon()}
-				{this.renderInput()}
+				{this.renderSearchIcon()}
+				{this.renderInputContainer()}
 			</div>
 		);
 	}

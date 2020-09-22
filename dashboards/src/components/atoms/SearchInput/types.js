@@ -9,6 +9,7 @@ export type Props = {
 	className: string,
 	forwardedRef: ForwardedRef,
 	onChange: (value: string) => void,
+	onFocus?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
 	value: string
 };
 

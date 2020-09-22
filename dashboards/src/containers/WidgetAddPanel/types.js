@@ -9,6 +9,7 @@ import type {WidgetMap} from 'store/widgets/data/types';
 export type ConnectedProps = {|
 	dashboards: DashboardsState,
 	layoutMode: LayoutMode,
+	personalDashboard: boolean,
 	user: UserData,
 	widgets: WidgetMap
 |};
