@@ -137,7 +137,7 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
 };
 
 // $FlowFixMe
-const getBuildSet = (widget: Widget) => widget.data.find(set => !set.sourceForCompute);
+const getBuildSet = (widget: Object) => widget.data.find(set => !set.sourceForCompute);
 
 export {
 	getBuildSet,

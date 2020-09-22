@@ -12,37 +12,35 @@ export type Column = {
 };
 
 export type Row = {
-	[accessor: string]: string
+	[accessor: string]: string | number
 };
 
-export type ValueProps = {
-	columnIndex: number,
-	value: string | number
-};
+export type CellConfigProps = React$Config<CellProps, DefaultCellProps>;
 
 export type Components = $Shape<{
-	Cell: React$ComponentType<React$Config<CellProps, DefaultCellProps>>,
+	BodyCell: React$ComponentType<CellConfigProps>,
+	FooterCell: React$ComponentType<CellConfigProps>,
 	HeaderCell: React$ComponentType<HeaderProps>,
-	Row: React$ComponentType<RowProps>,
-	Value: React$ComponentType<ValueProps>
+	Row: React$ComponentType<RowProps>
 }>;
 
 export type OnClickCellProps = {
-	columnIndex: number,
-	rowIndex: number,
+	column: Column,
+	row: Row | null,
 	value: number | string
 };
 
-export type OnClickDataCell = (event: MouseEvent, props: OnClickCellProps) => void;
+export type OnClickCell = (event: MouseEvent, props: OnClickCellProps) => void;
 
 export type Props = {
+	className: string,
 	columns: Array<Column>,
 	columnsRatioWidth: Array<number>,
 	components: Components,
 	data: Array<Row>,
 	onChangeColumnWidth: (columnsWidth: Array<number>) => void,
 	onChangeSorting: (sorting: TableSorting) => void,
-	onClickDataCell: OnClickDataCell,
+	onClickDataCell: OnClickCell,
 	settings: Table,
 	sorting: TableSorting
 };

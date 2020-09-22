@@ -1,15 +1,18 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {Cell} from 'components/organisms/Table/components';
+import type {CellConfigProps, OnClickCellProps} from 'components/organisms/Table/types';
 import type {Column, Props, State} from './types';
 import {COLUMN_TYPES, ID_ACCESSOR} from './constants';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce} from 'src/helpers';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import type {OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
+import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
 import {parseMSInterval} from 'store/widgets/helpers';
 import React, {PureComponent} from 'react';
+import styles from './styles.less';
 import {Table} from 'components/organisms';
 import type {TableSorting} from 'store/widgets/data/types';
+import type {ValueProps} from 'components/organisms/Table/components/Cell/types';
 
 export class TableWidget extends PureComponent<Props, State> {
 	state = {
@@ -47,23 +50,18 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	handleClickDataCell = (e: MouseEvent, props: OnClickCellProps) => {
-		const {data: tableData, onDrillDown, widget} = this.props;
-		const {columns} = this.state;
-		const {columnIndex, rowIndex} = props;
-		const {data} = tableData;
+		const {column, row: currentRow} = props;
 
-		if (columns[columnIndex].type === COLUMN_TYPES.INDICATOR) {
+		if (column.type === COLUMN_TYPES.INDICATOR && currentRow) {
+			const {onDrillDown, widget} = this.props;
+			const {columns} = this.state;
 			const mixin = createDrillDownMixin(widget);
-			const currentRow = data[rowIndex];
-			let currentGroupIndex = columns
-				.findIndex(column => {
-					return this.isGroupColumn(column) && column.accessor in currentRow;
-				});
-			let currentId = currentRow[ID_ACCESSOR];
+			let currentGroupIndex = columns.findIndex(column => this.isGroupColumn(column) && column.accessor in currentRow);
 
 			while (currentGroupIndex > -1 && this.isGroupColumn(columns[currentGroupIndex])) {
 				const {accessor, attribute, group} = columns[currentGroupIndex];
-				const row = this.findRow(currentId, accessor);
+				// $FlowFixMe
+				const row = this.findRow(currentRow[ID_ACCESSOR], accessor);
 
 				if (row) {
 					const {[accessor]: value} = row;
@@ -90,34 +88,45 @@ export class TableWidget extends PureComponent<Props, State> {
 		return type === PARAMETER || type === BREAKDOWN;
 	};
 
-	renderValue = (props: ValueProps) => {
-		const {columns} = this.state;
-		const {columnIndex, value} = props;
-		const {aggregation, attribute, type} = columns[columnIndex];
+	renderBodyCell = (props: CellConfigProps) => {
+		const Component = props.column.type === COLUMN_TYPES.INDICATOR ? this.renderIndicatorCell : Cell;
+		return <Component {...props} />;
+	};
 
-		if (type === COLUMN_TYPES.INDICATOR) {
-			if (attribute.type === ATTRIBUTE_TYPES.dtInterval) {
-				return parseMSInterval(Number(value));
-			}
+	renderIndicatorCell = (props: CellConfigProps) => {
+		const {column, value} = props;
+		const {aggregation, attribute} = column;
+		const components = {
+			Value: this.renderLink
+		};
+		let cellValue = value;
 
-			if (aggregation === DEFAULT_AGGREGATION.PERCENT) {
-				return `${value}%`;
-			}
+		if (attribute.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION) {
+			cellValue = parseMSInterval(Number(value));
+		} else if (aggregation === DEFAULT_AGGREGATION.PERCENT && value) {
+			cellValue = `${value}%`;
 		}
 
-		return value;
+		return <Cell {...props} components={components} value={cellValue} />;
 	};
+
+	renderLink = (props: ValueProps) => (
+		<a href="javascript:void(0)" >
+			{props.value}
+		</a>
+	);
 
 	render (): React$Node {
 		const {data: tableData, widget} = this.props;
 		const {columns} = this.state;
 		const {columnsRatioWidth, sorting, table} = widget;
 		const components = {
-			Value: this.renderValue
+			BodyCell: this.renderBodyCell
 		};
 
 		return (
 			<Table
+				className={styles.table}
 				columns={columns}
 				columnsRatioWidth={columnsRatioWidth}
 				components={components}

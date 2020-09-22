@@ -7,13 +7,12 @@ import styles from './styles.less';
 export class Header extends PureComponent<Props> {
 	renderColumn = (column: Column, index: number) => {
 		const {columnsWidth, components} = this.props;
-		const {Cell, Value} = components;
+		const {FooterCell} = components;
 		const {accessor, footer} = column;
 
 		return (
-			<Cell
-				columnIndex={index}
-				components={{Value}}
+			<FooterCell
+				column={column}
 				key={accessor}
 				value={footer}
 				width={columnsWidth[index]}
