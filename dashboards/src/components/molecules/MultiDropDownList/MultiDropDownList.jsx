@@ -14,14 +14,14 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 	getItems = (): Array<Object> => {
 		const {items} = this.props;
 		const {searchValue} = this.state;
-		const reg = new RegExp(searchValue, 'i');
+		const reg = new RegExp(searchValue, 'ig');
 
 		return items
 			.map(item => ({
 				...item,
 				children: item.children.filter(child => reg.test(child.label)
 				)}))
-			.filter(({children, label}) => reg.test(label) && children.length !== 0);
+			.filter(({children, label}) => reg.test(label) || children.length !== 0);
 	};
 
 	handleSearch = (searchValue: string) => this.setState({searchValue});

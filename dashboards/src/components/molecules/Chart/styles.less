@@ -3,37 +3,6 @@
 :local {
 	.container {
 		height: 100%;
-
-		&:hover {
-			.zoomPanel {
-				display: block;
-			}
-		}
-	}
-
-	.chart {
-		overflow: hidden;
-	}
-
-	.zoomed {
-		&:nth-child(1) {
-			cursor: crosshair;
-		}
-	}
-
-	.panned {
-		&:nth-child(1) {
-			cursor: move;
-		}
-	}
-
-	.zoomPanel {
-		cursor: pointer;
-		display: none;
-		left: calc(100% - 8px);
-		position: absolute;
-		top: 0;
-		z-index: 1;
 	}
 }
 
