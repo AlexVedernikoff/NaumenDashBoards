@@ -20,22 +20,25 @@ export class PanelPoint extends Component<Props, State> {
 	showSingle = () => {
 		const {geoposition, pointData, showSinglePoint, setSinglePoint, type} = this.props;
 
-		if(geoposition) {
-			const data = {
-				geoposition,
-				data: [pointData],
-				type
-			};
+		this.setState({actionShow: false});
 
-			!showSinglePoint && setSinglePoint(data);
-		} else {
+		if(!geoposition) {
 			const {header} = pointData;
 
 			notify('single', 'info', header);
 		}
+		const data = {
+			geoposition,
+			data: [pointData],
+			type
+		};
+
+		!showSinglePoint && setSinglePoint(data);
 	}
 
-	toggleActionShow = () => this.setState({actionShow: !this.state.actionShow});
+	showAction = () => this.setState({actionShow: true});
+
+	hideAction = () => this.setState({actionShow: false});
 
 	renderOption = (option: Option, id: number) => <PanelPointContent option={option} key={`option_${id}`} />;
 
@@ -43,12 +46,12 @@ export class PanelPoint extends Component<Props, State> {
 		const {pointData, statusColor} = this.props;
 		const {actions, header, options, uuid} = pointData;
 		const {actionShow} = this.state;
-		const showKebab = (actionShow && actions) ? true : false;
+		const showKebab = (actionShow && actions.length) ? true : false;
 
 		return (
 			<div
-				onMouseEnter={this.toggleActionShow}
-				onMouseLeave={this.toggleActionShow}
+				onMouseEnter={this.showAction}
+				onMouseLeave={this.hideAction}
 				onClick={this.showSingle}
 				className={styles.pointContainer}
 			>

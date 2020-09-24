@@ -23,7 +23,8 @@ export const getLatLngBounds = (dataMarkers: Array<Point>) => {
 
 	const markers = dataMarkers.length >= 2 ? dataMarkers : defaultBounds;
 	const latLngs = markers.map(marker => {
-		return L.latLng(marker.geoposition.latitude, marker.geoposition.longitude);
+		if(marker.geoposition)
+			return L.latLng(marker.geoposition.latitude, marker.geoposition.longitude);
 	});
 
 	return L.latLngBounds(latLngs);

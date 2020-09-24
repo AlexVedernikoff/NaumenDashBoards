@@ -2,7 +2,6 @@
 import {getContext, getParams, getMap, getLastGeopositions} from 'utils/api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from './constants';
-import {getGeoMarkers} from 'helpers/marker';
 import {getTimeInSeconds} from 'helpers/time';
 import {notify} from 'helpers/notify';
 import type {Point, PointType} from 'types/point';
@@ -41,9 +40,13 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 			markers = await getMap(contentCode, subjectUuid)
 		}
 
-		const geoMarkers = getGeoMarkers(markers);
+		const {errors} = markers;
 
-		dispatch(setData(geoMarkers));
+		if (errors.length) {
+			const label = errors.join(', ') + '.';
+			notify('static', 'info', label);
+		}
+		dispatch(setData(markers));
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError());

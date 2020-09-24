@@ -6,8 +6,8 @@ const props = (state: AppState): ConnectedProps => {
 	const {dynamicPoints, staticPoints} = state.geolocation;
 
 	return {
-		dynamicPoints,
-		staticPoints
+		dynamicPoints: dynamicPoints.filter(point => point.geoposition !== null),
+		staticPoints: staticPoints.filter(point => point.geoposition !== null)
 	};
 };
 

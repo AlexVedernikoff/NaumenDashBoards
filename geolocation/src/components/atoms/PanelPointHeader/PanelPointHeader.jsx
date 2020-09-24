@@ -28,7 +28,11 @@ export class PanelPointHeader extends Component<Props, State> {
 		);
 	};
 
-	openActions = () => this.setState({openAction: !this.state.openAction});
+	openActions = (event: SyntheticEvent<HTMLButtonElement>) => {
+		event.stopPropagation();
+
+		this.setState({openAction: !this.state.openAction});
+	}
 
 	callChangeState = (uuid: string, states: Array<string>) => async() => {
 		const {fetchGeolocation} = this.props;
@@ -128,6 +132,15 @@ export class PanelPointHeader extends Component<Props, State> {
 			</div>
 		);
 	};
+
+	componentDidUpdate () {
+		const {showKebab} = this.props;
+		const {openAction} = this.state;
+
+		if(!showKebab && openAction) {
+			this.setState({openAction: false});
+		}
+	}
 
 	render () {
 		const {showKebab, header, statusColor} = this.props;

@@ -78,23 +78,39 @@ export default {
 										'waitClientAnswer', 'resolved', 'deffered'
 								]
 						}
+					],
+					actions :
+					[
+						{
+							type : 'open_link',
+							name : 'Перейти на карточку',
+							link : 'http://map-dev.nsd.naumen.ru/sd/operator/?anchor=uuid:serviceCall$2309303',
+							inPlace : false
+						},
+						{
+							type : 'change_responsible',
+							name : 'Сменить ответственного'
+						},
+						{
+							type : 'change_state',
+							name : 'Сменить статус',
+							states : [
+									'waitClientAnswer', 'resolved', 'deffered'
+							]
+					}
 				]
 			}
 			]
 		},
 		{
 			type: 'static',
-			geoposition:
-			{
-				latitude : 56.5633,
-				longitude : 60.7202
-			},
+			geoposition: null,
 			data: [
 			{
 					type : 'static',
 					uuid : 'serviceCall$2509393',
 					header : 'Инцидент 123',
-					group : 'white',
+					group : 'red',
 					options :
 					[
 						{
@@ -146,7 +162,7 @@ export default {
 					type : 'static',
 					uuid : 'serviceCall$2509397',
 					header : 'Инцидент test',
-					group : 'white',
+					group : 'red',
 					options :
 					[
 						{
@@ -190,12 +206,12 @@ export default {
 	staticGroups : [
 		{
 			name : 'Красная',
-			color : 'FA1010',
+			color : '#FA1010',
 			code : 'red'
 		},
 		{
 			name : 'Белая',
-			color : 'FFFFFF',
+			color : '#FFFFFF',
 			code : 'white'
 		}
 	],

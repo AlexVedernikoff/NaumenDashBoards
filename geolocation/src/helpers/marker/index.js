@@ -1,9 +1,7 @@
 // @flow
-import type {FetchResponse} from 'types/point';
 import {getTimeInSeconds} from 'helpers/time';
-import {notify} from 'helpers/notify';
 import type {Params} from 'types/params';
-import type {Point, StaticGroup} from 'types/point';
+import type {Group, Point, PointData, StaticGroup} from 'types/point';
 
 /**
  * Returns the color of dynamic point
@@ -22,16 +20,38 @@ export const colorActive = (date: string, params: Params): string => {
 	return isActivePoint ? params.colorDynamicActivePoint : params.colorDynamicInactivePoint;
 };
 /**
- * Returns the color of dynamic point
+ * Returns the color of static point
  * @constructor
- * @param {string} group - The group code of static point - .
+ * @param {string} group - The group code of static point.
  * @param {Array<StaticGroup>} staticGroups - The array of static groups for static points.
  * @returns {string} - Color of group for static point
 */
-export const colorGroup = (group: string, staticGroups: Array<StaticGroup>): string => {
+export const colorGroup = (group: Group, staticGroups: Array<StaticGroup>): string => {
 	const found = staticGroups.find(item => item.code === group);
 
 	return found ? found.color : '';
+}
+
+/**
+ * Returns the color of claster point
+ * @constructor
+ * @param {PointData} data - The data of claster point.
+ * @param {Array<StaticGroup>} staticGroups - The array of static groups for static points.
+ * @param {string} colorStaticPoint - The dafault color of static point
+ * @returns {string} - Color for claster point. If points have few colors return empty string.
+*/
+export const colorMultipleGroup = (data: Array<PointData>, staticGroups: Array<StaticGroup>, colorStaticPoint: string) => {
+	const colors = data.map(item => colorGroup(item.group, staticGroups));
+	const uniqueColors = [...new Set(colors)];
+
+	if(uniqueColors.length === 1) {
+		if(uniqueColors.includes('')) {
+			return colorStaticPoint;
+		} else {
+			return uniqueColors[0];
+		}
+	}
+	return '';
 }
 
 export const checkActivePoint = (point: Point, singlePoint: Point) => {
@@ -41,32 +61,3 @@ export const checkActivePoint = (point: Point, singlePoint: Point) => {
 	return found;
 }
 
-export const getGeoMarkers = (markers: FetchResponse) => {
-	const {dynamicPoints, errors, staticGroups, staticPoints } = markers;
-	const geoMarkers = {
-		dynamicPoints: [],
-		staticGroups,
-		staticPoints: []
-	};
-
-	if(!staticPoints.length && !dynamicPoints.length ) {
-		notify('empty', 'empty');
-	}
-	staticPoints.forEach((marker) => {
-		if (marker.geoposition !== null ) {
-			geoMarkers.staticPoints.push(marker)
-		}
-	});
-	dynamicPoints.forEach((marker) => {
-		if (marker.geoposition !== null ) {
-			geoMarkers.dynamicPoints.push(marker);
-		}
-	});
-
-	if (errors.length) {
-		const label = errors.join(', ') + '.';
-		notify('static', 'info', label);
-	}
-
-	return geoMarkers;
-};

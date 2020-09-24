@@ -11,10 +11,12 @@ export type Point = {
 	type: PointType
 };
 
+export type Group = string | null;
+
 export type PointData = {
-	actions?: Array<Action>,
+	actions: Array<Action>,
 	errorMessage?: string,
-	group: string,
+	group: Group,
 	header: string,
 	options?: Array<Option>,
 	type: 'dynamic' | 'static',
