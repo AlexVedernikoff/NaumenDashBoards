@@ -24,14 +24,6 @@ export class DashboardHeader extends Component<Props, State> {
 		showModal: false
 	};
 
-	componentDidMount () {
-		const {changeLayoutMode, personalDashboard, user} = this.props;
-
-		if (user.role === USER_ROLES.REGULAR && !personalDashboard) {
-			changeLayoutMode(LAYOUT_MODE.WEB);
-		}
-	}
-
 	createDocument = (way: string) => async (type: string) => {
 		const {DOWNLOAD, MAIL} = EXPORT_VARIANTS;
 		const {sendToMail} = this.props;

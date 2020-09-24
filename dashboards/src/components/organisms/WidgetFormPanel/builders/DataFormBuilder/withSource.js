@@ -119,9 +119,10 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 		renderAddSourceInput = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleAddSource} />;
 
 		renderSourceFieldset = (props: RenderSourceFieldsetProps) => (set: DataSet, index: number) => {
-			const {errors, setDataFieldValue, sources: baseSources} = this.props;
+			const {errors, setDataFieldValue, sources: baseSources, values} = this.props;
 			const {onSelectCallback, sourceRefFields, sources = baseSources, useFilter} = props;
 			const error = errors[getDataErrorKey(index, FIELDS.source)];
+			const removable = values.data.length > 1;
 
 			return (
 				<SourceFieldset
@@ -134,6 +135,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 					onChangeDescriptor={this.handleChangeDescriptor(sourceRefFields)}
 					onRemove={this.handleRemoveSource}
 					onSelectSource={this.handleSelectSource(onSelectCallback)}
+					removable={removable}
 					set={set}
 					sourceRefFields={sourceRefFields}
 					sources={sources}

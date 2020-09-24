@@ -7,6 +7,7 @@ import {COLUMN_TYPES, ID_ACCESSOR} from './constants';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce} from 'src/helpers';
 import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
+import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
 import {parseMSInterval} from 'store/widgets/helpers';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -89,7 +90,18 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	renderBodyCell = (props: CellConfigProps) => {
-		const Component = props.column.type === COLUMN_TYPES.INDICATOR ? this.renderIndicatorCell : Cell;
+		const {INDICATOR, PARAMETER} = COLUMN_TYPES;
+		const {aggregation, type} = props.column;
+		let Component = Cell;
+
+		if (type === INDICATOR && aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE) {
+			Component = this.renderIndicatorCell;
+		}
+
+		if (type === PARAMETER) {
+			Component = this.renderParameterCell;
+		}
+
 		return <Component {...props} />;
 	};
 
@@ -115,6 +127,8 @@ export class TableWidget extends PureComponent<Props, State> {
 			{props.value}
 		</a>
 	);
+
+	renderParameterCell = (props: CellConfigProps) => <Cell {...props} defaultValue={DEFAULT_TABLE_VALUE.EMPTY_ROW} />;
 
 	render (): React$Node {
 		const {data: tableData, widget} = this.props;

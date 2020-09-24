@@ -37,7 +37,10 @@ export class SearchInput extends PureComponent<Props, State> {
 
 	handleClick = (e: SyntheticInputEvent<HTMLInputElement>) => e.stopPropagation();
 
-	handleClickRemoveIcon = () => this.props.onChange('');
+	handleClickRemoveIcon = () => {
+		this.setState({value: ''});
+		this.props.onChange('');
+	};
 
 	renderInput = () => {
 		const {forwardedRef, onFocus} = this.props;

@@ -8,6 +8,7 @@ import {number, object} from 'yup';
 import type {Props, State, Values} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import {USER_ROLES} from 'store/context/constants';
 
 export class AutoUpdateButton extends PureComponent<Props, State> {
 	state = {
@@ -114,6 +115,19 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 		);
 	};
 
+	renderForm = () => {
+		const {className, personalDashboard, role} = this.props;
+
+		if (personalDashboard || role !== USER_ROLES.REGULAR) {
+			return (
+				<form className={cn([styles.form, className])} onSubmit={this.handleSubmit}>
+					{this.renderTitle()}
+					{this.renderSettings()}
+				</form>
+			);
+		}
+	};
+
 	renderInput = () => {
 		const {errors, values} = this.state;
 		const {interval} = values;
@@ -198,15 +212,10 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {className} = this.props;
-
 		return (
 			<Fragment>
 				{this.renderTimerButton()}
-				<form className={cn([styles.form, className])} onSubmit={this.handleSubmit}>
-					{this.renderTitle()}
-					{this.renderSettings()}
-				</form>
+				{this.renderForm()}
 			</Fragment>
 		);
 	}

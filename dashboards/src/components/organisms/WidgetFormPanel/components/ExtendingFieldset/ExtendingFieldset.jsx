@@ -1,11 +1,14 @@
 // @flow
+import cn from 'classnames';
 import {ExtendButton} from 'components/atoms';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import styles from './styles.less';
 
 export class ExtendingFieldset extends PureComponent<Props> {
 	static defaultProps = {
-		className: ''
+		className: '',
+		disabled: false
 	};
 
 	renderChildren = () => {
@@ -23,10 +26,14 @@ export class ExtendingFieldset extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className} = this.props;
+		const {className, disabled} = this.props;
+		const CN = cn({
+			[className]: true,
+			[styles.disabled]: disabled
+		});
 
 		return (
-			<div className={className}>
+			<div className={CN}>
 				{this.renderExtendButton()}
 				{this.renderChildren()}
 			</div>
