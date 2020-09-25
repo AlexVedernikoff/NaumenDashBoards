@@ -120,6 +120,22 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     /**
+     * Метод агрегации N/A
+     * @param parameter - параметр агрегации
+     * @return тело запрос с агрегацией N/A
+     */
+    QueryWrapper noneAggregate(parameter)
+    {
+        def attribute = parameter.attribute
+        def sc = api.selectClause
+        String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        IApiCriteriaColumn column = sc.property(attributeCodes)
+        criteria.addColumn(column)
+        criteria.addGroupColumn(column)
+        return this
+    }
+
+    /**
      * Метод преобразования динамического типа атрибута к конкретному типу даты
      * @param attribute - динамический атрибут
      * @param column - преобразованная колонка для запроса
@@ -566,9 +582,9 @@ class QueryWrapper implements CriteriaWrapper
                                          }
             String code = parameter.attribute.code
             String parameterFqn = parameter.attribute.metaClassFqn
-            if (columnCode == 'id')
+            if (columnCode.contains('id'))
             {
-                columnCode = modules.dashboardQueryWrapper.UUID_CODE
+                columnCode = columnCode.replace('id', modules.dashboardQueryWrapper.UUID_CODE)
             }
             if (code == AttributeType.TOTAL_VALUE_TYPE)
             {
@@ -728,9 +744,10 @@ class QueryWrapper implements CriteriaWrapper
 /**
  * Метод получения данных биаграммы
  * @param requestData - запрос на получение данных
+ * @param onlyFilled - вывод только заполненных полей
  * @return результат выборки
  */
-List<List> getData(RequestData requestData)
+List<List> getData(RequestData requestData, Boolean onlyFilled = true)
 {
     validate(requestData)
     validate(requestData.source)
@@ -766,6 +783,10 @@ List<List> getData(RequestData requestData)
                                          .result.head().head()
 
             wrapper.percentAggregate(parameter, totalCount)
+        }
+        else if (parameter.type == Aggregation.NOT_APPLICABLE)
+        {
+            wrapper.noneAggregate(parameter)
         }
         else
         {
@@ -805,7 +826,15 @@ List<List> getData(RequestData requestData)
     requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
 
     //Фильтрация по непустым атрибутам
-    Set attributeSet = requestData.aggregations*.attribute + clonedGroups*.attribute
+    Set attributeSet
+    if (onlyFilled)
+    {
+        attributeSet = requestData.aggregations*.attribute + clonedGroups*.attribute
+    }
+    else
+    {
+        attributeSet = clonedGroups*.attribute
+    }
     attributeSet.findResults {
         it
     }.collect { attr ->
@@ -885,17 +914,17 @@ private static def validate(AggregationParameter parameter) throws IllegalArgume
         case AttributeType.DT_INTERVAL_TYPE:
         case AttributeType.NUMBER_TYPES:
             if (!(type in Aggregation.with {
-                [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT]
+                [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ]
             }))
             {
                 throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
             }
             break
         default:
-            if ((!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT]) &&
-                  parameter.attribute.type != AttributeType.CATALOG_ITEM_TYPE) ||
-                 (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
-                  !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT] })))
+            if ((!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT, Aggregation.NOT_APPLICABLE ]) &&
+                 parameter.attribute.type != AttributeType.CATALOG_ITEM_TYPE) ||
+                (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
+                 !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ] })))
             {
                 throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
             }

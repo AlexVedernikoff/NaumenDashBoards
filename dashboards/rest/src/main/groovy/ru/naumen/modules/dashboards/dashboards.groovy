@@ -71,11 +71,11 @@ String getAttributesDataSources(requestContent)
     String classFqn = requestContent.classFqn.toString()
     List<String> types = requestContent?.types
     def metaInfo = api.metainfo.getMetaClass(classFqn)
-    List attributes = types ? metaInfo.attributes.findResults {
+    List attributes = types ? metaInfo?.attributes?.findResults {
         it.type.code in types ? it : null
-    } : metaInfo.attributes.toList()
-    Collection<Attribute> mappingAttributes =
-        mappingAttribute(attributes, metaInfo.title, metaInfo.code)
+    } : metaInfo?.attributes?.toList()
+    Collection<Attribute> mappingAttributes = attributes ?
+        mappingAttribute(attributes, metaInfo.title, metaInfo.code) : []
     return toJson(mappingAttributes)
 }
 
@@ -89,11 +89,11 @@ def getDataSourceAttributes(requestContent, Boolean parseToJson = true)
     String classFqn = requestContent.classFqn.toString()
     List<String> types = requestContent?.types
     def metaInfo = api.metainfo.getMetaClass(classFqn)
-    List attributes = types ? metaInfo.attributes.findResults {
+    List attributes = types ? metaInfo?.attributes?.findResults {
         it.type.code in types ? it : null
-    } : metaInfo.attributes.toList()
-    Collection<Attribute> mappingAttributes =
-        mappingAttribute(attributes, metaInfo.title, metaInfo.code)
+    } : metaInfo?.attributes?.toList()
+    Collection<Attribute> mappingAttributes = attributes ?
+        mappingAttribute(attributes, metaInfo.title, metaInfo.code) : []
     return parseToJson ? toJson(mappingAttributes) : mappingAttributes
 }
 

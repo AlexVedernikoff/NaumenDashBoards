@@ -96,7 +96,7 @@ class TableDiagram
     /**
      * Список значений Column
      */
-    Collection<Column> columns = [new Column("", "breakdownTitle", 0)]
+    Collection<Column> columns = [new Column("", "breakdownTitle", "")]
     /**
      * Список значений строки
      */
@@ -120,7 +120,31 @@ class Column
     /**
      * Итого по Column
      */
-    Double footer
+    String footer
+    /**
+     * Атрибут колонки
+     */
+    Attribute attribute
+    /**
+     * Тип атрибута колонки
+     */
+    ColumnType type
+    /**
+     * Группа (есть у параметров/разбивки)
+     */
+    Map<String, Object> group
+    /**
+     * Агрегация (есть у показателей)
+     */
+    String aggregation
+}
+
+class NumberColumn extends Column
+{
+    /**
+     * флаг отображения колонки
+     */
+    boolean show
 }
 
 /**
@@ -165,6 +189,26 @@ class SeriesCombo
      * Значение разбивки
      */
     String breakdownValue = ""
+}
+
+class ResRow
+{
+    /**
+     * перечисления количеств [[уникальный ид: кол-во]]
+     */
+    List<Map> count
+    /**
+     * название Параметра
+     */
+    String key
+    /**
+     * значение Параметра
+     */
+    String value
+    /**
+     * родитель
+     */
+    ResRow parent
 }
 //endregion
 
@@ -261,31 +305,35 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             return mappingSummaryDiagram(res)
         case TABLE:
             def normRequest = mappingTableDiagramRequest(requestContent, subjectUUID)
-            def res = getDiagramData(normRequest)
-            def (totalColumn, totalRow) = requestContent.data
-                                                        .findResult { key, value ->
-                                                            !(value.sourceForCompute) ? value : null
-                                                        }
-                                                        .with {
-                                                            [it.calcTotalColumn, it.calcTotalRow]
-                                                        }
-            return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean)
+            Boolean onlyFilled = !requestContent.showEmptyData
+            Integer aggregationCnt = normRequest?.data?.findResult { key, value ->
+                value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
+            }
+            List<Integer> ids = getComputeAggregationIds(requestContent)
+            def res = getDiagramData(normRequest, onlyFilled, aggregationCnt, requestContent, ids)
+            def (totalColumn, totalRow, showRowNum) = [requestContent.calcTotalColumn,
+                                                       requestContent.calcTotalRow,
+                                                       requestContent.showRowNum]
+            return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean,
+                                       showRowNum as boolean, normRequest, requestContent,
+                                       aggregationCnt)
         case COMBO:
             def normRequest = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(normRequest)
-            def (firstAdditionalData, secondAdditionalData) = (requestContent.data as Map)
-                .findAll { key, value -> !(value.sourceForCompute)
-                }
-                .collect { key, value ->
-                    [
-                        type     : value.type,
-                        breakdown: value.yAxis.title,
-                        name     : value.yAxis.title,
-                        dataKey  : key
-                    ]
+            List<Map> additionals = (requestContent.data as Map)
+                .findResults { key, value ->
+                    if (!(value.sourceForCompute))
+                    {
+                        return [
+                            type     : value.type,
+                            breakdown: value.yAxis.title,
+                            name     : value.yAxis.title,
+                            dataKey  : key
+                        ]
+                    }
                 }
             boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
-            return mappingComboDiagram(res, firstAdditionalData as Map, secondAdditionalData as Map, reverseGroups)
+            return mappingComboDiagram(res, additionals, reverseGroups)
         default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
     }
 }
@@ -689,32 +737,55 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
         def data = value as Map<String, Object>
         def source = new Source(classFqn: data.source, descriptor: data.descriptor)
-        def column = data.column as Map<String, Object>
-        def aggregationParameter = new AggregationParameter(
-            title: 'column',
-            type: data.aggregation as Aggregation,
-            attribute: mappingAttribute(column)
-        )
         def dynamicGroup = null
-        boolean dynamicInAggregate = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-        if (dynamicInAggregate)
-        {
-            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(column))
-        }
-        def row = data.row as Map<String, Object>
 
-        //в таблице группировка по строке всегда обычная.
-        def groupParameter = new GroupParameter(
-            title: 'row',
-            type: GroupType.OVERLAP,
-            attribute: mappingAttribute(row)
-        )
-        boolean dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-        if (dynamicInParameter) {
-            dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(row))
+        List<Map<String, Object>> indicators = data.indicators as List<Map>
+        List<AggregationParameter> aggregationParameters = indicators.collect { indicator ->
+            String aggregation = indicator.aggregation
+            Map attribute = indicator.attribute
+            return new AggregationParameter(
+                title: 'column',
+                type: aggregation as Aggregation,
+                attribute: mappingAttribute(attribute)
+            )
         }
 
-        //а вот разбивка может быть кастомной.
+        boolean dynamicInAggregate
+        aggregationParameters.each { aggregationParameter ->
+            dynamicInAggregate = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            if (dynamicInAggregate)
+            {
+                dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(aggregationParameter.attribute))
+            }
+        }
+
+        List<Map<String, Object>> parameters = data.parameters as List<Map>
+        List groupParameters = []
+        List parameterFilters = []
+        parameters.each {
+            Map attribute = it.attribute
+            Map<String, Object> group = it.group
+
+            if (group.way == 'SYSTEM')
+            {
+                def groupParameter = buildSystemGroup(group, attribute, 'parameter')
+                groupParameters << groupParameter
+            }
+            else
+            {
+                def customGroup = [attribute: mappingAttribute(attribute), *:group.data]
+                parameterFilters << getFilterList(customGroup, subjectUUID, 'parameter')
+            }
+        }
+
+        boolean dynamicInParameter
+        groupParameters.each {groupParameter ->
+            dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            if (dynamicInParameter) {
+                dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(groupParameter.attribute))
+            }
+        }
+
         def mayBeBreakdown = data.breakdown
         def breakdownMap = [:]
         def breakdownParameter = null
@@ -761,26 +832,30 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
 
         def res = new RequestData(
             source: source,
-            aggregations: [aggregationParameter],
-            groups: [groupParameter, breakdownParameter].grep()
+            aggregations: aggregationParameters,
+            groups: groupParameters + [breakdownParameter].grep()
         )
 
-        def comp = column?.stringForCompute?.with {
-            def compData = column.computeData as Map
-            [
-                formula    : it as String,
-                title      : column.title as String,
-                computeData: compData.collectEntries { k, v ->
+        def comp = indicators?.findResults { indicator ->
+            if (indicator?.attribute?.stringForCompute)
+            {
+                def compData = indicator.attribute.computeData as Map
+                def computeData = compData.collectEntries { k, v ->
                     String dataKey = v.dataKey
                     def br = breakdownMap[dataKey] as GroupParameter
                     def aggr = new AggregationParameter(
-                        title: 'aggregation',
+                        title: indicator?.attribute?.title,
                         type: v.aggregation as Aggregation,
                         attribute: mappingAttribute(v.attr as Map)
                     )
-                    [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                    return [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
                 }
-            ]
+                return [
+                    formula    : indicator?.attribute?.stringForCompute as String,
+                    title      : indicator.attribute.title as String,
+                    computeData: computeData
+                ]
+            }
         }
 
         def breakdownAttribute
@@ -805,10 +880,9 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             breakdownCustomGroup =  dynamicGroup
         }
         FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
-        FilterList parameterFilter = null
-        if (dynamicInAggregate || dynamicInParameter)
+        if (dynamicInAggregate)
         {
-            parameterFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
+            parameterFilters << getFilterList(dynamicGroup, subjectUUID, 'parameter')
         }
 
         def requisite
@@ -825,13 +899,132 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, parameterFilter])
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, *parameterFilters])
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             null, requisite: requisite]]
     } as Map<String, Map>
-    return buildDiagramRequest(intermediateData, subjectUUID)
+    DiagramRequest request = buildDiagramRequest(intermediateData, subjectUUID)
+    if (request?.data?.keySet()?.size() > 1)
+    {
+        request = changeRequestToOneSource(request)
+    }
+    return request
+}
+
+/**
+ * Метод преобразования запроса от нескольких источников к одному
+ * @param request - запрос
+ * @return новый запрос с одним источником
+ */
+private DiagramRequest changeRequestToOneSource(DiagramRequest request)
+{
+    List totalGroups = []
+    List totalAggregations = []
+    List tempKeys = []
+    List compIds = collectComputationFromRequest(request)
+    Boolean requestWithComputation = request.requisite.nodes.any { node -> node.any { it.type == 'COMPUTATION' } }
+
+    Requisite totalRequisite = mappingTotalRequisite(request, compIds)
+    Source mainSource = request.data.values().find().source
+
+    request.data.each { key, requestData ->
+        requestData.groups.each { totalGroups << it }
+        requestData.aggregations.each { aggregation ->
+            totalAggregations << prepareAggregation(aggregation, mainSource.classFqn)
+        }
+        tempKeys << key
+    }
+
+    def breakdowns = totalGroups.findAll { it.title == 'breakdown' }
+    //т.к. разбивка закреплена за первым источником, а в запросе она должна идти в самом конце,
+    // то мы убираем её с текущего места в списке групп и ставим в самый конец
+    totalGroups = totalGroups - breakdowns
+    totalGroups = totalGroups + breakdowns
+    RequestData totalRequestData = new RequestData(source: mainSource, aggregations: totalAggregations, groups: totalGroups, filters: null)
+    String totalRequestDataKey = requestWithComputation ? tempKeys[compIds[0]] : tempKeys.find()
+
+    return new DiagramRequest(requisite: [totalRequisite], data: [(totalRequestDataKey): totalRequestData])
+}
+
+/**
+ * Метод подсчёта индексов вычислений среди всех агрегаций в запросе
+ * @param request - запрос
+ * @return список индексов вычислений среди всех агрегаций в запросе
+ */
+List collectComputationFromRequest(DiagramRequest request)
+{
+    List compIds = []
+    request?.requisite?.nodes.collectMany { it }
+           .eachWithIndex { it, id ->
+               if (it.type == 'COMPUTATION')
+               {
+                   compIds << id
+               }
+           }
+    return compIds
+}
+
+/**
+ * Метод подготовки итогового реквизита
+ * @param request - запрос
+ * @param compIds - индексы агрегаций с вычислениями
+ * @return
+ */
+Requisite mappingTotalRequisite(DiagramRequest request, List compIds = [])
+{
+    Set totalFilters = []
+    String title = ''
+    List nodes = []
+
+    if (compIds)
+    {
+        compIds.each { id ->
+            request.requisite.each {
+                totalFilters += it.filterList
+                title = 'COMPUTATION'
+                nodes << it.nodes
+            }
+            nodes = nodes[id]
+        }
+    }
+    else
+    {
+        request.requisite.each {
+            totalFilters += it.filterList
+            title = 'DEFAULT'
+            nodes << it.nodes
+        }
+    }
+    return new Requisite(filterList: totalFilters, title: title, nodes: !compIds && nodes.size() > 1 ? nodes.find() : nodes)
+}
+
+/**
+ * Метод подготовки агрегации
+ * @param aggregationParameter - параметр агрегации
+ * @param classFqn - classFqn источника
+ * @return правильный параметр агрегации
+ */
+AggregationParameter prepareAggregation(AggregationParameter aggregationParameter, String classFqn)
+{
+    if (aggregationParameter?.attribute?.sourceCode == classFqn)
+    {
+        return aggregationParameter
+    }
+    else
+    {
+        Attribute sourceAttribute = new Attribute(
+            code: aggregationParameter?.attribute?.sourceCode,
+            sourceCode: classFqn,
+            title: "${aggregationParameter?.attribute?.title} (${aggregationParameter?.attribute?.sourceName})",
+            type: 'object'
+        )
+
+        sourceAttribute.addLast(aggregationParameter.attribute)
+        aggregationParameter.attribute = sourceAttribute
+        return aggregationParameter
+    }
 }
 
 /**
@@ -1023,12 +1216,13 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
  * Метод создания параметра группировки основанного только на системных группировках
  * @param groupType - объект описывающий группировку
  * @param attr - атрибут
+ * @param title - название места, откуда пришла группа
  * @return параметр группировки
  */
-private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr)
+private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr, String title = 'breakdown')
 {
     return groupType?.way == 'SYSTEM' ? new GroupParameter(
-        title: 'breakdown',
+        title: title,
         type: attr.type == AttributeType.DT_INTERVAL_TYPE
             ? getDTIntervalGroupType(groupType.data as String)
             : groupType.data as GroupType,
@@ -1099,39 +1293,89 @@ private DiagramRequest buildDiagramRequest(Map<String, Map> intermediateData, St
  */
 private Map<String, RequestData> produceComputationData(Closure getData, Map map)
 {
-    def computeData = map.computeData as Map<String, Object>
-    // делаем предположение. Если есть вычисление значит реквизиты точно есть
-    def req = map.requisite as Requisite
-    //в записи лежит формула
-    def node = req.nodes.head()
-    //по идее на этом этапе у нас только один реквизит и у него одна запись
-    def formula = (node as ComputationRequisiteNode).formula
-    def variableNames = new FormulaCalculator(formula).variableNames
-
-    variableNames.collectEntries { variableName ->
-        def comp = computeData[variableName] as Map<String, Object>
-
-        def attribute = comp?.aggregation?.attribute
-        def attributeType = attribute?.type
-        if (attributeType in AttributeType.LINK_TYPES)
-        {
-            attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
+    if (map.computeData instanceof Collection)
+    {
+        def computeData = map.computeData as List<Map>
+        // делаем предположение. Если есть вычисление значит реквизиты точно есть
+        def req = map.requisite as Requisite
+        //в записи лежит формула
+        def node = req.nodes.find {
+            it instanceof ComputationRequisiteNode
         }
+        //по идее на этом этапе у нас только один реквизит и у него одна запись
+        def formula = (node as ComputationRequisiteNode).formula
+        def variableNames = new FormulaCalculator(formula).variableNames
 
-        def dataKey = comp.dataKey as String
-        // этот ключ указывает на источник вместе с группировками
+        return variableNames.collectEntries { variableName ->
+            def comp = computeData[variableName].find() as Map<String, Object>
 
-        def requestData = getData(dataKey) as RequestData
-        def newRequestData = requestData.clone()
-        def group = comp.group as GroupParameter
-        def aggregation = comp.aggregation as AggregationParameter
-        newRequestData.aggregations = [aggregation]
-        // предполагаем что количество агрегаций будет не больше одной
-        newRequestData.groups = (newRequestData.groups || group) ? (newRequestData.groups + group).grep() :
-            null
-        // группировку нужно будет добавить к существующим
-        newRequestData.groups = newRequestData.groups as Set
-        [(variableName): newRequestData]
+            def attribute = comp?.aggregation?.attribute
+            def attributeType = attribute?.type
+            if (attributeType in AttributeType.LINK_TYPES)
+            {
+                attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
+            }
+
+            def dataKey = comp.dataKey as String
+            // этот ключ указывает на источник вместе с группировками
+            def requestData = getData(dataKey) as RequestData
+            def newRequestData = requestData.clone()
+            def group = comp.group as GroupParameter
+            def aggregation = comp.aggregation as AggregationParameter
+            aggregation.attribute.title = aggregation.title
+            List computeAggregationIds = []
+            newRequestData.aggregations.eachWithIndex { aggr, id ->
+                if(aggr?.attribute?.type == 'COMPUTED_ATTR')
+                {
+                    computeAggregationIds += id
+                }
+            }
+            computeAggregationIds.each { id ->
+                newRequestData.aggregations -= newRequestData.aggregations[id]
+                newRequestData.aggregations.add(id, aggregation)
+            }
+            // предполагаем что количество агрегаций будет не больше одной
+            newRequestData.groups = (newRequestData.groups || group) ? (newRequestData.groups + group).grep() :
+                null
+            // группировку нужно будет добавить к существующим
+            newRequestData.groups = newRequestData.groups as Set
+            return [(variableName): newRequestData]
+        }
+    }
+    else
+    {
+        def computeData = map.computeData as Map<String, Object>
+        // делаем предположение. Если есть вычисление значит реквизиты точно есть
+        def req = map.requisite as Requisite
+        //в записи лежит формула
+        def node = req.nodes.head()
+        //по идее на этом этапе у нас только один реквизит и у него одна запись
+        def formula = (node as ComputationRequisiteNode).formula
+        def variableNames = new FormulaCalculator(formula).variableNames
+
+        return variableNames.collectEntries { variableName ->
+            def comp = computeData[variableName] as Map<String, Object>
+
+            def attribute = comp?.aggregation?.attribute
+            def attributeType = attribute?.type
+            if (attributeType in AttributeType.LINK_TYPES)
+            {
+                attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
+            }
+            def dataKey = comp.dataKey as String
+            // этот ключ указывает на источник вместе с группировками
+            def requestData = getData(dataKey) as RequestData
+            def newRequestData = requestData.clone()
+            def group = comp.group as GroupParameter
+            def aggregation = comp.aggregation as AggregationParameter
+            newRequestData.aggregations = [aggregation]
+            // предполагаем что количество агрегаций будет не больше одной
+            newRequestData.groups = (newRequestData.groups || group) ? (newRequestData.groups + group).grep() :
+                null
+            // группировку нужно будет добавить к существующим
+            newRequestData.groups = newRequestData.groups as Set
+            return [(variableName): newRequestData]
+        }
     }
 }
 
@@ -1993,9 +2237,13 @@ private List<List<FilterParameter>> mappingFilter(List<List> data,
 /**
  * Метод получения данных для диаграмм
  * @param request - запрос на получение данных
- * @return сырые данные для построения диаграм
+ * @param onlyFilled - только заполненные поля (для таблицы)
+ * @param aggregationCnt - количество агрегаций
+ * @param requestContent - тело запроса
+ * @param ids - индексы вычислений в агрегациях
+ * @return сырые данные из Бд по запросу
  */
-private def getDiagramData(DiagramRequest request)
+private def getDiagramData(DiagramRequest request, Boolean onlyFilled = true, Integer aggregationCnt = 1, Map<String, Object> requestContent = [:], List<Integer> ids = [0])
 {
     //TODO: уже сверхкостыльно получается. Нужно придумать решение по лучше
     assert request: "Empty request!"
@@ -2013,16 +2261,18 @@ private def getDiagramData(DiagramRequest request)
             switch (filterListSize)
             {
                 case 0:
-                    return getNoFilterListDiagramData(node, request)
+                    return getNoFilterListDiagramData(node, request, aggregationCnt, onlyFilled, requestContent, ids)
                 case 1:
                     return getOneFilterListDiagramData(
-                        node, request,
-                        parameterFilters, breakdownFilters
+                        node, request, aggregationCnt,
+                        parameterFilters, breakdownFilters,
+                        onlyFilled, requestContent, ids
                     )
                 case 2:
                     return getTwoFilterListDiagramData(
-                        node, request,
-                        parameterFilters, breakdownFilters
+                        node, request, aggregationCnt,
+                        parameterFilters, breakdownFilters,
+                        onlyFilled, requestContent, ids
                     )
             }
         }
@@ -2053,24 +2303,81 @@ private boolean checkGroupTypes(Collection<RequestData> listRequest)
  * @param variables - результат выборки
  * @return список группировок
  */
-private Collection<Collection<String>> findUniqueGroups(def variables)
-{ // работает только с методами которые имеют группировки. В противном случае бросает исключение
-    return variables.values().collect { el ->
-        el ? el.transpose().tail().transpose() : []
-    }.inject([]) { first, second ->
-        first + second
-    }.unique() as Collection<Collection<String>>
+private Collection<Collection<String>> findUniqueGroups (List ids, def variables)
+{
+    return ids.collectMany { id ->
+        variables.values().collect { el ->
+            if(el)
+            {
+                def value = id > 0
+                    ? el.transpose()[0..id-1] + el.transpose()[(id + 1)..el.transpose().size()-1]
+                    : el.transpose().tail()
+                return value.transpose()
+            }
+            else
+            {
+                return []
+            }
+        }.inject([]) { first, second ->
+            first + second
+        }.unique() as Collection<Collection<String>>
+    }
+}
+
+/**
+ * Метод получения индексов агрегаций с вычислениями из тела запроса
+ * @param requestContent - тело запроса
+ * @return  индексы агрегаций с вычислениями из тела запроса
+ */
+List<Integer> getComputeAggregationIds(def requestContent)
+{
+    List<Integer> ids = []
+    Integer id = 0
+    requestContent?.data?.each { key, value ->
+        value.indicators.each { aggr ->
+            if(aggr?.attribute?.type == 'COMPUTED_ATTR')
+            {
+                ids << id
+            }
+            id++
+        }
+    }
+    return ids.unique() as List<Integer>
 }
 
 /**
  * Метод округления числовых результатов
- * @param list - список числовых значений
+ * @param listOfLists - список данных
+ * @param aggregationCnt - количество агрегаций
+ * @param exceptNulls - убирать 0
  * @return список округлённых числовых значений
  */
-private List formatAggregationSet(List list)
+private List formatAggregationSet(List listOfLists, Integer aggregationCnt = 1, Boolean exceptNulls = false)
 {
-    return list.collect {
-        [DECIMAL_FORMAT.format((it as List).head() as Double), (it as List).tail()].flatten()
+    if (aggregationCnt < 1)
+    {
+        return listOfLists
+    }
+
+    return listOfLists.findResults { List list ->
+
+        if (exceptNulls && list.any { it == 0 })
+        {
+            return null
+        }
+
+        if (aggregationCnt > 1)
+        {
+            return list.withIndex().collect { item, int index ->
+                if (index < aggregationCnt)
+                {
+                    return DECIMAL_FORMAT.format(item as Double)
+                }
+                return item
+            }
+        }
+
+        return [DECIMAL_FORMAT.format(list.head() as Double), list.tail()].flatten()
     }
 }
 
@@ -2080,36 +2387,25 @@ private List formatAggregationSet(List list)
  * @param list - результат выборки
  * @return результат выборки с изменёнными значениями группировки
  */
-private List formatGroupSet(RequestData data, List list)
+private List formatGroupSet(List list, RequestData data, Integer countAggregation, Integer countNotAggregated)
 {
-    assert data.aggregations.grep().size() == 1: "Not supported data format"
     def countGroup = data.groups.grep().size()
-    assert countGroup < 3: "Not supported data format"
-
-    // работатет только при одной агрегации и группировкам не больше 2
-    switch (countGroup)
+    if (countGroup == 0)
     {
-        case 0:
-            return list
-        case 1:
-            return list.collect { el ->
-                def (value, group) = el
-                Closure formatGroup = this.&formatGroup.curry(data.groups[0], data.source.classFqn)
-                [value, formatGroup(group)]
+        return list
+    }
+    else
+    {
+        return list.collect { el ->
+            def value = countAggregation > 0 ? el[0..countAggregation-1] : []
+            List<String> groups = el[countAggregation..el.size() - (countNotAggregated + 1)]
+            List<String> notAggregated = countNotAggregated > 0  ? el[(el.size() - countNotAggregated)..el.size()-1]*.toString() : []
+            def totalGroupValues = groups.withIndex().collect { group, i ->
+                return formatGroup(data.groups[i] as GroupParameter,
+                                   data.source.classFqn, group)
             }
-        case 2:
-            return list.collect { el ->
-                def (value, group, breakdown) = el
-                Closure formatGroup = this.&formatGroup.curry(
-                    data.groups[0] as GroupParameter,
-                    data.source.classFqn
-                )
-                Closure formatBreakdown = this.&formatGroup.curry(
-                    data.groups[1] as GroupParameter,
-                    data.source.classFqn
-                )
-                [value, formatGroup(group), formatBreakdown(breakdown)]
-            }
+            return notAggregated.any() ? value + totalGroupValues + notAggregated : value + totalGroupValues
+        }
     }
 }
 
@@ -2157,33 +2453,33 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value)
                     {
                         value = value.split('\\$', 2).last() ?: value
                     }
-                    return value.replaceAll("\\<.*?>","")
+                    return value ? value.toString().replaceAll("\\<.*?>","") : ""
             }
-    case GroupType.DAY:
-        String format = parameter.format
-        switch (format) {
-            case 'dd':
-                return value + '-й'
-            case 'dd.mm.YY':
-                value = value.tokenize('./')*.padLeft(2, '0').join('.')
-                return value
-            case 'dd.mm.YY hh':
-                String[] dateParts = value.split()
-                dateParts[0] = dateParts[0].tokenize('./')*.padLeft(2, '0').join('.')
-                dateParts[1] = dateParts[1].padLeft(2, '0')
-                return "${dateParts[0]}, ${dateParts[1]}ч"
-            case 'dd.mm.YY hh:ii':
-                return value.format('dd.MM.yyyy hh:mm')
-            case 'WD':
-                String[] weekDayNames = ['понедельник', 'вторник', 'среда',
-                                         'четверг', 'пятница', 'суббота', 'воскресенье']
-                return weekDayNames[(value as int) - 1]
-            default:
-                def (day, month) = value.split('/', 2)
-                String monthName = GENITIVE_RUSSIAN_MONTH[(month as int) - 1]
-                return "$day $monthName"
-        }
-        break
+        case GroupType.DAY:
+            String format = parameter.format
+            switch (format) {
+                case 'dd':
+                    return value + '-й'
+                case 'dd.mm.YY':
+                    value = value.tokenize('./')*.padLeft(2, '0').join('.')
+                    return value
+                case 'dd.mm.YY hh':
+                    String[] dateParts = value.split()
+                    dateParts[0] = dateParts[0].tokenize('./')*.padLeft(2, '0').join('.')
+                    dateParts[1] = dateParts[1].padLeft(2, '0')
+                    return "${dateParts[0]}, ${dateParts[1]}ч"
+                case 'dd.mm.YY hh:ii':
+                    return value.format('dd.MM.yyyy hh:mm')
+                case 'WD':
+                    String[] weekDayNames = ['понедельник', 'вторник', 'среда',
+                                             'четверг', 'пятница', 'суббота', 'воскресенье']
+                    return weekDayNames[(value as int) - 1]
+                default:
+                    def (day, month) = value.split('/', 2)
+                    String monthName = GENITIVE_RUSSIAN_MONTH[(month as int) - 1]
+                    return "$day $monthName"
+            }
+            break
         case GroupType.MONTH:
             String format = parameter.format
             switch(format) {
@@ -2199,7 +2495,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value)
             String format = parameter.format
             switch(format) {
                 case 'QQ YY':
-                    return value
+                    return value.toString()
                 default:
                     return "$value кв-л"
             }
@@ -2207,9 +2503,9 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value)
             String format = parameter.format
             switch (format) {
                 case 'ww':
-                    return value + '-я'
+                    return value.toString() + '-я'
                 default:
-                    return value
+                    return value.toString()
             }
         case GroupType.SEVEN_DAYS:
             def russianLocale = new Locale("ru")
@@ -2230,9 +2526,9 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value)
             }
             return "$startDate - $endDate"
         case GroupType.MINUTES:
-            return value.padLeft(2, '0')
+            return value.toString().padLeft(2, '0') + ' мин'
         case GroupType.HOURS:
-            value = value.tokenize(':/')*.padLeft(2, '0').join(':')
+            value = value.toString().tokenize(':/')*.padLeft(2, '0').join(':')
             return value
         case GroupType.getTimerTypes():
             return (value as TimerStatus).getRussianName()
@@ -2249,13 +2545,22 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value)
 /**
  * Метод приведения результата выборки к единой структуре
  * @param data - результат выполнения запроса на получение данных диаграммы
+ * @param aggregationCnt - количество агрегаций
  * @return результат запроса данных диаграммы
  */
-private def formatResult(Map data)
+private def formatResult(Map data, Integer aggregationCnt = 1)
 {
     return data ? data.collect { key, list ->
         key ? list?.collect {
-            [it.head() ?: 0, key, it.tail()].flatten()
+            if (aggregationCnt > 1)
+            {
+                return [it[0..aggregationCnt-1] ?: 0, key, it[aggregationCnt..-1]].flatten()
+            }
+            else
+            {
+                //формат данных нестабилен, потому оставлен flatten
+                return [it.head() ?: 0, key, it.tail()].flatten()
+            }
         } ?: [[0, key]] : list
     }.inject { first, second -> first + second
     } : []
@@ -2356,75 +2661,556 @@ private SummaryDiagram mappingSummaryDiagram(List list)
 }
 
 /**
- * Метод преобразования результата выборки к таблице
- * @param list - данные диаграмы
- * @return TableDiagram
+ * Метод формирования таблицы
+ * @param list - список данных из БД
+ * @param totalColumn - флаг на подсчёт итоговой колонки
+ * @param totalRow - флаг для подсчёта итоговой строки
+ * @param showRowNum - флаг для вывода номера строки
+ * @param request - запрос
+ * @param requestContent - тело запроса с фронта
+ * @param aggregationCnt - количество агрегаций
+ * @return сформированная таблица
  */
-private TableDiagram mappingTableDiagram(List list, boolean totalColumn, boolean totalRow)
+private TableDiagram mappingTableDiagram(List list,
+                                         boolean totalColumn,
+                                         boolean totalRow,
+                                         boolean  showRowNum,
+                                         DiagramRequest request,
+                                         Map<String, Object> requestContent,
+                                         Integer aggregationCnt)
 {
     def resultDataSet = list.head() as List<List>
     def transposeDataSet = resultDataSet.transpose()
-    switch (transposeDataSet.size())
+    List<Map> attributes = getAttributeNamesAndValuesFromRequest(request, requestContent)
+    List<String> allAggregationAttributes = getAggregationAttributeNames(request)
+    if (transposeDataSet.size() == 0)
     {
-        case 0: // если результирующее множество пустое
-            return new TableDiagram()
-        case 3:
-            def (aggregationSet, breakdownSet, groupSet) = transposeDataSet
-            Collection<Column> columns = (groupSet as Set<String>).collect { group ->
-                Double total = totalColumn ? resultDataSet.sum { el ->
-                    el[2] == group ? el.head() as double : 0
-                }.with(DECIMAL_FORMAT.&format) as Double : 0
-                new Column(header: group, accessor: group.replace('.', ' '), footer: total)
-            }
-
-            columns.add(0, new Column(header: '', accessor: 'breakdownTitle', footer: 0))
-
-            List<Map<Object, Object>> data = (breakdownSet as Set<String>).collect { breakdown ->
-                def res = resultDataSet.findAll {
-                    it[1] == breakdown
-                }.collectEntries { dataList ->
-                    def (aggregationResult, _, groupResult) = dataList
-                    def key = (groupResult as String).replace('.', ' ')
-                    [(key): aggregationResult as String]
-                }
-                [breakdownTitle: breakdown.replace('.', ' ')] + res
-            }
-
-            if (totalRow)
-            {
-                Double totalResult = totalColumn
-                    ? (aggregationSet as List).sum {
-                    it as double
-                }.with(DECIMAL_FORMAT.&format) as Double
-                    : 0
-                columns += new Column('Итого', 'total', totalResult)
-                data.each { el ->
-                    el << [total: el.values().tail().sum(DECIMAL_FORMAT.&parse).with(
-                        DECIMAL_FORMAT.&format
-                    ) as Double]
-                }
-            }
-            return new TableDiagram(columns: columns, data: data)
-        default: throw new IllegalArgumentException('Invalid format result data set')
+        return new TableDiagram()
     }
+    else
+    {
+        Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(requestContent)
+        List notAggregatedAttributes = notAggregationAttributeNames(attributes)
+
+        return mappingManyColumnsTableDiagram(
+            resultDataSet, transposeDataSet, totalColumn,
+            totalRow, showRowNum, aggregationCnt, attributes,
+            innerCustomGroupNames, notAggregatedAttributes, allAggregationAttributes
+        )
+    }
+}
+
+/**
+ * Метод подготовки колонок таблицы
+ * @param attributes - список атрибутов
+ * @return Collection<Column>
+ */
+Collection<Column> collectColumns(List<Map> attributes)
+{
+    return attributes.collect { attrValue ->
+        return new Column(
+            footer:      "",
+            accessor:    attrValue.name,
+            header:      attrValue.name,
+            attribute:   attrValue.attribute,
+            type:        attrValue.type,
+            group:       attrValue.group,
+            aggregation: attrValue.aggregation,
+            )
+    }
+}
+
+/**
+ * Метод подготовки датасета из Бд
+ * @param resultDataSet - датасет из Бд
+ * @param attributeNames - список названий
+ * @param innerCustomGroupNames - список названий кастомных группировок
+ * @return подготовленный датасет
+ */
+List prepareResultDataSet(List resultDataSet, List<String> attributeNames, Set<Map> innerCustomGroupNames)
+{
+    resultDataSet.each { row ->
+        int newIndex = 0
+        int currentIndex = 0
+        row.each { value ->
+            if (value in innerCustomGroupNames.value)
+            {
+                currentIndex = row.indexOf(value)
+                def attributeName = innerCustomGroupNames.find{ it.value == value }.attributeName
+                newIndex = attributeNames.indexOf(attributeName)
+            }
+        }
+        def valueToPast = row[currentIndex]
+        row.remove(valueToPast)
+        row.add(newIndex, valueToPast)
+    }
+    return resultDataSet
+}
+
+/**
+ * Метод преобразования результата к таблице с несколькими колонками
+ * @param resultDataSet - итоговый датасет
+ * @param transposeDataSet - транспонированный датасет
+ * @param totalColumn - флаг на подсчёт итоговой колонки
+ * @param totalRow - флаг для подсчёта итоговой строки
+ * @param showRowNum - флаг для вывода номера строки
+ * @param attributes - атрибуты
+ * @param breakdownGroupWay - тип группировки в разбивке
+ * @param allAggregationAttributes - список названий только атрибутов агргегации в правильном порядке
+ * @return TableDiagram
+ */
+private TableDiagram mappingManyColumnsTableDiagram(List resultDataSet, def transposeDataSet,
+                                                    boolean totalColumn,
+                                                    boolean totalRow,
+                                                    boolean showRowNum,
+                                                    Integer aggregationCnt,
+                                                    List<Map> attributes = null,
+                                                    Set<Map> innerCustomGroupNames = [],
+                                                    List<String> notAggregatedAttributes = [],
+                                                    List<String> allAggregationAttributes = [])
+{
+    List<String> attributeNames = attributes.name
+    if(notAggregatedAttributes)
+    {
+        attributes = changeNotAggregatedAttributePlaceInAttributes(attributes, notAggregatedAttributes)
+        attributeNames = attributes.name//здесь атрибуты поменялись местами
+    }
+    if (innerCustomGroupNames)
+    {
+        //для работы необходим учет именно основных группировок, а для колонок идут внутреннние группировки группы
+        resultDataSet = prepareResultDataSet(resultDataSet, attributeNames, innerCustomGroupNames)
+    }
+    return mappingTableWithoutBreakdown(
+        resultDataSet,
+        transposeDataSet,
+        attributes,
+        totalColumn,
+        totalRow,
+        showRowNum,
+        aggregationCnt,
+        allAggregationAttributes
+    )
+}
+
+/**
+ * метод изменения места атрибута с агрегацией N/A
+ * @param attributes - список атрибутов
+ * @param notAggregatedAttributes - неагрегированные атрибуты
+ * @return новый список атрибутов
+ */
+List changeNotAggregatedAttributePlaceInAttributes(List attributes, List notAggregatedAttributes)
+{
+    notAggregatedAttributes.each { attribute ->
+        int index = attributes.name.indexOf(attribute)
+        def valueToChange = attributes[index]
+        attributes -= valueToChange
+        attributes << valueToChange
+    }
+    return attributes
+}
+
+/**
+ * Метод изменения места атрибута с агрегацией N/A
+ * @param list - текущий список данных из БД
+ * @param attributeNames - список названий атрибутов
+ * @param notAggregatedAttributes - список атрибутов с агрегацией N/A
+ * @return список данных из БД в корректном виде
+ */
+List changeNotAggregatedAttributePlace(List list,List attributeNames, List notAggregatedAttributes)
+{
+    if (attributeNames && notAggregatedAttributes)
+    {
+        List<Integer> indexes = notAggregatedAttributes.collect {name -> attributeNames.indexOf(name) }
+        list = list.collect {
+            def values = it[indexes]
+            it -= values
+            //values - список, потому операция +
+            it += values
+        }
+    }
+    return list
+}
+
+/**
+ * Метод получения названия атрибутов с агрегацией N/A
+ * @param attributes - все атрибуты запроса
+ * @return список названий атрибутов с агрегацией N/A
+ */
+List<String> notAggregationAttributeNames(List attributes)
+{
+    return attributes.findResults{
+        it.aggregation == Aggregation.NOT_APPLICABLE ? it.name : null
+    }
+}
+
+/**
+ * Метод получения "детей" по "родителю"
+ * @param parent - родитель
+ * @param tree - дерево для поиска
+ * @return список "детей"
+ */
+List getChildrenByParent (ResRow parent, List tree)
+{
+    List children = []
+    tree.each { child ->
+        def tempParent = new ResRow(key: parent.key, value: parent.value, parent:parent.parent, count: null)
+        boolean correctParent = JsonOutput.toJson(child?.parent) == JsonOutput.toJson(tempParent)
+        boolean unique = !children.any { it?.value == child?.value && it?.key == child?.key && it?.count == child?.count}
+
+        if (correctParent && unique)
+        {
+            children << child
+        }
+    }
+    return children
+}
+
+/**
+ * Метод получения названий атрибутов агрегации в исходном порядке
+ * @param request - тело запроса
+ * @return список названий атрибутов агрегации в исходном порядке
+ */
+List<String> getAggregationAttributeNames(DiagramRequest request)
+{
+    return request.data.collectMany { key, value ->
+        value.aggregations.collect { aggregation ->
+            return aggregation?.attribute?.title
+        }
+    }
+}
+
+/**
+ * Метод построения таблицы без разбивки в запросе
+ * @param resultDataSet - итоговый датасет
+ * @param transposeDataSet - транспонированный датасет
+ * @param attributes - список атрибутов для построения
+ * @param totalColumn - флаг на подсчёт итогов в колонках
+ * @param totalRow - флаг на подсчёт итогов в строках
+ * @param showRowNum - флаг на показ номера строки
+ * @param aggregationCnt - количество агрегаций
+ * @param allAggregationAttributes - список названий атрибутов агрегации в правильном порядке
+ * @return TableDiagram
+ */
+private TableDiagram mappingTableWithoutBreakdown(List resultDataSet, def transposeDataSet, List<Map> attributes,  boolean totalColumn,
+                                                  boolean totalRow, boolean showRowNum, Integer aggregationCnt, List<String> allAggregationAttributes)
+{
+    Collection<Column> columns = collectColumns(attributes)
+
+    int cnt = attributes.size()
+    List<String> attributeNames = attributes.name
+    List<Map<String, Object>> tempMaps = getTempMaps(resultDataSet, attributeNames, cnt)
+    List<ResRow> totalTree = getTotalTree(tempMaps, attributeNames, aggregationCnt)
+
+    Set serviceRows = [totalTree[0]]
+    totalTree.each { service ->
+        if (service.key == attributeNames[aggregationCnt] && !serviceRows*.value.contains(service.value))
+        {
+            serviceRows << service
+        }
+    }
+    int id = 1
+    List<Map<String, Object>> data = serviceRows.collect { serviceRow ->
+        List<ResRow> tempTree = totalTree.findResults { leaf ->
+            getLastParent(leaf).value == serviceRow.value ? leaf : null
+        }
+        def totalRows = []
+        return getFullRowsNew(totalRows, serviceRow, tempTree)
+    }.collect { tree ->
+        //(cnt - aggregationCnt) > 1 - важно проверить, иначе итоговый список уже сформирован
+        return aggregationCnt > 0 && (cnt - aggregationCnt) > 1
+            ? getTotalCountTree(tree, attributeNames, aggregationCnt)
+            : tree
+    }.collectMany { mapList ->
+        return mapList.collect {
+            def row = it.count.any()
+                ? [ID: id++, (it.key) : it.value] + it.count.collectEntries { it }
+                : [ID: id++, (it.key) : it.value]
+            if (totalRow && it.count.any() && aggregationCnt > 0)
+            {
+                return getTotalRows(row, attributeNames[0..aggregationCnt - 1])
+            }
+            else
+            {
+                return row
+            }
+        }
+    }
+    if (aggregationCnt > 0)
+    {
+        columns = totalColumn
+            ? columns[aggregationCnt..-1] + getTotalColumns(columns[0..aggregationCnt-1], data, attributeNames[aggregationCnt])
+            : columns[aggregationCnt..-1] + columns[0..aggregationCnt-1]
+
+        //это делать необходимо при наличии в запросе агрегаций N/A
+        //получаем колонки агрегаций в правильном порядке
+        Collection<Column> aggregationColumns = allAggregationAttributes.collect { name -> columns.find { it.header == name } }
+        //убираем, чтобы потом подставить правильно
+        columns -= aggregationColumns
+        if (totalColumn)
+        {
+            columns[-1].footer = 'Итого'
+        }
+        //агрегация всегда стоит в конце
+        columns += aggregationColumns
+
+        if (totalRow)
+        {
+            Double totalForTotal = data.sum { it.keySet().contains(attributeNames[aggregationCnt]) ? it["Итого"] as Double : 0 }
+            columns.add(new Column(header: "Итого", accessor: "Итого", footer: DECIMAL_FORMAT.format(totalForTotal)))
+        }
+    }
+    columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
+    return new TableDiagram(columns: columns, data: data)
+}
+
+/**
+ * Метод получения последнего родителя в "листе"
+ * @param leaf - "лист" для поиска родителя
+ * @return последний родитель
+ */
+ResRow getLastParent(ResRow leaf) {
+    def parent = leaf.parent
+    if (!parent)
+    {
+        return leaf
+    }
+    while (parent.parent)
+    {
+        parent = parent.parent
+    }
+    return parent
+}
+
+/**
+ * Метод подсчета итогов в дереве
+ * @param tree - дерево
+ * @param attributeNames - список атрибутов
+ * @param aggregationCnt - количество агрегаций
+ * @return - дерево с подсчитанными итогами
+ */
+List<ResRow> getTotalCountTree(def tree, List<String> attributeNames, Integer aggregationCnt)
+{
+    attributeNames[-2..aggregationCnt].each { parentKey ->
+        tree.each { parent ->
+            if (parent.key == parentKey) {
+                def oldParent = parent //чтобы потом заменить
+                def children = getChildrenByParent(parent, tree)
+                List<Map> childrenCounts = children.collectMany { it.count as List<Map> }
+                def aggregationNames = attributeNames[0..aggregationCnt - 1]
+                def totalCounts = aggregationNames.collect { attributeName ->
+                    def totalSumPerCount = 0
+                    childrenCounts.each {  map ->
+                        if (map[attributeName])
+                        {
+                            totalSumPerCount += map[attributeName] as Double
+                        }
+                    }
+                    return [(attributeName): DECIMAL_FORMAT.format(totalSumPerCount)]
+                }
+                parent.count = totalCounts
+                def id = tree.indexOf(oldParent)
+                tree -= tree [id]
+                tree.add(id, parent)
+            }
+        }
+    }
+    return tree
+}
+
+/**
+ * Метод получения итогов по строкам
+ * @param row - строка
+ * @param aggregationAttributeNames - названия атрибутов агрегации
+ * @return строки с итогами
+ */
+private def getTotalRows(def row, List<String> aggregationAttributeNames)
+{
+    List values = aggregationAttributeNames.collect { attributeName -> row[attributeName] }
+    Double total = values.sum { it as Double }
+    return row + ["Итого" : DECIMAL_FORMAT.format(total)]
+}
+
+/**
+ * Метод получения итоговых значений в колонках
+ * @param columns - колонки с подсчётами
+ * @param data - итоговый датасет
+ * @param mainAttributeName - название главного атрибута
+ * @param aggregationCnt - количество агрегаций в запросе
+ * @return итоговые колонки
+ */
+private Collection<Column> getTotalColumns(Collection<Column> columns, List<Map> data,
+                                           String mainAttributeName)
+{
+    return columns.collect { column ->
+        Double attributeSum = data.sum {
+            it.keySet().contains(mainAttributeName) ? it[column.header] as Double : 0
+        }
+        column.footer = DECIMAL_FORMAT.format(attributeSum)
+        return column
+    }
+}
+
+/**
+ * Метод получения итогового дерева
+ * @param tempMaps - список мап атрибут/значение
+ * @param attributeNames - список названий атрибутов
+ * @param aggregationCnt - количество агрегаций в запросе
+ * @return итоговое дерево
+ */
+List<ResRow> getTotalTree(List<Map> tempMaps, List<String> attributeNames, int aggregationCnt)
+{
+    List<ResRow> totalTree = []
+    tempMaps.collect { resultRow ->
+        resultRow[aggregationCnt..-1].collect { map ->
+            totalTree << createResRow(map, resultRow, attributeNames, aggregationCnt)
+        }
+    }
+    return totalTree
+}
+
+/**
+ * Метод получения мап атрибут/значение
+ * @param resultDataSet - итоговый датасет
+ * @param attributeNames - список названий атрибутов
+ * @param cnt - количество атрибутов
+ * @return список временных мап
+ */
+List<Map<String, Object>> getTempMaps(List resultDataSet, List<String> attributeNames, int cnt)
+{
+    return resultDataSet.collectMany { groupValue ->
+        int i = 0
+        return groupValue.collect { value ->
+            [(attributeNames[i++]): value]
+        }.collate(cnt)
+    }
+}
+
+/**
+ * Метод создания строки дерева
+ * @param map - мапа
+ * @param row - строка мап
+ * @param attributeNames - список названий атрибутов
+ * @param aggregationCnt - количество агрегаций
+ * @param i - индекс
+ * @return строка дерева
+ */
+ResRow createResRow(Map map, List<Map> row, List<String> attributeNames, int aggregationCnt)
+{
+    def key = map.keySet().find()
+    int index = attributeNames.indexOf(key)//индекс первого родителя
+    int id = 0
+    def fullRow = []
+    attributeNames[aggregationCnt..index].each { parentKey ->
+        def tempParent = row[parentKey].grep().find()
+        def previousParent = fullRow.any() ? fullRow[id++] : null
+        fullRow << new ResRow(key: parentKey, value: tempParent, parent: previousParent, count: null)
+    }
+    def totalRow = fullRow.last()
+    totalRow.count = index == attributeNames.size() - 1 && aggregationCnt > 0 ? row[0..aggregationCnt - 1] : null
+    return totalRow
+}
+
+/**
+ * Метод получения всех листьев по дереву
+ * @param totalRows - список всех листьев по дереву
+ * @param parent - родитель
+ * @param tempTree - временное дерево
+ * @return список всех листьев по дереву
+ */
+List getFullRowsNew(List totalRows, ResRow parent, List tempTree)
+{
+    totalRows = totalRows + parent
+    List children = getChildrenByParent(parent, tempTree)
+    return [parent] + children.collectMany { getFullRowsNew(totalRows, it, tempTree) }
+}
+
+/**
+ * Метод получения названий и самих основных атрибутов запроса
+ * @param request - запрос
+ * @param requestContent - тело запроса
+ * @return список названий атрибутов
+ */
+private List<Map> getAttributeNamesAndValuesFromRequest(DiagramRequest request, Map<String, Object> requestContent)
+{
+    def aggregations = request.data.collectMany { key, value ->
+        value.aggregations.collect { aggregation ->
+            return [name : aggregation?.attribute?.title, attribute : aggregation?.attribute,
+                    type : ColumnType.INDICATOR,
+                    aggregation : aggregation?.type]
+        }
+    }
+
+    def parameterAttributes = requestContent.data.collectMany { key, value ->
+        if (!value.sourceForCompute)
+        {
+            value.parameters.collect { parameter ->
+                def name = parameter?.group?.way == 'CUSTOM'
+                    ? parameter?.group?.data?.name
+                    : parameter?.attribute?.title
+                Map<String, Object> group = parameter?.group
+                return [name : name, attribute : parameter?.attribute,
+                        type : ColumnType.PARAMETER,group : group]
+            }
+        }
+        else
+        {
+            return []
+        }
+    }
+
+    def breakdownAttributes = requestContent.data.findResult { key, value ->
+        def name = value?.breakdownGroup?.way == 'CUSTOM'
+            ? value?.breakdownGroup?.data?.name
+            : value?.breakdown?.title
+        Map<String, Object> group =  value?.breakdownGroup
+        return  group ? [name : name, attribute : value?.breakdown,
+                         type: ColumnType.BREAKDOWN, group : group] : null
+    }
+
+    return (aggregations + parameterAttributes + breakdownAttributes).grep()
+}
+
+/**
+ * Метод получения названий внутренних групп из основных группировок
+ * @param request - запрос
+ * @return список названий
+ */
+private Set<Map> getInnerCustomGroupNames(def requestContent)
+{
+    Set<Map> attributeMaps = []
+    requestContent.data.values().each { value ->
+        value.parameters.each { parameter ->
+            if (parameter?.group?.way == 'CUSTOM')
+            {
+                parameter?.group?.data?.subGroups?.each { sub ->
+                    attributeMaps << [attributeName: parameter?.group?.data?.name, value: sub?.name]
+                }
+            }
+        }
+
+        if (value?.breakdownGroup?.way == 'CUSTOM')
+        {
+            value?.breakdownGroup?.data?.subGroups?.each { sub ->
+                attributeMaps << [attributeName: value?.breakdownGroup?.data?.name, value: sub?.name]
+            }
+        }
+    }
+    return attributeMaps
 }
 
 /**
  * Метод преобразования результата выборки к комбо диаграме
  * @param list - данные диаграмы
+ * @param additionals - дополнительные данные
  * @return ComboDiagram
  */
 private ComboDiagram mappingComboDiagram(List list,
-                                         Map firstAdditionalData,
-                                         Map secondAdditionalData,
+                                         List<Map> additionals,
                                          boolean reverseGroups)
 {
-    def (firstResultDataSet, secondResultDataSet) = list
-    def firstTransposeDataSet = (firstResultDataSet as List<List>)?.transpose() ?: []
-    def secondTransposeDataSet = (secondResultDataSet as List<List>)?.transpose() ?: []
-
-    Set labels = (firstTransposeDataSet[1] ?: []) + (secondTransposeDataSet[1] ?: [])
-    Set diagramLabels = (firstTransposeDataSet[2] ?: []) + (secondTransposeDataSet[2] ?: [])
+    List transposeSets = list.collect { (it as List<List>)?.transpose() ?: [] }
+    Set labels = transposeSets.collectMany { it[1] ?: [] }
+    Set diagramLabels = transposeSets.collectMany { it[2] ?: [] }
 
     Closure getsSeries = { Set labelSet,
                            List<List> dataSet,
@@ -2481,25 +3267,21 @@ private ComboDiagram mappingComboDiagram(List list,
         }
     }
 
-    def firstSeries = getsSeries(
-        labels,
-        firstResultDataSet as List<List>,
-        firstAdditionalData,
-        diagramLabels,
-        reverseGroups
-    )
-    def secondSeries = getsSeries(
-        labels,
-        secondResultDataSet as List<List>,
-        secondAdditionalData,
-        diagramLabels,
-        reverseGroups
-    )
+    List fullSeries = []
+    list.eachWithIndex { dataSet, i ->
+        fullSeries += getsSeries(
+            labels,
+            dataSet,
+            additionals[i],
+            diagramLabels,
+            false
+        )
+    }
     return new ComboDiagram(
         labels: reverseGroups == true
             ? diagramLabels
             : labels,
-        series: firstSeries + secondSeries
+        series: fullSeries
     )
 }
 
@@ -2558,7 +3340,9 @@ private Map<String, Object> transformRequestWithComputation(Map<String, Object> 
             )
             return [(key): dataForDiagram]
         }
-        return [type: map.type, data: newData, sorting: map.sorting]
+        return [type: map.type, data: newData, sorting: map.sorting,
+                showEmptyData: map.showEmptyData, calcTotalColumn: map.calcTotalColumn,
+                calcTotalRow : map.calcTotalRow, showRowNum: map.showRowNum]
     }
     return cardObjectUuid ? transform(requestContent) : requestContent
 }
@@ -2655,7 +3439,7 @@ private FilterList getFilterList(Map<String, Object> customGroup, String subject
  * @param request - запрос
  * @return сырые данные для построения диаграм
  */
-private List getNoFilterListDiagramData(def node, DiagramRequest request)
+private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt,  Boolean onlyFilled, Map<String,Object> requestContent, List<Integer> ids = [0])
 {
     String nodeType = node.type
     switch (nodeType.toLowerCase())
@@ -2663,9 +3447,18 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request)
         case 'default':
             def requisiteNode = node as DefaultRequisiteNode
             RequestData requestData = request.data[requisiteNode.dataKey]
-            Closure formatAggregation = this.&formatAggregationSet
-            Closure formatGroup = this.&formatGroupSet.curry(requestData)
-            def res = modules.dashboardQueryWrapper.getData(requestData)
+            List attributes = []
+            List<String> notAggregatedAttributes = []
+            if (requestContent)
+            {
+                attributes = getAttributeNamesAndValuesFromRequest(request, requestContent)
+                notAggregatedAttributes = notAggregationAttributeNames(attributes)
+            }
+            Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
+            Closure formatAggregation = this.&formatAggregationSet.rcurry(aggregationCnt, onlyFilled)
+            Closure formatGroup = this.&formatGroupSet.rcurry(requestData, aggregationCnt, notAggregatedAttributes.size())
+            def res = modules.dashboardQueryWrapper.getData(requestData, onlyFilled)
+                             .with(prepareResult)
                              .with(formatGroup)
                              .with(formatAggregation)
             def total = res ? [(requisiteNode.title): res] : [:]
@@ -2682,22 +3475,34 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request)
                     "Wrong group types in calculation!"
                 )
             }
+
+            List attributes = []
+            List<String> notAggregatedAttributes = []
+            if (requestContent)
+            {
+                attributes = getAttributeNamesAndValuesFromRequest(request, requestContent)
+                notAggregatedAttributes = notAggregationAttributeNames(attributes)
+            }
+            Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
             def variables = dataSet.collectEntries { key, data ->
                 Closure postProcess =
-                    this.&formatGroupSet.curry(data as RequestData)
-                [(key): modules.dashboardQueryWrapper.getData(data as RequestData).
-                    with(postProcess)]
+                    this.&formatGroupSet.rcurry(data as RequestData, aggregationCnt, notAggregatedAttributes.size())
+                [(key): modules.dashboardQueryWrapper.getData(data as RequestData, onlyFilled).with(prepareResult).with(postProcess)]
             } as Map<String, List>
 
             //Вычисление формулы. Выглядит немного костыльно...
             def res = dataSet.values().head().groups?.size() ?
-                findUniqueGroups(variables).collect { group ->
-                    def resultCalculation = calculator.execute { variable ->
-                        (variables[variable as String].findResult {
-                            group == it.tail() ? it.head() : null
-                        } ?: 0) as Double
+                findUniqueGroups(ids, variables).collectMany { group ->
+                    ids.collect { id ->
+                        def resultCalculation = calculator.execute { variable ->
+                            (variables[variable as String].findResult {
+                                def value = id > 0 ? it[0..id-1] + it[(id + 1)..-1] : it[1..-1]
+                                group == value ? it[id] : null
+                            } ?: 0) as Double
+                        }
+                        group.add(id, resultCalculation)
+                        return group
                     }
-                    return [resultCalculation, group].flatten()
                 } : [[calculator.execute { key ->
                 variables[key as String].head().head() as Double
             }]]
@@ -2717,8 +3522,12 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request)
  */
 private List getOneFilterListDiagramData(def node,
                                          DiagramRequest request,
+                                         Integer aggregationCnt,
                                          List parameterFilters,
-                                         List breakdownFilters)
+                                         List breakdownFilters,
+                                         Boolean onlyFilled,
+                                         Map<String,Object> requestContent,
+                                         List<Integer> ids = [0])
 {
     String nodeType = node.type
     def filtering = parameterFilters ? parameterFilters : breakdownFilters
@@ -2728,15 +3537,24 @@ private List getOneFilterListDiagramData(def node,
             def requisiteNode = node as DefaultRequisiteNode
             RequestData requestData = request.data[requisiteNode.dataKey]
             RequestData newRequestData = requestData.clone()
-            Closure formatAggregation = this.&formatAggregationSet
-            Closure formatGroup = this.&formatGroupSet.curry(requestData)
+            List attributes = []
+            List<String> notAggregatedAttributes = []
+            if (requestContent)
+            {
+                attributes = getAttributeNamesAndValuesFromRequest(request, requestContent)
+                notAggregatedAttributes = notAggregationAttributeNames(attributes)
+            }
+            Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
+            Closure formatAggregation = this.&formatAggregationSet.ncurry(1, aggregationCnt)
+            Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, aggregationCnt, notAggregatedAttributes.size())
             return filtering*.get(0)?.collectMany {
                 newRequestData.filters = [it]
-                def res = modules.dashboardQueryWrapper.getData(newRequestData)
+                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled)
+                                 .with(prepareResult)
                                  .with(formatGroup)
                                  .with(formatAggregation)
                 Map partial = res ? [(it.title.grep() as Set): res] : [:]
-                return formatResult(partial)
+                return formatResult(partial, aggregationCnt)
             }
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
@@ -2745,32 +3563,44 @@ private List getOneFilterListDiagramData(def node,
                 [(it): request.data[it]]
             } as Map<String, RequestData>
 
+            List attributes = []
+            List<String> notAggregatedAttributes = []
+            if (requestContent)
+            {
+                attributes = getAttributeNamesAndValuesFromRequest(request, requestContent)
+                notAggregatedAttributes = notAggregationAttributeNames(attributes)
+            }
+            Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
             def variables = dataSet.collectMany { key, data ->
                 RequestData newData = data.clone()
                 return filtering*.get(0).collect {
                     newData.filters = [it]
                     Closure postProcess =
-                        this.&formatGroupSet.curry(data as RequestData)
-                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData)
-                    [(key): res.with(postProcess)]  as Map<String, List>
+                        this.&formatGroupSet.rcurry(newData as RequestData, aggregationCnt, notAggregatedAttributes.size())
+                    def res = modules.dashboardQueryWrapper.getData(newData as RequestData, onlyFilled)
+                    [(key): res.with(postProcess).with(prepareResult)]  as Map<String, List>
                 }
             }
             int i = 0
             return variables.collectMany { totalVar ->
                 def res = dataSet.values().head().groups?.size() ?
-                    findUniqueGroups(totalVar).collect { group ->
-                        def resultCalculation = calculator.execute { variable ->
-                            (totalVar[variable as String].findResult {
-                                group == it.tail() ? it.head() : null
-                            } ?: 0) as Double
+                    findUniqueGroups(ids, totalVar).collectMany { group ->
+                        ids.collect { id ->
+                            def resultCalculation = calculator.execute { variable ->
+                                (totalVar[variable as String].findResult {
+                                    def value = id > 0 ? it[0..id-1] + it[(id + 1)..-1] : it[1..-1]
+                                    group == value ? it[id] : null
+                                } ?: 0) as Double
+                            }
+                            group.add(id, resultCalculation)
+                            return group
                         }
-                        return [resultCalculation, group].flatten()
                     } : [[calculator.execute { key ->
                     totalVar[key as String].head().head() as Double
                 }]]
                 def title = filtering*.get(0).title.grep()
-                Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): formatAggregationSet(res)]
-                return formatResult(total)
+                Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): formatAggregationSet(res)] //возможно, надо добавить aggregationCnt
+                return formatResult(total, aggregationCnt)
             }
 
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
@@ -2787,8 +3617,12 @@ private List getOneFilterListDiagramData(def node,
  */
 private List getTwoFilterListDiagramData(def node,
                                          DiagramRequest request,
+                                         Integer aggregationCnt,
                                          List parameterFilters,
-                                         List breakdownFilters)
+                                         List breakdownFilters,
+                                         Boolean onlyFilled,
+                                         Map<String, Object> requestContent,
+                                         List<Integer> ids = [0])
 {
     String nodeType = node.type
     def pareFilters = parameterFilters.collectMany { parameterFilter ->
@@ -2808,13 +3642,23 @@ private List getTwoFilterListDiagramData(def node,
                 newRequestData.filters = condition.inject { first, second ->
                     first + second
                 }
-                Closure formatAggregation = this.&formatAggregationSet
-                Closure formatGroup = this.&formatGroupSet.curry(newRequestData)
-                def res = modules.dashboardQueryWrapper.getData(newRequestData)
+
+                List attributes = []
+                List<String> notAggregatedAttributes = []
+                if (requestContent)
+                {
+                    attributes = getAttributeNamesAndValuesFromRequest(request, requestContent)
+                    notAggregatedAttributes = notAggregationAttributeNames(attributes)
+                }
+                Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
+                Closure formatAggregation = this.&formatAggregationSet.ncurry(1, aggregationCnt)
+                Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData as RequestData, aggregationCnt, notAggregatedAttributes.size())
+                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled)
+                                 .with(prepareResult)
                                  .with(formatGroup)
                                  .with(formatAggregation)
                 def total = res ? [(condition.title.flatten().grep() as Set): res] : null
-                formatResult(total)
+                formatResult(total, aggregationCnt)
             }
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
@@ -2823,6 +3667,14 @@ private List getTwoFilterListDiagramData(def node,
                 [(it): request.data[it]]
             } as Map<String, RequestData>
 
+            List attributes = []
+            List<String> notAggregatedAttributes = []
+            if (requestContent)
+            {
+                attributes = getAttributeNamesAndValuesFromRequest(request, requestContent)
+                notAggregatedAttributes = notAggregationAttributeNames(attributes)
+            }
+            Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
             def variables = dataSet.collectMany { key, data ->
                 RequestData newData = data.clone()
                 return pareFilters.collect { condition ->
@@ -2830,27 +3682,31 @@ private List getTwoFilterListDiagramData(def node,
                         first + second
                     }
                     Closure postProcess =
-                        this.&formatGroupSet.curry(data as RequestData)
-                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData)
-                    [(key): res.with(postProcess)]  as Map<String, List>
+                        this.&formatGroupSet.rcurry(newData as RequestData, aggregationCnt, notAggregatedAttributes.size())
+                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData, onlyFilled)
+                    [(key): res.with(postProcess).with(prepareResult)]  as Map<String, List>
                 }
             }
             int i = 0
             return variables.collectMany { totalVar ->
                 def res = dataSet.values().head().groups?.size() ?
-                    findUniqueGroups(totalVar).collect { group ->
-                        def resultCalculation = calculator.execute { variable ->
-                            (totalVar[variable as String].findResult {
-                                group == it.tail() ? it.head() : null
-                            } ?: 0) as Double
+                    findUniqueGroups(ids, totalVar).collectMany { group ->
+                        ids.collect { id ->
+                            def resultCalculation = calculator.execute { variable ->
+                                (totalVar[variable as String].findResult {
+                                    def value = id > 0 ? it[0..id-1] + it[(id + 1)..-1] : it[1..-1]
+                                    group == value ? it[id] : null
+                                } ?: 0) as Double
+                            }
+                            group.add(id, resultCalculation)
+                            return group
                         }
-                        return [resultCalculation, group].flatten()
                     } : [[calculator.execute { key ->
                     totalVar[key as String].head().head() as Double
                 }]]
                 def title = pareFilters*.title.flatten().grep() as Set
-                Map total = [( title.any {it[0] != ''} ? title[i++] : ''): formatAggregationSet(res)]
-                return formatResult(total)
+                Map total = [( title.any {it[0] != ''} ? title[i++] : ''): formatAggregationSet(res)]//возможно, добавить aggregationCnt
+                return formatResult(total, aggregationCnt)
             }
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
