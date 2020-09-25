@@ -1,4 +1,5 @@
 // @flow
+import {getSourceTypes} from './store/helpers';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import type {LayoutMode} from './store/dashboard/settings/types';
@@ -26,26 +27,6 @@ function debounce (func: Function, ms: number) {
 function getMapValues<K, T> (map: ({[K]: T})): Array<T> {
 	return Object.keys(map).map(key => map[key]);
 }
-
-/**
- * При переключении вкладок стенда теряется высота приложения. Данная функция устанавливает body минимальную высоту,
- * полученную при инициализации.
- */
-const fixInitialHeight = () => {
-	document.addEventListener('DOMContentLoaded', () => {
-		const {top} = window;
-		const {body} = document;
-		let minHeight = '100%';
-
-		if (top) {
-			minHeight = `${top.innerHeight}px`;
-		}
-
-		if (body) {
-			body.style.minHeight = minHeight;
-		}
-	});
-};
 
 /**
  * Функция проверяет является ли переменная объектом
@@ -104,6 +85,13 @@ const getLayoutMode = () => {
 };
 
 /**
+ * Возвращает массив для окна фильтрации, содержащий код источника и все его подтипы
+ * @param {string} classFqn - код источника
+ * @returns {Array<string>}
+ */
+const getDescriptorCases = (classFqn: string) => [classFqn, ...getSourceTypes(classFqn)];
+
+/**
  * На текущий момент у окружения метода нет полифилов к es6. Для стабильной работы на старых браузерах все ответы
  * перепарсиваются согласно окружению внутреннего приложения.
  * @param {Function} restCallModule - метод для осуществления запросов к модулям
@@ -122,7 +110,7 @@ export {
 	deepClone,
 	extend,
 	isMacOS,
-	fixInitialHeight,
+	getDescriptorCases,
 	getLayoutMode,
 	getMapValues,
 	isObject

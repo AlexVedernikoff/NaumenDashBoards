@@ -37,7 +37,26 @@ const parseResponseErrorText = (text: string) => {
 	return result;
 };
 
+/**
+ * Возвращает подтипы источника
+ * @param {string} classFqn - код источника
+ * @returns {Array<string>}
+ */
+const getSourceTypes = (classFqn: string) => {
+	const {map: sources} = store.getState().sources.data;
+	let types = sources[classFqn].children || [];
+
+	if (types.length > 0) {
+		const subTypes = types.map(getSourceTypes)
+			.reduce((allSubTypes, subTypes) => [...allSubTypes, ...subTypes], []);
+		types = [...types, ...subTypes];
+	}
+
+	return types;
+};
+
 export {
 	getParams,
+	getSourceTypes,
 	parseResponseErrorText
 };

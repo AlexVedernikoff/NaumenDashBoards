@@ -2,11 +2,11 @@
 import 'babel-polyfill';
 import 'dom4';
 import 'whatwg-fetch';
-import './iframeResizer';
+import 'iframe-resizer';
 import './fakeApi';
 import App from 'components/App';
 import {configureStore} from 'store';
-import {decorateRestCallModule, fixInitialHeight} from './helpers';
+import {decorateRestCallModule} from './helpers';
 import {Provider} from 'react-redux';
 import React from 'react';
 import {render} from 'react-dom';
@@ -14,7 +14,6 @@ import smoothscroll from 'smoothscroll-polyfill';
 
 top.injectJsApi && top.injectJsApi(top, window);
 smoothscroll.polyfill();
-fixInitialHeight();
 decorateRestCallModule(window.jsApi.restCallModule);
 
 export const root = document.getElementById('root');

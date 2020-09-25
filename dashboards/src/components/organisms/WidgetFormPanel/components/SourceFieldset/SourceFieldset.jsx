@@ -2,7 +2,9 @@
 import {ExtendButton, LegacyCheckbox as Checkbox} from 'components/atoms';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormField} from 'WidgetFormPanel/components';
+import {getDescriptorCases} from 'src/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
+import {isSourceType} from 'store/sources/data/helpers';
 import type {OnChangeLabelEvent, OnRemoveEvent} from 'components/molecules/TreeSelect/types';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
@@ -21,7 +23,8 @@ export class SourceFieldset extends Component<Props> {
 		const {descriptor, source} = set;
 
 		if (source) {
-			let context = descriptor ? JSON.parse(descriptor) : this.createFilterContext(source.value);
+			const {value: classFqn} = source;
+			const context = descriptor ? this.getFilterContext(descriptor, classFqn) : this.createFilterContext(source.value);
 
 			try {
 				const {serializedContext} = await window.jsApi.commands.filterForm(context);
@@ -35,10 +38,23 @@ export class SourceFieldset extends Component<Props> {
 	createFilterContext = (classFqn: string) => {
 		const context: Object = {};
 
-		if (classFqn.includes('$')) {
-			context.cases = [classFqn];
+		if (isSourceType(classFqn)) {
+			context.cases = getDescriptorCases(classFqn);
 		} else {
 			context.clazz = classFqn;
+		}
+
+		return context;
+	};
+
+	getFilterContext = (descriptor: string, classFqn: string) => {
+		let context = JSON.parse(descriptor);
+
+		if (!context.clazz) {
+			context = {
+				...context,
+				cases: getDescriptorCases(classFqn)
+			};
 		}
 
 		return context;

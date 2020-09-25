@@ -35,7 +35,7 @@ const setChildrenDataSources = (map: DataSourceMap, classFqn: string, children: 
  * @param {Array<RawDataSource>} sources - массив классов с типами и подтипами
  * @returns {DataSourceMap}
  */
-export const getDataSourceMap = (sources: Array<RawDataSource>) => {
+const getDataSourceMap = (sources: Array<RawDataSource>) => {
 	let map = {};
 
 	sources.forEach(source => {
@@ -46,4 +46,11 @@ export const getDataSourceMap = (sources: Array<RawDataSource>) => {
 	});
 
 	return map;
+};
+
+const isSourceType = (classFqn: string) => classFqn.includes('$');
+
+export {
+	getDataSourceMap,
+	isSourceType
 };

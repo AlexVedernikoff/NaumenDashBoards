@@ -2,6 +2,8 @@
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin} from './types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {getDescriptorCases} from 'src/helpers';
+import {isSourceType} from 'store/sources/data/helpers';
 import {LINKS_EVENTS} from './constants';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -9,10 +11,9 @@ const getPartsClassFqn = (code?: string) => {
 	const cases = [];
 	let classFqn = code;
 
-	if (classFqn && classFqn.includes('$')) {
-		const parts = classFqn.split('$');
-		classFqn = parts.shift();
-		cases.push(parts.pop());
+	if (classFqn && isSourceType(classFqn)) {
+		classFqn = classFqn.split('$')[0];
+		cases.push(...getDescriptorCases(classFqn).map(type => type.split('$')[1]));
 	}
 
 	return {
