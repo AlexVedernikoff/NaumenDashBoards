@@ -1,9 +1,11 @@
 // @flow
-import type {ComputedAttr} from 'store/widgets/data/types';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {ComputedAttr, Indicator} from 'store/widgets/data/types';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'WidgetFormPanel/helpers';
+import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
+import {getDefaultIndicator, hasDifferentAggregations} from 'WidgetFormPanel/components/TableForm/helpers';
 import {IndicatorFieldset, SortableList} from 'WidgetFormPanel/components';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props} from './types';
@@ -11,13 +13,16 @@ import React, {Fragment, PureComponent} from 'react';
 import withForm from 'WidgetFormPanel/withForm';
 
 export class IndicatorsBox extends PureComponent<Props> {
-	getDefaultIndicator = () => ({
-		aggregation: DEFAULT_AGGREGATION.COUNT,
-		attribute: null
-	});
+	checkForBreakdown = () => {
+		const {onRemoveBreakdown, values} = this.props;
+
+		if (hasDifferentAggregations(values.data)) {
+			onRemoveBreakdown();
+		}
+	};
 
 	getIndicators = () => {
-		const {indicators = [this.getDefaultIndicator()]} = this.props.set;
+		const {indicators = [getDefaultIndicator()]} = this.props.set;
 		return indicators;
 	};
 
@@ -42,7 +47,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 
 	handleClickAddInput = () => {
 		const {index, setDataFieldValue} = this.props;
-		setDataFieldValue(index, FIELDS.indicators, [...this.getIndicators(), this.getDefaultIndicator()]);
+		setDataFieldValue(index, FIELDS.indicators, [...this.getIndicators(), getDefaultIndicator()]);
 	};
 
 	handleClickSumInput = () => {
@@ -88,12 +93,22 @@ export class IndicatorsBox extends PureComponent<Props> {
 	handleSelect = (event: OnSelectAttributeEvent, index: number) => {
 		const {index: dataSetIndex, setDataFieldValue, transformAttribute} = this.props;
 		const indicators = this.getIndicators();
+		const currentValue = indicators[index];
+		const {value} = event;
+
+		if (value && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!currentValue || currentValue.type !== value.type)) {
+			indicators[index] = {
+				...indicators[index],
+				aggregation: getDefaultAggregation(value)
+			};
+		}
+
 		indicators[index] = {
 			...indicators[index],
 			attribute: transformAttribute(event, this.handleSelect, index)
 		};
 
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators);
+		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators, this.checkForBreakdown);
 	};
 
 	handleSelectAggregation = (index: number, name: string, value: string) => {
@@ -104,12 +119,13 @@ export class IndicatorsBox extends PureComponent<Props> {
 			aggregation: value
 		};
 
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators);
+		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators, this.checkForBreakdown);
 	};
 
-	renderFieldset = (indicator: Object, index: number) => {
+	renderFieldset = (indicator: Indicator, index: number, indicators: Array<Indicator>) => {
 		const {errors, index: dataSetIndex, set} = this.props;
 		const {aggregation, attribute} = indicator;
+		const removable = indicators.length > 1;
 		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.indicators, index, FIELDS.attribute);
 
 		return (
@@ -125,7 +141,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 				onSaveComputedAttribute={this.handleSaveComputedAttribute}
 				onSelect={this.handleSelect}
 				onSelectAggregation={this.handleSelectAggregation}
-				removable={true}
+				removable={removable}
 				set={set}
 				usesNotApplicableAggregation={true}
 				value={attribute}

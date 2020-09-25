@@ -2,6 +2,7 @@
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
 import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateSettings, LayoutMode} from './types';
+import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
@@ -99,10 +100,12 @@ const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 		dispatch(setAutoUpdateSettings(autoUpdate));
 	}
 
-	dispatch(setWidgets(widgets));
-	dispatch(fetchAllBuildData(widgets));
-	dispatch(setWebLayouts(widgets, layouts));
-	dispatch(setMobileLayouts(widgets, mobileLayouts));
+	batch(() => {
+		dispatch(setWidgets(widgets));
+		dispatch(fetchAllBuildData(widgets));
+		dispatch(setWebLayouts(widgets, layouts));
+		dispatch(setMobileLayouts(widgets, mobileLayouts));
+	});
 };
 
 /**

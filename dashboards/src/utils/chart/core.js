@@ -2,7 +2,7 @@
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, Legend} from 'store/widgets/data/types';
-import {CHART_TYPES, DATA_LABELS_LIMIT, DEFAULT_COLORS, LEGEND_POSITIONS, LOCALES} from './constants';
+import {CHART_TYPES, DATA_LABELS_LIMIT, LEGEND_POSITIONS, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'src/helpers';
@@ -147,7 +147,6 @@ const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries =
 const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexOptions => {
 	const {colors, type: widgetType} = widget;
 	const type = widgetType === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(widgetType);
-	const chartColors = colors || DEFAULT_COLORS;
 	const {bar, line} = CHART_TYPES;
 	const {dataLabels, legend} = widget;
 	const isAxisChart = type === bar || type === line;
@@ -166,9 +165,12 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 			locales: LOCALES,
 			parentHeightOffset: 0,
 			type,
-			width: '100%'
+			width: '100%',
+			zoom: {
+				enabled: false
+			}
 		},
-		colors: [...chartColors],
+		colors: [...colors],
 		dataLabels: getDataLabelsOptions(dataLabels, data, isAxisChart),
 		legend: getLegendOptions(legend, width),
 		series: getSeries(widget, data)

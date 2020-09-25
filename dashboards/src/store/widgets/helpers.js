@@ -38,7 +38,7 @@ const transformGroupFormat = (group?: Group, extendCustom: boolean = true) => {
 
 		resultGroup = {
 			...group,
-			data: customGroups[group.data]
+			data: customGroups.original[group.data]
 		};
 	}
 

@@ -7,6 +7,7 @@ export type Props = {
 	...ContextProps,
 	calcTotalColumn: boolean,
 	index: number,
+	onRemoveBreakdown: () => void,
 	renderAddInput: (props: $Shape<IconButtonProps>) => React$Node,
 	renderSumInput: (props: $Shape<IconButtonProps>) => React$Node,
 	set: DataSet

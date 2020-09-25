@@ -1,5 +1,8 @@
 // @flow
-import type {AxisIndicator, AxisParameter} from 'store/widgets/data/types';
+import type {AxisIndicator, AxisWidget, ComboWidget} from 'store/widgets/data/types';
+import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {getBuildSet} from 'store/widgets/data/helpers';
+import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
 
 const axisLabelFormatter = (value: number | string) => {
@@ -34,14 +37,30 @@ const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero:
 	return formattedValue;
 };
 
-const getXAxisOptions = (parameter: AxisParameter) => {
+const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>): Array<string> => {
+	const set = getBuildSet(widget);
+	const {group} = set;
+
+	if (group.way === GROUP_WAYS.SYSTEM && group.data === DATETIME_SYSTEM_GROUP.SEVEN_DAYS) {
+		return labels.map(str => {
+			const dates = str.split('-');
+			return `${moment(dates[0], 'DD.MM.YY').format('DD MMMM')} - ${moment(dates[1], 'DD.MM.YY').format('DD MMMM')}`;
+		});
+	}
+
+	return labels;
+};
+
+const getXAxisOptions = (widget: AxisWidget | ComboWidget) => {
+	const {parameter} = widget;
 	const {name, show, showName} = parameter;
 
-	const options: Object = {
+	let options: Object = {
 		labels: {
-			hideOverlappingLabels: false,
+			hideOverlappingLabels: true,
+			maxHeight: 100,
+			minHeight: 50,
 			rotate: -60,
-			rotateAlways: true,
 			show,
 			trim: true
 		},
@@ -80,6 +99,7 @@ const getYAxisOptions = (indicator: AxisIndicator) => {
 
 export {
 	axisLabelFormatter,
+	getXAxisLabels,
 	getXAxisOptions,
 	getYAxisOptions,
 	valueFormatter

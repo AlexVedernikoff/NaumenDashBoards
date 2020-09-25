@@ -7,6 +7,7 @@ import type {OnChangeAttributeLabelEvent, OnChangeGroup, OnSelectAttributeEvent}
 export type Props = {
 	dataSet: DataSet,
 	disabled: boolean,
+	disabledGroup: boolean,
 	error: string,
 	filter?: (options: Array<Attribute>, index: number) => Array<Attribute>,
 	group: Group,

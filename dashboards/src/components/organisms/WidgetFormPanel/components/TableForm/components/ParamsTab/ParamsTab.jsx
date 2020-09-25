@@ -5,6 +5,8 @@ import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'WidgetFormPanel/helpers';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
+import {hasDifferentAggregations} from 'WidgetFormPanel/components/TableForm/helpers';
 import {IconButton} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {IndicatorsBox, ParametersBox} from './components';
@@ -54,7 +56,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		setDataFieldValue(index, FIELDS.withBreakdown, true);
 	};
 
-	handleRemoveBreakdown = (index: number) => {
+	handleRemoveBreakdown = (index: number = this.mainIndex) => {
 		const {setDataFieldValue} = this.props;
 
 		setDataFieldValue(index, FIELDS.breakdown, null);
@@ -62,9 +64,14 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	};
 
 	handleSelectBreakdown = (event: OnSelectAttributeEvent, index: number) => {
-		const {setDataFieldValue, transformAttribute} = this.props;
+		const {setDataFieldValue, transformAttribute, values} = this.props;
+		const {[FIELDS.breakdown]: currentValue} = values.data[index];
 		const {name} = event;
 		const nextValue = transformAttribute(event, this.handleSelectBreakdown, index);
+
+		if (!currentValue || currentValue.type !== nextValue.type) {
+			setDataFieldValue(index, FIELDS.breakdownGroup, getDefaultSystemGroup(nextValue));
+		}
 
 		setDataFieldValue(index, name, nextValue);
 	};
@@ -80,6 +87,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return (
 			<ExtendingFieldset
 				className={styles.breakdownField}
+				disabled={hasDifferentAggregations(values.data)}
 				index={this.mainIndex}
 				onClick={this.handleExtendBreakdown(this.mainIndex)}
 				show={show} text="Разбивка"
@@ -119,6 +127,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				<IndicatorsBox
 					calcTotalColumn={calcTotalColumn}
 					index={index}
+					onRemoveBreakdown={this.handleRemoveBreakdown}
 					renderAddInput={this.renderAddInput}
 					renderSumInput={this.renderSumInput}
 					set={set}
@@ -160,7 +169,13 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	};
 
 	renderSumInput = (props: $Shape<IconButtonProps>) => (
-		<IconButton{...props} className={styles.sumInput} icon={ICON_NAMES.SUM} round={false} />
+		<IconButton
+			className={styles.sumInput}
+			icon={ICON_NAMES.SUM}
+			round={false}
+			tip="Подсчитывать итоги"
+			{...props}
+		/>
 	);
 
 	render () {

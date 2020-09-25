@@ -38,9 +38,9 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {group, map, setSubmit} = this.props;
+		const {group, originalGroups, setSubmit} = this.props;
 
-		if (group.data in map) {
+		if (group.data in originalGroups) {
 			this.setState({selectedGroup: group.data});
 		}
 
@@ -52,10 +52,10 @@ export class CustomGroup extends Component<Props, State> {
 	getGroupValue = (group: CustomGroupType) => group.id;
 
 	getSelectedGroup = () => {
-		const {map} = this.props;
+		const {editableGroups} = this.props;
 		const {selectedGroup} = this.state;
 
-		return map[selectedGroup];
+		return editableGroups[selectedGroup];
 	};
 
 	getUsingWidgets = (): Array<string> => {
@@ -157,7 +157,7 @@ export class CustomGroup extends Component<Props, State> {
 			if (selectedGroup.id.startsWith(LOCAL_PREFIX_ID)) {
 				onCreate(selectedGroup, this.onCreateCallBack);
 			} else {
-				onUpdate(selectedGroup, true);
+				onUpdate(selectedGroup, true, this.onCreateCallBack);
 				this.onSubmit(selectedGroup.id);
 			}
 		}
@@ -167,7 +167,11 @@ export class CustomGroup extends Component<Props, State> {
 		const {selectedGroup} = this.state;
 
 		if (selectedGroup) {
-			const usedInWidgets = this.getUsingWidgets();
+			const {editableGroups, originalGroups} = this.props;
+			const {selectedGroup} = this.state;
+			const groupIsChanged = originalGroups[selectedGroup]
+				&& JSON.stringify(originalGroups[selectedGroup]) !== JSON.stringify(editableGroups[selectedGroup]);
+			const usedInWidgets = groupIsChanged ? this.getUsingWidgets() : [];
 
 			usedInWidgets.length > 0 ? this.setState({showSaveInfo: true}) : this.save();
 		}

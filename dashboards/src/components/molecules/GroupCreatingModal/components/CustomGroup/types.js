@@ -1,5 +1,10 @@
 // @flow
-import type {CustomGroup as StoreCustomGroup, CustomGroupsMap, OperandType} from 'store/customGroups/types';
+import type {
+	CustomGroup as StoreCustomGroup,
+	CustomGroupsMap,
+	OperandType,
+	UpdateCustomGroup
+} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
 import type {SetSubmit} from 'components/molecules/GroupCreatingModal/types';
@@ -45,12 +50,13 @@ export type AttrCustomProps = {|
 |};
 
 export type Props = {
+	editableGroups: CustomGroupsMap,
 	group: Group,
-	map: CustomGroupsMap,
 	onCreate: (customGroup: StoreCustomGroup, onCreateCallback: Function) => ThunkAction,
 	onRemove: (groupId: string) => ThunkAction,
 	onSubmit: Group => void,
-	onUpdate: (customGroup: StoreCustomGroup, remote?: boolean) => ThunkAction,
+	onUpdate: UpdateCustomGroup,
+	originalGroups: CustomGroupsMap,
 	setSubmit: SetSubmit,
 	show: boolean,
 	widgets: Array<Widget>,

@@ -1,5 +1,5 @@
 // @flow
-import type {Props, State} from './types';
+import type {Item, Props, State} from './types';
 import React, {Component} from 'react';
 import {ReactSortable} from 'react-sortablejs';
 import styles from './styles.less';
@@ -7,13 +7,13 @@ import styles from './styles.less';
 export class SortableList extends Component<Props, State> {
 	renderHandler = () => <div className={styles.handler} />;
 
-	renderItem = (item: any, index: number) => {
+	renderItem = (item: Item, index: number, items: Array<Item>) => {
 		const {renderItem} = this.props;
 
 		return (
 			<div className={styles.item} key={index}>
 				{this.renderHandler()}
-				{renderItem(item, index)}
+				{renderItem(item, index, items)}
 			</div>
 		);
 	};

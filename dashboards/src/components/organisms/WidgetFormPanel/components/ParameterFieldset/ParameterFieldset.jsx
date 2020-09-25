@@ -1,6 +1,5 @@
 // @flow
 import {AttributeFieldset, AttributeGroupField, FormField} from 'WidgetFormPanel/components';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import type {Group} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
@@ -11,6 +10,7 @@ import React, {PureComponent} from 'react';
 export class ParameterFieldset extends PureComponent<Props> {
 	static defaultProps = {
 		disabled: false,
+		disabledGroup: false,
 		removable: false
 	};
 
@@ -30,9 +30,9 @@ export class ParameterFieldset extends PureComponent<Props> {
 	};
 
 	renderGroup = (props: Object) => {
-		const {group, index, name, value: parameter} = this.props;
-		const {disabled: selectDisabled, parent, value} = props;
-		const disabled = selectDisabled || (index !== 0 && parameter && !(parameter.type in ATTRIBUTE_SETS.REF));
+		const {disabledGroup, group, name} = this.props;
+		const {disabled: parameterDisabled, parent, value} = props;
+		const disabled = parameterDisabled || disabledGroup;
 		const field = {
 			disabled,
 			name,

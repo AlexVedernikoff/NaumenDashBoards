@@ -21,7 +21,7 @@ const getParams = () => {
 /**
  * Парсит текст серверной ошибки
  * @param {string} text - текст ошибки
- * @returns {Object | string}
+ * @returns {object | string}
  */
 const parseResponseErrorText = (text: string) => {
 	let data = text.split('njava.lang.Exception:')[1];

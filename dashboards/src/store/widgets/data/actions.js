@@ -28,10 +28,12 @@ const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch, getS
 		}));
 	}
 
-	dispatch(addLayouts(NewWidget.id));
-	dispatch({
-		payload,
-		type: WIDGETS_EVENTS.ADD_WIDGET
+	batch(() => {
+		dispatch({
+			payload,
+			type: WIDGETS_EVENTS.ADD_WIDGET
+		});
+		dispatch(addLayouts(NewWidget.id));
 	});
 };
 
@@ -48,7 +50,7 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
  * @param {Widget} settings - данные формы редактирования
  * @returns {ThunkAction}
  */
-const saveWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const saveWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
@@ -116,12 +118,12 @@ const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatc
 		};
 		const widget = await window.jsApi.restCallModule('dashboardSettings', 'createWidget', payload);
 
-		batch([
-			dispatch(deleteWidget(NewWidget.id)),
-			dispatch(replaceLayoutsId(NewWidget.id, widget.id)),
-			dispatch(setCreatedWidget(widget)),
-			dispatch(fetchBuildData(widget))
-		]);
+		batch(() => {
+			dispatch(deleteWidget(NewWidget.id));
+			dispatch(replaceLayoutsId(NewWidget.id, widget.id));
+			dispatch(setCreatedWidget(widget));
+			dispatch(fetchBuildData(widget));
+		});
 		dispatch(saveNewLayouts());
 	} catch (e) {
 		validationErrors = getErrors(e);
@@ -136,7 +138,7 @@ const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatc
  * @param {string} widgetId - идентификатор виджета
  * @returns {ThunkAction}
  */
-const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch({
 		type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
 	});
@@ -148,11 +150,11 @@ const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch,
 		};
 		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
 
-		batch([
-			dispatch(setCreatedWidget(widget)),
-			dispatch(addLayouts(widget.id)),
-			dispatch(fetchBuildData(widget))
-		]);
+		batch(() => {
+			dispatch(setCreatedWidget(widget));
+			dispatch(addLayouts(widget.id));
+			dispatch(fetchBuildData(widget));
+		});
 		dispatch(saveNewLayouts());
 		dispatch({
 			type: WIDGETS_EVENTS.RESPONSE_WIDGET_COPY
@@ -200,7 +202,7 @@ const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): voi
 /**
  * Возвращает объект ошибок из ответа сервера
  * @param {ResponseError} error - серверная ошибка
- * @returns {Object | void}
+ * @returns {object | void}
  */
 const getErrors = (error: ResponseError) => {
 	const {responseText, status} = error;
@@ -224,7 +226,7 @@ const getErrors = (error: ResponseError) => {
  * @returns {ThunkAction}
  */
 const validateWidgetToCopy = (widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<boolean> => {
-	let isValid = false;
+	let isValid = true;
 
 	dispatch({
 		type: WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY
@@ -249,6 +251,25 @@ const validateWidgetToCopy = (widgetKey: string): ThunkAction => async (dispatch
 	}
 
 	return isValid;
+};
+
+/**
+ * Устанавливает выбранный виджет для редактирования
+ * @param {string} widgetId - уникальный идентификатор выбранного виджета
+ * @returns {ThunkAction}
+ */
+const setSelectedWidget = (widgetId: string) => (dispatch: Dispatch, getState: GetState) => {
+	const {selectedWidget} = getState().widgets.data;
+
+	if (selectedWidget === NewWidget.id) {
+		dispatch(deleteWidget(selectedWidget));
+		dispatch(removeLayouts(selectedWidget));
+	}
+
+	dispatch({
+		payload: widgetId,
+		type: WIDGETS_EVENTS.SET_SELECTED_WIDGET
+	});
 };
 
 const deleteWidget = (payload: string) => ({
@@ -279,11 +300,6 @@ const resetWidget = () => ({
 const setCreatedWidget = (payload: Widget) => ({
 	payload,
 	type: WIDGETS_EVENTS.SET_CREATED_WIDGET
-});
-
-const setSelectedWidget = (payload: string) => ({
-	payload,
-	type: WIDGETS_EVENTS.SET_SELECTED_WIDGET
 });
 
 const setWidgets = (widgets: Array<Widget>): Object => {
