@@ -1,12 +1,12 @@
 // @flow
 import {createToast} from 'store/toasts/actions';
-import type {CustomGroup, CustomGroupsMap} from './types';
+import type {CustomGroup, CustomGroupsMap, OnCreateCallback} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 
-const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callback: Function): ThunkAction =>
+const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callback: OnCreateCallback): ThunkAction =>
 	async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const payload = {
@@ -17,7 +17,7 @@ const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callb
 		callback(id);
 
 		dispatch(removeCustomGroup(localId));
-		dispatch(saveCustomGroup({...customGroupData, id}));
+		dispatch(saveCustomGroup({group: {...customGroupData, id}, remote: true}));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка создания группировки',
@@ -45,17 +45,24 @@ const deleteCustomGroup = (groupKey: string): ThunkAction => async (dispatch: Di
 	}
 };
 
-const updateCustomGroup = (group: CustomGroup, remote: boolean = false): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback?: OnCreateCallback): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+	let updatedGroup = group;
+
 	try {
 		if (remote) {
 			const payload = {
 				...getParams(),
 				group
 			};
-			await window.jsApi.restCallModule('dashboardSettings', 'updateCustomGroup', payload);
+			({group: updatedGroup} = await window.jsApi.restCallModule('dashboardSettings', 'updateCustomGroup', payload));
+
+			if (updatedGroup.id !== group.id) {
+				callback && callback(updatedGroup.id);
+			}
 		}
 
-		dispatch(saveCustomGroup(group));
+		dispatch(saveCustomGroup({group: updatedGroup, remote}));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка сохранения группировки',
@@ -77,7 +84,7 @@ const setCustomGroups = (payload: CustomGroupsMap) => (dispatch: Dispatch) => {
 	});
 };
 
-const saveCustomGroup = (payload: CustomGroup) => ({
+const saveCustomGroup = payload => ({
 	payload,
 	type: CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP
 });

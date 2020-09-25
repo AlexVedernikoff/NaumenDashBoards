@@ -3,6 +3,7 @@ import {array, object} from 'yup';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {getDefaultIndicator, getDefaultParameter} from './helpers';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
 import {normalizeDataSet} from 'utils/normalizer/widget/tableNormalizer';
 import {ParamsTab, StyleTab} from './components';
@@ -21,12 +22,12 @@ export class TableForm extends Component<TypedFormProps> {
 			...base,
 			data: array().of(object({
 				[breakdown]: requiredByCompute(breakdown, conditionalBreakdown(indicators)),
-				[indicators]: array(object({
+				[indicators]: requiredByCompute(indicators, array(object({
 					attribute: requiredAttribute(getErrorMessage(indicator))
-				})),
+				})).default([getDefaultIndicator()])),
 				[parameters]: array(object({
 					attribute: requiredAttribute(getErrorMessage(parameter))
-				})),
+				})).default([getDefaultParameter()]),
 				[source]: object().required(getErrorMessage(source)).nullable()
 			}))
 		});

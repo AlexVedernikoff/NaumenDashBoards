@@ -14,7 +14,7 @@ const CHART_TYPES = {
 	pie
 };
 
-const DATA_LABELS_LIMIT = 500;
+const DATA_LABELS_LIMIT = 250;
 
 const bottom: 'bottom' = 'bottom';
 const left: 'left' = 'left';

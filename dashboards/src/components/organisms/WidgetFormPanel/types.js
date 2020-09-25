@@ -84,6 +84,7 @@ export type TypedFormProps = {|
 |};
 
 export type Props = {|
+	addFieldErrorRef: DivRef => void,
 	attributes: AttributesMap,
 	cancelForm: () => ThunkAction,
 	context: Context,

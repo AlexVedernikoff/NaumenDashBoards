@@ -10,7 +10,8 @@ export const props = (state: AppState): ConnectedProps => {
 	const widgets = getMapValues(map).filter(widget => widget.id !== selectedWidget);
 
 	return {
-		customGroups,
+		editableCustomGroups: customGroups.editable,
+		originalCustomGroups: customGroups.original,
 		widgets
 	};
 };

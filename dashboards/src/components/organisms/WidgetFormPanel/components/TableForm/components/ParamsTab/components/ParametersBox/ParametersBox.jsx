@@ -2,8 +2,9 @@
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'WidgetFormPanel/helpers';
+import {getDefaultParameter} from 'WidgetFormPanel/components/TableForm/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
-import type {Group} from 'store/widgets/data/types';
+import type {Group, Parameter} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'WidgetFormPanel/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import {ParameterFieldset, SortableList} from 'WidgetFormPanel/components';
@@ -12,13 +13,8 @@ import React, {Fragment, PureComponent} from 'react';
 import withForm from 'WidgetFormPanel/withForm';
 
 export class ParametersBox extends PureComponent<Props> {
-	getDefaultParameter = () => ({
-		attribute: null,
-		group: getDefaultSystemGroup(null)
-	});
-
 	getParameters = () => {
-		const {parameters = [this.getDefaultParameter()]} = this.props.set;
+		const {parameters = [getDefaultParameter()]} = this.props.set;
 		return parameters;
 	};
 
@@ -57,7 +53,7 @@ export class ParametersBox extends PureComponent<Props> {
 
 	handleClickAddInput = () => {
 		const {index, setDataFieldValue} = this.props;
-		setDataFieldValue(index, FIELDS.parameters, [...this.getParameters(), this.getDefaultParameter()]);
+		setDataFieldValue(index, FIELDS.parameters, [...this.getParameters(), getDefaultParameter()]);
 	};
 
 	handleClickSumInput = () => {
@@ -84,7 +80,7 @@ export class ParametersBox extends PureComponent<Props> {
 		attribute = transformAttribute(event, this.handleSelect, index);
 
 		if (dataSetIndex === 0 && (!currentValue || currentValue.type !== attribute.type)) {
-			setDataFieldValue(dataSetIndex, FIELDS.group, getDefaultSystemGroup(attribute));
+			parameters[index] = {...parameters[index], [FIELDS.group]: getDefaultSystemGroup(attribute)};
 		}
 
 		parameters[index] = {...parameters[index], attribute};
@@ -92,9 +88,10 @@ export class ParametersBox extends PureComponent<Props> {
 		setDataFieldValue(dataSetIndex, FIELDS.parameters, parameters);
 	};
 
-	renderParameterFieldset = (parameter: Object, index: number) => {
+	renderFieldset = (parameter: Parameter, index: number, parameters: Array<Parameter>) => {
 		const {errors, index: dataSetIndex, set} = this.props;
 		const {attribute, group} = parameter;
+		const removable = parameters.length > 1;
 		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.parameters, index, FIELDS.attribute);
 
 		return (
@@ -109,7 +106,7 @@ export class ParametersBox extends PureComponent<Props> {
 				onChangeLabel={this.handleChangeAttributeTitle}
 				onRemove={this.handleRemove}
 				onSelect={this.handleSelect}
-				removable={true}
+				removable={removable}
 				value={attribute}
 			/>
 		);
@@ -139,7 +136,7 @@ export class ParametersBox extends PureComponent<Props> {
 				<SortableList
 					list={this.getParameters()}
 					onChangeOrder={this.handleChangeOrder}
-					renderItem={this.renderParameterFieldset}
+					renderItem={this.renderFieldset}
 				/>
 			</FormBox>
 		);

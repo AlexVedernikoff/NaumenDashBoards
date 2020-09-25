@@ -2,7 +2,8 @@
 import {connect} from 'react-redux';
 import {deepClone} from 'src/helpers';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
-import {FIELDS} from 'WidgetFormPanel';
+import type {DivRef} from 'components/types';
+import {FIELDS, formRef} from 'WidgetFormPanel';
 import Form from 'components/organisms/WidgetFormPanel';
 import {functions, props} from './selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -11,6 +12,7 @@ import React, {PureComponent} from 'react';
 import type {UpdateWidget} from 'WidgetFormPanel/types';
 
 class WidgetFormPanel extends PureComponent<Props, State> {
+	fieldErrorRefs = [];
 	state = {
 		errors: {},
 		isSubmitting: false,
@@ -34,6 +36,29 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 		cancelForm();
 	}
 
+	addFieldErrorRef = (ref: DivRef) => {
+		this.fieldErrorRefs.push(ref);
+	};
+
+	focusOnError = () => {
+		const {current: form} = formRef;
+
+		if (this.fieldErrorRefs.length > 0 && form) {
+			const offsets = this.fieldErrorRefs.map(({current}) => {
+				let top = 0;
+
+				if (current) {
+					top = current.getBoundingClientRect().top;
+				}
+
+				return top;
+			});
+			const top = Math.min(...offsets) - form.getBoundingClientRect().top;
+
+			form.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
+		}
+	};
+
 	handleSubmit = async (updateWidget: UpdateWidget) => {
 		const {changeLayoutMode, createWidget, layoutMode, saveWidget, widget} = this.props;
 		const {values} = this.state;
@@ -52,6 +77,8 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 			if (errors) {
 				this.setState({errors});
 			}
+		} else {
+			this.focusOnError();
 		}
 	};
 
@@ -109,6 +136,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 	};
 
 	render () {
+		this.fieldErrorRefs = [];
 		const {
 			attributes,
 			cancelForm,
@@ -133,6 +161,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 		if (valuesSet) {
 			return (
 				<Form
+					addFieldErrorRef={this.addFieldErrorRef}
 					attributes={attributes}
 					cancelForm={cancelForm}
 					context={context}

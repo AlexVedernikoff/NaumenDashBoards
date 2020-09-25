@@ -1,5 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {DataSet} from 'containers/WidgetFormPanel/types';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {filterByAttribute, getDataErrorKey} from 'WidgetFormPanel/helpers';
@@ -117,12 +118,15 @@ export class ParameterDataBox extends PureComponent<Props> {
 
 	renderParameterFieldset = (set: DataSet, index: number) => {
 		const {errors, name, values} = this.props;
+		const parameter = set[name];
+		const disabledGroup = index !== 0 && parameter && !(parameter.type in ATTRIBUTE_SETS.REF);
 		const errorKey = getDataErrorKey(index, name);
 
 		return (
 			<ParameterFieldset
 				dataSet={set}
 				disabled={this.isDisabled(index)}
+				disabledGroup={disabledGroup}
 				error={errors[errorKey]}
 				filter={this.filter}
 				group={set[FIELDS.group]}
@@ -133,7 +137,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 				onChangeGroup={this.handleChangeGroup}
 				onChangeLabel={this.handleChangeAttributeTitle}
 				onSelect={this.handleSelect}
-				value={set[name]}
+				value={parameter}
 			/>
 		);
 	};

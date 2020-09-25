@@ -5,7 +5,7 @@ import type {
 	Props as SystemProps
 } from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
 import type {Attribute} from 'store/sources/attributes/types';
-import type {CustomGroup, CustomGroupsMap} from 'store/customGroups/types';
+import type {CustomGroup, CustomGroupsMap, UpdateCustomGroup} from 'store/customGroups/types';
 import type {Group, Widget} from 'store/widgets/data/types';
 import type {Item} from 'store/sources/currentObject/types';
 import type {ThunkAction} from 'store/types';
@@ -29,7 +29,8 @@ export type AttributeGroupProps = {|
 |};
 
 export type ConnectedProps = {|
-	customGroups: CustomGroupsMap,
+	editableCustomGroups: CustomGroupsMap,
+	originalCustomGroups: CustomGroupsMap,
 	widgets: Array<Widget>
 |};
 
@@ -38,7 +39,7 @@ type onCreateCallback = (id: string) => void;
 export type ConnectedFunctions = {|
 	createCustomGroup: (group: CustomGroup, callback: onCreateCallback) => ThunkAction,
 	deleteCustomGroup: (id: string) => ThunkAction,
-	updateCustomGroup: (group: CustomGroup, remote?: boolean) => ThunkAction
+	updateCustomGroup: UpdateCustomGroup
 |};
 
 export type ModalProps = {|

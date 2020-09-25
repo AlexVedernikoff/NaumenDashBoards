@@ -2,6 +2,7 @@
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {CUSTOM_GROUPS_EVENTS, OPERAND_SETS, OPERAND_TYPES} from './constants';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
+import type {ThunkAction} from 'store/types';
 
 export type OperandType = $Keys<typeof OPERAND_TYPES>;
 
@@ -194,7 +195,10 @@ type RemoveCustomGroup = {
 };
 
 type SaveCustomGroup = {
-	payload: CustomGroup,
+	payload: {
+		group: CustomGroup,
+		remote: boolean
+	},
 	type: typeof CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP
 };
 
@@ -207,6 +211,10 @@ type UnknownCustomGroupsAction = {
 	type: typeof CUSTOM_GROUPS_EVENTS.UNKNOWN_CUSTOM_GROUPS_ACTION
 };
 
+export type OnCreateCallback = (groupId: string) => void;
+
+export type UpdateCustomGroup = (customGroup: CustomGroup, remote?: boolean, callback?: OnCreateCallback) => ThunkAction;
+
 export type CustomGroupsAction =
 	| RemoveCustomGroup
 	| SaveCustomGroup
@@ -214,4 +222,7 @@ export type CustomGroupsAction =
 	| UnknownCustomGroupsAction
 ;
 
-export type CustomGroupsState = CustomGroupsMap;
+export type CustomGroupsState = {
+	editable: CustomGroupsMap,
+	original: CustomGroupsMap
+};

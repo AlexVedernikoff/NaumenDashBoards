@@ -14,21 +14,10 @@ export const formRef: DivRef = createRef();
 export const FormContext: React$Context<Object> = createContext({});
 
 export class WidgetFormPanel extends Component<Props, State> {
-	fieldErrorRefs = [];
 	state: {
 		// $FlowFixMe
 		rendered: false
 	};
-
-	componentDidMount (): * {
-		this.setState({rendered: true});
-	}
-
-	componentDidUpdate () {
-		this.focusOnError();
-	}
-
-	addFieldErrorRef = (ref: DivRef) => this.fieldErrorRefs.push(ref);
 
 	changeAttributeTitle = (currentValue: Attribute, parent: Attribute | null, title: string) => {
 		let value = currentValue;
@@ -51,27 +40,9 @@ export class WidgetFormPanel extends Component<Props, State> {
 		return value;
 	};
 
-	focusOnError = () => {
-		const {current: form} = formRef;
-
-		if (this.fieldErrorRefs.length > 0 && form) {
-			const offsets = this.fieldErrorRefs.map(({current}) => {
-				let top = 0;
-
-				if (current) {
-					top = current.getBoundingClientRect().top;
-				}
-
-				return top;
-			});
-			const top = Math.min(...offsets) - form.getBoundingClientRect().top;
-
-			form.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
-		}
-	};
-
 	getContextValue = () => {
 		const {
+			addFieldErrorRef,
 			attributes,
 			dynamicGroups,
 			errors,
@@ -89,7 +60,7 @@ export class WidgetFormPanel extends Component<Props, State> {
 		} = this.props;
 
 		return {
-			addFieldErrorRef: this.addFieldErrorRef,
+			addFieldErrorRef,
 			attributes,
 			changeAttributeTitle: this.changeAttributeTitle,
 			dynamicGroups,
@@ -213,7 +184,6 @@ export class WidgetFormPanel extends Component<Props, State> {
 	};
 
 	render () {
-		this.fieldErrorRefs = [];
 		return this.renderTypedForm();
 	}
 }

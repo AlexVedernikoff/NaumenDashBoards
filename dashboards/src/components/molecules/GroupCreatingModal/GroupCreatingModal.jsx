@@ -67,19 +67,29 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderCustomGroup = () => {
-		const {createCustomGroup, customGroups, customProps, deleteCustomGroup, group, updateCustomGroup, widgets} = this.props;
+		const {
+			createCustomGroup,
+			customProps,
+			deleteCustomGroup,
+			editableCustomGroups,
+			group,
+			originalCustomGroups,
+			updateCustomGroup,
+			widgets
+		} = this.props;
 		const {way} = this.state;
 		const show = way === GROUP_WAYS.CUSTOM;
 
 		return (
 			<CustomGroup
 				{...customProps}
+				editableGroups={editableCustomGroups}
 				group={group}
-				map={customGroups}
 				onCreate={createCustomGroup}
 				onRemove={deleteCustomGroup}
 				onSubmit={this.handleSubmitGroup}
 				onUpdate={updateCustomGroup}
+				originalGroups={originalCustomGroups}
 				setSubmit={this.setSubmit(GROUP_WAYS.CUSTOM)}
 				show={show}
 				widgets={widgets}
