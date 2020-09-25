@@ -2,12 +2,11 @@
 import type {ApexOptions} from 'apexcharts';
 import {axisLabelFormatter, getXAxisLabels, getXAxisOptions, getYAxisOptions, valueFormatter} from './helpers';
 import type {AxisWidget} from 'store/widgets/data/types';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {hasMSInterval} from 'store/widgets/helpers';
+import {hasMSInterval, hasPercent} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -22,9 +21,8 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 	const set = getBuildSet(widget);
 
 	if (set && !set.sourceForCompute) {
-		const {aggregation} = set;
 		const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
-		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
+		const usesPercent = hasPercent(set, FIELDS.yAxis);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
 		const xaxis = {
@@ -61,6 +59,10 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 			},
 			plotOptions: {
 				bar: {
+					dataLabels: {
+						orientation: horizontal && stacked ? 'vertical' : 'horizontal',
+						position: horizontal && !stacked ? 'bottom' : 'center'
+					},
 					horizontal
 				}
 			},

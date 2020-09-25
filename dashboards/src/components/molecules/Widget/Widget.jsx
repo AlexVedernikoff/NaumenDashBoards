@@ -1,5 +1,6 @@
 // @flow
 import cn from 'classnames';
+import {createContextName} from 'utils/export/helpers';
 import {createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
 import {Diagram, Modal} from 'components/molecules';
 import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -115,11 +116,12 @@ export class Widget extends PureComponent<Props, State> {
 		onEdit(data.id);
 	};
 
-	handleClickExportButton = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+	handleClickExportButton = async (e: SyntheticMouseEvent<HTMLDivElement>) => {
 		const {buildData, data} = this.props;
-		const {name} = data;
 		const {current} = this.ref;
 		const {type} = e.currentTarget.dataset;
+		const contextName = await createContextName();
+		const name = `${data.name}_${contextName}`;
 
 		if (type === FILE_VARIANTS.XLSX) {
 			return exportSheet(name, buildData.data);

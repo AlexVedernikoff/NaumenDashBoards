@@ -24,8 +24,8 @@ export class Node extends PureComponent<Props> {
 	};
 
 	handleClickShowMore = () => {
-		const {children, data, getOptionValue, onLoadMoreChildren} = this.props;
-		onLoadMoreChildren && onLoadMoreChildren(getOptionValue(data.value), Children.count(children));
+		const {children, data, onLoadMoreChildren} = this.props;
+		onLoadMoreChildren && onLoadMoreChildren(data, Children.count(children));
 	};
 
 	handleClickToggleIcon = () => {
@@ -75,7 +75,11 @@ export class Node extends PureComponent<Props> {
 		const {loading} = this.props.data;
 
 		if (loading) {
-			return <Loader className={styles.loader} />;
+			return (
+				<div className={styles.toggleIconContainer}>
+					<Loader size={20} />
+				</div>
+			);
 		}
 	};
 

@@ -2,7 +2,7 @@
 import {createToast} from 'store/toasts/actions';
 import type {CustomGroup, CustomGroupsMap, OnCreateCallback} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
-import type {Dispatch, ThunkAction} from 'store/types';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 
@@ -46,7 +46,8 @@ const deleteCustomGroup = (groupKey: string): ThunkAction => async (dispatch: Di
 };
 
 const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback?: OnCreateCallback): ThunkAction =>
-	async (dispatch: Dispatch): Promise<void> => {
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {original: originalGroups} = getState().customGroups;
 	let updatedGroup = group;
 
 	try {
@@ -59,6 +60,7 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback
 
 			if (updatedGroup.id !== group.id) {
 				callback && callback(updatedGroup.id);
+				dispatch(saveCustomGroup({group: originalGroups[group.id], remote: false}));
 			}
 		}
 

@@ -5,6 +5,7 @@ const getCurrentContentParameters = async () => await ({
 });
 
 const getCurrentContextObject = async () => await ({
+	card_caption: 'Сотрудник "Петров Петр Петрович"',
 	metaClass: process.env.CONTEXT_OBJECT_META_CLASS
 });
 

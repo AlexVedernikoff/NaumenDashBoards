@@ -14,7 +14,7 @@ export type Props = {
 	getOptionValue: (option: Option) => string,
 	onClick: Node => void,
 	onClickToggleIcon: (value: NodeValue) => void,
-	onLoadMoreChildren?: (value: string, offset: number) => void,
+	onLoadMoreChildren?: (value: Node, offset: number) => void,
 	selected: boolean,
 	showMoreChildren: boolean
 };

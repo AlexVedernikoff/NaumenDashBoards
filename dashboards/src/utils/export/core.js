@@ -16,7 +16,7 @@ window.html2canvas = html2canvas;
 	общее изображение контейнера. После этого происходит удаление всех png представлений и возврат svg-графиков на место.
  */
 const createIEImage = async (container: HTMLDivElement, options: Object) => {
-	const charts = container.querySelectorAll('.apexcharts-svg');
+	const charts = container.querySelectorAll('.apexcharts-svg, .speedometer');
 	const serializer = new XMLSerializer();
 	const temp = [];
 

@@ -44,8 +44,8 @@ export class TableForm extends Component<TypedFormProps> {
 		}
 
 		const {
-			calcTotalColumn = true,
-			calcTotalRow = true,
+			calcTotalColumn = false,
+			calcTotalRow = false,
 			computedAttrs = [],
 			data = [],
 			displayMode,

@@ -1,14 +1,14 @@
 // @flow
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {Cell} from 'components/organisms/Table/components';
 import type {CellConfigProps, OnClickCellProps} from 'components/organisms/Table/types';
 import type {Column, Props, State} from './types';
 import {COLUMN_TYPES, ID_ACCESSOR} from './constants';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce} from 'src/helpers';
-import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import {parseMSInterval} from 'store/widgets/helpers';
+import {FIELDS} from 'WidgetFormPanel/constants';
+import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {Table} from 'components/organisms';
@@ -107,15 +107,14 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	renderIndicatorCell = (props: CellConfigProps) => {
 		const {column, value} = props;
-		const {aggregation, attribute} = column;
 		const components = {
 			Value: this.renderLink
 		};
 		let cellValue = value;
 
-		if (attribute.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION) {
+		if (hasMSInterval(column, FIELDS.attribute)) {
 			cellValue = parseMSInterval(Number(value));
-		} else if (aggregation === DEFAULT_AGGREGATION.PERCENT && value) {
+		} else if (value && hasPercent(column, FIELDS.attribute)) {
 			cellValue = `${value}%`;
 		}
 
