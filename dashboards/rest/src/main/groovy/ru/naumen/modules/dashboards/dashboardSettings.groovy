@@ -1208,7 +1208,7 @@ List<Map<String, String>> getDashboardsUUIDAndTitle()
     }
     else
     {
-        throw new IllegalStateException('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
+        throw new Exception('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
     }
 }
 
@@ -1295,7 +1295,7 @@ String widgetIsBadToCopy(requestContent)
                 def slurper = new groovy.json.JsonSlurper()
                 def descriptorMap  = slurper.parseText(descriptor)
                 def filters = descriptorMap.filters
-                filtersHasSubject += filters.collectMany { filterValue ->
+                filtersHasSubject += filters?.collectMany { filterValue ->
                     def conditionCodes = filterValue*.properties.conditionCode
                     conditionCodes.collect { conditionCode ->
                         if (conditionCode.toLowerCase().contains('subject'))
@@ -1350,20 +1350,24 @@ private Map<String, Object> editWidgetDescriptor(Map<String, Object> widgetSetti
                 def slurper = new groovy.json.JsonSlurper()
                 def descriptorMap  = slurper.parseText(descriptor)
                 def filters = descriptorMap.filters
-                def valuesToRemove = filters.collectMany { filterValue ->
-                    def conditionCodes = filterValue*.properties.conditionCode
-                    conditionCodes.collect { conditionCode ->
-                        if (conditionCode.toLowerCase().contains('subject'))
-                        {
-                            if (dashboardKey.tokenize('_').find() != widgetKey.tokenize('_').find())
+                if (filters)
+                {
+                    def valuesToRemove = filters.collectMany { filterValue ->
+                        def conditionCodes = filterValue*.properties.conditionCode
+                        conditionCodes.collect { conditionCode ->
+                            if (conditionCode.toLowerCase().contains('subject'))
                             {
-                                return filterValue
+                                if (dashboardKey.tokenize('_').find() != widgetKey.tokenize('_').find())
+                                {
+                                    return filterValue
+                                }
                             }
                         }
-                    }
-                }.grep()
-                filters -= valuesToRemove
-                descriptorMap.filters = filters
+                    }.grep()
+
+                    filters -= valuesToRemove
+                    descriptorMap.filters = filters
+                }
                 descriptor = toJson(descriptorMap)
                 dataValue.descriptor = descriptor
             }

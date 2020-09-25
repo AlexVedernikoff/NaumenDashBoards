@@ -84,7 +84,8 @@ enum Aggregation
     AVG('AVG(%s)'),
     MAX('MAX(%s)'),
     MIN('MIN(%s)'),
-    MDN('%s') //TODO: Тут должна была быть медиана.
+    MDN('%s'), //TODO: Тут должна была быть медиана.
+    NOT_APPLICABLE('')
 
     Aggregation(String aggregationFormat)
     {
@@ -148,6 +149,16 @@ enum MCDisplayMode
 {
     MOBILE,
     ANY
+}
+
+/**
+ * Тип параметра колонки
+ */
+enum ColumnType
+{
+    PARAMETER,
+    INDICATOR,
+    BREAKDOWN
 }
 //endregion
 
