@@ -24,6 +24,6 @@ export class PanelShowAll extends Component<Props, State> {
 				</div>
 			</div>
 		);
-	};
+	}
 }
 export default connect(props, functions)(PanelShowAll);

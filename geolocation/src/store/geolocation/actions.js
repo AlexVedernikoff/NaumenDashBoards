@@ -4,7 +4,7 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from './constants';
 import {getTimeInSeconds} from 'helpers/time';
 import {notify} from 'helpers/notify';
-import type {Point, PointType} from 'types/point';
+import type {GroupCode, Point, PointType} from 'types/point';
 import testData from 'helpers/testData';
 import testData2 from 'helpers/testData2';
 
@@ -22,7 +22,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any>
 
 		dispatch(setContext(context));
 		dispatch(setParams(params))
-			.then(() => dispatch(fetchGeolocation()))
+			.then(() => dispatch(fetchGeolocation(true)))
 			.then(() => dispatch(reloadGeolocation(true)))
 			.catch(error => error);
 	} catch (error) {
@@ -30,23 +30,29 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any>
 	}
 };
 
-const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let markers = testData;
 		const {context} = getState().geolocation;
 		const {contentCode, subjectUuid} = context;
 
 		if (environment !== 'development') {
-			markers = await getMap(contentCode, subjectUuid)
+			markers = await getMap(contentCode, subjectUuid);
 		}
 
-		const {errors} = markers;
+		const {errors, staticGroups} = markers;
+		const {params} = getState().geolocation;
+		const {colorStaticPoint, groupingMethodName} = params;
+		const found = staticGroups.find(group => group.name === 'Без группы');
 
 		if (errors.length) {
 			const label = errors.join(', ') + '.';
 			notify('static', 'info', label);
 		}
-		dispatch(setData(markers));
+		if (staticGroups.length && !found && groupingMethodName) {
+			staticGroups.push({name: 'Без группы', color: colorStaticPoint, code: null});
+		}
+		dispatch(setData(markers, firstCall));
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError());
@@ -108,9 +114,12 @@ const setParams = (payload: Object) => dispatch => {
 	return Promise.resolve();
 };
 
-const setData = (payload: Object) => ({
+const setData = (payload: Object, firstCall) => ({
 	type: GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION,
-	payload
+	payload: {
+		...payload,
+		firstCall
+	}
 });
 
 const reloadActivePoint = (payload: Object) => ({
@@ -133,24 +142,40 @@ const setSinglePoint = (data: Point) => ({
 });
 
 const resetSinglePoint = () => ({
-	type: GEOLOCATION_EVENTS.RESET_SINGLE_POINT,
+	type: GEOLOCATION_EVENTS.RESET_SINGLE_POINT
 });
 
 const togglePanel = () => ({
-	type: GEOLOCATION_EVENTS.TOGGLE_PANEL,
+	type: GEOLOCATION_EVENTS.TOGGLE_PANEL
 });
 
 const toggleFilter = () => ({
-	type: GEOLOCATION_EVENTS.TOGGLE_FILTER,
+	type: GEOLOCATION_EVENTS.TOGGLE_FILTER
+});
+
+const toggleGroup = (payload: GroupCode) => ({
+	type: GEOLOCATION_EVENTS.TOGGLE_GROUP,
+	payload
+});
+
+const resetAllGroups = () => ({
+	type: GEOLOCATION_EVENTS.RESET_ALL_GROUPS
+});
+
+const selectAllGroups = () => ({
+	type: GEOLOCATION_EVENTS.SELECT_ALL_GROUPS
 });
 
 export {
 	getAppConfig,
 	fetchGeolocation,
 	reloadGeolocation,
+	resetAllGroups,
 	resetSinglePoint,
+	selectAllGroups,
 	setSinglePoint,
 	setTab,
+	toggleGroup,
 	toggleFilter,
-	togglePanel,
+	togglePanel
 };

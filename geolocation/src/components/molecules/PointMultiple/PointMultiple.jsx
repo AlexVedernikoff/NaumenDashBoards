@@ -59,4 +59,5 @@ export class PointMultiple extends Component<Props, State> {
 			</Marker>
 		);
 	}
-}export default connect(props, functions)(PointMultiple);
+}
+export default connect(props, functions)(PointMultiple);

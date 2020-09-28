@@ -16,14 +16,12 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				params: action.payload
 			};
 		case GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION:
-			const {dynamicPoints, staticGroups, staticPoints} = action.payload;
-
 			return {
 				...state,
-				dynamicPoints,
+				dynamicPoints: action.payload.dynamicPoints,
 				showSinglePoint: false,
-				staticPoints,
-				staticGroups,
+				staticPoints: action.payload.staticPoints,
+				staticGroups: action.payload.firstCall ? action.payload.staticGroups.map(group => ({...group, checked: true})) : [...state.staticGroups],
 				success: true
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
@@ -47,6 +45,7 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				...state,
 				controls: {
 					...state.controls,
+					filterOpen: false,
 					panelOpen: !state.controls.panelOpen
 				},
 				showSinglePoint: false
@@ -73,6 +72,23 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				...state,
 				singlePoint: initialGeolocationState.singlePoint,
 				showSinglePoint: false
+			};
+		case GEOLOCATION_EVENTS.TOGGLE_GROUP:
+			return {
+				...state,
+				staticGroups: state.staticGroups.map(group =>
+					group.code === action.payload ? {...group, checked: !group.checked} : group
+				)
+			};
+		case GEOLOCATION_EVENTS.SELECT_ALL_GROUPS:
+			return {
+				...state,
+				staticGroups: state.staticGroups.map(group => ({...group, checked: true}))
+			};
+		case GEOLOCATION_EVENTS.RESET_ALL_GROUPS:
+			return {
+				...state,
+				staticGroups: state.staticGroups.map(group => ({...group, checked: false}))
 			};
 		case GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR:
 			return {

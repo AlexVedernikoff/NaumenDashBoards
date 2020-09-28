@@ -3,8 +3,7 @@ import type {Context} from 'types/api';
 import type {Controls} from 'types/controls';
 import {GEOLOCATION_EVENTS} from './constants';
 import type {Params} from 'types/params';
-import type {Point, StaticGroup} from 'types/point';
-import type {PointType} from 'types/point';
+import type {GroupCode, Point, PointType, StaticGroup} from 'types/point';
 
 type SetContext = {
 	type: typeof GEOLOCATION_EVENTS.SET_CONTEXT,
@@ -35,21 +34,34 @@ type SetTab = {
 	payload: PointType
 };
 
-type setSinglePoint = {
+type SetSinglePoint = {
 	type: typeof GEOLOCATION_EVENTS.SET_SINGLE_POINT,
 	payload: Point
 };
 
-type resetSinglePoint = {
+type ResetSinglePoint = {
 	type: typeof GEOLOCATION_EVENTS.RESET_SINGLE_POINT
 };
 
+type ToggleGroup = {
+	type: typeof GEOLOCATION_EVENTS.TOGGLE_GROUP,
+	payload: GroupCode
+};
+
+type ResetAllGroups = {
+	type: typeof GEOLOCATION_EVENTS.RESET_ALL_GROUPS
+};
+
+type SelectAllGroups = {
+	type: typeof GEOLOCATION_EVENTS.SELECT_ALL_GROUPS
+};
+
 type TogglePanel = {
-	type: typeof GEOLOCATION_EVENTS.TOGGLE_PANEL,
+	type: typeof GEOLOCATION_EVENTS.TOGGLE_PANEL
 };
 
 type ToggleFilter = {
-	type: typeof GEOLOCATION_EVENTS.TOGGLE_FILTER,
+	type: typeof GEOLOCATION_EVENTS.TOGGLE_FILTER
 };
 
 type UnknownGeolocationAction = {
@@ -60,13 +72,16 @@ type UnknownGeolocationAction = {
 export type GeolocationAction =
 	| ReloadActivePoint
 	| RecordGeolocationError
-	| resetSinglePoint
+	| ResetAllGroups
+	| ResetSinglePoint
+	| SelectAllGroups
 	| SetContext
 	| SetDataGeolocation
 	| SetParams
-	| setSinglePoint
+	| SetSinglePoint
 	| SetTab
 	| ToggleFilter
+	| ToggleGroup
 	| TogglePanel
 	| UnknownGeolocationAction
 ;

@@ -4,13 +4,16 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchGeolocation, reloadGeolocation, toggleFilter, togglePanel} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => {
-	const {updatePointsMode, groupingMethodName} = state.geolocation.params;
+	const {geolocation} = state;
+	const {controls, staticGroups} = geolocation;
+	const {groupingMethodName, updatePointsMode} = geolocation.params;
+	const filterShow = !!groupingMethodName;
 
 	return {
-		filterActive: true,
-		filterOpen: state.geolocation.controls.filterOpen,
-		filterShow: groupingMethodName === 'groupingMethodName',
-		panelOpen: state.geolocation.controls.panelOpen,
+		filterActive: staticGroups.some(item => !item.checked),
+		filterOpen: controls.filterOpen,
+		filterShow,
+		panelOpen: controls.panelOpen,
 		updatePointsMode
 	};
 };

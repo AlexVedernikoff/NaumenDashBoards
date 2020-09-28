@@ -1,7 +1,4 @@
 // @flow
-import type {Params} from 'types/params';
-import type {Point, StaticGroup} from 'types/point';
-
 type OwnProps = {};
 
 export type ConnectedProps = {

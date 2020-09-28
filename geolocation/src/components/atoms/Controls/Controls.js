@@ -57,8 +57,8 @@ export class Controls extends Component<Props, State> {
 	render () {
 		const activeColor = '#EBEBEB';
 		const defaultColor = '#FFFFFF';
-		const {filterActive, filterOpen, filterShow,  panelOpen} = this.props;
-		const {filterHover,  panelHover, reloadHover} = this.state;
+		const {filterActive, filterOpen, filterShow, panelOpen} = this.props;
+		const {filterHover, panelHover, reloadHover} = this.state;
 		const panelIconColor = (panelHover || panelOpen) ? activeColor : defaultColor;
 		const filterIconColor = (filterHover || filterOpen) ? activeColor : defaultColor;
 		const reloadIconColor = reloadHover ? activeColor : defaultColor;

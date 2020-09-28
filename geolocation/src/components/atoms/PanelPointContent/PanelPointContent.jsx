@@ -3,18 +3,9 @@ import cn from 'classnames';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './PanelPointContent.less';
-import Truncate from 'react-truncate';
+import {truncatedText} from 'components/atoms/TruncatedText';
 
 export class PanelPointContent extends Component<Props, State> {
-	renderTruncatedText = (text: string, line: number = 3) => {
-		const ellipsis = <span>...</span>;
-		return (
-			<Truncate lines={line} ellipsis={ellipsis}>
-				{text}
-			</Truncate>
-		);
-	};
-
 	render () {
 		const {option} = this.props;
 		const {label, presentation, value} = option;
@@ -32,8 +23,8 @@ export class PanelPointContent extends Component<Props, State> {
 
 		return (
 			<div className={optionCN}>
-				{label && <div className={styles.optionLeft}>{this.renderTruncatedText(label)}</div>}
-				{value && <div className={optionValueCN}>{this.renderTruncatedText(value)}</div>}
+				{label && <div className={styles.optionLeft}>{truncatedText(label)}</div>}
+				{value && <div className={optionValueCN}>{truncatedText(value)}</div>}
 			</div>
 		);
 	}

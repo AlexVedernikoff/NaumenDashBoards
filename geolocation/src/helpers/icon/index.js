@@ -49,7 +49,7 @@ export const divIconMarker = (iconName: IconName, color: string, count: number) 
 
 	switch (iconName) {
 		case 'multiple':
-			if(color) {
+			if (color) {
 				icon = multipleMarker(color);
 				borderColor = color;
 			} else {
@@ -57,7 +57,7 @@ export const divIconMarker = (iconName: IconName, color: string, count: number) 
 			}
 			break;
 		case 'multipleHover':
-			if(color) {
+			if (color) {
 				icon = multipleMarkerHover(color);
 				borderColor = color;
 			} else {
@@ -70,7 +70,7 @@ export const divIconMarker = (iconName: IconName, color: string, count: number) 
 
 	const blob = new Blob([icon], {type: 'image/svg+xml'});
 	const url = URL.createObjectURL(blob);
-	
+
 	const countHtml = `<div class="boxCount" style='border: 1px solid ${borderColor}'>${count.toString()}</div>`;
 
 	const divIconData = {

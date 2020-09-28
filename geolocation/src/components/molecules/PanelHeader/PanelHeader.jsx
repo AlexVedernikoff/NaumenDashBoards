@@ -5,33 +5,23 @@ import {functions, props} from './selectors';
 import type {PointType} from 'types/point';
 import React, {Component} from 'react';
 import styles from './PanelHeader.less';
-import Truncate from 'react-truncate';
+import {truncatedText} from 'components/atoms/TruncatedText';
 
 export class PanelHeader extends Component<Props, State> {
-	renderTruncatedText = (text: string, line: number = 1) => {
-		const ellipsis = <span>...</span>;
-
-		return (
-			<Truncate lines={line} ellipsis={ellipsis}>
-				{text}
-			</Truncate>
-		);
-	};
-
 	renderTab = (type: PointType, label: string) => {
 		const {panelShow, setTab} = this.props;
 
-		if(type === panelShow) {
+		if (type === panelShow) {
 			return (
 				<div>
-					<div className={styles.lable} >{this.renderTruncatedText(label)}</div>
+					<div className={styles.lable} >{truncatedText(label)}</div>
 					<div className={styles.active} />
 				</div>
 			);
 		}
 		return (
 			<div onClick={() => setTab(type)}>
-				<div className={styles.inActiveLable} >{this.renderTruncatedText(label)}</div>
+				<div className={styles.inActiveLable} >{truncatedText(label)}</div>
 			</div>
 		);
 	};
@@ -50,4 +40,3 @@ export class PanelHeader extends Component<Props, State> {
 	}
 }
 export default connect(props, functions)(PanelHeader);
-

@@ -1,22 +1,21 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {setTab} from 'store/geolocation/actions';
+import {resetAllGroups, selectAllGroups} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {panelShow, params} = geolocation;
-	const {dynamicPointsListName, staticPointsListName} = params;
+	const {controls, staticGroups} = geolocation;
 
 	return {
-		dynamicPointsListName,
-		panelShow,
-		staticPointsListName
+		open: controls.filterOpen,
+		staticGroups
 	};
 };
 
 const functions: ConnectedFunctions = {
-	setTab
+	resetAllGroups,
+	selectAllGroups
 };
 
 export {

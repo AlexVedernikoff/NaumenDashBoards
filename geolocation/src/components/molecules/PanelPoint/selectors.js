@@ -9,7 +9,7 @@ const props = (state: AppState, props: OwnProps): ConnectedProps => {
 	const {params, showSinglePoint, staticGroups} = geolocation;
 	const {geoposition, pointData, type} = props;
 	let statusColor = '';
-	
+
 	if (type === 'dynamic' && geoposition) {
 		const {date} = geoposition;
 

@@ -8,7 +8,7 @@ import KebabIcon from 'icons/KebabIcon';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './PanelPointHeader.less';
-import Truncate from 'react-truncate';
+import {truncatedText} from 'components/atoms/TruncatedText';
 
 export class PanelPointHeader extends Component<Props, State> {
 	constructor (props: Object) {
@@ -18,23 +18,13 @@ export class PanelPointHeader extends Component<Props, State> {
 		};
 	}
 
-	renderTruncatedText = (text: string, line: number = 3) => {
-		const ellipsis = <span>...</span>;
-
-		return (
-			<Truncate lines={line} ellipsis={ellipsis}>
-				{text}
-			</Truncate>
-		);
-	};
-
 	openActions = (event: SyntheticEvent<HTMLButtonElement>) => {
 		event.stopPropagation();
 
 		this.setState({openAction: !this.state.openAction});
 	}
 
-	callChangeState = (uuid: string, states: Array<string>) => async() => {
+	callChangeState = (uuid: string, states: Array<string>) => async () => {
 		const {fetchGeolocation} = this.props;
 		const response = await changeState(uuid, states);
 
@@ -43,7 +33,7 @@ export class PanelPointHeader extends Component<Props, State> {
 		}
 	};
 
-	callChangeResponsible = (uuid: string) => async() => {
+	callChangeResponsible = (uuid: string) => async () => {
 		const {fetchGeolocation} = this.props;
 		const response = await changeResponsible(uuid);
 
@@ -53,17 +43,15 @@ export class PanelPointHeader extends Component<Props, State> {
 	};
 
 	renderAction = (uuid: string, action: Action) => {
-		const {name, type} = action;
+		const {inPlace, link, name, states, type} = action;
+		const target = !inPlace ? '_blank' : '';
 
 		switch (type) {
 			case 'open_link':
-				const {link, inPlace} = action;
-				const target = !inPlace ? '_blank' : '';
-
 				return (
 					<div className={styles.actionItem}>
 						<a href={link} target={target}>
-							<div>{this.renderTruncatedText(name, 1)}</div>
+							<div>{truncatedText(name, 1)}</div>
 						</a>
 					</div>
 				);
@@ -73,18 +61,16 @@ export class PanelPointHeader extends Component<Props, State> {
 						className={styles.actionItem}
 						onClick={this.callChangeResponsible(uuid)}
 					>
-						{this.renderTruncatedText(name, 1)}
+						{truncatedText(name, 1)}
 					</div>
 				);
 			case 'change_state':
-				const {states} = action;
-
 				return (
 					<div
 						className={styles.actionItem}
 						onClick={this.callChangeState(uuid, states)}
 					>
-						{this.renderTruncatedText(name, 1)}
+						{truncatedText(name, 1)}
 					</div>
 				);
 		}
@@ -94,7 +80,7 @@ export class PanelPointHeader extends Component<Props, State> {
 		const {openAction} = this.state;
 		const {actions, uuid} = this.props;
 
-		if(openAction) {
+		if (openAction) {
 			return (
 				<div className={styles.actionsContainer}>
 					{actions.map((action, index) =>
@@ -107,7 +93,7 @@ export class PanelPointHeader extends Component<Props, State> {
 		}
 	};
 
-	renderHeader = (header: string) => <div className={styles.contentHeader}>{this.renderTruncatedText(header, 2)}</div>
+	renderHeader = (header: string) => <div className={styles.contentHeader}>{truncatedText(header, 2)}</div>
 
 	renderKebab = (header: string) => {
 		const {openAction} = this.state;
@@ -137,7 +123,7 @@ export class PanelPointHeader extends Component<Props, State> {
 		const {showKebab} = this.props;
 		const {openAction} = this.state;
 
-		if(!showKebab && openAction) {
+		if (!showKebab && openAction) {
 			this.setState({openAction: false});
 		}
 	}
@@ -148,7 +134,7 @@ export class PanelPointHeader extends Component<Props, State> {
 		return (
 			<div>
 				<div className={styles.contentHeaderContainer}>
-					<div className={styles.contentStatus}  style={{background: statusColor}}/>
+					<div className={styles.contentStatus} style={{background: statusColor}}/>
 					{showKebab ? this.renderKebab(header) : this.renderHeader(header)}
 				</div>
 				{this.renderActions()}

@@ -79,7 +79,7 @@ const changeState = async (uuid: string, states: Array<any>) => {
 	const response = await jsApi.forms.changeState(uuid, states);
 
 	return response;
-}
+};
 
 const changeResponsible = async (uuid: string) => {
 	const {jsApi} = window;

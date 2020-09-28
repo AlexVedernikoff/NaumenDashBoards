@@ -2,7 +2,7 @@
 export type OwnProps = {};
 
 export type ConnectedProps = {
-	open: boolean,
+	open: boolean
 };
 
 export type ConnectedFunctions = {};

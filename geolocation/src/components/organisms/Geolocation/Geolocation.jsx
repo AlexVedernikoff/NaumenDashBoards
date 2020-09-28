@@ -3,7 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import 'styles/styles.less';
 import Controls from 'components/atoms/Controls';
 import Copyright from 'components/atoms/Copyright';
-import Filter from 'components/atoms/Filter';
+import Filter from 'components/molecules/Filter';
 import L from 'leaflet';
 import PointsList from 'components/molecules/PointsList';
 import {Map as LeafletMap} from 'react-leaflet';
@@ -27,13 +27,13 @@ export class Geolocation extends Component<Props, State> {
 
 	reloadBound = () => this.setState({reloadBound: true});
 
-	centerOnSinglePoint() {
+	centerOnSinglePoint () {
 		const {singlePoint} = this.props;
 		const {geoposition} = singlePoint;
 		const {latitude, longitude} = geoposition;
 
 		this.mapRef.current.leafletElement.panTo(new L.LatLng(latitude, longitude));
-	};
+	}
 
 	resetSinglePoint = () => () => {
 		const {resetSinglePoint} = this.props;
@@ -45,7 +45,7 @@ export class Geolocation extends Component<Props, State> {
 		const {bounds, loading, showSinglePoint} = this.props;
 		const {reloadBound} = this.state;
 
-		if(showSinglePoint) {
+		if (showSinglePoint) {
 			this.centerOnSinglePoint();
 		} else {
 			this.mapRef.current.leafletElement.fitBounds(bounds);
@@ -76,9 +76,9 @@ export class Geolocation extends Component<Props, State> {
 				>
 					<PointsList />
 					<Controls setBounds={this.reloadBound} />
-					<Filter />
 					<Copyright />
 				</LeafletMap>
+				<Filter />
 				<Panel />
 			</div>
 		);

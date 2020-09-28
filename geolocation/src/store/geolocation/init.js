@@ -9,7 +9,7 @@ export const initialGeolocationState: GeolocationState = {
 	},
 	controls: {
 		filterOpen: false,
-		panelOpen: true,
+		panelOpen: true
 	},
 	dynamicPoints: [],
 	error: false,
@@ -17,16 +17,16 @@ export const initialGeolocationState: GeolocationState = {
 	panelShow: 'static',
 	params: {
 		autoUpdateLocation: true,
-		dynamicPointsListName: "Инженеры",
-		groupingMethodName: "groupingMethodName",
-		command: "getCurrentContentParameters",
-		colorStaticPoint: '#EB5757',
+		dynamicPointsListName: 'Инженеры',
+		command: 'getCurrentContentParameters',
 		colorDynamicActivePoint: '#4D92C8',
 		colorDynamicInactivePoint: '#828282',
-		pointsMethodName: 'pointsMethodName',
+		colorStaticPoint: '#EB5757',
+		groupingMethodName: 'groupingMethodName',
 		locationUpdateFrequency: {length: 60, interval: 'SECOND'},
+		pointsMethodName: 'pointsMethodName',
 		requestCurrentLocation: false,
-		staticPointsListName: "Заявки",
+		staticPointsListName: 'Заявки',
 		timeIntervalInactivity: {length: 1200, interval: 'SECOND'},
 		updatePointsMode: 'getPoints'
 	},

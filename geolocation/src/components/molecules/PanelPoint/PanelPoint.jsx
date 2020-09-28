@@ -1,5 +1,5 @@
 // @flow
-import {connect} from 'react-redux';;
+import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import {notify} from 'helpers/notify';
 import PanelPointContent from 'components/atoms/PanelPointContent';
@@ -13,27 +13,30 @@ export class PanelPoint extends Component<Props, State> {
 	constructor (props: Object) {
 		super(props);
 		this.state = {
-			actionShow: false,
+			actionShow: false
 		};
 	}
 
 	showSingle = () => {
-		const {geoposition, pointData, showSinglePoint, setSinglePoint, type} = this.props;
+		const {showSinglePoint} = this.props;
 
-		this.setState({actionShow: false});
+		if (!showSinglePoint) {
+			const {geoposition, pointData, setSinglePoint, type} = this.props;
 
-		if(!geoposition) {
-			const {header} = pointData;
+			this.setState({actionShow: false});
+			if (!geoposition) {
+				const {header} = pointData;
 
-			notify('single', 'info', header);
+				notify('single', 'info', header);
+			}
+			const data = {
+				geoposition,
+				data: [pointData],
+				type
+			};
+
+			setSinglePoint(data);
 		}
-		const data = {
-			geoposition,
-			data: [pointData],
-			type
-		};
-
-		!showSinglePoint && setSinglePoint(data);
 	}
 
 	showAction = () => this.setState({actionShow: true});
@@ -46,11 +49,11 @@ export class PanelPoint extends Component<Props, State> {
 		const {pointData, statusColor} = this.props;
 		const {actions, header, options, uuid} = pointData;
 		const {actionShow} = this.state;
-		const showKebab = (actionShow && actions.length) ? true : false;
+		const showKebab = (actionShow && actions.length);
 
 		return (
 			<div
-				onMouseEnter={this.showAction}
+				onMouseOver={this.showAction}
 				onMouseLeave={this.hideAction}
 				onClick={this.showSingle}
 				className={styles.pointContainer}
@@ -65,6 +68,6 @@ export class PanelPoint extends Component<Props, State> {
 				{options && options.map(this.renderOption)}
 			</div>
 		);
-	};
+	}
 }
 export default connect(props, functions)(PanelPoint);

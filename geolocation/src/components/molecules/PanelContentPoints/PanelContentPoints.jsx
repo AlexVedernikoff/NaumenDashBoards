@@ -10,7 +10,7 @@ import styles from './PanelContentPoints.less';
 
 export class PanelContentPoints extends Component<Props, State> {
 	renderPointData = (pointData: PointData, key: number, type: PointType, geoposition: Geoposition) => {
-		return <PanelPoint key={key} pointData={pointData} type={type} geoposition={geoposition} />
+		return <PanelPoint key={key} pointData={pointData} type={type} geoposition={geoposition} />;
 	}
 
 	renderPoint = (point: Point, key: number) => {
@@ -31,6 +31,6 @@ export class PanelContentPoints extends Component<Props, State> {
 				{points.map(this.renderPoint)}
 			</div>
 		);
-	};
+	}
 }
 export default connect(props, functions)(PanelContentPoints);

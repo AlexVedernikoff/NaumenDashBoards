@@ -5,26 +5,27 @@ import type {Option} from './option';
 
 export type PointType = 'dynamic' | 'static';
 
-export type Point = {
-	data: Array<PointData>,
-	geoposition: Geoposition,
-	type: PointType
-};
-
-export type Group = string | null;
+export type GroupCode = string | null;
 
 export type PointData = {
 	actions: Array<Action>,
 	errorMessage?: string,
-	group: Group,
+	group: GroupCode,
 	header: string,
 	options?: Array<Option>,
 	type: 'dynamic' | 'static',
 	uuid?: string
 };
 
+export type Point = {
+	data: Array<PointData>,
+	geoposition: Geoposition,
+	type: PointType
+};
+
 export type StaticGroup = {
-	code: string,
+	checked: boolean,
+	code: GroupCode,
 	color: string,
 	name: string
 };
@@ -34,5 +35,4 @@ export type FetchResponse = {
 	errors: Array<string>,
 	staticGroups: Array<StaticGroup>,
 	staticPoints: Array<Point>
-}
-
+};

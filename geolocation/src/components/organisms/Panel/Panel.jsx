@@ -9,7 +9,7 @@ import styles from './Panel.less';
 
 export class Panel extends Component<Props, State> {
 	render () {
-		const {open} = this.props
+		const {open} = this.props;
 
 		if (open) {
 			return (
@@ -21,7 +21,7 @@ export class Panel extends Component<Props, State> {
 				</div>
 			);
 		} else {
-			return null ;
+			return null;
 		}
 	}
 }
