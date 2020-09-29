@@ -41,7 +41,16 @@ const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch, getS
  * Сбрасывает выбранный виджет
  * @returns {ThunkAction}
  */
-const cancelForm = (): ThunkAction => (dispatch: Dispatch): void => {
+const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
+	const {selectedWidget} = getState().widgets.data;
+
+	if (selectedWidget === NewWidget.id) {
+		batch(() => {
+			dispatch(deleteWidget(NewWidget.id));
+			dispatch(removeLayouts(NewWidget.id));
+		});
+	}
+
 	dispatch(resetWidget());
 };
 
@@ -181,8 +190,12 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 		};
 
 		await window.jsApi.restCallModule('dashboardSettings', 'deleteWidget', payload);
-		dispatch(removeLayouts(widgetId));
-		dispatch(deleteWidget(widgetId));
+
+		batch(() => {
+			dispatch(removeLayouts(widgetId));
+			dispatch(deleteWidget(widgetId));
+		});
+
 		dispatch(saveNewLayouts());
 	} catch (e) {
 		dispatch(recordDeleteError());

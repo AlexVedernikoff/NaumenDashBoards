@@ -261,8 +261,8 @@ const uploadFile = async (file: Blob, name: string) => {
  */
 const sendToMail = (name: string, type: string, file: Blob): ThunkAction => async (dispatch: Dispatch) => {
 	try {
-		const key = uploadFile(file, name);
-		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type);
+		const key = await uploadFile(file, name);
+		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type, name);
 
 		dispatch(createToast({
 			text: 'Файл успешно отправлен'

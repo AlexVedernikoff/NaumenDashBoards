@@ -1,6 +1,7 @@
 // @flow
 import {save} from './helpers';
 import type {Sheet as SheetType, SheetColumn, SheetData} from './types';
+import {TABLE_NAME_LENGTH_LIMIT} from './constants';
 import XLSX from 'xlsx';
 
 class Sheet {
@@ -57,8 +58,13 @@ const exportSheet = (name: string, data: SheetType) => {
 	const table = (new Sheet(data)).create();
 	const workbook = XLSX.utils.book_new();
 	const sheet = XLSX.utils.table_to_sheet(table);
+	let tableName = name;
 
-	XLSX.utils.book_append_sheet(workbook, sheet, name);
+	if (tableName.length >= TABLE_NAME_LENGTH_LIMIT) {
+		tableName = `${tableName.substring(0, 27)}...`;
+	}
+
+	XLSX.utils.book_append_sheet(workbook, sheet, tableName);
 
 	const file = XLSX.write(workbook, {bookType: 'xlsx', type: 'binary'});
 	const blob = new Blob([stringToArrayBuffer(file)], {

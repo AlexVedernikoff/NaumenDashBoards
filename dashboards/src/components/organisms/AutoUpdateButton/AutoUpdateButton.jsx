@@ -174,7 +174,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderText = () => <span className={styles.text}> минут</span>;
 
 	renderTimerButton = () => {
-		const {onChangeRemainder, settings} = this.props;
+		const {onChangeRemainder, personalDashboard, role, settings} = this.props;
 		const {enabled, remainder} = settings;
 		const buttonCN = enabled ? styles.enabledAutoUpdateButton : '';
 
@@ -184,14 +184,18 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 			);
 		}
 
-		return (
-			<IconButton
-				className={buttonCN}
-				name={ICON_NAMES.TIMER_OFF}
-				outline
-				tip="Автообновление выключено"
-			/>
-		);
+		if (personalDashboard || role !== USER_ROLES.REGULAR) {
+			return (
+				<IconButton
+					className={buttonCN}
+					name={ICON_NAMES.TIMER_OFF}
+					outline
+					tip="Автообновление выключено"
+				/>
+			);
+		}
+
+		return null;
 	};
 
 	renderTitle = () => {

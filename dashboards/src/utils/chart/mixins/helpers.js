@@ -82,14 +82,14 @@ const getYAxisOptions = (indicator: AxisIndicator) => {
 	const options: Object = {
 		decimalsInFloat: 2,
 		labels: {
-			// Если проставить значение, то уплывает название оси на легенду
-			maxWidth: undefined
+			maxWidth: 140
 		},
 		show
 	};
 
 	if (showName) {
 		options.title = {
+			offsetX: -5,
 			text: name
 		};
 	}

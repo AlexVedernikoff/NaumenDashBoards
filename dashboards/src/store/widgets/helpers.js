@@ -62,9 +62,13 @@ const	getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widge
 /**
  * Сообщает используется ли в наборе данных виджета агрегация в процентах
  * @param {object} set - набор данных виджета
+ * @param {string} field - наименования поля показателя виджета
  * @returns {boolean}
  */
-const hasPercent = (set: Object) => set.aggregation === DEFAULT_AGGREGATION.PERCENT;
+const hasPercent = (set: Object, field: string = FIELDS.indicator) => {
+	const {aggregation, [field]: indicator} = set;
+	return indicator.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && aggregation === DEFAULT_AGGREGATION.PERCENT;
+};
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация, по которой возвращается интервал в миллисекундах

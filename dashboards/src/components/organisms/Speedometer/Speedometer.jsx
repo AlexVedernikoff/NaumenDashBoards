@@ -161,7 +161,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		if (height > 0 && width > 0) {
 			return (
-				<svg className={styles.svg} xmlns="http://www.w3.org/2000/svg">
+				<svg className="speedometer" height={height} width={width} xmlns="http://www.w3.org/2000/svg">
 					{this.renderArc(START_DEGREE, END_DEGREE)}
 					{this.renderRanges()}
 					{this.renderBorderValue(arcX - radius, min)}

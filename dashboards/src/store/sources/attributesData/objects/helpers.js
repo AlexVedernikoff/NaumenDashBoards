@@ -60,13 +60,15 @@ const receiveObjectData = (map: ObjectsMap, payload: ReceivePayload) => {
 	});
 
 	if (parentUUID) {
+		const children = map[property].items[parentUUID].children || [];
+
 		return {
 			...map[property],
 			items: {
 				...map[property].items,
 				[parentUUID]: {
 					...map[property].items[parentUUID],
-					children: data.map(item => item.uuid),
+					children: [...children, ...data.map(item => item.uuid)],
 					loading: false,
 					uploaded
 				},

@@ -15,19 +15,18 @@ const createContextName = async () => {
 		name = 'Дашборд';
 	}
 
-	return `${name}(${moment().format('DD-MM-YYYY')})`;
+	return `${name} (${moment().format('DD-MM-YYYY')})`;
 };
 
 /**
  * Выгружает файл в браузер
  * @param {Blob} blob - файл
- * @param {string} subName - название файла
+ * @param {string} fileName - название файла
  * @param {string} extension - расширение файла
  */
-const save = async (blob: Blob, subName: string, extension: string) => {
+const save = (blob: Blob, fileName: string, extension: string) => {
 	const {body} = document;
-	const contextName = await createContextName();
-	const name = subName ? `${subName}_${contextName}.${extension}` : `${contextName}.${extension}`;
+	const name = `${fileName}.${extension}`;
 
 	if (isLegacyBrowser()) {
 		window.navigator.msSaveBlob(blob, name);

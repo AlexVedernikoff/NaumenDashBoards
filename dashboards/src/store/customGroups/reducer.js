@@ -34,7 +34,7 @@ const reducer = (
 			};
 		case CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS:
 			return {
-				editable: action.payload,
+				editable: deepClone(action.payload),
 				original: action.payload
 			};
 		default:

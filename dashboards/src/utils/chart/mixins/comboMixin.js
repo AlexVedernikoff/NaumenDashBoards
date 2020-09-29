@@ -7,7 +7,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
-import {hasMSInterval} from 'store/widgets/helpers';
+import {hasMSInterval, hasPercent} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: number, ctx: Object) => {
@@ -29,9 +29,9 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 
 const getYAxis = (set: Object, index: number, widget: Object) => {
 	const {colors, indicator} = widget;
-	const {aggregation, dataKey, source, yAxis} = set;
+	const {dataKey, source, yAxis} = set;
 	const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
-	const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
+	const usesPercent = hasPercent(set, FIELDS.yAxis);
 	const customOptions = getYAxisOptions(indicator);
 	const {show} = customOptions;
 	const color = colors[index];

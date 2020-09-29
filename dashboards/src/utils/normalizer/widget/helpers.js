@@ -306,7 +306,7 @@ const mixinBreakdown = (source: Object, target: Object, extendCustom: boolean = 
 
 /**
  * Возвращает шаблон названия виджета
- * @param {Object} widget - виджет
+ * @param {object} widget - виджет
  * @returns {string} - шаблон названия
  */
 const templateName = (widget: Object) => {
