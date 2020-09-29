@@ -308,8 +308,18 @@ String updateCustomGroup(Map<String, Object> requestContent) {
     def dashboard = isPersonal ? getDashboardSetting(personalDashboardKey) : getDashboardSetting(defaultDashboardKey)
 
     if (groupKey in dashboard.customGroupIds) {
+        //если дб персональный, а группировка с общего
+        if (isPersonal && !groupKey.contains(user?.login))
+        {
+            groupKey += "_${user?.login}"
+            group.name += '_личная'
+            //добавили новый ключ
+            dashboard.customGroupIds += groupKey
+            saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE)
+            group.id = groupKey
+        }
         if (saveJsonSettings(groupKey, toJson(group), CUSTOM_GROUP_NAMESPACE)) {
-            return toJson([id: groupKey])
+            return toJson([group: group])
         } else {
             throw new Exception("Custom group settings not saved!")
         }
@@ -340,7 +350,7 @@ String deleteCustomGroup(Map<String, Object> requestContent) {
         if (deleteJsonSettings(groupKey, CUSTOM_GROUP_NAMESPACE)) {
             dashboard.customGroupIds -= groupKey
             if (saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE)) {
-                return groupKey
+                return toJson([id: groupKey])
             } else {
                 throw new Exception("Dashboard settings not saved!")
             }
@@ -510,7 +520,8 @@ String editWidget(Map<String, Object> requestContent)
     String classFqn = requestContent.classFqn
     def widget = requestContent.widget
     String widgetKey = widget.id
-    validateName(requestContent, widgetKey)
+    Boolean isPersonal = requestContent.isPersonal
+    validateName(requestContent, widgetKey, isPersonal, user)
 
     def widgetWithCorrectName = changeTotalWidgetName(widget, classFqn)
     String contentCode = requestContent.contentCode
@@ -574,7 +585,7 @@ String editWidget(Map<String, Object> requestContent)
 /**
  * Массовое редактирование виджетов в дашборде
  * @param requestContent - тело запроса ()
- * @return список ключей отредактированнных виджетов
+ * @return ключ дашборда
  */
 String editLayouts(Map<String, Object> requestContent)
 {
@@ -596,7 +607,7 @@ String editLayouts(Map<String, Object> requestContent)
         logger.error(message)
         throw new IllegalArgumentException(message)
     }
-    return dashboardKey
+    return  toJson([dashboardKey: dashboardKey])
 }
 
 /**
@@ -1114,7 +1125,7 @@ private List<String> getWidgetNames(Map<String, Object> widgets)
 {
     return widgets.values().collect {
         def widget = fromJson(it as String)
-        return widget.templateName ? widget.templateName.toString() : widget.name.toString()
+        return widget?.templateName ? widget?.templateName?.toString() : widget?.name?.toString()
     }.toList()
 }
 
@@ -1122,11 +1133,19 @@ private List<String> getWidgetNames(Map<String, Object> widgets)
  * Метод проверки уникальности названия виджета в рамках текущего дашборда
  * @param requestContent - запрос на построение/редактирование виджета
  * @param widgetKey - ключ виджета (нужен при редактировании виджета)
+ * @param isPersonal - флаг на персональный дб
+ * @param user - текущий пользователь
  * @return список названий виджетов
  */
-private void validateName(Map<String, Object> requestContent, String widgetKey = null) {
-    String name = requestContent.widget.templateName ?: requestContent.widget.name
-    String dashboardKey = generateDashboardKey(requestContent.classFqn, requestContent.contentCode)
+private void validateName(Map<String, Object> requestContent,
+                          String widgetKey = null,
+                          Boolean isPersonal = false,
+                          def user = null)
+{
+    String name = requestContent?.widget?.templateName ?: requestContent?.widget?.name
+    String dashboardKey = isPersonal
+        ? generateDashboardKey(requestContent.classFqn, requestContent.contentCode, user?.login as String)
+        : generateDashboardKey(requestContent.classFqn, requestContent.contentCode)
     List<String> widgetsNames = getWidgetNamesFromDashboard(dashboardKey, widgetKey)
     if (name in widgetsNames)
     {
@@ -1202,14 +1221,14 @@ List<Map<String, String>> getDashboardsUUIDAndTitle()
     {
         def appCode = root.dashboardCode
         def contents = api.apps.listContents(appCode)
-        return contents.collect {
-            [uuid: ("${it.subjectFqn}_${it.contentUuid}".toString()) , title: it.contentTitle]
+        if (contents)
+        {
+            return contents.collect {
+                [uuid: ("${it.subjectFqn}_${it.contentUuid}".toString()) , title: it.contentTitle]
+            }
         }
     }
-    else
-    {
-        throw new Exception('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
-    }
+    throw new Exception('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
 }
 
 /**
@@ -1258,7 +1277,7 @@ String copyWidgetToDashboard(requestContent)
     Map<String, Object> widgetSettings = getWidgetSettings(widgetKey)
 
     String destinationDashboardKey = generateDashboardKey(classFqn, contentCode)
-    DashboardSettings dashboardSettings = getDashboardSetting(destinationDashboardKey)
+    DashboardSettings dashboardSettings = getDashboardSetting(destinationDashboardKey) ?: new DashboardSettings()
     List<String> currentWidgetIds = dashboardSettings.widgetIds
 
     Closure<String> generateKey = this.&generateWidgetKey.curry(currentWidgetIds, classFqn, contentCode)
@@ -1332,6 +1351,7 @@ private Map<String, Object> editWidgetDescriptor(Map<String, Object> widgetSetti
         Map<String, Object> widget = (widgetSettings as LinkedHashMap).clone() as Map<String, Object>
         widget.templateName = widget.templateName ? widget.templateName + '_копия' : widget.name + '_копия'
         widget.name += '_копия'
+        widget.header?.name += '_копия'
         widget.header?.template = widget.header?.template ? widget.header?.template + '_копия' : widget.header?.name + '_копия'
 
         List<String> widgetsNames = getWidgetNamesFromDashboard(dashboardKey)
@@ -1339,6 +1359,7 @@ private Map<String, Object> editWidgetDescriptor(Map<String, Object> widgetSetti
         {
             widget.templateName += '_копия'
             widget.name += '_копия'
+            widget.header?.name += '_копия'
             widget.header?.template += '_копия'
         }
 
@@ -1379,6 +1400,7 @@ private Map<String, Object> editWidgetDescriptor(Map<String, Object> widgetSetti
 
     widgetSettings?.templateName = widgetSettings?.templateName ? widgetSettings?.templateName + '_копия' : widgetSettings?.name + '_копия'
     widgetSettings?.name += '_копия'
+    widgetSettings?.header?.name += '_копия'
     widgetSettings?.header?.template  = widgetSettings?.header?.template ? widgetSettings?.header?.template + '_копия' : widgetSettings?.header?.name + '_копия'
     return widgetSettings
 }
@@ -1397,19 +1419,20 @@ String checkWidgetName(String widgetName, def subject)
         String tempWidgetName = widgetName
         String fqn = subject.getMetaClass().toString()
         List variables = []
-        int id = 0
         List variableIds = []
         for (int i = 0; i < idsCount; i++)
         {
             def var = tempWidgetName.dropWhile { it != '{'}.takeWhile { it != '}'}.drop(1)
             variables += var
             def varToCheck = var - "subject."
-            if (checkAttributeType (varToCheck, fqn))
+            Boolean updateValue = varToCheck.tokenize('.').any { check ->
+                return checkAttributeType (check, fqn)
+            }
+            if (updateValue)
             {
-                variableIds += id
+                variableIds += i
             }
             tempWidgetName -= "\${${var}}"
-            id++
         }
 
         def tempResult = null
@@ -1446,7 +1469,7 @@ List<String> getWidgetNamesFromDashboard(String dashboardKey,  String widgetKey 
  * @param classFqn - метакласс
  * @return флаг true|false
  */
-boolean checkAttributeType(String code, String classFqn)
+Boolean checkAttributeType(String code, String classFqn)
 {
     def attributeType = api.metainfo.getMetaClass(classFqn).getAttribute(code).getType()
     return attributeType.toString().contains('caseList')

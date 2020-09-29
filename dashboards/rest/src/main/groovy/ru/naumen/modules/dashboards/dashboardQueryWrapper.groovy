@@ -754,7 +754,16 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true)
     def wrapper = QueryWrapper.build(requestData.source)
 
     requestData.aggregations.each { validate(it as AggregationParameter) }
-    requestData.aggregations.each {
+    //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
+    def clonedAggregations = requestData.aggregations.collect {
+        new AggregationParameter(
+            title: it.title,
+            type: it.type,
+            attribute: it.attribute.deepClone(),
+            sortingType: it.sortingType
+        )
+    }
+    clonedAggregations.each {
         prepareAttribute(it.attribute as Attribute)
         AggregationParameter parameter = it as AggregationParameter
         if (parameter.type == Aggregation.PERCENT)
@@ -826,14 +835,10 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true)
     requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
 
     //Фильтрация по непустым атрибутам
-    Set attributeSet
+    Set attributeSet = []
     if (onlyFilled)
     {
-        attributeSet = requestData.aggregations*.attribute + clonedGroups*.attribute
-    }
-    else
-    {
-        attributeSet = clonedGroups*.attribute
+        attributeSet = clonedAggregations*.attribute + clonedGroups*.attribute
     }
     attributeSet.findResults {
         it

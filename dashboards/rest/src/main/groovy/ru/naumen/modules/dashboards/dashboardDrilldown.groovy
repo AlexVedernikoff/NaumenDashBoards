@@ -1149,6 +1149,7 @@ class Link
         {
             case 'ii':
             default:
+                value = value.replace(' мин', '')
                 def datePoint = api.date.createDateTimePointPredicates(['MINUTE', value as int, 'EQ'], ['MINUTE', value as int, 'EQ'])
                 return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }

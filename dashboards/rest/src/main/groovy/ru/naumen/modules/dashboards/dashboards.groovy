@@ -473,15 +473,17 @@ private def getMetaClassChildren(String fqn)
 /**
  * Маппинг из списка объектов, идентифицирующий метакласс в список источников данных
  * Collection<fqn> -> Collection<DataSource>
+ * @param fqns - fqn-ы
+ * @param fromAttribute - флаг на получение данных из атрибута, сделанного под источник
  */
-private Collection<DataSource> mappingDataSource(def fqns)
+private Collection<DataSource> mappingDataSource(def fqns, Boolean fromAttribute = false)
 {
     return fqns.collect {
         new DataSource(
             it.code,
             it.title,
-            mappingDataSource(it.children),
-            checkForDynamicAttributes(it.code)
+            fromAttribute ? [] : mappingDataSource(it.children),
+            fromAttribute ? false : checkForDynamicAttributes(it.code)
         )
     }.sort { it.title }
 }
@@ -673,5 +675,17 @@ boolean checkForDynamicAttributes(String fqn)
         }
     }
     return typesWithDynamic.any { it == true }
+}
+
+/**
+ * Метод получения связанных источников
+ * @param requestContent - тело запроса
+ * @return - список связанных источников
+ */
+String getLinkedDataSources(requestContent)
+{
+    def linkAttributes = getDataSourceAttributes(requestContent, false)
+    def sources = mappingDataSource(linkAttributes, true)
+    return toJson(sources)
 }
 //endregion
