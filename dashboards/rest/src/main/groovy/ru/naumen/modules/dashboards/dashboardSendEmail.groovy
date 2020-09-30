@@ -21,23 +21,23 @@ import static groovy.json.JsonOutput.toJson
  * Метод отправки сообщений на почту
  * @param tokenKey - ключ на файл в хранилище
  * @param format - формат файла
+ * @param fileName - название файла
  * @return успех/провал
  */
-String sendFileToMail(String tokenKey, String format)
+String sendFileToMail(String tokenKey, String format, String fileName)
 {
     if (!user?.email)
     {
         utils.throwReadableException('User email is null or empty!')
     }
     def file = utils.uploadService.get(tokenKey)
-    String title = file?.name
     def ds = new ByteArrayDataSource(file.inputStream, file.contentType)
 
     def message = api.mail.sender.createMail()
     message.addTo(user.title, user.email)
-    message.setSubject(title) //установка темы сообщения
-    message.addText("${title}. Файл с изображением дашборда находится во вложении.") //установка текста сообщения
-    message.attachFile(ds, "${title}.${format}")
+    message.setSubject(fileName) //установка темы сообщения
+    message.addText("${fileName}. Файл с изображением дашборда находится во вложении.") //установка текста сообщения
+    message.attachFile(ds, "${fileName}.${format}")
     return toJson(api.mail.sender.sendMail(message))
 }
 //endregion
