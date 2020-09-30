@@ -14,14 +14,14 @@ export class PanelHeader extends Component<Props, State> {
 		if (type === panelShow) {
 			return (
 				<div>
-					<div className={styles.lable} >{truncatedText(label)}</div>
+					<div className={styles.lable} >{truncatedText(label, 1)}</div>
 					<div className={styles.active} />
 				</div>
 			);
 		}
 		return (
 			<div onClick={() => setTab(type)}>
-				<div className={styles.inActiveLable} >{truncatedText(label)}</div>
+				<div className={styles.inActiveLable} >{truncatedText(label, 1)}</div>
 			</div>
 		);
 	};

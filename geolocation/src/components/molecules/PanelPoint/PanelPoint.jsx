@@ -46,17 +46,18 @@ export class PanelPoint extends Component<Props, State> {
 	renderOption = (option: Option, id: number) => <PanelPointContent option={option} key={`option_${id}`} />;
 
 	render () {
-		const {pointData, statusColor} = this.props;
+		const {pointData, showSinglePoint, statusColor} = this.props;
 		const {actions, header, options, uuid} = pointData;
 		const {actionShow} = this.state;
 		const showKebab = (actionShow && actions.length);
+		const pointContainerCN = showSinglePoint ? styles.pointSingleContainer : styles.pointContainer;
 
 		return (
 			<div
 				onMouseOver={this.showAction}
 				onMouseLeave={this.hideAction}
 				onClick={this.showSingle}
-				className={styles.pointContainer}
+				className={pointContainerCN}
 			>
 				{header && <PanelPointHeader
 					header={header}

@@ -2,7 +2,6 @@
 import React from 'react';
 import styles from './Notify.less';
 import {toast, cssTransition} from 'react-toastify';
-import type {MessageStyleType, NotifyTemplateType} from 'types/helper';
 
 const transitionToast = cssTransition({
 	duration: 10
@@ -16,29 +15,6 @@ const getPreparedMessage = (notifyTemplateType: NotifyTemplateType, text: string
 			message = (
 				<div>
 					Произошла ошибка при получении данных. Обратитесь к администратору системы.
-				</div>
-			);
-			break;
-		case 'empty':
-			message = (
-				<div>
-					Нет данных для отображения меток
-				</div>
-			);
-			break;
-		case 'static':
-			message = (
-				<div className={styles.textNotify}>
-					Нет информации о местоположении неподвижных меток: <br />
-					{text}
-				</div>
-			);
-			break;
-		case 'dynamic':
-			message = (
-				<div className={styles.textNotify}>
-					Нет информации о местоположении подвижных меток: <br />
-					{text}
 				</div>
 			);
 			break;

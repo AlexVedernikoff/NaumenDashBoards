@@ -1,5 +1,6 @@
 // @flow
 import type {Context} from 'types/api';
+import {notify} from 'helpers/notify';
 import {initialGeolocationState} from 'store/geolocation/init';
 
 const injectJsApi = () => top.injectJsApi(top, window);
@@ -74,18 +75,28 @@ const getLastGeopositions = async (contentCode: string, subjectUuid: string, dyn
 	return data;
 };
 
-const changeState = async (uuid: string, states: Array<any>) => {
+const changeState = async (uuid: string, states: Array<string>): Promise<string | null> => {
 	const {jsApi} = window;
-	const response = await jsApi.forms.changeState(uuid, states);
+	let result;
 
-	return response;
+	try {
+		result = await jsApi.forms.changeState(uuid, states);
+	} catch (err) {
+		notify('common', 'info', err);
+	}
+	return result || Promise.resolve(null);
 };
 
-const changeResponsible = async (uuid: string) => {
+const changeResponsible = async (uuid: string): Promise<string | null> => {
 	const {jsApi} = window;
-	const response = await jsApi.forms.changeResponsible(uuid);
+	let result;
 
-	return response;
+	try {
+		return await jsApi.forms.changeResponsible(uuid);
+	} catch (err) {
+		notify('common', 'info', err);
+	}
+	return result || Promise.resolve(null);
 };
 
 export {

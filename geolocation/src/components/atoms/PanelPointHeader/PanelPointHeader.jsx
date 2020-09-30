@@ -24,8 +24,10 @@ export class PanelPointHeader extends Component<Props, State> {
 		this.setState({openAction: !this.state.openAction});
 	}
 
-	callChangeState = (uuid: string, states: Array<string>) => async () => {
-		const {fetchGeolocation} = this.props;
+	callChangeState = (states: Array<string>) => async (event: SyntheticEvent<HTMLButtonElement>) => {
+		event.stopPropagation();
+
+		const {fetchGeolocation, uuid} = this.props;
 		const response = await changeState(uuid, states);
 
 		if (response) {
@@ -33,8 +35,10 @@ export class PanelPointHeader extends Component<Props, State> {
 		}
 	};
 
-	callChangeResponsible = (uuid: string) => async () => {
-		const {fetchGeolocation} = this.props;
+	callChangeResponsible = async (event: SyntheticEvent<HTMLButtonElement>) => {
+		event.stopPropagation();
+
+		const {fetchGeolocation, uuid} = this.props;
 		const response = await changeResponsible(uuid);
 
 		if (response) {
@@ -42,7 +46,7 @@ export class PanelPointHeader extends Component<Props, State> {
 		}
 	};
 
-	renderAction = (uuid: string, action: Action) => {
+	renderAction = (action: Action) => {
 		const {inPlace, link, name, states, type} = action;
 		const target = !inPlace ? '_blank' : '';
 
@@ -50,7 +54,7 @@ export class PanelPointHeader extends Component<Props, State> {
 			case 'open_link':
 				return (
 					<div className={styles.actionItem}>
-						<a href={link} target={target}>
+						<a href={link} target={target} onClick={event => event.stopPropagation()}>
 							<div>{truncatedText(name, 1)}</div>
 						</a>
 					</div>
@@ -59,7 +63,7 @@ export class PanelPointHeader extends Component<Props, State> {
 				return (
 					<div
 						className={styles.actionItem}
-						onClick={this.callChangeResponsible(uuid)}
+						onClick={this.callChangeResponsible}
 					>
 						{truncatedText(name, 1)}
 					</div>
@@ -68,7 +72,7 @@ export class PanelPointHeader extends Component<Props, State> {
 				return (
 					<div
 						className={styles.actionItem}
-						onClick={this.callChangeState(uuid, states)}
+						onClick={this.callChangeState(states)}
 					>
 						{truncatedText(name, 1)}
 					</div>
@@ -78,14 +82,14 @@ export class PanelPointHeader extends Component<Props, State> {
 
 	renderActions = () => {
 		const {openAction} = this.state;
-		const {actions, uuid} = this.props;
+		const {actions} = this.props;
 
 		if (openAction) {
 			return (
 				<div className={styles.actionsContainer}>
 					{actions.map((action, index) =>
 						<div key={index} className={styles.actionContainer}>
-							{this.renderAction(uuid, action)}
+							{this.renderAction(action)}
 						</div>
 					)}
 				</div>
@@ -95,7 +99,9 @@ export class PanelPointHeader extends Component<Props, State> {
 
 	renderHeader = (header: string) => <div className={styles.contentHeader}>{truncatedText(header, 2)}</div>
 
-	renderKebab = (header: string) => {
+	handleMouseOut = () => this.setState({openAction: false});
+
+	renderKebab = () => {
 		const {openAction} = this.state;
 
 		const kebabContinerCN = cn({
@@ -104,17 +110,11 @@ export class PanelPointHeader extends Component<Props, State> {
 		});
 
 		return (
-			<div className={styles.contentHeaderKebab}>
-				{this.renderHeader(header)}
-				<div className={kebabContinerCN}>
-					<div
-						className={styles.kebabIcon}
-						onClick={this.openActions}
-						title="Действия"
-					>
-						<KebabIcon />
-					</div>
+			<div className={kebabContinerCN} onClick={this.openActions} onMouseLeave={this.handleMouseOut}>
+				<div className={styles.kebabIcon} title="Действия">
+					<KebabIcon />
 				</div>
+				{this.renderActions()}
 			</div>
 		);
 	};
@@ -135,9 +135,9 @@ export class PanelPointHeader extends Component<Props, State> {
 			<div>
 				<div className={styles.contentHeaderContainer}>
 					<div className={styles.contentStatus} style={{background: statusColor}}/>
-					{showKebab ? this.renderKebab(header) : this.renderHeader(header)}
+					{this.renderHeader(header)}
+					{showKebab && this.renderKebab()}
 				</div>
-				{this.renderActions()}
 			</div>
 		);
 	}

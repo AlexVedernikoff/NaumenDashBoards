@@ -21,9 +21,15 @@ export class PanelPointContent extends Component<Props, State> {
 			[styles.optionLine]: presentation === 'full_length'
 		});
 
+		const optionLableCN = cn({
+			[styles.optionLeft]: presentation === 'right_of_label',
+			[styles.optionWide]: presentation === 'under_label',
+			[styles.optionHide]: presentation === 'full_length'
+		});
+
 		return (
 			<div className={optionCN}>
-				{label && <div className={styles.optionLeft}>{truncatedText(label)}</div>}
+				{label && <div className={optionLableCN}>{truncatedText(label)}</div>}
 				{value && <div className={optionValueCN}>{truncatedText(value)}</div>}
 			</div>
 		);

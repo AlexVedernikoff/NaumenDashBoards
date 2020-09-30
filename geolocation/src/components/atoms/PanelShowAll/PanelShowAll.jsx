@@ -12,7 +12,6 @@ export class PanelShowAll extends Component<Props, State> {
 
 		setTab(type);
 	};
-
 	render () {
 		return (
 			<div className={styles.singleContainerWrap} onClick={this.showAll}>

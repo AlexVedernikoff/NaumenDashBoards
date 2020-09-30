@@ -47,7 +47,7 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 
 		if (errors.length) {
 			const label = errors.join(', ') + '.';
-			notify('static', 'info', label);
+			notify('common', 'info', label);
 		}
 		if (staticGroups.length && !found && groupingMethodName) {
 			staticGroups.push({name: 'Без группы', color: colorStaticPoint, code: null});
@@ -84,7 +84,7 @@ const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (di
 		if (errors.length) {
 			const label = errors.join(', ') + '.';
 
-			notify('dynamic', 'info', label);
+			notify('common', 'info', label);
 		}
 		Array.isArray(geopositions) && geopositions.map(marker => {
 			if (marker.hasOwnProperty('geoposition')) {
