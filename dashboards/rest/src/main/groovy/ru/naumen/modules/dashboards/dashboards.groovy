@@ -279,7 +279,9 @@ String getCatalogItemObject(Map requestContent)
  */
 String getStates(String classFqn)
 {
-    def result = api.metainfo.getMetaClass(classFqn)
+    String maxMetaCase = getMaxMetaCaseId(classFqn)
+    String totalClass = "${classFqn}\$${maxMetaCase}"
+    def result = api.metainfo.getMetaClass(totalClass)
                     ?.workflow
                     ?.states
                     ?.sort {
@@ -687,5 +689,15 @@ String getLinkedDataSources(requestContent)
     def linkAttributes = getDataSourceAttributes(requestContent, false)
     def sources = mappingDataSource(linkAttributes, true)
     return toJson(sources)
+}
+
+/**
+ * Метод получения максимального id типа у класса (необходимо при получении названий статусов у класса и его типов)
+ * @param classFqn - fqn основного класса
+ * @return id потомка, который использовался при запросе в БД
+ */
+String getMaxMetaCaseId(String classFqn)
+{
+    return api.db.query("select max(metaCaseId) from ${classFqn}").list().head()
 }
 //endregion
