@@ -2362,7 +2362,7 @@ private List formatAggregationSet(List listOfLists, Integer aggregationCnt = 1, 
 
     return listOfLists.findResults { List list ->
 
-        if (exceptNulls && list.any { it == 0 })
+        if (exceptNulls && list.any { !it || it == 0 })
         {
             return null
         }
@@ -2372,13 +2372,13 @@ private List formatAggregationSet(List listOfLists, Integer aggregationCnt = 1, 
             return list.withIndex().collect { item, int index ->
                 if (index < aggregationCnt)
                 {
-                    return DECIMAL_FORMAT.format(item as Double)
+                    return item ? DECIMAL_FORMAT.format(item as Double) : DECIMAL_FORMAT.format(0)
                 }
                 return item
             }
         }
 
-        return [DECIMAL_FORMAT.format(list.head() as Double), list.tail()].flatten()
+        return list ? [DECIMAL_FORMAT.format(list.head() as Double), list.tail()].flatten() : [DECIMAL_FORMAT.format(0)]
     }
 }
 
