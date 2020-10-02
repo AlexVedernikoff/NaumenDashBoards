@@ -300,8 +300,9 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             def res = getDiagramData(normRequest)
             return mappingRoundDiagram(res)
         case [SUMMARY, SPEEDOMETER]:
+            Boolean exceptNulls = false
             def normRequest = mappingSummaryDiagramRequest(requestContent, subjectUUID)
-            def res = getDiagramData(normRequest)
+            def res = getDiagramData(normRequest, exceptNulls)
             return mappingSummaryDiagram(res)
         case TABLE:
             def normRequest = mappingTableDiagramRequest(requestContent, subjectUUID)
