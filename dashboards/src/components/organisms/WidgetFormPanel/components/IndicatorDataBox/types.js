@@ -9,5 +9,6 @@ export type Props = {
 	name: string,
 	renderLeftControl?: (set: DataSet, index: number) => React$Node,
 	set: DataSet,
-	useBreakdown: boolean
+	usesBreakdown: boolean,
+	usesEmptyData: boolean
 };

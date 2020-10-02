@@ -47,11 +47,12 @@ const normalizeDataSet = (set: Object, index: number, data: Array<Object>): Circ
 	};
 
 	if (!set.sourceForCompute) {
-		const {aggregation, indicator} = set;
+		const {aggregation, indicator, showEmptyData} = set;
 		resultSet = {
 			...set,
 			aggregation: aggregationFilter(aggregation),
 			indicator,
+			showEmptyData: !!showEmptyData,
 			sourceForCompute: false
 		};
 		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data)}, resultSet);

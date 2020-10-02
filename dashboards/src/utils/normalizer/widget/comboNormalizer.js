@@ -47,10 +47,11 @@ const normalizeDataSet = (set: Object, index: number, data: Array<Object>): Comb
 	};
 
 	if (!set.sourceForCompute) {
-		const {aggregation, type = WIDGET_TYPES.COLUMN, yAxis} = set;
+		const {aggregation, showEmptyData, type = WIDGET_TYPES.COLUMN, yAxis} = set;
 		resultSet = {
 			...resultSet,
 			aggregation: aggregationFilter(aggregation),
+			showEmptyData: !!showEmptyData,
 			sourceForCompute: false,
 			type,
 			yAxis

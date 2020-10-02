@@ -10,7 +10,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	renderIndicatorBoxes = () => {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
-			useBreakdown: false
+			usesBreakdown: false
 		};
 
 		return renderIndicatorBoxes(props);

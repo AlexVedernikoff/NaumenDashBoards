@@ -56,7 +56,7 @@ const resetComputedAttributeState = (attribute: MixedAttribute) => {
 };
 
 const createAxisData = (widget: AxisWidget) => {
-	const {showEmptyData, sorting, type} = widget;
+	const {sorting, type} = widget;
 	const data: Object = {};
 
 	widget.data.forEach(set => {
@@ -71,10 +71,11 @@ const createAxisData = (widget: AxisWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, yAxis} = set;
+			const {aggregation, showEmptyData, yAxis} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation: transformAggregation(aggregation, type),
+				showEmptyData,
 				yAxis: resetComputedAttributeState(yAxis)
 			};
 
@@ -84,7 +85,6 @@ const createAxisData = (widget: AxisWidget) => {
 
 	return {
 		data,
-		showEmptyData,
 		sorting,
 		type
 	};
@@ -108,11 +108,12 @@ const createCircleData = (widget: CircleWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, indicator} = set;
+			const {aggregation, indicator, showEmptyData} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation,
 				indicator: resetComputedAttributeState(indicator),
+				showEmptyData,
 				sourceForCompute: false
 			};
 
@@ -128,7 +129,7 @@ const createCircleData = (widget: CircleWidget) => {
 };
 
 const createComboData = (widget: ComboWidget) => {
-	const {showEmptyData, sorting, type} = widget;
+	const {sorting, type} = widget;
 	const data: Object = {};
 
 	widget.data.forEach(set => {
@@ -143,10 +144,11 @@ const createComboData = (widget: ComboWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, type, yAxis} = set;
+			const {aggregation, showEmptyData, type, yAxis} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation: transformAggregation(aggregation, type),
+				showEmptyData,
 				type,
 				yAxis: resetComputedAttributeState(yAxis)
 			};
@@ -157,7 +159,6 @@ const createComboData = (widget: ComboWidget) => {
 
 	return {
 		data,
-		showEmptyData,
 		sorting,
 		type
 	};

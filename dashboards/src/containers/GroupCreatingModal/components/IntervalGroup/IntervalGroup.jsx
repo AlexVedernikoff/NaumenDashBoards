@@ -31,12 +31,15 @@ export class IntervalGroup extends Component<AttributeGroupProps> {
 
 	getCustomProps = () => ({
 		createCondition: this.createCustomCondition,
+		getErrorKey: this.getErrorKey,
 		groups: this.getCustomGroups(),
 		options: CUSTOM_OPTIONS,
 		renderCondition: this.renderCustomCondition,
 		resolveConditionRule: this.resolveConditionRule,
 		type: this.props.attribute.type
 	});
+
+	getErrorKey = (key: string) => `${key}.value`;
 
 	getSystemProps = () => ({
 		defaultValue: INTERVAL_SYSTEM_GROUP.WEEK,

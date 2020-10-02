@@ -156,6 +156,7 @@ export type BuildAxisData = {
 	breakdown?: Attribute | ComputedBreakdown,
 	breakdownGroup?: Group,
 	group: Group,
+	showEmptyData: boolean,
 	sourceForCompute: false,
 	xAxis: Attribute,
 	yAxis: MixedAttribute
@@ -171,7 +172,6 @@ export type AxisWidget = {
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
-	showEmptyData: boolean,
 	sorting: ChartSorting,
 	type: $Keys<typeof WIDGET_SETS.AXIS>
 };
@@ -184,6 +184,7 @@ export type BuildCircleData = {
 	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
 	indicator: MixedAttribute,
+	showEmptyData: boolean,
 	sourceForCompute: false
 };
 
@@ -223,7 +224,6 @@ export type ComboWidget = {
 	indicator: AxisIndicator,
 	legend: Legend,
 	parameter: AxisParameter,
-	showEmptyData: boolean,
 	sorting: ChartSorting,
 	type: typeof WIDGET_TYPES.COMBO,
 };

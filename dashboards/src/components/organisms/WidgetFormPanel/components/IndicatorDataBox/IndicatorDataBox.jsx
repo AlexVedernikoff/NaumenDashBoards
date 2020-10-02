@@ -9,9 +9,10 @@ import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggrega
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'src/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
+import {LegacyCheckbox as Checkbox} from 'components/atoms';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'WidgetFormPanel/types';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withForm from 'WidgetFormPanel/withForm';
 
@@ -19,7 +20,8 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	static defaultProps = {
 		children: null,
 		name: FIELDS.indicator,
-		useBreakdown: true
+		usesBreakdown: true,
+		usesEmptyData: false
 	};
 
 	createComputedBreakdown = (indicator: ComputedAttr) => {
@@ -41,6 +43,11 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		const parameter = values.data[index][name];
 
 		setDataFieldValue(index, name, changeAttributeTitle(parameter, parent, label));
+	};
+
+	handleChangeShowEmptyData = (name: string, value: boolean) => {
+		const {index, setDataFieldValue} = this.props;
+		setDataFieldValue(index, name, value);
 	};
 
 	handleExtendBreakdown = (index: number) => () => {
@@ -137,10 +144,10 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	renderBreakdownFieldSet = () => {
-		const {index, name, set, useBreakdown} = this.props;
+		const {index, name, set, usesBreakdown} = this.props;
 		const indicator = set[name];
 
-		if (useBreakdown) {
+		if (usesBreakdown) {
 			const show = this.showBreakdown(index);
 			const field = indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR
 				? this.renderComputedBreakdownFieldSet(indicator)
@@ -200,6 +207,19 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		);
 	};
 
+	renderIndicator = () => {
+		const {children, index, renderLeftControl, set} = this.props;
+		const control = renderLeftControl && renderLeftControl(set, index);
+
+		return (
+			<FormBox leftControl={control} title="Показатель">
+				{this.renderIndicatorFieldSet()}
+				{this.renderBreakdownFieldSet()}
+				{children}
+			</FormBox>
+		);
+	};
+
 	renderIndicatorFieldSet = () => {
 		const {errors, index, name, set, setDataFieldValue, values} = this.props;
 		const {computedAttrs} = values;
@@ -224,16 +244,30 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		);
 	};
 
-	render () {
-		const {children, index, renderLeftControl, set} = this.props;
-		const control = renderLeftControl && renderLeftControl(set, index);
+	renderShowEmptyDataBox = () => {
+		const {set, usesEmptyData} = this.props;
+		const {showEmptyData} = set;
 
+		if (usesEmptyData) {
+			return (
+				<FormBox>
+					<Checkbox
+						label="Учитывать NULL"
+						name={FIELDS.showEmptyData}
+						onClick={this.handleChangeShowEmptyData}
+						value={showEmptyData}
+					/>
+				</FormBox>
+			);
+		}
+	};
+
+	render () {
 		return (
-			<FormBox leftControl={control} title="Показатель">
-				{this.renderIndicatorFieldSet()}
-				{this.renderBreakdownFieldSet()}
-				{children}
-			</FormBox>
+			<Fragment>
+				{this.renderIndicator()}
+				{this.renderShowEmptyDataBox()}
+			</Fragment>
 		);
 	}
 }

@@ -8,7 +8,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	renderIndicatorBoxes = () => {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
-			name: FIELDS.yAxis
+			name: FIELDS.yAxis,
+			usesEmptyData: true
 		};
 
 		return renderIndicatorBoxes(props);
