@@ -281,8 +281,15 @@ class Link
                     {
                         if (attributeType in AttributeType.LINK_TYPES)
                         {
-                            def objects = findObjects(attr.ref, attr.property, value)
-                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                            if (value == 'Нет данных')
+                            {
+                                result << [filterBuilder.OR(attr.code, 'null', null)]
+                            }
+                            else
+                            {
+                                def objects = findObjects(attr.ref, attr.property, value)
+                                result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                            }
                         }
                         else
                         {
@@ -593,6 +600,10 @@ class Link
         // "fromTo", "lastN", "today", "timerStatusContains", "timerStatusNotContains", "backTimerDeadLineFromTo",
         // "backTimerDeadLineContains", "titleContains", "titleNotContains", "containsWithRemoved",
         // "notContainsWithRemoved", "containsUser", "containsSubject", "containsUserAttribute", "containsSubjectAttribute"
+        if (value == 'Нет данных')
+        {
+            return filterBuilder.OR(code, 'null', null)
+        }
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         switch (type)
         {
