@@ -216,11 +216,14 @@ private Map changeTotalWidgetName(Map widgetSettings, String classFqn)
         widget?.name = widget?.templateName
             ? replaceWidgetName(widget?.templateName, classFqn)
             : widget?.name
-        def header = (widget?.header as LinkedHashMap).clone() as Map
-        header?.name = header?.template
-            ? replaceWidgetName(header?.template, classFqn)
-            : header?.name
-        widget?.header = header
+        if (widget?.header)
+        {
+            def header = (widget?.header as LinkedHashMap).clone() as Map
+            header?.name = header?.template
+                ? replaceWidgetName(header?.template, classFqn)
+                : header?.name
+            widget?.header = header
+        }
         return widget
     }
     return widgetSettings
