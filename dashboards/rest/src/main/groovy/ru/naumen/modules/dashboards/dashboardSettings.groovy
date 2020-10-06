@@ -21,7 +21,8 @@ import static groovy.json.JsonOutput.toJson
 @Field private static final String DASHBOARD_NAMESPACE = 'dashboards'
 @Field private static final String CUSTOM_GROUP_NAMESPACE = 'custom_groups'
 @Field private static final String WIDGET_NAMESPACE = 'widgets'
-@Field private static final String GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
+@Field private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
+@Field private static final String GROUP_MASTER_DASHBOARD = 'dashboardMaster'
 @Field private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
 //endregion
 
@@ -864,7 +865,10 @@ private checkRightsOnDashboard(def user, String messageError)
  */
 private boolean checkUserOnMasterDashboard(def user)
 {
-    user?.UUID ? GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code : true
+    return user?.UUID
+        ? ((OLD_GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code) ||
+           (GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code))
+        : true
 }
 
 /**
