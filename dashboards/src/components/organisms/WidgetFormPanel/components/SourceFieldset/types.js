@@ -16,7 +16,7 @@ export type Props = {
 	set: DataSet,
 	sourceRefFields: SourceRefFields,
 	sources: DataSourceMap,
-	useFilter: boolean
+	usesFilter: boolean
 };
 
 export type State = {

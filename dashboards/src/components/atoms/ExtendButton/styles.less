@@ -1,17 +1,9 @@
 @import '/styles/variables';
 
 :local {
-	.activeContainer {
-		color: @black;
-
-		svg {
-			fill: @black;
-		}
-	}
-
 	.container {
 		align-items: center;
-		color: #5F5F5F;
+		color: @dimgrey;
 		cursor: pointer;
 		display: flex;
 		padding: 12px 24px;
@@ -19,6 +11,14 @@
 		&:hover {
 			.activeContainer();
 			background-color: @gainsboro;
+		}
+	}
+
+	.activeContainer {
+		color: @black;
+
+		svg {
+			fill: @black;
 		}
 	}
 

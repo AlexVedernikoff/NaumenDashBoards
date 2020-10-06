@@ -120,7 +120,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 		renderSourceFieldset = (props: RenderSourceFieldsetProps) => (set: DataSet, index: number) => {
 			const {errors, setDataFieldValue, sources: baseSources, values} = this.props;
-			const {onSelectCallback, sourceRefFields, sources = baseSources, useFilter} = props;
+			const {onSelectCallback, sourceRefFields, sources = baseSources, usesFilter} = props;
 			const error = errors[getDataErrorKey(index, FIELDS.source)];
 			const removable = values.data.length > 1;
 
@@ -139,7 +139,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 					set={set}
 					sourceRefFields={sourceRefFields}
 					sources={sources}
-					useFilter={useFilter}
+					usesFilter={usesFilter}
 				/>
 			);
 		};

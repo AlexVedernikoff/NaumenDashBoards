@@ -52,7 +52,7 @@ export type RenderSourceFieldsetProps = $Shape<{
 	onSelectCallback: (index: number, sourceRefFields: SourceRefFields) => Function,
 	sourceRefFields: SourceRefFields,
 	sources: DataSourceMap,
-	useFilter: boolean
+	usesFilter: boolean
 }>;
 
 export type DataBuilderProps = {

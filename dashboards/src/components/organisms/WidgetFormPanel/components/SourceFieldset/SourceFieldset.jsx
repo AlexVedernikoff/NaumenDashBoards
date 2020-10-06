@@ -2,6 +2,7 @@
 import {ExtendButton, LegacyCheckbox as Checkbox} from 'components/atoms';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {FormField} from 'WidgetFormPanel/components';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeLabelEvent, OnRemoveEvent} from 'components/molecules/TreeSelect/types';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
@@ -12,7 +13,7 @@ import {TreeSelect} from 'components/molecules';
 export class SourceFieldset extends Component<Props> {
 	static defaultProps = {
 		removable: true,
-		useFilter: true
+		usesFilter: true
 	};
 
 	callFilterModal = async () => {
@@ -102,10 +103,21 @@ export class SourceFieldset extends Component<Props> {
 	};
 
 	renderFilterButton = () => {
-		const {set, useFilter} = this.props;
+		const {set, usesFilter} = this.props;
+		const {FILLED_FILTER, FILTER} = ICON_NAMES;
 		const active = !!set.descriptor;
+		const iconName = active ? FILLED_FILTER : FILTER;
 
-		return useFilter && <ExtendButton active={active} onClick={this.callFilterModal} text="Фильтр" />;
+		if (usesFilter) {
+			return (
+				<ExtendButton
+					active={active}
+					iconName={iconName}
+					onClick={this.callFilterModal}
+					text="Фильтр"
+				/>
+			);
+		}
 	};
 
 	renderRemoveButton = () => {
