@@ -333,8 +333,23 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                         ]
                     }
                 }
-            boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
-            return mappingComboDiagram(res, additionals, reverseGroups)
+
+            String format = requestContent.data.findResult { key, value ->
+                if (value.xAxis.type in AttributeType.DATE_TYPES && value.group.way == 'SYSTEM')
+                {
+                    return value.group.format
+                }
+            }
+            String group =  requestContent.data.findResult { key, value ->
+                if (value.xAxis.type in AttributeType.DATE_TYPES && value.group.way == 'SYSTEM')
+                {
+                    return value.group.data
+                }
+            }
+            Boolean changeLabels = requestContent?.sorting?.value == 'PARAMETER'
+            Boolean reverseLabels = requestContent?.sorting?.type == 'DESC' && changeLabels
+            Boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
+            return mappingComboDiagram(res, additionals, reverseGroups, group, format, changeLabels, reverseLabels)
         default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
     }
 }
@@ -3203,14 +3218,27 @@ private Set<Map> getInnerCustomGroupNames(def requestContent)
  * Метод преобразования результата выборки к комбо диаграме
  * @param list - данные диаграмы
  * @param additionals - дополнительные данные
+ * @param reverseGroups - флаг на изменение группировок местами
+ * @param groupFormat - формат группы даты['DAY']
+ * @param format - формат данных группы даты ['dd MM']
+ * @param changeLabels - флаг на изменение списка лейблов (лейблы идут из параметров)
+ * @param reverseLabels - флаг на обратный порядок лейблов
  * @return ComboDiagram
  */
 private ComboDiagram mappingComboDiagram(List list,
                                          List<Map> additionals,
-                                         boolean reverseGroups)
+                                         Boolean reverseGroups,
+                                         String groupFormat,
+                                         String format,
+                                         Boolean changeLabels,
+                                         Boolean reverseLabels)
 {
     List transposeSets = list.collect { (it as List<List>)?.transpose() ?: [] }
     Set labels = transposeSets.collectMany { it[1] ?: [] }
+    if (groupFormat && changeLabels)
+    {
+        labels = getLabelsInCorrectOrder(labels, groupFormat, format, reverseLabels)
+    }
     Set diagramLabels = transposeSets.collectMany { it[2] ?: [] }
 
     Closure getsSeries = { Set labelSet,
@@ -3284,6 +3312,153 @@ private ComboDiagram mappingComboDiagram(List list,
             : labels,
         series: fullSeries
     )
+}
+
+/**
+ * Метод получения подписей по датам в корректном виде
+ * @param labels - исходные подписи по датам
+ * @param format - формат дат
+ * @param reverse - флаг на упорядочивание в обратном порядке
+ * @return подписи в правильном порядке
+ */
+Set getLabelsInCorrectOrder(Set labels, String group, String format, Boolean reverse)
+{
+    switch (group as GroupType)
+    {
+        case [GroupType.MINUTES, GroupType.HOURS]: return minutesAndHoursInCorrectOrder(labels, format, reverse)
+        case GroupType.DAY : return daysInCorrectOrder(labels, format, reverse)
+        case GroupType.SEVEN_DAYS: return sevenDaysInCorretOrder(labels, reverse)
+        case GroupType.MONTH : return monthsInCorrectOrder(labels, format, reverse)
+        case [GroupType.WEEK, GroupType.YEAR] : return weeksInCorrectOrder(labels, format, reverse)
+        case GroupType.QUARTER : return quartersInCorrectOrder(labels, format, reverse)
+    }
+}
+
+/**
+ * Метод получения подписей по минутам и часам в корректном виде
+ * @param labels - исходные подписи по датам
+ * @param format - формат дат 11
+ * @param reverse - флаг на упорядочивание в обратном порядке
+ * @return подписи в правильном порядке
+ */
+Set minutesAndHoursInCorrectOrder(Set labels, String format, Boolean reverse)
+{
+    //это формат ii, форматтер изменится только, если придёт формат часов
+    SimpleDateFormat formatter = new SimpleDateFormat("mm мин", new Locale("ru"))
+    switch(format)
+    {
+        case 'hh':
+            formatter = new SimpleDateFormat("HH", new Locale("ru"))
+            break
+        case 'hh:ii':
+            formatter = new SimpleDateFormat("hh:mm", new Locale("ru"))
+            break
+    }
+    return labels.sort { reverse ? - formatter.parse(it).getTime() : formatter.parse(it) }
+}
+
+/**
+ * Метод получения подписей по дням в корректном виде
+ * @param labels - исходные подписи по датам
+ * @param format - формат дат
+ * @param reverse - флаг на упорядочивание в обратном порядке
+ * @return подписи в правильном порядке
+ */
+Set daysInCorrectOrder(Set labels, String format, Boolean reverse)
+{
+    //данный формат dd MM, но на старых версиях виджетов формата может не быть,
+    // а этот использовался по умолчанию
+    SimpleDateFormat formatter = new SimpleDateFormat("dd MMM", new Locale("ru"))
+    switch(format)
+    {
+        case 'dd.mm.YY hh:ii':
+            formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("ru"))
+            break
+        case 'dd.mm.YY hh':
+            formatter = new SimpleDateFormat("dd.MM.yyyy, HHч", new Locale("ru"))
+            break
+        case 'dd.mm.YY':
+            formatter = new SimpleDateFormat("dd.MM.yyyy", new Locale("ru"))
+            break
+        case 'dd':
+            formatter = new SimpleDateFormat("dd-й", new Locale("ru"))
+            break
+        case 'WD':
+            formatter = new SimpleDateFormat("EEEE", new Locale("ru"))
+            break
+    }
+    if (format == 'WD')
+    {
+        return labels.sort { Calendar.getInstance().setTime(formatter.parse(it))}
+    }
+    return labels.sort { reverse ? - formatter.parse(it).getTime() : formatter.parse(it) }
+}
+
+/**
+ * Метод получения подписей по 7-ми дням в корректном виде
+ * @param labels - исходные подписи по датам
+ * @param reverse - флаг на упорядочивание в обратном порядке
+ * @return подписи в правильном порядке
+ */
+Set sevenDaysInCorretOrder(Set labels, Boolean reverse)
+{
+    SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy", new Locale("ru"))
+    return labels.sort { reverse ?
+        - formatter.parse(it.tokenize('-').find()).getTime()
+        : formatter.parse(it) }
+}
+
+/**
+ * Метод получения подписей по месяцам в корректном виде
+ * @param labels - исходные подписи по датам
+ * @param format - формат дат
+ * @param reverse - флаг на упорядочивание в обратном порядке
+ * @return подписи в правильном порядке
+ */
+Set monthsInCorrectOrder(Set labels, String format, Boolean reverse)
+{
+    //данный формат MM, но на старых версиях виджетов формата может не быть,
+    // а этот использовался по умолчанию
+    SimpleDateFormat formatter = new SimpleDateFormat("MMM", new Locale("ru"))
+    if (format == 'MM YY')
+    {
+        formatter = new SimpleDateFormat("MMM yyyy", new Locale("ru"))
+    }
+    return labels.sort { reverse ? - formatter.parse(it).getTime() : formatter.parse(it) }
+}
+
+/**
+ * Метод получения подписей по неделям в корректном виде
+ * @param labels - исходные подписи по датам
+ * @param format - формат дат
+ * @param reverse - флаг на упорядочивание в обратном порядке
+ * @return подписи в правильном порядке
+ */
+Set weeksInCorrectOrder(Set labels, String format, Boolean reverse)
+{
+    SimpleDateFormat formatter = new SimpleDateFormat(format, new Locale("ru"))
+    if (format == 'WW YY')
+    {
+        formatter = new SimpleDateFormat('ww неделя yyyy', new Locale("ru"))
+    }
+    return labels.sort { reverse ? - formatter.parse(it.replace('-я', '')).getTime() : formatter.parse(it) }
+}
+
+/**
+ * Метод получения подписей по кварталам в корректном виде
+ * @param labels - исходные подписи по датам
+ * @param format - формат дат
+ * @param reverse - флаг на упорядочивание в обратном порядке
+ * @return подписи в правильном порядке
+ */
+Set quartersInCorrectOrder(Set labels, String format, Boolean reverse)
+{
+    SimpleDateFormat formatter = new SimpleDateFormat("MM", new Locale("ru"))
+    if (format == 'QQ YY')
+    {
+        formatter = new SimpleDateFormat("MM кв-л yyyy", new Locale("ru"))
+    }
+    return labels.sort { reverse ? - formatter.parse(it.replace(' кв-л ', '')).getTime() : formatter.parse(it) }
 }
 
 /**
