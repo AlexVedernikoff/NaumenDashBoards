@@ -1,12 +1,13 @@
 // @flow
 import ApexCharts from 'apexcharts';
+import cn from 'classnames';
 import type {DivRef} from 'components/types';
 import {getLegendCroppingFormatter, getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
+import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import {ResizeDetector} from 'components/molecules';
 import styles from './styles.less';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -37,6 +38,17 @@ export class Chart extends PureComponent<Props> {
 		}
 	}
 
+	getClassname = () => {
+		const {legend} = this.props.widget;
+		const {BLOCK, INLINE} = LEGEND_DISPLAY_TYPES;
+		const {displayType} = legend;
+
+		return cn({
+			[styles.blockLegend]: displayType === BLOCK,
+			[styles.inlineLegend]: displayType === INLINE
+		});
+	};
+
 	getOptions = () => {
 		const {data, widget} = this.props;
 		const {current} = this.ref;
@@ -52,7 +64,7 @@ export class Chart extends PureComponent<Props> {
 	handleResize = (width: number) => {
 		if (this.chart) {
 			const {fontSize} = this.props.widget.legend;
-			const legendWidth = getLegendWidth(width);
+			const legendWidth = this.hasSideLegend() ? getLegendWidth(width) : width;
 
 			// $FlowFixMe
 			this.chart.updateOptions({
@@ -72,13 +84,6 @@ export class Chart extends PureComponent<Props> {
 		return show && (position === left || position === right);
 	};
 
-	hasZoom = () => {
-		const {widget} = this.props;
-		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE} = WIDGET_TYPES;
-
-		return [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE].includes(widget.type);
-	};
-
 	mixinResize = (chart: React$Node) => (
 		<ResizeDetector className={styles.container} onResize={this.handleResize} skipOnMount={true}>
 			{chart}
@@ -86,11 +91,9 @@ export class Chart extends PureComponent<Props> {
 	);
 
 	render () {
-		let chart = <div ref={this.ref} />;
+		let chart = <div className={this.getClassname()} ref={this.ref} />;
 
-		if (this.hasSideLegend()) {
-			chart = this.mixinResize(chart);
-		}
+		chart = this.mixinResize(chart);
 
 		return chart;
 	}

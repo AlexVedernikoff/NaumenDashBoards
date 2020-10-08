@@ -17,7 +17,7 @@ import {
 	WIDGETS_EVENTS
 } from './constants';
 import {GROUP_WAYS} from 'store/widgets/constants';
-import {LEGEND_POSITIONS} from 'utils/chart';
+import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart';
 import NewWidget from './NewWidget';
 
 export type DisplayMode = $Keys<typeof DISPLAY_MODE>;
@@ -108,7 +108,10 @@ type BaseWidget = {|
 
 type LegendPosition = $Keys<typeof LEGEND_POSITIONS>;
 
+type LegendDisplayType = $Keys<typeof LEGEND_DISPLAY_TYPES>;
+
 export type Legend = {
+	displayType: LegendDisplayType,
 	fontFamily: string,
 	fontSize: number,
 	position: LegendPosition,

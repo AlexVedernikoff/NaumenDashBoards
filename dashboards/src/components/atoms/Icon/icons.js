@@ -96,6 +96,11 @@ sprite.add(ICON_NAMES.CLOSE, `
 	<path d="M11.6 13.1L8.1 9.5 4.5 13.1 3.1 11.6 6.6 8.1 3.1 4.5 4.5 3.1 8.1 6.6 11.6 3.1 13.1 4.5 9.5 8.1 13.1 11.6 11.6 13.1Z" />
 `);
 
+sprite.add(ICON_NAMES.COLUMN, `
+	<path d="M3 8L13 8 13 5 3 5V8Z" />
+	<path d="M3 12L13 12 13 9 3 9V12Z" />
+`);
+
 sprite.add(ICON_NAMES.COLUMN_CHART, `
 	<rect width="24" height="24" fill="#EEEEEE"/>
 	<path fill-rule="evenodd" clip-rule="evenodd" d="M7 5H9V19H7V5ZM3 11H5V19H3V11ZM13 15H11V19H13V15ZM15 7H17V19H15V7ZM21 13H19V19H21V13Z" fill="${WIDGET_SUB_COLOR}"/>
@@ -287,6 +292,11 @@ sprite.add(ICON_NAMES.REMOVE, `
 
 sprite.add(ICON_NAMES.RIGHT_ANGLE, `
 	<path fill-rule="evenodd" clip-rule="evenodd" d="M11 8L6 12L6 4L11 8Z" />
+`);
+
+sprite.add(ICON_NAMES.ROW, `
+	<path d="M2 10L7 10 7 7 2 7V10Z" />
+	<path d="M9 10L14 10 14 7 9 7V10Z" />
 `);
 
 sprite.add(ICON_NAMES.STACKED_BAR_CHART, `
