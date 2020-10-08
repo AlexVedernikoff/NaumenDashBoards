@@ -41,6 +41,7 @@ type Option = {
 
 export type AttrCustomProps = {|
 	createCondition: CreateCondition,
+	getErrorKey?: (key: string) => string,
 	groups: Array<StoreCustomGroup>,
 	operandData?: Object,
 	options: Array<Option>,
@@ -87,6 +88,7 @@ export type InfoPanelProps = {
 export type ContextProps = {
 	createCondition: CreateCondition,
 	errors: ErrorsMap,
+	getErrorKey?: (key: string) => string,
 	operandData?: Object,
 	options: Array<Object>,
 	renderCondition: RenderCondition

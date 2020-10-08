@@ -66,10 +66,11 @@ const normalizeDataSet = (set: Object, index: number, data: Array<Object>) => {
 	};
 
 	if (!set.sourceForCompute) {
-		const {aggregation, yAxis} = set;
+		const {aggregation, showEmptyData, yAxis} = set;
 		resultSet = {
 			...resultSet,
 			aggregation: aggregationFilter(aggregation),
+			showEmptyData: !!showEmptyData,
 			sourceForCompute: false,
 			yAxis
 		};

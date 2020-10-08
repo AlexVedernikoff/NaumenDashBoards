@@ -13,6 +13,13 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import withCustomGroup from 'CustomGroup/withCustomGroup';
 
 export class OrCondition extends PureComponent<Props> {
+	getErrorKey = () => {
+		const {getErrorKey, validationPath} = this.props;
+		const key = `${validationPath}.${FIELDS.data}`;
+
+		return getErrorKey && typeof getErrorKey === 'function' ? getErrorKey(key) : key;
+	};
+
 	handleChangeOperandData = (condition: OrConditionType) => {
 		const {index, onUpdate} = this.props;
 		onUpdate(index, condition);
@@ -37,17 +44,15 @@ export class OrCondition extends PureComponent<Props> {
 			<div className={styles.operandContainer}>
 				<div className={styles.operand}>
 					{renderCondition(condition, this.handleChangeOperandData)}
-					{this.renderFieldError(FIELDS.data)}
+					{this.renderFieldError()}
 				</div>
 			</div>
 		);
 	};
 
-	renderFieldError = (path: string) => {
-		const {errors, validationPath} = this.props;
-		const errorKey = `${validationPath}.${path}`;
-
-		return <FieldError className={cn(mainStyles.error, styles.error)} text={errors[errorKey]} />;
+	renderFieldError = () => {
+		const {errors} = this.props;
+		return <FieldError className={cn(mainStyles.error, styles.error)} text={errors[this.getErrorKey()]} />;
 	};
 
 	renderOperandSelect = () => {

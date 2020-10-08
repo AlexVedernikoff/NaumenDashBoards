@@ -32,7 +32,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
 			name: FIELDS.yAxis,
-			renderLeftControl: this.renderChartInput
+			renderLeftControl: this.renderChartInput,
+			usesEmptyData: true
 		};
 
 		return renderIndicatorBoxes(props);
