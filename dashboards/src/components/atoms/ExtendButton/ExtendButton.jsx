@@ -7,11 +7,12 @@ import styles from './styles.less';
 
 export class ExtendButton extends PureComponent<Props> {
 	static defaultProps = {
-		className: ''
+		className: '',
+		iconName: ICON_NAMES.PLUS
 	};
 
 	render () {
-		const {active, className, onClick, text} = this.props;
+		const {active, className, iconName, onClick, text} = this.props;
 		const containerCN = cn({
 			[styles.container]: true,
 			[styles.activeContainer]: active,
@@ -20,7 +21,7 @@ export class ExtendButton extends PureComponent<Props> {
 
 		return (
 			<div className={containerCN} onClick={onClick}>
-				<Icon name={ICON_NAMES.PLUS} />
+				<Icon name={iconName} />
 				<div className={styles.text}>{text}</div>
 			</div>
 		);

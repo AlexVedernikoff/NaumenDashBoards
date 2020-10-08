@@ -158,7 +158,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const props = {
 			sourceRefFields,
 			sources: this.getDataSetSources(index),
-			useFilter: isMainSource
+			usesFilter: isMainSource
 		};
 
 		return (
