@@ -4,10 +4,14 @@
 	.container {
 		height: 100%;
 	}
-}
 
-.apexcharts-legend {
-	display: block !important;
+	.blockLegend :global(.apexcharts-legend) {
+		display: block !important;
+	}
+
+	.inlineLegend :global(.apexcharts-legend) {
+		display: flex !important;
+	}
 }
 
 .apexcharts-canvas ::-webkit-scrollbar {

@@ -8,8 +8,8 @@ import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
+import {extend, getMapValues, isObject} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
-import {getMapValues, isObject} from 'src/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 
 const mock: Object = Object.freeze({});
@@ -192,8 +192,7 @@ const legend = (widget: Object): Legend => {
 	} = legend;
 
 	return {
-		...DEFAULT_CHART_SETTINGS.legend,
-		...legend,
+		...extend(DEFAULT_CHART_SETTINGS.legend, legend),
 		position,
 		show
 	};

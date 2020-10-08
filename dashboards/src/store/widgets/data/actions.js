@@ -157,14 +157,15 @@ const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch)
 			...getParams(),
 			widgetKey: widgetId
 		};
-		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
+		const data = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
+		const widget = normalizer.widget(data);
 
 		batch(() => {
 			dispatch(setCreatedWidget(widget));
 			dispatch(addLayouts(widget.id));
-			dispatch(fetchBuildData(widget));
 		});
 		dispatch(saveNewLayouts());
+		dispatch(fetchBuildData(widget));
 		dispatch({
 			type: WIDGETS_EVENTS.RESPONSE_WIDGET_COPY
 		});

@@ -28,6 +28,14 @@ const LEGEND_POSITIONS = {
 	top
 };
 
+const BLOCK: 'BLOCK' = 'BLOCK';
+const INLINE: 'INLINE' = 'INLINE';
+
+const LEGEND_DISPLAY_TYPES = {
+	BLOCK,
+	INLINE
+};
+
 const DEFAULT_COLORS = [
 	'#EA3223',
 	'#999999',
@@ -58,6 +66,7 @@ const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 		showShadow: true
 	},
 	legend: {
+		displayType: LEGEND_DISPLAY_TYPES.BLOCK,
 		fontFamily: FONT_FAMILIES[0],
 		fontSize: 14,
 		position: LEGEND_POSITIONS.right,
@@ -100,6 +109,7 @@ export {
 	DEFAULT_COLORS,
 	DEFAULT_CHART_SETTINGS,
 	DEFAULT_DATA_LABEL_COLOR,
+	LEGEND_DISPLAY_TYPES,
 	LEGEND_POSITIONS,
 	LOCALES
 };

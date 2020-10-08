@@ -20,6 +20,7 @@ const defaultValue: 'defaultValue' = 'defaultValue';
 const descriptor: 'descriptor' = 'descriptor';
 const diagramName: 'diagramName' = 'diagramName';
 const displayMode: 'displayMode' = 'displayMode';
+const displayType: 'displayType' = 'displayType';
 const tickAmount: 'tickAmount' = 'tickAmount';
 const fontColor: 'fontColor' = 'fontColor';
 const fontFamily: 'fontFamily' = 'fontFamily';
@@ -85,6 +86,7 @@ const FIELDS = {
 	descriptor,
 	diagramName,
 	displayMode,
+	displayType,
 	fontColor,
 	fontFamily,
 	fontSize,

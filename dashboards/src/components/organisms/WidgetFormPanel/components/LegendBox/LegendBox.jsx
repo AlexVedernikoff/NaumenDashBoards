@@ -2,12 +2,30 @@
 import {CheckIconButtonGroup, DisableableBox, FormField, ToggableFormBox} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {LEGEND_POSITIONS} from 'utils/chart/constants';
+import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {withStyleFormBuilder} from 'WidgetFormPanel/builders';
 
 export class LegendBox extends PureComponent<Props> {
+	renderLegendDisplayTypeButtons = () => {
+		const {data, handleChange} = this.props;
+		const icons = [
+			{
+				name: ICON_NAMES.COLUMN,
+				title: 'Вывести в столбец',
+				value: LEGEND_DISPLAY_TYPES.BLOCK
+			},
+			{
+				name: ICON_NAMES.ROW,
+				title: 'Вывести в строку',
+				value: LEGEND_DISPLAY_TYPES.INLINE
+			}
+		];
+
+		return <CheckIconButtonGroup icons={icons} name={FIELDS.displayType} onChange={handleChange} value={data.displayType} />;
+	};
+
 	renderLegendPositionButtons = () => {
 		const {data, handleChange} = this.props;
 		const icons = [
@@ -49,6 +67,9 @@ export class LegendBox extends PureComponent<Props> {
 					<FormField row>
 						{this.renderLegendPositionButtons()}
 						{renderTextHandlerButtons()}
+					</FormField>
+					<FormField>
+						{this.renderLegendDisplayTypeButtons()}
 					</FormField>
 				</DisableableBox>
 			</ToggableFormBox>
