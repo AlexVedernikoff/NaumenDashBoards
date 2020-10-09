@@ -679,7 +679,21 @@ String getUserData(Map<String, Object> requestContent)
     String contentCode = requestContent.contentCode
     String groupUser = getUserGroup(user)
     Boolean hasPersonalDashboard = user && getDashboardSetting(classFqn, contentCode, user?.login as String)
-    return toJson([groupUser: groupUser, hasPersonalDashboard: hasPersonalDashboard])
+    return toJson([groupUser: groupUser, hasPersonalDashboard: hasPersonalDashboard, name: user?.title, email: user?.email])
+}
+
+/**
+ * Метод получения списка пользователей - ФИО и адрес эл. почты
+ * @return [title: ФИО, email: email]
+ */
+String getUsers()
+{
+    List<Map> users = api.db.query("FROM employee WHERE email LIKE '%@%' ORDER BY email")
+                         .list()
+                         .collect { user ->
+                             [id: user.UUID, name: user.title, email: user.email]
+                         }
+    return toJson(users)
 }
 //endregion
 
