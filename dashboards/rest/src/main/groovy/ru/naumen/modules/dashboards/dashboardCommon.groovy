@@ -32,6 +32,11 @@ enum DiagramType
     SUMMARY,
     SPEEDOMETER,
     TABLE
+
+    static List<DiagramType> StandardTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]
+    static List<DiagramType> RoundTypes = [DONUT, PIE]
+    static List<DiagramType> CountTypes = [SUMMARY, SPEEDOMETER]
+    static List<DiagramType> NullableTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO]
 }
 
 /**
@@ -345,6 +350,7 @@ class Requisite
     String title
     Collection<RequisiteNode> nodes
     Collection<FilterList> filterList
+    Boolean showNulls
 }
 
 class RequisiteNode
