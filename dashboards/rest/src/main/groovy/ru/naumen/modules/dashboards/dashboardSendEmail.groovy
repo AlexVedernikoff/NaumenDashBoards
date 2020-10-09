@@ -22,22 +22,24 @@ import static groovy.json.JsonOutput.toJson
  * @param tokenKey - ключ на файл в хранилище
  * @param format - формат файла
  * @param fileName - название файла
- * @return успех/провал
+ * @param users - список пользователей
  */
-String sendFileToMail(String tokenKey, String format, String fileName)
+void sendFileToMail(String tokenKey, String format, String fileName, List users)
 {
-    if (!user?.email)
-    {
-        utils.throwReadableException('User email is null or empty!')
-    }
-    def file = utils.uploadService.get(tokenKey)
-    def ds = new ByteArrayDataSource(file.inputStream, file.contentType)
+    users.each {user ->
+        if (!user?.email)
+        {
+            utils.throwReadableException('User email is null or empty!')
+        }
+        def file = utils.uploadService.get(tokenKey)
+        def ds = new ByteArrayDataSource(file.inputStream, file.contentType)
 
-    def message = api.mail.sender.createMail()
-    message.addTo(user.title, user.email)
-    message.setSubject(fileName) //установка темы сообщения
-    message.addText("${fileName}. Файл с изображением дашборда находится во вложении.") //установка текста сообщения
-    message.attachFile(ds, "${fileName}.${format}")
-    return toJson(api.mail.sender.sendMail(message))
+        def message = api.mail.sender.createMail()
+        message.addTo(user.title, user.email)
+        message.setSubject(fileName) //установка темы сообщения
+        message.addText("${fileName}. Файл с изображением дашборда находится во вложении.") //установка текста сообщения
+        message.attachFile(ds, "${fileName}.${format}")
+        api.mail.sender.sendMail(message)
+    }
 }
 //endregion
