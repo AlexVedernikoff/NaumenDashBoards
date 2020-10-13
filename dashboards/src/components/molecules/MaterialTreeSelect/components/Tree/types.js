@@ -14,6 +14,7 @@ export type Props = {
 	getOptionValue: (option: Node | null) => string,
 	initialSelected: Array<string>,
 	isEnabledNode?: NodeValue => boolean,
+	loading: boolean,
 	multiple: boolean,
 	onLoad?: (value: NodeValue | null, offset?: number) => void,
 	onSelect: Node => void,

@@ -48,7 +48,7 @@ export class CurrentObjectOperand extends PureComponent<Props> {
 	isEnabledNode = (node: TreeNode<Attribute>) => this.props.attribute.property === node.value.property;
 
 	render () {
-		const {operand} = this.props;
+		const {data, operand} = this.props;
 
 		return (
 			<MaterialTreeSelect
@@ -56,6 +56,7 @@ export class CurrentObjectOperand extends PureComponent<Props> {
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
 				isEnabledNode={this.isEnabledNode}
+				loading={data.loading}
 				onLoad={this.handleLoad}
 				onSelect={this.handleSelect}
 				options={this.getOptions()}

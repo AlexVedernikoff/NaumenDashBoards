@@ -30,7 +30,7 @@ export class SubGroup extends PureComponent<Props> {
 				...subGroup.data,
 				[createCondition()]
 			]
-		});
+		}, true);
 	};
 
 	handleRemoveAndCondition = (index: number) => {
@@ -41,7 +41,7 @@ export class SubGroup extends PureComponent<Props> {
 		data.length === 0 ? onRemove(subGroupIndex) : onUpdate(subGroupIndex, {...subGroup, data});
 	};
 
-	handleUpdateAndCondition = (index: number, condition: AndConditionType) => {
+	handleUpdateAndCondition = (index: number, condition: AndConditionType, isNewCondition: boolean = false) => {
 		const {index: subGroupIndex, onUpdate, subGroup} = this.props;
 		const {data} = subGroup;
 		data[index] = condition;
@@ -49,7 +49,7 @@ export class SubGroup extends PureComponent<Props> {
 		onUpdate(subGroupIndex, {
 			...subGroup,
 			data: [...data]
-		});
+		}, isNewCondition);
 	};
 
 	renderAndCondition = (condition: AndConditionType, index: number, conditions: Array<AndConditionType>) => {

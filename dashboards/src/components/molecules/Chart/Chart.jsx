@@ -44,6 +44,7 @@ export class Chart extends PureComponent<Props> {
 		const {displayType} = legend;
 
 		return cn({
+			[styles.container]: true,
 			[styles.blockLegend]: displayType === BLOCK,
 			[styles.inlineLegend]: displayType === INLINE
 		});

@@ -11,7 +11,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 		async: false,
 		focusOnSearch: false,
 		isEditingLabel: false,
-		isSearching: false,
+		isSearching: true,
 		loading: false,
 		maxLabelLength: null,
 		multiple: false,
@@ -93,6 +93,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 
 	renderList = (searchValue: string) => {
 		const {
+			loading,
 			multiple,
 			options,
 			showCreationButton,
@@ -113,6 +114,7 @@ export class MaterialSelect extends PureComponent<Props, State> {
 			creationButton,
 			getOptionLabel: this.getOptionLabel,
 			getOptionValue: this.getOptionValue,
+			loading,
 			multiple,
 			onClose: this.hideMenu,
 			onSelect: this.handleSelect,

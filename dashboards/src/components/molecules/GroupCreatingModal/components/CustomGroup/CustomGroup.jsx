@@ -47,6 +47,10 @@ export class CustomGroup extends Component<Props, State> {
 		setSubmit(this.submit);
 	}
 
+	componentWillUnmount () {
+		this.removeLocalGroups();
+	}
+
 	getGroupLabel = (group: CustomGroupType) => group.name;
 
 	getGroupValue = (group: CustomGroupType) => group.id;
@@ -123,10 +127,17 @@ export class CustomGroup extends Component<Props, State> {
 		selectedGroup: this.getGroupValue(value)
 	});
 
-	handleUpdate = (subGroups: Array<SubGroup>) => {
+	handleUpdate = (subGroups: Array<SubGroup>, isNewCondition: boolean = false) => {
 		const selectedGroup = this.getSelectedGroup();
+		let {isSubmitting} = this.state;
 
-		selectedGroup && this.update({...selectedGroup, subGroups});
+		if (isSubmitting && isNewCondition) {
+			isSubmitting = false;
+
+			this.setState(() => ({errors: {}, isSubmitting}));
+		}
+
+		selectedGroup && this.update({...selectedGroup, subGroups}, isSubmitting);
 	};
 
 	isUsingCurrentGroup = (widget: Object) => !!widget.data.find(set => {
@@ -147,6 +158,14 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	onSubmit = (data: string) => this.props.onSubmit({data, way: GROUP_WAYS.CUSTOM});
+
+	removeLocalGroups = () => {
+		const {editableGroups, onRemove} = this.props;
+
+		Object.keys(editableGroups)
+			.filter(id => id.startsWith(LOCAL_PREFIX_ID))
+			.forEach(onRemove);
+	};
 
 	save = async () => {
 		const {onCreate, onUpdate} = this.props;
@@ -182,9 +201,8 @@ export class CustomGroup extends Component<Props, State> {
 		return group && typeof group === 'object' && group.data === selectedGroup;
 	};
 
-	update = async (customGroup: CustomGroupType) => {
+	update = async (customGroup: CustomGroupType, isSubmitting: boolean = this.state.isSubmitting) => {
 		const {onUpdate} = this.props;
-		const {isSubmitting} = this.state;
 
 		if (isSubmitting) {
 			this.validate(customGroup);

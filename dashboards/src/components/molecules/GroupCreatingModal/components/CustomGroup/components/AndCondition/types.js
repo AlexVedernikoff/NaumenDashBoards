@@ -11,6 +11,6 @@ export type Props = {
 	isLast: boolean,
 	onCreate?: () => void,
 	onRemove: (index: number) => void,
-	onUpdate: (index: number, data: AndCondition) => void,
+	onUpdate: (index: number, data: AndCondition, isNewCondition?: boolean) => void,
 	validationPath: string
 };

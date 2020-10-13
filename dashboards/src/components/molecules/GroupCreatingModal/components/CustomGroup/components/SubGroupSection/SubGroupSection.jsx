@@ -21,7 +21,7 @@ export class SubGroupSection extends Component<Props> {
 			createNewSubGroup(
 				createCondition()
 			)
-		]);
+		], true);
 	};
 
 	handleRemoveSubGroup = (index: number) => {
@@ -34,11 +34,11 @@ export class SubGroupSection extends Component<Props> {
 		}
 	};
 
-	handleUpdateSubGroup = (index: number, subGroup: SubGroupType) => {
+	handleUpdateSubGroup = (index: number, subGroup: SubGroupType, isNewCondition: boolean = false) => {
 		const {onUpdate, subGroups} = this.props;
 		subGroups[index] = subGroup;
 
-		onUpdate([...subGroups]);
+		onUpdate([...subGroups], isNewCondition);
 	};
 
 	renderCreateButton = () => (

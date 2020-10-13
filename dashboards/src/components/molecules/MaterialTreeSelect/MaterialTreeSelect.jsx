@@ -71,13 +71,14 @@ export class MaterialTreeSelect extends Component<Props, State> {
 	hideMenu = () => this.setState({showMenu: false});
 
 	renderList = (searchValue: string) => {
-		const {isEnabledNode, multiple, onLoad, options, showMore, value, values} = this.props;
+		const {isEnabledNode, loading, multiple, onLoad, options, showMore, value, values} = this.props;
 
 		return (
 			<Tree
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
 				isEnabledNode={isEnabledNode}
+				loading={loading}
 				multiple={multiple}
 				onLoad={onLoad}
 				onSelect={this.handleSelect}

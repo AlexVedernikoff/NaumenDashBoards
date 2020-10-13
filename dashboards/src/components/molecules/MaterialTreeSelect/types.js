@@ -8,6 +8,7 @@ export type Props = {
 	getOptionLabel?: (option: NodeValue) => string,
 	getOptionValue?: (option: NodeValue) => any,
 	isEnabledNode?: NodeValue => boolean,
+	loading: boolean,
 	multiple: boolean,
 	name: string,
 	onClear?: () => void,

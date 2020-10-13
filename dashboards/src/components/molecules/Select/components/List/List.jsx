@@ -1,7 +1,7 @@
 // @flow
-import {Button} from 'components/atoms';
+import {Button, Loader} from 'components/atoms';
 import {FixedSizeList} from 'react-window';
-import {ListOption} from 'components/molecules/Select/components';
+import {ListMessage, ListOption} from 'components/molecules/Select/components';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -11,6 +11,7 @@ export class List extends PureComponent<Props, State> {
 	static defaultProps = {
 		isSearching: false,
 		itemSize: 32,
+		loading: false,
 		maxHeight: 250,
 		messages: {
 			noOptions: 'Список пуст',
@@ -113,12 +114,17 @@ export class List extends PureComponent<Props, State> {
 		);
 	};
 
+	renderLoader = () => this.props.loading && <ListMessage><Loader size={35} /></ListMessage>;
+
 	renderNoOptionsMessage = () => {
-		const {searchValue} = this.props;
+		const {loading, searchValue} = this.props;
+		const {options} = this.state;
 		const {noOptions, notFound} = this.getMessages();
 		const message = searchValue ? notFound : noOptions;
+		const loaded = !loading;
+		const notOptions = options.length === 0;
 
-		return <div className={styles.noOptionsMessage}>{message}</div>;
+		return loaded && notOptions ? <ListMessage>{message}</ListMessage> : null;
 	};
 
 	renderShowMoreButton = () => {
@@ -149,15 +155,11 @@ export class List extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {options} = this.state;
-
-		if (options.length === 0) {
-			return this.renderNoOptionsMessage();
-		}
-
 		return (
 			<div className={styles.list}>
 				{this.renderVertualizedList()}
+				{this.renderLoader()}
+				{this.renderNoOptionsMessage()}
 				{this.renderShowMoreButton()}
 			</div>
 		);

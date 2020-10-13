@@ -1,5 +1,6 @@
 // @flow
-import {Button} from 'components/atoms';
+import {Button, Loader} from 'components/atoms';
+import {ListMessage} from 'components/molecules/Select/components';
 import {Node} from 'components/molecules/MaterialTreeSelect/components';
 import type {Node as ReactNode} from 'react';
 import type {Node as NodeType, Props, State} from './types';
@@ -11,6 +12,7 @@ export class Tree extends Component<Props, State> {
 	static defaultProps = {
 		className: '',
 		initialSelected: [],
+		loading: false,
 		multiple: false,
 		show: true,
 		showMore: false,
@@ -138,6 +140,16 @@ export class Tree extends Component<Props, State> {
 		return null;
 	};
 
+	renderLoader = () => this.props.loading && <ListMessage><Loader size={35} /></ListMessage>;
+
+	renderNoOptionsMessage = () => {
+		const {loading, options} = this.props;
+		const loaded = !loading;
+		const noOptions = Object.keys(options).length === 0;
+
+		return loaded && noOptions ? <ListMessage>Список пуст</ListMessage> : null;
+	};
+
 	renderNode = (node: NodeType) => {
 		const {getOptionLabel, getOptionValue, onLoad, searchValue} = this.props;
 		const {foundIds, selectedIds} = this.state;
@@ -192,6 +204,8 @@ export class Tree extends Component<Props, State> {
 			return (
 				<div className={styles.tree}>
 					{this.getRoots().map(this.renderNode)}
+					{this.renderLoader()}
+					{this.renderNoOptionsMessage()}
 					{this.renderShowMoreButton()}
 				</div>
 			);

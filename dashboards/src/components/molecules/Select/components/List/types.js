@@ -10,6 +10,7 @@ export type Props = {
 	getOptionLabel?: (option: Option) => string,
 	getOptionValue?: (option: Option) => string,
 	itemSize: number,
+	loading: boolean,
 	maxHeight: number,
 	messages?: Messages,
 	multiple: boolean,

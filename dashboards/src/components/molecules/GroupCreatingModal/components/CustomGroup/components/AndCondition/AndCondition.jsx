@@ -16,7 +16,7 @@ export class AndCondition extends PureComponent<Props> {
 		onUpdate(index, [
 			...condition,
 			createCondition()
-		]);
+		], true);
 	};
 
 	handleRemoveOrCondition = (index: number) => {

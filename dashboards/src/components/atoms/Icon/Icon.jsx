@@ -15,10 +15,7 @@ export class Icon extends PureComponent<Props> {
 
 	render () {
 		const {className, name, onClick, size, title} = this.props;
-		const svgCN = cn({
-			[className]: true,
-			[styles.icon]: true
-		});
+		const svgCN = cn(styles.icon, className);
 
 		return (
 			<svg className={svgCN} fill="currentColor" onClick={onClick} {...ICON_PROPS[size]}>

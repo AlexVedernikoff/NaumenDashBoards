@@ -93,6 +93,7 @@ export class ObjectGroup extends Component<Props, State> {
 		return {
 			async: true,
 			key: actual.toString(),
+			loading,
 			onLoad: this.handleLoadData(actual),
 			options,
 			showMore
