@@ -23,6 +23,7 @@ import MultiDropDownList from './MultiDropDownList';
 import OuterSelect from './OuterSelect';
 import ResizeDetector from './ResizeDetector';
 import Select from './Select';
+import Slider from './Slider';
 import Summary from './Summary';
 import ToggableFormBox from './ToggableFormBox';
 import TransparentSelect from './TransparentSelect';
@@ -54,6 +55,7 @@ export {
 	OuterSelect,
 	ResizeDetector,
 	Select,
+	Slider,
 	Summary,
 	ToggableFormBox,
 	TransparentSelect,

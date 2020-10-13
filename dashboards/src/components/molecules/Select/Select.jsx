@@ -2,24 +2,37 @@
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {List, Menu} from './components';
+import {Loader, OutsideClickDetector} from 'components/atoms';
 import type {Option, Props, State} from './types';
-import {OutsideClickDetector} from 'components/atoms';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Select extends PureComponent<Props, State> {
 	static defaultProps = {
+		async: false,
 		className: '',
 		disabled: false,
 		editable: false,
+		error: false,
+		isSearching: false,
+		loading: false,
 		name: '',
 		showCreationButton: false,
 		textCreationButton: 'Создать',
+		uploaded: false,
 		value: null
 	};
 
 	state = {
 		showMenu: false
+	};
+
+	fetchOptions = () => {
+		const {async, error, fetchOptions, loading, uploaded} = this.props;
+
+		if (async && typeof fetchOptions === 'function' && (error || loading || uploaded) === false) {
+			fetchOptions();
+		}
 	};
 
 	getOptionLabel = (option: Object) => {
@@ -51,7 +64,10 @@ export class Select extends PureComponent<Props, State> {
 		onChangeLabel && onChangeLabel({name, value});
 	};
 
-	handleClick = () => this.setState({showMenu: !this.state.showMenu});
+	handleClick = () => {
+		this.setState({showMenu: !this.state.showMenu});
+		this.fetchOptions();
+	};
 
 	handleClickClearLabelIcon = () => {
 		const {name, onChangeLabel} = this.props;
@@ -74,7 +90,7 @@ export class Select extends PureComponent<Props, State> {
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderCaretIcon = () => <Icon name={ICON_NAMES.CARET} />;
+	renderCaretIcon = () => <Icon className={styles.caret} name={ICON_NAMES.CHEVRON} />;
 
 	renderClearIcon = () => {
 		const {editable} = this.props;
@@ -107,7 +123,7 @@ export class Select extends PureComponent<Props, State> {
 			);
 		}
 
-		return label;
+		return <div className={styles.label}>{label}</div>;
 	};
 
 	renderList = (searchValue: string) => {
@@ -125,8 +141,10 @@ export class Select extends PureComponent<Props, State> {
 		);
 	};
 
+	renderLoader = () => this.props.loading ? <Loader size={15} /> : null;
+
 	renderMenu = () => {
-		const {showCreationButton, textCreationButton} = this.props;
+		const {isSearching, showCreationButton, textCreationButton} = this.props;
 		const {showMenu} = this.state;
 		let creationButton;
 
@@ -137,12 +155,24 @@ export class Select extends PureComponent<Props, State> {
 			};
 		}
 
-		return showMenu && <Menu className={styles.menu} creationButton={creationButton} isSearching={false} renderList={this.renderList} />;
+		if (showMenu) {
+			return (
+				<OutsideClickDetector onClickOutside={this.hideMenu}>
+					<Menu
+						className={styles.menu}
+						creationButton={creationButton}
+						isSearching={isSearching}
+						renderList={this.renderList}
+					/>
+				</OutsideClickDetector>
+			);
+		}
 	};
 
 	renderValueContainer = () => (
-		<div className={styles.valueContainer} onClick={this.handleClick} tabIndex={1}>
+		<div className={styles.valueContainer} onClick={this.handleClick}>
 			{this.renderLabel()}
+			{this.renderLoader()}
 			{this.renderIndicators()}
 		</div>
 	);

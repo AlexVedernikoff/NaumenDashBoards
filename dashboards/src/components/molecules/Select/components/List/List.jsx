@@ -1,6 +1,7 @@
 // @flow
-import {Button, SimpleListOption} from 'components/atoms';
+import {Button} from 'components/atoms';
 import {FixedSizeList} from 'react-window';
+import {ListOption} from 'components/molecules/Select/components';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -86,7 +87,7 @@ export class List extends PureComponent<Props, State> {
 	};
 
 	renderListItem = (data: Object) => {
-		const {getOptionLabel, multiple, onSelect, searchValue, showSelectedIcon, value, values} = this.props;
+		const {getOptionLabel, multiple, onSelect, searchValue, value, values} = this.props;
 		const {options} = this.state;
 		const {index, style} = data;
 		const option = options[index];
@@ -100,14 +101,13 @@ export class List extends PureComponent<Props, State> {
 		}
 
 		return (
-			<SimpleListOption
+			<ListOption
 				found={!!searchValue}
 				getOptionLabel={getOptionLabel}
 				key={optionValue}
 				onClick={onSelect}
 				option={option}
 				selected={selected}
-				showSelectedIcon={showSelectedIcon}
 				style={style}
 			/>
 		);
