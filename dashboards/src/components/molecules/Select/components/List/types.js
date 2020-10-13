@@ -19,7 +19,6 @@ export type Props = {
 	options: Array<Option>,
 	searchValue: string,
 	showMore: boolean,
-	showSelectedIcon?: boolean,
 	value: Option | null,
 	values: Array<Option>
 };

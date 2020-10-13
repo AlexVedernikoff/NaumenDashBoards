@@ -1,0 +1,34 @@
+@import '/styles/variables';
+
+:local {
+	.slider {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 12px;
+	}
+
+	.paginationBulletsContainer {
+		align-items: center;
+		display: flex;
+		justify-content: center;
+		overflow-x: auto;
+	}
+
+	.paginationBullet {
+		background-color: rgba(0, 0, 0, 0.2);
+		border-radius: 50%;
+		cursor: pointer;
+		display: inline-block;
+		margin: 5px;
+		min-height: 6px;
+		min-width: 6px;
+	}
+
+	.selectedPaginationBullet {
+		background-color: rgba(0, 0, 0, 0.5);
+		margin: 4px;
+		min-height: 8px;
+		min-width: 8px;
+	}
+}

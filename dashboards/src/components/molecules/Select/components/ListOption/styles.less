@@ -2,10 +2,13 @@
 
 :local {
 	.option {
+		align-items: center;
 		box-sizing: border-box;
 		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
 		overflow: hidden;
-		padding: 8px 24px;
+		padding: 8px 12px;
 		text-overflow: ellipsis;
 
 		&:hover {
@@ -18,9 +21,10 @@
 	}
 
 	.label {
-		align-items: center;
-		display: flex;
-		justify-content: space-between;
+		flex: auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.selected {
@@ -34,5 +38,13 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.selectedIconContainer {
+		margin-left: 12px;
+
+		svg {
+			color: @info;
+		}
 	}
 }

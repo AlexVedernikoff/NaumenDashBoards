@@ -11,11 +11,16 @@ export type SelectEvent = {
 };
 
 export type Props = {
+	async: boolean,
 	className: string,
 	disabled: boolean,
 	editable: boolean,
+	error: boolean,
+	fetchOptions?: () => any,
 	getOptionLabel?: (option: Option) => string,
 	getOptionValue?: (option: Option) => any,
+	isSearching: boolean,
+	loading: boolean,
 	name: string,
 	onChangeLabel?: OnChangeInputEvent => void,
 	onClickCreationButton?: () => void,
@@ -23,6 +28,7 @@ export type Props = {
 	options: Array<Option>,
 	showCreationButton: boolean,
 	textCreationButton: string,
+	uploaded: boolean,
 	value: Value
 };
 

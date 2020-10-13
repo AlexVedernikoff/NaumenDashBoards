@@ -22,7 +22,6 @@ import Popover from './Popover';
 import RadioButton from './RadioButton';
 import RadioField from './RadioField';
 import SearchInput from './SearchInput';
-import SimpleListOption from './SimpleListOption';
 import Text from './Text';
 import TextArea from './TextArea';
 import TextInput from './TextInput';
@@ -55,7 +54,6 @@ export {
 	RadioButton,
 	RadioField,
 	SearchInput,
-	SimpleListOption,
 	Text,
 	TextArea,
 	TextInput,

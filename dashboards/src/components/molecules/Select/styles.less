@@ -2,6 +2,7 @@
 
 :local {
 	.container {
+		color: @black;
 		position: relative;
 
 		&:hover {
@@ -27,12 +28,18 @@
 		font-size: 13px;
 		height: 32px;
 		justify-content: space-between;
-		height: 32px;
 		padding: 8px 10px 8px 12px;
 
 		&:focus-within {
 			border: 1px solid @info;
 		}
+	}
+
+	.label {
+		flex: auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.menu {
@@ -56,6 +63,10 @@
 		align-items: center;
 		display: flex;
 		margin-left: auto;
+	}
+
+	.caret {
+		color: @ninegrey;
 	}
 
 	.clearLabelIcon {

@@ -5,7 +5,7 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
-export class SimpleListOption extends PureComponent<Props> {
+export class ListOption extends PureComponent<Props> {
 	static defaultProps = {
 		showSelectedIcon: false
 	};
@@ -30,23 +30,32 @@ export class SimpleListOption extends PureComponent<Props> {
 		onClick(option);
 	};
 
+	renderLabel = () => (
+		<div className={styles.label}>
+			{this.getOptionLabel()}
+		</div>
+	);
+
 	renderSelectedIcon = () => {
-		const {selected, showSelectedIcon} = this.props;
-		return showSelectedIcon && selected ? <Icon name={ICON_NAMES.DONE} /> : null;
+		const {selected} = this.props;
+
+		if (selected) {
+			return (
+				<div className={styles.selectedIconContainer}>
+					<Icon name={ICON_NAMES.DONE} />
+				</div>
+			);
+		}
 	};
 
 	render () {
-		const {style} = this.props;
-
 		return (
-			<div className={this.getClassName()} onClick={this.handleClick} style={style}>
-				<div className={styles.label}>
-					{this.getOptionLabel()}
-					{this.renderSelectedIcon()}
-				</div>
+			<div className={this.getClassName()} onClick={this.handleClick}>
+				{this.renderLabel()}
+				{this.renderSelectedIcon()}
 			</div>
 		);
 	}
 }
 
-export default SimpleListOption;
+export default ListOption;
