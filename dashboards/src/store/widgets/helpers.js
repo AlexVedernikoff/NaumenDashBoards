@@ -100,10 +100,20 @@ const parseMSInterval = (ms: number) => {
 	return ms;
 };
 
+/**
+ * Сообщает используется ли в наборе данных виджета разбивка
+ * @param {object} widget - виджет
+ * @returns {boolean}
+ */
+const hasBreakdown = (widget: Object): boolean => !!widget.data
+		.filter(set => !set.sourceForCompute)
+		.find(set => !!set[FIELDS.breakdown]);
+
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
 	getLayoutWidgets,
+	hasBreakdown,
 	hasMSInterval,
 	hasPercent,
 	isGroupKey,

@@ -1,5 +1,5 @@
 // @flow
-import {FONT_FAMILIES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
+import {FONT_FAMILIES, HEADER_POSITIONS, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import type {Header} from 'store/widgets/data/types';
 
 const DEFAULT_HEADER_SETTINGS: Header = {
@@ -8,6 +8,7 @@ const DEFAULT_HEADER_SETTINGS: Header = {
 	fontSize: 16,
 	fontStyle: undefined,
 	name: '',
+	position: HEADER_POSITIONS.TOP,
 	show: true,
 	template: '',
 	textAlign: TEXT_ALIGNS.left,

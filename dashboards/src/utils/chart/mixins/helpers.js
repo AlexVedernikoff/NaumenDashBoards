@@ -22,7 +22,7 @@ const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero:
 		formattedValue = parseMSInterval(formattedValue);
 	} else if (value) {
 		if (!Number.isInteger(formattedValue)) {
-			formattedValue = formattedValue.toFixed(2);
+			formattedValue = parseFloat(formattedValue.toFixed(2));
 		}
 
 		if (usesPercent) {

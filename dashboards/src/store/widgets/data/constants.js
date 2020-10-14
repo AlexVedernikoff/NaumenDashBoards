@@ -196,6 +196,15 @@ const DISPLAY_MODE = {
 	ANY
 };
 
+// Позиция заголовка виджета
+const BOTTOM: 'BOTTOM' = 'BOTTOM';
+const TOP: 'TOP' = 'TOP';
+
+const HEADER_POSITIONS = {
+	BOTTOM,
+	TOP
+};
+
 export {
 	COMBO_TYPES,
 	DEFAULT_AXIS_SORTING_SETTINGS,
@@ -205,6 +214,7 @@ export {
 	FONT_FAMILIES,
 	FONT_SIZE_OPTIONS,
 	FONT_STYLES,
+	HEADER_POSITIONS,
 	LIMIT,
 	RANGES_TYPES,
 	SORTING_TYPES,

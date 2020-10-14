@@ -8,6 +8,7 @@ import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import {ResizeDetector} from 'components/molecules';
 import styles from './styles.less';
+import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -64,13 +65,18 @@ export class Chart extends PureComponent<Props> {
 
 	handleResize = (width: number) => {
 		if (this.chart) {
-			const {fontSize} = this.props.widget.legend;
+			const {fontSize, textHandler} = this.props.widget.legend;
 			const legendWidth = this.hasSideLegend() ? getLegendWidth(width) : width;
+			let legendFormatter;
+
+			if (textHandler === TEXT_HANDLERS.CROP) {
+				legendFormatter = getLegendCroppingFormatter(legendWidth, fontSize);
+			}
 
 			// $FlowFixMe
 			this.chart.updateOptions({
 				legend: {
-					formatter: getLegendCroppingFormatter(legendWidth, fontSize),
+					formatter: legendFormatter,
 					width: legendWidth
 				}
 			});

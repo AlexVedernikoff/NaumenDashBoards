@@ -191,8 +191,10 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 			const {onSelect, searchValue, value} = props;
 			const initialSelected = [this.getOptionValue(value)];
 			const {[dataSet.dataKey]: sourceData = {
-				data: {}
+				data: {},
+				loading: true
 			}} = dynamicGroups;
+			const {data, loading} = sourceData;
 
 			return (
 				<TreeList
@@ -200,9 +202,10 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 					getOptionValue={this.getOptionValue}
 					initialSelected={initialSelected}
 					isEnabledNode={this.isEnabledDynamicNode}
+					loading={loading}
 					onLoad={this.handleLoadDynamicAttributes}
 					onSelect={this.handleSelectDynAttr(onSelect)}
-					options={sourceData.data}
+					options={data}
 					searchValue={searchValue}
 					value={value}
 				/>

@@ -7,6 +7,7 @@ import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
 import {getErrorMessage, rules} from 'WidgetFormPanel/schema';
+import {getLegendSettings} from 'utils/chart/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/axisNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
@@ -66,7 +67,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			header,
 			id,
 			indicator: extend(DEFAULT_CHART_SETTINGS.yAxis, indicator),
-			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
+			legend: extend(getLegendSettings(values), legend),
 			name,
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
 			showEmptyData,

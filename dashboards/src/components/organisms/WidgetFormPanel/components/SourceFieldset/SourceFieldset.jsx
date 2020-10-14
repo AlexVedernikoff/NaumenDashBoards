@@ -121,7 +121,8 @@ export class SourceFieldset extends Component<Props> {
 	renderFilterButton = () => {
 		const {set, usesFilter} = this.props;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
-		const active = !!set.descriptor;
+		const {descriptor} = set;
+		const active = descriptor && !!JSON.parse(descriptor).filters;
 		const iconName = active ? FILLED_FILTER : FILTER;
 
 		if (usesFilter) {
@@ -130,7 +131,7 @@ export class SourceFieldset extends Component<Props> {
 					active={active}
 					iconName={iconName}
 					onClick={this.callFilterModal}
-					text="Фильтр"
+					text="Фильтрация"
 				/>
 			);
 		}

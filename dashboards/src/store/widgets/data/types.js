@@ -7,6 +7,7 @@ import {
 	DEFAULT_TABLE_VALUE,
 	DISPLAY_MODE,
 	FONT_STYLES,
+	HEADER_POSITIONS,
 	RANGES_TYPES,
 	SORTING_TYPES,
 	SORTING_VALUES,
@@ -82,12 +83,15 @@ type BaseData = {
 	source: Source
 };
 
+export type HeaderPosition = $Keys<typeof HEADER_POSITIONS>;
+
 export type Header = {
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number,
 	fontStyle?: FontStyle,
 	name: string,
+	position: HeaderPosition,
 	show: boolean,
 	template: string,
 	textAlign: TextAlign,
@@ -187,7 +191,6 @@ export type BuildCircleData = {
 	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
 	indicator: MixedAttribute,
-	showEmptyData: boolean,
 	sourceForCompute: false
 };
 

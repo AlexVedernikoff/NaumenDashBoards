@@ -2,10 +2,10 @@
 import {Chart, Summary} from 'components/molecules';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
-import {FONT_STYLES, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {FONT_STYLES, HEADER_POSITIONS, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {PADDING} from './constants';
 import type {Props, State} from './types';
-import React, {Component, createRef, Fragment} from 'react';
+import React, {Component, createRef} from 'react';
 import settingsStyles from 'styles/settings.less';
 import {SpeedometerWidget, TableWidget} from 'components/organisms';
 import styles from './styles.less';
@@ -64,15 +64,20 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	renderContent = () => {
-		const {buildData} = this.props;
+		const {buildData, widget} = this.props;
 		const {error, loading} = buildData;
 
 		if (!(loading || error)) {
+			const contentCN = cn({
+				[styles.content]: true,
+				[styles.reverseContent]: widget.header.position === HEADER_POSITIONS.BOTTOM
+			});
+
 			return (
-				<Fragment>
+				<div className={contentCN}>
 					{this.renderName()}
 					{this.renderDiagram()}
-				</Fragment>
+				</div>
 			);
 		}
 
