@@ -127,12 +127,13 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderList = (searchValue: string) => {
-		const {options, value} = this.props;
+		const {loading, options, value} = this.props;
 
 		return (
 			<List
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
+				loading={loading}
 				onSelect={this.handleSelect}
 				options={options}
 				searchValue={searchValue}

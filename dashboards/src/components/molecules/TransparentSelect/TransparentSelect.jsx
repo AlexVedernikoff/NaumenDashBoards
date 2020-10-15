@@ -98,13 +98,14 @@ export class TransparentSelect extends PureComponent<Props, State> {
 	};
 
 	renderList = (searchValue: string) => {
-		const {components, getOptionLabel, getOptionValue, options, value} = this.props;
+		const {components, getOptionLabel, getOptionValue, loading, options, value} = this.props;
 		const {List: Component = List} = components;
 
 		return (
 			<Component
 				getOptionLabel={getOptionLabel}
 				getOptionValue={getOptionValue}
+				loading={loading}
 				onSelect={this.handleSelect}
 				options={options}
 				searchValue={searchValue}

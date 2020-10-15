@@ -252,7 +252,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 			return (
 				<FormBox>
 					<Checkbox
-						label="Учитывать NULL"
+						label="Учитывать незаполненные данные"
 						name={FIELDS.showEmptyData}
 						onClick={this.handleChangeShowEmptyData}
 						value={showEmptyData}

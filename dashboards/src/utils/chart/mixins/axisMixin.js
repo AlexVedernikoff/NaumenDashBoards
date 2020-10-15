@@ -59,10 +59,6 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 			},
 			plotOptions: {
 				bar: {
-					dataLabels: {
-						orientation: horizontal && stacked ? 'vertical' : 'horizontal',
-						position: horizontal && !stacked ? 'bottom' : 'center'
-					},
 					horizontal
 				}
 			},

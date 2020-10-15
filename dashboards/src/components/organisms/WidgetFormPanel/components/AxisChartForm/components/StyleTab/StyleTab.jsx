@@ -4,6 +4,7 @@ import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel/constants';
+import {getLegendSettings} from 'utils/chart/helpers';
 import {IndicatorBox, ParameterBox} from 'WidgetFormPanel/components/AxisChartForm/components';
 import React, {Component} from 'react';
 import type {StyleTabProps} from 'WidgetFormPanel/types';
@@ -20,15 +21,16 @@ export class StyleTab extends Component<StyleTabProps> {
 	};
 
 	render () {
+		const {values} = this.props;
 		const {
 			colors,
 			dataLabels = DEFAULT_CHART_SETTINGS.dataLabels,
 			header,
 			indicator = DEFAULT_CHART_SETTINGS.yAxis,
-			legend = DEFAULT_CHART_SETTINGS.legend,
+			legend = getLegendSettings(values),
 			parameter = DEFAULT_CHART_SETTINGS.xAxis,
 			sorting = DEFAULT_AXIS_SORTING_SETTINGS
-		} = this.props.values;
+		} = values;
 
 		return (
 			<div className={styles.container}>
