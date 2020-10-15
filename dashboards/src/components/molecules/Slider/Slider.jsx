@@ -57,11 +57,17 @@ export class Slider extends PureComponent<Props, State> {
 		return <div className={CN} onClick={this.handleClickPaginationBullet(index)} />;
 	};
 
-	renderPaginationBullets = () => (
-		<div className={styles.paginationBulletsContainer}>
-			{this.getSlides().map(this.renderPaginationBullet)}
-		</div>
-	);
+	renderPaginationBullets = () => {
+		const {children, size} = this.props;
+
+		if (Children.count(children) > size) {
+			return (
+				<div className={styles.paginationBulletsContainer}>
+					{this.getSlides().map(this.renderPaginationBullet)}
+				</div>
+			);
+		}
+	};
 
 	render () {
 		const {className} = this.props;

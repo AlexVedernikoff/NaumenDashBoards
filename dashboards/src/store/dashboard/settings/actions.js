@@ -13,6 +13,7 @@ import isMobile from 'ismobilejs';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState, switchState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
+import type {User} from 'store/users/types';
 
 /**
  * Получает и устанавливает настройки автообновления
@@ -257,17 +258,28 @@ const uploadFile = async (file: Blob, name: string) => {
  * @param {string} name - название файла
  * @param {string} type - тип файла
  * @param {Blob} file - файл для отправки
+ * @param {Array<User>} users - список пользователей, которым осуществляется отправка файла
  * @returns {ThunkAction}
  */
-const sendToMail = (name: string, type: string, file: Blob): ThunkAction => async (dispatch: Dispatch) => {
+const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>): ThunkAction => async (dispatch: Dispatch) => {
+	dispatch({
+		type: DASHBOARD_EVENTS.REQUEST_EXPORTING_FILE_TO_EMAIL
+	});
+
 	try {
 		const key = await uploadFile(file, name);
-		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type, name);
+		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type, name, users);
 
+		dispatch({
+			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
+		});
 		dispatch(createToast({
 			text: 'Файл успешно отправлен'
 		}));
 	} catch (e) {
+		dispatch({
+			type: DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR
+		});
 		dispatch(createToast({
 			text: 'Ошибка отправки файла',
 			type: 'error'
@@ -399,6 +411,6 @@ export {
 	removePersonalDashboard,
 	saveAutoUpdateSettings,
 	seeDashboard,
-	sendToMail,
+	sendToEmails,
 	setEditable
 };

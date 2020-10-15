@@ -25,8 +25,10 @@ const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 		contentCode
 	};
 	const {
+		email,
 		groupUser: role,
-		hasPersonalDashboard
+		hasPersonalDashboard,
+		name
 	} = await window.jsApi.restCallModule('dashboardSettings', 'getUserData', payload);
 
 	if (role !== USER_ROLES.REGULAR) {
@@ -34,7 +36,9 @@ const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	}
 
 	dispatch(setUserData({
+		email,
 		hasPersonalDashboard,
+		name,
 		role
 	}));
 };

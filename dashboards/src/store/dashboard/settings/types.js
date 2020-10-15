@@ -1,7 +1,11 @@
 // @flow
+import type {ChangingState, ThunkAction} from 'store/types';
 import {DASHBOARD_EVENTS, LAYOUT_MODE} from './constants';
+import type {User} from 'store/users/types';
 
 export type LayoutMode = $Keys<typeof LAYOUT_MODE>;
+
+export type SendToEmails = (name: string, type: string, file: Blob, users: Array<User>) => ThunkAction;
 
 export type AutoUpdateSettings = {
 	defaultInterval: number,
@@ -44,6 +48,20 @@ type ErrorDeletePersonalDashboard = {
 	type: typeof DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
 };
 
+type RecordDashboardError = {
+	payload: null,
+	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
+};
+
+type RecordExportingFileToEmailError = {
+	payload: null,
+	type: typeof DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR
+};
+
+type RequestExportingFileToEmail = {
+	type: typeof DASHBOARD_EVENTS.REQUEST_EXPORTING_FILE_TO_EMAIL
+};
+
 type RequestDashboard = {
 	payload: null,
 	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD
@@ -54,9 +72,8 @@ export type ReceiveDashboard = {
 	type: typeof DASHBOARD_EVENTS.RECEIVE_DASHBOARD
 };
 
-type RecordDashboardError = {
-	payload: null,
-	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
+export type ResponseExportingFileToEmail = {
+	type: typeof DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
 };
 
 type SetEditable = {
@@ -100,6 +117,9 @@ export type SettingsAction =
 	| RequestDashboard
 	| ReceiveDashboard
 	| RecordDashboardError
+	| RecordExportingFileToEmailError
+	| RequestExportingFileToEmail
+	| ResponseExportingFileToEmail
 	| SetEditable
 	| SetPersonal
 	| SwitchOnEditMode
@@ -112,6 +132,7 @@ export type SettingsState = {
 	editable: boolean,
 	editMode: boolean,
 	error: boolean,
+	exportingFailToEmail: ChangingState,
 	layoutMode: LayoutMode,
 	loading: boolean,
 	personal: boolean,
