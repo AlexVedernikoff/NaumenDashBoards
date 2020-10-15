@@ -2,8 +2,8 @@
 import AutoUpdateButton from 'containers/AutoUpdateButton';
 import {Button, ButtonGroup} from 'components/atoms';
 import {createContextName} from 'utils/export/helpers';
-import {createSnapshot, EXPORT_VARIANTS} from 'utils/export';
-import {DropDownButton, IconButton, NavItem} from './components';
+import {createSnapshot} from 'utils/export';
+import {DropDownButton, ExportByEmailButton, IconButton, NavItem} from './components';
 import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
@@ -24,28 +24,6 @@ export class DashboardHeader extends Component<Props, State> {
 		showModal: false
 	};
 
-	createDocument = (way: string) => async (type: string) => {
-		const {DOWNLOAD, MAIL} = EXPORT_VARIANTS;
-		const {sendToMail} = this.props;
-		const {current} = gridRef;
-		const toDownload = way === DOWNLOAD;
-		const name = await createContextName();
-
-		if (current) {
-			const file = await createSnapshot({
-				container: current,
-				fragment: false,
-				name,
-				toDownload,
-				type
-			});
-
-			if (way === MAIL && file) {
-				sendToMail(name, type, file);
-			}
-		}
-	};
-
 	handleChangeDisplayMode = () => {
 		const {changeLayoutMode, layoutMode} = this.props;
 		const mode = layoutMode === LAYOUT_MODE.WEB ? LAYOUT_MODE.MOBILE : LAYOUT_MODE.WEB;
@@ -63,6 +41,20 @@ export class DashboardHeader extends Component<Props, State> {
 
 		if (personalDashboard !== personal) {
 			switchDashboard();
+		}
+	};
+
+	handleExportDownload = async (type: string) => {
+		const {current} = gridRef;
+		const name = await createContextName();
+
+		if (current) {
+			await createSnapshot({
+				container: current,
+				name,
+				toDownload: true,
+				type
+			});
 		}
 	};
 
@@ -111,7 +103,7 @@ export class DashboardHeader extends Component<Props, State> {
 			<DropDownButton
 				menu={EXPORT_LIST}
 				name={ICON_NAMES.DOWNLOAD}
-				onSelect={this.createDocument(EXPORT_VARIANTS.DOWNLOAD)}
+				onSelect={this.handleExportDownload}
 				tip="Скачать"
 			/>
 		</NavItem>
@@ -119,12 +111,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 	renderMailExportButton = () => (
 		<NavItem>
-			<DropDownButton
-				menu={EXPORT_LIST}
-				name={ICON_NAMES.MAIL}
-				onSelect={this.createDocument(EXPORT_VARIANTS.MAIL)}
-				tip="Отправить на почту"
-			/>
+			<ExportByEmailButton />
 		</NavItem>
 	);
 

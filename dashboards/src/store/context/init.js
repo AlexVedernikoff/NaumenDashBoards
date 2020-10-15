@@ -9,7 +9,9 @@ export const initialContextState: ContextState = {
 	switching: false,
 	temp: null,
 	user: {
+		email: '',
 		hasPersonalDashboard: false,
+		name: '',
 		role: USER_ROLES.REGULAR
 	}
 };

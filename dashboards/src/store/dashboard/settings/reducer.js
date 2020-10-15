@@ -60,11 +60,37 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 				error: true,
 				loading: false
 			};
+		case DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR:
+			return {
+				...state,
+				exportingFailToEmail: {
+					...state.exportingFailToEmail,
+					error: true,
+					loading: false
+				}
+			};
 		case DASHBOARD_EVENTS.REQUEST_DASHBOARD:
 			return {
 				...state,
 				error: false,
 				loading: true
+			};
+		case DASHBOARD_EVENTS.REQUEST_EXPORTING_FILE_TO_EMAIL:
+			return {
+				...state,
+				exportingFailToEmail: {
+					...state.exportingFailToEmail,
+					error: false,
+					loading: true
+				}
+			};
+		case DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL:
+			return {
+				...state,
+				exportingFailToEmail: {
+					...state.exportingFailToEmail,
+					loading: false
+				}
 			};
 		case DASHBOARD_EVENTS.SET_EDITABLE_PARAM:
 			return {

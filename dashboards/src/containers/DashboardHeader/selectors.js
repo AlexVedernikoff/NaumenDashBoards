@@ -7,8 +7,7 @@ import {
 	getSettings,
 	removePersonalDashboard,
 	saveAutoUpdateSettings,
-	seeDashboard,
-	sendToMail
+	seeDashboard
 } from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {switchDashboard} from 'store/context/actions';
@@ -39,6 +38,5 @@ export const functions: ConnectedFunctions = {
 	removePersonalDashboard,
 	saveAutoUpdateSettings,
 	seeDashboard,
-	sendToMail,
 	switchDashboard
 };

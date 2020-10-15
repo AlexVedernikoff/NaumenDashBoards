@@ -1,11 +1,12 @@
 // @flow
+import {createContextName} from './helpers';
 import {createSnapshot} from './core';
 import exportSheet from './xlxs';
-import {EXPORT_VARIANTS, FILE_VARIANTS} from './constants';
+import {FILE_VARIANTS} from './constants';
 
 export {
+	createContextName,
 	createSnapshot,
 	exportSheet,
-	EXPORT_VARIANTS,
 	FILE_VARIANTS
 };

@@ -7,6 +7,7 @@ import dashboards from './dashboards/reducer';
 import {ROOT_EVENTS} from './constants';
 import sources from './sources/reducer';
 import toasts from './toasts/reducer';
+import users from './users/reducer';
 import widgets from './widgets/reducer';
 
 const appReducer = combineReducers({
@@ -16,13 +17,14 @@ const appReducer = combineReducers({
 	dashboards,
 	sources,
 	toasts,
+	users,
 	widgets
 });
 
 const rootReducer = (state: Object, action: Object) => {
 	switch (action.type) {
 		case ROOT_EVENTS.RESET_STATE:
-			return appReducer({context: state.context, sources: state.sources}, action);
+			return appReducer({context: state.context, sources: state.sources, users: state.users}, action);
 		case ROOT_EVENTS.SWITCH_STATE:
 			return appReducer({...state, ...action.payload}, action);
 	}

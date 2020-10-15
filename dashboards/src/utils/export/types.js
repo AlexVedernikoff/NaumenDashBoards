@@ -1,9 +1,9 @@
 // @flow
 export type Options = {
 	container: HTMLDivElement,
-	fragment: boolean,
+	fragment?: boolean,
 	name: string,
-	toDownload: boolean,
+	toDownload?: boolean,
 	type: string
 };
 

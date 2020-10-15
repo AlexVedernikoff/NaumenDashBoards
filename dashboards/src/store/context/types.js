@@ -24,7 +24,9 @@ type Temp = {
 };
 
 export type UserData = {
+	email: string,
 	hasPersonalDashboard: boolean,
+	name: string,
 	role: UserRole
 };
 

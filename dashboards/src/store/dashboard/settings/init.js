@@ -13,6 +13,10 @@ export const initialDashboardState: SettingsState = {
 	editMode: false,
 	editable: false,
 	error: false,
+	exportingFailToEmail: {
+		error: false,
+		loading: false
+	},
 	layoutMode: getLayoutMode(),
 	loading: false,
 	personal: false,

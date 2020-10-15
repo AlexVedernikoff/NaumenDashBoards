@@ -23,7 +23,6 @@ export type ConnectedFunctions = {
 	removePersonalDashboard: () => ThunkAction,
 	saveAutoUpdateSettings: (enabled: boolean, interval: string | number) => ThunkAction,
 	seeDashboard: () => ThunkAction,
-	sendToMail: (name: string, type: string, file: Blob) => ThunkAction,
 	switchDashboard: () => ThunkAction
 };
 
