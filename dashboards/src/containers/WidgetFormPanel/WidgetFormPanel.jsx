@@ -6,6 +6,7 @@ import type {DivRef} from 'components/types';
 import {FIELDS, formRef} from 'WidgetFormPanel';
 import Form from 'components/organisms/WidgetFormPanel';
 import {functions, props} from './selectors';
+import type {LayoutSize} from 'components/organisms/WidgetFormPanel/types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -57,6 +58,19 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 
 			form.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
 		}
+	};
+
+	handleChangeLayoutSize = (layoutSize: LayoutSize) => {
+		const {changeLayout, layoutMode, widget} = this.props;
+		const payload = {
+			layout: {
+				...layoutSize,
+				i: widget.id
+			},
+			layoutMode
+		};
+
+		changeLayout(payload);
 	};
 
 	handleSubmit = async (updateWidget: UpdateWidget) => {
@@ -175,6 +189,7 @@ class WidgetFormPanel extends PureComponent<Props, State> {
 					isNew={this.isNew()}
 					layoutMode={layoutMode}
 					linkedSources={linkedSources}
+					onChangeLayoutSize={this.handleChangeLayoutSize}
 					onSubmit={this.handleSubmit}
 					personalDashboard={personalDashboard}
 					refAttributes={refAttributes}

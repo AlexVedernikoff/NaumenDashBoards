@@ -174,11 +174,12 @@ export class WidgetFormPanel extends Component<Props, State> {
 	renderForm = (props: RenderFormProps) => <Form forwardedRef={formRef} {...this.props} {...props} />;
 
 	renderTypedForm = () => {
+		const {layoutMode} = this.props;
 		const Form = this.resolve();
 
 		return (
 			<FormContext.Provider value={this.getContextValue()}>
-				<Form render={this.renderForm} />
+				<Form layoutMode={layoutMode} render={this.renderForm} />
 			</FormContext.Provider>
 		);
 	};

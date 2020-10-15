@@ -1,5 +1,5 @@
 // @flow
-import {addLayouts, changeLayouts, removeLayouts, replaceLayoutsId} from './helpers';
+import {addLayouts, changeLayout, changeLayouts, removeLayouts, replaceLayoutsId} from './helpers';
 import {defaultLayoutsAction, initialLayoutsState} from './init';
 import type {LayoutsAction, LayoutsState} from './types';
 import {LAYOUTS_EVENTS} from './constants';
@@ -9,6 +9,8 @@ const reducer = (state: LayoutsState = initialLayoutsState, action: LayoutsActio
 	switch (action.type) {
 		case LAYOUTS_EVENTS.ADD_LAYOUTS:
 			return addLayouts(removeLayouts(state, NewWidget.id), action.payload);
+		case LAYOUTS_EVENTS.CHANGE_LAYOUT:
+			return changeLayout(state, action.payload);
 		case LAYOUTS_EVENTS.CHANGE_LAYOUTS:
 			return changeLayouts(state, action.payload);
 		case LAYOUTS_EVENTS.REMOVE_LAYOUTS:

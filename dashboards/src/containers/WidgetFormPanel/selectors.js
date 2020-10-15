@@ -1,6 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import {cancelForm, createWidget, saveWidget} from 'store/widgets/data/actions';
+import {changeLayout} from 'store/dashboard/layouts/actions';
 import {changeLayoutMode} from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {createToast} from 'store/toasts/actions';
@@ -38,6 +39,7 @@ export const props = (state: AppState): ConnectedProps => {
 
 export const functions: ConnectedFunctions = {
 	cancelForm,
+	changeLayout,
 	changeLayoutMode,
 	createToast,
 	createWidget,

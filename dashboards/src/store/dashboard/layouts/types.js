@@ -25,6 +25,16 @@ type AddLayouts = {
 	type: typeof LAYOUTS_EVENTS.ADD_LAYOUTS
 };
 
+export type LayoutPayloadForChange = {
+	layout: $Shape<Layout>,
+	layoutMode: LayoutMode
+};
+
+type ChangeLayout = {
+	payload: LayoutPayloadForChange,
+	type: typeof LAYOUTS_EVENTS.CHANGE_LAYOUT
+};
+
 export type LayoutsPayloadForChange = {
 	layoutMode: LayoutMode,
 	layouts: Layouts
@@ -68,6 +78,7 @@ type UnknownLayoutsAction = {
 
 export type LayoutsAction =
 	| AddLayouts
+	| ChangeLayout
 	| ChangeLayouts
 	| RecordSaveLayoutsError
 	| RemoveLayouts

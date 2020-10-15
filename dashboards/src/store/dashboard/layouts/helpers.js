@@ -1,7 +1,15 @@
 // @flow
 import {deepClone} from 'src/helpers';
 import {GRID_PROPS} from 'components/organisms/DashboardContent/constants';
-import type {Layout, Layouts, LayoutsPayloadForAdd, LayoutsPayloadForChange, LayoutsState, ReplaceLayoutsIdPayload} from './types';
+import type {
+	Layout,
+	LayoutPayloadForChange,
+	Layouts,
+	LayoutsPayloadForAdd,
+	LayoutsPayloadForChange,
+	LayoutsState,
+	ReplaceLayoutsIdPayload
+} from './types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -92,6 +100,29 @@ const addLayouts = (state: LayoutsState, payload: LayoutsPayloadForAdd): Layouts
 };
 
 /**
+ * Изменяет данные положения и размеров виджета
+ * @param {LayoutsState} state - состояние положений виджетов
+ * @param {LayoutPayloadForChange} payload - данные для изменения положений
+ * @returns {LayoutsState}
+ */
+const changeLayout = (state: LayoutsState, payload: LayoutPayloadForChange): LayoutsState => {
+	const {layout: newLayout, layoutMode} = payload;
+	const layouts = state[layoutMode];
+	const netLayouts = {};
+
+	Object.keys(layouts).forEach(breakpoint => {
+		netLayouts[breakpoint] = layouts[breakpoint]
+			.map(layout => layout.i === newLayout.i ? {...layout, ...newLayout} : layout);
+	});
+
+	return {
+		...state,
+		// $FlowFixMe
+		[layoutMode]: netLayouts
+	};
+};
+
+/**
  * Изменяет текущее положение виджетов
  * @param {LayoutsState} state - состояние положений виджетов
  * @param {LayoutsPayloadForChange} payload - данные для изменения положений
@@ -99,7 +130,7 @@ const addLayouts = (state: LayoutsState, payload: LayoutsPayloadForAdd): Layouts
  */
 const changeLayouts = (state: LayoutsState, payload: LayoutsPayloadForChange): LayoutsState => {
 	const {layoutMode, layouts: newLayouts} = payload;
-	const layouts = state[layoutMode];
+	const layouts = deepClone(state[layoutMode]);
 
 	Object.keys(newLayouts).forEach(breakpoint => {
 		newLayouts[breakpoint].forEach(newLayout => {
@@ -172,6 +203,7 @@ const removeLayouts = (state: LayoutsState, widgetId: string): LayoutsState => {
 
 export {
 	addLayouts,
+	changeLayout,
 	changeLayouts,
 	createLayout,
 	filterLayouts,

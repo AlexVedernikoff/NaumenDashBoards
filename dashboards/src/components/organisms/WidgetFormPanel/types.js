@@ -72,7 +72,13 @@ export type StyleTabProps = {|
 	values: Values
 |};
 
+export type LayoutSize = {|
+	h: number,
+	w: number
+|};
+
 export type RenderFormProps = {|
+	layoutSize?: LayoutSize,
 	renderParamsTab: ParamsTabProps => Node,
 	renderStyleTab: StyleTabProps => Node,
 	schema: Object,
@@ -80,6 +86,7 @@ export type RenderFormProps = {|
 |};
 
 export type TypedFormProps = {|
+	layoutMode: LayoutMode,
 	render: (props: RenderFormProps) => Node
 |};
 
@@ -98,6 +105,7 @@ export type Props = {|
 	isNew: boolean,
 	layoutMode: LayoutMode,
 	linkedSources: LinkedDataSourceMap,
+	onChangeLayoutSize: (layoutSize: LayoutSize) => void,
 	onSubmit: (func: UpdateWidget) => Promise<void>,
 	personalDashboard: boolean,
 	refAttributes: AttributesMap,

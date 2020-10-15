@@ -5,6 +5,7 @@ import type {Context, UserData} from 'store/context/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
+import type {LayoutPayloadForChange} from 'store/dashboard/layouts/types';
 import type {LinkedDataSourceMap} from 'store/sources/linkedData/types';
 import type {NewToast} from 'store/toasts/types';
 import {NewWidget} from 'entities';
@@ -62,6 +63,7 @@ export type FetchLinkedDataSources = (classFqn: string) => ThunkAction;
 
 export type ConnectedFunctions = {
 	cancelForm: () => ThunkAction,
+	changeLayout: (payload: LayoutPayloadForChange) => Object,
 	changeLayoutMode: (mode: LayoutMode) => ThunkAction,
 	createToast: (newToast: $Exact<NewToast>) => ThunkAction,
 	createWidget: Widget => Object | void,
