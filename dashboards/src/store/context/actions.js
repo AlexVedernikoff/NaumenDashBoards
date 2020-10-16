@@ -1,6 +1,6 @@
 // @flow
 import {CONTEXT_EVENTS, USER_ROLES} from './constants';
-import {createPersonalState, setEditable} from 'store/dashboard/settings/actions';
+import {createNewState, setEditable} from 'store/dashboard/settings/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {switchState} from 'store/actions';
 import type {UserData} from './types';
@@ -57,7 +57,7 @@ const switchDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: 
 	if (temp) {
 		dispatch(switchState(temp));
 	} else {
-		await dispatch(createPersonalState());
+		await dispatch(createNewState());
 	}
 
 	dispatch(endSwitch());

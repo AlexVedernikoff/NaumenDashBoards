@@ -1,8 +1,6 @@
 @import "/styles/variables.less";
 
 :local {
-	@right-panel-width: 320px;
-
 	.content {
 		background-color: @greyBg;
 		height: calc(100% - @top-bar-height);
@@ -13,42 +11,21 @@
 		background-color: @blue;
 	}
 
-	.common-props {
+	.gridContainer {
 		background-color: @blue;
 		bottom: 0;
-		overflow-x: hidden;
+		left: 0;
 		overflow-y: auto;
+		padding-right: 12px;
 		position: absolute;
 		top: 0;
-	}
-
-	.editModeContainer {
-		.common-props();
-		left: 0;
-		padding-right: 12px;
-		right: @right-panel-width;
-	}
-
-	.viewModeContainer {
-		.common-props();
-		left: 0;
-		padding: 20px @right-panel-width/2;
 		right: 0;
 	}
 
-	.containerMk {
+	.MKGridContainer {
 		margin: 0 auto;
 		padding: 0;
 		width: 320px;
-	}
-
-	.panel {
-		.common-props();
-
-		background-color: @white;
-		box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
-		right: 0;
-		width: @right-panel-width;
 	}
 
 	.grid {
@@ -66,6 +43,7 @@
 
 .react-grid-layout {
 	min-height: 100%;
+	position: relative;
 }
 
 .react-grid-item {

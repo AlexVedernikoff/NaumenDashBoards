@@ -10,6 +10,7 @@ export type Icon = {
 
 export type Props = {
 	className: string,
+	disabled: boolean,
 	icons: Array<Icon>,
 	name: string,
 	onChange: OnChangeInputEvent => void,

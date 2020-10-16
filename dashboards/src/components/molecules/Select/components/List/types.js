@@ -12,7 +12,7 @@ export type Props = {
 	itemSize: number,
 	loading: boolean,
 	maxHeight: number,
-	messages?: Messages,
+	messages: Messages,
 	multiple: boolean,
 	onClickShowMore?: () => void,
 	onClose?: () => void,

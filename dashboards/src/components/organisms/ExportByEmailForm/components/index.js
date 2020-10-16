@@ -1,6 +1,6 @@
 // @flow
 import FormContent from './FormContent';
-import FormFooter from './FormFooter'
+import FormFooter from './FormFooter';
 import FormHeader from './FormHeader';
 import UserField from './UserField';
 

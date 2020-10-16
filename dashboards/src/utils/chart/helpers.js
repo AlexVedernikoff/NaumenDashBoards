@@ -7,7 +7,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 /**
  * Возвращает настройки легенды в зависимости от параметров переданного виджета
  * @param {Chart} widget - виджет
- * @return {Legend} - настройки легенды
+ * @returns {Legend} - настройки легенды
  */
 const getLegendSettings = (widget: Chart) => {
 	const {type} = widget;
