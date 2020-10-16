@@ -3,6 +3,7 @@ import {getSourceTypes} from './store/helpers';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import type {LayoutMode} from './store/dashboard/settings/types';
+import {LOCAL_STORAGE_VARS} from './store/constants';
 
 /**
  * Возвращает функцию, которая не будет срабатывать, пока продолжает вызываться
@@ -80,7 +81,7 @@ const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platfo
  */
 const getLayoutMode = () => {
 	// $FlowFixMe
-	const localStorageLayoutMode: LayoutMode = localStorage.getItem('layoutMode') || LAYOUT_MODE.WEB;
+	const localStorageLayoutMode: LayoutMode = localStorage.getItem(LOCAL_STORAGE_VARS.LAYOUT_MODE) || LAYOUT_MODE.WEB;
 	return isMobile().any ? LAYOUT_MODE.MOBILE : localStorageLayoutMode;
 };
 

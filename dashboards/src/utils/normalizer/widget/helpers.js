@@ -5,7 +5,11 @@ import type {AxisIndicator, AxisParameter, ChartSorting, ComputedBreakdown, Data
 import {createDefaultGroup, transformGroupFormat} from 'store/widgets/helpers';
 import type {CreateFunction, Fields, LegacyWidget} from './types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
+import {
+	DEFAULT_AXIS_SORTING_SETTINGS,
+	DEFAULT_CIRCLE_SORTING_SETTINGS,
+	WIDGET_TYPES
+} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
 import {extend, getMapValues, isObject} from 'src/helpers';
@@ -185,10 +189,12 @@ const getLegendPosition = (value: any) => {
  * @returns {object}
  */
 const legend = (widget: Object): Legend => {
-	const {legend = {}, showLegend, legendPosition} = widget;
+	const {legend = {}, showLegend, legendPosition, type} = widget;
+	const {BAR, COLUMN, LINE} = WIDGET_TYPES;
+	const defaultShowLegend = typeof showLegend === 'undefined' ? ![BAR, COLUMN, LINE].includes(type) : Boolean(showLegend);
 	const {
 		position = getLegendPosition(legendPosition),
-		show = Boolean(showLegend)
+		show = defaultShowLegend
 	} = legend;
 
 	return {

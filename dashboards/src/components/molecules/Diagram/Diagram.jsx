@@ -138,9 +138,22 @@ export class Diagram extends Component<Props, State> {
 				[settingsStyles.crop]: textHandler === CROP,
 				[settingsStyles.wrap]: textHandler === WRAP
 			});
+			let minHeight;
+
+			if (this.nameRef.current) {
+				minHeight = this.nameRef.current.clientHeight;
+			}
+
+			const style = {
+				color: fontColor,
+				fontFamily,
+				fontSize: Number(fontSize),
+				minHeight,
+				textAlign
+			};
 
 			return (
-				<div className={nameCN} ref={this.nameRef} style={{color: fontColor, fontFamily, fontSize: Number(fontSize), textAlign}}>
+				<div className={nameCN} ref={this.nameRef} style={style}>
 					{useName ? widgetName : name}
 				</div>
 			);

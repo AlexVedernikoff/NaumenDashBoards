@@ -124,7 +124,7 @@ export class List extends PureComponent<Props, State> {
 		const loaded = !loading;
 		const notOptions = options.length === 0;
 
-		return loaded && notOptions ? <ListMessage>{message}</ListMessage> : null;
+		return loaded && notOptions && message ? <ListMessage>{message}</ListMessage> : null;
 	};
 
 	renderShowMoreButton = () => {

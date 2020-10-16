@@ -1,5 +1,6 @@
 // @flow
 import cn from 'classnames';
+import {DashboardPanel} from 'components/organisms';
 import {debounce} from 'src/helpers';
 import type {DivRef} from 'components/types';
 import {getLayoutWidgets} from 'src/store/widgets/helpers';
@@ -15,8 +16,6 @@ import {Responsive as Grid} from 'react-grid-layout';
 import type {State, WidgetRef} from './types';
 import styles from './styles.less';
 import type {Widget as WidgetType} from 'store/widgets/data/types';
-import WidgetAddPanel from 'containers/WidgetAddPanel';
-import WidgetFormPanel from 'containers/WidgetFormPanel';
 
 export const gridRef: DivRef = createRef();
 
@@ -26,6 +25,7 @@ export class DashboardContent extends Component<Props, State> {
 	state = {
 		focusedWidget: '',
 		newWidgetFocused: false,
+		swipedPanel: false,
 		width: null
 	};
 
@@ -67,12 +67,16 @@ export class DashboardContent extends Component<Props, State> {
 		});
 	};
 
+	handleToggleSwipePanel = () => this.setState({swipedPanel: !this.state.swipedPanel});
+
 	handleWidgetSelect = (widgetId: string) => {
 		const {selectWidget, selectedWidget} = this.props;
 
 		if (widgetId !== selectedWidget) 	{
 			selectWidget(widgetId);
 		}
+
+		this.setState({swipedPanel: false});
 	};
 
 	isDesktopMK = () => {
@@ -137,11 +141,9 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	renderGridWithContainer = () => {
-		const {editMode} = this.props;
 		const containerCN = cn({
-			[styles.editModeContainer]: editMode,
-			[styles.viewModeContainer]: !editMode,
-			[styles.containerMk]: this.isDesktopMK()
+			[styles.gridContainer]: true,
+			[styles.MKGridContainer]: this.isDesktopMK()
 		});
 
 		return (
@@ -151,16 +153,21 @@ export class DashboardContent extends Component<Props, State> {
 		);
 	};
 
-	renderRightPanel = () => {
+	renderPanel = () => {
 		const {editMode, selectedWidget} = this.props;
+		const {swipedPanel} = this.state;
 
 		if (editMode) {
 			return (
-				<div className={styles.panel}>
-					{selectedWidget ? <WidgetFormPanel key={selectedWidget} /> : <WidgetAddPanel />}
-				</div>
+				<DashboardPanel
+					onToggleSwipe={this.handleToggleSwipePanel}
+					selectedWidget={selectedWidget}
+					swiped={swipedPanel}
+				/>
 			);
 		}
+
+		return null;
 	};
 
 	renderWidget = (widget: WidgetType) => {
@@ -212,7 +219,7 @@ export class DashboardContent extends Component<Props, State> {
 		return (
 			<div className={styles.content}>
 				{this.renderGridWithContainer()}
-				{this.renderRightPanel()}
+				{this.renderPanel()}
 			</div>
 		);
 	}

@@ -7,7 +7,8 @@ import styles from './styles.less';
 
 export class CheckIconButtonGroup extends PureComponent<Props> {
 	static defaultProps = {
-		className: ''
+		className: '',
+		disabled: false
 	};
 
 	renderIcon = (option: IconType) => {
@@ -29,10 +30,15 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, icons} = this.props;
+		const {className, disabled, icons} = this.props;
+		const CN = cn({
+			[styles.container]: true,
+			[styles.disabled]: disabled,
+			[className]: true
+		});
 
 		return (
-			<div className={cn(styles.container, className)}>
+			<div className={CN}>
 				{icons.map(this.renderIcon)}
 			</div>
 		);

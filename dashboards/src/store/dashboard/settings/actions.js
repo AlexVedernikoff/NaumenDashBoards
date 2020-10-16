@@ -10,6 +10,7 @@ import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getContext, getMetaCLass, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import isMobile from 'ismobilejs';
+import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState, switchState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
@@ -360,14 +361,16 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 };
 
 /**
- * Создает состояние для персонального дашборда
+ * Создает состояние для дашборда
  * @returns {ThunkAction}
  */
-const createPersonalState = () => async (dispatch: Dispatch) => {
+const createNewState = () => async (dispatch: Dispatch, getState: GetState) => {
+	const {personal} = getState().dashboard.settings;
+
 	dispatch(resetState());
 	dispatch(getAutoUpdateSettings());
-	dispatch(setEditable(true));
-	dispatch(setPersonal(true));
+	dispatch(setPersonal(!personal));
+	dispatch(setEditable(!personal));
 	await dispatch(getSettings());
 };
 
@@ -377,11 +380,20 @@ const createPersonalState = () => async (dispatch: Dispatch) => {
  * @returns {ThunkAction}
  */
 const changeLayoutMode = (payload: LayoutMode): ThunkAction => (dispatch: Dispatch) => {
-	localStorage.setItem('layoutMode', payload);
+	localStorage.setItem(LOCAL_STORAGE_VARS.LAYOUT_MODE, payload);
 
 	dispatch({
 		payload,
 		type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
+	});
+};
+
+const setPersonal = (payload: boolean) => (dispatch: Dispatch) => {
+	localStorage.setItem(LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, payload.toString());
+
+	dispatch({
+		payload,
+		type: DASHBOARD_EVENTS.SET_PERSONAL
 	});
 };
 
@@ -395,16 +407,11 @@ const setEditable = (payload: boolean) => ({
 	type: DASHBOARD_EVENTS.SET_EDITABLE_PARAM
 });
 
-const setPersonal = payload => ({
-	payload,
-	type: DASHBOARD_EVENTS.SET_PERSONAL
-});
-
 export {
 	changeIntervalRemainder,
 	changeLayoutMode,
 	createPersonalDashboard,
-	createPersonalState,
+	createNewState,
 	editDashboard,
 	fetchDashboard,
 	getSettings,

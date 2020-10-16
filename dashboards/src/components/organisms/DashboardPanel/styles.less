@@ -1,0 +1,53 @@
+@import "/styles/variables.less";
+
+:local {
+	.container {
+		bottom: 0;
+		box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 320px;
+		z-index: 1;
+	}
+
+	.swipedContainer {
+		left: 100%;
+	}
+
+	.drawerControl {
+		background-color: @steel;
+		bottom: 0;
+		cursor: pointer;
+		left: -20px;
+		padding: 15px 0;
+		position: absolute;
+		top: 0;
+		width: 20px;
+		z-index: 3;
+
+		&:hover {
+			background-color: @grey;
+
+			.drawerIcon {
+				color: white;
+			}
+		}
+	}
+
+	.activeDrawerControl {
+		bottom: auto;
+	}
+
+	.drawerIcon {
+		padding: 2px;
+	}
+
+	.content {
+		bottom: 0;
+		left: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+	}
+}

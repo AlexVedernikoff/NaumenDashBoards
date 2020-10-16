@@ -10,6 +10,9 @@ import {withStyleFormBuilder} from 'WidgetFormPanel/builders';
 export class LegendBox extends PureComponent<Props> {
 	renderLegendDisplayTypeButtons = () => {
 		const {data, handleChange} = this.props;
+		const {left, right} = LEGEND_POSITIONS;
+		const {displayType, position} = data;
+		const disabled = position === left || position === right;
 		const icons = [
 			{
 				name: ICON_NAMES.COLUMN,
@@ -23,7 +26,15 @@ export class LegendBox extends PureComponent<Props> {
 			}
 		];
 
-		return <CheckIconButtonGroup icons={icons} name={FIELDS.displayType} onChange={handleChange} value={data.displayType} />;
+		return (
+			<CheckIconButtonGroup
+				disabled={disabled}
+				icons={icons}
+				name={FIELDS.displayType}
+				onChange={handleChange}
+				value={displayType}
+			/>
+		);
 	};
 
 	renderLegendPositionButtons = () => {

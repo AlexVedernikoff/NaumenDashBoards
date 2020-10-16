@@ -3,6 +3,7 @@ import AttributeCreatingModal from './AttributeCreatingModal';
 import AutoUpdateButton from './AutoUpdateButton';
 import DashboardContent from './DashboardContent';
 import DashboardHeader from './DashboardHeader';
+import DashboardPanel from './DashboardPanel';
 import ExportByEmailForm from './ExportByEmailForm';
 import Speedometer from './Speedometer';
 import SpeedometerWidget from './SpeedometerWidget';
@@ -17,6 +18,7 @@ export {
 	AutoUpdateButton,
 	DashboardContent,
 	DashboardHeader,
+	DashboardPanel,
 	ExportByEmailForm,
 	Speedometer,
 	SpeedometerWidget,
