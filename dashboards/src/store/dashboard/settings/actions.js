@@ -7,12 +7,14 @@ import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchAllBuildData} from 'store/widgets/buildData/actions';
-import {getContext, getMetaCLass, getUserData, setTemp, setUserData, switchDashboard} from 'store/context/actions';
+import {getContext, getEditableParam, getMetaCLass, getUserData, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
+import {getLayoutMode} from 'src/helpers';
+import {getLocalStorageValue, setLocalStorageValue} from 'store/helpers';
 import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-import {resetState, switchState} from 'store/actions';
+import {resetState} from 'store/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
 import type {User} from 'store/users/types';
 
@@ -32,16 +34,6 @@ const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Pro
 };
 
 /**
- * Получает и устанавливает параметер редактируемости дашборда
- * @returns {ThunkAction}
- */
-const getEditableParam = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {editable = true} = await window.jsApi.commands.getCurrentContentParameters();
-	// В части случаев значение приходит строкой
-	dispatch(setEditable(editable.toString() === 'true'));
-};
-
-/**
  * Получает данные, необходимые для работы дашборда
  * @returns {ThunkAction}
  */
@@ -55,6 +47,8 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		dispatch(getMetaCLass());
 		dispatch(getAutoUpdateSettings());
 		dispatch(getEditableParam());
+		dispatch(initPersonalValue());
+		dispatch(initLayoutMode());
 
 		await Promise.all([
 			dispatch(getDataSources()),
@@ -159,9 +153,8 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 			type: DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD
 		});
 
-		const {context, dashboard} = getState();
-		const {contentCode, subjectUuid: classFqn, user} = context;
-		const {editable} = dashboard.settings;
+		const {context} = getState();
+		const {contentCode, editableDashboard: editable, subjectUuid: classFqn, user} = context;
 		const payload = {
 			classFqn,
 			contentCode,
@@ -197,17 +190,14 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		});
 
 		const {context} = getState();
-		const {contentCode, subjectUuid, temp, user} = context;
+		const {contentCode, subjectUuid, user} = context;
 		await window.jsApi.restCallModule('dashboardSettings', 'deletePersonalDashboard', subjectUuid, contentCode);
 
-		if (temp) {
-			dispatch(setTemp(null));
-			dispatch(switchState(temp));
-			dispatch(setUserData({...user, hasPersonalDashboard: false}));
-			dispatch({
-				type: DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD
-			});
-		}
+		dispatch(switchDashboard(false));
+		dispatch(setUserData({...user, hasPersonalDashboard: false}));
+		dispatch({
+			type: DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD
+		});
 	} catch (e) {
 		dispatch({
 			type: DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
@@ -364,13 +354,10 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
  * Создает состояние для дашборда
  * @returns {ThunkAction}
  */
-const createNewState = () => async (dispatch: Dispatch, getState: GetState) => {
-	const {personal} = getState().dashboard.settings;
-
+const createNewState = (personalDashboard: boolean) => async (dispatch: Dispatch, getState: GetState) => {
 	dispatch(resetState());
 	dispatch(getAutoUpdateSettings());
-	dispatch(setPersonal(!personal));
-	dispatch(setEditable(!personal));
+	dispatch(setPersonalValue(personalDashboard));
 	await dispatch(getSettings());
 };
 
@@ -380,7 +367,7 @@ const createNewState = () => async (dispatch: Dispatch, getState: GetState) => {
  * @returns {ThunkAction}
  */
 const changeLayoutMode = (payload: LayoutMode): ThunkAction => (dispatch: Dispatch) => {
-	localStorage.setItem(LOCAL_STORAGE_VARS.LAYOUT_MODE, payload);
+	setLocalStorageValue(LOCAL_STORAGE_VARS.LAYOUT_MODE, payload);
 
 	dispatch({
 		payload,
@@ -388,8 +375,8 @@ const changeLayoutMode = (payload: LayoutMode): ThunkAction => (dispatch: Dispat
 	});
 };
 
-const setPersonal = (payload: boolean) => (dispatch: Dispatch) => {
-	localStorage.setItem(LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, payload.toString());
+const setPersonalValue = (payload: boolean) => (dispatch: Dispatch) => {
+	setLocalStorageValue(LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, payload);
 
 	dispatch({
 		payload,
@@ -397,14 +384,19 @@ const setPersonal = (payload: boolean) => (dispatch: Dispatch) => {
 	});
 };
 
+const initLayoutMode = () => ({
+	payload: getLocalStorageValue(LOCAL_STORAGE_VARS.LAYOUT_MODE, getLayoutMode()),
+	type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
+});
+
+const initPersonalValue = () => ({
+	payload: getLocalStorageValue(LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, false),
+	type: DASHBOARD_EVENTS.SET_PERSONAL
+});
+
 const changeAutoUpdateSettings = payload => ({
 	payload,
 	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
-});
-
-const setEditable = (payload: boolean) => ({
-	payload,
-	type: DASHBOARD_EVENTS.SET_EDITABLE_PARAM
 });
 
 export {
@@ -418,6 +410,5 @@ export {
 	removePersonalDashboard,
 	saveAutoUpdateSettings,
 	seeDashboard,
-	sendToEmails,
-	setEditable
+	sendToEmails
 };

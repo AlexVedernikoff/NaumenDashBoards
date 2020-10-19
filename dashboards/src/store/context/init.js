@@ -4,6 +4,7 @@ import {CONTEXT_EVENTS, USER_ROLES} from './constants';
 
 export const initialContextState: ContextState = {
 	contentCode: '',
+	editableDashboard: false,
 	metaClass: '',
 	subjectUuid: '',
 	switching: false,

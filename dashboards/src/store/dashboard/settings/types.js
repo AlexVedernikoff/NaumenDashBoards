@@ -76,11 +76,6 @@ export type ResponseExportingFileToEmail = {
 	type: typeof DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
 };
 
-type SetEditable = {
-	payload: boolean,
-	type: typeof DASHBOARD_EVENTS.SET_EDITABLE_PARAM
-};
-
 type ChangeLayoutMode = {
 	payload: LayoutMode,
 	type: typeof DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE,
@@ -120,7 +115,6 @@ export type SettingsAction =
 	| RecordExportingFileToEmailError
 	| RequestExportingFileToEmail
 	| ResponseExportingFileToEmail
-	| SetEditable
 	| SetPersonal
 	| SwitchOnEditMode
 	| SwitchOffEditMode
@@ -129,7 +123,6 @@ export type SettingsAction =
 
 export type SettingsState = {
 	autoUpdate: AutoUpdateSettings,
-	editable: boolean,
 	editMode: boolean,
 	error: boolean,
 	exportingFailToEmail: ChangingState,
