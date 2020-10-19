@@ -39,6 +39,11 @@ type SetContext = {
 	type: typeof CONTEXT_EVENTS.SET_CONTEXT
 };
 
+type SetEditableParam = {
+	payload: boolean,
+	type: typeof CONTEXT_EVENTS.SET_EDITABLE_PARAM
+};
+
 type SetTemp = {
 	payload: Temp,
 	type: typeof CONTEXT_EVENTS.SET_TEMP
@@ -60,6 +65,7 @@ type UnknownContextAction = {
 export type ContextAction =
 	| EndSwitch
 	| SetContext
+	| SetEditableParam
 	| SetTemp
 	| SetUserData
 	| StartSwitch
@@ -68,6 +74,7 @@ export type ContextAction =
 
 export type ContextState = {
 	contentCode: string,
+	editableDashboard: boolean,
 	metaClass: string,
 	subjectUuid: string,
 	switching: boolean,

@@ -15,6 +15,9 @@ const commands = {
 };
 const extractSubjectUuid = () => process.env.SUBJECT_UUID;
 const findContentCode = () => process.env.CONTENT_CODE;
+const getCurrentUser = () => ({
+	uuid: process.env.USER_UUID
+})
 
 const restCallModule = async (module, method, ...params) => {
 	try {
@@ -43,6 +46,7 @@ const jsApi = {
 	commands,
 	extractSubjectUuid,
 	findContentCode,
+	getCurrentUser,
 	restCallModule
 };
 

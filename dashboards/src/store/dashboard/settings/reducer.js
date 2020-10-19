@@ -92,11 +92,6 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 					loading: false
 				}
 			};
-		case DASHBOARD_EVENTS.SET_EDITABLE_PARAM:
-			return {
-				...state,
-				editable: action.payload
-			};
 		case DASHBOARD_EVENTS.SET_PERSONAL:
 			return {
 				...state,

@@ -7,8 +7,8 @@ import {store} from 'src';
  */
 const getParams = () => {
 	const {context, dashboard} = store.getState();
-	const {contentCode, subjectUuid: classFqn} = context;
-	const {editable, personal: isPersonal} = dashboard.settings;
+	const {contentCode, editableDashboard: editable, subjectUuid: classFqn} = context;
+	const {personal: isPersonal} = dashboard.settings;
 
 	return {
 		classFqn,
@@ -55,8 +55,58 @@ const getSourceTypes = (classFqn: string) => {
 	return types;
 };
 
+/**
+ * Возвращает ключ для сохранения данных в localStorage
+ * @return {string}
+ */
+const getLocalStorageId = () => {
+	const {jsApi} = window;
+	let contentCode = '';
+	let subjectUuid = '';
+	let userId = '';
+
+	try {
+		contentCode = jsApi.findContentCode();
+		subjectUuid = jsApi.extractSubjectUuid();
+		({uuid: userId} = jsApi.getCurrentUser());
+	} catch (e) {
+		console.error(e);
+	}
+
+	return `dashboard_${contentCode}_${subjectUuid}_${userId}`;
+};
+
+/**
+ * Сохраняет данные в localStorage относительно конкретного дашборда
+ * @param {string} key - ключ
+ * @return {any} value - значение
+ */
+const setLocalStorageValue = (key: string, value: any) => {
+	const localStorageId = getLocalStorageId();
+	let storage = localStorage.getItem(localStorageId);
+	storage = storage ? JSON.parse(storage) : {};
+	storage[key] = value;
+
+	localStorage.setItem(localStorageId, JSON.stringify(storage));
+};
+
+/**
+ * Возвращает данные из localStorage относительно конкретного дашборда
+ * @param {string} key - ключ
+ * @return {any} defaultValue - значение по умолчанию
+ */
+const getLocalStorageValue = (key: string, defaultValue: any) => {
+	const localStorageId = getLocalStorageId();
+	let storage = localStorage.getItem(localStorageId);
+	storage = storage ? JSON.parse(storage) : {};
+
+	return storage[key] || defaultValue;
+};
+
 export {
+	getLocalStorageValue,
 	getParams,
 	getSourceTypes,
-	parseResponseErrorText
+	parseResponseErrorText,
+	setLocalStorageValue
 };

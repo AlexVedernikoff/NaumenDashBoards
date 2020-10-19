@@ -72,21 +72,6 @@ export class List extends PureComponent<Props, State> {
 		onClickShowMore && onClickShowMore();
 	};
 
-	renderList = () => {
-		const {options} = this.props;
-
-		if (options.length === 0) {
-			return this.renderNoOptionsMessage();
-		}
-
-		return (
-			<div className={styles.list}>
-				{options.map(this.renderListItem)}
-				{this.renderShowMoreButton()}
-			</div>
-		);
-	};
-
 	renderListItem = (data: Object) => {
 		const {getOptionLabel, multiple, onSelect, searchValue, value, values} = this.props;
 		const {options} = this.state;

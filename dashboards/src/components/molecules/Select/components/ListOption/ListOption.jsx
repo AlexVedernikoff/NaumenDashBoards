@@ -49,8 +49,10 @@ export class ListOption extends PureComponent<Props> {
 	};
 
 	render () {
+		const {style} = this.props;
+
 		return (
-			<div className={this.getClassName()} onClick={this.handleClick}>
+			<div className={this.getClassName()} onClick={this.handleClick} style={style}>
 				{this.renderLabel()}
 				{this.renderSelectedIcon()}
 			</div>

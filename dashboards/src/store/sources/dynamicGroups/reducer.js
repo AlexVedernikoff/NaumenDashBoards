@@ -26,7 +26,8 @@ const setDynamicGroups = (state: DynamicGroupsState, payload: ReceiveDynamicAttr
 	return {
 		...state,
 		[dataKey]: {
-			...state[dataKey]
+			...state[dataKey],
+			loading: false
 		}
 	};
 };
@@ -76,8 +77,11 @@ const reducer = (
 				...state,
 				[action.payload]: {
 					...state[action.payload],
-					error: true,
-					loading: false
+					data: {
+						...state[action.payload].data,
+						error: true,
+						loading: false
+					}
 				}
 			};
 		case DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTE_GROUPS_ERROR:
@@ -85,8 +89,8 @@ const reducer = (
 				...state,
 				[action.payload]: {
 					...state[action.payload],
-					error: false,
-					loading: true
+					error: true,
+					loading: false
 				}
 			};
 		case DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTE_GROUPS:

@@ -1,7 +1,6 @@
 // @flow
 import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
 import {getLayoutMode} from 'src/helpers';
-import {initPersonalProperty} from './helpers';
 import type {SettingsAction, SettingsState} from './types';
 
 export const initialDashboardState: SettingsState = {
@@ -12,7 +11,6 @@ export const initialDashboardState: SettingsState = {
 		remainder: DEFAULT_INTERVAL * 60
 	},
 	editMode: false,
-	editable: false,
 	error: false,
 	exportingFailToEmail: {
 		error: false,
@@ -20,7 +18,7 @@ export const initialDashboardState: SettingsState = {
 	},
 	layoutMode: getLayoutMode(),
 	loading: false,
-	personal: initPersonalProperty(),
+	personal: false,
 	personalCreating: false,
 	personalDeleting: false
 };
