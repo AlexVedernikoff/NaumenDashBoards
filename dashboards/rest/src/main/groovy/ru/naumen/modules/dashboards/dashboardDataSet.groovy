@@ -2939,7 +2939,7 @@ List changeNotAggregatedAttributePlace(List list,List attributeNames, List notAg
         List<Integer> indexes = notAggregatedAttributes.collect {name -> attributeNames.indexOf(name) }
         list = list.collect {
             def values = it[indexes]
-            it -= values
+            values.each { value -> it.remove(it.indexOf(value)) }
             //values - список, потому операция +
             it += values
         }
