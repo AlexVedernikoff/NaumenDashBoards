@@ -1219,7 +1219,7 @@ String editWidgetChunkData(Map<String, Object> requestContent) {
         }
 
         if (saveJsonSettings(widgetKey, toJson(widgetSettings), WIDGET_NAMESPACE)) {
-            return widgetKey
+            return toJson([id:widgetKey])
         } else {
             throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
         }
