@@ -12,8 +12,8 @@ const getPartsClassFqn = (code?: string) => {
 	let classFqn = code;
 
 	if (classFqn && isSourceType(classFqn)) {
-		classFqn = classFqn.split('$')[0];
 		cases.push(...getDescriptorCases(classFqn).map(type => type.split('$')[1]));
+		classFqn = classFqn.split('$')[0];
 	}
 
 	return {

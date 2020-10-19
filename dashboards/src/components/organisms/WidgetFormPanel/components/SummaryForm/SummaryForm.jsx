@@ -4,14 +4,20 @@ import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/WidgetFormPanel';
 import {getErrorMessage, rules} from 'components/organisms/WidgetFormPanel/schema';
+import {getSummaryLayoutSize} from './helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'WidgetFormPanel/types';
 import React, {Component} from 'react';
+import type {State} from './types';
 import type {SummaryWidget, Widget} from 'store/widgets/data/types';
 import type {Values} from 'containers/WidgetFormPanel/types';
 
-export class SummaryForm extends Component<TypedFormProps> {
+export class SummaryForm extends Component<TypedFormProps, State> {
+	state = {
+		layoutSize: getSummaryLayoutSize(this.props.layoutMode)
+	};
+
 	getSchema = () => {
 		const {base, requiredByCompute} = rules;
 		const {indicator, source} = FIELDS;
@@ -56,7 +62,10 @@ export class SummaryForm extends Component<TypedFormProps> {
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
+		const {layoutSize} = this.state;
+
 		return this.props.render({
+			layoutSize,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

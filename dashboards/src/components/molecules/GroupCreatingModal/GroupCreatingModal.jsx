@@ -1,7 +1,8 @@
 // @flow
-import {CustomGroup, FormField, SystemGroup} from './components';
+import CustomGroup from './components/CustomGroup/CustomGroup';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from './constants';
+import {FormField, SystemGroup} from './components';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
 import {Label, RadioField, TextInput} from 'components/atoms';

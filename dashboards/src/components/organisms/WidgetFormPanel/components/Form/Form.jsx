@@ -1,20 +1,26 @@
 // @flow
 import cn from 'classnames';
+import {DEFAULT_WIDGET_LAYOUT_SIZE, TABS} from './constants';
 import type {Node} from 'react';
 import type {Props, State, Tab} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
-import {TABS} from './constants';
 import {WidgetForm} from 'components/templates';
 
 export class Form extends Component<Props, State> {
+	static defaultProps = {
+		layoutSize: DEFAULT_WIDGET_LAYOUT_SIZE
+	};
+
 	state = {
 		tab: TABS.PARAMS
 	};
 
 	componentDidMount () {
 		const {schema, setSchema} = this.props;
+
 		setSchema(schema);
+		this.setWidgetLayoutSize();
 	}
 
 	handleClick = (tab: Tab) => () => this.setState({tab});
@@ -22,6 +28,11 @@ export class Form extends Component<Props, State> {
 	handleSubmit = () => {
 		const {onSubmit, updateWidget} = this.props;
 		onSubmit(updateWidget);
+	};
+
+	setWidgetLayoutSize = () => {
+		const {isNew, layoutSize, onChangeLayoutSize} = this.props;
+		isNew && onChangeLayoutSize(layoutSize);
 	};
 
 	renderParamsTabContent = () => {

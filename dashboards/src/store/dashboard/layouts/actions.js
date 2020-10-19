@@ -5,7 +5,7 @@ import {getMapValues} from 'src/helpers';
 import {getParams} from 'store/helpers';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
-import type {Layouts, LayoutsPayloadForChange} from './types';
+import type {LayoutPayloadForChange, Layouts, LayoutsPayloadForChange} from './types';
 import {LAYOUTS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 
@@ -100,6 +100,11 @@ const addLayouts = (widgetId: string) => (dispatch: Dispatch, getState: GetState
 	});
 };
 
+const changeLayout = (payload: LayoutPayloadForChange) => ({
+	payload,
+	type: LAYOUTS_EVENTS.CHANGE_LAYOUT
+});
+
 const replaceLayoutsId = (from: string, to: string) => ({
 	payload: {
 		from,
@@ -120,6 +125,7 @@ const removeLayouts = (payload: string) => ({
 
 export {
 	addLayouts,
+	changeLayout,
 	changeLayouts,
 	removeLayouts,
 	replaceLayoutsId,

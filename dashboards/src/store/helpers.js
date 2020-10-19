@@ -57,7 +57,7 @@ const getSourceTypes = (classFqn: string) => {
 
 /**
  * Возвращает ключ для сохранения данных в localStorage
- * @return {string}
+ * @returns {string}
  */
 const getLocalStorageId = () => {
 	const {jsApi} = window;
@@ -79,7 +79,7 @@ const getLocalStorageId = () => {
 /**
  * Сохраняет данные в localStorage относительно конкретного дашборда
  * @param {string} key - ключ
- * @return {any} value - значение
+ * @param {any} value - значение
  */
 const setLocalStorageValue = (key: string, value: any) => {
 	const localStorageId = getLocalStorageId();
@@ -93,7 +93,8 @@ const setLocalStorageValue = (key: string, value: any) => {
 /**
  * Возвращает данные из localStorage относительно конкретного дашборда
  * @param {string} key - ключ
- * @return {any} defaultValue - значение по умолчанию
+ * @param {any} defaultValue - значение по умолчанию
+ * @returns {any} - данные localStorage
  */
 const getLocalStorageValue = (key: string, defaultValue: any) => {
 	const localStorageId = getLocalStorageId();
