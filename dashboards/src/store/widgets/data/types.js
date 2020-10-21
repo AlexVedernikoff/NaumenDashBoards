@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {ChangingState} from 'store/types';
+import type {ChangingState, ThunkAction} from 'store/types';
 import {
 	COMBO_TYPES,
 	DEFAULT_TABLE_VALUE,
@@ -384,6 +384,8 @@ export type Widget =
 	| SummaryWidget
 	| TableWidget
 ;
+
+export type EditWidgetChunkData = (widget: Widget, chunkData: Object) => ThunkAction;
 
 export type AddWidget = {
 	payload: NewWidget,

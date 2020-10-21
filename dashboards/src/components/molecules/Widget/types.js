@@ -1,7 +1,7 @@
 // @flow
 import type {BuildData} from 'store/widgets/buildData/types';
-import type {DisplayMode, Widget} from 'store/widgets/data/types';
 import type {DrillDown} from 'store/widgets/links/types';
+import type {EditWidgetChunkData, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
@@ -20,8 +20,7 @@ export type Props = {
 	...$Exact<GridProps>,
 	buildData: BuildData,
 	data: Widget,
-	displayMode: DisplayMode,
-	editWidgetChunkData: (Widget, Object) => Object | void,
+	editWidgetChunkData: EditWidgetChunkData,
 	fetchBuildData: (widget: Widget) => ThunkAction,
 	focused: boolean,
 	isEditable: boolean,
@@ -38,13 +37,5 @@ export type Props = {
 };
 
 export type State = {
-	hasError: boolean,
-	layoutModeValue: string,
-	showRemoveModal: boolean,
-	showSubmenu: boolean
-};
-
-export type ExportItem = {
-	key: string,
-	text: string
+	hasError: boolean
 };
