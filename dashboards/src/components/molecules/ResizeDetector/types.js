@@ -8,7 +8,8 @@ export type Props = {
 	debounceRate: number,
 	forwardedRef?: Ref<'div'>,
 	onResize?: (width: number, height: number) => void,
-	skipOnMount: boolean
+	skipOnMount: boolean,
+	style?: Object
 };
 
 export type State = {

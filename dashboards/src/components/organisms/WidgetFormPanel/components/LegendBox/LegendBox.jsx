@@ -1,5 +1,5 @@
 // @flow
-import {CheckIconButtonGroup, DisableableBox, FormField, ToggableFormBox} from 'components/molecules';
+import {CheckIconButtonGroup, FormField, ToggableFormBox} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart/constants';
@@ -69,20 +69,18 @@ export class LegendBox extends PureComponent<Props> {
 		const {data, handleBoolChange, renderFontFamilySelect, renderFontSizeSelect, renderTextHandlerButtons} = this.props;
 
 		return (
-			<ToggableFormBox title="Легенда">
-				<DisableableBox handleChange={handleBoolChange} label="Показывать на диаграмме" name={FIELDS.show} value={data.show}>
-					<FormField label="Шрифт" row>
-						{renderFontFamilySelect()}
-						{renderFontSizeSelect()}
-					</FormField>
-					<FormField row>
-						{this.renderLegendPositionButtons()}
-						{renderTextHandlerButtons()}
-					</FormField>
-					<FormField>
-						{this.renderLegendDisplayTypeButtons()}
-					</FormField>
-				</DisableableBox>
+			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={data.show} title="Легенда">
+				<FormField label="Шрифт" row>
+					{renderFontFamilySelect()}
+					{renderFontSizeSelect()}
+				</FormField>
+				<FormField row>
+					{this.renderLegendPositionButtons()}
+					{renderTextHandlerButtons()}
+				</FormField>
+				<FormField>
+					{this.renderLegendDisplayTypeButtons()}
+				</FormField>
 			</ToggableFormBox>
 		);
 	}

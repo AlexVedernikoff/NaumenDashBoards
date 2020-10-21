@@ -13,7 +13,21 @@ type Ranges = {
 	use: boolean
 };
 
+export type TextValueProps = {
+	alignmentBaseline: string,
+	children: React$Node,
+	fontSize: number,
+	textAnchor: string,
+	x: number,
+	y: number
+};
+
+type Components = {
+	TextValue: React$ComponentType<TextValueProps>
+};
+
 export type Props = {
+	components?: Components,
 	max: number,
 	min: number,
 	ranges: Ranges,

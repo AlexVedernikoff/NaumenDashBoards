@@ -1,16 +1,26 @@
 // @flow
 import {FormBox} from 'components/molecules';
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import styles from './styles.less';
+import {Toggle} from 'components/atoms';
 
 export class ToggableFormBox extends PureComponent<Props, State> {
-	state = {
+	static defaultProps = {
+		name: '',
 		showContent: false
 	};
 
-	handleClick = () => this.setState({showContent: !this.state.showContent});
+	state = {
+		showContent: this.props.showContent
+	};
+
+	handleToggle = (event: OnChangeInputEvent) => {
+		const {onToggle} = this.props;
+
+		this.setState({showContent: !this.state.showContent});
+		onToggle && onToggle(event);
+	};
 
 	renderContent = () => {
 		const {children} = this.props;
@@ -20,18 +30,17 @@ export class ToggableFormBox extends PureComponent<Props, State> {
 	};
 
 	renderControl = () => {
+		const {name} = this.props;
 		const {showContent} = this.state;
-		const {ARROW_BOTTOM, ARROW_TOP} = ICON_NAMES;
-		const iconName = showContent ? ARROW_TOP : ARROW_BOTTOM;
 
-		return <Icon className={styles.icon} name={iconName} onClick={this.handleClick} />;
+		return <Toggle checked={showContent} name={name} onChange={this.handleToggle} value={showContent} />;
 	};
 
 	render () {
 		const {title} = this.props;
 
 		return (
-			<FormBox leftControl={this.renderControl()} title={title}>
+			<FormBox rightControl={this.renderControl()} title={title}>
 				{this.renderContent()}
 			</FormBox>
 		);

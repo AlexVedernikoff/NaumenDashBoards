@@ -1,5 +1,5 @@
 // @flow
-import {CheckIconButtonGroup, DisableableBox, FormField, ToggableFormBox} from 'components/molecules';
+import {CheckIconButtonGroup, FormField, ToggableFormBox} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {HEADER_POSITIONS} from 'store/widgets/data/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -39,8 +39,7 @@ export class HeaderBox extends PureComponent<Props> {
 		} = this.props;
 
 		return (
-			<ToggableFormBox title="Заголовок">
-				<DisableableBox handleChange={handleBoolChange} label="Показывать на диаграмме" name={FIELDS.show} value={data.show}>
+			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={data.show} title="Заголовок">
 					<FormField label="Шрифт" row>
 						{renderFontFamilySelect()}
 						{renderFontSizeSelect()}
@@ -54,7 +53,6 @@ export class HeaderBox extends PureComponent<Props> {
 						{renderTextHandlerButtons()}
 						{this.renderPositionButtons()}
 					</FormField>
-				</DisableableBox>
 			</ToggableFormBox>
 		);
 	}

@@ -1,7 +1,7 @@
 // @flow
 import {Checkbox} from 'components/atoms';
-import {DisableableBox, FormField, ToggableFormBox} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
+import {FormField, ToggableFormBox} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -24,17 +24,15 @@ export class DataLabelsBox extends PureComponent<Props> {
 		const {data, handleBoolChange, renderColorInput, renderFontFamilySelect, renderFontSizeSelect} = this.props;
 
 		return (
-			<ToggableFormBox title="Метки данных">
-				<DisableableBox handleChange={handleBoolChange} label="Показывать на диаграмме" name={FIELDS.show} value={data.show}>
-					<FormField label="Шрифт" row>
-						{renderFontFamilySelect()}
-						{renderFontSizeSelect()}
-					</FormField>
-					<FormField row={true}>
-						{renderColorInput()}
-						{this.renderShowShadowInput()}
-					</FormField>
-				</DisableableBox>
+			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={data.show} title="Метки данных">
+				<FormField label="Шрифт" row>
+					{renderFontFamilySelect()}
+					{renderFontSizeSelect()}
+				</FormField>
+				<FormField row={true}>
+					{renderColorInput()}
+					{this.renderShowShadowInput()}
+				</FormField>
 			</ToggableFormBox>
 		);
 	}

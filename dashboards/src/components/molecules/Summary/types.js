@@ -8,9 +8,8 @@ export type Props = {
 };
 
 export type State = {
-	height: number,
-	title: string,
-	total: number
+	fontSize: number | null,
+	value: string | null
 };
 
 export type DefaultSummarySettings = {

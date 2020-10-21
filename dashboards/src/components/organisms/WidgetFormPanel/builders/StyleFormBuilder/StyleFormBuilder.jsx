@@ -3,6 +3,7 @@ import {CheckIconButtonGroup, ColorInput, Select} from 'components/molecules';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {
 	FONT_FAMILIES,
+	FONT_SIZE_AUTO_OPTION,
 	FONT_SIZE_OPTIONS,
 	FONT_STYLES,
 	SORTING_TYPES,
@@ -87,8 +88,9 @@ export class StyleFormBuilder extends Component<Props> {
 		);
 	};
 
-	renderFontSizeSelect = () => {
+	renderFontSizeSelect = (usesAuto: boolean = false) => {
 		const {[FIELDS.fontSize]: value} = this.props.data;
+		const options = usesAuto ? [FONT_SIZE_AUTO_OPTION, ...FONT_SIZE_OPTIONS] : FONT_SIZE_OPTIONS;
 
 		return (
 			<Select
@@ -97,7 +99,7 @@ export class StyleFormBuilder extends Component<Props> {
 				name={FIELDS.fontSize}
 				onChangeLabel={this.handleChangeFontSize}
 				onSelect={this.handleChange}
-				options={FONT_SIZE_OPTIONS}
+				options={options}
 				value={value}
 			/>
 		);

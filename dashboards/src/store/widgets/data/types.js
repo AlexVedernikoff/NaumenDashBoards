@@ -265,6 +265,14 @@ export type SummaryWidget = {
 };
 
 // Спидометр
+export type SpeedometerIndicatorSettings = {
+	fontColor: string,
+	fontFamily: string,
+	fontSize: number | string,
+	fontStyle?: FontStyle,
+	show: boolean
+};
+
 export type Range = {
 	color: string,
 	from: string | number,
@@ -288,6 +296,7 @@ export type SpeedometerWidget = {
 	...BaseWidget,
 	borders: Borders,
 	data: Array<SummaryData>,
+	indicator: SpeedometerIndicatorSettings,
 	ranges: Ranges,
 	type: typeof WIDGET_TYPES.SPEEDOMETER
 };

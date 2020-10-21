@@ -46,10 +46,10 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {children, className} = this.props;
+		const {children, className, style} = this.props;
 
 		return (
-			<div className={className} ref={this.getRef()}>
+			<div className={className} ref={this.getRef()} style={style}>
 				{children}
 			</div>
 		);
