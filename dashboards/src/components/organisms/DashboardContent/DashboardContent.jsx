@@ -185,7 +185,7 @@ export class DashboardContent extends Component<Props, State> {
 			user
 		} = this.props;
 		const {focusedWidget} = this.state;
-		const {displayMode, id} = widget;
+		const {id} = widget;
 		const isNew = id === NewWidget.id;
 		const focused = focusedWidget === widget.id;
 		const ref = isNew ? this.newWidgetRef : null;
@@ -194,7 +194,6 @@ export class DashboardContent extends Component<Props, State> {
 			<Widget
 				buildData={buildData[id]}
 				data={widget}
-				displayMode={displayMode}
 				editWidgetChunkData={editWidgetChunkData}
 				fetchBuildData={fetchBuildData}
 				focused={focused}

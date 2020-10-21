@@ -8,7 +8,6 @@ export type Props = {
 	focused: boolean,
 	onDrillDown: DrillDown,
 	onUpdate: Widget => void,
-	showSubmenu: boolean,
 	widget: Widget
 };
 
