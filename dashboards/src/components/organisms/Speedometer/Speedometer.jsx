@@ -1,6 +1,6 @@
 // @flow
 import {BASE_FONT_SIZES, BASE_RADIUS, DEFAULT_SPEEDOMETER_SETTINGS, END_DEGREE, START_DEGREE} from './constants';
-import type {Props, State} from './types';
+import type {Props, State, TextValueProps} from './types';
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {PureComponent} from 'react';
 import {ResizeDetector} from 'components/molecules';
@@ -11,6 +11,10 @@ export class Speedometer extends PureComponent<Props, State> {
 		max: 100,
 		min: 0,
 		ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges
+	};
+
+	components = {
+		TextValue: this.renderTextValue
 	};
 
 	state = {
@@ -48,6 +52,11 @@ export class Speedometer extends PureComponent<Props, State> {
 		const angle = Math.round(180 / (max - min) * (Number(value) - min)) - 90;
 
 		return Math.min(Math.max(START_DEGREE, angle), END_DEGREE);
+	};
+
+	getComponents = () => {
+		const {components} = this.props;
+		return components ? {...this.components, ...components} : this.components;
 	};
 
 	handleResize = (width: number, height: number) => {
@@ -176,6 +185,10 @@ export class Speedometer extends PureComponent<Props, State> {
 		return null;
 	};
 
+	renderTextValue (props: TextValueProps) {
+		return <text {...props} />;
+	}
+
 	renderTitle = () => {
 		const {title} = this.props;
 		const {arcX, arcY, fontSizeScale, radius, width} = this.state;
@@ -207,18 +220,18 @@ export class Speedometer extends PureComponent<Props, State> {
 		const {arcX, arcY, fontSizeScale, radius} = this.state;
 		const fontSize = BASE_FONT_SIZES.VALUE_FONT_SIZE * fontSizeScale;
 		const y = arcY - radius * 0.6;
+		const {TextValue} = this.getComponents();
 
 		return (
-			<text
+			<TextValue
 				alignmentBaseline="middle"
 				fontSize={fontSize}
-				fontWeight="bold"
 				textAnchor="middle"
 				x={arcX}
 				y={y}
 			>
 				{value}
-			</text>
+			</TextValue>
 		);
 	};
 

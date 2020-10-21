@@ -114,6 +114,8 @@ const FONT_STYLES = {
 	UNDERLINE
 };
 
+const FONT_SIZE_AUTO_OPTION = 'auto';
+
 // Достопная размерность шрифтов
 const FONT_SIZE_OPTIONS = [13, 14, 15, 16, 17];
 
@@ -212,6 +214,7 @@ export {
 	DEFAULT_TABLE_VALUE,
 	DISPLAY_MODE,
 	FONT_FAMILIES,
+	FONT_SIZE_AUTO_OPTION,
 	FONT_SIZE_OPTIONS,
 	FONT_STYLES,
 	HEADER_POSITIONS,

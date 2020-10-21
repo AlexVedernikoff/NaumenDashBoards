@@ -16,12 +16,7 @@ export class ParameterBox extends PureComponent<Props> {
 		} = data;
 
 		return (
-			<ToggableFormBox title="Параметр">
-				<FormField>
-					<FormCheckControl label="Показать ось">
-						<Checkbox checked={show} name={FIELDS.show} onChange={handleBoolChange} value={show} />
-					</FormCheckControl>
-				</FormField>
+			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={show} title="Параметр">
 				<FormField>
 					<FormCheckControl label="Выводить название">
 						<Checkbox checked={showName} name={FIELDS.showName} onChange={handleBoolChange} value={showName} />
