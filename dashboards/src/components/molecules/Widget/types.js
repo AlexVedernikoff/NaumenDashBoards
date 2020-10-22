@@ -1,5 +1,6 @@
 // @flow
 import type {BuildData} from 'store/widgets/buildData/types';
+import type {DivRef} from 'src/components/types';
 import type {DrillDown} from 'store/widgets/links/types';
 import type {EditWidgetChunkData, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
@@ -29,7 +30,7 @@ export type Props = {
 	layoutMode: string,
 	onClick: (id: string) => void,
 	onDrillDown: DrillDown,
-	onEdit: (id: string) => void,
+	onEdit: (id: string, ref: DivRef) => void,
 	onRemove: (id: string) => ThunkAction,
 	onUpdate: Widget => void,
 	personalDashboard: boolean,

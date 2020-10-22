@@ -6,6 +6,7 @@ import 'iframe-resizer';
 import './fakeApi';
 import App from 'components/App';
 import {configureStore} from 'store';
+import DashboardResizer from './utils/dashboardResizer';
 import {decorateRestCallModule} from './helpers';
 import {Provider} from 'react-redux';
 import React from 'react';
@@ -16,6 +17,7 @@ top.injectJsApi && top.injectJsApi(top, window);
 smoothscroll.polyfill();
 decorateRestCallModule(window.jsApi.restCallModule);
 
+export const resizer = new DashboardResizer();
 export const root = document.getElementById('root');
 export const store = configureStore();
 

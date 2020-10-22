@@ -9,7 +9,7 @@ export type Props = {
 	editWidgetChunkData: EditWidgetChunkData,
 	isEditable: boolean,
 	onDrillDown: DrillDown,
-	onEdit: (id: string) => void,
+	onEdit: () => void,
 	onExport: (type: string) => Promise<void>,
 	onRemove: (id: string) => ThunkAction,
 	personalDashboard: boolean,

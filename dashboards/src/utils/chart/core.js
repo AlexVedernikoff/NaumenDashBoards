@@ -164,6 +164,7 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 			height: '100%',
 			locales: LOCALES,
 			parentHeightOffset: 0,
+			redrawOnWindowResize: false,
 			type,
 			width: '100%',
 			zoom: {

@@ -65,6 +65,11 @@ export class Widget extends PureComponent<Props, State> {
 		onClick(data.id);
 	};
 
+	handleEdit = () => {
+		const {data, onEdit} = this.props;
+		onEdit(data.id, this.ref);
+	};
+
 	handleExport = async (type: string) => {
 		const {buildData, data: widget} = this.props;
 		const {current} = this.ref;
@@ -92,7 +97,6 @@ export class Widget extends PureComponent<Props, State> {
 			editWidgetChunkData,
 			isEditable,
 			onDrillDown,
-			onEdit,
 			onRemove,
 			personalDashboard,
 			user
@@ -104,7 +108,7 @@ export class Widget extends PureComponent<Props, State> {
 				editWidgetChunkData={editWidgetChunkData}
 				isEditable={isEditable}
 				onDrillDown={onDrillDown}
-				onEdit={onEdit}
+				onEdit={this.handleEdit}
 				onExport={this.handleExport}
 				onRemove={onRemove}
 				personalDashboard={personalDashboard}
