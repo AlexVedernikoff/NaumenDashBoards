@@ -119,6 +119,9 @@ const FONT_SIZE_AUTO_OPTION = 'auto';
 // Достопная размерность шрифтов
 const FONT_SIZE_OPTIONS = [13, 14, 15, 16, 17];
 
+// Максимальный размер шрифта
+const MAX_FONT_SIZE = 180;
+
 // Позиция текста
 const center: 'center' = 'center';
 const left: 'left' = 'left';
@@ -219,6 +222,7 @@ export {
 	FONT_STYLES,
 	HEADER_POSITIONS,
 	LIMIT,
+	MAX_FONT_SIZE,
 	RANGES_TYPES,
 	SORTING_TYPES,
 	SORTING_VALUES,

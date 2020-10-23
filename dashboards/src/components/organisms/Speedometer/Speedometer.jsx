@@ -8,6 +8,7 @@ import styles from './styles.less';
 
 export class Speedometer extends PureComponent<Props, State> {
 	static defaultProps = {
+		color: '#c1bdbd',
 		max: 100,
 		min: 0,
 		ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges
@@ -78,7 +79,7 @@ export class Speedometer extends PureComponent<Props, State> {
 		};
 	};
 
-	renderArc = (startDegree: number, endDegree: number, color: string = '#ecf0f1') => {
+	renderArc = (startDegree: number, endDegree: number, color: string = this.props.color) => {
 		const strokeWidth = this.state.height * 0.1;
 
 		return (
@@ -110,7 +111,7 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	renderNeedle = () => {
-		const {value} = this.props;
+		const {color, value} = this.props;
 		const {height, radius, width} = this.state;
 		const needleWidth = width / 2 - radius / 2 + 100;
 		const x = width / 2 - (needleWidth * 0.5);
@@ -119,7 +120,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		return (
 			<svg height={radius} viewBox="0 0 20 200" width={needleWidth} x={x} y={y}>
-				<g fill="#ecf0f1">
+				<g fill={color}>
 					<path
 						d="M13.89 84.24L2.83 83.88c0 0 3.65-70.77 3.96-74.98C7.1 4.56 7.83 0 8.53 0c0.7 0 1.75 4.27 2.05 8.89C10.88 13.52 13.89 84.24 13.89 84.24z"
 						transform={`rotate(${angle}, 8, 85)`}

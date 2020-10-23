@@ -6,6 +6,7 @@ import {
 	FONT_SIZE_AUTO_OPTION,
 	FONT_SIZE_OPTIONS,
 	FONT_STYLES,
+	MAX_FONT_SIZE,
 	SORTING_TYPES,
 	TEXT_ALIGNS,
 	TEXT_HANDLERS
@@ -38,9 +39,13 @@ export class StyleFormBuilder extends Component<Props> {
 	};
 
 	handleChangeFontSize = (event: OnChangeInputEvent) => {
-		const {name, value} = event;
+		let {name, value} = event;
 
 		if (/^(\d+)?$/.test(value.toString())) {
+			if (Number(value) > MAX_FONT_SIZE) {
+				value = MAX_FONT_SIZE;
+			}
+
 			this.handleChange({name, value});
 		}
 	};
@@ -79,7 +84,7 @@ export class StyleFormBuilder extends Component<Props> {
 
 		return (
 			<Select
-				className={styles.fontFamily}
+				className={styles.fontFamilySelect}
 				name={FIELDS.fontFamily}
 				onSelect={this.handleChange}
 				options={FONT_FAMILIES}
@@ -94,7 +99,7 @@ export class StyleFormBuilder extends Component<Props> {
 
 		return (
 			<Select
-				className={styles.fontSize}
+				className={styles.fontSizeSelect}
 				editable={true}
 				name={FIELDS.fontSize}
 				onChangeLabel={this.handleChangeFontSize}

@@ -27,6 +27,7 @@ type Components = {
 };
 
 export type Props = {
+	color: string,
 	components?: Components,
 	max: number,
 	min: number,
