@@ -7,7 +7,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
-import {hasMSInterval, hasPercent} from 'store/widgets/helpers';
+import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: number, ctx: Object) => {
@@ -80,10 +80,12 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions =
 	const {labels, series} = chart;
 	const strokeWidth = series.find(s => s.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 	const stacked = widget.data.findIndex(set => set.type && set.type === WIDGET_TYPES.COLUMN_STACKED) !== -1;
+	const set = widget.data.find(set => !set.sourceForCompute);
+	const usesMetaClass = set ? hasMetaClass(set, FIELDS.xAxis) : false;
 
 	const xaxis = {
 		labels: {
-			formatter: axisLabelFormatter
+			formatter: axisLabelFormatter(usesMetaClass)
 		}
 	};
 
