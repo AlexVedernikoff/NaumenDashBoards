@@ -140,8 +140,9 @@ String getAttributesFromLinkAttribute(requestContent)
                   }
         : metaInfo.attributes
                   .findResults {
-                      !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, metaInfo.title, metaInfo.code) :
-                          null
+                      !it.computable && it.type.code in AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER
+                          ? buildAttribute(it, metaInfo.title, metaInfo.code)
+                          : null
                   }
                   .sort {
                       it.title
@@ -165,8 +166,9 @@ String getAttributesFromLinkAttribute(requestContent)
                 : attributes ? attributes.findResults {
                 !result*.code.find { x -> x == it.code
                 } && !attributeList*.code.find { x -> x == it.code
-                } && !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, metaInfo.title, metaInfo.code) :
-                    null
+                } && !it.computable && it.type.code in AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER
+                    ? buildAttribute(it, metaInfo.title, metaInfo.code)
+                    : null
             } : []
         }
         result += attributeList
@@ -500,7 +502,7 @@ private Collection<DataSource> mappingDataSource(def fqns, Boolean fromAttribute
 private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
 {
     return attributes.findResults {
-        !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, sourceName, sourceCode) : null
+        !it.computable && it.type.code in AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER ? buildAttribute(it, sourceName, sourceCode) : null
     }.sort { it.title }
 }
 
