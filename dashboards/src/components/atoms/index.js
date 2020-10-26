@@ -9,6 +9,7 @@ import DropdownMenu from './DropdownMenu';
 import ExtendButton from './ExtendButton';
 import FieldButton from './FieldButton';
 import FieldError from './FieldError';
+import HorizontalLabel from './HorizontalLabel';
 import Icon from './Icon';
 import IconButton from './IconButton';
 import InfoPanel from './InfoPanel';
@@ -41,6 +42,7 @@ export {
 	ExtendButton,
 	FieldButton,
 	FieldError,
+	HorizontalLabel,
 	Icon,
 	IconButton,
 	InfoPanel,

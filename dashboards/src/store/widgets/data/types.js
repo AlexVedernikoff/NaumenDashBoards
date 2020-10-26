@@ -213,6 +213,12 @@ export type CircleWidget = {
 
 // Комбо график
 
+export type ComboIndicatorSettings = $Shape<{
+	max: number,
+	min: number,
+	showDependent: boolean
+}>;
+
 type ComboType = $Keys<typeof COMBO_TYPES>;
 
 export type BuildComboData = {
@@ -228,6 +234,7 @@ export type ComboWidget = {
 	data: Array<ComboData>,
 	dataLabels: DataLabels,
 	indicator: AxisIndicator,
+	indicatorSettings: ComboIndicatorSettings,
 	legend: Legend,
 	parameter: AxisParameter,
 	sorting: ChartSorting,

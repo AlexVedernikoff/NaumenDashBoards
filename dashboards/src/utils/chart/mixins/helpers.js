@@ -1,4 +1,5 @@
 // @flow
+import type {ApexAxisChartSeries} from 'apexcharts';
 import type {AxisIndicator, AxisWidget, ComboWidget} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
@@ -98,8 +99,35 @@ const getYAxisOptions = (indicator: AxisIndicator) => {
 	return options;
 };
 
+/**
+ * Округляет число
+ * @param {number} value - исходное число
+ * @returns {number} - округленное число
+ */
+const getNiceScale = (value: number) => {
+	const exponent = Math.floor(Math.log10(value) - 1);
+	const converter = Math.pow(10, exponent);
+
+	return Math.round(value / converter) * converter;
+};
+
+/**
+ * Возвращает максимальное значений данных
+ * @param {ApexAxisChartSeries} series - данные для построения графика
+ * @returns {number} - максимальное значение
+ */
+const getMaxValue = (series: ApexAxisChartSeries) => {
+	const values = series
+		.map(s => s.data)
+		.reduce((all, data) => [...all, ...data], []);
+
+	return Math.max(...values);
+};
+
 export {
 	axisLabelFormatter,
+	getMaxValue,
+	getNiceScale,
 	getXAxisLabels,
 	getXAxisOptions,
 	getYAxisOptions,
