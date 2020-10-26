@@ -669,7 +669,7 @@ def getDynamicAttributeGroups(def descriptor, boolean aggregateToJson = true)
  */
 boolean checkForDynamicAttributes(String fqn)
 {
-    List types = api.metainfo.getTypes(fqn).toList()
+    List types = api.metainfo.getTypes(fqn).toList() + api.metainfo.getMetaClass(fqn)
 
     List typesWithDynamic = types.collect {
         it.attributes.any {

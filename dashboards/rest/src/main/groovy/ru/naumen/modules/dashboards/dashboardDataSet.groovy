@@ -305,17 +305,13 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             return mappingSummaryDiagram(res)
         case TABLE:
             Boolean showNulls = requestContent.showEmptyData
-            //временное решение, пока вычисления в агрегации готовы для одного источника
-            Boolean currentChanges = requestContent.data.keySet().size() == 1 &&
-                                     requestContent.data.values()[0].indicators.attribute.any {
-                                         it.type == 'COMPUTED_ATTR'
-                                     }
-            def request = mappingTableDiagramRequest(requestContent, subjectUUID, showNulls, currentChanges)
+            Boolean computationInRequest = requestContent?.data?.values()?.indicators?.any { it?.attribute?.any { it.type == 'COMPUTED_ATTR'} }
+            def request = mappingTableDiagramRequest(requestContent, subjectUUID, showNulls, computationInRequest)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
             }
             def res = getDiagramData(request, diagramType, aggregationCnt, requestContent)
-            if (currentChanges)
+            if (computationInRequest)
             {
                 res = prepareDataSet(res, requestContent, showNulls)
             }
@@ -753,11 +749,11 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
  * @param requestContent - запрос на построеине таблицы
  * @param subjectUUID - идентификатор "текущего объекта"
  * @param showNulls - флаг на отображение пустых значений
- * @param currentChanges - флаг на наличие запроса для текущих изменений
+ * @param computationInRequest - флаг на наличие вычислений в запросе
  * @return DiagramRequest
  */
-private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent,
-                                                  String subjectUUID, Boolean showNulls, Boolean currentChanges)
+private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent, String subjectUUID,
+                                                  Boolean showNulls, Boolean computationInRequest)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -970,16 +966,126 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
             null, requisite: requisite]]
     } as Map<String, Map>
-    if (currentChanges)
+    Boolean manySources = requestContent?.data?.values()?.sourceForCompute.count { !it } > 1
+    if(manySources)
+    {
+        Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
+        intermediateData = updateIntermediateDataToOneSource(intermediateData, computationInRequest, countOfCustomsInFirstSource)
+    }
+    if(computationInRequest)
     {
         intermediateData = updateIntermediateData(intermediateData)
     }
-    DiagramRequest request = buildDiagramRequest(intermediateData, subjectUUID)
-    if (requestContent?.data.values().sourceForCompute.count { !it } > 1)
+    return buildDiagramRequest(intermediateData, subjectUUID)
+}
+
+/**
+ * Метод подсчёта кастомных группировок в запросе
+ * @param requestContent - тело запроса
+ * @param inFirstSource - флаг на подсчёт только в первом источнике
+ * @return количество кастомных группировок
+ */
+Integer countDataForManyCustomGroupsInParameters(Map<String, Object> requestContent, Boolean inFirstSource = true)
+{
+    def tempData = requestContent.data as Map<String, Object>
+    if (inFirstSource)
     {
-        request = changeRequestToOneSource(request)
+        def data = tempData.findResult {k, v -> v} //берем данные первого источника
+        return data?.parameters?.count { it?.group?.way == 'CUSTOM' }
     }
-    return request
+    else
+    {
+        def data = tempData.findResults {k, v -> v} //берем данные всех источников
+        return data?.parameters?.sum { return it?.count { it?.group?.way == 'CUSTOM' } }
+    }
+}
+
+/**
+ * Метод преобразования промежуточных данных от нескольких источников к промежуточным данным от одного источника
+ * @param intermediateData - промежуточные данные от нескольких источников
+ * @param computationInRequest - флаг на наличие вычислдений в запросе
+ * @param countOfCustomsInFirstSource - количество кастомных группировок в первом источнике
+ * @return промежуточные данные от одного источника
+ */
+Map<String, Map> updateIntermediateDataToOneSource(Map<String, Map> intermediateData, Boolean computationInRequest, Integer countOfCustomsInFirstSource)
+{
+    //если агрегаций нет, то источник нужен только для вычисления
+    List<RequestData> requestData = intermediateData.findResults { key, value -> value?.requestData?.aggregations ? value?.requestData : null }
+    Source mainSource = intermediateData.findResult { key, value -> value.requestData ?: null }.source
+    def totalKey = intermediateData.findResult { key, value -> key ?: null }
+    List computationData = intermediateData.collectMany { key, value -> value.computeData ?: []  }
+    Requisite originalRequisite = intermediateData.findResult { key, value ->
+        if (computationInRequest && value?.requisite?.nodes?.findAll {it.type == 'COMPUTATION'})
+        {
+            return value.requisite
+        }
+        else
+        {
+            return value.requisite
+        }
+    }
+    def filterList = intermediateData.collectMany { key, value ->
+        if (value?.requisite)
+        {
+            return value?.requisite?.filterList
+        }
+        else
+        {
+            return []
+        }
+    }
+    //наличие фильтров в разных источниках
+    int cnt = filterList.count {
+        it.place == 'parameter'
+    }
+    //если фильтры есть больше, чем в одном источнике
+    if (cnt > 1)
+    {
+        //берём фильтры первого источника
+        def parameterFilters = filterList.find {
+            it.place == 'parameter'
+        }?.filters
+        //идём по фильтрам остальных источников (со второго по последний)
+        filterList.findAll { it.place == 'parameter' }[1..-1].each { tempFilterList ->
+            List tempFilters = tempFilterList?.filters
+            parameterFilters = parameterFilters?.collectMany { parameterFilter ->
+                tempFilters.collect {
+                    (countOfCustomsInFirstSource > 1) ? [*parameterFilter, it] : [parameterFilter, it]
+                }
+            }
+        }
+        parameterFilters = new FilterList(place: 'parameter', filters: parameterFilters)
+        FilterList breakdownFilterList = filterList.find {
+            it.place == 'breakdown' && it.filters
+        }
+        originalRequisite.filterList = breakdownFilterList ? [parameterFilters] + [breakdownFilterList] : [parameterFilters]
+    }
+    else
+    {
+        originalRequisite.filterList = filterList.findAll { it.filters }
+    }
+    if (computationInRequest)
+    {
+        //если есть вычисления меняем все ноды
+        originalRequisite.nodes = intermediateData.findResults { key, value ->
+            if (value?.requisite?.nodes?.any { it?.type == 'COMPUTATION' })
+            {
+                return value.requisite
+            }
+        }.nodes.inject {first, second -> first + second}
+    }
+    List fullGroups =  requestData?.groups?.flatten()
+    List fullAggregations = requestData?.aggregations?.collectMany {
+        computationInRequest ? it : it?.collect { aggr -> prepareAggregation(aggr, mainSource.classFqn)}
+    }
+
+    def breakdowns = fullGroups.findAll { it.title == 'breakdown' }
+    fullGroups = fullGroups - breakdowns
+    fullGroups = fullGroups + breakdowns
+
+    RequestData totalRequestData = new RequestData(source: mainSource, aggregations: fullAggregations, groups: fullGroups, filters: null)
+    return [(totalKey): [requestData: totalRequestData, computeData: computationData, customGroup:
+        null, requisite: originalRequisite]]
 }
 
 /**
@@ -1032,93 +1138,6 @@ Map<String, Map> updateIntermediateData(Map<String, Map> intermediateData)
         intermediateData = dataMap + [*:dataMaps]
     }
     return intermediateData
-}
-
-/**
- * Метод преобразования запроса от нескольких источников к одному
- * @param request - запрос
- * @return новый запрос с одним источником
- */
-private DiagramRequest changeRequestToOneSource(DiagramRequest request)
-{
-    List totalGroups = []
-    List totalAggregations = []
-    List tempKeys = []
-    List compIds = collectComputationFromRequest(request)
-    Boolean requestWithComputation = request.requisite.nodes.any { node -> node.any { it.type == 'COMPUTATION' } }
-
-    Requisite totalRequisite = mappingTotalRequisite(request, compIds)
-    Source mainSource = request.data.values().find().source
-
-    request.data.each { key, requestData ->
-        requestData.groups.each { totalGroups << it }
-        requestData.aggregations.each { aggregation ->
-            totalAggregations << prepareAggregation(aggregation, mainSource.classFqn)
-        }
-        tempKeys << key
-    }
-
-    def breakdowns = totalGroups.findAll { it.title == 'breakdown' }
-    //т.к. разбивка закреплена за первым источником, а в запросе она должна идти в самом конце,
-    // то мы убираем её с текущего места в списке групп и ставим в самый конец
-    totalGroups = totalGroups - breakdowns
-    totalGroups = totalGroups + breakdowns
-    RequestData totalRequestData = new RequestData(source: mainSource, aggregations: totalAggregations, groups: totalGroups, filters: null)
-    String totalRequestDataKey = requestWithComputation ? tempKeys[compIds[0]] : tempKeys.find()
-
-    return new DiagramRequest(requisite: [totalRequisite], data: [(totalRequestDataKey): totalRequestData])
-}
-
-/**
- * Метод подсчёта индексов вычислений среди всех агрегаций в запросе
- * @param request - запрос
- * @return список индексов вычислений среди всех агрегаций в запросе
- */
-List collectComputationFromRequest(DiagramRequest request)
-{
-    List compIds = []
-    request?.requisite?.nodes.collectMany { it }
-           .eachWithIndex { it, id ->
-               if (it.type == 'COMPUTATION')
-               {
-                   compIds << id
-               }
-           }
-    return compIds
-}
-
-/**
- * Метод подготовки итогового реквизита
- * @param request - запрос
- * @param compIds - индексы агрегаций с вычислениями
- * @return
- */
-Requisite mappingTotalRequisite(DiagramRequest request, List compIds = [])
-{
-    Set totalFilters = []
-    String title = ''
-    List nodes = []
-
-    if (compIds)
-    {
-        compIds.each { id ->
-            request.requisite.each {
-                totalFilters += it.filterList
-                title = 'COMPUTATION'
-                nodes << it.nodes
-            }
-            nodes = nodes[id]
-        }
-    }
-    else
-    {
-        request.requisite.each {
-            totalFilters += it.filterList
-            title = 'DEFAULT'
-            nodes << it.nodes
-        }
-    }
-    return new Requisite(filterList: totalFilters, title: title, nodes: !compIds && nodes.size() > 1 ? nodes.find() : nodes)
 }
 
 /**
@@ -2380,9 +2399,14 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
                 it.place == 'breakdown'
             }?.filters
 
-            if (diagramType == DiagramType.TABLE && parameterFilters?.size() > 2)
+            if (diagramType == DiagramType.TABLE)
             {
-                filterListSize = 2
+                Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
+                Integer countOfCustomsInFullRequest = countDataForManyCustomGroupsInParameters(requestContent, false)
+                if  (countOfCustomsInFirstSource > 1 || countOfCustomsInFullRequest > 1 )
+                {
+                    filterListSize = 2
+                }
             }
             switch (filterListSize)
             {
@@ -4093,7 +4117,14 @@ private List getTwoFilterListDiagramData(def node,
 {
     String nodeType = node.type
     def pareFilters
-    if (diagramType == DiagramType.TABLE && parameterFilters.size() > 2)
+    Integer countOfCustomsInFirstSource
+    Integer countOfCustomsInFullRequest
+    if (diagramType == DiagramType.TABLE)
+    {
+        countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
+        countOfCustomsInFullRequest = countDataForManyCustomGroupsInParameters(requestContent, false)
+    }
+    if (diagramType == DiagramType.TABLE && countOfCustomsInFirstSource > 1 || countOfCustomsInFullRequest > 1 )
     {
         pareFilters = breakdownFilters
             ? parameterFilters.collectMany { parameterFilter ->
@@ -4138,7 +4169,15 @@ private List getTwoFilterListDiagramData(def node,
                                  .with(prepareResult)
                                  .with(formatGroup)
                                  .with(formatAggregation)
-                def total = res ? [(condition.title.flatten().grep() as Set): res] : null
+                def total
+                if (diagramType == DiagramType.TABLE && (countOfCustomsInFirstSource > 1) && !onlyFilled)
+                {
+                    total = [(condition.title.flatten().grep() as Set): res ?: [[0] * aggregationCnt]]
+                }
+                else
+                {
+                    total = res ? [(condition.title.flatten().grep() as Set): res] : null
+                }
                 total = formatResult(total, aggregationCnt)
                 Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
                 if (hasState)
