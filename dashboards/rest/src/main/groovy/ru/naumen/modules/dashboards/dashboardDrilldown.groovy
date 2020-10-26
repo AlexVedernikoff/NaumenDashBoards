@@ -11,6 +11,7 @@
 package ru.naumen.modules.dashboards
 
 import java.text.SimpleDateFormat
+import ru.naumen.core.shared.dto.SimpleDtObject
 import static groovy.json.JsonOutput.toJson
 //region КЛАССЫ
 /**
@@ -279,21 +280,24 @@ class Link
                     }
                     else
                     {
-                        if (attributeType in AttributeType.LINK_TYPES)
+                        switch(attributeType)
                         {
-                            if (value == 'Нет данных')
-                            {
-                                result << [filterBuilder.OR(attr.code, 'null', null)]
-                            }
-                            else
-                            {
-                                def objects = findObjects(attr.ref, attr.property, value)
-                                result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
-                            }
-                        }
-                        else
-                        {
-                            result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
+                            case AttributeType.LINK_TYPES:
+                                if (value == 'Нет данных')
+                                {
+                                    result << [filterBuilder.OR(attr.code, 'null', null)]
+                                }
+                                else
+                                {
+                                    def objects = findObjects(attr.ref, attr.property, value)
+                                    result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                                }
+                                break;
+                            case AttributeType.STATE_TYPE:
+                                getStateFilters(attr, value, filterBuilder)
+                                break;
+                            default:
+                                result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
                         }
                     }
                 }
@@ -591,6 +595,35 @@ class Link
         }
     }
 
+    /**
+     * Метод получения фильтров для атрибута типа статус
+     * @param attribute - аттрибут
+     * @param value - значение
+     * @param filterBuilder - текущий filterBuilder
+     * @return изменённый filterBuilder
+     */
+    private def getStateFilters(Attribute attribute, def value, def filterBuilder)
+    {
+        String sourceCode = attribute.sourceCode
+        String code = attribute.code
+        if(attribute?.type == AttributeType.STATE_TYPE)
+        {
+            def(title, state) = value.tokenize('()')
+            if(sourceCode.contains('$'))
+            {
+                return filterBuilder.AND(
+                    filterBuilder.OR(code, 'contains', new SimpleDtObject("$sourceCode:$state",''))
+                )
+            }
+            def cases = api.metainfo.getTypes(sourceCode).code
+            return filterBuilder.AND(
+                *cases.collect{filterBuilder.OR(code, 'contains', new SimpleDtObject("$it:$state", ''))}
+            )
+        }
+        def DBvalue = value.tokenize('-').last()
+        return filterBuilder.AND(filterBuilder.OR(code, 'contains', DBvalue))
+    }
+
     private def getOrFilter(String type, String code, def value, def filterBuilder)
     {
         //TODO: хорошему нужно вынести все эти методы в enum. Можно прям в этом модуле
@@ -607,8 +640,9 @@ class Link
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         switch (type)
         {
-            case [AttributeType.STATE_TYPE, AttributeType.META_CLASS_TYPE]:
-                return filterBuilder.OR(code, 'titleContains', value as String)
+            case AttributeType.META_CLASS_TYPE:
+                def DBvalue = value.tokenize('-').last()
+                return filterBuilder.OR(code, 'contains', DBvalue)
             case AttributeType.DATE_TYPES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
             case AttributeType.DT_INTERVAL_TYPE:

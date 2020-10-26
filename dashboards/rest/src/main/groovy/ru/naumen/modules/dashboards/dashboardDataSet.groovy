@@ -2539,10 +2539,12 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     return TimeUnit.MILLISECONDS.toHours(value as long)
                 case AttributeType.STATE_TYPE:
                     def (stateValue, stateCase) = value.tokenize('$')
-                    String totalFqn = fqnClass.contains('$') ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
-                    return api.metainfo.getStateTitle(totalFqn, stateValue)
+                    String totalFqn = (fqnClass.contains('$') || stateCase == "" ) ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
+                    String userEq = api.metainfo.getStateTitle(totalFqn, stateValue)
+                    return "${userEq} (${stateValue})"
                 case AttributeType.META_CLASS_TYPE:
-                    return api.metainfo.getMetaClass(value).title
+                    def russianEq = api.metainfo.getMetaClass(value).title
+                    return "${russianEq}-${value}"
                 case AttributeType.BOOL_TYPE:
                     String viewMode = api.metainfo.getMetaClass(fqnClass)
                                          .getAttribute(parameter.attribute.code)
@@ -2681,6 +2683,81 @@ private def formatResult(Map data, Integer aggregationCnt = 1)
         } ?: [[0, key]] : list
     }.inject { first, second -> first + second
     } : []
+}
+
+/**
+ * Метод получения всех агрегаций после суммирования по паре название(код)
+ * @param resValue - итоговое значение для обработки
+ * @param aggregationCnt - число агрегаций
+ * @return итоговй список агрегаций
+ */
+List getTotalAggregation(List resValue, int aggregationCnt)
+{
+    def aggregations = resValue[0]
+    def value = aggregations[0]
+    def manyAggregationsByPare = aggregations.size() - 1 > 1 ? 1..-1 : 1
+    if (aggregations.size() > 1)
+    {
+        if(manyAggregationsByPare instanceof Collection)
+        {
+            return value.withIndex().collect { num, i ->
+                num = num as Double
+                aggregations[manyAggregationsByPare].each {
+                    num += (it[i] as Double)
+                }
+                return DECIMAL_FORMAT.format(num)
+            }
+        }
+        else {
+            return value.withIndex().collect { num, i ->
+                num = num as Double
+                num += aggregations[manyAggregationsByPare][i] as Double
+                return DECIMAL_FORMAT.format(num)
+            }
+        }
+    }
+    else
+    {
+        return value
+    }
+}
+
+/**
+ * Метод подготовки данных, среди которых есть значения статуса
+ * @param res - сет данных
+ * @param aggregationCnt - количество агрегаций в запросе
+ * @return обновленный сет данных
+ */
+private List prepareRequestWithStates(List res, Integer aggregationCnt)
+{
+    //собираем набор уникальных пар "название статуса (код)", отсекая у статуса часть после "-"
+    Set stateValues = res.findResults {
+        it[aggregationCnt..-1]
+    }
+
+    if (aggregationCnt > 0)
+    {
+        //идём по уникальным парам, формируя новый aggregationSet
+        return stateValues.collect { value ->
+            def aggergationSet = []
+            def resValue = res.findResults { resValue ->
+                //берём основное значение и отсекаем у статуса часть после "-"
+                def tempResValue = resValue[aggregationCnt..-1]
+                //сравниваем значение с тем, что есть в текущей паре "название статуса (код)"
+                if (tempResValue == value)
+                {
+                    //если оно совпадает берём у всего значения агрегацию
+                    aggergationSet << [resValue[0..aggregationCnt-1]]
+                    return [aggergationSet.collectMany{ it }, *tempResValue]
+                }
+            }.last()
+            List totalAggregation = aggregationCnt > 1
+                ? getTotalAggregation(resValue, aggregationCnt)
+                : [DECIMAL_FORMAT.format(resValue[0].sum { it[0] as Double })]
+            return [*totalAggregation, *resValue[1..-1]]
+        }
+    }
+    return stateValues.toList()
 }
 
 /**
@@ -3044,7 +3121,7 @@ List getSpecificAggregationsList (def requestContent, Boolean isCompute = null)
  * @param showNulls - флаг на отображение нулей
  * @return итоговый датасет
  */
-List prepareDataSet(List list, def requestContent, boolean showNulls)
+List prepareDataSet(List list, def requestContent, Boolean showNulls)
 {
     List compAggregations = getSpecificAggregationsList(requestContent, true)
     List usualAggregations = getSpecificAggregationsList(requestContent, false)
@@ -3821,7 +3898,13 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                              .with(formatGroup)
                              .with(formatAggregation)
             def total = res ? [(requisiteNode.title): res] : [:]
-            return formatResult(total)
+            total = formatResult(total, aggregationCnt)
+            Boolean hasState = requestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+            if (hasState)
+            {
+                total = prepareRequestWithStates(total, aggregationCnt)
+            }
+            return total
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
             def calculator = new FormulaCalculator(requisiteNode.formula)
@@ -3843,6 +3926,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                 notAggregatedAttributes = notAggregationAttributeNames(attributes)
             }
             Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
+            aggregationCnt = 1
             def variables = dataSet.collectEntries { key, data ->
                 Closure postProcess =
                     this.&formatGroupSet.rcurry(data as RequestData, aggregationCnt, notAggregatedAttributes.size(), diagramType)
@@ -3850,13 +3934,20 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             } as Map<String, List>
 
             //Вычисление формулы. Выглядит немного костыльно...
+            Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
             def res = dataSet.values().head().groups?.size() ?
                 findUniqueGroups([0], variables).collect { group ->
                     def resultCalculation = calculator.execute { variable ->
-                        (variables[variable as String].findResult {
-                            def value =  it[1..-1]
-                            group == value ? it[0] : null
-                        } ?: 0) as Double
+                        hasState
+                            ? (variables[variable as String].findResults {
+                                def value =  it[1..-1]
+                                group == value ? it[0] : null
+                            }?.sum {it as Double} ?: 0) as Double
+
+                                : (variables[variable as String].findResult {
+                                def value =  it[1..-1]
+                                group == value ? it[0] : null
+                            } ?: 0) as Double
                     }
                     group.add(0, resultCalculation)
                     return group
@@ -3864,7 +3955,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                 variables[key as String].head().head() as Double
             }]]
             def total = [(node.title): formatAggregationSet(res, aggregationCnt, onlyFilled)]
-            return formatResult(total)
+            return formatResult(total, aggregationCnt)
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 }
@@ -3914,8 +4005,14 @@ private List getOneFilterListDiagramData(def node,
                                  .with(prepareResult)
                                  .with(formatGroup)
                                  .with(formatAggregation)
-                Map partial = res ? [(it.title.grep() as Set): res] : [:]
-                return formatResult(partial, aggregationCnt)
+                def partial = res ? [(it.title.grep() as Set): res] : [:]
+                partial = formatResult(partial, aggregationCnt)
+                Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+                if (hasState)
+                {
+                    partial = prepareRequestWithStates(partial, aggregationCnt)
+                }
+                return partial
             }
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
@@ -3944,10 +4041,17 @@ private List getOneFilterListDiagramData(def node,
             }
             int i = 0
             return variables.collectMany { totalVar ->
+                Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
                 def res = dataSet.values().head().groups?.size() ?
                     findUniqueGroups([0], totalVar).collect { group ->
                         def resultCalculation = calculator.execute { variable ->
-                            (totalVar[variable as String].findResult {
+                            hasState
+                                ? (totalVar[variable as String].findResults {
+                                def value = it[1..-1]
+                                group == value ? it[0] : null
+                            }?.sum {it as Double} ?: 0) as Double
+
+                                : (totalVar[variable as String].findResult {
                                 def value = it[1..-1]
                                 group == value ? it[0] : null
                             } ?: 0) as Double
@@ -4035,7 +4139,13 @@ private List getTwoFilterListDiagramData(def node,
                                  .with(formatGroup)
                                  .with(formatAggregation)
                 def total = res ? [(condition.title.flatten().grep() as Set): res] : null
-                formatResult(total, aggregationCnt)
+                total = formatResult(total, aggregationCnt)
+                Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+                if (hasState)
+                {
+                    total = prepareRequestWithStates(total, aggregationCnt)
+                }
+                return total
             }
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
@@ -4063,13 +4173,18 @@ private List getTwoFilterListDiagramData(def node,
                     [(key): res.with(postProcess).with(prepareResult)]  as Map<String, List>
                 }
             }
-            int i = 0
             def title = pareFilters.title
-            return variables.collectMany { totalVar ->
+            return variables.withIndex().collectMany { totalVar, i ->
+                Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
                 def res = dataSet.values().head().groups?.size() ?
                     findUniqueGroups([0], totalVar).collect { group ->
                         def resultCalculation = calculator.execute { variable ->
-                            (totalVar[variable as String].findResult {
+                            hasState
+                                ? (totalVar[variable as String].findResults {
+                                        def value = it[1..-1]
+                                        group == value ? it[0] : null
+                                    }?.sum {it as Double} ?: 0) as Double
+                                : (totalVar[variable as String].findResult {
                                 def value = it[1..-1]
                                 group == value ? it[0] : null
                             } ?: 0) as Double
@@ -4079,7 +4194,7 @@ private List getTwoFilterListDiagramData(def node,
                     } : [[calculator.execute { key ->
                     totalVar[key as String].head().head() as Double
                 }]]
-                Map total = [( title.any {it[0] != ''} ? title[i++].flatten() : ''): formatAggregationSet(res, aggregationCnt, onlyFilled)]
+                Map total = res ? [( title.any {it[0] != ''} ? title[i].flatten() : ''): formatAggregationSet(res, aggregationCnt, onlyFilled)] : [:]
                 return formatResult(total, aggregationCnt)
             }
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
