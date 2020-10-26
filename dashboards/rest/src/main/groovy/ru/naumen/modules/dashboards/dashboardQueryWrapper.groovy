@@ -166,10 +166,12 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.OVERLAP:
                 if (attributeCodes.any {it == 'state'})
                 {
-                    column = sc.concat(sc.property('state'),
-                                       sc.constant('$'),
-                                       sc.max(sc.property('metaCaseId')))
-                    criteria.addGroupColumn(sc.property('state'))
+                    column = sc.concat (sc.property(attributeCodes),
+                                        sc.constant('$'),
+                                        sc.property('metaCaseId')
+                    )
+                    criteria.addGroupColumn(column)
+                    criteria.addGroupColumn(sc.property('metaCaseId'))
                     criteria.addColumn(column)
                 }
                 else
@@ -838,7 +840,7 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true)
     Set attributeSet = []
     if (onlyFilled)
     {
-        attributeSet = clonedAggregations*.attribute + clonedGroups*.attribute
+        attributeSet = clonedAggregations.findAll { it?.type == Aggregation.NOT_APPLICABLE }.attribute + clonedGroups*.attribute
     }
     attributeSet.findResults {
         it
