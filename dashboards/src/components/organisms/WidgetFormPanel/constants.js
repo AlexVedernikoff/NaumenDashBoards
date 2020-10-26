@@ -29,6 +29,7 @@ const fontStyle: 'fontStyle' = 'fontStyle';
 const group: 'group' = 'group';
 const header: 'header' = 'header';
 const indicator: 'indicator' = 'indicator';
+const indicatorSettings: 'indicatorSettings' = 'indicatorSettings';
 const indicators: 'indicators' = 'indicators';
 const isNew: 'isNew' = 'isNew';
 const layout: 'layout' = 'layout';
@@ -44,6 +45,7 @@ const ranges: 'ranges' = 'ranges';
 const row: 'row' = 'row';
 const rowHeader: 'rowHeader' = 'rowHeader';
 const show: 'show' = 'show';
+const showDependent: 'showDependent' = 'showDependent';
 const showEmptyData: 'showEmptyData' = 'showEmptyData';
 const showName: 'showName' = 'showName';
 const showRowNum: 'showRowNum' = 'showRowNum';
@@ -94,6 +96,7 @@ const FIELDS = {
 	group,
 	header,
 	indicator,
+	indicatorSettings,
 	indicators,
 	isNew,
 	layout,
@@ -109,6 +112,7 @@ const FIELDS = {
 	row,
 	rowHeader,
 	show,
+	showDependent,
 	showEmptyData,
 	showName,
 	showRowNum,

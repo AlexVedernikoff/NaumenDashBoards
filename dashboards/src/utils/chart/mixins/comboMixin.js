@@ -1,6 +1,14 @@
 // @flow
 import type {ApexOptions} from 'apexcharts';
-import {axisLabelFormatter, getXAxisLabels, getXAxisOptions, getYAxisOptions, valueFormatter} from './helpers';
+import {
+	axisLabelFormatter,
+	getMaxValue,
+	getNiceScale,
+	getXAxisLabels,
+	getXAxisOptions,
+	getYAxisOptions,
+	valueFormatter
+} from './helpers';
 import type {ComboWidget} from 'store/widgets/data/types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
@@ -27,8 +35,8 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 	return formattedValue;
 };
 
-const getYAxis = (set: Object, index: number, widget: Object) => {
-	const {colors, indicator} = widget;
+const getYAxis = (set: Object, index: number, widget: Object, maxValue?: number) => {
+	const {colors, indicator, indicatorSettings} = widget;
 	const {dataKey, source, yAxis} = set;
 	const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
 	const usesPercent = hasPercent(set, FIELDS.yAxis);
@@ -36,6 +44,18 @@ const getYAxis = (set: Object, index: number, widget: Object) => {
 	const {show} = customOptions;
 	const color = colors[index];
 	const text = `${getProcessedValue(yAxis, 'title')} (${source.label})`;
+	let {max, min} = indicatorSettings;
+
+	if (min) {
+		min = Number(min);
+	}
+
+	if (max) {
+		max = Number(max);
+	} else if (maxValue) {
+		max = getNiceScale(maxValue);
+	}
+
 	let options = {
 		axisBorder: {
 			color,
@@ -50,6 +70,8 @@ const getYAxis = (set: Object, index: number, widget: Object) => {
 				colors: color
 			}
 		},
+		max,
+		min,
 		seriesName: dataKey,
 		show,
 		title: {
@@ -82,6 +104,11 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions =
 	const stacked = widget.data.findIndex(set => set.type && set.type === WIDGET_TYPES.COLUMN_STACKED) !== -1;
 	const set = widget.data.find(set => !set.sourceForCompute);
 	const usesMetaClass = set ? hasMetaClass(set, FIELDS.xAxis) : false;
+	let maxValue;
+
+	if (widget.indicatorSettings.showDependent) {
+		maxValue = getMaxValue(series);
+	}
 
 	const xaxis = {
 		labels: {
@@ -116,7 +143,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions =
 			shared: false
 		},
 		xaxis: extend(xaxis, getXAxisOptions(widget)),
-		yaxis: widget.data.filter(s => !s.sourceForCompute).map((s, i) => getYAxis(s, i, widget))
+		yaxis: widget.data.filter(s => !s.sourceForCompute).map((s, i) => getYAxis(s, i, widget, maxValue))
 	};
 };
 

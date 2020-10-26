@@ -1,7 +1,7 @@
 // @flow
 import type {DataBuilderProps} from 'WidgetFormPanel/builders/DataFormBuilder/types';
 import {FieldDivider} from 'WidgetFormPanel/components';
-import {FieldError, Label, TextInput} from 'components/atoms';
+import {FieldError, HorizontalLabel, Label, TextInput} from 'components/atoms';
 import {FIELDS} from 'WidgetFormPanel';
 import {FormField} from 'components/molecules';
 import type {Ranges} from 'store/widgets/data/types';
@@ -51,9 +51,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderScaleBorderField = (name: string, value: string) => (
 		<FormField row small>
-			{this.renderTextInputLabel(name)}
+			<HorizontalLabel>{name}</HorizontalLabel>
 			<TextInput
-				className={styles.borderTextField}
 				name={name}
 				onChange={this.handleChangeBorder}
 				onlyNumber={true}
@@ -98,8 +97,6 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 		return renderSourceBox(sourceRefFields);
 	};
-
-	renderTextInputLabel = (label: string) => <div className={styles.textInputLabel}>{label}</div>;
 
 	render () {
 		const {renderBaseBoxes, renderDisplayModeSelect} = this.props;
