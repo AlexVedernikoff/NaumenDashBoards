@@ -2,14 +2,15 @@
 import type {AxisIndicator, AxisWidget, ComboWidget} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
+import {META_CLASS_NAME_DIVIDER} from 'utils/chart/constants';
 import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
 
-const axisLabelFormatter = (value: number | string) => {
-	let label = value;
+const axisLabelFormatter = (usesMetaClass: boolean) => (value: number | string) => {
+	let label = String(value);
 
-	if (typeof label === 'string' && label.length > 25) {
-		label = `${label.substring(0, 20)}...`;
+	if (usesMetaClass && label.includes(META_CLASS_NAME_DIVIDER)) {
+		label = label.split(META_CLASS_NAME_DIVIDER)[0];
 	}
 
 	return label;

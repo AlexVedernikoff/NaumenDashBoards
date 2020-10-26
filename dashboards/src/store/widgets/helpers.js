@@ -71,6 +71,17 @@ const hasPercent = (set: Object, field: string = FIELDS.indicator) => {
 };
 
 /**
+ * Сообщает используется ли в наборе данных виджета метакласс
+ * @param {object} set - набор данных виджета
+ * @param {Array<string>} fields - наименования полей атрибутов
+ * @returns {boolean}
+ */
+const hasMetaClass = (set: Object, ...fields: Array<string>) => fields.every(field => {
+	const {[field]: attribute} = set;
+	return attribute && attribute.type === ATTRIBUTE_TYPES.metaClass;
+});
+
+/**
  * Сообщает используется ли в наборе данных виджета агрегация, по которой возвращается интервал в миллисекундах
  * @param {object} set - набор данных виджета
  * @param {string} field - наименования поля показателя виджета
@@ -114,6 +125,7 @@ export {
 	getDefaultSystemGroup,
 	getLayoutWidgets,
 	hasBreakdown,
+	hasMetaClass,
 	hasMSInterval,
 	hasPercent,
 	isGroupKey,

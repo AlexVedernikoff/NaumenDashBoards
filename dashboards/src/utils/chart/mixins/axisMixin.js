@@ -6,7 +6,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasPercent} from 'store/widgets/helpers';
+import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -21,6 +21,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 	const set = getBuildSet(widget);
 
 	if (set && !set.sourceForCompute) {
+		const usesMetaClass = hasMetaClass(set, FIELDS.xAxis);
 		const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
 		const usesPercent = hasPercent(set, FIELDS.yAxis);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
@@ -28,13 +29,13 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 		const xaxis = {
 			categories: getXAxisLabels(widget, categories),
 			labels: {
-				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter
+				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesMetaClass)
 			}
 		};
 		const yaxis = {
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
-				formatter: horizontal ? axisLabelFormatter : valueFormatter(usesMSInterval, usesPercent)
+				formatter: horizontal ? axisLabelFormatter(usesMetaClass) : valueFormatter(usesMSInterval, usesPercent)
 			}
 		};
 
