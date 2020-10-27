@@ -702,4 +702,19 @@ String getMaxMetaCaseId(String classFqn)
 {
     return api.db.query("select max(metaCaseId) from ${classFqn}").list().head()
 }
+
+/**
+ * Метод получения карточки объекта по UUID-у
+ * @param value - значение объекта типа (значение - UUID)
+ * @return ссылка на карточку объекта в Json-формате
+ */
+String getCardObject(String value)
+{
+    if (value && value.tokenize('-').size() > 1)
+    {
+        String objectUUID = value.tokenize('-').last()
+        def link = api.web.open(objectUUID)
+        return toJson([link: link])
+    }
+}
 //endregion

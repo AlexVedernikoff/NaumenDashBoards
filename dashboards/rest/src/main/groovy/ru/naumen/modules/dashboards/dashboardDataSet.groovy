@@ -943,7 +943,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
             if (computeCheck)
             {
                 requisiteNode = comp.collect {
-                    new ComputationRequisiteNode (
+                    new ComputationRequisiteNode(
                         title: null,
                         type: 'COMPUTATION',
                         formula: it.formula
@@ -2554,21 +2554,30 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
     switch (type)
     {
         case GroupType.OVERLAP:
+            def uuid = null
+            if (diagramType == DiagramType.TABLE)
+            {
+                if (value)
+                {
+                    (value, uuid) = value?.tokenize('-')
+                }
+
+            }
             switch (parameter.attribute.type)
             {
                 case AttributeType.DT_INTERVAL_TYPE:
                     if (parameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)) {
-                        return value
+                        return uuid ? "${value}-${uuid}": value
                     }
                     return TimeUnit.MILLISECONDS.toHours(value as long)
                 case AttributeType.STATE_TYPE:
                     def (stateValue, stateCase) = value.tokenize('$')
                     String totalFqn = (fqnClass.contains('$') || stateCase == "" ) ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
                     String userEq = api.metainfo.getStateTitle(totalFqn, stateValue)
-                    return "${userEq} (${stateValue})"
+                    return uuid ? "${userEq} (${stateValue})-${uuid}"  : "${userEq} (${stateValue})"
                 case AttributeType.META_CLASS_TYPE:
-                    def russianEq = api.metainfo.getMetaClass(value).title
-                    return "${russianEq}-${value}"
+                    def userEq = api.metainfo.getMetaClass(value).title
+                    return uuid ? "${userEq}-${value}-${uuid}" : "${userEq}-${value}"
                 case AttributeType.BOOL_TYPE:
                     String viewMode = api.metainfo.getMetaClass(fqnClass)
                                          .getAttribute(parameter.attribute.code)
@@ -2590,6 +2599,10 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     {
                         //в таблице важно фронту отправлять пустую строку
                         value = value ?: ""
+                        if (uuid)
+                        {
+                            value = "${value}-${uuid}"
+                        }
                     }
                     else if( diagramType in DiagramType.NullableTypes)
                     {
@@ -3917,7 +3930,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
             Closure formatAggregation = this.&formatAggregationSet.rcurry(aggregationCnt, onlyFilled)
             Closure formatGroup = this.&formatGroupSet.rcurry(requestData, aggregationCnt, notAggregatedAttributes.size(), diagramType)
-            def res = modules.dashboardQueryWrapper.getData(requestData, onlyFilled)
+            def res = modules.dashboardQueryWrapper.getData(requestData, onlyFilled, diagramType)
                              .with(prepareResult)
                              .with(formatGroup)
                              .with(formatAggregation)
@@ -3954,7 +3967,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             def variables = dataSet.collectEntries { key, data ->
                 Closure postProcess =
                     this.&formatGroupSet.rcurry(data as RequestData, aggregationCnt, notAggregatedAttributes.size(), diagramType)
-                [(key): modules.dashboardQueryWrapper.getData(data as RequestData, onlyFilled).with(prepareResult).with(postProcess)]
+                [(key): modules.dashboardQueryWrapper.getData(data as RequestData, onlyFilled, diagramType).with(prepareResult).with(postProcess)]
             } as Map<String, List>
 
             //Вычисление формулы. Выглядит немного костыльно...
@@ -4025,7 +4038,7 @@ private List getOneFilterListDiagramData(def node,
             Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, aggregationCnt, notAggregatedAttributes.size(), diagramType)
             return filtering*.get(0)?.collectMany {
                 newRequestData.filters = [it]
-                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled)
+                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
                                  .with(prepareResult)
                                  .with(formatGroup)
                                  .with(formatAggregation)
@@ -4059,7 +4072,7 @@ private List getOneFilterListDiagramData(def node,
                     RequestData newData = data.clone()
                     newData.filters = [filter]
                     Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, aggregationCnt, notAggregatedAttributes.size(), diagramType)
-                    def res = modules.dashboardQueryWrapper.getData(newData as RequestData, onlyFilled)
+                    def res = modules.dashboardQueryWrapper.getData(newData as RequestData, onlyFilled, diagramType)
                     [(key): res.with(postProcess).with(prepareResult)]  as Map<String, List>
                 }
             }
@@ -4074,7 +4087,6 @@ private List getOneFilterListDiagramData(def node,
                                 def value = it[1..-1]
                                 group == value ? it[0] : null
                             }?.sum {it as Double} ?: 0) as Double
-
                                 : (totalVar[variable as String].findResult {
                                 def value = it[1..-1]
                                 group == value ? it[0] : null
@@ -4165,7 +4177,7 @@ private List getTwoFilterListDiagramData(def node,
                 Closure prepareResult = this.&changeNotAggregatedAttributePlace.rcurry(attributes?.name, notAggregatedAttributes)
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(aggregationCnt, onlyFilled)
                 Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData as RequestData, aggregationCnt, notAggregatedAttributes.size(), diagramType)
-                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled)
+                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
                                  .with(prepareResult)
                                  .with(formatGroup)
                                  .with(formatAggregation)
@@ -4208,7 +4220,7 @@ private List getTwoFilterListDiagramData(def node,
                         first + second
                     }
                     Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, aggregationCnt, notAggregatedAttributes.size(), diagramType)
-                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData, onlyFilled)
+                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData, onlyFilled, diagramType)
                     [(key): res.with(postProcess).with(prepareResult)]  as Map<String, List>
                 }
             }

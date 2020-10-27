@@ -122,14 +122,28 @@ class QueryWrapper implements CriteriaWrapper
     /**
      * Метод агрегации N/A
      * @param parameter - параметр агрегации
+     * @param diagramType - тип диаграммы
      * @return тело запрос с агрегацией N/A
      */
-    QueryWrapper noneAggregate(parameter)
+    QueryWrapper noneAggregate(parameter, DiagramType diagramType)
     {
         def attribute = parameter.attribute
         def sc = api.selectClause
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
+        if (diagramType == DiagramType.TABLE)
+        {
+            if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
+            {
+                String attributeCode = attributeCodes.find()
+                column = sc.concat(column, sc.constant('-'), sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
+            }
+            //атрибут связанного типа
+            if(parameter.attribute.type == AttributeType.STRING_TYPE)
+            {
+                column = sc.concat(column, sc.constant('-'), sc.property(modules.dashboardQueryWrapper.UUID_CODE))
+            }
+        }
         criteria.addColumn(column)
         criteria.addGroupColumn(column)
         return this
@@ -153,7 +167,7 @@ class QueryWrapper implements CriteriaWrapper
         return column
     }
 
-    QueryWrapper group(GroupParameter parameter)
+    QueryWrapper group(GroupParameter parameter, DiagramType diagramType)
     {
         def sc = api.selectClause
         GroupType groupType = parameter.type
@@ -168,14 +182,33 @@ class QueryWrapper implements CriteriaWrapper
                 {
                     column = sc.concat (sc.property(attributeCodes),
                                         sc.constant('$'),
-                                        sc.property('metaCaseId')
-                    )
+                                        sc.property('metaCaseId'))
                     criteria.addGroupColumn(column)
                     criteria.addGroupColumn(sc.property('metaCaseId'))
                     criteria.addColumn(column)
                 }
                 else
                 {
+                    if (diagramType == DiagramType.TABLE && attributeCodes.every { it != 'metaClassFqn'})
+                    {
+                        if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
+                        {
+                            String attributeCode = attributeCodes.find()
+                            column = sc.concat(
+                                column,
+                                sc.constant('-'),
+                                sc.property("${ attributeCode }.${ modules.dashboardQueryWrapper.UUID_CODE }")
+                            )
+                        }
+                        else
+                        {
+                            column = sc.concat(
+                                column,
+                                sc.constant('-'),
+                                sc.property(modules.dashboardQueryWrapper.UUID_CODE)
+                            )
+                        }
+                    }
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
                 }
@@ -747,9 +780,10 @@ class QueryWrapper implements CriteriaWrapper
  * Метод получения данных биаграммы
  * @param requestData - запрос на получение данных
  * @param onlyFilled - вывод только заполненных полей
+ * @param diagramType - тип диаграммы
  * @return результат выборки
  */
-List<List> getData(RequestData requestData, Boolean onlyFilled = true)
+List<List> getData(RequestData requestData, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT)
 {
     validate(requestData)
     validate(requestData.source)
@@ -797,7 +831,7 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true)
         }
         else if (parameter.type == Aggregation.NOT_APPLICABLE)
         {
-            wrapper.noneAggregate(parameter)
+            wrapper.noneAggregate(parameter, diagramType)
         }
         else
         {
@@ -830,7 +864,7 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true)
         }
         else
         {
-            wrapper.group(parameter)
+            wrapper.group(parameter, diagramType)
         }
     }
 
