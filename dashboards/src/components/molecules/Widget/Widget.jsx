@@ -152,7 +152,6 @@ export class Widget extends PureComponent<Props, State> {
 			<div {...gridProps} className={this.getClassName()} onClick={this.handleClick} ref={this.ref}>
 				{this.renderControlPanel()}
 				{this.renderDiagram()}
-				{this.renderControlPanel()}
 				{this.renderError()}
 				{children}
 			</div>
