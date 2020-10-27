@@ -260,7 +260,7 @@ export type SummaryData = BuildSummaryData | ComputeSummaryData;
 export type SummaryIndicator = {
 	fontColor: string,
 	fontFamily: string,
-	fontSize: number,
+	fontSize: number | string,
 	fontStyle?: FontStyle
 };
 
