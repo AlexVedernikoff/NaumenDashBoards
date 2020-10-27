@@ -2593,7 +2593,7 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     }
                     else if( diagramType in DiagramType.NullableTypes)
                     {
-                        value = value ?: "Нет данных"
+                        value = value ?: "Не заполнено"
                     }
                     return value.toString().replaceAll("\\<.*?>","")
             }
