@@ -24,6 +24,7 @@ import static groovy.json.JsonOutput.toJson
 @Field private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
 @Field private static final String GROUP_MASTER_DASHBOARD = 'dashboardMaster'
 @Field private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
+@Field private static final String TEXT_WIDGET_TYPE = 'TEXT'
 //endregion
 
 //region КЛАССЫ
@@ -134,7 +135,7 @@ String getSettings(Map<String, Object> requestContent)
             autoUpdate  : personalDashboard?.autoUpdate,
             widgets     : personalDashboard?.widgetIds?.findResults{ widgetKey ->
                 def widget = getWidgetSettings(widgetKey, isMobile)
-                return changeTotalWidgetName(widget, classFqn)
+                return  widget?.type == TEXT_WIDGET_TYPE ? widget : changeTotalWidgetName(widget, classFqn)
             } ?: [],
             customGroups: personalDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
@@ -146,7 +147,7 @@ String getSettings(Map<String, Object> requestContent)
             autoUpdate  : defaultDashboard?.autoUpdate,
             widgets     : defaultDashboard?.widgetIds?.findResults{ widgetKey ->
                 def widget = getWidgetSettings(widgetKey, isMobile)
-                return changeTotalWidgetName(widget, classFqn)
+                return  widget?.type == TEXT_WIDGET_TYPE ? widget : changeTotalWidgetName(widget, classFqn)
             } ?: [],
             customGroups: defaultDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
@@ -165,7 +166,7 @@ String getSettings(Map<String, Object> requestContent)
             // Пользователь этого даже не заметит
             widgets     : defaultDashboard?.widgetIds?.findResults{ widgetKey ->
                 def widget = getWidgetSettings(widgetKey, isMobile)
-                return changeTotalWidgetName(widget, classFqn)
+                return widget?.type == TEXT_WIDGET_TYPE ? widget : changeTotalWidgetName(widget, classFqn)
             } ?: [],
             customGroups: defaultDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
@@ -472,12 +473,18 @@ Map prepareLayouts(Map layouts, String userLogin)
  */
 String createWidget(Map<String, Object> requestContent)
 {
-    validateName(requestContent)
+    def widget = requestContent.widget
+    Boolean widgetTypeIsNotText = widget.type != TEXT_WIDGET_TYPE
+    if (widgetTypeIsNotText)
+    {
+        validateName(requestContent)
+    }
+
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
-    def widget = requestContent.widget
-    def widgetWithCorrectName = changeTotalWidgetName(widget, classFqn)
     boolean isPersonal = requestContent.isPersonal
+    def widgetWithCorrectName = widgetTypeIsNotText ? changeTotalWidgetName(widget, classFqn): widget
+
     DashboardSettings dashboardSettings = null
     String dashboardKey = null
     if(isPersonal)
@@ -525,11 +532,15 @@ String editWidget(Map<String, Object> requestContent)
     def widget = requestContent.widget
     String widgetKey = widget.id
     Boolean isPersonal = requestContent.isPersonal
-    validateName(requestContent, widgetKey, isPersonal, user)
+    Boolean widgetTypeIsNotText = widget.type != TEXT_WIDGET_TYPE
+    if (widgetTypeIsNotText)
+    {
+        validateName(requestContent, widgetKey, isPersonal, user)
+    }
 
-    def widgetWithCorrectName = changeTotalWidgetName(widget, classFqn)
+    def widgetWithCorrectName = widgetTypeIsNotText ? changeTotalWidgetName(widget, classFqn) : widget
     String contentCode = requestContent.contentCode
-    if(requestContent.isPersonal as boolean)
+    if(isPersonal)
     {
         checkRightsOnEditDashboard(requestContent.editable)
         Closure<DashboardSettings> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
@@ -1260,7 +1271,7 @@ List<Map<String, String>> getDashboardsUUIDAndTitle()
 WidgetInfo getWidgetInfo(String widgetKey)
 {
     def widgetSettings = getWidgetSettings(widgetKey)
-    return widgetSettings ? new WidgetInfo(value: widgetKey ,label: widgetSettings.name) : null
+    return widgetSettings && widgetSettings?.type != TEXT_WIDGET_TYPE ? new WidgetInfo(value: widgetKey ,label: widgetSettings.name) : null
 }
 
 /**
