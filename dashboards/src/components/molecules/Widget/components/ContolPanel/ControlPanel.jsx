@@ -45,11 +45,6 @@ export class ControlPanel extends PureComponent<Props, State> {
 		onDrillDown(widget, e.item.props.keyEvent);
 	};
 
-	handleClickEditButton = () => {
-		const {onEdit, widget} = this.props;
-		onEdit(widget.id);
-	};
-
 	handleClickExportItem = (e: Object) => this.props.onExport(e.key);
 
 	handleClickRemoveButton = () => this.setState({showRemoveModal: true});
@@ -101,11 +96,11 @@ export class ControlPanel extends PureComponent<Props, State> {
 	};
 
 	renderEditButton = () => {
-		const {isEditable} = this.props;
+		const {isEditable, onEdit} = this.props;
 
 		if (isEditable) {
 			return (
-				<IconButton icon={ICON_NAMES.EDIT} onClick={this.handleClickEditButton} round={false} tip="Редактировать" />
+				<IconButton icon={ICON_NAMES.EDIT} onClick={onEdit} round={false} tip="Редактировать" />
 			);
 		}
 

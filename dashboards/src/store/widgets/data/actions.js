@@ -206,11 +206,13 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 /**
  * Устанавливает выбранный виджет для последующего редактирования
  * @param {string} payload - id виджета
+ * @param {Function} callback - коллбэк-функция, которая будет вызвана после выбора виджета
  * @returns {ThunkAction}
  */
-const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
+const selectWidget = (payload: string, callback?: Function): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch(setSelectedWidget(payload));
 	dispatch(editDashboard());
+	callback && callback();
 };
 
 /**

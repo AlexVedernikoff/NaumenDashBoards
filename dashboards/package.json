@@ -11,7 +11,7 @@
   "contributors": [],
   "description": "Embedded application 'DashBoards' for 'SMP'",
   "dependencies": {
-    "apexcharts": "git+https://github.com/FunkiR/apexcharts.js.git#develop",
+    "apexcharts": "^3.22.1",
     "canvg": "^3.0.2",
     "dom4": "^2.1.5",
     "html2canvas": "^1.0.0-rc.5",

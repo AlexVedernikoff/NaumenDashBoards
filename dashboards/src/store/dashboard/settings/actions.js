@@ -15,6 +15,7 @@ import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState} from 'store/actions';
+import {resizer} from 'index';
 import {setCustomGroups} from 'store/customGroups/actions';
 import type {User} from 'store/users/types';
 
@@ -141,6 +142,8 @@ const editDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 	dispatch({
 		type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
 	});
+
+	resizer.resetHeight();
 };
 
 /**
@@ -214,11 +217,14 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
  * Сбрасывает выбранный виджет и выключает режим редактирования
  * @returns {ThunkAction}
  */
-const seeDashboard = (): ThunkAction => (dispatch: Dispatch) => {
+const seeDashboard = (): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch(resetWidget());
+
 	dispatch({
 		type: DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
 	});
+
+	resizer.resize();
 };
 
 /**
@@ -320,8 +326,8 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 
 /**
  * Сохраняет настройки автообновления
- * @param {boolean} enabled - найстроки автообновления
- * @param {number} interval - найстроки автообновления
+ * @param {boolean} enabled - параметр сообщает включено или выключено автообновление
+ * @param {number} interval - интервал автообновления
  * @returns {ThunkAction}
  */
 const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => async (dispatch: Dispatch, getState: GetState): Promise<void> => {

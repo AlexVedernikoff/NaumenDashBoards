@@ -12,6 +12,7 @@ import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {Component, createRef} from 'react';
 import {ResizeDetector, Widget} from 'components/molecules';
+import {resizer} from 'index';
 import {Responsive as Grid} from 'react-grid-layout';
 import type {State, WidgetRef} from './types';
 import styles from './styles.less';
@@ -30,7 +31,6 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		window.addEventListener('resize', this.setGridWidth);
 		window.addEventListener('blur', this.resetFocus);
 	}
 
@@ -41,6 +41,16 @@ export class DashboardContent extends Component<Props, State> {
 	componentWillUnmount () {
 		window.removeEventListener('blur', this.resetFocus);
 	}
+
+	focusOnSelectWidget = (widgetRef: DivRef) => () => {
+		const {current: widget} = widgetRef;
+		const {current: container} = this.gridContainerRef;
+
+		if (!resizer.isFullSize() && container && widget) {
+			const top = widget.getBoundingClientRect().top - container.getBoundingClientRect().top;
+			container.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
+		}
+	};
 
 	handleClick = (focusedWidget: string) => {
 		const {focusedWidget: currentFocusedWidget} = this.state;
@@ -69,11 +79,12 @@ export class DashboardContent extends Component<Props, State> {
 
 	handleToggleSwipePanel = () => this.setState({swipedPanel: !this.state.swipedPanel});
 
-	handleWidgetSelect = (widgetId: string) => {
-		const {selectWidget, selectedWidget} = this.props;
+	handleWidgetSelect = (id: string, ref: DivRef) => {
+		const {editMode, selectWidget, selectedWidget} = this.props;
 
-		if (widgetId !== selectedWidget) 	{
-			selectWidget(widgetId);
+		if (id !== selectedWidget) 	{
+			const callback = editMode ? null : this.focusOnSelectWidget(ref);
+			selectWidget(id, callback);
 		}
 
 		this.setState({swipedPanel: false});
@@ -105,9 +116,10 @@ export class DashboardContent extends Component<Props, State> {
 
 		if (current) {
 			const {paddingLeft, paddingRight} = getComputedStyle(current);
-			const width: number = Math.round(current.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight));
+			const width: number = Math.round(current.offsetWidth - parseFloat(paddingLeft) - parseFloat(paddingRight));
 
 			this.setState({width});
+			resizer.resize();
 		}
 	};
 

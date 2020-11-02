@@ -3,8 +3,8 @@ import AutoUpdateButton from 'containers/AutoUpdateButton';
 import {Button, ButtonGroup} from 'components/atoms';
 import {createContextName} from 'utils/export/helpers';
 import {createSnapshot} from 'utils/export';
+import {DASHBOARD_HEADER_HEIGHT, EXPORT_LIST} from './constants';
 import {DropDownButton, ExportByEmailButton, IconButton, NavItem} from './components';
-import {EXPORT_LIST} from './constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
@@ -207,7 +207,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 	render () {
 		return (
-			<header className={styles.header}>
+			<header className={styles.header} style={{height: DASHBOARD_HEADER_HEIGHT}}>
 				<ul className={styles.nav}>
 					{this.renderSwitchDashboardButton()}
 				</ul>

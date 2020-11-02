@@ -13,7 +13,7 @@ export type ConnectedFunctions = {
 	editWidgetChunkData: (widget: Widget, chunkData: Object) => ThunkAction,
 	fetchBuildData: (widget: Widget) => ThunkAction,
 	removeWidget: (widgetId: string) => ThunkAction,
-	selectWidget: (widgetId: string) => ThunkAction,
+	selectWidget: (widgetId: string, callback: Function) => ThunkAction,
 	updateWidget: Widget => Object
 };
 

@@ -11,6 +11,9 @@ const EXPORT_LIST = [
 	}
 ];
 
+const DASHBOARD_HEADER_HEIGHT = 52;
+
 export {
+	DASHBOARD_HEADER_HEIGHT,
 	EXPORT_LIST
 };
