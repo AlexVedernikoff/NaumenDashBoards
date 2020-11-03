@@ -4,7 +4,8 @@ import type {Point} from 'types/point';
 type OwnProps = {};
 
 export type ConnectedProps = {
-	points: Array<Point>
+	points: Array<Point>,
+	timeUpdate: number
 };
 
 export type ConnectedFunctions = {};

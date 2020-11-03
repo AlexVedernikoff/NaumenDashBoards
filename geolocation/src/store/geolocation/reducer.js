@@ -22,14 +22,16 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				showSinglePoint: false,
 				staticPoints: action.payload.staticPoints,
 				staticGroups: action.payload.firstCall ? action.payload.staticGroups.map(group => ({...group, checked: true})) : [...state.staticGroups],
-				success: true
+				success: true,
+				timeUpdate: new Date().getTime()
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {
 				...state,
 				dynamicPoints: action.payload,
 				loading: false,
-				showSinglePoint: false
+				showSinglePoint: false,
+				timeUpdate: new Date().getTime()
 			};
 		case GEOLOCATION_EVENTS.TOGGLE_FILTER:
 			return {
@@ -38,7 +40,8 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					...state.controls,
 					filterOpen: !state.controls.filterOpen,
 					panelOpen: false
-				}
+				},
+				showSinglePoint: false
 			};
 		case GEOLOCATION_EVENTS.TOGGLE_PANEL:
 			return {
@@ -61,6 +64,7 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				...state,
 				controls: {
 					...state.controls,
+					filterOpen: false,
 					panelOpen: true
 				},
 				panelShow: action.payload.type,

@@ -13,7 +13,7 @@ export class CircleMarker extends Component<Props, State> {
 				center={[latitude, longitude]}
 				fillColor={color}
 				stroke={false}
-				radius={accuracy}
+				radius={accuracy || 20}
 			/>
 		);
 	}

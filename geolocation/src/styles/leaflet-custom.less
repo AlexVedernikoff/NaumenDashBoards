@@ -56,6 +56,19 @@ body {
 	width: 36px;
 }
 
+.customMarker {
+	outline: none;
+}
+
+.customMarker.active {
+	/**
+	* Для выдвижения активного маркера на первый план используем z-index
+	* По-умолчанию z-index для маркеров задается библиотекой leaflet, причем значения z-index динамические
+	* Путем просмотра значений, было установлено, что z-index для отрисованных маркеров < 1000
+	**/
+	z-index: 1000 !important;
+}
+
 .dynamic {
 	margin-top: -12px;
 	margin-left: -12px;
@@ -144,10 +157,6 @@ html, body, #root {
 	margin-bottom: 48px;
 }
 
-.leaflet-popup-content {
-    width: 320px !important;
-}
-
 .leaflet-popup-content-wrapper {
 	padding: 0;
 }
@@ -165,4 +174,8 @@ html, body, #root {
 .leaflet-touch-zoom > div:nth-child(3),
 .leaflet-touch-zoom > div:nth-child(4) {
 	display: none;
+}
+
+.leaflet-top.leaflet-right {
+	top: 4px;
 }

@@ -82,7 +82,9 @@ const changeState = async (uuid: string, states: Array<string>): Promise<string 
 	try {
 		result = await jsApi.forms.changeState(uuid, states);
 	} catch (err) {
-		notify('common', 'info', err);
+		const message = err.toString();
+
+		notify('common', 'info', message);
 	}
 	return result || Promise.resolve(null);
 };
@@ -94,7 +96,9 @@ const changeResponsible = async (uuid: string): Promise<string | null> => {
 	try {
 		return await jsApi.forms.changeResponsible(uuid);
 	} catch (err) {
-		notify('common', 'info', err);
+		const message = err.toString();
+
+		notify('common', 'info', message);
 	}
 	return result || Promise.resolve(null);
 };

@@ -98,5 +98,6 @@ export type GeolocationState = {
 	singlePoint: Point | null,
 	staticGroups: Array<StaticGroup>,
 	staticPoints: Array<Point>,
-	success: boolean
+	success: boolean,
+	timeUpdate: number
 };

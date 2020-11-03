@@ -3,7 +3,6 @@ import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import getLatLngBounds from 'helpers/bound';
 import {reloadGeolocation, resetSinglePoint} from 'store/geolocation/actions';
-import {filterByGroup} from 'helpers/marker';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
@@ -12,16 +11,15 @@ import {filterByGroup} from 'helpers/marker';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {dynamicPoints, showSinglePoint, singlePoint, loading, staticGroups, staticPoints} = geolocation;
-	const points = filterByGroup(staticPoints, staticGroups);
-	const bounds = [].concat(dynamicPoints, points);
-	const showSingle = (singlePoint) => !!singlePoint.geoposition;
+	const {controls, dynamicPoints, timeUpdate, staticPoints} = geolocation;
+	const bounds = [].concat(dynamicPoints, staticPoints);
+	const {filterOpen, panelOpen} = controls;
+	const panelRightPadding = (filterOpen || panelOpen) ? 400 : 0;
 
 	return {
 		bounds: getLatLngBounds(bounds),
-		loading,
-		showSinglePoint: (showSinglePoint && singlePoint) ? showSingle(singlePoint) : false,
-		singlePoint
+		panelRightPadding,
+		timeUpdate
 	};
 };
 

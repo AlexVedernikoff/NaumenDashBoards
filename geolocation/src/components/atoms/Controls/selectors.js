@@ -5,14 +5,14 @@ import {fetchGeolocation, reloadGeolocation, toggleFilter, togglePanel} from 'st
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {controls, staticGroups} = geolocation;
+	const {controls, loading, staticGroups} = geolocation;
 	const {groupingMethodName, updatePointsMode} = geolocation.params;
-	const filterShow = !!groupingMethodName;
+	const filterShow = !!(groupingMethodName && staticGroups.length);
 
 	return {
 		filterActive: staticGroups.some(item => !item.checked),
 		filterOpen: controls.filterOpen,
-		filterShow,
+		filterShow: loading ? true : filterShow,
 		panelOpen: controls.panelOpen,
 		updatePointsMode
 	};

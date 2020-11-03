@@ -1,15 +1,18 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {filterByGroupInPanel} from 'helpers/marker';
+import {filterInSinglePoint, filterByGroupInPanel} from 'helpers/marker';
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {dynamicPoints, panelShow, showSinglePoint, singlePoint, staticGroups, staticPoints} = geolocation;
-	const points = panelShow === 'dynamic' ? dynamicPoints : filterByGroupInPanel(staticPoints, staticGroups);
+	const {dynamicPoints, panelShow, params, showSinglePoint, singlePoint, staticGroups, staticPoints, timeUpdate} = geolocation;
+	const {groupingMethodName} = params;
+	const pointsAll = panelShow === 'dynamic' ? dynamicPoints : filterByGroupInPanel(staticPoints, staticGroups, groupingMethodName);
+	const points = (showSinglePoint && singlePoint) ? filterInSinglePoint(singlePoint, staticGroups, groupingMethodName) : pointsAll;
 
 	return {
-		points: (showSinglePoint && singlePoint) ? [singlePoint] : points
+		points,
+		timeUpdate
 	};
 };
 

@@ -11,7 +11,7 @@ import React, {Component} from 'react';
 export class PointsList extends Component<Props, State> {
 	renderDynamicMarker = (point: Point, key: number) => <PointDynamic point={point} key={key} />;
 
-	renderStaticMarker = (point: Point, key: number) => point.data.length === 1 ? <PointStatic point={point} key={key} /> : <PointMultiple point={point} key={key} />;
+	renderStaticMarker = (point: Point) => point.data.length === 1 ? <PointStatic point={point} key={point.data[0].uuid} /> : <PointMultiple point={point} key={point.data[0].uuid} />;
 
 	render () {
 		const {dynamicPoints, staticPoints} = this.props;

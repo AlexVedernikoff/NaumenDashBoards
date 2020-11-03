@@ -48,7 +48,7 @@ export class PanelPointHeader extends Component<Props, State> {
 
 	renderAction = (action: Action) => {
 		const {inPlace, link, name, states, type} = action;
-		const target = !inPlace ? '_blank' : '';
+		const target = !inPlace ? '_blank' : '_top';
 
 		switch (type) {
 			case 'open_link':
@@ -103,20 +103,23 @@ export class PanelPointHeader extends Component<Props, State> {
 
 	renderKebab = () => {
 		const {openAction} = this.state;
+		const {showKebab} = this.props;
 
 		const kebabContinerCN = cn({
 			[styles.kebabContainer]: true,
 			[styles.kebabContainerActive]: openAction
 		});
 
-		return (
-			<div className={kebabContinerCN} onClick={this.openActions} onMouseLeave={this.handleMouseOut}>
-				<div className={styles.kebabIcon} title="Действия">
-					<KebabIcon />
+		if (showKebab) {
+			return (
+				<div className={kebabContinerCN} onClick={this.openActions} onMouseLeave={this.handleMouseOut}>
+					<div className={styles.kebabIcon} title="Действия">
+						<KebabIcon />
+					</div>
+					{this.renderActions()}
 				</div>
-				{this.renderActions()}
-			</div>
-		);
+			);
+		}
 	};
 
 	componentDidUpdate () {
@@ -129,15 +132,13 @@ export class PanelPointHeader extends Component<Props, State> {
 	}
 
 	render () {
-		const {showKebab, header, statusColor} = this.props;
+		const {header, statusColor} = this.props;
 
 		return (
-			<div>
-				<div className={styles.contentHeaderContainer}>
-					<div className={styles.contentStatus} style={{background: statusColor}}/>
-					{this.renderHeader(header)}
-					{showKebab && this.renderKebab()}
-				</div>
+			<div className={styles.contentHeaderContainer}>
+				<div className={styles.contentStatus} style={{background: statusColor}}/>
+				{this.renderHeader(header)}
+				{this.renderKebab()}
 			</div>
 		);
 	}

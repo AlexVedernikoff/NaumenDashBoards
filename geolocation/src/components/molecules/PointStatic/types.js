@@ -20,5 +20,6 @@ export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
 
 export type State = {
 	open: boolean,
+	timeoutId: TimeoutID | null,
 	type: IconName
 };

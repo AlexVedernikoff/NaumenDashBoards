@@ -41,16 +41,19 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 		}
 
 		const {errors, staticGroups} = markers;
-		const {params} = getState().geolocation;
-		const {colorStaticPoint, groupingMethodName} = params;
-		const found = staticGroups.find(group => group.name === 'Без группы');
 
 		if (errors.length) {
 			const label = errors.join(', ') + '.';
 			notify('common', 'info', label);
 		}
-		if (staticGroups.length && !found && groupingMethodName) {
-			staticGroups.push({name: 'Без группы', color: colorStaticPoint, code: null});
+		if (firstCall) {
+			const {params} = getState().geolocation;
+			const {colorStaticPoint, groupingMethodName} = params;
+			const found = staticGroups.find(group => group.name === 'Без группы');
+
+			if (staticGroups.length && !found && groupingMethodName) {
+				staticGroups.push({name: 'Без группы', color: colorStaticPoint, code: null});
+			}
 		}
 		dispatch(setData(markers, firstCall));
 	} catch (error) {

@@ -16,7 +16,7 @@ export class Filter extends Component<Props, State> {
 		return (
 			<div className={styles.filterBtnContainer}>
 				<div onClick={selectAllGroups}>Выбрать все</div>
-				<div onClick={resetAllGroups}>Снять выбор со всех</div>
+				<div onClick={resetAllGroups}>Снять выбор</div>
 			</div>
 		);
 	}

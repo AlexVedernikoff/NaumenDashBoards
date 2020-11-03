@@ -15,15 +15,29 @@ export class PointDynamic extends Component<Props, State> {
 
 		this.state = {
 			open: false,
+			/**
+			 * Таймаут используется для устранения эффекта мерцания маркера при hover
+			 * Перерискова и вывод изображения маркера занимает некоторое время, из-за это мы получаем множество смен событий onMouseOver и onMouseOut
+			 * **/
+			timeoutId: null,
 			type: 'dynamic'
 		};
 	}
 
 	renderCircle = (geoposition: Geoposition, color: string) => (<CircleMarker geoposition={geoposition} color={color} />);
 
-	handleMouseOver = () => this.setState({type: 'dynamicHover'});
+	handleMouseOver = () => {
+		clearTimeout(this.state.timeoutId);
+		this.setState({type: 'dynamicHover'});
+	};
 
-	handleMouseOut = () => !this.state.open && this.setState({type: 'dynamic'});
+	handleMouseOut = () => {
+		if (!this.state.open) {
+			const timeoutId = setTimeout(() => this.setState({type: 'dynamic'}), 100);
+
+			this.setState({timeoutId});
+		}
+	}
 
 	showSingle = () => () => {
 		const {point, setSinglePoint} = this.props;
@@ -31,6 +45,14 @@ export class PointDynamic extends Component<Props, State> {
 		this.setState({open: true});
 		setSinglePoint(point);
 	};
+
+	shouldComponentUpdate (nextProps: Props, nextState: State) {
+		if (nextProps.active !== this.props.active || nextProps.color !== this.props.color || nextState.type !== this.state.type) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	componentDidUpdate (prevProps: Props) {
 		const {active} = this.props;

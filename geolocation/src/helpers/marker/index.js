@@ -27,7 +27,7 @@ export const colorActive = (date: string, params: Params): string => {
  * @returns {string} - Цвет из группы для статической точки.
 */
 export const colorGroup = (group: GroupCode, staticGroups: Array<StaticGroup>): string => {
-	const found = staticGroups.find(item => item.code === group);
+	const found = staticGroups.find(item => (item.code === group && item.checked));
 
 	return found ? found.color : '';
 };
@@ -54,6 +54,17 @@ export const colorMultipleGroup = (data: Array<PointData>, staticGroups: Array<S
 	return '';
 };
 
+const filterPointData = (pointData: Array<PointData>, staticGroups: Array<StaticGroup>): Array<PointData> => {
+	const activeGroups = [];
+
+	staticGroups.forEach(group => {
+		if (group.checked) {
+			activeGroups.push(group.code);
+		}
+	});
+	return pointData.filter(item => activeGroups.includes(item.group));
+};
+
 /**
  * Возвращает массив отфильтрованных статических точек.
  * @constructor
@@ -61,22 +72,23 @@ export const colorMultipleGroup = (data: Array<PointData>, staticGroups: Array<S
  * @param {Array<StaticGroup>} staticGroups - Массив статических групп.
  * @returns {Array<Point>} - Массив статических точек.
 */
-export const filterByGroup = (staticPoints: Array<Point>, staticGroups: Array<StaticGroup>) => {
+export const filterByGroup = (staticPoints: Array<Point>, staticGroups: Array<StaticGroup>, groupingMethodName: string) => {
 	const points = [];
 
-	staticGroups.forEach(group => {
-		staticPoints.forEach(staticPoint => {
-			if (group.checked) {
-				const {data, geoposition} = staticPoint;
+	if (!groupingMethodName || groupingMethodName === '' || staticGroups.length === 0) {
+		return staticPoints;
+	}
 
-				if (geoposition) {
-					const found = data.find(dataPoint => group.code === dataPoint.group);
+	staticPoints.forEach(staticPoint => {
+		const {data, geoposition} = staticPoint;
 
-					found && points.push(staticPoint);
-				}
-			}
-		});
+		if (geoposition) {
+			const pointData = filterPointData(data, staticGroups);
+
+			pointData.length && points.push({...staticPoint, data: pointData});
+		}
 	});
+
 	return points;
 };
 
@@ -85,11 +97,15 @@ export const filterByGroup = (staticPoints: Array<Point>, staticGroups: Array<St
  * @constructor
  * @param {Array<Point>} staticPoints - Массив стаических точек.
  * @param {Array<StaticGroup>} staticGroups - Массив статических групп.
+ * @param {string} groupingMethodName - Метод группировки для статических точек.
  * @returns {Array<Point>} - Массив статических точек.
 */
-export const filterByGroupInPanel = (staticPoints: Array<Point>, staticGroups: Array<StaticGroup>) => {
+export const filterByGroupInPanel = (staticPoints: Array<Point>, staticGroups: Array<StaticGroup>, groupingMethodName: string) => {
 	const points = [];
 
+	if (!groupingMethodName || groupingMethodName === '' || staticGroups.length === 0) {
+		return staticPoints;
+	}
 	staticGroups.forEach(group => {
 		staticPoints.forEach(staticPoint => {
 			if (group.checked) {
@@ -104,6 +120,26 @@ export const filterByGroupInPanel = (staticPoints: Array<Point>, staticGroups: A
 		});
 	});
 	return points;
+};
+
+/**
+ * Возвращает кластерные точки с отсортированными и отфильтрованными данными, если задан метод группировки.
+ * @constructor
+ * @param {Point} staticPoints - Статическая точка для показа в панели.
+ * @param {Array<StaticGroup>} staticGroups - Массив статических групп.
+ * @param {String} groupingMethodName - Метод группировки для статических точек.
+ * @returns {Array<Point>} - Массив из кластерной точки с отсортироваными и отфильтрованными данными.
+*/
+export const filterInSinglePoint = (singlePoint: Point, staticGroups: Array<StaticGroup>, groupingMethodName: string) => {
+	const {data} = singlePoint;
+
+	if (data.length > 1) {
+		const point = filterByGroupInPanel([singlePoint], staticGroups, groupingMethodName);
+
+		return point;
+	} else {
+		return [singlePoint];
+	}
 };
 
 export const checkActivePoint = (point: Point, singlePoint: Point) => {

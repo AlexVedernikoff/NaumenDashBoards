@@ -28,13 +28,14 @@ export const initialGeolocationState: GeolocationState = {
 		requestCurrentLocation: false,
 		staticPointsListName: 'Заявки',
 		timeIntervalInactivity: {length: 1200, interval: 'SECOND'},
-		updatePointsMode: 'getPoints'
+		updatePointsMode: 'getMap'
 	},
 	staticGroups: [],
 	staticPoints: [],
 	showSinglePoint: false,
 	singlePoint: null,
-	success: false
+	success: false,
+	timeUpdate: new Date().getTime()
 };
 
 export const defaultGeolocationAction: GeolocationAction = {

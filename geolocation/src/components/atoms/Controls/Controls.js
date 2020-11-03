@@ -22,18 +22,14 @@ export class Controls extends Component<Props, State> {
 	}
 
 	reloadActiveMarkers = () => {
-		const {fetchGeolocation, reloadGeolocation, setBounds, updatePointsMode} = this.props;
+		const {fetchGeolocation, reloadGeolocation, updatePointsMode} = this.props;
 
-		if (updatePointsMode === 'getPoints') {
-			toast.dismiss();
-			/*
-				Ждем закртыия всех toasts
-			*/
-			setTimeout(() => fetchGeolocation(), 500);
+		toast.dismiss();
+		if (updatePointsMode === 'getMap') {
+			fetchGeolocation();
 		} else {
 			reloadGeolocation();
 		}
-		setBounds();
 	};
 
 	openFilter = () => {
@@ -64,10 +60,7 @@ export class Controls extends Component<Props, State> {
 		const reloadIconColor = reloadHover ? activeColor : defaultColor;
 
 		return (
-			<div>
-				<Control position='topright'>
-					<div className={styles.controlIcon} />
-				</Control>
+			<div className={styles.controlsContainer}>
 				<Control position='topright'>
 					<div
 						className={styles.controlIcon}

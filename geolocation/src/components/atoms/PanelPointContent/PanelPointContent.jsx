@@ -12,7 +12,7 @@ export class PanelPointContent extends Component<Props, State> {
 
 		const optionCN = cn({
 			[styles.option]: true,
-			[styles.optionFlex]: presentation === 'right_of_label'
+			[styles.optionFull]: presentation === 'right_of_label'
 		});
 
 		const optionValueCN = cn({

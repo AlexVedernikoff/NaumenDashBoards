@@ -3,4 +3,4 @@ export type IconName = 'dynamic' | 'dynamicHover' | 'multiple' | 'multipleHover'
 export type MessageStyleType = 'error' | 'info';
 export type NotifyTemplateType = 'common' | 'error' | 'single';
 export type TimeInterval = 'SECOND' | 'MINUTE' | 'HOUR' | 'DAY' | 'WEEK';
-export type UpdatePointsMode = 'getPoints' | 'getLastGeopositions';
+export type UpdatePointsMode = 'getMap' | 'getLastGeopositions';

@@ -2,6 +2,7 @@
 import React from 'react';
 import styles from './Notify.less';
 import {toast, cssTransition} from 'react-toastify';
+import type {MessageStyleType, NotifyTemplateType} from 'types/helper';
 
 const transitionToast = cssTransition({
 	duration: 10
@@ -37,7 +38,7 @@ const getPreparedMessage = (notifyTemplateType: NotifyTemplateType, text: string
 };
 
 export const notify = (notifyTemplateType: NotifyTemplateType, messageStyleType: MessageStyleType, text: string = '') => {
-	const notifyMessage = getPreparedMessage(notifyTemplateType, text);
+	const notifyMessage = getPreparedMessage(notifyTemplateType, text.replace(/&quot;/g, '"'));
 
 	toast(notifyMessage, {
 		autoClose: false,

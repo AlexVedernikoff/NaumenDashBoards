@@ -13,13 +13,27 @@ export class PointStatic extends Component<Props, State> {
 
 		this.state = {
 			open: false,
+			/**
+			 * Таймаут используется для устранения эффекта мерцания маркера при hover
+			 * Перерискова и вывод изображения маркера занимает некоторое время, из-за это мы получаем множество смен событий onMouseOver и onMouseOut
+			 * **/
+			timeoutId: null,
 			type: 'static'
 		};
 	}
 
-	handleMouseOver = () => this.setState({type: 'staticHover'});
+	handleMouseOver = () => {
+		clearTimeout(this.state.timeoutId);
+		this.setState({type: 'staticHover'});
+	}
 
-	handleMouseOut = () => !this.state.open && this.setState({type: 'static'});
+	handleMouseOut = () => {
+		if (!this.state.open) {
+			const timeoutId = setTimeout(() => this.setState({type: 'static'}), 100);
+
+			this.setState({timeoutId});
+		}
+	}
 
 	showSingle = () => () => {
 		const {point, setSinglePoint} = this.props;
@@ -27,6 +41,14 @@ export class PointStatic extends Component<Props, State> {
 		this.setState({open: true});
 		setSinglePoint(point);
 	};
+
+	shouldComponentUpdate (nextProps: Props, nextState: State) {
+		if (nextProps.active !== this.props.active || nextState.type !== this.state.type) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	componentDidUpdate (prevProps: Props) {
 		const {active} = this.props;

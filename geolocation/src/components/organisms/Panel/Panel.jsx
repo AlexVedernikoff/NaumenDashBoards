@@ -15,10 +15,8 @@ export class Panel extends Component<Props, State> {
 		this.panelContainerRef = React.createRef();
 	}
 
-	componentDidUpdate (prevProps: Props) {
-		const {showSinglePoint} = this.props;
-
-		if (!prevProps.showSinglePoint && showSinglePoint && this.panelContainerRef.current) {
+	componentDidUpdate () {
+		if (this.panelContainerRef.current) {
 			this.panelContainerRef.current.scrollTop = 0;
 		}
 	}

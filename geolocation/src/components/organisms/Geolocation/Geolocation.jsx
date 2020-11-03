@@ -4,7 +4,6 @@ import 'styles/styles.less';
 import Controls from 'components/atoms/Controls';
 import Copyright from 'components/atoms/Copyright';
 import Filter from 'components/molecules/Filter';
-import L from 'leaflet';
 import PointsList from 'components/molecules/PointsList';
 import {Map as LeafletMap} from 'react-leaflet';
 import Panel from 'components/organisms/Panel';
@@ -18,21 +17,7 @@ export class Geolocation extends Component<Props, State> {
 	constructor (props: Props) {
 		super(props);
 
-		this.state = {
-			reloadBound: false
-		};
-
 		this.mapRef = React.createRef();
-	}
-
-	reloadBound = () => this.setState({reloadBound: true});
-
-	centerOnSinglePoint () {
-		const {singlePoint} = this.props;
-		const {geoposition} = singlePoint;
-		const {latitude, longitude} = geoposition;
-
-		this.mapRef.current.leafletElement.panTo(new L.LatLng(latitude, longitude));
 	}
 
 	resetSinglePoint = () => () => {
@@ -42,18 +27,10 @@ export class Geolocation extends Component<Props, State> {
 	};
 
 	componentDidUpdate (prevProps: Props) {
-		const {bounds, loading, showSinglePoint} = this.props;
-		const {reloadBound} = this.state;
+		const {bounds, panelRightPadding, timeUpdate} = this.props;
 
-		if (showSinglePoint) {
-			this.centerOnSinglePoint();
-		} else {
-			this.mapRef.current.leafletElement.fitBounds(bounds);
-		}
-
-		if (prevProps.loading !== loading || reloadBound) {
-			this.mapRef.current.leafletElement.fitBounds(bounds);
-			this.setState({reloadBound: false});
+		if (prevProps.timeUpdate !== timeUpdate) {
+			this.mapRef.current.leafletElement.fitBounds(bounds, {paddingBottomRight: [panelRightPadding, 0]});
 		}
 	}
 
@@ -75,7 +52,7 @@ export class Geolocation extends Component<Props, State> {
 					zoomControl={false}
 				>
 					<PointsList />
-					<Controls setBounds={this.reloadBound} />
+					<Controls />
 					<Copyright />
 				</LeafletMap>
 				<Filter />

@@ -13,13 +13,31 @@ export class PointMultiple extends Component<Props, State> {
 
 		this.state = {
 			type: 'multiple',
+			/**
+			 * Таймаут используется для устранения эффекта мерцания маркера при hover
+			 * Перерискова и вывод изображения маркера занимает некоторое время, из-за это мы получаем множество смен событий onMouseOver и onMouseOut
+			 * **/
+			timeoutId: null,
 			open: false
 		};
 	}
 
-	handleMouseOver = () => this.state.type !== 'multipleHover' && this.setState({type: 'multipleHover'});
+	handleMouseOver = () => {
+		clearTimeout(this.state.timeoutId);
+		if (this.state.type !== 'multipleHover') {
+			const timeoutId = setTimeout(() => this.setState({type: 'multipleHover'}), 200);
 
-	handleMouseOut = () => !this.state.open && this.setState({type: 'multiple'});
+			this.setState({timeoutId});
+		}
+	};
+
+	handleMouseOut = () => {
+		if (!this.state.open) {
+			const timeoutId = setTimeout(() => this.setState({type: 'multiple'}), 300);
+
+			this.setState({timeoutId});
+		}
+	}
 
 	openPopup = () => this.setState({open: !this.state.open}, () => this.handleMouseOut());
 
@@ -29,6 +47,14 @@ export class PointMultiple extends Component<Props, State> {
 		this.setState({open: true});
 		setSinglePoint(point);
 	};
+
+	shouldComponentUpdate (nextProps: Props, nextState: State) {
+		if (nextProps.active !== this.props.active || nextProps.color !== this.props.color || nextProps.count !== this.props.count || nextState.type !== this.state.type) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	componentDidUpdate (prevProps: Props) {
 		const {active} = this.props;
