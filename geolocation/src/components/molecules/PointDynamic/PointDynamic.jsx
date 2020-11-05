@@ -47,7 +47,11 @@ export class PointDynamic extends Component<Props, State> {
 	};
 
 	shouldComponentUpdate (nextProps: Props, nextState: State) {
-		if (nextProps.active !== this.props.active || nextProps.color !== this.props.color || nextState.type !== this.state.type) {
+		const {latitude, longitude} = this.props.geoposition;
+
+		if (nextProps.active !== this.props.active || nextProps.color !== this.props.color || nextState.type !== this.state.type
+			|| nextProps.geoposition.latitude !== latitude || nextProps.geoposition.longitude !== longitude
+		) {
 			return true;
 		} else {
 			return false;

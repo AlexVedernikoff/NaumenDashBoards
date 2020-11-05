@@ -6,13 +6,10 @@
 		padding-right: 56px;
 	}
 
-	.panelContainer::-webkit-scrollbar {
-		display: none;
-	}
-
-	.panelContainer {
-		scrollbar-width: none;
-		-ms-overflow-style: none;
+	.panelContentWrap {
+		height: calc(100% - 48px);
+		overflow: hidden;
+		padding-top: 38px;
 	}
 
 	.panelContainer {
@@ -24,4 +21,14 @@
 		position: relative;
 		width: 320px;
 	}
+
+	.panelContentContainer {
+		background: #FFFFFF;
+		height: 100%;
+		margin-left: auto;
+		overflow-y: auto;
+		position: relative;
+		width: 320px;
+	}
+
 }

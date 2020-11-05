@@ -10,10 +10,14 @@ const props = (state: AppState, props: OwnProps): ConnectedProps => {
 	const {geoposition, pointData, type} = props;
 	let statusColor = '';
 
-	if (type === 'dynamic' && geoposition) {
-		const {date} = geoposition;
+	if (type === 'dynamic') {
+		if (geoposition) {
+			const {date} = geoposition;
 
-		statusColor = colorActive(date, params);
+			statusColor = colorActive(date, params);
+		} else {
+			statusColor = params.colorDynamicInactivePoint;
+		}
 	} else {
 		const {group} = pointData;
 		const {colorStaticPoint} = params;

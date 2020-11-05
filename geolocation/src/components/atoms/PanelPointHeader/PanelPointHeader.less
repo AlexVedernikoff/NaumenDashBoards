@@ -1,8 +1,8 @@
 :local {
 	.contentHeaderContainer {
-		border-bottom: 2px solid  #EFF3F8;;
 		display: flex;
-		height: 56px;
+		height: 54px;
+		position: relative;
 	}
 
 	.contentHeaderKebab {
@@ -16,36 +16,27 @@
 		font-size: 13px;
 		font-weight: 400;
 		height: 54px;
-		margin-left: 12px;
+		margin-left: 16px;
 		margin-right: 20px;
 		line-height: 15px;
 		width: 100%;
 	}
 
-	.contentStatus {
-		bottom: 2px;
-		margin: 2px;
-		left: 2px;
-		top: 2px;
-		width: 4px;
-	}
-
 	.kebabContainer {
 		align-items: center;
-		background: linear-gradient(270deg, #F4F4F4 0%, #F4F4F4 79.84%, rgba(244, 244, 244, 0.6) 92.5%, rgba(244, 244, 244, 0) 100%);
+		background: linear-gradient(270deg, #FFFFFF 0%, #FFFFFF 79.84%, rgba(255, 255, 255, 0.6) 92.5%, rgba(255, 255, 255, 0) 100%);
 		cursor: pointer;
-		color: #f4f4f4;
+		color: #ffffff;
 		height: 54px;
-		margin-top: 2px;
 		min-width: 60px;
 		position: absolute;
 		right: 12px;
 		text-align: end;
 	}
 
-	.kebabContainer:hover,
-	.kebabContainerActive {
-		color: #EBEBEB;
+	.kebabIcon:hover,
+	.kebabIconActive {
+		color: #D1D1D1;
 		z-index: 1;
 	}
 
@@ -54,12 +45,11 @@
 		box-shadow: 0px 2px 8px rgba(95, 95, 95, 0.2);
 		cursor: pointer;
 		color: #323232;
-		margin-top: 18px;
 		min-width: 240px;
 		padding-top: 6px;
 		padding-bottom: 6px;
 		position: absolute;
-		right: 4px;
+		right: 0px;
 		text-align: start;
 	}
 

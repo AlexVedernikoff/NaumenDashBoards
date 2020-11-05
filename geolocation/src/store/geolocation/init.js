@@ -22,7 +22,7 @@ export const initialGeolocationState: GeolocationState = {
 		colorDynamicActivePoint: '#4D92C8',
 		colorDynamicInactivePoint: '#828282',
 		colorStaticPoint: '#EB5757',
-		groupingMethodName: 'groupingMethodName',
+		groupingMethodName: '',
 		locationUpdateFrequency: {length: 60, interval: 'SECOND'},
 		pointsMethodName: 'pointsMethodName',
 		requestCurrentLocation: false,

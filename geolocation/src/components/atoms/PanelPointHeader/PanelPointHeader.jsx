@@ -105,15 +105,15 @@ export class PanelPointHeader extends Component<Props, State> {
 		const {openAction} = this.state;
 		const {showKebab} = this.props;
 
-		const kebabContinerCN = cn({
-			[styles.kebabContainer]: true,
-			[styles.kebabContainerActive]: openAction
+		const kebabIconCN = cn({
+			[styles.kebabIcon]: true,
+			[styles.kebabIconActive]: openAction
 		});
 
 		if (showKebab) {
 			return (
-				<div className={kebabContinerCN} onClick={this.openActions} onMouseLeave={this.handleMouseOut}>
-					<div className={styles.kebabIcon} title="Действия">
+				<div className={styles.kebabContainer} onMouseLeave={this.handleMouseOut}>
+					<div className={kebabIconCN} onClick={this.openActions} title="Действия">
 						<KebabIcon />
 					</div>
 					{this.renderActions()}
@@ -132,11 +132,10 @@ export class PanelPointHeader extends Component<Props, State> {
 	}
 
 	render () {
-		const {header, statusColor} = this.props;
+		const {header} = this.props;
 
 		return (
 			<div className={styles.contentHeaderContainer}>
-				<div className={styles.contentStatus} style={{background: statusColor}}/>
 				{this.renderHeader(header)}
 				{this.renderKebab()}
 			</div>

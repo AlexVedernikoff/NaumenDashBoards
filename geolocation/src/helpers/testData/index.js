@@ -30,6 +30,11 @@ export default {
 							label: 'Адрес',
 							value: 'г. Екатеринбург, ул. Фрунзе 12, подъезд 3',
 							presentation: 'under_label'
+						},
+						{
+							label: 'Клиент',
+							value: 'Оргтехника66 sdfs sdfsfsdfsfsdf',
+							presentation: 'full_length'
 						}
 					],
 					actions:
@@ -113,6 +118,11 @@ export default {
 							label: 'Адрес',
 							value: 'г. Екатеринбург, ул. Фрунзе 12, подъезд 3',
 							presentation: 'under_label'
+						},
+						{
+							label: 'Клиент',
+							value: 'Оргтехника66',
+							presentation: 'right_of_label'
 						}
 					],
 					actions:
@@ -153,7 +163,7 @@ export default {
 					[
 						{
 							label: 'Клиент',
-							value: 'Оргтехника66',
+							value: 'Оргтехникsdfsdf  wefwewe sfdf sdfs f sdf sdfs sdfsdfsd sfvs  sdfsf fsdfdfsg dfsggdgdfgdfgd dsfgdfgа66',
 							presentation: 'right_of_label'
 						},
 						{

@@ -12,7 +12,7 @@ import {reloadGeolocation, resetSinglePoint} from 'store/geolocation/actions';
 export const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
 	const {controls, dynamicPoints, timeUpdate, staticPoints} = geolocation;
-	const bounds = [].concat(dynamicPoints, staticPoints);
+	const bounds = [].concat(dynamicPoints, staticPoints).filter(point => point.geoposition !== null);
 	const {filterOpen, panelOpen} = controls;
 	const panelRightPadding = (filterOpen || panelOpen) ? 400 : 0;
 

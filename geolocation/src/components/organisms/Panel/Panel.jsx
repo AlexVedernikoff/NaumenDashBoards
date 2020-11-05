@@ -5,6 +5,7 @@ import PanelContent from 'components/molecules/PanelContent';
 import PanelHeader from 'components/molecules/PanelHeader';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
+import Scrollable from 'components/atoms/Scrollable';
 import styles from './Panel.less';
 
 export class Panel extends Component<Props, State> {
@@ -17,8 +18,16 @@ export class Panel extends Component<Props, State> {
 
 	componentDidUpdate () {
 		if (this.panelContainerRef.current) {
-			this.panelContainerRef.current.scrollTop = 0;
+			window.setTimeout(() => {
+				if (this.panelContainerRef.current) {
+					this.panelContainerRef.current.scrollTop = 0;
+				}
+			}, 100);
 		}
+	}
+
+	attachRef = (element: null | HTMLDivElement) => {
+		this.panelContainerRef.current = element;
 	}
 
 	render () {
@@ -27,9 +36,17 @@ export class Panel extends Component<Props, State> {
 		if (open) {
 			return (
 				<div className={styles.panelWrap}>
-					<div className={styles.panelContainer} ref={this.panelContainerRef}>
-						<PanelHeader />
-						<PanelContent />
+					<div >
+						<div className={styles.panelContainer}>
+							<PanelHeader />
+						</div>
+					</div>
+					<div className={styles.panelContentWrap}>
+						<div className={styles.panelContentContainer} >
+							<Scrollable scrollbarColors='grey' attachRef={this.attachRef}>
+								<PanelContent />
+							</Scrollable>
+						</div>
 					</div>
 				</div>
 			);

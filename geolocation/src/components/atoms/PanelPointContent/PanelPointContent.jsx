@@ -12,7 +12,8 @@ export class PanelPointContent extends Component<Props, State> {
 
 		const optionCN = cn({
 			[styles.option]: true,
-			[styles.optionFull]: presentation === 'right_of_label'
+			[styles.optionFull]: presentation === 'right_of_label',
+			[styles.optionUnderLabel]: presentation === 'under_label'
 		});
 
 		const optionValueCN = cn({
@@ -27,12 +28,16 @@ export class PanelPointContent extends Component<Props, State> {
 			[styles.optionHide]: presentation === 'full_length'
 		});
 
-		return (
-			<div className={optionCN}>
-				{label && <div className={optionLableCN}>{truncatedText(label)}</div>}
-				{value && <div className={optionValueCN}>{truncatedText(value)}</div>}
-			</div>
-		);
+		if (value) {
+			return (
+				<div className={optionCN}>
+					{label && <div className={optionLableCN}>{truncatedText(label)}</div>}
+					<div className={optionValueCN}>{truncatedText(value)}</div>
+				</div>
+			);
+		} else {
+			return null;
+		}
 	}
 }
 export default PanelPointContent;

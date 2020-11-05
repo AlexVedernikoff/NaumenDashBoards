@@ -43,7 +43,7 @@ export class PointStatic extends Component<Props, State> {
 	};
 
 	shouldComponentUpdate (nextProps: Props, nextState: State) {
-		if (nextProps.active !== this.props.active || nextState.type !== this.state.type) {
+		if (nextProps.active !== this.props.active || nextState.type !== this.state.type || nextProps.color !== this.props.color) {
 			return true;
 		} else {
 			return false;

@@ -6,7 +6,6 @@ type OwnProps = {
 	actions: Array<Action>,
 	header: string,
 	showKebab: boolean,
-	statusColor: string,
 	uuid: string
 };
 
