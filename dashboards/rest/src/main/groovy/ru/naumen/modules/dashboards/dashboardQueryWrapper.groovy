@@ -131,18 +131,17 @@ class QueryWrapper implements CriteriaWrapper
         def sc = api.selectClause
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
-        if (diagramType == DiagramType.TABLE)
+        if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
         {
-            if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
-            {
-                String attributeCode = attributeCodes.find()
-                column = sc.concat(column, sc.constant('-'), sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
-            }
-            //атрибут связанного типа
-            if(parameter.attribute.type == AttributeType.STRING_TYPE)
-            {
-                column = sc.concat(column, sc.constant('-'), sc.property(modules.dashboardQueryWrapper.UUID_CODE))
-            }
+            String attributeCode = attributeCodes.find()
+            column = sc.concat(column, sc.constant('-'), sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
+            criteria.addGroupColumn(sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
+        }
+        //атрибут связанного типа
+        if(parameter.attribute.type == AttributeType.STRING_TYPE)
+        {
+            column = sc.concat(column, sc.constant('-'), sc.property(modules.dashboardQueryWrapper.UUID_CODE))
+            criteria.addGroupColumn(sc.property(modules.dashboardQueryWrapper.UUID_CODE))
         }
         criteria.addColumn(column)
         criteria.addGroupColumn(column)
@@ -189,26 +188,6 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 else
                 {
-                    if (diagramType == DiagramType.TABLE && attributeCodes.every { it != 'metaClassFqn'})
-                    {
-                        if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
-                        {
-                            String attributeCode = attributeCodes.find()
-                            column = sc.concat(
-                                column,
-                                sc.constant('-'),
-                                sc.property("${ attributeCode }.${ modules.dashboardQueryWrapper.UUID_CODE }")
-                            )
-                        }
-                        else
-                        {
-                            column = sc.concat(
-                                column,
-                                sc.constant('-'),
-                                sc.property(modules.dashboardQueryWrapper.UUID_CODE)
-                            )
-                        }
-                    }
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
                 }
@@ -724,10 +703,10 @@ class QueryWrapper implements CriteriaWrapper
         return this
     }
 
-    List<List> getResult()
+    List<List> getResult(Boolean requestHasOneNoneAggregation = false)
     {
         return execute(criteria).collect {
-            it.collect() as List
+            requestHasOneNoneAggregation ? [it] : it.collect() as List
         }
     }
 
@@ -889,7 +868,11 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true, DiagramTy
         wrapper.filtering([it])
     }
 
-    return wrapper.result
+    //при таких условиях в запросе придёт массив с 1 уровнем вложенности [v1, v2. v3,..]
+    Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
+        it?.type == Aggregation.NOT_APPLICABLE
+    } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
+    return wrapper.getResult(requestHasOneNoneAggregation)
 }
 
 /**
