@@ -283,7 +283,7 @@ class Link
                         switch(attributeType)
                         {
                             case AttributeType.LINK_TYPES:
-                                if (value == 'Не заполнено')
+                                if (value == 'Не заполнено' || value == 'EMPTY')
                                 {
                                     result << [filterBuilder.OR(attr.code, 'null', null)]
                                 }
@@ -633,7 +633,7 @@ class Link
         // "fromTo", "lastN", "today", "timerStatusContains", "timerStatusNotContains", "backTimerDeadLineFromTo",
         // "backTimerDeadLineContains", "titleContains", "titleNotContains", "containsWithRemoved",
         // "notContainsWithRemoved", "containsUser", "containsSubject", "containsUserAttribute", "containsSubjectAttribute"
-        if (value == 'Не заполнено')
+        if (value == 'Не заполнено' || value == 'EMPTY')
         {
             return filterBuilder.OR(code, 'null', null)
         }
