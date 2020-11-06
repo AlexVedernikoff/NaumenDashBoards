@@ -56,11 +56,6 @@ export class ParametersBox extends PureComponent<Props> {
 		setDataFieldValue(index, FIELDS.parameters, [...this.getParameters(), getDefaultParameter()]);
 	};
 
-	handleClickSumInput = () => {
-		const {calcTotalRow, setFieldValue} = this.props;
-		setFieldValue(FIELDS.calcTotalRow, !calcTotalRow);
-	};
-
 	handleRemove = (index: number) => {
 		const {index: dataSetIndex, setDataFieldValue} = this.props;
 		const parameters = this.getParameters();
@@ -113,18 +108,13 @@ export class ParametersBox extends PureComponent<Props> {
 	};
 
 	renderRightControl = () => {
-		const {calcTotalRow, renderAddInput, renderSumInput} = this.props;
-		const sumInputProps = {
-			active: calcTotalRow,
-			onClick: this.handleClickSumInput
-		};
+		const {renderAddInput} = this.props;
 		const addInputProps = {
 			onClick: this.handleClickAddInput
 		};
 
 		return (
 			<Fragment>
-				{renderSumInput(sumInputProps)}
 				{renderAddInput(addInputProps)}
 			</Fragment>
 		);

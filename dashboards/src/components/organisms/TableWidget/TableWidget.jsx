@@ -2,7 +2,8 @@
 import {Cell} from 'components/organisms/Table/components';
 import type {CellConfigProps, OnClickCellProps} from 'components/organisms/Table/types';
 import type {Column, Props, State} from './types';
-import {COLUMN_TYPES, ID_ACCESSOR} from './constants';
+import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
+import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce} from 'src/helpers';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
@@ -12,7 +13,6 @@ import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers'
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {Table} from 'components/organisms';
-import type {TableSorting} from 'store/widgets/data/types';
 import type {ValueProps} from 'components/organisms/Table/components/Cell/types';
 
 export class TableWidget extends PureComponent<Props, State> {
@@ -40,7 +40,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		return row || id === 1 ? row : this.findRow(id - 1, accessor);
 	};
 
-	handleChangeColumnWidth = (columnsRatioWidth: Array<number>) => {
+	handleChangeColumnWidth = (columnsRatioWidth: ColumnsRatioWidth) => {
 		const {onUpdate, widget} = this.props;
 		onUpdate({...widget, columnsRatioWidth});
 	};
@@ -51,50 +51,45 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	handleClickDataCell = (e: MouseEvent, props: OnClickCellProps) => {
-		const {column, row: currentRow} = props;
+		const {column, row} = props;
+		const {attribute, type} = column;
+		const {BREAKDOWN, INDICATOR} = COLUMN_TYPES;
 
-		if (column.type === COLUMN_TYPES.INDICATOR && currentRow) {
+		if ((type === INDICATOR || type === BREAKDOWN) && row) {
 			const {onDrillDown, widget} = this.props;
 			const {columns} = this.state;
 			const mixin = createDrillDownMixin(widget);
-			let currentGroupIndex = columns.findIndex(column => this.isGroupColumn(column) && column.accessor in currentRow);
+			const dataColumns = columns.filter(this.isGroupColumn);
 
-			while (currentGroupIndex > -1 && this.isGroupColumn(columns[currentGroupIndex])) {
-				const {accessor, attribute, group} = columns[currentGroupIndex];
-				// $FlowFixMe
-				const row = this.findRow(currentRow[ID_ACCESSOR], accessor);
-
-				if (row) {
-					const {[accessor]: value} = row;
-					mixin.title = `${mixin.title}. ${value}`;
-
-					mixin.filters.push({
-						attribute,
-						group,
-						value
-					});
-				}
-
-				currentGroupIndex--;
+			if (type === BREAKDOWN) {
+				dataColumns.push(column);
 			}
+
+			dataColumns.forEach(column => {
+				const {accessor, group, header, type} = column;
+				const {[accessor]: rowValue = EMPTY_VALUE} = row;
+				const value = type === BREAKDOWN ? header : rowValue;
+				mixin.title = `${mixin.title}. ${value}`;
+
+				mixin.filters.push({
+					attribute,
+					group,
+					value
+				});
+			});
 
 			onDrillDown(widget, 0, mixin);
 		}
 	};
 
-	isGroupColumn = (column: Column) => {
-		const {BREAKDOWN, PARAMETER} = COLUMN_TYPES;
-		const {type} = column;
-
-		return type === PARAMETER || type === BREAKDOWN;
-	};
+	isGroupColumn = (column: Column) => column.type === COLUMN_TYPES.PARAMETER;
 
 	renderBodyCell = (props: CellConfigProps) => {
-		const {INDICATOR, PARAMETER} = COLUMN_TYPES;
+		const {BREAKDOWN, INDICATOR, PARAMETER} = COLUMN_TYPES;
 		const {aggregation, type} = props.column;
 		let Component = Cell;
 
-		if (type === INDICATOR && aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE) {
+		if ((type === INDICATOR || type === BREAKDOWN) && aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE) {
 			Component = this.renderIndicatorCell;
 		}
 

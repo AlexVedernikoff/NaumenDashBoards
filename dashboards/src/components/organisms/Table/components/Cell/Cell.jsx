@@ -1,6 +1,5 @@
 // @flow
 import cn from 'classnames';
-import {DEFAULT_COLUMN_WIDTH} from './constants';
 import type {DefaultProps, Props, ValueProps} from './types';
 import {DEFAULT_TABLE_VALUE, FONT_STYLES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import React, {PureComponent} from 'react';
@@ -18,7 +17,7 @@ export class Cell extends PureComponent<Props> {
 		textHandler: TEXT_HANDLERS.CROP,
 		tip: '',
 		value: '',
-		width: DEFAULT_COLUMN_WIDTH
+		width: null
 	};
 
 	components = {
@@ -83,10 +82,10 @@ export class Cell extends PureComponent<Props> {
 		});
 
 		return (
-			<td className={cellCN} onClick={this.handleClick} style={{color: fontColor, height: 32, textAlign}} title={tip} width={width}>
+			<div className={cellCN} onClick={this.handleClick} style={{color: fontColor, textAlign, width}} title={tip} >
 				{this.renderValue()}
 				{children}
-			</td>
+			</div>
 		);
 	}
 }

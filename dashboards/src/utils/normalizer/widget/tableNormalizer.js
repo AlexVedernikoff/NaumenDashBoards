@@ -11,7 +11,7 @@ import {
 } from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
-import {extend} from 'src/helpers';
+import {extend, isObject} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
@@ -114,7 +114,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 	return {
 		calcTotalColumn,
 		calcTotalRow,
-		columnsRatioWidth: array(widget[FIELDS.columnsRatioWidth]),
+		columnsRatioWidth: isObject(widget[FIELDS.columnsRatioWidth]) ? widget[FIELDS.columnsRatioWidth] : {},
 		computedAttrs: array(widget[FIELDS.computedAttrs]),
 		data: data.map(normalizeDataSet),
 		displayMode,

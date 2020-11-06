@@ -194,7 +194,7 @@ const createSummaryData = (widget: SummaryWidget | SpeedometerWidget) => {
 };
 
 const createTableData = (widget: TableWidget) => {
-	const {calcTotalColumn, calcTotalRow, showEmptyData, table, type} = widget;
+	const {calcTotalColumn, showEmptyData, table, type} = widget;
 	const {showRowNum} = table.body;
 	const data: Object = {};
 
@@ -227,7 +227,6 @@ const createTableData = (widget: TableWidget) => {
 
 	return {
 		calcTotalColumn,
-		calcTotalRow,
 		data,
 		showEmptyData,
 		showRowNum,

@@ -110,12 +110,12 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderDataSet = (set: DataSet, index: number) => {
 		const {values} = this.props;
-		const {calcTotalColumn, calcTotalRow} = values;
+		const {calcTotalColumn} = values;
 
 		return (
 			<Fragment>
 				{this.renderSourceBox(set, index)}
-				{this.renderParametersBox(set, index, calcTotalRow)}
+				{this.renderParametersBox(set, index)}
 				{this.renderIndicatorsBox(set, index, calcTotalColumn)}
 			</Fragment>
 		);
@@ -138,13 +138,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return null;
 	};
 
-	renderParametersBox = (set: DataSet, index: number, calcTotalRow: boolean) => (
-		<ParametersBox
-			calcTotalRow={calcTotalRow}
-			index={index}
-			renderAddInput={this.renderAddInput}
-			renderSumInput={this.renderSumInput}
-			set={set} />
+	renderParametersBox = (set: DataSet, index: number) => (
+		<ParametersBox index={index} renderAddInput={this.renderAddInput} set={set} />
 	);
 
 	renderSourceBox = (set: DataSet, index: number) => {

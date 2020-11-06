@@ -26,15 +26,16 @@ export class Body extends PureComponent<Props> {
 		return 0;
 	});
 
-	renderCell = (row: RowType, rowIndex: number) => (column: Column, columnIndex: number) => {
-		const {components, onClickCell, settings} = this.props;
+	renderCell = (row: RowType, rowIndex: number) => (column: Column) => {
+		const {columnsWidth, components, onClickCell, settings} = this.props;
 		const {defaultValue, textAlign, textHandler} = settings.body;
-		const width = this.props.columnsWidth[columnIndex];
-		const {BodyCell} = components;
 		const {accessor} = column;
+		const {BodyCell} = components;
+		const width = columnsWidth[accessor];
 
 		return (
 			<BodyCell
+				className={styles.cell}
 				column={column}
 				defaultValue={defaultValue.value}
 				key={accessor}
@@ -57,23 +58,23 @@ export class Body extends PureComponent<Props> {
 	};
 
 	render () {
-		const {columns, data, page, pageSize, sorting, width} = this.props;
-		const {column, type} = sorting;
+		const {data, page, pageSize, sorting, width} = this.props;
+		const {accessor, type} = sorting;
 		const start = pageSize * (page - 1);
 		let rows = data;
 		let height;
 
-		if (column !== null && columns[column]) {
-			rows = this.sort(data, columns[column].accessor, type === SORTING_TYPES.ASC);
+		if (accessor !== null) {
+			rows = this.sort(data, accessor, type === SORTING_TYPES.ASC);
 		}
 
 		rows = rows.slice(start, start + pageSize);
 		height = rows.length * ROW_HEIGHT;
 
 		return (
-			<tbody className={styles.container} style={{height, minWidth: width}}>
+			<div className={styles.container} style={{height, width}}>
 				{rows.map(this.renderRow)}
-			</tbody>
+			</div>
 		);
 	}
 }

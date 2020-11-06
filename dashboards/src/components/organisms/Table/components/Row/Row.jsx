@@ -6,9 +6,9 @@ import styles from './styles.less';
 export class Row extends PureComponent<Props> {
 	render () {
 		return (
-			<tr className={styles.row}>
+			<div className={styles.row}>
 				{this.props.children}
-			</tr>
+			</div>
 		);
 	}
 }

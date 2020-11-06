@@ -7,8 +7,8 @@ export type Props = {
 	columnIndex: number,
 	fontColor: string,
 	fontStyle?: FontStyle,
-	onChangeWidth: (width: number, index: number) => void,
-	onClick: (index: number) => void,
+	onChangeWidth: (width: number, column: Column) => void,
+	onClick: (column: Column) => void,
 	sorting?: SortingType,
 	value: string,
 	width: number

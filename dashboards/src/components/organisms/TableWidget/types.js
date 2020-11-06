@@ -9,6 +9,7 @@ export type Column = {
 	accessor: string,
 	aggregation: string,
 	attribute: Attribute,
+	columns?: Array<Column>,
 	footer: string,
 	group: Group,
 	header: string,

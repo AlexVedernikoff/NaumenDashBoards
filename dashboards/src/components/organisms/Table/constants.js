@@ -22,7 +22,7 @@ const DEFAULT_TABLE_SETTINGS = {
 };
 
 const DEFAULT_TABLE_SORTING = {
-	column: null,
+	accessor: null,
 	type: SORTING_TYPES.ASC
 };
 
