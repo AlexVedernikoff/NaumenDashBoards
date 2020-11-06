@@ -21,5 +21,6 @@ module.name_mapper='^images\/\(.*\)$' -> '<PROJECT_ROOT>/src/images/\1'
 module.name_mapper='^store\/\(.*\)$' -> '<PROJECT_ROOT>/src/store/\1'
 module.name_mapper='^store$' -> '<PROJECT_ROOT>/src/store/index.js'
 module.name_mapper='^containers\/\(.*\)$' -> '<PROJECT_ROOT>/src/containers/\1'
-
-
+module.name_mapper='^config\/\(.*\)$' -> '<PROJECT_ROOT>/config/\1'
+module.name_mapper='^utils\/\(.*\)$' -> '<PROJECT_ROOT>/src/utils/\1'
+module.name_mapper='^mock\/\(.*\)$' -> '<PROJECT_ROOT>/src/mock/\1'

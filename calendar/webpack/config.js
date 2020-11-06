@@ -7,10 +7,17 @@ const localIp = require('my-local-ip');
 const optimization = require('./optimization');
 const plugins = require('./plugins');
 const resolve = require('./resolve');
+const config = require('../config/dev.json');
 
 module.exports = {
 	devServer: {
-		host: localIp()
+		host: localIp(),
+		proxy: {
+			'/sd/services/rest/*': {
+				changeOrigin: true,
+				target: config.apiUrl
+			}
+		}
 	},
 	entry: {
 		'index': ['babel-polyfill', './src/index.js']

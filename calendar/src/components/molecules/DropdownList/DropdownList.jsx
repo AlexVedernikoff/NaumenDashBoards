@@ -3,11 +3,16 @@ import {DropDownList} from '@progress/kendo-react-dropdowns';
 import type {Props} from './types';
 import React from 'react';
 
-const DropdownList = ({label, data}: Props) => {
+const DropdownList = ({label, data, onChange: handleChange}: Props) => {
 	return (
 		<div>
 			<p>{label}</p>
-			<DropDownList data={data} textField="value" dataItemKey="id" />
+			<DropDownList
+				onChange={handleChange}
+				data={data}
+				textField="value"
+				dataItemKey="id"
+			/>
 		</div>
 	);
 };

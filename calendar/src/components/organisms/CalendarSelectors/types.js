@@ -1,7 +1,7 @@
 // @flow
 type SelectorRecord = {
-    id: string,
-    value: string
+		id: string,
+		value: string
 };
 
 type Location = SelectorRecord;

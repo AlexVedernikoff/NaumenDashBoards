@@ -1,5 +1,6 @@
 // @flow
-import type {ConnectedProps} from './types';
+import type {ConnectedFunctions, ConnectedProps} from './types';
+import {getCalendarList, getLocationList} from 'store/CalendarSelectors/actions';
 import type {State} from 'store/types';
 
 export const props = (state: State): ConnectedProps => {
@@ -12,4 +13,9 @@ export const props = (state: State): ConnectedProps => {
 		isLoading,
 		locationList
 	};
+};
+
+export const functions: ConnectedFunctions = {
+	getCalendarList,
+	getLocationList
 };
