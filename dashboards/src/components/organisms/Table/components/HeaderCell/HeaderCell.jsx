@@ -35,8 +35,8 @@ export class HeaderCell extends PureComponent<Props> {
 	}
 
 	handleClick = () => {
-		const {columnIndex, onClick} = this.props;
-		onClick(columnIndex);
+		const {column, onClick} = this.props;
+		onClick(column);
 	};
 
 	handleClickResizer = (event: SyntheticMouseEvent<HTMLDivElement>) => event.stopPropagation();
@@ -52,10 +52,10 @@ export class HeaderCell extends PureComponent<Props> {
 
 	mouseMove = (event: MouseEvent) => {
 		if (this.dragStart) {
-			const {columnIndex, onChangeWidth} = this.props;
+			const {column, onChangeWidth} = this.props;
 			const newWidth = Math.floor(Math.max(this.resizerOffset + event.pageX - this.cursorStart, MIN_WIDTH));
 
-			onChangeWidth(newWidth, columnIndex);
+			onChangeWidth(newWidth, column);
 		}
 	};
 
@@ -66,7 +66,7 @@ export class HeaderCell extends PureComponent<Props> {
 	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.ref} />;
 
 	render () {
-		const {column, fontColor, fontStyle, sorting, value, width} = this.props;
+		const {column, fontColor, fontStyle, sorting, value} = this.props;
 		const {ASC, DESC} = SORTING_TYPES;
 		const cellCN = cn({
 			[styles.cell]: true,
@@ -85,7 +85,6 @@ export class HeaderCell extends PureComponent<Props> {
 				textAlign={TEXT_ALIGNS.center}
 				tip={value}
 				value={value}
-				width={width}
 			>
 				{this.renderResizer()}
 			</Cell>

@@ -35,7 +35,7 @@ export class TableForm extends Component<TypedFormProps> {
 
 	updateWidget = (widget: Widget, values: Values): TableWidget => {
 		const {id} = widget;
-		let columnsRatioWidth = [];
+		let columnsRatioWidth = {};
 		let sorting = DEFAULT_TABLE_SORTING;
 
 		if (widget.type === WIDGET_TYPES.TABLE) {

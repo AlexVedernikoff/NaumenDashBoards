@@ -6,6 +6,7 @@ import type {Table, TableSorting} from 'store/widgets/data/types';
 
 export type Column = {
 	accessor: string,
+	columns?: Array<Column>,
 	footer: string,
 	header: string,
 	[string]: any
@@ -19,6 +20,7 @@ export type CellConfigProps = React$Config<CellProps, DefaultCellProps>;
 
 export type Components = $Shape<{
 	BodyCell: React$ComponentType<CellConfigProps>,
+	Cell: React$ComponentType<CellConfigProps>,
 	FooterCell: React$ComponentType<CellConfigProps>,
 	HeaderCell: React$ComponentType<HeaderProps>,
 	Row: React$ComponentType<RowProps>
@@ -32,22 +34,28 @@ export type OnClickCellProps = {
 
 export type OnClickCell = (event: MouseEvent, props: OnClickCellProps) => void;
 
+export type ColumnsWidth = {
+	[accessor: string]: number
+};
+
 export type Props = {
 	className: string,
 	columns: Array<Column>,
-	columnsRatioWidth: Array<number>,
-	components: Components,
+	columnsRatioWidth: ColumnsWidth,
+	components?: Components,
 	data: Array<Row>,
-	onChangeColumnWidth: (columnsWidth: Array<number>) => void,
-	onChangeSorting: (sorting: TableSorting) => void,
-	onClickDataCell: OnClickCell,
+	onChangeColumnWidth?: (columnsWidth: ColumnsWidth) => void,
+	onChangeSorting?: (sorting: TableSorting) => void,
+	onClickDataCell?: OnClickCell,
 	settings: Table,
 	sorting: TableSorting
 };
 
 export type State = {
-	columnsWidth: Array<number>,
+	columnsWidth: ColumnsWidth,
+	components: Components,
 	page: number,
 	pageSize: number,
-	width: number
+	sorting: TableSorting,
+	width: number | null
 };

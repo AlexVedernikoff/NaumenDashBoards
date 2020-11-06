@@ -11,7 +11,10 @@ const COLUMN_TYPES = {
 
 const ID_ACCESSOR: 'ID' = 'ID';
 
+const EMPTY_VALUE: 'EMPTY' = 'EMPTY';
+
 export {
 	COLUMN_TYPES,
+	EMPTY_VALUE,
 	ID_ACCESSOR
 };

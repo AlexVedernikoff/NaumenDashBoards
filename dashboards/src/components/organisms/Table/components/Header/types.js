@@ -1,14 +1,14 @@
 // @flow
-import type {Column, Components, Row} from 'Table/types';
+import type {Column, ColumnsWidth, Components, Row} from 'Table/types';
 import type {TableColumnHeader, TableSorting} from 'store/widgets/data/types';
 
 export type Props = {
 	columns: Array<Column>,
 	columnSettings: TableColumnHeader,
-	columnsWidth: Array<number>,
+	columnsWidth: ColumnsWidth,
 	components: Components,
 	data: Array<Row>,
-	onChangeColumnWidth: (width: number, index: number) => void,
+	onChangeColumnWidth: (width: number, column: Column) => void,
 	onChangeSorting: TableSorting => void,
 	sorting: TableSorting,
 	width: number

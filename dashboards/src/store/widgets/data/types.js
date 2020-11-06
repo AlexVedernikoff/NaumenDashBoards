@@ -313,7 +313,7 @@ export type SpeedometerWidget = {
 export type DefaultTableValue = $Keys<typeof DEFAULT_TABLE_VALUE>;
 
 export type TableSorting = {
-	column: number | null,
+	accessor: string | null,
 	type: SortingType
 };
 
@@ -367,11 +367,15 @@ export type Table = {
 	}
 };
 
+export type ColumnsRatioWidth = {
+	[accessor: string]: number
+};
+
 export type TableWidget = {
 	...BaseWidget,
 	calcTotalColumn: boolean,
 	calcTotalRow: boolean,
-	columnsRatioWidth: Array<number>,
+	columnsRatioWidth: ColumnsRatioWidth,
 	data: Array<TableData>,
 	showEmptyData: boolean,
 	sorting: TableSorting,
