@@ -2,14 +2,14 @@
 import {Button, FieldError, InfoPanel, Text} from 'components/atoms';
 import {createNewSubGroup} from './helpers';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {FormField} from 'components/molecules/GroupCreatingModal/components';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {InputRef} from 'src/components/types';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
-import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
+import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import React, {Component, createContext, createRef, Fragment} from 'react';
 import schema from './schema';

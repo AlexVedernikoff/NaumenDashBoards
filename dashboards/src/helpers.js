@@ -23,7 +23,7 @@ function debounce (func: Function, ms: number) {
  * @param {object} map - объект
  * @returns {Array<any>} - массив значений объекта
  */
-function getMapValues<K, T> (map: ({[K]: T})): Array<T> {
+function getMapValues<T> (map: $Shape<{[key: string]: T}>): Array<T> {
 	return Object.keys(map).map(key => map[key]);
 }
 

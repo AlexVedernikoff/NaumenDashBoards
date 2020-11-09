@@ -13,7 +13,7 @@ import {
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
 import {extend, getMapValues, isObject} from 'src/helpers';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 
 const mock: Object = Object.freeze({});

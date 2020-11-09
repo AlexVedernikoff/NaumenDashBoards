@@ -56,6 +56,7 @@ const COMBO: 'COMBO' = 'COMBO';
 const SPEEDOMETER: 'SPEEDOMETER' = 'SPEEDOMETER';
 const SUMMARY: 'SUMMARY' = 'SUMMARY';
 const TABLE: 'TABLE' = 'TABLE';
+const TEXT: 'TEXT' = 'TEXT';
 
 const WIDGET_TYPES = {
 	BAR,
@@ -68,7 +69,8 @@ const WIDGET_TYPES = {
 	PIE,
 	SPEEDOMETER,
 	SUMMARY,
-	TABLE
+	TABLE,
+	TEXT
 };
 
 // Возможные подтипы комбо-графика

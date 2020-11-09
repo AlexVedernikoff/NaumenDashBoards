@@ -10,7 +10,7 @@ import {
 } from './helpers';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
-import {FIELDS} from 'WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LegacyWidget} from './types';
 import type {SummaryData, SummaryWidget} from 'store/widgets/data/types';
 import uuid from 'tiny-uuid';

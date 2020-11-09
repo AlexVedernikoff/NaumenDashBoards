@@ -1,7 +1,7 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin} from './types';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDescriptorCases} from 'src/helpers';
 import {isSourceType} from 'store/sources/data/helpers';
 import {LINKS_EVENTS} from './constants';

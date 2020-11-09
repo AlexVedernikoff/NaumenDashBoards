@@ -4,6 +4,7 @@ import AutoUpdateButton from './AutoUpdateButton';
 import DashboardContent from './DashboardContent';
 import DashboardHeader from './DashboardHeader';
 import DashboardPanel from './DashboardPanel';
+import DiagramWidgetEditForm from './DiagramWidgetEditForm';
 import ExportByEmailForm from './ExportByEmailForm';
 import Speedometer from './Speedometer';
 import SpeedometerWidget from './SpeedometerWidget';
@@ -11,7 +12,6 @@ import Startup from './Startup';
 import Table from './Table';
 import TableWidget from './TableWidget';
 import WidgetAddPanel from './WidgetAddPanel';
-import WidgetFormPanel from './WidgetFormPanel';
 
 export {
 	AttributeCreatingModal,
@@ -19,12 +19,12 @@ export {
 	DashboardContent,
 	DashboardHeader,
 	DashboardPanel,
+	DiagramWidgetEditForm,
 	ExportByEmailForm,
 	Speedometer,
 	SpeedometerWidget,
 	Startup,
 	Table,
 	TableWidget,
-	WidgetAddPanel,
-	WidgetFormPanel
+	WidgetAddPanel
 };

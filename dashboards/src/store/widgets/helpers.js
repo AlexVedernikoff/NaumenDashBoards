@@ -11,7 +11,7 @@ import {
 } from './constants';
 import type {DiagramWidgetDataSet, Group, Widget} from './data/types';
 import {DISPLAY_MODE} from './data/constants';
-import {FIELDS} from 'WidgetFormPanel/constants';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import {store} from 'src';
 

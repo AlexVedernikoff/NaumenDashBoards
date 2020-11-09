@@ -21,7 +21,7 @@ import {
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
 import {COMBO_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DEFAULT_COMBO_Y_AXIS_SETTINGS} from 'utils/chart/constants';
-import {FIELDS} from 'WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';

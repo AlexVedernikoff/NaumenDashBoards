@@ -2,7 +2,7 @@
 import type {ApexOptions} from 'apexcharts';
 import type {CircleWidget} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getLegendOptions, getMetaClassLabel, valueFormatter} from './helpers';
 import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';

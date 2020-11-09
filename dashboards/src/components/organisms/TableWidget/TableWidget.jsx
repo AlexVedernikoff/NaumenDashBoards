@@ -10,7 +10,7 @@ import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce} from 'src/helpers';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import {FIELDS} from 'WidgetFormPanel/constants';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
 import React, {PureComponent} from 'react';

@@ -14,7 +14,7 @@ import type {ComboWidget} from 'store/widgets/data/types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
-import {FIELDS} from 'WidgetFormPanel/constants';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';

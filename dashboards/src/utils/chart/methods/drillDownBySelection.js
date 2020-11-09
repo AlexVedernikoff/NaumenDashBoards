@@ -4,7 +4,7 @@ import type {AxisWidget, Chart, CircleWidget, ComboWidget} from 'store/widgets/d
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
-import {FIELDS} from 'components/organisms/WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {store} from 'src';
 import type {ThunkAction} from 'store/types';
 import {transformGroupFormat} from 'store/widgets/helpers';

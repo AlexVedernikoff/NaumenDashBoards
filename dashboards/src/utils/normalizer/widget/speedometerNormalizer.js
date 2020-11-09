@@ -2,7 +2,7 @@
 import {array, header, string, templateName} from './helpers';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
-import {FIELDS} from 'WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import type {SpeedometerWidget} from 'store/widgets/data/types';
 
 const speedometerNormalizer = (widget: SpeedometerWidget): SpeedometerWidget => {

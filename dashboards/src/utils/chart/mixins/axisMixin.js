@@ -12,7 +12,7 @@ import {
 import type {AxisWidget} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
-import {FIELDS} from 'WidgetFormPanel/constants';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';

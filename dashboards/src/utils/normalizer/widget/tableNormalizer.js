@@ -12,7 +12,7 @@ import {
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {extend, isObject} from 'src/helpers';
-import {FIELDS} from 'WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
 import type {TableData, TableWidget} from 'store/widgets/data/types';

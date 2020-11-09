@@ -6,7 +6,7 @@ import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
 import {FormField} from 'components/molecules/GroupCreatingModal/components';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
-import {MAX_TEXT_LENGTH} from 'WidgetFormPanel/constants';
+import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';

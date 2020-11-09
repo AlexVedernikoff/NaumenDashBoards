@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
-import {FIELDS} from 'WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import uuid from 'tiny-uuid';

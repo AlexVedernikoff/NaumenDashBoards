@@ -2,7 +2,7 @@
 import axisNormalizer from './axisNormalizer';
 import circleNormalizer from './circleNormalizer';
 import comboNormalizer from './comboNormalizer';
-import {FIELDS} from 'WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LegacyWidget} from './types';
 import speedometerNormalizer from './speedometerNormalizer';
 import summaryNormalizer from './summaryNormalizer';

@@ -385,6 +385,27 @@ export type TableWidget = {
 	type: typeof WIDGET_TYPES.TABLE
 };
 
+// Text
+
+export type TextSettings = {
+	content: Object,
+	styleMap: Object,
+	textAlign: TextAlign
+};
+
+type Variables = {
+	[key: string]: string
+};
+
+export type TextWidget = {
+	displayMode: DisplayMode,
+	id: string,
+	text: string,
+	textSettings: TextSettings,
+	type: typeof WIDGET_TYPES.TEXT,
+	variables: Variables
+};
+
 export type Chart =
 	| AxisWidget
 	| CircleWidget
@@ -396,6 +417,11 @@ export type Widget =
 	| SpeedometerWidget
 	| SummaryWidget
 	| TableWidget
+;
+
+export type AnyWidget =
+	| Widget
+	| TextWidget
 ;
 
 export type DiagramWidgetDataSet =

@@ -1,5 +1,6 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
+import type {AnyWidget} from './types';
 import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
@@ -10,7 +11,6 @@ import {isObject} from 'src/helpers';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import normalizer from 'utils/normalizer';
-import type {Widget} from './types';
 
 /**
  * Добавляет новый виджет
@@ -56,10 +56,10 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): 
 
 /**
  * Сохраняет изменение данных виджета
- * @param {Widget} settings - данные формы редактирования
+ * @param {AnyWidget} settings - данные формы редактирования
  * @returns {ThunkAction}
  */
-const saveWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const saveWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
@@ -85,11 +85,11 @@ const saveWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch)
 
 /**
  * Сохраняет изменение части данных виджета
- * @param {Widget} widget - данные виджета
+ * @param {AnyWidget} widget - данные виджета
  * @param {object} chunkData - данные которые нужно изменить
  * @returns {ThunkAction}
  */
-const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const editWidgetChunkData = (widget: AnyWidget, chunkData: Object): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const payload = {
 			...getParams(),
@@ -112,10 +112,10 @@ const editWidgetChunkData = (widget: Widget, chunkData: Object): ThunkAction => 
 
 /**
  * Создает новый виджет
- * @param {Widget} settings - данные формы создания виджета
+ * @param {AnyWidget} settings - данные формы создания виджета
  * @returns {ThunkAction}
  */
-const createWidget = (settings: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
@@ -313,12 +313,12 @@ const resetWidget = () => ({
 	type: WIDGETS_EVENTS.RESET_WIDGET
 });
 
-const setCreatedWidget = (payload: Widget) => ({
+const setCreatedWidget = (payload: AnyWidget) => ({
 	payload,
 	type: WIDGETS_EVENTS.SET_CREATED_WIDGET
 });
 
-const setWidgets = (widgets: Array<Widget>): Object => {
+const setWidgets = (widgets: Array<AnyWidget>): Object => {
 	const payload = widgets
 		.map(rawWidget => {
 			let widget;
@@ -339,7 +339,7 @@ const setWidgets = (widgets: Array<Widget>): Object => {
 	});
 };
 
-const updateWidget = (payload: Widget) => ({
+const updateWidget = (payload: AnyWidget) => ({
 	payload,
 	type: WIDGETS_EVENTS.UPDATE_WIDGET
 });

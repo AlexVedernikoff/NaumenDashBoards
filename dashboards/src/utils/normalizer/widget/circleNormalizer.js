@@ -18,7 +18,7 @@ import {
 } from './helpers';
 import type {CircleData, CircleWidget} from 'store/widgets/data/types';
 import {DISPLAY_MODE} from 'store/widgets/data/constants';
-import {FIELDS} from 'WidgetFormPanel';
+import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
 
