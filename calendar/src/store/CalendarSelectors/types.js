@@ -14,6 +14,7 @@ export type LocationList = Array<Location>;
 export type CalendarList = Array<Calendar>;
 
 export type CalendarSelectorsState = {
+	calendarId: string | null,
 	calendarList: CalendarList,
 	error: Error | null,
 	isLoading: boolean,

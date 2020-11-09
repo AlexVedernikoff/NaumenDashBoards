@@ -1,16 +1,21 @@
 // @flow
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import type {ComponentType} from 'react';
 import DropdownList from 'components/molecules/DropdownList';
 import type {Props} from 'containers/CalendarSelectors/types';
 import styles from './CalendarSelectors.less';
 
 const CalendarSelectors: ComponentType<Props> = (props: Props) => {
+	const [locationValue, setLocationValue] = useState(null);
+	const [calendarValue, setCalendarValue] = useState(null);
+
 	const {
+		calendarId,
 		calendarList,
-		locationList,
 		getCalendarList,
-		getLocationList
+		getLocationList,
+		locationList,
+		setCalendar
 	} = props;
 
 	useEffect(() => {
@@ -19,20 +24,37 @@ const CalendarSelectors: ComponentType<Props> = (props: Props) => {
 
 	const handleLocationChange = useCallback(
 		(event) => {
+			if (calendarId) {
+				setCalendar(null);
+			}
 			const {value} = event;
+			setLocationValue(value);
+			setCalendarValue(null);
 			getCalendarList(value.id);
 		},
-		[getCalendarList]
+		[calendarId, getCalendarList]
 	);
+
+	const handleSetCalendar = useCallback((event) => {
+		const {value} = event;
+		setCalendarValue(value);
+		setCalendar(value.id);
+	}, []);
 
 	return (
 		<div className={styles.dropdownContainer}>
 			<DropdownList
-				onChange={handleLocationChange}
-				label="Выберите локацию"
 				data={locationList}
+				label="Выберите локацию"
+				onChange={handleLocationChange}
+				value={locationValue}
 			/>
-			<DropdownList label="Выберите календарь" data={calendarList} />
+			<DropdownList
+				data={calendarList}
+				label="Выберите календарь"
+				onChange={handleSetCalendar}
+				value={calendarValue}
+			/>
 		</div>
 	);
 };

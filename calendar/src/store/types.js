@@ -1,5 +1,6 @@
 // @flow
 import type {CalendarSelectorsState} from './CalendarSelectors/types';
+import type {CalendarState} from './Calendar/types';
 
 export type ChangingState = {
 	error: boolean,
@@ -18,6 +19,7 @@ type Action = {
 };
 
 export type State = {
+	calendar: CalendarState,
 	calendarSelectors: CalendarSelectorsState
 };
 

@@ -1,0 +1,44 @@
+[
+	{
+		"link": "test_link",
+		"color": "#E70505",
+		"start": "2020-10-30T08:30:00.000Z",
+		"end": "2020-10-30T09:00:00.000Z",
+		"description": "Mock data"
+	},
+	{
+		"link": "test_link2",
+		"color": "#E70505",
+		"start": "2020-11-02T07:30:00.000Z",
+		"end": "2020-11-02T10:30:00.000Z",
+		"description": "Mock data2"
+	},
+	{
+		"link": "test_link3",
+		"color": "#989898",
+		"start": "2020-10-30T06:00:00.000Z",
+		"end": "2020-10-30T07:00:00.000Z",
+		"description": "Mock data3"
+	},
+	{
+		"link": "test_link4",
+		"color": null,
+		"start": "2020-10-26T02:00:00.000Z",
+		"end": "2020-10-26T02:30:00.000Z",
+		"description": "Mock data4"
+	},
+	{
+		"link": "test_link5",
+		"color": "#E70505",
+		"start": "2020-10-30T10:30:00.000Z",
+		"end": "2020-10-30T12:00:00.000Z",
+		"description": "Mock data5"
+	},
+	{
+		"link": "test_link6",
+		"color": "#E70505",
+		"start": "2020-10-30T012:30:00.000Z",
+		"end": "2020-10-30T15:00:00.000Z",
+		"description": "Mock data6"
+	}
+]
