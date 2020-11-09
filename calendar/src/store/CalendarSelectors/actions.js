@@ -14,8 +14,8 @@ const getCalendarList = (id: string): ThunkAction => async (
 	dispatch(setCalendarListLoading(true));
 	try {
 		const data = await window.jsApi.restCallModule(
-			'dashboardCalendar',
-			'fieldCalendar',
+			'calendarController',
+			'getCalendars',
 			id
 		);
 		dispatch(setCalendarList(data));
@@ -34,8 +34,8 @@ const getLocationList = (): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch(setLocationListLoading(true));
 	try {
 		const data = await window.jsApi.restCallModule(
-			'dashboardCalendar',
-			'fieldLocation'
+			'calendarController',
+			'getLocations'
 		);
 		dispatch(setLocationList(data));
 	} catch (error) {
@@ -70,4 +70,9 @@ const setError = (payload: Error) => ({
 	type: CALENDAR_SELECTORS_EVENTS.SET_ERROR
 });
 
-export {getCalendarList, getLocationList};
+const setCalendar = (payload: string | null) => ({
+	payload,
+	type: CALENDAR_SELECTORS_EVENTS.SET_CALENDAR
+});
+
+export {getCalendarList, getLocationList, setCalendar};

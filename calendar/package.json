@@ -44,7 +44,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^23.1.0",
     "jest-cli": "^23.1.0",
-    "less": "^3.0.4",
+    "less": "^3.12.2",
     "less-loader": "^4.1.0",
     "mini-css-extract-plugin": "^0.4.0",
     "my-local-ip": "^1.0.0",
@@ -90,7 +90,7 @@
     "url": "git@gitsd.naumen.ru:repo/ea40.git"
   },
   "scripts": {
-    "build": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
+    "build": "npm run clear && cross-env NODE_ENV=production API=external webpack --config ./webpack/config.js && npm run zip",
     "clear": "rm -rf ./dist/*",
     "dev": "cross-env NODE_ENV=development API=local webpack-dev-server --config ./webpack/config.js",
     "dev-external": "cross-env NODE_ENV=development API=external webpack-dev-server --config ./webpack/config.js",
@@ -102,9 +102,18 @@
   },
   "version": "1.0.0",
   "dependencies": {
+    "@progress/kendo-date-math": "^1.5.1",
+    "@progress/kendo-drawing": "^1.9.3",
     "@progress/kendo-licensing": "^1.0.2",
+    "@progress/kendo-react-buttons": "^4.0.0",
+    "@progress/kendo-react-dateinputs": "^4.0.0",
+    "@progress/kendo-react-dialogs": "^4.0.0",
     "@progress/kendo-react-dropdowns": "^4.0.0",
+    "@progress/kendo-react-form": "^4.0.0",
+    "@progress/kendo-react-inputs": "^4.0.0",
     "@progress/kendo-react-intl": "^4.0.0",
+    "@progress/kendo-react-popup": "^4.0.0",
+    "@progress/kendo-react-scheduler": "^4.0.0",
     "@progress/kendo-theme-default": "^4.25.1"
   }
 }

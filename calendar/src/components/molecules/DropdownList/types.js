@@ -1,5 +1,5 @@
 // @flow
-type SelectOption = {
+export type SelectOption = {
 	id: string,
 	value: string
 };
@@ -9,5 +9,6 @@ export type Props = {
 	label: string,
 	onChange?: (
 		event: SyntheticInputEvent<HTMLOptionElement> & { value: SelectOption }
-	) => void
+	) => void,
+	value: SelectOption | null
 };
