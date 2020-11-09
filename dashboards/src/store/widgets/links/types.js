@@ -29,6 +29,8 @@ export type LinkMap = {
 
 export type DrillDown = (widget: Widget, index: number, mixin?: DrillDownMixin) => ThunkAction;
 
+export type OpenCardObject = (value: string) => ThunkAction;
+
 export type RequestLink = {
 	payload: string,
 	type: typeof LINKS_EVENTS.REQUEST_LINK

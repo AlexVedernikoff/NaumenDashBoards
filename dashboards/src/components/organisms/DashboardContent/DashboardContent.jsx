@@ -190,6 +190,7 @@ export class DashboardContent extends Component<Props, State> {
 			editable,
 			fetchBuildData,
 			layoutMode,
+			openCardObject,
 			personalDashboard,
 			removeWidget,
 			selectedWidget,
@@ -217,6 +218,7 @@ export class DashboardContent extends Component<Props, State> {
 				onClick={this.handleClick}
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
+				onOpenCardObject={openCardObject}
 				onRemove={removeWidget}
 				onUpdate={updateWidget}
 				personalDashboard={personalDashboard}

@@ -11,6 +11,14 @@ const BUILD_DATA_EVENTS = {
 	UNKNOWN_BUILD_DATA_ACTION
 };
 
+// Используется для разделения лейбла и uuid в значениях метакласса. Необходимо для перехода на список объектов
+const META_CLASS_VALUE_SEPARATOR = '#';
+
+// Используется для разделения лейбла и uuid в значениях, по которым можно перейти на карточку объекта
+const CARD_OBJECT_VALUE_SEPARATOR = '#';
+
 export {
-	BUILD_DATA_EVENTS
+	BUILD_DATA_EVENTS,
+	META_CLASS_VALUE_SEPARATOR,
+	CARD_OBJECT_VALUE_SEPARATOR
 };

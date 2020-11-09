@@ -18,12 +18,17 @@ export type Row = {
 
 export type CellConfigProps = React$Config<CellProps, DefaultCellProps>;
 
+export type ValueProps = {
+	value: string | number
+};
+
 export type Components = $Shape<{
 	BodyCell: React$ComponentType<CellConfigProps>,
 	Cell: React$ComponentType<CellConfigProps>,
 	FooterCell: React$ComponentType<CellConfigProps>,
 	HeaderCell: React$ComponentType<HeaderProps>,
-	Row: React$ComponentType<RowProps>
+	Row: React$ComponentType<RowProps>,
+	Value: React$ComponentType<ValueProps>,
 }>;
 
 export type OnClickCellProps = {

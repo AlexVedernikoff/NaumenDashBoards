@@ -119,7 +119,7 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderDiagram = () => {
-		const {buildData, data, focused, isNew, onDrillDown, onUpdate} = this.props;
+		const {buildData, data, focused, isNew, onDrillDown, onOpenCardObject, onUpdate} = this.props;
 		const {hasError} = this.state;
 
 		if (!isNew && buildData && !hasError) {
@@ -128,6 +128,7 @@ export class Widget extends PureComponent<Props, State> {
 					buildData={buildData}
 					focused={focused}
 					onDrillDown={onDrillDown}
+					onOpenCardObject={onOpenCardObject}
 					onUpdate={onUpdate}
 					widget={data}
 				/>

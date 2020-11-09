@@ -9,6 +9,7 @@ import React, {Component, createRef} from 'react';
 import settingsStyles from 'styles/settings.less';
 import {SpeedometerWidget, TableWidget} from 'components/organisms';
 import styles from './styles.less';
+import type {TableWidget as TableWidgetType} from 'store/widgets/data/types';
 
 export class Diagram extends Component<Props, State> {
 	ref: DivRef = createRef();
@@ -30,7 +31,7 @@ export class Diagram extends Component<Props, State> {
 		}
 	}
 
-	isUpdated = (prevProps: Props, nextProps: Props) => {
+	isUpdated = (prevProps: Props, nextProps: Props): boolean => {
 		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}, widget: prevWidget} = prevProps;
 		const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}, widget: nextWidget} = nextProps;
 
@@ -38,7 +39,7 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	resolveDiagram = () => {
-		const {buildData, focused, onDrillDown, onUpdate, widget} = this.props;
+		const {buildData, focused, widget} = this.props;
 		const {data} = buildData;
 		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
@@ -57,7 +58,7 @@ export class Diagram extends Component<Props, State> {
 			case SUMMARY:
 				return <Summary data={data} widget={widget} />;
 			case TABLE:
-				return <TableWidget data={data} onDrillDown={onDrillDown} onUpdate={onUpdate} widget={widget} />;
+				return this.renderTableWidget(widget);
 			default:
 				return null;
 		}
@@ -160,6 +161,21 @@ export class Diagram extends Component<Props, State> {
 		}
 
 		return null;
+	};
+
+	renderTableWidget = (widget: TableWidgetType) => {
+		const {buildData, onDrillDown, onOpenCardObject, onUpdate} = this.props;
+		const {data} = buildData;
+
+		return (
+			<TableWidget
+				data={data}
+				onDrillDown={onDrillDown}
+				onOpenCardObject={onOpenCardObject}
+				onUpdate={onUpdate}
+				widget={widget}
+			/>
+		);
 	};
 
 	render () {

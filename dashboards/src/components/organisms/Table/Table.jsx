@@ -1,7 +1,7 @@
 // @flow
 import {Body, Cell, Footer, Header, HeaderCell, Pagination, Row} from './components';
 import cn from 'classnames';
-import type {Column, ColumnsWidth, Components, Props, State} from './types';
+import type {Column, ColumnsWidth, Components, Props, State, ValueProps} from './types';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import {DEFAULT_TABLE_SETTINGS} from './constants';
 import React, {createRef, PureComponent} from 'react';
@@ -28,7 +28,8 @@ export class Table extends PureComponent<Props, State> {
 		Cell,
 		FooterCell: Cell,
 		HeaderCell,
-		Row
+		Row,
+		Value: this.renderValue
 	};
 	ref: Ref<'div'> = createRef();
 
@@ -43,6 +44,10 @@ export class Table extends PureComponent<Props, State> {
 
 	getExtendedComponents (components?: Components): Components {
 		return components ? {...this.components, ...components} : this.components;
+	}
+
+	renderValue (props: ValueProps) {
+		return props.value;
 	}
 
 	/**

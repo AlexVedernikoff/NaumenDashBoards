@@ -1,5 +1,4 @@
 // @flow
-import {Cell} from 'components/organisms/Table/components';
 import cn from 'classnames';
 import {MIN_WIDTH} from './constants';
 import type {Props} from './types';
@@ -66,28 +65,29 @@ export class HeaderCell extends PureComponent<Props> {
 	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.ref} />;
 
 	render () {
-		const {column, fontColor, fontStyle, sorting, value} = this.props;
+		const {column, components, fontColor, fontStyle, sorting, value} = this.props;
 		const {ASC, DESC} = SORTING_TYPES;
+		const {Cell} = components;
 		const cellCN = cn({
-			[styles.cell]: true,
+			[styles.cellContainer]: true,
 			[styles.sortAsc]: sorting === ASC,
 			[styles.sortDesc]: sorting === DESC
 		});
 
 		return (
-			<Cell
-				body={false}
-				className={cellCN}
-				column={column}
-				fontColor={fontColor}
-				fontStyle={fontStyle}
-				onClick={this.handleClick}
-				textAlign={TEXT_ALIGNS.center}
-				tip={value}
-				value={value}
-			>
+			<div className={cellCN} onClick={this.handleClick}>
+				<Cell
+					className={styles.cell}
+					column={column}
+					components={components}
+					fontColor={fontColor}
+					fontStyle={fontStyle}
+					textAlign={TEXT_ALIGNS.center}
+					tip={value}
+					value={value}
+				/>
 				{this.renderResizer()}
-			</Cell>
+			</div>
 		);
 	}
 }

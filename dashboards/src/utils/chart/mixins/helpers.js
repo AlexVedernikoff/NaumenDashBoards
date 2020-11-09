@@ -4,7 +4,8 @@ import type {ApexLegend} from 'utils/chart/types';
 import type {AxisIndicator, AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {LEGEND_POSITIONS, META_CLASS_NAME_DIVIDER} from 'utils/chart/constants';
+import {LEGEND_POSITIONS} from 'utils/chart/constants';
+import {META_CLASS_VALUE_SEPARATOR} from 'store/widgets/buildData/constants';
 import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
 import {TEXT_HANDLERS} from 'store/widgets/data/constants';
@@ -14,7 +15,7 @@ import {TEXT_HANDLERS} from 'store/widgets/data/constants';
  * @param {string} value - значение метакласса
  * @returns {string}
  */
-const getMetaClassLabel = (value: string): string => value.split(META_CLASS_NAME_DIVIDER)[0];
+const getMetaClassLabel = (value: string): string => value.split(META_CLASS_VALUE_SEPARATOR)[0];
 
 const axisLabelFormatter = (usesMetaClass: boolean) => (value: number | string) => {
 	let label = String(value);

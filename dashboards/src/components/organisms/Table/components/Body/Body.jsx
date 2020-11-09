@@ -37,6 +37,7 @@ export class Body extends PureComponent<Props> {
 			<BodyCell
 				className={styles.cell}
 				column={column}
+				components={components}
 				defaultValue={defaultValue.value}
 				key={accessor}
 				onClick={onClickCell}

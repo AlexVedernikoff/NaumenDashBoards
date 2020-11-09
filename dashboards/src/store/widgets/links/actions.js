@@ -44,6 +44,13 @@ const createPostData = (widget: Widget, index: number) => {
 };
 
 /**
+ * Преобразует ссылку к относительному виду. Необходимо для корректной работы
+ * @param {string} link - абсолютная ссылка [http://nordclan-dev2.nsd.naumen.ru/sd/operator/?anchor=list:!!encoded_prms=encoded_text$99466589]
+ * @returns {string} - относительная ссылка [/sd/operator/?anchor=list:!!encoded_prms=encoded_text$99466589]
+ */
+const getRelativeLink = (link: string): string => link.replace(/^(.+?)\?/, '/sd/operator/?');
+
+/**
  * Создание ссылки для перехода на данные диаграммы
  * @param {Widget} widget - данные виджета
  * @param {number} index - индекс набора данных массива data виджета
@@ -57,28 +64,45 @@ const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): Thunk
 		postData = {...postData, ...mixin};
 	}
 
-	dispatch(getLink(widget.id, postData));
+	dispatch(openObjectsList(widget.id, postData));
 };
 
 /**
- * Получаем ссылку по отправленным данным и открываем ее в новом окне
+ * Открывает список объектов
  * @param {string} id - индетификатор виджета
  * @param {object} payload - данные для построения ссылки
- * @returns {Function}
+ * @returns {ThunkAction}
  */
-const getLink = (id: string, payload: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const openObjectsList = (id: string, payload: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {context} = getState();
 	const {subjectUuid} = context;
 
 	dispatch(requestLink(id));
 	try {
-		let {link} = await window.jsApi.restCallModule('dashboardDrilldown', 'getLink', payload, subjectUuid);
-		link = `${link.replace(/^(.+?)\?/, '/sd/operator/?')}`;
+		const {link} = await window.jsApi.restCallModule('dashboardDrilldown', 'getLink', payload, subjectUuid);
 
-		window.open(link);
+		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
 	} catch (e) {
 		dispatch(recordLinkError(id));
+	}
+};
+
+/**
+ * Открывает карточку объекта по переданному значению объекта
+ * @param {string} value - значение объекта
+ * @returns {ThunkAction}
+ */
+const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(requestLink(value));
+
+	try {
+		const {link} = await window.jsApi.restCallModule('dashboards', 'getCardObject', value);
+
+		window.open(getRelativeLink(link));
+		dispatch(receiveLink(value));
+	} catch (e) {
+		dispatch(recordLinkError(value));
 	}
 };
 
@@ -98,5 +122,6 @@ const recordLinkError = (payload: string) => ({
 });
 
 export {
-	drillDown
+	drillDown,
+	openCardObject
 };

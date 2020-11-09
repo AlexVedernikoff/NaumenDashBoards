@@ -14,6 +14,7 @@ export class Header extends PureComponent<Props> {
 			<FooterCell
 				className={styles.cell}
 				column={column}
+				components={components}
 				key={accessor}
 				value={footer}
 				width={columnsWidth[accessor]}

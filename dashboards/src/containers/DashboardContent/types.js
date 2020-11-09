@@ -1,6 +1,6 @@
 // @flow
 import type {BuildDataMap} from 'store/widgets/buildData/types';
-import type {DrillDown} from 'store/widgets/links/types';
+import type {DrillDown, OpenCardObject} from 'store/widgets/links/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {Layouts, LayoutsPayloadForChange} from 'store/dashboard/layouts/types';
 import type {ThunkAction} from 'store/types';
@@ -12,6 +12,7 @@ export type ConnectedFunctions = {
 	drillDown: DrillDown,
 	editWidgetChunkData: (widget: Widget, chunkData: Object) => ThunkAction,
 	fetchBuildData: (widget: Widget) => ThunkAction,
+	openCardObject: OpenCardObject,
 	removeWidget: (widgetId: string) => ThunkAction,
 	selectWidget: (widgetId: string, callback: Function) => ThunkAction,
 	updateWidget: Widget => Object
