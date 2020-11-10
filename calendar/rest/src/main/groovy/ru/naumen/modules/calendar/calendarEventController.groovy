@@ -29,16 +29,22 @@ interface EventController
 {
     /**
      * Возвращает список доступных локаций
-     * @return Json с элементами типа SelectItem
+     * @return Json с элементами типа {@link SelectItem}
      */
     String getLocations()
 
     /**
      * Возвращает список календарей в локации с id = locationUuid
      * @param locationUuid - id локации
-     * @return Json с элементами типа SelectItem
+     * @return Json с элементами типа {@link SelectItem}
      */
     String getCalendars(String locationUuid)
+
+    /**
+     * Возвращает список состояний событий и соответствующие им цвета
+     * @return Json с элементами типа {@link StateColor}
+     */
+    String getEventStatesColors();
 
     /**
      * Возвращает список событий в указанном календаре за указанный период
@@ -67,11 +73,17 @@ trait EventControllerTrait implements EventController
     }
 
     @Override
+    String getEventStatesColors()
+    {
+        return toJson(service.getEventStatesColors())
+    }
+
+    @Override
     String getEvents(String calendarFilterUuid, String startDateString, String endDateString)
     {
         final String dateFormat = 'yyyy-MM-dd\'T\'hh:mm:ss.S'
-        Date startDate = Date.parse(dateFormat, startDateString).clearTime()
-        Date endDate = Date.parse(dateFormat, endDateString).clearTime().plus(1)
+        Date startDate = Date.parse(dateFormat, startDateString)
+        Date endDate = Date.parse(dateFormat, endDateString).plus(1)
         ZoneId userTimeZone = getUserTimeZone(user)
         return toJson(service.getEvents(calendarFilterUuid, startDate, endDate, userTimeZone))
     }
@@ -99,6 +111,13 @@ class CalendarService
     private static final String REGISTERED_STATE = 'registered'
     private static final String TYPE_LOCATION = 'persReception$prLocation'
     private static final String TYPE_CALENDAR = 'persReception$prCalendar'
+    private static final String TYPE_TIMESLOT = 'persReception$prTimeSlot'
+    private static final String TYPE_BOOKING = 'persReception$prTimeBooking'
+
+    // Префикс для типа "Тайм-слот"
+    private static final String TIME_SLOT_TYPE = 'time-slot'
+    // Префикс для типа "Запись на приём"
+    private static final String APPOINTMENT_TYPE = 'appointment'
 
     /**
      * Метод возвращает допустимые значения в выпадающем списке "Локации личного приема" (persReception$prLocation)
@@ -107,7 +126,7 @@ class CalendarService
     List<SelectItem> getLocations()
     {
         def result = api.utils.find(TYPE_LOCATION, [state: REGISTERED_STATE])
-                .collect{this.& toSelectItem}
+                .collect(this.& toSelectItem)
         return result
     }
 
@@ -120,8 +139,19 @@ class CalendarService
     {
         def location = api.utils.get(locationUuid)
         def result = api.utils.find(TYPE_CALENDAR, [state: REGISTERED_STATE, prLocation: location])
-                .collect{this.& toSelectItem}
-        return result;
+                .collect(this.& toSelectItem)
+        return result
+    }
+
+    /**
+     * Возвращает список состояний событий и их цвета
+     * @return Список элементов {@link StateColor}
+     */
+    List<StateColor> getEventStatesColors()
+    {
+        def appointments = getStatesColors(TYPE_BOOKING, APPOINTMENT_TYPE)
+        def slots = getStatesColors(TYPE_TIMESLOT, TIME_SLOT_TYPE)
+        return appointments + slots
     }
 
     /**
@@ -131,10 +161,8 @@ class CalendarService
      * @param endDate - конец диапазона
      * @return список событий
      */
-    public List<Event> getEvents(String calendarFilterUuid, Date startDate, Date endDate, ZoneId userTimeZone)
+    List<Event> getEvents(String calendarFilterUuid, Date startDate, Date endDate, ZoneId userTimeZone)
     {
-        startDate.clearTime()
-        endDate.clearTime()
         def calendar = api.utils.get(calendarFilterUuid)
         if (!calendar)
         {
@@ -156,7 +184,7 @@ class CalendarService
     }
 
     /**
-     * Преобразует Тайм-слот в Event
+     * Преобразует Тайм-слот в {@link Event}
      */
     private Event toEvent(def timeSlot, ZoneId userTimeZone)
     {
@@ -170,6 +198,7 @@ class CalendarService
             {
                 return null
             }
+            event.type = "${APPOINTMENT_TYPE}_${booking.state}"
             event.color = api.wf.state(booking).color?.html()
             def clients = []
             if (booking.clientFL)
@@ -184,6 +213,7 @@ class CalendarService
         }
         else
         {
+            event.type = "${TIME_SLOT_TYPE}_${timeSlot.state}"
             event.color = api.wf.state(timeSlot).color?.html()
             event.description = api.wf.state(timeSlot).title
             event.link = timeSlot.UUID
@@ -192,6 +222,20 @@ class CalendarService
         return event
     }
 
+    /**
+     * Возвращает список {@link StateColor}, где в value записывается тип события вида "${eventType}_${state.code}"),
+     * а в color - цвет события
+     * @param fqn - FQN типа, для которого необходимо получить состояния и их цвета
+     * @param eventType - суффикс, который добавится в поле value
+     * @return озвращает список {@link StateColor}
+     */
+    private List<StateColor> getStatesColors(String fqn, String eventType)
+    {
+        return api.metainfo.getMetaClass(fqn)
+                .workflow
+                .states
+                .collect{new StateColor(it.color?.html(), "${eventType}_${it.code}")}
+    }
 
     /**
      * Определяет, что указанный диапазон дат составляет ровно 1 месяц
@@ -208,11 +252,11 @@ class CalendarService
     }
 
     /**
-     * Helper для создания SelectItem из ISDtObject
+     * Helper для создания {@link SelectItem} из ISDtObject
      * @param object - полученный из системы объект
      * @return SelectItem с id == object.UUID и value == object.title
      */
-    private SelectItem toSelectItem(ISDtObject object)
+    private static SelectItem toSelectItem(ISDtObject object)
     {
         return new SelectItem(object.UUID, object.title)
     }
@@ -222,7 +266,7 @@ class CalendarService
      * @param date - дата для конвертации
      * @return дату формата yyyy-MM-dd'T'hh:mm:ss.SZ
      */
-    private String zonedDateToString(ZonedDateTime date)
+    private static String zonedDateToString(ZonedDateTime date)
     {
         return date.format(DateTimeFormatter.ofPattern(DATE_FORMAT))
     }
@@ -253,6 +297,10 @@ class Event
      * Данные для формирования ссылки на событие
      */
     String link
+    /**
+     * Тип события
+     */
+    String type
 }
 
 /**
@@ -270,3 +318,20 @@ class SelectItem
      */
     String value
 }
+
+/**
+ * Модель для списка состояний событий и их цветов
+ */
+@TupleConstructor
+class StateColor
+{
+    /**
+     * Цвет состояния, например '#E70505'
+     */
+    String color
+    /**
+     * Состояние
+     */
+    String value
+}
+
