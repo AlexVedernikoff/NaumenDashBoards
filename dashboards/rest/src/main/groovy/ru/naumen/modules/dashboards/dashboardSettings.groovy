@@ -135,7 +135,7 @@ String getSettings(Map<String, Object> requestContent)
             autoUpdate  : personalDashboard?.autoUpdate,
             widgets     : personalDashboard?.widgetIds?.findResults{ widgetKey ->
                 def widget = getWidgetSettings(widgetKey, isMobile)
-                return  widget?.type == TEXT_WIDGET_TYPE ? widget : changeTotalWidgetName(widget, classFqn)
+                return  widget?.type == TEXT_WIDGET_TYPE ? changeTextInTextWidget(widget, classFqn) : changeTotalWidgetName(widget, classFqn)
             } ?: [],
             customGroups: personalDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
@@ -147,7 +147,7 @@ String getSettings(Map<String, Object> requestContent)
             autoUpdate  : defaultDashboard?.autoUpdate,
             widgets     : defaultDashboard?.widgetIds?.findResults{ widgetKey ->
                 def widget = getWidgetSettings(widgetKey, isMobile)
-                return  widget?.type == TEXT_WIDGET_TYPE ? widget : changeTotalWidgetName(widget, classFqn)
+                return  widget?.type == TEXT_WIDGET_TYPE ? changeTextInTextWidget(widget, classFqn) : changeTotalWidgetName(widget, classFqn)
             } ?: [],
             customGroups: defaultDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
@@ -166,7 +166,7 @@ String getSettings(Map<String, Object> requestContent)
             // Пользователь этого даже не заметит
             widgets     : defaultDashboard?.widgetIds?.findResults{ widgetKey ->
                 def widget = getWidgetSettings(widgetKey, isMobile)
-                return widget?.type == TEXT_WIDGET_TYPE ? widget : changeTotalWidgetName(widget, classFqn)
+                return widget?.type == TEXT_WIDGET_TYPE ? changeTextInTextWidget(widget, classFqn) : changeTotalWidgetName(widget, classFqn)
             } ?: [],
             customGroups: defaultDashboard?.customGroupIds?.collectEntries {
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
@@ -225,6 +225,32 @@ private Map changeTotalWidgetName(Map widgetSettings, String classFqn)
                 ? replaceWidgetName(header?.template, classFqn)
                 : header?.name
             widget?.header = header
+        }
+        return widget
+    }
+    return widgetSettings
+}
+
+/**
+ * Метод по замене переменных в тексте виджета типа "Текст"
+ * @param widgetSettings - настройки виджета
+ * @param classFqn - uuid текущего объекта
+ * @return итоговые настройки виджета
+ */
+private Map changeTextInTextWidget(Map widgetSettings, String classFqn)
+{
+    if (widgetSettings)
+    {
+        def widget = (widgetSettings as LinkedHashMap).clone() as Map
+        def textInWidget = widget.text
+        widget.variables = textInWidget.tokenize().collectEntries { possibleVar ->
+            if(possibleVar.contains('${') )
+            {
+                def value = replaceWidgetName(possibleVar, classFqn)
+                //условие равенства - значит, такой переменной нет
+                return possibleVar == value ? [:] : [(possibleVar): value]
+            }
+            return [:]
         }
         return widget
     }
@@ -483,7 +509,7 @@ String createWidget(Map<String, Object> requestContent)
     String classFqn = requestContent.classFqn
     String contentCode = requestContent.contentCode
     boolean isPersonal = requestContent.isPersonal
-    def widgetWithCorrectName = widgetTypeIsNotText ? changeTotalWidgetName(widget, classFqn): widget
+    def widgetWithCorrectName = widgetTypeIsNotText ? changeTotalWidgetName(widget, classFqn) : changeTextInTextWidget(widget, classFqn)
 
     DashboardSettings dashboardSettings = null
     String dashboardKey = null
@@ -538,7 +564,7 @@ String editWidget(Map<String, Object> requestContent)
         validateName(requestContent, widgetKey, isPersonal, user)
     }
 
-    def widgetWithCorrectName = widgetTypeIsNotText ? changeTotalWidgetName(widget, classFqn) : widget
+    def widgetWithCorrectName = widgetTypeIsNotText ? changeTotalWidgetName(widget, classFqn) : changeTextInTextWidget(widget, classFqn)
     String contentCode = requestContent.contentCode
     if(isPersonal)
     {
