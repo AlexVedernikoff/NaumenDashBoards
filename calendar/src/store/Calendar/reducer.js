@@ -18,6 +18,16 @@ const reducer = (
 				...state,
 				isLoading: payload
 			};
+		case CALENDAR_EVENTS.SET_CALENDAR_RESOURCE_COLOR_LIST:
+			return {
+				...state,
+				calendarResourceColorList: payload
+			};
+		case CALENDAR_EVENTS.SET_CALENDAR_RESOURCE_COLOR_LIST_LOADING:
+			return {
+				...state,
+				isLoading: payload
+			};
 		case CALENDAR_EVENTS.SET_ERROR:
 			return {
 				...state,

@@ -1,24 +1,29 @@
 // @flow
 import {CALENDAR_EVENTS} from './constants';
 
+export type ResourceColor = {
+	color: string | null,
+	value: string
+};
 export type CalendarData = {
-	color: string,
 	end: Date,
 	id: string,
 	start: Date,
-	title: string
+	title: string,
+	type: string
 };
 
 export type CalendarApiData = {
-	color: string,
 	description: string,
 	end: string,
 	link: string,
-	start: string
+	start: string,
+	type: string
 };
 
 export type CalendarState = {
 	+calendarData: Array<CalendarData>,
+	+calendarResourceColorList: Array<ResourceColor>,
 	+error: Error | null,
 	+isLoading: boolean
 };
@@ -44,4 +49,19 @@ export type ISetCalendarData = {
 	type: typeof CALENDAR_EVENTS.SET_CALENDAR_DATA
 };
 
-export type ActionType = ISetCalendarData | ISetError | ISetCalendarLoading;
+export type ISetCalendarResourceColorList = {
+	payload: Array<ResourceColor>,
+	type: typeof CALENDAR_EVENTS.SET_CALENDAR_RESOURCE_COLOR_LIST
+};
+
+export type ISetCalendarResourceColorListLoading = {
+	payload: boolean,
+	type: typeof CALENDAR_EVENTS.SET_CALENDAR_RESOURCE_COLOR_LIST_LOADING
+};
+
+export type ActionType =
+	| ISetCalendarData
+	| ISetCalendarLoading
+	| ISetCalendarResourceColorList
+	| ISetCalendarResourceColorListLoading
+	| ISetError;

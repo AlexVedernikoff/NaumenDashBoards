@@ -2,6 +2,7 @@ import config from '../config/dev.json';
 import delayMockResponse from 'utils/delayMockResponse';
 import fieldCalendarData from 'mock/fieldCalendar.json';
 import fieldLocationData from 'mock/fieldLocation.json';
+import getEventStatesColors from 'mock/getEventStatesColors.json';
 import getEvents from 'mock/getEvents.json';
 
 /* eslint-disable */
@@ -12,6 +13,9 @@ const getMockData = async (method: string) => {
 		}
 		case 'getEvents': {
 			return await delayMockResponse(getEvents);
+		}
+		case 'getEventStatesColors': {
+			return await delayMockResponse(getEventStatesColors);
 		}
 		case 'getLocations': {
 			return await delayMockResponse(fieldLocationData);
