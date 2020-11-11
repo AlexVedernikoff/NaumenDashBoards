@@ -1,0 +1,42 @@
+[
+	{
+		"value": "appointment_registered",
+		"color": "#E70505"
+	},
+	{
+		"value": "appointment_canceledByCl",
+		"color": "#50B83C"
+	},
+	{
+		"value": "appointment_canceledByUser",
+		"color": "#50B83C"
+	},
+	{
+		"value": "appointment_closed",
+		"color": "#0254FB"
+	},
+	{
+		"value": "appointment_notHappened",
+		"color": "#0160FD"
+	},
+	{
+		"value": "time-slot_registered",
+		"color": "#E70505"
+	},
+	{
+		"value": "time-slot_blocked",
+		"color": null
+	},
+	{
+		"value": "time-slot_stopped",
+		"color": "#989898"
+	},
+	{
+		"value": "time-slot_limited",
+		"color": "#FFFF00"
+	},
+	{
+		"value": "time-slot_closed",
+		"color": "#3123FF"
+	}
+]

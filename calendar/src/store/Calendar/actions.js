@@ -1,5 +1,10 @@
 // @flow
-import type {CalendarApiData, CalendarData, GetCalendarDataParams} from './types';
+import type {
+	CalendarApiData,
+	CalendarData,
+	GetCalendarDataParams,
+	ResourceColor
+} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {CALENDAR_EVENTS} from './constants';
 
@@ -21,18 +26,39 @@ const getCalendarData = (params: GetCalendarDataParams): ThunkAction => async (
 			dateFrom,
 			dateTo
 		);
-		const normalizedData: Array<CalendarData> = data.map(({end, start, link, color, description}) => ({
-			color,
-			end: new Date(end),
-			id: link,
-			start: new Date(start),
-			title: description
-		}));
+		const normalizedData: Array<CalendarData> = data.map(
+			({end, start, link, description, type}) => ({
+				end: new Date(end),
+				id: link,
+				start: new Date(start),
+				title: description,
+				type
+			})
+		);
 		dispatch(setCalendarData(normalizedData));
 	} catch (error) {
 		dispatch(setError(error));
 	} finally {
 		dispatch(setCalendarLoading(false));
+	}
+};
+
+/**
+ * Получает список всех возможных типов событий с их цветом
+ * @returns {ThunkAction}
+ */
+const getCalendarResourceColorList = (): ThunkAction => async (dispatch: Dispatch) => {
+	dispatch(setCalendarResourceColorListLoading(true));
+	try {
+		const data: Array<ResourceColor> = await window.jsApi.restCallModule(
+			'calendarController',
+			'getEventStatesColors'
+		);
+		dispatch(setCalendarResourceColorList(data));
+	} catch (error) {
+		dispatch(setError(error));
+	} finally {
+		dispatch(setCalendarResourceColorListLoading(false));
 	}
 };
 
@@ -51,9 +77,22 @@ const setError = (payload: Error) => ({
 	type: CALENDAR_EVENTS.SET_ERROR
 });
 
+const setCalendarResourceColorList = (payload: Array<ResourceColor>) => ({
+	payload,
+	type: CALENDAR_EVENTS.SET_CALENDAR_RESOURCE_COLOR_LIST
+});
+
+const setCalendarResourceColorListLoading = (payload: boolean) => ({
+	payload,
+	type: CALENDAR_EVENTS.SET_CALENDAR_RESOURCE_COLOR_LIST_LOADING
+});
+
 export {
 	getCalendarData,
-	setCalendarLoading,
+	getCalendarResourceColorList,
 	setCalendarData,
+	setCalendarLoading,
+	setCalendarResourceColorList,
+	setCalendarResourceColorListLoading,
 	setError
 };
