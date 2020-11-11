@@ -9,9 +9,9 @@ import {
 	INTEGER_AGGREGATION,
 	INTERVALS
 } from './constants';
+import type {DiagramWidgetDataSet, Group, Widget} from './data/types';
 import {DISPLAY_MODE} from './data/constants';
 import {FIELDS} from 'WidgetFormPanel/constants';
-import type {Group, Widget} from './data/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import {store} from 'src';
 
@@ -72,12 +72,12 @@ const hasPercent = (set: Object, field: string = FIELDS.indicator) => {
 
 /**
  * Сообщает используется ли в наборе данных виджета метакласс
- * @param {object} set - набор данных виджета
+ * @param {DiagramWidgetDataSet} dataSet - набор данных виджета
  * @param {Array<string>} fields - наименования полей атрибутов
  * @returns {boolean}
  */
-const hasMetaClass = (set: Object, ...fields: Array<string>) => fields.every(field => {
-	const {[field]: attribute} = set;
+const hasMetaClass = (dataSet: DiagramWidgetDataSet, ...fields: Array<string>) => !!fields.find(field => {
+	const {[field]: attribute} = dataSet;
 	return attribute && attribute.type === ATTRIBUTE_TYPES.metaClass;
 });
 

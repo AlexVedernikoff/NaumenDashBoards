@@ -1,17 +1,26 @@
 // @flow
 import type {ApexAxisChartSeries} from 'apexcharts';
-import type {AxisIndicator, AxisWidget, ComboWidget} from 'store/widgets/data/types';
+import type {ApexLegend} from 'utils/chart/types';
+import type {AxisIndicator, AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {META_CLASS_NAME_DIVIDER} from 'utils/chart/constants';
+import {LEGEND_POSITIONS, META_CLASS_NAME_DIVIDER} from 'utils/chart/constants';
 import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
+import {TEXT_HANDLERS} from 'store/widgets/data/constants';
+
+/**
+ * Возвращает лейбл метакласса, отсекая все лишнее
+ * @param {string} value - значение метакласса
+ * @returns {string}
+ */
+const getMetaClassLabel = (value: string): string => value.split(META_CLASS_NAME_DIVIDER)[0];
 
 const axisLabelFormatter = (usesMetaClass: boolean) => (value: number | string) => {
 	let label = String(value);
 
-	if (usesMetaClass && label.includes(META_CLASS_NAME_DIVIDER)) {
-		label = label.split(META_CLASS_NAME_DIVIDER)[0];
+	if (usesMetaClass) {
+		label = getMetaClassLabel(label);
 	}
 
 	return label;
@@ -124,9 +133,84 @@ const getMaxValue = (series: ApexAxisChartSeries) => {
 	return Math.max(...values);
 };
 
+/**
+ * Возвращает ширину легенды относительно общей ширины графика
+ * @param {HTMLDivElement} container - контейнер, где размещен график
+ * @param {LegendPosition} position - позиция легенды
+ * @returns {number}
+ */
+const getLegendWidth = (container: HTMLDivElement, position: LegendPosition): number => {
+	const {clientWidth: width} = container;
+	const {bottom, top} = LEGEND_POSITIONS;
+
+	return position === bottom || position === top ? width : width * 0.2;
+};
+
+/**
+ * Форматирует значение легенды
+ * @param {Legend} settings - настройки легенды виджета
+ * @param {HTMLDivElement} container - контейнер, где размещен график
+ * @param {boolean} usesMetaClass - сообщает используется ли метакласс
+ * @returns {Function}
+ */
+const legendFormatter = (settings: Legend, container: HTMLDivElement, usesMetaClass: boolean) => (legend: string) => {
+	const {fontSize, position, textHandler} = settings;
+	const length = Math.round(getLegendWidth(container, position) / fontSize);
+	let label = legend ? String(legend) : '';
+
+	if (label) {
+		if (usesMetaClass) {
+			label = getMetaClassLabel(label);
+		}
+
+		if (textHandler === TEXT_HANDLERS.CROP && label.length > length) {
+			label = `${label.substr(0, length)}...`;
+		}
+	}
+
+	return label;
+};
+
+/**
+ * Возвращает настройки для отображения легенды графика
+ * @param {Legend} settings - настройки легенды виджета
+ * @param {HTMLDivElement} container - контейнер, где размещен график
+ * @param {boolean} usesMetaClass - сообщает используется ли метакласс
+ * @returns {ApexLegend}
+ */
+const getLegendOptions = (settings: Legend, container: HTMLDivElement, usesMetaClass: boolean = false): ApexLegend => {
+	const {fontFamily, fontSize, position, show} = settings;
+	const {bottom, top} = LEGEND_POSITIONS;
+	const options = {
+		fontFamily,
+		fontSize,
+		itemMargin: {
+			horizontal: 5
+		},
+		position,
+		show,
+		showForSingleSeries: true
+	};
+	let height;
+
+	if (position === bottom || position === top) {
+		height = 100;
+	}
+
+	return {
+		...options,
+		formatter: legendFormatter(settings, container, usesMetaClass),
+		height,
+		width: getLegendWidth(container, position)
+	};
+};
+
 export {
 	axisLabelFormatter,
+	getLegendOptions,
+	getLegendWidth,
 	getMaxValue,
+	getMetaClassLabel,
 	getNiceScale,
 	getXAxisLabels,
 	getXAxisOptions,

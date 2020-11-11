@@ -1,87 +1,40 @@
 // @flow
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
-import type {Chart, DataLabels, Legend} from 'store/widgets/data/types';
-import {CHART_TYPES, DATA_LABELS_LIMIT, LEGEND_POSITIONS, LOCALES} from './constants';
+import type {Chart, DataLabels} from 'store/widgets/data/types';
+import {CHART_TYPES, DATA_LABELS_LIMIT, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'src/helpers';
-import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Функция возвращает примесь опций в зависимости от переданного типа графика
  * @param {Chart} widget - тип графика выбранный пользователем
  * @param {DiagramBuildData} data - тип графика выбранный пользователем
+ * @param {HTMLDivElement} container - контейнер, где размещен график
  * @returns {Function}
  */
-const resolveMixin = (widget: Chart, data: DiagramBuildData): Function => {
+const resolveMixin = (widget: Chart, data: DiagramBuildData, container: HTMLDivElement): Function => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = WIDGET_TYPES;
 
 	switch (widget.type) {
 		case BAR:
-			return axisMixin(true)(widget, data);
+			return axisMixin(true)(widget, data, container);
 		case BAR_STACKED:
-			return axisMixin(true, true)(widget, data);
+			return axisMixin(true, true)(widget, data, container);
 		case COLUMN:
-			return axisMixin(false)(widget, data);
+			return axisMixin(false)(widget, data, container);
 		case COLUMN_STACKED:
-			return axisMixin(false, true)(widget, data);
+			return axisMixin(false, true)(widget, data, container);
 		case COMBO:
-			return comboMixin(widget, data);
+			return comboMixin(widget, data, container);
 		case DONUT:
 		case PIE:
-			return circleMixin(widget, data);
+			return circleMixin(widget, data, container);
 		case LINE:
-			return axisMixin(false)(widget, data);
+			return axisMixin(false)(widget, data, container);
 	}
-};
-
-const getLegendCroppingFormatter = (width: number, fontSize: number) => {
-	const length = Math.round(width / fontSize);
-
-	return function (legend: string) {
-		if (legend) {
-			return legend.length > length ? `${legend.substr(0, length)}...` : legend;
-		}
-
-		return '';
-	};
-};
-
-const getLegendOptions = (settings: Legend, widgetWidth: number) => {
-	const {fontFamily, fontSize, position, show, textHandler} = settings;
-	const {bottom, top} = LEGEND_POSITIONS;
-	const options = {
-		fontFamily,
-		fontSize,
-		itemMargin: {
-			horizontal: 5
-		},
-		position,
-		show,
-		showForSingleSeries: true
-	};
-	let formatter;
-	let height;
-	let width;
-
-	if (position === bottom || position === top) {
-		width = widgetWidth;
-		height = 100;
-	} else {
-		width = getLegendWidth(widgetWidth);
-	}
-
-	if (textHandler === TEXT_HANDLERS.CROP) {
-		formatter = getLegendCroppingFormatter(width, fontSize);
-	}
-
-	return {
-		...options,
-		formatter,
-		height,
-		width
-	};
 };
 
 const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAxisChart: boolean) => {
@@ -141,14 +94,14 @@ const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries =
  * Функция возвращет объединенный набор базовых и типовых опций
  * @param {Chart} widget - виджет
  * @param {DiagramBuildData} data - данные графика виджета
- * @param {number} width - ширина графика
+ * @param {HTMLDivElement} container - контейнер, где размещен график
  * @returns {ApexOptions}
  */
-const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexOptions => {
+const getOptions = (widget: Chart, data: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
 	const {colors, type: widgetType} = widget;
 	const type = widgetType === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(widgetType);
 	const {bar, line} = CHART_TYPES;
-	const {dataLabels, legend} = widget;
+	const {dataLabels} = widget;
 	const isAxisChart = type === bar || type === line;
 
 	const options: ApexOptions = {
@@ -173,11 +126,10 @@ const getOptions = (widget: Chart, data: DiagramBuildData, width: number): ApexO
 		},
 		colors: [...colors],
 		dataLabels: getDataLabelsOptions(dataLabels, data, isAxisChart),
-		legend: getLegendOptions(legend, width),
 		series: getSeries(widget, data)
 	};
 
-	return extend(options, resolveMixin(widget, data));
+	return extend(options, resolveMixin(widget, data, container));
 };
 
 const getChartType = (type: string) => {
@@ -196,16 +148,7 @@ const getChartType = (type: string) => {
 	}
 };
 
-/**
- * Получаем ширину легенды относительно общей ширины графика
- * @param {number} width - ширина графика
- * @returns {number}
- */
-const getLegendWidth = (width: number) => width * 0.2;
-
 export {
 	getChartType,
-	getLegendCroppingFormatter,
-	getLegendWidth,
 	getOptions
 };

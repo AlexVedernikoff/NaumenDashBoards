@@ -2,6 +2,7 @@
 import type {ApexOptions} from 'apexcharts';
 import {
 	axisLabelFormatter,
+	getLegendOptions,
 	getMaxValue,
 	getNiceScale,
 	getXAxisLabels,
@@ -14,6 +15,7 @@ import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'WidgetFormPanel/constants';
+import {getBuildSet} from 'store/widgets/data/helpers';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -96,15 +98,23 @@ const getYAxis = (set: Object, index: number, widget: Object, maxValue?: number)
  * Примесь combo-графиков
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
+ * @param {HTMLDivElement} container - контейнер, где размещен график
  * @returns {ApexOptions}
  */
-const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions => {
+const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
+	const {legend} = widget;
 	const {labels, series} = chart;
 	const strokeWidth = series.find(s => s.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 	const stacked = widget.data.findIndex(set => set.type && set.type === WIDGET_TYPES.COLUMN_STACKED) !== -1;
-	const set = widget.data.find(set => !set.sourceForCompute);
-	const usesMetaClass = set ? hasMetaClass(set, FIELDS.xAxis) : false;
+	const buildDataSet = getBuildSet(widget);
+	let parameterUsesMetaClass = false;
+	let breakdownUsesMetaClass = false;
 	let maxValue;
+
+	if (buildDataSet) {
+		parameterUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.xAxis);
+		breakdownUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.breakdown);
+	}
 
 	if (widget.indicatorSettings.showDependent) {
 		maxValue = getMaxValue(series);
@@ -112,7 +122,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions =
 
 	const xaxis = {
 		labels: {
-			formatter: axisLabelFormatter(usesMetaClass)
+			formatter: axisLabelFormatter(parameterUsesMetaClass)
 		}
 	};
 
@@ -129,6 +139,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData): ApexOptions =
 			}
 		},
 		labels: getXAxisLabels(widget, labels),
+		legend: getLegendOptions(legend, container, breakdownUsesMetaClass),
 		markers: {
 			hover: {
 				size: 8

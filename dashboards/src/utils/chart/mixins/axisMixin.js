@@ -1,6 +1,14 @@
 // @flow
 import type {ApexOptions} from 'apexcharts';
-import {axisLabelFormatter, getXAxisLabels, getXAxisOptions, getYAxisOptions, valueFormatter} from './helpers';
+import {
+	axisLabelFormatter,
+	getLegendOptions,
+	getMetaClassLabel,
+	getXAxisLabels,
+	getXAxisOptions,
+	getYAxisOptions,
+	valueFormatter
+} from './helpers';
 import type {AxisWidget} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
@@ -15,27 +23,29 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @param {boolean} stacked - накопление данных
  * @returns {ApexOptions}
  */
-const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: AxisWidget, chart: DiagramBuildData): ApexOptions => {
-	const {indicator, type} = widget;
+const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
+	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
+	const {indicator, legend, type} = widget;
 	const {categories} = chart;
-	const set = getBuildSet(widget);
+	const buildDataSet = getBuildSet(widget);
 
-	if (set && !set.sourceForCompute) {
-		const usesMetaClass = hasMetaClass(set, FIELDS.xAxis);
-		const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
-		const usesPercent = hasPercent(set, FIELDS.yAxis);
+	if (buildDataSet) {
+		const parameterUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.xAxis);
+		const breakdownUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.breakdown);
+		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
+		const usesPercent = hasPercent(buildDataSet, FIELDS.yAxis);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
 		const xaxis = {
 			categories: getXAxisLabels(widget, categories),
 			labels: {
-				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesMetaClass)
+				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(parameterUsesMetaClass)
 			}
 		};
 		const yaxis = {
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
-				formatter: horizontal ? axisLabelFormatter(usesMetaClass) : valueFormatter(usesMSInterval, usesPercent)
+				formatter: horizontal ? axisLabelFormatter(parameterUsesMetaClass) : valueFormatter(usesMSInterval, usesPercent)
 			}
 		};
 
@@ -52,6 +62,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 					bottom: 20
 				}
 			},
+			legend: getLegendOptions(legend, container, breakdownUsesMetaClass),
 			markers: {
 				hover: {
 					size: 8
@@ -70,7 +81,10 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) => (widget: Ax
 				intersect: true,
 				shared: false,
 				y: {
-					formatter: valueFormatter(usesMSInterval, usesPercent && !stacked)
+					formatter: valueFormatter(usesMSInterval, usesPercent && !stacked),
+					title: {
+						formatter: breakdownUsesMetaClass && getMetaClassLabel
+					}
 				}
 			},
 			xaxis: extend(xaxis, getXAxisOptions(widget)),

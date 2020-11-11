@@ -2,23 +2,22 @@
 import ApexCharts from 'apexcharts';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
-import {getLegendCroppingFormatter, getLegendWidth, getOptions, LEGEND_POSITIONS} from 'utils/chart';
+import {getLegendWidth, getOptions} from 'utils/chart';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import {ResizeDetector} from 'components/molecules';
 import styles from './styles.less';
-import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
-	ref: DivRef = createRef();
+	containerRef: DivRef = createRef();
 
 	componentDidMount () {
 		const options = this.getOptions();
 
 		if (options) {
-			this.chart = new ApexCharts(this.ref.current, options);
+			this.chart = new ApexCharts(this.containerRef.current, options);
 			this.chart.render();
 		}
 	}
@@ -53,42 +52,28 @@ export class Chart extends PureComponent<Props> {
 
 	getOptions = () => {
 		const {data, widget} = this.props;
-		const {current} = this.ref;
+		const {current} = this.containerRef;
 		let options;
 
 		if (current) {
-			options = getOptions(widget, data, current.clientWidth);
+			options = getOptions(widget, data, current);
 		}
 
 		return options;
 	};
 
 	handleResize = (width: number) => {
-		if (this.chart) {
-			const {fontSize, textHandler} = this.props.widget.legend;
-			const legendWidth = this.hasSideLegend() ? getLegendWidth(width) : width;
-			let legendFormatter;
+		const {legend} = this.props.widget;
+		const {position, show} = legend;
+		const {current: container} = this.containerRef;
 
-			if (textHandler === TEXT_HANDLERS.CROP) {
-				legendFormatter = getLegendCroppingFormatter(legendWidth, fontSize);
-			}
-
-			// $FlowFixMe
+		if (show && this.chart && container) {
 			this.chart.updateOptions({
 				legend: {
-					formatter: legendFormatter,
-					width: legendWidth
+					width: getLegendWidth(container, position)
 				}
 			});
 		}
-	};
-
-	hasSideLegend = () => {
-		const {legend} = this.props.widget;
-		const {position, show} = legend;
-		const {left, right} = LEGEND_POSITIONS;
-
-		return show && (position === left || position === right);
 	};
 
 	mixinResize = (chart: React$Node) => (
@@ -98,7 +83,7 @@ export class Chart extends PureComponent<Props> {
 	);
 
 	render () {
-		let chart = <div className={this.getClassname()} ref={this.ref} />;
+		let chart = <div className={this.getClassname()} ref={this.containerRef} />;
 
 		chart = this.mixinResize(chart);
 

@@ -110,9 +110,9 @@ type BaseWidget = {|
 
 // Общие параметры графиков
 
-type LegendPosition = $Keys<typeof LEGEND_POSITIONS>;
+export type LegendPosition = $Keys<typeof LEGEND_POSITIONS>;
 
-type LegendDisplayType = $Keys<typeof LEGEND_DISPLAY_TYPES>;
+export type LegendDisplayType = $Keys<typeof LEGEND_DISPLAY_TYPES>;
 
 export type Legend = {
 	displayType: LegendDisplayType,
@@ -299,6 +299,8 @@ export type Ranges = {
 	use: boolean
 };
 
+export type SpeedometerData = SummaryData;
+
 export type SpeedometerWidget = {
 	...BaseWidget,
 	borders: Borders,
@@ -394,6 +396,15 @@ export type Widget =
 	| SpeedometerWidget
 	| SummaryWidget
 	| TableWidget
+;
+
+export type DiagramWidgetDataSet =
+	| AxisData
+	| CircleData
+	| ComboData
+	| SummaryData
+	| SpeedometerData
+	| TableData
 ;
 
 export type EditWidgetChunkData = (widget: Widget, chunkData: Object) => ThunkAction;
