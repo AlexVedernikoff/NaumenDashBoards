@@ -539,6 +539,31 @@ class Link
                                 }
                             }
                             break
+                        case AttributeType.META_CLASS_TYPE:
+                        //кейс работы с фильтрами для статусов будет переделан, потому для метакласса кейс описан отдельно
+                            result += customSubGroupCondition.collect { orCondition ->
+                                orCondition.collect {
+                                    switch (it.type.toLowerCase())
+                                    {
+                                        case 'contains':
+                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                        case 'not_contains':
+                                            return filterBuilder.OR(attr.code, 'notContains', it.data.uuid)
+                                        case 'contains_any':
+                                            return filterBuilder.OR(attr.code, 'containsInSet', it.data*.uuid)
+                                        case 'title_contains':
+                                            return filterBuilder.OR(attr.code, 'titleContains', it.data)
+                                        case 'title_not_contains':
+                                            return filterBuilder.OR(attr.code, 'titleNotContains', it.data)
+                                        case ['equal_subject_attribute', 'equal_attr_current_object']:
+                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                        default: throw new IllegalArgumentException(
+                                            "Not supported condition type: ${ it.type }"
+                                        )
+                                    }
+                                }
+                            }
+                            break
                         default: throw new IllegalArgumentException(
                             "Not supported attribute type: ${ attributeType }"
                         )
@@ -606,22 +631,17 @@ class Link
     {
         String sourceCode = attribute.sourceCode
         String code = attribute.code
-        if(attribute?.type == AttributeType.STATE_TYPE)
+        def(title, state) = StateMarshaller.unmarshal(value, StateMarshaller.valueDelimiter)
+        if(sourceCode.contains('$'))
         {
-            def(title, state) = value.tokenize('()')
-            if(sourceCode.contains('$'))
-            {
-                return filterBuilder.AND(
-                    filterBuilder.OR(code, 'contains', new SimpleDtObject("$sourceCode:$state",''))
-                )
-            }
-            def cases = api.metainfo.getTypes(sourceCode).code
             return filterBuilder.AND(
-                *cases.collect{filterBuilder.OR(code, 'contains', new SimpleDtObject("$it:$state", ''))}
+                filterBuilder.OR(code, 'contains', new SimpleDtObject("$sourceCode:$state",''))
             )
         }
-        def DBvalue = value.tokenize('-').last()
-        return filterBuilder.AND(filterBuilder.OR(code, 'contains', DBvalue))
+        def cases = api.metainfo.getTypes(sourceCode).code
+        return filterBuilder.AND(
+            *cases.collect{filterBuilder.OR(code, 'contains', new SimpleDtObject("$it:$state", ''))}
+        )
     }
 
     private def getOrFilter(String type, String code, def value, def filterBuilder)
@@ -641,7 +661,7 @@ class Link
         switch (type)
         {
             case AttributeType.META_CLASS_TYPE:
-                def DBvalue = value.tokenize('-').last()
+                def DBvalue = MetaClassMarshaller.unmarshal(value).last()
                 return filterBuilder.OR(code, 'contains', DBvalue)
             case AttributeType.DATE_TYPES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))

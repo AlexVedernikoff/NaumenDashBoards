@@ -2342,15 +2342,10 @@ private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUU
                 {
                     throw new IllegalArgumentException("Condition data is null or empty")
                 }
-                attribute.attrChains().last().ref = new Attribute(
-                    title: 'Название',
-                    code: 'title',
-                    type: 'string'
-                )
                 return new FilterParameter(
                     value: condition.data,
                     title: title,
-                    type: Comparison.CONTAINS,
+                    type: Comparison.METACLASS_TITLE_CONTAINS,
                     attribute: attribute
                 )
             case 'title_not_contains':
@@ -2361,7 +2356,7 @@ private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUU
                 return new FilterParameter(
                     value: condition.data,
                     title: title,
-                    type: Comparison.NOT_CONTAINS,
+                    type: Comparison.METACLASS_TITLE_NOT_CONTAINS,
                     attribute: attribute
                 )
             case 'equal_attr_current_object':
@@ -2517,7 +2512,7 @@ private List formatAggregationSet(List listOfLists, List listIdsOfNormalAggregat
     }
 
     return listOfLists.findResults { List list ->
-        if (exceptNulls && list.any { !it || it == 0 })
+        if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every { !it || it == 0 })
         {
             return null
         }
@@ -2525,7 +2520,9 @@ private List formatAggregationSet(List listOfLists, List listIdsOfNormalAggregat
         if (listIdsOfNormalAggregations.size() > 0)
         {
             listIdsOfNormalAggregations.each { index ->
-                list[index] = list[index] ?  DECIMAL_FORMAT.format(list[index] as Double) : DECIMAL_FORMAT.format(0)
+                list[index] = list[index] = list[index] && !(list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
+                    ? DECIMAL_FORMAT.format(list[index] as Double)
+                    : DECIMAL_FORMAT.format(0)
             }
             return list
         }
@@ -2586,13 +2583,13 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     }
                     return TimeUnit.MILLISECONDS.toHours(value as long)
                 case AttributeType.STATE_TYPE:
-                    def (stateValue, stateCase) = value.tokenize('$')
+                    def (stateValue, stateCase) = StateMarshaller.unmarshal(value, StateMarshaller.delimiter)
                     String totalFqn = (fqnClass.contains('$') || stateCase == "" ) ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
                     String userEq = api.metainfo.getStateTitle(totalFqn, stateValue)
-                    return "${userEq} (${stateValue})"
+                    return StateMarshaller.marshal(userEq, stateValue)
                 case AttributeType.META_CLASS_TYPE:
                     def userEq = api.metainfo.getMetaClass(value).title
-                    return "${userEq}-${value}"
+                    return MetaClassMarshaller.marshal(userEq, value)
                 case AttributeType.BOOL_TYPE:
                     String viewMode = api.metainfo.getMetaClass(fqnClass)
                                          .getAttribute(parameter.attribute.code)
@@ -2813,7 +2810,7 @@ private List prepareRequestWithStates(List res, Integer aggregationCnt)
  * @param list - данные диаграмы
  * @return StandardDiagram
  */
-private StandardDiagram mappingStandardDiagram(List list, String legendName, boolean reverseGroups)
+private StandardDiagram mappingStandardDiagram(List list, String legendName, Boolean reverseGroups)
 {
     def resultDataSet = list.head() as List<List>
     def transposeDataSet = resultDataSet.transpose()
@@ -3083,6 +3080,7 @@ private TableDiagram mappingManyColumnsTableDiagram(List resultDataSet, def tran
     {
         //для работы необходим учет именно основных группировок, а для колонок идут внутреннние группировки группы
         resultDataSet = prepareResultDataSet(resultDataSet, attributeNames, innerCustomGroupNames)
+        transposeDataSet = resultDataSet.transpose()
     }
 
     return mappingTable(resultDataSet,
