@@ -134,13 +134,13 @@ class QueryWrapper implements CriteriaWrapper
         if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
         {
             String attributeCode = attributeCodes.find()
-            column = sc.concat(column, sc.constant('-'), sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
+            column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
             criteria.addGroupColumn(sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
         }
         //атрибут связанного типа
         if(parameter.attribute.type == AttributeType.STRING_TYPE)
         {
-            column = sc.concat(column, sc.constant('-'), sc.property(modules.dashboardQueryWrapper.UUID_CODE))
+            column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(modules.dashboardQueryWrapper.UUID_CODE))
             criteria.addGroupColumn(sc.property(modules.dashboardQueryWrapper.UUID_CODE))
         }
         criteria.addColumn(column)
@@ -180,7 +180,7 @@ class QueryWrapper implements CriteriaWrapper
                 if (attributeCodes.any {it == 'state'})
                 {
                     column = sc.concat (sc.property(attributeCodes),
-                                        sc.constant('$'),
+                                        sc.constant(StateMarshaller.delimiter),
                                         sc.property('metaCaseId'))
                     criteria.addGroupColumn(column)
                     criteria.addGroupColumn(sc.property('metaCaseId'))
@@ -658,6 +658,14 @@ class QueryWrapper implements CriteriaWrapper
                 case Comparison.STATE_TITLE_NOT_CONTAINS:
                     List fqns = getFqns(parameterFqn)
                     return api.filters.stateTitleLike(fqns, parameter.value).with(api.filters.&not)
+                case Comparison.METACLASS_TITLE_CONTAINS:
+                    return api.filters.inCases(api.metainfo.getTypes(parameterFqn).findAll{
+                        it.title.contains(parameter.value)
+                    }*.fqnCase as String[])
+                case Comparison.METACLASS_TITLE_NOT_CONTAINS:
+                    return api.filters.inCases(api.metainfo.getTypes(parameterFqn).findAll{
+                        !it.title.contains(parameter.value)
+                    }*.fqnCase as String[])
                 default: throw new IllegalArgumentException("Not supported filter type: $type!")
 
             }
@@ -868,7 +876,7 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true, DiagramTy
         wrapper.filtering([it])
     }
 
-    //при таких условиях в запросе придёт массив с 1 уровнем вложенности [v1, v2. v3,..]
+    //при таких условиях в запросе придёт массив с 1 уровнем вложенности [v1, v2, v3,..]
     Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
         it?.type == Aggregation.NOT_APPLICABLE
     } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0

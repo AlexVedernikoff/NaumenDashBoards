@@ -710,9 +710,9 @@ String getMaxMetaCaseId(String classFqn)
  */
 String getCardObject(String value)
 {
-    if (value && value.tokenize('-').size() > 1)
+    if (value && ObjectMarshaller.unmarshal(value).size() > 1)
     {
-        String objectUUID = value.tokenize('-').last()
+        String objectUUID = ObjectMarshaller.unmarshal(value).last()
         def link = api.web.open(objectUUID)
         return toJson([link: link])
     }

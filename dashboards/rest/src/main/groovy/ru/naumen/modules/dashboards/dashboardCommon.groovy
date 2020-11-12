@@ -126,7 +126,9 @@ enum Comparison
     EQUAL_REMOVED,
     NOT_EQUAL_REMOVED,
     STATE_TITLE_CONTAINS,
-    STATE_TITLE_NOT_CONTAINS
+    STATE_TITLE_NOT_CONTAINS,
+    METACLASS_TITLE_CONTAINS,
+    METACLASS_TITLE_NOT_CONTAINS
 }
 /**
  * Типы статусов для атрибутов типа счётчик и обратный счётчик
@@ -418,6 +420,98 @@ class FilterList
 {
     Collection<Collection<FilterParameter>> filters
     String place
+}
+
+/**
+ * Класс для преобразования/получения значения статуса
+ */
+class StateMarshaller
+{
+    /**
+     * делитель для значения из Бд
+     */
+    static String delimiter = '$'
+
+    /**
+     * делитель для значения
+     */
+    static String valueDelimiter = '()'
+
+    /**
+     * Метод получения значения для пользователя
+     * @param localizedTitle - название статуса, полученный по коду
+     * @param stateValue - значение статуса (код)
+     * @return название статуса (код)
+     */
+    static String marshal(String localizedTitle, String stateValue)
+    {
+        return "${localizedTitle} (${stateValue})"
+    }
+
+    /**
+     * Метод для парсинга значения
+     * @param value - значение целиком
+     * @param delimiter - разделитель для значения
+     * @return [название статуса, код статуса]
+     */
+    static Collection<String> unmarshal(String value, String delimiter)
+    {
+        return value.tokenize(delimiter)
+    }
+}
+
+/**
+ * Класс для преобразования/получения значения метакласса
+ */
+class MetaClassMarshaller
+{
+    /**
+     * делитель для значения
+     */
+    static String delimiter = '#'
+
+    /**
+     * Метод получения значения для пользователя
+     * @param localizedTitle - название метакласа, полученное по коду
+     * @param stateValue - значение метакласса (код)
+     * @return название метакласа delimiter код
+     */
+    static String marshal(String localizedTitle, String value)
+    {
+        return "${localizedTitle}${delimiter}${value}"
+    }
+
+    /**
+     * Метод для парсинга значения
+     * @param value - значение целиком
+     * @return [название метакласса, код метакласса]
+     */
+    static Collection<String> unmarshal(String value)
+    {
+        return value.tokenize(delimiter)
+    }
+}
+
+/**
+ * Класс для преобразования/получения значения объекта для вывода карточки объекта
+ */
+class ObjectMarshaller
+{
+    /**
+     * делитель для значения
+     */
+    static String delimiter = '#'
+
+    /**
+     * Метод для парсинга значения
+     * @param value - значение целиком
+     * @return [значение объекта, uuid объекта]
+     */
+    static List<String> unmarshal(String value)
+    {
+        return value.tokenize(delimiter)
+    }
+
 }
 //endregion
 return
