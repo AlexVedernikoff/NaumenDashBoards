@@ -30,6 +30,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 	const buildDataSet = getBuildSet(widget);
 
 	if (buildDataSet) {
+		const {showEmptyData} = buildDataSet;
 		const parameterUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.xAxis);
 		const breakdownUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.breakdown);
 		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
@@ -55,7 +56,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 				stacked
 			},
 			dataLabels: {
-				formatter: valueFormatter(usesMSInterval, usesPercent, false)
+				formatter: valueFormatter(usesMSInterval, usesPercent, showEmptyData)
 			},
 			grid: {
 				padding: {

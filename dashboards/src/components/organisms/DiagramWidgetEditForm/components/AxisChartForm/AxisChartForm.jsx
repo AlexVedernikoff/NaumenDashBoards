@@ -52,7 +52,6 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			legend,
 			parameter,
 			name = '',
-			showEmptyData,
 			sorting,
 			templateName,
 			type
@@ -70,7 +69,6 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			legend: extend(getLegendSettings(values), legend),
 			name,
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
-			showEmptyData,
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),
 			templateName,
 			type
