@@ -21,10 +21,28 @@ const transformType = (widget: LegacyWidget) => {
 };
 
 const widgetNormalizer = (widget: Object): Widget => {
-	const {COMBO, DONUT, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
+	const {
+		BAR,
+		BAR_STACKED,
+		COLUMN,
+		COLUMN_STACKED,
+		COMBO,
+		DONUT,
+		LINE,
+		PIE,
+		SPEEDOMETER,
+		SUMMARY,
+		TABLE
+	} = WIDGET_TYPES;
 	transformType(widget);
 
 	switch (widget[FIELDS.type]) {
+		case BAR:
+		case BAR_STACKED:
+		case COLUMN:
+		case COLUMN_STACKED:
+		case LINE:
+			return axisNormalizer(widget);
 		case DONUT:
 		case PIE:
 			return circleNormalizer(widget);
@@ -37,7 +55,7 @@ const widgetNormalizer = (widget: Object): Widget => {
 		case TABLE:
 			return tableNormalizer(widget);
 		default:
-			return axisNormalizer(widget);
+			return widget;
 	}
 };
 

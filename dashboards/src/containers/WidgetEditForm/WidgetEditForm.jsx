@@ -3,7 +3,7 @@ import type {AnyWidget} from 'store/widgets/data/types';
 import {connect} from 'react-redux';
 import {deepClone} from 'src/helpers';
 import DiagramWidgetEditForm from 'containers/DiagramWidgetEditForm';
-import {DISPLAY_MODE} from 'store/widgets/data/constants';
+import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DivRef} from 'components/types';
 import {FIELDS} from './constants';
 import type {FormElement, Props, Schema, State, Values} from './types';
@@ -11,6 +11,7 @@ import {functions, props} from './selectors';
 import type {LayoutSize} from 'components/organisms/DiagramWidgetEditForm/types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import React, {PureComponent} from 'react';
+import {TextWidgetEditForm} from 'components/organisms';
 import type {UpdateWidget} from 'containers/WidgetEditForm/types';
 
 class WidgetEditForm extends PureComponent<Props, State> {
@@ -98,6 +99,41 @@ class WidgetEditForm extends PureComponent<Props, State> {
 
 	isNew = (): boolean => this.props.widget.id === NewWidget.id;
 
+	resolveForm = () => {
+		const {type} = this.props.widget;
+		const {
+			BAR,
+			BAR_STACKED,
+			COLUMN,
+			COLUMN_STACKED,
+			COMBO,
+			DONUT,
+			LINE,
+			PIE,
+			SPEEDOMETER,
+			SUMMARY,
+			TABLE,
+			TEXT
+		} = WIDGET_TYPES;
+
+		switch (type) {
+			case BAR:
+			case BAR_STACKED:
+			case COLUMN:
+			case COLUMN_STACKED:
+			case COMBO:
+			case DONUT:
+			case LINE:
+			case PIE:
+			case SPEEDOMETER:
+			case SUMMARY:
+			case TABLE:
+				return DiagramWidgetEditForm;
+			case TEXT:
+				return TextWidgetEditForm;
+		}
+	};
+
 	setDataFieldValue = (index: number, name: string, value: any, callback?: Function) => {
 		const {data} = this.state.values;
 		data[index] = {
@@ -184,10 +220,9 @@ class WidgetEditForm extends PureComponent<Props, State> {
 			values,
 			widget
 		};
+		const Form = this.resolveForm();
 
-		return (
-			<DiagramWidgetEditForm {...injectedProps} />
-		);
+		return Form ? <Form {...injectedProps} /> : null;
 	}
 }
 

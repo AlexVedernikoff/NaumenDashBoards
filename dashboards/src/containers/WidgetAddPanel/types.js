@@ -21,4 +21,7 @@ export type ConnectedFunctions = {|
 	validateWidgetToCopy: (widgetId: string) => ThunkAction
 |};
 
-export type Props = ConnectedFunctions & ConnectedProps;
+export type Props = {
+	...ConnectedFunctions,
+	...ConnectedProps
+};

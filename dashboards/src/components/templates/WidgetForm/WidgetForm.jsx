@@ -9,6 +9,7 @@ import styles from './styles.less';
 export class WidgetForm extends PureComponent<Props> {
 	static defaultProps = {
 		components: {},
+		title: '',
 		updating: false
 	};
 

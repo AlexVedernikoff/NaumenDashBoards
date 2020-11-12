@@ -11,34 +11,28 @@ import {
 	TEXT_ALIGNS,
 	TEXT_HANDLERS
 } from 'store/widgets/data/constants';
+import type {FontSizeSelectProps, InputProps, OnChangeEvent, Props, SelectProps} from './types';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import type {InputProps, OnChangeEvent, Props} from './types';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class StyleFormBuilder extends Component<Props> {
 	handleBoolChange = (event: OnChangeInputEvent) => {
-		const {data, name, onChange} = this.props;
-		const {name: key, value} = event;
+		const {onChange} = this.props;
+		const {name, value} = event;
 
-		onChange(name, {
-			...data,
-			[key]: !value
-		});
+		onChange(name, !value);
 	};
 
 	handleChange = (event: OnChangeEvent) => {
-		const {data, name, onChange} = this.props;
-		const {name: key, value} = event;
+		const {onChange} = this.props;
+		const {name, value} = event;
 
-		onChange(name, {
-			...data,
-			[key]: value
-		});
+		onChange(name, value);
 	};
 
-	handleChangeFontSize = (event: OnChangeInputEvent) => {
+	handleChangeFontSize = (onSelect: Function) => (event: OnChangeInputEvent) => {
 		let {name, value} = event;
 
 		if (/^(\d+)?$/.test(value.toString())) {
@@ -46,7 +40,7 @@ export class StyleFormBuilder extends Component<Props> {
 				value = MAX_FONT_SIZE;
 			}
 
-			this.handleChange({name, value});
+			onSelect({name, value: Number(value)});
 		}
 	};
 
@@ -79,31 +73,40 @@ export class StyleFormBuilder extends Component<Props> {
 		);
 	};
 
-	renderFontFamilySelect = () => {
-		const {[FIELDS.fontFamily]: value} = this.props.data;
+	renderFontFamilySelect = (props: $Shape<SelectProps> = {}) => {
+		const {
+			name = FIELDS.fontFamily,
+			onSelect = this.handleChange,
+			value = this.props.data[FIELDS.fontFamily]
+		} = props;
 
 		return (
 			<Select
 				className={styles.fontFamilySelect}
-				name={FIELDS.fontFamily}
-				onSelect={this.handleChange}
+				name={name}
+				onSelect={onSelect}
 				options={FONT_FAMILIES}
 				value={value}
 			/>
 		);
 	};
 
-	renderFontSizeSelect = (usesAuto: boolean = false) => {
-		const {[FIELDS.fontSize]: value} = this.props.data;
+	renderFontSizeSelect = (props: $Shape<FontSizeSelectProps> = {}) => {
+		const {
+			name = FIELDS.fontSize,
+			onSelect = this.handleChange,
+			usesAuto = false,
+			value = this.props.data[FIELDS.fontSize]
+		} = props;
 		const options = usesAuto ? [FONT_SIZE_AUTO_OPTION, ...FONT_SIZE_OPTIONS] : FONT_SIZE_OPTIONS;
 
 		return (
 			<Select
 				className={styles.fontSizeSelect}
 				editable={true}
-				name={FIELDS.fontSize}
-				onChangeLabel={this.handleChangeFontSize}
-				onSelect={this.handleChange}
+				name={name}
+				onChangeLabel={this.handleChangeFontSize(onSelect)}
+				onSelect={onSelect}
 				options={options}
 				value={value}
 			/>
