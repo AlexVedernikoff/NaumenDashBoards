@@ -15,7 +15,9 @@ const hasDifferentAggregations = (data: Array<DataSet>) => !data
 			if (setIndex === 0 && indicatorIndex === 0) {
 				return true;
 			} else if (indicatorIndex === 0) {
-				return aggregation === data[setIndex - 1].indicators[0].aggregation;
+				const {indicators} = data[setIndex - 1];
+
+				return aggregation === Array.isArray(indicators) && indicators[0].aggregation;
 			}
 
 			return aggregation === indicators[indicatorIndex - 1].aggregation;

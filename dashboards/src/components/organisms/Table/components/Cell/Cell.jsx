@@ -53,7 +53,7 @@ export class Cell extends PureComponent<Props> {
 		const {components, value} = this.props;
 		const {Value} = components;
 
-		return value ? <Value value={value} /> : this.renderDefaultValue();
+		return value && Number(value) !== 0 ? <Value value={value} /> : this.renderDefaultValue();
 	};
 
 	render () {

@@ -73,13 +73,13 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	/**
-	 * Возвращает начальные данные ширины столбцов относительно ширины таблицы с учетом подстолбцов
+	 * Возвращает данные ширины столбцов относительно ширины таблицы с учетом подстолбцов
 	 * @param {number} tableWidth - ширина таблицы
 	 * @param {Array<Column>} columns - колонки
 	 * @param {ColumnsWidth} columnsWidth - данные ширины столбцов
 	 * @returns {ColumnsWidth}
 	 */
-	getInitColumnsWidth = (tableWidth: number, columns: Array<Column>, columnsWidth: ColumnsWidth): ColumnsWidth => {
+	getColumnsWidthByTableWidth = (tableWidth: number, columns: Array<Column>, columnsWidth: ColumnsWidth): ColumnsWidth => {
 		const defaultWidth = this.calcDefaultColumnWidth(tableWidth, columns.length);
 		let newColumnsWidth = {...columnsWidth};
 
@@ -88,7 +88,7 @@ export class Table extends PureComponent<Props, State> {
 			let width;
 
 			if (Array.isArray(subColumns)) {
-				newColumnsWidth = this.getInitColumnsWidth(tableWidth, subColumns, newColumnsWidth);
+				newColumnsWidth = this.getColumnsWidthByTableWidth(tableWidth, subColumns, newColumnsWidth);
 				width = sumColumnsWidth(newColumnsWidth, subColumns);
 			}
 
@@ -162,9 +162,7 @@ export class Table extends PureComponent<Props, State> {
 		const {columns, columnsRatioWidth} = this.props;
 		let {columnsWidth} = this.state;
 
-		if (Object.keys(columnsWidth).length === 0) {
-			columnsWidth = this.getInitColumnsWidth(newWidth, columns, columnsWidth);
-		}
+		columnsWidth = this.getColumnsWidthByTableWidth(newWidth, columns, columnsWidth);
 
 		Object.keys(columnsRatioWidth).forEach(accessor => {
 			if (columnsRatioWidth[accessor]) {
