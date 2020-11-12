@@ -8,16 +8,18 @@ import styles from './styles.less';
 export class CheckIconButtonGroup extends PureComponent<Props> {
 	static defaultProps = {
 		className: '',
-		disabled: false
+		disabled: false,
+		value: ''
 	};
 
 	renderIcon = (option: IconType) => {
 		const {name, onChange, value: currentValue} = this.props;
-		const {name: iconName, title, value} = option;
+		const {active, name: iconName, title, value} = option;
+		const checked = active || value === currentValue;
 
 		return (
 			<CheckIconButton
-				checked={value === currentValue}
+				checked={checked}
 				key={value}
 				name={name}
 				onChange={onChange}

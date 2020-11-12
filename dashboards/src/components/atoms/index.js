@@ -25,6 +25,7 @@ import RadioField from './RadioField';
 import SearchInput from './SearchInput';
 import Text from './Text';
 import TextArea from './TextArea';
+import TextEditor from './TextEditor';
 import TextInput from './TextInput';
 import TimerButton from './TimerButton';
 import Toast from './Toast';
@@ -58,6 +59,7 @@ export {
 	SearchInput,
 	Text,
 	TextArea,
+	TextEditor,
 	TextInput,
 	TimerButton,
 	Toast,

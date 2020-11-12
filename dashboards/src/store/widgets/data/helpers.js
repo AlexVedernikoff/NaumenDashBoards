@@ -7,9 +7,13 @@ import type {
 	SetWidgets,
 	UpdateWidget,
 	Widget,
+	WidgetType,
 	WidgetsDataState
 } from './types';
+import {DiagramWidget, TextWidget} from './templates';
+import type {LayoutMode} from 'store/dashboard/settings/types';
 import NewWidget from 'store/widgets/data/NewWidget';
+import {WIDGET_TYPES} from './constants';
 
 /**
  * Устанавливаем полученные виджеты
@@ -139,7 +143,42 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
 // $FlowFixMe
 const getBuildSet = (widget: Object) => widget.data.find(set => !set.sourceForCompute);
 
+const createNewWidget = (layoutMode: LayoutMode, type?: WidgetType) => {
+	const {
+		BAR,
+		BAR_STACKED,
+		COLUMN,
+		COLUMN_STACKED,
+		COMBO,
+		DONUT,
+		LINE,
+		PIE,
+		SPEEDOMETER,
+		SUMMARY,
+		TABLE,
+		TEXT
+	} = WIDGET_TYPES;
+
+	switch (type) {
+		case BAR:
+		case BAR_STACKED:
+		case COLUMN:
+		case COLUMN_STACKED:
+		case COMBO:
+		case DONUT:
+		case LINE:
+		case PIE:
+		case SPEEDOMETER:
+		case SUMMARY:
+		case TABLE:
+			return new DiagramWidget(layoutMode);
+		case TEXT:
+			return new TextWidget(layoutMode);
+	}
+};
+
 export {
+	createNewWidget,
 	getBuildSet,
 	setWidgets,
 	setSelectedWidget,

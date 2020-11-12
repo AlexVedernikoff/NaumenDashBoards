@@ -20,7 +20,7 @@ export class IndicatorBox extends PureComponent<Props> {
 			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={data.show} title="Показатель">
 				<FormField row>
 					{renderFontFamilySelect()}
-					{renderFontSizeSelect(true)}
+					{renderFontSizeSelect({usesAuto: true})}
 				</FormField>
 				<FormField row>
 					{renderFontStyleButtons()}

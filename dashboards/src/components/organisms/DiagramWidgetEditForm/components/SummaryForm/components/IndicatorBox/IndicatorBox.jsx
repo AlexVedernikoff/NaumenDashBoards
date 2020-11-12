@@ -12,7 +12,7 @@ export class IndicatorBox extends PureComponent<Props> {
 			<ToggableFormBox title="Показатель">
 				<FormField label="Шрифт" row>
 					{renderFontFamilySelect()}
-					{renderFontSizeSelect(true)}
+					{renderFontSizeSelect({usesAuto: true})}
 				</FormField>
 				<FormField row>
 					{renderFontStyleButtons()}

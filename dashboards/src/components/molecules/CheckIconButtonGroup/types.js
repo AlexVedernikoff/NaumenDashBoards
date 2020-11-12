@@ -3,6 +3,7 @@ import type {IconName} from 'components/atoms/Icon/types';
 import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Icon = {
+	active?: boolean,
 	name: IconName,
 	title: string,
 	value: string

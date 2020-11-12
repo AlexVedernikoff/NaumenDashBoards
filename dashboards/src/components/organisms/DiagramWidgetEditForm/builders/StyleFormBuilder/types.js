@@ -1,5 +1,5 @@
 // @flow
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 
 export type OnChangeEvent = {
 	name: string,
@@ -12,25 +12,35 @@ export type InputProps = {
 	value: string
 };
 
+export type SelectProps = {
+	name: string,
+	onSelect: OnSelectEvent => void,
+	value: any
+};
+
+export type FontSizeSelectProps = {
+	...SelectProps,
+	usesAuto: boolean
+};
+
 export type StyleBuilderProps = {|
 	handleBoolChange: OnChangeInputEvent => void,
 	handleChange: OnChangeEvent => void,
 	handleConditionChange: OnChangeInputEvent => void,
-	renderColorInput: ($Shape<InputProps> | void) => React$Node,
-	renderFontFamilySelect: () => React$Node,
-	renderFontSizeSelect: (usesAuto?: boolean) => React$Node,
-	renderFontStyleButtons: ($Shape<InputProps> | void) => React$Node,
-	renderSortingButtons: ($Shape<InputProps> | void) => React$Node,
-	renderTextAlignButtons: ($Shape<InputProps> | void) => React$Node,
-	renderTextHandlerButtons: ($Shape<InputProps> | void) => React$Node,
+	renderColorInput: (props?: $Shape<InputProps>) => React$Node,
+	renderFontFamilySelect: (props?: $Shape<SelectProps>) => React$Node,
+	renderFontSizeSelect: (props?: $Shape<FontSizeSelectProps>) => React$Node,
+	renderFontStyleButtons: (props?: $Shape<InputProps>) => React$Node,
+	renderSortingButtons: (props?: $Shape<InputProps>) => React$Node,
+	renderTextAlignButtons: (props?: $Shape<InputProps>) => React$Node,
+	renderTextHandlerButtons: (props?: $Shape<InputProps>) => React$Node,
 |};
 
 type Data = Object;
 
 export type Props = {
 	data: Data,
-	name: string,
-	onChange: (name: string, data: Data) => void,
+	onChange: (name: string, value: any) => void,
 	render: StyleBuilderProps => React$Node
 };
 
