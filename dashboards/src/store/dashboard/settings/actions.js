@@ -233,19 +233,29 @@ const seeDashboard = (): ThunkAction => async (dispatch: Dispatch) => {
  * @param {string} name - имя файла
  * @returns {string} key - ключ файла, для обращения на сервере
  */
-const uploadFile = async (file: Blob, name: string) => {
-	const formData = new FormData();
-	formData.append('file', file, name);
-	// $FlowFixMe
-	const csrf = Array.from(window.top.document.head.getElementsByTagName('meta')).find(m => m.name === '_csrf').content;
-	const response = await fetch(`/sd/operator/upload?_csrf=${csrf}`, {
-		body: formData,
-		method: 'POST'
-	});
+const uploadFile = async (file: Blob, name: string): Promise<string> => {
+	const csrfMeta = Array.from(window.top.document.head.getElementsByTagName('meta')).find(m => m.name === '_csrf');
+	let key = '';
 
-	let key = await response.text();
-	key = key.split('::')[1];
-	key = key.substr(0, key.length - 1);
+	if (csrfMeta) {
+		const formData = new FormData();
+		formData.append('file', file, name);
+
+		const response = await fetch(`/sd/operator/upload?_csrf=${csrfMeta.content}`, {
+			body: formData,
+			method: 'POST'
+		});
+		key = await response.text();
+
+		const defaultSeparator = '::';
+		const newSeparator = '@UUID_FILENAME_SPLITTER@';
+
+		if (key.includes(defaultSeparator)) {
+			key = key.substring(0, key.length - 1).split(defaultSeparator)[1];
+		} else if (key.includes(newSeparator)) {
+			key = key.split(newSeparator)[0].substring(2);
+		}
+	}
 
 	return key;
 };
