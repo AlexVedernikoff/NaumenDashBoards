@@ -111,7 +111,7 @@ const createData = (widget: Object, fields: Object) => {
 const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 	const {displayMode = DISPLAY_MODE.WEB, id, type} = widget;
 	const dataFields = getDataFields();
-	let {data, showEmptyData} = widget;
+	let {data} = widget;
 
 	if (!data) {
 		data = hasOrdinalFormat(widget)
@@ -133,7 +133,6 @@ const axisNormalizer = (widget: LegacyWidget): AxisWidget => {
 		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
 		parameter: axisParameter(widget, set[FIELDS.xAxis]),
-		showEmptyData: Boolean(showEmptyData),
 		sorting: chartSorting(widget),
 		templateName: templateName(widget),
 		type

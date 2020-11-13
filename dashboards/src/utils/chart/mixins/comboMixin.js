@@ -24,12 +24,12 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 	const {seriesIndex, w} = ctx;
 	const {series} = w.config;
 
-	const set = widget.data.find(set => set.dataKey === series[seriesIndex].dataKey);
+	const buildDataSet = widget.data.find(set => set.dataKey === series[seriesIndex].dataKey);
 	let formattedValue = value;
 
-	if (set && !set.sourceForCompute) {
-		const {aggregation} = set;
-		const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
+	if (buildDataSet && !buildDataSet.sourceForCompute) {
+		const {aggregation} = buildDataSet;
+		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
 		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
 		formattedValue = valueFormatter(usesMSInterval, usesPercent, showZero)(value);
 	}
@@ -107,6 +107,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	const strokeWidth = series.find(s => s.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 	const stacked = widget.data.findIndex(set => set.type && set.type === WIDGET_TYPES.COLUMN_STACKED) !== -1;
 	const buildDataSet = getBuildSet(widget);
+	const {showEmptyData} = buildDataSet;
 	let parameterUsesMetaClass = false;
 	let breakdownUsesMetaClass = false;
 	let maxValue;
@@ -131,7 +132,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			stacked
 		},
 		dataLabels: {
-			formatter: dataLabelsFormatter(widget, false)
+			formatter: dataLabelsFormatter(widget, showEmptyData)
 		},
 		grid: {
 			padding: {
