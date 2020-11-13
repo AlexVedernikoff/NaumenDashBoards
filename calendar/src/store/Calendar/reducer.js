@@ -16,6 +16,8 @@ const reducer = (
 		case CALENDAR_EVENTS.SET_CALENDAR_DATA_LOADING:
 			return {
 				...state,
+				// NOTE: удаляем старые данные, если начинается загрузка, чтоб они не "прыгали" при переключении месяца
+				calendarData: payload === true ? [] : state.calendarData,
 				isLoading: payload
 			};
 		case CALENDAR_EVENTS.SET_CALENDAR_RESOURCE_COLOR_LIST:
