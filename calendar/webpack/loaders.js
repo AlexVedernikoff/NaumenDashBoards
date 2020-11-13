@@ -3,7 +3,6 @@
 
 const Autoprefixer = require('autoprefixer');
 const define = require('./define');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
 	rules: [
@@ -18,7 +17,10 @@ module.exports = {
 			test: /\.(css|less)$/,
 			use: [
 				{
-					loader: MiniCssExtractPlugin.loader
+					loader: 'style-loader',
+					options: {
+						injectType: 'singletonStyleTag'
+					}
 				},
 				{
 					loader: 'css-loader',
@@ -56,9 +58,7 @@ module.exports = {
 		},
 		{
 			test: /\.(gif|png|jpg|jpeg|woff|woff2|ttf|eot|svg)$/,
-			use: {
-				loader: 'file-loader'
-			}
+			type: 'asset/resource'
 		}
 	]
 };

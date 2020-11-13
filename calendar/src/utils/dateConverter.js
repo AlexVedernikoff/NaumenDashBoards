@@ -50,3 +50,11 @@ export const getDates = (date: Date, view: string) => {
 			throw new Error('Unsupported type of date');
 	}
 };
+
+/**
+ * Функция для получения даты формата dd-mm-YYYY
+ * @param {Date} date - дата
+ * @returns {string} - форматированная дата строкой
+ */
+export const getFormattedDate = (date: Date) =>
+	`${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
