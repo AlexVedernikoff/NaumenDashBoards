@@ -39,7 +39,7 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	resolveDiagram = () => {
-		const {buildData, focused, widget} = this.props;
+		const {buildData, widget} = this.props;
 		const {data} = buildData;
 		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
@@ -52,7 +52,7 @@ export class Diagram extends Component<Props, State> {
 			case DONUT:
 			case LINE:
 			case PIE:
-				return <Chart data={data} focused={focused} widget={widget} />;
+				return <Chart data={data} widget={widget} />;
 			case SPEEDOMETER:
 				return <SpeedometerWidget data={data} widget={widget} />;
 			case SUMMARY:

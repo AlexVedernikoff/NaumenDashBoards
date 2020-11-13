@@ -5,7 +5,6 @@ import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
 	buildData: BuildData,
-	focused: boolean,
 	onDrillDown: DrillDown,
 	onOpenCardObject: OpenCardObject,
 	onUpdate: Widget => void,

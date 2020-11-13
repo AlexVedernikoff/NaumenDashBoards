@@ -20,6 +20,18 @@ const EMPTY_DATA_OPTIONS = [
 	}
 ];
 
+const PAGE_SIZES = [
+	5,
+	10,
+	15,
+	20,
+	25,
+	50,
+	100
+];
+
 export {
-	EMPTY_DATA_OPTIONS
+	EMPTY_DATA_OPTIONS,
+	PAGE_SIZES
 };
+

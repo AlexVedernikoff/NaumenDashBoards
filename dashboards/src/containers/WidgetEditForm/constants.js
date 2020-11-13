@@ -38,6 +38,7 @@ const legend: 'legend' = 'legend';
 const name: 'name' = 'name';
 const max: 'max' = 'max';
 const min: 'min' = 'min';
+const pageSize: 'pageSize' = 'pageSize';
 const parameter: 'parameter' = 'parameter';
 const parameters: 'parameters' = 'parameters';
 const position: 'position' = 'position';
@@ -105,6 +106,7 @@ const FIELDS = {
 	min,
 	mkLayout,
 	name,
+	pageSize,
 	parameter,
 	parameters,
 	position,

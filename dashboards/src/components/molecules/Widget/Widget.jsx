@@ -48,21 +48,13 @@ export class Widget extends PureComponent<Props, State> {
 	}
 
 	getClassName = () => {
-		const {className, focused, isSelected} = this.props;
+		const {className, isSelected} = this.props;
 
 		return cn({
 			[styles.widget]: true,
-			[styles.focusedWidget]: focused,
 			[styles.selectedWidget]: isSelected,
 			[className]: true
 		});
-	};
-
-	handleClick = (e: MouseEvent) => {
-		const {data, onClick} = this.props;
-
-		e.stopPropagation();
-		onClick(data.id);
 	};
 
 	handleEdit = () => {
@@ -119,14 +111,13 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderDiagram = () => {
-		const {buildData, data, focused, isNew, onDrillDown, onOpenCardObject, onUpdate} = this.props;
+		const {buildData, data, isNew, onDrillDown, onOpenCardObject, onUpdate} = this.props;
 		const {hasError} = this.state;
 
 		if (!isNew && buildData && !hasError) {
 			return (
 				<Diagram
 					buildData={buildData}
-					focused={focused}
 					onDrillDown={onDrillDown}
 					onOpenCardObject={onOpenCardObject}
 					onUpdate={onUpdate}
@@ -154,7 +145,7 @@ export class Widget extends PureComponent<Props, State> {
 		};
 
 		return (
-			<div {...gridProps} className={this.getClassName()} onClick={this.handleClick} ref={this.ref}>
+			<div {...gridProps} className={this.getClassName()} ref={this.ref}>
 				{this.renderControlPanel()}
 				{this.renderDiagram()}
 				{this.renderError()}

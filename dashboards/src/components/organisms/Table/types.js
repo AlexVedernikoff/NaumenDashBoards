@@ -52,6 +52,7 @@ export type Props = {
 	onChangeColumnWidth?: (columnsWidth: ColumnsWidth) => void,
 	onChangeSorting?: (sorting: TableSorting) => void,
 	onClickDataCell?: OnClickCell,
+	pageSize: number,
 	settings: Table,
 	sorting: TableSorting
 };
@@ -60,7 +61,6 @@ export type State = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
 	page: number,
-	pageSize: number,
 	sorting: TableSorting,
 	width: number | null
 };
