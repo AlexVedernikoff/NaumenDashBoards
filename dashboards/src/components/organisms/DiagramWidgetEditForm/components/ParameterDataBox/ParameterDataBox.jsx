@@ -116,20 +116,21 @@ export class ParameterDataBox extends PureComponent<Props> {
 		return index !== 0 && mainSource && currentSource && mainSource.value === currentSource.value;
 	};
 
-	renderParameterFieldset = (set: DataSet, index: number) => {
+	renderParameterFieldset = (dataSet: DataSet, index: number) => {
 		const {errors, name, values} = this.props;
-		const parameter = set[name];
+		const parameter = dataSet[name];
 		const disabledGroup = index !== 0 && parameter && !(parameter.type in ATTRIBUTE_SETS.REF);
 		const errorKey = getDataErrorKey(index, name);
 
 		return (
 			<ParameterFieldset
-				dataSet={set}
+				dataSet={dataSet}
+				dataSetIndex={index}
 				disabled={this.isDisabled(index)}
 				disabledGroup={disabledGroup}
 				error={errors[errorKey]}
 				filter={this.filter}
-				group={set[FIELDS.group]}
+				group={dataSet[FIELDS.group]}
 				index={index}
 				key={errorKey}
 				mainSet={values.data[0]}

@@ -4,6 +4,7 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
 import {FormCheckControl, TransparentSelect} from 'components/molecules';
+import {getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
 import {List} from 'components/molecules/Select/components';
 import type {OnChangeInputEvent, OnChangeLabelEvent, OnSelectEvent, TreeNode} from 'components/types';
 import type {Props as SelectProps} from 'components/molecules/TransparentSelect/types';
@@ -27,7 +28,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		showDynamicAttributesError: false
 	};
 
-	fetchAttributes = (classFqn: string) => () => this.props.fetchAttributes(classFqn);
+	fetchAttributes = (classFqn: string, parentClassFqn?: string | null) => () => this.props.fetchAttributes(classFqn, parentClassFqn);
 
 	fetchRefAttributes = (parent: Attribute) => () => this.props.fetchRefAttributes(parent);
 
@@ -65,25 +66,27 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	};
 
 	getSourceSelectProps = () => {
-		const {attributes, dataSet} = this.props;
+		const {attributes, dataSet, dataSetIndex, values} = this.props;
 		const {source} = dataSet;
-		let data = {
-			fetchOptions: source && this.fetchAttributes(source.value)
+		const parentClassFqn = getParentClassFqn(values, dataSetIndex);
+		const fetchOptions = source ? this.fetchAttributes(source.value, parentClassFqn) : null;
+		let props = {
+			fetchOptions
 		};
 
 		if (source) {
 			const {[source.value]: sourceData = this.getDefaultMapData()} = attributes;
 
 			if (sourceData) {
-				data = {
+				props = {
 					...sourceData,
-					...data,
+					...props,
 					options: this.getSourceOptions(sourceData.options)
 				};
 			}
 		}
 
-		return data;
+		return props;
 	};
 
 	handleChangeLabel = (parent: Attribute | null = null) => (event: OnChangeLabelEvent) => {

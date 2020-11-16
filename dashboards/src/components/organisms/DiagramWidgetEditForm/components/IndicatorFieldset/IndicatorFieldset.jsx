@@ -149,12 +149,13 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {error, index, name, onRemove, removable, set, value} = this.props;
+		const {dataSet, dataSetIndex, error, index, name, onRemove, removable, value} = this.props;
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
-					dataSet={set}
+					dataSet={dataSet}
+					dataSetIndex={dataSetIndex}
 					getSourceOptions={this.getSourceOptions}
 					index={index}
 					name={name}

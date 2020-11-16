@@ -6,6 +6,7 @@ import type {OnChangeAttributeLabelEvent, OnChangeGroup, OnSelectAttributeEvent}
 
 export type Props = {
 	dataSet: DataSet,
+	dataSetIndex: number,
 	disabled: boolean,
 	disabledGroup: boolean,
 	error: string,

@@ -143,7 +143,7 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
 // $FlowFixMe
 const getBuildSet = (widget: Object) => widget.data.find(set => !set.sourceForCompute);
 
-const createNewWidget = (layoutMode: LayoutMode, type?: WidgetType) => {
+const createNewWidget = (layoutMode: LayoutMode, type: WidgetType = WIDGET_TYPES.BAR) => {
 	const {
 		BAR,
 		BAR_STACKED,

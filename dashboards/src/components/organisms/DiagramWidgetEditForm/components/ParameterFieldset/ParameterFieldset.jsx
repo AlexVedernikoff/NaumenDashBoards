@@ -53,12 +53,13 @@ export class ParameterFieldset extends PureComponent<Props> {
 	};
 
 	render () {
-		const {dataSet, disabled, error, filter, index, name, onRemove, removable, value} = this.props;
+		const {dataSet, dataSetIndex, disabled, error, filter, index, name, onRemove, removable, value} = this.props;
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
 					dataSet={dataSet}
+					dataSetIndex={dataSetIndex}
 					disabled={disabled}
 					getAttributeOptions={filter}
 					getSourceOptions={filter}

@@ -92,6 +92,7 @@ export class ParametersBox extends PureComponent<Props> {
 		return (
 			<ParameterFieldset
 				dataSet={set}
+				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
 				group={group}
 				index={index}
