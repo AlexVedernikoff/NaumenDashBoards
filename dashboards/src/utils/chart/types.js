@@ -20,3 +20,9 @@ export type ApexLegend = {
 	showForSingleSeries: boolean,
 	width: number
 };
+
+export type AxisProps = {
+	name: string,
+	show: boolean,
+	showName: boolean
+};

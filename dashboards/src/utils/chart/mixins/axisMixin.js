@@ -25,7 +25,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  */
 const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
-	const {indicator, legend, type} = widget;
+	const {indicator, legend, parameter, type} = widget;
 	const {categories} = chart;
 	const buildDataSet = getBuildSet(widget);
 
@@ -37,13 +37,15 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 		const usesPercent = hasPercent(buildDataSet, FIELDS.yAxis);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
-		const xaxis = {
+		const xAxisSettings = horizontal ? indicator : parameter;
+		const yAxisSettings = horizontal ? parameter : indicator;
+		let xaxis = {
 			categories: getXAxisLabels(widget, categories),
 			labels: {
 				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(parameterUsesMetaClass)
 			}
 		};
-		const yaxis = {
+		let yaxis = {
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
 				formatter: horizontal ? axisLabelFormatter(parameterUsesMetaClass) : valueFormatter(usesMSInterval, usesPercent)
@@ -88,8 +90,8 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 					}
 				}
 			},
-			xaxis: extend(xaxis, getXAxisOptions(widget)),
-			yaxis: extend(yaxis, getYAxisOptions(indicator))
+			xaxis: extend(xaxis, getXAxisOptions(xAxisSettings)),
+			yaxis: extend(yaxis, getYAxisOptions(yAxisSettings))
 		};
 	}
 };
