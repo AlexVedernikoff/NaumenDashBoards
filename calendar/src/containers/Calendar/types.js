@@ -18,6 +18,7 @@ export type ConnectedProps = {
 export type ConnectedFunctions = {
 	getCalendarData: (params: GetCalendarDataParams) => ThunkAction,
 	getCalendarResourceColorList: () => ThunkAction,
+	openEventLink: (linkId: string) => void | ThunkAction,
 	setCalendarData: (calendarData: Array<CalendarData>) => ISetCalendarData
 };
 
