@@ -22,7 +22,7 @@ export type ConnectedProps = {|
 	sources: DataSourceMap
 |};
 
-export type FetchAttributes = (classFqn: string, onLoadCallback?: OnLoadCallback) => ThunkAction;
+export type FetchAttributes = (classFqn: string, parentClassFqn?: string | null, onLoadCallback?: OnLoadCallback) => ThunkAction;
 
 export type FetchDynamicAttributeGroups = (dataKey: string, descriptor: string) => ThunkAction;
 

@@ -131,6 +131,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 		return (
 			<IndicatorFieldset
 				aggregation={aggregation}
+				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
 				index={index}
 				key={index}

@@ -6,14 +6,20 @@ import type {OnLoadCallback} from 'store/sources/types';
 /**
  * Получаем атрибуты конкретного класса
  * @param {string} classFqn - код класса
+ * @param {string | null} parentClassFqn - код класса родителя
  * @param {OnLoadCallback} callback - колбэк-функция
  * @returns {ThunkAction}
  */
-const fetchAttributes = (classFqn: string, callback?: OnLoadCallback): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const fetchAttributes = (classFqn: string, parentClassFqn: string | null = null, callback?: OnLoadCallback): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
 	dispatch(requestAttributes(classFqn));
 
 	try {
-		const attributes = await window.jsApi.restCallModule('dashboards', 'getDataSourceAttributes', {classFqn});
+		const params = {
+			classFqn,
+			parentClassFqn
+		};
+		const attributes = await window.jsApi.restCallModule('dashboards', 'getDataSourceAttributes', params);
 
 		callback && callback(attributes);
 		dispatch(receiveAttributes(attributes, classFqn));

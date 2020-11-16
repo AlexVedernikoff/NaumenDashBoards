@@ -67,7 +67,7 @@ export class DiagramWidgetEditForm extends Component<Props> {
 			changeAttributeTitle: this.changeAttributeTitle,
 			dynamicGroups,
 			errors,
-			fetchAttributes: fetchAttributes,
+			fetchAttributes,
 			fetchDynamicAttributeGroups,
 			fetchDynamicAttributes,
 			fetchLinkedDataSources,

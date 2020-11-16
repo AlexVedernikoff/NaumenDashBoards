@@ -7,6 +7,8 @@ import type {SetDataFieldValue} from 'containers/WidgetEditForm/types';
 export type Props = {
 	...ContextProps,
 	aggregation: string,
+	dataSet: DataSet,
+	dataSetIndex: number,
 	error: string,
 	index: number,
 	name: string,
@@ -17,7 +19,6 @@ export type Props = {
 	onSelect: (event: OnSelectAttributeEvent, index: number) => void,
 	onSelectAggregation: SetDataFieldValue,
 	removable: boolean,
-	set: DataSet,
 	usesNotApplicableAggregation: boolean,
 	value: Object | null
 };

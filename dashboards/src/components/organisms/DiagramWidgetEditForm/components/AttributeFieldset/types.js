@@ -17,6 +17,7 @@ type DataSet = {
 export type Props = {
 	...ContextProps,
 	dataSet: DataSet,
+	dataSetIndex: number,
 	disabled: boolean,
 	getAttributeOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
 	getSourceOptions?: (Array<Attribute>, index: number) => Array<Attribute>,

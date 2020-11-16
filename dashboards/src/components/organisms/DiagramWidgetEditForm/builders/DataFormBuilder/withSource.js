@@ -4,7 +4,7 @@ import type {ContextProps} from 'DiagramWidgetEditForm/types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
+import {getDataErrorKey, getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import {getMapValues} from 'src/helpers';
 import {IconButton} from 'components/atoms';
@@ -64,6 +64,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 				const {fetchAttributes, setDataFieldValue, values} = this.props;
 				const {name, value: nextSource} = event;
 				const prevSource = values.data[index][name];
+				const parentClassFqn = getParentClassFqn(values, index);
 				let callback;
 
 				if (onSelectCallback) {
@@ -73,7 +74,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 				getMapValues(sourceRefFields).forEach(name => setDataFieldValue(index, name, undefined));
 
 				if (nextSource) {
-					fetchAttributes(nextSource.value, this.setDefaultIndicator(index, sourceRefFields));
+					fetchAttributes(nextSource.value, parentClassFqn, this.setDefaultIndicator(index, sourceRefFields));
 				}
 
 				setDataFieldValue(index, name, nextSource, callback);
