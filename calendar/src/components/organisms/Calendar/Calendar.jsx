@@ -45,6 +45,7 @@ const Calendar = ({
 	calendarResourceColorList,
 	getCalendarData,
 	getCalendarResourceColorList,
+	openEventLink,
 	setCalendarData,
 	isLoading
 }: Props) => {
@@ -97,6 +98,23 @@ const Calendar = ({
 		}
 	};
 
+	const schedulerItemRenderer = (props) => (
+		<CustomCalendarItem
+			{...props}
+			onEventClick={openEventLink}
+		/>
+	);
+
+	const schedulerHeaderRenderer = (props) => (
+		<CustomCalendarHeader
+			{...props}
+			onExportToPDFClick={handleGeneratePDF}
+			isDisabledExport={!calendarId}
+		/>
+	);
+
+	const schedulerFooterRenderer = () => <SchedulerFooter />;
+
 	const resources: Array<Resourse> = useMemo(
 		() => [
 			{
@@ -133,15 +151,9 @@ const Calendar = ({
 						<Scheduler
 							data={calendarData}
 							date={date}
-							footer={() => <SchedulerFooter />}
-							header={(props) => (
-								<CustomCalendarHeader
-									{...props}
-									onExportToPDFClick={handleGeneratePDF}
-									isDisabledExport={!calendarId}
-								/>
-							)}
-							item={CustomCalendarItem}
+							footer={schedulerFooterRenderer}
+							header={schedulerHeaderRenderer}
+							item={schedulerItemRenderer}
 							onDateChange={handleDateChange}
 							onViewChange={handleViewChange}
 							resources={resources}

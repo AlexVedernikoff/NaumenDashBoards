@@ -3,6 +3,7 @@ import type {
 	CalendarApiData,
 	CalendarData,
 	GetCalendarDataParams,
+	Link,
 	ResourceColor
 } from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -62,6 +63,24 @@ const getCalendarResourceColorList = (): ThunkAction => async (dispatch: Dispatc
 	}
 };
 
+/**
+ * Открывает в новой вкладке ссылку на событие
+ * @param {string} linkId - id события
+ * @returns {void | ThunkAction}
+ */
+const openEventLink = (linkId: string): void | ThunkAction => async (dispatch: Dispatch) => {
+	try {
+		const data: Link = await window.jsApi.restCallModule(
+			'calendarController',
+			'getObjectLink',
+			linkId
+		);
+		window.open(data.link, '_blank');
+	} catch (error) {
+		dispatch(setError(error));
+	}
+};
+
 const setCalendarLoading = (payload: boolean) => ({
 	payload,
 	type: CALENDAR_EVENTS.SET_CALENDAR_DATA_LOADING
@@ -90,6 +109,7 @@ const setCalendarResourceColorListLoading = (payload: boolean) => ({
 export {
 	getCalendarData,
 	getCalendarResourceColorList,
+	openEventLink,
 	setCalendarData,
 	setCalendarLoading,
 	setCalendarResourceColorList,

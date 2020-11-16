@@ -5,6 +5,12 @@ export type ResourceColor = {
 	color: string | null,
 	value: string
 };
+
+export type Link = {
+	link: string,
+	title: string
+};
+
 export type CalendarData = {
 	end: Date,
 	id: string,
