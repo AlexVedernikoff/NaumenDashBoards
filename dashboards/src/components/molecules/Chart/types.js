@@ -4,6 +4,5 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 
 export type Props = {
 	data: DiagramBuildData,
-	focused: boolean,
 	widget: Chart
 };

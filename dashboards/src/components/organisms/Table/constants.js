@@ -7,6 +7,7 @@ const DEFAULT_TABLE_SETTINGS = {
 			label: 'Показывать " "',
 			value: DEFAULT_TABLE_VALUE.EMPTY_ROW
 		},
+		pageSize: 20,
 		showRowNum: true,
 		textAlign: TEXT_ALIGNS.left,
 		textHandler: TEXT_HANDLERS.CROP

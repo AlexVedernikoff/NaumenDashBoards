@@ -192,19 +192,29 @@ export class TableWidget extends PureComponent<Props, State> {
 	);
 
 	renderParameterCell = (props: CellConfigProps) => {
+		const {fontColor, fontStyle} = this.props.widget.table.rowHeader;
 		let {column, value} = props;
 
 		if (column.attribute.type === ATTRIBUTE_TYPES.metaClass) {
 			value = this.getSeparatedLabel(props.value, CARD_OBJECT_VALUE_SEPARATOR);
 		}
 
-		return <Cell {...props} defaultValue={DEFAULT_TABLE_VALUE.EMPTY_ROW} value={value} />;
+		return (
+			<Cell
+				{...props}
+				defaultValue={DEFAULT_TABLE_VALUE.EMPTY_ROW}
+				fontColor={fontColor}
+				fontStyle={fontStyle}
+				value={value}
+			/>
+		);
 	};
 
 	render (): React$Node {
 		const {data: tableData, widget} = this.props;
 		const {columns} = this.state;
 		const {columnsRatioWidth, sorting, table} = widget;
+		const {pageSize} = table.body;
 		const components = {
 			BodyCell: this.renderBodyCell,
 			HeaderCell: this.renderHeaderCell
@@ -220,6 +230,7 @@ export class TableWidget extends PureComponent<Props, State> {
 				onChangeColumnWidth={debounce(this.handleChangeColumnWidth, 1000)}
 				onChangeSorting={this.handleChangeSorting}
 				onClickDataCell={this.handleClickDataCell}
+				pageSize={pageSize}
 				settings={table}
 				sorting={sorting}
 			/>

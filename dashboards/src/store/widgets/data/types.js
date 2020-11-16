@@ -319,11 +319,6 @@ export type TableSorting = {
 	type: SortingType
 };
 
-export type TableColumnHeader = {
-	fontColor: string,
-	fontStyle?: FontStyle
-};
-
 export type Parameter = {
 	attribute: Attribute,
 	group: Group
@@ -352,21 +347,26 @@ type ComputeTableData = {
 
 export type TableData = BuildTableData | ComputeTableData;
 
-export type Table = {
-	body: {
-		defaultValue: {
-			label: string,
-			value: DefaultTableValue
-		},
-		showRowNum: boolean,
-		textAlign: TextAlign,
-		textHandler: TextHandler
+export type TableHeaderSettings = {
+	fontColor: string,
+	fontStyle?: FontStyle
+};
+
+export type TableBodySettings = {
+	defaultValue: {
+		label: string,
+		value: DefaultTableValue
 	},
-	columnHeader: TableColumnHeader,
-	rowHeader: {
-		fontColor: string,
-		fontStyle?: FontStyle
-	}
+	pageSize: number,
+	showRowNum: boolean,
+	textAlign: TextAlign,
+	textHandler: TextHandler
+};
+
+export type Table = {
+	body: TableBodySettings,
+	columnHeader: TableHeaderSettings,
+	rowHeader: TableHeaderSettings
 };
 
 export type ColumnsRatioWidth = {

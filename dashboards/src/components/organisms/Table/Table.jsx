@@ -16,6 +16,7 @@ export class Table extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
 		columnsRatioWidth: {},
+		pageSize: 20,
 		settings: DEFAULT_TABLE_SETTINGS,
 		sorting: {
 			accessor: null,
@@ -37,7 +38,6 @@ export class Table extends PureComponent<Props, State> {
 		columnsWidth: {},
 		components: this.getExtendedComponents(this.props.components),
 		page: 1,
-		pageSize: 20,
 		sorting: this.props.sorting,
 		width: null
 	};
@@ -176,8 +176,8 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderBody = (width: number) => {
-		const {data, onClickDataCell, settings} = this.props;
-		const {columnsWidth, components, page, pageSize, sorting} = this.state;
+		const {data, onClickDataCell, pageSize, settings} = this.props;
+		const {columnsWidth, components, page, sorting} = this.state;
 
 		return (
 			<Body
@@ -238,8 +238,8 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderPagination = () => {
-		const {data} = this.props;
-		const {page, pageSize, width} = this.state;
+		const {data, pageSize} = this.props;
+		const {page, width} = this.state;
 		const total = Math.max(Math.ceil(data.length / pageSize), 1);
 
 		if (width) {

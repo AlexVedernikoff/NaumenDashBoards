@@ -1,10 +1,10 @@
 // @flow
 import type {Column, ColumnsWidth, Components, Row} from 'Table/types';
-import type {TableColumnHeader, TableSorting} from 'store/widgets/data/types';
+import type {TableHeaderSettings, TableSorting} from 'store/widgets/data/types';
 
 export type Props = {
 	columns: Array<Column>,
-	columnSettings: TableColumnHeader,
+	columnSettings: TableHeaderSettings,
 	columnsWidth: ColumnsWidth,
 	components: Components,
 	data: Array<Row>,

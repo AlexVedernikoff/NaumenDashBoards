@@ -24,22 +24,13 @@ export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
 	newWidgetRef: WidgetRef = createRef();
 	state = {
-		focusedWidget: '',
 		newWidgetFocused: false,
 		swipedPanel: false,
 		width: null
 	};
 
-	componentDidMount () {
-		window.addEventListener('blur', this.resetFocus);
-	}
-
 	componentDidUpdate () {
 		this.setFocusOnNewWidget();
-	}
-
-	componentWillUnmount () {
-		window.removeEventListener('blur', this.resetFocus);
 	}
 
 	focusOnSelectWidget = (widgetRef: DivRef) => () => {
@@ -49,14 +40,6 @@ export class DashboardContent extends Component<Props, State> {
 		if (!resizer.isFullSize() && container && widget) {
 			const top = widget.getBoundingClientRect().top - container.getBoundingClientRect().top;
 			container.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
-		}
-	};
-
-	handleClick = (focusedWidget: string) => {
-		const {focusedWidget: currentFocusedWidget} = this.state;
-
-		if (currentFocusedWidget !== focusedWidget) {
-			this.setState({focusedWidget});
 		}
 	};
 
@@ -94,8 +77,6 @@ export class DashboardContent extends Component<Props, State> {
 		const {layoutMode} = this.props;
 		return !isMobile().any && layoutMode === LAYOUT_MODE.MOBILE;
 	};
-
-	resetFocus = () => this.state.focusedWidget && this.setState({focusedWidget: ''});
 
 	setFocusOnNewWidget = () => {
 		const {current: grid} = gridRef;
@@ -159,7 +140,7 @@ export class DashboardContent extends Component<Props, State> {
 		});
 
 		return (
-			<ResizeDetector className={containerCN} forwardedRef={this.gridContainerRef} onClick={this.resetFocus} onResize={this.setGridWidth}>
+			<ResizeDetector className={containerCN} forwardedRef={this.gridContainerRef} onResize={this.setGridWidth}>
 				{this.renderGrid()}
 			</ResizeDetector>
 		);
@@ -197,10 +178,8 @@ export class DashboardContent extends Component<Props, State> {
 			updateWidget,
 			user
 		} = this.props;
-		const {focusedWidget} = this.state;
 		const {id} = widget;
 		const isNew = id === NewWidget.id;
-		const focused = focusedWidget === widget.id;
 		const ref = isNew ? this.newWidgetRef : null;
 
 		return (
@@ -209,13 +188,11 @@ export class DashboardContent extends Component<Props, State> {
 				data={widget}
 				editWidgetChunkData={editWidgetChunkData}
 				fetchBuildData={fetchBuildData}
-				focused={focused}
 				isEditable={editable}
 				isNew={isNew}
 				isSelected={selectedWidget === widget.id}
 				key={id}
 				layoutMode={layoutMode}
-				onClick={this.handleClick}
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
 				onOpenCardObject={openCardObject}
