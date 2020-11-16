@@ -80,8 +80,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderBreakdownFieldSet = () => {
 		const {errors, handleChangeGroup, values} = this.props;
-		const set = values.data[this.mainIndex];
-		const show = set[FIELDS.withBreakdown] || set[FIELDS.breakdown];
+		const dataSet = values.data[this.mainIndex];
+		const show = dataSet[FIELDS.withBreakdown] || dataSet[FIELDS.breakdown];
 		const errorKey = getDataErrorKey(this.mainIndex, FIELDS.breakdown);
 
 		return (
@@ -93,6 +93,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				show={show} text="Разбивка"
 			>
 				<BreakdownFieldset
+					dataSet={dataSet}
+					dataSetIndex={this.mainIndex}
 					error={errors[errorKey]}
 					index={this.mainIndex}
 					key={errorKey}
@@ -102,7 +104,6 @@ export class ParamsTab extends Component<DataBuilderProps> {
 					onRemove={this.handleRemoveBreakdown}
 					onSelect={this.handleSelectBreakdown}
 					removable={true}
-					set={set}
 				/>
 			</ExtendingFieldset>
 		);
@@ -121,16 +122,16 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		);
 	};
 
-	renderIndicatorsBox = (set: DataSet, index: number, calcTotalColumn: boolean) => {
-		if (!set.sourceForCompute) {
+	renderIndicatorsBox = (dataSet: DataSet, index: number, calcTotalColumn: boolean) => {
+		if (!dataSet.sourceForCompute) {
 			return (
 				<IndicatorsBox
 					calcTotalColumn={calcTotalColumn}
+					dataSet={dataSet}
 					index={index}
 					onRemoveBreakdown={this.handleRemoveBreakdown}
 					renderAddInput={this.renderAddInput}
 					renderSumInput={this.renderSumInput}
-					set={set}
 				/>
 			);
 		}
@@ -138,8 +139,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return null;
 	};
 
-	renderParametersBox = (set: DataSet, index: number) => (
-		<ParametersBox index={index} renderAddInput={this.renderAddInput} set={set} />
+	renderParametersBox = (dataSet: DataSet, index: number) => (
+		<ParametersBox dataSet={dataSet} index={index} renderAddInput={this.renderAddInput} />
 	);
 
 	renderSourceBox = (set: DataSet, index: number) => {

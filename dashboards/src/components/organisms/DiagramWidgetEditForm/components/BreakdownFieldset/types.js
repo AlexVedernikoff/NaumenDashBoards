@@ -3,6 +3,8 @@ import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import type {OnChangeAttributeLabelEvent, OnChangeGroup, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
 
 export type Props = {
+	dataSet: DataSet,
+	dataSetIndex: number,
 	error: string,
 	index: number,
 	name: string,
@@ -10,6 +12,5 @@ export type Props = {
 	onChangeLabel: (event: OnChangeAttributeLabelEvent, index: number) => void,
 	onRemove: (index: number) => void,
 	onSelect: (event: OnSelectAttributeEvent, index: number) => void,
-	removable: boolean,
-	set: DataSet
+	removable: boolean
 };

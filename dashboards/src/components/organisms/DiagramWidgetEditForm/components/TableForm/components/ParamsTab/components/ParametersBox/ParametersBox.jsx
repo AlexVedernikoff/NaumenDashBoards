@@ -14,7 +14,7 @@ import withForm from 'DiagramWidgetEditForm/withForm';
 
 export class ParametersBox extends PureComponent<Props> {
 	getParameters = () => {
-		const {parameters = [getDefaultParameter()]} = this.props.set;
+		const {parameters = [getDefaultParameter()]} = this.props.dataSet;
 		return parameters;
 	};
 
@@ -84,14 +84,14 @@ export class ParametersBox extends PureComponent<Props> {
 	};
 
 	renderFieldset = (parameter: Parameter, index: number, parameters: Array<Parameter>) => {
-		const {errors, index: dataSetIndex, set} = this.props;
+		const {dataSet, errors, index: dataSetIndex} = this.props;
 		const {attribute, group} = parameter;
 		const removable = parameters.length > 1;
 		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.parameters, index, FIELDS.attribute);
 
 		return (
 			<ParameterFieldset
-				dataSet={set}
+				dataSet={dataSet}
 				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
 				group={group}

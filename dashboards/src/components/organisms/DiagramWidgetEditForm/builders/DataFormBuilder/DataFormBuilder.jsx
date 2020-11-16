@@ -166,9 +166,9 @@ export class DataFormBuilder extends Component<Props> {
 		return null;
 	};
 
-	renderIndicatorBox = (props: IndicatorBoxProps) => (set: DataSet, index: number) => {
-		if (!set[FIELDS.sourceForCompute]) {
-			return <IndicatorDataBox index={index} set={set} {...props} />;
+	renderIndicatorBox = (props: IndicatorBoxProps) => (dataSet: DataSet, index: number) => {
+		if (!dataSet[FIELDS.sourceForCompute]) {
+			return <IndicatorDataBox dataSet={dataSet} index={index} {...props} />;
 		}
 
 		return null;
