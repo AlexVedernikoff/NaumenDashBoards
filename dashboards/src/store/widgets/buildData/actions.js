@@ -1,6 +1,6 @@
 // @flow
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {
+	AnyWidget,
 	AxisWidget,
 	CircleWidget,
 	ComboWidget,
@@ -11,10 +11,11 @@ import type {
 	Widget,
 	WidgetType
 } from 'store/widgets/data/types';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {BUILD_DATA_EVENTS} from './constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {mixinBreakdown} from 'utils/normalizer/widget/helpers';
 import type {PostData, ReceiveBuildDataPayload} from './types';
 import {transformGroupFormat} from 'store/widgets/helpers';
@@ -259,10 +260,10 @@ const createPostData = (widget: Widget): PostData | void => {
 
 /**
  * Получаем данные графиков для всех виджетов
- * @param {Array<Widget>} widgets - список виджетов
+ * @param {Array<AnyWidget>} widgets - список виджетов
  * @returns {ThunkAction}
  */
-const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const fetchAllBuildData = (widgets: Array<AnyWidget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {layoutMode} = getState().dashboard.settings;
 	const filteredWidgets = widgets.filter(item => (item.displayMode === layoutMode || item.displayMode === DISPLAY_MODE.ANY));
 
@@ -271,22 +272,25 @@ const fetchAllBuildData = (widgets: Array<Widget>): ThunkAction => async (dispat
 
 /**
  * Получаем данные графика для конкретного виджета
- * @param {Widget} widget - данные виджета
+ * @param {AnyWidget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	dispatch(requestBuildData(widget.id));
+const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	if (widget.type in DIAGRAM_WIDGET_TYPES) {
+		dispatch(requestBuildData(widget.id));
 
-	try {
-		const {subjectUuid} = getState().context;
-		const payload = createPostData(widget);
-		const data = await window.jsApi.restCallModule('dashboardDataSet', 'getDataForCompositeDiagram', payload, subjectUuid);
+		try {
+			const {subjectUuid} = getState().context;
+			// $FlowFixMe
+			const payload = createPostData(widget);
+			const data = await window.jsApi.restCallModule('dashboardDataSet', 'getDataForCompositeDiagram', payload, subjectUuid);
 
-		dispatch(
-			receiveBuildData({data, id: widget.id})
-		);
-	} catch (e) {
-		dispatch(recordBuildDataError(widget.id));
+			dispatch(
+				receiveBuildData({data, id: widget.id})
+			);
+		} catch (e) {
+			dispatch(recordBuildDataError(widget.id));
+		}
 	}
 };
 

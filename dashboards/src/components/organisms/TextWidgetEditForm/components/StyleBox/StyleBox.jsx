@@ -1,6 +1,7 @@
 // @flow
 import {CheckIconButtonGroup, FormBox, FormField} from 'components/molecules';
 import {DEFAULT_TEXT_WIDGET_SETTINGS, FIELDS} from 'components/organisms/TextWidgetEditForm/constants';
+import {FONT_SIZE_OPTIONS} from './constants';
 import {FONT_STYLES} from 'store/widgets/data/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
@@ -9,6 +10,7 @@ import React, {PureComponent} from 'react';
 import {RichUtils} from 'draft-js';
 import type {StyleBuilderProps} from 'DiagramWidgetEditForm/builders/StyleFormBuilder/types';
 import StyleFormBuilder from 'DiagramWidgetEditForm/builders/StyleFormBuilder/StyleFormBuilder';
+import styles from './styles.less';
 
 export class StyleBox extends PureComponent<Props> {
 	addStyleToMap = (name: string, value: string | number) => {
@@ -52,7 +54,7 @@ export class StyleBox extends PureComponent<Props> {
 		const {styleMap} = this.props.textSettings;
 		const currentStyle = this.props.editorState.getCurrentInlineStyle();
 		const styleName = Object.keys(styleMap)
-			.find(name => currentStyle.has(styleName) && name.startsWith(baseStyleName));
+			.find(name => currentStyle.has(name) && name.startsWith(baseStyleName));
 
 		return styleName ? styleMap[styleName][baseStyleName] : defaultValue;
 	};
@@ -125,7 +127,9 @@ export class StyleBox extends PureComponent<Props> {
 			value: this.getEditorValue(FIELDS.fontFamily, fontFamily)
 		};
 		const fonsSizeSelectProps = {
+			editable: false,
 			onSelect: this.handleSelectStyle,
+			options: FONT_SIZE_OPTIONS,
 			value: this.getEditorValue(FIELDS.fontSize, fontSize)
 		};
 		const colorInputProps = {
@@ -135,7 +139,7 @@ export class StyleBox extends PureComponent<Props> {
 		};
 
 		return (
-			<FormBox>
+			<FormBox className={styles.box}>
 				<FormField label="Шрифт" row>
 					{renderFontFamilySelect(fontFamilySelectProps)}
 					{renderFontSizeSelect(fonsSizeSelectProps)}

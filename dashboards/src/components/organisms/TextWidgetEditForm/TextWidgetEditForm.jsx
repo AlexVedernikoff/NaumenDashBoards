@@ -1,11 +1,13 @@
 // @flow
 import {COMMAND_EVENTS, FIELDS, HOT_KEYS, HOT_KEYS_COMMANDS} from './constants';
 import {convertToRaw, getDefaultKeyBinding, KeyBindingUtil, RichUtils} from 'draft-js';
+import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {EditorState, OnChangeEvent} from 'components/atoms/TextEditor/types';
 import {FONT_STYLES, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {FormBox, FormField} from 'components/molecules';
+import {FormBox, FormField, Select} from 'components/molecules';
 import type {InjectedProps as Props, Values} from 'containers/WidgetEditForm/types';
-import React, {PureComponent} from 'react';
+import type {OnSelectEvent, Ref} from 'components/types';
+import React, {createRef, PureComponent} from 'react';
 import {StyleBox} from './components';
 import styles from './styles.less';
 import {TextEditor} from 'components/atoms';
@@ -13,11 +15,25 @@ import type {TextSettings, TextWidget, Widget} from 'store/widgets/data/types';
 import {WidgetForm} from 'components/templates';
 
 export class TextWidgetEditForm extends PureComponent<Props> {
+	editorRef: Ref<typeof TextEditor> = createRef();
+
+	focusOnTextEditor = () => {
+		const {current: editor} = this.editorRef;
+		editor && editor.focusEditor();
+	};
+
 	getEditorText = (): string => {
 		const {editorState} = this.props.values;
 		const content = convertToRaw(editorState.getCurrentContent());
 
 		return content.blocks.map(block => (!block.text.trim() && '\n') || block.text).join('\n');
+	};
+
+	handleChangeDisplayMode = ({name, value}: OnSelectEvent) => {
+		const {setFieldValue} = this.props;
+		const {value: modeValue} = value;
+
+		setFieldValue(name, modeValue);
 	};
 
 	handleChangeTextEditor = ({value}: OnChangeEvent) => this.updateEditorState(value);
@@ -78,7 +94,10 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 		return getDefaultKeyBinding(e);
 	};
 
-	updateEditorState = (editorState: EditorState) => this.props.setFieldValue(FIELDS.editorState, editorState);
+	updateEditorState = (editorState: EditorState) => {
+		const {setFieldValue} = this.props;
+		setFieldValue(FIELDS.editorState, editorState, this.focusOnTextEditor);
+	};
 
 	updateWidget = (widget: Widget, values: Values): TextWidget => {
 		const {id} = widget;
@@ -101,6 +120,25 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 			type: WIDGET_TYPES.TEXT,
 			variables: {}
 		};
+	};
+
+	renderDisplayModeSelect = () => {
+		const {displayMode} = this.props.values;
+		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
+
+		return (
+			<FormBox title="Область отображения">
+				<FormField>
+					<Select
+						name={FIELDS.displayMode}
+						onSelect={this.handleChangeDisplayMode}
+						options={DISPLAY_MODE_OPTIONS}
+						placeholder="Отображение виджета в мобильной версии"
+						value={value}
+					/>
+				</FormField>
+			</FormBox>
+		);
 	};
 
 	renderStyleBox = () => {
@@ -133,6 +171,7 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 					keyBindingFn={this.keyBindingFn}
 					name={FIELDS.editorState}
 					onChange={this.handleChangeTextEditor}
+					ref={this.editorRef}
 					styleMap={styleMap}
 					textAlign={textAlign}
 					value={editorState}
@@ -155,6 +194,7 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 					{this.renderTextEditor()}
 				</FormBox>
 				{this.renderStyleBox()}
+				{this.renderDisplayModeSelect()}
 			</WidgetForm>
 		);
 	}

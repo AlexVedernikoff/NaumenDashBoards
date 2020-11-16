@@ -23,6 +23,8 @@ export class Diagram extends Component<Props, State> {
 		if (this.nameRef.current) {
 			this.setState({nameRendered: true});
 		}
+
+		this.getBuildData();
 	}
 
 	componentDidUpdate (prevProps: Props) {
@@ -30,6 +32,11 @@ export class Diagram extends Component<Props, State> {
 			this.setState({nameRendered: true});
 		}
 	}
+
+	getBuildData = () => {
+		const {buildData, fetchBuildData, widget} = this.props;
+		!buildData && fetchBuildData(widget);
+	};
 
 	isUpdated = (prevProps: Props, nextProps: Props): boolean => {
 		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}, widget: prevWidget} = prevProps;
@@ -65,8 +72,8 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	renderContent = () => {
-		const {buildData, widget} = this.props;
-		const {error, loading} = buildData;
+		const {buildData = {}, widget} = this.props;
+		const {error, loading = true} = buildData;
 
 		if (!(loading || error)) {
 			const contentCN = cn({

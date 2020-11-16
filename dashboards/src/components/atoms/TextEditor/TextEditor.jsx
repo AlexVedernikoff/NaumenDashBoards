@@ -17,7 +17,8 @@ export class TextEditor extends PureComponent<Props> {
 	editorRef: Ref<typeof Editor> = createRef();
 
 	componentDidMount () {
-		this.handleChange(this.getEditorStateFromContent());
+		const {value} = this.props;
+		!value && this.handleChange(this.getEditorStateFromContent());
 	}
 
 	componentDidUpdate (prevProps: Props) {

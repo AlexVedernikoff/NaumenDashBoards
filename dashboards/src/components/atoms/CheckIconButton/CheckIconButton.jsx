@@ -16,6 +16,8 @@ export class CheckIconButton extends PureComponent<Props> {
 		onChange({name, value});
 	};
 
+	handleMouseDown = (e: MouseEvent) => e.preventDefault();
+
 	render () {
 		const {checked, children, title} = this.props;
 		const buttonCN = cn({
@@ -23,7 +25,15 @@ export class CheckIconButton extends PureComponent<Props> {
 			[styles.checked]: checked
 		});
 
-		return <button className={buttonCN} onClick={this.handleClick} title={title}>{children}</button>;
+		return (
+			<button
+				className={buttonCN}
+				onClick={this.handleClick}
+				onMouseDown={this.handleMouseDown}
+				title={title}>
+				{children}
+			</button>
+		);
 	}
 }
 

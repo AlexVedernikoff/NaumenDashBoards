@@ -6,6 +6,7 @@ import styles from './styles.less';
 
 export class FormBox extends PureComponent<Props> {
 	static defaultProps = {
+		className: '',
 		leftControl: null,
 		rightControl: null,
 		title: ''
@@ -50,8 +51,10 @@ export class FormBox extends PureComponent<Props> {
 	};
 
 	render () {
+		const {className} = this.props;
+
 		return (
-			<div className={styles.container}>
+			<div className={cn(styles.container, className)}>
 				{this.renderHeader()}
 				{this.renderContent()}
 			</div>
