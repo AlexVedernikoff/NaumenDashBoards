@@ -4,10 +4,12 @@ import {ControlPanel} from './components';
 import {createContextName, createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
 import {Diagram} from 'components/molecules';
 import type {DivRef} from 'components/types';
-import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
+import {TextWidget} from 'components/organisms';
+import type {TextWidget as TextWidgetType, Widget as WidgetType} from 'store/widgets/data/types';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Widget extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -26,14 +28,6 @@ export class Widget extends PureComponent<Props, State> {
 		return {
 			hasError: true
 		};
-	}
-
-	componentDidMount () {
-		const {buildData, data, fetchBuildData} = this.props;
-
-		if (data.id !== NewWidget.id && !buildData) {
-			fetchBuildData(data);
-		}
 	}
 
 	componentDidUpdate (prevProps: Props) {
@@ -83,6 +77,47 @@ export class Widget extends PureComponent<Props, State> {
 		}
 	};
 
+	renderContent = () => {
+		const {data, isNew} = this.props;
+		const {hasError} = this.state;
+
+		if (!isNew && !hasError) {
+			const {
+				BAR,
+				BAR_STACKED,
+				COLUMN,
+				COLUMN_STACKED,
+				COMBO,
+				DONUT,
+				LINE,
+				PIE,
+				SPEEDOMETER,
+				SUMMARY,
+				TABLE,
+				TEXT
+			} = WIDGET_TYPES;
+
+			switch (data.type) {
+				case BAR:
+				case BAR_STACKED:
+				case COLUMN:
+				case COLUMN_STACKED:
+				case COMBO:
+				case DONUT:
+				case LINE:
+				case PIE:
+				case SPEEDOMETER:
+				case SUMMARY:
+				case TABLE:
+					return this.renderDiagram(data);
+				case TEXT:
+					return this.renderTextWidget(data);
+				default:
+					return null;
+			}
+		}
+	};
+
 	renderControlPanel = () => {
 		const {
 			data: widget,
@@ -110,18 +145,19 @@ export class Widget extends PureComponent<Props, State> {
 		);
 	};
 
-	renderDiagram = () => {
-		const {buildData, data, isNew, onDrillDown, onOpenCardObject, onUpdate} = this.props;
+	renderDiagram = (widget: WidgetType) => {
+		const {buildData, fetchBuildData, isNew, onDrillDown, onOpenCardObject, onUpdate} = this.props;
 		const {hasError} = this.state;
 
-		if (!isNew && buildData && !hasError) {
+		if (!isNew && !hasError) {
 			return (
 				<Diagram
 					buildData={buildData}
+					fetchBuildData={fetchBuildData}
 					onDrillDown={onDrillDown}
 					onOpenCardObject={onOpenCardObject}
 					onUpdate={onUpdate}
-					widget={data}
+					widget={widget}
 				/>
 			);
 		}
@@ -133,6 +169,8 @@ export class Widget extends PureComponent<Props, State> {
 
 		return hasError && <div className={styles.error} title={message}>{message}</div>;
 	};
+
+	renderTextWidget = (widget: TextWidgetType) => <TextWidget widget={widget} />;
 
 	render () {
 		const {children, onMouseDown, onMouseUp, onTouchEnd, onTouchStart, style} = this.props;
@@ -147,7 +185,7 @@ export class Widget extends PureComponent<Props, State> {
 		return (
 			<div {...gridProps} className={this.getClassName()} ref={this.ref}>
 				{this.renderControlPanel()}
-				{this.renderDiagram()}
+				{this.renderContent()}
 				{this.renderError()}
 				{children}
 			</div>

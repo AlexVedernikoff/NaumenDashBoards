@@ -20,6 +20,8 @@ export type SelectProps = {
 
 export type FontSizeSelectProps = {
 	...SelectProps,
+	editable: boolean,
+	options: Array<number>,
 	usesAuto: boolean
 };
 

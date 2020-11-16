@@ -93,21 +93,23 @@ export class StyleFormBuilder extends Component<Props> {
 
 	renderFontSizeSelect = (props: $Shape<FontSizeSelectProps> = {}) => {
 		const {
+			editable = true,
 			name = FIELDS.fontSize,
 			onSelect = this.handleChange,
+			options = FONT_SIZE_OPTIONS,
 			usesAuto = false,
 			value = this.props.data[FIELDS.fontSize]
 		} = props;
-		const options = usesAuto ? [FONT_SIZE_AUTO_OPTION, ...FONT_SIZE_OPTIONS] : FONT_SIZE_OPTIONS;
+		const selectOptions = usesAuto ? [FONT_SIZE_AUTO_OPTION, ...options] : options;
 
 		return (
 			<Select
 				className={styles.fontSizeSelect}
-				editable={true}
+				editable={editable}
 				name={name}
 				onChangeLabel={this.handleChangeFontSize(onSelect)}
 				onSelect={onSelect}
-				options={options}
+				options={selectOptions}
 				value={value}
 			/>
 		);

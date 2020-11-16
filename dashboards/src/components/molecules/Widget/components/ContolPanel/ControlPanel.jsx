@@ -11,7 +11,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import {Item as MenuItem, SubMenu} from 'rc-menu';
 import {Modal} from 'components/molecules';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from 'components/atoms/IconButton/constants';
@@ -78,6 +78,27 @@ export class ControlPanel extends PureComponent<Props, State> {
 		}
 
 		return null;
+	};
+
+	renderDiagramWidgetItems = () => {
+		const {type} = this.props.widget;
+
+		if (type !== WIDGET_TYPES.TEXT) {
+			const exportList = type !== WIDGET_TYPES.TABLE
+				? EXPORT_LIST.filter(list => list !== FILE_VARIANTS.XLSX)
+				: EXPORT_LIST;
+
+			return (
+				<Fragment>
+					<SubMenu popupClassName="popupSubmenu" title={<span>Источники</span>}>
+						{this.renderDrillDownItems()}
+					</SubMenu >
+					<SubMenu popupClassName="popupSubmenu" title={<span>Экспорт</span>}>
+						{exportList.map(this.renderExportItem)}
+					</SubMenu>
+				</Fragment>
+			);
+		}
 	};
 
 	renderDrillDownItems = (): Array<React$Node> | null => {
@@ -148,22 +169,12 @@ export class ControlPanel extends PureComponent<Props, State> {
 	};
 
 	renderSubmenu = () => {
-		const {widget} = this.props;
 		const {showSubmenu} = this.state;
-		const {type} = widget;
-		const list = type !== WIDGET_TYPES.TABLE
-			? EXPORT_LIST.filter(list => list !== FILE_VARIANTS.XLSX)
-			: EXPORT_LIST;
 
 		if (showSubmenu) {
 			return (
 				<DropdownMenu onSelect={this.handleToggleSubMenu} onToggle={this.handleToggleSubMenu}>
-					<SubMenu popupClassName="popupSubmenu" title={<span>Источники</span>}>
-						{this.renderDrillDownItems()}
-					</SubMenu >
-					<SubMenu popupClassName="popupSubmenu" title={<span>Экспорт</span>}>
-						{list.map(this.renderExportItem)}
-					</SubMenu>
+					{this.renderDiagramWidgetItems()}
 					{this.renderRemoveMenuItem()}
 				</DropdownMenu>
 			);

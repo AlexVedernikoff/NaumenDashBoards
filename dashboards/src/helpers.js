@@ -102,10 +102,18 @@ const decorateRestCallModule = (restCallModule: Function) => {
 	};
 };
 
+/**
+ * Экранирует специальные символы строки
+ * @param {string} string - строка
+ * @returns {string}
+ */
+const escapeString = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export {
 	debounce,
 	decorateRestCallModule,
 	deepClone,
+	escapeString,
 	extend,
 	isMacOS,
 	getDescriptorCases,
