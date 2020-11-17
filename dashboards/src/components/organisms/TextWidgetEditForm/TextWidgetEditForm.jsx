@@ -36,6 +36,10 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 		setFieldValue(name, modeValue);
 	};
 
+	handleChangeEditorStateByStyle = (editorState: EditorState) => {
+		this.updateEditorState(editorState, this.focusOnTextEditor);
+	};
+
 	handleChangeTextEditor = ({value}: OnChangeEvent) => this.updateEditorState(value);
 
 	handleChangeTextSettings = (textSettings: TextSettings) => this.props.setFieldValue(FIELDS.textSettings, textSettings);
@@ -94,9 +98,9 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 		return getDefaultKeyBinding(e);
 	};
 
-	updateEditorState = (editorState: EditorState) => {
+	updateEditorState = (editorState: EditorState, callback?: Function) => {
 		const {setFieldValue} = this.props;
-		setFieldValue(FIELDS.editorState, editorState, this.focusOnTextEditor);
+		setFieldValue(FIELDS.editorState, editorState, callback);
 	};
 
 	updateWidget = (widget: Widget, values: Values): TextWidget => {
@@ -148,7 +152,7 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 			return (
 				<StyleBox
 					editorState={editorState}
-					onChangeEditorState={this.updateEditorState}
+					onChangeEditorState={this.handleChangeEditorStateByStyle}
 					onChangeTextSettings={this.handleChangeTextSettings}
 					textSettings={textSettings}
 				/>
