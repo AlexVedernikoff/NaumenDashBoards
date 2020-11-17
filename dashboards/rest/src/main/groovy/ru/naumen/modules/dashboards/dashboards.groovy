@@ -87,13 +87,26 @@ String getAttributesDataSources(requestContent)
 def getDataSourceAttributes(requestContent, Boolean parseToJson = true)
 {
     String classFqn = requestContent.classFqn.toString()
+    String parentClassFqn = requestContent.parentClassFqn
     List<String> types = requestContent?.types
-    def metaInfo = api.metainfo.getMetaClass(classFqn)
+
+    def metaInfo = api.metainfo.getMetaClass(parentClassFqn ?: classFqn)
+    String attributeTitle = ""
+    if (parentClassFqn)
+    {
+        //источником является ссылочный атрибут верхнего источника с кодом parentClassFqn
+        def attribute = metaInfo?.getAttribute(classFqn)
+        String relatedMetaClass = attribute?.type?.relatedMetaClass
+        metaInfo = relatedMetaClass ? api.metainfo.getMetaClass(relatedMetaClass) : metaInfo
+        attributeTitle = attribute?.title
+    }
+
     List attributes = types ? metaInfo?.attributes?.findResults {
         it.type.code in types ? it : null
     } : metaInfo?.attributes?.toList()
+
     Collection<Attribute> mappingAttributes = attributes ?
-        mappingAttribute(attributes, metaInfo.title, metaInfo.code) : []
+        mappingAttribute(attributes, attributeTitle ?: metaInfo.title, parentClassFqn ? classFqn : metaInfo.code) : []
     return parseToJson ? toJson(mappingAttributes) : mappingAttributes
 }
 

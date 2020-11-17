@@ -152,7 +152,27 @@ class AggregationColumn extends Column
     /**
      * Список колонок детей - значений разбивки
      */
-    List <Column> columns
+    List<AggregationBreakdownColumn> columns
+}
+
+class AggregationBreakdownColumn extends Column
+{
+    /**
+     * Показатель, у которого берётся разбивка
+     */
+    Indicator indicator
+}
+
+class Indicator
+{
+    /**
+     * Агрегация (есть у показателей)
+     */
+    String aggregation
+    /**
+     * Атрибут показателя
+     */
+    Attribute attribute
 }
 
 /**
@@ -1090,7 +1110,20 @@ Map<String, Map> updateIntermediateDataToOneSource(Map<String, Map> intermediate
             }
         }.nodes.inject {first, second -> first + second}
     }
-    List fullGroups =  requestData?.groups?.flatten()
+    List fullGroups =  requestData?.collectMany {
+        def groups = it?.groups
+        //если параметры из другого источника
+        if (it?.source?.classFqn != mainSource.classFqn)
+        {
+            //добавляем привязку к этому источнику - атрибуту
+            return groups.collect { group ->
+                group.attribute.code = "${it?.source?.classFqn}.${group.attribute.code}"
+                return group
+            }
+        }
+        return groups
+    }
+
     List fullAggregations = requestData?.aggregations?.collectMany {
         computationInRequest ? it : it?.collect { aggr -> prepareAggregation(aggr, mainSource.classFqn)}
     }
@@ -2534,30 +2567,49 @@ private List formatAggregationSet(List listOfLists, List listIdsOfNormalAggregat
  * @param data - данные запроса
  * @param list - результат выборки
  * @param data - данные запроса
- * @param countAggregation - число агрегаций
- * @param countNotAggregated - число агрегаций N/A
+ * @param listIdsOfNormalAggregations - список индексов нормальных агрегаций
  * @param diagramType - тип диаграммы
  * @return результат выборки с изменёнными значениями группировки
  */
-private List formatGroupSet(List list, RequestData data, Integer countAggregation, Integer countNotAggregated, DiagramType diagramType)
+private List formatGroupSet(List list, RequestData data, List listIdsOfNormalAggregations, DiagramType diagramType)
 {
     def countGroup = data.groups.grep().size()
-    if (countGroup == 0)
+    def countNA = data.aggregations?.count { it?.type == Aggregation.NOT_APPLICABLE }
+    if (countGroup == 0 && countNA == 0)
     {
         return list
     }
     else
     {
         return list.collect { el ->
-            def value = countAggregation > 0 ? el[0..countAggregation-1] : []
-            List<String> groups = el[countAggregation..el.size() - (countNotAggregated + 1)]
-            List<String> notAggregated = countNotAggregated > 0  ? el[(el.size() - countNotAggregated)..el.size()-1]*.toString() : []
+            def groups = el //резервируем значения для групп
+            def elAggregations = el[listIdsOfNormalAggregations] //резервируем значения для агрегаций
+            elAggregations.each { groups.remove (groups.indexOf(it)) } //убираем в группах агрегации
+            List notAggregated = data.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }  //ищем агрегации n/a
+            List requestGroups = updateNotAggregatedToGroups(notAggregated) + data.groups
+
+            //обрабатываем группы
             def totalGroupValues = groups.withIndex().collect { group, i ->
-                return formatGroup(data.groups[i] as GroupParameter,
-                                   data.source.classFqn, group, diagramType)
+                return formatGroup(requestGroups[i] as GroupParameter,
+                                   data.source.classFqn, group, diagramType, requestGroups[i]?.title == 'n/a')
             }
-            return notAggregated.any() ? value + totalGroupValues + notAggregated : value + totalGroupValues
+            //возвращаем агрегации в нужные места
+            elAggregations.eachWithIndex() {aggr, i -> totalGroupValues.add(listIdsOfNormalAggregations[i], aggr) }
+            //возвращаем итог
+            return totalGroupValues
         }
+    }
+}
+
+/**
+ * Метод по преобразованию агрегаций N/A  к группировкам
+ * @param notAggregated - список агрегаций N/A
+ * @return преобразованные агрегации N/A  к группировкам
+ */
+List updateNotAggregatedToGroups(List notAggregated)
+{
+    return notAggregated.collect {
+        new GroupParameter( type:GroupType.OVERLAP, title: 'n/a', attribute: it?.attribute)
     }
 }
 
@@ -2566,16 +2618,25 @@ private List formatGroupSet(List list, RequestData data, Integer countAggregatio
  * @param parameter - тип группировки
  * @param fqnClass - класс атрибута группировки
  * @param value - значение группировки
+ * @param fromNA - флаг на обработку атрибута из агрегации N/a
  * @return человеко читаемое значение группировки
  */
-private String formatGroup(GroupParameter parameter, String fqnClass, def value, DiagramType diagramType)
+private String formatGroup(GroupParameter parameter, String fqnClass, def value, DiagramType diagramType, Boolean fromNA = false)
 {
     GroupType type = parameter.type
 
     switch (type)
     {
         case GroupType.OVERLAP:
-            switch (parameter.attribute.type)
+            def uuid = null
+            if (diagramType == DiagramType.TABLE)
+            {
+                if (value)
+                {
+                    (value, uuid) = ObjectMarshaller.unmarshal(value.toString())
+                }
+            }
+            switch (parameter.attribute.attrChains().last()?.type)
             {
                 case AttributeType.DT_INTERVAL_TYPE:
                     if (parameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)) {
@@ -2584,9 +2645,9 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     return TimeUnit.MILLISECONDS.toHours(value as long)
                 case AttributeType.STATE_TYPE:
                     def (stateValue, stateCase) = StateMarshaller.unmarshal(value, StateMarshaller.delimiter)
-                    String totalFqn = (fqnClass.contains('$') || stateCase == "" ) ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
-                    String userEq = api.metainfo.getStateTitle(totalFqn, stateValue)
-                    return StateMarshaller.marshal(userEq, stateValue)
+                    String totalFqn = (fqnClass.contains('$') || !stateCase) ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
+                    String userEq = stateValue ? api.metainfo.getStateTitle(totalFqn, stateValue) : null
+                    return userEq ? StateMarshaller.marshal(userEq, stateValue) : ""
                 case AttributeType.META_CLASS_TYPE:
                     def userEq = api.metainfo.getMetaClass(value).title
                     return MetaClassMarshaller.marshal(userEq, value)
@@ -2603,12 +2664,16 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     return (value as TimerStatus).getRussianName()
                 default:
                     //прийти в качестве значения может, как UUID, так и просто id
-                    if (parameter.attribute?.code == 'UUID')
+                    if (parameter.attribute?.attrChains()?.last()?.code == 'UUID' && !fromNA)
                     {
                         value = value.split('\\$', 2).last() ?: value
                     }
                     if (diagramType == DiagramType.TABLE)
                     {
+                        if(value && uuid)
+                        {
+                            value = ObjectMarshaller.marshal(value, uuid)
+                        }
                         //в таблице важно фронту отправлять пустую строку
                         value = value ?: ""
                     }
@@ -2773,33 +2838,36 @@ List getTotalAggregation(List resValue, int aggregationCnt)
  * @param aggregationCnt - количество агрегаций в запросе
  * @return обновленный сет данных
  */
-private List prepareRequestWithStates(List res, Integer aggregationCnt)
+private List prepareRequestWithStates(List res, List listIdsOfNormalAggregations)
 {
-    //собираем набор уникальных пар "название статуса (код)", отсекая у статуса часть после "-"
-    Set stateValues = res.findResults {
-        it[aggregationCnt..-1]
+    def list = res
+    Set stateValues = list.findResults { el ->
+        def elAggregations = el[listIdsOfNormalAggregations]
+        return el.minus(elAggregations)
     }
-
+    Integer aggregationCnt = listIdsOfNormalAggregations.size()
     if (aggregationCnt > 0)
     {
-        //идём по уникальным парам, формируя новый aggregationSet
         return stateValues.collect { value ->
             def aggergationSet = []
             def resValue = res.findResults { resValue ->
-                //берём основное значение и отсекаем у статуса часть после "-"
-                def tempResValue = resValue[aggregationCnt..-1]
+                def tempResValue = resValue
+                def elAggregations = tempResValue[listIdsOfNormalAggregations]
+                tempResValue = tempResValue.minus(elAggregations)
                 //сравниваем значение с тем, что есть в текущей паре "название статуса (код)"
                 if (tempResValue == value)
                 {
                     //если оно совпадает берём у всего значения агрегацию
-                    aggergationSet << [resValue[0..aggregationCnt-1]]
+                    aggergationSet << [resValue[listIdsOfNormalAggregations]]
                     return [aggergationSet.collectMany{ it }, *tempResValue]
                 }
             }.last()
             List totalAggregation = aggregationCnt > 1
                 ? getTotalAggregation(resValue, aggregationCnt)
                 : [DECIMAL_FORMAT.format(resValue[0].sum { it[0] as Double })]
-            return [*totalAggregation, *resValue[1..-1]]
+            resValue = resValue[1..-1]
+            totalAggregation.eachWithIndex() {aggr, i -> resValue.add(listIdsOfNormalAggregations[i], aggr) }
+            return resValue
         }
     }
     return stateValues.toList()
@@ -2997,17 +3065,18 @@ Collection<Column> collectColumns(List<Map> attributes, Boolean hasBreakdown = f
  * @param parentAttributeName - название атрибута агрегации
  * @return - колонки со значениями разбивки
  */
-List<Column> getBreakdownColumns(List breakdownValues, def breakdownAttributeValue, def aggregationAttributeValue)
+List<AggregationBreakdownColumn> getBreakdownColumns(List breakdownValues, def breakdownAttributeValue, def aggregationAttributeValue)
 {
     return breakdownValues.collect { value ->
-        return new Column(
+        return new AggregationBreakdownColumn(
             footer:      "",
             accessor:    "${aggregationAttributeValue.name}\$${value}",
             header:      value,
             attribute:   breakdownAttributeValue.attribute,
             type:        breakdownAttributeValue.type,
             group:       breakdownAttributeValue.group,
-            aggregation: aggregationAttributeValue.aggregation
+            indicator:   new Indicator (aggregation: aggregationAttributeValue.aggregation,
+                                        attribute: aggregationAttributeValue.attribute)
         )
     }
 }
@@ -3168,7 +3237,8 @@ List getSpecificAggregationsList (def requestContent, Boolean isCompute = null)
                     String currentSource = value.source
                     if (currentSource != mainSource)
                     {
-                        String currentSourceName = api.metainfo.getMetaClass(currentSource).title
+                        String currentSourceName = api.metainfo.getMetaClass(mainSource)
+                                                       .getAttribute(currentSource).title
                         attribute?.title = "${attribute?.title} (${currentSourceName})"
                     }
                     return [name : attribute?.title, attribute : attribute,
@@ -3246,7 +3316,7 @@ List prepareDataSet(List list, def requestContent, Boolean showNulls, Boolean ha
         }
         else
         {
-            usual -= usual.findAll { it[0..aggregationSize-1].any { !it || it == "0"}}
+            usual -= usual.findAll { it[0..aggregationSize-1].any { !it || it == "0"} || it[aggregationSize..-1].every { it == ""}}
         }
     }
     return [usual]
@@ -3279,8 +3349,8 @@ private TableDiagram mappingTable(List resultDataSet,
 
     int cnt = attributes.size()
     List<String> attributeNames = attributes.name
-    List notAggregatedAttributes = notAggregationAttributeNames(attributes)
-    Integer notAggregatedAttributeSize = notAggregatedAttributes.size()
+    List notAggregatedAttributeNames = notAggregationAttributeNames(attributes)
+    Integer notAggregatedAttributeSize = notAggregatedAttributeNames.size()
     List<Map<String, Object>> tempMaps = getTempMaps(resultDataSet, attributeNames, cnt)
     List data = []
     //подготовка данных
@@ -3288,7 +3358,7 @@ private TableDiagram mappingTable(List resultDataSet,
     {
 
         List<Map> rows = getFullRows(tempMaps, aggregationCnt + notAggregatedAttributeSize)
-        rows = prepareRowsWithBreakdown(rows, aggregationCnt + notAggregatedAttributeSize, attributeNames, breakdownValues)
+        rows = prepareRowsWithBreakdown(rows, aggregationCnt + notAggregatedAttributeSize, attributeNames, notAggregatedAttributeNames, breakdownValues)
         data = rows.withIndex().collect { map, id->
             return [ID: ++id, *:map.sum()]
         }
@@ -3297,7 +3367,7 @@ private TableDiagram mappingTable(List resultDataSet,
     {
         aggregationCnt += notAggregatedAttributeSize
         data = tempMaps.withIndex().collect { map, id->
-            def value = map[aggregationCnt..-1] + map[0..aggregationCnt -1].collect { it.findResult {k,v -> [(k): v?: "0"]} }
+            def value = map[aggregationCnt..-1] + map[0..aggregationCnt -1].collect { it.findResult {k,v -> [(k): v ?: ""]} }
             return [ID: ++id, *:value.sum()]
         }
     }
@@ -3317,7 +3387,7 @@ private TableDiagram mappingTable(List resultDataSet,
                 childrenColumns.each { childCol ->
                     String keyName = "${aggrCol.header}\$${childCol.header}"
                     totalCount = aggrCol.aggregation == 'NOT_APPLICABLE'
-                        ? data.count { it.findAll{ k, v -> k == keyName } }
+                        ? data.count { it.findAll{ k, v -> k == keyName && v != "" } }
                         : data.sum{it.entrySet().sum{ it.key == keyName ? it.value as Double : 0 }}
                     childCol.footer = DECIMAL_FORMAT.format(totalCount)
                 }
@@ -3325,7 +3395,7 @@ private TableDiagram mappingTable(List resultDataSet,
             else
             {
                 totalCount = aggrCol.aggregation == 'NOT_APPLICABLE'
-                    ? data.count { it[aggrCol.header] != "0" }
+                    ? data.count { it[aggrCol.header] != "" }
                     : data.sum { it[aggrCol.header] as Double }
                 aggrCol.footer = DECIMAL_FORMAT.format(totalCount)
             }
@@ -3418,7 +3488,7 @@ List<Map> updateAggregations(List<Map> group, Integer aggregationCnt)
  * @param breakdownValues - список значений разбивки
  * @return - новые строки на отправку в таблицу
  */
-List<Map> prepareRowsWithBreakdown(List<Map> rows, Integer aggregationCnt, List<String> attributeNames, List<String> breakdownValues)
+List<Map> prepareRowsWithBreakdown(List<Map> rows, Integer aggregationCnt, List<String> attributeNames, List<String> notAggregatedAttributeNames,  List<String> breakdownValues)
 {
     List listAttributes = []
     if (aggregationCnt > 0)
@@ -3434,7 +3504,15 @@ List<Map> prepareRowsWithBreakdown(List<Map> rows, Integer aggregationCnt, List<
             //сами значения агргегации на удаление из списка
             List removeAggregations =  row.findAll { it[aggregationName] }
             List newAggregations = breakdownValues.collect { value ->
-                def num = aggregations.findResult{ it[value] } ?: "0"
+                def num = aggregations.findResult{ it[value] }
+                if (aggregationName in notAggregatedAttributeNames)
+                {
+                    num = num ?: ""
+                }
+                else
+                {
+                    num = num ?: "0"
+                }
                 return [("$aggregationName\$$value"): num]
             }
             row -= removeAggregations
@@ -3991,20 +4069,21 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             def listIdsOfNormalAggregations = diagramType == DiagramType.TABLE
                 ? request?.data?.findResult { key, value ->
                     value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
-                }
-                : [0]
+                } : [0]
 
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
-            Closure formatGroup = this.&formatGroupSet.rcurry(requestData, aggregationCnt + notAggregatedAttributes.size(), 0, diagramType)
+            Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
             def res = modules.dashboardQueryWrapper.getData(requestData, onlyFilled, diagramType)
                              .with(formatGroup)
                              .with(formatAggregation)
             def total = res ? [(requisiteNode.title): res] : [:]
             total = formatResult(total, aggregationCnt)
-            Boolean hasState = requestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+            Boolean hasState = requestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
+                               requestData?.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }
+                                          .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
             if (hasState)
             {
-                total = prepareRequestWithStates(total, aggregationCnt)
+                total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
             }
             return total
         case 'computation':
@@ -4027,16 +4106,18 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                 attributes = getAttributeNamesAndValuesFromRequest(requestContent)
                 notAggregatedAttributes = notAggregationAttributeNames(attributes)
             }
-
+            def listIdsOfNormalAggregations = [0]
             aggregationCnt = 1
             def variables = dataSet.collectEntries { key, data ->
                 Closure postProcess =
-                    this.&formatGroupSet.rcurry(data as RequestData, aggregationCnt + notAggregatedAttributes.size(), 0, diagramType)
+                    this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
                 [(key): modules.dashboardQueryWrapper.getData(data as RequestData, onlyFilled, diagramType).with(postProcess)]
             } as Map<String, List>
 
             //Вычисление формулы. Выглядит немного костыльно...
-            Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+            Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
+                               dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
+                                      .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
             def res = dataSet.values().head().groups?.size() ?
                 findUniqueGroups([0], variables).collect { group ->
                     def resultCalculation = calculator.execute { variable ->
@@ -4055,7 +4136,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                 } : [[calculator.execute { key ->
                 variables[key as String].head().head() as Double
             }]]
-            def total = [(node.title): formatAggregationSet(res, [0], onlyFilled)]
+            def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)]
             return formatResult(total, aggregationCnt)
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
@@ -4100,10 +4181,9 @@ private List getOneFilterListDiagramData(def node,
             def listIdsOfNormalAggregations = diagramType == DiagramType.TABLE
                 ? request?.data?.findResult { key, value ->
                     value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
-                }
-                : [0]
+                } : [0]
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
-            Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, aggregationCnt + notAggregatedAttributes.size(), 0, diagramType)
+            Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
             return filtering*.get(0)?.collectMany {
                 newRequestData.filters = [it]
                 def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
@@ -4111,10 +4191,12 @@ private List getOneFilterListDiagramData(def node,
                                  .with(formatAggregation)
                 def partial = res ? [(it.title.grep() as Set): res] : [:]
                 partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
-                Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+                Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
+                                   newRequestData?.aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
+                                                 .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
                 if (hasState)
                 {
-                    partial = prepareRequestWithStates(partial, aggregationCnt)
+                    partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations)
                 }
                 return partial
             }
@@ -4132,20 +4214,22 @@ private List getOneFilterListDiagramData(def node,
                 attributes = getAttributeNamesAndValuesFromRequest(requestContent)
                 notAggregatedAttributes = notAggregationAttributeNames(attributes)
             }
-
+            def listIdsOfNormalAggregations = [0]
             aggregationCnt = 1
             def variables = filtering*.get(0).collect { filter ->
                 return dataSet.collectEntries { key, data ->
                     RequestData newData = data.clone()
                     newData.filters = [filter]
-                    Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, aggregationCnt + notAggregatedAttributes.size(), 0, diagramType)
+                    Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
                     def res = modules.dashboardQueryWrapper.getData(newData as RequestData, onlyFilled, diagramType)
                     [(key): res.with(postProcess)]  as Map<String, List>
                 }
             }
             int i = 0
             return variables.collectMany { totalVar ->
-                Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+                Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
+                                   dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
+                                          .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
                 def res = dataSet.values().head().groups?.size() || notAggregatedAttributes.size() ?
                     findUniqueGroups([0], totalVar).collect { group ->
                         def resultCalculation = calculator.execute { variable ->
@@ -4165,7 +4249,7 @@ private List getOneFilterListDiagramData(def node,
                     totalVar[key as String].head().head() as Double
                 }]]
                 def title = filtering*.get(0).title.grep()
-                Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): formatAggregationSet(res, [0], onlyFilled)]
+                Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)]
                 return formatResult(total, aggregationCnt)
             }
 
@@ -4226,8 +4310,8 @@ private List getTwoFilterListDiagramData(def node,
         case 'default':
             def listIdsOfNormalAggregations = diagramType == DiagramType.TABLE
                 ? request?.data?.findResult { key, value ->
-                    value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
-                }
+                value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
+            }
                 : [0]
             return pareFilters.collectMany { condition ->
                 def requisiteNode = node as DefaultRequisiteNode
@@ -4246,7 +4330,7 @@ private List getTwoFilterListDiagramData(def node,
                     notAggregatedAttributes = notAggregationAttributeNames(attributes)
                 }
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
-                Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData as RequestData, aggregationCnt  + notAggregatedAttributes.size(), 0, diagramType)
+                Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData as RequestData, listIdsOfNormalAggregations, diagramType)
                 def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
                                  .with(formatGroup)
                                  .with(formatAggregation)
@@ -4254,10 +4338,12 @@ private List getTwoFilterListDiagramData(def node,
 
                 def total = res ? [(condition.title.flatten().grep() as Set): res] : [:]
                 total = formatResult(total, aggregationCnt + notAggregatedAttributes.size())
-                Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+                Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
+                                   newRequestData?.aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
+                                                 .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
                 if (hasState)
                 {
-                    total = prepareRequestWithStates(total, aggregationCnt)
+                    total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
                 }
                 return total
             }
@@ -4268,6 +4354,7 @@ private List getTwoFilterListDiagramData(def node,
                 [(it): request.data[it]]
             } as Map<String, RequestData>
             aggregationCnt = 1
+            def listIdsOfNormalAggregations = [0]
             List attributes = []
             List<String> notAggregatedAttributes = []
             if (requestContent)
@@ -4282,14 +4369,16 @@ private List getTwoFilterListDiagramData(def node,
                     newData.filters = condition.inject { first, second ->
                         first + second
                     }
-                    Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, aggregationCnt + notAggregatedAttributes.size(), 0, diagramType)
+                    Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
                     def res = modules.dashboardQueryWrapper.getData( newData as RequestData, onlyFilled, diagramType)
                     [(key): res.with(postProcess)]  as Map<String, List>
                 }
             }
             def title = pareFilters.title
             return variables.withIndex().collectMany { totalVar, i ->
-                Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }
+                Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }||
+                                   dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
+                                          .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
                 def res = dataSet.values().head().groups?.size() || notAggregatedAttributes.size()?
                     findUniqueGroups([0], totalVar).collect { group ->
                         def resultCalculation = calculator.execute { variable ->
@@ -4308,7 +4397,7 @@ private List getTwoFilterListDiagramData(def node,
                     } : [[calculator.execute { key ->
                     totalVar[key as String].find().find() as Double ?: 0
                 }]]
-                Map total = res ? [( title.any {it[0] != ''} ? title[i].flatten() : ''): formatAggregationSet(res, [0], onlyFilled)] : [:]
+                Map total = res ? [( title.any {it[0] != ''} ? title[i].flatten() : ''): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)] : [:]
                 return formatResult(total, aggregationCnt)
             }
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")

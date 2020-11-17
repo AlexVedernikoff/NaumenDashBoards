@@ -143,6 +143,18 @@ class QueryWrapper implements CriteriaWrapper
             column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(modules.dashboardQueryWrapper.UUID_CODE))
             criteria.addGroupColumn(sc.property(modules.dashboardQueryWrapper.UUID_CODE))
         }
+
+        if (attributeCodes.any { it.contains('state') })
+        {
+            column = sc.concat(sc.property(attributeCodes),
+                               sc.constant(StateMarshaller.delimiter),
+                               sc.property('metaCaseId'))
+            criteria.addGroupColumn(column)
+            criteria.addGroupColumn(sc.property('metaCaseId'))
+            criteria.addColumn(column)
+            return this
+        }
+
         criteria.addColumn(column)
         criteria.addGroupColumn(column)
         return this
@@ -156,7 +168,7 @@ class QueryWrapper implements CriteriaWrapper
      */
     private IApiCriteriaColumn castDynamicToType(Attribute attribute, def column)
     {
-        if (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) &&
+        if (attribute?.code?.contains(AttributeType.VALUE_TYPE) &&
             (attribute.type in AttributeType.DATE_TYPES))
         {
             String typeToCast = attribute.type == AttributeType.DATE_TIME_TYPE ? 'timestamp' : attribute.type
@@ -177,11 +189,11 @@ class QueryWrapper implements CriteriaWrapper
         switch (groupType)
         {
             case GroupType.OVERLAP:
-                if (attributeCodes.any {it == 'state'})
+                if (attributeCodes.any {it.contains('state')})
                 {
-                    column = sc.concat (sc.property(attributeCodes),
-                                        sc.constant(StateMarshaller.delimiter),
-                                        sc.property('metaCaseId'))
+                    column = sc.concat(sc.property(attributeCodes),
+                                       sc.constant(StateMarshaller.delimiter),
+                                       sc.property('metaCaseId'))
                     criteria.addGroupColumn(column)
                     criteria.addGroupColumn(sc.property('metaCaseId'))
                     criteria.addColumn(column)
