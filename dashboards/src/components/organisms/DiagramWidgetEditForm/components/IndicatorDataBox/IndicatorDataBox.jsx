@@ -139,13 +139,13 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	showBreakdown = (index: number) => {
-		const set = this.props.values.data[index];
-		return this.requiredBreakdown() || set[FIELDS.withBreakdown] || set[FIELDS.breakdown];
+		const dataSet = this.props.values.data[index];
+		return this.requiredBreakdown() || dataSet[FIELDS.withBreakdown] || dataSet[FIELDS.breakdown];
 	};
 
 	renderBreakdownFieldSet = () => {
-		const {index, name, set, usesBreakdown} = this.props;
-		const indicator = set[name];
+		const {dataSet, index, name, usesBreakdown} = this.props;
+		const indicator = dataSet[name];
 
 		if (usesBreakdown) {
 			const show = this.showBreakdown(index);
@@ -162,9 +162,9 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	renderComputedBreakdownFieldSet = (indicator: ComputedAttr) => {
-		const {errors, index, set, setDataFieldValue, transformAttribute, values} = this.props;
+		const {dataSet, errors, index, setDataFieldValue, transformAttribute, values} = this.props;
 		const {data} = values;
-		let {breakdown} = set;
+		let {breakdown} = dataSet;
 
 		if (!Array.isArray(breakdown)) {
 			breakdown = this.createComputedBreakdown(indicator);
@@ -188,11 +188,13 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	renderDefaultBreakdownFieldSet = () => {
-		const {errors, handleChangeGroup, index, set} = this.props;
+		const {dataSet, errors, handleChangeGroup, index} = this.props;
 		const errorKey = getDataErrorKey(index, FIELDS.breakdown);
 
 		return (
 			<BreakdownFieldset
+				dataSet={dataSet}
+				dataSetIndex={index}
 				error={errors[errorKey]}
 				index={index}
 				key={errorKey}
@@ -202,14 +204,13 @@ export class IndicatorDataBox extends PureComponent<Props> {
 				onRemove={this.handleRemoveBreakdown}
 				onSelect={this.handleSelectBreakdown}
 				removable={!this.requiredBreakdown()}
-				set={set}
 			/>
 		);
 	};
 
 	renderIndicator = () => {
-		const {children, index, renderLeftControl, set} = this.props;
-		const control = renderLeftControl && renderLeftControl(set, index);
+		const {children, dataSet, index, renderLeftControl} = this.props;
+		const control = renderLeftControl && renderLeftControl(dataSet, index);
 
 		return (
 			<FormBox leftControl={control} title="Показатель">
@@ -221,13 +222,14 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	renderIndicatorFieldSet = () => {
-		const {errors, index, name, set, setDataFieldValue, values} = this.props;
+		const {dataSet, errors, index, name, setDataFieldValue, values} = this.props;
 		const {computedAttrs} = values;
 
 		return (
 			<IndicatorFieldset
-				aggregation={set[FIELDS.aggregation]}
+				aggregation={dataSet[FIELDS.aggregation]}
 				computedAttrs={computedAttrs}
+				dataSet={dataSet}
 				error={errors[getDataErrorKey(index, name)]}
 				index={index}
 				key={this.getKey(name, index)}
@@ -238,15 +240,14 @@ export class IndicatorDataBox extends PureComponent<Props> {
 				onSaveComputedAttribute={this.handleSaveComputedAttribute}
 				onSelect={this.handleSelectIndicator}
 				onSelectAggregation={setDataFieldValue}
-				set={set}
-				value={set[name]}
+				value={dataSet[name]}
 			/>
 		);
 	};
 
 	renderShowEmptyDataBox = () => {
-		const {set, usesEmptyData} = this.props;
-		const {showEmptyData} = set;
+		const {dataSet, usesEmptyData} = this.props;
+		const {showEmptyData} = dataSet;
 
 		if (usesEmptyData) {
 			return (

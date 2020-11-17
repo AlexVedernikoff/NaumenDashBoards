@@ -22,7 +22,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 	};
 
 	getIndicators = () => {
-		const {indicators = [getDefaultIndicator()]} = this.props.set;
+		const {indicators = [getDefaultIndicator()]} = this.props.dataSet;
 		return indicators;
 	};
 
@@ -123,7 +123,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 	};
 
 	renderFieldset = (indicator: Indicator, index: number, indicators: Array<Indicator>) => {
-		const {errors, index: dataSetIndex, set} = this.props;
+		const {dataSet, errors, index: dataSetIndex} = this.props;
 		const {aggregation, attribute} = indicator;
 		const removable = indicators.length > 1;
 		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.indicators, index, FIELDS.attribute);
@@ -131,6 +131,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 		return (
 			<IndicatorFieldset
 				aggregation={aggregation}
+				dataSet={dataSet}
 				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
 				index={index}
@@ -143,7 +144,6 @@ export class IndicatorsBox extends PureComponent<Props> {
 				onSelect={this.handleSelect}
 				onSelectAggregation={this.handleSelectAggregation}
 				removable={removable}
-				set={set}
 				usesNotApplicableAggregation={true}
 				value={attribute}
 			/>

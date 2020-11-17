@@ -29,7 +29,7 @@ export class BreakdownFieldset extends PureComponent<Props> {
 	};
 
 	renderGroup = (props: Object) => {
-		const {name, set: currentSet} = this.props;
+		const {dataSet, name} = this.props;
 		const {disabled, parent, value} = props;
 		const field = {
 			name,
@@ -44,25 +44,26 @@ export class BreakdownFieldset extends PureComponent<Props> {
 				name={FIELDS.breakdownGroup}
 				onChange={this.handleChangeGroup}
 				parent={parent}
-				value={currentSet[FIELDS.breakdownGroup]}
+				value={dataSet[FIELDS.breakdownGroup]}
 			/>
 		);
 	};
 
 	render () {
-		const {error, name, removable, set} = this.props;
+		const {dataSet, dataSetIndex, error, name, removable} = this.props;
 
 		return (
 			<FormField error={error}>
 				<AttributeFieldset
-					dataSet={set}
+					dataSet={dataSet}
+					dataSetIndex={dataSetIndex}
 					name={name}
 					onChangeLabel={this.handleChangeLabel}
 					onRemove={this.handleRemove}
 					onSelect={this.handleSelect}
 					removable={removable}
 					renderRefField={this.renderGroup}
-					value={set[name]}
+					value={dataSet[name]}
 				/>
 			</FormField>
 		);
