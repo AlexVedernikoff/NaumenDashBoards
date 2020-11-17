@@ -12,6 +12,7 @@ import {
 } from './helpers';
 import type {ComboWidget} from 'store/widgets/data/types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import {DEFAULT_Y_AXIS_MIN} from 'utils/chart/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
@@ -42,11 +43,9 @@ const getYAxis = (set: Object, index: number, widget: Object, maxValue?: number)
 	const {dataKey, source, yAxis} = set;
 	const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
 	const usesPercent = hasPercent(set, FIELDS.yAxis);
-	const customOptions = getYAxisOptions(indicator);
-	const {show} = customOptions;
 	const color = colors[index];
-	const text = `${getProcessedValue(yAxis, 'title')} (${source.label})`;
-	let {max, min} = indicatorSettings;
+	const defaultText = `${getProcessedValue(yAxis, 'title')} (${source.label})`;
+	let {max, min = DEFAULT_Y_AXIS_MIN} = indicatorSettings;
 
 	if (min) {
 		min = Number(min);
@@ -66,6 +65,7 @@ const getYAxis = (set: Object, index: number, widget: Object, maxValue?: number)
 		axisTicks: {
 			show: true
 		},
+		forceNiceScale: true,
 		labels: {
 			formatter: valueFormatter(usesMSInterval, usesPercent),
 			style: {
@@ -74,24 +74,16 @@ const getYAxis = (set: Object, index: number, widget: Object, maxValue?: number)
 		},
 		max,
 		min,
+		opposite: index > 0,
 		seriesName: dataKey,
-		show,
 		title: {
 			style: {
 				color
-			},
-			text
+			}
 		}
 	};
 
-	if (show) {
-		options = {
-			...extend(options, getYAxisOptions(indicator)),
-			opposite: index > 0
-		};
-	}
-
-	return options;
+	return extend(options, getYAxisOptions(indicator, defaultText));
 };
 
 /**
