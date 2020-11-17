@@ -456,7 +456,7 @@ class StateMarshaller
      */
     static Collection<String> unmarshal(String value, String delimiter)
     {
-        return value.tokenize(delimiter)
+        return value ? value.tokenize(delimiter) : []
     }
 }
 
@@ -488,7 +488,7 @@ class MetaClassMarshaller
      */
     static Collection<String> unmarshal(String value)
     {
-        return value.tokenize(delimiter)
+        return value ? value.tokenize(delimiter) : []
     }
 }
 
@@ -503,15 +503,25 @@ class ObjectMarshaller
     static String delimiter = '#'
 
     /**
+     * Метод получения значения для пользователя
+     * @param value - значение объекта
+     * @param uuid - uuid объекта
+     * @return  значение объекта delimiter uuid объекта
+     */
+    static String marshal(String value, String uuid)
+    {
+        return "${value}${delimiter}${uuid}"
+    }
+
+    /**
      * Метод для парсинга значения
      * @param value - значение целиком
      * @return [значение объекта, uuid объекта]
      */
     static List<String> unmarshal(String value)
     {
-        return value.tokenize(delimiter)
+        return value ? value.tokenize(delimiter) : []
     }
-
 }
 //endregion
 return

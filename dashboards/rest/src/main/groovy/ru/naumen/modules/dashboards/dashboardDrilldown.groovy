@@ -149,7 +149,7 @@ class Link
                          .setAttrGroup(attrGroup)
                          .setAttrCodes(attrCodes)
                          .setDaysToLive(liveDays)
-        if (descriptor)
+        if(descriptor)
         {
             def slurper = new groovy.json.JsonSlurper()
             def UUID = slurper.parseText(descriptor).cardObjectUuid
@@ -213,6 +213,11 @@ class Link
             }.collect { Attribute attr, Collection<Map> filter ->
                 Collection<Collection> result = []
                 String attributeType = attr.type as String
+                if (attr?.sourceCode != classFqn)
+                {
+                    //если атрибут из другого источника (атрибута), указываем его код в начале
+                    attr?.code = "${attr?.sourceCode}.${attr?.code}"
+                }
 
                 def contextValue = filter.findResults { map ->
                     def group = map.group as Map
@@ -280,24 +285,39 @@ class Link
                     }
                     else
                     {
-                        switch(attributeType)
+                        if (attr.code.contains('.'))
                         {
-                            case AttributeType.LINK_TYPES:
-                                if (value == 'Не заполнено' || value == 'EMPTY')
-                                {
-                                    result << [filterBuilder.OR(attr.code, 'null', null)]
-                                }
-                                else
-                                {
-                                    def objects = findObjects(attr.ref, attr.property, value)
-                                    result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
-                                }
-                                break;
-                            case AttributeType.STATE_TYPE:
-                                getStateFilters(attr, value, filterBuilder)
-                                break;
-                            default:
-                                result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
+                            String currentAttrCode = attr.code
+                            def (sourceAttrCode, attrCode) = currentAttrCode.tokenize('.')
+                            String metaForAttr = api.metainfo.getMetaClass(classFqn)
+                                                    .getAttribute(sourceAttrCode)
+                                                    .type.relatedMetaClass
+
+                            attr.code = attrCode
+                            def objects = findObjects(attr, metaForAttr, value)
+                            result << [filterBuilder.OR(sourceAttrCode, 'containsInSet', objects)]
+                        }
+                        else
+                        {
+                            switch(attributeType)
+                            {
+                                case AttributeType.LINK_TYPES:
+                                    if (value == 'Не заполнено')
+                                    {
+                                        result << [filterBuilder.OR(attr.code, 'null', null)]
+                                    }
+                                    else
+                                    {
+                                        def objects = findObjects(attr.ref, attr.property, value)
+                                        result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                                    }
+                                    break;
+                                case AttributeType.STATE_TYPE:
+                                    getStateFilters(attr, value, filterBuilder)
+                                    break;
+                                default:
+                                    result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
+                            }
                         }
                     }
                 }
