@@ -2782,15 +2782,15 @@ private def formatResult(Map data, Integer aggregationCnt = 1)
             if (aggregationCnt > 1)
             {
                 return it.size() > aggregationCnt
-                    ? [it[0..aggregationCnt-1] ?: 0, key, it[aggregationCnt..-1]].flatten()
-                    : [it[0..aggregationCnt-1] ?: 0, key].flatten()
+                    ? [it[0..aggregationCnt-1] ?: DECIMAL_FORMAT.format(0), key, it[aggregationCnt..-1]].flatten()
+                    : [it[0..aggregationCnt-1] ?: DECIMAL_FORMAT.format(0), key].flatten()
             }
             else
             {
                 //формат данных нестабилен, потому оставлен flatten
-                return [it.head() ?: 0, key, it.tail()].flatten()
+                return [it.head() ?: DECIMAL_FORMAT.format(0), key, it.tail()].flatten()
             }
-        } ?: [[0, key].flatten()] : list
+        } ?: [[DECIMAL_FORMAT.format(0), key].flatten()] : list
     }.inject { first, second -> first + second
     } : []
 }
@@ -4189,7 +4189,18 @@ private List getOneFilterListDiagramData(def node,
                 def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
                                  .with(formatGroup)
                                  .with(formatAggregation)
-                def partial = res ? [(it.title.grep() as Set): res] : [:]
+                Boolean nullFromTable = !res && diagramType == DiagramType.TABLE
+                if(nullFromTable)
+                {
+                    //в таблцце нужно обязательно дополнить результат пустыми значениями
+                    Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(requestContent).attributeName
+                    def attributesExceptAggregation = attributes - attributes[listIdsOfNormalAggregations] - innerCustomGroupNames
+                    def tempRes = [""*attributesExceptAggregation.size()]
+                    listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
+                    res = [tempRes]
+                }
+                def partial = onlyFilled && (!res || nullFromTable) ? [:] :[(it.title.grep() as Set): res]
+
                 partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                 Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
                                    newRequestData?.aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
