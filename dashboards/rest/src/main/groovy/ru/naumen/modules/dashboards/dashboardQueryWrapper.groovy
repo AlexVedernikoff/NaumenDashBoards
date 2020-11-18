@@ -168,7 +168,7 @@ class QueryWrapper implements CriteriaWrapper
      */
     private IApiCriteriaColumn castDynamicToType(Attribute attribute, def column)
     {
-        if (attribute?.code?.contains(AttributeType.VALUE_TYPE) &&
+        if (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) &&
             (attribute.type in AttributeType.DATE_TYPES))
         {
             String typeToCast = attribute.type == AttributeType.DATE_TIME_TYPE ? 'timestamp' : attribute.type

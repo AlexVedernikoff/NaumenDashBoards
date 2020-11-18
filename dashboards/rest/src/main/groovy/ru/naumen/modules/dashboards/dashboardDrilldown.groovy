@@ -65,6 +65,12 @@ class Link
      */
     private int liveDays = 30
 
+    /**
+     * Тип диаграммы, для которой генерируется ссылка
+     */
+    private DiagramType diagramType
+
+
     private Map<String, Integer> genitiveRussianMonth = Calendar.with {
         [
             'января'  : JANUARY,
@@ -115,7 +121,7 @@ class Link
      */
     private String subjectUUID
 
-    Link(Map<String, Object> map, String cardObjectUuid)
+    Link(Map<String, Object> map, String cardObjectUuid, DiagramType diagramType)
     {
         this.subjectUUID = cardObjectUuid
         this.classFqn = map.classFqn
@@ -128,6 +134,7 @@ class Link
         this.cases = map.cases as Collection
         this.attrCodes = map.attrCodes as Collection
         this.filters = map.filters as Collection
+        this.diagramType = diagramType
         this.template = metaInfo.attributes.find {
             it.code == 'dashboardTemp'
         }?.with {
@@ -213,7 +220,14 @@ class Link
             }.collect { Attribute attr, Collection<Map> filter ->
                 Collection<Collection> result = []
                 String attributeType = attr.type as String
-                if (attr?.sourceCode != classFqn)
+                //выглядит костыльно, но это необходимо, чтобы обойти ситуацию,
+                // когда основной источник запроса - дочерний к classFqn,
+                // когда у нас сама диаграмма типа таблица
+                //и для дат это неприменимо
+                if (attr?.sourceCode != classFqn &&
+                    !(StateMarshaller.unmarshal(attr?.sourceCode, '$').last() in cases) &&
+                    diagramType == DiagramType.TABLE &&
+                    !(attr.type in AttributeType.DATE_TYPES))
                 {
                     //если атрибут из другого источника (атрибута), указываем его код в начале
                     attr?.code = "${attr?.sourceCode}.${attr?.code}"
@@ -233,7 +247,7 @@ class Link
                     if (groupType)
                     {
                         if (attributeType in AttributeType.DATE_TYPES
-                              || attributeType == AttributeType.DT_INTERVAL_TYPE)
+                            || attributeType == AttributeType.DT_INTERVAL_TYPE)
                         {
                             returnValue = [(groupType):
                                                attributeType == AttributeType.DT_INTERVAL_TYPE
@@ -419,8 +433,8 @@ class Link
                             }
                             break
                         case AttributeType.STATE_TYPE:
-                           customSubGroupCondition.each { orCondition ->
-                               orCondition.each {
+                            customSubGroupCondition.each { orCondition ->
+                                orCondition.each {
                                     String sourceCode = attr.sourceCode
                                     Closure buildStateFilter = { String code, String condition, String stateCode ->
                                         if(sourceCode.contains('$'))
@@ -591,7 +605,7 @@ class Link
                             }
                             break
                         case AttributeType.META_CLASS_TYPE:
-                        //кейс работы с фильтрами для статусов будет переделан, потому для метакласса кейс описан отдельно
+                            //кейс работы с фильтрами для статусов будет переделан, потому для метакласса кейс описан отдельно
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     switch (it.type.toLowerCase())
@@ -1277,11 +1291,14 @@ class Link
 /**
  * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
  * @param requestContent - параметры запроса
+ * @param cardObjectUuid - Uuid карточки текущего объекта
+ * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
  * @return ссылка на на страницу с произвольным списком объектов в json-формате.
  */
-String getLink(Map<String, Object> requestContent, String cardObjectUuid)
+String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
 {
-    Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid)
+    DiagramType diagramType = diagramTypeFromRequest as DiagramType
+    Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
     def linkBuilder = link.getBuilder()
     def webLink = api.web.list(linkBuilder)
     return toJson([link: webLink])

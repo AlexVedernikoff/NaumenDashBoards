@@ -321,7 +321,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             def res = getDiagramData(request, diagramType)
             String key = request.data.keySet().head()
             String legend = request.data[key].aggregations.attribute.sourceName.head()
-            boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
+            Boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
             return mappingStandardDiagram(res, legend, reverseGroups)
         case DiagramType.RoundTypes:
             def request = mappingRoundDiagramRequest(requestContent, subjectUUID)
@@ -356,7 +356,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                                                        requestContent.showRowNum]
 
             return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean,
-                                       showRowNum as boolean, request, requestContent)
+                                       showRowNum as boolean, requestContent)
         case COMBO:
             def request = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(request, diagramType)
@@ -2997,13 +2997,12 @@ private TableDiagram mappingTableDiagram(List list,
     else
     {
         Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(requestContent)
-        List notAggregatedAttributes = notAggregationAttributeNames(attributes)
         Boolean requestHasBreakdown = checkForBreakdown(requestContent)
 
         return mappingManyColumnsTableDiagram(
             resultDataSet, transposeDataSet, totalColumn,
             totalRow, showRowNum, requestHasBreakdown, aggregationCnt, attributes,
-            innerCustomGroupNames, notAggregatedAttributes, allAggregationAttributes
+            innerCustomGroupNames, allAggregationAttributes
         )
     }
 }
@@ -3088,11 +3087,10 @@ List<AggregationBreakdownColumn> getBreakdownColumns(List breakdownValues, def b
  * @param requestContent - текущий запрос
  * @return разбивка или пустой маp
  */
-Map<String, Object> checkForBreakdown(Map<String, Object> requestContent)
+Boolean checkForBreakdown(Map<String, Object> requestContent)
 {
     def tempData = requestContent.data as Map<String, Object>
-    def data = tempData.findResult {k, v -> v}
-    return data.breakdown
+    return tempData.any { k, v -> v?.breakdown }
 }
 
 /**
@@ -3240,7 +3238,7 @@ List getSpecificAggregationsList (def requestContent, Boolean isCompute = null)
                     if (currentSource != mainSource)
                     {
                         String currentSourceName = api.metainfo.getMetaClass(mainSource)
-                                                       .getAttribute(currentSource).title
+                                                      .getAttribute(currentSource).title
                         attribute?.title = "${attribute?.title} (${currentSourceName})"
                     }
                     return [name : attribute?.title, attribute : attribute,
