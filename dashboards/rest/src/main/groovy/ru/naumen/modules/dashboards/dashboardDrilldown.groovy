@@ -419,16 +419,47 @@ class Link
                             }
                             break
                         case AttributeType.STATE_TYPE:
-                            result += customSubGroupCondition.collect { orCondition ->
-                                orCondition.collect {
+                           customSubGroupCondition.each { orCondition ->
+                               orCondition.each {
+                                    String sourceCode = attr.sourceCode
+                                    Closure buildStateFilter = { String code, String condition, String stateCode ->
+                                        if(sourceCode.contains('$'))
+                                        {
+                                            def objectToFilter = new SimpleDtObject("$sourceCode:$stateCode",'')
+                                            return filterBuilder.AND(
+                                                filterBuilder.OR(code, condition, objectToFilter)
+                                            )
+                                        }
+                                        def cases = api.metainfo.getTypes(sourceCode).code
+                                        return filterBuilder.AND(
+                                            *cases.collect{
+                                                filterBuilder.OR(code,
+                                                                 condition,
+                                                                 new SimpleDtObject("$it:$stateCode", ''))
+                                            }
+                                        )
+                                    }
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'contains':
-                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                            return buildStateFilter(attr.code, 'contains', it.data.uuid)
                                         case 'not_contains':
-                                            return filterBuilder.OR(attr.code, 'notContains', it.data.uuid)
+                                            return buildStateFilter(attr.code, 'notContains', it.data.uuid)
                                         case 'contains_any':
-                                            return filterBuilder.OR(attr.code, 'containsInSet', it.data*.uuid)
+                                            List objectsToFilter = it.data*.uuid.collectMany { stateCode ->
+                                                if(sourceCode.contains('$'))
+                                                {
+                                                    def cases = api.metainfo.getTypes(sourceCode).code
+                                                    return cases.collect {
+                                                        new SimpleDtObject("$it:$stateCode", '')
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    return [new SimpleDtObject("$sourceCode:$stateCode",'')]
+                                                }
+                                            }
+                                            return filterBuilder.OR(attr.code, 'containsInSet', objectsToFilter)
                                         case 'title_contains':
                                             return filterBuilder.OR(attr.code, 'titleContains', it.data)
                                         case 'title_not_contains':
