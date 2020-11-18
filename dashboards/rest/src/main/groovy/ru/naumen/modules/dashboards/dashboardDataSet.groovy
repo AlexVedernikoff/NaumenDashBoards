@@ -1565,7 +1565,9 @@ private Map<String, RequestData> produceComputationData(Closure getData, Diagram
             if (diagramType == DiagramType.TABLE)
             {
                 //убираем всю информацию о вычислении
-                newRequestData.aggregations -= newRequestData.aggregations.findAll { it.attribute.type == 'COMPUTED_ATTR'}
+                newRequestData.aggregations -= newRequestData.aggregations.findAll {
+                    !it?.attribute || it?.attribute?.type == 'COMPUTED_ATTR'
+                }
                 //заменяем нормальным атрибутов агрегации
                 newRequestData.aggregations.add(0, aggregation)
             }
