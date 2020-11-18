@@ -64,22 +64,23 @@ const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): Thunk
 		postData = {...postData, ...mixin};
 	}
 
-	dispatch(openObjectsList(widget.id, postData));
+	dispatch(openObjectsList(widget, postData));
 };
 
 /**
  * Открывает список объектов
- * @param {string} id - индетификатор виджета
+ * @param {Widget} widget - данные виджета
  * @param {object} payload - данные для построения ссылки
  * @returns {ThunkAction}
  */
-const openObjectsList = (id: string, payload: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {context} = getState();
 	const {subjectUuid} = context;
+	const {id, type} = widget;
 
 	dispatch(requestLink(id));
 	try {
-		const {link} = await window.jsApi.restCallModule('dashboardDrilldown', 'getLink', payload, subjectUuid);
+		const {link} = await window.jsApi.restCallModule('dashboardDrilldown', 'getLink', payload, subjectUuid, type);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
