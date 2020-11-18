@@ -5,6 +5,7 @@ import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
+import {DiagramWidget} from 'store/widgets/data/templates';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getContext, getEditableParam, getMetaCLass, getUserData, setUserData, switchDashboard} from 'store/context/actions';
@@ -299,14 +300,14 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
  * @returns {ThunkAction}
  */
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
-	const {context, sources} = getState();
+	const {context, dashboard, sources} = getState();
 	const {contentCode} = context;
 	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
 	const key = `widgetContext_${metaClass}_${contentCode}`;
 	const descriptorStr = localStorage.getItem(key);
 
 	if (descriptorStr) {
-		const newWidget: Object = new NewWidget();
+		const newWidget: Object = new DiagramWidget(dashboard.settings.layoutMode);
 		const descriptor = JSON.parse(descriptorStr);
 		let classFqn;
 
