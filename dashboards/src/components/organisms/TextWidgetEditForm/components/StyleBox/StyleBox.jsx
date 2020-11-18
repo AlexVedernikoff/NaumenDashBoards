@@ -1,13 +1,13 @@
 // @flow
 import {CheckIconButtonGroup, FormBox, FormField} from 'components/molecules';
 import {DEFAULT_TEXT_WIDGET_SETTINGS, FIELDS} from 'components/organisms/TextWidgetEditForm/constants';
+import {EditorState, Modifier, RichUtils} from 'draft-js';
 import {FONT_SIZE_OPTIONS} from './constants';
 import {FONT_STYLES} from 'store/widgets/data/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {RichUtils} from 'draft-js';
 import type {StyleBuilderProps} from 'DiagramWidgetEditForm/builders/StyleFormBuilder/types';
 import StyleFormBuilder from 'DiagramWidgetEditForm/builders/StyleFormBuilder/StyleFormBuilder';
 import styles from './styles.less';
@@ -31,23 +31,52 @@ export class StyleBox extends PureComponent<Props> {
 	};
 
 	changeEditorStyle = (name: string, value: string | number) => {
-		const {editorState, onChangeEditorState} = this.props;
+		const {onChangeEditorState, textSettings} = this.props;
+		const editorState = this.getEditorState();
 		const styleName = this.getStyleName(name, value);
 		const currentStyle = editorState.getCurrentInlineStyle();
 
 		if (!currentStyle.has(styleName)) {
 			this.addStyleToMap(name, value);
 
-			// Сбрасываем текущий стиль
-			let nextEditorState = currentStyle.reduce((state, styleName) => {
-				return styleName.startsWith(name) ? RichUtils.toggleInlineStyle(state, styleName) : state;
-			}, editorState);
+			const selection = editorState.getSelection();
+			// Удаляем аналогичные стили у всех вложенных блоков
+			const nextContentState = Object.keys(textSettings.styleMap).filter(styleName => styleName.startsWith(name))
+				.reduce((contentState, styleName) => {
+					return Modifier.removeInlineStyle(contentState, selection, styleName);
+				}, editorState.getCurrentContent());
+
+			let nextEditorState = EditorState.push(
+				editorState,
+				nextContentState,
+				'change-inline-style'
+			);
 
 			onChangeEditorState(RichUtils.toggleInlineStyle(
 				nextEditorState,
 				styleName
 			));
 		}
+	};
+
+	getEditorState = () => {
+		let {editorState} = this.props;
+
+		const currentContent = editorState.getCurrentContent();
+		let selection = editorState.getSelection();
+
+		if (selection.isCollapsed()) {
+			selection = selection.merge({
+				anchorKey: currentContent.getFirstBlock().getKey(),
+				anchorOffset: 0,
+				focusKey: currentContent.getLastBlock().getKey(),
+				focusOffset: currentContent.getLastBlock().getText().length
+			});
+
+			editorState = EditorState.acceptSelection(editorState, selection);
+		}
+
+		return editorState;
 	};
 
 	getEditorValue = <T>(baseStyleName: string, defaultValue: T): T => {
@@ -67,10 +96,10 @@ export class StyleBox extends PureComponent<Props> {
 	};
 
 	handleChangeFontStyle = (e: OnChangeInputEvent) => {
-		const {editorState, onChangeEditorState} = this.props;
+		const {onChangeEditorState} = this.props;
 		const {value} = e;
 
-		onChangeEditorState(RichUtils.toggleInlineStyle(editorState, value));
+		onChangeEditorState(RichUtils.toggleInlineStyle(this.getEditorState(), value));
 	};
 
 	handleChangeTextSettings = (name: string, value: any) => {
