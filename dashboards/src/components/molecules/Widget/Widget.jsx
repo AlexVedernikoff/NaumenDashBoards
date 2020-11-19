@@ -123,26 +123,31 @@ export class Widget extends PureComponent<Props, State> {
 			data: widget,
 			editWidgetChunkData,
 			isEditable,
+			isNew,
 			onDrillDown,
 			onRemove,
 			personalDashboard,
 			user
 		} = this.props;
 
-		return (
-			<ControlPanel
-				className={styles.controlPanel}
-				editWidgetChunkData={editWidgetChunkData}
-				isEditable={isEditable}
-				onDrillDown={onDrillDown}
-				onEdit={this.handleEdit}
-				onExport={this.handleExport}
-				onRemove={onRemove}
-				personalDashboard={personalDashboard}
-				user={user}
-				widget={widget}
-			/>
-		);
+		if (!isNew) {
+			return (
+				<ControlPanel
+					className={styles.controlPanel}
+					editWidgetChunkData={editWidgetChunkData}
+					isEditable={isEditable}
+					onDrillDown={onDrillDown}
+					onEdit={this.handleEdit}
+					onExport={this.handleExport}
+					onRemove={onRemove}
+					personalDashboard={personalDashboard}
+					user={user}
+					widget={widget}
+				/>
+			);
+		}
+
+		return null;
 	};
 
 	renderDiagram = (widget: WidgetType) => {
