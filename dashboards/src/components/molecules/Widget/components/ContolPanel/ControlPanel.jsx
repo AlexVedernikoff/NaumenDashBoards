@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import {DropDownButton} from 'components/molecules/Widget/components';
 import {DropdownMenu, IconButton} from 'components/atoms';
@@ -11,7 +11,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import {Item as MenuItem, SubMenu} from 'rc-menu';
 import {Modal} from 'components/molecules';
 import type {Props, State} from './types';
-import React, {Fragment, PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from 'components/atoms/IconButton/constants';
@@ -60,6 +60,17 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 	handleToggleSubMenu = () => this.setState({showSubmenu: !this.state.showSubmenu});
 
+	renderButtonSubmenu = () => {
+		const {type} = this.props.widget;
+		const {showSubmenu} = this.state;
+
+		if (showSubmenu) {
+			return type in DIAGRAM_WIDGET_TYPES ? this.renderDiagramSubmenu() : this.renderSimpleSubmenu();
+		}
+
+		return null;
+	};
+
 	renderChangeDisplayModeButton = () => {
 		const {personalDashboard, user, widget} = this.props;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === widget.displayMode) || DISPLAY_MODE_OPTIONS[0];
@@ -80,25 +91,19 @@ export class ControlPanel extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderDiagramWidgetItems = () => {
+	renderDiagramSubmenu = () => {
 		const {type} = this.props.widget;
+		const exportList = type !== WIDGET_TYPES.TABLE
+			? EXPORT_LIST.filter(list => list !== FILE_VARIANTS.XLSX)
+			: EXPORT_LIST;
 
-		if (type !== WIDGET_TYPES.TEXT) {
-			const exportList = type !== WIDGET_TYPES.TABLE
-				? EXPORT_LIST.filter(list => list !== FILE_VARIANTS.XLSX)
-				: EXPORT_LIST;
-
-			return (
-				<Fragment>
-					<SubMenu popupClassName="popupSubmenu" title={<span>Источники</span>}>
-						{this.renderDrillDownItems()}
-					</SubMenu >
-					<SubMenu popupClassName="popupSubmenu" title={<span>Экспорт</span>}>
-						{exportList.map(this.renderExportItem)}
-					</SubMenu>
-				</Fragment>
-			);
-		}
+		return (
+			<DropdownMenu onSelect={this.handleToggleSubMenu} onToggle={this.handleToggleSubMenu}>
+				{this.renderSubmenu(<span>Источники</span>, this.renderDrillDownItems())}
+				{this.renderSubmenu(<span>Экспорт</span>, exportList.map(this.renderExportItem))}
+				{this.renderRemoveMenuItem()}
+			</DropdownMenu>
+		);
 	};
 
 	renderDrillDownItems = (): Array<React$Node> | null => {
@@ -145,6 +150,8 @@ export class ControlPanel extends PureComponent<Props, State> {
 				</MenuItem>
 			);
 		}
+
+		return null;
 	};
 
 	renderRemoveModal = () => {
@@ -168,13 +175,12 @@ export class ControlPanel extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSubmenu = () => {
+	renderSimpleSubmenu = () => {
 		const {showSubmenu} = this.state;
 
 		if (showSubmenu) {
 			return (
 				<DropdownMenu onSelect={this.handleToggleSubMenu} onToggle={this.handleToggleSubMenu}>
-					{this.renderDiagramWidgetItems()}
 					{this.renderRemoveMenuItem()}
 				</DropdownMenu>
 			);
@@ -182,6 +188,12 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 		return null;
 	};
+
+	renderSubmenu = (title: React$Node, content: React$Node) => (
+		<SubMenu popupClassName="popupSubmenu" title={title}>
+			{content}
+		</SubMenu >
+	);
 
 	renderSubmenuButton = () => {
 		const {showSubmenu} = this.state;
@@ -196,7 +208,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 					tip="Меню"
 					variant={ICON_BUTTON_VARIANTS.GRAY}
 				/>
-				{this.renderSubmenu()}
+				{this.renderButtonSubmenu()}
 			</div>
 		);
 	};
