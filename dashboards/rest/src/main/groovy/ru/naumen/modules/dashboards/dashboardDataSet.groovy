@@ -387,8 +387,9 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             }
             Boolean changeLabels = requestContent?.sorting?.value == 'PARAMETER'
             Boolean reverseLabels = requestContent?.sorting?.type == 'DESC' && changeLabels
-            Boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
-            return mappingComboDiagram(res, additionals, reverseGroups, group, format, changeLabels, reverseLabels)
+            List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(requestContent, diagramType)
+            return mappingComboDiagram(res, additionals, group, format,
+                                       changeLabels, reverseLabels, customsInBreakdown)
         default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
     }
 }
@@ -1290,7 +1291,8 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
             breakdown = mayBeBreakdown?.with {
                 buildSystemGroup(
                     data.breakdownGroup as Map<String, Object>,
-                    it as Map<String, Object>
+                    it as Map<String, Object>,
+                    'usual_breakdown'
                 )
             }
             dynamicInBreakdown = breakdown?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
@@ -1576,8 +1578,9 @@ private Map<String, RequestData> produceComputationData(Closure getData, Diagram
                 newRequestData.aggregations = [aggregation]
             }
             // предполагаем что количество агрегаций будет не больше одной
-            newRequestData.groups = (newRequestData.groups || group) ? (newRequestData.groups + group).grep() :
-                null
+            newRequestData.groups = (newRequestData.groups || group)
+                ? (newRequestData.groups.findAll { it?.title != 'usual_breakdown' } + group).grep()
+                : null
             // группировку нужно будет добавить к существующим
             newRequestData.groups = newRequestData.groups as Set
             return [(variableName): newRequestData]
@@ -3650,29 +3653,48 @@ private Set<Map> getInnerCustomGroupNames(def requestContent)
  * Метод преобразования результата выборки к комбо диаграме
  * @param list - данные диаграмы
  * @param additionals - дополнительные данные
- * @param reverseGroups - флаг на изменение группировок местами
  * @param groupFormat - формат группы даты['DAY']
  * @param format - формат данных группы даты ['dd MM']
  * @param changeLabels - флаг на изменение списка лейблов (лейблы идут из параметров)
  * @param reverseLabels - флаг на обратный порядок лейблов
+ * @param customsInBreakdown - список флагов на наличие кастомных группировок в разбивке в разных источниках
  * @return ComboDiagram
  */
 private ComboDiagram mappingComboDiagram(List list,
                                          List<Map> additionals,
-                                         Boolean reverseGroups,
                                          String groupFormat,
                                          String format,
                                          Boolean changeLabels,
-                                         Boolean reverseLabels)
+                                         Boolean reverseLabels,
+                                         List<Boolean> customsInBreakdown)
 {
     List transposeSets = list.collect { (it as List<List>)?.transpose() ?: [] }
-    Set labels = transposeSets.collectMany { it[1] ?: [] }
+
+    Set labels = transposeSets.withIndex().collectMany { set, i ->
+        if (customsInBreakdown[i])
+        {
+            return set[2] ?: [] //значения параметра стоят на 3-м месте в результатах запроса, если группировка в разбивке кастомная
+        }
+        else
+        {
+            return set[1] ?: [] //иначе на 2-м
+        }
+    }
+
     if (groupFormat && changeLabels)
     {
         labels = getLabelsInCorrectOrder(labels, groupFormat, format, reverseLabels)
     }
-    Set diagramLabels = transposeSets.collectMany { it[2] ?: [] }
 
+    Set diagramLabels = transposeSets.withIndex().collectMany { set, i ->
+        if (customsInBreakdown[i])
+        {
+            return set[1] ?: [] //значения кастомной группировки из разбивки стоят на 2-м месте в результатах запроса
+        }
+        else {
+            return set[2] ?: [] //если группировка разбивки обычная, то на 3-м
+        }
+    }
     Closure getsSeries = { Set labelSet,
                            List<List> dataSet,
                            Map additionalData,
@@ -3731,17 +3753,15 @@ private ComboDiagram mappingComboDiagram(List list,
     List fullSeries = []
     list.eachWithIndex { dataSet, i ->
         fullSeries += getsSeries(
-            labels,
+            customsInBreakdown[i] ? diagramLabels : labels ,
             dataSet,
             additionals[i],
-            diagramLabels,
-            false
+            customsInBreakdown[i] ? labels : diagramLabels,
+            customsInBreakdown[i]
         )
     }
     return new ComboDiagram(
-        labels: reverseGroups == true
-            ? diagramLabels
-            : labels,
+        labels: labels,
         series: fullSeries
     )
 }
@@ -3972,10 +3992,10 @@ private Map<String, Object> transformRequestWithoutComputation(Map<String, Objec
     return cardObjectUuid ? transform(requestContent) : requestContent
 }
 
-private boolean isCustomGroupFromBreakdown(Map<String, Object> requestContent)
+private def isCustomGroupFromBreakdown(Map<String, Object> requestContent, DiagramType diagramType = DiagramType.COLUMN)
 {
     def requestData = requestContent.data as Map<String, Object>
-    return requestData.findResult { key, value ->
+    List<Boolean> customsInBreakdown = requestData.findResults { key, value ->
         def data = value as Map<String, Object>
         def group = data.group as Map<String, Object>
         def isSystemParameterGroup = group?.way == 'SYSTEM'
@@ -3984,6 +4004,7 @@ private boolean isCustomGroupFromBreakdown(Map<String, Object> requestContent)
         boolean sourceForCompute = data.sourceForCompute
         sourceForCompute == false ? isSystemParameterGroup && isCustomBreakdownGroup : null
     }
+    return diagramType == DiagramType.COMBO ? customsInBreakdown : customsInBreakdown.find()
 }
 
 /**
