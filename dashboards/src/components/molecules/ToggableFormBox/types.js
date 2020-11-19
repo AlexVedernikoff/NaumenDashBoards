@@ -8,7 +8,3 @@ export type Props = {
 	showContent: boolean,
 	title: string
 };
-
-export type State = {
-	showContent: boolean
-};

@@ -2,7 +2,7 @@
 import {array, object} from 'yup';
 import type {ComboWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
-import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, DEFAULT_COMBO_Y_AXIS_SETTINGS} from 'utils/chart/constants';
+import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
@@ -38,7 +38,6 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			displayMode,
 			header,
 			indicator,
-			indicatorSettings = DEFAULT_COMBO_Y_AXIS_SETTINGS,
 			legend,
 			parameter,
 			name = '',
@@ -57,7 +56,6 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			header,
 			id,
 			indicator: extend(DEFAULT_CHART_SETTINGS.yAxis, indicator),
-			indicatorSettings,
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
 			name,
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),

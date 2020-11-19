@@ -1,38 +1,27 @@
 // @flow
 import {FormBox} from 'components/molecules';
 import type {OnChangeInputEvent} from 'components/types';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {Toggle} from 'components/atoms';
 
-export class ToggableFormBox extends PureComponent<Props, State> {
+export class ToggableFormBox extends PureComponent<Props> {
 	static defaultProps = {
-		name: '',
-		showContent: false
-	};
-
-	state = {
-		showContent: this.props.showContent
+		name: ''
 	};
 
 	handleToggle = (event: OnChangeInputEvent) => {
 		const {onToggle} = this.props;
-
-		this.setState({showContent: !this.state.showContent});
 		onToggle && onToggle(event);
 	};
 
 	renderContent = () => {
-		const {children} = this.props;
-		const {showContent} = this.state;
-
+		const {children, showContent} = this.props;
 		return showContent ? children : null;
 	};
 
 	renderControl = () => {
-		const {name} = this.props;
-		const {showContent} = this.state;
-
+		const {name, showContent} = this.props;
 		return <Toggle checked={showContent} name={name} onChange={this.handleToggle} value={showContent} />;
 	};
 

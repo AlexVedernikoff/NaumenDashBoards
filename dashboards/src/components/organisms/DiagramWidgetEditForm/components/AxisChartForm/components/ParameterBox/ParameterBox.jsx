@@ -1,7 +1,7 @@
 // @flow
 import {Checkbox, TextInput} from 'components/atoms';
+import {CollapsableFormBox, FormCheckControl, FormField} from 'components/molecules';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {FormCheckControl, FormField, ToggableFormBox} from 'components/molecules';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -17,7 +17,12 @@ export class ParameterBox extends PureComponent<Props> {
 		} = data;
 
 		return (
-			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={show} title="Параметр">
+			<CollapsableFormBox title="Параметр">
+				<FormField>
+					<FormCheckControl label="Показать ось">
+						<Checkbox checked={show} name={FIELDS.show} onChange={handleBoolChange} value={show} />
+					</FormCheckControl>
+				</FormField>
 				<FormField>
 					<FormCheckControl label="Выводить название">
 						<Checkbox checked={showName} name={FIELDS.showName} onChange={handleBoolChange} value={showName} />
@@ -26,7 +31,7 @@ export class ParameterBox extends PureComponent<Props> {
 				<FormField small={true}>
 					<TextInput maxLength={MAX_TEXT_LENGTH} name={FIELDS.name} onChange={handleChange} value={name} />
 				</FormField>
-			</ToggableFormBox>
+			</CollapsableFormBox>
 		);
 	}
 }

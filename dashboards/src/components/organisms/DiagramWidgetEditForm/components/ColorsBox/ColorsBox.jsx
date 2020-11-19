@@ -1,5 +1,5 @@
 // @flow
-import {AbsolutePortal, ColorPicker, FormField, ToggableFormBox} from 'components/molecules';
+import {AbsolutePortal, CollapsableFormBox, ColorPicker, FormField} from 'components/molecules';
 import {DEFAULT_COLORS} from 'utils/chart/constants';
 import type {DivRef} from 'components/types';
 import type {Props, State} from './types';
@@ -84,9 +84,9 @@ export class ColorsBox extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<ToggableFormBox title="Цвета диаграммы">
+			<CollapsableFormBox title="Цвета диаграммы">
 				{this.renderColors()}
-			</ToggableFormBox>
+			</CollapsableFormBox>
 		);
 	}
 }
