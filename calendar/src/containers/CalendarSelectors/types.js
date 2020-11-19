@@ -1,7 +1,12 @@
 // @flow
 import type {CalendarList, LocationList} from 'store/CalendarSelectors/types';
 import {CALENDAR_SELECTORS_EVENTS} from 'store/CalendarSelectors/constants';
+import type {InitParams} from 'utils/types';
 import type {ThunkAction} from 'store/types';
+
+type OwnProps = {
+	initParams: InitParams
+};
 
 export type ConnectedProps = {
 	calendarId: string | null,
@@ -22,4 +27,4 @@ export type ConnectedFunctions = {
 	}
 };
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;

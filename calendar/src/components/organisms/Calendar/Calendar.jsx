@@ -3,7 +3,6 @@ import {
 	DayView,
 	MonthView,
 	Scheduler,
-	SchedulerFooter,
 	WeekView
 } from '@progress/kendo-react-scheduler';
 import {
@@ -15,6 +14,7 @@ import {
 import React, {
 	useCallback,
 	useEffect,
+	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState
@@ -23,6 +23,7 @@ import type {Resourse, SchedulerEvent} from './types';
 import {getDates, getFormattedDate} from 'utils/dateConverter';
 import CustomCalendarHeader from 'components/molecules/CustomCalendarHeader';
 import CustomCalendarItem from 'components/molecules/CustomCalendarItem';
+import CustomSlot from 'components/molecules/CustomSlot';
 import LoadingPanel from 'components/molecules/LoadingPanel';
 import {PDFExport} from '@progress/kendo-react-pdf';
 import type {Props} from 'containers/Calendar/types';
@@ -51,6 +52,8 @@ const Calendar = ({
 }: Props) => {
 	const [view, setView] = useState('month');
 	const [date, setDate] = useState(currentDate);
+	const [isFull, setIsFull] = useState(false);
+
 	const [dateInterval, setDateInterval] = useState({
 		dateFrom: currentDate,
 		dateTo: currentDate
@@ -61,6 +64,13 @@ const Calendar = ({
 	useEffect(() => {
 		getCalendarResourceColorList();
 	}, []);
+
+	useLayoutEffect(() => {
+		if (isFull && PDFGeneratorRef.current) {
+			PDFGeneratorRef.current.save();
+			setIsFull(false);
+		}
+	}, [isFull]);
 
 	useEffect(() => {
 		if (!calendarId) {
@@ -94,7 +104,7 @@ const Calendar = ({
 
 	const handleGeneratePDF = () => {
 		if (PDFGeneratorRef.current) {
-			PDFGeneratorRef.current.save();
+			setIsFull(true);
 		}
 	};
 
@@ -112,8 +122,6 @@ const Calendar = ({
 			isDisabledExport={!calendarId}
 		/>
 	);
-
-	const schedulerFooterRenderer = () => <SchedulerFooter />;
 
 	const resources: Array<Resourse> = useMemo(
 		() => [
@@ -136,36 +144,65 @@ const Calendar = ({
 		[dateInterval]
 	);
 
+	const renderDayView = () =>
+		<DayView
+			selectedDateFormat="{0:d MMMM y}"
+			selectedShortDateFormat="{0:d MMMM y}"
+			workDayEnd="19:00"
+			workDayStart="9:00"
+		/>;
+
+	const renderWeekView = () =>
+		<WeekView
+			selectedDateFormat="{0:d MMMM y} - {1:d MMMM y}"
+			selectedShortDateFormat="{0:d MMMM y} - {1:d MMMM y}"
+			slot={CustomSlot}
+			workDayEnd="19:00"
+			workDayStart="9:00"
+		/>;
+
+	const renderMonthView = () => <MonthView slot={CustomSlot} />;
+
+	const renderCalendar = () =>
+		<Scheduler
+			data={calendarData}
+			date={date}
+			header={schedulerHeaderRenderer}
+			height={isFull ? '100%' : '600px'}
+			item={schedulerItemRenderer}
+			onDateChange={handleDateChange}
+			onViewChange={handleViewChange}
+			resources={resources}
+			view={view}
+		>
+			{renderDayView()}
+			{renderWeekView()}
+			{renderMonthView()}
+		</Scheduler>;
+
+	const renderLocalizedCalendar = () =>
+		<LocalizationProvider language="ru-RU">
+			<IntlProvider locale="ru">
+				{renderCalendar()}
+			</IntlProvider>
+		</LocalizationProvider>;
+
+	const renderPDFExportableItem = () => <PDFExport
+		ref={PDFGeneratorRef}
+		paperSize="auto"
+		margin={40}
+		fileName={PDFFileName}
+		author="Naumen"
+	>
+		{renderLocalizedCalendar()}
+	</PDFExport>;
+
+	const renderLoader = () => isLoading && <LoadingPanel />;
+
 	return (
 		<div className={styles.container}>
-			{isLoading && <LoadingPanel />}
-			<PDFExport
-				ref={PDFGeneratorRef}
-				paperSize="auto"
-				margin={40}
-				fileName={PDFFileName}
-				author="Naumen"
-			>
-				<LocalizationProvider language="ru-RU">
-					<IntlProvider locale="ru">
-						<Scheduler
-							data={calendarData}
-							date={date}
-							footer={schedulerFooterRenderer}
-							header={schedulerHeaderRenderer}
-							item={schedulerItemRenderer}
-							onDateChange={handleDateChange}
-							onViewChange={handleViewChange}
-							resources={resources}
-							view={view}
-						>
-							<DayView showWorkHours={false} workDayEnd="00:00" />
-							<WeekView showWorkHours={false} workDayEnd="00:00" />
-							<MonthView />
-						</Scheduler>
-					</IntlProvider>
-				</LocalizationProvider>
-			</PDFExport>
+			{renderLoader()}
+			{renderPDFExportableItem()}
 		</div>
 	);
 };

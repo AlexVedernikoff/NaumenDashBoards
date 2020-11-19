@@ -1,11 +1,16 @@
 {
+	"calendar": {
+		"today": "Сегодня"
+	},
 	"scheduler": {
-			"today": "Сегодня",
-			"allDay": "Весь день",
-			"showWorkDay": "Показать рабочий день",
-			"showFullDay": "Показать полный день",
-			"dayViewTitle": "День",
-			"weekViewTitle": "Неделя",
-			"monthViewTitle": "Месяц"
+		"allDay": "Весь день",
+		"dayViewTitle": "День",
+		"monthViewTitle": "Месяц",
+		"nextTitle": "Следующий период",
+		"previousTitle": "Предыдущий период",
+		"showFullDay": "Показать полный день",
+		"showWorkDay": "Показать рабочий день",
+		"today": "Сегодня",
+		"weekViewTitle": "Неделя"
 	}
 }

@@ -121,6 +121,7 @@
     "@progress/kendo-theme-default": "^4.25.1",
     "cldr-core": "^37.0.0",
     "cldr-dates-full": "^37.0.0",
-    "cldr-numbers-full": "^37.0.0"
+    "cldr-numbers-full": "^37.0.0",
+    "iframe-resizer": "^4.2.11"
   }
 }
