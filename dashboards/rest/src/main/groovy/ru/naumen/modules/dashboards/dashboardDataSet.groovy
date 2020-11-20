@@ -2897,11 +2897,11 @@ private StandardDiagram mappingStandardDiagram(List list, String legendName, Boo
             return new StandardDiagram(categories: groupResult, series: series)
         case 3:
             def (groupResult, breakdownResult) = transposeDataSet.tail()
-            def categories = groupResult as Set
+            def categories = groupResult?.findAll() as Set
             StandardDiagram standardDiagram = new StandardDiagram()
             if (reverseGroups) {
-                def series = (breakdownResult as Set)
-                def categoriesForDiagram = breakdownResult as Set
+                def series = (breakdownResult?.findAll() as Set)
+                def categoriesForDiagram = breakdownResult?.findAll() as Set
                 def seriesForDiagram = categories.collect { categoriesValue ->
                     def data = series.collect {
                         seriesValue ->
@@ -2916,13 +2916,16 @@ private StandardDiagram mappingStandardDiagram(List list, String legendName, Boo
                     series: seriesForDiagram
                 )
             } else {
-                def series = (breakdownResult as Set).collect { breakdownValue ->
-                    def data = categories.collect { groupValue ->
-                        (list.head() as List<List>).findResult { el ->
-                            el.tail() == [groupValue, breakdownValue] ? el.head() : null
-                        } ?: 0
+                def series = (breakdownResult as Set).findResults { breakdownValue ->
+                    if(breakdownValue)
+                    {
+                        def data = categories.collect { groupValue ->
+                            (list.head() as List<List>).findResult { el ->
+                                el.tail() == [groupValue, breakdownValue] ? el.head() : null
+                            } ?: 0
+                        }
+                        return new Series(name: breakdownValue, data: data)
                     }
-                    new Series(name: breakdownValue, data: data)
                 }
                 standardDiagram = new StandardDiagram(categories: categories, series: series)
             }
@@ -3347,7 +3350,7 @@ private TableDiagram mappingTable(List resultDataSet,
                                   Integer aggregationCnt,
                                   List<String> allAggregationAttributes)
 {
-    List breakdownValues = hasBreakdown ? transposeDataSet.last().unique() : []
+    List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
     Collection <Column> columns = collectColumns(attributes, hasBreakdown, breakdownValues)
 
     int cnt = attributes.size()
@@ -3673,11 +3676,11 @@ private ComboDiagram mappingComboDiagram(List list,
     Set labels = transposeSets.withIndex().collectMany { set, i ->
         if (customsInBreakdown[i])
         {
-            return set[2] ?: [] //значения параметра стоят на 3-м месте в результатах запроса, если группировка в разбивке кастомная
+            return set[2]?.findAll() ?: [] //значения параметра стоят на 3-м месте в результатах запроса, если группировка в разбивке кастомная
         }
         else
         {
-            return set[1] ?: [] //иначе на 2-м
+            return set[1]?.findAll() ?: [] //иначе на 2-м
         }
     }
 
@@ -3689,10 +3692,10 @@ private ComboDiagram mappingComboDiagram(List list,
     Set diagramLabels = transposeSets.withIndex().collectMany { set, i ->
         if (customsInBreakdown[i])
         {
-            return set[1] ?: [] //значения кастомной группировки из разбивки стоят на 2-м месте в результатах запроса
+            return set[1]?.findAll() ?: [] //значения кастомной группировки из разбивки стоят на 2-м месте в результатах запроса
         }
         else {
-            return set[2] ?: [] //если группировка разбивки обычная, то на 3-м
+            return set[2]?.findAll() ?: [] //если группировка разбивки обычная, то на 3-м
         }
     }
     Closure getsSeries = { Set labelSet,
@@ -3732,7 +3735,7 @@ private ComboDiagram mappingComboDiagram(List list,
                         )
                     }
                 } else {
-                    return (transposeData[2] as Set).collect { breakdown ->
+                    return (labelDiagramSet).collect { breakdown ->
                         new SeriesCombo(
                             type: additionalData.type as String,
                             breakdownValue: breakdown as String,
@@ -4210,17 +4213,14 @@ private List getOneFilterListDiagramData(def node,
                 def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
                                  .with(formatGroup)
                                  .with(formatAggregation)
-                Boolean nullFromTable = !res && diagramType == DiagramType.TABLE
-                if(nullFromTable)
+
+                if(!res && !onlyFilled)
                 {
-                    //в таблцце нужно обязательно дополнить результат пустыми значениями
-                    Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(requestContent).attributeName
-                    def attributesExceptAggregation = attributes - attributes[listIdsOfNormalAggregations] - innerCustomGroupNames
-                    def tempRes = [""*attributesExceptAggregation.size()]
+                    def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
                     listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
                     res = [tempRes]
                 }
-                def partial = onlyFilled && (!res || nullFromTable) ? [:] :[(it.title.grep() as Set): res]
+                def partial = onlyFilled && !res ? [:] :[(it.title.grep() as Set): res]
 
                 partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                 Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
