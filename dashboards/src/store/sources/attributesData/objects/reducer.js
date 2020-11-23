@@ -11,7 +11,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 				...state,
 				actual: {
 					...state.actual,
-					[action.payload.property]: receiveObjectData(state.actual, action.payload)
+					[action.payload.id]: receiveObjectData(state.actual, action.payload)
 				}
 			};
 		case OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA:
@@ -19,7 +19,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 				...state,
 				all: {
 					...state.all,
-					[action.payload.property]: receiveObjectData(state.all, action.payload)
+					[action.payload.id]: receiveObjectData(state.all, action.payload)
 				}
 			};
 		case OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR:
@@ -27,7 +27,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 				...state,
 				actual: {
 					...state.actual,
-					[action.payload.property]: recordObjectError(state.actual, action.payload)
+					[action.payload.id]: recordObjectError(state.actual, action.payload)
 				}
 			};
 		case OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR:
@@ -35,7 +35,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 				...state,
 				all: {
 					...state.all,
-					[action.payload.property]: recordObjectError(state.all, action.payload)
+					[action.payload.id]: recordObjectError(state.all, action.payload)
 				}
 			};
 		case OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA:
@@ -43,7 +43,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 				...state,
 				actual: {
 					...state.actual,
-					[action.payload.property]: requestObjectData(state.actual, action.payload)
+					[action.payload.id]: requestObjectData(state.actual, action.payload)
 				}
 		};
 		case OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA:
@@ -51,7 +51,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 				...state,
 				all: {
 					...state.all,
-					[action.payload.property]: requestObjectData(state.all, action.payload)
+					[action.payload.id]: requestObjectData(state.all, action.payload)
 				}
 			};
 		default:

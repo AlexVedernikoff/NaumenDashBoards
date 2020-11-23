@@ -44,6 +44,7 @@ export class BreakdownFieldset extends PureComponent<Props> {
 				name={FIELDS.breakdownGroup}
 				onChange={this.handleChangeGroup}
 				parent={parent}
+				source={dataSet.source}
 				value={dataSet[FIELDS.breakdownGroup]}
 			/>
 		);

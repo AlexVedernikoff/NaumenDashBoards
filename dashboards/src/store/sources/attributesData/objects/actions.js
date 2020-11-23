@@ -1,6 +1,7 @@
 // @flow
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {FetchParams, Payload, ReceivePayload} from './types';
+import {getObjectKey} from './helpers';
 import {LIMIT, OBJECTS_EVENTS} from './constants';
 
 /**
@@ -13,24 +14,27 @@ import {LIMIT, OBJECTS_EVENTS} from './constants';
 const fetch = (request, receive, recordError) => (params: FetchParams): ThunkAction => async (dispatch: Dispatch) => {
 	const {
 		actual,
+		attribute,
 		offset = 0,
 		parentUUID = null,
-		property
+		source
 	} = params;
+	const id = getObjectKey(attribute, source);
 	const payload = {
-		parentUUID,
-		property
+		id,
+		parentUUID
 	};
 
 	dispatch(request(payload));
 
 	try {
 		const requestPayload = {
+			attribute,
 			count: LIMIT,
 			offset,
 			parentUUID,
-			property,
-			removed: !actual
+			removed: !actual,
+			sourceCode: source.value
 		};
 		const data = await window.jsApi.restCallModule('dashboards', 'getAttributeObject', requestPayload);
 		const uploaded = data.length < LIMIT;

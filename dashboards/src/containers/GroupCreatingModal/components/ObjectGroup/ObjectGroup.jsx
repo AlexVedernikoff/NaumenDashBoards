@@ -14,6 +14,7 @@ import type {
 	SimpleOperand as SimpleOperandType
 } from 'store/customGroups/types';
 import {functions, props} from './selectors';
+import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
 import {MaterialTreeSelect} from 'components/molecules';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
@@ -78,10 +79,10 @@ export class ObjectGroup extends Component<Props, State> {
 	};
 
 	getObjectSelectProps = (actual: boolean) => {
-		const {attribute, objects} = this.props;
+		const {attribute, objects, source} = this.props;
 		const map = actual ? objects.actual : objects.all;
 
-		const {[attribute.property]: data = {
+		const {[getObjectKey(attribute, source)]: data = {
 			error: false,
 			items: {},
 			loading: true,
@@ -121,14 +122,15 @@ export class ObjectGroup extends Component<Props, State> {
 	};
 
 	handleLoadData = (actual: boolean) => (node?: Object, offset?: number = 0) => {
-		const {attribute, fetchObjectData} = this.props;
+		const {attribute, fetchObjectData, source} = this.props;
 		const parentUUID = node ? node.id : null;
 
 		fetchObjectData({
 			actual,
+			attribute,
 			offset,
 			parentUUID,
-			property: attribute.property
+			source
 		});
 	};
 

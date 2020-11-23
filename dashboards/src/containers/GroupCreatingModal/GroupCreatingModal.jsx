@@ -77,13 +77,14 @@ export class GroupCreatingModalContainer extends Component<Props> {
 		const AttributeGroup = this.resolve();
 
 		if (AttributeGroup) {
-			const {attribute, editableCustomGroups} = this.props;
+			const {attribute, editableCustomGroups, source} = this.props;
 
 			return (
 				<AttributeGroup
 					attribute={attribute}
 					customGroups={getMapValues(editableCustomGroups)}
 					renderModal={this.renderModal}
+					source={source}
 				/>
 			);
 		}

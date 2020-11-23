@@ -60,7 +60,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 	);
 
 	renderModal = () => {
-		const {field, value} = this.props;
+		const {field, source, value} = this.props;
 		const {showModal} = this.state;
 		const {parent, value: attribute} = field;
 		let group = value;
@@ -77,6 +77,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 					key={attribute.type}
 					onClose={this.handleCloseModal}
 					onSubmit={this.handleSubmitModal}
+					source={source}
 				/>
 			);
 		}

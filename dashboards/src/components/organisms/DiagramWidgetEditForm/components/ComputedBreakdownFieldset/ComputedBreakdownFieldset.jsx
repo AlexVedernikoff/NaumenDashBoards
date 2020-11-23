@@ -5,7 +5,7 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
-import type {Group} from 'store/widgets/data/types';
+import type {Group, Source} from 'store/widgets/data/types';
 import type {GroupAttributeField} from 'DiagramWidgetEditForm/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
 import type {Props} from './types';
@@ -130,7 +130,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 						onRemove={this.handleRemove}
 						onSelect={this.handleSelect}
 						removable={removable}
-						renderRefField={this.renderGroup(group, breakdownIndex)}
+						renderRefField={this.renderGroup(group, breakdownIndex, dataSet.source)}
 						value={value}
 					/>
 				</FormField>
@@ -140,7 +140,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		return null;
 	};
 
-	renderGroup = (group: Group | null, breakdownIndex: number) => (props: Object) => {
+	renderGroup = (group: Group | null, breakdownIndex: number, source: Source) => (props: Object) => {
 		const {name, value: breakdown} = this.props;
 		const {disabled: selectDisabled, parent, value} = props;
 		const breakdownValue = breakdown[breakdownIndex].value;
@@ -160,6 +160,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup}
 				parent={parent}
+				source={source}
 				value={group}
 			/>
 		);

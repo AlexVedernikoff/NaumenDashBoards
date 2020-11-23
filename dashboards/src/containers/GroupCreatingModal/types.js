@@ -6,7 +6,7 @@ import type {
 } from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {CustomGroup, CustomGroupsMap, UpdateCustomGroup} from 'store/customGroups/types';
-import type {Group, Widget} from 'store/widgets/data/types';
+import type {Group, Source, Widget} from 'store/widgets/data/types';
 import type {Item} from 'store/sources/currentObject/types';
 import type {ThunkAction} from 'store/types';
 
@@ -25,7 +25,8 @@ export type FetchCurrentObjectAttributes = (parent: Item | null, attribute: Attr
 export type AttributeGroupProps = {|
 	attribute: Attribute,
 	customGroups: Array<CustomGroup>,
-	renderModal: RenderModal
+	renderModal: RenderModal,
+	source: Source
 |};
 
 export type ConnectedProps = {|
@@ -46,7 +47,8 @@ export type ModalProps = {|
 	attribute: Attribute,
 	group: Group,
 	onClose: () => void,
-	onSubmit: (value: Group, attributeTitle: string) => void
+	onSubmit: (value: Group, attributeTitle: string) => void,
+	source: Source
 |};
 
 export type Props = {|

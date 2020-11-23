@@ -30,7 +30,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 	};
 
 	renderGroup = (props: Object) => {
-		const {disabledGroup, group, name} = this.props;
+		const {dataSet, disabledGroup, group, name} = this.props;
 		const {disabled: parameterDisabled, parent, value} = props;
 		const disabled = parameterDisabled || disabledGroup;
 		const field = {
@@ -47,6 +47,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup}
 				parent={parent}
+				source={dataSet.source}
 				value={group}
 			/>
 		);
