@@ -14,27 +14,34 @@ import normalizer from 'utils/normalizer';
 
 /**
  * Добавляет новый виджет
- * @param {NewWidget} payload - объект нового виджета
  * @returns {ThunkAction}
  */
-const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
+const checkWidgetsCount = () => (dispatch: Dispatch, getState: GetState): void => {
 	const {map} = getState().widgets.data;
 
 	if (Object.keys(map).length >= LIMIT) {
-		return dispatch(createToast({
+		throw dispatch(createToast({
 			text: `На дашборд можно вывести не больше ${LIMIT} виджетов.
 			Чтобы добавить на текущий дашборд виджет, удалите один из существующих.`,
 			type: 'error'
 		}));
 	}
+};
 
-	batch(() => {
-		dispatch({
-			payload,
-			type: WIDGETS_EVENTS.ADD_WIDGET
+/**
+ * Добавляет новый виджет
+ * @param {NewWidget} payload - объект нового виджета
+ * @returns {ThunkAction}
+ */
+const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): void => {
+		dispatch(checkWidgetsCount());
+		batch(() => {
+			dispatch({
+				payload,
+				type: WIDGETS_EVENTS.ADD_WIDGET
+			});
+			dispatch(addLayouts(NewWidget.id));
 		});
-		dispatch(addLayouts(NewWidget.id));
-	});
 };
 
 /**
@@ -153,6 +160,8 @@ const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch)
 	});
 
 	try {
+		dispatch(checkWidgetsCount());
+
 		const payload = {
 			...getParams(),
 			widgetKey: widgetId
