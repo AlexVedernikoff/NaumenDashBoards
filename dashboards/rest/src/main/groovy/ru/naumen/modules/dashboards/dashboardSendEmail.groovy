@@ -31,7 +31,7 @@ void sendFileToMail(String tokenKey, String format, String fileName, List users)
         {
             utils.throwReadableException('User email is null or empty!')
         }
-        def file = utils.uploadService.get(tokenKey)
+        def file = beanFactory.getBean('uploadServiceImpl').get(tokenKey)
         def ds = new ByteArrayDataSource(file.inputStream, file.contentType)
 
         def message = api.mail.sender.createMail()
