@@ -168,6 +168,7 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	renderIndicatorCell = (props: CellConfigProps) => {
+		const {fontColor, fontStyle} = this.props.widget.table.body.indicatorSettings;
 		const {column, value} = props;
 		const components = {
 			Value: this.renderLinkValue
@@ -182,17 +183,21 @@ export class TableWidget extends PureComponent<Props, State> {
 			cellValue = this.getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);
 		}
 
-		return <Cell {...props} components={components} value={cellValue} />;
+		return <Cell {...props} components={components} fontColor={fontColor} fontStyle={fontStyle} value={cellValue} />;
 	};
 
-	renderLinkValue = (props: ValueProps) => (
-		<span className={styles.link} >
-			{props.value}
-		</span>
-	);
+	renderLinkValue = (props: ValueProps) => {
+		const {fontColor: color, value} = props;
+
+		return (
+			<span className={styles.link} style={{color}}>
+				{value}
+			</span>
+		);
+	};
 
 	renderParameterCell = (props: CellConfigProps) => {
-		const {fontColor, fontStyle} = this.props.widget.table.rowHeader;
+		const {fontColor, fontStyle} = this.props.widget.table.body.parameterSettings;
 		let {column, value} = props;
 
 		if (column.attribute.type === ATTRIBUTE_TYPES.metaClass) {

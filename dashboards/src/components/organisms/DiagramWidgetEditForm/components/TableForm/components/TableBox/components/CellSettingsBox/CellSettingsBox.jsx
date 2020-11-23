@@ -5,7 +5,7 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
-export class HeaderSettingsBox extends PureComponent<Props> {
+export class CellSettingsBox extends PureComponent<Props> {
 	handleChange = ({name, value}: OnChangeInputEvent) => this.updateSettings(name, value);
 
 	handleChangeFontStyle = (event: OnChangeInputEvent) => {
@@ -47,4 +47,4 @@ export class HeaderSettingsBox extends PureComponent<Props> {
 	}
 }
 
-export default withStyleFormBuilder(HeaderSettingsBox);
+export default withStyleFormBuilder(CellSettingsBox);

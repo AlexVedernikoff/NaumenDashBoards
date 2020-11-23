@@ -40,6 +40,7 @@ const max: 'max' = 'max';
 const min: 'min' = 'min';
 const pageSize: 'pageSize' = 'pageSize';
 const parameter: 'parameter' = 'parameter';
+const parameterSettings: 'parameterSettings' = 'parameterSettings';
 const parameters: 'parameters' = 'parameters';
 const position: 'position' = 'position';
 const ranges: 'ranges' = 'ranges';
@@ -108,6 +109,7 @@ const FIELDS = {
 	name,
 	pageSize,
 	parameter,
+	parameterSettings,
 	parameters,
 	position,
 	ranges,

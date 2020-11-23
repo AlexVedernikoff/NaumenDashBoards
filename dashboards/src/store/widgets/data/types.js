@@ -347,17 +347,21 @@ type ComputeTableData = {
 
 export type TableData = BuildTableData | ComputeTableData;
 
-export type TableHeaderSettings = {
+export type TableCellSettings = {
 	fontColor: string,
 	fontStyle?: FontStyle
 };
+
+export type TableHeaderSettings = TableCellSettings;
 
 export type TableBodySettings = {
 	defaultValue: {
 		label: string,
 		value: DefaultTableValue
 	},
+	indicatorSettings: TableCellSettings,
 	pageSize: number,
+	parameterSettings: TableCellSettings,
 	showRowNum: boolean,
 	textAlign: TextAlign,
 	textHandler: TextHandler
@@ -365,8 +369,7 @@ export type TableBodySettings = {
 
 export type Table = {
 	body: TableBodySettings,
-	columnHeader: TableHeaderSettings,
-	rowHeader: TableHeaderSettings
+	columnHeader: TableCellSettings
 };
 
 export type ColumnsRatioWidth = {

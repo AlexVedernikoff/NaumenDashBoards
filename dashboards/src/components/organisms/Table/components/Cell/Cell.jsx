@@ -50,10 +50,10 @@ export class Cell extends PureComponent<Props> {
 	};
 
 	renderValue = () => {
-		const {components, value} = this.props;
+		const {components, fontColor, value} = this.props;
 		const {Value} = components;
 
-		return value && Number(value) !== 0 ? <Value value={value} /> : this.renderDefaultValue();
+		return value && Number(value) !== 0 ? <Value fontColor={fontColor} value={value} /> : this.renderDefaultValue();
 	};
 
 	render () {

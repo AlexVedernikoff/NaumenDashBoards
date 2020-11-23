@@ -1,5 +1,5 @@
 // @flow
-import {BodySettingsBox, HeaderSettingsBox} from './components';
+import {BodySettingsBox, CellSettingsBox} from './components';
 import {CollapsableFormBox} from 'components/molecules';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import type {Props} from './types';
@@ -30,7 +30,7 @@ export class TableBox extends PureComponent<Props> {
 
 	renderHeader = (name: string, label: string) => {
 		const {data} = this.props;
-		return <HeaderSettingsBox data={data[name]} label={label} name={name} onChange={this.handleChangeHeaderSettings} />;
+		return <CellSettingsBox data={data[name]} label={label} name={name} onChange={this.handleChangeHeaderSettings} />;
 	};
 
 	renderTableBody = () => {
@@ -50,8 +50,6 @@ export class TableBox extends PureComponent<Props> {
 		return (
 			<CollapsableFormBox title="Таблица">
 				{this.renderHeader(FIELDS.columnHeader, 'Заголовок столбца')}
-				{this.renderFieldDivider()}
-				{this.renderHeader(FIELDS.rowHeader, 'Заголовок строки')}
 				{this.renderFieldDivider()}
 				{this.renderTableBody()}
 			</CollapsableFormBox>

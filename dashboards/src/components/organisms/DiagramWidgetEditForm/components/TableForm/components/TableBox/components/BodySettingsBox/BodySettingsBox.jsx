@@ -1,4 +1,5 @@
 // @flow
+import {CellSettingsBox} from 'DiagramWidgetEditForm/components/TableForm/components/TableBox/components';
 import {Checkbox, Label} from 'components/atoms';
 import {EMPTY_DATA_OPTIONS, PAGE_SIZES} from './constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
@@ -23,6 +24,19 @@ export class BodySettingsBox extends PureComponent<Props> {
 			...data,
 			[name]: value
 		});
+	};
+
+	renderCellSettingsBox = (name: string, label: string) => {
+		const {[name]: data} = this.props.data;
+
+		return (
+			<CellSettingsBox
+				data={data}
+				label={label}
+				name={name}
+				onChange={this.updateSettings}
+			/>
+		);
 	};
 
 	render () {
@@ -74,6 +88,8 @@ export class BodySettingsBox extends PureComponent<Props> {
 						value: textAlign
 					})}
 				</FormField>
+				{this.renderCellSettingsBox(FIELDS.parameterSettings, 'Стили значений параметра')}
+				{this.renderCellSettingsBox(FIELDS.indicatorSettings, 'Стили значений показателя')}
 			</Fragment>
 		);
 	}
