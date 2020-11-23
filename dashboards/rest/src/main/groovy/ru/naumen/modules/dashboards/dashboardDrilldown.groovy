@@ -224,8 +224,8 @@ class Link
                 // когда основной источник запроса - дочерний к classFqn,
                 // когда у нас сама диаграмма типа таблица
                 //и для дат это неприменимо
-                if (attr?.sourceCode != classFqn &&
-                    !(StateMarshaller.unmarshal(attr?.sourceCode, '$').last() in cases) &&
+                if (attr?.sourceCode && attr?.sourceCode != classFqn &&
+                    !(StateMarshaller.unmarshal(attr?.sourceCode, '$')?.last() in cases) &&
                     diagramType == DiagramType.TABLE &&
                     !(attr.type in AttributeType.DATE_TYPES))
                 {
@@ -340,8 +340,8 @@ class Link
                     //Тут обработка только группировок по датам
                     context.keySet().each { groupType ->
                         def value = context.get(groupType)
-                        def format = value.last()
-                        String stringValue = value.head()
+                        def format = value?.last()
+                        String stringValue = value?.head()
                         getDateFilters(groupType, format, stringValue, filterBuilder, attr)
                     }
                 }
@@ -1195,9 +1195,9 @@ class Link
         switch (format)
         {
             case 'yyyy':
+            default:
                 def datePoint = api.date.createDateTimePointPredicates(['YEAR', value as int, 'EQ'], ['YEAR', value as int, 'EQ'])
                 return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
-            default: throw new IllegalArgumentException("Not supported year format: $format")
         }
     }
 
