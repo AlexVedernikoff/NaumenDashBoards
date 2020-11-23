@@ -102,7 +102,7 @@ const getYAxis = (set: Object, index: number, widget: Object, maxValue?: number)
  * @returns {ApexOptions}
  */
 const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
-	const {legend} = widget;
+	const {legend, parameter} = widget;
 	const {labels, series} = chart;
 	const strokeWidth = series.find(s => s.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 	const stacked = widget.data.findIndex(set => set.type && set.type === WIDGET_TYPES.COLUMN_STACKED) !== -1;
@@ -154,7 +154,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			intersect: true,
 			shared: false
 		},
-		xaxis: extend(xaxis, getXAxisOptions(widget)),
+		xaxis: extend(xaxis, getXAxisOptions(parameter)),
 		yaxis: widget.data.filter(s => !s.sourceForCompute).map((s, i) => getYAxis(s, i, widget, maxValue))
 	};
 };

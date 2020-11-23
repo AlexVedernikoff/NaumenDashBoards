@@ -1,7 +1,12 @@
 // @flow
 import type {ApexAxisChartSeries} from 'apexcharts';
-import type {ApexLegend} from 'utils/chart/types';
-import type {AxisIndicator, AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
+import type {ApexLegend, AxisProps} from 'utils/chart/types';
+import type {
+	AxisWidget,
+	ComboWidget,
+	Legend,
+	LegendPosition
+} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {LEGEND_POSITIONS} from 'utils/chart/constants';
@@ -63,9 +68,8 @@ const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>)
 	return labels;
 };
 
-const getXAxisOptions = (widget: AxisWidget | ComboWidget) => {
-	const {parameter} = widget;
-	const {name, show, showName} = parameter;
+const getXAxisOptions = (props: AxisProps) => {
+	const {name, show, showName} = props;
 
 	let options: Object = {
 		labels: {
@@ -88,8 +92,8 @@ const getXAxisOptions = (widget: AxisWidget | ComboWidget) => {
 	return options;
 };
 
-const getYAxisOptions = (indicator: AxisIndicator) => {
-	const {name, show, showName} = indicator;
+const getYAxisOptions = (props: AxisProps) => {
+	const {name, show, showName} = props;
 
 	const options: Object = {
 		decimalsInFloat: 2,
