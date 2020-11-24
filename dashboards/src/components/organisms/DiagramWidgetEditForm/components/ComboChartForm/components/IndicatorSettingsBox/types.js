@@ -8,3 +8,7 @@ export type Props = {
 	name: string,
 	onChange: (name: string, data: ComboIndicatorSettings) => void
 };
+
+export type State = {
+	showAdditionalSettings: boolean
+};

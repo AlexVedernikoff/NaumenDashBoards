@@ -2,6 +2,7 @@
 import AbsolutePortal from './AbsolutePortal';
 import Chart from './Chart';
 import CheckIconButtonGroup from './CheckIconButtonGroup';
+import CollapsableFormBox from './CollapsableFormBox';
 import ColorInput from './ColorInput';
 import ColorPicker from './ColorPicker';
 import Datepicker from './Datepicker';
@@ -33,6 +34,7 @@ export {
 	AbsolutePortal,
 	Chart,
 	CheckIconButtonGroup,
+	CollapsableFormBox,
 	ColorInput,
 	ColorPicker,
 	Datepicker,

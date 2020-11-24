@@ -1,6 +1,6 @@
 // @flow
+import {CollapsableFormBox, FormField} from 'components/molecules';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormField, ToggableFormBox} from 'components/molecules';
 import type {Props} from './types';
 import {RadioField} from 'components/atoms';
 import React, {Fragment, PureComponent} from 'react';
@@ -66,9 +66,9 @@ export class SortingBox extends PureComponent<Props> {
 
 	render () {
 		return (
-			<ToggableFormBox title="Сортировка">
+			<CollapsableFormBox title="Сортировка">
 				{this.renderFields()}
-			</ToggableFormBox>
+			</CollapsableFormBox>
 		);
 	}
 }

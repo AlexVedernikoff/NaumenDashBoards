@@ -117,7 +117,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		breakdownUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.breakdown);
 	}
 
-	if (widget.indicatorSettings.showDependent) {
+	if (widget.indicator.showDependent) {
 		maxValue = getMaxValue(series);
 	}
 

@@ -1,5 +1,5 @@
 // @flow
-import {FormField, ToggableFormBox} from 'components/molecules';
+import {CollapsableFormBox, FormField} from 'components/molecules';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
@@ -9,7 +9,7 @@ export class IndicatorBox extends PureComponent<Props> {
 		const {renderColorInput, renderFontFamilySelect, renderFontSizeSelect, renderFontStyleButtons} = this.props;
 
 		return (
-			<ToggableFormBox title="Показатель">
+			<CollapsableFormBox title="Показатель">
 				<FormField label="Шрифт" row>
 					{renderFontFamilySelect()}
 					{renderFontSizeSelect({usesAuto: true})}
@@ -18,7 +18,7 @@ export class IndicatorBox extends PureComponent<Props> {
 					{renderFontStyleButtons()}
 					{renderColorInput()}
 				</FormField>
-			</ToggableFormBox>
+			</CollapsableFormBox>
 		);
 	}
 }

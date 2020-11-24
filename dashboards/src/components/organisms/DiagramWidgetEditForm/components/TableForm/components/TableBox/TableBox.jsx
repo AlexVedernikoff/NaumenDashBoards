@@ -1,11 +1,11 @@
 // @flow
 import {BodySettingsBox, HeaderSettingsBox} from './components';
+import {CollapsableFormBox} from 'components/molecules';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import type {TableBodySettings, TableHeaderSettings} from 'store/widgets/data/types';
-import {ToggableFormBox} from 'components/molecules';
 
 export class TableBox extends PureComponent<Props> {
 	handleChangeBodySettings = (bodyName: string, settings: TableBodySettings) => {
@@ -48,13 +48,13 @@ export class TableBox extends PureComponent<Props> {
 
 	render () {
 		return (
-			<ToggableFormBox title="Таблица">
+			<CollapsableFormBox title="Таблица">
 				{this.renderHeader(FIELDS.columnHeader, 'Заголовок столбца')}
 				{this.renderFieldDivider()}
 				{this.renderHeader(FIELDS.rowHeader, 'Заголовок строки')}
 				{this.renderFieldDivider()}
 				{this.renderTableBody()}
-			</ToggableFormBox>
+			</CollapsableFormBox>
 		);
 	}
 }
