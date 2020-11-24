@@ -15,7 +15,6 @@ import FormField from './FormField';
 import GroupCreatingModal from './GroupCreatingModal';
 import InputForm from './InputForm';
 import MaterialSelect from './MaterialSelect';
-import MaterialSimpleTreeSelect from './MaterialSimpleTreeSelect';
 import MaterialTreeSelect from './MaterialTreeSelect';
 import MiniSelect from './MiniSelect';
 import Modal from './Modal';
@@ -47,7 +46,6 @@ export {
 	GroupCreatingModal,
 	InputForm,
 	MaterialSelect,
-	MaterialSimpleTreeSelect,
 	MaterialTreeSelect,
 	MiniSelect,
 	Modal,
