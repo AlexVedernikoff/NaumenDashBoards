@@ -1,8 +1,8 @@
 // @flow
-import type ContentBlock from 'draft-js/lib/ContentBlock.js.flow';
+import type {Content} from 'components/atoms/TextEditor/types';
 import {convertFromRaw, EditorState, Modifier, SelectionState} from 'draft-js';
 import {escapeString} from 'src/helpers';
-import type {FindWithRegexCallback, Props, State} from './types';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {TextEditor} from 'components/atoms';
@@ -21,65 +21,58 @@ export class TextWidget extends PureComponent<Props, State> {
 		}
 	}
 
-	findVarWithRegex (regex: RegExp, contentBlock: ContentBlock, callback: FindWithRegexCallback) {
-		const text = contentBlock.getText();
-		let matchArr;
-		let start;
-		let end;
+	replaceVars (contentState: Content, regex: RegExp, value: string): Content {
+		let nextContentState = contentState;
 
-		do {
-			matchArr = regex.exec(text);
+		const replaced = !!contentState.getBlockMap().find(contentBlock => {
+			const text = contentBlock.getText();
+			const matchArr = regex.exec(text);
+			let replaced = false;
 
 			if (matchArr !== null) {
-				start = matchArr.index;
-				end = start + matchArr[0].length;
-				callback(start, end);
+				const start = matchArr.index;
+				const end = start + matchArr[0].length;
+				const blockKey = contentBlock.getKey();
+				const blockSelection = SelectionState
+					.createEmpty(blockKey)
+					.merge({
+						anchorOffset: start,
+						focusOffset: end
+					});
+
+				nextContentState = Modifier.replaceText(
+					contentState,
+					blockSelection,
+					value,
+					contentBlock.getInlineStyleAt(start)
+				);
+				replaced = true;
 			}
-		} while (matchArr);
+
+			return replaced;
+		});
+
+		if (replaced) {
+			nextContentState = this.replaceVars(nextContentState, regex, value);
+		}
+
+		return nextContentState;
 	}
 
 	getEditorStateWithReplacedVars (props: Props) {
 		const {textSettings, variables} = props.widget;
-		const editorState = EditorState.createWithContent(convertFromRaw(textSettings.content));
-		const blockMap = editorState.getCurrentContent().getBlockMap();
-		let nextEditorState = editorState;
+		let editorState = EditorState.createWithContent(convertFromRaw(textSettings.content));
 
 		Object.keys(variables).forEach(key => {
-			const regex = new RegExp(escapeString(key), 'g');
-			const selectionsToReplace = [];
+			const regex = new RegExp(escapeString(key));
 
-			blockMap.forEach(contentBlock => (
-				this.findVarWithRegex(regex, contentBlock, (start, end) => {
-					const blockKey = contentBlock.getKey();
-					const blockSelection = SelectionState
-						.createEmpty(blockKey)
-						.merge({
-							anchorOffset: start,
-							focusOffset: end
-						});
-
-					selectionsToReplace.push([blockSelection, contentBlock.getInlineStyleAt(start)]);
-				})
-			));
-
-			let contentState = nextEditorState.getCurrentContent();
-
-			selectionsToReplace.forEach(([selectionState, style]) => {
-				contentState = Modifier.replaceText(
-					contentState,
-					selectionState,
-					variables[key],
-					style
-				);
-			});
-
-			nextEditorState = EditorState.push(
-				nextEditorState,
-				contentState
+			editorState = EditorState.push(
+				editorState,
+				this.replaceVars(editorState.getCurrentContent(), regex, variables[key])
 			);
 		});
 
-		return nextEditorState;
+		return editorState;
 	}
 
 	render () {
