@@ -191,6 +191,7 @@ export type BuildCircleData = {
 	breakdown: Attribute | ComputedBreakdown,
 	breakdownGroup: Group,
 	indicator: MixedAttribute,
+	showEmptyData: boolean,
 	sourceForCompute: false
 };
 

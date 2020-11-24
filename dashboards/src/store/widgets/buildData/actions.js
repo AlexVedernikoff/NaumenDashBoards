@@ -109,11 +109,12 @@ const createCircleData = (widget: CircleWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, indicator} = set;
+			const {aggregation, indicator, showEmptyData} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation,
 				indicator: resetComputedAttributeState(indicator),
+				showEmptyData,
 				sourceForCompute: false
 			};
 

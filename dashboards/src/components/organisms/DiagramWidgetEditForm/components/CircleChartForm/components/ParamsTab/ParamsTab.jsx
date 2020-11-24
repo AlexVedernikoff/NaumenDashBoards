@@ -23,7 +23,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 			<Fragment>
 				{renderBaseBoxes()}
 				{this.renderSourceBox()}
-				{renderIndicatorBoxes()}
+				{renderIndicatorBoxes({usesEmptyData: true})}
 				{renderDisplayModeSelect()}
 			</Fragment>
 		);
