@@ -14,20 +14,21 @@ import {
 import React, {
 	useCallback,
 	useEffect,
-	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState
 } from 'react';
 import type {Resourse, SchedulerEvent} from './types';
 import {getDates, getFormattedDate} from 'utils/dateConverter';
+import {CALENDAR_VIEW_TYPES} from 'constants/index';
 import CustomCalendarHeader from 'components/molecules/CustomCalendarHeader';
 import CustomCalendarItem from 'components/molecules/CustomCalendarItem';
+import CustomDaySlot from 'components/molecules/CustomDaySlot';
 import CustomSlot from 'components/molecules/CustomSlot';
 import LoadingPanel from 'components/molecules/LoadingPanel';
 import {PDFExport} from '@progress/kendo-react-pdf';
 import type {Props} from 'containers/Calendar/types';
-import caGregorian from 'cldr-dates-full/main/ru/ca-gregorian.json';
+import caGregorian from './ca-gregorian.json';
 import dateFields from 'cldr-dates-full/main/ru/dateFields.json';
 import likelySubtags from 'cldr-core/supplemental/likelySubtags.json';
 import numbers from 'cldr-numbers-full/main/ru/numbers.json';
@@ -44,13 +45,15 @@ const Calendar = ({
 	calendarData,
 	calendarId,
 	calendarResourceColorList,
+	defaultView,
 	getCalendarData,
+	isAppLoading,
+	isCalendarLoading,
 	getCalendarResourceColorList,
 	openEventLink,
-	setCalendarData,
-	isLoading
+	setCalendarData
 }: Props) => {
-	const [view, setView] = useState('month');
+	const [view, setView] = useState(CALENDAR_VIEW_TYPES['{week=Неделя}']);
 	const [date, setDate] = useState(currentDate);
 	const [isFull, setIsFull] = useState(false);
 
@@ -65,7 +68,11 @@ const Calendar = ({
 		getCalendarResourceColorList();
 	}, []);
 
-	useLayoutEffect(() => {
+	useEffect(() => {
+		setView(CALENDAR_VIEW_TYPES[defaultView]);
+	}, [defaultView]);
+
+	useEffect(() => {
 		if (isFull && PDFGeneratorRef.current) {
 			PDFGeneratorRef.current.save();
 			setIsFull(false);
@@ -108,14 +115,14 @@ const Calendar = ({
 		}
 	};
 
-	const schedulerItemRenderer = (props) => (
+	const renderSchedulerItem = (props) => (
 		<CustomCalendarItem
 			{...props}
 			onEventClick={openEventLink}
 		/>
 	);
 
-	const schedulerHeaderRenderer = (props) => (
+	const renderSchedulerHeader = (props) => (
 		<CustomCalendarHeader
 			{...props}
 			onExportToPDFClick={handleGeneratePDF}
@@ -146,16 +153,17 @@ const Calendar = ({
 
 	const renderDayView = () =>
 		<DayView
-			selectedDateFormat="{0:d MMMM y}"
-			selectedShortDateFormat="{0:d MMMM y}"
+			selectedDateFormat="{0:d.MM.y}"
+			selectedShortDateFormat="{0:d.MM.y}"
+			slot={CustomDaySlot}
 			workDayEnd="19:00"
 			workDayStart="9:00"
 		/>;
 
 	const renderWeekView = () =>
 		<WeekView
-			selectedDateFormat="{0:d MMMM y} - {1:d MMMM y}"
-			selectedShortDateFormat="{0:d MMMM y} - {1:d MMMM y}"
+			selectedDateFormat="{0:d.MM.y} - {1:d.MM.y}"
+			selectedShortDateFormat="{0:d.MM.y} - {1:d.MM.y}"
 			slot={CustomSlot}
 			workDayEnd="19:00"
 			workDayStart="9:00"
@@ -167,9 +175,9 @@ const Calendar = ({
 		<Scheduler
 			data={calendarData}
 			date={date}
-			header={schedulerHeaderRenderer}
+			header={renderSchedulerHeader}
 			height={isFull ? '100%' : '600px'}
-			item={schedulerItemRenderer}
+			item={renderSchedulerItem}
 			onDateChange={handleDateChange}
 			onViewChange={handleViewChange}
 			resources={resources}
@@ -187,17 +195,18 @@ const Calendar = ({
 			</IntlProvider>
 		</LocalizationProvider>;
 
-	const renderPDFExportableItem = () => <PDFExport
-		ref={PDFGeneratorRef}
-		paperSize="auto"
-		margin={40}
-		fileName={PDFFileName}
-		author="Naumen"
-	>
-		{renderLocalizedCalendar()}
-	</PDFExport>;
+	const renderPDFExportableItem = () =>
+		<PDFExport
+			ref={PDFGeneratorRef}
+			paperSize="auto"
+			margin={40}
+			fileName={PDFFileName}
+			author="Naumen"
+		>
+			{renderLocalizedCalendar()}
+		</PDFExport>;
 
-	const renderLoader = () => isLoading && <LoadingPanel />;
+	const renderLoader = () => (isAppLoading || isCalendarLoading) && <LoadingPanel />;
 
 	return (
 		<div className={styles.container}>

@@ -1,30 +1,23 @@
 // @flow
-import React, {useCallback, useEffect, useState} from 'react';
-import type {ComponentType} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import DropdownList from 'components/molecules/DropdownList';
 import {LOCATION_TYPES} from 'constants/index';
 import type {Props} from 'containers/CalendarSelectors/types';
 import styles from './CalendarSelectors.less';
 
-const CalendarSelectors: ComponentType<Props> = (props: Props) => {
-	const {
-		initParams: {metaClass, subjectId}
-	} = props;
+const CalendarSelectors = ({
+	calendarList,
+	getCalendarList,
+	getLocationList,
+	locationList,
+	metaClass,
+	selectedOptions: {calendar, location},
+	setSelectedOption,
+	subjectId
+}: Props) => {
 	const isLocationSubject = metaClass && metaClass.includes(LOCATION_TYPES.LOCATION);
 	const isCalendarSubject = metaClass && metaClass.includes(LOCATION_TYPES.CALENDAR);
 	const isCustomSubject = Boolean(metaClass);
-
-	const [locationValue, setLocationValue] = useState(null);
-	const [calendarValue, setCalendarValue] = useState(null);
-
-	const {
-		calendarId,
-		calendarList,
-		getCalendarList,
-		getLocationList,
-		locationList,
-		setCalendar
-	} = props;
 
 	useEffect(() => {
 		if (!isCustomSubject) {
@@ -34,28 +27,27 @@ const CalendarSelectors: ComponentType<Props> = (props: Props) => {
 				getCalendarList(subjectId);
 			}
 			if (isCalendarSubject) {
-				setCalendar(subjectId);
+				setSelectedOption('calendar', {
+					id: subjectId,
+					value: 'calendar'
+				});
 			}
 		}
 	}, [getLocationList, isCalendarSubject, isCustomSubject, isLocationSubject]);
 
 	const handleLocationChange = useCallback(
 		(event) => {
-			if (calendarId) {
-				setCalendar(null);
-			}
 			const {value} = event;
-			setLocationValue(value);
-			setCalendarValue(null);
+			setSelectedOption('location', value);
+			setSelectedOption('calendar', null);
 			getCalendarList(value.id);
 		},
-		[calendarId, getCalendarList]
+		[getCalendarList]
 	);
 
 	const handleSetCalendar = useCallback((event) => {
 		const {value} = event;
-		setCalendarValue(value);
-		setCalendar(value.id);
+		setSelectedOption('calendar', value);
 	}, []);
 
 	if (isCalendarSubject) {
@@ -67,7 +59,7 @@ const CalendarSelectors: ComponentType<Props> = (props: Props) => {
 			data={locationList}
 			label="Выберите локацию"
 			onChange={handleLocationChange}
-			value={locationValue}
+			value={location}
 		/>
 	);
 
@@ -75,7 +67,7 @@ const CalendarSelectors: ComponentType<Props> = (props: Props) => {
 		data={calendarList}
 		label="Выберите календарь"
 		onChange={handleSetCalendar}
-		value={calendarValue}
+		value={calendar}
 	/>;
 
 	return (

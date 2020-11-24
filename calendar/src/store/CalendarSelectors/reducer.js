@@ -8,11 +8,6 @@ const reducer = (
 	{type, payload}: ActionType
 ): CalendarSelectorsState => {
 	switch (type) {
-		case CALENDAR_SELECTORS_EVENTS.SET_CALENDAR:
-			return {
-				...state,
-				calendarId: payload
-			};
 		case CALENDAR_SELECTORS_EVENTS.SET_CALENDAR_LIST:
 			return {
 				...state,
@@ -38,6 +33,16 @@ const reducer = (
 				...state,
 				isLoading: payload
 			};
+		case CALENDAR_SELECTORS_EVENTS.SET_SELECTED_OPTION: {
+			const {data, fieldName} = payload;
+			return {
+				...state,
+				selectedOptions: {
+					...state.selectedOptions,
+					[fieldName]: data
+				}
+			};
+		}
 		default:
 			return state;
 	}

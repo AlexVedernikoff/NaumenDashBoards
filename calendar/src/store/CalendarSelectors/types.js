@@ -5,20 +5,23 @@ type SelectorRecord = {
 	value: string
 };
 
-type Location = SelectorRecord;
+export type Location = SelectorRecord;
 
-type Calendar = SelectorRecord;
+export type Calendar = SelectorRecord;
 
 export type LocationList = Array<Location>;
 
 export type CalendarList = Array<Calendar>;
 
 export type CalendarSelectorsState = {
-	calendarId: string | null,
 	calendarList: CalendarList,
 	error: Error | null,
 	isLoading: boolean,
-	locationList: LocationList
+	locationList: LocationList,
+	selectedOptions: {
+		calendar: Calendar | null,
+		location: Location | null
+	}
 };
 
 export type ActionType = {

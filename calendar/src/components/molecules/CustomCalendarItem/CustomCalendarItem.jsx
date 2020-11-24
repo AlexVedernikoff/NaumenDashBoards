@@ -12,12 +12,6 @@ const CustomCalendarItem = ({dataItem, onEventClick, ...restProps}: Props) => {
 		<SchedulerItem
 			{...restProps}
 			onClick={handleEventClick}
-			style={{
-				...restProps.style,
-				overflow: 'hidden',
-				textOverflow: 'ellipsis',
-				whiteSpace: 'nowrap'
-			}}
 		/>
 	);
 };

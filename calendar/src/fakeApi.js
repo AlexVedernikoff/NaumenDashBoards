@@ -55,8 +55,15 @@ const restCallModule = async (module, method, ...params) => {
 	}
 };
 
+const getParameters = async () => await ({
+	DefaultMode: '{day=День}'
+});
+
 const jsApi = {
-	restCallModule,
+	contents: {
+		getParameters
+	},
+	restCallModule
 };
 
 export default jsApi;

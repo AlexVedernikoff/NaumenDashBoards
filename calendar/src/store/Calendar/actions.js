@@ -36,6 +36,7 @@ const getCalendarData = (params: GetCalendarDataParams): ThunkAction => async (
 				type
 			})
 		);
+
 		dispatch(setCalendarData(normalizedData));
 	} catch (error) {
 		dispatch(setError(error));
@@ -55,6 +56,7 @@ const getCalendarResourceColorList = (): ThunkAction => async (dispatch: Dispatc
 			'calendarController',
 			'getEventStatesColors'
 		);
+
 		dispatch(setCalendarResourceColorList(data));
 	} catch (error) {
 		dispatch(setError(error));
@@ -75,6 +77,7 @@ const openEventLink = (linkId: string): void | ThunkAction => async (dispatch: D
 			'getObjectLink',
 			linkId
 		);
+
 		window.open(data.link, '_blank');
 	} catch (error) {
 		dispatch(setError(error));

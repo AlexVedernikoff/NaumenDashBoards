@@ -1,9 +1,10 @@
 // @flow
 'use strict';
-const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const define = require('./define');
+const webpack = require('webpack');
 
 const {license} = define;
 
@@ -13,7 +14,12 @@ const plugins = [
 		template: './src/index.html',
 		title: 'SMP Calendar'
 	}),
-	new webpack.EnvironmentPlugin(['NODE_ENV', 'API', 'LICENSE'])
+	new webpack.EnvironmentPlugin(['NODE_ENV', 'API', 'LICENSE']),
+	new CopyPlugin([
+		{
+			from: 'static'
+		}
+	])
 ];
 
 if (license === 'use') {
