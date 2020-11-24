@@ -36,7 +36,7 @@ enum DiagramType
     static List<DiagramType> StandardTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]
     static List<DiagramType> RoundTypes = [DONUT, PIE]
     static List<DiagramType> CountTypes = [SUMMARY, SPEEDOMETER]
-    static List<DiagramType> NullableTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO]
+    static List<DiagramType> NullableTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO, DONUT, PIE]
 }
 
 /**

@@ -690,6 +690,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
             aggregationFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
         }
         def requisite
+        Boolean showNulls = data.showEmptyData as Boolean
         if (data.sourceForCompute)
         {
             requisite = null
@@ -703,7 +704,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, aggregationFilter], showNulls: false)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, aggregationFilter], showNulls: showNulls)
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
