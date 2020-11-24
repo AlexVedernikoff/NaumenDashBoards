@@ -12,7 +12,7 @@ import type {
 } from 'store/customGroups/types';
 import {CUSTOM_OPTIONS} from './constants';
 import {functions, props} from './selectors';
-import {MaterialSimpleTreeSelect} from 'components/molecules';
+import {MaterialTreeSelect} from 'components/molecules';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
@@ -130,14 +130,16 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 	};
 
 	renderSelect = (props: SelectRenderProps) => {
-		const {items} = this.props.selectData;
+		const {error, items, loading} = this.props.selectData;
 
 		return (
-			<MaterialSimpleTreeSelect
+			<MaterialTreeSelect
 				async={true}
+				error={error}
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
-				onLoadOptions={this.handleLoadData}
+				loading={loading}
+				onLoad={this.handleLoadData}
 				options={items}
 				{...props}
 			/>

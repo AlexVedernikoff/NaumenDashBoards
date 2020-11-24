@@ -1,21 +1,27 @@
 // @flow
 import {CATALOG_ITEM_SETS_EVENTS} from './constants';
 import type {SelectData} from 'store/customGroups/types';
+import type {TreeNode} from 'components/types';
 
-type Leaf = {
-	title: string,
-	uuid: string,
-};
-
-export type Root = {
-	children: Array<Leaf>,
+export type CatalogItem = {
 	title: string,
 	uuid: string
 };
 
+export type RawCatalogItem = {
+	...CatalogItem,
+	children: Array<RawCatalogItem>
+};
+
+export type CatalogItemNode = TreeNode<CatalogItem>;
+
+export type CatalogItemTree = {
+	[key: string]: CatalogItemNode
+};
+
 export type CatalogItemSetData = {
 	error: boolean,
-	items: Array<Root>,
+	items: CatalogItemTree,
 	loading: boolean
 };
 

@@ -2,15 +2,19 @@
 import type {CatalogItemSetsAction, CatalogItemSetsState} from './types';
 import {CATALOG_ITEM_SETS_EVENTS} from './constants';
 import {defaultCatalogItemSetsAction, initialCatalogItemSetsState} from './init';
+import {getTree} from './helpers';
 
-const reducer = (state: CatalogItemSetsState = initialCatalogItemSetsState, action: CatalogItemSetsAction = defaultCatalogItemSetsAction): CatalogItemSetsState => {
+const reducer = (
+	state: CatalogItemSetsState = initialCatalogItemSetsState,
+	action: CatalogItemSetsAction = defaultCatalogItemSetsAction
+): CatalogItemSetsState => {
 	switch (action.type) {
 		case CATALOG_ITEM_SETS_EVENTS.RECEIVE_CATALOG_ITEM_SET_DATA:
 			return {
 				...state,
 				[action.payload.property]: {
 					...state[action.payload.property],
-					items: action.payload.data,
+					items: getTree(action.payload.data),
 					loading: false
 				}
 			};
