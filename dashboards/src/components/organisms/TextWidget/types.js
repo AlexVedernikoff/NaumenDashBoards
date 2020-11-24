@@ -9,5 +9,3 @@ export type Props = {
 export type State = {
 	editorState: EditorState
 };
-
-export type FindWithRegexCallback = (start: number, end: number) => void;
