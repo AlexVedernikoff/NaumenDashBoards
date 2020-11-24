@@ -38,14 +38,14 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 	return formattedValue;
 };
 
-const getYAxis = (set: Object, index: number, widget: Object, maxValue?: number) => {
-	const {colors, indicator, indicatorSettings} = widget;
+const getYAxis = (set: Object, index: number, widget: ComboWidget, maxValue?: number) => {
+	const {colors, indicator} = widget;
 	const {dataKey, source, yAxis} = set;
 	const usesMSInterval = hasMSInterval(set, FIELDS.yAxis);
 	const usesPercent = hasPercent(set, FIELDS.yAxis);
 	const color = colors[index];
 	const defaultText = `${getProcessedValue(yAxis, 'title')} (${source.label})`;
-	let {max, min = DEFAULT_Y_AXIS_MIN} = indicatorSettings;
+	let {max, min = DEFAULT_Y_AXIS_MIN} = indicator;
 
 	if (min) {
 		min = Number(min);
