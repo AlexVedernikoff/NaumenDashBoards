@@ -2,6 +2,9 @@
 	"calendar": {
 		"today": "Сегодня"
 	},
+	"datepicker": {
+		"toggleCalendar": "Выбрать день"
+	},
 	"scheduler": {
 		"allDay": "Весь день",
 		"dayViewTitle": "День",

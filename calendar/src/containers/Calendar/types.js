@@ -11,8 +11,10 @@ export type ConnectedProps = {
 	calendarData: Array<CalendarData>,
 	calendarId: string | null,
 	calendarResourceColorList: Array<ResourceColor>,
+	defaultView: string,
 	error: Error | null,
-	isLoading: boolean
+	isAppLoading: boolean,
+	isCalendarLoading: boolean
 };
 
 export type ConnectedFunctions = {

@@ -10,15 +10,21 @@ import type {State} from 'store/types';
 
 export const props = (state: State): ConnectedProps => {
 	const {
-		calendar: {calendarData, calendarResourceColorList, error, isLoading},
-		calendarSelectors: {calendarId}
+		app: {defaultView, isLoading: isAppLoading},
+		calendar: {calendarData, calendarResourceColorList, error, isLoading: isCalendarLoading},
+		calendarSelectors: {selectedOptions}
 	} = state;
+	const calendarId = selectedOptions.calendar
+		? selectedOptions.calendar.id
+		: null;
 	return {
 		calendarData,
 		calendarId,
 		calendarResourceColorList,
+		defaultView,
 		error,
-		isLoading
+		isAppLoading,
+		isCalendarLoading
 	};
 };
 

@@ -1,30 +1,42 @@
 // @flow
-import type {CalendarList, LocationList} from 'store/CalendarSelectors/types';
+import type {
+	Calendar,
+	CalendarList,
+	Location,
+	LocationList
+} from 'store/CalendarSelectors/types';
 import {CALENDAR_SELECTORS_EVENTS} from 'store/CalendarSelectors/constants';
-import type {InitParams} from 'utils/types';
 import type {ThunkAction} from 'store/types';
 
-type OwnProps = {
-	initParams: InitParams
-};
-
 export type ConnectedProps = {
-	calendarId: string | null,
 	calendarList: CalendarList,
 	error: Error | null,
 	isLoading: boolean,
-	locationList: LocationList
+	locationList: LocationList,
+	metaClass: string | null,
+	selectedOptions: {
+		calendar: Calendar | null,
+		location: Location | null
+	},
+	subjectId: string | null
 };
 
 export type ConnectedFunctions = {
 	getCalendarList: (locationId: string) => ThunkAction,
 	getLocationList: () => ThunkAction,
-	setCalendar: (
-		calendarId: string | null
+	setSelectedOption: (
+		fieldName: string,
+		data: Calendar | Location | null
 	) => {
-		payload: string | null,
-		type: typeof CALENDAR_SELECTORS_EVENTS.SET_CALENDAR
+		payload: {
+			data: Calendar | Location | null,
+			fieldName: string
+		},
+		type: typeof CALENDAR_SELECTORS_EVENTS.SET_SELECTED_OPTION
 	}
 };
 
-export type Props = OwnProps & ConnectedProps & ConnectedFunctions;
+export type Props = {
+	// NOTE: По какой-то причине Flow не видит subjectId в ConnectedProps
+	subjectId: string | null
+} & ConnectedProps & ConnectedFunctions;

@@ -1,6 +1,6 @@
 // @flow
 import 'iframe-resizer';
-import App from 'components/App';
+import App from 'containers/App';
 import {Provider} from 'react-redux';
 import React from 'react';
 import configureStore from 'store';

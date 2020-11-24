@@ -1,29 +1,19 @@
 // @flow
-import '@progress/kendo-theme-default/dist/all.css';
-import React, {useEffect, useState} from 'react';
+import 'styles/customTheme.css';
+import React, {useEffect} from 'react';
 import Calendar from 'containers/Calendar';
 import CalendarSelectors from 'containers/CalendarSelectors';
-import {getInitParams} from 'utils/calendarInit';
+import type {Props} from 'containers/App/types';
 import styles from 'styles/app.less';
 
-const App = () => {
-	const [initParams, setInitParams] = useState({
-		metaClass: null,
-		subjectId: null
-	});
-
+const App = ({getInitParams}: Props) => {
 	useEffect(() => {
-		(async () => {
-			const params = await getInitParams();
-			if (params) {
-				setInitParams(params);
-			}
-		})();
+		getInitParams();
 	}, []);
 
 	return (
 		<div className={styles.wrapper}>
-			<CalendarSelectors initParams={initParams} />
+			<CalendarSelectors />
 			<Calendar />
 		</div>
 	);

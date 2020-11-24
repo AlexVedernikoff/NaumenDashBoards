@@ -1,4 +1,5 @@
 // @flow
+import type {AppState} from './App/types';
 import type {CalendarSelectorsState} from './CalendarSelectors/types';
 import type {CalendarState} from './Calendar/types';
 
@@ -19,6 +20,7 @@ type Action = {
 };
 
 export type State = {
+	app: AppState,
 	calendar: CalendarState,
 	calendarSelectors: CalendarSelectorsState
 };

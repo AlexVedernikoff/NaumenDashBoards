@@ -3,31 +3,34 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {
 	getCalendarList,
 	getLocationList,
-	setCalendar
+	setSelectedOption
 } from 'store/CalendarSelectors/actions';
 import type {State} from 'store/types';
 
 export const props = (state: State): ConnectedProps => {
 	const {
 		calendarSelectors: {
-			calendarId,
 			calendarList,
 			error,
 			isLoading,
-			locationList
-		}
+			locationList,
+			selectedOptions
+		},
+		app: {metaClass, subjectId}
 	} = state;
 	return {
-		calendarId,
 		calendarList,
 		error,
 		isLoading,
-		locationList
+		locationList,
+		metaClass,
+		selectedOptions,
+		subjectId
 	};
 };
 
 export const functions: ConnectedFunctions = {
 	getCalendarList,
 	getLocationList,
-	setCalendar
+	setSelectedOption
 };

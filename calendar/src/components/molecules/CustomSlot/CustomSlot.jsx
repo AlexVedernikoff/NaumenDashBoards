@@ -2,17 +2,21 @@
 import type {Props} from './types';
 import React from 'react';
 import {SchedulerSlot} from '@progress/kendo-react-scheduler';
+import cn from 'classnames';
 import styles from './CustomSlot.less';
 
 const date = new Date();
 
 const CustomSlot = (props: Props) => {
 	const isCurrentDay = props.start.toDateString() === date.toDateString();
+	const customSlotClasses = cn(styles.customSlot, {
+		[styles.currentDay]: isCurrentDay
+	});
 
-	return 	(
+	return (
 		<SchedulerSlot
 			{...props}
-			className={isCurrentDay ? styles.currentDay : ''}
+			className={customSlotClasses}
 		/>
 	);
 };

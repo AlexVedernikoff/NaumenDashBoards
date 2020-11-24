@@ -1,6 +1,7 @@
 // @flow
-import type {CalendarList, LocationList} from './types';
+import type {Calendar, CalendarList, Location, LocationList} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
+import {ALL_CALENDARS_PREFIX} from 'constants/index';
 import {CALENDAR_SELECTORS_EVENTS} from './constants';
 
 /**
@@ -13,12 +14,19 @@ const getCalendarList = (id: string): ThunkAction => async (
 ) => {
 	dispatch(setCalendarListLoading(true));
 	try {
-		const data = await window.jsApi.restCallModule(
+		const data: CalendarList = await window.jsApi.restCallModule(
 			'calendarController',
 			'getCalendars',
 			id
 		);
+
 		dispatch(setCalendarList(data));
+
+		const allOption = data.find(calendarItem => calendarItem.id.includes(ALL_CALENDARS_PREFIX));
+
+		if (allOption) {
+			dispatch(setSelectedOption('calendar', allOption));
+		}
 	} catch (error) {
 		dispatch(setError(error));
 	} finally {
@@ -33,10 +41,11 @@ const getCalendarList = (id: string): ThunkAction => async (
 const getLocationList = (): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch(setLocationListLoading(true));
 	try {
-		const data = await window.jsApi.restCallModule(
+		const data: LocationList = await window.jsApi.restCallModule(
 			'calendarController',
 			'getLocations'
 		);
+
 		dispatch(setLocationList(data));
 	} catch (error) {
 		dispatch(setError(error));
@@ -70,9 +79,12 @@ const setError = (payload: Error) => ({
 	type: CALENDAR_SELECTORS_EVENTS.SET_ERROR
 });
 
-const setCalendar = (payload: string | null) => ({
-	payload,
-	type: CALENDAR_SELECTORS_EVENTS.SET_CALENDAR
+const setSelectedOption = (fieldName: string, data: Calendar | Location | null) => ({
+	payload: {
+		data,
+		fieldName
+	},
+	type: CALENDAR_SELECTORS_EVENTS.SET_SELECTED_OPTION
 });
 
-export {getCalendarList, getLocationList, setCalendar};
+export {getCalendarList, getLocationList, setSelectedOption};
