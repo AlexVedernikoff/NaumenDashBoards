@@ -3699,6 +3699,8 @@ private ComboDiagram mappingComboDiagram(List list,
             return set[2]?.findAll() ?: [] //если группировка разбивки обычная, то на 3-м
         }
     }
+    //максимальный размер транспонированных датасетов из всех, что пришли из БД
+    Integer globalMaxSize = transposeSets.collect{ it?.size() }?.max()
     Closure getsSeries = { Set labelSet,
                            List<List> dataSet,
                            Map additionalData,
@@ -3707,7 +3709,19 @@ private ComboDiagram mappingComboDiagram(List list,
         def transposeData = dataSet?.transpose() ?: []
         switch (transposeData.size()) {
             case 0:
-                return []
+                if(globalMaxSize == 0)
+                {
+                    return []
+                }
+                //нужно отправить источник, даже если данных по нему нет
+                def result = new SeriesCombo(
+                    type: additionalData.type as String,
+                    breakdownValue: additionalData.breakdown as String,
+                    data: [],
+                    name: additionalData.name as String,
+                    dataKey: additionalData.dataKey as String
+                )
+                return [result]
             case 2:
                 Collection data = labelSet.collect { group ->
                     dataSet.findResult { it[1] == group ? it[0] : null } ?: '0'
