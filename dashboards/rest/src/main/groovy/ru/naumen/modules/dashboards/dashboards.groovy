@@ -242,20 +242,30 @@ String getCatalogObject(Map requestContent)
     offset?.with {
         searchParameter.offset(offset as int)
     }
-    def result =
-        api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect { el ->
-            [
-                title   : el.title,
-                uuid    : el.UUID,
-                children: api.utils.find(classFqn, removeCondition + [parent: el.UUID]).collect {
-                    [
-                        title: it.title,
-                        uuid : it.UUID,
-                    ]
-                }
-            ]
-        }
+    def result = getAllCatalogValues(api.utils.find(classFqn, removeCondition + parentCondition, searchParameter),
+                                     classFqn,
+                                     removeCondition)
     return toJson(result)
+}
+
+/**
+ * Метод получения данных справочника по всем уровням
+ * @param firstLevelValues - значения первого уровня
+ * @param classFqn - тип объекта
+ * @param removeCondition - условие удаления
+ * @return многоуровневый список значений [title: ..., uuid: ..., children:...]
+ */
+List<Map> getAllCatalogValues(def firstLevelValues, String classFqn, def removeCondition)
+{
+    return firstLevelValues.collect { el ->
+        [
+            title   : el.title,
+            uuid    : el.UUID,
+            children: getAllCatalogValues(api.utils.find(classFqn, removeCondition + [parent: el.UUID]),
+                                          classFqn,
+                                          removeCondition)
+        ]
+    }
 }
 
 String getCatalogItemObject(Map requestContent)
