@@ -1,8 +1,8 @@
 // @flow
 import BodySettingsBox from './BodySettingsBox';
-import HeaderSettingsBox from './HeaderSettingsBox';
+import CellSettingsBox from './CellSettingsBox';
 
 export {
 	BodySettingsBox,
-	HeaderSettingsBox
+	CellSettingsBox
 };

@@ -19,6 +19,7 @@ export type Row = {
 export type CellConfigProps = React$Config<CellProps, DefaultCellProps>;
 
 export type ValueProps = {
+	fontColor: string,
 	value: string | number
 };
 
