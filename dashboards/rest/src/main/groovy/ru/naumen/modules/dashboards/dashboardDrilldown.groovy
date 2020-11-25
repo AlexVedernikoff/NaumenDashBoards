@@ -490,6 +490,7 @@ class Link
                         case AttributeType.LINK_TYPES:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
+                                    Boolean attributeTypeIsSet = attributeType in AttributeType.LINK_SET_TYPES
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'empty':
@@ -498,9 +499,17 @@ class Link
                                             return filterBuilder.OR(attr.code, 'notNull', null)
                                         case 'contains':
                                             def value = api.utils.get(it.data.uuid)
+                                            if (attributeTypeIsSet)
+                                            {
+                                                value = [value]
+                                            }
                                             return filterBuilder.OR(attr.code, 'contains', value)
                                         case 'not_contains':
                                             def value = api.utils.get(it.data.uuid)
+                                            if (attributeTypeIsSet)
+                                            {
+                                                value = [value]
+                                            }
                                             return filterBuilder.OR(attr.code, 'notContains', value)
                                         case 'title_contains':
                                             def value = it.data
@@ -518,6 +527,10 @@ class Link
                                             )
                                         case 'contains_including_archival':
                                             def value = api.utils.get(it.data.uuid)
+                                            if (attributeTypeIsSet)
+                                            {
+                                                value = [value]
+                                            }
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'containsWithRemoved',
@@ -525,9 +538,24 @@ class Link
                                             )
                                         case 'not_contains_including_archival':
                                             def value = api.utils.get(it.data.uuid)
+                                            if (attributeTypeIsSet)
+                                            {
+                                                value = [value]
+                                            }
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'notContainsWithRemoved',
+                                                value
+                                            )
+                                        case 'contains_including_nested':
+                                            def value = api.utils.get(it.data.uuid)
+                                            if (attributeTypeIsSet)
+                                            {
+                                                value = [value]
+                                            }
+                                            return filterBuilder.OR(
+                                                attr.code,
+                                                'containsWithNested',
                                                 value
                                             )
                                         case 'contains_any':
@@ -559,6 +587,10 @@ class Link
                                                 )
                                             }
                                             def value = api.utils.get(subjectUUID)[code]
+                                            if (attributeTypeIsSet)
+                                            {
+                                                value = [value]
+                                            }
                                             return filterBuilder.OR(attr.code, 'contains', value)
                                         default: throw new IllegalArgumentException(
                                             "Not supported condition type: ${ it.type }"
