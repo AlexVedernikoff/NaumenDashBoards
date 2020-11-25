@@ -21,6 +21,7 @@ import {
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
 import {COMBO_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
+import {getDefaultComboYAxisName} from 'store/widgets/data/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
@@ -35,8 +36,8 @@ const type = (type: any) => {
 	return resultType && resultType in COMBO_TYPES ? resultType : COMBO_TYPES.COLUMN;
 };
 
-const normalizeDataSet = (set: Object, index: number, data: Array<Object>): ComboData => {
-	const {dataKey, descriptor, group, source, xAxis} = set;
+const normalizeDataSet = (dataSet: ComboData, index: number, data: Array<ComboData>): ComboData => {
+	const {dataKey, descriptor, group, source, xAxis} = dataSet;
 	let resultSet = {
 		dataKey,
 		descriptor,
@@ -46,17 +47,23 @@ const normalizeDataSet = (set: Object, index: number, data: Array<Object>): Comb
 		xAxis
 	};
 
-	if (!set.sourceForCompute) {
-		const {aggregation, showEmptyData, type = WIDGET_TYPES.COLUMN, yAxis} = set;
+	if (!dataSet.sourceForCompute) {
+		const {aggregation, showEmptyData, type = WIDGET_TYPES.COLUMN, yAxis, yAxisName} = dataSet;
 		resultSet = {
 			...resultSet,
 			aggregation: aggregationFilter(aggregation),
 			showEmptyData: !!showEmptyData,
 			sourceForCompute: false,
 			type,
-			yAxis
+			yAxis,
+			yAxisName
 		};
-		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data, FIELDS.yAxis)}, resultSet);
+
+		if (!yAxisName) {
+			resultSet.yAxisName = getDefaultComboYAxisName(resultSet);
+		}
+
+		resultSet = mixinBreakdown({...dataSet, breakdown: breakdown(index, data, FIELDS.yAxis)}, resultSet);
 	}
 
 	return resultSet;
@@ -131,7 +138,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		showEmptyData,
 		type
 	} = widget;
-	const set = getMainDataSet(data);
+	const dataSet = getMainDataSet(data);
 
 	return {
 		colors: colors(widget[FIELDS.colors]),
@@ -141,10 +148,10 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		displayMode,
 		header: header(widget),
 		id,
-		indicator: axisIndicator(widget, set[FIELDS.yAxis]),
+		indicator: axisIndicator(widget, dataSet[FIELDS.yAxis]),
 		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
-		parameter: axisParameter(widget, set[FIELDS.xAxis]),
+		parameter: axisParameter(widget, dataSet[FIELDS.xAxis]),
 		showEmptyData: Boolean(showEmptyData),
 		sorting: chartSorting(widget),
 		templateName: templateName(widget),

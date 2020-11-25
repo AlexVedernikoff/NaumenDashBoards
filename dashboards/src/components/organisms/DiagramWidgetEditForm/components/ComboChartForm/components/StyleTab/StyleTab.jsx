@@ -21,6 +21,10 @@ export class StyleTab extends Component<StyleTabProps> {
 		setFieldValue(name, data);
 	};
 
+	handleChangeDataSet = (index: number, name: string, value: string) => {
+		this.props.setDataFieldValue(index, name, value);
+	};
+
 	render () {
 		const {values} = this.props;
 		const {
@@ -38,7 +42,13 @@ export class StyleTab extends Component<StyleTabProps> {
 				<HeaderBox data={header} name={FIELDS.header} onChange={this.handleChange} />
 				<LegendBox data={legend} name={FIELDS.legend} onChange={this.handleChange} />
 				<ParameterBox data={parameter} name={FIELDS.parameter} onChange={this.handleChange} />
-				<IndicatorSettingsBox data={extend(DEFAULT_CHART_SETTINGS.yAxis, indicator)} name={FIELDS.indicator} onChange={this.handleChange} />
+				<IndicatorSettingsBox
+					data={extend(DEFAULT_CHART_SETTINGS.yAxis, indicator)}
+					name={FIELDS.indicator}
+					onChange={this.handleChange}
+					onChangeDataSet={this.handleChangeDataSet}
+					values={values}
+				/>
 				<SortingBox data={sorting} name={FIELDS.sorting} onChange={this.handleChange} />
 				<DataLabelsBox data={dataLabels} name={FIELDS.dataLabels} onChange={this.handleChange} />
 				<ColorsBox data={colors} name={FIELDS.colors} onChange={this.handleChange} />

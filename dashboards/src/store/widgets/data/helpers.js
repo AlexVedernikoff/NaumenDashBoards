@@ -10,7 +10,9 @@ import type {
 	WidgetType,
 	WidgetsDataState
 } from './types';
+import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DiagramWidget, TextWidget} from './templates';
+import {getProcessedValue} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {WIDGET_TYPES} from './constants';
@@ -177,9 +179,26 @@ const createNewWidget = (layoutMode: LayoutMode, type: WidgetType = WIDGET_TYPES
 	}
 };
 
+/**
+ * Возвращает название оси Y для комбо графика по умолчанию
+ * @param {DataSet} dataSet - набор данных виджета для построения
+ * @returns {string}
+ */
+const getDefaultComboYAxisName = (dataSet: DataSet) => {
+	const {source, yAxis} = dataSet;
+	let name = '';
+
+	if (yAxis) {
+		name = `${getProcessedValue(yAxis, 'title')} (${source.label})`;
+	}
+
+	return name;
+};
+
 export {
 	createNewWidget,
 	getBuildSet,
+	getDefaultComboYAxisName,
 	setWidgets,
 	setSelectedWidget,
 	updateWidget,
