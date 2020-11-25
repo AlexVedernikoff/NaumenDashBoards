@@ -1913,12 +1913,25 @@ private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID,
                 {
                     throw new IllegalArgumentException("Condition data is null or empty")
                 }
-                String uuid = condition.data.uuid
-                def value = api.utils.get(uuid)
+                def value = condition.data.uuid
                 return new FilterParameter(
                     value: value,
                     title: title,
                     type: Comparison.NOT_EQUAL_REMOVED,
+                    attribute: attribute
+                )
+            case 'contains_including_nested':
+                if (!condition.data)
+                {
+                    throw new IllegalArgumentException("Condition data is null or empty")
+                }
+                String uuid = condition.data.uuid
+                def value = api.utils.get(uuid)
+                def nestedVaues =  api.utils.getNested(value)
+                return new FilterParameter(
+                    value: [value, *nestedVaues],
+                    title: title,
+                    type: Comparison.IN,
                     attribute: attribute
                 )
             case 'contains_any':
