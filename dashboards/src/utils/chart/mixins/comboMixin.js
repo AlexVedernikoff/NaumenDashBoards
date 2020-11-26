@@ -116,7 +116,8 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	const xaxis = {
 		labels: {
 			formatter: axisLabelFormatter(parameterUsesMetaClass)
-		}
+		},
+		tickPlacement: 'between'
 	};
 
 	return {
