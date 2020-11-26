@@ -740,4 +740,18 @@ String getCardObject(String value)
         return toJson([link: link])
     }
 }
+
+/**
+ * Метод проверки, является ли первый источник родительским классом для другого
+ * (для таблицы источники с 2 по n-й - ссылочные атрибуты первого)
+ * @param parentClassFqn - код класса предполагаемого родительского источника
+ * @param childClassFqn - код предполагаемого дочернего источника (атрибут первого)
+ * @return флаг true/false в json-формате
+ */
+String checkForParent(String parentClassFqn, String childClassFqn)
+{
+    //при проверке этим методом вернётся пустая строка, если атрибут есть, или сообщение об ошибке
+    Boolean isParent = api.metainfo.checkAttributeExisting(parentClassFqn, childClassFqn).isEmpty()
+    return toJson([result: isParent])
+}
 //endregion
