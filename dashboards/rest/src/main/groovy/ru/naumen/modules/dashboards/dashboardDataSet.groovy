@@ -4282,6 +4282,12 @@ private List getOneFilterListDiagramData(def node,
                     newData.filters = [filter]
                     Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
                     def res = modules.dashboardQueryWrapper.getData(newData as RequestData, onlyFilled, diagramType)
+                    if(!res && !onlyFilled)
+                    {
+                        def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
+                        listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
+                        res = [tempRes]
+                    }
                     [(key): res.with(postProcess)]  as Map<String, List>
                 }
             }
@@ -4310,7 +4316,7 @@ private List getOneFilterListDiagramData(def node,
                 }]]
                 def title = filtering*.get(0).title.grep()
                 Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)]
-                return formatResult(total, aggregationCnt)
+                return onlyFilled && !res ? [] : formatResult(total, aggregationCnt)
             }
 
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
