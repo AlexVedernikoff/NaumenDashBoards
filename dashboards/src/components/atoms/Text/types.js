@@ -9,5 +9,6 @@ export type Props = {
 	children: React$Node,
 	className: string,
 	elementType: TextElementType,
+	onClick?: () => void,
 	type: TextType;
 };

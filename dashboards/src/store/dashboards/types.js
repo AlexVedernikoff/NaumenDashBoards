@@ -1,11 +1,16 @@
 // @flow
 import {DASHBOARDS_EVENTS} from './constants';
+import type {ThunkAction} from 'store/types';
+
+export type FetchDashboards = () => ThunkAction;
+
+export type WidgetItem = {
+	label: string,
+	value: string
+};
 
 export type DashboardItem = {
-	children: Array<{
-		label: string,
-		value: string
-	}>,
+	children: Array<WidgetItem>,
 	label: string,
 	value: string
 };

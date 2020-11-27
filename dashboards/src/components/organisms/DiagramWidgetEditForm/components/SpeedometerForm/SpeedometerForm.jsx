@@ -50,6 +50,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 			header,
 			indicator,
 			name = '',
+			navigation,
 			ranges,
 			templateName,
 			type
@@ -64,6 +65,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 			id,
 			indicator: extend(DEFAULT_SPEEDOMETER_SETTINGS.indicator, indicator),
 			name,
+			navigation,
 			ranges: extend(DEFAULT_SPEEDOMETER_SETTINGS.ranges, ranges),
 			templateName,
 			type

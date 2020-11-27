@@ -56,10 +56,10 @@ const getSourceTypes = (classFqn: string) => {
 };
 
 /**
- * Возвращает ключ для сохранения данных в localStorage
+ * Возвращает ключ для сохранения данных в localStorage относительно пользователя
  * @returns {string}
  */
-const getLocalStorageId = () => {
+const getUserLocalStorageId = () => {
 	const {jsApi} = window;
 	let contentCode = '';
 	let subjectUuid = '';
@@ -77,37 +77,52 @@ const getLocalStorageId = () => {
 };
 
 /**
- * Сохраняет данные в localStorage относительно конкретного дашборда
- * @param {string} key - ключ
+ * Сохраняет данные localStorage
+ * @param {string} storageKey - ключ данных
+ * @param {string} key - ключ значения
  * @param {any} value - значение
  */
-const setLocalStorageValue = (key: string, value: any) => {
-	const localStorageId = getLocalStorageId();
-	let storage = localStorage.getItem(localStorageId);
+const setLocalStorageValue = (storageKey: string, key: string, value: any) => {
+	let storage = localStorage.getItem(storageKey);
 	storage = storage ? JSON.parse(storage) : {};
 	storage[key] = value;
 
-	localStorage.setItem(localStorageId, JSON.stringify(storage));
+	localStorage.setItem(storageKey, JSON.stringify(storage));
 };
 
 /**
- * Возвращает данные из localStorage относительно конкретного дашборда
+ * Возвращает данные из localStorage
+ * @param {string} storageKey - ключ данных
  * @param {string} key - ключ
  * @param {any} defaultValue - значение по умолчанию
  * @returns {any} - данные localStorage
  */
-const getLocalStorageValue = (key: string, defaultValue: any) => {
-	const localStorageId = getLocalStorageId();
-	let storage = localStorage.getItem(localStorageId);
+const getLocalStorageValue = (storageKey: string, key: string, defaultValue: any) => {
+	let storage = localStorage.getItem(storageKey);
 	storage = storage ? JSON.parse(storage) : {};
 
 	return storage[key] || defaultValue;
+};
+
+/**
+ * Удаляет данные из localStorage
+ * @param {string} storageKey - ключ данных
+ * @param {string} key - ключ
+ */
+const removeLocalStorageValue = (storageKey: string, key: string) => {
+	let storage = localStorage.getItem(storageKey);
+
+	if (storage) {
+		localStorage.setItem(storageKey, JSON.stringify({...JSON.parse(storage), [key]: undefined}));
+	}
 };
 
 export {
 	getLocalStorageValue,
 	getParams,
 	getSourceTypes,
+	getUserLocalStorageId,
 	parseResponseErrorText,
+	removeLocalStorageValue,
 	setLocalStorageValue
 };

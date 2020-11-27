@@ -14,7 +14,7 @@ import React, {Component, createRef} from 'react';
 import {ResizeDetector, Widget} from 'components/molecules';
 import {resizer} from 'index';
 import {Responsive as Grid} from 'react-grid-layout';
-import type {State, WidgetRef} from './types';
+import type {State} from './types';
 import styles from './styles.less';
 import type {Widget as WidgetType} from 'store/widgets/data/types';
 
@@ -22,16 +22,10 @@ export const gridRef: DivRef = createRef();
 
 export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
-	newWidgetRef: WidgetRef = createRef();
 	state = {
-		newWidgetFocused: false,
 		swipedPanel: false,
 		width: null
 	};
-
-	componentDidUpdate () {
-		this.setFocusOnNewWidget();
-	}
 
 	focusOnSelectWidget = (widgetRef: DivRef) => () => {
 		const {current: widget} = widgetRef;
@@ -63,33 +57,15 @@ export class DashboardContent extends Component<Props, State> {
 	handleToggleSwipePanel = () => this.setState({swipedPanel: !this.state.swipedPanel});
 
 	handleWidgetSelect = (id: string, ref: DivRef) => {
-		const {editMode, selectWidget, selectedWidget} = this.props;
-
-		if (id !== selectedWidget) 	{
-			const callback = editMode ? null : this.focusOnSelectWidget(ref);
-			selectWidget(id, callback);
-		}
+		const {selectWidget} = this.props;
 
 		this.setState({swipedPanel: false});
+		selectWidget(id);
 	};
 
 	isDesktopMK = () => {
 		const {layoutMode} = this.props;
 		return !isMobile().any && layoutMode === LAYOUT_MODE.MOBILE;
-	};
-
-	setFocusOnNewWidget = () => {
-		const {current: grid} = gridRef;
-		const {current: newWidget} = this.newWidgetRef;
-		const {current: container} = this.gridContainerRef;
-		const {newWidgetFocused} = this.state;
-
-		if (newWidget && container && grid && !newWidgetFocused) {
-			container && container.scrollTo(0, grid.clientHeight);
-			this.setState(() => ({newWidgetFocused: true}));
-		} else if (!newWidget && newWidgetFocused) {
-			this.setState(() => ({newWidgetFocused: false}));
-		}
 	};
 
 	setGridWidth = () => {
@@ -172,6 +148,7 @@ export class DashboardContent extends Component<Props, State> {
 			fetchBuildData,
 			layoutMode,
 			openCardObject,
+			openNavigationLink,
 			personalDashboard,
 			removeWidget,
 			selectedWidget,
@@ -179,8 +156,8 @@ export class DashboardContent extends Component<Props, State> {
 			user
 		} = this.props;
 		const {id} = widget;
-		const isNew = id === NewWidget.id;
-		const ref = isNew ? this.newWidgetRef : null;
+		const isNew = widget.id === NewWidget.id;
+		const isSelected = selectedWidget === widget.id;
 
 		return (
 			<Widget
@@ -188,6 +165,7 @@ export class DashboardContent extends Component<Props, State> {
 				data={widget}
 				editWidgetChunkData={editWidgetChunkData}
 				fetchBuildData={fetchBuildData}
+				focused={isSelected}
 				isEditable={editable}
 				isNew={isNew}
 				isSelected={selectedWidget === widget.id}
@@ -196,10 +174,10 @@ export class DashboardContent extends Component<Props, State> {
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
 				onOpenCardObject={openCardObject}
+				onOpenNavigationLink={openNavigationLink}
 				onRemove={removeWidget}
 				onUpdate={updateWidget}
 				personalDashboard={personalDashboard}
-				ref={ref}
 				user={user}
 			/>
 		);

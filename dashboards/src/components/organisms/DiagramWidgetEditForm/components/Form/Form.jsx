@@ -38,6 +38,8 @@ export class Form extends Component<Props, State> {
 	renderParamsTabContent = () => {
 		const {
 			context,
+			dashboards,
+			fetchDashboards,
 			isNew,
 			layoutMode,
 			personalDashboard,
@@ -47,6 +49,8 @@ export class Form extends Component<Props, State> {
 
 		const content = renderParamsTab({
 			context,
+			dashboards,
+			fetchDashboards,
 			isNew,
 			layoutMode,
 			personalDashboard,

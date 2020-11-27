@@ -2,6 +2,7 @@
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {ComputedAttr, Group} from 'store/widgets/data/types';
 import type {Context, UserData} from 'store/context/types';
+import type {DashboardsState, FetchDashboards} from 'store/dashboards/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DivRef, OnChangeLabelEvent, OnSelectEvent} from 'components/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
@@ -53,6 +54,8 @@ export type ContextProps = {|
 
 export type ParamsTabProps = {|
 	context: Context,
+	dashboards: DashboardsState,
+	fetchDashboards: FetchDashboards,
 	isNew: boolean,
 	layoutMode: LayoutMode,
 	personalDashboard: boolean,

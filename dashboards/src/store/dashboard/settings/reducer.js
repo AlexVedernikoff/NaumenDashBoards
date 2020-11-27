@@ -92,6 +92,11 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 					loading: false
 				}
 			};
+		case DASHBOARD_EVENTS.SET_CODE:
+			return {
+				...state,
+				code: action.payload
+			};
 		case DASHBOARD_EVENTS.SET_PERSONAL:
 			return {
 				...state,

@@ -6,9 +6,10 @@ import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
-import {getParams, parseResponseErrorText} from 'store/helpers';
+import {getLocalStorageValue, getParams, parseResponseErrorText, removeLocalStorageValue} from 'store/helpers';
 import {isObject} from 'src/helpers';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
+import {NAVIGATION_TARGET_WIDGET_KEY} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import normalizer from 'utils/normalizer';
 
@@ -297,6 +298,24 @@ const setSelectedWidget = (widgetId: string) => (dispatch: Dispatch, getState: G
 	});
 };
 
+/**
+ * Устанавливает виджет для редактирования из данных дашборда в localStorage
+ * @returns {ThunkAction}
+ */
+const initSelectedWidget = () => (dispatch: Dispatch, getState: GetState) => {
+	const {code} = getState().dashboard.settings;
+	const widgetId = getLocalStorageValue(code, NAVIGATION_TARGET_WIDGET_KEY, '');
+
+	if (widgetId) {
+		removeLocalStorageValue(code, NAVIGATION_TARGET_WIDGET_KEY);
+
+		dispatch({
+			payload: widgetId,
+			type: WIDGETS_EVENTS.SET_SELECTED_WIDGET
+		});
+	}
+};
+
 const deleteWidget = (payload: string) => ({
 	payload,
 	type: WIDGETS_EVENTS.DELETE_WIDGET
@@ -359,6 +378,7 @@ export {
 	copyWidget,
 	createWidget,
 	editWidgetChunkData,
+	initSelectedWidget,
 	removeWidget,
 	resetWidget,
 	saveWidget,

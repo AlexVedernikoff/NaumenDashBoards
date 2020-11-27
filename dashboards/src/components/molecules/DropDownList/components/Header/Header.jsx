@@ -3,6 +3,7 @@ import {IconButton, Text} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import styles from './styles.less';
 import {TEXT_TYPES} from 'components/atoms/Text';
 
 export class Header extends PureComponent<Props> {
@@ -15,11 +16,11 @@ export class Header extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, title} = this.props;
+		const {className, onClick, title} = this.props;
 
 		return (
 			<div className={className}>
-				<Text type={TEXT_TYPES.SMALL}>{title}</Text>
+				<Text className={styles.text} onClick={onClick} type={TEXT_TYPES.SMALL}>{title}</Text>
 				{this.renderCaret()}
 			</div>
 		);

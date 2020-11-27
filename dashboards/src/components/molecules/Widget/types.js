@@ -1,7 +1,7 @@
 // @flow
 import type {BuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'src/components/types';
-import type {DrillDown, OpenCardObject} from 'store/widgets/links/types';
+import type {DrillDown, OpenCardObject, OpenNavigationLink} from 'store/widgets/links/types';
 import type {EditWidgetChunkData, Widget} from 'store/widgets/data/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
@@ -23,6 +23,7 @@ export type Props = {
 	data: Widget,
 	editWidgetChunkData: EditWidgetChunkData,
 	fetchBuildData: (widget: Widget) => ThunkAction,
+	focused: boolean,
 	isEditable: boolean,
 	isNew: boolean,
 	isSelected: boolean,
@@ -30,6 +31,7 @@ export type Props = {
 	onDrillDown: DrillDown,
 	onEdit: (id: string, ref: DivRef) => void,
 	onOpenCardObject: OpenCardObject,
+	onOpenNavigationLink: OpenNavigationLink,
 	onRemove: (id: string) => ThunkAction,
 	onUpdate: Widget => void,
 	personalDashboard: boolean,

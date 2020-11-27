@@ -5,6 +5,8 @@ import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDescriptorCases} from 'src/helpers';
 import {isSourceType} from 'store/sources/data/helpers';
 import {LINKS_EVENTS} from './constants';
+import {NAVIGATION_TARGET_WIDGET_KEY} from 'store/dashboard/settings/constants';
+import {setLocalStorageValue} from 'store/helpers';
 import type {Widget} from 'store/widgets/data/types';
 
 const getPartsClassFqn = (code?: string) => {
@@ -107,6 +109,29 @@ const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch
 	}
 };
 
+/**
+ * Открывает дашборд по переданному идентификатору и сохраняет идентификатор виджета, для последующего фокуса.
+ * @param {string} dashboardId - уникальный идентификатор дашборда
+ * @param {string} widgetId - уникальный идентификатор виджета
+ * @returns {ThunkAction}
+ */
+const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch(requestLink(dashboardId));
+
+	if (widgetId) {
+		setLocalStorageValue(dashboardId, NAVIGATION_TARGET_WIDGET_KEY, widgetId);
+	}
+
+	try {
+		const {link} = await window.jsApi.restCallModule('dashboards', 'getDashboardLink', dashboardId);
+
+		window.open(getRelativeLink(link));
+		dispatch(receiveLink(dashboardId));
+	} catch (e) {
+		dispatch(recordLinkError(dashboardId));
+	}
+};
+
 const requestLink = (payload: string) => ({
 	payload,
 	type: LINKS_EVENTS.REQUEST_LINK
@@ -124,5 +149,6 @@ const recordLinkError = (payload: string) => ({
 
 export {
 	drillDown,
-	openCardObject
+	openCardObject,
+	openNavigationLink
 };

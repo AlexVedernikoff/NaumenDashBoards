@@ -47,6 +47,16 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 	handleClickExportItem = (e: Object) => this.props.onExport(e.key);
 
+	handleClickNavigationButton = () => {
+		const {onOpenNavigationLink, widget} = this.props;
+		const {dashboard, widget: navigationWidget} = widget.navigation;
+
+		if (dashboard) {
+			const widgetId = navigationWidget ? navigationWidget.value : '';
+			onOpenNavigationLink(dashboard.value, widgetId);
+		}
+	};
+
 	handleClickRemoveButton = () => this.setState({showRemoveModal: true});
 
 	handleCloseRemoveModal = () => this.setState({showRemoveModal: false});
@@ -139,6 +149,29 @@ export class ControlPanel extends PureComponent<Props, State> {
 		</MenuItem>
 	);
 
+	renderNavigationButton = () => {
+		const {navigation, type} = this.props.widget;
+
+		if (type in DIAGRAM_WIDGET_TYPES && navigation.show) {
+			let {showTip, tip} = navigation;
+
+			if (!showTip) {
+				tip = '';
+			}
+
+			return (
+				<IconButton
+					icon={ICON_NAMES.EXTERNAL_LINK}
+					onClick={this.handleClickNavigationButton}
+					round={false}
+					tip={tip}
+				/>
+			);
+		}
+
+		return null;
+	};
+
 	renderRemoveMenuItem = () => {
 		const {isEditable} = this.props;
 
@@ -218,6 +251,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 		return (
 			<div className={cn(styles.panel, className)}>
+				{this.renderNavigationButton()}
 				{this.renderChangeDisplayModeButton()}
 				{this.renderEditButton()}
 				{this.renderSubmenuButton()}

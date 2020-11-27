@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
-import {addWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import {addWidget, initSelectedWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
@@ -11,7 +11,7 @@ import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getContext, getEditableParam, getMetaCLass, getUserData, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLayoutMode} from 'src/helpers';
-import {getLocalStorageValue, setLocalStorageValue} from 'store/helpers';
+import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -59,6 +59,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		]);
 
 		dispatch(getPassedWidget());
+		dispatch(initSelectedWidget());
 		dispatch({
 			type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
 		});
@@ -85,10 +86,13 @@ const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	const {
 		autoUpdate,
 		customGroups,
+		dashboardKey: code,
 		layouts,
 		mobileLayouts,
 		widgets
 	} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
+
+	dispatch(setCode(code));
 
 	if (customGroups !== null) {
 		dispatch(setCustomGroups(customGroups));
@@ -384,7 +388,7 @@ const createNewState = (personalDashboard: boolean) => async (dispatch: Dispatch
  * @returns {ThunkAction}
  */
 const changeLayoutMode = (payload: LayoutMode): ThunkAction => (dispatch: Dispatch) => {
-	setLocalStorageValue(LOCAL_STORAGE_VARS.LAYOUT_MODE, payload);
+	setLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.LAYOUT_MODE, payload);
 
 	dispatch({
 		payload,
@@ -393,7 +397,7 @@ const changeLayoutMode = (payload: LayoutMode): ThunkAction => (dispatch: Dispat
 };
 
 const setPersonalValue = (payload: boolean) => (dispatch: Dispatch) => {
-	setLocalStorageValue(LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, payload);
+	setLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, payload);
 
 	dispatch({
 		payload,
@@ -402,18 +406,23 @@ const setPersonalValue = (payload: boolean) => (dispatch: Dispatch) => {
 };
 
 const initLayoutMode = () => ({
-	payload: getLocalStorageValue(LOCAL_STORAGE_VARS.LAYOUT_MODE, getLayoutMode()),
+	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.LAYOUT_MODE, getLayoutMode()),
 	type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
 });
 
 const initPersonalValue = () => ({
-	payload: getLocalStorageValue(LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, false),
+	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, false),
 	type: DASHBOARD_EVENTS.SET_PERSONAL
 });
 
 const changeAutoUpdateSettings = payload => ({
 	payload,
 	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
+});
+
+const setCode = payload => ({
+	payload,
+	type: DASHBOARD_EVENTS.SET_CODE
 });
 
 export {

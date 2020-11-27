@@ -1,21 +1,26 @@
 // @flow
 
-type Child = {
+export type Node = {
 	label: string,
 	value: string
 };
 
-export type Item = {
-	children: Array<Child>,
-	label: string,
-	value: string
+export type Root = {
+	...Node,
+	children: Array<Node>
+};
+
+export type Value = {
+	...Node,
+	parent?: Node
 };
 
 export type Props = {
-	items: Array<Item>,
+	className: string,
+	items: Array<Root>,
 	loading: boolean,
-	onFocusSearchInput: (e: SyntheticInputEvent<HTMLInputElement>) => void,
-	onSelect: (child: Child) => any
+	onFocusSearchInput?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
+	onSelect: (value: Value) => any
 };
 
 export type State = {

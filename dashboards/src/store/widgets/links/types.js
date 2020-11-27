@@ -31,6 +31,8 @@ export type DrillDown = (widget: Widget, index: number, mixin?: DrillDownMixin) 
 
 export type OpenCardObject = (value: string) => ThunkAction;
 
+export type OpenNavigationLink = (dashboardCode: string, widgetId: string) => ThunkAction;
+
 export type RequestLink = {
 	payload: string,
 	type: typeof LINKS_EVENTS.REQUEST_LINK

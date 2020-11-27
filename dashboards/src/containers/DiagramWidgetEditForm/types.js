@@ -1,5 +1,6 @@
 // @flow
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
+import type {DashboardsState, FetchDashboards} from 'store/dashboards/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {InjectedProps} from 'containers/WidgetEditForm/types';
@@ -15,6 +16,7 @@ export type DataSet = {
 
 export type ConnectedProps = {|
 	attributes: AttributesMap,
+	dashboards: DashboardsState,
 	dynamicGroups: DynamicGroupsMap,
 	linkedSources: LinkedDataSourceMap,
 	refAttributes: AttributesMap,
@@ -33,6 +35,7 @@ export type FetchLinkedDataSources = (classFqn: string) => ThunkAction;
 
 export type ConnectedFunctions = {|
 	fetchAttributes: FetchAttributes,
+	fetchDashboards: FetchDashboards,
 	fetchDynamicAttributeGroups: FetchDynamicAttributeGroups,
 	fetchDynamicAttributes: FetchDynamicAttributes,
 	fetchLinkedDataSources: FetchLinkedDataSources,

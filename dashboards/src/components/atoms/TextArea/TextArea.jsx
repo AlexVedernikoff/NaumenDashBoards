@@ -6,6 +6,7 @@ import styles from './styles.less';
 
 export class TextArea extends Component<Props> {
 	static defaultProps = {
+		label: '',
 		maxLength: null,
 		placeholder: 'Введите текст...'
 	};
@@ -33,12 +34,18 @@ export class TextArea extends Component<Props> {
 	renderLabel = () => <Label>{this.props.label}</Label>;
 
 	renderLabelContainer = () => {
-		return (
-			<div className={styles.labelContainer}>
-				{this.renderLabel()}
-				{this.renderClearButton()}
-			</div>
-		);
+		const {label} = this.props;
+
+		if (label) {
+			return (
+				<div className={styles.labelContainer}>
+					{this.renderLabel()}
+					{this.renderClearButton()}
+				</div>
+			);
+		}
+
+		return null;
 	};
 
 	renderTextArea = () => {

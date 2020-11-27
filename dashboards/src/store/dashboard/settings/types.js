@@ -81,6 +81,11 @@ type ChangeLayoutMode = {
 	type: typeof DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE,
 };
 
+type SetCode= {
+	payload: string,
+	type: typeof DASHBOARD_EVENTS.SET_CODE
+};
+
 type SetPersonal = {
 	payload: boolean,
 	type: typeof DASHBOARD_EVENTS.SET_PERSONAL
@@ -115,6 +120,7 @@ export type SettingsAction =
 	| RecordExportingFileToEmailError
 	| RequestExportingFileToEmail
 	| ResponseExportingFileToEmail
+	| SetCode
 	| SetPersonal
 	| SwitchOnEditMode
 	| SwitchOffEditMode
@@ -123,6 +129,7 @@ export type SettingsAction =
 
 export type SettingsState = {
 	autoUpdate: AutoUpdateSettings,
+	code: string,
 	editMode: boolean,
 	error: boolean,
 	exportingFailToEmail: ChangingState,

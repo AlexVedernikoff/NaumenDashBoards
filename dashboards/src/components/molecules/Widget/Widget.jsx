@@ -30,16 +30,33 @@ export class Widget extends PureComponent<Props, State> {
 		};
 	}
 
+	componentDidMount () {
+		this.focus();
+	}
+
 	componentDidUpdate (prevProps: Props) {
+		const {buildData, focused} = this.props;
+
 		if (prevProps.buildData) {
 			const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}} = prevProps;
-			const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}} = this.props;
+			const {loading: prevLoading, updateDate: prevUpdateDate} = buildData;
 
 			if (nextLoading !== prevLoading || nextUpdateDate !== prevUpdateDate) {
 				this.setState({hasError: false});
 			}
 		}
+
+		if (focused && focused !== prevProps.focused) {
+			this.focus();
+		}
 	}
+
+	focus = () => {
+		const {focused} = this.props;
+		const {current: widget} = this.ref;
+
+		focused && widget && widget.focus();
+	};
 
 	getClassName = () => {
 		const {className, isSelected} = this.props;
@@ -125,6 +142,7 @@ export class Widget extends PureComponent<Props, State> {
 			isEditable,
 			isNew,
 			onDrillDown,
+			onOpenNavigationLink,
 			onRemove,
 			personalDashboard,
 			user
@@ -139,6 +157,7 @@ export class Widget extends PureComponent<Props, State> {
 					onDrillDown={onDrillDown}
 					onEdit={this.handleEdit}
 					onExport={this.handleExport}
+					onOpenNavigationLink={onOpenNavigationLink}
 					onRemove={onRemove}
 					personalDashboard={personalDashboard}
 					user={user}
@@ -188,7 +207,7 @@ export class Widget extends PureComponent<Props, State> {
 		};
 
 		return (
-			<div {...gridProps} className={this.getClassName()} ref={this.ref}>
+			<div {...gridProps} className={this.getClassName()} ref={this.ref} tabIndex={0}>
 				{this.renderControlPanel()}
 				{this.renderContent()}
 				{this.renderError()}
