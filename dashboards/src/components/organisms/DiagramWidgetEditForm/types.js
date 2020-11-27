@@ -60,7 +60,8 @@ export type ParamsTabProps = {|
 |};
 
 export type StyleTabProps = {|
-	setFieldValue: (name: string, value: any) => void,
+	setDataFieldValue: SetDataFieldValue,
+	setFieldValue: SetFieldValue,
 	values: Values
 |};
 

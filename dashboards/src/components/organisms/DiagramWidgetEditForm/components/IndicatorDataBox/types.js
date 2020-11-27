@@ -8,6 +8,7 @@ export type Props = {
 	dataSet: DataSet,
 	index: number,
 	name: string,
+	onSelectCallback: (index: number) => Function,
 	renderLeftControl?: (set: DataSet, index: number) => React$Node,
 	usesBreakdown: boolean,
 	usesEmptyData: boolean

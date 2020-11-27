@@ -66,6 +66,7 @@ const use: 'use' = 'use';
 const useName: 'useName' = 'useName';
 const xAxis: 'xAxis' = 'xAxis';
 const yAxis: 'yAxis' = 'yAxis';
+const yAxisName: 'yAxisName' = 'yAxisName';
 const withBreakdown: 'withBreakdown' = 'withBreakdown';
 
 const FIELDS = {
@@ -136,7 +137,8 @@ const FIELDS = {
 	value,
 	withBreakdown,
 	xAxis,
-	yAxis
+	yAxis,
+	yAxisName
 };
 
 export {

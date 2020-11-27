@@ -1,8 +1,8 @@
 // @flow
 import type {ContextProps, ParamsTabProps} from 'DiagramWidgetEditForm/types';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {OnChangeInputEvent} from 'components/types';
+import type {Props as IndicatorProps} from 'DiagramWidgetEditForm/components/IndicatorDataBox/types';
 
 export type SourceRefFields = $Shape<{
 	breakdown: string,
@@ -29,12 +29,7 @@ export type CheckboxProps = {
 	value: boolean,
 };
 
-export type IndicatorBoxProps = $Shape<{|
-	children: React$Node,
-	name: string,
-	renderLeftControl: (set: DataSet, index: number) => React$Node,
-	useBreakdown?: boolean
-|}>;
+export type IndicatorBoxProps = $Shape<IndicatorProps>;
 
 export type ParameterBoxProps = $Shape<{|
 	children: React$Node,

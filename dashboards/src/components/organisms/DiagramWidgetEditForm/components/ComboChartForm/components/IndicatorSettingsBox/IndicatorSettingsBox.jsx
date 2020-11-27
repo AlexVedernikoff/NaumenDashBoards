@@ -1,7 +1,9 @@
 // @flow
 import {Checkbox, HorizontalLabel, LegacyCheckbox, TextInput} from 'components/atoms';
 import {CollapsableFormBox, FormCheckControl, FormField} from 'components/molecules';
+import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {getDefaultComboYAxisName} from 'store/widgets/data/helpers';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
@@ -28,6 +30,13 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 		}
 
 		handleChange({...event, value});
+	};
+
+	handleChangeName = (index: number) => (event: OnChangeInputEvent) => {
+		const {onChangeDataSet} = this.props;
+		const {name, value} = event;
+
+		return onChangeDataSet(index, name, value);
 	};
 
 	handleClickDependentCheckbox = (name: string, value: boolean) => this.props.handleChange({name, value});
@@ -64,6 +73,21 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 		return null;
 	};
 
+	renderNameField = (dataSet: DataSet, index: number) => {
+		const {yAxisName = getDefaultComboYAxisName(dataSet)} = dataSet;
+
+		return (
+			<FormField small>
+				<TextInput
+					maxLength={MAX_TEXT_LENGTH}
+					name={FIELDS.yAxisName}
+					onChange={this.handleChangeName(index)}
+					value={yAxisName}
+				/>
+			</FormField>
+		);
+	};
+
 	renderScaleField = (name: string) => {
 		const {[name]: value = 'auto'} = this.props.data;
 
@@ -90,8 +114,8 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {data, handleBoolChange, handleChange} = this.props;
-		const {name, show, showName} = data;
+		const {data, handleBoolChange, values} = this.props;
+		const {show, showName} = data;
 		const {showAdditionalSettings} = this.state;
 
 		return (
@@ -106,9 +130,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 						<Checkbox checked={showName} name={FIELDS.showName} onChange={handleBoolChange} value={showName} />
 					</FormCheckControl>
 				</FormField>
-				<FormField small>
-					<TextInput maxLength={MAX_TEXT_LENGTH} name={FIELDS.name} onChange={handleChange} value={name} />
-				</FormField>
+				{values.data.filter(dataSet => !dataSet.sourceForCompute).map(this.renderNameField)}
 				<FormField>
 					<FormCheckControl label="Настроить параметры оси">
 						<Checkbox

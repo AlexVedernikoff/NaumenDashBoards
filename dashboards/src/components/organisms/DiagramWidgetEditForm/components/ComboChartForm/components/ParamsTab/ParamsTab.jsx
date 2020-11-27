@@ -3,6 +3,7 @@ import {CHART_OPTIONS} from './constants';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import {getProcessedValue} from 'store/sources/attributes/helpers';
 import Icon, {ICON_SIZES} from 'components/atoms/Icon';
 import {MiniSelect} from 'components/molecules';
 import React, {Component, Fragment} from 'react';
@@ -11,6 +12,15 @@ import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {
 	handleSelectChartType = (index: number) => (name: string, value: string) => this.props.setDataFieldValue(index, name, value);
+
+	onSelectIndicatorCallback = (index: number) => () => {
+		const {setDataFieldValue, values} = this.props;
+		const {[FIELDS.yAxis]: indicator} = values.data[index];
+
+		if (indicator) {
+			setDataFieldValue(index, FIELDS.yAxisName, getProcessedValue(indicator, 'title'));
+		}
+	};
 
 	renderChartFieldLabel = (icon: any) => <Icon name={icon} size={ICON_SIZES.LARGE} />;
 
@@ -32,6 +42,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
 			name: FIELDS.yAxis,
+			onSelectCallback: this.onSelectIndicatorCallback,
 			renderLeftControl: this.renderChartInput,
 			usesEmptyData: true
 		};
@@ -53,7 +64,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const sourceRefFields = {
 			breakdown: FIELDS.breakdown,
 			indicator: FIELDS.yAxis,
-			parameter: FIELDS.xAxis
+			parameter: FIELDS.xAxis,
+			yAxisName: FIELDS.yAxisName
 		};
 
 		return renderSourceBox(sourceRefFields, 2);

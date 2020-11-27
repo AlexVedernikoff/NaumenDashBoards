@@ -8,7 +8,6 @@ import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'src/helpers';
-import {getProcessedValue} from 'store/sources/attributes/helpers';
 import {LegacyCheckbox as Checkbox} from 'components/atoms';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
 import type {Props} from './types';
@@ -94,17 +93,13 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	handleSelectIndicator = (event: OnSelectAttributeEvent, index: number) => {
-		const {name, setDataFieldValue, setFieldValue, transformAttribute, values} = this.props;
+		const {name, onSelectCallback, setDataFieldValue, transformAttribute, values} = this.props;
 		const currentValue = values.data[index][name];
 		let {value} = event;
+		let callback;
 
-		if (name === FIELDS.yAxis && index === 0) {
-			const {indicator} = values;
-
-			setFieldValue(FIELDS.indicator, {
-				...indicator,
-				name: getProcessedValue(value, 'title')
-			});
+		if (onSelectCallback) {
+			callback = onSelectCallback(index);
 		}
 
 		value = transformAttribute(event, this.handleSelectIndicator, index);
@@ -113,7 +108,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 			setDataFieldValue(index, FIELDS.aggregation, getDefaultAggregation(value));
 		}
 
-		setDataFieldValue(index, name, value);
+		setDataFieldValue(index, name, value, callback);
 		this.showBreakdown(index) && this.setDefaultBreakdown(index, value);
 	};
 

@@ -225,7 +225,8 @@ type ComboType = $Keys<typeof COMBO_TYPES>;
 
 export type BuildComboData = {
 	...BuildAxisData,
-	type: ComboType
+	type: ComboType,
+	yAxisName: string
 };
 
 export type ComboData = ComputeAxisData | BuildComboData;

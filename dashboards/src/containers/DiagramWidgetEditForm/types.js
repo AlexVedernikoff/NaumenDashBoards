@@ -10,7 +10,6 @@ import type {ThunkAction} from 'store/types';
 
 export type DataSet = {
 	source: Source,
-	sourceForCompute: boolean,
 	[string]: any
 };
 
