@@ -1,5 +1,5 @@
 // @flow
-import {Checkbox, TextArea, Toggle} from 'components/atoms';
+import {Checkbox, FieldError, TextArea, Toggle} from 'components/atoms';
 import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceRefFields, TextAreaProps} from './types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
@@ -199,7 +199,7 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	renderSourceBox = (sourceRefFields: SourceRefFields) => {
-		const {renderAddSourceInput, renderSourceFieldset, values} = this.props;
+		const {errors, renderAddSourceInput, renderSourceFieldset, values} = this.props;
 		const props = {
 			onSelectCallback: this.setMainSourceValues,
 			sourceRefFields
@@ -208,6 +208,7 @@ export class DataFormBuilder extends Component<Props> {
 		return (
 			<FormBox rightControl={renderAddSourceInput()} title="Источник">
 				{values.data.map(renderSourceFieldset(props))}
+				<FieldError className={styles.errorField} text={errors[FIELDS.sources]} />
 			</FormBox>
 		);
 	};

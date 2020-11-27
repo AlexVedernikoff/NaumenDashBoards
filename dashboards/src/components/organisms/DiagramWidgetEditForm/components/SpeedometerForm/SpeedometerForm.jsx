@@ -14,8 +14,8 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class SpeedometerForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredByCompute} = rules;
-		const {borders, indicator, source} = FIELDS;
+		const {base, requiredByCompute, validateSources} = rules;
+		const {borders, indicator, source, sources} = FIELDS;
 
 		return object({
 			...base,
@@ -35,7 +35,8 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 					indicator => !indicator || indicator.type !== ATTRIBUTE_TYPES.dtInterval
 				),
 				[source]: object().required(getErrorMessage(source)).nullable()
-			}))
+			})),
+			[sources]: validateSources
 		});
 	};
 

@@ -2,12 +2,12 @@
 import {BreakdownFieldset, ExtendingFieldset} from 'DiagramWidgetEditForm/components';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
+import {FieldError, IconButton} from 'components/atoms';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
-import {IconButton} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {IndicatorsBox, ParametersBox} from './components';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
@@ -144,7 +144,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	);
 
 	renderSourceBox = (set: DataSet, index: number) => {
-		const {renderAddSourceInput, renderSourceFieldset} = this.props;
+		const {errors, renderAddSourceInput, renderSourceFieldset} = this.props;
 		const sourceRefFields = {
 			breakdown: FIELDS.breakdown,
 			indicator: FIELDS.indicators,
@@ -156,10 +156,12 @@ export class ParamsTab extends Component<DataBuilderProps> {
 			sources: this.getDataSetSources(index),
 			usesFilter: isMainSource
 		};
+		const error = index > 0 ? <FieldError className={styles.errorField} text={errors[FIELDS.sources]} /> : null;
 
 		return (
 			<FormBox rightControl={renderAddSourceInput()} title="Источник">
 				{renderSourceFieldset(props)(set, index)}
+				{error}
 			</FormBox>
 		);
 	};

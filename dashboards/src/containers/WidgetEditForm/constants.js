@@ -55,6 +55,7 @@ const showShadow: 'showShadow' = 'showShadow';
 const sorting: 'sorting' = 'sorting';
 const source: 'source' = 'source';
 const sourceForCompute: 'sourceForCompute' = 'sourceForCompute';
+const sources: 'sources' = 'sources';
 const table: 'table' = 'table';
 const template: 'template' = 'template';
 const templateName: 'templateName' = 'templateName';
@@ -125,6 +126,7 @@ const FIELDS = {
 	sorting,
 	source,
 	sourceForCompute,
+	sources,
 	table,
 	template,
 	templateName,

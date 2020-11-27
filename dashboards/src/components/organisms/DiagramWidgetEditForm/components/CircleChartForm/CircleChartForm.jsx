@@ -14,8 +14,8 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class CircleChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredBreakdown, requiredByCompute} = rules;
-		const {breakdown, indicator, source} = FIELDS;
+		const {base, requiredBreakdown, requiredByCompute, validateSources} = rules;
+		const {breakdown, indicator, source, sources} = FIELDS;
 
 		return object({
 			...base,
@@ -23,7 +23,8 @@ export class CircleChartForm extends Component<TypedFormProps> {
 				[breakdown]: requiredByCompute(breakdown, requiredBreakdown(FIELDS.indicator)),
 				[indicator]: requiredByCompute(indicator),
 				[source]: object().required(getErrorMessage(source)).nullable()
-			}))
+			})),
+			[sources]: validateSources
 		});
 	};
 

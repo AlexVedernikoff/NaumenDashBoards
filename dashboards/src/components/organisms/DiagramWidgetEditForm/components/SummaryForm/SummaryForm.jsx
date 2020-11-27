@@ -19,14 +19,15 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 	};
 
 	getSchema = () => {
-		const {base, requiredByCompute} = rules;
-		const {indicator, source} = FIELDS;
+		const {base, requiredByCompute, validateSources} = rules;
+		const {indicator, source, sources} = FIELDS;
 
 		return object({
 			...base,
 			data: array().of(object({
 				[indicator]: requiredByCompute(indicator),
-				[source]: object().required(getErrorMessage(source)).nullable()
+				[source]: object().required(getErrorMessage(source)).nullable(),
+				[sources]: validateSources
 			}))
 		});
 	};

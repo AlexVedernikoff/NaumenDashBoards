@@ -169,13 +169,26 @@ const requiredByCompute = (key: string, rule: Object) => {
 	}).nullable();
 };
 
+const validateSources = mixed().when(FIELDS.data, {
+		is: data => data.length > 1,
+		then: mixed().test(
+			'check-sources-number',
+			'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
+			function () {
+				const {data} = this.options.parent;
+				return data.filter(dataSet => !dataSet.sourceForCompute).length === 1;
+		})
+	}
+);
+
 const rules = {
 	base,
 	conditionalBreakdown,
 	parameterRule,
 	requiredAttribute,
 	requiredBreakdown,
-	requiredByCompute
+	requiredByCompute,
+	validateSources
 };
 
 export {

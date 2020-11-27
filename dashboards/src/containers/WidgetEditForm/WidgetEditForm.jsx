@@ -161,7 +161,16 @@ class WidgetEditForm extends PureComponent<Props, State> {
 		this.form = form;
 	};
 
-	setSchema = (schema: Schema) => this.setState({schema});
+	setSchema = (schema: Schema) => {
+		const {isSubmitting} = this.state;
+		let callback;
+
+		if (isSubmitting) {
+			callback = this.validate;
+		}
+
+		this.setState({schema}, callback);
+	};
 
 	validate = async (values?: Values): Promise<boolean> => {
 		const {widgets} = this.props;
