@@ -1,9 +1,9 @@
 // @flow
 import {array, object} from 'yup';
+import {checkSourceForParent, getDefaultIndicator, getDefaultParameter} from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
-import {getDefaultIndicator, getDefaultParameter} from './helpers';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {normalizeDataSet} from 'utils/normalizer/widget/tableNormalizer';
 import {ParamsTab, StyleTab} from './components';
@@ -15,8 +15,8 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class TableForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute} = rules;
-		const {breakdown, indicator, indicators, parameter, parameters, source} = FIELDS;
+		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, validateSources} = rules;
+		const {breakdown, indicator, indicators, parameter, parameters, source, sources} = FIELDS;
 
 		return object({
 			...base,
@@ -28,8 +28,15 @@ export class TableForm extends Component<TypedFormProps> {
 				[parameters]: array(object({
 					attribute: requiredAttribute(getErrorMessage(parameter))
 				})).default([getDefaultParameter()]),
-				[source]: object().required(getErrorMessage(source)).nullable()
-			}))
+				[source]: object()
+					.required(getErrorMessage(source)).nullable()
+					.test(
+						'check-source-for-parent',
+						'Для данного типа выбранный источник не доступен - выберите другой',
+						checkSourceForParent
+					)
+			})),
+			[sources]: validateSources
 		});
 	};
 

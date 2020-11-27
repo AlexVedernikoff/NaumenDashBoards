@@ -16,8 +16,8 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class AxisChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, parameterRule, requiredByCompute} = rules;
-		const {breakdown, source, xAxis, yAxis} = FIELDS;
+		const {base, parameterRule, requiredByCompute, validateSources} = rules;
+		const {breakdown, source, sources, xAxis, yAxis} = FIELDS;
 
 		return object({
 			...base,
@@ -26,7 +26,8 @@ export class AxisChartForm extends Component<TypedFormProps> {
 				[source]: object().required(getErrorMessage(source)).nullable(),
 				[xAxis]: parameterRule(xAxis),
 				[yAxis]: requiredByCompute(yAxis)
-			}))
+			})),
+			[sources]: validateSources
 		});
 	};
 

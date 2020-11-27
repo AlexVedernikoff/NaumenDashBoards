@@ -24,6 +24,34 @@ const hasDifferentAggregations = (data: Array<DataSet>) => !data
 		})
 	);
 
+/**
+ * Функция обработчик для правила валидации связи источников
+ * @returns {Promise<boolean>}
+ */
+async function checkSourceForParent () {
+	const {options, parent} = this;
+	const {data} = options.values;
+	const {dataKey, source} = parent;
+	const mainSource = data[0].source;
+	const index = data.findIndex(dataSet => dataSet.dataKey === dataKey);
+	let result = true;
+
+	if (index > 0 && source && mainSource) {
+		try {
+			({result} = await window.jsApi.restCallModule(
+				'dashboards',
+				'checkForParent',
+				mainSource.value,
+				source.value
+			));
+		} catch (e) {
+			result = false;
+		}
+	}
+
+	return result;
+}
+
 const getDefaultIndicator = () => ({
 	aggregation: DEFAULT_AGGREGATION.COUNT,
 	attribute: null
@@ -35,6 +63,7 @@ const getDefaultParameter = () => ({
 });
 
 export {
+	checkSourceForParent,
 	getDefaultIndicator,
 	getDefaultParameter,
 	hasDifferentAggregations
