@@ -19,21 +19,7 @@ export class Cell extends PureComponent<Props> {
 		width: null
 	};
 
-	handleClick = (e: MouseEvent) => {
-		const {column, onClick, row, value} = this.props;
-
-		if (onClick) {
-			const props = {
-				column,
-				row,
-				value
-			};
-
-			onClick(e, props);
-		}
-	};
-
-	renderDefaultValue = () => {
+	getDefaultValue = () => {
 		const {defaultValue} = this.props;
 		const {DASH, NULL, ZERO} = DEFAULT_TABLE_VALUE;
 
@@ -49,11 +35,26 @@ export class Cell extends PureComponent<Props> {
 		}
 	};
 
+	handleClick = (e: MouseEvent) => {
+		const {column, onClick, row, value} = this.props;
+
+		if (onClick) {
+			const props = {
+				column,
+				row,
+				value
+			};
+
+			onClick(e, props);
+		}
+	};
+
 	renderValue = () => {
 		const {components, fontColor, value} = this.props;
 		const {Value} = components;
+		const renderValue = value || this.getDefaultValue();
 
-		return value && Number(value) !== 0 ? <Value fontColor={fontColor} value={value} /> : this.renderDefaultValue();
+		return <Value fontColor={fontColor} value={renderValue} />;
 	};
 
 	render () {

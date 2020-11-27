@@ -32,6 +32,11 @@ export class Body extends PureComponent<Props> {
 		const {accessor} = column;
 		const {BodyCell} = components;
 		const width = columnsWidth[accessor];
+		let value = row[accessor];
+
+		if (Number(value) === 0) {
+			value = '';
+		}
 
 		return (
 			<BodyCell
@@ -45,7 +50,7 @@ export class Body extends PureComponent<Props> {
 				rowIndex={rowIndex}
 				textAlign={textAlign}
 				textHandler={textHandler}
-				value={row[accessor]}
+				value={value}
 				width={width}
 			/>
 		);

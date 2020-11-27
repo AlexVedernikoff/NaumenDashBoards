@@ -4,7 +4,7 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
-export class Header extends PureComponent<Props> {
+export class Footer extends PureComponent<Props> {
 	renderColumn = (column: Column) => {
 		const {columnsWidth, components} = this.props;
 		const {FooterCell} = components;
@@ -34,4 +34,4 @@ export class Header extends PureComponent<Props> {
 	}
 }
 
-export default Header;
+export default Footer;
