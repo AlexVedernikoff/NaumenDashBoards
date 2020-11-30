@@ -4,7 +4,7 @@ import {MIN_WIDTH} from './constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
-import {SORTING_TYPES, TEXT_ALIGNS} from 'store/widgets/data/constants';
+import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 
 export class HeaderCell extends PureComponent<Props> {
@@ -65,7 +65,7 @@ export class HeaderCell extends PureComponent<Props> {
 	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.ref} />;
 
 	render () {
-		const {column, components, fontColor, fontStyle, sorting, value} = this.props;
+		const {column, components, fontColor, fontStyle, sorting, textAlign, textHandler, value, width} = this.props;
 		const {ASC, DESC} = SORTING_TYPES;
 		const {Cell} = components;
 		const cellCN = cn({
@@ -82,9 +82,11 @@ export class HeaderCell extends PureComponent<Props> {
 					components={components}
 					fontColor={fontColor}
 					fontStyle={fontStyle}
-					textAlign={TEXT_ALIGNS.center}
+					textAlign={textAlign}
+					textHandler={textHandler}
 					tip={value}
 					value={value}
+					width={width}
 				/>
 				{this.renderResizer()}
 			</div>

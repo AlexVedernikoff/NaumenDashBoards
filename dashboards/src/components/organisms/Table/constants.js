@@ -6,6 +6,12 @@ const DEFAULT_CELL_SETTINGS = Object.freeze({
 	fontStyle: undefined
 });
 
+const DEFAULT_HEADER_CELL_SETTINGS = Object.freeze({
+	...DEFAULT_CELL_SETTINGS,
+	textAlign: TEXT_ALIGNS.center,
+	textHandler: TEXT_HANDLERS.CROP
+});
+
 const DEFAULT_TABLE_SETTINGS = {
 	body: {
 		defaultValue: {
@@ -19,7 +25,7 @@ const DEFAULT_TABLE_SETTINGS = {
 		textAlign: TEXT_ALIGNS.left,
 		textHandler: TEXT_HANDLERS.CROP
 	},
-	columnHeader: DEFAULT_CELL_SETTINGS
+	columnHeader: DEFAULT_HEADER_CELL_SETTINGS
 };
 
 const DEFAULT_TABLE_SORTING = {

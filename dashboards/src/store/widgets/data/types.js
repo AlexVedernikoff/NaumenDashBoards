@@ -364,7 +364,11 @@ export type TableCellSettings = {
 	fontStyle?: FontStyle
 };
 
-export type TableHeaderSettings = TableCellSettings;
+export type TableHeaderSettings = {
+	...TableCellSettings,
+	textAlign: TextAlign,
+	textHandler: TextHandler
+};
 
 export type TableBodySettings = {
 	defaultValue: {
@@ -381,7 +385,7 @@ export type TableBodySettings = {
 
 export type Table = {
 	body: TableBodySettings,
-	columnHeader: TableCellSettings
+	columnHeader: TableHeaderSettings
 };
 
 export type ColumnsRatioWidth = {
