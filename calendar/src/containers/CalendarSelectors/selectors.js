@@ -12,16 +12,15 @@ export const props = (state: State): ConnectedProps => {
 		calendarSelectors: {
 			calendarList,
 			error,
-			isLoading,
 			locationList,
 			selectedOptions
 		},
-		app: {metaClass, subjectId}
+		app: {metaClass, subjectId, isLoading: isAppSelectorsLoading}
 	} = state;
 	return {
 		calendarList,
 		error,
-		isLoading,
+		isAppSelectorsLoading,
 		locationList,
 		metaClass,
 		selectedOptions,

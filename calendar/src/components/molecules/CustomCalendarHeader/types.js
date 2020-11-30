@@ -3,7 +3,8 @@ import type {Node} from 'react';
 
 export type Props = {
 	children: Node,
-	isDisabledExport: boolean,
+	isDisabledButtons: boolean,
 	onExportToPDFClick: () => void,
+	onRefresh: () => void,
 	[key: string]: any
 };

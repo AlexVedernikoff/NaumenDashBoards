@@ -4,9 +4,10 @@ import type {CalendarSelectorsState} from './types';
 export const initialState: CalendarSelectorsState = {
 	calendarList: [],
 	error: null,
-	isLoading: false,
+	isLoading: true,
 	locationList: [],
 	selectedOptions: {
+		appointmentsDisabled: false,
 		calendar: null,
 		location: null
 	}

@@ -14,6 +14,7 @@
 		"showFullDay": "Показать полный день",
 		"showWorkDay": "Показать рабочий день",
 		"today": "Сегодня",
-		"weekViewTitle": "Неделя"
+		"weekViewTitle": "Неделя",
+		"workWeekViewTitle": "Неделя"
 	}
 }

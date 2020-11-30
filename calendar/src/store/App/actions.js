@@ -11,7 +11,7 @@ import type {ObjectType} from 'utils/types';
 const getInitParams = (): ThunkAction => async (dispatch: Dispatch) => {
 	try {
 		dispatch(setAppLoading(true));
-		const {DefaultMode: defaultView = '{week=Неделя}'}: ObjectType = await window.jsApi.contents.getParameters();
+		const {DefaultMode: defaultView = '{week=Неделя}', SkryvatSubbotuIVoskresene: hideWeekend = false}: ObjectType = await window.jsApi.contents.getParameters();
 
 		if (window.jsApi.forms) {
 			const data: ObjectType = await window.jsApi.forms.getValues();
@@ -20,6 +20,7 @@ const getInitParams = (): ThunkAction => async (dispatch: Dispatch) => {
 
 			dispatch(setAppInitData({
 				defaultView,
+				hideWeekend,
 				metaClass,
 				subjectId
 			}));
@@ -29,6 +30,7 @@ const getInitParams = (): ThunkAction => async (dispatch: Dispatch) => {
 
 		dispatch(setAppInitData({
 			defaultView,
+			hideWeekend,
 			metaClass: null,
 			subjectId: null
 		}));

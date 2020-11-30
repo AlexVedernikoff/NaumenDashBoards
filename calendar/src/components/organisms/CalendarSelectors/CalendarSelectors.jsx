@@ -1,5 +1,6 @@
 // @flow
-import React, {useCallback, useEffect} from 'react';
+import React, {Fragment, useCallback, useEffect} from 'react';
+import {Checkbox} from '@progress/kendo-react-inputs';
 import DropdownList from 'components/molecules/DropdownList';
 import {LOCATION_TYPES} from 'constants/index';
 import type {Props} from 'containers/CalendarSelectors/types';
@@ -9,9 +10,10 @@ const CalendarSelectors = ({
 	calendarList,
 	getCalendarList,
 	getLocationList,
+	isAppSelectorsLoading,
 	locationList,
 	metaClass,
-	selectedOptions: {calendar, location},
+	selectedOptions: {appointmentsDisabled, calendar, location},
 	setSelectedOption,
 	subjectId
 }: Props) => {
@@ -50,9 +52,10 @@ const CalendarSelectors = ({
 		setSelectedOption('calendar', value);
 	}, []);
 
-	if (isCalendarSubject) {
-		return null;
-	}
+	const handleSetAppointment = useCallback((event) => {
+		const {value} = event;
+		setSelectedOption('appointmentsDisabled', value);
+	}, []);
 
 	const renderLocationSelector = () => !isLocationSubject && (
 		<DropdownList
@@ -63,18 +66,38 @@ const CalendarSelectors = ({
 		/>
 	);
 
-	const renderCalendarSelector = () => <DropdownList
-		data={calendarList}
-		label="Выберите календарь"
-		onChange={handleSetCalendar}
-		value={calendar}
-	/>;
+	const renderCalendarSelector = () =>
+		<DropdownList
+			data={calendarList}
+			label="Выберите календарь"
+			onChange={handleSetCalendar}
+			value={calendar}
+		/>;
+
+	const renderAppointmentCheckBox = () =>
+		<Checkbox
+			className={styles.customCheckboxPosition}
+			label="Не отображать записи на прием"
+			onChange={handleSetAppointment}
+			value={appointmentsDisabled}
+		/>;
+
+	if (isAppSelectorsLoading) {
+		return null;
+	}
+
+	if (isCalendarSubject) {
+		return renderAppointmentCheckBox();
+	}
 
 	return (
-		<div className={styles.dropdownContainer}>
-			{renderLocationSelector()}
-			{renderCalendarSelector()}
-		</div>
+		<Fragment>
+			<div className={styles.dropdownContainer}>
+				{renderLocationSelector()}
+				{renderCalendarSelector()}
+				{renderAppointmentCheckBox()}
+			</div>
+		</Fragment>
 	);
 };
 

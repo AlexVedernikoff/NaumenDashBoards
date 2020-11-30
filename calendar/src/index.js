@@ -1,5 +1,8 @@
 // @flow
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import 'iframe-resizer';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import App from 'containers/App';
 import {Provider} from 'react-redux';
 import React from 'react';

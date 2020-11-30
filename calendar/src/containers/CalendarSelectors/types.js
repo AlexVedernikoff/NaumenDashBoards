@@ -11,10 +11,11 @@ import type {ThunkAction} from 'store/types';
 export type ConnectedProps = {
 	calendarList: CalendarList,
 	error: Error | null,
-	isLoading: boolean,
+	isAppSelectorsLoading: boolean,
 	locationList: LocationList,
 	metaClass: string | null,
 	selectedOptions: {
+		appointmentsDisabled: boolean,
 		calendar: Calendar | null,
 		location: Location | null
 	},

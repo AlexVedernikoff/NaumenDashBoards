@@ -3,6 +3,7 @@ import {APP_EVENTS} from './constants';
 
 export type InitParams = {
 	defaultView: string,
+	hideWeekend: boolean,
 	metaClass: string | null,
 	subjectId: string | null
 };
@@ -10,6 +11,7 @@ export type InitParams = {
 export type AppState = {
 	+defaultView: string,
 	+error: Error | null,
+	+hideWeekend: boolean,
 	+isLoading: boolean,
 	+metaClass: string | null,
 	+subjectId: string | null

@@ -20,7 +20,7 @@ module.exports = {
 		}
 	},
 	entry: {
-		'index': ['babel-polyfill', './src/index.js']
+		'index': ['core-js/stable', './src/index.js']
 	},
 	mode: define.mode,
 	module: loaders,
