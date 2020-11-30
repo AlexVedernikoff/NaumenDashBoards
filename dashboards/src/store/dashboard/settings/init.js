@@ -10,6 +10,7 @@ export const initialDashboardState: SettingsState = {
 		interval: DEFAULT_INTERVAL,
 		remainder: DEFAULT_INTERVAL * 60
 	},
+	code: '',
 	editMode: false,
 	error: false,
 	exportingFailToEmail: {

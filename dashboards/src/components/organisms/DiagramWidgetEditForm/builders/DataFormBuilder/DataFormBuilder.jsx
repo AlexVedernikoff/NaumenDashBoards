@@ -5,7 +5,7 @@ import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {FormBox, FormCheckControl, OuterSelect, Select} from 'components/molecules';
-import {FormField, IndicatorDataBox, ParameterDataBox} from 'DiagramWidgetEditForm/components';
+import {FormField, IndicatorDataBox, NavigationBox, ParameterDataBox} from 'DiagramWidgetEditForm/components';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import React, {Component, Fragment} from 'react';
@@ -179,6 +179,19 @@ export class DataFormBuilder extends Component<Props> {
 		return values.data.map(this.renderIndicatorBox(props));
 	};
 
+	renderNavigationBox = () => {
+		const {dashboards, fetchDashboards, setFieldValue, values} = this.props;
+
+		return (
+			<NavigationBox
+				dashboards={dashboards}
+				fetchDashboards={fetchDashboards}
+				onChange={setFieldValue}
+				settings={values.navigation}
+			/>
+		);
+	};
+
 	renderParameterBox = (props: ParameterBoxProps) => <ParameterDataBox name={props.name} />;
 
 	renderShowEmptyDataCheckbox = () => {
@@ -256,6 +269,7 @@ export class DataFormBuilder extends Component<Props> {
 			renderBaseBoxes: this.renderBaseBoxes,
 			renderDisplayModeSelect: this.renderDisplayModeSelect,
 			renderIndicatorBoxes: this.renderIndicatorBoxes,
+			renderNavigationBox: this.renderNavigationBox,
 			renderParameterBox: this.renderParameterBox,
 			renderShowEmptyDataCheckbox: this.renderShowEmptyDataCheckbox,
 			renderSourceBox: this.renderSourceBox

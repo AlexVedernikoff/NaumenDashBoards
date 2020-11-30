@@ -2,7 +2,7 @@
 import type {AppState} from 'store/types';
 import {changeLayouts} from 'store/dashboard/layouts/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {drillDown, openCardObject} from 'store/widgets/links/actions';
+import {drillDown, openCardObject, openNavigationLink} from 'store/widgets/links/actions';
 import {editWidgetChunkData, removeWidget, selectWidget, updateWidget} from 'store/widgets/data/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getMapValues} from 'src/helpers';
@@ -36,6 +36,7 @@ export const functions: ConnectedFunctions = {
 	editWidgetChunkData,
 	fetchBuildData,
 	openCardObject,
+	openNavigationLink,
 	removeWidget,
 	selectWidget,
 	updateWidget

@@ -13,6 +13,7 @@ import styles from './styles.less';
 import {TEXT_TYPES} from 'components/atoms/Text/constants';
 import type {TitleProps} from 'components/templates/WidgetForm/types';
 import {USER_ROLES} from 'store/context/constants';
+import type {Value} from 'components/molecules/MultiDropDownList/types';
 import {VARIANTS} from 'components/atoms/IconButton/constants';
 import {WidgetForm} from 'components/templates';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -41,16 +42,19 @@ export class WidgetAddPanel extends Component<Props, State> {
 		!dashboards.uploaded && fetchDashboards();
 	};
 
-	handleSelect = async (item: Object) => {
+	handleSelect = async (item: Value) => {
 		const {copyWidget, validateWidgetToCopy} = this.props;
 		const {value: widgetId} = item;
-		const isValid = await validateWidgetToCopy(widgetId);
 
-		if (!isValid) {
-			return this.setState({invalidWidgetId: widgetId});
+		if (item.parent) {
+			const isValid = await validateWidgetToCopy(widgetId);
+
+			if (!isValid) {
+				return this.setState({invalidWidgetId: widgetId});
+			}
+
+			copyWidget(widgetId);
 		}
-
-		copyWidget(widgetId);
 	};
 
 	handleSubmitModal = () => {

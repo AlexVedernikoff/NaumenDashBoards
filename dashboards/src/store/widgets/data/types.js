@@ -17,6 +17,7 @@ import {
 	WIDGET_TYPES,
 	WIDGETS_EVENTS
 } from './constants';
+import type {DashboardItem, WidgetItem} from 'store/dashboards/types';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart';
 import NewWidget from './NewWidget';
@@ -99,12 +100,21 @@ export type Header = {
 	useName: boolean
 };
 
+export type NavigationSettings = {
+	dashboard: DashboardItem | null,
+	show: boolean,
+	showTip: boolean,
+	tip: string,
+	widget: WidgetItem | null,
+};
+
 type BaseWidget = {|
 	computedAttrs: Array<ComputedAttr>,
 	displayMode: DisplayMode,
 	header: Header,
 	id: string,
 	name: string,
+	navigation: NavigationSettings,
 	templateName: string
 |};
 

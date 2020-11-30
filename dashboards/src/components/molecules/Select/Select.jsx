@@ -3,7 +3,7 @@ import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {List, Menu} from './components';
 import {Loader, OutsideClickDetector} from 'components/atoms';
-import type {Option, Props, State} from './types';
+import type {MenuProps, Option, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
@@ -11,12 +11,14 @@ export class Select extends PureComponent<Props, State> {
 	static defaultProps = {
 		async: false,
 		className: '',
+		components: {},
 		disabled: false,
 		editable: false,
 		error: false,
 		isSearching: false,
 		loading: false,
 		name: '',
+		placeholder: '',
 		showCreationButton: false,
 		textCreationButton: 'Создать',
 		uploaded: false,
@@ -106,6 +108,21 @@ export class Select extends PureComponent<Props, State> {
 		}
 	};
 
+	renderDefaultMenu = (props: MenuProps) => {
+		const {showCreationButton, textCreationButton} = this.props;
+		const {showMenu} = this.state;
+		let creationButton;
+
+		if (showCreationButton) {
+			creationButton = {
+				onClick: this.handleClickCreationButton,
+				text: textCreationButton
+			};
+		}
+
+		return showMenu ? <Menu{...props} creationButton={creationButton} renderList={this.renderList} /> : null;
+	};
+
 	renderIndicators = () => (
 		<div className={styles.indicatorsContainer}>
 			{this.renderClearIcon()}
@@ -114,8 +131,8 @@ export class Select extends PureComponent<Props, State> {
 	);
 
 	renderLabel = () => {
-		const {editable, value} = this.props;
-		const label = this.getOptionLabel(value);
+		const {editable, placeholder, value} = this.props;
+		const label = this.getOptionLabel(value) || placeholder;
 
 		if (editable) {
 			return (
@@ -145,25 +162,19 @@ export class Select extends PureComponent<Props, State> {
 	renderLoader = () => this.props.loading ? <Loader size={15} /> : null;
 
 	renderMenu = () => {
-		const {isSearching, showCreationButton, textCreationButton} = this.props;
+		const {components, isSearching, loading, options} = this.props;
 		const {showMenu} = this.state;
-		let creationButton;
-
-		if (showCreationButton) {
-			creationButton = {
-				onClick: this.handleClickCreationButton,
-				text: textCreationButton
-			};
-		}
+		const {Menu = this.renderDefaultMenu} = components;
 
 		if (showMenu) {
 			return (
 				<OutsideClickDetector onClickOutside={this.hideMenu}>
 					<Menu
 						className={styles.menu}
-						creationButton={creationButton}
 						isSearching={isSearching}
-						renderList={this.renderList}
+						loading={loading}
+						onSelect={this.handleSelect}
+						options={options}
 					/>
 				</OutsideClickDetector>
 			);

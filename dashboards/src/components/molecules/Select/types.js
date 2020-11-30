@@ -10,9 +10,22 @@ export type SelectEvent = {
 	value: Value;
 };
 
+export type MenuProps = {
+	className: string,
+	isSearching: boolean,
+	loading: boolean,
+	onSelect: Option => void,
+	options: Array<Option>
+};
+
+export type Components = $Shape<{
+	Menu: React$ComponentType<MenuProps>
+}>;
+
 export type Props = {
 	async: boolean,
 	className: string,
+	components: Components,
 	disabled: boolean,
 	editable: boolean,
 	error: boolean,
@@ -26,6 +39,7 @@ export type Props = {
 	onClickCreationButton?: () => void,
 	onSelect: SelectEvent => void,
 	options: Array<Option>,
+	placeholder: string,
 	showCreationButton: boolean,
 	textCreationButton: string,
 	uploaded: boolean,

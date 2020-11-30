@@ -19,7 +19,7 @@ import {
 	templateName
 } from './helpers';
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
-import {COMBO_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {COMBO_TYPES, DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDefaultComboYAxisName} from 'store/widgets/data/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
@@ -135,6 +135,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
 		id,
+		navigation = DEFAULT_NAVIGATION_SETTINGS,
 		showEmptyData,
 		type
 	} = widget;
@@ -151,6 +152,7 @@ const comboNormalizer = (widget: LegacyWidget): ComboWidget => {
 		indicator: axisIndicator(widget, dataSet[FIELDS.yAxis]),
 		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
+		navigation,
 		parameter: axisParameter(widget, dataSet[FIELDS.xAxis]),
 		showEmptyData: Boolean(showEmptyData),
 		sorting: chartSorting(widget),

@@ -1,12 +1,16 @@
 // @flow
 import {DropDownList} from 'components/molecules';
-import type {Item, Props, State} from './types';
 import {Loader, SearchInput} from 'components/atoms';
-import React, {Fragment, PureComponent} from 'react';
+import type {Props, Root, State} from './types';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import Text, {TEXT_TYPES} from 'components/atoms/Text';
 
 export class MultiDropDownList extends PureComponent<Props, State> {
+	static defaultProps = {
+		className: ''
+	};
+
 	state = {
 		searchValue: ''
 	};
@@ -41,12 +45,11 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 		return items.map(this.renderListItem);
 	};
 
-	renderListItem = (item: Item) => {
+	renderListItem = (item: Root) => {
 		const {onSelect} = this.props;
 		const {searchValue} = this.state;
-		const {children, label} = item;
 
-		return <DropDownList expand={!!searchValue} onSelect={onSelect} options={children} title={label} />;
+		return <DropDownList expand={!!searchValue} onSelect={onSelect} value={item} />;
 	};
 
 	renderLoader = () => {
@@ -68,11 +71,11 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<Fragment>
+			<div className={this.props.className}>
 				{this.renderSearchInput()}
 				{this.renderLoader()}
 				{this.renderList()}
-			</Fragment>
+			</div>
 		);
 	}
 }

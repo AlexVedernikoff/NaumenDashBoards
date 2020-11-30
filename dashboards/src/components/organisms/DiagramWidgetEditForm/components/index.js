@@ -18,6 +18,7 @@ import HeaderBox from './HeaderBox';
 import IndicatorDataBox from './IndicatorDataBox';
 import IndicatorFieldset from './IndicatorFieldset';
 import LegendBox from './LegendBox';
+import NavigationBox from './NavigationBox';
 import ParameterDataBox from './ParameterDataBox';
 import ParameterFieldset from './ParameterFieldset';
 import SortableList from './SortableList';
@@ -47,6 +48,7 @@ export {
 	IndicatorDataBox,
 	IndicatorFieldset,
 	LegendBox,
+	NavigationBox,
 	ParameterDataBox,
 	ParameterFieldset,
 	SortableList,

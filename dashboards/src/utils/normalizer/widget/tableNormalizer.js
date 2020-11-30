@@ -9,8 +9,8 @@ import {
 	string,
 	templateName
 } from './helpers';
+import {DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
-import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {extend, isObject} from 'src/helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
@@ -105,6 +105,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
 		id,
+		navigation = DEFAULT_NAVIGATION_SETTINGS,
 		showEmptyData = true,
 		sorting = DEFAULT_TABLE_SORTING,
 		table,
@@ -121,6 +122,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		header: header(widget),
 		id,
 		name: string(widget[FIELDS.name]),
+		navigation,
 		showEmptyData,
 		sorting,
 		table: extend(DEFAULT_TABLE_SETTINGS, table),

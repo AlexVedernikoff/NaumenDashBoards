@@ -17,7 +17,7 @@ import {
 	templateName
 } from './helpers';
 import type {CircleData, CircleWidget} from 'store/widgets/data/types';
-import {DISPLAY_MODE} from 'store/widgets/data/constants';
+import {DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
@@ -86,7 +86,7 @@ const createData = (widget: Object, fields: Object) => {
 };
 
 const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
-	const {displayMode = DISPLAY_MODE.WEB, id, type} = widget;
+	const {displayMode = DISPLAY_MODE.WEB, id, navigation = DEFAULT_NAVIGATION_SETTINGS, type} = widget;
 	const dataFields = getDataFields();
 	let {data} = widget;
 
@@ -104,6 +104,7 @@ const circleNormalizer = (widget: LegacyWidget): CircleWidget => {
 		id,
 		legend: legend(widget),
 		name: string(widget[FIELDS.name]),
+		navigation,
 		sorting: chartSorting(widget, true),
 		templateName: templateName(widget),
 		type

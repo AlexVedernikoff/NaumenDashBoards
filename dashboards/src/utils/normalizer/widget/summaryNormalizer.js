@@ -8,8 +8,8 @@ import {
 	string,
 	templateName
 } from './helpers';
+import {DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
-import {DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LegacyWidget} from './types';
 import type {SummaryData, SummaryWidget} from 'store/widgets/data/types';
@@ -70,6 +70,7 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 		data = getOrdinalData(widget, dataFields, createData),
 		displayMode = DISPLAY_MODE.WEB,
 		indicator = DEFAULT_SUMMARY_SETTINGS.indicator,
+		navigation = DEFAULT_NAVIGATION_SETTINGS,
 		type
 	} = widget;
 
@@ -81,6 +82,7 @@ const summaryNormalizer = (widget: LegacyWidget): SummaryWidget => {
 		id,
 		indicator,
 		name: string(widget[FIELDS.name]),
+		navigation,
 		templateName: templateName(widget),
 		type
 	};

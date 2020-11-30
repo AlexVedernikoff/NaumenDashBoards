@@ -41,6 +41,7 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 			header,
 			indicator,
 			name = '',
+			navigation,
 			templateName,
 			type
 		} = values;
@@ -53,6 +54,7 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 			id,
 			indicator: extend(DEFAULT_SUMMARY_SETTINGS.indicator, indicator),
 			name,
+			navigation,
 			templateName,
 			type
 		};

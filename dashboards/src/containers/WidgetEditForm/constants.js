@@ -36,6 +36,7 @@ const layout: 'layout' = 'layout';
 const mkLayout: 'mkLayout' = 'mkLayout';
 const legend: 'legend' = 'legend';
 const name: 'name' = 'name';
+const navigation: 'navigation' = 'navigation';
 const max: 'max' = 'max';
 const min: 'min' = 'min';
 const pageSize: 'pageSize' = 'pageSize';
@@ -61,6 +62,7 @@ const template: 'template' = 'template';
 const templateName: 'templateName' = 'templateName';
 const textAlign: 'textAlign' = 'textAlign';
 const textHandler: 'textHandler' = 'textHandler';
+const tip: 'tip' = 'tip';
 const type: 'type' = 'type';
 const value: 'value' = 'value';
 const use: 'use' = 'use';
@@ -109,6 +111,7 @@ const FIELDS = {
 	min,
 	mkLayout,
 	name,
+	navigation,
 	pageSize,
 	parameter,
 	parameterSettings,
@@ -133,6 +136,7 @@ const FIELDS = {
 	textAlign,
 	textHandler,
 	tickAmount,
+	tip,
 	type,
 	use,
 	useName,
