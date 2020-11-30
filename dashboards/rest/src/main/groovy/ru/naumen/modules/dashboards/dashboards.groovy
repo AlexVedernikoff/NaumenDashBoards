@@ -757,4 +757,27 @@ String checkForParent(String parentClassFqn, String childClassFqn)
     Boolean isParent = api.metainfo.checkAttributeExisting(parentClassFqn, childClassFqn).isEmpty()
     return toJson([result: isParent])
 }
+
+/**
+ * Метод формирования ссылки для перехода на дашборд
+ * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
+ * @return ссылка на на страницу с дошбордом в json-формате.
+ */
+String getDashboardLink(String dashboardCode)
+{
+    def root = api.utils.findFirst('root', [:])
+    if (root.hasProperty('dashboardCode') && root.dashboardCode)
+    {
+        def appCode = root.dashboardCode
+        def(subjectFqn, dashboardUUID) = DashboardCodeMarshaller.unmarshal(dashboardCode)
+
+        def db = api.apps.listContents(appCode).find {
+            it.contentUuid == dashboardUUID
+        }
+        String usedUUID = user ? user.UUID : api.utils.findFirst(subjectFqn, ['removed': false]).UUID
+        def link = api.web.openTab(usedUUID, db.tabUuid).replace('?anchor=', '#')
+        return toJson([link: link])
+    }
+    throw new Exception('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
+}
 //endregion

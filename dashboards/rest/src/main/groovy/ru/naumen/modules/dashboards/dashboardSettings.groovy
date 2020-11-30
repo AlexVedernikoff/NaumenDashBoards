@@ -141,8 +141,8 @@ String getSettings(Map<String, Object> requestContent)
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
             },
             mobileLayouts: personalDashboard?.mobileLayouts,
-            layouts: isMobile ? null : personalDashboard?.layouts
-
+            layouts: isMobile ? null : personalDashboard?.layouts,
+            dashboardKey: generateDashboardKey(classFqn, contentCode, user?.login as String)
         ] : [
             autoUpdate  : defaultDashboard?.autoUpdate,
             widgets     : defaultDashboard?.widgetIds?.findResults{ widgetKey ->
@@ -153,7 +153,8 @@ String getSettings(Map<String, Object> requestContent)
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
             },
             mobileLayouts: defaultDashboard?.mobileLayouts,
-            layouts: isMobile ? null : defaultDashboard?.layouts
+            layouts: isMobile ? null : defaultDashboard?.layouts,
+            dashboardKey: generateDashboardKey(classFqn, contentCode, user?.login as String)
         ]
     }
     else
@@ -172,7 +173,8 @@ String getSettings(Map<String, Object> requestContent)
                 key -> [(key): getSettingsFromJson(loadJsonSettings(key, CUSTOM_GROUP_NAMESPACE))]
             },
             mobileLayouts: defaultDashboard?.mobileLayouts,
-            layouts: isMobile ? null : defaultDashboard?.layouts
+            layouts: isMobile ? null : defaultDashboard?.layouts,
+            dashboardKey: generateDashboardKey(classFqn, contentCode)
         ]
     }
     return toJson(result)
@@ -1282,7 +1284,7 @@ List<Map<String, String>> getDashboardsUUIDAndTitle()
         if (contents)
         {
             return contents.collect {
-                [uuid: ("${it.subjectFqn}_${it.contentUuid}".toString()) , title: it.contentTitle]
+                [uuid: (DashboardCodeMarshaller.marshal(it.subjectFqn, it.contentUuid)) , title: it.contentTitle]
             }
         }
     }
