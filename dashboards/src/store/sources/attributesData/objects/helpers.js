@@ -1,5 +1,7 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import type {ObjectsMap, ObjectsState, Payload, RawObjectData, ReceivePayload} from './types';
+import type {Source} from 'store/widgets/data/types';
 
 const getObjectsMap = (state: ObjectsState, actual: boolean): ObjectsMap => actual ? state.actual : state.all;
 
@@ -17,21 +19,21 @@ const createObjectData = () => ({
 });
 
 const requestObjectData = (map: ObjectsMap, payload: Payload) => {
-	const {parentUUID, property} = payload;
+	const {id, parentUUID} = payload;
 
-	if (!map[property]) {
+	if (!map[id]) {
 		return createObjectData();
 	} else if (parentUUID) {
 		return {
-			...map[property],
+			...map[id],
 			items: {
-				...map[property].items,
-				[parentUUID]: request(map[property].items[parentUUID])
+				...map[id].items,
+				[parentUUID]: request(map[id].items[parentUUID])
 			}
 		};
 	}
 
-	return request(map[property]);
+	return request(map[id]);
 };
 
 const createObjectDataItem = (data: RawObjectData, root: boolean) => {
@@ -52,7 +54,7 @@ const createObjectDataItem = (data: RawObjectData, root: boolean) => {
 };
 
 const receiveObjectData = (map: ObjectsMap, payload: ReceivePayload) => {
-	const {data, parentUUID, property, uploaded} = payload;
+	const {data, id, parentUUID, uploaded} = payload;
 	const items = {};
 
 	data.forEach(item => {
@@ -60,14 +62,14 @@ const receiveObjectData = (map: ObjectsMap, payload: ReceivePayload) => {
 	});
 
 	if (parentUUID) {
-		const children = map[property].items[parentUUID].children || [];
+		const children = map[id].items[parentUUID].children || [];
 
 		return {
-			...map[property],
+			...map[id],
 			items: {
-				...map[property].items,
+				...map[id].items,
 				[parentUUID]: {
-					...map[property].items[parentUUID],
+					...map[id].items[parentUUID],
 					children: [...children, ...data.map(item => item.uuid)],
 					loading: false,
 					uploaded
@@ -78,9 +80,9 @@ const receiveObjectData = (map: ObjectsMap, payload: ReceivePayload) => {
 	}
 
 	return {
-		...map[property],
+		...map[id],
 		items: {
-			...map[property].items,
+			...map[id].items,
 			...items
 		},
 		loading: false,
@@ -95,24 +97,36 @@ const recordError = (object: Object) => ({
 });
 
 const recordObjectError = (map: ObjectsMap, payload: Payload) => {
-	const {parentUUID, property} = payload;
+	const {id, parentUUID} = payload;
 
 	if (parentUUID) {
 		return {
-			...map[property],
+			...map[id],
 			items: {
-				...map[property].items,
-				[parentUUID]: recordError(map[property].items[parentUUID])
+				...map[id].items,
+				[parentUUID]: recordError(map[id].items[parentUUID])
 			}
 		};
 	}
 
-	return recordError(map[property]);
+	return recordError(map[id]);
+};
+
+/**
+ * Возвращает уникальный ключ атрибута относительно выбранного источника
+ * @param {Attribute} attribute - атрибут
+ * @param {Source} source - источник атрибута
+ * @returns {string}
+ */
+const getObjectKey = (attribute: Attribute, source: Source): string => {
+	const {code, property} = attribute;
+	return `${source.value}_${property}${code}`;
 };
 
 export {
+	getObjectKey,
+	getObjectsMap,
 	receiveObjectData,
 	recordObjectError,
-	getObjectsMap,
 	requestObjectData
 };

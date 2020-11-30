@@ -1,5 +1,7 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {OBJECTS_EVENTS} from './constants';
+import type {Source} from 'store/widgets/data/types';
 import type {TreeNode} from 'components/types';
 
 export type RawObjectData = {
@@ -30,14 +32,15 @@ export type ObjectsMap = {
 
 export type FetchParams = {
 	actual: boolean,
+	attribute: Attribute,
 	offset: number,
 	parentUUID: string | null,
-	property: string
+	source: Source
 };
 
 export type Payload = {
-	parentUUID: string | null,
-	property: string
+	id: string,
+	parentUUID: string | null
 };
 
 export type ReceivePayload = {

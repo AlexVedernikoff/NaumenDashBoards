@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {Group} from 'store/widgets/data/types';
+import type {Group, Source} from 'store/widgets/data/types';
 
 export type GroupAttributeField = {
 	name: string,
@@ -13,6 +13,7 @@ export type Props = {
 	field: GroupAttributeField,
 	name: string,
 	onChange: (name: string, value: Group, field: GroupAttributeField) => void,
+	source: Source,
 	value: Group | string | null
 };
 
