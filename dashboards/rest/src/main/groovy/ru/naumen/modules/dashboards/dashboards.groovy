@@ -197,14 +197,17 @@ String getAttributeObject(Map requestContent)
 {
     String uuid = requestContent.parentUUID
     boolean removed = requestContent.removed
-    String classFqn = requestContent.property
+    String sourceCode = requestContent.sourceCode
+    String attributeCode = requestContent.attribute.code
+    //получили списки типов
+    List types = api.metainfo.getMetaClass(sourceCode).getAttribute(attributeCode).type.attributeType.permittedTypes.toList()
     def count = requestContent.count as int
     def offset = requestContent.offset as int
     def condition = removed ? [:] : [removed: false]
 
     def intermediateData = uuid
-        ? getChildren(classFqn, uuid, condition + [parent: uuid])
-        : getTop(classFqn, condition)
+        ? types.collectMany { classFqn -> getChildren(classFqn.toString(), uuid, condition + [parent: uuid]) }
+        : types.collectMany { classFqn -> getTop(classFqn.toString(), condition) }
 
     def result = getObjects(intermediateData, count, offset).collect { object ->
         [
