@@ -16,6 +16,11 @@ import groovy.transform.TupleConstructor
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.dto.ISDtObject
 
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 import static groovy.json.JsonOutput.toJson
@@ -96,12 +101,12 @@ trait EventControllerTrait implements EventController
                      String endDateString,
                      boolean hideAppointments = false)
     {
-        final String dateFormat = 'yyyy-MM-dd\'T\'HH:mm:ss.S'
-        Date startDate = Date.parse(dateFormat, startDateString)
-        Date endDate = Date.parse(dateFormat, endDateString).plus(1)
+
+        Instant startDate = ZonedDateTime.parse(startDateString, DateTimeFormatter.ISO_DATE_TIME).toInstant()
+        Instant endDate = ZonedDateTime.parse(endDateString, DateTimeFormatter.ISO_DATE_TIME).plusDays(1).toInstant()
         return toJson(
-            service.
-                getEvents(calendarFilterUuid, startDate, endDate, hideAppointments)
+                service.
+                        getEvents(calendarFilterUuid, startDate, endDate, hideAppointments)
         )
     }
 
@@ -159,7 +164,7 @@ class CalendarService
     List<SelectItem> getLocations()
     {
         def result = api.utils.find(TYPE_LOCATION, [state: REGISTERED_STATE])
-                        .collect(this.&toSelectItem)
+                .collect(this.&toSelectItem)
         return result
     }
 
@@ -172,9 +177,9 @@ class CalendarService
     {
         def location = api.utils.get(locationUuid)
         def result = api.utils.find(TYPE_CALENDAR, [state: REGISTERED_STATE, prLocation: location])
-                        .collect(this.&toSelectItem)
+                .collect(this.&toSelectItem)
         result.
-            add(0, new SelectItem("${ ALL_CALENDARS_ID }_${ locationUuid }", ALL_CALENDARS_TITLE))
+                add(0, new SelectItem("${ ALL_CALENDARS_ID }_${ locationUuid }", ALL_CALENDARS_TITLE))
         return result
     }
 
@@ -198,18 +203,24 @@ class CalendarService
      * @return список событий
      */
     List<Event> getEvents(String calendarFilterUuid,
-                          Date startDate,
-                          Date endDate,
+                          Instant startDate,
+                          Instant endDate,
                           boolean hideAppointments)
     {
         String locationUuid = parseLocationId(calendarFilterUuid);
         // Выбираем все тайм-слоты из локации, или из календаря
         def timeSlots = locationUuid ? getLocationTimeSlots(locationUuid) :
-            getCalendarTimeSlots(calendarFilterUuid)
+                getCalendarTimeSlots(calendarFilterUuid)
         if (!timeSlots)
         {
             return null
         }
+        // Убираем из результата слоты в статусах "Временно заблокирован для записи" (blocked)
+        // и "Запись не ведётся" (stopped)
+        timeSlots = timeSlots.findAll {
+            !(it.state in [BLOCKED_STATE, STOPPED_STATE])
+        }
+
         final boolean isMonth = periodIsMonth(startDate, endDate)
         def events = timeSlots.findResults {
             // Не отображать записи на прием
@@ -223,18 +234,45 @@ class CalendarService
                 return null
             }
             // Если есть запись на прием, то отфильтровываем по ее состоянию
-            def booking = it.prTimeBookings?.find()
-            if (BOOKING_STATE_FILTER.contains(booking?.state))
+            if (it.state == CLOSED_STATE)
             {
-                return null
+                def booking = it.prTimeBookings?.find {
+                    it.state == REGISTERED_STATE
+                }
+                if (!booking)
+                {
+                    return null
+                }
             }
-            if (it.startDate >= startDate && it.endDate <= endDate)
+            if (it.endDate.toInstant() >= Instant.now() &&
+                    datesRangesIntersect(
+                            startDate,
+                            endDate,
+                            it.startDate.toInstant(),
+                            it.endDate.toInstant()
+                    ))
             {
                 return toEvent(it)
             }
             return null
         }
         return events
+    }
+
+    /**
+     * Определяет, пересекаются ли 2 временных отрезка
+     * @param dateFrom1 начало первого отрезка
+     * @param dateTo1 окончание первого отрезка
+     * @param dateFrom2 начало второго отрезка
+     * @param dateTo2 окончание второго отрезка
+     * @return true, если отрезки пересекаются, иначе - false
+     */
+    private boolean datesRangesIntersect(Instant dateFrom1,
+                                         Instant dateTo1,
+                                         Instant dateFrom2,
+                                         Instant dateTo2)
+    {
+        return !(dateFrom2 > dateTo1 || dateTo2 < dateFrom1)
     }
 
     /**
@@ -264,12 +302,17 @@ class CalendarService
             return null
         }
         def calendars =
-            api.utils.find(TYPE_CALENDAR, [state: REGISTERED_STATE, prLocation: location])
+                api.utils.find(TYPE_CALENDAR, [state: REGISTERED_STATE, prLocation: location])
         return calendars.collectMany {
             it.ptTimeSlots
         }
     }
 
+    /**
+     * Возвращает все тайм-слоты для указанного календаря
+     * @param calendarUuid - UUID календаря
+     * @return список тайм-слотов в календаре
+     */
     private def getCalendarTimeSlots(String calendarUuid)
     {
         def calendar = api.utils.get(calendarUuid)
@@ -282,12 +325,14 @@ class CalendarService
     private Event toEvent(def timeSlot)
     {
         def event = new Event()
-        event.start = timeSlot.startDate
-        event.end = timeSlot.endDate
+        event.start = dateToIsoString(timeSlot.startDate)
+        event.end = dateToIsoString(timeSlot.endDate)
         //Есть запись на прием
         if (timeSlot.state == CLOSED_STATE)
         {
-            def booking = timeSlot.prTimeBookings?.find()
+            def booking = timeSlot.prTimeBookings?.find {
+                it.state == REGISTERED_STATE
+            }
             if (!booking)
             {
                 return null
@@ -325,13 +370,7 @@ class CalendarService
      */
     private String getTimeSlotTitle(def timeSlot)
     {
-        String title = timeSlot.title;
-        // Не указываем status для
-        if (timeSlot.state == BLOCKED_STATE || timeSlot.state == STOPPED_STATE)
-        {
-            return title;
-        }
-        return "${ title } ${ api.wf.state(timeSlot).title }"
+        return "${ timeSlot.title } ${ api.wf.state(timeSlot).title }"
     }
 
     /**
@@ -344,11 +383,11 @@ class CalendarService
     private List<StateColor> getStatesColors(String fqn, String eventType)
     {
         return api.metainfo.getMetaClass(fqn)
-                  .workflow
-                  .states
-                  .collect {
-                      new StateColor(it.color?.html(), "${ eventType }_${ it.code }")
-                  }
+                .workflow
+                .states
+                .collect {
+                    new StateColor(it.color?.html(), "${ eventType }_${ it.code }")
+                }
     }
 
     /**
@@ -357,10 +396,12 @@ class CalendarService
      * @param endDate - конец диапазона
      * @return true, если указанный диапазон дат составляет ровно 1 месяц, иначе - false
      */
-    private boolean periodIsMonth(Date startDate, Date endDate)
+    private boolean periodIsMonth(Instant startDate, Instant endDate)
     {
+        Date start = Date.from(startDate)
+        Date end = Date.from(endDate)
         use(TimeCategory) {
-            return (startDate + 1.month) == endDate
+            return (start + 1.month) == end
         }
     }
 
@@ -372,6 +413,13 @@ class CalendarService
     private static SelectItem toSelectItem(ISDtObject object)
     {
         return new SelectItem(object.UUID, object.title)
+    }
+
+    private String dateToIsoString(Date date)
+    {
+        ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.of('UTC'))
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+        return zonedDateTime.format(formatter);
     }
 }
 
@@ -387,11 +435,11 @@ class Event
     /**
      * Время начала события
      */
-    Date start
+    String start
     /**
      * Время окончания события
      */
-    Date end
+    String end
     /**
      * Цвет события (вычисляется из его статуса)
      */
