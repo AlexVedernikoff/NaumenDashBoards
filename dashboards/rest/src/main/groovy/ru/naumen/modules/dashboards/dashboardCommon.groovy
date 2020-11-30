@@ -524,5 +524,37 @@ class ObjectMarshaller
         return value ? value.tokenize(delimiter) : []
     }
 }
+
+/**
+ * Класс для преобразования/получения значения объекта для вывода кода дашборда
+ */
+class DashboardCodeMarshaller
+{
+    /**
+     * делитель для значения
+     */
+    static String delimiter = '_'
+
+    /**
+     * Метод получения значения для пользователя
+     * @param value - Fqn объекта, под которым был создан дашборд
+     * @param uuid - uuid дашборда
+     * @return  значение объекта delimiter uuid объекта
+     */
+    static String marshal(String value, String uuid)
+    {
+        return "${value}${delimiter}${uuid}"
+    }
+
+    /**
+     * Метод для парсинга значения
+     * @param value - значение дашборда целиком
+     * @return [ Fqn объекта, под которым был создан дашборд (root/employee), uuid дашборда]
+     */
+    static List<String> unmarshal(String value)
+    {
+        return value ? value.tokenize(delimiter) : []
+    }
+}
 //endregion
 return
