@@ -26,7 +26,7 @@ export class Header extends PureComponent<Props> {
 	renderColumn = (column: Column, index: number) => {
 		const {columnSettings, columnsWidth, components, onChangeColumnWidth, sorting} = this.props;
 		const {HeaderCell} = components;
-		const {fontColor, fontStyle} = columnSettings;
+		const {fontColor, fontStyle, textAlign, textHandler} = columnSettings;
 		const {accessor, columns, header} = column;
 		const width = Array.isArray(columns) ? sumColumnsWidth(columnsWidth, columns) : columnsWidth[accessor];
 		let sortingType;
@@ -47,6 +47,8 @@ export class Header extends PureComponent<Props> {
 					onChangeWidth={onChangeColumnWidth}
 					onClick={this.handleClick}
 					sorting={sortingType}
+					textAlign={textAlign}
+					textHandler={textHandler}
 					value={header}
 					width={width}
 				/>
