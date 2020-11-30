@@ -19,6 +19,7 @@ export type CalendarSelectorsState = {
 	isLoading: boolean,
 	locationList: LocationList,
 	selectedOptions: {
+		appointmentsDisabled: boolean,
 		calendar: Calendar | null,
 		location: Location | null
 	}

@@ -9,7 +9,7 @@ const date = new Date();
 
 const CustomSlot = (props: Props) => {
 	const isCurrentDay = props.start.toDateString() === date.toDateString();
-	const customSlotClasses = cn(styles.customSlot, {
+	const customSlotClasses = cn({
 		[styles.currentDay]: isCurrentDay
 	});
 

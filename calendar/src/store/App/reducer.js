@@ -9,10 +9,11 @@ const reducer = (
 ): AppState => {
 	switch (action.type) {
 		case APP_EVENTS.SET_APP_INIT_DATA: {
-			const {defaultView, metaClass, subjectId} = action.payload;
+			const {defaultView, hideWeekend, metaClass, subjectId} = action.payload;
 			return {
 				...state,
 				defaultView,
+				hideWeekend,
 				metaClass,
 				subjectId
 			};

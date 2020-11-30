@@ -56,7 +56,8 @@ const restCallModule = async (module, method, ...params) => {
 };
 
 const getParameters = async () => await ({
-	DefaultMode: '{day=День}'
+	DefaultMode: '{week=Неделя}',
+	SkryvatSubbotuIVoskresene: false
 });
 
 const jsApi = {

@@ -8,11 +8,13 @@ import type {
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
+	appointmentsDisabled: boolean,
 	calendarData: Array<CalendarData>,
 	calendarId: string | null,
 	calendarResourceColorList: Array<ResourceColor>,
 	defaultView: string,
 	error: Error | null,
+	hideWeekend: boolean,
 	isAppLoading: boolean,
 	isCalendarLoading: boolean
 };
@@ -24,4 +26,6 @@ export type ConnectedFunctions = {
 	setCalendarData: (calendarData: Array<CalendarData>) => ISetCalendarData
 };
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props = {
+	getCalendarData: (params: GetCalendarDataParams) => ThunkAction
+} & ConnectedProps & ConnectedFunctions;

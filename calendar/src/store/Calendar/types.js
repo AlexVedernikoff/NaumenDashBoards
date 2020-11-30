@@ -35,6 +35,7 @@ export type CalendarState = {
 };
 
 export type GetCalendarDataParams = {
+	appointmentsDisabled: boolean,
 	calendarId: string,
 	dateFrom: Date,
 	dateTo: Date

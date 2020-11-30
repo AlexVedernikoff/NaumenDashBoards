@@ -8,6 +8,7 @@ import type {
 } from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {CALENDAR_EVENTS} from './constants';
+import {batch} from 'react-redux';
 
 /**
  * Получает список всех событий календаря для данных параметров
@@ -19,13 +20,14 @@ const getCalendarData = (params: GetCalendarDataParams): ThunkAction => async (
 ) => {
 	dispatch(setCalendarLoading(true));
 	try {
-		const {calendarId, dateFrom, dateTo} = params;
+		const {appointmentsDisabled, calendarId, dateFrom, dateTo} = params;
 		const data: Array<CalendarApiData> = await window.jsApi.restCallModule(
 			'calendarController',
 			'getEvents',
 			calendarId,
 			dateFrom,
-			dateTo
+			dateTo,
+			appointmentsDisabled
 		);
 		const normalizedData: Array<CalendarData> = data.map(
 			({end, start, link, description, type}) => ({
@@ -36,12 +38,15 @@ const getCalendarData = (params: GetCalendarDataParams): ThunkAction => async (
 				type
 			})
 		);
-
-		dispatch(setCalendarData(normalizedData));
+		batch(() => {
+			dispatch(setCalendarData(normalizedData));
+			dispatch(setCalendarLoading(false));
+		});
 	} catch (error) {
-		dispatch(setError(error));
-	} finally {
-		dispatch(setCalendarLoading(false));
+		batch(() => {
+			dispatch(setError(error));
+			dispatch(setCalendarLoading(false));
+		});
 	}
 };
 

@@ -1,36 +1,37 @@
 // @flow
+import endOfMonth from 'date-fns/endOfMonth';
+import endOfWeek from 'date-fns/endOfWeek';
+import startOfDay from 'date-fns/startOfDay';
+import startOfMonth from 'date-fns/startOfMonth';
+import startOfWeek from 'date-fns/startOfWeek';
 
 /**
  * Функция для получения дат начала и конца месяца переданного дня
  * @param {Date} date - дата, находящаяся в нужном месяце
  * @returns {[Date, Date]} - кортеж из даты старта и даты конца месяца
  */
-const getMonthDates = (date: Date) => {
-	const dateFrom = new Date(date.getFullYear(), date.getMonth(), 1);
-	const dateTo = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-	return [dateFrom, dateTo];
-};
+const getMonthDates = (date: Date) => [startOfMonth(date), endOfMonth(date)];
 
 /**
  * Функция для получения дат начала и конца недели переданного дня
  * @param {Date} date - дата, находящаяся в нужной неделе
  * @returns {[Date, Date]} - кортеж из даты старта и даты конца недели
  */
-const getWeekDates = (date: Date) => {
-	const dateCopy = new Date(
-		date.getFullYear(),
-		date.getMonth(),
-		date.getDate()
-	);
-	const dayOfWeek = dateCopy.getDay();
-	const currentDay = dateCopy.getDate();
-	const firstDay = currentDay - dayOfWeek + 1;
-	const lastDay = firstDay + 6;
-	return [
-		new Date(dateCopy.setDate(firstDay)),
-		new Date(dateCopy.setDate(lastDay))
-	];
-};
+const getWeekDates = (date: Date) => [
+	startOfWeek(date, {
+		weekStartsOn: 1
+	}),
+	endOfWeek(date, {
+		weekStartsOn: 1
+	})
+];
+
+/**
+ * Функция для получения начала и конца переданного дня
+ * @param {Date} date - дата
+ * @returns {[Date, Date]} - кортеж из даты старта и даты конца
+ */
+const getDate = (date: Date) => [startOfDay(date), startOfDay(date)];
 
 /**
  * Функция для получения дат начала и конца определенного промежутка (месяц, неделя, день)
@@ -44,8 +45,10 @@ export const getDates = (date: Date, view: string) => {
 			return getMonthDates(date);
 		case 'week':
 			return getWeekDates(date);
+		case 'work-week':
+			return getWeekDates(date);
 		case 'day':
-			return [date, date];
+			return getDate(date);
 		default:
 			throw new Error('Unsupported type of date');
 	}

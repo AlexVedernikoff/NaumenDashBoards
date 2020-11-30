@@ -3,14 +3,22 @@
 
 const Autoprefixer = require('autoprefixer');
 const define = require('./define');
+const path = require('path');
 
 module.exports = {
 	rules: [
 		{
-			exclude: /(node_modules|bower_components)/,
-			test: /\.jsx?$/,
+			exclude: /@babel(?:\/|\\{1,2})runtime|core-js/,
+			test: /\.(js|jsx)$/,
 			use: {
-				loader: 'babel-loader'
+				loader: 'babel-loader',
+				options: {
+					babelrc: false,
+					cacheDirectory: true,
+					compact: false,
+					configFile: path.resolve(__dirname, '../babel.config.js'),
+					sourceMaps: false
+				}
 			}
 		},
 		{
@@ -25,7 +33,9 @@ module.exports = {
 				{
 					loader: 'css-loader',
 					options: {
-						localIdentName: define.development ? '[path][name]__[local]' : '[hash:base64]',
+						localIdentName: define.development
+							? '[path][name]__[local]'
+							: '[hash:base64]',
 						sourceMap: define.development
 					}
 				},
@@ -34,11 +44,7 @@ module.exports = {
 					options: {
 						plugins: [
 							new Autoprefixer({
-								browsers: [
-									'>1%',
-									'last 3 versions',
-									'ie > 8'
-								]
+								browsers: ['>1%', 'last 3 versions', 'ie > 8']
 							})
 						],
 						sourceMap: define.development

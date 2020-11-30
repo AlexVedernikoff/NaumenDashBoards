@@ -21,12 +21,13 @@ const DropdownList = ({
 		<div>
 			<p>{label}</p>
 			<DropDownList
-				onChange={handleChange}
+				className={styles.dropdownItem}
 				data={data}
-				textField="value"
 				dataItemKey="id"
-				value={value}
 				itemRender={itemRender}
+				onChange={handleChange}
+				textField="value"
+				value={value}
 			/>
 		</div>
 	);
