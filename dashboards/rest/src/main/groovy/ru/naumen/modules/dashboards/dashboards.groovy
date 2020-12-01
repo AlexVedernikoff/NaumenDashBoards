@@ -290,13 +290,9 @@ String getCatalogItemObject(Map requestContent)
         searchParameter.offset(offset as int)
     }
 
-    def result =
-        api.utils.find(classFqn, removeCondition + parentCondition, searchParameter).collect {
-            [
-                title: it.title,
-                uuid : it.UUID
-            ]
-        }
+    def result = getAllCatalogValues(api.utils.find(classFqn, removeCondition + parentCondition, searchParameter),
+                                     classFqn,
+                                     removeCondition)
     return toJson(result)
 }
 
