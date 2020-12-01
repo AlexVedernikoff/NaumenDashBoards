@@ -17,7 +17,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	};
 
 	render () {
-		const {renderBaseBoxes, renderDisplayModeSelect, renderIndicatorBoxes} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect, renderIndicatorBoxes, renderNavigationBox} = this.props;
 
 		return (
 			<Fragment>
@@ -25,6 +25,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				{this.renderSourceBox()}
 				{renderIndicatorBoxes({usesEmptyData: true})}
 				{renderDisplayModeSelect()}
+				{renderNavigationBox()}
 			</Fragment>
 		);
 	}

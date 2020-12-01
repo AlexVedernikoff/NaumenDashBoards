@@ -177,7 +177,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	);
 
 	render () {
-		const {renderBaseBoxes, renderDisplayModeSelect, renderShowEmptyDataCheckbox, values} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect, renderNavigationBox, renderShowEmptyDataCheckbox, values} = this.props;
 		const {data} = values;
 
 		return (
@@ -187,6 +187,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				{this.renderBreakdownFieldSet()}
 				{renderShowEmptyDataCheckbox()}
 				{renderDisplayModeSelect()}
+				{renderNavigationBox()}
 			</Fragment>
 		);
 	}
