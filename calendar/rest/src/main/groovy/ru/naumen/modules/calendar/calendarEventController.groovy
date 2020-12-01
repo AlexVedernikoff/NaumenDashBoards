@@ -221,6 +221,11 @@ class CalendarService
             !(it.state in [BLOCKED_STATE, STOPPED_STATE])
         }
 
+        /// Объединяем слоты в статусе 'registered' с одинаковым временем начала и окончания
+        timeSlots = timeSlots
+                .groupBy{[state: (it.state == REGISTERED_STATE ? it.state : it.UUID), startDate: it.startDate, endDate: it.endDate]}
+                .collect{k, v -> v.find()}
+
         final boolean isMonth = periodIsMonth(startDate, endDate)
         def events = timeSlots.findResults {
             // Не отображать записи на прием
