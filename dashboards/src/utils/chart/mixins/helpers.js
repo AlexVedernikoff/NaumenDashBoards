@@ -37,7 +37,11 @@ const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero:
 			formattedValue = parseFloat(formattedValue.toFixed(2));
 		}
 
-		if (usesPercent) {
+		if (formattedValue === Infinity) {
+			formattedValue = '';
+		}
+
+		if (formattedValue && usesPercent) {
 			formattedValue = `${formattedValue}%`;
 		}
 	}
