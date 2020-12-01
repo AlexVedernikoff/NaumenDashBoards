@@ -1,8 +1,9 @@
 // @flow
-import {COMMAND_EVENTS, FIELDS, HOT_KEYS, HOT_KEYS_COMMANDS} from './constants';
+import {COMMAND_EVENTS} from 'components/atoms/TextEditor/constants';
 import {convertToRaw, getDefaultKeyBinding, KeyBindingUtil, RichUtils} from 'draft-js';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {EditorState, OnChangeEvent} from 'components/atoms/TextEditor/types';
+import {FIELDS, HOT_KEYS, HOT_KEYS_COMMANDS} from './constants';
 import {FONT_STYLES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {FormBox, FormField, Select} from 'components/molecules';
 import type {InjectedProps as Props, Values} from 'containers/WidgetEditForm/types';
