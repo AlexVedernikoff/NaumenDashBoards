@@ -26,9 +26,9 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 			...base,
 			data: array().of(object({
 				[indicator]: requiredByCompute(indicator),
-				[source]: object().required(getErrorMessage(source)).nullable(),
-				[sources]: validateSources
-			}))
+				[source]: object().required(getErrorMessage(source)).nullable()
+			})),
+			[sources]: validateSources
 		});
 	};
 
