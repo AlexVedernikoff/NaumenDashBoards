@@ -1,7 +1,8 @@
 // @flow
 import 'draft-js/dist/Draft.css';
+import {CHANGE_TYPES, COMMAND_EVENTS} from './constants';
 import cn from 'classnames';
-import {convertFromRaw, Editor, EditorState} from 'draft-js';
+import {ContentState, convertFromRaw, Editor, EditorState, Modifier} from 'draft-js';
 import type {EditorState as EEditorStateType, Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
@@ -48,6 +49,19 @@ export class TextEditor extends PureComponent<Props> {
 		onChange && onChange({name, value: editorState});
 	};
 
+	handlePastedText = (text: string, html?: string, editorState: EditorState) => {
+		const pastedBlocks = ContentState.createFromText(text).blockMap;
+		const newState = Modifier.replaceWithFragment(
+			editorState.getCurrentContent(),
+			editorState.getSelection(),
+			pastedBlocks
+		);
+		const newEditorState = EditorState.push(editorState, newState, CHANGE_TYPES.INSERT_CHANGE_TYPE);
+		this.handleChange(newEditorState);
+
+		return COMMAND_EVENTS.COMMAND_HANDLED_EVENT;
+	};
+
 	renderEditor = () => {
 		const {handleKeyCommand, keyBindingFn, readOnly, styleMap, textAlign, value} = this.props;
 
@@ -59,6 +73,7 @@ export class TextEditor extends PureComponent<Props> {
 					handleKeyCommand={handleKeyCommand}
 					keyBindingFn={keyBindingFn}
 					onChange={this.handleChange}
+					onPaste={this.handlePastedText}
 					readOnly={readOnly}
 					ref={this.editorRef}
 					textAlignment={textAlign}
