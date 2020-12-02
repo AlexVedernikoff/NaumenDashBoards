@@ -1,4 +1,5 @@
 // @flow
+import {arrayToTree} from 'utils/arrayToTree';
 import type {CatalogItemsAction, CatalogItemsState} from './types';
 import {CATALOG_ITEMS_EVENTS} from './constants';
 import {defaultCatalogItemsAction, initialCatalogItemsState} from './init';
@@ -10,7 +11,9 @@ const reducer = (state: CatalogItemsState = initialCatalogItemsState, action: Ca
 				...state,
 				[action.payload.property]: {
 					...state[action.payload.property],
-					items: action.payload.data,
+					items: arrayToTree(action.payload.data, {keys: {
+							id: 'uuid'
+						}}),
 					loading: false
 				}
 			};

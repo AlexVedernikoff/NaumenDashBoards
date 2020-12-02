@@ -135,7 +135,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {renderRefField} = this.props;
 		const {disabled, value} = props;
 
-		if (!parent && value && value.type in ATTRIBUTE_SETS.REF) {
+		if (!parent && value && value.type in ATTRIBUTE_SETS.REFERENCE) {
 			return (
 				<Fragment>
 					{this.renderParentAttributeField(props)}

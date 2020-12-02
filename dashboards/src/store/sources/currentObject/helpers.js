@@ -56,7 +56,7 @@ const receiveRoots = (state: CurrentObjectState, payload: ReceiveRootsPayload) =
 	let items = {};
 
 	attributes.forEach(value => {
-		const children = value.type in ATTRIBUTE_SETS.REF ? [] : null;
+		const children = value.type in ATTRIBUTE_SETS.REFERENCE ? [] : null;
 		const id = getNodeId(value);
 
 		items[id] = createNode(id, value, null, children);

@@ -153,7 +153,7 @@ export type RefCustomGroup = {|
 	id: string,
 	name: string,
 	subGroups: Array<RefSubGroup>,
-	type: $Keys<typeof ATTRIBUTE_SETS.REF>
+	type: $Keys<typeof ATTRIBUTE_SETS.REFERENCE>
 |};
 
 // Группировка для счетчиков

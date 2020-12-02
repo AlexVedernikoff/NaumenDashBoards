@@ -1,14 +1,19 @@
 // @flow
 import {CATALOG_ITEMS_EVENTS} from './constants';
+import type {TreeNode} from 'components/types';
 
 export type Data = {
 	title: string,
 	uuid: string
 };
 
+export type CatalogItemTree = {
+	[key: string]: TreeNode<Data>
+};
+
 export type CatalogItemData = {
 	error: boolean,
-	items: Array<Data>,
+	items: CatalogItemTree,
 	loading: boolean
 };
 

@@ -145,7 +145,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		const {disabled: selectDisabled, parent, value} = props;
 		const breakdownValue = breakdown[breakdownIndex].value;
 		const isNotMain = breakdownIndex !== 0;
-		const isNotRefAttr = breakdownValue && !(breakdownValue.type in ATTRIBUTE_SETS.REF);
+		const isNotRefAttr = breakdownValue && !(breakdownValue.type in ATTRIBUTE_SETS.REFERENCE);
 		const disabled = selectDisabled || (isNotMain && isNotRefAttr);
 		const field = {
 			name,

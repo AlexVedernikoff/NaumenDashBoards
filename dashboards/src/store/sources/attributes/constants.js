@@ -54,22 +54,27 @@ const ATTRIBUTE_TYPES = {
 	COMPUTED_ATTR
 };
 
+// Набор типов дат
 const DATE = {
 	date,
 	dateTime
 };
+
+// Набор числовых типов
 const NUMBER = {
 	double,
 	integer
 };
 
+// Набор типов объекта
 const OBJECT = {
 	backBOLinks,
 	boLinks,
 	object
 };
 
-const REF = {
+// Набор ссылочных типов
+const REFERENCE = {
 	...OBJECT,
 	catalogItem,
 	catalogItemSet
@@ -79,7 +84,7 @@ const ATTRIBUTE_SETS = {
 	DATE,
 	NUMBER,
 	OBJECT,
-	REF
+	REFERENCE
 };
 
 const DYNAMIC_ATTRIBUTE_PROPERTY = 'totalValue';
