@@ -25,30 +25,14 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		return options;
 	};
 
-	handleChangeGroup = (name: string, group: Group, field: GroupAttributeField) => {
+	handleChangeGroup = (breakdownIndex: number) => (name: string, group: Group) => {
 		const {index, name: breakdownName, onChange} = this.props;
 		let {value: breakdown} = this.props;
-		let {parent, value} = field;
 
-		if (parent) {
-			value = {
-				...parent,
-				ref: value
-			};
-		}
-
-		breakdown = breakdown.map((set, index) => {
-			const updatedSet = {
-				...set,
-				group
-			};
-
-			if (index === 0) {
-				updatedSet[FIELDS.value] = value;
-			}
-
-			return updatedSet;
-		});
+		breakdown[breakdownIndex] = {
+			...breakdown[breakdownIndex],
+			group
+		};
 
 		onChange(index, breakdownName, breakdown);
 	};
@@ -158,7 +142,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 				disabled={disabled}
 				field={field}
 				name={FIELDS.group}
-				onChange={this.handleChangeGroup}
+				onChange={this.handleChangeGroup(breakdownIndex)}
 				parent={parent}
 				source={source}
 				value={group}
