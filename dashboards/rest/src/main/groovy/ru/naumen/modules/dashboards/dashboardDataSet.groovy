@@ -3165,11 +3165,16 @@ private TableDiagram mappingManyColumnsTableDiagram(List resultDataSet, def tran
                                                     List<String> allAggregationAttributes = [])
 {
     List<String> attributeNames = attributes.name
+    List customValuesInBreakdown = []
     if (innerCustomGroupNames)
     {
         //для работы необходим учет именно основных группировок, а для колонок идут внутреннние группировки группы
         resultDataSet = prepareResultDataSet(resultDataSet, attributeNames, innerCustomGroupNames)
         transposeDataSet = resultDataSet.transpose()
+        if(hasBreakdown)
+        {
+            customValuesInBreakdown = innerCustomGroupNames.findAll { it.attributeName == attributeNames.last() }.value
+        }
     }
 
     return mappingTable(resultDataSet,
@@ -3179,6 +3184,7 @@ private TableDiagram mappingManyColumnsTableDiagram(List resultDataSet, def tran
                         totalRow,
                         showRowNum,
                         hasBreakdown,
+                        customValuesInBreakdown,
                         aggregationCnt,
                         allAggregationAttributes)
 }
@@ -3350,6 +3356,7 @@ List prepareDataSet(List list, def requestContent, Boolean showNulls, Boolean ha
  * @param totalColumn - флаг на подсчёт итогов в колонках
  * @param totalRow  - флаг на подсчёт итогов в строках
  * @param showRowNum - флаг на отображение номера строки
+ * @param customValuesInBreakdown - значения кастомной группировки в разбивке
  * @param aggregationCnt - количество агрегаций в запросе
  * @param allAggregationAttributes - названия всех атрибутов агрегации
  * @return TableDiagram
@@ -3361,11 +3368,12 @@ private TableDiagram mappingTable(List resultDataSet,
                                   Boolean totalRow,
                                   Boolean showRowNum,
                                   Boolean hasBreakdown,
+                                  List customValuesInBreakdown,
                                   Integer aggregationCnt,
                                   List<String> allAggregationAttributes)
 {
     List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
-    Collection <Column> columns = collectColumns(attributes, hasBreakdown, breakdownValues)
+    Collection <Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
 
     int cnt = attributes.size()
     List<String> attributeNames = attributes.name
@@ -3385,9 +3393,8 @@ private TableDiagram mappingTable(List resultDataSet,
     }
     else
     {
-        aggregationCnt += notAggregatedAttributeSize
         data = tempMaps.withIndex().collect { map, id->
-            def value = map[aggregationCnt..-1] + map[0..aggregationCnt -1].collect { it.findResult {k,v -> [(k): v ?: ""]} }
+            def value = map[aggregationCnt..-1] + map[0..aggregationCnt -1].collect { it.findResult {k,v -> [(k): v ?: "0"]} }
             return [ID: ++id, *:value.sum()]
         }
     }
@@ -4225,10 +4232,14 @@ private List getOneFilterListDiagramData(def node,
             RequestData newRequestData = requestData.clone()
             List attributes = []
             List<String> notAggregatedAttributes = []
+            Boolean customInBreakTable = false
             if (requestContent)
             {
                 attributes = getAttributeNamesAndValuesFromRequest(requestContent)
                 notAggregatedAttributes = notAggregationAttributeNames(attributes)
+                String attrInCustoms = getInnerCustomGroupNames(requestContent).find().attributeName
+                String possibleBreakdownAttribute = attributes.last().name
+                customInBreakTable = possibleBreakdownAttribute == attrInCustoms
             }
             def listIdsOfNormalAggregations = diagramType == DiagramType.TABLE
                 ? request?.data?.findResult { key, value ->
@@ -4242,13 +4253,13 @@ private List getOneFilterListDiagramData(def node,
                                  .with(formatGroup)
                                  .with(formatAggregation)
 
-                if(!res && !onlyFilled)
+                if(!res && !onlyFilled && !customInBreakTable)
                 {
                     def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
                     listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
                     res = [tempRes]
                 }
-                def partial = onlyFilled && !res ? [:] :[(it.title.grep() as Set): res]
+                def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(it.title.grep() as Set): res]
 
                 partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                 Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
@@ -4400,8 +4411,12 @@ private List getTwoFilterListDiagramData(def node,
                 def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
                                  .with(formatGroup)
                                  .with(formatAggregation)
-
-
+                if(!res && !onlyFilled)
+                {
+                    def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
+                    listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
+                    res = [tempRes]
+                }
                 def total = res ? [(condition.title.flatten().grep() as Set): res] : [:]
                 total = formatResult(total, aggregationCnt + notAggregatedAttributes.size())
                 Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||

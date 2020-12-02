@@ -126,7 +126,7 @@ String getAttributesFromLinkAttribute(requestContent)
 
     String attributeClassFqn = linkAttribute.property
     boolean deep = requestContent?.deep
-    List<String> types = requestContent?.types
+    List<String> types = requestContent?.types ?: AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER
 
     def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
 
@@ -143,23 +143,13 @@ String getAttributesFromLinkAttribute(requestContent)
         return toJson([attribute])
     }
 
-    Collection<Attribute> result = types
-        ? metaInfo.attributes
-                  .findResults {
-                      !it.computable && it.type.code in types ? buildAttribute(it, metaInfo.title, metaInfo.code) : null
-                  }
-                  .sort {
-                      it.title
-                  }
-        : metaInfo.attributes
-                  .findResults {
-                      !it.computable && it.type.code in AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER
-                          ? buildAttribute(it, metaInfo.title, metaInfo.code)
-                          : null
-                  }
-                  .sort {
-                      it.title
-                  }
+    Collection<Attribute> result = metaInfo.attributes.findResults {
+        !it.computable && it.type.code in types
+            ? buildAttribute(it, metaInfo.title, metaInfo.code)
+            : null
+    }.sort {
+        it.title
+    }
 
     if (deep)
     {
@@ -169,19 +159,11 @@ String getAttributesFromLinkAttribute(requestContent)
         childrenClasses.each {
             def metainfo = api.metainfo.getMetaClass(it)
             def attributes = metainfo?.attributes
-            attributeList += types
-                ? attributes ? attributes.findResults {
+            attributeList += attributes ? attributes.findResults {
                 !result*.code.find { x -> x == it.code
                 } && !attributeList*.code.find { x -> x == it.code
                 } && !it.computable && it.type.code in types
                     ? buildAttribute(it, metaInfo.title, metaInfo.code) : null
-            } : []
-                : attributes ? attributes.findResults {
-                !result*.code.find { x -> x == it.code
-                } && !attributeList*.code.find { x -> x == it.code
-                } && !it.computable && it.type.code in AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER
-                    ? buildAttribute(it, metaInfo.title, metaInfo.code)
-                    : null
             } : []
         }
         result += attributeList
@@ -189,7 +171,6 @@ String getAttributesFromLinkAttribute(requestContent)
             it.title
         }
     }
-
     return toJson(result)
 }
 
@@ -205,11 +186,12 @@ String getAttributeObject(Map requestContent)
     def offset = requestContent.offset as int
     def condition = removed ? [:] : [removed: false]
 
-    def intermediateData = uuid
-        ? types.collectMany { classFqn -> getChildren(classFqn.toString(), uuid, condition + [parent: uuid]) }
-        : types.collectMany { classFqn -> getTop(classFqn.toString(), condition) }
+    def intermediateData = uuid ?: types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }
 
-    def result = getObjects(intermediateData, count, offset).collect { object ->
+    List values = uuid
+            ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }
+            : getObjects(intermediateData, count, offset)
+    def result = values?.collect { object ->
         [
             title   : object.title,
             uuid    : object.UUID,

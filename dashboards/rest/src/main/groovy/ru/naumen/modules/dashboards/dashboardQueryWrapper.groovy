@@ -178,6 +178,78 @@ class QueryWrapper implements CriteriaWrapper
         return column
     }
 
+    /**
+     * Метод по добавлению группировок в запрос и их обработке
+     * @param wrapper - текущий запрос в БД
+     * @param parameter - параметр с группой для добавления
+     * @param diagramType - тип диаграммы
+     * @return текущий запрос в БД с добавленной группой
+     */
+    QueryWrapper processGroup(QueryWrapper wrapper, GroupParameter parameter, DiagramType diagramType)
+    {
+        if (parameter.type == GroupType.SEVEN_DAYS)
+        {
+            Date startMinDate = modules.dashboardCommon.getMinDate(
+                parameter.attribute.code,
+                parameter.attribute.sourceCode
+            )
+            startMinDate = new Date(startMinDate.time).clearTime()
+            wrapper.sevenDaysGroup(parameter, startMinDate)
+        }
+        else
+        {
+            wrapper.group(parameter, diagramType)
+        }
+        return wrapper
+    }
+
+    /**
+     * Метод по добавлению агрегаций в запрос и их обработке
+     * @param wrapper текущий запрос в БД
+     * @param requestData - данные для запроса
+     * @param parameter - параметр с агрегацией для добавления
+     * @param diagramType - тип диаграммы
+     * @return текущий запрос в БД с добавленной агрегацией
+     */
+    QueryWrapper processAggregation(QueryWrapper wrapper, RequestData requestData, AggregationParameter parameter, DiagramType diagramType)
+    {
+        if (parameter.type == Aggregation.PERCENT)
+        {
+            def totalAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
+            def totalParameter = new AggregationParameter(
+                title: 'totalCount',
+                type: Aggregation.COUNT_CNT,
+                attribute: totalAttribute
+            )
+
+            def filterAttribute = requestData?.groups?.find()?.attribute
+            def filterParameter = filterAttribute
+                ? new FilterParameter(
+                title: 'filter',
+                type: Comparison.NOT_NULL,
+                attribute: filterAttribute)
+                : null
+
+            def wrappedQuery = QueryWrapper.build(requestData.source)
+            if (filterParameter)
+            {
+                wrappedQuery.filtering([filterParameter])
+            }
+            int totalCount = wrappedQuery.aggregate(totalParameter)
+                                         .result.head().head()
+
+            wrapper.percentAggregate(parameter, totalCount)
+        }
+        else if (parameter.type == Aggregation.NOT_APPLICABLE)
+        {
+            wrapper.noneAggregate(parameter, diagramType)
+        }
+        else
+        {
+            wrapper.aggregate(parameter)
+        }
+    }
+
     QueryWrapper group(GroupParameter parameter, DiagramType diagramType)
     {
         def sc = api.selectClause
@@ -798,47 +870,7 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true, DiagramTy
             sortingType: it.sortingType
         )
     }
-    clonedAggregations.each {
-        prepareAttribute(it.attribute as Attribute)
-        AggregationParameter parameter = it as AggregationParameter
-        if (parameter.type == Aggregation.PERCENT)
-        {
-            def totalAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
-            def totalParameter = new AggregationParameter(
-                title: 'totalCount',
-                type: Aggregation.COUNT_CNT,
-                attribute: totalAttribute
-            )
 
-            def filterAttribute = requestData?.groups?.find()?.attribute
-            def filterParameter = filterAttribute
-                ? new FilterParameter(
-                title: 'filter',
-                type: Comparison.NOT_NULL,
-                attribute: filterAttribute)
-                : null
-
-            def wrappedQuery = QueryWrapper.build(requestData.source)
-            if (filterParameter)
-            {
-                wrappedQuery.filtering([filterParameter])
-            }
-            int totalCount = wrappedQuery.aggregate(totalParameter)
-                                         .result.head().head()
-
-            wrapper.percentAggregate(parameter, totalCount)
-        }
-        else if (parameter.type == Aggregation.NOT_APPLICABLE)
-        {
-            wrapper.noneAggregate(parameter, diagramType)
-        }
-        else
-        {
-            wrapper.aggregate(parameter)
-        }
-    }
-
-    //TODO: Нужна возможность получать начало отсчёта из вне
     requestData.groups.each { validate(it as GroupParameter) }
     def clonedGroups = requestData.groups.collect {
         new GroupParameter(
@@ -849,22 +881,15 @@ List<List> getData(RequestData requestData, Boolean onlyFilled = true, DiagramTy
             format: it.format
         )
     }
+
+    clonedAggregations.each {
+        prepareAttribute(it.attribute as Attribute)
+        wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top)
+    }
+
     clonedGroups.each {
         prepareAttribute(it.attribute as Attribute)
-        GroupParameter parameter = it as GroupParameter
-        if (parameter.type == GroupType.SEVEN_DAYS)
-        {
-            Date startMinDate = modules.dashboardCommon.getMinDate(
-                parameter.attribute.code,
-                parameter.attribute.sourceCode
-            )
-            startMinDate = new Date(startMinDate.time).clearTime()
-            wrapper.sevenDaysGroup(parameter, startMinDate)
-        }
-        else
-        {
-            wrapper.group(parameter, diagramType)
-        }
+        wrapper.processGroup(wrapper, it as GroupParameter, diagramType)
     }
 
     requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
