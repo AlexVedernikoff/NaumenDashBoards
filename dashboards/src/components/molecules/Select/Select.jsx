@@ -92,7 +92,7 @@ export class Select extends PureComponent<Props, State> {
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderCaretIcon = () => <Icon className={styles.caret} name={ICON_NAMES.CHEVRON} />;
+	renderCaretIcon = () => <Icon className={styles.caret} name={ICON_NAMES.CHEVRON} onClick={this.handleClick} />;
 
 	renderClearIcon = () => {
 		const {editable} = this.props;
@@ -135,9 +135,7 @@ export class Select extends PureComponent<Props, State> {
 		const label = this.getOptionLabel(value) || placeholder;
 
 		if (editable) {
-			return (
-				<input className={styles.input} onChange={this.handleChangeLabel} value={label} />
-			);
+			return <input className={styles.input} onChange={this.handleChangeLabel} onFocus={this.hideMenu} value={label} />;
 		}
 
 		return <div className={styles.label}>{label}</div>;
@@ -182,7 +180,7 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderValueContainer = () => (
-		<div className={styles.valueContainer} onClick={this.handleClick}>
+		<div className={styles.valueContainer}>
 			{this.renderLabel()}
 			{this.renderLoader()}
 			{this.renderIndicators()}
