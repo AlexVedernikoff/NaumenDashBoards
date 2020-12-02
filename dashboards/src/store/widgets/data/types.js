@@ -76,6 +76,11 @@ export type ComputedBreakdown = Array<{
 	value: Attribute | null
 }>;
 
+export type DataTopSettings = {
+	count: number,
+	show: boolean
+};
+
 // Общие параметры всех виджетов
 
 type BaseData = {
@@ -175,6 +180,7 @@ export type BuildAxisData = {
 	group: Group,
 	showEmptyData: boolean,
 	sourceForCompute: false,
+	top: DataTopSettings,
 	xAxis: Attribute,
 	yAxis: MixedAttribute
 };
@@ -202,7 +208,8 @@ export type BuildCircleData = {
 	breakdownGroup: Group,
 	indicator: MixedAttribute,
 	showEmptyData: boolean,
-	sourceForCompute: false
+	sourceForCompute: false,
+	top: DataTopSettings
 };
 
 type ComputeCircleData = {
@@ -401,6 +408,7 @@ export type TableWidget = {
 	showEmptyData: boolean,
 	sorting: TableSorting,
 	table: Table,
+	top: DataTopSettings,
 	type: typeof WIDGET_TYPES.TABLE
 };
 

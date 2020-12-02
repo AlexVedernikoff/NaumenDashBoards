@@ -17,7 +17,7 @@ import {
 	templateName
 } from './helpers';
 import type {CircleData, CircleWidget} from 'store/widgets/data/types';
-import {DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
+import {DEFAULT_NAVIGATION_SETTINGS, DEFAULT_TOP_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LegacyWidget} from './types';
 import uuid from 'tiny-uuid';
@@ -47,13 +47,14 @@ const normalizeDataSet = (set: Object, index: number, data: Array<Object>): Circ
 	};
 
 	if (!set.sourceForCompute) {
-		const {aggregation, indicator, showEmptyData} = set;
+		const {aggregation, indicator, showEmptyData, top = DEFAULT_TOP_SETTINGS} = set;
 		resultSet = {
 			...set,
 			aggregation: aggregationFilter(aggregation),
 			indicator,
 			showEmptyData: !!showEmptyData,
-			sourceForCompute: false
+			sourceForCompute: false,
+			top
 		};
 		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data)}, resultSet);
 	}

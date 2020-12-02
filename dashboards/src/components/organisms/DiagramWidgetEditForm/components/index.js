@@ -10,6 +10,7 @@ import ComboChartForm from './ComboChartForm';
 import ComputedAttributeEditor from './ComputedAttributeEditor';
 import ComputedBreakdownFieldset from './ComputedBreakdownFieldset';
 import DataLabelsBox from './DataLabelsBox';
+import DataTopField from './DataTopField';
 import ExtendingFieldset from './ExtendingFieldset';
 import FieldDivider from './FieldDivider';
 import Form from './Form';
@@ -40,6 +41,7 @@ export {
 	ComputedAttributeEditor,
 	ComputedBreakdownFieldset,
 	DataLabelsBox,
+	DataTopField,
 	ExtendingFieldset,
 	FieldDivider,
 	Form,

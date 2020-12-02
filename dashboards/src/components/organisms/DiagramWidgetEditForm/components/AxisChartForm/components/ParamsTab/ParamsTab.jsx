@@ -22,7 +22,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const props = {
 			name: FIELDS.yAxis,
 			onSelectCallback: this.onSelectIndicatorCallback,
-			usesEmptyData: true
+			usesEmptyData: true,
+			usesTop: true
 		};
 
 		return renderIndicatorBoxes(props);

@@ -9,7 +9,7 @@ import {
 	string,
 	templateName
 } from './helpers';
-import {DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
+import {DEFAULT_NAVIGATION_SETTINGS, DEFAULT_TOP_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {extend, isObject} from 'src/helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
@@ -108,6 +108,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		navigation = DEFAULT_NAVIGATION_SETTINGS,
 		showEmptyData = true,
 		sorting = DEFAULT_TABLE_SORTING,
+		top = DEFAULT_TOP_SETTINGS,
 		table,
 		type
 	} = widget;
@@ -127,6 +128,7 @@ const tableNormalizer = (widget: LegacyWidget): TableWidget => {
 		sorting,
 		table: extend(DEFAULT_TABLE_SETTINGS, table),
 		templateName: templateName(widget),
+		top,
 		type
 	};
 };

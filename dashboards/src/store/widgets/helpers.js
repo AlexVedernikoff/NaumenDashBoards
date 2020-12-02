@@ -120,6 +120,19 @@ const hasBreakdown = (widget: Object): boolean => !!widget.data
 		.filter(set => !set.sourceForCompute)
 		.find(set => !!set[FIELDS.breakdown]);
 
+/**
+ * Проверяет является ли переданный тип агрегации допустимым для выборки топ значений
+ * @param {string} aggregation - тип агрегации
+ * @returns {boolean}
+ */
+const isAllowedTopAggregation = (aggregation: string) => {
+	const {COUNT, PERCENT} = DEFAULT_AGGREGATION;
+	const {AVG, MAX, MIN} = INTEGER_AGGREGATION;
+	const allowedAggregations = [AVG, COUNT, MAX, MIN, PERCENT];
+
+	return allowedAggregations.includes(aggregation);
+};
+
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
@@ -128,6 +141,7 @@ export {
 	hasMetaClass,
 	hasMSInterval,
 	hasPercent,
+	isAllowedTopAggregation,
 	isGroupKey,
 	parseMSInterval,
 	transformGroupFormat

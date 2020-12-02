@@ -4,6 +4,7 @@ import type {
 	AxisWidget,
 	CircleWidget,
 	ComboWidget,
+	DataTopSettings,
 	MixedAttribute,
 	SpeedometerWidget,
 	SummaryWidget,
@@ -13,12 +14,14 @@ import type {
 } from 'store/widgets/data/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {BUILD_DATA_EVENTS} from './constants';
+import {countIndicators} from 'components/organisms/DiagramWidgetEditForm/components/TableForm/helpers';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {getBuildSet} from 'store/widgets/data/helpers';
+import {isAllowedTopAggregation, transformGroupFormat} from 'store/widgets/helpers';
 import {mixinBreakdown} from 'utils/normalizer/widget/helpers';
 import type {PostData, ReceiveBuildDataPayload} from './types';
-import {transformGroupFormat} from 'store/widgets/helpers';
 
 const getSourceValue = source => source && typeof source === 'object' ? source.value : '';
 
@@ -56,6 +59,19 @@ const resetComputedAttributeState = (attribute: MixedAttribute) => {
 	return attribute;
 };
 
+/**
+ * Возвращает количество необходимых значений для выборки топа
+ * @param {DataTopSettings} settings - настройка для выборки топ значений
+ * @param {string} aggregation - тип агрегации
+ * @param {boolean} disabled - указывает на блокировку возможности использования выборки топа
+ * @returns {number|null}
+ */
+const getTopCount = (settings: DataTopSettings, aggregation: string, disabled: boolean = false) => {
+	const {count, show} = settings;
+
+	return show && isAllowedTopAggregation(aggregation) && !disabled ? count : null;
+};
+
 const createAxisData = (widget: AxisWidget) => {
 	const {sorting, type} = widget;
 	const data: Object = {};
@@ -72,11 +88,13 @@ const createAxisData = (widget: AxisWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, showEmptyData, yAxis} = set;
+			const {aggregation, showEmptyData, top, yAxis} = set;
+
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation: transformAggregation(aggregation, type),
 				showEmptyData,
+				top: getTopCount(top, aggregation),
 				yAxis: resetComputedAttributeState(yAxis)
 			};
 
@@ -109,13 +127,15 @@ const createCircleData = (widget: CircleWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, indicator, showEmptyData} = set;
+			const {aggregation, indicator, showEmptyData, top} = set;
+
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation,
 				indicator: resetComputedAttributeState(indicator),
 				showEmptyData,
-				sourceForCompute: false
+				sourceForCompute: false,
+				top: getTopCount(top, aggregation)
 			};
 
 			data[dataKey] = mixinBreakdown(set, data[dataKey], true);
@@ -145,11 +165,12 @@ const createComboData = (widget: ComboWidget) => {
 		};
 
 		if (!set.sourceForCompute) {
-			const {aggregation, showEmptyData, type, yAxis} = set;
+			const {aggregation, showEmptyData, top, type, yAxis} = set;
 			data[dataKey] = {
 				...data[dataKey],
 				aggregation: transformAggregation(aggregation, type),
 				showEmptyData,
+				top: getTopCount(top, aggregation),
 				type,
 				yAxis: resetComputedAttributeState(yAxis)
 			};
@@ -196,7 +217,7 @@ const createSummaryData = (widget: SummaryWidget | SpeedometerWidget) => {
 };
 
 const createTableData = (widget: TableWidget) => {
-	const {calcTotalColumn, showEmptyData, table, type} = widget;
+	const {calcTotalColumn, showEmptyData, table, top, type} = widget;
 	const {showRowNum} = table.body;
 	const data: Object = {};
 
@@ -232,6 +253,7 @@ const createTableData = (widget: TableWidget) => {
 		data,
 		showEmptyData,
 		showRowNum,
+		top: getTopCount(top, getBuildSet(widget).indicators.aggregation, countIndicators(widget.data) > 1),
 		type
 	};
 };

@@ -44,7 +44,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 			name: FIELDS.yAxis,
 			onSelectCallback: this.onSelectIndicatorCallback,
 			renderLeftControl: this.renderChartInput,
-			usesEmptyData: true
+			usesEmptyData: true,
+			usesTop: true
 		};
 
 		return renderIndicatorBoxes(props);

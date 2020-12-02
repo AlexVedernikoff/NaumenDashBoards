@@ -1,13 +1,14 @@
 // @flow
-import {BreakdownFieldset, ExtendingFieldset} from 'DiagramWidgetEditForm/components';
+import {BreakdownFieldset, DataTopField, ExtendingFieldset} from 'DiagramWidgetEditForm/components';
+import {countIndicators, getDefaultIndicator, hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {DataTopSettings} from 'store/widgets/data/types';
 import {FieldError, IconButton} from 'components/atoms';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
-import {getDefaultSystemGroup} from 'store/widgets/helpers';
-import {hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
+import {getDefaultSystemGroup, isAllowedTopAggregation} from 'store/widgets/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {IndicatorsBox, ParametersBox} from './components';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
@@ -49,6 +50,11 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const parameter = values.data[index][name];
 
 		setDataFieldValue(index, name, changeAttributeTitle(parameter, parent, label));
+	};
+
+	handleChangeTopSettings = (top: DataTopSettings) => {
+		const {setFieldValue} = this.props;
+		setFieldValue(FIELDS.top, top);
 	};
 
 	handleExtendBreakdown = (index: number) => () => {
@@ -122,6 +128,14 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		);
 	};
 
+	renderDataTopField = () => {
+		const {data, top} = this.props.values;
+		const {indicators = [getDefaultIndicator()]} = data[this.mainIndex];
+		const disabled = countIndicators(data) > 1 || !isAllowedTopAggregation(indicators[0].aggregation);
+
+		return <DataTopField disabled={disabled} onChange={this.handleChangeTopSettings} value={top} />;
+	};
+
 	renderIndicatorsBox = (dataSet: DataSet, index: number, calcTotalColumn: boolean) => {
 		if (!dataSet.sourceForCompute) {
 			return (
@@ -185,6 +199,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				{renderBaseBoxes()}
 				{data.map(this.renderDataSet)}
 				{this.renderBreakdownFieldSet()}
+				{this.renderDataTopField()}
 				{renderShowEmptyDataCheckbox()}
 				{renderDisplayModeSelect()}
 				{renderNavigationBox()}

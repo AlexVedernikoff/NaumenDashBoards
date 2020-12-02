@@ -13,6 +13,7 @@ const column: 'column' = 'column';
 const columnHeader: 'columnHeader' = 'columnHeader';
 const columnsRatioWidth: 'columnsRatioWidth' = 'columnsRatioWidth';
 const computedAttrs: 'computedAttrs' = 'computedAttrs';
+const count: 'count' = 'count';
 const data: 'data' = 'data';
 const dataLabels: 'dataLabels' = 'dataLabels';
 const dataKey: 'dataKey' = 'dataKey';
@@ -63,6 +64,7 @@ const templateName: 'templateName' = 'templateName';
 const textAlign: 'textAlign' = 'textAlign';
 const textHandler: 'textHandler' = 'textHandler';
 const tip: 'tip' = 'tip';
+const top: 'top' = 'top';
 const type: 'type' = 'type';
 const value: 'value' = 'value';
 const use: 'use' = 'use';
@@ -87,6 +89,7 @@ const FIELDS = {
 	columnHeader,
 	columnsRatioWidth,
 	computedAttrs,
+	count,
 	data,
 	dataKey,
 	dataLabels,
@@ -137,6 +140,7 @@ const FIELDS = {
 	textHandler,
 	tickAmount,
 	tip,
+	top,
 	type,
 	use,
 	useName,

@@ -1,12 +1,12 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {BreakdownFieldset, ComputedBreakdownFieldset, ExtendingFieldset, IndicatorFieldset} from 'DiagramWidgetEditForm/components';
-import type {ComputedAttr, MixedAttribute} from 'store/widgets/data/types';
+import {BreakdownFieldset, ComputedBreakdownFieldset, DataTopField, ExtendingFieldset, IndicatorFieldset} from 'DiagramWidgetEditForm/components';
+import type {ComputedAttr, DataTopSettings, MixedAttribute} from 'store/widgets/data/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
-import {getDefaultSystemGroup} from 'store/widgets/helpers';
+import {getDefaultSystemGroup, isAllowedTopAggregation} from 'store/widgets/helpers';
 import {getMapValues} from 'src/helpers';
 import {LegacyCheckbox as Checkbox} from 'components/atoms';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
@@ -20,7 +20,8 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		children: null,
 		name: FIELDS.indicator,
 		usesBreakdown: true,
-		usesEmptyData: false
+		usesEmptyData: false,
+		usesTop: false
 	};
 
 	createComputedBreakdown = (indicator: ComputedAttr) => {
@@ -47,6 +48,11 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	handleChangeShowEmptyData = (name: string, value: boolean) => {
 		const {index, setDataFieldValue} = this.props;
 		setDataFieldValue(index, name, value);
+	};
+
+	handleChangeTopSettings = (top: DataTopSettings) => {
+		const {index, setDataFieldValue} = this.props;
+		setDataFieldValue(index, FIELDS.top, top);
 	};
 
 	handleExtendBreakdown = (index: number) => () => {
@@ -182,6 +188,13 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		);
 	};
 
+	renderDataTopField = () => {
+		const {aggregation, top} = this.props.dataSet;
+		const disabled = !isAllowedTopAggregation(aggregation);
+
+		return <DataTopField disabled={disabled} onChange={this.handleChangeTopSettings} value={top} />;
+	};
+
 	renderDefaultBreakdownFieldSet = () => {
 		const {dataSet, errors, handleChangeGroup, index} = this.props;
 		const errorKey = getDataErrorKey(index, FIELDS.breakdown);
@@ -211,6 +224,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 			<FormBox leftControl={control} title="Показатель">
 				{this.renderIndicatorFieldSet()}
 				{this.renderBreakdownFieldSet()}
+				{this.renderDataTopField()}
 				{children}
 			</FormBox>
 		);

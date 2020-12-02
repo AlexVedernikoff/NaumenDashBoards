@@ -19,8 +19,8 @@ import {
 	string,
 	templateName
 } from './helpers';
-import type {AxisWidget} from 'store/widgets/data/types';
-import {DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
+import type {AxisData, AxisWidget} from 'store/widgets/data/types';
+import {DEFAULT_NAVIGATION_SETTINGS, DEFAULT_TOP_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {LegacyWidget} from './types';
@@ -54,7 +54,7 @@ const getDataFields = () => {
 	};
 };
 
-const normalizeDataSet = (set: Object, index: number, data: Array<Object>) => {
+const normalizeDataSet = (set: Object, index: number, data: Array<Object>): AxisData => {
 	const {dataKey, descriptor, group, source, xAxis} = set;
 	let resultSet = {
 		dataKey,
@@ -66,12 +66,13 @@ const normalizeDataSet = (set: Object, index: number, data: Array<Object>) => {
 	};
 
 	if (!set.sourceForCompute) {
-		const {aggregation, showEmptyData, yAxis} = set;
+		const {aggregation, showEmptyData, top = DEFAULT_TOP_SETTINGS, yAxis} = set;
 		resultSet = {
 			...resultSet,
 			aggregation: aggregationFilter(aggregation),
 			showEmptyData: !!showEmptyData,
 			sourceForCompute: false,
+			top,
 			yAxis
 		};
 		resultSet = mixinBreakdown({...set, breakdown: breakdown(index, data, FIELDS.yAxis)}, resultSet);
