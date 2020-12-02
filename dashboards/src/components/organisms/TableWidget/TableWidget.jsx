@@ -121,7 +121,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		}
 
 		return this.isIndicatorColumn(column) && aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE
-			&& (attribute.type in ATTRIBUTE_SETS.REF || attribute.type === ATTRIBUTE_TYPES.string);
+			&& (attribute.type in ATTRIBUTE_SETS.REFERENCE || attribute.type === ATTRIBUTE_TYPES.string);
 	};
 
 	isGroupColumn = (column: Column): boolean => column.type === COLUMN_TYPES.PARAMETER;

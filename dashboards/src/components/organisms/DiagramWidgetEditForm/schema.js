@@ -28,7 +28,7 @@ const getErrorMessage = (key: string) => {
 const validateAttribute = (value: Attribute | null) => {
 	let attribute = value;
 
-	if (attribute && attribute.type in ATTRIBUTE_SETS.REF) {
+	if (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE) {
 		attribute = attribute.ref;
 	}
 

@@ -157,7 +157,7 @@ export class DiagramWidgetEditForm extends Component<Props> {
 			parent = null;
 		}
 
-		if (value && value.type in ATTRIBUTE_SETS.REF && !value.ref) {
+		if (value && value.type in ATTRIBUTE_SETS.REFERENCE && !value.ref) {
 			const key = createRefKey(value);
 
 			if (refAttributes[key]) {

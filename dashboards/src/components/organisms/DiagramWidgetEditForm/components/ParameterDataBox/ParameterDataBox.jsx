@@ -101,7 +101,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 
 		value = transformAttribute(event, this.handleSelect, index);
 
-		if (index === 0 && (!currentValue || currentValue.type !== value.type)) {
+		if (index === 0 && (!currentValue || value.type in ATTRIBUTE_SETS.REFERENCE || currentValue.type !== value.type)) {
 			setDataFieldValue(index, FIELDS.group, getDefaultSystemGroup(value));
 		}
 
@@ -119,7 +119,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 	renderParameterFieldset = (dataSet: DataSet, index: number) => {
 		const {errors, name, values} = this.props;
 		const parameter = dataSet[name];
-		const disabledGroup = index !== 0 && parameter && !(parameter.type in ATTRIBUTE_SETS.REF);
+		const disabledGroup = index !== 0 && parameter && !(parameter.type in ATTRIBUTE_SETS.REFERENCE);
 		const errorKey = getDataErrorKey(index, name);
 
 		return (
