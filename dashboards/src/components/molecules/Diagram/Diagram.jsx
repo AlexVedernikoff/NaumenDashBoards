@@ -12,6 +12,13 @@ import styles from './styles.less';
 import type {TableWidget as TableWidgetType} from 'store/widgets/data/types';
 
 export class Diagram extends Component<Props, State> {
+	static defaultProps = {
+		buildData: {
+			error: false,
+			loading: false
+		}
+	};
+
 	ref: DivRef = createRef();
 	nameRef: DivRef = createRef();
 
@@ -35,7 +42,11 @@ export class Diagram extends Component<Props, State> {
 
 	getBuildData = () => {
 		const {buildData, fetchBuildData, widget} = this.props;
-		!buildData && fetchBuildData(widget);
+		const {data, error, loading} = buildData;
+
+		if (!(error || loading || data)) {
+			fetchBuildData(widget);
+		}
 	};
 
 	isUpdated = (prevProps: Props, nextProps: Props): boolean => {
@@ -72,10 +83,10 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	renderContent = () => {
-		const {buildData = {}, widget} = this.props;
-		const {error, loading = true} = buildData;
+		const {buildData, widget} = this.props;
+		const {data, error, loading} = buildData;
 
-		if (!(loading || error)) {
+		if (!(loading || error) && data) {
 			const contentCN = cn({
 				[styles.content]: true,
 				[styles.reverseContent]: widget.header.position === HEADER_POSITIONS.BOTTOM
