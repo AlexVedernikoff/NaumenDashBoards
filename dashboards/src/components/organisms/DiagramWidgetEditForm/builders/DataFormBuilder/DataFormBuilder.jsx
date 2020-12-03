@@ -180,16 +180,18 @@ export class DataFormBuilder extends Component<Props> {
 	};
 
 	renderNavigationBox = () => {
-		const {dashboards, fetchDashboards, setFieldValue, values} = this.props;
+		const {dashboards, fetchDashboards, personalDashboard, setFieldValue, user, values} = this.props;
 
-		return (
-			<NavigationBox
-				dashboards={dashboards}
-				fetchDashboards={fetchDashboards}
-				onChange={setFieldValue}
-				settings={values.navigation}
-			/>
-		);
+		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+			return (
+				<NavigationBox
+					dashboards={dashboards}
+					fetchDashboards={fetchDashboards}
+					onChange={setFieldValue}
+					settings={values.navigation}
+				/>
+			);
+		}
 	};
 
 	renderParameterBox = (props: ParameterBoxProps) => <ParameterDataBox name={props.name} />;
