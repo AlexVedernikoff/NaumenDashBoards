@@ -6,7 +6,7 @@ export type FetchUsers = () => ThunkAction;
 
 export type User = {
 	email: string,
-	name: string
+	name?: string
 };
 
 export type ReceiveUsers = {

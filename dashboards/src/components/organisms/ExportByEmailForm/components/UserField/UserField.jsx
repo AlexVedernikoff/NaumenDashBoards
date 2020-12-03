@@ -1,7 +1,7 @@
 // @flow
 import {IconButton} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import type {OnSelectEvent} from 'components/types';
+import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {Select} from 'components/molecules';
@@ -11,10 +11,25 @@ import type {User} from 'store/users/types';
 export class UserField extends PureComponent<Props> {
 	getUserLabel = (user: User) => {
 		const {email, name} = user;
-		return email ? `${name} (${email})` : `${name}`;
+		let label = '';
+
+		if (name && email) {
+			label = `${name} (${email})`;
+		} else if (name) {
+			label = name;
+		} else if (email) {
+			label = email;
+		}
+
+		return label;
 	};
 
 	getUserValue = (user: User) => user.email;
+
+	handleChangeLabel = ({value}: OnChangeInputEvent) => {
+		const {index, onSelect} = this.props;
+		onSelect(index, {email: value.toString()});
+	};
 
 	handleRemoveUser = () => {
 		const {index, onRemove} = this.props;
@@ -52,12 +67,14 @@ export class UserField extends PureComponent<Props> {
 			<Select
 				async={true}
 				className={styles.select}
+				editable={true}
 				error={error}
 				fetchOptions={fetchUsers}
 				getOptionLabel={this.getUserLabel}
 				getOptionValue={this.getUserValue}
 				isSearching={true}
 				loading={loading}
+				onChangeLabel={this.handleChangeLabel}
 				onSelect={this.handleSelectUser}
 				options={options}
 				uploaded={uploaded}
