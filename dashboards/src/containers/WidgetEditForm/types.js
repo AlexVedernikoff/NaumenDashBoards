@@ -23,6 +23,8 @@ export type UpdateWidget = (widget: Object, values: Values) => AnyWidget;
 
 export type FormElement = HTMLDivElement | HTMLFormElement;
 
+export type YupType = Object;
+
 export type ValidateOptions = {
 	abortEarly?: boolean,
 	context?: Object,

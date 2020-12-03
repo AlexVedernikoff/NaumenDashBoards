@@ -4,6 +4,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import type {YupType} from 'containers/WidgetEditForm/types';
 
 const getErrorMessage = (key: string) => {
 	const messages = {
@@ -169,16 +170,27 @@ const requiredByCompute = (key: string, rule: Object) => {
 	}).nullable();
 };
 
-const validateSources = mixed().when(FIELDS.data, {
-		is: data => data.length > 1,
-		then: mixed().test(
-			'check-sources-number',
-			'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
-			function () {
-				const {data} = this.options.parent;
-				return data.filter(dataSet => !dataSet.sourceForCompute).length === 1;
+const testSourcesNumber = (type: YupType) => type.when(FIELDS.data, {
+	is: data => data.length > 1,
+	then: mixed().test(
+		'check-sources-number',
+		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
+		function () {
+			const {data} = this.options.parent;
+			return data.filter(dataSet => !dataSet.sourceForCompute).length === 1;
 		})
-	}
+});
+
+const testMinSourcesNumber = (type: YupType) => type.test(
+	'check-min-sources-number',
+	'Должен быть выбран как минимум один источник для построения',
+	function () {
+		const {data} = this.options.parent;
+		return data.filter(dataSet => !dataSet.sourceForCompute).length > 0;
+});
+
+const validateSources = testSourcesNumber(
+	testMinSourcesNumber(mixed())
 );
 
 const rules = {
@@ -188,6 +200,7 @@ const rules = {
 	requiredAttribute,
 	requiredBreakdown,
 	requiredByCompute,
+	testMinSourcesNumber,
 	validateSources
 };
 

@@ -1,5 +1,5 @@
 // @flow
-import {array, object} from 'yup';
+import {array, mixed, object} from 'yup';
 import type {ComboWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
@@ -14,8 +14,8 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class ComboChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, parameterRule, requiredByCompute} = rules;
-		const {breakdown, source, xAxis, yAxis} = FIELDS;
+		const {base, conditionalBreakdown, parameterRule, requiredByCompute, testMinSourcesNumber} = rules;
+		const {breakdown, source, sources, xAxis, yAxis} = FIELDS;
 
 		return object({
 			...base,
@@ -24,7 +24,8 @@ export class ComboChartForm extends Component<TypedFormProps> {
 				[source]: object().required(getErrorMessage(source)).nullable(),
 				[xAxis]: parameterRule(xAxis),
 				[yAxis]: requiredByCompute(yAxis)
-			}))
+			})),
+			[sources]: testMinSourcesNumber(mixed())
 		});
 	};
 

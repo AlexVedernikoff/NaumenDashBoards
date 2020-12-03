@@ -19,8 +19,8 @@ export class SourceFieldset extends Component<Props> {
 	};
 
 	callFilterModal = async () => {
-		const {index, onChangeDescriptor, set} = this.props;
-		const {descriptor, source} = set;
+		const {dataSet, index, onChangeDescriptor} = this.props;
+		const {descriptor, source} = dataSet;
 
 		if (source) {
 			const {value: classFqn} = source;
@@ -66,8 +66,8 @@ export class SourceFieldset extends Component<Props> {
 	};
 
 	handleChangeSourceLabel = (event: OnChangeLabelEvent) => {
-		const {index, onChange, set} = this.props;
-		let {source} = set;
+		const {dataSet, index, onChange} = this.props;
+		let {source} = dataSet;
 
 		if (source) {
 			const {label, name} = event;
@@ -105,23 +105,25 @@ export class SourceFieldset extends Component<Props> {
 	};
 
 	renderComputeCheckbox = () => {
-		const {set} = this.props;
-		const {sourceForCompute} = set;
+		const {computable, dataSet} = this.props;
+		const {sourceForCompute} = dataSet;
 
-		return (
-			<Checkbox
-				label="Только для вычислений"
-				name={FIELDS.sourceForCompute}
-				onClick={this.handleChangeCompute}
-				value={sourceForCompute}
-			/>
-		);
+		if (computable) {
+			return (
+				<Checkbox
+					label="Только для вычислений"
+					name={FIELDS.sourceForCompute}
+					onClick={this.handleChangeCompute}
+					value={sourceForCompute}
+				/>
+			);
+		}
 	};
 
 	renderFilterButton = () => {
-		const {set, usesFilter} = this.props;
+		const {dataSet, usesFilter} = this.props;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
-		const {descriptor} = set;
+		const {descriptor} = dataSet;
 		const active = descriptor && !!JSON.parse(descriptor).filters;
 		const iconName = active ? FILLED_FILTER : FILTER;
 
@@ -150,8 +152,8 @@ export class SourceFieldset extends Component<Props> {
 	};
 
 	renderSourceSelect = () => {
-		const {error, set, sources} = this.props;
-		const {source} = set;
+		const {dataSet, error, sources} = this.props;
+		const {source} = dataSet;
 		let initialSelected;
 
 		if (source) {

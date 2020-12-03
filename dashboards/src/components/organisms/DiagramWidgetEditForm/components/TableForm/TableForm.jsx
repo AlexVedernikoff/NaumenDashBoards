@@ -1,5 +1,5 @@
 // @flow
-import {array, object} from 'yup';
+import {array, mixed, object} from 'yup';
 import {checkSourceForParent, getDefaultIndicator, getDefaultParameter} from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {extend} from 'src/helpers';
@@ -15,7 +15,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class TableForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, validateSources} = rules;
+		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, testMinSourcesNumber} = rules;
 		const {breakdown, indicator, indicators, parameter, parameters, source, sources} = FIELDS;
 
 		return object({
@@ -36,7 +36,7 @@ export class TableForm extends Component<TypedFormProps> {
 						checkSourceForParent
 					)
 			})),
-			[sources]: validateSources
+			[sources]: testMinSourcesNumber(mixed())
 		});
 	};
 
