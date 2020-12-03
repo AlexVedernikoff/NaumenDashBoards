@@ -71,9 +71,9 @@ export class TextEditor extends PureComponent<Props> {
 					customStyleMap={styleMap}
 					editorState={value}
 					handleKeyCommand={handleKeyCommand}
+					handlePastedText={this.handlePastedText}
 					keyBindingFn={keyBindingFn}
 					onChange={this.handleChange}
-					onPaste={this.handlePastedText}
 					readOnly={readOnly}
 					ref={this.editorRef}
 					textAlignment={textAlign}
