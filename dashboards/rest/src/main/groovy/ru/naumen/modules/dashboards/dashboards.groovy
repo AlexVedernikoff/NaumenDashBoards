@@ -752,7 +752,7 @@ String getDashboardLink(String dashboardCode)
         def db = api.apps.listContents(appCode).find {
             it.contentUuid == dashboardUUID
         }
-        String usedUUID = user ? user.UUID : api.utils.findFirst(subjectFqn, ['removed': false]).UUID
+        String usedUUID = (user && user.metaClass?.toString() == subjectFqn) ? user.UUID : api.utils.findFirst(subjectFqn, ['removed': false]).UUID
         def link = api.web.openTab(usedUUID, db.tabUuid).replace('?anchor=', '#')
         return toJson([link: link])
     }
