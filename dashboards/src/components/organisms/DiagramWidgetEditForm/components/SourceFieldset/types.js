@@ -6,6 +6,8 @@ import type {SetDataFieldValue} from 'containers/WidgetEditForm/types';
 import type {SourceRefFields} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 
 export type Props = {
+	computable: boolean,
+	dataSet: DataSet,
 	error: string,
 	index: number,
 	onChange: SetDataFieldValue,
@@ -14,7 +16,6 @@ export type Props = {
 	onRemove: (index: number) => void,
 	onSelectSource: (index: number, event: OnSelectEvent, sourceRefFields: SourceRefFields) => void,
 	removable: boolean,
-	set: DataSet,
 	sourceRefFields: SourceRefFields,
 	sources: DataSourceMap,
 	usesFilter: boolean
