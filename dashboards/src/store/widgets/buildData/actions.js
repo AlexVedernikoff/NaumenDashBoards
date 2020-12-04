@@ -253,7 +253,7 @@ const createTableData = (widget: TableWidget) => {
 		data,
 		showEmptyData,
 		showRowNum,
-		top: getTopCount(top, getBuildSet(widget).indicators.aggregation, countIndicators(widget.data) > 1),
+		top: getTopCount(top, getBuildSet(widget).indicators[0].aggregation, countIndicators(widget.data) > 1),
 		type
 	};
 };
