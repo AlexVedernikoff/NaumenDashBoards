@@ -1,10 +1,15 @@
 // @flow
+import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
 class LegacyCheckbox extends Component<Props> {
+	static defaultProps = {
+		className: ''
+	};
+
 	handleClick = () => {
 		const {name, onClick, value} = this.props;
 		onClick(name, !value);
@@ -27,7 +32,7 @@ class LegacyCheckbox extends Component<Props> {
 
 	render () {
 		return (
-			<label className={styles.container} onClick={this.handleClick}>
+			<label className={cn(styles.container, this.props.className)} onClick={this.handleClick}>
 				{this.renderCheckbox()}
 				{this.renderLabel()}
 			</label>
