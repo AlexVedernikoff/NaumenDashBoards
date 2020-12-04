@@ -52,6 +52,15 @@ async function checkSourceForParent () {
 	return result;
 }
 
+/**
+ * Подсчитывает количество показателей
+ * @param {DataSet} data - набор данных виджета
+ * @returns {number}
+ */
+const countIndicators = (data: Array<DataSet>): number => data.reduce((count, {indicators}) => {
+	return Array.isArray(indicators) ? count + indicators.length : count;
+}, 0);
+
 const getDefaultIndicator = () => ({
 	aggregation: DEFAULT_AGGREGATION.COUNT,
 	attribute: null
@@ -64,6 +73,7 @@ const getDefaultParameter = () => ({
 
 export {
 	checkSourceForParent,
+	countIndicators,
 	getDefaultIndicator,
 	getDefaultParameter,
 	hasDifferentAggregations

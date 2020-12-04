@@ -2,6 +2,7 @@
 import {array, mixed, object} from 'yup';
 import {checkSourceForParent, getDefaultIndicator, getDefaultParameter} from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
+import {DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
@@ -11,7 +12,6 @@ import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetE
 import React, {Component} from 'react';
 import type {TableWidget, Widget} from 'store/widgets/data/types';
 import type {Values} from 'containers/WidgetEditForm/types';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class TableForm extends Component<TypedFormProps> {
 	getSchema = () => {
@@ -62,6 +62,7 @@ export class TableForm extends Component<TypedFormProps> {
 			showEmptyData,
 			table,
 			templateName,
+			top = DEFAULT_TOP_SETTINGS,
 			type
 		} = values;
 
@@ -80,6 +81,7 @@ export class TableForm extends Component<TypedFormProps> {
 			sorting,
 			table: extend(DEFAULT_TABLE_SETTINGS, table),
 			templateName,
+			top,
 			type
 		};
 	};

@@ -19,7 +19,13 @@ import {
 	templateName
 } from './helpers';
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
-import {COMBO_TYPES, DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {
+	COMBO_TYPES,
+	DEFAULT_NAVIGATION_SETTINGS,
+	DEFAULT_TOP_SETTINGS,
+	DISPLAY_MODE,
+	WIDGET_TYPES
+} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDefaultComboYAxisName} from 'store/widgets/data/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
@@ -48,12 +54,13 @@ const normalizeDataSet = (dataSet: ComboData, index: number, data: Array<ComboDa
 	};
 
 	if (!dataSet.sourceForCompute) {
-		const {aggregation, showEmptyData, type = WIDGET_TYPES.COLUMN, yAxis, yAxisName} = dataSet;
+		const {aggregation, showEmptyData, top = DEFAULT_TOP_SETTINGS, type = WIDGET_TYPES.COLUMN, yAxis, yAxisName} = dataSet;
 		resultSet = {
 			...resultSet,
 			aggregation: aggregationFilter(aggregation),
 			showEmptyData: !!showEmptyData,
 			sourceForCompute: false,
+			top,
 			type,
 			yAxis,
 			yAxisName

@@ -216,13 +216,18 @@ const HEADER_POSITIONS = {
 	TOP
 };
 
-const DEFAULT_NAVIGATION_SETTINGS = {
+const DEFAULT_NAVIGATION_SETTINGS = Object.freeze({
 	dashboard: null,
 	show: false,
 	showTip: false,
 	tip: '',
 	widget: null
-};
+});
+
+const DEFAULT_TOP_SETTINGS = Object.freeze({
+	count: 5,
+	show: false
+});
 
 export {
 	COMBO_TYPES,
@@ -230,6 +235,7 @@ export {
 	DEFAULT_CIRCLE_SORTING_SETTINGS,
 	DEFAULT_NAVIGATION_SETTINGS,
 	DEFAULT_TABLE_VALUE,
+	DEFAULT_TOP_SETTINGS,
 	DIAGRAM_WIDGET_TYPES,
 	DISPLAY_MODE,
 	FONT_FAMILIES,

@@ -346,26 +346,10 @@ const setCreatedWidget = (payload: AnyWidget) => ({
 	type: WIDGETS_EVENTS.SET_CREATED_WIDGET
 });
 
-const setWidgets = (widgets: Array<AnyWidget>): Object => {
-	const payload = widgets
-		.map(rawWidget => {
-			let widget;
-
-			try {
-				widget = normalizer.widget(rawWidget);
-			} catch (e) {
-				widget = null;
-			}
-
-			return widget;
-		})
-		.filter(widget => widget);
-
-	return ({
-		payload,
-		type: WIDGETS_EVENTS.SET_WIDGETS
-	});
-};
+const setWidgets = (payload: Array<AnyWidget>): Object => ({
+	payload,
+	type: WIDGETS_EVENTS.SET_WIDGETS
+});
 
 const updateWidget = (payload: AnyWidget) => ({
 	payload,
