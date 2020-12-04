@@ -53,7 +53,7 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
 		},
 		enabled: show && !dataLabelsLimitIsExceeded,
 		style: {
-			colors: [fontColor],
+			colors: new Array(series.length).fill(fontColor),
 			fontFamily,
 			fontSize
 		}

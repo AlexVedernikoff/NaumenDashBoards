@@ -3,7 +3,6 @@ import type {ApexOptions} from 'apexcharts';
 import {
 	axisLabelFormatter,
 	getLegendOptions,
-	getMetaClassLabel,
 	getXAxisLabels,
 	getXAxisOptions,
 	getYAxisOptions,
@@ -82,13 +81,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 			},
 			tooltip: {
 				intersect: true,
-				shared: false,
-				y: {
-					formatter: valueFormatter(usesMSInterval, usesPercent && !stacked),
-					title: {
-						formatter: breakdownUsesMetaClass && getMetaClassLabel
-					}
-				}
+				shared: false
 			},
 			xaxis: extend(xaxis, getXAxisOptions(xAxisSettings)),
 			yaxis: extend(yaxis, getYAxisOptions(yAxisSettings))

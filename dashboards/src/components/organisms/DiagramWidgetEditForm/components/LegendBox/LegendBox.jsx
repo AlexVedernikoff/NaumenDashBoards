@@ -70,16 +70,16 @@ export class LegendBox extends PureComponent<Props> {
 
 		return (
 			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={data.show} title="Легенда">
-				<FormField label="Шрифт" row>
+				<FormField row>
 					{renderFontFamilySelect()}
 					{renderFontSizeSelect()}
 				</FormField>
-				<FormField row>
-					{this.renderLegendPositionButtons()}
-					{renderTextHandlerButtons()}
-				</FormField>
 				<FormField>
+					{this.renderLegendPositionButtons()}
+				</FormField>
+				<FormField row>
 					{this.renderLegendDisplayTypeButtons()}
+					{renderTextHandlerButtons()}
 				</FormField>
 			</ToggableFormBox>
 		);

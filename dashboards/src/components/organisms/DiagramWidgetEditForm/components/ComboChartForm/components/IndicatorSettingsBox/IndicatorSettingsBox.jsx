@@ -8,6 +8,7 @@ import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import styles from './styles.less';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class IndicatorSettingsBox extends PureComponent<Props, State> {
@@ -89,12 +90,12 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 	};
 
 	renderScaleField = (name: string) => {
-		const {[name]: value = 'auto'} = this.props.data;
+		const {[name]: value} = this.props.data;
 
 		return (
 			<FormField row small>
 				<HorizontalLabel>{name}</HorizontalLabel>
-				<TextInput name={name} onChange={this.handleChange} onlyNumber={true} value={value} />
+				<TextInput name={name} onChange={this.handleChange} onlyNumber={true} placeholder="auto" value={value} />
 			</FormField>
 		);
 	};
@@ -105,6 +106,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 
 		return (
 			<LegacyCheckbox
+				className={styles.showDependentCheckbox}
 				label="Показывать зависимо"
 				name={FIELDS.showDependent}
 				onClick={this.handleClickDependentCheckbox}
