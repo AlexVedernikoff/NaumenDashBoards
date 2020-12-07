@@ -807,7 +807,7 @@ class QueryWrapper implements CriteriaWrapper
         switch (type)
         {
             case Aggregation.COUNT_CNT:
-                return api.selectClause.&count
+                return api.selectClause.&countDistinct
             case Aggregation.SUM:
                 return api.selectClause.&sum
             case Aggregation.AVG:
