@@ -150,7 +150,9 @@ class WidgetEditForm extends PureComponent<Props, State> {
 			[name]: value
 		};
 
-		isSubmitting && this.validate(values);
+		if (isSubmitting && prevValues.type === values.type) {
+			this.validate(values);
+		}
 
 		return {
 			values
