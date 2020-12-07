@@ -14,3 +14,10 @@ export const CALENDAR_VIEW_TYPES = {
 	'{month=Месяц}': 'month',
 	'{week=Неделя}': 'week'
 };
+
+export const CALENDAR_STATUS_FILTER = [
+	{id: 'closed', value: 'Есть записи на прием'},
+	{id: 'registered', value: 'Запись доступна'},
+	{id: 'queue', value: 'Прием по живой очереди'},
+	{id: 'limited', value: 'Недоступные записи'}
+];

@@ -1,8 +1,9 @@
 // @flow
 import React, {Fragment, useCallback, useEffect} from 'react';
-import {Checkbox} from '@progress/kendo-react-inputs';
+import {CALENDAR_STATUS_FILTER} from '../../../constants';
 import DropdownList from 'components/molecules/DropdownList';
 import {LOCATION_TYPES} from 'constants/index';
+import {MultiSelect} from '@progress/kendo-react-dropdowns';
 import type {Props} from 'containers/CalendarSelectors/types';
 import styles from './CalendarSelectors.less';
 
@@ -13,7 +14,7 @@ const CalendarSelectors = ({
 	isAppSelectorsLoading,
 	locationList,
 	metaClass,
-	selectedOptions: {appointmentsDisabled, calendar, location},
+	selectedOptions: {calendar, calendarStatusFilter, location},
 	setSelectedOption,
 	subjectId
 }: Props) => {
@@ -52,9 +53,9 @@ const CalendarSelectors = ({
 		setSelectedOption('calendar', value);
 	}, []);
 
-	const handleSetAppointment = useCallback((event) => {
+	const handleSetStatusFilter = useCallback((event) => {
 		const {value} = event;
-		setSelectedOption('appointmentsDisabled', value);
+		setSelectedOption('calendarStatusFilter', value);
 	}, []);
 
 	const renderLocationSelector = () => !isLocationSubject && (
@@ -74,20 +75,26 @@ const CalendarSelectors = ({
 			value={calendar}
 		/>;
 
-	const renderAppointmentCheckBox = () =>
-		<Checkbox
-			className={styles.customCheckboxPosition}
-			label="Не отображать записи на прием"
-			onChange={handleSetAppointment}
-			value={appointmentsDisabled}
-		/>;
+	const renderStatusFilter = () =>
+		<div>
+			<p>Фильтр записей</p>
+			<MultiSelect
+				className={styles.multiselect}
+				data={CALENDAR_STATUS_FILTER}
+				dataItemKey="id"
+				onChange={handleSetStatusFilter}
+				placeholder="Все"
+				textField="value"
+				value={calendarStatusFilter}
+			/>
+		</div>;
 
 	if (isAppSelectorsLoading) {
 		return null;
 	}
 
 	if (isCalendarSubject) {
-		return renderAppointmentCheckBox();
+		return renderStatusFilter();
 	}
 
 	return (
@@ -95,7 +102,7 @@ const CalendarSelectors = ({
 			<div className={styles.dropdownContainer}>
 				{renderLocationSelector()}
 				{renderCalendarSelector()}
-				{renderAppointmentCheckBox()}
+				{renderStatusFilter()}
 			</div>
 		</Fragment>
 	);

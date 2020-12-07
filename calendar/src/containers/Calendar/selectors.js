@@ -14,15 +14,15 @@ export const props = (state: State): ConnectedProps => {
 		calendar: {calendarData, calendarResourceColorList, error, isLoading: isCalendarLoading},
 		calendarSelectors: {selectedOptions}
 	} = state;
-	const {appointmentsDisabled, calendar} = selectedOptions;
+	const {calendarStatusFilter, calendar} = selectedOptions;
 	const calendarId = calendar
 		? calendar.id
 		: null;
 	return {
-		appointmentsDisabled,
 		calendarData,
 		calendarId,
 		calendarResourceColorList,
+		calendarStatusFilter,
 		defaultView,
 		error,
 		hideWeekend,

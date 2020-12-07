@@ -1,5 +1,5 @@
 // @flow
-import type {Calendar, CalendarList, Location, LocationList} from './types';
+import type {Calendar, CalendarList, CalendarStatusFilterList, Location, LocationList} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {ALL_CALENDARS_PREFIX} from 'constants/index';
 import {CALENDAR_SELECTORS_EVENTS} from './constants';
@@ -79,7 +79,7 @@ const setError = (payload: Error) => ({
 	type: CALENDAR_SELECTORS_EVENTS.SET_ERROR
 });
 
-const setSelectedOption = (fieldName: string, data: Calendar | Location | null) => ({
+const setSelectedOption = (fieldName: string, data: CalendarStatusFilterList | Calendar | Location | null) => ({
 	payload: {
 		data,
 		fieldName

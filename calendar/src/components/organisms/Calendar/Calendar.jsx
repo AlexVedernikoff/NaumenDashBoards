@@ -48,10 +48,10 @@ load(caGregorian, dateFields, likelySubtags, numbers, timeZoneNames, weekData);
 loadMessages(ruMessages, 'ru-RU');
 
 const Calendar = ({
-	appointmentsDisabled,
 	calendarData,
 	calendarId,
 	calendarResourceColorList,
+	calendarStatusFilter,
 	defaultView,
 	getCalendarData,
 	hideWeekend,
@@ -124,12 +124,12 @@ const Calendar = ({
 		});
 
 		getCalendarData({
-			appointmentsDisabled,
 			calendarId,
+			calendarStatusFilter,
 			dateFrom,
 			dateTo
 		});
-	}, [appointmentsDisabled, calendarId, date, view]);
+	}, [calendarStatusFilter, calendarId, date, view]);
 
 	const handleViewChange = useCallback((event: SchedulerEvent<string>) => {
 		setView(event.value);
@@ -148,12 +148,12 @@ const Calendar = ({
 	const handleRefresh = useCallback(() => {
 		const {dateFrom, dateTo} = datesRef.current;
 		getCalendarData({
-			appointmentsDisabled,
 			calendarId,
+			calendarStatusFilter,
 			dateFrom,
 			dateTo
 		});
-	}, [appointmentsDisabled, calendarId]);
+	}, [calendarStatusFilter, calendarId]);
 
 	const renderSchedulerItem = (props) => (
 		<CustomCalendarItem {...props} onEventClick={openEventLink} />
