@@ -339,7 +339,8 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                 //вернём всё из бд, после сагрегируем
                 showNulls = true
             }
-            def request = mappingTableDiagramRequest(requestContent, subjectUUID, showNulls, computationInRequest)
+            Integer top = requestContent.top as Integer
+            def request = mappingTableDiagramRequest(requestContent, subjectUUID, showNulls, computationInRequest, top)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
             }
@@ -551,6 +552,7 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         }
         def requisite
         Boolean showNulls = data.showEmptyData as Boolean
+        Integer top = data.top as Integer
         if (data.sourceForCompute)
         {
             requisite = null
@@ -564,7 +566,7 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [parameterFilter, breakdownFilter], showNulls: showNulls)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [parameterFilter, breakdownFilter], showNulls: showNulls, top: top)
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
@@ -691,6 +693,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
         }
         def requisite
         Boolean showNulls = data.showEmptyData as Boolean
+        Integer top = data.top as Integer
         if (data.sourceForCompute)
         {
             requisite = null
@@ -704,7 +707,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, aggregationFilter], showNulls: showNulls)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [breakdownFilter, aggregationFilter], showNulls: showNulls, top: top)
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
@@ -788,10 +791,11 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
  * @param subjectUUID - идентификатор "текущего объекта"
  * @param showNulls - флаг на отображение пустых значений
  * @param computationInRequest - флаг на наличие вычислений в запросе
+ * @param top - количество записей, которое нужно вывести
  * @return DiagramRequest
  */
 private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent, String subjectUUID,
-                                                  Boolean showNulls, Boolean computationInRequest)
+                                                  Boolean showNulls, Boolean computationInRequest, Integer top)
 {
     def uglyRequestData = requestContent.data as Map<String, Object>
     Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
@@ -998,7 +1002,7 @@ private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestCon
                 )
                     : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
             }
-            requisite = new Requisite(title: 'DEFAULT', nodes: (computeCheck) ? requisiteNode : [requisiteNode], filterList: [breakdownFilter, *parameterFilters], showNulls: showNulls)
+            requisite = new Requisite(title: 'DEFAULT', nodes: (computeCheck) ? requisiteNode : [requisiteNode], filterList: [breakdownFilter, *parameterFilters], showNulls: showNulls, top: top)
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
@@ -1385,6 +1389,7 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
         }
         def requisite
         Boolean showNulls = data.showEmptyData as Boolean
+        Integer top = data.top as Integer
         if (data.sourceForCompute)
         {
             requisite = null
@@ -1398,7 +1403,7 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [parameterFilter, breakdownFilter], showNulls: showNulls)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [parameterFilter, breakdownFilter], showNulls: showNulls, top: top)
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup:
@@ -2466,6 +2471,7 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
     assert request: "Empty request!"
     return request.requisite.collect { requisite ->
         Boolean onlyFilled = !requisite.showNulls
+        Integer top = requisite.top
         return requisite.nodes.collectMany { node ->
             def filterList = requisite.filterList.grep()
             def filterListSize = requisite.filterList.filters.grep().size()
@@ -2488,17 +2494,17 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
             switch (filterListSize)
             {
                 case 0:
-                    return getNoFilterListDiagramData(node, request, aggregationCnt, onlyFilled, diagramType, requestContent)
+                    return getNoFilterListDiagramData(node, request, aggregationCnt, top, onlyFilled, diagramType, requestContent)
                 case 1:
                     return getOneFilterListDiagramData(
                         node, request, aggregationCnt,
                         parameterFilters, breakdownFilters,
-                        onlyFilled, diagramType, requestContent)
+                        top, onlyFilled, diagramType, requestContent)
                 case 2:
                     return getTwoFilterListDiagramData(
                         node, request, aggregationCnt,
                         parameterFilters, breakdownFilters,
-                        onlyFilled, diagramType, requestContent)
+                        top, onlyFilled, diagramType, requestContent)
             }
         }
     }
@@ -4006,7 +4012,7 @@ private Map<String, Object> transformRequestWithComputation(Map<String, Object> 
             )
             return [(key): dataForDiagram]
         }
-        return [type: map.type, data: newData, sorting: map.sorting,
+        return [type: map.type, data: newData, sorting: map.sorting, top: map.top,
                 showEmptyData: map.showEmptyData, calcTotalColumn: map.calcTotalColumn,
                 calcTotalRow : map.calcTotalRow, showRowNum: map.showRowNum]
     }
@@ -4101,16 +4107,42 @@ private FilterList getFilterList(Map<String, Object> customGroup, String subject
 }
 
 /**
+ * Метод по получению TOP Х данных
+ * @param currentRes - текущий результат запроса из БД
+ * @param top - количество данных, которое нужно получить
+ * @param parameterFilters - фильтры для параметра из кастомных группировок
+ * @param breakdownFilters - фильтры для показателя из кастомных группировок
+ * @param fromNoOrOneFilterList - флаг на результат работы 0 или 1 списка фильтров
+ * @return TOP Х данных, отсортированных по убыванию показателя
+ */
+List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [], Boolean fromNoOrOneFilterList = true)
+{
+    Integer paramIndex = 1 //индекс, на котором расположены значения параметра (первого параметра для таблицы)
+    Integer aggregationIndex = 0 //индекс, на котором расположены значения показателя (первого показателя для таблицы)
+    if(parameterFilters || breakdownFilters)
+    {
+        paramIndex = parameterFilters ? 1 : 2
+    }
+    //суммируем данные по группам - подсчитываем значения первого показателя и выставляем в порядке по убыванию
+    def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v.sum{ it[aggregationIndex] as Double } ] }.sort { -it[1] as Double }
+    //берём из этих групп первые по top или все группы, если данных меньше
+    tempResult = tempResult.size() > top && fromNoOrOneFilterList ? tempResult[0..top - 1]*.get(0) : tempResult*.get(0)
+    //находим соответсвия данных с теми группами, что получили, и выводим их
+    return tempResult.collectMany { value -> currentRes.findAll {it[paramIndex] == value} }
+}
+
+/**
  * Метод получения данных для диаграмм без списков фильтров
  * @param node - нода реквизита запроса
  * @param request - запрос
  * @param aggregationCnt - количество агрегаций
+ * @param top - количество записей, которое нужно вывести
  * @param onlyFilled - флаг на получение только заполненных данных, без null
  * @param diagramType  - тип диаграммы
  * @param requestContent - тело запроса
  * @return сырые данные для построения диаграм
  */
-private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt,  Boolean onlyFilled,  DiagramType diagramType, Map<String,Object> requestContent)
+private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean onlyFilled,  DiagramType diagramType, Map<String,Object> requestContent)
 {
     String nodeType = node.type
     switch (nodeType.toLowerCase())
@@ -4132,7 +4164,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
 
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
             Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-            def res = modules.dashboardQueryWrapper.getData(requestData, onlyFilled, diagramType)
+            def res = modules.dashboardQueryWrapper.getData(requestData, top, onlyFilled, diagramType)
                              .with(formatGroup)
                              .with(formatAggregation)
             def total = res ? [(requisiteNode.title): res] : [:]
@@ -4143,6 +4175,14 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             if (hasState)
             {
                 total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
+            }
+            if (top)
+            {
+                if(requestData?.groups?.size() > 1)
+                {
+                    return getTop(total, top)
+                }
+                return total.size() > top ? total[0..top - 1] : total
             }
             return total
         case 'computation':
@@ -4170,7 +4210,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             def variables = dataSet.collectEntries { key, data ->
                 Closure postProcess =
                     this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                [(key): modules.dashboardQueryWrapper.getData(data as RequestData, onlyFilled, diagramType).with(postProcess)]
+                [(key): modules.dashboardQueryWrapper.getData(data as RequestData, top, onlyFilled, diagramType).with(postProcess)]
             } as Map<String, List>
 
             //Вычисление формулы. Выглядит немного костыльно...
@@ -4196,7 +4236,16 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                 variables[key as String].head().head() as Double
             }]]
             def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)]
-            return formatResult(total, aggregationCnt)
+            total = formatResult(total, aggregationCnt)
+            if (top)
+            {
+                if(dataSet.values().head().groups?.size() > 1)
+                {
+                    return getTop(total, top)
+                }
+                return total.size() > top ? total[0..top - 1] : total
+            }
+            return total
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 }
@@ -4208,6 +4257,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
  * @param aggregationCnt - количество агрегаций
  * @param parameterFilters - список фильтров из параметра
  * @param breakdownFilters - список фильтров из разбивки
+ * @param top - количество записей, которое нужно вывести
  * @param onlyFilled - флаг на получение только заполненных данных, без null
  * @param diagramType  - тип диаграммы
  * @param requestContent - тело запроса
@@ -4218,6 +4268,7 @@ private List getOneFilterListDiagramData(def node,
                                          Integer aggregationCnt,
                                          List parameterFilters,
                                          List breakdownFilters,
+                                         Integer top,
                                          Boolean onlyFilled,
                                          DiagramType diagramType,
                                          Map<String,Object> requestContent)
@@ -4247,9 +4298,9 @@ private List getOneFilterListDiagramData(def node,
                 } : [0]
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
             Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
-            return filtering*.get(0)?.collectMany {
-                newRequestData.filters = [it]
-                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
+            def res = filtering*.get(0)?.withIndex()?.collectMany { filters, i ->
+                newRequestData.filters = [filters]
+                def res = modules.dashboardQueryWrapper.getData(newRequestData, top, onlyFilled, diagramType)
                                  .with(formatGroup)
                                  .with(formatAggregation)
 
@@ -4259,7 +4310,7 @@ private List getOneFilterListDiagramData(def node,
                     listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
                     res = [tempRes]
                 }
-                def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(it.title.grep() as Set): res]
+                def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filters.title.grep() as Set): res]
 
                 partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                 Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
@@ -4269,8 +4320,24 @@ private List getOneFilterListDiagramData(def node,
                 {
                     partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations)
                 }
-                return partial
+                if ((parameterFilters && i < top) || !top)
+                {
+                    return partial
+                }
+                else if(breakdownFilters && top)
+                {
+                    return partial.size() > top ? partial[0..top-1] : partial
+                }
+                else
+                {
+                    return []
+                }
             }
+            if(top)
+            {
+                return getTop(res, top, parameterFilters, breakdownFilters)
+            }
+            return res
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
             def calculator = new FormulaCalculator(requisiteNode.formula)
@@ -4292,7 +4359,7 @@ private List getOneFilterListDiagramData(def node,
                     RequestData newData = data.clone()
                     newData.filters = [filter]
                     Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                    def res = modules.dashboardQueryWrapper.getData(newData as RequestData, onlyFilled, diagramType)
+                    def res = modules.dashboardQueryWrapper.getData(newData as RequestData, top, onlyFilled, diagramType)
                     if(!res && !onlyFilled)
                     {
                         def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
@@ -4303,7 +4370,7 @@ private List getOneFilterListDiagramData(def node,
                 }
             }
             int i = 0
-            return variables.collectMany { totalVar ->
+            def res = variables.collectMany { totalVar ->
                 Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
                                    dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
                                           .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
@@ -4326,10 +4393,27 @@ private List getOneFilterListDiagramData(def node,
                     totalVar[key as String].head().head() as Double
                 }]]
                 def title = filtering*.get(0).title.grep()
-                Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)]
-                return onlyFilled && !res ? [] : formatResult(total, aggregationCnt)
+                res = formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)
+                Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): res]
+                res = onlyFilled && !res ? [] : formatResult(total, aggregationCnt)
+                if ((parameterFilters && i < top) || !top)
+                {
+                    return res
+                }
+                else if(breakdownFilters && top)
+                {
+                    return res.size() > top ? res[0..top-1] : res
+                }
+                else
+                {
+                    return []
+                }
             }
-
+            if(top)
+            {
+                return getTop(res, top, parameterFilters, breakdownFilters)
+            }
+            return res
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 }
@@ -4341,6 +4425,7 @@ private List getOneFilterListDiagramData(def node,
  * @param aggregationCnt - количество агрегаций
  * @param parameterFilters - список фильтров из параметра
  * @param breakdownFilters - список фильтров из разбивки
+ * @param top - количество записей, которое нужно вывести
  * @param onlyFilled - флаг на получение только заполненных данных, без null
  * @param diagramType  - тип диаграммы
  * @param requestContent - тело запроса
@@ -4351,6 +4436,7 @@ private List getTwoFilterListDiagramData(def node,
                                          Integer aggregationCnt,
                                          List parameterFilters,
                                          List breakdownFilters,
+                                         Integer top,
                                          Boolean onlyFilled,
                                          DiagramType diagramType,
                                          Map<String, Object> requestContent)
@@ -4390,7 +4476,7 @@ private List getTwoFilterListDiagramData(def node,
                 value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
             }
                 : [0]
-            return pareFilters.collectMany { condition ->
+            def res = pareFilters.collectMany { condition ->
                 def requisiteNode = node as DefaultRequisiteNode
                 RequestData requestData = request.data[requisiteNode.dataKey]
                 RequestData newRequestData = requestData.clone()
@@ -4408,9 +4494,10 @@ private List getTwoFilterListDiagramData(def node,
                 }
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
                 Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData as RequestData, listIdsOfNormalAggregations, diagramType)
-                def res = modules.dashboardQueryWrapper.getData(newRequestData, onlyFilled, diagramType)
+                def res = modules.dashboardQueryWrapper.getData(newRequestData, top, onlyFilled, diagramType)
                                  .with(formatGroup)
                                  .with(formatAggregation)
+
                 if(!res && !onlyFilled)
                 {
                     def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
@@ -4426,8 +4513,17 @@ private List getTwoFilterListDiagramData(def node,
                 {
                     total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
                 }
+                if (top && total.size() > top)
+                {
+                    return total[0..top - 1]
+                }
                 return total
             }
+            if(top)
+            {
+                return getTop(res, top, parameterFilters, breakdownFilters, false)
+            }
+            return res
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
             def calculator = new FormulaCalculator(requisiteNode.formula)
@@ -4451,12 +4547,12 @@ private List getTwoFilterListDiagramData(def node,
                         first + second
                     }
                     Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData, onlyFilled, diagramType)
+                    def res = modules.dashboardQueryWrapper.getData( newData as RequestData, top, onlyFilled, diagramType)
                     [(key): res.with(postProcess)]  as Map<String, List>
                 }
             }
             def title = pareFilters.title
-            return variables.withIndex().collectMany { totalVar, i ->
+            def res = variables.withIndex().collectMany { totalVar, i ->
                 Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE }||
                                    dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
                                           .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
@@ -4476,11 +4572,22 @@ private List getTwoFilterListDiagramData(def node,
                         group.add(0, resultCalculation)
                         return group
                     } : [[calculator.execute { key ->
-                    totalVar[key as String].find().find() as Double ?: 0
+                    totalVar[key as String].head().head() as Double
                 }]]
-                Map total = res ? [( title.any {it[0] != ''} ? title[i].flatten() : ''): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)] : [:]
-                return formatResult(total, aggregationCnt)
+                res = formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)
+                Map total = res ? [( title.any {it[0] != ''} ? title[i].flatten() : ''): res] : [:]
+                res = onlyFilled && !res ? [] : formatResult(total, aggregationCnt)
+                if (top && res.size() > top)
+                {
+                    return res[0..top - 1]
+                }
+                return res
             }
+            if(top)
+            {
+                return getTop(res, top, parameterFilters, breakdownFilters, false)
+            }
+            return res
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
 }

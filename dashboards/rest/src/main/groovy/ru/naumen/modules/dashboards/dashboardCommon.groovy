@@ -361,6 +361,7 @@ class Requisite
     Collection<RequisiteNode> nodes
     Collection<FilterList> filterList
     Boolean showNulls
+    Integer top
 }
 
 class RequisiteNode

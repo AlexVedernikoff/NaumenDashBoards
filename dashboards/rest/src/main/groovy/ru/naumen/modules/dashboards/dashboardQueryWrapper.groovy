@@ -53,7 +53,7 @@ class QueryWrapper implements CriteriaWrapper
         return new QueryWrapper(source)
     }
 
-    QueryWrapper aggregate(AggregationParameter parameter, boolean fromSevenDays = false)
+    QueryWrapper aggregate(AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
@@ -80,13 +80,19 @@ class QueryWrapper implements CriteriaWrapper
             column = castDynamicToType(attribute, column)
             criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
         }
-
         column.with(aggregation).with(criteria.&addColumn)
-        String sortingType = parameter.sortingType
-        if (sortingType)
+        if(top)
         {
-            Closure sorting = getSorting(sortingType)
-            column.with(aggregation).with(sorting).with(criteria.&addOrder)
+            column.with(aggregation).with(getSorting('DESC')).with(criteria.&addOrder)
+        }
+        else
+        {
+            String sortingType = parameter.sortingType
+            if (sortingType)
+            {
+                Closure sorting = getSorting(sortingType)
+                column.with(aggregation).with(sorting).with(criteria.&addOrder)
+            }
         }
         return this
     }
@@ -211,7 +217,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param diagramType - тип диаграммы
      * @return текущий запрос в БД с добавленной агрегацией
      */
-    QueryWrapper processAggregation(QueryWrapper wrapper, RequestData requestData, AggregationParameter parameter, DiagramType diagramType)
+    QueryWrapper processAggregation(QueryWrapper wrapper, RequestData requestData, AggregationParameter parameter, DiagramType diagramType, Integer top)
     {
         if (parameter.type == Aggregation.PERCENT)
         {
@@ -235,7 +241,7 @@ class QueryWrapper implements CriteriaWrapper
             {
                 wrappedQuery.filtering([filterParameter])
             }
-            int totalCount = wrappedQuery.aggregate(totalParameter)
+            int totalCount = wrappedQuery.aggregate(totalParameter, false, top)
                                          .result.head().head()
 
             wrapper.percentAggregate(parameter, totalCount)
@@ -246,7 +252,7 @@ class QueryWrapper implements CriteriaWrapper
         }
         else
         {
-            wrapper.aggregate(parameter)
+            wrapper.aggregate(parameter, false, top)
         }
     }
 
@@ -854,7 +860,7 @@ class QueryWrapper implements CriteriaWrapper
  * @param diagramType - тип диаграммы
  * @return результат выборки
  */
-List<List> getData(RequestData requestData, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT)
+List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT)
 {
     validate(requestData)
     validate(requestData.source)
