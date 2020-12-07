@@ -16,8 +16,6 @@ import groovy.transform.TupleConstructor
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.dto.ISDtObject
 
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -47,7 +45,7 @@ interface EventController
      * Возвращает список состояний событий и соответствующие им цвета
      * @return Json с элементами типа {@link StateColor}
      */
-    String getEventStatesColors();
+    String getEventStatesColors()
 
     /**
      * Возвращает список событий в указанном календаре за указанный период
@@ -60,17 +58,15 @@ interface EventController
     String getEvents(String calendarFilterUuid,
                      String startDate,
                      String endDate,
-                     boolean hideAppointments)
-
-    // Для совместимости со прежней версией ui, которая принимает 3 аргумента
-    String getEvents(String calendarFilterUuid, String startDate, String endDate)
+                     List<String> statuses,
+                     String userId)
 
     /**
      * Возвращает ссылку на объект и title объекта
      * @param objectUuid - UUID объекта
      * @return {@link ObjectLink}
      */
-    String getObjectLink(String objectUuid);
+    String getObjectLink(String objectUuid)
 }
 
 trait EventControllerTrait implements EventController
@@ -99,14 +95,19 @@ trait EventControllerTrait implements EventController
     String getEvents(String calendarFilterUuid,
                      String startDateString,
                      String endDateString,
-                     boolean hideAppointments = false)
+                     List<String> statuses,
+                     String userId)
     {
 
-        Instant startDate = ZonedDateTime.parse(startDateString, DateTimeFormatter.ISO_DATE_TIME).toInstant()
-        Instant endDate = ZonedDateTime.parse(endDateString, DateTimeFormatter.ISO_DATE_TIME).plusDays(1).toInstant()
+        Instant startDate =
+            ZonedDateTime.parse(startDateString, DateTimeFormatter.ISO_DATE_TIME).toInstant()
+        Instant endDate =
+            ZonedDateTime.parse(endDateString, DateTimeFormatter.ISO_DATE_TIME).plusDays(1).
+                toInstant()
+        def user = getUserById(userId)
         return toJson(
-                service.
-                        getEvents(calendarFilterUuid, startDate, endDate, hideAppointments)
+            service.
+                getEvents(calendarFilterUuid, startDate, endDate, statuses, user)
         )
     }
 
@@ -115,6 +116,11 @@ trait EventControllerTrait implements EventController
     {
         def object = api.utils.get(objectUuid)
         return toJson(new ObjectLink(object?.title, api.web.open(objectUuid)))
+    }
+
+    private def getUserById(String id)
+    {
+        return api.utils.load(id)
     }
 }
 
@@ -157,6 +163,15 @@ class CalendarService
     // Заголовок для элемента выбора всех календарей
     private static final String ALL_CALENDARS_TITLE = "Все календари"
 
+    // Код группы СОДФУ Виртуальная приёмная КЦ
+    private static final String GROUP_KC = 'SODFUVirtualnayaPriemnayaKC'
+    // Код группы СОДФУ Виртуальная приёмная Запись на приём
+    private static final String GROUP_LPFG1 = 'SODFUVirtualnayaPriemnayaZapisNaPriem'
+    // Код группы СОДФУ Виртуальная приёмная Приём заявителей
+    private static final String GROUP_LPFG2 = 'SODFUVirtualnayaPriemnayaPriemZayavitelei'
+
+    private static final Set GROUPS = [GROUP_KC, GROUP_LPFG1, GROUP_LPFG2]
+
     /**
      * Метод возвращает допустимые значения в выпадающем списке "Локации личного приема" (persReception$prLocation)
      * @return список локаций личного приема
@@ -164,7 +179,7 @@ class CalendarService
     List<SelectItem> getLocations()
     {
         def result = api.utils.find(TYPE_LOCATION, [state: REGISTERED_STATE])
-                .collect(this.&toSelectItem)
+                        .collect(this.&toSelectItem)
         return result
     }
 
@@ -177,9 +192,9 @@ class CalendarService
     {
         def location = api.utils.get(locationUuid)
         def result = api.utils.find(TYPE_CALENDAR, [state: REGISTERED_STATE, prLocation: location])
-                .collect(this.&toSelectItem)
+                        .collect(this.&toSelectItem)
         result.
-                add(0, new SelectItem("${ ALL_CALENDARS_ID }_${ locationUuid }", ALL_CALENDARS_TITLE))
+            add(0, new SelectItem("${ ALL_CALENDARS_ID }_${ locationUuid }", ALL_CALENDARS_TITLE))
         return result
     }
 
@@ -205,12 +220,13 @@ class CalendarService
     List<Event> getEvents(String calendarFilterUuid,
                           Instant startDate,
                           Instant endDate,
-                          boolean hideAppointments)
+                          List<String> statuses,
+                          def user)
     {
         String locationUuid = parseLocationId(calendarFilterUuid);
         // Выбираем все тайм-слоты из локации, или из календаря
         def timeSlots = locationUuid ? getLocationTimeSlots(locationUuid) :
-                getCalendarTimeSlots(calendarFilterUuid)
+            getCalendarTimeSlots(calendarFilterUuid)
         if (!timeSlots)
         {
             return null
@@ -223,45 +239,168 @@ class CalendarService
 
         /// Объединяем слоты в статусе 'registered' с одинаковым временем начала и окончания
         timeSlots = timeSlots
-                .groupBy{[state: (it.state == REGISTERED_STATE ? it.state : it.UUID), startDate: it.startDate, endDate: it.endDate]}
-                .collect{k, v -> v.find()}
+            .groupBy {
+                [state                                                           : (
+                    it.state == REGISTERED_STATE ? it.state : it.UUID), startDate:
+                     it.startDate, endDate                                       : it.endDate]
+            }
+            .collect { k, v -> v.find()
+            }
 
+        HashSet<String> states = Set.of(statuses);
         final boolean isMonth = periodIsMonth(startDate, endDate)
         def events = timeSlots.findResults {
-            // Не отображать записи на прием
-            if (hideAppointments && it.state == CLOSED_STATE)
-            {
-                return null
-            }
-            // При отображении расписания на месяц не отображаем занятые тайм-слоты
-            if (isMonth && it.state != CLOSED_STATE)
-            {
-                return null
-            }
-            // Если есть запись на прием, то отфильтровываем по ее состоянию
-            if (it.state == CLOSED_STATE)
-            {
-                def booking = it.prTimeBookings?.find {
-                    it.state == REGISTERED_STATE
-                }
-                if (!booking)
-                {
-                    return null
-                }
-            }
-            if (it.endDate.toInstant() >= Instant.now() &&
-                    datesRangesIntersect(
-                            startDate,
-                            endDate,
-                            it.startDate.toInstant(),
-                            it.endDate.toInstant()
-                    ))
+            if (
+            filterByState(it, states) &&
+            filterMonthAppointments(it, isMonth) &&
+            filterRegisteredAppointments(it) &&
+            filterByDate(it, startDate, endDate) &&
+            filterByUserGroup(it, user)
+            )
             {
                 return toEvent(it)
             }
             return null
         }
         return events
+    }
+
+    /**
+     * Фильтрация слотов по группам пользователя
+     * @param slot слот
+     * @param user пользователь
+     * @return true, если пользователю можно отобразить слот, иначе - false
+     */
+    private boolean filterByUserGroup(def slot, def user)
+    {
+        // Если пользователь - admin, или если статус != registere, то отображаем слот
+        if (!user || (slot.state != REGISTERED_STATE))
+        {
+            return true
+        }
+        // Если пльзователь не состоит ни в одной из групп, то отображаем все слоты
+        if (GROUPS.disjoint(user.employeeSecGroups*.code))
+        {
+            return true
+        };
+        def matches = user.employeeSecGroups.collect {
+            switch (it.code)
+            {
+                case GROUP_KC: return filterSlotsForKcEmployee(slot)
+                case GROUP_LPFG1: return filterSlotsForLpfgEmployee(slot)
+                case GROUP_LPFG2: return filterSlotsForLpfgEmployee(slot)
+                default: return false
+            }
+        }
+        return matches.contains(true)
+    }
+
+    /**
+     * Определяет видимость слота для пользователя группы СОДФУ Виртуальная приёмная КЦ
+     * @param slot слот
+     * @return true, если пользователю можно отобразить слот, иначе - false
+     */
+    private boolean filterSlotsForKcEmployee(def slot)
+    {
+        if (!slot.lastBookingLK && !slot.advBookingLK)
+        {
+            return false
+        }
+        Instant now = Instant.now()
+        boolean ok = true
+        if (slot.lastBookingLK && slot.lastBookingLK.toInstant() > now)
+        {
+            ok = false
+        }
+        else if (slot.advBookingLK && slot.advBookingLK.toInstant() < now)
+        {
+            ok = false
+        }
+        return ok
+    }
+
+    /**
+     * Определяет видимость слота для пользователя групп "СОДФУ Виртуальная приёмная Запись на приём"
+     * и "Виртуальная приёмная Приём заявителей"
+     * @param slot слот
+     * @return true, если пользователю можно отобразить слот, иначе - false
+     */
+    private boolean filterSlotsForLpfgEmployee(def slot)
+    {
+        if (!slot.lastBookingSOO && !slot.advBookingSOO)
+        {
+            return false
+        }
+        Instant now = Instant.now()
+        boolean ok = true
+        if (slot.lastBookingSOO && slot.lastBookingSOO.toInstant() > now)
+        {
+            ok = false
+        }
+        else if (slot.advBookingSOO && slot.advBookingSOO.toInstant() < now)
+        {
+            ok = false
+        }
+        return ok
+    }
+
+    /**
+     * Фильтрация занятых тайм-слотов
+     * @param slot
+     * @param hideAppointments
+     * @return true, если пользователю можно отобразить слот, иначе - false
+     */
+    private boolean filterByState(def slot, HashSet<String> states)
+    {
+        return states.contains(slot.state) || states.isEmpty()
+    }
+
+    /**
+     * При отображении расписания на месяц не отображаем занятые тайм-слоты
+     * @param slot
+     * @param isMonth
+     * @return true, если пользователю можно отобразить слот, иначе - false
+     */
+    private boolean filterMonthAppointments(def slot, boolean isMonth)
+    {
+        return !(isMonth && slot.state != CLOSED_STATE)
+    }
+
+    /**
+     * Если есть запись на прием, то отфильтровываем по ее состоянию
+     * @param slot
+     * @return true, если пользователю можно отобразить слот, иначе - false
+     */
+    private boolean filterRegisteredAppointments(def slot)
+    {
+        if (slot.state == CLOSED_STATE)
+        {
+            def booking = slot.prTimeBookings?.find {
+                it.state == REGISTERED_STATE
+            }
+            if (!booking)
+            {
+                return false
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Фильтрация слотов по времени
+     * @param slot
+     * @param startDate
+     * @param endDate
+     * @return true, если пользователю можно отобразить слот, иначе - false
+     */
+    private boolean filterByDate(def slot, Instant startDate, Instant endDate)
+    {
+        return slot.endDate.toInstant() >= Instant.now() && datesRangesIntersect(
+            startDate,
+            endDate,
+            slot.startDate.toInstant(),
+            slot.endDate.toInstant()
+        )
     }
 
     /**
@@ -307,7 +446,7 @@ class CalendarService
             return null
         }
         def calendars =
-                api.utils.find(TYPE_CALENDAR, [state: REGISTERED_STATE, prLocation: location])
+            api.utils.find(TYPE_CALENDAR, [state: REGISTERED_STATE, prLocation: location])
         return calendars.collectMany {
             it.ptTimeSlots
         }
@@ -388,11 +527,11 @@ class CalendarService
     private List<StateColor> getStatesColors(String fqn, String eventType)
     {
         return api.metainfo.getMetaClass(fqn)
-                .workflow
-                .states
-                .collect {
-                    new StateColor(it.color?.html(), "${ eventType }_${ it.code }")
-                }
+                  .workflow
+                  .states
+                  .collect {
+                      new StateColor(it.color?.html(), "${ eventType }_${ it.code }")
+                  }
     }
 
     /**
