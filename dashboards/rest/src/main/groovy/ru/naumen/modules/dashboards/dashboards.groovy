@@ -186,22 +186,20 @@ String getAttributeObject(Map requestContent)
     def offset = requestContent.offset as int
     def condition = removed ? [:] : [removed: false]
 
-    def intermediateData = uuid ?: types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }
-
+    //на первом месте стоит тип, по которому будут искаться значения
+    def intermediateData = uuid ?: types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }.unique { it.find() }
     List values = uuid
-            ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }
-            : getObjects(intermediateData, count, offset)
+        ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }
+        : getObjects(intermediateData, count, offset)
+
+    types = uuid ? types : intermediateData*.find()
     def result = values?.collect { object ->
         [
             title   : object.title,
             uuid    : object.UUID,
             property: object.metaClass as String,
-            children: getAllInheritanceChains()
-                .findAll { it*.code.contains(object.metaClass as String) }
-                .collect { it*.code as Set }
-                .inject([]) { first, second -> first + second }
-                .collect { api.utils.count(it, [parent: object.UUID]) as int }
-                .inject(0) { first, second -> first + second }
+            children: types.collect { api.utils.count(it, [parent: object.UUID]) as int }
+                           .inject(0) { first, second -> first + second }
         ]
     }
     return toJson(result)
