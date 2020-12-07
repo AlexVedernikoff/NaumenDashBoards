@@ -20,14 +20,17 @@ const getCalendarData = (params: GetCalendarDataParams): ThunkAction => async (
 ) => {
 	dispatch(setCalendarLoading(true));
 	try {
-		const {appointmentsDisabled, calendarId, dateFrom, dateTo} = params;
+		const {calendarId, calendarStatusFilter, dateFrom, dateTo} = params;
+		const {uuid} = window.jsApi.getCurrentUser();
+		const normalizedCalendarStatusFilter = calendarStatusFilter.map(({id}) => id);
 		const data: Array<CalendarApiData> = await window.jsApi.restCallModule(
 			'calendarController',
 			'getEvents',
 			calendarId,
 			dateFrom,
 			dateTo,
-			appointmentsDisabled
+			normalizedCalendarStatusFilter,
+			uuid
 		);
 		const normalizedData: Array<CalendarData> = data.map(
 			({end, start, link, description, type}) => ({

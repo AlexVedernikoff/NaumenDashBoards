@@ -5,13 +5,14 @@ import type {
 	ISetCalendarData,
 	ResourceColor
 } from 'store/Calendar/types';
+import type {CalendarStatusFilterList} from 'store/CalendarSelectors/types';
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
-	appointmentsDisabled: boolean,
 	calendarData: Array<CalendarData>,
 	calendarId: string | null,
 	calendarResourceColorList: Array<ResourceColor>,
+	calendarStatusFilter: CalendarStatusFilterList,
 	defaultView: string,
 	error: Error | null,
 	hideWeekend: boolean,

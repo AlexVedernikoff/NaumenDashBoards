@@ -11,6 +11,7 @@ const CustomCalendarItem = ({dataItem, onEventClick, ...restProps}: Props) => {
 	return (
 		<SchedulerItem
 			{...restProps}
+			style={{border: '1px #dee2e6 solid'}}
 			onClick={handleEventClick}
 		/>
 	);

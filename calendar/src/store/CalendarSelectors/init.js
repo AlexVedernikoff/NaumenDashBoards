@@ -7,8 +7,8 @@ export const initialState: CalendarSelectorsState = {
 	isLoading: true,
 	locationList: [],
 	selectedOptions: {
-		appointmentsDisabled: false,
 		calendar: null,
+		calendarStatusFilter: [],
 		location: null
 	}
 };

@@ -2,6 +2,7 @@
 import type {
 	Calendar,
 	CalendarList,
+	CalendarStatusFilterList,
 	Location,
 	LocationList
 } from 'store/CalendarSelectors/types';
@@ -15,8 +16,8 @@ export type ConnectedProps = {
 	locationList: LocationList,
 	metaClass: string | null,
 	selectedOptions: {
-		appointmentsDisabled: boolean,
 		calendar: Calendar | null,
+		calendarStatusFilter: CalendarStatusFilterList,
 		location: Location | null
 	},
 	subjectId: string | null
@@ -27,10 +28,10 @@ export type ConnectedFunctions = {
 	getLocationList: () => ThunkAction,
 	setSelectedOption: (
 		fieldName: string,
-		data: Calendar | Location | null
+		data: CalendarStatusFilterList | Calendar | Location | null
 	) => {
 		payload: {
-			data: Calendar | Location | null,
+			data: CalendarStatusFilterList | Calendar | Location | null,
 			fieldName: string
 		},
 		type: typeof CALENDAR_SELECTORS_EVENTS.SET_SELECTED_OPTION

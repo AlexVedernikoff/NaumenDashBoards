@@ -9,9 +9,13 @@ export type Location = SelectorRecord;
 
 export type Calendar = SelectorRecord;
 
+export type CalendarStatusFilter = SelectorRecord;
+
 export type LocationList = Array<Location>;
 
 export type CalendarList = Array<Calendar>;
+
+export type CalendarStatusFilterList = Array<SelectorRecord>;
 
 export type CalendarSelectorsState = {
 	calendarList: CalendarList,
@@ -19,8 +23,8 @@ export type CalendarSelectorsState = {
 	isLoading: boolean,
 	locationList: LocationList,
 	selectedOptions: {
-		appointmentsDisabled: boolean,
 		calendar: Calendar | null,
+		calendarStatusFilter: CalendarStatusFilterList,
 		location: Location | null
 	}
 };

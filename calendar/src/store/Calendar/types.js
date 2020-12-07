@@ -1,5 +1,6 @@
 // @flow
 import {CALENDAR_EVENTS} from './constants';
+import type {CalendarStatusFilterList} from '../CalendarSelectors/types';
 
 export type ResourceColor = {
 	color: string | null,
@@ -35,8 +36,8 @@ export type CalendarState = {
 };
 
 export type GetCalendarDataParams = {
-	appointmentsDisabled: boolean,
 	calendarId: string,
+	calendarStatusFilter: CalendarStatusFilterList,
 	dateFrom: Date,
 	dateTo: Date
 };

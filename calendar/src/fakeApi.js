@@ -1,3 +1,4 @@
+// @flow
 import config from '../config/dev.json';
 import delayMockResponse from 'utils/delayMockResponse';
 import fieldCalendarData from 'mock/fieldCalendar.json';
@@ -60,10 +61,15 @@ const getParameters = async () => await ({
 	SkryvatSubbotuIVoskresene: false
 });
 
+const getCurrentUser = () => ({
+	uuid: '319d1bca-6978-4244-b66f-51620d6dc228'
+});
+
 const jsApi = {
 	contents: {
 		getParameters
 	},
+	getCurrentUser,
 	restCallModule
 };
 
