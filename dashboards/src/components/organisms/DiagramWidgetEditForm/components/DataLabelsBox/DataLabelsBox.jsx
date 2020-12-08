@@ -25,7 +25,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 		return (
 			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={data.show} title="Метки данных">
-				<FormField label="Шрифт" row>
+				<FormField row>
 					{renderFontFamilySelect()}
 					{renderFontSizeSelect()}
 				</FormField>

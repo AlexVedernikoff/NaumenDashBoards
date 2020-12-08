@@ -40,7 +40,7 @@ export class HeaderBox extends PureComponent<Props> {
 
 		return (
 			<ToggableFormBox name={FIELDS.show} onToggle={handleBoolChange} showContent={data.show} title="Заголовок">
-					<FormField label="Шрифт" row>
+					<FormField row>
 						{renderFontFamilySelect()}
 						{renderFontSizeSelect()}
 					</FormField>

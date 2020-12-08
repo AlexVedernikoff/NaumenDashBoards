@@ -78,8 +78,8 @@ export class LegendBox extends PureComponent<Props> {
 					{this.renderLegendPositionButtons()}
 				</FormField>
 				<FormField row>
-					{this.renderLegendDisplayTypeButtons()}
 					{renderTextHandlerButtons()}
+					{this.renderLegendDisplayTypeButtons()}
 				</FormField>
 			</ToggableFormBox>
 		);
