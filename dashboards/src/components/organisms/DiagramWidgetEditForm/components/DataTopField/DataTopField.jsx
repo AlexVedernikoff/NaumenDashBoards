@@ -25,6 +25,8 @@ export class DataTopField extends PureComponent<Props> {
 		});
 	};
 
+	handleChangeCount = ({name, value}: OnChangeInputEvent) => this.changeSettings(name, value);
+
 	handleSelectCount = ({name, value}: OnSelectEvent) => this.changeSettings(name, value);
 
 	handleToggleShow = ({name, value}: OnChangeInputEvent) => this.changeSettings(name, !value);
@@ -35,7 +37,9 @@ export class DataTopField extends PureComponent<Props> {
 		return (
 			<Select
 				className={styles.select}
+				editable={true}
 				name={FIELDS.count}
+				onChangeLabel={this.handleChangeCount}
 				onSelect={this.handleSelectCount}
 				options={COUNT_OPTIONS}
 				value={count}
