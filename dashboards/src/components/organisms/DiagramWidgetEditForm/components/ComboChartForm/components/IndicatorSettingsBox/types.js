@@ -8,7 +8,7 @@ export type Props = {
 	data: ComboIndicatorSettings,
 	name: string,
 	onChange: (name: string, data: ComboIndicatorSettings) => void,
-	onChangeDataSet: (index: number, name: string, value: any) => void,
+	onChangeDataSetValue: (index: number, name: string, value: any) => void,
 	values: Values
 };
 

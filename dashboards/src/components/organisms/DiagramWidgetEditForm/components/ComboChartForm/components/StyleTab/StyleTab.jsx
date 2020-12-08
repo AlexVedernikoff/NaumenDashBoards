@@ -21,7 +21,7 @@ export class StyleTab extends Component<StyleTabProps> {
 		setFieldValue(name, data);
 	};
 
-	handleChangeDataSet = (index: number, name: string, value: string) => {
+	handleChangeDataSetValue = (index: number, name: string, value: string) => {
 		this.props.setDataFieldValue(index, name, value);
 	};
 
@@ -46,7 +46,7 @@ export class StyleTab extends Component<StyleTabProps> {
 					data={extend(DEFAULT_CHART_SETTINGS.yAxis, indicator)}
 					name={FIELDS.indicator}
 					onChange={this.handleChange}
-					onChangeDataSet={this.handleChangeDataSet}
+					onChangeDataSetValue={this.handleChangeDataSetValue}
 					values={values}
 				/>
 				<SortingBox data={sorting} name={FIELDS.sorting} onChange={this.handleChange} />

@@ -82,7 +82,7 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, maxValue
 		}
 	};
 
-	return extend(options, getYAxisOptions(indicator, name));
+	return extend(options, getYAxisOptions({...indicator, name}));
 };
 
 /**

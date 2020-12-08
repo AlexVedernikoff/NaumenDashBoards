@@ -34,10 +34,10 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 	};
 
 	handleChangeName = (index: number) => (event: OnChangeInputEvent) => {
-		const {onChangeDataSet} = this.props;
+		const {onChangeDataSetValue} = this.props;
 		const {name, value} = event;
 
-		return onChangeDataSet(index, name, value);
+		onChangeDataSetValue(index, name, value);
 	};
 
 	handleClickDependentCheckbox = (name: string, value: boolean) => this.props.handleChange({name, value});
