@@ -182,13 +182,14 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	renderTableWidget = (widget: TableWidgetType) => {
-		const {buildData, onDrillDown, onOpenCardObject, onUpdate} = this.props;
+		const {buildData, fetchBuildData, onDrillDown, onOpenCardObject, onUpdate} = this.props;
 		const {data} = buildData;
 
 		return (
 			<TableWidget
 				data={data}
 				onDrillDown={onDrillDown}
+				onFetchBuildData={fetchBuildData}
 				onOpenCardObject={onOpenCardObject}
 				onUpdate={onUpdate}
 				widget={widget}

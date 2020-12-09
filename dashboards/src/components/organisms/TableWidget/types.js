@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {COLUMN_TYPES} from './constants';
-import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDown, OpenCardObject} from 'store/widgets/links/types';
+import type {FetchBuildData} from 'store/widgets/buildData/types';
 import type {Group, TableWidget} from 'store/widgets/data/types';
 
 export type BaseColumn = {
@@ -51,9 +51,25 @@ export type Column =
 	| BaseColumn
 ;
 
+type LimitsExceeded = {
+	indicator: boolean,
+	parameter: boolean
+};
+
+type Row = {
+	[accessor: string]: string | number
+};
+
+export type Data = {
+	columns: Array<Column>,
+	data: Array<Row>,
+	limitsExceeded: LimitsExceeded
+};
+
 export type Props = {
-	data: DiagramBuildData,
+	data: Data,
 	onDrillDown: DrillDown,
+	onFetchBuildData: FetchBuildData,
 	onOpenCardObject: OpenCardObject,
 	onUpdate: TableWidget => void,
 	widget: TableWidget

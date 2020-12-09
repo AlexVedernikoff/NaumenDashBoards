@@ -13,7 +13,7 @@ import type {
 	WidgetType
 } from 'store/widgets/data/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {BUILD_DATA_EVENTS} from './constants';
+import {BUILD_DATA_EVENTS, IGNORE_TABLE_DATA_LIMITS_SETTINGS} from './constants';
 import {countIndicators} from 'components/organisms/DiagramWidgetEditForm/components/TableForm/helpers';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -217,7 +217,7 @@ const createSummaryData = (widget: SummaryWidget | SpeedometerWidget) => {
 };
 
 const createTableData = (widget: TableWidget) => {
-	const {calcTotalColumn, showEmptyData, table, top, type} = widget;
+	const {calcTotalColumn, ignoreDataLimits = IGNORE_TABLE_DATA_LIMITS_SETTINGS, showEmptyData, table, top, type} = widget;
 	const {showRowNum} = table.body;
 	const data: Object = {};
 
@@ -251,6 +251,7 @@ const createTableData = (widget: TableWidget) => {
 	return {
 		calcTotalColumn,
 		data,
+		ignoreLimits: ignoreDataLimits,
 		showEmptyData,
 		showRowNum,
 		top: getTopCount(top, getBuildSet(widget).indicators[0].aggregation, countIndicators(widget.data) > 1),

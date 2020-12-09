@@ -17,8 +17,15 @@ const META_CLASS_VALUE_SEPARATOR = '#';
 // Используется для разделения лейбла и uuid в значениях, по которым можно перейти на карточку объекта
 const CARD_OBJECT_VALUE_SEPARATOR = '#';
 
+// Настройки для игнорирования лимита получаемых данных по параметру и показателю для построения таблицы
+const IGNORE_TABLE_DATA_LIMITS_SETTINGS = {
+	indicator: false,
+	parameter: false
+};
+
 export {
 	BUILD_DATA_EVENTS,
-	META_CLASS_VALUE_SEPARATOR,
-	CARD_OBJECT_VALUE_SEPARATOR
+	CARD_OBJECT_VALUE_SEPARATOR,
+	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
+	META_CLASS_VALUE_SEPARATOR
 };
