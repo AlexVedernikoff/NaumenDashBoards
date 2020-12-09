@@ -6,7 +6,7 @@ import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormCheckControl, FormField, Select} from 'components/molecules';
 import type {InputValue, OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
-import React, {Fragment, PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
@@ -44,7 +44,7 @@ export class BodySettingsBox extends PureComponent<Props> {
 		const {defaultValue, pageSize, showRowNum, textAlign, textHandler} = data;
 
 		return (
-			<Fragment>
+			<div className={styles.container}>
 				<Label className={styles.label}>Тело таблицы</Label>
 				<FormField>
 					<FormCheckControl label="Отображать номер строки">
@@ -90,7 +90,7 @@ export class BodySettingsBox extends PureComponent<Props> {
 				</FormField>
 				{this.renderCellSettingsBox(FIELDS.parameterSettings, 'Стили значений параметра')}
 				{this.renderCellSettingsBox(FIELDS.indicatorSettings, 'Стили значений показателя')}
-			</Fragment>
+			</div>
 		);
 	}
 }
