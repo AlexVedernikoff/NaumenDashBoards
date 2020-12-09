@@ -35,7 +35,7 @@ void sendFileToMail(String tokenKey, String format, String fileName, List users)
         def ds = new ByteArrayDataSource(file.inputStream, file.contentType)
 
         def message = api.mail.sender.createMail()
-        message.addTo(user.title, user.email)
+        message.addTo(user.title ?: api.metainfo.getMetaClass('employee').title, user.email)
         message.setSubject(fileName) //установка темы сообщения
         message.addText("${fileName}. Файл с изображением дашборда находится во вложении.") //установка текста сообщения
         message.attachFile(ds, "${fileName}.${format}")
