@@ -399,12 +399,18 @@ export type ColumnsRatioWidth = {
 	[accessor: string]: number
 };
 
+export type IgnoreTableDataLimitsSettings = {
+	indicator: boolean,
+	parameter: boolean
+};
+
 export type TableWidget = {
 	...BaseWidget,
 	calcTotalColumn: boolean,
 	calcTotalRow: boolean,
 	columnsRatioWidth: ColumnsRatioWidth,
 	data: Array<TableData>,
+	ignoreDataLimits?: IgnoreTableDataLimitsSettings,
 	showEmptyData: boolean,
 	sorting: TableSorting,
 	table: Table,
