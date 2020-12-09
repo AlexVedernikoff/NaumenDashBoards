@@ -3,7 +3,7 @@ import React, {useCallback} from 'react';
 import type {Props} from './types.js';
 import {SchedulerItem} from '@progress/kendo-react-scheduler';
 
-const CustomCalendarItem = ({dataItem, onEventClick, ...restProps}: Props) => {
+const CustomCalendarMonthItem = ({dataItem, onEventClick, ...restProps}: Props) => {
 	const {id} = dataItem;
 
 	const handleEventClick = useCallback(() => onEventClick(id), [id]);
@@ -11,10 +11,9 @@ const CustomCalendarItem = ({dataItem, onEventClick, ...restProps}: Props) => {
 	return (
 		<SchedulerItem
 			{...restProps}
-			style={{border: '1px solid #dee2e6'}}
 			onClick={handleEventClick}
 		/>
 	);
 };
 
-export default CustomCalendarItem;
+export default CustomCalendarMonthItem;

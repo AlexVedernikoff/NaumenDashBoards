@@ -24,6 +24,7 @@ import type {Resourse, SchedulerEvent} from './types';
 import {getDates, getFormattedDate} from 'utils/dateConverter';
 import CustomCalendarHeader from 'components/molecules/CustomCalendarHeader';
 import CustomCalendarItem from 'components/molecules/CustomCalendarItem';
+import CustomCalendarMonthItem from 'components/molecules/CustomCalendarMonthItem';
 import CustomDaySlot from 'components/molecules/CustomDaySlot';
 import CustomSlot from 'components/molecules/CustomSlot';
 import LoadingPanel from 'components/molecules/LoadingPanel';
@@ -78,16 +79,15 @@ const Calendar = ({
 
 	useMemo(() => {
 		new ResizeObserver(() => {
-			resizer.resize(setCalendarHeight);
+			const height = resizer.getResizedHeigh();
+			setCalendarHeight(height);
 		}).observe(window.document.body);
 	}, []);
 
 	useEffect(() => {
-		if (resizer.shouldUpdate()) {
-			const height = resizer.setHeight();
-			setCalendarHeight(height);
-		}
-	}, [isAppLoading]);
+		const height = resizer.getResizedHeigh();
+		setCalendarHeight(height);
+	}, [calendarStatusFilter, isAppLoading]);
 
 	useEffect(() => {
 		getCalendarResourceColorList();
@@ -218,7 +218,7 @@ const Calendar = ({
 			/>
 		);
 
-	const renderMonthView = () => <MonthView slot={CustomSlot} />;
+	const renderMonthView = () => <MonthView item={CustomCalendarMonthItem} slot={CustomSlot} />;
 
 	const renderCalendar = () => (
 		<Scheduler
