@@ -2,13 +2,27 @@
 export class Resizer {
 	initHeight: number;
 	rootElement: HTMLElement | null;
-	selectorsOffset: number;
 	margin: number;
 
 	constructor () {
 		this.initHeight = window.innerHeight;
 		this.rootElement = document.getElementById('root');
 		this.margin = 32;
+	}
+
+	/**
+	 * Получаем таким образом селекторы, т.к. имя класса генерируется хэшом и всегда разное
+	 * @returns {number} - высота блока с селекторами в px
+	 */
+	getSelectorsOffset (): number {
+		return (
+			(this.rootElement
+				&& this.rootElement.firstChild
+				&& this.rootElement.firstChild.firstChild
+				&& this.rootElement.firstChild.firstChild instanceof HTMLElement
+				&& Number(this.rootElement.firstChild.firstChild.offsetHeight))
+			|| 0
+		);
 	}
 
 	isFullSize () {
@@ -26,7 +40,7 @@ export class Resizer {
 		return isFullSize;
 	}
 
-	shouldUpdate () {
+	shouldBeResized () {
 		if (document.body) {
 			return this.initHeight !== document.body.style.height;
 		}
@@ -34,29 +48,22 @@ export class Resizer {
 		return false;
 	}
 
-	setHeight () {
-		if (this.rootElement) {
-			// NOTE: Получаем таким образом селекторы, т.к. имя класса генерируется хэшом и всегда разное
-			this.selectorsOffset
-				= (this.rootElement.firstChild
-				&& this.rootElement.firstChild.firstChild
-				&& this.rootElement.firstChild.firstChild instanceof HTMLElement
-				&& Number(this.rootElement.firstChild.firstChild.offsetHeight)) || 0;
-			const newHeight = `${this.initHeight}px`;
-
-			if (document.body) {
-				document.body.style.height = newHeight;
-				return `${this.initHeight - this.selectorsOffset - this.margin}px`;
-			}
-		}
-	}
-
-	resize (setCalendarHeigth: (heigth: string) => void) {
-		const shouldUpdate = this.shouldUpdate();
-
-		if (shouldUpdate) {
+	/**
+	 * Получить новую высоту календаря с учетом ресайза приложения
+	 * @returns {void | string} - пересчитанная высота календаря
+	 */
+	getResizedHeigh () {
+		if (this.rootElement && this.shouldBeResized()) {
 			const isFullSize = this.isFullSize();
-			setCalendarHeigth(`${(isFullSize ? window.innerHeight : this.initHeight) - this.selectorsOffset - this.margin}px`);
+			const selectorsOffset = this.getSelectorsOffset();
+
+			if (!isFullSize && document.body) {
+				document.body.style.height = `${this.initHeight}px`;
+			}
+
+			return isFullSize
+				? `${window.innerHeight - selectorsOffset - this.margin}px`
+				: `${this.initHeight - selectorsOffset - this.margin}px`;
 		}
 	}
 }

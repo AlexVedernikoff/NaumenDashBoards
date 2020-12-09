@@ -1,11 +1,15 @@
 // @flow
-import React, {Fragment, useCallback, useEffect} from 'react';
+import {LocalizationProvider, loadMessages} from '@progress/kendo-react-intl';
+import React, {useCallback, useEffect} from 'react';
 import {CALENDAR_STATUS_FILTER} from '../../../constants';
 import DropdownList from 'components/molecules/DropdownList';
 import {LOCATION_TYPES} from 'constants/index';
 import {MultiSelect} from '@progress/kendo-react-dropdowns';
 import type {Props} from 'containers/CalendarSelectors/types';
+import ruLocale from './ruLocale.json';
 import styles from './CalendarSelectors.less';
+
+loadMessages(ruLocale, 'ru-RU');
 
 const CalendarSelectors = ({
 	calendarList,
@@ -98,13 +102,13 @@ const CalendarSelectors = ({
 	}
 
 	return (
-		<Fragment>
+		<LocalizationProvider language="ru-RU">
 			<div className={styles.dropdownContainer}>
 				{renderLocationSelector()}
 				{renderCalendarSelector()}
 				{renderStatusFilter()}
 			</div>
-		</Fragment>
+		</LocalizationProvider>
 	);
 };
 
