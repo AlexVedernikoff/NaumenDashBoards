@@ -159,6 +159,10 @@ const Calendar = ({
 		<CustomCalendarItem {...props} onEventClick={openEventLink} />
 	);
 
+	const renderCustomMonthItem = (props) => (
+		<CustomCalendarMonthItem {...props} onEventClick={openEventLink} />
+	);
+
 	const renderSchedulerHeader = (props) => (
 		<CustomCalendarHeader
 			{...props}
@@ -218,7 +222,7 @@ const Calendar = ({
 			/>
 		);
 
-	const renderMonthView = () => <MonthView item={CustomCalendarMonthItem} slot={CustomSlot} />;
+	const renderMonthView = () => <MonthView item={renderCustomMonthItem} slot={CustomSlot} />;
 
 	const renderCalendar = () => (
 		<Scheduler
