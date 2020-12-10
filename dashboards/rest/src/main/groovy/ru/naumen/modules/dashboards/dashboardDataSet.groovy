@@ -4143,10 +4143,10 @@ private FilterList getFilterList(Map<String, Object> customGroup, String subject
  * @param top - количество данных, которое нужно получить
  * @param parameterFilters - фильтры для параметра из кастомных группировок
  * @param breakdownFilters - фильтры для показателя из кастомных группировок
- * @param fromTwoFiltersList - флаг на результат работы 0 или 1 списка фильтров
+ * @param fromNoOrTwoFiltersList - флаг на результат работы 0 или 1 списка фильтров
  * @return TOP Х данных, отсортированных по убыванию показателя
  */
-List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [], Boolean fromTwoFiltersList = false)
+List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [], Boolean fromNoOrTwoFiltersList = false)
 {
     Integer paramIndex = 1 //индекс, на котором расположены значения параметра (первого параметра для таблицы)
     Integer aggregationIndex = 0 //индекс, на котором расположены значения показателя (первого показателя для таблицы)
@@ -4157,7 +4157,7 @@ List getTop(List currentRes, Integer top, List parameterFilters = [], List break
     //суммируем данные по группам - подсчитываем значения первого показателя и выставляем в порядке по убыванию
     def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v.sum{ it[aggregationIndex] as Double } ] }.sort { -it[1] as Double }
     //берём из этих групп первые по top или все группы, если данных меньше
-    tempResult = tempResult.size() > top && fromTwoFiltersList ? tempResult[0..top - 1]*.get(0) : tempResult*.get(0)
+    tempResult = tempResult.size() > top && fromNoOrTwoFiltersList ? tempResult[0..top - 1]*.get(0) : tempResult*.get(0)
     //находим соответсвия данных с теми группами, что получили, и выводим их
     return tempResult.collectMany { value -> currentRes.findAll {it[paramIndex] == value} }
 }
@@ -4212,7 +4212,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             {
                 if(requestData?.groups?.size() > 1)
                 {
-                    return getTop(total, top)
+                    return getTop(total, top, [], [], true)
                 }
                 return total.size() > top ? total[0..top - 1] : total
             }
@@ -4274,7 +4274,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             {
                 if(dataSet.values().head().groups?.size() > 1)
                 {
-                    return getTop(total, top)
+                    return getTop(total, top, [], [], true)
                 }
                 return total.size() > top ? total[0..top - 1] : total
             }
