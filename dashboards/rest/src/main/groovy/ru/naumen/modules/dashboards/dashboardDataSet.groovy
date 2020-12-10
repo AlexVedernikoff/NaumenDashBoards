@@ -4143,10 +4143,10 @@ private FilterList getFilterList(Map<String, Object> customGroup, String subject
  * @param top - количество данных, которое нужно получить
  * @param parameterFilters - фильтры для параметра из кастомных группировок
  * @param breakdownFilters - фильтры для показателя из кастомных группировок
- * @param fromNoOrOneFilterList - флаг на результат работы 0 или 1 списка фильтров
+ * @param fromTwoFiltersList - флаг на результат работы 0 или 1 списка фильтров
  * @return TOP Х данных, отсортированных по убыванию показателя
  */
-List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [], Boolean fromNoOrOneFilterList = true)
+List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [], Boolean fromTwoFiltersList = false)
 {
     Integer paramIndex = 1 //индекс, на котором расположены значения параметра (первого параметра для таблицы)
     Integer aggregationIndex = 0 //индекс, на котором расположены значения показателя (первого показателя для таблицы)
@@ -4157,7 +4157,7 @@ List getTop(List currentRes, Integer top, List parameterFilters = [], List break
     //суммируем данные по группам - подсчитываем значения первого показателя и выставляем в порядке по убыванию
     def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v.sum{ it[aggregationIndex] as Double } ] }.sort { -it[1] as Double }
     //берём из этих групп первые по top или все группы, если данных меньше
-    tempResult = tempResult.size() > top && fromNoOrOneFilterList ? tempResult[0..top - 1]*.get(0) : tempResult*.get(0)
+    tempResult = tempResult.size() > top && fromTwoFiltersList ? tempResult[0..top - 1]*.get(0) : tempResult*.get(0)
     //находим соответсвия данных с теми группами, что получили, и выводим их
     return tempResult.collectMany { value -> currentRes.findAll {it[paramIndex] == value} }
 }
@@ -4403,7 +4403,7 @@ private List getOneFilterListDiagramData(def node,
                 }
             }
             int i = 0
-            def res = variables.collectMany { totalVar ->
+            def res = variables.withIndex().collectMany { totalVar, j ->
                 Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
                                    dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
                                           .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
@@ -4429,7 +4429,7 @@ private List getOneFilterListDiagramData(def node,
                 res = formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)
                 Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): res]
                 res = onlyFilled && !res ? [] : formatResult(total, aggregationCnt)
-                if ((parameterFilters && i < top) || !top)
+                if ((parameterFilters && j < top) || !top)
                 {
                     return res
                 }
@@ -4554,7 +4554,7 @@ private List getTwoFilterListDiagramData(def node,
             }
             if(top)
             {
-                return getTop(res, top, parameterFilters, breakdownFilters, false)
+                return getTop(res, top, parameterFilters, breakdownFilters, true)
             }
             return res
         case 'computation':
@@ -4618,7 +4618,7 @@ private List getTwoFilterListDiagramData(def node,
             }
             if(top)
             {
-                return getTop(res, top, parameterFilters, breakdownFilters, false)
+                return getTop(res, top, parameterFilters, breakdownFilters, true)
             }
             return res
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
