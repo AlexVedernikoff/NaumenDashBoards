@@ -13,6 +13,7 @@ package ru.naumen.modules.dashboards
 
 import groovy.transform.AutoClone
 import groovy.transform.TupleConstructor
+import groovy.transform.Field
 
 //region enum
 /**
@@ -179,6 +180,28 @@ Date getMinDate(String code, String classFqn)
 {
     return api.db.query("select min(${code}) from ${classFqn}").list().head() as Date
 }
+
+/**
+ * Метод получения количества уникальных значений по атрибуту из Бд
+ * @return - количество уникальных значений по данному атрибуту
+ */
+Integer countDistinct(Attribute attribute, String classFqn)
+{
+    String attrCode = attribute.attrChains()*.code.join('.')
+    return api.db.query("select count(distinct ${attrCode}) from ${classFqn}").list().head() as Integer
+}
+
+//endregion
+
+//region КОНСТАНТЫ
+/**
+ * предел значений по количеству строк в таблице
+ */
+@Field private static final Integer tableParameterLimit = 10000
+/**
+ * предел значений по количеству значений разбивки в таблице
+ */
+@Field private static final Integer tableBreakdownLimit = 30
 
 //endregion
 

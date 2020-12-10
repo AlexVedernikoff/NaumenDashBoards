@@ -33,8 +33,20 @@ trait CriteriaWrapper
             : api.db.createCriteria().addSource(source.classFqn) as ApiCriteria
     }
 
-    List execute(ApiCriteria criteria)
+    List execute(ApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false)
     {
+        if(diagramType == DiagramType.TABLE)
+        {
+            if (ignoreParameterLimit)
+            {
+                return api.db.query(criteria).list()
+            }
+            else
+            {
+                return api.db.query(criteria).setMaxResults(modules.dashboardCommon.tableParameterLimit).list()
+            }
+
+        }
         return api.db.query(criteria).setMaxResults(100).list()
     }
 }
@@ -801,9 +813,9 @@ class QueryWrapper implements CriteriaWrapper
         return this
     }
 
-    List<List> getResult(Boolean requestHasOneNoneAggregation = false)
+    List<List> getResult(Boolean requestHasOneNoneAggregation = false,DiagramType diagramType = diagramType.COLUMN, Boolean ignoreParameterLimit = false)
     {
-        return execute(criteria).collect {
+        return execute(criteria, diagramType, ignoreParameterLimit).collect {
             requestHasOneNoneAggregation ? [it] : it.collect() as List
         }
     }
@@ -860,7 +872,7 @@ class QueryWrapper implements CriteriaWrapper
  * @param diagramType - тип диаграммы
  * @return результат выборки
  */
-List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT)
+List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT, Boolean ignoreParameterLimit = false)
 {
     validate(requestData)
     validate(requestData.source)
@@ -923,7 +935,7 @@ List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = tr
     Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
         it?.type == Aggregation.NOT_APPLICABLE
     } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
-    return wrapper.getResult(requestHasOneNoneAggregation)
+    return wrapper.getResult(requestHasOneNoneAggregation, diagramType, ignoreParameterLimit)
 }
 
 /**
