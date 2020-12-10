@@ -105,16 +105,19 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 		setDefaultIndicator = (index: number, sourceRefFields: SourceRefFields) => (attributes: Array<Attribute>) => {
 			const {setDataFieldValue} = this.props;
+			const {indicator: indicatorName} = sourceRefFields;
 			let indicator = attributes.find(attribute => attribute.code === 'UUID');
 
-			if (sourceRefFields.indicator === FIELDS.indicators) {
+			if (indicatorName === FIELDS.indicators) {
 				indicator = [{
 					aggregation: getDefaultAggregation(indicator),
 					attribute: indicator
 				}];
+			} else {
+				setDataFieldValue(index, FIELDS.aggregation, getDefaultAggregation(indicator));
 			}
 
-			setDataFieldValue(index, sourceRefFields.indicator, indicator);
+			setDataFieldValue(index, indicatorName, indicator);
 		};
 
 		renderAddSourceInput = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleAddSource} />;
