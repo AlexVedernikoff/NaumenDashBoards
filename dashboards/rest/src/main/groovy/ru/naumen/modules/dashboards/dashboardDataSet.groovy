@@ -101,6 +101,27 @@ class TableDiagram
      * Список значений строки
      */
     Collection<Map<String, Object>> data = []
+
+    /**
+     * Объект, отображающий превышения по пределам ограничений
+     */
+    LimitExceeded limitsExceeded
+}
+
+/**
+ * Класс, описывающий флаги на превышение данных в БД относительно ограничений
+ */
+class LimitExceeded
+{
+    /**
+     * флаг на превышение по параметру
+     */
+    Boolean parameter
+
+    /**
+     * флаг на превышение по разбивке
+     */
+    Boolean breakdown
 }
 
 /**
@@ -344,7 +365,8 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
             }
-            def res = getDiagramData(request, diagramType, aggregationCnt, requestContent)
+            Map ignoreLimits = requestContent.ignoreLimits as Map ?: [breakdown: false, parameter: false]
+            def res = getDiagramData(request, diagramType, aggregationCnt, requestContent, ignoreLimits)
             if (computationInRequest)
             {
                 //а здесь уже важно знать, выводить пустые значения или нет
@@ -357,7 +379,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                                                        requestContent.showRowNum]
 
             return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean,
-                                       showRowNum as boolean, requestContent)
+                                       showRowNum as boolean, requestContent, ignoreLimits)
         case COMBO:
             def request = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(request, diagramType)
@@ -2463,9 +2485,10 @@ private List<List<FilterParameter>> mappingFilter(List<List> data,
  * @param diagramType - тип диаграммы
  * @param aggregationCnt - количество агрегаций
  * @param requestContent - тело запроса
+ * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
  * @return сырые данные из Бд по запросу
  */
-private def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT, Integer aggregationCnt = 1, Map<String, Object> requestContent = [:])
+private def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT, Integer aggregationCnt = 1, Map<String, Object> requestContent = [:], Map<String, Boolean> ignoreLimits = [breakdown: false, parameter:false])
 {
     //TODO: уже сверхкостыльно получается. Нужно придумать решение по лучше
     assert request: "Empty request!"
@@ -2494,7 +2517,7 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
             switch (filterListSize)
             {
                 case 0:
-                    return getNoFilterListDiagramData(node, request, aggregationCnt, top, onlyFilled, diagramType, requestContent)
+                    return getNoFilterListDiagramData(node, request, aggregationCnt, top, onlyFilled, diagramType, requestContent, ignoreLimits)
                 case 1:
                     return getOneFilterListDiagramData(
                         node, request, aggregationCnt,
@@ -3003,13 +3026,15 @@ private SummaryDiagram mappingSummaryDiagram(List list)
  * @param showRowNum - флаг для вывода номера строки
  * @param request - запрос
  * @param requestContent - тело запроса с фронта
+ * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
  * @return сформированная таблица
  */
 private TableDiagram mappingTableDiagram(List list,
                                          boolean totalColumn,
                                          boolean totalRow,
                                          boolean  showRowNum,
-                                         Map<String, Object> requestContent)
+                                         Map<String, Object> requestContent,
+                                         Map<String, Boolean> ignoreLimits = [breakdown: false, parameter: false])
 {
     def resultDataSet = list.head() as List<List>
     def transposeDataSet = resultDataSet.transpose()
@@ -3023,13 +3048,32 @@ private TableDiagram mappingTableDiagram(List list,
     else
     {
         Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(requestContent)
-        Boolean requestHasBreakdown = checkForBreakdown(requestContent)
+        Boolean hasBreakdown = checkForBreakdown(requestContent)
 
-        return mappingManyColumnsTableDiagram(
-            resultDataSet, transposeDataSet, totalColumn,
-            totalRow, showRowNum, requestHasBreakdown, aggregationCnt, attributes,
-            innerCustomGroupNames, allAggregationAttributes
-        )
+        List<String> attributeNames = attributes.name
+        List customValuesInBreakdown = []
+        if (innerCustomGroupNames)
+        {
+            //для работы необходим учет именно основных группировок, а для колонок идут внутреннние группировки группы
+            resultDataSet = prepareResultDataSet(resultDataSet, attributeNames, innerCustomGroupNames)
+            transposeDataSet = resultDataSet.transpose()
+            if(hasBreakdown)
+            {
+                customValuesInBreakdown = innerCustomGroupNames.findAll { it.attributeName == attributeNames.last() }.value
+            }
+        }
+
+        return mappingTable(resultDataSet,
+                            transposeDataSet,
+                            attributes,
+                            totalColumn,
+                            totalRow,
+                            showRowNum,
+                            hasBreakdown,
+                            customValuesInBreakdown,
+                            aggregationCnt,
+                            allAggregationAttributes,
+                            ignoreLimits)
     }
 }
 
@@ -3144,55 +3188,6 @@ List prepareResultDataSet(List resultDataSet, List<String> attributeNames, Set<M
         row.add(newIndex, valueToPast)
     }
     return resultDataSet
-}
-
-/**
- * Метод преобразования результата к таблице с несколькими колонками
- * @param resultDataSet - итоговый датасет
- * @param transposeDataSet - транспонированный датасет
- * @param totalColumn - флаг на подсчёт итоговой колонки
- * @param totalRow - флаг для подсчёта итоговой строки
- * @param showRowNum - флаг для вывода номера строки
- * @param hasBreakdown - флаг на наличие разбивки в запросе
- * @param aggregationCnt - количество реальных агрегаций
- * @param attributes - атрибуты
- * @param innerCustomGroupNames - названия значений кастомных группировок
- * @param allAggregationAttributes - все атрибуты агрегации
- * @return TableDiagram
- */
-private TableDiagram mappingManyColumnsTableDiagram(List resultDataSet, def transposeDataSet,
-                                                    Boolean totalColumn,
-                                                    Boolean totalRow,
-                                                    Boolean showRowNum,
-                                                    Boolean hasBreakdown,
-                                                    Integer aggregationCnt,
-                                                    List<Map> attributes = null,
-                                                    Set<Map> innerCustomGroupNames = [],
-                                                    List<String> allAggregationAttributes = [])
-{
-    List<String> attributeNames = attributes.name
-    List customValuesInBreakdown = []
-    if (innerCustomGroupNames)
-    {
-        //для работы необходим учет именно основных группировок, а для колонок идут внутреннние группировки группы
-        resultDataSet = prepareResultDataSet(resultDataSet, attributeNames, innerCustomGroupNames)
-        transposeDataSet = resultDataSet.transpose()
-        if(hasBreakdown)
-        {
-            customValuesInBreakdown = innerCustomGroupNames.findAll { it.attributeName == attributeNames.last() }.value
-        }
-    }
-
-    return mappingTable(resultDataSet,
-                        transposeDataSet,
-                        attributes,
-                        totalColumn,
-                        totalRow,
-                        showRowNum,
-                        hasBreakdown,
-                        customValuesInBreakdown,
-                        aggregationCnt,
-                        allAggregationAttributes)
 }
 
 /**
@@ -3365,6 +3360,7 @@ List prepareDataSet(List list, def requestContent, Boolean showNulls, Boolean ha
  * @param customValuesInBreakdown - значения кастомной группировки в разбивке
  * @param aggregationCnt - количество агрегаций в запросе
  * @param allAggregationAttributes - названия всех атрибутов агрегации
+ * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
  * @return TableDiagram
  */
 private TableDiagram mappingTable(List resultDataSet,
@@ -3376,9 +3372,14 @@ private TableDiagram mappingTable(List resultDataSet,
                                   Boolean hasBreakdown,
                                   List customValuesInBreakdown,
                                   Integer aggregationCnt,
-                                  List<String> allAggregationAttributes)
+                                  List<String> allAggregationAttributes,
+                                  Map<String, Boolean> ignoreLimits)
 {
     List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
+    breakdownValues = !customValuesInBreakdown && breakdownValues.size() > modules.dashboardCommon.tableBreakdownLimit
+        ? breakdownValues[0..modules.dashboardCommon.tableBreakdownLimit - 1]
+        : breakdownValues
+
     Collection <Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
 
     int cnt = attributes.size()
@@ -3387,12 +3388,13 @@ private TableDiagram mappingTable(List resultDataSet,
     Integer notAggregatedAttributeSize = notAggregatedAttributeNames.size()
     List<Map<String, Object>> tempMaps = getTempMaps(resultDataSet, attributeNames, cnt)
     List data = []
+    Integer parameterIndex = aggregationCnt + notAggregatedAttributeSize //индекс,
+    // с которого в строке начинаются значения параметров
     //подготовка данных
     if (hasBreakdown)
     {
-
-        List<Map> rows = getFullRows(tempMaps, aggregationCnt + notAggregatedAttributeSize)
-        rows = prepareRowsWithBreakdown(rows, aggregationCnt + notAggregatedAttributeSize, attributeNames, notAggregatedAttributeNames, breakdownValues)
+        List<Map> rows = getFullRows(tempMaps, parameterIndex)
+        rows = prepareRowsWithBreakdown(rows, parameterIndex, attributeNames, notAggregatedAttributeNames, breakdownValues)
         data = rows.withIndex().collect { map, id->
             return [ID: ++id, *:map.sum()]
         }
@@ -3437,7 +3439,36 @@ private TableDiagram mappingTable(List resultDataSet,
     //агрегация всегда стоит в конце
     columns += aggregationColumns
     columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
-    return new TableDiagram(columns: columns, data: data)
+
+    Boolean limitParameter = !ignoreLimits.parameter &&
+                             modules.dashboardCommon.countDistinct(attributes.attribute[parameterIndex],
+                                                                   attributes.attribute[parameterIndex].sourceCode) >
+                             modules.dashboardCommon.tableParameterLimit
+    limitParameter = checkForDateInAttribute(attributes[parameterIndex], limitParameter)
+
+    Boolean limitBreakdown = hasBreakdown &&
+                             !ignoreLimits.breakdown &&
+                             modules.dashboardCommon.countDistinct(attributes.attribute.last(),
+                                                                   attributes.attribute.last().sourceCode) >
+                             modules.dashboardCommon.tableBreakdownLimit
+    limitBreakdown = checkForDateInAttribute(attributes.last(), limitBreakdown)
+
+    LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
+
+    return new TableDiagram(columns: columns, data: data, limitsExceeded: limitsExceeded)
+}
+
+/**
+ * Метод на проверку даты в атрибуте, который нужно проверить на выход за пределы
+ * @param attributeValue - значение атрибута и его группы
+ * @param flag - текущий флаг на выход за ограничения
+ * @return - флаг/false
+ */
+Boolean checkForDateInAttribute(Map attributeValue, Boolean flag)
+{
+    return (attributeValue.group.way == 'SYSTEM' &&
+            attributeValue.group.data as GroupType == GroupType.DAY &&
+            attributeValue.group.format in ['dd.mm.YY hh:ii', 'dd.mm.YY hh']) ? flag : false
 }
 
 /**
@@ -3629,7 +3660,7 @@ private List<Map> getAttributeNamesAndValuesFromRequest(Map<String, Object> requ
                     ? parameter?.group?.data?.name
                     : parameter?.attribute?.title
                 Map<String, Object> group = parameter?.group
-                return [name : name, attribute : parameter?.attribute,
+                return [name : name, attribute : Attribute.fromMap(parameter?.attribute),
                         type : ColumnType.PARAMETER,group : group]
             }
         }
@@ -3644,7 +3675,7 @@ private List<Map> getAttributeNamesAndValuesFromRequest(Map<String, Object> requ
             ? value?.breakdownGroup?.data?.name
             : value?.breakdown?.title
         Map<String, Object> group =  value?.breakdownGroup
-        return  group ? [name : name, attribute : value?.breakdown,
+        return  group ? [name : name, attribute : Attribute.fromMap(value?.breakdown),
                          type: ColumnType.BREAKDOWN, group : group] : null
     }
 
@@ -4014,7 +4045,7 @@ private Map<String, Object> transformRequestWithComputation(Map<String, Object> 
         }
         return [type: map.type, data: newData, sorting: map.sorting, top: map.top,
                 showEmptyData: map.showEmptyData, calcTotalColumn: map.calcTotalColumn,
-                calcTotalRow : map.calcTotalRow, showRowNum: map.showRowNum]
+                calcTotalRow : map.calcTotalRow, showRowNum: map.showRowNum, ignoreLimits: map.ignoreLimits]
     }
     return cardObjectUuid ? transform(requestContent) : requestContent
 }
@@ -4140,9 +4171,10 @@ List getTop(List currentRes, Integer top, List parameterFilters = [], List break
  * @param onlyFilled - флаг на получение только заполненных данных, без null
  * @param diagramType  - тип диаграммы
  * @param requestContent - тело запроса
+ * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
  * @return сырые данные для построения диаграм
  */
-private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean onlyFilled,  DiagramType diagramType, Map<String,Object> requestContent)
+private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean onlyFilled,  DiagramType diagramType, Map<String,Object> requestContent, Map<String,Boolean> ignoreLimits)
 {
     String nodeType = node.type
     switch (nodeType.toLowerCase())
@@ -4164,7 +4196,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
 
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
             Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-            def res = modules.dashboardQueryWrapper.getData(requestData, top, onlyFilled, diagramType)
+            def res = modules.dashboardQueryWrapper.getData(requestData, top, onlyFilled, diagramType, ignoreLimits.parameter)
                              .with(formatGroup)
                              .with(formatAggregation)
             def total = res ? [(requisiteNode.title): res] : [:]
@@ -4210,7 +4242,8 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             def variables = dataSet.collectEntries { key, data ->
                 Closure postProcess =
                     this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                [(key): modules.dashboardQueryWrapper.getData(data as RequestData, top, onlyFilled, diagramType).with(postProcess)]
+                [(key): modules.dashboardQueryWrapper.getData(data as RequestData, top, onlyFilled, diagramType, ignoreLimits.parameter)
+                               .with(postProcess)]
             } as Map<String, List>
 
             //Вычисление формулы. Выглядит немного костыльно...
