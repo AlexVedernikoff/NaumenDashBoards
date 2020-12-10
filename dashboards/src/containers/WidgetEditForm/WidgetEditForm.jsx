@@ -92,6 +92,8 @@ class WidgetEditForm extends PureComponent<Props, State> {
 			if (errors) {
 				this.setState({errors});
 			}
+
+			this.setState({values: this.getValues(updatedWidget)});
 		} else {
 			this.focusOnError();
 		}

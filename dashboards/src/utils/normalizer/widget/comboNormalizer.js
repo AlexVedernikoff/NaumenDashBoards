@@ -54,7 +54,14 @@ const normalizeDataSet = (dataSet: ComboData, index: number, data: Array<ComboDa
 	};
 
 	if (!dataSet.sourceForCompute) {
-		const {aggregation, showEmptyData, top = DEFAULT_TOP_SETTINGS, type = WIDGET_TYPES.COLUMN, yAxis, yAxisName} = dataSet;
+		const {
+			aggregation,
+			showEmptyData,
+			top = DEFAULT_TOP_SETTINGS,
+			type = WIDGET_TYPES.COLUMN,
+			yAxis,
+			yAxisName = getDefaultComboYAxisName(resultSet)
+		} = dataSet;
 		resultSet = {
 			...resultSet,
 			aggregation: aggregationFilter(aggregation),
@@ -65,10 +72,6 @@ const normalizeDataSet = (dataSet: ComboData, index: number, data: Array<ComboDa
 			yAxis,
 			yAxisName
 		};
-
-		if (!yAxisName) {
-			resultSet.yAxisName = getDefaultComboYAxisName(resultSet);
-		}
 
 		resultSet = mixinBreakdown({...dataSet, breakdown: breakdown(index, data, FIELDS.yAxis)}, resultSet);
 	}

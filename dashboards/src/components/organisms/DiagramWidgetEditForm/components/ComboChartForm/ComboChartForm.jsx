@@ -48,16 +48,23 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			templateName,
 			type
 		} = values;
+		const indicatorSettings = extend(DEFAULT_CHART_SETTINGS.yAxis, indicator);
+		const comboData = data.map(normalizeDataSet);
+
+		// $FlowFixMe
+		if (!comboData.find(({yAxisName}) => yAxisName)) {
+			indicatorSettings.showName = false;
+		}
 
 		return {
 			colors,
 			computedAttrs,
-			data: data.map(normalizeDataSet),
+			data: comboData,
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),
 			displayMode,
 			header,
 			id,
-			indicator: extend(DEFAULT_CHART_SETTINGS.yAxis, indicator),
+			indicator: indicatorSettings,
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
 			name,
 			navigation,
