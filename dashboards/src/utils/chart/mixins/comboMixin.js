@@ -40,7 +40,7 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 
 const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, maxValue?: number) => {
 	const {colors, indicator} = widget;
-	const {dataKey, yAxisName: name} = dataSet;
+	const {dataKey, showEmptyData, yAxisName: name} = dataSet;
 	const usesMSInterval = hasMSInterval(dataSet, FIELDS.yAxis);
 	const usesPercent = hasPercent(dataSet, FIELDS.yAxis);
 	const color = colors[index];
@@ -66,7 +66,7 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, maxValue
 		},
 		forceNiceScale: true,
 		labels: {
-			formatter: valueFormatter(usesMSInterval, usesPercent),
+			formatter: valueFormatter(usesMSInterval, usesPercent, showEmptyData),
 			style: {
 				colors: color
 			}

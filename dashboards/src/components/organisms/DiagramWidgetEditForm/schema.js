@@ -3,6 +3,7 @@ import {array, lazy, mixed, object, string} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import type {YupType} from 'containers/WidgetEditForm/types';
 
@@ -193,6 +194,10 @@ const validateSources = testSourcesNumber(
 	testMinSourcesNumber(mixed())
 );
 
+const validateTopSettings = object({
+	count: string().required('Укажите значение ТОП')
+}).default(DEFAULT_TOP_SETTINGS);
+
 const rules = {
 	base,
 	conditionalBreakdown,
@@ -201,7 +206,8 @@ const rules = {
 	requiredBreakdown,
 	requiredByCompute,
 	testMinSourcesNumber,
-	validateSources
+	validateSources,
+	validateTopSettings
 };
 
 export {
