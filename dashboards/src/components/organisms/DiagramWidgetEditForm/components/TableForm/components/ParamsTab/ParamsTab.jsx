@@ -7,7 +7,7 @@ import type {DataTopSettings} from 'store/widgets/data/types';
 import {FieldError, IconButton} from 'components/atoms';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormBox} from 'components/molecules';
-import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
+import {getDataErrorKey, getErrorKey} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultSystemGroup, isAllowedTopAggregation} from 'store/widgets/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {IndicatorsBox, ParametersBox} from './components';
@@ -129,11 +129,13 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	};
 
 	renderDataTopField = () => {
-		const {data, top} = this.props.values;
+		const {errors, values} = this.props;
+		const {data, top} = values;
 		const {indicators = [getDefaultIndicator()]} = data[this.mainIndex];
 		const disabled = countIndicators(data) > 1 || !isAllowedTopAggregation(indicators[0].aggregation);
+		const error = errors[getErrorKey(FIELDS.top, FIELDS.count)];
 
-		return <DataTopField disabled={disabled} onChange={this.handleChangeTopSettings} value={top} />;
+		return <DataTopField disabled={disabled} error={error} onChange={this.handleChangeTopSettings} value={top} />;
 	};
 
 	renderIndicatorsBox = (dataSet: DataSet, index: number, calcTotalColumn: boolean) => {

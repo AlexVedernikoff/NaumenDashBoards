@@ -15,8 +15,8 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class TableForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, testMinSourcesNumber} = rules;
-		const {breakdown, indicator, indicators, parameter, parameters, source, sources} = FIELDS;
+		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, testMinSourcesNumber, validateTopSettings} = rules;
+		const {breakdown, indicator, indicators, parameter, parameters, source, sources, top} = FIELDS;
 
 		return object({
 			...base,
@@ -36,7 +36,8 @@ export class TableForm extends Component<TypedFormProps> {
 						checkSourceForParent
 					)
 			})),
-			[sources]: testMinSourcesNumber(mixed())
+			[sources]: testMinSourcesNumber(mixed()),
+			[top]: validateTopSettings
 		});
 	};
 

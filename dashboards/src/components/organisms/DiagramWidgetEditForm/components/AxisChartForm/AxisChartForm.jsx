@@ -16,14 +16,15 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class AxisChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, parameterRule, requiredByCompute, validateSources} = rules;
-		const {breakdown, source, sources, xAxis, yAxis} = FIELDS;
+		const {base, parameterRule, requiredByCompute, validateSources, validateTopSettings} = rules;
+		const {breakdown, source, sources, top, xAxis, yAxis} = FIELDS;
 
 		return object({
 			...base,
 			data: array().of(object({
 				[breakdown]: requiredByCompute(breakdown, lazy(this.resolveBreakdownRule)),
 				[source]: object().required(getErrorMessage(source)).nullable(),
+				[top]: validateTopSettings,
 				[xAxis]: parameterRule(xAxis),
 				[yAxis]: requiredByCompute(yAxis)
 			})),

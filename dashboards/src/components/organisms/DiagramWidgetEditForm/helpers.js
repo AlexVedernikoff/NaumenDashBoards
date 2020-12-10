@@ -21,8 +21,13 @@ const filterByAttribute = (options: Array<Attribute>, attribute: Attribute): Arr
 	});
 };
 
-const getDataErrorKey = (...keys: Array<string | number>) => {
-	let errorKey = FIELDS.data;
+/**
+ * Возвращает составной ключ ошибки валидации
+ * @param {Array<string>} keys - ключи в порядке вложенности
+ * @returns {string}
+ */
+const getErrorKey = (...keys: Array<string | number>): string => {
+	let errorKey = keys.splice(0, 1)[0].toString();
 
 	keys.forEach(key => {
 		errorKey += typeof key === 'string' ? `.${key}` : `[${key}]`;
@@ -30,6 +35,13 @@ const getDataErrorKey = (...keys: Array<string | number>) => {
 
 	return errorKey;
 };
+
+/**
+ * Возвращает составной ключ ошибки валидации для параметров
+ * @param {Array<string>} keys - ключи в порядке вложенности
+ * @returns {string}
+ */
+const getDataErrorKey = (...keys: Array<string | number>): string => getErrorKey(FIELDS.data, ...keys);
 
 /**
  * Возвращает код источника родителя в формах, где дополнительные источники являются дочерними к первому.
@@ -54,6 +66,7 @@ const getParentClassFqn = (values: Values, index: number) => {
 
 export {
 	getDataErrorKey,
+	getErrorKey,
 	getParentClassFqn,
 	filterByAttribute
 };

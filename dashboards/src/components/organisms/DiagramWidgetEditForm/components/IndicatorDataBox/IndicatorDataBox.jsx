@@ -189,11 +189,12 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	renderDataTopField = () => {
-		const {usesTop} = this.props;
+		const {errors, index, usesTop} = this.props;
 		const {aggregation, top} = this.props.dataSet;
 		const disabled = !isAllowedTopAggregation(aggregation);
+		const error = errors[getDataErrorKey(index, FIELDS.top, FIELDS.count)];
 
-		return usesTop && <DataTopField disabled={disabled} onChange={this.handleChangeTopSettings} value={top} />;
+		return usesTop && <DataTopField disabled={disabled} error={error} onChange={this.handleChangeTopSettings} value={top} />;
 	};
 
 	renderDefaultBreakdownFieldSet = () => {

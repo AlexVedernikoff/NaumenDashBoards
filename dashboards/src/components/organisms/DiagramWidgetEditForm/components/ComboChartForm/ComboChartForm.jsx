@@ -14,14 +14,15 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class ComboChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, parameterRule, requiredByCompute, testMinSourcesNumber} = rules;
-		const {breakdown, source, sources, xAxis, yAxis} = FIELDS;
+		const {base, conditionalBreakdown, parameterRule, requiredByCompute, testMinSourcesNumber, validateTopSettings} = rules;
+		const {breakdown, source, sources, top, xAxis, yAxis} = FIELDS;
 
 		return object({
 			...base,
 			data: array().of(object({
 				[breakdown]: requiredByCompute(breakdown, conditionalBreakdown(FIELDS.yAxis)),
 				[source]: object().required(getErrorMessage(source)).nullable(),
+				[top]: validateTopSettings,
 				[xAxis]: parameterRule(xAxis),
 				[yAxis]: requiredByCompute(yAxis)
 			})),

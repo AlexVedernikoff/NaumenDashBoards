@@ -58,16 +58,18 @@ export class DataTopField extends PureComponent<Props> {
 	};
 
 	render () {
-		const {disabled} = this.props;
+		const {disabled, error} = this.props;
 		const CN = cn({
 			[styles.field]: true,
 			[styles.disabled]: disabled
 		});
 
 		return (
-			<FormField className={CN} row>
-				{this.renderShowCheckbox()}
-				{this.renderCountSelect()}
+			<FormField error={error}>
+				<div className={CN}>
+					{this.renderShowCheckbox()}
+					{this.renderCountSelect()}
+				</div>
 			</FormField>
 		);
 	}
