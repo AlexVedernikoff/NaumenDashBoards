@@ -813,7 +813,7 @@ class QueryWrapper implements CriteriaWrapper
         return this
     }
 
-    List<List> getResult(Boolean requestHasOneNoneAggregation = false,DiagramType diagramType = diagramType.COLUMN, Boolean ignoreParameterLimit = false)
+    List<List> getResult(Boolean requestHasOneNoneAggregation = false, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false)
     {
         return execute(criteria, diagramType, ignoreParameterLimit).collect {
             requestHasOneNoneAggregation ? [it] : it.collect() as List
