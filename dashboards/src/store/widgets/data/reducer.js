@@ -102,6 +102,11 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			};
 		case WIDGETS_EVENTS.SET_CREATED_WIDGET:
 			return createWidget(state, action);
+		case WIDGETS_EVENTS.SET_FOCUSED_WIDGET:
+			return {
+				...state,
+				focusedWidget: action.payload
+			};
 		case WIDGETS_EVENTS.SET_SELECTED_WIDGET:
 			return setSelectedWidget(state, action);
 		case WIDGETS_EVENTS.SET_WIDGETS:

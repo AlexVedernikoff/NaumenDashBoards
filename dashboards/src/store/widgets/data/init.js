@@ -11,6 +11,7 @@ export const initialWidgetsState: WidgetsDataState = {
 		error: false,
 		loading: false
 	},
+	focusedWidget: '',
 	map: {},
 	saving: {
 		error: false,

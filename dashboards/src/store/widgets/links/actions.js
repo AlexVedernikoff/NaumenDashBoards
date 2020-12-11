@@ -5,8 +5,7 @@ import {FIELDS} from 'DiagramWidgetEditForm';
 import {getDescriptorCases} from 'src/helpers';
 import {isSourceType} from 'store/sources/data/helpers';
 import {LINKS_EVENTS} from './constants';
-import {NAVIGATION_TARGET_WIDGET_KEY} from 'store/dashboard/settings/constants';
-import {setLocalStorageValue} from 'store/helpers';
+import StorageSettings from 'utils/storageSettings';
 import type {Widget} from 'store/widgets/data/types';
 
 const getPartsClassFqn = (code?: string) => {
@@ -116,11 +115,10 @@ const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch
  * @returns {ThunkAction}
  */
 const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(requestLink(dashboardId));
+	const storageSettings = new StorageSettings(dashboardId);
 
-	if (widgetId) {
-		setLocalStorageValue(dashboardId, NAVIGATION_TARGET_WIDGET_KEY, widgetId);
-	}
+	widgetId ? storageSettings.setTargetWidget(widgetId) : 	storageSettings.setFocus(true);
+	dispatch(requestLink(dashboardId));
 
 	try {
 		const {link} = await window.jsApi.restCallModule('dashboards', 'getDashboardLink', dashboardId);
