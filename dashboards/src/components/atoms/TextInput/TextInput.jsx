@@ -37,7 +37,7 @@ export class TextInput extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, disabled, maxLength, placeholder, value} = this.props;
+		const {className, disabled, maxLength, onBlur, onFocus, placeholder, value} = this.props;
 		const containerCN = cn({
 			[styles.container]: true,
 			[className]: true,
@@ -49,7 +49,9 @@ export class TextInput extends PureComponent<Props> {
 				<input
 					className={styles.input}
 					maxLength={maxLength}
+					onBlur={onBlur}
 					onChange={this.handleChange}
+					onFocus={onFocus}
 					placeholder={placeholder}
 					value={value}
 				/>

@@ -6,7 +6,9 @@ export type Props = {
 	disabled: boolean,
 	maxLength: number | null,
 	name: string,
+	onBlur?: (SyntheticFocusEvent<HTMLInputElement>) => void,
 	onChange: OnChangeInputEvent => void,
+	onFocus?: (SyntheticFocusEvent<HTMLInputElement>) => void,
 	onlyNumber: boolean,
 	placeholder: string,
 	value: InputValue
