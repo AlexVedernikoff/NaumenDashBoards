@@ -32,22 +32,24 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 		const {showEmptyData} = buildDataSet;
 		const parameterUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.xAxis);
 		const breakdownUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.breakdown);
+		const usesMetaClass = breakdownUsesMetaClass || parameterUsesMetaClass;
 		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
 		const usesPercent = hasPercent(buildDataSet, FIELDS.yAxis);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
 		const xAxisSettings = horizontal ? indicator : parameter;
 		const yAxisSettings = horizontal ? parameter : indicator;
+
 		let xaxis = {
 			categories: getXAxisLabels(widget, categories),
 			labels: {
-				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(parameterUsesMetaClass)
+				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesMetaClass)
 			}
 		};
 		let yaxis = {
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
-				formatter: horizontal ? axisLabelFormatter(parameterUsesMetaClass) : valueFormatter(usesMSInterval, usesPercent)
+				formatter: horizontal ? axisLabelFormatter(usesMetaClass) : valueFormatter(usesMSInterval, usesPercent)
 			}
 		};
 
@@ -81,7 +83,13 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 			},
 			tooltip: {
 				intersect: true,
-				shared: false
+				shared: false,
+				y: {
+					formatter: valueFormatter(usesMSInterval, usesPercent && !stacked),
+					title: {
+						formatter: axisLabelFormatter(usesMetaClass)
+					}
+				}
 			},
 			xaxis: extend(xaxis, getXAxisOptions(xAxisSettings)),
 			yaxis: extend(yaxis, getYAxisOptions(yAxisSettings))
