@@ -1,4 +1,7 @@
 // @flow
+import {Caret, IndicatorsContainer} from 'components/molecules/Select/components';
+import type {ComponentProps as CaretComponentProps} from 'components/molecules/Select/components/Caret/types';
+import type {ComponentProps as IndicatorsContainerComponentProps} from 'components/molecules/Select/components/IndicatorsContainer/types';
 import {IconButton} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
@@ -43,6 +46,18 @@ export class UserField extends PureComponent<Props> {
 		onSelect(index, value);
 	};
 
+	renderCaret = (props: CaretComponentProps) => <Caret iconName={ICON_NAMES.USER} onClick={props.onClick} round={false} />;
+
+	renderIndicatorsContainer = (props: IndicatorsContainerComponentProps) => {
+		const {children} = props;
+
+		return (
+			<IndicatorsContainer className={styles.indicatorsContainer}>
+				{children}
+			</IndicatorsContainer>
+		);
+	};
+
 	renderUserRemoveButton = () => {
 		const {removable} = this.props;
 
@@ -62,11 +77,16 @@ export class UserField extends PureComponent<Props> {
 	renderUserSelect = () => {
 		const {fetchUsers, usersData, value} = this.props;
 		const {data: options, error, loading, uploaded} = usersData;
+		const components = {
+			Caret: this.renderCaret,
+			IndicatorsContainer: this.renderIndicatorsContainer
+		};
 
 		return (
 			<Select
 				async={true}
 				className={styles.select}
+				components={components}
 				editable={true}
 				error={error}
 				fetchOptions={fetchUsers}

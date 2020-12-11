@@ -31,6 +31,11 @@ export class TextInput extends PureComponent<Props> {
 		onChange({name, value: ''});
 	};
 
+	renderClearIcon = () => {
+		const {value} = this.props;
+		return value ? <IconButton className={styles.icon} icon={ICON_NAMES.REMOVE} onClick={this.handleClear} /> : null;
+	};
+
 	render () {
 		const {className, disabled, maxLength, placeholder, value} = this.props;
 		const containerCN = cn({
@@ -41,8 +46,14 @@ export class TextInput extends PureComponent<Props> {
 
 		return (
 			<div className={containerCN}>
-				<input className={styles.input} maxLength={maxLength} onChange={this.handleChange} placeholder={placeholder} value={value} />
-				<IconButton className={styles.icon} icon={ICON_NAMES.REMOVE} onClick={this.handleClear} />
+				<input
+					className={styles.input}
+					maxLength={maxLength}
+					onChange={this.handleChange}
+					placeholder={placeholder}
+					value={value}
+				/>
+				{this.renderClearIcon()}
 			</div>
 		);
 	}
