@@ -6,7 +6,21 @@ import {store} from 'index';
 export class DashboardResizer {
 	initHeight: number = window.innerHeight;
 
-	getContentHeight = () => gridRef.current && gridRef.current.getBoundingClientRect().height + DASHBOARD_HEADER_HEIGHT;
+	getContentHeight (): number | null {
+		return gridRef.current && gridRef.current.getBoundingClientRect().height + DASHBOARD_HEADER_HEIGHT;
+	}
+
+	getScrollParent = (node?: HTMLElement | null): HTMLElement | null => {
+		let parentNode = null;
+
+		if (node) {
+			const {clientHeight, scrollHeight} = node;
+			// $FlowFixMe
+			parentNode = scrollHeight > clientHeight ? node : this.getScrollParent(node.parentNode);
+		}
+
+		return parentNode;
+	};
 
 	isFullSize = () => {
 		let isFullSize = true;
@@ -33,6 +47,18 @@ export class DashboardResizer {
 		} else {
 			const height = this.getContentHeight();
 			height && this.setHeight(height);
+		}
+	};
+
+	scrollTo = (x: number, y: number) => {
+		const {frameElement} = window;
+		const scrollParent = this.getScrollParent(frameElement);
+
+		if (scrollParent) {
+			const parentOffset = scrollParent.getBoundingClientRect().top;
+			const dashboardOffset = frameElement.getBoundingClientRect().top;
+
+			setTimeout(() => scrollParent.scrollTo(x, y + dashboardOffset - parentOffset));
 		}
 	};
 

@@ -3,7 +3,14 @@ import type {AppState} from 'store/types';
 import {changeLayouts} from 'store/dashboard/layouts/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {drillDown, openCardObject, openNavigationLink} from 'store/widgets/links/actions';
-import {editWidgetChunkData, removeWidget, selectWidget, updateWidget} from 'store/widgets/data/actions';
+import {
+	editWidgetChunkData,
+	focusWidget,
+	removeWidget,
+	resetFocusedWidget,
+	selectWidget,
+	updateWidget
+} from 'store/widgets/data/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getMapValues} from 'src/helpers';
 import {USER_ROLES} from 'store/context/constants';
@@ -13,7 +20,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const {layouts: dashboardLayouts, settings} = dashboard;
 	const {editMode, layoutMode, personal: personalDashboard} = settings;
 	const {buildData, data} = widgets;
-	const {selectedWidget} = data;
+	const {focusedWidget, selectedWidget} = data;
 	const {user} = context;
 	const editable = context.user.role !== USER_ROLES.REGULAR || personalDashboard;
 
@@ -21,6 +28,7 @@ export const props = (state: AppState): ConnectedProps => {
 		buildData,
 		editMode,
 		editable,
+		focusedWidget,
 		layoutMode,
 		layouts: dashboardLayouts[layoutMode],
 		personalDashboard,
@@ -35,9 +43,11 @@ export const functions: ConnectedFunctions = {
 	drillDown,
 	editWidgetChunkData,
 	fetchBuildData,
+	focusWidget,
 	openCardObject,
 	openNavigationLink,
 	removeWidget,
+	resetFocusedWidget,
 	selectWidget,
 	updateWidget
 };

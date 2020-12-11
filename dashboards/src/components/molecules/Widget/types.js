@@ -30,6 +30,7 @@ export type Props = {
 	layoutMode: string,
 	onDrillDown: DrillDown,
 	onEdit: (id: string, ref: DivRef) => void,
+	onFocus: (element: HTMLDivElement) => void,
 	onOpenCardObject: OpenCardObject,
 	onOpenNavigationLink: OpenNavigationLink,
 	onRemove: (id: string) => ThunkAction,

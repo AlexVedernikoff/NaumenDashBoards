@@ -54,12 +54,8 @@ const LAYOUT_MODE = {
 	WEB
 };
 
-// Ключ, который используется для сохранения id виджета при навигации с дашборда
-const NAVIGATION_TARGET_WIDGET_KEY = 'targetWidget';
-
 export {
 	DASHBOARD_EVENTS,
 	DEFAULT_INTERVAL,
-	LAYOUT_MODE,
-	NAVIGATION_TARGET_WIDGET_KEY
+	LAYOUT_MODE
 };

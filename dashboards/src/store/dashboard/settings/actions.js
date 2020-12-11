@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
-import {addWidget, initSelectedWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import {addWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
@@ -19,6 +19,7 @@ import normalizer from 'utils/normalizer';
 import {resetState} from 'store/actions';
 import {resizer} from 'index';
 import {setCustomGroups} from 'store/customGroups/actions';
+import StorageSettings from 'utils/storageSettings';
 import type {User} from 'store/users/types';
 
 /**
@@ -60,7 +61,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		]);
 
 		dispatch(getPassedWidget());
-		dispatch(initSelectedWidget());
+		dispatch(initStorageSettings());
 		dispatch({
 			type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
 		});
@@ -69,6 +70,24 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 			type: DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
 		});
 	}
+};
+
+/**
+ * Инициализирует настройки дашборда сохраненные в localStorage
+ * @returns {ThunkAction}
+ */
+const initStorageSettings = () => (dispatch: Dispatch, getState: GetState) => {
+	const {code} = getState().dashboard.settings;
+	const storageSettings = new StorageSettings(code);
+	const {focused, targetWidget} = storageSettings.getSettings();
+
+	if (targetWidget) {
+		dispatch(focusWidget(targetWidget));
+	} else if (focused) {
+		resizer.scrollTo(0, 0);
+	}
+
+	storageSettings.clear();
 };
 
 /**

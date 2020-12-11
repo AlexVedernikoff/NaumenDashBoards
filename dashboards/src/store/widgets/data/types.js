@@ -1,7 +1,7 @@
 // @flow
+import type {Action, ChangingState, ThunkAction} from 'store/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {ChangingState, ThunkAction} from 'store/types';
 import {
 	COMBO_TYPES,
 	DEFAULT_TABLE_VALUE,
@@ -21,6 +21,10 @@ import type {DashboardItem, WidgetItem} from 'store/dashboards/types';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart';
 import NewWidget from './NewWidget';
+
+export type ResetFocusedWidget = () => Action;
+
+export type FocusWidget = (widgetId: string) => Action;
 
 export type DisplayMode = $Keys<typeof DISPLAY_MODE>;
 
@@ -537,6 +541,11 @@ export type RecordWidgetDeleteError = {
 	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
 };
 
+export type SetFocusedWidget = {
+	payload: string,
+	type: typeof WIDGETS_EVENTS.SET_FOCUSED_WIDGET
+};
+
 export type SetWidgets = {
 	payload: Array<Widget>,
 	type: typeof WIDGETS_EVENTS.SET_WIDGETS
@@ -563,6 +572,7 @@ export type WidgetsAction =
 	| ResponseWidgetCopy
 	| SelectWidget
 	| SetCreatedWidget
+	| SetFocusedWidget
 	| SetWidgets
 	| UpdateWidget
 	| UnknownWidgetsAction
@@ -575,6 +585,7 @@ export type WidgetMap = {
 export type WidgetsDataState = {
 	copying: ChangingState,
 	deleting: ChangingState,
+	focusedWidget: string,
 	map: WidgetMap,
 	saving: ChangingState,
 	selectedWidget: string,

@@ -27,16 +27,6 @@ export class DashboardContent extends Component<Props, State> {
 		width: null
 	};
 
-	focusOnSelectWidget = (widgetRef: DivRef) => () => {
-		const {current: widget} = widgetRef;
-		const {current: container} = this.gridContainerRef;
-
-		if (!resizer.isFullSize() && container && widget) {
-			const top = widget.getBoundingClientRect().top - container.getBoundingClientRect().top;
-			container.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
-		}
-	};
-
 	handleGridToggle = (show: boolean) => () => {
 		const {current: grid} = gridRef;
 
@@ -56,8 +46,29 @@ export class DashboardContent extends Component<Props, State> {
 
 	handleToggleSwipePanel = () => this.setState({swipedPanel: !this.state.swipedPanel});
 
-	handleWidgetSelect = (id: string, ref: DivRef) => {
-		const {selectWidget} = this.props;
+	handleWidgetFocus = (element: HTMLDivElement) => {
+		const {resetFocusedWidget, selectedWidget} = this.props;
+		const {current: container} = this.gridContainerRef;
+		const {top} = element.getBoundingClientRect();
+
+		if (resizer.isFullSize() || selectedWidget) {
+			container && container.scrollTo({
+				behavior: 'smooth',
+				top: Math.max(top - container.getBoundingClientRect().top, 0)
+			});
+		} else {
+			resizer.scrollTo(0, top);
+		}
+
+		resetFocusedWidget();
+	};
+
+	handleWidgetSelect = (id: string) => {
+		const {focusWidget, selectWidget, selectedWidget} = this.props;
+
+		if (!resizer.isFullSize() && !selectedWidget) {
+			focusWidget(id);
+		}
 
 		this.setState({swipedPanel: false});
 		selectWidget(id);
@@ -146,6 +157,7 @@ export class DashboardContent extends Component<Props, State> {
 			editWidgetChunkData,
 			editable,
 			fetchBuildData,
+			focusedWidget,
 			layoutMode,
 			openCardObject,
 			openNavigationLink,
@@ -156,8 +168,9 @@ export class DashboardContent extends Component<Props, State> {
 			user
 		} = this.props;
 		const {id} = widget;
-		const isNew = widget.id === NewWidget.id;
-		const isSelected = selectedWidget === widget.id;
+		const isNew = id === NewWidget.id;
+		const isSelected = id === selectedWidget;
+		const isFocused = id === focusedWidget;
 
 		return (
 			<Widget
@@ -165,14 +178,15 @@ export class DashboardContent extends Component<Props, State> {
 				data={widget}
 				editWidgetChunkData={editWidgetChunkData}
 				fetchBuildData={fetchBuildData}
-				focused={isSelected}
+				focused={isFocused}
 				isEditable={editable}
 				isNew={isNew}
-				isSelected={selectedWidget === widget.id}
+				isSelected={isSelected}
 				key={id}
 				layoutMode={layoutMode}
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
+				onFocus={this.handleWidgetFocus}
 				onOpenCardObject={openCardObject}
 				onOpenNavigationLink={openNavigationLink}
 				onRemove={removeWidget}

@@ -19,7 +19,7 @@ export type ResponseError = {
 	statusText: string
 };
 
-type Action = {
+export type Action = {
 	data?: any,
 	type: string
 };

@@ -52,10 +52,10 @@ export class Widget extends PureComponent<Props, State> {
 	}
 
 	focus = () => {
-		const {focused} = this.props;
+		const {focused, onFocus} = this.props;
 		const {current: widget} = this.ref;
 
-		focused && widget && widget.focus();
+		focused && widget && onFocus(widget);
 	};
 
 	getClassName = () => {
