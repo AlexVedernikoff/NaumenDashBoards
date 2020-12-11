@@ -1,76 +1,103 @@
 // @flow
-import {CollapsableFormBox, FormField} from 'components/molecules';
+import {CheckIconButtonGroup, CollapsableFormBox} from 'components/molecules';
+import cn from 'classnames';
+import type {Components, Props, SortingValueOption, State} from './types';
+import Container from 'components/atoms/Container';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import type {Props} from './types';
+import {ICON_NAMES} from 'components/atoms/Icon';
+import type {OnChangeInputEvent} from 'components/types';
 import {RadioField} from 'components/atoms';
-import React, {Fragment, PureComponent} from 'react';
-import {SORTING_VALUES} from 'store/widgets/data/constants';
+import React, {PureComponent} from 'react';
+import {SORTING_OPTIONS} from './constants';
+import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
-import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
-export class SortingBox extends PureComponent<Props> {
+const defaultComponents = {
+	Container
+};
+
+export class SortingBox extends PureComponent<Props, State> {
 	static defaultProps = {
-		circle: false
+		options: SORTING_OPTIONS
 	};
 
-	renderAxisFields = () => {
-		const {INDICATOR, PARAMETER} = SORTING_VALUES;
+	state = {
+		components: this.getExtendedComponents(this.props.components)
+	};
+
+	getExtendedComponents (components?: $Shape<Components>) {
+		return components ? {...defaultComponents, ...components} : defaultComponents;
+	}
+
+	handleChange = ({name: valueName, value}: OnChangeInputEvent) => {
+		const {data, name, onChange} = this.props;
+		onChange(name, {
+			...data,
+			[valueName]: value
+		});
+	};
+
+	renderSortingButtons = () => {
+		const {type} = this.props.data;
+		const icons = [
+			{
+				name: ICON_NAMES.ASC,
+				title: 'По возрастанию',
+				value: SORTING_TYPES.ASC
+			},
+			{
+				name: ICON_NAMES.DESC,
+				title: 'По убыванию',
+				value: SORTING_TYPES.DESC
+			}
+		];
+
+		return <CheckIconButtonGroup icons={icons} name={FIELDS.type} onChange={this.handleChange} value={type} />;
+	};
+
+	renderValueField = (option: SortingValueOption) => {
+		const {value: currentValue} = this.props.data;
+		const {disabled, label, value} = option;
+		const CN = cn({
+			[styles.valueField]: true,
+			[styles.disabledValueField]: disabled
+		});
 
 		return (
-			<Fragment>
-				<FormField row>
-					{this.renderRadioButton('Параметр', PARAMETER)}
-					{this.renderSortingButtons()}
-				</FormField>
-				<FormField>
-					{this.renderRadioButton('Показатель', INDICATOR)}
-				</FormField>
-			</Fragment>
+			<div className={CN}>
+				<RadioField
+					checked={currentValue === value}
+					label={label}
+					name={FIELDS.value}
+					onChange={this.handleChange}
+					value={value}
+				/>
+			</div>
 		);
 	};
 
-	renderCircleFields = () => {
-		const {INDICATOR} = SORTING_VALUES;
+	renderValueFields = () => {
+		const {options} = this.props;
 
 		return (
-			<FormField row>
-				{this.renderRadioButton('Показатель', INDICATOR)}
-				{this.renderSortingButtons()}
-			</FormField>
+			<div className={styles.typeFieldset}>
+				{options.map(this.renderValueField)}
+			</div>
 		);
 	};
-
-	renderFields = () => this.props.circle ? this.renderCircleFields() : this.renderAxisFields();
-
-	renderRadioButton = (label: string, value: string) => {
-		const {data, handleChange} = this.props;
-		const {value: currentValue} = data;
-		const checked = currentValue === value;
-
-		return (
-			<RadioField
-				checked={checked}
-				label={label}
-				name={FIELDS.value}
-				onChange={handleChange}
-				value={value}
-			/>
-		);
-	};
-
-	renderSortingButtons = () => (
-		<div className={styles.sortingButtons}>
-			{this.props.renderSortingButtons()}
-		</div>
-	);
 
 	render () {
+		const {Container} = this.state.components;
+
 		return (
 			<CollapsableFormBox title="Сортировка">
-				{this.renderFields()}
+				<Container className={styles.container}>
+					{this.renderValueFields()}
+					{this.renderSortingButtons()}
+				</Container>
 			</CollapsableFormBox>
 		);
 	}
 }
 
-export default withStyleFormBuilder(SortingBox);
+export default SortingBox;

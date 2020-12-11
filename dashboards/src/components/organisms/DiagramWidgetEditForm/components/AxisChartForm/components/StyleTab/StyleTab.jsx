@@ -5,6 +5,7 @@ import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {getLegendSettings} from 'utils/chart/helpers';
+import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
 import {IndicatorBox, ParameterBox} from 'DiagramWidgetEditForm/components/AxisChartForm/components';
 import React, {Component} from 'react';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
@@ -38,7 +39,12 @@ export class StyleTab extends Component<StyleTabProps> {
 				<LegendBox data={legend} name={FIELDS.legend} onChange={this.handleChange} />
 				<ParameterBox data={parameter} name={FIELDS.parameter} onChange={this.handleChange} />
 				<IndicatorBox data={extend(DEFAULT_CHART_SETTINGS.yAxis, indicator)} name={FIELDS.indicator} onChange={this.handleChange} />
-				<SortingBox data={sorting} name={FIELDS.sorting} onChange={this.handleChange} />
+				<SortingBox
+					data={sorting}
+					name={FIELDS.sorting}
+					onChange={this.handleChange}
+					options={getSortingOptions(values)}
+				/>
 				<DataLabelsBox data={dataLabels} name={FIELDS.dataLabels} onChange={this.handleChange} />
 				<ColorsBox data={colors} name={FIELDS.colors} onChange={this.handleChange} />
 			</div>

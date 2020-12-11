@@ -1,9 +1,13 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'DiagramWidgetEditForm';
+import {SORTING_OPTIONS} from './components/SortingBox/constants';
+import type {SortingValueOption} from './components/SortingBox/types';
+import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {usesCustomGroup} from 'store/widgets/helpers';
 import type {Values} from 'containers/WidgetEditForm/types';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const filterByAttribute = (options: Array<Attribute>, attribute: Attribute): Array<Attribute> => {
 	const {DATE, OBJECT} = ATTRIBUTE_SETS;
@@ -64,9 +68,18 @@ const getParentClassFqn = (values: Values, index: number) => {
 	return parentClassFqn;
 };
 
+/**
+ * Возвращает набор опций значений сортировки в зависимости от данных виджета
+ * @param {DiagramFormWidget} widget - виджет
+ * @returns {Array<SortingValueOption>}
+ */
+const getSortingOptions = (widget: DiagramFormWidget): Array<SortingValueOption> => SORTING_OPTIONS
+	.map(option => option.value === SORTING_VALUES.DEFAULT ? {...option, disabled: !usesCustomGroup(widget)} : option);
+
 export {
+	filterByAttribute,
 	getDataErrorKey,
 	getErrorKey,
 	getParentClassFqn,
-	filterByAttribute
+	getSortingOptions
 };

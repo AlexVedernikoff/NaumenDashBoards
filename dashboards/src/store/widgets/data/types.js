@@ -36,6 +36,8 @@ export type TextHandler = $Keys<typeof TEXT_HANDLERS>;
 
 export type SortingType = $Keys<typeof SORTING_TYPES>;
 
+export type SortingValue = $Keys<typeof SORTING_VALUES>;
+
 export type GroupType = string;
 
 export type GroupWay = $Keys<typeof GROUP_WAYS>;
@@ -143,8 +145,8 @@ export type Legend = {
 };
 
 export type ChartSorting = {
-	type: $Keys<typeof SORTING_TYPES>,
-	value: $Keys<typeof SORTING_VALUES>
+	type: SortingType,
+	value: SortingValue
 };
 
 export type DataLabels = {

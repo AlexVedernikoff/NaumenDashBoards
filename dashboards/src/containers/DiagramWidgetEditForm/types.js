@@ -14,6 +14,11 @@ export type DataSet = {
 	[string]: any
 };
 
+export type DiagramFormWidget = {
+	data: Array<DataSet>,
+	name: string
+};
+
 export type ConnectedProps = {|
 	attributes: AttributesMap,
 	dashboards: DashboardsState,

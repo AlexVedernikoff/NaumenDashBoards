@@ -9,6 +9,7 @@ import {
 	INTEGER_AGGREGATION,
 	INTERVALS
 } from './constants';
+import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
 import type {DiagramWidgetDataSet, Group, Widget} from './data/types';
 import {DISPLAY_MODE} from './data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
@@ -133,6 +134,14 @@ const isAllowedTopAggregation = (aggregation: string) => {
 	return allowedAggregations.includes(aggregation);
 };
 
+/**
+ * Сообщает используется ли в наборе данных виджета пользовательская группировка
+ * @param {DiagramFormWidget} widget - виджет
+ * @returns {boolean}
+ */
+const usesCustomGroup = (widget: DiagramFormWidget): boolean => !!widget.data
+	.find(({group, sourceForCompute}) => !sourceForCompute && group && group.way === GROUP_WAYS.CUSTOM);
+
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
@@ -144,5 +153,6 @@ export {
 	isAllowedTopAggregation,
 	isGroupKey,
 	parseMSInterval,
-	transformGroupFormat
+	transformGroupFormat,
+	usesCustomGroup
 };
