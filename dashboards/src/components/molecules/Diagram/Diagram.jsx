@@ -1,6 +1,7 @@
 // @flow
 import {Chart, Summary} from 'components/molecules';
 import cn from 'classnames';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
 import {FONT_STYLES, HEADER_POSITIONS, TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {PADDING} from './constants';
@@ -14,6 +15,7 @@ import type {TableWidget as TableWidgetType} from 'store/widgets/data/types';
 export class Diagram extends Component<Props, State> {
 	static defaultProps = {
 		buildData: {
+			data: null,
 			error: false,
 			loading: false
 		}
@@ -56,9 +58,8 @@ export class Diagram extends Component<Props, State> {
 		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading || nextWidget !== prevWidget;
 	};
 
-	resolveDiagram = () => {
-		const {buildData, widget} = this.props;
-		const {data} = buildData;
+	resolveDiagram = (data: DiagramBuildData) => {
+		const {widget} = this.props;
 		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
 		switch (widget.type) {
@@ -76,7 +77,7 @@ export class Diagram extends Component<Props, State> {
 			case SUMMARY:
 				return <Summary data={data} widget={widget} />;
 			case TABLE:
-				return this.renderTableWidget(widget);
+				return this.renderTableWidget(widget, data);
 			default:
 				return null;
 		}
@@ -95,7 +96,7 @@ export class Diagram extends Component<Props, State> {
 			return (
 				<div className={contentCN}>
 					{this.renderName()}
-					{this.renderDiagram()}
+					{this.renderDiagram(data)}
 				</div>
 			);
 		}
@@ -103,7 +104,7 @@ export class Diagram extends Component<Props, State> {
 		return null;
 	};
 
-	renderDiagram = () => {
+	renderDiagram = (data: DiagramBuildData) => {
 		const {show} = this.props.widget.header;
 		const {nameRendered} = this.state;
 
@@ -118,7 +119,7 @@ export class Diagram extends Component<Props, State> {
 
 			return (
 				<div className={styles.diagramContainer} style={{height}}>
-					{this.resolveDiagram()}
+					{this.resolveDiagram(data)}
 				</div>
 			);
 		}
@@ -181,9 +182,8 @@ export class Diagram extends Component<Props, State> {
 		return null;
 	};
 
-	renderTableWidget = (widget: TableWidgetType) => {
-		const {buildData, fetchBuildData, onDrillDown, onOpenCardObject, onUpdate} = this.props;
-		const {data} = buildData;
+	renderTableWidget = (widget: TableWidgetType, data: DiagramBuildData) => {
+		const {fetchBuildData, onDrillDown, onOpenCardObject, onUpdate} = this.props;
 
 		return (
 			<TableWidget

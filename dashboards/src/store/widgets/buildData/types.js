@@ -15,7 +15,7 @@ export type DiagramBuildData = {
 };
 
 export type BuildData = {
-	data: DiagramBuildData,
+	data: DiagramBuildData | null,
 	error: boolean,
 	loading: boolean,
 	updateDate?: Date | ''

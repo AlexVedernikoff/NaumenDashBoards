@@ -68,6 +68,11 @@ export class Widget extends PureComponent<Props, State> {
 		});
 	};
 
+	handleClick = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+		const {data, onClick} = this.props;
+		onClick(e, data);
+	};
+
 	handleEdit = () => {
 		const {data, onEdit} = this.props;
 		onEdit(data.id, this.ref);
@@ -75,22 +80,25 @@ export class Widget extends PureComponent<Props, State> {
 
 	handleExport = async (type: string) => {
 		const {buildData, data: widget} = this.props;
+		const {data} = buildData;
 		const {current} = this.ref;
 		const contextName = await createContextName();
 		const name = `${widget.name}_${contextName}`;
 
-		if (type === FILE_VARIANTS.XLSX) {
-			return exportSheet(name, buildData.data);
-		}
+		if (data) {
+			if (type === FILE_VARIANTS.XLSX) {
+				return exportSheet(name, data);
+			}
 
-		if (current) {
-			createSnapshot({
-				container: current,
-				fragment: true,
-				name,
-				toDownload: true,
-				type
-			});
+			if (current) {
+				createSnapshot({
+					container: current,
+					fragment: true,
+					name,
+					toDownload: true,
+					type
+				});
+			}
 		}
 	};
 
@@ -207,7 +215,7 @@ export class Widget extends PureComponent<Props, State> {
 		};
 
 		return (
-			<div {...gridProps} className={this.getClassName()} ref={this.ref} tabIndex={0}>
+			<div {...gridProps} className={this.getClassName()} onClick={this.handleClick} ref={this.ref}>
 				{this.renderControlPanel()}
 				{this.renderContent()}
 				{this.renderError()}

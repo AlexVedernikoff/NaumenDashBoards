@@ -30,8 +30,8 @@ const GRID_PROPS = {
 		},
 		containerPadding: isMobile.any ? [16, 20] : [20, 20],
 		rowHeight: GRID_LAYOUT_HEIGHT
-	}
-
+	},
+	resizeHandles: ['sw', 'nw', 'se', 'ne']
 };
 
 export {
