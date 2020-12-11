@@ -1,9 +1,14 @@
 // @flow
+import {Caret, IndicatorsContainer, List, Menu} from './components';
 import cn from 'classnames';
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {List, Menu} from './components';
-import {Loader, OutsideClickDetector} from 'components/atoms';
-import type {MenuProps, Option, Props, State} from './types';
+import {Loader, OutsideClickDetector, TextInput} from 'components/atoms';
+import type {
+	MenuProps,
+	Option,
+	Props,
+	State
+} from './types';
+import type {OnChangeInputEvent} from 'components/types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
@@ -26,8 +31,19 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	state = {
+		components: this.getExtendedComponents(this.props),
 		showMenu: false
 	};
+
+	getExtendedComponents (props: Props) {
+		const {components} = props;
+
+		return {
+			Caret,
+			IndicatorsContainer,
+			...components
+		};
+	}
 
 	fetchOptions = () => {
 		const {async, error, fetchOptions, loading, uploaded} = this.props;
@@ -59,9 +75,8 @@ export class Select extends PureComponent<Props, State> {
 		return value;
 	};
 
-	handleChangeLabel = (e: SyntheticInputEvent<HTMLInputElement>) => {
+	handleChangeLabel = ({value}: OnChangeInputEvent) => {
 		const {name, onChangeLabel} = this.props;
-		const {value} = e.currentTarget;
 
 		onChangeLabel && onChangeLabel({name, value});
 	};
@@ -92,22 +107,6 @@ export class Select extends PureComponent<Props, State> {
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderCaretIcon = () => <Icon className={styles.caret} name={ICON_NAMES.CHEVRON} onClick={this.handleClick} />;
-
-	renderClearIcon = () => {
-		const {editable} = this.props;
-
-		if (editable) {
-			return (
-				<Icon
-					className={styles.clearLabelIcon}
-					name={ICON_NAMES.REMOVE}
-					onClick={this.handleClickClearLabelIcon}
-				/>
-			);
-		}
-	};
-
 	renderDefaultMenu = (props: MenuProps) => {
 		const {showCreationButton, textCreationButton} = this.props;
 		const {showMenu} = this.state;
@@ -120,22 +119,33 @@ export class Select extends PureComponent<Props, State> {
 			};
 		}
 
-		return showMenu ? <Menu{...props} creationButton={creationButton} renderList={this.renderList} /> : null;
+		return showMenu ? <Menu {...props} creationButton={creationButton} renderList={this.renderList} /> : null;
 	};
 
-	renderIndicators = () => (
-		<div className={styles.indicatorsContainer}>
-			{this.renderClearIcon()}
-			{this.renderCaretIcon()}
-		</div>
-	);
+	renderIndicators = () => {
+		const {Caret, IndicatorsContainer} = this.state.components;
+
+		return (
+			<IndicatorsContainer>
+				{this.renderLoader()}
+				<Caret onClick={this.handleClick} />
+			</IndicatorsContainer>
+		);
+	};
 
 	renderLabel = () => {
 		const {editable, placeholder, value} = this.props;
 		const label = this.getOptionLabel(value) || placeholder;
 
 		if (editable) {
-			return <input className={styles.input} onChange={this.handleChangeLabel} onFocus={this.hideMenu} value={label} />;
+			return (
+				<TextInput
+					className={styles.input}
+					onChange={this.handleChangeLabel}
+					onFocus={this.hideMenu}
+					value={label}
+				/>
+			);
 		}
 
 		return <div className={styles.label}>{label}</div>;
@@ -157,7 +167,7 @@ export class Select extends PureComponent<Props, State> {
 		);
 	};
 
-	renderLoader = () => this.props.loading ? <Loader size={15} /> : null;
+	renderLoader = () => this.props.loading ? <Loader className={styles.loader} size={15} /> : null;
 
 	renderMenu = () => {
 		const {components, isSearching, loading, options} = this.props;
@@ -179,13 +189,16 @@ export class Select extends PureComponent<Props, State> {
 		}
 	};
 
-	renderValueContainer = () => (
-		<div className={styles.valueContainer}>
-			{this.renderLabel()}
-			{this.renderLoader()}
-			{this.renderIndicators()}
-		</div>
-	);
+	renderValueContainer = () => {
+		const {editable} = this.props;
+
+		return (
+			<div className={styles.valueContainer} onClick={!editable && this.handleClick}>
+				{this.renderLabel()}
+				{this.renderIndicators()}
+			</div>
+		);
+	};
 
 	render () {
 		const {className, disabled} = this.props;

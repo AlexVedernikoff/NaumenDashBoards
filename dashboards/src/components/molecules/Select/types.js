@@ -1,4 +1,6 @@
 // @flow
+import type {ComponentProps as CaretComponentProps} from './components/Caret/types';
+import type {ComponentProps as IndicatorsContainerComponentProps} from './components/IndicatorsContainer/types';
 import type {OnChangeInputEvent} from 'components/types';
 
 export type Option = Object;
@@ -18,14 +20,16 @@ export type MenuProps = {
 	options: Array<Option>
 };
 
-export type Components = $Shape<{
+export type Components = {
+	Caret: React$ComponentType<CaretComponentProps>,
+	IndicatorsContainer: React$ComponentType<IndicatorsContainerComponentProps>,
 	Menu: React$ComponentType<MenuProps>
-}>;
+};
 
 export type Props = {
 	async: boolean,
 	className: string,
-	components: Components,
+	components: $Shape<Components>,
 	disabled: boolean,
 	editable: boolean,
 	error: boolean,
@@ -47,5 +51,6 @@ export type Props = {
 };
 
 export type State = {
+	components: Components,
 	showMenu: boolean
 };

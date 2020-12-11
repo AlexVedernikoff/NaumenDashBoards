@@ -22,13 +22,11 @@
 		align-items: center;
 		border: 1px solid @grey;
 		border-radius: @border-radius;
-		box-sizing: border-box;
 		cursor: pointer;
 		display: flex;
 		font-size: 13px;
 		height: 32px;
 		justify-content: space-between;
-		padding: 8px 10px 8px 12px;
 
 		&:focus-within {
 			border: 1px solid @info;
@@ -36,8 +34,10 @@
 	}
 
 	.label {
+		box-sizing: border-box;
 		flex: auto;
 		overflow: hidden;
+		padding: 8px 12px;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
@@ -55,19 +55,14 @@
 	}
 
 	.input {
-		flex: auto;
-		height: 100%;
-		width: 0;
+		border: none !important;
+		box-sizing: border-box;
+		height: 100% !important;
+		padding: 8px 4px 8px 12px !important;
 	}
 
-	.indicatorsContainer {
-		align-items: center;
-		display: flex;
-		margin-left: auto;
-	}
-
-	.caret {
-		color: @ninegrey;
+	.loader {
+		margin: 0 8px;
 	}
 
 	.clearLabelIcon {
