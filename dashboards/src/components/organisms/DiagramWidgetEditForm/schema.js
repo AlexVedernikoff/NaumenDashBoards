@@ -1,5 +1,5 @@
 // @flow
-import {array, lazy, mixed, object, string} from 'yup';
+import {array, lazy, mixed, number, object, string} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
@@ -195,7 +195,7 @@ const validateSources = testSourcesNumber(
 );
 
 const validateTopSettings = object({
-	count: string().required('Укажите значение ТОП')
+	count: number().required('Укажите значение ТОП').typeError('Значение ТОП должно быть числом')
 }).default(DEFAULT_TOP_SETTINGS);
 
 const rules = {
