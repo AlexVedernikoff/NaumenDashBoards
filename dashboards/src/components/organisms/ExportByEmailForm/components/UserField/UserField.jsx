@@ -1,17 +1,23 @@
 // @flow
-import {Caret, IndicatorsContainer} from 'components/molecules/Select/components';
+import {Caret, IndicatorsContainer, ValueContainer} from 'components/molecules/Select/components';
 import type {ComponentProps as CaretComponentProps} from 'components/molecules/Select/components/Caret/types';
 import type {ComponentProps as IndicatorsContainerComponentProps} from 'components/molecules/Select/components/IndicatorsContainer/types';
-import {IconButton} from 'components/atoms';
+import {IconButton, TextInput} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
-import type {Props} from './types';
+import type {Props, State} from './types';
+import type {Props as ValueContainerProps} from 'components/molecules/Select/components/ValueContainer/types';
+import type {Props as ValueLabelProps} from 'components/molecules/Select/components/ValueLabel/types';
 import React, {PureComponent} from 'react';
 import {Select} from 'components/molecules';
 import styles from './styles.less';
 import type {User} from 'store/users/types';
 
-export class UserField extends PureComponent<Props> {
+export class UserField extends PureComponent<Props, State> {
+	state = {
+		focusedSelectInput: false
+	};
+
 	getUserLabel = (user: User) => {
 		const {email, name} = user;
 		let label = '';
@@ -29,10 +35,14 @@ export class UserField extends PureComponent<Props> {
 
 	getUserValue = (user: User) => user.email;
 
+	handleBlurTextInput = () => this.setState({focusedSelectInput: false});
+
 	handleChangeLabel = ({value}: OnChangeInputEvent) => {
 		const {index, onSelect} = this.props;
 		onSelect(index, {email: value.toString()});
 	};
+
+	handleFocusTextInput = () => this.setState({focusedSelectInput: true});
 
 	handleRemoveUser = () => {
 		const {index, onRemove} = this.props;
@@ -79,7 +89,9 @@ export class UserField extends PureComponent<Props> {
 		const {data: options, error, loading, uploaded} = usersData;
 		const components = {
 			Caret: this.renderCaret,
-			IndicatorsContainer: this.renderIndicatorsContainer
+			IndicatorsContainer: this.renderIndicatorsContainer,
+			ValueContainer: this.renderValueContainer,
+			ValueLabel: this.renderValueLabel
 		};
 
 		return (
@@ -87,7 +99,6 @@ export class UserField extends PureComponent<Props> {
 				async={true}
 				className={styles.select}
 				components={components}
-				editable={true}
 				error={error}
 				fetchOptions={fetchUsers}
 				getOptionLabel={this.getUserLabel}
@@ -99,6 +110,25 @@ export class UserField extends PureComponent<Props> {
 				options={options}
 				uploaded={uploaded}
 				value={value}
+			/>
+		);
+	};
+
+	renderValueContainer = ({onClick, ...props}: ValueContainerProps) => <ValueContainer {...props} />;
+
+	renderValueLabel = (props: ValueLabelProps) => {
+		const {value} = this.props;
+		const {focusedSelectInput} = this.state;
+		const {label} = props;
+		const inputValue = value && focusedSelectInput ? value.email : label;
+
+		return (
+			<TextInput
+				className={styles.selectInput}
+				onBlur={this.handleBlurTextInput}
+				onChange={this.handleChangeLabel}
+				onFocus={this.handleFocusTextInput}
+				value={inputValue}
 			/>
 		);
 	};

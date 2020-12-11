@@ -10,3 +10,7 @@ export type Props = {
 	usersData: UsersState,
 	value: User
 };
+
+export type State = {
+	focusedSelectInput: boolean
+};

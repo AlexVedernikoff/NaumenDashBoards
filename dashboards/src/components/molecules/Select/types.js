@@ -2,6 +2,8 @@
 import type {ComponentProps as CaretComponentProps} from './components/Caret/types';
 import type {ComponentProps as IndicatorsContainerComponentProps} from './components/IndicatorsContainer/types';
 import type {OnChangeInputEvent} from 'components/types';
+import type {Props as ValueContainerProps} from './components/ValueContainer/types';
+import type {Props as ValueLabelProps} from './components/ValueLabel/types';
 
 export type Option = Object;
 
@@ -23,7 +25,9 @@ export type MenuProps = {
 export type Components = {
 	Caret: React$ComponentType<CaretComponentProps>,
 	IndicatorsContainer: React$ComponentType<IndicatorsContainerComponentProps>,
-	Menu: React$ComponentType<MenuProps>
+	Menu: React$ComponentType<MenuProps>,
+	ValueContainer: React$ComponentType<ValueContainerProps>,
+	ValueLabel: React$ComponentType<ValueLabelProps>
 };
 
 export type Props = {

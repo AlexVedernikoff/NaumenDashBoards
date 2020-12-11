@@ -1,5 +1,5 @@
 // @flow
-import {Caret, IndicatorsContainer, List, Menu} from './components';
+import {Caret, IndicatorsContainer, List, Menu, ValueContainer, ValueLabel} from './components';
 import cn from 'classnames';
 import {Loader, OutsideClickDetector, TextInput} from 'components/atoms';
 import type {
@@ -41,6 +41,8 @@ export class Select extends PureComponent<Props, State> {
 		return {
 			Caret,
 			IndicatorsContainer,
+			ValueContainer,
+			ValueLabel,
 			...components
 		};
 	}
@@ -135,6 +137,7 @@ export class Select extends PureComponent<Props, State> {
 
 	renderLabel = () => {
 		const {editable, placeholder, value} = this.props;
+		const {ValueLabel} = this.state.components;
 		const label = this.getOptionLabel(value) || placeholder;
 
 		if (editable) {
@@ -148,7 +151,7 @@ export class Select extends PureComponent<Props, State> {
 			);
 		}
 
-		return <div className={styles.label}>{label}</div>;
+		return <ValueLabel className={styles.label} label={label} />;
 	};
 
 	renderList = (searchValue: string) => {
@@ -191,12 +194,18 @@ export class Select extends PureComponent<Props, State> {
 
 	renderValueContainer = () => {
 		const {editable} = this.props;
+		const {ValueContainer} = this.state.components;
+		let onClick;
+
+		if (!editable) {
+			onClick = this.handleClick;
+		}
 
 		return (
-			<div className={styles.valueContainer} onClick={!editable && this.handleClick}>
+			<ValueContainer className={styles.valueContainer} onClick={onClick}>
 				{this.renderLabel()}
 				{this.renderIndicators()}
-			</div>
+			</ValueContainer>
 		);
 	};
 
