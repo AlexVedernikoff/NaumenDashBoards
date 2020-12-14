@@ -530,7 +530,8 @@ private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> request
         {
             parameterCustomGroup = dynamicGroup
         }
-        FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter')
+        FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter',
+                                                   demoSorting.value == 'PARAMETER' ? demoSorting.type : '')
 
         def breakdownAttribute
         def breakdownGroupData
@@ -630,7 +631,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
         def breakdownMap = [:]
         GroupParameter breakdown = null
         boolean dynamicInBreakdown = false
-
+        def breakdownCustomGroup = null
         if (mayBeBreakdown instanceof Collection)
         {
             def groupTypes = data.breakdown*.group as Set
@@ -647,6 +648,9 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                     }
                     [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                 }
+                breakdownCustomGroup = data.breakdown.find().group.way == 'CUSTOM'
+                    ? [attribute: modules.dashboardDataSet.mappingAttribute(data.breakdown.find().value), *: data.breakdown.find().group.data]
+                    : breakdownCustomGroup
             }
             else
             {
@@ -695,7 +699,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
         }
 
 
-        def breakdownCustomGroup
+
         if(dynamicInBreakdown)
         {
             breakdownCustomGroup = dynamicGroup
@@ -704,7 +708,7 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
         {
             breakdownCustomGroup = data.breakdownGroup?.way == 'CUSTOM'
                 ? [attribute: mappingAttribute(mayBeBreakdown), *: data.breakdownGroup.data]
-                : null
+                : breakdownCustomGroup
         }
 
         FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
@@ -1362,7 +1366,8 @@ private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestCon
             parameterCustomGroup = dynamicGroup
         }
 
-        FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter')
+        FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter',
+                                                   demoSorting.value == 'PARAMETER' ? demoSorting.type : '')
 
         def breakdownAttribute
         def breakdownGroupData
@@ -2501,6 +2506,9 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
             def parameterFilters = filterList.find {
                 it.place == 'parameter'
             }?.filters
+            String parameterSortingType = filterList.find {
+                it.place == 'parameter'
+            }?.sortingType
             def breakdownFilters = filterList.find {
                 it.place == 'breakdown'
             }?.filters
@@ -2521,12 +2529,12 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
                 case 1:
                     return getOneFilterListDiagramData(
                         node, request, aggregationCnt,
-                        parameterFilters, breakdownFilters,
+                        parameterFilters, parameterSortingType, breakdownFilters,
                         top, onlyFilled, diagramType, requestContent)
                 case 2:
                     return getTwoFilterListDiagramData(
                         node, request, aggregationCnt,
-                        parameterFilters, breakdownFilters,
+                        parameterFilters, parameterSortingType, breakdownFilters,
                         top, onlyFilled, diagramType, requestContent)
             }
         }
@@ -4114,9 +4122,10 @@ Map<String, Object> mappingDynamicAttributeCustomGroup(Attribute dynamicAttribut
  * @param customGroup - кастомная группировка для построения фильтра
  * @param subjectUUID - идентификатор "текущего объекта"
  * @param place - место, откуда была создана кастомная группировка
+ * @param sortingType - тип сортировки
  * @return - список фильтров
  */
-private FilterList getFilterList(Map<String, Object> customGroup, String subjectUUID, String place) {
+private FilterList getFilterList(Map<String, Object> customGroup, String subjectUUID, String place, String sortingType = '') {
     def filterList = customGroup?.subGroups?.collect { subGroup ->
         String attributeType = customGroup.attribute.type.split('\\$', 2).head()
         customGroup.attribute.type = attributeType
@@ -4132,7 +4141,8 @@ private FilterList getFilterList(Map<String, Object> customGroup, String subject
     }
     FilterList filter = new FilterList(
         filters: filterList,
-        place: place
+        place: place,
+        sortingType: sortingType
     )
     return filter
 }
@@ -4150,7 +4160,7 @@ List getTop(List currentRes, Integer top, List parameterFilters = [], List break
 {
     Integer paramIndex = 1 //индекс, на котором расположены значения параметра (первого параметра для таблицы)
     Integer aggregationIndex = 0 //индекс, на котором расположены значения показателя (первого показателя для таблицы)
-    if(parameterFilters || breakdownFilters)
+    if((parameterFilters || breakdownFilters) && currentRes.find()?.size() > 2)
     {
         paramIndex = parameterFilters ? 1 : 2
     }
@@ -4160,6 +4170,43 @@ List getTop(List currentRes, Integer top, List parameterFilters = [], List break
     tempResult = tempResult.size() > top && fromNoOrTwoFiltersList ? tempResult[0..top - 1]*.get(0) : tempResult*.get(0)
     //находим соответсвия данных с теми группами, что получили, и выводим их
     return tempResult.collectMany { value -> currentRes.findAll {it[paramIndex] == value} }
+}
+
+/**
+ * Метод сортировки итоговых значений в БД
+ * @param res - итоговый датасет из БД
+ * @param aggregationSortingType - тип сортировки показателя
+ * @param parameterSortingType - тип сортировки параметра
+ * @param parameterFilters - список фильтров параметра
+ * @param breakdownFilters - список фильтров разбивки
+ * @return - итоговый датасет в отсортированном виде
+ */
+List sortResList(List res,String aggregationSortingType = '', parameterSortingType = '', parameterFilters = [], breakdownFilters = [])
+{
+    int paramIndex = parameterFilters ? 1 : 2 // место, с которого начинаются значения параметра
+    Integer aggregationIndex = 0 //место, где находятся значения агрегации
+    if(aggregationSortingType)
+    {
+        if(res.find()?.size() > 2)
+        {
+            def tempResult = res.groupBy { it[paramIndex] }.collect{ k, v -> [k, v.sum{ it[aggregationIndex] as Double } ] }
+                                .sort { aggregationSortingType == 'ASC' ? it[1].toDouble() :  -it[1].toDouble() }
+                                *.get(0)
+            //находим соответсвия данных с теми группами, что получили, и выводим их
+            return tempResult.collectMany { value -> res.findAll {it[paramIndex] == value} }
+        }
+        else
+        {
+            return res.sort { aggregationSortingType == 'ASC' ? it[0].toDouble() :  -it[0].toDouble() }
+        }
+    }
+
+    if(parameterSortingType)
+    {
+        res = res.sort { it[paramIndex].toUpperCase() }
+        return parameterSortingType == 'ASC' ? res : res.reverse()
+    }
+    return res
 }
 
 /**
@@ -4289,6 +4336,7 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
  * @param request - запрос
  * @param aggregationCnt - количество агрегаций
  * @param parameterFilters - список фильтров из параметра
+ * @param parameterSortingType - тип сортировки параметра
  * @param breakdownFilters - список фильтров из разбивки
  * @param top - количество записей, которое нужно вывести
  * @param onlyFilled - флаг на получение только заполненных данных, без null
@@ -4300,6 +4348,7 @@ private List getOneFilterListDiagramData(def node,
                                          DiagramRequest request,
                                          Integer aggregationCnt,
                                          List parameterFilters,
+                                         String parameterSortingType,
                                          List breakdownFilters,
                                          Integer top,
                                          Boolean onlyFilled,
@@ -4331,6 +4380,7 @@ private List getOneFilterListDiagramData(def node,
                 } : [0]
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
             Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
+            String aggregationSortingType = newRequestData.aggregations.find().sortingType
             def res = filtering*.get(0)?.withIndex()?.collectMany { filters, i ->
                 newRequestData.filters = [filters]
                 def res = modules.dashboardQueryWrapper.getData(newRequestData, top, onlyFilled, diagramType)
@@ -4370,6 +4420,10 @@ private List getOneFilterListDiagramData(def node,
             {
                 return getTop(res, top, parameterFilters, breakdownFilters)
             }
+            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            {
+                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
+            }
             return res
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
@@ -4387,6 +4441,7 @@ private List getOneFilterListDiagramData(def node,
             }
             def listIdsOfNormalAggregations = [0]
             aggregationCnt = 1
+            String aggregationSortingType = dataSet.values().head().aggregations.find().sortingType
             def variables = filtering*.get(0).collect { filter ->
                 return dataSet.collectEntries { key, data ->
                     RequestData newData = data.clone()
@@ -4446,6 +4501,10 @@ private List getOneFilterListDiagramData(def node,
             {
                 return getTop(res, top, parameterFilters, breakdownFilters)
             }
+            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            {
+                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
+            }
             return res
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
     }
@@ -4457,6 +4516,7 @@ private List getOneFilterListDiagramData(def node,
  * @param request - запрос
  * @param aggregationCnt - количество агрегаций
  * @param parameterFilters - список фильтров из параметра
+ * @param parameterSortingType - тип сортировки параметра
  * @param breakdownFilters - список фильтров из разбивки
  * @param top - количество записей, которое нужно вывести
  * @param onlyFilled - флаг на получение только заполненных данных, без null
@@ -4468,6 +4528,7 @@ private List getTwoFilterListDiagramData(def node,
                                          DiagramRequest request,
                                          Integer aggregationCnt,
                                          List parameterFilters,
+                                         String parameterSortingType,
                                          List breakdownFilters,
                                          Integer top,
                                          Boolean onlyFilled,
@@ -4506,12 +4567,13 @@ private List getTwoFilterListDiagramData(def node,
         case 'default':
             def listIdsOfNormalAggregations = diagramType == DiagramType.TABLE
                 ? request?.data?.findResult { key, value ->
-                value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
-            }
-                : [0]
+                    value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
+                } : [0]
+
+            def requisiteNode = node as DefaultRequisiteNode
+            RequestData requestData = request.data[requisiteNode.dataKey]
+            String aggregationSortingType = requestData.aggregations.find().sortingType
             def res = pareFilters.collectMany { condition ->
-                def requisiteNode = node as DefaultRequisiteNode
-                RequestData requestData = request.data[requisiteNode.dataKey]
                 RequestData newRequestData = requestData.clone()
                 //объединяем попарно фильтр-условие из параметра и группировки
                 newRequestData.filters = condition.inject { first, second ->
@@ -4556,6 +4618,10 @@ private List getTwoFilterListDiagramData(def node,
             {
                 return getTop(res, top, parameterFilters, breakdownFilters, true)
             }
+            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            {
+                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
+            }
             return res
         case 'computation':
             def requisiteNode = node as ComputationRequisiteNode
@@ -4572,6 +4638,7 @@ private List getTwoFilterListDiagramData(def node,
                 attributes = getAttributeNamesAndValuesFromRequest(requestContent)
                 notAggregatedAttributes = notAggregationAttributeNames(attributes)
             }
+            String aggregationSortingType = dataSet.values().head().aggregations.find().sortingType
 
             def variables = pareFilters.collect { condition ->
                 return dataSet.collectEntries { key, data ->
@@ -4619,6 +4686,10 @@ private List getTwoFilterListDiagramData(def node,
             if(top)
             {
                 return getTop(res, top, parameterFilters, breakdownFilters, true)
+            }
+            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            {
+                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
             }
             return res
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")

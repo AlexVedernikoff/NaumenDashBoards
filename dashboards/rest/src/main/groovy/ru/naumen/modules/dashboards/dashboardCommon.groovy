@@ -38,6 +38,7 @@ enum DiagramType
     static List<DiagramType> RoundTypes = [DONUT, PIE]
     static List<DiagramType> CountTypes = [SUMMARY, SPEEDOMETER]
     static List<DiagramType> NullableTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO, DONUT, PIE]
+    static List<DiagramType> SortableTypes = [*StandardTypes, *RoundTypes, COMBO]
 }
 
 /**
@@ -453,6 +454,7 @@ class FilterList
 {
     Collection<Collection<FilterParameter>> filters
     String place
+    String sortingType
 }
 
 /**
