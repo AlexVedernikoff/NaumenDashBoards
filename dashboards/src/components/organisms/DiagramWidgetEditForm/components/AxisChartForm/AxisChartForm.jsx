@@ -8,6 +8,7 @@ import {extend} from 'src/helpers';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {getErrorMessage, rules} from 'DiagramWidgetEditForm/schema';
 import {getLegendSettings} from 'utils/chart/helpers';
+import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/axisNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
@@ -52,9 +53,9 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			header,
 			indicator,
 			legend,
+			navigation,
 			parameter,
 			name = '',
-			navigation,
 			sorting,
 			templateName,
 			type
@@ -71,7 +72,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			indicator: extend(DEFAULT_CHART_SETTINGS.yAxis, indicator),
 			legend: extend(getLegendSettings(values), legend),
 			name,
-			navigation,
+			navigation: navigationSettings(navigation),
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),
 			templateName,

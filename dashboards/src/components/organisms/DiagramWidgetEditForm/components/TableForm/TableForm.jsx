@@ -6,6 +6,7 @@ import {DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/tableNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
@@ -77,7 +78,7 @@ export class TableForm extends Component<TypedFormProps> {
 			header,
 			id,
 			name,
-			navigation,
+			navigation: navigationSettings(navigation),
 			showEmptyData,
 			sorting,
 			table: extend(DEFAULT_TABLE_SETTINGS, table),
