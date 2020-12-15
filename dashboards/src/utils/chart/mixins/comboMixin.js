@@ -2,6 +2,7 @@
 import type {ApexOptions} from 'apexcharts';
 import {
 	axisLabelFormatter,
+	checkLabelsForOverlap,
 	getLegendOptions,
 	getMaxValue,
 	getNiceScale,
@@ -112,6 +113,8 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		maxValue = getMaxValue(series);
 	}
 
+	const legendSettings = getLegendOptions(legend, container, breakdownUsesMetaClass);
+	const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legendSettings);
 	const xaxis = {
 		labels: {
 			formatter: axisLabelFormatter(parameterUsesMetaClass)
@@ -131,7 +134,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 				bottom: 20
 			}
 		},
-		labels: getXAxisLabels(widget, labels),
+		labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
 		legend: getLegendOptions(legend, container, breakdownUsesMetaClass),
 		markers: {
 			hover: {
@@ -146,7 +149,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			intersect: true,
 			shared: false
 		},
-		xaxis: extend(xaxis, getXAxisOptions(parameter)),
+		xaxis: extend(xaxis, getXAxisOptions(parameter, hasOverlappedLabel)),
 		yaxis: widget.data
 			.filter(dataSet => !dataSet.sourceForCompute)
 			.map((dataSet, i) => getYAxis(dataSet, i, widget, maxValue))

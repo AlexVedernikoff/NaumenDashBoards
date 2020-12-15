@@ -1,10 +1,10 @@
 // @flow
 import type {ApexAxisChartSeries} from 'apexcharts';
-import type {ApexLegend, AxisProps} from 'utils/chart/types';
+import type {ApexLabels, ApexLegend, AxisProps} from 'utils/chart/types';
+import {AXIS_FONT_SIZE, LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {LEGEND_POSITIONS} from 'utils/chart/constants';
 import {META_CLASS_VALUE_SEPARATOR} from 'store/widgets/buildData/constants';
 import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
@@ -17,14 +17,12 @@ import {TEXT_HANDLERS} from 'store/widgets/data/constants';
  */
 const getMetaClassLabel = (value: string): string => value.split(META_CLASS_VALUE_SEPARATOR)[0];
 
-const axisLabelFormatter = (usesMetaClass: boolean) => (value: number | string) => {
-	let label = String(value);
-
-	if (usesMetaClass) {
-		label = getMetaClassLabel(label);
+const axisLabelFormatter = (usesMetaClass: boolean) => (value: number | string | Array<string>) => {
+	if (!Array.isArray(value) && usesMetaClass) {
+		return getMetaClassLabel(String(value));
 	}
 
-	return label;
+	return value;
 };
 
 const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero: boolean = true) => (value: number) => {
@@ -53,31 +51,37 @@ const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero:
 	return formattedValue;
 };
 
-const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>): Array<string> => {
+const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>, wrap: boolean): ApexLabels => {
 	const set = getBuildSet(widget);
 	const {group} = set;
+	let formattedLabels = labels;
 
 	if (group.way === GROUP_WAYS.SYSTEM && group.data === DATETIME_SYSTEM_GROUP.SEVEN_DAYS) {
-		return labels.map(str => {
+		formattedLabels = labels.map(str => {
 			const dates = str.split('-');
-			return `${moment(dates[0], 'DD.MM.YY').format('DD MMMM')} - ${moment(dates[1], 'DD.MM.YY').format('DD MMMM')}`;
+			const startDate = moment(dates[0], 'DD.MM.YY').format('DD MMMM');
+			const endDate = moment(dates[1], 'DD.MM.YY').format('DD MMMM');
+
+			return `${startDate} - ${endDate}`;
 		});
+	} else if (wrap) {
+		formattedLabels = labels.map(label => label.split(' '));
 	}
 
-	return labels;
+	return formattedLabels;
 };
 
-const getXAxisOptions = (props: AxisProps) => {
+const getXAxisOptions = (props: AxisProps, rotate: boolean) => {
 	const {name, show, showName} = props;
 
 	let options: Object = {
 		labels: {
-			hideOverlappingLabels: true,
+			hideOverlappingLabels: false,
 			maxHeight: 100,
 			minHeight: 50,
-			rotate: -60,
+			rotate: rotate ? -60 : 0,
 			show,
-			trim: true
+			trim: rotate
 		},
 		title: {
 			offsetY: 10
@@ -208,8 +212,29 @@ const getLegendOptions = (settings: Legend, container: HTMLDivElement, usesMetaC
 	};
 };
 
+/**
+ * Проверяет есть ли в наборе подписей слова с длинной превышающей длину сектора графика
+ * @param {Array<string>} labels - массив подписей
+ * @param {HTMLDivElement} container - контейнер графика
+ * @param {ApexLegend} legendSetting - настройки легенды графика
+ * @returns {boolean}
+ */
+const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement, legendSetting: ApexLegend) => {
+	const {width: legendWidth} = legendSetting;
+	let {clientWidth: width} = container;
+
+	if (legendWidth !== width) {
+		width -= legendWidth;
+	}
+
+	const columnWidth = width / labels.length;
+
+	return !!labels.find(label => label.split(' ').find(label => columnWidth <= AXIS_FONT_SIZE * label.length));
+};
+
 export {
 	axisLabelFormatter,
+	checkLabelsForOverlap,
 	getLegendOptions,
 	getLegendWidth,
 	getMaxValue,
