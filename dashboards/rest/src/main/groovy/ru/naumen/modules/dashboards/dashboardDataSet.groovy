@@ -383,6 +383,9 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
         case COMBO:
             def request = mappingComboDiagramRequest(requestContent, subjectUUID)
             def res = getDiagramData(request, diagramType)
+            Integer sortingDataIndex = getSortingDataIndex(requestContent as Map)
+            //нашли источник, по которому должна быть сортировка
+            res = sortResultListsForCombo(res, sortingDataIndex)
             List<Map> additionals = (requestContent.data as Map)
                 .findResults { key, value ->
                     if (!(value.sourceForCompute))
@@ -402,7 +405,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                     return value.group.format
                 }
             }
-            String group =  requestContent.data.findResult { key, value ->
+            String groupFormat =  requestContent.data.findResult { key, value ->
                 if (value.xAxis.type in AttributeType.DATE_TYPES && value.group.way == 'SYSTEM')
                 {
                     return value.group.data
@@ -411,8 +414,8 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             Boolean changeLabels = requestContent?.sorting?.value == 'PARAMETER'
             Boolean reverseLabels = requestContent?.sorting?.type == 'DESC' && changeLabels
             List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(requestContent, diagramType)
-            return mappingComboDiagram(res, additionals, group, format,
-                                       changeLabels, reverseLabels, customsInBreakdown)
+            return mappingComboDiagram(res, additionals, groupFormat, format,
+                                       changeLabels, reverseLabels, customsInBreakdown, sortingDataIndex)
         default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
     }
 }
@@ -2542,6 +2545,35 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
 }
 
 /**
+ * Метод по упорядочиванию итоговых датасетов для комбо
+ * @param res - список итоговых датасетов
+ * @param sortingDataIndex -  индекс датасета, который будет в основе комбо-диаграммы
+ * @return упорядоченный список итоговых датасетов
+ */
+List sortResultListsForCombo(List res, Integer sortingDataIndex)
+{
+    if(sortingDataIndex > 0)
+    {
+        //убрали его с текущего места
+        List toSort = res.remove(sortingDataIndex)
+        //поставили первым, тк по нему будут выстроены все остальные
+        res.add(0, toSort)
+    }
+    return res
+}
+
+/**
+ * Метод по получению индекса датасета, который будет в основе комбо-диаграммы
+ * @param requestContent - тело запроса
+ * @return индекс датасета, который будет в основе комбо-диаграммы
+ */
+Integer getSortingDataIndex(Map requestContent)
+{
+    def dataKeyForSorting = requestContent.sorting?.dataKey
+    return requestContent.data.keySet().findIndexOf {it == dataKeyForSorting }
+}
+
+/**
  * Метод проверки списка группировок на соответствие единому типу атрибута
  * @param listRequest - список запросов на построение диаграмм
  * @return true\false "соответствует"\"не соответствует"
@@ -3727,6 +3759,7 @@ private Set<Map> getInnerCustomGroupNames(def requestContent)
  * @param changeLabels - флаг на изменение списка лейблов (лейблы идут из параметров)
  * @param reverseLabels - флаг на обратный порядок лейблов
  * @param customsInBreakdown - список флагов на наличие кастомных группировок в разбивке в разных источниках
+ * @param sortingDataIndex - индекс датасета, который будет в основе комбо-диаграммы
  * @return ComboDiagram
  */
 private ComboDiagram mappingComboDiagram(List list,
@@ -3735,7 +3768,8 @@ private ComboDiagram mappingComboDiagram(List list,
                                          String format,
                                          Boolean changeLabels,
                                          Boolean reverseLabels,
-                                         List<Boolean> customsInBreakdown)
+                                         List<Boolean> customsInBreakdown,
+                                         Integer sortingDataIndex)
 {
     List transposeSets = list.collect { (it as List<List>)?.transpose() ?: [] }
 
@@ -3842,6 +3876,12 @@ private ComboDiagram mappingComboDiagram(List list,
             customsInBreakdown[i] ? labels : diagramLabels,
             customsInBreakdown[i]
         )
+    }
+    if (sortingDataIndex > 0)
+    {
+        List moveBack = fullSeries[0]
+        fullSeries -= moveBack
+        fullSeries.add(sortingDataIndex, moveBack)
     }
     return new ComboDiagram(
         labels: labels,
