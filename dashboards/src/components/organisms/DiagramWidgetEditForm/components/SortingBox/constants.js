@@ -11,7 +11,7 @@ const SORTING_OPTIONS = [
 		value: SORTING_VALUES.PARAMETER
 	},
 	{
-		label: 'Индикатор',
+		label: 'Показатель',
 		value: SORTING_VALUES.INDICATOR
 	}
 ];

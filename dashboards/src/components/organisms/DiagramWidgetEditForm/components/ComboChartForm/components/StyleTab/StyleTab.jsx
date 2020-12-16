@@ -29,7 +29,7 @@ export class StyleTab extends Component<StyleTabProps> {
 		const attribute = value === SORTING_VALUES.INDICATOR ? yAxis : xAxis;
 		let label = getProcessedValue(attribute, 'title');
 
-		if (source) {
+		if (label && source) {
 			label = `${label} (${source.label})`;
 		}
 
@@ -75,6 +75,7 @@ export class StyleTab extends Component<StyleTabProps> {
 		const {INDICATOR, PARAMETER} = SORTING_VALUES;
 		const {dataKey: sortingDataKey, value} = sorting;
 		const dataSet = data.find(({dataKey}) => dataKey === sortingDataKey) || data[0];
+		const options = data.filter(({sourceForCompute}) => !sourceForCompute);
 
 		if (value === INDICATOR || value === PARAMETER) {
 			return (
@@ -83,7 +84,7 @@ export class StyleTab extends Component<StyleTabProps> {
 						getOptionLabel={this.getSortingIndicatorLabel}
 						getOptionValue={this.getSortingIndicatorValue}
 						onSelect={this.handleSelectSortingIndicator}
-						options={data}
+						options={options}
 						value={dataSet}
 					/>
 				</div>
