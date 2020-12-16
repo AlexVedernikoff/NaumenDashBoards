@@ -67,13 +67,15 @@ const switchDashboard = (savePrevState: boolean = true): ThunkAction => async (d
 
 	savePrevState ? dispatch(setTemp({customGroups, dashboard, widgets})) : dispatch(setTemp(null));
 
-	if (temp) {
-		dispatch(switchState(temp));
-	} else {
-		await dispatch(createNewState(!personalDashboard));
+	try {
+		if (temp) {
+			dispatch(switchState(temp));
+		} else {
+			await dispatch(createNewState(!personalDashboard));
+		}
+	} finally {
+		dispatch(endSwitch());
 	}
-
-	dispatch(endSwitch());
 };
 
 const endSwitch = () => ({

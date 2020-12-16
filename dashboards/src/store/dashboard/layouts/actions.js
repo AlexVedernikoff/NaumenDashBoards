@@ -10,12 +10,33 @@ import {LAYOUTS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 
 /**
+ * При совпадении ключей заменяет данные положений виджетов на текущие
+ * @param {Layouts} targetLayouts - набор положений виджетов
+ * @param {Layouts} currentLayouts - текущий набор положений виджетов
+ * @return {Layouts}
+ */
+const setCurrentLayouts = (targetLayouts: Layouts, currentLayouts: Layouts): Layouts => {
+	const layouts = {};
+
+	Object.keys(targetLayouts).forEach(key => {
+		layouts[key] = targetLayouts[key].map(layout => {
+			return (currentLayouts[key] && currentLayouts[key].find(currentLayout => currentLayout.i === layout.i)) || layout;
+		});
+	});
+
+	return layouts;
+};
+
+/**
  * Устанавливает положения виджетов для веб представления
  * @param {Array<object>} widgets - ненормализованные виджеты
+ * @param {boolean} refresh - указывает о необходимости обновления предыдущих положений
  * @param {Layouts} layouts - положения виджетов
  * @returns {ThunkAction}
  */
-const setWebLayouts = (widgets: Array<Object>, layouts?: Layouts) => (dispatch: Dispatch) => {
+const setWebLayouts = (widgets: Array<Object>, refresh: boolean, layouts?: Layouts) => (dispatch: Dispatch, getState: GetState) => {
+	const layoutMode = LAYOUT_MODE.WEB;
+	const {[layoutMode]: currentLayouts} = getState().dashboard.layouts;
 	let widgetLayouts = layouts;
 
 	if (!isMobile().any) {
@@ -28,8 +49,12 @@ const setWebLayouts = (widgets: Array<Object>, layouts?: Layouts) => (dispatch: 
 			};
 		}
 
+		if (refresh) {
+			widgetLayouts = setCurrentLayouts(widgetLayouts, currentLayouts);
+		}
+
 		dispatch(changeLayouts({
-			layoutMode: LAYOUT_MODE.WEB,
+			layoutMode,
 			layouts: widgetLayouts
 		}));
 	}
@@ -38,10 +63,13 @@ const setWebLayouts = (widgets: Array<Object>, layouts?: Layouts) => (dispatch: 
 /**
  * Устанавливает положения виджетов для мобильного представления
  * @param {Array<object>} widgets - ненормализованные виджеты
+ * @param {boolean} refresh - указывает о необходимости обновления предыдущих положений
  * @param {Layouts} layouts - положения виджетов
  * @returns {ThunkAction}
  */
-const setMobileLayouts = (widgets: Array<Object>, layouts?: Layouts) => (dispatch: Dispatch) => {
+const setMobileLayouts = (widgets: Array<Object>, refresh: boolean, layouts?: Layouts) => (dispatch: Dispatch, getState: GetState) => {
+	const layoutMode = LAYOUT_MODE.MOBILE;
+	const {[layoutMode]: currentLayouts} = getState().dashboard.layouts;
 	let widgetLayouts = layouts;
 
 	if (!widgetLayouts) {
@@ -50,8 +78,12 @@ const setMobileLayouts = (widgets: Array<Object>, layouts?: Layouts) => (dispatc
 		};
 	}
 
+	if (refresh) {
+		widgetLayouts = setCurrentLayouts(widgetLayouts, currentLayouts);
+	}
+
 	dispatch(changeLayouts({
-		layoutMode: LAYOUT_MODE.MOBILE,
+		layoutMode,
 		layouts: widgetLayouts
 	}));
 };
