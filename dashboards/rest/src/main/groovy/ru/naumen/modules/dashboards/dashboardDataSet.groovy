@@ -3506,9 +3506,10 @@ private TableDiagram mappingTable(List resultDataSet,
  */
 Boolean checkForDateInAttribute(Map attributeValue, Boolean flag)
 {
-    return (attributeValue.group.way == 'SYSTEM' &&
-            attributeValue.group.data as GroupType == GroupType.DAY &&
-            attributeValue.group.format in ['dd.mm.YY hh:ii', 'dd.mm.YY hh']) ? flag : false
+    return (!(attributeValue.attribute.type in AttributeType.DATE_TYPES) ||
+            (attributeValue.group.way == 'SYSTEM' &&
+             attributeValue.group.data as GroupType == GroupType.DAY &&
+             attributeValue.group.format in ['dd.mm.YY hh:ii', 'dd.mm.YY hh'])) ? flag : false
 }
 
 /**
