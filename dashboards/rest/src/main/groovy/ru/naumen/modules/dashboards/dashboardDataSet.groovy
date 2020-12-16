@@ -3879,7 +3879,7 @@ private ComboDiagram mappingComboDiagram(List list,
     }
     if (sortingDataIndex > 0)
     {
-        List moveBack = fullSeries[0]
+        SeriesCombo moveBack = fullSeries[0]
         fullSeries -= moveBack
         fullSeries.add(sortingDataIndex, moveBack)
     }
