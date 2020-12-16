@@ -1,7 +1,7 @@
 // @flow
 import type {ApexAxisChartSeries} from 'apexcharts';
 import type {ApexLabels, ApexLegend, AxisProps} from 'utils/chart/types';
-import {AXIS_FONT_SIZE, LEGEND_POSITIONS} from 'utils/chart/constants';
+import {AXIS_FONT_SIZE, LEGEND_HEIGHT, LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
@@ -201,7 +201,7 @@ const getLegendOptions = (settings: Legend, container: HTMLDivElement, usesMetaC
 	let height;
 
 	if (position === bottom || position === top) {
-		height = 100;
+		height = LEGEND_HEIGHT;
 	}
 
 	return {
@@ -216,20 +216,36 @@ const getLegendOptions = (settings: Legend, container: HTMLDivElement, usesMetaC
  * Проверяет есть ли в наборе подписей слова с длинной превышающей длину сектора графика
  * @param {Array<string>} labels - массив подписей
  * @param {HTMLDivElement} container - контейнер графика
- * @param {ApexLegend} legendSetting - настройки легенды графика
+ * @param {Legend} legend - настройки легенды графика
+ * @param {boolean} horizontal - указывает является ли график горизонтальным
  * @returns {boolean}
  */
-const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement, legendSetting: ApexLegend) => {
-	const {width: legendWidth} = legendSetting;
-	let {clientWidth: width} = container;
+const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement, legend: Legend, horizontal: boolean = false) => {
+	const {bottom, left, right, top} = LEGEND_POSITIONS;
+	const {position: legendPosition, show: showLegend} = legend;
+	let {clientHeight: height, clientWidth: width} = container;
+	let overlapped = false;
 
-	if (legendWidth !== width) {
-		width -= legendWidth;
+	if (horizontal) {
+		if (showLegend && (legendPosition === bottom || legendPosition === top)) {
+			height -= LEGEND_HEIGHT;
+		}
+
+		const columnHeight = height / labels.length;
+
+		overlapped = !!labels.find(label => columnHeight <= label.split(' ').length * 12);
+	} else {
+		if (showLegend && (legendPosition === left || legendPosition === right)) {
+			width -= getLegendWidth(container, legendPosition);
+		}
+
+		const columnWidth = width / labels.length;
+		const fontWidth = AXIS_FONT_SIZE * 0.5;
+
+		overlapped = !!labels.find(label => label.split(' ').find(label => columnWidth <= label.length * fontWidth));
 	}
 
-	const columnWidth = width / labels.length;
-
-	return !!labels.find(label => label.split(' ').find(label => columnWidth <= AXIS_FONT_SIZE * label.length));
+	return overlapped;
 };
 
 export {

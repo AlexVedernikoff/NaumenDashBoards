@@ -113,8 +113,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		maxValue = getMaxValue(series);
 	}
 
-	const legendSettings = getLegendOptions(legend, container, breakdownUsesMetaClass);
-	const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legendSettings);
+	const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend);
 	const xaxis = {
 		labels: {
 			formatter: axisLabelFormatter(parameterUsesMetaClass)

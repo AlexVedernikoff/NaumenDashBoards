@@ -26,7 +26,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
 	const {indicator, legend, parameter, type} = widget;
-	const {categories} = chart;
+	const {categories: labels} = chart;
 	const buildDataSet = getBuildSet(widget);
 
 	if (buildDataSet) {
@@ -40,11 +40,9 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
 		const xAxisSettings = horizontal ? indicator : parameter;
 		const yAxisSettings = horizontal ? parameter : indicator;
-		const legendSettings = getLegendOptions(legend, container, breakdownUsesMetaClass);
-		const hasOverlappedLabel = checkLabelsForOverlap(categories, container, legendSettings);
+		const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend, horizontal);
 
 		let xaxis = {
-			categories: getXAxisLabels(widget, categories, !hasOverlappedLabel),
 			labels: {
 				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesMetaClass)
 			}
@@ -69,7 +67,8 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 					bottom: 20
 				}
 			},
-			legend: legendSettings,
+			labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
+			legend: getLegendOptions(legend, container, breakdownUsesMetaClass),
 			markers: {
 				hover: {
 					size: 8

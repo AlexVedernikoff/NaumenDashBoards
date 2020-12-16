@@ -1,13 +1,16 @@
 // @flow
 import ApexCharts from 'apexcharts';
+import {checkLabelsForOverlap, getXAxisLabels} from 'utils/chart/mixins/helpers';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
 import {getLegendWidth, getOptions} from 'utils/chart';
+import {isAxisChart, isHorizontalChart} from 'store/widgets/helpers';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import {ResizeDetector} from 'components/molecules';
 import styles from './styles.less';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -62,17 +65,37 @@ export class Chart extends PureComponent<Props> {
 		return options;
 	};
 
-	handleResize = (width: number) => {
-		const {legend} = this.props.widget;
-		const {position, show} = legend;
+	handleResize = () => {
+		const {data, widget} = this.props;
+		const {legend, type} = widget;
 		const {current: container} = this.containerRef;
 
-		if (show && this.chart && container) {
-			this.chart.updateOptions({
+		if (container) {
+			let opts = {
 				legend: {
-					width: getLegendWidth(container, position)
+					width: getLegendWidth(container, legend.position)
 				}
-			});
+			};
+
+			if (isAxisChart(widget)) {
+				const rawLabels = type === WIDGET_TYPES.COMBO ? data.labels : data.categories;
+				const hasOverlappedLabel = checkLabelsForOverlap(rawLabels, container, legend, isHorizontalChart(widget));
+				// $FlowFixMe
+				const labels = getXAxisLabels(widget, rawLabels, !hasOverlappedLabel);
+
+				opts = {
+					...opts,
+					labels,
+					xaxis: {
+						labels: {
+							rotate: hasOverlappedLabel ? -60 : 0,
+							trim: hasOverlappedLabel
+						}
+					}
+				};
+			}
+
+			this.chart && this.chart.updateOptions(opts);
 		}
 	};
 
