@@ -1,13 +1,22 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {AxisIndicator, AxisParameter, ChartSorting, ComputedBreakdown, DataLabels, Header, Legend} from 'store/widgets/data/types';
+import type {
+	AxisIndicator,
+	AxisParameter,
+	ChartSorting,
+	ComputedBreakdown,
+	DataLabels,
+	Header,
+	Legend, NavigationSettings
+} from 'store/widgets/data/types';
 import {createDefaultGroup, transformGroupFormat} from 'store/widgets/helpers';
 import type {CreateFunction, Fields, LegacyWidget} from './types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {
 	DEFAULT_AXIS_SORTING_SETTINGS,
 	DEFAULT_CIRCLE_SORTING_SETTINGS,
+	DEFAULT_NAVIGATION_SETTINGS,
 	WIDGET_TYPES
 } from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
@@ -319,6 +328,24 @@ const templateName = (widget: Object) => {
 	return templateName || name;
 };
 
+/**
+ * Нормализует настройки навигации виджета
+ * @param {NavigationSettings} settings - настройки навигации
+ * @returns {NavigationSettings} - настройки навигации
+ */
+const navigationSettings = (settings: NavigationSettings = DEFAULT_NAVIGATION_SETTINGS): NavigationSettings => {
+	const {showTip, tip} = settings;
+
+	if (showTip && !tip) {
+		return {
+			...settings,
+			showTip: false
+		};
+	}
+
+	return settings;
+};
+
 export {
 	aggregation,
 	array,
@@ -334,6 +361,7 @@ export {
 	hasOrdinalFormat,
 	header,
 	legend,
+	navigationSettings,
 	mixinBreakdown,
 	object,
 	string,

@@ -5,6 +5,7 @@ import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/con
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
@@ -65,7 +66,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 			id,
 			indicator: extend(DEFAULT_SPEEDOMETER_SETTINGS.indicator, indicator),
 			name,
-			navigation,
+			navigation: navigationSettings(navigation),
 			ranges: extend(DEFAULT_SPEEDOMETER_SETTINGS.ranges, ranges),
 			templateName,
 			type

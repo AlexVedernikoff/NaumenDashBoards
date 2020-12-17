@@ -5,6 +5,7 @@ import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {getSummaryLayoutSize} from './helpers';
+import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
@@ -54,7 +55,7 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 			id,
 			indicator: extend(DEFAULT_SUMMARY_SETTINGS.indicator, indicator),
 			name,
-			navigation,
+			navigation: navigationSettings(navigation),
 			templateName,
 			type
 		};

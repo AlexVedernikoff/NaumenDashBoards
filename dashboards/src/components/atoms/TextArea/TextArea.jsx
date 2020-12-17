@@ -1,5 +1,6 @@
 // @flow
 import {Label} from 'components/atoms';
+import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
@@ -7,7 +8,7 @@ import styles from './styles.less';
 export class TextArea extends Component<Props> {
 	static defaultProps = {
 		label: '',
-		maxLength: null,
+		maxLength: MAX_TEXT_LENGTH,
 		placeholder: 'Введите текст...'
 	};
 

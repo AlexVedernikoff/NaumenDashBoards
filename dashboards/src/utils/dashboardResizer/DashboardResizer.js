@@ -50,6 +50,22 @@ export class DashboardResizer {
 		}
 	};
 
+	/**
+	 * Функция для обхода проблемы, когда высота прокрутки родительского элемента не успевает увеличиваться
+	 * относительно содержимого
+	 * @param {number} x - значение по горизонтали
+	 * @param {number} y - значение по вертикали
+	 * @param {HTMLElement} parent - родительский элемент
+	 * @param {number} attemptCount - количество попыток применить текущую функцию
+	 */
+	scrollByValidParentScrollHeight = (x: number, y: number, parent: HTMLElement, attemptCount: number = 0) => {
+		if (parent.scrollHeight >= y) {
+			parent.scrollTo(x, y);
+		} else if (attemptCount < 5) {
+			setTimeout(() => this.scrollByValidParentScrollHeight(x, y, parent), 1000, attemptCount + 1);
+		}
+	};
+
 	scrollTo = (x: number, y: number) => {
 		const {frameElement} = window;
 		const scrollParent = this.getScrollParent(frameElement);
@@ -57,8 +73,9 @@ export class DashboardResizer {
 		if (scrollParent) {
 			const parentOffset = scrollParent.getBoundingClientRect().top;
 			const dashboardOffset = frameElement.getBoundingClientRect().top;
+			const totalY = y + dashboardOffset - parentOffset;
 
-			setTimeout(() => scrollParent.scrollTo(x, y + dashboardOffset - parentOffset));
+			this.scrollByValidParentScrollHeight(x, totalY, scrollParent);
 		}
 	};
 

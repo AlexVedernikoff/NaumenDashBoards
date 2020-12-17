@@ -6,6 +6,7 @@ import {DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/circleNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
@@ -57,7 +58,7 @@ export class CircleChartForm extends Component<TypedFormProps> {
 			id,
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
 			name,
-			navigation,
+			navigation: navigationSettings(navigation),
 			showEmpty,
 			sorting: extend(DEFAULT_CIRCLE_SORTING_SETTINGS, sorting),
 			templateName,

@@ -6,6 +6,7 @@ import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/comboNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
@@ -68,7 +69,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			indicator: indicatorSettings,
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
 			name,
-			navigation,
+			navigation: navigationSettings(navigation),
 			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
 			showEmptyData,
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),
