@@ -385,7 +385,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             def res = getDiagramData(request, diagramType)
             Integer sortingDataIndex = getSortingDataIndex(requestContent as Map)
             //нашли источник, по которому должна быть сортировка
-            res = sortResultListsForCombo(res, sortingDataIndex)
+            res = sortListsForCombo(res, sortingDataIndex)
             List<Map> additionals = (requestContent.data as Map)
                 .findResults { key, value ->
                     if (!(value.sourceForCompute))
@@ -398,6 +398,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                         ]
                     }
                 }
+            additionals = sortListsForCombo(additionals, sortingDataIndex)
 
             String format = requestContent.data.findResult { key, value ->
                 if (value.xAxis.type in AttributeType.DATE_TYPES && value.group.way == 'SYSTEM')
@@ -700,8 +701,6 @@ private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestCon
                 }
             ]
         }
-
-
 
         if(dynamicInBreakdown)
         {
@@ -2546,20 +2545,20 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
 
 /**
  * Метод по упорядочиванию итоговых датасетов для комбо
- * @param res - список итоговых датасетов
+ * @param list - список для сортировки
  * @param sortingDataIndex -  индекс датасета, который будет в основе комбо-диаграммы
  * @return упорядоченный список итоговых датасетов
  */
-List sortResultListsForCombo(List res, Integer sortingDataIndex)
+List sortListsForCombo(List list, Integer sortingDataIndex)
 {
     if(sortingDataIndex > 0)
     {
         //убрали его с текущего места
-        List toSort = res.remove(sortingDataIndex)
+        def toSort = list.remove(sortingDataIndex)
         //поставили первым, тк по нему будут выстроены все остальные
-        res.add(0, toSort)
+        list.add(0, toSort)
     }
-    return res
+    return list
 }
 
 /**
