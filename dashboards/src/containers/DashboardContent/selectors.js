@@ -21,13 +21,14 @@ export const props = (state: AppState): ConnectedProps => {
 	const {editMode, layoutMode, personal: personalDashboard} = settings;
 	const {buildData, data} = widgets;
 	const {focusedWidget, selectedWidget} = data;
-	const {user} = context;
-	const editable = context.user.role !== USER_ROLES.REGULAR || personalDashboard;
+	const {editableDashboard, user} = context;
+	const editable = editableDashboard && (context.user.role !== USER_ROLES.REGULAR || personalDashboard);
 
 	return {
 		buildData,
 		editMode,
 		editable,
+		editableDashboard,
 		focusedWidget,
 		layoutMode,
 		layouts: dashboardLayouts[layoutMode],

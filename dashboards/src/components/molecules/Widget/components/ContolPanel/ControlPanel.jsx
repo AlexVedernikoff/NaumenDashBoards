@@ -40,6 +40,8 @@ export class ControlPanel extends PureComponent<Props, State> {
 		editWidgetChunkData(widget, {displayMode: value});
 	};
 
+	handleClick = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
+
 	handleClickDrillDownButton = (e: Object) => {
 		const {onDrillDown, widget} = this.props;
 		onDrillDown(widget, e.item.props.keyEvent);
@@ -250,7 +252,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 		const {className} = this.props;
 
 		return (
-			<div className={cn(styles.panel, className)}>
+			<div className={cn(styles.panel, className)} onClick={this.handleClick}>
 				{this.renderNavigationButton()}
 				{this.renderChangeDisplayModeButton()}
 				{this.renderEditButton()}

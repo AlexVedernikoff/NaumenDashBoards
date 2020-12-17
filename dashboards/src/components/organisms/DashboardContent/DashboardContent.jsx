@@ -1,4 +1,6 @@
 // @flow
+import 'react-grid-layout/css/styles.css';
+import type {AnyWidget, Widget as WidgetType} from 'store/widgets/data/types';
 import cn from 'classnames';
 import {DashboardPanel} from 'components/organisms';
 import {debounce} from 'src/helpers';
@@ -16,16 +18,30 @@ import {resizer} from 'index';
 import {Responsive as Grid} from 'react-grid-layout';
 import type {State} from './types';
 import styles from './styles.less';
-import type {Widget as WidgetType} from 'store/widgets/data/types';
+import {USER_ROLES} from 'store/context/constants';
 
 export const gridRef: DivRef = createRef();
 
 export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
 	state = {
+		selectedWidget: '',
 		swipedPanel: false,
 		width: null
 	};
+
+	componentDidMount () {
+		const {editableDashboard, user} = this.props;
+
+		if (editableDashboard && user.role === USER_ROLES.REGULAR) {
+			window.addEventListener('beforeunload', (event) => {
+				event.preventDefault();
+				event.returnValue = '';
+			});
+		}
+	}
+
+	handleClick = () => this.setState({selectedWidget: ''});
 
 	handleGridToggle = (show: boolean) => () => {
 		const {current: grid} = gridRef;
@@ -45,6 +61,11 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	handleToggleSwipePanel = () => this.setState({swipedPanel: !this.state.swipedPanel});
+
+	handleWidgetClick = (e: SyntheticMouseEvent<HTMLDivElement>, widget: AnyWidget) => {
+		e.stopPropagation();
+		this.setState({selectedWidget: widget.id});
+	};
 
 	handleWidgetFocus = (element: HTMLDivElement) => {
 		const {resetFocusedWidget, selectedWidget} = this.props;
@@ -93,10 +114,10 @@ export class DashboardContent extends Component<Props, State> {
 
 	renderGrid = () => {
 		const {layoutMode, layouts, selectedWidget, widgets} = this.props;
-		const {width} = this.state;
+		const {selectedWidget: localSelectedWidget, width} = this.state;
 
 		if (width) {
-			const isEditable = !!selectedWidget;
+			const isEditable = Boolean(selectedWidget || localSelectedWidget);
 			const containerWidth = this.isDesktopMK() ? 320 : width;
 			const layoutWidgets = getLayoutWidgets(widgets, layoutMode);
 
@@ -109,6 +130,7 @@ export class DashboardContent extends Component<Props, State> {
 					onDrag={this.handleGridToggle(true)}
 					onDragStop={this.handleGridToggle(false)}
 					onLayoutChange={debounce(this.handleLayoutChange, 1000)}
+					resizeHandles={GRID_PROPS.resizeHandles}
 					width={containerWidth}
 					{...GRID_PROPS[layoutMode]}
 				>
@@ -127,7 +149,12 @@ export class DashboardContent extends Component<Props, State> {
 		});
 
 		return (
-			<ResizeDetector className={containerCN} forwardedRef={this.gridContainerRef} onResize={this.setGridWidth}>
+			<ResizeDetector
+				className={containerCN}
+				forwardedRef={this.gridContainerRef}
+				onClick={this.handleClick}
+				onResize={this.setGridWidth}
+			>
 				{this.renderGrid()}
 			</ResizeDetector>
 		);
@@ -184,6 +211,7 @@ export class DashboardContent extends Component<Props, State> {
 				isSelected={isSelected}
 				key={id}
 				layoutMode={layoutMode}
+				onClick={this.handleWidgetClick}
 				onDrillDown={drillDown}
 				onEdit={this.handleWidgetSelect}
 				onFocus={this.handleWidgetFocus}
