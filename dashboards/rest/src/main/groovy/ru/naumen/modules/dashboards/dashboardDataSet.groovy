@@ -4223,7 +4223,7 @@ List getTop(List currentRes, Integer top, List parameterFilters = [], List break
  */
 List sortResList(List res,String aggregationSortingType = '', parameterSortingType = '', parameterFilters = [], breakdownFilters = [])
 {
-    int paramIndex = parameterFilters ? 1 : 2 // место, с которого начинаются значения параметра
+    int paramIndex = !breakdownFilters ? 1 : 2 // место, с которого начинаются значения параметра
     Integer aggregationIndex = 0 //место, где находятся значения агрегации
     if(aggregationSortingType)
     {
@@ -4337,6 +4337,8 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
                                dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
                                       .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
+            String aggregationSortingType = dataSet.values().head().aggregations.find().sortingType
+            String parameterSortingType = dataSet.values().head().groups.find().sortingType
             def res = dataSet.values().head().groups?.size() ?
                 findUniqueGroups([0], variables).collect { group ->
                     def resultCalculation = calculator.execute { variable ->
@@ -4364,6 +4366,11 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                     return getTop(total, top, [], [], true)
                 }
                 return total.size() > top ? total[0..top - 1] : total
+            }
+
+            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            {
+                return sortResList(total, aggregationSortingType, parameterSortingType)
             }
             return total
         default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
