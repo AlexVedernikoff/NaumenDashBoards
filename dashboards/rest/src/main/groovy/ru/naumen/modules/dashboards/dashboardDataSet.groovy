@@ -399,7 +399,6 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
                     }
                 }
             additionals = sortListsForCombo(additionals, sortingDataIndex)
-
             String format = requestContent.data.findResult { key, value ->
                 if (value.xAxis.type in AttributeType.DATE_TYPES && value.group.way == 'SYSTEM')
                 {
@@ -415,6 +414,7 @@ private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
             Boolean changeLabels = requestContent?.sorting?.value == 'PARAMETER'
             Boolean reverseLabels = requestContent?.sorting?.type == 'DESC' && changeLabels
             List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(requestContent, diagramType)
+            customsInBreakdown = sortListsForCombo(customsInBreakdown, sortingDataIndex)
             return mappingComboDiagram(res, additionals, groupFormat, format,
                                        changeLabels, reverseLabels, customsInBreakdown, sortingDataIndex)
         default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
