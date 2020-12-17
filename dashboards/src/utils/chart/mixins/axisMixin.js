@@ -2,6 +2,7 @@
 import type {ApexOptions} from 'apexcharts';
 import {
 	axisLabelFormatter,
+	checkLabelsForOverlap,
 	getLegendOptions,
 	getXAxisLabels,
 	getXAxisOptions,
@@ -39,9 +40,11 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
 		const xAxisSettings = horizontal ? indicator : parameter;
 		const yAxisSettings = horizontal ? parameter : indicator;
+		const legendSettings = getLegendOptions(legend, container, breakdownUsesMetaClass);
+		const hasOverlappedLabel = checkLabelsForOverlap(categories, container, legendSettings);
 
 		let xaxis = {
-			categories: getXAxisLabels(widget, categories),
+			categories: getXAxisLabels(widget, categories, !hasOverlappedLabel),
 			labels: {
 				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesMetaClass)
 			}
@@ -66,7 +69,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 					bottom: 20
 				}
 			},
-			legend: getLegendOptions(legend, container, breakdownUsesMetaClass),
+			legend: legendSettings,
 			markers: {
 				hover: {
 					size: 8
@@ -91,7 +94,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 					}
 				}
 			},
-			xaxis: extend(xaxis, getXAxisOptions(xAxisSettings)),
+			xaxis: extend(xaxis, getXAxisOptions(xAxisSettings, hasOverlappedLabel)),
 			yaxis: extend(yaxis, getYAxisOptions(yAxisSettings))
 		};
 	}

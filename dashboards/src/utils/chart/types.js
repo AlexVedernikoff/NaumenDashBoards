@@ -21,6 +21,8 @@ export type ApexLegend = {
 	width: number
 };
 
+export type ApexLabels = Array<string> | Array<Array<string>>;
+
 export type AxisProps = {
 	name: string,
 	show: boolean,
