@@ -698,7 +698,7 @@ class QueryWrapper implements CriteriaWrapper
                                          }
             String code = parameter.attribute.code
             String parameterFqn = parameter.attribute.metaClassFqn
-            if (columnCode.contains('id'))
+            if (parameter.attribute.attrChains()*.code.any { it == 'id' })
             {
                 columnCode = columnCode.replace('id', modules.dashboardQueryWrapper.UUID_CODE)
             }
