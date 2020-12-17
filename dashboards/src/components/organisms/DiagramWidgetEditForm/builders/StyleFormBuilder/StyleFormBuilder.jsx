@@ -7,7 +7,6 @@ import {
 	FONT_SIZE_OPTIONS,
 	FONT_STYLES,
 	MAX_FONT_SIZE,
-	SORTING_TYPES,
 	TEXT_ALIGNS,
 	TEXT_HANDLERS
 } from 'store/widgets/data/constants';
@@ -143,24 +142,6 @@ export class StyleFormBuilder extends Component<Props> {
 		return <CheckIconButtonGroup icons={icons} name={name} onChange={onChange} value={value} />;
 	};
 
-	renderSortingButtons = () => {
-		const {type} = this.props.data;
-		const icons = [
-			{
-				name: ICON_NAMES.DESC,
-				title: 'По убыванию',
-				value: SORTING_TYPES.DESC
-			},
-			{
-				name: ICON_NAMES.ASC,
-				title: 'По возрастанию',
-				value: SORTING_TYPES.ASC
-			}
-		];
-
-		return <CheckIconButtonGroup icons={icons} name={FIELDS.type} onChange={this.handleChange} value={type} />;
-	};
-
 	renderTextAlignButtons = (props: $Shape<InputProps> = {}) => {
 		const {data} = this.props;
 		const {
@@ -221,7 +202,6 @@ export class StyleFormBuilder extends Component<Props> {
 			renderFontFamilySelect: this.renderFontFamilySelect,
 			renderFontSizeSelect: this.renderFontSizeSelect,
 			renderFontStyleButtons: this.renderFontStyleButtons,
-			renderSortingButtons: this.renderSortingButtons,
 			renderTextAlignButtons: this.renderTextAlignButtons,
 			renderTextHandlerButtons: this.renderTextHandlerButtons
 		});

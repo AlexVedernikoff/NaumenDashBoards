@@ -33,7 +33,6 @@ export type StyleBuilderProps = {|
 	renderFontFamilySelect: (props?: $Shape<SelectProps>) => React$Node,
 	renderFontSizeSelect: (props?: $Shape<FontSizeSelectProps>) => React$Node,
 	renderFontStyleButtons: (props?: $Shape<InputProps>) => React$Node,
-	renderSortingButtons: (props?: $Shape<InputProps>) => React$Node,
 	renderTextAlignButtons: (props?: $Shape<InputProps>) => React$Node,
 	renderTextHandlerButtons: (props?: $Shape<InputProps>) => React$Node,
 |};

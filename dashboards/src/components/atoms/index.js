@@ -3,6 +3,7 @@ import Button from './Button';
 import ButtonGroup from './ButtonGroup';
 import CheckIconButton from './CheckIconButton';
 import Checkbox from './Checkbox';
+import Container from './Container';
 import CreationPanel from './CreationPanel';
 import DatepickerControl from './DatepickerControl';
 import DropdownMenu from './DropdownMenu';
@@ -37,6 +38,7 @@ export {
 	ButtonGroup,
 	CheckIconButton,
 	Checkbox,
+	Container,
 	CreationPanel,
 	DatepickerControl,
 	DropdownMenu,
