@@ -182,8 +182,8 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	renderHeaderCell = (props: HeaderCellProps) => {
 		const {ignoreDataLimits = IGNORE_TABLE_DATA_LIMITS_SETTINGS} = this.props.widget;
-		const {indicator: indicatorLimitIgnored, parameter: parameterLimitIgnored} = ignoreDataLimits;
-		const {indicator: indicatorLimitExceeded, parameter: parameterLimitExceeded} = this.props.data.limitsExceeded;
+		const {breakdown: breakdownLimitIgnored, parameter: parameterLimitIgnored} = ignoreDataLimits;
+		const {breakdown: breakdownLimitExceeded, parameter: parameterLimitExceeded} = this.props.data.limitsExceeded;
 		const {BREAKDOWN, INDICATOR, PARAMETER} = COLUMN_TYPES;
 		const {attribute, type} = props.column;
 		let {components, value} = props;
@@ -192,7 +192,7 @@ export class TableWidget extends PureComponent<Props, State> {
 			value = this.getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR);
 		}
 
-		if (type === INDICATOR && indicatorLimitExceeded && !indicatorLimitIgnored) {
+		if (type === INDICATOR && breakdownLimitExceeded && !breakdownLimitIgnored) {
 			components = {...components, Value: this.renderIndicatorHeaderValueWithWarning};
 		} else if (type === PARAMETER && parameterLimitExceeded && !parameterLimitIgnored) {
 			components = {...components, Value: this.renderParameterHeaderValueWithWarning};
@@ -222,7 +222,7 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	renderIndicatorHeaderValueWithWarning = (props: ValueProps) => (
 		<ValueWithLimitWarning
-			name={LIMIT_NAMES.INDICATOR}
+			name={LIMIT_NAMES.BREAKDOWN}
 			onSubmit={this.handleSubmitLimitWarningModal}
 			value={props.value}
 			warningText="Результат превышает 30 столбцов и может быть труден для восприятия. Вы уверены, что хотите выгрузить данные на диаграмму?"
@@ -263,7 +263,7 @@ export class TableWidget extends PureComponent<Props, State> {
 			name={LIMIT_NAMES.PARAMETER}
 			onSubmit={this.handleSubmitLimitWarningModal}
 			value={props.value}
-			warningText="Результат превышает 10000 значений. Вы уверены, что хотите выгрузить данные на диаграмму."
+			warningText="Результат превышает 10000 значений. Вы уверены, что хотите выгрузить данные на диаграмму?"
 		/>
 	);
 

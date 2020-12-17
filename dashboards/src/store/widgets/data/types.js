@@ -406,7 +406,7 @@ export type ColumnsRatioWidth = {
 };
 
 export type IgnoreTableDataLimitsSettings = {
-	indicator: boolean,
+	breakdown: boolean,
 	parameter: boolean
 };
 

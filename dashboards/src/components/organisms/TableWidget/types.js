@@ -52,7 +52,7 @@ export type Column =
 ;
 
 type LimitsExceeded = {
-	indicator: boolean,
+	breakdown: boolean,
 	parameter: boolean
 };
 

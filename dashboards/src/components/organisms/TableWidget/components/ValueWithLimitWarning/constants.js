@@ -1,9 +1,9 @@
 // @flow
-const INDICATOR: 'indicator' = 'indicator';
+const BREAKDOWN: 'breakdown' = 'breakdown';
 const PARAMETER: 'parameter' = 'parameter';
 
 const LIMIT_NAMES = {
-	INDICATOR,
+	BREAKDOWN,
 	PARAMETER
 };
 

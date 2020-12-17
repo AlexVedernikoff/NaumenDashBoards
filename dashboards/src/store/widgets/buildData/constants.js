@@ -19,7 +19,7 @@ const CARD_OBJECT_VALUE_SEPARATOR = '#';
 
 // Настройки для игнорирования лимита получаемых данных по параметру и показателю для построения таблицы
 const IGNORE_TABLE_DATA_LIMITS_SETTINGS = {
-	indicator: false,
+	breakdown: false,
 	parameter: false
 };
 
