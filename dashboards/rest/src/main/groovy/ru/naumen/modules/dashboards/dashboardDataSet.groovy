@@ -3415,7 +3415,8 @@ private TableDiagram mappingTable(List resultDataSet,
                                   Map<String, Boolean> ignoreLimits)
 {
     List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
-    breakdownValues = !customValuesInBreakdown && breakdownValues.size() > modules.dashboardCommon.tableBreakdownLimit
+    Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > modules.dashboardCommon.tableBreakdownLimit && !ignoreLimits.breakdown
+    breakdownValues = valuesInBasicBreakdownExceedLimit
         ? breakdownValues[0..modules.dashboardCommon.tableBreakdownLimit - 1]
         : breakdownValues
 
