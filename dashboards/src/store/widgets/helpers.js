@@ -1,4 +1,5 @@
 // @flow
+import type {AnyWidget, DiagramWidgetDataSet, Group, Widget} from './data/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
@@ -10,8 +11,7 @@ import {
 	INTERVALS
 } from './constants';
 import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
-import type {DiagramWidgetDataSet, Group, Widget} from './data/types';
-import {DISPLAY_MODE} from './data/constants';
+import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import {store} from 'src';
@@ -142,6 +142,26 @@ const isAllowedTopAggregation = (aggregation: string) => {
 const usesCustomGroup = (widget: DiagramFormWidget): boolean => !!widget.data
 	.find(({group, sourceForCompute}) => !sourceForCompute && group && group.way === GROUP_WAYS.CUSTOM);
 
+/**
+ * Проверяет является ли виджет осевым графиком
+ * @param {AnyWidget} widget - виджет
+ * @returns {boolean}
+ */
+const isAxisChart = (widget: AnyWidget): boolean => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE} = WIDGET_TYPES;
+	return [BAR, BAR_STACKED, COMBO, COLUMN, COLUMN_STACKED, LINE].includes(widget.type);
+};
+
+/**
+ * Проверяет является ли виджет горизонтальным графиком
+ * @param {AnyWidget} widget - виджет
+ * @returns {boolean}
+ */
+const isHorizontalChart = (widget: AnyWidget): boolean => {
+	const {BAR, BAR_STACKED} = WIDGET_TYPES;
+	return [BAR, BAR_STACKED].includes(widget.type);
+};
+
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
@@ -151,6 +171,8 @@ export {
 	hasMSInterval,
 	hasPercent,
 	isAllowedTopAggregation,
+	isAxisChart,
+	isHorizontalChart,
 	isGroupKey,
 	parseMSInterval,
 	transformGroupFormat,
