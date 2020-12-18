@@ -188,16 +188,18 @@ Date getMinDate(String code, String classFqn)
  */
 Integer countDistinct(Attribute attribute, String classFqn)
 {
+    String attributeType = attribute.type
     String attrCode = attribute.attrChains()*.code*.replace('metaClass', 'metaClassFqn').join('.')
-    if(attribute.type == AttributeType.META_CLASS_TYPE)
+    def s = api.selectClause
+    def criteria = api.db.createCriteria().addSource(classFqn)
+    if(attributeType == AttributeType.META_CLASS_TYPE)
     {
-        def s = api.selectClause
-        def criteria = api.db.createCriteria().addSource(classFqn)
-                          .addColumn(s.property(attrCode))
-                          .addGroupColumn(s.property(attrCode))
+        criteria.addColumn(s.property(attrCode))
+                .addGroupColumn(s.property(attrCode))
         return api.db.query(criteria).list().size()
     }
-    return api.db.query("select count(distinct ${attrCode}) from ${classFqn}").list().head() as Integer
+    criteria.addColumn(s.countDistinct(s.property(attrCode)))
+    return api.db.query(criteria).list().head() as Integer
 }
 
 //endregion
