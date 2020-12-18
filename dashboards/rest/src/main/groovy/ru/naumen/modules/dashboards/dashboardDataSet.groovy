@@ -3487,6 +3487,7 @@ private TableDiagram mappingTable(List resultDataSet,
     limitParameter = checkForDateInAttribute(attributes[parameterIndex], limitParameter)
 
     Boolean limitBreakdown = hasBreakdown &&
+                             !customValuesInBreakdown &&
                              !ignoreLimits.breakdown &&
                              modules.dashboardCommon.countDistinct(attributes.attribute.last(),
                                                                    attributes.attribute.last().sourceCode) >
