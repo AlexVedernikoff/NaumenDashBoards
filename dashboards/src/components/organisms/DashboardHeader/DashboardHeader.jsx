@@ -32,8 +32,8 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	handleClickRefreshButton = () => {
-		const {getSettings, personalDashboard} = this.props;
-		getSettings(personalDashboard);
+		const {getSettings} = this.props;
+		getSettings(true);
 	};
 
 	handleClickSwitchButton = (personal: boolean) => () => {

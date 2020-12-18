@@ -92,9 +92,10 @@ const initStorageSettings = () => (dispatch: Dispatch, getState: GetState) => {
 
 /**
  * Получает настройки дашборда
+ * @param {boolean} refresh - сообщает вызывается ли метод для обновления данных дашборда
  * @returns {ThunkAction}
  */
-const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const {context, dashboard} = getState();
 	const {contentCode, subjectUuid: classFqn} = context;
 	const payload = {
@@ -139,8 +140,8 @@ const getSettings = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	batch(() => {
 		dispatch(setWidgets(widgets));
 		dispatch(fetchAllBuildData(widgets));
-		dispatch(setWebLayouts(widgets, layouts));
-		dispatch(setMobileLayouts(widgets, mobileLayouts));
+		dispatch(setWebLayouts(widgets, refresh, layouts));
+		dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
 	});
 };
 
@@ -164,7 +165,7 @@ const setAutoUpdateSettings = (settings: $Shape<AutoUpdateSettings>): ThunkActio
  */
 const changeIntervalRemainder = (remainder: number): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	if (remainder === 0) {
-		dispatch(getSettings());
+		dispatch(getSettings(true));
 	}
 
 	dispatch({

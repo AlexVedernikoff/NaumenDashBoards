@@ -1,5 +1,4 @@
 // @flow
-import 'react-grid-layout/css/styles.css';
 import type {AnyWidget, Widget as WidgetType} from 'store/widgets/data/types';
 import cn from 'classnames';
 import {DashboardPanel} from 'components/organisms';
