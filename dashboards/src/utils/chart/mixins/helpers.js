@@ -18,11 +18,21 @@ import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 const getMetaClassLabel = (value: string): string => value.split(META_CLASS_VALUE_SEPARATOR)[0];
 
 const axisLabelFormatter = (usesMetaClass: boolean) => (value: number | string | Array<string>) => {
-	if (!Array.isArray(value) && usesMetaClass) {
-		return getMetaClassLabel(String(value));
+	let label = value;
+
+	if (usesMetaClass) {
+		if (Array.isArray(label)) {
+			label = label.join(' ');
+		}
+
+		label = getMetaClassLabel(String(label));
+
+		if (Array.isArray(value)) {
+			label = label.split(' ');
+		}
 	}
 
-	return value;
+	return label;
 };
 
 const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero: boolean = true) => (value: number) => {
