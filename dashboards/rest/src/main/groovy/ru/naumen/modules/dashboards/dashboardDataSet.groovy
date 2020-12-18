@@ -4338,8 +4338,8 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
                                dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
                                       .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
-            String aggregationSortingType = dataSet.values().head().aggregations.find().sortingType
-            String parameterSortingType = dataSet.values().head().groups.find().sortingType
+            String aggregationSortingType = dataSet.values().head().aggregations.find()?.sortingType
+            String parameterSortingType = dataSet.values().head().groups.find()?.sortingType
             def res = dataSet.values().head().groups?.size() ?
                 findUniqueGroups([0], variables).collect { group ->
                     def resultCalculation = calculator.execute { variable ->
