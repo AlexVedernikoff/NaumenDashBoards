@@ -7,23 +7,14 @@ import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 
 export class Body extends PureComponent<Props> {
-	getSortValue = (value: string | number): number => typeof value === 'string' ? Number(value) : value;
-
 	sort = (data: Array<RowType>, accessor: string, asc: boolean): Array<RowType> => data.sort((row1, row2) => {
-		// TODO убрать, когда начнут приходить данные числами
-		const leftValue = this.getSortValue(row1[accessor]);
-		const rightValue = this.getSortValue(row2[accessor]);
+		const leftValue = String(asc ? row1[accessor] : row2[accessor]);
+		const rightValue = String(asc ? row2[accessor] : row1[accessor]);
 
-		// $FlowFixMe
-		if (leftValue > rightValue) {
-			return asc ? 1 : -1;
-		}
-		// $FlowFixMe
-		if (leftValue < rightValue) {
-			return asc ? -1 : 1;
-		}
-
-		return 0;
+		return leftValue.localeCompare(rightValue, undefined, {
+			numeric: true,
+			sensitivity: 'base'
+		});
 	});
 
 	renderCell = (row: RowType, rowIndex: number) => (column: Column) => {
