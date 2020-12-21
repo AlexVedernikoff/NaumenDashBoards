@@ -4,12 +4,19 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {AxisChartForm, CircleChartForm, ComboChartForm, Form, SpeedometerForm, SummaryForm, TableForm} from './components';
 import type {ComputedAttr, Group} from 'store/widgets/data/types';
 import {createRefKey} from 'store/sources/refAttributes/actions';
+import {
+	DEFAULT_AXIS_SORTING_SETTINGS,
+	DEFAULT_CIRCLE_SORTING_SETTINGS,
+	SORTING_VALUES,
+	WIDGET_TYPES
+} from 'store/widgets/data/constants';
 import type {DivRef} from 'components/types';
 import {FIELDS} from 'DiagramWidgetEditForm';
+import {GROUP_WAYS} from 'store/widgets/constants';
+import {isAxisChart, isCircleChart} from 'store/widgets/helpers';
 import type {OnSelectAttributeEvent, RenderFormProps} from './types';
 import type {Props} from 'containers/DiagramWidgetEditForm/types';
 import React, {Component, createContext, createRef} from 'react';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export const formRef: DivRef = createRef();
 export const FormContext: React$Context<Object> = createContext({});
@@ -90,12 +97,27 @@ export class DiagramWidgetEditForm extends Component<Props> {
 		return attributes.find(attribute => attribute.code === 'title') || null;
 	};
 
-	handleChangeGroup = (index: number, name: string, value: Group, field: Object) => {
-		const {setDataFieldValue} = this.props;
+	handleChangeGroup = (index: number, name: string, group: Group, field: Object) => {
+		const {setDataFieldValue, setFieldValue, values} = this.props;
+		const {type} = values;
 		const {name: fieldName, parent, value: attribute} = field;
+		const {sorting = isAxisChart(type) ? DEFAULT_AXIS_SORTING_SETTINGS : DEFAULT_CIRCLE_SORTING_SETTINGS} = values;
+		const {DEFAULT, INDICATOR} = SORTING_VALUES;
+
+		if ((isAxisChart(type) && name === FIELDS.group) || (isCircleChart(type) && name === FIELDS.breakdownGroup)) {
+			let {value} = sorting;
+
+			if (group.way === GROUP_WAYS.CUSTOM && sorting.value !== DEFAULT) {
+				value = DEFAULT;
+			} else if (sorting.value === DEFAULT) {
+				value = INDICATOR;
+			}
+
+			setFieldValue(FIELDS.sorting, {...sorting, value});
+		}
 
 		setDataFieldValue(index, fieldName, this.changeAttributeTitle(attribute, parent, attribute.title));
-		setDataFieldValue(index, name, value);
+		setDataFieldValue(index, name, group);
 	};
 
 	onLoadRefAttributes = (event: OnSelectAttributeEvent, callback: Function, ...rest: Array<any>) =>

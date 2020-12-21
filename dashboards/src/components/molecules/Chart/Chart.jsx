@@ -77,9 +77,9 @@ export class Chart extends PureComponent<Props> {
 				}
 			};
 
-			if (isAxisChart(widget)) {
+			if (isAxisChart(type)) {
 				const rawLabels = type === WIDGET_TYPES.COMBO ? data.labels : data.categories;
-				const hasOverlappedLabel = checkLabelsForOverlap(rawLabels, container, legend, isHorizontalChart(widget));
+				const hasOverlappedLabel = checkLabelsForOverlap(rawLabels, container, legend, isHorizontalChart(type));
 				// $FlowFixMe
 				const labels = getXAxisLabels(widget, rawLabels, !hasOverlappedLabel);
 

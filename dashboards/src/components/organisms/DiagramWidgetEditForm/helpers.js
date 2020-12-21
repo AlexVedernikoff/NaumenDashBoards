@@ -3,10 +3,10 @@ import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'DiagramWidgetEditForm';
+import {isCircleChart, usesCustomGroup} from 'store/widgets/helpers';
 import {SORTING_OPTIONS} from './components/SortingBox/constants';
 import type {SortingValueOption} from './components/SortingBox/types';
 import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {usesCustomGroup} from 'store/widgets/helpers';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 const filterByAttribute = (options: Array<Attribute>, attribute: Attribute): Array<Attribute> => {
@@ -74,7 +74,10 @@ const getParentClassFqn = (values: Values, index: number) => {
  * @returns {Array<SortingValueOption>}
  */
 const getSortingOptions = (widget: DiagramFormWidget): Array<SortingValueOption> => SORTING_OPTIONS
-	.map(option => option.value === SORTING_VALUES.DEFAULT ? {...option, disabled: !usesCustomGroup(widget)} : option);
+	.map(option => option.value === SORTING_VALUES.DEFAULT
+		? {...option, disabled: !usesCustomGroup(widget, isCircleChart(widget.type))}
+		: option
+	);
 
 export {
 	filterByAttribute,
