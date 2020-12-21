@@ -41,14 +41,14 @@ export class SortingBox extends PureComponent<Props, State> {
 		const {type} = this.props.data;
 		const icons = [
 			{
-				name: ICON_NAMES.ASC,
-				title: 'По возрастанию',
-				value: SORTING_TYPES.ASC
-			},
-			{
 				name: ICON_NAMES.DESC,
 				title: 'По убыванию',
 				value: SORTING_TYPES.DESC
+			},
+			{
+				name: ICON_NAMES.ASC,
+				title: 'По возрастанию',
+				value: SORTING_TYPES.ASC
 			}
 		];
 

@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, DiagramWidgetDataSet, Group, Widget} from './data/types';
+import type {AnyWidget, DiagramWidgetDataSet, Group, Widget, WidgetType} from './data/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
@@ -137,29 +137,50 @@ const isAllowedTopAggregation = (aggregation: string) => {
 /**
  * Сообщает используется ли в наборе данных виджета пользовательская группировка
  * @param {DiagramFormWidget} widget - виджет
+ * @param {boolean} checkBreakdown - указывает на необходимость проверки группировки разбивки
  * @returns {boolean}
  */
-const usesCustomGroup = (widget: DiagramFormWidget): boolean => !!widget.data
-	.find(({group, sourceForCompute}) => !sourceForCompute && group && group.way === GROUP_WAYS.CUSTOM);
+const usesCustomGroup = (widget: DiagramFormWidget, checkBreakdown: boolean): boolean => {
+	const groupKeys = [FIELDS.group];
 
-/**
- * Проверяет является ли виджет осевым графиком
- * @param {AnyWidget} widget - виджет
- * @returns {boolean}
- */
-const isAxisChart = (widget: AnyWidget): boolean => {
-	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE} = WIDGET_TYPES;
-	return [BAR, BAR_STACKED, COMBO, COLUMN, COLUMN_STACKED, LINE].includes(widget.type);
+	if (checkBreakdown) {
+		groupKeys.push(FIELDS.breakdownGroup);
+	}
+
+	return !!widget.data.find(set => {
+		const {sourceForCompute} = set;
+		return !sourceForCompute && groupKeys.find(key => set[key] && set[key].way === GROUP_WAYS.CUSTOM);
+	});
 };
 
 /**
- * Проверяет является ли виджет горизонтальным графиком
- * @param {AnyWidget} widget - виджет
+ * Проверяет принадлежность типа виджета к осевым графикам
+ * @param {AnyWidget} type - тип виджета
  * @returns {boolean}
  */
-const isHorizontalChart = (widget: AnyWidget): boolean => {
+const isAxisChart = (type: WidgetType): boolean => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE} = WIDGET_TYPES;
+	return [BAR, BAR_STACKED, COMBO, COLUMN, COLUMN_STACKED, LINE].includes(type);
+};
+
+/**
+ * Проверяет принадлежность типа виджета к круговым графикам
+ * @param {AnyWidget} type - тип виджета
+ * @returns {boolean}
+ */
+const isCircleChart = (type: WidgetType) => {
+	const {DONUT, PIE} = WIDGET_TYPES;
+	return [DONUT, PIE].includes(type);
+};
+
+/**
+ * Проверяет принадлежность типа виджета к горизонтальным графикам
+ * @param {AnyWidget} type - тип виджета
+ * @returns {boolean}
+ */
+const isHorizontalChart = (type: WidgetType): boolean => {
 	const {BAR, BAR_STACKED} = WIDGET_TYPES;
-	return [BAR, BAR_STACKED].includes(widget.type);
+	return [BAR, BAR_STACKED].includes(type);
 };
 
 export {
@@ -172,6 +193,7 @@ export {
 	hasPercent,
 	isAllowedTopAggregation,
 	isAxisChart,
+	isCircleChart,
 	isHorizontalChart,
 	isGroupKey,
 	parseMSInterval,

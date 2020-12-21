@@ -6,7 +6,7 @@ import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {InjectedProps} from 'containers/WidgetEditForm/types';
 import type {LinkedDataSourceMap} from 'store/sources/linkedData/types';
 import type {OnLoadCallback} from 'store/sources/types';
-import type {Source, Widget} from 'store/widgets/data/types';
+import type {Source, Widget, WidgetType} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
 export type DataSet = {
@@ -16,7 +16,8 @@ export type DataSet = {
 
 export type DiagramFormWidget = {
 	data: Array<DataSet>,
-	name: string
+	name: string,
+	type: WidgetType
 };
 
 export type ConnectedProps = {|

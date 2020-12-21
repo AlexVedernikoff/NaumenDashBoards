@@ -35,9 +35,9 @@ sprite.add(ICON_NAMES.ARROW_TOP, `
 `);
 
 sprite.add(ICON_NAMES.ASC, `
-	<path d="M2 11L2 13H6V11H2Z" />
-	<path d="M2 7V9H10V7H2Z" />
-	<path d="M2 3L2 5H14V3H2Z" />
+	<path d="M6 5V3H2V5H6Z" />
+	<path d="M10 9V7H2V9H10Z" />
+	<path d="M14 13V11H2V13H14Z" />
 `);
 
 sprite.add(ICON_NAMES.BAR_CHART, `
@@ -130,9 +130,9 @@ sprite.add(ICON_NAMES.DATA, `
 `);
 
 sprite.add(ICON_NAMES.DESC, `
-	<path d="M6 5V3H2V5H6Z" />
-	<path d="M10 9V7H2V9H10Z" />
-	<path d="M14 13V11H2V13H14Z" />
+	<path d="M2 11L2 13H6V11H2Z" />
+	<path d="M2 7V9H10V7H2Z" />
+	<path d="M2 3L2 5H14V3H2Z" />
 `);
 
 sprite.add(ICON_NAMES.DIVISION, `
