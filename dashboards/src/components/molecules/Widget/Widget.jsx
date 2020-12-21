@@ -151,9 +151,7 @@ export class Widget extends PureComponent<Props, State> {
 			isNew,
 			onDrillDown,
 			onOpenNavigationLink,
-			onRemove,
-			personalDashboard,
-			user
+			onRemove
 		} = this.props;
 
 		if (!isNew) {
@@ -167,8 +165,6 @@ export class Widget extends PureComponent<Props, State> {
 					onExport={this.handleExport}
 					onOpenNavigationLink={onOpenNavigationLink}
 					onRemove={onRemove}
-					personalDashboard={personalDashboard}
-					user={user}
 					widget={widget}
 				/>
 			);

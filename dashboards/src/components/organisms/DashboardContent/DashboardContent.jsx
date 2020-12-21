@@ -187,11 +187,9 @@ export class DashboardContent extends Component<Props, State> {
 			layoutMode,
 			openCardObject,
 			openNavigationLink,
-			personalDashboard,
 			removeWidget,
 			selectedWidget,
-			updateWidget,
-			user
+			updateWidget
 		} = this.props;
 		const {id} = widget;
 		const isNew = id === NewWidget.id;
@@ -218,8 +216,6 @@ export class DashboardContent extends Component<Props, State> {
 				onOpenNavigationLink={openNavigationLink}
 				onRemove={removeWidget}
 				onUpdate={updateWidget}
-				personalDashboard={personalDashboard}
-				user={user}
 			/>
 		);
 	};

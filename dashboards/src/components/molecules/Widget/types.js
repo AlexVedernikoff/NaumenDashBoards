@@ -5,7 +5,6 @@ import type {DivRef} from 'src/components/types';
 import type {DrillDown, OpenCardObject, OpenNavigationLink} from 'store/widgets/links/types';
 import type {Node} from 'react';
 import type {ThunkAction} from 'store/types';
-import type {UserData} from 'store/context/types';
 
 type GridProps = {
 	children?: Node,
@@ -35,9 +34,7 @@ export type Props = {
 	onOpenCardObject: OpenCardObject,
 	onOpenNavigationLink: OpenNavigationLink,
 	onRemove: (id: string) => ThunkAction,
-	onUpdate: Widget => void,
-	personalDashboard: boolean,
-	user: UserData
+	onUpdate: Widget => void
 };
 
 export type State = {

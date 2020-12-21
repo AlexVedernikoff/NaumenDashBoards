@@ -13,7 +13,6 @@ import {Modal} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import {USER_ROLES} from 'store/context/constants';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from 'components/atoms/IconButton/constants';
 
 export class ControlPanel extends PureComponent<Props, State> {
@@ -84,10 +83,10 @@ export class ControlPanel extends PureComponent<Props, State> {
 	};
 
 	renderChangeDisplayModeButton = () => {
-		const {personalDashboard, user, widget} = this.props;
+		const {isEditable, widget} = this.props;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === widget.displayMode) || DISPLAY_MODE_OPTIONS[0];
 
-		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+		if (isEditable) {
 			return (
 				<DropDownButton
 					buttonIcon={this.getDisplayModeIcon()}
