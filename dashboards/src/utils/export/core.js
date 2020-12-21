@@ -58,12 +58,12 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 };
 
 /**
- * Управляет отображением панели зума и других элементов на графике при создании изображения
+ * Управляет отображением ненужных для экспорта элементов
  * @param {HTMLDivElement} container - элемент по которому создается изображение
  * @param {boolean} show - значение указывает о необходимости скрыть\показать элемент
  */
-const handleShowToolbar = (container: HTMLDivElement, show: boolean) => {
-	const toolbars = container.querySelectorAll('.apexcharts-toolbar, .rc-menu, .header-submenu');
+const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean) => {
+	const toolbars = container.querySelectorAll('.apexcharts-toolbar, .rc-menu, .header-submenu, .react-resizable-handle');
 
 	toolbars.forEach(toolbar => {
 		toolbar.style.visibility = show ? 'visible' : 'hidden';
@@ -86,11 +86,11 @@ const createImage = async (options: Options) => {
 		};
 	}
 
-	handleShowToolbar(container, false);
+	handleShowUnnecessaryElements(container, false);
 
 	const image = isLegacyBrowser(false) ? await createIEImage(container, config) : await html2canvas(container, config);
 
-	handleShowToolbar(container, true);
+	handleShowUnnecessaryElements(container, true);
 
 	return image;
 };
