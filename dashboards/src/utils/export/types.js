@@ -7,17 +7,18 @@ export type Options = {
 	type: string
 };
 
-export type SheetColumn = {
+export type TableColumn = {
 	accessor: string,
+	columns?: Array<TableColumn>,
 	footer: string,
 	header: string
 };
 
-export type SheetData = {
+export type TableRow = {
 	[string]: string
 };
 
-export type Sheet = {
-	columns: Array<SheetColumn>,
-	data: Array<SheetData>
+export type TableData = {
+	columns: Array<TableColumn>,
+	data: Array<TableRow>
 };

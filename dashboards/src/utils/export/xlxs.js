@@ -1,15 +1,17 @@
 // @flow
 import {save} from './helpers';
-import type {Sheet as SheetType, SheetColumn, SheetData} from './types';
+import type {TableColumn, TableData, TableRow} from './types';
 import {TABLE_NAME_LENGTH_LIMIT} from './constants';
 import XLSX from 'xlsx';
 
-class Sheet {
+class Table {
 	columns = [];
+	usesSubColumns = false;
 	data = [];
 
-	constructor ({columns, data}: SheetType) {
+	constructor ({columns, data}: TableData) {
 		this.columns = columns;
+		this.usesSubColumns = this.columns.filter(({columns}) => Array.isArray(columns)).length > 0;
 		this.data = data;
 	}
 
@@ -22,25 +24,49 @@ class Sheet {
 
 	createFooter = () => `<tr>${this.columns.map(this.createFooterColumn).join('')}</tr>`;
 
-	createFooterColumn = ({footer}: SheetColumn) => `<td>${footer}</td>`;
+	createFooterColumn = ({footer}: TableColumn) => `<td>${footer}</td>`;
 
-	createHead = () => `<tr>${this.columns.map(this.createHeadColumn).join('')}</tr>`;
+	createHead = () => (`
+		<tr>${this.columns.map(this.createHeadColumn).join('')}</tr>
+		${this.createSubHead()}
+	`);
 
-	createHeadColumn = ({header}: SheetColumn) => `<th>${header}</th>`;
+	createHeadColumn = ({columns, header}: TableColumn) => {
+		let rowspan = this.usesSubColumns && !Array.isArray(columns) ? 2 : 1;
+		let colspan = this.usesSubColumns && Array.isArray(columns) ? columns.length : 1;
 
-	createRow = (row) => `<tr>${this.columns.map(column => this.createRowColumn(column, row)).join('')}</tr>`;
+		return `<th colspan="${colspan}" rowspan="${rowspan}">${header}</th>`;
+	};
 
-	createRowColumn = (column: SheetColumn, row: SheetData) => `<td>${row[column.accessor] || ''}</td>`;
+	createRow = (row: TableRow) => `<tr>${this.getDataColumns().map(column => this.createRowColumn(column, row)).join('')}</tr>`;
+
+	createRowColumn = (column: TableColumn, row: TableRow) => `<td>${row[column.accessor] || ''}</td>`;
 
 	createRows = () => this.data.map(this.createRow).join('');
 
+	createSubHead = () => {
+		return this.usesSubColumns ? `<tr>${this.getSubColumns().map(this.createSubheadColumn).join('')}</tr>` : '';
+	};
+
+	createSubheadColumn = ({header}: TableColumn) => `<th>${header}</th>`;
+
 	createTable = () => (`
-			<table>
-				${this.createHead()}
-				${this.createRows()}
-				${this.createFooter()}
-			</table>
+		<table>
+			${this.createHead()}
+			${this.createRows()}
+			${this.createFooter()}
+		</table>
 	`);
+
+	getDataColumns = () => this.columns.reduce((columns, column) => {
+		return Array.isArray(column.columns) ? [...columns, ...column.columns] : [...columns, column];
+	}, []);
+
+	getSubColumns = () => {
+		return this.columns.reduce((columns, column) => {
+			return Array.isArray(column.columns) ? [...columns, ...column.columns] : columns;
+		}, []);
+	};
 }
 
 const stringToArrayBuffer = (s: string) => {
@@ -54,8 +80,8 @@ const stringToArrayBuffer = (s: string) => {
 	return buf;
 };
 
-const exportSheet = (name: string, data: SheetType) => {
-	const table = (new Sheet(data)).create();
+const exportSheet = (name: string, data: TableData) => {
+	const table = (new Table(data)).create();
 	const workbook = XLSX.utils.book_new();
 	const sheet = XLSX.utils.table_to_sheet(table);
 	let tableName = name;
