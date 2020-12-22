@@ -67,19 +67,16 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	handleWidgetFocus = (element: HTMLDivElement) => {
-		const {resetFocusedWidget, selectedWidget} = this.props;
+		const {resetFocusedWidget} = this.props;
 		const {current: container} = this.gridContainerRef;
-		const {top} = element.getBoundingClientRect();
+		let {top} = element.getBoundingClientRect();
 
-		if (resizer.isFullSize() || selectedWidget) {
-			container && container.scrollTo({
-				behavior: 'smooth',
-				top: Math.max(top - container.getBoundingClientRect().top, 0)
-			});
-		} else {
-			resizer.scrollTo(0, top);
-		}
+		container && container.scrollTo({
+			behavior: 'smooth',
+			top: Math.max(top - container.getBoundingClientRect().top + container.scrollTop, 0)
+		});
 
+		resizer.scrollTo(0, 0);
 		resetFocusedWidget();
 	};
 

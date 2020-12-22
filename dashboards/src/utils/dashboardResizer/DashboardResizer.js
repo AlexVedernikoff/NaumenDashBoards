@@ -70,10 +70,10 @@ export class DashboardResizer {
 		const {frameElement} = window;
 		const scrollParent = this.getScrollParent(frameElement);
 
-		if (scrollParent) {
+		if (scrollParent && !this.isFullSize()) {
 			const parentOffset = scrollParent.getBoundingClientRect().top;
 			const dashboardOffset = frameElement.getBoundingClientRect().top;
-			const totalY = y + dashboardOffset - parentOffset;
+			const totalY = y + dashboardOffset - parentOffset + scrollParent.scrollTop;
 
 			this.scrollByValidParentScrollHeight(x, totalY, scrollParent);
 		}
