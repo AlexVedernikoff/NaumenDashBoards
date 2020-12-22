@@ -322,7 +322,15 @@ class Link
                                     }
                                     else
                                     {
-                                        def objects = findObjects(attr.ref, attr.property, value)
+                                        List objects = []
+                                        if(attributeType in AttributeType.ONLY_LINK_TYPES)
+                                        {
+                                            objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
+                                        }
+                                        else
+                                        {
+                                            objects = findObjects(attr.ref, attr.property, value)
+                                        }
                                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
                                     }
                                     break;
@@ -784,13 +792,15 @@ class Link
      * @param attr - атрибут объекто
      * @param fqnClass - класс объекта
      * @param value - значение атрибута
+     * @param fromLinks - метод вызван для атрибута типа boLinks, backBOLinks
      * @return список объектов
      */
-    private List<Object> findObjects(Attribute attr, String fqnClass, def value)
+    private List<Object> findObjects(Attribute attr, String fqnClass, def value, Boolean fromLinks = false)
     {
+        String searchField = fromLinks ? modules.dashboardQueryWrapper.UUID_CODE : attr.code
         return attr.ref ?
             api.utils.find(fqnClass, [(attr.code): findObjects(attr.ref, attr.property, value)])
-            : api.utils.find(fqnClass, [(attr.code): value]).collect()
+            : api.utils.find(fqnClass, [(searchField): value]).collect()
     }
     /**
      * Метод создания контекста из из списка фильтров сгруппированных по атрибуту
