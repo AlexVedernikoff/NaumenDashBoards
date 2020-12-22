@@ -1,8 +1,59 @@
 // @flow
+import {arrayToTree} from 'utils/arrayToTree';
+import type {Attribute} from 'store/sources/attributes/types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {FetchParams, Payload, ReceivePayload} from './types';
 import {getObjectKey} from './helpers';
 import {LIMIT, OBJECTS_EVENTS} from './constants';
+import type {Source} from 'store/widgets/data/types';
+
+/**
+ * Осуществляет поиск объектов по названию
+ * @param {Source} source - источник относительно которого нужно производить поиск
+ * @param {Attribute} attribute - атрибут источника
+ * @param {string} searchValue - название
+ * @returns {ThunkAction}
+ */
+const searchObjects = (source: Source, attribute: Attribute, searchValue: string): ThunkAction =>
+	async (dispatch: Dispatch) => {
+		const id = getObjectKey(attribute, source);
+
+	dispatch({
+		payload: {
+			id,
+			searchValue
+		},
+		type: OBJECTS_EVENTS.FOUND_OBJECTS_PENDING
+	});
+
+	try {
+		const requestPayload = {
+			attribute,
+			sourceCode: source.value,
+			value: searchValue
+		};
+		const response = await window.jsApi.restCallModule('dashboards', 'searchValue', requestPayload);
+		const items = arrayToTree(response, {
+			keys: {
+				children: 'children',
+				id: 'uuid'
+			}
+		});
+
+		dispatch({
+			payload: {
+				id,
+				items
+			},
+			type: OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
+		});
+	} catch (error) {
+		dispatch({
+			payload: id,
+			type: OBJECTS_EVENTS.FOUND_OBJECT_REJECTED
+		});
+	}
+};
 
 /**
  * Вызывает необходимый метод получения данных для ссылочного атрибута
@@ -80,5 +131,6 @@ const receiveAllObjectData = (payload: ReceivePayload) => ({
 });
 
 export {
-	fetchObjectData
+	fetchObjectData,
+	searchObjects
 };

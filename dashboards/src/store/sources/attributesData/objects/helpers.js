@@ -124,6 +124,7 @@ const getObjectKey = (attribute: Attribute, source: Source): string => {
 };
 
 export {
+	createObjectData,
 	getObjectKey,
 	getObjectsMap,
 	receiveObjectData,

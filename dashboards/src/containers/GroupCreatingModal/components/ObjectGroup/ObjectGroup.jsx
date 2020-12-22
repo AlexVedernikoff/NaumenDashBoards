@@ -13,6 +13,7 @@ import type {
 	SelectOperand as SelectOperandType,
 	SimpleOperand as SimpleOperandType
 } from 'store/customGroups/types';
+import {debounce} from 'src/helpers';
 import {functions, props} from './selectors';
 import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
 import {MaterialTreeSelect} from 'components/molecules';
@@ -22,6 +23,7 @@ import type {Props, State} from './types';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
 import type {RenderProps as MultiSelectRenderProps} from 'CustomGroup/components/MultiSelectOperand/types';
+import {SearchInput} from 'components/atoms';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class ObjectGroup extends Component<Props, State> {
@@ -78,21 +80,43 @@ export class ObjectGroup extends Component<Props, State> {
 		};
 	};
 
-	getObjectSelectProps = (actual: boolean) => {
-		const {attribute, objects, source} = this.props;
-		const map = actual ? objects.actual : objects.all;
+	getObjectId = () => {
+		const {attribute, source} = this.props;
+		return getObjectKey(attribute, source);
+	};
 
-		const {[getObjectKey(attribute, source)]: data = {
-			error: false,
-			items: {},
-			loading: true,
-			uploaded: false
-		}} = map;
-		const {error, items: options, loading, uploaded} = data;
+	getObjectSelectData = (actual: boolean) => {
+		const {actual: actualMap, all: allMap, found} = this.props.objects;
+		const id = this.getObjectId();
+		const {[id]: foundData} = found;
+		let data;
+
+		if (foundData && foundData.searchValue) {
+			data = foundData;
+		} else {
+			const map = actual ? actualMap : allMap;
+
+			({[id]: data = {
+				error: false,
+				items: {},
+				loading: true,
+				uploaded: false
+			}} = map);
+		}
+
+		return data;
+	};
+
+	getObjectSelectProps = (actual: boolean) => {
+		const {error, items: options, loading, uploaded} = this.getObjectSelectData(actual);
 		const showMore = !(loading || uploaded || error);
+		const components = {
+			SearchInput: this.renderSearchInput
+		};
 
 		return {
 			async: true,
+			components,
 			key: actual.toString(),
 			loading,
 			onLoad: this.handleLoadData(actual),
@@ -119,6 +143,11 @@ export class ObjectGroup extends Component<Props, State> {
 			default:
 				return [];
 		}
+	};
+
+	handleChangeSearchInput = async (searchValue: string) => {
+		const {attribute, searchObjects, source} = this.props;
+		searchObjects(source, attribute, searchValue);
 	};
 
 	handleLoadData = (actual: boolean) => (node?: Object, offset?: number = 0) => {
@@ -216,6 +245,16 @@ export class ObjectGroup extends Component<Props, State> {
 				operand={operand}
 				render={this.renderMultiSelect(actual)}
 			/>
+		);
+	};
+
+	renderSearchInput = () => {
+		const {[this.getObjectId()]: foundData = {
+			searchValue: ''
+		}} = this.props.objects.found;
+
+		return (
+			<SearchInput onChange={debounce(this.handleChangeSearchInput, 500)} value={foundData.searchValue} />
 		);
 	};
 
