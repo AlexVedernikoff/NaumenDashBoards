@@ -2,7 +2,6 @@
 import type {DrillDown, OpenNavigationLink} from 'store/widgets/links/types';
 import type {EditWidgetChunkData, Widget} from 'store/widgets/data/types';
 import {ThunkAction} from 'redux-thunk';
-import type {UserData} from 'store/context/types';
 
 export type Props = {
 	className: string,
@@ -13,8 +12,6 @@ export type Props = {
 	onExport: (type: string) => Promise<void>,
 	onOpenNavigationLink: OpenNavigationLink,
 	onRemove: (id: string) => ThunkAction,
-	personalDashboard: boolean,
-	user: UserData,
 	widget: Widget
 };
 

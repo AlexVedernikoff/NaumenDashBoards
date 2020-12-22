@@ -22,7 +22,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const {buildData, data} = widgets;
 	const {focusedWidget, selectedWidget} = data;
 	const {editableDashboard, user} = context;
-	const editable = editableDashboard && (context.user.role !== USER_ROLES.REGULAR || personalDashboard);
+	const editable = user.role !== USER_ROLES.REGULAR || personalDashboard;
 
 	return {
 		buildData,
