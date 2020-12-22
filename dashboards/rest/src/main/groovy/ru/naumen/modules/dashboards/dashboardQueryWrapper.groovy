@@ -288,6 +288,16 @@ class QueryWrapper implements CriteriaWrapper
                     criteria.addGroupColumn(sc.property('metaCaseId'))
                     criteria.addColumn(column)
                 }
+                else if(parameter.attribute.type in AttributeType.ONLY_LINK_TYPES)
+                {
+                    column = sc.concat(
+                        sc.property(attributeCodes),
+                        sc.constant(LinksAttributeMarshaller.delimiter),
+                        sc.property(LinksAttributeMarshaller.marshal(parameter.attribute.code, modules.dashboardQueryWrapper.UUID_CODE))
+                    )
+                    criteria.addGroupColumn(column)
+                    criteria.addColumn(column)
+                }
                 else
                 {
                     criteria.addGroupColumn(column)

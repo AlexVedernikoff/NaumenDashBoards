@@ -240,6 +240,8 @@ class AttributeType {
 
     static final Collection<String> LINK_SET_TYPES = [CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
 
+    static final Collection<String> ONLY_LINK_TYPES = [BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
+
     static final Collection<String> SIMPLE_TYPES = [ DT_INTERVAL_TYPE, DATE_TYPE, DATE_TIME_TYPE, STRING_TYPE, INTEGER_TYPE, STATE_TYPE,
                                                      DOUBLE_TYPE, BOOL_TYPE, TIMER_TYPE, BACK_TIMER_TYPE, LOCALIZED_TEXT_TYPE].asImmutable()
 
@@ -586,6 +588,43 @@ class DashboardCodeMarshaller
      * Метод для парсинга значения
      * @param value - значение дашборда целиком
      * @return [ Fqn объекта, под которым был создан дашборд (root/employee), uuid дашборда]
+     */
+    static List<String> unmarshal(String value)
+    {
+        return value ? value.tokenize(delimiter) : []
+    }
+}
+
+/**
+ * Класс для преобразования/получения значения объекта для атрибута типа НБО и НОБО
+ */
+class LinksAttributeMarshaller
+{
+    /**
+     * делитель для значения
+     */
+    static String delimiter = '#'
+
+    /**
+     * делитель для запроса в БД
+     */
+    static String valueDelimiter = '.'
+
+    /**
+     * Метод получения значения для пользователя
+     * @param value - название объекта типа boLinks или backBOLinks
+     * @param uuid - uuid этого объекта
+     * @return  название объекта delimiter uuid объекта
+     */
+    static String marshal(String value, String uuid)
+    {
+        return "${value}${valueDelimiter}${uuid}"
+    }
+
+    /**
+     * Метод для парсинга значения
+     * @param value - значение объекта вместе с uuid-ом
+     * @return [ название объекта, uuid объекта]
      */
     static List<String> unmarshal(String value)
     {
