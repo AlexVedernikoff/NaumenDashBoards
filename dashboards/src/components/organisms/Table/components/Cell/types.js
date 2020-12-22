@@ -10,7 +10,7 @@ export type DefaultProps = {|
 	textAlign: TextAlign,
 	textHandler: TextHandler,
 	tip: string,
-	value: string | number,
+	value: string,
 	width: number | null
 |};
 

@@ -1,9 +1,15 @@
 // @flow
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {CARD_OBJECT_VALUE_SEPARATOR, META_CLASS_VALUE_SEPARATOR} from 'store/widgets/buildData/constants';
 import cn from 'classnames';
+import {COLUMN_TYPES} from 'components/organisms/TableWidget/constants';
 import {ControlPanel} from './components';
 import {createContextName, createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
+import {deepClone} from 'src/helpers';
 import {Diagram} from 'components/molecules';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
+import {getSeparatedLabel, isCardObjectColumn} from 'components/organisms/TableWidget/helpers';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
@@ -87,7 +93,7 @@ export class Widget extends PureComponent<Props, State> {
 
 		if (data) {
 			if (type === FILE_VARIANTS.XLSX) {
-				return exportSheet(name, data);
+				return exportSheet(name, {...data, data: this.removeCodesFromRows(data)});
 			}
 
 			if (current) {
@@ -100,6 +106,31 @@ export class Widget extends PureComponent<Props, State> {
 				});
 			}
 		}
+	};
+
+	removeCodesFromRows = (data: DiagramBuildData) => {
+		const {columns, data: originalRows} = data;
+		const rows = deepClone(originalRows);
+
+		columns.forEach(column => {
+			const {accessor, attribute, type} = column;
+
+			if (type === COLUMN_TYPES.PARAMETER && attribute.type === ATTRIBUTE_TYPES.metaClass) {
+				rows.forEach(row => {
+					const value = row[accessor];
+					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR) : value;
+				});
+			}
+
+			if (isCardObjectColumn(column)) {
+				rows.forEach(row => {
+					const value = row[accessor];
+					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR) : value;
+				});
+			}
+		});
+
+		return rows;
 	};
 
 	renderContent = () => {
