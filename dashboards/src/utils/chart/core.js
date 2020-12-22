@@ -1,7 +1,7 @@
 // @flow
 import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
-import type {Chart, DataLabels} from 'store/widgets/data/types';
+import type {Chart, DataLabels, WidgetType} from 'store/widgets/data/types';
 import {CHART_TYPES, DATA_LABELS_LIMIT, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
@@ -132,7 +132,7 @@ const getOptions = (widget: Chart, data: DiagramBuildData, container: HTMLDivEle
 	return extend(options, resolveMixin(widget, data, container));
 };
 
-const getChartType = (type: string) => {
+const getChartType = (type: WidgetType) => {
 	const {DONUT, LINE, PIE} = WIDGET_TYPES;
 	const {bar, donut, line, pie} = CHART_TYPES;
 

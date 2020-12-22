@@ -72,14 +72,16 @@ const hasPercent = (set: Object, field: string = FIELDS.indicator) => {
 };
 
 /**
- * Сообщает используется ли в наборе данных виджета метакласс
+ * Сообщает об использовании uuid в лейблах
  * @param {DiagramWidgetDataSet} dataSet - набор данных виджета
  * @param {Array<string>} fields - наименования полей атрибутов
  * @returns {boolean}
  */
-const hasMetaClass = (dataSet: DiagramWidgetDataSet, ...fields: Array<string>) => !!fields.find(field => {
+const hasUUIDsInLabels = (dataSet: DiagramWidgetDataSet, ...fields: Array<string>) => !!fields.find(field => {
 	const {[field]: attribute} = dataSet;
-	return attribute && attribute.type === ATTRIBUTE_TYPES.metaClass;
+	const {backBOLinks, boLinks, metaClass} = ATTRIBUTE_TYPES;
+
+	return attribute && [backBOLinks, boLinks, metaClass].includes(attribute.type);
 });
 
 /**
@@ -188,7 +190,7 @@ export {
 	getDefaultSystemGroup,
 	getLayoutWidgets,
 	hasBreakdown,
-	hasMetaClass,
+	hasUUIDsInLabels,
 	hasMSInterval,
 	hasPercent,
 	isAllowedTopAggregation,

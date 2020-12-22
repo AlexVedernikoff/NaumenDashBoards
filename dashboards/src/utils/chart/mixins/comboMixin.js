@@ -19,7 +19,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';
+import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: number, ctx: Object) => {
@@ -100,13 +100,13 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	const stacked = widget.data.findIndex(dataSet => dataSet.type && dataSet.type === WIDGET_TYPES.COLUMN_STACKED) !== -1;
 	const buildDataSet = getBuildSet(widget);
 	const {showEmptyData} = buildDataSet;
-	let parameterUsesMetaClass = false;
-	let breakdownUsesMetaClass = false;
+	let parameterUsesUUIDs = false;
+	let breakdownUsesUUIDs = false;
 	let maxValue;
 
 	if (buildDataSet) {
-		parameterUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.xAxis);
-		breakdownUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.breakdown);
+		parameterUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.xAxis);
+		breakdownUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.breakdown);
 	}
 
 	if (widget.indicator.showDependent) {
@@ -116,7 +116,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend);
 	const xaxis = {
 		labels: {
-			formatter: axisLabelFormatter(parameterUsesMetaClass)
+			formatter: axisLabelFormatter(parameterUsesUUIDs)
 		},
 		tickPlacement: 'between'
 	};
@@ -134,7 +134,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			}
 		},
 		labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
-		legend: getLegendOptions(legend, container, breakdownUsesMetaClass),
+		legend: getLegendOptions(legend, container, breakdownUsesUUIDs),
 		markers: {
 			hover: {
 				size: 8

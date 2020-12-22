@@ -11,21 +11,21 @@ import {parseMSInterval} from 'store/widgets/helpers';
 import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 /**
- * Возвращает лейбл метакласса, отсекая все лишнее
- * @param {string} value - значение метакласса
+ * Возвращает лейбл без uuid
+ * @param {string} value - исходное значение лейбла
  * @returns {string}
  */
-const getMetaClassLabel = (value: string): string => value.split(META_CLASS_VALUE_SEPARATOR)[0];
+const getLabelWithoutUUID = (value: string): string => value.split(META_CLASS_VALUE_SEPARATOR)[0];
 
-const axisLabelFormatter = (usesMetaClass: boolean) => (value: number | string | Array<string>) => {
+const axisLabelFormatter = (usesUUIDs: boolean) => (value: number | string | Array<string>) => {
 	let label = value;
 
-	if (usesMetaClass) {
+	if (usesUUIDs) {
 		if (Array.isArray(label)) {
 			label = label.join(' ');
 		}
 
-		label = getMetaClassLabel(String(label));
+		label = getLabelWithoutUUID(String(label));
 
 		if (Array.isArray(value)) {
 			label = label.split(' ');
@@ -177,7 +177,7 @@ const legendFormatter = (settings: Legend, container: HTMLDivElement, usesMetaCl
 
 	if (label) {
 		if (usesMetaClass) {
-			label = getMetaClassLabel(label);
+			label = getLabelWithoutUUID(label);
 		}
 
 		if (textHandler === TEXT_HANDLERS.CROP && label.length > length) {
@@ -264,7 +264,7 @@ export {
 	getLegendOptions,
 	getLegendWidth,
 	getMaxValue,
-	getMetaClassLabel,
+	getLabelWithoutUUID,
 	getNiceScale,
 	getXAxisLabels,
 	getXAxisOptions,
