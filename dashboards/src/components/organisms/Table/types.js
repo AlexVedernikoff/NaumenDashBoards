@@ -13,7 +13,7 @@ export type Column = {
 };
 
 export type Row = {
-	[accessor: string]: string | number
+	[accessor: string]: string
 };
 
 export type CellConfigProps = React$Config<CellProps, DefaultCellProps>;

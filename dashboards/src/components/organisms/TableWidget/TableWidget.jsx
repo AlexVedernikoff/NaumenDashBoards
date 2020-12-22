@@ -1,6 +1,5 @@
 // @flow
-import type {AttributeColumn, Column, Props, State} from './types';
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
 	CARD_OBJECT_VALUE_SEPARATOR,
 	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
@@ -8,13 +7,14 @@ import {
 } from 'store/widgets/buildData/constants';
 import {Cell, HeaderCell} from 'components/organisms/Table/components';
 import type {CellConfigProps, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
+import type {Column, Props, State} from './types';
 import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce} from 'src/helpers';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
+import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
@@ -68,13 +68,16 @@ export class TableWidget extends PureComponent<Props, State> {
 			}
 
 			let value = type === BREAKDOWN ? header : rowValue;
-			let subTitle = value;
 
-			if (attribute.type === ATTRIBUTE_TYPES.metaClass) {
-				subTitle = this.getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR);
+			if (value) {
+				let subTitle: string = value;
+
+				if (attribute.type === ATTRIBUTE_TYPES.metaClass) {
+					subTitle = getSeparatedLabel(subTitle, META_CLASS_VALUE_SEPARATOR);
+				}
+
+				mixin.title = `${mixin.title}. ${subTitle}`;
 			}
-
-			mixin.title = `${mixin.title}. ${subTitle}`;
 
 			mixin.filters.push({
 				attribute,
@@ -93,9 +96,6 @@ export class TableWidget extends PureComponent<Props, State> {
 		return row || id === 1 ? row : this.findRow(id - 1, accessor);
 	};
 
-	getSeparatedLabel = (value?: string | number, separator: string): string =>
-		value && typeof value === 'string' ? value.split(separator)[0] : '';
-
 	handleChangeColumnWidth = (columnsRatioWidth: ColumnsRatioWidth) => {
 		const {onUpdate, widget} = this.props;
 		onUpdate({...widget, columnsRatioWidth});
@@ -109,8 +109,8 @@ export class TableWidget extends PureComponent<Props, State> {
 	handleClickDataCell = (e: MouseEvent, props: OnClickCellProps) => {
 		const {column} = props;
 
-		if (this.isIndicatorColumn(column)) {
-			this.isCardObjectColumn(column) ? this.openCardObject(props) : this.drillDown(props);
+		if (isIndicatorColumn(column)) {
+			isCardObjectColumn(column) ? this.openCardObject(props) : this.drillDown(props);
 		}
 	};
 
@@ -132,30 +132,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		}
 	};
 
-	isCardObjectColumn = (column: AttributeColumn): boolean => {
-		let {attribute} = column;
-		let aggregation;
-
-		if (column.type === COLUMN_TYPES.INDICATOR) {
-			({aggregation} = column);
-		}
-
-		if (column.type === COLUMN_TYPES.BREAKDOWN) {
-			({aggregation, attribute} = column.indicator);
-		}
-
-		return this.isIndicatorColumn(column) && aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE
-			&& (attribute.type in ATTRIBUTE_SETS.REFERENCE || attribute.type === ATTRIBUTE_TYPES.string);
-	};
-
 	isGroupColumn = (column: Column): boolean => column.type === COLUMN_TYPES.PARAMETER;
-
-	isIndicatorColumn = (column: AttributeColumn): boolean => {
-		const {type} = column;
-		const {BREAKDOWN, INDICATOR} = COLUMN_TYPES;
-
-		return type === BREAKDOWN || type === INDICATOR;
-	};
 
 	openCardObject = (props: OnClickCellProps) => {
 		const {onOpenCardObject} = this.props;
@@ -169,7 +146,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {type} = column;
 		let Component = Cell;
 
-		if (this.isIndicatorColumn(column)) {
+		if (isIndicatorColumn(column)) {
 			Component = this.renderIndicatorCell;
 		}
 
@@ -189,7 +166,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		let {components, value} = props;
 
 		if (type === BREAKDOWN && attribute.type === ATTRIBUTE_TYPES.metaClass) {
-			value = this.getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR);
+			value = getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR);
 		}
 
 		if (type === INDICATOR && breakdownLimitExceeded && !breakdownLimitIgnored) {
@@ -203,7 +180,7 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	renderIndicatorCell = (props: CellConfigProps) => {
 		const {fontColor, fontStyle} = this.props.widget.table.body.indicatorSettings;
-		const {column, value} = props;
+		const {column, value = ''} = props;
 		const components = {
 			Value: this.renderLinkValue
 		};
@@ -213,11 +190,11 @@ export class TableWidget extends PureComponent<Props, State> {
 			cellValue = parseMSInterval(Number(value));
 		} else if (value && hasPercent(column, FIELDS.attribute)) {
 			cellValue = `${value}%`;
-		} else if (this.isCardObjectColumn(column)) {
-			cellValue = this.getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);
+		} else if (isCardObjectColumn(column)) {
+			cellValue = getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);
 		}
 
-		return <Cell {...props} components={components} fontColor={fontColor} fontStyle={fontStyle} value={cellValue} />;
+		return <Cell {...props} components={components} fontColor={fontColor} fontStyle={fontStyle} value={cellValue.toString()} />;
 	};
 
 	renderIndicatorHeaderValueWithWarning = (props: ValueProps) => (
@@ -243,8 +220,8 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {fontColor, fontStyle} = this.props.widget.table.body.parameterSettings;
 		let {column, value} = props;
 
-		if (column.attribute.type === ATTRIBUTE_TYPES.metaClass) {
-			value = this.getSeparatedLabel(props.value, CARD_OBJECT_VALUE_SEPARATOR);
+		if (column.attribute.type === ATTRIBUTE_TYPES.metaClass && typeof value === 'string') {
+			value = getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);
 		}
 
 		return (

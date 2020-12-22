@@ -57,7 +57,7 @@ type LimitsExceeded = {
 };
 
 type Row = {
-	[accessor: string]: string | number
+	[accessor: string]: string
 };
 
 export type Data = {
