@@ -14,7 +14,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasMetaClass, hasPercent} from 'store/widgets/helpers';
+import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -31,9 +31,9 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 
 	if (buildDataSet) {
 		const {showEmptyData} = buildDataSet;
-		const parameterUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.xAxis);
-		const breakdownUsesMetaClass = hasMetaClass(buildDataSet, FIELDS.breakdown);
-		const usesMetaClass = breakdownUsesMetaClass || parameterUsesMetaClass;
+		const parameterUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.xAxis);
+		const breakdownUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.breakdown);
+		const usesUUIDs = parameterUsesUUIDs || breakdownUsesUUIDs;
 		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
 		const usesPercent = hasPercent(buildDataSet, FIELDS.yAxis);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
@@ -44,13 +44,13 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 
 		let xaxis = {
 			labels: {
-				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesMetaClass)
+				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesUUIDs)
 			}
 		};
 		let yaxis = {
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
-				formatter: horizontal ? axisLabelFormatter(usesMetaClass) : valueFormatter(usesMSInterval, usesPercent)
+				formatter: horizontal ? axisLabelFormatter(usesUUIDs) : valueFormatter(usesMSInterval, usesPercent)
 			}
 		};
 
@@ -68,7 +68,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 				}
 			},
 			labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
-			legend: getLegendOptions(legend, container, breakdownUsesMetaClass),
+			legend: getLegendOptions(legend, container, breakdownUsesUUIDs),
 			markers: {
 				hover: {
 					size: 8
@@ -89,7 +89,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 				y: {
 					formatter: valueFormatter(usesMSInterval, usesPercent && !stacked),
 					title: {
-						formatter: axisLabelFormatter(usesMetaClass)
+						formatter: axisLabelFormatter(breakdownUsesUUIDs)
 					}
 				}
 			},
