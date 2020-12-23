@@ -113,12 +113,9 @@ export class SubGroup extends PureComponent<Props> {
 		const {name} = this.props.subGroup;
 
 		return (
-			<TextInput
-				className={styles.nameInput}
-				maxLength={MAX_TEXT_LENGTH}
-				onChange={this.handleChangeName}
-				value={name}
-			/>
+			<div className={styles.nameInput}>
+				<TextInput maxLength={MAX_TEXT_LENGTH} onChange={this.handleChangeName} value={name} />
+			</div>
 		);
 	};
 
