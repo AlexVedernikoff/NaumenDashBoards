@@ -5,6 +5,7 @@ import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constant
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {isObject} from 'src/helpers';
 import type {YupType} from 'containers/WidgetEditForm/types';
 
 const getErrorMessage = (key: string) => {
@@ -34,7 +35,7 @@ const validateAttribute = (value: Attribute | null) => {
 		attribute = attribute.ref;
 	}
 
-	return !!attribute;
+	return isObject(attribute);
 };
 
 const base = {
@@ -56,7 +57,7 @@ const base = {
  * @param {string} text - текст сообщения
  * @returns {*}
  */
-const requiredAttribute = (text: string) => object().test(
+const requiredAttribute = (text: string) => mixed().test(
 	'required-attribute',
 	text,
 	validateAttribute
@@ -133,7 +134,7 @@ const computedBreakdownRule = (value: any) => lazy((attribute: Attribute | null,
 const requiredBreakdown = (indicatorName: string) => lazy((value: mixed, context: Object) => {
 	const indicator = context.parent[indicatorName];
 
-	if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+	if ((indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR)) {
 		return array().of(object({
 			value: computedBreakdownRule(value)
 		}));
