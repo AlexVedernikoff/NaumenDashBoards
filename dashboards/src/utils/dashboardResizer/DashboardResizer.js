@@ -60,8 +60,7 @@ export class DashboardResizer {
 	 */
 	scrollByValidParentScrollHeight = (x: number, y: number, parent: HTMLElement, attemptCount: number = 0) => {
 		if (parent.scrollHeight >= y) {
-			const {scrollTo} = parent;
-			typeof scrollTo === 'function' && scrollTo(x, y);
+			parent.scrollTo && parent.scrollTo(x, y);
 		} else if (attemptCount < 5) {
 			setTimeout(() => this.scrollByValidParentScrollHeight(x, y, parent), 1000, attemptCount + 1);
 		}
