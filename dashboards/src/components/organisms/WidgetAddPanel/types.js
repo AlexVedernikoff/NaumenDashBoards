@@ -1,4 +1,10 @@
 // @flow
+
+type InvalidCopyData = {
+	dashboardId: string,
+	widgetId: string
+};
+
 export type State = {
-	invalidWidgetId: string
+	invalidCopyData: InvalidCopyData | null
 };

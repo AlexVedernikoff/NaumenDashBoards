@@ -3,7 +3,7 @@ import {array, object} from 'yup';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
-import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {getSummaryLayoutSize} from './helpers';
 import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
@@ -20,7 +20,7 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 	};
 
 	getSchema = () => {
-		const {base, requiredByCompute, validateSources} = rules;
+		const {base, requiredByCompute} = rules;
 		const {indicator, source, sources} = FIELDS;
 
 		return object({
@@ -29,7 +29,7 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 				[indicator]: requiredByCompute(indicator),
 				[source]: object().required(getErrorMessage(source)).nullable()
 			})),
-			[sources]: validateSources
+			[sources]: mixed().minSourceNumbers().sourceNumbers()
 		});
 	};
 

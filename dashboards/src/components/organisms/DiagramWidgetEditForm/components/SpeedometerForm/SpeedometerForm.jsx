@@ -4,7 +4,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
-import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
 import {ParamsTab, StyleTab} from './components';
@@ -15,7 +15,7 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class SpeedometerForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredByCompute, validateSources} = rules;
+		const {base, requiredByCompute} = rules;
 		const {borders, indicator, source, sources} = FIELDS;
 
 		return object({
@@ -37,7 +37,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 				),
 				[source]: object().required(getErrorMessage(source)).nullable()
 			})),
-			[sources]: validateSources
+			[sources]: mixed().minSourceNumbers().sourceNumbers()
 		});
 	};
 

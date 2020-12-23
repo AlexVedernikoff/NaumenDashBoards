@@ -20,7 +20,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class WidgetAddPanel extends Component<Props, State> {
 	state = {
-		invalidWidgetId: ''
+		invalidCopyData: null
 	};
 
 	addDiagramWidget = () => {
@@ -35,7 +35,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 	addWidget = (widget?: NewWidget) => widget && this.props.addWidget(widget);
 
-	handleCloseModal = () => this.setState({invalidWidgetId: ''});
+	handleCloseModal = () => this.setState({invalidCopyData: null});
 
 	handleFocusSearchInput = () => {
 		const {dashboards, fetchDashboards} = this.props;
@@ -44,25 +44,34 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 	handleSelect = async (item: Value) => {
 		const {copyWidget, validateWidgetToCopy} = this.props;
-		const {value: widgetId} = item;
+		const {parent, value: widgetId} = item;
 
-		if (item.parent) {
-			const isValid = await validateWidgetToCopy(widgetId);
+		if (parent) {
+			const {value: dashboardId} = parent;
+			const isValid = await validateWidgetToCopy(dashboardId, widgetId);
 
 			if (!isValid) {
-				return this.setState({invalidWidgetId: widgetId});
+				return this.setState({
+					invalidCopyData: {
+						dashboardId,
+						widgetId
+					}
+				});
 			}
 
-			copyWidget(widgetId);
+			copyWidget(dashboardId, widgetId);
 		}
 	};
 
 	handleSubmitModal = () => {
 		const {copyWidget} = this.props;
-		const {invalidWidgetId} = this.state;
+		const {invalidCopyData} = this.state;
 
-		this.setState({invalidWidgetId: ''});
-		copyWidget(invalidWidgetId);
+		if (invalidCopyData) {
+			const {dashboardId, widgetId} = invalidCopyData;
+			this.setState({invalidCopyData: null});
+			copyWidget(dashboardId, widgetId);
+		}
 	};
 
 	renderCancelButton = () => null;
@@ -89,9 +98,9 @@ export class WidgetAddPanel extends Component<Props, State> {
 	};
 
 	renderModal = () => {
-		const {invalidWidgetId} = this.state;
+		const {invalidCopyData} = this.state;
 
-		if (invalidWidgetId) {
+		if (invalidCopyData) {
 			return (
 				<Modal
 					header="Подтверждение копирования"

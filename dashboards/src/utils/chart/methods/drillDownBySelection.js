@@ -100,7 +100,7 @@ const addBreakdownFilter = (dataSet: DataSet, value: string, mixin: DrillDownMix
  */
 const addAxisChartFilters = (widget: AxisWidget, props: AddFiltersProps): ReturnsAddFiltersData => {
 	const {buildData, config, mixin} = props;
-	const {categories, series} = buildData;
+	const {labels, series} = buildData;
 	const {dataPointIndex, seriesIndex} = config;
 	const {data} = widget;
 	const index = data.findIndex(dataSet => !dataSet.sourceForCompute);
@@ -111,7 +111,7 @@ const addAxisChartFilters = (widget: AxisWidget, props: AddFiltersProps): Return
 		const {aggregation, yAxis: attribute} = dataSet;
 
 		newMixin.filters.push({aggregation, attribute});
-		newMixin = addParameterFilter(dataSet, categories[dataPointIndex], newMixin);
+		newMixin = addParameterFilter(dataSet, labels[dataPointIndex], newMixin);
 		newMixin = addBreakdownFilter(dataSet, series[seriesIndex].name, newMixin);
 	}
 

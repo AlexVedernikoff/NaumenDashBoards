@@ -6,7 +6,7 @@ import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/co
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {getErrorMessage, rules} from 'DiagramWidgetEditForm/schema';
+import {getErrorMessage, mixed, rules} from 'DiagramWidgetEditForm/schema';
 import {getLegendSettings} from 'utils/chart/helpers';
 import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/axisNormalizer';
@@ -17,7 +17,7 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class AxisChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, parameterRule, requiredByCompute, validateSources, validateTopSettings} = rules;
+		const {base, parameterRule, requiredByCompute, validateTopSettings} = rules;
 		const {breakdown, source, sources, top, xAxis, yAxis} = FIELDS;
 
 		return object({
@@ -29,7 +29,7 @@ export class AxisChartForm extends Component<TypedFormProps> {
 				[xAxis]: parameterRule(xAxis),
 				[yAxis]: requiredByCompute(yAxis)
 			})),
-			[sources]: validateSources
+			[sources]: mixed().minSourceNumbers().sourceNumbers()
 		});
 	};
 

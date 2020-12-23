@@ -5,7 +5,7 @@ import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {DEFAULT_CIRCLE_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
-import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/circleNormalizer';
 import {ParamsTab, StyleTab} from './components';
@@ -15,7 +15,7 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class CircleChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredBreakdown, requiredByCompute, validateSources, validateTopSettings} = rules;
+		const {base, requiredBreakdown, requiredByCompute, validateTopSettings} = rules;
 		const {breakdown, indicator, source, sources, top} = FIELDS;
 
 		return object({
@@ -26,7 +26,7 @@ export class CircleChartForm extends Component<TypedFormProps> {
 				[source]: object().required(getErrorMessage(source)).nullable(),
 				[top]: validateTopSettings
 			})),
-			[sources]: validateSources
+			[sources]: mixed().minSourceNumbers().sourceNumbers()
 		});
 	};
 

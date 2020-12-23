@@ -1,12 +1,11 @@
 // @flow
-import {array, lazy, mixed, number, object, string} from 'yup';
+import {addMethod, array, lazy, mixed, number, object, string} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {isObject} from 'src/helpers';
-import type {YupType} from 'containers/WidgetEditForm/types';
 
 const getErrorMessage = (key: string) => {
 	const messages = {
@@ -134,7 +133,7 @@ const computedBreakdownRule = (value: any) => lazy((attribute: Attribute | null,
 const requiredBreakdown = (indicatorName: string) => lazy((value: mixed, context: Object) => {
 	const indicator = context.parent[indicatorName];
 
-	if ((indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR)) {
+	if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 		return array().of(object({
 			value: computedBreakdownRule(value)
 		}));
@@ -172,28 +171,25 @@ const requiredByCompute = (key: string, rule: Object) => {
 	}).nullable();
 };
 
-const testSourcesNumber = (type: YupType) => type.when(FIELDS.data, {
-	is: data => data.length > 1,
-	then: mixed().test(
+addMethod(mixed, 'sourceNumbers', function () {
+	return this.test(
 		'check-sources-number',
 		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
 		function () {
 			const {data} = this.options.parent;
 			return data.filter(dataSet => !dataSet.sourceForCompute).length === 1;
-		})
+	});
 });
 
-const testMinSourcesNumber = (type: YupType) => type.test(
-	'check-min-sources-number',
-	'Должен быть выбран как минимум один источник для построения',
-	function () {
-		const {data} = this.options.parent;
-		return data.filter(dataSet => !dataSet.sourceForCompute).length > 0;
+addMethod(mixed, 'minSourceNumbers', function () {
+	return this.test(
+		'check-min-source-numbers',
+		'Должен быть выбран как минимум один источник для построения',
+		function () {
+			const {data} = this.options.parent;
+			return data.filter(dataSet => !dataSet.sourceForCompute).length > 0;
+		});
 });
-
-const validateSources = testSourcesNumber(
-	testMinSourcesNumber(mixed())
-);
 
 const validateTopSettings = object({
 	count: number().required('Укажите значение ТОП').typeError('Значение ТОП должно быть числом')
@@ -206,12 +202,11 @@ const rules = {
 	requiredAttribute,
 	requiredBreakdown,
 	requiredByCompute,
-	testMinSourcesNumber,
-	validateSources,
 	validateTopSettings
 };
 
 export {
 	getErrorMessage,
-	rules
+	rules,
+	mixed
 };

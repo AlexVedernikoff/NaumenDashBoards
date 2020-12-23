@@ -1,11 +1,11 @@
 // @flow
-import {array, mixed, object} from 'yup';
+import {array, object} from 'yup';
 import {checkSourceForParent, getDefaultIndicator, getDefaultParameter} from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
-import {getErrorMessage, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {navigationSettings} from 'utils/normalizer/widget/helpers';
 import {normalizeDataSet} from 'utils/normalizer/widget/tableNormalizer';
 import {ParamsTab, StyleTab} from './components';
@@ -16,7 +16,7 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class TableForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, testMinSourcesNumber, validateTopSettings} = rules;
+		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, validateTopSettings} = rules;
 		const {breakdown, indicator, indicators, parameter, parameters, source, sources, top} = FIELDS;
 
 		return object({
@@ -37,7 +37,7 @@ export class TableForm extends Component<TypedFormProps> {
 						checkSourceForParent
 					)
 			})),
-			[sources]: testMinSourcesNumber(mixed()),
+			[sources]: mixed().minSourceNumbers(),
 			[top]: validateTopSettings
 		});
 	};

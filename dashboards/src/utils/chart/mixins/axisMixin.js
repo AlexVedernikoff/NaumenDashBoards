@@ -26,7 +26,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
 	const {indicator, legend, parameter, type} = widget;
-	const {categories: labels} = chart;
+	const {labels} = chart;
 	const buildDataSet = getBuildSet(widget);
 
 	if (buildDataSet) {

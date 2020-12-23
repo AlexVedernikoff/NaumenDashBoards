@@ -152,10 +152,11 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
 
 /**
  * Копирует виджет
- * @param {string} widgetId - идентификатор виджета
+ * @param {string} dashboardKey - идентификатор дашборда
+ * @param {string} widgetKey - идентификатор виджета
  * @returns {ThunkAction}
  */
-const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch({
 		type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
 	});
@@ -165,7 +166,8 @@ const copyWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch)
 
 		const payload = {
 			...getParams(),
-			widgetKey: widgetId
+			dashboardKey,
+			widgetKey
 		};
 		const data = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
 		const widget = normalizer.widget(data);
@@ -248,10 +250,11 @@ const getErrors = (error: ResponseError) => {
 
 /**
  * Проверяет является ли выбранный виджет валидным для копирования
- * @param {string} widgetKey - id виджета
+ * @param {string} dashboardKey - идентификатор дашборда
+ * @param {string} widgetKey - идентификатор виджета
  * @returns {ThunkAction}
  */
-const validateWidgetToCopy = (widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<boolean> => {
+const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<boolean> => {
 	let isValid = true;
 
 	dispatch({
@@ -261,6 +264,7 @@ const validateWidgetToCopy = (widgetKey: string): ThunkAction => async (dispatch
 	try {
 		const payload = {
 			...getParams(),
+			dashboardKey,
 			widgetKey
 		};
 
