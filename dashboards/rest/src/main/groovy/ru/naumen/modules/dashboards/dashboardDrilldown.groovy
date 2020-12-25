@@ -236,13 +236,18 @@ class Link
                 def contextValue = filter.findResults { map ->
                     def group = map.group as Map
                     def value = map.value
+                    def aggregation = map.aggregation
+                    if (aggregation)
+                    {
+                        result << [filterBuilder.OR(attr.code, 'notNull', null)]
+                        return null
+                    }
                     String groupWay = group.way
                     GroupType groupType = groupWay.toLowerCase() == 'system'
                         ? attributeType == AttributeType.DT_INTERVAL_TYPE ? GroupType.OVERLAP :
                         group.data as GroupType
                         : null
-                    String format =
-                        attributeType == AttributeType.DT_INTERVAL_TYPE ? group.data : group.format
+                    String format = attributeType == AttributeType.DT_INTERVAL_TYPE ? group.data : group.format
                     def returnValue = null
                     if (groupType)
                     {
@@ -267,7 +272,7 @@ class Link
                 def customSubGroupSet = filter.findResults { map ->
                     def group = map.group as Map
                     String value = map.value
-                    if (group.way.toLowerCase() == 'custom')
+                    if (!map.aggregation && group.way.toLowerCase() == 'custom')
                     {
                         def customGroup = group.data as Map
                         def subGroupSet = customGroup.subGroups as Collection
