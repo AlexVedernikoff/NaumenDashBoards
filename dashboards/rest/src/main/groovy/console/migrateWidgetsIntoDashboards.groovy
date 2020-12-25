@@ -57,6 +57,7 @@ void deleteValuesInOldNameSpaces(List valuesIds, String namespace)
 List dashboardKeys = getDashboardKeys(DASHBOARD_NAMESPACE)
 
 dashboardKeys.each { dashboardKey ->
+    def slurper = new groovy.json.JsonSlurper()
     def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
     dashboardSettings = dashboardSettings ? slurper.parseText(dashboardSettings) : null
 
@@ -76,7 +77,7 @@ dashboardKeys.each { dashboardKey ->
         return api.keyValue.get(CUSTOM_GROUP_NAMESPACE, customGroupKey)
     }
 
-    if(api.keyValue.put(DASHBOARD_NAMESPACE, dashboardKey, dashboardSettings))
+    if(api.keyValue.put(DASHBOARD_NAMESPACE, dashboardKey, toJson(dashboardSettings)))
     {
         logger.info(
             "dashboard with dashboardKey ${dashboardKey} was updated successfully"

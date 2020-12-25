@@ -770,7 +770,6 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
             dynamicGroup = mappingDynamicAttributeCustomGroup(aggregationParameter.attribute)
             dynamicGroup.subGroups*.name = aggregationParameter.attribute.title
         }
-        def res = new RequestData(source: source, aggregations: [aggregationParameter])
 
         def comp = indicator?.stringForCompute?.with {
             def compData = indicator.computeData as Map
@@ -790,6 +789,8 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
         }
         String attributeTitle = indicator?.title
         FilterList dynamicFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
+        source.filterList = [dynamicFilter]
+        def res = new RequestData(source: source, aggregations: [aggregationParameter])
         def requisite
         if (data.sourceForCompute)
         {
@@ -804,7 +805,7 @@ private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestC
                 formula: comp.formula
             )
                 : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: key)
-            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], filterList: [dynamicFilter], showNulls: true)
+            requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], showNulls: true)
         }
 
         [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite:
@@ -2731,7 +2732,7 @@ Map<String, Object> getInfoAboutFilters(String dataKey, DiagramRequest request)
 {
     def filterList = request.data[dataKey].source.filterList.grep()
     Integer filterListSize = filterList.filters.grep().size()
-    Map parameterInfo = filterList.find {
+    def parameterInfo = filterList.find {
         it.place == 'parameter'
     }
 
