@@ -395,7 +395,6 @@ class Requisite
 {
     String title
     Collection<RequisiteNode> nodes
-    Collection<FilterList> filterList
     Boolean showNulls
     Integer top
 }
@@ -429,6 +428,7 @@ class Source
 {
     String classFqn
     String descriptor
+    Collection<FilterList> filterList
 }
 
 abstract class Parameter<T>
