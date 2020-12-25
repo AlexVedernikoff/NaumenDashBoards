@@ -181,7 +181,7 @@ String getAttributeObject(Map requestContent)
     String sourceCode = requestContent.sourceCode
     String attributeCode = requestContent.attribute.code
     //получили списки типов
-    List types = api.metainfo.getMetaClass(sourceCode).getAttribute(attributeCode).type.attributeType.permittedTypes.toList()
+    List types = getAttributeTypes(attributeCode, sourceCode)
     def count = requestContent.count as int
     def offset = requestContent.offset as int
     def condition = removed ? [:] : [removed: false]
@@ -189,7 +189,7 @@ String getAttributeObject(Map requestContent)
     //на первом месте стоит тип, по которому будут искаться значения
     def intermediateData = uuid ?: types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }.unique { it.find() }
     List values = uuid
-        ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }
+        ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }.unique { it?.UUID }
         : getObjects(intermediateData, count, offset)
 
     types = uuid ? types : intermediateData*.find()
@@ -203,6 +203,65 @@ String getAttributeObject(Map requestContent)
         ]
     }
     return toJson(result)
+}
+
+/**
+ * Метод по получению списка типов атрибута
+ * @param attributeCode - код атрибута
+ * @param sourceCode - источник атрибута
+ * @return типы атрибута
+ */
+List getAttributeTypes(String attributeCode, String sourceCode)
+{
+    return api.metainfo.getMetaClass(sourceCode).getAttribute(attributeCode).type.attributeType.permittedTypes.toList()
+}
+
+/**
+ * Метод асинхронного поиска значения на всех уровнях
+ * @param requestContent - тело запроса
+ * @return объекты с таким значением
+ */
+String searchValue(Map requestContent)
+{
+    String sourceCode = requestContent.sourceCode
+    String attributeCode = requestContent.attribute.code
+    def value = requestContent.value
+
+    def context = api.attrs.definePossibleValues().searchString(value)
+    def results = api.attrs.listPossibleValues(attributeCode, [metaClass: sourceCode], context).results
+
+    return toJson(getValues(results, sourceCode))
+}
+
+/**
+ * Метод формирования стандартной мапы
+ * @param title - название для мапы
+ * @param uuid - uuid для мапы
+ * @param property - property для мапы
+ * @param children - список детей
+ * @return базовая мапа
+ */
+Map basicMap(String title, String uuid, String property, List children = [])
+{
+    return [
+        title   : title,
+        uuid    : uuid,
+        property: property,
+        children: children
+    ] as Map
+}
+
+/**
+ * Метод по преобразованию списка значений к списку типовых мап
+ * @param values - список значений
+ * @param sourceCode - код источника атрибута
+ * @return списку типовых мап [title: it.title, uuid: it.uuid, children: it.children]
+ */
+List getValues(List values, String sourceCode)
+{
+    return values.collect {
+        return basicMap(it.title, it.uuid, sourceCode, getValues(it.children, sourceCode))
+    }
 }
 
 String getCatalogObject(Map requestContent)
