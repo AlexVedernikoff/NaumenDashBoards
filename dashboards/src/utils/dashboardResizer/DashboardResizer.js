@@ -26,10 +26,10 @@ export class DashboardResizer {
 		let isFullSize = true;
 
 		if (window.parent) {
-			const {innerHeight: parentHeight, innerWidth: parentWidth} = window.parent;
-			const {innerHeight, innerWidth} = window;
+			const {innerHeight: parentHeight} = window.parent;
+			const {innerHeight} = window;
 
-			isFullSize = parentHeight === innerHeight && parentWidth === innerWidth;
+			isFullSize = parentHeight >= innerHeight && innerHeight !== this.initHeight;
 		}
 
 		return isFullSize;
