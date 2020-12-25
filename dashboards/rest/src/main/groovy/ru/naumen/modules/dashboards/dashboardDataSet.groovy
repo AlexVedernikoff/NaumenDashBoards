@@ -32,7 +32,7 @@ class StandardDiagram
     /**
      * список значений для оси x
      */
-    Collection<Object> categories = []
+    Collection<Object> labels = []
     /**
      * список значений Series
      */
@@ -2976,32 +2976,35 @@ private StandardDiagram mappingStandardDiagram(List list, String legendName, Boo
         case 2:
             def (aggregationResult, groupResult) = transposeDataSet
             def series = [new Series(name: legendName, data: aggregationResult as List)]
-            return new StandardDiagram(categories: groupResult, series: series)
+            return new StandardDiagram(labels: groupResult, series: series)
         case 3:
             def (groupResult, breakdownResult) = transposeDataSet.tail()
-            def categories = groupResult?.findAll() as Set
+            def labels = groupResult?.findAll() as Set
             StandardDiagram standardDiagram = new StandardDiagram()
-            if (reverseGroups) {
+            if (reverseGroups)
+            {
                 def series = (breakdownResult?.findAll() as Set)
-                def categoriesForDiagram = breakdownResult?.findAll() as Set
-                def seriesForDiagram = categories.collect { categoriesValue ->
+                def labelsForDiagram = breakdownResult?.findAll() as Set
+                def seriesForDiagram = labels.collect { labelsValue ->
                     def data = series.collect {
                         seriesValue ->
                             (list.head() as List<List>).findResult { el->
-                                el.tail() == [categoriesValue, seriesValue] ? el.head() : null
+                                el.tail() == [labelsValue, seriesValue] ? el.head() : null
                             } ?: 0
                     }
-                    new Series(name: categoriesValue, data: data)
+                    new Series(name: labelsValue, data: data)
                 }
                 standardDiagram = new StandardDiagram(
-                    categories: categoriesForDiagram,
+                    labels: labelsForDiagram,
                     series: seriesForDiagram
                 )
-            } else {
+            }
+            else
+            {
                 def series = (breakdownResult as Set).findResults { breakdownValue ->
                     if(breakdownValue)
                     {
-                        def data = categories.collect { groupValue ->
+                        def data = labels.collect { groupValue ->
                             (list.head() as List<List>).findResult { el ->
                                 el.tail() == [groupValue, breakdownValue] ? el.head() : null
                             } ?: 0
@@ -3009,7 +3012,7 @@ private StandardDiagram mappingStandardDiagram(List list, String legendName, Boo
                         return new Series(name: breakdownValue, data: data)
                     }
                 }
-                standardDiagram = new StandardDiagram(categories: categories, series: series)
+                standardDiagram = new StandardDiagram(labels: labels, series: series)
             }
             return standardDiagram
         default: throw new IllegalArgumentException("Invalid format result data set")
