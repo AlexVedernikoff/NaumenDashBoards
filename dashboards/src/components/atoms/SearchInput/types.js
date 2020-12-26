@@ -5,13 +5,23 @@ export type ForwardedRef = {
 	current: null | ElementRef<'input'>
 };
 
-export type Props = {
+export type DefaultProps = {|
 	className: string,
 	forwardedRef: ForwardedRef,
-	onChange: (value: string) => void,
-	onFocus?: (e: SyntheticInputEvent<HTMLInputElement>) => void,
 	value: string
+|};
+
+export type RequiredProps = {
+	onChange: (value: string) => void,
+	onFocus?: (e: SyntheticInputEvent<HTMLInputElement>) => void
 };
+
+export type Props = {
+	...RequiredProps,
+	...DefaultProps
+};
+
+export type ComponentProps = React$Config<Props, DefaultProps>;
 
 export type State = {
 	value: string

@@ -1,10 +1,16 @@
 // @flow
+import type {ComponentProps as SearchInputComponentProps} from 'components/atoms/SearchInput/types';
 import type {NodeValue, Tree} from './components/Tree/types';
 
 export type Value = Object;
 
+export type Components = {
+	SearchInput: React$ComponentType<SearchInputComponentProps>;
+};
+
 export type Props = {
 	async: boolean,
+	components?: $Shape<Components>,
 	getOptionLabel?: (option: NodeValue) => string,
 	getOptionValue?: (option: NodeValue) => any,
 	isEnabledNode?: NodeValue => boolean,
@@ -22,6 +28,8 @@ export type Props = {
 };
 
 export type State = {
+	components: Components,
 	optionsLoaded: boolean,
+	searchValue: string,
 	showMenu: boolean
 };

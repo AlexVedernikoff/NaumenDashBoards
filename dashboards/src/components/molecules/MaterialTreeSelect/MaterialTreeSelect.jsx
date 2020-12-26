@@ -1,9 +1,9 @@
 // @flow
-import {Menu} from 'components/molecules/Select/components';
+import type {Components, Props, State} from './types';
+import {debounce} from 'src/helpers';
 import {MultiValueContainer, ValueContainer} from 'components/molecules/MaterialSelect/components';
 import type {Node} from './components/Tree/types';
-import {OutsideClickDetector} from 'components/atoms';
-import type {Props, State} from './types';
+import {OutsideClickDetector, SearchInput} from 'components/atoms';
 import React, {Component} from 'react';
 import styles from './styles.less';
 import {Tree} from './components';
@@ -20,9 +20,20 @@ export class MaterialTreeSelect extends Component<Props, State> {
 	};
 
 	state = {
+		components: this.getExtendedComponents(this.props),
 		optionsLoaded: false,
+		searchValue: '',
 		showMenu: false
 	};
+
+	getExtendedComponents (props: Props): Components {
+		const {components: customComponents} = props;
+		const components = {
+			SearchInput
+		};
+
+		return customComponents ? {...components, ...customComponents} : components;
+	}
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
@@ -45,6 +56,8 @@ export class MaterialTreeSelect extends Component<Props, State> {
 
 		return value;
 	};
+
+	handleChangeSearchInput = (searchValue: string) => this.setState({searchValue});
 
 	handleClickValueContainer = () => {
 		const {async, onLoad} = this.props;
@@ -70,8 +83,9 @@ export class MaterialTreeSelect extends Component<Props, State> {
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderList = (searchValue: string) => {
+	renderList = () => {
 		const {isEnabledNode, loading, multiple, onLoad, options, showMore, value, values} = this.props;
+		const {searchValue} = this.state;
 
 		return (
 			<Tree
@@ -93,7 +107,17 @@ export class MaterialTreeSelect extends Component<Props, State> {
 
 	renderMenu = () => {
 		const {showMenu} = this.state;
-		return showMenu && <Menu className={styles.tree} renderList={this.renderList} />;
+
+		if (showMenu) {
+			return (
+				<div className={styles.menu}>
+					{this.renderSearchInput()}
+					{this.renderList()}
+				</div>
+			);
+		}
+
+		return null;
 	};
 
 	renderMultiValueContainer = () => {
@@ -109,6 +133,13 @@ export class MaterialTreeSelect extends Component<Props, State> {
 				values={values}
 			/>
 		);
+	};
+
+	renderSearchInput = () => {
+		const {components, searchValue} = this.state;
+		const {SearchInput} = components;
+
+		return <SearchInput onChange={debounce(this.handleChangeSearchInput, 1000)} value={searchValue} />;
 	};
 
 	renderSimpleValueContainer = () => {

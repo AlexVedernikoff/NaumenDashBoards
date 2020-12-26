@@ -4,7 +4,8 @@ import {OBJECTS_EVENTS} from './constants';
 
 export const initialObjectsState: ObjectsState = {
 	actual: {},
-	all: {}
+	all: {},
+	found: {}
 };
 
 export const defaultObjectsAction: ObjectsAction = {

@@ -1,11 +1,48 @@
 // @flow
+import {createObjectData, receiveObjectData, recordObjectError, requestObjectData} from './helpers';
 import {defaultObjectsAction, initialObjectsState} from './init';
 import type {ObjectsAction, ObjectsState} from './types';
 import {OBJECTS_EVENTS} from './constants';
-import {receiveObjectData, recordObjectError, requestObjectData} from './helpers';
 
 const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsAction = defaultObjectsAction): ObjectsState => {
 	switch (action.type) {
+		case OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED:
+			return {
+				...state,
+				found: {
+					...state.found,
+					[action.payload.id]: {
+						...state.found[action.payload.id],
+						items: action.payload.items,
+						loading: false,
+						uploaded: true
+					}
+				}
+			};
+		case OBJECTS_EVENTS.FOUND_OBJECTS_PENDING:
+			return {
+				...state,
+				found: {
+					...state.found,
+					[action.payload.id]: {
+						...createObjectData(),
+						searchValue: action.payload.searchValue
+					}
+				}
+			};
+		case OBJECTS_EVENTS.FOUND_OBJECT_REJECTED:
+			return {
+				...state,
+				...state,
+				found: {
+					...state.found,
+					[action.payload]: {
+						...state.found[action.payload],
+						error: true,
+						loading: false
+					}
+				}
+			};
 		case OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA:
 			return {
 				...state,
