@@ -15,17 +15,19 @@ import type {ThunkAction} from 'store/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
- * Добавляет фильтр
+ * Добавляет фильтр группировки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @param {AddFilterProps} props - данные для нового фильтра
  * @returns {DrillDownMixin}
  */
-const addFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDownMixin => {
+const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDownMixin => {
 	const {attribute, group, subTitle, value} = props;
-	let newMixin = deepClone(mixin);
+	let newMixin = mixin;
 
 	if (attribute && group) {
-		if (value) {
+		newMixin = deepClone(mixin);
+
+		if (subTitle) {
 			newMixin.title = `${mixin.title}. ${subTitle}`;
 		}
 
@@ -45,7 +47,7 @@ const addFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDownMixin
 const addParameterFilter = (dataSet: DataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const subTitle = hasUUIDsInLabels(dataSet, FIELDS.xAxis) ? getLabelWithoutUUID(value) : value;
 
-	return addFilter(mixin, {
+	return addGroupFilter(mixin, {
 		attribute: dataSet[FIELDS.xAxis],
 		group: transformGroupFormat(dataSet[FIELDS.group]),
 		subTitle,
@@ -69,7 +71,7 @@ const addBreakdownFilter = (dataSet: DataSet, value: string, mixin: DrillDownMix
 		const breakdownSet = breakdown.find(attrSet => attrSet[FIELDS.dataKey] === dataSet.dataKey);
 
 		if (breakdownSet) {
-			newMixin = addFilter(mixin, {
+			newMixin = addGroupFilter(mixin, {
 				attribute: breakdownSet.value,
 				group: transformGroupFormat(breakdownSet.group),
 				subTitle,
@@ -77,7 +79,7 @@ const addBreakdownFilter = (dataSet: DataSet, value: string, mixin: DrillDownMix
 			});
 		}
 	} else {
-		newMixin = addFilter(mixin, {
+		newMixin = addGroupFilter(mixin, {
 			attribute: breakdown,
 			group: transformGroupFormat(dataSet[FIELDS.breakdownGroup]),
 			mixin,
@@ -102,11 +104,13 @@ const addAxisChartFilters = (widget: AxisWidget, props: AddFiltersProps): Return
 	const {dataPointIndex, seriesIndex} = config;
 	const {data} = widget;
 	const index = data.findIndex(dataSet => !dataSet.sourceForCompute);
+	const dataSet = data[index];
 	let newMixin = mixin;
 
-	if (index !== -1) {
-		const dataSet = data[index];
+	if (dataSet && !dataSet.sourceForCompute) {
+		const {aggregation, yAxis: attribute} = dataSet;
 
+		newMixin.filters.push({aggregation, attribute});
 		newMixin = addParameterFilter(dataSet, categories[dataPointIndex], newMixin);
 		newMixin = addBreakdownFilter(dataSet, series[seriesIndex].name, newMixin);
 	}
@@ -127,11 +131,13 @@ const addComboChartFilters = (widget: ComboWidget, props: AddFiltersProps): Retu
 	const {dataPointIndex, seriesIndex} = config;
 	const {data} = widget;
 	const index = data.findIndex(dataSet => dataSet.dataKey === buildData.series[config.seriesIndex].dataKey);
+	const dataSet = widget.data[index];
 	let newMixin = mixin;
 
-	if (index !== -1) {
-		const dataSet = widget.data[index];
+	if (dataSet && !dataSet.sourceForCompute) {
+		const {aggregation, yAxis: attribute} = dataSet;
 
+		newMixin.filters.push({aggregation, attribute});
 		newMixin = addParameterFilter(dataSet, labels[dataPointIndex], newMixin);
 		newMixin = addBreakdownFilter(dataSet, series[seriesIndex].name, newMixin);
 	}
@@ -151,9 +157,13 @@ const addCircleChartFilters = (widget: CircleWidget, props: AddFiltersProps): Re
 	const {dataPointIndex} = config;
 	const {data} = widget;
 	const index = data.findIndex(dataSet => !dataSet.sourceForCompute);
+	const dataSet = widget.data[index];
 	let newMixin = mixin;
 
-	if (index !== -1) {
+	if (dataSet && !dataSet.sourceForCompute) {
+		const {aggregation, indicator: attribute} = dataSet;
+
+		newMixin.filters.push({aggregation, attribute});
 		newMixin = addBreakdownFilter(data[index], buildData.labels[dataPointIndex], newMixin);
 	}
 

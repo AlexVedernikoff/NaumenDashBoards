@@ -50,14 +50,17 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {onDrillDown, widget} = this.props;
 		const {columns} = this.state;
 		const {column, row} = props;
-		const {type} = column;
 		const {BREAKDOWN} = COLUMN_TYPES;
 		const mixin = createDrillDownMixin(widget);
 		const dataColumns = columns.filter(this.isGroupColumn);
+		let {aggregation, attribute, type} = column;
 
 		if (type === BREAKDOWN) {
 			dataColumns.push(column);
+			({aggregation, attribute} = column.indicator);
 		}
+
+		mixin.filters.push({aggregation, attribute});
 
 		dataColumns.forEach(column => {
 			const {accessor, attribute, group, header, type} = column;

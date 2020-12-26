@@ -1,13 +1,13 @@
 // @flow
-import type {Attribute} from 'store/sources/attributes/types';
-import type {Group, Widget} from 'store/widgets/data/types';
+import type {Group, MixedAttribute, Widget} from 'store/widgets/data/types';
 import {LINKS_EVENTS} from './constants';
 import type {ThunkAction} from 'store/types';
 
 type Filter = {
-	attribute: Attribute,
-	group: Group | null,
-	value: string | number
+	aggregation?: string,
+	attribute: MixedAttribute,
+	group?: Group | null,
+	value?: string | number
 };
 
 export type DrillDownMixin = {
