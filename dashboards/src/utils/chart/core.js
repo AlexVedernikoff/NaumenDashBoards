@@ -79,12 +79,14 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
  * @returns {ApexAxisChartSeries}
  */
 const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries => {
-	const {series} = data;
+	const {series: originalSeries} = data;
+	let series = originalSeries;
 
-	if (widget.type === WIDGET_TYPES.COMBO && series.length > 0) {
-		series.forEach(s => {
-			s.type = s.type.toUpperCase() === WIDGET_TYPES.LINE ? CHART_TYPES.line : CHART_TYPES.bar;
-		});
+	if (widget.type === WIDGET_TYPES.COMBO && originalSeries.length > 0) {
+		series = originalSeries.map(s => ({
+			...s,
+			type: s.type.toUpperCase() === WIDGET_TYPES.LINE ? CHART_TYPES.line : CHART_TYPES.bar
+		}));
 	}
 
 	return series;

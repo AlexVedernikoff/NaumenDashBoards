@@ -1,5 +1,6 @@
 // @flow
 import type {ApexOptions} from 'apexcharts';
+import type {ApexYAxisOptions} from 'utils/chart/types';
 import {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
@@ -8,7 +9,6 @@ import {
 	getNiceScale,
 	getXAxisLabels,
 	getXAxisOptions,
-	getYAxisOptions,
 	valueFormatter
 } from './helpers';
 import type {ComboWidget} from 'store/widgets/data/types';
@@ -39,13 +39,22 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 	return formattedValue;
 };
 
-const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, maxValue?: number) => {
+/**
+ * Возвращает настройки оси Y
+ * @param {DataSet} dataSet - набор данных виджета, относительно которого настраивается ось
+ * @param {number} index - индекс набора данных виджета
+ * @param {ComboWidget} widget - виджет
+ * @param {boolean} forceHide - указывает на необходимость скрывать ось.
+ * @param {?number} maxValue - максимальное значение
+ * @returns {ApexYAxisOptions}
+ */
+const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, forceHide: boolean, maxValue?: number) => {
 	const {colors, indicator} = widget;
 	const {dataKey, showEmptyData, yAxisName: name} = dataSet;
 	const usesMSInterval = hasMSInterval(dataSet, FIELDS.yAxis);
 	const usesPercent = hasPercent(dataSet, FIELDS.yAxis);
 	const color = colors[index];
-	let {max, min = DEFAULT_Y_AXIS_MIN} = indicator;
+	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
 
 	if (min) {
 		min = Number(min);
@@ -57,7 +66,7 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, maxValue
 		max = getNiceScale(maxValue);
 	}
 
-	let options = {
+	return {
 		axisBorder: {
 			color,
 			show: true
@@ -68,6 +77,7 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, maxValue
 		forceNiceScale: true,
 		labels: {
 			formatter: valueFormatter(usesMSInterval, usesPercent, showEmptyData),
+			maxWidth: 140,
 			style: {
 				colors: color
 			}
@@ -76,14 +86,48 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, maxValue
 		min,
 		opposite: index > 0,
 		seriesName: dataKey,
+		show: !forceHide && show,
 		title: {
 			style: {
 				color
-			}
+			},
+			text: showName && name
 		}
 	};
+};
 
-	return extend(options, getYAxisOptions({...indicator, name}));
+/**
+ * Возвращает настройки осей Y относительно каждого объекта данных series
+ * @param {ComboWidget} widget - данные виджета
+ * @param {DiagramBuildData} chart - данные конкретного графика
+ * @param {?number} maxValue - максимальное значение по оси
+ * @returns {Array<ApexYAxisOptions>}
+ */
+const getYAxises = (widget: ComboWidget, chart: DiagramBuildData, maxValue?: number): Array<ApexYAxisOptions> => {
+	const usedDataKeys = [];
+
+	return chart.series.map((s, i) => {
+		const {dataKey} = s;
+		const dataSet = widget.data.find(dataSet => dataSet.dataKey === dataKey);
+
+		if (dataSet) {
+			/**
+			 * Настройка осей идет относительно объектов series, но на графике должно отображаться количество осей относительно
+			 * количества источников (в случае разбивки на 1 источник приходит n-е количество данных series). По этому ось
+			 * отрисовывается только относительно первого набора значений разбивки. Остальные оси разбивки по источнику скрываются.
+			 * @type {boolean}
+			 */
+			let forceHide = false;
+
+			if (usedDataKeys.includes(dataKey)) {
+				forceHide = true;
+			} else {
+				usedDataKeys.push(dataKey);
+			}
+
+			return getYAxis(dataSet, i, widget, forceHide, maxValue);
+		}
+	}).filter(yaxis => yaxis);
 };
 
 /**
@@ -109,8 +153,8 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		breakdownUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.breakdown);
 	}
 
-	if (widget.indicator.showDependent) {
-		maxValue = getMaxValue(series);
+	if (widget.indicator.showDependent || stacked) {
+		maxValue = getMaxValue(series, stacked);
 	}
 
 	const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend);
@@ -149,9 +193,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			shared: false
 		},
 		xaxis: extend(xaxis, getXAxisOptions(parameter, hasOverlappedLabel)),
-		yaxis: widget.data
-			.filter(dataSet => !dataSet.sourceForCompute)
-			.map((dataSet, i) => getYAxis(dataSet, i, widget, maxValue))
+		yaxis: getYAxises(widget, chart, maxValue)
 	};
 };
 
