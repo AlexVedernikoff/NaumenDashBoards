@@ -11,7 +11,7 @@ export type DefaultProps = {|
 	textHandler: TextHandler,
 	tip: string,
 	value: string,
-	width: number | null
+	width: number | string
 |};
 
 export type Props = {

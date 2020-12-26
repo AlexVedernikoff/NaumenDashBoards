@@ -16,7 +16,7 @@ export class Cell extends PureComponent<Props> {
 		textHandler: TEXT_HANDLERS.CROP,
 		tip: '',
 		value: '',
-		width: null
+		width: '100%'
 	};
 
 	getDefaultValue = () => {

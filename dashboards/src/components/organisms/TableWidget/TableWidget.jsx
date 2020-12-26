@@ -7,7 +7,7 @@ import {
 } from 'store/widgets/buildData/constants';
 import {Cell, HeaderCell} from 'components/organisms/Table/components';
 import type {CellConfigProps, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
-import type {Column, Props, State} from './types';
+import type {Column, ParameterColumn, Props, Row, State} from './types';
 import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
@@ -25,20 +25,36 @@ import {ValueWithLimitWarning} from './components';
 
 export class TableWidget extends PureComponent<Props, State> {
 	state = {
-		columns: []
+		columns: this.getColumns(this.props)
 	};
 
-	static getDerivedStateFromProps (props: Props) {
+	getColumns (props: Props): Array<Column> {
 		const {data, widget} = props;
 		let {columns} = data;
 
 		if (!widget.table.body.showRowNum) {
 			columns = (columns.filter(c => c.accessor !== ID_ACCESSOR): Array<Column>);
+		} else {
+			columns = (columns.map(column => {
+				if (column.accessor === ID_ACCESSOR && !column.type) {
+					return {
+						...column,
+						width: this.getMaxValueCellLength(data.data, ID_ACCESSOR)
+					};
+				}
+
+				return column;
+			}): Array<Column>);
 		}
 
-		return {
-			columns
-		};
+		return columns;
+	}
+
+	getMaxValueCellLength (data: Array<Row>, accessor: string): number {
+		return data.reduce((maxLength, row) => {
+			const currentLength = String(row[accessor]).length * 16;
+			return currentLength > maxLength ? currentLength : maxLength;
+		}, 0);
 	}
 
 	/**
@@ -52,7 +68,8 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {column, row} = props;
 		const {BREAKDOWN} = COLUMN_TYPES;
 		const mixin = createDrillDownMixin(widget);
-		const dataColumns = columns.filter(this.isGroupColumn);
+		// $FlowFixMe
+		const dataColumns: Array<ParameterColumn> = columns.filter(this.isGroupColumn);
 		let {aggregation, attribute, type} = column;
 
 		if (type === BREAKDOWN) {

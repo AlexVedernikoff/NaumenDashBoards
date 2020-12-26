@@ -10,7 +10,8 @@ export type BaseColumn = {
 	columns?: Array<BaseColumn>,
 	footer: string,
 	header: string,
-	type?: string
+	type?: string,
+	width?: number
 };
 
 export type ParameterColumn = {
@@ -56,7 +57,7 @@ type LimitsExceeded = {
 	parameter: boolean
 };
 
-type Row = {
+export type Row = {
 	[accessor: string]: string
 };
 

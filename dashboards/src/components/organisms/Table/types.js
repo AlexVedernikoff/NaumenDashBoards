@@ -9,6 +9,7 @@ export type Column = {
 	columns?: Array<Column>,
 	footer: string,
 	header: string,
+	width?: number,
 	[string]: any
 };
 

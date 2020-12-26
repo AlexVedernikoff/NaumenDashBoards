@@ -53,11 +53,14 @@ export class Table extends PureComponent<Props, State> {
 	/**
 	 * Подсчитывает ширину колонки по умолчанию относительно ширины родителя
 	 * @param {number} parentWidth - ширина родителя
-	 * @param {number} count - количество колонок
+	 * @param {Array<Column>} columns - колонки
 	 * @returns {number}
 	 */
-	calcDefaultColumnWidth = (parentWidth: number, count: number): number => {
-		return Math.max(Math.round(parentWidth / count), DEFAULT_COLUMN_WIDTH);
+	calcDefaultColumnWidth = (parentWidth: number, columns: Array<Column>): number => {
+		const sumCustomWidths = columns.reduce((sum, column) => Number.isInteger(column.width) ? sum + column.width : sum, 0);
+		const columnsWithoutCustomWidth = columns.filter(column => !Number.isInteger(column.width));
+
+		return Math.max(Math.round((parentWidth - sumCustomWidths) / columnsWithoutCustomWidth.length), DEFAULT_COLUMN_WIDTH);
 	};
 
 	/**
@@ -80,12 +83,11 @@ export class Table extends PureComponent<Props, State> {
 	 * @returns {ColumnsWidth}
 	 */
 	getColumnsWidthByTableWidth = (tableWidth: number, columns: Array<Column>, columnsWidth: ColumnsWidth): ColumnsWidth => {
-		const defaultWidth = this.calcDefaultColumnWidth(tableWidth, columns.length);
+		const defaultWidth = this.calcDefaultColumnWidth(tableWidth, columns);
 		let newColumnsWidth = {...columnsWidth};
 
 		columns.forEach(column => {
-			const {accessor, columns: subColumns} = column;
-			let width;
+			let {accessor, columns: subColumns, width} = column;
 
 			if (Array.isArray(subColumns)) {
 				newColumnsWidth = this.getColumnsWidthByTableWidth(tableWidth, subColumns, newColumnsWidth);
@@ -105,7 +107,7 @@ export class Table extends PureComponent<Props, State> {
 	 * @param {ColumnsWidth} columnsWidth - данные ширины столбцов
 	 * @returns {ColumnsWidth}
 	 */
-	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth = this.state.columnsWidth): ColumnsWidth => {
+	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth): ColumnsWidth => {
 		const {accessor, columns} = column;
 		let newColumnsWidth = {
 			...columnsWidth,
