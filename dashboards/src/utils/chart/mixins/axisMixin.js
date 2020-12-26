@@ -50,7 +50,8 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 		let yaxis = {
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
-				formatter: horizontal ? axisLabelFormatter(usesUUIDs) : valueFormatter(usesMSInterval, usesPercent)
+				formatter: horizontal ? axisLabelFormatter(usesUUIDs) : valueFormatter(usesMSInterval, usesPercent),
+				maxWidth: 140
 			}
 		};
 

@@ -8,7 +8,7 @@ import {getBuildSet} from 'store/widgets/data/helpers';
 import {META_CLASS_VALUE_SEPARATOR} from 'store/widgets/buildData/constants';
 import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
-import {TEXT_HANDLERS} from 'store/widgets/data/constants';
+import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Возвращает лейбл без uuid
@@ -109,10 +109,6 @@ const getYAxisOptions = (props: AxisProps, defaultText: string = '') => {
 	const {name, show, showName} = props;
 
 	const options: Object = {
-		decimalsInFloat: 2,
-		labels: {
-			maxWidth: 140
-		},
 		show
 	};
 
@@ -131,23 +127,40 @@ const getYAxisOptions = (props: AxisProps, defaultText: string = '') => {
  * @returns {number} - округленное число
  */
 const getNiceScale = (value: number) => {
-	const exponent = Math.floor(Math.log10(value) - 1);
+	const exponent = Math.round(Math.log10(value) - 1);
 	const converter = Math.pow(10, exponent);
 
-	return Math.round(value / converter) * converter;
+	return Math.ceil(value / converter) * converter;
 };
 
 /**
  * Возвращает максимальное значений данных
  * @param {ApexAxisChartSeries} series - данные для построения графика
+ * @param {boolean} stacked - указывает на необходимость подсчета значений для графиков с накоплением
  * @returns {number} - максимальное значение
  */
-const getMaxValue = (series: ApexAxisChartSeries) => {
+const getMaxValue = (series: ApexAxisChartSeries, stacked: boolean) => {
 	const values = series
 		.map(s => s.data)
 		.reduce((all, data) => [...all, ...data], []);
+	/**
+	 * Множитель для увеличения значения от максимального. Необходим для корректной отрисовки элементов, что находятся
+	 * чуть выше максимального значения.
+	 * @type {number}
+	 */
+	const increasingFactor = 1.25;
+	const stackedValues = [];
 
-	return Math.max(...values);
+	if (stacked) {
+		series.filter(({type}) => type === WIDGET_TYPES.COLUMN_STACKED).forEach(({data}) => {
+			data.forEach((originalValue, index) => {
+				const value = parseFloat(originalValue);
+				stackedValues[index] = stackedValues[index] ? stackedValues[index] + value : value;
+			});
+		});
+	}
+
+	return Math.max(...values, ...stackedValues) * increasingFactor;
 };
 
 /**
