@@ -91,7 +91,7 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, forceHid
 			style: {
 				color
 			},
-			text: showName && name
+			text: showName ? name : undefined
 		}
 	};
 };
