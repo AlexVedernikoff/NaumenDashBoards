@@ -4,7 +4,7 @@ import cn from 'classnames';
 import type {Column, ColumnsWidth, Components, Props, State, ValueProps} from './types';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import {DEFAULT_TABLE_SETTINGS} from './constants';
-import React, {createRef, PureComponent} from 'react';
+import React, {createRef, Fragment, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import {ResizeDetector} from 'components/molecules';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
@@ -37,6 +37,7 @@ export class Table extends PureComponent<Props, State> {
 	state = {
 		columnsWidth: {},
 		components: this.getExtendedComponents(this.props.components),
+		fixedColumns: this.getFixedColumns(this.props),
 		page: 1,
 		sorting: this.props.sorting,
 		width: null
@@ -44,6 +45,11 @@ export class Table extends PureComponent<Props, State> {
 
 	getExtendedComponents (components?: Components): Components {
 		return components ? {...this.components, ...components} : this.components;
+	}
+
+	getFixedColumns (props: Props): Array<Column> {
+		const {columns, fixedColumnsCount} = props;
+		return columns.slice(0, fixedColumnsCount);
 	}
 
 	renderValue (props: ValueProps) {
@@ -67,13 +73,8 @@ export class Table extends PureComponent<Props, State> {
 	 * Возвращает массив колонок для отрисовки без учёта объединяющих столбцов
 	 * @returns {Array<Column>}
 	 */
-	getColumnsForRender = (): Array<Column> => {
-		const {columns} = this.props;
-
-		return columns
-			.map(column => column.columns || column)
+	getColumnsForRender = (columns: Array<Column>): Array<Column> => columns.map(column => column.columns || column)
 			.reduce((columns, value) => Array.isArray(value) ? [...columns, ...value] : [...columns, value], []);
-	};
 
 	/**
 	 * Возвращает данные ширины столбцов относительно ширины таблицы с учетом подстолбцов
@@ -130,22 +131,25 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	handleChangeColumnWidth = (columnWidth: number, column: Column) => {
-		const {columns, columnsRatioWidth, onChangeColumnWidth} = this.props;
+		const {columns, columnsRatioWidth, getNewColumnsWidth = this.getNewColumnsWidth, onChangeColumnWidth} = this.props;
 		const {columnsWidth} = this.state;
 		const {current: container} = this.ref;
 		const {accessor} = column;
 
 		if (container) {
 			const {clientWidth: containerWidth} = container;
-			const newColumnsWidth = this.getNewColumnsWidth(column, columnWidth, columnsWidth);
+			const newColumnsWidth = getNewColumnsWidth(column, columnWidth, columnsWidth);
+			const width = sumColumnsWidth(newColumnsWidth, columns);
 
-			this.setState(() => ({
-				columnsWidth: newColumnsWidth,
-				width: sumColumnsWidth(newColumnsWidth, columns)
-			}));
+			if (width >= container.clientWidth) {
+				this.setState(() => ({
+					columnsWidth: newColumnsWidth,
+					width: sumColumnsWidth(newColumnsWidth, columns)
+				}));
 
-			columnsRatioWidth[accessor] = Number((columnWidth / containerWidth).toFixed(2));
-			onChangeColumnWidth && onChangeColumnWidth(columnsRatioWidth);
+				columnsRatioWidth[accessor] = Number((columnWidth / containerWidth).toFixed(2));
+				onChangeColumnWidth && onChangeColumnWidth(columnsRatioWidth);
+			}
 		}
 	};
 
@@ -177,13 +181,13 @@ export class Table extends PureComponent<Props, State> {
 		this.setState({columnsWidth, width});
 	};
 
-	renderBody = (width: number) => {
+	renderBody = (columns: Array<Column>) => {
 		const {data, onClickDataCell, pageSize, settings} = this.props;
 		const {columnsWidth, components, page, sorting} = this.state;
 
 		return (
 			<Body
-				columns={this.getColumnsForRender()}
+				columns={this.getColumnsForRender(columns)}
 				columnsWidth={columnsWidth}
 				components={components}
 				data={data}
@@ -192,36 +196,50 @@ export class Table extends PureComponent<Props, State> {
 				pageSize={pageSize}
 				settings={settings}
 				sorting={sorting}
-				width={width}
 			/>
 		);
 	};
 
-	renderFooter = (width: number) => {
-		const {columns} = this.props;
+	renderColumns = (columns: Array<Column> = this.props.columns) => (
+		<Fragment>
+			{this.renderHeader(columns)}
+			{this.renderBody(columns)}
+			{this.renderFooter(columns)}
+		</Fragment>
+	);
+
+	renderFixedTable = () => {
+		const {columns, fixedColumnsCount} = this.props;
+		const {width} = this.state;
+		const fixedColumns = columns.slice(0, fixedColumnsCount);
+
+		return width ? <div className={styles.fixedTable}>{this.renderColumns(fixedColumns)}</div> : null;
+	};
+
+	renderFooter = (columns: Array<Column>) => {
 		const {columnsWidth, components} = this.state;
 		const hasFooter = columns.find(i => i.footer);
 
 		if (hasFooter) {
 			return (
 				<Footer
-					columns={this.getColumnsForRender()}
+					columns={this.getColumnsForRender(columns)}
 					columnsWidth={columnsWidth}
 					components={components}
-					width={width}
 				/>
 			);
 		}
 	};
 
-	renderHeader = (width: number) => {
+	renderHeader = (columnsToRender: Array<Column>) => {
 		const {columns, data, settings} = this.props;
 		const {columnsWidth, components, sorting} = this.state;
 		const {columnHeader} = settings;
+		const usesSubColumns = !!columns.find(column => Array.isArray(column.columns));
 
 		return (
 			<Header
-				columns={columns}
+				columns={columnsToRender}
 				columnSettings={columnHeader}
 				columnsWidth={columnsWidth}
 				components={components}
@@ -229,7 +247,7 @@ export class Table extends PureComponent<Props, State> {
 				onChangeColumnWidth={this.handleChangeColumnWidth}
 				onChangeSorting={this.handleChangeSorting}
 				sorting={sorting}
-				width={width}
+				usesSubColumns={usesSubColumns}
 			/>
 		);
 	};
@@ -251,7 +269,6 @@ export class Table extends PureComponent<Props, State> {
 					onPrevClick={this.handlePrevClick}
 					page={page}
 					total={total}
-					width={width}
 				/>
 			);
 		}
@@ -259,28 +276,20 @@ export class Table extends PureComponent<Props, State> {
 
 	renderTable = () => {
 		const {width} = this.state;
-
-		if (width) {
-			return (
-				<div className={styles.table}>
-					{this.renderHeader(width)}
-					{this.renderBody(width)}
-					{this.renderFooter(width)}
-					{this.renderNoData()}
-					{this.renderPagination()}
-				</div>
-			);
-		}
-
-		return null;
+		return width ? <div className={styles.table}>{this.renderColumns()}</div> : null;
 	};
 
 	render () {
 		const {className} = this.props;
 
 		return (
-			<ResizeDetector className={cn(styles.container, className)} forwardedRef={this.ref} onResize={this.handleResize}>
-				{this.renderTable()}
+			<ResizeDetector onResize={this.handleResize} >
+				<div className={cn(styles.container, className)} ref={this.ref}>
+					{this.renderFixedTable()}
+					{this.renderTable()}
+					{this.renderNoData()}
+					{this.renderPagination()}
+				</div>
 			</ResizeDetector>
 		);
 	}

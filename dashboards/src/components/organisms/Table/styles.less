@@ -3,21 +3,25 @@
 :local {
 	.container {
 		background-color: white;
+		font-weight: 400;
 		height: 100%;
-		overflow: hidden;
+		overflow-x: hidden;
+		overflow-y: auto;
+		position: relative;
 	}
 
 	.table {
-		display: flex;
-		flex-direction: column;
-		font-weight: 400;
-		height: 100%;
+		border: 1px solid @silver;
 		overflow-x: auto;
-		position: relative;
+	}
 
-		* {
-			box-sizing: border-box;
-		}
+	.fixedTable {
+		border: 1px solid @silver;
+		background-color: white;
+		position: absolute;
+		left: 0;
+		top: 0;
+		z-index: 1;
 	}
 
 	.noData {

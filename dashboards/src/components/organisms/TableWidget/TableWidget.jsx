@@ -6,55 +6,37 @@ import {
 	META_CLASS_VALUE_SEPARATOR
 } from 'store/widgets/buildData/constants';
 import {Cell, HeaderCell} from 'components/organisms/Table/components';
-import type {CellConfigProps, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
-import type {Column, ParameterColumn, Props, Row, State} from './types';
+import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
+import type {Column, ColumnType, ParameterColumn, Props, State} from './types';
 import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
-import {debounce} from 'src/helpers';
+import {debounce, deepClone} from 'src/helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import styles from './styles.less';
 import {Table} from 'components/organisms';
 import {ValueWithLimitWarning} from './components';
 
 export class TableWidget extends PureComponent<Props, State> {
-	state = {
-		columns: this.getColumns(this.props)
-	};
+	tableRef: Ref<typeof Table> = createRef();
+	state = this.initState(this.props);
 
-	getColumns (props: Props): Array<Column> {
-		const {data, widget} = props;
+	initState (props: Props): State {
+		const {data} = props;
 		let {columns} = data;
 
-		if (!widget.table.body.showRowNum) {
-			columns = (columns.filter(c => c.accessor !== ID_ACCESSOR): Array<Column>);
-		} else {
-			columns = (columns.map(column => {
-				if (column.accessor === ID_ACCESSOR && !column.type) {
-					return {
-						...column,
-						width: this.getMaxValueCellLength(data.data, ID_ACCESSOR)
-					};
-				}
+		const fixedColumnsCount = columns.findIndex(column => column.type === COLUMN_TYPES.INDICATOR);
 
-				return column;
-			}): Array<Column>);
-		}
-
-		return columns;
-	}
-
-	getMaxValueCellLength (data: Array<Row>, accessor: string): number {
-		return data.reduce((maxLength, row) => {
-			const currentLength = String(row[accessor]).length * 16;
-			return currentLength > maxLength ? currentLength : maxLength;
-		}, 0);
+		return {
+			fixedColumnsCount
+		};
 	}
 
 	/**
@@ -63,8 +45,8 @@ export class TableWidget extends PureComponent<Props, State> {
 	 * @returns {void}
 	 */
 	drillDown = (props: OnClickCellProps) => {
-		const {onDrillDown, widget} = this.props;
-		const {columns} = this.state;
+		const {data, onDrillDown, widget} = this.props;
+		const {columns} = data;
 		const {column, row} = props;
 		const {BREAKDOWN} = COLUMN_TYPES;
 		const mixin = createDrillDownMixin(widget);
@@ -116,6 +98,86 @@ export class TableWidget extends PureComponent<Props, State> {
 		return row || id === 1 ? row : this.findRow(id - 1, accessor);
 	};
 
+	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth): ColumnsWidth => {
+		const {current: table} = this.tableRef;
+		const {accessor, type} = column;
+		const {BREAKDOWN, INDICATOR, PARAMETER} = COLUMN_TYPES;
+		const ratio = columnsWidth[accessor] / newWidth;
+		let newColumnsWidth = columnsWidth;
+
+		if (type === PARAMETER) {
+			newColumnsWidth = this.getNewParametersColumnsWidth(column, newColumnsWidth, ratio);
+		} else if (type === BREAKDOWN || type === INDICATOR) {
+			newColumnsWidth = this.getNewIndicatorsColumnsWidth(column, newColumnsWidth, ratio);
+		} else if (table) {
+			newColumnsWidth = table.getNewColumnsWidth(column, newWidth, columnsWidth);
+		}
+
+		return newColumnsWidth;
+	};
+
+	getNewIndicatorsColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number): ColumnsWidth => {
+		const {columns} = this.props.data;
+		const {BREAKDOWN, INDICATOR} = COLUMN_TYPES;
+		const {accessor, type} = column;
+		let newColumnsWidth = columnsWidth;
+		let isLastIndicator = false;
+		let isLastBreakdown = false;
+
+		if (type === INDICATOR) {
+			isLastIndicator = this.isLastTypedColumn(column, INDICATOR);
+		} else if (type === BREAKDOWN) {
+			const lastIndicator = columns.find((column) => this.isLastTypedColumn(column, INDICATOR));
+
+			if (lastIndicator && Array.isArray(lastIndicator.columns)) {
+				isLastBreakdown = !!lastIndicator.columns.find(
+					(column, index, columns) => column.accessor === accessor && index === columns.length - 1
+				);
+			}
+		}
+
+		if (isLastIndicator || isLastBreakdown) {
+			newColumnsWidth = deepClone(newColumnsWidth);
+
+			columns.filter(column => column.type === INDICATOR).forEach(column => {
+				let width = 0;
+
+				if (Array.isArray(column.columns)) {
+					column.columns.filter(column => column.type === BREAKDOWN).forEach(column => {
+						const newWidth = newColumnsWidth[column.accessor] / ratio;
+
+						newColumnsWidth[column.accessor] = newWidth;
+						width += newWidth;
+					});
+				} else {
+					width = newColumnsWidth[column.accessor] / ratio;
+				}
+
+				newColumnsWidth[column.accessor] = width;
+			});
+		}
+
+		return newColumnsWidth;
+	};
+
+	getNewParametersColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number): ColumnsWidth => {
+		const {columns} = this.props.data;
+		const {PARAMETER} = COLUMN_TYPES;
+		let newColumnsWidth = columnsWidth;
+
+		if (this.isLastTypedColumn(column, PARAMETER)) {
+			newColumnsWidth = deepClone(newColumnsWidth);
+
+			columns.forEach(column => {
+				if (column.type === PARAMETER) {
+					newColumnsWidth[column.accessor] = columnsWidth[column.accessor] / ratio;
+				}
+			});
+		}
+
+		return newColumnsWidth;
+	};
+
 	handleChangeColumnWidth = (columnsRatioWidth: ColumnsRatioWidth) => {
 		const {onUpdate, widget} = this.props;
 		onUpdate({...widget, columnsRatioWidth});
@@ -153,6 +215,15 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	isGroupColumn = (column: Column): boolean => column.type === COLUMN_TYPES.PARAMETER;
+
+	isLastTypedColumn = (column: Column, type: ColumnType): boolean => {
+		const {columns} = this.props.data;
+		const {accessor, type: columnType} = column;
+		const columnIndex = columns.findIndex(column => column.accessor === accessor);
+		const nextColumn = columns[columnIndex + 1];
+
+		return columnType === type && (!nextColumn || nextColumn.type !== type);
+	};
 
 	openCardObject = (props: OnClickCellProps) => {
 		const {onOpenCardObject} = this.props;
@@ -266,7 +337,8 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	render (): React$Node {
 		const {data: tableData, widget} = this.props;
-		const {columns} = this.state;
+		const {fixedColumnsCount} = this.state;
+		const {columns, data} = tableData;
 		const {columnsRatioWidth, sorting, table} = widget;
 		const {pageSize} = table.body;
 		const components = {
@@ -280,11 +352,14 @@ export class TableWidget extends PureComponent<Props, State> {
 				columns={columns}
 				columnsRatioWidth={columnsRatioWidth}
 				components={components}
-				data={tableData.data}
+				data={data}
+				fixedColumnsCount={fixedColumnsCount}
+				getNewColumnsWidth={this.getNewColumnsWidth}
 				onChangeColumnWidth={debounce(this.handleChangeColumnWidth, 1000)}
 				onChangeSorting={this.handleChangeSorting}
 				onClickDataCell={this.handleClickDataCell}
 				pageSize={pageSize}
+				ref={this.tableRef}
 				settings={table}
 				sorting={sorting}
 			/>

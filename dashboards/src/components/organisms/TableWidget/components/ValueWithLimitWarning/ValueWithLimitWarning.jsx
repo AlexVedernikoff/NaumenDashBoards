@@ -1,6 +1,5 @@
 // @flow
-import {IconButton} from 'components/atoms';
-import {ICON_NAMES} from 'components/atoms/Icon';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {Modal} from 'components/molecules';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
@@ -12,7 +11,7 @@ export class ValueWithLimitWarning extends PureComponent<Props, State> {
 		showModal: false
 	};
 
-	handleClickButton = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
+	handleClickButton = (e: SyntheticMouseEvent<HTMLElement>) => {
 		e.stopPropagation();
 		this.setState({showModal: true});
 	};
@@ -54,11 +53,11 @@ export class ValueWithLimitWarning extends PureComponent<Props, State> {
 
 		return (
 			<div className={styles.container}>
-				<IconButton
+				<Icon
 					className={styles.iconButton}
-					icon={ICON_NAMES.INFO}
+					name={ICON_NAMES.INFO}
 					onClick={this.handleClickButton}
-					tip="Данные загружены не полностью. Подробнее..."
+					title="Данные загружены не полностью. Подробнее..."
 				/>
 				{value}
 		</div>

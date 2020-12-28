@@ -51,6 +51,8 @@ export type Props = {
 	columnsRatioWidth: ColumnsWidth,
 	components?: Components,
 	data: Array<Row>,
+	fixedColumnsCount: number,
+	getNewColumnsWidth: (column: Column, newWidth: number, columnsWidth: ColumnsWidth) => ColumnsWidth,
 	onChangeColumnWidth?: (columnsWidth: ColumnsWidth) => void,
 	onChangeSorting?: (sorting: TableSorting) => void,
 	onClickDataCell?: OnClickCell,
@@ -62,6 +64,7 @@ export type Props = {
 export type State = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
+	fixedColumns: Array<Column>,
 	page: number,
 	sorting: TableSorting,
 	width: number | null

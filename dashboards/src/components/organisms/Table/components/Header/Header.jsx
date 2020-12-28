@@ -2,6 +2,7 @@
 import type {Column} from 'Table/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import {ROW_HEIGHT} from 'Table/constants';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 import {sumColumnsWidth} from 'Table/helpers';
@@ -36,7 +37,7 @@ export class Header extends PureComponent<Props> {
 		}
 
 		return (
-			<div className={styles.cellContainer} style={{width}}>
+			<div className={styles.cellContainer} style={{minWidth: width}}>
 				<HeaderCell
 					column={column}
 					columnIndex={index}
@@ -70,10 +71,15 @@ export class Header extends PureComponent<Props> {
 	};
 
 	render () {
-		const {columns, width} = this.props;
+		const {columns, usesSubColumns} = this.props;
+		let height = ROW_HEIGHT;
+
+		if (usesSubColumns) {
+			height *= 2;
+		}
 
 		return (
-			<div className={styles.header} style={{width}}>
+			<div className={styles.row} style={{height}}>
 				{columns.map(this.renderColumn)}
 			</div>
 		);

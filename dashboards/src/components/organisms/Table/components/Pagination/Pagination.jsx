@@ -37,10 +37,8 @@ export class Pagination extends PureComponent<Props> {
 	};
 
 	render () {
-		const {width} = this.props;
-
 		return (
-			<div className={styles.container} style={{width}}>
+			<div className={styles.container}>
 				{this.renderPrevButton()}
 				{this.renderCenter()}
 				{this.renderNextButton()}

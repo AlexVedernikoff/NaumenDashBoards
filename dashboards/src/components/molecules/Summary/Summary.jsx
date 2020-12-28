@@ -54,8 +54,10 @@ export class Summary extends PureComponent<Props, State> {
 		const {fontSize} = this.state;
 
 		return (
-			<ResizeDetector className={className} onClick={onClick} onResize={this.handleResize} style={{...style, fontSize}}>
-				{fontSize && value}
+			<ResizeDetector onResize={this.handleResize}>
+				<div className={className} onClick={onClick} style={{...style, fontSize}}>
+					{fontSize && value}
+				</div>
 			</ResizeDetector>
 		);
 	};

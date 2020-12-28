@@ -11,5 +11,5 @@ export type Props = {
 	onChangeColumnWidth: (width: number, column: Column) => void,
 	onChangeSorting: TableSorting => void,
 	sorting: TableSorting,
-	width: number
+	usesSubColumns: boolean
 };

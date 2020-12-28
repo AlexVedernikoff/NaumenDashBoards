@@ -11,8 +11,7 @@ export type Props = {
 	page: number,
 	pageSize: number,
 	settings: Table,
-	sorting: TableSorting,
-	width: number
+	sorting: TableSorting
 };
 
 export type State = {
