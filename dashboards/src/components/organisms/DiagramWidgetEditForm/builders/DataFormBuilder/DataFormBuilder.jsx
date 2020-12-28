@@ -201,7 +201,7 @@ export class DataFormBuilder extends Component<Props> {
 
 		return (
 			<FormField>
-				<FormCheckControl label="Отображать нулевые значения" reverse>
+				<FormCheckControl label="Показывать нулевые значения" reverse>
 					<Toggle
 						checked={showEmptyData}
 						name={FIELDS.showEmptyData}

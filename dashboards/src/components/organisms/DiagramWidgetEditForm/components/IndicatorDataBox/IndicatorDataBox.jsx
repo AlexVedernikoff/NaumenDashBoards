@@ -264,7 +264,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 			return (
 				<FormBox>
 					<Checkbox
-						label="Учитывать незаполненные данные"
+						label="Показывать нулевые значения"
 						name={FIELDS.showEmptyData}
 						onClick={this.handleChangeShowEmptyData}
 						value={showEmptyData}
