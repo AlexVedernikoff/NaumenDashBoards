@@ -1,5 +1,5 @@
 // @flow
-import {array, object} from 'yup';
+import {array, number, object} from 'yup';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {extend} from 'src/helpers';
@@ -17,18 +17,28 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 	getSchema = () => {
 		const {base, requiredByCompute} = rules;
 		const {borders, indicator, source, sources} = FIELDS;
+		const borderRequiredMessage = 'В поле границы шкал необходимо указать число';
 
 		return object({
 			...base,
-			[borders]: object().test(
-				'compared-borders',
-				'Значение min должно быть меньше max',
-				borders => borders && (Number(borders.min) < Number(borders.max))
-			).test(
-				'required-borders',
-				'Укажите границы шкал',
-				borders => borders && Number.isInteger(parseInt(borders.min)) && Number.isInteger(parseInt(borders.max))
-			),
+			[borders]: object({
+				max: number().test(
+					'check-border-max',
+					'значение в поле max не может быть меньше значения в поле min',
+					function (value: string) {
+						const {min} = this.options.parent;
+						return isNaN(parseFloat(min)) || Number(value) > Number(min);
+					}
+				).required(borderRequiredMessage).typeError(borderRequiredMessage),
+				min: number().test(
+					'check-border-min',
+					'значение в поле min не может превышать значение в поле max',
+					function (value: string) {
+						const {max} = this.options.parent;
+						return isNaN(parseFloat(max)) || Number(value) < Number(max);
+					}
+				).required(borderRequiredMessage).typeError(borderRequiredMessage)
+			}).default({}),
 			data: array().of(object({
 				[indicator]: requiredByCompute(indicator).test(
 					'valid-attribute',
