@@ -7,8 +7,8 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 const plugins = [
 	new MiniCssExtractPlugin({
-		chunkFilename: '[id].css',
-		filename: '[name].css'
+		chunkFilename: '[id].[contenthash].css',
+		filename: '[name].[contenthash].css'
 	}),
 	new CopyPlugin([
 		{

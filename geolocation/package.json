@@ -10,7 +10,7 @@
     "url": "https://nordclan.com/"
   },
   "contributors": [],
-  "description": "Embedded aplication 'GeoLocatiom' for smp ",
+  "description": "Embedded aplication 'GeoLocation' for smp",
   "devDependencies": {
     "autoprefixer": "^8.6.0",
     "babel-core": "^6.26.3",
@@ -61,7 +61,8 @@
     "url-loader": "^1.0.1",
     "webpack": "^4.11.1",
     "webpack-cli": "^3.0.2",
-    "webpack-dev-server": "^3.1.4"
+    "webpack-dev-server": "^3.1.4",
+    "axios": "^0.19.0"
   },
   "homepage": "https://gitsd.naumen.ru/nordclan/nordclan",
   "jest": {
@@ -80,14 +81,14 @@
   "keywords": [
     "naumen",
     "embedded",
-    "boilerplate",
+    "geolocation",
     "react"
   ],
   "license": "ISC",
-  "name": "boilerplate",
+  "name": "geolocation",
   "repository": {
     "type": "git",
-    "url": "git@gitsd.naumen.ru:repo/ea40.git"
+    "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"
   },
   "scripts": {
     "build": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
@@ -99,7 +100,7 @@
     "test:watch": "npm run test -- --watch",
     "zip": "zip -r -j \"dist-$(date +\"%d-%m-%Y %H-%M-%S\").zip\" ./dist/*"
   },
-  "version": "1.0.1-0",
+  "version": "2.0.0",
   "dependencies": {
     "leaflet": "^1.5.1",
     "react-leaflet": "^2.4.0",

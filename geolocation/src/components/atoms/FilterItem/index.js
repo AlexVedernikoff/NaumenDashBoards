@@ -1,3 +1,3 @@
 // @flow
-import filterItem from './filterItem';
+import filterItem from './FilterItem';
 export default filterItem;
