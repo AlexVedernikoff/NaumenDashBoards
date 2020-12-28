@@ -51,6 +51,9 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
 		background: {
 			enabled: false
 		},
+		dropShadow: {
+			enabled: false
+		},
 		enabled: show && !dataLabelsLimitIsExceeded,
 		style: {
 			colors: new Array(series.length).fill(fontColor),
