@@ -10,7 +10,6 @@ import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import {ResizeDetector} from 'components/molecules';
 import styles from './styles.less';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -78,14 +77,13 @@ export class Chart extends PureComponent<Props> {
 			};
 
 			if (isAxisChart(type)) {
-				const rawLabels = type === WIDGET_TYPES.COMBO ? data.labels : data.categories;
-				const hasOverlappedLabel = checkLabelsForOverlap(rawLabels, container, legend, isHorizontalChart(type));
-				// $FlowFixMe
-				const labels = getXAxisLabels(widget, rawLabels, !hasOverlappedLabel);
+				const {labels} = data;
+				const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend, isHorizontalChart(type));
 
 				opts = {
 					...opts,
-					labels,
+					// $FlowFixMe
+					labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
 					xaxis: {
 						labels: {
 							rotate: hasOverlappedLabel ? -60 : 0,
