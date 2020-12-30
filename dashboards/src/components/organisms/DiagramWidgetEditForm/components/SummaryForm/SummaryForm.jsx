@@ -1,6 +1,6 @@
 // @flow
 import {array, object} from 'yup';
-import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
+import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';

@@ -1,5 +1,5 @@
 // @flow
-import {Chart, Summary} from 'components/molecules';
+import {Chart} from 'components/molecules';
 import cn from 'classnames';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
@@ -8,7 +8,7 @@ import {PADDING} from './constants';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
 import settingsStyles from 'styles/settings.less';
-import {SpeedometerWidget, TableWidget} from 'components/organisms';
+import {SpeedometerWidget, SummaryWidget, TableWidget} from 'components/organisms';
 import styles from './styles.less';
 import type {TableWidget as TableWidgetType} from 'store/widgets/data/types';
 
@@ -59,7 +59,7 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	resolveDiagram = (data: DiagramBuildData) => {
-		const {widget} = this.props;
+		const {onDrillDown, widget} = this.props;
 		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE} = WIDGET_TYPES;
 
 		switch (widget.type) {
@@ -75,7 +75,7 @@ export class Diagram extends Component<Props, State> {
 			case SPEEDOMETER:
 				return <SpeedometerWidget data={data} widget={widget} />;
 			case SUMMARY:
-				return <Summary data={data} widget={widget} />;
+				return <SummaryWidget data={data} onDrillDown={onDrillDown} widget={widget} />;
 			case TABLE:
 				return this.renderTableWidget(widget, data);
 			default:

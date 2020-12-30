@@ -1,5 +1,5 @@
 // @flow
-import {DEFAULT_SUMMARY_SETTINGS} from 'components/molecules/Summary/constants';
+import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/constants';
 import {extend} from 'src/helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {HeaderBox} from 'DiagramWidgetEditForm/components';

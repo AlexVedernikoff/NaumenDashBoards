@@ -9,6 +9,7 @@ import ExportByEmailForm from './ExportByEmailForm';
 import Speedometer from './Speedometer';
 import SpeedometerWidget from './SpeedometerWidget';
 import Startup from './Startup';
+import SummaryWidget from './SummaryWidget';
 import Table from './Table';
 import TableWidget from './TableWidget';
 import TextWidget from './TextWidget';
@@ -26,6 +27,7 @@ export {
 	Speedometer,
 	SpeedometerWidget,
 	Startup,
+	SummaryWidget,
 	Table,
 	TableWidget,
 	TextWidget,
