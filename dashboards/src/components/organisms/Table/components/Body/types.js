@@ -14,3 +14,7 @@ export type Props = {
 	sorting: TableSorting,
 	width: number
 };
+
+export type State = {
+	rows: Array<Row>
+};
