@@ -1,9 +1,11 @@
 // @flow
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
+import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {FieldDivider} from 'DiagramWidgetEditForm/components';
 import {FieldError, HorizontalLabel, Label, TextInput} from 'components/atoms';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormField} from 'components/molecules';
+import {getErrorKey} from 'DiagramWidgetEditForm/helpers';
 import type {Ranges} from 'store/widgets/data/types';
 import {RangesFieldset} from 'DiagramWidgetEditForm/components/SpeedometerForm/components';
 import React, {Component, Fragment} from 'react';
@@ -13,12 +15,29 @@ import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
 export class ParamsTab extends Component<DataBuilderProps> {
 	sourceRefFields = [FIELDS.indicator];
 
-	handleChangeBorder = ({name, value}: Object) => {
+	handleChangeBorder = ({name, value: inputValue}: Object) => {
 		const {setFieldValue, values} = this.props;
-		setFieldValue(FIELDS.borders, {
-			...values[FIELDS.borders],
-			[name]: value
-		});
+		const {borders, ranges = DEFAULT_SPEEDOMETER_SETTINGS.ranges} = values;
+		const value = inputValue.replace(',', '.');
+
+		if (!value || /^-?(\d+)?(\.)?(\d{1,4})?$/.test(value)) {
+			setFieldValue(FIELDS.borders, {
+				...borders,
+				[name]: value
+			});
+
+			if (ranges.data.length === 1) {
+				const rangeName: string = name === FIELDS.max ? 'to' : 'from';
+
+				this.handleChangeRanges({
+					...ranges,
+					data: [{
+						...ranges.data[0],
+						[rangeName]: value
+					}]
+				});
+			}
+		}
 	};
 
 	handleChangeRanges = (ranges: Ranges) => {
@@ -42,24 +61,23 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return <RangesFieldset onChange={this.handleChangeRanges} ranges={ranges} />;
 	};
 
-	renderScaleBorderError = () => {
-		const {errors} = this.props;
-		const error = errors[FIELDS.borders];
-
+	renderScaleBorderError = (error: string) => {
 		return error ? <FieldError className={styles.scaleBorderField} text={error} /> : null;
 	};
 
-	renderScaleBorderField = (name: string, value: string) => (
-		<FormField row small>
-			<HorizontalLabel>{name}</HorizontalLabel>
-			<TextInput
-				name={name}
-				onChange={this.handleChangeBorder}
-				onlyNumber={true}
-				value={value}
-			/>
-		</FormField>
-	);
+	renderScaleBorderField = (name: string, value: string) => {
+		const error = this.props.errors[getErrorKey(FIELDS.borders, name)];
+
+		return (
+			<Fragment>
+				<FormField row small>
+					<HorizontalLabel>{name}</HorizontalLabel>
+					<TextInput name={name} onChange={this.handleChangeBorder} value={value} />
+				</FormField>
+				{this.renderScaleBorderError(error)}
+			</Fragment>
+		);
+	};
 
 	renderScaleBorderFields = () => {
 		const {borders = {}} = this.props.values;
@@ -70,7 +88,6 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				{this.renderScaleBorderLabel()}
 				{this.renderScaleBorderField('min', min)}
 				{this.renderScaleBorderField('max', max)}
-				{this.renderScaleBorderError()}
 			</Fragment>
 		);
 	};
