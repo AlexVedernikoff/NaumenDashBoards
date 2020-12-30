@@ -1,17 +1,15 @@
 // @flow
-import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import type {SummaryIndicator, SummaryWidget} from 'store/widgets/data/types';
+import type {FontStyle} from 'store/widgets/data/types';
 
 export type Props = {
-	data: DiagramBuildData,
-	widget: SummaryWidget
+	color: string,
+	fontFamily: string,
+	fontSize: string | number, // '10px' | '10' | 10
+	fontStyle: ?FontStyle,
+	onClick: () => void,
+	value: string | number
 };
 
 export type State = {
-	fontSize: number | null,
-	value: string | null
-};
-
-export type DefaultSummarySettings = {
-	indicator: SummaryIndicator
+	fontSize: number | null
 };
