@@ -1,6 +1,8 @@
 // @flow
 import {array, lazy, number, object, string} from 'yup';
+import {AVAILABLE_DATE_FORMATS} from './components/BetweenOperand/constants';
 import {isObject} from 'src/helpers';
+import moment from 'moment';
 
 const messages = {
 	float: 'Поле должно содержать вещественное число',
@@ -13,11 +15,15 @@ const BETWEEN_RULE = object().test(
 	'between-condition',
 	'Поля должны содержать даты, первая дата должна быть не больше второй',
 	value => {
+		const isValidDate = (date) => date && moment(date, AVAILABLE_DATE_FORMATS, true).isValid();
 		let valid = false;
 
 		if (isObject(value)) {
 			const {endDate, startDate} = value;
-			valid = (startDate && !endDate) || (!startDate && endDate) || new Date(startDate) < new Date(endDate);
+			valid = (startDate && isValidDate(startDate) && !endDate)
+				|| (!startDate && endDate && isValidDate(endDate))
+				|| (isValidDate(startDate) && isValidDate(endDate))
+				|| moment(startDate, AVAILABLE_DATE_FORMATS) < moment(endDate, AVAILABLE_DATE_FORMATS);
 		}
 
 		return valid;
