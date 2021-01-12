@@ -2,7 +2,6 @@
 import {Button, Loader} from 'components/atoms';
 import {ListMessage} from 'components/molecules/Select/components';
 import {Node} from 'components/molecules/MaterialTreeSelect/components';
-import type {Node as ReactNode} from 'react';
 import type {Node as NodeType, Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
@@ -11,6 +10,9 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 export class Tree extends Component<Props, State> {
 	static defaultProps = {
 		className: '',
+		components: {
+			Node
+		},
 		initialSelected: [],
 		loading: false,
 		multiple: false,
@@ -21,7 +23,6 @@ export class Tree extends Component<Props, State> {
 	};
 
 	state = {
-		expandedNodes: [],
 		foundIds: [],
 		selectedIds: []
 	};
@@ -59,24 +60,18 @@ export class Tree extends Component<Props, State> {
 		onSelect(node);
 	};
 
-	handleClickNodeToggleIcon = (node: NodeType) => {
-		const {onLoad} = this.props;
-		const {expandedNodes} = this.state;
-		const {children, id} = node;
-		const expanded = expandedNodes.includes(id);
-
-		if (onLoad && !expanded && Array.isArray(children) && children.length === 0) {
-			onLoad(node);
-		}
-
-		this.setState({
-			expandedNodes: expanded ? expandedNodes.filter(v => v !== id) : [...expandedNodes, id]
-		});
-	};
-
 	handleClickShowMore = () => {
 		const {onLoad} = this.props;
 		onLoad && onLoad(null, this.getRoots().length);
+	};
+
+	handleLoadChildren = (node: NodeType) => {
+		const {onLoad} = this.props;
+		const {children, loading} = node;
+
+		if (onLoad && Array.isArray(children) && !loading) {
+			onLoad(node, children.length);
+		}
 	};
 
 	isEnabledNode = (node: NodeType) => {
@@ -88,13 +83,6 @@ export class Tree extends Component<Props, State> {
 		}
 
 		return enabled;
-	};
-
-	isExpanded = (nodeId: string) => {
-		const {searchValue} = this.props;
-		const {expandedNodes} = this.state;
-
-		return Boolean(searchValue) || expandedNodes.includes(nodeId);
 	};
 
 	isRoot = (node: NodeType) => !node.parent;
@@ -129,15 +117,9 @@ export class Tree extends Component<Props, State> {
 		this.setState({foundIds});
 	};
 
-	renderChildren = (node: NodeType, expanded: boolean): ReactNode => {
+	renderChildren = (children: Array<string>): Array<React$Node> => {
 		const {options} = this.props;
-		const {children} = node;
-
-		if (expanded && Array.isArray(children) && children.length > 0) {
-			return children.map(id => options[id] && this.renderNode(options[id]));
-		}
-
-		return null;
+		return children.map(id => options[id] && this.renderNode(options[id]));
 	};
 
 	renderLoader = () => this.props.loading && <ListMessage><Loader size={35} /></ListMessage>;
@@ -151,12 +133,10 @@ export class Tree extends Component<Props, State> {
 	};
 
 	renderNode = (node: NodeType) => {
-		const {getOptionLabel, getOptionValue, onLoad, searchValue} = this.props;
+		const {components, getOptionLabel, getOptionValue, searchValue} = this.props;
 		const {foundIds, selectedIds} = this.state;
-		const {children, error, id, loading, uploaded} = node;
-		const showMoreChildren = children && !(loading || uploaded || error);
-		const nodeValue = getOptionValue(node.value);
-		const expanded = this.isExpanded(id);
+		const {Node} = components;
+		const {id} = node;
 		const enabled = this.isEnabledNode(node);
 		const selected = selectedIds.includes(id);
 
@@ -165,21 +145,19 @@ export class Tree extends Component<Props, State> {
 				<Node
 					data={node}
 					enabled={enabled}
-					expanded={expanded}
-					found={Boolean(searchValue)}
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
-					key={nodeValue}
+					key={id}
 					onClick={this.handleClick}
-					onClickToggleIcon={this.handleClickNodeToggleIcon}
-					onLoadMoreChildren={onLoad}
+					onLoadChildren={this.handleLoadChildren}
+					renderChildren={this.renderChildren}
+					searchValue={searchValue}
 					selected={Boolean(selected)}
-					showMoreChildren={Boolean(showMoreChildren)}
-				>
-					{this.renderChildren(node, expanded)}
-				</Node>
+				/>
 			);
 		}
+
+		return null;
 	};
 
 	renderShowMoreButton = () => {

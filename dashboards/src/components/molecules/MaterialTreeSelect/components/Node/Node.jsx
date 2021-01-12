@@ -2,19 +2,31 @@
 import {Button, Loader} from 'components/atoms';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import type {Props} from './types';
-import React, {Children, PureComponent} from 'react';
+import type {Props, State} from './types';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
-export class Node extends PureComponent<Props> {
+export class Node extends PureComponent<Props, State> {
+	state = {
+		expanded: !!this.props.searchValue
+	};
+
+	componentDidUpdate (prevProps: Props) {
+		const {searchValue} = this.props;
+
+		if (searchValue !== prevProps.searchValue) {
+			this.setState({expanded: !!searchValue});
+		}
+	}
+
 	getLabelClassName = () => {
-		const {found, selected} = this.props;
+		const {selected} = this.props;
 
 		return cn({
 			[styles.labelContainer]: true,
 			[styles.selectedNode]: selected,
-			[styles.foundNode]: found
+			[styles.foundNode]: this.isFoundLabel()
 		});
 	};
 
@@ -24,22 +36,36 @@ export class Node extends PureComponent<Props> {
 	};
 
 	handleClickShowMore = () => {
-		const {children, data, onLoadMoreChildren} = this.props;
-		onLoadMoreChildren && onLoadMoreChildren(data, Children.count(children));
+		const {data, onLoadChildren} = this.props;
+		onLoadChildren(data);
 	};
 
 	handleClickToggleIcon = () => {
-		const {data, onClickToggleIcon} = this.props;
-		onClickToggleIcon(data);
+		const {data, onLoadChildren} = this.props;
+		const {expanded} = this.state;
+		const {children} = data;
+
+		if (!expanded && Array.isArray(children) && children.length === 0) {
+			onLoadChildren(data);
+		}
+
+		this.setState({expanded: !expanded});
+	};
+
+	isFoundLabel = () => {
+		const {data, getOptionLabel, searchValue} = this.props;
+		return searchValue && (new RegExp(searchValue, 'i')).test(getOptionLabel(data.value));
 	};
 
 	renderChildren = () => {
-		const {children} = this.props;
+		const {data, renderChildren} = this.props;
+		const {expanded} = this.state;
+		const {children} = data;
 
-		if (children) {
+		if (expanded && Array.isArray(children) && children.length > 0) {
 			return (
 				<div className={styles.childrenContainer}>
-					{children}
+					{renderChildren(children)}
 					{this.renderShowMoreButton()}
 				</div>
 			);
@@ -84,9 +110,9 @@ export class Node extends PureComponent<Props> {
 	};
 
 	renderShowMoreButton = () => {
-		const {showMoreChildren} = this.props;
+		const {children, error, loading, uploaded} = this.props.data;
 
-		if (showMoreChildren) {
+		if (children && !(loading || uploaded || error)) {
 			return (
 				<Button className={styles.showMoreButton} onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>
 					Показать еще
@@ -96,7 +122,8 @@ export class Node extends PureComponent<Props> {
 	};
 
 	renderToggleIcon = () => {
-		const {data, expanded} = this.props;
+		const {data} = this.props;
+		const {expanded} = this.state;
 		const {TOGGLE_COLLAPSED, TOGGLE_EXPANDED} = ICON_NAMES;
 		const name = expanded ? TOGGLE_EXPANDED : TOGGLE_COLLAPSED;
 		const iconCN = cn({
