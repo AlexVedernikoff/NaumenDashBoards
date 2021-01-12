@@ -2226,9 +2226,13 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
  */
 String getDateFormatByDate(String date)
 {
-    if (date.contains(':'))
+    if(date.contains('-'))
     {
-        return 'dd.MM.yy HH:mm'
+        return 'yyyy-MM-dd' //старый формат данных
+    }
+    else if (date.contains(':'))
+    {
+        return 'dd.MM.yy HH:mm' //для атрибутов типа дата/время
     }
     else if(date.contains('.'))
     {
@@ -2236,7 +2240,7 @@ String getDateFormatByDate(String date)
     }
     else
     {
-        return 'yyyy-MM-dd'
+        throw new IllegalArgumentException('Неправильная дата!')
     }
 }
 
