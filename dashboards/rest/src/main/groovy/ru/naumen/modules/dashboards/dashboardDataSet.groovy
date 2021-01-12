@@ -3690,15 +3690,29 @@ private TableDiagram mappingTable(List resultDataSet,
     {
         List<Map> rows = getFullRows(tempMaps, parameterIndex)
         rows = prepareRowsWithBreakdown(rows, parameterIndex, attributeNames, notAggregatedAttributeNames, breakdownValues)
-        data = rows.withIndex().collect { map, id->
-            return [ID: ++id, *:map.sum()]
+        data = rows.withIndex().collect { map, id ->
+            if (showRowNum)
+            {
+                return [ID: ++id, *:map.sum()]
+            }
+            else
+            {
+                return [*:map.sum()]
+            }
         }
     }
     else
     {
-        data = tempMaps.withIndex().collect { map, id->
+        data = tempMaps.withIndex().collect { map, id ->
             def value = map[aggregationCnt..-1] + map[0..aggregationCnt -1].collect { it.findResult {k,v -> [(k): v ?: "0"]} }
-            return [ID: ++id, *:value.sum()]
+            if(showRowNum)
+            {
+                return [ID: ++id, *:value.sum()]
+            }
+            else
+            {
+                return [*:value.sum()]
+            }
         }
     }
 
@@ -3733,7 +3747,10 @@ private TableDiagram mappingTable(List resultDataSet,
     }
     //агрегация всегда стоит в конце
     columns += aggregationColumns
-    columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
+    if(showRowNum)
+    {
+        columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
+    }
 
     Boolean limitParameter = !ignoreLimits.parameter &&
                              modules.dashboardCommon.countDistinct(attributes.attribute[parameterIndex],
