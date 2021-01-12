@@ -2188,11 +2188,11 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
                 }
                 return buildFilterParameterFromCondition([start, end])
             case 'between':
-                String dateFormat = 'yyyy-MM-dd'
                 def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
                 def start
                 if(dateSet.startDate)
                 {
+                    String dateFormat = getDateFormatByDate(dateSet.startDate)
                     start = Date.parse(dateFormat, dateSet.startDate as String)
                 }
                 else
@@ -2206,6 +2206,7 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
                 def end
                 if (dateSet.endDate)
                 {
+                    String dateFormat = getDateFormatByDate(dateSet.endDate)
                     end = Date.parse(dateFormat, dateSet.endDate as String)
                 }
                 else
@@ -2215,6 +2216,27 @@ private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attr
                 return buildFilterParameterFromCondition([start, end])
             default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
         }
+    }
+}
+
+/**
+ * Метод получения формата обработки даты по той, что пришла с фронта
+ * @param date - дата строкой
+ * @return формат для преобразования строки в дату
+ */
+String getDateFormatByDate(String date)
+{
+    if (date.contains(':'))
+    {
+        return 'dd.MM.yy HH:mm'
+    }
+    else if(date.contains('.'))
+    {
+        return 'dd.MM.yy'
+    }
+    else
+    {
+        return 'yyyy-MM-dd'
     }
 }
 
