@@ -452,19 +452,32 @@ class Link
                                     Closure buildStateFilter = { String code, String condition, String stateCode ->
                                         if(sourceCode.contains('$'))
                                         {
-                                            def objectToFilter = new SimpleDtObject("$sourceCode:$stateCode",'')
+                                            def objectToFilter = new SimpleDtObject("$sourceCode:$stateCode", '')
                                             return filterBuilder.AND(
                                                 filterBuilder.OR(code, condition, objectToFilter)
                                             )
                                         }
                                         def cases = api.metainfo.getTypes(sourceCode).code
-                                        return filterBuilder.AND(
-                                            *cases.collect{
-                                                filterBuilder.OR(code,
-                                                                 condition,
-                                                                 new SimpleDtObject("$it:$stateCode", ''))
+                                        if (condition == 'contains')
+                                        {
+                                            return filterBuilder.AND(
+                                                *cases.collect {
+                                                    filterBuilder.OR(code,
+                                                                     condition,
+                                                                     new SimpleDtObject("$it:$stateCode", ''))
+                                                }
+                                            )
+                                        }
+                                        else
+                                        {
+                                            cases.each { filterBuilder.AND(
+                                                filterBuilder.OR(
+                                                    code,
+                                                    condition,
+                                                    new SimpleDtObject("$it:$stateCode", '')))
                                             }
-                                        )
+                                            return filterBuilder
+                                        }
                                     }
                                     switch (it.type.toLowerCase())
                                     {
@@ -474,25 +487,25 @@ class Link
                                             return buildStateFilter(attr.code, 'notContains', it.data.uuid)
                                         case 'contains_any':
                                             List objectsToFilter = it.data*.uuid.collectMany { stateCode ->
-                                                if(sourceCode.contains('$'))
+                                                if (sourceCode.contains('$'))
+                                                {
+                                                    return [new SimpleDtObject("$sourceCode:$stateCode", '')]
+                                                }
+                                                else
                                                 {
                                                     def cases = api.metainfo.getTypes(sourceCode).code
                                                     return cases.collect {
                                                         new SimpleDtObject("$it:$stateCode", '')
                                                     }
                                                 }
-                                                else
-                                                {
-                                                    return [new SimpleDtObject("$sourceCode:$stateCode",'')]
-                                                }
                                             }
-                                            return filterBuilder.OR(attr.code, 'containsInSet', objectsToFilter)
+                                            return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', objectsToFilter))
                                         case 'title_contains':
-                                            return filterBuilder.OR(attr.code, 'titleContains', it.data)
+                                            return filterBuilder.AND(filterBuilder.OR(attr.code, 'titleContains', it.data))
                                         case 'title_not_contains':
-                                            return filterBuilder.OR(attr.code, 'titleNotContains', it.data)
+                                            return filterBuilder.AND(filterBuilder.OR(attr.code,'titleNotContains',it.data))
                                         case ['equal_subject_attribute', 'equal_attr_current_object']:
-                                            return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
+                                            return filterBuilder.AND(filterBuilder.OR(attr.code,'contains',it.data.uuid))
                                         default: throw new IllegalArgumentException(
                                             "Not supported condition type: ${ it.type }"
                                         )
