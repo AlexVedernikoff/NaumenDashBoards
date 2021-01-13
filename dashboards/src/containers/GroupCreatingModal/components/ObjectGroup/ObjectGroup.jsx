@@ -17,6 +17,7 @@ import {debounce} from 'src/helpers';
 import {functions, props} from './selectors';
 import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
 import {MaterialTreeSelect} from 'components/molecules';
+import {Node} from 'components/molecules/MaterialTreeSelect/components';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
@@ -111,6 +112,7 @@ export class ObjectGroup extends Component<Props, State> {
 		const {error, items: options, loading, uploaded} = this.getObjectSelectData(actual);
 		const showMore = !(loading || uploaded || error);
 		const components = {
+			Node: this.renderNode,
 			SearchInput: this.renderSearchInput
 		};
 
@@ -246,6 +248,13 @@ export class ObjectGroup extends Component<Props, State> {
 				render={this.renderMultiSelect(actual)}
 			/>
 		);
+	};
+
+	renderNode = (props: Object) => {
+		const {[this.getObjectId()]: foundData = {}} = this.props.objects.found;
+		const {searchValue} = foundData;
+
+		return <Node {...props} searchValue={searchValue} />;
 	};
 
 	renderSearchInput = () => {

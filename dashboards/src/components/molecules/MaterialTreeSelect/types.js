@@ -1,10 +1,12 @@
 // @flow
 import type {ComponentProps as SearchInputComponentProps} from 'components/atoms/SearchInput/types';
 import type {NodeValue, Tree} from './components/Tree/types';
+import type {Props as NodeProps} from './components/Node/types';
 
 export type Value = Object;
 
 export type Components = {
+	Node: React$ComponentType<NodeProps>,
 	SearchInput: React$ComponentType<SearchInputComponentProps>;
 };
 

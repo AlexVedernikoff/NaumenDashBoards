@@ -2,11 +2,11 @@
 import type {Components, Props, State} from './types';
 import {debounce} from 'src/helpers';
 import {MultiValueContainer, ValueContainer} from 'components/molecules/MaterialSelect/components';
-import type {Node} from './components/Tree/types';
+import {Node, Tree} from './components';
+import type {Node as NodeType} from './components/Tree/types';
 import {OutsideClickDetector, SearchInput} from 'components/atoms';
 import React, {Component} from 'react';
 import styles from './styles.less';
-import {Tree} from './components';
 
 export class MaterialTreeSelect extends Component<Props, State> {
 	static defaultProps = {
@@ -29,6 +29,7 @@ export class MaterialTreeSelect extends Component<Props, State> {
 	getExtendedComponents (props: Props): Components {
 		const {components: customComponents} = props;
 		const components = {
+			Node,
 			SearchInput
 		};
 
@@ -71,7 +72,7 @@ export class MaterialTreeSelect extends Component<Props, State> {
 		this.setState({showMenu: !showMenu});
 	};
 
-	handleSelect = (node: Node) => {
+	handleSelect = (node: NodeType) => {
 		const {multiple, name, onSelect} = this.props;
 
 		if (!multiple) {
@@ -84,11 +85,12 @@ export class MaterialTreeSelect extends Component<Props, State> {
 	hideMenu = () => this.setState({showMenu: false});
 
 	renderList = () => {
-		const {isEnabledNode, loading, multiple, onLoad, options, showMore, value, values} = this.props;
+		const {components, isEnabledNode, loading, multiple, onLoad, options, showMore, value, values} = this.props;
 		const {searchValue} = this.state;
 
 		return (
 			<Tree
+				components={components}
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
 				isEnabledNode={isEnabledNode}

@@ -1,4 +1,5 @@
 // @flow
+import type {Props as NodeProps} from 'components/molecules/MaterialTreeSelect/components/Node/types';
 import type {TreeNode} from 'components/types';
 
 export type NodeValue = Object;
@@ -9,7 +10,12 @@ export type Tree = {
 	[string]: Node
 };
 
+type Components = {
+	Node: React$ComponentType<NodeProps>,
+};
+
 export type Props = {
+	components: Components,
 	getOptionLabel: (option: Node | null) => string,
 	getOptionValue: (option: Node | null) => string,
 	initialSelected: Array<string>,
@@ -27,7 +33,6 @@ export type Props = {
 };
 
 export type State = {
-	expandedNodes: Array<string>,
 	foundIds: Array<string>,
 	selectedIds: Array<string>
 };
