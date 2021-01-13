@@ -29,8 +29,9 @@ class WidgetEditForm extends PureComponent<Props, State> {
 		return deepClone(values);
 	}
 
-	componentDidCatch () {
+	componentDidCatch (e: Error) {
 		const {cancelForm, createToast} = this.props;
+		console.error(e);
 
 		createToast({
 			text: 'Ошибка формы редактирования',

@@ -1,7 +1,7 @@
 // @flow
 import {Button, Loader} from 'components/atoms';
 import {ListMessage} from 'components/molecules/Select/components';
-import {Node} from 'components/molecules/MaterialTreeSelect/components';
+import Node from 'components/molecules/MaterialTreeSelect/components/Node';
 import type {Node as NodeType, Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
