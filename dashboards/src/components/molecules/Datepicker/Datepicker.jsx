@@ -3,7 +3,6 @@ import cn from 'classnames';
 import {DatepickerControl} from 'components/atoms';
 import {LIMIT_DAYS, WEEK_LABELS, WEEKEND_DAYS} from './constants';
 import moment from 'moment';
-import type Moment from 'moment';
 import type {Props as ControlProps} from 'components/atoms/DatepickerControl/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -39,7 +38,7 @@ export class Datepicker extends PureComponent<Props, State> {
 		});
 	};
 
-	getDays = (startDate: Moment) => {
+	getDays = (startDate: moment) => {
 		const days = [];
 
 		for (let i = 0; i < LIMIT_DAYS; i++) {
@@ -73,7 +72,7 @@ export class Datepicker extends PureComponent<Props, State> {
 
 	renderControl = (props: ControlProps) => <DatepickerControl {...props} />;
 
-	renderDay = (date: Moment) => {
+	renderDay = (date: moment) => {
 		const {value} = this.props;
 		const {currentDate} = this.state;
 		const isToday = moment().isSame(date, 'day');

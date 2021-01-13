@@ -22,17 +22,19 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 	handleClickOutside = () => this.setState({showDatepicker: false});
 
 	handleSelect = (date: string) => {
-		const {name, onChange} = this.props;
+		const {name, onSelect} = this.props;
 
-		this.setState({showDatepicker: false});
-		onChange(name, date);
+		this.setState({ showDatepicker: false });
+		onSelect(name, date);
 	};
 
 	renderCalendarIcon = () => <Icon className={styles.calendarIcon} name={ICON_NAMES.CALENDAR} onClick={this.handleClickCalendarIcon} />;
 
 	renderDatepicker = () => {
-		const {value} = this.props;
+		const {availableFormats, value: currValue} = this.props;
 		const {showDatepicker} = this.state;
+
+		const value = moment(currValue, availableFormats, true).isValid() ? moment(currValue, availableFormats) : moment();
 
 		if (showDatepicker) {
 			return (
@@ -45,12 +47,10 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 
 	renderValue = () => {
 		const {value} = this.props;
-		const date = moment(value);
-		const inputValue = date.isValid() ? date.format('DD.MM.YYYY') : value;
 
 		return (
 			<div className={styles.valueContainer}>
-				<input onChange={this.handleChange} value={inputValue} />
+				<input onChange={this.handleChange} value={value} />
 			</div>
 		);
 	};
