@@ -11,7 +11,7 @@ export type Symbol = {
 export type Props = {
 	className: string,
 	name: IconName,
-	onClick?: () => void,
+	onClick?: (e: SyntheticMouseEvent<HTMLElement>) => void,
 	size: $Keys<typeof ICON_SIZES>,
 	title: string
 };

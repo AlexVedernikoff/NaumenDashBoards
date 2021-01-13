@@ -14,6 +14,8 @@ export type BaseColumn = {
 	width?: number
 };
 
+export type ColumnType = $Keys<typeof COLUMN_TYPES>;
+
 export type ParameterColumn = {
 	...BaseColumn,
 	attribute: Attribute,
@@ -77,5 +79,5 @@ export type Props = {
 };
 
 export type State = {
-	columns: Array<Column>
+	fixedColumnsCount: number
 };

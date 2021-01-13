@@ -2,7 +2,6 @@
 import type {Column} from 'Table/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import styles from './styles.less';
 
 export class Footer extends PureComponent<Props> {
 	renderColumn = (column: Column) => {
@@ -12,7 +11,6 @@ export class Footer extends PureComponent<Props> {
 
 		return (
 			<FooterCell
-				className={styles.cell}
 				column={column}
 				components={components}
 				key={accessor}
@@ -23,14 +21,10 @@ export class Footer extends PureComponent<Props> {
 	};
 
 	render () {
-		const {columns, components, width} = this.props;
+		const {columns, components} = this.props;
 		const {Row} = components;
 
-		return (
-			<div className={styles.header} style={{width}}>
-				<Row>{columns.map(this.renderColumn)}</Row>
-			</div>
-		);
+		return <Row>{columns.map(this.renderColumn)}</Row>;
 	}
 }
 

@@ -1,8 +1,8 @@
 // @flow
+import {Children, cloneElement, createRef, isValidElement, PureComponent} from 'react';
 import {debounce} from 'src/helpers';
-import type {DivRef} from 'components/types';
 import type {Props, State} from './types';
-import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import ResizeObserver from 'resize-observer-polyfill';
 
 export class ResizeDetector extends PureComponent<Props, State> {
@@ -17,11 +17,11 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	};
 
 	observer: Object;
-	ref: DivRef = createRef();
+	elementRef: Ref<string> = createRef();
 
 	componentDidMount () {
 		const {debounceRate} = this.props;
-		const {current: element} = this.getRef();
+		const {current: element} = this.elementRef;
 		this.observer = new ResizeObserver(debounce(this.handleResize, debounceRate));
 
 		element && this.observer.observe(element);
@@ -31,7 +31,33 @@ export class ResizeDetector extends PureComponent<Props, State> {
 		this.observer.disconnect();
 	}
 
-	getRef = () => this.props.forwardedRef || this.ref;
+	cloneComponentElement = (child: React$Element<typeof React$Component>) => {
+		let {props} = child;
+
+		if (!props.forwardedRef) {
+			props = {
+				...props,
+				forwardedRef: this.elementRef
+			};
+		}
+
+		return cloneElement(child, props);
+	};
+
+	cloneDOMElement = (child: React$Element<'string'>) => {
+		let {props, ref} = child;
+
+		if (!ref) {
+			props = {
+				...props,
+				ref: this.elementRef
+			};
+		} else {
+			this.elementRef = ref;
+		}
+
+		return cloneElement(child, props);
+	};
 
 	handleResize = (entries: Array<ResizeObserverEntry>) => {
 		const {onResize, skipOnMount} = this.props;
@@ -46,13 +72,13 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {children, className, onClick, style} = this.props;
+		const child = Children.only(this.props.children);
 
-		return (
-			<div className={className} onClick={onClick} ref={this.getRef()} style={style}>
-				{children}
-			</div>
-		);
+		if (isValidElement(child)) {
+			return child.type === 'function' ? this.cloneComponentElement(child) : this.cloneDOMElement(child);
+		}
+
+		return child;
 	}
 }
 

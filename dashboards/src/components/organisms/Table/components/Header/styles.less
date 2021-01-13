@@ -1,13 +1,8 @@
 @import '/styles/variables';
 
 :local {
-	.header {
-		border: 1px solid @silver;
-		box-shadow: 0 2px 15px 0 @grey;
+	.row {
 		display: flex;
-		position: sticky;
-		top: 0;
-		z-index: 2;
 	}
 
 	.subColumnsContainer {
@@ -18,6 +13,7 @@
 		align-items: stretch;
 		display: flex;
 		flex-direction: column;
+		outline: 0.5px solid @silver;
 		overflow-x: hidden;
 	}
 }

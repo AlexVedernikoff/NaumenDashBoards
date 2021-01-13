@@ -98,7 +98,7 @@ export class Chart extends PureComponent<Props> {
 	};
 
 	mixinResize = (chart: React$Node) => (
-		<ResizeDetector className={styles.container} onResize={this.handleResize} skipOnMount={true}>
+		<ResizeDetector onResize={this.handleResize} skipOnMount={true}>
 			{chart}
 		</ResizeDetector>
 	);

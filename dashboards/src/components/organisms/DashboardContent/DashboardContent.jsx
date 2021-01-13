@@ -145,13 +145,10 @@ export class DashboardContent extends Component<Props, State> {
 		});
 
 		return (
-			<ResizeDetector
-				className={containerCN}
-				forwardedRef={this.gridContainerRef}
-				onClick={this.handleClick}
-				onResize={this.setGridWidth}
-			>
-				{this.renderGrid()}
+			<ResizeDetector onResize={this.setGridWidth}>
+				<div className={containerCN} onClick={this.handleClick} ref={this.gridContainerRef}>
+					{this.renderGrid()}
+				</div>
 			</ResizeDetector>
 		);
 	};
