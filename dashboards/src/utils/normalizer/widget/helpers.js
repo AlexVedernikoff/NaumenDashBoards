@@ -269,30 +269,8 @@ const getMainDataSet = (data: Array<Object>): Object => data.find(set => !set.so
  * @returns {Attribute | ComputedBreakdown | undefined} - при наличии, возвращает экземпляр разбивки
  */
 const breakdown = (index: number, data: Array<Object>, indicatorKey: string = FIELDS.indicator): Object | Array<Object> => {
-	const {breakdown: value, breakdownGroup, [indicatorKey]: indicator, source} = getMainDataSet(data);
-	let {breakdown} = data[index];
-
-	if (indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR && isObject(breakdown)) {
-		const usesDataSets = getMapValues(indicator.computeData).map(set => set.dataKey)
-			.filter((key, i, keys) => keys.indexOf(key) === i);
-
-		breakdown = data
-			.filter(({dataKey}) => usesDataSets.includes(dataKey))
-			.map(({dataKey}) => {
-				const {source: currentSource} = data.find(set => set.dataKey === dataKey) || mock;
-				const mainClassFqn = source.value.split('$')[0];
-				const currentClassFqn = currentSource && currentSource.value.split('$')[0];
-				const currentValue = mainClassFqn === currentClassFqn ? value : null;
-
-				return {
-					dataKey,
-					group: transformGroupFormat(breakdownGroup),
-					value: currentValue
-				};
-			});
-	}
-
-	return breakdown;
+	const {breakdown, [indicatorKey]: indicator} = data[index];
+	return indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR && isObject(breakdown) ? undefined : breakdown;
 };
 
 /**
