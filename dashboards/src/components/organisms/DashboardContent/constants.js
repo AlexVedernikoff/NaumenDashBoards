@@ -15,7 +15,6 @@ const GRID_PROPS = {
 			lg: DEFAULT_COLS_COUNT,
 			sm: 1
 		},
-		compactType: null,
 		containerPadding: [20, 20],
 		rowHeight: GRID_LAYOUT_HEIGHT
 	},

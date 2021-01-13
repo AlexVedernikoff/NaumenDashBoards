@@ -35,13 +35,13 @@ export class DashboardResizer {
 		return isFullSize;
 	};
 
-	resetHeight = () => this.isFullSize() ? this.setHeight(window.innerHeight) : this.setHeight(this.initHeight);
+	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setHeight(this.initHeight);
 
 	resize = () => {
 		const {editMode: editableDashboard} = store.getState().dashboard.settings;
 
 		if (this.isFullSize()) {
-			this.resetHeight();
+			this.setFullHeight();
 		} else if (editableDashboard) {
 			this.setHeight(this.initHeight);
 		} else {
@@ -79,11 +79,15 @@ export class DashboardResizer {
 		}
 	};
 
-	setHeight = (height: number) => {
-		const newHeight = `${height}px`;
+	setFullHeight = () => {
+		if (document.body) document.body.style.height = '100%';
+	};
 
-		if (document.body && document.body.style.height !== newHeight) {
-			document.body.style.height = newHeight;
+	setHeight = (height: number) => {
+		const attrHeight = `${height}px`;
+
+		if (document.body && document.body.style.height !== height) {
+			document.body.style.height = attrHeight;
 		}
 	};
 }

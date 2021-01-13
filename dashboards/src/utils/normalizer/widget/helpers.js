@@ -21,7 +21,7 @@ import {
 } from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS, LEGEND_POSITIONS} from 'utils/chart/constants';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
-import {extend, getMapValues, isObject} from 'src/helpers';
+import {extend, isObject} from 'src/helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getProcessedValue} from 'store/sources/attributes/helpers';
 
