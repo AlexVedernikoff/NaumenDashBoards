@@ -1,5 +1,5 @@
 // @flow
-import type {Range} from 'store/widgets/data/types';
+import type {Range, RangesType} from 'store/widgets/data/types';
 
 export type Props = {
 	index: number,
@@ -8,5 +8,5 @@ export type Props = {
 	onRemove: (index: number) => void,
 	range: Range,
 	removable: boolean,
-	usePercent: boolean
+	type: RangesType
 };

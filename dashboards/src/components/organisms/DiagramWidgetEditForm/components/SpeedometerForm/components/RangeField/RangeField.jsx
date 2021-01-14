@@ -6,6 +6,7 @@ import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import type {Props as ColorInputProps} from 'components/molecules/ColorInput/components/Input/types';
+import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {TextInput} from 'components/atoms';
@@ -29,25 +30,36 @@ export class RangeField extends PureComponent<Props> {
 		});
 	};
 
-	handleChangeToRange = (event: OnChangeInputEvent) => {
-		const {index, onChangeToRange, usePercent} = this.props;
+	handleChangeAbsoluteRange = (event: OnChangeInputEvent) => {
 		let value = String(event.value);
 
-		if (usePercent) {
-			value = value.replace(/%/g, '');
-		}
-
-		if (/^(\d+)?$/.test(value) && (!usePercent || Number(value) <= 100)) {
-			onChangeToRange(index, value);
+		if (/^-?(\d+)?(\.)?(\d{1,4})?$/.test(value)) {
+			this.handleChange(event);
 		}
 	};
+
+	handleChangePercentRange = (event: OnChangeInputEvent) => {
+		let {name, value} = event;
+
+		value = String(value).replace(/%/g, '');
+
+		if (/^(\d{1,3})?$/.test(value) && (name !== FIELDS.to || Number(value) <= 100)) {
+			this.handleChange({...event, value});
+		}
+	};
+
+	handleChangeRange = (event: OnChangeInputEvent) => this.hasPercentType()
+		? this.handleChangePercentRange(event)
+		: this.handleChangeAbsoluteRange(event);
 
 	handleRemove = () => {
 		const {index, onRemove} = this.props;
 		onRemove(index);
 	};
 
-	modifyValue = (value: string | number) => this.props.usePercent ? `${value}%` : value;
+	hasPercentType = () => this.props.type === RANGES_TYPES.PERCENT;
+
+	modifyValue = (value: string | number) => this.hasPercentType() ? `${value}%` : value;
 
 	renderColorInput = (props: ColorInputProps) => {
 		const {forwardedRef, onClick, value} = props;
@@ -75,9 +87,10 @@ export class RangeField extends PureComponent<Props> {
 	};
 
 	render () {
-		const {index, range, usePercent} = this.props;
+		const {index, range} = this.props;
 		const {color, from, to} = range;
-		const toRangeDisabled = usePercent && index > 0 && Number(to) === 100;
+		const hasPercentType = this.hasPercentType();
+		const toRangeDisabled = hasPercentType && index > 0 && Number(to) === 100;
 
 		return (
 			<FormField className={styles.container} row>
@@ -90,15 +103,16 @@ export class RangeField extends PureComponent<Props> {
 				/>
 				<TextInput
 					className={styles.fromField}
-					disabled={usePercent}
-					name="from"
-					onChange={this.handleChange}
+					disabled={hasPercentType}
+					name={FIELDS.from}
+					onChange={this.handleChangeRange}
 					value={this.modifyValue(from)}
 				/>
 				<TextInput
 					className={styles.toField}
 					disabled={toRangeDisabled}
-					onChange={this.handleChangeToRange}
+					name={FIELDS.from}
+					onChange={this.handleChangeRange}
 					value={this.modifyValue(to)}
 				/>
 			</FormField>

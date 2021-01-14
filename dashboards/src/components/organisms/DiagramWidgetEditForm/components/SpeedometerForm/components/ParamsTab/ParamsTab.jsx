@@ -8,6 +8,7 @@ import {FormField} from 'components/molecules';
 import {getErrorKey} from 'DiagramWidgetEditForm/helpers';
 import type {Ranges} from 'store/widgets/data/types';
 import {RangesFieldset} from 'DiagramWidgetEditForm/components/SpeedometerForm/components';
+import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
@@ -21,12 +22,9 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const value = inputValue.replace(',', '.');
 
 		if (!value || /^-?(\d+)?(\.)?(\d{1,4})?$/.test(value)) {
-			setFieldValue(FIELDS.borders, {
-				...borders,
-				[name]: value
-			});
+			const {data, type} = ranges;
 
-			if (ranges.data.length === 1) {
+			if (type === RANGES_TYPES.ABSOLUTE && data.length === 1) {
 				const rangeName: string = name === FIELDS.max ? 'to' : 'from';
 
 				this.handleChangeRanges({
@@ -37,6 +35,11 @@ export class ParamsTab extends Component<DataBuilderProps> {
 					}]
 				});
 			}
+
+			setFieldValue(FIELDS.borders, {
+				...borders,
+				[name]: value
+			});
 		}
 	};
 
