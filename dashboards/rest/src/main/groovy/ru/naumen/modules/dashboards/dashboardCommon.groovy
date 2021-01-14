@@ -189,7 +189,8 @@ Date getMinDate(String code, String classFqn)
 Integer countDistinct(Attribute attribute, String classFqn)
 {
     String attributeType = attribute.type
-    String attrCode = attribute.attrChains()*.code*.replace('metaClass', 'metaClassFqn').join('.')
+    List attrCodesList = attribute.attrChains()*.code
+    String attrCode = attrCodesList.collect { it == 'UUID' ? 'id' : it.replace('metaClass', 'metaClassFqn') }.join('.')
     def s = api.selectClause
     def criteria = api.db.createCriteria().addSource(classFqn)
     if(attributeType == AttributeType.META_CLASS_TYPE)

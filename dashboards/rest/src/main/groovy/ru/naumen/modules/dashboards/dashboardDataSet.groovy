@@ -3688,17 +3688,30 @@ private TableDiagram mappingTable(List resultDataSet,
     //подготовка данных
     if (hasBreakdown)
     {
-        List<Map> rows = getFullRows(tempMaps, parameterIndex)
-        rows = prepareRowsWithBreakdown(rows, parameterIndex, attributeNames, notAggregatedAttributeNames, breakdownValues)
-        data = rows.withIndex().collect { map, id ->
+        Integer indexToFind = 2 //берём до предпоследнего значения в строке, на последнем месте - разбивка
+        def groups = tempMaps.groupBy { it[parameterIndex..-(indexToFind)] }//группируем данные по параметрам (их значениям)
+        int id = 0
+        data = groups.collect { parameters, group ->
+            if (valuesInBasicBreakdownExceedLimit)
+            {
+                //если предел по значениям кастомной группировки превышен,
+                // то нужно взять лишь те группы значений, где в разбивке значения из ограничения
+                group = group.findAll { it.last().values().head() in breakdownValues }
+            }
+            List<Map> aggregations = []
+            if(group)
+            {
+                aggregations = updateAggregations(group, aggregationCnt, notAggregatedAttributeNames)
+            }
+            def map = [:]
             if (showRowNum)
             {
-                return [ID: ++id, *:map.sum()]
+                map = [ID: ++id]
             }
-            else
-            {
-                return [*:map.sum()]
+            (parameters + aggregations).each {
+                map << it
             }
+            return map
         }
     }
     else
@@ -3786,20 +3799,6 @@ Boolean checkForDateInAttribute(Map attributeValue, Boolean flag)
 }
 
 /**
- * метод получения всех строк
- * @param tempMaps - текущие мапы из всего датасета
- * @param aggregationCnt - количество агрегаций в запросе
- * @return список итоговых строк
- */
-List<Map> getFullRows(List<Map> tempMaps, Integer aggregationCnt)
-{
-    List groupsByParameters = getGroupsByTempMaps(tempMaps, aggregationCnt)
-    return aggregationCnt > 0
-        ? collectMapListsWithAggregations(groupsByParameters, aggregationCnt)
-        : groupsByParameters
-}
-
-/**
  * Метод получения групп значений агрегации и разбивки по параметрам
  * @param tempMaps - текущие мапы значений
  * @param aggregationCnt - количество агргегаций в запросе
@@ -3824,36 +3823,23 @@ List getGroupsByTempMaps(List<Map> tempMaps, Integer aggregationCnt)
 }
 
 /**
- * Метод получения списков мап с преобразованными агрегациями
- * @param groups - текущие группы данных по идентичным значениям параметров
- * @param aggregationCnt - количество агрегаций в запросе
- * @return списки мап с преобразованными агрегациями
- */
-List<Map> collectMapListsWithAggregations(List groups, Integer aggregationCnt)
-{
-    return groups.collect { group ->
-        //берём первый список мап (название атрибута - значение
-        List<Map> firstMapList = group[0]
-        //из него берём значения только для параметров - они останутся неизменными
-        List<Map> parameters = firstMapList[aggregationCnt..-2]
-        List<Map> aggregations = updateAggregations(group, aggregationCnt)
-        return parameters + aggregations
-    }
-}
-
-/**
  * Метод преобразования агрегации с включением в неё значений разбивки
  * @param group - текущие группа данных по идентичным значениям параметров
  * @param aggregationCnt - количество агрегаций в запросе
+ * @param notAggregatedAttributeNames - список названий атрибутов с агрегацией N/A
  * @return преобразованная агрегация с включением в неё значений разбивки
  */
-List<Map> updateAggregations(List<Map> group, Integer aggregationCnt)
+List<Map> updateAggregations(List<Map> group, Integer aggregationCnt, List notAggregatedAttributeNames)
 {
     return group.collectMany { value ->
         return (0..aggregationCnt - 1).collect {
             def aggregation = value[it].findResult { k, v -> [k, v] }
             def breakdownValue = value.last().findResult { k, v -> [k, v] }
-            return [(aggregation[0]) : [(breakdownValue[1]): aggregation[1]]]
+            if (!aggregation[1])
+            {
+                aggregation[1] = notAggregatedAttributeNames?.contains(aggregation[0]) ? "" : "0"
+            }
+            return [("${aggregation[0]}\$${breakdownValue[1]}"): aggregation[1]]
         }
     }
 }
