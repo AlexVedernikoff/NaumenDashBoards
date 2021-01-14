@@ -102,7 +102,6 @@ export class RangesFieldset extends PureComponent<Props> {
 
 	renderRangeField = (range: Range, index: number, ranges: Array<Range>) => {
 		const {type} = this.props.ranges;
-		const usePercent = type === RANGES_TYPES.PERCENT;
 		const removable = ranges.length > 1;
 
 		return (
@@ -113,7 +112,7 @@ export class RangesFieldset extends PureComponent<Props> {
 				onRemove={this.handleRemoveRange}
 				range={range}
 				removable={removable}
-				usePercent={usePercent}
+				type={type}
 			/>
 		);
 	};

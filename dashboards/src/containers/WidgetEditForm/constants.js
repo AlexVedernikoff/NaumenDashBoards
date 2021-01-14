@@ -27,6 +27,7 @@ const fontColor: 'fontColor' = 'fontColor';
 const fontFamily: 'fontFamily' = 'fontFamily';
 const fontSize: 'fontSize' = 'fontSize';
 const fontStyle: 'fontStyle' = 'fontStyle';
+const from: 'from' = 'from';
 const group: 'group' = 'group';
 const header: 'header' = 'header';
 const indicator: 'indicator' = 'indicator';
@@ -64,6 +65,7 @@ const templateName: 'templateName' = 'templateName';
 const textAlign: 'textAlign' = 'textAlign';
 const textHandler: 'textHandler' = 'textHandler';
 const tip: 'tip' = 'tip';
+const to: 'to' = 'to';
 const top: 'top' = 'top';
 const type: 'type' = 'type';
 const value: 'value' = 'value';
@@ -102,6 +104,7 @@ const FIELDS = {
 	fontFamily,
 	fontSize,
 	fontStyle,
+	from,
 	group,
 	header,
 	indicator,
@@ -140,6 +143,7 @@ const FIELDS = {
 	textHandler,
 	tickAmount,
 	tip,
+	to,
 	top,
 	type,
 	use,
