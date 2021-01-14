@@ -148,10 +148,12 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	let breakdownUsesUUIDs = false;
 	let maxValue;
 
-	if (buildDataSet) {
-		parameterUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.xAxis);
-		breakdownUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.breakdown);
-	}
+	widget.data.forEach(dataSet => {
+		if (!dataSet.sourceForCompute) {
+			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(dataSet, FIELDS.xAxis);
+			breakdownUsesUUIDs = !breakdownUsesUUIDs || hasUUIDsInLabels(dataSet, FIELDS.breakdown);
+		}
+	});
 
 	if (widget.indicator.showDependent || stacked) {
 		maxValue = getMaxValue(series, stacked);
