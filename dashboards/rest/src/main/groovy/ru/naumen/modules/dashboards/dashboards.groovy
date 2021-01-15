@@ -227,10 +227,57 @@ String searchValue(Map requestContent)
     String attributeCode = requestContent.attribute.code
     def value = requestContent.value
 
-    def context = api.attrs.definePossibleValues().searchString(value)
-    def results = api.attrs.listPossibleValues(attributeCode, [metaClass: sourceCode], context).results
+    def bottomValues = getAttributeTypes(attributeCode, sourceCode).collectMany {
+        api.utils.find(it.toString(), [title: op.like("%${value}%") ])
+    }.unique { it.UUID }
 
-    return toJson(getValues(results, sourceCode))
+    def withParentsBottoms = []
+    def independentBottoms = []
+    bottomValues.each { bottom ->
+        def parents = getParents(bottom)
+        if(parents)
+        {
+            withParentsBottoms << (parents + bottom)
+        }
+        else
+        {
+            independentBottoms << basicMap(bottom.title,
+                                    bottom.UUID,
+                                    bottom.metaClass.toString())
+        }
+    }
+    withParentsBottoms = withParentsBottoms.groupBy { it[0..-2] }.collect { parentSet, both ->
+        def childrenList = both*.last().flatten().collect {
+            basicMap(it.title,
+                     it.UUID,
+                     it.metaClass.toString())
+        }
+
+        parentSet.each { bottomParent ->
+            childrenList = basicMap(bottomParent.title,
+                                    bottomParent.UUID,
+                                    bottomParent.metaClass.toString(),
+                                    childrenList instanceof Collection ? childrenList : [childrenList])
+        }
+        return childrenList
+    }
+    return toJson(independentBottoms + withParentsBottoms)
+}
+
+/**
+ * Метод, возвращающий всех "родителей" объекта
+ * @param bottom - объект "на дне"
+ * @return - список всех "родителей"
+ */
+def getParents(def bottom)
+{
+    def parentList = []
+    while(bottom?.parent)
+    {
+        parentList += bottom.parent
+        bottom = bottom.parent
+    }
+    return parentList
 }
 
 /**
@@ -238,10 +285,10 @@ String searchValue(Map requestContent)
  * @param title - название для мапы
  * @param uuid - uuid для мапы
  * @param property - property для мапы
- * @param children - список детей
+ * @param children - дети
  * @return базовая мапа
  */
-Map basicMap(String title, String uuid, String property, List children = [])
+Map basicMap(String title, String uuid, String property, def children = [])
 {
     return [
         title   : title,
