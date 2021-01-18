@@ -31,7 +31,7 @@ export class Header extends PureComponent<Props> {
 			: this.renderHeaderCell(column, index, columns);
 	};
 
-	renderColumnWidthSubColumns = (column: Column, index: number, columns: Array<Column>) => {
+	renderColumnWithSubColumns = (column: Column, index: number, columns: Array<Column>) => {
 		const {columnsWidth} = this.props;
 		const {accessor, columns: subColumns} = column;
 		const width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
