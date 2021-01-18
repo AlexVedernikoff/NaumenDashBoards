@@ -73,16 +73,13 @@ const hasPercent = (set: Object, field: string = FIELDS.indicator) => {
 
 /**
  * Сообщает об использовании uuid в лейблах
- * @param {DiagramWidgetDataSet} dataSet - набор данных виджета
- * @param {Array<string>} fields - наименования полей атрибутов
+ * @param {Attribute} attribute - атрибут
  * @returns {boolean}
  */
-const hasUUIDsInLabels = (dataSet: DiagramWidgetDataSet, ...fields: Array<string>) => !!fields.find(field => {
-	const {[field]: attribute} = dataSet;
+const hasUUIDsInLabels = (attribute?: Attribute) => {
 	const {backBOLinks, boLinks, metaClass} = ATTRIBUTE_TYPES;
-
 	return attribute && [backBOLinks, boLinks, metaClass].includes(attribute.type);
-});
+};
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация, по которой возвращается интервал в миллисекундах

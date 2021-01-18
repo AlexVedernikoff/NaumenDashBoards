@@ -4,16 +4,20 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 
 export class Footer extends PureComponent<Props> {
-	renderColumn = (column: Column) => {
-		const {columnsWidth, components} = this.props;
+	renderColumn = (column: Column, index: number, columns: Array<Column>) => {
+		const {columnsWidth, components, fixedColumnsCount, fixedLeft} = this.props;
 		const {FooterCell} = components;
 		const {accessor, footer} = column;
+		const left = fixedColumnsCount - index > 0 ? fixedLeft : 0;
+		const last = index === columns.length - 1;
 
 		return (
 			<FooterCell
 				column={column}
 				components={components}
 				key={accessor}
+				last={last}
+				left={left}
 				value={footer}
 				width={columnsWidth[accessor]}
 			/>
@@ -21,10 +25,14 @@ export class Footer extends PureComponent<Props> {
 	};
 
 	render () {
-		const {columns, components} = this.props;
+		const {columns, components, width} = this.props;
 		const {Row} = components;
 
-		return <Row>{columns.map(this.renderColumn)}</Row>;
+		return (
+			<div style={{width}}>
+				<Row>{columns.map(this.renderColumn)}</Row>
+			</div>
+		);
 	}
 }
 

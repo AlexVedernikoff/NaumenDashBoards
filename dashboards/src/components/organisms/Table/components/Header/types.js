@@ -8,8 +8,10 @@ export type Props = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
 	data: Array<Row>,
+	fixedColumnsCount: number,
+	fixedLeft: number,
 	onChangeColumnWidth: (width: number, column: Column) => void,
 	onChangeSorting: TableSorting => void,
 	sorting: TableSorting,
-	usesSubColumns: boolean
+	width: number
 };

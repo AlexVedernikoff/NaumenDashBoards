@@ -8,13 +8,13 @@ import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 
 export class HeaderCell extends PureComponent<Props> {
-	ref: Ref<'div'> = createRef();
+	resizerRef: Ref<'div'> = createRef();
 	dragStart = false;
 	resizerOffset: number;
 	cursorStart: number;
 
 	componentDidMount () {
-		const {current: resizer} = this.ref;
+		const {current: resizer} = this.resizerRef;
 
 		if (resizer) {
 			document.addEventListener('mousemove', this.mouseMove);
@@ -24,7 +24,7 @@ export class HeaderCell extends PureComponent<Props> {
 	}
 
 	componentWillUnmount () {
-		const {current: resizer} = this.ref;
+		const {current: resizer} = this.resizerRef;
 
 		if (resizer) {
 			document.removeEventListener('mousemove', this.mouseMove);
@@ -35,7 +35,7 @@ export class HeaderCell extends PureComponent<Props> {
 
 	handleClick = () => {
 		const {column, onClick} = this.props;
-		onClick(column);
+		!this.dragStart && onClick(column);
 	};
 
 	handleClickResizer = (event: SyntheticMouseEvent<HTMLDivElement>) => event.stopPropagation();
@@ -62,10 +62,10 @@ export class HeaderCell extends PureComponent<Props> {
 		this.dragStart = false;
 	};
 
-	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.ref} />;
+	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.resizerRef} />;
 
 	render () {
-		const {column, components, fontColor, fontStyle, sorting, textAlign, textHandler, value, width} = this.props;
+		const {column, components, fontColor, fontStyle, last, left, sorting, textAlign, textHandler, value, width} = this.props;
 		const {ASC, DESC} = SORTING_TYPES;
 		const {Cell} = components;
 		const cellCN = cn({
@@ -82,13 +82,16 @@ export class HeaderCell extends PureComponent<Props> {
 					components={components}
 					fontColor={fontColor}
 					fontStyle={fontStyle}
+					last={last}
+					left={left}
 					textAlign={textAlign}
 					textHandler={textHandler}
 					tip={value}
 					value={value}
 					width={width}
-				/>
-				{this.renderResizer()}
+				>
+					{this.renderResizer()}
+				</Cell>
 			</div>
 		);
 	}

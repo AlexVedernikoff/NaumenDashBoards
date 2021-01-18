@@ -8,9 +8,11 @@ import styles from './styles.less';
 
 export class Cell extends PureComponent<Props> {
 	static defaultProps: DefaultProps = {
+		children: null,
 		className: '',
 		defaultValue: DEFAULT_TABLE_VALUE.EMPTY_ROW,
 		fontColor: '',
+		left: 0,
 		row: null,
 		textAlign: TEXT_ALIGNS.left,
 		textHandler: TEXT_HANDLERS.CROP,
@@ -58,11 +60,13 @@ export class Cell extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, fontColor, fontStyle, textAlign, textHandler, tip, width} = this.props;
+		const {children, className, fontColor, fontStyle, last, left, textAlign, textHandler, tip, width} = this.props;
 		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 		const {CROP, WRAP} = TEXT_HANDLERS;
 		const cellCN = cn({
 			[styles.cell]: true,
+			[styles.lastCell]: last,
+			[styles.fixedCell]: left > 0,
 			[settingsStyles.bold]: fontStyle === BOLD,
 			[settingsStyles.italic]: fontStyle === ITALIC,
 			[settingsStyles.underline]: fontStyle === UNDERLINE,
@@ -70,10 +74,17 @@ export class Cell extends PureComponent<Props> {
 			[settingsStyles.wrap]: textHandler === WRAP,
 			[className]: true
 		});
+		const style = {
+			color: fontColor,
+			left,
+			textAlign,
+			width
+		};
 
 		return (
-			<div className={cellCN} onClick={this.handleClick} style={{color: fontColor, textAlign, width}} title={tip} >
+			<div className={cellCN} onClick={this.handleClick} style={style} title={tip}>
 				{this.renderValue()}
+				{children}
 			</div>
 		);
 	}

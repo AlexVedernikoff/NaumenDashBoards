@@ -16,12 +16,14 @@ export class Body extends PureComponent<Props> {
 		});
 	});
 
-	renderCell = (row: RowType, rowIndex: number) => (column: Column) => {
-		const {columnsWidth, components, onClickCell, settings} = this.props;
+	renderCell = (row: RowType, rowIndex: number) => (column: Column, columnIndex: number, columns: Array<Column>) => {
+		const {columnsWidth, components, fixedColumnsCount, fixedLeft, onClickCell, settings} = this.props;
 		const {defaultValue, textAlign, textHandler} = settings.body;
 		const {accessor} = column;
 		const {BodyCell} = components;
 		const width = columnsWidth[accessor];
+		const left = fixedColumnsCount - columnIndex > 0 ? fixedLeft : undefined;
+		const last = columnIndex === columns.length - 1;
 		let value = row[accessor];
 
 		if (Number(value) === 0) {
@@ -35,6 +37,8 @@ export class Body extends PureComponent<Props> {
 				components={components}
 				defaultValue={defaultValue.value}
 				key={accessor}
+				last={last}
+				left={left}
 				onClick={onClickCell}
 				row={row}
 				rowIndex={rowIndex}
@@ -54,7 +58,7 @@ export class Body extends PureComponent<Props> {
 	};
 
 	render () {
-		const {data, page, pageSize, sorting} = this.props;
+		const {data, page, pageSize, sorting, width} = this.props;
 		const {accessor, type} = sorting;
 		const start = pageSize * (page - 1);
 		let rows = data;
@@ -66,7 +70,7 @@ export class Body extends PureComponent<Props> {
 		rows = rows.slice(start, start + pageSize);
 
 		return (
-			<div className={styles.container}>
+			<div className={styles.body} style={{width}}>
 				{rows.map(this.renderRow)}
 			</div>
 		);

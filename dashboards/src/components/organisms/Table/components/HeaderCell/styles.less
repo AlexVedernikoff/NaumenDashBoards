@@ -2,16 +2,10 @@
 
 :local {
 	.cellContainer {
-		align-items: center;
+		align-items: stretch;
 		cursor: pointer;
 		display: flex;
-		height: 100%;
 		justify-content: center;
-		position: relative;
-	}
-
-	.cell {
-		border: none;
 	}
 
 	.sortAsc {
@@ -25,11 +19,11 @@
 	.resizer {
 		bottom: 0;
 		cursor: col-resize;
+		display: inline-block;
 		position: absolute;
-		right: -15px;
+		right: 0;
 		top: 0;
-		width: 30px;
-
-		z-index: 1;
+		width: 20px;
+		z-index: 99;
 	}
 }

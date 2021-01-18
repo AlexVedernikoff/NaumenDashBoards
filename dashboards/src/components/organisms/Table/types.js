@@ -64,8 +64,8 @@ export type Props = {
 export type State = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
-	fixedColumns: Array<Column>,
+	fixedLeft: number,
 	page: number,
 	sorting: TableSorting,
-	width: number | null
+	width: number
 };

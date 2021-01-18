@@ -7,7 +7,7 @@ import {
 } from 'store/widgets/buildData/constants';
 import {Cell, HeaderCell} from 'components/organisms/Table/components';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
-import type {Column, ColumnType, ParameterColumn, Props, State} from './types';
+import type {Column, ColumnType, ParameterColumn, Props, Row, State} from './types';
 import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
@@ -15,7 +15,7 @@ import {debounce, deepClone} from 'src/helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
-import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
+import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
 import React, {createRef, PureComponent} from 'react';
@@ -33,10 +33,22 @@ export class TableWidget extends PureComponent<Props, State> {
 		let {columns} = data;
 
 		const fixedColumnsCount = columns.findIndex(column => column.type === COLUMN_TYPES.INDICATOR);
+		const idColumn = columns.find(column => column.accessor === ID_ACCESSOR);
+
+		if (idColumn) {
+			idColumn.width = this.getMaxValueCellLength(data.data, ID_ACCESSOR);
+		}
 
 		return {
 			fixedColumnsCount
 		};
+	}
+
+	getMaxValueCellLength (data: Array<Row>, accessor: string): number {
+		return data.reduce((maxLength, row) => {
+			const currentLength = String(row[accessor]).length * 16;
+			return currentLength > maxLength ? currentLength : maxLength;
+		}, 0);
 	}
 
 	/**
@@ -98,17 +110,25 @@ export class TableWidget extends PureComponent<Props, State> {
 		return row || id === 1 ? row : this.findRow(id - 1, accessor);
 	};
 
+	getLastTypedColumn = (columns: Array<Column>, type: ColumnType): ?Column => columns.find((column, index, columns) => {
+		const nextColumn = columns[index + 1];
+		return column.type === type && (!nextColumn || nextColumn.type !== type);
+	});
+
 	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth): ColumnsWidth => {
+		const {columns} = this.props.data;
 		const {current: table} = this.tableRef;
-		const {accessor, type} = column;
+		const {accessor} = column;
 		const {BREAKDOWN, INDICATOR, PARAMETER} = COLUMN_TYPES;
 		const ratio = columnsWidth[accessor] / newWidth;
+		const isLastIndicator = this.isLastTypedColumn(columns, column, INDICATOR)
+			|| this.isLastTypedColumn(this.getLastTypedColumn(columns, INDICATOR).columns, column, BREAKDOWN);
 		let newColumnsWidth = columnsWidth;
 
-		if (type === PARAMETER) {
-			newColumnsWidth = this.getNewParametersColumnsWidth(column, newColumnsWidth, ratio);
-		} else if (type === BREAKDOWN || type === INDICATOR) {
+		if (isLastIndicator) {
 			newColumnsWidth = this.getNewIndicatorsColumnsWidth(column, newColumnsWidth, ratio);
+		} else if (this.isLastTypedColumn(columns, column, PARAMETER)) {
+			newColumnsWidth = this.getNewParametersColumnsWidth(column, newColumnsWidth, ratio);
 		} else if (table) {
 			newColumnsWidth = table.getNewColumnsWidth(column, newWidth, columnsWidth);
 		}
@@ -119,43 +139,24 @@ export class TableWidget extends PureComponent<Props, State> {
 	getNewIndicatorsColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number): ColumnsWidth => {
 		const {columns} = this.props.data;
 		const {BREAKDOWN, INDICATOR} = COLUMN_TYPES;
-		const {accessor, type} = column;
-		let newColumnsWidth = columnsWidth;
-		let isLastIndicator = false;
-		let isLastBreakdown = false;
+		const newColumnsWidth = deepClone(columnsWidth);
 
-		if (type === INDICATOR) {
-			isLastIndicator = this.isLastTypedColumn(column, INDICATOR);
-		} else if (type === BREAKDOWN) {
-			const lastIndicator = columns.find((column) => this.isLastTypedColumn(column, INDICATOR));
+		columns.filter(column => column.type === INDICATOR).forEach(column => {
+			let width = 0;
 
-			if (lastIndicator && Array.isArray(lastIndicator.columns)) {
-				isLastBreakdown = !!lastIndicator.columns.find(
-					(column, index, columns) => column.accessor === accessor && index === columns.length - 1
-				);
+			if (Array.isArray(column.columns)) {
+				column.columns.filter(column => column.type === BREAKDOWN).forEach(column => {
+					const newWidth = newColumnsWidth[column.accessor] / ratio;
+
+					newColumnsWidth[column.accessor] = newWidth;
+					width += newWidth;
+				});
+			} else {
+				width = newColumnsWidth[column.accessor] / ratio;
 			}
-		}
 
-		if (isLastIndicator || isLastBreakdown) {
-			newColumnsWidth = deepClone(newColumnsWidth);
-
-			columns.filter(column => column.type === INDICATOR).forEach(column => {
-				let width = 0;
-
-				if (Array.isArray(column.columns)) {
-					column.columns.filter(column => column.type === BREAKDOWN).forEach(column => {
-						const newWidth = newColumnsWidth[column.accessor] / ratio;
-
-						newColumnsWidth[column.accessor] = newWidth;
-						width += newWidth;
-					});
-				} else {
-					width = newColumnsWidth[column.accessor] / ratio;
-				}
-
-				newColumnsWidth[column.accessor] = width;
-			});
-		}
+			newColumnsWidth[column.accessor] = width;
+		});
 
 		return newColumnsWidth;
 	};
@@ -163,17 +164,13 @@ export class TableWidget extends PureComponent<Props, State> {
 	getNewParametersColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number): ColumnsWidth => {
 		const {columns} = this.props.data;
 		const {PARAMETER} = COLUMN_TYPES;
-		let newColumnsWidth = columnsWidth;
+		const newColumnsWidth = deepClone(columnsWidth);
 
-		if (this.isLastTypedColumn(column, PARAMETER)) {
-			newColumnsWidth = deepClone(newColumnsWidth);
-
-			columns.forEach(column => {
-				if (column.type === PARAMETER) {
-					newColumnsWidth[column.accessor] = columnsWidth[column.accessor] / ratio;
-				}
-			});
-		}
+		columns.forEach(column => {
+			if (column.type === PARAMETER) {
+				newColumnsWidth[column.accessor] = columnsWidth[column.accessor] / ratio;
+			}
+		});
 
 		return newColumnsWidth;
 	};
@@ -216,13 +213,11 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	isGroupColumn = (column: Column): boolean => column.type === COLUMN_TYPES.PARAMETER;
 
-	isLastTypedColumn = (column: Column, type: ColumnType): boolean => {
-		const {columns} = this.props.data;
-		const {accessor, type: columnType} = column;
-		const columnIndex = columns.findIndex(column => column.accessor === accessor);
-		const nextColumn = columns[columnIndex + 1];
+	isLastTypedColumn = (columns: Array<Column> = [], column: Column, type: ColumnType): boolean => {
+		const {accessor} = column;
+		const lastTypedColumn = this.getLastTypedColumn(columns, type);
 
-		return columnType === type && (!nextColumn || nextColumn.type !== type);
+		return column.type === type && !!lastTypedColumn && lastTypedColumn.accessor === accessor;
 	};
 
 	openCardObject = (props: OnClickCellProps) => {
@@ -311,7 +306,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {fontColor, fontStyle} = this.props.widget.table.body.parameterSettings;
 		let {column, value} = props;
 
-		if (column.attribute.type === ATTRIBUTE_TYPES.metaClass && typeof value === 'string') {
+		if (hasUUIDsInLabels(column.attribute) && typeof value === 'string') {
 			value = getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);
 		}
 
