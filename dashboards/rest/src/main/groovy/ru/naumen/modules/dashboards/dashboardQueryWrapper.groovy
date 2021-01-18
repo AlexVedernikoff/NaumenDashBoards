@@ -454,7 +454,7 @@ class QueryWrapper implements CriteriaWrapper
                 switch (format)
                 {
                     case 'WW YY':
-                        def weekColumn = sc.extract(column, 'WEEK')
+                        def weekColumn = sc.week(column)
                         def yearColumn = sc.year(column)
                         criteria.addColumn(sc.concat(weekColumn,
                                                      sc.constant(' неделя '),
@@ -494,7 +494,7 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'QQ YY':
-                        def quarterColumn = sc.extract(column, 'QUARTER')
+                        def quarterColumn = sc.quarter(column)
                         def yearColumn = sc.year(column)
                         criteria.addColumn(sc.concat(quarterColumn, sc.constant(' кв-л '),
                                                      yearColumn))
@@ -514,7 +514,7 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     default:
-                        IApiCriteriaColumn groupColumn = sc.extract(column, groupType as String)
+                        IApiCriteriaColumn groupColumn = sc.(groupType.toString().toLowerCase())(column)
                         criteria.addGroupColumn(groupColumn)
                         criteria.addColumn(groupColumn)
                         String sortingType = parameter.sortingType
