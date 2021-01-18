@@ -67,16 +67,21 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	handleWidgetFocus = (element: HTMLDivElement) => {
-		const {resetFocusedWidget} = this.props;
+		const {editMode: editableDashboard, resetFocusedWidget} = this.props;
 		const {current: container} = this.gridContainerRef;
-		let {top} = element.getBoundingClientRect();
+		const {top} = element.getBoundingClientRect();
+		let y = 0;
 
-		container && container.scrollTo({
-			behavior: 'smooth',
-			top: Math.max(top - container.getBoundingClientRect().top + container.scrollTop, 0)
-		});
+		if (resizer.isFullSize() || editableDashboard) {
+			container && container.scrollTo({
+				behavior: 'smooth',
+				top: Math.max(top - container.getBoundingClientRect().top + container.scrollTop, 0)
+			});
+		} else {
+			y = top;
+		}
 
-		resizer.scrollTo(0, 0);
+		resizer.scrollTo(0, y);
 		resetFocusedWidget();
 	};
 
