@@ -111,7 +111,7 @@ export class RangeField extends PureComponent<Props> {
 				<TextInput
 					className={styles.toField}
 					disabled={toRangeDisabled}
-					name={FIELDS.from}
+					name={FIELDS.to}
 					onChange={this.handleChangeRange}
 					value={this.modifyValue(to)}
 				/>
