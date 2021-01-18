@@ -30,9 +30,9 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 	const buildDataSet = getBuildSet(widget);
 
 	if (buildDataSet) {
-		const {showEmptyData} = buildDataSet;
-		const parameterUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.xAxis);
-		const breakdownUsesUUIDs = hasUUIDsInLabels(buildDataSet, FIELDS.breakdown);
+		const {breakdown, showEmptyData, xAxis} = buildDataSet;
+		const parameterUsesUUIDs = hasUUIDsInLabels(xAxis);
+		const breakdownUsesUUIDs = hasUUIDsInLabels(breakdown);
 		const usesUUIDs = parameterUsesUUIDs || breakdownUsesUUIDs;
 		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
 		const usesPercent = hasPercent(buildDataSet, FIELDS.yAxis);

@@ -150,8 +150,10 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 
 	widget.data.forEach(dataSet => {
 		if (!dataSet.sourceForCompute) {
-			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(dataSet, FIELDS.xAxis);
-			breakdownUsesUUIDs = !breakdownUsesUUIDs || hasUUIDsInLabels(dataSet, FIELDS.breakdown);
+			const {breakdown, xAxis} = dataSet;
+
+			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(xAxis);
+			breakdownUsesUUIDs = !breakdownUsesUUIDs || (!Array.isArray(breakdown) && hasUUIDsInLabels(breakdown));
 		}
 	});
 

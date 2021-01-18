@@ -45,7 +45,7 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
  * @returns {DrillDownMixin}
  */
 const addParameterFilter = (dataSet: DataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
-	const subTitle = hasUUIDsInLabels(dataSet, FIELDS.xAxis) ? getLabelWithoutUUID(value) : value;
+	const subTitle = hasUUIDsInLabels(dataSet.xAxis) ? getLabelWithoutUUID(value) : value;
 
 	return addGroupFilter(mixin, {
 		attribute: dataSet[FIELDS.xAxis],
@@ -63,8 +63,8 @@ const addParameterFilter = (dataSet: DataSet, value: string, mixin: DrillDownMix
  * @returns {DrillDownMixin}
  */
 const addBreakdownFilter = (dataSet: DataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
-	const breakdown = dataSet[FIELDS.breakdown];
-	const subTitle = hasUUIDsInLabels(dataSet, FIELDS.xAxis) ? getLabelWithoutUUID(value) : value;
+	const {breakdown, xAxis} = dataSet;
+	const subTitle = hasUUIDsInLabels(xAxis) ? getLabelWithoutUUID(value) : value;
 	let newMixin = mixin;
 
 	if (Array.isArray(breakdown)) {

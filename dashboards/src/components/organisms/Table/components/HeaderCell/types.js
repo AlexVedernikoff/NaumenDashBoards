@@ -8,6 +8,8 @@ export type Props = {
 	components: Components,
 	fontColor: string,
 	fontStyle?: FontStyle,
+	last: boolean,
+	left: number,
 	onChangeWidth: (width: number, column: Column) => void,
 	onClick: (column: Column) => void,
 	sorting?: SortingType,

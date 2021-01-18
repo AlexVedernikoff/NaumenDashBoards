@@ -2,7 +2,6 @@
 import type {Column} from 'Table/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {ROW_HEIGHT} from 'Table/constants';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 import {sumColumnsWidth} from 'Table/helpers';
@@ -24,12 +23,35 @@ export class Header extends PureComponent<Props> {
 		}
 	};
 
-	renderColumn = (column: Column, index: number) => {
-		const {columnSettings, columnsWidth, components, onChangeColumnWidth, sorting} = this.props;
+	renderColumn = (column: Column, index: number, columns: Array<Column>) => {
+		const {columns: subColumns} = column;
+
+		return Array.isArray(subColumns)
+			? this.renderColumnWithSubColumns(column, index, subColumns)
+			: this.renderHeaderCell(column, index, columns);
+	};
+
+	renderColumnWidthSubColumns = (column: Column, index: number, columns: Array<Column>) => {
+		const {columnsWidth} = this.props;
+		const {accessor, columns: subColumns} = column;
+		const width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
+
+		return (
+			<div className={styles.cellContainer} style={{minWidth: width}}>
+				{this.renderHeaderCell(column, index, columns)}
+				{this.renderSubColumns(columns)}
+			</div>
+		);
+	};
+
+	renderHeaderCell = (column: Column, index: number, columns: Array<Column>, isSubColumn: boolean = false) => {
+		const {columnSettings, columnsWidth, components, fixedColumnsCount, fixedLeft, onChangeColumnWidth, sorting} = this.props;
 		const {HeaderCell} = components;
 		const {fontColor, fontStyle, textAlign, textHandler} = columnSettings;
-		const {accessor, columns, header} = column;
-		const width = Array.isArray(columns) ? sumColumnsWidth(columnsWidth, columns) : columnsWidth[accessor];
+		const {accessor, columns: subColumns, header} = column;
+		const width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
+		const last = index === columns.length - 1;
+		const left = fixedColumnsCount - index > 0 && !isSubColumn ? fixedLeft : 0;
 		let sortingType;
 
 		if (sorting.accessor === accessor) {
@@ -37,24 +59,23 @@ export class Header extends PureComponent<Props> {
 		}
 
 		return (
-			<div className={styles.cellContainer} style={{minWidth: width}}>
-				<HeaderCell
-					column={column}
-					columnIndex={index}
-					components={components}
-					fontColor={fontColor}
-					fontStyle={fontStyle}
-					key={accessor}
-					onChangeWidth={onChangeColumnWidth}
-					onClick={this.handleClick}
-					sorting={sortingType}
-					textAlign={textAlign}
-					textHandler={textHandler}
-					value={header}
-					width={width}
-				/>
-				{this.renderSubColumns(columns)}
-			</div>
+			<HeaderCell
+				column={column}
+				columnIndex={index}
+				components={components}
+				fontColor={fontColor}
+				fontStyle={fontStyle}
+				key={accessor}
+				last={last}
+				left={left}
+				onChangeWidth={onChangeColumnWidth}
+				onClick={this.handleClick}
+				sorting={sortingType}
+				textAlign={textAlign}
+				textHandler={textHandler}
+				value={header}
+				width={width}
+			/>
 		);
 	};
 
@@ -62,7 +83,7 @@ export class Header extends PureComponent<Props> {
 		if (Array.isArray(columns) && columns.length > 0) {
 			return (
 				<div className={styles.subColumnsContainer}>
-					{columns.map(this.renderColumn)}
+					{columns.map((column, index, columns) => this.renderHeaderCell(column, index, columns, true))}
 				</div>
 			);
 		}
@@ -71,15 +92,10 @@ export class Header extends PureComponent<Props> {
 	};
 
 	render () {
-		const {columns, usesSubColumns} = this.props;
-		let height = ROW_HEIGHT;
-
-		if (usesSubColumns) {
-			height *= 2;
-		}
+		const {columns, width} = this.props;
 
 		return (
-			<div className={styles.row} style={{height}}>
+			<div className={styles.header} style={{maxWidth: width}}>
 				{columns.map(this.renderColumn)}
 			</div>
 		);

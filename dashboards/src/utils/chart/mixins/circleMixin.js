@@ -23,7 +23,7 @@ const circleMixin = (widget: CircleWidget, chart: DiagramBuildData, container: H
 	const dataSet = getBuildSet(widget);
 
 	if (dataSet && !dataSet.sourceForCompute) {
-		const usesUUIDs = hasUUIDsInLabels(dataSet, FIELDS.breakdown);
+		const usesUUIDs = hasUUIDsInLabels(dataSet.breakdown);
 		const usesMSInterval = hasMSInterval(dataSet);
 		const usesPercent = hasPercent(dataSet);
 

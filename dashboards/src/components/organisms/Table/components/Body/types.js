@@ -7,11 +7,14 @@ export type Props = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
 	data: Array<Row>,
+	fixedColumnsCount: number,
+	fixedLeft: number,
 	onClickCell?: OnClickCell,
 	page: number,
 	pageSize: number,
 	settings: Table,
-	sorting: TableSorting
+	sorting: TableSorting,
+	width: number
 };
 
 export type State = {
