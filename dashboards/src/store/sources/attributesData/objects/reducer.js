@@ -6,6 +6,17 @@ import {OBJECTS_EVENTS} from './constants';
 
 const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsAction = defaultObjectsAction): ObjectsState => {
 	switch (action.type) {
+		case OBJECTS_EVENTS.CHANGE_SEARCH_VALUE:
+			return {
+				...state,
+				found: {
+					...state.found,
+					[action.payload.id]: {
+						...state.found[action.payload.id],
+						searchValue: action.payload.searchValue
+					}
+				}
+			};
 		case OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED:
 			return {
 				...state,
@@ -43,52 +54,28 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					}
 				}
 			};
-		case OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA:
+		case OBJECTS_EVENTS.OBJECT_DATA_FULFILLED:
 			return {
 				...state,
-				actual: {
-					...state.actual,
-					[action.payload.id]: receiveObjectData(state.actual, action.payload)
+				[action.payload.type]: {
+					...state[action.payload.type],
+					[action.payload.id]: receiveObjectData(state[action.payload.type], action.payload)
 				}
 			};
-		case OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA:
+		case OBJECTS_EVENTS.OBJECT_DATA_PENDING:
 			return {
 				...state,
-				all: {
-					...state.all,
-					[action.payload.id]: receiveObjectData(state.all, action.payload)
+				[action.payload.type]: {
+					...state[action.payload.type],
+					[action.payload.id]: requestObjectData(state[action.payload.type], action.payload)
 				}
 			};
-		case OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR:
+		case OBJECTS_EVENTS.OBJECT_DATA_REJECTED:
 			return {
 				...state,
-				actual: {
-					...state.actual,
-					[action.payload.id]: recordObjectError(state.actual, action.payload)
-				}
-			};
-		case OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR:
-			return {
-				...state,
-				all: {
-					...state.all,
-					[action.payload.id]: recordObjectError(state.all, action.payload)
-				}
-			};
-		case OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA:
-			return {
-				...state,
-				actual: {
-					...state.actual,
-					[action.payload.id]: requestObjectData(state.actual, action.payload)
-				}
-		};
-		case OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA:
-			return {
-				...state,
-				all: {
-					...state.all,
-					[action.payload.id]: requestObjectData(state.all, action.payload)
+				[action.payload.type]: {
+					...state[action.payload.type],
+					[action.payload.id]: recordObjectError(state[action.payload.type], action.payload)
 				}
 			};
 		default:

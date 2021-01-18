@@ -9,15 +9,20 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class Node extends PureComponent<Props, State> {
 	state = {
-		expanded: !!this.props.searchValue
+		expanded: !!this.props.searchValue && this.hasChildren(this.props)
 	};
 
 	componentDidUpdate (prevProps: Props) {
 		const {searchValue} = this.props;
 
-		if (searchValue !== prevProps.searchValue) {
+		if (searchValue !== prevProps.searchValue && this.hasChildren(this.props)) {
 			this.setState({expanded: !!searchValue});
 		}
+	}
+
+	hasChildren (props: Props): boolean {
+		const {children} = props.data;
+		return Array.isArray(children) && children.length > 0;
 	}
 
 	getLabelClassName = () => {
@@ -58,14 +63,14 @@ export class Node extends PureComponent<Props, State> {
 	};
 
 	renderChildren = () => {
-		const {data, renderChildren} = this.props;
+		const {children, data} = this.props;
 		const {expanded} = this.state;
-		const {children} = data;
+		const {children: nodeChildren} = data;
 
-		if (expanded && Array.isArray(children) && children.length > 0) {
+		if (expanded && Array.isArray(nodeChildren) && nodeChildren.length > 0) {
 			return (
 				<div className={styles.childrenContainer}>
-					{renderChildren(children)}
+					{expanded && children(nodeChildren)}
 					{this.renderShowMoreButton()}
 				</div>
 			);

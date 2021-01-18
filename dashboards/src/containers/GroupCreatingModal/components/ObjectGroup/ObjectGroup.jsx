@@ -18,6 +18,7 @@ import {functions, props} from './selectors';
 import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
 import {MaterialTreeSelect} from 'components/molecules';
 import {Node} from 'components/molecules/MaterialTreeSelect/components';
+import {OBJECTS_DATA_TYPES} from 'store/sources/attributesData/objects/constants';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
@@ -81,6 +82,19 @@ export class ObjectGroup extends Component<Props, State> {
 		};
 	};
 
+	getDataType = (actual: boolean) => {
+		const {ACTUAL, ALL, FOUND} = OBJECTS_DATA_TYPES;
+		let type = ALL;
+
+		if (this.isSearching()) {
+			type = FOUND;
+		} else if (actual) {
+			type = ACTUAL;
+		}
+
+		return type;
+	};
+
 	getObjectId = () => {
 		const {attribute, source} = this.props;
 		return getObjectKey(attribute, source);
@@ -92,7 +106,7 @@ export class ObjectGroup extends Component<Props, State> {
 		const {[id]: foundData} = found;
 		let data;
 
-		if (foundData && foundData.searchValue) {
+		if (this.isSearching()) {
 			data = foundData;
 		} else {
 			const map = actual ? actualMap : allMap;
@@ -154,20 +168,33 @@ export class ObjectGroup extends Component<Props, State> {
 
 	handleLoadData = (actual: boolean) => (node?: Object, offset?: number = 0) => {
 		const {attribute, fetchObjectData, source} = this.props;
-		const parentUUID = node ? node.id : null;
+		let parentUUID = null;
+		let id = null;
+
+		if (node) {
+			id = node.id;
+			parentUUID = node.value.uuid;
+		}
 
 		fetchObjectData({
 			actual,
 			attribute,
+			id,
 			offset,
 			parentUUID,
-			source
+			source,
+			type: this.getDataType(actual)
 		});
 	};
 
 	hasActualType = (condition: RefOrCondition) => {
 		const {CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL} = OPERAND_TYPES;
 		return ![CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL].includes(condition.type);
+	};
+
+	isSearching = (): boolean => {
+		const {[this.getObjectId()]: foundData} = this.props.objects.found;
+		return Boolean(foundData && foundData.searchValue);
 	};
 
 	resolveConditionRule = (condition: RefOrCondition) => {

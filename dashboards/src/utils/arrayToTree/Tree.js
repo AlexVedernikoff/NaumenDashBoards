@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_OPTIONS} from './constants';
 import {extend} from 'src/helpers';
-import type {InputArray, InputArrayNode, Options} from './types';
+import type {InputArray, InputArrayNode, NodeValue, Options, Tree as TreeMap} from './types';
 
 class Tree {
 	array = [];
@@ -13,6 +13,7 @@ class Tree {
 		this.options = extend({
 			...this.options,
 			values: {
+				children: this.getChildren,
 				id: this.getId,
 				uploaded: true,
 				value: this.getValue
@@ -27,14 +28,14 @@ class Tree {
 	 * @returns {string} - ключ добавленного узла
 	 */
 	addNode = (arrayNode: InputArrayNode, parent: string | null): string => {
-		const {keys} = this.options;
-		const {[keys.children]: children} = arrayNode;
-		const {id, uploaded, value} = this.getNodeValues(arrayNode, parent);
+		const {children, id, uploaded, value} = this.getNodeValues(arrayNode, parent);
 
-		const childrenIds = Array.isArray(children) && children.length > 0 ? this.addNodes(children, id) : null;
+		if (Array.isArray(children) && children.length > 0) {
+			this.addNodes(arrayNode.children, id);
+		}
 
 		this.tree[id] = {
-			children: childrenIds,
+			children,
 			id,
 			loading: false,
 			parent,
@@ -63,12 +64,24 @@ class Tree {
 
 	createTree = () => this.addNodes(this.array, this.options.parent);
 
-	getId = (node: InputArrayNode, parent: string | null) => {
-		const {[this.options.keys.id]: id} = node;
-		return parent ? `${parent}$${id}` : id;
+	getChildren = (node: InputArrayNode, parent: string | null): Array<string> => {
+		const {keys, values} = this.options;
+		const {[keys.children]: children} = node;
+		let ids = null;
+
+		if (Array.isArray(children) && children.length > 0) {
+			ids = children.map(child => values.id(child, parent));
+		}
+
+		return ids;
 	};
 
-	getNodeValues = (node: InputArrayNode, parent: string | null) => {
+	getId = (node: InputArrayNode): string => {
+		const {[this.options.keys.id]: id} = node;
+		return id;
+	};
+
+	getNodeValues = (node: InputArrayNode, parent: string | null): Values => {
 		const {values} = this.options;
 		const nodeValues = {};
 
@@ -79,9 +92,9 @@ class Tree {
 		return nodeValues;
 	};
 
-	getTree = () => this.tree;
+	getTree = (): TreeMap => this.tree;
 
-	getValue = (node: InputArrayNode) => {
+	getValue = (node: InputArrayNode): NodeValue => {
 		const {[this.options.keys.children]: children, ...value} = node;
 		return value;
 	};

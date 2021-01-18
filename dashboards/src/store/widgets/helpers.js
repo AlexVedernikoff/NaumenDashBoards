@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, DiagramWidgetDataSet, Group, Widget, WidgetType} from './data/types';
+import type {AnyWidget, Group, Widget, WidgetType} from './data/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
@@ -76,9 +76,9 @@ const hasPercent = (set: Object, field: string = FIELDS.indicator) => {
  * @param {Attribute} attribute - атрибут
  * @returns {boolean}
  */
-const hasUUIDsInLabels = (attribute?: Attribute) => {
+const hasUUIDsInLabels = (attribute?: Attribute): boolean => {
 	const {backBOLinks, boLinks, metaClass} = ATTRIBUTE_TYPES;
-	return attribute && [backBOLinks, boLinks, metaClass].includes(attribute.type);
+	return Boolean(attribute && [backBOLinks, boLinks, metaClass].includes(attribute.type));
 };
 
 /**

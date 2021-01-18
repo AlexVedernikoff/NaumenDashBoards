@@ -150,10 +150,11 @@ export class Tree extends Component<Props, State> {
 					key={id}
 					onClick={this.handleClick}
 					onLoadChildren={this.handleLoadChildren}
-					renderChildren={this.renderChildren}
 					searchValue={searchValue}
 					selected={Boolean(selected)}
-				/>
+				>
+					{(children) => this.renderChildren(children)}
+				</Node>
 			);
 		}
 

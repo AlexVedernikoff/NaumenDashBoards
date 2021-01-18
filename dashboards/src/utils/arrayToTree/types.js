@@ -1,9 +1,9 @@
 // @flow
 import type {TreeNode} from 'components/types';
 
-export type Value = Object;
+export type NodeValue = Object;
 
-export type Node = TreeNode<Value>;
+export type Node = TreeNode<NodeValue>;
 
 export type Tree = {
 	[key: string]: Node
@@ -27,14 +27,15 @@ type GetValue<T> = (node: InputArrayNode, parent: string | null) => T;
 
 type OptionValue<T> = GetValue<T> | T;
 
-type Values = $Shape<{
+export type Values = {
+	children: OptionValue<Array<string>>,
 	id: OptionValue<string>,
 	uploaded: OptionValue<boolean>,
-	value: OptionValue<Object>
-}>;
+	value: OptionValue<NodeValue>
+};
 
 export type Options = $Shape<{
 	keys: Keys,
 	parent: string | null,
-	values: Values
+	values: $Shape<Values>
 }>;

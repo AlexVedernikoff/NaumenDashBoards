@@ -5,13 +5,13 @@ import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree
 type Option = Object;
 
 export type Props = {
+	children: (Array<string>) => Array<ReactNode>,
 	data: Node,
 	enabled: boolean,
 	getOptionLabel: (option: Option) => string,
 	getOptionValue: (option: Option) => string,
 	onClick: Node => void,
 	onLoadChildren: Node => void,
-	renderChildren: (Array<string>) => Array<ReactNode>,
 	searchValue: string,
 	selected: boolean
 };

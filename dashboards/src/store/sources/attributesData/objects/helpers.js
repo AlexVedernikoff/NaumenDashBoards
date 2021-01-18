@@ -36,7 +36,7 @@ const requestObjectData = (map: ObjectsMap, payload: Payload) => {
 	return request(map[id]);
 };
 
-const createObjectDataItem = (data: RawObjectData, root: boolean) => {
+const createObjectDataItem = (data: RawObjectData, parent: string | null) => {
 	const {children, title, uuid} = data;
 
 	return {
@@ -44,7 +44,7 @@ const createObjectDataItem = (data: RawObjectData, root: boolean) => {
 		error: false,
 		id: uuid,
 		loading: false,
-		root,
+		parent,
 		uploaded: false,
 		value: {
 			title,
@@ -58,7 +58,7 @@ const receiveObjectData = (map: ObjectsMap, payload: ReceivePayload) => {
 	const items = {};
 
 	data.forEach(item => {
-		items[item.uuid] = createObjectDataItem(item, !parentUUID);
+		items[item.uuid] = createObjectDataItem(item, parentUUID);
 	});
 
 	if (parentUUID) {

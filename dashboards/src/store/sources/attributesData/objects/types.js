@@ -8,7 +8,8 @@ import type {TreeNode} from 'components/types';
 export type SearchObjects = (source: Source, attribute: Attribute, value: string) => ThunkAction;
 
 export type RawObjectData = {
-	children: number,
+	children: Array<RawObjectData>,
+	hasChildren: boolean,
 	title: string,
 	uuid: string
 };
@@ -43,22 +44,31 @@ type FoundMap = {
 };
 
 export type FetchParams = {
-	actual: boolean,
 	attribute: Attribute,
 	offset: number,
 	parentUUID: string | null,
-	source: Source
+	source: Source,
+	type: string
 };
 
 export type Payload = {
 	id: string,
-	parentUUID: string | null
+	parentUUID: string | null,
+	type: string
 };
 
 export type ReceivePayload = {
 	...Payload,
 	data: Array<RawObjectData>,
 	uploaded: boolean
+};
+
+type ChangeSearchValue = {
+	payload: {
+		id: string,
+		searchValue: string
+	},
+	type: typeof OBJECTS_EVENTS.CHANGE_SEARCH_VALUE
 };
 
 type FoundObjectsFulfilled = {
@@ -82,34 +92,19 @@ type FoundObjectsRejected = {
 	type: typeof OBJECTS_EVENTS.FOUND_OBJECT_REJECTED
 };
 
-type ReceiveActualObjectData = {
+type ObjectDataFulfilled = {
 	payload: ReceivePayload,
-	type: typeof OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA
+	type: typeof OBJECTS_EVENTS.OBJECT_DATA_FULFILLED
 };
 
-type ReceiveAllObjectData = {
-	payload: ReceivePayload,
-	type: typeof OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA
-};
-
-type RecordActualObjectDataError = {
+type ObjectDataPending = {
 	payload: Payload,
-	type: typeof OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR
+	type: typeof OBJECTS_EVENTS.OBJECT_DATA_PENDING
 };
 
-type RecordAllObjectDataError = {
+type ObjectDataRejected = {
 	payload: Payload,
-	type: typeof OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR
-};
-
-type RequestActualObjectData = {
-	payload: Payload,
-	type: typeof OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA
-};
-
-type RequestAllObjectData = {
-	payload: Payload,
-	type: typeof OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA
+	type: typeof OBJECTS_EVENTS.OBJECT_DATA_REJECTED
 };
 
 type UnknownObjectsAction = {
@@ -117,15 +112,13 @@ type UnknownObjectsAction = {
 };
 
 export type ObjectsAction =
+	| ChangeSearchValue
 	| FoundObjectsFulfilled
 	| FoundObjectsPending
 	| FoundObjectsRejected
-	| ReceiveActualObjectData
-	| ReceiveAllObjectData
-	| RecordActualObjectDataError
-	| RecordAllObjectDataError
-	| RequestActualObjectData
-	| RequestAllObjectData
+	| ObjectDataFulfilled
+	| ObjectDataPending
+	| ObjectDataRejected
 	| UnknownObjectsAction
 ;
 

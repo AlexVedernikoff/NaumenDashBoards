@@ -2,10 +2,45 @@
 import {arrayToTree} from 'utils/arrayToTree';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import type {FetchParams, Payload, ReceivePayload} from './types';
+import type {FetchParams, RawObjectData} from './types';
 import {getObjectKey} from './helpers';
-import {LIMIT, OBJECTS_EVENTS} from './constants';
+import {LIMIT, OBJECTS_DATA_TYPES, OBJECTS_EVENTS} from './constants';
 import type {Source} from 'store/widgets/data/types';
+
+/**
+ * Сообщает загружены ли дочерние элементы узла полностью
+ * @param {RawObjectData} node - узел данных
+ * @returns {boolean}
+ */
+const isUploaded = (node: RawObjectData): boolean => {
+	const {children, hasChildren} = node;
+	return (Array.isArray(children) && children.length > 0) || !hasChildren;
+};
+
+/**
+ * Возвращает ключи дочерних элементов
+ * @param {RawObjectData} node - узел данных
+ * @returns {Array<string>}
+ */
+const getChildren = (node: RawObjectData): Array<string> => {
+	const {children, hasChildren} = node;
+	let ids = null;
+
+	if (Array.isArray(children) && children.length > 0) {
+		ids = children.map(getId);
+	} else if (hasChildren) {
+		ids = [];
+	}
+
+	return ids;
+};
+
+/**
+ * Возвращает уникальный идентификатор узла
+ * @param {RawObjectData} node - узел данных
+ * @returns {string}
+ */
+const getId = (node: RawObjectData): string => node.uuid;
 
 /**
  * Осуществляет поиск объектов по названию
@@ -15,8 +50,9 @@ import type {Source} from 'store/widgets/data/types';
  * @returns {ThunkAction}
  */
 const searchObjects = (source: Source, attribute: Attribute, searchValue: string): ThunkAction =>
-	async (dispatch: Dispatch) => {
+	async (dispatch: Dispatch, getState: GetState) => {
 		const id = getObjectKey(attribute, source);
+		const {id: foundData} = getState().sources.attributesData.objects.found;
 
 	dispatch({
 		payload: {
@@ -27,26 +63,41 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 	});
 
 	try {
-		const requestPayload = {
-			attribute,
-			sourceCode: source.value,
-			value: searchValue
-		};
-		const response = await window.jsApi.restCallModule('dashboards', 'searchValue', requestPayload);
-		const items = arrayToTree(response, {
-			keys: {
-				children: 'children',
-				id: 'uuid'
-			}
-		});
+		if (searchValue) {
+			const requestPayload = {
+				attribute,
+				sourceCode: source.value,
+				value: searchValue
+			};
+			const response = await window.jsApi.restCallModule('dashboards', 'searchValue', requestPayload);
+			const items = arrayToTree(response, {
+				keys: {
+					children: 'children',
+					id: 'uuid'
+				},
+				values: {
+					children: getChildren,
+					id: getId,
+					uploaded: isUploaded
+				}
+			});
 
-		dispatch({
-			payload: {
-				id,
-				items
-			},
-			type: OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
-		});
+			dispatch({
+				payload: {
+					id,
+					items
+				},
+				type: OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
+			});
+		} else if (foundData && foundData.searchValue) {
+			dispatch({
+				payload: {
+					id,
+					searchValue
+				},
+				type: OBJECTS_EVENTS.CHANGE_SEARCH_VALUE
+			});
+		}
 	} catch (error) {
 		dispatch({
 			payload: id,
@@ -56,27 +107,29 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 };
 
 /**
- * Вызывает необходимый метод получения данных для ссылочного атрибута
- * @param {Function} request - экшен запроса
- * @param {Function} receive - экшен получения данных атрибута
- * @param {Function} recordError - экшен записи ошибки
+ * Получает список объектов атрибута
+ * @param {FetchParams} params - параметры для запрос
  * @returns {ThunkAction}
  */
-const fetch = (request, receive, recordError) => (params: FetchParams): ThunkAction => async (dispatch: Dispatch) => {
+const fetchObjectData = (params: FetchParams): ThunkAction => async (dispatch: Dispatch) => {
 	const {
-		actual,
 		attribute,
 		offset = 0,
 		parentUUID = null,
-		source
+		source,
+		type
 	} = params;
 	const id = getObjectKey(attribute, source);
 	const payload = {
 		id,
-		parentUUID
+		parentUUID,
+		type
 	};
 
-	dispatch(request(payload));
+	dispatch({
+		payload,
+		type: OBJECTS_EVENTS.OBJECT_DATA_PENDING
+	});
 
 	try {
 		const requestPayload = {
@@ -84,51 +137,23 @@ const fetch = (request, receive, recordError) => (params: FetchParams): ThunkAct
 			count: LIMIT,
 			offset,
 			parentUUID,
-			removed: !actual,
+			removed: type === OBJECTS_DATA_TYPES.ALL,
 			sourceCode: source.value
 		};
 		const data = await window.jsApi.restCallModule('dashboards', 'getAttributeObject', requestPayload);
 		const uploaded = data.length < LIMIT;
 
-		dispatch(receive({...payload, data, uploaded}));
+		dispatch({
+			payload: {...payload, data, uploaded},
+			type: OBJECTS_EVENTS.OBJECT_DATA_FULFILLED
+		});
 	} catch (error) {
-		dispatch(recordError(payload));
+		dispatch({
+			payload,
+			type: OBJECTS_EVENTS.OBJECT_DATA_REJECTED
+		});
 	}
 };
-
-const fetchObjectData = (params: FetchParams) => params.actual
-	? fetch(requestActualData, receiveActualData, recordActualDataError)(params)
-	: fetch(requestAllData, receiveAllObjectData, recordAllObjectDataError)(params);
-
-const requestActualData = (payload: Payload) => ({
-	payload,
-	type: OBJECTS_EVENTS.REQUEST_ACTUAL_OBJECT_DATA
-});
-
-const requestAllData = (payload: Payload) => ({
-	payload,
-	type: OBJECTS_EVENTS.REQUEST_ALL_OBJECT_DATA
-});
-
-const recordActualDataError = (payload: Payload) => ({
-	payload,
-	type: OBJECTS_EVENTS.RECORD_ACTUAL_OBJECT_DATA_ERROR
-});
-
-const recordAllObjectDataError = (payload: Payload) => ({
-	payload,
-	type: OBJECTS_EVENTS.RECORD_ALL_OBJECT_DATA_ERROR
-});
-
-const receiveActualData = (payload: ReceivePayload) => ({
-	payload,
-	type: OBJECTS_EVENTS.RECEIVE_ACTUAL_OBJECT_DATA
-});
-
-const receiveAllObjectData = (payload: ReceivePayload) => ({
-	payload,
-	type: OBJECTS_EVENTS.RECEIVE_ALL_OBJECT_DATA
-});
 
 export {
 	fetchObjectData,
