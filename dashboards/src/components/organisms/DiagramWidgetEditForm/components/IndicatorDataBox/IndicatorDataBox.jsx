@@ -2,6 +2,7 @@
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {BreakdownFieldset, ComputedBreakdownFieldset, DataTopField, ExtendingFieldset, IndicatorFieldset} from 'DiagramWidgetEditForm/components';
 import type {ComputedAttr, DataTopSettings, MixedAttribute} from 'store/widgets/data/types';
+import {DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {FormBox} from 'components/molecules';
 import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
@@ -12,7 +13,6 @@ import {LegacyCheckbox as Checkbox} from 'components/atoms';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withForm from 'DiagramWidgetEditForm/withForm';
 
 export class IndicatorDataBox extends PureComponent<Props> {
@@ -83,6 +83,17 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		saveComputedAttribute(attribute);
 		setDataFieldValue(index, name, attribute);
 		this.showBreakdown(index) && this.setDefaultBreakdown(index, attribute);
+	};
+
+	handleSelectAggregation = (index: number, name: string, value: string) => {
+		const {setDataFieldValue, values} = this.props;
+		const {top = DEFAULT_TOP_SETTINGS} = values.data[index];
+
+		if (top.show && !isAllowedTopAggregation(value)) {
+			setDataFieldValue(index, FIELDS.top, {...top, show: false});
+		}
+
+		setDataFieldValue(index, name, value);
 	};
 
 	handleSelectBreakdown = (event: OnSelectAttributeEvent, index: number) => {
@@ -250,7 +261,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 				onRemoveComputedAttribute={this.handleRemoveComputedAttribute}
 				onSaveComputedAttribute={this.handleSaveComputedAttribute}
 				onSelect={this.handleSelectIndicator}
-				onSelectAggregation={setDataFieldValue}
+				onSelectAggregation={this.handleSelectAggregation}
 				value={dataSet[name]}
 			/>
 		);
