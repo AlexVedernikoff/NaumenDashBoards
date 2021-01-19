@@ -2559,7 +2559,7 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
                     }
                     if(top)
                     {
-                        return getTop(res, top, parameterFilters, breakdownFilters)
+                        res = getTop(res, top, parameterFilters, breakdownFilters)
                     }
                     if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                     {
@@ -2649,7 +2649,7 @@ private def getDiagramData(DiagramRequest request, DiagramType diagramType = Dia
                     }
                     if(top)
                     {
-                        return getTop(res, top, parameterFilters, breakdownFilters)
+                        res = getTop(res, top, parameterFilters, breakdownFilters)
                     }
                     if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                     {
@@ -4541,6 +4541,9 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                     value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
                 } : [0]
 
+            String aggregationSortingType = requestData.aggregations.find()?.sortingType
+            String parameterSortingType = requestData.groups.find()?.sortingType
+
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
             Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
             def res = modules.dashboardQueryWrapper.getData(requestData, top, onlyFilled, diagramType, ignoreLimits.parameter)
@@ -4559,9 +4562,13 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             {
                 if(requestData?.groups?.size() > 1)
                 {
-                    return getTop(total, top, [], [], true)
+                    total = getTop(total, top, [], [], true)
                 }
-                return total.size() > top ? total[0..top - 1] : total
+                total = total.size() > top ? total[0..top - 1] : total
+            }
+            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            {
+                return sortResList(total, aggregationSortingType, parameterSortingType)
             }
             return total
         case 'computation':
@@ -4623,9 +4630,9 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             {
                 if(dataSet.values().head().groups?.size() > 1)
                 {
-                    return getTop(total, top, [], [], true)
+                    total = getTop(total, top, [], [], true)
                 }
-                return total.size() > top ? total[0..top - 1] : total
+                total = total.size() > top ? total[0..top - 1] : total
             }
 
             if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
