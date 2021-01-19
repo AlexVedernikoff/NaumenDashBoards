@@ -226,38 +226,49 @@ String searchValue(Map requestContent)
     String sourceCode = requestContent.sourceCode
     String attributeCode = requestContent.attribute.code
     def value = requestContent.value
+    Boolean removed = requestContent.removed ?: false
 
-    def bottomValues = getAttributeTypes(attributeCode, sourceCode).collectMany {
-        api.utils.find(it.toString(), [title: op.like("%${value}%") ])
+    def types = getAttributeTypes(attributeCode, sourceCode).collectMany { classFqn ->
+        return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn))
+    }.unique { it.getFqn()}
+
+    def bottomValues = types.collectMany {
+        api.utils.find(it.toString(), [title: op.like("%${value}%"), removed: removed], sp.ignoreCase())
     }.unique { it.UUID }
 
     def withParentsBottoms = []
     def independentBottoms = []
+    bottomValues.removeAll {it.parent == null}
+
+    def childrenInBottomValues = []
     bottomValues.each { bottom ->
         def parents = getParents(bottom)
         if(parents)
         {
-            withParentsBottoms << (parents + bottom)
+            //если в списке есть ближайший родитель объекта, значит, объект появится в списке в любом случае, его можно убрать,чтобы избежать повторного построения списка
+            if(bottom.parent in bottomValues)
+            {
+                childrenInBottomValues << bottom
+            }
+            else
+            {
+                withParentsBottoms << (parents + bottom)
+            }
         }
         else
         {
-            independentBottoms << basicMap(bottom.title,
-                                    bottom.UUID,
-                                    bottom.metaClass.toString())
+            independentBottoms << basicMap(bottom, getChildrenTree(bottom, childrenInBottomValues, sourceCode), sourceCode)
         }
     }
-    withParentsBottoms = withParentsBottoms.groupBy { it[0..-2] }.collect { parentSet, both ->
-        def childrenList = both*.last().flatten().collect {
-            basicMap(it.title,
-                     it.UUID,
-                     it.metaClass.toString())
-        }
 
+    withParentsBottoms = withParentsBottoms.groupBy { it[0..-2] }.collect { parentSet, both ->
+        def childrenList = both*.last().flatten().collect { child ->
+            return basicMap(child,
+                            getChildrenTree(child, childrenInBottomValues, sourceCode),
+                            sourceCode)
+        }
         parentSet.each { bottomParent ->
-            childrenList = basicMap(bottomParent.title,
-                                    bottomParent.UUID,
-                                    bottomParent.metaClass.toString(),
-                                    childrenList instanceof Collection ? childrenList : [childrenList])
+            childrenList = basicMap(bottomParent, childrenList instanceof Collection ? childrenList : [childrenList])
         }
         return childrenList
     }
@@ -281,6 +292,22 @@ def getParents(def bottom)
 }
 
 /**
+ * Метод по получению детей из полученного списка
+ * @param parent - текущий родитель
+ * @param bottomValuesWithChildren - значения из списка с возмодными детьми
+ * @param fqn - класс родителя
+ * @return мапа с детьми по всем уровням из найденных
+ */
+def getChildrenTree(def parent, List bottomValuesWithChildren, String fqn)
+{
+    def children = bottomValuesWithChildren.findAll { it.parent == parent }
+    bottomValuesWithChildren -= children
+    return children.collect {
+        return basicMap(it, getChildrenTree(it, bottomValuesWithChildren, fqn), fqn)
+    }
+}
+
+/**
  * Метод формирования стандартной мапы
  * @param title - название для мапы
  * @param uuid - uuid для мапы
@@ -288,27 +315,44 @@ def getParents(def bottom)
  * @param children - дети
  * @return базовая мапа
  */
-Map basicMap(String title, String uuid, String property, def children = [])
+Map basicMap(def value, def children = [], String fqn = '')
 {
-    return [
-        title   : title,
-        uuid    : uuid,
-        property: property,
-        children: children
-    ] as Map
+    Map map = [
+        title   : value.title,
+        uuid    : value.UUID,
+        property: value.metaClass.toString()
+    ]
+    if(fqn && !children)
+    {
+        map.putAll(hasChildren: checkForChildren(value))
+    }
+    else
+    {
+        map.putAll(children: children)
+    }
+    return map
 }
 
 /**
- * Метод по преобразованию списка значений к списку типовых мап
- * @param values - список значений
- * @param sourceCode - код источника атрибута
- * @return списку типовых мап [title: it.title, uuid: it.uuid, children: it.children]
+ * Метод проверки наличия детей у значения
+ * @param value - значение
+ * @return флаг на наличие
  */
-List getValues(List values, String sourceCode)
+Boolean checkForChildren(def value)
 {
-    return values.collect {
-        return basicMap(it.title, it.uuid, sourceCode, getValues(it.children, sourceCode))
+    def classFqn = value.metaClass.id
+    def hasParents = api.metainfo.getMetaClass(classFqn).hasAttribute('parent')
+    def fqnsToCount = []
+
+    if(hasParents && classFqn != 'employee')
+    {
+        fqnsToCount << classFqn
     }
+    if(classFqn == 'ou')
+    {
+        fqnsToCount << 'employee'
+    }
+    return fqnsToCount.any{ api.utils.findFirst(it, [parent: value]) }
 }
 
 String getCatalogObject(Map requestContent)
