@@ -43,7 +43,7 @@ def getLastGeopositions(String objectUuid, String contentUuid, Collection<String
 {
     def params = api.apps.contentParameters(utils.get(objectUuid).getMetaClass().toString(), UI.WINDOW_KEY, contentUuid)
 
-    return getLastGeopositionsInt(user, params.requestCurrentGeoposition ?: false, params.locationUpdateFrequency?.ms ?: 0, employeeUuids)
+    return getLastGeopositionsInt(user, params.requestCurrentLocation ?: false, params.locationUpdateFrequency?.ms ?: 0, employeeUuids)
 }
 
 //БЛОК СКРИПТОВОГО АПИ--------------------------------------------------------
@@ -121,7 +121,7 @@ private def getMapInt(def user, def object, String pointsMethodName, String grou
     return getObjectMapper(user).writeValueAsString(new Map(groupedStaticPoints, staticGroups, groupedDynamicPoints, errors))
 }
 
-private def getLastGeopositionsInt(def user, boolean requestCurrentGeoposition, long locationUpdateFrequency, Collection<String> employeeUuids)
+private def getLastGeopositionsInt(def user, boolean requestCurrentLocation, long locationUpdateFrequency, Collection<String> employeeUuids)
 {
     def errors = []
     def geopositions = []
@@ -132,7 +132,7 @@ private def getLastGeopositionsInt(def user, boolean requestCurrentGeoposition, 
     {
         def userGeoposition = getLastGeoposition(employeeUuid)
 
-        if (requestCurrentGeoposition
+        if (requestCurrentLocation
             && (!userGeoposition || (currentDate.time - userGeoposition.date.time) > locationUpdateFrequency * 1000))
         {
             api.location.getMobileLocation(employeeUuid)
