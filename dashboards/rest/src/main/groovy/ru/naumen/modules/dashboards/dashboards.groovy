@@ -198,8 +198,9 @@ String getAttributeObject(Map requestContent)
             title   : object.title,
             uuid    : object.UUID,
             property: object.metaClass as String,
-            children: types.collect { api.utils.count(it, [parent: object.UUID]) as int }
-                           .inject(0) { first, second -> first + second }
+            children: api.metainfo.getMetaClass(object.metaClass.id).hasAttribute('parent')
+                ? types.sum { api.utils.count(it, [parent: object.UUID]) as int }
+                : 0
         ]
     }
     return toJson(result)
@@ -238,11 +239,16 @@ String searchValue(Map requestContent)
 
     def withParentsBottoms = []
     def independentBottoms = []
-    bottomValues.removeAll {it.parent == null}
+    Boolean attributeClassHasParent = types.every { api.metainfo.getMetaClass(it).hasAttribute('parent') }
+    if(attributeClassHasParent)
+    {
+        bottomValues.removeAll {it.parent == null}
+    }
 
     def childrenInBottomValues = []
     bottomValues.each { bottom ->
-        def parents = getParents(bottom)
+        Boolean bottomClassHasParent = api.metainfo.getMetaClass(bottom.metaClass.id).hasAttribute('parent')
+        def parents = bottomClassHasParent ? getParents(bottom) : []
         if(parents)
         {
             //если в списке есть ближайший родитель объекта, значит, объект появится в списке в любом случае, его можно убрать,чтобы избежать повторного построения списка
@@ -257,7 +263,7 @@ String searchValue(Map requestContent)
         }
         else
         {
-            independentBottoms << basicMap(bottom, getChildrenTree(bottom, childrenInBottomValues, sourceCode), sourceCode)
+            independentBottoms << basicMap(bottom, bottomClassHasParent ? getChildrenTree(bottom, childrenInBottomValues, sourceCode) : [], sourceCode)
         }
     }
 
@@ -352,7 +358,7 @@ Boolean checkForChildren(def value)
     {
         fqnsToCount << 'employee'
     }
-    return fqnsToCount.any{ api.utils.findFirst(it, [parent: value]) }
+    return hasParents ? fqnsToCount.any{ api.utils.findFirst(it, [parent: value]) } : false
 }
 
 String getCatalogObject(Map requestContent)
