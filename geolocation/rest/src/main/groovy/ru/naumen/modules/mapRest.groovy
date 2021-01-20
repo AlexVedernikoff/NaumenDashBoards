@@ -11,6 +11,7 @@
  * И методы, использование которых предполагается в mapParams
  */
 //Версия: 4.11
+package ru.naumen.modules.geolocation
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.Field
@@ -90,11 +91,11 @@ private def getMapInt(def user, def object, String pointsMethodName, String grou
 
     def points = callParamsMethod(errors, 'Нет данных для отображения', [], pointsMethodName, object, user)
     def staticGroups = callParamsMethodIfExists(errors, 'Произошла ошибка при группировке меток', [], groupingMethodName)
-    
+
     def (staticPoints, dynamicPoints) = points.split { it.type == MapPointType.STATIC }
 
     def groupedStaticPoints = groupPoints(MapPointType.STATIC, staticPoints)
-    
+
     if (staticGroups)
     {
         def groupCount = staticGroups.size()
@@ -144,7 +145,7 @@ private def getLastGeopositionsInt(def user, boolean requestCurrentGeoposition, 
 
         geopositions += new DynamicPointGeoposition(employeeUuid, userGeoposition)
     }
-    
+
     if (withoutGeoposition)
     {
         errors.add('Нет информации о местоположении подвижных меток: ' + withoutGeoposition.join(', '))

@@ -10,13 +10,14 @@
  * Ориентирован на схему данных ITSM365.
  */
 //Версия SMP: 4.11
+package ru.naumen.modules.geolocation
 
 import groovy.transform.Memoized
 
 /**
  * Возвращает группы для статических точек Заявок.
  *
- * Если вы хотите группировать заявки на карте, 
+ * Если вы хотите группировать заявки на карте,
  * то укажите название этого метода в параметре контента с ВП "Название метода группировки неподвижных точек"
  */
 @Memoized
@@ -75,7 +76,7 @@ def employeesByServiceCall(def serviceCall, def user)
 }
 
 /**
- * Метод возвращает список из 
+ * Метод возвращает список из
  * - подвижных точек - участников команды;
  * - неподвижных точек - запросов в ответственности команды.
  *
@@ -90,7 +91,7 @@ def employeesByTeam(def team, def user)
     {
         points += createServiceCallPoint(serviceCall)
     }
-  
+
     // Добавляем на карту динамические точки с сотрудниками
     for (def employee : team.members)
     {
@@ -101,7 +102,7 @@ def employeesByTeam(def team, def user)
 }
 
 /**
- * Метод возвращает список из 
+ * Метод возвращает список из
  * - подвижной точки сотрудника;
  * - неподвижных точек - запросов в ответственности сотрудника.
  *
@@ -135,7 +136,7 @@ private def createServiceCallPoint(def serviceCall)
         // заголовок: тип запроса + номер
         .setHeader(api.metainfo.getMetaClassTitle(serviceCall.metaClass) + '-' + serviceCall.number)
         // геопозиция отдела-контрагента
-        .setGeoposition(clientOU?.latitude, clientOU?.longitude) 
+        .setGeoposition(clientOU?.latitude, clientOU?.longitude)
         // тема Заявки;
         // представление для отображения: на всю ширину
         .addOption('Тема', "${serviceCall?.shortDescr}", modules.mapRest.presentation.fullLength())
@@ -161,7 +162,7 @@ private def createServiceCallPoint(def serviceCall)
  */
 private def createEmployeePoint(def employee, def user)
 {
-    // по умолчанию в заголовок выводится ФИО сотрудника, 
+    // по умолчанию в заголовок выводится ФИО сотрудника,
     // координаты метки на карте - последняя геопозиция сотрудника
     def point = modules.mapRest.createDynamicPoint(employee)
         // телефон сотрудника, если он указан;
@@ -169,7 +170,7 @@ private def createEmployeePoint(def employee, def user)
         .addOption('Телефон', employee.mobilePhoneNumber ?: 'Телефон не указан', modules.mapRest.presentation.underLabel())
         // перейти по ссылке, в данном случае - на карточку Сотрудника
         .addAction(modules.mapRest.action.openLink('Перейти на карточку', api.web.open(employee)))
-    
+
     // метка времени последней геопозиции сотрудника;
     // представление для отображения: на всю ширину
     point.addOption('Последняя геопозиция', modules.mapRest.formatDate(user, point.geoposition?.date, 'dd.MM.yyyy HH:mm'), modules.mapRest.presentation.underLabel())
