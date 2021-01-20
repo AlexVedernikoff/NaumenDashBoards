@@ -101,7 +101,7 @@
     "test:watch": "npm run test -- --watch",
     "zip": "cd dist/ && bestzip ../\"$npm_package_name-v$npm_package_version.zip\" *"
   },
-  "version": "2.0.2",
+  "version": "2.0.3-0",
   "dependencies": {
     "leaflet": "^1.5.1",
     "react-leaflet": "^2.4.0",
