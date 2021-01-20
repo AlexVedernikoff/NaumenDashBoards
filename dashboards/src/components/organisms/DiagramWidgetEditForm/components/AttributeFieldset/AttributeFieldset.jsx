@@ -269,7 +269,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {dataSet, sources} = this.props;
 		const {showDynamicAttributes} = this.state;
 		const {source} = dataSet;
-		const hasDynamic = source && sources[source.value] && sources[source.value].hasDynamic;
+		const hasDynamic = source && sources[source.value] && sources[source.value].value.hasDynamic;
 
 		if (hasDynamic) {
 			return (

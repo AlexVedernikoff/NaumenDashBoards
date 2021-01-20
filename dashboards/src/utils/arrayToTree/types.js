@@ -23,6 +23,18 @@ type Keys = $Shape<{
 	id: string
 }>;
 
+type GetValue<T> = (node: InputArrayNode, parent: string | null) => T;
+
+type OptionValue<T> = GetValue<T> | T;
+
+type Values = $Shape<{
+	id: OptionValue<string>,
+	uploaded: OptionValue<boolean>,
+	value: OptionValue<Object>
+}>;
+
 export type Options = $Shape<{
-	keys: Keys
+	keys: Keys,
+	parent: string | null,
+	values: Values
 }>;

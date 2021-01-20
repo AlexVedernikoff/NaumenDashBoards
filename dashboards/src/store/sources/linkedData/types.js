@@ -1,13 +1,6 @@
 // @flow
-import type {DataSourceMap} from 'store/sources/data/types';
+import type {DataSource, DataSourceMap} from 'store/sources/data/types';
 import {LINKED_DATA_SOURCES_EVENTS} from './constants';
-
-export type RawDataSource = {
-	children: Array<RawDataSource>,
-	classFqn: string,
-	hasDynamic: boolean,
-	title: string
-};
 
 export type LinkedDataSourceMap = {
 	[classFqn: string]: DataSourceMap
@@ -15,8 +8,8 @@ export type LinkedDataSourceMap = {
 
 export type ReceiveDataSources = {
 	payload: {
-		classFqn: string,
-		sources: RawDataSource[]
+		id: string,
+		sources: DataSourceMap
 	},
 	type: typeof LINKED_DATA_SOURCES_EVENTS.RECEIVE_LINKED_DATA_SOURCES
 };
@@ -27,7 +20,7 @@ type RecordDataSourcesError = {
 };
 
 type RequestDataSources = {
-	payload: string,
+	payload: DataSource,
 	type: typeof LINKED_DATA_SOURCES_EVENTS.REQUEST_LINKED_DATA_SOURCES
 };
 

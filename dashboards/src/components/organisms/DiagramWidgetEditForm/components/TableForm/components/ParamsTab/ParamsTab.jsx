@@ -25,16 +25,16 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		let {fetchLinkedDataSources, linkedSources, sources, values} = this.props;
 
 		if (index > 0) {
-			const mainSource = values.data[0].source;
-			const classFqn = mainSource && mainSource.value;
+			const mainSource = values.data[this.mainIndex].source;
 
-			if (classFqn) {
-				const linkData = linkedSources[classFqn];
+			if (mainSource) {
+				const {value} = mainSource;
+				const linkData = linkedSources[value];
 
 				if (linkData) {
 					sources = linkData.map;
 				} else {
-					fetchLinkedDataSources(classFqn);
+					fetchLinkedDataSources(value);
 				}
 			} else {
 				sources = {};
