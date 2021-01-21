@@ -197,6 +197,23 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     /**
+     * Метод по получению правильного подхода к группированию по кварталу
+     * @return колонка для группировки по кварталу
+     */
+    private IApiCriteriaColumn getQuarterGroupColumn(def column)
+    {
+        def sc = api.selectClause
+        if(sc.metaClass.respondsTo(sc, 'quarter'))
+        {
+            return sc.quarter(column)
+        }
+        else
+        {
+            return sc.extract(column, 'QUARTER')
+        }
+    }
+
+    /**
      * Метод по добавлению группировок в запрос и их обработке
      * @param wrapper - текущий запрос в БД
      * @param parameter - параметр с группой для добавления
@@ -494,7 +511,7 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'QQ YY':
-                        def quarterColumn = sc.quarter(column)
+                        def quarterColumn = getQuarterGroupColumn(column)
                         def yearColumn = sc.year(column)
                         criteria.addColumn(sc.concat(quarterColumn, sc.constant(' кв-л '),
                                                      yearColumn))
@@ -514,7 +531,15 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     default:
-                        IApiCriteriaColumn groupColumn = sc.(groupType.toString().toLowerCase())(column)
+                        IApiCriteriaColumn groupColumn
+                        if(groupType == GroupType.QUARTER)
+                        {
+                            groupColumn = getQuarterGroupColumn(column)
+                        }
+                        else
+                        {
+                            groupColumn = sc.(groupType.toString().toLowerCase())(column)
+                        }
                         criteria.addGroupColumn(groupColumn)
                         criteria.addColumn(groupColumn)
                         String sortingType = parameter.sortingType

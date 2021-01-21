@@ -3669,7 +3669,7 @@ private TableDiagram mappingTable(List resultDataSet,
                                   List<String> allAggregationAttributes,
                                   Map<String, Boolean> ignoreLimits)
 {
-    List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
+    List breakdownValues = hasBreakdown ? transposeDataSet.last().unique() : []
     Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > modules.dashboardCommon.tableBreakdownLimit && !ignoreLimits.breakdown
     breakdownValues = valuesInBasicBreakdownExceedLimit
         ? breakdownValues[0..modules.dashboardCommon.tableBreakdownLimit - 1]
@@ -4156,7 +4156,7 @@ private ComboDiagram mappingComboDiagram(List list,
  * @param reverse - флаг на упорядочивание в обратном порядке
  * @return подписи в правильном порядке
  */
-Set getLabelsInCorrectOrder(Set labels, String group, String format, Boolean reverse)
+Set getLabelsInCorrectOrder(Set labels, def group, String format, Boolean reverse)
 {
     switch (group as GroupType)
     {
@@ -4456,7 +4456,21 @@ private FilterList getFilterList(Map<String, Object> customGroup, String subject
  * @param fromNoOrTwoFiltersList - флаг на результат работы 0 или 1 списка фильтров
  * @return TOP Х данных, отсортированных по убыванию показателя
  */
-List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [], Boolean fromNoOrTwoFiltersList = false)
+/**
+ * Метод по получению TOP Х данных
+ * @param currentRes - текущий результат запроса из БД
+ * @param top - количество данных, которое нужно получить
+ * @param parameterFilters - фильтры для параметра из кастомных группировок
+ * @param breakdownFilters - фильтры для показателя из кастомных группировок
+ * @param fromNoOrTwoFiltersList - флаг на результат работы 0 или 1 списка фильтров
+ * @param parameterWithDate - параметр, если в списке параметров есть атрибут даты
+ * @param parameterOrderWithDates - порядок для параметра, содержащего дату
+ * @param aggregationOrderWithDates - порядок для показателя в запросе, где в параметре дата
+ * @return TOP Х данных
+ */
+List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [],
+            Boolean fromNoOrTwoFiltersList = false, def parameterWithDate = null,
+            String parameterOrderWithDates = '', String aggregationOrderWithDates = '')
 {
     Integer paramIndex = 1 //индекс, на котором расположены значения параметра (первого параметра для таблицы)
     Integer aggregationIndex = 0 //индекс, на котором расположены значения показателя (первого показателя для таблицы)
@@ -4465,9 +4479,29 @@ List getTop(List currentRes, Integer top, List parameterFilters = [], List break
         paramIndex = parameterFilters ? 1 : 2
     }
     //суммируем данные по группам - подсчитываем значения первого показателя и выставляем в порядке по убыванию
-    def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v.sum{ it[aggregationIndex] as Double } ] }.sort { -it[1] as Double }
+    def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v ->
+        [k, v.sum{ it[aggregationIndex] as Double } ]
+    }.sort {
+        -it[1] as Double
+    }
     //берём из этих групп первые по top или все группы, если данных меньше
-    tempResult = tempResult.size() > top && fromNoOrTwoFiltersList ? tempResult[0..top - 1]*.get(0) : tempResult*.get(0)
+    if(tempResult.size() > top && fromNoOrTwoFiltersList)
+    {
+        tempResult = tempResult[0..top - 1]
+    }
+    if(parameterWithDate && aggregationOrderWithDates == 'ASC')
+    {
+        tempResult.sort {it[1] as Double}
+    }
+    tempResult = tempResult*.get(0)
+
+    if(parameterWithDate && !aggregationOrderWithDates)
+    {
+        tempResult = getLabelsInCorrectOrder(tempResult as Set,
+                                             parameterWithDate.type,
+                                             parameterWithDate.format,
+                                             parameterOrderWithDates != 'ASC').toList()
+    }
     //находим соответсвия данных с теми группами, что получили, и выводим их
     return tempResult.collectMany { value -> currentRes.findAll {it[paramIndex] == value} }
 }
@@ -4542,7 +4576,10 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                 } : [0]
 
             String aggregationSortingType = requestData.aggregations.find()?.sortingType
-            String parameterSortingType = requestData.groups.find()?.sortingType
+            def parameter = requestData.groups.find()
+            String parameterSortingType = parameter?.sortingType
+            String parameterAttributeType = parameter?.attribute?.type
+            Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
             Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
             Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
@@ -4560,13 +4597,11 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             }
             if (top)
             {
-                if(requestData?.groups?.size() > 1)
-                {
-                    total = getTop(total, top, [], [], true)
-                }
-                total = total.size() > top ? total[0..top - 1] : total
+                total = getTop(total, top, [], [], true, parameterWithDate ? parameter : null, parameterSortingType, aggregationSortingType)
             }
-            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            if (!parameterWithDate &&
+                (aggregationSortingType || parameterSortingType) &&
+                diagramType in DiagramType.SortableTypes)
             {
                 return sortResList(total, aggregationSortingType, parameterSortingType)
             }
@@ -4605,7 +4640,11 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
                                dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
                                       .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
             String aggregationSortingType = dataSet.values().head().aggregations.find()?.sortingType
-            String parameterSortingType = dataSet.values().head().groups.find()?.sortingType
+            def parameter = dataSet.values().head().groups.find()
+            String parameterSortingType = parameter?.sortingType
+            String parameterAttributeType = parameter?.attribute?.type
+            Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
+
             def res = dataSet.values().head().groups?.size() ?
                 findUniqueGroups([0], variables).collect { group ->
                     def resultCalculation = calculator.execute { variable ->
@@ -4628,14 +4667,12 @@ private List getNoFilterListDiagramData(def node, DiagramRequest request, Intege
             total = formatResult(total, aggregationCnt)
             if (top)
             {
-                if(dataSet.values().head().groups?.size() > 1)
-                {
-                    total = getTop(total, top, [], [], true)
-                }
-                total = total.size() > top ? total[0..top - 1] : total
+                total = getTop(total, top, [], [], true, parameterWithDate ? parameter : null, parameterSortingType, aggregationSortingType)
             }
 
-            if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+            if (!parameterWithDate &&
+                (aggregationSortingType || parameterSortingType) &&
+                diagramType in DiagramType.SortableTypes)
             {
                 return sortResList(total, aggregationSortingType, parameterSortingType)
             }
