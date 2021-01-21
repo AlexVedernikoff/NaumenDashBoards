@@ -1,5 +1,6 @@
 // @flow
-import type {Column, ColumnsWidth, Components, Row} from 'Table/types';
+import type {Column, ColumnsWidth, Components, FixedPositions, Row} from 'Table/types';
+import type {Ref} from 'components/types';
 import type {TableHeaderSettings, TableSorting} from 'store/widgets/data/types';
 
 export type Props = {
@@ -8,10 +9,11 @@ export type Props = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
 	data: Array<Row>,
-	fixedColumnsCount: number,
-	fixedLeft: number,
+	fixedPositions: FixedPositions,
+	forwardedRef: Ref<'div'>,
 	onChangeColumnWidth: (width: number, column: Column) => void,
 	onChangeSorting: TableSorting => void,
+	scrollBarWidth: number,
 	sorting: TableSorting,
 	width: number
 };

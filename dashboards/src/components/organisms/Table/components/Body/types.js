@@ -1,5 +1,5 @@
 // @flow
-import type {Column, ColumnsWidth, Components, OnClickCell, Row} from 'Table/types';
+import type {Column, ColumnsWidth, Components, FixedPositions, OnClickCell, Row} from 'Table/types';
 import type {Table, TableSorting} from 'store/widgets/data/types';
 
 export type Props = {
@@ -7,9 +7,10 @@ export type Props = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
 	data: Array<Row>,
-	fixedColumnsCount: number,
-	fixedLeft: number,
+	fixedPositions: FixedPositions,
+	onChangeScrollBarWidth: (scrollBarWidth: number) => void,
 	onClickCell?: OnClickCell,
+	onScroll: (event: SyntheticEvent<HTMLDivElement>) => void,
 	page: number,
 	pageSize: number,
 	settings: Table,

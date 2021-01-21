@@ -2,14 +2,20 @@
 import type {Column} from 'Table/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import styles from './styles.less';
 
 export class Footer extends PureComponent<Props> {
 	renderColumn = (column: Column, index: number, columns: Array<Column>) => {
-		const {columnsWidth, components, fixedColumnsCount, fixedLeft} = this.props;
+		const {columnsWidth, components, fixedPositions, scrollBarWidth} = this.props;
 		const {FooterCell} = components;
 		const {accessor, footer} = column;
-		const left = fixedColumnsCount - index > 0 ? fixedLeft : 0;
+		const left = fixedPositions[accessor];
 		const last = index === columns.length - 1;
+		let width = columnsWidth[accessor];
+
+		if (last) {
+			width += scrollBarWidth;
+		}
 
 		return (
 			<FooterCell
@@ -19,18 +25,18 @@ export class Footer extends PureComponent<Props> {
 				last={last}
 				left={left}
 				value={footer}
-				width={columnsWidth[accessor]}
+				width={width}
 			/>
 		);
 	};
 
 	render () {
-		const {columns, components, width} = this.props;
+		const {columns, components, forwardedRef, width} = this.props;
 		const {Row} = components;
 
 		return (
-			<div style={{width}}>
-				<Row>{columns.map(this.renderColumn)}</Row>
+			<div className={styles.footer} ref={forwardedRef}>
+				<Row width={width}>{columns.map(this.renderColumn)}</Row>
 			</div>
 		);
 	}

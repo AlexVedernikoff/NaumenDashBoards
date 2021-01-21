@@ -110,7 +110,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		return row || id === 1 ? row : this.findRow(id - 1, accessor);
 	};
 
-	getLastTypedColumn = (columns: Array<Column>, type: ColumnType): ?Column => columns.find((column, index, columns) => {
+	getLastTypedColumn = (columns: $ReadOnlyArray<Column>, type: ColumnType): ?Column => columns.find((column, index, columns) => {
 		const nextColumn = columns[index + 1];
 		return column.type === type && (!nextColumn || nextColumn.type !== type);
 	});
@@ -121,11 +121,16 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {accessor} = column;
 		const {BREAKDOWN, INDICATOR, PARAMETER} = COLUMN_TYPES;
 		const ratio = columnsWidth[accessor] / newWidth;
-		const isLastIndicator = this.isLastTypedColumn(columns, column, INDICATOR)
-			|| this.isLastTypedColumn(this.getLastTypedColumn(columns, INDICATOR).columns, column, BREAKDOWN);
+		const isLastIndicator = this.isLastTypedColumn(columns, column, INDICATOR);
 		let newColumnsWidth = columnsWidth;
+		let isLastBreakdown = false;
 
-		if (isLastIndicator) {
+		if (!isLastIndicator) {
+			const lastIndicator = this.getLastTypedColumn(columns, INDICATOR);
+			isLastBreakdown = lastIndicator && this.isLastTypedColumn(lastIndicator.columns, column, BREAKDOWN);
+		}
+
+		if (isLastIndicator || isLastBreakdown) {
 			newColumnsWidth = this.getNewIndicatorsColumnsWidth(column, newColumnsWidth, ratio);
 		} else if (this.isLastTypedColumn(columns, column, PARAMETER)) {
 			newColumnsWidth = this.getNewParametersColumnsWidth(column, newColumnsWidth, ratio);
@@ -213,7 +218,7 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	isGroupColumn = (column: Column): boolean => column.type === COLUMN_TYPES.PARAMETER;
 
-	isLastTypedColumn = (columns: Array<Column> = [], column: Column, type: ColumnType): boolean => {
+	isLastTypedColumn = (columns: $ReadOnlyArray<Column> = [], column: Column, type: ColumnType): boolean => {
 		const {accessor} = column;
 		const lastTypedColumn = this.getLastTypedColumn(columns, type);
 
@@ -251,7 +256,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {attribute, type} = props.column;
 		let {components, value} = props;
 
-		if (type === BREAKDOWN && attribute.type === ATTRIBUTE_TYPES.metaClass) {
+		if (type === BREAKDOWN && hasUUIDsInLabels(attribute) && typeof value === 'string') {
 			value = getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR);
 		}
 

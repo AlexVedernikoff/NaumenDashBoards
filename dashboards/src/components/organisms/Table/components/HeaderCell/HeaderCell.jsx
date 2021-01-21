@@ -68,14 +68,16 @@ export class HeaderCell extends PureComponent<Props> {
 		const {column, components, fontColor, fontStyle, last, left, sorting, textAlign, textHandler, value, width} = this.props;
 		const {ASC, DESC} = SORTING_TYPES;
 		const {Cell} = components;
+		const fixed = !isNaN(parseFloat(left));
 		const cellCN = cn({
 			[styles.cellContainer]: true,
+			[styles.fixedCellContainer]: fixed,
 			[styles.sortAsc]: sorting === ASC,
 			[styles.sortDesc]: sorting === DESC
 		});
 
 		return (
-			<div className={cellCN} onClick={this.handleClick}>
+			<div className={cellCN} onClick={this.handleClick} style={{left}}>
 				<Cell
 					className={styles.cell}
 					column={column}
@@ -83,15 +85,13 @@ export class HeaderCell extends PureComponent<Props> {
 					fontColor={fontColor}
 					fontStyle={fontStyle}
 					last={last}
-					left={left}
 					textAlign={textAlign}
 					textHandler={textHandler}
 					tip={value}
 					value={value}
 					width={width}
-				>
-					{this.renderResizer()}
-				</Cell>
+				/>
+				{this.renderResizer()}
 			</div>
 		);
 	}

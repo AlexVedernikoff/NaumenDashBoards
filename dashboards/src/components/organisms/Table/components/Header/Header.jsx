@@ -23,39 +23,46 @@ export class Header extends PureComponent<Props> {
 		}
 	};
 
+	isLast = (columns: Array<Column>, index: number) => index === columns.length - 1;
+
 	renderColumn = (column: Column, index: number, columns: Array<Column>) => {
 		const {columns: subColumns} = column;
+		const last = this.isLast(columns, index);
 
 		return Array.isArray(subColumns)
-			? this.renderColumnWithSubColumns(column, index, subColumns)
-			: this.renderHeaderCell(column, index, columns);
+			? this.renderColumnWithSubColumns(column, index, subColumns, last)
+			: this.renderHeaderCell(column, index, columns, last);
 	};
 
-	renderColumnWithSubColumns = (column: Column, index: number, columns: Array<Column>) => {
-		const {columnsWidth} = this.props;
+	renderColumnWithSubColumns = (column: Column, index: number, columns: Array<Column>, last: boolean) => {
+		const {columnsWidth, fixedPositions} = this.props;
 		const {accessor, columns: subColumns} = column;
 		const width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
+		const left = fixedPositions[accessor];
 
 		return (
-			<div className={styles.cellContainer} style={{minWidth: width}}>
-				{this.renderHeaderCell(column, index, columns)}
-				{this.renderSubColumns(columns)}
+			<div className={styles.cellContainer} style={{left, minWidth: width}}>
+				{this.renderHeaderCell(column, index, columns, last)}
+				{this.renderSubColumns(columns, last)}
 			</div>
 		);
 	};
 
-	renderHeaderCell = (column: Column, index: number, columns: Array<Column>, isSubColumn: boolean = false) => {
-		const {columnSettings, columnsWidth, components, fixedColumnsCount, fixedLeft, onChangeColumnWidth, sorting} = this.props;
+	renderHeaderCell = (column: Column, index: number, columns: Array<Column>, last: boolean) => {
+		const {columnSettings, columnsWidth, components, fixedPositions, onChangeColumnWidth, scrollBarWidth, sorting} = this.props;
 		const {HeaderCell} = components;
 		const {fontColor, fontStyle, textAlign, textHandler} = columnSettings;
 		const {accessor, columns: subColumns, header} = column;
-		const width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
-		const last = index === columns.length - 1;
-		const left = fixedColumnsCount - index > 0 && !isSubColumn ? fixedLeft : 0;
+		const left = fixedPositions[accessor];
+		let width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
 		let sortingType;
 
 		if (sorting.accessor === accessor) {
 			sortingType = sorting.type;
+		}
+
+		if (last) {
+			width += scrollBarWidth;
 		}
 
 		return (
@@ -79,11 +86,15 @@ export class Header extends PureComponent<Props> {
 		);
 	};
 
-	renderSubColumns = (columns?: Array<Column>): React$Node => {
+	renderSubColumns = (columns?: Array<Column>, lastColumn: boolean): React$Node => {
 		if (Array.isArray(columns) && columns.length > 0) {
 			return (
 				<div className={styles.subColumnsContainer}>
-					{columns.map((column, index, columns) => this.renderHeaderCell(column, index, columns, true))}
+					{columns.map((column, index, columns) => {
+						const last = lastColumn && this.isLast(columns, index);
+
+						return this.renderHeaderCell(column, index, columns, last);
+					})}
 				</div>
 			);
 		}
@@ -92,10 +103,10 @@ export class Header extends PureComponent<Props> {
 	};
 
 	render () {
-		const {columns, width} = this.props;
+		const {columns, forwardedRef} = this.props;
 
 		return (
-			<div className={styles.header} style={{maxWidth: width}}>
+			<div className={styles.header} ref={forwardedRef}>
 				{columns.map(this.renderColumn)}
 			</div>
 		);

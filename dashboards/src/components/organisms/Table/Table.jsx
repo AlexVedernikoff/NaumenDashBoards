@@ -1,9 +1,10 @@
 // @flow
 import {Body, Cell, Footer, Header, HeaderCell, Pagination, Row} from './components';
 import cn from 'classnames';
-import type {Column, ColumnsWidth, Components, Props, State, ValueProps} from './types';
+import type {Column, ColumnsWidth, Components, FixedPositions, Props, State, ValueProps} from './types';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import {DEFAULT_TABLE_SETTINGS} from './constants';
+import {isLegacyBrowser} from 'utils/export/helpers';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import {ResizeDetector} from 'components/molecules';
@@ -13,7 +14,6 @@ import {sumColumnsWidth} from './helpers';
 import type {TableSorting} from 'store/widgets/data/types';
 
 export class Table extends PureComponent<Props, State> {
-	tableScrollTop = 0;
 	static defaultProps = {
 		className: '',
 		columnsRatioWidth: {},
@@ -33,24 +33,22 @@ export class Table extends PureComponent<Props, State> {
 		Row,
 		Value: this.renderValue
 	};
-	ref: Ref<'div'> = createRef();
+	tableRef: Ref<'div'> = createRef();
+	headerRef: Ref<'div'> = createRef();
+	footerRef: Ref<'div'> = createRef();
 
 	state = {
 		columnsWidth: {},
 		components: this.getExtendedComponents(this.props.components),
-		fixedLeft: 0,
+		fixedPositions: {},
 		page: 1,
+		scrollBarWidth: 0,
 		sorting: this.props.sorting,
 		width: 0
 	};
 
 	getExtendedComponents (components?: Components): Components {
 		return components ? {...this.components, ...components} : this.components;
-	}
-
-	getFixedColumns (props: Props): Array<Column> {
-		const {columns, fixedColumnsCount} = props;
-		return columns.slice(0, fixedColumnsCount);
 	}
 
 	renderValue (props: ValueProps) {
@@ -74,7 +72,7 @@ export class Table extends PureComponent<Props, State> {
 	 * Возвращает массив колонок для отрисовки без учёта объединяющих столбцов
 	 * @returns {Array<Column>}
 	 */
-	getColumnsForRender = (columns: Array<Column>): Array<Column> => columns.map(column => column.columns || column)
+	getColumnsForRender = (): Array<Column> => this.props.columns.map(column => column.columns || column)
 			.reduce((columns, value) => Array.isArray(value) ? [...columns, ...value] : [...columns, value], []);
 
 	/**
@@ -89,10 +87,11 @@ export class Table extends PureComponent<Props, State> {
 		let newColumnsWidth = {...columnsWidth};
 
 		columns.forEach(column => {
-			let {accessor, columns: subColumns, width} = column;
+			let {accessor, columns: subColumns, width: columnWidth} = column;
+			let width = columnWidth || defaultWidth;
 
 			if (Array.isArray(subColumns)) {
-				newColumnsWidth = this.getColumnsWidthByTableWidth(tableWidth, subColumns, newColumnsWidth);
+				newColumnsWidth = this.getColumnsWidthByTableWidth(width, subColumns, newColumnsWidth);
 				width = sumColumnsWidth(newColumnsWidth, subColumns);
 			}
 
@@ -100,6 +99,21 @@ export class Table extends PureComponent<Props, State> {
 		});
 
 		return newColumnsWidth;
+	};
+
+	getFixedPositions = (columnsWidth: ColumnsWidth): FixedPositions => {
+		const {columns, fixedColumnsCount} = this.props;
+		const fixedPositions = {};
+
+		if (!isLegacyBrowser(false)) {
+			columns.slice(0, fixedColumnsCount).forEach(({accessor}, index, columns) => {
+				fixedPositions[accessor] = index > 0
+					? columns.slice(0, index).reduce((width, column) => width + columnsWidth[column.accessor], 0)
+					: 0;
+			});
+		}
+
+		return fixedPositions;
 	};
 
 	/**
@@ -131,20 +145,36 @@ export class Table extends PureComponent<Props, State> {
 		return newColumnsWidth;
 	};
 
+	handleBodyScroll = (e: SyntheticEvent<HTMLDivElement>) => {
+		const {scrollLeft} = e.currentTarget;
+		const {current: header} = this.headerRef;
+		const {current: footer} = this.footerRef;
+
+		if (header) {
+			header.scrollLeft = scrollLeft;
+		}
+
+		if (footer) {
+			footer.scrollLeft = scrollLeft;
+		}
+	};
+
 	handleChangeColumnWidth = (columnWidth: number, column: Column) => {
 		const {columns, columnsRatioWidth, getNewColumnsWidth = this.getNewColumnsWidth, onChangeColumnWidth} = this.props;
 		const {columnsWidth} = this.state;
-		const {current: container} = this.ref;
+		const {current: container} = this.tableRef;
 		const {accessor} = column;
 
 		if (container) {
 			const {clientWidth: containerWidth} = container;
 			const newColumnsWidth = getNewColumnsWidth(column, columnWidth, columnsWidth);
+			const fixedPositions = this.getFixedPositions(newColumnsWidth);
 			const width = sumColumnsWidth(newColumnsWidth, columns);
 
 			if (width >= container.clientWidth) {
 				this.setState(() => ({
 					columnsWidth: newColumnsWidth,
+					fixedPositions,
 					width
 				}));
 
@@ -153,6 +183,8 @@ export class Table extends PureComponent<Props, State> {
 			}
 		}
 	};
+
+	handleChangeScrollBarWidth = (scrollBarWidth: number) => this.setState({scrollBarWidth});
 
 	handleChangeSorting = (sorting: TableSorting) => {
 		const {onChangeSorting} = this.props;
@@ -178,34 +210,25 @@ export class Table extends PureComponent<Props, State> {
 		});
 
 		const width = sumColumnsWidth(columnsWidth, columns);
+		const fixedPositions = this.getFixedPositions(columnsWidth);
 
-		this.setState({columnsWidth, width});
+		this.setState({columnsWidth, fixedPositions, width});
 	};
 
-	handleScroll = (event: {...Event, target: HTMLDivElement}) => {
-		const {target} = event;
-
-		if (this.tableScrollTop === target.scrollTop) {
-			const fixedLeft = target.scrollLeft > 0 ? target.scrollLeft : 0;
-			this.setState({fixedLeft});
-		} else {
-			this.tableScrollTop = target.scrollTop;
-		}
-	};
-
-	renderBody = (columns: Array<Column>) => {
-		const {data, fixedColumnsCount, onClickDataCell, pageSize, settings} = this.props;
-		const {columnsWidth, components, fixedLeft, page, sorting, width} = this.state;
+	renderBody = () => {
+		const {data, onClickDataCell, pageSize, settings} = this.props;
+		const {columnsWidth, components, fixedPositions, page, sorting, width} = this.state;
 
 		return (
 			<Body
-				columns={this.getColumnsForRender(columns)}
+				columns={this.getColumnsForRender()}
 				columnsWidth={columnsWidth}
 				components={components}
 				data={data}
-				fixedColumnsCount={fixedColumnsCount}
-				fixedLeft={fixedLeft}
+				fixedPositions={fixedPositions}
+				onChangeScrollBarWidth={this.handleChangeScrollBarWidth}
 				onClickCell={onClickDataCell}
+				onScroll={this.handleBodyScroll}
 				page={page}
 				pageSize={pageSize}
 				settings={settings}
@@ -215,19 +238,20 @@ export class Table extends PureComponent<Props, State> {
 		);
 	};
 
-	renderFooter = (columns: Array<Column>) => {
-		const {fixedColumnsCount} = this.props;
-		const {columnsWidth, components, fixedLeft, width} = this.state;
+	renderFooter = () => {
+		const {columns} = this.props;
+		const {columnsWidth, components, fixedPositions, scrollBarWidth, width} = this.state;
 		const hasFooter = columns.find(i => i.footer);
 
 		if (hasFooter) {
 			return (
 				<Footer
-					columns={this.getColumnsForRender(columns)}
+					columns={this.getColumnsForRender()}
 					columnsWidth={columnsWidth}
 					components={components}
-					fixedColumnsCount={fixedColumnsCount}
-					fixedLeft={fixedLeft}
+					fixedPositions={fixedPositions}
+					forwardedRef={this.footerRef}
+					scrollBarWidth={scrollBarWidth}
 					width={width}
 				/>
 			);
@@ -235,8 +259,8 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderHeader = () => {
-		const {columns, data, fixedColumnsCount, settings} = this.props;
-		const {columnsWidth, components, fixedLeft, sorting, width} = this.state;
+		const {columns, data, settings} = this.props;
+		const {columnsWidth, components, fixedPositions, scrollBarWidth, sorting, width} = this.state;
 		const {columnHeader} = settings;
 
 		return (
@@ -246,10 +270,11 @@ export class Table extends PureComponent<Props, State> {
 				columnsWidth={columnsWidth}
 				components={components}
 				data={data}
-				fixedColumnsCount={fixedColumnsCount}
-				fixedLeft={fixedLeft}
+				fixedPositions={fixedPositions}
+				forwardedRef={this.headerRef}
 				onChangeColumnWidth={this.handleChangeColumnWidth}
 				onChangeSorting={this.handleChangeSorting}
+				scrollBarWidth={scrollBarWidth}
 				sorting={sorting}
 				width={width}
 			/>
@@ -265,7 +290,7 @@ export class Table extends PureComponent<Props, State> {
 		const {data, pageSize} = this.props;
 		const {page, width} = this.state;
 		const total = Math.max(Math.ceil(data.length / pageSize), 1);
-		const {current} = this.ref;
+		const {current} = this.tableRef;
 
 		if (width > 0 && current) {
 			return (
@@ -283,15 +308,15 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderTable = () => {
-		const {columns, data} = this.props;
+		const {data} = this.props;
 		const {width} = this.state;
 
-		if (width > 0 && data.length > 0) {
+		if (data.length > 0 && width > 0) {
 			return (
-				<div className={styles.table} onScroll={this.handleScroll}>
+				<div className={styles.table}>
 					{this.renderHeader()}
-					{this.renderBody(columns)}
-					{this.renderFooter(columns)}
+					{this.renderBody()}
+					{this.renderFooter()}
 				</div>
 			);
 		}
@@ -304,7 +329,7 @@ export class Table extends PureComponent<Props, State> {
 
 		return (
 			<ResizeDetector onResize={this.handleResize} >
-				<div className={cn(styles.container, className)} ref={this.ref}>
+				<div className={cn(styles.container, className)} ref={this.tableRef}>
 					{this.renderTable()}
 					{this.renderNoData()}
 					{this.renderPagination()}

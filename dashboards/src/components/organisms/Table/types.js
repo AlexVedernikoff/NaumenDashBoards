@@ -45,6 +45,10 @@ export type ColumnsWidth = {
 	[accessor: string]: number
 };
 
+export type FixedPositions = {
+	[accessor: string]: number
+};
+
 export type Props = {
 	className: string,
 	columns: Array<Column>,
@@ -64,8 +68,9 @@ export type Props = {
 export type State = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
-	fixedLeft: number,
+	fixedPositions: FixedPositions,
 	page: number,
+	scrollBarWidth: number,
 	sorting: TableSorting,
 	width: number
 };

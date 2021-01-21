@@ -12,7 +12,7 @@ export class Cell extends PureComponent<Props> {
 		className: '',
 		defaultValue: DEFAULT_TABLE_VALUE.EMPTY_ROW,
 		fontColor: '',
-		left: 0,
+		left: null,
 		row: null,
 		textAlign: TEXT_ALIGNS.left,
 		textHandler: TEXT_HANDLERS.CROP,
@@ -63,10 +63,11 @@ export class Cell extends PureComponent<Props> {
 		const {children, className, fontColor, fontStyle, last, left, textAlign, textHandler, tip, width} = this.props;
 		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 		const {CROP, WRAP} = TEXT_HANDLERS;
+		const fixed = !isNaN(parseFloat(left));
 		const cellCN = cn({
 			[styles.cell]: true,
+			[styles.fixedCell]: fixed,
 			[styles.lastCell]: last,
-			[styles.fixedCell]: left > 0,
 			[settingsStyles.bold]: fontStyle === BOLD,
 			[settingsStyles.italic]: fontStyle === ITALIC,
 			[settingsStyles.underline]: fontStyle === UNDERLINE,

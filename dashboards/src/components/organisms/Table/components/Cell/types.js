@@ -7,7 +7,7 @@ export type DefaultProps = {|
 	className: string,
 	defaultValue: DefaultTableValue,
 	fontColor: string,
-	left: number,
+	left: number | null,
 	row: Row | null,
 	textAlign: TextAlign,
 	textHandler: TextHandler,

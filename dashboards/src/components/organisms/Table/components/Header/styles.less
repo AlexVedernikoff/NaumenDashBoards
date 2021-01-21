@@ -3,14 +3,24 @@
 :local {
 	.header {
 		display: flex;
+		flex: 1 0 auto;
+		overflow-x: scroll;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
 	}
 
 	.cellContainer {
 		display: flex;
+		flex: 1 0 auto;
 		flex-direction: column;
 	}
 
 	.subColumnsContainer {
 		display: flex;
+		flex: 1 0 auto;
 	}
 }
