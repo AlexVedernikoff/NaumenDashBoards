@@ -10,7 +10,14 @@ class Tree {
 
 	constructor (array: InputArray, options: Options) {
 		this.array = array;
-		this.options = extend(this.options, options);
+		this.options = extend({
+			...this.options,
+			values: {
+				id: this.getId,
+				uploaded: true,
+				value: this.getValue
+			}
+		}, options);
 	}
 
 	/**
@@ -21,12 +28,8 @@ class Tree {
 	 */
 	addNode = (arrayNode: InputArrayNode, parent: string | null): string => {
 		const {keys} = this.options;
-		const {[keys.children]: children, ...value} = arrayNode;
-		let {[keys.id]: id} = value;
-
-		if (parent) {
-			id = `${parent}$${id}`;
-		}
+		const {[keys.children]: children} = arrayNode;
+		const {id, uploaded, value} = this.getNodeValues(arrayNode, parent);
 
 		const childrenIds = Array.isArray(children) && children.length > 0 ? this.addNodes(children, id) : null;
 
@@ -35,7 +38,7 @@ class Tree {
 			id,
 			loading: false,
 			parent,
-			uploaded: true,
+			uploaded,
 			value
 		};
 
@@ -58,11 +61,30 @@ class Tree {
 		return ids;
 	};
 
-	createTree = () => this.addNodes(this.array);
+	createTree = () => this.addNodes(this.array, this.options.parent);
 
-	getId = (id: string, parent: string | null) => parent ? `${parent}$${id}` : id;
+	getId = (node: InputArrayNode, parent: string | null) => {
+		const {[this.options.keys.id]: id} = node;
+		return parent ? `${parent}$${id}` : id;
+	};
+
+	getNodeValues = (node: InputArrayNode, parent: string | null) => {
+		const {values} = this.options;
+		const nodeValues = {};
+
+		Object.keys(values).forEach(key => {
+			nodeValues[key] = typeof values[key] === 'function' ? values[key](node, parent) : values[key];
+		});
+
+		return nodeValues;
+	};
 
 	getTree = () => this.tree;
+
+	getValue = (node: InputArrayNode) => {
+		const {[this.options.keys.children]: children, ...value} = node;
+		return value;
+	};
 }
 
 export default Tree;

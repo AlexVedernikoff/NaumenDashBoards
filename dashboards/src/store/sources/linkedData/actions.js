@@ -1,16 +1,21 @@
 // @flow
+import {arrayToTree} from 'utils/arrayToTree';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {Dispatch, ThunkAction} from 'store/types';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {getDataSourceValue} from 'store/sources/data/actions';
 import {LINKED_DATA_SOURCES_EVENTS} from './constants';
-import type {RawDataSource} from './types';
 
 /**
  * Возвращает ссылочные источники
  * @param {string} classFqn - код источника
  * @returns {ThunkAction}
  */
-const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatch: Dispatch) => {
-	dispatch(requestDataSources(classFqn));
+const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+	const {[classFqn]: source} = getState().sources.data.map;
+	dispatch({
+		payload: source,
+		type: LINKED_DATA_SOURCES_EVENTS.REQUEST_LINKED_DATA_SOURCES
+	});
 
 	try {
 		const {backBOLinks, boLinks, object} = ATTRIBUTE_TYPES;
@@ -20,29 +25,28 @@ const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatc
 		};
 		const sources = await window.jsApi.restCallModule('dashboards', 'getLinkedDataSources', payload);
 
-		dispatch(receiveDataSources(classFqn, sources));
+		dispatch({
+			payload: {
+				id: classFqn,
+				sources: arrayToTree(sources, {
+					keys: {
+						id: 'classFqn'
+					},
+					parent: classFqn,
+					values: {
+						value: getDataSourceValue
+					}
+				})
+			},
+			type: LINKED_DATA_SOURCES_EVENTS.RECEIVE_LINKED_DATA_SOURCES
+		});
 	} catch (e) {
-		dispatch(recordErrorDataSources(classFqn));
+		dispatch({
+			payload: classFqn,
+			type: LINKED_DATA_SOURCES_EVENTS.RECORD_LINKED_DATA_SOURCES_ERROR
+		});
 	}
 };
-
-const receiveDataSources = (classFqn: string, sources: RawDataSource) => ({
-	payload: {
-		classFqn,
-		sources
-	},
-	type: LINKED_DATA_SOURCES_EVENTS.RECEIVE_LINKED_DATA_SOURCES
-});
-
-const recordErrorDataSources = (payload: string) => ({
-	payload,
-	type: LINKED_DATA_SOURCES_EVENTS.RECORD_LINKED_DATA_SOURCES_ERROR
-});
-
-const requestDataSources = (payload: string) => ({
-	payload,
-	type: LINKED_DATA_SOURCES_EVENTS.REQUEST_LINKED_DATA_SOURCES
-});
 
 export {
 	fetchLinkedDataSources

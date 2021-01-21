@@ -2,7 +2,6 @@
 import type {DataSourcesAction, DataSourcesState} from './types';
 import {DATA_SOURCES_EVENTS} from './constants';
 import {defaultDataSourcesAction, initialDataSourcesState} from './init';
-import {getDataSourceMap} from './helpers';
 
 const reducer = (state: DataSourcesState = initialDataSourcesState, action: DataSourcesAction = defaultDataSourcesAction): DataSourcesState => {
 	switch (action.type) {
@@ -16,7 +15,7 @@ const reducer = (state: DataSourcesState = initialDataSourcesState, action: Data
 			return {
 				...state,
 				loading: false,
-				map: getDataSourceMap(action.payload)
+				map: action.payload
 			};
 		case DATA_SOURCES_EVENTS.RECORD_DATA_SOURCES_ERROR:
 			return {

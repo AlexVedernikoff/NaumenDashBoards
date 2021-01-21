@@ -15,7 +15,6 @@ module.exports = {
 		proxy: {
 			'/sd/services/rest/*': {
 				changeOrigin: true,
-				secure: false,
 				target: process.env.API_URL
 			}
 		}

@@ -10,18 +10,19 @@ export type RawDataSource = {
 };
 
 type Source = {
+	hasDynamic: boolean,
 	label: string,
 	value: string,
 };
 
-export type DataSource = TreeNode<Source, {hasDynamic: boolean}>;
+export type DataSource = TreeNode<Source>;
 
 export type DataSourceMap = {
 	[key: string]: DataSource
 };
 
 export type ReceiveDataSources = {
-	payload: RawDataSource[],
+	payload: DataSourceMap,
 	type: typeof DATA_SOURCES_EVENTS.RECEIVE_DATA_SOURCES
 };
 
