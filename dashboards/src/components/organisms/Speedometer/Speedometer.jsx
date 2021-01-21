@@ -146,8 +146,10 @@ export class Speedometer extends PureComponent<Props, State> {
 		let {color, from, to} = range;
 
 		if (type === RANGES_TYPES.PERCENT) {
-			from = Math.round(max / 100 * from);
-			to = Math.round(max / 100 * to);
+			const diff = max - min;
+
+			from = min + Math.round(diff / 100 * from);
+			to = min + Math.round(diff / 100 * to);
 		} else {
 			from = Math.max(from, min);
 			to = Math.min(to, max);
