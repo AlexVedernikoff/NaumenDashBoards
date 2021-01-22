@@ -2930,7 +2930,10 @@ private List formatGroupSet(List list, RequestData data, List listIdsOfNormalAgg
             //обрабатываем группы
             def totalGroupValues = groups.withIndex().collect { group, i ->
                 return formatGroup(requestGroups[i] as GroupParameter,
-                                   data.source.classFqn, group, diagramType, requestGroups[i]?.title == 'n/a')
+                                   data.source.classFqn, group,
+                                   diagramType,
+                                   requestGroups[i]?.title == 'n/a',
+                                   requestGroups[i]?.title == 'breakdown')
             }
             //возвращаем агрегации в нужные места
             elAggregations.eachWithIndex() {aggr, i -> totalGroupValues.add(listIdsOfNormalAggregations[i], aggr) }
@@ -2958,9 +2961,10 @@ List updateNotAggregatedToGroups(List notAggregated)
  * @param fqnClass - класс атрибута группировки
  * @param value - значение группировки
  * @param fromNA - флаг на обработку атрибута из агрегации N/a
+ * @param fromBreakdown - флаг на обработку атрибута из разбивки
  * @return человеко читаемое значение группировки
  */
-private String formatGroup(GroupParameter parameter, String fqnClass, def value, DiagramType diagramType, Boolean fromNA = false)
+private String formatGroup(GroupParameter parameter, String fqnClass, def value, DiagramType diagramType, Boolean fromNA = false, Boolean fromBreakdown = false)
 {
     GroupType type = parameter.type
 
@@ -2978,7 +2982,8 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
             switch (parameter.attribute.attrChains().last()?.type)
             {
                 case AttributeType.DT_INTERVAL_TYPE:
-                    if (parameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)) {
+                    if (parameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
+                    {
                         return value
                     }
                     return TimeUnit.MILLISECONDS.toHours(value as long)
@@ -3013,16 +3018,15 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                         {
                             value = ObjectMarshaller.marshal(value, uuid)
                         }
-                        //в таблице важно фронту отправлять пустую строку
-                        value = value ?: ""
                     }
-                    else if( diagramType in DiagramType.NullableTypes)
-                    {
-                        value = value ?: "Не заполнено"
-                    }
+                    value = value ?: getNullValue(diagramType, fromBreakdown)
                     return value.toString().replaceAll("\\<.*?>","")
             }
         case GroupType.DAY:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             String format = parameter.format
             switch (format) {
                 case 'dd':
@@ -3048,6 +3052,10 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
             }
             break
         case GroupType.MONTH:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             String format = parameter.format
             switch(format) {
                 case 'MM YY':
@@ -3059,6 +3067,10 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     return NOMINATIVE_RUSSIAN_MONTH[(value as int) - 1]
             }
         case GroupType.QUARTER:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             String format = parameter.format
             switch(format) {
                 case 'QQ YY':
@@ -3067,6 +3079,10 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     return "$value кв-л"
             }
         case [GroupType.WEEK, GroupType.YEAR]:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             String format = parameter.format
             switch (format) {
                 case 'ww':
@@ -3075,6 +3091,10 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
                     return value.toString()
             }
         case GroupType.SEVEN_DAYS:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             def russianLocale = new Locale("ru")
             SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
             SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd.MM.yy", russianLocale)
@@ -3093,19 +3113,54 @@ private String formatGroup(GroupParameter parameter, String fqnClass, def value,
             }
             return "$startDate - $endDate"
         case GroupType.MINUTES:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             return value.toString().padLeft(2, '0') + ' мин'
         case GroupType.HOURS:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             value = value.toString().tokenize(':/')*.padLeft(2, '0').join(':')
             return value
         case GroupType.getTimerTypes():
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             return (value as TimerStatus).getRussianName()
         case GroupType.SECOND_INTERVAL:
         case GroupType.MINUTE_INTERVAL:
         case GroupType.HOUR_INTERVAL:
         case GroupType.DAY_INTERVAL:
         case GroupType.WEEK_INTERVAL:
+            if(!value)
+            {
+                return getNullValue(diagramType, fromBreakdown)
+            }
             return value.toString().replaceAll("\\<.*?>","")
         default: throw new IllegalArgumentException("Not supported type: $type")
+    }
+}
+
+/**
+ * Метод получения пустого значения
+ * @param diagramType - тип диаграммы
+ * @param fromBreakdown - флаг на получение значения для разбивки
+ * @return пустое значение в зависимости от типа диаграммы
+ */
+private String getNullValue(DiagramType diagramType, Boolean fromBreakdown)
+{
+    //в таблице важно фронту отправлять пустую строку
+    if(diagramType == DiagramType.TABLE && !fromBreakdown)
+    {
+        return ""
+    }
+    else if((diagramType in DiagramType.NullableTypes) || fromBreakdown)
+    {
+        return "Не заполнено"
     }
 }
 
