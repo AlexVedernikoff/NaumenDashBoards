@@ -12,6 +12,7 @@ package ru.naumen.modules.dashboards
 
 import groovy.transform.Field
 import groovy.transform.Immutable
+import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 
 import static groovy.json.JsonOutput.toJson
 
@@ -181,12 +182,13 @@ String getAttributeObject(Map requestContent)
     String sourceCode = requestContent.sourceCode
     String attributeCode = requestContent.attribute.code
     //получили списки типов
-    List types = getAttributeTypes(attributeCode, sourceCode)
+    def metaClass = api.metainfo.getMetaClass(sourceCode)
+    List types = getPermittedTypes(metaClass, attributeCode).toList()
     def count = requestContent.count as int
     def offset = requestContent.offset as int
     def condition = removed ? [:] : [removed: false]
 
-    //на первом месте стоит тип, по которому будут искаться значения
+    //на первом месте стоит тип, по которому будет поиск значений
     def intermediateData = uuid ?: types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }.unique { it.find() }
     List values = uuid
         ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }.unique { it?.UUID }
@@ -207,14 +209,25 @@ String getAttributeObject(Map requestContent)
 }
 
 /**
- * Метод по получению списка типов атрибута
- * @param attributeCode - код атрибута
- * @param sourceCode - источник атрибута
- * @return типы атрибута
+ * Метод по получению типов и класса атрибута из метакласса источника
+ * @param mc - метакласс источника
+ * @param attrCode - код атрибута
+ * @return список типов и класса атрибута
  */
-List getAttributeTypes(String attributeCode, String sourceCode)
+Set getPermittedTypes(def mc, String attrCode)
 {
-    return api.metainfo.getMetaClass(sourceCode).getAttribute(attributeCode).type.attributeType.permittedTypes.toList()
+    def attr = mc.getAttribute(attrCode)
+    if (attr in IAttributeWrapper)
+    {
+        attr = attr.@attribute
+    }
+
+    def result = attr?.permittedTypesCache
+    if (result)
+    {
+        return result
+    }
+    return attr?.type?.permittedTypes
 }
 
 /**
@@ -229,7 +242,8 @@ String searchValue(Map requestContent)
     def value = requestContent.value
     Boolean removed = requestContent.removed ?: false
 
-    def types = getAttributeTypes(attributeCode, sourceCode).collectMany { classFqn ->
+    def metaClass = api.metainfo.getMetaClass(sourceCode)
+    def types = getPermittedTypes(metaClass, attributeCode).toList().collectMany { classFqn ->
         return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn))
     }.unique { it.getFqn()}
 
@@ -529,31 +543,26 @@ private Collection getAllInheritanceChains(String classFqn = MAIN_FQN)
  * @param requiredOffset - требуемое смещение объектов
  * @return список объектов
  */
-private List getObjects(List data, int requiredCount, int requiredOffset)
+private List getObjects(List intermediateData, int requiredCount, int requiredOffset)
 {
-    if (!data)
-    {
-        return []
+    return intermediateData.collectMany { data ->
+        if (!data)
+        {
+            return []
+        }
+        if (!requiredCount)
+        {
+            return []
+        }
+        def (classFqn, condition, int count) = data
+        int mainCount = (count - requiredOffset).with {
+            it < 0 ? 0 : it
+        }
+
+        int realCount = requiredCount < mainCount ? requiredCount : mainCount
+        def result = mainCount ? api.utils.find(classFqn, condition, sp.limit(realCount).offset(requiredOffset)) : []
+        return result
     }
-    if (!requiredCount)
-    {
-        return []
-    }
-    def (classFqn, condition, int count) = data.head()
-    int mainCount = (count - requiredOffset).with {
-        it < 0 ? 0 : it
-    }
-    int remainCount = requiredCount - mainCount
-    int remainOffset = (requiredOffset - count).with {
-        it < 0 ? 0 : it
-    }
-    int realCount = requiredCount < mainCount ? requiredCount : mainCount
-    def result = mainCount ? api.utils.find(
-        classFqn, condition, sp.limit(realCount).offset(
-        requiredOffset
-    )
-    ) : []
-    return result + getObjects(data.tail(), remainCount, remainOffset)
 }
 
 /**
