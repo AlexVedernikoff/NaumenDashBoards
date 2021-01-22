@@ -503,9 +503,9 @@ class Link
                                         case 'title_contains':
                                             return filterBuilder.AND(filterBuilder.OR(attr.code, 'titleContains', it.data))
                                         case 'title_not_contains':
-                                            return filterBuilder.AND(filterBuilder.OR(attr.code,'titleNotContains',it.data))
+                                            return filterBuilder.AND(filterBuilder.OR(attr.code, 'titleNotContains', it.data))
                                         case ['equal_subject_attribute', 'equal_attr_current_object']:
-                                            return filterBuilder.AND(filterBuilder.OR(attr.code,'contains',it.data.uuid))
+                                            return filterBuilder.AND(filterBuilder.OR(attr.code, 'contains', it.data.uuid))
                                         default: throw new IllegalArgumentException(
                                             "Not supported condition type: ${ it.type }"
                                         )
@@ -1284,8 +1284,12 @@ class Link
                     def (d, m, y) = dayAndMonth.tokenize('.')
                     [d as int, m as int, y as int]
                 }.transpose()
-                def datePointStart = api.date.createDateTimePointPredicates(['DAY',  day[0], 'GE'], ['MONTH', month[0], 'EQ'], ['YEAR', year[0], 'EQ'])
-                def datePointEnd = api.date.createDateTimePointPredicates(['DAY',  day[1], 'LE'], ['MONTH',  month[1], 'EQ'], ['YEAR', year[1], 'EQ'])
+                def datePointStart = api.date.createDateTimePointPredicates(['DAY',  day[0], 'GE'],
+                                                                            ['MONTH', month[0], 'EQ'],
+                                                                            ['YEAR', year[0], 'EQ'])
+                def datePointEnd = api.date.createDateTimePointPredicates(['DAY',  day[1], 'LE'],
+                                                                          ['MONTH',  month[1], 'EQ'],
+                                                                          ['YEAR', year[1], 'EQ'])
 
                 if (day[0] > day[1])
                 {
@@ -1294,8 +1298,8 @@ class Link
                 }
                 else
                 {
-                    filterBuilder.AND(filterBuilder.OR('creationDate', 'fromToDatePoint', datePointStart))
-                                 .AND(filterBuilder.OR('creationDate', 'fromToDatePoint', datePointEnd))
+                    filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointStart))
+                                 .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointEnd))
                 }
                 return filterBuilder
         }

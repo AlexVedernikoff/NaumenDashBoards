@@ -220,13 +220,14 @@ class QueryWrapper implements CriteriaWrapper
      * @param diagramType - тип диаграммы
      * @return текущий запрос в БД с добавленной группой
      */
-    QueryWrapper processGroup(QueryWrapper wrapper, GroupParameter parameter, DiagramType diagramType)
+    QueryWrapper processGroup(QueryWrapper wrapper, GroupParameter parameter, DiagramType diagramType, Source source)
     {
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
             Date startMinDate = modules.dashboardCommon.getMinDate(
                 parameter.attribute.code,
-                parameter.attribute.sourceCode
+                parameter.attribute.sourceCode,
+                source.descriptor
             )
             startMinDate = new Date(startMinDate.time).clearTime()
             wrapper.sevenDaysGroup(parameter, startMinDate)
@@ -942,7 +943,7 @@ List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = tr
 
     clonedGroups.each {
         prepareAttribute(it.attribute as Attribute)
-        wrapper.processGroup(wrapper, it as GroupParameter, diagramType)
+        wrapper.processGroup(wrapper, it as GroupParameter, diagramType, requestData.source)
     }
 
     requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
