@@ -44,7 +44,7 @@ export type SourceInjectedProps = {|
 |};
 
 export type RenderSourceFieldsetProps = $Shape<{
-	onSelectCallback: (index: number, sourceRefFields: SourceRefFields) => Function,
+	onSelectCallback: (index: number, sourceRefFields: SourceRefFields) => void,
 	sourceRefFields: SourceRefFields,
 	sources: DataSourceMap,
 	usesFilter: boolean

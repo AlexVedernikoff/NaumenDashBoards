@@ -37,15 +37,20 @@ async function checkSourceForParent () {
 	let result = true;
 
 	if (index > 0 && source && mainSource) {
-		try {
-			({result} = await window.jsApi.restCallModule(
-				'dashboards',
-				'checkForParent',
-				mainSource.value,
-				source.value
-			));
-		} catch (e) {
-			result = false;
+		const {value: mainValue} = mainSource;
+		const {value} = source;
+
+		if (mainValue !== value) {
+			try {
+				({result} = await window.jsApi.restCallModule(
+					'dashboards',
+					'checkForParent',
+					mainValue,
+					value
+				));
+			} catch (e) {
+				result = false;
+			}
 		}
 	}
 

@@ -1,7 +1,7 @@
 // @flow
 import {arrayToTree} from 'utils/arrayToTree';
 import type {Attribute} from 'store/sources/attributes/types';
-import type {Dispatch, ThunkAction} from 'store/types';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {FetchParams, RawObjectData} from './types';
 import {getObjectKey} from './helpers';
 import {LIMIT, OBJECTS_DATA_TYPES, OBJECTS_EVENTS} from './constants';
@@ -22,7 +22,7 @@ const isUploaded = (node: RawObjectData): boolean => {
  * @param {RawObjectData} node - узел данных
  * @returns {Array<string>}
  */
-const getChildren = (node: RawObjectData): Array<string> => {
+const getChildren = (node: RawObjectData): Array<string> | null => {
 	const {children, hasChildren} = node;
 	let ids = null;
 

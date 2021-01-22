@@ -59,8 +59,9 @@ const getParentClassFqn = (values: Values, index: number) => {
 
 	if (type === WIDGET_TYPES.TABLE && index > 0) {
 		const mainSource = data[0][FIELDS.source];
+		const source = data[index][FIELDS.source];
 
-		if (mainSource) {
+		if (mainSource && source && source.value !== mainSource.value) {
 			parentClassFqn = mainSource.value;
 		}
 	}

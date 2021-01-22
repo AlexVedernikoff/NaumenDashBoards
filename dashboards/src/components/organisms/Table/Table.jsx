@@ -283,10 +283,10 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderTable = () => {
-		const {columns} = this.props;
+		const {columns, data} = this.props;
 		const {width} = this.state;
 
-		if (width > 0) {
+		if (width > 0 && data.length > 0) {
 			return (
 				<div className={styles.table} onScroll={this.handleScroll}>
 					{this.renderHeader()}
