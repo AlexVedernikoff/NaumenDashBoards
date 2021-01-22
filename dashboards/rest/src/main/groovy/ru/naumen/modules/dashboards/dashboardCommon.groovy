@@ -175,10 +175,21 @@ enum ColumnType
 
 /**
  * Метод получения минимальной даты из Бд
- * @return - минимальная дата по данному атрибуту
+ * @param code - код атрибута
+ * @param classFqn - класс источника
+ * @param descriptor - фильтр для источника
+ * @return минимальная дата по данному атрибуту
  */
-Date getMinDate(String code, String classFqn)
+Date getMinDate(String code, String classFqn, String descriptor = '')
 {
+    if(descriptor)
+    {
+        def sc = api.selectClause
+        def apiDescr = api.listdata.createListDescriptor(descriptor)
+        def dateCriteria = api.listdata.createCriteria(apiDescr)
+                              .addColumn(sc.min(sc.property(code)))
+        return api.db.query(dateCriteria).list().head() as Date
+    }
     return api.db.query("select min(${code}) from ${classFqn}").list().head() as Date
 }
 
