@@ -93,7 +93,7 @@ def getDataSourceAttributes(requestContent, Boolean parseToJson = true)
 
     def metaInfo = api.metainfo.getMetaClass(parentClassFqn ?: classFqn)
     String attributeTitle = ""
-    if (parentClassFqn)
+    if (parentClassFqn  && parentClassFqn != classFqn)
     {
         //источником является ссылочный атрибут верхнего источника с кодом parentClassFqn
         def attribute = metaInfo?.getAttribute(classFqn)
@@ -894,8 +894,9 @@ String getCardObject(String value)
  */
 String checkForParent(String parentClassFqn, String childClassFqn)
 {
-    //при проверке этим методом вернётся пустая строка, если атрибут есть, или сообщение об ошибке
-    Boolean isParent = api.metainfo.checkAttributeExisting(parentClassFqn, childClassFqn).isEmpty()
+    //n+1-й источник может быть такой же, как и первый
+    //при проверке методом checkAttributeExisting вернётся пустая строка, если атрибут есть, или сообщение об ошибке
+    Boolean isParent = parentClassFqn == childClassFqn || api.metainfo.checkAttributeExisting(parentClassFqn, childClassFqn).isEmpty()
     return toJson([result: isParent])
 }
 
