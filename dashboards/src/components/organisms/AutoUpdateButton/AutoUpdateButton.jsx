@@ -202,16 +202,14 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 		const {values} = this.state;
 
 		return (
-			<div className={styles.title}>
-				<Checkbox
-					activeColor="info"
-					className={styles.checkbox}
-					label="Автообновление диаграмм"
-					name="enabled"
-					onClick={this.handleClick}
-					value={values.enabled}
-				/>
-			</div>
+			<Checkbox
+				activeColor="info"
+				className={styles.checkbox}
+				label="Автообновление диаграмм"
+				name="enabled"
+				onClick={this.handleClick}
+				value={values.enabled}
+			/>
 		);
 	};
 

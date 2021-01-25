@@ -31,8 +31,10 @@ class LegacyCheckbox extends Component<Props> {
 	};
 
 	render () {
+		const {className} = this.props;
+
 		return (
-			<label className={cn(styles.container, this.props.className)} onClick={this.handleClick}>
+			<label className={cn(styles.container, className)} onClick={this.handleClick}>
 				{this.renderCheckbox()}
 				{this.renderLabel()}
 			</label>
