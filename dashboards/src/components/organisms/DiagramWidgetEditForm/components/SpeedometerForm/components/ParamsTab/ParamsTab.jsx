@@ -53,7 +53,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
 			children: this.renderSettingsFields(),
-			useBreakdown: false
+			usesBreakdown: false
 		};
 
 		return renderIndicatorBoxes(props);
