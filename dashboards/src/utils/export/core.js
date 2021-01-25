@@ -63,7 +63,7 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
  * @param {boolean} show - значение указывает о необходимости скрыть\показать элемент
  */
 const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean) => {
-	const toolbars = container.querySelectorAll('.apexcharts-toolbar, .rc-menu, .header-submenu, .react-resizable-handle');
+	const toolbars = container.querySelectorAll('.apexcharts-toolbar, .rc-menu, .header-submenu, .react-resizable-handle, .apexcharts-tooltip');
 
 	toolbars.forEach(toolbar => {
 		toolbar.style.visibility = show ? 'visible' : 'hidden';
