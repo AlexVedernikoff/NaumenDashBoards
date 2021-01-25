@@ -1,6 +1,5 @@
 // @flow
 import type {ApexOptions} from 'apexcharts';
-import type {ApexYAxisOptions} from 'utils/chart/types';
 import {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
@@ -40,19 +39,21 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 };
 
 /**
- * Возвращает настройки оси Y
+ * Устанавливает настройки оси Y
+ * @param {ApexOptions} options - опции графика
  * @param {DataSet} dataSet - набор данных виджета, относительно которого настраивается ось
  * @param {number} index - индекс набора данных виджета
  * @param {ComboWidget} widget - виджет
  * @param {boolean} forceHide - указывает на необходимость скрывать ось.
  * @param {?number} maxValue - максимальное значение
- * @returns {ApexYAxisOptions}
+ * @returns {ApexOptions}
  */
-const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, forceHide: boolean, maxValue?: number) => {
+const setYAxis = (options: ApexOptions, dataSet: DataSet, index: number, widget: ComboWidget, forceHide: boolean, maxValue?: number): ApexOptions => {
 	const {colors, indicator} = widget;
-	const {dataKey, showEmptyData, yAxisName: name} = dataSet;
+	const {breakdown, dataKey, showEmptyData, yAxisName: name} = dataSet;
 	const usesMSInterval = hasMSInterval(dataSet, FIELDS.yAxis);
 	const usesPercent = hasPercent(dataSet, FIELDS.yAxis);
+	const usesUUIDs = !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown);
 	const color = colors[index];
 	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
 
@@ -66,7 +67,7 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, forceHid
 		max = getNiceScale(maxValue);
 	}
 
-	return {
+	const yaxis = {
 		axisBorder: {
 			color,
 			show: true
@@ -94,19 +95,37 @@ const getYAxis = (dataSet: DataSet, index: number, widget: ComboWidget, forceHid
 			text: showName ? name : undefined
 		}
 	};
+
+	const yTooltip = {
+		formatter: valueFormatter(usesMSInterval, usesPercent),
+		title: {
+			formatter: axisLabelFormatter(usesUUIDs)
+		}
+	};
+
+	return {
+		...options,
+		tooltip: {
+			...options.tooltip,
+			y: [...options.tooltip.y, yTooltip]
+		},
+		yaxis: [...options.yaxis, yaxis]
+	};
 };
 
 /**
- * Возвращает настройки осей Y относительно каждого объекта данных series
+ * Устанавливает настройки осей Y относительно каждого объекта данных series
+ * @param {ApexOptions} options - опции графика
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
  * @param {?number} maxValue - максимальное значение по оси
- * @returns {Array<ApexYAxisOptions>}
+ * @returns {ApexOptions}
  */
-const getYAxises = (widget: ComboWidget, chart: DiagramBuildData, maxValue?: number): Array<ApexYAxisOptions> => {
+const setYAxises = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData, maxValue?: number): ApexOptions => {
 	const usedDataKeys = [];
+	let extendedOptions = options;
 
-	return chart.series.map((s, i) => {
+	chart.series.forEach((s, i) => {
 		const {dataKey} = s;
 		const dataSet = widget.data.find(dataSet => dataSet.dataKey === dataKey);
 
@@ -125,9 +144,11 @@ const getYAxises = (widget: ComboWidget, chart: DiagramBuildData, maxValue?: num
 				usedDataKeys.push(dataKey);
 			}
 
-			return getYAxis(dataSet, i, widget, forceHide, maxValue);
+			extendedOptions = setYAxis(extendedOptions, dataSet, i, widget, forceHide, maxValue);
 		}
-	}).filter(yaxis => yaxis);
+	});
+
+	return extendedOptions;
 };
 
 /**
@@ -169,7 +190,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		tickPlacement: 'between'
 	};
 
-	return {
+	let options = {
 		chart: {
 			stacked
 		},
@@ -194,11 +215,16 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		},
 		tooltip: {
 			intersect: true,
-			shared: false
+			shared: false,
+			y: []
 		},
 		xaxis: extend(xaxis, getXAxisOptions(parameter, hasOverlappedLabel)),
-		yaxis: getYAxises(widget, chart, maxValue)
+		yaxis: []
 	};
+
+	options = setYAxises(options, widget, chart, maxValue);
+
+	return options;
 };
 
 export default comboMixin;
