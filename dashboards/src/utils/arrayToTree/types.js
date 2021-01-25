@@ -28,10 +28,10 @@ type GetValue<T> = (node: InputArrayNode, parent: string | null) => T;
 type OptionValue<T> = GetValue<T> | T;
 
 export type Values = {
-	children: OptionValue<Array<string>>,
-	id: OptionValue<string>,
+	children: OptionValue<Array<string> | null>,
+	id: GetValue<string>,
 	uploaded: OptionValue<boolean>,
-	value: OptionValue<NodeValue>
+	value: GetValue<NodeValue>
 };
 
 export type Options = $Shape<{

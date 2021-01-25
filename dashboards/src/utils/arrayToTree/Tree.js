@@ -64,7 +64,7 @@ class Tree {
 
 	createTree = () => this.addNodes(this.array, this.options.parent);
 
-	getChildren = (node: InputArrayNode, parent: string | null): Array<string> => {
+	getChildren = (node: InputArrayNode, parent: string | null): Array<string> | null => {
 		const {keys, values} = this.options;
 		const {[keys.children]: children} = node;
 		let ids = null;
@@ -81,7 +81,7 @@ class Tree {
 		return id;
 	};
 
-	getNodeValues = (node: InputArrayNode, parent: string | null): Values => {
+	getNodeValues = (node: InputArrayNode, parent: string | null) => {
 		const {values} = this.options;
 		const nodeValues = {};
 

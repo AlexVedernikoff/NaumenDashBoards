@@ -8,7 +8,7 @@ import type {TreeNode} from 'components/types';
 export type SearchObjects = (source: Source, attribute: Attribute, value: string) => ThunkAction;
 
 export type RawObjectData = {
-	children: Array<RawObjectData>,
+	children: number,
 	hasChildren: boolean,
 	title: string,
 	uuid: string

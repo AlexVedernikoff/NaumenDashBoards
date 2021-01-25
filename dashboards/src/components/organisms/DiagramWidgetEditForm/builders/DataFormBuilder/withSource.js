@@ -61,28 +61,30 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 		handleSelectSource = (onSelectCallback: Function) =>
 			(index: number, event: OnSelectEvent, sourceRefFields: SourceRefFields) => {
-				const {fetchAttributes, setDataFieldValue, values} = this.props;
+				const {setDataFieldValue, values} = this.props;
 				const {name, value: nextSource} = event;
 				const prevSource = values.data[index][name];
-				const parentClassFqn = getParentClassFqn(values, index);
-				let callback;
-
-				if (onSelectCallback) {
-					callback = onSelectCallback(index, sourceRefFields);
-				}
 
 				getMapValues(sourceRefFields).forEach(name => setDataFieldValue(index, name, undefined));
 
-				if (nextSource) {
-					fetchAttributes(nextSource.value, parentClassFqn, this.setDefaultIndicator(index, sourceRefFields));
-				}
-
-				setDataFieldValue(index, name, nextSource, callback);
+				setDataFieldValue(index, name, nextSource, this.handleSelectSourceCallback(index, sourceRefFields, onSelectCallback));
 
 				if ((prevSource && !nextSource) || (nextSource && prevSource && prevSource.value !== nextSource.value)) {
 					setDataFieldValue(index, FIELDS.descriptor, '');
 				}
 			};
+
+		handleSelectSourceCallback = (index: number, sourceRefFields: SourceRefFields, onSelectCallback: Function) => () => {
+			const {fetchAttributes, values} = this.props;
+			const source = values.data[index][FIELDS.source];
+
+			if (source) {
+				const parentClassFqn = getParentClassFqn(values, index);
+				fetchAttributes(source.value, parentClassFqn, this.setDefaultIndicator(index, sourceRefFields));
+			}
+
+			onSelectCallback && onSelectCallback(index, sourceRefFields);
+		};
 
 		resetDynamicAttributes = (index: number, sourceRefFields: SourceRefFields) => {
 			const {setDataFieldValue, values} = this.props;
