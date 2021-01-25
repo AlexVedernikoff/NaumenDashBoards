@@ -6,7 +6,7 @@ export type Props = {
 	fontFamily: string,
 	fontSize: string | number, // '10px' | '10' | 10
 	fontStyle: ?FontStyle,
-	onClick: () => void,
+	onClickValue: () => void,
 	value: string | number
 };
 

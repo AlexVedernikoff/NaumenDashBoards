@@ -7,7 +7,7 @@ import React, {PureComponent} from 'react';
 import {Summary} from 'components/molecules';
 
 export class SummaryWidget extends PureComponent<Props> {
-	handleClick = () => {
+	handleClickValue = () => {
 		const {onDrillDown, widget} = this.props;
 		const mixin = createDrillDownMixin(widget);
 		const index = widget.data.findIndex(dataSet => !dataSet.sourceForCompute);
@@ -33,7 +33,7 @@ export class SummaryWidget extends PureComponent<Props> {
 				fontFamily={fontFamily}
 				fontSize={fontSize}
 				fontStyle={fontStyle}
-				onClick={this.handleClick}
+				onClickValue={this.handleClickValue}
 				value={value}
 			/>
 		);

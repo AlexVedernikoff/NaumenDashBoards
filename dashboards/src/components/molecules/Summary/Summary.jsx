@@ -49,21 +49,25 @@ export class Summary extends PureComponent<Props, State> {
 		}
 	};
 
+	renderValue = () => {
+		const {onClickValue, value} = this.props;
+		return <span onClick={onClickValue}>{value}</span>;
+	};
+
 	renderWithResize = (className: string, style: Object) => {
-		const {onClick, value} = this.props;
 		const {fontSize} = this.state;
 
 		return (
 			<ResizeDetector onResize={this.handleResize}>
-				<div className={className} onClick={onClick} style={{...style, fontSize}}>
-					{fontSize && value}
+				<div className={className} style={{...style, fontSize}}>
+					{fontSize && this.renderValue()}
 				</div>
 			</ResizeDetector>
 		);
 	};
 
 	render () {
-		const {color, fontFamily, fontSize, fontStyle, onClick, value} = this.props;
+		const {color, fontFamily, fontSize, fontStyle} = this.props;
 		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 		const containerCN = cn({
 			[styles.container]: true,
@@ -82,8 +86,8 @@ export class Summary extends PureComponent<Props, State> {
 		}
 
 		return (
-			<div className={containerCN} onClick={onClick} style={style}>
-				{value}
+			<div className={containerCN} style={style}>
+				{this.renderValue()}
 			</div>
 		);
 	}
