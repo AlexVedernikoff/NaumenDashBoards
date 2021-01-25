@@ -342,7 +342,7 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 	const {context, dashboard, sources} = getState();
 	const {contentCode} = context;
 	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
-	const key = `widgetContext_${metaClass}_${contentCode}`;
+	const key = `widgetContext_${metaClass.split('$')[0]}_${contentCode}`;
 	const descriptorStr = localStorage.getItem(key);
 
 	if (descriptorStr) {
