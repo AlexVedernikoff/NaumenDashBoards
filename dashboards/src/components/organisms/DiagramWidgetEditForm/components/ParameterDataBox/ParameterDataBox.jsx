@@ -54,7 +54,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 		const currentSet = values.data[index];
 		let mainParameter = mainSet[name];
 
-		if (currentSet !== mainSet && !this.isDisabled(index) && mainParameter) {
+		if (currentSet !== mainSet && mainParameter) {
 			return filterByAttribute(options, mainParameter);
 		}
 
@@ -108,14 +108,6 @@ export class ParameterDataBox extends PureComponent<Props> {
 		setDataFieldValue(index, name, value, callback);
 	};
 
-	isDisabled = (index: number) => {
-		const {data} = this.props.values;
-		const mainSource = data[0][FIELDS.source];
-		const currentSource = data[index][FIELDS.source];
-
-		return index !== 0 && mainSource && currentSource && mainSource.value === currentSource.value;
-	};
-
 	renderParameterFieldset = (dataSet: DataSet, index: number) => {
 		const {errors, name, values} = this.props;
 		const parameter = dataSet[name];
@@ -126,7 +118,6 @@ export class ParameterDataBox extends PureComponent<Props> {
 			<ParameterFieldset
 				dataSet={dataSet}
 				dataSetIndex={index}
-				disabled={this.isDisabled(index)}
 				disabledGroup={disabledGroup}
 				error={errors[errorKey]}
 				filter={this.filter}
