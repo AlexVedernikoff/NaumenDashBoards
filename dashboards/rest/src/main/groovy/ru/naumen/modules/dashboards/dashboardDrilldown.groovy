@@ -10,9 +10,78 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
 
+import groovy.transform.Field
+
 import java.text.SimpleDateFormat
 import ru.naumen.core.shared.dto.SimpleDtObject
 import static groovy.json.JsonOutput.toJson
+import ru.naumen.core.server.script.api.injection.InjectApi
+
+@Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl()
+
+interface DashboardDrilldown
+{
+    /**
+     * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
+     * @param requestContent - параметры запроса
+     * @param cardObjectUuid - Uuid карточки текущего объекта
+     * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
+     * @return ссылка на на страницу с произвольным списком объектов в json-формате.
+     */
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
+}
+
+class DashboardDrilldownImpl implements DashboardDrilldown
+{
+    DashboardDrilldownService service = DashboardDrilldownService.instance
+
+    @Override
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
+    {
+        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest)])
+    }
+}
+
+@InjectApi
+@Singleton
+class DashboardDrilldownService
+{
+
+    /**
+     * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
+     * @param requestContent - параметры запроса
+     * @param cardObjectUuid - Uuid карточки текущего объекта
+     * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
+     * @return ссылка на на страницу с произвольным списком объектов в json-формате.
+     */
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
+    {
+        DiagramType diagramType = diagramTypeFromRequest as DiagramType
+        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
+        def linkBuilder = link.getBuilder()
+        return api.web.list(linkBuilder)
+    }
+
+    /**
+     * Метод для изменения запроса с целью подмены объекта фильтрации в запросах
+     * @param requestContent - фактическое значение идентификатора "текущего объекта"
+     * @param cardObjectUuid - запрос на построение диаграммы
+     * @return Изменённый запрос
+     */
+    private Map<String, Object> transformRequest(Map<String, Object> requestContent,
+                                                 String cardObjectUuid)
+    {
+        Closure<Map<String, Object>> transform = { Map<String, Object> request ->
+            Map<String, Object> res = [:] << request
+            res.descriptor = DashboardMarshaller.substitutionCardObject(
+                request.descriptor as String,
+                cardObjectUuid
+            )
+            return res
+        }
+        return cardObjectUuid ? transform(requestContent) : requestContent
+    }
+}
 //region КЛАССЫ
 /**
  * Объект помощник для формирования ссылок
@@ -424,7 +493,7 @@ class Link
                                             }
                                             else
                                             {
-                                                Date minDate = modules.dashboardCommon.getMinDate(
+                                                Date minDate = DashboardsUtils.getMinDate(
                                                     attr.code,
                                                     attr.sourceCode
                                                 )
@@ -815,7 +884,7 @@ class Link
      */
     private List<Object> findObjects(Attribute attr, String fqnClass, def value, Boolean fromLinks = false)
     {
-        String searchField = fromLinks ? modules.dashboardQueryWrapper.UUID_CODE : attr.code
+        String searchField = fromLinks ? DashboardQueryWrapperUtils.UUID_CODE : attr.code
         return attr.ref ?
             api.utils.find(fqnClass, [(attr.code): findObjects(attr.ref, attr.property, value)])
             : api.utils.find(fqnClass, [(searchField): value]).collect()
@@ -1348,45 +1417,5 @@ class Link
                 return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
-}
-//endregion
-
-//region REST-МЕТОДЫ
-/**
- * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
- * @param requestContent - параметры запроса
- * @param cardObjectUuid - Uuid карточки текущего объекта
- * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
- * @return ссылка на на страницу с произвольным списком объектов в json-формате.
- */
-String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
-{
-    DiagramType diagramType = diagramTypeFromRequest as DiagramType
-    Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
-    def linkBuilder = link.getBuilder()
-    def webLink = api.web.list(linkBuilder)
-    return toJson([link: webLink])
-}
-//endregion
-
-//region вспомогательных методов
-/**
- * Метод для изменения запроса с целью подмены объекта фильтрации в запросах
- * @param requestContent - фактическое значение идентификатора "текущего объекта"
- * @param cardObjectUuid - запрос на построение диаграммы
- * @return Изменённый запрос
- */
-private Map<String, Object> transformRequest(Map<String, Object> requestContent,
-                                             String cardObjectUuid)
-{
-    Closure<Map<String, Object>> transform = { Map<String, Object> request ->
-        Map<String, Object> res = [:] << request
-        res.descriptor = DashboardMarshaller.substitutionCardObject(
-            request.descriptor as String,
-            cardObjectUuid
-        )
-        return res
-    }
-    return cardObjectUuid ? transform(requestContent) : requestContent
 }
 //endregion

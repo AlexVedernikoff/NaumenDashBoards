@@ -15,6 +15,7 @@ import groovy.transform.AutoClone
 import groovy.transform.TupleConstructor
 import groovy.transform.Field
 
+import ru.naumen.core.server.script.api.injection.InjectApi
 //region enum
 /**
  * Типы диаграмм
@@ -34,11 +35,12 @@ enum DiagramType
     SPEEDOMETER,
     TABLE
 
-    static List<DiagramType> StandardTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE]
+    static List<DiagramType> StandardTypes = [COLUMN, COLUMN_STACKED, LINE]
+    static List<DiagramType> BarTypes = [BAR, BAR_STACKED]
     static List<DiagramType> RoundTypes = [DONUT, PIE]
     static List<DiagramType> CountTypes = [SUMMARY, SPEEDOMETER]
     static List<DiagramType> NullableTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO, DONUT, PIE]
-    static List<DiagramType> SortableTypes = [*StandardTypes, *RoundTypes, COMBO]
+    static List<DiagramType> SortableTypes = [*StandardTypes, *BarTypes, *RoundTypes, COMBO]
 }
 
 /**
@@ -171,62 +173,38 @@ enum ColumnType
 }
 //endregion
 
-//region МЕТОДЫ
-
-/**
- * Метод получения минимальной даты из Бд
- * @param code - код атрибута
- * @param classFqn - класс источника
- * @param descriptor - фильтр для источника
- * @return минимальная дата по данному атрибуту
- */
-Date getMinDate(String code, String classFqn, String descriptor = '')
+@InjectApi
+class DashboardUtils
 {
-    if(descriptor)
+    /**
+     * предел значений по количеству строк в таблице
+     */
+    static final Integer tableParameterLimit = 10000
+    /**
+     * предел значений по количеству значений разбивки в таблице
+     */
+    static final Integer tableBreakdownLimit = 30
+
+    /**
+     * Метод получения минимальной даты из Бд
+     * @param code - код атрибута
+     * @param classFqn - класс источника
+     * @param descriptor - фильтр для источника
+     * @return минимальная дата по данному атрибуту
+     */
+    static Date getMinDate(String code, String classFqn, String descriptor = '')
     {
-        def sc = api.selectClause
-        def apiDescr = api.listdata.createListDescriptor(descriptor)
-        def dateCriteria = api.listdata.createCriteria(apiDescr)
-                              .addColumn(sc.min(sc.property(code)))
-        return api.db.query(dateCriteria).list().head() as Date
+        if(descriptor)
+        {
+            def sc = getApi().selectClause
+            def apiDescr = getApi().listdata.createListDescriptor(descriptor)
+            def dateCriteria = getApi().listdata.createCriteria(apiDescr)
+                                       .addColumn(sc.min(sc.property(code)))
+            return getApi().db.query(dateCriteria).list().head() as Date
+        }
+        return getApi().db.query("select min(${code}) from ${classFqn}").list().head() as Date
     }
-    return api.db.query("select min(${code}) from ${classFqn}").list().head() as Date
 }
-
-/**
- * Метод получения количества уникальных значений по атрибуту из Бд
- * @return - количество уникальных значений по данному атрибуту
- */
-Integer countDistinct(Attribute attribute, String classFqn)
-{
-    String attributeType = attribute.type
-    List attrCodesList = attribute.attrChains()*.code
-    String attrCode = attrCodesList.collect { it == 'UUID' ? 'id' : it.replace('metaClass', 'metaClassFqn') }.join('.')
-    def s = api.selectClause
-    def criteria = api.db.createCriteria().addSource(classFqn)
-    if(attributeType == AttributeType.META_CLASS_TYPE)
-    {
-        criteria.addColumn(s.property(attrCode))
-                .addGroupColumn(s.property(attrCode))
-        return api.db.query(criteria).list().size()
-    }
-    criteria.addColumn(s.countDistinct(s.property(attrCode)))
-    return api.db.query(criteria).list().head() as Integer
-}
-
-//endregion
-
-//region КОНСТАНТЫ
-/**
- * предел значений по количеству строк в таблице
- */
-@Field private static final Integer tableParameterLimit = 10000
-/**
- * предел значений по количеству значений разбивки в таблице
- */
-@Field private static final Integer tableBreakdownLimit = 30
-
-//endregion
 
 //region КЛАССЫ
 /**

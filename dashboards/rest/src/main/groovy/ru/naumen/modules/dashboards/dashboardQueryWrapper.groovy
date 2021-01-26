@@ -15,13 +15,6 @@ import groovy.transform.Field
 import ru.naumen.core.server.script.api.criteria.*
 import java.sql.Timestamp
 
-//region КОНСТАНТЫ
-@Field private static final String UUID_CODE = 'UUID'
-@Field private static final Double ACCURACY = 0.9
-@Field private static final Double ROUNDING = 0.6
-@Field private static final Integer WEEKDAY_COUNT = 7
-//endregion
-
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
 {
@@ -43,7 +36,7 @@ trait CriteriaWrapper
             }
             else
             {
-                return api.db.query(criteria).setMaxResults(modules.dashboardCommon.tableParameterLimit).list()
+                return api.db.query(criteria).setMaxResults(DashboardUtils.tableParameterLimit).list()
             }
 
         }
@@ -152,14 +145,14 @@ class QueryWrapper implements CriteriaWrapper
         if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
         {
             String attributeCode = attributeCodes.find()
-            column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
-            criteria.addGroupColumn(sc.property("${attributeCode}.${modules.dashboardQueryWrapper.UUID_CODE}"))
+            column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
+            criteria.addGroupColumn(sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
         }
         //атрибут связанного типа
         if(parameter.attribute.type == AttributeType.STRING_TYPE)
         {
-            column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(modules.dashboardQueryWrapper.UUID_CODE))
-            criteria.addGroupColumn(sc.property(modules.dashboardQueryWrapper.UUID_CODE))
+            column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(DashboardQueryWrapperUtils.UUID_CODE))
+            criteria.addGroupColumn(sc.property(DashboardQueryWrapperUtils.UUID_CODE))
         }
 
         if (attributeCodes.any { it.contains('state') })
@@ -224,7 +217,7 @@ class QueryWrapper implements CriteriaWrapper
     {
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
-            Date startMinDate = modules.dashboardCommon.getMinDate(
+            Date startMinDate = DashboardUtils.getMinDate(
                 parameter.attribute.code,
                 parameter.attribute.sourceCode,
                 source.descriptor
@@ -311,7 +304,7 @@ class QueryWrapper implements CriteriaWrapper
                     column = sc.concat(
                         sc.property(attributeCodes),
                         sc.constant(LinksAttributeMarshaller.delimiter),
-                        sc.property(LinksAttributeMarshaller.marshal(parameter.attribute.code, modules.dashboardQueryWrapper.UUID_CODE))
+                        sc.property(LinksAttributeMarshaller.marshal(parameter.attribute.code, DashboardQueryWrapperUtils.UUID_CODE))
                     )
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
@@ -707,9 +700,9 @@ class QueryWrapper implements CriteriaWrapper
                                                 .with(sc.&cast.rcurry('timestamp')) // приводим к формату даты
                                                 .with(sc.&columnSubtract.rcurry(sc.constant("'$minDate'"))) // Вычитаем значение минимальной даты
                                                 .with(sc.&extract.rcurry('DAY')) // извлекаем количество дней
-                                                .with(sc.&columnSum.rcurry(sc.constant(modules.dashboardQueryWrapper.ACCURACY))) //прибавляем для точности данных
-                                                .with(sc.&columnDivide.rcurry(sc.constant(modules.dashboardQueryWrapper.WEEKDAY_COUNT))) // делим на семь дней
-                                                .with(sc.&columnSubtract.rcurry(sc.constant(modules.dashboardQueryWrapper.ROUNDING))) // вычитаем коэффициент округления
+                                                .with(sc.&columnSum.rcurry(sc.constant(DashboardQueryWrapperUtils.ACCURACY))) //прибавляем для точности данных
+                                                .with(sc.&columnDivide.rcurry(sc.constant(DashboardQueryWrapperUtils.WEEKDAY_COUNT))) // делим на семь дней
+                                                .with(sc.&columnSubtract.rcurry(sc.constant(DashboardQueryWrapperUtils.ROUNDING))) // вычитаем коэффициент округления
                                                 .with(sc.&abs)
                                                 .with(sc.&round)
         criteria.addGroupColumn(weekNumberColumn)
@@ -736,7 +729,7 @@ class QueryWrapper implements CriteriaWrapper
             String parameterFqn = parameter.attribute.metaClassFqn
             if (parameter.attribute.attrChains()*.code.any { it == 'id' })
             {
-                columnCode = columnCode.replace('id', modules.dashboardQueryWrapper.UUID_CODE)
+                columnCode = columnCode.replace('id', DashboardQueryWrapperUtils.UUID_CODE)
             }
             if (code == AttributeType.TOTAL_VALUE_TYPE)
             {
@@ -901,256 +894,267 @@ class QueryWrapper implements CriteriaWrapper
     }
 }
 
-/**
- * Метод получения данных биаграммы
- * @param requestData - запрос на получение данных
- * @param onlyFilled - вывод только заполненных полей
- * @param diagramType - тип диаграммы
- * @return результат выборки
- */
-List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT, Boolean ignoreParameterLimit = false)
+
+class DashboardQueryWrapperUtils
 {
-    validate(requestData)
-    validate(requestData.source)
-    def wrapper = QueryWrapper.build(requestData.source)
+    private static final String UUID_CODE = 'UUID'
+    private static final Double ACCURACY = 0.9
+    private static final Double ROUNDING = 0.6
+    private static final Integer WEEKDAY_COUNT = 7
 
-    requestData.aggregations.each { validate(it as AggregationParameter) }
-    //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
-    def clonedAggregations = requestData.aggregations.collect {
-        new AggregationParameter(
-            title: it.title,
-            type: it.type,
-            attribute: it.attribute.deepClone(),
-            sortingType: it.sortingType
-        )
-    }
-
-    requestData.groups.each { validate(it as GroupParameter) }
-    def clonedGroups = requestData.groups.collect {
-        new GroupParameter(
-            title: it.title,
-            type: it.type,
-            attribute: it.attribute.deepClone(),
-            sortingType: it.sortingType,
-            format: it.format
-        )
-    }
-
-    clonedAggregations.each {
-        prepareAttribute(it.attribute as Attribute)
-        wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top)
-    }
-
-    clonedGroups.each {
-        prepareAttribute(it.attribute as Attribute)
-        wrapper.processGroup(wrapper, it as GroupParameter, diagramType, requestData.source)
-    }
-
-    requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
-
-    //Фильтрация по непустым атрибутам
-    Set attributeSet = []
-    if (onlyFilled)
+    /**
+     * Метод получения данных биаграммы
+     * @param requestData - запрос на получение данных
+     * @param onlyFilled - вывод только заполненных полей
+     * @param diagramType - тип диаграммы
+     * @return результат выборки
+     */
+    static List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
+                              Boolean ignoreParameterLimit = false)
     {
-        attributeSet = clonedAggregations.findAll { it?.type == Aggregation.NOT_APPLICABLE }.attribute + clonedGroups*.attribute
-    }
-    attributeSet.findResults {
-        it
-    }.collect { attr ->
-        new FilterParameter(
-            title: 'не пусто',
-            type: Comparison.NOT_NULL,
-            attribute: attr,
-            value: null
-        )
-    }.each {
-        wrapper.filtering([it])
+        validate(requestData)
+        validate(requestData.source)
+        def wrapper = QueryWrapper.build(requestData.source)
+
+        requestData.aggregations.each { validate(it as AggregationParameter) }
+        //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
+        def clonedAggregations = requestData.aggregations.collect {
+            new AggregationParameter(
+                title: it.title,
+                type: it.type,
+                attribute: it.attribute.deepClone(),
+                sortingType: it.sortingType
+            )
+        }
+
+        requestData.groups.each { validate(it as GroupParameter) }
+        def clonedGroups = requestData.groups.collect {
+            new GroupParameter(
+                title: it.title,
+                type: it.type,
+                attribute: it.attribute.deepClone(),
+                sortingType: it.sortingType,
+                format: it.format
+            )
+        }
+
+        clonedAggregations.each {
+            prepareAttribute(it.attribute as Attribute)
+            wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top)
+        }
+
+        clonedGroups.each {
+            prepareAttribute(it.attribute as Attribute)
+            wrapper.processGroup(wrapper, it as GroupParameter, diagramType, requestData.source)
+        }
+
+        requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
+
+        //Фильтрация по непустым атрибутам
+        Set attributeSet = []
+        if (onlyFilled)
+        {
+            attributeSet = clonedAggregations.findAll { it?.type == Aggregation.NOT_APPLICABLE }.attribute + clonedGroups*.attribute
+        }
+        attributeSet.findResults {
+            it
+        }.collect { attr ->
+            new FilterParameter(
+                title: 'не пусто',
+                type: Comparison.NOT_NULL,
+                attribute: attr,
+                value: null
+            )
+        }.each {
+            wrapper.filtering([it])
+        }
+
+        //при таких условиях в запросе придёт массив с 1 уровнем вложенности [v1, v2, v3,..]
+        Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
+            it?.type == Aggregation.NOT_APPLICABLE
+        } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
+        return wrapper.getResult(requestHasOneNoneAggregation, diagramType, ignoreParameterLimit)
     }
 
-    //при таких условиях в запросе придёт массив с 1 уровнем вложенности [v1, v2, v3,..]
-    Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
-        it?.type == Aggregation.NOT_APPLICABLE
-    } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
-    return wrapper.getResult(requestHasOneNoneAggregation, diagramType, ignoreParameterLimit)
+    /**
+     * Метод проверки данных запроса.
+     * Выбрасывает исключение.
+     * @param data - данные запроса
+     */
+    private static void validate(RequestData data)
+    {
+        if (!data)
+        {
+            throw new IllegalArgumentException("Empty request data")
+        }
+
+        def source = data.source
+        validate(source as Source)
+
+        def aggregations = data.aggregations
+        if (!aggregations)
+        {
+            throw new IllegalArgumentException("Empty aggregation")
+        }
+        aggregations.each {
+            validate(it as AggregationParameter)
+        }
+        data.groups.each {
+            validate(it as GroupParameter)
+        }
+    }
+
+    /**
+     * Метод проверки источника.
+     * Бросает исключение.
+     * @param source - источник
+     */
+    private static void validate(Source source)
+    {
+        if (!source)
+        {
+            throw new IllegalArgumentException("Empty source")
+        }
+        if (!(source.descriptor) && !(source.classFqn))
+        {
+            throw new IllegalArgumentException("Invalid source")
+        }
+    }
+
+    /**
+     * Метод проверки параметра агрегации.
+     * Бросает исключение.
+     * @param parameter - параметр агрегации
+     */
+    private static def validate(AggregationParameter parameter) throws IllegalArgumentException
+    {
+        if (!parameter.attribute.attrChains())
+        {
+            throw new IllegalArgumentException("Attribute is null or empty!")
+        }
+        Aggregation type = parameter.type
+        String attributeType = parameter.attribute.attrChains().last().type
+        switch (attributeType)
+        {
+            case AttributeType.DT_INTERVAL_TYPE:
+            case AttributeType.NUMBER_TYPES:
+                if (!(type in Aggregation.with {
+                    [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ]
+                }))
+                {
+                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+                }
+                break
+            default:
+                if ((!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT, Aggregation.NOT_APPLICABLE ]) &&
+                     parameter.attribute.type != AttributeType.CATALOG_ITEM_TYPE) ||
+                    (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
+                     !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ] })))
+                {
+                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+                }
+                break
+        }
+    }
+
+    /**
+     * Метод проверки параметра группировки
+     * @param parameter - параметр группировки
+     */
+    private static def validate(GroupParameter parameter)
+    {
+        if (!parameter.attribute.attrChains())
+        {
+            throw new IllegalArgumentException("Attribute is null or empty!")
+        }
+        GroupType type = parameter.type
+        //Смотрим на тип последнего вложенного атрибута
+        String attributeType = parameter.attribute.attrChains().last().type
+        switch (attributeType)
+        {
+            case AttributeType.DT_INTERVAL_TYPE:
+                def groupTypeSet = GroupType.with {
+                    [OVERLAP, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL, DAY_INTERVAL,
+                     WEEK_INTERVAL]
+                }
+                if (!(type in groupTypeSet))
+                {
+                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                }
+                break
+            case AttributeType.DATE_TYPES:
+                def groupTypeSet = GroupType.with {
+                    [OVERLAP, DAY, SEVEN_DAYS, WEEK, MONTH, QUARTER, YEAR, HOURS, MINUTES]
+                }
+                if (!(type in groupTypeSet))
+                {
+                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                }
+                break
+            case AttributeType.TIMER_TYPES:
+                def groupTypeSet = GroupType.with {
+                    [OVERLAP, ACTIVE, NOT_STARTED, PAUSED, STOPPED, EXCEED]
+                }
+                if (!(type in groupTypeSet))
+                {
+                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                }
+                break
+            default:
+                if (type != GroupType.OVERLAP)
+                {
+                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                }
+                break
+        }
+    }
+
+    /**
+     * Метод подготовки полей атрибута
+     * @param parameter - параметр агрегации
+     */
+    private static def prepareAttribute(Attribute attribute)
+    {
+        String attributeType = attribute.attrChains().last().type
+        String attributeCode = attribute.attrChains().last().code
+        switch (attributeType)
+        {
+            case AttributeType.LOCALIZED_TEXT_TYPE:
+                attribute.attrChains().last().ref = new Attribute(code: 'ru', type: 'string')
+                break
+            case AttributeType.DT_INTERVAL_TYPE:
+                if (!(attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
+                {
+                    attribute.attrChains().last().ref = new Attribute(code: 'ms', type: 'long')
+                }
+                break
+            case AttributeType.TIMER_TYPES:
+                attribute.attrChains().last().ref = new Attribute(code: 'statusCode', type: 'string')
+                break
+            case AttributeType.LINK_TYPES:
+                attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
+                break
+            default:
+                if (!(attributeType in AttributeType.ALL_ATTRIBUTE_TYPES))
+                {
+                    throw new IllegalArgumentException("Not supported attribute type: $attributeType")
+                }
+                break
+        }
+        if (attributeCode == UUID_CODE)
+        {
+            attribute.attrChains().last().code = 'id'
+        }
+        if (attributeCode.contains(AttributeType.TOTAL_VALUE_TYPE))
+        {
+            def (dynAttrCode, templateUUID) = attribute.code.split('_', 2)
+            attribute.code = dynAttrCode
+            attribute.attrChains().last().ref = new Attribute(
+                code: 'textValue',
+                type: 'string',
+                title: templateUUID
+            )
+        }
+    }
 }
-
-/**
- * Метод проверки данных запроса.
- * Выбрасывает исключение.
- * @param data - данные запроса
- */
-private void validate(RequestData data)
-{
-    if (!data)
-    {
-        throw new IllegalArgumentException("Empty request data")
-    }
-
-    def source = data.source
-    validate(source as Source)
-
-    def aggregations = data.aggregations
-    if (!aggregations)
-    {
-        throw new IllegalArgumentException("Empty aggregation")
-    }
-    aggregations.each {
-        validate(it as AggregationParameter)
-    }
-    data.groups.each {
-        validate(it as GroupParameter)
-    }
-}
-
-/**
- * Метод проверки источника.
- * Бросает исключение.
- * @param source - источник
- */
-private void validate(Source source)
-{
-    if (!source)
-    {
-        throw new IllegalArgumentException("Empty source")
-    }
-    if (!(source.descriptor) && !(source.classFqn))
-    {
-        throw new IllegalArgumentException("Invalid source")
-    }
-}
-
-/**
- * Метод проверки параметра агрегации.
- * Бросает исключение.
- * @param parameter - параметр агрегации
- */
-private static def validate(AggregationParameter parameter) throws IllegalArgumentException
-{
-    if (!parameter.attribute.attrChains())
-    {
-        throw new IllegalArgumentException("Attribute is null or empty!")
-    }
-    Aggregation type = parameter.type
-    String attributeType = parameter.attribute.attrChains().last().type
-    switch (attributeType)
-    {
-        case AttributeType.DT_INTERVAL_TYPE:
-        case AttributeType.NUMBER_TYPES:
-            if (!(type in Aggregation.with {
-                [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ]
-            }))
-            {
-                throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
-            }
-            break
-        default:
-            if ((!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT, Aggregation.NOT_APPLICABLE ]) &&
-                 parameter.attribute.type != AttributeType.CATALOG_ITEM_TYPE) ||
-                (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
-                 !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ] })))
-            {
-                throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
-            }
-            break
-    }
-}
-
-/**
- * Метод проверки параметра группировки
- * @param parameter - параметр группировки
- */
-private static def validate(GroupParameter parameter)
-{
-    if (!parameter.attribute.attrChains())
-    {
-        throw new IllegalArgumentException("Attribute is null or empty!")
-    }
-    GroupType type = parameter.type
-    //Смотрим на тип последнего вложенного атрибута
-    String attributeType = parameter.attribute.attrChains().last().type
-    switch (attributeType)
-    {
-        case AttributeType.DT_INTERVAL_TYPE:
-            def groupTypeSet = GroupType.with {
-                [OVERLAP, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL, DAY_INTERVAL,
-                 WEEK_INTERVAL]
-            }
-            if (!(type in groupTypeSet))
-            {
-                throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
-            }
-            break
-        case AttributeType.DATE_TYPES:
-            def groupTypeSet = GroupType.with {
-                [OVERLAP, DAY, SEVEN_DAYS, WEEK, MONTH, QUARTER, YEAR, HOURS, MINUTES]
-            }
-            if (!(type in groupTypeSet))
-            {
-                throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
-            }
-            break
-        case AttributeType.TIMER_TYPES:
-            def groupTypeSet = GroupType.with {
-                [OVERLAP, ACTIVE, NOT_STARTED, PAUSED, STOPPED, EXCEED]
-            }
-            if (!(type in groupTypeSet))
-            {
-                throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
-            }
-            break
-        default:
-            if (type != GroupType.OVERLAP)
-            {
-                throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
-            }
-            break
-    }
-}
-
-/**
- * Метод подготовки полей атрибута
- * @param parameter - параметр агрегации
- */
-private static def prepareAttribute(Attribute attribute)
-{
-    String attributeType = attribute.attrChains().last().type
-    String attributeCode = attribute.attrChains().last().code
-    switch (attributeType)
-    {
-        case AttributeType.LOCALIZED_TEXT_TYPE:
-            attribute.attrChains().last().ref = new Attribute(code: 'ru', type: 'string')
-            break
-        case AttributeType.DT_INTERVAL_TYPE:
-            if (!(attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
-            {
-                attribute.attrChains().last().ref = new Attribute(code: 'ms', type: 'long')
-            }
-            break
-        case AttributeType.TIMER_TYPES:
-            attribute.attrChains().last().ref = new Attribute(code: 'statusCode', type: 'string')
-            break
-        case AttributeType.LINK_TYPES:
-            attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
-            break
-        default:
-            if (!(attributeType in AttributeType.ALL_ATTRIBUTE_TYPES))
-            {
-                throw new IllegalArgumentException("Not supported attribute type: $attributeType")
-            }
-            break
-    }
-    if (attributeCode == UUID_CODE)
-    {
-        attribute.attrChains().last().code = 'id'
-    }
-    if (attributeCode.contains(AttributeType.TOTAL_VALUE_TYPE))
-    {
-        def (dynAttrCode, templateUUID) = attribute.code.split('_', 2)
-        attribute.code = dynAttrCode
-        attribute.attrChains().last().ref = new Attribute(
-            code: 'textValue',
-            type: 'string',
-            title: templateUUID
-        )
-    }
-}
+return
