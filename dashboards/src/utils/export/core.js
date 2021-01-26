@@ -63,9 +63,18 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
  * @param {boolean} show - значение указывает о необходимости скрыть\показать элемент
  */
 const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean) => {
-	const toolbars = container.querySelectorAll('.apexcharts-toolbar, .rc-menu, .header-submenu, .react-resizable-handle, .apexcharts-tooltip');
+	const classNames = [
+		'.apexcharts-toolbar',
+		'.rc-menu',
+		'.header-submenu',
+		'.react-resizable-handle',
+		'.apexcharts-tooltip',
+		'.apexcharts-xaxistooltip',
+		'.apexcharts-yaxistooltip'
+	];
+	const elements = container.querySelectorAll(classNames.join(', '));
 
-	toolbars.forEach(toolbar => {
+	elements.forEach(toolbar => {
 		toolbar.style.visibility = show ? 'visible' : 'hidden';
 	});
 };
@@ -78,10 +87,13 @@ const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean)
 const createImage = async (options: Options) => {
 	const {container, fragment, type} = options;
 	const backgroundColor = type === FILE_VARIANTS.PNG ? '#EFF3F8' : '#FFF';
-	let config = {};
+	let config = {
+		scrollY: 0
+	};
 
 	if (!fragment) {
 		config = {
+			...config,
 			backgroundColor
 		};
 	}
