@@ -10,6 +10,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const {development, license} = require('./define');
 
+const packagejson = require('../package.json');
+
 const plugins = [
 	new MiniCssExtractPlugin({
 		chunkFilename: development ? '[id].css' : '[id].[hash].css',
@@ -29,10 +31,17 @@ const plugins = [
 ];
 
 if (license === 'use') {
+	const packageReplacer = {};
+	packageReplacer.search = `package ru.naumen.modules.${packagejson.name}`;
+	packageReplacer.replacer = packageReplacer.search;
+	packageReplacer.replacer += '_v';
+	packageReplacer.replacer += packagejson.version.split('.').join('_').split('-')[0].toString();
+
 	plugins.push(new GroovyWebpackPlugin({
-		output: './dist/params.xml',
-		path: './rest/src/main/groovy/ru/naumen/modules/',
-		recursive: true
+		editBySuperusers: false,
+		output: './dist/privateModules.xml',
+		paths: ['./rest/src/main/groovy/ru/naumen/modules/dashboards'],
+		replacers: [packageReplacer]
 	}));
 }
 
