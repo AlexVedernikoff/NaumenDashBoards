@@ -279,7 +279,7 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     @Override
     String editWidgetChunkData(Map<String, Object> requestContent)
     {
-        return toJson(service.editWidgetChunkData(requestContent))
+        return toJson(service.editWidgetChunkData(requestContent, user))
     }
 }
 
