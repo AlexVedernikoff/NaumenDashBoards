@@ -35,12 +35,11 @@ enum DiagramType
     SPEEDOMETER,
     TABLE
 
-    static List<DiagramType> StandardTypes = [COLUMN, COLUMN_STACKED, LINE]
-    static List<DiagramType> BarTypes = [BAR, BAR_STACKED]
+    static List<DiagramType> StandardTypes = [COLUMN, COLUMN_STACKED, LINE, BAR, BAR_STACKED]
     static List<DiagramType> RoundTypes = [DONUT, PIE]
     static List<DiagramType> CountTypes = [SUMMARY, SPEEDOMETER]
     static List<DiagramType> NullableTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO, DONUT, PIE]
-    static List<DiagramType> SortableTypes = [*StandardTypes, *BarTypes, *RoundTypes, COMBO]
+    static List<DiagramType> SortableTypes = [*StandardTypes, *RoundTypes, COMBO]
 }
 
 /**
