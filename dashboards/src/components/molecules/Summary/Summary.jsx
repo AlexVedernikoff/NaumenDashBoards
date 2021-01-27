@@ -49,9 +49,12 @@ export class Summary extends PureComponent<Props, State> {
 		}
 	};
 
-	renderValue = () => {
+	renderValue = (fontSize: number) => {
 		const {onClickValue, value} = this.props;
-		return <span onClick={onClickValue}>{value}</span>;
+		const height = fontSize * 0.8;
+		const lineHeight = `${height}px`;
+
+		return <span onClick={onClickValue} style={{height, lineHeight}}>{value}</span>;
 	};
 
 	renderWithResize = (className: string, style: Object) => {
@@ -60,7 +63,7 @@ export class Summary extends PureComponent<Props, State> {
 		return (
 			<ResizeDetector onResize={this.handleResize}>
 				<div className={className} style={{...style, fontSize}}>
-					{fontSize && this.renderValue()}
+					{fontSize && this.renderValue(fontSize)}
 				</div>
 			</ResizeDetector>
 		);
@@ -75,19 +78,23 @@ export class Summary extends PureComponent<Props, State> {
 			[settingsStyles.italic]: fontStyle === ITALIC,
 			[settingsStyles.underline]: fontStyle === UNDERLINE
 		});
-		const style = {
+
+		let style = {
 			color,
-			fontFamily,
-			fontSize: Number(fontSize)
+			fontFamily
 		};
 
 		if (fontSize === FONT_SIZE_AUTO_OPTION) {
 			return this.renderWithResize(containerCN, style);
 		}
 
+		const customFontSize = Number(fontSize);
+
+		style = {...style, fontSize: customFontSize};
+
 		return (
 			<div className={containerCN} style={style}>
-				{this.renderValue()}
+				{this.renderValue(customFontSize)}
 			</div>
 		);
 	}
