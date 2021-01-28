@@ -134,7 +134,7 @@ const getNiceScale = (value: number) => {
 };
 
 /**
- * Возвращает максимальное значений данных
+ * Возвращает максимальное значение данных
  * @param {ApexAxisChartSeries} series - данные для построения графика
  * @param {boolean} stacked - указывает на необходимость подсчета значений для графиков с накоплением
  * @returns {number} - максимальное значение
@@ -143,24 +143,27 @@ const getMaxValue = (series: ApexAxisChartSeries, stacked: boolean) => {
 	const values = series
 		.map(s => s.data)
 		.reduce((all, data) => [...all, ...data], []);
-	/**
-	 * Множитель для увеличения значения от максимального. Необходим для корректной отрисовки элементов, что находятся
-	 * чуть выше максимального значения.
-	 * @type {number}
-	 */
-	const increasingFactor = 1.25;
+	const maxStackedValue = stacked ? getMaxStackedValue(series) : 0;
+
+	return Math.max(...values, maxStackedValue);
+};
+
+/**
+ * Возвращает максимальное значение данных графика с накоплением
+ * @param {ApexAxisChartSeries} series - данные для построения графика
+ * @returns {number} - максимальное значение
+ */
+const getMaxStackedValue = (series: ApexAxisChartSeries) => {
 	const stackedValues = [];
 
-	if (stacked) {
-		series.filter(({type}) => type === WIDGET_TYPES.COLUMN_STACKED).forEach(({data}) => {
-			data.forEach((originalValue, index) => {
-				const value = parseFloat(originalValue);
-				stackedValues[index] = stackedValues[index] ? stackedValues[index] + value : value;
-			});
+	series.filter(({type}) => type === WIDGET_TYPES.COLUMN_STACKED).forEach(({data}) => {
+		data.forEach((originalValue, index) => {
+			const value = parseFloat(originalValue);
+			stackedValues[index] = stackedValues[index] ? stackedValues[index] + value : value;
 		});
-	}
+	});
 
-	return Math.max(...values, ...stackedValues) * increasingFactor;
+	return Math.max(...stackedValues);
 };
 
 /**
@@ -276,6 +279,7 @@ export {
 	checkLabelsForOverlap,
 	getLegendOptions,
 	getLegendWidth,
+	getMaxStackedValue,
 	getMaxValue,
 	getLabelWithoutUUID,
 	getNiceScale,
