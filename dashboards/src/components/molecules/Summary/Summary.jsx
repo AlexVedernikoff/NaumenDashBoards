@@ -54,7 +54,7 @@ export class Summary extends PureComponent<Props, State> {
 		const height = fontSize * 0.8;
 		const lineHeight = `${height}px`;
 
-		return <span onClick={onClickValue} style={{height, lineHeight}}>{value}</span>;
+		return <span className={styles.value} onClick={onClickValue} style={{height, lineHeight}}>{value}</span>;
 	};
 
 	renderWithResize = (className: string, style: Object) => {
