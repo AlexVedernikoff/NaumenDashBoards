@@ -175,6 +175,7 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 		batch(() => {
 			dispatch(setCreatedWidget(widget));
 			dispatch(addLayouts(widget.id));
+			dispatch(focusWidget(widget.id));
 		});
 		dispatch(saveNewLayouts());
 		dispatch(fetchBuildData(widget));
