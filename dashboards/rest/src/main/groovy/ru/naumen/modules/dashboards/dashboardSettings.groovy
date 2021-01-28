@@ -818,7 +818,7 @@ class DashboardSettingsService
             throw new Exception([message: "Super-user can't reset dashboard settings!"])
         }
         String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        DashboardSettings personalDashboard = getDashboardSetting(personalDashboardKey)
+        DashboardSettingsClass personalDashboard = getDashboardSetting(personalDashboardKey)
         return personalDashboard
             ? deleteJsonSettings(personalDashboardKey, DASHBOARD_NAMESPACE).with { resultOfRemoving ->
             if (resultOfRemoving)
