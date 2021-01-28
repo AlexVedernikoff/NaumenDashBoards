@@ -890,7 +890,7 @@ class DashboardSettingsService
      * @param requestContent - тело запроса
      * @return ключ скопированного виджета
      */
-    String copyWidgetToDashboard(requestContent)
+    Map<String, Object> copyWidgetToDashboard(requestContent)
     {
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
@@ -924,7 +924,8 @@ class DashboardSettingsService
         String widgetKey = requestContent.widgetKey
 
         String sourceDashboardKey = requestContent.dashboardKey
-        Map<String, Object> widgetSettings = getWidgetSettings(sourceDashboardKey.widgets.find { getSettingsFromJson(it).id == widgetKey })
+        DashboardSettingsClass sourceDashboardSettings = getDashboardSetting(sourceDashboardKey)
+        Map<String, Object> widgetSettings = getWidgetSettings(sourceDashboardSettings.widgets.find { getSettingsFromJson(it).id == widgetKey })
 
         String dashboardKey = generateDashboardKey(classFqn, contentCode)
 
