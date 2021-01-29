@@ -2,43 +2,29 @@
 import cn from 'classnames';
 import {MIN_WIDTH} from './constants';
 import type {Props} from './types';
-import React, {createRef, PureComponent} from 'react';
-import type {Ref} from 'components/types';
+import React, {PureComponent} from 'react';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 
 export class HeaderCell extends PureComponent<Props> {
-	resizerRef: Ref<'div'> = createRef();
 	dragStart = false;
 	resizerOffset: number;
 	cursorStart: number;
 
 	componentDidMount () {
-		const {current: resizer} = this.resizerRef;
-
-		if (resizer) {
-			document.addEventListener('mousemove', this.mouseMove);
-			document.addEventListener('mouseup', this.mouseUp);
-			resizer.addEventListener('mousedown', this.mouseDown);
-		}
+		document.addEventListener('mousemove', this.mouseMove);
+		document.addEventListener('mouseup', this.mouseUp);
 	}
 
 	componentWillUnmount () {
-		const {current: resizer} = this.resizerRef;
-
-		if (resizer) {
-			document.removeEventListener('mousemove', this.mouseMove);
-			document.removeEventListener('mouseup', this.mouseUp);
-			resizer.removeEventListener('mousedown', this.mouseDown);
-		}
+		document.removeEventListener('mousemove', this.mouseMove);
+		document.removeEventListener('mouseup', this.mouseUp);
 	}
 
-	handleClick = () => {
+	handleMouseDownCell = () => {
 		const {column, onClick} = this.props;
 		!this.dragStart && onClick(column);
 	};
-
-	handleClickResizer = (event: SyntheticMouseEvent<HTMLDivElement>) => event.stopPropagation();
 
 	mouseDown = (event: MouseEvent) => {
 		const {width} = this.props;
@@ -62,7 +48,7 @@ export class HeaderCell extends PureComponent<Props> {
 		this.dragStart = false;
 	};
 
-	renderResizer = () => <div className={styles.resizer} onClick={this.handleClickResizer} ref={this.resizerRef} />;
+	renderResizer = () => <div className={styles.resizer} onMouseDown={this.mouseDown} />;
 
 	render () {
 		const {column, components, fontColor, fontStyle, last, left, sorting, textAlign, textHandler, value, width} = this.props;
@@ -77,9 +63,8 @@ export class HeaderCell extends PureComponent<Props> {
 		});
 
 		return (
-			<div className={cellCN} onClick={this.handleClick} style={{left}}>
+			<div className={cellCN} onMouseDown={this.handleMouseDownCell} style={{left}}>
 				<Cell
-					className={styles.cell}
 					column={column}
 					components={components}
 					fontColor={fontColor}
