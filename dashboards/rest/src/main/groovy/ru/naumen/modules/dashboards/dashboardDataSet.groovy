@@ -2235,7 +2235,7 @@ class DashboardDataSetService
                                 listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
                                 res = [tempRes]
                             }
-                            def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filters.title.grep() as Set): res]
+                            def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filters.title.flatten().grep() as Set): res]
 
                             partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                             Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
@@ -2661,7 +2661,7 @@ class DashboardDataSetService
                 def uuid = null
                 if (diagramType == DiagramType.TABLE)
                 {
-                    if (value)
+                    if (value && !(parameter?.attribute?.type in AttributeType.DATE_TYPES ))
                     {
                         (value, uuid) = ObjectMarshaller.unmarshal(value.toString())
                     }
@@ -2693,6 +2693,28 @@ class DashboardDataSetService
                         }
                     case AttributeType.TIMER_TYPES:
                         return (value as TimerStatus).getRussianName()
+                    case AttributeType.DATE_TYPES:
+                        if(!value)
+                        {
+                            return getNullValue(diagramType, fromBreakdown)
+                        }
+                        if(value instanceof Date)
+                        {
+                            return value.format('dd.MM.yyyy hh:mm')
+                        }
+                        //данные при таком подходе приходят строкой, поэтому метод format не поможет
+                        String[] dateParts = value.split()
+                        dateParts[0] = dateParts[0].tokenize('./')*.padLeft(2, '0').join('.')
+                        dateParts[1] = dateParts[1].tokenize(':/')*.padLeft(2, '0').join(':')
+                        value = "${dateParts[0]}, ${dateParts[1]}"
+                        if (diagramType == DiagramType.TABLE)
+                        {
+                            if(value && uuid)
+                            {
+                                value = ObjectMarshaller.marshal(value, uuid)
+                            }
+                        }
+                        return value
                     default:
                         //прийти в качестве значения может, как UUID, так и просто id
                         if (parameter.attribute?.attrChains()?.last()?.code == 'UUID' && !fromNA)
@@ -4224,7 +4246,7 @@ class DashboardDataSetService
         if(parameterWithDate && !aggregationOrderWithDates)
         {
             tempResult = getLabelsInCorrectOrder(tempResult as Set,
-                                                 parameterWithDate.type,
+                                                 parameterWithDate.type as String,
                                                  parameterWithDate.format,
                                                  parameterOrderWithDates != 'ASC').toList()
         }
