@@ -55,7 +55,7 @@ export class RangesFieldset extends PureComponent<Props> {
 		if (lastTo && (type !== RANGES_TYPES.PERCENT || Number(lastTo) < 99)) {
 			ranges.data.push({
 				color: 'white',
-				from: String(Number(lastTo) + 1),
+				from: String(Number(lastTo)),
 				to: ''
 			});
 
