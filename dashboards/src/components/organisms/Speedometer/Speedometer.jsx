@@ -155,7 +155,7 @@ export class Speedometer extends PureComponent<Props, State> {
 			to = Math.min(to, max);
 		}
 
-		if (parseFloat(from) && parseFloat(to) && from < to) {
+		if (!isNaN(parseFloat(from)) && !isNaN(parseFloat(to)) && from < to) {
 			return this.renderArc(this.getAngleByValue(from), this.getAngleByValue(to), color);
 		}
 
