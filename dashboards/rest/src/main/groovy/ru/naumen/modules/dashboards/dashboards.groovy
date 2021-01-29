@@ -338,6 +338,10 @@ class DashboardsService
         List<String> types = requestContent?.types ?: AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER
 
         def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
+        List attributeTypes = linkAttribute.sourceCode
+            ? getPermittedTypes(api.metainfo.getMetaClass(linkAttribute.sourceCode), linkAttribute.code)?.toList()
+            : []
+        List metaInfos = attributeTypes?.collect { api.metainfo.getMetaClass(it.toString()) }
 
         if (attributeClassFqn == AttributeType.TOTAL_VALUE_TYPE)
         {
@@ -353,11 +357,14 @@ class DashboardsService
             return [attribute]
         }
 
-        Collection<Attribute> result = metaInfo.attributes.findResults {
-            !it.computable && it.type.code in types
-                ? buildAttribute(it, metaInfo.title, metaInfo.code)
-                : null
-        }.sort { it.title }
+        Collection<Attribute> result = [metaInfo, *metaInfos].collectMany { meta ->
+            return meta.attributes.findResults {
+                !it.computable && it.type.code in types
+                    ? buildAttribute(it, metaInfo.title, metaInfo.code)
+                    : null
+            }
+        }.unique{ it.code }
+        .sort { it.title }
 
         if (deep)
         {
@@ -367,13 +374,15 @@ class DashboardsService
             childrenClasses.each {
                 def metainfo = api.metainfo.getMetaClass(it)
                 def attributes = metainfo?.attributes
-                attributeList += attributes ? attributes.findResults {
-                    !result*.code.find { x -> x == it.code
-                    } && !attributeList*.code.find { x -> x == it.code
-                    } && !it.computable && it.type.code in types
-                        ? buildAttribute(it, metaInfo.title, metaInfo.code)
+                attributeList += attributes
+                    ? attributes.findResults {
+                        !(it.code in result*.code) &&
+                        !(it.code in attributeList*.code) &&
+                        !it.computable && it.type.code in types
+                            ? buildAttribute(it, metaInfo.title, metaInfo.code)
                         : null
-                } : []
+                    }
+                : []
             }
             result += attributeList
             result.sort {
