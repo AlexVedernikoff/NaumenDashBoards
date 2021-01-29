@@ -142,10 +142,42 @@ class QueryWrapper implements CriteriaWrapper
         def sc = api.selectClause
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
+        String lastParameterAttributeType = attribute.attrChains()*.type.last()
         if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
         {
             String attributeCode = attributeCodes.find()
-            column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
+            if(lastParameterAttributeType in AttributeType.DATE_TYPES)
+            {
+                //дата приходит в зависимости от БД по-разному и строкой, тк использована конкатенация
+                //необходимо преобразование даты на уровне БД
+                def day = sc.day(column)
+                def month = sc.month(column)
+                def year = sc.year(column)
+                def hour = sc.extract(column, 'HOUR')
+                def minute = sc.extract(column, 'MINUTE')
+
+                def dateColumn = sc.concat(day,
+                                           sc.constant('.'), month,
+                                           sc.constant('.'), year,
+                                           sc.constant(' '), hour,
+                                           sc.constant(':'), minute)
+
+                //для атрибута ссылочного типа необходима передача uuid-а
+                column = sc.concat(dateColumn,
+                                   sc.constant(ObjectMarshaller.delimiter),
+                                   sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
+
+                criteria.addGroupColumn(day)
+                        .addGroupColumn(month)
+                        .addGroupColumn(year)
+                        .addGroupColumn(hour)
+                        .addGroupColumn(minute)
+            }
+            else
+            {
+                column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter),
+                                   sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
+            }
             criteria.addGroupColumn(sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
         }
         //атрибут связанного типа
@@ -155,7 +187,7 @@ class QueryWrapper implements CriteriaWrapper
             criteria.addGroupColumn(sc.property(DashboardQueryWrapperUtils.UUID_CODE))
         }
 
-        if (attributeCodes.any { it.contains('state') })
+        if (attributeCodes.any { it.contains('state') } && lastParameterAttributeType == AttributeType.STATE_TYPE)
         {
             column = sc.concat(sc.property(attributeCodes),
                                sc.constant(StateMarshaller.delimiter),
@@ -286,11 +318,12 @@ class QueryWrapper implements CriteriaWrapper
         String[] attributeCodes = parameter.attribute.attrChains()*.code
                                            .with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
+        String lastParameterAttributeType = parameter.attribute.attrChains()*.type.last()
         column = castDynamicToType(parameter.attribute, column)
         switch (groupType)
         {
             case GroupType.OVERLAP:
-                if (attributeCodes.any {it.contains('state')})
+                if (attributeCodes.any {it.contains('state')} && lastParameterAttributeType == AttributeType.STATE_TYPE)
                 {
                     column = sc.concat(sc.property(attributeCodes),
                                        sc.constant(StateMarshaller.delimiter),
