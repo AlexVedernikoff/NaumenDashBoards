@@ -125,13 +125,7 @@ const hasBreakdown = (widget: Object): boolean => !!widget.data
  * @param {string} aggregation - тип агрегации
  * @returns {boolean}
  */
-const isAllowedTopAggregation = (aggregation: string) => {
-	const {COUNT, PERCENT} = DEFAULT_AGGREGATION;
-	const {AVG, MAX, MIN} = INTEGER_AGGREGATION;
-	const allowedAggregations = [AVG, COUNT, MAX, MIN, PERCENT];
-
-	return allowedAggregations.includes(aggregation);
-};
+const isAllowedTopAggregation = (aggregation: string) => aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE;
 
 /**
  * Сообщает используется ли в наборе данных виджета пользовательская группировка
