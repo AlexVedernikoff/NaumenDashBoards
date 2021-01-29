@@ -982,7 +982,8 @@ class DashboardDataSetService
             Requisite defaultRequisite = new Requisite(
                 title: 'DEFAULT',
                 nodes: [defaultRequisiteNode],
-                showNulls: originalRequisite.showNulls
+                showNulls: originalRequisite.showNulls,
+                top: originalRequisite.top
             )
 
             dataMap = [(keyForData): [requestData: defaultRequestData, computeData: null, customGroup:
