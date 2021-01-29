@@ -75,6 +75,24 @@ export class DashboardHeader extends Component<Props, State> {
 		</NavItem>
 	);
 
+	renderControls = () => {
+		if (!isMobile().any) {
+			return (
+				<ul className={styles.nav}>
+					{this.renderAutoUpdateButton()}
+					{this.renderRefreshButton()}
+					{this.renderDownloadExportButton()}
+					{this.renderMailExportButton()}
+					{this.renderRemoveButton()}
+					{this.renderSaveSelfButton()}
+					{this.renderModeButton()}
+				</ul>
+			);
+		}
+
+		return null;
+	};
+
 	renderDisplayModeButton = () => {
 		const {layoutMode, personalDashboard, user} = this.props;
 		const isDesktop = !isMobile().any;
@@ -215,15 +233,7 @@ export class DashboardHeader extends Component<Props, State> {
 					{this.renderSwitchDashboardButton()}
 				</ul>
 				{this.renderDisplayModeButton()}
-				<ul className={styles.nav}>
-					{this.renderAutoUpdateButton()}
-					{this.renderRefreshButton()}
-					{this.renderDownloadExportButton()}
-					{this.renderMailExportButton()}
-					{this.renderRemoveButton()}
-					{this.renderSaveSelfButton()}
-					{this.renderModeButton()}
-				</ul>
+				{this.renderControls()}
 			</header>
 		);
 	}
