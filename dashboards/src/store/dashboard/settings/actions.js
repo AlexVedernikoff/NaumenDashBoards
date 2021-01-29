@@ -343,7 +343,13 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 	const {contentCode} = context;
 	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
 	const key = `widgetContext_${metaClass.split('$')[0]}_${contentCode}`;
-	const descriptorStr = localStorage.getItem(key);
+	let descriptorStr;
+
+	// Данные могут сохраняться как по типу так и по классу
+	[`widgetContext_${metaClass}_${contentCode}`, `widgetContext_${metaClass.split('$')[0]}_${contentCode}`].every(key => {
+		descriptorStr = localStorage.getItem(key);
+		return !descriptorStr;
+	});
 
 	if (descriptorStr) {
 		const newWidget: Object = new DiagramWidget(dashboard.settings.layoutMode);
