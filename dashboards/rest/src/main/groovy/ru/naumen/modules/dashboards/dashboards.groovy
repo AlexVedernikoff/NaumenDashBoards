@@ -300,24 +300,29 @@ class DashboardsService
         List<String> types = requestContent?.types
 
         def metaInfo = api.metainfo.getMetaClass(parentClassFqn ?: classFqn)
+        def metaClassTypes = parentClassFqn ? [] : api.metainfo.getTypes(classFqn)
         String attributeTitle = ""
-        if (parentClassFqn  && parentClassFqn != classFqn)
+        if (parentClassFqn && parentClassFqn != classFqn)
         {
             //источником является ссылочный атрибут верхнего источника с кодом parentClassFqn
             def attribute = metaInfo?.getAttribute(classFqn)
             String relatedMetaClass = attribute?.type?.relatedMetaClass
+            metaClassTypes = relatedMetaClass ? api.metainfo.getTypes(relatedMetaClass) : []
             metaInfo = relatedMetaClass ? api.metainfo.getMetaClass(relatedMetaClass) : metaInfo
             attributeTitle = attribute?.title
         }
 
-        List attributes = types ? metaInfo?.attributes?.findResults {
-            it.type.code in types ? it : null
-        } : metaInfo?.attributes?.toList()
+        return ([metaInfo] + metaClassTypes).collectMany { mc ->
+            def attributes = types
+                ? mc?.attributes?.findAll { it.type.code in types ? it : null }
+                : mc?.attributes?.toList()
 
-        return attributes
-            ? mappingAttribute(attributes, attributeTitle ?: metaInfo.title, parentClassFqn ? classFqn : metaInfo.code)
-            : []
+            return attributes
+                ? mappingAttribute(attributes, attributeTitle ?: mc.title, parentClassFqn ? classFqn : mc.code)
+                : []
+        }.unique { it.code }.sort { it.title }
     }
+
 
     /**
     * Отдаёт список атрибутов метакласа ссылочного типа атрибута
@@ -358,11 +363,13 @@ class DashboardsService
         }
 
         Collection<Attribute> result = [metaInfo, *metaInfos].collectMany { meta ->
-            return meta.attributes.findResults {
+            return meta
+                ? meta.attributes?.findResults {
                 !it.computable && it.type.code in types
                     ? buildAttribute(it, metaInfo.title, metaInfo.code)
                     : null
-            }
+                }
+                : []
         }.unique{ it.code }
         .sort { it.title }
 
