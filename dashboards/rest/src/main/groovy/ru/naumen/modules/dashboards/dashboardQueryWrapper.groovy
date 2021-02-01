@@ -925,6 +925,28 @@ class QueryWrapper implements CriteriaWrapper
     {
         return 'metaClass' in list ? (list - 'metaClass' + 'metaClassFqn') : list
     }
+
+    /**
+     *  Метод для установки типов при запросе из основного класса
+     * @param sourceClassFqn - код основного класса
+     * @param diagramType - тип диаграммы
+     * @param attrSourceCodes - список кодов источников у атрибутов
+     * @return тело запроса в БД
+     */
+    QueryWrapper setCases(String sourceClassFqn, DiagramType diagramType, List attrSourceCodes = [])
+    {
+        attrSourceCodes?.each { cases ->
+            if(cases && cases != sourceClassFqn && diagramType != DiagramType.TABLE)
+            {
+                criteria.add(
+                    api.filters.inCases(
+                        api.metainfo.getMetaClass(cases).fqnCase
+                    )
+                )
+            }
+        }
+        return this
+    }
 }
 
 
@@ -971,15 +993,25 @@ class DashboardQueryWrapperUtils
             )
         }
 
+        wrapper.setCases(requestData.source.classFqn, diagramType, clonedAggregations.attribute?.sourceCode?.unique())
+
         clonedAggregations.each {
             prepareAttribute(it.attribute as Attribute)
             wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top)
         }
 
+        wrapper.setCases(requestData.source.classFqn, diagramType, clonedGroups.attribute?.sourceCode?.unique())
+
         clonedGroups.each {
             prepareAttribute(it.attribute as Attribute)
             wrapper.processGroup(wrapper, it as GroupParameter, diagramType, requestData.source)
         }
+
+        Set filterAttributeSourceCodes = requestData.filters?.collectMany { filters ->
+            return filters*.attribute?.sourceCode
+        }
+
+        wrapper.setCases(requestData.source.classFqn, diagramType, filterAttributeSourceCodes?.toList())
 
         requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
 
