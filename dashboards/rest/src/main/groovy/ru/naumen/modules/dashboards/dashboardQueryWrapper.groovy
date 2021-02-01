@@ -14,6 +14,7 @@ package ru.naumen.modules.dashboards
 import groovy.transform.Field
 import ru.naumen.core.server.script.api.criteria.*
 import java.sql.Timestamp
+import ru.naumen.core.server.script.api.injection.InjectApi
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -949,7 +950,7 @@ class QueryWrapper implements CriteriaWrapper
     }
 }
 
-
+@InjectApi
 class DashboardQueryWrapperUtils
 {
     private static final String UUID_CODE = 'UUID'
@@ -1220,6 +1221,22 @@ class DashboardQueryWrapperUtils
                 title: templateUUID
             )
         }
+    }
+
+    /**
+     * Метод получению количества объектов в динамическом атрибуте
+     * @param source- источник запроса с правильным дескриптором
+     * @param templateUUID - идентификатор шаблона атрибута
+     * @return количество объектов в динамическом атрибуте
+     */
+    static Integer countDistinctTotalValue(Source source, String templateUUID)
+    {
+        def sc = getApi().selectClause
+        def wrapper = QueryWrapper.build(source)
+        def column = sc.property('totalValue.textValue')
+        wrapper.criteria.addColumn(sc.countDistinct(column))
+        wrapper.criteria.add(getApi().filters.attrValueEq('totalValue.linkTemplate', getApi().utils.get(templateUUID)))
+        return wrapper.result.head().head()
     }
 }
 return
