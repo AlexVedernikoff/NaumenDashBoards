@@ -168,7 +168,7 @@ class DashboardDataSetService
                                                            requestContent.showRowNum]
 
                 return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean,
-                                           showRowNum as boolean, requestContent, ignoreLimits)
+                                           showRowNum as boolean, requestContent, request, ignoreLimits)
             case COMBO:
                 def request = mappingComboDiagramRequest(requestContent, subjectUUID)
                 def res = getDiagramData(request, diagramType)
@@ -637,7 +637,8 @@ class DashboardDataSetService
                 dynamicInAggregate = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
                 if (dynamicInAggregate)
                 {
-                    dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(aggregationParameter.attribute))
+                    def attrClone = aggregationParameter.attribute.deepClone()
+                    dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
                 }
             }
 
@@ -683,8 +684,10 @@ class DashboardDataSetService
             boolean dynamicInParameter
             groupParameters.each {groupParameter ->
                 dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                if (dynamicInParameter) {
-                    dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(groupParameter.attribute))
+                if (dynamicInParameter)
+                {
+                    def attrClone = groupParameter.attribute.deepClone()
+                    dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
                 }
             }
 
@@ -779,7 +782,7 @@ class DashboardDataSetService
                 breakdownCustomGroup =  dynamicGroup
             }
             FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
-            if (dynamicInAggregate)
+            if (dynamicInAggregate || dynamicInParameter)
             {
                 parameterFilters << getFilterList(dynamicGroup, subjectUUID, 'parameter')
             }
@@ -3086,6 +3089,7 @@ class DashboardDataSetService
      * @param request - запрос
      * @param requestContent - тело запроса с фронта
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
+     * @param request - тело обработанного запроса
      * @return сформированная таблица
      */
     private TableDiagram mappingTableDiagram(List list,
@@ -3093,6 +3097,7 @@ class DashboardDataSetService
                                              boolean totalRow,
                                              boolean  showRowNum,
                                              Map<String, Object> requestContent,
+                                             DiagramRequest request,
                                              Map<String, Boolean> ignoreLimits = [breakdown: false, parameter: false])
     {
         def resultDataSet = list.head() as List<List>
@@ -3132,7 +3137,8 @@ class DashboardDataSetService
                                 customValuesInBreakdown,
                                 aggregationCnt,
                                 allAggregationAttributes,
-                                ignoreLimits)
+                                ignoreLimits,
+                                request)
         }
     }
 
@@ -3441,11 +3447,13 @@ class DashboardDataSetService
      * @param aggregationCnt - количество агрегаций в запросе
      * @param allAggregationAttributes - названия всех атрибутов агрегации
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
+     * @param request тело обработанного запроса
      * @return TableDiagram
      */
     private TableDiagram mappingTable(List resultDataSet, List transposeDataSet, List attributes, Boolean totalColumn,
                                       Boolean totalRow, Boolean showRowNum, Boolean hasBreakdown, List customValuesInBreakdown,
-                                      Integer aggregationCnt, List<String> allAggregationAttributes, Map<String, Boolean> ignoreLimits)
+                                      Integer aggregationCnt, List<String> allAggregationAttributes, Map<String, Boolean> ignoreLimits,
+                                      DiagramRequest request)
     {
         List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
         Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > DashboardUtils.tableBreakdownLimit && !ignoreLimits.breakdown
@@ -3543,19 +3551,34 @@ class DashboardDataSetService
             columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
         }
 
+        def source = request.data.findResult { k, v -> v.source }
+
+        def parameterAttribute = attributes.attribute[parameterIndex]
         Boolean limitParameter = !ignoreLimits.parameter &&
-                                 countDistinct(attributes.attribute[parameterIndex],
-                                               attributes.attribute[parameterIndex].sourceCode) >
-                                 DashboardUtils.tableParameterLimit
+                                 parameterAttribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
+                                                                 parameterAttribute.code.tokenize('_').last()) >
+              DashboardUtils.tableParameterLimit
+            : countDistinct(parameterAttribute,
+                            parameterAttribute.sourceCode) >
+              DashboardUtils.tableParameterLimit
         limitParameter = checkForDateInAttribute(attributes[parameterIndex], limitParameter)
 
-        Boolean limitBreakdown = hasBreakdown &&
-                                 !customValuesInBreakdown &&
-                                 !ignoreLimits.breakdown &&
-                                 countDistinct(attributes.attribute.last(),
-                                               attributes.attribute.last().sourceCode) >
-                                 DashboardUtils.tableBreakdownLimit
-        limitBreakdown = checkForDateInAttribute(attributes.last(), limitBreakdown)
+        def breakdownAttribute = hasBreakdown ? attributes.attribute.last() : null
+        Boolean limitBreakdown = false
+        if(breakdownAttribute)
+        {
+            limitBreakdown = !customValuesInBreakdown &&
+                             !ignoreLimits.breakdown &&
+                             breakdownAttribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
+                                                                     breakdownAttribute.code.tokenize('_').last()) >
+                  DashboardUtils.tableBreakdownLimit
+                : countDistinct(breakdownAttribute,
+                                breakdownAttribute.sourceCode) >
+                  DashboardUtils.tableBreakdownLimit
+            limitBreakdown = checkForDateInAttribute(attributes.last(), limitBreakdown)
+        }
 
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
 
