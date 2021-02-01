@@ -12,12 +12,14 @@ package ru.naumen.modules.dashboards
 
 import groovy.transform.Field
 import groovy.transform.Immutable
+import groovy.transform.InheritConstructors
+import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.api.injection.InjectApi
 
-@Field @Lazy @Delegate Dashboards dashboards = new DashboardsImpl()
+@Field @Lazy @Delegate Dashboards dashboards = new DashboardsImpl(binding)
 
 interface Dashboards
 {
@@ -145,9 +147,15 @@ interface Dashboards
     String getDashboardLink(String dashboardCode)
 }
 
-class DashboardsImpl implements Dashboards
+@InheritConstructors
+class DashboardsImpl extends Script implements Dashboards
 {
     DashboardsService service = DashboardsService.instance
+
+    Object run()
+    {
+        return null
+    }
 
     @Override
     String getDataSources()
@@ -248,7 +256,7 @@ class DashboardsImpl implements Dashboards
     @Override
     String getDashboardLink(String dashboardCode)
     {
-        return toJson(service.getDashboardLink(dashboardCode))
+        return toJson(service.getDashboardLink(dashboardCode, user))
     }
 }
 
@@ -322,7 +330,6 @@ class DashboardsService
                 : []
         }.unique { it.code }.sort { it.title }
     }
-
 
     /**
     * Отдаёт список атрибутов метакласа ссылочного типа атрибута
@@ -692,7 +699,7 @@ class DashboardsService
     * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
     * @return ссылка на на страницу с дошбордом в json-формате.
     */
-    Map getDashboardLink(String dashboardCode)
+    Map getDashboardLink(String dashboardCode, user)
     {
         def root = api.utils.findFirst('root', [:])
         if (root.hasProperty('dashboardCode') && root.dashboardCode)
