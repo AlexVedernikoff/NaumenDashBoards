@@ -47,6 +47,33 @@ export class Table extends PureComponent<Props, State> {
 		width: 0
 	};
 
+	/**
+	 * Применяет преднастройки относительной ширины колонок
+	 * @param {number} width - ширина таблицы
+	 * @param {ColumnsWidth} columnsWidth - данные ширины столбцов
+	 * @returns {ColumnsWidth}
+	 */
+	applyColumnsRatioWidth = (width: number, columnsWidth: ColumnsWidth) => {
+		const {columns, columnsRatioWidth} = this.props;
+		let newColumnsWidth = Object.keys(columnsRatioWidth).reduce((newColumnsWidth, accessor) => ({
+			...newColumnsWidth,
+			[accessor]: width * columnsRatioWidth[accessor]
+		}), columnsWidth);
+
+		const sumWidth = sumColumnsWidth(newColumnsWidth, columns);
+
+		if (sumWidth < width) {
+			const diff = sumWidth / width;
+
+			newColumnsWidth = Object.keys(newColumnsWidth).reduce((newColumnsWidth, accessor) => ({
+				...newColumnsWidth,
+				[accessor]: newColumnsWidth[accessor] / diff
+			}), newColumnsWidth);
+		}
+
+		return newColumnsWidth;
+	};
+
 	getExtendedComponents (components?: Components): Components {
 		return components ? {...this.components, ...components} : this.components;
 	}
@@ -62,20 +89,10 @@ export class Table extends PureComponent<Props, State> {
 	 * @returns {number}
 	 */
 	calcDefaultColumnWidth = (parentWidth: number, columns: Array<Column>): number => {
-		const {columnsRatioWidth} = this.props;
-		const {current: table} = this.tableRef;
 		const sumCustomWidths = columns.reduce((sum, column) => Number.isInteger(column.width) ? sum + column.width : sum, 0);
-		let sumRelativeWidth = 0;
+		const columnsWithDefaultWidth = columns.filter(({width}) => !Number.isInteger(width));
 
-		if (table) {
-			sumRelativeWidth = columns.reduce(
-				(sum, {accessor}) => accessor in columnsRatioWidth ? sum + table.clientWidth * columnsRatioWidth[accessor] : sum, 0
-			);
-		}
-
-		const columnsWithDefaultWidth = columns.filter(({accessor, width}) => !Number.isInteger(width) && !(accessor in columnsRatioWidth));
-
-		return Math.max(Math.floor((parentWidth - sumCustomWidths - sumRelativeWidth) / columnsWithDefaultWidth.length), DEFAULT_COLUMN_WIDTH);
+		return Math.max(Math.floor((parentWidth - sumCustomWidths) / columnsWithDefaultWidth.length), DEFAULT_COLUMN_WIDTH);
 	};
 
 	/**
@@ -208,16 +225,11 @@ export class Table extends PureComponent<Props, State> {
 	handlePrevClick = () => this.setState({page: this.state.page - 1});
 
 	handleResize = (newWidth: number) => {
-		const {columns, columnsRatioWidth} = this.props;
+		const {columns} = this.props;
 		let {columnsWidth} = this.state;
 
 		columnsWidth = this.getColumnsWidthByTableWidth(newWidth, columns, columnsWidth);
-
-		Object.keys(columnsRatioWidth).forEach(accessor => {
-			if (columnsRatioWidth[accessor]) {
-				columnsWidth[accessor] = newWidth * columnsRatioWidth[accessor];
-			}
-		});
+		columnsWidth = this.applyColumnsRatioWidth(newWidth, columnsWidth);
 
 		const width = sumColumnsWidth(columnsWidth, columns);
 		const fixedPositions = this.getFixedPositions(columnsWidth);
