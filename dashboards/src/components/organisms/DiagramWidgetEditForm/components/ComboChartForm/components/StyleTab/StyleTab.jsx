@@ -15,6 +15,7 @@ import {ParameterBox} from 'DiagramWidgetEditForm/components/AxisChartForm/compo
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component, Fragment} from 'react';
 import {Select} from 'components/molecules';
+import type {SortingValue} from 'store/widgets/data/types';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';
 
@@ -23,8 +24,7 @@ export class StyleTab extends Component<StyleTabProps> {
 		return data && typeof data === 'object' ? {...defaultData, ...data} : defaultData;
 	};
 
-	getSortingIndicatorLabel = (dataSet: DataSet) => {
-		const {value} = this.props.values.sorting;
+	getSortingIndicatorLabel = (value: SortingValue) => (dataSet: DataSet) => {
 		const {source, xAxis, yAxis} = dataSet;
 		const attribute = value === SORTING_VALUES.INDICATOR ? yAxis : xAxis;
 		let label = getProcessedValue(attribute, 'title');
@@ -71,17 +71,17 @@ export class StyleTab extends Component<StyleTabProps> {
 	};
 
 	renderSortingIndicators = () => {
-		const {data, sorting} = this.props.values;
-		const {INDICATOR, PARAMETER} = SORTING_VALUES;
-		const {dataKey: sortingDataKey, value} = sorting;
-		const dataSet = data.find(({dataKey}) => dataKey === sortingDataKey) || data[0];
-		const options = data.filter(({sourceForCompute}) => !sourceForCompute);
+		const {data, sorting = DEFAULT_AXIS_SORTING_SETTINGS} = this.props.values;
+		const {dataKey: sortingDataKey = '', value: sortingValue} = sorting;
 
-		if (value === INDICATOR || value === PARAMETER) {
+		if (sortingValue !== SORTING_VALUES.DEFAULT) {
+			const dataSet = data.find(({dataKey}) => dataKey === sortingDataKey) || data[0];
+			const options = data.filter(({sourceForCompute}) => !sourceForCompute);
+
 			return (
 				<div className={styles.sortingIndicatorField}>
 					<Select
-						getOptionLabel={this.getSortingIndicatorLabel}
+						getOptionLabel={this.getSortingIndicatorLabel(sortingValue)}
 						getOptionValue={this.getSortingIndicatorValue}
 						onSelect={this.handleSelectSortingIndicator}
 						options={options}
