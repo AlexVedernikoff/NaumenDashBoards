@@ -271,9 +271,10 @@ class QueryWrapper implements CriteriaWrapper
      * @param requestData - данные для запроса
      * @param parameter - параметр с агрегацией для добавления
      * @param diagramType - тип диаграммы
+     * @param onlyFilled - флаг на получение только заполненных данных
      * @return текущий запрос в БД с добавленной агрегацией
      */
-    QueryWrapper processAggregation(QueryWrapper wrapper, RequestData requestData, AggregationParameter parameter, DiagramType diagramType, Integer top)
+    QueryWrapper processAggregation(QueryWrapper wrapper, RequestData requestData, AggregationParameter parameter, DiagramType diagramType, Integer top, Boolean onlyFilled)
     {
         if (parameter.type == Aggregation.PERCENT)
         {
@@ -293,7 +294,7 @@ class QueryWrapper implements CriteriaWrapper
                 : null
 
             def wrappedQuery = QueryWrapper.build(requestData.source)
-            if (filterParameter)
+            if (filterParameter && onlyFilled)
             {
                 wrappedQuery.filtering([filterParameter])
             }
@@ -1000,7 +1001,7 @@ class DashboardQueryWrapperUtils
 
         clonedAggregations.each {
             prepareAttribute(it.attribute as Attribute)
-            wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top)
+            wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top, onlyFilled)
         }
 
         wrapper.setCases(requestData.source.classFqn,
