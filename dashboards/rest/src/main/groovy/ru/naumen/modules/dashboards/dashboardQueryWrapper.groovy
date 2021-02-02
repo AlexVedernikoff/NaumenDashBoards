@@ -994,14 +994,18 @@ class DashboardQueryWrapperUtils
             )
         }
 
-        wrapper.setCases(requestData.source.classFqn, diagramType, clonedAggregations.attribute?.sourceCode?.unique())
+        wrapper.setCases(requestData.source.classFqn,
+                         diagramType,
+                         clonedAggregations.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
 
         clonedAggregations.each {
             prepareAttribute(it.attribute as Attribute)
             wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top)
         }
 
-        wrapper.setCases(requestData.source.classFqn, diagramType, clonedGroups.attribute?.sourceCode?.unique())
+        wrapper.setCases(requestData.source.classFqn,
+                         diagramType,
+                         clonedGroups.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
 
         clonedGroups.each {
             prepareAttribute(it.attribute as Attribute)
@@ -1009,7 +1013,7 @@ class DashboardQueryWrapperUtils
         }
 
         Set filterAttributeSourceCodes = requestData.filters?.collectMany { filters ->
-            return filters*.attribute?.sourceCode
+            return filters*.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode
         }
 
         wrapper.setCases(requestData.source.classFqn, diagramType, filterAttributeSourceCodes?.toList())
