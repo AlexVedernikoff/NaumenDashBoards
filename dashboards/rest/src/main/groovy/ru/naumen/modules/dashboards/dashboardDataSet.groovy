@@ -144,12 +144,12 @@ class DashboardDataSetService
             case TABLE:
                 Boolean showNulls = requestContent.showEmptyData
                 Boolean computationInRequest = requestContent?.data?.values()?.indicators?.any { it?.attribute?.any { it.type == 'COMPUTED_ATTR'} }
-                if (computationInRequest)
+                Integer top = requestContent.top as Integer
+                if (computationInRequest && !top)
                 {
                     //вернём всё из бд, после сагрегируем
                     showNulls = true
                 }
-                Integer top = requestContent.top as Integer
                 def request = mappingTableDiagramRequest(requestContent, subjectUUID, showNulls, computationInRequest, top)
                 Integer aggregationCnt = request?.data?.findResult { key, value ->
                     value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
@@ -985,8 +985,7 @@ class DashboardDataSetService
             Requisite defaultRequisite = new Requisite(
                 title: 'DEFAULT',
                 nodes: [defaultRequisiteNode],
-                showNulls: originalRequisite.showNulls,
-                top: originalRequisite.top
+                showNulls: originalRequisite.showNulls
             )
 
             dataMap = [(keyForData): [requestData: defaultRequestData, computeData: null, customGroup:
@@ -1001,7 +1000,8 @@ class DashboardDataSetService
             Requisite tempRequisite = new Requisite(
                 title: 'DEFAULT',
                 nodes: [originalRequisite.nodes[i]],
-                showNulls: originalRequisite.showNulls
+                showNulls: originalRequisite.showNulls,
+                top: originalRequisite.top
             )
             String dataKey = "сompute-data_${i}"
             return [(dataKey): [requestData: tempRequestData, computeData: computationData[i], customGroup:
@@ -3360,36 +3360,34 @@ class DashboardDataSetService
         List usualAggregations = getSpecificAggregationsList(requestContent, false)
         List aggregations = getSpecificAggregationsList(requestContent)
 
-        if (aggregations.size() == compAggregations.size() && compAggregations.size() == 1)
-        {
-            //уже всё готово, возвращаем список без изменений
-            return list
-        }
-
-        List indexesOfComputeInRequest = aggregations.findIndexValues { it.name in compAggregations.name }
-
-        List indexesOfNotAggregatedInRequest = usualAggregations.findIndexValues { it.aggregation == Aggregation.NOT_APPLICABLE }
-
-        int usualAggregationSize = usualAggregations.size()
-        //количество всех агрегаций равно количеству всех вычислений
-        if (aggregations.size() == compAggregations.size())
-        {
-            usualAggregationSize = 1 //чтобы корректно достучаться до элемента в массиве
-            indexesOfComputeInRequest = indexesOfComputeInRequest[1..-1] //на первом месте уже стоит результат первого вычисления
-        }
         List usual = list[0] //на первом месте в списке  результатов, нужно внедрить на нужные места данные из результатов вычислений
 
-        list[1..-1].eachWithIndex { listRow, i -> //идем по другим спискам, где уже есть вычисления, результат хранится на первом месте, i покажет место, где хранится индекс подстановки числа из вычислений
-            usual.each { row ->
-                def range = usualAggregationSize + i..-1
-                def tempRow = indexesOfNotAggregatedInRequest
-                    ? row[*indexesOfNotAggregatedInRequest, range]
-                    : row[range]
-                tempRow = tempRow.collect { it ?: 0}.sort()
-                def num = listRow.find {
-                    it[1..-1].collect { it ?: 0}.sort() == tempRow
-                }.find() //при последующей итерации число агрегаций увеличивается на 1
-                row.add(indexesOfComputeInRequest[i]  as int, num)
+        if (!(aggregations.size() == compAggregations.size() && compAggregations.size() == 1))
+        {
+            List indexesOfComputeInRequest = aggregations.findIndexValues { it.name in compAggregations.name }
+
+            List indexesOfNotAggregatedInRequest = usualAggregations.findIndexValues { it.aggregation == Aggregation.NOT_APPLICABLE }
+
+            int usualAggregationSize = usualAggregations.size()
+            //количество всех агрегаций равно количеству всех вычислений
+            if (aggregations.size() == compAggregations.size())
+            {
+                usualAggregationSize = 1 //чтобы корректно достучаться до элемента в массиве
+                indexesOfComputeInRequest = indexesOfComputeInRequest[1..-1] //на первом месте уже стоит результат первого вычисления
+            }
+
+            list[1..-1].eachWithIndex { listRow, i -> //идем по другим спискам, где уже есть вычисления, результат хранится на первом месте, i покажет место, где хранится индекс подстановки числа из вычислений
+                usual.each { row ->
+                    def range = usualAggregationSize + i..-1
+                    def tempRow = indexesOfNotAggregatedInRequest
+                        ? row[*indexesOfNotAggregatedInRequest, range]
+                        : row[range]
+                    tempRow = tempRow.collect { it ?: 0}.sort()
+                    def num = listRow.find {
+                        it[1..-1].collect { it ?: 0}.sort() == tempRow
+                    }.find() //при последующей итерации число агрегаций увеличивается на 1
+                    row.add(indexesOfComputeInRequest[i]  as int, num)
+                }
             }
         }
 
