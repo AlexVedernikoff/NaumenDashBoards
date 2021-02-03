@@ -2243,8 +2243,7 @@ class DashboardDataSetService
 
                             partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                             Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                               newRequestData?.aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
-                                                             .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
+                                               newRequestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE  }
                             if (hasState)
                             {
                                 partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations)
@@ -2254,7 +2253,10 @@ class DashboardDataSetService
                         }
                         if(top)
                         {
-                            res = getTop(res, top, parameterFilters, breakdownFilters)
+                            Boolean fromNoOrTwoFilter = requestData.groups?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) } ||
+                                                        requestData.aggregations?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)}
+
+                            res = getTop(res, top, parameterFilters, breakdownFilters, fromNoOrTwoFilter)
                         }
                         if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                         {
@@ -2285,7 +2287,7 @@ class DashboardDataSetService
                             return [(it): request.data[it]]
                         } as Map<String, RequestData>
 
-                        String aggregationSortingType = dataSet.values().head().aggregations.find()?.sortingType
+
                         if(filterListSize == 0)
                         {
                             parameterSortingType = dataSet.values().head().groups.find()?.sortingType
@@ -2313,11 +2315,13 @@ class DashboardDataSetService
                         }.transpose().collect{ it.sum() }
 
                         int i = 0
+                        def groups = dataSet.values().head().groups
+                        def aggregations = dataSet.values().head().aggregations
+                        String aggregationSortingType = aggregations.find()?.sortingType
+                        Boolean hasState = groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
+                                           aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE }
                         def res = variables.withIndex().collectMany { totalVar, j ->
-                            Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                               dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
-                                                      .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
-                            def res = dataSet.values().head().groups?.size() || notAggregatedAttributes.size() ?
+                            def res = groups?.size() || notAggregatedAttributes.size() ?
                                 findUniqueGroups([0], totalVar).collect { group ->
                                     def resultCalculation = calculator.execute { variable ->
                                         hasState
@@ -2344,7 +2348,9 @@ class DashboardDataSetService
                         }
                         if(top)
                         {
-                            res = getTop(res, top, parameterFilters, breakdownFilters)
+                            Boolean fromNoOrTwoFilter = groups?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) } ||
+                                                        aggregations?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) }
+                            res = getTop(res, top, parameterFilters, breakdownFilters, fromNoOrTwoFilter)
                         }
                         if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                         {
@@ -4359,8 +4365,7 @@ class DashboardDataSetService
                 def total = res ? [(requisiteNode.title): res] : [:]
                 total = formatResult(total, aggregationCnt)
                 Boolean hasState = requestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                   requestData?.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }
-                                              .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
+                                   requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE }
                 if (hasState)
                 {
                     total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
@@ -4407,8 +4412,7 @@ class DashboardDataSetService
 
                 //Вычисление формулы. Выглядит немного костыльно...
                 Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                   dataSet.values().head().aggregations?.findAll {it.type == Aggregation.NOT_APPLICABLE }
-                                          .any { value -> value?.attribute?.type == AttributeType.STATE_TYPE  }
+                                   dataSet.values().head().aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE }
                 String aggregationSortingType = dataSet.values().head().aggregations.find()?.sortingType
                 def parameter = dataSet.values().head().groups.find()
                 String parameterSortingType = parameter?.sortingType
