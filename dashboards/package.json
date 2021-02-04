@@ -136,5 +136,5 @@
     "test:watch": "npm run test -- --watch",
     "zip": "zip -r -j \"$npm_package_name-v$npm_package_version.zip\" ./dist/*"
   },
-  "version": "1.0.10"
+  "version": "1.0.11-0"
 }
