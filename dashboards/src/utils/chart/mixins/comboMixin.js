@@ -4,6 +4,7 @@ import {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
 	getLegendOptions,
+	getMaxStackedValue,
 	getMaxValue,
 	getNiceScale,
 	getXAxisLabels,
@@ -41,21 +42,30 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 /**
  * Устанавливает настройки оси Y
  * @param {ApexOptions} options - опции графика
+ * @param {ComboWidget} widget - виджет
+ * @param {DiagramBuildData} chart - данные конкретного графика
  * @param {DataSet} dataSet - набор данных виджета, относительно которого настраивается ось
  * @param {number} index - индекс набора данных виджета
- * @param {ComboWidget} widget - виджет
  * @param {boolean} forceHide - указывает на необходимость скрывать ось.
- * @param {?number} maxValue - максимальное значение
  * @returns {ApexOptions}
  */
-const setYAxis = (options: ApexOptions, dataSet: DataSet, index: number, widget: ComboWidget, forceHide: boolean, maxValue?: number): ApexOptions => {
+const setYAxis = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData, dataSet: DataSet, index: number, forceHide: boolean): ApexOptions => {
 	const {colors, indicator} = widget;
-	const {breakdown, dataKey, showEmptyData, yAxisName: name} = dataSet;
+	const {series} = chart;
+	const {breakdown, dataKey, showEmptyData, type, yAxisName: name} = dataSet;
 	const usesMSInterval = hasMSInterval(dataSet, FIELDS.yAxis);
 	const usesPercent = hasPercent(dataSet, FIELDS.yAxis);
 	const usesUUIDs = !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown);
 	const color = colors[index];
+	const stacked = type === WIDGET_TYPES.COLUMN_STACKED;
 	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
+	let maxValue;
+
+	if (widget.indicator.showDependent) {
+		maxValue = getMaxValue(series, stacked);
+	} else if (stacked) {
+		maxValue = getMaxStackedValue(series);
+	}
 
 	if (min) {
 		min = Number(min);
@@ -64,7 +74,14 @@ const setYAxis = (options: ApexOptions, dataSet: DataSet, index: number, widget:
 	if (max) {
 		max = Number(max);
 	} else if (maxValue) {
-		max = getNiceScale(maxValue);
+		/**
+		 * Множитель для увеличения значения от максимального. Необходим для корректной отрисовки элементов, что находятся
+		 * чуть выше максимального значения.
+		 * @type {number}
+		 */
+		const increasingFactor = 1.25;
+
+		max = getNiceScale(maxValue) * increasingFactor;
 	}
 
 	const yaxis = {
@@ -105,6 +122,10 @@ const setYAxis = (options: ApexOptions, dataSet: DataSet, index: number, widget:
 
 	return {
 		...options,
+		chart: {
+			...options.chart,
+			stacked: options.chart.stacked || stacked
+		},
 		tooltip: {
 			...options.tooltip,
 			y: [...options.tooltip.y, yTooltip]
@@ -118,10 +139,9 @@ const setYAxis = (options: ApexOptions, dataSet: DataSet, index: number, widget:
  * @param {ApexOptions} options - опции графика
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
- * @param {?number} maxValue - максимальное значение по оси
  * @returns {ApexOptions}
  */
-const setYAxises = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData, maxValue?: number): ApexOptions => {
+const setYAxises = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData): ApexOptions => {
 	const usedDataKeys = [];
 	let extendedOptions = options;
 
@@ -144,7 +164,7 @@ const setYAxises = (options: ApexOptions, widget: ComboWidget, chart: DiagramBui
 				usedDataKeys.push(dataKey);
 			}
 
-			extendedOptions = setYAxis(extendedOptions, dataSet, i, widget, forceHide, maxValue);
+			extendedOptions = setYAxis(extendedOptions, widget, chart, dataSet, i, forceHide);
 		}
 	});
 
@@ -162,12 +182,10 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	const {legend, parameter} = widget;
 	const {labels, series} = chart;
 	const strokeWidth = series.find(dataSet => dataSet.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
-	const stacked = widget.data.findIndex(dataSet => dataSet.type && dataSet.type === WIDGET_TYPES.COLUMN_STACKED) !== -1;
 	const buildDataSet = getBuildSet(widget);
 	const {showEmptyData} = buildDataSet;
 	let parameterUsesUUIDs = false;
 	let breakdownUsesUUIDs = false;
-	let maxValue;
 
 	widget.data.forEach(dataSet => {
 		if (!dataSet.sourceForCompute) {
@@ -177,10 +195,6 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			breakdownUsesUUIDs = !breakdownUsesUUIDs || (!Array.isArray(breakdown) && hasUUIDsInLabels(breakdown));
 		}
 	});
-
-	if (widget.indicator.showDependent || stacked) {
-		maxValue = getMaxValue(series, stacked);
-	}
 
 	const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend);
 	const xaxis = {
@@ -192,7 +206,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 
 	let options = {
 		chart: {
-			stacked
+			stacked: false
 		},
 		dataLabels: {
 			formatter: dataLabelsFormatter(widget, showEmptyData)
@@ -222,7 +236,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		yaxis: []
 	};
 
-	options = setYAxises(options, widget, chart, maxValue);
+	options = setYAxises(options, widget, chart);
 
 	return options;
 };
