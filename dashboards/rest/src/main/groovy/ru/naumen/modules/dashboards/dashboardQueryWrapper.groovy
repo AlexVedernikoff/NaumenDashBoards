@@ -255,8 +255,16 @@ class QueryWrapper implements CriteriaWrapper
                 parameter.attribute.sourceCode,
                 source.descriptor
             )
-            startMinDate = new Date(startMinDate.time).clearTime()
-            wrapper.sevenDaysGroup(parameter, startMinDate)
+            if(startMinDate)
+            {
+                startMinDate = new Date(startMinDate.time).clearTime()
+                wrapper.sevenDaysGroup(parameter, startMinDate)
+            }
+            else
+            {
+                parameter.type = GroupType.OVERLAP
+                wrapper.group(parameter, diagramType)
+            }
         }
         else
         {
@@ -733,8 +741,7 @@ class QueryWrapper implements CriteriaWrapper
         String minDate = new Timestamp(minStartDate.time)// преобразуем дату в понятный ормат для БД
         IApiCriteriaColumn weekNumberColumn = sc.property(attributeCodes)
                                                 .with(sc.&cast.rcurry('timestamp')) // приводим к формату даты
-                                                .with(sc.&columnSubtract.rcurry(sc.constant("'$minDate'"))) // Вычитаем значение минимальной даты
-                                                .with(sc.&extract.rcurry('DAY')) // извлекаем количество дней
+                                                .with(sc.&absDurationInUnits.rcurry(sc.constant("'$minDate'"), 'day')) // Вычитаем значение минимальной даты и извлекаем количество дней
                                                 .with(sc.&columnSum.rcurry(sc.constant(DashboardQueryWrapperUtils.ACCURACY))) //прибавляем для точности данных
                                                 .with(sc.&columnDivide.rcurry(sc.constant(DashboardQueryWrapperUtils.WEEKDAY_COUNT))) // делим на семь дней
                                                 .with(sc.&columnSubtract.rcurry(sc.constant(DashboardQueryWrapperUtils.ROUNDING))) // вычитаем коэффициент округления
