@@ -5,7 +5,7 @@ import type {Chart, DataLabels, WidgetType} from 'store/widgets/data/types';
 import {CHART_TYPES, DATA_LABELS_LIMIT, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**

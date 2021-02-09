@@ -1,5 +1,5 @@
 // @flow
-import {deepClone} from 'src/helpers';
+import {deepClone} from 'helpers';
 import {GRID_PROPS} from 'components/organisms/DashboardContent/constants';
 import type {
 	Layout,

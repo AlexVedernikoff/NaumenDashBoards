@@ -1,6 +1,6 @@
 // @flow
 import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
-import {getLayoutMode} from 'src/helpers';
+import {getLayoutMode} from 'helpers';
 import type {SettingsAction, SettingsState} from './types';
 
 export const initialDashboardState: SettingsState = {

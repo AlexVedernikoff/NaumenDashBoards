@@ -1,5 +1,5 @@
 // @flow
-import type {InputRef} from 'src/components/types';
+import type {InputRef} from 'components/types';
 
 export type Option = Object;
 

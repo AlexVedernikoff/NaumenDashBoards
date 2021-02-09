@@ -1,7 +1,7 @@
 // @flow
 import type {CustomGroupsAction, CustomGroupsState} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
-import {deepClone} from 'src/helpers';
+import {deepClone} from 'helpers';
 import {defaultCustomGroupsAction, initialCustomGroupsState} from './init';
 
 const reducer = (

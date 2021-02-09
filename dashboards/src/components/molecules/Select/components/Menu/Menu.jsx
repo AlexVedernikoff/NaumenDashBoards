@@ -1,8 +1,8 @@
 // @flow
 import cn from 'classnames';
 import {CreationPanel, SearchInput} from 'components/atoms';
-import {debounce} from 'src/helpers';
-import type {InputRef} from 'src/components/types';
+import {debounce} from 'helpers';
+import type {InputRef} from 'components/types';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
 import styles from './styles.less';

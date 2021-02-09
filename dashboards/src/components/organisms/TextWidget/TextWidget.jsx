@@ -1,7 +1,7 @@
 // @flow
 import type {Content} from 'components/atoms/TextEditor/types';
 import {convertFromRaw, EditorState, Modifier, SelectionState} from 'draft-js';
-import {escapeString} from 'src/helpers';
+import {escapeString} from 'helpers';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

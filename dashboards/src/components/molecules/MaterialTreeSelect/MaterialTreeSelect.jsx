@@ -1,6 +1,6 @@
 // @flow
 import type {Components, Props, State} from './types';
-import {debounce} from 'src/helpers';
+import {debounce} from 'helpers';
 import {MultiValueContainer, ValueContainer} from 'components/molecules/MaterialSelect/components';
 import {Node, Tree} from './components';
 import type {Node as NodeType} from './components/Tree/types';

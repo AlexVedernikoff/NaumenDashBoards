@@ -1,7 +1,7 @@
 // @flow
 import type {AnyWidget} from 'store/widgets/data/types';
 import {connect} from 'react-redux';
-import {deepClone} from 'src/helpers';
+import {deepClone} from 'helpers';
 import DiagramWidgetEditForm from 'containers/DiagramWidgetEditForm';
 import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DivRef} from 'components/types';

@@ -1,6 +1,6 @@
 // @flow
 import {DEFAULT_OPTIONS} from './constants';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import type {InputArray, InputArrayNode, NodeValue, Options, Tree as TreeMap} from './types';
 
 class Tree {

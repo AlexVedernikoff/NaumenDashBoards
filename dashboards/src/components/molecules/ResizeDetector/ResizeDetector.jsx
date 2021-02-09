@@ -1,6 +1,6 @@
 // @flow
 import {Children, cloneElement, createRef, isValidElement, PureComponent} from 'react';
-import {debounce} from 'src/helpers';
+import {debounce} from 'helpers';
 import type {Props, State} from './types';
 import type {Ref} from 'components/types';
 import ResizeObserver from 'resize-observer-polyfill';

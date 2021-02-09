@@ -1,6 +1,6 @@
 // @flow
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {HeaderBox} from 'DiagramWidgetEditForm/components';
 import {IndicatorStyleBox as IndicatorBox} from 'DiagramWidgetEditForm/components/SpeedometerForm/components';

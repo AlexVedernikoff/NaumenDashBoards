@@ -1,6 +1,6 @@
 // @flow
 import {Checkbox, ExtendButton, Label, RadioField} from 'components/atoms';
-import {deepClone} from 'src/helpers';
+import {deepClone} from 'helpers';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {FieldDivider} from 'DiagramWidgetEditForm/components';
 import {FIELDS} from 'DiagramWidgetEditForm';

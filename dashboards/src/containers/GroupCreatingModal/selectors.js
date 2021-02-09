@@ -3,7 +3,7 @@ import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {createCustomGroup, deleteCustomGroup, updateCustomGroup} from 'store/customGroups/actions';
 import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
-import {getMapValues} from 'src/helpers';
+import {getMapValues} from 'helpers';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {customGroups, widgets: widgetsState} = state;

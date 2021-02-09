@@ -2,9 +2,9 @@
 import type {AnyWidget, Widget as WidgetType} from 'store/widgets/data/types';
 import cn from 'classnames';
 import {DashboardPanel} from 'components/organisms';
-import {debounce} from 'src/helpers';
+import {debounce} from 'helpers';
 import type {DivRef} from 'components/types';
-import {getLayoutWidgets} from 'src/store/widgets/helpers';
+import {getLayoutWidgets} from 'store/widgets/helpers';
 import {GRID_PROPS} from './constants';
 import isMobile from 'ismobilejs';
 import type {Layout, Layouts} from 'store/dashboard/layouts/types';

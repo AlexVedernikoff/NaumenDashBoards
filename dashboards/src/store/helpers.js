@@ -1,5 +1,5 @@
 // @flow
-import {store} from 'src';
+import {store} from 'index';
 
 /**
  * Формирует параметры для запросов изменения данных дашборда

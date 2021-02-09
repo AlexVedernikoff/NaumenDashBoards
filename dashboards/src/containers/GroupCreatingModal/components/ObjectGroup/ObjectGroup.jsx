@@ -13,7 +13,7 @@ import type {
 	SelectOperand as SelectOperandType,
 	SimpleOperand as SimpleOperandType
 } from 'store/customGroups/types';
-import {debounce} from 'src/helpers';
+import {debounce} from 'helpers';
 import {functions, props} from './selectors';
 import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
 import {MaterialTreeSelect} from 'components/molecules';

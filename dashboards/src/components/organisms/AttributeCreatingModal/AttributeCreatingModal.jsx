@@ -5,7 +5,7 @@ import {ConstantControl, OperatorControl, SourceControl} from './components';
 import type {Control, ControlType, Props, State} from './types';
 import {CONTROL_TYPES, MATH_OPERATORS, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
 import {getAggregationLabel} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
-import {getMapValues, isObject} from 'src/helpers';
+import {getMapValues, isObject} from 'helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {Modal} from 'components/molecules';
 import React, {PureComponent} from 'react';

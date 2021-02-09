@@ -5,7 +5,7 @@ import cn from 'classnames';
 import {COLUMN_TYPES} from 'components/organisms/TableWidget/constants';
 import {ControlPanel} from './components';
 import {createContextName, createSnapshot, exportSheet, FILE_VARIANTS} from 'utils/export';
-import {deepClone} from 'src/helpers';
+import {deepClone} from 'helpers';
 import {Diagram} from 'components/molecules';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';

@@ -12,7 +12,7 @@ import {
 	updateWidget
 } from 'store/widgets/data/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
-import {getMapValues} from 'src/helpers';
+import {getMapValues} from 'helpers';
 import {USER_ROLES} from 'store/context/constants';
 
 export const props = (state: AppState): ConnectedProps => {

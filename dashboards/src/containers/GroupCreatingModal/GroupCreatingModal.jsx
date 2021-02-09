@@ -15,7 +15,7 @@ import {
 } from './components';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
-import {getMapValues} from 'src/helpers';
+import {getMapValues} from 'helpers';
 import {GroupCreatingModal} from 'components/molecules';
 import React, {Component} from 'react';
 

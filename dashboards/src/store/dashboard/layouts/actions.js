@@ -1,7 +1,7 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {filterLayouts, getLegacyLayouts} from './helpers';
-import {getMapValues} from 'src/helpers';
+import {getMapValues} from 'helpers';
 import {getParams} from 'store/helpers';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';

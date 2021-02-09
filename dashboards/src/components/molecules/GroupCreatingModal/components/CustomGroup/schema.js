@@ -1,7 +1,7 @@
 // @flow
 import {array, lazy, number, object, string} from 'yup';
 import {AVAILABLE_DATE_FORMATS} from './components/BetweenOperand/constants';
-import {isObject} from 'src/helpers';
+import {isObject} from 'helpers';
 import moment from 'moment';
 
 const messages = {

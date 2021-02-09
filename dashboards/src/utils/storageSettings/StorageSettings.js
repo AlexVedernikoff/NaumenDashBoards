@@ -1,5 +1,5 @@
 // @flow
-import {isObject} from 'src/helpers';
+import {isObject} from 'helpers';
 import {setLocalStorageValue} from 'store/helpers';
 import type {StorageSettings as StorageSettingsType, StorageSettingsKey, StorageSettingsValue} from './types';
 import {STORAGE_SETTINGS_KEYS} from './constants';
