@@ -240,6 +240,29 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     /**
+     * Метод по формированию колонки с разницей дат
+     * @param column - колонка
+     * @param minDate - минимальная дата в датасете
+     * @return колонка с разницей дат
+     */
+    private IApiCriteriaColumn getSubtractDateColumn(def column, def minDate)
+    {
+        def sc = api.selectClause
+        if(sc.metaClass.respondsTo(sc, 'absDurationInUnits'))
+        {
+            return sc.absDurationInUnits(column, sc.constant("'$minDate'"), 'day')
+        }
+        else
+        {
+            return sc.extract(
+                sc.columnSubtract(
+                    column, sc.constant("'$minDate'") // Вычитаем значение минимальной даты
+                ),
+                'DAY') // извлекаем количество дней
+        }
+    }
+
+    /**
      * Метод по добавлению группировок в запрос и их обработке
      * @param wrapper - текущий запрос в БД
      * @param parameter - параметр с группой для добавления
@@ -741,7 +764,7 @@ class QueryWrapper implements CriteriaWrapper
         String minDate = new Timestamp(minStartDate.time)// преобразуем дату в понятный ормат для БД
         IApiCriteriaColumn weekNumberColumn = sc.property(attributeCodes)
                                                 .with(sc.&cast.rcurry('timestamp')) // приводим к формату даты
-                                                .with(sc.&absDurationInUnits.rcurry(sc.constant("'$minDate'"), 'day')) // Вычитаем значение минимальной даты и извлекаем количество дней
+                                                .with(this.&getSubtractDateColumn.rcurry(minDate)) // Вычитаем значение минимальной даты и извлекаем количество дней
                                                 .with(sc.&columnSum.rcurry(sc.constant(DashboardQueryWrapperUtils.ACCURACY))) //прибавляем для точности данных
                                                 .with(sc.&columnDivide.rcurry(sc.constant(DashboardQueryWrapperUtils.WEEKDAY_COUNT))) // делим на семь дней
                                                 .with(sc.&columnSubtract.rcurry(sc.constant(DashboardQueryWrapperUtils.ROUNDING))) // вычитаем коэффициент округления
