@@ -63,11 +63,12 @@ export class Form extends Component<Props, State> {
 	};
 
 	renderStyleTabContent = () => {
-		const {renderStyleTab, setDataFieldValue, setFieldValue, values} = this.props;
+		const {renderStyleTab, setDataFieldValue, setFieldValue, values, widget} = this.props;
 		const content = renderStyleTab({
 			setDataFieldValue,
 			setFieldValue,
-			values
+			values,
+			widget
 		});
 
 		return this.renderTabContent(content, TABS.STYLE);

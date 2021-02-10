@@ -7,7 +7,7 @@ import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getLegendSettings} from 'utils/chart/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
@@ -70,6 +70,22 @@ export class StyleTab extends Component<StyleTabProps> {
 		});
 	};
 
+	renderColorsBox = () => {
+		const {values, widget} = this.props;
+		const {colorsSettings} = values;
+
+		return (
+			<ColorsBox
+				disabledCustomSettings={true}
+				name={FIELDS.colorsSettings}
+				onChange={this.handleChange}
+				value={colorsSettings}
+				values={values}
+				widget={widget}
+			/>
+		);
+	};
+
 	renderSortingContainer = (props: ContainerProps) => {
 		const {children, className} = props;
 
@@ -108,7 +124,6 @@ export class StyleTab extends Component<StyleTabProps> {
 	render () {
 		const {values} = this.props;
 		const {
-			colors,
 			data,
 			dataLabels = DEFAULT_CHART_SETTINGS.dataLabels,
 			header,
@@ -149,7 +164,7 @@ export class StyleTab extends Component<StyleTabProps> {
 					options={getSortingOptions(values)}
 				/>
 				<DataLabelsBox data={dataLabels} name={FIELDS.dataLabels} onChange={this.handleChange} />
-				<ColorsBox data={colors} name={FIELDS.colors} onChange={this.handleChange} />
+				{this.renderColorsBox()}
 			</div>
 		);
 	}

@@ -1,11 +1,11 @@
 // @flow
 import AxisSettingsBox from 'DiagramWidgetEditForm/components/AxisChartForm/components/AxisSettingsBox';
-import ColorsBox from 'DiagramWidgetEditForm/components/ColorsBox';
+import ColorsBox from 'containers/DiagramWidgetEditForm/components/ColorsBox';
 import DataLabelsBox from 'DiagramWidgetEditForm/components/DataLabelsBox';
-import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
+import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getLegendSettings} from 'utils/chart/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
@@ -34,11 +34,27 @@ export class StyleTab extends Component<StyleTabProps> {
 		setDataFieldValue(index, name, value);
 	};
 
+	renderColorsBox = () => {
+		const {values, widget} = this.props;
+		const {colorsSettings} = values;
+		const disabledCustomSettings = widget.type === WIDGET_TYPES.LINE;
+
+		return (
+			<ColorsBox
+				disabledCustomSettings={disabledCustomSettings}
+				name={FIELDS.colorsSettings}
+				onChange={this.handleChange}
+				value={colorsSettings}
+				values={values}
+				widget={widget}
+			/>
+		);
+	};
+
 	render () {
 		const {values} = this.props;
 
 		const {
-			colors,
 			data,
 			dataLabels = DEFAULT_CHART_SETTINGS.dataLabels,
 			header,
@@ -77,7 +93,7 @@ export class StyleTab extends Component<StyleTabProps> {
 					options={getSortingOptions(values)}
 				/>
 				<DataLabelsBox data={dataLabels} name={FIELDS.dataLabels} onChange={this.handleChange} />
-				<ColorsBox data={colors} name={FIELDS.colors} onChange={this.handleChange} />
+				{this.renderColorsBox()}
 			</div>
 		);
 	}

@@ -50,14 +50,14 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
  * @returns {ApexOptions}
  */
 const setYAxis = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData, dataSet: ComboData, index: number, forceHide: boolean): ApexOptions => {
-	const {colors, indicator} = widget;
+	const {colorsSettings, indicator} = widget;
 	const {series} = chart;
 	const {breakdown, dataKey, indicators, showEmptyData, type, yAxisName: name} = dataSet;
 	const {aggregation, attribute} = indicators[0];
 	const usesMSInterval = hasMSInterval(attribute, aggregation);
 	const usesPercent = hasPercent(attribute, aggregation);
 	const usesUUIDs = Array.isArray(breakdown) && hasUUIDsInLabels(breakdown[0].attribute);
-	const color = colors[index];
+	const color = colorsSettings.auto.colors[index];
 	const stacked = type === WIDGET_TYPES.COLUMN_STACKED;
 	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
 	let maxValue;

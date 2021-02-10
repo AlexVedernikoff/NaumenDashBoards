@@ -6,9 +6,11 @@ import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
+import {getCustomColorsSettingsKey} from './helpers';
+import {getMapValues, isObject} from 'helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
-import {isObject} from 'helpers';
-import {LIMIT, WIDGETS_EVENTS} from './constants';
+import {isCircleChart} from 'src/store/widgets/helpers';
+import {LIMIT, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 
 /**
@@ -284,6 +286,36 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 };
 
 /**
+ * Устанавливает значение использования глобальной настройки цветов графика для всех подходящих виджетов
+ * @param {string} key - ключ настроек
+ * @param {boolean} useGlobal - значение использования глобальной настройки
+ * @returns {ThunkAction}
+ */
+const setUseGlobalChartSettings = (key: string, useGlobal: boolean): ThunkAction =>
+	(dispatch: Dispatch, getState: GetState): void => {
+	const {map: mapWidgets} = getState().widgets.data;
+		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED} = WIDGET_TYPES;
+		const barCharts = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED];
+
+	getMapValues(mapWidgets).forEach(widget => {
+		const {type} = widget;
+
+		if ((barCharts.includes(type) || isCircleChart(type)) && getCustomColorsSettingsKey(widget) === key) {
+			updateWidget({
+				...widget,
+				colorsSettings: {
+					...widget.colorsSettings,
+					custom: {
+						...widget.colorsSettings.custom,
+						useGlobal
+					}
+				}
+			});
+		}
+	});
+};
+
+/**
  * Устанавливает выбранный виджет для редактирования
  * @param {string} widgetId - уникальный идентификатор выбранного виджета
  * @returns {ThunkAction}
@@ -365,6 +397,7 @@ export {
 	saveWidget,
 	selectWidget,
 	setSelectedWidget,
+	setUseGlobalChartSettings,
 	setWidgets,
 	updateWidget,
 	validateWidgetToCopy

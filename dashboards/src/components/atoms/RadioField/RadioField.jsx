@@ -7,7 +7,8 @@ import React, {PureComponent} from 'react';
 export class RadioField extends PureComponent<Props> {
 	static defaultProps = {
 		className: '',
-		disabled: false
+		disabled: false,
+		name: ''
 	};
 
 	trigger: Function;

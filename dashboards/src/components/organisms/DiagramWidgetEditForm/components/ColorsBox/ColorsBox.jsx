@@ -1,95 +1,117 @@
 // @flow
-import AbsolutePortal from 'components/molecules/AbsolutePortal';
+import type {
+	AutoChartColorsSettings,
+	ChartColorsSettings,
+	ChartColorsSettingsType,
+	CustomChartColorsSettings
+} from 'store/widgets/data/types';
+import AutoColorsSettings from './components/AutoColorsSettings';
+import {CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
-import ColorPicker from 'components/molecules/ColorPicker';
-import {DEFAULT_CHART_COLORS} from 'store/widgets/data/constants';
-import type {DivRef} from 'components/types';
+import CustomColorsSettings from './components/CustomColorsSettings';
 import FormField from 'components/molecules/FormField';
-import type {Props, State} from './types';
-import React, {createRef, PureComponent} from 'react';
-import styles from './styles.less';
+import type {OnChangeEvent} from 'components/types';
+import type {Props} from './types';
+import RadioField from 'components/atoms/RadioField';
+import React, {Fragment, PureComponent} from 'react';
 
-export class ColorsBox extends PureComponent<Props, State> {
-	static defaultProps = {
-		data: DEFAULT_CHART_COLORS
+export class ColorsBox extends PureComponent<Props> {
+	change = (value: ChartColorsSettings) => {
+		const {name, onChange} = this.props;
+
+		onChange(name, value);
 	};
 
-	ref: DivRef = createRef();
+	getCurrentSettingsType = () => {
+		const {disabledCustomSettings, value} = this.props;
+		const {AUTO} = CHART_COLORS_SETTINGS_TYPES;
 
-	state = {
-		colorIndex: 0,
-		showPicker: false
+		return disabledCustomSettings ? AUTO : value.type;
 	};
 
-	changeColor = (color: string) => {
-		const {data, name, onChange} = this.props;
-		const {colorIndex} = this.state;
+	handleChangeAutoSettings = (auto: AutoChartColorsSettings) => {
+		const {value} = this.props;
 
-		data[colorIndex] = color;
-
-		this.setState({showPicker: false});
-		onChange(name, data);
+		this.change({...value, auto});
 	};
 
-	handleClickColor = (index: number) => () => {
-		let {colorIndex, showPicker} = this.state;
+	handleChangeCustomSettings = (custom: CustomChartColorsSettings) => {
+		const {value} = this.props;
 
-		if (showPicker && colorIndex === index) {
-			showPicker = false;
-		} else if (colorIndex !== index) {
-			showPicker = true;
-		} else {
-			showPicker = !showPicker;
-		}
-
-		this.setState({
-			colorIndex: index,
-			showPicker
-		});
+		this.change({...value, custom});
 	};
 
-	hidePicker = () => this.setState({showPicker: false});
+	handleChangeType = ({value: type}: OnChangeEvent<ChartColorsSettingsType>) => {
+		const {value} = this.props;
 
-	renderColor = (backgroundColor: string, index: number) => (
-		<div className={styles.paletteItem} key={index} onClick={this.handleClickColor(index)} style={{backgroundColor}} />
-	);
+		this.change({...value, type});
+	};
 
-	renderColorPicker = () => {
-		const {data} = this.props;
-		const {colorIndex, showPicker} = this.state;
+	renderAutoColorsSettings = () => {
+		const {auto} = this.props.value;
 
-		if (showPicker) {
+		return <AutoColorsSettings onChange={this.handleChangeAutoSettings} value={auto} />;
+	};
+
+	renderCustomColorsSettings = () => {
+		const {disabledCustomSettings, labels, value} = this.props;
+		const {auto: autoSettings, custom: customSettings} = value;
+
+		if (!disabledCustomSettings && customSettings.data) {
+			const {colors: defaultColors} = autoSettings;
+
 			return (
-				<AbsolutePortal elementRef={this.ref} onClickOutside={this.hidePicker}>
-					<div className={styles.picker}>
-						<ColorPicker
-							onChange={this.changeColor}
-							onClose={this.hidePicker}
-							value={data[colorIndex]}
-						/>
-					</div>
-				</AbsolutePortal>
+				<CustomColorsSettings
+					defaultColors={defaultColors}
+					labels={labels}
+					onChange={this.handleChangeCustomSettings}
+					value={customSettings}
+				/>
 			);
 		}
+
+		return null;
 	};
 
-	renderColors = () => {
-		const {data} = this.props;
+	renderSettings = () => {
+		const {CUSTOM} = CHART_COLORS_SETTINGS_TYPES;
+
+		return this.getCurrentSettingsType() === CUSTOM ? this.renderCustomColorsSettings() : this.renderAutoColorsSettings();
+	};
+
+	renderSettingsTypeControl = (value: ChartColorsSettingsType, label: string, disabled: boolean = false) => {
+		const checked = this.getCurrentSettingsType() === value;
 
 		return (
 			<FormField>
-				<div className={styles.paletteContainer} ref={this.ref}>
-					{data.map(this.renderColor)}
-					{this.renderColorPicker()}
-				</div>
+				<RadioField
+					checked={checked}
+					disabled={disabled}
+					label={label}
+					onChange={this.handleChangeType}
+					value={value}
+				/>
 			</FormField>
+		);
+	};
+
+	renderSettingsTypeControls = () => {
+		const {disabledCustomSettings} = this.props;
+		const {AUTO, CUSTOM} = CHART_COLORS_SETTINGS_TYPES;
+
+		return (
+			<Fragment>
+				{this.renderSettingsTypeControl(AUTO, 'Автоматически')}
+				{this.renderSettingsTypeControl(CUSTOM, 'Вручную', disabledCustomSettings)}
+			</Fragment>
 		);
 	};
 
 	render () {
 		return (
-			<CollapsableFormBox title="Цвета диаграммы">
-				{this.renderColors()}
+			<CollapsableFormBox showContent={true} title="Цвета диаграммы">
+				{this.renderSettingsTypeControls()}
+				{this.renderSettings()}
 			</CollapsableFormBox>
 		);
 	}
