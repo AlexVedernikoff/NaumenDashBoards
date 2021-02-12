@@ -12,6 +12,7 @@ import {Tree} from 'components/molecules/MaterialTreeSelect/components';
 export class TreeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
 		initialSelected: [],
+		name: '',
 		placeholder: 'Выберите значение'
 	};
 

@@ -4,7 +4,7 @@ import type {ApexLabels, ApexLegend, AxisProps} from 'utils/chart/types';
 import {AXIS_FONT_SIZE, LEGEND_HEIGHT, LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
-import {getBuildSet} from 'store/widgets/data/helpers';
+import {getMainDataSet} from 'store/widgets/data/helpers';
 import {META_CLASS_VALUE_SEPARATOR} from 'store/widgets/buildData/constants';
 import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
@@ -62,8 +62,7 @@ const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero:
 };
 
 const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>, wrap: boolean): ApexLabels => {
-	const set = getBuildSet(widget);
-	const {group} = set;
+	const {group} = getMainDataSet(widget.data).parameters[0];
 	let formattedLabels = labels;
 
 	if (group.way === GROUP_WAYS.SYSTEM && group.data === DATETIME_SYSTEM_GROUP.SEVEN_DAYS) {

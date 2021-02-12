@@ -3,7 +3,7 @@ import {CHART_OPTIONS} from './constants';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
-import {getProcessedValue} from 'store/sources/attributes/helpers';
+import {getAttributeValue} from 'store/sources/attributes/helpers';
 import Icon, {ICON_SIZES} from 'components/atoms/Icon';
 import {MiniSelect} from 'components/molecules';
 import React, {Component, Fragment} from 'react';
@@ -18,7 +18,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const {[FIELDS.yAxis]: indicator} = values.data[index];
 
 		if (indicator) {
-			setDataFieldValue(index, FIELDS.yAxisName, getProcessedValue(indicator, 'title'));
+			setDataFieldValue(index, FIELDS.yAxisName, getAttributeValue(indicator, 'title'));
 		}
 	};
 

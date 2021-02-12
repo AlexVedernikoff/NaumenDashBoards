@@ -10,7 +10,7 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getContext, getEditableParam, getMetaCLass, getUserData, setUserData, switchDashboard} from 'store/context/actions';
 import {getDataSources} from 'store/sources/data/actions';
-import {getLayoutMode} from 'src/helpers';
+import {getLayoutMode} from 'helpers';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';

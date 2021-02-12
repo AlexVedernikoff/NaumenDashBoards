@@ -1,16 +1,16 @@
 // @flow
 import type {AddFilterProps, AddFiltersProps, ReturnsAddFiltersData} from './types';
-import type {AxisWidget, Chart, CircleWidget, ComboWidget} from 'store/widgets/data/types';
+import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboWidget} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
-import {deepClone} from 'src/helpers';
+import {deepClone} from 'helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
+import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {hasUUIDsInLabels, transformGroupFormat} from 'store/widgets/helpers';
-import {store} from 'src';
+import {store} from 'index';
 import type {ThunkAction} from 'store/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -39,17 +39,18 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 
 /**
  * Добавляет в примесь данных данные параметра
- * @param {DataSet} dataSet - набор данных виджета
+ * @param {AxisData} dataSet - набор данных виджета
  * @param {string} value - значение параметра
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {DrillDownMixin}
  */
-const addParameterFilter = (dataSet: DataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
-	const subTitle = hasUUIDsInLabels(dataSet.xAxis) ? getLabelWithoutUUID(value) : value;
+const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): DrillDownMixin => {
+	const {attribute, group} = dataSet.parameters[0];
+	const subTitle = hasUUIDsInLabels(attribute) ? getLabelWithoutUUID(value) : value;
 
 	return addGroupFilter(mixin, {
-		attribute: dataSet[FIELDS.xAxis],
-		group: transformGroupFormat(dataSet[FIELDS.group]),
+		attribute,
+		group: transformGroupFormat(group),
 		subTitle,
 		value
 	});
@@ -57,31 +58,36 @@ const addParameterFilter = (dataSet: DataSet, value: string, mixin: DrillDownMix
 
 /**
  * Добавляет в примесь данных данные разбивки
- * @param {DataSet} dataSet - набор данных виджета
+ * @param {ChartDataSet} dataSet - набор данных виджета
  * @param {string} value - значение разбивки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {DrillDownMixin}
  */
-const addBreakdownFilter = (dataSet: DataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
-	const {breakdown, xAxis} = dataSet;
-	const subTitle = hasUUIDsInLabels(xAxis) ? getLabelWithoutUUID(value) : value;
+const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
+	const {breakdown} = dataSet;
 	let newMixin = mixin;
 
 	if (Array.isArray(breakdown)) {
 		const breakdownSet = breakdown.find(attrSet => attrSet[FIELDS.dataKey] === dataSet.dataKey);
 
 		if (breakdownSet) {
+			const {group, value: attribute} = breakdownSet;
+			const subTitle = hasUUIDsInLabels(attribute) ? getLabelWithoutUUID(value) : value;
+
 			newMixin = addGroupFilter(mixin, {
-				attribute: breakdownSet.value,
-				group: transformGroupFormat(breakdownSet.group),
+				attribute,
+				group: transformGroupFormat(group),
 				subTitle,
 				value
 			});
 		}
-	} else {
+	} else if (breakdown) {
+		const {attribute, group} = breakdown;
+		const subTitle = hasUUIDsInLabels(attribute) ? getLabelWithoutUUID(value) : value;
+
 		newMixin = addGroupFilter(mixin, {
-			attribute: breakdown,
-			group: transformGroupFormat(dataSet[FIELDS.breakdownGroup]),
+			attribute,
+			group: transformGroupFormat(group),
 			mixin,
 			subTitle,
 			value
@@ -103,14 +109,14 @@ const addAxisChartFilters = (widget: AxisWidget, props: AddFiltersProps): Return
 	const {labels, series} = buildData;
 	const {dataPointIndex, seriesIndex} = config;
 	const {data} = widget;
-	const index = data.findIndex(dataSet => !dataSet.sourceForCompute);
+	const index = getMainDataSetIndex(widget.data);
 	const dataSet = data[index];
 	let newMixin = mixin;
 
-	if (dataSet && !dataSet.sourceForCompute) {
-		const {aggregation, yAxis: attribute} = dataSet;
+	if (dataSet) {
+		const {aggregation, attribute} = dataSet.indicators[0];
 
-		newMixin.filters.push({aggregation, attribute});
+		attribute && newMixin.filters.push({aggregation, attribute});
 		newMixin = addParameterFilter(dataSet, labels[dataPointIndex], newMixin);
 		newMixin = addBreakdownFilter(dataSet, series[seriesIndex].name, newMixin);
 	}
@@ -134,10 +140,10 @@ const addComboChartFilters = (widget: ComboWidget, props: AddFiltersProps): Retu
 	const dataSet = widget.data[index];
 	let newMixin = mixin;
 
-	if (dataSet && !dataSet.sourceForCompute) {
-		const {aggregation, yAxis: attribute} = dataSet;
+	if (dataSet) {
+		const {aggregation, attribute} = dataSet.indicators[0];
 
-		newMixin.filters.push({aggregation, attribute});
+		attribute && newMixin.filters.push({aggregation, attribute});
 		newMixin = addParameterFilter(dataSet, labels[dataPointIndex], newMixin);
 		newMixin = addBreakdownFilter(dataSet, series[seriesIndex].name, newMixin);
 	}
@@ -156,14 +162,14 @@ const addCircleChartFilters = (widget: CircleWidget, props: AddFiltersProps): Re
 	const {buildData, config, mixin} = props;
 	const {dataPointIndex} = config;
 	const {data} = widget;
-	const index = data.findIndex(dataSet => !dataSet.sourceForCompute);
+	const index = getMainDataSetIndex(data);
 	const dataSet = widget.data[index];
 	let newMixin = mixin;
 
-	if (dataSet && !dataSet.sourceForCompute) {
-		const {aggregation, indicator: attribute} = dataSet;
+	if (dataSet) {
+		const {aggregation, attribute} = dataSet.indicators[0];
 
-		newMixin.filters.push({aggregation, attribute});
+		attribute && newMixin.filters.push({aggregation, attribute});
 		newMixin = addBreakdownFilter(data[index], buildData.labels[dataPointIndex], newMixin);
 	}
 

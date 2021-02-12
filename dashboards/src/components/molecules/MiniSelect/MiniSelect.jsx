@@ -10,7 +10,8 @@ import styles from './styles.less';
 export class MiniSelect extends PureComponent<Props, State> {
 	static defaultProps = {
 		isDisabled: false,
-		showCaret: true
+		showCaret: true,
+		value: ''
 	};
 
 	state = {

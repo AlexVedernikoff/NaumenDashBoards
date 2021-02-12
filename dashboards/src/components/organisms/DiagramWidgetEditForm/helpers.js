@@ -1,9 +1,10 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
-import {FIELDS} from 'DiagramWidgetEditForm';
-import {isCircleChart, usesCustomGroup} from 'store/widgets/helpers';
+import {FIELDS} from 'DiagramWidgetEditForm/index';
+import {getDefaultSystemGroup, isCircleChart, usesCustomGroup} from 'store/widgets/helpers';
 import {SORTING_OPTIONS} from './components/SortingBox/constants';
 import type {SortingValueOption} from './components/SortingBox/types';
 import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -80,9 +81,29 @@ const getSortingOptions = (widget: DiagramFormWidget): Array<SortingValueOption>
 		: option
 	);
 
+/**
+ * Возвращает объект показателя по умолчанию
+ * @return {Indicator}
+ */
+const getDefaultIndicator = () => ({
+	aggregation: DEFAULT_AGGREGATION.COUNT,
+	attribute: null
+});
+
+/**
+ * Возвращает объект параметра по умолчанию
+ * @return {Parameter}
+ */
+const getDefaultParameter = () => ({
+	attribute: null,
+	group: getDefaultSystemGroup(null)
+});
+
 export {
 	filterByAttribute,
 	getDataErrorKey,
+	getDefaultIndicator,
+	getDefaultParameter,
 	getErrorKey,
 	getParentClassFqn,
 	getSortingOptions

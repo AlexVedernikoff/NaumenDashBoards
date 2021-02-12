@@ -3,7 +3,7 @@ import CustomGroup from './components/CustomGroup/CustomGroup';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from './constants';
 import {FormField, SystemGroup} from './components';
-import {getProcessedValue} from 'store/sources/attributes/helpers';
+import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
 import {Label, RadioField, TextInput} from 'components/atoms';
 import {Modal} from 'components/molecules';
@@ -32,7 +32,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 	componentDidMount () {
 		const {attribute, group} = this.props;
 		const {way} = group;
-		const attributeTitle = getProcessedValue(attribute, 'title', '');
+		const attributeTitle = getAttributeValue(attribute, 'title', '');
 
 		this.setState({
 			attributeTitle,

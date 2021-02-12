@@ -1,8 +1,7 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin} from './types';
-import {FIELDS} from 'DiagramWidgetEditForm';
-import {getDescriptorCases} from 'src/helpers';
+import {getDescriptorCases} from 'helpers';
 import {isSourceType} from 'store/sources/data/helpers';
 import {LINKS_EVENTS} from './constants';
 import StorageSettings from 'utils/storageSettings';
@@ -25,12 +24,11 @@ const getPartsClassFqn = (code?: string) => {
 
 const createPostData = (widget: Widget, index: number) => {
 	let postData = {};
-	const set = widget.data[index];
-	const source = set[FIELDS.source];
-	const descriptor = set[FIELDS.descriptor];
+	const {source} = widget.data[index];
+	const {descriptor, value: sourceValue} = source;
 
 	if (source) {
-		const {label: title, value} = source;
+		const {label: title, value} = sourceValue;
 		const {cases, classFqn} = getPartsClassFqn(value);
 
 		postData = {

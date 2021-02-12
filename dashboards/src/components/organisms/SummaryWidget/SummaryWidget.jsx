@@ -1,6 +1,6 @@
 // @flow
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
-import {getBuildSet} from 'store/widgets/data/helpers';
+import {getMainDataSet, getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {hasMSInterval, parseMSInterval} from 'store/widgets/helpers';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -10,12 +10,12 @@ export class SummaryWidget extends PureComponent<Props> {
 	handleClickValue = () => {
 		const {onDrillDown, widget} = this.props;
 		const mixin = createDrillDownMixin(widget);
-		const index = widget.data.findIndex(dataSet => !dataSet.sourceForCompute);
+		const index = getMainDataSetIndex(widget.data);
 		const dataSet = widget.data[index];
+		const {indicators} = dataSet;
+		const {aggregation, attribute} = indicators[0];
 
-		if (dataSet && !dataSet.sourceForCompute) {
-			const {aggregation, indicator: attribute} = dataSet;
-
+		if (attribute) {
 			mixin.filters.push({aggregation, attribute});
 			onDrillDown(widget, index, mixin);
 		}
@@ -25,7 +25,8 @@ export class SummaryWidget extends PureComponent<Props> {
 		const {data, widget} = this.props;
 		const {fontColor, fontFamily, fontSize, fontStyle} = widget.indicator;
 		const {total} = data;
-		const value = hasMSInterval(getBuildSet(widget)) ? parseMSInterval(total) : total;
+		const {aggregation, attribute} = getMainDataSet(widget.data).indicators[0];
+		const value = hasMSInterval(attribute, aggregation) ? parseMSInterval(total) : total;
 
 		return (
 			<Summary

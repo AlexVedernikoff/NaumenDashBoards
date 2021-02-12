@@ -9,7 +9,6 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class List extends PureComponent<Props, State> {
 	static defaultProps = {
-		isSearching: false,
 		itemSize: 32,
 		loading: false,
 		maxHeight: 250,

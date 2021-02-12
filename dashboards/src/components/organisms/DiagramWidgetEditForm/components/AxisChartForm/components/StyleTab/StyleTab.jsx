@@ -27,9 +27,9 @@ export class StyleTab extends Component<StyleTabProps> {
 			colors,
 			dataLabels = DEFAULT_CHART_SETTINGS.dataLabels,
 			header,
-			indicator = DEFAULT_CHART_SETTINGS.yAxis,
+			indicator = DEFAULT_CHART_SETTINGS.axis,
 			legend = getLegendSettings(values),
-			parameter = DEFAULT_CHART_SETTINGS.xAxis,
+			parameter = DEFAULT_CHART_SETTINGS.axis,
 			sorting = DEFAULT_AXIS_SORTING_SETTINGS
 		} = values;
 
@@ -38,7 +38,7 @@ export class StyleTab extends Component<StyleTabProps> {
 				<HeaderBox data={header} name={FIELDS.header} onChange={this.handleChange} />
 				<LegendBox data={legend} name={FIELDS.legend} onChange={this.handleChange} />
 				<ParameterBox data={parameter} name={FIELDS.parameter} onChange={this.handleChange} />
-				<IndicatorBox data={extend(DEFAULT_CHART_SETTINGS.yAxis, indicator)} name={FIELDS.indicator} onChange={this.handleChange} />
+				<IndicatorBox data={extend(DEFAULT_CHART_SETTINGS.axis, indicator)} name={FIELDS.indicator} onChange={this.handleChange} />
 				<SortingBox
 					data={sorting}
 					name={FIELDS.sorting}

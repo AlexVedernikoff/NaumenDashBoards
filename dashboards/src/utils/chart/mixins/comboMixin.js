@@ -11,13 +11,11 @@ import {
 	getXAxisOptions,
 	valueFormatter
 } from './helpers';
-import type {ComboWidget} from 'store/widgets/data/types';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {ComboData, ComboWidget} from 'store/widgets/data/types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_Y_AXIS_MIN} from 'utils/chart/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import {extend} from 'src/helpers';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {extend} from 'helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -29,9 +27,10 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 	const buildDataSet = widget.data.find(dataSet => dataSet.dataKey === series[seriesIndex].dataKey);
 	let formattedValue = value;
 
-	if (buildDataSet && !buildDataSet.sourceForCompute) {
-		const {aggregation} = buildDataSet;
-		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
+	if (buildDataSet) {
+		const indicator = buildDataSet.indicators[0];
+		const {aggregation, attribute} = indicator;
+		const usesMSInterval = hasMSInterval(attribute, aggregation);
 		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
 		formattedValue = valueFormatter(usesMSInterval, usesPercent, showZero)(value);
 	}
@@ -44,18 +43,19 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
  * @param {ApexOptions} options - опции графика
  * @param {ComboWidget} widget - виджет
  * @param {DiagramBuildData} chart - данные конкретного графика
- * @param {DataSet} dataSet - набор данных виджета, относительно которого настраивается ось
+ * @param {ComboData} dataSet - набор данных виджета, относительно которого настраивается ось
  * @param {number} index - индекс набора данных виджета
  * @param {boolean} forceHide - указывает на необходимость скрывать ось.
  * @returns {ApexOptions}
  */
-const setYAxis = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData, dataSet: DataSet, index: number, forceHide: boolean): ApexOptions => {
+const setYAxis = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData, dataSet: ComboData, index: number, forceHide: boolean): ApexOptions => {
 	const {colors, indicator} = widget;
 	const {series} = chart;
-	const {breakdown, dataKey, showEmptyData, type, yAxisName: name} = dataSet;
-	const usesMSInterval = hasMSInterval(dataSet, FIELDS.yAxis);
-	const usesPercent = hasPercent(dataSet, FIELDS.yAxis);
-	const usesUUIDs = !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown);
+	const {breakdown, dataKey, indicators, showEmptyData, type, yAxisName: name} = dataSet;
+	const {aggregation, attribute} = indicators[0];
+	const usesMSInterval = hasMSInterval(attribute, aggregation);
+	const usesPercent = hasPercent(attribute, aggregation);
+	const usesUUIDs = !!breakdown && !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute);
 	const color = colors[index];
 	const stacked = type === WIDGET_TYPES.COLUMN_STACKED;
 	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
@@ -183,16 +183,23 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	const {labels, series} = chart;
 	const strokeWidth = series.find(dataSet => dataSet.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 	const buildDataSet = getBuildSet(widget);
-	const {showEmptyData} = buildDataSet;
+	const {showEmptyData, xAxisName} = buildDataSet;
+	const xAxisProps = {
+		...parameter,
+		name: xAxisName
+	};
 	let parameterUsesUUIDs = false;
 	let breakdownUsesUUIDs = false;
 
 	widget.data.forEach(dataSet => {
 		if (!dataSet.sourceForCompute) {
-			const {breakdown, xAxis} = dataSet;
+			const {breakdown, parameters} = dataSet;
 
-			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(xAxis);
-			breakdownUsesUUIDs = !breakdownUsesUUIDs || (!Array.isArray(breakdown) && hasUUIDsInLabels(breakdown));
+			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(parameters[0].attribute);
+
+			if (breakdown) {
+				breakdownUsesUUIDs = !breakdownUsesUUIDs || (!Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute));
+			}
 		}
 	});
 
@@ -232,7 +239,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			shared: false,
 			y: []
 		},
-		xaxis: extend(xaxis, getXAxisOptions(parameter, hasOverlappedLabel)),
+		xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel)),
 		yaxis: []
 	};
 

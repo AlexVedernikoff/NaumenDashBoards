@@ -7,7 +7,7 @@ import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getParams, parseResponseErrorText} from 'store/helpers';
-import {isObject} from 'src/helpers';
+import {isObject} from 'helpers';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 

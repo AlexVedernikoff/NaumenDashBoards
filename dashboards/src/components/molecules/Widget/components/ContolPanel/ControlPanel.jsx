@@ -126,7 +126,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 			return (
 				<MenuItem key={dataKey} keyEvent={index} onClick={this.handleClickDrillDownButton}>
-					{source.label}
+					{source.value.label}
 				</MenuItem>
 			);
 		});

@@ -1,5 +1,6 @@
 // @flow
 import type {ApexOptions} from 'apexcharts';
+import type {AxisData, AxisWidget} from 'store/widgets/data/types';
 import {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
@@ -9,10 +10,8 @@ import {
 	getYAxisOptions,
 	valueFormatter
 } from './helpers';
-import type {AxisWidget} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import {extend} from 'src/helpers';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {extend} from 'helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -25,21 +24,30 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  */
 const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
-	const {indicator, legend, parameter, type} = widget;
+	const {indicator: indicatorSettings, legend, parameter, type} = widget;
 	const {labels} = chart;
-	const buildDataSet = getBuildSet(widget);
+	const buildDataSet: AxisData = getBuildSet(widget);
 
 	if (buildDataSet) {
-		const {breakdown, showEmptyData, xAxis} = buildDataSet;
-		const parameterUsesUUIDs = hasUUIDsInLabels(xAxis);
-		const breakdownUsesUUIDs = hasUUIDsInLabels(breakdown);
+		const {breakdown, indicators, parameters, showEmptyData, xAxisName, yAxisName} = buildDataSet;
+		const {aggregation, attribute} = indicators[0];
+		const parameterUsesUUIDs = hasUUIDsInLabels(parameters[0].attribute);
+		const breakdownUsesUUIDs = !!breakdown && !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute);
 		const usesUUIDs = parameterUsesUUIDs || breakdownUsesUUIDs;
-		const usesMSInterval = hasMSInterval(buildDataSet, FIELDS.yAxis);
-		const usesPercent = hasPercent(buildDataSet, FIELDS.yAxis);
+		const usesMSInterval = hasMSInterval(attribute, aggregation);
+		const usesPercent = hasPercent(attribute, aggregation);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
-		const xAxisSettings = horizontal ? indicator : parameter;
-		const yAxisSettings = horizontal ? parameter : indicator;
+		const xAxisSettings = {
+			...parameter,
+			name: xAxisName
+		};
+		const yAxisSettings = {
+			...indicatorSettings,
+			name: yAxisName
+		};
+		const xAxisProps = horizontal ? yAxisSettings : xAxisSettings;
+		const yAxisProps = horizontal ? xAxisSettings : yAxisSettings;
 		const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend, horizontal);
 
 		let xaxis = {
@@ -94,8 +102,8 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 					}
 				}
 			},
-			xaxis: extend(xaxis, getXAxisOptions(xAxisSettings, hasOverlappedLabel)),
-			yaxis: extend(yaxis, getYAxisOptions(yAxisSettings))
+			xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel)),
+			yaxis: extend(yaxis, getYAxisOptions(yAxisProps))
 		};
 	}
 };
