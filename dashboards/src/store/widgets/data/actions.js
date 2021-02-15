@@ -10,7 +10,6 @@ import {getParams, parseResponseErrorText} from 'store/helpers';
 import {isObject} from 'src/helpers';
 import {LIMIT, WIDGETS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-import normalizer from 'utils/normalizer';
 
 /**
  * Добавляет новый виджет
@@ -169,8 +168,7 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 			dashboardKey,
 			widgetKey
 		};
-		const data = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
-		const widget = normalizer.widget(data);
+		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
 
 		batch(() => {
 			dispatch(setCreatedWidget(widget));

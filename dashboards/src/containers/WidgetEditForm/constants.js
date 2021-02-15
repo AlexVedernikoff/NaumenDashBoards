@@ -30,6 +30,7 @@ const fontStyle: 'fontStyle' = 'fontStyle';
 const from: 'from' = 'from';
 const group: 'group' = 'group';
 const header: 'header' = 'header';
+const id: 'id' = 'id';
 const indicator: 'indicator' = 'indicator';
 const indicatorSettings: 'indicatorSettings' = 'indicatorSettings';
 const indicators: 'indicators' = 'indicators';
@@ -72,6 +73,7 @@ const value: 'value' = 'value';
 const use: 'use' = 'use';
 const useName: 'useName' = 'useName';
 const xAxis: 'xAxis' = 'xAxis';
+const xAxisName: 'xAxisName' = 'xAxisName';
 const yAxis: 'yAxis' = 'yAxis';
 const yAxisName: 'yAxisName' = 'yAxisName';
 const withBreakdown: 'withBreakdown' = 'withBreakdown';
@@ -107,6 +109,7 @@ const FIELDS = {
 	from,
 	group,
 	header,
+	id,
 	indicator,
 	indicatorSettings,
 	indicators,
@@ -151,6 +154,7 @@ const FIELDS = {
 	value,
 	withBreakdown,
 	xAxis,
+	xAxisName,
 	yAxis,
 	yAxisName
 };

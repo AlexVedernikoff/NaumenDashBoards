@@ -49,6 +49,11 @@ export type Source = {
 	value: string
 };
 
+export type SourceData = {
+	descriptor: string,
+	value: Source
+};
+
 export type Group = {
 	data: string,
 	format?: string,
@@ -78,9 +83,21 @@ export type MixedAttribute = ComputedAttr | Attribute;
 
 export type ComputedBreakdown = Array<{
 	dataKey: string,
-	group: Group | null,
-	value: Attribute | null
+	group: Group,
+	value: Attribute
 }>;
+
+export type Parameter = {
+	attribute: Attribute,
+	group: Group
+};
+
+export type Breakdown = Parameter | ComputedBreakdown;
+
+export type Indicator = {
+	aggregation: string,
+	attribute: MixedAttribute | null
+};
 
 export type DataTopSettings = {
 	count: number,
@@ -88,12 +105,6 @@ export type DataTopSettings = {
 };
 
 // Общие параметры всех виджетов
-
-type BaseData = {
-	dataKey: string,
-	descriptor: string,
-	source: Source
-};
 
 export type HeaderPosition = $Keys<typeof HEADER_POSITIONS>;
 
@@ -159,71 +170,47 @@ export type DataLabels = {
 
 // График с осями
 
-export type AxisIndicator = {
-	name: string,
+export type AxisSettings = {
 	show: boolean,
 	showName: boolean
 };
 
-export type AxisParameter = {
-	name: string,
-	show: boolean,
-	showName: boolean
-};
-
-export type ComputeAxisData = {
-	...BaseData,
-	group: Group,
-	sourceForCompute: true,
-	xAxis: Attribute,
-};
-
-export type BuildAxisData = {
-	...BaseData,
-	aggregation: string,
-	breakdown?: Attribute | ComputedBreakdown,
-	breakdownGroup?: Group,
-	group: Group,
+export type AxisData = {
+	breakdown?: Breakdown,
+	dataKey: string,
+	indicators: Array<Indicator>,
+	parameters: Array<Parameter>,
 	showEmptyData: boolean,
-	sourceForCompute: false,
+	source: SourceData,
+	sourceForCompute: boolean,
 	top: DataTopSettings,
-	xAxis: Attribute,
-	yAxis: MixedAttribute
+	xAxisName: string,
+	yAxisName: string
 };
-
-export type AxisData = ComputeAxisData | BuildAxisData;
 
 export type AxisWidget = {
 	...BaseWidget,
 	colors: Array<string>,
-	data: Array<AxisData>,
+	data: $ReadOnlyArray<AxisData>,
 	dataLabels: DataLabels,
-	indicator: AxisIndicator,
+	indicator: AxisSettings,
 	legend: Legend,
-	parameter: AxisParameter,
+	parameter: AxisSettings,
 	sorting: ChartSorting,
 	type: $Keys<typeof WIDGET_SETS.AXIS>
 };
 
 // Круговой график
 
-export type BuildCircleData = {
-	...BaseData,
-	aggregation: string,
-	breakdown: Attribute | ComputedBreakdown,
-	breakdownGroup: Group,
-	indicator: MixedAttribute,
+export type CircleData = {
+	breakdown?: Breakdown,
+	dataKey: string,
+	indicators: Array<Indicator>,
 	showEmptyData: boolean,
-	sourceForCompute: false,
+	source: SourceData,
+	sourceForCompute: boolean,
 	top: DataTopSettings
 };
-
-type ComputeCircleData = {
-	...BaseData,
-	sourceForCompute: true
-};
-
-export type CircleData = BuildCircleData | ComputeCircleData;
 
 export type CircleWidget = {
 	...BaseWidget,
@@ -238,7 +225,7 @@ export type CircleWidget = {
 // Комбо график
 
 export type ComboIndicatorSettings = $Shape<{
-	...AxisIndicator,
+	...AxisSettings,
 	max: number,
 	min: number,
 	showDependent: boolean
@@ -246,13 +233,10 @@ export type ComboIndicatorSettings = $Shape<{
 
 type ComboType = $Keys<typeof COMBO_TYPES>;
 
-export type BuildComboData = {
-	...BuildAxisData,
-	type: ComboType,
-	yAxisName: string
+export type ComboData = {
+	...AxisData,
+	type: ComboType
 };
-
-export type ComboData = ComputeAxisData | BuildComboData;
 
 export type ComboWidget = {
 	...BaseWidget,
@@ -261,26 +245,19 @@ export type ComboWidget = {
 	dataLabels: DataLabels,
 	indicator: ComboIndicatorSettings,
 	legend: Legend,
-	parameter: AxisParameter,
+	parameter: AxisSettings,
 	sorting: ChartSorting,
 	type: typeof WIDGET_TYPES.COMBO,
 };
 
 // Сводка
 
-type BuildSummaryData = {
-	...BaseData,
-	aggregation: string,
-	indicator: MixedAttribute,
-	sourceForCompute: false
+export type SummaryData = {
+	dataKey: string,
+	indicators: Array<Indicator>,
+	source: SourceData,
+	sourceForCompute: boolean
 };
-
-type ComputeSummaryData = {
-	...BaseData,
-	sourceForCompute: true
-};
-
-export type SummaryData = BuildSummaryData | ComputeSummaryData;
 
 export type SummaryIndicator = {
 	fontColor: string,
@@ -344,33 +321,14 @@ export type TableSorting = {
 	type: SortingType
 };
 
-export type Parameter = {
-	attribute: Attribute,
-	group: Group
-};
-
-export type Indicator = {
-	aggregation: string,
-	attribute: Attribute
-};
-
-type BuildTableData = {
-	...BaseData,
-	breakdown: Attribute | ComputedBreakdown,
-	breakdownGroup: Group,
-	indicators: Array<Indicator>,
+export type TableData = {
+	breakdown?: Breakdown,
+	dataKey: string,
+	indicators?: Array<Indicator>,
 	parameters: Array<Parameter>,
-	showEmpty: boolean,
-	sourceForCompute: false
+	source: SourceData,
+	sourceForCompute: boolean
 };
-
-type ComputeTableData = {
-	...BaseData,
-	parameters: Array<Parameter>,
-	sourceForCompute: true
-};
-
-export type TableData = BuildTableData | ComputeTableData;
 
 export type TableCellSettings = {
 	fontColor: string,
@@ -413,7 +371,6 @@ export type IgnoreTableDataLimitsSettings = {
 export type TableWidget = {
 	...BaseWidget,
 	calcTotalColumn: boolean,
-	calcTotalRow: boolean,
 	columnsRatioWidth: ColumnsRatioWidth,
 	data: Array<TableData>,
 	ignoreDataLimits?: IgnoreTableDataLimitsSettings,
