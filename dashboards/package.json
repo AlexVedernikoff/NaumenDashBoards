@@ -104,8 +104,14 @@
       "src"
     ],
     "moduleNameMapper": {
-      "\\.(css|less)$": "identity-obj-proxy"
+      "\\.(css|less)$": "identity-obj-proxy",
+      "^CustomGroup(.*)$": "<rootDir>/src/components/molecules/GroupCreatingModal/components/CustomGroup$1",
+      "^DiagramWidgetEditForm(.*)$": "<rootDir>/src/components/organisms/DiagramWidgetEditForm$1",
+      "^Table(.*)$": "<rootDir>/src/components/organisms/Table$1"
     },
+    "setupFiles": [
+      "jest-canvas-mock"
+    ],
     "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.jsx?$",
     "testPathIgnorePatterns": [
       "(/tests/helpers.*|(\\.|/)(test|spec))\\.jsx?$"

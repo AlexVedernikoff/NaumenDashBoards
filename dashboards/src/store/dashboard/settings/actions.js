@@ -15,7 +15,6 @@ import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 
 import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-import normalizer from 'utils/normalizer';
 import {resetState} from 'store/actions';
 import {resizer} from 'index';
 import {setCustomGroups} from 'store/customGroups/actions';
@@ -110,7 +109,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 		dashboardKey: code,
 		layouts,
 		mobileLayouts,
-		widgets: rawWidgets
+		widgets
 	} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
 
 	dispatch(setCode(code));
@@ -122,20 +121,6 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 	if (autoUpdate !== null) {
 		dispatch(setAutoUpdateSettings(autoUpdate));
 	}
-
-	const widgets = rawWidgets
-		.map(rawWidget => {
-			let widget;
-
-			try {
-				widget = normalizer.widget(rawWidget);
-			} catch (e) {
-				widget = null;
-			}
-
-			return widget;
-		})
-		.filter(widget => widget);
 
 	batch(() => {
 		dispatch(setWidgets(widgets));
