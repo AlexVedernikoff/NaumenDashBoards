@@ -2341,7 +2341,7 @@ class DashboardDataSetService
                             }]]
                             def title = fullFilterList.find().value.title.grep()
                             res = formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)
-                            Map total = [( title.any {it[0] != ''} ? title[i++] as Set : ''): res]
+                            Map total = [( title.any {it[0] != ''} ? title[i++].flatten() as Set : ''): res]
                             res = onlyFilled && !res ? [] : formatResult(total, aggregationCnt)
                             filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
                             return prepareResultListListForTop(res, filterListSize, top, parameterFilters, breakdownFilters, j)
