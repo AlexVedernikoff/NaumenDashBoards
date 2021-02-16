@@ -3426,6 +3426,10 @@ class DashboardDataSetService
     {
         String attributeType = attribute.type
         List attrCodesList = attribute.attrChains()*.code
+        if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
+        {
+            attrCodesList = attrCodesList.collect { it == 'title' ? 'code' : it }
+        }
         String attrCode = attrCodesList.collect { it == 'UUID' ? 'id' : it.replace('metaClass', 'metaClassFqn') }.join('.')
         def s = api.selectClause
         def criteria = api.db.createCriteria().addSource(classFqn)
