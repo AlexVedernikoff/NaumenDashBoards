@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
 import {DEFAULT_NAVIGATION_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {getDefaultIndicator, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {NavigationSettings, WidgetType} from 'store/widgets/data/types';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -18,10 +18,16 @@ class DiagramWidget extends NewWidget {
 
 	constructor (layoutMode: LayoutMode) {
 		super(layoutMode);
+
 		this.data.push({
-			[FIELDS.dataKey]: uuid(),
-			[FIELDS.descriptor]: '',
-			[FIELDS.sourceForCompute]: false
+			dataKey: uuid(),
+			indicators: [getDefaultIndicator()],
+			parameters: [getDefaultParameter()],
+			source: {
+				descriptor: '',
+				value: null
+			},
+			sourceForCompute: false
 		});
 	}
 }

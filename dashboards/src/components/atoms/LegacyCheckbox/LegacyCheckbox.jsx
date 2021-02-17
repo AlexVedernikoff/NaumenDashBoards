@@ -7,7 +7,8 @@ import styles from './styles.less';
 
 class LegacyCheckbox extends Component<Props> {
 	static defaultProps = {
-		className: ''
+		className: '',
+		name: ''
 	};
 
 	handleClick = () => {

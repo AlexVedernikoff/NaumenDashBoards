@@ -1,11 +1,10 @@
 // @flow
-import type {AxisIndicator, AxisParameter, DataLabels, Legend, LegendPosition} from 'store/widgets/data/types';
+import type {AxisSettings, DataLabels, Legend, LegendPosition} from 'store/widgets/data/types';
 
 export type DefaultChartSettings = {
+	axis: AxisSettings,
 	dataLabels: DataLabels,
-	legend: Legend,
-	xAxis: AxisParameter,
-	yAxis: AxisIndicator
+	legend: Legend
 };
 
 export type ApexLegend = {

@@ -58,6 +58,10 @@ const DEFAULT_COLORS = [
 const DEFAULT_DATA_LABEL_COLOR = 'white';
 
 const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
+	axis: {
+		show: true,
+		showName: false
+	},
 	dataLabels: {
 		fontColor: DEFAULT_DATA_LABEL_COLOR,
 		fontFamily: FONT_FAMILIES[0],
@@ -72,16 +76,6 @@ const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 		position: LEGEND_POSITIONS.right,
 		show: true,
 		textHandler: TEXT_HANDLERS.CROP
-	},
-	xAxis: {
-		name: '',
-		show: true,
-		showName: false
-	},
-	yAxis: {
-		name: '',
-		show: true,
-		showName: false
 	}
 };
 

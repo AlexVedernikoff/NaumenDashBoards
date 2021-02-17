@@ -250,6 +250,8 @@ export type ComboWidget = {
 	type: typeof WIDGET_TYPES.COMBO,
 };
 
+export type ChartDataSet = AxisData | CircleData | ComboData;
+
 // Сводка
 
 export type SummaryData = {
@@ -324,7 +326,7 @@ export type TableSorting = {
 export type TableData = {
 	breakdown?: Breakdown,
 	dataKey: string,
-	indicators?: Array<Indicator>,
+	indicators: Array<Indicator>,
 	parameters: Array<Parameter>,
 	source: SourceData,
 	sourceForCompute: boolean

@@ -1,7 +1,7 @@
 // @flow
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {getProcessedValue} from 'store/sources/attributes/helpers';
+import {getAttributeValue} from 'store/sources/attributes/helpers';
 import React, {Component, Fragment} from 'react';
 import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
 
@@ -13,7 +13,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 		setFieldValue(FIELDS.indicator, {
 			...indicator,
-			name: getProcessedValue(attribute, 'title')
+			name: getAttributeValue(attribute, 'title')
 		});
 	};
 
