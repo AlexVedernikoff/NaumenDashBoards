@@ -15,6 +15,13 @@ import static groovy.json.JsonOutput.toJson
 String DASHBOARD_NAMESPACE = 'dashboards'
 String CUSTOM_GROUP_NAMESPACE = 'custom_groups'
 String WIDGET_NAMESPACE = 'widgets'
+
+String BACKUP_MODULE = 'workerKeyValueStorage'
+String ROOT_CLASS_CODE = 'root'
+String KEY_VALUE_STORAGE_ATTR_CODE = 'keyValueDataF'
+
+String NEW_DASHBOARD_FIELD_FOR_WIDGETS = 'widgets'
+String NEW_DASHBOARD_FIELD_FOR_GROUPS = 'customGroups'
 //endregion
 
 //region МЕТОДЫ
@@ -54,42 +61,68 @@ void deleteValuesInOldNameSpaces(List valuesIds, String namespace)
 //endregion
 
 //region ОСНОВНОЙ БЛОК
-List dashboardKeys = getDashboardKeys(DASHBOARD_NAMESPACE)
+//модуля для создания бэкапа может НЕ быть в списке модулей
+Boolean hasNoBackupModule = !modules[BACKUP_MODULE]
+//checkAttributeExisting() возвращает строку c описанием ошибки, если атрибут НЕ найден
+Boolean keyValueDataAttrNotExists = api.metainfo.checkAttributeExisting(ROOT_CLASS_CODE, KEY_VALUE_STORAGE_ATTR_CODE)
+if(hasNoBackupModule && keyValueDataAttrNotExists)
+{
+    throw new Exception('Бэкап создать невозможно.  Обратитесь к администратору для создания нужных атрибутов.')
+}
+else
+{
+    //создаём актуальный бэкап
+    modules.workerKeyValueStorage.copyAllKeyValueStorageToFile()
 
-dashboardKeys.each { dashboardKey ->
-    def slurper = new groovy.json.JsonSlurper()
-    def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
-    dashboardSettings = dashboardSettings ? slurper.parseText(dashboardSettings) : null
+    List dashboardKeys = getDashboardKeys(DASHBOARD_NAMESPACE)
 
-    List widgetKeys = dashboardSettings.widgetIds
-    logger.info(
-        "full count of widgets - ${ widgetKeys.size() } on dashboard ${ dashboardKey }"
-    )
-    dashboardSettings.widgets = widgetKeys.collect { widgetKey ->
-        return api.keyValue.get(WIDGET_NAMESPACE, widgetKey)
-    }
+    dashboardKeys.each { dashboardKey ->
+        def slurper = new groovy.json.JsonSlurper()
+        def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+        dashboardSettings = dashboardSettings ? slurper.parseText(dashboardSettings) : null
 
-    List customGroupKeys = dashboardSettings.customGroupIds
-    logger.info(
-        "full count of groups - ${ customGroupKeys.size() } on dashboard ${ dashboardKey }"
-    )
-    dashboardSettings.customGroups = customGroupKeys.collect { customGroupKey ->
-        return api.keyValue.get(CUSTOM_GROUP_NAMESPACE, customGroupKey)
-    }
+        if(dashboardSettings)
+        {
+            List widgetKeys = dashboardSettings.widgetIds
+            logger.info( "full count of widgets - ${ widgetKeys?.size() } on dashboard ${ dashboardKey }")
 
-    if(api.keyValue.put(DASHBOARD_NAMESPACE, dashboardKey, toJson(dashboardSettings)))
-    {
-        logger.info(
-            "dashboard with dashboardKey ${dashboardKey} was updated successfully"
-        )
-        deleteValuesInOldNameSpaces(widgetKeys, WIDGET_NAMESPACE)
-        deleteValuesInOldNameSpaces(customGroupKeys, CUSTOM_GROUP_NAMESPACE)
-    }
-    else
-    {
-        logger.info(
-            "dashboard with dashboardKey ${dashboardKey} wasn't updated"
-        )
+            dashboardSettings.widgets = widgetKeys?.findResults { widgetKey ->
+                return api.keyValue.get(WIDGET_NAMESPACE, widgetKey)
+            }
+
+            List customGroupKeys = dashboardSettings.customGroupIds
+            logger.info( "full count of groups - ${ customGroupKeys?.size() } on dashboard ${ dashboardKey }")
+
+            dashboardSettings.customGroups = customGroupKeys?.findResults { customGroupKey ->
+                return api.keyValue.get(CUSTOM_GROUP_NAMESPACE, customGroupKey)
+            }
+
+            Boolean dashboardUpdated = false
+            Boolean anyWidgetsAndGroupsInKeyValueStorage = (dashboardSettings.widgets || dashboardSettings.customGroups)
+            Boolean dashboardFormatIsOld = !dashboardSettings.keySet().any{ it == NEW_DASHBOARD_FIELD_FOR_WIDGETS  || it == NEW_DASHBOARD_FIELD_FOR_GROUPS }
+
+            //сохраняем, если Дб старый, виджетов  и групп нет, но поля добавить нужно, или, если виджеты или группы нашлись для дашборда
+            if(anyWidgetsAndGroupsInKeyValueStorage || (!anyWidgetsAndGroupsInKeyValueStorage && dashboardFormatIsOld))
+            {
+                dashboardUpdated = api.keyValue.put(DASHBOARD_NAMESPACE, dashboardKey, toJson(dashboardSettings))
+            }
+
+            if(dashboardUpdated)
+            {
+                logger.info("dashboard with dashboardKey ${dashboardKey} was updated successfully")
+
+                deleteValuesInOldNameSpaces(widgetKeys, WIDGET_NAMESPACE)
+                deleteValuesInOldNameSpaces(customGroupKeys, CUSTOM_GROUP_NAMESPACE)
+            }
+            else
+            {
+                logger.info( "dashboard with dashboardKey ${dashboardKey} wasn't updated")
+            }
+        }
+        else
+        {
+            logger.info("dashboard with dashboardKey ${dashboardKey} has no settings")
+        }
     }
 }
 

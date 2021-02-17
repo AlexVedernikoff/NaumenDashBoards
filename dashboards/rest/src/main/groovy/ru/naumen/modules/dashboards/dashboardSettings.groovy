@@ -325,7 +325,7 @@ class DashboardSettingsService
                 } ?: [],
                 customGroups : personalDashboard?.customGroups?.collectEntries {
                     def settings = getSettingsFromJson(it)
-                    return [(settings.id): settings]
+                    return settings ? [(settings.id): settings] : [:]
                 },
                 mobileLayouts: personalDashboard?.mobileLayouts,
                 layouts      : isMobile ? null : personalDashboard?.layouts,
@@ -340,7 +340,7 @@ class DashboardSettingsService
                 } ?: [],
                 customGroups : defaultDashboard?.customGroups?.collectEntries {
                     def settings = getSettingsFromJson(it)
-                    return [(settings.id): settings]
+                    return settings ? [(settings.id): settings] : [:]
                 },
                 mobileLayouts: defaultDashboard?.mobileLayouts,
                 layouts      : isMobile ? null : defaultDashboard?.layouts,
@@ -363,7 +363,7 @@ class DashboardSettingsService
                 } ?: [],
                 customGroups : defaultDashboard?.customGroups?.collectEntries {
                     def settings = getSettingsFromJson(it)
-                    return [(settings.id): settings]
+                    return settings ? [(settings.id): settings] : [:]
                 },
                 mobileLayouts: defaultDashboard?.mobileLayouts,
                 layouts      : isMobile ? null : defaultDashboard?.layouts,
