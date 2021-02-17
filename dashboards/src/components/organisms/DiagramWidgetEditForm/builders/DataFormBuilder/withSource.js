@@ -1,17 +1,15 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import type {ContextProps} from 'DiagramWidgetEditForm/types';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {DataSet, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {getDataErrorKey, getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
+import {getDataErrorKey, getDefaultIndicator, getDefaultParameter, getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
-import {getMapValues} from 'src/helpers';
 import {IconButton} from 'components/atoms';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import React from 'react';
-import type {RenderSourceFieldsetProps, SourceInjectedProps, SourceRefFields} from './types';
+import type {RenderSourceFieldsetProps, SourceInjectedProps} from './types';
 import {SourceFieldset} from 'DiagramWidgetEditForm/components';
 import uuid from 'tiny-uuid';
 
@@ -19,34 +17,39 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 	return class WrappedComponent extends React.Component<ContextProps> {
 		handleAddSource = () => {
 			const {setFieldValue, values} = this.props;
-			const set = {
-				[FIELDS.dataKey]: uuid(),
-				[FIELDS.descriptor]: '',
-				[FIELDS.sourceForCompute]: true
-			};
-			const data = [...values.data, set];
+			const data = [...values.data, {
+				dataKey: uuid(),
+				indicators: [getDefaultIndicator()],
+				parameters: [getDefaultParameter()],
+				source: {
+					descriptor: '',
+					value: null
+				},
+				sourceForCompute: true
+			}];
 
 			setFieldValue(FIELDS.data, data);
 		};
 
-		handleChangeCompute = (index: number, event: OnChangeInputEvent) => {
+		handleChange = (dataSetIndex: number, source: SourceData) => {
 			const {setDataFieldValue} = this.props;
-			const name = FIELDS.sourceForCompute;
-			const {value} = event;
-
-			setDataFieldValue(index, name, value);
+			setDataFieldValue(dataSetIndex, FIELDS.source, source);
 		};
 
-		handleChangeDescriptor = (sourceRefFields: SourceRefFields) => (index: number, descriptor: string) => {
-			const {fetchDynamicAttributeGroups, setDataFieldValue, values} = this.props;
+		handleFetchAttributes = (dataSetIndex: number, classFqn: string) => {
+			const {fetchAttributes, values} = this.props;
+			const parentClassFqn = getParentClassFqn(values, dataSetIndex);
 
-			if (descriptor) {
-				const {dataKey} = values.data[index];
-				fetchDynamicAttributeGroups(dataKey, descriptor);
-			}
+			this.resetAttributes(dataSetIndex);
+			fetchAttributes(classFqn, parentClassFqn, this.setDefaultIndicator(dataSetIndex));
+		};
 
-			setDataFieldValue(index, FIELDS.descriptor, descriptor);
-			this.resetDynamicAttributes(index, sourceRefFields);
+		handleFetchDynamicAttributes = (dataSetIndex: number, descriptor: string) => {
+			const {fetchDynamicAttributeGroups, values} = this.props;
+			const {dataKey} = values.data[dataSetIndex];
+
+			this.resetDynamicAttributes(dataSetIndex);
+			fetchDynamicAttributeGroups(dataKey, descriptor);
 		};
 
 		handleRemoveSource = (index: number) => {
@@ -59,95 +62,93 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			}
 		};
 
-		handleSelectSource = (onSelectCallback: Function) =>
-			(index: number, event: OnSelectEvent, sourceRefFields: SourceRefFields) => {
-				const {setDataFieldValue, values} = this.props;
-				const {name, value: nextSource} = event;
-				const prevSource = values.data[index][name];
-
-				getMapValues(sourceRefFields).forEach(name => setDataFieldValue(index, name, undefined));
-
-				setDataFieldValue(index, name, nextSource, this.handleSelectSourceCallback(index, sourceRefFields, onSelectCallback));
-
-				if ((prevSource && !nextSource) || (nextSource && prevSource && prevSource.value !== nextSource.value)) {
-					setDataFieldValue(index, FIELDS.descriptor, '');
-				}
-			};
-
-		handleSelectSourceCallback = (index: number, sourceRefFields: SourceRefFields, onSelectCallback: Function) => () => {
+		handleSelectSourceCallback = (index: number) => () => {
 			const {fetchAttributes, values} = this.props;
 			const source = values.data[index][FIELDS.source];
 
 			if (source) {
 				const parentClassFqn = getParentClassFqn(values, index);
-				fetchAttributes(source.value, parentClassFqn, this.setDefaultIndicator(index, sourceRefFields));
+				fetchAttributes(source.value, parentClassFqn, this.setDefaultIndicator(index));
 			}
-
-			onSelectCallback && onSelectCallback(index, sourceRefFields);
 		};
 
-		resetDynamicAttributes = (index: number, sourceRefFields: SourceRefFields) => {
+		isDynamicAttribute = (attribute: ?Attribute) => attribute && attribute.property === DYNAMIC_ATTRIBUTE_PROPERTY;
+
+		resetAttributes = (index: number) => {
 			const {setDataFieldValue, values} = this.props;
-			const set = values.data[index];
+			const {breakdown} = values.data[index];
 
-			getMapValues(sourceRefFields).forEach(name => {
-				let value = set[name];
-
-				if (name === FIELDS.breakdown && Array.isArray(value)) {
-					value = value.map(breakdownSet => {
-						return breakdownSet.value && breakdownSet.value === DYNAMIC_ATTRIBUTE_PROPERTY ? null : breakdownSet;
-					});
-
-					setDataFieldValue(index, name, value);
-				} else if (value && set[name].property === DYNAMIC_ATTRIBUTE_PROPERTY) {
-					setDataFieldValue(index, name, undefined);
-				}
-			});
+			setDataFieldValue(index, FIELDS.parameters, [getDefaultParameter()]);
+			setDataFieldValue(index, FIELDS.indicators, [getDefaultIndicator()]);
+			breakdown && setDataFieldValue(index, FIELDS.breakdown, getDefaultParameter());
 		};
 
-		setDefaultIndicator = (index: number, sourceRefFields: SourceRefFields) => (attributes: Array<Attribute>) => {
-			const {setDataFieldValue} = this.props;
-			const {indicator: indicatorName} = sourceRefFields;
-			let indicator = attributes.find(attribute => attribute.code === 'UUID');
+		resetDynamicAttribute = (data: Object) => {
+			const {attribute, ...rest} = data;
 
-			if (indicatorName === FIELDS.indicators) {
-				indicator = [{
-					aggregation: getDefaultAggregation(indicator),
-					attribute: indicator
-				}];
-			} else {
-				setDataFieldValue(index, FIELDS.aggregation, getDefaultAggregation(indicator));
+			return {
+				...rest,
+				attribute: this.isDynamicAttribute(attribute) ? null : attribute
+			};
+		};
+
+		resetDynamicAttributes = (index: number) => {
+			const {setDataFieldValue, values} = this.props;
+			let {breakdown, indicators, parameters} = values.data[index];
+
+			parameters = parameters.map(this.resetDynamicAttribute);
+
+			indicators = indicators.map(this.resetDynamicAttribute);
+
+			if (Array.isArray(breakdown)) {
+				breakdown = breakdown.map(({value, ...rest}) => ({
+					...rest,
+					value: this.isDynamicAttribute(value) ? null : value
+				}));
+			} else if (breakdown) {
+				breakdown = this.resetDynamicAttribute(breakdown);
 			}
 
-			setDataFieldValue(index, indicatorName, indicator);
+			setDataFieldValue(index, FIELDS.parameters, parameters);
+			setDataFieldValue(index, FIELDS.indicators, indicators);
+			setDataFieldValue(index, FIELDS.breakdown, breakdown);
+		};
+
+		setDefaultIndicator = (index: number) => (attributes: Array<Attribute>) => {
+			const {setDataFieldValue} = this.props;
+			const indicator = attributes.find(attribute => attribute.code === 'UUID');
+
+			setDataFieldValue(index, FIELDS.indicators, [{
+				aggregation: getDefaultAggregation(indicator),
+				attribute: indicator
+			}]);
 		};
 
 		renderAddSourceInput = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleAddSource} />;
 
-		renderSourceFieldset = (props: RenderSourceFieldsetProps) => (dataSet: DataSet, index: number) => {
-			const {errors, setDataFieldValue, sources: baseSources, values} = this.props;
-			const {onSelectCallback, sourceRefFields, sources = baseSources, usesFilter} = props;
+		renderSourceFieldset = (props: RenderSourceFieldsetProps = {}) => (dataSet: DataSet, index: number) => {
+			const {errors, sources: baseSources, values} = this.props;
+			const {sources = baseSources, usesFilter} = props;
+			const {source, sourceForCompute} = dataSet;
 			const error = errors[getDataErrorKey(index, FIELDS.source)];
-			const computable = values.data.length > 1 || dataSet.sourceForCompute;
+			const computable = values.data.length > 1 || sourceForCompute;
 			const removable = values.data.length > 1;
 
 			return (
 				<SourceFieldset
 					computable={computable}
 					dataSet={dataSet}
+					dataSetIndex={index}
 					error={error}
-					index={index}
 					key={index}
-					name={FIELDS.source}
-					onChange={setDataFieldValue}
-					onChangeCompute={this.handleChangeCompute}
-					onChangeDescriptor={this.handleChangeDescriptor(sourceRefFields)}
+					onChange={this.handleChange}
+					onFetchAttributes={this.handleFetchAttributes}
+					onFetchDynamicAttributes={this.handleFetchDynamicAttributes}
 					onRemove={this.handleRemoveSource}
-					onSelectSource={this.handleSelectSource(onSelectCallback)}
 					removable={removable}
-					sourceRefFields={sourceRefFields}
 					sources={sources}
 					usesFilter={usesFilter}
+					value={source}
 				/>
 			);
 		};

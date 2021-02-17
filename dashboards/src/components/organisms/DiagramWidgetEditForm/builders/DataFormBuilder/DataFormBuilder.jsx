@@ -1,6 +1,6 @@
 // @flow
 import {Checkbox, FieldError, TextArea, Toggle} from 'components/atoms';
-import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, SourceRefFields, TextAreaProps} from './types';
+import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, TextAreaProps} from './types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
@@ -65,19 +65,6 @@ export class DataFormBuilder extends Component<Props> {
 		const {setFieldValue} = this.props;
 		const {name, value} = event;
 		setFieldValue(name, !value);
-	};
-
-	setMainSourceValues = (index: number, sourceRefFields: SourceRefFields) => () => {
-		const {setDataFieldValue, values} = this.props;
-		const {data} = values;
-		const mainSet = data[0];
-		const mainSource = mainSet.source;
-		const currentSource = data[index].source;
-
-		if (index > 0 && mainSource && currentSource && mainSource.value === currentSource.value) {
-			setDataFieldValue(index, sourceRefFields.parameter, mainSet[sourceRefFields.parameter]);
-			setDataFieldValue(index, FIELDS.group, mainSet[FIELDS.group]);
-		}
 	};
 
 	renderBaseBoxes = () => {
@@ -174,7 +161,7 @@ export class DataFormBuilder extends Component<Props> {
 		return null;
 	};
 
-	renderIndicatorBoxes = (props?: IndicatorBoxProps = {}): Array<React$Node> => {
+	renderIndicatorBoxes = (props: IndicatorBoxProps = {}): Array<React$Node> => {
 		const {values} = this.props;
 		return values.data.map(this.renderIndicatorBox(props));
 	};
@@ -213,16 +200,12 @@ export class DataFormBuilder extends Component<Props> {
 		);
 	};
 
-	renderSourceBox = (sourceRefFields: SourceRefFields) => {
+	renderSourceBox = () => {
 		const {errors, renderAddSourceInput, renderSourceFieldset, values} = this.props;
-		const props = {
-			onSelectCallback: this.setMainSourceValues,
-			sourceRefFields
-		};
 
 		return (
 			<FormBox rightControl={renderAddSourceInput()} title="Источник">
-				{values.data.map(renderSourceFieldset(props))}
+				{values.data.map(renderSourceFieldset())}
 				<FieldError className={styles.errorField} text={errors[FIELDS.sources]} />
 			</FormBox>
 		);

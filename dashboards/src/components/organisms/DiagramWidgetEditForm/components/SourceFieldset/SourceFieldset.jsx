@@ -1,14 +1,14 @@
 // @flow
 import {ExtendButton, LegacyCheckbox as Checkbox} from 'components/atoms';
-import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormField} from 'DiagramWidgetEditForm/components';
-import {getDescriptorCases} from 'src/helpers';
+import {getDescriptorCases} from 'helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {isSourceType} from 'store/sources/data/helpers';
-import type {OnChangeLabelEvent, OnRemoveEvent} from 'components/molecules/TreeSelect/types';
+import type {OnChangeLabelEvent} from 'components/molecules/TreeSelect/types';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Component} from 'react';
+import type {SourceData} from 'containers/DiagramWidgetEditForm/types';
 import styles from './styles.less';
 import {TreeSelect} from 'components/molecules';
 
@@ -19,20 +19,30 @@ export class SourceFieldset extends Component<Props> {
 	};
 
 	callFilterModal = async () => {
-		const {dataSet, index, onChangeDescriptor} = this.props;
-		const {descriptor, source} = dataSet;
+		const {dataSetIndex, onFetchDynamicAttributes, value} = this.props;
+		const {descriptor, value: sourceValue} = value;
 
-		if (source) {
-			const {value: classFqn} = source;
-			const context = descriptor ? this.getFilterContext(descriptor, classFqn) : this.createFilterContext(source.value);
+		if (sourceValue) {
+			const {value: classFqn} = sourceValue;
+			const context = descriptor ? this.getFilterContext(descriptor, classFqn) : this.createFilterContext(classFqn);
 
 			try {
-				const {serializedContext} = await window.jsApi.commands.filterForm(context);
-				onChangeDescriptor(index, serializedContext);
+				const {serializedContext: newDescriptor} = await window.jsApi.commands.filterForm(context);
+
+				onFetchDynamicAttributes(dataSetIndex, newDescriptor);
+				this.change({
+					...value,
+					descriptor: newDescriptor
+				});
 			} catch (e) {
 				console.error('Ошибка окна фильтрации: ', e);
 			}
 		}
+	};
+
+	change = (source: SourceData) => {
+		const {dataSetIndex, onChange} = this.props;
+		onChange(dataSetIndex, source);
 	};
 
 	createFilterContext = (classFqn: string) => {
@@ -60,63 +70,62 @@ export class SourceFieldset extends Component<Props> {
 		return context;
 	};
 
-	handleChangeCompute = (name: string, value: boolean) => {
-		const {index, onChangeCompute} = this.props;
-		onChangeCompute(index, {name, value});
-	};
+	handleChangeCompute = (name: string, value: boolean) => this.change({
+		...this.props.value,
+		forCompute: value
+	});
 
-	handleChangeSourceLabel = (event: OnChangeLabelEvent) => {
-		const {dataSet, index, onChange} = this.props;
-		let {source} = dataSet;
+	handleChangeSourceLabel = ({label}: OnChangeLabelEvent) => {
+		const {value: source} = this.props;
 
-		if (source) {
-			const {label, name} = event;
-			source = {...source, label};
-
-			onChange(index, name, source);
-		}
+		this.change({
+			...source,
+			value: {
+				...source.value,
+				label
+			}
+		});
 	};
 
 	handleClickRemoveButton = () => {
-		const {index, onRemove} = this.props;
-		onRemove(index);
+		const {dataSetIndex, onRemove} = this.props;
+		onRemove(dataSetIndex);
 	};
 
-	handleRemoveSource = (event: OnRemoveEvent) => {
-		const {index, onChange} = this.props;
-		const {name} = event;
+	handleRemoveSource = () => this.change({
+		...this.props.value,
+		value: null
+	});
 
-		onChange(index, name, null);
-	};
+	handleSelect = ({value: newSourceValue}: OnSelectEvent) => {
+		const {dataSetIndex, onFetchAttributes, value: source} = this.props;
+		const {value: sourceValue} = source;
+		const {label, value} = newSourceValue;
+		let newSource = source;
 
-	handleSelect = (event: OnSelectEvent) => {
-		const {index, onSelectSource, sourceRefFields} = this.props;
-		const {name, value: source} = event;
-		let value = null;
-
-		if (source) {
-			value = {
-				label: source.label,
-				value: source.value
+		if ((sourceValue && !newSourceValue) || (newSourceValue && sourceValue && newSourceValue.value !== sourceValue.value)) {
+			newSource = {
+				...newSource,
+				descriptor: ''
 			};
 		}
 
-		onSelectSource(index, {name, value}, sourceRefFields);
+		onFetchAttributes(dataSetIndex, value);
+		this.change({
+			...newSource,
+			value: {
+				label,
+				value
+			}
+		});
 	};
 
 	renderComputeCheckbox = () => {
 		const {computable, dataSet} = this.props;
-		const {sourceForCompute} = dataSet;
+		const {forCompute} = dataSet.source;
 
 		if (computable) {
-			return (
-				<Checkbox
-					label="Только для вычислений"
-					name={FIELDS.sourceForCompute}
-					onClick={this.handleChangeCompute}
-					value={sourceForCompute}
-				/>
-			);
+			return <Checkbox label="Только для вычислений" onClick={this.handleChangeCompute} value={forCompute} />;
 		}
 	};
 
@@ -124,7 +133,7 @@ export class SourceFieldset extends Component<Props> {
 		const {dataSet, usesFilter} = this.props;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
 		const {descriptor} = dataSet;
-		const active = descriptor && !!JSON.parse(descriptor).filters;
+		const active = !!descriptor && !!JSON.parse(descriptor).filters;
 		const iconName = active ? FILLED_FILTER : FILTER;
 
 		if (usesFilter) {
@@ -152,25 +161,24 @@ export class SourceFieldset extends Component<Props> {
 	};
 
 	renderSourceSelect = () => {
-		const {dataSet, error, sources} = this.props;
-		const {source} = dataSet;
+		const {error, sources, value} = this.props;
+		const {value: sourceValue} = value;
 		let initialSelected;
 
-		if (source) {
-			initialSelected = [source.value];
+		if (sourceValue) {
+			initialSelected = [sourceValue.value];
 		}
 
 		return (
 			<FormField error={error} small>
 				<TreeSelect
 					initialSelected={initialSelected}
-					name={FIELDS.source}
 					onChangeLabel={this.handleChangeSourceLabel}
 					onRemove={this.handleRemoveSource}
 					onSelect={this.handleSelect}
 					options={sources}
 					removable={true}
-					value={source}
+					value={sourceValue}
 				/>
 			</FormField>
 		);

@@ -19,6 +19,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	static defaultProps = {
 		disabled: false,
 		index: 0,
+		name: '',
 		removable: false,
 		showCreationButton: false
 	};
@@ -27,6 +28,14 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		showDynamicAttributes: false,
 		showDynamicAttributesError: false
 	};
+
+	componentDidMount () {
+		this.setRefTitleAttribute();
+	}
+
+	componentDidUpdate () {
+		this.setRefTitleAttribute();
+	}
 
 	fetchAttributes = (classFqn: string, parentClassFqn?: string | null) => () => this.props.fetchAttributes(classFqn, parentClassFqn);
 
@@ -67,15 +76,15 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 
 	getSourceSelectProps = () => {
 		const {attributes, dataSet, dataSetIndex, values} = this.props;
-		const {source} = dataSet;
+		const {value: sourceValue} = dataSet.source;
 		const parentClassFqn = getParentClassFqn(values, dataSetIndex);
-		const fetchOptions = source ? this.fetchAttributes(source.value, parentClassFqn) : null;
+		const fetchOptions = sourceValue ? this.fetchAttributes(sourceValue.value, parentClassFqn) : null;
 		let props = {
 			fetchOptions
 		};
 
-		if (source) {
-			const {[source.value]: sourceData = this.getDefaultMapData()} = attributes;
+		if (sourceValue) {
+			const {[sourceValue.value]: sourceData = this.getDefaultMapData()} = attributes;
 
 			if (sourceData) {
 				props = {
@@ -89,14 +98,37 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		return props;
 	};
 
+	getTitleAttribute = (attributes: Array<Attribute>) => {
+		return attributes.find(attribute => attribute.code === 'title') || null;
+	};
+
 	handleChangeLabel = (parent: Attribute | null = null) => (event: OnChangeLabelEvent) => {
-		const {index, onChangeLabel} = this.props;
-		onChangeLabel({...event, parent}, index);
+		const {index, onChangeLabel, value} = this.props;
+		const {label: title} = event;
+		let newValue = value;
+
+		if (parent) {
+			newValue = {
+				...parent,
+				ref: {
+					...parent.ref,
+					title
+				}
+			};
+		} else {
+			newValue = {
+				...newValue,
+				title
+			};
+		}
+
+		onChangeLabel({...event, value: newValue}, index);
 	};
 
 	handleChangeShowDynamicAttributes = ({value: show}: OnChangeInputEvent) => {
 		const {dataSet, dynamicGroups, fetchDynamicAttributeGroups} = this.props;
-		const {dataKey, descriptor} = dataSet;
+		const {dataKey, source} = dataSet;
+		const {descriptor} = source;
 
 		if (descriptor || show) {
 			if (!show && !dynamicGroups[dataKey]) {
@@ -124,12 +156,41 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 
 	handleSelect = (parent: Attribute | null = null) => (event: OnSelectEvent) => {
 		const {index, onSelect} = this.props;
-		onSelect({...event, parent}, index);
+		let {value} = event;
+
+		if (parent) {
+			value = {
+				...parent,
+				ref: value
+			};
+		}
+
+		onSelect({...event, value}, index);
 	};
 
 	handleSelectDynAttr = (onSelect: Function) => ({value}: DynamicGroupsNode) => onSelect(value);
 
 	isEnabledDynamicNode = (node: TreeNode<Object>) => !!node.parent;
+
+	setRefTitleAttribute = () => {
+		const {fetchRefAttributes, index, name, onSelect, refAttributes, value} = this.props;
+		let newValue = value;
+
+		if (value && !value.ref && value.type in ATTRIBUTE_SETS.REFERENCE) {
+			const refAttributesData = refAttributes[createRefKey(value)];
+
+			if (refAttributesData && !refAttributesData.loading) {
+				newValue = {
+					...value,
+					ref: this.getTitleAttribute(refAttributesData.options)
+				};
+
+				onSelect({name, value: newValue}, index);
+			} else if (!refAttributesData || !refAttributesData.loading) {
+				fetchRefAttributes(value);
+			}
+		}
+	};
 
 	renderAttributeField = (props: Object, parent: Attribute | null = null) => {
 		const {renderRefField} = this.props;
@@ -248,18 +309,14 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	);
 
 	renderSelect = (props: SelectProps, parent: Attribute | null = null) => {
-		const {source} = this.props.dataSet;
+		const {value: sourceValue} = this.props.dataSet.source;
+		const note = sourceValue ? sourceValue.label : '';
 		let components;
-		let note;
 
 		if (!parent) {
 			components = {
 				List: this.renderListContainer
 			};
-		}
-
-		if (source) {
-			note = source.label;
 		}
 
 		return <TransparentSelect className={styles.select} components={components} note={note} {...props} />;
@@ -268,8 +325,8 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 	renderToggleShowingDynAttr = () => {
 		const {dataSet, sources} = this.props;
 		const {showDynamicAttributes} = this.state;
-		const {source} = dataSet;
-		const hasDynamic = source && sources[source.value] && sources[source.value].value.hasDynamic;
+		const {value: sourceValue} = dataSet.source;
+		const hasDynamic = sourceValue && sources[sourceValue.value] && sources[sourceValue.value].value.hasDynamic;
 
 		if (hasDynamic) {
 			return (

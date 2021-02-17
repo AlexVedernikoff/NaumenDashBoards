@@ -1,17 +1,18 @@
 // @flow
+import {AxisSettingsBox} from 'DiagramWidgetEditForm/components/AxisChartForm/components';
 import {ColorsBox, DataLabelsBox, HeaderBox, LegendBox, SortingBox} from 'DiagramWidgetEditForm/components';
 import {Container} from 'components/atoms';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getLegendSettings} from 'utils/chart/helpers';
-import {getProcessedValue} from 'store/sources/attributes/helpers';
+import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
 import {IndicatorSettingsBox} from 'DiagramWidgetEditForm/components/ComboChartForm/components';
-import type {OnSelectEvent} from 'components/types';
-import {ParameterBox} from 'DiagramWidgetEditForm/components/AxisChartForm/components';
+import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component, Fragment} from 'react';
 import {Select} from 'components/molecules';
@@ -25,12 +26,13 @@ export class StyleTab extends Component<StyleTabProps> {
 	};
 
 	getSortingIndicatorLabel = (value: SortingValue) => (dataSet: DataSet) => {
-		const {source, xAxis, yAxis} = dataSet;
-		const attribute = value === SORTING_VALUES.INDICATOR ? yAxis : xAxis;
-		let label = getProcessedValue(attribute, 'title');
+		const {indicators, parameters, source} = dataSet;
+		const {value: sourceValue} = source;
+		const attribute = value === SORTING_VALUES.INDICATOR ? indicators[0].attribute : parameters[0].attribute;
+		let label = getAttributeValue(attribute, 'title');
 
-		if (label && source) {
-			label = `${label} (${source.label})`;
+		if (label && sourceValue) {
+			label = `${label} (${sourceValue.label})`;
 		}
 
 		return label;
@@ -41,6 +43,11 @@ export class StyleTab extends Component<StyleTabProps> {
 	handleChange = (name: string, data: Object) => {
 		const {setFieldValue} = this.props;
 		setFieldValue(name, data);
+	};
+
+	handleChangeAxisName = (index: number) => ({name, value}: OnChangeInputEvent) => {
+		const {setDataFieldValue} = this.props;
+		setDataFieldValue(index, name, value);
 	};
 
 	handleChangeDataSetValue = (index: number, name: string, value: string) => {
@@ -96,21 +103,31 @@ export class StyleTab extends Component<StyleTabProps> {
 		const {values} = this.props;
 		const {
 			colors,
+			data,
 			dataLabels = DEFAULT_CHART_SETTINGS.dataLabels,
 			header,
-			indicator = DEFAULT_CHART_SETTINGS.yAxis,
+			indicator = DEFAULT_CHART_SETTINGS.axis,
 			legend = getLegendSettings(values),
-			parameter = DEFAULT_CHART_SETTINGS.xAxis,
+			parameter = DEFAULT_CHART_SETTINGS.axis,
 			sorting = DEFAULT_AXIS_SORTING_SETTINGS
 		} = values;
+		const index = getMainDataSetIndex(data);
+		const {xAxisName} = data[index];
 
 		return (
 			<div className={styles.container}>
 				<HeaderBox data={header} name={FIELDS.header} onChange={this.handleChange} />
 				<LegendBox data={legend} name={FIELDS.legend} onChange={this.handleChange} />
-				<ParameterBox data={parameter} name={FIELDS.parameter} onChange={this.handleChange} />
+				<AxisSettingsBox
+					axisFieldName={FIELDS.xAxisName}
+					axisName={xAxisName}
+					name={FIELDS.parameter}
+					onChangeAxisName={this.handleChangeAxisName(index)}
+					onChangeSettings={this.handleChange}
+					settings={parameter}
+				/>
 				<IndicatorSettingsBox
-					data={extend(DEFAULT_CHART_SETTINGS.yAxis, indicator)}
+					data={extend(DEFAULT_CHART_SETTINGS.axis, indicator)}
 					name={FIELDS.indicator}
 					onChange={this.handleChange}
 					onChangeDataSetValue={this.handleChangeDataSetValue}

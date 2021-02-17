@@ -5,7 +5,9 @@ import {AttributeCreatingModal} from 'components/organisms';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {ComputedAttr} from 'store/widgets/data/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
+import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
+import type {Indicator} from 'containers/DiagramWidgetEditForm/types';
+import type {OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import withForm from 'DiagramWidgetEditForm/withForm';
@@ -17,6 +19,11 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	state = {
 		showCreatingModal: false
+	};
+
+	change = (indicator: Indicator) => {
+		const {dataSetIndex, index, onChange} = this.props;
+		onChange(dataSetIndex, index, indicator);
 	};
 
 	getModalSources = () => {
@@ -54,47 +61,87 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	getSourceOptions = (options: Array<Attribute>) => [...this.props.values.computedAttrs, ...options];
 
-	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
-		const {index, onChangeLabel} = this.props;
-		onChangeLabel(event, index);
-	};
+	handleChangeLabel = ({value: attribute}: OnSelectEvent) => this.change({
+		...this.props.value,
+		attribute
+	});
 
 	handleClickCreationButton = () => this.setState({showCreatingModal: true});
 
 	handleCloseCreatingModal = () => this.setState({showCreatingModal: false});
 
-	handleRemoveComputedAttribute = (value: ComputedAttr) => {
-		const {index, name, onRemoveComputedAttribute} = this.props;
-		onRemoveComputedAttribute(index, name, value);
+	handleRemoveComputedAttribute = (attribute: ComputedAttr) => {
+		const {value} = this.props;
+
+		this.removeComputedAttribute(attribute);
+		this.change({
+			...value,
+			attribute: null
+		});
 	};
 
-	handleSelectAggregation = (name: string, value: string) => {
-		const {index, onSelectAggregation} = this.props;
-		onSelectAggregation(index, name, value);
-	};
+	handleSelectAggregation = (name: string, aggregation: string) => this.change({
+		...this.props.value,
+		aggregation
+	});
 
-	handleSelectIndicator = (event: OnSelectAttributeEvent) => {
-		const {index, onSelect} = this.props;
-		onSelect(event, index);
+	handleSelectIndicator = ({value: attribute}: OnSelectEvent) => {
+		const {value} = this.props;
+		let newIndicator = value;
+
+		const {attribute: currentAttribute} = value;
+
+		if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!currentAttribute || currentAttribute.type !== attribute.type)) {
+			newIndicator = {
+				...newIndicator,
+				[FIELDS.aggregation]: getDefaultAggregation(attribute)
+			};
+		}
+
+		this.change({
+			...newIndicator,
+			attribute
+		});
 	};
 
 	handleSubmitCreatingModal = (attribute: ComputedAttr) => {
+		const {value} = this.props;
 		this.setState({showCreatingModal: false});
+
 		this.saveComputedAttribute(attribute);
+		this.change({
+			...value,
+			attribute
+		});
+	};
+
+	removeComputedAttribute = (attribute: ComputedAttr) => {
+		const {setFieldValue, values} = this.props;
+		setFieldValue(FIELDS.computedAttrs, values.computedAttrs.filter(a => a.code !== attribute.code));
 	};
 
 	saveComputedAttribute = (attribute: ComputedAttr) => {
-		const {index, name, onSaveComputedAttribute} = this.props;
-		onSaveComputedAttribute(index, name, attribute);
+		const {setFieldValue, values} = this.props;
+		const {computedAttrs} = values;
+		const attrIndex = computedAttrs.findIndex(attr => attr.code === attribute.code);
+
+		if (attrIndex !== -1) {
+			computedAttrs[attrIndex] = attribute;
+		} else {
+			computedAttrs.push(attribute);
+		}
+
+		setFieldValue(FIELDS.computedAttrs, computedAttrs);
 	};
 
 	renderAggregation = (props: Object) => {
-		const {aggregation, usesNotApplicableAggregation, value: indicator} = this.props;
+		const {usesNotApplicableAggregation, value: indicator} = this.props;
+		const {aggregation, attribute} = indicator;
 		const {catalogItem} = ATTRIBUTE_TYPES;
 		let {value} = props;
 
-		if (indicator && indicator.type === catalogItem) {
-			value = indicator;
+		if (attribute && attribute.type === catalogItem) {
+			value = attribute;
 		}
 
 		return (
@@ -111,14 +158,15 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	renderComputedAttributeEditor = () => {
 		const {value} = this.props;
+		const {attribute} = value;
 
-		if (value) {
+		if (attribute && attribute.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 			return (
 				<ComputedAttributeEditor
 					onRemove={this.handleRemoveComputedAttribute}
 					onSubmit={this.saveComputedAttribute}
 					sources={this.getModalSources()}
-					value={value}
+					value={attribute}
 				/>
 			);
 		}
@@ -149,7 +197,8 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {dataSet, dataSetIndex, error, index, name, onRemove, removable, value} = this.props;
+		const {dataSet, dataSetIndex, error, index, onRemove, removable, value} = this.props;
+		const {attribute} = value;
 
 		return (
 			<FormField error={error}>
@@ -158,7 +207,6 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 					dataSetIndex={dataSetIndex}
 					getSourceOptions={this.getSourceOptions}
 					index={index}
-					name={name}
 					onChangeLabel={this.handleChangeLabel}
 					onClickCreationButton={this.handleClickCreationButton}
 					onRemove={onRemove}
@@ -166,7 +214,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 					removable={removable}
 					renderRefField={this.renderRefField}
 					showCreationButton={true}
-					value={value}
+					value={attribute}
 				/>
 				{this.renderCreatingModal()}
 			</FormField>

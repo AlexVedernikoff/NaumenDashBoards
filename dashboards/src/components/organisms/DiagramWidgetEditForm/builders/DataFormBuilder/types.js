@@ -4,12 +4,6 @@ import type {DataSourceMap} from 'store/sources/data/types';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props as IndicatorProps} from 'DiagramWidgetEditForm/components/IndicatorDataBox/types';
 
-export type SourceRefFields = $Shape<{
-	breakdown: string,
-	indicator: string,
-	parameter: string
-}>;
-
 export type TextAreaProps = {
 	className?: string,
 	errorPath?: string,
@@ -44,8 +38,6 @@ export type SourceInjectedProps = {|
 |};
 
 export type RenderSourceFieldsetProps = $Shape<{
-	onSelectCallback: (index: number, sourceRefFields: SourceRefFields) => void,
-	sourceRefFields: SourceRefFields,
 	sources: DataSourceMap,
 	usesFilter: boolean
 }>;
@@ -60,7 +52,7 @@ export type DataBuilderProps = {
 	renderNavigationBox: () => React$Node,
 	renderParameterBox: (props: ParameterBoxProps) => React$Node,
 	renderShowEmptyDataCheckbox: () => React$Node,
-	renderSourceBox: (sourceRefFields: SourceRefFields, minCountBuildingSources?: number) => React$Node
+	renderSourceBox: (minCountBuildingSources?: number) => React$Node
 };
 
 export type Props = {

@@ -6,8 +6,7 @@ import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {Group, Source} from 'store/widgets/data/types';
-import type {GroupAttributeField} from 'DiagramWidgetEditForm/components/AttributeGroupField/types';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
+import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Component} from 'react';
 
@@ -25,45 +24,27 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		return options;
 	};
 
-	handleChangeGroup = (breakdownIndex: number) => (name: string, group: Group) => {
+	handleChangeGroup = (breakdownIndex: number) => (name: string, group: Group, value: Attribute) => {
 		const {index, name: breakdownName, onChange} = this.props;
 		let {value: breakdown} = this.props;
 
 		breakdown[breakdownIndex] = {
 			...breakdown[breakdownIndex],
-			group
+			group,
+			value
 		};
 
 		onChange(index, breakdownName, breakdown);
 	};
 
-	handleChangeLabel = (event: OnChangeAttributeLabelEvent, breakdownIndex: number) => {
-		const {index, name, onChange} = this.props;
-		const {label: title, parent} = event;
-		let {value: breakdown} = this.props;
-		let value = breakdown[breakdownIndex].value;
-
-		if (parent && value && value.ref) {
-			value = {
-				...value,
-				ref: {
-					...value.ref,
-					title
-				}
-			};
-		} else {
-			value = {
-				...value,
-				title
-			};
-		}
-
-		breakdown[breakdownIndex] = {
-			...breakdown[breakdownIndex],
+	handleChangeLabel = ({value}: OnSelectEvent, breakdownIndex: number) => {
+		const {index, name, onChange, value: breakdown} = this.props;
+		const newBreakdown = breakdown.map((dataSet, index) => index === breakdownIndex ? {
+			...dataSet,
 			value
-		};
+		} : dataSet);
 
-		onChange(index, name, [...breakdown]);
+		onChange(index, name, newBreakdown);
 	};
 
 	handleRemove = () => {
@@ -71,10 +52,10 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		onRemove(index);
 	};
 
-	handleSelect = (event: OnSelectAttributeEvent, breakdownIndex: number) => {
-		const {index, name, onChange, transformAttribute, value: breakdown} = this.props;
+	handleSelect = (event: OnSelectEvent, breakdownIndex: number) => {
+		const {index, name, onChange, value: breakdown} = this.props;
 		const prevValue = breakdown[breakdownIndex][FIELDS.value];
-		const value = transformAttribute(event, this.handleSelect, breakdownIndex);
+		const {value} = event;
 		const isMain = breakdownIndex === 0;
 		const typeIsChanged = !prevValue || (prevValue && prevValue.type !== value.type);
 
@@ -114,7 +95,7 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 						onRemove={this.handleRemove}
 						onSelect={this.handleSelect}
 						removable={removable}
-						renderRefField={this.renderGroup(group, breakdownIndex, dataSet.source)}
+						renderRefField={this.renderGroup(group, breakdownIndex, dataSet.source.value)}
 						value={value}
 					/>
 				</FormField>
@@ -124,23 +105,18 @@ export class ComputedBreakdownFieldset extends Component<Props> {
 		return null;
 	};
 
-	renderGroup = (group: Group | null, breakdownIndex: number, source: Source) => (props: Object) => {
-		const {name, value: breakdown} = this.props;
+	renderGroup = (group: Group | null, breakdownIndex: number, source: Source | null) => (props: Object) => {
+		const {value: breakdown} = this.props;
 		const {disabled: selectDisabled, parent, value} = props;
 		const breakdownValue = breakdown[breakdownIndex].value;
 		const isNotMain = breakdownIndex !== 0;
 		const isNotRefAttr = breakdownValue && !(breakdownValue.type in ATTRIBUTE_SETS.REFERENCE);
 		const disabled = selectDisabled || (isNotMain && isNotRefAttr);
-		const field = {
-			name,
-			parent,
-			value
-		};
 
 		return (
 			<AttributeGroupField
+				attribute={value}
 				disabled={disabled}
-				field={field}
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup(breakdownIndex)}
 				parent={parent}

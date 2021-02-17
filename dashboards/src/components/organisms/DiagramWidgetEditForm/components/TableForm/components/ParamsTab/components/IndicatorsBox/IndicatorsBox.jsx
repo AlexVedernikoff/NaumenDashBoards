@@ -1,13 +1,10 @@
 // @flow
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {ComputedAttr, Indicator} from 'store/widgets/data/types';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormBox} from 'components/molecules';
-import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
-import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
-import {getDefaultIndicator, hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
+import {getDataErrorKey, getDefaultIndicator} from 'DiagramWidgetEditForm/helpers';
+import {hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
+import type {Indicator} from 'store/widgets/data/types';
 import {IndicatorFieldset, SortableList} from 'DiagramWidgetEditForm/components';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import withForm from 'DiagramWidgetEditForm/withForm';
@@ -26,18 +23,12 @@ export class IndicatorsBox extends PureComponent<Props> {
 		return indicators;
 	};
 
-	handleChangeAttributeTitle = (event: OnChangeAttributeLabelEvent, index: number) => {
-		const {changeAttributeTitle, index: dataSetIndex, setDataFieldValue} = this.props;
-		const {label, parent} = event;
-		const indicators = this.getIndicators();
+	handleChange = (dataSetIndex: number, index: number, newIndicator: Indicator) => {
+		const {setDataFieldValue, values} = this.props;
+		const {indicators} = values.data[dataSetIndex];
+		const newIndicators = indicators.map((indicator, i) => i === index ? newIndicator : indicator);
 
-		indicators[index] = {
-			...indicators[index],
-			// $FlowFixMe
-			attribute: changeAttributeTitle(indicators[index].attribute, parent, label)
-		};
-
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators);
+		setDataFieldValue(index, FIELDS.indicators, newIndicators, this.checkForBreakdown);
 	};
 
 	handleChangeOrder = (indicators: Array<Object>) => {
@@ -66,51 +57,6 @@ export class IndicatorsBox extends PureComponent<Props> {
 		}
 	};
 
-	handleRemoveComputedAttribute = (index: number, name: string, attribute: ComputedAttr) => {
-		const {index: dataSetIndex, removeComputedAttribute, setDataFieldValue} = this.props;
-		const indicators = this.getIndicators();
-		indicators[index] = {
-			...indicators[index],
-			attribute: null
-		};
-
-		removeComputedAttribute(attribute);
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators);
-	};
-
-	handleSaveComputedAttribute = (index: number, name: string, attribute: ComputedAttr) => {
-		const {index: dataSetIndex, saveComputedAttribute, setDataFieldValue} = this.props;
-		const indicators = this.getIndicators();
-		indicators[index] = {
-			...indicators[index],
-			attribute
-		};
-
-		saveComputedAttribute(attribute);
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators);
-	};
-
-	handleSelect = (event: OnSelectAttributeEvent, index: number) => {
-		const {index: dataSetIndex, setDataFieldValue, transformAttribute} = this.props;
-		const indicators = this.getIndicators();
-		const currentValue = indicators[index];
-		const {value} = event;
-
-		if (value && value.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!currentValue || currentValue.type !== value.type)) {
-			indicators[index] = {
-				...indicators[index],
-				aggregation: getDefaultAggregation(value)
-			};
-		}
-
-		indicators[index] = {
-			...indicators[index],
-			attribute: transformAttribute(event, this.handleSelect, index)
-		};
-
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators, this.checkForBreakdown);
-	};
-
 	handleSelectAggregation = (index: number, name: string, value: string) => {
 		const {index: dataSetIndex, setDataFieldValue} = this.props;
 		const indicators = this.getIndicators();
@@ -124,28 +70,21 @@ export class IndicatorsBox extends PureComponent<Props> {
 
 	renderFieldset = (indicator: Indicator, index: number, indicators: Array<Indicator>) => {
 		const {dataSet, errors, index: dataSetIndex} = this.props;
-		const {aggregation, attribute} = indicator;
 		const removable = indicators.length > 1;
-		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.indicators, index, FIELDS.attribute);
+		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.indicators, index);
 
 		return (
 			<IndicatorFieldset
-				aggregation={aggregation}
 				dataSet={dataSet}
 				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
 				index={index}
 				key={index}
-				name={FIELDS.attribute}
-				onChangeLabel={this.handleChangeAttributeTitle}
+				onChange={this.handleChange}
 				onRemove={this.handleRemove}
-				onRemoveComputedAttribute={this.handleRemoveComputedAttribute}
-				onSaveComputedAttribute={this.handleSaveComputedAttribute}
-				onSelect={this.handleSelect}
-				onSelectAggregation={this.handleSelectAggregation}
 				removable={removable}
 				usesNotApplicableAggregation={true}
-				value={attribute}
+				value={indicator}
 			/>
 		);
 	};

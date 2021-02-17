@@ -1,12 +1,14 @@
 // @flow
+import AxisSettingsBox from 'DiagramWidgetEditForm/components/AxisChartForm/components/AxisSettingsBox';
 import {ColorsBox, DataLabelsBox, HeaderBox, LegendBox, SortingBox} from 'DiagramWidgetEditForm/components';
 import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {getLegendSettings} from 'utils/chart/helpers';
+import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
-import {IndicatorBox, ParameterBox} from 'DiagramWidgetEditForm/components/AxisChartForm/components';
+import type {OnChangeInputEvent} from 'components/types';
 import React, {Component} from 'react';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';
@@ -21,10 +23,17 @@ export class StyleTab extends Component<StyleTabProps> {
 		setFieldValue(name, data);
 	};
 
+	handleChangeAxisName = (index: number) => ({name, value}: OnChangeInputEvent) => {
+		const {setDataFieldValue} = this.props;
+		setDataFieldValue(index, name, value);
+	};
+
 	render () {
 		const {values} = this.props;
+
 		const {
 			colors,
+			data,
 			dataLabels = DEFAULT_CHART_SETTINGS.dataLabels,
 			header,
 			indicator = DEFAULT_CHART_SETTINGS.axis,
@@ -32,13 +41,29 @@ export class StyleTab extends Component<StyleTabProps> {
 			parameter = DEFAULT_CHART_SETTINGS.axis,
 			sorting = DEFAULT_AXIS_SORTING_SETTINGS
 		} = values;
+		const index = getMainDataSetIndex(data);
+		const {xAxisName, yAxisName} = data[index];
 
 		return (
 			<div className={styles.container}>
 				<HeaderBox data={header} name={FIELDS.header} onChange={this.handleChange} />
 				<LegendBox data={legend} name={FIELDS.legend} onChange={this.handleChange} />
-				<ParameterBox data={parameter} name={FIELDS.parameter} onChange={this.handleChange} />
-				<IndicatorBox data={extend(DEFAULT_CHART_SETTINGS.axis, indicator)} name={FIELDS.indicator} onChange={this.handleChange} />
+				<AxisSettingsBox
+					axisFieldName={FIELDS.xAxisName}
+					axisName={xAxisName}
+					name={FIELDS.parameter}
+					onChangeAxisName={this.handleChangeAxisName(index)}
+					onChangeSettings={this.handleChange}
+					settings={extend(DEFAULT_CHART_SETTINGS.axis, parameter)}
+				/>
+				<AxisSettingsBox
+					axisFieldName={FIELDS.yAxisName}
+					axisName={yAxisName}
+					name={FIELDS.indicator}
+					onChangeAxisName={this.handleChangeAxisName(index)}
+					onChangeSettings={this.handleChange}
+					settings={extend(DEFAULT_CHART_SETTINGS.axis, indicator)}
+				/>
 				<SortingBox
 					data={sorting}
 					name={FIELDS.sorting}

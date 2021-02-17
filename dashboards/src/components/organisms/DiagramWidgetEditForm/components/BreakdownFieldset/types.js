@@ -1,16 +1,13 @@
 // @flow
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
-import type {OnChangeAttributeLabelEvent, OnChangeGroup, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
+import type {DataSet, DefaultBreakdown} from 'containers/DiagramWidgetEditForm/types';
 
 export type Props = {
 	dataSet: DataSet,
 	dataSetIndex: number,
 	error: string,
-	index: number,
 	name: string,
-	onChangeGroup: OnChangeGroup,
-	onChangeLabel: (event: OnChangeAttributeLabelEvent, index: number) => void,
+	onChange: (index: number, value: DefaultBreakdown) => void,
 	onRemove: (index: number) => void,
-	onSelect: (event: OnSelectAttributeEvent, index: number) => void,
-	removable: boolean
+	removable: boolean,
+	value: DefaultBreakdown
 };

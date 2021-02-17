@@ -1,17 +1,16 @@
 // @flow
 import {BreakdownFieldset, DataTopField, ExtendingFieldset} from 'DiagramWidgetEditForm/components';
-import {countIndicators, getDefaultIndicator, hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
+import {countIndicators, hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {DataSet, DefaultBreakdown} from 'containers/DiagramWidgetEditForm/types';
 import type {DataTopSettings} from 'store/widgets/data/types';
 import {FieldError, IconButton} from 'components/atoms';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormBox} from 'components/molecules';
-import {getDataErrorKey, getErrorKey} from 'DiagramWidgetEditForm/helpers';
-import {getDefaultSystemGroup, isAllowedTopAggregation} from 'store/widgets/helpers';
+import {getDataErrorKey, getDefaultIndicator, getDefaultParameter, getErrorKey} from 'DiagramWidgetEditForm/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {IndicatorsBox, ParametersBox} from './components';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
+import {isAllowedTopAggregation} from 'store/widgets/helpers';
 import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
@@ -44,12 +43,9 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return sources;
 	};
 
-	handleChangeAttributeTitle = (event: OnChangeAttributeLabelEvent, index: number) => {
-		const {changeAttributeTitle, setDataFieldValue, values} = this.props;
-		const {label, name, parent} = event;
-		const parameter = values.data[index][name];
-
-		setDataFieldValue(index, name, changeAttributeTitle(parameter, parent, label));
+	handleChangeBreakdown = (index: number, breakdown: DefaultBreakdown) => {
+		const {setDataFieldValue} = this.props;
+		setDataFieldValue(index, FIELDS.breakdown, breakdown);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
@@ -69,26 +65,18 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		setDataFieldValue(index, FIELDS.withBreakdown, false);
 	};
 
-	handleSelectBreakdown = (event: OnSelectAttributeEvent, index: number) => {
-		const {setDataFieldValue, transformAttribute, values} = this.props;
-		const {[FIELDS.breakdown]: currentValue} = values.data[index];
-		const {name} = event;
-		const nextValue = transformAttribute(event, this.handleSelectBreakdown, index);
-
-		if (!currentValue || currentValue.type !== nextValue.type) {
-			setDataFieldValue(index, FIELDS.breakdownGroup, getDefaultSystemGroup(nextValue));
-		}
-
-		setDataFieldValue(index, name, nextValue);
-	};
-
 	renderAddInput = (props: $Shape<IconButtonProps>) => <IconButton {...props} icon={ICON_NAMES.PLUS} round={false} />;
 
 	renderBreakdownFieldSet = () => {
-		const {errors, handleChangeGroup, values} = this.props;
+		const {errors, values} = this.props;
 		const dataSet = values.data[this.mainIndex];
 		const show = dataSet[FIELDS.withBreakdown] || dataSet[FIELDS.breakdown];
 		const errorKey = getDataErrorKey(this.mainIndex, FIELDS.breakdown);
+		let {breakdown} = dataSet;
+
+		if (!breakdown || Array.isArray(breakdown)) {
+			breakdown = getDefaultParameter();
+		}
 
 		return (
 			<ExtendingFieldset
@@ -102,14 +90,12 @@ export class ParamsTab extends Component<DataBuilderProps> {
 					dataSet={dataSet}
 					dataSetIndex={this.mainIndex}
 					error={errors[errorKey]}
-					index={this.mainIndex}
 					key={errorKey}
 					name={FIELDS.breakdown}
-					onChangeGroup={handleChangeGroup}
-					onChangeLabel={this.handleChangeAttributeTitle}
+					onChange={this.handleChangeBreakdown}
 					onRemove={this.handleRemoveBreakdown}
-					onSelect={this.handleSelectBreakdown}
 					removable={true}
+					value={breakdown}
 				/>
 			</ExtendingFieldset>
 		);
@@ -161,14 +147,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderSourceBox = (set: DataSet, index: number) => {
 		const {errors, renderAddSourceInput, renderSourceFieldset} = this.props;
-		const sourceRefFields = {
-			breakdown: FIELDS.breakdown,
-			indicator: FIELDS.indicators,
-			parameter: FIELDS.parameters
-		};
 		const isMainSource = index === 0;
 		const props = {
-			sourceRefFields,
 			sources: this.getDataSetSources(index),
 			usesFilter: isMainSource
 		};
