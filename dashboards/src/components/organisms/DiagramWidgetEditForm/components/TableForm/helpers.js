@@ -1,7 +1,6 @@
 // @flow
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import {getDefaultSystemGroup} from 'store/widgets/helpers';
+import {getDefaultIndicator} from 'DiagramWidgetEditForm/helpers';
 
 /**
  * Проверяет используются ли в наборах данных для построения виджета разные типы агрегаций
@@ -66,20 +65,8 @@ const countIndicators = (data: Array<DataSet>): number => data.reduce((count, {i
 	return Array.isArray(indicators) ? count + indicators.length : count;
 }, 0);
 
-const getDefaultIndicator = () => ({
-	aggregation: DEFAULT_AGGREGATION.COUNT,
-	attribute: null
-});
-
-const getDefaultParameter = () => ({
-	attribute: null,
-	group: getDefaultSystemGroup(null)
-});
-
 export {
 	checkSourceForParent,
 	countIndicators,
-	getDefaultIndicator,
-	getDefaultParameter,
 	hasDifferentAggregations
 };

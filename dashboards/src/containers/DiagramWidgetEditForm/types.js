@@ -1,20 +1,76 @@
 // @flow
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
+import type {
+	Breakdown as WidgetBreakdown,
+	ComputedAttr,
+	Group,
+	Indicator as WidgetIndicator,
+	MixedAttribute,
+	Parameter as WidgetParameter,
+	Source,
+	SourceData as WidgetSourceData,
+	Widget,
+	WidgetType
+} from 'store/widgets/data/types';
 import type {DashboardsState, FetchDashboards} from 'store/dashboards/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
 import type {InjectedProps} from 'containers/WidgetEditForm/types';
 import type {LinkedDataSourceMap} from 'store/sources/linkedData/types';
 import type {OnLoadCallback} from 'store/sources/types';
-import type {Source, Widget, WidgetType} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
+export type SourceData = {
+	descriptor: string,
+	forCompute: boolean,
+	value: Source | null
+};
+
+export type Indicator = {
+	aggregation: string,
+	attribute: MixedAttribute | null
+};
+
+export type Parameter = {
+	attribute: Attribute | null,
+	group: Group
+};
+
+export type ComputedBreakdown = Array<{
+	dataKey: string,
+	group: Group | null,
+	value: Attribute | null
+}>;
+
+export type DefaultBreakdown = {
+	attribute: Attribute | null,
+	group: Group
+};
+
+export type Breakdown = DefaultBreakdown | ComputedBreakdown;
+
 export type DataSet = {
-	source: Source,
-	[string]: any
+	breakdown?: Breakdown,
+	dataKey: string,
+	indicators: Array<Indicator>,
+	parameters: Array<Parameter>,
+	source: SourceData,
+	sourceForCompute: boolean,
+	[key: string]: any | typeof undefined
+};
+
+export type FilledDataSet = {
+	breakdown?: WidgetBreakdown,
+	dataKey: string,
+	indicators: Array<WidgetIndicator>,
+	parameters: Array<WidgetParameter>,
+	source: WidgetSourceData,
+	sourceForCompute: boolean,
+	[key: string]: any | typeof undefined
 };
 
 export type DiagramFormWidget = {
+	computedAttrs: Array<ComputedAttr>,
 	data: Array<DataSet>,
 	name: string,
 	type: WidgetType

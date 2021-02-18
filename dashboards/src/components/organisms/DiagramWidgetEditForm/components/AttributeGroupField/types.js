@@ -2,18 +2,13 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Group, Source} from 'store/widgets/data/types';
 
-export type GroupAttributeField = {
-	name: string,
-	parent: Attribute | null,
-	value: Attribute,
-};
-
 export type Props = {
+	attribute: Attribute,
 	disabled: boolean,
-	field: GroupAttributeField,
 	name: string,
-	onChange: (name: string, value: Group, field: GroupAttributeField) => void,
-	source: Source,
+	onChange: (name: string, value: Group, attribute: Attribute) => void,
+	parent: Attribute | null,
+	source: Source | null,
 	value: Group | string | null
 };
 

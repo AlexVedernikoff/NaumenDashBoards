@@ -1,57 +1,76 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {AttributeFieldset, AttributeGroupField, FormField} from 'DiagramWidgetEditForm/components';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {DefaultBreakdown} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {Group} from 'store/widgets/data/types';
-import type {GroupAttributeField} from 'DiagramWidgetEditForm/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 
 export class BreakdownFieldset extends PureComponent<Props> {
-	handleChangeGroup = (name: string, value: Group, field: GroupAttributeField) => {
-		const {index, onChangeGroup} = this.props;
-		onChangeGroup(index, name, value, field);
+	change = (breakdown: DefaultBreakdown) => {
+		const {dataSetIndex, onChange} = this.props;
+		onChange(dataSetIndex, breakdown);
 	};
 
-	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
-		const {index, onChangeLabel} = this.props;
-		onChangeLabel(event, index);
-	};
+	handleChangeGroup = (name: string, group: Group, attribute: Attribute) => this.change({
+		...this.props.value,
+		attribute,
+		group
+	});
+
+	handleChangeLabel = ({value: attribute}: OnChangeAttributeLabelEvent) => this.change({
+		...this.props.value,
+		attribute
+	});
 
 	handleRemove = () => {
-		const {index, onRemove} = this.props;
-		onRemove(index);
+		const {dataSetIndex, onRemove} = this.props;
+		onRemove(dataSetIndex);
 	};
 
 	handleSelect = (event: OnSelectAttributeEvent) => {
-		const {index, onSelect} = this.props;
-		onSelect(event, index);
+		const {value} = this.props;
+		const {attribute: currentAttribute} = value;
+		const {value: attribute} = event;
+		let newValue = value;
+
+		if (attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!currentAttribute || currentAttribute.type !== attribute.type)) {
+			newValue = {
+				...newValue,
+				group: getDefaultSystemGroup(attribute)
+			};
+		}
+
+		this.change({
+			...newValue,
+			attribute
+		});
 	};
 
 	renderGroup = (props: Object) => {
-		const {dataSet, name} = this.props;
+		const {dataSet, value: breakdown} = this.props;
 		const {disabled, parent, value} = props;
-		const field = {
-			name,
-			parent,
-			value
-		};
 
 		return (
 			<AttributeGroupField
+				attribute={value}
 				disabled={disabled}
-				field={field}
 				name={FIELDS.breakdownGroup}
 				onChange={this.handleChangeGroup}
 				parent={parent}
-				source={dataSet.source}
-				value={dataSet[FIELDS.breakdownGroup]}
+				source={dataSet.source.value}
+				value={breakdown.group}
 			/>
 		);
 	};
 
 	render () {
-		const {dataSet, dataSetIndex, error, name, removable} = this.props;
+		const {dataSet, dataSetIndex, error, name, removable, value} = this.props;
+		const {attribute} = value;
 
 		return (
 			<FormField error={error}>
@@ -64,7 +83,7 @@ export class BreakdownFieldset extends PureComponent<Props> {
 					onSelect={this.handleSelect}
 					removable={removable}
 					renderRefField={this.renderGroup}
-					value={dataSet[name]}
+					value={attribute}
 				/>
 			</FormField>
 		);

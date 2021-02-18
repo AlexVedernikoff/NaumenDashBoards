@@ -1,8 +1,6 @@
 // @flow
-import type {ComputedBreakdown} from 'store/widgets/data/types';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {ComputedBreakdown, DataSet} from 'containers/DiagramWidgetEditForm/types';
 import type {ErrorsMap} from 'containers/WidgetEditForm/types';
-import type {TransformAttribute} from 'DiagramWidgetEditForm/types';
 
 export type Props = {
 	data: Array<DataSet>,
@@ -12,6 +10,5 @@ export type Props = {
 	onChange: (index: number, name: string, value: ComputedBreakdown) => void,
 	onRemove: (index: number) => void,
 	removable: boolean,
-	transformAttribute: TransformAttribute,
 	value: ComputedBreakdown
 };

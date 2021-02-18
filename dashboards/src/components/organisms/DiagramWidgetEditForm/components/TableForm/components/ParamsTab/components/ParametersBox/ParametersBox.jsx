@@ -1,12 +1,8 @@
 // @flow
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {FormBox} from 'components/molecules';
-import {getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
-import {getDefaultParameter} from 'DiagramWidgetEditForm/components/TableForm/helpers';
-import {getDefaultSystemGroup} from 'store/widgets/helpers';
-import type {Group, Parameter} from 'store/widgets/data/types';
-import type {GroupAttributeField} from 'DiagramWidgetEditForm/components/AttributeGroupField/types';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
+import {getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
+import type {Parameter} from 'containers/DiagramWidgetEditForm/types';
 import {ParameterFieldset, SortableList} from 'DiagramWidgetEditForm/components';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
@@ -18,32 +14,12 @@ export class ParametersBox extends PureComponent<Props> {
 		return parameters;
 	};
 
-	handleChangeAttributeTitle = (event: OnChangeAttributeLabelEvent, index: number) => {
-		const {changeAttributeTitle, index: dataSetIndex, setDataFieldValue} = this.props;
-		const {label, parent} = event;
-		const parameters = this.getParameters();
+	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
+		const {setDataFieldValue, values} = this.props;
+		const {parameters} = values.data[dataSetIndex];
+		const newParameters = parameters.map((parameter, index) => index === parameterIndex ? newParameter : parameter);
 
-		parameters[index] = {
-			...parameters[index],
-			attribute: changeAttributeTitle(parameters[index].attribute, parent, label)
-		};
-
-		setDataFieldValue(dataSetIndex, FIELDS.parameters, parameters);
-	};
-
-	handleChangeGroup = (index: number, name: string, value: Group, field: GroupAttributeField) => {
-		const {index: dataSetIndex, setDataFieldValue} = this.props;
-		const {parent, value: attribute} = field;
-		const event = {
-			label: attribute.title,
-			name: FIELDS.parameters,
-			parent
-		};
-		const parameters = this.getParameters();
-		parameters[index] = {...parameters[index], group: value};
-
-		this.handleChangeAttributeTitle(event, index);
-		setDataFieldValue(dataSetIndex, FIELDS.parameters, parameters);
+		setDataFieldValue(dataSetIndex, FIELDS.parameters, newParameters);
 	};
 
 	handleChangeOrder = (parameters: Array<Object>) => {
@@ -66,44 +42,22 @@ export class ParametersBox extends PureComponent<Props> {
 		}
 	};
 
-	handleSelect = (event: OnSelectAttributeEvent, index: number) => {
-		const {index: dataSetIndex, setDataFieldValue, transformAttribute} = this.props;
-		const parameters = this.getParameters();
-		const currentValue = parameters[index].attribute;
-		let attribute;
-
-		attribute = transformAttribute(event, this.handleSelect, index);
-
-		if (dataSetIndex === 0 && (!currentValue || currentValue.type !== attribute.type)) {
-			parameters[index] = {...parameters[index], [FIELDS.group]: getDefaultSystemGroup(attribute)};
-		}
-
-		parameters[index] = {...parameters[index], attribute};
-
-		setDataFieldValue(dataSetIndex, FIELDS.parameters, parameters);
-	};
-
 	renderFieldset = (parameter: Parameter, index: number, parameters: Array<Parameter>) => {
 		const {dataSet, errors, index: dataSetIndex} = this.props;
-		const {attribute, group} = parameter;
 		const removable = parameters.length > 1;
-		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.parameters, index, FIELDS.attribute);
+		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.parameters, index);
 
 		return (
 			<ParameterFieldset
 				dataSet={dataSet}
 				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
-				group={group}
 				index={index}
 				key={index}
-				name={FIELDS.attribute}
-				onChangeGroup={this.handleChangeGroup}
-				onChangeLabel={this.handleChangeAttributeTitle}
+				onChange={this.handleChange}
 				onRemove={this.handleRemove}
-				onSelect={this.handleSelect}
 				removable={removable}
-				value={attribute}
+				value={parameter}
 			/>
 		);
 	};

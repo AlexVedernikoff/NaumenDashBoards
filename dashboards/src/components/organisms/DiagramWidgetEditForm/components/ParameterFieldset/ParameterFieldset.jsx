@@ -1,9 +1,12 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {AttributeFieldset, AttributeGroupField, FormField} from 'DiagramWidgetEditForm/components';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {Group} from 'store/widgets/data/types';
-import type {GroupAttributeField} from 'DiagramWidgetEditForm/components/AttributeGroupField/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
+import type {Parameter} from 'containers/DiagramWidgetEditForm/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 
@@ -14,47 +17,62 @@ export class ParameterFieldset extends PureComponent<Props> {
 		removable: false
 	};
 
-	handleChangeGroup = (name: string, value: Group, field: GroupAttributeField) => {
-		const {index, onChangeGroup} = this.props;
-		onChangeGroup(index, name, value, field);
+	change = (parameter: Parameter) => {
+		const {dataSetIndex, index, onChange} = this.props;
+		onChange(dataSetIndex, index, parameter);
 	};
 
-	handleChangeLabel = (event: OnChangeAttributeLabelEvent) => {
-		const {index, onChangeLabel} = this.props;
-		onChangeLabel(event, index);
-	};
+	handleChangeGroup = (name: string, group: Group, attribute: Attribute) => this.change({
+		...this.props.value,
+		attribute,
+		group
+	});
 
-	handleSelect = (event: OnSelectAttributeEvent) => {
-		const {index, onSelect} = this.props;
-		onSelect(event, index);
+	handleChangeLabel = ({value: attribute}: OnChangeAttributeLabelEvent) => this.change({
+		...this.props.value,
+		attribute
+	});
+
+	handleSelect = ({value: newAttribute}: OnSelectAttributeEvent) => {
+		const {index, value} = this.props;
+		const {attribute} = value;
+		let newValue = value;
+
+		if (index === 0 && (!attribute || newAttribute.type in ATTRIBUTE_SETS.REFERENCE || attribute.type !== newAttribute.type)) {
+			newValue = {
+				...newValue,
+				group: getDefaultSystemGroup(value)
+			};
+		}
+
+		this.change({
+			...newValue,
+			attribute: newAttribute
+		});
 	};
 
 	renderGroup = (props: Object) => {
-		const {dataSet, disabledGroup, group, name} = this.props;
-		const {disabled: parameterDisabled, parent, value} = props;
+		const {dataSet, disabledGroup, value} = this.props;
+		const {disabled: parameterDisabled, parent, value: attribute} = props;
+		const {group} = value;
 		const disabled = parameterDisabled || disabledGroup;
-		const field = {
-			disabled,
-			name,
-			parent,
-			value
-		};
 
 		return (
 			<AttributeGroupField
+				attribute={attribute}
 				disabled={disabled}
-				field={field}
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup}
 				parent={parent}
-				source={dataSet.source}
+				source={dataSet.source.value}
 				value={group}
 			/>
 		);
 	};
 
 	render () {
-		const {dataSet, dataSetIndex, disabled, error, filter, index, name, onRemove, removable, value} = this.props;
+		const {dataSet, dataSetIndex, disabled, error, filter, index, onRemove, removable, value} = this.props;
+		const {attribute} = value;
 
 		return (
 			<FormField error={error}>
@@ -65,13 +83,12 @@ export class ParameterFieldset extends PureComponent<Props> {
 					getAttributeOptions={filter}
 					getSourceOptions={filter}
 					index={index}
-					name={name}
 					onChangeLabel={this.handleChangeLabel}
 					onRemove={onRemove}
 					onSelect={this.handleSelect}
 					removable={removable}
 					renderRefField={this.renderGroup}
-					value={value}
+					value={attribute}
 				/>
 			</FormField>
 		);
