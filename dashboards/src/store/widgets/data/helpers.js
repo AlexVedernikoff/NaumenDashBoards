@@ -1,10 +1,7 @@
 // @flow
 import type {
 	AddWidget,
-	AxisData,
-	ComboData,
 	DeleteWidget,
-	DiagramWidgetDataSet,
 	SelectWidget,
 	SetCreatedWidget,
 	SetWidgets,
@@ -184,10 +181,10 @@ const createNewWidget = (layoutMode: LayoutMode, type: WidgetType = WIDGET_TYPES
 
 /**
  * Возвращает название оси Y по умолчанию для осевых графиков
- * @param {AxisData | ComboData} dataSet - набор данных виджета для построения
+ * @param {DataSet} dataSet - набор данных виджета для построения
  * @returns {string}
  */
-const getDefaultComboYAxisName = (dataSet: AxisData | ComboData): string => {
+const getDefaultComboYAxisName = (dataSet: DataSet): string => {
 	const {indicators, source} = dataSet;
 	const {attribute} = indicators[0];
 	const {value: sourceValue} = source;
@@ -202,19 +199,21 @@ const getDefaultComboYAxisName = (dataSet: AxisData | ComboData): string => {
 
 /**
  * Возвращает набор данных главного источника
- * @param {Array<DataSet>} data - массив набора данных виджета для построения
- * @returns {DataSet}
+ * @template T
+ * @param {Array<T>} data - массив набора данных виджета для построения
+ * @returns {T}
  */
-const getMainDataSet = (data: $ReadOnlyArray<DataSet>): DataSet => {
+const getMainDataSet = <T: Object>(data: $ReadOnlyArray<T>): T => {
 	return data.find(dataSet => !dataSet.sourceForCompute) || data[0];
 };
 
 /**
  * Возвращает индекс набора данных главного источника
- * @param {Array<DataSet>} data - массив набора данных виджета для построения
+ * @template T
+ * @param {Array<T>} data - массив набора данных виджета для построения
  * @returns {number}
  */
-const getMainDataSetIndex = (data: $ReadOnlyArray<DiagramWidgetDataSet>): number => {
+const getMainDataSetIndex = <T: Object>(data: $ReadOnlyArray<T>): number => {
 	return data.findIndex(dataSet => !dataSet.sourceForCompute) || 0;
 };
 

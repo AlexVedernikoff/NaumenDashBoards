@@ -25,12 +25,6 @@ export type CheckboxProps = {
 
 export type IndicatorBoxProps = $Shape<IndicatorProps>;
 
-export type ParameterBoxProps = $Shape<{|
-	children: React$Node,
-	name: string,
-	useGroup: boolean
-|}>;
-
 export type SourceInjectedProps = {|
 	renderAddSourceInput: () => React$Node,
 	renderSourceFieldset: (sourceRefFields: Object) => (set: Object, index: number) => React$Node,
@@ -50,7 +44,7 @@ export type DataBuilderProps = {
 	renderDisplayModeSelect: () => React$Node,
 	renderIndicatorBoxes: (props?: IndicatorBoxProps) => React$Node,
 	renderNavigationBox: () => React$Node,
-	renderParameterBox: (props: ParameterBoxProps) => React$Node,
+	renderParameterBox: () => React$Node,
 	renderShowEmptyDataCheckbox: () => React$Node,
 	renderSourceBox: (minCountBuildingSources?: number) => React$Node
 };

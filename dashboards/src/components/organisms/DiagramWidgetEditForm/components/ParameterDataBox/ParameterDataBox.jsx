@@ -12,7 +12,6 @@ import {ParameterFieldset} from 'DiagramWidgetEditForm/components';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {SORTING_VALUES} from 'store/widgets/data/constants';
-import withForm from 'DiagramWidgetEditForm/withForm';
 
 export class ParameterDataBox extends PureComponent<Props> {
 	componentDidUpdate (prevProps: Props) {
@@ -151,4 +150,4 @@ export class ParameterDataBox extends PureComponent<Props> {
 	}
 }
 
-export default withForm(ParameterDataBox);
+export default ParameterDataBox;

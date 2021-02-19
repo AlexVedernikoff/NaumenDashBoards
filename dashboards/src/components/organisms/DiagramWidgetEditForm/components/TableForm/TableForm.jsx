@@ -1,45 +1,52 @@
 // @flow
 import {array, object} from 'yup';
-import {checkSourceForParent, getDefaultIndicator, getDefaultParameter} from './helpers';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
-import {navigationSettings} from 'utils/normalizer/widget/helpers';
-import {normalizeDataSet} from 'utils/normalizer/widget/tableNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
-import type {TableWidget, Widget} from 'store/widgets/data/types';
+import type {TableData, TableWidget, Widget} from 'store/widgets/data/types';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 export class TableForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, requiredAttribute, requiredByCompute, validateTopSettings} = rules;
-		const {breakdown, indicator, indicators, parameter, parameters, source, sources, top} = FIELDS;
+		const {base, parameter, requiredBreakdown, requiredByCompute, validateTopSettings} = rules;
 
 		return object({
 			...base,
 			data: array().of(object({
-				[breakdown]: requiredByCompute(breakdown, conditionalBreakdown(indicators)),
-				[indicators]: requiredByCompute(indicators, array(object({
-					attribute: requiredAttribute(getErrorMessage(indicator))
-				})).default([getDefaultIndicator()])),
-				[parameters]: array(object({
-					attribute: requiredAttribute(getErrorMessage(parameter))
-				})).default([getDefaultParameter()]),
-				[source]: object()
-					.required(getErrorMessage(source)).nullable()
-					.test(
-						'check-source-for-parent',
-						'Для данного типа выбранный источник не доступен - выберите другой',
-						checkSourceForParent
-					)
+				breakdown: requiredByCompute(requiredBreakdown),
+				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
+				parameters: array(parameter),
+				source: mixed().source()
 			})),
-			[sources]: mixed().minSourceNumbers(),
-			[top]: validateTopSettings
+			sources: mixed().minSourceNumbers(),
+			top: validateTopSettings
 		});
+	};
+
+	normalizeDataSet = (dataSet: FilledDataSet): TableData => {
+		const {
+			breakdown,
+			dataKey,
+			indicators,
+			parameters,
+			source,
+			sourceForCompute
+		} = dataSet;
+
+		return {
+			breakdown,
+			dataKey,
+			indicators,
+			parameters,
+			source,
+			sourceForCompute
+		};
 	};
 
 	updateWidget = (widget: Widget, values: Values): TableWidget => {
@@ -56,7 +63,7 @@ export class TableForm extends Component<TypedFormProps> {
 			calcTotalColumn = false,
 			calcTotalRow = false,
 			computedAttrs = [],
-			data = [],
+			data,
 			displayMode,
 			header,
 			name = '',
@@ -73,12 +80,12 @@ export class TableForm extends Component<TypedFormProps> {
 			calcTotalRow,
 			columnsRatioWidth,
 			computedAttrs,
-			data: data.map(normalizeDataSet),
+			data: data.map(this.normalizeDataSet),
 			displayMode,
 			header,
 			id,
 			name,
-			navigation: navigationSettings(navigation),
+			navigation,
 			showEmptyData,
 			sorting,
 			table: extend(DEFAULT_TABLE_SETTINGS, table),

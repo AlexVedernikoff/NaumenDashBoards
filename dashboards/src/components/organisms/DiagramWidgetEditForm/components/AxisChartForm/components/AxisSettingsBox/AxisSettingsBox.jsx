@@ -6,40 +6,35 @@ import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
-export class IndicatorBox extends PureComponent<Props> {
-	handleChangeTickAmount = (event: OnChangeInputEvent) => {
-		const {handleChange} = this.props;
-		const {value} = event;
-
-		if (value.toString().length < 3) {
-			handleChange(event);
-		}
+export class AxisSettingsBox extends PureComponent<Props> {
+	handleChangeSettings = ({name: propName, value}: OnChangeInputEvent) => {
+		const {name, onChangeSettings, settings} = this.props;
+		onChangeSettings(name, {...settings, [propName]: value});
 	};
 
 	render () {
-		const {data, handleBoolChange, handleChange} = this.props;
-		const {name, show, showName} = data;
+		const {axisFieldName, axisName, onChangeAxisName, settings} = this.props;
+		const {show, showName} = settings;
 
 		return (
 			<CollapsableFormBox title="Показатель">
 				<FormField>
 					<FormCheckControl label="Показать ось">
-						<Checkbox checked={show} name={FIELDS.show} onChange={handleBoolChange} value={show} />
+						<Checkbox checked={show} name={FIELDS.show} onChange={this.handleChangeSettings} value={show} />
 					</FormCheckControl>
 				</FormField>
 				<FormField>
 					<FormCheckControl label="Выводить название">
-						<Checkbox checked={showName} name={FIELDS.showName} onChange={handleBoolChange} value={showName} />
+						<Checkbox checked={showName} name={FIELDS.showName} onChange={this.handleChangeSettings} value={showName} />
 					</FormCheckControl>
 				</FormField>
 				<FormField small>
-					<TextInput maxLength={MAX_TEXT_LENGTH} name={FIELDS.name} onChange={handleChange} value={name} />
+					<TextInput maxLength={MAX_TEXT_LENGTH} name={axisFieldName} onChange={onChangeAxisName} value={axisName} />
 				</FormField>
 			</CollapsableFormBox>
 		);
 	}
 }
 
-export default withStyleFormBuilder(IndicatorBox);
+export default AxisSettingsBox;

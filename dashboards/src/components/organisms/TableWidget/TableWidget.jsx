@@ -11,9 +11,8 @@ import type {Column, ColumnType, ParameterColumn, Props, Row, State} from './typ
 import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
-import {debounce, deepClone} from 'src/helpers';
+import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import {FIELDS} from 'DiagramWidgetEditForm';
 import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
@@ -272,14 +271,15 @@ export class TableWidget extends PureComponent<Props, State> {
 	renderIndicatorCell = (props: CellConfigProps) => {
 		const {fontColor, fontStyle} = this.props.widget.table.body.indicatorSettings;
 		const {column, value = ''} = props;
+		const {aggregation, attribute} = column;
 		const components = {
 			Value: this.renderLinkValue
 		};
 		let cellValue = value;
 
-		if (hasMSInterval(column, FIELDS.attribute)) {
+		if (hasMSInterval(attribute, aggregation)) {
 			cellValue = parseMSInterval(Number(value));
-		} else if (value && hasPercent(column, FIELDS.attribute)) {
+		} else if (value && hasPercent(attribute, aggregation)) {
 			cellValue = `${value}%`;
 		} else if (isCardObjectColumn(column)) {
 			cellValue = getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);

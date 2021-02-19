@@ -34,4 +34,3 @@ export {
 	EMPTY_DATA_OPTIONS,
 	PAGE_SIZES
 };
-

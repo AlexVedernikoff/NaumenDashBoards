@@ -21,7 +21,7 @@ const circleMixin = (widget: CircleWidget, chart: DiagramBuildData, container: H
 	const {legend} = widget;
 	const {breakdown, indicators} = getMainDataSet(widget.data);
 	const {aggregation, attribute} = indicators[0];
-	const usesUUIDs = hasUUIDsInLabels(breakdown.attribute);
+	const usesUUIDs = breakdown && !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute);
 	const usesMSInterval = hasMSInterval(attribute, aggregation);
 	const usesPercent = hasPercent(attribute, aggregation);
 

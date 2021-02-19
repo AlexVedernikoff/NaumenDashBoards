@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, Group, Widget, WidgetType} from './data/types';
+import type {AnyWidget, Group, MixedAttribute, Widget, WidgetType} from './data/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
@@ -14,7 +14,7 @@ import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import type {LayoutMode} from 'store/dashboard/settings/types';
-import {store} from 'src';
+import {store} from 'index';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
@@ -62,13 +62,12 @@ const	getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widge
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация в процентах
- * @param {object} set - набор данных виджета
- * @param {string} field - наименования поля показателя виджета
+ * @param {MixedAttribute | null} attribute - атрибут
+ * @param {string} aggregation - агрегация атрибута
  * @returns {boolean}
  */
-const hasPercent = (set: Object, field: string = FIELDS.indicator) => {
-	const {aggregation, [field]: indicator} = set;
-	return indicator.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && aggregation === DEFAULT_AGGREGATION.PERCENT;
+const hasPercent = (attribute: MixedAttribute | null, aggregation: string): boolean => {
+	return Boolean(attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && aggregation === DEFAULT_AGGREGATION.PERCENT);
 };
 
 /**
@@ -83,13 +82,12 @@ const hasUUIDsInLabels = (attribute?: Attribute): boolean => {
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация, по которой возвращается интервал в миллисекундах
- * @param {object} set - набор данных виджета
- * @param {string} field - наименования поля показателя виджета
+ * @param {MixedAttribute | null} attribute - атрибут
+ * @param {string} aggregation - агрегация атрибута
  * @returns {boolean}
  */
-const hasMSInterval = (set: Object, field: string = FIELDS.indicator) => {
-	const {aggregation, [field]: indicator} = set;
-	return indicator.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION;
+const hasMSInterval = (attribute: MixedAttribute | null, aggregation: string): boolean => {
+	return Boolean(attribute && attribute.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION);
 };
 
 /**
@@ -140,9 +138,9 @@ const usesCustomGroup = (widget: DiagramFormWidget, checkBreakdown: boolean): bo
 		groupKeys.push(FIELDS.breakdownGroup);
 	}
 
-	return !!widget.data.find(set => {
-		const {sourceForCompute} = set;
-		return !sourceForCompute && groupKeys.find(key => set[key] && set[key].way === GROUP_WAYS.CUSTOM);
+	return !!widget.data.find(dataSet => {
+		const {sourceForCompute} = dataSet;
+		return !sourceForCompute && groupKeys.find(key => dataSet[key] && dataSet[key].way === GROUP_WAYS.CUSTOM);
 	});
 };
 
