@@ -5,7 +5,7 @@ import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import Icon, {ICON_SIZES} from 'components/atoms/Icon';
-import {MiniSelect} from 'components/molecules';
+import MiniSelect from 'components/molecules/MiniSelect';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';

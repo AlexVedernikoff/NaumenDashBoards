@@ -1,7 +1,7 @@
 // @flow
 import {AVAILABLE_DATE_FORMATS} from './constants';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
-import {MaterialDateInput} from 'components/atoms';
+import MaterialDateInput from 'components/atoms/MaterialDateInput';
 import moment from 'moment';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

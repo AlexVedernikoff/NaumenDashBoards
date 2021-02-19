@@ -1,7 +1,7 @@
 // @flow
 import type {AnyWidget, Widget as WidgetType} from 'store/widgets/data/types';
 import cn from 'classnames';
-import {DashboardPanel} from 'components/organisms';
+import DashboardPanel from 'components/organisms/DashboardPanel';
 import {debounce} from 'helpers';
 import type {DivRef} from 'components/types';
 import {getLayoutWidgets} from 'store/widgets/helpers';
@@ -12,12 +12,13 @@ import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {Component, createRef} from 'react';
-import {ResizeDetector, Widget} from 'components/molecules';
+import ResizeDetector from 'components/molecules/ResizeDetector';
 import {resizer} from 'index';
 import {Responsive as Grid} from 'react-grid-layout';
 import type {State} from './types';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
+import Widget from 'components/molecules/Widget';
 
 export const gridRef: DivRef = createRef();
 

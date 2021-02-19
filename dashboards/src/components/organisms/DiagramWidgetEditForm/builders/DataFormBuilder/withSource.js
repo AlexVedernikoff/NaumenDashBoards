@@ -6,11 +6,11 @@ import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {getDataErrorKey, getDefaultIndicator, getDefaultParameter, getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
-import {IconButton} from 'components/atoms';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import React from 'react';
 import type {RenderSourceFieldsetProps, SourceInjectedProps} from './types';
-import {SourceFieldset} from 'DiagramWidgetEditForm/components';
+import SourceFieldset from 'DiagramWidgetEditForm/components/SourceFieldset';
 import uuid from 'tiny-uuid';
 
 export const withSource = (Component: React$ComponentType<SourceInjectedProps>) => {

@@ -8,7 +8,7 @@ import {
 	EXCEED_OPTIONS,
 	TIMER_STATUS_OPTIONS
 } from './constants';
-import {BetweenOperand, SelectOperand} from 'CustomGroup/components';
+import BetweenOperand from 'CustomGroup/components/BetweenOperand';
 import type {
 	BetweenOperand as BetweenOperandType,
 	CustomGroup,
@@ -18,11 +18,12 @@ import type {
 } from 'store/customGroups/types';
 import {BETWEEN_RULE} from 'CustomGroup/schema';
 import {createBetweenOperand, createDefaultOperand} from 'CustomGroup/helpers';
-import {MaterialSelect} from 'components/molecules';
+import MaterialSelect from 'components/molecules/MaterialSelect';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
+import SelectOperand from 'CustomGroup/components/SelectOperand';
 
 export class TimerGroup extends Component<Props> {
 	createCustomCondition = (type: OperandType = OPERAND_TYPES.STATUS_CONTAINS) => {

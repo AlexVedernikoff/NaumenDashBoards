@@ -1,5 +1,6 @@
 // @flow
-import {CheckIconButtonGroup, ColorInput, Select} from 'components/molecules';
+import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
+import ColorInput from 'components/molecules/ColorInput';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {
 	FONT_FAMILIES,
@@ -14,6 +15,7 @@ import type {FontSizeSelectProps, InputProps, OnChangeEvent, Props, SelectProps}
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component} from 'react';
+import Select from 'components/molecules/Select';
 import styles from './styles.less';
 
 export class StyleFormBuilder extends Component<Props> {

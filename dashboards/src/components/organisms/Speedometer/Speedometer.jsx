@@ -3,7 +3,7 @@ import {BASE_FONT_SIZES, BASE_RADIUS, DEFAULT_SPEEDOMETER_SETTINGS, END_DEGREE, 
 import type {Props, State, TextValueProps} from './types';
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {PureComponent} from 'react';
-import {ResizeDetector} from 'components/molecules';
+import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
 
 export class Speedometer extends PureComponent<Props, State> {

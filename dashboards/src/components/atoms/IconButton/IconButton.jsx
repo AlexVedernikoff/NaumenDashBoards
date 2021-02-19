@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {Icon} from 'components/atoms';
+import Icon from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

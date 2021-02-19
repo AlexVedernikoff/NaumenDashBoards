@@ -1,9 +1,9 @@
 // @flow
-import {AndCondition} from 'CustomGroup/components';
+import AndCondition from 'CustomGroup/components/AndCondition';
 import type {AndCondition as AndConditionType} from 'CustomGroup/types';
-import {FieldError, TextInput} from 'components/atoms';
+import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
-import {FormField} from 'components/molecules/GroupCreatingModal/components';
+import FormField from 'components/molecules/GroupCreatingModal/components/FormField';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'components/constants';
@@ -11,6 +11,7 @@ import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import TextInput from 'components/atoms/TextInput';
 import withCustomGroup from 'CustomGroup/withCustomGroup';
 
 export class SubGroup extends PureComponent<Props> {

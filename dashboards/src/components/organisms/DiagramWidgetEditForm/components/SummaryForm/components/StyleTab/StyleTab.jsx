@@ -2,8 +2,8 @@
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/constants';
 import {extend} from 'helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {HeaderBox} from 'DiagramWidgetEditForm/components';
-import {IndicatorBox} from 'DiagramWidgetEditForm/components/SummaryForm/components';
+import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
+import IndicatorBox from 'DiagramWidgetEditForm/components/SummaryForm/components/IndicatorBox';
 import React, {Component} from 'react';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';

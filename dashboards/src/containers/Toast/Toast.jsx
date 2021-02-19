@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import {Toast} from 'components/atoms';
+import Toast from 'components/atoms/Toast';
 import type {Toast as ToastType} from 'store/toasts/types';
 
 export class ToastContainer extends Component<Props> {

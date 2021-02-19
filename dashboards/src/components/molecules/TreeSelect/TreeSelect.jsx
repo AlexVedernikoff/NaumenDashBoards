@@ -1,9 +1,10 @@
 // @flow
-import {IconButton, OutsideClickDetector} from 'components/atoms';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {InputForm as LabelEditingForm} from 'components/molecules';
+import LabelEditingForm from 'components/molecules/InputForm';
 import {Menu} from 'components/molecules/Select/components';
 import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree/types';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

@@ -4,7 +4,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {createDefaultOperand, createIntervalOperand} from 'CustomGroup/helpers';
 import type {CustomGroup, IntervalOperand as IntervalOperandType, IntervalOrCondition, OperandType} from 'store/customGroups/types';
 import {CUSTOM_OPTIONS, SYSTEM_OPTIONS} from './constants';
-import {IntervalOperand} from 'CustomGroup/components';
+import IntervalOperand from 'CustomGroup/components/IntervalOperand';
 import {INTERVAL_RULE} from 'CustomGroup/schema';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
 import type {OnChangeOperand} from 'CustomGroup/types';

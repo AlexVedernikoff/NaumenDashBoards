@@ -1,6 +1,6 @@
 // @flow
 import {createPortal} from 'react-dom';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {Children, cloneElement, Component, createRef} from 'react';
 import type {Ref} from 'components/types';

@@ -1,6 +1,7 @@
 // @flow
 import cn from 'classnames';
-import {FieldError, Label} from 'components/atoms';
+import FieldError from 'components/atoms/FieldError';
+import Label from 'components/atoms/Label';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';

@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_TABLE_SETTINGS} from 'components/organisms/Table/constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {HeaderBox} from 'DiagramWidgetEditForm/components';
+import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
 import React, {Component} from 'react';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';

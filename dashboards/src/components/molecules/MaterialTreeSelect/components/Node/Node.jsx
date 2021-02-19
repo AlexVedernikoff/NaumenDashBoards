@@ -1,11 +1,11 @@
 // @flow
-import {Button, Loader} from 'components/atoms';
+import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import Loader from 'components/atoms/Loader';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class Node extends PureComponent<Props, State> {
 	state = {

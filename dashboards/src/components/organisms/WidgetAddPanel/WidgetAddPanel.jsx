@@ -1,21 +1,23 @@
 // @flow
-import {Button, IconButton, Text} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import cn from 'classnames';
 import {createNewWidget} from 'store/widgets/data/helpers';
+import IconButton, {VARIANTS} from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {Modal, MultiDropDownList} from 'components/molecules';
+import Modal from 'components/molecules/Modal';
+import MultiDropDownList from 'components/molecules/MultiDropDownList';
 import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/WidgetAddPanel/types';
 import React, {Component, Fragment} from 'react';
 import {SIZES} from 'components/molecules/Modal/constants';
 import type {State} from './types';
 import styles from './styles.less';
+import Text from 'components/atoms/Text';
 import {TEXT_TYPES} from 'components/atoms/Text/constants';
 import type {TitleProps} from 'components/templates/WidgetForm/types';
 import {USER_ROLES} from 'store/context/constants';
 import type {Value} from 'components/molecules/MultiDropDownList/types';
-import {VARIANTS} from 'components/atoms/IconButton/constants';
-import {WidgetForm} from 'components/templates';
+import WidgetForm from 'components/templates/WidgetForm';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class WidgetAddPanel extends Component<Props, State> {

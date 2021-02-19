@@ -1,9 +1,15 @@
 // @flow
-import {AxisChartForm, CircleChartForm, ComboChartForm, Form, SpeedometerForm, SummaryForm, TableForm} from './components';
+import AxisChartForm from './components/AxisChartForm';
+import CircleChartForm from './components/CircleChartForm';
+import ComboChartForm from './components/ComboChartForm';
 import type {DivRef} from 'components/types';
+import Form from './components/Form';
 import type {Props} from 'containers/DiagramWidgetEditForm/types';
 import React, {Component, createContext, createRef} from 'react';
 import type {RenderFormProps} from './types';
+import SpeedometerForm from './components/SpeedometerForm';
+import SummaryForm from './components/SummaryForm';
+import TableForm from './components/TableForm';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export const formRef: DivRef = createRef();

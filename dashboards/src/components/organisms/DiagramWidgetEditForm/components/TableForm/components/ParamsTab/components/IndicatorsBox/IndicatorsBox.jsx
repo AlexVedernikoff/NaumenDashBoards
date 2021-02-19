@@ -1,12 +1,13 @@
 // @flow
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormBox} from 'components/molecules';
+import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultIndicator} from 'DiagramWidgetEditForm/helpers';
 import {hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
 import type {Indicator} from 'store/widgets/data/types';
-import {IndicatorFieldset, SortableList} from 'DiagramWidgetEditForm/components';
+import IndicatorFieldset from 'DiagramWidgetEditForm/components/IndicatorFieldset';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import SortableList from 'DiagramWidgetEditForm/components/SortableList';
 import withForm from 'DiagramWidgetEditForm/withForm';
 
 export class IndicatorsBox extends PureComponent<Props> {

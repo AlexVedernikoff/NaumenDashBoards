@@ -1,8 +1,9 @@
 // @flow
-import {DropDownList} from 'components/molecules';
-import {Loader, SearchInput} from 'components/atoms';
+import DropDownList from 'components/molecules/DropDownList';
+import Loader from 'components/atoms/Loader';
 import type {Props, Root, State} from './types';
 import React, {PureComponent} from 'react';
+import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import Text, {TEXT_TYPES} from 'components/atoms/Text';
 

@@ -1,7 +1,10 @@
 // @flow
-import {AbsolutePortal, CollapsableFormBox, ColorPicker, FormField} from 'components/molecules';
+import AbsolutePortal from 'components/molecules/AbsolutePortal';
+import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
+import ColorPicker from 'components/molecules/ColorPicker';
 import {DEFAULT_COLORS} from 'utils/chart/constants';
 import type {DivRef} from 'components/types';
+import FormField from 'components/molecules/FormField';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';

@@ -1,13 +1,17 @@
 // @flow
-import {Checkbox, TextArea} from 'components/atoms';
+import Checkbox from 'components/atoms/Checkbox';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormCheckControl, MultiDropDownList, Select, ToggableFormBox} from 'components/molecules';
-import {FormField} from 'DiagramWidgetEditForm/components';
+import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormField from 'DiagramWidgetEditForm/components/FormField';
 import type {MenuProps} from 'components/molecules/Select/types';
+import MultiDropDownList from 'components/molecules/MultiDropDownList';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import TextArea from 'components/atoms/TextArea';
+import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class NavigationBox extends PureComponent<Props> {
 	handleChangeTip = (event: OnChangeInputEvent) => {

@@ -1,12 +1,15 @@
 // @flow
 import type {Components, Props, State} from './types';
 import {debounce} from 'helpers';
-import {MultiValueContainer, ValueContainer} from 'components/molecules/MaterialSelect/components';
-import {Node, Tree} from './components';
+import MultiValueContainer from 'components/molecules/MaterialSelect/components/MultiValueContainer';
+import Node from './components/Node';
 import type {Node as NodeType} from './components/Tree/types';
-import {OutsideClickDetector, SearchInput} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {Component} from 'react';
+import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
+import Tree from './components/Tree';
+import ValueContainer from 'components/molecules/MaterialSelect/components/ValueContainer';
 
 export class MaterialTreeSelect extends Component<Props, State> {
 	static defaultProps = {

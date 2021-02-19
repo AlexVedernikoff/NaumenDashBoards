@@ -2,7 +2,7 @@
 import ExportByEmailForm from 'containers/ExportByEmailForm';
 import {IconButton} from 'components/organisms/DashboardHeader/components';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

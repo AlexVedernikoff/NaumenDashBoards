@@ -1,10 +1,14 @@
 // @flow
-import {ColorsBox, DataLabelsBox, HeaderBox, LegendBox, SortingBox} from 'DiagramWidgetEditForm/components';
+import ColorsBox from 'DiagramWidgetEditForm/components/ColorsBox';
+import DataLabelsBox from 'DiagramWidgetEditForm/components/DataLabelsBox';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {DEFAULT_CIRCLE_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
+import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
+import LegendBox from 'DiagramWidgetEditForm/components/LegendBox';
 import React, {Component} from 'react';
+import SortingBox from 'DiagramWidgetEditForm/components/SortingBox';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';
 

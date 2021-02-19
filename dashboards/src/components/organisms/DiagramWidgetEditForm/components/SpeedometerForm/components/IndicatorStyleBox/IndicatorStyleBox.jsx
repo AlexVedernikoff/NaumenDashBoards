@@ -1,8 +1,9 @@
 // @flow
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormField, ToggableFormBox} from 'components/molecules';
+import FormField from 'components/molecules/FormField';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class IndicatorBox extends PureComponent<Props> {

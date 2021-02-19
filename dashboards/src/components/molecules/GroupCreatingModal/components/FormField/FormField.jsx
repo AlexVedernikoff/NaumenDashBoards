@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {Label} from 'components/atoms';
+import Label from 'components/atoms/Label';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

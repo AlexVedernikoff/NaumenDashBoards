@@ -1,6 +1,6 @@
 // @flow
-import {MaterialSelect} from 'components/molecules/index';
-import {MaterialTextInput} from 'components/atoms';
+import MaterialSelect from 'components/molecules/MaterialSelect';
+import MaterialTextInput from 'components/atoms/MaterialTextInput';
 import {OPTIONS} from './constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

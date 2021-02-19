@@ -1,7 +1,9 @@
 // @flow
-import {Button, Loader} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import {FixedSizeList} from 'react-window';
-import {ListMessage, ListOption} from 'components/molecules/Select/components';
+import ListMessage from 'components/molecules/Select/components/ListMessage';
+import ListOption from 'components/molecules/Select/components/ListOption';
+import Loader from 'components/atoms/Loader';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

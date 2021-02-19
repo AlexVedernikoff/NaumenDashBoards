@@ -1,5 +1,6 @@
 // @flow
-import {CollapsableFormBox, FormField} from 'components/molecules';
+import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
+import FormField from 'components/molecules/FormField';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';

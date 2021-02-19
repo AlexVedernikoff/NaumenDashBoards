@@ -1,11 +1,11 @@
 // @flow
-import {Button, Loader} from 'components/atoms';
-import {ListMessage} from 'components/molecules/Select/components';
+import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
+import ListMessage from 'components/molecules/Select/components/ListMessage';
+import Loader from 'components/atoms/Loader';
 import Node from 'components/molecules/MaterialTreeSelect/components/Node';
 import type {Node as NodeType, Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
-import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class Tree extends Component<Props, State> {
 	static defaultProps = {

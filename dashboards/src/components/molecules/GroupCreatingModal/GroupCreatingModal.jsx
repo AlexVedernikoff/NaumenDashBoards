@@ -2,16 +2,19 @@
 import CustomGroup from './components/CustomGroup/CustomGroup';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from './constants';
-import {FormField, SystemGroup} from './components';
+import FormField from './components/FormField';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
-import {Label, RadioField, TextInput} from 'components/atoms';
-import {Modal} from 'components/molecules';
+import Label from 'components/atoms/Label';
+import Modal from 'components/molecules/Modal';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import type {Props as SystemProps} from './components/SystemGroup/types';
+import RadioField from 'components/atoms/RadioField';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import SystemGroup from './components/SystemGroup';
+import TextInput from 'components/atoms/TextInput';
 
 export class GroupCreatingModal extends Component<Props, State> {
 	static defaultProps = {

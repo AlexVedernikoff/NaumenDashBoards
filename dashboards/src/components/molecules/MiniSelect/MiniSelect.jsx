@@ -3,7 +3,7 @@ import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
 import type {Option, Props, State} from './types';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 

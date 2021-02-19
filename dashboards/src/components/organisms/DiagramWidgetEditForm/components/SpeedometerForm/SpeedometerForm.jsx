@@ -5,10 +5,11 @@ import {extend} from 'helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
-import {ParamsTab, StyleTab} from './components';
+import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import type {SpeedometerData, SpeedometerWidget, Widget} from 'store/widgets/data/types';
+import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 export class SpeedometerForm extends Component<TypedFormProps> {

@@ -1,5 +1,7 @@
 // @flow
-import {Header as DefaultHeader, List as DefaultList, ListItem as DefaultListItem} from './components';
+import DefaultHeader from './components/Header';
+import DefaultList from './components/List';
+import DefaultListItem from './components/ListItem';
 import type {Node, Value} from 'components/molecules/MultiDropDownList/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';

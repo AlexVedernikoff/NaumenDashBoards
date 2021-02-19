@@ -1,10 +1,10 @@
 // @flow
-import {IconButton, Text} from 'components/atoms';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import {TEXT_TYPES} from 'components/atoms/Text';
+import Text, {TEXT_TYPES} from 'components/atoms/Text';
 
 export class Header extends PureComponent<Props> {
 	renderCaret = () => {

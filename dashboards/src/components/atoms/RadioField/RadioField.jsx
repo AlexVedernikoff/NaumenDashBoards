@@ -1,7 +1,7 @@
 // @flow
-import {FormCheckControl} from 'components/molecules';
+import FormCheckControl from 'components/molecules/FormCheckControl';
 import type {Props} from './types';
-import {RadioButton} from 'components/atoms';
+import RadioButton from 'components/atoms/RadioButton';
 import React, {PureComponent} from 'react';
 
 export class RadioField extends PureComponent<Props> {

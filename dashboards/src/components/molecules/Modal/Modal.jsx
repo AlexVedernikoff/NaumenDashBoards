@@ -1,5 +1,5 @@
 // @flow
-import {Button} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import cn from 'classnames';
 import {createPortal} from 'react-dom';
 import {FOOTER_POSITIONS, SIZES} from './constants';

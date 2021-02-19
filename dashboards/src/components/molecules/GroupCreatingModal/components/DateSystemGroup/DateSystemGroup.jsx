@@ -12,11 +12,12 @@ import {
 	YEAR_FORMATS
 } from './constants';
 import {DATETIME_SYSTEM_GROUP} from 'store/widgets/constants';
-import {FormField, SystemGroup} from 'components/molecules/GroupCreatingModal/components';
+import FormField from 'components/molecules/GroupCreatingModal/components/FormField';
 import type {Group} from 'store/widgets/data/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import {Select} from 'components/molecules/index';
+import Select from 'components/molecules/Select';
+import SystemGroup from 'components/molecules/GroupCreatingModal/components/SystemGroup';
 
 export class DateSystemGroup extends PureComponent<Props, State> {
 	state = {

@@ -1,7 +1,7 @@
 // @flow
-import {AbsolutePortal, ColorPicker} from 'components/molecules';
+import AbsolutePortal from 'components/molecules/AbsolutePortal';
 import cn from 'classnames';
-import {Input} from './components';
+import Input from './components/Input';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';

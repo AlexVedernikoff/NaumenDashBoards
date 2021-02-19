@@ -1,6 +1,7 @@
 // @flow
-import {ExtendButton, LegacyCheckbox as Checkbox} from 'components/atoms';
-import {FormField} from 'DiagramWidgetEditForm/components';
+import Checkbox from 'components/atoms/LegacyCheckbox';
+import ExtendButton from 'components/atoms/ExtendButton';
+import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDescriptorCases} from 'helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {isSourceType} from 'store/sources/data/helpers';
@@ -10,7 +11,7 @@ import type {Props} from './types';
 import React, {Component} from 'react';
 import type {SourceData} from 'containers/DiagramWidgetEditForm/types';
 import styles from './styles.less';
-import {TreeSelect} from 'components/molecules';
+import TreeSelect from 'components/molecules/TreeSelect';
 
 export class SourceFieldset extends Component<Props> {
 	static defaultProps = {

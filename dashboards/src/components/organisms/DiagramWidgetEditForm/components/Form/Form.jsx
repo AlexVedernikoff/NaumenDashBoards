@@ -5,7 +5,7 @@ import type {Node} from 'react';
 import type {Props, State, Tab} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
-import {WidgetForm} from 'components/templates';
+import WidgetForm from 'components/templates/WidgetForm';
 
 export class Form extends Component<Props, State> {
 	static defaultProps = {

@@ -1,9 +1,11 @@
 // @flow
-import {CheckIconButtonGroup, FormBox, FormField} from 'components/molecules';
+import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
 import {DEFAULT_TEXT_WIDGET_SETTINGS, FIELDS} from 'components/organisms/TextWidgetEditForm/constants';
 import {EditorState, Modifier, RichUtils} from 'draft-js';
 import {FONT_SIZE_OPTIONS} from './constants';
 import {FONT_STYLES} from 'store/widgets/data/constants';
+import FormBox from 'components/molecules/FormBox';
+import FormField from 'components/molecules/FormField';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';

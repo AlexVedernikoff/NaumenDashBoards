@@ -1,12 +1,13 @@
 // @flow
-import {CheckIconButtonGroup, CollapsableFormBox} from 'components/molecules';
+import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
 import cn from 'classnames';
+import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import type {Components, Props, SortingValueOption, State} from './types';
 import Container from 'components/atoms/Container';
 import {FIELDS} from 'DiagramWidgetEditForm';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent} from 'components/types';
-import {RadioField} from 'components/atoms';
+import RadioField from 'components/atoms/RadioField';
 import React, {PureComponent} from 'react';
 import {SORTING_OPTIONS} from './constants';
 import {SORTING_TYPES} from 'store/widgets/data/constants';

@@ -1,5 +1,5 @@
 // @flow
-import {Label} from 'components/atoms';
+import Label from 'components/atoms/Label';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';

@@ -1,6 +1,7 @@
 // @flow
-import {CheckIconButton, Icon} from 'components/atoms';
+import CheckIconButton from 'components/atoms/CheckIconButton';
 import cn from 'classnames';
+import Icon from 'components/atoms/Icon';
 import type {Icon as IconType, Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

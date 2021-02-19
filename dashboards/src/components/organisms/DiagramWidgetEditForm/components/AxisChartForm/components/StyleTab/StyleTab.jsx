@@ -1,6 +1,7 @@
 // @flow
 import AxisSettingsBox from 'DiagramWidgetEditForm/components/AxisChartForm/components/AxisSettingsBox';
-import {ColorsBox, DataLabelsBox, HeaderBox, LegendBox, SortingBox} from 'DiagramWidgetEditForm/components';
+import ColorsBox from 'DiagramWidgetEditForm/components/ColorsBox';
+import DataLabelsBox from 'DiagramWidgetEditForm/components/DataLabelsBox';
 import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
@@ -8,8 +9,11 @@ import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {getLegendSettings} from 'utils/chart/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
+import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
+import LegendBox from 'DiagramWidgetEditForm/components/LegendBox';
 import type {OnChangeInputEvent} from 'components/types';
 import React, {Component} from 'react';
+import SortingBox from 'DiagramWidgetEditForm/components/SortingBox';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';
 

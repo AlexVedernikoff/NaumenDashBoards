@@ -1,7 +1,10 @@
 // @flow
-import {Caret, IndicatorsContainer, List, Menu, ValueContainer, ValueLabel} from './components';
+import Caret from './components/Caret';
 import cn from 'classnames';
-import {Loader, OutsideClickDetector, TextInput} from 'components/atoms';
+import IndicatorsContainer from './components/IndicatorsContainer';
+import List from './components/List';
+import Loader from 'components/atoms/Loader';
+import Menu from './components/Menu';
 import type {
 	MenuProps,
 	Option,
@@ -9,8 +12,12 @@ import type {
 	State
 } from './types';
 import type {OnChangeInputEvent} from 'components/types';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import TextInput from 'components/atoms/TextInput';
+import ValueContainer from './components/ValueContainer';
+import ValueLabel from './components/ValueLabel';
 
 export class Select extends PureComponent<Props, State> {
 	static defaultProps = {

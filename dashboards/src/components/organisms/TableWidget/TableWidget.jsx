@@ -5,7 +5,7 @@ import {
 	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
 	META_CLASS_VALUE_SEPARATOR
 } from 'store/widgets/buildData/constants';
-import {Cell, HeaderCell} from 'components/organisms/Table/components';
+import Cell from 'Table/components/Cell';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
 import type {Column, ColumnType, ParameterColumn, Props, Row, State} from './types';
 import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
@@ -13,6 +13,7 @@ import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
+import HeaderCell from 'Table/components/HeaderCell';
 import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
@@ -20,8 +21,8 @@ import type {Props as HeaderCellProps} from 'components/organisms/Table/componen
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
-import {Table} from 'components/organisms';
-import {ValueWithLimitWarning} from './components';
+import Table from 'components/organisms/Table';
+import ValueWithLimitWarning from './components/ValueWithLimitWarning';
 
 export class TableWidget extends PureComponent<Props, State> {
 	tableRef: Ref<typeof Table> = createRef();

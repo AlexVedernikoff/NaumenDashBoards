@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {ExtendButton} from 'components/atoms';
+import ExtendButton from 'components/atoms/ExtendButton';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

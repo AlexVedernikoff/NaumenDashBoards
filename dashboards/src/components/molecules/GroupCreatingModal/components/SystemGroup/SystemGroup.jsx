@@ -1,9 +1,9 @@
 // @flow
-import {FormField} from 'components/molecules/GroupCreatingModal/components';
+import FormField from 'components/molecules/GroupCreatingModal/components/FormField';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import {Select} from 'components/molecules/index';
+import Select from 'components/molecules/Select';
 
 export class SystemGroup extends PureComponent<Props, State> {
 	state = {

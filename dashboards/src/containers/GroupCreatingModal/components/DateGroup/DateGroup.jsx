@@ -1,7 +1,7 @@
 // @flow
 import type {AttributeGroupProps} from 'containers/GroupCreatingModal/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {BetweenOperand, SimpleOperand} from 'CustomGroup/components';
+import BetweenOperand from 'CustomGroup/components/BetweenOperand';
 import type {
 	BetweenOperand as BetweenOperandType,
 	CustomGroup,
@@ -12,12 +12,13 @@ import type {
 import {BETWEEN_RULE, INTEGER_RULE} from 'CustomGroup/schema';
 import {createBetweenOperand, createDefaultOperand, createSimpleOperand} from 'CustomGroup/helpers';
 import {CUSTOM_OPTIONS, DATETIME_SYSTEM_OPTIONS, SYSTEM_OPTIONS} from './constants';
-import {DateSystemGroup} from 'components/molecules/GroupCreatingModal/components';
+import DateSystemGroup from 'components/molecules/GroupCreatingModal/components/DateSystemGroup';
 import {DATETIME_SYSTEM_GROUP} from 'store/widgets/constants';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props as SystemGroupProps} from 'components/molecules/GroupCreatingModal/components/SystemGroup/types';
 import React, {Component} from 'react';
+import SimpleOperand from 'CustomGroup/components/SimpleOperand';
 
 export class DateGroup extends Component<AttributeGroupProps> {
 	createCustomCondition = (type: OperandType = OPERAND_TYPES.BETWEEN) => {

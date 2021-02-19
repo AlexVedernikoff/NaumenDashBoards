@@ -1,5 +1,5 @@
 // @flow
-import {Chart} from 'components/molecules';
+import Chart from 'components/molecules/Chart';
 import cn from 'classnames';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
@@ -8,8 +8,10 @@ import {PADDING} from './constants';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
 import settingsStyles from 'styles/settings.less';
-import {SpeedometerWidget, SummaryWidget, TableWidget} from 'components/organisms';
+import SpeedometerWidget from 'components/organisms/SpeedometerWidget';
 import styles from './styles.less';
+import SummaryWidget from 'components/organisms/SummaryWidget';
+import TableWidget from 'components/organisms/TableWidget';
 import type {TableWidget as TableWidgetType} from 'store/widgets/data/types';
 
 export class Diagram extends Component<Props, State> {

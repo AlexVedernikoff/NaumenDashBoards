@@ -1,10 +1,12 @@
 // @flow
-import {CheckIconButtonGroup, FormField, ToggableFormBox} from 'components/molecules';
+import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import FormField from 'components/molecules/FormField';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class LegendBox extends PureComponent<Props> {

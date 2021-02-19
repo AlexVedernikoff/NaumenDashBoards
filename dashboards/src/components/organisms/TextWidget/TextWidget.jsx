@@ -5,7 +5,7 @@ import {escapeString} from 'helpers';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import {TextEditor} from 'components/atoms';
+import TextEditor from 'components/atoms/TextEditor';
 
 export class TextWidget extends PureComponent<Props, State> {
 	state = {

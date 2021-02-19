@@ -1,9 +1,9 @@
 // @flow
-import {FormBox} from 'components/molecules';
+import FormBox from 'components/molecules/FormBox';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {Toggle} from 'components/atoms';
+import Toggle from 'components/atoms/Toggle';
 
 export class ToggableFormBox extends PureComponent<Props> {
 	static defaultProps = {

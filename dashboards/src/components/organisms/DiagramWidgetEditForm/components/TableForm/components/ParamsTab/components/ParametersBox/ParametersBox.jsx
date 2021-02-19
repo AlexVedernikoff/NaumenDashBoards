@@ -1,11 +1,12 @@
 // @flow
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormBox} from 'components/molecules';
+import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
 import type {Parameter} from 'containers/DiagramWidgetEditForm/types';
-import {ParameterFieldset, SortableList} from 'DiagramWidgetEditForm/components';
+import ParameterFieldset from 'DiagramWidgetEditForm/components/ParameterFieldset';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import SortableList from 'DiagramWidgetEditForm/components/SortableList';
 import withForm from 'DiagramWidgetEditForm/withForm';
 
 export class ParametersBox extends PureComponent<Props> {
