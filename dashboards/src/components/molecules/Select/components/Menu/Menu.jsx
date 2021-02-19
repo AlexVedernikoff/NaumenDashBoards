@@ -1,10 +1,11 @@
 // @flow
 import cn from 'classnames';
-import {CreationPanel, SearchInput} from 'components/atoms';
+import CreationPanel from 'components/atoms/CreationPanel';
 import {debounce} from 'helpers';
 import type {InputRef} from 'components/types';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
+import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 
 export class Menu extends Component<Props, State> {

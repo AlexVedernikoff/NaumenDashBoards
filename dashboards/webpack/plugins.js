@@ -3,6 +3,7 @@
 
 const CopyPlugin = require('copy-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
@@ -27,7 +28,8 @@ const plugins = [
 		template: './src/index.html',
 		title: 'SMP Embedded Application'
 	}),
-	new Dotenv()
+	new Dotenv(),
+	new CircularDependencyPlugin()
 ];
 
 if (license === 'use') {

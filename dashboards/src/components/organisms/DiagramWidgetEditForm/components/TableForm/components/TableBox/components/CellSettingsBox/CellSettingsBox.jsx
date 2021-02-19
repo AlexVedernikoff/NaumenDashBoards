@@ -1,5 +1,5 @@
 // @flow
-import {FormField} from 'components/molecules';
+import FormField from 'components/molecules/FormField';
 import type {InputValue, OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

@@ -1,13 +1,19 @@
 // @flow
-import {Body, Cell, Footer, Header, HeaderCell, Pagination, Row} from './components';
+import Body from './components/Body';
+import Cell from './components/Cell';
 import cn from 'classnames';
 import type {Column, ColumnsWidth, Components, FixedPositions, Props, State, ValueProps} from './types';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import {DEFAULT_TABLE_SETTINGS} from './constants';
+import Footer from './components/Footer';
+import Header from './components/Header';
+import HeaderCell from './components/HeaderCell';
 import {isLegacyBrowser} from 'utils/export/helpers';
+import Pagination from './components/Pagination';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
-import {ResizeDetector} from 'components/molecules';
+import ResizeDetector from 'components/molecules/ResizeDetector';
+import Row from './components/Row';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 import {sumColumnsWidth} from './helpers';

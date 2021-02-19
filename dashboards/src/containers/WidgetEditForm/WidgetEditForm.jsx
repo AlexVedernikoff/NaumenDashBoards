@@ -11,7 +11,7 @@ import {functions, props} from './selectors';
 import type {LayoutSize} from 'components/organisms/DiagramWidgetEditForm/types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import React, {PureComponent} from 'react';
-import {TextWidgetEditForm} from 'components/organisms';
+import TextWidgetEditForm from 'components/organisms/TextWidgetEditForm';
 import type {UpdateWidget} from 'containers/WidgetEditForm/types';
 
 class WidgetEditForm extends PureComponent<Props, State> {

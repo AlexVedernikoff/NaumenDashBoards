@@ -1,9 +1,8 @@
 // @flow
-import {Button} from 'components/atoms';
+import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 
 export class FormFooter extends PureComponent<Props> {
 	renderResetButton = () => {

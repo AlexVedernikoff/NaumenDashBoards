@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Item} from 'store/sources/currentObject/types';
-import {MaterialTreeSelect} from 'components/molecules';
+import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import type {SelectData} from 'store/customGroups/types';

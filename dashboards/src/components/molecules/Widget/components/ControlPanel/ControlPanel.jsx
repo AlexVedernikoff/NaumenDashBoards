@@ -2,14 +2,15 @@
 import cn from 'classnames';
 import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
-import {DropDownButton} from 'components/molecules/Widget/components';
-import {DropdownMenu, IconButton} from 'components/atoms';
+import DropDownButton from 'components/molecules/Widget/components/DropDownButton';
+import DropdownMenu from 'components/atoms/DropdownMenu';
 import {EXPORT_LIST} from './constants';
 import {FILE_VARIANTS} from 'utils/export';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {Item as MenuItem, SubMenu} from 'rc-menu';
-import {Modal} from 'components/molecules';
+import Modal from 'components/molecules/Modal';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

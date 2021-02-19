@@ -4,7 +4,7 @@ import {getMainDataSet, getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {hasMSInterval, parseMSInterval} from 'store/widgets/helpers';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {Summary} from 'components/molecules';
+import Summary from 'components/molecules/Summary';
 
 export class SummaryWidget extends PureComponent<Props> {
 	handleClickValue = () => {

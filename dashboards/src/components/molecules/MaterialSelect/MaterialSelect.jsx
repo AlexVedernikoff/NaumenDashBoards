@@ -1,10 +1,11 @@
 // @flow
 import {List, Menu} from 'components/molecules/Select/components';
-import {MultiValueContainer, ValueContainer} from './components';
+import MultiValueContainer from './components/MultiValueContainer';
 import type {Option, Props, State} from './types';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import ValueContainer from './components/ValueContainer';
 
 export class MaterialSelect extends PureComponent<Props, State> {
 	static defaultProps = {

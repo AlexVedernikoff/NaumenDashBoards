@@ -1,8 +1,8 @@
 // @flow
 import {IconButton} from 'components/organisms/DashboardHeader/components';
-import {MenuItem} from './components';
+import MenuItem from './components/MenuItem';
 import type {MenuItem as MenuItemType, Props, State} from './types';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 

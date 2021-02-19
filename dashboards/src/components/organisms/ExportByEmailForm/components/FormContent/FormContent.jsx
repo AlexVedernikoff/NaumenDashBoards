@@ -1,10 +1,10 @@
 // @flow
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {Slider} from 'components/molecules';
+import Slider from 'components/molecules/Slider';
 import styles from './styles.less';
 import type {User} from 'store/users/types';
-import {UserField} from 'components/organisms/ExportByEmailForm/components';
+import UserField from 'components/organisms/ExportByEmailForm/components/UserField';
 
 export class FormContent extends PureComponent<Props> {
 	renderField = (value: User, index: number) => {

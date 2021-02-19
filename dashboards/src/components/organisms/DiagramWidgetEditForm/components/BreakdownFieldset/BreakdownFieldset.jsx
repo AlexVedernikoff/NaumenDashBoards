@@ -1,9 +1,11 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {AttributeFieldset, AttributeGroupField, FormField} from 'DiagramWidgetEditForm/components';
+import AttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldset';
+import AttributeGroupField from 'DiagramWidgetEditForm/components/AttributeGroupField';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {DefaultBreakdown} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import type {Group} from 'store/widgets/data/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';

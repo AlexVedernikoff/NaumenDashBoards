@@ -1,14 +1,18 @@
 // @flow
-import {Checkbox, ExtendButton, Label, RadioField} from 'components/atoms';
+import Checkbox from 'components/atoms/Checkbox';
 import {deepClone} from 'helpers';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
-import {FieldDivider} from 'DiagramWidgetEditForm/components';
+import ExtendButton from 'components/atoms/ExtendButton';
+import FieldDivider from 'DiagramWidgetEditForm/components/FieldDivider';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormCheckControl, FormField} from 'components/molecules';
+import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormField from 'components/molecules/FormField';
+import Label from 'components/atoms/Label';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
+import RadioField from 'components/atoms/RadioField';
 import type {Range} from 'store/widgets/data/types';
-import {RangeField} from 'DiagramWidgetEditForm/components/SpeedometerForm/components';
+import RangeField from 'DiagramWidgetEditForm/components/SpeedometerForm/components/RangeField';
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';

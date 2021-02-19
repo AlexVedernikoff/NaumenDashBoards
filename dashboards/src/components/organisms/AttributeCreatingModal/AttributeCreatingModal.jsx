@@ -1,13 +1,14 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {Button, InfoPanel} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import {ConstantControl, OperatorControl, SourceControl} from './components';
 import type {Control, ControlType, Props, State} from './types';
 import {CONTROL_TYPES, MATH_OPERATORS, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
 import {getAggregationLabel} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import {getMapValues, isObject} from 'helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {Modal} from 'components/molecules';
+import InfoPanel from 'components/atoms/InfoPanel';
+import Modal from 'components/molecules/Modal';
 import React, {PureComponent} from 'react';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import styles from './styles.less';

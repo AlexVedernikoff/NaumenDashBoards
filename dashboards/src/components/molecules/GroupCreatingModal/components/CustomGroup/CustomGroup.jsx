@@ -1,21 +1,23 @@
 // @flow
-import {Button, FieldError, InfoPanel, Text} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import {createNewSubGroup} from './helpers';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
+import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {FormField} from 'components/molecules/GroupCreatingModal/components';
+import FormField from 'components/molecules/GroupCreatingModal/components/FormField';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import InfoPanel from 'components/atoms/InfoPanel';
 import type {InputRef, OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import React, {Component, createContext, createRef, Fragment} from 'react';
 import schema from './schema';
-import {Select} from 'components/molecules';
+import Select from 'components/molecules/Select';
 import styles from './styles.less';
-import {SubGroupSection} from './components';
-import {TEXT_TYPES} from 'components/atoms/Text/constants';
+import SubGroupSection from './components/SubGroupSection';
+import Text, {TEXT_TYPES} from 'components/atoms/Text';
 import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';

@@ -1,16 +1,20 @@
 // @flow
 import AutoUpdateButton from 'containers/AutoUpdateButton';
-import {Button, ButtonGroup} from 'components/atoms';
+import Button from 'components/atoms/Button';
+import ButtonGroup from 'components/atoms/ButtonGroup';
 import {createContextName} from 'utils/export/helpers';
 import {createSnapshot} from 'utils/export';
 import {DASHBOARD_HEADER_HEIGHT, EXPORT_LIST} from './constants';
-import {DropDownButton, ExportByEmailButton, IconButton, NavItem} from './components';
+import DropDownButton from './components/DropDownButton';
+import ExportByEmailButton from './components/ExportByEmailButton';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/DashboardContent';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import IconButton from './components/IconButton';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
-import {Modal} from 'components/molecules';
+import Modal from 'components/molecules/Modal';
+import NavItem from './components/NavItem';
 import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component} from 'react';
 import type {State} from './types';

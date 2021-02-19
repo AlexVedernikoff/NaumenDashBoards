@@ -1,13 +1,16 @@
 // @flow
-import {Button, LegacyCheckbox as Checkbox, Popover, TimerButton} from 'components/atoms';
+import Button from 'components/atoms/Button';
+import Checkbox from 'components/atoms/LegacyCheckbox';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import {IconButton} from 'components/organisms/DashboardHeader/components';
 import {MAX_INTERVAL} from './constants';
 import {number, object} from 'yup';
+import Popover from 'components/atoms/Popover';
 import type {Props, State, Values} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import TimerButton from 'components/atoms/TimerButton';
 import {USER_ROLES} from 'store/context/constants';
 
 export class AutoUpdateButton extends PureComponent<Props, State> {

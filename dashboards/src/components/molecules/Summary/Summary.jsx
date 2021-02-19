@@ -3,7 +3,7 @@ import cn from 'classnames';
 import {FONT_SIZE_AUTO_OPTION, FONT_STYLES} from 'store/widgets/data/constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import {ResizeDetector} from 'components/molecules';
+import ResizeDetector from 'components/molecules/ResizeDetector';
 import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
 

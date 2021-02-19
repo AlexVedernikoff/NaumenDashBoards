@@ -1,10 +1,13 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {AttributeAggregationField, AttributeFieldset, ComputedAttributeEditor, FormField} from 'DiagramWidgetEditForm/components';
-import {AttributeCreatingModal} from 'components/organisms';
+import AttributeAggregationField from 'DiagramWidgetEditForm/components/AttributeAggregationField';
+import AttributeCreatingModal from 'components/organisms/AttributeCreatingModal';
+import AttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldset';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {ComputedAttr} from 'store/widgets/data/types';
+import ComputedAttributeEditor from 'DiagramWidgetEditForm/components/ComputedAttributeEditor';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import type {Indicator} from 'containers/DiagramWidgetEditForm/types';
 import type {OnSelectEvent} from 'components/types';

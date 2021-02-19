@@ -1,7 +1,8 @@
 // @flow
 import cn from 'classnames';
-import {ColorInput, FormField} from 'components/molecules';
+import ColorInput from 'components/molecules/ColorInput';
 import {FIELDS} from 'DiagramWidgetEditForm';
+import FormField from 'components/molecules/FormField';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
@@ -9,7 +10,7 @@ import type {Props as ColorInputProps} from 'components/molecules/ColorInput/com
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import {TextInput} from 'components/atoms';
+import TextInput from 'components/atoms/TextInput';
 
 export class RangeField extends PureComponent<Props> {
 	getColorBrightness = (color: string) => Math.round(

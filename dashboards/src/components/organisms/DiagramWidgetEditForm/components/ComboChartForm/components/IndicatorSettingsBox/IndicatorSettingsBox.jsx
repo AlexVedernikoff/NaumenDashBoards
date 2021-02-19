@@ -1,14 +1,19 @@
 // @flow
-import {Checkbox, HorizontalLabel, LegacyCheckbox, TextInput} from 'components/atoms';
-import {CollapsableFormBox, FormCheckControl, FormField} from 'components/molecules';
+import Checkbox from 'components/atoms/Checkbox';
+import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormField from 'components/molecules/FormField';
 import {getDefaultComboYAxisName} from 'store/widgets/data/helpers';
+import HorizontalLabel from 'components/atoms/HorizontalLabel';
+import LegacyCheckbox from 'components/atoms/LegacyCheckbox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import TextInput from 'components/atoms/TextInput';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class IndicatorSettingsBox extends PureComponent<Props, State> {

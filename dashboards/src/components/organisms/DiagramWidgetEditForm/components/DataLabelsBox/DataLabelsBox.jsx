@@ -1,10 +1,11 @@
 // @flow
-import {Checkbox} from 'components/atoms';
+import Checkbox from 'components/atoms/Checkbox';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {FormField, ToggableFormBox} from 'components/molecules';
+import FormField from 'components/molecules/FormField';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class DataLabelsBox extends PureComponent<Props> {

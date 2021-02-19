@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {DatepickerControl} from 'components/atoms';
+import DatepickerControl from 'components/atoms/DatepickerControl';
 import {LIMIT_DAYS, WEEK_LABELS, WEEKEND_DAYS} from './constants';
 import moment from 'moment';
 import type {Props as ControlProps} from 'components/atoms/DatepickerControl/types';

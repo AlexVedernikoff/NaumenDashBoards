@@ -2,7 +2,7 @@
 import 'rc-menu/assets/index.css';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import Menu from 'rc-menu';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

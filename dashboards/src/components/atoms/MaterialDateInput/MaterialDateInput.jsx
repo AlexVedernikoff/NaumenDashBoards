@@ -1,8 +1,8 @@
 // @flow
-import {Datepicker} from 'components/molecules';
+import Datepicker from 'components/molecules/Datepicker';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import moment from 'moment';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

@@ -5,15 +5,17 @@ import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {EditorState, OnChangeEvent} from 'components/atoms/TextEditor/types';
 import {FIELDS, HOT_KEYS, HOT_KEYS_COMMANDS} from './constants';
 import {FONT_STYLES, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {FormBox, FormField, Select} from 'components/molecules';
+import FormBox from 'components/molecules/FormBox';
+import FormField from 'components/molecules/FormField';
 import type {InjectedProps as Props, Values} from 'containers/WidgetEditForm/types';
 import type {OnSelectEvent, Ref} from 'components/types';
 import React, {createRef, PureComponent} from 'react';
-import {StyleBox} from './components';
+import Select from 'components/molecules/Select';
+import StyleBox from './components/StyleBox';
 import styles from './styles.less';
-import {TextEditor} from 'components/atoms';
+import TextEditor from 'components/atoms/TextEditor';
 import type {TextSettings, TextWidget, Widget} from 'store/widgets/data/types';
-import {WidgetForm} from 'components/templates';
+import WidgetForm from 'components/templates/WidgetForm';
 
 export class TextWidgetEditForm extends PureComponent<Props> {
 	editorRef: Ref<typeof TextEditor> = createRef();

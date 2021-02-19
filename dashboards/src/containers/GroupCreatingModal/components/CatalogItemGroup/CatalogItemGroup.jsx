@@ -2,7 +2,7 @@
 import {connect} from 'react-redux';
 import {createCustomGroupType} from 'containers/GroupCreatingModal/helpers';
 import {createDefaultOperand, createMultiSelectOperand, createSimpleOperand} from 'CustomGroup/helpers';
-import {CurrentObjectOperand, MultiSelectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
+import CurrentObjectOperand from 'CustomGroup/components/CurrentObjectOperand';
 import type {
 	CustomGroup,
 	MultiSelectOperand as MultiSelectOperandType,
@@ -13,13 +13,16 @@ import type {
 } from 'store/customGroups/types';
 import {CUSTOM_OPTIONS} from './constants';
 import {functions, props} from './selectors';
-import {MaterialTreeSelect} from 'components/molecules';
+import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
+import MultiSelectOperand from 'CustomGroup/components/MultiSelectOperand';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
 import type {RenderProps as MultiSelectRenderProps} from 'CustomGroup/components/MultiSelectOperand/types';
+import SelectOperand from 'CustomGroup/components/SelectOperand';
+import SimpleOperand from 'CustomGroup/components/SimpleOperand';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class CatalogItemGroup extends Component<Props> {

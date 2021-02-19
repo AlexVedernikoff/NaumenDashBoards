@@ -1,15 +1,24 @@
 // @flow
-import {Checkbox, FieldError, TextArea, Toggle} from 'components/atoms';
+import Checkbox from 'components/atoms/Checkbox';
 import type {CheckboxProps, IndicatorBoxProps, Props, TextAreaProps} from './types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
+import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {FormBox, FormCheckControl, OuterSelect, Select} from 'components/molecules';
-import {FormField, IndicatorDataBox, NavigationBox, ParameterDataBox} from 'DiagramWidgetEditForm/components';
+import FormBox from 'components/molecules/FormBox';
+import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormField from 'DiagramWidgetEditForm/components/FormField';
+import IndicatorDataBox from 'DiagramWidgetEditForm/components/IndicatorDataBox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
+import NavigationBox from 'DiagramWidgetEditForm/components/NavigationBox';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import OuterSelect from 'components/molecules/OuterSelect';
+import ParameterDataBox from 'DiagramWidgetEditForm/components/ParameterDataBox';
 import React, {Component, Fragment} from 'react';
+import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import TextArea from 'components/atoms/TextArea';
+import Toggle from 'components/atoms/Toggle';
 import {USER_ROLES} from 'store/context/constants';
 import {WIDGET_OPTIONS} from './constants';
 import withForm from 'DiagramWidgetEditForm/withForm';

@@ -5,7 +5,7 @@ import {CUSTOM_OPTIONS} from './constants';
 import {functions, props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import {RefGroup} from 'containers/GroupCreatingModal/components';
+import RefGroup from 'containers/GroupCreatingModal/components/RefGroup';
 
 export class StateGroup extends Component<Props> {
 	handleLoadData = () => {

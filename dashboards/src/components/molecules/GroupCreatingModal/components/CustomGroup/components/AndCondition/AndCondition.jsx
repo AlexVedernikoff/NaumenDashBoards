@@ -1,7 +1,7 @@
 // @flow
-import {Button} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import cn from 'classnames';
-import {OrCondition} from 'CustomGroup/components';
+import OrCondition from 'CustomGroup/components/OrCondition';
 import type {OrCondition as OrConditionType} from 'CustomGroup/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

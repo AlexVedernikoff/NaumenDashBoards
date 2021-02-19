@@ -1,7 +1,8 @@
 // @flow
-import {AxisSettingsBox} from 'DiagramWidgetEditForm/components/AxisChartForm/components';
-import {ColorsBox, DataLabelsBox, HeaderBox, LegendBox, SortingBox} from 'DiagramWidgetEditForm/components';
-import {Container} from 'components/atoms';
+import AxisSettingsBox from 'DiagramWidgetEditForm/components/AxisChartForm/components/AxisSettingsBox';
+import ColorsBox from 'DiagramWidgetEditForm/components/ColorsBox';
+import Container from 'components/atoms/Container';
+import DataLabelsBox from 'DiagramWidgetEditForm/components/DataLabelsBox';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
@@ -11,11 +12,14 @@ import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getLegendSettings} from 'utils/chart/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
-import {IndicatorSettingsBox} from 'DiagramWidgetEditForm/components/ComboChartForm/components';
+import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
+import IndicatorSettingsBox from 'DiagramWidgetEditForm/components/ComboChartForm/components/IndicatorSettingsBox';
+import LegendBox from 'DiagramWidgetEditForm/components/LegendBox';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component, Fragment} from 'react';
-import {Select} from 'components/molecules';
+import Select from 'components/molecules/Select';
+import SortingBox from 'DiagramWidgetEditForm/components/SortingBox';
 import type {SortingValue} from 'store/widgets/data/types';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';

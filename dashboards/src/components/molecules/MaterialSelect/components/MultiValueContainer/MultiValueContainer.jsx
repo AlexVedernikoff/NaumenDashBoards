@@ -1,5 +1,5 @@
 // @flow
-import {Button} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';

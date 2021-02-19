@@ -1,7 +1,10 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {BreakdownFieldset, ComputedBreakdownFieldset, DataTopField, ExtendingFieldset, IndicatorFieldset} from 'DiagramWidgetEditForm/components';
+import BreakdownFieldset from 'DiagramWidgetEditForm/components/BreakdownFieldset';
+import Checkbox from 'components/atoms/Checkbox';
 import type {ComputedAttr, DataTopSettings} from 'store/widgets/data/types';
+import ComputedBreakdownFieldset from 'DiagramWidgetEditForm/components/ComputedBreakdownFieldset';
+import DataTopField from 'DiagramWidgetEditForm/components/DataTopField';
 import type {DefaultBreakdown, Indicator} from 'containers/DiagramWidgetEditForm/types';
 import {
 	DEFAULT_CIRCLE_SORTING_SETTINGS,
@@ -9,13 +12,14 @@ import {
 	SORTING_VALUES,
 	WIDGET_TYPES
 } from 'store/widgets/data/constants';
+import ExtendingFieldset from 'DiagramWidgetEditForm/components/ExtendingFieldset';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {FormBox} from 'components/molecules';
+import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
 import {getMapValues} from 'helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
+import IndicatorFieldset from 'DiagramWidgetEditForm/components/IndicatorFieldset';
 import {isAllowedTopAggregation, isCircleChart} from 'store/widgets/helpers';
-import {LegacyCheckbox as Checkbox} from 'components/atoms';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import withForm from 'DiagramWidgetEditForm/withForm';

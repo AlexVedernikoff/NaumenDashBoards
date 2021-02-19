@@ -1,14 +1,16 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {AttributeAggregationField} from 'DiagramWidgetEditForm/components';
+import AttributeAggregationField from 'DiagramWidgetEditForm/components/AttributeAggregationField';
 import cn from 'classnames';
-import {CreationPanel, OutsideClickDetector, SearchInput} from 'components/atoms';
+import CreationPanel from 'components/atoms/CreationPanel';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
+import SearchInput from 'components/atoms/SearchInput';
 import type {SourceOption} from 'components/organisms/AttributeCreatingModal/types';
 import styles from './styles.less';
 

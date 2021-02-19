@@ -3,7 +3,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {connect} from 'react-redux';
 import {createCustomGroupType} from 'containers/GroupCreatingModal/helpers';
 import {createDefaultOperand, createMultiSelectOperand, createSimpleOperand} from 'CustomGroup/helpers';
-import {CurrentObjectOperand, MultiSelectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
+import CurrentObjectOperand from 'CustomGroup/components/CurrentObjectOperand';
 import {CUSTOM_BACK_BO_LINKS_OPTIONS, CUSTOM_BO_LINKS_OPTIONS, CUSTOM_OBJECT_OPTIONS} from './constants';
 import type {
 	CustomGroup,
@@ -16,7 +16,8 @@ import type {
 import {debounce} from 'helpers';
 import {functions, props} from './selectors';
 import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
-import {MaterialTreeSelect} from 'components/molecules';
+import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
+import MultiSelectOperand from 'CustomGroup/components/MultiSelectOperand';
 import {Node} from 'components/molecules/MaterialTreeSelect/components';
 import {OBJECTS_DATA_TYPES} from 'store/sources/attributesData/objects/constants';
 import type {OnChangeOperand} from 'CustomGroup/types';
@@ -25,7 +26,9 @@ import type {Props, State} from './types';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
 import type {RenderProps as MultiSelectRenderProps} from 'CustomGroup/components/MultiSelectOperand/types';
-import {SearchInput} from 'components/atoms';
+import SearchInput from 'components/atoms/SearchInput';
+import SelectOperand from 'CustomGroup/components/SelectOperand';
+import SimpleOperand from 'CustomGroup/components/SimpleOperand';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class ObjectGroup extends Component<Props, State> {

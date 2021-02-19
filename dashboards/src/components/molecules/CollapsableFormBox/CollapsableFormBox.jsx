@@ -1,5 +1,5 @@
 // @flow
-import {FormBox} from 'components/molecules';
+import FormBox from 'components/molecules/FormBox';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';

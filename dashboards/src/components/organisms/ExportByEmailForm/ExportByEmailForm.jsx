@@ -2,7 +2,9 @@
 import cn from 'classnames';
 import {createContextName, createSnapshot} from 'utils/export';
 import {createDefaultUser} from './helpers';
-import {FormContent, FormFooter, FormHeader} from './components';
+import FormContent from './components/FormContent';
+import FormFooter from './components/FormFooter';
+import FormHeader from './components/FormHeader';
 import {FORMATS} from './constants';
 import {gridRef} from 'components/organisms/DashboardContent';
 import type {OnSelectEvent} from 'components/types';

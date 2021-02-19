@@ -1,10 +1,11 @@
 // @flow
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createDefaultGroup} from 'store/widgets/helpers';
-import {FieldButton, Icon} from 'components/atoms';
+import FieldButton from 'components/atoms/FieldButton';
 import type {Group} from 'store/widgets/data/types';
 import GroupCreatingModal from 'containers/GroupCreatingModal';
 import {GROUP_WAYS} from 'store/widgets/constants';
+import Icon from 'components/atoms/Icon';
 import {ICONS} from './constants';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';

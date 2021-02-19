@@ -2,7 +2,7 @@
 import {connect} from 'react-redux';
 import {createCustomGroupType} from 'containers/GroupCreatingModal/helpers';
 import {createDefaultOperand, createSimpleOperand} from 'CustomGroup/helpers';
-import {CurrentObjectOperand, SelectOperand, SimpleOperand} from 'CustomGroup/components';
+import CurrentObjectOperand from 'CustomGroup/components/CurrentObjectOperand';
 import type {
 	CustomGroup,
 	OperandType,
@@ -12,12 +12,14 @@ import type {
 } from 'store/customGroups/types';
 import {CUSTOM_OPTIONS} from './constants';
 import {functions, props} from './selectors';
-import {MaterialTreeSelect} from 'components/molecules';
+import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
+import SelectOperand from 'CustomGroup/components/SelectOperand';
+import SimpleOperand from 'CustomGroup/components/SimpleOperand';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class CatalogItemSetGroup extends Component<Props, State> {

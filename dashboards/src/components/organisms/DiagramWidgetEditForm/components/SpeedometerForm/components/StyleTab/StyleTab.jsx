@@ -2,8 +2,8 @@
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {extend} from 'helpers';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {HeaderBox} from 'DiagramWidgetEditForm/components';
-import {IndicatorStyleBox as IndicatorBox} from 'DiagramWidgetEditForm/components/SpeedometerForm/components';
+import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
+import IndicatorBox from 'DiagramWidgetEditForm/components/SpeedometerForm/components/IndicatorStyleBox';
 import React, {Component} from 'react';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';

@@ -1,10 +1,14 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
-import {IconButton, Label, Loader, OutsideClickDetector} from 'components/atoms';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {InputForm as LabelEditingForm} from 'components/molecules';
-import {List, Menu} from 'components/molecules/Select/components';
+import Label from 'components/atoms/Label';
+import LabelEditingForm from 'components/molecules/InputForm';
+import List from 'components/molecules/Select/components/List';
+import Loader from 'components/atoms/Loader';
+import Menu from 'components/molecules/Select/components/Menu';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

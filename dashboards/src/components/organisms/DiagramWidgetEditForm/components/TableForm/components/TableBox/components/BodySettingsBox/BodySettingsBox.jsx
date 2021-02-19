@@ -1,12 +1,15 @@
 // @flow
-import {CellSettingsBox} from 'DiagramWidgetEditForm/components/TableForm/components/TableBox/components';
-import {Checkbox, Label} from 'components/atoms';
+import CellSettingsBox from 'DiagramWidgetEditForm/components/TableForm/components/TableBox/components/CellSettingsBox';
+import Checkbox from 'components/atoms/Checkbox';
 import {EMPTY_DATA_OPTIONS, PAGE_SIZES} from './constants';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormCheckControl, FormField, Select} from 'components/molecules';
+import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormField from 'components/molecules/FormField';
 import type {InputValue, OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import Label from 'components/atoms/Label';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 

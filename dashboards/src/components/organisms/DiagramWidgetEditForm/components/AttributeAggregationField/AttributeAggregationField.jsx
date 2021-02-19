@@ -1,6 +1,6 @@
 // @flow
 import {getAggregationOptions} from './helpers';
-import {MiniSelect} from 'components/molecules';
+import MiniSelect from 'components/molecules/MiniSelect';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 

@@ -1,16 +1,19 @@
 // @flow
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
-import {FieldDivider} from 'DiagramWidgetEditForm/components';
-import {FieldError, HorizontalLabel, Label, TextInput} from 'components/atoms';
+import FieldDivider from 'DiagramWidgetEditForm/components/FieldDivider';
+import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormField} from 'components/molecules';
+import FormField from 'components/molecules/FormField';
 import {getErrorKey} from 'DiagramWidgetEditForm/helpers';
+import HorizontalLabel from 'components/atoms/HorizontalLabel';
+import Label from 'components/atoms/Label';
 import type {Ranges} from 'store/widgets/data/types';
-import {RangesFieldset} from 'DiagramWidgetEditForm/components/SpeedometerForm/components';
+import RangesFieldset from 'DiagramWidgetEditForm/components/SpeedometerForm/components/RangesFieldset';
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import TextInput from 'components/atoms/TextInput';
 import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {

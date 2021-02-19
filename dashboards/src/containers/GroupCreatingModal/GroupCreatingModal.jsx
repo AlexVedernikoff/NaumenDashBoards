@@ -1,23 +1,21 @@
 // @flow
 import type {AttrModalProps, Props} from './types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {
-	CatalogItemGroup,
-	CatalogItemSetGroup,
-	DateGroup,
-	IntervalGroup,
-	MetaClassGroup,
-	NumberGroup,
-	ObjectGroup,
-	StateGroup,
-	StringGroup,
-	TimerGroup
-} from './components';
+import CatalogItemGroup from './components/CatalogItemGroup';
+import CatalogItemSetGroup from './components/CatalogItemSetGroup';
 import {connect} from 'react-redux';
+import DateGroup from './components/DateGroup';
 import {functions, props} from './selectors';
 import {getMapValues} from 'helpers';
-import {GroupCreatingModal} from 'components/molecules';
+import GroupCreatingModal from 'components/molecules/GroupCreatingModal';
+import IntervalGroup from './components/IntervalGroup';
+import MetaClassGroup from './components/MetaClassGroup';
+import NumberGroup from './components/NumberGroup';
+import ObjectGroup from './components/ObjectGroup';
 import React, {Component} from 'react';
+import StateGroup from './components/StateGroup';
+import StringGroup from './components/StringGroup';
+import TimerGroup from './components/TimerGroup';
 
 export class GroupCreatingModalContainer extends Component<Props> {
 	resolve = () => {

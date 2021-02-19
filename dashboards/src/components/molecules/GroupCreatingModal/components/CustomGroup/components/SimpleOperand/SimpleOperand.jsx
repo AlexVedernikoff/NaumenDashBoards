@@ -1,5 +1,5 @@
 // @flow
-import {MaterialTextInput} from 'components/atoms';
+import MaterialTextInput from 'components/atoms/MaterialTextInput';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 

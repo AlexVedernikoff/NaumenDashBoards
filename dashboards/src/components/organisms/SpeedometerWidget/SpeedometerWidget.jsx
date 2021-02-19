@@ -4,7 +4,7 @@ import {FONT_SIZE_AUTO_OPTION, FONT_STYLES} from 'store/widgets/data/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import settingsStyles from 'styles/settings.less';
-import {Speedometer} from 'components/organisms';
+import Speedometer from 'components/organisms/Speedometer';
 import type {TextValueProps} from 'components/organisms/Speedometer/types';
 
 export class SpeedometerWidget extends PureComponent<Props> {

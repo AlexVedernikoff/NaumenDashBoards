@@ -1,10 +1,12 @@
 // @flow
-import {Button, FieldError, IconButton} from 'components/atoms';
+import Button from 'components/atoms/Button';
 import cn from 'classnames';
+import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'components/molecules/GroupCreatingModal/constants';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
-import {MaterialSelect} from 'components/molecules/index';
+import MaterialSelect from 'components/molecules/MaterialSelect';
 import type {OrCondition as OrConditionType} from 'CustomGroup/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

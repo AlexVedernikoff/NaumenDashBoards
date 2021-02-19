@@ -1,16 +1,20 @@
 // @flow
-import {BreakdownFieldset, DataTopField, ExtendingFieldset} from 'DiagramWidgetEditForm/components';
+import BreakdownFieldset from 'DiagramWidgetEditForm/components/BreakdownFieldset';
 import {countIndicators, hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import type {DataSet, DefaultBreakdown} from 'containers/DiagramWidgetEditForm/types';
+import DataTopField from 'DiagramWidgetEditForm/components/DataTopField';
 import type {DataTopSettings} from 'store/widgets/data/types';
-import {FieldError, IconButton} from 'components/atoms';
+import ExtendingFieldset from 'DiagramWidgetEditForm/components/ExtendingFieldset';
+import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'DiagramWidgetEditForm';
-import {FormBox} from 'components/molecules';
+import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultIndicator, getDefaultParameter, getErrorKey} from 'DiagramWidgetEditForm/helpers';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {IndicatorsBox, ParametersBox} from './components';
+import IndicatorsBox from './components/IndicatorsBox';
 import {isAllowedTopAggregation} from 'store/widgets/helpers';
+import ParametersBox from './components/ParametersBox';
 import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';

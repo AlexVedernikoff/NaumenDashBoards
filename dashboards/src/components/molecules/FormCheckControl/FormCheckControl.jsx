@@ -3,7 +3,7 @@ import cn from 'classnames';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import {Text} from 'components/atoms';
+import Text from 'components/atoms/Text';
 
 export class FormCheckControl extends PureComponent<Props> {
 	static defaultProps = {

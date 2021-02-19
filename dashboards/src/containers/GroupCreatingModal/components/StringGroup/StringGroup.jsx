@@ -12,7 +12,7 @@ import {CUSTOM_OPTIONS} from './constants';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
-import {SimpleOperand} from 'CustomGroup/components';
+import SimpleOperand from 'CustomGroup/components/SimpleOperand';
 import {STRING_RULE} from 'CustomGroup/schema';
 
 export class StringGroup extends Component<AttributeGroupProps> {

@@ -3,7 +3,7 @@ import type {Attribute, Props, State} from './types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
-import {FormCheckControl, TransparentSelect} from 'components/molecules';
+import FormCheckControl from 'components/molecules/FormCheckControl';
 import {getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
 import {List} from 'components/molecules/Select/components';
 import type {OnChangeInputEvent, OnChangeLabelEvent, OnSelectEvent, TreeNode} from 'components/types';
@@ -11,7 +11,8 @@ import type {Props as SelectProps} from 'components/molecules/TransparentSelect/
 import type {Props as ListProps} from 'components/molecules/Select/components/List/types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
-import {Toggle} from 'components/atoms';
+import Toggle from 'components/atoms/Toggle';
+import TransparentSelect from 'components/molecules/TransparentSelect';
 import {Tree as TreeList} from 'components/molecules/MaterialTreeSelect/components';
 import withForm from 'DiagramWidgetEditForm/withForm';
 

@@ -13,7 +13,7 @@ import {FLOAT_RULE, INTEGER_RULE} from 'CustomGroup/schema';
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import React, {Component} from 'react';
-import {SimpleOperand} from 'CustomGroup/components';
+import SimpleOperand from 'CustomGroup/components/SimpleOperand';
 
 export class NumberGroup extends Component<AttributeGroupProps> {
 	createCustomCondition = (type: OperandType = OPERAND_TYPES.EQUAL) => {

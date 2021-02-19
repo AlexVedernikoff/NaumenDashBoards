@@ -1,10 +1,12 @@
 // @flow
-import {CheckIconButtonGroup, FormField, ToggableFormBox} from 'components/molecules';
+import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import FormField from 'components/molecules/FormField';
 import {HEADER_POSITIONS} from 'store/widgets/data/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class HeaderBox extends PureComponent<Props> {

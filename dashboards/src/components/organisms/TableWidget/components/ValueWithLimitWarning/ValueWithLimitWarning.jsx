@@ -1,6 +1,6 @@
 // @flow
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {Modal} from 'components/molecules';
+import Modal from 'components/molecules/Modal';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import {SIZES} from 'components/molecules/Modal/constants';

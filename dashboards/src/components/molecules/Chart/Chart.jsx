@@ -8,7 +8,7 @@ import {isAxisChart, isHorizontalChart} from 'store/widgets/helpers';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
-import {ResizeDetector} from 'components/molecules';
+import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
 
 export class Chart extends PureComponent<Props> {

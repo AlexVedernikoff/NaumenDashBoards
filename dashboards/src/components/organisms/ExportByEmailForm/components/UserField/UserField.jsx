@@ -2,15 +2,16 @@
 import {Caret, IndicatorsContainer, ValueContainer} from 'components/molecules/Select/components';
 import type {ComponentProps as CaretComponentProps} from 'components/molecules/Select/components/Caret/types';
 import type {ComponentProps as IndicatorsContainerComponentProps} from 'components/molecules/Select/components/IndicatorsContainer/types';
-import {IconButton, TextInput} from 'components/atoms';
+import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
 import type {Props as ValueContainerProps} from 'components/molecules/Select/components/ValueContainer/types';
 import type {Props as ValueLabelProps} from 'components/molecules/Select/components/ValueLabel/types';
 import React, {PureComponent} from 'react';
-import {Select} from 'components/molecules';
+import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import TextInput from 'components/atoms/TextInput';
 import type {User} from 'store/users/types';
 
 export class UserField extends PureComponent<Props, State> {

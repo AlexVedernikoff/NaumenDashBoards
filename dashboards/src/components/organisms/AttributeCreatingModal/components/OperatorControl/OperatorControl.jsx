@@ -1,8 +1,8 @@
 // @flow
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {Option} from './components';
+import Option from './components/Option';
 import type {Option as OptionType, Props, State} from './types';
-import {OutsideClickDetector} from 'components/atoms';
+import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
