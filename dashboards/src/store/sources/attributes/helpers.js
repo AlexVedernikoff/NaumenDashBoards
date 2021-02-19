@@ -19,7 +19,7 @@ const getProcessedAttribute = (attribute: Attribute) => {
  * @param {MixedAttribute | null} attribute - атрибут
  * @param {string} key - ключ свойства атрибута
  * @param {any} defaultValue - дефолтное значение
- * @return {any}
+ * @returns {any}
  */
 const getAttributeValue = (attribute: MixedAttribute | null, key: string, defaultValue: any = '') => {
 	if (attribute) {
@@ -42,7 +42,7 @@ const getAttributeValue = (attribute: MixedAttribute | null, key: string, defaul
  * @param {MixedAttribute | null} attribute - атрибут
  * @param {string} key - ключ свойства атрибута
  * @param {any} value - значение
- * @return {MixedAttribute | null}
+ * @returns {MixedAttribute | null}
  */
 const setAttributeValue = (attribute: Attribute, key: string, value: any) => {
 	let newAttribute = attribute;

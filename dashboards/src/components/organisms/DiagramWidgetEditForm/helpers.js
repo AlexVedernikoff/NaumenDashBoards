@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
+import type {DiagramFormWidget, Indicator, Parameter} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'DiagramWidgetEditForm/index';
 import {getDefaultSystemGroup, isCircleChart, usesCustomGroup} from 'store/widgets/helpers';
 import {SORTING_OPTIONS} from './components/SortingBox/constants';
@@ -83,7 +83,7 @@ const getSortingOptions = (widget: DiagramFormWidget): Array<SortingValueOption>
 
 /**
  * Возвращает объект показателя по умолчанию
- * @return {Indicator}
+ * @returns {Indicator}
  */
 const getDefaultIndicator = () => ({
 	aggregation: DEFAULT_AGGREGATION.COUNT,
@@ -92,7 +92,7 @@ const getDefaultIndicator = () => ({
 
 /**
  * Возвращает объект параметра по умолчанию
- * @return {Parameter}
+ * @returns {Parameter}
  */
 const getDefaultParameter = () => ({
 	attribute: null,

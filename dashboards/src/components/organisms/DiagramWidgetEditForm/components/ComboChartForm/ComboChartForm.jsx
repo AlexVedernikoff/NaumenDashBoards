@@ -1,13 +1,12 @@
 // @flow
 import {array, object} from 'yup';
-import type {ComboWidget, Widget} from 'store/widgets/data/types';
-import {DEFAULT_AXIS_SORTING_SETTINGS} from 'store/widgets/data/constants';
+import type {ComboData, ComboWidget, Widget} from 'store/widgets/data/types';
+import {COMBO_TYPES, DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
-import {navigationSettings} from 'utils/normalizer/widget/helpers';
-import {normalizeDataSet} from 'utils/normalizer/widget/comboNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
@@ -15,20 +14,49 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class ComboChartForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, conditionalBreakdown, parameterRule, requiredByCompute, validateTopSettings} = rules;
-		const {breakdown, source, sources, top, xAxis, yAxis} = FIELDS;
+		const {base, parameter, requiredBreakdown, requiredByCompute, validateTopSettings} = rules;
 
 		return object({
 			...base,
 			data: array().of(object({
-				[breakdown]: requiredByCompute(breakdown, conditionalBreakdown(FIELDS.yAxis)),
-				[source]: object().required(getErrorMessage(source)).nullable(),
-				[top]: validateTopSettings,
-				[xAxis]: parameterRule(xAxis),
-				[yAxis]: requiredByCompute(yAxis)
+				breakdown: requiredByCompute(requiredBreakdown),
+				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
+				parameters: array(parameter),
+				source: mixed().source(),
+				top: validateTopSettings
 			})),
-			[sources]: mixed().minSourceNumbers()
+			sources: mixed().minSourceNumbers()
 		});
+	};
+
+	normalizeDataSet = (dataSet: FilledDataSet): ComboData => {
+		const {
+			breakdown,
+			dataKey,
+			indicators,
+			parameters,
+			showEmptyData = false,
+			source,
+			sourceForCompute,
+			top = DEFAULT_TOP_SETTINGS,
+			type = COMBO_TYPES.COLUMN,
+			xAxisName = '',
+			yAxisName = ''
+		} = dataSet;
+
+		return {
+			breakdown,
+			dataKey,
+			indicators,
+			parameters,
+			showEmptyData,
+			source,
+			sourceForCompute,
+			top,
+			type,
+			xAxisName,
+			yAxisName
+		};
 	};
 
 	updateWidget = (widget: Widget, values: Values): ComboWidget => {
@@ -36,7 +64,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 		const {
 			colors = DEFAULT_COLORS,
 			computedAttrs = [],
-			data = [],
+			data,
 			dataLabels,
 			displayMode,
 			header,
@@ -50,10 +78,9 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			templateName,
 			type
 		} = values;
-		const indicatorSettings = extend(DEFAULT_CHART_SETTINGS.yAxis, indicator);
-		const comboData = data.map(normalizeDataSet);
+		const indicatorSettings = extend(DEFAULT_CHART_SETTINGS.axis, indicator);
+		const comboData = data.map(this.normalizeDataSet);
 
-		// $FlowFixMe
 		if (!comboData.find(({yAxisName}) => yAxisName)) {
 			indicatorSettings.showName = false;
 		}
@@ -69,8 +96,8 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			indicator: indicatorSettings,
 			legend: extend(DEFAULT_CHART_SETTINGS.legend, legend),
 			name,
-			navigation: navigationSettings(navigation),
-			parameter: extend(DEFAULT_CHART_SETTINGS.xAxis, parameter),
+			navigation,
+			parameter: extend(DEFAULT_CHART_SETTINGS.axis, parameter),
 			showEmptyData,
 			sorting: extend(DEFAULT_AXIS_SORTING_SETTINGS, sorting),
 			templateName,

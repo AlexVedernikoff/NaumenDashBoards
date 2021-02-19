@@ -1,27 +1,24 @@
 // @flow
 import {array, number, object} from 'yup';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
-import {extend} from 'src/helpers';
+import {extend} from 'helpers';
 import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
-import {navigationSettings} from 'utils/normalizer/widget/helpers';
-import {normalizeDataSet} from 'utils/normalizer/widget/summaryNormalizer';
 import {ParamsTab, StyleTab} from './components';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
-import type {SpeedometerWidget, Widget} from 'store/widgets/data/types';
+import type {SpeedometerData, SpeedometerWidget, Widget} from 'store/widgets/data/types';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 export class SpeedometerForm extends Component<TypedFormProps> {
 	getSchema = () => {
 		const {base, requiredByCompute} = rules;
-		const {borders, indicator, source, sources} = FIELDS;
 		const borderRequiredMessage = 'В поле границы шкал необходимо указать число';
 
 		return object({
 			...base,
-			[borders]: object({
+			borders: object({
 				max: number().test(
 					'check-border-max',
 					'значение в поле max не может быть меньше значения в поле min',
@@ -40,23 +37,30 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 				).required(borderRequiredMessage).typeError(borderRequiredMessage)
 			}).default({}),
 			data: array().of(object({
-				[indicator]: requiredByCompute(indicator).test(
-					'valid-attribute',
-					'Выбранный показатель не может быть использован на текущем типе виджета',
-					indicator => !indicator || indicator.type !== ATTRIBUTE_TYPES.dtInterval
-				),
-				[source]: object().required(getErrorMessage(source)).nullable()
+				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
+				source: mixed().source()
 			})),
-			[sources]: mixed().minSourceNumbers().sourceNumbers()
+			sources: mixed().minSourceNumbers().sourceNumbers()
 		});
+	};
+
+	normalizeDataSet = (dataSet: FilledDataSet): SpeedometerData => {
+		const {dataKey, indicators, source, sourceForCompute} = dataSet;
+
+		return {
+			dataKey,
+			indicators,
+			source,
+			sourceForCompute
+		};
 	};
 
 	updateWidget = (widget: Widget, values: Values): SpeedometerWidget => {
 		const {id} = widget;
 		const {
 			borders,
-			computedAttrs = [],
-			data = [],
+			computedAttrs,
+			data,
 			displayMode,
 			header,
 			indicator,
@@ -70,13 +74,13 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 		return {
 			borders,
 			computedAttrs,
-			data: data.map(normalizeDataSet),
+			data: data.map(this.normalizeDataSet),
 			displayMode,
 			header,
 			id,
 			indicator: extend(DEFAULT_SPEEDOMETER_SETTINGS.indicator, indicator),
 			name,
-			navigation: navigationSettings(navigation),
+			navigation,
 			ranges: extend(DEFAULT_SPEEDOMETER_SETTINGS.ranges, ranges),
 			templateName,
 			type

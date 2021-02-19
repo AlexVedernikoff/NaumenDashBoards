@@ -3,9 +3,11 @@ import {addMethod, array, lazy, mixed, number, object, string} from 'yup';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import type {DefaultBreakdown, Parameter, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {isObject} from 'src/helpers';
+import {getDefaultParameter} from './helpers';
+import {isObject} from 'helpers';
 
 const getErrorMessage = (key: string) => {
 	const messages = {
@@ -22,6 +24,69 @@ const getErrorMessage = (key: string) => {
 	return messages[key] || 'Ошибка заполнения';
 };
 
+addMethod(mixed, 'source', function () {
+	return this.test(
+		'check-sources',
+		'Укажите источник данных',
+		({value}: SourceData) => !!value
+	);
+});
+
+addMethod(mixed, 'sourceNumbers', function () {
+	return this.test(
+		'check-sources-number',
+		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
+		function () {
+			const {data} = this.options.parent;
+			return data.filter(dataSet => !dataSet.sourceForCompute).length === 1;
+		});
+});
+
+addMethod(mixed, 'minSourceNumbers', function () {
+	return this.test(
+		'check-min-source-numbers',
+		'Должен быть выбран как минимум один источник для построения',
+		function () {
+			const {data} = this.options.parent;
+			return data.filter(dataSet => !dataSet.sourceForCompute).length > 0;
+		});
+});
+
+addMethod(mixed, 'requiredAttribute', function (text: string) {
+	return this.test(
+		'check-attribute',
+		text,
+		({attribute} = {}) => validateAttribute(attribute)
+	);
+});
+
+addMethod(mixed, 'group', function () {
+	return this.test(
+		'check-attribute-group',
+		'Группировка данного атрибута не применима к другим полям',
+		function (attributeData: Parameter | DefaultBreakdown) {
+			const {data} = this.options.values;
+			const {attribute, group} = attributeData;
+			const {DAY, HOURS, MINUTES} = DATETIME_SYSTEM_GROUP;
+			const {dateTime} = ATTRIBUTE_TYPES;
+			let result = true;
+
+			if (attribute && attribute.type === dateTime && group.way === GROUP_WAYS.SYSTEM) {
+				const {data: groupData, format} = group;
+				const useTime = groupData === HOURS || groupData === MINUTES || (groupData === DAY && format && format.includes('hh'));
+
+				if (useTime) {
+					result = data.findIndex(({parameters}) => {
+						return parameters.findIndex(({attribute}) => attribute && attribute.type !== dateTime) !== -1;
+					}) === -1;
+				}
+			}
+
+			return result;
+		}
+	);
+});
+
 /**
  * Валидация атрибута с учетом вложенности (ссылочного атрибута)
  * @param {Attribute} value - атрибут
@@ -37,6 +102,9 @@ const validateAttribute = (value: Attribute | null) => {
 	return isObject(attribute);
 };
 
+/**
+ * Базовые правила валидации всех виджетов
+ */
 const base = {
 	[FIELDS.header]: object({
 		[FIELDS.template]: string().when(FIELDS.useName, {
@@ -52,144 +120,69 @@ const base = {
 };
 
 /**
- * Правило для валидации атрибута
- * @param {string} text - текст сообщения
- * @returns {*}
- */
-const requiredAttribute = (text: string) => mixed().test(
-	'required-attribute',
-	text,
-	validateAttribute
-).nullable();
-
-/**
- * Добавляет правило валидации с учетом возможности использования группировки относительно других наборов данных
- * @param {object} rule - основное правило
- * @param {string} field - наименование поля атрибута
- * @param {Array<object>} data - набор данных, относительно которого проверяется возможность использования текущей группировки
- * @param {object} parent - объект данных, в контексте которого находится атрибут
- * @returns {object}
- */
-const mixinGroupRule = (rule: Object, field, data: Array<Object>, parent) => rule.test(
-	'grouped-attribute',
-	'Группировка данного атрибута не применима к другим полям',
-	attribute => {
-		const {DAY, HOURS, MINUTES} = DATETIME_SYSTEM_GROUP;
-		const {dateTime} = ATTRIBUTE_TYPES;
-		const isMain = parent === data[0];
-		const group = parent[FIELDS.group];
-
-		if (isMain && attribute && attribute.type === dateTime && group.way === GROUP_WAYS.SYSTEM) {
-			const {data: groupData, format} = group;
-			const useTime = groupData === HOURS || groupData === MINUTES || (groupData === DAY && format && format.includes('hh'));
-
-			if (useTime) {
-				return data.findIndex(set => set[field] && set[field].type !== ATTRIBUTE_TYPES.dateTime) === -1;
-			}
-		}
-
-		return true;
-	}
-);
-
-/**
- * Правило для параметров
- * @param {string} field - наименование поля параметра
- * @returns {object}
- */
-const parameterRule = (field: string) => lazy((attribute: Attribute | null, ctx: Object) => {
-	const {parent, values} = ctx;
-	const {data} = values;
-	const isMain = parent === data[0];
-	const rule = requiredAttribute(getErrorMessage(field));
-
-	return isMain ? mixinGroupRule(rule, field, data, parent) : rule;
-});
-
-/**
  * Правило для разбивки вычисляемого атрибута
  * @param {any} value - значение разбивки
  * @returns {object}
  */
-const computedBreakdownRule = (value: any) => lazy((attribute: Attribute | null, ctx: Object) => {
+const computedBreakdownRule = (value: any = []) => lazy((attribute: Attribute | null, ctx: Object) => {
 	const {parent} = ctx;
-	let data = value;
+	const rule = mixed().requiredAttribute(getErrorMessage(FIELDS.breakdown));
 
-	if (!Array.isArray(data)) {
-		data = [];
+	if (Array.isArray(value) && parent === value[0]) {
+		rule.group();
 	}
 
-	const isMain = parent === data[0];
-	const rule = requiredAttribute(getErrorMessage(FIELDS.breakdown));
-
-	return isMain ? mixinGroupRule(rule, FIELDS.value, data, parent) : rule;
+	return rule;
 });
 
 /**
  * Правило для валидации разбивки
- * @param {string} indicatorName - наименование поля индикатора
  * @returns {object}
  */
-const requiredBreakdown = (indicatorName: string) => lazy((value: mixed, context: Object) => {
-	const indicator = context.parent[indicatorName];
+const requiredBreakdown = lazy((value: mixed, context: Object) => {
+	const {attribute} = context.parent.indicators[0];
 
-	if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-		return array().of(object({
-			value: computedBreakdownRule(value)
-		}));
+	if (attribute && attribute.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+		return array().of(object({value: computedBreakdownRule(value)}));
 	}
 
-	return requiredAttribute(getErrorMessage(FIELDS.breakdown));
+	return mixed().requiredAttribute(getErrorMessage(FIELDS.breakdown)).default(getDefaultParameter());
+});
+
+/**
+ * Правило для валидации параметра
+ */
+const parameter = lazy((parameter: Parameter, options: Object) => {
+	const {data} = options.values;
+	const rule = mixed().requiredAttribute(getErrorMessage(FIELDS.parameter));
+
+	if (data[0].parameters[0] === parameter) {
+		rule.group();
+	}
+
+	return rule;
 });
 
 /**
  * Правило валидации разбвивки в зависимости от ее динамического добавления
- * @param {string} indicatorName - наименование поля индикатора
  * @returns {object}
  */
-const conditionalBreakdown = (indicatorName: string) => mixed().when([FIELDS.withBreakdown, FIELDS.breakdown], {
+const conditionalBreakdown = mixed().when([FIELDS.withBreakdown, FIELDS.breakdown], {
 	is: (withBreakdown, breakdown) => Boolean(withBreakdown || breakdown),
-	then: requiredBreakdown(indicatorName)
+	then: requiredBreakdown
 });
 
 /**
  * Правило валидации атрибута только в случае если источник не для вычислений
- * @param {string} key - название поля
  * @param {object} rule - правило
  * @returns {object}
  */
-const requiredByCompute = (key: string, rule: Object) => {
-	let computeRule = rule;
-
-	if (!computeRule) {
-		computeRule = requiredAttribute(getErrorMessage(key));
-	}
-
-	return mixed().when(FIELDS.sourceForCompute, {
-		is: false,
-		then: computeRule
+const requiredByCompute = (rule: Object) => {
+	return mixed().when(FIELDS.source, {
+		is: ({forCompute}: SourceData) => !forCompute,
+		then: rule
 	}).nullable();
 };
-
-addMethod(mixed, 'sourceNumbers', function () {
-	return this.test(
-		'check-sources-number',
-		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
-		function () {
-			const {data} = this.options.parent;
-			return data.filter(dataSet => !dataSet.sourceForCompute).length === 1;
-	});
-});
-
-addMethod(mixed, 'minSourceNumbers', function () {
-	return this.test(
-		'check-min-source-numbers',
-		'Должен быть выбран как минимум один источник для построения',
-		function () {
-			const {data} = this.options.parent;
-			return data.filter(dataSet => !dataSet.sourceForCompute).length > 0;
-		});
-});
 
 const validateTopSettings = object({
 	count: number().required('Укажите значение ТОП').typeError('Значение ТОП должно быть числом')
@@ -198,8 +191,7 @@ const validateTopSettings = object({
 const rules = {
 	base,
 	conditionalBreakdown,
-	parameterRule,
-	requiredAttribute,
+	parameter,
 	requiredBreakdown,
 	requiredByCompute,
 	validateTopSettings

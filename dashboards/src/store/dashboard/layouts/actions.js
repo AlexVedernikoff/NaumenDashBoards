@@ -13,7 +13,7 @@ import NewWidget from 'store/widgets/data/NewWidget';
  * При совпадении ключей заменяет данные положений виджетов на текущие
  * @param {Layouts} targetLayouts - набор положений виджетов
  * @param {Layouts} currentLayouts - текущий набор положений виджетов
- * @return {Layouts}
+ * @returns {Layouts}
  */
 const setCurrentLayouts = (targetLayouts: Layouts, currentLayouts: Layouts): Layouts => {
 	const layouts = {};

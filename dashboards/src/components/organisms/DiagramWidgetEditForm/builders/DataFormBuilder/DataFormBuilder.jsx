@@ -1,6 +1,6 @@
 // @flow
 import {Checkbox, FieldError, TextArea, Toggle} from 'components/atoms';
-import type {CheckboxProps, IndicatorBoxProps, ParameterBoxProps, Props, TextAreaProps} from './types';
+import type {CheckboxProps, IndicatorBoxProps, Props, TextAreaProps} from './types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
@@ -181,7 +181,18 @@ export class DataFormBuilder extends Component<Props> {
 		}
 	};
 
-	renderParameterBox = (props: ParameterBoxProps) => <ParameterDataBox name={props.name} />;
+	renderParameterBox = () => {
+		const {errors, setDataFieldValue, setFieldValue, values} = this.props;
+
+		return (
+			<ParameterDataBox
+				errors={errors}
+				setDataFieldValue={setDataFieldValue}
+				setFieldValue={setFieldValue}
+				values={values}
+			/>
+		);
+	};
 
 	renderShowEmptyDataCheckbox = () => {
 		const {showEmptyData} = this.props.values;

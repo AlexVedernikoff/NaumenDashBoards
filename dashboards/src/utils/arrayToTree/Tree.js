@@ -70,7 +70,7 @@ class Tree {
 		let ids = null;
 
 		if (Array.isArray(children) && children.length > 0) {
-			ids = children.map(child => values.id(child, parent));
+			ids = children.map(child => values.id ? values.id(child, parent) : this.getId(child));
 		}
 
 		return ids;
