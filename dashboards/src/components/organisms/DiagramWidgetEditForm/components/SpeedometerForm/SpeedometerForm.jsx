@@ -1,10 +1,9 @@
 // @flow
-import {array, number, object} from 'yup';
+import {array, baseSchema, mixed} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
-import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
+import {number, object} from 'yup';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
@@ -14,11 +13,10 @@ import type {Values} from 'containers/WidgetEditForm/types';
 
 export class SpeedometerForm extends Component<TypedFormProps> {
 	getSchema = () => {
-		const {base, requiredByCompute} = rules;
 		const borderRequiredMessage = 'В поле границы шкал необходимо указать число';
 
 		return object({
-			...base,
+			...baseSchema,
 			borders: object({
 				max: number().test(
 					'check-border-max',
@@ -38,7 +36,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 				).required(borderRequiredMessage).typeError(borderRequiredMessage)
 			}).default({}),
 			data: array().of(object({
-				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
+				indicators: mixed().requiredByCompute(array().indicators()),
 				source: mixed().source()
 			})),
 			sources: mixed().minSourceNumbers().sourceNumbers()

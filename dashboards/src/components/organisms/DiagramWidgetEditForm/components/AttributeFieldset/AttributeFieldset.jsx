@@ -1,5 +1,5 @@
 // @flow
-import type {Attribute, Props, State} from './types';
+import type {Attribute, Props, RefProps, State} from './types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
@@ -209,7 +209,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const select = this.renderSelect(props, parent);
 
 		if (renderRefField) {
-			const refProps = {
+			const refProps: RefProps = {
 				disabled,
 				parent,
 				value

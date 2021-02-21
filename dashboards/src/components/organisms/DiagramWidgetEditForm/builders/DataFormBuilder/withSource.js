@@ -4,7 +4,13 @@ import type {ContextProps} from 'DiagramWidgetEditForm/types';
 import type {DataSet, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {getDataErrorKey, getDefaultIndicator, getDefaultParameter, getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
+import {
+	getDataErrorKey,
+	getDefaultBreakdown,
+	getDefaultIndicator,
+	getDefaultParameter,
+	getParentClassFqn
+} from 'DiagramWidgetEditForm/helpers';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -76,11 +82,11 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 		resetAttributes = (index: number) => {
 			const {setDataFieldValue, values} = this.props;
-			const {breakdown} = values.data[index];
+			const {breakdown, dataKey} = values.data[index];
 
 			setDataFieldValue(index, FIELDS.parameters, [getDefaultParameter()]);
 			setDataFieldValue(index, FIELDS.indicators, [getDefaultIndicator()]);
-			breakdown && setDataFieldValue(index, FIELDS.breakdown, getDefaultParameter());
+			breakdown && setDataFieldValue(index, FIELDS.breakdown, [getDefaultBreakdown(dataKey)]);
 		};
 
 		resetDynamicAttribute = (data: Object) => {
@@ -96,22 +102,9 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			const {setDataFieldValue, values} = this.props;
 			let {breakdown, indicators, parameters} = values.data[index];
 
-			parameters = parameters.map(this.resetDynamicAttribute);
-
-			indicators = indicators.map(this.resetDynamicAttribute);
-
-			if (Array.isArray(breakdown)) {
-				breakdown = breakdown.map(({value, ...rest}) => ({
-					...rest,
-					value: this.isDynamicAttribute(value) ? null : value
-				}));
-			} else if (breakdown) {
-				breakdown = this.resetDynamicAttribute(breakdown);
-			}
-
-			setDataFieldValue(index, FIELDS.parameters, parameters);
-			setDataFieldValue(index, FIELDS.indicators, indicators);
-			setDataFieldValue(index, FIELDS.breakdown, breakdown);
+			setDataFieldValue(index, FIELDS.parameters, parameters.map(this.resetDynamicAttribute));
+			setDataFieldValue(index, FIELDS.indicators, indicators.map(this.resetDynamicAttribute));
+			setDataFieldValue(index, FIELDS.breakdown, breakdown.map(this.resetDynamicAttribute));
 		};
 
 		setDefaultIndicator = (index: number) => (attributes: Array<Attribute>) => {

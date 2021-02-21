@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import type {BreakdownItem, DiagramFormWidget, Indicator, Parameter} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import type {DiagramFormWidget, Indicator, Parameter} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getDefaultSystemGroup, isCircleChart, usesCustomGroup} from 'store/widgets/helpers';
 import {SORTING_OPTIONS} from './components/SortingBox/constants';
@@ -85,7 +85,7 @@ const getSortingOptions = (widget: DiagramFormWidget): Array<SortingValueOption>
  * Возвращает объект показателя по умолчанию
  * @returns {Indicator}
  */
-const getDefaultIndicator = () => ({
+const getDefaultIndicator = (): Indicator => ({
 	aggregation: DEFAULT_AGGREGATION.COUNT,
 	attribute: null
 });
@@ -94,14 +94,26 @@ const getDefaultIndicator = () => ({
  * Возвращает объект параметра по умолчанию
  * @returns {Parameter}
  */
-const getDefaultParameter = () => ({
+const getDefaultParameter = (): Parameter => ({
 	attribute: null,
+	group: getDefaultSystemGroup(null)
+});
+
+/**
+ * Возвращает объект разбивки по умолчанию
+ * @param {string} dataKey - ключ сета данных
+ * @returns {BreakdownItem}
+ */
+const getDefaultBreakdown = (dataKey: string): BreakdownItem => ({
+	attribute: null,
+	dataKey,
 	group: getDefaultSystemGroup(null)
 });
 
 export {
 	filterByAttribute,
 	getDataErrorKey,
+	getDefaultBreakdown,
 	getDefaultIndicator,
 	getDefaultParameter,
 	getErrorKey,

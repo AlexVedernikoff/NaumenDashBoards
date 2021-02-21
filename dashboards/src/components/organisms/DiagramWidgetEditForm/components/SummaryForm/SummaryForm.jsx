@@ -1,10 +1,8 @@
 // @flow
-import {array, object} from 'yup';
+import {array, baseSchema, mixed, object} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
-import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {getSummaryLayoutSize} from './helpers';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
@@ -19,18 +17,14 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 		layoutSize: getSummaryLayoutSize(this.props.layoutMode)
 	};
 
-	getSchema = () => {
-		const {base, requiredByCompute} = rules;
-
-		return object({
-			...base,
-			data: array().of(object({
-				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
-				source: mixed().source()
-			})),
-			sources: mixed().minSourceNumbers().sourceNumbers()
-		});
-	};
+	getSchema = () => object({
+		...baseSchema,
+		data: array().of(object({
+			indicators: mixed().requiredByCompute(array().indicators()),
+			source: mixed().source()
+		})),
+		sources: mixed().minSourceNumbers().sourceNumbers()
+	});
 
 	normalizeDataSet = (dataSet: FilledDataSet): SummaryData => {
 		const {dataKey, indicators, source, sourceForCompute} = dataSet;

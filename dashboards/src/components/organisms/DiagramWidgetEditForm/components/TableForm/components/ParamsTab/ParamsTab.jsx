@@ -1,15 +1,15 @@
 // @flow
+import type {Breakdown, DataSet} from 'containers/DiagramWidgetEditForm/types';
 import BreakdownFieldset from 'DiagramWidgetEditForm/components/BreakdownFieldset';
 import {countIndicators, hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
-import type {DataSet, DefaultBreakdown} from 'containers/DiagramWidgetEditForm/types';
 import DataTopField from 'DiagramWidgetEditForm/components/DataTopField';
 import type {DataTopSettings} from 'store/widgets/data/types';
 import ExtendingFieldset from 'DiagramWidgetEditForm/components/ExtendingFieldset';
 import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormBox from 'components/molecules/FormBox';
-import {getDataErrorKey, getDefaultIndicator, getDefaultParameter, getErrorKey} from 'DiagramWidgetEditForm/helpers';
+import {getDefaultBreakdown, getDefaultIndicator, getErrorKey} from 'DiagramWidgetEditForm/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import IndicatorsBox from './components/IndicatorsBox';
@@ -47,9 +47,9 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return sources;
 	};
 
-	handleChangeBreakdown = (index: number, breakdown: DefaultBreakdown) => {
+	handleChangeBreakdown = (breakdown: Breakdown) => {
 		const {setDataFieldValue} = this.props;
-		setDataFieldValue(index, FIELDS.breakdown, breakdown);
+		setDataFieldValue(this.mainIndex, FIELDS.breakdown, breakdown);
 	};
 
 	handleChangeParameters = (index: number, parameters: Array<Paremeter>) => {
@@ -62,45 +62,43 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		setFieldValue(FIELDS.top, top);
 	};
 
-	handleExtendBreakdown = (index: number) => () => {
-		const {setDataFieldValue} = this.props;
-		setDataFieldValue(index, FIELDS.withBreakdown, true);
+	handleExtendBreakdown = () => {
+		const {setDataFieldValue, values} = this.props;
+		const {dataKey} = values.data[this.mainIndex];
+
+		setDataFieldValue(this.mainIndex, FIELDS.withBreakdown, true);
+		setDataFieldValue(this.mainIndex, FIELDS.breakdown, [getDefaultBreakdown(dataKey)]);
 	};
 
-	handleRemoveBreakdown = (index: number = this.mainIndex) => {
+	handleRemoveBreakdown = () => {
 		const {setDataFieldValue} = this.props;
 
-		setDataFieldValue(index, FIELDS.breakdown, null);
-		setDataFieldValue(index, FIELDS.withBreakdown, false);
+		setDataFieldValue(this.mainIndex, FIELDS.breakdown, undefined);
+		setDataFieldValue(this.mainIndex, FIELDS.withBreakdown, false);
 	};
 
 	renderAddInput = (props: $Shape<IconButtonProps>) => <IconButton {...props} icon={ICON_NAMES.PLUS} round={false} />;
 
 	renderBreakdownFieldSet = () => {
 		const {errors, values} = this.props;
-		const dataSet = values.data[this.mainIndex];
+		const {data} = values;
+		const dataSet = data[this.mainIndex];
 		const show = dataSet[FIELDS.withBreakdown] || dataSet[FIELDS.breakdown];
-		const errorKey = getDataErrorKey(this.mainIndex, FIELDS.breakdown);
-		let {breakdown} = dataSet;
-
-		if (!breakdown || Array.isArray(breakdown)) {
-			breakdown = getDefaultParameter();
-		}
+		const {breakdown, indicators} = dataSet;
 
 		return (
 			<ExtendingFieldset
 				className={styles.breakdownField}
 				disabled={hasDifferentAggregations(values.data)}
 				index={this.mainIndex}
-				onClick={this.handleExtendBreakdown(this.mainIndex)}
+				onClick={this.handleExtendBreakdown}
 				show={show} text="Разбивка"
 			>
 				<BreakdownFieldset
-					dataSet={dataSet}
-					dataSetIndex={this.mainIndex}
-					error={errors[errorKey]}
-					key={errorKey}
-					name={FIELDS.breakdown}
+					data={data}
+					errors={errors}
+					index={this.mainIndex}
+					indicator={indicators[0]}
 					onChange={this.handleChangeBreakdown}
 					onRemove={this.handleRemoveBreakdown}
 					removable={true}

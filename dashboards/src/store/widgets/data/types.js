@@ -81,18 +81,18 @@ export type ComputedAttr = {|
 
 export type MixedAttribute = ComputedAttr | Attribute;
 
-export type ComputedBreakdown = Array<{
-	dataKey: string,
-	group: Group,
-	value: Attribute
-}>;
-
 export type Parameter = {
 	attribute: Attribute,
 	group: Group
 };
 
-export type Breakdown = Parameter | ComputedBreakdown;
+export type BreakdownItem = {
+	attribute: Attribute,
+	dataKey: string,
+	group: Group
+};
+
+export type Breakdown = Array<BreakdownItem>;
 
 export type Indicator = {
 	aggregation: string,
@@ -203,7 +203,7 @@ export type AxisWidget = {
 // Круговой график
 
 export type CircleData = {
-	breakdown?: Breakdown,
+	breakdown: Breakdown,
 	dataKey: string,
 	indicators: Array<Indicator>,
 	showEmptyData: boolean,

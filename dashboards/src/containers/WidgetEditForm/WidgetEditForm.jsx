@@ -5,7 +5,6 @@ import {deepClone} from 'helpers';
 import DiagramWidgetEditForm from 'containers/DiagramWidgetEditForm';
 import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DivRef} from 'components/types';
-import {FIELDS} from './constants';
 import type {FormElement, Props, Schema, State, Values} from './types';
 import {functions, props} from './selectors';
 import type {LayoutSize} from 'components/organisms/DiagramWidgetEditForm/types';
@@ -137,15 +136,22 @@ class WidgetEditForm extends PureComponent<Props, State> {
 		}
 	};
 
-	setDataFieldValue = (index: number, name: string, value: any, callback?: Function) => {
-		const {data} = this.state.values;
-		data[index] = {
-			...data[index],
-			[name]: value
+	setDataFieldValue = (index: number, name: string, value: any, callback?: Function) => this.setState(({isSubmitting, values}) => {
+		const {data} = values;
+		const newData = data.map((dataSet, i) => i === index ? {...dataSet, [name]: value} : dataSet);
+		const newValues = {
+			...values,
+			data: newData
 		};
 
-		this.setFieldValue(FIELDS.data, data, callback);
-	};
+		if (isSubmitting && values.type === newValues.type) {
+			this.validate(newValues);
+		}
+
+		return {
+			values: newValues
+		};
+	}, callback);
 
 	setFieldValue = (name: string, value: any, callback?: Function) => this.setState(({isSubmitting, values: prevValues}) => {
 		const values = {
@@ -204,39 +210,47 @@ class WidgetEditForm extends PureComponent<Props, State> {
 	};
 
 	render () {
-		this.fieldErrorRefs = [];
-		const {
-			cancelForm,
-			context,
-			layoutMode,
-			personalDashboard,
-			saving,
-			user,
-			widget
-		} = this.props;
-		const {errors, values} = this.state;
-		const injectedProps = {
-			cancelForm,
-			context,
-			errors,
-			isNew: this.isNew(),
-			layoutMode,
-			onAddFieldErrorRef: this.handleAddFieldErrorRef,
-			onChangeLayoutSize: this.handleChangeLayoutSize,
-			onSubmit: this.handleSubmit,
-			personalDashboard,
-			saving,
-			setDataFieldValue: this.setDataFieldValue,
-			setFieldValue: this.setFieldValue,
-			setForm: this.setForm,
-			setSchema: this.setSchema,
-			user,
-			values,
-			widget
-		};
 		const Form = this.resolveForm();
 
-		return Form ? <Form {...injectedProps} /> : null;
+		if (Form) {
+			this.fieldErrorRefs = [];
+			const {
+				cancelForm,
+				context,
+				layoutMode,
+				personalDashboard,
+				saving,
+				user,
+				widget
+			} = this.props;
+			const {errors, values} = this.state;
+			const contextProps = {
+				errors,
+				setDataFieldValue: this.setDataFieldValue,
+				setFieldValue: this.setFieldValue,
+				values,
+				widget
+			};
+			const props = {
+				...contextProps,
+				cancelForm,
+				context,
+				isNew: this.isNew(),
+				layoutMode,
+				onAddFieldErrorRef: this.handleAddFieldErrorRef,
+				onChangeLayoutSize: this.handleChangeLayoutSize,
+				onSubmit: this.handleSubmit,
+				personalDashboard,
+				saving,
+				setForm: this.setForm,
+				setSchema: this.setSchema,
+				user
+			};
+
+			return <Form {...props} />;
+		}
+
+		return null;
 	}
 }
 

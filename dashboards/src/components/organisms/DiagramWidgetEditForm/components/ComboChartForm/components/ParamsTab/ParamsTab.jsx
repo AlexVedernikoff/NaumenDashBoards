@@ -1,5 +1,6 @@
 // @flow
 import {CHART_OPTIONS} from './constants';
+import {COMBO_TYPES} from 'store/widgets/data/constants';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
@@ -24,24 +25,27 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderChartFieldLabel = (icon: any) => <Icon name={icon} size={ICON_SIZES.LARGE} />;
 
-	renderChartInput = (set: DataSet, index: number) => (
-		<div className={styles.chartInput}>
-			<MiniSelect
-				name={FIELDS.type}
-				onSelect={this.handleSelectChartType(index)}
-				options={CHART_OPTIONS}
-				renderLabel={this.renderChartFieldLabel}
-				showCaret={false}
-				tip="Тип графика"
-				value={set[FIELDS.type]}
-			/>
-		</div>
-	);
+	renderChartInput = (dataSet: DataSet, index: number) => {
+		const {type: value = COMBO_TYPES.COLUMN} = dataSet;
+
+		return (
+			<div className={styles.chartInput}>
+				<MiniSelect
+					name={FIELDS.type}
+					onSelect={this.handleSelectChartType(index)}
+					options={CHART_OPTIONS}
+					renderLabel={this.renderChartFieldLabel}
+					showCaret={false}
+					tip="Тип графика"
+					value={value}
+				/>
+			</div>
+		);
+	};
 
 	renderIndicatorBoxes = () => {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
-			name: FIELDS.yAxis,
 			onSelectCallback: this.onSelectIndicatorCallback,
 			renderLeftControl: this.renderChartInput,
 			usesEmptyData: true,
@@ -51,35 +55,14 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return renderIndicatorBoxes(props);
 	};
 
-	renderParameterBox = () => {
-		const {renderParameterBox} = this.props;
-		const props = {
-			name: FIELDS.xAxis
-		};
-
-		return renderParameterBox(props);
-	};
-
-	renderSourceBox = () => {
-		const {renderSourceBox} = this.props;
-		const sourceRefFields = {
-			breakdown: FIELDS.breakdown,
-			indicator: FIELDS.yAxis,
-			parameter: FIELDS.xAxis,
-			yAxisName: FIELDS.yAxisName
-		};
-
-		return renderSourceBox(sourceRefFields, 2);
-	};
-
 	render () {
-		const {renderBaseBoxes, renderDisplayModeSelect, renderNavigationBox} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect, renderNavigationBox, renderParameterBox, renderSourceBox} = this.props;
 
 		return (
 			<Fragment>
 				{renderBaseBoxes()}
-				{this.renderSourceBox()}
-				{this.renderParameterBox()}
+				{renderSourceBox()}
+				{renderParameterBox()}
 				{this.renderIndicatorBoxes()}
 				{renderDisplayModeSelect()}
 				{renderNavigationBox()}

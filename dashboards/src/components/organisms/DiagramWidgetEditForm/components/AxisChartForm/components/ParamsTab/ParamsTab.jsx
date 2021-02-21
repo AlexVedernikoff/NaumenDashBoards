@@ -20,7 +20,6 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	renderIndicatorBoxes = () => {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
-			name: FIELDS.yAxis,
 			onSelectCallback: this.onSelectIndicatorCallback,
 			usesEmptyData: true,
 			usesTop: true
@@ -29,34 +28,14 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		return renderIndicatorBoxes(props);
 	};
 
-	renderParameterBox = () => {
-		const {renderParameterBox} = this.props;
-		const props = {
-			name: FIELDS.xAxis
-		};
-
-		return renderParameterBox(props);
-	};
-
-	renderSourceBox = () => {
-		const {renderSourceBox} = this.props;
-		const sourceRefFields = {
-			breakdown: FIELDS.breakdown,
-			indicator: FIELDS.yAxis,
-			parameter: FIELDS.xAxis
-		};
-
-		return renderSourceBox(sourceRefFields);
-	};
-
 	render () {
-		const {renderBaseBoxes, renderDisplayModeSelect, renderNavigationBox} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect, renderNavigationBox, renderParameterBox, renderSourceBox} = this.props;
 
 		return (
 			<Fragment>
 				{renderBaseBoxes()}
-				{this.renderSourceBox()}
-				{this.renderParameterBox()}
+				{renderSourceBox()}
+				{renderParameterBox()}
 				{this.renderIndicatorBoxes()}
 				{renderDisplayModeSelect()}
 				{renderNavigationBox()}

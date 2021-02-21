@@ -1,12 +1,10 @@
 // @flow
 import {addMethod, array, lazy, mixed, number, object, string} from 'yup';
-import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {BreakdownItem, Parameter, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
-import type {DefaultBreakdown, Parameter, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {getDefaultParameter} from './helpers';
 import {isObject} from 'helpers';
 
 const getErrorMessage = (key: string) => {
@@ -52,11 +50,31 @@ addMethod(mixed, 'minSourceNumbers', function () {
 		});
 });
 
+/**
+ * Правило валидации атрибута только в случае если источник не для вычислений
+ * @param {object} rule - правило
+ * @returns {object}
+ */
+addMethod(mixed, 'requiredByCompute', function (schema) {
+	return this.when(FIELDS.source, {
+		is: ({forCompute}: SourceData) => !forCompute,
+		then: schema
+	});
+});
+
 addMethod(mixed, 'requiredAttribute', function (text: string) {
 	return this.test(
 		'check-attribute',
 		text,
-		({attribute} = {}) => validateAttribute(attribute)
+		({attribute: value} = {}) => {
+			let attribute = value;
+
+			if (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE) {
+				attribute = attribute.ref;
+			}
+
+			return isObject(attribute);
+		}
 	);
 });
 
@@ -64,7 +82,7 @@ addMethod(mixed, 'group', function () {
 	return this.test(
 		'check-attribute-group',
 		'Группировка данного атрибута не применима к другим полям',
-		function (attributeData: Parameter | DefaultBreakdown) {
+		function (attributeData: Parameter | BreakdownItem) {
 			const {data} = this.options.values;
 			const {attribute, group} = attributeData;
 			const {DAY, HOURS, MINUTES} = DATETIME_SYSTEM_GROUP;
@@ -87,25 +105,49 @@ addMethod(mixed, 'group', function () {
 	);
 });
 
+addMethod(object, 'topSettings', function () {
+	return this.shape({
+		count: number().required('Укажите значение ТОП').typeError('Значение ТОП должно быть числом')
+	}).default(DEFAULT_TOP_SETTINGS);
+});
+
+addMethod(array, 'parameters', function () {
+	return this.of(lazy((parameter: Parameter, options: Object) => {
+		const {data} = options.values;
+		const schema = mixed().requiredAttribute(getErrorMessage(FIELDS.parameter));
+
+		return data[0].parameters[0] === parameter ? schema.group() : schema;
+	}));
+});
+
+addMethod(array, 'indicators', function () {
+	return this.of(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)));
+});
+
+addMethod(array, 'breakdown', function () {
+	return this.of(lazy((item: BreakdownItem, options: Object) => {
+		const {parent} = options;
+		const schema = mixed().requiredAttribute(getErrorMessage(FIELDS.breakdown));
+
+		return parent[0] === item ? schema.group() : schema;
+	}));
+});
+
 /**
- * Валидация атрибута с учетом вложенности (ссылочного атрибута)
- * @param {Attribute} value - атрибут
- * @returns {boolean}
+ * Правило валидации разбвивки в зависимости от ее динамического добавления
+ * @returns {object}
  */
-const validateAttribute = (value: Attribute | null) => {
-	let attribute = value;
-
-	if (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE) {
-		attribute = attribute.ref;
-	}
-
-	return isObject(attribute);
-};
+addMethod(array, 'conditionalBreakdown', function () {
+	return this.when([FIELDS.withBreakdown, FIELDS.breakdown], {
+		is: (withBreakdown, breakdown) => Boolean(withBreakdown || breakdown),
+		then: array().breakdown()
+	});
+});
 
 /**
  * Базовые правила валидации всех виджетов
  */
-const base = {
+const baseSchema = {
 	[FIELDS.header]: object({
 		[FIELDS.template]: string().when(FIELDS.useName, {
 			is: false,
@@ -119,86 +161,10 @@ const base = {
 	).required(getErrorMessage(FIELDS.name)))
 };
 
-/**
- * Правило для разбивки вычисляемого атрибута
- * @param {any} value - значение разбивки
- * @returns {object}
- */
-const computedBreakdownRule = (value: any = []) => lazy((attribute: Attribute | null, ctx: Object) => {
-	const {parent} = ctx;
-	const rule = mixed().requiredAttribute(getErrorMessage(FIELDS.breakdown));
-
-	if (Array.isArray(value) && parent === value[0]) {
-		rule.group();
-	}
-
-	return rule;
-});
-
-/**
- * Правило для валидации разбивки
- * @returns {object}
- */
-const requiredBreakdown = lazy((value: mixed, context: Object) => {
-	const {attribute} = context.parent.indicators[0];
-
-	if (attribute && attribute.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-		return array().of(object({value: computedBreakdownRule(value)}));
-	}
-
-	return mixed().requiredAttribute(getErrorMessage(FIELDS.breakdown)).default(getDefaultParameter());
-});
-
-/**
- * Правило для валидации параметра
- */
-const parameter = lazy((parameter: Parameter, options: Object) => {
-	const {data} = options.values;
-	const rule = mixed().requiredAttribute(getErrorMessage(FIELDS.parameter));
-
-	if (data[0].parameters[0] === parameter) {
-		rule.group();
-	}
-
-	return rule;
-});
-
-/**
- * Правило валидации разбвивки в зависимости от ее динамического добавления
- * @returns {object}
- */
-const conditionalBreakdown = mixed().when([FIELDS.withBreakdown, FIELDS.breakdown], {
-	is: (withBreakdown, breakdown) => Boolean(withBreakdown || breakdown),
-	then: requiredBreakdown
-});
-
-/**
- * Правило валидации атрибута только в случае если источник не для вычислений
- * @param {object} rule - правило
- * @returns {object}
- */
-const requiredByCompute = (rule: Object) => {
-	return mixed().when(FIELDS.source, {
-		is: ({forCompute}: SourceData) => !forCompute,
-		then: rule
-	}).nullable();
-};
-
-const validateTopSettings = object({
-	count: number().required('Укажите значение ТОП').typeError('Значение ТОП должно быть числом')
-}).default(DEFAULT_TOP_SETTINGS);
-
-const rules = {
-	base,
-	conditionalBreakdown,
-	parameter,
-	requiredBreakdown,
-	requiredByCompute,
-	validateTopSettings
-};
-
 export {
+	array,
+	baseSchema,
 	getErrorMessage,
-	rules,
+	object,
 	mixed
 };

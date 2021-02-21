@@ -2,93 +2,167 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import AttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldset';
 import AttributeGroupField from 'DiagramWidgetEditForm/components/AttributeGroupField';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {DefaultBreakdown} from 'containers/DiagramWidgetEditForm/types';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {BreakdownItem} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
-import type {Group} from 'store/widgets/data/types';
-import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
+import {getMapValues} from 'src/helpers';
+import type {Group, Source} from 'store/widgets/data/types';
+import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
+import type {RefProps} from 'DiagramWidgetEditForm/components/AttributeFieldset/types';
 
-export class BreakdownFieldset extends PureComponent<Props> {
-	change = (breakdown: DefaultBreakdown) => {
-		const {dataSetIndex, onChange} = this.props;
-		onChange(dataSetIndex, breakdown);
+export class BreakdownFieldset extends Component<Props> {
+	mainIndex = 0;
+
+	static defaultProps = {
+		value: []
 	};
 
-	handleChangeGroup = (name: string, group: Group, attribute: Attribute) => this.change({
-		...this.props.value,
-		attribute,
-		group
-	});
+	componentDidMount () {
+		this.resetBreakdownIfIsNotValid();
+	}
 
-	handleChangeLabel = ({value: attribute}: OnChangeAttributeLabelEvent) => this.change({
-		...this.props.value,
-		attribute
-	});
+	componentDidUpdate (prevProps: Props) {
+		const {indicator} = this.props;
+		const {indicator: prevIndicator} = prevProps;
+		const {COMPUTED_ATTR} = ATTRIBUTE_TYPES;
+		const switchToComputedIndicator = prevIndicator && prevIndicator.type !== COMPUTED_ATTR
+			&& indicator && indicator.type === COMPUTED_ATTR;
+		const switchFromComputedIndicator = prevIndicator && prevIndicator.type === COMPUTED_ATTR
+			&& indicator && indicator.type !== COMPUTED_ATTR;
 
-	handleRemove = () => {
-		const {dataSetIndex, onRemove} = this.props;
-		onRemove(dataSetIndex);
-	};
+		if (switchToComputedIndicator || switchFromComputedIndicator) {
+			this.resetBreakdownIfIsNotValid();
+		}
+	}
 
-	handleSelect = (event: OnSelectAttributeEvent) => {
-		const {value} = this.props;
-		const {attribute: currentAttribute} = value;
-		const {value: attribute} = event;
-		let newValue = value;
+	filter = (options: Array<Attribute>, index: number): Array<Attribute> => {
+		if (index > this.mainIndex) {
+			const {value} = this.props;
+			const mainParameter = value[this.mainIndex].attribute;
 
-		if (attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!currentAttribute || currentAttribute.type !== attribute.type)) {
-			newValue = {
-				...newValue,
-				group: getDefaultSystemGroup(attribute)
-			};
+			if (mainParameter) {
+				return filterByAttribute(options, mainParameter);
+			}
 		}
 
-		this.change({
-			...newValue,
-			attribute
-		});
+		return options;
 	};
 
-	renderGroup = (props: Object) => {
-		const {dataSet, value: breakdown} = this.props;
-		const {disabled, parent, value} = props;
+	handleChangeGroup = (breakdownIndex: number) => (name: string, group: Group, attribute: Attribute) => {
+		const {onChange, value} = this.props;
+		const newBreakdown = value.map((item, i) => breakdownIndex === i ? {...item, attribute, group} : item);
 
-		return (
-			<AttributeGroupField
-				attribute={value}
-				disabled={disabled}
-				name={FIELDS.breakdownGroup}
-				onChange={this.handleChangeGroup}
-				parent={parent}
-				source={dataSet.source.value}
-				value={breakdown.group}
-			/>
-		);
+		onChange(newBreakdown);
 	};
 
-	render () {
-		const {dataSet, dataSetIndex, error, name, removable, value} = this.props;
-		const {attribute} = value;
+	handleChangeLabel = ({value: attribute}: OnSelectEvent, breakdownIndex: number) => {
+		const {onChange, value: breakdown} = this.props;
+		const newBreakdown = breakdown.map((item, i) => i === breakdownIndex ? {...item, attribute} : item);
 
-		return (
-			<FormField error={error}>
-				<AttributeFieldset
-					dataSet={dataSet}
-					dataSetIndex={dataSetIndex}
-					name={name}
-					onChangeLabel={this.handleChangeLabel}
-					onRemove={this.handleRemove}
-					onSelect={this.handleSelect}
-					removable={removable}
-					renderRefField={this.renderGroup}
-					value={attribute}
+		onChange(newBreakdown);
+	};
+
+	handleSelect = (event: OnSelectEvent, breakdownIndex: number) => {
+		const {onChange, value: breakdown} = this.props;
+		const {attribute: prevAttribute} = breakdown[breakdownIndex];
+		const {value: attribute} = event;
+		const isMain = breakdownIndex === this.mainIndex;
+		const typeIsChanged = !prevAttribute || prevAttribute.type !== attribute.type;
+		let newBreakdown = breakdown.map((item, i) => i === breakdownIndex ? {...item, attribute} : item);
+
+		if (isMain && typeIsChanged) {
+			const defaultGroup = getDefaultSystemGroup(attribute);
+
+			newBreakdown = newBreakdown.map((item, index) => ({
+				...item,
+				attribute: index === this.mainIndex ? item.attribute : null,
+				group: defaultGroup
+			}));
+		}
+
+		onChange(newBreakdown);
+	};
+
+	resetBreakdownIfIsNotValid = () => {
+		const {data, indicator, onChange, value} = this.props;
+		let usedKeys = [];
+
+		if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+			usedKeys = getMapValues(indicator.computeData)
+				.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : dataKey, usedKeys);
+		} else {
+			usedKeys = data.filter(dataSet => !dataSet.sourceForCompute).map(dataSet => dataSet.dataKey);
+		}
+
+		if (usedKeys.sort().toString() !== value.sort().toString()) {
+			onChange(usedKeys.map(dataKey => ({
+				attribute: null,
+				dataKey,
+				group: getDefaultSystemGroup()
+			})));
+		}
+	};
+
+	renderField = (item: BreakdownItem, breakdownIndex: number) => {
+		const {data, errors, index, onRemove, removable} = this.props;
+		const {attribute, dataKey, group} = item;
+		const dataSet = data.find(set => set.dataKey === dataKey);
+		const error = errors[getDataErrorKey(index, FIELDS.breakdown, breakdownIndex)];
+
+		if (dataSet) {
+			const {source} = dataSet;
+
+			return (
+				<FormField error={error} key={index}>
+					<AttributeFieldset
+						dataSet={dataSet}
+						getAttributeOptions={this.filter}
+						getSourceOptions={this.filter}
+						index={breakdownIndex}
+						onChangeLabel={this.handleChangeLabel}
+						onRemove={onRemove}
+						onSelect={this.handleSelect}
+						removable={removable}
+						renderRefField={this.renderGroup(group, breakdownIndex, source.value)}
+						value={attribute}
+					/>
+				</FormField>
+			);
+		}
+
+		return null;
+	};
+
+	renderGroup = (group: Group | null, breakdownIndex: number, source: Source | null) => (props: RefProps) => {
+		const {disabled: selectDisabled, parent, value: attribute} = props;
+		const isNotMain = breakdownIndex !== this.mainIndex;
+		const isNotRefAttr = attribute && !(attribute.type in ATTRIBUTE_SETS.REFERENCE);
+		const disabled = Boolean(selectDisabled || (isNotMain && isNotRefAttr));
+
+		if (attribute) {
+			return (
+				<AttributeGroupField
+					attribute={attribute}
+					disabled={disabled}
+					name={FIELDS.group}
+					onChange={this.handleChangeGroup(breakdownIndex)}
+					parent={parent}
+					source={source}
+					value={group}
 				/>
-			</FormField>
-		);
+			);
+		}
+
+		return null;
+	};
+
+	render (): Array<React$Node> {
+		return this.props.value.map(this.renderField);
 	}
 }
 
