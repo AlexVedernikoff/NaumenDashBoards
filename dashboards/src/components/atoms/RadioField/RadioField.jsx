@@ -6,7 +6,8 @@ import React, {PureComponent} from 'react';
 
 export class RadioField extends PureComponent<Props> {
 	static defaultProps = {
-		className: ''
+		className: '',
+		disabled: false
 	};
 
 	trigger: Function;
@@ -16,10 +17,10 @@ export class RadioField extends PureComponent<Props> {
 	handleSetTrigger = (trigger: Function) => (this.trigger = trigger);
 
 	render () {
-		const {className, label, ...radioButtonProps} = this.props;
+		const {className, disabled, label, ...radioButtonProps} = this.props;
 
 		return (
-			<FormCheckControl className={className} label={label} onClickLabel={this.handleClickLabel} >
+			<FormCheckControl className={className} disabled={disabled} label={label} onClickLabel={this.handleClickLabel}>
 				<RadioButton {...radioButtonProps} setTrigger={this.handleSetTrigger} />
 			</FormCheckControl>
 		);

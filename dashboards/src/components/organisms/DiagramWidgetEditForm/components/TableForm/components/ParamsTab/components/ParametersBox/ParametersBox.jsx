@@ -1,5 +1,5 @@
 // @flow
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
 import type {Parameter} from 'containers/DiagramWidgetEditForm/types';
@@ -7,7 +7,6 @@ import ParameterFieldset from 'DiagramWidgetEditForm/components/ParameterFieldse
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import SortableList from 'DiagramWidgetEditForm/components/SortableList';
-import withForm from 'DiagramWidgetEditForm/withForm';
 
 export class ParametersBox extends PureComponent<Props> {
 	getParameters = () => {
@@ -16,30 +15,30 @@ export class ParametersBox extends PureComponent<Props> {
 	};
 
 	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
-		const {setDataFieldValue, values} = this.props;
-		const {parameters} = values.data[dataSetIndex];
+		const {dataSet, onChange} = this.props;
+		const {parameters} = dataSet;
 		const newParameters = parameters.map((parameter, index) => index === parameterIndex ? newParameter : parameter);
 
-		setDataFieldValue(dataSetIndex, FIELDS.parameters, newParameters);
+		onChange(dataSetIndex, newParameters);
 	};
 
 	handleChangeOrder = (parameters: Array<Object>) => {
-		const {index, setDataFieldValue} = this.props;
-		setDataFieldValue(index, FIELDS.parameters, parameters);
+		const {index, onChange} = this.props;
+		onChange(index, parameters);
 	};
 
 	handleClickAddInput = () => {
-		const {index, setDataFieldValue} = this.props;
-		setDataFieldValue(index, FIELDS.parameters, [...this.getParameters(), getDefaultParameter()]);
+		const {index, onChange} = this.props;
+		onChange(index, [...this.getParameters(), getDefaultParameter()]);
 	};
 
 	handleRemove = (index: number) => {
-		const {index: dataSetIndex, setDataFieldValue} = this.props;
+		const {index: dataSetIndex, onChange} = this.props;
 		const parameters = this.getParameters();
 
 		if (parameters.length > 1) {
 			parameters.splice(index, 1);
-			setDataFieldValue(dataSetIndex, FIELDS.parameters, parameters);
+			onChange(dataSetIndex, parameters);
 		}
 	};
 
@@ -89,4 +88,4 @@ export class ParametersBox extends PureComponent<Props> {
 	}
 }
 
-export default withForm(ParametersBox);
+export default ParametersBox;

@@ -4,7 +4,7 @@ import {deepClone} from 'helpers';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import ExtendButton from 'components/atoms/ExtendButton';
 import FieldDivider from 'DiagramWidgetEditForm/components/FieldDivider';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
 import Label from 'components/atoms/Label';

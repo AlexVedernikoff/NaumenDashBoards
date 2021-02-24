@@ -1,11 +1,11 @@
 // @flow
 import {DEFAULT_TABLE_SETTINGS} from 'components/organisms/Table/constants';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
 import React, {Component} from 'react';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
 import styles from './styles.less';
-import {TableBox} from 'DiagramWidgetEditForm/components/TableForm/components';
+import TableBox from 'DiagramWidgetEditForm/components/TableForm/components/TableBox';
 
 export class StyleTab extends Component<StyleTabProps> {
 	handleChange = (name: string, data: Object) => {

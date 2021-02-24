@@ -7,7 +7,7 @@ import DataTopField from 'DiagramWidgetEditForm/components/DataTopField';
 import type {DataTopSettings} from 'store/widgets/data/types';
 import ExtendingFieldset from 'DiagramWidgetEditForm/components/ExtendingFieldset';
 import FieldError from 'components/atoms/FieldError';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultIndicator, getDefaultParameter, getErrorKey} from 'DiagramWidgetEditForm/helpers';
 import IconButton from 'components/atoms/IconButton';
@@ -50,6 +50,11 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	handleChangeBreakdown = (index: number, breakdown: DefaultBreakdown) => {
 		const {setDataFieldValue} = this.props;
 		setDataFieldValue(index, FIELDS.breakdown, breakdown);
+	};
+
+	handleChangeParameters = (index: number, parameters: Array<Paremeter>) => {
+		const {setDataFieldValue} = this.props;
+		setDataFieldValue(index, FIELDS.parameters, parameters);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
@@ -146,7 +151,13 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	};
 
 	renderParametersBox = (dataSet: DataSet, index: number) => (
-		<ParametersBox dataSet={dataSet} index={index} renderAddInput={this.renderAddInput} />
+		<ParametersBox
+			dataSet={dataSet}
+			errors={this.props.errors}
+			index={index}
+			onChange={this.handleChangeParameters}
+			renderAddInput={this.renderAddInput}
+		/>
 	);
 
 	renderSourceBox = (set: DataSet, index: number) => {

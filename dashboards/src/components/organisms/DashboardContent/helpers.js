@@ -1,6 +1,5 @@
 // @flow
-import {DEFAULT_COLS_COUNT, GRID_PROPS} from './constants';
-import {gridRef} from './index';
+import {DEFAULT_COLS_COUNT, GRID_PROPS, gridRef} from './constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 
 /**

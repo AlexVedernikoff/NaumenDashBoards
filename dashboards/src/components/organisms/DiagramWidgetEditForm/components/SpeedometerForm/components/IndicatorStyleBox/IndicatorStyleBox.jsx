@@ -1,5 +1,5 @@
 // @flow
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormField from 'components/molecules/FormField';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

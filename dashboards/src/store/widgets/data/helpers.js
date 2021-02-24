@@ -11,10 +11,11 @@ import type {
 	WidgetsDataState
 } from './types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
-import {DiagramWidget, TextWidget} from './templates';
+import DiagramWidget from './templates/DiagramWidget';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import NewWidget from 'store/widgets/data/NewWidget';
+import TextWidget from './templates/TextWidget';
 import {WIDGET_TYPES} from './constants';
 
 /**

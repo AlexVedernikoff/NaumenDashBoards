@@ -1,6 +1,6 @@
 // @flow
 import ExportByEmailForm from 'containers/ExportByEmailForm';
-import {IconButton} from 'components/organisms/DashboardHeader/components';
+import IconButton from 'components/organisms/DashboardHeader/components/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';

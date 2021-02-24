@@ -26,6 +26,11 @@ export type OnChangeLabelEvent = {
 	name: string
 };
 
+export type OnChangeEvent<V> = {
+	name: string,
+	value: V
+};
+
 export type TreeNode<V, R = {}> = {
 	...R,
 	children: Array<string> | null,

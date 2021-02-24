@@ -2,7 +2,7 @@
 import {CHART_OPTIONS} from './constants';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
-import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import Icon, {ICON_SIZES} from 'components/atoms/Icon';
 import MiniSelect from 'components/molecules/MiniSelect';

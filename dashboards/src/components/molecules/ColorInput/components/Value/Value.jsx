@@ -4,7 +4,7 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
-export class Input extends PureComponent<Props> {
+export class Value extends PureComponent<Props> {
 	renderButton = () => (
 		<button className={styles.button}>
 			<Icon name={ICON_NAMES.CARET} />
@@ -20,7 +20,7 @@ export class Input extends PureComponent<Props> {
 		const {forwardedRef, onClick} = this.props;
 
 		return (
-			<div className={styles.input} onClick={onClick} ref={forwardedRef}>
+			<div className={styles.container} onClick={onClick} ref={forwardedRef}>
 				{this.renderValue()}
 				{this.renderButton()}
 			</div>
@@ -28,4 +28,4 @@ export class Input extends PureComponent<Props> {
 	}
 }
 
-export default Input;
+export default Value;

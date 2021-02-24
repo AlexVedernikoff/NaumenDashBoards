@@ -3,7 +3,7 @@ import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuil
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import FieldDivider from 'DiagramWidgetEditForm/components/FieldDivider';
 import FieldError from 'components/atoms/FieldError';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormField from 'components/molecules/FormField';
 import {getErrorKey} from 'DiagramWidgetEditForm/helpers';
 import HorizontalLabel from 'components/atoms/HorizontalLabel';

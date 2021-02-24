@@ -3,7 +3,7 @@ import Checkbox from 'components/atoms/Checkbox';
 import cn from 'classnames';
 import {COUNT_OPTIONS} from './constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';

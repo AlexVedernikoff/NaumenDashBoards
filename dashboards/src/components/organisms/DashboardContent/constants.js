@@ -1,6 +1,10 @@
 // @flow
+import {createRef} from 'react';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
+import type {Ref} from 'components/types';
+
+export const gridRef: Ref<'div'> = createRef();
 
 const DEFAULT_COLS_COUNT = 12;
 const GRID_LAYOUT_HEIGHT = 50;

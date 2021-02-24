@@ -1,6 +1,6 @@
 // @flow
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
-import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import React, {Component, Fragment} from 'react';
 import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
 

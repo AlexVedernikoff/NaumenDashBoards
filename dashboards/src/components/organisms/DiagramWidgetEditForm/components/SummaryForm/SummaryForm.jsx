@@ -2,7 +2,7 @@
 import {array, object} from 'yup';
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {getSummaryLayoutSize} from './helpers';

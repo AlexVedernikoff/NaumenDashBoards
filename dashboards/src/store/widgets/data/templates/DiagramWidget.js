@@ -1,8 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
+import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP} from 'store/widgets/constants';
 import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
 import {DEFAULT_NAVIGATION_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {getDefaultIndicator, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {NavigationSettings, WidgetType} from 'store/widgets/data/types';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -21,8 +21,14 @@ class DiagramWidget extends NewWidget {
 
 		this.data.push({
 			dataKey: uuid(),
-			indicators: [getDefaultIndicator()],
-			parameters: [getDefaultParameter()],
+			indicators: [{
+				aggregation: DEFAULT_AGGREGATION.COUNT,
+				attribute: null
+			}],
+			parameters: [{
+				attribute: null,
+				group: DEFAULT_SYSTEM_GROUP.OVERLAP
+			}],
 			source: {
 				descriptor: '',
 				value: null

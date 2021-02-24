@@ -2,7 +2,7 @@
 import {array, number, object} from 'yup';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'components/organisms/DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import ParamsTab from './components/ParamsTab';

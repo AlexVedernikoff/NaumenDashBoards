@@ -1,6 +1,6 @@
 // @flow
 import AutoUpdateButton from 'containers/AutoUpdateButton';
-import Button from 'components/atoms/Button';
+import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import ButtonGroup from 'components/atoms/ButtonGroup';
 import {createContextName} from 'utils/export/helpers';
 import {createSnapshot} from 'utils/export';
@@ -8,7 +8,7 @@ import {DASHBOARD_HEADER_HEIGHT, EXPORT_LIST} from './constants';
 import DropDownButton from './components/DropDownButton';
 import ExportByEmailButton from './components/ExportByEmailButton';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
-import {gridRef} from 'components/organisms/DashboardContent';
+import {gridRef} from 'components/organisms/DashboardContent/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from './components/IconButton';
 import isMobile from 'ismobilejs';
@@ -20,7 +20,6 @@ import React, {Component} from 'react';
 import type {State} from './types';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
-import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from './components/IconButton/constants';
 
 export class DashboardHeader extends Component<Props, State> {

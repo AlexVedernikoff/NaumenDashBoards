@@ -1,6 +1,6 @@
 // @flow
 import Checkbox from 'components/atoms/Checkbox';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import type {MenuProps} from 'components/molecules/Select/types';

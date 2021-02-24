@@ -1,16 +1,16 @@
 // @flow
-import type {OnChangeInputEvent} from 'components/types';
-import type {Props as InputProps} from './components/Input/types';
+import type {OnChangeEvent} from 'components/types';
+import type {Props as ValueProps} from './components/Value/types';
 
-export type Components = $Shape<{
-	Input: React$ComponentType<InputProps>
-}>;
+export type Components = {
+	Value: React$ComponentType<ValueProps>
+};
 
 export type Props = {
 	className: string,
-	components: Components,
+	components: $Shape<Components>,
 	name: string,
-	onChange: OnChangeInputEvent => void,
+	onChange: OnChangeEvent<string> => void,
 	portable: boolean,
 	value: string
 };

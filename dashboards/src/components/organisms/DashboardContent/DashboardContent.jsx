@@ -5,7 +5,7 @@ import DashboardPanel from 'components/organisms/DashboardPanel';
 import {debounce} from 'helpers';
 import type {DivRef} from 'components/types';
 import {getLayoutWidgets} from 'store/widgets/helpers';
-import {GRID_PROPS} from './constants';
+import {GRID_PROPS, gridRef} from './constants';
 import isMobile from 'ismobilejs';
 import type {Layout, Layouts} from 'store/dashboard/layouts/types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
@@ -13,14 +13,12 @@ import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {Component, createRef} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
-import {resizer} from 'index';
+import {resizer as dashboardResizer} from 'constants.js';
 import {Responsive as Grid} from 'react-grid-layout';
 import type {State} from './types';
 import styles from './styles.less';
 import {USER_ROLES} from 'store/context/constants';
 import Widget from 'components/molecules/Widget';
-
-export const gridRef: DivRef = createRef();
 
 export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
@@ -73,7 +71,7 @@ export class DashboardContent extends Component<Props, State> {
 		const {top} = element.getBoundingClientRect();
 		let y = 0;
 
-		if (resizer.isFullSize() || editableDashboard) {
+		if (dashboardResizer.isFullSize() || editableDashboard) {
 			container && container.scrollTo({
 				behavior: 'smooth',
 				top: Math.max(top - container.getBoundingClientRect().top + container.scrollTop, 0)
@@ -82,14 +80,14 @@ export class DashboardContent extends Component<Props, State> {
 			y = top;
 		}
 
-		resizer.scrollTo(0, y);
+		dashboardResizer.scrollTo(0, y);
 		resetFocusedWidget();
 	};
 
 	handleWidgetSelect = (id: string) => {
 		const {focusWidget, selectWidget, selectedWidget} = this.props;
 
-		if (!resizer.isFullSize() && !selectedWidget) {
+		if (!dashboardResizer.isFullSize() && !selectedWidget) {
 			focusWidget(id);
 		}
 
@@ -110,7 +108,7 @@ export class DashboardContent extends Component<Props, State> {
 			const width: number = Math.round(current.offsetWidth - parseFloat(paddingLeft) - parseFloat(paddingRight));
 
 			this.setState({width});
-			resizer.resize();
+			dashboardResizer.resize();
 		}
 	};
 

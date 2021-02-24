@@ -2,7 +2,7 @@
 import CellSettingsBox from 'DiagramWidgetEditForm/components/TableForm/components/TableBox/components/CellSettingsBox';
 import Checkbox from 'components/atoms/Checkbox';
 import {EMPTY_DATA_OPTIONS, PAGE_SIZES} from './constants';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
 import type {InputValue, OnChangeInputEvent, OnSelectEvent} from 'components/types';

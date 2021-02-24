@@ -1,7 +1,7 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import BreakdownFieldset from 'DiagramWidgetEditForm/components/BreakdownFieldset';
-import Checkbox from 'components/atoms/Checkbox';
+import Checkbox from 'components/atoms/LegacyCheckbox';
 import type {ComputedAttr, DataTopSettings} from 'store/widgets/data/types';
 import ComputedBreakdownFieldset from 'DiagramWidgetEditForm/components/ComputedBreakdownFieldset';
 import DataTopField from 'DiagramWidgetEditForm/components/DataTopField';
