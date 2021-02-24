@@ -169,7 +169,7 @@ export class ObjectGroup extends Component<Props, State> {
 		searchObjects(source, attribute, searchValue);
 	};
 
-	handleLoadData = (actual: boolean) => (node?: Object, offset?: number = 0) => {
+	handleLoadData = (actual: boolean) => (node?: Object, offset: number = 0) => {
 		const {attribute, fetchObjectData, source} = this.props;
 		let parentUUID = null;
 		let id = null;

@@ -1,8 +1,3 @@
 // @flow
-import DashboardContent, {gridRef} from './DashboardContent';
-
-export {
-	gridRef
-};
-
+import DashboardContent from './DashboardContent';
 export default DashboardContent;

@@ -1,11 +1,17 @@
 // @flow
 import Button, {VARIANTS} from 'components/atoms/Button';
+import cn from 'classnames';
 import type {Color, Props, State} from './types';
 import React, {Component} from 'react';
 import {SketchPicker} from 'react-color';
 import styles from './styles.less';
 
 export class ColorPicker extends Component<Props, State> {
+	static defaultProps = {
+		className: '',
+		forwardedRef: null
+	};
+
 	state = {
 		currentColor: '',
 		itemColor: '',
@@ -51,11 +57,11 @@ export class ColorPicker extends Component<Props, State> {
 	setColor = (color: Color) => this.setState(() => ({itemColor: color.hex}));
 
 	render () {
-		const {onClose} = this.props;
+		const {className, forwardedRef, onClose, style} = this.props;
 		const {itemColor, presetColors} = this.state;
 
 		return (
-			<div className={styles.container}>
+			<div className={cn(styles.container, className)} ref={forwardedRef} style={style}>
 				<div className={styles.pickerContainer}>
 					<SketchPicker
 						className={styles.picker}

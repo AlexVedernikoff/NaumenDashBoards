@@ -2,6 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {DataSet, Parameter} from 'containers/DiagramWidgetEditForm/types';
+import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import FormBox from 'components/molecules/FormBox';
@@ -11,7 +12,6 @@ import {isAxisChart} from 'store/widgets/helpers';
 import ParameterFieldset from 'DiagramWidgetEditForm/components/ParameterFieldset';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {SORTING_VALUES} from 'store/widgets/data/constants';
 
 export class ParameterDataBox extends PureComponent<Props> {
 	componentDidUpdate (prevProps: Props) {
@@ -91,7 +91,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
 		const {setDataFieldValue, setFieldValue, values} = this.props;
 		const {parameters} = values.data[dataSetIndex];
-		const {sorting, type} = values;
+		const {sorting = DEFAULT_AXIS_SORTING_SETTINGS, type} = values;
 		let callback;
 
 		if (dataSetIndex === 0 && parameterIndex === 0) {

@@ -1,11 +1,12 @@
 // @flow
 import AbsolutePortal from 'components/molecules/AbsolutePortal';
 import cn from 'classnames';
-import Input from './components/Input';
-import type {Props, State} from './types';
+import ColorPicker from 'components/molecules/ColorPicker';
+import type {Components, Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
+import Value from './components/Value';
 
 export class ColorInput extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -15,12 +16,19 @@ export class ColorInput extends PureComponent<Props, State> {
 		portable: true,
 		value: '#4F5C70'
 	};
-
+	components: Components = this.getExtendedComponents(this.props.components);
 	ref: Ref<'div'> = createRef();
 
 	state = {
 		showPicker: false
 	};
+
+	getExtendedComponents (components: $Shape<Components>) {
+		return {
+			Value,
+			...components
+		};
+	}
 
 	closePicker = () => this.setState({showPicker: false});
 
@@ -35,28 +43,13 @@ export class ColorInput extends PureComponent<Props, State> {
 
 	hidePicker = () => this.setState({showPicker: false});
 
-	renderInput = () => {
-		const {components, value} = this.props;
-		const {Input: CustomInput} = components;
-		const props = {
-			forwardedRef: this.ref,
-			onClick: this.handleClick,
-			value
-		};
-		const Component = CustomInput || Input;
-
-		return <Component {...props} />;
-	};
-
 	renderPicker = () => {
 		const {value} = this.props;
 		const {showPicker} = this.state;
 
 		if (showPicker) {
 			return (
-				<div className={styles.picker}>
-					<ColorPicker onChange={this.handleChange} onClose={this.closePicker} value={value} />
-				</div>
+				<ColorPicker className={styles.picker} onChange={this.handleChange} onClose={this.closePicker} value={value} />
 			);
 		}
 
@@ -78,8 +71,10 @@ export class ColorInput extends PureComponent<Props, State> {
 	};
 
 	renderValue = () => {
-		const {value: backgroundColor} = this.props;
-		return <span className={styles.value} style={{backgroundColor}} />;
+		const {value} = this.props;
+		const {Value} = this.components;
+
+		return <Value forwardedRef={this.ref} onClick={this.handleClick} value={value} />;
 	};
 
 	render () {
@@ -88,7 +83,7 @@ export class ColorInput extends PureComponent<Props, State> {
 
 		return (
 			<span className={cn(className, styles.container)}>
-				{this.renderInput()}
+				{this.renderValue()}
 				{picker}
 			</span>
 		);

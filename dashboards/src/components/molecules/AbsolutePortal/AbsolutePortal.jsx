@@ -2,7 +2,7 @@
 import {createPortal} from 'react-dom';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
-import React, {Children, cloneElement, Component, createRef} from 'react';
+import React, {Children, cloneElement, Component, createRef, isValidElement} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
 
@@ -27,6 +27,34 @@ export class AbsolutePortal extends Component<Props, State> {
 
 		this.container = null;
 	}
+
+	cloneComponentElement = (child: React$Element<typeof React$Component>, style: Object) => {
+		let {props} = child;
+
+		if (!props.forwardedRef) {
+			props = {
+				...props,
+				forwardedRef: this.childRef
+			};
+		}
+
+		return cloneElement(child, {...props, style});
+	};
+
+	cloneDOMElement = (child: React$Element<'string'>, style: Object) => {
+		let {props, ref} = child;
+
+		if (!ref) {
+			props = {
+				...props,
+				ref: this.childRef
+			};
+		} else {
+			this.childRef = ref;
+		}
+
+		return cloneElement(child, {...props, style});
+	};
 
 	createContainer = () => {
 		const div = document.createElement('div');
@@ -79,29 +107,27 @@ export class AbsolutePortal extends Component<Props, State> {
 		const {children, onClickOutside} = this.props;
 		const {childPosition} = this.state;
 		const child = Children.only(children);
-		const {props, ref} = child;
-		let {style} = props;
+		const {props} = child;
+		let element = child;
 
-		if (childPosition) {
-			style = {
-				...style = {},
-				...childPosition
-			};
+		if (isValidElement(child)) {
+			let {style} = props;
+
+			if (childPosition) {
+				style = {
+					...style = {},
+					...childPosition
+				};
+			}
+
+			element = typeof child.type === 'function'
+				? this.cloneComponentElement(child, style)
+				: this.cloneDOMElement(child, style);
 		}
-
-		if (ref) {
-			this.childRef = ref;
-		}
-
-		const childElement = cloneElement(child, {
-			...child.props,
-			ref: this.childRef,
-			style
-		});
 
 		return (
 			<OutsideClickDetector onClickOutside={onClickOutside}>
-				{childElement}
+				{element}
 			</OutsideClickDetector>
 		);
 	};

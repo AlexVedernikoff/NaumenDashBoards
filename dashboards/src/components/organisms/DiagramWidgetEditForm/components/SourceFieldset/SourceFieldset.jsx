@@ -2,7 +2,7 @@
 import Checkbox from 'components/atoms/LegacyCheckbox';
 import ExtendButton from 'components/atoms/ExtendButton';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
-import {getDescriptorCases} from 'helpers';
+import {getDescriptorCases} from 'store/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {isSourceType} from 'store/sources/data/helpers';
 import type {OnChangeLabelEvent} from 'components/molecules/TreeSelect/types';

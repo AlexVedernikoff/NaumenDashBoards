@@ -1,7 +1,8 @@
 // @flow
 import type {ContextProps} from './types';
-import {FormContext} from './DiagramWidgetEditForm';
-import React from 'react';
+import React, {createContext} from 'react';
+
+export const FormContext: React$Context<Object> = createContext({});
 
 export const withForm = (Component: React$ComponentType<Object>) => {
 	return class WrappedComponent extends React.Component<Object> {

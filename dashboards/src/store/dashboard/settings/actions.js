@@ -5,7 +5,7 @@ import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
-import {DiagramWidget} from 'store/widgets/data/templates';
+import DiagramWidget from 'store/widgets/data/templates/DiagramWidget';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getContext, getEditableParam, getMetaCLass, getUserData, setUserData, switchDashboard} from 'store/context/actions';
@@ -16,7 +16,7 @@ import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState} from 'store/actions';
-import {resizer} from 'index';
+import {resizer as dashboardResizer} from 'constants.js';
 import {setCustomGroups} from 'store/customGroups/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {User} from 'store/users/types';
@@ -83,7 +83,7 @@ const initStorageSettings = () => (dispatch: Dispatch, getState: GetState) => {
 	if (targetWidget) {
 		dispatch(focusWidget(targetWidget));
 	} else if (focused) {
-		resizer.scrollTo(0, 0);
+		dashboardResizer.scrollTo(0, 0);
 	}
 
 	storageSettings.clear();
@@ -168,7 +168,7 @@ const editDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 		type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
 	});
 
-	resizer.resetHeight();
+	dashboardResizer.resetHeight();
 };
 
 /**
@@ -249,7 +249,7 @@ const seeDashboard = (): ThunkAction => async (dispatch: Dispatch) => {
 		type: DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
 	});
 
-	resizer.resize();
+	dashboardResizer.resize();
 };
 
 /**

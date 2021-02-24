@@ -1,5 +1,5 @@
 // @flow
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultIndicator} from 'DiagramWidgetEditForm/helpers';
 import {hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
@@ -25,8 +25,8 @@ export class IndicatorsBox extends PureComponent<Props> {
 	};
 
 	handleChange = (dataSetIndex: number, index: number, newIndicator: Indicator) => {
-		const {setDataFieldValue, values} = this.props;
-		const {indicators} = values.data[dataSetIndex];
+		const {dataSet, setDataFieldValue} = this.props;
+		const {indicators} = dataSet;
 		const newIndicators = indicators.map((indicator, i) => i === index ? newIndicator : indicator);
 
 		setDataFieldValue(index, FIELDS.indicators, newIndicators, this.checkForBreakdown);
@@ -56,17 +56,6 @@ export class IndicatorsBox extends PureComponent<Props> {
 
 			setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators);
 		}
-	};
-
-	handleSelectAggregation = (index: number, name: string, value: string) => {
-		const {index: dataSetIndex, setDataFieldValue} = this.props;
-		const indicators = this.getIndicators();
-		indicators[index] = {
-			...indicators[index],
-			aggregation: value
-		};
-
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, indicators, this.checkForBreakdown);
 	};
 
 	renderFieldset = (indicator: Indicator, index: number, indicators: Array<Indicator>) => {

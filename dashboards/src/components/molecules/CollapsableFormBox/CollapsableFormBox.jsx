@@ -6,8 +6,12 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class CollapsableFormBox extends PureComponent<Props, State> {
-	state = {
+	static defaultProps = {
 		showContent: false
+	};
+
+	state = {
+		showContent: this.props.showContent
 	};
 
 	handleClick = () => this.setState({showContent: !this.state.showContent});

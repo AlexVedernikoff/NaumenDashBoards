@@ -1,8 +1,9 @@
 // @flow
 import type {ComponentType} from 'react';
 import type {ContextProps} from './types';
-import {CustomGroupContext} from './CustomGroup';
-import React from 'react';
+import React, {createContext} from 'react';
+
+export const CustomGroupContext: Object = createContext({});
 
 export const withCustomGroup = (Component: ComponentType<Object>) => {
 	return class WrappedComponent extends React.Component<Object> {

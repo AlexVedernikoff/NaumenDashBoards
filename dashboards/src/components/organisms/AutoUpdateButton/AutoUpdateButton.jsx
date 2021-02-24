@@ -3,7 +3,7 @@ import Button from 'components/atoms/Button';
 import Checkbox from 'components/atoms/LegacyCheckbox';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {IconButton} from 'components/organisms/DashboardHeader/components';
+import IconButton from 'components/organisms/DashboardHeader/components/IconButton';
 import {MAX_INTERVAL} from './constants';
 import {number, object} from 'yup';
 import Popover from 'components/atoms/Popover';

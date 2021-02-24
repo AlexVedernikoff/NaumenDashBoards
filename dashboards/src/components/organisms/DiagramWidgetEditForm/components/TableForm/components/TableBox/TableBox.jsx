@@ -1,7 +1,7 @@
 // @flow
 import BodySettingsBox from './components/BodySettingsBox';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import HeaderSettingsBox from './components/HeaderSettingsBox';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

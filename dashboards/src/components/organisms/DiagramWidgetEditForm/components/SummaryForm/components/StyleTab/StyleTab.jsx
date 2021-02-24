@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
 import IndicatorBox from 'DiagramWidgetEditForm/components/SummaryForm/components/IndicatorBox';
 import React, {Component} from 'react';

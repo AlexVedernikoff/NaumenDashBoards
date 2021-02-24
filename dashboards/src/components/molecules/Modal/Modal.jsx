@@ -5,7 +5,7 @@ import {createPortal} from 'react-dom';
 import {FOOTER_POSITIONS, SIZES} from './constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
-import {root} from 'index';
+import {root} from 'constants.js';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 

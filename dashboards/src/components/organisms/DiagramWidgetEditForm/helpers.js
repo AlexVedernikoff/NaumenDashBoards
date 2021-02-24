@@ -3,7 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {DiagramFormWidget, Indicator, Parameter} from 'containers/DiagramWidgetEditForm/types';
-import {FIELDS} from 'DiagramWidgetEditForm/index';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getDefaultSystemGroup, isCircleChart, usesCustomGroup} from 'store/widgets/helpers';
 import {SORTING_OPTIONS} from './components/SortingBox/constants';
 import type {SortingValueOption} from './components/SortingBox/types';
