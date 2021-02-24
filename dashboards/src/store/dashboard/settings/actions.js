@@ -16,7 +16,7 @@ import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState} from 'store/actions';
-import {resizer as dashboardResizer} from 'constants.js';
+import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomGroups} from 'store/customGroups/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {User} from 'store/users/types';

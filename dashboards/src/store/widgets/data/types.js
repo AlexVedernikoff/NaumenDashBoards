@@ -3,7 +3,9 @@ import type {Action, ChangingState, ThunkAction} from 'store/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
+	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
+	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_TABLE_VALUE,
 	DISPLAY_MODE,
 	FONT_STYLES,
@@ -166,6 +168,46 @@ export type DataLabels = {
 	fontSize: number,
 	show: boolean,
 	showShadow: boolean
+};
+
+// Настройка цветов графика
+export type CustomChartColorsSettingsType = $Keys<typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES>;
+
+export type ChartColorSettings = {
+	color: string,
+	text: string
+};
+
+export type CustomLabelChartColorsSettings = {
+	colors: Array<ChartColorSettings>,
+	defaultColor: string,
+	key: string,
+	type: typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES.LABEL,
+};
+
+export type CustomBreakdownChartColorsSettings = {
+	colors: Array<ChartColorSettings>,
+	key: string,
+	type: typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
+};
+
+export type CustomChartColorsSettingsData = CustomLabelChartColorsSettings | CustomBreakdownChartColorsSettings;
+
+export type ChartColorsSettingsType = $Keys<typeof CHART_COLORS_SETTINGS_TYPES>;
+
+export type AutoChartColorsSettings = {
+	colors: Array<string>
+};
+
+export type CustomChartColorsSettings = {
+	data?: CustomChartColorsSettingsData,
+	useGlobal: boolean
+};
+
+export type ChartColorsSettings = {
+	auto: AutoChartColorsSettings,
+	custom: CustomChartColorsSettings,
+	type: ChartColorsSettingsType
 };
 
 // График с осями

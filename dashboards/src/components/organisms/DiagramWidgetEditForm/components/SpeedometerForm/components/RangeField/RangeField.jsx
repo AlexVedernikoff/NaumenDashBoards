@@ -62,7 +62,7 @@ export class RangeField extends PureComponent<Props> {
 
 	modifyValue = (value: string | number) => this.hasPercentType() ? `${value}%` : value;
 
-	renderColorInput = (props: ColorInputProps) => {
+	renderColorValue = (props: ColorInputProps) => {
 		const {forwardedRef, onClick, value} = props;
 		const brightness = this.getColorBrightness(value.substring(1, 6));
 		const inputCN = cn({
@@ -97,7 +97,7 @@ export class RangeField extends PureComponent<Props> {
 			<FormField className={styles.container} row>
 				{this.renderRemoveIcon()}
 				<ColorInput
-					components={{Input: this.renderColorInput}}
+					components={{Value: this.renderColorValue}}
 					name={FIELDS.color}
 					onChange={this.handleChange}
 					value={color}

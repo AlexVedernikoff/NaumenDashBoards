@@ -1,5 +1,4 @@
 // @flow
-import {getSourceTypes} from './store/helpers';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 
@@ -83,13 +82,6 @@ const getLayoutMode = () => {
 };
 
 /**
- * Возвращает массив для окна фильтрации, содержащий код источника и все его подтипы
- * @param {string} classFqn - код источника
- * @returns {Array<string>}
- */
-const getDescriptorCases = (classFqn: string) => [classFqn, ...getSourceTypes(classFqn)];
-
-/**
  * На текущий момент у окружения метода нет полифилов к es6. Для стабильной работы на старых браузерах все ответы
  * перепарсиваются согласно окружению внутреннего приложения.
  * @param {Function} restCallModule - метод для осуществления запросов к модулям
@@ -116,7 +108,6 @@ export {
 	escapeString,
 	extend,
 	isMacOS,
-	getDescriptorCases,
 	getLayoutMode,
 	getMapValues,
 	isObject

@@ -13,7 +13,7 @@ import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {Component, createRef} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
-import {resizer as dashboardResizer} from 'constants.js';
+import {resizer as dashboardResizer} from 'app.constants';
 import {Responsive as Grid} from 'react-grid-layout';
 import type {State} from './types';
 import styles from './styles.less';

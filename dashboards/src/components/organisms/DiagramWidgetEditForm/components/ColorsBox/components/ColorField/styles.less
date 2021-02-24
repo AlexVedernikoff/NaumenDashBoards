@@ -1,0 +1,36 @@
+@import "/styles/variables.less";
+
+:local {
+	.field {
+		align-items: center;
+		display: flex;
+
+		&:hover {
+			.removeButton {
+				opacity: 1;
+			}
+		}
+	}
+
+	.colorValue {
+		border-radius: @border-radius;
+		cursor: pointer;
+		height: 24px;
+		margin-left: 12px;
+		width: 24px;
+	}
+
+	.label {
+		color: @black;
+		margin-left: 12px;
+	}
+
+	.removeButton {
+		opacity: 0;
+	}
+
+	.hiddenRemoveButton {
+		pointer-events: none;
+		visibility: hidden;
+	}
+}

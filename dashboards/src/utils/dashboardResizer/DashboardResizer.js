@@ -1,10 +1,15 @@
 // @flow
 import {DASHBOARD_HEADER_HEIGHT} from 'components/organisms/DashboardHeader/constants';
-import {gridRef} from 'components/organisms/DashboardContent';
-import {store} from 'index';
+import {gridRef} from 'components/organisms/DashboardContent/constants';
+import type {Store} from 'src/store/types';
 
 export class DashboardResizer {
 	initHeight: number = window.innerHeight;
+	store = null;
+
+	constructor (store: Store) {
+		this.store = store;
+	}
 
 	getContentHeight (): number | null {
 		return gridRef.current && gridRef.current.getBoundingClientRect().height + DASHBOARD_HEADER_HEIGHT;
@@ -38,7 +43,7 @@ export class DashboardResizer {
 	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setHeight(this.initHeight);
 
 	resize = () => {
-		const {editMode: editableDashboard} = store.getState().dashboard.settings;
+		const editableDashboard = this.store && this.store.getState().dashboard.settings.editMode;
 
 		if (this.isFullSize()) {
 			this.setFullHeight();

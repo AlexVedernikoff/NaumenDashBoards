@@ -40,4 +40,7 @@ export type GetState = () => AppState;
 export type ThunkAction = (dispatch: Dispatch, getState: GetState) => any;
 type PromiseAction = Promise<Action>;
 export type Dispatch = (action: Action | ThunkAction | PromiseAction) => void;
+export type Store = {
+	getState: () => AppState
+};
 /* eslint-enable no-use-before-define */

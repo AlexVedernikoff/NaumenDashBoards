@@ -3,6 +3,7 @@
 .*/flux/.*
 .*/react-motion/.*
 .*/tests/.*
+.*.stories.*
 
 [untyped]
 .*/node_modules/*
@@ -13,6 +14,8 @@
 
 [options]
 esproposal.class_instance_fields=enable
+esproposal.optional_chaining=enable
+
 module.system.node.resolve_dirname=node_modules
 module.system.node.resolve_dirname=src
 module.name_mapper.extension='css' -> '<PROJECT_ROOT>/flow/stub/css-modules.js'

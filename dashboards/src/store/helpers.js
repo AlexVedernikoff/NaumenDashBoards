@@ -1,5 +1,5 @@
 // @flow
-import {store} from 'index';
+import {store} from 'app.constants';
 
 /**
  * Формирует параметры для запросов изменения данных дашборда
@@ -117,7 +117,15 @@ const removeLocalStorageValue = (storageKey: string, key: string) => {
 	}
 };
 
+/**
+ * Возвращает массив для окна фильтрации, содержащий код источника и все его подтипы
+ * @param {string} classFqn - код источника
+ * @returns {Array<string>}
+ */
+const getDescriptorCases = (classFqn: string) => [classFqn, ...getSourceTypes(classFqn)];
+
 export {
+	getDescriptorCases,
 	getLocalStorageValue,
 	getParams,
 	getSourceTypes,

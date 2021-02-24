@@ -233,8 +233,26 @@ const DEFAULT_TOP_SETTINGS = Object.freeze({
 	show: false
 });
 
+/**
+ * Типы настройки цветов графика
+ */
+const CHART_COLORS_SETTINGS_TYPES = {
+	AUTO: 'AUTO',
+	CUSTOM: 'CUSTOM'
+};
+
+/**
+ * Типы пользовательской настройки цветов графика
+ */
+const CUSTOM_CHART_COLORS_SETTINGS_TYPES = {
+	BREAKDOWN: 'BREAKDOWN',
+	LABEL: 'LABEL'
+};
+
 export {
+	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
+	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_AXIS_SORTING_SETTINGS,
 	DEFAULT_CIRCLE_SORTING_SETTINGS,
 	DEFAULT_NAVIGATION_SETTINGS,

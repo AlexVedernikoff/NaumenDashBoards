@@ -12,9 +12,9 @@ import {
 } from './constants';
 import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
-import {store} from 'index';
+import {store} from 'app.constants';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {

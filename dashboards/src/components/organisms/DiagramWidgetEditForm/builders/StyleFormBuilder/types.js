@@ -8,7 +8,7 @@ export type OnChangeEvent = {
 
 export type InputProps = {
 	name: string,
-	onChange: OnChangeInputEvent => void,
+	onChange: OnChangeEvent => void,
 	value: string
 };
 

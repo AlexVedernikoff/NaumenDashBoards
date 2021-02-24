@@ -1,7 +1,7 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin} from './types';
-import {getDescriptorCases} from 'helpers';
+import {getDescriptorCases} from 'store/helpers';
 import {isSourceType} from 'store/sources/data/helpers';
 import {LINKS_EVENTS} from './constants';
 import StorageSettings from 'utils/storageSettings';

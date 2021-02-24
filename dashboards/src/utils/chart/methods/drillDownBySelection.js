@@ -6,11 +6,11 @@ import {deepClone} from 'helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
 import type {DrillDownMixin} from 'store/widgets/links/types';
-import {FIELDS} from 'DiagramWidgetEditForm';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {hasUUIDsInLabels, transformGroupFormat} from 'store/widgets/helpers';
-import {store} from 'index';
+import {store} from 'app.constants';
 import type {ThunkAction} from 'store/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
