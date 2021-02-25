@@ -3,15 +3,15 @@ import CustomGroup from './components/CustomGroup/CustomGroup';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from './constants';
 import FormField from './components/FormField';
-import {getAttributeValue, setAttributeValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
 import Label from 'components/atoms/Label';
 import Modal from 'components/molecules/Modal';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent} from 'components/types';
 import type {Props, State} from './types';
 import type {Props as SystemProps} from './components/SystemGroup/types';
 import RadioField from 'components/atoms/RadioField';
 import React, {Component, Fragment} from 'react';
+import {setAttributeValue} from 'store/sources/attributes/helpers';
 import styles from './styles.less';
 import SystemGroup from './components/SystemGroup';
 import TextInput from 'components/atoms/TextInput';
@@ -45,7 +45,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleChange = ({name, value}: OnChangeInputEvent) => this.setState({[name]: value});
 
-	handleChangeAttributeTitle = (e: OnChangeInputEvent) => {
+	handleChangeAttributeTitle = (e: OnChangeEvent<string>) => {
 		const {attribute} = this.state;
 		const {value} = e;
 
@@ -108,14 +108,11 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	renderNameField = () => {
 		const {attribute} = this.state;
+		const value = attribute.ref?.title ?? attribute.title;
 
 		return (
 			<FormField label="Название поля">
-				<TextInput
-					name={FIELDS.attributeTitle}
-					onChange={this.handleChangeAttributeTitle}
-					value={getAttributeValue(attribute, 'title')}
-				/>
+				<TextInput onChange={this.handleChangeAttributeTitle} value={value} />
 			</FormField>
 		);
 	};

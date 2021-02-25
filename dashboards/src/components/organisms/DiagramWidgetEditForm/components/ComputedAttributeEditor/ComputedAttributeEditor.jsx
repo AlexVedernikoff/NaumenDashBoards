@@ -28,12 +28,6 @@ export class ComputedAttributeEditor extends PureComponent<Props, State> {
 		onSubmit(value);
 	};
 
-	renderButton = () => (
-		<FieldButton onClick={this.handleClickFieldButton} tip="Редактировать поле">
-			f(x)
-		</FieldButton>
-	);
-
 	renderModal = () => {
 		const {sources, value} = this.props;
 		const {showModal} = this.state;
@@ -53,10 +47,10 @@ export class ComputedAttributeEditor extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<div>
-				{this.renderButton()}
+			<FieldButton onClick={this.handleClickFieldButton} tip="Редактировать поле">
+				f(x)
 				{this.renderModal()}
-			</div>
+			</FieldButton>
 		);
 	}
 }

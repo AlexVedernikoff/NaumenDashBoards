@@ -9,7 +9,12 @@ import styles from './styles.less';
 import ValueContainer from './components/ValueContainer';
 
 export class MaterialSelect extends PureComponent<Props> {
-	static defaultProps = Select.defaultProps;
+	static defaultProps = {
+		...Select.defaultProps,
+		isEditingLabel: false,
+		maxLabelLength: null,
+		values: []
+	};
 	selectRef: Ref<typeof Select> = createRef();
 	components = null;
 
@@ -30,7 +35,7 @@ export class MaterialSelect extends PureComponent<Props> {
 		const {name, onChangeLabel} = this.props;
 		const {value} = e.currentTarget;
 
-		onChangeLabel && onChangeLabel(name, value);
+		onChangeLabel && onChangeLabel({name, value});
 	};
 
 	handleClick = () => {

@@ -1,12 +1,13 @@
 // @flow
 import Checkbox from 'components/atoms/Checkbox';
+import type {DashboardItem} from 'store/dashboards/types';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
-import type {MenuProps} from 'components/molecules/Select/types';
 import MultiDropDownList from 'components/molecules/MultiDropDownList';
-import type {OnChangeEvent, OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
@@ -24,7 +25,7 @@ export class NavigationBox extends PureComponent<Props> {
 		});
 	};
 
-	handleSelect = ({value: selectValue}: OnSelectEvent) => {
+	handleSelect = (selectValue: DashboardItem) => {
 		const {onChange, settings} = this.props;
 		const {parent, ...value} = selectValue;
 		let dashboard = value;
@@ -52,16 +53,18 @@ export class NavigationBox extends PureComponent<Props> {
 		});
 	};
 
-	renderMenuContainer = (props: MenuProps) => {
-		const {className, loading, onSelect, options} = props;
+	renderMenuContainer = (props: ContainerProps) => {
+		const {className} = props;
+		const {dashboards} = this.props;
+		const {items, loading} = dashboards;
 
 		return (
 			<MultiDropDownList
 				className={className}
 				isSelectedHeader={true}
-				items={options}
+				items={items}
 				loading={loading}
-				onSelect={onSelect}
+				onSelect={this.handleSelect}
 			/>
 		);
 	};
@@ -81,7 +84,6 @@ export class NavigationBox extends PureComponent<Props> {
 					components={components}
 					fetchOptions={fetchDashboards}
 					loading={loading}
-					onSelect={this.handleSelect}
 					options={items}
 					placeholder="Укажите дашборд или виджет"
 					value={value}

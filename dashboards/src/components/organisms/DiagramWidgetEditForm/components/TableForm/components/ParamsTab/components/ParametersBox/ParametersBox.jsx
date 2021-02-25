@@ -47,12 +47,13 @@ export class ParametersBox extends PureComponent<Props> {
 
 	renderFieldset = (parameter: Parameter, index: number, parameters: Array<Parameter>) => {
 		const {dataSet, errors, index: dataSetIndex} = this.props;
+		const {dataKey, source} = dataSet;
 		const removable = parameters.length > 1;
 		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.parameters, index);
 
 		return (
 			<ParameterFieldset
-				dataSet={dataSet}
+				dataKey={dataKey}
 				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
 				index={index}
@@ -60,6 +61,7 @@ export class ParametersBox extends PureComponent<Props> {
 				onChange={this.handleChange}
 				onRemove={this.handleRemove}
 				removable={removable}
+				source={source}
 				value={parameter}
 			/>
 		);

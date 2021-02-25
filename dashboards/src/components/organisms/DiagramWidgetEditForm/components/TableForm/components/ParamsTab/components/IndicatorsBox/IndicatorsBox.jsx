@@ -66,10 +66,11 @@ export class IndicatorsBox extends PureComponent<Props> {
 		const {dataSet, errors, index: dataSetIndex} = this.props;
 		const removable = indicators.length > 1;
 		const errorKey = getDataErrorKey(dataSetIndex, FIELDS.indicators, index);
+		const {dataKey, source} = dataSet;
 
 		return (
 			<IndicatorFieldset
-				dataSet={dataSet}
+				dataKey={dataKey}
 				dataSetIndex={dataSetIndex}
 				error={errors[errorKey]}
 				index={index}
@@ -77,6 +78,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 				onChange={this.handleChange}
 				onRemove={this.handleRemove}
 				removable={removable}
+				source={source}
 				usesNotApplicableAggregation={true}
 				value={indicator}
 			/>

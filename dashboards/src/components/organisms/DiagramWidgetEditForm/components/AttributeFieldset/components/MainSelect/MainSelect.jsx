@@ -4,12 +4,13 @@ import cn from 'classnames';
 import Label from 'components/atoms/Label';
 import List from 'containers/DiagramWidgetEditForm/components/AttributeFieldSet/components/MainSelectList';
 import type {Props} from './types';
+import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import withGetComponents from 'components/HOCs/withGetComponents';
+import withParentSource from 'DiagramWidgetEditForm/HOCs/withParentSource';
 
 export class MainSelect extends PureComponent<Props> {
-	components = null;
-
 	fetchAttributes = () => {
 		const {fetchAttributes, parentSource, source} = this.props;
 		const classFqn = source?.value;
@@ -18,22 +19,19 @@ export class MainSelect extends PureComponent<Props> {
 	};
 
 	getComponents = () => {
-		const {Field, ...components} = this.props.components;
+		const {components, getComponents} = this.props;
+		const {Field, ...rest} = components;
 
-		if (!this.components) {
-			this.components = {
-				Field: this.renderField,
-				List,
-				Value: this.renderValue,
-				...components
-			};
-		}
-
-		return this.components;
+		return getComponents({
+			Field: this.renderField,
+			List,
+			Value: this.renderValue,
+			...rest
+		});
 	};
 
 	getOptionsData = () => {
-		const {attributes, dataSetIndex, getOptions, source} = this.props;
+		const {attributes, getOptions, source} = this.props;
 		let options = [];
 		let loading = false;
 
@@ -43,7 +41,7 @@ export class MainSelect extends PureComponent<Props> {
 			({options = [], loading = false} = data);
 
 			if (getOptions) {
-				options = getOptions(options, dataSetIndex);
+				options = getOptions(options);
 			}
 		}
 
@@ -63,8 +61,8 @@ export class MainSelect extends PureComponent<Props> {
 		const {className, label, onClick} = props;
 
 		return (
-			 <div className={styles.value} onClick={onClick}>
-				 {this.renderValueNote()}
+			<div className={styles.value} onClick={onClick}>
+				{this.renderValueNote()}
 				<div className={cn(className, styles.label)}>{label}</div>
 			</div>
 		);
@@ -83,22 +81,23 @@ export class MainSelect extends PureComponent<Props> {
 	};
 
 	render () {
-		const {name, onSelect, value} = this.props;
+		const {name, onRemove, onSelect, removable, value} = this.props;
 		const {loading, options} = this.getOptionsData();
-		const components = this.getComponents();
 
 		return (
 			<AttributeSelect
-				components={components}
+				components={this.getComponents()}
 				fetchOptions={this.fetchAttributes}
 				loading={loading}
 				name={name}
+				onRemove={onRemove}
 				onSelect={onSelect}
 				options={options}
+				removable={removable}
 				value={value}
 			/>
 		);
 	}
 }
 
-export default MainSelect;
+export default withParentSource(withGetComponents(MainSelect));

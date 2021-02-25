@@ -1,17 +1,19 @@
 // @flow
 import cn from 'classnames';
-import Container from 'components/atoms/Container';
-import {debounce, isObject} from 'helpers';
-import IconButton from 'components/atoms/IconButton';
-import {ICON_NAMES} from 'src/components/atoms/Icon';
-import List from './components/List';
-import Loader from 'components/atoms/Loader';
-import type {OnChangeInputEvent} from 'components/types';
 import type {
+	Components,
 	Option,
 	Props,
 	State
 } from './types';
+import Container from 'components/atoms/Container';
+import {debounce} from 'helpers';
+import {getOptionLabel, getOptionValue} from './helpers';
+import IconButton from 'components/atoms/IconButton';
+import {ICON_NAMES} from 'src/components/atoms/Icon';
+import List from './components/List';
+import Loader from 'components/atoms/Loader';
+import type {OnChangeEvent} from 'components/types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {PureComponent} from 'react';
 import SearchInput from 'components/atoms/SearchInput';
@@ -24,8 +26,8 @@ export class Select extends PureComponent<Props, State> {
 		className: '',
 		disabled: false,
 		editable: false,
-		getOptionLabel: option => isObject(option) ? option.label : option || '',
-		getOptionValue: option => isObject(option) ? option.value : option,
+		getOptionLabel,
+		getOptionValue,
 		isSearching: false,
 		loading: false,
 		loadingMessage: 'Загрузка...',
@@ -44,9 +46,9 @@ export class Select extends PureComponent<Props, State> {
 		showMenu: false
 	};
 
-	getExtendedComponents (props: Props) {
+	getExtendedComponents (props: Props): Components {
 		const {components: extendedComponents} = props;
-		const components = {
+		const components: Components = {
 			Caret: IconButton,
 			IndicatorsContainer: Container,
 			MenuContainer: Container,
@@ -66,7 +68,7 @@ export class Select extends PureComponent<Props, State> {
 		}
 	};
 
-	getFoundOptions = (searchValue: string) => {
+	getFoundOptions = (searchValue: string): Array<Option> => {
 		const {getOptionLabel, options} = this.props;
 		let foundOptions = options;
 
@@ -79,7 +81,7 @@ export class Select extends PureComponent<Props, State> {
 		return foundOptions;
 	};
 
-	handleChangeLabel = ({value}: OnChangeInputEvent) => {
+	handleChangeLabel = ({value}: OnChangeEvent<string>) => {
 		const {name, onChangeLabel} = this.props;
 
 		onChangeLabel && onChangeLabel({name, value});
@@ -98,7 +100,7 @@ export class Select extends PureComponent<Props, State> {
 		const {multiple, name, onSelect} = this.props;
 
 		!multiple && this.setState({showMenu: false});
-		onSelect({name, value});
+		onSelect && onSelect({name, value});
 	};
 
 	hideMenu = () => this.setState({showMenu: false});
@@ -204,7 +206,17 @@ export class Select extends PureComponent<Props, State> {
 		const {isSearching} = this.props;
 		const {searchValue} = this.state;
 
-		return isSearching && <SearchInput focusOnMount={true} onChange={debounce(this.handleChangeSearchInput, 500)} value={searchValue} />;
+		if (isSearching) {
+			return (
+				<SearchInput
+					focusOnMount={true}
+					onChange={debounce(this.handleChangeSearchInput, 500)}
+					value={searchValue}
+				/>
+			);
+		}
+
+		return null;
 	};
 
 	renderValueContainer = () => {

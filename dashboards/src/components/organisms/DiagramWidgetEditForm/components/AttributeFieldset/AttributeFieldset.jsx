@@ -17,7 +17,7 @@ export class AttributeFieldset extends PureComponent<Props> {
 	getMainOptions = (options: Array<Attribute>): Array<Attribute> => {
 		const {dataSetIndex, getMainOptions} = this.props;
 
-		return getMainOptions(options, dataSetIndex);
+		return getMainOptions ? getMainOptions(options, dataSetIndex) : options;
 	};
 
 	getOptionLabel = (attribute: Attribute | null) => attribute ? attribute.title : '';
@@ -27,33 +27,30 @@ export class AttributeFieldset extends PureComponent<Props> {
 	getRefOptions = (options: Array<Attribute>): Array<Attribute> => {
 		const {dataSetIndex, getRefOptions} = this.props;
 
-		return getRefOptions(options, dataSetIndex);
-	};
-
-	getSourceOptions = (attributes: Array<Attribute>) => {
-		const {getSourceOptions, index} = this.props;
-
-		return getSourceOptions ? getSourceOptions(attributes, index) : attributes;
+		return getRefOptions ? getRefOptions(options, dataSetIndex) : options;
 	};
 
 	handleChangeLabelMain = (title: string) => {
-		const {index, onChangeLabel, value} = this.props;
+		const {index, name, onChangeLabel, value} = this.props;
 		const newValue = {...value, title};
 
-		onChangeLabel({value: newValue}, index);
+		onChangeLabel({name, value: newValue}, index);
 	};
 
 	handleChangeLabelRef = (title: string) => {
-		const {index, onChangeLabel, value} = this.props;
-		const newValue = {
-			...value,
-			ref: {
-				...value.ref,
-				title
-			}
-		};
+		const {index, name, onChangeLabel, value} = this.props;
 
-		onChangeLabel(newValue);
+		if (value?.ref) {
+			const newValue = {
+				...value,
+				ref: {
+					...value.ref,
+					title
+				}
+			};
+
+			onChangeLabel({name, value: newValue}, index);
+		}
 	};
 
 	handleDrop = () => {

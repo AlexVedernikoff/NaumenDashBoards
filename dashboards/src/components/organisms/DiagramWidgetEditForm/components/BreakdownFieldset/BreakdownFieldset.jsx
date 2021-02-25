@@ -4,20 +4,34 @@ import AttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldse
 import AttributeGroupField from 'DiagramWidgetEditForm/components/AttributeGroupField';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {BreakdownItem, DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {FieldContext, Props} from './types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'helpers';
-import type {Group, Source} from 'store/widgets/data/types';
+import type {Group} from 'store/widgets/data/types';
 import type {OnSelectEvent} from 'components/types';
-import type {Props} from './types';
-import React, {Component} from 'react';
-import type {RefProps} from 'DiagramWidgetEditForm/components/AttributeFieldset/types';
+import React, {Component, createContext} from 'react';
 
+/**
+ * Возвращает ключи датасетов, которые используются в разбивке
+ * @param {Array<DataSet>} data - список датасетов
+ * @returns {Array<string>}
+ */
 const getUsedDataKeys = (data: Array<DataSet>): Array<string> => {
 	return data.filter(dataSet => !dataSet.sourceForCompute).map(dataSet => dataSet.dataKey);
 };
+
+const Context: React$Context<FieldContext> = createContext({
+	breakdown: {
+		attribute: null,
+		dataKey: '',
+		group: getDefaultSystemGroup()
+	},
+	breakdownIndex: 0,
+	source: null
+});
 
 export class BreakdownFieldset extends Component<Props> {
 	mainIndex = 0;
@@ -45,13 +59,13 @@ export class BreakdownFieldset extends Component<Props> {
 		}
 	}
 
-	filter = (options: Array<Attribute>, index: number): Array<Attribute> => {
+	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number): Array<Attribute> => {
 		if (index > this.mainIndex) {
 			const {value} = this.props;
 			const mainParameter = value[this.mainIndex].attribute;
 
 			if (mainParameter) {
-				return filterByAttribute(options, mainParameter);
+				return filterByAttribute(options, mainParameter, filterByRef);
 			}
 		}
 
@@ -119,44 +133,55 @@ export class BreakdownFieldset extends Component<Props> {
 
 	renderField = (item: BreakdownItem, breakdownIndex: number) => {
 		const {data, errors, index, onRemove, removable} = this.props;
-		const {attribute, dataKey, group} = item;
+		const {attribute, dataKey} = item;
 		const dataSet = data.find(set => set.dataKey === dataKey);
 		const error = errors[getDataErrorKey(index, FIELDS.breakdown, breakdownIndex)];
 
 		if (dataSet) {
-			const {source} = dataSet;
+			const {dataKey, source} = dataSet;
+			const context: FieldContext = {
+				breakdown: item,
+				breakdownIndex,
+				source: source.value
+			};
+			const components = {
+				Field: this.renderGroupWithContext
+			};
 
 			return (
-				<FormField error={error} key={index}>
-					<AttributeFieldset
-						dataSet={dataSet}
-						dataSetIndex={index}
-						getAttributeOptions={this.filter}
-						getSourceOptions={this.filter}
-						index={breakdownIndex}
-						onChangeLabel={this.handleChangeLabel}
-						onRemove={onRemove}
-						onSelect={this.handleSelect}
-						removable={removable}
-						renderRefField={this.renderGroup(group, breakdownIndex, source.value)}
-						value={attribute}
-					/>
-				</FormField>
+				<Context.Provider value={context}>
+					<FormField error={error} key={index}>
+						<AttributeFieldset
+							components={components}
+							dataKey={dataKey}
+							getMainOptions={this.filterOptions(false)}
+							getRefOptions={this.filterOptions(true)}
+							index={breakdownIndex}
+							onChangeLabel={this.handleChangeLabel}
+							onRemove={onRemove}
+							onSelect={this.handleSelect}
+							removable={removable}
+							source={source}
+							value={attribute}
+						/>
+					</FormField>
+				</Context.Provider>
 			);
 		}
 
 		return null;
 	};
 
-	renderGroup = (group: Group | null, breakdownIndex: number, source: Source | null) => (props: RefProps) => {
-		const {disabled: selectDisabled, parent, value: attribute} = props;
+	renderGroup = (context: FieldContext) => {
+		const {breakdown, breakdownIndex, source} = context;
+		const {attribute, group} = breakdown;
 		const isNotMain = breakdownIndex !== this.mainIndex;
 		const isNotRefAttr = attribute && !(attribute.type in ATTRIBUTE_SETS.REFERENCE);
-		const disabled = Boolean(selectDisabled || (isNotMain && isNotRefAttr));
+		const disabled = Boolean(isNotMain && isNotRefAttr);
 
 		return (
 			<AttributeGroupField
-				attribute={parent || attribute}
+				attribute={attribute}
 				disabled={disabled}
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup(breakdownIndex)}
@@ -165,6 +190,12 @@ export class BreakdownFieldset extends Component<Props> {
 			/>
 		);
 	};
+
+	renderGroupWithContext = () => (
+		<Context.Consumer>
+			{(context) => this.renderGroup(context)}
+		</Context.Consumer>
+	);
 
 	render (): Array<React$Node> {
 		return this.props.value.map(this.renderField);

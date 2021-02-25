@@ -17,13 +17,6 @@ export class MainSelectList extends PureComponent<Props, State> {
 		showDynamicAttributesError: false
 	};
 
-	fetchAttributes = () => {
-		const {fetchAttributes, parentSource, source} = this.props;
-		const classFqn = source.value?.value;
-
-		classFqn && fetchAttributes(classFqn, parentSource);
-	};
-
 	handleChangeShowDynamicAttributes = ({value: show}: OnChangeEvent<boolean>) => {
 		const {dataKey, dynamicGroups, fetchDynamicAttributeGroups, source} = this.props;
 		const {descriptor} = source;
@@ -128,4 +121,4 @@ export class MainSelectList extends PureComponent<Props, State> {
 	}
 }
 
-export default withAttributeFieldset(MainSelectList);
+export default withAttributeFieldset<Props>(MainSelectList);

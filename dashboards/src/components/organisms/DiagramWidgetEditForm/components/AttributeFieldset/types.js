@@ -1,4 +1,5 @@
 // @flow
+import type {Components} from './components/AttributeSelect/types';
 import type {OnSelectEvent} from 'components/types';
 import type {SourceData} from 'containers/DiagramWidgetEditForm/types';
 
@@ -11,11 +12,12 @@ export type RefProps = {
 };
 
 export type Props = {
+	components: Components,
 	dataKey: string,
 	dataSetIndex: number,
 	disabled: boolean,
-	getAttributeOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
-	getSourceOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
+	getMainOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
+	getRefOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
 	index: number,
 	name: string,
 	onChangeLabel: (event: OnSelectEvent, index: number) => void,

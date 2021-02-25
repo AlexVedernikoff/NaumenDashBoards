@@ -3,17 +3,27 @@ import type {Attribute} from 'store/sources/attributes/types';
 import AttributeAggregationField from 'DiagramWidgetEditForm/components/AttributeAggregationField';
 import AttributeCreatingModal from 'components/organisms/AttributeCreatingModal';
 import AttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldset';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {ComputedAttr} from 'store/widgets/data/types';
 import ComputedAttributeEditor from 'DiagramWidgetEditForm/components/ComputedAttributeEditor';
+import Container from 'components/atoms/Container';
+import CreationPanel from 'components/atoms/CreationPanel';
+import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import type {Indicator} from 'containers/DiagramWidgetEditForm/types';
 import type {OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import React, {createContext, PureComponent} from 'react';
 import withForm from 'DiagramWidgetEditForm/withForm';
+import withGetComponents from 'components/HOCs/withGetComponents';
+
+const Context: React$Context<Indicator> = createContext({
+	aggregation: DEFAULT_AGGREGATION.COUNT,
+	attribute: null
+});
 
 export class IndicatorFieldset extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -29,6 +39,13 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 		onChange(dataSetIndex, index, indicator);
 	};
+
+	getComponents = () => this.props.getComponents({
+		Field: this.renderFieldWithContext,
+		MenuContainer: this.renderMenuContainer
+	});
+
+	getMainOptions = (options: Array<Attribute>): Array<Attribute> => [...this.props.values.computedAttrs, ...options];
 
 	getModalSources = () => {
 		const {attributes: map, fetchAttributes, values} = this.props;
@@ -63,14 +80,12 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return sources;
 	};
 
-	getSourceOptions = (options: Array<Attribute>) => [...this.props.values.computedAttrs, ...options];
-
 	handleChangeLabel = ({value: attribute}: OnSelectEvent) => this.change({
 		...this.props.value,
 		attribute
 	});
 
-	handleClickCreationButton = () => this.setState({showCreatingModal: true});
+	handleClickCreationPanel = () => this.setState({showCreatingModal: true});
 
 	handleCloseCreatingModal = () => this.setState({showCreatingModal: false});
 
@@ -140,26 +155,29 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		setFieldValue(FIELDS.computedAttrs, computedAttrs);
 	};
 
-	renderAggregation = (props: Object) => {
-		const {usesNotApplicableAggregation, value: indicator} = this.props;
+	renderAggregation = (indicator: Indicator) => {
+		const {usesNotApplicableAggregation} = this.props;
 		const {aggregation, attribute} = indicator;
-		const {catalogItem} = ATTRIBUTE_TYPES;
-		let {value} = props;
+		const {COMPUTED_ATTR, catalogItem} = ATTRIBUTE_TYPES;
 
-		if (attribute && attribute.type === catalogItem) {
-			value = attribute;
+		if (attribute?.type !== COMPUTED_ATTR) {
+			const {REFERENCE} = ATTRIBUTE_SETS;
+			// $FlowFixMe
+			const value: Attribute = attribute && attribute.type in REFERENCE && attribute?.type !== catalogItem ? attribute.ref : attribute;
+
+			return (
+				<AttributeAggregationField
+					attribute={value}
+					name={FIELDS.aggregation}
+					onSelect={this.handleSelectAggregation}
+					tip="Агрегация"
+					usesNotApplicableAggregation={usesNotApplicableAggregation}
+					value={aggregation}
+				/>
+			);
 		}
 
-		return (
-			<AttributeAggregationField
-				attribute={value}
-				name={FIELDS.aggregation}
-				onSelect={this.handleSelectAggregation}
-				tip="Агрегация"
-				usesNotApplicableAggregation={usesNotApplicableAggregation}
-				value={aggregation}
-			/>
-		);
+		return null;
 	};
 
 	renderComputedAttributeEditor = () => {
@@ -192,40 +210,58 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		}
 	};
 
-	renderRefField = (props: Object) => {
-		const {value} = props;
+	renderField = (indicator: Indicator) => {
+		const {attribute} = indicator;
 
-		if (value && value.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+		if (attribute && attribute.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 			return this.renderComputedAttributeEditor();
 		}
 
-		return this.renderAggregation(props);
+		return this.renderAggregation(indicator);
+	};
+
+	renderFieldWithContext = () => (
+		<Context.Consumer>
+			{(indicator) => this.renderField(indicator)}
+		</Context.Consumer>
+	);
+
+	renderMenuContainer = (props: ContainerProps) => {
+		const {children, className} = props;
+
+		return (
+			<Container className={className}>
+				{children}
+				<CreationPanel onClick={this.handleClickCreationPanel} text="Создать поле" />
+			</Container>
+		);
 	};
 
 	render () {
-		const {dataSet, dataSetIndex, error, index, onRemove, removable, value} = this.props;
+		const {dataKey, dataSetIndex, error, index, onRemove, removable, source, value} = this.props;
 		const {attribute} = value;
 
 		return (
-			<FormField error={error}>
-				<AttributeFieldset
-					dataSet={dataSet}
-					dataSetIndex={dataSetIndex}
-					getSourceOptions={this.getSourceOptions}
-					index={index}
-					onChangeLabel={this.handleChangeLabel}
-					onClickCreationButton={this.handleClickCreationButton}
-					onRemove={onRemove}
-					onSelect={this.handleSelectIndicator}
-					removable={removable}
-					renderRefField={this.renderRefField}
-					showCreationButton={true}
-					value={attribute}
-				/>
-				{this.renderCreatingModal()}
-			</FormField>
+			<Context.Provider value={value}>
+				<FormField error={error}>
+					<AttributeFieldset
+						components={this.getComponents()}
+						dataKey={dataKey}
+						dataSetIndex={dataSetIndex}
+						getMainOptions={this.getMainOptions}
+						index={index}
+						onChangeLabel={this.handleChangeLabel}
+						onRemove={onRemove}
+						onSelect={this.handleSelectIndicator}
+						removable={removable}
+						source={source}
+						value={attribute}
+					/>
+					{this.renderCreatingModal()}
+				</FormField>
+			</Context.Provider>
 		);
 	}
 }
 
-export default withForm(IndicatorFieldset);
+export default withForm(withGetComponents(IndicatorFieldset));

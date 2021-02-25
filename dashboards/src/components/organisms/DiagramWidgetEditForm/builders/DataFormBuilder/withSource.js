@@ -51,7 +51,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 		handleFetchAttributes = (dataSetIndex: number, classFqn: string) => {
 			const {fetchAttributes, values} = this.props;
-			const parentClassFqn = getParentClassFqn(values, dataSetIndex);
+			const parentClassFqn = getParentClassFqn(values);
 
 			this.resetAttributes(dataSetIndex);
 			fetchAttributes(classFqn, parentClassFqn, this.setDefaultIndicator(dataSetIndex));
@@ -80,7 +80,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			const source = values.data[index][FIELDS.source];
 
 			if (source) {
-				const parentClassFqn = getParentClassFqn(values, index);
+				const parentClassFqn = getParentClassFqn(values);
 
 				fetchAttributes(source.value, parentClassFqn, this.setDefaultIndicator(index));
 			}

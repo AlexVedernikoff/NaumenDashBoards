@@ -3,10 +3,11 @@ import AttributeSelect from 'DiagramWidgetEditForm/components/AttributeFieldset/
 import {createRefKey} from 'src/store/sources/refAttributes/actions';
 import Icon, {ICON_NAMES} from 'src/components/atoms/Icon';
 import type {Props} from './types';
+import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
-export class RefSelect extends PureComponent<Props, State> {
+export class RefSelect extends PureComponent<Props> {
 	components = null;
 
 	fetchAttributes = () => {
@@ -30,7 +31,7 @@ export class RefSelect extends PureComponent<Props, State> {
 	};
 
 	getOptionsData = () => {
-		const {dataSetIndex, getOptions, parent, refAttributes} = this.props;
+		const {getOptions, parent, refAttributes} = this.props;
 		const {[createRefKey(parent)]: data = {}} = refAttributes;
 		let {
 			options = [],
@@ -38,7 +39,7 @@ export class RefSelect extends PureComponent<Props, State> {
 		} = data;
 
 		if (getOptions) {
-			options = getOptions(options, dataSetIndex, true);
+			options = getOptions(options);
 		}
 
 		return {

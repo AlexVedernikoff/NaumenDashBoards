@@ -4,7 +4,6 @@
 const LOCAL_PREFIX_ID: 'local_' = 'local_';
 
 // название полей
-const attributeTitle: 'attributeTitle' = 'attributeTitle';
 const data: 'data' = 'data';
 const endDate: 'endDate' = 'endDate';
 const name: 'name' = 'name';
@@ -15,7 +14,6 @@ const value: 'value' = 'value';
 const way: 'way' = 'way';
 
 const FIELDS = {
-	attributeTitle,
 	data,
 	endDate,
 	name,

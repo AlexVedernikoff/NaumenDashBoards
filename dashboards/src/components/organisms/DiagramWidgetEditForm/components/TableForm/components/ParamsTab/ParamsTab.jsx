@@ -9,12 +9,13 @@ import ExtendingFieldset from 'DiagramWidgetEditForm/components/ExtendingFieldse
 import FieldError from 'components/atoms/FieldError';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormBox from 'components/molecules/FormBox';
-import {getDefaultBreakdown, getDefaultIndicator, getErrorKey} from 'DiagramWidgetEditForm/helpers';
+import {getDefaultBreakdown, getDefaultIndicator, getErrorKey, getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import IndicatorsBox from './components/IndicatorsBox';
 import {isAllowedTopAggregation} from 'store/widgets/helpers';
 import ParametersBox from './components/ParametersBox';
+import {ParentSource} from 'DiagramWidgetEditForm/HOCs/withParentSource';
 import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
@@ -196,7 +197,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const {data} = values;
 
 		return (
-			<Fragment>
+			<ParentSource.Provider value={getParentClassFqn(values)}>
 				{renderBaseBoxes()}
 				{data.map(this.renderDataSet)}
 				{this.renderBreakdownFieldSet()}
@@ -204,7 +205,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				{renderShowEmptyDataCheckbox()}
 				{renderDisplayModeSelect()}
 				{renderNavigationBox()}
-			</Fragment>
+			</ParentSource.Provider>
 		);
 	}
 }

@@ -5,7 +5,7 @@ import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuil
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
-import Icon, {ICON_SIZES} from 'components/atoms/Icon';
+import Icon from 'components/atoms/Icon';
 import MiniSelect from 'components/molecules/MiniSelect';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
@@ -23,7 +23,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		}
 	};
 
-	renderChartFieldLabel = (icon: any) => <Icon name={icon} size={ICON_SIZES.LARGE} />;
+	renderChartFieldLabel = (icon: any) => <Icon height={24} name={icon} viewBox="0 0 24 24" width={24} />;
 
 	renderChartInput = (dataSet: DataSet, index: number) => {
 		const {type: value = COMBO_TYPES.COLUMN} = dataSet;

@@ -8,7 +8,7 @@ export const props = (state: AppState): ConnectedProps => {
 
 	return {
 		dynamicGroups,
-		sources
+		sources: sources.map
 	};
 };
 

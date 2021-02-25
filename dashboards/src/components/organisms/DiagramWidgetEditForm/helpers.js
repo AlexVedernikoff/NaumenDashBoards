@@ -10,20 +10,21 @@ import type {SortingValueOption} from './components/SortingBox/types';
 import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Values} from 'containers/WidgetEditForm/types';
 
-const filterByAttribute = (options: Array<Attribute>, attribute: Attribute): Array<Attribute> => {
+const filterByAttribute = (options: Array<Attribute>, attribute: ?Attribute, filterByRef: boolean): Array<Attribute> => {
 	const {DATE, OBJECT} = ATTRIBUTE_SETS;
+	const targetAttribute = filterByRef ? attribute?.ref : attribute;
 
-	return options.filter(option => {
-		if (attribute.type in OBJECT) {
-			return option.property === attribute.property;
+	return targetAttribute ? options.filter(option => {
+		if (targetAttribute.type in OBJECT) {
+			return option.property === targetAttribute.property;
 		}
 
-		if (attribute.type in DATE) {
+		if (targetAttribute.type in DATE) {
 			return option.type in DATE;
 		}
 
-		return option.type === attribute.type;
-	});
+		return option.type === targetAttribute.type;
+	}) : options;
 };
 
 /**
@@ -51,23 +52,12 @@ const getDataErrorKey = (...keys: Array<string | number>): string => getErrorKey
 /**
  * Возвращает код источника родителя в формах, где дополнительные источники являются дочерними к первому.
  * @param {Values} values - значения формы
- * @param {number} index - индекс набора данных
  * @returns {string | null}
  */
-const getParentClassFqn = (values: Values, index: number) => {
+const getParentClassFqn = (values: Values): string | null => {
 	const {data, type} = values;
-	let parentClassFqn = null;
 
-	if (type === WIDGET_TYPES.TABLE && index > 0) {
-		const mainSource = data[0][FIELDS.source];
-		const source = data[index][FIELDS.source];
-
-		if (mainSource && source && source.value !== mainSource.value) {
-			parentClassFqn = mainSource.value;
-		}
-	}
-
-	return parentClassFqn;
+	return type === WIDGET_TYPES.TABLE ? data[0][FIELDS.source]?.value?.value : null;
 };
 
 /**

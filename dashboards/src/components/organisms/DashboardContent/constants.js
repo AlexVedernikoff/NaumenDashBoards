@@ -9,7 +9,7 @@ export const gridRef: Ref<'div'> = createRef();
 const DEFAULT_COLS_COUNT = 12;
 const GRID_LAYOUT_HEIGHT = 50;
 
-const GRID_PROPS = {
+const GRID_PROPS: Object = {
 	[LAYOUT_MODE.WEB]: {
 		breakpoints: {
 			lg: 768,

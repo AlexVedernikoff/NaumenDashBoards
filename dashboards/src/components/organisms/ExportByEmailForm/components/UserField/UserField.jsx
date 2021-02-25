@@ -1,12 +1,12 @@
 // @flow
+import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButton/types';
 import Container from 'components/atoms/Container';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
 import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
-import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
@@ -37,7 +37,7 @@ export class UserField extends PureComponent<Props, State> {
 
 	handleBlurTextInput = () => this.setState({focusedSelectInput: false});
 
-	handleChangeLabel = ({value}: OnChangeInputEvent) => {
+	handleChangeLabel = ({value}: OnChangeEvent<string>) => {
 		const {index, onSelect} = this.props;
 
 		onSelect(index, {email: value.toString()});

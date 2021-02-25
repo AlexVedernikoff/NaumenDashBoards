@@ -76,14 +76,15 @@ export class ParameterDataBox extends PureComponent<Props> {
 		setFieldValue(FIELDS.data, newData);
 	};
 
-	filter = (options: Array<Attribute>, index: number): Array<Attribute> => {
+	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number): Array<Attribute> => {
 		const {values} = this.props;
 		const mainSet = values.data[0];
 		const currentSet = values.data[index];
-		let mainParameter = mainSet.parameters?.[0].attribute;
 
-		if (currentSet !== mainSet && mainParameter) {
-			return filterByAttribute(options, mainParameter);
+		if (currentSet !== mainSet) {
+			const mainParameter = mainSet.parameters?.[0].attribute;
+
+			return filterByAttribute(options, mainParameter, filterByRef);
 		}
 
 		return options;
@@ -126,17 +127,19 @@ export class ParameterDataBox extends PureComponent<Props> {
 		const {attribute} = parameter;
 		const disabledGroup = index !== 0 && !!attribute && !(attribute.type in ATTRIBUTE_SETS.REFERENCE);
 		const errorKey = getDataErrorKey(index, FIELDS.parameters, parameterIndex);
+		const {dataKey, source} = dataSet;
 
 		return (
 			<ParameterFieldset
-				dataSet={dataSet}
+				dataKey={dataKey}
 				dataSetIndex={index}
 				disabledGroup={disabledGroup}
 				error={errors[errorKey]}
-				filter={this.filter}
+				filterOptions={this.filterOptions}
 				index={parameterIndex}
 				key={errorKey}
 				onChange={this.handleChange}
+				source={source}
 				value={parameter}
 			/>
 		);

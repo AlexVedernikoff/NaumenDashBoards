@@ -1,12 +1,12 @@
 // @flow
-import type {OnChangeInputEvent} from 'components/types';
-import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
+import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButton/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props as ValueProps} from './components/Value/types';
 
 export type Option = Object;
 
-export type Value = Option | string | number | null;
+export type Value = any;
 
 export type SelectEvent = {
 	name: string,
@@ -25,6 +25,7 @@ export type Components = {
 	Caret: React$ComponentType<IconButtonProps>,
 	IndicatorsContainer: React$ComponentType<ContainerProps>,
 	MenuContainer: React$ComponentType<ContainerProps>,
+	Message: React$ComponentType<ContainerProps>,
 	Value: React$ComponentType<ValueProps>,
 	ValueContainer: React$ComponentType<ContainerProps>
 };
@@ -44,8 +45,8 @@ export type Props = {
 	name: string,
 	noOptionsMessage: string,
 	notFoundMessage: string,
-	onChangeLabel?: OnChangeInputEvent => void,
-	onSelect: SelectEvent => void,
+	onChangeLabel?: OnChangeEvent<string> => void,
+	onSelect?: SelectEvent => void,
 	options: Array<Option>,
 	placeholder: string,
 	value: Value

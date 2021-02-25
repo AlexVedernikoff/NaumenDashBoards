@@ -7,6 +7,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
 import Loader from 'components/atoms/Loader';
 import type {Props, State} from './types';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
@@ -14,7 +15,8 @@ import styles from './styles.less';
 export class AttributeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
 		...Select.defaultProps,
-		droppable: false
+		droppable: false,
+		removable: false
 	};
 	components = null;
 	state = {
@@ -42,7 +44,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 	handleClickDropIcon = () => {
 		const {name, onDrop} = this.props;
 
-		onDrop(name);
+		onDrop && onDrop(name);
 	};
 
 	handleClickEditIcon = () => this.setState({showForm: true});
@@ -50,7 +52,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 	handleClickRemoveIcon = () => {
 		const {name, onRemove} = this.props;
 
-		onRemove(name);
+		onRemove && onRemove(name);
 	};
 
 	handleCloseForm = () => this.setState({showForm: false});
@@ -97,7 +99,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderIndicators = (props) => (
+	renderIndicators = (props: ContainerProps) => (
 		<div className={cn(props.className, styles.indicatorContainer)}>
 			{this.renderEditIcon()}
 			{this.renderDropIcon()}
@@ -114,22 +116,27 @@ export class AttributeSelect extends PureComponent<Props, State> {
 	};
 
 	renderSelect = () => {
-		const components = this.getComponents();
+		const {disabled, fetchOptions, loading, onSelect, options, value} = this.props;
 
 		return (
 			<Select
-				{...this.props}
 				className={styles.select}
-				components={components}
+				components={this.getComponents()}
+				disabled={disabled}
+				fetchOptions={fetchOptions}
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
 				isSearching={true}
+				loading={loading}
+				onSelect={onSelect}
+				options={options}
 				placeholder="Не выбрано"
+				value={value}
 			/>
 		);
 	};
 
-	renderValueContainer = (props: Object) => {
+	renderValueContainer = (props: ContainerProps) => {
 		const {children, className} = props;
 
 		return (

@@ -1,6 +1,7 @@
 // @flow
 import Button from 'components/atoms/Button';
 import {FixedSizeList} from 'react-window';
+import {getOptionLabel, getOptionValue} from 'components/molecules/Select/helpers';
 import ListOption from 'components/molecules/Select/components/ListOption';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -9,6 +10,8 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class List extends PureComponent<Props> {
 	static defaultProps = {
+		getOptionLabel,
+		getOptionValue,
 		itemSize: 32,
 		maxHeight: 250,
 		multiple: false,

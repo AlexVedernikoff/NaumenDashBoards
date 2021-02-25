@@ -2,7 +2,7 @@
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
 
-const ICONS = {
+const ICONS: Object = {
 	[GROUP_WAYS.CUSTOM]: {
 		calendar: ICON_NAMES.TOUCH_CALENDAR,
 		number: ICON_NAMES.TOUCH_NUMBER,

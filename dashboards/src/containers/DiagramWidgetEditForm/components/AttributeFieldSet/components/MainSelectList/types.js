@@ -12,4 +12,7 @@ export type ConnectedFunctions = {|
 	fetchDynamicAttributes: FetchDynamicAttributes
 |};
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props = {
+	...ConnectedFunctions,
+	...ConnectedProps
+};

@@ -165,17 +165,19 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		const {dataSet, errors, index, values} = this.props;
 		const {computedAttrs} = values;
 		const errorKey = getDataErrorKey(index, FIELDS.indicators, indicatorIndex);
+		const {dataKey, source} = dataSet;
 
 		return (
 			<IndicatorFieldset
 				computedAttrs={computedAttrs}
-				dataSet={dataSet}
+				dataKey={dataKey}
 				dataSetIndex={index}
 				error={errors[errorKey]}
 				index={indicatorIndex}
 				key={errorKey}
 				name={FIELDS.indicators}
 				onChange={this.handleChange}
+				source={source}
 				value={indicator}
 			/>
 		);

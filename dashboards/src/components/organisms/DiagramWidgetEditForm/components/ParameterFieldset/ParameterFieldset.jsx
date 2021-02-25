@@ -10,8 +10,13 @@ import type {Group} from 'store/widgets/data/types';
 import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramWidgetEditForm/types';
 import type {Parameter} from 'containers/DiagramWidgetEditForm/types';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
-import type {RefProps} from 'DiagramWidgetEditForm/components/AttributeFieldset/types';
+import React, {createContext, PureComponent} from 'react';
+import withGetComponents from 'components/HOCs/withGetComponents';
+
+const Context: React$Context<Parameter> = createContext({
+	attribute: null,
+	group: getDefaultSystemGroup()
+});
 
 export class ParameterFieldset extends PureComponent<Props> {
 	static defaultProps = {
@@ -25,6 +30,16 @@ export class ParameterFieldset extends PureComponent<Props> {
 
 		onChange(dataSetIndex, index, parameter);
 	};
+
+	filterOptions = (filterByRef: boolean): Function => {
+		const {filterOptions} = this.props;
+
+		return filterOptions && filterOptions(filterByRef);
+	};
+
+	getComponents = () => this.props.getComponents({
+		Field: this.renderGroupWithContext
+	});
 
 	handleChangeGroup = (name: string, group: Group, attribute: Attribute) => this.change({
 		...this.props.value,
@@ -55,47 +70,56 @@ export class ParameterFieldset extends PureComponent<Props> {
 		});
 	};
 
-	renderGroup = (props: RefProps) => {
-		const {dataSet, disabledGroup, value} = this.props;
-		const {disabled: parameterDisabled, parent, value: attribute} = props;
-		const {group} = value;
+	renderGroup = (parameter: Parameter) => {
+		const {disabled: parameterDisabled, disabledGroup, source} = this.props;
+		const {attribute, group} = parameter;
 		const disabled = parameterDisabled || disabledGroup;
 
 		return (
 			<AttributeGroupField
-				attribute={parent || attribute}
+				attribute={attribute}
 				disabled={disabled}
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup}
-				source={dataSet.source.value}
+				source={source.value}
 				value={group}
 			/>
 		);
 	};
 
+	renderGroupWithContext = () => (
+		<Context.Consumer>
+			{(parameter) => this.renderGroup(parameter)}
+		</Context.Consumer>
+	);
+
 	render () {
-		const {dataSet, dataSetIndex, disabled, error, filter, index, onRemove, removable, value} = this.props;
+		const {dataKey, dataSetIndex, disabled, error, index, onRemove, removable, source, value} = this.props;
 		const {attribute} = value;
 
 		return (
-			<FormField error={error}>
-				<AttributeFieldset
-					dataSet={dataSet}
-					dataSetIndex={dataSetIndex}
-					disabled={disabled}
-					getAttributeOptions={filter}
-					getSourceOptions={filter}
-					index={index}
-					onChangeLabel={this.handleChangeLabel}
-					onRemove={onRemove}
-					onSelect={this.handleSelect}
-					removable={removable}
-					renderRefField={this.renderGroup}
-					value={attribute}
-				/>
-			</FormField>
+			<Context.Provider value={value}>
+				<FormField error={error}>
+					<AttributeFieldset
+						components={this.getComponents()}
+						dataKey={dataKey}
+						dataSetIndex={dataSetIndex}
+						disabled={disabled}
+						getMainOptions={this.filterOptions(false)}
+						getRefOptions={this.filterOptions(true)}
+						index={index}
+						onChangeLabel={this.handleChangeLabel}
+						onRemove={onRemove}
+						onSelect={this.handleSelect}
+						removable={removable}
+						renderRefField={this.renderGroup}
+						source={source}
+						value={attribute}
+					/>
+				</FormField>
+			</Context.Provider>
 		);
 	}
 }
 
-export default ParameterFieldset;
+export default withGetComponents(ParameterFieldset);

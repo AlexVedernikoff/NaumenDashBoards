@@ -8,3 +8,5 @@ export type ConnectedProps = {|
 export type ConnectedFunctions = {|
 	fetchAttributes: FetchAttributes
 |};
+
+export type Props = ConnectedProps & ConnectedFunctions;
