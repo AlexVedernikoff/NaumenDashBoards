@@ -133,15 +133,17 @@ const changeLayouts = (state: LayoutsState, payload: LayoutsPayloadForChange): L
 	const layouts = deepClone(state[layoutMode]);
 
 	Object.keys(newLayouts).forEach(breakpoint => {
-		newLayouts[breakpoint].forEach(newLayout => {
-			const index = layouts[breakpoint].findIndex(l => l.i === newLayout.i);
+		if (Array.isArray(newLayouts[breakpoint])) {
+			newLayouts[breakpoint].forEach(newLayout => {
+				const index = layouts[breakpoint].findIndex(l => l.i === newLayout.i);
 
-			if (index > -1) {
-				layouts[breakpoint][index] = {...layouts[breakpoint][index], ...newLayout};
-			} else {
-				layouts[breakpoint].push(newLayout);
-			}
-		});
+				if (index > -1) {
+					layouts[breakpoint][index] = {...layouts[breakpoint][index], ...newLayout};
+				} else {
+					layouts[breakpoint].push(newLayout);
+				}
+			});
+		}
 	});
 
 	return {
