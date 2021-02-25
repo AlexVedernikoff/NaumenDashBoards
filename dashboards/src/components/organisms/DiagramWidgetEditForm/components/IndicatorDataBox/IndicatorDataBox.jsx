@@ -1,11 +1,9 @@
 // @flow
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {Breakdown, Indicator} from 'containers/DiagramWidgetEditForm/types';
 import BreakdownFieldset from 'DiagramWidgetEditForm/components/BreakdownFieldset';
 import Checkbox from 'components/atoms/LegacyCheckbox';
-import type {ComputedAttr, DataTopSettings} from 'store/widgets/data/types';
-import ComputedBreakdownFieldset from 'DiagramWidgetEditForm/components/ComputedBreakdownFieldset';
 import DataTopField from 'DiagramWidgetEditForm/components/DataTopField';
-import type {DefaultBreakdown, Indicator} from 'containers/DiagramWidgetEditForm/types';
+import type {DataTopSettings} from 'store/widgets/data/types';
 import {
 	DEFAULT_CIRCLE_SORTING_SETTINGS,
 	DEFAULT_TOP_SETTINGS,
@@ -15,8 +13,7 @@ import {
 import ExtendingFieldset from 'DiagramWidgetEditForm/components/ExtendingFieldset';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import FormBox from 'components/molecules/FormBox';
-import {getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
-import {getMapValues} from 'helpers';
+import {getDataErrorKey, getDefaultBreakdown} from 'DiagramWidgetEditForm/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import IndicatorFieldset from 'DiagramWidgetEditForm/components/IndicatorFieldset';
 import {isAllowedTopAggregation, isCircleChart} from 'store/widgets/helpers';
@@ -32,19 +29,8 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		usesTop: false
 	};
 
-	createComputedBreakdown = (indicator: ComputedAttr) => {
-		const {values} = this.props;
-		const breakdown = [];
-		const arrData = getMapValues(indicator.computeData);
-		values.data.map(set => set.dataKey)
-			.filter(dataKey => arrData.find(set => set.dataKey === dataKey))
-			.forEach(dataKey => breakdown.push({dataKey, group: null, value: null}));
-
-		return breakdown;
-	};
-
 	handleChange = (dataSetIndex: number, index: number, newIndicator: Indicator) => {
-		const {setDataFieldValue, values} = this.props;
+		const {onSelectCallback, setDataFieldValue, values} = this.props;
 		const {data, top = DEFAULT_TOP_SETTINGS} = values;
 		const {indicators} = data[dataSetIndex];
 		const newIndicators = indicators.map((indicator, i) => i === index ? newIndicator : indicator);
@@ -54,15 +40,15 @@ export class IndicatorDataBox extends PureComponent<Props> {
 			setDataFieldValue(index, FIELDS.top, {...top, show: false});
 		}
 
-		setDataFieldValue(index, FIELDS.indicators, newIndicators, this.onSelectIndicatorCallback(index));
+		setDataFieldValue(index, FIELDS.indicators, newIndicators, onSelectCallback(index));
 	};
 
-	handleChangeBreakdown = (index: number, breakdown: DefaultBreakdown) => {
-		const {setDataFieldValue, setFieldValue, values} = this.props;
+	handleChangeBreakdown = (breakdown: Breakdown) => {
+		const {index, setDataFieldValue, setFieldValue, values} = this.props;
 		const {sorting = DEFAULT_CIRCLE_SORTING_SETTINGS, type} = values;
 
 		if (isCircleChart(type)) {
-			const {group} = breakdown;
+			const {group} = breakdown[0];
 			const {DEFAULT, INDICATOR} = SORTING_VALUES;
 			let {value} = sorting;
 
@@ -89,24 +75,18 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	handleExtendBreakdown = (index: number) => () => {
-		const {setDataFieldValue} = this.props;
+		const {setDataFieldValue, values} = this.props;
+		const {dataKey} = values.data[index];
 
 		setDataFieldValue(index, FIELDS.withBreakdown, true);
-		this.setDefaultBreakdown(index);
+		setDataFieldValue(index, FIELDS.breakdown, [getDefaultBreakdown(dataKey)]);
 	};
 
-	handleRemoveBreakdown = (index: number) => {
-		const {setDataFieldValue} = this.props;
+	handleRemoveBreakdown = () => {
+		const {index, setDataFieldValue} = this.props;
 
-		setDataFieldValue(index, FIELDS.breakdown, null);
+		setDataFieldValue(index, FIELDS.breakdown, undefined);
 		setDataFieldValue(index, FIELDS.withBreakdown, false);
-	};
-
-	onSelectIndicatorCallback = (index: number) => {
-		const {onSelectCallback} = this.props;
-
-		onSelectCallback && onSelectCallback(index);
-		this.showBreakdown(index) && this.setDefaultBreakdown(index);
 	};
 
 	requiredBreakdown = () => {
@@ -116,67 +96,38 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		return [BAR_STACKED, COLUMN_STACKED, DONUT, PIE].includes(values.type);
 	};
 
-	setDefaultBreakdown = (index: number) => {
-		const {setDataFieldValue, values} = this.props;
-		const {breakdown, indicators} = values.data[index];
-		const {attribute} = indicators[0];
-		let newBreakdown = breakdown;
-
-		if (attribute && attribute.type === ATTRIBUTE_TYPES.COMPUTED_ATTR && !Array.isArray(breakdown)) {
-			newBreakdown = this.createComputedBreakdown(attribute);
-		} else if (Array.isArray(breakdown)) {
-			newBreakdown = null;
-		}
-
-		breakdown !== newBreakdown && setDataFieldValue(index, FIELDS.breakdown, newBreakdown);
-	};
-
-	showBreakdown = (index: number) => {
+	shouldShowBreakdown = (index: number) => {
 		const dataSet = this.props.values.data[index];
 		return this.requiredBreakdown() || dataSet[FIELDS.withBreakdown] || dataSet[FIELDS.breakdown];
 	};
 
 	renderBreakdownFieldSet = () => {
-		const {dataSet, index, usesBreakdown} = this.props;
-		const {attribute} = dataSet.indicators[0];
+		const {dataSet, errors, index, usesBreakdown, values} = this.props;
 
 		if (usesBreakdown) {
-			const show = this.showBreakdown(index);
-			const field = attribute && attribute.type === ATTRIBUTE_TYPES.COMPUTED_ATTR
-				? this.renderComputedBreakdownFieldSet(attribute)
-				: this.renderDefaultBreakdownFieldSet();
+			const {data} = values;
+			const {attribute} = dataSet.indicators[0];
+			const show = this.shouldShowBreakdown(index);
+			let {breakdown} = dataSet;
 
 			return (
 				<ExtendingFieldset index={index} onClick={this.handleExtendBreakdown(index)} show={show} text="Разбивка">
-					{field}
+					<BreakdownFieldset
+						data={data}
+						errors={errors}
+						index={index}
+						indicator={attribute}
+						key={index}
+						onChange={this.handleChangeBreakdown}
+						onRemove={this.handleRemoveBreakdown}
+						removable={!this.requiredBreakdown()}
+						value={breakdown}
+					/>
 				</ExtendingFieldset>
 			);
 		}
-	};
 
-	renderComputedBreakdownFieldSet = (indicator: ComputedAttr) => {
-		const {dataSet, errors, index, setDataFieldValue, values} = this.props;
-		const {data} = values;
-		let {breakdown} = dataSet;
-
-		if (!Array.isArray(breakdown)) {
-			breakdown = this.createComputedBreakdown(indicator);
-		}
-
-		return (
-			<ComputedBreakdownFieldset
-				createDefaultValue={this.createComputedBreakdown}
-				data={data}
-				errors={errors}
-				index={index}
-				key={getDataErrorKey(FIELDS.breakdown, index)}
-				name={FIELDS.breakdown}
-				onChange={setDataFieldValue}
-				onRemove={this.handleRemoveBreakdown}
-				removable={!this.requiredBreakdown()}
-				value={breakdown}
-			/>
-		);
+		return null;
 	};
 
 	renderDataTopField = () => {
@@ -186,31 +137,6 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		const error = errors[getDataErrorKey(index, FIELDS.top, FIELDS.count)];
 
 		return usesTop && <DataTopField disabled={disabled} error={error} onChange={this.handleChangeTopSettings} value={top} />;
-	};
-
-	renderDefaultBreakdownFieldSet = () => {
-		const {dataSet, errors, index} = this.props;
-		const errorKey = getDataErrorKey(index, FIELDS.breakdown);
-		let {breakdown} = dataSet;
-
-		if (!breakdown || Array.isArray(breakdown)) {
-			breakdown = getDefaultParameter();
-		}
-
-		return (
-			<BreakdownFieldset
-				dataSet={dataSet}
-				dataSetIndex={index}
-				error={errors[errorKey]}
-				index={index}
-				key={errorKey}
-				name={FIELDS.breakdown}
-				onChange={this.handleChangeBreakdown}
-				onRemove={this.handleRemoveBreakdown}
-				removable={!this.requiredBreakdown()}
-				value={breakdown}
-			/>
-		);
 	};
 
 	renderIndicatorFieldSet = (indicator: Indicator, indicatorIndex: number) => {

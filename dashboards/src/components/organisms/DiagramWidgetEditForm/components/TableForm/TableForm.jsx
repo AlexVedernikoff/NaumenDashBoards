@@ -1,11 +1,9 @@
 // @flow
-import {array, object} from 'yup';
+import {array, baseSchema, mixed, object} from 'components/organisms/DiagramWidgetEditForm/schema';
 import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organisms/Table/constants';
 import {DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
-import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
@@ -14,21 +12,17 @@ import type {TableData, TableWidget, Widget} from 'store/widgets/data/types';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 export class TableForm extends Component<TypedFormProps> {
-	getSchema = () => {
-		const {base, parameter, requiredBreakdown, requiredByCompute, validateTopSettings} = rules;
-
-		return object({
-			...base,
-			data: array().of(object({
-				breakdown: requiredByCompute(requiredBreakdown),
-				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
-				parameters: array(parameter),
-				source: mixed().source()
-			})),
-			sources: mixed().minSourceNumbers(),
-			top: validateTopSettings
-		});
-	};
+	getSchema = () => object({
+		...baseSchema,
+		data: array().of(object({
+			breakdown: mixed().requiredByCompute(array().breakdown()),
+			indicators: mixed().requiredByCompute(array().indicators()),
+			parameters: array().parameters(),
+			source: mixed().source()
+		})),
+		sources: mixed().minSourceNumbers(),
+		top: object().topSettings()
+	});
 
 	normalizeDataSet = (dataSet: FilledDataSet): TableData => {
 		const {

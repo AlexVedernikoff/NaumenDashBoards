@@ -32,7 +32,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 		const {breakdown, indicators, parameters, showEmptyData, xAxisName, yAxisName} = buildDataSet;
 		const {aggregation, attribute} = indicators[0];
 		const parameterUsesUUIDs = hasUUIDsInLabels(parameters[0].attribute);
-		const breakdownUsesUUIDs = !!breakdown && !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute);
+		const breakdownUsesUUIDs = Array.isArray(breakdown) && hasUUIDsInLabels(breakdown[0].attribute);
 		const usesUUIDs = parameterUsesUUIDs || breakdownUsesUUIDs;
 		const usesMSInterval = hasMSInterval(attribute, aggregation);
 		const usesPercent = hasPercent(attribute, aggregation);

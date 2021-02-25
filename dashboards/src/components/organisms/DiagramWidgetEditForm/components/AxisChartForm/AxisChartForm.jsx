@@ -1,14 +1,13 @@
 // @flow
-import {array, lazy, object} from 'yup';
+import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {AxisData, AxisWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'containers/WidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
-import {getErrorMessage, mixed, rules} from 'DiagramWidgetEditForm/schema';
 import {getLegendSettings} from 'utils/chart/helpers';
+import {lazy} from 'yup';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
@@ -16,21 +15,17 @@ import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 export class AxisChartForm extends Component<TypedFormProps> {
-	getSchema = () => {
-		const {base, parameter, requiredByCompute, validateTopSettings} = rules;
-
-		return object({
-			...base,
-			data: array().of(object({
-				breakdown: requiredByCompute(lazy(this.resolveBreakdownRule)),
-				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
-				parameters: array(parameter),
-				source: mixed().source(),
-				top: validateTopSettings
-			})),
-			sources: mixed().minSourceNumbers().sourceNumbers()
-		});
-	};
+	getSchema = () => object({
+		...baseSchema,
+		data: array().of(object({
+			breakdown: mixed().requiredByCompute(lazy(this.resolveBreakdownSchema)),
+			indicators: mixed().requiredByCompute(array().indicators()),
+			parameters: array().parameters(),
+			source: mixed().source(),
+			top: object().topSettings()
+		})),
+		sources: mixed().minSourceNumbers().sourceNumbers()
+	});
 
 	normalizeDataSet = (dataSet: FilledDataSet): AxisData => {
 		const {
@@ -60,13 +55,12 @@ export class AxisChartForm extends Component<TypedFormProps> {
 		};
 	};
 
-	resolveBreakdownRule = (attribute: Attribute | null, context: Object) => {
-		const {conditionalBreakdown, requiredBreakdown} = rules;
+	resolveBreakdownSchema = (attribute: Attribute | null, context: Object) => {
 		const {BAR, COLUMN, LINE} = WIDGET_TYPES;
 		const {type} = context.values;
 		const hasConditionalBreakdown = type === BAR || type === COLUMN || type === LINE;
 
-		return hasConditionalBreakdown ? conditionalBreakdown : requiredBreakdown;
+		return hasConditionalBreakdown ? array().conditionalBreakdown() : array().breakdown();
 	};
 
 	updateWidget = (widget: Widget, values: Values): AxisWidget => {

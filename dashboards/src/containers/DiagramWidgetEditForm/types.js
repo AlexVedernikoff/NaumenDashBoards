@@ -36,18 +36,13 @@ export type Parameter = {
 	group: Group
 };
 
-export type ComputedBreakdown = Array<{
-	dataKey: string,
-	group: Group | null,
-	value: Attribute | null
-}>;
-
-export type DefaultBreakdown = {
+export type BreakdownItem = {
 	attribute: Attribute | null,
+	dataKey: string,
 	group: Group
 };
 
-export type Breakdown = DefaultBreakdown | ComputedBreakdown;
+export type Breakdown = Array<BreakdownItem>;
 
 export type DataSet = {
 	breakdown?: Breakdown,
@@ -60,7 +55,7 @@ export type DataSet = {
 };
 
 export type FilledDataSet = {
-	breakdown?: WidgetBreakdown,
+	breakdown: WidgetBreakdown,
 	dataKey: string,
 	indicators: Array<WidgetIndicator>,
 	parameters: Array<WidgetParameter>,

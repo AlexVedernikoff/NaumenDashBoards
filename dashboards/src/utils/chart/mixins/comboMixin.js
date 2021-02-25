@@ -55,7 +55,7 @@ const setYAxis = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuild
 	const {aggregation, attribute} = indicators[0];
 	const usesMSInterval = hasMSInterval(attribute, aggregation);
 	const usesPercent = hasPercent(attribute, aggregation);
-	const usesUUIDs = !!breakdown && !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute);
+	const usesUUIDs = Array.isArray(breakdown) && hasUUIDsInLabels(breakdown[0].attribute);
 	const color = colors[index];
 	const stacked = type === WIDGET_TYPES.COLUMN_STACKED;
 	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;

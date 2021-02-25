@@ -40,7 +40,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 		const {attribute} = value;
 		let newValue = value;
 
-		if (index === 0 && (!attribute || newAttribute.type in ATTRIBUTE_SETS.REFERENCE || attribute.type !== newAttribute.type)) {
+		if (index === 0 && (newAttribute.type in ATTRIBUTE_SETS.REFERENCE || !attribute || attribute.type !== newAttribute.type)) {
 			newValue = {
 				...newValue,
 				group: getDefaultSystemGroup(value)

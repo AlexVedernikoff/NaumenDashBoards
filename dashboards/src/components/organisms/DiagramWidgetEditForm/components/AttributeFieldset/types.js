@@ -10,6 +10,12 @@ export type Source = {
 	value: string
 };
 
+export type RefProps = {
+	disabled: boolean,
+	parent: Attribute | null,
+	value: Attribute | null
+};
+
 export type Props = {
 	...ContextProps,
 	dataSet: DataSet,

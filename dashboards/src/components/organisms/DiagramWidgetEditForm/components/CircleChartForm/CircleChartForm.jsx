@@ -1,12 +1,10 @@
 // @flow
-import {array, object} from 'yup';
+import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {CircleData, CircleWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {DEFAULT_CIRCLE_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
-import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
@@ -14,20 +12,16 @@ import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 export class CircleChartForm extends Component<TypedFormProps> {
-	getSchema = () => {
-		const {base, requiredBreakdown, requiredByCompute, validateTopSettings} = rules;
-
-		return object({
-			...base,
-			data: array().of(object({
-				breakdown: requiredBreakdown,
-				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
-				source: mixed().source(),
-				top: validateTopSettings
-			})),
-			sources: mixed().minSourceNumbers().sourceNumbers()
-		});
-	};
+	getSchema = () => object({
+		...baseSchema,
+		data: array().of(object({
+			breakdown: array().breakdown(),
+			indicators: mixed().requiredByCompute(array().indicators()),
+			source: mixed().source(),
+			top: object().topSettings()
+		})),
+		sources: mixed().minSourceNumbers().sourceNumbers()
+	});
 
 	normalizeDataSet = (dataSet: FilledDataSet): CircleData => {
 		const {

@@ -46,7 +46,7 @@ export type DataBuilderProps = {
 	renderNavigationBox: () => React$Node,
 	renderParameterBox: () => React$Node,
 	renderShowEmptyDataCheckbox: () => React$Node,
-	renderSourceBox: (minCountBuildingSources?: number) => React$Node
+	renderSourceBox: () => React$Node
 };
 
 export type Props = {

@@ -17,8 +17,6 @@ import TextInput from 'components/atoms/TextInput';
 import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {
-	sourceRefFields = [FIELDS.indicator];
-
 	handleChangeBorder = ({name, value: inputValue}: Object) => {
 		const {setFieldValue, values} = this.props;
 		const {borders, ranges = DEFAULT_SPEEDOMETER_SETTINGS.ranges} = values;
@@ -111,23 +109,13 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		</Fragment>
 	);
 
-	renderSourceBox = () => {
-		const {renderSourceBox} = this.props;
-		const {indicator} = FIELDS;
-		const sourceRefFields = {
-			indicator
-		};
-
-		return renderSourceBox(sourceRefFields);
-	};
-
 	render () {
-		const {renderBaseBoxes, renderDisplayModeSelect, renderNavigationBox} = this.props;
+		const {renderBaseBoxes, renderDisplayModeSelect, renderNavigationBox, renderSourceBox} = this.props;
 
 		return (
 			<Fragment>
 				{renderBaseBoxes()}
-				{this.renderSourceBox()}
+				{renderSourceBox()}
 				{this.renderIndicatorBoxes()}
 				{renderDisplayModeSelect()}
 				{renderNavigationBox()}

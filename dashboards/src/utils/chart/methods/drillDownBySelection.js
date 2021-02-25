@@ -65,30 +65,16 @@ const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMi
  */
 const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {breakdown} = dataSet;
+	const breakdownSet = breakdown && breakdown.find(attrSet => attrSet[FIELDS.dataKey] === dataSet.dataKey);
 	let newMixin = mixin;
 
-	if (Array.isArray(breakdown)) {
-		const breakdownSet = breakdown.find(attrSet => attrSet[FIELDS.dataKey] === dataSet.dataKey);
-
-		if (breakdownSet) {
-			const {group, value: attribute} = breakdownSet;
-			const subTitle = hasUUIDsInLabels(attribute) ? getLabelWithoutUUID(value) : value;
-
-			newMixin = addGroupFilter(mixin, {
-				attribute,
-				group: transformGroupFormat(group),
-				subTitle,
-				value
-			});
-		}
-	} else if (breakdown) {
-		const {attribute, group} = breakdown;
+	if (breakdownSet) {
+		const {attribute, group} = breakdownSet;
 		const subTitle = hasUUIDsInLabels(attribute) ? getLabelWithoutUUID(value) : value;
 
 		newMixin = addGroupFilter(mixin, {
 			attribute,
 			group: transformGroupFormat(group),
-			mixin,
 			subTitle,
 			value
 		});

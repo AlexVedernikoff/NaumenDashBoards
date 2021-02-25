@@ -1,12 +1,10 @@
 // @flow
-import {array, object} from 'yup';
+import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {ComboData, ComboWidget, Widget} from 'store/widgets/data/types';
 import {COMBO_TYPES, DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
 import {extend} from 'helpers';
-import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
-import {getErrorMessage, mixed, rules} from 'components/organisms/DiagramWidgetEditForm/schema';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
@@ -14,21 +12,17 @@ import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
 
 export class ComboChartForm extends Component<TypedFormProps> {
-	getSchema = () => {
-		const {base, parameter, requiredBreakdown, requiredByCompute, validateTopSettings} = rules;
-
-		return object({
-			...base,
-			data: array().of(object({
-				breakdown: requiredByCompute(requiredBreakdown),
-				indicators: requiredByCompute(array(mixed().requiredAttribute(getErrorMessage(FIELDS.indicator)))),
-				parameters: array(parameter),
-				source: mixed().source(),
-				top: validateTopSettings
-			})),
-			sources: mixed().minSourceNumbers()
-		});
-	};
+	getSchema = () => object({
+		...baseSchema,
+		data: array().of(object({
+			breakdown: mixed().requiredByCompute(array().breakdown()),
+			indicators: mixed().requiredByCompute(array().indicators()),
+			parameters: array().parameters(),
+			source: mixed().source(),
+			top: object().topSettings()
+		})),
+		sources: mixed().minSourceNumbers()
+	});
 
 	normalizeDataSet = (dataSet: FilledDataSet): ComboData => {
 		const {
