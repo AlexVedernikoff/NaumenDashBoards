@@ -33,11 +33,11 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const {attributes: map, fetchAttributes, values} = this.props;
 		const sources = [];
 
-		values.data.forEach(set => {
-			const source = set[FIELDS.source];
+		values.data.forEach(dataSet => {
+			const {value: source} = dataSet[FIELDS.source];
 
 			if (source) {
-				const dataKey = set[FIELDS.dataKey];
+				const dataKey = dataSet[FIELDS.dataKey];
 				const classFqn = source.value;
 				let {[classFqn]: sourceData = {
 					error: false,

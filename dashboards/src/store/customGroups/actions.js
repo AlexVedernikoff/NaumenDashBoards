@@ -73,15 +73,15 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback
 	}
 };
 
-const setCustomGroups = (payload: CustomGroupsMap) => (dispatch: Dispatch) => {
-	Object.keys(payload).forEach(key => {
-		if (!payload[key]) {
-			delete payload[key];
-		}
+const setCustomGroups = (customGroups: Array<CustomGroup>) => (dispatch: Dispatch) => {
+	let map = {};
+
+	customGroups.forEach(customGroup => {
+		map[customGroup.id] = customGroup;
 	});
 
 	dispatch({
-		payload,
+		payload: map,
 		type: CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS
 	});
 };
