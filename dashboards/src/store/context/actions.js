@@ -29,6 +29,7 @@ const getContext = (): ThunkAction => (dispatch: Dispatch) => {
 
 const getMetaCLass = (): ThunkAction => async (dispatch: Dispatch) => {
 	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
+
 	dispatch(setContext({metaClass}));
 };
 

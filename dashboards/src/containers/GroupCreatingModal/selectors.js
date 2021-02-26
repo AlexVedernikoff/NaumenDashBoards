@@ -10,6 +10,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const {map, selectedWidget} = widgetsState.data;
 	const widgets = getMapValues(map).filter(widget => {
 		const {id, type} = widget;
+
 		return id !== selectedWidget && type in DIAGRAM_WIDGET_TYPES;
 	});
 

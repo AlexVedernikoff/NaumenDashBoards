@@ -12,16 +12,19 @@ export class ToggableFormBox extends PureComponent<Props> {
 
 	handleToggle = (event: OnChangeInputEvent) => {
 		const {onToggle} = this.props;
+
 		onToggle && onToggle(event);
 	};
 
 	renderContent = () => {
 		const {children, showContent} = this.props;
+
 		return showContent ? children : null;
 	};
 
 	renderControl = () => {
 		const {name, showContent} = this.props;
+
 		return <Toggle checked={showContent} name={name} onChange={this.handleToggle} value={showContent} />;
 	};
 

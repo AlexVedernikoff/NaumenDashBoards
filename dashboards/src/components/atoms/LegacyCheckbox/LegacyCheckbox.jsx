@@ -13,6 +13,7 @@ class LegacyCheckbox extends Component<Props> {
 
 	handleClick = () => {
 		const {name, onClick, value} = this.props;
+
 		onClick(name, !value);
 	};
 
@@ -28,6 +29,7 @@ class LegacyCheckbox extends Component<Props> {
 
 	renderLabel = () => {
 		const {label, renderLabel} = this.props;
+
 		return renderLabel ? renderLabel(label) : <div>{label}</div>;
 	};
 

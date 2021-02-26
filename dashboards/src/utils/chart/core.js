@@ -44,6 +44,7 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
 
 	if (isAxisChart) {
 		const sumDataValues = series.reduce((sum, s) => sum + s.data.length, 0);
+
 		dataLabelsLimitIsExceeded = sumDataValues > DATA_LABELS_LIMIT;
 	}
 

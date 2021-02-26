@@ -6,6 +6,7 @@ import uuid from 'tiny-uuid';
 
 const createToast = (newToast: $Exact<NewToast>) => (dispatch: Dispatch) => {
 	const toast = {...DEFAULT_TOAST, ...newToast, id: uuid()};
+
 	dispatch(addToast(toast));
 };
 

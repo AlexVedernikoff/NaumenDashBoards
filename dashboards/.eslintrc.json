@@ -25,30 +25,35 @@
 		"sort-keys-fix"
 	],
 	"rules": {
+		"babel/semi": [2, "always"],
+		"comma-dangle": ["error", "never"],
 		"curly": 0,
-		"indent": [
-			0,
-			"tab"
-		],
-		"local-rules/sort-imports": 2,
-		"local-rules/sort-class-methods": 2,
 		"flowtype/semi": 2,
 		"flowtype/sort-keys": [2, "asc", {"caseSensitive": true, "natural": true}],
-		"no-param-reassign": 2,
 		"import/no-relative-parent-imports": 2,
-		"no-tabs": 0,
-		"operator-linebreak": ["error", "before"],
-		"react/jsx-tag-spacing": [2, {"beforeSelfClosing": "always"}],
-		"react/jsx-sort-props": 2,
-		"require-atomic-updates": "off",
-		"semi": [2, "always"],
-		"babel/semi": [2, "always"],
-		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": true}],
-		"sort-keys": [2, "asc", {"caseSensitive": true}],
-		"sort-vars": [2, {"ignoreCase": false}],
+		"indent": [0, "tab"],
 		"jsdoc/newline-after-description": 0,
 		"jsdoc/require-returns-description": 0,
-		"sort-keys-fix/sort-keys-fix": "warn"
+		"no-param-reassign": 2,
+		"no-tabs": 0,
+		"operator-linebreak": ["error", "before"],
+		"padding-line-between-statements": [
+			"warn",
+			{ "blankLine": "always", "prev": ["const", "let", "var"], "next": "*"},
+			{ "blankLine": "any",    "prev": ["const", "let", "var"], "next": ["const", "let", "var"]},
+			{ "blankLine": "always", "prev": "*", "next": "if" },
+			{ "blankLine": "always", "prev": "if", "next": "*" }
+		],
+		"react/jsx-sort-props": 2,
+		"react/jsx-tag-spacing": [2, {"beforeSelfClosing": "always"}],
+		"require-atomic-updates": "off",
+		"semi": [2, "always"],
+		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": true}],
+		"sort-keys": [2, "asc", {"caseSensitive": true}],
+		"sort-keys-fix/sort-keys-fix": "warn",
+		"sort-vars": [2, {"ignoreCase": false}],
+		"local-rules/sort-class-methods": "error",
+		"local-rules/sort-imports": "error"
 	},
 	"settings": {
 		"react": {

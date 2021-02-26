@@ -13,9 +13,9 @@ import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import HeaderCell from 'Table/components/HeaderCell';
 import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
+import HeaderCell from 'Table/components/HeaderCell';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
 import React, {createRef, PureComponent} from 'react';
@@ -47,6 +47,7 @@ export class TableWidget extends PureComponent<Props, State> {
 	getMaxValueCellLength (data: Array<Row>, accessor: string): number {
 		return data.reduce((maxLength, row) => {
 			const currentLength = String(row[accessor]).length * 16;
+
 			return currentLength > maxLength ? currentLength : maxLength;
 		}, 0);
 	}
@@ -112,6 +113,7 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	getLastTypedColumn = (columns: $ReadOnlyArray<Column>, type: ColumnType): ?Column => columns.find((column, index, columns) => {
 		const nextColumn = columns[index + 1];
+
 		return column.type === type && (!nextColumn || nextColumn.type !== type);
 	});
 
@@ -127,6 +129,7 @@ export class TableWidget extends PureComponent<Props, State> {
 
 		if (!isLastIndicator) {
 			const lastIndicator = this.getLastTypedColumn(columns, INDICATOR);
+
 			isLastBreakdown = lastIndicator && this.isLastTypedColumn(lastIndicator.columns, column, BREAKDOWN);
 		}
 
@@ -182,11 +185,13 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	handleChangeColumnWidth = (columnsRatioWidth: ColumnsRatioWidth) => {
 		const {onUpdate, widget} = this.props;
+
 		onUpdate({...widget, columnsRatioWidth});
 	};
 
 	handleChangeSorting = (sorting: TableSorting) => {
 		const {onUpdate, widget} = this.props;
+
 		onUpdate({...widget, sorting});
 	};
 

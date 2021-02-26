@@ -24,11 +24,13 @@ export class StyleTab extends Component<StyleTabProps> {
 
 	handleChange = (name: string, data: Object) => {
 		const {setFieldValue} = this.props;
+
 		setFieldValue(name, data);
 	};
 
 	handleChangeAxisName = (index: number) => ({name, value}: OnChangeInputEvent) => {
 		const {setDataFieldValue} = this.props;
+
 		setDataFieldValue(index, name, value);
 	};
 

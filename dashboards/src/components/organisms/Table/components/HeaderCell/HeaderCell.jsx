@@ -23,11 +23,13 @@ export class HeaderCell extends PureComponent<Props> {
 
 	handleMouseDownCell = () => {
 		const {column, onClick} = this.props;
+
 		!this.dragStart && onClick(column);
 	};
 
 	mouseDown = (event: MouseEvent) => {
 		const {width} = this.props;
+
 		this.cursorStart = event.pageX;
 		this.resizerOffset = width;
 		this.dragStart = true;

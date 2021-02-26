@@ -100,6 +100,7 @@ export class ObjectGroup extends Component<Props, State> {
 
 	getObjectId = () => {
 		const {attribute, source} = this.props;
+
 		return getObjectKey(attribute, source);
 	};
 
@@ -166,6 +167,7 @@ export class ObjectGroup extends Component<Props, State> {
 
 	handleChangeSearchInput = async (searchValue: string) => {
 		const {attribute, searchObjects, source} = this.props;
+
 		searchObjects(source, attribute, searchValue);
 	};
 
@@ -192,11 +194,13 @@ export class ObjectGroup extends Component<Props, State> {
 
 	hasActualType = (condition: RefOrCondition) => {
 		const {CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL} = OPERAND_TYPES;
+
 		return ![CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL].includes(condition.type);
 	};
 
 	isSearching = (): boolean => {
 		const {[this.getObjectId()]: foundData} = this.props.objects.found;
+
 		return Boolean(foundData && foundData.searchValue);
 	};
 

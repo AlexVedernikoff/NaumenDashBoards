@@ -25,11 +25,13 @@ class WidgetEditForm extends PureComponent<Props, State> {
 
 	getValues (widget: AnyWidget): Values {
 		const {id, ...values} = widget;
+
 		return deepClone(values);
 	}
 
 	componentDidCatch (e: Error) {
 		const {cancelForm, createToast} = this.props;
+
 		console.error(e);
 
 		createToast({
@@ -52,6 +54,7 @@ class WidgetEditForm extends PureComponent<Props, State> {
 			});
 			// $FlowFixMe
 			const top = Math.min(...offsets) - this.form.getBoundingClientRect().top;
+
 			// $FlowFixMe
 			this.form.scrollTo({behavior: 'smooth', top: Math.max(top, 0)});
 		}

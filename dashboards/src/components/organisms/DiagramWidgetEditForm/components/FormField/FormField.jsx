@@ -1,6 +1,6 @@
 // @flow
-import type {DivRef} from 'components/types';
 import BaseFormField from 'components/molecules/FormField';
+import type {DivRef} from 'components/types';
 import type {Props} from './types';
 import React, {Component, createRef} from 'react';
 import withForm from 'DiagramWidgetEditForm/withForm';

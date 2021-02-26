@@ -51,6 +51,7 @@ export class ColorPicker extends Component<Props, State> {
 	handleChangeComplete = (): void => {
 		const {onChange} = this.props;
 		const {itemColor} = this.state;
+
 		onChange(itemColor);
 	};
 

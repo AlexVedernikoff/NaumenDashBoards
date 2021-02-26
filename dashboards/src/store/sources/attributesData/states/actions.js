@@ -13,6 +13,7 @@ const fetchMetaClassStates = (metaClassFqn: string): ThunkAction => async (dispa
 
 	try {
 		const data = await window.jsApi.restCallModule('dashboards', 'getStates', metaClassFqn);
+
 		dispatch(receiveMetaClassStates({data, metaClassFqn}));
 	} catch (error) {
 		dispatch(recordMetaClassStatesError(metaClassFqn));

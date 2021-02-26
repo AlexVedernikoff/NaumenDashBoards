@@ -27,11 +27,13 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 	addDiagramWidget = () => {
 		const {layoutMode} = this.props;
+
 		this.addWidget(createNewWidget(layoutMode));
 	};
 
 	addTextWidget = () => {
 		const {layoutMode} = this.props;
+
 		this.addWidget(createNewWidget(layoutMode, WIDGET_TYPES.TEXT));
 	};
 
@@ -41,6 +43,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 	handleFocusSearchInput = () => {
 		const {dashboards, fetchDashboards} = this.props;
+
 		!dashboards.uploaded && fetchDashboards();
 	};
 
@@ -71,6 +74,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 		if (invalidCopyData) {
 			const {dashboardId, widgetId} = invalidCopyData;
+
 			this.setState({invalidCopyData: null});
 			copyWidget(dashboardId, widgetId);
 		}
@@ -119,6 +123,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 	renderSubmitButton = (props: Object) => {
 		const {onSubmit} = props;
+
 		return <Button onClick={onSubmit}>Создать</Button>;
 	};
 

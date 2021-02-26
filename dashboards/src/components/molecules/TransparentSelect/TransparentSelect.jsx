@@ -45,6 +45,7 @@ export class TransparentSelect extends PureComponent<Props, State> {
 
 	handleClickRemoveIcon = () => {
 		const {name, onRemove} = this.props;
+
 		onRemove(name);
 	};
 

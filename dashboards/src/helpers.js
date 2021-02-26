@@ -78,6 +78,7 @@ const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platfo
  */
 const getLayoutMode = () => {
 	const {MOBILE, WEB} = LAYOUT_MODE;
+
 	return isMobile().any ? MOBILE : WEB;
 };
 
@@ -90,6 +91,7 @@ const getLayoutMode = () => {
 const decorateRestCallModule = (restCallModule: Function) => {
 	window.jsApi.restCallModule = async (...params) => {
 		const data = await restCallModule(...params);
+
 		return JSON.parse(JSON.stringify(data));
 	};
 };

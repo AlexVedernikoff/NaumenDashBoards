@@ -13,6 +13,7 @@ export class Value extends PureComponent<Props> {
 
 	renderValue = () => {
 		const {value: backgroundColor} = this.props;
+
 		return <span className={styles.value} style={{backgroundColor}} />;
 	};
 

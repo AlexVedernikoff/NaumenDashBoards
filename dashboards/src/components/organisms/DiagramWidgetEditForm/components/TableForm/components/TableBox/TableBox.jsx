@@ -28,6 +28,7 @@ export class TableBox extends PureComponent<Props> {
 
 	renderHeader = () => {
 		const {data} = this.props;
+
 		return <HeaderSettingsBox data={data[FIELDS.columnHeader]} onChange={this.handleChangeHeaderSettings} />;
 	};
 

@@ -8,7 +8,7 @@ import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
-import {getMapValues} from 'src/helpers';
+import {getMapValues} from 'helpers';
 import type {Group, Source} from 'store/widgets/data/types';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';

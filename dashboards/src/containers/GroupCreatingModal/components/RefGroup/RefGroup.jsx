@@ -53,6 +53,7 @@ export class RefGroup extends Component<Props> {
 
 	getCustomGroups = (): Array<CustomGroup> => {
 		const {customGroups, customType} = this.props;
+
 		return customGroups.filter(({type}) => type === customType);
 	};
 

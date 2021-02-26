@@ -14,6 +14,7 @@ import type {Source} from 'store/widgets/data/types';
  */
 const isUploaded = (node: RawObjectData): boolean => {
 	const {children, hasChildren} = node;
+
 	return (Array.isArray(children) && children.length > 0) || !hasChildren;
 };
 

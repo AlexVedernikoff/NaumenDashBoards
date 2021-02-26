@@ -11,11 +11,13 @@ export class InputForm extends Component<Props, State> {
 
 	componentDidMount () {
 		const {value} = this.props;
+
 		this.setState({value: value.toString()});
 	}
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {value} = e.currentTarget;
+
 		this.setState({value});
 	};
 

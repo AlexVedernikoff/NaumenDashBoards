@@ -21,6 +21,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 
 	getIndicators = () => {
 		const {indicators = [getDefaultIndicator()]} = this.props.dataSet;
+
 		return indicators;
 	};
 
@@ -34,16 +35,19 @@ export class IndicatorsBox extends PureComponent<Props> {
 
 	handleChangeOrder = (indicators: Array<Object>) => {
 		const {index, setDataFieldValue} = this.props;
+
 		setDataFieldValue(index, FIELDS.indicators, indicators);
 	};
 
 	handleClickAddInput = () => {
 		const {index, setDataFieldValue} = this.props;
+
 		setDataFieldValue(index, FIELDS.indicators, [...this.getIndicators(), getDefaultIndicator()]);
 	};
 
 	handleClickSumInput = () => {
 		const {calcTotalColumn, setFieldValue} = this.props;
+
 		setFieldValue(FIELDS.calcTotalColumn, !calcTotalColumn);
 	};
 

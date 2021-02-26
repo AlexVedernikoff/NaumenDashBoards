@@ -11,6 +11,7 @@ import styles from './styles.less';
 export class StyleTab extends Component<StyleTabProps> {
 	handleChange = (name: string, data: Object) => {
 		const {setFieldValue} = this.props;
+
 		setFieldValue(name, data);
 	};
 

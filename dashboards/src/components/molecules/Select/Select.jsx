@@ -97,6 +97,7 @@ export class Select extends PureComponent<Props, State> {
 
 	handleClickClearLabelIcon = () => {
 		const {name, onChangeLabel} = this.props;
+
 		onChangeLabel && onChangeLabel({name, value: ''});
 	};
 

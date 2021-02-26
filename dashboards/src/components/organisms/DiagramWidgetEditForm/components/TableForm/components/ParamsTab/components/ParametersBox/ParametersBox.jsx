@@ -11,6 +11,7 @@ import SortableList from 'DiagramWidgetEditForm/components/SortableList';
 export class ParametersBox extends PureComponent<Props> {
 	getParameters = () => {
 		const {parameters = [getDefaultParameter()]} = this.props.dataSet;
+
 		return parameters;
 	};
 
@@ -24,11 +25,13 @@ export class ParametersBox extends PureComponent<Props> {
 
 	handleChangeOrder = (parameters: Array<Object>) => {
 		const {index, onChange} = this.props;
+
 		onChange(index, parameters);
 	};
 
 	handleClickAddInput = () => {
 		const {index, onChange} = this.props;
+
 		onChange(index, [...this.getParameters(), getDefaultParameter()]);
 	};
 

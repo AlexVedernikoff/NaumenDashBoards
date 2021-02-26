@@ -57,6 +57,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 	getComponents = () => {
 		const {components} = this.props;
+
 		return components ? {...this.components, ...components} : this.components;
 	};
 
@@ -164,6 +165,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 	renderRanges = (): Array<React$Node> | null => {
 		const {data, use} = this.props.ranges;
+
 		return use ? data.map(this.renderRange) : null;
 	};
 
@@ -201,6 +203,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		if (fontSize * title.length > width + radius) {
 			const end = Math.round(width / fontSize) - 3;
+
 			displayTitle = `${displayTitle.substring(0, end)}...`;
 		}
 

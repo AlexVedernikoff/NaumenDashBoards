@@ -49,16 +49,19 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	handleChangeBreakdown = (breakdown: Breakdown) => {
 		const {setDataFieldValue} = this.props;
+
 		setDataFieldValue(this.mainIndex, FIELDS.breakdown, breakdown);
 	};
 
 	handleChangeParameters = (index: number, parameters: Array<Paremeter>) => {
 		const {setDataFieldValue} = this.props;
+
 		setDataFieldValue(index, FIELDS.parameters, parameters);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
 		const {setFieldValue} = this.props;
+
 		setFieldValue(FIELDS.top, top);
 	};
 

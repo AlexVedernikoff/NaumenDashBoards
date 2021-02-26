@@ -13,6 +13,7 @@ const fetchCatalogItemData = (property: string): ThunkAction => async (dispatch:
 
 	try {
 		const data = await window.jsApi.restCallModule('dashboards', 'getCatalogItemObject', {property});
+
 		dispatch(receiveCatalogItemData({data, property}));
 	} catch (error) {
 		dispatch(recordCatalogItemDataError(property));

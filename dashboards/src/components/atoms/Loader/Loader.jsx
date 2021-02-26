@@ -12,6 +12,7 @@ export class Loader extends PureComponent<Props> {
 
 	render () {
 		const {className, size} = this.props;
+
 		return <div className={cn(styles.loader, className)} style={{height: size, width: size}} />;
 	}
 }

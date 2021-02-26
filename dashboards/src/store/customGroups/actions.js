@@ -1,6 +1,6 @@
 // @flow
 import {createToast} from 'store/toasts/actions';
-import type {CustomGroup, CustomGroupsMap, OnCreateCallback} from './types';
+import type {CustomGroup, OnCreateCallback} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
@@ -14,6 +14,7 @@ const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callb
 			group: customGroupData
 		};
 		const {id} = await window.jsApi.restCallModule('dashboardSettings', 'saveCustomGroup', payload);
+
 		callback(id);
 
 		dispatch(removeCustomGroup(localId));
@@ -33,6 +34,7 @@ const deleteCustomGroup = (groupKey: string): ThunkAction => async (dispatch: Di
 				...getParams(),
 				groupKey
 			};
+
 			await window.jsApi.restCallModule('dashboardSettings', 'deleteCustomGroup', payload);
 		}
 
@@ -56,6 +58,7 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback
 				...getParams(),
 				group
 			};
+
 			({group: updatedGroup} = await window.jsApi.restCallModule('dashboardSettings', 'updateCustomGroup', payload));
 
 			if (updatedGroup.id !== group.id) {

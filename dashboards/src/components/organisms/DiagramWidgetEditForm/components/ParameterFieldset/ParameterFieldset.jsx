@@ -21,6 +21,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 
 	change = (parameter: Parameter) => {
 		const {dataSetIndex, index, onChange} = this.props;
+
 		onChange(dataSetIndex, index, parameter);
 	};
 

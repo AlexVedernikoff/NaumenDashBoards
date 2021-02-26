@@ -13,6 +13,7 @@ export class List extends PureComponent<Props> {
 
 	render (): Array<React$Node> | null {
 		const {options, show} = this.props;
+
 		return show ? options.map(this.renderItem) : null;
 	}
 }

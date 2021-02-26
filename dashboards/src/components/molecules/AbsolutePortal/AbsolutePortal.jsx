@@ -58,6 +58,7 @@ export class AbsolutePortal extends Component<Props, State> {
 
 	createContainer = () => {
 		const div = document.createElement('div');
+
 		div.className = styles.container;
 
 		if (document.body !== null) {
@@ -69,6 +70,7 @@ export class AbsolutePortal extends Component<Props, State> {
 
 	getElementRect = () => {
 		const {current: element} = this.props.elementRef;
+
 		return element && element.getBoundingClientRect();
 	};
 
@@ -152,6 +154,7 @@ export class AbsolutePortal extends Component<Props, State> {
 		if (!this.container) {
 			this.container = this.createContainer();
 		}
+
 		// $FlowFixMe
 		return createPortal(this.renderPortal(), this.container);
 	}

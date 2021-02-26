@@ -37,6 +37,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 	handleChangeDisplayMode = ({value}: Object) => {
 		const {editWidgetChunkData, widget} = this.props;
+
 		editWidgetChunkData(widget, {displayMode: value});
 	};
 
@@ -44,6 +45,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 	handleClickDrillDownButton = (e: Object) => {
 		const {onDrillDown, widget} = this.props;
+
 		onDrillDown(widget, e.item.props.keyEvent);
 	};
 
@@ -55,6 +57,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 		if (dashboard) {
 			const widgetId = navigationWidget ? navigationWidget.value : '';
+
 			onOpenNavigationLink(dashboard.value, widgetId);
 		}
 	};

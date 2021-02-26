@@ -7,6 +7,7 @@ import styles from './styles.less';
 export class Option extends PureComponent<Props> {
 	handleClick = () => {
 		const {onClick, value} = this.props;
+
 		onClick(value);
 	};
 

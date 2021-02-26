@@ -25,6 +25,7 @@ export class WidgetForm extends PureComponent<Props> {
 
 	getComponents = () => {
 		const {components} = this.props;
+
 		return {...this.components, ...components};
 	};
 

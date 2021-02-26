@@ -26,11 +26,13 @@ export class Form extends PureComponent<Props, State> {
 
 	handleAddUser = () => {
 		const {selectedUsers} = this.state;
+
 		this.setState({selectedUsers: [...selectedUsers, createDefaultUser()]});
 	};
 
 	handleRemoveUser = (index: number) => {
 		const {selectedUsers} = this.state;
+
 		selectedUsers.splice(index, 1);
 
 		this.setState({selectedUsers: [...selectedUsers]});
@@ -42,6 +44,7 @@ export class Form extends PureComponent<Props, State> {
 
 	handleSelectUser = (index: number, user: User) => {
 		const {selectedUsers} = this.state;
+
 		selectedUsers[index] = user;
 
 		this.setState({selectedUsers: [...selectedUsers]});

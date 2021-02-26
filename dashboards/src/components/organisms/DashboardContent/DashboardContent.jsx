@@ -97,6 +97,7 @@ export class DashboardContent extends Component<Props, State> {
 
 	isDesktopMK = () => {
 		const {layoutMode} = this.props;
+
 		return !isMobile().any && layoutMode === LAYOUT_MODE.MOBILE;
 	};
 

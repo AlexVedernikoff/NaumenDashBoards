@@ -13,6 +13,7 @@ import TextInput from 'components/atoms/TextInput';
 export class AxisSettingsBox extends PureComponent<Props> {
 	handleChangeSettings = ({name: propName, value}: OnChangeInputEvent) => {
 		const {name, onChangeSettings, settings} = this.props;
+
 		onChangeSettings(name, {...settings, [propName]: value});
 	};
 

@@ -27,11 +27,13 @@ export class Form extends Component<Props, State> {
 
 	handleSubmit = () => {
 		const {onSubmit, updateWidget} = this.props;
+
 		onSubmit(updateWidget);
 	};
 
 	setWidgetLayoutSize = () => {
 		const {isNew, layoutSize, onChangeLayoutSize} = this.props;
+
 		isNew && onChangeLayoutSize(layoutSize);
 	};
 

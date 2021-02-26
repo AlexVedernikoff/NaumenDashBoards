@@ -18,6 +18,7 @@ export class DropDownList extends PureComponent<Props, State> {
 
 	getRootValue = (): Value => {
 		const {children, ...value} = this.props.value;
+
 		return value;
 	};
 
@@ -25,6 +26,7 @@ export class DropDownList extends PureComponent<Props, State> {
 
 	handleSelect = (value: Node) => {
 		const {onSelect} = this.props;
+
 		onSelect({...value, parent: this.getRootValue()});
 	};
 

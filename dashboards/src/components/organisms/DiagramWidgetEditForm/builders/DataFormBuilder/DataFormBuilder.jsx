@@ -73,6 +73,7 @@ export class DataFormBuilder extends Component<Props> {
 	handleToggleShowEmptyData = (event: OnChangeInputEvent) => {
 		const {setFieldValue} = this.props;
 		const {name, value} = event;
+
 		setFieldValue(name, !value);
 	};
 
@@ -164,7 +165,7 @@ export class DataFormBuilder extends Component<Props> {
 
 	renderIndicatorBox = (props: IndicatorBoxProps) => (dataSet: DataSet, index: number) => {
 		if (!dataSet[FIELDS.sourceForCompute]) {
-			return <IndicatorDataBox dataSet={dataSet} index={index} {...props} />;
+			return <IndicatorDataBox dataSet={dataSet} index={index} key={index} {...props} />;
 		}
 
 		return null;
@@ -172,6 +173,7 @@ export class DataFormBuilder extends Component<Props> {
 
 	renderIndicatorBoxes = (props: IndicatorBoxProps = {}): Array<React$Node> => {
 		const {values} = this.props;
+
 		return values.data.map(this.renderIndicatorBox(props));
 	};
 

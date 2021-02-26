@@ -22,6 +22,7 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 
 	focusOnTextEditor = () => {
 		const {current: editor} = this.editorRef;
+
 		editor && editor.focusEditor();
 	};
 
@@ -77,6 +78,7 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 
 	handleSubmit = () => {
 		const {onSubmit} = this.props;
+
 		onSubmit(this.updateWidget);
 	};
 
@@ -103,6 +105,7 @@ export class TextWidgetEditForm extends PureComponent<Props> {
 
 	updateEditorState = (editorState: EditorState, callback?: Function) => {
 		const {setFieldValue} = this.props;
+
 		setFieldValue(FIELDS.editorState, editorState, callback);
 	};
 

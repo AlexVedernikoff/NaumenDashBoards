@@ -20,6 +20,7 @@ const BETWEEN_RULE = object().test(
 
 		if (isObject(value)) {
 			const {endDate, startDate} = value;
+
 			valid = (startDate && isValidDate(startDate) && !endDate)
 				|| (!startDate && endDate && isValidDate(endDate))
 				|| (isValidDate(startDate) && isValidDate(endDate))

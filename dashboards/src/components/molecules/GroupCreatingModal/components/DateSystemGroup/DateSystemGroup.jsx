@@ -28,6 +28,7 @@ export class DateSystemGroup extends PureComponent<Props, State> {
 
 	componentDidMount () {
 		const {format} = this.props.group;
+
 		format && this.setState({format});
 	}
 
@@ -60,6 +61,7 @@ export class DateSystemGroup extends PureComponent<Props, State> {
 
 	handleSelectFormat = ({value}: Object) => {
 		const {value: format} = value;
+
 		this.setState({format});
 	};
 

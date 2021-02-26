@@ -17,6 +17,7 @@ class Table {
 
 	create = () => {
 		const container = document.createElement('div');
+
 		container.innerHTML = this.createTable().trim();
 
 		return container.firstChild;

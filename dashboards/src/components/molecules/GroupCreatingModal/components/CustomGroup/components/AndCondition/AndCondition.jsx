@@ -21,6 +21,7 @@ export class AndCondition extends PureComponent<Props> {
 
 	handleRemoveOrCondition = (index: number) => {
 		const {condition, index: andConditionIndex, onRemove, onUpdate} = this.props;
+
 		condition.splice(index, 1);
 
 		condition.length === 0 ? onRemove(andConditionIndex) : onUpdate(andConditionIndex, [...condition]);
@@ -28,6 +29,7 @@ export class AndCondition extends PureComponent<Props> {
 
 	handleUpdateOrCondition = (index: number, orCondition: OrConditionType) => {
 		const {condition, index: AndConditionIndex, onUpdate} = this.props;
+
 		condition[index] = orCondition;
 
 		onUpdate(AndConditionIndex, [...condition]);

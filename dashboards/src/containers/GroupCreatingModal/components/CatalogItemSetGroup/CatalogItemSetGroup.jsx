@@ -89,6 +89,7 @@ export class CatalogItemSetGroup extends Component<Props, State> {
 
 	handleLoadData = () => {
 		const {attribute, fetchCatalogItemSetData} = this.props;
+
 		fetchCatalogItemSetData(attribute.property);
 	};
 

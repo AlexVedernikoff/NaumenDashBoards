@@ -37,9 +37,11 @@ export class List extends PureComponent<Props, State> {
 
 		if (searchValue !== stateSearchValue) {
 			const reg = new RegExp(searchValue, 'i');
+
 			// $FlowFixMe
 			options = options.filter(o => {
 				const label = getOptionLabel ? getOptionLabel(o) : o.label;
+
 				return reg.test(label);
 			});
 		}
@@ -53,16 +55,19 @@ export class List extends PureComponent<Props, State> {
 	getMessages = () => {
 		const {messages} = this.props;
 		const defaultMessages = List.defaultProps.messages;
+
 		return messages ? {...defaultMessages, ...messages} : defaultMessages;
 	};
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
+
 		return getOptionLabel ? getOptionLabel(option) : option.label;
 	};
 
 	getOptionValue = (option: Object) => {
 		const {getOptionValue} = this.props;
+
 		return getOptionValue ? getOptionValue(option) : option.value;
 	};
 

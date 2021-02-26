@@ -24,6 +24,7 @@ export class IntervalOperand extends PureComponent<Props> {
 
 	handleSelect = (name: string, group: Object) => {
 		const {onChange, operand} = this.props;
+
 		onChange({
 			...operand,
 			data: {

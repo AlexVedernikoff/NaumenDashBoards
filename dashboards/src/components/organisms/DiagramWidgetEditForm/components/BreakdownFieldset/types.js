@@ -1,7 +1,7 @@
 // @flow
 import type {Breakdown, DataSet} from 'containers/DiagramWidgetEditForm/types';
 import type {ErrorsMap} from 'containers/WidgetEditForm/types';
-import type {MixedAttribute} from 'src/store/widgets/data/types';
+import type {MixedAttribute} from 'store/widgets/data/types';
 
 export type Props = {
 	data: Array<DataSet>,

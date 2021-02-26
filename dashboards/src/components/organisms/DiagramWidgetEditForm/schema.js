@@ -36,6 +36,7 @@ addMethod(mixed, 'sourceNumbers', function () {
 		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
 		function () {
 			const {data} = this.options.parent;
+
 			return data.filter(dataSet => !dataSet.sourceForCompute).length === 1;
 		});
 });
@@ -46,6 +47,7 @@ addMethod(mixed, 'minSourceNumbers', function () {
 		'Должен быть выбран как минимум один источник для построения',
 		function () {
 			const {data} = this.options.parent;
+
 			return data.filter(dataSet => !dataSet.sourceForCompute).length > 0;
 		});
 });

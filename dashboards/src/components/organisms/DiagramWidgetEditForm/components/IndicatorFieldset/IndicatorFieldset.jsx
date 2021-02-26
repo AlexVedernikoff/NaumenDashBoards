@@ -26,6 +26,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	change = (indicator: Indicator) => {
 		const {dataSetIndex, index, onChange} = this.props;
+
 		onChange(dataSetIndex, index, indicator);
 	};
 
@@ -109,6 +110,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	handleSubmitCreatingModal = (attribute: ComputedAttr) => {
 		const {value} = this.props;
+
 		this.setState({showCreatingModal: false});
 
 		this.saveComputedAttribute(attribute);
@@ -120,6 +122,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	removeComputedAttribute = (attribute: ComputedAttr) => {
 		const {setFieldValue, values} = this.props;
+
 		setFieldValue(FIELDS.computedAttrs, values.computedAttrs.filter(a => a.code !== attribute.code));
 	};
 

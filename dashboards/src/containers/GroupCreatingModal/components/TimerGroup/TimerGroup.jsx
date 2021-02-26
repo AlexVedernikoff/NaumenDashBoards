@@ -39,11 +39,13 @@ export class TimerGroup extends Component<Props> {
 
 	getCustomGroups = (): Array<CustomGroup> => {
 		const {attribute, customGroups} = this.props;
+
 		return customGroups.filter(({type}) => type === attribute.type);
 	};
 
 	getCustomOptions = () => {
 		const {attribute} = this.props;
+
 		return attribute.type === ATTRIBUTE_TYPES.timer ? CUSTOM_TIMER_OPTIONS : CUSTOM_BACK_TIMER_OPTIONS;
 	};
 
@@ -62,6 +64,7 @@ export class TimerGroup extends Component<Props> {
 
 	getStatusOptions = () => {
 		const {attribute} = this.props;
+
 		return attribute.type === ATTRIBUTE_TYPES.timer ? TIMER_STATUS_OPTIONS : BACK_TIMER_STATUS_OPTIONS;
 	};
 

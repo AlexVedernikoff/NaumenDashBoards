@@ -29,6 +29,7 @@ export class Tree extends Component<Props, State> {
 
 	componentDidMount () {
 		const {initialSelected: selectedIds} = this.props;
+
 		selectedIds.length > 0 && this.setState({selectedIds});
 	}
 
@@ -62,6 +63,7 @@ export class Tree extends Component<Props, State> {
 
 	handleClickShowMore = () => {
 		const {onLoad} = this.props;
+
 		onLoad && onLoad(null, this.getRoots().length);
 	};
 
@@ -119,6 +121,7 @@ export class Tree extends Component<Props, State> {
 
 	renderChildren = (children: Array<string>): Array<React$Node> => {
 		const {options} = this.props;
+
 		return children.map(id => options[id] && this.renderNode(options[id]));
 	};
 

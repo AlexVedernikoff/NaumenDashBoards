@@ -67,6 +67,7 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 
 	renderSearchInput = () => {
 		const {onFocusSearchInput} = this.props;
+
 		return <SearchInput className={styles.field} onChange={this.handleSearch} onFocus={onFocusSearchInput} />;
 	};
 

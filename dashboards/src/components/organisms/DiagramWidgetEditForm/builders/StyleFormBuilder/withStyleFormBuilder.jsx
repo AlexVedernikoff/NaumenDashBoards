@@ -19,6 +19,7 @@ export const withStyleFormBuilder = (Component: ComponentType<WrappedProps>) => 
 
 		render () {
 			const {data} = this.props;
+
 			return <StyleFormBuilder data={data} onChange={this.handleChange} render={this.renderComponent} />;
 		}
 	};

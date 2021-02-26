@@ -20,6 +20,7 @@ export class ValueWithLimitWarning extends PureComponent<Props, State> {
 
 	handleSubmitModal = () => {
 		const {name, onSubmit} = this.props;
+
 		onSubmit(name);
 	};
 

@@ -51,11 +51,13 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleChangeAttributeTitle = (e: OnChangeInputEvent) => {
 		const {value} = e;
+
 		this.setState({attributeTitle: String(value)});
 	};
 
 	handleSubmit = () => {
 		const submit = this.state.way === GROUP_WAYS.SYSTEM ? this.systemGroupSubmit : this.customGroupSubmit;
+
 		submit && submit();
 	};
 
@@ -103,6 +105,7 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	renderDefaultSystemGroup = (props: $Shape<SystemProps>) => {
 		const {systemProps} = this.props;
+
 		return systemProps ? <SystemGroup {...systemProps} {...props} /> : null;
 	};
 

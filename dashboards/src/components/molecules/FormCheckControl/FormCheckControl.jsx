@@ -15,6 +15,7 @@ export class FormCheckControl extends PureComponent<Props> {
 
 	renderLabel = () => {
 		const {label, onClickLabel} = this.props;
+
 		return <Text className={styles.label} onClick={onClickLabel}>{label}</Text>;
 	};
 

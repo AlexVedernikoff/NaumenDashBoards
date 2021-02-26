@@ -22,6 +22,7 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	componentDidMount () {
 		const {debounceRate} = this.props;
 		const {current: element} = this.elementRef;
+
 		this.observer = new ResizeObserver(debounce(this.handleResize, debounceRate));
 
 		element && this.observer.observe(element);

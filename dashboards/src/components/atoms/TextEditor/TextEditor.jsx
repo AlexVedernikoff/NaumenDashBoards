@@ -19,6 +19,7 @@ export class TextEditor extends PureComponent<Props> {
 
 	componentDidMount () {
 		const {value} = this.props;
+
 		!value && this.handleChange(this.getEditorStateFromContent());
 	}
 
@@ -33,6 +34,7 @@ export class TextEditor extends PureComponent<Props> {
 
 	focusEditor = () => {
 		const {current: editor} = this.editorRef;
+
 		editor && editor.focus();
 	};
 
@@ -46,6 +48,7 @@ export class TextEditor extends PureComponent<Props> {
 
 	handleChange = (editorState: EEditorStateType) => {
 		const {name, onChange} = this.props;
+
 		onChange && onChange({name, value: editorState});
 	};
 
@@ -57,6 +60,7 @@ export class TextEditor extends PureComponent<Props> {
 			pastedBlocks
 		);
 		const newEditorState = EditorState.push(editorState, newState, CHANGE_TYPES.INSERT_CHANGE_TYPE);
+
 		this.handleChange(newEditorState);
 
 		return COMMAND_EVENTS.COMMAND_HANDLED_EVENT;

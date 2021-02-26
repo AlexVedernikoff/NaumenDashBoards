@@ -94,6 +94,7 @@ export class StyleBox extends PureComponent<Props> {
 
 	handleChangeColor = (e: OnChangeInputEvent) => {
 		const {name, value} = e;
+
 		this.changeEditorStyle(name, value.toString());
 	};
 
@@ -115,6 +116,7 @@ export class StyleBox extends PureComponent<Props> {
 
 	handleSelectStyle = (e: OnSelectEvent) => {
 		const {name, value} = e;
+
 		this.changeEditorStyle(name, value);
 	};
 

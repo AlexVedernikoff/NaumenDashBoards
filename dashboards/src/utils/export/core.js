@@ -27,6 +27,7 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 		let v = null;
 
 		let svg = serializer.serializeToString(chart);
+
 		svg = svg.replace(/(xmlns="http:\/\/www.w3.org\/2000\/svg"|xmlns:NS\d+=""|NS\d+:xmlns:data="ApexChartsNS")/g, '');
 		svg = svg.replace(/NS\d+:data:(innerTranslate[XY](="(.+?)")|(startAngle|angle|realIndex|strokeWidth|pathOrig|value|longestSeries)="(.+?)")/g, '');
 

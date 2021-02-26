@@ -30,6 +30,7 @@ export class Chart extends PureComponent<Props> {
 
 		if (currentData !== prevData) {
 			const options = this.getOptions();
+
 			options && this.chart && this.chart.updateOptions(options);
 		}
 	}

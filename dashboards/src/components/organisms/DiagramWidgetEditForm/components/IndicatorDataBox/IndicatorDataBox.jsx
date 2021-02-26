@@ -66,11 +66,13 @@ export class IndicatorDataBox extends PureComponent<Props> {
 
 	handleChangeShowEmptyData = (name: string, value: boolean) => {
 		const {index, setDataFieldValue} = this.props;
+
 		setDataFieldValue(index, name, value);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
 		const {index, setDataFieldValue} = this.props;
+
 		setDataFieldValue(index, FIELDS.top, top);
 	};
 
@@ -98,6 +100,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 
 	shouldShowBreakdown = (index: number) => {
 		const dataSet = this.props.values.data[index];
+
 		return this.requiredBreakdown() || dataSet[FIELDS.withBreakdown] || dataSet[FIELDS.breakdown];
 	};
 
