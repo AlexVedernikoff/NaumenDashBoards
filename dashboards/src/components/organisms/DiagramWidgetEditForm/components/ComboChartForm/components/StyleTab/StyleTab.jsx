@@ -32,7 +32,7 @@ export class StyleTab extends Component<StyleTabProps> {
 	getSortingIndicatorLabel = (value: SortingValue) => (dataSet: DataSet) => {
 		const {indicators, parameters, source} = dataSet;
 		const {value: sourceValue} = source;
-		const attribute = value === SORTING_VALUES.INDICATOR ? indicators[0].attribute : parameters[0].attribute;
+		const attribute = value === SORTING_VALUES.INDICATOR ? indicators[0].attribute : parameters?.[0].attribute;
 		let label = getAttributeValue(attribute, 'title');
 
 		if (label && sourceValue) {

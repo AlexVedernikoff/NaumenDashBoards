@@ -28,7 +28,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		let {fetchLinkedDataSources, linkedSources, sources, values} = this.props;
 
 		if (index > 0) {
-			const mainSource = values.data[this.mainIndex].source;
+			const {value: mainSource} = values.data[this.mainIndex].source;
 
 			if (mainSource) {
 				const {value} = mainSource;
@@ -46,6 +46,8 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 		return sources;
 	};
+
+	getUsedDataKeys = () => [this.props.values.data[this.mainIndex].dataKey];
 
 	handleChangeBreakdown = (breakdown: Breakdown) => {
 		const {setDataFieldValue} = this.props;
@@ -100,6 +102,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 				<BreakdownFieldset
 					data={data}
 					errors={errors}
+					getUsedDataKeys={this.getUsedDataKeys}
 					index={this.mainIndex}
 					indicator={indicators[0]}
 					onChange={this.handleChangeBreakdown}

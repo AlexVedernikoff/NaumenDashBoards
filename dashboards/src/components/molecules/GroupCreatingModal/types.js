@@ -1,5 +1,6 @@
 // @flow
 import type {AttrModalProps, Props as ContainerProps} from 'containers/GroupCreatingModal/types';
+import type {Attribute} from 'store/sources/attributes/types';
 import type {GroupWay} from 'store/widgets/data/types';
 
 export type Props = {|
@@ -8,7 +9,7 @@ export type Props = {|
 |};
 
 export type State = {
-	attributeTitle: string,
+	attribute: Attribute,
 	way: GroupWay
 };
 

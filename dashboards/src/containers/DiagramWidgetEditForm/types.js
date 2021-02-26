@@ -22,7 +22,6 @@ import type {ThunkAction} from 'store/types';
 
 export type SourceData = {
 	descriptor: string,
-	forCompute: boolean,
 	value: Source | null
 };
 
@@ -48,7 +47,7 @@ export type DataSet = {
 	breakdown?: Breakdown,
 	dataKey: string,
 	indicators: Array<Indicator>,
-	parameters: Array<Parameter>,
+	parameters?: Array<Parameter>,
 	source: SourceData,
 	sourceForCompute: boolean,
 	[key: string]: any | typeof undefined

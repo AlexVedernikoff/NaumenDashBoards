@@ -58,8 +58,8 @@ addMethod(mixed, 'minSourceNumbers', function () {
  * @returns {object}
  */
 addMethod(mixed, 'requiredByCompute', function (schema) {
-	return this.when(FIELDS.source, {
-		is: ({forCompute}: SourceData) => !forCompute,
+	return this.when(FIELDS.sourceForCompute, {
+		is: false,
 		then: schema
 	});
 });

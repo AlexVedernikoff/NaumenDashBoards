@@ -47,7 +47,7 @@ export type ModalProps = {|
 	attribute: Attribute,
 	group: Group,
 	onClose: () => void,
-	onSubmit: (value: Group, attributeTitle: string) => void,
+	onSubmit: (value: Group, attribute: Attribute) => void,
 	source: Source
 |};
 

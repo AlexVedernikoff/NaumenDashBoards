@@ -6,6 +6,7 @@ import type {MixedAttribute} from 'store/widgets/data/types';
 export type Props = {
 	data: Array<DataSet>,
 	errors: ErrorsMap,
+	getUsedDataKeys: (data: Array<DataSet>) => Array<string>,
 	index: number,
 	indicator: MixedAttribute | null,
 	onChange: (value: Breakdown) => void,

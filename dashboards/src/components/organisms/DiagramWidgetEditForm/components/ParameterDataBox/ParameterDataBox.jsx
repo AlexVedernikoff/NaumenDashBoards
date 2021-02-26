@@ -4,7 +4,7 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {DataSet, Parameter} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
+import {filterByAttribute, getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
 import FormBox from 'components/molecules/FormBox';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
@@ -15,8 +15,8 @@ import React, {PureComponent} from 'react';
 
 export class ParameterDataBox extends PureComponent<Props> {
 	componentDidUpdate (prevProps: Props) {
-		const {attribute: prevAttribute} = prevProps.values.data[0].parameters[0];
-		const {attribute} = prevProps.values.data[0].parameters[0];
+		const prevAttribute = prevProps.values.data[0].parameters?.[0].attribute;
+		const attribute = prevProps.values.data[0].parameters?.[0].attribute;
 
 		if (prevAttribute && attribute && prevAttribute.type !== attribute.type) {
 			this.changeAdditionalParameterFields();
@@ -31,7 +31,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 		const {setFieldValue, values} = this.props;
 		const {data} = values;
 		const {parameters, source: mainSource} = data[0];
-		const mainParameter = parameters[0];
+		const mainParameter = parameters?.[0];
 		const {attribute: mainAttribute, group: mainGroup} = mainParameter;
 		const {value: mainSourceValue} = mainSource;
 
@@ -39,8 +39,9 @@ export class ParameterDataBox extends PureComponent<Props> {
 			let newDataSet = dataSet;
 
 			if (index > 0) {
-				const {parameters, source} = newDataSet;
+				const {source} = newDataSet;
 				const {value: sourceValue} = source;
+				const parameters = this.getParameters(dataSet);
 
 				const newParameters = parameters.map(parameter => {
 					let newParameter = parameter;
@@ -79,7 +80,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 		const {values} = this.props;
 		const mainSet = values.data[0];
 		const currentSet = values.data[index];
-		let mainParameter = mainSet.parameters[0].attribute;
+		let mainParameter = mainSet.parameters?.[0].attribute;
 
 		if (currentSet !== mainSet && mainParameter) {
 			return filterByAttribute(options, mainParameter);
@@ -88,9 +89,11 @@ export class ParameterDataBox extends PureComponent<Props> {
 		return options;
 	};
 
+	getParameters = ({parameters}: DataSet): Array<Parameter> => parameters || [getDefaultParameter()];
+
 	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
 		const {setDataFieldValue, setFieldValue, values} = this.props;
-		const {parameters} = values.data[dataSetIndex];
+		const parameters = this.getParameters(values.data[dataSetIndex]);
 		const {sorting = DEFAULT_AXIS_SORTING_SETTINGS, type} = values;
 		let callback;
 
@@ -139,12 +142,16 @@ export class ParameterDataBox extends PureComponent<Props> {
 		);
 	};
 
+	renderParameters = (dataSet: DataSet, index: number): Array<React$Node> => {
+		return this.getParameters(dataSet).map(this.renderParameterFieldset(dataSet, index));
+	};
+
 	render () {
 		const {values} = this.props;
 
 		return (
 			<FormBox title="Параметр">
-				{values.data.map((dataSet, index) => dataSet.parameters.map(this.renderParameterFieldset(dataSet, index)))}
+				{values.data.map(this.renderParameters)}
 			</FormBox>
 		);
 	}
