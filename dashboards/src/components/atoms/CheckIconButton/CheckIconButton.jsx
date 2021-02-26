@@ -13,6 +13,7 @@ export class CheckIconButton extends PureComponent<Props> {
 
 	handleClick = () => {
 		const {name, onChange, value} = this.props;
+
 		onChange({name, value});
 	};
 

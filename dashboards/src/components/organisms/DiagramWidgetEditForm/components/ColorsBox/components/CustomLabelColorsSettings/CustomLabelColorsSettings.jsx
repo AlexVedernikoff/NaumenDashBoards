@@ -115,6 +115,7 @@ export class CustomLabelColorsSettings extends PureComponent<Props, State> {
 
 	renderDefaultColorField = () => {
 		const {defaultColor} = this.props.value;
+
 		return <ColorField label="Все параметры" onChange={this.handleChangeDefaultColor} value={defaultColor} />;
 	};
 

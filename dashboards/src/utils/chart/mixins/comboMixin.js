@@ -32,6 +32,7 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 		const {aggregation, attribute} = indicator;
 		const usesMSInterval = hasMSInterval(attribute, aggregation);
 		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
+
 		formattedValue = valueFormatter(usesMSInterval, usesPercent, showZero)(value);
 	}
 

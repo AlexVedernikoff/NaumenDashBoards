@@ -188,6 +188,7 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 			contentCode,
 			editable
 		};
+
 		await window.jsApi.restCallModule('dashboardSettings', 'createPersonalDashboard', payload);
 
 		dispatch(setUserData({...user, hasPersonalDashboard: true}));
@@ -219,6 +220,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		const {context} = getState();
 		const {contentCode, subjectUuid, user} = context;
+
 		await window.jsApi.restCallModule('dashboardSettings', 'deletePersonalDashboard', subjectUuid, contentCode);
 
 		dispatch(switchDashboard(false));
@@ -264,12 +266,14 @@ const uploadFile = async (file: Blob, name: string): Promise<string> => {
 
 	if (csrfMeta) {
 		const formData = new FormData();
+
 		formData.append('file', file, name);
 
 		const response = await fetch(`/sd/operator/upload?_csrf=${csrfMeta.content}`, {
 			body: formData,
 			method: 'POST'
 		});
+
 		key = await response.text();
 
 		const defaultSeparator = '::';
@@ -300,6 +304,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 
 	try {
 		const key = await uploadFile(file, name);
+
 		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type, name, users);
 
 		dispatch({
@@ -348,6 +353,7 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 		}
 
 		const {label, value} = sources.data.map[classFqn].value;
+
 		newWidget.name = '';
 		newWidget.data[0] = {
 			...newWidget.data[0],
@@ -383,6 +389,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 			contentCode,
 			isPersonal
 		};
+
 		await window.jsApi.restCallModule('dashboardSettings', 'saveAutoUpdateSettings', payload);
 
 		dispatch(setAutoUpdateSettings(autoUpdateSetting));
@@ -399,9 +406,11 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 
 /**
  * Создает состояние для дашборда
+ *
  * @returns {ThunkAction}
+ * @param {boolean} personalDashboard - указывает является ли новое состояние, состоянием персонального дашборда
  */
-const createNewState = (personalDashboard: boolean) => async (dispatch: Dispatch, getState: GetState) => {
+const createNewState = (personalDashboard: boolean) => async (dispatch: Dispatch) => {
 	dispatch(resetState());
 	dispatch(getAutoUpdateSettings());
 	dispatch(setPersonalValue(personalDashboard));

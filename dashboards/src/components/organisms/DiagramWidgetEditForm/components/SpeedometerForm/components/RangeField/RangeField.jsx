@@ -55,6 +55,7 @@ export class RangeField extends PureComponent<Props> {
 
 	handleRemove = () => {
 		const {index, onRemove} = this.props;
+
 		onRemove(index);
 	};
 

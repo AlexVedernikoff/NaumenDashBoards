@@ -27,6 +27,7 @@ export class CurrentObjectOperand extends PureComponent<Props> {
 		return Object.keys(options)
 			.filter(key => {
 				const node = options[key];
+
 				return node.children !== null || this.props.attribute.property === node.value.property;
 			})
 			.reduce((obj, key) => {
@@ -37,11 +38,13 @@ export class CurrentObjectOperand extends PureComponent<Props> {
 
 	handleLoad = (item: Item | null) => {
 		const {attribute, fetch} = this.props;
+
 		fetch(item, attribute);
 	};
 
 	handleSelect = (name: string, value: Attribute) => {
 		const {onChange, operand} = this.props;
+
 		onChange({...operand, data: value});
 	};
 

@@ -14,6 +14,7 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {name, onChange} = this.props;
+
 		onChange(name, e.currentTarget.value);
 	};
 

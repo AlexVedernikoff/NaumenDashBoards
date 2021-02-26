@@ -268,6 +268,7 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 		};
 
 		const {result} = await window.jsApi.restCallModule('dashboardSettings', 'widgetIsBadToCopy', payload);
+
 		isValid = !result;
 
 		dispatch({

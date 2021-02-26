@@ -22,6 +22,7 @@ export class Node extends PureComponent<Props, State> {
 
 	hasChildren (props: Props): boolean {
 		const {children} = props.data;
+
 		return Array.isArray(children) && children.length > 0;
 	}
 
@@ -37,11 +38,13 @@ export class Node extends PureComponent<Props, State> {
 
 	handleClick = () => {
 		const {data, enabled, onClick} = this.props;
+
 		enabled && onClick(data);
 	};
 
 	handleClickShowMore = () => {
 		const {data, onLoadChildren} = this.props;
+
 		onLoadChildren(data);
 	};
 
@@ -59,6 +62,7 @@ export class Node extends PureComponent<Props, State> {
 
 	isFoundLabel = () => {
 		const {data, getOptionLabel, searchValue} = this.props;
+
 		return searchValue && (new RegExp(searchValue, 'i')).test(getOptionLabel(data.value));
 	};
 

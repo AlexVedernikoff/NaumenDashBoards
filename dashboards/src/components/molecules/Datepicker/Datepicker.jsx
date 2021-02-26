@@ -26,6 +26,7 @@ export class Datepicker extends PureComponent<Props, State> {
 
 	decreaseMonth = () => {
 		const {currentDate} = this.state;
+
 		this.setState({
 			currentDate: moment(currentDate).subtract(1, 'months')
 		});
@@ -33,6 +34,7 @@ export class Datepicker extends PureComponent<Props, State> {
 
 	decreaseYear = () => {
 		const {currentDate} = this.state;
+
 		this.setState({
 			currentDate: moment(currentDate).subtract(1, 'years')
 		});
@@ -58,6 +60,7 @@ export class Datepicker extends PureComponent<Props, State> {
 
 	increaseMonth = () => {
 		const {currentDate} = this.state;
+
 		this.setState({
 			currentDate: moment(currentDate).add(1, 'months')
 		});
@@ -65,6 +68,7 @@ export class Datepicker extends PureComponent<Props, State> {
 
 	increaseYear = () => {
 		const {currentDate} = this.state;
+
 		this.setState({
 			currentDate: moment(currentDate).add(1, 'years')
 		});

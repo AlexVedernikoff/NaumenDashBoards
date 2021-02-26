@@ -32,6 +32,7 @@ export class SortingBox extends PureComponent<Props, State> {
 
 	handleChange = ({name: valueName, value}: OnChangeInputEvent) => {
 		const {data, name, onChange} = this.props;
+
 		onChange(name, {
 			...data,
 			[valueName]: value
@@ -56,7 +57,7 @@ export class SortingBox extends PureComponent<Props, State> {
 		return <CheckIconButtonGroup icons={icons} name={FIELDS.type} onChange={this.handleChange} value={type} />;
 	};
 
-	renderValueField = (option: SortingValueOption) => {
+	renderValueField = (option: SortingValueOption, index: number) => {
 		const {value: currentValue} = this.props.data;
 		const {disabled, label, value} = option;
 		const CN = cn({
@@ -65,7 +66,7 @@ export class SortingBox extends PureComponent<Props, State> {
 		});
 
 		return (
-			<div className={CN}>
+			<div className={CN} key={index}>
 				<RadioField
 					checked={currentValue === value}
 					label={label}

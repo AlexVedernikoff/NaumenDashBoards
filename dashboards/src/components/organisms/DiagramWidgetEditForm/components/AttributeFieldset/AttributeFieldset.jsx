@@ -44,6 +44,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 
 	getAttributeOptions = (attributes: Array<Attribute>) => {
 		const {getAttributeOptions, index} = this.props;
+
 		return getAttributeOptions ? getAttributeOptions(attributes, index) : attributes;
 	};
 
@@ -72,6 +73,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 
 	getSourceOptions = (attributes: Array<Attribute>) => {
 		const {getSourceOptions, index} = this.props;
+
 		return getSourceOptions ? getSourceOptions(attributes, index) : attributes;
 	};
 
@@ -152,6 +154,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 
 	handleRemove = () => {
 		const {index, onRemove} = this.props;
+
 		onRemove && onRemove(index);
 	};
 

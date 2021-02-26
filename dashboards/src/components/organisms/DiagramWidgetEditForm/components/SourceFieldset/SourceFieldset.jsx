@@ -43,6 +43,7 @@ export class SourceFieldset extends Component<Props> {
 
 	change = (source: SourceData) => {
 		const {dataSetIndex, onChange} = this.props;
+
 		onChange(dataSetIndex, source);
 	};
 
@@ -90,6 +91,7 @@ export class SourceFieldset extends Component<Props> {
 
 	handleClickRemoveButton = () => {
 		const {dataSetIndex, onRemove} = this.props;
+
 		onRemove(dataSetIndex);
 	};
 

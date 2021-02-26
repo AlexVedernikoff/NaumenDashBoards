@@ -24,11 +24,13 @@ export class OrCondition extends PureComponent<Props> {
 
 	handleChangeOperandData = (condition: OrConditionType) => {
 		const {index, onUpdate} = this.props;
+
 		onUpdate(index, condition);
 	};
 
 	handleClickRemoveButton = () => {
 		const {index, onRemove} = this.props;
+
 		onRemove(index);
 	};
 
@@ -54,6 +56,7 @@ export class OrCondition extends PureComponent<Props> {
 
 	renderFieldError = () => {
 		const {errors} = this.props;
+
 		return <FieldError className={cn(mainStyles.error, styles.error)} text={errors[this.getErrorKey()]} />;
 	};
 

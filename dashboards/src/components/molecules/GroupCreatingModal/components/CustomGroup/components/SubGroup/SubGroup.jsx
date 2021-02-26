@@ -37,6 +37,7 @@ export class SubGroup extends PureComponent<Props> {
 	handleRemoveAndCondition = (index: number) => {
 		const {index: subGroupIndex, onRemove, onUpdate, subGroup} = this.props;
 		const {data} = subGroup;
+
 		data.splice(index, 1);
 
 		data.length === 0 ? onRemove(subGroupIndex) : onUpdate(subGroupIndex, {...subGroup, data});
@@ -45,6 +46,7 @@ export class SubGroup extends PureComponent<Props> {
 	handleUpdateAndCondition = (index: number, condition: AndConditionType, isNewCondition: boolean = false) => {
 		const {index: subGroupIndex, onUpdate, subGroup} = this.props;
 		const {data} = subGroup;
+
 		data[index] = condition;
 
 		onUpdate(subGroupIndex, {

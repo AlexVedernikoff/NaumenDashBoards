@@ -37,6 +37,7 @@ export class Menu extends Component<Props, State> {
 
 		if (creationButton) {
 			const {onClick, text} = creationButton;
+
 			return <CreationPanel onClick={onClick} text={text} />;
 		}
 	};

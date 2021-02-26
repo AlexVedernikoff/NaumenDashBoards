@@ -78,6 +78,7 @@ class Tree {
 
 	getId = (node: InputArrayNode): string => {
 		const {[this.options.keys.id]: id} = node;
+
 		return id;
 	};
 
@@ -96,6 +97,7 @@ class Tree {
 
 	getValue = (node: InputArrayNode): NodeValue => {
 		const {[this.options.keys.children]: children, ...value} = node;
+
 		return value;
 	};
 }

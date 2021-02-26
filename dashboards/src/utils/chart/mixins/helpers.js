@@ -158,6 +158,7 @@ const getMaxStackedValue = (series: ApexAxisChartSeries) => {
 	series.filter(({type}) => type === WIDGET_TYPES.COLUMN_STACKED).forEach(({data}) => {
 		data.forEach((originalValue, index) => {
 			const value = parseFloat(originalValue);
+
 			stackedValues[index] = stackedValues[index] ? stackedValues[index] + value : value;
 		});
 	});

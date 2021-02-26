@@ -293,8 +293,8 @@ export class Table extends PureComponent<Props, State> {
 
 		return (
 			<Header
-				columns={columns}
 				columnSettings={columnHeader}
+				columns={columns}
 				columnsWidth={columnsWidth}
 				components={components}
 				data={data}
@@ -311,6 +311,7 @@ export class Table extends PureComponent<Props, State> {
 
 	renderNoData = () => {
 		const {data} = this.props;
+
 		return data.length === 0 ? <div className={styles.noData}>Данные отсутствуют</div> : null;
 	};
 

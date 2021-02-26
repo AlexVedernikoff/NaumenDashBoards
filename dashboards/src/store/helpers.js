@@ -25,6 +25,7 @@ const getParams = () => {
  */
 const parseResponseErrorText = (text: string) => {
 	let data = text.split('njava.lang.Exception:')[1];
+
 	data = data.substr(0, data.length - 2).trim();
 	let result;
 
@@ -49,6 +50,7 @@ const getSourceTypes = (classFqn: string) => {
 	if (types.length > 0) {
 		const subTypes = types.map(getSourceTypes)
 			.reduce((allSubTypes, subTypes) => [...allSubTypes, ...subTypes], []);
+
 		types = [...types, ...subTypes];
 	}
 
@@ -84,6 +86,7 @@ const getUserLocalStorageId = () => {
  */
 const setLocalStorageValue = (storageKey: string, key: string, value: any) => {
 	let storage = localStorage.getItem(storageKey);
+
 	storage = storage ? JSON.parse(storage) : {};
 	storage[key] = value;
 
@@ -99,6 +102,7 @@ const setLocalStorageValue = (storageKey: string, key: string, value: any) => {
  */
 const getLocalStorageValue = (storageKey: string, key: string, defaultValue: any) => {
 	let storage = localStorage.getItem(storageKey);
+
 	storage = storage ? JSON.parse(storage) : {};
 
 	return storage[key] || defaultValue;

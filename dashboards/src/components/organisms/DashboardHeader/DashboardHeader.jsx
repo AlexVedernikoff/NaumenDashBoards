@@ -36,6 +36,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 	handleClickRefreshButton = () => {
 		const {getSettings} = this.props;
+
 		getSettings(true);
 	};
 

@@ -6,6 +6,7 @@ import styles from './styles.less';
 export class MenuItem extends PureComponent<Props> {
 	handleClick = () => {
 		const {onClick, value} = this.props;
+
 		onClick(value);
 	};
 

@@ -32,6 +32,7 @@ export class RangesFieldset extends PureComponent<Props> {
 	handleChangeToRange = (index: number, value: string) => {
 		const {onChange, ranges} = this.props;
 		const nextIndex = index + 1;
+
 		ranges.data[index] = {...ranges.data[index], to: value};
 
 		if (ranges.data[nextIndex]) {
@@ -43,11 +44,13 @@ export class RangesFieldset extends PureComponent<Props> {
 
 	handleChangeType = ({name, value}: OnChangeInputEvent) => {
 		const {onChange, ranges} = this.props;
+
 		onChange({...ranges, data: [...DEFAULT_SPEEDOMETER_SETTINGS.ranges.data], [name]: value});
 	};
 
 	handleChangeUse = ({name, value}: OnChangeInputEvent) => {
 		const {onChange, ranges} = this.props;
+
 		onChange({...ranges, [name]: !value});
 	};
 

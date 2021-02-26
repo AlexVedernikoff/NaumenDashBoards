@@ -64,11 +64,13 @@ export class CustomGroup extends Component<Props, State> {
 
 	getUsingWidgets = (): Array<string> => {
 		const {widgets} = this.props;
+
 		return widgets.filter(this.isUsingCurrentGroup).map(widget => widget.name);
 	};
 
 	handleChangeGroupName = (event: OnChangeInputEvent) => {
 		const selectedGroup = this.getSelectedGroup();
+
 		selectedGroup && this.update({...selectedGroup, name: String(event.value)});
 	};
 
@@ -198,6 +200,7 @@ export class CustomGroup extends Component<Props, State> {
 
 	testFieldAtUsingGroup = (group: any) => {
 		const {selectedGroup} = this.state;
+
 		return group && typeof group === 'object' && group.data === selectedGroup;
 	};
 

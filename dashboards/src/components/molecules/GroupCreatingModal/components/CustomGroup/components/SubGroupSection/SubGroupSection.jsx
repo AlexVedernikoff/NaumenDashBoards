@@ -36,6 +36,7 @@ export class SubGroupSection extends Component<Props> {
 
 	handleUpdateSubGroup = (index: number, subGroup: SubGroupType, isNewCondition: boolean = false) => {
 		const {onUpdate, subGroups} = this.props;
+
 		subGroups[index] = subGroup;
 
 		onUpdate([...subGroups], isNewCondition);

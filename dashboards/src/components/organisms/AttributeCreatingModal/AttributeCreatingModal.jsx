@@ -64,6 +64,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	changeControlType = (index: number) => {
 		const {controls} = this.state;
 		const control = controls[index];
+
 		controls[index] = {
 			...control,
 			type: control.type === CONTROL_TYPES.SOURCE ? CONTROL_TYPES.CONSTANT : CONTROL_TYPES.SOURCE
@@ -75,6 +76,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	changeTemplateType = () => {
 		const {templates} = this.state;
 		const {CONSTANT_TEMPLATE, SOURCE_TEMPLATE} = TEMPLATES;
+
 		templates[1] = templates[1].type === CONTROL_TYPES.SOURCE ? CONSTANT_TEMPLATE : SOURCE_TEMPLATE;
 		this.setState({templates: [...templates]});
 	};
@@ -82,6 +84,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	createNewControl = (value: any, type: ControlType) => {
 		const {controls, templates} = this.state;
 		const control: Control = {name: uuid(), type, value};
+
 		templates[1] = TEMPLATES.SOURCE_TEMPLATE;
 
 		this.setState({
@@ -92,6 +95,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	handleChangeName = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {value: title} = e.currentTarget;
+
 		this.setState({title});
 	};
 
@@ -183,6 +187,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			if (value) {
 				if (type === SOURCE) {
 					const {aggregation, attribute: attr, dataKey, source} = value;
+
 					title = `${title} ${source.label} - ${attr.title} (${getAggregationLabel(aggregation)})`;
 
 					computeData[name] = {

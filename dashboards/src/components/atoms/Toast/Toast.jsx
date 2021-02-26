@@ -7,11 +7,13 @@ import styles from './styles.less';
 export class Toast extends PureComponent<Props> {
 	componentDidMount () {
 		const {data, onMount} = this.props;
+
 		onMount(data);
 	}
 
 	getClassName = () => {
 		const {position, type} = this.props.data;
+
 		return cn([styles.container, styles[position], styles[type]]);
 	};
 

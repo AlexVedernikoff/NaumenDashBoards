@@ -33,6 +33,7 @@ export class NumberGroup extends Component<AttributeGroupProps> {
 
 	getCustomGroups = (): Array<CustomGroup> => {
 		const {attribute, customGroups} = this.props;
+
 		return customGroups.filter(({type}) => type === attribute.type);
 	};
 

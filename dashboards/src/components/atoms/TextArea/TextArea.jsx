@@ -21,6 +21,7 @@ export class TextArea extends Component<Props> {
 
 	handleClear = () => {
 		const {name, onChange} = this.props;
+
 		onChange({name, value: ''});
 	};
 

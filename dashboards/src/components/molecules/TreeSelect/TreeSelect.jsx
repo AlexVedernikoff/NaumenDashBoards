@@ -57,11 +57,13 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	handleClickRemoveButton = () => {
 		const {name, onRemove} = this.props;
+
 		onRemove({name});
 	};
 
 	handleRemoveValue = () => {
 		const {name, onSelect} = this.props;
+
 		onSelect({name, value: null});
 	};
 
@@ -95,6 +97,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	renderLabel = () => {
 		const label = this.getOptionLabel(this.props.value);
+
 		return <div className={styles.label} title={label}>{label}</div>;
 	};
 
@@ -133,6 +136,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	renderMenu = () => {
 		const {showMenu} = this.state;
+
 		return showMenu && <Menu className={styles.list} renderList={this.renderList} />;
 	};
 

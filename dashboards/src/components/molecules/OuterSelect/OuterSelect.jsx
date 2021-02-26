@@ -7,6 +7,7 @@ import styles from './styles.less';
 export class OuterSelect extends PureComponent<Props> {
 	handleClick = (e: SyntheticMouseEvent<HTMLDivElement>) => {
 		const {name, onSelect} = this.props;
+
 		onSelect(name, e.currentTarget.dataset.value);
 	};
 

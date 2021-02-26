@@ -1,7 +1,7 @@
 // @flow
 import {DASHBOARD_HEADER_HEIGHT} from 'components/organisms/DashboardHeader/constants';
 import {gridRef} from 'components/organisms/DashboardContent/constants';
-import type {Store} from 'src/store/types';
+import type {Store} from 'store/types';
 
 export class DashboardResizer {
 	initHeight: number = window.innerHeight;
@@ -20,6 +20,7 @@ export class DashboardResizer {
 
 		if (node) {
 			const {clientHeight, scrollHeight} = node;
+
 			// $FlowFixMe
 			parentNode = scrollHeight > clientHeight ? node : this.getScrollParent(node.parentNode);
 		}
@@ -51,6 +52,7 @@ export class DashboardResizer {
 			this.setHeight(this.initHeight);
 		} else {
 			const height = this.getContentHeight();
+
 			height && this.setHeight(height);
 		}
 	};

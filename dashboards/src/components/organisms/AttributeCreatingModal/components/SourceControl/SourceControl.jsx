@@ -40,6 +40,7 @@ export class SourceControl extends PureComponent<Props, State> {
 
 	filterNoMatchingAttributes = (searchValue: string) => (option: SourceOption) => {
 		let {attributes} = option;
+
 		attributes = attributes.filter(a => a.title.toLowerCase().includes(searchValue.toLowerCase()));
 
 		return {...option, attributes};
@@ -80,6 +81,7 @@ export class SourceControl extends PureComponent<Props, State> {
 
 	handleClickButton = () => {
 		const {index, name, onClickButton} = this.props;
+
 		onClickButton(index, name);
 	};
 
@@ -94,6 +96,7 @@ export class SourceControl extends PureComponent<Props, State> {
 
 	handleSelectAggregation = (name: string, aggregation: string) => {
 		const {index, onSelect, type, value} = this.props;
+
 		onSelect(index, name, {...value, aggregation}, type);
 	};
 

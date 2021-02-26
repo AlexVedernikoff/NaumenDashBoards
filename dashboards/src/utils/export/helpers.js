@@ -10,6 +10,7 @@ const createContextName = async () => {
 
 	try {
 		const context = await window.jsApi.commands.getCurrentContextObject();
+
 		name = context['card_caption'].replace(/(\|\||\|\|\|\|\*:|\*)/g, '');
 	} catch (e) {
 		name = 'Дашборд';
@@ -32,6 +33,7 @@ const save = (blob: Blob, fileName: string, extension: string) => {
 		window.navigator.msSaveBlob(blob, name);
 	} else if (body) {
 		const link = document.createElement('a');
+
 		link.href = URL.createObjectURL(blob);
 		link.download = name;
 

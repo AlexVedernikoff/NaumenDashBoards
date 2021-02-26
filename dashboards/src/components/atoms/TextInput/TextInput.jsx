@@ -28,11 +28,13 @@ export class TextInput extends PureComponent<Props> {
 
 	handleClear = () => {
 		const {name, onChange} = this.props;
+
 		onChange({name, value: ''});
 	};
 
 	renderClearIcon = () => {
 		const {value} = this.props;
+
 		return value ? <IconButton className={styles.icon} icon={ICON_NAMES.REMOVE} onClick={this.handleClear} /> : null;
 	};
 

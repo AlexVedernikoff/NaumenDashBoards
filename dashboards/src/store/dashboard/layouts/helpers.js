@@ -70,6 +70,7 @@ const getLegacyLayouts = (widgets: Array<Object>): Array<Layout> => {
 
 	return widgets.map(widget => {
 		const {id, layout} = widget;
+
 		return layout || createLayout(id, getLastY(layouts));
 	});
 };

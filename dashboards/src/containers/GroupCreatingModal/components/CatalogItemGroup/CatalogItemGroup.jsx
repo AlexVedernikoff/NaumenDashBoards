@@ -81,6 +81,7 @@ export class CatalogItemGroup extends Component<Props> {
 
 	getCustomType = () => {
 		const {property, type} = this.props.attribute;
+
 		return createCustomGroupType(type, property);
 	};
 
@@ -115,6 +116,7 @@ export class CatalogItemGroup extends Component<Props> {
 
 	handleLoadOptions = () => {
 		const {attribute, fetchCatalogItemData} = this.props;
+
 		fetchCatalogItemData(attribute.property);
 	};
 

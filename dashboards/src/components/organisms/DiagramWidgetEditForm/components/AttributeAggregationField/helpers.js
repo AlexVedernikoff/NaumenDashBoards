@@ -32,6 +32,7 @@ const getAggregationOptions = (attribute: Attribute | null, withNotApplicableAgg
 
 const getAggregationLabel = (aggregation: string) => {
 	const value = [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS].find(o => o.value === aggregation);
+
 	return value ? value.label : aggregation;
 };
 

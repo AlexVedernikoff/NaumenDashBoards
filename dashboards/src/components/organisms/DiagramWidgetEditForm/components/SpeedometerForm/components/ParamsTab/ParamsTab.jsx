@@ -62,6 +62,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	renderRangesControl = () => {
 		const {ranges} = this.props.values;
+
 		return <RangesFieldset onChange={this.handleChangeRanges} ranges={ranges} />;
 	};
 

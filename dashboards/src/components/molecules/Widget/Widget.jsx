@@ -76,11 +76,13 @@ export class Widget extends PureComponent<Props, State> {
 
 	handleClick = (e: SyntheticMouseEvent<HTMLDivElement>) => {
 		const {data, onClick} = this.props;
+
 		onClick(e, data);
 	};
 
 	handleEdit = () => {
 		const {data, onEdit} = this.props;
+
 		onEdit(data.id, this.ref);
 	};
 
@@ -118,6 +120,7 @@ export class Widget extends PureComponent<Props, State> {
 			if (type === COLUMN_TYPES.PARAMETER && attribute.type === ATTRIBUTE_TYPES.metaClass) {
 				rows.forEach(row => {
 					const value = row[accessor];
+
 					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR) : value;
 				});
 			}
@@ -125,6 +128,7 @@ export class Widget extends PureComponent<Props, State> {
 			if (isCardObjectColumn(column)) {
 				rows.forEach(row => {
 					const value = row[accessor];
+
 					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR) : value;
 				});
 			}

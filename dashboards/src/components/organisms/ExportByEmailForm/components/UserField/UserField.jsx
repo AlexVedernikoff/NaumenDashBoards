@@ -40,6 +40,7 @@ export class UserField extends PureComponent<Props, State> {
 
 	handleChangeLabel = ({value}: OnChangeInputEvent) => {
 		const {index, onSelect} = this.props;
+
 		onSelect(index, {email: value.toString()});
 	};
 
@@ -47,6 +48,7 @@ export class UserField extends PureComponent<Props, State> {
 
 	handleRemoveUser = () => {
 		const {index, onRemove} = this.props;
+
 		onRemove(index);
 	};
 

@@ -12,6 +12,7 @@ import {LINKED_DATA_SOURCES_EVENTS} from './constants';
  */
 const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	const {[classFqn]: source} = getState().sources.data.map;
+
 	dispatch({
 		payload: {
 			...source,

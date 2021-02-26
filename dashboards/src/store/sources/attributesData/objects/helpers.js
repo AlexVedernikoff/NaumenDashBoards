@@ -120,6 +120,7 @@ const recordObjectError = (map: ObjectsMap, payload: Payload) => {
  */
 const getObjectKey = (attribute: Attribute, source: Source): string => {
 	const {code, property} = attribute;
+
 	return `${source.value}_${property}${code}`;
 };
 

@@ -23,6 +23,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 					'значение в поле max не может быть меньше значения в поле min',
 					function (value: string) {
 						const {min} = this.options.parent;
+
 						return isNaN(parseFloat(min)) || Number(value) > Number(min);
 					}
 				).required(borderRequiredMessage).typeError(borderRequiredMessage),
@@ -31,6 +32,7 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 					'значение в поле min не может превышать значение в поле max',
 					function (value: string) {
 						const {max} = this.options.parent;
+
 						return isNaN(parseFloat(max)) || Number(value) < Number(max);
 					}
 				).required(borderRequiredMessage).typeError(borderRequiredMessage)

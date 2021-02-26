@@ -77,6 +77,7 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
  */
 const hasUUIDsInLabels = (attribute?: Attribute): boolean => {
 	const {backBOLinks, boLinks, metaClass} = ATTRIBUTE_TYPES;
+
 	return Boolean(attribute && [backBOLinks, boLinks, metaClass].includes(attribute.type));
 };
 
@@ -101,6 +102,7 @@ const parseMSInterval = (ms: number) => {
 	if (intervalData) {
 		const {label, min} = intervalData;
 		let intervalValue = ms / min;
+
 		intervalValue = ms > INTERVALS[INTERVALS.length - 1].min ? intervalValue.toFixed(2) : Math.round(intervalValue);
 
 		return `${intervalValue} ${label}`;
@@ -140,6 +142,7 @@ const usesCustomGroup = (widget: DiagramFormWidget, checkBreakdown: boolean): bo
 
 	return !!widget.data.find(dataSet => {
 		const {sourceForCompute} = dataSet;
+
 		return !sourceForCompute && groupKeys.find(key => dataSet[key] && dataSet[key].way === GROUP_WAYS.CUSTOM);
 	});
 };
@@ -151,6 +154,7 @@ const usesCustomGroup = (widget: DiagramFormWidget, checkBreakdown: boolean): bo
  */
 const isAxisChart = (type: WidgetType): boolean => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE} = WIDGET_TYPES;
+
 	return [BAR, BAR_STACKED, COMBO, COLUMN, COLUMN_STACKED, LINE].includes(type);
 };
 
@@ -161,6 +165,7 @@ const isAxisChart = (type: WidgetType): boolean => {
  */
 const isCircleChart = (type: WidgetType) => {
 	const {DONUT, PIE} = WIDGET_TYPES;
+
 	return [DONUT, PIE].includes(type);
 };
 
@@ -171,6 +176,7 @@ const isCircleChart = (type: WidgetType) => {
  */
 const isHorizontalChart = (type: WidgetType): boolean => {
 	const {BAR, BAR_STACKED} = WIDGET_TYPES;
+
 	return [BAR, BAR_STACKED].includes(type);
 };
 

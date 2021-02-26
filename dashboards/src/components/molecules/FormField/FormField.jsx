@@ -18,6 +18,7 @@ export class FormField extends PureComponent<Props> {
 
 	renderError = () => {
 		const {error} = this.props;
+
 		return error ? <FieldError text={error} /> : null;
 	};
 
@@ -41,6 +42,7 @@ export class FormField extends PureComponent<Props> {
 
 	renderLabel = () => {
 		const {label} = this.props;
+
 		return label ? <Label className={styles.label}>{label}</Label> : null;
 	};
 

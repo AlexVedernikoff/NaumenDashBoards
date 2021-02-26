@@ -12,6 +12,7 @@ export class Toggle extends PureComponent<Props> {
 
 	handleClick = () => {
 		const {name, onChange, value} = this.props;
+
 		onChange({name, value});
 	};
 

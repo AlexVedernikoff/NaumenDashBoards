@@ -10,6 +10,7 @@ import RefGroup from 'containers/GroupCreatingModal/components/RefGroup';
 export class StateGroup extends Component<Props> {
 	handleLoadData = () => {
 		const {attribute, fetchMetaClassStates} = this.props;
+
 		fetchMetaClassStates(attribute.metaClassFqn);
 	};
 

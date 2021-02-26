@@ -6,7 +6,7 @@ import FormField from 'components/molecules/FormField';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import Label from 'components/atoms/Label';
-import type {OnChangeEvent} from 'src/components/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props as ValueProps} from 'components/molecules/ColorInput/components/Value/types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -31,6 +31,7 @@ export class ColorField extends PureComponent<Props, State> {
 
 	handleChange = ({value}: OnChangeEvent<string>) => {
 		const {name, onChange} = this.props;
+
 		onChange({name, value});
 	};
 
@@ -38,6 +39,7 @@ export class ColorField extends PureComponent<Props, State> {
 
 	handleClickRemoveButton = () => {
 		const {name, onRemove} = this.props;
+
 		onRemove && onRemove(name);
 	};
 
@@ -54,6 +56,7 @@ export class ColorField extends PureComponent<Props, State> {
 
 	renderColorValue = (props: ValueProps) => {
 		const {forwardedRef, onClick, value: backgroundColor} = props;
+
 		return <div className={styles.colorValue} onClick={onClick} ref={forwardedRef} style={{backgroundColor}} />;
 	};
 

@@ -6,6 +6,7 @@ import Text, {TEXT_TYPES} from 'components/atoms/Text';
 export class ListItem extends PureComponent<Props> {
 	handleClick = () => {
 		const {item, onClick} = this.props;
+
 		onClick(item);
 	};
 

@@ -39,6 +39,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 		handleChange = (dataSetIndex: number, source: SourceData) => {
 			const {setDataFieldValue} = this.props;
+
 			setDataFieldValue(dataSetIndex, FIELDS.source, source);
 		};
 
@@ -74,6 +75,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 			if (source) {
 				const parentClassFqn = getParentClassFqn(values, index);
+
 				fetchAttributes(source.value, parentClassFqn, this.setDefaultIndicator(index));
 			}
 		};

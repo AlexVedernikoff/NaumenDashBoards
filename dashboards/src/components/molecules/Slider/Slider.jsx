@@ -27,6 +27,7 @@ export class Slider extends PureComponent<Props, State> {
 
 	countSlides = (props: Props = this.props) => {
 		const {children, size} = props;
+
 		return Math.ceil(Children.count(children) / size);
 	};
 

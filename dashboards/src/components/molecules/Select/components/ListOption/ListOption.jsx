@@ -22,11 +22,13 @@ export class ListOption extends PureComponent<Props> {
 
 	getOptionLabel = () => {
 		const {getOptionLabel, option} = this.props;
+
 		return getOptionLabel ? getOptionLabel(option) : option.label;
 	};
 
 	handleClick = () => {
 		const {onClick, option} = this.props;
+
 		onClick(option);
 	};
 

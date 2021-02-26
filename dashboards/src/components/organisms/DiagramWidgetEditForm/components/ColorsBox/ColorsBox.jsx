@@ -24,6 +24,7 @@ export class ColorsBox extends PureComponent<Props, State> {
 	changeColor = (color: string) => {
 		const {data, name, onChange} = this.props;
 		const {colorIndex} = this.state;
+
 		data[colorIndex] = color;
 
 		this.setState({showPicker: false});
