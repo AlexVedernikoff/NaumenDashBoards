@@ -5,13 +5,13 @@ import {FIELDS} from 'containers/WidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
 import {MAX_TEXT_LENGTH} from 'components/constants';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import TextInput from 'components/atoms/TextInput';
 
 export class AxisSettingsBox extends PureComponent<Props> {
-	handleChangeSettings = ({name: propName, value}: OnChangeInputEvent) => {
+	handleChangeSettings = ({name: propName, value}: OnChangeEvent<boolean>) => {
 		const {name, onChangeSettings, settings} = this.props;
 
 		onChangeSettings(name, {...settings, [propName]: value});

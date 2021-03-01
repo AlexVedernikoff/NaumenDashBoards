@@ -1,6 +1,9 @@
 // @flow
 import type {
 	AddWidget,
+	AxisWidget,
+	CircleWidget,
+	CustomChartColorsSettingsType,
 	DeleteWidget,
 	SelectWidget,
 	SetCreatedWidget,
@@ -10,13 +13,13 @@ import type {
 	WidgetType,
 	WidgetsDataState
 } from './types';
+import {CUSTOM_CHART_COLORS_SETTINGS_TYPES, WIDGET_TYPES} from './constants';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import DiagramWidget from './templates/DiagramWidget';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import TextWidget from './templates/TextWidget';
-import {WIDGET_TYPES} from './constants';
 
 /**
  * Устанавливаем полученные виджеты
@@ -218,9 +221,52 @@ const getMainDataSetIndex = <T: Object>(data: $ReadOnlyArray<T>): number => {
 	return data.findIndex(dataSet => !dataSet.sourceForCompute) || 0;
 };
 
+/**
+ * Возвращает тип пользовательских настроек цветов основанный на данных виджета
+ * @param {AxisWidget | CircleWidget} widget - график
+ * @returns {CustomChartColorsSettingsType}
+ */
+const getCustomColorsSettingsType = (widget: $ReadOnly<AxisWidget | CircleWidget>): CustomChartColorsSettingsType => {
+	const {data, type} = widget;
+	const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = WIDGET_TYPES;
+	const {BREAKDOWN, LABEL} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
+
+	return [BAR_STACKED, COLUMN_STACKED, DONUT, PIE].includes(type) || getMainDataSet(data).breakdown ? BREAKDOWN : LABEL;
+};
+
+/**
+ * Возвращает ключ пользовательских настроек цветов основанный на данных виджета
+ * @param {AxisWidget | CircleWidget} widget - график
+ * @returns {string}
+ */
+const getCustomColorsSettingsKey = (widget: $ReadOnly<AxisWidget | CircleWidget>): string => {
+	const type = getCustomColorsSettingsType(widget);
+
+	const createKey = (source, value) => {
+		const {attribute, group} = value;
+		let key = source && attribute && group ? `${source.value}-${attribute.code}-${group.data}` : '';
+
+		if (key && group.format) {
+			key = `${key}-${group.format}`;
+		}
+
+		return key;
+	};
+
+	const {breakdown, parameters, source} = getMainDataSet(widget.data);
+	const {value: sourceValue} = source;
+	const {BREAKDOWN} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
+
+	return type === BREAKDOWN && Array.isArray(breakdown)
+		? createKey(sourceValue, breakdown[0])
+		: createKey(sourceValue, parameters[0]);
+};
+
 export {
 	createNewWidget,
 	getBuildSet,
+	getCustomColorsSettingsType,
+	getCustomColorsSettingsKey,
 	getDefaultComboYAxisName,
 	getMainDataSet,
 	getMainDataSetIndex,

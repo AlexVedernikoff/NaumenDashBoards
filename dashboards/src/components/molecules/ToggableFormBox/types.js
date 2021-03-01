@@ -1,10 +1,10 @@
 // @flow
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 
 export type Props = {
 	children: React$Node,
 	name: string,
-	onToggle?: (event: OnChangeInputEvent) => void,
+	onToggle?: (event: OnChangeEvent<boolean>) => void,
 	showContent: boolean,
 	title: string
 };

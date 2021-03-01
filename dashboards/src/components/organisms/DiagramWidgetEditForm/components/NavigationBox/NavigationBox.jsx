@@ -5,7 +5,7 @@ import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import type {MenuProps} from 'components/molecules/Select/types';
 import MultiDropDownList from 'components/molecules/MultiDropDownList';
-import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
@@ -42,7 +42,7 @@ export class NavigationBox extends PureComponent<Props> {
 		});
 	};
 
-	handleToggleShow = (event: OnChangeInputEvent) => {
+	handleToggleShow = (event: OnChangeEvent<boolean>) => {
 		const {onChange, settings} = this.props;
 		const {name, value} = event;
 

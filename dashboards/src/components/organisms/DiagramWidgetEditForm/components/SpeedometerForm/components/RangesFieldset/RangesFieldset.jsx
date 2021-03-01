@@ -8,7 +8,7 @@ import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
 import Label from 'components/atoms/Label';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import RadioField from 'components/atoms/RadioField';
 import type {Range} from 'store/widgets/data/types';
@@ -48,7 +48,7 @@ export class RangesFieldset extends PureComponent<Props> {
 		onChange({...ranges, data: [...DEFAULT_SPEEDOMETER_SETTINGS.ranges.data], [name]: value});
 	};
 
-	handleChangeUse = ({name, value}: OnChangeInputEvent) => {
+	handleChangeUse = ({name, value}: OnChangeEvent<boolean>) => {
 		const {onChange, ranges} = this.props;
 
 		onChange({...ranges, [name]: !value});

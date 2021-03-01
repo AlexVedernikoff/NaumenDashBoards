@@ -1,5 +1,5 @@
 // @flow
-import type {Breakdown, DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {Breakdown, DataSet, Parameter} from 'containers/DiagramWidgetEditForm/types';
 import BreakdownFieldset from 'DiagramWidgetEditForm/components/BreakdownFieldset';
 import {countIndicators, hasDifferentAggregations} from 'DiagramWidgetEditForm/components/TableForm/helpers';
 import type {DataBuilderProps} from 'DiagramWidgetEditForm/builders/DataFormBuilder/types';
@@ -53,7 +53,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		setDataFieldValue(this.mainIndex, FIELDS.breakdown, breakdown);
 	};
 
-	handleChangeParameters = (index: number, parameters: Array<Paremeter>) => {
+	handleChangeParameters = (index: number, parameters: Array<Parameter>) => {
 		const {setDataFieldValue} = this.props;
 
 		setDataFieldValue(index, FIELDS.parameters, parameters);

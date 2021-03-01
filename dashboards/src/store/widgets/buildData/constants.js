@@ -12,10 +12,7 @@ const BUILD_DATA_EVENTS = {
 };
 
 // Используется для разделения лейбла и uuid в значениях метакласса. Необходимо для перехода на список объектов
-const META_CLASS_VALUE_SEPARATOR = '#';
-
-// Используется для разделения лейбла и uuid в значениях, по которым можно перейти на карточку объекта
-const CARD_OBJECT_VALUE_SEPARATOR = '#';
+const SEPARATOR = '#';
 
 // Настройки для игнорирования лимита получаемых данных по параметру и показателю для построения таблицы
 const IGNORE_TABLE_DATA_LIMITS_SETTINGS = {
@@ -25,7 +22,6 @@ const IGNORE_TABLE_DATA_LIMITS_SETTINGS = {
 
 export {
 	BUILD_DATA_EVENTS,
-	CARD_OBJECT_VALUE_SEPARATOR,
 	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
-	META_CLASS_VALUE_SEPARATOR
+	SEPARATOR
 };

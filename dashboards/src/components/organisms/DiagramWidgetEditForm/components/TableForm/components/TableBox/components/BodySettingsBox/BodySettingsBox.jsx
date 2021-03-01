@@ -5,7 +5,7 @@ import {EMPTY_DATA_OPTIONS, PAGE_SIZES} from './constants';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
-import type {InputValue, OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {InputValue, OnChangeEvent, OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import Label from 'components/atoms/Label';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -14,7 +14,7 @@ import styles from './styles.less';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class BodySettingsBox extends PureComponent<Props> {
-	handleBoolChange = ({name, value}: OnChangeInputEvent) => this.updateSettings(name, !value);
+	handleBoolChange = ({name, value}: OnChangeEvent<boolean>) => this.updateSettings(name, !value);
 
 	handleChange = ({name, value}: OnChangeInputEvent) => this.updateSettings(name, value);
 

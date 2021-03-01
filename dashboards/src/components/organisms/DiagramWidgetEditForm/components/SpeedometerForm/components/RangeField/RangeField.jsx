@@ -4,7 +4,7 @@ import ColorInput from 'components/molecules/ColorInput';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormField from 'components/molecules/FormField';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import type {Props as ColorInputProps} from 'components/molecules/ColorInput/components/Value/types';
 import {RANGES_TYPES} from 'store/widgets/data/constants';
@@ -21,7 +21,7 @@ export class RangeField extends PureComponent<Props> {
 
 	getColorNumber = (color: string, from: number) => parseInt(`0x${color.substr(from, 2)}`);
 
-	handleChange = (event: OnChangeInputEvent) => {
+	handleChange = (event: OnChangeEvent<string>) => {
 		const {index, onChange, range} = this.props;
 		const {name, value} = event;
 
@@ -31,7 +31,7 @@ export class RangeField extends PureComponent<Props> {
 		});
 	};
 
-	handleChangeAbsoluteRange = (event: OnChangeInputEvent) => {
+	handleChangeAbsoluteRange = (event: OnChangeEvent<string>) => {
 		let value = String(event.value);
 
 		if (/^-?(\d+)?(\.)?(\d{1,4})?$/.test(value)) {
@@ -39,7 +39,7 @@ export class RangeField extends PureComponent<Props> {
 		}
 	};
 
-	handleChangePercentRange = (event: OnChangeInputEvent) => {
+	handleChangePercentRange = (event: OnChangeEvent<string>) => {
 		let {name, value} = event;
 
 		value = String(value).replace(/%/g, '');
@@ -49,7 +49,7 @@ export class RangeField extends PureComponent<Props> {
 		}
 	};
 
-	handleChangeRange = (event: OnChangeInputEvent) => this.hasPercentType()
+	handleChangeRange = (event: OnChangeEvent<string>) => this.hasPercentType()
 		? this.handleChangePercentRange(event)
 		: this.handleChangeAbsoluteRange(event);
 

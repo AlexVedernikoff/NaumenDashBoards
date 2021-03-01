@@ -1,10 +1,10 @@
 // @flow
-import type {InputValue, OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 
 export type Props = {
 	checked: boolean,
 	disabled: boolean,
 	name: string,
-	onChange: OnChangeInputEvent => void,
-	value: InputValue
+	onChange: OnChangeEvent<boolean> => void,
+	value: boolean
 };

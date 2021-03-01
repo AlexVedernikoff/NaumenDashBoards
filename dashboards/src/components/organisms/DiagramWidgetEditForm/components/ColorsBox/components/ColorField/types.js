@@ -1,6 +1,10 @@
 // @flow
 import type {OnChangeEvent} from 'components/types';
-import type {Props as LabelProps} from 'components/atoms/Label/types';
+import type {Props as BaseLabelProps} from 'components/atoms/Label/types';
+
+export type LabelProps = {
+	name: string
+} & BaseLabelProps;
 
 export type Components = {
 	Label: React$ComponentType<LabelProps>

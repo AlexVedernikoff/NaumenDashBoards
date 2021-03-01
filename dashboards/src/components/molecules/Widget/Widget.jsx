@@ -1,6 +1,5 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {CARD_OBJECT_VALUE_SEPARATOR, META_CLASS_VALUE_SEPARATOR} from 'store/widgets/buildData/constants';
 import cn from 'classnames';
 import {COLUMN_TYPES} from 'components/organisms/TableWidget/constants';
 import ControlPanel from './components/ControlPanel';
@@ -12,6 +11,7 @@ import type {DivRef} from 'components/types';
 import {getSeparatedLabel, isCardObjectColumn} from 'components/organisms/TableWidget/helpers';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
+import {SEPARATOR} from 'store/widgets/buildData/constants';
 import styles from './styles.less';
 import TextWidget from 'components/organisms/TextWidget';
 import type {TextWidget as TextWidgetType, Widget as WidgetType} from 'store/widgets/data/types';
@@ -121,7 +121,7 @@ export class Widget extends PureComponent<Props, State> {
 				rows.forEach(row => {
 					const value = row[accessor];
 
-					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR) : value;
+					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, SEPARATOR) : value;
 				});
 			}
 
@@ -129,7 +129,7 @@ export class Widget extends PureComponent<Props, State> {
 				rows.forEach(row => {
 					const value = row[accessor];
 
-					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR) : value;
+					row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, SEPARATOR) : value;
 				});
 			}
 		});

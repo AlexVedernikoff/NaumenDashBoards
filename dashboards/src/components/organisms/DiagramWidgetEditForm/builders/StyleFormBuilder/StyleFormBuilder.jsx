@@ -11,22 +11,22 @@ import {
 	TEXT_ALIGNS,
 	TEXT_HANDLERS
 } from 'store/widgets/data/constants';
-import type {FontSizeSelectProps, InputProps, OnChangeEvent, Props, SelectProps} from './types';
+import type {FontSizeSelectProps, InputProps, OnChangeInputEvent, Props, SelectProps} from './types';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 import React, {Component} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 
 export class StyleFormBuilder extends Component<Props> {
-	handleBoolChange = (event: OnChangeInputEvent) => {
+	handleBoolChange = (event: OnChangeEvent<boolean>) => {
 		const {onChange} = this.props;
 		const {name, value} = event;
 
 		onChange(name, !value);
 	};
 
-	handleChange = (event: OnChangeEvent) => {
+	handleChange = (event: OnChangeInputEvent) => {
 		const {onChange} = this.props;
 		const {name, value} = event;
 
