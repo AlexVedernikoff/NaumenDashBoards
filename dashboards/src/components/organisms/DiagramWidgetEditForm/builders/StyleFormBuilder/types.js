@@ -1,14 +1,14 @@
 // @flow
-import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 
-export type OnChangeEvent = {
+export type OnChangeInputEvent = {
 	name: string,
 	value: any
 };
 
 export type InputProps = {
 	name: string,
-	onChange: OnChangeEvent => void,
+	onChange: OnChangeInputEvent => void,
 	value: string
 };
 
@@ -26,8 +26,8 @@ export type FontSizeSelectProps = {
 };
 
 export type StyleBuilderProps = {|
-	handleBoolChange: OnChangeInputEvent => void,
-	handleChange: OnChangeEvent => void,
+	handleBoolChange: OnChangeEvent<boolean> => void,
+	handleChange: OnChangeInputEvent => void,
 	handleConditionChange: OnChangeInputEvent => void,
 	renderColorInput: (props?: $Shape<InputProps>) => React$Node,
 	renderFontFamilySelect: (props?: $Shape<SelectProps>) => React$Node,

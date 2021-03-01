@@ -11,7 +11,7 @@ import FormField from 'DiagramWidgetEditForm/components/FormField';
 import IndicatorDataBox from 'DiagramWidgetEditForm/components/IndicatorDataBox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import NavigationBox from 'DiagramWidgetEditForm/components/NavigationBox';
-import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import OuterSelect from 'components/molecules/OuterSelect';
 import ParameterDataBox from 'DiagramWidgetEditForm/components/ParameterDataBox';
 import React, {Component, Fragment} from 'react';
@@ -61,7 +61,7 @@ export class DataFormBuilder extends Component<Props> {
 		setFieldValue(FIELDS.displayMode, modeValue);
 	};
 
-	handleChangeUseName = ({name, value}: OnChangeInputEvent) => {
+	handleChangeUseName = ({name, value}: OnChangeEvent<boolean>) => {
 		const {setFieldValue, values} = this.props;
 
 		setFieldValue(FIELDS.header, {
@@ -70,7 +70,7 @@ export class DataFormBuilder extends Component<Props> {
 		});
 	};
 
-	handleToggleShowEmptyData = (event: OnChangeInputEvent) => {
+	handleToggleShowEmptyData = (event: OnChangeEvent<boolean>) => {
 		const {setFieldValue} = this.props;
 		const {name, value} = event;
 

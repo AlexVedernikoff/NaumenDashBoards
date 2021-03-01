@@ -5,17 +5,14 @@ import {changeLayout} from 'store/dashboard/layouts/actions';
 import {changeLayoutMode} from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {createToast} from 'store/toasts/actions';
-import {getMapValues} from 'helpers';
+import {getAllWidgetsWithoutSelected, getSelectedWidget} from 'src/store/widgets/data/selectors';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard, widgets: widgetsState} = state;
 	const {layoutMode, personal: personalDashboard} = dashboard.settings;
 	const {data} = widgetsState;
-	const {map, selectedWidget} = data;
 	const {contentCode, subjectUuid, user} = context;
 	const contentContext = {contentCode, subjectUuid};
-	const widget = data.map[selectedWidget];
-	const widgets = getMapValues(map).filter(({id}) => id !== selectedWidget);
 
 	return {
 		context: contentContext,
@@ -23,8 +20,8 @@ export const props = (state: AppState): ConnectedProps => {
 		personalDashboard,
 		saving: data.saving,
 		user,
-		widget,
-		widgets
+		widget: getSelectedWidget(state),
+		widgets: getAllWidgetsWithoutSelected(state)
 	};
 };
 

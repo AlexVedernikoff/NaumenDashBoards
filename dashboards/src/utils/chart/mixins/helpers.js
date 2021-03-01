@@ -5,9 +5,9 @@ import {AXIS_FONT_SIZE, LEGEND_HEIGHT, LEGEND_POSITIONS} from 'utils/chart/const
 import type {AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getMainDataSet} from 'store/widgets/data/helpers';
-import {META_CLASS_VALUE_SEPARATOR} from 'store/widgets/buildData/constants';
 import moment from 'moment';
 import {parseMSInterval} from 'store/widgets/helpers';
+import {SEPARATOR} from 'store/widgets/buildData/constants';
 import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -15,7 +15,7 @@ import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
  * @param {string} value - исходное значение лейбла
  * @returns {string}
  */
-const getLabelWithoutUUID = (value: string): string => value.split(META_CLASS_VALUE_SEPARATOR)[0];
+const getLabelWithoutUUID = (value: string): string => value.split(SEPARATOR)[0];
 
 const axisLabelFormatter = (usesUUIDs: boolean) => (value: number | string | Array<string>) => {
 	let label = value;

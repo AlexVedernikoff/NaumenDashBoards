@@ -2,9 +2,9 @@
 import type {ChartColorSettings} from 'store/widgets/data/types';
 import ColorField from 'DiagramWidgetEditForm/components/ColorsBox/components/ColorField';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import type {LabelProps} from 'DiagramWidgetEditForm/components/ColorsBox/components/ColorField/types';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
-import type {Props as LabelProps} from 'components/atoms/Label/types';
 import React, {Fragment, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
@@ -155,7 +155,7 @@ export class CustomLabelColorsSettings extends PureComponent<Props, State> {
 		);
 	};
 
-	renderLabelColors = () => this.props.value.colors.map(this.renderField);
+	renderLabelColors = (): Array<React$Node> => this.props.value.colors.map(this.renderField);
 
 	render () {
 		return (

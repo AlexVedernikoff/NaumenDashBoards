@@ -1,6 +1,6 @@
 // @flow
 import FormBox from 'components/molecules/FormBox';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Toggle from 'components/atoms/Toggle';
@@ -10,7 +10,7 @@ export class ToggableFormBox extends PureComponent<Props> {
 		name: ''
 	};
 
-	handleToggle = (event: OnChangeInputEvent) => {
+	handleToggle = (event: OnChangeEvent<boolean>) => {
 		const {onToggle} = this.props;
 
 		onToggle && onToggle(event);

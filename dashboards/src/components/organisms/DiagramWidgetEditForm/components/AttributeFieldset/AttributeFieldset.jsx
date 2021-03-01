@@ -6,7 +6,7 @@ import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import {getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
 import {List} from 'components/molecules/Select/components';
-import type {OnChangeInputEvent, OnChangeLabelEvent, OnSelectEvent, TreeNode} from 'components/types';
+import type {OnChangeEvent, OnChangeLabelEvent, OnSelectEvent, TreeNode} from 'components/types';
 import type {Props as SelectProps} from 'components/molecules/TransparentSelect/types';
 import type {Props as ListProps} from 'components/molecules/Select/components/List/types';
 import React, {Fragment, PureComponent} from 'react';
@@ -128,7 +128,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		onChangeLabel({...event, value: newValue}, index);
 	};
 
-	handleChangeShowDynamicAttributes = ({value: show}: OnChangeInputEvent) => {
+	handleChangeShowDynamicAttributes = ({value: show}: OnChangeEvent<boolean>) => {
 		const {dataSet, dynamicGroups, fetchDynamicAttributeGroups} = this.props;
 		const {dataKey, source} = dataSet;
 		const {descriptor} = source;

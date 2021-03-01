@@ -1,7 +1,7 @@
 // @flow
 import type {ContextProps, ParamsTabProps} from 'DiagramWidgetEditForm/types';
 import type {DataSourceMap} from 'store/sources/data/types';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent} from 'components/types';
 import type {Props as IndicatorProps} from 'DiagramWidgetEditForm/components/IndicatorDataBox/types';
 
 export type TextAreaProps = {
@@ -19,7 +19,7 @@ export type TextAreaProps = {
 export type CheckboxProps = {
 	label: string,
 	name: string,
-	onChange: OnChangeInputEvent => void,
+	onChange: OnChangeEvent<boolean> => void,
 	value: boolean,
 };
 

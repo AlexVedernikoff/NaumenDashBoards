@@ -6,7 +6,7 @@ import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
-import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
@@ -31,7 +31,7 @@ export class DataTopField extends PureComponent<Props> {
 
 	handleSelectCount = ({name, value}: OnSelectEvent) => this.changeSettings(name, value);
 
-	handleToggleShow = ({name, value}: OnChangeInputEvent) => this.changeSettings(name, !value);
+	handleToggleShow = ({name, value}: OnChangeEvent<boolean>) => this.changeSettings(name, !value);
 
 	renderCountSelect = () => {
 		const {count} = this.props.value;

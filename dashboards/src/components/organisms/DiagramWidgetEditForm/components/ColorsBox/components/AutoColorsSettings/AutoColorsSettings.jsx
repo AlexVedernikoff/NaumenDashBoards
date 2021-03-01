@@ -1,19 +1,13 @@
 // @flow
 import AbsolutePortal from 'components/molecules/AbsolutePortal';
-import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import ColorPicker from 'components/molecules/ColorPicker';
-import {DEFAULT_CHART_COLORS} from 'store/widgets/data/constants';
 import type {DivRef} from 'components/types';
 import FormField from 'components/molecules/FormField';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
 
-export class ColorsBox extends PureComponent<Props, State> {
-	static defaultProps = {
-		data: DEFAULT_CHART_COLORS
-	};
-
+export class AutoColorsSettings extends PureComponent<Props, State> {
 	ref: DivRef = createRef();
 
 	state = {
@@ -21,14 +15,16 @@ export class ColorsBox extends PureComponent<Props, State> {
 		showPicker: false
 	};
 
-	changeColor = (color: string) => {
-		const {data, name, onChange} = this.props;
+	changeColor = (newColor: string) => {
+		const {onChange, value} = this.props;
 		const {colorIndex} = this.state;
-
-		data[colorIndex] = color;
+		const newColors = value.colors.map((color, index) => index === colorIndex ? newColor : color);
 
 		this.setState({showPicker: false});
-		onChange(name, data);
+		onChange({
+			...value,
+			colors: newColors
+		});
 	};
 
 	handleClickColor = (index: number) => () => {
@@ -55,44 +51,35 @@ export class ColorsBox extends PureComponent<Props, State> {
 	);
 
 	renderColorPicker = () => {
-		const {data} = this.props;
+		const {colors} = this.props.value;
 		const {colorIndex, showPicker} = this.state;
 
 		if (showPicker) {
 			return (
 				<AbsolutePortal elementRef={this.ref} onClickOutside={this.hidePicker}>
-					<div className={styles.picker}>
-						<ColorPicker
-							onChange={this.changeColor}
-							onClose={this.hidePicker}
-							value={data[colorIndex]}
-						/>
-					</div>
+					<ColorPicker
+						className={styles.picker}
+						onChange={this.changeColor}
+						onClose={this.hidePicker}
+						value={colors[colorIndex]}
+					/>
 				</AbsolutePortal>
 			);
 		}
 	};
 
-	renderColors = () => {
-		const {data} = this.props;
+	render () {
+		const {colors} = this.props.value;
 
 		return (
 			<FormField>
 				<div className={styles.paletteContainer} ref={this.ref}>
-					{data.map(this.renderColor)}
+					{colors.map(this.renderColor)}
 					{this.renderColorPicker()}
 				</div>
 			</FormField>
 		);
-	};
-
-	render () {
-		return (
-			<CollapsableFormBox title="Цвета диаграммы">
-				{this.renderColors()}
-			</CollapsableFormBox>
-		);
 	}
 }
 
-export default ColorsBox;
+export default AutoColorsSettings;

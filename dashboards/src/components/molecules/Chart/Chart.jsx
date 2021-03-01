@@ -25,10 +25,10 @@ export class Chart extends PureComponent<Props> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {data: currentData} = this.props;
-		const {data: prevData} = prevProps;
+		const {data: currentData, widget: currentWidget} = this.props;
+		const {data: prevData, widget: prevWidget} = prevProps;
 
-		if (currentData !== prevData) {
+		if (currentData !== prevData || currentWidget !== prevWidget) {
 			const options = this.getOptions();
 
 			options && this.chart && this.chart.updateOptions(options);

@@ -1,10 +1,5 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {
-	CARD_OBJECT_VALUE_SEPARATOR,
-	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
-	META_CLASS_VALUE_SEPARATOR
-} from 'store/widgets/buildData/constants';
 import Cell from 'Table/components/Cell';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
 import type {Column, ColumnType, ParameterColumn, Props, Row, State} from './types';
@@ -16,6 +11,10 @@ import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
 import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
+import {
+	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
+	SEPARATOR
+} from 'store/widgets/buildData/constants';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
 import React, {createRef, PureComponent} from 'react';
@@ -88,7 +87,7 @@ export class TableWidget extends PureComponent<Props, State> {
 				let subTitle: string = value;
 
 				if (attribute.type === ATTRIBUTE_TYPES.metaClass) {
-					subTitle = getSeparatedLabel(subTitle, META_CLASS_VALUE_SEPARATOR);
+					subTitle = getSeparatedLabel(subTitle, SEPARATOR);
 				}
 
 				mixin.title = `${mixin.title}. ${subTitle}`;
@@ -262,7 +261,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		let {components, value} = props;
 
 		if (type === BREAKDOWN && hasUUIDsInLabels(attribute) && typeof value === 'string') {
-			value = getSeparatedLabel(value, META_CLASS_VALUE_SEPARATOR);
+			value = getSeparatedLabel(value, SEPARATOR);
 		}
 
 		if (type === INDICATOR && breakdownLimitExceeded && !breakdownLimitIgnored) {
@@ -288,7 +287,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		} else if (value && hasPercent(attribute, aggregation)) {
 			cellValue = `${value}%`;
 		} else if (isCardObjectColumn(column)) {
-			cellValue = getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);
+			cellValue = getSeparatedLabel(value, SEPARATOR);
 		}
 
 		return <Cell {...props} components={components} fontColor={fontColor} fontStyle={fontStyle} value={cellValue.toString()} />;
@@ -318,7 +317,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		let {column, value} = props;
 
 		if (hasUUIDsInLabels(column.attribute) && typeof value === 'string') {
-			value = getSeparatedLabel(value, CARD_OBJECT_VALUE_SEPARATOR);
+			value = getSeparatedLabel(value, SEPARATOR);
 		}
 
 		return (

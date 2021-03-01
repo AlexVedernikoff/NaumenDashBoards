@@ -1,4 +1,5 @@
 // @flow
+import type {ChartColorsSettings} from './types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 
 const ADD_WIDGET: 'ADD_WIDGET' = 'ADD_WIDGET';
@@ -249,12 +250,53 @@ const CUSTOM_CHART_COLORS_SETTINGS_TYPES = {
 	LABEL: 'LABEL'
 };
 
+/**
+ * Цвета графиков по умолчанию
+ */
+const DEFAULT_CHART_COLORS = [
+	'#EA3223',
+	'#999999',
+	'#2C6FBA',
+	'#4EAD5B',
+	'#DE5D30',
+	'#67369A',
+	'#F6C142',
+	'#4CAEEA',
+	'#A1BA66',
+	'#B02318',
+	'#536130',
+	'#DCA5A2',
+	'#928A5B',
+	'#9BB3D4',
+	'#8C4A1C',
+	'#FFFE55'
+];
+
+/**
+ * Цвет значения разбивки по умолчанию. Используется, когда для значения заранее не настроен цвет
+ * @type {string}
+ */
+const DEFAULT_BREAKDOWN_COLOR = '#9b9b9b';
+
+const DEFAULT_COLORS_SETTINGS: ChartColorsSettings = Object.freeze({
+	auto: {
+		colors: DEFAULT_CHART_COLORS
+	},
+	custom: {
+		useGlobal: true
+	},
+	type: CHART_COLORS_SETTINGS_TYPES.AUTO
+});
+
 export {
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
 	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_AXIS_SORTING_SETTINGS,
+	DEFAULT_BREAKDOWN_COLOR,
 	DEFAULT_CIRCLE_SORTING_SETTINGS,
+	DEFAULT_CHART_COLORS,
+	DEFAULT_COLORS_SETTINGS,
 	DEFAULT_NAVIGATION_SETTINGS,
 	DEFAULT_TABLE_VALUE,
 	DEFAULT_TOP_SETTINGS,
