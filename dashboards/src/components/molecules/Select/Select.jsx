@@ -1,87 +1,86 @@
 // @flow
-import Caret from './components/Caret';
 import cn from 'classnames';
-import IndicatorsContainer from './components/IndicatorsContainer';
+import Container from 'components/atoms/Container';
+import {debounce, isObject} from 'helpers';
+import IconButton from 'components/atoms/IconButton';
+import {ICON_NAMES} from 'src/components/atoms/Icon';
 import List from './components/List';
 import Loader from 'components/atoms/Loader';
-import Menu from './components/Menu';
+import type {OnChangeInputEvent} from 'components/types';
 import type {
-	MenuProps,
 	Option,
 	Props,
 	State
 } from './types';
-import type {OnChangeInputEvent} from 'components/types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {PureComponent} from 'react';
+import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
-import ValueContainer from './components/ValueContainer';
-import ValueLabel from './components/ValueLabel';
+import Value from './components/Value';
 
 export class Select extends PureComponent<Props, State> {
 	static defaultProps = {
-		async: false,
 		className: '',
-		components: {},
 		disabled: false,
 		editable: false,
-		error: false,
+		getOptionLabel: option => isObject(option) ? option.label : option || '',
+		getOptionValue: option => isObject(option) ? option.value : option,
 		isSearching: false,
 		loading: false,
+		loadingMessage: 'Загрузка...',
+		multiple: false,
 		name: '',
+		noOptionsMessage: 'Список пуст',
+		notFoundMessage: 'Ничего не найдено',
+		options: [],
 		placeholder: '',
-		showCreationButton: false,
-		textCreationButton: 'Создать',
-		uploaded: false,
 		value: null
 	};
-
+	components = this.getExtendedComponents(this.props);
 	state = {
-		components: this.getExtendedComponents(this.props),
+		foundOptions: [],
+		searchValue: '',
 		showMenu: false
 	};
 
 	getExtendedComponents (props: Props) {
-		const {components} = props;
-
-		return {
-			Caret,
-			IndicatorsContainer,
-			ValueContainer,
-			ValueLabel,
-			...components
+		const {components: extendedComponents} = props;
+		const components = {
+			Caret: IconButton,
+			IndicatorsContainer: Container,
+			MenuContainer: Container,
+			Message: Container,
+			Value,
+			ValueContainer: Container
 		};
+
+		return extendedComponents ? {...components, ...extendedComponents} : components;
 	}
 
 	fetchOptions = () => {
-		const {async, error, fetchOptions, loading, uploaded} = this.props;
+		const {fetchOptions, options} = this.props;
 
-		if (async && typeof fetchOptions === 'function' && (error || loading || uploaded) === false) {
+		if (options.length === 0 && typeof fetchOptions === 'function') {
 			fetchOptions();
 		}
 	};
 
-	getOptionLabel = (option: Object) => {
-		const {getOptionLabel} = this.props;
-		let label = option;
+	getFoundOptions = (searchValue: string) => {
+		const {getOptionLabel, options} = this.props;
+		let foundOptions = options;
 
-		if (option && typeof option === 'object') {
-			label = getOptionLabel ? getOptionLabel(option) : option.label;
+		if (searchValue) {
+			const reg = new RegExp(searchValue, 'i');
+
+			foundOptions = options.filter(o => {
+				const label = getOptionLabel ? getOptionLabel(o) : o.label;
+
+				return reg.test(label);
+			});
 		}
 
-		return label;
-	};
-
-	getOptionValue = (option: Object) => {
-		const {getOptionValue} = this.props;
-		let value = option;
-
-		if (option && typeof option === 'object') {
-			value = getOptionValue ? getOptionValue(option) : option.value;
-		}
-
-		return value;
+		return foundOptions;
 	};
 
 	handleChangeLabel = ({value}: OnChangeInputEvent) => {
@@ -90,63 +89,43 @@ export class Select extends PureComponent<Props, State> {
 		onChangeLabel && onChangeLabel({name, value});
 	};
 
+	handleChangeSearchInput = (searchValue: string) => {
+		this.setState({foundOptions: this.getFoundOptions(searchValue), searchValue});
+	};
+
 	handleClick = () => {
+		!this.state.showMenu && this.fetchOptions();
 		this.setState({showMenu: !this.state.showMenu});
-		this.fetchOptions();
-	};
-
-	handleClickClearLabelIcon = () => {
-		const {name, onChangeLabel} = this.props;
-
-		onChangeLabel && onChangeLabel({name, value: ''});
-	};
-
-	handleClickCreationButton = () => {
-		const {onClickCreationButton} = this.props;
-
-		this.setState({showMenu: false});
-		onClickCreationButton && onClickCreationButton();
 	};
 
 	handleSelect = (value: Option) => {
-		const {name, onSelect} = this.props;
+		const {multiple, name, onSelect} = this.props;
 
-		this.setState({showMenu: false});
+		!multiple && this.setState({showMenu: false});
 		onSelect({name, value});
 	};
 
 	hideMenu = () => this.setState({showMenu: false});
 
-	renderDefaultMenu = (props: MenuProps) => {
-		const {showCreationButton, textCreationButton} = this.props;
-		const {showMenu} = this.state;
-		let creationButton;
-
-		if (showCreationButton) {
-			creationButton = {
-				onClick: this.handleClickCreationButton,
-				text: textCreationButton
-			};
-		}
-
-		return showMenu ? <Menu {...props} creationButton={creationButton} renderList={this.renderList} /> : null;
-	};
-
 	renderIndicators = () => {
-		const {Caret, IndicatorsContainer} = this.state.components;
+		const {Caret, IndicatorsContainer} = this.components;
 
 		return (
-			<IndicatorsContainer>
+			<IndicatorsContainer className={styles.indicatorsContainer}>
 				{this.renderLoader()}
-				<Caret onClick={this.handleClick} />
+				<Caret className={styles.caret} icon={ICON_NAMES.CARET} onClick={this.handleClick} round={true} />
 			</IndicatorsContainer>
 		);
 	};
 
 	renderLabel = () => {
-		const {editable, placeholder, value} = this.props;
-		const {ValueLabel} = this.state.components;
-		const label = this.getOptionLabel(value) || placeholder;
+		const {editable, getOptionLabel, placeholder, value} = this.props;
+		const {Value} = this.components;
+		const label = getOptionLabel(value) || placeholder;
+		const valueCN = cn({
+			[styles.value]: true,
+			[styles.placeholder]: !value
+		});
 
 		if (editable) {
 			return (
@@ -159,17 +138,18 @@ export class Select extends PureComponent<Props, State> {
 			);
 		}
 
-		return <ValueLabel className={styles.label} label={label} />;
+		return <Value className={valueCN} label={label} onClick={this.handleClick} />;
 	};
 
-	renderList = (searchValue: string) => {
-		const {loading, options, value} = this.props;
+	renderList = () => {
+		const {getOptionLabel, getOptionValue, options: allOptions, value} = this.props;
+		const {foundOptions, searchValue} = this.state;
+		const options = searchValue ? foundOptions : allOptions;
 
 		return (
 			<List
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				loading={loading}
+				getOptionLabel={getOptionLabel}
+				getOptionValue={getOptionValue}
 				onSelect={this.handleSelect}
 				options={options}
 				searchValue={searchValue}
@@ -180,37 +160,63 @@ export class Select extends PureComponent<Props, State> {
 
 	renderLoader = () => this.props.loading ? <Loader className={styles.loader} size={15} /> : null;
 
+	renderLoadingMessage = () => {
+		const {Message} = this.components;
+		const {loading, loadingMessage} = this.props;
+
+		return loading && <Message className={styles.message}>{loadingMessage}</Message>;
+	};
+
 	renderMenu = () => {
-		const {components, isSearching, loading, options} = this.props;
 		const {showMenu} = this.state;
-		const {Menu = this.renderDefaultMenu} = components;
+		const {MenuContainer} = this.components;
 
 		if (showMenu) {
 			return (
 				<OutsideClickDetector onClickOutside={this.hideMenu}>
-					<Menu
-						className={styles.menu}
-						isSearching={isSearching}
-						loading={loading}
-						onSelect={this.handleSelect}
-						options={options}
-					/>
+					<MenuContainer className={styles.menu}
+					>
+						{this.renderSearchInput()}
+						{this.renderNoOptionsMessage()}
+						{this.renderNotFoundMessage()}
+						{this.renderList()}
+						{this.renderLoadingMessage()}
+					</MenuContainer>
 				</OutsideClickDetector>
 			);
 		}
 	};
 
-	renderValueContainer = () => {
-		const {editable} = this.props;
-		const {ValueContainer} = this.state.components;
-		let onClick;
+	renderNoOptionsMessage = () => {
+		const {loading, noOptionsMessage, options} = this.props;
+		const {Message} = this.components;
 
-		if (!editable) {
-			onClick = this.handleClick;
-		}
+		return !loading && options.length === 0 ? <Message className={styles.message}>{noOptionsMessage}</Message> : null;
+	};
+
+	renderNotFoundMessage = () => {
+		const {loading, notFoundMessage} = this.props;
+		const {foundOptions, searchValue} = this.state;
+		const {Message} = this.components;
+
+		console.log(loading, searchValue, foundOptions);
+		return !loading && searchValue && foundOptions.length === 0
+			? <Message className={styles.message}>{notFoundMessage}</Message>
+			: null;
+	};
+
+	renderSearchInput = () => {
+		const {isSearching} = this.props;
+		const {searchValue} = this.state;
+
+		return isSearching && <SearchInput focusOnMount={true} onChange={debounce(this.handleChangeSearchInput, 500)} value={searchValue} />;
+	};
+
+	renderValueContainer = () => {
+		const {ValueContainer} = this.components;
 
 		return (
-			<ValueContainer className={styles.valueContainer} onClick={onClick}>
+			<ValueContainer className={styles.valueContainer}>
 				{this.renderLabel()}
 				{this.renderIndicators()}
 			</ValueContainer>

@@ -42,6 +42,7 @@ const ITALIC: 'ITALIC' = 'ITALIC';
 const KEBAB: 'KEBAB' = 'KEBAB';
 const LEFT_ANGLE: 'LEFT_ANGLE' = 'LEFT_ANGLE';
 const LINE_CHART: 'LINE_CHART' = 'LINE_CHART';
+const LINK: 'LINK' = 'LINK';
 const NUMBER: 'NUMBER' = 'NUMBER';
 const MAIL: 'MAIL' = 'MAIL';
 const MINUS: 'MINUS' = 'MINUS';
@@ -130,6 +131,7 @@ const ICON_NAMES = {
 	KEBAB,
 	LEFT_ANGLE,
 	LINE_CHART,
+	LINK,
 	MAIL,
 	MINUS,
 	MOBILE,
@@ -175,32 +177,9 @@ const ICON_NAMES = {
 	ZOOM
 };
 
-const NORMAL: 'NORMAL' = 'NORMAL';
-const LARGE: 'LARGE' = 'LARGE';
-
-const ICON_SIZES = {
-	LARGE,
-	NORMAL
-};
-
-const ICON_PROPS = {
-	[LARGE]: {
-		height: 24,
-		viewBox: '0 0 24 24',
-		width: 24
-	},
-	[NORMAL]: {
-		height: 16,
-		viewBox: '0 0 16 16',
-		width: 16
-	}
-};
-
 const WIDGET_SUB_COLOR = '#B390E0';
 
 export {
 	ICON_NAMES,
-	ICON_PROPS,
-	ICON_SIZES,
 	WIDGET_SUB_COLOR
 };

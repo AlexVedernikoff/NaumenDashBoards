@@ -1,10 +1,15 @@
 // @flow
+import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class InputForm extends Component<Props, State> {
+	static defaultProps = {
+		className: ''
+	};
+
 	state = {
 		value: ''
 	};
@@ -35,11 +40,11 @@ export class InputForm extends Component<Props, State> {
 	};
 
 	render () {
-		const {onClose} = this.props;
+		const {className, onClose} = this.props;
 		const {value} = this.state;
 
 		return (
-			<div className={styles.container}>
+			<div className={cn(styles.container, className)}>
 				<input
 					autoComplete="off"
 					className={styles.input}

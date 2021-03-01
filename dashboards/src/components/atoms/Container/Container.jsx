@@ -4,10 +4,10 @@ import React, {PureComponent} from 'react';
 
 export class Container extends PureComponent<Props> {
 	render () {
-		const {children, className} = this.props;
+		const {children, className, onClick} = this.props;
 
 		return (
-			<div className={className}>
+			<div className={className} onClick={onClick}>
 				{children}
 			</div>
 		);

@@ -1,62 +1,21 @@
 // @flow
 import Button from 'components/atoms/Button';
 import {FixedSizeList} from 'react-window';
-import ListMessage from 'components/molecules/Select/components/ListMessage';
 import ListOption from 'components/molecules/Select/components/ListOption';
-import Loader from 'components/atoms/Loader';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
-export class List extends PureComponent<Props, State> {
+export class List extends PureComponent<Props> {
 	static defaultProps = {
 		itemSize: 32,
-		loading: false,
 		maxHeight: 250,
-		messages: {
-			noOptions: 'Список пуст',
-			notFound: 'Ничего не найдено'
-		},
 		multiple: false,
 		searchValue: '',
 		showMore: false,
 		value: null,
 		values: []
-	};
-
-	state = {
-		options: [],
-		searchValue: ''
-	};
-
-	static getDerivedStateFromProps (props: Props, state: State) {
-		const {getOptionLabel, searchValue} = props;
-		const {searchValue: stateSearchValue} = state;
-		let {options} = props;
-
-		if (searchValue !== stateSearchValue) {
-			const reg = new RegExp(searchValue, 'i');
-
-			// $FlowFixMe
-			options = options.filter(o => {
-				const label = getOptionLabel ? getOptionLabel(o) : o.label;
-
-				return reg.test(label);
-			});
-		}
-
-		return {
-			options,
-			searchValue
-		};
-	}
-
-	getMessages = () => {
-		const {messages} = this.props;
-		const defaultMessages = List.defaultProps.messages;
-
-		return messages ? {...defaultMessages, ...messages} : defaultMessages;
 	};
 
 	getOptionLabel = (option: Object) => {
@@ -79,8 +38,7 @@ export class List extends PureComponent<Props, State> {
 	};
 
 	renderListItem = (data: Object) => {
-		const {getOptionLabel, multiple, onSelect, searchValue, value, values} = this.props;
-		const {options} = this.state;
+		const {getOptionLabel, multiple, onSelect, options, searchValue, value, values} = this.props;
 		const {index, style} = data;
 		const option = options[index];
 		const optionValue = this.getOptionValue(option);
@@ -105,32 +63,25 @@ export class List extends PureComponent<Props, State> {
 		);
 	};
 
-	renderLoader = () => this.props.loading && <ListMessage><Loader size={35} /></ListMessage>;
-
-	renderNoOptionsMessage = () => {
-		const {loading, searchValue} = this.props;
-		const {options} = this.state;
-		const {noOptions, notFound} = this.getMessages();
-		const message = searchValue ? notFound : noOptions;
-		const loaded = !loading;
-		const notOptions = options.length === 0;
-
-		return loaded && notOptions && message ? <ListMessage>{message}</ListMessage> : null;
-	};
-
 	renderShowMoreButton = () => {
 		const {showMore} = this.props;
 
 		if (showMore) {
 			return (
-				<Button className={styles.showMoreButton} onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>Показать еще</Button>
+				<Button
+					className={styles.showMoreButton}
+					onClick={this.handleClickShowMore}
+					variant={BUTTON_VARIANTS.SIMPLE}>
+					Показать еще
+				</Button>
 			);
 		}
+
+		return null;
 	};
 
 	renderVertualizedList = () => {
-		const {itemSize, maxHeight} = this.props;
-		const {options} = this.state;
+		const {itemSize, maxHeight, options} = this.props;
 		const height = Math.min(itemSize * options.length, maxHeight);
 
 		return (
@@ -149,8 +100,6 @@ export class List extends PureComponent<Props, State> {
 		return (
 			<div className={styles.list}>
 				{this.renderVertualizedList()}
-				{this.renderLoader()}
-				{this.renderNoOptionsMessage()}
 				{this.renderShowMoreButton()}
 			</div>
 		);

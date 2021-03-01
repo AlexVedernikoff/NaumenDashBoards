@@ -9,6 +9,7 @@ import styles from './styles.less';
 
 export class MiniSelect extends PureComponent<Props, State> {
 	static defaultProps = {
+		className: '',
 		isDisabled: false,
 		showCaret: true,
 		value: ''
@@ -84,16 +85,16 @@ export class MiniSelect extends PureComponent<Props, State> {
 	renderOptions = (): Array<Node> => this.props.options.filter(this.isNotCurrent).map(this.renderOption);
 
 	renderSelect = () => {
-		const {isDisabled} = this.props;
-		const CNSelect = [styles.select];
-
-		if (isDisabled) {
-			CNSelect.push(styles.disabled);
-		}
+		const {className, isDisabled} = this.props;
+		const selectCN = cn({
+			[styles.select]: true,
+			[styles.disabled]: isDisabled,
+			[className]: true
+		});
 
 		return (
 			<OutsideClickDetector onClickOutside={this.hideList}>
-				<div className={cn(CNSelect)}>
+				<div className={selectCN}>
 					{this.renderValue()}
 					{this.renderList()}
 				</div>

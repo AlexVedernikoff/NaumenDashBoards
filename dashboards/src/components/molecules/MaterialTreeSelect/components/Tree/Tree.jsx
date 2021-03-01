@@ -1,6 +1,5 @@
 // @flow
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
-import ListMessage from 'components/molecules/Select/components/ListMessage';
 import Loader from 'components/atoms/Loader';
 import Node from 'components/molecules/MaterialTreeSelect/components/Node';
 import type {Node as NodeType, Props, State} from './types';
@@ -125,32 +124,34 @@ export class Tree extends Component<Props, State> {
 		return children.map(id => options[id] && this.renderNode(options[id]));
 	};
 
-	renderLoader = () => this.props.loading && <ListMessage><Loader size={35} /></ListMessage>;
+	renderLoader = () => this.props.loading && <div className={styles.message}><Loader size={35} /></div>;
 
 	renderNoOptionsMessage = () => {
 		const {loading, options} = this.props;
 		const loaded = !loading;
 		const noOptions = Object.keys(options).length === 0;
 
-		return loaded && noOptions ? <ListMessage>Список пуст</ListMessage> : null;
+		return loaded && noOptions ? <div className={styles.message}>Список пуст</div> : null;
 	};
 
 	renderNode = (node: NodeType) => {
 		const {components, getOptionLabel, getOptionValue, searchValue} = this.props;
 		const {foundIds, selectedIds} = this.state;
-		const {Node} = components;
-		const {id} = node;
-		const enabled = this.isEnabledNode(node);
-		const selected = selectedIds.includes(id);
+		const {id, value} = node;
 
 		if (!searchValue || foundIds.includes(id)) {
+			const {Node} = components;
+			const enabled = this.isEnabledNode(node);
+			const selected = selectedIds.includes(id);
+			const key = id || value;
+
 			return (
 				<Node
 					data={node}
 					enabled={enabled}
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
-					key={id}
+					key={key}
 					onClick={this.handleClick}
 					onLoadChildren={this.handleLoadChildren}
 					searchValue={searchValue}

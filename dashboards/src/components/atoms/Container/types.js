@@ -1,5 +1,6 @@
 // @flow
 export type Props = {
 	children: React$Node,
-	className: string
+	className: string,
+	onClick?: (event: SyntheticMouseEvent<HTMLDivElement>) => void
 };
