@@ -5,7 +5,7 @@ import {createRefKey} from 'store/sources/refAttributes/actions';
 import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import {getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
-import {List} from 'components/molecules/Select/components';
+import List from 'components/molecules/Select/components/List';
 import type {OnChangeEvent, OnChangeLabelEvent, OnSelectEvent, TreeNode} from 'components/types';
 import type {Props as SelectProps} from 'components/molecules/TransparentSelect/types';
 import type {Props as ListProps} from 'components/molecules/Select/components/List/types';

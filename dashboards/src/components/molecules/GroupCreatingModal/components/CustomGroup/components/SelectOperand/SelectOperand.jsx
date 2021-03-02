@@ -1,9 +1,10 @@
 // @flow
 import {Component} from 'react';
-import type {Props, Value} from './types';
+import type {OnSelectEvent} from 'src/components/types';
+import type {Props} from './types';
 
 export class SelectOperand extends Component<Props> {
-	handleSelect = (name: string, value: Value) => {
+	handleSelect = ({value}: OnSelectEvent) => {
 		const {convert, onChange, operand} = this.props;
 		let data = value;
 

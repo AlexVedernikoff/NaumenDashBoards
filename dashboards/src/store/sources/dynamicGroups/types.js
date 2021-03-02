@@ -1,6 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {DYNAMIC_GROUPS_EVENTS} from './constants';
+import type {ThunkAction} from 'src/store/types';
 import type {TreeNode} from 'components/types';
 
 export type DynamicGroup = {
@@ -78,3 +79,7 @@ export type DynamicGroupsAction =
 ;
 
 export type DynamicGroupsState = DynamicGroupsMap;
+
+export type FetchDynamicAttributeGroups = (dataKey: string, descriptor: string) => ThunkAction;
+
+export type FetchDynamicAttributes = (dataKey: string, groupCode: string) => ThunkAction;

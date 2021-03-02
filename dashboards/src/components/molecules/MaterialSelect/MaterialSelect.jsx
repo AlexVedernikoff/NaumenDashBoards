@@ -1,158 +1,45 @@
 // @flow
-import {List, Menu} from 'components/molecules/Select/components';
+import cn from 'classnames';
 import MultiValueContainer from './components/MultiValueContainer';
-import type {Option, Props, State} from './types';
-import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
-import React, {PureComponent} from 'react';
+import type {Props} from './types';
+import React, {createRef, PureComponent} from 'react';
+import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import ValueContainer from './components/ValueContainer';
 
-export class MaterialSelect extends PureComponent<Props, State> {
-	static defaultProps = {
-		async: false,
-		focusOnSearch: false,
-		isEditingLabel: false,
-		isSearching: true,
-		loading: false,
-		maxLabelLength: null,
-		multiple: false,
-		name: '',
-		placeholder: 'Выберите значение',
-		showCreationButton: false,
-		showMore: false,
-		textCreationButton: 'Создать',
-		value: null,
-		values: []
-	};
+export class MaterialSelect extends PureComponent<Props> {
+	static defaultProps = Select.defaultProps;
+	selectRef = createRef();
+	components = null;
 
-	state = {
-		optionsLoaded: false,
-		showMenu: false
-	};
+	getComponents = () => {
+		if (!this.components) {
+			const {components = {}} = this.props;
 
-	getOptionLabel = (option: Object) => {
-		const {getOptionLabel} = this.props;
-		let label = '';
-
-		if (option) {
-			label = getOptionLabel ? getOptionLabel(option) : option.label;
-		}
-
-		return label;
-	};
-
-	getOptionValue = (option: Object) => {
-		const {getOptionValue} = this.props;
-		let value = '';
-
-		if (option) {
-			value = getOptionValue ? getOptionValue(option) : option.value;
-		}
-
-		return value;
-	};
-
-	handleChangeLabel = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {onChangeLabel, value: currentValue} = this.props;
-		const {value} = e.currentTarget;
-
-		if (currentValue && onChangeLabel) {
-			onChangeLabel(this.getOptionValue(currentValue), value);
-		}
-	};
-
-	handleClickCreationButton = () => {
-		const {onClickCreationButton} = this.props;
-
-		this.setState({showMenu: false});
-		onClickCreationButton && onClickCreationButton();
-	};
-
-	handleClickValue = () => {
-		const {async, onLoadOptions, options} = this.props;
-		const {optionsLoaded, showMenu} = this.state;
-
-		if (async && !optionsLoaded && options.length === 0 && onLoadOptions) {
-			this.setState({optionsLoaded: true});
-			onLoadOptions();
-		}
-
-		this.setState({showMenu: !showMenu});
-	};
-
-	handleSelect = (value: Option) => {
-		const {multiple, name, onSelect} = this.props;
-
-		if (!multiple) {
-			this.setState({showMenu: false});
-		}
-
-		onSelect(name, value);
-	};
-
-	hideMenu = () => this.setState({showMenu: false});
-
-	renderList = (searchValue: string) => {
-		const {
-			loading,
-			multiple,
-			options,
-			showCreationButton,
-			textCreationButton,
-			value,
-			values
-		} = this.props;
-		let creationButton;
-
-		if (showCreationButton) {
-			creationButton = {
-				onClick: this.handleClickCreationButton,
-				text: textCreationButton
+			this.components = {
+				ValueContainer: this.renderValueContainer,
+				...components
 			};
 		}
 
-		const props = {
-			creationButton,
-			getOptionLabel: this.getOptionLabel,
-			getOptionValue: this.getOptionValue,
-			loading,
-			multiple,
-			onClose: this.hideMenu,
-			onSelect: this.handleSelect,
-			options,
-			searchValue,
-			value,
-			values
-		};
-
-		return <List {...props} />;
+		return this.components;
 	};
 
-	renderMenu = () => {
-		const {focusOnSearch, isSearching} = this.props;
-		const {showMenu} = this.state;
+	handleClick = () => {
+		const {current: select} = this.selectRef;
 
-		if (showMenu) {
-			const props = {
-				className: styles.menu,
-				focusOnSearch,
-				isSearching,
-				renderList: this.renderList
-			};
-
-			return <Menu {...props} />;
-		}
+		select && select.handleClick();
 	};
 
 	renderMultiValueContainer = () => {
-		const {onClear, onRemove, values} = this.props;
+		const {getOptionLabel, getOptionValue, onClear, onRemove, values} = this.props;
 
 		return (
 			<MultiValueContainer
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
+				getOptionLabel={getOptionLabel}
+				getOptionValue={getOptionValue}
 				onClear={onClear}
-				onClick={this.handleClickValue}
+				onClick={this.handleClick}
 				onRemove={onRemove}
 				values={values}
 			/>
@@ -160,34 +47,46 @@ export class MaterialSelect extends PureComponent<Props, State> {
 	};
 
 	renderSimpleValueContainer = () => {
-		const {forwardedLabelInputRef, isEditingLabel, maxLabelLength, placeholder, value} = this.props;
+		const {
+			forwardedLabelInputRef,
+			getOptionLabel,
+			getOptionValue,
+			isEditingLabel,
+			maxLabelLength,
+			onChangeLabel,
+			placeholder,
+			value
+		} = this.props;
 
 		return (
 			<ValueContainer
 				editableLabel={isEditingLabel}
 				forwardedInputRef={forwardedLabelInputRef}
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				label={this.getOptionLabel(value)}
+				getOptionLabel={getOptionLabel}
+				getOptionValue={getOptionValue}
 				maxLabelLength={maxLabelLength}
-				onChangeLabel={this.handleChangeLabel}
-				onClick={this.handleClickValue}
+				onChangeLabel={onChangeLabel}
+				onClick={this.handleClick}
 				placeholder={placeholder}
 				value={value}
 			/>
 		);
 	};
 
-	renderValueContainer = () => this.props.multiple ? this.renderMultiValueContainer() : this.renderSimpleValueContainer();
+	renderValueContainer = () => {
+		return this.props.multiple ? this.renderMultiValueContainer() : this.renderSimpleValueContainer();
+	};
 
 	render () {
+		const {className} = this.props;
+
 		return (
-			<OutsideClickDetector onClickOutside={this.hideMenu}>
-				<div className={styles.container}>
-					{this.renderValueContainer()}
-					{this.renderMenu()}
-				</div>
-			</OutsideClickDetector>
+			<Select
+				{...this.props}
+				className={cn(styles.select, className)}
+				components={this.getComponents()}
+				ref={this.selectRef}
+			/>
 		);
 	}
 }

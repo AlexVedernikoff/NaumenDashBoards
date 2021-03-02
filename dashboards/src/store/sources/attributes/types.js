@@ -1,5 +1,7 @@
 // @flow
 import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES} from './constants';
+import type {OnLoadCallback} from 'src/store/sources/types';
+import type {ThunkAction} from 'src/store/types';
 
 export type Attribute = {
 	code: string,
@@ -54,3 +56,5 @@ export type AttributesAction =
 ;
 
 export type AttributesState = AttributesMap;
+
+export type FetchAttributes = (classFqn: string, parentClassFqn?: string | null, onLoadCallback?: OnLoadCallback) => ThunkAction;

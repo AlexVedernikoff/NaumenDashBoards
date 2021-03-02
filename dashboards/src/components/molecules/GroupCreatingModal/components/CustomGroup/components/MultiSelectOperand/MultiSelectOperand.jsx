@@ -1,6 +1,7 @@
 // @flow
 import {Component} from 'react';
-import type {Props, Value} from './types';
+import type {OnSelectEvent} from 'src/components/types';
+import type {Props} from './types';
 
 export class MultiSelectOperand extends Component<Props> {
 	handleClear = () => {
@@ -23,7 +24,7 @@ export class MultiSelectOperand extends Component<Props> {
 		});
 	};
 
-	handleSelect = (name: string, value: Value) => {
+	handleSelect = ({value}: OnSelectEvent) => {
 		const {convert, getOptionValue, onChange, operand} = this.props;
 		const index = operand.data.findIndex(currentValue => getOptionValue(currentValue) === getOptionValue(value));
 		let {data} = operand;

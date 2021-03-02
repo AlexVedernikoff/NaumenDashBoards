@@ -2,7 +2,7 @@
 import AbsolutePortal from 'components/molecules/AbsolutePortal';
 import type {DivRef} from 'components/types';
 import IconButton from 'components/atoms/IconButton';
-import {List} from 'components/molecules/Select/components';
+import List from 'components/molecules/Select/components/List';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';

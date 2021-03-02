@@ -1,6 +1,8 @@
 // @flow
 import Button from 'components/atoms/Button';
+import Container from 'components/atoms/Container';
 import {createNewSubGroup} from './helpers';
+import CreationPanel from 'components/atoms/CreationPanel';
 import type {CustomGroup as CustomGroupType, InfoPanelProps, Props, State, SubGroup} from './types';
 import {CustomGroupContext} from './withCustomGroup';
 import FieldError from 'components/atoms/FieldError';
@@ -25,6 +27,7 @@ import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
 export class CustomGroup extends Component<Props, State> {
 	groupNameRef: InputRef = createRef();
+	components = null;
 
 	state = {
 		errors: {},
@@ -51,9 +54,19 @@ export class CustomGroup extends Component<Props, State> {
 		this.removeLocalGroups();
 	}
 
-	getGroupLabel = (group: CustomGroupType) => group.name;
+	getGroupLabel = (group: CustomGroupType) => group?.name ?? '';
 
-	getGroupValue = (group: CustomGroupType) => group.id;
+	getGroupSelectComponents = () => {
+		if (!this.components) {
+			this.components = {
+				MenuContainer: this.renderGroupSelectMenuContainer
+			};
+		}
+
+		return this.components;
+	};
+
+	getGroupValue = (group: CustomGroupType) => group?.id;
 
 	getSelectedGroup = () => {
 		const {editableGroups} = this.props;
@@ -74,7 +87,7 @@ export class CustomGroup extends Component<Props, State> {
 		selectedGroup && this.update({...selectedGroup, name: String(event.value)});
 	};
 
-	handleClickCreationButton = () => {
+	handleClickCreationPanel = () => {
 		const {createCondition, groups, type} = this.props;
 		const {current: groupNameInput} = this.groupNameRef;
 		const id = `${LOCAL_PREFIX_ID}${uuid()}`;
@@ -240,23 +253,22 @@ export class CustomGroup extends Component<Props, State> {
 
 	renderGroupSelect = () => {
 		const {groups} = this.props;
+		const components = this.getGroupSelectComponents();
 		const selectedGroup = this.getSelectedGroup();
 		const editable = !!selectedGroup;
 
 		return (
 			<Select
 				className={styles.groupSelect}
+				components={components}
 				editable={editable}
 				forwardedLabelInputRef={this.groupNameRef}
 				getOptionLabel={this.getGroupLabel}
 				getOptionValue={this.getGroupValue}
 				maxLabelLength={MAX_TEXT_LENGTH}
 				onChangeLabel={this.handleChangeGroupName}
-				onClickCreationButton={this.handleClickCreationButton}
 				onSelect={this.handleSelectGroup}
 				options={groups}
-				showCreationButton={true}
-				textCreationButton="Добавить группировку"
 				value={selectedGroup}
 			/>
 		);
@@ -276,6 +288,17 @@ export class CustomGroup extends Component<Props, State> {
 			{this.renderGroupSelectError()}
 		</Fragment>
 	);
+
+	renderGroupSelectMenuContainer = (props) => {
+		const {children, className} = props;
+
+		return (
+			<Container className={className}>
+				{children}
+				<CreationPanel onClick={this.handleClickCreationPanel} text="Добавить группировку" />
+			</Container>
+		);
+	};
 
 	renderInfoIcon = () => (
 		<div title="Название для сохранения группировки">

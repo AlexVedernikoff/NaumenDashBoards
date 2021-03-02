@@ -82,7 +82,10 @@ export class MaterialTreeSelect extends Component<Props, State> {
 			this.setState({showMenu: false});
 		}
 
-		onSelect(name, node.value);
+		onSelect({
+			name,
+			value: node.value
+		});
 	};
 
 	hideMenu = () => this.setState({showMenu: false});

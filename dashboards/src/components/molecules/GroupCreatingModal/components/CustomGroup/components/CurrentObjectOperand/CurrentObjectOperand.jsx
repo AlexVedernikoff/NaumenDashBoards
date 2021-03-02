@@ -2,10 +2,10 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Item} from 'store/sources/currentObject/types';
 import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
+import type {OnSelectEvent, TreeNode} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import type {SelectData} from 'store/customGroups/types';
-import type {TreeNode} from 'components/types';
 
 export class CurrentObjectOperand extends PureComponent<Props> {
 	static defaultProps = {
@@ -42,7 +42,7 @@ export class CurrentObjectOperand extends PureComponent<Props> {
 		fetch(item, attribute);
 	};
 
-	handleSelect = (name: string, value: Attribute) => {
+	handleSelect = ({value}: OnSelectEvent) => {
 		const {onChange, operand} = this.props;
 
 		onChange({...operand, data: value});

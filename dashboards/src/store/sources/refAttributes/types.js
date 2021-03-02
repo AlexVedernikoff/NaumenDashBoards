@@ -1,6 +1,8 @@
 // @flow
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
+import type {OnLoadCallback} from 'src/store/sources/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
+import type {ThunkAction} from 'src/store/types';
 
 type RequestRefAttributes = {
 	payload: string,
@@ -32,3 +34,5 @@ export type RefAttributesAction =
 ;
 
 export type RefAttributesState = AttributesMap;
+
+export type FetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback) => ThunkAction;

@@ -1,6 +1,7 @@
 // @flow
 import MaterialSelect from 'components/molecules/MaterialSelect';
 import MaterialTextInput from 'components/atoms/MaterialTextInput';
+import type {OnSelectEvent} from 'src/components/types';
 import {OPTIONS} from './constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -22,14 +23,14 @@ export class IntervalOperand extends PureComponent<Props> {
 		});
 	};
 
-	handleSelect = (name: string, group: Object) => {
+	handleSelect = ({value}: OnSelectEvent) => {
 		const {onChange, operand} = this.props;
 
 		onChange({
 			...operand,
 			data: {
 				...operand.data,
-				type: group.value
+				type: value.value
 			}
 		});
 	};

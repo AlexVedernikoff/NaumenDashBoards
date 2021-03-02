@@ -1,13 +1,12 @@
 // @flow
-import {Caret, IndicatorsContainer, ValueContainer} from 'components/molecules/Select/components';
-import type {ComponentProps as CaretComponentProps} from 'components/molecules/Select/components/Caret/types';
-import type {ComponentProps as IndicatorsContainerComponentProps} from 'components/molecules/Select/components/IndicatorsContainer/types';
+import Container from 'components/atoms/Container';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
-import type {Props as ValueContainerProps} from 'components/molecules/Select/components/ValueContainer/types';
-import type {Props as ValueLabelProps} from 'components/molecules/Select/components/ValueLabel/types';
+import type {Props as ValueLabelProps} from 'components/molecules/Select/components/Value/types';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
@@ -59,15 +58,15 @@ export class UserField extends PureComponent<Props, State> {
 		onSelect(index, value);
 	};
 
-	renderCaret = (props: CaretComponentProps) => <Caret iconName={ICON_NAMES.USER} onClick={props.onClick} round={false} />;
+	renderCaret = (props: IconButtonProps) => <IconButton iconName={ICON_NAMES.USER} onClick={props.onClick} round={false} />;
 
-	renderIndicatorsContainer = (props: IndicatorsContainerComponentProps) => {
+	renderIndicatorsContainer = (props: ContainerProps) => {
 		const {children} = props;
 
 		return (
-			<IndicatorsContainer className={styles.indicatorsContainer}>
+			<Container className={styles.indicatorsContainer}>
 				{children}
-			</IndicatorsContainer>
+			</Container>
 		);
 	};
 
@@ -89,20 +88,17 @@ export class UserField extends PureComponent<Props, State> {
 
 	renderUserSelect = () => {
 		const {fetchUsers, usersData, value} = this.props;
-		const {data: options, error, loading, uploaded} = usersData;
 		const components = {
 			Caret: this.renderCaret,
 			IndicatorsContainer: this.renderIndicatorsContainer,
-			ValueContainer: this.renderValueContainer,
 			ValueLabel: this.renderValueLabel
 		};
+		const {data: options, loading} = usersData;
 
 		return (
 			<Select
-				async={true}
 				className={styles.select}
 				components={components}
-				error={error}
 				fetchOptions={fetchUsers}
 				getOptionLabel={this.getUserLabel}
 				getOptionValue={this.getUserValue}
@@ -111,13 +107,10 @@ export class UserField extends PureComponent<Props, State> {
 				onChangeLabel={this.handleChangeLabel}
 				onSelect={this.handleSelectUser}
 				options={options}
-				uploaded={uploaded}
 				value={value}
 			/>
 		);
 	};
-
-	renderValueContainer = ({onClick, ...props}: ValueContainerProps) => <ValueContainer {...props} />;
 
 	renderValueLabel = (props: ValueLabelProps) => {
 		const {value} = this.props;

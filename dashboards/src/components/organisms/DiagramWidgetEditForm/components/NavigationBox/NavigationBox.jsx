@@ -55,7 +55,7 @@ export class NavigationBox extends PureComponent<Props> {
 	renderSelect = () => {
 		const {dashboards, fetchDashboards, settings} = this.props;
 		const {dashboard, widget} = settings;
-		const {error, items, loading, uploaded} = dashboards;
+		const {items, loading} = dashboards;
 		const components = {
 			Menu: this.renderSelectMenu
 		};
@@ -64,15 +64,12 @@ export class NavigationBox extends PureComponent<Props> {
 		return (
 			<FormField>
 				<Select
-					async={true}
 					components={components}
-					error={error}
 					fetchOptions={fetchDashboards}
 					loading={loading}
 					onSelect={this.handleSelect}
 					options={items}
 					placeholder="Укажите дашборд или виджет"
-					uploaded={uploaded}
 					value={value}
 				/>
 			</FormField>

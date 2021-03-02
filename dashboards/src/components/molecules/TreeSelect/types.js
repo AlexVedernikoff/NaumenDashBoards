@@ -29,6 +29,7 @@ export type Props = {
 };
 
 export type State = {
+	searchValue: string,
 	showForm: boolean,
 	showMenu: boolean
 };

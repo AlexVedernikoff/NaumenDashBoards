@@ -1,14 +1,16 @@
 // @flow
+import Container from 'src/components/atoms/Container';
+import {debounce} from 'src/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
-import {Menu} from 'components/molecules/Select/components';
 import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree/types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import SearchInput from 'src/components/atoms/SearchInput';
 import styles from './styles.less';
-import {Tree} from 'components/molecules/MaterialTreeSelect/components';
+import Tree from 'components/molecules/MaterialTreeSelect/components/Tree';
 
 export class TreeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -18,6 +20,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 	};
 
 	state = {
+		searchValue: '',
 		showForm: false,
 		showMenu: false
 	};
@@ -51,15 +54,11 @@ export class TreeSelect extends PureComponent<Props, State> {
 		onChangeLabel({label, name});
 	};
 
+	handleChangeSearchInput = (searchValue: string) => this.setState({searchValue});
+
 	handleClick = () => this.setState({showMenu: true});
 
 	handleClickIndicators = (e: Event) => e.stopPropagation();
-
-	handleClickRemoveButton = () => {
-		const {name, onRemove} = this.props;
-
-		onRemove({name});
-	};
 
 	handleRemoveValue = () => {
 		const {name, onSelect} = this.props;
@@ -118,8 +117,9 @@ export class TreeSelect extends PureComponent<Props, State> {
 		}
 	};
 
-	renderList = (searchValue: string) => {
+	renderList = () => {
 		const {initialSelected, options, value} = this.props;
+		const {searchValue} = this.state;
 
 		return (
 			<Tree
@@ -137,7 +137,14 @@ export class TreeSelect extends PureComponent<Props, State> {
 	renderMenu = () => {
 		const {showMenu} = this.state;
 
-		return showMenu && <Menu className={styles.list} renderList={this.renderList} />;
+		if (showMenu) {
+			return (
+				<Container className={styles.menu}>
+					{this.renderSearchInput()}
+					{this.renderList()}
+				</Container>
+			);
+		}
 	};
 
 	renderPlaceholder = () => (
@@ -145,6 +152,12 @@ export class TreeSelect extends PureComponent<Props, State> {
 			{this.props.placeholder}
 		</div>
 	);
+
+	renderSearchInput = () => {
+		const {searchValue} = this.state;
+
+		return <SearchInput onChange={debounce(this.handleChangeSearchInput, 500)} value={searchValue} />;
+	};
 
 	renderSelect = () => (
 		<OutsideClickDetector onClickOutside={this.hideTree}>

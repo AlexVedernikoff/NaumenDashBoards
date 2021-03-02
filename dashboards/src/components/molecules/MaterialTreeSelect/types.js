@@ -1,6 +1,7 @@
 // @flow
 import type {ComponentProps as SearchInputComponentProps} from 'components/atoms/SearchInput/types';
 import type {NodeValue, Tree} from './components/Tree/types';
+import type {OnSelectEvent} from 'src/components/types';
 import type {Props as NodeProps} from './components/Node/types';
 
 export type Value = Object;
@@ -22,7 +23,7 @@ export type Props = {
 	onClear?: () => void,
 	onLoad: (value: NodeValue | null, offset?: number) => void,
 	onRemove?: (value: string) => void,
-	onSelect: (name: string, value: Value) => void,
+	onSelect: (event: OnSelectEvent) => void,
 	options: Tree,
 	showMore: boolean,
 	value: Value | null,
