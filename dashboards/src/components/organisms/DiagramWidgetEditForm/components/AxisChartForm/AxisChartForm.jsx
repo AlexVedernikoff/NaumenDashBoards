@@ -3,18 +3,20 @@ import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {AxisData, AxisWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
+import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getLegendSettings} from 'utils/chart/helpers';
+import type {InjectedProps} from 'containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving/types';
 import {lazy} from 'yup';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
+import withChartColorsSettingsSaving from 'containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving';
 
-export class AxisChartForm extends Component<TypedFormProps> {
+export class AxisChartForm extends Component<TypedFormProps & InjectedProps> {
 	getSchema = () => object({
 		...baseSchema,
 		data: array().of(object({
@@ -64,9 +66,10 @@ export class AxisChartForm extends Component<TypedFormProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): AxisWidget => {
+		const {saveCustomColorsSettings} = this.props;
 		const {id} = widget;
 		const {
-			colors = DEFAULT_COLORS,
+			colorsSettings,
 			computedAttrs = [],
 			data,
 			dataLabels,
@@ -82,8 +85,10 @@ export class AxisChartForm extends Component<TypedFormProps> {
 			type
 		} = values;
 
+		saveCustomColorsSettings(colorsSettings);
+
 		return {
-			colors,
+			colorsSettings,
 			computedAttrs,
 			data: data.map(this.normalizeDataSet),
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),
@@ -115,4 +120,4 @@ export class AxisChartForm extends Component<TypedFormProps> {
 	}
 }
 
-export default AxisChartForm;
+export default withChartColorsSettingsSaving(AxisChartForm);

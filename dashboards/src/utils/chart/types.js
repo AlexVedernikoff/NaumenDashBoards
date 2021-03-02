@@ -28,4 +28,4 @@ export type AxisProps = {
 	showName: boolean
 };
 
-export type ApexYAxisOptions = Object;
+export type Options = Object;

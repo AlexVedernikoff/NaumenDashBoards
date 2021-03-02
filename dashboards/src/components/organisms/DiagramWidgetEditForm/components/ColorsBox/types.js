@@ -1,13 +1,10 @@
 // @flow
-type Colors = Array<string>;
+import type {ChartColorsSettings} from 'store/widgets/data/types';
 
 export type Props = {
-	data: Colors,
+	disabledCustomSettings: boolean,
+	labels?: Array<string>,
 	name: string,
-	onChange: (name: string, data: Colors) => void
-};
-
-export type State = {
-	colorIndex: number,
-	showPicker: boolean
+	onChange: (name: string, value: any) => void,
+	value: ChartColorsSettings
 };

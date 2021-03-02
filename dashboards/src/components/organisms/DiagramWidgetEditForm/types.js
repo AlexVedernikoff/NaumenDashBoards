@@ -14,6 +14,7 @@ import type {
 } from 'containers/DiagramWidgetEditForm/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {Node} from 'react';
+import type {Widget} from 'store/widgets/data/types';
 
 export type OnSelectAttributeEvent = {
 	name: string,
@@ -51,7 +52,8 @@ export type ParamsTabProps = {|
 export type StyleTabProps = {|
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,
-	values: Values
+	values: Values,
+	widget: Widget
 |};
 
 export type LayoutSize = {|

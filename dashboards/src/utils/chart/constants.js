@@ -1,6 +1,7 @@
 // @flow
+import type {ChartColorsSettings} from 'store/widgets/data/types';
+import {CHART_COLORS_SETTINGS_TYPES, FONT_FAMILIES, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import type {DefaultChartSettings} from './types';
-import {FONT_FAMILIES, TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 const bar: 'bar' = 'bar';
 const donut: 'donut' = 'donut';
@@ -103,11 +104,29 @@ const AXIS_FONT_SIZE = 12;
 
 const LEGEND_HEIGHT = 100;
 
+/**
+ * Цвет значения разбивки по умолчанию. Используется, когда для значения заранее не настроен цвет
+ * @type {string}
+ */
+const DEFAULT_BREAKDOWN_COLOR = '#9b9b9b';
+
+const DEFAULT_COLORS_SETTINGS: ChartColorsSettings = Object.freeze({
+	auto: {
+		colors: DEFAULT_COLORS
+	},
+	custom: {
+		useGlobal: true
+	},
+	type: CHART_COLORS_SETTINGS_TYPES.AUTO
+});
+
 export {
 	AXIS_FONT_SIZE,
 	CHART_TYPES,
 	DATA_LABELS_LIMIT,
+	DEFAULT_BREAKDOWN_COLOR,
 	DEFAULT_COLORS,
+	DEFAULT_COLORS_SETTINGS,
 	DEFAULT_CHART_SETTINGS,
 	DEFAULT_DATA_LABEL_COLOR,
 	DEFAULT_Y_AXIS_MIN,

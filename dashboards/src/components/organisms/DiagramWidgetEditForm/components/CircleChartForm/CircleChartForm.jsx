@@ -1,17 +1,19 @@
 // @flow
 import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {CircleData, CircleWidget, Widget} from 'store/widgets/data/types';
-import {DEFAULT_CHART_SETTINGS, DEFAULT_COLORS} from 'utils/chart/constants';
+import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {DEFAULT_CIRCLE_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {InjectedProps} from 'containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving/types';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
+import withChartColorsSettingsSaving from 'src/containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving';
 
-export class CircleChartForm extends Component<TypedFormProps> {
+export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 	getSchema = () => object({
 		...baseSchema,
 		data: array().of(object({
@@ -46,9 +48,10 @@ export class CircleChartForm extends Component<TypedFormProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): CircleWidget => {
+		const {saveCustomColorsSettings} = this.props;
 		const {id} = widget;
 		const {
-			colors = DEFAULT_COLORS,
+			colorsSettings,
 			computedAttrs = [],
 			data,
 			dataLabels,
@@ -63,8 +66,10 @@ export class CircleChartForm extends Component<TypedFormProps> {
 			type
 		} = values;
 
+		saveCustomColorsSettings(colorsSettings);
+
 		return {
-			colors,
+			colorsSettings,
 			computedAttrs,
 			data: data.map(this.normalizeDataSet),
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),
@@ -95,4 +100,4 @@ export class CircleChartForm extends Component<TypedFormProps> {
 	}
 }
 
-export default CircleChartForm;
+export default withChartColorsSettingsSaving(CircleChartForm);

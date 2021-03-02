@@ -85,12 +85,11 @@ export class DiagramWidgetEditForm extends Component<Props> {
 	renderForm = (props: RenderFormProps) => <Form forwardedRef={formRef} {...props} {...this.props} />;
 
 	render () {
-		const {layoutMode} = this.props;
 		const Form = this.resolveForm();
 
 		return (
 			<FormContext.Provider value={this.getContextValue()}>
-				<Form layoutMode={layoutMode} render={this.renderForm} />
+				<Form {...this.props} render={this.renderForm} />
 			</FormContext.Provider>
 		);
 	}

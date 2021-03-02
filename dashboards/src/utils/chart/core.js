@@ -6,6 +6,7 @@ import {CHART_TYPES, DATA_LABELS_LIMIT, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'helpers';
+import {setColors} from './helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -104,13 +105,13 @@ const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries =
  * @returns {ApexOptions}
  */
 const getOptions = (widget: Chart, data: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
-	const {colors, type: widgetType} = widget;
+	const {type: widgetType} = widget;
 	const type = widgetType === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(widgetType);
 	const {bar, line} = CHART_TYPES;
 	const {dataLabels} = widget;
 	const isAxisChart = type === bar || type === line;
 
-	const options: ApexOptions = {
+	let options: ApexOptions = {
 		chart: {
 			animations: {
 				enabled: false
@@ -130,10 +131,11 @@ const getOptions = (widget: Chart, data: DiagramBuildData, container: HTMLDivEle
 				enabled: false
 			}
 		},
-		colors: [...colors],
 		dataLabels: getDataLabelsOptions(dataLabels, data, isAxisChart),
 		series: getSeries(widget, data)
 	};
+
+	options = setColors(options, widget, data);
 
 	return extend(options, resolveMixin(widget, data, container));
 };

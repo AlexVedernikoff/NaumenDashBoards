@@ -1,9 +1,9 @@
 // @flow
-import ColorsBox from 'DiagramWidgetEditForm/components/ColorsBox';
+import ColorsBox from 'containers/DiagramWidgetEditForm/components/ColorsBox';
 import DataLabelsBox from 'DiagramWidgetEditForm/components/DataLabelsBox';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {DEFAULT_CIRCLE_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
-import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
 import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
 import LegendBox from 'DiagramWidgetEditForm/components/LegendBox';
@@ -19,10 +19,24 @@ export class StyleTab extends Component<StyleTabProps> {
 		setFieldValue(name, data);
 	};
 
+	renderColorsBox = () => {
+		const {values, widget} = this.props;
+		const {colorsSettings} = values;
+
+		return (
+			<ColorsBox
+				name={FIELDS.colorsSettings}
+				onChange={this.handleChange}
+				value={colorsSettings}
+				values={values}
+				widget={widget}
+			/>
+		);
+	};
+
 	render () {
 		const {values} = this.props;
 		const {
-			colors,
 			dataLabels = DEFAULT_CHART_SETTINGS.dataLabels,
 			header,
 			legend = DEFAULT_CHART_SETTINGS.legend,
@@ -40,7 +54,7 @@ export class StyleTab extends Component<StyleTabProps> {
 					options={getSortingOptions(values).filter(option => option.value !== SORTING_VALUES.PARAMETER)}
 				/>
 				<DataLabelsBox data={dataLabels} name={FIELDS.dataLabels} onChange={this.handleChange} />
-				<ColorsBox data={colors} name={FIELDS.colors} onChange={this.handleChange} />
+				{this.renderColorsBox()}
 			</div>
 		);
 	}
