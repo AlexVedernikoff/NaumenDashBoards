@@ -11,6 +11,7 @@ import type {OnChangeAttributeLabelEvent, OnSelectAttributeEvent} from 'DiagramW
 import type {Parameter} from 'containers/DiagramWidgetEditForm/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import type {RefProps} from 'DiagramWidgetEditForm/components/AttributeFieldset/types';
 
 export class ParameterFieldset extends PureComponent<Props> {
 	static defaultProps = {
@@ -54,7 +55,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 		});
 	};
 
-	renderGroup = (props: Object) => {
+	renderGroup = (props: RefProps) => {
 		const {dataSet, disabledGroup, value} = this.props;
 		const {disabled: parameterDisabled, parent, value: attribute} = props;
 		const {group} = value;
@@ -62,11 +63,10 @@ export class ParameterFieldset extends PureComponent<Props> {
 
 		return (
 			<AttributeGroupField
-				attribute={attribute}
+				attribute={parent || attribute}
 				disabled={disabled}
 				name={FIELDS.group}
 				onChange={this.handleChangeGroup}
-				parent={parent}
 				source={dataSet.source.value}
 				value={group}
 			/>

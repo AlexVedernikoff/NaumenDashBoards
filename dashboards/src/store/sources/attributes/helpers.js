@@ -21,7 +21,7 @@ const getProcessedAttribute = (attribute: Attribute) => {
  * @param {any} defaultValue - дефолтное значение
  * @returns {any}
  */
-const getAttributeValue = (attribute: MixedAttribute | null, key: string, defaultValue: any = '') => {
+const getAttributeValue = (attribute: ?MixedAttribute, key: string, defaultValue: any = '') => {
 	if (attribute) {
 		let targetAttribute = attribute;
 

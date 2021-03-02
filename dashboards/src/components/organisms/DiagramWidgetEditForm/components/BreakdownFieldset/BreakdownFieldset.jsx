@@ -3,7 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import AttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldset';
 import AttributeGroupField from 'DiagramWidgetEditForm/components/AttributeGroupField';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {BreakdownItem} from 'containers/DiagramWidgetEditForm/types';
+import type {BreakdownItem, DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
@@ -15,10 +15,15 @@ import type {Props} from './types';
 import React, {Component} from 'react';
 import type {RefProps} from 'DiagramWidgetEditForm/components/AttributeFieldset/types';
 
+const getUsedDataKeys = (data: Array<DataSet>): Array<string> => {
+	return data.filter(dataSet => !dataSet.sourceForCompute).map(dataSet => dataSet.dataKey);
+};
+
 export class BreakdownFieldset extends Component<Props> {
 	mainIndex = 0;
 
 	static defaultProps = {
+		getUsedDataKeys,
 		value: []
 	};
 
@@ -89,22 +94,26 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	resetBreakdownIfIsNotValid = () => {
-		const {data, indicator, onChange, value} = this.props;
-		let usedKeys = [];
+		const {data, getUsedDataKeys, indicator, onChange, value} = this.props;
 
-		if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-			usedKeys = getMapValues(indicator.computeData)
-				.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : dataKey, usedKeys);
-		} else {
-			usedKeys = data.filter(dataSet => !dataSet.sourceForCompute).map(dataSet => dataSet.dataKey);
-		}
+		if (value) {
+			const breakdownKeys = value.map(({dataKey}) => dataKey);
+			let usedKeys = [];
 
-		if (usedKeys.sort().toString() !== value.sort().toString()) {
-			onChange(usedKeys.map(dataKey => ({
-				attribute: null,
-				dataKey,
-				group: getDefaultSystemGroup()
-			})));
+			if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+				usedKeys = getMapValues(indicator.computeData)
+					.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : dataKey, usedKeys);
+			} else {
+				usedKeys = getUsedDataKeys(data);
+			}
+
+			if (usedKeys.sort().toString() !== breakdownKeys.sort().toString()) {
+				onChange(usedKeys.map(dataKey => ({
+					attribute: null,
+					dataKey,
+					group: getDefaultSystemGroup()
+				})));
+			}
 		}
 	};
 
@@ -144,21 +153,16 @@ export class BreakdownFieldset extends Component<Props> {
 		const isNotRefAttr = attribute && !(attribute.type in ATTRIBUTE_SETS.REFERENCE);
 		const disabled = Boolean(selectDisabled || (isNotMain && isNotRefAttr));
 
-		if (attribute) {
-			return (
-				<AttributeGroupField
-					attribute={attribute}
-					disabled={disabled}
-					name={FIELDS.group}
-					onChange={this.handleChangeGroup(breakdownIndex)}
-					parent={parent}
-					source={source}
-					value={group}
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<AttributeGroupField
+				attribute={parent || attribute}
+				disabled={disabled}
+				name={FIELDS.group}
+				onChange={this.handleChangeGroup(breakdownIndex)}
+				source={source}
+				value={group}
+			/>
+		);
 	};
 
 	render (): Array<React$Node> {

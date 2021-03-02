@@ -1,4 +1,5 @@
 // @flow
+import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {createDefaultGroup} from 'store/widgets/helpers';
 import FieldButton from 'components/atoms/FieldButton';
@@ -9,7 +10,6 @@ import Icon from 'components/atoms/Icon';
 import {ICONS} from './constants';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
-import {setAttributeValue} from 'store/sources/attributes/helpers';
 
 export class AttributeGroupField extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -43,11 +43,10 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 
 	handleCloseModal = () => this.setState({showModal: false});
 
-	handleSubmitModal = (group: Group, title: string) => {
-		const {attribute, name, onChange, parent} = this.props;
-		const newAttribute = setAttributeValue(parent || attribute, 'title', title);
+	handleSubmitModal = (group: Group, attribute: Attribute) => {
+		const {name, onChange} = this.props;
 
-		onChange(name, group, newAttribute);
+		onChange(name, group, attribute);
 		this.setState({showModal: false});
 	};
 
@@ -60,13 +59,10 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 	renderModal = () => {
 		const {attribute, source, value} = this.props;
 		const {showModal} = this.state;
-		let group = value;
-
-		if (!group) {
-			group = createDefaultGroup(group, attribute);
-		}
 
 		if (showModal && attribute && source) {
+			const group = value || createDefaultGroup(value, attribute);
+
 			return (
 				<GroupCreatingModal
 					attribute={attribute}

@@ -3,7 +3,7 @@ import CustomGroup from './components/CustomGroup/CustomGroup';
 import {DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {FIELDS} from './constants';
 import FormField from './components/FormField';
-import {getAttributeValue} from 'store/sources/attributes/helpers';
+import {getAttributeValue, setAttributeValue} from 'store/sources/attributes/helpers';
 import type {Group, GroupWay} from 'store/widgets/data/types';
 import Label from 'components/atoms/Label';
 import Modal from 'components/molecules/Modal';
@@ -24,23 +24,19 @@ export class GroupCreatingModal extends Component<Props, State> {
 		}
 	};
 
-	state = {
-		attributeTitle: '',
-		way: GROUP_WAYS.SYSTEM
-	};
+	state = this.initState(this.props);
 
 	customGroupSubmit: Function;
 	systemGroupSubmit: Function;
 
-	componentDidMount () {
-		const {attribute, group} = this.props;
+	initState (props: Props) {
+		const {attribute, group} = props;
 		const {way} = group;
-		const attributeTitle = getAttributeValue(attribute, 'title', '');
 
-		this.setState({
-			attributeTitle,
+		return {
+			attribute,
 			way
-		});
+		};
 	}
 
 	componentDidCatch () {
@@ -50,9 +46,10 @@ export class GroupCreatingModal extends Component<Props, State> {
 	handleChange = ({name, value}: OnChangeInputEvent) => this.setState({[name]: value});
 
 	handleChangeAttributeTitle = (e: OnChangeInputEvent) => {
+		const {attribute} = this.state;
 		const {value} = e;
 
-		this.setState({attributeTitle: String(value)});
+		this.setState({attribute: setAttributeValue(attribute, 'title', value)});
 	};
 
 	handleSubmit = () => {
@@ -63,9 +60,9 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleSubmitGroup = (group: Group) => {
 		const {onSubmit} = this.props;
-		const {attributeTitle} = this.state;
+		const {attribute} = this.state;
 
-		onSubmit(group, attributeTitle);
+		onSubmit(group, attribute);
 	};
 
 	setSubmit = (way: GroupWay) => (submit: Function) => {
@@ -110,14 +107,14 @@ export class GroupCreatingModal extends Component<Props, State> {
 	};
 
 	renderNameField = () => {
-		const {attributeTitle} = this.state;
+		const {attribute} = this.state;
 
 		return (
 			<FormField label="Название поля">
 				<TextInput
 					name={FIELDS.attributeTitle}
 					onChange={this.handleChangeAttributeTitle}
-					value={attributeTitle}
+					value={getAttributeValue(attribute, 'title')}
 				/>
 			</FormField>
 		);

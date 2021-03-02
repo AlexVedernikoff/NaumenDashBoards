@@ -72,10 +72,11 @@ export class SourceFieldset extends Component<Props> {
 		return context;
 	};
 
-	handleChangeCompute = (name: string, value: boolean) => this.change({
-		...this.props.value,
-		forCompute: value
-	});
+	handleChangeCompute = (name: string, value: boolean) => {
+		const {dataSetIndex, onChangeForCompute} = this.props;
+
+		onChangeForCompute(dataSetIndex, value);
+	};
 
 	handleChangeSourceLabel = ({label}: OnChangeLabelEvent) => {
 		const {value: source} = this.props;
@@ -125,17 +126,17 @@ export class SourceFieldset extends Component<Props> {
 
 	renderComputeCheckbox = () => {
 		const {computable, dataSet} = this.props;
-		const {forCompute} = dataSet.source;
+		const {sourceForCompute} = dataSet;
 
 		if (computable) {
-			return <Checkbox label="Только для вычислений" onClick={this.handleChangeCompute} value={forCompute} />;
+			return <Checkbox label="Только для вычислений" onClick={this.handleChangeCompute} value={sourceForCompute} />;
 		}
 	};
 
 	renderFilterButton = () => {
 		const {dataSet, usesFilter} = this.props;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
-		const {descriptor} = dataSet;
+		const {descriptor} = dataSet.source;
 		const active = !!descriptor && !!JSON.parse(descriptor).filters;
 		const iconName = active ? FILLED_FILTER : FILTER;
 

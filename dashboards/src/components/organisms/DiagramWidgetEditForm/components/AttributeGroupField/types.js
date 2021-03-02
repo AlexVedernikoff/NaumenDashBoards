@@ -3,11 +3,10 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {Group, Source} from 'store/widgets/data/types';
 
 export type Props = {
-	attribute: Attribute,
+	attribute: Attribute | null,
 	disabled: boolean,
 	name: string,
 	onChange: (name: string, value: Group, attribute: Attribute) => void,
-	parent: Attribute | null,
 	source: Source | null,
 	value: Group | string | null
 };

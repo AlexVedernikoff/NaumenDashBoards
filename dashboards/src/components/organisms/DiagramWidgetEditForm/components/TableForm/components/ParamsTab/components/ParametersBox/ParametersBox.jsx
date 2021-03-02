@@ -16,8 +16,8 @@ export class ParametersBox extends PureComponent<Props> {
 	};
 
 	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
-		const {dataSet, onChange} = this.props;
-		const {parameters} = dataSet;
+		const {onChange} = this.props;
+		const parameters = this.getParameters();
 		const newParameters = parameters.map((parameter, index) => index === parameterIndex ? newParameter : parameter);
 
 		onChange(dataSetIndex, newParameters);

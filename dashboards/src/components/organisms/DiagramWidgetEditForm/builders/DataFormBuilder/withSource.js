@@ -43,6 +43,12 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			setDataFieldValue(dataSetIndex, FIELDS.source, source);
 		};
 
+		handleChangeForCompute = (dataSetIndex: number, value: boolean) => {
+			const {setDataFieldValue} = this.props;
+
+			setDataFieldValue(dataSetIndex, FIELDS.sourceForCompute, value);
+		};
+
 		handleFetchAttributes = (dataSetIndex: number, classFqn: string) => {
 			const {fetchAttributes, values} = this.props;
 			const parentClassFqn = getParentClassFqn(values, dataSetIndex);
@@ -137,6 +143,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 					error={error}
 					key={index}
 					onChange={this.handleChange}
+					onChangeForCompute={this.handleChangeForCompute}
 					onFetchAttributes={this.handleFetchAttributes}
 					onFetchDynamicAttributes={this.handleFetchDynamicAttributes}
 					onRemove={this.handleRemoveSource}
