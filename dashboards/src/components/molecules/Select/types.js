@@ -1,9 +1,8 @@
 // @flow
-import type {ComponentProps as CaretComponentProps} from './components/Caret/types';
-import type {ComponentProps as IndicatorsContainerComponentProps} from './components/IndicatorsContainer/types';
 import type {OnChangeInputEvent} from 'components/types';
-import type {Props as ValueContainerProps} from './components/ValueContainer/types';
-import type {Props as ValueLabelProps} from './components/ValueLabel/types';
+import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import type {Props as ValueProps} from './components/Value/types';
 
 export type Option = Object;
 
@@ -23,38 +22,34 @@ export type MenuProps = {
 };
 
 export type Components = {
-	Caret: React$ComponentType<CaretComponentProps>,
-	IndicatorsContainer: React$ComponentType<IndicatorsContainerComponentProps>,
-	Menu: React$ComponentType<MenuProps>,
-	ValueContainer: React$ComponentType<ValueContainerProps>,
-	ValueLabel: React$ComponentType<ValueLabelProps>
+	Caret: React$ComponentType<IconButtonProps>,
+	IndicatorsContainer: React$ComponentType<ContainerProps>,
+	MenuContainer: React$ComponentType<ContainerProps>,
+	Value: React$ComponentType<ValueProps>,
+	ValueContainer: React$ComponentType<ContainerProps>
 };
 
 export type Props = {
-	async: boolean,
 	className: string,
 	components: $Shape<Components>,
 	disabled: boolean,
 	editable: boolean,
-	error: boolean,
-	fetchOptions?: () => any,
+	fetchOptions?: () => void,
 	getOptionLabel?: (option: Option) => string,
 	getOptionValue?: (option: Option) => any,
 	isSearching: boolean,
 	loading: boolean,
+	multiple: boolean,
 	name: string,
 	onChangeLabel?: OnChangeInputEvent => void,
-	onClickCreationButton?: () => void,
 	onSelect: SelectEvent => void,
 	options: Array<Option>,
 	placeholder: string,
-	showCreationButton: boolean,
-	textCreationButton: string,
-	uploaded: boolean,
 	value: Value
 };
 
 export type State = {
-	components: Components,
+	fountOptions: Array<Option>,
+	searchValue: string,
 	showMenu: boolean
 };

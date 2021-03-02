@@ -12,6 +12,7 @@ export type Option = {
 };
 
 export type Props = {
+	className: string,
 	isDisabled: boolean,
 	name: string,
 	onSelect: (name: string, value: string) => any,

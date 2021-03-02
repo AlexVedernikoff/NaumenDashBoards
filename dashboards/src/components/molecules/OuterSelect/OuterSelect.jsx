@@ -1,5 +1,5 @@
 // @flow
-import Icon, {ICON_NAMES, ICON_SIZES} from 'components/atoms/Icon';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Option, Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -29,7 +29,7 @@ export class OuterSelect extends PureComponent<Props> {
 		return (
 			<div className={styles.optionContainer} key={value} title={tip}>
 					<div className={styles.option} data-value={value} onClick={this.handleClick}>
-						<Icon name={icon} size={ICON_SIZES.LARGE} />
+						<Icon height={24} name={icon} viewBox="0 0 24 24" width={24} />
 						{this.renderCheckedIcon(value)}
 					</div>
 			</div>

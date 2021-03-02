@@ -1,5 +1,5 @@
 // @flow
-import {ICON_NAMES, ICON_SIZES} from './constants';
+import {ICON_NAMES} from './constants';
 
 export type IconName = $Keys<typeof ICON_NAMES>;
 
@@ -10,8 +10,10 @@ export type Symbol = {
 
 export type Props = {
 	className: string,
+	height: number,
 	name: IconName,
 	onClick?: (e: SyntheticMouseEvent<HTMLElement>) => void,
-	size: $Keys<typeof ICON_SIZES>,
-	title: string
+	title: string,
+	viewBox: string,
+	width: number
 };
