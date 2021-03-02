@@ -10,7 +10,7 @@ export const props = (state: AppState, props: ContainerProps): ConnectedProps =>
 	const {widget} = props;
 
 	return {
-		buildData: widgets.buildData[widget.id]?.data,
+		buildData: widgets.buildData[widget.id],
 		customChartColorsSettings
 	};
 };

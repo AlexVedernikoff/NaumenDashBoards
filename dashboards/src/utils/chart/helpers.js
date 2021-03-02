@@ -10,10 +10,10 @@ import {
 	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	WIDGET_TYPES
 } from 'store/widgets/data/constants';
-import {DEFAULT_BREAKDOWN_COLOR, DEFAULT_CHART_SETTINGS, DEFAULT_COLORS_SETTINGS} from './constants';
+import {DEFAULT_BREAKDOWN_COLOR, DEFAULT_CHART_SETTINGS} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import {getCustomColorsSettingsKey, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasBreakdown, hasUUIDsInLabels} from 'store/widgets/helpers';
+import {getCustomColorsSettingsKey} from 'store/widgets/data/helpers';
+import {hasBreakdown, isCircleChart} from 'store/widgets/helpers';
 import type {Options} from './types';
 import {SEPARATOR} from 'src/store/widgets/buildData/constants';
 import {store} from 'app.constants';
@@ -34,32 +34,73 @@ const getLegendSettings = (widget: Chart) => {
 	};
 };
 
+/**
+ * Сравнивает значения лейблов
+ * @param {string} label1 - значение лейбла
+ * @param {string} label2 - значение лейбла
+ * @returns {boolean}
+ */
+const equalLabels = (label1: string, label2: string) => label1?.includes(SEPARATOR) && label2?.includes(SEPARATOR)
+		? label1.split(SEPARATOR)[1] === label2.split(SEPARATOR)[1]
+		: label1 === label2;
+
+/**
+ * Возвращает список цветов для значений разбивки
+ * @param {CustomBreakdownChartColorsSettings} settings - настройки цветов
+ * @param {Array<string>} labels - лейблы, относительно которых происходит настройка
+ * @param {Array<string>} defaultColors - набор цветов по умолчанию
+ * @returns {boolean}
+ */
+const getBreakdownColors = (settings: CustomBreakdownChartColorsSettings, labels: Array<string>, defaultColors: Array<string>) => {
+	const colors = Array(labels.length).fill(DEFAULT_BREAKDOWN_COLOR).map((c, i) => defaultColors[i] ?? c);
+	const usedLabels = [];
+
+	settings.colors.forEach(({color, key}) => {
+		const index = labels.findIndex((label, index) => equalLabels(label, key) && !usedLabels.includes(index));
+
+		if (index > -1) {
+			if (color) {
+				colors[index] = color;
+			}
+
+			usedLabels.push(index);
+		}
+	});
+
+	return colors;
+};
+
+/**
+ * Устанавливает цвета для отрисовки графика
+ * @param {Options} options - опции графика
+ * @param {Chart} widget - виджет
+ * @param {DiagramBuildData} data - данные для построения виджета
+ * @returns {boolean}
+ */
 const setColors = (options: Options, widget: Chart, data: DiagramBuildData) => {
-	const {colorsSettings = DEFAULT_COLORS_SETTINGS} = widget;
+	const {colorsSettings} = widget;
 	const {auto: autoSettings, custom: customSettings, type} = colorsSettings;
-	const currentKey = getCustomColorsSettingsKey(widget);
-	const {breakdown, parameters} = getMainDataSet(widget.data);
-	const parameterUsesUUIDs = hasUUIDsInLabels(parameters[0].attribute);
-	const breakdownUsesUUIDs = !!breakdown && !Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute);
-	const usesUUIDs = parameterUsesUUIDs || breakdownUsesUUIDs;
+	const {CUSTOM} = CHART_COLORS_SETTINGS_TYPES;
+	const currentKey = type === CUSTOM && getCustomColorsSettingsKey(widget);
 	let {data: customSettingsData, useGlobal} = customSettings;
 	let extendedOptions = options;
 
-	if (useGlobal) {
-		customSettingsData = store.getState().dashboard.customChartColorsSettings;
-	}
-
-	const compareText = (text1: string, text2: string) => usesUUIDs && text1.includes(SEPARATOR) && text2.includes(SEPARATOR)
-		? text1.split(SEPARATOR)[1] === text2.split(SEPARATOR)[1]
-		: text1 === text2;
-
+	/**
+	 * Устанавливает цвета для лейблов оси X
+	 * @param {Options} options - опции графика
+	 * @param {CustomLabelChartColorsSettings} settings - настройки цветов
+	 * @param {Array<string>} labels - лейблы оси X
+	 * @returns {Options}
+	 */
 	const setLabelsColors = (options: Options, settings: CustomLabelChartColorsSettings, labels: Array<string>) => {
 		const {colors: labelColors, defaultColor} = settings;
 		const colors = Array(labels.length).fill(defaultColor);
 		const usedLabels = [];
 
-		labelColors.forEach(({color, text}) => {
-			const index = labels.findIndex((label, index) => compareText(label, text) && !usedLabels.includes(index));
+		labelColors.forEach(({color, key}) => {
+			const index = labels.findIndex((label, index) => {
+				return equalLabels(label, key) && !usedLabels.includes(index);
+			});
 
 			if (index > -1) {
 				colors[index] = color;
@@ -78,35 +119,30 @@ const setColors = (options: Options, widget: Chart, data: DiagramBuildData) => {
 		};
 	};
 
-	const setBreakdownColors = (options: Options, settings: CustomBreakdownChartColorsSettings, series: Array<Object>) => {
-		const {colors: breakdownColors} = settings;
-		const colors = Array(series.length).fill(DEFAULT_BREAKDOWN_COLOR);
-		const usedLabels = [];
-
-		breakdownColors.forEach(({color, text}) => {
-			const index = series.findIndex((s, index) => compareText(s.name, text) && !usedLabels.includes(index));
-
-			if (index > -1) {
-				if (color) {
-					colors[index] = color;
-				}
-
-				usedLabels.push(index);
-			}
-		});
+	/**
+	 * Устанавливает цвета для значений разбивки
+	 * @param {Options} options - опции графика
+	 * @param {CustomLabelChartColorsSettings} settings - настройки цветов
+	 * @returns {Options}
+	 */
+	const setBreakdownColors = (options: Options, settings: CustomBreakdownChartColorsSettings) => {
+		const {labels, series} = data;
+		const colorsLabels = isCircleChart(widget.type) ? labels : series.map(s => s.name);
 
 		return {
 			...options,
-			colors
+			colors: getBreakdownColors(settings, colorsLabels, autoSettings.colors)
 		};
 	};
 
-	if (type === CHART_COLORS_SETTINGS_TYPES.CUSTOM && data && customSettingsData && customSettingsData.key === currentKey) {
-		const {labels, series} = data;
+	if (useGlobal) {
+		customSettingsData = store.getState().dashboard.customChartColorsSettings[currentKey]?.data ?? customSettingsData;
+	}
 
-		extendedOptions = customSettingsData.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.LABEL
-			? setLabelsColors(extendedOptions, customSettingsData, labels)
-			: setBreakdownColors(extendedOptions, customSettingsData, series);
+	if (type === CUSTOM && customSettingsData?.key === currentKey) {
+		extendedOptions = customSettingsData.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
+			? setBreakdownColors(extendedOptions, customSettingsData)
+			: setLabelsColors(extendedOptions, customSettingsData, data.labels);
 	} else {
 		extendedOptions = {
 			...extendedOptions,
@@ -118,6 +154,8 @@ const setColors = (options: Options, widget: Chart, data: DiagramBuildData) => {
 };
 
 export {
+	getBreakdownColors,
 	getLegendSettings,
+	equalLabels,
 	setColors
 };

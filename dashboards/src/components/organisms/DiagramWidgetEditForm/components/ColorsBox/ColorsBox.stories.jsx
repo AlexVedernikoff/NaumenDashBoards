@@ -29,6 +29,7 @@ const Template = (args) => {
 export const AutoSettings = Template.bind({});
 
 AutoSettings.args = {
+	disabledCustomSettings: true,
 	name: 'test',
 	value: DEFAULT_COLORS_SETTINGS
 };
@@ -36,8 +37,13 @@ AutoSettings.args = {
 export const CustomLabelSettings = Template.bind({});
 
 CustomLabelSettings.args = {
+	buildData: {
+		data: {
+			labels: ['label1', 'label2', 'label3'],
+			series: [{}]
+		}
+	},
 	disabledCustomSettings: false,
-	labels: ['label1', 'label2', 'label3'],
 	name: 'test',
 	value: {
 		...DEFAULT_COLORS_SETTINGS,
@@ -56,6 +62,22 @@ CustomLabelSettings.args = {
 export const CustomBreakdownSettings = Template.bind({});
 
 CustomBreakdownSettings.args = {
+	buildData: {
+		data: {
+			labels: ['label1', 'label2', 'label3'],
+			series: [
+				{
+					name: 'breakdown1'
+				},
+				{
+					name: 'breakdown2'
+				},
+				{
+					name: 'breakdown3'
+				}
+			]
+		}
+	},
 	disabledCustomSettings: false,
 	name: 'test',
 	value: {
@@ -63,16 +85,7 @@ CustomBreakdownSettings.args = {
 		custom: {
 			...DEFAULT_COLORS_SETTINGS.custom,
 			data: {
-				colors: [
-					{
-						color: 'blue',
-						text: 'breakdown1'
-					},
-					{
-						color: 'green',
-						text: 'breakdown2'
-					}
-				],
+				colors: [],
 				type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
 			}
 		},

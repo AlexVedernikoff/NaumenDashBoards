@@ -1,6 +1,6 @@
 import {action} from '@storybook/addon-actions';
 import CustomBreakdownColorsSettings from './CustomBreakdownColorsSettings';
-import {CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
+import {CUSTOM_CHART_COLORS_SETTINGS_TYPES, DEFAULT_CHART_COLORS} from 'store/widgets/data/constants';
 import React from 'react';
 import {useArgs} from '@storybook/client-api';
 
@@ -20,21 +20,13 @@ export const Component = args => {
 };
 
 Component.args = {
+	defaultColors: DEFAULT_CHART_COLORS,
+	labels: ['label1#test', 'label2', 'label3'],
 	value: {
-		colors: [
-			{
+		colors: [{
 			color: 'blue',
-			text: 'breakdown1'
-			},
-			{
-				color: 'red',
-				text: 'breakdown2'
-			},
-			{
-				color: 'green',
-				text: 'breakdown3'
-			}
-		],
+			key: 'label1#test'
+		}],
 		type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
 	}
 };

@@ -1,7 +1,7 @@
 import {action} from '@storybook/addon-actions';
-import {CUSTOM_CHART_COLORS_SETTINGS_TYPES, DEFAULT_COLORS_SETTINGS} from 'src/store/widgets/data/constants';
+import {CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'src/store/widgets/data/constants';
 import CustomColorsSettings from './CustomColorsSettings';
-import {DEFAULT_CHART_COLORS} from 'store/widgets/data/constants';
+import {DEFAULT_CHART_COLORS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import React from 'react';
 import {useArgs} from '@storybook/client-api';
 
@@ -26,37 +26,63 @@ const Template = (args) => {
 	);
 };
 
-export const LabelSettings = Template.bind({});
+export const AxisLabelSettings = Template.bind({});
 
-LabelSettings.args = {
-	labels: ['label1', 'label2', 'label3'],
+AxisLabelSettings.args = {
+	buildData: {
+		data: {
+			labels: ['label1', 'label2', 'label3'],
+			series: [{}]
+		},
+		type: WIDGET_TYPES.BAR
+	},
+	defaultColors: DEFAULT_CHART_COLORS,
 	value: {
-		...DEFAULT_COLORS_SETTINGS.custom,
 		data: {
 			colors: [],
-			defaultColor: DEFAULT_CHART_COLORS[0],
+			defaultColor: 'red',
 			type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.LABEL
 		}
 	}
 };
 
-export const BreakdownSettings = Template.bind({});
+export const AxisBreakdownSettings = Template.bind({});
 
-BreakdownSettings.args = {
-	value: {
-		...DEFAULT_COLORS_SETTINGS.custom,
+AxisBreakdownSettings.args = {
+	buildData: {
 		data: {
-			colors: [
+			series: [
 				{
-					color: 'blue',
-					text: 'breakdown1'
+					name: 'breakdown1'
 				},
 				{
-					color: 'green',
-					text: 'breakdown2'
+					name: 'breakdown2'
+				},
+				{
+					name: 'breakdown3'
 				}
-			],
+			]
+		},
+		type: WIDGET_TYPES.BAR
+	},
+	defaultColors: DEFAULT_CHART_COLORS,
+	value: {
+		data: {
+			colors: [],
 			type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
 		}
+	}
+};
+
+export const CircleBreakdownSettings = Template.bind({});
+
+CircleBreakdownSettings.args = {
+	...AxisBreakdownSettings.args,
+	buildData: {
+		data: {
+			labels: ['label1', 'label2', 'label3'],
+			series: [1, 2, 3]
+		},
+		type: WIDGET_TYPES.PIE
 	}
 };

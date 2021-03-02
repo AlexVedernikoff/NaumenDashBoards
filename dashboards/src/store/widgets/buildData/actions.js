@@ -24,7 +24,7 @@ const fetchAllBuildData = (widgets: Array<AnyWidget>): ThunkAction => async (dis
  */
 const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	if (widget.type in DIAGRAM_WIDGET_TYPES) {
-		dispatch(requestBuildData(widget.id));
+		dispatch(requestBuildData(widget));
 
 		try {
 			const {context, dashboard} = getState();
@@ -55,7 +55,7 @@ const recordBuildDataError = (payload: string) => ({
 	type: BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
 });
 
-const requestBuildData = (payload: string) => ({
+const requestBuildData = (payload: AnyWidget) => ({
 	payload,
 	type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA
 });

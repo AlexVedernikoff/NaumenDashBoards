@@ -2,14 +2,15 @@
 import type {CustomChartColorsSettingsData} from 'src/store/widgets/data/types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {EVENTS} from './constants';
+import {getParams} from 'store/helpers';
 
 /**
  * Сохраняет настройки
- * @param {CustomChartColorsSettingsData} settings - настройки
- * @return {ThunkAction}
+ * @param {CustomChartColorsSettingsData} colorsSettings - настройки
+ * @returns {ThunkAction}
  */
-const saveCustomChartColorsSettings = (settings: CustomChartColorsSettingsData): ThunkAction => (dispatch: Dispatch) => {
-	const {key} = settings;
+const saveCustomChartColorsSettings = (colorsSettings: CustomChartColorsSettingsData): ThunkAction => async (dispatch: Dispatch) => {
+	const {key} = colorsSettings;
 
 	dispatch({
 		payload: key,
@@ -17,9 +18,15 @@ const saveCustomChartColorsSettings = (settings: CustomChartColorsSettingsData):
 	});
 
 	try {
-		// TODO: дождаться реализации бэка
+		const request = {
+			...getParams(),
+			colorsSettings
+		};
+
+		await window.jsApi.restCallModule('dashboardSettings', 'saveCustomColors', request);
+
 		dispatch({
-			payload: settings,
+			payload: colorsSettings,
 			type: EVENTS.SAVE_FULFILLED
 		});
 	} catch (e) {
@@ -33,21 +40,28 @@ const saveCustomChartColorsSettings = (settings: CustomChartColorsSettingsData):
 /**
  * Удаляет настройки
  * @param {string} payload - ключ настроек
- * @return {ThunkAction}
+ * @returns {ThunkAction}
  */
-const removeCustomChartColorsSettings = (payload: string) => (dispatch: Dispatch) => {
+const removeCustomChartColorsSettings = (payload: string) => async (dispatch: Dispatch) => {
 	dispatch({
 		payload,
 		type: EVENTS.REMOVE_PENDING
 	});
 
 	try {
-		// TODO: дождаться реализации бэка
+		const request = {
+			...getParams(),
+			key: payload
+		};
+
+		await window.jsApi.restCallModule('dashboardSettings', 'deleteCustomColors', request);
+
 		dispatch({
 			payload,
 			type: EVENTS.REMOVE_FULFILLED
 		});
 	} catch (e) {
+
 		dispatch({
 			payload,
 			type: EVENTS.REMOVE_REJECTED
@@ -55,7 +69,26 @@ const removeCustomChartColorsSettings = (payload: string) => (dispatch: Dispatch
 	}
 };
 
+/**
+ * Устанавливает список настроек
+ * @param {Array<CustomChartColorsSettingsData>} array - список настроек
+ * @returns {ThunkAction}
+ */
+const setCustomChartsColorsSettings = (array: Array<CustomChartColorsSettingsData>): ThunkAction => (dispatch: Dispatch) => {
+	const map = {};
+
+	array.filter(Boolean).forEach(settings => {
+		map[settings.key] = settings;
+	});
+
+	dispatch({
+		payload: map,
+		type: EVENTS.SET
+	});
+};
+
 export {
 	removeCustomChartColorsSettings,
-	saveCustomChartColorsSettings
+	saveCustomChartColorsSettings,
+	setCustomChartsColorsSettings
 };

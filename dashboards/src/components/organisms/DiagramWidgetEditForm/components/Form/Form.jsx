@@ -26,9 +26,9 @@ export class Form extends Component<Props, State> {
 	handleClick = (tab: Tab) => () => this.setState({tab});
 
 	handleSubmit = () => {
-		const {onSubmit, updateWidget} = this.props;
+		const {onSubmit, onSubmitCallback, updateWidget} = this.props;
 
-		onSubmit(updateWidget);
+		onSubmit(updateWidget, onSubmitCallback);
 	};
 
 	setWidgetLayoutSize = () => {

@@ -2,10 +2,12 @@
 import type {CustomBreakdownChartColorsSettings} from 'store/widgets/data/types';
 
 export type Props = {
+	defaultColors: Array<string>,
+	labels: Array<string>,
 	onChange: (settings: CustomBreakdownChartColorsSettings) => void,
 	value: CustomBreakdownChartColorsSettings
 };
 
 export type State = {
-	options: Array<string>
+	colors: Array<string>
 };

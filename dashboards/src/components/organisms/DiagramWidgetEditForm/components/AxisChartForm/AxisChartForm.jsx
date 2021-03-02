@@ -2,7 +2,12 @@
 import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {AxisData, AxisWidget, Widget} from 'store/widgets/data/types';
-import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {
+	DEFAULT_AXIS_SORTING_SETTINGS,
+	DEFAULT_COLORS_SETTINGS,
+	DEFAULT_TOP_SETTINGS,
+	WIDGET_TYPES
+} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
@@ -68,10 +73,9 @@ export class AxisChartForm extends Component<TypedFormProps & InjectedProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): AxisWidget => {
-		const {saveCustomColorsSettings} = this.props;
 		const {id} = widget;
 		const {
-			colorsSettings,
+			colorsSettings = DEFAULT_COLORS_SETTINGS,
 			computedAttrs = [],
 			data,
 			dataLabels,
@@ -86,8 +90,6 @@ export class AxisChartForm extends Component<TypedFormProps & InjectedProps> {
 			templateName,
 			type
 		} = values;
-
-		saveCustomColorsSettings(colorsSettings);
 
 		return {
 			colorsSettings,
@@ -113,7 +115,10 @@ export class AxisChartForm extends Component<TypedFormProps & InjectedProps> {
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
+		const {saveCustomColorsSettings} = this.props;
+
 		return this.props.render({
+			onSubmitCallback: saveCustomColorsSettings,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

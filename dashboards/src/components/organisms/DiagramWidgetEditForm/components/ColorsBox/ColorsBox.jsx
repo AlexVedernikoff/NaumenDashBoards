@@ -54,16 +54,16 @@ export class ColorsBox extends PureComponent<Props> {
 	};
 
 	renderCustomColorsSettings = () => {
-		const {disabledCustomSettings, labels, value} = this.props;
+		const {buildData, disabledCustomSettings, value} = this.props;
 		const {auto: autoSettings, custom: customSettings} = value;
 
-		if (!disabledCustomSettings && customSettings.data) {
+		if (!disabledCustomSettings && customSettings.data && buildData?.data) {
 			const {colors: defaultColors} = autoSettings;
 
 			return (
 				<CustomColorsSettings
+					buildData={buildData}
 					defaultColors={defaultColors}
-					labels={labels}
 					onChange={this.handleChangeCustomSettings}
 					value={customSettings}
 				/>

@@ -1,23 +1,23 @@
 // @flow
-import type {ChartColorsSettings} from 'src/store/widgets/data/types';
+import type {AxisWidget, CircleWidget} from 'store/widgets/data/types';
 import {compose} from 'redux';
 import {connect} from 'react-redux';
-import {DEFAULT_COLORS_SETTINGS} from 'utils/chart/constants';
 import {functions} from './selectors';
 import type {InjectedProps, Props} from './types';
 import React from 'react';
 
 export const withChartColorsSettingsSaving = <Config: {} & InjectedProps>(Component: React$ComponentType<Config>): React$ComponentType<Config> => {
 	return class WrappedComponent extends React.Component<Config & Props> {
-		save = (settings: ChartColorsSettings = DEFAULT_COLORS_SETTINGS) => {
+		save = (widget: AxisWidget | CircleWidget) => {
 			const {saveCustomChartColorsSettings, setUseGlobalChartSettings} = this.props;
-			const {data, useGlobal} = settings.custom;
+			const {colorsSettings} = widget;
+			const {data, useGlobal} = colorsSettings.custom;
 
 			if (useGlobal && data) {
 				const {key} = data;
 
 				saveCustomChartColorsSettings(data);
-				setUseGlobalChartSettings(key, useGlobal);
+				setUseGlobalChartSettings(key, useGlobal, widget.id);
 			}
 		};
 

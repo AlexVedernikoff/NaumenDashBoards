@@ -8,7 +8,7 @@ import type {
 import {CHART_COLORS_SETTINGS_TYPES, CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
 import Component from 'DiagramWidgetEditForm/components/ColorsBox';
 import {connect} from 'react-redux';
-import {DEFAULT_BREAKDOWN_COLOR, DEFAULT_COLORS_SETTINGS} from 'utils/chart/constants';
+import {DEFAULT_COLORS_SETTINGS} from 'utils/chart/constants';
 import {functions, props} from './selectors';
 import {getCustomColorsSettingsKey, getCustomColorsSettingsType} from 'store/widgets/data/helpers';
 import type {Props} from './types';
@@ -25,29 +25,19 @@ export class ColorsBox extends React.Component<Props> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {data: prevData} = prevProps.values;
-		const {data} = this.props.values;
+		const {values: prevValues} = prevProps;
+		const {values} = this.props;
 
-		if (prevData !== data) {
+		if (prevValues.data !== values.data) {
 			this.setSettingsByActualData();
 		}
 	}
 
-	createBreakdownCustomSettings = (key: string): CustomBreakdownChartColorsSettings => {
-		const {buildData, value} = this.props;
-		const defaultColors = value.auto.colors;
-
-		const colors = buildData.series.map(({name: text}, index) => ({
-			color: defaultColors[index] || DEFAULT_BREAKDOWN_COLOR,
-			text
-		}));
-
-		return {
-			colors,
-			key,
-			type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
-		};
-	};
+	createBreakdownCustomSettings = (key: string): CustomBreakdownChartColorsSettings => ({
+		colors: [],
+		key,
+		type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
+	});
 
 	createCustomSettings = (type: CustomChartColorsSettingsType, key: string) => type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
 		? this.createBreakdownCustomSettings(key)
@@ -121,9 +111,9 @@ export class ColorsBox extends React.Component<Props> {
 	};
 
 	isDisabledCustomSettings = () => {
-		const {buildData, disabledCustomSettings, values, widget} = this.props;
+		const {disabledCustomSettings, values, widget} = this.props;
 
-		return disabledCustomSettings || !buildData || getCustomColorsSettingsKey(widget) !== getCustomColorsSettingsKey(values);
+		return disabledCustomSettings || getCustomColorsSettingsKey(widget) !== getCustomColorsSettingsKey(values);
 	};
 
 	setSettingsByActualData = () => {
@@ -158,8 +148,8 @@ export class ColorsBox extends React.Component<Props> {
 
 		return (
 			<Component
+				buildData={buildData}
 				disabledCustomSettings={this.isDisabledCustomSettings()}
-				labels={buildData?.labels}
 				name={name}
 				onChange={this.handleChange}
 				value={value}
