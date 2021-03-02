@@ -11,19 +11,22 @@ import {
 	WIDGET_TYPES
 } from 'store/widgets/data/constants';
 import ExtendingFieldset from 'DiagramWidgetEditForm/components/ExtendingFieldset';
-import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormBox from 'components/molecules/FormBox';
 import {getDataErrorKey, getDefaultBreakdown} from 'DiagramWidgetEditForm/helpers';
+import {getMainDataSet} from 'store/widgets/data/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import IndicatorFieldset from 'DiagramWidgetEditForm/components/IndicatorFieldset';
 import {isAllowedTopAggregation, isCircleChart} from 'store/widgets/helpers';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import styles from './styles.less';
 import withForm from 'DiagramWidgetEditForm/withForm';
 
 export class IndicatorDataBox extends PureComponent<Props> {
 	static defaultProps = {
 		children: null,
+		usesBlankData: false,
 		usesBreakdown: true,
 		usesEmptyData: false,
 		usesTop: false
@@ -64,7 +67,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		setDataFieldValue(index, FIELDS.breakdown, breakdown);
 	};
 
-	handleChangeShowEmptyData = (name: string, value: boolean) => {
+	handleChangeCheckbox = (name: string, value: boolean) => {
 		const {index, setDataFieldValue} = this.props;
 
 		setDataFieldValue(index, name, value);
@@ -89,6 +92,22 @@ export class IndicatorDataBox extends PureComponent<Props> {
 
 		setDataFieldValue(index, FIELDS.breakdown, undefined);
 		setDataFieldValue(index, FIELDS.withBreakdown, false);
+	};
+
+	hasCustomGroup = () => {
+		const {breakdown, parameters} = getMainDataSet(this.props.values.data);
+		const {CUSTOM} = GROUP_WAYS;
+
+		return parameters?.[0]?.group.way === CUSTOM || breakdown?.[0]?.group.way === CUSTOM;
+	};
+
+	isAllowedComboDiagram = () => {
+		const {data, type} = this.props.values;
+		const {BAR, BAR_STACKED, COMBO} = WIDGET_TYPES;
+
+		return type === COMBO && data
+			.filter(({sourceForCompute, type: sybType}) => !sourceForCompute && [BAR, BAR_STACKED].includes(sybType))
+			.length > 1;
 	};
 
 	requiredBreakdown = () => {
@@ -177,20 +196,36 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		);
 	};
 
-	renderShowEmptyDataBox = () => {
+	renderShowBlankDataCheckbox = () => {
+		const {dataSet, usesBlankData} = this.props;
+		const {showBlankData} = dataSet;
+
+		if (usesBlankData && (this.isAllowedComboDiagram() || !this.hasCustomGroup())) {
+			return (
+				<Checkbox
+					className={styles.checkbox}
+					label="Показывать незаполненные данные"
+					name={FIELDS.showBlankData}
+					onClick={this.handleChangeCheckbox}
+					value={Boolean(showBlankData)}
+				/>
+			);
+		}
+	};
+
+	renderShowEmptyDataCheckbox = () => {
 		const {dataSet, usesEmptyData} = this.props;
 		const {showEmptyData} = dataSet;
 
-		if (usesEmptyData) {
+		if (usesEmptyData && (this.isAllowedComboDiagram() || this.hasCustomGroup())) {
 			return (
-				<FormBox>
-					<Checkbox
-						label="Показывать нулевые значения"
-						name={FIELDS.showEmptyData}
-						onClick={this.handleChangeShowEmptyData}
-						value={Boolean(showEmptyData)}
-					/>
-				</FormBox>
+				<Checkbox
+					className={styles.checkbox}
+					label="Показывать нулевые значения"
+					name={FIELDS.showEmptyData}
+					onClick={this.handleChangeCheckbox}
+					value={Boolean(showEmptyData)}
+				/>
 			);
 		}
 	};
@@ -199,7 +234,8 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		return (
 			<Fragment>
 				{this.renderIndicators()}
-				{this.renderShowEmptyDataBox()}
+				{this.renderShowEmptyDataCheckbox()}
+				{this.renderShowBlankDataCheckbox()}
 			</Fragment>
 		);
 	}

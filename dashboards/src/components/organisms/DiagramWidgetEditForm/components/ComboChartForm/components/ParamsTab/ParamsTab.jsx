@@ -48,6 +48,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const props = {
 			onSelectCallback: this.onSelectIndicatorCallback,
 			renderLeftControl: this.renderChartInput,
+			usesBlankData: true,
 			usesEmptyData: true,
 			usesTop: true
 		};

@@ -4,7 +4,7 @@ import ColorsBox from 'DiagramWidgetEditForm/components/ColorsBox';
 import Container from 'components/atoms/Container';
 import DataLabelsBox from 'DiagramWidgetEditForm/components/DataLabelsBox';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
-import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
+import {DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_COLORS_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
@@ -72,7 +72,7 @@ export class StyleTab extends Component<StyleTabProps> {
 
 	renderColorsBox = () => {
 		const {values, widget} = this.props;
-		const {colorsSettings} = values;
+		const {colorsSettings = DEFAULT_COLORS_SETTINGS} = values;
 
 		return (
 			<ColorsBox
