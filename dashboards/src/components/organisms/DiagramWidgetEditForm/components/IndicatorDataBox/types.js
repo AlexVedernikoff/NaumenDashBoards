@@ -9,6 +9,7 @@ export type Props = {|
 	index: number,
 	onSelectCallback: (index: number) => Function,
 	renderLeftControl?: (set: DataSet, index: number) => React$Node,
+	usesBlankData: boolean,
 	usesBreakdown: boolean,
 	usesEmptyData: boolean,
 	usesTop: boolean

@@ -21,6 +21,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 		const {renderIndicatorBoxes} = this.props;
 		const props = {
 			onSelectCallback: this.onSelectIndicatorCallback,
+			usesBlankData: true,
 			usesEmptyData: true,
 			usesTop: true
 		};
