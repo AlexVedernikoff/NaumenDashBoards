@@ -347,7 +347,7 @@ class DashboardsService
 
         String attributeClassFqn = linkAttribute.property
         boolean deep = requestContent?.deep
-        List<String> types = requestContent?.types ?: AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER
+        List<String> types = requestContent?.types ?: AttributeType.ALL_ATTRIBUTE_TYPES
 
         def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
         List attributeTypes = linkAttribute.sourceCode
@@ -1027,7 +1027,7 @@ class DashboardsService
     private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
     {
         return attributes.findResults {
-            !it.computable && it.type.code in AttributeType.ATTRIBUTE_TYPES_WITHOUT_TIMER ? buildAttribute(it, sourceName, sourceCode) : null
+            !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, sourceName, sourceCode) : null
         }.sort { it.title }
     }
 
