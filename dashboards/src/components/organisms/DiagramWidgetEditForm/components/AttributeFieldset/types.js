@@ -1,14 +1,8 @@
 // @flow
-import type {ContextProps} from 'DiagramWidgetEditForm/types';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import type {OnSelectEvent} from 'components/types';
+import type {SourceData} from 'containers/DiagramWidgetEditForm/types';
 
 export type Attribute = Object;
-
-export type Source = {
-	label: string,
-	value: string
-};
 
 export type RefProps = {
 	disabled: boolean,
@@ -17,8 +11,7 @@ export type RefProps = {
 };
 
 export type Props = {
-	...ContextProps,
-	dataSet: DataSet,
+	dataKey: string,
 	dataSetIndex: number,
 	disabled: boolean,
 	getAttributeOptions?: (Array<Attribute>, index: number) => Array<Attribute>,
@@ -26,12 +19,10 @@ export type Props = {
 	index: number,
 	name: string,
 	onChangeLabel: (event: OnSelectEvent, index: number) => void,
-	onClickCreationButton?: () => void,
 	onRemove?: (index: number) => void,
 	onSelect: (event: OnSelectEvent, index: number) => void,
 	removable: boolean,
-	renderRefField?: (parent: Attribute | null) => React$Node,
-	showCreationButton: boolean,
+	source: SourceData,
 	value: Attribute | null
 };
 

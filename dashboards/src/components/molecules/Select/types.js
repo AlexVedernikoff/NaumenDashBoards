@@ -31,16 +31,19 @@ export type Components = {
 
 export type Props = {
 	className: string,
-	components: $Shape<Components>,
+	components?: $Shape<Components>,
 	disabled: boolean,
 	editable: boolean,
-	fetchOptions?: () => void,
-	getOptionLabel?: (option: Option) => string,
-	getOptionValue?: (option: Option) => any,
+	fetchOptions?: () => any,
+	getOptionLabel: (option: Option) => string,
+	getOptionValue: (option: Option) => any,
 	isSearching: boolean,
 	loading: boolean,
+	loadingMessage: string,
 	multiple: boolean,
 	name: string,
+	noOptionsMessage: string,
+	notFoundMessage: string,
 	onChangeLabel?: OnChangeInputEvent => void,
 	onSelect: SelectEvent => void,
 	options: Array<Option>,
@@ -49,7 +52,7 @@ export type Props = {
 };
 
 export type State = {
-	fountOptions: Array<Option>,
+	foundOptions: Array<Option>,
 	searchValue: string,
 	showMenu: boolean
 };

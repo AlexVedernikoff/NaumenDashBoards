@@ -52,12 +52,26 @@ export class NavigationBox extends PureComponent<Props> {
 		});
 	};
 
+	renderMenuContainer = (props: MenuProps) => {
+		const {className, loading, onSelect, options} = props;
+
+		return (
+			<MultiDropDownList
+				className={className}
+				isSelectedHeader={true}
+				items={options}
+				loading={loading}
+				onSelect={onSelect}
+			/>
+		);
+	};
+
 	renderSelect = () => {
 		const {dashboards, fetchDashboards, settings} = this.props;
 		const {dashboard, widget} = settings;
 		const {items, loading} = dashboards;
 		const components = {
-			Menu: this.renderSelectMenu
+			MenuContainer: this.renderMenuContainer
 		};
 		const value = widget || dashboard;
 
@@ -73,20 +87,6 @@ export class NavigationBox extends PureComponent<Props> {
 					value={value}
 				/>
 			</FormField>
-		);
-	};
-
-	renderSelectMenu = (props: MenuProps) => {
-		const {className, loading, onSelect, options} = props;
-
-		return (
-			<MultiDropDownList
-				className={className}
-				isSelectedHeader={true}
-				items={options}
-				loading={loading}
-				onSelect={onSelect}
-			/>
 		);
 	};
 

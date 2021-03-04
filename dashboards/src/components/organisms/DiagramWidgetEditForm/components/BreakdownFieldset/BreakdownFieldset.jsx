@@ -130,6 +130,7 @@ export class BreakdownFieldset extends Component<Props> {
 				<FormField error={error} key={index}>
 					<AttributeFieldset
 						dataSet={dataSet}
+						dataSetIndex={index}
 						getAttributeOptions={this.filter}
 						getSourceOptions={this.filter}
 						index={breakdownIndex}

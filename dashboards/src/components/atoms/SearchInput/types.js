@@ -1,13 +1,10 @@
 // @flow
-import type {ElementRef} from 'react';
-
-export type ForwardedRef = {
-	current: null | ElementRef<'input'>
-};
+import type {Ref} from 'components/types';
 
 export type DefaultProps = {|
 	className: string,
-	forwardedRef: ForwardedRef,
+	focusOnMount: boolean,
+	forwardedRef: Ref<'input'> | null,
 	value: string
 |};
 
