@@ -15,6 +15,7 @@ import type {InputRef, OnChangeInputEvent, OnSelectEvent} from 'components/types
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'components/constants';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component, createRef, Fragment} from 'react';
 import schema from './schema';
 import Select from 'components/molecules/Select';
@@ -289,7 +290,7 @@ export class CustomGroup extends Component<Props, State> {
 		</Fragment>
 	);
 
-	renderGroupSelectMenuContainer = (props) => {
+	renderGroupSelectMenuContainer = (props: ContainerProps) => {
 		const {children, className} = props;
 
 		return (

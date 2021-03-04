@@ -1,75 +1,34 @@
 // @flow
-import type {Attribute, Props, RefProps, State} from './types';
+import type {Attribute, Props} from './types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import {createRefKey} from 'store/sources/refAttributes/actions';
-import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
-import FormCheckControl from 'components/molecules/FormCheckControl';
-import {getParentClassFqn} from 'DiagramWidgetEditForm/helpers';
-import List from 'components/molecules/Select/components/List';
-import type {OnChangeEvent, OnChangeLabelEvent, OnSelectEvent, TreeNode} from 'components/types';
-import type {Props as SelectProps} from 'components/molecules/TransparentSelect/types';
-import type {Props as ListProps} from 'components/molecules/Select/components/List/types';
+import MainSelect from 'containers/DiagramWidgetEditForm/components/AttributeFieldSet/components/MainSelect';
+import type {OnSelectEvent} from 'components/types';
 import React, {Fragment, PureComponent} from 'react';
-import styles from './styles.less';
-import Toggle from 'components/atoms/Toggle';
-import TransparentSelect from 'components/molecules/TransparentSelect';
-import {Tree as TreeList} from 'components/molecules/MaterialTreeSelect/components';
-import withForm from 'DiagramWidgetEditForm/withForm';
+import RefSelect from 'containers/DiagramWidgetEditForm/components/AttributeFieldSet/components/RefSelect';
 
-export class AttributeFieldset extends PureComponent<Props, State> {
+export class AttributeFieldset extends PureComponent<Props> {
 	static defaultProps = {
 		disabled: false,
 		index: 0,
 		name: '',
-		removable: false,
-		showCreationButton: false
+		removable: false
 	};
 
-	state = {
-		showDynamicAttributes: false,
-		showDynamicAttributesError: false
+	getMainOptions = (options: Array<Attribute>): Array<Attribute> => {
+		const {dataSetIndex, getMainOptions} = this.props;
+
+		return getMainOptions(options, dataSetIndex);
 	};
-
-	componentDidMount () {
-		this.setRefTitleAttribute();
-	}
-
-	componentDidUpdate () {
-		this.setRefTitleAttribute();
-	}
-
-	fetchAttributes = (classFqn: string, parentClassFqn?: string | null) => () => this.props.fetchAttributes(classFqn, parentClassFqn);
-
-	fetchRefAttributes = (parent: Attribute) => () => this.props.fetchRefAttributes(parent);
-
-	getAttributeOptions = (attributes: Array<Attribute>) => {
-		const {getAttributeOptions, index} = this.props;
-
-		return getAttributeOptions ? getAttributeOptions(attributes, index) : attributes;
-	};
-
-	getAttributeSelectProps = (parent: Attribute): $Shape<SelectProps> => {
-		const {refAttributes} = this.props;
-		const key = createRefKey(parent);
-		const {[key]: data = this.getDefaultMapData()} = refAttributes;
-
-		return {
-			...data,
-			fetchOptions: this.fetchRefAttributes(parent),
-			options: this.getAttributeOptions(data.options)
-		};
-	};
-
-	getDefaultMapData = () => ({
-		error: false,
-		loading: false,
-		options: [],
-		uploaded: false
-	});
 
 	getOptionLabel = (attribute: Attribute | null) => attribute ? attribute.title : '';
 
 	getOptionValue = (attribute: Attribute | null) => attribute ? attribute.code : '';
+
+	getRefOptions = (options: Array<Attribute>): Array<Attribute> => {
+		const {dataSetIndex, getRefOptions} = this.props;
+
+		return getRefOptions(options, dataSetIndex);
+	};
 
 	getSourceOptions = (attributes: Array<Attribute>) => {
 		const {getSourceOptions, index} = this.props;
@@ -77,79 +36,34 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		return getSourceOptions ? getSourceOptions(attributes, index) : attributes;
 	};
 
-	getSourceSelectProps = () => {
-		const {attributes, dataSet, dataSetIndex, values} = this.props;
-		const {value: sourceValue} = dataSet.source;
-		const parentClassFqn = getParentClassFqn(values, dataSetIndex);
-		const fetchOptions = sourceValue ? this.fetchAttributes(sourceValue.value, parentClassFqn) : null;
-		let props = {
-			fetchOptions
+	handleChangeLabelMain = (title: string) => {
+		const {index, onChangeLabel, value} = this.props;
+		const newValue = {...value, title};
+
+		onChangeLabel({value: newValue}, index);
+	};
+
+	handleChangeLabelRef = (title: string) => {
+		const {index, onChangeLabel, value} = this.props;
+		const newValue = {
+			...value,
+			ref: {
+				...value.ref,
+				title
+			}
 		};
 
-		if (sourceValue) {
-			const {[sourceValue.value]: sourceData = this.getDefaultMapData()} = attributes;
-
-			if (sourceData) {
-				props = {
-					...sourceData,
-					...props,
-					options: this.getSourceOptions(sourceData.options)
-				};
-			}
-		}
-
-		return props;
+		onChangeLabel(newValue);
 	};
 
-	getTitleAttribute = (attributes: Array<Attribute>) => {
-		return attributes.find(attribute => attribute.code === 'title') || null;
-	};
+	handleDrop = () => {
+		const {index, name, onSelect, value} = this.props;
+		const newValue = {
+			...value,
+			ref: null
+		};
 
-	handleChangeLabel = (parent: Attribute | null = null) => (event: OnChangeLabelEvent) => {
-		const {index, onChangeLabel, value} = this.props;
-		const {label: title} = event;
-		let newValue = value;
-
-		if (parent) {
-			newValue = {
-				...parent,
-				ref: {
-					...parent.ref,
-					title
-				}
-			};
-		} else {
-			newValue = {
-				...newValue,
-				title
-			};
-		}
-
-		onChangeLabel({...event, value: newValue}, index);
-	};
-
-	handleChangeShowDynamicAttributes = ({value: show}: OnChangeEvent<boolean>) => {
-		const {dataSet, dynamicGroups, fetchDynamicAttributeGroups} = this.props;
-		const {dataKey, source} = dataSet;
-		const {descriptor} = source;
-
-		if (descriptor || show) {
-			if (!show && !dynamicGroups[dataKey]) {
-				fetchDynamicAttributeGroups(dataKey, descriptor);
-			}
-
-			this.setState({showDynamicAttributes: !show});
-		} else {
-			this.setState({showDynamicAttributesError: true});
-		}
-	};
-
-	handleLoadDynamicAttributes = (node: DynamicGroupsNode | null) => {
-		const {dataSet, fetchDynamicAttributes} = this.props;
-
-		if (node) {
-			fetchDynamicAttributes(dataSet.dataKey, this.getOptionValue(node.value));
-		}
+		onSelect({name, value: newValue}, index);
 	};
 
 	handleRemove = () => {
@@ -158,124 +72,58 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		onRemove && onRemove(index);
 	};
 
-	handleSelect = (parent: Attribute | null = null) => (event: OnSelectEvent) => {
+	handleSelectMain = (event: OnSelectEvent) => {
 		const {index, onSelect} = this.props;
-		let {value} = event;
 
-		if (parent) {
-			value = {
-				...parent,
-				ref: value
-			};
-		}
-
-		onSelect({...event, value}, index);
+		onSelect(event, index);
 	};
 
-	handleSelectDynAttr = (onSelect: Function) => ({value}: DynamicGroupsNode) => onSelect(value);
+	handleSelectRef = (event: OnSelectEvent) => {
+		const {index, onSelect, value} = this.props;
+		const {value: refValue} = event;
+		const newValue = {
+			...value,
+			ref: refValue
+		};
 
-	isEnabledDynamicNode = (node: TreeNode<Object>) => !!node.parent;
-
-	setRefTitleAttribute = () => {
-		const {fetchRefAttributes, index, name, onSelect, refAttributes, value} = this.props;
-		let newValue = value;
-
-		if (value && !value.ref && value.type in ATTRIBUTE_SETS.REFERENCE) {
-			const refAttributesData = refAttributes[createRefKey(value)];
-
-			if (refAttributesData && !refAttributesData.loading) {
-				newValue = {
-					...value,
-					ref: this.getTitleAttribute(refAttributesData.options)
-				};
-
-				onSelect({name, value: newValue}, index);
-			} else if (!refAttributesData || !refAttributesData.loading) {
-				fetchRefAttributes(value);
-			}
-		}
+		onSelect({...event, value: newValue}, index);
 	};
 
-	renderAttributeField = (props: Object, parent: Attribute | null = null) => {
-		const {renderRefField} = this.props;
-		const {disabled, value} = props;
-
-		if (!parent && value && value.type in ATTRIBUTE_SETS.REFERENCE) {
-			return (
-				<Fragment>
-					{this.renderParentAttributeField(props)}
-					{this.renderChildAttributeField({...props}, value)}
-				</Fragment>
-			);
-		}
-
-		const select = this.renderSelect(props, parent);
-
-		if (renderRefField) {
-			const refProps: RefProps = {
-				disabled,
-				parent,
-				value
-			};
-
-			return (
-				<div className={styles.combinedContainer}>
-					<div className={styles.combinedRef}>
-						{renderRefField(refProps)}
-					</div>
-					<div className={styles.combinedAttribute}>
-						{select}
-					</div>
-				</div>
-			);
-		}
+	renderMainSelect = () => {
+		const {components, disabled, removable, source, value} = this.props;
 
 		return (
-			<div className={styles.container}>
-				{select}
-			</div>
+			<MainSelect
+				components={components}
+				disabled={disabled}
+				getOptions={this.getMainOptions}
+				onChangeLabel={this.handleChangeLabelMain}
+				onRemove={this.handleRemove}
+				onSelect={this.handleSelectMain}
+				removable={removable}
+				source={source.value}
+				value={value}
+			/>
 		);
 	};
 
-	renderChildAttributeField = (props: SelectProps, parent: Attribute | null = null) => {
-		if (parent) {
-			return this.renderAttributeField({
-				...props,
-				...this.getAttributeSelectProps(parent),
-				onChangeLabel: this.handleChangeLabel(parent),
-				onSelect: this.handleSelect(parent),
-				value: parent.ref
-			}, parent);
-		}
+	renderRefSelect = () => {
+		const {components, disabled, removable, value} = this.props;
 
-		return null;
-	};
-
-	renderDynamicAttributeList = (props: ListProps) => {
-		const {dataSet, dynamicGroups} = this.props;
-		const {showDynamicAttributes} = this.state;
-
-		if (dataSet.descriptor && showDynamicAttributes) {
-			const {onSelect, searchValue, value} = props;
-			const initialSelected = [this.getOptionValue(value)];
-			const {[dataSet.dataKey]: sourceData = {
-				data: {},
-				loading: true
-			}} = dynamicGroups;
-			const {data, loading} = sourceData;
-
+		if (value && value.type in ATTRIBUTE_SETS.REFERENCE) {
 			return (
-				<TreeList
-					getOptionLabel={this.getOptionLabel}
-					getOptionValue={this.getOptionValue}
-					initialSelected={initialSelected}
-					isEnabledNode={this.isEnabledDynamicNode}
-					loading={loading}
-					onLoad={this.handleLoadDynamicAttributes}
-					onSelect={this.handleSelectDynAttr(onSelect)}
-					options={data}
-					searchValue={searchValue}
-					value={value}
+				<RefSelect
+					components={components}
+					disabled={disabled}
+					droppable={true}
+					getOptions={this.getRefOptions}
+					onChangeLabel={this.handleChangeLabelRef}
+					onDrop={this.handleDrop}
+					onRemove={this.handleRemove}
+					onSelect={this.handleSelectRef}
+					parent={value}
+					removable={removable}
+					value={value.ref}
 				/>
 			);
 		}
@@ -283,99 +131,14 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderDynamicAttributesError = () => {
-		const {descriptor} = this.props.dataSet;
-		const {showDynamicAttributesError} = this.state;
-
-		if (!descriptor && showDynamicAttributesError) {
-			return (
-				<div className={styles.dynamicError}>
-					Для отображения списка, установите, пожалуйста, параметры фильтрации
-				</div>
-			);
-		}
-	};
-
-	renderList = (props: ListProps) => <List {...props} />;
-
-	renderListContainer = (props: ListProps) => (
-		<Fragment>
-			{this.renderToggleShowingDynAttr()}
-			{this.renderDynamicAttributeList(props)}
-			{this.renderList(props)}
-		</Fragment>
-	);
-
-	renderParentAttributeField = (props: SelectProps) => (
-		<div className={styles.parentInput}>
-			{this.renderSelect(props)}
-		</div>
-	);
-
-	renderSelect = (props: SelectProps, parent: Attribute | null = null) => {
-		const {value: sourceValue} = this.props.dataSet.source;
-		const note = sourceValue ? sourceValue.label : '';
-		let components;
-
-		if (!parent) {
-			components = {
-				List: this.renderListContainer
-			};
-		}
-
-		return <TransparentSelect className={styles.select} components={components} note={note} {...props} />;
-	};
-
-	renderToggleShowingDynAttr = () => {
-		const {dataSet, sources} = this.props;
-		const {showDynamicAttributes} = this.state;
-		const {value: sourceValue} = dataSet.source;
-		const hasDynamic = sourceValue && sources[sourceValue.value] && sources[sourceValue.value].value.hasDynamic;
-
-		if (hasDynamic) {
-			return (
-				<Fragment>
-					<FormCheckControl className={styles.dynamicAttributesShowHandler} label="Динамические атрибуты">
-						<Toggle
-							checked={showDynamicAttributes}
-							onChange={this.handleChangeShowDynamicAttributes}
-							value={showDynamicAttributes}
-						/>
-					</FormCheckControl>
-					{this.renderDynamicAttributesError()}
-				</Fragment>
-			);
-		}
-
-		return null;
-	};
-
 	render () {
-		const {
-			disabled,
-			name,
-			onClickCreationButton,
-			removable,
-			showCreationButton,
-			value
-		} = this.props;
-
-		return this.renderAttributeField({
-			...this.getSourceSelectProps(),
-			async: true,
-			disabled,
-			getOptionLabel: this.getOptionLabel,
-			getOptionValue: this.getOptionValue,
-			name,
-			onChangeLabel: this.handleChangeLabel(),
-			onClickCreationButton,
-			onRemove: this.handleRemove,
-			onSelect: this.handleSelect(),
-			removable,
-			showCreationButton,
-			value
-		});
+		return (
+			<Fragment>
+				{this.renderMainSelect()}
+				{this.renderRefSelect()}
+			</Fragment>
+		);
 	}
 }
 
-export default withForm(AttributeFieldset);
+export default AttributeFieldset;

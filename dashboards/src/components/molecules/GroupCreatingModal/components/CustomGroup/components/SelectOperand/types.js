@@ -1,11 +1,12 @@
 // @flow
 import type {Node} from 'react';
+import type {OnSelectEvent} from 'components/types';
 import type {SelectData, SelectOperand} from 'store/customGroups/types';
 
 export type Value = Object;
 
 export type RenderProps = {|
-	onSelect: (name: string, value: Value) => void,
+	onSelect: (event: OnSelectEvent) => void,
 	value: Object | null
 |};
 

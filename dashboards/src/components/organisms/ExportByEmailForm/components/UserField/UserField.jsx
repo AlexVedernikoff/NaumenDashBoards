@@ -4,7 +4,7 @@ import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
-import type {Props as ValueLabelProps} from 'components/molecules/Select/components/Value/types';
+import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props as IconButtonProps} from 'components/atoms/IconButton/types';
 import React, {PureComponent} from 'react';
@@ -58,7 +58,7 @@ export class UserField extends PureComponent<Props, State> {
 		onSelect(index, value);
 	};
 
-	renderCaret = (props: IconButtonProps) => <IconButton iconName={ICON_NAMES.USER} onClick={props.onClick} round={false} />;
+	renderCaret = (props: IconButtonProps) => <IconButton icon={ICON_NAMES.USER} onClick={props.onClick} round={false} />;
 
 	renderIndicatorsContainer = (props: ContainerProps) => {
 		const {children} = props;
@@ -91,7 +91,7 @@ export class UserField extends PureComponent<Props, State> {
 		const components = {
 			Caret: this.renderCaret,
 			IndicatorsContainer: this.renderIndicatorsContainer,
-			ValueLabel: this.renderValueLabel
+			Value: this.renderValue
 		};
 		const {data: options, loading} = usersData;
 
@@ -112,7 +112,7 @@ export class UserField extends PureComponent<Props, State> {
 		);
 	};
 
-	renderValueLabel = (props: ValueLabelProps) => {
+	renderValue = (props: ValueProps) => {
 		const {value} = this.props;
 		const {focusedSelectInput} = this.state;
 		const {label} = props;

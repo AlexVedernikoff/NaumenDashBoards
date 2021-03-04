@@ -2,14 +2,14 @@
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
-import React, {createRef, PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class SearchInput extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
 		focusOnMount: false,
-		forwardedRef: createRef(),
+		forwardedRef: null,
 		value: ''
 	};
 
@@ -20,7 +20,7 @@ export class SearchInput extends PureComponent<Props, State> {
 	componentDidMount () {
 		const {focusOnMount, forwardedRef, value} = this.props;
 		const {value: stateValue} = this.state;
-		const {current: input} = forwardedRef;
+		const input = forwardedRef?.current;
 
 		if (value !== stateValue) {
 			this.setState({value});

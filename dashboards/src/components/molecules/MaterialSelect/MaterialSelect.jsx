@@ -3,13 +3,14 @@ import cn from 'classnames';
 import MultiValueContainer from './components/MultiValueContainer';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import ValueContainer from './components/ValueContainer';
 
 export class MaterialSelect extends PureComponent<Props> {
 	static defaultProps = Select.defaultProps;
-	selectRef = createRef();
+	selectRef: Ref<typeof Select> = createRef();
 	components = null;
 
 	getComponents = () => {
@@ -23,6 +24,13 @@ export class MaterialSelect extends PureComponent<Props> {
 		}
 
 		return this.components;
+	};
+
+	handleChangeLabel = (e: SyntheticInputEvent<HTMLInputElement>) => {
+		const {name, onChangeLabel} = this.props;
+		const {value} = e.currentTarget;
+
+		onChangeLabel && onChangeLabel(name, value);
 	};
 
 	handleClick = () => {
@@ -48,12 +56,10 @@ export class MaterialSelect extends PureComponent<Props> {
 
 	renderSimpleValueContainer = () => {
 		const {
-			forwardedLabelInputRef,
 			getOptionLabel,
 			getOptionValue,
 			isEditingLabel,
 			maxLabelLength,
-			onChangeLabel,
 			placeholder,
 			value
 		} = this.props;
@@ -61,11 +67,10 @@ export class MaterialSelect extends PureComponent<Props> {
 		return (
 			<ValueContainer
 				editableLabel={isEditingLabel}
-				forwardedInputRef={forwardedLabelInputRef}
 				getOptionLabel={getOptionLabel}
 				getOptionValue={getOptionValue}
 				maxLabelLength={maxLabelLength}
-				onChangeLabel={onChangeLabel}
+				onChangeLabel={this.handleChangeLabel}
 				onClick={this.handleClick}
 				placeholder={placeholder}
 				value={value}

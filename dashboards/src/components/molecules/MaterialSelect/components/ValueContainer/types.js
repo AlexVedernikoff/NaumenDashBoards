@@ -1,11 +1,6 @@
 // @flow
 import type {InputRef} from 'components/types';
-type Option = Object;
-
-type Value = {
-	label: string,
-	value: string
-};
+import type {Option, Value} from 'components/molecules/Select/types';
 
 export type Props = {
 	editableLabel: boolean,
