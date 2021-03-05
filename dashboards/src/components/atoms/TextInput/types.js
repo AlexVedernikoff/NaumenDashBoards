@@ -1,5 +1,5 @@
 // @flow
-import type {InputValue, OnChangeInputEvent} from 'components/types';
+import type {InputValue, OnChangeEvent} from 'components/types';
 
 export type Props = {
 	className: string,
@@ -7,7 +7,7 @@ export type Props = {
 	maxLength: number | null,
 	name: string,
 	onBlur?: (SyntheticFocusEvent<HTMLInputElement>) => void,
-	onChange: OnChangeInputEvent => void,
+	onChange: OnChangeEvent<string> => void,
 	onFocus?: (SyntheticFocusEvent<HTMLInputElement>) => void,
 	onlyNumber: boolean,
 	placeholder: string,

@@ -11,7 +11,7 @@ import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
 import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
 import LegendBox from 'DiagramWidgetEditForm/components/LegendBox';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 import React, {Component} from 'react';
 import SortingBox from 'DiagramWidgetEditForm/components/SortingBox';
 import type {StyleTabProps} from 'DiagramWidgetEditForm/types';
@@ -28,7 +28,7 @@ export class StyleTab extends Component<StyleTabProps> {
 		setFieldValue(name, data);
 	};
 
-	handleChangeAxisName = (index: number) => ({name, value}: OnChangeInputEvent) => {
+	handleChangeAxisName = (index: number) => ({name, value}: OnChangeEvent<string>) => {
 		const {setDataFieldValue} = this.props;
 
 		setDataFieldValue(index, name, value);

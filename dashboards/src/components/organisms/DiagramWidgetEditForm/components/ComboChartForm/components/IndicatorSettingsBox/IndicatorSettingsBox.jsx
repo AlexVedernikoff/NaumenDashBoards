@@ -9,7 +9,7 @@ import {getDefaultComboYAxisName} from 'store/widgets/data/helpers';
 import HorizontalLabel from 'components/atoms/HorizontalLabel';
 import LegacyCheckbox from 'components/atoms/LegacyCheckbox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
@@ -27,7 +27,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 		};
 	}
 
-	handleChange = (event: OnChangeInputEvent) => {
+	handleChange = (event: OnChangeEvent<string>) => {
 		const {handleChange} = this.props;
 		let {value} = event;
 
@@ -38,7 +38,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 		handleChange({...event, value});
 	};
 
-	handleChangeName = (index: number) => (event: OnChangeInputEvent) => {
+	handleChangeName = (index: number) => (event: OnChangeEvent<string>) => {
 		const {onChangeDataSetValue} = this.props;
 		const {name, value} = event;
 

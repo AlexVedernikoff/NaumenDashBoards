@@ -11,7 +11,7 @@ import FormField from 'components/molecules/GroupCreatingModal/components/FormFi
 import {GROUP_WAYS} from 'store/widgets/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import InfoPanel from 'components/atoms/InfoPanel';
-import type {InputRef, OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {InputRef, OnChangeEvent, OnSelectEvent} from 'components/types';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'components/constants';
@@ -82,7 +82,7 @@ export class CustomGroup extends Component<Props, State> {
 		return widgets.filter(this.isUsingCurrentGroup).map(widget => widget.name);
 	};
 
-	handleChangeGroupName = (event: OnChangeInputEvent) => {
+	handleChangeGroupName = (event: OnChangeEvent<string>) => {
 		const selectedGroup = this.getSelectedGroup();
 
 		selectedGroup && this.update({...selectedGroup, name: String(event.value)});

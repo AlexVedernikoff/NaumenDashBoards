@@ -15,7 +15,7 @@ import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
 import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
 import IndicatorSettingsBox from 'DiagramWidgetEditForm/components/ComboChartForm/components/IndicatorSettingsBox';
 import LegendBox from 'DiagramWidgetEditForm/components/LegendBox';
-import type {OnChangeInputEvent, OnSelectEvent} from 'components/types';
+import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component, Fragment} from 'react';
 import Select from 'components/molecules/Select';
@@ -50,7 +50,7 @@ export class StyleTab extends Component<StyleTabProps> {
 		setFieldValue(name, data);
 	};
 
-	handleChangeAxisName = (index: number) => ({name, value}: OnChangeInputEvent) => {
+	handleChangeAxisName = (index: number) => ({name, value}: OnChangeEvent<string>) => {
 		const {setDataFieldValue} = this.props;
 
 		setDataFieldValue(index, name, value);

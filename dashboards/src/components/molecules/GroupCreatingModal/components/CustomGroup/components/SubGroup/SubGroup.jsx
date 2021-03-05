@@ -7,7 +7,7 @@ import FormField from 'components/molecules/GroupCreatingModal/components/FormFi
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'components/constants';
-import type {OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
@@ -15,11 +15,11 @@ import TextInput from 'components/atoms/TextInput';
 import withCustomGroup from 'CustomGroup/withCustomGroup';
 
 export class SubGroup extends PureComponent<Props> {
-	handleChangeName = (e: OnChangeInputEvent) => {
+	handleChangeName = (e: OnChangeEvent<string>) => {
 		const {index, onUpdate, subGroup} = this.props;
 		const {value} = e;
 
-		onUpdate(index, {...subGroup, name: String(value)});
+		onUpdate(index, {...subGroup, name: value});
 	};
 
 	handleCreateAndCondition = () => {
