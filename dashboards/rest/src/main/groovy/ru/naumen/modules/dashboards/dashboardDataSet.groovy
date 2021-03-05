@@ -19,6 +19,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
+import com.amazonaws.util.json.Jackson
 
 import ru.naumen.core.server.script.api.injection.InjectApi
 
@@ -26,17 +27,8 @@ import static DiagramType.*
 
 @Field @Lazy @Delegate DashboardDataSet dashboardDataSet = new DashboardDataSetImpl()
 
-
 interface DashboardDataSet
 {
-    /**
-     * Метод получения данных для нескольких диаграмм
-     * @param requestContent - тело запроса
-     * @param cardObjectUuid - идентификатор "текущего объекта"
-     * @return ассоциативный массив из ключа виджета и данных диаграммы
-     */
-    String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectUuid)
-
     /**
      * Получение данных для диаграмм. Нужен для обратной совместимости.
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
@@ -44,7 +36,7 @@ interface DashboardDataSet
      * @return данные для построения диаграммы
      */
     @Deprecated
-    String getDataForCompositeDiagram(Map<String, Object> requestContent, String cardObjectUuid)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
 
     /**
      * Получение данных для диаграмм. С поддержкой вычислений.
@@ -52,7 +44,7 @@ interface DashboardDataSet
      * @param cardObjectUuid - идентификатор "текущего объекта"
      * @return данные для построения диаграммы
      */
-    String getDataForDiagram(Map<String, Object> requestContent, String cardObjectUuid)
+    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
 }
 
 @InjectApi
@@ -66,37 +58,17 @@ class DashboardDataSetImpl implements DashboardDataSet
     }
 
     @Override
-    String getDataForDiagrams(Map<String, Object> requestContent, String cardObjectUuid)
-    {
-        return requestContent.collectEntries { key, value ->
-            api.tx.call {
-                try
-                {
-                    return [(key): service.buildDiagram(
-                        service.transformRequest(value as Map<String, Object>, cardObjectUuid), cardObjectUuid
-                    )]
-                }
-                catch (Exception ex)
-                {
-                    logger.error("error in widget: $key", ex)
-                    return [(key): null]
-                }
-            }
-        }.with(JsonOutput.&toJson)
-    }
-
-    @Override
     @Deprecated
-    String getDataForCompositeDiagram(Map<String, Object> requestContent, String cardObjectUuid)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
     {
-        return getDataForDiagram(requestContent, cardObjectUuid)
+        return getDataForDiagram(dashboardKey, widgetKey, cardObjectUuid)
     }
 
     @Override
-    String getDataForDiagram(Map<String, Object> requestContent, String cardObjectUuid)
+    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
     {
         return api.tx.call {
-            service.buildDiagram(service.transformRequest(requestContent, cardObjectUuid), cardObjectUuid)
+            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid)
         }.with(JsonOutput.&toJson)
     }
 }
@@ -105,6 +77,8 @@ class DashboardDataSetImpl implements DashboardDataSet
 @Singleton
 class DashboardDataSetService
 {
+    DashboardSettingsService dashboardSettingsService = DashboardSettingsService.instance
+
     private static final List<String> NOMINATIVE_RUSSIAN_MONTH = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
                                                                   'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
     private static final List<String> GENITIVE_RUSSIAN_MONTH = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
@@ -116,93 +90,130 @@ class DashboardDataSetService
     }
 
     /**
+     * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
+     * @param dashboardKey - ключ дашборда
+     * @param widgetKey - ключ виджета
+     * @return тело запроса
+     */
+    Widget getWidgetSettingsByDashboardAndWidgetKey(String dashboardKey, String widgetKey)
+    {
+        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
+        def widget = dbSettings.widgets.find { it.id == widgetKey }
+        if(widget)
+        {
+            widget.data = widget.data.collect { widgetData ->
+                widgetData.parameters?.findResults {
+                    it.group = Group.mappingGroup(it.group, dbSettings, false)
+                    return it
+                }
+                widgetData.breakdown?.findResults {
+                    it.group = Group.mappingGroup(it.group, dbSettings, false)
+                    return it
+                }
+                return widgetData
+            }
+            return widget
+        }
+        else
+        {
+            throw new IllegalArgumentException('Widget is not found!')
+        }
+    }
+
+
+    /**
      * Метод построения диаграмм.
      * @param requestContent - запрос на построение диаграмы
      * @param subjectUUID - идентификатор "текущего объекта"
      * @return Типизированниые данные для построения диаграмм
      */
-    private def buildDiagram(Map<String, Object> requestContent, String subjectUUID)
+    private def buildDiagram(String dashboardKey, String widgetKey, String subjectUUID)
     {
-        def diagramType = requestContent.type as DiagramType
+        def widgetSettings = getWidgetSettingsByDashboardAndWidgetKey(dashboardKey, widgetKey)
+        def diagramType = widgetSettings.type as DiagramType
+        def request
+        def res
+        if (diagramType == DiagramType.TABLE)
+        {
+            Boolean showTableNulls = widgetSettings.showEmptyData
+            Boolean computationInTableRequest = widgetSettings?.data?.any { it.indicators?.any { it?.attribute?.any { it.type == 'COMPUTED_ATTR'} } }
+            Integer tableTop = widgetSettings.top?.show ? widgetSettings.top?.count as Integer : null
+            if (computationInTableRequest && !tableTop)
+            {
+                //вернём всё из бд, после сагрегируем
+                showTableNulls = true
+            }
+            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, showTableNulls, computationInTableRequest, tableTop)
+            Integer aggregationCnt = request?.data?.findResult { key, value ->
+                value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
+            }
+            IgnoreLimits ignoreLimits = widgetSettings.ignoreLimits ?: new IgnoreLimits()
+            res = getDiagramData(request, diagramType, aggregationCnt, widgetSettings, ignoreLimits)
+            if (computationInTableRequest)
+            {
+                //а здесь уже важно знать, выводить пустые значения или нет
+                showTableNulls = widgetSettings.showEmptyData
+                Boolean requestHasBreakdown = checkForBreakdown(widgetSettings)
+                res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
+            }
+        }
+        else
+        {
+            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType)
+            res = getDiagramData(request, diagramType)
+        }
         switch (diagramType)
         {
-            case DiagramType.StandardTypes:
-                def request = mappingStandardDiagramRequest(requestContent, subjectUUID)
-                def res = getDiagramData(request, diagramType)
+            case [*DiagramType.StandardTypes]:
                 String key = request.data.keySet().head()
                 String legend = request.data[key].aggregations.attribute.sourceName.head()
-                Boolean reverseGroups = isCustomGroupFromBreakdown(requestContent)
+                Boolean reverseGroups = isCustomGroupFromBreakdown(widgetSettings)
                 return mappingStandardDiagram(res, legend, reverseGroups)
             case DiagramType.RoundTypes:
-                def request = mappingRoundDiagramRequest(requestContent, subjectUUID)
-                def res = getDiagramData(request)
                 return mappingRoundDiagram(res)
             case DiagramType.CountTypes:
-                def request = mappingSummaryDiagramRequest(requestContent, subjectUUID)
-                def res = getDiagramData(request)
                 return mappingSummaryDiagram(res)
             case TABLE:
-                Boolean showNulls = requestContent.showEmptyData
-                Boolean computationInRequest = requestContent?.data?.values()?.indicators?.any { it?.attribute?.any { it.type == 'COMPUTED_ATTR'} }
-                Integer top = requestContent.top as Integer
-                if (computationInRequest && !top)
-                {
-                    //вернём всё из бд, после сагрегируем
-                    showNulls = true
-                }
-                def request = mappingTableDiagramRequest(requestContent, subjectUUID, showNulls, computationInRequest, top)
-                Integer aggregationCnt = request?.data?.findResult { key, value ->
-                    value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
-                }
-                Map ignoreLimits = requestContent.ignoreLimits as Map ?: [breakdown: false, parameter: false]
-                def res = getDiagramData(request, diagramType, aggregationCnt, requestContent, ignoreLimits)
-                if (computationInRequest)
-                {
-                    //а здесь уже важно знать, выводить пустые значения или нет
-                    showNulls = requestContent.showEmptyData
-                    Boolean requestHasBreakdown = checkForBreakdown(requestContent)
-                    res = prepareDataSet(res, requestContent, showNulls, requestHasBreakdown)
-                }
-                def (totalColumn, totalRow, showRowNum) = [requestContent.calcTotalColumn,
-                                                           requestContent.calcTotalRow,
-                                                           requestContent.showRowNum]
+                IgnoreLimits ignoreLimits = widgetSettings.ignoreLimits ?: new IgnoreLimits()
+                def (totalColumn, showRowNum) = [widgetSettings.calcTotalColumn,
+                                                 widgetSettings.showRowNum]
 
-                return mappingTableDiagram(res, totalColumn as boolean, totalRow as boolean,
-                                           showRowNum as boolean, requestContent, request, ignoreLimits)
+                return mappingTableDiagram(res, totalColumn as boolean,
+                                           showRowNum as boolean, widgetSettings, request, ignoreLimits)
             case COMBO:
-                def request = mappingComboDiagramRequest(requestContent, subjectUUID)
-                def res = getDiagramData(request, diagramType)
-                Integer sortingDataIndex = getSortingDataIndex(requestContent as Map)
+                Integer sortingDataIndex = getSortingDataIndex(widgetSettings)
                 //нашли источник, по которому должна быть сортировка
                 res = sortListsForCombo(res, sortingDataIndex)
-                List<Map> additionals = (requestContent.data as Map)
-                    .findResults { key, value ->
-                        if (!(value.sourceForCompute))
-                        {
-                            return [
-                                type     : value.type,
-                                breakdown: value.yAxis.title,
-                                name     : value.yAxis.title,
-                                dataKey  : key
-                            ]
-                        }
+                List<Map> additionals = (widgetSettings.data).findResults { value ->
+                    if (!(value.sourceForCompute))
+                    {
+                        def indicator = value.indicators.find()
+                        return [
+                            type     : indicator.attribute.type,
+                            breakdown: indicator.attribute.title,
+                            name     : indicator.attribute.title,
+                            dataKey  : value.dataKey
+                        ]
                     }
+                }
                 additionals = sortListsForCombo(additionals, sortingDataIndex)
-                String format = requestContent.data.findResult { key, value ->
-                    if (value.xAxis.type in AttributeType.DATE_TYPES && value.group.way == 'SYSTEM')
+                String format = widgetSettings.data.findResult { value ->
+                    def xAxis = value.parameters.find()
+                    if (xAxis.attribute.type in AttributeType.DATE_TYPES && xAxis.group.way == Way.SYSTEM)
                     {
-                        return value.group.format
+                        return xAxis.group.format
                     }
                 }
-                String groupFormat =  requestContent.data.findResult { key, value ->
-                    if (value.xAxis.type in AttributeType.DATE_TYPES && value.group.way == 'SYSTEM')
+                String groupFormat =  widgetSettings.data.findResult { value ->
+                    def xAxis = value.parameters.find()
+                    if (xAxis.attribute.type in AttributeType.DATE_TYPES && xAxis.group.way == Way.SYSTEM)
                     {
-                        return value.group.data
+                        return xAxis.group.data
                     }
                 }
-                Boolean changeLabels = requestContent?.sorting?.value == 'PARAMETER'
-                Boolean reverseLabels = requestContent?.sorting?.type == 'DESC' && changeLabels
-                List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(requestContent, diagramType)
+                Boolean changeLabels = widgetSettings?.sorting?.value == SortingValue.PARAMETER
+                Boolean reverseLabels = widgetSettings?.sorting?.type == SortingType.DESC && changeLabels
+                List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(widgetSettings, diagramType)
                 customsInBreakdown = sortListsForCombo(customsInBreakdown, sortingDataIndex)
                 return mappingComboDiagram(res, additionals, groupFormat, format,
                                            changeLabels, reverseLabels, customsInBreakdown, sortingDataIndex)
@@ -211,654 +222,22 @@ class DashboardDataSetService
     }
 
     /**
-     * Метод приведения запроса на построение стандартных диаграм к единому формату
-     * @param requestContent - запрос на построеине стандатной диаграмы
-     * @param subjectUUID - идентификатор "текущего объекта"
-     * @return DiagramRequest
-     */
-    private DiagramRequest mappingStandardDiagramRequest(Map<String, Object> requestContent,
-                                                         String subjectUUID)
-    {
-        def demoSorting = requestContent.sorting as Map<String, Object>
-        def uglyRequestData = requestContent.data as Map<String, Object>
-        Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
-            def data = value as Map<String, Object>
-            def source = new Source(classFqn: data.source, descriptor: data.descriptor)
-            def yAxis = data.yAxis as Map<String, Object>
-            def aggregationParameter = new AggregationParameter(
-                title: 'yAxis',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(yAxis),
-                sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
-            )
-            def dynamicGroup = null
-            def xAxis = data.xAxis as Map<String, Object>
-            boolean dynamicInAggregation = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-            if (dynamicInAggregation)
-            {
-                dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(yAxis))
-            }
-            def group = data.group as Map<String, Object>
-            def groupParameter = buildSystemGroup(group, xAxis)
-            groupParameter?.sortingType = demoSorting.value == 'PARAMETER' ? demoSorting.type : null
-            boolean dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-            if (dynamicInParameter)
-            {
-                dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(xAxis))
-            }
-
-            def mayBeBreakdown = data.breakdown
-            def breakdownMap = [:]
-            def breakdown = null
-            boolean dynamicInBreakdown = false
-
-            if (mayBeBreakdown instanceof Collection)
-            {
-                def groupTypes = data.breakdown*.group as Set
-                // Это список типов группировок.
-                // По хорошему они должны быть одинаковыми.
-                // Не знаю почему фронт шлёт их на каждый атрибут...
-                if (groupTypes.size() == 1)
-                {
-                    //Группировка одного типа можно продолжать
-                    breakdownMap = mayBeBreakdown.collectEntries { el ->
-                        dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                        if(dynamicInBreakdown)
-                        {
-                            dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
-                        }
-                        [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
-                    }
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Does not match group types: $groupTypes")
-                }
-            }
-            else
-            {
-                //это обычная разбивка... Ну или кастомная
-                breakdown = mayBeBreakdown?.with {
-                    buildSystemGroup(
-                        data.breakdownGroup as Map<String, Object>,
-                        it as Map<String, Object>
-                    )
-                }
-                dynamicInBreakdown = breakdown?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                if (dynamicInBreakdown)
-                {
-                    dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
-                }
-
-            }
-
-            def comp = yAxis?.stringForCompute?.with {
-                def compData = yAxis.computeData as Map
-                [
-                    formula    : it as String,
-                    title      : yAxis.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def br = breakdownMap[dataKey] as GroupParameter
-                        def aggr = new AggregationParameter(
-                            title: 'aggregation',
-                            type: v.aggregation as Aggregation,
-                            attribute: mappingAttribute(v.attr as Map),
-                            sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
-                        )
-                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
-                    }
-                ]
-            }
-
-            def parameterCustomGroup = group.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
-                : null
-            if (dynamicInParameter)
-            {
-                parameterCustomGroup = dynamicGroup
-            }
-            FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter',
-                                                       demoSorting.value == 'PARAMETER' ? demoSorting.type : '')
-
-            def breakdownAttribute
-            def breakdownGroupData
-            boolean isBreakdownGroupCustom = false
-            if(mayBeBreakdown instanceof Collection) {
-                breakdownAttribute = mayBeBreakdown?.value.find()
-                breakdownGroupData = mayBeBreakdown?.group?.data.find()
-                isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == 'CUSTOM'
-            }
-            else {
-                breakdownAttribute = mayBeBreakdown
-                breakdownGroupData = data?.breakdownGroup?.data
-                isBreakdownGroupCustom = data?.breakdownGroup?.way == 'CUSTOM'
-            }
-            def breakdownCustomGroup =  isBreakdownGroupCustom
-                ? [attribute: mappingAttribute(breakdownAttribute), *: breakdownGroupData]
-                : null
-            if (dynamicInBreakdown)
-            {
-                breakdownCustomGroup =  dynamicGroup
-            }
-            FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
-
-            if (dynamicInAggregation) {
-
-                dynamicFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
-                if(!parameterFilter?.filters) {
-                    parameterFilter?.filters = dynamicFilter.filters
-                } else if (parameterFilter?.filters) {
-                    //Если у нас есть фильтры в параметре и при этом есть дин. атрибут в агрегации,
-                    // необходимо его фильтр так же объединить с исходными фильтрами. Для этого переходим на
-                    // второй уровень вложенности и производим сложение условий через операцию и.
-                    parameterFilter?.filters = parameterFilter?.filters.collectMany {
-                        [it.collectMany { [it, dynamicFilter.filters[0][0]] }]
-                    }
-                }
-                else if(!breakdownFilter?.filters) {
-                    breakdownFilter?.filters = dynamicFilter.filters
-                }
-
-            }
-            def requisite
-            Boolean showNulls = data.showEmptyData as Boolean
-            Integer top = data.top as Integer
-            if (data.sourceForCompute)
-            {
-                requisite = null
-            }
-            else
-            {
-                def requisiteNode = comp
-                    ? new ComputationRequisiteNode(
-                    title: null,
-                    type: 'COMPUTATION',
-                    formula: comp.formula
-                )
-                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-                requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], showNulls: showNulls, top: top)
-            }
-            source.filterList = [parameterFilter, breakdownFilter]
-            RequestData res = new RequestData(
-                source: source,
-                aggregations: [aggregationParameter],
-                groups: [groupParameter, breakdown].grep()
-            )
-            [(key): [requestData: res, computeData: comp?.computeData, customGroup:
-                null, requisite: requisite]]
-        } as Map<String, Map>
-        return buildDiagramRequest(intermediateData, subjectUUID)
-    }
-
-    /**
-     * Метод приведения запроса на построение круговых диаграм к единому формату
-     * @param requestContent - запрос на построеине круговой диаграмы
-     * @param subjectUUID - идентификатор "текущего объекта"
-     * @return DiagramRequest
-     */
-    private DiagramRequest mappingRoundDiagramRequest(Map<String, Object> requestContent,
-                                                      String subjectUUID)
-    {
-        def demoSorting = requestContent.sorting as Map<String, Object>
-        def uglyRequestData = requestContent.data as Map<String, Object>
-        Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
-            def data = value as Map<String, Object>
-            def source = new Source(classFqn: data.source, descriptor: data.descriptor)
-
-            def indicator = data.indicator as Map<String, Object>
-            def aggregationParameter = new AggregationParameter(
-                title: 'indicator',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(indicator),
-                sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
-            )
-            def dynamicGroup
-            boolean dynamicInAggregation = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-            if (dynamicInAggregation)
-            {
-                dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(indicator))
-            }
-
-            def mayBeBreakdown = data.breakdown
-            def breakdownMap = [:]
-            GroupParameter breakdown = null
-            boolean dynamicInBreakdown = false
-            def breakdownCustomGroup = null
-            if (mayBeBreakdown instanceof Collection)
-            {
-                def groupTypes = data.breakdown*.group as Set
-                // Это список типов группировок.
-                // По хорошему они должны быть одинаковыми.
-                // Не знаю почему фронт шлёт их на каждый атрибут...
-                if (groupTypes.size() == 1)
-                {
-                    //Группировка одного типа можно продолжать
-                    breakdownMap = mayBeBreakdown.collectEntries { el ->
-                        dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                        if(dynamicInBreakdown) {
-                            dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
-                        }
-                        [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
-                    }
-                    breakdownCustomGroup = data.breakdown.find().group.way == 'CUSTOM'
-                        ? [attribute: mappingAttribute(data.breakdown.find().value), *: data.breakdown.find().group.data]
-                        : breakdownCustomGroup
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Does not match group types: $groupTypes")
-                }
-            }
-            else
-            {
-                //это обычная разбивка... Ну или кастомная
-                breakdown = mayBeBreakdown?.with {
-                    buildSystemGroup(
-                        data.breakdownGroup as Map<String, Object>,
-                        it as Map<String, Object>
-                    )
-                }
-                dynamicInBreakdown = breakdown?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                if (dynamicInBreakdown)
-                {
-                    dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
-                }
-            }
-
-            def comp = indicator?.stringForCompute?.with {
-                def compData = indicator.computeData as Map
-                [
-                    formula    : it as String,
-                    title      : indicator.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def br = breakdownMap[dataKey] as GroupParameter
-                        def aggr = new AggregationParameter(
-                            title: 'aggregation',
-                            type: v.aggregation as Aggregation,
-                            attribute: mappingAttribute(v.attr as Map),
-                            sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
-                        )
-                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
-                    }
-                ]
-            }
-
-            if(dynamicInBreakdown)
-            {
-                breakdownCustomGroup = dynamicGroup
-            }
-            else
-            {
-                breakdownCustomGroup = data.breakdownGroup?.way == 'CUSTOM'
-                    ? [attribute: mappingAttribute(mayBeBreakdown), *: data.breakdownGroup.data]
-                    : breakdownCustomGroup
-            }
-
-            FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
-            FilterList aggregationFilter = null
-            if (dynamicInAggregation)
-            {
-                aggregationFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
-            }
-            def requisite
-            Boolean showNulls = data.showEmptyData as Boolean
-            Integer top = data.top as Integer
-            if (data.sourceForCompute)
-            {
-                requisite = null
-            }
-            else
-            {
-                def requisiteNode = comp
-                    ? new ComputationRequisiteNode(
-                    title: null,
-                    type: 'COMPUTATION',
-                    formula: comp.formula
-                )
-                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-                requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], showNulls: showNulls, top: top)
-            }
-            source.filterList = [breakdownFilter, aggregationFilter]
-            RequestData res = new RequestData(
-                source: source,
-                aggregations: [aggregationParameter],
-                groups: [breakdown].grep()
-            )
-
-            [(key): [requestData: res, computeData: comp?.computeData, customGroup:
-                null, requisite: requisite]]
-        } as Map<String, Map>
-        return buildDiagramRequest(intermediateData, subjectUUID)
-    }
-
-    /**
-     * Метод приведения запроса на построение сводки к единому формату
-     * @param requestContent - запрос на построеине сводки
-     * @param subjectUUID - идентификатор "текущего объекта"
-     * @return DiagramRequest
-     */
-    private DiagramRequest mappingSummaryDiagramRequest(Map<String, Object> requestContent,
-                                                        String subjectUUID)
-    {
-        def uglyRequestData = requestContent.data as Map<String, Object>
-        Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
-            def data = value as Map<String, Object>
-            def source = new Source(classFqn: data.source, descriptor: data.descriptor)
-
-            def indicator = data.indicator as Map<String, Object>
-            def aggregationParameter = new AggregationParameter(
-                title: 'indicator',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(indicator)
-            )
-            def dynamicGroup
-            if (aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
-            {
-                dynamicGroup = mappingDynamicAttributeCustomGroup(aggregationParameter.attribute)
-                dynamicGroup.subGroups*.name = aggregationParameter.attribute.title
-            }
-
-            def comp = indicator?.stringForCompute?.with {
-                def compData = indicator.computeData as Map
-                [
-                    formula    : it as String,
-                    title      : indicator.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def aggr = new AggregationParameter(
-                            title: 'aggregation',
-                            type: v.aggregation as Aggregation,
-                            attribute: mappingAttribute(v.attr as Map)
-                        )
-                        [(k): [aggregation: aggr, dataKey: dataKey]]
-                    }
-                ]
-            }
-            String attributeTitle = indicator?.title
-            FilterList dynamicFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
-            source.filterList = [dynamicFilter]
-            def res = new RequestData(source: source, aggregations: [aggregationParameter])
-            def requisite
-            if (data.sourceForCompute)
-            {
-                requisite = null
-            }
-            else
-            {
-                def requisiteNode = comp
-                    ? new ComputationRequisiteNode(
-                    title: comp.title,
-                    type: 'COMPUTATION',
-                    formula: comp.formula
-                )
-                    : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: key)
-                requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], showNulls: true)
-            }
-
-            [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite:
-                requisite]]
-        } as Map<String, Map>
-        return buildDiagramRequest(intermediateData, subjectUUID)
-    }
-
-    /**
-     * Метод приведения запроса на построение таблицы к единому формату
-     * @param requestContent - запрос на построеине таблицы
-     * @param subjectUUID - идентификатор "текущего объекта"
-     * @param showNulls - флаг на отображение пустых значений
-     * @param computationInRequest - флаг на наличие вычислений в запросе
-     * @param top - количество записей, которое нужно вывести
-     * @return DiagramRequest
-     */
-    private DiagramRequest mappingTableDiagramRequest(Map<String, Object> requestContent, String subjectUUID,
-                                                      Boolean showNulls, Boolean computationInRequest, Integer top)
-    {
-        def uglyRequestData = requestContent.data as Map<String, Object>
-        Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
-            def data = value as Map<String, Object>
-            def source = new Source(classFqn: data.source, descriptor: data.descriptor)
-            def dynamicGroup = null
-
-            List<Map<String, Object>> indicators = data.indicators as List<Map>
-            List<AggregationParameter> aggregationParameters = indicators.collect { indicator ->
-                String aggregation = indicator.aggregation
-                Map attribute = indicator.attribute
-                return new AggregationParameter(
-                    title: 'column',
-                    type: aggregation as Aggregation,
-                    attribute: mappingAttribute(attribute)
-                )
-            }
-
-            boolean dynamicInAggregate
-            aggregationParameters.each { aggregationParameter ->
-                dynamicInAggregate = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                if (dynamicInAggregate)
-                {
-                    def attrClone = aggregationParameter.attribute.deepClone()
-                    dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
-                }
-            }
-
-            List<Map<String, Object>> parameters = data.parameters as List<Map>
-            List groupParameters = []
-            List parameterFilters = []
-            //cчитаем только параметры с группировкой, среди всех параметров
-            int groupParameterId = 0
-            parameters.each {
-                Map attribute = it.attribute
-                Map<String, Object> group = it.group
-
-                if (group.way == 'SYSTEM')
-                {
-                    def groupParameter = buildSystemGroup(group, attribute, 'parameter')
-                    groupParameters << groupParameter
-                }
-                else
-                {
-                    def customGroup = [attribute: mappingAttribute(attribute), *:group.data]
-                    def newParameterFilterList = getFilterList(customGroup, subjectUUID, 'parameter')
-                    if (parameterFilters)
-                    {
-                        List newParameterFilters = newParameterFilterList.filters
-                        Collection<Collection<FilterParameter>> parameterListFilters = parameterFilters.find().filters
-                        parameterListFilters = parameterListFilters.collectMany { parameterFilter ->
-                            newParameterFilters.collect {
-                                //если группировка добавляется не впервые, добавляем её другим форматом
-                                (groupParameterId > 1) ? [*parameterFilter, it] : [parameterFilter, it]
-                            }
-                        }
-                        def filterList = new FilterList(place: 'parameter', filters: parameterListFilters)
-                        parameterFilters = [filterList]
-                    }
-                    else
-                    {
-                        parameterFilters << newParameterFilterList
-                    }
-                    groupParameterId++
-                }
-            }
-
-            boolean dynamicInParameter
-            groupParameters.each {groupParameter ->
-                dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                if (dynamicInParameter)
-                {
-                    def attrClone = groupParameter.attribute.deepClone()
-                    dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
-                }
-            }
-
-            def mayBeBreakdown = data.breakdown
-            def breakdownMap = [:]
-            def breakdownParameter = null
-            boolean dynamicInBreakdown = false
-
-            if (mayBeBreakdown instanceof Collection)
-            {
-                def groupTypes = data.breakdown*.group as Set
-                // Это список типов группировок.
-                // По хорошему они должны быть одинаковыми.
-                // Не знаю почему фронт шлёт их на каждый атрибут...
-                if (groupTypes.size() == 1)
-                {
-                    //Группировка одного типа можно продолжать
-                    breakdownMap = mayBeBreakdown.collectEntries { el ->
-                        dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                        if(dynamicInBreakdown)
-                        {
-                            dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
-                        }
-                        [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
-                    }
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Does not match group types: $groupTypes")
-                }
-            }
-            else
-            {
-                //это обычная разбивка... Ну или кастомная
-                breakdownParameter = mayBeBreakdown?.with {
-                    buildSystemGroup(
-                        data.breakdownGroup as Map<String, Object>,
-                        it as Map<String, Object>
-                    )
-                }
-                dynamicInBreakdown = breakdownParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                if (dynamicInBreakdown)
-                {
-                    dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
-                }
-            }
-
-            int compIndicatorId = 0
-            //ведём подсчёт только показателей с вычислениями; не все показатели могут быть с вычислениями
-            def comp = indicators?.findResults { indicator ->
-                if (indicator?.attribute?.stringForCompute)
-                {
-                    def compData = indicator.attribute.computeData as Map
-                    def computeData = compData.collectEntries { k, v ->
-                        String dataKey = "сompute-data_${compIndicatorId}"
-                        def br = breakdownMap[v.dataKey] as GroupParameter
-                        def aggr = new AggregationParameter(
-                            title: indicator?.attribute?.title,
-                            type: v.aggregation as Aggregation,
-                            attribute: mappingAttribute(v.attr as Map)
-                        )
-                        return [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
-                    }
-                    compIndicatorId++
-                    return [
-                        formula    : indicator?.attribute?.stringForCompute as String,
-                        title      : indicator.attribute.title as String,
-                        computeData: computeData
-                    ]
-                }
-            }
-
-            def breakdownAttribute
-            def breakdownGroupData
-            boolean isBreakdownGroupCustom = false
-            if(mayBeBreakdown instanceof Collection)
-            {
-                breakdownAttribute = mayBeBreakdown?.value.find()
-                breakdownGroupData = mayBeBreakdown?.group?.data.find()
-                isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == 'CUSTOM'
-            }
-            else {
-                breakdownAttribute = mayBeBreakdown
-                breakdownGroupData = data?.breakdownGroup?.data
-                isBreakdownGroupCustom = data?.breakdownGroup?.way == 'CUSTOM'
-            }
-            def breakdownCustomGroup =  isBreakdownGroupCustom
-                ? [attribute: mappingAttribute(breakdownAttribute), *: breakdownGroupData]
-                : null
-            if (dynamicInBreakdown)
-            {
-                breakdownCustomGroup =  dynamicGroup
-            }
-            FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
-            if (dynamicInAggregate || dynamicInParameter)
-            {
-                parameterFilters << getFilterList(dynamicGroup, subjectUUID, 'parameter')
-            }
-
-            def requisite
-            if (data.sourceForCompute)
-            {
-                requisite = null
-            }
-            else
-            {
-                def requisiteNode
-                Boolean computeCheck = comp?.size() > 1
-                //если вычисления есть больше, чем в одном показателе, составляем список нод по ним
-                if (computeCheck)
-                {
-                    requisiteNode = comp.collect {
-                        new ComputationRequisiteNode(
-                            title: null,
-                            type: 'COMPUTATION',
-                            formula: it.formula
-                        )
-                    }
-                }
-                else
-                {
-                    requisiteNode = comp
-                        ? new ComputationRequisiteNode(
-                        title: null,
-                        type: 'COMPUTATION',
-                        formula: comp.formula
-                    )
-                        : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-                }
-                requisite = new Requisite(title: 'DEFAULT', nodes: (computeCheck) ? requisiteNode : [requisiteNode], showNulls: showNulls, top: top)
-            }
-            source.filterList = [breakdownFilter, *parameterFilters]
-            RequestData res = new RequestData(
-                source: source,
-                aggregations: aggregationParameters,
-                groups: groupParameters + [breakdownParameter].grep()
-            )
-            [(key): [requestData: res, computeData: comp?.computeData, customGroup:
-                null, requisite: requisite]]
-        } as Map<String, Map>
-        Boolean manySources = requestContent?.data?.values()?.sourceForCompute.count { !it } > 1
-        if(manySources)
-        {
-            Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
-            intermediateData = updateIntermediateDataToOneSource(intermediateData, computationInRequest, countOfCustomsInFirstSource)
-        }
-        if(computationInRequest)
-        {
-            intermediateData = updateIntermediateData(intermediateData)
-        }
-        return buildDiagramRequest(intermediateData, subjectUUID, DiagramType.TABLE)
-    }
-
-    /**
      * Метод подсчёта кастомных группировок в запросе
      * @param requestContent - тело запроса
      * @param inFirstSource - флаг на подсчёт только в первом источнике
      * @return количество кастомных группировок
      */
-    Integer countDataForManyCustomGroupsInParameters(Map<String, Object> requestContent, Boolean inFirstSource = true)
+    Integer countDataForManyCustomGroupsInParameters(def requestContent, Boolean inFirstSource = true)
     {
-        def tempData = requestContent.data as Map<String, Object>
+        def tempData = requestContent.data
         if (inFirstSource)
         {
-            def data = tempData.findResult {k, v -> v} //берем данные первого источника
-            return data?.parameters?.count { it?.group?.way == 'CUSTOM' }
+            def data = tempData.find() //берем данные первого источника
+            return data?.parameters?.count { it?.group?.way == Way.CUSTOM }
         }
         else
         {
-            def data = tempData.findResults {k, v -> v} //берем данные всех источников
-            return data?.parameters?.sum { return it?.count { it?.group?.way == 'CUSTOM' } }
+            return tempData?.parameters?.sum { return it?.count { it?.group?.way == Way.CUSTOM } }
         }
     }
 
@@ -898,17 +277,17 @@ class DashboardDataSetService
         }
         //наличие фильтров в разных источниках
         int cnt = filterList.count {
-            it.place == 'parameter'
+            it?.place == 'parameter'
         }
         //если фильтры есть больше, чем в одном источнике
         if (cnt > 1)
         {
             //берём фильтры первого источника
             def parameterFilters = filterList.find {
-                it.place == 'parameter'
+                it?.place == 'parameter'
             }?.filters
             //идём по фильтрам остальных источников (со второго по последний)
-            filterList.findAll { it.place == 'parameter' }[1..-1].each { tempFilterList ->
+            filterList.findAll { it?.place == 'parameter' }[1..-1].each { tempFilterList ->
                 List tempFilters = tempFilterList?.filters
                 parameterFilters = parameterFilters?.collectMany { parameterFilter ->
                     tempFilters.collect {
@@ -918,7 +297,7 @@ class DashboardDataSetService
             }
             parameterFilters = new FilterList(place: 'parameter', filters: parameterFilters)
             FilterList breakdownFilterList = filterList.find {
-                it.place == 'breakdown' && it.filters
+                it?.place == 'breakdown' && it.filters
             }
             mainSource.filterList = breakdownFilterList ? [parameterFilters] + [breakdownFilterList] : [parameterFilters]
         }
@@ -1044,192 +423,253 @@ class DashboardDataSetService
     }
 
     /**
-     * Метод приведения запроса на построение комбо диаграм к единому формату
-     * @param requestContent - запрос на построеине комбо диаграмы
+     * Метод приведения запроса на построение диаграмм к единому формату
+     * @param widgetSettings - настройки виджета на построение диаграммы
      * @param subjectUUID - идентификатор "текущего объекта"
+     * @param diagramType - тип диаграммы
+     * @param showTableNulls - флаг на отображение пустых значений, если диаграмма типа таблица
+     * @param computationInTableRequest - флаг на наличие вычислений в запросе, если диаграмма типа таблица
+     * @param tableTop - количество записей, которое нужно вывести, если диаграмма типа таблица
      * @return DiagramRequest
      */
-    private DiagramRequest mappingComboDiagramRequest(Map<String, Object> requestContent,
-                                                      String subjectUUID)
+    private DiagramRequest mappingDiagramRequest(def widgetSettings, String subjectUUID,
+                                                 DiagramType diagramType, Boolean showTableNulls = false,
+                                                 Boolean computationInTableRequest = false, Integer tableTop = 0)
     {
-        def demoSorting = requestContent.sorting as Map<String, Object>
-        def uglyRequestData = requestContent.data as Map<String, Object>
-        Map<String, Map> intermediateData = uglyRequestData.collectEntries { key, value ->
-            def data = value as Map<String, Object>
-            def source = new Source(classFqn: data.source, descriptor: data.descriptor)
-            def yAxis = data.yAxis as Map<String, Object>
-            def aggregationParameter = new AggregationParameter(
-                title: 'yAxis',
-                type: data.aggregation as Aggregation,
-                attribute: mappingAttribute(yAxis),
-                sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
-            )
-            def xAxis = data.xAxis as Map<String, Object>
-            def group = data.group as Map<String, Object>
+        def sorting
+        def uglyRequestData = widgetSettings.data
+        Boolean isDiagramTypeTable = diagramType == DiagramType.TABLE
+        Boolean isDiagramTypeNotCount = !(diagramType in [DiagramType.CountTypes, DiagramType.RoundTypes])
+        Boolean isDiagramTypeCount = diagramType in DiagramType.CountTypes
+        if(!isDiagramTypeCount)
+        {
+            sorting = widgetSettings.sorting
+        }
+        def intermediateData = [:]
+        uglyRequestData.each { data ->
+            def descriptor = DashboardMarshaller.substitutionCardObject(data.source.descriptor as String, subjectUUID)
+            def source = new Source(classFqn: data.source.value.value, descriptor: descriptor)
+            def sourceForCompute = data.sourceForCompute
             def dynamicGroup = null
-            boolean dynamicInAggregation = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-            if (dynamicInAggregation)
-            {
-                dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(yAxis))
+
+            List<BaseAttribute> indicators = data.indicators
+            List<AggregationParameter> aggregationParameters = indicators.collect { indicator ->
+                return new AggregationParameter(
+                    title: 'column',
+                    type: indicator.aggregation,
+                    attribute: indicator.attribute,
+                    sortingType: sorting?.value == SortingValue.INDICATOR ? sorting?.type : null
+                )
+            }
+            boolean dynamicInAggregate
+            aggregationParameters.each { aggregationParameter ->
+                dynamicInAggregate = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                if (dynamicInAggregate)
+                {
+                    def attrClone = aggregationParameter.attribute.deepClone()
+                    dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
+                }
             }
 
-            def groupParameter = buildSystemGroup(group, xAxis)
-            groupParameter?.sortingType = demoSorting.value == 'PARAMETER' ? demoSorting.type : null
-            boolean dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-            if (dynamicInParameter)
+            Collection<NewParameter> parameters = data.parameters
+            List groupParameters = []
+            List parameterFilters = []
+            //cчитаем только параметры с группировкой, среди всех параметров
+            int groupParameterId = 0
+            if(isDiagramTypeNotCount)
             {
-                dynamicGroup = mappingDynamicAttributeCustomGroup(mappingAttribute(xAxis))
+                parameters.each {
+                    Attribute attribute = it.attribute
+                    Group group = it.group
+
+                    if (group.way == Way.SYSTEM)
+                    {
+                        def groupParameter = buildSystemGroup(group, attribute, 'parameter')
+                        groupParameter?.sortingType = sorting?.value == SortingValue.PARAMETER ? sorting?.type : null
+                        groupParameters << groupParameter
+                    }
+                    else
+                    {
+                        def newParameterFilterList = getFilterList(it,
+                                                                   subjectUUID,
+                                                                   'parameter',
+                                                                   sorting.value == SortingValue.PARAMETER ? sorting.type : null)
+                        if (parameterFilters)
+                        {
+                            List newParameterFilters = newParameterFilterList.filters
+                            Collection<Collection<FilterParameter>> parameterListFilters = parameterFilters.find().filters
+                            parameterListFilters = parameterListFilters.collectMany { parameterFilter ->
+                                newParameterFilters.collect {
+                                    //если группировка добавляется не впервые, добавляем её другим форматом
+                                    (groupParameterId > 1) ? [*parameterFilter, it] : [parameterFilter, it]
+                                }
+                            }
+                            def filterList = new FilterList(place: 'parameter',
+                                                            filters: parameterListFilters,
+                                                            sortingType: sorting?.value == SortingValue.PARAMETER ? sorting?.type : '')
+                            parameterFilters = [filterList]
+                        }
+                        else
+                        {
+                            parameterFilters << newParameterFilterList
+                        }
+                        groupParameterId++
+                    }
+                }
+            }
+
+            boolean dynamicInParameter
+            groupParameters.each {groupParameter ->
+                dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                if (dynamicInParameter)
+                {
+                    def attrClone = groupParameter.attribute.deepClone()
+                    dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
+                }
             }
 
             def mayBeBreakdown = data.breakdown
             def breakdownMap = [:]
-            def breakdown = null
             boolean dynamicInBreakdown = false
 
-            if (mayBeBreakdown instanceof Collection)
+            if(isDiagramTypeNotCount)
             {
-                def groupTypes = data.breakdown*.group as Set
-                // Это список типов группировок.
-                // По хорошему они должны быть одинаковыми.
-                // Не знаю почему фронт шлёт их на каждый атрибут...
-                if (groupTypes.size() == 1)
+                if (mayBeBreakdown instanceof Collection)
                 {
-                    //Группировка одного типа можно продолжать
-                    breakdownMap = mayBeBreakdown.collectEntries { el ->
-                        dynamicInBreakdown = el?.value?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                        if (dynamicInBreakdown)
-                        {
-                            dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(el.value))
+                    def groupTypes = data.breakdown*.group as Set
+                    if (groupTypes.size() == 1)
+                    {
+                        //Группировка одного типа можно продолжать
+                        breakdownMap = mayBeBreakdown.collectEntries { el ->
+                            dynamicInBreakdown = el?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                            if(dynamicInBreakdown)
+                            {
+                                dynamicGroup =  mappingDynamicAttributeCustomGroup(el.attribute)
+                            }
+                            [(el.dataKey): buildSystemGroup(el.group, el.attribute)]
                         }
-                        [(el.dataKey): buildSystemGroup(el.group as Map, el.value as Map)]
                     }
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Does not match group types: $groupTypes")
-                }
-            }
-            else
-            {
-                //это обычная разбивка... Ну или кастомная
-                breakdown = mayBeBreakdown?.with {
-                    buildSystemGroup(
-                        data.breakdownGroup as Map<String, Object>,
-                        it as Map<String, Object>,
-                        'usual_breakdown'
-                    )
-                }
-                dynamicInBreakdown = breakdown?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                if (dynamicInBreakdown)
-                {
-                    dynamicGroup =  mappingDynamicAttributeCustomGroup(mappingAttribute(mayBeBreakdown))
+                    else
+                    {
+                        throw new IllegalArgumentException("Does not match group types: $groupTypes")
+                    }
                 }
             }
 
-            def comp = !(data.sourceForCompute) ? yAxis.stringForCompute?.with {
-                def compData = yAxis.computeData as Map
-                [
-                    formula    : it as String,
-                    title      : yAxis.title as String,
-                    computeData: compData.collectEntries { k, v ->
-                        String dataKey = v.dataKey
-                        def br = breakdownMap[dataKey] as GroupParameter
+            int compIndicatorId = 0
+            //ведём подсчёт только показателей с вычислениями; не все показатели могут быть с вычислениями
+            def comp = !(sourceForCompute) ? indicators?.findResults { indicator ->
+                if (indicator?.attribute instanceof ComputedAttr)
+                {
+                    def compData = indicator.attribute.computeData as Map
+                    def computeData = compData.collectEntries { k, v ->
+                        String dataKey = isDiagramTypeTable ? "сompute-data_${compIndicatorId}" : v.dataKey
+                        def br = breakdownMap[v.dataKey] as GroupParameter
                         def aggr = new AggregationParameter(
-                            title: 'aggregation',
+                            title: indicator?.attribute?.title,
                             type: v.aggregation as Aggregation,
-                            attribute: mappingAttribute(v.attr as Map),
-                            sortingType: demoSorting.value == 'INDICATOR' ? demoSorting.type : null
+                            attribute: v.attr
                         )
-                        [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
+                        return [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
                     }
-                ]
-            } : null
+                    compIndicatorId++
+                    return [
+                        formula    : indicator?.attribute?.stringForCompute as String,
+                        title      : indicator.attribute.title as String,
+                        computeData: computeData
+                    ]
+                }
+            } : []
 
-            def parameterCustomGroup = group.way == 'CUSTOM'
-                ? [attribute: mappingAttribute(xAxis)] + (group.data as Map<String, Object>)
-                : null
-            if (dynamicInParameter)
-            {
-                parameterCustomGroup = dynamicGroup
-            }
-
-            FilterList parameterFilter = getFilterList(parameterCustomGroup, subjectUUID, 'parameter',
-                                                       demoSorting.value == 'PARAMETER' ? demoSorting.type : '')
-
-            def breakdownAttribute
-            def breakdownGroupData
             boolean isBreakdownGroupCustom = false
-            if (mayBeBreakdown instanceof Collection)
+            if(isDiagramTypeNotCount)
             {
-                breakdownAttribute = mayBeBreakdown?.value.find()
-                breakdownGroupData = mayBeBreakdown?.group?.data.find()
-                isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == 'CUSTOM'
+                isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == Way.CUSTOM
             }
-            else
-            {
-                breakdownAttribute = mayBeBreakdown
-                breakdownGroupData = data?.breakdownGroup?.data
-                isBreakdownGroupCustom = data?.breakdownGroup?.way == 'CUSTOM'
-            }
+
+            def breakdownAttribute = mayBeBreakdown?.find() //м.б. нужно будет убрать find() и пойти в цикле
+
             def breakdownCustomGroup =  isBreakdownGroupCustom
-                ? [attribute: mappingAttribute(breakdownAttribute), *: breakdownGroupData]
+                ? new NewParameter(group: breakdownAttribute?.group, attribute: breakdownAttribute?.attribute)
                 : null
             if (dynamicInBreakdown)
             {
                 breakdownCustomGroup = dynamicGroup
             }
             FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
-
-            if (dynamicInAggregation) {
-
-                dynamicFilter = getFilterList(dynamicGroup, subjectUUID, 'parameter')
-                if (!parameterFilter?.filters)
-                {
-                    parameterFilter?.filters = dynamicFilter.filters
-                }
-                else if (parameterFilter?.filters)
-                {
-                    //Если у нас есть фильтры в параметре и при этом есть дин. атрибут в агрегации,
-                    // необходимо его фильтр так же объединить с исходными фильтрами. Для этого переходим на
-                    // второй уровень вложенности и производим сложение условий через операцию и.
-                    parameterFilter?.filters = parameterFilter?.filters.collectMany {
-                        [it.collectMany { [it, dynamicFilter.filters[0][0]] }]
-                    }
-                }
-                else if (!breakdownFilter?.filters)
-                {
-                    breakdownFilter?.filters = dynamicFilter.filters
-                }
+            if (dynamicInAggregate || dynamicInParameter)
+            {
+                parameterFilters << getFilterList(dynamicGroup,
+                                                  subjectUUID,
+                                                  'parameter',
+                                                  sorting.value == SortingValue.PARAMETER ? sorting.type : null)
             }
+
             def requisite
-            Boolean showNulls = data.showEmptyData as Boolean
-            Integer top = data.top as Integer
-            if (data.sourceForCompute)
+            if (sourceForCompute)
             {
                 requisite = null
             }
             else
             {
-                def requisiteNode = comp
-                    ? new ComputationRequisiteNode(
-                    title: null,
-                    type: 'COMPUTATION',
-                    formula: comp.formula
-                )
-                    : new DefaultRequisiteNode(title: null, type: 'DEFAULT', dataKey: key)
-                requisite = new Requisite(title: 'DEFAULT', nodes: [requisiteNode], showNulls: showNulls, top: top)
+                def requisiteNode
+                Boolean computeCheck = comp?.size() > 1
+                //если вычисления есть больше, чем в одном показателе, составляем список нод по ним
+                if (computeCheck)
+                {
+                    requisiteNode = comp.collect {
+                        new ComputationRequisiteNode(
+                            title: null,
+                            type: 'COMPUTATION',
+                            formula: it.formula
+                        )
+                    }
+                }
+                else
+                {
+                    String attributeTitle = null
+                    if(isDiagramTypeCount)
+                    {
+                        attributeTitle = aggregationParameters.find()?.attribute?.title
+                    }
+                    requisiteNode = comp
+                        ? new ComputationRequisiteNode(
+                        title: null,
+                        type: 'COMPUTATION',
+                        formula: comp.formula
+                    )
+                        : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: data.dataKey)
+                }
+                Boolean showNulls = isDiagramTypeTable ? showTableNulls : data.showEmptyData as Boolean
+                Integer top = isDiagramTypeTable ? tableTop : data?.top?.show ? data.top?.count as Integer : null
+                requisite = new Requisite(title: 'DEFAULT',
+                                          nodes: (computeCheck) ? requisiteNode : [requisiteNode],
+                                          showNulls: showNulls,
+                                          top: top)
             }
-
-            source.filterList = [parameterFilter, breakdownFilter]
+            source.filterList = [breakdownFilter, *parameterFilters]
             RequestData res = new RequestData(
                 source: source,
-                aggregations: [aggregationParameter],
-                groups: [groupParameter, breakdown].grep()
+                aggregations: aggregationParameters,
+                groups: groupParameters + [breakdownMap[data.dataKey] as GroupParameter].grep()
             )
-
-            [(key): [requestData: res, computeData: comp?.computeData, customGroup: null, requisite: requisite]]
-        } as Map<String, Map>
-        return buildDiagramRequest(intermediateData, subjectUUID)
+            intermediateData << [(data.dataKey): [requestData: res,
+                                                  computeData: isDiagramTypeTable
+                                                      ? comp?.computeData
+                                                      : comp.find()?.computeData,
+                                                  requisite: requisite]]
+        }
+        Boolean manySources = isDiagramTypeTable && widgetSettings?.data*.sourceForCompute?.count { !it } > 1
+        if(manySources)
+        {
+            Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(widgetSettings)
+            intermediateData = updateIntermediateDataToOneSource(intermediateData, computationInTableRequest, countOfCustomsInFirstSource)
+        }
+        if(computationInTableRequest)
+        {
+            intermediateData = updateIntermediateData(intermediateData)
+        }
+        return buildDiagramRequest(intermediateData, subjectUUID, diagramType)
     }
 
     /**
@@ -1239,14 +679,14 @@ class DashboardDataSetService
      * @param title - название места, откуда пришла группа
      * @return параметр группировки
      */
-    private GroupParameter buildSystemGroup(Map<String, Object> groupType, Map<String, Object> attr, String title = 'breakdown')
+    private GroupParameter buildSystemGroup(def groupType, Attribute attr, String title = 'breakdown')
     {
-        return groupType?.way == 'SYSTEM' ? new GroupParameter(
+        return groupType?.way == Way.SYSTEM ? new GroupParameter(
             title: title,
             type: attr.type == AttributeType.DT_INTERVAL_TYPE
                 ? getDTIntervalGroupType(groupType.data as String)
                 : groupType.data as GroupType,
-            attribute: mappingAttribute(attr),
+            attribute: attr,
             format: groupType.format
         ) : null
     }
@@ -1468,7 +908,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
             {
@@ -1591,7 +1031,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
             {
@@ -1775,7 +1215,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type ->
                 def interval = condition.data as Map
@@ -1814,7 +1254,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison type ->
                 new FilterParameter(
@@ -1851,7 +1291,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             Closure buildFilterParameterFromCondition = { Comparison type ->
                 new FilterParameter(
                     value: condition.data?.with(valueConverter),
@@ -1892,7 +1332,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
                 return new FilterParameter(
@@ -2018,8 +1458,9 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title) {
-        return mappingFilter(data) { Map condition ->
+    private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title)
+    {
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
                 return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
@@ -2063,7 +1504,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
                 return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
@@ -2104,7 +1545,7 @@ class DashboardDataSetService
 
     private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
     {
-        return mappingFilter(data) { Map condition ->
+        return mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
             {
@@ -2169,7 +1610,7 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingFilter(List<List> data, Closure<FilterParameter> mapFilter)
     {
-        return data.collect { andCondition -> andCondition.collect { orCondition -> mapFilter(orCondition as Map<String, Object>) }}
+        return data.collect { andCondition -> andCondition.collect { orCondition -> mapFilter(orCondition) }}
     }
 
     /**
@@ -2181,7 +1622,7 @@ class DashboardDataSetService
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @return сырые данные из Бд по запросу
      */
-    private def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT, Integer aggregationCnt = 1, Map<String, Object> requestContent = [:], Map<String, Boolean> ignoreLimits = [breakdown: false, parameter:false])
+    private def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT, Integer aggregationCnt = 1, def requestContent = null, IgnoreLimits ignoreLimits = new IgnoreLimits())
     {
         assert request: "Empty request!"
         return request.requisite.collect { requisite ->
@@ -2194,7 +1635,7 @@ class DashboardDataSetService
                     case 'default':
                         DefaultRequisiteNode requisiteNode = node as DefaultRequisiteNode
                         RequestData requestData = request.data[requisiteNode.dataKey] as RequestData
-                        String aggregationSortingType = requestData.aggregations.find().sortingType
+                        String aggregationSortingType = requestData.aggregations.find()?.sortingType
                         def listIdsOfNormalAggregations = diagramType == DiagramType.TABLE
                             ? request?.data?.findResult { key, value ->
                             value?.aggregations?.withIndex()?.findResults { val, i ->
@@ -2287,7 +1728,6 @@ class DashboardDataSetService
                             return [(it): request.data[it]]
                         } as Map<String, RequestData>
 
-
                         if(filterListSize == 0)
                         {
                             parameterSortingType = dataSet.values().head().groups.find()?.sortingType
@@ -2299,9 +1739,9 @@ class DashboardDataSetService
                         List notAggregatedAttributes = []
                         def variables = dataSet.collect{ key, data ->
                             def filtering = fullFilterList.get(key)
-                            return filtering.collect { filter ->
+                            return filtering.collect { filters ->
                                 RequestData newData = data.clone()
-                                newData.filters = filter
+                                newData.filters = filters
                                 Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
                                 def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, onlyFilled, diagramType)
                                 if(!res && !onlyFilled)
@@ -2371,7 +1811,7 @@ class DashboardDataSetService
      * @param breakdownFilters - фильтры из разбивки
      * @return подготовленный список фильтров
      */
-    List prepareFilters(Integer filterListSize, DiagramType diagramType, Map<String, Object> requestContent, List parameterFilters = [], List breakdownFilters = [])
+    List prepareFilters(Integer filterListSize, DiagramType diagramType, def requestContent, List parameterFilters = [], List breakdownFilters = [])
     {
         filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
         Integer countOfCustomsInFirstSource
@@ -2459,11 +1899,11 @@ class DashboardDataSetService
     {
         def filterList = request.data[dataKey].source.filterList.grep()
         Integer filterListSize = filterList.filters.grep().size()
-        def parameterInfo = filterList.find { it.place == 'parameter' }
+        def parameterInfo = filterList.find { it?.place == 'parameter' }
 
         List parameterFilters = parameterInfo?.filters
-        String parameterSortingType = parameterInfo?.sortingType
-        List breakdownFilters = filterList.find { it.place == 'breakdown' }?.filters
+        String parameterSortingType = parameterInfo?.sortingType ?: request.data[dataKey].groups?.find()?.sortingType //если фильтры в разбивке, а упорядочиваем по параметру
+        List breakdownFilters = filterList.find { it?.place == 'breakdown' }?.filters
 
         return [parameterSortingType: parameterSortingType,
                 parameterFilters : parameterFilters,
@@ -2478,7 +1918,7 @@ class DashboardDataSetService
      * @param diagramType - тип диаграммы
      * @return настоящее количество фильтров в диаграмме
      */
-    Integer checkTableForSize(Integer filterListSize, Map requestContent, DiagramType diagramType)
+    Integer checkTableForSize(Integer filterListSize, def requestContent, DiagramType diagramType)
     {
         if (diagramType == DiagramType.TABLE)
         {
@@ -2515,10 +1955,10 @@ class DashboardDataSetService
      * @param requestContent - тело запроса
      * @return индекс датасета, который будет в основе комбо-диаграммы
      */
-    Integer getSortingDataIndex(Map requestContent)
+    Integer getSortingDataIndex(def requestContent)
     {
         def dataKeyForSorting = requestContent.sorting?.dataKey
-        return requestContent.data.keySet().findIndexOf {it == dataKeyForSorting }
+        return requestContent.data.findIndexOf {it == dataKeyForSorting }
     }
 
     /**
@@ -3090,7 +2530,6 @@ class DashboardDataSetService
      * Метод формирования таблицы
      * @param list - список данных из БД
      * @param totalColumn - флаг на подсчёт итоговой колонки
-     * @param totalRow - флаг для подсчёта итоговой строки
      * @param showRowNum - флаг для вывода номера строки
      * @param request - запрос
      * @param requestContent - тело запроса с фронта
@@ -3100,11 +2539,10 @@ class DashboardDataSetService
      */
     private TableDiagram mappingTableDiagram(List list,
                                              boolean totalColumn,
-                                             boolean totalRow,
                                              boolean  showRowNum,
-                                             Map<String, Object> requestContent,
+                                             def requestContent,
                                              DiagramRequest request,
-                                             Map<String, Boolean> ignoreLimits = [breakdown: false, parameter: false])
+                                             IgnoreLimits ignoreLimits = new IgnoreLimits())
     {
         def resultDataSet = list.head() as List<List>
         def transposeDataSet = resultDataSet.transpose()
@@ -3137,7 +2575,6 @@ class DashboardDataSetService
                                 transposeDataSet,
                                 attributes,
                                 totalColumn,
-                                totalRow,
                                 showRowNum,
                                 hasBreakdown,
                                 customValuesInBreakdown,
@@ -3228,10 +2665,10 @@ class DashboardDataSetService
      * @param requestContent - текущий запрос
      * @return разбивка или пустой маp
      */
-    Boolean checkForBreakdown(Map<String, Object> requestContent)
+    Boolean checkForBreakdown(def requestContent)
     {
-        def tempData = requestContent.data as Map<String, Object>
-        return tempData.any { k, v -> v?.breakdown }
+        def tempData = requestContent.data
+        return tempData.any { v -> v?.breakdown?.any() }
     }
 
     /**
@@ -3302,7 +2739,7 @@ class DashboardDataSetService
      */
     List<String> getAggregationAttributeNames(DiagramRequest request)
     {
-        return request.data.collectMany { key, value ->
+        return request.data.collectMany { value ->
             value.aggregations.collect { aggregation ->
                 return aggregation?.attribute?.title
             }
@@ -3317,31 +2754,34 @@ class DashboardDataSetService
      */
     List getSpecificAggregationsList (def requestContent, Boolean isCompute = null)
     {
-        String mainSource = requestContent?.data?.findResult { key, value -> if (!value.sourceForCompute) return value.source }
-        return requestContent?.data?.collectMany { key, value ->
+        String mainSource = requestContent?.data?.findResult { value -> if (!value.sourceForCompute) return value.source.value.value }
+        return requestContent?.data?.collectMany { value ->
             if (!value.sourceForCompute)
             {
-                return value?.indicators?.findResults{ aggregation ->
+                return value?.indicators?.findResults { indicator ->
                     Boolean conditionTrue = true
                     if (isCompute != null)
                     {
-                        conditionTrue = !(isCompute ^ aggregation?.attribute?.type == 'COMPUTED_ATTR')//xor
+                        conditionTrue = !(isCompute ^ indicator?.attribute?.type == 'COMPUTED_ATTR')//xor
                     }
 
                     if (conditionTrue)
                     {
+                        BaseAttribute attribute = indicator?.attribute
+                        String currentSource = value.source.value.value
 
-                        Attribute attribute = mappingAttribute(aggregation?.attribute)
-                        String currentSource = value.source
                         if (currentSource != mainSource)
                         {
                             String currentSourceName = api.metainfo.getMetaClass(mainSource)
                                                           .getAttribute(currentSource).title
-                            attribute?.title = "${attribute?.title} (${currentSourceName})"
+                            if(!attribute?.title?.contains(currentSourceName))
+                            {
+                                attribute?.title = "${attribute?.title} (${currentSourceName})"
+                            }
                         }
                         return [name : attribute?.title, attribute : attribute,
                                 type : ColumnType.INDICATOR,
-                                aggregation : aggregation?.aggregation as Aggregation]
+                                aggregation : indicator?.aggregation]
                     }
                 }
             }
@@ -3449,7 +2889,6 @@ class DashboardDataSetService
      * @param transposeDataSet - транспонированный итоговый датасет
      * @param attributes - список атрибутов
      * @param totalColumn - флаг на подсчёт итогов в колонках
-     * @param totalRow  - флаг на подсчёт итогов в строках
      * @param showRowNum - флаг на отображение номера строки
      * @param customValuesInBreakdown - значения кастомной группировки в разбивке
      * @param aggregationCnt - количество агрегаций в запросе
@@ -3459,8 +2898,8 @@ class DashboardDataSetService
      * @return TableDiagram
      */
     private TableDiagram mappingTable(List resultDataSet, List transposeDataSet, List attributes, Boolean totalColumn,
-                                      Boolean totalRow, Boolean showRowNum, Boolean hasBreakdown, List customValuesInBreakdown,
-                                      Integer aggregationCnt, List<String> allAggregationAttributes, Map<String, Boolean> ignoreLimits,
+                                      Boolean showRowNum, Boolean hasBreakdown, List customValuesInBreakdown,
+                                      Integer aggregationCnt, List<String> allAggregationAttributes, IgnoreLimits ignoreLimits,
                                       DiagramRequest request)
     {
         List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
@@ -3602,7 +3041,7 @@ class DashboardDataSetService
     Boolean checkForDateInAttribute(Map attributeValue, Boolean flag)
     {
         return (!(attributeValue.attribute.type in AttributeType.DATE_TYPES) ||
-                (attributeValue.group.way == 'SYSTEM' &&
+                (attributeValue.group.way == Way.SYSTEM &&
                  attributeValue.group.data as GroupType == GroupType.DAY &&
                  attributeValue.group.format in ['dd.mm.YY hh:ii', 'dd.mm.YY hh'])) ? flag : false
     }
@@ -3757,20 +3196,19 @@ class DashboardDataSetService
      * @param requestContent - тело запроса
      * @return список названий атрибутов
      */
-    private List<Map> getAttributeNamesAndValuesFromRequest(Map<String, Object> requestContent)
+    private List<Map> getAttributeNamesAndValuesFromRequest(def requestContent)
     {
         def aggregations = getSpecificAggregationsList(requestContent)
 
-        def parameterAttributes = requestContent.data.collectMany { key, value ->
+        def parameterAttributes = requestContent.data.collectMany { value ->
             if (!value.sourceForCompute)
             {
                 value.parameters.collect { parameter ->
-                    def name = parameter?.group?.way == 'CUSTOM'
+                    def name = parameter?.group?.way == Way.CUSTOM
                         ? parameter?.group?.data?.name
                         : parameter?.attribute?.title
-                    Map<String, Object> group = parameter?.group
-                    return [name : name, attribute : Attribute.fromMap(parameter?.attribute),
-                            type : ColumnType.PARAMETER,group : group]
+                    return [name : name, attribute : parameter?.attribute,
+                            type : ColumnType.PARAMETER,group : parameter?.group]
                 }
             }
             else
@@ -3779,13 +3217,21 @@ class DashboardDataSetService
             }
         }
 
-        def breakdownAttributes = requestContent.data.findResult { key, value ->
-            def name = value?.breakdownGroup?.way == 'CUSTOM'
-                ? value?.breakdownGroup?.data?.name
-                : value?.breakdown?.title
-            Map<String, Object> group =  value?.breakdownGroup
-            return  group ? [name : name, attribute : Attribute.fromMap(value?.breakdown),
-                             type: ColumnType.BREAKDOWN, group : group] : null
+        def breakdownAttributes = requestContent.data.collectMany { value ->
+            if (!value.sourceForCompute)
+            {
+                value.breakdown.collect { breakdown ->
+                    def name = breakdown?.group?.way == Way.CUSTOM
+                        ? breakdown?.group?.data?.name
+                        : breakdown?.attribute?.title
+                    return [name : name, attribute : breakdown?.attribute,
+                            type : ColumnType.BREAKDOWN, group : breakdown?.group]
+                }
+            }
+            else
+            {
+                return []
+            }
         }
 
         return (aggregations + parameterAttributes + breakdownAttributes).grep()
@@ -3799,9 +3245,9 @@ class DashboardDataSetService
     private Set<Map> getInnerCustomGroupNames(def requestContent)
     {
         Set<Map> attributeMaps = []
-        requestContent.data.values().each { value ->
+        requestContent.data.each { value ->
             value.parameters.each { parameter ->
-                if (parameter?.group?.way == 'CUSTOM')
+                if (parameter?.group?.way == Way.CUSTOM)
                 {
                     parameter?.group?.data?.subGroups?.each { sub ->
                         attributeMaps << [attributeName: parameter?.group?.data?.name, value: sub?.name]
@@ -3809,10 +3255,12 @@ class DashboardDataSetService
                 }
             }
 
-            if (value?.breakdownGroup?.way == 'CUSTOM')
-            {
-                value?.breakdownGroup?.data?.subGroups?.each { sub ->
-                    attributeMaps << [attributeName: value?.breakdownGroup?.data?.name, value: sub?.name]
+            value.breakdown?.each { breakdown ->
+                if (breakdown?.group?.way == Way.CUSTOM)
+                {
+                    breakdown?.group?.data?.subGroups?.each { sub ->
+                        attributeMaps << [attributeName: breakdown?.group?.data?.name, value: sub?.name]
+                    }
                 }
             }
         }
@@ -4113,70 +3561,18 @@ class DashboardDataSetService
     }
 
     /**
-     * Метод для изменения запроса с целью подмены объекта фильтрации
-     * @param requestContent - запрос на построение диаграммы
-     * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
-     * @return изменённый запрос
+     * Метод для проверки является ли кастомная группировка группировкой из разбивки
+     * @param requestContent - тело запроса
+     * @param diagramType - тип диаграммы
+     * @return флаг или список флагов
      */
-    private Map<String, Object> transformRequest(Map<String, Object> requestContent,
-                                                 String cardObjectUuid)
+    private def isCustomGroupFromBreakdown(def requestContent, DiagramType diagramType = DiagramType.COLUMN)
     {
-        return requestContent.data
-            ? transformRequestWithComputation(requestContent, cardObjectUuid)
-            : transformRequestWithoutComputation(requestContent, cardObjectUuid)
-    }
-
-    /**
-     * Метод для изменения запроса с целью подмены объекта фильтрации в запросах с поддержкой вычислений
-     * @param requestContent - запрос на построение диаграммы
-     * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
-     * @return изменённый запрос
-     */
-    private Map<String, Object> transformRequestWithComputation(Map<String, Object> requestContent,
-                                                                String cardObjectUuid)
-    {
-        Closure<Map<String, Object>> transform = { Map<String, Object> map ->
-            def data = map.data as Map<String, Object>
-            def newData = data.collectEntries { key, value ->
-                def dataForDiagram = [:] << (value as Map<String, Object>)
-                dataForDiagram.descriptor = DashboardMarshaller.substitutionCardObject(
-                    dataForDiagram.descriptor as String, cardObjectUuid
-                )
-                return [(key): dataForDiagram]
-            }
-            return [type: map.type, data: newData, sorting: map.sorting, top: map.top,
-                    showEmptyData: map.showEmptyData, calcTotalColumn: map.calcTotalColumn,
-                    calcTotalRow : map.calcTotalRow, showRowNum: map.showRowNum, ignoreLimits: map.ignoreLimits]
-        }
-        return cardObjectUuid ? transform(requestContent) : requestContent
-    }
-
-    /**
-     * Метод для изменения запроса с целью подмены объекта фильтрации в запросах без поддержки вычислений
-     * @param requestContent - запрос на построение диаграммы
-     * @param cardObjectUuid - фактическое значение идентификатора "текущего объекта"
-     * @return изменённый запрос
-     */
-    private Map<String, Object> transformRequestWithoutComputation(Map<String, Object> requestContent, String cardObjectUuid)
-    {
-        Closure<Map<String, Object>> transform = { Map<String, Object> map ->
-            def res = [:] << map
-            res.descriptor =
-                DashboardMarshaller.substitutionCardObject(res.descriptor as String, cardObjectUuid)
-            return res
-        }
-        return cardObjectUuid ? transform(requestContent) : requestContent
-    }
-
-    private def isCustomGroupFromBreakdown(Map<String, Object> requestContent, DiagramType diagramType = DiagramType.COLUMN)
-    {
-        def requestData = requestContent.data as Map<String, Object>
-        List<Boolean> customsInBreakdown = requestData.findResults { key, value ->
-            def data = value as Map<String, Object>
-            def group = data.group as Map<String, Object>
-            def isSystemParameterGroup = group?.way == 'SYSTEM'
-            def isCustomBreakdownGroup = data.breakdownGroup?.way == 'CUSTOM' ||
-                                         data.breakdown?.group?.way.find() == 'CUSTOM'
+        def requestData = requestContent.data
+        List<Boolean> customsInBreakdown = requestData.findResults { data ->
+            def parameter = data.parameters.find()
+            def isSystemParameterGroup = parameter?.group?.way == Way.SYSTEM
+            def isCustomBreakdownGroup = data.breakdown?.group?.way.find() == Way.CUSTOM
             boolean sourceForCompute = data.sourceForCompute
             sourceForCompute == false ? isSystemParameterGroup && isCustomBreakdownGroup : null
         }
@@ -4188,7 +3584,7 @@ class DashboardDataSetService
      * @param dynamicAttribute - динамический атрибут
      * @return кастомная группировка для динамического атрибута
      */
-    Map<String, Object> mappingDynamicAttributeCustomGroup(Attribute dynamicAttribute)
+    NewParameter mappingDynamicAttributeCustomGroup(Attribute dynamicAttribute)
     {
         if (dynamicAttribute?.property == AttributeType.TOTAL_VALUE_TYPE)
         {
@@ -4199,15 +3595,19 @@ class DashboardDataSetService
             dynamicAttribute.attrChains().head().type = AttributeType.OBJECT_TYPE
             dynamicAttribute.attrChains().last().ref = new Attribute(code: 'linkTemplate', type: 'string')
 
-            def subGroupsData = [[data: [title: 'Шаблон атрибута',
-                                         uuid: uuidForTemplate],
-                                  type: 'CONTAINS']]
-            def subGroups = [data: [subGroupsData], name: '']
+            def subGroupData = new SubGroupData(data: [title: 'Шаблон атрибута', uuid: uuidForTemplate],
+                                                type: 'CONTAINS')
 
-            return [attribute: dynamicAttribute, name: groupName,
-                    subGroups: [subGroups], type: groupType, id: ''] as Map<String, Object>
+            def subGroup = new SubGroup(data: [[subGroupData]], name: '')
+
+            def customGroup = new CustomGroup(name: groupName,
+                                              subGroups: [subGroup],
+                                              type: groupType)
+
+            def group = new CustomGroupInfo(data:customGroup, way: Way.CUSTOM)
+            return new NewParameter(attribute:dynamicAttribute, group:group)
         }
-        return [:] as Map<String, Object>
+        return null
     }
 
     /**
@@ -4218,22 +3618,27 @@ class DashboardDataSetService
      * @param sortingType - тип сортировки
      * @return - список фильтров
      */
-    private FilterList getFilterList(Map<String, Object> customGroup, String subjectUUID, String place, String sortingType = '') {
-        def filterList = customGroup?.subGroups?.collect { subGroup ->
-            String attributeType = customGroup.attribute.type.split('\\$', 2).head()
-            customGroup.attribute.type = attributeType
-            Closure<Collection<Collection<FilterParameter>>> mappingFilters =
-                getMappingFilterMethodByType(attributeType, subjectUUID)
-            String groupName = subGroup.name
-            def filters = mappingFilters(
-                subGroup.data as List<List>,
-                customGroup.attribute,
-                groupName
-            )
-            return filters
+    private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, SortingType sortingType = null) {
+        if(parameter?.group)
+        {
+            def customGroup = parameter?.group?.data
+
+            def filterList = customGroup?.subGroups?.collect { subGroup ->
+                String attributeType = parameter.attribute.type.split('\\$', 2).head()
+                parameter.attribute.type = attributeType
+                Closure<Collection<Collection<FilterParameter>>> mappingFilters = getMappingFilterMethodByType(attributeType, subjectUUID)
+                def filters = mappingFilters(
+                    subGroup.data as List<List>,
+                    parameter.attribute,
+                    subGroup.name,
+                    subGroup.id
+                )
+                return filters
+            }
+            FilterList filter = new FilterList(filters: filterList, place: place, sortingType: sortingType)
+            return filter
         }
-        FilterList filter = new FilterList(filters: filterList, place: place, sortingType: sortingType)
-        return filter
+        return null
     }
 
     /**
@@ -4335,7 +3740,7 @@ class DashboardDataSetService
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @return сырые данные для построения диаграм
      */
-    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean onlyFilled,  DiagramType diagramType, Map<String,Object> requestContent, Map<String,Boolean> ignoreLimits)
+    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean onlyFilled,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits)
     {
         String nodeType = node.type
         switch (nodeType.toLowerCase())
@@ -4582,7 +3987,7 @@ class Column
     /**
      * Атрибут колонки
      */
-    Attribute attribute
+    BaseAttribute attribute
     /**
      * Тип атрибута колонки
      */
@@ -4590,7 +3995,7 @@ class Column
     /**
      * Группа (есть у параметров/разбивки)
      */
-    Map<String, Object> group
+    Group group
     /**
      * Агрегация (есть у показателей)
      */
@@ -4630,7 +4035,7 @@ class Indicator
     /**
      * Атрибут показателя
      */
-    Attribute attribute
+    BaseAttribute attribute
 }
 
 /**
