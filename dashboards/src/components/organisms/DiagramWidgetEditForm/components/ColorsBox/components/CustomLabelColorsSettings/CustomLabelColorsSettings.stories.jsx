@@ -20,7 +20,7 @@ export const Component = args => {
 };
 
 Component.args = {
-	labels: ['label1', 'label2', 'label3'],
+	labels: ['label1#test', 'label2', 'label3'],
 	value: {
 		colors: [],
 		defaultColor: 'red',

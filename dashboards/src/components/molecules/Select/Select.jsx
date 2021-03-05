@@ -73,11 +73,7 @@ export class Select extends PureComponent<Props, State> {
 		if (searchValue) {
 			const reg = new RegExp(searchValue, 'i');
 
-			foundOptions = options.filter(o => {
-				const label = getOptionLabel ? getOptionLabel(o) : o.label;
-
-				return reg.test(label);
-			});
+			foundOptions = options.filter(o => reg.test(getOptionLabel(o)));
 		}
 
 		return foundOptions;
@@ -199,7 +195,6 @@ export class Select extends PureComponent<Props, State> {
 		const {foundOptions, searchValue} = this.state;
 		const {Message} = this.components;
 
-		console.log(loading, searchValue, foundOptions);
 		return !loading && searchValue && foundOptions.length === 0
 			? <Message className={styles.message}>{notFoundMessage}</Message>
 			: null;

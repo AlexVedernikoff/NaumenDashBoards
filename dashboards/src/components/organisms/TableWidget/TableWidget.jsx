@@ -8,13 +8,14 @@ import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from './helpers';
+import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
 import {
 	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
 	SEPARATOR
 } from 'store/widgets/buildData/constants';
+import {isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
 import React, {createRef, PureComponent} from 'react';

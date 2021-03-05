@@ -54,10 +54,10 @@ export class Diagram extends Component<Props, State> {
 	};
 
 	isUpdated = (prevProps: Props, nextProps: Props): boolean => {
-		const {buildData: {loading: prevLoading, updateDate: prevUpdateDate}, widget: prevWidget} = prevProps;
-		const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}, widget: nextWidget} = nextProps;
+		const {buildData: prevBuildData, widget: prevWidget} = prevProps;
+		const {buildData, widget} = nextProps;
 
-		return nextUpdateDate !== prevUpdateDate || nextLoading !== prevLoading || nextWidget !== prevWidget;
+		return buildData?.data !== prevBuildData?.data || widget !== prevWidget;
 	};
 
 	resolveDiagram = (data: DiagramBuildData) => {

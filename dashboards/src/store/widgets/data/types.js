@@ -175,7 +175,7 @@ export type CustomChartColorsSettingsType = $Keys<typeof CUSTOM_CHART_COLORS_SET
 
 export type ChartColorSettings = {
 	color: string,
-	text: string
+	key: string
 };
 
 export type CustomLabelChartColorsSettings = {
@@ -231,6 +231,8 @@ export type AxisData = {
 	yAxisName: string
 };
 
+export type AxisWidgetType = $Keys<typeof WIDGET_SETS.AXIS>;
+
 export type AxisWidget = {
 	...BaseWidget,
 	colorsSettings: ChartColorsSettings,
@@ -240,7 +242,7 @@ export type AxisWidget = {
 	legend: Legend,
 	parameter: AxisSettings,
 	sorting: ChartSorting,
-	type: $Keys<typeof WIDGET_SETS.AXIS>,
+	type: AxisWidgetType,
 };
 
 // Круговой график
@@ -256,6 +258,8 @@ export type CircleData = {
 	top: DataTopSettings
 };
 
+export type CircleWidgetType = $Keys<typeof WIDGET_SETS.CIRCLE>;
+
 export type CircleWidget = {
 	...BaseWidget,
 	colorsSettings: ChartColorsSettings,
@@ -263,7 +267,7 @@ export type CircleWidget = {
 	dataLabels: DataLabels,
 	legend: Legend,
 	sorting: ChartSorting,
-	type: $Keys<typeof WIDGET_SETS.CIRCLE>
+	type: CircleWidgetType
 };
 
 // Комбо график
@@ -597,4 +601,4 @@ export type WidgetsDataState = {
 	validatingToCopy: ChangingState
 };
 
-export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean) => ThunkAction;
+export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string) => ThunkAction;

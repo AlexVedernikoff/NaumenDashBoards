@@ -2,7 +2,11 @@
 import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {CircleData, CircleWidget, Widget} from 'store/widgets/data/types';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
-import {DEFAULT_CIRCLE_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
+import {
+	DEFAULT_CIRCLE_SORTING_SETTINGS,
+	DEFAULT_COLORS_SETTINGS,
+	DEFAULT_TOP_SETTINGS
+} from 'store/widgets/data/constants';
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import type {InjectedProps} from 'containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving/types';
@@ -11,7 +15,7 @@ import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetE
 import React, {Component} from 'react';
 import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
-import withChartColorsSettingsSaving from 'src/containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving';
+import withChartColorsSettingsSaving from 'containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving';
 
 export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 	getSchema = () => object({
@@ -50,10 +54,9 @@ export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): CircleWidget => {
-		const {saveCustomColorsSettings} = this.props;
 		const {id} = widget;
 		const {
-			colorsSettings,
+			colorsSettings = DEFAULT_COLORS_SETTINGS,
 			computedAttrs = [],
 			data,
 			dataLabels,
@@ -67,8 +70,6 @@ export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 			templateName,
 			type
 		} = values;
-
-		saveCustomColorsSettings(colorsSettings);
 
 		return {
 			colorsSettings,
@@ -93,7 +94,10 @@ export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
+		const {saveCustomColorsSettings} = this.props;
+
 		return this.props.render({
+			onSubmitCallback: saveCustomColorsSettings,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

@@ -73,12 +73,13 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
 /**
  * Сообщает об использовании uuid в лейблах
  * @param {Attribute} attribute - атрибут
+ * @param {Group} group - группировка
  * @returns {boolean}
  */
-const hasUUIDsInLabels = (attribute?: Attribute): boolean => {
-	const {backBOLinks, boLinks, metaClass} = ATTRIBUTE_TYPES;
+const hasUUIDsInLabels = (attribute?: Attribute, group?: Group): boolean => {
+	const {metaClass} = ATTRIBUTE_TYPES;
 
-	return Boolean(attribute && [backBOLinks, boLinks, metaClass].includes(attribute.type));
+	return attribute?.type in ATTRIBUTE_SETS.REFERENCE || attribute?.type === metaClass || group?.way === GROUP_WAYS.CUSTOM;
 };
 
 /**

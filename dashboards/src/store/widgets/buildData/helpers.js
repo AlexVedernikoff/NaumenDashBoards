@@ -1,56 +1,13 @@
 // @flow
-import type {
-	BuildDataState,
-	ReceiveBuildDataPayload
-} from './types';
 
 /**
- * Устанавливаем данные графика конкретного виджета
- * @param {BuildDataState} state - хранилище данных графиков
- * @param {string} payload - id виджета
- * @returns {void}
+ * Возвращает значение представления без переданного кода
+ * @param {string} value - значение представления
+ * @param {string} separator - разделитель лейбла и кода
+ * @returns {string}
  */
-export const setRequestBuildData = (state: BuildDataState, payload: string) => ({
-	...state,
-	[payload]: {
-		data: {},
-		error: false,
-		loading: true
-	}
-});
+const getSeparatedLabel = (value: string, separator: string): string => value.split(separator)[0];
 
-/**
- * Устанавливаем данные графика конкретного виджета
- * @param {BuildDataState} state - хранилище данных графиков
- * @param {ReceiveBuildDataPayload} payload - данные графика и id виджета
- * @returns {void}
- */
-export const setBuildData = (state: BuildDataState, payload: ReceiveBuildDataPayload) => {
-	const {data, id} = payload;
-
-	return {
-		...state,
-		[id]: {
-			...state[id],
-			data,
-			error: !data,
-			loading: false,
-			updateDate: new Date()
-		}
-	};
+export {
+	getSeparatedLabel
 };
-
-/**
- * Устанавливаем данные графика конкретного виджета
- * @param {BuildDataState} state - хранилище данных графиков
- * @param {string} payload - id виджета
- * @returns {void}
- */
-export const setBuildDataError = (state: BuildDataState, payload: string) => ({
-	...state,
-	[payload]: {
-		...state[payload],
-		error: true,
-		loading: false
-	}
-});

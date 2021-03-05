@@ -37,6 +37,8 @@ export type Schema = {
 	validate(value: any, options?: ValidateOptions): Promise<void>;
 };
 
+export type OnSubmitCallback = (widget: AnyWidget) => void;
+
 export type InjectedProps = {|
 	cancelForm: () => ThunkAction,
 	context: Context,
@@ -45,7 +47,7 @@ export type InjectedProps = {|
 	layoutMode: LayoutMode,
 	onAddFieldErrorRef: DivRef => void,
 	onChangeLayoutSize: (layoutSize: LayoutSize) => void,
-	onSubmit: (func: UpdateWidget) => Promise<void>,
+	onSubmit: (func: UpdateWidget, callback?: OnSubmitCallback) => Promise<void>,
 	personalDashboard: boolean,
 	saving: ChangingState,
 	setDataFieldValue: SetDataFieldValue,

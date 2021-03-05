@@ -2,6 +2,7 @@
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget} from './types';
 import {batch} from 'react-redux';
+import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
@@ -10,7 +11,6 @@ import {getCustomColorsSettingsKey} from './helpers';
 import {getMapValues, isObject} from 'helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
 import {isCircleChart} from 'src/store/widgets/helpers';
-import {LIMIT, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 
 /**
@@ -289,28 +289,37 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
  * Устанавливает значение использования глобальной настройки цветов графика для всех подходящих виджетов
  * @param {string} key - ключ настроек
  * @param {boolean} useGlobal - значение использования глобальной настройки
+ * @param {string} targetWidgetId - идентификатор виджета, настройки которого в дальнейшем будут применяться к остальным виджетам
  * @returns {ThunkAction}
  */
-const setUseGlobalChartSettings = (key: string, useGlobal: boolean): ThunkAction =>
+const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string): ThunkAction =>
 	(dispatch: Dispatch, getState: GetState): void => {
 	const {map: mapWidgets} = getState().widgets.data;
 		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED} = WIDGET_TYPES;
 		const barCharts = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED];
 
 	getMapValues(mapWidgets).forEach(widget => {
-		const {type} = widget;
+		const {id, type} = widget;
 
-		if ((barCharts.includes(type) || isCircleChart(type)) && getCustomColorsSettingsKey(widget) === key) {
-			updateWidget({
-				...widget,
-				colorsSettings: {
-					...widget.colorsSettings,
-					custom: {
-						...widget.colorsSettings.custom,
-						useGlobal
+		try {
+			const equalKeys = getCustomColorsSettingsKey(widget) === key;
+
+			if (id !== targetWidgetId && (barCharts.includes(type) || isCircleChart(type)) && equalKeys) {
+				const {colorsSettings} = widget;
+
+				dispatch(editWidgetChunkData(widget, {
+					colorsSettings: {
+						...colorsSettings,
+						custom: {
+							...colorsSettings.custom,
+							useGlobal
+						},
+						type: CHART_COLORS_SETTINGS_TYPES.CUSTOM
 					}
-				}
-			});
+				}));
+			}
+		} catch (e) {
+			console.log(e);
 		}
 	});
 };

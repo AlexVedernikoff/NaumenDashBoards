@@ -1,38 +1,70 @@
 // @flow
-import type {ChartColorSettings} from 'store/widgets/data/types';
 import ColorField from 'DiagramWidgetEditForm/components/ColorsBox/components/ColorField';
+import {equalLabels, getBreakdownColors} from 'utils/chart/helpers';
+import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
 import type {OnChangeEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import {SEPARATOR} from 'store/widgets/buildData/constants';
 
 export class CustomBreakdownColorsSettings extends PureComponent<Props, State> {
+	state = {
+		colors: []
+	};
+
+	componentDidMount () {
+		this.setColors();
+	}
+
+	componentDidUpdate (prevProps: Props) {
+		const {labels: prevLabels, value: prevValue} = prevProps;
+		const {labels, value} = this.props;
+
+		if (prevLabels !== labels || prevValue.colors !== value.colors) {
+			this.setColors();
+		}
+	}
+
 	handleChangeColor = ({name, value: color}: OnChangeEvent<string>) => {
-		const {onChange, value} = this.props;
-		const index = Number(name);
+		const {labels, onChange, value} = this.props;
+		const {colors} = value;
+		const label = labels[Number(name)];
+		const colorSettingsIndex = colors.findIndex(({key}) => equalLabels(key, label));
+		const newColors = colorSettingsIndex !== -1
+			? colors.map((colorSettings, i) => i === colorSettingsIndex ? {...colorSettings, color} : colorSettings)
+			: [...colors, {color, key: label}];
 
 		onChange({
 			...value,
-			colors: value.colors.map((colorSettings, i) => i === index ? {...colorSettings, color} : colorSettings)
+			colors: newColors
 		});
 	};
 
-	renderField = (colorSettings: ChartColorSettings, index: number) => {
-		const {color, text} = colorSettings;
-		const key = `${text}-${index}`;
+	setColors = () => {
+		const {defaultColors, labels, value} = this.props;
+
+		this.setState({
+			colors: getBreakdownColors(value, labels, defaultColors)
+		});
+	};
+
+	renderField = (label: string, index: number) => {
+		const {colors} = this.state;
+		const key = `${label}-${index}`;
 
 		return (
 			<ColorField
 				key={key}
-				label={text}
+				label={getSeparatedLabel(label, SEPARATOR)}
 				name={index.toString()}
 				onChange={this.handleChangeColor}
-				value={color}
+				value={colors[index]}
 			/>
 		);
 	};
 
 	render (): React$Node {
-		return this.props.value.colors.map(this.renderField);
+		return this.props.labels.map(this.renderField);
 	}
 }
 

@@ -17,6 +17,7 @@ import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
+import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import {setCustomGroups} from 'store/customGroups/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {User} from 'store/users/types';
@@ -105,6 +106,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 	};
 	const {
 		autoUpdate,
+		customColorsSettings,
 		customGroups,
 		dashboardKey: code,
 		layouts,
@@ -113,6 +115,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 	} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
 
 	dispatch(setCode(code));
+	dispatch(setCustomChartsColorsSettings(customColorsSettings));
 
 	if (customGroups !== null) {
 		dispatch(setCustomGroups(customGroups));

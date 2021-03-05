@@ -5,7 +5,14 @@ import type {DashboardsState, FetchDashboards} from 'store/dashboards/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {DivRef} from 'components/types';
 import type {DynamicGroupsMap} from 'store/sources/dynamicGroups/types';
-import type {ErrorsMap, SetDataFieldValue, SetFieldValue, UpdateWidget, Values} from 'containers/WidgetEditForm/types';
+import type {
+	ErrorsMap,
+	OnSubmitCallback,
+	SetDataFieldValue,
+	SetFieldValue,
+	UpdateWidget,
+	Values
+} from 'containers/WidgetEditForm/types';
 import type {
 	FetchAttributes,
 	FetchDynamicAttributeGroups,
@@ -63,6 +70,7 @@ export type LayoutSize = {|
 
 export type RenderFormProps = {|
 	layoutSize?: LayoutSize,
+	onSubmitCallback?: OnSubmitCallback,
 	renderParamsTab: ParamsTabProps => Node,
 	renderStyleTab: StyleTabProps => Node,
 	schema: Object,

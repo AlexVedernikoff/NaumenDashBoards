@@ -18,7 +18,7 @@ export type BuildData = {
 	data: DiagramBuildData | null,
 	error: boolean,
 	loading: boolean,
-	updateDate?: Date | ''
+	type: WidgetType
 };
 
 export type BuildDataMap = {
@@ -31,7 +31,7 @@ export type ReceiveBuildDataPayload = {
 };
 
 export type RequestBuildData = {
-	payload: string,
+	payload: Widget,
 	type: typeof BUILD_DATA_EVENTS.REQUEST_BUILD_DATA
 };
 

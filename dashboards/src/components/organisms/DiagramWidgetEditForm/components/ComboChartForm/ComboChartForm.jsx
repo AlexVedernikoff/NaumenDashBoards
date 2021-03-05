@@ -1,7 +1,12 @@
 // @flow
 import {array, baseSchema, mixed, object} from 'DiagramWidgetEditForm/schema';
 import type {ComboData, ComboWidget, Widget} from 'store/widgets/data/types';
-import {COMBO_TYPES, DEFAULT_AXIS_SORTING_SETTINGS, DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
+import {
+	COMBO_TYPES,
+	DEFAULT_AXIS_SORTING_SETTINGS,
+	DEFAULT_COLORS_SETTINGS,
+	DEFAULT_TOP_SETTINGS
+} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
@@ -59,7 +64,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 	updateWidget = (widget: Widget, values: Values): ComboWidget => {
 		const {id} = widget;
 		const {
-			colorsSettings,
+			colorsSettings = DEFAULT_COLORS_SETTINGS,
 			computedAttrs = [],
 			data,
 			dataLabels,

@@ -8,7 +8,8 @@ import {deepClone} from 'helpers';
 import Diagram from 'components/molecules/Diagram';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
-import {getSeparatedLabel, isCardObjectColumn} from 'components/organisms/TableWidget/helpers';
+import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
+import {isCardObjectColumn} from 'components/organisms/TableWidget/helpers';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import {SEPARATOR} from 'store/widgets/buildData/constants';
@@ -43,13 +44,8 @@ export class Widget extends PureComponent<Props, State> {
 	componentDidUpdate (prevProps: Props) {
 		const {buildData, focused} = this.props;
 
-		if (prevProps.buildData) {
-			const {buildData: {loading: nextLoading, updateDate: nextUpdateDate}} = prevProps;
-			const {loading: prevLoading, updateDate: prevUpdateDate} = buildData;
-
-			if (nextLoading !== prevLoading || nextUpdateDate !== prevUpdateDate) {
-				this.setState({hasError: false});
-			}
+		if (!buildData?.error) {
+			this.setState({hasError: false});
 		}
 
 		if (focused && focused !== prevProps.focused) {

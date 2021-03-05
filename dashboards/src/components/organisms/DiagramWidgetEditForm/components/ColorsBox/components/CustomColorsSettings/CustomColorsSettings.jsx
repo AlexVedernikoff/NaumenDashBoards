@@ -11,11 +11,19 @@ import {CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
 import CustomLabelColorsSettings from 'DiagramWidgetEditForm/components/ColorsBox/components/CustomLabelColorsSettings';
 import FormCheckControl from 'src/components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
+import {isCircleChart} from 'store/widgets/helpers';
 import type {OnChangeEvent} from 'src/components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 
 export class CustomColorsSettings extends PureComponent<Props> {
+	getBreakdownLabels = (): Array<string> => {
+		const {data, type} = this.props.buildData;
+		const {labels, series} = data;
+
+		return isCircleChart(type) ? labels : series.map(s => s.name);
+	};
+
 	handleChange = (data: CustomChartColorsSettingsData) => {
 		const {onChange, value} = this.props;
 
@@ -40,17 +48,31 @@ export class CustomColorsSettings extends PureComponent<Props> {
 		);
 	};
 
-	renderBreakdownCustomColorsSettings = (settings: BreakdownColorsSettings) => (
-		<CustomBreakdownColorsSettings onChange={this.handleChange} value={settings} />
-	);
+	renderBreakdownCustomColorsSettings = (settings: BreakdownColorsSettings) => {
+		const {defaultColors} = this.props;
 
-	renderLabelCustomColorsSettings = (settings: LabelColorsSettings) => (
-		<CustomLabelColorsSettings
-			labels={this.props.labels}
-			onChange={this.handleChange}
-			value={settings}
-		/>
-	);
+		return (
+			<CustomBreakdownColorsSettings
+				defaultColors={defaultColors}
+				labels={this.getBreakdownLabels()}
+				onChange={this.handleChange}
+				value={settings}
+			/>
+		);
+	};
+
+	renderLabelCustomColorsSettings = (settings: LabelColorsSettings) => {
+		const {buildData, defaultColors} = this.props;
+
+		return (
+			<CustomLabelColorsSettings
+				defaultColors={defaultColors}
+				labels={buildData.data.labels}
+				onChange={this.handleChange}
+				value={settings}
+			/>
+		);
+	};
 
 	renderSettingsByType = () => {
 		const {data} = this.props.value;

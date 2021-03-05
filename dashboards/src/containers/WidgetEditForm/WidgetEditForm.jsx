@@ -5,7 +5,7 @@ import {deepClone} from 'helpers';
 import DiagramWidgetEditForm from 'containers/DiagramWidgetEditForm';
 import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DivRef} from 'components/types';
-import type {FormElement, Props, Schema, State, Values} from './types';
+import type {FormElement, OnSubmitCallback, Props, Schema, State, Values} from './types';
 import {functions, props} from './selectors';
 import type {LayoutSize} from 'components/organisms/DiagramWidgetEditForm/types';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -77,7 +77,7 @@ class WidgetEditForm extends PureComponent<Props, State> {
 		changeLayout(payload);
 	};
 
-	handleSubmit = async (updateWidget: UpdateWidget) => {
+	handleSubmit = async (updateWidget: UpdateWidget, callback: OnSubmitCallback) => {
 		const {changeLayoutMode, createWidget, layoutMode, saveWidget, widget} = this.props;
 		const {values} = this.state;
 		const isValid = await this.validate();
@@ -97,6 +97,7 @@ class WidgetEditForm extends PureComponent<Props, State> {
 			}
 
 			this.setState({values: this.getValues(updatedWidget)});
+			callback && callback(updatedWidget);
 		} else {
 			this.focusOnError();
 		}
