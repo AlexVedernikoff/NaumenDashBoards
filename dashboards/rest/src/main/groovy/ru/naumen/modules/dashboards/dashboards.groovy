@@ -1100,6 +1100,7 @@ class DashboardsService
                     }
                 }
             }
+            else return []
         }
     }
 

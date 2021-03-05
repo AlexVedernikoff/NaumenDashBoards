@@ -303,7 +303,7 @@ class DashboardDataSetService
         }
         else
         {
-            mainSource.filterList = filterList.findAll { it.filters }
+            mainSource.filterList = filterList.findAll { it?.filters }
         }
         if (computationInRequest)
         {
@@ -3624,7 +3624,7 @@ class DashboardDataSetService
             def customGroup = parameter?.group?.data
 
             def filterList = customGroup?.subGroups?.collect { subGroup ->
-                String attributeType = parameter.attribute.type.split('\\$', 2).head()
+                String attributeType = parameter.attribute.attrChains().last().type.split('\\$', 2).head()
                 parameter.attribute.type = attributeType
                 Closure<Collection<Collection<FilterParameter>>> mappingFilters = getMappingFilterMethodByType(attributeType, subjectUUID)
                 def filters = mappingFilters(
