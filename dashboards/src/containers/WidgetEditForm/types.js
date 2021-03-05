@@ -7,7 +7,7 @@ import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {LayoutPayloadForChange} from 'store/dashboard/layouts/types';
 import type {LayoutSize} from 'components/organisms/DiagramWidgetEditForm/types';
 import type {NewToast} from 'store/toasts/types';
-import {NewWidget} from 'entities';
+import type NewWidget from 'store/widgets/data/NewWidget';
 
 export type SetFieldValue = (name: string, value: any, callback?: Function) => void;
 
@@ -56,7 +56,7 @@ export type InjectedProps = {|
 	setSchema: (schema: Schema) => void,
 	user: UserData,
 	values: Values,
-	widget: AnyWidget
+	widget: AnyWidget | NewWidget
 |};
 
 export type State = {

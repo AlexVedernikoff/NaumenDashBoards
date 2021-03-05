@@ -79,7 +79,9 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
 const hasUUIDsInLabels = (attribute?: Attribute, group?: Group): boolean => {
 	const {metaClass} = ATTRIBUTE_TYPES;
 
-	return attribute?.type in ATTRIBUTE_SETS.REFERENCE || attribute?.type === metaClass || group?.way === GROUP_WAYS.CUSTOM;
+	return (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE)
+		|| attribute?.type === metaClass
+		|| group?.way === GROUP_WAYS.CUSTOM;
 };
 
 /**
@@ -164,7 +166,7 @@ const isAxisChart = (type: WidgetType): boolean => {
  * @param {AnyWidget} type - тип виджета
  * @returns {boolean}
  */
-const isCircleChart = (type: WidgetType) => {
+const isCircleChart = (type: WidgetType): boolean => {
 	const {DONUT, PIE} = WIDGET_TYPES;
 
 	return [DONUT, PIE].includes(type);
@@ -181,11 +183,24 @@ const isHorizontalChart = (type: WidgetType): boolean => {
 	return [BAR, BAR_STACKED].includes(type);
 };
 
+/**
+ * Проверяет возможность наличия глобальных настроек цветов
+ * @param {AnyWidget} type - тип виджета
+ * @returns {boolean}
+ */
+const hasChartColorsSettings = (type: WidgetType): boolean => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED} = WIDGET_TYPES;
+	const barCharts = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED];
+
+	return isCircleChart(type) || barCharts.includes(type);
+};
+
 export {
 	createDefaultGroup,
 	getDefaultSystemGroup,
 	getLayoutWidgets,
 	hasBreakdown,
+	hasChartColorsSettings,
 	hasUUIDsInLabels,
 	hasMSInterval,
 	hasPercent,

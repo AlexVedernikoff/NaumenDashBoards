@@ -1,5 +1,4 @@
 // @flow
-import type {ApexOptions} from 'apexcharts';
 import type {AxisData, AxisWidget} from 'store/widgets/data/types';
 import {
 	axisLabelFormatter,
@@ -14,16 +13,17 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
+import type {Options} from 'utils/chart/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Примесь графиков по умолчанию (bar, column, line)
  * @param {boolean} horizontal - положение графика
  * @param {boolean} stacked - накопление данных
- * @returns {ApexOptions}
+ * @returns {Options}
  */
 const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
-	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
+	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): Options => {
 	const {indicator: indicatorSettings, legend, parameter, type} = widget;
 	const {labels} = chart;
 	const buildDataSet: AxisData = getBuildSet(widget);

@@ -1,5 +1,4 @@
 // @flow
-import type {ApexOptions} from 'apexcharts';
 import {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
@@ -18,6 +17,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
+import type {Options} from 'utils/chart/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: number, ctx: Object) => {
@@ -41,15 +41,15 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 
 /**
  * Устанавливает настройки оси Y
- * @param {ApexOptions} options - опции графика
+ * @param {Options} options - опции графика
  * @param {ComboWidget} widget - виджет
  * @param {DiagramBuildData} chart - данные конкретного графика
  * @param {ComboData} dataSet - набор данных виджета, относительно которого настраивается ось
  * @param {number} index - индекс набора данных виджета
  * @param {boolean} forceHide - указывает на необходимость скрывать ось.
- * @returns {ApexOptions}
+ * @returns {Options}
  */
-const setYAxis = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData, dataSet: ComboData, index: number, forceHide: boolean): ApexOptions => {
+const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData, dataSet: ComboData, index: number, forceHide: boolean): Options => {
 	const {colorsSettings, indicator} = widget;
 	const {series} = chart;
 	const {breakdown, dataKey, indicators, showEmptyData, type, yAxisName: name} = dataSet;
@@ -137,12 +137,12 @@ const setYAxis = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuild
 
 /**
  * Устанавливает настройки осей Y относительно каждого объекта данных series
- * @param {ApexOptions} options - опции графика
+ * @param {Options} options - опции графика
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
- * @returns {ApexOptions}
+ * @returns {Options}
  */
-const setYAxises = (options: ApexOptions, widget: ComboWidget, chart: DiagramBuildData): ApexOptions => {
+const setYAxises = (options: Options, widget: ComboWidget, chart: DiagramBuildData): Options => {
 	const usedDataKeys = [];
 	let extendedOptions = options;
 
@@ -177,9 +177,9 @@ const setYAxises = (options: ApexOptions, widget: ComboWidget, chart: DiagramBui
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
  * @param {HTMLDivElement} container - контейнер, где размещен график
- * @returns {ApexOptions}
+ * @returns {Options}
  */
-const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
+const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTMLDivElement): Options => {
 	const {legend, parameter} = widget;
 	const {labels, series} = chart;
 	const strokeWidth = series.find(dataSet => dataSet.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;

@@ -1,11 +1,12 @@
 // @flow
-import type {ApexAxisChartSeries, ApexOptions} from 'apexcharts';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, WidgetType} from 'store/widgets/data/types';
 import {CHART_TYPES, DATA_LABELS_LIMIT, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'helpers';
+import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
+import type {Options, Series} from './types';
 import {setColors} from './helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -81,9 +82,9 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
  * Функция преобразует набор данных в требуемый формат
  * @param {Chart} widget - виджет
  * @param {DiagramBuildData} data - данные графика виджета
- * @returns {ApexAxisChartSeries}
+ * @returns {Series}
  */
-const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries => {
+const getSeries = (widget: Chart, data: DiagramBuildData): Series => {
 	const {series: originalSeries} = data;
 	let series = originalSeries;
 
@@ -102,16 +103,22 @@ const getSeries = (widget: Chart, data: DiagramBuildData): ApexAxisChartSeries =
  * @param {Chart} widget - виджет
  * @param {DiagramBuildData} data - данные графика виджета
  * @param {HTMLDivElement} container - контейнер, где размещен график
- * @returns {ApexOptions}
+ * @param {GlobalCustomChartColorsSettings} globalColorsSettings - глобальные настройки цветов
+ * @returns {Options}
  */
-const getOptions = (widget: Chart, data: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
+const getOptions = (
+	widget: Chart,
+	data: DiagramBuildData,
+	container: HTMLDivElement,
+	globalColorsSettings: GlobalCustomChartColorsSettings
+): Options => {
 	const {type: widgetType} = widget;
 	const type = widgetType === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(widgetType);
 	const {bar, line} = CHART_TYPES;
 	const {dataLabels} = widget;
 	const isAxisChart = type === bar || type === line;
 
-	let options: ApexOptions = {
+	let options: Options = {
 		chart: {
 			animations: {
 				enabled: false
@@ -135,7 +142,7 @@ const getOptions = (widget: Chart, data: DiagramBuildData, container: HTMLDivEle
 		series: getSeries(widget, data)
 	};
 
-	options = setColors(options, widget, data);
+	options = setColors(options, widget, data, globalColorsSettings);
 
 	return extend(options, resolveMixin(widget, data, container));
 };

@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Item, TypeData} from 'store/sources/currentObject/types';
 import type {SelectOperand} from 'store/customGroups/types';
-import {ThunkAction} from 'redux-thunk';
+import type {ThunkAction} from 'store/types';
 
 export type Props = {
 	attribute: Attribute,

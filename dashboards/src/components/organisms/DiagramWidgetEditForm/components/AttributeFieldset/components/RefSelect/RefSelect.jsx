@@ -32,14 +32,20 @@ export class RefSelect extends PureComponent<Props> {
 
 	getOptionsData = () => {
 		const {getOptions, parent, refAttributes} = this.props;
-		const {[createRefKey(parent)]: data = {}} = refAttributes;
-		let {
-			options = [],
-			loading = false
-		} = data;
+		let loading = false;
+		let options = [];
 
-		if (getOptions) {
-			options = getOptions(options);
+		if (parent) {
+			const {[createRefKey(parent)]: data = {
+				loading,
+				options
+			}} = refAttributes;
+
+			({loading, options} = data);
+
+			if (getOptions) {
+				options = getOptions(options);
+			}
 		}
 
 		return {

@@ -11,7 +11,6 @@ import type {Props, State} from './types';
 import type {Props as SystemProps} from './components/SystemGroup/types';
 import RadioField from 'components/atoms/RadioField';
 import React, {Component, Fragment} from 'react';
-import {setAttributeValue} from 'store/sources/attributes/helpers';
 import styles from './styles.less';
 import SystemGroup from './components/SystemGroup';
 import TextInput from 'components/atoms/TextInput';
@@ -47,9 +46,15 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	handleChangeAttributeTitle = (e: OnChangeEvent<string>) => {
 		const {attribute} = this.state;
-		const {value} = e;
+		const {value: title} = e;
+		const newAttribute = {
+			...attribute,
+			title
+		};
 
-		this.setState({attribute: setAttributeValue(attribute, 'title', value)});
+		this.setState({
+			attribute: newAttribute
+		});
 	};
 
 	handleSubmit = () => {
@@ -108,11 +113,10 @@ export class GroupCreatingModal extends Component<Props, State> {
 
 	renderNameField = () => {
 		const {attribute} = this.state;
-		const value = attribute.ref?.title ?? attribute.title;
 
 		return (
 			<FormField label="Название поля">
-				<TextInput onChange={this.handleChangeAttributeTitle} value={value} />
+				<TextInput onChange={this.handleChangeAttributeTitle} value={attribute.title} />
 			</FormField>
 		);
 	};

@@ -3,7 +3,7 @@ import 'draft-js/dist/Draft.css';
 import {CHANGE_TYPES, COMMAND_EVENTS} from './constants';
 import cn from 'classnames';
 import {ContentState, convertFromRaw, Editor, EditorState, Modifier} from 'draft-js';
-import type {EditorState as EEditorStateType, Props} from './types';
+import type {EditorState as EditorStateType, Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
@@ -38,7 +38,7 @@ export class TextEditor extends PureComponent<Props> {
 		editor && editor.focus();
 	};
 
-	getEditorStateFromContent = (): EEditorStateType => {
+	getEditorStateFromContent = (): EditorStateType => {
 		const {content} = this.props;
 
 		return content
@@ -46,13 +46,13 @@ export class TextEditor extends PureComponent<Props> {
 			: EditorState.createEmpty();
 	};
 
-	handleChange = (editorState: EEditorStateType) => {
+	handleChange = (editorState: EditorStateType) => {
 		const {name, onChange} = this.props;
 
 		onChange && onChange({name, value: editorState});
 	};
 
-	handlePastedText = (text: string, html?: string, editorState: EditorState) => {
+	handlePastedText = (text: string, html?: string, editorState: EditorStateType) => {
 		const pastedBlocks = ContentState.createFromText(text).blockMap;
 		const newState = Modifier.replaceWithFragment(
 			editorState.getCurrentContent(),

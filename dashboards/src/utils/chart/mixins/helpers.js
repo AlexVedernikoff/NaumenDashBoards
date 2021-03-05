@@ -1,6 +1,5 @@
 // @flow
-import type {ApexAxisChartSeries} from 'apexcharts';
-import type {ApexLabels, ApexLegend, AxisProps} from 'utils/chart/types';
+import type {ApexLabels, ApexLegend, AxisProps, Series} from 'utils/chart/types';
 import {AXIS_FONT_SIZE, LEGEND_HEIGHT, LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
@@ -134,11 +133,11 @@ const getNiceScale = (value: number) => {
 
 /**
  * Возвращает максимальное значение данных
- * @param {ApexAxisChartSeries} series - данные для построения графика
+ * @param {Series} series - данные для построения графика
  * @param {boolean} stacked - указывает на необходимость подсчета значений для графиков с накоплением
  * @returns {number} - максимальное значение
  */
-const getMaxValue = (series: ApexAxisChartSeries, stacked: boolean) => {
+const getMaxValue = (series: Series, stacked: boolean) => {
 	const values = series
 		.map(s => s.data)
 		.reduce((all, data) => [...all, ...data], []);
@@ -149,10 +148,10 @@ const getMaxValue = (series: ApexAxisChartSeries, stacked: boolean) => {
 
 /**
  * Возвращает максимальное значение данных графика с накоплением
- * @param {ApexAxisChartSeries} series - данные для построения графика
+ * @param {Series} series - данные для построения графика
  * @returns {number} - максимальное значение
  */
-const getMaxStackedValue = (series: ApexAxisChartSeries) => {
+const getMaxStackedValue = (series: Series) => {
 	const stackedValues = [];
 
 	series.filter(({type}) => type === WIDGET_TYPES.COLUMN_STACKED).forEach(({data}) => {

@@ -29,3 +29,5 @@ export type AxisProps = {
 };
 
 export type Options = Object;
+
+export type Series = Array<any>;

@@ -5,6 +5,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getLabelWithoutUUID, getLegendOptions, valueFormatter} from './helpers';
 import {getMainDataSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
+import type {Options} from 'utils/chart/types';
 
 const dataLabelsFormatter = (usesMSInterval: boolean, usesPercent: boolean) => (val, options) => {
 	return valueFormatter(usesMSInterval, usesPercent)(options.w.config.series[options.seriesIndex]);
@@ -17,7 +18,7 @@ const dataLabelsFormatter = (usesMSInterval: boolean, usesPercent: boolean) => (
  * @param {HTMLDivElement} container - контейнер, где размещен график
  * @returns {ApexOptions}
  */
-const circleMixin = (widget: CircleWidget, chart: DiagramBuildData, container: HTMLDivElement): ApexOptions => {
+const circleMixin = (widget: CircleWidget, chart: DiagramBuildData, container: HTMLDivElement): Options => {
 	const {legend} = widget;
 	const {breakdown, indicators} = getMainDataSet(widget.data);
 	const {aggregation, attribute} = indicators[0];

@@ -16,6 +16,10 @@ import RadioField from 'components/atoms/RadioField';
 import React, {Fragment, PureComponent} from 'react';
 
 export class ColorsBox extends PureComponent<Props> {
+	static defaultProps = {
+		labels: []
+	};
+
 	change = (value: ChartColorsSettings) => {
 		const {name, onChange} = this.props;
 
@@ -54,16 +58,16 @@ export class ColorsBox extends PureComponent<Props> {
 	};
 
 	renderCustomColorsSettings = () => {
-		const {buildData, disabledCustomSettings, value} = this.props;
+		const {disabledCustomSettings, labels, value} = this.props;
 		const {auto: autoSettings, custom: customSettings} = value;
 
-		if (!disabledCustomSettings && customSettings.data && buildData?.data) {
+		if (!disabledCustomSettings && customSettings.data) {
 			const {colors: defaultColors} = autoSettings;
 
 			return (
 				<CustomColorsSettings
-					buildData={buildData}
 					defaultColors={defaultColors}
+					labels={labels}
 					onChange={this.handleChangeCustomSettings}
 					value={customSettings}
 				/>

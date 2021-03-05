@@ -1,6 +1,5 @@
 // @flow
 import Checkbox from 'components/atoms/Checkbox';
-import type {DashboardItem} from 'store/dashboards/types';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
@@ -13,6 +12,7 @@ import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import TextArea from 'components/atoms/TextArea';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
+import type {Value} from 'components/molecules/MultiDropDownList/types';
 
 export class NavigationBox extends PureComponent<Props> {
 	handleChangeTip = (event: OnChangeInputEvent) => {
@@ -25,7 +25,7 @@ export class NavigationBox extends PureComponent<Props> {
 		});
 	};
 
-	handleSelect = (selectValue: DashboardItem) => {
+	handleSelect = (selectValue: Value) => {
 		const {onChange, settings} = this.props;
 		const {parent, ...value} = selectValue;
 		let dashboard = value;

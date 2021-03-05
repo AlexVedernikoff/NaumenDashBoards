@@ -1,13 +1,13 @@
 // @flow
-import type {CustomChartColorsSettingsData} from 'store/widgets/data/types';
+import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import type {Item, SettingsMap, State} from './types';
 
 /**
  * Возвращает элемент состояния конкретной настройки
- * @param {CustomChartColorsSettingsData | undefined} data - данные конкретной настройки
+ * @param {GlobalCustomChartColorsSettings} data - данные конкретной настройки
  * @returns {Item}
  */
-const getItem = (data?: CustomChartColorsSettingsData): Item => ({
+const getItem = (data: GlobalCustomChartColorsSettings = null): Item => ({
 	data,
 	removing: {
 		error: false,
@@ -25,10 +25,10 @@ const getItem = (data?: CustomChartColorsSettingsData): Item => ({
  * @returns {State}
  */
 const getMap = (payload: SettingsMap): State => {
-	const map = {...payload};
+	const map = {};
 
-	Object.keys(map).forEach(key => {
-		map[key] = getItem(map[key]);
+	Object.keys(payload).forEach(key => {
+		map[key] = getItem(payload[key]);
 	});
 
 	return map;

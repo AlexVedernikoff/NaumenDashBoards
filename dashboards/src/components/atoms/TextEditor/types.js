@@ -1,11 +1,9 @@
 // @flow
-import type DraftJSEditorState from 'draft-js/lib/EditorState.js.flow';
-import type {RawDraftContentState} from 'draft-js/lib/RawDraftContentState.js.flow';
 import type {TextAlign} from 'store/widgets/data/types';
 
-export type EditorState = DraftJSEditorState;
+export type EditorState = Object;
 
-export type Content = RawDraftContentState;
+export type Content = Object;
 
 export type Value = EditorState;
 

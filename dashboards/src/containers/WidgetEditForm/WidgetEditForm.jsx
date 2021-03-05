@@ -23,7 +23,7 @@ class WidgetEditForm extends PureComponent<Props, State> {
 		values: this.getValues(this.props.widget)
 	};
 
-	getValues (widget: AnyWidget): Values {
+	getValues (widget: $ReadOnly<AnyWidget | NewWidget>): Values {
 		const {id, ...values} = widget;
 
 		return deepClone(values);
@@ -77,7 +77,7 @@ class WidgetEditForm extends PureComponent<Props, State> {
 		changeLayout(payload);
 	};
 
-	handleSubmit = async (updateWidget: UpdateWidget, callback: OnSubmitCallback) => {
+	handleSubmit = async (updateWidget: UpdateWidget, callback?: OnSubmitCallback) => {
 		const {changeLayoutMode, createWidget, layoutMode, saveWidget, widget} = this.props;
 		const {values} = this.state;
 		const isValid = await this.validate();
@@ -94,10 +94,9 @@ class WidgetEditForm extends PureComponent<Props, State> {
 
 			if (errors) {
 				this.setState({errors});
+			} else {
+				this.setState({values: this.getValues(updatedWidget)}, () => callback && callback(updatedWidget));
 			}
-
-			this.setState({values: this.getValues(updatedWidget)});
-			callback && callback(updatedWidget);
 		} else {
 			this.focusOnError();
 		}

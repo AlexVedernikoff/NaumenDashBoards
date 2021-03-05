@@ -13,10 +13,10 @@ import {
 import {DEFAULT_BREAKDOWN_COLOR, DEFAULT_CHART_SETTINGS} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getCustomColorsSettingsKey} from 'store/widgets/data/helpers';
+import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import {hasBreakdown, isCircleChart} from 'store/widgets/helpers';
 import type {Options} from './types';
 import {SEPARATOR} from 'src/store/widgets/buildData/constants';
-import {store} from 'app.constants';
 
 /**
  * Возвращает настройки легенды в зависимости от параметров переданного виджета
@@ -75,9 +75,15 @@ const getBreakdownColors = (settings: CustomBreakdownChartColorsSettings, labels
  * @param {Options} options - опции графика
  * @param {Chart} widget - виджет
  * @param {DiagramBuildData} data - данные для построения виджета
+ * @param {GlobalCustomChartColorsSettings} globalColorsSettings - глобальные настройки цветов
  * @returns {boolean}
  */
-const setColors = (options: Options, widget: Chart, data: DiagramBuildData) => {
+const setColors = (
+	options: Options,
+	widget: Chart,
+	data: DiagramBuildData,
+	globalColorsSettings: GlobalCustomChartColorsSettings
+) => {
 	const {colorsSettings} = widget;
 	const {auto: autoSettings, custom: customSettings, type} = colorsSettings;
 	const {CUSTOM} = CHART_COLORS_SETTINGS_TYPES;
@@ -135,11 +141,11 @@ const setColors = (options: Options, widget: Chart, data: DiagramBuildData) => {
 		};
 	};
 
-	if (useGlobal) {
-		customSettingsData = store.getState().dashboard.customChartColorsSettings[currentKey]?.data ?? customSettingsData;
+	if (useGlobal && globalColorsSettings) {
+		customSettingsData = globalColorsSettings;
 	}
 
-	if (type === CUSTOM && customSettingsData?.key === currentKey) {
+	if (type === CUSTOM && customSettingsData && customSettingsData.key === currentKey) {
 		extendedOptions = customSettingsData.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
 			? setBreakdownColors(extendedOptions, customSettingsData)
 			: setLabelsColors(extendedOptions, customSettingsData, data.labels);

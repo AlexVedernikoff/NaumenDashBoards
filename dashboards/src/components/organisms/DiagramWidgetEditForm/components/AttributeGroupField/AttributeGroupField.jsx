@@ -43,11 +43,15 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 
 	handleCloseModal = () => this.setState({showModal: false});
 
-	handleSubmitModal = (group: Group, attribute: Attribute) => {
-		const {name, onChange} = this.props;
+	handleSubmitModal = (group: Group, newGroupAttribute: Attribute) => {
+		const {attribute, name, onChange} = this.props;
 
-		onChange(name, group, attribute);
-		this.setState({showModal: false});
+		if (attribute) {
+			const newAttribute = attribute.ref ? {...attribute, ref: newGroupAttribute} : newGroupAttribute;
+
+			onChange(name, group, newAttribute);
+			this.setState({showModal: false});
+		}
 	};
 
 	renderButton = () => (
@@ -61,11 +65,12 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 		const {showModal} = this.state;
 
 		if (showModal && attribute && source) {
-			const group = value || createDefaultGroup(value, attribute);
+			const groupAttribute = attribute.ref || attribute;
+			const group = value || createDefaultGroup(value, groupAttribute);
 
 			return (
 				<GroupCreatingModal
-					attribute={attribute}
+					attribute={groupAttribute}
 					group={group}
 					key={attribute.type}
 					onClose={this.handleCloseModal}

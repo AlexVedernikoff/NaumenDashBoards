@@ -1,5 +1,5 @@
 // @flow
-import Chart from 'components/molecules/Chart';
+import Chart from 'containers/Chart';
 import cn from 'classnames';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';

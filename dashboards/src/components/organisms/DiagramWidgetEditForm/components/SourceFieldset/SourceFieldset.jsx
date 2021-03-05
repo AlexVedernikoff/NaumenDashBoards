@@ -81,13 +81,15 @@ export class SourceFieldset extends Component<Props> {
 	handleChangeSourceLabel = ({label}: OnChangeLabelEvent) => {
 		const {value: source} = this.props;
 
-		this.change({
-			...source,
-			value: {
-				...source.value,
-				label
-			}
-		});
+		if (source.value) {
+			this.change({
+				...source,
+				value: {
+					...source.value,
+					label
+				}
+			});
+		}
 	};
 
 	handleClickRemoveButton = () => {

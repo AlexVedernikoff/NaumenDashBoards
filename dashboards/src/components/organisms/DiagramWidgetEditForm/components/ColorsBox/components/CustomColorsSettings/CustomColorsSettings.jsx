@@ -1,5 +1,5 @@
 // @flow
-import Checkbox from 'src/components/atoms/Checkbox';
+import Checkbox from 'components/atoms/Checkbox';
 import type {
 	CustomBreakdownChartColorsSettings as BreakdownColorsSettings,
 	CustomChartColorsSettingsData,
@@ -9,21 +9,13 @@ import CustomBreakdownColorsSettings
 	from 'DiagramWidgetEditForm/components/ColorsBox/components/CustomBreakdownColorsSettings';
 import {CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
 import CustomLabelColorsSettings from 'DiagramWidgetEditForm/components/ColorsBox/components/CustomLabelColorsSettings';
-import FormCheckControl from 'src/components/molecules/FormCheckControl';
+import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
-import {isCircleChart} from 'store/widgets/helpers';
-import type {OnChangeEvent} from 'src/components/types';
+import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 
 export class CustomColorsSettings extends PureComponent<Props> {
-	getBreakdownLabels = (): Array<string> => {
-		const {data, type} = this.props.buildData;
-		const {labels, series} = data;
-
-		return isCircleChart(type) ? labels : series.map(s => s.name);
-	};
-
 	handleChange = (data: CustomChartColorsSettingsData) => {
 		const {onChange, value} = this.props;
 
@@ -49,12 +41,12 @@ export class CustomColorsSettings extends PureComponent<Props> {
 	};
 
 	renderBreakdownCustomColorsSettings = (settings: BreakdownColorsSettings) => {
-		const {defaultColors} = this.props;
+		const {defaultColors, labels} = this.props;
 
 		return (
 			<CustomBreakdownColorsSettings
 				defaultColors={defaultColors}
-				labels={this.getBreakdownLabels()}
+				labels={labels}
 				onChange={this.handleChange}
 				value={settings}
 			/>
@@ -62,12 +54,12 @@ export class CustomColorsSettings extends PureComponent<Props> {
 	};
 
 	renderLabelCustomColorsSettings = (settings: LabelColorsSettings) => {
-		const {buildData, defaultColors} = this.props;
+		const {defaultColors, labels} = this.props;
 
 		return (
 			<CustomLabelColorsSettings
 				defaultColors={defaultColors}
-				labels={buildData.data.labels}
+				labels={labels}
 				onChange={this.handleChange}
 				value={settings}
 			/>

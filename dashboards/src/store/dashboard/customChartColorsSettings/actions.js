@@ -61,7 +61,6 @@ const removeCustomChartColorsSettings = (payload: string) => async (dispatch: Di
 			type: EVENTS.REMOVE_FULFILLED
 		});
 	} catch (e) {
-
 		dispatch({
 			payload,
 			type: EVENTS.REMOVE_REJECTED

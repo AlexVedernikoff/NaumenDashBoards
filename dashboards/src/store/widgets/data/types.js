@@ -236,7 +236,7 @@ export type AxisWidgetType = $Keys<typeof WIDGET_SETS.AXIS>;
 export type AxisWidget = {
 	...BaseWidget,
 	colorsSettings: ChartColorsSettings,
-	data: $ReadOnlyArray<AxisData>,
+	data: Array<AxisData>,
 	dataLabels: DataLabels,
 	indicator: AxisSettings,
 	legend: Legend,
@@ -601,4 +601,4 @@ export type WidgetsDataState = {
 	validatingToCopy: ChangingState
 };
 
-export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string) => ThunkAction;
+export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;

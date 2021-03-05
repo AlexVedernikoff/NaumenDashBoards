@@ -3,8 +3,10 @@ import type {CustomChartColorsSettingsData} from 'store/widgets/data/types';
 import {EVENTS} from './constants';
 import type {ThunkAction} from 'store/types';
 
+export type GlobalCustomChartColorsSettings = CustomChartColorsSettingsData | null;
+
 export type Item = {
-	data?: CustomChartColorsSettingsData,
+	data: GlobalCustomChartColorsSettings,
 	removing: {
 		error: boolean,
 		loading: boolean

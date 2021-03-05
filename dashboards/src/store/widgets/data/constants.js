@@ -96,7 +96,7 @@ const AXIS = {
 	LINE
 };
 
-// Груговые графики
+// Круговые графики
 const CIRCLE = {
 	DONUT,
 	PIE

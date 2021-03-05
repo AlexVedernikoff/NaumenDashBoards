@@ -1,23 +1,26 @@
 // @flow
 import type {BuildData} from 'store/widgets/buildData/types';
+import type {
+	GlobalCustomChartColorsSettings,
+	RemoveCustomChartColorsSetting
+} from 'store/dashboard/customChartColorsSettings/types';
 import type {Props as ComponentProps} from 'DiagramWidgetEditForm/components/ColorsBox/types';
-import type {RemoveCustomChartColorsSetting, State} from 'store/dashboard/customChartColorsSettings/types';
 import type {SetUseGlobalChartSettings, Widget} from 'store/widgets/data/types';
 import type {Values} from 'src/containers/WidgetEditForm/types';
 
 export type ConnectedProps = {|
 	buildData?: BuildData,
-	customChartColorsSettings: State
+	globalColorsSettings: GlobalCustomChartColorsSettings
 |};
 
-export type ConnectedFunctions = {
+export type ConnectedFunctions = {|
 	removeCustomChartColorsSettings: RemoveCustomChartColorsSetting,
 	setUseGlobalChartSettings: SetUseGlobalChartSettings
-};
+|};
 
-export type ContainerProps = {
+export type ContainerProps = {|
 	values: Values,
 	widget: Widget
-};
+|};
 
-export type Props = ComponentProps & ContainerProps & ConnectedProps & ConnectedFunctions;
+export type Props = ConnectedProps & ComponentProps & ConnectedFunctions & ContainerProps;

@@ -79,5 +79,6 @@ export type RenderFormProps = {|
 
 export type TypedFormProps = {|
 	layoutMode: LayoutMode,
-	render: (props: RenderFormProps) => Node
+	render: (props: RenderFormProps) => Node,
+	values: Values
 |};

@@ -11,6 +11,7 @@ import {connect} from 'react-redux';
 import {DEFAULT_COLORS_SETTINGS} from 'utils/chart/constants';
 import {functions, props} from './selectors';
 import {getCustomColorsSettingsKey, getCustomColorsSettingsType} from 'store/widgets/data/helpers';
+import {isCircleChart} from 'store/widgets/helpers';
 import type {Props} from './types';
 import React from 'react';
 
@@ -25,10 +26,10 @@ export class ColorsBox extends React.Component<Props> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {values: prevValues} = prevProps;
-		const {values} = this.props;
+		const {globalColorsSettings: prevGlobalSettings, values: prevValues} = prevProps;
+		const {globalColorsSettings, values} = this.props;
 
-		if (prevValues.data !== values.data) {
+		if (prevValues.data !== values.data || prevGlobalSettings !== globalColorsSettings) {
 			this.setSettingsByActualData();
 		}
 	}
@@ -39,9 +40,17 @@ export class ColorsBox extends React.Component<Props> {
 		type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
 	});
 
-	createCustomSettings = (type: CustomChartColorsSettingsType, key: string) => type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
-		? this.createBreakdownCustomSettings(key)
-		: this.createLabelCustomSettings(key);
+	createCustomSettings = (type: CustomChartColorsSettingsType, key: string | null) => {
+		let settings = null;
+
+		if (key) {
+			settings = type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
+				? this.createBreakdownCustomSettings(key)
+				: this.createLabelCustomSettings(key);
+		}
+
+		return settings;
+	};
 
 	createLabelCustomSettings = (key: string): CustomLabelChartColorsSettings => {
 		const {colors: defaultColors} = this.props.value.auto;
@@ -55,14 +64,14 @@ export class ColorsBox extends React.Component<Props> {
 	};
 
 	getCustomColorsSettingsData = () => {
-		const {customChartColorsSettings, values, widget} = this.props;
+		const {globalColorsSettings, values, widget} = this.props;
 		const {data: customSettingsData, useGlobal} = values.colorsSettings.custom;
 		const currentType = getCustomColorsSettingsType(widget);
 		const currentKey = getCustomColorsSettingsKey(widget);
 		let settingsData;
 
-		if (useGlobal && customChartColorsSettings[currentKey]?.data) {
-			settingsData = customChartColorsSettings[currentKey].data;
+		if (useGlobal && globalColorsSettings) {
+			settingsData = globalColorsSettings;
 		} else if (customSettingsData?.key === currentKey) {
 			settingsData = customSettingsData;
 		} else if (getCustomColorsSettingsKey(values) === currentKey) {
@@ -72,9 +81,25 @@ export class ColorsBox extends React.Component<Props> {
 		return settingsData;
 	};
 
+	getLabels = (): Array<String> | void => {
+		const {buildData, value} = this.props;
+		let labels;
+
+		if (buildData?.data && value.type === CHART_COLORS_SETTINGS_TYPES.CUSTOM) {
+			const {data, type} = buildData;
+			const {labels: dataLabels, series} = data;
+
+			labels = value.custom.data?.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN && !isCircleChart(type)
+				? series.map(s => s.name)
+				: dataLabels;
+		}
+
+		return labels;
+	};
+
 	handleChange = (name: string, value: ChartColorsSettings) => {
 		const {
-			customChartColorsSettings,
+			globalColorsSettings,
 			onChange,
 			removeCustomChartColorsSettings,
 			setUseGlobalChartSettings,
@@ -88,7 +113,7 @@ export class ColorsBox extends React.Component<Props> {
 		if (customSettings.useGlobal && !newCustomSettings.useGlobal && newCustomSettings.data) {
 			const {key} = newCustomSettings.data;
 
-			if (customChartColorsSettings[key]?.data) {
+			if (globalColorsSettings) {
 				setUseGlobalChartSettings(key, false);
 				removeCustomChartColorsSettings(key);
 			}
@@ -111,9 +136,11 @@ export class ColorsBox extends React.Component<Props> {
 	};
 
 	isDisabledCustomSettings = () => {
-		const {disabledCustomSettings, values, widget} = this.props;
+		const {disabledCustomSettings, globalColorsSettings, values, widget} = this.props;
+		const currentKey = getCustomColorsSettingsKey(values);
 
-		return disabledCustomSettings || getCustomColorsSettingsKey(widget) !== getCustomColorsSettingsKey(values);
+		return disabledCustomSettings
+			|| (globalColorsSettings?.key !== currentKey && getCustomColorsSettingsKey(widget) !== currentKey);
 	};
 
 	setSettingsByActualData = () => {
@@ -144,12 +171,12 @@ export class ColorsBox extends React.Component<Props> {
 	};
 
 	render () {
-		const {buildData, name, value} = this.props;
+		const {name, value} = this.props;
 
 		return (
 			<Component
-				buildData={buildData}
 				disabledCustomSettings={this.isDisabledCustomSettings()}
+				labels={this.getLabels()}
 				name={name}
 				onChange={this.handleChange}
 				value={value}

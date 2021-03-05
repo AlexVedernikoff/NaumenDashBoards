@@ -97,7 +97,7 @@ export class SourceControl extends PureComponent<Props, State> {
 	handleSelectAggregation = (name: string, aggregation: string) => {
 		const {index, onSelect, type, value} = this.props;
 
-		onSelect(index, name, {...value, aggregation}, type);
+		value && onSelect(index, name, {...value, aggregation}, type);
 	};
 
 	handleShowList = () => this.setState(state => ({showList: !state.showList}));

@@ -37,10 +37,14 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			setFieldValue(FIELDS.data, data);
 		};
 
-		handleChange = (dataSetIndex: number, source: SourceData) => {
-			const {setDataFieldValue} = this.props;
+		handleChange = (dataSetIndex: number, newSource: SourceData) => {
+			const {setDataFieldValue, values} = this.props;
 
-			setDataFieldValue(dataSetIndex, FIELDS.source, source);
+			if (newSource.descriptor !== values.data[dataSetIndex].source.descriptor) {
+				this.resetDynamicAttributes(dataSetIndex);
+			}
+
+			setDataFieldValue(dataSetIndex, FIELDS.source, newSource);
 		};
 
 		handleChangeForCompute = (dataSetIndex: number, value: boolean) => {
@@ -61,7 +65,6 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			const {fetchDynamicAttributeGroups, values} = this.props;
 			const {dataKey} = values.data[dataSetIndex];
 
-			this.resetDynamicAttributes(dataSetIndex);
 			fetchDynamicAttributeGroups(dataKey, descriptor);
 		};
 
@@ -107,12 +110,25 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 		};
 
 		resetDynamicAttributes = (index: number) => {
-			const {setDataFieldValue, values} = this.props;
-			let {breakdown, indicators, parameters} = values.data[index];
+			const {setFieldValue, values} = this.props;
+			const newData = values.data.map((dataSet, dataSetIndex) => {
+				let newDataSet = dataSet;
 
-			setDataFieldValue(index, FIELDS.parameters, parameters.map(this.resetDynamicAttribute));
-			setDataFieldValue(index, FIELDS.indicators, indicators.map(this.resetDynamicAttribute));
-			breakdown && setDataFieldValue(index, FIELDS.breakdown, breakdown.map(this.resetDynamicAttribute));
+				if (dataSetIndex === index) {
+					const {breakdown, indicators, parameters} = newDataSet;
+
+					newDataSet = {
+						...newDataSet,
+						breakdown: breakdown?.map(this.resetDynamicAttribute),
+						indicators: indicators.map(this.resetDynamicAttribute),
+						parameters: parameters?.map(this.resetDynamicAttribute)
+					};
+				}
+
+				return newDataSet;
+			});
+
+			setFieldValue(FIELDS.data, newData);
 		};
 
 		setDefaultIndicator = (index: number) => (attributes: Array<Attribute>) => {

@@ -37,7 +37,7 @@ const HOT_KEYS_COMMANDS = {
 	TOGGLE_UNDERLINE_STYLE
 };
 
-const DEFAULT_TEXT_WIDGET_SETTINGS = {
+const DEFAULT_TEXT_WIDGET_SETTINGS: Object = {
 	color: '#323232',
 	fontFamily: FONT_FAMILIES[0],
 	fontSize: 16

@@ -1,7 +1,7 @@
 // @flow
 import type {DrillDown, OpenNavigationLink} from 'store/widgets/links/types';
 import type {EditWidgetChunkData, Widget} from 'store/widgets/data/types';
-import {ThunkAction} from 'redux-thunk';
+import type {ThunkAction} from 'store/types';
 
 export type Props = {
 	className: string,

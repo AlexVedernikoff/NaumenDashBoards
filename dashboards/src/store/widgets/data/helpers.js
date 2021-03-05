@@ -5,14 +5,17 @@ import type {
 	CircleWidget,
 	CustomChartColorsSettingsType,
 	DeleteWidget,
+	Group,
 	SelectWidget,
 	SetCreatedWidget,
 	SetWidgets,
+	Source,
 	UpdateWidget,
 	Widget,
 	WidgetType,
 	WidgetsDataState
 } from './types';
+import type {Attribute} from 'store/sources/attributes/types';
 import {CUSTOM_CHART_COLORS_SETTINGS_TYPES, WIDGET_TYPES} from './constants';
 import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import DiagramWidget from './templates/DiagramWidget';
@@ -146,7 +149,6 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
 	};
 };
 
-// $FlowFixMe
 const getBuildSet = ({data}: Object) => data.find(set => !set.sourceForCompute) || data[0];
 
 const createNewWidget = (layoutMode: LayoutMode, type: WidgetType = WIDGET_TYPES.BAR) => {
@@ -226,7 +228,7 @@ const getMainDataSetIndex = <T: Object>(data: $ReadOnlyArray<T>): number => {
  * @param {AxisWidget | CircleWidget} widget - график
  * @returns {CustomChartColorsSettingsType}
  */
-const getCustomColorsSettingsType = (widget: $ReadOnly<AxisWidget | CircleWidget>): CustomChartColorsSettingsType => {
+const getCustomColorsSettingsType = (widget: $ReadOnly<Widget>): CustomChartColorsSettingsType => {
 	const {data, type} = widget;
 	const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = WIDGET_TYPES;
 	const {BREAKDOWN, LABEL} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
@@ -235,31 +237,80 @@ const getCustomColorsSettingsType = (widget: $ReadOnly<AxisWidget | CircleWidget
 };
 
 /**
+ * Создает ключ ключ пользовательских настроек цветов основанный на переданных значениях
+ * @param {Source} source - источник
+ * @param {Attribute} attribute - атрибут
+ * @param {Group} group - группировка атрибута
+ * @returns {string | null}
+ */
+const createCustomColorsSettingsKey = (source: Source, attribute: Attribute, group: Group): string | null => {
+	let key = source && attribute && group ? `${source.value}-${attribute.code}-${group.data}` : null;
+
+	if (key && group.format) {
+		key = `${key}-${group.format}`;
+	}
+
+	return key;
+};
+
+/**
+ * Создает ключ ключ пользовательских настроек цветов основанный на данных виджета для осевых графиков
+ * @param {AxisWidget} widget - осевой график
+ * @returns {string | null}
+ */
+const createCustomAxisChartColorsSettingsKey = (widget: AxisWidget): string | null => {
+	const type = getCustomColorsSettingsType(widget);
+	const {BREAKDOWN, LABEL} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
+	const {breakdown, parameters, source} = getMainDataSet(widget.data);
+	let key = null;
+
+	if (type === BREAKDOWN && Array.isArray(breakdown)) {
+		const {attribute, group} = breakdown[0];
+
+		key = createCustomColorsSettingsKey(source.value, attribute, group);
+	}
+
+	if (type === LABEL) {
+		const {attribute, group} = parameters[0];
+
+		key = createCustomColorsSettingsKey(source.value, attribute, group);
+	}
+
+	return key;
+};
+
+/**
+ * Создает ключ ключ пользовательских настроек цветов основанный на данных виджета для круговых графиков
+ * @param {CircleWidget} widget - осевой график
+ * @returns {string | null}
+ */
+const createCustomCircleChartColorsSettingsKey = (widget: CircleWidget): string | null => {
+	const {breakdown, source} = getMainDataSet(widget.data);
+	const {attribute, group} = breakdown[0];
+
+	return createCustomColorsSettingsKey(source.value, attribute, group);
+};
+
+/**
  * Возвращает ключ пользовательских настроек цветов основанный на данных виджета
  * @param {AxisWidget | CircleWidget} widget - график
- * @returns {string}
+ * @returns {string | null}
  */
-const getCustomColorsSettingsKey = (widget: $ReadOnly<AxisWidget | CircleWidget>): string => {
-	const type = getCustomColorsSettingsType(widget);
+const getCustomColorsSettingsKey = (widget: Widget): string | null => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, DONUT, PIE} = WIDGET_TYPES;
 
-	const createKey = (source, value) => {
-		const {attribute, group} = value;
-		let key = source && attribute && group ? `${source.value}-${attribute.code}-${group.data}` : '';
-
-		if (key && group.format) {
-			key = `${key}-${group.format}`;
-		}
-
-		return key;
-	};
-
-	const {breakdown, parameters, source} = getMainDataSet(widget.data);
-	const {value: sourceValue} = source;
-	const {BREAKDOWN} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
-
-	return type === BREAKDOWN && Array.isArray(breakdown)
-		? createKey(sourceValue, breakdown[0])
-		: createKey(sourceValue, parameters[0]);
+	switch (widget.type) {
+		case BAR:
+		case BAR_STACKED:
+		case COLUMN:
+		case COLUMN_STACKED:
+			return createCustomAxisChartColorsSettingsKey(widget);
+		case DONUT:
+		case PIE:
+			return createCustomCircleChartColorsSettingsKey(widget);
+		default:
+			return null;
+	}
 };
 
 export {

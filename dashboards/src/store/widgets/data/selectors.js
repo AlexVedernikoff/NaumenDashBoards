@@ -59,7 +59,17 @@ const getAllWidgetsWithoutSelected = createSelector(
  */
 const getSelectedWidgetBuildData = createSelector(
 	[getWidgetsBuildData, getSelectedWidgetId],
-	(buildData: BuildDataState, widgetId: string): BuildData => buildData.map[widgetId]
+	(buildData: BuildDataState, widgetId: string): BuildData => buildData[widgetId]
+);
+
+/**
+ * Возвращает данные для построения виджета
+ * @param {string} widgetId - идентификатор виджета
+ * @returns {Function}
+ */
+const getWidgetBuildData = (widgetId: string) => createSelector(
+	getWidgetsBuildData,
+	(buildData: BuildDataState): BuildData => buildData[widgetId]
 );
 
 /**
@@ -75,5 +85,6 @@ export {
 	getAllWidgets,
 	getAllWidgetsWithoutSelected,
 	getSelectedWidget,
-	getSelectedWidgetBuildData
+	getSelectedWidgetBuildData,
+	getWidgetBuildData
 };

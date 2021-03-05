@@ -24,15 +24,10 @@ export class Chart extends PureComponent<Props> {
 		}
 	}
 
-	componentDidUpdate (prevProps: Props) {
-		const {data: currentData, widget: currentWidget} = this.props;
-		const {data: prevData, widget: prevWidget} = prevProps;
+	componentDidUpdate () {
+		const options = this.getOptions();
 
-		if (currentData !== prevData || currentWidget !== prevWidget) {
-			const options = this.getOptions();
-
-			options && this.chart && this.chart.updateOptions(options);
-		}
+		options && this.chart && this.chart.updateOptions(options);
 	}
 
 	componentWillUnmount () {
@@ -54,12 +49,12 @@ export class Chart extends PureComponent<Props> {
 	};
 
 	getOptions = () => {
-		const {data, widget} = this.props;
+		const {data, globalColorsSettings, widget} = this.props;
 		const {current} = this.containerRef;
 		let options;
 
 		if (current) {
-			options = getOptions(widget, data, current);
+			options = getOptions(widget, data, current, globalColorsSettings);
 		}
 
 		return options;

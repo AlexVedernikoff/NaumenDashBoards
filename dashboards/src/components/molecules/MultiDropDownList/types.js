@@ -2,7 +2,8 @@
 
 export type Node = {
 	label: string,
-	value: string
+	value: string,
+	...Object
 };
 
 export type Root = {

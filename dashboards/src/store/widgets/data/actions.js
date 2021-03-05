@@ -2,7 +2,7 @@
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget} from './types';
 import {batch} from 'react-redux';
-import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
+import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
@@ -10,7 +10,7 @@ import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getCustomColorsSettingsKey} from './helpers';
 import {getMapValues, isObject} from 'helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
-import {isCircleChart} from 'src/store/widgets/helpers';
+import {hasChartColorsSettings} from 'store/widgets/helpers';
 import NewWidget from 'store/widgets/data/NewWidget';
 
 /**
@@ -96,9 +96,11 @@ const saveWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
  * Сохраняет изменение части данных виджета
  * @param {AnyWidget} widget - данные виджета
  * @param {object} chunkData - данные которые нужно изменить
+ * @param {boolean} refreshData - указывает на необходимость обновить данные для построения
  * @returns {ThunkAction}
  */
-const editWidgetChunkData = (widget: AnyWidget, chunkData: Object): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const editWidgetChunkData = (widget: AnyWidget, chunkData: Object, refreshData: boolean = true): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const payload = {
 			...getParams(),
@@ -113,7 +115,7 @@ const editWidgetChunkData = (widget: AnyWidget, chunkData: Object): ThunkAction 
 		await window.jsApi.restCallModule('dashboardSettings', 'editWidgetChunkData', payload);
 
 		dispatch(updateWidget(updatedWidgetData));
-		dispatch(fetchBuildData(updatedWidgetData));
+		refreshData && dispatch(fetchBuildData(updatedWidgetData));
 	} catch (e) {
 		dispatch(recordSaveError());
 	}
@@ -292,19 +294,17 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
  * @param {string} targetWidgetId - идентификатор виджета, настройки которого в дальнейшем будут применяться к остальным виджетам
  * @returns {ThunkAction}
  */
-const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string): ThunkAction =>
+const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string = ''): ThunkAction =>
 	(dispatch: Dispatch, getState: GetState): void => {
 	const {map: mapWidgets} = getState().widgets.data;
-		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED} = WIDGET_TYPES;
-		const barCharts = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED];
 
 	getMapValues(mapWidgets).forEach(widget => {
 		const {id, type} = widget;
 
 		try {
-			const equalKeys = getCustomColorsSettingsKey(widget) === key;
+			const validWidget = id !== targetWidgetId && hasChartColorsSettings(type);
 
-			if (id !== targetWidgetId && (barCharts.includes(type) || isCircleChart(type)) && equalKeys) {
+			if (validWidget && getCustomColorsSettingsKey(widget) === key) {
 				const {colorsSettings} = widget;
 
 				dispatch(editWidgetChunkData(widget, {
@@ -316,7 +316,7 @@ const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidget
 						},
 						type: CHART_COLORS_SETTINGS_TYPES.CUSTOM
 					}
-				}));
+				}, false));
 			}
 		} catch (e) {
 			console.log(e);

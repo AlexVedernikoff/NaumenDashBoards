@@ -1,11 +1,10 @@
 // @flow
 import {addMethod, array, lazy, mixed, number, object, string} from 'yup';
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {BreakdownItem, Parameter, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {isObject} from 'helpers';
 
 const getErrorMessage = (key: string) => {
 	const messages = {
@@ -68,15 +67,7 @@ addMethod(mixed, 'requiredAttribute', function (text: string) {
 	return this.test(
 		'check-attribute',
 		text,
-		({attribute: value} = {}) => {
-			let attribute = value;
-
-			if (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE) {
-				attribute = attribute.ref;
-			}
-
-			return isObject(attribute);
-		}
+		({attribute}) => !!attribute
 	);
 });
 
