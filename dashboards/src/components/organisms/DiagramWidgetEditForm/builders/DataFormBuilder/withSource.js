@@ -112,7 +112,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 			setDataFieldValue(index, FIELDS.parameters, parameters.map(this.resetDynamicAttribute));
 			setDataFieldValue(index, FIELDS.indicators, indicators.map(this.resetDynamicAttribute));
-			setDataFieldValue(index, FIELDS.breakdown, breakdown.map(this.resetDynamicAttribute));
+			breakdown && setDataFieldValue(index, FIELDS.breakdown, breakdown.map(this.resetDynamicAttribute));
 		};
 
 		setDefaultIndicator = (index: number) => (attributes: Array<Attribute>) => {
