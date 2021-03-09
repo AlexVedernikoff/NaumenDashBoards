@@ -785,14 +785,19 @@ class QueryWrapper implements CriteriaWrapper
     QueryWrapper filtering(List<FilterParameter> filters)
     {
         filters.collect { parameter ->
-            String columnCode = parameter.attribute
-                                         .attrChains()*.code
+            def attribute = parameter.attribute as Attribute
+            if(attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
+            {
+                attribute?.attrChains()?.last()?.ref = new Attribute(code: 'title', type: 'string')
+            }
+
+            String columnCode = attribute.attrChains()*.code
                                          .inject { first, second ->
                                              "${ first }.${ second }".toString()
                                          }
-            String code = parameter.attribute.code
-            String parameterFqn = parameter.attribute.metaClassFqn
-            if (parameter.attribute.attrChains()*.code.any { it == 'id' })
+            String code = attribute.code
+            String parameterFqn = attribute.metaClassFqn
+            if (attribute.attrChains()*.code.any { it == 'id' })
             {
                 columnCode = columnCode.replace('id', DashboardQueryWrapperUtils.UUID_CODE)
             }

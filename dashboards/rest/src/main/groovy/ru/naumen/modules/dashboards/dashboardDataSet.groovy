@@ -3593,7 +3593,7 @@ class DashboardDataSetService
             def groupType = 'object'
             def groupName = 'totalValueGroup'
             dynamicAttribute.attrChains().head().type = AttributeType.OBJECT_TYPE
-            dynamicAttribute.attrChains().last().ref = new Attribute(code: 'linkTemplate', type: 'string')
+            dynamicAttribute.attrChains().last().ref = new Attribute(code: 'linkTemplate', type: 'object')
 
             def subGroupData = new SubGroupData(data: [title: 'Шаблон атрибута', uuid: uuidForTemplate],
                                                 type: 'CONTAINS')
