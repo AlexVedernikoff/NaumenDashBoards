@@ -50,7 +50,7 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 		const {onSelect} = this.props;
 		const {searchValue} = this.state;
 
-		return <DropDownList expand={!!searchValue} onSelect={onSelect} value={item} />;
+		return <DropDownList expand={!!searchValue} key={item.value} onSelect={onSelect} value={item} />;
 	};
 
 	renderLoader = () => {

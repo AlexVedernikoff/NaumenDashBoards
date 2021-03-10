@@ -602,3 +602,8 @@ export type WidgetsDataState = {
 };
 
 export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
+
+export type ValidateWidgetToCopyResult = {
+	isValid: boolean,
+	reasons?: string[],
+};
