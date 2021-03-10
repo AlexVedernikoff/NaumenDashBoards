@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
-import type {AnyWidget} from './types';
+import type {AnyWidget, ValidateWidgetToCopyResult} from './types';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
@@ -155,11 +155,13 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
 
 /**
  * Копирует виджет
+ *
  * @param {string} dashboardKey - идентификатор дашборда
  * @param {string} widgetKey - идентификатор виджета
+ * @param {boolean} ignoreCustomGroups - сбросить кастомные группировки
  * @returns {ThunkAction}
  */
-const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const copyWidget = (dashboardKey: string, widgetKey: string, ignoreCustomGroups: boolean = false): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch({
 		type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
 	});
@@ -170,6 +172,7 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 		const payload = {
 			...getParams(),
 			dashboardKey,
+			ignoreCustomGroups,
 			widgetKey
 		};
 		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
@@ -257,8 +260,9 @@ const getErrors = (error: ResponseError) => {
  * @param {string} widgetKey - идентификатор виджета
  * @returns {ThunkAction}
  */
-const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<boolean> => {
+const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<ValidateWidgetToCopyResult> => {
 	let isValid = true;
+	let reasons = [];
 
 	dispatch({
 		type: WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY
@@ -270,9 +274,9 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 			dashboardKey,
 			widgetKey
 		};
+		let result = false;
 
-		const {result} = await window.jsApi.restCallModule('dashboardSettings', 'widgetIsBadToCopy', payload);
-
+		({reasons, result} = await window.jsApi.restCallModule('dashboardSettings', 'widgetIsBadToCopy', payload));
 		isValid = !result;
 
 		dispatch({
@@ -284,7 +288,7 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 		});
 	}
 
-	return isValid;
+	return {isValid, reasons};
 };
 
 /**

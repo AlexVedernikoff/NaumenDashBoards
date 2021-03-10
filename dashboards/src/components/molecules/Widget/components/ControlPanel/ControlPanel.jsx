@@ -157,7 +157,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 	renderNavigationButton = () => {
 		const {navigation, type} = this.props.widget;
 
-		if (type in DIAGRAM_WIDGET_TYPES && navigation.show) {
+		if (navigation?.show && type in DIAGRAM_WIDGET_TYPES) {
 			let {showTip, tip} = navigation;
 
 			if (!showTip) {

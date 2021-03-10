@@ -1,6 +1,7 @@
 // @flow
 import Button from 'components/atoms/Button';
 import cn from 'classnames';
+import {COPY_WIDGET_ERRORS} from './constants';
 import {createNewWidget} from 'store/widgets/data/helpers';
 import IconButton, {VARIANTS} from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -53,12 +54,13 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 		if (parent) {
 			const {value: dashboardId} = parent;
-			const isValid = await validateWidgetToCopy(dashboardId, widgetId);
+			const {isValid, reasons} = await validateWidgetToCopy(dashboardId, widgetId);
 
 			if (!isValid) {
 				return this.setState({
 					invalidCopyData: {
 						dashboardId,
+						reasons,
 						widgetId
 					}
 				});
@@ -73,10 +75,11 @@ export class WidgetAddPanel extends Component<Props, State> {
 		const {invalidCopyData} = this.state;
 
 		if (invalidCopyData) {
-			const {dashboardId, widgetId} = invalidCopyData;
+			const {dashboardId, reasons, widgetId} = invalidCopyData;
+			const ignoreCustomGroups = reasons.includes(COPY_WIDGET_ERRORS.HAS_CUSTOM_GROUPS);
 
 			this.setState({invalidCopyData: null});
-			copyWidget(dashboardId, widgetId);
+			copyWidget(dashboardId, widgetId, ignoreCustomGroups);
 		}
 	};
 
@@ -107,6 +110,19 @@ export class WidgetAddPanel extends Component<Props, State> {
 		const {invalidCopyData} = this.state;
 
 		if (invalidCopyData) {
+			let message = 'Виджет будет скопирован не полностью. Продолжить копирование?';
+			const {reasons} = invalidCopyData;
+			const hasSubjectFilters = reasons.includes(COPY_WIDGET_ERRORS.HAS_SUBJECT_FILTERS);
+			const hasCustomGroups = reasons.includes(COPY_WIDGET_ERRORS.HAS_CUSTOM_GROUPS);
+
+			if (hasSubjectFilters && hasCustomGroups) {
+				message = 'Виджет будет скопирован без относительных критериев фильтрации. Настроенные пользовательские группировки будут заменены на системные. Продолжить копирование?';
+			} else if (hasSubjectFilters) {
+				message = 'Виджет будет скопирован без относительных критериев фильтрации. Продолжить копирование?';
+			} else if (hasCustomGroups) {
+				message = 'Виджет будет скопирован без установленных пользовательских группировок. Продолжить копирование?';
+			}
+
 			return (
 				<Modal
 					header="Подтверждение копирования"
@@ -115,7 +131,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 					onSubmit={this.handleSubmitModal}
 					size={SIZES.SMALL}
 				>
-					Виджет будет скопирован без относительных критериев фильтрации. Продолжить копирование?
+					{message}
 				</Modal>
 			);
 		}

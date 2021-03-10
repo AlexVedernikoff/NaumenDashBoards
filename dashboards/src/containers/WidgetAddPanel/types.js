@@ -16,7 +16,7 @@ export type ConnectedProps = {|
 
 export type ConnectedFunctions = {|
 	addWidget: (widget: NewWidget) => ThunkAction,
-	copyWidget: (dashboardId: string, widgetId: string) => ThunkAction,
+	copyWidget: (dashboardId: string, widgetId: string, ignoreCustomGroups?: boolean) => ThunkAction,
 	fetchDashboards: () => ThunkAction,
 	validateWidgetToCopy: (dashboardId: string, widgetId: string) => ThunkAction
 |};
