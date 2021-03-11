@@ -316,6 +316,24 @@ enum DefaultValueEnum
     NULL,
     ZERO
 }
+
+/**
+ * Тип параметра для настроек цвета
+ */
+enum CustomLabelType
+{
+    LABEL,
+    BREAKDOWN
+}
+
+/**
+ * Тип настройки цвета
+ */
+enum ColorType
+{
+    AUTO,
+    CUSTOM
+}
 //endregion
 
 @InjectApi
@@ -348,6 +366,119 @@ class DashboardUtils
             return getApi().db.query(dateCriteria).list().head() as Date
         }
         return getApi().db.query("select min(${code}) from ${classFqn}").list().head() as Date
+    }
+
+    /**
+     * Метод по преобразованию поля data к новому формату
+     * @param dataOrZeroWidget - поле data от старого виджета или виджет целиком
+     * @param clazz - класс формата виджета
+     * @return поле data обновленного формата
+     */
+    static Collection updateDataToNewFormat(def dataOrZeroWidget, Class clazz)
+    {
+        switch (clazz)
+        {
+            case AxisZero:
+                def dataKey = UUID.randomUUID()
+                return [new DiagramNewData(
+                    indicators: [new NewIndicator(aggregation: dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.yAxis)],
+                    parameters: [new NewParameter(group: dataOrZeroWidget.group, attribute: dataOrZeroWidget.xAxis)],
+                    breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
+                    dataKey: dataKey,
+                    sourceForCompute: dataOrZeroWidget.sourceForCompute,
+                    source: new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
+                    top: new Top(),
+                    type: dataOrZeroWidget.type)]
+            case [AxisPrev, CirclePrev, SummaryPrev]:
+                return dataOrZeroWidget
+            case AxisCurrentAndNew:
+                if(dataOrZeroWidget.find() instanceof AxisCurrentData)
+                {
+                    return dataOrZeroWidget.collect {
+                        new DiagramNewData(
+                            indicators: [new NewIndicator(aggregation: it.aggregation, attribute: it.yAxis)],
+                            parameters: [new NewParameter(group: it.group, attribute: it.xAxis)],
+                            breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
+                            dataKey: it.dataKey,
+                            showEmptyData: it.showEmptyData,
+                            showBlankData: it.showBlankData,
+                            sourceForCompute: it.sourceForCompute,
+                            source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
+                            top: it.top,
+                            type: it.type)
+                    }
+                }
+                else return dataOrZeroWidget
+            case CircleZero:
+            case SummaryZero:
+                def dataKey = UUID.randomUUID()
+                return [new DiagramNewData(
+                    breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
+                    indicators: [new NewIndicator(aggregation:  dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.indicator)],
+                    source: new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
+                    sourceForCompute: dataOrZeroWidget.sourceForCompute,
+                    dataKey: dataKey,
+                    top: new Top()
+                )]
+            case [CircleCurrentAndNew, SummaryCurrentAndNew, SpeedometerCurrentAndNew] :
+                if(dataOrZeroWidget.find() instanceof CircleAndSummaryCurrentData) //почему-то не работает со списком
+                {
+                    return dataOrZeroWidget.collect {new DiagramNewData(
+                        breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
+                        indicators: [new NewIndicator(aggregation: it.aggregation, attribute: it.indicator)],
+                        source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
+                        sourceForCompute: it.sourceForCompute,
+                        showEmptyData: it.showEmptyData,
+                        showBlankData: it.showBlankData,
+                        dataKey: it.dataKey,
+                        top: clazz == CircleCurrentAndNew ? new Top() : null
+                    )}
+                }
+                else return dataOrZeroWidget
+            case TablePrevAndCurrentAndNew:
+                if(dataOrZeroWidget.find() instanceof TablePrevData)
+                {
+                    return dataOrZeroWidget
+                }
+                else if (dataOrZeroWidget.find() instanceof TableCurrentData)
+                {
+                    return dataOrZeroWidget.collect {
+                        new DiagramNewData(
+                            indicators: it.indicators,
+                            parameters: it.parameters,
+                            breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
+                            dataKey: it.dataKey,
+                            sourceForCompute: it.sourceForCompute,
+                            source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
+                            )
+                    }
+                }
+                else return dataOrZeroWidget
+
+        }
+    }
+
+    /**
+     * Метод по получению разбивки нового формата
+     * @param oldBreakdown - старая разбивка
+     * @param breakdownGroup - группировка для разбивки
+     * @param dataKey - ключ для конкретных данных на построение
+     * @return разбивка нового формата
+     */
+    static Collection<NewBreakdown> getNewFormatBreakdownOrNull(def oldBreakdown, Group breakdownGroup, String dataKey)
+    {
+        if(!oldBreakdown)
+        {
+            return null
+        }
+        //уже новый формат, который готов
+        if(oldBreakdown.find().properties.keySet().toList().any { it == 'dataKey'})
+        {
+            return oldBreakdown
+        }
+        return oldBreakdown
+            ? oldBreakdown.findResults { new NewBreakdown(attribute: it, group: breakdownGroup, dataKey: dataKey) }
+            : null
     }
 
     /**
@@ -479,6 +610,8 @@ class DashboardUtils
                     header: oldFormatWidget.header as Header,
                     columnsRatioWidth: oldFormatWidget.columnsRatioWidth,
                     showEmptyData: oldFormatWidget.showEmptyData,
+                    showBlankData: oldFormatWidget.showBlankData,
+                    showRowNum: fields.showRowNum,
                     sorting: oldFormatWidget.sorting as Sorting,
                     table: oldFormatWidget.table as TableObject,
                     data: oldFormatWidget.data as Collection<DiagramNowData>,
@@ -524,6 +657,8 @@ class AttributeType {
     static final Collection<String> DATE_TYPES = [DATE_TYPE, DATE_TIME_TYPE].asImmutable()
 
     static final Collection<String> DYNAMIC_ATTRIBUTE_TYPES = [DATE_TYPE, DATE_TIME_TYPE, DT_INTERVAL_TYPE, STRING_TYPE].asImmutable()
+
+    static final Collection<String> HAS_UUID_TYPES = [*LINK_TYPES, STATE_TYPE, META_CLASS_TYPE]
 
     static final String OBJECT_TYPE = 'object'
 
@@ -659,6 +794,7 @@ class Requisite
     String title
     Collection<RequisiteNode> nodes
     Boolean showNulls
+    Boolean showBlank
     Integer top
 }
 
@@ -712,6 +848,7 @@ class GroupParameter extends Parameter<GroupType>
 class FilterParameter extends Parameter<Comparison>
 {
     def value
+    String id
 }
 
 /**
@@ -1019,6 +1156,8 @@ class DashboardSettingsDeseializer extends StdDeserializer
 
         fields.layouts = mapper.convertValue(fields.layouts, Layout)
         fields.mobileLayouts = mapper.convertValue(fields.mobileLayouts, Layout)
+        fields.customColorsSettings = fields.customColorsSettings ? mapper.convertValue(fields.customColorsSettings,
+                                                                                        new TypeReference<Collection<CustomChartSettingsData>>() {}) : []
         return DashboardSettingsClass.fromMap(fields)
     }
 }
@@ -1054,6 +1193,8 @@ class DashboardSettingsClass
      */
     String dashboardKey
 
+    Collection<CustomChartSettingsData> customColorsSettings = []
+
     static fromMap(Map fields)
     {
         return fields ?
@@ -1061,7 +1202,8 @@ class DashboardSettingsClass
                                        widgets: fields.widgets as Collection<Widget>,
                                        customGroups: fields.customGroups as Collection<CustomGroup>,
                                        layouts: fields.layouts as Layout,
-                                       mobileLayouts: fields.mobileLayouts as Layout)
+                                       mobileLayouts: fields.mobileLayouts as Layout,
+                                       customColorsSettings: fields.customColorsSettings as Collection<CustomChartSettingsData>)
             : null
     }
 }
@@ -1859,7 +2001,9 @@ class SystemGroupInfo extends Group
         }
 
         return fields instanceof Map
-            ? new SystemGroupInfo(fields)
+            ? new SystemGroupInfo(data: fields.data as GroupType,
+                                  way: fields.way as Way,
+                                  format: fields.format)
             : null
     }
 }
@@ -2040,11 +2184,15 @@ class SubGroup
      * Название внутренней группы
      */
     String name
+    /**
+     * Индекс подгруппы
+     */
+    String id
 
     static SubGroup fromMap(Map fields)
     {
         return fields
-            ? new SubGroup(data: SubGroupData.fromListOfMap(fields.data), name: fields.name)
+            ? new SubGroup(data: SubGroupData.fromListOfMap(fields.data), name: fields.name, id: fields.id ?: UUID.randomUUID())
             : null
     }
 
@@ -2356,6 +2504,16 @@ class WidgetCustomDeserializer<T> extends StdDeserializer<T>
         }
 
         fields.computedAttrs = mapper.convertValue(fields.computedAttrs, new TypeReference<Collection<ComputedAttr>>() {})
+
+        //прошлый формат придет в поле colors
+        String colorField = 'colors'
+        if('colorsSettings' in fields.keySet().toList())
+        {
+            colorField = 'colorsSettings'
+        }
+        //но новый формат ставим в новое поле
+        fields.colorsSettings = fields[colorField] ? mapper.convertValue(fields[colorField], ColorsSettings) : null
+
         fields.data = mapper.convertValue(fields.data, new TypeReference<Collection<DiagramNowData>>() {})
 
         return clazz.fromMap(fields)
@@ -2397,8 +2555,9 @@ static Map updatePrevTypes(Map fields)
                                 breakdown        : fields."breakdown_$index",
                                 breakdownGroup   : fields."breakdownGroup_$index",
                                 top              : top?.show ? top?.count : null,
-                                type			 : type,
-                                showEmptyData    : fields.showEmptyData]
+                                type             : type,
+                                showEmptyData    : fields.showEmptyData,
+                                showBlankData    : fields.showBlankData]
                 return [(dataKey): dataBody]
             }
         }
@@ -2421,7 +2580,8 @@ static Map updatePrevTypes(Map fields)
                                 breakdown       : fields."breakdown_$index",
                                 breakdownGroup  : fields."breakdownGroup_$index",
                                 top             : top?.show ? top?.count : null,
-                                showEmptyData   : fields.showEmptyData]
+                                showEmptyData   : fields.showEmptyData,
+                                showBlankData   : fields.showBlankData]
                 data = [(dataKey): dataBody]
             }
         }
@@ -2447,6 +2607,7 @@ static Map updatePrevTypes(Map fields)
                                       breakdownGroup  : fields."breakdownGroup_$index",
                                       top             : top?.show ? top?.count : null,
                                       showEmptyData   : fields.showEmptyData,
+                                      showBlankData   : fields.showBlankData,
                                       calcTotalColumn : fields."calcTotalColumn_$index",
                                       calcTotalRow    : fields."calcTotalRow_$index"]
 
@@ -2473,7 +2634,11 @@ abstract class Widget
      * Коллекция цветов диаграммы
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    Collection<String> colors
+    /**
+     * Настройки цветов
+     */
+    @JsonAlias(['colors', 'colorsSettings'])
+    ColorsSettings colorsSettings
     /**
      * Название диаграммы
      */
@@ -2719,114 +2884,6 @@ class AxisCurrentAndNew extends NewDiagrams
     }
 }
 
-/**
- * Метод по преобразованию поля data к новому формату
- * @param dataOrZeroWidget - поле data от старого виджета или виджет целиком
- * @param clazz - класс формата виджета
- * @return поле data обновленного формата
- */
-static Collection updateDataToNewFormat(def dataOrZeroWidget, Class clazz)
-{
-    switch (clazz)
-    {
-        case AxisZero:
-            def dataKey = UUID.randomUUID()
-            return [new DiagramNewData(
-                indicators: [new NewIndicator(aggregation: dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.yAxis)],
-                parameters: [new NewParameter(group: dataOrZeroWidget.group, attribute: dataOrZeroWidget.xAxis)],
-                breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
-                dataKey: dataKey,
-                sourceForCompute: dataOrZeroWidget.sourceForCompute,
-                source: new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
-                top: new Top(),
-                type: dataOrZeroWidget.type)]
-        case [AxisPrev, CirclePrev, SummaryPrev]:
-            return dataOrZeroWidget
-        case AxisCurrentAndNew:
-            if(dataOrZeroWidget.find() instanceof AxisCurrentData)
-            {
-                return dataOrZeroWidget.collect {
-                    new DiagramNewData(
-                        indicators: [new NewIndicator(aggregation: it.aggregation, attribute: it.yAxis)],
-                        parameters: [new NewParameter(group: it.group, attribute: it.xAxis)],
-                        breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
-                        dataKey: it.dataKey,
-                        showEmptyData: it.showEmptyData,
-                        sourceForCompute: it.sourceForCompute,
-                        source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
-                        top: it.top,
-                        type: it.type)
-                }
-            }
-            else return dataOrZeroWidget
-        case CircleZero:
-        case SummaryZero:
-            def dataKey = UUID.randomUUID()
-            return [new DiagramNewData(
-                breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
-                indicators: [new NewIndicator(aggregation:  dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.indicator)],
-                source: new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
-                sourceForCompute: dataOrZeroWidget.sourceForCompute,
-                dataKey: dataKey,
-                top: new Top()
-            )]
-        case [CircleCurrentAndNew, SummaryCurrentAndNew, SpeedometerCurrentAndNew] :
-            if(dataOrZeroWidget.find() instanceof CircleAndSummaryCurrentData) //почему-то не работает со списком
-            {
-                return dataOrZeroWidget.collect {new DiagramNewData(
-                    breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
-                    indicators: [new NewIndicator(aggregation: it.aggregation, attribute: it.indicator)],
-                    source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
-                    sourceForCompute: it.sourceForCompute,
-                    dataKey: it.dataKey,
-                    top: clazz == CircleCurrentAndNew ? new Top() : null
-                )}
-            }
-            else return dataOrZeroWidget
-        case TablePrevAndCurrentAndNew:
-            if(dataOrZeroWidget.find() instanceof TablePrevData)
-            {
-                return dataOrZeroWidget
-            }
-            else if (dataOrZeroWidget.find() instanceof TableCurrentData)
-            {
-                return dataOrZeroWidget.collect {
-                    new DiagramNewData(
-                        indicators: it.indicators,
-                        parameters: it.parameters,
-                        breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
-                        dataKey: it.dataKey,
-                        sourceForCompute: it.sourceForCompute,
-                        source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
-                        )
-                }
-            }
-            else return dataOrZeroWidget
-    }
-}
-
-/**
- * Метод по получению разбивки нового формата
- * @param oldBreakdown - старая разбивка
- * @param breakdownGroup - группировка для разбивки
- * @param dataKey - ключ для конкретных данных на построение
- * @return разбивка нового формата
- */
-static Collection<NewBreakdown> getNewFormatBreakdownOrNull(def oldBreakdown, Group breakdownGroup, String dataKey)
-{
-    if(!oldBreakdown)
-    {
-        return null
-    }
-    //уже новый формат, который готов
-    if(oldBreakdown.find().properties.keySet().toList().any { it == 'dataKey'})
-    {
-        return oldBreakdown
-    }
-    return oldBreakdown
-        ? oldBreakdown.findResults { new NewBreakdown(attribute: it, group: breakdownGroup, dataKey: dataKey) }
-        : null
-}
 
 /**
  * Класс, описывающий общие поля текущих данных на построение
@@ -2840,6 +2897,11 @@ class DiagramNowData
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean showEmptyData = false
+
+    /**
+     * Флаг на использование незаполненных значений
+     */
+    Boolean showBlankData = false
     /**
      * Флаг на данные только для построения
      */
@@ -2912,6 +2974,7 @@ class AxisCurrentData extends DiagramNowData
                                 breakdown: fields.breakdown as Collection<BaseBreakdown>,
                                 descriptor: fields.descriptor,
                                 showEmptyData: fields.showEmptyData,
+                                showBlankData: fields.showBlankData,
                                 sourceForCompute: fields.sourceForCompute,
                                 dataKey: fields.dataKey,
                                 top: fields.top as Top,
@@ -2970,6 +3033,7 @@ class DiagramNewData extends DiagramNowData
                 source: fields.source as NewSourceValue,
                 dataKey: fields.dataKey,
                 showEmptyData: fields.showEmptyData,
+                showBlankData: fields.showBlankData,
                 sourceForCompute: fields.sourceForCompute,
                 xAxisName: fields.xAxisName,
                 yAxisName: fields.yAxisName,
@@ -3061,6 +3125,7 @@ class CircleAndSummaryCurrentData extends DiagramNowData
                 descriptor: fields.descriptor,
                 source: fields.source as SourceValue,
                 showEmptyData: fields.showEmptyData,
+                showBlankData: fields.showBlankData,
                 sourceForCompute: fields.sourceForCompute,
                 indicator: fields.indicator as AggregationAttribute,
                 top: fields.top as Top)
@@ -3504,6 +3569,11 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
      * Флаг на использование пустых значений
      */
     Boolean showEmptyData
+
+    /**
+     * Флаг на использование незаполненных значений
+     */
+    Boolean showBlankData
     /**
      * Настройки ширины колонок
      */
@@ -3541,6 +3611,7 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
                 header: fields.header as Header,
                 columnsRatioWidth: fields.columnsRatioWidth,
                 showEmptyData: fields.showEmptyData,
+                showBlankData: fields.showBlankData,
                 sorting: fields.sorting as Sorting,
                 table: fields.table as TableObject,
                 data: fields.data as Collection<DiagramNowData> ,
@@ -3627,6 +3698,166 @@ class TextSettings
     {
         return fields
             ? new TextSettings(fields)
+            : null
+    }
+}
+
+/**
+ * Настройки цвета для параметра
+ */
+class ChartColorSettings
+{
+    /**
+     * Цвет
+     */
+    String color
+    /**
+     * Ключ параметра
+     */
+    String key
+
+    static ChartColorSettings fromMap(Map fields)
+    {
+        return fields ?
+            new ChartColorSettings(fields)
+            : null
+    }
+
+    static Collection<ChartColorSettings> fromColorCollection(Collection colorMapCollection)
+    {
+        return colorMapCollection
+            ? colorMapCollection.findResults { return fromMap(it) } : []
+    }
+}
+
+/**
+ * Данные настроек цвета для параметра
+ */
+class CustomChartSettingsData
+{
+    /**
+     * Коллекция настроек цвета для параметра
+     */
+    Collection<ChartColorSettings> colors
+    /**
+     * Ключ для настроек
+     */
+    String key
+    /**
+     * Тип данных, для которых предназначены настройки
+     */
+    CustomLabelType type
+    /**
+     * Код цвета по умолчанию
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String defaultColor
+
+    static CustomChartSettingsData fromMap(Map fields)
+    {
+        return fields ?
+            new CustomChartSettingsData(colors: ChartColorSettings.fromColorCollection(fields.colors),
+                                        key: fields.key,
+                                        type: fields.type as CustomLabelType,
+                                        defaultColor: fields.defaultColor)
+            :null
+    }
+}
+
+/**
+ * Класс по преобразования json-строки в объект класса
+ */
+class ColorsSettingsDeserializer extends StdDeserializer
+{
+    ColorsSettingsDeserializer() {
+        this(null);
+    }
+
+    ColorsSettingsDeserializer(Class<?> vc) {
+        super(vc);
+    }
+
+    @Override
+    ColorsSettings deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
+    {
+        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
+        def obj = mapper.readTree(jp)
+
+        if(obj.fieldNames().toList().any { it == 'auto'})
+        {
+            Map<String, Object> fields = mapper.convertValue(obj, Map)
+            return ColorsSettings.fromMap(fields)
+        }
+        else
+        {
+            //если настройки пришли старого формата, переделываем их в объект нового
+            return new ColorsSettings(auto: new AutoColors(colors: obj?.elements()*.textValue()), type: ColorType.AUTO, custom: new CustomColors())
+        }
+    }
+}
+
+/**
+ * Данные настроек цвета для параметра
+ */
+@JsonDeserialize(using = ColorsSettingsDeserializer)
+class ColorsSettings
+{
+    /**
+     * Данные автоматических настроек цвета
+     */
+    AutoColors auto
+    /**
+     * Данные пользовательских цвета
+     */
+    CustomColors custom
+    /**
+     * Тип цвета для применения
+     */
+    ColorType type
+
+    static ColorsSettings fromMap(Map fields)
+    {
+        return fields ? new ColorsSettings(auto: AutoColors.fromMap(fields.auto),
+                                           custom: fields.custom ? CustomColors.fromMap(fields.custom) : new CustomColors(),
+                                           type: fields.type as ColorType) : null
+    }
+}
+
+/**
+ * Автоматические настройки цвета
+ */
+class AutoColors
+{
+    /**
+     * Список цветов
+     */
+    Collection<String> colors
+
+    static AutoColors fromMap(Map fields)
+    {
+        return fields ? new AutoColors(colors: fields.colors) : null
+    }
+}
+
+/**
+ * Пользовательские настройки цвета
+ */
+class CustomColors
+{
+    /**
+     * данные о настройках
+     */
+    CustomChartSettingsData data
+    /**
+     * флаг на использование во всем дашборде
+     */
+    Boolean useGlobal = false
+
+    static CustomColors fromMap(Map fields)
+    {
+        return fields ?
+            new CustomColors(data: CustomChartSettingsData.fromMap(fields.data),
+                             useGlobal: fields.useGlobal)
             : null
     }
 }

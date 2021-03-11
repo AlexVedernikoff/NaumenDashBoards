@@ -65,6 +65,21 @@ interface DashboardSettings
     String deleteCustomGroup(Map<String, Object> requestContent)
 
     /**
+     * Метод сохранения настроек кастомных цветов.
+     * Сохраняет в персональный дашборд.
+     * @param requestContent - тело запроса
+     * @return ключь кастомной группировки
+     */
+    String saveCustomColors(Map<String, Object> requestContent)
+
+    /**
+     * Метод удаления настроек цветов.
+     * @param requestContent - тело запроса
+     * @return ключь кастомной группировки
+     */
+    String deleteCustomColors(Map<String, Object> requestContent)
+
+    /**
      * Метод включение автообновлений дашборда
      * @param requestContent - параметры запроса (classFqn, contentCode, interval)
      * @return true|false
@@ -199,6 +214,18 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     String deleteCustomGroup(Map<String, Object> requestContent)
     {
         return toJson(service.deleteCustomGroup(requestContent, user))
+    }
+
+    @Override
+    String saveCustomColors(Map<String, Object> requestContent)
+    {
+        return toJson(service.saveCustomColors(requestContent, user))
+    }
+
+    @Override
+    String deleteCustomColors(Map<String, Object> requestContent)
+    {
+        return toJson(service.deleteCustomColors(requestContent, user))
     }
 
     @Override
@@ -529,6 +556,102 @@ class DashboardSettingsService
         else
         {
             throw new Exception("group not contains in dashboard")
+        }
+    }
+
+    /**
+     * Метод по сохранению настроек кастомных цветов диаграммы относительно дашборда
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @return словарь [id]
+     */
+    Boolean saveCustomColors(Map<String, Object> requestContent, user)
+    {
+        String classFqn = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        boolean isPersonal = requestContent.isPersonal
+        def colorsSettings = requestContent.colorsSettings as Map<String, Object>
+        colorsSettings = mapper.convertValue(colorsSettings, CustomChartSettingsData)
+        if (isPersonal && !(user.login))
+        {
+            throw new Exception("Login is null, not found personal dashboard")
+        }
+
+        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+
+        Closure<Map> saveDashboard = { String dashboardKey, DashboardSettingsClass settings ->
+            if (saveJsonSettings(dashboardKey, toJson(settings), DASHBOARD_NAMESPACE))
+            {
+                return true
+            }
+            else
+            {
+                throw new Exception("Dashboard settings not saved!")
+            }
+        }
+
+        if (isPersonal)
+        {
+            def dashboard = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
+            if(colorsSettings.key in dashboard.customColorsSettings*.key)
+            {
+                dashboard.customColorsSettings.removeIf { it.key == colorsSettings.key }
+            }
+            dashboard.customColorsSettings += colorsSettings
+            saveDashboard(personalDashboardKey, dashboard)
+        }
+        else
+        {
+            def dashboard = getDashboardSetting(defaultDashboardKey) ?: new DashboardSettingsClass()
+            if(colorsSettings.key in dashboard.customColorsSettings*.key)
+            {
+                dashboard.customColorsSettings.removeIf { it.key == colorsSettings.key }
+            }
+            dashboard.customColorsSettings += colorsSettings
+            saveDashboard(defaultDashboardKey, dashboard)
+        }
+    }
+
+    /**
+     * Метод по удалению настроек кастомных цветов диаграммы относительно дашборда
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @return словарь [id]
+     */
+    Map deleteCustomColors(Map<String, Object> requestContent, user)
+    {
+        String classFqn = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        String colorsKey = requestContent.groupKey
+        boolean isPersonal = requestContent.isPersonal
+        if (isPersonal && !(user?.login))
+        {
+            throw new Exception("Login is null, not found personal dashboard")
+        }
+
+        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+
+        def dashboard = isPersonal
+            ? getDashboardSetting(personalDashboardKey)
+            : getDashboardSetting(defaultDashboardKey)
+
+        if (colorsKey in dashboard.customColorsSettings*.key)
+        {
+            dashboard.customColorsSettings.removeIf { it.key == colorsKey }
+            if (saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE))
+            {
+                return [id: colorsKey]
+            }
+            else
+            {
+                throw new Exception("Dashboard settings not saved!")
+            }
+        }
+        else
+        {
+            throw new Exception("colors not contains in dashboard")
         }
     }
 
@@ -1065,6 +1188,22 @@ class DashboardSettingsService
             default:
                 return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.OVERLAP)
         }
+    }
+
+    /**
+     * Метод по добавлению uuid-ов в подгруппы кастомных группировок, если их там ещё нет
+     * @param group - кастомная группировка
+     * @return кастомная группировка с uuid-ами в подгруппах
+     */
+    private CustomGroup addUUIDSToSubGroupsIfNotAdded(CustomGroup group)
+    {
+        group?.subGroups.each {
+            if(!it.id)
+            {
+                it.id = UUID.randomUUID()
+            }
+        }
+        return group
     }
 
     /**
