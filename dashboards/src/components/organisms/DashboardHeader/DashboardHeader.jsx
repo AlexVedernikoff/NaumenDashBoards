@@ -80,30 +80,25 @@ export class DashboardHeader extends Component<Props, State> {
 	);
 
 	renderControls = () => {
-		if (!isMobile().any) {
-			return (
-				<ul className={styles.nav}>
-					{this.renderAutoUpdateButton()}
-					{this.renderRefreshButton()}
-					{this.renderDownloadExportButton()}
-					{this.renderMailExportButton()}
-					{this.renderRemoveButton()}
-					{this.renderSaveSelfButton()}
-					{this.renderModeButton()}
-				</ul>
-			);
-		}
-
-		return null;
+		return (
+			<ul className={styles.nav}>
+				{this.renderAutoUpdateButton()}
+				{this.renderRefreshButton()}
+				{this.renderDownloadExportButton()}
+				{this.renderMailExportButton()}
+				{this.renderRemoveButton()}
+				{this.renderSaveSelfButton()}
+				{this.renderModeButton()}
+			</ul>
+		);
 	};
 
 	renderDisplayModeButton = () => {
 		const {layoutMode, personalDashboard, user} = this.props;
-		const isDesktop = !isMobile().any;
 		const isMobileLayoutMode = layoutMode === LAYOUT_MODE.MOBILE;
 		const customTip = isMobileLayoutMode ? 'Переключиться в WEB представление' : 'Переключиться в мобильное представление';
 
-		if (isDesktop && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
 			return (
 				<div className={styles.displayModeContainer}>
 					<IconButton
@@ -231,15 +226,19 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	render () {
-		return (
-			<header className={styles.header} style={{height: DASHBOARD_HEADER_HEIGHT}}>
-				<ul className={styles.nav}>
-					{this.renderSwitchDashboardButton()}
-				</ul>
-				{this.renderDisplayModeButton()}
-				{this.renderControls()}
-			</header>
-		);
+		if (!isMobile().any) {
+			return (
+				<header className={styles.header} style={{height: DASHBOARD_HEADER_HEIGHT}}>
+					<ul className={styles.nav}>
+						{this.renderSwitchDashboardButton()}
+					</ul>
+					{this.renderDisplayModeButton()}
+					{this.renderControls()}
+				</header>
+			);
+		}
+
+		return null;
 	}
 }
 
