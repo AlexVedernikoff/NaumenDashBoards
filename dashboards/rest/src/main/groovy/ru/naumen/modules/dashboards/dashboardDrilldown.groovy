@@ -15,6 +15,7 @@ import groovy.transform.Field
 import java.text.SimpleDateFormat
 import ru.naumen.core.shared.dto.SimpleDtObject
 import static groovy.json.JsonOutput.toJson
+import com.amazonaws.util.json.Jackson
 import ru.naumen.core.server.script.api.injection.InjectApi
 
 @Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl()
@@ -293,8 +294,11 @@ class Link
         if (filters)
         {
             filters.groupBy {
-                Attribute.fromMap(it.attribute as Map)
-            }.collect { Attribute attr, Collection<Map> filter ->
+                //Видимо, механизм по новому классу группировать не может
+                Jackson.toJsonString(Jackson.fromJsonString(toJson(it.attribute), Attribute) )
+            }.collect {
+                def attr, Collection<Map> filter ->
+                attr = Jackson.fromJsonString(attr, Attribute)
                 Collection<Collection> result = []
                 String attributeType = attr.type as String
                 //выглядит костыльно, но это необходимо, чтобы обойти ситуацию,
