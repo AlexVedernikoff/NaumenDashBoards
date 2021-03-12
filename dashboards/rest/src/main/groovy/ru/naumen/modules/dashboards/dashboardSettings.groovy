@@ -301,7 +301,7 @@ class DashboardSettingsService
      * @param requestContent - параметры запроса (classFqn, contentCode, isPersonal)
      * @return настройки автообновления вместе с настройками виджетов
      */
-    DashboardSettingsClass1 getSettings(Map<String, Object> requestContent, user)
+    DashboardSettingsClass getSettings(Map<String, Object> requestContent, user)
     {
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
@@ -514,7 +514,7 @@ class DashboardSettingsService
             ? getDashboardSetting(personalDashboardKey)
             : getDashboardSetting(defaultDashboardKey)
 
-        if (groupKey in dashboard.customGroups*.id)
+        if (groupKey in dashboard.customGroups.id)
         {
             dashboard.customGroups.removeIf { it.id == groupKey }
             if (saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE))
@@ -546,7 +546,7 @@ class DashboardSettingsService
         String personalDashboardKey =generateDashboardKey(classFqn, contentCode, user?.login as String)
         String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
         def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-            ?: new DashboardSettingsClass1()
+            ?: new DashboardSettingsClass()
         //Этой настройки может и не быть
         settings.autoUpdate = new AutoUpdate(interval)
         return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
@@ -892,6 +892,10 @@ class DashboardSettingsService
 
         Closure<String> generateKey = this.&generateWidgetKey.curry(currentWidgets*.id, classFqn, contentCode)
         Widget newWidgetSettings = editWidgetDescriptor(widgetSettings, destinationDashboardKey)
+        if(destinationDashboardKey != sourceDashboardKey)
+        {
+            newWidgetSettings = editCustomGroupsFromAnotherDBToSystem(widgetSettings)
+        }
         return prepareWidgetSettings(newWidgetSettings, generateKey).with { widget ->
             dashboardSettings.widgets += widget
             saveJsonSettings(destinationDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
@@ -911,6 +915,8 @@ class DashboardSettingsService
         String widgetKey = requestContent.widgetKey
 
         String sourceDashboardKey = requestContent.dashboardKey
+        String destinationDashboardKey = generateDashboardKey(classFqn, contentCode)
+        List reasons = []
         DashboardSettingsClass sourceDashboardSettings = getDashboardSetting(sourceDashboardKey)
         Widget widgetSettings = getWidgetSettings(sourceDashboardSettings.widgets.find { it.id == widgetKey })
 
@@ -919,6 +925,7 @@ class DashboardSettingsService
         if (widgetSettings)
         {
             def filtersHasSubject = []
+            def widgetHasCustomGroups = []
             widgetSettings.data.collect { dataValue ->
                 def descriptor = dataValue.source.descriptor
                 if (descriptor)
@@ -941,7 +948,25 @@ class DashboardSettingsService
                 }
             }
             Boolean hasSubjectFilters = filtersHasSubject.any { it == true }
-            return [result: hasSubjectFilters]
+
+            if(hasSubjectFilters)
+            {
+                reasons << 'hasSubjectFilters'
+            }
+
+            if(destinationDashboardKey != sourceDashboardKey)
+            {
+                widgetSettings.data.each { dataValue ->
+                    widgetHasCustomGroups << dataValue.parameters?.any { it?.group?.way == Way.CUSTOM }
+                    widgetHasCustomGroups << dataValue.breakdown?.any { it?.group?.way == Way.CUSTOM }
+                }
+            }
+            Boolean hasCustomGroups = widgetHasCustomGroups.any { it == true }
+            if(hasCustomGroups)
+            {
+                reasons << 'hasCustomGroups'
+            }
+            return [result: [hasSubjectFilters, hasCustomGroups].any {it == true}, reasons: reasons]
         }
         else
         {
@@ -988,6 +1013,57 @@ class DashboardSettingsService
         {
             logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
             return null
+        }
+    }
+
+    /**
+     * Метод по изменению кастомных группировок на системные
+     * @param widgetSettings - настройки виджета
+     * @return измененные настройки виджета
+     */
+    private Widget editCustomGroupsFromAnotherDBToSystem(def widgetSettings)
+    {
+        widgetSettings.data.each { dataValue ->
+            dataValue.parameters = updateCustomGroupsToSystem(dataValue.parameters)
+            if(dataValue.breakdown)
+            {
+                dataValue.breakdown = updateCustomGroupsToSystem(dataValue.breakdown)
+            }
+        }
+        return widgetSettings
+    }
+
+    /**
+     * Метод по замене групп в списке значений с группами
+     * @param valuesWithGroup - список значений с группами
+     * @return значения только с системными группами
+     */
+    private Collection updateCustomGroupsToSystem(Collection valuesWithGroup)
+    {
+        return valuesWithGroup.collect {
+            if(it?.group?.way == Way.CUSTOM)
+            {
+                it.group = getSystemGroup(it.attribute)
+            }
+            return it
+        }
+    }
+
+    /**
+     * Метод по получению системной группировки для атрибута
+     * @param attribute - атрибут параметра
+     * @return системная группировка для атрибута
+     */
+    private SystemGroupInfo getSystemGroup(def attribute)
+    {
+        switch (attribute?.type)
+        {
+            case AttributeType.DT_INTERVAL_TYPE:
+                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.WEEK_INTERVAL)
+            case AttributeType.DATE_TYPES:
+                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.MONTH)
+            default:
+                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.OVERLAP)
         }
     }
 
