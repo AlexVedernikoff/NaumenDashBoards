@@ -136,6 +136,7 @@ class DashboardDataSetService
         if (diagramType == DiagramType.TABLE)
         {
             Boolean showTableNulls = widgetSettings.showEmptyData
+            Boolean showTableBlank = widgetSettings.showBlankData
             Boolean computationInTableRequest = widgetSettings?.data?.any { it.indicators?.any { it?.attribute?.any { it.type == 'COMPUTED_ATTR'} } }
             Integer tableTop = widgetSettings.top?.show ? widgetSettings.top?.count as Integer : null
             if (computationInTableRequest && !tableTop)
@@ -143,7 +144,7 @@ class DashboardDataSetService
                 //вернём всё из бд, после сагрегируем
                 showTableNulls = true
             }
-            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, showTableNulls, computationInTableRequest, tableTop)
+            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, showTableNulls, showTableBlank, computationInTableRequest, tableTop)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
             }
@@ -189,7 +190,7 @@ class DashboardDataSetService
                     {
                         def indicator = value.indicators.find()
                         return [
-                            type     : indicator.attribute.type,
+                            type     : value.type,
                             breakdown: indicator.attribute.title,
                             name     : indicator.attribute.title,
                             dataKey  : value.dataKey
@@ -428,12 +429,13 @@ class DashboardDataSetService
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param diagramType - тип диаграммы
      * @param showTableNulls - флаг на отображение пустых значений, если диаграмма типа таблица
+     * @param showTableBlank - флаг на отображение незаполненных значений, если диаграмма типа таблица
      * @param computationInTableRequest - флаг на наличие вычислений в запросе, если диаграмма типа таблица
      * @param tableTop - количество записей, которое нужно вывести, если диаграмма типа таблица
      * @return DiagramRequest
      */
     private DiagramRequest mappingDiagramRequest(def widgetSettings, String subjectUUID,
-                                                 DiagramType diagramType, Boolean showTableNulls = false,
+                                                 DiagramType diagramType, Boolean showTableNulls = false,  Boolean showTableBlank = false,
                                                  Boolean computationInTableRequest = false, Integer tableTop = 0)
     {
         def sorting
@@ -641,10 +643,12 @@ class DashboardDataSetService
                         : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: data.dataKey)
                 }
                 Boolean showNulls = isDiagramTypeTable ? showTableNulls : data.showEmptyData as Boolean
+                Boolean showBlank = isDiagramTypeTable ? showTableBlank : data.showBlankData as Boolean
                 Integer top = isDiagramTypeTable ? tableTop : data?.top?.show ? data.top?.count as Integer : null
                 requisite = new Requisite(title: 'DEFAULT',
                                           nodes: (computeCheck) ? requisiteNode : [requisiteNode],
                                           showNulls: showNulls,
+                                          showBlank: showBlank,
                                           top: top)
             }
             source.filterList = [breakdownFilter, *parameterFilters]
@@ -906,7 +910,7 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
@@ -916,6 +920,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: null,
                         title: title,
+                        id: id,
                         type: Comparison.IS_NULL,
                         attribute: attribute
                     )
@@ -923,6 +928,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: null,
                         title: title,
+                        id: id,
                         type: Comparison.NOT_NULL,
                         attribute: attribute
                     )
@@ -936,6 +942,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
@@ -949,6 +956,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.NOT_EQUAL,
                         attribute: attribute
                     )
@@ -963,6 +971,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: values,
                         title: title,
+                        id: id,
                         type: Comparison.IN,
                         attribute: attribute
                     )
@@ -974,6 +983,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: condition.data,
                         title: title,
+                        id: id,
                         type: Comparison.CONTAINS,
                         attribute: attribute
                     )
@@ -985,6 +995,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: condition.data,
                         title: title,
+                        id: id,
                         type: Comparison.NOT_CONTAINS,
                         attribute: attribute
                     )
@@ -993,6 +1004,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
@@ -1012,6 +1024,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
@@ -1029,7 +1042,7 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
@@ -1039,6 +1052,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: null,
                         title: title,
+                        id: id,
                         type: Comparison.IS_NULL,
                         attribute: attribute
                     )
@@ -1046,6 +1060,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: null,
                         title: title,
+                        id: id,
                         type: Comparison.NOT_NULL,
                         attribute: attribute
                     )
@@ -1059,6 +1074,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
@@ -1072,6 +1088,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.NOT_EQUAL,
                         attribute: attribute
                     )
@@ -1086,6 +1103,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: values,
                         title: title,
+                        id: id,
                         type: Comparison.IN,
                         attribute: attribute
                     )
@@ -1097,6 +1115,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: condition.data,
                         title: title,
+                        id: id,
                         type: Comparison.CONTAINS,
                         attribute: attribute
                     )
@@ -1108,6 +1127,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: condition.data,
                         title: title,
+                        id: id,
                         type: Comparison.NOT_CONTAINS,
                         attribute: attribute
                     )
@@ -1121,6 +1141,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.EQUAL_REMOVED,
                         attribute: attribute
                     )
@@ -1133,6 +1154,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.NOT_EQUAL_REMOVED,
                         attribute: attribute
                     )
@@ -1147,6 +1169,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: [value, *nestedVaues],
                         title: title,
+                        id: id,
                         type: Comparison.IN,
                         attribute: attribute
                     )
@@ -1161,6 +1184,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: values,
                         title: title,
+                        id: id,
                         type: Comparison.IN,
                         attribute: attribute
                     )
@@ -1178,6 +1202,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
@@ -1197,6 +1222,7 @@ class DashboardDataSetService
                     return new FilterParameter(
                         value: value,
                         title: title,
+                        id: id,
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
@@ -1213,7 +1239,7 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
@@ -1224,7 +1250,8 @@ class DashboardDataSetService
                     ? api.types.newDateTimeInterval([interval.value as long, interval.type as String])
                     : null
                 //Важный момент. Обязательно извлекать милисекунды, так как критерия не может это сделать сама.
-                new FilterParameter(value: value, title: title, type: type, attribute: attribute)
+                new FilterParameter(value: value, title: title,
+                                    id: id, type: type, attribute: attribute)
             }
             switch (conditionType.toLowerCase())
             {
@@ -1252,7 +1279,7 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
@@ -1260,6 +1287,7 @@ class DashboardDataSetService
                 new FilterParameter(
                     value: condition.data,
                     title: title,
+                    id: id,
                     type: type,
                     attribute: attribute
                 )
@@ -1289,13 +1317,14 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             Closure buildFilterParameterFromCondition = { Comparison type ->
                 new FilterParameter(
                     value: condition.data?.with(valueConverter),
                     title: title,
+                    id: id,
                     type: type,
                     attribute: attribute
                 )
@@ -1330,13 +1359,14 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
                 return new FilterParameter(
                     title: title,
+                    id: id,
                     type: Comparison.BETWEEN,
                     attribute: attribute,
                     value: value
@@ -1458,12 +1488,12 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
-                return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
+                return new FilterParameter(title: title, id: id, type: comparison, attribute: attr, value: value)
             }
             switch (conditionType.toLowerCase()) {
                 case 'contains':
@@ -1489,7 +1519,8 @@ class DashboardDataSetService
                     {
                         throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
                     }
-                    return new FilterParameter(value: value, title: title, type: Comparison.EQUAL, attribute: attribute)
+                    return new FilterParameter(value: value, title: title,
+                                               id: id, type: Comparison.EQUAL, attribute: attribute)
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
@@ -1502,12 +1533,13 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
-                return new FilterParameter(title: title, type: comparison, attribute: attr, value: value)
+                return new FilterParameter(title: title,
+                                           id: id, type: comparison, attribute: attr, value: value)
             }
             switch (conditionType.toLowerCase())
             {
@@ -1543,7 +1575,7 @@ class DashboardDataSetService
         }
     }
 
-    private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title)
+    private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
     {
         return mappingFilter(data) { condition ->
             String conditionType = condition.type
@@ -1555,33 +1587,38 @@ class DashboardDataSetService
                         throw new IllegalArgumentException("Condition data is null or empty")
                     }
                     String uuid = condition.data.uuid
-                    return new FilterParameter(value: uuid, title: title, type: Comparison.CONTAINS, attribute: attribute)
+                    return new FilterParameter(value: uuid, title: title,
+                                               id: id, type: Comparison.CONTAINS, attribute: attribute)
                 case 'not_contains':
                     if (!condition.data)
                     {
                         throw new IllegalArgumentException("Condition data is null or empty")
                     }
                     String uuid = condition.data.uuid
-                    return new FilterParameter(value: uuid, title: title, type: Comparison.NOT_CONTAINS, attribute: attribute)
+                    return new FilterParameter(value: uuid, title: title,
+                                               id: id, type: Comparison.NOT_CONTAINS, attribute: attribute)
                 case 'contains_any':
                     if (!condition.data)
                     {
                         throw new IllegalArgumentException("Condition data is null or empty")
                     }
                     def uuids = condition.data*.uuid
-                    return new FilterParameter(value: uuids, title: title, type: Comparison.CONTAINS, attribute: attribute)
+                    return new FilterParameter(value: uuids, title: title,
+                                               id: id, type: Comparison.CONTAINS, attribute: attribute)
                 case 'title_contains':
                     if (!condition.data)
                     {
                         throw new IllegalArgumentException("Condition data is null or empty")
                     }
-                    return new FilterParameter(value: condition.data, title: title, type: Comparison.METACLASS_TITLE_CONTAINS, attribute: attribute)
+                    return new FilterParameter(value: condition.data, title: title,
+                                               id: id, type: Comparison.METACLASS_TITLE_CONTAINS, attribute: attribute)
                 case 'title_not_contains':
                     if (!condition.data)
                     {
                         throw new IllegalArgumentException("Condition data is null or empty")
                     }
-                    return new FilterParameter(value: condition.data, title: title, type: Comparison.METACLASS_TITLE_NOT_CONTAINS, attribute: attribute)
+                    return new FilterParameter(value: condition.data, title: title,
+                                               id: id, type: Comparison.METACLASS_TITLE_NOT_CONTAINS, attribute: attribute)
                 case 'equal_attr_current_object':
                     if (!condition.data)
                     {
@@ -1595,7 +1632,8 @@ class DashboardDataSetService
                     {
                         throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
                     }
-                    return new FilterParameter(value: value, title: title, type: Comparison.EQUAL, attribute: attribute)
+                    return new FilterParameter(value: value, title: title,
+                                               id: id, type: Comparison.EQUAL, attribute: attribute)
                 default:
                     throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
@@ -1627,6 +1665,7 @@ class DashboardDataSetService
         assert request: "Empty request!"
         return request.requisite.collect { requisite ->
             Boolean onlyFilled = !requisite.showNulls
+            Boolean notBlank = !requisite.showBlank
             Integer top = requisite.top
             return requisite.nodes.collectMany { node ->
                 String nodeType = node.type
@@ -1663,14 +1702,14 @@ class DashboardDataSetService
                         }
                         if(!filtering)
                         {
-                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, onlyFilled, diagramType, requestContent, ignoreLimits)
+                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits)
                         }
                         RequestData newRequestData = requestData.clone()
                         Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
                             newRequestData.filters = filters
-                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, onlyFilled, diagramType)
+                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType)
                                                                 .with(formatGroup)
                                                                 .with(formatAggregation)
 
@@ -1680,7 +1719,18 @@ class DashboardDataSetService
                                 listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
                                 res = [tempRes]
                             }
-                            def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filters.title.flatten().grep() as Set): res]
+                            def filtersTitle = filters.findResults {
+                                if(it.title)
+                                {
+                                    def titleValue = (it.title as Set).find()
+                                    if(diagramType in DiagramType.SortableTypes && titleValue)
+                                    {
+                                        return "${titleValue}#${(it.id as Set).find()}"
+                                    }
+                                    return titleValue
+                                }
+                            }
+                            def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filtersTitle): res]
 
                             partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                             Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
@@ -1694,10 +1744,7 @@ class DashboardDataSetService
                         }
                         if(top)
                         {
-                            Boolean fromNoOrTwoFilter = requestData.groups?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) } ||
-                                                        requestData.aggregations?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)}
-
-                            res = getTop(res, top, parameterFilters, breakdownFilters, fromNoOrTwoFilter)
+                            res = getTop(res, top, parameterFilters, breakdownFilters)
                         }
                         if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                         {
@@ -1731,7 +1778,7 @@ class DashboardDataSetService
                         if(filterListSize == 0)
                         {
                             parameterSortingType = dataSet.values().head().groups.find()?.sortingType
-                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, onlyFilled, diagramType, requestContent, ignoreLimits)
+                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits)
                         }
 
                         List<Integer> listIdsOfNormalAggregations = [0]
@@ -1743,7 +1790,7 @@ class DashboardDataSetService
                                 RequestData newData = data.clone()
                                 newData.filters = filters
                                 Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, onlyFilled, diagramType)
+                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType)
                                 if(!res && !onlyFilled)
                                 {
                                     def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
@@ -1780,17 +1827,26 @@ class DashboardDataSetService
                                 totalVar[key as String].find().find() as Double ?: 0
                             }]]
                             def title = fullFilterList.find().value.title.grep()
+                            def id = fullFilterList.find().value.id.grep()
                             res = formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)
-                            Map total = [( title.any {it[0] != ''} ? title[i++].flatten() as Set : ''): res]
+                            def filtersTitle = title.any {it[0] != ''}
+                                ? (title[i] as Set)?.withIndex().findResults { val, idx ->
+                                return val.findResults {
+                                    return diagramType in DiagramType.SortableTypes && it
+                                        ? "${it}#${id[i][idx].find()}"
+                                        : it
+                                }
+                            }
+                                : []
+                            i++
+                            Map total = [(filtersTitle): res]
                             res = onlyFilled && !res ? [] : formatResult(total, aggregationCnt)
                             filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
                             return prepareResultListListForTop(res, filterListSize, top, parameterFilters, breakdownFilters, j)
                         }
                         if(top)
                         {
-                            Boolean fromNoOrTwoFilter = groups?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) } ||
-                                                        aggregations?.attribute?.any { it?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) }
-                            res = getTop(res, top, parameterFilters, breakdownFilters, fromNoOrTwoFilter)
+                            res = getTop(res, top, parameterFilters, breakdownFilters)
                         }
                         if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                         {
@@ -3602,7 +3658,8 @@ class DashboardDataSetService
 
             def customGroup = new CustomGroup(name: groupName,
                                               subGroups: [subGroup],
-                                              type: groupType)
+                                              type: groupType,
+                                              id: '')
 
             def group = new CustomGroupInfo(data:customGroup, way: Way.CUSTOM)
             return new NewParameter(attribute:dynamicAttribute, group:group)
@@ -3734,13 +3791,13 @@ class DashboardDataSetService
      * @param request - запрос
      * @param aggregationCnt - количество агрегаций
      * @param top - количество записей, которое нужно вывести
-     * @param onlyFilled - флаг на получение только заполненных данных, без null
+     * @param notBlank - флаг на получение только заполненных данных, без null
      * @param diagramType  - тип диаграммы
      * @param requestContent - тело запроса
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @return сырые данные для построения диаграм
      */
-    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean onlyFilled,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits)
+    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean notBlank,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits)
     {
         String nodeType = node.type
         switch (nodeType.toLowerCase())
@@ -3766,9 +3823,9 @@ class DashboardDataSetService
                 String parameterAttributeType = parameter?.attribute?.type
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
-                Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
+                Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, notBlank)
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-                def res = DashboardQueryWrapperUtils.getData(requestData, top, onlyFilled, diagramType, ignoreLimits.parameter)
+                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits.parameter)
                                                     .with(formatGroup)
                                                     .with(formatAggregation)
                 def total = res ? [(requisiteNode.title): res] : [:]
@@ -3815,7 +3872,7 @@ class DashboardDataSetService
                 def variables = dataSet.collectEntries { key, data ->
                     Closure postProcess =
                         this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, onlyFilled, diagramType, ignoreLimits.parameter)
+                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, notBlank, diagramType, ignoreLimits.parameter)
                                                       .with(postProcess)]
                 } as Map<String, List>
 
@@ -3846,7 +3903,7 @@ class DashboardDataSetService
                     } : [[calculator.execute { key ->
                     variables[key as String].head().head() as Double
                 }]]
-                def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)]
+                def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, notBlank)]
                 total = formatResult(total, aggregationCnt)
                 if (top)
                 {
