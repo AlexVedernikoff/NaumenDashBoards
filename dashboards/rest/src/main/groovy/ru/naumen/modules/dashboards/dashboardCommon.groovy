@@ -2478,6 +2478,109 @@ class WidgetCustomDeserializer<T> extends StdDeserializer<T>
         super(vc);
     }
 
+    /**
+     * Метод по преобразованию данных диаграм с форматом prev к поддерживаемому формату
+     * @param fields - текущие поля из хранилища
+     * @return преобразованные поля
+     */
+    static Map updatePrevTypes(Map fields)
+    {
+        if (fields)
+        {
+            return null
+        }
+        else
+        {
+            def data
+            if((fields.type as DiagramType) in [*DiagramType.StandardTypes, DiagramType.COMBO])
+            {
+                data = fields.order.collect { index ->
+                    def dataKey = fields."dataKey_$index"
+                    def parameters = [[attribute: fields."xAxis_$index", group: fields."group$index"]]
+                    def indicators = [[aggregation : fields."aggregation_$index", attribute:
+                        fields."yAxis_$index", type: fields."type_$index"]]
+
+                    def source = fields."source_$index".value
+                    def descriptor = fields."descriptor_$index"
+                    def sourceForCompute = fields."sourceForCompute_$index"
+                    def top = fields.top
+                    def type = fields."type_$index"
+
+                    Map dataBody = [descriptor       : descriptor,
+                                    parameters       :parameters,
+                                    source           : source,
+                                    sourceForCompute : sourceForCompute, indicators:indicators,
+                                    breakdown        : fields."breakdown_$index",
+                                    breakdownGroup   : fields."breakdownGroup_$index",
+                                    top              : top?.show ? top?.count : null,
+                                    type             : type,
+                                    showEmptyData    : fields.showEmptyData,
+                                    showBlankData    : fields.showBlankData]
+                    return [(dataKey): dataBody]
+                }
+            }
+            else if((fields.type as DiagramType) in [*DiagramType.RoundTypes, *DiagramType.CountTypes])
+            {
+                data = fields.order.collect { index ->
+                    def dataKey = fields."dataKey_$index"
+                    def indicators = [[aggregation: fields."aggregation_$index", attribute: fields."indicator_$index"]]
+
+                    def source =  fields."source_$index".value
+                    def descriptor = fields."descriptor_$index"
+                    def sourceForCompute = fields."sourceForCompute_$index"
+                    def top = fields.top
+
+                    Map dataBody = [descriptor      : descriptor,
+                                    parameters      : [],
+                                    source          : source,
+                                    sourceForCompute: sourceForCompute,
+                                    indicators      : indicators,
+                                    breakdown       : fields."breakdown_$index",
+                                    breakdownGroup  : fields."breakdownGroup_$index",
+                                    top             : top?.show ? top?.count : null,
+                                    showEmptyData   : fields.showEmptyData,
+                                    showBlankData   : fields.showBlankData]
+                    data = [(dataKey): dataBody]
+                }
+            }
+            else if((fields.type as DiagramType) == DiagramType.TABLE)
+            {
+                data = fields.order.collect { index ->
+                    def dataKey = fields."dataKey_$index"
+                    def parameters = [[attribute: fields."row_$index", group: fields."group$index"]]
+                    def indicators = [[aggregation: fields."aggregation_$index", attribute: fields."column_$index"]]
+
+                    def source =  fields."source_$index".value
+                    def descriptor = fields."descriptor_$index"
+                    def sourceForCompute = fields."sourceForCompute_$index"
+
+                    def top = fields.top
+
+                    Map requestContent = [descriptor      : descriptor,
+                                          parameters      : parameters,
+                                          source          : source,
+                                          sourceForCompute: sourceForCompute,
+                                          indicators      : indicators,
+                                          breakdown       : fields."breakdown_$index",
+                                          breakdownGroup  : fields."breakdownGroup_$index",
+                                          top             : top?.show ? top?.count : null,
+                                          showEmptyData   : fields.showEmptyData,
+                                          showBlankData   : fields.showBlankData,
+                                          calcTotalColumn : fields."calcTotalColumn_$index",
+                                          calcTotalRow    : fields."calcTotalRow_$index"]
+
+                    return [(dataKey): requestContent]
+                }
+            }
+            else
+            {
+                throw new IllegalArgumentException("Проверьте ${fields.type}!")
+            }
+            fields.data = data
+            return fields
+        }
+    }
+
     @Override
     T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
     {
@@ -2489,7 +2592,7 @@ class WidgetCustomDeserializer<T> extends StdDeserializer<T>
         {
             throw ctxt.instantiationException(Widget, "проверьте тип виджета ${widgetId}!")
         }
-        obj.put('diagramType', clazz.getName())
+        obj.put('diagramType', clazz.simpleName)
 
         Map<String, Object> fields = mapper.convertValue(obj, Map)
         if(clazz == Text)
@@ -2515,109 +2618,6 @@ class WidgetCustomDeserializer<T> extends StdDeserializer<T>
         fields.data = mapper.convertValue(fields.data, new TypeReference<Collection<DiagramNowData>>() {})
 
         return clazz.fromMap(fields)
-    }
-}
-
-/**
- * Метод по преобразованию данных диаграм с форматом prev к поддерживаемому формату
- * @param fields - текущие поля из хранилища
- * @return преобразованные поля
- */
-static Map updatePrevTypes(Map fields)
-{
-    if (fields)
-    {
-        return null
-    }
-    else
-    {
-        def data
-        if((fields.type as DiagramType) in [*DiagramType.StandardTypes, DiagramType.COMBO])
-        {
-            data = fields.order.collect { index ->
-                def dataKey = fields."dataKey_$index"
-                def parameters = [[attribute: fields."xAxis_$index", group: fields."group$index"]]
-                def indicators = [[aggregation : fields."aggregation_$index", attribute:
-                    fields."yAxis_$index", type: fields."type_$index"]]
-
-                def source = fields."source_$index".value
-                def descriptor = fields."descriptor_$index"
-                def sourceForCompute = fields."sourceForCompute_$index"
-                def top = fields.top
-                def type = fields."type_$index"
-
-                Map dataBody = [descriptor       : descriptor,
-                                parameters       :parameters,
-                                source           : source,
-                                sourceForCompute : sourceForCompute, indicators:indicators,
-                                breakdown        : fields."breakdown_$index",
-                                breakdownGroup   : fields."breakdownGroup_$index",
-                                top              : top?.show ? top?.count : null,
-                                type             : type,
-                                showEmptyData    : fields.showEmptyData,
-                                showBlankData    : fields.showBlankData]
-                return [(dataKey): dataBody]
-            }
-        }
-        else if((fields.type as DiagramType) in [*DiagramType.RoundTypes, *DiagramType.CountTypes])
-        {
-            data = fields.order.collect { index ->
-                def dataKey = fields."dataKey_$index"
-                def indicators = [[aggregation: fields."aggregation_$index", attribute: fields."indicator_$index"]]
-
-                def source =  fields."source_$index".value
-                def descriptor = fields."descriptor_$index"
-                def sourceForCompute = fields."sourceForCompute_$index"
-                def top = fields.top
-
-                Map dataBody = [descriptor      : descriptor,
-                                parameters      : [],
-                                source          : source,
-                                sourceForCompute: sourceForCompute,
-                                indicators      : indicators,
-                                breakdown       : fields."breakdown_$index",
-                                breakdownGroup  : fields."breakdownGroup_$index",
-                                top             : top?.show ? top?.count : null,
-                                showEmptyData   : fields.showEmptyData,
-                                showBlankData   : fields.showBlankData]
-                data = [(dataKey): dataBody]
-            }
-        }
-        else if((fields.type as DiagramType) == DiagramType.TABLE)
-        {
-            data = fields.order.collect { index ->
-                def dataKey = fields."dataKey_$index"
-                def parameters = [[attribute: fields."row_$index", group: fields."group$index"]]
-                def indicators = [[aggregation: fields."aggregation_$index", attribute: fields."column_$index"]]
-
-                def source =  fields."source_$index".value
-                def descriptor = fields."descriptor_$index"
-                def sourceForCompute = fields."sourceForCompute_$index"
-
-                def top = fields.top
-
-                Map requestContent = [descriptor      : descriptor,
-                                      parameters      : parameters,
-                                      source          : source,
-                                      sourceForCompute: sourceForCompute,
-                                      indicators      : indicators,
-                                      breakdown       : fields."breakdown_$index",
-                                      breakdownGroup  : fields."breakdownGroup_$index",
-                                      top             : top?.show ? top?.count : null,
-                                      showEmptyData   : fields.showEmptyData,
-                                      showBlankData   : fields.showBlankData,
-                                      calcTotalColumn : fields."calcTotalColumn_$index",
-                                      calcTotalRow    : fields."calcTotalRow_$index"]
-
-                return [(dataKey): requestContent]
-            }
-        }
-        else
-        {
-            throw new IllegalArgumentException("Проверьте ${fields.type}!")
-        }
-        fields.data = data
-        return fields
     }
 }
 
