@@ -1389,15 +1389,11 @@ class DashboardSettingsService
      * @param userLogin - логин пользователя
      * @return - правильные положения для виджетов
      */
-    private Map prepareLayouts(Layout layouts, String userLogin)
+    private Layout prepareLayouts(Layout layouts, String userLogin)
     {
-        return layouts.collectEntries { key, value ->
-            value = value.collect {
-                it.i += "_${ userLogin }"
-                return it
-            }
-            [(key): value]
-        }
+        layouts?.lg?.each { it?.i += "_${ userLogin }" }
+        layouts?.sm?.each { it?.i += "_${ userLogin }" }
+        return layouts
     }
 
     /**
