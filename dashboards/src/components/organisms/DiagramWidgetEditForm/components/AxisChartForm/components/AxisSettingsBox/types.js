@@ -9,4 +9,5 @@ export type Props = {
 	onChangeAxisName: (event: OnChangeEvent<string>) => void,
 	onChangeSettings: (name: string, settings: AxisSettings) => void,
 	settings: AxisSettings,
+	title: string
 };

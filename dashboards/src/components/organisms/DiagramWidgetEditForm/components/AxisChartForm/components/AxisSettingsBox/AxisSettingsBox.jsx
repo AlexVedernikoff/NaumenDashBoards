@@ -11,18 +11,22 @@ import React, {PureComponent} from 'react';
 import TextInput from 'components/atoms/TextInput';
 
 export class AxisSettingsBox extends PureComponent<Props> {
+	static defaultProps = {
+		title: 'Показатель'
+	};
+
 	handleChangeSettings = ({name: propName, value}: OnChangeEvent<boolean>) => {
 		const {name, onChangeSettings, settings} = this.props;
 
-		onChangeSettings(name, {...settings, [propName]: value});
+		onChangeSettings(name, {...settings, [propName]: !value});
 	};
 
 	render () {
-		const {axisFieldName, axisName, onChangeAxisName, settings} = this.props;
+		const {axisFieldName, axisName, onChangeAxisName, settings, title} = this.props;
 		const {show, showName} = settings;
 
 		return (
-			<CollapsableFormBox title="Показатель">
+			<CollapsableFormBox title={title}>
 				<FormField>
 					<FormCheckControl label="Показать ось">
 						<Checkbox checked={show} name={FIELDS.show} onChange={this.handleChangeSettings} value={show} />
