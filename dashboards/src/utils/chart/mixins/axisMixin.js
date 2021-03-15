@@ -30,12 +30,15 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 
 	if (buildDataSet) {
 		const {breakdown, indicators, parameters, showEmptyData, xAxisName, yAxisName} = buildDataSet;
-		const {aggregation, attribute} = indicators[0];
-		const parameterUsesUUIDs = hasUUIDsInLabels(parameters[0].attribute);
-		const breakdownUsesUUIDs = Array.isArray(breakdown) && hasUUIDsInLabels(breakdown[0].attribute);
+		const {aggregation, attribute: indicatorAttribute} = indicators[0];
+		const {attribute: parameterAttribute, group: parameterGroup} = parameters[0];
+		const firstBreakdown = (Array.isArray(breakdown) && breakdown[0]) || {attribute: undefined, group: undefined};
+		const {attribute: breakdownAttribute, group: breakdownGroup} = firstBreakdown;
+		const parameterUsesUUIDs = hasUUIDsInLabels(parameterAttribute, parameterGroup);
+		const breakdownUsesUUIDs = Array.isArray(breakdown) && hasUUIDsInLabels(breakdownAttribute, breakdownGroup);
 		const usesUUIDs = parameterUsesUUIDs || breakdownUsesUUIDs;
-		const usesMSInterval = hasMSInterval(attribute, aggregation);
-		const usesPercent = hasPercent(attribute, aggregation);
+		const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
+		const usesPercent = hasPercent(indicatorAttribute, aggregation);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
 		const xAxisSettings = {

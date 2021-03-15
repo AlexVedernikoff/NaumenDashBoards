@@ -258,10 +258,10 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {breakdown: breakdownLimitIgnored, parameter: parameterLimitIgnored} = ignoreDataLimits;
 		const {breakdown: breakdownLimitExceeded, parameter: parameterLimitExceeded} = this.props.data.limitsExceeded;
 		const {BREAKDOWN, INDICATOR, PARAMETER} = COLUMN_TYPES;
-		const {attribute, type} = props.column;
+		const {attribute, group, type} = props.column;
 		let {components, value} = props;
 
-		if (type === BREAKDOWN && hasUUIDsInLabels(attribute) && typeof value === 'string') {
+		if (type === BREAKDOWN && hasUUIDsInLabels(attribute, group) && typeof value === 'string') {
 			value = getSeparatedLabel(value, SEPARATOR);
 		}
 

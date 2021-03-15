@@ -56,7 +56,9 @@ const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData
 	const {aggregation, attribute} = indicators[0];
 	const usesMSInterval = hasMSInterval(attribute, aggregation);
 	const usesPercent = hasPercent(attribute, aggregation);
-	const usesUUIDs = Array.isArray(breakdown) && hasUUIDsInLabels(breakdown[0].attribute);
+	const firstBreakdown = (Array.isArray(breakdown) && breakdown[0]) || {attribute: undefined, group: undefined};
+	const {attribute: breakdownAttribute, group} = firstBreakdown;
+	const usesUUIDs = hasUUIDsInLabels(breakdownAttribute, group);
 	const color = colorsSettings.auto.colors[index];
 	const stacked = type === WIDGET_TYPES.COLUMN_STACKED;
 	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
@@ -195,11 +197,15 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	widget.data.forEach(dataSet => {
 		if (!dataSet.sourceForCompute) {
 			const {breakdown, parameters} = dataSet;
+			const {attribute: parameterAttribute, group} = parameters[0];
 
-			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(parameters[0].attribute);
+			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(parameterAttribute, group);
 
 			if (breakdown) {
-				breakdownUsesUUIDs = !breakdownUsesUUIDs || (!Array.isArray(breakdown) && hasUUIDsInLabels(breakdown.attribute));
+				const breakdownSanitized = (!Array.isArray(breakdown) && breakdown) || {attribute: undefined, group: undefined};
+				const {attribute: breakdownAttribute = undefined, group = undefined} = breakdownSanitized;
+
+				breakdownUsesUUIDs = !breakdownUsesUUIDs || hasUUIDsInLabels(breakdownAttribute, group);
 			}
 		}
 	});
