@@ -103,11 +103,11 @@ class DashboardDataSetService
         {
             widget.data = widget.data.collect { widgetData ->
                 widgetData.parameters?.findResults {
-                    it.group = Group.mappingGroup(it.group, dbSettings, false)
+                    it.group = Group.mappingGroup(it.group, dbSettings?.customGroups, false)
                     return it
                 }
                 widgetData.breakdown?.findResults {
-                    it.group = Group.mappingGroup(it.group, dbSettings, false)
+                    it.group = Group.mappingGroup(it.group, dbSettings?.customGroups, false)
                     return it
                 }
                 return widgetData
