@@ -411,10 +411,18 @@ class Link
                                         List objects = []
                                         if(attributeType in AttributeType.ONLY_LINK_TYPES)
                                         {
+                                            if(!attr.ref)
+                                            {
+                                                attr.ref = new Attribute(code:'title', type:'string')
+                                            }
                                             objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
                                         }
                                         else
                                         {
+                                            if(!attr.ref)
+                                            {
+                                                attr.ref = new Attribute(code:'title', type:'string')
+                                            }
                                             objects = findObjects(attr.ref, attr.property, value)
                                         }
                                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
