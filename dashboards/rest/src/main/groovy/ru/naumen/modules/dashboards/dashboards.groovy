@@ -354,8 +354,8 @@ class DashboardsService
         List<String> types = requestContent?.types ?: AttributeType.ALL_ATTRIBUTE_TYPES
 
         def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
-        List attributeTypes = linkAttribute.sourceCode
-            ? getPermittedTypes(api.metainfo.getMetaClass(linkAttribute.sourceCode), linkAttribute.code)?.toList()
+        List attributeTypes = linkAttribute.metaClassFqn
+            ? getPermittedTypes(api.metainfo.getMetaClass(linkAttribute.metaClassFqn), linkAttribute.code)?.toList()
             : []
         List metaInfos = attributeTypes?.collect { api.metainfo.getMetaClass(it.toString()) }
 
