@@ -77,6 +77,7 @@ export class StyleTab extends Component<StyleTabProps> {
 					onChangeAxisName={this.handleChangeAxisName(index)}
 					onChangeSettings={this.handleChange}
 					settings={extend(DEFAULT_CHART_SETTINGS.axis, parameter)}
+					title="Параметр"
 				/>
 				<AxisSettingsBox
 					axisFieldName={FIELDS.yAxisName}
@@ -85,6 +86,7 @@ export class StyleTab extends Component<StyleTabProps> {
 					onChangeAxisName={this.handleChangeAxisName(index)}
 					onChangeSettings={this.handleChange}
 					settings={extend(DEFAULT_CHART_SETTINGS.axis, indicator)}
+					title="Показатель"
 				/>
 				<SortingBox
 					data={sorting}
