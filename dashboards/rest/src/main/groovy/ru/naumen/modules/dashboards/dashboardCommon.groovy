@@ -102,7 +102,9 @@ enum GroupType
     EXCEED,
 
     HOURS,
-    MINUTES
+    MINUTES,
+    HOUR,
+    MINUTE
 
     static List<GroupType> getTimerTypes()
     {
@@ -611,7 +613,7 @@ class DashboardUtils
                     columnsRatioWidth: oldFormatWidget.columnsRatioWidth,
                     showEmptyData: oldFormatWidget.showEmptyData,
                     showBlankData: oldFormatWidget.showBlankData,
-                    showRowNum: fields.showRowNum,
+                    showRowNum: oldFormatWidget.showRowNum,
                     sorting: oldFormatWidget.sorting as Sorting,
                     table: oldFormatWidget.table as TableObject,
                     data: oldFormatWidget.data as Collection<DiagramNowData>,
@@ -1443,15 +1445,13 @@ class BaseAttributeCustomDeserializer<T> extends StdDeserializer<T>
      */
     private Map<Class, Closure<Boolean>> predictors = [
         (Attribute) : { value ->
-            return use(JacksonUtils)
-            {
+            return use(JacksonUtils) {
                 value.hasField('metaClassFqn')
             }
         },
         (ComputedAttr) : {
             value ->
-                return use(JacksonUtils)
-                {
+                return use(JacksonUtils) {
                     value.hasField('computeData')
                 }
         }
@@ -1898,15 +1898,13 @@ class GroupCustomDeserializer<T> extends StdDeserializer<T>
      * словарь отличительных особенностей
      */
     private Map<Class, Closure<Boolean>> predictors = [
-        (SysemGroupInfo) : { value ->
-            return use(JacksonUtils)
-            {
+        (SystemGroupInfo) : { value ->
+            return use(JacksonUtils) {
                 value['way'] == 'SYSTEM'
             }
         },
         (CustomGroupInfo): { value ->
-            return use(JacksonUtils)
-            {
+            return use(JacksonUtils) {
                 value['way'] == 'CUSTOM'
             }
         }
@@ -2286,7 +2284,7 @@ class AxisZero extends OldDiagrams
                 group: fields.group  as Group,
                 source: fields.source as SourceValue,
                 xAxis: fields.xAxis as Attribute,
-                yAxis: fields.yAxis as AggregationAttribute,
+                yAxis: fields.yAxis as BaseAttribute,
                 name: fields.name,
                 diagramName: fields.diagramName,
                 id: fields.id,
@@ -2757,34 +2755,28 @@ class DiagramNowDataDeserializer<T> extends StdDeserializer<T>
      */
     Map<Class, Closure<Boolean>> predictors = [
         (AxisCurrentData): { value ->
-            return use(JacksonUtils)
-            {
+            return use(JacksonUtils) {
                 value.hasField('xAxis')
             }
         },
         (DiagramNewData) : { value ->
-            return use(JacksonUtils)
-            {
-                (value.hasField('indicators') || value['sourceForCompute'])
-                    && !value.hasField('descriptor')
+            return use(JacksonUtils) {
+                (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
             }
         },
         (TableCurrentData): { value ->
-            return use(JacksonUtils)
-            {
+            return use(JacksonUtils) {
                 value.hasField('parameters') && value.hasField('descriptor')
             }
         },
         (CircleAndSummaryCurrentData): { value ->
-            return use(JacksonUtils)
-            {
+            return use(JacksonUtils) {
                 (value.hasField('indicator') || value['sourceForCompute']) && value.hasField('descriptor')
             }
         },
         (TablePrevData) : {
             value ->
-                return use(JacksonUtils)
-                {
+                return use(JacksonUtils) {
                     value.hasField('row') && value.hasField('descriptor')
                 }
         }
@@ -2981,7 +2973,7 @@ class AxisCurrentData extends DiagramNowData
                                 group: fields.group as Group,
                                 source: fields.source as SourceValue,
                                 xAxis: fields.xAxis as Attribute,
-                                yAxis: fields.yAxis as AggregationAttribute,
+                                yAxis: fields.yAxis as BaseAttribute,
                                 yAxisName: fields.yAxisName,
                                 type: fields.type as ComboType)
             : null
@@ -3127,7 +3119,7 @@ class CircleAndSummaryCurrentData extends DiagramNowData
                 showEmptyData: fields.showEmptyData,
                 showBlankData: fields.showBlankData,
                 sourceForCompute: fields.sourceForCompute,
-                indicator: fields.indicator as AggregationAttribute,
+                indicator: fields.indicator as BaseAttribute,
                 top: fields.top as Top)
             : null
     }
@@ -3180,7 +3172,7 @@ class TablePrevData extends DiagramNowData
                 breakdown: fields.breakdown as Collection<BaseBreakdown>, // <- Разбивка только у первого источника
                 breakdownGroup: fields.breakdownGroup as Group,
                 calcTotalColumn: fields.calcTotalColumn,
-                column: fields.column as AggregationAttribute,
+                column: fields.column as BaseAttribute,
                 group: fields.group as Group,
                 row: Attribute.fromMap(fields.row),
                 sourceForCompute: fields.sourceForCompute,
