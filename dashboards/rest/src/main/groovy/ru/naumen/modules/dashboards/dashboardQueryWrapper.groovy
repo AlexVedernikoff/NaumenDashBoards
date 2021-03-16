@@ -143,7 +143,7 @@ class QueryWrapper implements CriteriaWrapper
         def sc = api.selectClause
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
-        String lastParameterAttributeType = attribute.attrChains()*.type.last()
+        String lastParameterAttributeType = Attribute.getAttributeType(attribute)
         if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
         {
             String attributeCode = attributeCodes.find()
@@ -355,7 +355,13 @@ class QueryWrapper implements CriteriaWrapper
         String[] attributeCodes = parameter.attribute.attrChains()*.code
                                            .with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
-        String lastParameterAttributeType = parameter.attribute.attrChains()*.type.last()
+        def attributeChains = parameter.attribute.attrChains()
+
+        //в цепочке атрибутов может прийти свыше 2-х только в случае, если выбран ссылочный атрибут,
+        // его податрибут: ссылочный атрибут, и уже его податрибут либо такой же ссылочный, либо обычный (сейчас это title строкового типа, подставляетя на бэке)
+        //поэтому, в в случае если пришёл ссылочный атрибут со ссылочным податрибутом, то важно знать тип последнего ссылочного, а title не интересен
+        //в ином случае, важен тип самого последнего атрибута
+        String lastParameterAttributeType = attributeChains.size() > 2 ? attributeChains*.type[-2] : attributeChains*.type.last()
         column = castDynamicToType(parameter.attribute, column)
         switch (groupType)
         {
@@ -369,13 +375,21 @@ class QueryWrapper implements CriteriaWrapper
                     criteria.addGroupColumn(sc.property('metaCaseId'))
                     criteria.addColumn(column)
                 }
-                else if(parameter.attribute.type in AttributeType.ONLY_LINK_TYPES)
+                else if(lastParameterAttributeType in AttributeType.ONLY_LINK_TYPES ||
+                        (lastParameterAttributeType in AttributeType.HAS_UUID_TYPES && diagramType in DiagramType.SortableTypes))
                 {
+
+                    def lastColumn =  sc.property(
+                        LinksAttributeMarshaller.marshal(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.join('.'),
+                                                         DashboardQueryWrapperUtils.UUID_CODE))
+                    if(lastParameterAttributeType == AttributeType.META_CLASS_TYPE)
+                    {
+                        lastColumn = sc.property(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.join('.'))
+                    }
                     column = sc.concat(
                         sc.property(attributeCodes),
                         sc.constant(LinksAttributeMarshaller.delimiter),
-                        sc.property(LinksAttributeMarshaller.marshal(parameter.attribute.code, DashboardQueryWrapperUtils.UUID_CODE))
-                    )
+                        lastColumn)
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
                 }
@@ -785,16 +799,13 @@ class QueryWrapper implements CriteriaWrapper
     {
         filters.collect { parameter ->
             def attribute = parameter.attribute as Attribute
-            if(attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
+            Collection attrChains = attribute.attrChains()
+            String code = attrChains*.code.join('.')
+            if(Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
             {
                 attribute?.attrChains()?.last()?.ref = new Attribute(code: 'title', type: 'string')
             }
-
-            String columnCode = attribute.attrChains()*.code
-                                         .inject { first, second ->
-                                             "${ first }.${ second }".toString()
-                                         }
-            String code = attribute.code
+            String columnCode = attribute.attrChains()*.code.join('.')
             String parameterFqn = attribute.metaClassFqn
             if (attribute.attrChains()*.code.any { it == 'id' })
             {
@@ -1029,18 +1040,14 @@ class DashboardQueryWrapperUtils
             )
         }
 
-        wrapper.setCases(requestData.source.classFqn,
-                         diagramType,
-                         clonedAggregations.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
+        wrapper.setCases(requestData.source.classFqn, diagramType, clonedAggregations.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
 
         clonedAggregations.each {
             prepareAttribute(it.attribute as Attribute)
             wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top, onlyFilled)
         }
 
-        wrapper.setCases(requestData.source.classFqn,
-                         diagramType,
-                         clonedGroups.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
+        wrapper.setCases(requestData.source.classFqn, diagramType, clonedGroups.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
 
         clonedGroups.each {
             prepareAttribute(it.attribute as Attribute)
@@ -1138,7 +1145,7 @@ class DashboardQueryWrapperUtils
             throw new IllegalArgumentException("Attribute is null or empty!")
         }
         Aggregation type = parameter.type
-        String attributeType = parameter.attribute.attrChains().last().type
+        String attributeType = Attribute.getAttributeType(parameter.attribute)
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1174,7 +1181,7 @@ class DashboardQueryWrapperUtils
         }
         GroupType type = parameter.type
         //Смотрим на тип последнего вложенного атрибута
-        String attributeType = parameter.attribute.attrChains().last().type
+        String attributeType = Attribute.getAttributeType(parameter.attribute)
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1220,7 +1227,7 @@ class DashboardQueryWrapperUtils
      */
     private static def prepareAttribute(Attribute attribute)
     {
-        String attributeType = attribute.attrChains().last().type
+        String attributeType = Attribute.getAttributeType(attribute)
         String attributeCode = attribute.attrChains().last().code
         switch (attributeType)
         {

@@ -1733,8 +1733,8 @@ class DashboardDataSetService
                             def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filtersTitle): res]
 
                             partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
-                            Boolean hasState = newRequestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                               newRequestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE  }
+                            Boolean hasState = newRequestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
+                                               newRequestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE  }
                             if (hasState)
                             {
                                 partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations)
@@ -1805,8 +1805,8 @@ class DashboardDataSetService
                         def groups = dataSet.values().head().groups
                         def aggregations = dataSet.values().head().aggregations
                         String aggregationSortingType = aggregations.find()?.sortingType
-                        Boolean hasState = groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                           aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE }
+                        Boolean hasState = groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
+                                           aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE }
                         def res = variables.withIndex().collectMany { totalVar, j ->
                             def res = groups?.size() || notAggregatedAttributes.size() ?
                                 findUniqueGroups([0], totalVar).collect { group ->
@@ -2165,14 +2165,14 @@ class DashboardDataSetService
         {
             case GroupType.OVERLAP:
                 def uuid = null
-                if (diagramType == DiagramType.TABLE)
+                if (diagramType == DiagramType.TABLE  || Attribute.getAttributeType(parameter.attribute) == AttributeType.META_CLASS_TYPE)
                 {
                     if (value && !(parameter?.attribute?.type in AttributeType.DATE_TYPES ))
                     {
                         (value, uuid) = ObjectMarshaller.unmarshal(value.toString())
                     }
                 }
-                switch (parameter.attribute.attrChains().last()?.type)
+                switch (Attribute.getAttributeType(parameter.attribute))
                 {
                     case AttributeType.DT_INTERVAL_TYPE:
                         if (parameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
@@ -3681,8 +3681,8 @@ class DashboardDataSetService
             def customGroup = parameter?.group?.data
 
             def filterList = customGroup?.subGroups?.collect { subGroup ->
-                String attributeType = parameter.attribute.attrChains().last().type.split('\\$', 2).head()
-                parameter.attribute.type = attributeType
+                String attributeType = Attribute.getAttributeType(parameter.attribute).split('\\$', 2).head()
+                parameter.attribute.attrChains().last().type = attributeType
                 Closure<Collection<Collection<FilterParameter>>> mappingFilters = getMappingFilterMethodByType(attributeType, subjectUUID)
                 def filters = mappingFilters(
                     subGroup.data as List<List>,
@@ -3830,8 +3830,8 @@ class DashboardDataSetService
                                                     .with(formatAggregation)
                 def total = res ? [(requisiteNode.title): res] : [:]
                 total = formatResult(total, aggregationCnt)
-                Boolean hasState = requestData?.groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                   requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE }
+                Boolean hasState = requestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
+                                   requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE }
                 if (hasState)
                 {
                     total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
@@ -3877,8 +3877,8 @@ class DashboardDataSetService
                 } as Map<String, List>
 
                 //Вычисление формулы. Выглядит немного костыльно...
-                Boolean hasState = dataSet.values().head().groups?.any { value -> value?.attribute?.type == AttributeType.STATE_TYPE } ||
-                                   dataSet.values().head().aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && it?.attribute?.type == AttributeType.STATE_TYPE }
+                Boolean hasState = dataSet.values().head().groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
+                                   dataSet.values().head().aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE }
                 String aggregationSortingType = dataSet.values().head().aggregations.find()?.sortingType
                 def parameter = dataSet.values().head().groups.find()
                 String parameterSortingType = parameter?.sortingType
@@ -3894,9 +3894,9 @@ class DashboardDataSetService
                                     group == value ? it[0]  as Double : 0
                                 } ?: 0) as Double
                                 : (variables[variable as String].findResult {
-                                def value =  it[1..-1]
-                                group == value ? it[0] : null
-                            } ?: 0) as Double
+                                    def value =  it[1..-1]
+                                    group == value ? it[0] : null
+                                } ?: 0) as Double
                         }
                         group.add(0, resultCalculation)
                         return group
