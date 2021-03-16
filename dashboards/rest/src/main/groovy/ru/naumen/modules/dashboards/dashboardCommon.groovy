@@ -775,6 +775,16 @@ class Attribute extends BaseAttribute
             this.ref = attribute
         }
     }
+
+    /**
+     * Метод, возвращающий тип атрибута
+     * @param attr - атрибут
+     * @return тип атрибута
+     */
+    static String getAttributeType(Attribute attr)
+    {
+        return attr?.attrChains()?.last?.type
+    }
 }
 
 class DynamicGroup
