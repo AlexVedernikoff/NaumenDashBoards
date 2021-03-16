@@ -90,7 +90,6 @@ export class CustomGroup extends Component<Props, State> {
 
 	handleClickCreationPanel = () => {
 		const {createCondition, groups, type} = this.props;
-		const {current: groupNameInput} = this.groupNameRef;
 		const id = `${LOCAL_PREFIX_ID}${uuid()}`;
 
 		if (groups.length < 30) {
@@ -105,7 +104,11 @@ export class CustomGroup extends Component<Props, State> {
 
 			this.setState({selectedGroup: id});
 			this.update(group);
-			groupNameInput && setTimeout(() => groupNameInput.focus());
+			setTimeout(() => {
+				const {current: groupNameInput} = this.groupNameRef;
+
+				groupNameInput && groupNameInput.focus();
+			});
 		} else {
 			this.setState({showLimitInfo: true});
 		}

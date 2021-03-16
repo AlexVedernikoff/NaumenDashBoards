@@ -24,7 +24,8 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 		const {attribute, value} = this.props;
 		const {CUSTOM, SYSTEM} = GROUP_WAYS;
 		const {DATE, NUMBER} = ATTRIBUTE_SETS;
-		const type = attribute ? attribute.type : '';
+		const attributeType = attribute?.type;
+		const type = (attributeType !== 'object' ? attributeType : attribute?.ref?.type) ?? '';
 		const way = value && typeof value === 'object' && value.way === CUSTOM ? CUSTOM : SYSTEM;
 		const {calendar, number, text} = ICONS[way];
 

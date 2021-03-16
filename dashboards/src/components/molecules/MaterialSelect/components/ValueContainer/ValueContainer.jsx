@@ -17,7 +17,7 @@ export class ValueContainer extends Component<Props> {
 	renderPlaceholder = () => {
 		const {getOptionLabel, placeholder, value} = this.props;
 
-		if (getOptionLabel(value) && placeholder) {
+		if (value && placeholder && getOptionLabel(value)) {
 			return <div className={styles.placeholder}>{placeholder}</div>;
 		}
 	};
@@ -28,6 +28,7 @@ export class ValueContainer extends Component<Props> {
 			[styles.input]: true,
 			[styles.editableInput]: editableLabel
 		});
+		const optionLabel = (value && getOptionLabel(value)) ?? '';
 
 		return (
 			<input
@@ -37,7 +38,7 @@ export class ValueContainer extends Component<Props> {
 				placeholder={placeholder}
 				readOnly={!editableLabel}
 				ref={forwardedInputRef}
-				value={getOptionLabel(value)}
+				value={optionLabel}
 			/>
 		);
 	};

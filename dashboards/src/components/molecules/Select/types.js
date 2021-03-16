@@ -1,6 +1,6 @@
 // @flow
 import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButton/types';
-import type {OnChangeEvent} from 'components/types';
+import type {InputRef, OnChangeEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props as ValueProps} from './components/Value/types';
 
@@ -36,6 +36,7 @@ export type Props = {
 	disabled: boolean,
 	editable: boolean,
 	fetchOptions?: () => any,
+	forwardedLabelInputRef?: InputRef,
 	getOptionLabel: (option: Option) => string,
 	getOptionValue: (option: Option) => any,
 	isSearching: boolean,
