@@ -783,7 +783,7 @@ class Attribute extends BaseAttribute
      */
     static String getAttributeType(Attribute attr)
     {
-        return attr?.attrChains()?.last?.type
+        return attr?.attrChains()?.last()?.type
     }
 }
 
