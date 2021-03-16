@@ -358,7 +358,7 @@ class QueryWrapper implements CriteriaWrapper
         def attributeChains = parameter.attribute.attrChains()
 
         //в цепочке атрибутов может прийти свыше 2-х только в случае, если выбран ссылочный атрибут,
-        // его податрибут: ссылочный атрибут, и уже его податрибут либо такой же ссылочный, либо обычный (сейчас это title строкового типа, подставляетя на бэке)
+        // его податрибут: ссылочный атрибут, и уже его податрибут либо такой же ссылочный, либо обычный (сейчас это title строкового типа, подставляется на бэке)
         //поэтому, в в случае если пришёл ссылочный атрибут со ссылочным податрибутом, то важно знать тип последнего ссылочного, а title не интересен
         //в ином случае, важен тип самого последнего атрибута
         String lastParameterAttributeType = attributeChains.size() > 2 ? attributeChains*.type[-2] : attributeChains*.type.last()
@@ -380,11 +380,11 @@ class QueryWrapper implements CriteriaWrapper
                 {
 
                     def lastColumn =  sc.property(
-                        LinksAttributeMarshaller.marshal(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.join('.'),
+                        LinksAttributeMarshaller.marshal(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'),
                                                          DashboardQueryWrapperUtils.UUID_CODE))
                     if(lastParameterAttributeType == AttributeType.META_CLASS_TYPE)
                     {
-                        lastColumn = sc.property(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.join('.'))
+                        lastColumn = sc.property(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'))
                     }
                     column = sc.concat(
                         sc.property(attributeCodes),
