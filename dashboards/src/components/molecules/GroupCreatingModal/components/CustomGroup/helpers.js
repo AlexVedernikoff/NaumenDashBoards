@@ -11,7 +11,7 @@ const createBetweenOperand = (type: string) => ({
 });
 
 const createDefaultOperand = (type: string) => ({
-	data: null,
+	data: '',
 	type
 });
 

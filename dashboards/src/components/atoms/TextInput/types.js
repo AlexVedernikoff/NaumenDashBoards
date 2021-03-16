@@ -1,9 +1,10 @@
 // @flow
-import type {InputValue, OnChangeEvent} from 'components/types';
+import type {InputRef, InputValue, OnChangeEvent} from 'components/types';
 
 export type Props = {
 	className: string,
 	disabled: boolean,
+	forwardedRef?: InputRef,
 	maxLength: number | null,
 	name: string,
 	onBlur?: (SyntheticFocusEvent<HTMLInputElement>) => void,

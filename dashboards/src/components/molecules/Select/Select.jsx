@@ -117,9 +117,10 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderLabel = () => {
-		const {editable, getOptionLabel, placeholder, value} = this.props;
+		const {editable, forwardedLabelInputRef, getOptionLabel, placeholder, value} = this.props;
 		const {Value} = this.components;
-		const label = getOptionLabel(value) || placeholder;
+		const label = (value && getOptionLabel(value)) ?? placeholder;
+
 		const valueCN = cn({
 			[styles.value]: true,
 			[styles.placeholder]: !value
@@ -129,6 +130,7 @@ export class Select extends PureComponent<Props, State> {
 			return (
 				<TextInput
 					className={styles.input}
+					forwardedRef={forwardedLabelInputRef}
 					onChange={this.handleChangeLabel}
 					onFocus={this.hideMenu}
 					value={label}

@@ -39,7 +39,7 @@ export class TextInput extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, disabled, maxLength, onBlur, onFocus, placeholder, value} = this.props;
+		const {className, disabled, forwardedRef, maxLength, onBlur, onFocus, placeholder, value} = this.props;
 		const containerCN = cn({
 			[styles.container]: true,
 			[className]: true,
@@ -55,6 +55,7 @@ export class TextInput extends PureComponent<Props> {
 					onChange={this.handleChange}
 					onFocus={onFocus}
 					placeholder={placeholder}
+					ref={forwardedRef}
 					value={value}
 				/>
 				{this.renderClearIcon()}
