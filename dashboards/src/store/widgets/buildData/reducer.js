@@ -2,9 +2,13 @@
 import type {BuildDataAction, BuildDataState} from './types';
 import {BUILD_DATA_EVENTS} from './constants';
 import {defaultAction, initialBuildDataState} from './init';
+import {updateWidgetData} from './helpers';
+import {WIDGETS_EVENTS} from 'store/widgets/data/constants';
 
 const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDataAction = defaultAction): BuildDataState => {
 	switch (action.type) {
+		case WIDGETS_EVENTS.UPDATE_WIDGET:
+			return updateWidgetData(state, action.payload);
 		case BUILD_DATA_EVENTS.REQUEST_BUILD_DATA:
 			return {
 				...state,
