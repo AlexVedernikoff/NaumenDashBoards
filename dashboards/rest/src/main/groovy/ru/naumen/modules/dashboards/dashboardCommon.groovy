@@ -498,7 +498,12 @@ class DashboardUtils
         String diagramType = oldFormatWidget.diagramType
         def widgetCurrentClazz = oldFormatWidget.getClass()
 
-        def oldDataFormat = oldFormatWidget.data.head()?.getClass()
+        if(widgetCurrentClazz == Text)
+        {
+            return oldFormatWidget
+        }
+        Boolean diagramTypeHasNoDataField = widgetCurrentClazz in [AxisZero, SummaryZero, CircleZero]
+        def oldDataFormat = diagramTypeHasNoDataField ? null : oldFormatWidget.data.head()?.getClass()
         Boolean calcTotalColumn
         if(widgetCurrentClazz == TablePrevAndCurrentAndNew)
         {
@@ -509,7 +514,6 @@ class DashboardUtils
             calcTotalColumn =oldFormatWidget.data.head().calcTotalColumn
         }
 
-        Boolean diagramTypeHasNoDataField = widgetCurrentClazz in [AxisZero, SummaryZero, CircleZero]
         def newDataForOld
         if(diagramTypeHasNoDataField)
         {
