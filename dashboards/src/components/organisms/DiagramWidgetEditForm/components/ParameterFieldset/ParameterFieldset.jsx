@@ -60,7 +60,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 		if (index === 0 && (newAttribute.type in ATTRIBUTE_SETS.REFERENCE || !attribute || attribute.type !== newAttribute.type)) {
 			newValue = {
 				...newValue,
-				group: getDefaultSystemGroup(value)
+				group: getDefaultSystemGroup(newAttribute)
 			};
 		}
 
