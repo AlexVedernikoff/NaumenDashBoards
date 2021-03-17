@@ -33,18 +33,20 @@ interface DashboardDataSet
      * Получение данных для диаграмм. Нужен для обратной совместимости.
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
      * @param cardObjectUuid - идентификатор "текущего объекта"
+     * @param ignoreTableLimits - объект, описывающий необходимость игнорирования пределов для таблицы
      * @return данные для построения диаграммы
      */
     @Deprecated
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits)
 
     /**
      * Получение данных для диаграмм. С поддержкой вычислений.
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
      * @param cardObjectUuid - идентификатор "текущего объекта"
+     * @param ignoreTableLimits - объект, описывающий необходимость игнорирования пределов для таблицы
      * @return данные для построения диаграммы
      */
-    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
+    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits)
 }
 
 @InjectApi
@@ -59,16 +61,17 @@ class DashboardDataSetImpl implements DashboardDataSet
 
     @Override
     @Deprecated
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits)
     {
-        return getDataForDiagram(dashboardKey, widgetKey, cardObjectUuid)
+        return getDataForDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits)
     }
 
     @Override
-    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid)
+    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits)
     {
+        ignoreTableLimits = ignoreTableLimits ? new IgnoreLimits(ignoreTableLimits as Map) : new IgnoreLimits()
         return api.tx.call {
-            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid)
+            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits)
         }.with(JsonOutput.&toJson)
     }
 }
@@ -125,9 +128,10 @@ class DashboardDataSetService
      * Метод построения диаграмм.
      * @param requestContent - запрос на построение диаграмы
      * @param subjectUUID - идентификатор "текущего объекта"
+     * @param ignoreTableLimits - объект, описывающий возможности игнорирования пределов для таблицы
      * @return Типизированниые данные для построения диаграмм
      */
-    private def buildDiagram(String dashboardKey, String widgetKey, String subjectUUID)
+    private def buildDiagram(String dashboardKey, String widgetKey, String subjectUUID, IgnoreLimits ignoreTableLimits)
     {
         def widgetSettings = getWidgetSettingsByDashboardAndWidgetKey(dashboardKey, widgetKey)
         def diagramType = widgetSettings.type as DiagramType
@@ -148,8 +152,7 @@ class DashboardDataSetService
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
             }
-            IgnoreLimits ignoreLimits = widgetSettings.ignoreLimits ?: new IgnoreLimits()
-            res = getDiagramData(request, diagramType, aggregationCnt, widgetSettings, ignoreLimits)
+            res = getDiagramData(request, diagramType, aggregationCnt, widgetSettings, ignoreTableLimits)
             if (computationInTableRequest)
             {
                 //а здесь уже важно знать, выводить пустые значения или нет
@@ -175,12 +178,11 @@ class DashboardDataSetService
             case DiagramType.CountTypes:
                 return mappingSummaryDiagram(res)
             case TABLE:
-                IgnoreLimits ignoreLimits = widgetSettings.ignoreLimits ?: new IgnoreLimits()
                 def (totalColumn, showRowNum) = [widgetSettings.calcTotalColumn,
                                                  widgetSettings.showRowNum]
 
                 return mappingTableDiagram(res, totalColumn as boolean,
-                                           showRowNum as boolean, widgetSettings, request, ignoreLimits)
+                                           showRowNum as boolean, widgetSettings, request, ignoreTableLimits)
             case COMBO:
                 Integer sortingDataIndex = getSortingDataIndex(widgetSettings)
                 //нашли источник, по которому должна быть сортировка
