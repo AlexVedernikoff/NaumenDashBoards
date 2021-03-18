@@ -13,7 +13,6 @@ export type AddFiltersProps = {
 export type AddFilterProps = {
 	attribute?: Attribute,
 	group?: Group,
-	subTitle: string,
 	value: string | number
 };
 

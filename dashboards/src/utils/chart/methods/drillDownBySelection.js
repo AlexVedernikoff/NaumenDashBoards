@@ -21,14 +21,14 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {DrillDownMixin}
  */
 const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDownMixin => {
-	const {attribute, group, subTitle, value} = props;
+	const {attribute, group, value} = props;
 	let newMixin = mixin;
 
 	if (attribute && group) {
 		newMixin = deepClone(mixin);
 
-		if (subTitle) {
-			newMixin.title = `${mixin.title}. ${subTitle}`;
+		if (value) {
+			newMixin.title = `${mixin.title}. ${value}`;
 		}
 
 		newMixin.filters.push({attribute, group, value});
@@ -40,42 +40,41 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 /**
  * Добавляет в примесь данных данные параметра
  * @param {AxisData} dataSet - набор данных виджета
- * @param {string} value - значение параметра
+ * @param {string} rawValue - значение параметра
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {DrillDownMixin}
  */
-const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): DrillDownMixin => {
+const addParameterFilter = (dataSet: AxisData, rawValue: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {attribute, group} = dataSet.parameters[0];
-	const subTitle = hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(value) : value;
+	const value = hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(rawValue) : rawValue;
 
 	return addGroupFilter(mixin, {
 		attribute,
 		group: transformGroupFormat(group),
-		subTitle,
 		value
 	});
 };
 
 /**
  * Добавляет в примесь данных данные разбивки
+ *
  * @param {ChartDataSet} dataSet - набор данных виджета
- * @param {string} value - значение разбивки
+ * @param {string} rawValue - значение разбивки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {DrillDownMixin}
  */
-const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
+const addBreakdownFilter = (dataSet: ChartDataSet, rawValue: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {breakdown} = dataSet;
 	const breakdownSet = breakdown && breakdown.find(attrSet => attrSet[FIELDS.dataKey] === dataSet.dataKey);
 	let newMixin = mixin;
 
 	if (breakdownSet) {
 		const {attribute, group} = breakdownSet;
-		const subTitle = hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(value) : value;
+		const value = hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(rawValue) : rawValue;
 
 		newMixin = addGroupFilter(mixin, {
 			attribute,
 			group: transformGroupFormat(group),
-			subTitle,
 			value
 		});
 	}
