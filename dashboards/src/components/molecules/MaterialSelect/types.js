@@ -5,6 +5,7 @@ export type Props = {
 	isEditingLabel: boolean,
 	maxLabelLength: number | null,
 	onClear?: () => void,
+	onLoadOptions: () => void,
 	onRemove?: (value: string) => void,
-	values: Array<Option>
+	values: Array<Option>,
 } & SelectProps;

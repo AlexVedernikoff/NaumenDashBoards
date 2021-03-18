@@ -44,6 +44,12 @@ export class MaterialSelect extends PureComponent<Props> {
 		select && select.handleClick();
 	};
 
+	onLoadOptions = () => {
+		const {onLoadOptions} = this.props;
+
+		onLoadOptions();
+	};
+
 	renderMultiValueContainer = () => {
 		const {getOptionLabel, getOptionValue, onClear, onRemove, values} = this.props;
 
@@ -92,6 +98,7 @@ export class MaterialSelect extends PureComponent<Props> {
 
 		return (
 			<Select
+				fetchOptions={this.onLoadOptions}
 				{...this.props}
 				className={cn(styles.select, className)}
 				components={this.getComponents()}
