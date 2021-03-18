@@ -220,7 +220,7 @@ class DashboardsImpl extends Script implements Dashboards
     @Override
     String getMetaClasses(String classFqn)
     {
-        return toJson(service.getMetaClasses())
+        return toJson(service.getMetaClasses(classFqn))
     }
 
     @Override
@@ -1045,7 +1045,7 @@ class DashboardsService
             title: value.title,
             type: value.type.code as String,
             property: value.type.relatedMetaClass as String,
-            metaClassFqn: value.declaredMetaClass.code,
+            metaClassFqn: value.metaClass.code,
             sourceName: sourceName,
             sourceCode: sourceCode
         )
