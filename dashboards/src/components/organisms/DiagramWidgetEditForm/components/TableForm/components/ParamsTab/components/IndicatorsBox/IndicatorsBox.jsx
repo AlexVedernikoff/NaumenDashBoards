@@ -30,7 +30,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 		const {indicators} = dataSet;
 		const newIndicators = indicators.map((indicator, i) => i === index ? newIndicator : indicator);
 
-		setDataFieldValue(index, FIELDS.indicators, newIndicators, this.checkForBreakdown);
+		setDataFieldValue(dataSetIndex, FIELDS.indicators, newIndicators, this.checkForBreakdown);
 	};
 
 	handleChangeOrder = (indicators: Array<Object>) => {
