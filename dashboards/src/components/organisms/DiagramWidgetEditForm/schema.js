@@ -100,7 +100,7 @@ addMethod(mixed, 'group', function () {
 
 addMethod(object, 'topSettings', function () {
 	return this.shape({
-		count: number().required('Укажите значение ТОП').typeError('Значение ТОП должно быть числом')
+		count: number().required('Укажите значение для ТОП показателя').typeError('Значение ТОП должно быть числом')
 	}).default(DEFAULT_TOP_SETTINGS);
 });
 
