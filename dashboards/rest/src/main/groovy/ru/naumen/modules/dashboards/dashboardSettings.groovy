@@ -801,7 +801,7 @@ class DashboardSettingsService
                 widgetWithCorrectName = prepareWidgetSettings(widgetWithCorrectName) { widgetKey }
                 DashboardSettingsClass dashboardSettings = getSettingByLogin(user?.login as String)
                 dashboardSettings.widgets.removeIf { it?.id == widgetKey }
-                dashboardSettings.widgets = widgetWithCorrectName
+                dashboardSettings.widgets += widgetWithCorrectName
                 def key = widgetWithCorrectName.id
                 if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE))
                 {
