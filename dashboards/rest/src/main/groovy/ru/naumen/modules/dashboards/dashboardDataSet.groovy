@@ -1017,12 +1017,6 @@ class DashboardDataSetService
                     }
                     def code = condition.data.code
                     def value = api.utils.get(subjectUUID)[code]
-                    def subjectAttribute = condition.data
-                    def subjectAttributeType = subjectAttribute.type
-                    if (subjectAttributeType != attribute.type)
-                    {
-                        throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
-                    }
                     return new FilterParameter(
                         value: value,
                         title: title,
@@ -1193,10 +1187,8 @@ class DashboardDataSetService
                 case ['contains_current_object', 'equal_current_object']:
                     def value = api.utils.get(subjectUUID)
                     String metaClass = value.metaClass
-                    String subjectType = metaClass.takeWhile { ch -> ch != '$'
-                    }
-                    String attributeType = attribute.property?.takeWhile { ch -> ch != '$'
-                    }
+                    String subjectType = metaClass.takeWhile { ch -> ch != '$' }
+                    String attributeType = attribute.property?.takeWhile { ch -> ch != '$' }
                     if (subjectType != attributeType)
                     {
                         throw new IllegalArgumentException( "Does not match subject type: $subjectType and attribute type: ${ attribute.property }" )
@@ -1215,12 +1207,6 @@ class DashboardDataSetService
                     }
                     def code = condition.data.code
                     def value = api.utils.get(subjectUUID)[code]
-                    def subjectAttribute = condition.data
-                    def subjectAttributeType = subjectAttribute.type
-                    if (subjectAttributeType != attribute.type)
-                    {
-                        throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
-                    }
                     return new FilterParameter(
                         value: value,
                         title: title,
@@ -1567,10 +1553,28 @@ class DashboardDataSetService
                 case 'expires_between': // Время окончания в диапазоне
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'время окончания', code: 'deadLineTime', type: 'integer'))
-                    String dateFormat = 'yyyy-MM-dd'
-                    def dateSet = condition.data as Map<String, Object> // тут будет массив дат
-                    def start = Date.parse(dateFormat, dateSet.startDate as String)
-                    def end = Date.parse(dateFormat, dateSet.endDate as String)
+                    def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
+                    def start
+                    if(dateSet.startDate)
+                    {
+                        String dateFormat = getDateFormatByDate(dateSet.startDate)
+                        start = Date.parse(dateFormat, dateSet.startDate as String)
+                    }
+                    else
+                    {
+                        Date minDate = DashboardUtils.getMinDate(attribute.code, attribute.sourceCode)
+                        start = new Date(minDate.time).clearTime()
+                    }
+                    def end
+                    if (dateSet.endDate)
+                    {
+                        String dateFormat = getDateFormatByDate(dateSet.endDate)
+                        end = Date.parse(dateFormat, dateSet.endDate as String)
+                    }
+                    else
+                    {
+                        end = new Date().clearTime()
+                    }
                     return buildFilterParameterFromCondition(Comparison.BETWEEN,temAttribute, [start.getTime(), end.getTime()])
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
@@ -1628,12 +1632,6 @@ class DashboardDataSetService
                     }
                     def code = condition.data.code
                     def value = api.utils.get(subjectUUID)[code]
-                    def subjectAttribute = condition.data
-                    def subjectAttributeType = subjectAttribute.type
-                    if (subjectAttributeType != attribute.type)
-                    {
-                        throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
-                    }
                     return new FilterParameter(value: value, title: title,
                                                id: id, type: Comparison.EQUAL, attribute: attribute)
                 default:
@@ -2125,7 +2123,7 @@ class DashboardDataSetService
                 //обрабатываем группы
                 def totalGroupValues = groups.withIndex().collect { group, i ->
                     return formatGroup(requestGroups[i] as GroupParameter,
-                                       data.source.classFqn,
+                                       requestGroups[i]?.attribute?.attrChains()?.last()?.metaClassFqn, //attributeChains.head().property
                                        group, diagramType,
                                        requestGroups[i]?.title == 'n/a',
                                        requestGroups[i]?.title == 'breakdown')

@@ -190,11 +190,12 @@ class QueryWrapper implements CriteriaWrapper
 
         if (attributeCodes.any { it.contains('state') } && lastParameterAttributeType == AttributeType.STATE_TYPE)
         {
+            String metaCaseId = getMetaCaseIdCode(attribute.attrChains())
             column = sc.concat(sc.property(attributeCodes),
                                sc.constant(StateMarshaller.delimiter),
-                               sc.property('metaCaseId'))
+                               sc.property(metaCaseId))
             criteria.addGroupColumn(column)
-            criteria.addGroupColumn(sc.property('metaCaseId'))
+            criteria.addGroupColumn(sc.property(metaCaseId))
             criteria.addColumn(column)
             return this
         }
@@ -202,6 +203,21 @@ class QueryWrapper implements CriteriaWrapper
         criteria.addColumn(column)
         criteria.addGroupColumn(column)
         return this
+    }
+
+    /**
+     * Метод для получения правильного кода атрибута для получения названия статуса по metaCaseId
+     * @param attrChains - цепочка атрибутов
+     * @return правильный код атрибута для получения названия статуса по metaCaseId
+     */
+    private String getMetaCaseIdCode(Collection attrChains)
+    {
+        if(attrChains?.size > 1)
+        {
+            //если атрибут ссылочного типа и в нем выбран статус, то нужно перейти к метаклассу самого последнего атрибута в цепочке
+            return "${attrChains?.last()?.metaClassFqn}.metaCaseId" //attributeChains.head().property
+        }
+        return 'metaCaseId'
     }
 
     /**
@@ -370,9 +386,9 @@ class QueryWrapper implements CriteriaWrapper
                 {
                     column = sc.concat(sc.property(attributeCodes),
                                        sc.constant(StateMarshaller.delimiter),
-                                       sc.property('metaCaseId'))
+                                       sc.property(getMetaCaseIdCode(attributeChains)))
                     criteria.addGroupColumn(column)
-                    criteria.addGroupColumn(sc.property('metaCaseId'))
+                    criteria.addGroupColumn(sc.property(getMetaCaseIdCode(attributeChains)))
                     criteria.addColumn(column)
                 }
                 else if(lastParameterAttributeType in AttributeType.ONLY_LINK_TYPES ||
