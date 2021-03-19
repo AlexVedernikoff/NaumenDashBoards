@@ -146,6 +146,7 @@ export class StyleTab extends Component<StyleTabProps> {
 					onChangeAxisName={this.handleChangeAxisName(index)}
 					onChangeSettings={this.handleChange}
 					settings={parameter}
+					title="Параметр"
 				/>
 				<IndicatorSettingsBox
 					data={extend(DEFAULT_CHART_SETTINGS.axis, indicator)}

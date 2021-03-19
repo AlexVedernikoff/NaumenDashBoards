@@ -80,8 +80,8 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 	};
 
 	renderNameField = (dataSet: DataSet, index: number) => {
-		const {yAxisName = getDefaultComboYAxisName(dataSet)} = dataSet;
-		const key = `${yAxisName}-${index}`;
+		const {dataKey, yAxisName = getDefaultComboYAxisName(dataSet)} = dataSet;
+		const key = `axis-${dataKey}-${index}`;
 
 		return (
 			<FormField key={key} small>

@@ -52,7 +52,7 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData, dataSet: ComboData, index: number, forceHide: boolean): Options => {
 	const {colorsSettings, indicator} = widget;
 	const {series} = chart;
-	const {breakdown, dataKey, indicators, showEmptyData, type, yAxisName: name} = dataSet;
+	const {breakdown, dataKey, indicators, type, yAxisName: name} = dataSet;
 	const {aggregation, attribute} = indicators[0];
 	const usesMSInterval = hasMSInterval(attribute, aggregation);
 	const usesPercent = hasPercent(attribute, aggregation);
@@ -97,7 +97,7 @@ const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData
 		},
 		forceNiceScale: true,
 		labels: {
-			formatter: valueFormatter(usesMSInterval, usesPercent, showEmptyData),
+			formatter: valueFormatter(usesMSInterval, usesPercent),
 			maxWidth: 140,
 			style: {
 				colors: color
