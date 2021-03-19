@@ -46,9 +46,21 @@ const transformGroupFormat = (group?: Group, extendCustom: boolean = true) => {
 	return resultGroup;
 };
 
-const getDefaultSystemGroup = (attribute: Object) => attribute && typeof attribute === 'object' && attribute.type in ATTRIBUTE_SETS.DATE
-	? createDefaultGroup(DATETIME_SYSTEM_GROUP.MONTH)
-	: createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
+const getDefaultSystemGroup = (attribute?: Object) => {
+	if (attribute && typeof attribute === 'object') {
+		const {type} = attribute;
+
+		if (type === ATTRIBUTE_TYPES.dtInterval) {
+			return createDefaultGroup(DATETIME_SYSTEM_GROUP.WEEK);
+		}
+
+		if (type in ATTRIBUTE_SETS.DATE) {
+			return createDefaultGroup(DATETIME_SYSTEM_GROUP.MONTH);
+		}
+	}
+
+	return createDefaultGroup(DEFAULT_SYSTEM_GROUP.OVERLAP);
+};
 
 /**
  * Фильтрует виджеты по режиму отображения
