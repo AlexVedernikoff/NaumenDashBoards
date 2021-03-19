@@ -25,6 +25,7 @@
 		"sort-keys-fix"
 	],
 	"rules": {
+		"one-var": ["error", "never"],
 		"babel/semi": [2, "always"],
 		"comma-dangle": ["error", "never"],
 		"curly": 0,

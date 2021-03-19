@@ -335,16 +335,20 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 	const {context, dashboard, sources} = getState();
 	const {contentCode} = context;
 	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
-	const key = `widgetContext_${metaClass.split('$')[0]}_${contentCode}`;
 	let descriptorStr;
+	let foundKey;
 
 	// Данные могут сохраняться как по типу так и по классу
-	[`widgetContext_${metaClass}_${contentCode}`, `widgetContext_${metaClass.split('$')[0]}_${contentCode}`].every(key => {
+	[
+		`widgetContext_${metaClass}_${contentCode}`,
+		`widgetContext_${metaClass.split('$')[0]}_${contentCode}`
+	].every(key => {
 		descriptorStr = localStorage.getItem(key);
+		foundKey = key;
 		return !descriptorStr;
 	});
 
-	if (descriptorStr) {
+	if (descriptorStr && foundKey) {
 		const newWidget: Object = new DiagramWidget(dashboard.settings.layoutMode);
 		const descriptor = JSON.parse(descriptorStr);
 		let classFqn;
@@ -360,17 +364,19 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 		newWidget.name = '';
 		newWidget.data[0] = {
 			...newWidget.data[0],
-			descriptor: descriptorStr,
 			source: {
-				label,
-				value
+				descriptor: descriptorStr,
+				value: {
+					label,
+					value
+				}
 			}
 		};
 
 		dispatch(addLayouts(NewWidget.id));
 		dispatch(addWidget(newWidget));
 		dispatch(editDashboard());
-		localStorage.removeItem(key);
+		localStorage.removeItem(foundKey);
 	}
 };
 
