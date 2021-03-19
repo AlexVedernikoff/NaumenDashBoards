@@ -2328,13 +2328,13 @@ class DashboardDataSetService
                 }
                 return "$startDate - $endDate"
             case GroupType.MINUTES:
-                if(!value)
+                if(value == null)
                 {
                     return getNullValue(diagramType, fromBreakdown)
                 }
                 return value.toString().padLeft(2, '0') + ' мин'
             case GroupType.HOURS:
-                if(!value)
+                if(value == null)
                 {
                     return getNullValue(diagramType, fromBreakdown)
                 }
