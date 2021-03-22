@@ -623,7 +623,7 @@ class DashboardSettingsService
     {
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
-        String colorsKey = requestContent.groupKey
+        String colorsKey = requestContent.key
         boolean isPersonal = requestContent.isPersonal
         if (isPersonal && !(user?.login))
         {
