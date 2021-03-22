@@ -230,7 +230,7 @@ const DEFAULT_NAVIGATION_SETTINGS = Object.freeze({
 });
 
 const DEFAULT_TOP_SETTINGS = Object.freeze({
-	count: 5,
+	count: null,
 	show: false
 });
 
