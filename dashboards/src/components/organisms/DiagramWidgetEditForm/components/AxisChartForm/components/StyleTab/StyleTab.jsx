@@ -9,6 +9,7 @@ import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getLegendSettings} from 'utils/chart/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'DiagramWidgetEditForm/helpers';
+import {hasBreakdown} from 'store/widgets/helpers';
 import HeaderBox from 'DiagramWidgetEditForm/components/HeaderBox';
 import LegendBox from 'DiagramWidgetEditForm/components/LegendBox';
 import type {OnChangeEvent} from 'components/types';
@@ -37,7 +38,7 @@ export class StyleTab extends Component<StyleTabProps> {
 	renderColorsBox = () => {
 		const {values, widget} = this.props;
 		const {colorsSettings} = values;
-		const disabledCustomSettings = widget.type === WIDGET_TYPES.LINE;
+		const disabledCustomSettings = widget.type === WIDGET_TYPES.LINE && !hasBreakdown(widget);
 
 		return (
 			<ColorsBox
