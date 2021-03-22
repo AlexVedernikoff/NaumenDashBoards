@@ -627,6 +627,31 @@ class DashboardUtils
                 )
         }
     }
+
+    /**
+     * Метод получения формата обработки даты по той, что пришла с фронта
+     * @param date - дата строкой
+     * @return формат для преобразования строки в дату
+     */
+    String getDateFormatByDate(String date)
+    {
+        if(date.contains('-'))
+        {
+            return 'yyyy-MM-dd' //старый формат данных
+        }
+        else if (date.contains(':'))
+        {
+            return 'dd.MM.yy HH:mm' //для атрибутов типа дата/время
+        }
+        else if(date.contains('.'))
+        {
+            return 'dd.MM.yy'
+        }
+        else
+        {
+            throw new IllegalArgumentException('Неправильная дата!')
+        }
+    }
 }
 
 //region КЛАССЫ

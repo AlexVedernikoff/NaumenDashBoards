@@ -1419,7 +1419,7 @@ class DashboardDataSetService
                     def start
                     if(dateSet.startDate)
                     {
-                        String dateFormat = getDateFormatByDate(dateSet.startDate)
+                        String dateFormat = DashboardUtils.getDateFormatByDate(dateSet.startDate)
                         start = Date.parse(dateFormat, dateSet.startDate as String)
                     }
                     else
@@ -1430,7 +1430,7 @@ class DashboardDataSetService
                     def end
                     if (dateSet.endDate)
                     {
-                        String dateFormat = getDateFormatByDate(dateSet.endDate)
+                        String dateFormat = DashboardUtils.getDateFormatByDate(dateSet.endDate)
                         end = Date.parse(dateFormat, dateSet.endDate as String)
                     }
                     else
@@ -1440,31 +1440,6 @@ class DashboardDataSetService
                     return buildFilterParameterFromCondition([start, end])
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
-        }
-    }
-
-    /**
-     * Метод получения формата обработки даты по той, что пришла с фронта
-     * @param date - дата строкой
-     * @return формат для преобразования строки в дату
-     */
-    String getDateFormatByDate(String date)
-    {
-        if(date.contains('-'))
-        {
-            return 'yyyy-MM-dd' //старый формат данных
-        }
-        else if (date.contains(':'))
-        {
-            return 'dd.MM.yy HH:mm' //для атрибутов типа дата/время
-        }
-        else if(date.contains('.'))
-        {
-            return 'dd.MM.yy'
-        }
-        else
-        {
-            throw new IllegalArgumentException('Неправильная дата!')
         }
     }
 
@@ -1557,7 +1532,7 @@ class DashboardDataSetService
                     def start
                     if(dateSet.startDate)
                     {
-                        String dateFormat = getDateFormatByDate(dateSet.startDate)
+                        String dateFormat = DashboardUtils.getDateFormatByDate(dateSet.startDate)
                         start = Date.parse(dateFormat, dateSet.startDate as String)
                     }
                     else
@@ -1568,7 +1543,7 @@ class DashboardDataSetService
                     def end
                     if (dateSet.endDate)
                     {
-                        String dateFormat = getDateFormatByDate(dateSet.endDate)
+                        String dateFormat = DashboardUtils.getDateFormatByDate(dateSet.endDate)
                         end = Date.parse(dateFormat, dateSet.endDate as String)
                     }
                     else

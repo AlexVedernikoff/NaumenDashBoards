@@ -378,6 +378,12 @@ class QueryWrapper implements CriteriaWrapper
         //поэтому, в в случае если пришёл ссылочный атрибут со ссылочным податрибутом, то важно знать тип последнего ссылочного, а title не интересен
         //в ином случае, важен тип самого последнего атрибута
         String lastParameterAttributeType = attributeChains.size() > 2 ? attributeChains*.type[-2] : attributeChains*.type.last()
+        //если подставили title сами, то нам важно знать тип самого первого атрибута  в цепочке, тк он может повлиять на необходимость вывести uuid
+        if( attributeChains.code.last() == 'title' && parameter.attribute.type in AttributeType.ONLY_LINK_TYPES)
+        {
+            lastParameterAttributeType = parameter.attribute.type
+        }
+
         column = castDynamicToType(parameter.attribute, column)
         switch (groupType)
         {
