@@ -115,7 +115,7 @@ const DEFAULT_COLORS_SETTINGS: ChartColorsSettings = Object.freeze({
 		colors: DEFAULT_COLORS
 	},
 	custom: {
-		useGlobal: true
+		useGlobal: false
 	},
 	type: CHART_COLORS_SETTINGS_TYPES.AUTO
 });
