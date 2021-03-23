@@ -30,7 +30,7 @@ export class DataTopField extends PureComponent<Props> {
 	handleChangeCount = ({name, value}: OnChangeEvent<string>) => {
 		const intValue = parseInt(value);
 
-		this.changeSettings(name, isNaN(intValue) ? value : intValue);
+		this.changeSettings(name, isNaN(intValue) ? null : intValue);
 	};
 
 	handleSelectCount = ({name, value}: OnSelectEvent) => this.changeSettings(name, value);

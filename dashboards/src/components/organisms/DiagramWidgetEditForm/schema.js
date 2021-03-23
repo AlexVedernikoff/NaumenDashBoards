@@ -1,5 +1,5 @@
 // @flow
-import {addMethod, array, lazy, mixed, number, object, string} from 'yup';
+import {addMethod, array, boolean, lazy, mixed, number, object, string} from 'yup';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {BreakdownItem, Parameter, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
@@ -99,8 +99,15 @@ addMethod(mixed, 'group', function () {
 });
 
 addMethod(object, 'topSettings', function () {
-	return this.shape({
-		count: number().required('Укажите значение для ТОП показателя').typeError('Значение ТОП должно быть числом')
+	return object({
+		count: number().when(
+				'show', {
+					is: true,
+					otherwise: number().typeError('Значение ТОП должно быть числом').nullable(),
+					then: number().required('Укажите значение для ТОП показателя').typeError('Значение ТОП должно быть числом')
+				}
+			),
+		show: boolean()
 	}).default(DEFAULT_TOP_SETTINGS);
 });
 
