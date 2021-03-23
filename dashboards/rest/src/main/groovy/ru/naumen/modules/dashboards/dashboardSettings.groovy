@@ -320,7 +320,6 @@ class DashboardSettingsService
     private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
     private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
-    private static final String TEXT_WIDGET_TYPE = 'TEXT'
     private static ObjectMapper mapper = new ObjectMapper()
 
     /**
@@ -348,7 +347,7 @@ class DashboardSettingsService
             if(personalDashboard)
             {
                 personalDashboard.widgets = personalDashboard?.widgets?.findResults { widget ->
-                    widget = widget?.type == TEXT_WIDGET_TYPE
+                    widget = widget?.type == DiagramType.TEXT
                         ? changeTextInTextWidget(widget, classFqn)
                         : changeTotalWidgetName(widget, classFqn)
                     return widget
@@ -361,7 +360,7 @@ class DashboardSettingsService
             else
             {
                 defaultDashboard.widgets = defaultDashboard?.widgets?.findResults { widget ->
-                    widget = widget?.type == TEXT_WIDGET_TYPE
+                    widget = widget?.type == DiagramType.TEXT
                         ? changeTextInTextWidget(widget, classFqn)
                         : changeTotalWidgetName(widget, classFqn)
                     return widget
@@ -375,7 +374,7 @@ class DashboardSettingsService
         else
         {
             defaultDashboard.widgets = defaultDashboard?.widgets?.findResults { widget ->
-                widget = widget?.type == TEXT_WIDGET_TYPE
+                widget = widget?.type == DiagramType.TEXT
                     ? changeTextInTextWidget(widget, classFqn)
                     : changeTotalWidgetName(widget, classFqn)
                 return widget
@@ -726,7 +725,7 @@ class DashboardSettingsService
     {
         def widget = requestContent.widget
         widget = mapper.convertValue(widget, Widget)
-        Boolean widgetTypeIsNotText = widget.type != TEXT_WIDGET_TYPE
+        Boolean widgetTypeIsNotText = widget.type != DiagramType.TEXT
         if (widgetTypeIsNotText)
         {
             validateName(requestContent)
@@ -781,7 +780,7 @@ class DashboardSettingsService
         widget = Jackson.fromJsonString(widget, Widget)
         String widgetKey = widget.id
         Boolean isPersonal = requestContent.isPersonal
-        Boolean widgetTypeIsNotText = widget.type != TEXT_WIDGET_TYPE
+        Boolean widgetTypeIsNotText = widget.type != DiagramType.TEXT
         if (widgetTypeIsNotText)
         {
             validateName(requestContent, widgetKey, isPersonal, user)
@@ -1724,7 +1723,7 @@ class DashboardSettingsService
     private List<String> getWidgetNames(List widgets)
     {
         return widgets.collect {
-            return it?.templateName ? it?.templateName?.toString() : it?.name?.toString()
+            return it.type != DiagramType.TEXT && it?.templateName ? it?.templateName?.toString() : it?.name?.toString()
         }
     }
 
@@ -1749,11 +1748,11 @@ class DashboardSettingsService
         if (name in widgetsNames)
         {
             throw new Exception(
-                [
+                toJson([
                     errors: [
                         "templateName" : "Виджет с названием \"$name\" не может быть сохранен. " +
                                          "Название виджета должно быть уникально в рамках дашборда."]
-                ]
+                ])
             )
         }
     }
@@ -1786,7 +1785,7 @@ class DashboardSettingsService
      */
     private WidgetInfo getWidgetInfo(def widgetSettings)
     {
-        return widgetSettings && widgetSettings?.type != TEXT_WIDGET_TYPE
+        return widgetSettings && widgetSettings?.type != DiagramType.TEXT
             ? new WidgetInfo(value: widgetSettings.id, label: widgetSettings.name)
             : null
     }
