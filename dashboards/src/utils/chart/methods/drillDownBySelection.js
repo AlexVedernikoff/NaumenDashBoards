@@ -1,6 +1,8 @@
 // @flow
 import type {AddFilterProps, AddFiltersProps, ReturnsAddFiltersData} from './types';
-import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboWidget} from 'store/widgets/data/types';
+import type {Attribute} from 'store/sources/attributes/types';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboWidget, Group} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {deepClone} from 'helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
@@ -37,6 +39,12 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 	return newMixin;
 };
 
+const getClearedAttributeValue = (attribute: Attribute, group: Group, value: string): string => {
+	const boLinksType = attribute && attribute.type in ATTRIBUTE_SETS.BO_LINKS;
+
+	return !boLinksType && hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(value) : value;
+};
+
 /**
  * Добавляет в примесь данных данные параметра
  * @param {AxisData} dataSet - набор данных виджета
@@ -46,7 +54,7 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
  */
 const addParameterFilter = (dataSet: AxisData, rawValue: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {attribute, group} = dataSet.parameters[0];
-	const value = hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(rawValue) : rawValue;
+	const value = getClearedAttributeValue(attribute, group, rawValue);
 
 	return addGroupFilter(mixin, {
 		attribute,
@@ -70,7 +78,7 @@ const addBreakdownFilter = (dataSet: ChartDataSet, rawValue: string, mixin: Dril
 
 	if (breakdownSet) {
 		const {attribute, group} = breakdownSet;
-		const value = hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(rawValue) : rawValue;
+		const value = getClearedAttributeValue(attribute, group, rawValue);
 
 		newMixin = addGroupFilter(mixin, {
 			attribute,

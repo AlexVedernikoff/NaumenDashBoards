@@ -80,7 +80,14 @@ const REFERENCE = {
 	catalogItemSet
 };
 
+// Набор ссылок на бизнес-объекты
+const BO_LINKS = {
+	backBOLinks,
+	boLinks
+};
+
 const ATTRIBUTE_SETS = {
+	BO_LINKS,
 	DATE,
 	NUMBER,
 	OBJECT,
