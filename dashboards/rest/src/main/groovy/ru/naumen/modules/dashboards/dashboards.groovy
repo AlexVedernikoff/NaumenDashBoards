@@ -470,14 +470,32 @@ class DashboardsService
     List searchValue(Map requestContent)
     {
         String sourceCode = requestContent.sourceCode
-        String attributeCode = requestContent.attribute.code
         def value = requestContent.value
         Boolean removed = requestContent.removed ?: false
 
+        def attr =  new Attribute(requestContent.attribute)
         def metaClass = api.metainfo.getMetaClass(sourceCode)
-        def types = getPermittedTypes(metaClass, attributeCode).toList().collectMany { classFqn ->
-            return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn))
-        }.unique { it.getFqn()}
+        def types
+        if (attr.ref)
+        {
+            String firstAttributeCode = attr.code
+            //на последнем месте стоит нужный нам атрибут
+            String lastAttributeCode = attr.attrChains().last().code
+            types = getPermittedTypes(metaClass, firstAttributeCode).toList()
+            def metaClasses = types.collect { api.metainfo.getMetaClass(it) }
+            //по последнему атрибуту берем правильные типы дял получения данных
+            types = metaClasses.collectMany { getPermittedTypes(it, lastAttributeCode) }.collectMany { classFqn ->
+                return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn))
+            }.unique { it.getFqn()}
+        }
+        else
+        {
+            String attributeCode = attr.code
+            //получили списки типов
+            types = getPermittedTypes(metaClass, attributeCode).collectMany { classFqn ->
+                return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn))
+            }.unique { it.getFqn()}
+        }
 
         def bottomValues = types.collectMany {
             api.utils.find(it.toString(), [title: op.like("%${value}%"), removed: removed], sp.ignoreCase())
