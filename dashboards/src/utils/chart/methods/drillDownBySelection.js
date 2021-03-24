@@ -1,7 +1,7 @@
 // @flow
 import type {AddFilterProps, AddFiltersProps, ReturnsAddFiltersData} from './types';
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboWidget, Group} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {deepClone} from 'helpers';
@@ -40,9 +40,9 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 };
 
 const getClearedAttributeValue = (attribute: Attribute, group: Group, value: string): string => {
-	const boLinksType = attribute && attribute.type in ATTRIBUTE_SETS.BO_LINKS;
+	const noClearing = attribute && (attribute.type in ATTRIBUTE_SETS.BO_LINKS || attribute.type === ATTRIBUTE_TYPES.metaClass);
 
-	return !boLinksType && hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(value) : value;
+	return !noClearing && hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(value) : value;
 };
 
 /**
