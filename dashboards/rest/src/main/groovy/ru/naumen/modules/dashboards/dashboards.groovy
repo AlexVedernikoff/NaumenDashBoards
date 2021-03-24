@@ -411,7 +411,7 @@ class DashboardsService
     }
 
     /**
-     * Метод по получению объектов атридутов
+     * Метод по получению объектов атрибутов
      * @param requestContent - Запрос на получение объектов атрибутов
      * @return список объектов атрибутов
      */
@@ -420,10 +420,25 @@ class DashboardsService
         String uuid = requestContent.parentUUID
         boolean removed = requestContent.removed
         String sourceCode = requestContent.sourceCode
-        String attributeCode = requestContent.attribute.code
-        //получили списки типов
+        def attr =  new Attribute(requestContent.attribute)
         def metaClass = api.metainfo.getMetaClass(sourceCode)
-        List types = getPermittedTypes(metaClass, attributeCode).toList()
+        List types
+        if (attr.ref)
+        {
+            String firstAttributeCode = attr.code
+            //на последнем месте стоит нужный нам атрибут
+            String lastAttributeCode = attr.attrChains().last().code
+            types = getPermittedTypes(metaClass, firstAttributeCode).toList()
+            def metaClasses = types.collect { api.metainfo.getMetaClass(it) }
+            //по последнему атрибуту берем правильные типы дял получения данных
+            types = metaClasses.collectMany {getPermittedTypes(it, lastAttributeCode).toList()}
+        }
+        else
+        {
+            String attributeCode = requestContent.attribute.code
+            //получили списки типов
+            types = getPermittedTypes(metaClass, attributeCode).toList()
+        }
         def count = requestContent.count as int
         def offset = requestContent.offset as int
         def condition = removed ? [:] : [removed: false]
