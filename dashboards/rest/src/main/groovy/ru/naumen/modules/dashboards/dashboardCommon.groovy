@@ -2088,7 +2088,7 @@ class IndicatorOrParameterCustomDeserializer<T> extends StdDeserializer<T>
 {
     private Map<Class, Closure<Boolean>> predictors = [
         (ComboIndicator) : { 'showDependent' in it.fieldNames().toList() },
-        (IndicatorOrParameter) : { 'name' in it.fieldNames().toList() }
+        (IndicatorOrParameter) : { 'show' in it.fieldNames().toList() }
     ]
 
     IndicatorOrParameterCustomDeserializer() {
