@@ -138,8 +138,8 @@ export class SourceFieldset extends Component<Props> {
 	renderFilterButton = () => {
 		const {dataSet, usesFilter} = this.props;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
-		const {descriptor} = dataSet.source;
-		const active = !!descriptor && !!JSON.parse(descriptor).filters;
+		const {descriptor = '{}'} = dataSet.source;
+		const active = JSON.parse(descriptor).filters?.length > 0;
 		const iconName = active ? FILLED_FILTER : FILTER;
 
 		if (usesFilter) {
