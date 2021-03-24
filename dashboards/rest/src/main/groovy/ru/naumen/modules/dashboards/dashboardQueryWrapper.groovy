@@ -143,8 +143,9 @@ class QueryWrapper implements CriteriaWrapper
         def sc = api.selectClause
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
+        def attributeChains = attribute.attrChains()
         String lastParameterAttributeType = Attribute.getAttributeType(attribute)
-        if (parameter.attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
+        if (attribute.type in AttributeType.LINK_TYPES_WITHOUT_CATALOG)
         {
             String attributeCode = attributeCodes.find()
             if(lastParameterAttributeType in AttributeType.DATE_TYPES)
@@ -182,7 +183,7 @@ class QueryWrapper implements CriteriaWrapper
             criteria.addGroupColumn(sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
         }
         //атрибут связанного типа
-        if(parameter.attribute.type == AttributeType.STRING_TYPE)
+        if(attribute.type == AttributeType.STRING_TYPE)
         {
             column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(DashboardQueryWrapperUtils.UUID_CODE))
             criteria.addGroupColumn(sc.property(DashboardQueryWrapperUtils.UUID_CODE))
@@ -196,6 +197,16 @@ class QueryWrapper implements CriteriaWrapper
                                sc.property(metaCaseId))
             criteria.addGroupColumn(column)
             criteria.addGroupColumn(sc.property(metaCaseId))
+            criteria.addColumn(column)
+            return this
+        }
+
+        String possibleDtIntervalType = attributeChains.size() > 2 ? attributeChains*.type[-2] : attribute.type
+        if(possibleDtIntervalType == AttributeType.DT_INTERVAL_TYPE)
+        {
+            def hourInterval = 1000 * 60 * 60
+            column = sc.columnDivide(column, sc.constant(hourInterval))
+            criteria.addGroupColumn(column)
             criteria.addColumn(column)
             return this
         }
