@@ -633,7 +633,7 @@ class DashboardUtils
      * @param date - дата строкой
      * @return формат для преобразования строки в дату
      */
-    String getDateFormatByDate(String date)
+    static String getDateFormatByDate(String date)
     {
         if(date.contains('-'))
         {
@@ -2081,9 +2081,42 @@ class CustomGroupInfo extends Group
 class LegendPosition extends ValueWithLabel<Position> { }
 
 /**
+ * Класс-десериализатор для информации об индикаторе/параметре
+ * @param <T>
+ */
+class IndicatorOrParameterCustomDeserializer<T> extends StdDeserializer<T>
+{
+    private Map<Class, Closure<Boolean>> predictors = [
+        (ComboIndicator) : { 'showDependent' in it.fieldNames().toList() },
+        (IndicatorOrParameter) : { 'name' in it.fieldNames().toList() }
+    ]
+
+    IndicatorOrParameterCustomDeserializer() {
+        this(null);
+    }
+
+    IndicatorOrParameterCustomDeserializer(Class<?> vc) {
+        super(vc);
+    }
+
+    @Override
+    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
+    {
+        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
+        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
+
+        Class clazz = predictors.find{clazz, predictor -> predictor(obj)}.key
+        Map<String, Object> fields = mapper.convertValue(obj, Map)
+        Method fromMapMethod = clazz.getMethod('fromMap', Map)
+        fromMapMethod.invoke(null, fields)
+    }
+}
+
+/**
  * Класс информации о параметре/показателе
  */
 @Canonical
+@JsonDeserialize(using = IndicatorOrParameterCustomDeserializer)
 class IndicatorOrParameter
 {
     /**
@@ -2099,6 +2132,11 @@ class IndicatorOrParameter
      * Флаг на отоюражение названия
      */
     Boolean showName = false
+
+    static IndicatorOrParameter fromMap(Map fields)
+    {
+        return new IndicatorOrParameter(fields)
+    }
 }
 
 /**
@@ -2119,6 +2157,17 @@ class ComboIndicator extends IndicatorOrParameter
      * Флаг на отображение датасетов зависимо
      */
     Boolean showDependent
+
+    static ComboIndicator fromMap(Map fields)
+    {
+        //необходимо прописать преобразование в Integer, иначе через (int) берется код символа
+        return new ComboIndicator(name: fields.name,
+                                  show: fields.show,
+                                  showName: fields.showName,
+                                  max: fields.max as Integer,
+                                  min: fields.min as Integer,
+                                  showDependent: fields.showDependent as Boolean)
+    }
 }
 
 /**
@@ -2641,6 +2690,10 @@ class WidgetCustomDeserializer<T> extends StdDeserializer<T>
         if(clazz in [AxisPrev, CirclePrev, SummaryPrev])
         {
             fields = updatePrevTypes(fields)
+        }
+        if(clazz == AxisCurrentAndNew)
+        {
+            fields.indicator = mapper.convertValue(fields.indicator, IndicatorOrParameter)
         }
 
         fields.computedAttrs = mapper.convertValue(fields.computedAttrs, new TypeReference<Collection<ComputedAttr>>() {})
@@ -3701,6 +3754,7 @@ class Text extends Widget
             ? new Text( displayMode: fields.displayMode as DisplayMode,
                         text: fields.text,
                         textSettings: TextSettings.fromMap(fields.textSettings),
+                        id: fields.id,
                         type: fields.type as DiagramType,
                         variables: fields.variables as Map<String, Object>)
             :null

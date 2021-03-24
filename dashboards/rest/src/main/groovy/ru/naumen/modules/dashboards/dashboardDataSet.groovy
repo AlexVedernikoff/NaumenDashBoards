@@ -3798,7 +3798,7 @@ class DashboardDataSetService
                 String parameterAttributeType = parameter?.attribute?.type
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
-                Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, notBlank)
+                Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, true)
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
                 def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits.parameter)
                                                     .with(formatGroup)
@@ -3878,7 +3878,7 @@ class DashboardDataSetService
                     } : [[calculator.execute { key ->
                     variables[key as String].head().head() as Double
                 }]]
-                def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, notBlank)]
+                def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, true)]
                 total = formatResult(total, aggregationCnt)
                 if (top)
                 {
