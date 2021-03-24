@@ -11,8 +11,9 @@ export type FieldContext = {
 
 export type Props = {
 	data: Array<DataSet>,
+	dataKey: string,
 	errors: ErrorsMap,
-	getUsedDataKeys: (data: Array<DataSet>) => Array<string>,
+	getUsedDataKeys?: (data: Array<DataSet>) => Array<string>,
 	index: number,
 	indicator: MixedAttribute | null,
 	onChange: (value: Breakdown) => void,

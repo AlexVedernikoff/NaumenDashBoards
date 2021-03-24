@@ -1,5 +1,5 @@
 // @flow
-import type {ChartColorsSettings} from './types';
+import type {ChartColorsSettings, DataTopSettings} from './types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 
 const ADD_WIDGET: 'ADD_WIDGET' = 'ADD_WIDGET';
@@ -229,8 +229,8 @@ const DEFAULT_NAVIGATION_SETTINGS = Object.freeze({
 	widget: null
 });
 
-const DEFAULT_TOP_SETTINGS = Object.freeze({
-	count: null,
+const DEFAULT_TOP_SETTINGS: DataTopSettings = Object.freeze({
+	count: 5,
 	show: false
 });
 
@@ -288,9 +288,19 @@ const DEFAULT_COLORS_SETTINGS: ChartColorsSettings = Object.freeze({
 	type: CHART_COLORS_SETTINGS_TYPES.AUTO
 });
 
+// Ошибки копирования
+const HAS_SUBJECT_FILTERS: 'hasSubjectFilters' = 'hasSubjectFilters';
+const HAS_CUSTOM_GROUPS: 'hasCustomGroups' = 'hasCustomGroups';
+
+const COPY_WIDGET_ERRORS = {
+	HAS_CUSTOM_GROUPS,
+	HAS_SUBJECT_FILTERS
+};
+
 export {
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
+	COPY_WIDGET_ERRORS,
 	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_AXIS_SORTING_SETTINGS,
 	DEFAULT_BREAKDOWN_COLOR,

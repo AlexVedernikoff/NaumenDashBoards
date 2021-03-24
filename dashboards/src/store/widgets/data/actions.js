@@ -260,7 +260,8 @@ const getErrors = (error: ResponseError) => {
  * @param {string} widgetKey - идентификатор виджета
  * @returns {ThunkAction}
  */
-const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<ValidateWidgetToCopyResult> => {
+const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAction =>
+	async (dispatch: Dispatch): Promise<ValidateWidgetToCopyResult> => {
 	let isValid = true;
 	let reasons = [];
 

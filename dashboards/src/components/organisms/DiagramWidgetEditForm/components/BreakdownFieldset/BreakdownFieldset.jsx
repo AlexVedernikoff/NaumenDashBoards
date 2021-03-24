@@ -3,7 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import AttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldset';
 import AttributeGroupField from 'DiagramWidgetEditForm/components/AttributeGroupField';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {BreakdownItem, DataSet} from 'containers/DiagramWidgetEditForm/types';
+import type {BreakdownItem} from 'containers/DiagramWidgetEditForm/types';
 import type {FieldContext, Props} from './types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
@@ -13,15 +13,6 @@ import {getMapValues} from 'helpers';
 import type {Group} from 'store/widgets/data/types';
 import type {OnSelectEvent} from 'components/types';
 import React, {Component, createContext} from 'react';
-
-/**
- * Возвращает ключи датасетов, которые используются в разбивке
- * @param {Array<DataSet>} data - список датасетов
- * @returns {Array<string>}
- */
-const getUsedDataKeys = (data: Array<DataSet>): Array<string> => {
-	return data.filter(dataSet => !dataSet.sourceForCompute).map(dataSet => dataSet.dataKey);
-};
 
 const Context: React$Context<FieldContext> = createContext({
 	breakdown: {
@@ -37,7 +28,7 @@ export class BreakdownFieldset extends Component<Props> {
 	mainIndex = 0;
 
 	static defaultProps = {
-		getUsedDataKeys,
+		dataKey: '',
 		value: []
 	};
 
@@ -108,16 +99,16 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	resetBreakdownIfIsNotValid = () => {
-		const {data, getUsedDataKeys, indicator, onChange, value} = this.props;
+		const {data, dataKey, getUsedDataKeys, indicator, onChange, value} = this.props;
 
 		if (value) {
 			const breakdownKeys = value.map(({dataKey}) => dataKey);
-			let usedKeys = [];
+			let usedKeys = [dataKey];
 
 			if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 				usedKeys = getMapValues(indicator.computeData)
 					.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : dataKey, usedKeys);
-			} else {
+			} else if (getUsedDataKeys) {
 				usedKeys = getUsedDataKeys(data);
 			}
 
