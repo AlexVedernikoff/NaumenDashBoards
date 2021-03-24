@@ -504,16 +504,17 @@ class Link
                                         case 'near':
                                             return filterBuilder.OR(attr.code, 'nextN', it.data as int)
                                         case 'between':
-                                            String dateFormat = 'yyyy-MM-dd'
+                                            String dateFormat
                                             def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
                                             def start
                                             if(dateSet.startDate)
                                             {
+                                                dateFormat = DashboardUtils.getDateFormatByDate(dateSet.startDate as String)
                                                 start = Date.parse(dateFormat, dateSet.startDate as String)
                                             }
                                             else
                                             {
-                                                Date minDate = DashboardsUtils.getMinDate(
+                                                Date minDate = DashboardUtils.getMinDate(
                                                     attr.code,
                                                     attr.sourceCode
                                                 )
@@ -522,6 +523,7 @@ class Link
                                             def end
                                             if (dateSet.endDate)
                                             {
+                                                dateFormat = DashboardUtils.getDateFormatByDate(dateSet.endDate as String)
                                                 end = Date.parse(dateFormat, dateSet.endDate as String)
                                             }
                                             else
