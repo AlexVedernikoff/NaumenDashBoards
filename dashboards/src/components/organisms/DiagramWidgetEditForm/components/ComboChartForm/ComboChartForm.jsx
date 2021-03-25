@@ -10,6 +10,7 @@ import {
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
+import {getComboYAxisName} from 'store/widgets/data/helpers';
 import ParamsTab from './components/ParamsTab';
 import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
@@ -57,7 +58,7 @@ export class ComboChartForm extends Component<TypedFormProps> {
 			top,
 			type,
 			xAxisName,
-			yAxisName
+			yAxisName: getComboYAxisName(source.value, indicators, yAxisName)
 		};
 	};
 

@@ -1,7 +1,7 @@
 // @flow
 import Button from 'components/atoms/Button';
 import cn from 'classnames';
-import {COPY_WIDGET_ERRORS} from './constants';
+import {COPY_WIDGET_ERRORS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {createNewWidget} from 'store/widgets/data/helpers';
 import IconButton, {VARIANTS} from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -19,7 +19,6 @@ import type {TitleProps} from 'components/templates/WidgetForm/types';
 import {USER_ROLES} from 'store/context/constants';
 import type {Value} from 'components/molecules/MultiDropDownList/types';
 import WidgetForm from 'components/templates/WidgetForm';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class WidgetAddPanel extends Component<Props, State> {
 	state = {
@@ -54,7 +53,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 		if (parent) {
 			const {value: dashboardId} = parent;
-			const {isValid, reasons} = await validateWidgetToCopy(dashboardId, widgetId);
+			const {isValid, reasons = []} = await validateWidgetToCopy(dashboardId, widgetId);
 
 			if (!isValid) {
 				return this.setState({

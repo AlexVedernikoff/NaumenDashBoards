@@ -5,6 +5,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
+	COPY_WIDGET_ERRORS,
 	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_TABLE_VALUE,
 	DISPLAY_MODE,
@@ -102,7 +103,7 @@ export type Indicator = {
 };
 
 export type DataTopSettings = {
-	count: number,
+	count: number | null,
 	show: boolean
 };
 
@@ -603,7 +604,9 @@ export type WidgetsDataState = {
 
 export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
 
+export type CopyWidgetError = $Values<typeof COPY_WIDGET_ERRORS>;
+
 export type ValidateWidgetToCopyResult = {
 	isValid: boolean,
-	reasons?: string[],
+	reasons?: Array<CopyWidgetError>,
 };

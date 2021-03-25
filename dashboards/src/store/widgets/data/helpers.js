@@ -6,6 +6,7 @@ import type {
 	CustomChartColorsSettingsType,
 	DeleteWidget,
 	Group,
+	Indicator,
 	SelectWidget,
 	SetCreatedWidget,
 	SetWidgets,
@@ -17,7 +18,6 @@ import type {
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {CUSTOM_CHART_COLORS_SETTINGS_TYPES, WIDGET_TYPES} from './constants';
-import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import DiagramWidget from './templates/DiagramWidget';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
@@ -187,17 +187,17 @@ const createNewWidget = (layoutMode: LayoutMode, type: WidgetType = WIDGET_TYPES
 
 /**
  * Возвращает название оси Y по умолчанию для осевых графиков
- * @param {DataSet} dataSet - набор данных виджета для построения
+ * @param {Source} source - источник
+ * @param {Array<Indicator>} indicators - показатели
+ * @param {string} yAxisName - название оси Y
  * @returns {string}
  */
-const getDefaultComboYAxisName = (dataSet: DataSet): string => {
-	const {indicators, source} = dataSet;
+const getComboYAxisName = (source: Source | null, indicators: Array<Indicator>, yAxisName: string = ''): string => {
 	const {attribute} = indicators[0];
-	const {value: sourceValue} = source;
-	let name = '';
+	let name = yAxisName;
 
-	if (attribute && sourceValue) {
-		name = `${getAttributeValue(attribute, 'title')} (${sourceValue.label})`;
+	if (!name && attribute && source) {
+		name = `${getAttributeValue(attribute, 'title')} (${source.label})`;
 	}
 
 	return name;
@@ -319,7 +319,7 @@ export {
 	getBuildSet,
 	getCustomColorsSettingsType,
 	getCustomColorsSettingsKey,
-	getDefaultComboYAxisName,
+	getComboYAxisName,
 	getMainDataSet,
 	getMainDataSetIndex,
 	setWidgets,

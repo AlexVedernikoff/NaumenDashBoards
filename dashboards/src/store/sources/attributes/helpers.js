@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from './types';
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from './constants';
+import {ATTRIBUTE_SETS} from './constants';
 import type {MixedAttribute} from 'store/widgets/data/types';
 
 /*
@@ -25,7 +25,7 @@ const getAttributeValue = (attribute: ?MixedAttribute, key: string, defaultValue
 	if (attribute) {
 		let targetAttribute = attribute;
 
-		if (targetAttribute.type in ATTRIBUTE_SETS.REFERENCE && targetAttribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+		if (targetAttribute.ref) {
 			targetAttribute = targetAttribute.ref;
 		}
 

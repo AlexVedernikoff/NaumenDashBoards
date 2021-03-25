@@ -40,10 +40,10 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		const {aggregation} = newIndicator;
 
 		if (top.show && !isAllowedTopAggregation(aggregation)) {
-			setDataFieldValue(index, FIELDS.top, {...top, show: false});
+			setDataFieldValue(dataSetIndex, FIELDS.top, {...top, show: false});
 		}
 
-		setDataFieldValue(index, FIELDS.indicators, newIndicators, onSelectCallback(index));
+		setDataFieldValue(dataSetIndex, FIELDS.indicators, newIndicators, onSelectCallback(index));
 	};
 
 	handleChangeBreakdown = (breakdown: Breakdown) => {
@@ -130,12 +130,13 @@ export class IndicatorDataBox extends PureComponent<Props> {
 			const {data} = values;
 			const {attribute} = dataSet.indicators[0];
 			const show = this.shouldShowBreakdown(index);
-			let {breakdown} = dataSet;
+			const {breakdown, dataKey} = dataSet;
 
 			return (
 				<ExtendingFieldset index={index} onClick={this.handleExtendBreakdown(index)} show={show} text="Разбивка">
 					<BreakdownFieldset
 						data={data}
+						dataKey={dataKey}
 						errors={errors}
 						index={index}
 						indicator={attribute}

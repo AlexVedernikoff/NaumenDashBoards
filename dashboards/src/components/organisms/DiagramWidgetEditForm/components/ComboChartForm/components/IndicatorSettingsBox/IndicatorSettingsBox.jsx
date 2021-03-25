@@ -5,7 +5,7 @@ import type {DataSet} from 'containers/DiagramWidgetEditForm/types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
-import {getDefaultComboYAxisName} from 'store/widgets/data/helpers';
+import {getComboYAxisName} from 'store/widgets/data/helpers';
 import HorizontalLabel from 'components/atoms/HorizontalLabel';
 import LegacyCheckbox from 'components/atoms/LegacyCheckbox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
@@ -80,7 +80,8 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 	};
 
 	renderNameField = (dataSet: DataSet, index: number) => {
-		const {dataKey, yAxisName = getDefaultComboYAxisName(dataSet)} = dataSet;
+		const {dataKey, indicators, source, yAxisName} = dataSet;
+		const name = getComboYAxisName(source.value, indicators, yAxisName);
 		const key = `axis-${dataKey}-${index}`;
 
 		return (
@@ -89,7 +90,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 					maxLength={MAX_TEXT_LENGTH}
 					name={FIELDS.yAxisName}
 					onChange={this.handleChangeName(index)}
-					value={yAxisName}
+					value={name}
 				/>
 			</FormField>
 		);

@@ -1,8 +1,5 @@
 // @flow
-
-import {COPY_WIDGET_ERRORS} from './constants';
-
-type CopyWidgetError = $Values<typeof COPY_WIDGET_ERRORS>;
+import type {CopyWidgetError} from 'store/widgets/data/types';
 
 type InvalidCopyData = {
 	dashboardId: string,
