@@ -179,20 +179,12 @@ export type ChartColorSettings = {
 	key: string
 };
 
-export type CustomLabelChartColorsSettings = {
+export type CustomChartColorsSettingsData = {
 	colors: Array<ChartColorSettings>,
 	defaultColor: string,
 	key: string,
-	type: typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES.LABEL,
+	type: $Keys<typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES>
 };
-
-export type CustomBreakdownChartColorsSettings = {
-	colors: Array<ChartColorSettings>,
-	key: string,
-	type: typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
-};
-
-export type CustomChartColorsSettingsData = CustomLabelChartColorsSettings | CustomBreakdownChartColorsSettings;
 
 export type ChartColorsSettingsType = $Keys<typeof CHART_COLORS_SETTINGS_TYPES>;
 

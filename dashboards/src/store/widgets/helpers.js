@@ -132,8 +132,7 @@ const parseMSInterval = (ms: number) => {
  * @returns {boolean}
  */
 const hasBreakdown = (widget: Object): boolean => !!widget.data
-		.filter(set => !set.sourceForCompute)
-		.find(set => !!set[FIELDS.breakdown]);
+		.find(({breakdown, sourceForCompute}) => !sourceForCompute && Array.isArray(breakdown));
 
 /**
  * Проверяет является ли переданный тип агрегации допустимым для выборки топ значений

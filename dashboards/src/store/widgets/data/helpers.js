@@ -297,7 +297,7 @@ const createCustomCircleChartColorsSettingsKey = (widget: CircleWidget): string 
  * @returns {string | null}
  */
 const getCustomColorsSettingsKey = (widget: Widget): string | null => {
-	const { BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, DONUT, LINE, PIE } = WIDGET_TYPES;
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, DONUT, LINE, PIE} = WIDGET_TYPES;
 
 	switch (widget.type) {
 		case BAR:

@@ -1,10 +1,10 @@
 // @flow
-import type {CustomLabelChartColorsSettings} from 'store/widgets/data/types';
+import type {CustomChartColorsSettingsData} from 'store/widgets/data/types';
 
 export type Props = {
 	labels: Array<string>,
-	onChange: (settings: CustomLabelChartColorsSettings) => void,
-	value: CustomLabelChartColorsSettings
+	onChange: (value: CustomChartColorsSettingsData) => void,
+	value: CustomChartColorsSettingsData
 };
 
 export type State = {

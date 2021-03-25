@@ -1,8 +1,9 @@
 // @flow
 import type {AppState} from 'store/types';
 import {createSelector} from 'reselect';
+import {CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
 import {getCustomColorsSettingsKey} from 'store/widgets/data/helpers';
-import {hasChartColorsSettings} from 'store/widgets/helpers';
+import {hasBreakdown, hasChartColorsSettings} from 'store/widgets/helpers';
 import type {State} from './types';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -20,7 +21,19 @@ const getGlobalChartColorsSettings = (state: AppState): State => state.dashboard
  */
 const getWidgetGlobalChartColorsSettings = (widget: Widget) => createSelector(
 	getGlobalChartColorsSettings,
-	settings => hasChartColorsSettings(widget.type) ? settings[getCustomColorsSettingsKey(widget)]?.data : null
+	settingsMap => {
+		let settings = null;
+
+		if (hasChartColorsSettings(widget.type)) {
+			const globalSettings = settingsMap[getCustomColorsSettingsKey(widget)]?.data;
+
+			if (!hasBreakdown(widget) || globalSettings?.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN) {
+				settings = globalSettings;
+			}
+		}
+
+		return settings;
+	}
 );
 
 export {

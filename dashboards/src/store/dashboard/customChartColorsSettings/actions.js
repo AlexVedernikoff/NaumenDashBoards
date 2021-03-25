@@ -1,5 +1,5 @@
 // @flow
-import type {CustomChartColorsSettingsData} from 'src/store/widgets/data/types';
+import type {CustomChartColorsSettingsData} from 'store/widgets/data/types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {EVENTS} from './constants';
 import {getParams} from 'store/helpers';

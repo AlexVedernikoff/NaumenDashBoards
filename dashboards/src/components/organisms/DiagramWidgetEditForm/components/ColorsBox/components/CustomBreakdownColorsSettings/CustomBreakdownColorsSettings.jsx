@@ -3,24 +3,24 @@ import ColorField from 'DiagramWidgetEditForm/components/ColorsBox/components/Co
 import {equalLabels, getBreakdownColors} from 'utils/chart/helpers';
 import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
 import type {OnChangeEvent} from 'components/types';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {SEPARATOR} from 'store/widgets/buildData/constants';
 
-export class CustomBreakdownColorsSettings extends PureComponent<Props, State> {
-	state = {
-		colors: []
-	};
-
+export class CustomBreakdownColorsSettings extends PureComponent<Props> {
 	componentDidMount () {
-		this.setColors();
+		const {labels, value} = this.props;
+
+		if (value.colors.length !== labels.length) {
+			this.setColors();
+		}
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {labels: prevLabels, value: prevValue} = prevProps;
+		const {labels: prevLabels} = prevProps;
 		const {labels, value} = this.props;
 
-		if (prevLabels !== labels || prevValue.colors !== value.colors) {
+		if (prevLabels !== labels || value.colors.length !== labels.length) {
 			this.setColors();
 		}
 	}
@@ -41,15 +41,18 @@ export class CustomBreakdownColorsSettings extends PureComponent<Props, State> {
 	};
 
 	setColors = () => {
-		const {defaultColors, labels, value} = this.props;
+		const {defaultColors, labels, onChange, value} = this.props;
+		const colors = getBreakdownColors(value, labels, defaultColors);
 
-		this.setState({
-			colors: getBreakdownColors(value, labels, defaultColors)
+		onChange({
+			...value,
+			colors: labels.map((key, index) => ({color: colors[index], key}))
 		});
 	};
 
 	renderField = (label: string, index: number) => {
-		const {colors} = this.state;
+		const {colors, defaultColor} = this.props.value;
+		const value = colors[index]?.color || defaultColor;
 		const key = `${label}-${index}`;
 
 		return (
@@ -58,7 +61,7 @@ export class CustomBreakdownColorsSettings extends PureComponent<Props, State> {
 				label={getSeparatedLabel(label, SEPARATOR)}
 				name={index.toString()}
 				onChange={this.handleChangeColor}
-				value={colors[index]}
+				value={value}
 			/>
 		);
 	};

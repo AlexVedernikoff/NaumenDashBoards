@@ -2,7 +2,7 @@
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget, ValidateWidgetToCopyResult} from './types';
 import {batch} from 'react-redux';
-import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
+import {CHART_COLORS_SETTINGS_TYPES, CUSTOM_CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
@@ -10,7 +10,7 @@ import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getCustomColorsSettingsKey} from './helpers';
 import {getMapValues, isObject} from 'helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
-import {hasChartColorsSettings} from 'store/widgets/helpers';
+import {hasBreakdown, hasChartColorsSettings} from 'store/widgets/helpers';
 import NewWidget from 'store/widgets/data/NewWidget';
 
 /**
@@ -301,13 +301,17 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
  */
 const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string = ''): ThunkAction =>
 	(dispatch: Dispatch, getState: GetState): void => {
-	const {map: mapWidgets} = getState().widgets.data;
+	const {dashboard, widgets} = getState();
+	const {map: mapWidgets} = widgets.data;
+	const {customChartColorsSettings} = dashboard;
 
 	getMapValues(mapWidgets).forEach(widget => {
 		const {id, type} = widget;
 
 		try {
-			const validWidget = id !== targetWidgetId && hasChartColorsSettings(type);
+			const {BREAKDOWN} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
+			const validWidget = id !== targetWidgetId && hasChartColorsSettings(type)
+				&& (customChartColorsSettings[key]?.data?.type === BREAKDOWN || !hasBreakdown(widget));
 
 			if (validWidget && getCustomColorsSettingsKey(widget) === key) {
 				const {colorsSettings} = widget;
