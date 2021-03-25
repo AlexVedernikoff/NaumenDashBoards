@@ -265,7 +265,7 @@ const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement,
 		}
 
 		const columnWidth = width / labels.length;
-		const fontWidth = AXIS_FONT_SIZE * 0.5;
+		const fontWidth = AXIS_FONT_SIZE * 0.7;
 
 		overlapped = !!labels.find(label => label.split(' ').find(label => columnWidth <= label.length * fontWidth));
 	}
