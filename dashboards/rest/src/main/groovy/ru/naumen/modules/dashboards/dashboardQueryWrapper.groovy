@@ -230,8 +230,8 @@ class QueryWrapper implements CriteriaWrapper
         }
         if(attrChains?.size > 1)
         {
-            //если атрибут ссылочного типа и в нем выбран статус, то нужно перейти к метаклассу самого последнего атрибута в цепочке
-            return "${attrChains?.last()?.metaClassFqn}.metaCaseId" //attributeChains.head().property
+            //если атрибут ссылочного типа и в нем выбран статус, то нужно перейти к metaCaseId от первого атрибута в цепочке
+            return "${attrChains?.head()?.code}.metaCaseId"
         }
         return 'metaCaseId'
     }

@@ -300,7 +300,8 @@ class Link
                 def attr, Collection<Map> filter ->
                 attr = Jackson.fromJsonString(attr, Attribute)
                 Collection<Collection> result = []
-                String attributeType = attr.type as String
+                String attributeType = Attribute.getAttributeType(attr)
+
                 //выглядит костыльно, но это необходимо, чтобы обойти ситуацию,
                 // когда основной источник запроса - дочерний к classFqn,
                 // когда у нас сама диаграмма типа таблица
@@ -843,9 +844,26 @@ class Link
      */
     private def getStateFilters(Attribute attribute, def value, def filterBuilder)
     {
-        String sourceCode = attribute.sourceCode
+        String sourceCode = attribute.attrChains().last().sourceCode
         String code = attribute.code
         def(title, state) = StateMarshaller.unmarshal(value, StateMarshaller.valueDelimiter)
+
+        if(attr.ref)
+        {
+            def values = []
+            if(sourceCode.contains('$'))
+            {
+                values = findObjects(attr.ref, sourceCode, state)
+            }
+            else
+            {
+                def cases = api.metainfo.getTypes(sourceCode).code
+                values = cases.collectMany {
+                    return findObjects(attr.ref, it, state)
+                }
+            }
+            return filterBuilder.AND(filterBuilder.OR(code, 'containsInSet', values))
+        }
         if(sourceCode.contains('$'))
         {
             return filterBuilder.AND(
