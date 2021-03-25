@@ -76,6 +76,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 					key={attribute.type}
 					onClose={this.handleCloseModal}
 					onSubmit={this.handleSubmitModal}
+					refAttribute={attribute}
 					source={source}
 				/>
 			);
