@@ -2167,6 +2167,7 @@ class DashboardDataSetService
                         }
                         return TimeUnit.MILLISECONDS.toHours(value as long)
                     case AttributeType.STATE_TYPE:
+                        fqnClass -= '__Evt' //убираем Evt, если источник из ЖЦ
                         def (stateValue, stateCase) = StateMarshaller.unmarshal(value, StateMarshaller.delimiter)
                         String totalFqn = (fqnClass.contains('$') || !stateCase) ? "${fqnClass}" : "${fqnClass}\$${stateCase}"
                         String userEq = stateValue ? api.metainfo.getStateTitle(totalFqn, stateValue) : null
