@@ -17,7 +17,8 @@ import React, {Fragment, PureComponent} from 'react';
 
 export class ColorsBox extends PureComponent<Props> {
 	static defaultProps = {
-		labels: []
+		labels: [],
+		usesBreakdownCustomSettings: false
 	};
 
 	change = (value: ChartColorsSettings) => {
@@ -58,10 +59,10 @@ export class ColorsBox extends PureComponent<Props> {
 	};
 
 	renderCustomColorsSettings = () => {
-		const {disabledCustomSettings, labels, value} = this.props;
+		const {disabledCustomSettings, labels, usesBreakdownCustomSettings, value} = this.props;
 		const {auto: autoSettings, custom: customSettings} = value;
 
-		if (!disabledCustomSettings && customSettings.data) {
+		if (!disabledCustomSettings && customSettings) {
 			const {colors: defaultColors} = autoSettings;
 
 			return (
@@ -69,6 +70,7 @@ export class ColorsBox extends PureComponent<Props> {
 					defaultColors={defaultColors}
 					labels={labels}
 					onChange={this.handleChangeCustomSettings}
+					usesBreakdownSettings={usesBreakdownCustomSettings}
 					value={customSettings}
 				/>
 			);

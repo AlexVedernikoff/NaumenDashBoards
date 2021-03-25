@@ -1,24 +1,31 @@
 // @flow
 import type {
 	ChartColorsSettings,
-	CustomBreakdownChartColorsSettings,
-	CustomChartColorsSettingsType,
-	CustomLabelChartColorsSettings
+	CustomChartColorsSettingsData,
+	CustomChartColorsSettingsType
 } from 'store/widgets/data/types';
-import {CHART_COLORS_SETTINGS_TYPES, CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
+import {
+	CHART_COLORS_SETTINGS_TYPES,
+	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
+	DEFAULT_BREAKDOWN_COLOR,
+	DEFAULT_COLORS_SETTINGS
+} from 'store/widgets/data/constants';
 import Component from 'DiagramWidgetEditForm/components/ColorsBox';
 import {connect} from 'react-redux';
-import {DEFAULT_COLORS_SETTINGS} from 'utils/chart/constants';
 import {functions, props} from './selectors';
 import {getCustomColorsSettingsKey, getCustomColorsSettingsType} from 'store/widgets/data/helpers';
-import {isCircleChart} from 'store/widgets/helpers';
-import type {Props} from './types';
+import {hasBreakdown, isCircleChart} from 'store/widgets/helpers';
+import type {Props, State} from './types';
 import React from 'react';
 
-export class ColorsBox extends React.Component<Props> {
+export class ColorsBox extends React.Component<Props, State> {
 	static defaultProps = {
 		disabledCustomSettings: true,
 		value: DEFAULT_COLORS_SETTINGS
+	};
+
+	state = {
+		labels: this.getLabels(this.props)
 	};
 
 	componentDidMount () {
@@ -31,11 +38,28 @@ export class ColorsBox extends React.Component<Props> {
 
 		if (prevValues.data !== values.data || prevGlobalSettings !== globalColorsSettings) {
 			this.setSettingsByActualData();
+			this.setState({labels: this.getLabels(this.props)});
 		}
 	}
 
-	createBreakdownCustomSettings = (key: string): CustomBreakdownChartColorsSettings => ({
+	getLabels (props: Props): Array<string> {
+		const {buildData, widget} = props;
+		let labels = [];
+
+		if (buildData?.data) {
+			const {labels: dataLabels, series} = buildData.data;
+
+			labels = hasBreakdown(widget) && !isCircleChart(widget.type)
+				? series.map(s => s.name)
+				: dataLabels;
+		}
+
+		return labels;
+	}
+
+	createBreakdownCustomSettings = (key: string): CustomChartColorsSettingsData => ({
 		colors: [],
+		defaultColor: DEFAULT_BREAKDOWN_COLOR,
 		key,
 		type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
 	});
@@ -52,7 +76,7 @@ export class ColorsBox extends React.Component<Props> {
 		return settings;
 	};
 
-	createLabelCustomSettings = (key: string): CustomLabelChartColorsSettings => {
+	createLabelCustomSettings = (key: string): CustomChartColorsSettingsData => {
 		const {colors: defaultColors} = this.props.value.auto;
 
 		return {
@@ -66,7 +90,6 @@ export class ColorsBox extends React.Component<Props> {
 	getCustomColorsSettingsData = () => {
 		const {globalColorsSettings, values, widget} = this.props;
 		const {data: customSettingsData, useGlobal} = values.colorsSettings.custom;
-		const currentType = getCustomColorsSettingsType(widget);
 		const currentKey = getCustomColorsSettingsKey(widget);
 		let settingsData;
 
@@ -75,26 +98,12 @@ export class ColorsBox extends React.Component<Props> {
 		} else if (customSettingsData?.key === currentKey) {
 			settingsData = customSettingsData;
 		} else if (getCustomColorsSettingsKey(values) === currentKey) {
+			const currentType = getCustomColorsSettingsType(widget);
+
 			settingsData = this.createCustomSettings(currentType, currentKey);
 		}
 
 		return settingsData;
-	};
-
-	getLabels = (): Array<String> | void => {
-		const {buildData, value} = this.props;
-		let labels;
-
-		if (buildData?.data && value.type === CHART_COLORS_SETTINGS_TYPES.CUSTOM) {
-			const {data, type} = buildData;
-			const {labels: dataLabels, series} = data;
-
-			labels = value.custom.data?.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN && !isCircleChart(type)
-				? series.map(s => s.name)
-				: dataLabels;
-		}
-
-		return labels;
 	};
 
 	handleChange = (name: string, value: ChartColorsSettings) => {
@@ -166,19 +175,23 @@ export class ColorsBox extends React.Component<Props> {
 				};
 			}
 
-			onChange(name, newColorsSettings);
+			if (newColorsSettings !== colorsSettings) {
+				onChange(name, newColorsSettings);
+			}
 		}
 	};
 
 	render () {
-		const {name, value} = this.props;
+		const {name, value, widget} = this.props;
+		const {labels} = this.state;
 
 		return (
 			<Component
 				disabledCustomSettings={this.isDisabledCustomSettings()}
-				labels={this.getLabels()}
+				labels={labels}
 				name={name}
 				onChange={this.handleChange}
+				usesBreakdownCustomSettings={hasBreakdown(widget)}
 				value={value}
 			/>
 		);

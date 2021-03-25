@@ -5,5 +5,6 @@ export type Props = {
 	defaultColors: Array<string>,
 	labels: Array<string>,
 	onChange: (value: CustomChartColorsSettings) => void,
+	usesBreakdownSettings: boolean,
 	value: CustomChartColorsSettings
 };

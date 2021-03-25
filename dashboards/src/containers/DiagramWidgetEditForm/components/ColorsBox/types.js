@@ -23,4 +23,8 @@ export type ContainerProps = {|
 	widget: Widget
 |};
 
+export type State = {
+	labels: Array<string>
+};
+
 export type Props = ConnectedProps & ComponentProps & ConnectedFunctions & ContainerProps;

@@ -1,13 +1,8 @@
 // @flow
 import Checkbox from 'components/atoms/Checkbox';
-import type {
-	CustomBreakdownChartColorsSettings as BreakdownColorsSettings,
-	CustomChartColorsSettingsData,
-	CustomLabelChartColorsSettings as LabelColorsSettings
-} from 'store/widgets/data/types';
 import CustomBreakdownColorsSettings
 	from 'DiagramWidgetEditForm/components/ColorsBox/components/CustomBreakdownColorsSettings';
-import {CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
+import type {CustomChartColorsSettingsData} from 'store/widgets/data/types';
 import CustomLabelColorsSettings from 'DiagramWidgetEditForm/components/ColorsBox/components/CustomLabelColorsSettings';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
@@ -40,7 +35,7 @@ export class CustomColorsSettings extends PureComponent<Props> {
 		);
 	};
 
-	renderBreakdownCustomColorsSettings = (settings: BreakdownColorsSettings) => {
+	renderBreakdownCustomColorsSettings = (value: CustomChartColorsSettingsData) => {
 		const {defaultColors, labels} = this.props;
 
 		return (
@@ -48,12 +43,12 @@ export class CustomColorsSettings extends PureComponent<Props> {
 				defaultColors={defaultColors}
 				labels={labels}
 				onChange={this.handleChange}
-				value={settings}
+				value={value}
 			/>
 		);
 	};
 
-	renderLabelCustomColorsSettings = (settings: LabelColorsSettings) => {
+	renderLabelCustomColorsSettings = (value: CustomChartColorsSettingsData) => {
 		const {defaultColors, labels} = this.props;
 
 		return (
@@ -61,18 +56,18 @@ export class CustomColorsSettings extends PureComponent<Props> {
 				defaultColors={defaultColors}
 				labels={labels}
 				onChange={this.handleChange}
-				value={settings}
+				value={value}
 			/>
 		);
 	};
 
 	renderSettingsByType = () => {
-		const {data} = this.props.value;
+		const {usesBreakdownSettings, value} = this.props;
 
-		if (data) {
-			return data.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
-				? this.renderBreakdownCustomColorsSettings(data)
-				: this.renderLabelCustomColorsSettings(data);
+		if (value.data) {
+			return usesBreakdownSettings
+				? this.renderBreakdownCustomColorsSettings(value.data)
+				: this.renderLabelCustomColorsSettings(value.data);
 		}
 
 		return null;

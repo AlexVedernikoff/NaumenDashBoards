@@ -1,22 +1,13 @@
 // @flow
-import type {
-	Chart,
-	CustomBreakdownChartColorsSettings,
-	CustomLabelChartColorsSettings,
-	Legend
-} from 'store/widgets/data/types';
-import {
-	CHART_COLORS_SETTINGS_TYPES,
-	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
-	WIDGET_TYPES
-} from 'store/widgets/data/constants';
-import {DEFAULT_BREAKDOWN_COLOR, DEFAULT_CHART_SETTINGS} from './constants';
+import type {Chart, CustomChartColorsSettingsData, Legend} from 'store/widgets/data/types';
+import {CHART_COLORS_SETTINGS_TYPES, DEFAULT_BREAKDOWN_COLOR, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {DEFAULT_CHART_SETTINGS} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getCustomColorsSettingsKey} from 'store/widgets/data/helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import {hasBreakdown, isCircleChart} from 'store/widgets/helpers';
 import type {Options} from './types';
-import {SEPARATOR} from 'src/store/widgets/buildData/constants';
+import {SEPARATOR} from 'store/widgets/buildData/constants';
 
 /**
  * Возвращает настройки легенды в зависимости от параметров переданного виджета
@@ -46,12 +37,12 @@ const equalLabels = (label1: string, label2: string) => label1?.includes(SEPARAT
 
 /**
  * Возвращает список цветов для значений разбивки
- * @param {CustomBreakdownChartColorsSettings} settings - настройки цветов
+ * @param {CustomChartColorsSettingsData} settings - настройки цветов
  * @param {Array<string>} labels - лейблы, относительно которых происходит настройка
  * @param {Array<string>} defaultColors - набор цветов по умолчанию
  * @returns {boolean}
  */
-const getBreakdownColors = (settings: CustomBreakdownChartColorsSettings, labels: Array<string>, defaultColors: Array<string>) => {
+const getBreakdownColors = (settings: CustomChartColorsSettingsData, labels: Array<string>, defaultColors: Array<string>) => {
 	const colors = Array(labels.length).fill(DEFAULT_BREAKDOWN_COLOR).map((c, i) => defaultColors[i] ?? c);
 	const usedLabels = [];
 
@@ -94,11 +85,11 @@ const setColors = (
 	/**
 	 * Устанавливает цвета для лейблов оси X
 	 * @param {Options} options - опции графика
-	 * @param {CustomLabelChartColorsSettings} settings - настройки цветов
+	 * @param {CustomChartColorsSettingsData} settings - настройки цветов
 	 * @param {Array<string>} labels - лейблы оси X
 	 * @returns {Options}
 	 */
-	const setLabelsColors = (options: Options, settings: CustomLabelChartColorsSettings, labels: Array<string>) => {
+	const setLabelsColors = (options: Options, settings: CustomChartColorsSettingsData, labels: Array<string>) => {
 		const {colors: labelColors, defaultColor} = settings;
 		const colors = Array(labels.length).fill(defaultColor);
 		const usedLabels = [];
@@ -128,10 +119,10 @@ const setColors = (
 	/**
 	 * Устанавливает цвета для значений разбивки
 	 * @param {Options} options - опции графика
-	 * @param {CustomLabelChartColorsSettings} settings - настройки цветов
+	 * @param {CustomChartColorsSettingsData} settings - настройки цветов
 	 * @returns {Options}
 	 */
-	const setBreakdownColors = (options: Options, settings: CustomBreakdownChartColorsSettings) => {
+	const setBreakdownColors = (options: Options, settings: CustomChartColorsSettingsData) => {
 		const {labels, series} = data;
 		const colorsLabels = isCircleChart(widget.type) ? labels : series.map(s => s.name);
 
@@ -146,7 +137,7 @@ const setColors = (
 	}
 
 	if (type === CUSTOM && customSettingsData && customSettingsData.key === currentKey) {
-		extendedOptions = customSettingsData.type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
+		extendedOptions = hasBreakdown(widget)
 			? setBreakdownColors(extendedOptions, customSettingsData)
 			: setLabelsColors(extendedOptions, customSettingsData, data.labels);
 	} else {

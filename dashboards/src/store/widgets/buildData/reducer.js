@@ -5,6 +5,13 @@ import {defaultAction, initialBuildDataState} from './init';
 import {updateWidgetData} from './helpers';
 import {WIDGETS_EVENTS} from 'store/widgets/data/constants';
 
+const request = (data = {}, type) => ({
+	...data,
+	error: false,
+	loading: true,
+	type
+});
+
 const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDataAction = defaultAction): BuildDataState => {
 	switch (action.type) {
 		case WIDGETS_EVENTS.UPDATE_WIDGET:
@@ -12,12 +19,7 @@ const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDat
 		case BUILD_DATA_EVENTS.REQUEST_BUILD_DATA:
 			return {
 				...state,
-				[action.payload.id]: {
-					data: null,
-					error: false,
-					loading: true,
-					type: action.payload.type
-				}
+				[action.payload.id]: request(state[action.payload.id], action.payload.type)
 			};
 		case BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA:
 			return {
