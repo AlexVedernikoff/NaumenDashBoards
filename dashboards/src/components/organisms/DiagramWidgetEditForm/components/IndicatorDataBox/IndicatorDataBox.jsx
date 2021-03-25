@@ -103,11 +103,12 @@ export class IndicatorDataBox extends PureComponent<Props> {
 
 	isAllowedComboDiagram = () => {
 		const {data, type} = this.props.values;
-		const {BAR, BAR_STACKED, COMBO} = WIDGET_TYPES;
+		const {COLUMN, COLUMN_STACKED, COMBO} = WIDGET_TYPES;
 
 		return type === COMBO && data
-			.filter(({sourceForCompute, type: sybType}) => !sourceForCompute && [BAR, BAR_STACKED].includes(sybType))
-			.length > 1;
+			.filter(({sourceForCompute, type: subType = COLUMN}) =>
+				!sourceForCompute && [COLUMN, COLUMN_STACKED].includes(subType)
+			).length > 1;
 	};
 
 	requiredBreakdown = () => {
