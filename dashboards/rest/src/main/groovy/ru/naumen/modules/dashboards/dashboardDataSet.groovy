@@ -2088,12 +2088,18 @@ class DashboardDataSetService
         }
         else
         {
+            List notAggregated = data.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }  //ищем агрегации n/a
+            List requestGroups = updateNotAggregatedToGroups(notAggregated) + data.groups
+            int dtIntervalAttributeIdx = requestGroups.findIndexOf {Attribute.getAttributeType(it.attribute) == AttributeType.DT_INTERVAL_TYPE}
+            dtIntervalAttributeIdx = dtIntervalAttributeIdx > -1 ? dtIntervalAttributeIdx + listIdsOfNormalAggregations.size() : dtIntervalAttributeIdx
+            if(dtIntervalAttributeIdx > -1)
+            {
+                list.removeIf{ !it[dtIntervalAttributeIdx] }
+            }
             return list.collect { el ->
                 def groups = el //резервируем значения для групп
                 def elAggregations = el[listIdsOfNormalAggregations] //резервируем значения для агрегаций
                 elAggregations.each { groups.remove (groups.indexOf(it)) } //убираем в группах агрегации
-                List notAggregated = data.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }  //ищем агрегации n/a
-                List requestGroups = updateNotAggregatedToGroups(notAggregated) + data.groups
 
                 //обрабатываем группы
                 def totalGroupValues = groups.withIndex().collect { group, i ->
@@ -2119,7 +2125,12 @@ class DashboardDataSetService
     List updateNotAggregatedToGroups(List notAggregated)
     {
         return notAggregated.collect {
-            new GroupParameter( type:GroupType.OVERLAP, title: 'n/a', attribute: it?.attribute)
+            def groupType = GroupType.OVERLAP
+            if(Attribute.getAttributeType(it.attribute) == AttributeType.DT_INTERVAL_TYPE)
+            {
+                groupType = GroupType.HOUR_INTERVAL
+            }
+            new GroupParameter( type: groupType, title: 'n/a', attribute: it?.attribute)
         }
     }
 
