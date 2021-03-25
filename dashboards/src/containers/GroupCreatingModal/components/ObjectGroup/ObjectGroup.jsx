@@ -166,13 +166,15 @@ export class ObjectGroup extends Component<Props, State> {
 	};
 
 	handleChangeSearchInput = async (searchValue: string) => {
-		const {attribute, searchObjects, source} = this.props;
+		const {refAttribute, searchObjects, source} = this.props;
 
-		searchObjects(source, attribute, searchValue);
+		if (refAttribute) {
+			searchObjects(source, refAttribute, searchValue);
+		}
 	};
 
 	handleLoadData = (actual: boolean) => (node?: Object, offset: number = 0) => {
-		const {attribute, fetchObjectData, source} = this.props;
+		const {fetchObjectData, refAttribute, source} = this.props;
 		let parentUUID = null;
 		let id = null;
 
@@ -181,15 +183,17 @@ export class ObjectGroup extends Component<Props, State> {
 			parentUUID = node.value.uuid;
 		}
 
-		fetchObjectData({
-			actual,
-			attribute,
-			id,
-			offset,
-			parentUUID,
-			source,
-			type: this.getDataType(actual)
-		});
+		if (refAttribute) {
+			fetchObjectData({
+				actual,
+				attribute: refAttribute,
+				id,
+				offset,
+				parentUUID,
+				source,
+				type: this.getDataType(actual)
+			});
+		}
 	};
 
 	hasActualType = (condition: RefOrCondition) => {

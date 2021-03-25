@@ -25,6 +25,7 @@ export type FetchCurrentObjectAttributes = (parent: Item | null, attribute: Attr
 export type AttributeGroupProps = {|
 	attribute: Attribute,
 	customGroups: Array<CustomGroup>,
+	refAttribute?: Attribute,
 	renderModal: RenderModal,
 	source: Source
 |};
@@ -48,6 +49,7 @@ export type ModalProps = {|
 	group: Group,
 	onClose: () => void,
 	onSubmit: (value: Group, attribute: Attribute) => void,
+	refAttribute?: Attribute,
 	source: Source
 |};
 
