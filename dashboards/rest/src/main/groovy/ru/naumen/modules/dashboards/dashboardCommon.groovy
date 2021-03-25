@@ -104,7 +104,8 @@ enum GroupType
     HOURS,
     MINUTES,
     HOUR,
-    MINUTE
+    MINUTE,
+    SECOND
 
     static List<GroupType> getTimerTypes()
     {
