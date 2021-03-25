@@ -38,12 +38,17 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		const {indicators} = data[dataSetIndex];
 		const newIndicators = indicators.map((indicator, i) => i === index ? newIndicator : indicator);
 		const {aggregation} = newIndicator;
+		let callback;
 
 		if (top.show && !isAllowedTopAggregation(aggregation)) {
 			setDataFieldValue(dataSetIndex, FIELDS.top, {...top, show: false});
 		}
 
-		setDataFieldValue(dataSetIndex, FIELDS.indicators, newIndicators, onSelectCallback(index));
+		if (onSelectCallback) {
+			callback = onSelectCallback(index);
+		}
+
+		setDataFieldValue(dataSetIndex, FIELDS.indicators, newIndicators, callback);
 	};
 
 	handleChangeBreakdown = (breakdown: Breakdown) => {
