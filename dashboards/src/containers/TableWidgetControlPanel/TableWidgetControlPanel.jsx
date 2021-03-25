@@ -1,6 +1,6 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {COLUMN_TYPES} from 'components/organisms/TableWidget/constants';
+import {COLUMN_TYPES, SEPARATOR} from 'store/widgets/buildData/constants';
 import {connect} from 'react-redux';
 import ControlPanel from 'components/organisms/DiagramWidget/components/ControlPanel';
 import {createContextName, exportSheet, FILE_VARIANTS} from 'utils/export';
@@ -12,7 +12,6 @@ import memoize from 'memoize-one';
 import {props} from './selectors';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {SEPARATOR} from 'store/widgets/buildData/constants';
 import type {TableRow} from 'utils/export/types';
 
 export class TableWidgetControlPanel extends PureComponent<Props> {

@@ -10,17 +10,14 @@ export class Header extends PureComponent<Props> {
 	handleClick = (column: Column) => {
 		const {onChangeSorting, sorting} = this.props;
 		const {ASC, DESC} = SORTING_TYPES;
-		const {accessor, columns} = column;
+		const {accessor} = column;
+		let type = ASC;
 
-		if (!columns) {
-			let type = ASC;
-
-			if (sorting.accessor === accessor && sorting.type === ASC) {
-				type = DESC;
-			}
-
-			onChangeSorting && onChangeSorting({accessor, type});
+		if (sorting.accessor === accessor && sorting.type === ASC) {
+			type = DESC;
 		}
+
+		onChangeSorting && onChangeSorting({accessor, type});
 	};
 
 	isLast = (columns: Array<Column>, index: number) => index === columns.length - 1;
@@ -34,21 +31,21 @@ export class Header extends PureComponent<Props> {
 			: this.renderHeaderCell(column, index, columns, last);
 	};
 
-	renderColumnWithSubColumns = (column: Column, index: number, columns: Array<Column>, last: boolean) => {
+	renderColumnWithSubColumns = (column: Column, index: number, columns: Array<Column>, isLast: boolean) => {
 		const {columnsWidth, fixedPositions} = this.props;
 		const {accessor, columns: subColumns} = column;
 		const width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
 		const left = fixedPositions[accessor];
 
 		return (
-			<div className={styles.cellContainer} style={{left, minWidth: width}}>
-				{this.renderHeaderCell(column, index, columns, last)}
-				{this.renderSubColumns(columns, last)}
+			<div className={styles.cellContainer} key={accessor} style={{left, minWidth: width}}>
+				{this.renderHeaderCell(column, index, columns, isLast)}
+				{this.renderSubColumns(columns, isLast)}
 			</div>
 		);
 	};
 
-	renderHeaderCell = (column: Column, index: number, columns: Array<Column>, last: boolean) => {
+	renderHeaderCell = (column: Column, index: number, columns: Array<Column>, isLast: boolean, isSubColumn: boolean = false) => {
 		const {columnSettings, columnsWidth, components, fixedPositions, onChangeColumnWidth, scrollBarWidth, sorting} = this.props;
 		const {HeaderCell} = components;
 		const {fontColor, fontStyle, textAlign, textHandler} = columnSettings;
@@ -56,13 +53,18 @@ export class Header extends PureComponent<Props> {
 		const left = fixedPositions[accessor];
 		let width = Array.isArray(subColumns) ? sumColumnsWidth(columnsWidth, subColumns) : columnsWidth[accessor];
 		let sortingType;
+		let onClick;
 
 		if (sorting.accessor === accessor) {
 			sortingType = sorting.type;
 		}
 
-		if (last) {
+		if (isLast) {
 			width += scrollBarWidth;
+		}
+
+		if (!isSubColumn && !Array.isArray(subColumns)) {
+			onClick = this.handleClick;
 		}
 
 		return (
@@ -73,10 +75,10 @@ export class Header extends PureComponent<Props> {
 				fontColor={fontColor}
 				fontStyle={fontStyle}
 				key={accessor}
-				last={last}
+				last={isLast}
 				left={left}
 				onChangeWidth={onChangeColumnWidth}
-				onClick={this.handleClick}
+				onClick={onClick}
 				sorting={sortingType}
 				textAlign={textAlign}
 				textHandler={textHandler}

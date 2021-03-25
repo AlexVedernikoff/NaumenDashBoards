@@ -1,5 +1,6 @@
 // @flow
 import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
+import {checkSourceForParent} from './helpers';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 
 const defaultValue = 'defaultValue';
@@ -22,10 +23,14 @@ const TABLE_FIELDS = {
 const schema = object({
 	...baseSchema,
 	data: array().of(object({
-		breakdown: mixed().requiredByCompute(array().breakdown()),
+		breakdown: mixed().requiredByCompute(array().conditionalBreakdown()),
 		indicators: mixed().requiredByCompute(array().indicators()),
 		parameters: array().parameters(),
-		source: mixed().source()
+		source: mixed().source().test(
+			'check-source-for-parent',
+			'Для данного типа выбранный источник не доступен - выберите другой',
+			checkSourceForParent
+		)
 	})),
 	sources: mixed().minSourceNumbers(),
 	top: object().topSettings()

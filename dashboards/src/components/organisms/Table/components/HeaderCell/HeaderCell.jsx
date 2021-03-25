@@ -24,7 +24,7 @@ export class HeaderCell extends PureComponent<Props> {
 	handleMouseDownCell = () => {
 		const {column, onClick} = this.props;
 
-		!this.dragStart && onClick(column);
+		!this.dragStart && onClick && onClick(column);
 	};
 
 	mouseDown = (event: MouseEvent) => {

@@ -1,12 +1,11 @@
 // @flow
 import type {Column, Row as RowType} from 'Table/types';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
-import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 
-export class Body extends PureComponent<Props> {
+export class Body extends PureComponent<Props, State> {
 	bodyRef: Ref<'div'> = createRef();
 
 	componentDidMount () {
@@ -20,16 +19,6 @@ export class Body extends PureComponent<Props> {
 			onChangeScrollBarWidth(scrollBarWidth);
 		}
 	}
-
-	sort = (data: Array<RowType>, accessor: string, asc: boolean): Array<RowType> => data.sort((row1, row2) => {
-		const leftValue = String(asc ? row1[accessor] : row2[accessor]);
-		const rightValue = String(asc ? row2[accessor] : row1[accessor]);
-
-		return leftValue.localeCompare(rightValue, undefined, {
-			numeric: true,
-			sensitivity: 'base'
-		});
-	});
 
 	renderCell = (row: RowType, rowIndex: number) => (column: Column, columnIndex: number, columns: Array<Column>) => {
 		const {columnsWidth, components, fixedPositions, onClickCell, settings} = this.props;
@@ -70,24 +59,15 @@ export class Body extends PureComponent<Props> {
 		const {columns, components, width} = this.props;
 		const {Row} = components;
 
-		return <Row width={width}>{columns.map(this.renderCell(row, index))}</Row>;
+		return <Row key={index} width={width}>{columns.map(this.renderCell(row, index))}</Row>;
 	};
 
 	render () {
-		const {data, onScroll, page, pageSize, sorting} = this.props;
-		const {accessor, type} = sorting;
-		const start = pageSize * (page - 1);
-		let rows = data;
-
-		if (accessor !== null) {
-			rows = this.sort(data, accessor, type === SORTING_TYPES.ASC);
-		}
-
-		rows = rows.slice(start, start + pageSize);
+		const {data, onScroll} = this.props;
 
 		return (
 			<div className={styles.body} onScroll={onScroll} ref={this.bodyRef}>
-				{rows.map(this.renderRow)}
+				{data.map(this.renderRow)}
 			</div>
 		);
 	}

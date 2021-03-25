@@ -57,17 +57,22 @@ export type Props = {
 	data: Array<Row>,
 	fixedColumnsCount: number,
 	getNewColumnsWidth: (column: Column, newWidth: number, columnsWidth: ColumnsWidth) => ColumnsWidth,
+	loading: boolean,
 	onChangeColumnWidth?: (columnsWidth: ColumnsWidth) => void,
 	onChangeSorting?: (sorting: TableSorting) => void,
 	onClickDataCell?: OnClickCell,
+	onFetch: (pageSize: number, page: number, sorting: TableSorting) => void,
 	pageSize: number,
 	settings: Table,
-	sorting: TableSorting
+	sorting: TableSorting,
+	total: number
 };
 
 export type State = {
 	columnsWidth: ColumnsWidth,
 	components: Components,
+	containerWidth: number,
+	dataColumns: Array<Column>,
 	fixedPositions: FixedPositions,
 	page: number,
 	scrollBarWidth: number,

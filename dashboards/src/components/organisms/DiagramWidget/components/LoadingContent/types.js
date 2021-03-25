@@ -1,9 +1,9 @@
 // @flow
-import type {BuildData, DiagramBuildData} from 'store/widgets/buildData/types';
+import type {DiagramBuildData, DiagramData} from 'store/widgets/buildData/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
-	buildData: BuildData,
+	buildData: DiagramData,
 	children: (data: DiagramBuildData) => React$Node,
 	widget: Widget
 };

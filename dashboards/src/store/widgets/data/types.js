@@ -420,7 +420,7 @@ export type IgnoreTableDataLimitsSettings = {
 export type TableWidget = {
 	...BaseWidget,
 	calcTotalColumn: boolean,
-	columnsRatioWidth: ColumnsRatioWidth,
+	columnsRatioWidth?: ColumnsRatioWidth,
 	data: Array<TableData>,
 	ignoreDataLimits?: IgnoreTableDataLimitsSettings,
 	showEmptyData: boolean,

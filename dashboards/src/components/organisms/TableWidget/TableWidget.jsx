@@ -2,21 +2,19 @@
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import Cell from 'Table/components/Cell';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
-import type {Column, ColumnType, ParameterColumn, Props, Row, State} from './types';
-import {COLUMN_TYPES, EMPTY_VALUE, ID_ACCESSOR} from './constants';
+import type {Column, ColumnType, ParameterColumn, Row} from 'store/widgets/buildData/types';
+import {COLUMN_TYPES, IGNORE_TABLE_DATA_LIMITS_SETTINGS, SEPARATOR} from 'store/widgets/buildData/constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
+import {EMPTY_VALUE, ID_ACCESSOR} from './constants';
 import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
-import {
-	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
-	SEPARATOR
-} from 'store/widgets/buildData/constants';
 import {isCardObjectColumn, isIndicatorColumn} from './helpers';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
+import type {Props, State} from './types';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
@@ -184,15 +182,15 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	handleChangeColumnWidth = (columnsRatioWidth: ColumnsRatioWidth) => {
-		const {onUpdate, widget} = this.props;
+		const {onUpdateWidget, widget} = this.props;
 
-		onUpdate({...widget, columnsRatioWidth});
+		onUpdateWidget({...widget, columnsRatioWidth});
 	};
 
 	handleChangeSorting = (sorting: TableSorting) => {
-		const {onUpdate, widget} = this.props;
+		const {onUpdateWidget, widget} = this.props;
 
-		onUpdate({...widget, sorting});
+		onUpdateWidget({...widget, sorting});
 	};
 
 	handleClickDataCell = (e: MouseEvent, props: OnClickCellProps) => {
@@ -203,8 +201,14 @@ export class TableWidget extends PureComponent<Props, State> {
 		}
 	};
 
+	handleFetch = (pageSize: number, page: number) => {
+		const {onUpdateData, widget} = this.props;
+
+		onUpdateData(widget, page, true);
+	};
+
 	handleSubmitLimitWarningModal = (name: string) => {
-		const {onFetchBuildData, onUpdate, widget} = this.props;
+		const {onUpdateData, onUpdateWidget, widget} = this.props;
 		const {ignoreDataLimits = IGNORE_TABLE_DATA_LIMITS_SETTINGS} = widget;
 
 		if (!ignoreDataLimits[name]) {
@@ -216,8 +220,8 @@ export class TableWidget extends PureComponent<Props, State> {
 				}
 			};
 
-			onUpdate(newWidget);
-			onFetchBuildData(newWidget);
+			onUpdateWidget(newWidget);
+			onUpdateData(newWidget);
 		}
 	};
 
@@ -342,9 +346,9 @@ export class TableWidget extends PureComponent<Props, State> {
 	);
 
 	render (): React$Node {
-		const {data: tableData, widget} = this.props;
+		const {data: tableData, loading, widget} = this.props;
 		const {fixedColumnsCount} = this.state;
-		const {columns, data} = tableData;
+		const {columns, data, total} = tableData;
 		const {columnsRatioWidth, sorting, table} = widget;
 		const {pageSize} = table.body;
 		const components = {
@@ -361,13 +365,16 @@ export class TableWidget extends PureComponent<Props, State> {
 				data={data}
 				fixedColumnsCount={fixedColumnsCount}
 				getNewColumnsWidth={this.getNewColumnsWidth}
+				loading={loading}
 				onChangeColumnWidth={debounce(this.handleChangeColumnWidth, 1000)}
 				onChangeSorting={this.handleChangeSorting}
 				onClickDataCell={this.handleClickDataCell}
+				onFetch={this.handleFetch}
 				pageSize={pageSize}
 				ref={this.tableRef}
 				settings={table}
 				sorting={sorting}
+				total={total}
 			/>
 		);
 	}

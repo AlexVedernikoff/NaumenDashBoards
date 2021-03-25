@@ -35,8 +35,8 @@ async function checkSourceForParent () {
 	let result = true;
 
 	if (index > 0 && source && mainSource) {
-		const {value: mainValue} = mainSource;
-		const {value} = source;
+		const {value: mainValue} = mainSource.value;
+		const {value} = source.value;
 
 		if (mainValue !== value) {
 			try {

@@ -2,43 +2,52 @@
 import {connect} from 'react-redux';
 import ControlPanel from 'containers/TableWidgetControlPanel';
 import {DEFAULT_COMPONENTS} from 'components/organisms/DiagramWidget/constants';
-import {functions} from './selectors';
+import {functions, props} from './selectors';
 import {LoadingDiagramWidget} from 'components/organisms/DiagramWidget';
-import memoize from 'memoize-one';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {createContext, PureComponent} from 'react';
 import Table from 'components/organisms/TableWidget';
+import type {TableBuildData} from 'store/widgets/buildData/types';
+
+const UPDATING_CONTEXT = createContext();
 
 export class TableWidget extends PureComponent<Props> {
-	getComponents = memoize(() => ({
+	components = {
 		...DEFAULT_COMPONENTS,
 		ControlPanel
-	}));
+	};
 
-	renderTable = (data: Object) => {
-		const {drillDown, fetchBuildData, openCardObject, updateWidget, widget} = this.props;
+	renderTable = (data: TableBuildData) => {
+		const {drillDown, openCardObject, updateData, updateWidget, widget} = this.props;
 
 		return (
-			<Table
-				data={data}
-				onDrillDown={drillDown}
-				onFetchBuildData={fetchBuildData}
-				onOpenCardObject={openCardObject}
-				onUpdate={updateWidget}
-				widget={widget}
-			/>
+			<UPDATING_CONTEXT.Consumer>
+				{updating => (
+					<Table
+						data={data}
+						loading={updating}
+						onDrillDown={drillDown}
+						onOpenCardObject={openCardObject}
+						onUpdateData={updateData}
+						onUpdateWidget={updateWidget}
+						widget={widget}
+					/>
+				)}
+			</UPDATING_CONTEXT.Consumer>
 		);
 	};
 
 	render () {
-		const {widget} = this.props;
+		const {updating, widget} = this.props;
 
 		return (
-			<LoadingDiagramWidget components={this.getComponents()} widget={widget}>
-				{(data) => this.renderTable(data)}
-			</LoadingDiagramWidget>
+			<UPDATING_CONTEXT.Provider value={updating}>
+				<LoadingDiagramWidget components={this.components} widget={widget}>
+					{data => this.renderTable(data)}
+				</LoadingDiagramWidget>
+			</UPDATING_CONTEXT.Provider>
 		);
 	}
 }
 
-export default connect(null, functions)(TableWidget);
+export default connect(props, functions)(TableWidget);

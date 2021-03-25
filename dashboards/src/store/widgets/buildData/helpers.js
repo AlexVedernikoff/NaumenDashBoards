@@ -60,17 +60,14 @@ const getDataSetFilterOptionsDescriptors = (dataSet: {dataKey: string, source: S
 };
 
 /**
- * Получение расширеных дескрипторов для виджета
- * @param {AnyWidget}  widget - Виджет
+ * Получение расширенных дескрипторов для виджета
+ * @param {Widget}  widget - Виджет
  * @returns  {Array<DataSetDescriptorRelation>} - расширеные дескрипторы
  */
-const getWidgetFilterOptionsDescriptors = (widget: AnyWidget): Array<DataSetDescriptorRelation> => {
-	if (widget.type !== WIDGET_TYPES.TEXT) {
-		const {data} = widget;
-		return data.map(getDataSetFilterOptionsDescriptors).flat();
-	}
+const getWidgetFilterOptionsDescriptors = (widget: Widget): Array<DataSetDescriptorRelation> => {
+	const {data} = widget;
 
-	return [];
+	return data.map(getDataSetFilterOptionsDescriptors).flat();
 };
 
 export {

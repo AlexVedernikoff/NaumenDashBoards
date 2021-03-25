@@ -1,36 +1,71 @@
 // @flow
-import type {AnyWidget} from 'store/widgets/data/types';
+import type {AnyWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import {BUILD_DATA_EVENTS} from './constants';
-import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE} from 'store/widgets/data/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getWidgetFilterOptionsDescriptors} from './helpers';
 import type {ReceiveBuildDataPayload} from './types';
+import {WIDGET_TYPES} from 'src/store/widgets/data/constants';
 
 /**
- * Получаем данные графиков для всех виджетов
- * @param {Array<AnyWidget>} widgets - список виджетов
+ * Получаем данные для таблицы
+ * @param {TableWidget} widget - данные виджета
+ * @param {number} pageNumber - номер текущей строки
+ * @param {boolean} update - сообщает о необходимости обновить данные или получить их заново
  * @returns {ThunkAction}
  */
-const fetchAllBuildData = (widgets: Array<AnyWidget>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {layoutMode} = getState().dashboard.settings;
-	const filteredWidgets = widgets.filter(item => (item.displayMode === layoutMode || item.displayMode === DISPLAY_MODE.ANY));
+const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update: boolean = false): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	update
+		? dispatch({payload: widget.id, type: BUILD_DATA_EVENTS.UPDATE_BUILD_DATA})
+		: dispatch({payload: widget, type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA});
 
-	filteredWidgets.forEach(widget => dispatch(fetchBuildData(widget)));
+	try {
+		const {context, dashboard} = getState();
+		const {
+			ignoreDataLimits: ignoreLimits = {
+				breakdown: false,
+				parameter: false
+			},
+			sorting,
+			table
+		} = widget;
+		const requestData = {
+			ignoreLimits,
+			pageNumber,
+			pageSize: table.body.pageSize,
+			sorting
+		};
+		const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
+		const data = await window.jsApi.restCallModule(
+			'dashboardDataSet',
+			'getDataForTableDiagram',
+			dashboard.settings.code,
+			widget.id,
+			context.subjectUuid,
+			requestData,
+			widgetFilters
+		);
+
+		dispatch(
+			receiveBuildData({data: {...data, page: pageNumber}, id: widget.id})
+		);
+	} catch (e) {
+		dispatch(recordBuildDataError(widget.id));
+	}
 };
 
 /**
- * Получаем данные графика для конкретного виджета
- * @param {AnyWidget} widget - данные виджета
+ * Получаем данные построения для диаграмм
+ * @param {Widget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	if (widget.type in DIAGRAM_WIDGET_TYPES) {
-		dispatch(requestBuildData(widget));
+const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	dispatch(requestBuildData(widget));
 
 		try {
 			const {context, dashboard} = getState();
 			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
-			const ignoreDataLimits = {breakdown: false, parameter: false, ...(widget.ignoreDataLimits || {})};
 
 			const data = await window.jsApi.restCallModule(
 				'dashboardDataSet',
@@ -38,16 +73,30 @@ const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Disp
 				dashboard.settings.code,
 				widget.id,
 				context.subjectUuid,
-				ignoreDataLimits,
 				widgetFilters
 			);
 
-			dispatch(
-				receiveBuildData({data, id: widget.id})
-			);
-		} catch (e) {
-			dispatch(recordBuildDataError(widget.id));
-		}
+		dispatch(
+			receiveBuildData({data, id: widget.id})
+		);
+	} catch (e) {
+		dispatch(recordBuildDataError(widget.id));
+	}
+};
+
+/**
+ * Получаем данные построения для конкретного виджета
+ * @param {Widget} widget - данные виджета
+ * @returns {ThunkAction}
+ */
+const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	const {TABLE} = WIDGET_TYPES;
+
+	switch (widget.type) {
+		case TABLE:
+			return dispatch(fetchTableBuildData(widget));
+		default:
+			return dispatch(fetchDiagramBuildData(widget));
 	}
 };
 
@@ -68,5 +117,5 @@ const requestBuildData = (payload: AnyWidget) => ({
 
 export {
 	fetchBuildData,
-	fetchAllBuildData
+	fetchTableBuildData
 };

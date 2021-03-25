@@ -1,6 +1,6 @@
 // @flow
 import type {AppState} from 'store/types';
-import type {BuildData, BuildDataState} from 'store/widgets/buildData/types';
+import type {BuildDataState, DiagramData} from 'store/widgets/buildData/types';
 import {createSelector} from 'reselect';
 import {getMapValues} from 'helpers';
 import type {Widget, WidgetsDataState} from 'store/widgets/data/types';
@@ -25,12 +25,13 @@ const getWidgetsBuildData = (state: AppState): BuildDataState => state.widgets.b
  * @param {Widget} widget - виджет
  * @returns {BuildDataState}
  */
-const getWidgetBuildData = (state: AppState, widget: Widget): BuildData => {
+const getWidgetBuildData = (state: AppState, widget: Widget): DiagramData => {
 	const {[widget.id]: data = {
 		data: null,
 		error: false,
 		loading: false,
-		type: widget.type
+		type: widget.type,
+		updating: false
 	}} = getWidgetsBuildData(state);
 
 	return data;
@@ -76,7 +77,7 @@ const getAllWidgetsWithoutSelected = createSelector(
  */
 const getSelectedWidgetBuildData = createSelector(
 	[getWidgetsBuildData, getSelectedWidgetId],
-	(buildData: BuildDataState, widgetId: string): BuildData => buildData[widgetId]
+	(buildData: BuildDataState, widgetId: string): DiagramData => buildData[widgetId]
 );
 
 /**
@@ -84,7 +85,7 @@ const getSelectedWidgetBuildData = createSelector(
  */
 const getAllWidgetsBuildData = createSelector(
 	getWidgetsBuildData,
-	(data: BuildDataState): BuildData[] => getMapValues(data)
+	(data: BuildDataState): DiagramData[] => getMapValues(data)
 );
 
 export {

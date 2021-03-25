@@ -11,7 +11,7 @@ export type Props = {
 	last: boolean,
 	left: number,
 	onChangeWidth: (width: number, column: Column) => void,
-	onClick: (column: Column) => void,
+	onClick?: (column: Column) => void,
 	sorting?: SortingType,
 	textAlign: TextAlign,
 	textHandler: TextHandler,

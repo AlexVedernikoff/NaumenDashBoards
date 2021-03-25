@@ -28,7 +28,8 @@ export class Table extends PureComponent<Props, State> {
 		sorting: {
 			accessor: null,
 			type: SORTING_TYPES.ASC
-		}
+		},
+		total: 0
 	};
 
 	components = {
@@ -46,12 +47,32 @@ export class Table extends PureComponent<Props, State> {
 	state = {
 		columnsWidth: {},
 		components: this.getExtendedComponents(this.props.components),
+		containerWidth: 0,
+		dataColumns: this.getDataColumns(this.props),
 		fixedPositions: {},
 		page: 1,
 		scrollBarWidth: 0,
 		sorting: this.props.sorting,
 		width: 0
 	};
+
+	componentDidUpdate (prevProps: Props) {
+		const {columns: prevColumns} = prevProps;
+		const {columns} = this.props;
+
+		if (prevColumns !== columns) {
+			this.setState({dataColumns: this.getDataColumns(this.props)});
+		}
+	}
+
+	/**
+	 * Возвращает массив колонок для отрисовки без учёта объединяющих столбцов
+	 * @returns {Array<Column>}
+	 */
+	getDataColumns (props: Props) {
+		return props.columns.map(column => column.columns || column)
+			.reduce((columns, value) => Array.isArray(value) ? [...columns, ...value] : [...columns, value], []);
+	}
 
 	/**
 	 * Применяет преднастройки относительной ширины колонок
@@ -103,12 +124,12 @@ export class Table extends PureComponent<Props, State> {
 		return Math.max(Math.floor((parentWidth - sumCustomWidths) / columnsWithDefaultWidth.length), DEFAULT_COLUMN_WIDTH);
 	};
 
-	/**
-	 * Возвращает массив колонок для отрисовки без учёта объединяющих столбцов
-	 * @returns {Array<Column>}
-	 */
-	getColumnsForRender = (): Array<Column> => this.props.columns.map(column => column.columns || column)
-			.reduce((columns, value) => Array.isArray(value) ? [...columns, ...value] : [...columns, value], []);
+	fetch = () => {
+		const {onFetch, pageSize} = this.props;
+		const {page, sorting} = this.state;
+
+		onFetch(pageSize, page, sorting);
+	};
 
 	/**
 	 * Возвращает данные ширины столбцов относительно ширины таблицы с учетом подстолбцов
@@ -224,34 +245,37 @@ export class Table extends PureComponent<Props, State> {
 	handleChangeSorting = (sorting: TableSorting) => {
 		const {onChangeSorting} = this.props;
 
-		this.setState({sorting});
+		this.setState({sorting}, this.fetch);
 		onChangeSorting && onChangeSorting(sorting);
 	};
 
-	handleNextClick = () => this.setState({page: this.state.page + 1});
+	handleNextClick = () => this.setState({page: this.state.page + 1}, this.fetch);
 
-	handlePrevClick = () => this.setState({page: this.state.page - 1});
+	handlePrevClick = () => this.setState({page: this.state.page - 1}, this.fetch);
 
 	handleResize = (newWidth: number) => {
 		const {columns} = this.props;
-		let {columnsWidth} = this.state;
+		const {columnsWidth, containerWidth} = this.state;
 
-		columnsWidth = this.getColumnsWidthByTableWidth(newWidth, columns, columnsWidth);
-		columnsWidth = this.applyColumnsRatioWidth(newWidth, columnsWidth);
+		if (newWidth !== containerWidth) {
+			let newColumnsWidth = columnsWidth;
+			newColumnsWidth = this.getColumnsWidthByTableWidth(newWidth, columns, newColumnsWidth);
+			newColumnsWidth = this.applyColumnsRatioWidth(newWidth, newColumnsWidth);
 
-		const width = sumColumnsWidth(columnsWidth, columns);
-		const fixedPositions = this.getFixedPositions(columnsWidth);
+			const width = sumColumnsWidth(newColumnsWidth, columns);
+			const fixedPositions = this.getFixedPositions(newColumnsWidth);
 
-		this.setState({columnsWidth, fixedPositions, width});
+			this.setState({columnsWidth: newColumnsWidth, containerWidth: newWidth, fixedPositions, width});
+		}
 	};
 
 	renderBody = () => {
 		const {data, onClickDataCell, pageSize, settings} = this.props;
-		const {columnsWidth, components, fixedPositions, page, sorting, width} = this.state;
+		const {columnsWidth, components, dataColumns, fixedPositions, page, sorting, width} = this.state;
 
 		return (
 			<Body
-				columns={this.getColumnsForRender()}
+				columns={dataColumns}
 				columnsWidth={columnsWidth}
 				components={components}
 				data={data}
@@ -270,13 +294,13 @@ export class Table extends PureComponent<Props, State> {
 
 	renderFooter = () => {
 		const {columns} = this.props;
-		const {columnsWidth, components, fixedPositions, scrollBarWidth, width} = this.state;
+		const {columnsWidth, components, dataColumns, fixedPositions, scrollBarWidth, width} = this.state;
 		const hasFooter = columns.find(i => i.footer);
 
 		if (hasFooter) {
 			return (
 				<Footer
-					columns={this.getColumnsForRender()}
+					columns={dataColumns}
 					columnsWidth={columnsWidth}
 					components={components}
 					fixedPositions={fixedPositions}
@@ -311,6 +335,8 @@ export class Table extends PureComponent<Props, State> {
 		);
 	};
 
+	renderLoading = () => this.props.loading && <div className={styles.loading}>Загрузка...</div>;
+
 	renderNoData = () => {
 		const {data} = this.props;
 
@@ -318,9 +344,9 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderPagination = () => {
-		const {data, pageSize} = this.props;
+		const {pageSize, total} = this.props;
 		const {page, width} = this.state;
-		const total = Math.max(Math.ceil(data.length / pageSize), 1);
+		const pages = Math.max(Math.ceil(total / pageSize), 1);
 		const {current} = this.tableRef;
 
 		if (width > 0 && current) {
@@ -329,7 +355,7 @@ export class Table extends PureComponent<Props, State> {
 					onNextClick={this.handleNextClick}
 					onPrevClick={this.handlePrevClick}
 					page={page}
-					total={total}
+					total={pages}
 					width={current.clientWidth}
 				/>
 			);
@@ -339,10 +365,9 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderTable = () => {
-		const {data} = this.props;
 		const {width} = this.state;
 
-		if (data.length > 0 && width > 0) {
+		if (width > 0) {
 			return (
 				<div className={styles.table}>
 					{this.renderHeader()}
@@ -359,10 +384,11 @@ export class Table extends PureComponent<Props, State> {
 		const {className} = this.props;
 
 		return (
-			<ResizeDetector onResize={this.handleResize} >
+			<ResizeDetector onResize={this.handleResize}>
 				<div className={cn(styles.container, className)} ref={this.tableRef}>
 					{this.renderTable()}
 					{this.renderNoData()}
+					{this.renderLoading()}
 					{this.renderPagination()}
 				</div>
 			</ResizeDetector>

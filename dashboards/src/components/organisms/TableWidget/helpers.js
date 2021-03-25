@@ -1,6 +1,6 @@
 // @flow
 import type {AttributeColumn} from './types';
-import {COLUMN_TYPES} from './constants';
+import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 
 /**

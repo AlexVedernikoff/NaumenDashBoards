@@ -1,28 +1,92 @@
 // @flow
-import {BUILD_DATA_EVENTS} from './constants';
-import type {SetCreatedWidget, UpdateWidget, Widget, WidgetType} from 'store/widgets/data/types';
+import type {Attribute} from 'store/sources/attributes/types';
+import {BUILD_DATA_EVENTS, COLUMN_TYPES} from './constants';
+import type {Group, SetCreatedWidget, TableWidget, UpdateWidget, Widget} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
-export type PostData = {
-	data: Object,
-	type: WidgetType
+export type BaseColumn = {
+	accessor: string,
+	columns?: Array<BaseColumn>,
+	footer: string,
+	header: string,
+	type?: string,
+	width?: number
+};
+
+export type ColumnType = $Keys<typeof COLUMN_TYPES>;
+
+export type ParameterColumn = {
+	...BaseColumn,
+	attribute: Attribute,
+	group: Group,
+	type: typeof COLUMN_TYPES.PARAMETER
+};
+
+export type IndicatorData = {
+	aggregation: string,
+	attribute: Attribute,
+};
+
+export type BreakdownColumn = {
+	...BaseColumn,
+	attribute: Attribute,
+	group: Group,
+	indicator: IndicatorData,
+	type: typeof COLUMN_TYPES.BREAKDOWN
+};
+
+export type IndicatorColumn = {
+	...BaseColumn,
+	aggregation: string,
+	attribute: Attribute,
+	type: typeof COLUMN_TYPES.INDICATOR
+};
+
+export type AttributeColumn =
+	| BreakdownColumn
+	| IndicatorColumn
+	| ParameterColumn
+	;
+
+export type Column =
+	| AttributeColumn
+	| BaseColumn
+	;
+
+export type Row = {
+	[accessor: string]: string
+};
+
+export type TableBuildData = {
+	columns: Array<Column>,
+	data: Array<Row>,
+	limitsExceeded: {
+		breakdown: boolean,
+		parameter: boolean
+	},
+	total: number
 };
 
 export type FetchBuildData = Widget => ThunkAction;
 
-export type DiagramBuildData = {
-	[string]: any
-};
+export type FetchTableBuildData = (widget: TableWidget, page?: number, update?: boolean) => ThunkAction;
 
-export type BuildData = {
-	data: DiagramBuildData | null,
+export type BuildData<Data> = {
+	data: Data | null,
 	error: boolean,
 	loading: boolean,
-	type: WidgetType
+	type: string,
+	updating: boolean
 };
 
+export type TableData = BuildData<TableBuildData>;
+
+export type DiagramBuildData = Object;
+
+export type DiagramData = BuildData<DiagramBuildData>;
+
 export type BuildDataMap = {
-	[key: string]: BuildData
+	[key: string]: DiagramData | TableData
 };
 
 export type ReceiveBuildDataPayload = {
@@ -45,6 +109,11 @@ export type RecordErrorBuildData = {
 	type: typeof BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
 };
 
+type UpdateBuildData = {
+	payload: string,
+	type: typeof BUILD_DATA_EVENTS.UPDATE_BUILD_DATA
+};
+
 type UnknownBuildDataAction = {
 	type: typeof BUILD_DATA_EVENTS.UNKNOWN_BUILD_DATA_ACTION
 };
@@ -55,6 +124,7 @@ export type BuildDataAction =
 	| RequestBuildData
 	| SetCreatedWidget
 	| UpdateWidget
+	| UpdateBuildData
 	| UnknownBuildDataAction
 ;
 
