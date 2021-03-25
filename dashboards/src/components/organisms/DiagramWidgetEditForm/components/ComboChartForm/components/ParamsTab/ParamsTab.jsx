@@ -16,10 +16,10 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	onSelectIndicatorCallback = (index: number) => () => {
 		const {setDataFieldValue, values} = this.props;
-		const {[FIELDS.yAxis]: indicator} = values.data[index];
+		const {indicators} = values.data[index];
 
-		if (indicator) {
-			setDataFieldValue(index, FIELDS.yAxisName, getAttributeValue(indicator, 'title'));
+		if (Array.isArray(indicators)) {
+			setDataFieldValue(index, FIELDS.yAxisName, getAttributeValue(indicators[0]?.attribute, 'title'));
 		}
 	};
 
