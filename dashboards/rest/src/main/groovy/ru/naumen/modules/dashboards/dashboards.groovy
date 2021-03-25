@@ -611,6 +611,7 @@ class DashboardsService
     */
     List<Map> getStates(String classFqn)
     {
+        classFqn -= '__Evt'
         String maxMetaCase = getMaxMetaCaseId(classFqn)
         String totalClass = "${classFqn}\$${maxMetaCase}"
         return api.metainfo.getMetaClass(totalClass)

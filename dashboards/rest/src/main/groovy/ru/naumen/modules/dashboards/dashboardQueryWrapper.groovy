@@ -223,6 +223,11 @@ class QueryWrapper implements CriteriaWrapper
      */
     private String getMetaCaseIdCode(Collection attrChains)
     {
+        if(this.criteria.currentMetaClass.fqn.code.contains('_Evt'))
+        {
+            //если источник из ЖЦ, то нужно обратиться к его классу-родителю
+            return 'parent.metaCaseId'
+        }
         if(attrChains?.size > 1)
         {
             //если атрибут ссылочного типа и в нем выбран статус, то нужно перейти к метаклассу самого последнего атрибута в цепочке
