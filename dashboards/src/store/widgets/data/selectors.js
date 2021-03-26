@@ -63,16 +63,6 @@ const getSelectedWidgetBuildData = createSelector(
 );
 
 /**
- * Возвращает данные для построения виджета
- * @param {string} widgetId - идентификатор виджета
- * @returns {Function}
- */
-const getWidgetBuildData = (widgetId: string) => createSelector(
-	getWidgetsBuildData,
-	(buildData: BuildDataState): BuildData => buildData[widgetId]
-);
-
-/**
  * Возвращает данные для построения всех виджетов
  */
 const getAllWidgetsBuildData = createSelector(
@@ -86,5 +76,5 @@ export {
 	getAllWidgetsWithoutSelected,
 	getSelectedWidget,
 	getSelectedWidgetBuildData,
-	getWidgetBuildData
+	getWidgetsBuildData
 };

@@ -14,7 +14,7 @@ import Component from 'DiagramWidgetEditForm/components/ColorsBox';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import {getCustomColorsSettingsKey, getCustomColorsSettingsType} from 'store/widgets/data/helpers';
-import {hasBreakdown, isCircleChart} from 'store/widgets/helpers';
+import {hasBreakdown, isAxisChart, isCircleChart} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React from 'react';
 
@@ -46,7 +46,7 @@ export class ColorsBox extends React.Component<Props, State> {
 		const {buildData, widget} = props;
 		let labels = [];
 
-		if (buildData?.data) {
+		if (buildData?.data && (isCircleChart(buildData.type) || isAxisChart(buildData.type))) {
 			const {labels: dataLabels, series} = buildData.data;
 
 			labels = hasBreakdown(widget) && !isCircleChart(widget.type)
