@@ -17,6 +17,22 @@ import type {ThunkAction} from 'store/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
+ * Определяет нужно ли проводить очистку значений для фильтрации в drilldown
+ *
+ * @param {Attribute} attribute - Атрибут
+ * @returns  {boolean} - Необходимость очищать значения для фильтрации
+ */
+const isNeedsClearedValue = (attribute: Attribute): boolean => {
+	const {metaClass} = ATTRIBUTE_TYPES;
+	const noNeedToCleanTypes = {
+		...ATTRIBUTE_SETS.BO_LINKS,
+		metaClass
+	};
+
+	return !(attribute && attribute.type in noNeedToCleanTypes);
+};
+
+/**
  * Добавляет фильтр группировки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @param {AddFilterProps} props - данные для нового фильтра
@@ -28,63 +44,52 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 
 	if (attribute && group) {
 		newMixin = deepClone(mixin);
+		const clearedValue = hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(value) : value;
 
-		if (value) {
-			newMixin.title = `${mixin.title}. ${value}`;
+		if (clearedValue) {
+			newMixin.title = `${mixin.title}. ${clearedValue}`;
 		}
 
-		newMixin.filters.push({attribute, group, value});
+		newMixin.filters.push({
+			attribute,
+			group: transformGroupFormat(group),
+			value: isNeedsClearedValue(attribute) ? clearedValue : value
+		});
 	}
 
 	return newMixin;
 };
 
-const getClearedAttributeValue = (attribute: Attribute, group: Group, value: string): string => {
-	const noClearing = attribute && (attribute.type in ATTRIBUTE_SETS.BO_LINKS || attribute.type === ATTRIBUTE_TYPES.metaClass);
-
-	return !noClearing && hasUUIDsInLabels(attribute, group) ? getLabelWithoutUUID(value) : value;
-};
-
 /**
  * Добавляет в примесь данных данные параметра
  * @param {AxisData} dataSet - набор данных виджета
- * @param {string} rawValue - значение параметра
+ * @param {string} value - значение параметра
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {DrillDownMixin}
  */
-const addParameterFilter = (dataSet: AxisData, rawValue: string, mixin: DrillDownMixin): DrillDownMixin => {
+const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {attribute, group} = dataSet.parameters[0];
-	const value = getClearedAttributeValue(attribute, group, rawValue);
 
-	return addGroupFilter(mixin, {
-		attribute,
-		group: transformGroupFormat(group),
-		value
-	});
+	return addGroupFilter(mixin, { attribute, group, value });
 };
 
 /**
  * Добавляет в примесь данных данные разбивки
  *
  * @param {ChartDataSet} dataSet - набор данных виджета
- * @param {string} rawValue - значение разбивки
+ * @param {string} value - значение разбивки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {DrillDownMixin}
  */
-const addBreakdownFilter = (dataSet: ChartDataSet, rawValue: string, mixin: DrillDownMixin): DrillDownMixin => {
+const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {breakdown} = dataSet;
 	const breakdownSet = breakdown && breakdown.find(attrSet => attrSet[FIELDS.dataKey] === dataSet.dataKey);
 	let newMixin = mixin;
 
 	if (breakdownSet) {
 		const {attribute, group} = breakdownSet;
-		const value = getClearedAttributeValue(attribute, group, rawValue);
 
-		newMixin = addGroupFilter(mixin, {
-			attribute,
-			group: transformGroupFormat(group),
-			value
-		});
+		newMixin = addGroupFilter(mixin, { attribute, group, value });
 	}
 
 	return newMixin;
