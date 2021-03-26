@@ -29,7 +29,14 @@ const isNeedsClearedValue = (attribute: Attribute): boolean => {
 		metaClass
 	};
 
-	return !(attribute && attribute.type in noNeedToCleanTypes);
+	if (attribute) {
+		const {type} = attribute;
+		const targetType = (type in ATTRIBUTE_SETS.OBJECT && attribute.ref) ? (attribute.ref.type ?? type) : type;
+
+		return !(targetType in noNeedToCleanTypes);
+	}
+
+	return true;
 };
 
 /**
