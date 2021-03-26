@@ -13,7 +13,7 @@ export type AddFiltersProps = {
 export type AddFilterProps = {
 	attribute?: Attribute,
 	group?: Group,
-	value: string | number
+	value: string
 };
 
 export type ReturnsAddFiltersData = [number, DrillDownMixin];
