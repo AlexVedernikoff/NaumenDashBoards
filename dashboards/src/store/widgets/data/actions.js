@@ -1,16 +1,17 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
-import type {AnyWidget, ValidateWidgetToCopyResult} from './types';
+import type {AnyWidget, CustomChartColorsSettingsData, ValidateWidgetToCopyResult} from './types';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, CUSTOM_CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
+import {getAllWidgets} from './selectors';
 import {getCustomColorsSettingsKey} from './helpers';
-import {getMapValues, isObject} from 'helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
 import {hasBreakdown, hasChartColorsSettings} from 'store/widgets/helpers';
+import {isObject} from 'helpers';
 import NewWidget from 'store/widgets/data/NewWidget';
 
 /**
@@ -294,26 +295,25 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 
 /**
  * Устанавливает значение использования глобальной настройки цветов графика для всех подходящих виджетов
- * @param {string} key - ключ настроек
+ * @param {string} settings - ключ настроек
  * @param {boolean} useGlobal - значение использования глобальной настройки
  * @param {string} targetWidgetId - идентификатор виджета, настройки которого в дальнейшем будут применяться к остальным виджетам
  * @returns {ThunkAction}
  */
-const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string = ''): ThunkAction =>
+const setUseGlobalChartSettings = (settings: CustomChartColorsSettingsData, useGlobal: boolean, targetWidgetId: string = ''): ThunkAction =>
 	(dispatch: Dispatch, getState: GetState): void => {
-	const {dashboard, widgets} = getState();
-	const {map: mapWidgets} = widgets.data;
-	const {customChartColorsSettings} = dashboard;
+	const widgets = getAllWidgets(getState());
+	const {key, type} = settings;
 
-	getMapValues(mapWidgets).forEach(widget => {
-		const {id, type} = widget;
+	widgets.forEach(widget => {
+		const {id, type: widgetType} = widget;
 
 		try {
 			const {BREAKDOWN} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
-			const validWidget = id !== targetWidgetId && hasChartColorsSettings(type)
-				&& (customChartColorsSettings[key]?.data?.type === BREAKDOWN || !hasBreakdown(widget));
+			const isValidWidget = id !== targetWidgetId && hasChartColorsSettings(widgetType)
+				&& (type === BREAKDOWN || !hasBreakdown(widget));
 
-			if (validWidget && getCustomColorsSettingsKey(widget) === key) {
+			if (isValidWidget && getCustomColorsSettingsKey(widget) === key) {
 				const {colorsSettings} = widget;
 
 				dispatch(editWidgetChunkData(widget, {

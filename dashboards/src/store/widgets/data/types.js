@@ -594,7 +594,7 @@ export type WidgetsDataState = {
 	validatingToCopy: ChangingState
 };
 
-export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
+export type SetUseGlobalChartSettings = (settings: CustomChartColorsSettingsData, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
 
 export type CopyWidgetError = $Values<typeof COPY_WIDGET_ERRORS>;
 

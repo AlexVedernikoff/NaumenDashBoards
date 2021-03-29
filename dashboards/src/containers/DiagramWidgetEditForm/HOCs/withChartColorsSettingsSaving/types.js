@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, SetUseGlobalChartSettings} from 'store/widgets/data/types';
+import type {AnyWidget, ChartColorsSettings, SetUseGlobalChartSettings} from 'store/widgets/data/types';
 import type {SaveCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 
 export type ConnectedFunctions = {
@@ -8,6 +8,7 @@ export type ConnectedFunctions = {
 };
 
 export type InjectedProps = {|
+	applyNewColorsSettings: (prevSettings: ChartColorsSettings, settings: ChartColorsSettings) => ChartColorsSettings;
 	saveCustomColorsSettings: (widget: AnyWidget) => void
 |};
 

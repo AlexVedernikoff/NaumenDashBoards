@@ -54,7 +54,9 @@ export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 	};
 
 	updateWidget = (widget: Widget, values: Values): CircleWidget => {
-		const {id} = widget;
+		const {applyNewColorsSettings} = this.props;
+		// $FlowFixMe | В некоторых виджетах нет настроек и без ошибки обратиться к свойству не получается
+		const {colorsSettings: prevColorsSettings = DEFAULT_COLORS_SETTINGS, id} = widget;
 		const {
 			colorsSettings = DEFAULT_COLORS_SETTINGS,
 			computedAttrs = [],
@@ -72,7 +74,7 @@ export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 		} = values;
 
 		return {
-			colorsSettings,
+			colorsSettings: applyNewColorsSettings(prevColorsSettings, colorsSettings),
 			computedAttrs,
 			data: data.map(this.normalizeDataSet),
 			dataLabels: extend(DEFAULT_CHART_SETTINGS.dataLabels, dataLabels),

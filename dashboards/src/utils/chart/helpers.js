@@ -1,6 +1,6 @@
 // @flow
 import type {Chart, CustomChartColorsSettingsData, Legend} from 'store/widgets/data/types';
-import {CHART_COLORS_SETTINGS_TYPES, DEFAULT_BREAKDOWN_COLOR, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {CHART_COLORS_SETTINGS_TYPES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getCustomColorsSettingsKey} from 'store/widgets/data/helpers';
@@ -43,7 +43,7 @@ const equalLabels = (label1: string, label2: string) => label1?.includes(SEPARAT
  * @returns {boolean}
  */
 const getBreakdownColors = (settings: CustomChartColorsSettingsData, labels: Array<string>, defaultColors: Array<string>) => {
-	const colors = Array(labels.length).fill(DEFAULT_BREAKDOWN_COLOR).map((c, i) => defaultColors[i] ?? c);
+	const colors = Array(labels.length).fill(settings.defaultColor).map((c, i) => defaultColors[i] ?? c);
 	const usedLabels = [];
 
 	settings.colors.forEach(({color, key}) => {
