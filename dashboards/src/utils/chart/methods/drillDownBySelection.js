@@ -9,8 +9,10 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
+import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
+import {GROUP_WAYS} from 'store/widgets/constants';
 import {hasUUIDsInLabels, transformGroupFormat} from 'store/widgets/helpers';
 import {store} from 'app.constants';
 import type {ThunkAction} from 'store/types';
@@ -18,25 +20,15 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Определяет нужно ли проводить очистку значений для фильтрации в drilldown
- *
  * @param {Attribute} attribute - Атрибут
+ * @param {Group} group - группировка атрибута
  * @returns  {boolean} - Необходимость очищать значения для фильтрации
  */
-const isNeedsClearedValue = (attribute: Attribute): boolean => {
+const isNeedsClearedValue = (attribute: Attribute, group: Group): boolean => {
 	const {metaClass} = ATTRIBUTE_TYPES;
-	const noNeedToCleanTypes = {
-		...ATTRIBUTE_SETS.BO_LINKS,
-		metaClass
-	};
+	const noNeedToCleanTypes = {...ATTRIBUTE_SETS.BO_LINKS, metaClass};
 
-	if (attribute) {
-		const {type} = attribute;
-		const targetType = (type in ATTRIBUTE_SETS.OBJECT && attribute.ref) ? (attribute.ref.type ?? type) : type;
-
-		return !(targetType in noNeedToCleanTypes);
-	}
-
-	return true;
+	return !(getAttributeValue(attribute, 'type') in noNeedToCleanTypes && group.way === GROUP_WAYS.SYSTEM);
 };
 
 /**
@@ -60,7 +52,7 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 		newMixin.filters.push({
 			attribute,
 			group: transformGroupFormat(group),
-			value: isNeedsClearedValue(attribute) ? clearedValue : value
+			value: isNeedsClearedValue(attribute, group) ? clearedValue : value
 		});
 	}
 
