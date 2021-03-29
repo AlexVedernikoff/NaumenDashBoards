@@ -9,7 +9,6 @@ export type Props = {
 	error: string,
 	onChange: (dataSetIndex: number, source: SourceData) => void,
 	onChangeForCompute: (dataSetIndex: number, value: boolean) => void,
-	onFetchAttributes: (dataSetIndex: number, classFqn: string) => void,
 	onFetchDynamicAttributes: (dataSetIndex: number, descriptor: string) => void,
 	onRemove: (index: number) => void,
 	removable: boolean,

@@ -1,7 +1,8 @@
 // @flow
 import AttributeSelect from 'DiagramWidgetEditForm/components/AttributeFieldset/components/AttributeSelect';
-import {createRefKey} from 'src/store/sources/refAttributes/actions';
-import Icon, {ICON_NAMES} from 'src/components/atoms/Icon';
+import cn from 'classnames';
+import {createRefKey} from 'store/sources/refAttributes/actions';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
 import React, {PureComponent} from 'react';
@@ -31,7 +32,7 @@ export class RefSelect extends PureComponent<Props> {
 	};
 
 	getOptionsData = () => {
-		const {getOptions, parent, refAttributes} = this.props;
+		const {parent, refAttributes} = this.props;
 		let loading = false;
 		let options = [];
 
@@ -42,10 +43,6 @@ export class RefSelect extends PureComponent<Props> {
 			}} = refAttributes;
 
 			({loading, options} = data);
-
-			if (getOptions) {
-				options = getOptions(options);
-			}
 		}
 
 		return {
@@ -62,17 +59,18 @@ export class RefSelect extends PureComponent<Props> {
 
 	renderValue = (props: ValueProps) => {
 		const {className, label, onClick} = props;
+		const containerCN = cn(className, styles.value);
 
 		return (
-			<div className={styles.value} onClick={onClick}>
+			<div className={containerCN} onClick={onClick}>
 				<Icon className={styles.linkIcon} height={18} name={ICON_NAMES.LINK} viewBox="0 0 12 18" width={12} />
-				<div className={className}>{label}</div>
+				<div className={styles.label}>{label}</div>
 			</div>
 		);
 	};
 
 	render () {
-		const {name, onChangeLabel, onDrop, onRemove, onSelect, value} = this.props;
+		const {getOptions, name, onChangeLabel, onDrop, onRemove, onSelect, value} = this.props;
 		const {loading, options} = this.getOptionsData();
 		const components = this.getComponents();
 
@@ -81,6 +79,7 @@ export class RefSelect extends PureComponent<Props> {
 				components={components}
 				droppable={true}
 				fetchOptions={this.fetchAttributes}
+				getOptions={getOptions}
 				loading={loading}
 				name={name}
 				onChangeLabel={onChangeLabel}

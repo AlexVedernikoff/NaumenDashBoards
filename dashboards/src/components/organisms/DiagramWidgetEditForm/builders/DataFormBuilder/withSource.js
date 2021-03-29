@@ -45,6 +45,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			}
 
 			setDataFieldValue(dataSetIndex, FIELDS.source, newSource);
+			this.handleFetchAttributes(dataSetIndex, newSource.value?.value);
 		};
 
 		handleChangeForCompute = (dataSetIndex: number, value: boolean) => {
@@ -53,12 +54,15 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			setDataFieldValue(dataSetIndex, FIELDS.sourceForCompute, value);
 		};
 
-		handleFetchAttributes = (dataSetIndex: number, classFqn: string) => {
+		handleFetchAttributes = (dataSetIndex: number, classFqn: string = '') => {
 			const {fetchAttributes, values} = this.props;
-			const parentClassFqn = getParentClassFqn(values);
 
-			this.resetAttributes(dataSetIndex);
-			fetchAttributes(classFqn, parentClassFqn, this.setDefaultIndicator(dataSetIndex));
+			if (classFqn) {
+				const parentClassFqn = getParentClassFqn(values);
+
+				values.data[dataSetIndex].source.value && this.resetAttributes(dataSetIndex);
+				fetchAttributes(classFqn, parentClassFqn, this.setDefaultIndicator(dataSetIndex));
+			}
 		};
 
 		handleFetchDynamicAttributes = (dataSetIndex: number, descriptor: string) => {
@@ -160,7 +164,6 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 					key={index}
 					onChange={this.handleChange}
 					onChangeForCompute={this.handleChangeForCompute}
-					onFetchAttributes={this.handleFetchAttributes}
 					onFetchDynamicAttributes={this.handleFetchDynamicAttributes}
 					onRemove={this.handleRemoveSource}
 					removable={removable}
