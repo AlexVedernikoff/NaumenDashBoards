@@ -1,4 +1,3 @@
-// @flow
 'use strict';
 require('dotenv').config();
 const define = require('./define');
@@ -19,7 +18,7 @@ module.exports = {
 			}
 		}
 	},
-	devtool: 'source-map',
+	devtool: define.development ? 'source-map' : false,
 	entry: {
 		'index': ['babel-polyfill', './src/index.js']
 	},
