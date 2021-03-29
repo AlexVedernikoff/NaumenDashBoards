@@ -38,6 +38,7 @@ export type Props = {
 	fetchOptions?: () => any,
 	forwardedLabelInputRef?: InputRef,
 	getOptionLabel: (option: Option) => string,
+	getOptions: (options: Array<Option>) => Array<Option>,
 	getOptionValue: (option: Option) => any,
 	isSearching: boolean,
 	loading: boolean,

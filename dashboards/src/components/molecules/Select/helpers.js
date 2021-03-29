@@ -24,7 +24,15 @@ const getOptionLabel = (option: Option): string => {
  */
 const getOptionValue = (option: Option): ?string => isObject(option) ? option.value : option;
 
+/**
+ * Функция получения опций для отображения
+ * @param {Array<Option>} options - опции
+ * @returns {Array<Option>}
+ */
+const getOptions = (options: Array<Option>): Array<Option> => options;
+
 export {
 	getOptionLabel,
-	getOptionValue
+	getOptionValue,
+	getOptions
 };

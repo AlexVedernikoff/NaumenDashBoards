@@ -23,11 +23,7 @@ const getProcessedAttribute = (attribute: Attribute) => {
  */
 const getAttributeValue = (attribute: ?MixedAttribute, key: string, defaultValue: any = '') => {
 	if (attribute) {
-		let targetAttribute = attribute;
-
-		if (targetAttribute.ref) {
-			targetAttribute = targetAttribute.ref;
-		}
+		const targetAttribute = attribute.ref || attribute;
 
 		if (targetAttribute && typeof targetAttribute === 'object') {
 			return targetAttribute[key];

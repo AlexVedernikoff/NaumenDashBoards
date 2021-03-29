@@ -53,11 +53,11 @@ export class ParameterFieldset extends PureComponent<Props> {
 	});
 
 	handleSelect = ({value: newAttribute}: OnSelectAttributeEvent) => {
-		const {index, value} = this.props;
+		const {dataSetIndex, value} = this.props;
 		const {attribute} = value;
 		let newValue = value;
 
-		if (index === 0 && (newAttribute.type in ATTRIBUTE_SETS.REFERENCE || !attribute || attribute.type !== newAttribute.type)) {
+		if (dataSetIndex === 0 && (newAttribute.type in ATTRIBUTE_SETS.REFERENCE || !attribute || attribute.type !== newAttribute.type)) {
 			newValue = {
 				...newValue,
 				group: getDefaultSystemGroup(newAttribute)

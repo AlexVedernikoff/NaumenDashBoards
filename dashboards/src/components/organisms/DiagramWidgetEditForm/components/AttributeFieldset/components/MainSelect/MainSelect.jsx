@@ -31,7 +31,7 @@ export class MainSelect extends PureComponent<Props> {
 	};
 
 	getOptionsData = () => {
-		const {attributes, getOptions, source} = this.props;
+		const {attributes, source} = this.props;
 		let options = [];
 		let loading = false;
 
@@ -39,10 +39,6 @@ export class MainSelect extends PureComponent<Props> {
 			const {[source.value]: data = {}} = attributes;
 
 			({options = [], loading = false} = data);
-
-			if (getOptions) {
-				options = getOptions(options);
-			}
 		}
 
 		return {
@@ -81,13 +77,14 @@ export class MainSelect extends PureComponent<Props> {
 	};
 
 	render () {
-		const {name, onChangeLabel, onRemove, onSelect, removable, value} = this.props;
+		const {getOptions, name, onChangeLabel, onRemove, onSelect, removable, value} = this.props;
 		const {loading, options} = this.getOptionsData();
 
 		return (
 			<AttributeSelect
 				components={this.getComponents()}
 				fetchOptions={this.fetchAttributes}
+				getOptions={getOptions}
 				loading={loading}
 				name={name}
 				onChangeLabel={onChangeLabel}

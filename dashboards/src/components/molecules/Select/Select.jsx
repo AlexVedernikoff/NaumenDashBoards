@@ -8,7 +8,7 @@ import type {
 } from './types';
 import Container from 'components/atoms/Container';
 import {debounce} from 'helpers';
-import {getOptionLabel, getOptionValue} from './helpers';
+import {getOptionLabel, getOptionValue, getOptions} from './helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'src/components/atoms/Icon';
 import List from './components/List';
@@ -28,6 +28,7 @@ export class Select extends PureComponent<Props, State> {
 		editable: false,
 		getOptionLabel,
 		getOptionValue,
+		getOptions,
 		isSearching: false,
 		loading: false,
 		loadingMessage: 'Загрузка...',
@@ -142,7 +143,7 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderList = () => {
-		const {getOptionLabel, getOptionValue, options: allOptions, value} = this.props;
+		const {getOptionLabel, getOptionValue, getOptions, options: allOptions, value} = this.props;
 		const {foundOptions, searchValue} = this.state;
 		const options = searchValue ? foundOptions : allOptions;
 
@@ -151,7 +152,7 @@ export class Select extends PureComponent<Props, State> {
 				getOptionLabel={getOptionLabel}
 				getOptionValue={getOptionValue}
 				onSelect={this.handleSelect}
-				options={options}
+				options={getOptions(options)}
 				searchValue={searchValue}
 				value={value}
 			/>

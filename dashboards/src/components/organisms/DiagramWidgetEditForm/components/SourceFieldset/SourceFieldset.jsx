@@ -104,7 +104,7 @@ export class SourceFieldset extends Component<Props> {
 	});
 
 	handleSelect = ({value: newSourceValue}: OnSelectEvent) => {
-		const {dataSetIndex, onFetchAttributes, value: source} = this.props;
+		const {value: source} = this.props;
 		const {value: sourceValue} = source;
 		const {label, value} = newSourceValue;
 		let newSource = source;
@@ -116,7 +116,6 @@ export class SourceFieldset extends Component<Props> {
 			};
 		}
 
-		onFetchAttributes(dataSetIndex, value);
 		this.change({
 			...newSource,
 			value: {
