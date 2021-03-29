@@ -1188,7 +1188,7 @@ class DashboardDataSetService
                     def value = api.utils.get(subjectUUID)
                     String metaClass = value.metaClass
                     String subjectType = metaClass.takeWhile { ch -> ch != '$' }
-                    String attributeType = attribute.property?.takeWhile { ch -> ch != '$' }
+                    String attributeType = attribute.attrChains().last().property?.takeWhile { ch -> ch != '$' }
                     if (subjectType != attributeType)
                     {
                         throw new IllegalArgumentException( "Does not match subject type: $subjectType and attribute type: ${ attribute.property }" )
@@ -3808,6 +3808,7 @@ class DashboardDataSetService
                 def parameter = requestData.groups.find()
                 String parameterSortingType = parameter?.sortingType
                 String parameterAttributeType = parameter?.attribute?.type
+                Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, true)
@@ -3827,7 +3828,7 @@ class DashboardDataSetService
                 {
                     total = getTop(total, top, [], [], true, parameterWithDate ? parameter : null, parameterSortingType, aggregationSortingType)
                 }
-                if (!parameterWithDate &&
+                if (!parameterWithDateOrDtInterval &&
                     (aggregationSortingType || parameterSortingType) &&
                     diagramType in DiagramType.SortableTypes)
                 {
@@ -3870,6 +3871,7 @@ class DashboardDataSetService
                 def parameter = dataSet.values().head().groups.find()
                 String parameterSortingType = parameter?.sortingType
                 String parameterAttributeType = parameter?.attribute?.type
+                Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
                 def res = dataSet.values().head().groups?.size() ?
@@ -3897,7 +3899,7 @@ class DashboardDataSetService
                     total = getTop(total, top, [], [], true, parameterWithDate ? parameter : null, parameterSortingType, aggregationSortingType)
                 }
 
-                if (!parameterWithDate &&
+                if (!parameterWithDateOrDtInterval &&
                     (aggregationSortingType || parameterSortingType) &&
                     diagramType in DiagramType.SortableTypes)
                 {
