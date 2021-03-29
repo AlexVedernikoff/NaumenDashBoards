@@ -2081,43 +2081,11 @@ class CustomGroupInfo extends Group
  */
 class LegendPosition extends ValueWithLabel<Position> { }
 
-/**
- * Класс-десериализатор для информации об индикаторе/параметре
- * @param <T>
- */
-class IndicatorOrParameterCustomDeserializer<T> extends StdDeserializer<T>
-{
-    private Map<Class, Closure<Boolean>> predictors = [
-        (ComboIndicator) : { 'showDependent' in it.fieldNames().toList() },
-        (IndicatorOrParameter) : { 'show' in it.fieldNames().toList() }
-    ]
-
-    IndicatorOrParameterCustomDeserializer() {
-        this(null);
-    }
-
-    IndicatorOrParameterCustomDeserializer(Class<?> vc) {
-        super(vc);
-    }
-
-    @Override
-    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
-
-        Class clazz = predictors.find{clazz, predictor -> predictor(obj)}.key
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
-        Method fromMapMethod = clazz.getMethod('fromMap', Map)
-        fromMapMethod.invoke(null, fields)
-    }
-}
 
 /**
  * Класс информации о параметре/показателе
  */
 @Canonical
-@JsonDeserialize(using = IndicatorOrParameterCustomDeserializer)
 class IndicatorOrParameter
 {
     /**
@@ -2134,40 +2102,31 @@ class IndicatorOrParameter
      */
     Boolean showName = false
 
-    static IndicatorOrParameter fromMap(Map fields)
-    {
-        return new IndicatorOrParameter(fields)
-    }
-}
-
-/**
- * Класс информации о показателе в комбо диаграмме
- */
-@Canonical
-class ComboIndicator extends IndicatorOrParameter
-{
     /**
      * Предел максимума
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer max
     /**
      * Предел минимума
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer min
     /**
      * Флаг на отображение датасетов зависимо
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean showDependent
 
-    static ComboIndicator fromMap(Map fields)
+    static IndicatorOrParameter fromMap(Map fields)
     {
         //необходимо прописать преобразование в Integer, иначе через (int) берется код символа
-        return new ComboIndicator(name: fields.name,
-                                  show: fields.show,
-                                  showName: fields.showName,
-                                  max: fields.max as Integer,
-                                  min: fields.min as Integer,
-                                  showDependent: fields.showDependent as Boolean)
+        return new IndicatorOrParameter(name: fields.name,
+                                        show: fields.show,
+                                        showName: fields.showName,
+                                        max: fields.max as Integer,
+                                        min: fields.min as Integer,
+                                        showDependent: fields.showDependent as Boolean)
     }
 }
 
