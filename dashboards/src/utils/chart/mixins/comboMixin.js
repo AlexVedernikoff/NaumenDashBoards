@@ -20,7 +20,7 @@ import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers
 import type {Options} from 'utils/chart/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
-const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: number, ctx: Object) => {
+const dataLabelsFormatter = (widget: ComboWidget) => (value: number, ctx: Object) => {
 	const {seriesIndex, w} = ctx;
 	const {series} = w.config;
 
@@ -28,12 +28,13 @@ const dataLabelsFormatter = (widget: ComboWidget, showZero: boolean) => (value: 
 	let formattedValue = value;
 
 	if (buildDataSet) {
-		const indicator = buildDataSet.indicators[0];
+		const {indicators, showEmptyData} = buildDataSet;
+		const indicator = indicators;
 		const {aggregation, attribute} = indicator;
 		const usesMSInterval = hasMSInterval(attribute, aggregation);
 		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
 
-		formattedValue = valueFormatter(usesMSInterval, usesPercent, showZero)(value);
+		formattedValue = valueFormatter(usesMSInterval, usesPercent, showEmptyData)(value);
 	}
 
 	return formattedValue;
@@ -186,7 +187,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 	const {labels, series} = chart;
 	const strokeWidth = series.find(dataSet => dataSet.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 	const buildDataSet = getBuildSet(widget);
-	const {showEmptyData, xAxisName} = buildDataSet;
+	const {xAxisName} = buildDataSet;
 	const xAxisProps = {
 		...parameter,
 		name: xAxisName
@@ -223,7 +224,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			stacked: false
 		},
 		dataLabels: {
-			formatter: dataLabelsFormatter(widget, showEmptyData)
+			formatter: dataLabelsFormatter(widget)
 		},
 		grid: {
 			padding: {

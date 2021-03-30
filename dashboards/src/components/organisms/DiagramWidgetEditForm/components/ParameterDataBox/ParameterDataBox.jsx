@@ -124,7 +124,7 @@ export class ParameterDataBox extends PureComponent<Props> {
 		const {attribute} = parameter;
 		const isEqualRefAttribute = getAttributeValue(attribute, 'type') in ATTRIBUTE_SETS.REFERENCE
 			&& getAttributeValue(attribute, 'property') === getAttributeValue(mainAttribute, 'property')
-			&& getAttributeValue(attribute, 'metaClassFqn') === getAttributeValue(mainAttribute, 'metaClassFqn');
+			&& getAttributeValue(attribute, 'code') === getAttributeValue(mainAttribute, 'code');
 		const disabledGroup = index !== this.mainIndex && (mainGroup.way === GROUP_WAYS.SYSTEM || isEqualRefAttribute);
 		const errorKey = getDataErrorKey(index, FIELDS.parameters, parameterIndex);
 		const {dataKey, source} = dataSet;

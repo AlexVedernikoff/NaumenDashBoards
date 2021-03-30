@@ -78,6 +78,22 @@ export class IndicatorDataBox extends PureComponent<Props> {
 		setDataFieldValue(index, name, value);
 	};
 
+	handleChangeShowBlankData = (name: string, value: boolean) => {
+		const {setFieldValue, values} = this.props;
+
+		if (values.type === WIDGET_TYPES.COMBO) {
+			const {data} = values;
+			const newData = data.map(dataSet => ({
+				...dataSet,
+				[name]: value
+			}));
+
+			return setFieldValue(FIELDS.data, newData);
+		}
+
+		this.handleChangeCheckbox(name, value);
+	};
+
 	handleChangeTopSettings = (top: DataTopSettings) => {
 		const {index, setDataFieldValue} = this.props;
 
@@ -215,7 +231,7 @@ export class IndicatorDataBox extends PureComponent<Props> {
 					className={styles.checkbox}
 					label="Показывать незаполненные данные"
 					name={FIELDS.showBlankData}
-					onClick={this.handleChangeCheckbox}
+					onClick={this.handleChangeShowBlankData}
 					value={Boolean(showBlankData)}
 				/>
 			);
