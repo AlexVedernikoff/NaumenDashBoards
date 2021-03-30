@@ -106,26 +106,54 @@ export class ColorsBox extends React.Component<Props, State> {
 		return settingsData;
 	};
 
-	handleChange = (name: string, value: ChartColorsSettings) => {
+	getNewSettingsByResetGlobal = (settings: ChartColorsSettings) => {
 		const {
 			globalColorsSettings,
-			onChange,
 			removeCustomChartColorsSettings,
 			setUseGlobalChartSettings,
-			value: colorsSettings,
-			values
+			widget
 		} = this.props;
+		const {data: newCustomData} = settings.custom;
+		let newSettings = settings;
+
+		if (globalColorsSettings && newCustomData) {
+			const {key} = newCustomData;
+			const widgetCustomSettingsData = widget.colorsSettings?.custom.data;
+
+			setUseGlobalChartSettings(newCustomData, false);
+			removeCustomChartColorsSettings(key);
+
+			if (widgetCustomSettingsData?.key === key) {
+				newSettings = {
+					...newSettings,
+					custom: {
+						...newSettings.custom,
+						data: widgetCustomSettingsData
+					}
+				};
+			} else {
+				newSettings = {
+					...newSettings,
+					custom: {
+						...newSettings.custom,
+						data: undefined
+					},
+					type: CHART_COLORS_SETTINGS_TYPES.AUTO
+				};
+			}
+		}
+
+		return newSettings;
+	};
+
+	handleChange = (name: string, value: ChartColorsSettings) => {
+		const {onChange, value: colorsSettings, values} = this.props;
 		const {custom: customSettings} = colorsSettings;
 		const {custom: newCustomSettings} = value;
 		let newSettings = value;
 
-		if (customSettings.useGlobal && !newCustomSettings.useGlobal && newCustomSettings.data) {
-			const {key} = newCustomSettings.data;
-
-			if (globalColorsSettings) {
-				setUseGlobalChartSettings(key, false);
-				removeCustomChartColorsSettings(key);
-			}
+		if (customSettings.useGlobal && !newCustomSettings.useGlobal) {
+			newSettings = this.getNewSettingsByResetGlobal(newSettings);
 		}
 
 		if (newSettings.type === CHART_COLORS_SETTINGS_TYPES.CUSTOM && !newCustomSettings.data) {
