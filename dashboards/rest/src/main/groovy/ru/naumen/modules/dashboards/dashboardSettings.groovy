@@ -291,7 +291,7 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     @Override
     String copyWidgetToDashboard(requestContent)
     {
-        return toJson(service.copyWidgetToDashboard(requestContent))
+        return Jackson.toJsonString(service.copyWidgetToDashboard(requestContent))
     }
 
     @Override
