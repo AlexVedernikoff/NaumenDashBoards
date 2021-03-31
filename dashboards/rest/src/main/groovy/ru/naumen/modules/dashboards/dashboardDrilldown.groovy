@@ -253,15 +253,10 @@ class Link
                 orFilter.elements.collect { filter ->
                     String attribute = filter.getAttributeFqn() as String
                     String condition = filter.getProperties().conditionCode
-                    Boolean attrTypeIsSet = filter.getProperties().attrTypeCode in AttributeType.LINK_SET_TYPES
                     def value = filter.getValue()
                     if (condition == 'containsSubject')
                     { // костыль. так как дескриптор статичный, а условие должно быть динамичным
                         def uuidSubject = api.utils.get(iDescriptor.clientSettings.formObjectUuid as String)
-                        if(attrTypeIsSet)
-                        {
-                            uuidSubject = [uuidSubject]
-                        }
                         filterBuilder.OR(attribute, 'contains', uuidSubject)
                     }
                     else
@@ -272,10 +267,6 @@ class Link
                             value = api.metainfo.getMetaClass(metaClass)
                                        .getAttribute(subjectAttribute)
                                        .getAttributeFqn()
-                            if(attrTypeIsSet)
-                            {
-                                value = [value]
-                            }
                         }
                         filterBuilder.OR(attribute, condition, value)
                     }
@@ -412,26 +403,43 @@ class Link
                                         List objects = []
                                         if(attributeType in AttributeType.ONLY_LINK_TYPES)
                                         {
-                                            if(!attr.ref)
+                                            if(attr.attrChains().count {it.type in AttributeType.LINK_TYPES} > 1)
                                             {
-                                                attr.ref = new Attribute(code:'title', type:'string')
+                                                //двухуровневый ссылочный
+                                                objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last())
                                             }
-                                            objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
+                                            else
+                                            {
+                                                if(!attr.ref)
+                                                {
+                                                    attr.ref = new Attribute(code:'title', type:'string')
+                                                }
+                                                objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
+                                            }
                                         }
                                         else
                                         {
-                                            if(!attr.ref)
+                                            if(attr.attrChains().count {it.type in AttributeType.LINK_TYPES} > 1)
                                             {
-                                                attr.ref = new Attribute(code:'title', type:'string')
+                                                //двухуровневый ссылочный
+                                                objects = api.utils.find(attr.ref.property, [title: value])
+                                                objects = findObjects(attr.ref, attr.property, objects)
                                             }
-                                            objects = findObjects(attr.ref, attr.property, value)
+                                            else
+                                            {
+                                                if(!attr.ref)
+                                                {
+                                                    attr.ref = new Attribute(code:'title', type:'string')
+                                                }
+                                                objects = findObjects(attr.ref, attr.property, value)
+                                            }
                                         }
                                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
                                     }
-                                    break;
+                                    break
                                 case AttributeType.STATE_TYPE:
                                     getStateFilters(attr, value, filterBuilder)
-                                    break;
+                                    break
                                 default:
                                     result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
                             }
@@ -609,21 +617,60 @@ class Link
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
                                     Boolean attributeTypeIsSet = attributeType in AttributeType.LINK_SET_TYPES
+                                    Boolean twoLinkAttrs = attr.attrChains().count { it.type in AttributeType.LINK_TYPES } == 2
+                                    def lastAttr = attr.attrChains().last()
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'empty':
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = api.utils.find(attr.property, [(lastAttr.code): null])
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             return filterBuilder.OR(attr.code, 'null', null)
                                         case 'not_empty':
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(null)])
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             return filterBuilder.OR(attr.code, 'notNull', null)
                                         case 'contains':
                                             def value = api.utils.get(it.data.uuid)
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = findObjects(attr.ref, attr.property, value)
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             if (attributeTypeIsSet)
                                             {
                                                 value = [value]
                                             }
+
                                             return filterBuilder.OR(attr.code, 'contains', value)
                                         case 'not_contains':
                                             def value = api.utils.get(it.data.uuid)
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             if (attributeTypeIsSet)
                                             {
                                                 value = [value]
@@ -631,6 +678,16 @@ class Link
                                             return filterBuilder.OR(attr.code, 'notContains', value)
                                         case 'title_contains':
                                             def value = it.data
+                                            if(twoLinkAttrs)
+                                            {
+                                                def lowValues = api.utils.find(lastAttr.property, ['title': op.like("%${value}%")])
+                                                def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    highValues
+                                                )
+                                            }
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'titleContains',
@@ -638,6 +695,16 @@ class Link
                                             )
                                         case 'title_not_contains':
                                             def value = it.data
+                                            if(twoLinkAttrs)
+                                            {
+                                                def lowValues = api.utils.find(lastAttr.property, ['title': op.not("%${value}%")])
+                                                def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    highValues
+                                                )
+                                            }
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'titleNotContains',
@@ -645,6 +712,15 @@ class Link
                                             )
                                         case 'contains_including_archival':
                                             def value = api.utils.get(it.data.uuid)
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = findObjects(attr.ref, attr.property, value)
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             if (attributeTypeIsSet)
                                             {
                                                 value = [value]
@@ -656,6 +732,15 @@ class Link
                                             )
                                         case 'not_contains_including_archival':
                                             def value = api.utils.get(it.data.uuid)
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             if (attributeTypeIsSet)
                                             {
                                                 value = [value]
@@ -667,6 +752,15 @@ class Link
                                             )
                                         case 'contains_including_nested':
                                             def value = api.utils.get(it.data.uuid)
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = findObjects(attr.ref, attr.property, value)
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             if (attributeTypeIsSet)
                                             {
                                                 value = [value]
@@ -681,12 +775,25 @@ class Link
                                             def values = uuids.collect { uuid ->
                                                 api.utils.get(uuid)
                                             }
+                                            if(twoLinkAttrs)
+                                            {
+                                                values = values.collectMany{ value -> findObjects(attr.ref, attr.property, value)}
+                                            }
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'containsInSet',
                                                 values
                                             )
                                         case ['contains_current_object', 'equal_current_object']:
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = findObjects(attr.ref, attr.property, subjectUUID)
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'contains',
@@ -705,6 +812,15 @@ class Link
                                                 )
                                             }
                                             def value = api.utils.get(subjectUUID)[code]
+                                            if(twoLinkAttrs)
+                                            {
+                                                def objects = findObjects(attr.ref, attr.property, value)
+                                                return filterBuilder.OR(
+                                                    attr.code,
+                                                    'containsInSet',
+                                                    objects
+                                                )
+                                            }
                                             if (attributeTypeIsSet)
                                             {
                                                 value = [value]
