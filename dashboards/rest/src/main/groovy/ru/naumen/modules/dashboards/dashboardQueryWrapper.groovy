@@ -158,11 +158,11 @@ class QueryWrapper implements CriteriaWrapper
                 def hour = sc.extract(column, 'HOUR')
                 def minute = sc.extract(column, 'MINUTE')
 
-                def dateColumn = sc.concat(day,
-                                           sc.constant('.'), month,
-                                           sc.constant('.'), year,
-                                           sc.constant(' '), hour,
-                                           sc.constant(':'), minute)
+                def dateColumn = sc.concat(sc.cast(day, 'string'),
+                                           sc.constant('.'), sc.cast(month, 'string'),
+                                           sc.constant('.'), sc.cast(year, 'string'),
+                                           sc.constant(' '), sc.cast(hour, 'string'),
+                                           sc.constant(':'), sc.cast(minute, 'string'))
 
                 //для атрибута ссылочного типа необходима передача uuid-а
                 column = sc.concat(dateColumn,
@@ -479,9 +479,9 @@ class QueryWrapper implements CriteriaWrapper
                         def yearColumn = sc.year(column)
                         criteria.addColumn(
                             sc.concat(
-                                dayColumn, sc.constant('.'),
-                                monthColumn, sc.constant('.'),
-                                yearColumn
+                                sc.cast(dayColumn, 'string'), sc.constant('.'),
+                                sc.cast(monthColumn, 'string'), sc.constant('.'),
+                                sc.cast(yearColumn, 'string')
                             )
                         )
 
@@ -509,10 +509,10 @@ class QueryWrapper implements CriteriaWrapper
                         IApiCriteriaColumn monthColumn = sc.month(column)
                         IApiCriteriaColumn yearColumn = sc.year(column)
 
-                        criteria.addColumn(sc.concat(dayColumn,sc.constant('.'),
-                                                     monthColumn, sc.constant('.'),
-                                                     yearColumn, sc.constant(' '),
-                                                     hourColumn))
+                        criteria.addColumn(sc.concat(sc.cast(dayColumn, 'string'),sc.constant('.'),
+                                                     sc.cast(monthColumn, 'string'), sc.constant('.'),
+                                                     sc.cast(yearColumn, 'string'), sc.constant(' '),
+                                                     sc.cast(hourColumn, 'string')))
 
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(monthColumn)
@@ -566,7 +566,7 @@ class QueryWrapper implements CriteriaWrapper
                         IApiCriteriaColumn monthColumn = sc.month(column)
                         criteria.addGroupColumn(dayColumn)
                         criteria.addGroupColumn(monthColumn)
-                        def sortColumn = sc.concat(dayColumn, sc.constant('/'), monthColumn)
+                        def sortColumn = sc.concat(sc.cast(dayColumn, 'string'), sc.constant('/'), sc.cast(monthColumn, 'string'))
                         criteria.addColumn(sortColumn)
                         String sortingType = parameter.sortingType
                         if (sortingType)
@@ -589,9 +589,9 @@ class QueryWrapper implements CriteriaWrapper
                     case 'WW YY':
                         def weekColumn = sc.week(column)
                         def yearColumn = sc.year(column)
-                        criteria.addColumn(sc.concat(weekColumn,
+                        criteria.addColumn(sc.concat(sc.cast(weekColumn, 'string'),
                                                      sc.constant(' неделя '),
-                                                     yearColumn))
+                                                     sc.cast(yearColumn, 'string')))
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(weekColumn)
                         String sortingType = parameter.sortingType
@@ -610,7 +610,7 @@ class QueryWrapper implements CriteriaWrapper
                     case 'MM YY':
                         def monthColumn = sc.month(column)
                         def yearColumn = sc.year(column)
-                        criteria.addColumn(sc.concat(monthColumn, sc.constant('/'), yearColumn))
+                        criteria.addColumn(sc.concat(sc.cast(monthColumn, 'string'), sc.constant('/'), sc.cast(yearColumn, 'string')))
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(monthColumn)
                         String sortingType = parameter.sortingType
@@ -629,8 +629,8 @@ class QueryWrapper implements CriteriaWrapper
                     case 'QQ YY':
                         def quarterColumn = getQuarterGroupColumn(column)
                         def yearColumn = sc.year(column)
-                        criteria.addColumn(sc.concat(quarterColumn, sc.constant(' кв-л '),
-                                                     yearColumn))
+                        criteria.addColumn(sc.concat(sc.cast(quarterColumn, 'string'), sc.constant(' кв-л '),
+                                                     sc.cast(yearColumn, 'string')))
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(quarterColumn)
                         String sortingType = parameter.sortingType
@@ -787,7 +787,7 @@ class QueryWrapper implements CriteriaWrapper
                         break
                     case 'hh:ii':
                         IApiCriteriaColumn minuteColumn = sc.extract(column, 'MINUTE')
-                        criteria.addColumn(sc.concat(hourColumn, sc.constant(':'), minuteColumn))
+                        criteria.addColumn(sc.concat(sc.cast(hourColumn, 'string'), sc.constant(':'), sc.cast(minuteColumn, 'string')))
                         criteria.addGroupColumn(hourColumn)
                         criteria.addGroupColumn(minuteColumn)
                         String sortingType = parameter.sortingType
