@@ -6,7 +6,6 @@ import {
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
 	COPY_WIDGET_ERRORS,
-	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_TABLE_VALUE,
 	DISPLAY_MODE,
 	FONT_STYLES,
@@ -172,8 +171,6 @@ export type DataLabels = {
 };
 
 // Настройка цветов графика
-export type CustomChartColorsSettingsType = $Keys<typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES>;
-
 export type ChartColorSettings = {
 	color: string,
 	key: string
@@ -182,8 +179,7 @@ export type ChartColorSettings = {
 export type CustomChartColorsSettingsData = {
 	colors: Array<ChartColorSettings>,
 	defaultColor: string,
-	key: string,
-	type: $Keys<typeof CUSTOM_CHART_COLORS_SETTINGS_TYPES>
+	key: string
 };
 
 export type ChartColorsSettingsType = $Keys<typeof CHART_COLORS_SETTINGS_TYPES>;
@@ -594,7 +590,7 @@ export type WidgetsDataState = {
 	validatingToCopy: ChangingState
 };
 
-export type SetUseGlobalChartSettings = (settings: CustomChartColorsSettingsData, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
+export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
 
 export type CopyWidgetError = $Values<typeof COPY_WIDGET_ERRORS>;
 

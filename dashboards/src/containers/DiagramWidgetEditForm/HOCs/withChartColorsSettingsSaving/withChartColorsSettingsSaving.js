@@ -37,7 +37,7 @@ export const withChartColorsSettingsSaving = <Config: {} & InjectedProps>(Compon
 
 			if (useGlobal && data) {
 				saveCustomChartColorsSettings(data);
-				setUseGlobalChartSettings(data, useGlobal, widget.id);
+				setUseGlobalChartSettings(data.key, useGlobal, widget.id);
 			}
 		};
 

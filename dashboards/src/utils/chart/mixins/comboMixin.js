@@ -29,7 +29,7 @@ const dataLabelsFormatter = (widget: ComboWidget) => (value: number, ctx: Object
 
 	if (buildDataSet) {
 		const {indicators, showEmptyData} = buildDataSet;
-		const indicator = indicators;
+		const indicator = indicators[0];
 		const {aggregation, attribute} = indicator;
 		const usesMSInterval = hasMSInterval(attribute, aggregation);
 		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
