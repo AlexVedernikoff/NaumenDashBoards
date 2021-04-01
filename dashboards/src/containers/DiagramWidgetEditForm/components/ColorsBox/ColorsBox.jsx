@@ -1,22 +1,21 @@
 // @flow
 import type {
 	ChartColorsSettings,
-	CustomChartColorsSettingsData,
-	CustomChartColorsSettingsType
+	Widget
 } from 'store/widgets/data/types';
 import {
 	CHART_COLORS_SETTINGS_TYPES,
-	CUSTOM_CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_BREAKDOWN_COLOR,
 	DEFAULT_COLORS_SETTINGS
 } from 'store/widgets/data/constants';
 import Component from 'DiagramWidgetEditForm/components/ColorsBox';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
-import {getCustomColorsSettingsKey, getCustomColorsSettingsType} from 'store/widgets/data/helpers';
+import {getCustomColorsSettingsKey} from 'store/widgets/data/helpers';
 import {hasBreakdown, isAxisChart, isCircleChart} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React from 'react';
+import type {Values} from 'containers/WidgetEditForm/types';
 
 export class ColorsBox extends React.Component<Props, State> {
 	static defaultProps = {
@@ -33,10 +32,10 @@ export class ColorsBox extends React.Component<Props, State> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {globalColorsSettings: prevGlobalSettings, values: prevValues} = prevProps;
-		const {globalColorsSettings, values} = this.props;
+		const {buildData: prevBuildData, globalColorsSettings: prevGlobalSettings, values: prevValues} = prevProps;
+		const {buildData, globalColorsSettings, values} = this.props;
 
-		if (prevValues.data !== values.data || prevGlobalSettings !== globalColorsSettings) {
+		if (prevValues.data !== values.data || prevGlobalSettings !== globalColorsSettings || prevBuildData?.data !== buildData?.data) {
 			this.setSettingsByActualData();
 			this.setState({labels: this.getLabels(this.props)});
 		}
@@ -57,34 +56,22 @@ export class ColorsBox extends React.Component<Props, State> {
 		return labels;
 	}
 
-	createBreakdownCustomSettings = (key: string): CustomChartColorsSettingsData => ({
-		colors: [],
-		defaultColor: DEFAULT_BREAKDOWN_COLOR,
-		key,
-		type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
-	});
-
-	createCustomSettings = (type: CustomChartColorsSettingsType, key: string | null) => {
+	createCustomSettings = (widget: Widget | Values) => {
+		const {colors: defaultColors} = this.props.value.auto;
+		const key = getCustomColorsSettingsKey(widget);
 		let settings = null;
 
 		if (key) {
-			settings = type === CUSTOM_CHART_COLORS_SETTINGS_TYPES.BREAKDOWN
-				? this.createBreakdownCustomSettings(key)
-				: this.createLabelCustomSettings(key);
+			const defaultColor = hasBreakdown(widget) ? DEFAULT_BREAKDOWN_COLOR : defaultColors[0];
+
+			settings = {
+				colors: [],
+				defaultColor,
+				key
+			};
 		}
 
 		return settings;
-	};
-
-	createLabelCustomSettings = (key: string): CustomChartColorsSettingsData => {
-		const {colors: defaultColors} = this.props.value.auto;
-
-		return {
-			colors: [],
-			defaultColor: defaultColors[0],
-			key,
-			type: CUSTOM_CHART_COLORS_SETTINGS_TYPES.LABEL
-		};
 	};
 
 	getCustomColorsSettingsData = () => {
@@ -98,9 +85,7 @@ export class ColorsBox extends React.Component<Props, State> {
 		} else if (customSettingsData?.key === currentKey) {
 			settingsData = customSettingsData;
 		} else if (getCustomColorsSettingsKey(values) === currentKey) {
-			const currentType = getCustomColorsSettingsType(widget);
-
-			settingsData = this.createCustomSettings(currentType, currentKey);
+			settingsData = this.createCustomSettings(widget);
 		}
 
 		return settingsData;
@@ -113,14 +98,13 @@ export class ColorsBox extends React.Component<Props, State> {
 			setUseGlobalChartSettings,
 			widget
 		} = this.props;
-		const {data: newCustomData} = settings.custom;
 		let newSettings = settings;
 
-		if (globalColorsSettings && newCustomData) {
-			const {key} = newCustomData;
-			const widgetCustomSettingsData = widget.colorsSettings?.custom.data;
+		if (globalColorsSettings) {
+			const {key} = globalColorsSettings;
+			const widgetCustomSettingsData = widget.colorsSettings.custom.data;
 
-			setUseGlobalChartSettings(newCustomData, false);
+			setUseGlobalChartSettings(key, false);
 			removeCustomChartColorsSettings(key);
 
 			if (widgetCustomSettingsData?.key === key) {
@@ -157,14 +141,11 @@ export class ColorsBox extends React.Component<Props, State> {
 		}
 
 		if (newSettings.type === CHART_COLORS_SETTINGS_TYPES.CUSTOM && !newCustomSettings.data) {
-			const type = getCustomColorsSettingsType(values);
-			const key = getCustomColorsSettingsKey(values);
-
 			newSettings = {
 				...newSettings,
 				custom: {
 					...newSettings.custom,
-					data: this.createCustomSettings(type, key)
+					data: this.createCustomSettings(values)
 				}
 			};
 		}

@@ -3,7 +3,6 @@ import type {
 	AddWidget,
 	AxisWidget,
 	CircleWidget,
-	CustomChartColorsSettingsType,
 	DeleteWidget,
 	Group,
 	Indicator,
@@ -17,12 +16,12 @@ import type {
 	WidgetsDataState
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
-import {CUSTOM_CHART_COLORS_SETTINGS_TYPES, WIDGET_TYPES} from './constants';
 import DiagramWidget from './templates/DiagramWidget';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import NewWidget from 'store/widgets/data/NewWidget';
 import TextWidget from './templates/TextWidget';
+import {WIDGET_TYPES} from './constants';
 
 /**
  * Устанавливаем полученные виджеты
@@ -224,19 +223,6 @@ const getMainDataSetIndex = <T: Object>(data: $ReadOnlyArray<T>): number => {
 };
 
 /**
- * Возвращает тип пользовательских настроек цветов основанный на данных виджета
- * @param {AxisWidget | CircleWidget} widget - график
- * @returns {CustomChartColorsSettingsType}
- */
-const getCustomColorsSettingsType = (widget: $ReadOnly<Widget>): CustomChartColorsSettingsType => {
-	const {data, type} = widget;
-	const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = WIDGET_TYPES;
-	const {BREAKDOWN, LABEL} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
-
-	return [BAR_STACKED, COLUMN_STACKED, DONUT, PIE].includes(type) || getMainDataSet(data).breakdown ? BREAKDOWN : LABEL;
-};
-
-/**
  * Создает ключ ключ пользовательских настроек цветов основанный на переданных значениях
  * @param {Source} source - источник
  * @param {Attribute} attribute - атрибут
@@ -259,19 +245,15 @@ const createCustomColorsSettingsKey = (source: Source, attribute: Attribute, gro
  * @returns {string | null}
  */
 const createCustomAxisChartColorsSettingsKey = (widget: AxisWidget): string | null => {
-	const type = getCustomColorsSettingsType(widget);
-	const {BREAKDOWN, LABEL} = CUSTOM_CHART_COLORS_SETTINGS_TYPES;
 	const {breakdown, parameters, source} = getMainDataSet(widget.data);
 	let key = null;
 
-	if (type === BREAKDOWN && Array.isArray(breakdown)) {
+	if (Array.isArray(breakdown)) {
 		const {attribute, group} = breakdown[0];
 
 		key = createCustomColorsSettingsKey(source.value, attribute, group);
-	}
-
-	if (type === LABEL) {
-		const {attribute, group} = (parameters && parameters[0]) ?? {};
+	} else if (widget.type !== WIDGET_TYPES.LINE) {
+		const {attribute, group} = parameters[0];
 
 		key = createCustomColorsSettingsKey(source.value, attribute, group);
 	}
@@ -317,7 +299,6 @@ const getCustomColorsSettingsKey = (widget: Widget): string | null => {
 export {
 	createNewWidget,
 	getBuildSet,
-	getCustomColorsSettingsType,
 	getCustomColorsSettingsKey,
 	getComboYAxisName,
 	getMainDataSet,
