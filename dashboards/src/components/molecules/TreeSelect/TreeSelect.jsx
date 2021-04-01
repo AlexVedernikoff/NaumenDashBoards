@@ -1,6 +1,6 @@
 // @flow
-import Container from 'src/components/atoms/Container';
-import {debounce} from 'src/helpers';
+import Container from 'components/atoms/Container';
+import {debounce} from 'helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
@@ -8,7 +8,7 @@ import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import SearchInput from 'src/components/atoms/SearchInput';
+import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import Tree from 'components/molecules/MaterialTreeSelect/components/Tree';
 

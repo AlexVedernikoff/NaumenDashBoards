@@ -1,7 +1,6 @@
 import {action} from '@storybook/addon-actions';
-import {CUSTOM_CHART_COLORS_SETTINGS_TYPES} from 'src/store/widgets/data/constants';
+import {CUSTOM_CHART_COLORS_SETTINGS_TYPES, DEFAULT_CHART_COLORS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import CustomColorsSettings from './CustomColorsSettings';
-import {DEFAULT_CHART_COLORS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import React from 'react';
 import {useArgs} from '@storybook/client-api';
 

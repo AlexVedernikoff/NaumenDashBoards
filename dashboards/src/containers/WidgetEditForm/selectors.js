@@ -5,7 +5,7 @@ import {changeLayout} from 'store/dashboard/layouts/actions';
 import {changeLayoutMode} from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {createToast} from 'store/toasts/actions';
-import {getAllWidgetsWithoutSelected, getSelectedWidget} from 'src/store/widgets/data/selectors';
+import {getAllWidgetsWithoutSelected, getSelectedWidget} from 'store/widgets/data/selectors';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard, widgets: widgetsState} = state;

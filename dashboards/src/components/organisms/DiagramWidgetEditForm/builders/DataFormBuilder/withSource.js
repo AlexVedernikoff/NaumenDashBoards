@@ -39,13 +39,18 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 
 		handleChange = (dataSetIndex: number, newSource: SourceData) => {
 			const {setDataFieldValue, values} = this.props;
+			const {source} = values.data[dataSetIndex];
 
-			if (newSource.descriptor !== values.data[dataSetIndex].source.descriptor) {
+			if (newSource.descriptor !== source.descriptor) {
 				this.resetDynamicAttributes(dataSetIndex);
 			}
 
+			if (source.value && source.value.value !== newSource.value?.value) {
+				this.resetAttributes(dataSetIndex);
+			}
+
 			setDataFieldValue(dataSetIndex, FIELDS.source, newSource);
-			this.handleFetchAttributes(dataSetIndex, newSource.value?.value);
+			newSource.value && this.handleFetchAttributes(dataSetIndex, newSource.value.value);
 		};
 
 		handleChangeForCompute = (dataSetIndex: number, value: boolean) => {
@@ -60,7 +65,6 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			if (classFqn) {
 				const parentClassFqn = getParentClassFqn(values);
 
-				values.data[dataSetIndex].source.value && this.resetAttributes(dataSetIndex);
 				fetchAttributes(classFqn, parentClassFqn, this.setDefaultIndicator(dataSetIndex));
 			}
 		};
@@ -79,17 +83,6 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			if (data.length > 1) {
 				data.splice(index, 1);
 				setFieldValue(FIELDS.data, data);
-			}
-		};
-
-		handleSelectSourceCallback = (index: number) => () => {
-			const {fetchAttributes, values} = this.props;
-			const source = values.data[index][FIELDS.source];
-
-			if (source) {
-				const parentClassFqn = getParentClassFqn(values);
-
-				fetchAttributes(source.value, parentClassFqn, this.setDefaultIndicator(index));
 			}
 		};
 

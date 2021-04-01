@@ -1,7 +1,7 @@
 // @flow
 import MaterialSelect from 'components/molecules/MaterialSelect';
 import MaterialTextInput from 'components/atoms/MaterialTextInput';
-import type {OnSelectEvent} from 'src/components/types';
+import type {OnSelectEvent} from 'components/types';
 import {OPTIONS} from './constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

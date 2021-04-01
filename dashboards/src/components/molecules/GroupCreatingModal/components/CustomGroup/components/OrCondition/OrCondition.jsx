@@ -7,7 +7,7 @@ import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import mainStyles from 'components/molecules/GroupCreatingModal/styles.less';
 import MaterialSelect from 'components/molecules/MaterialSelect';
-import type {OnSelectEvent} from 'src/components/types';
+import type {OnSelectEvent} from 'components/types';
 import type {OrCondition as OrConditionType} from 'CustomGroup/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

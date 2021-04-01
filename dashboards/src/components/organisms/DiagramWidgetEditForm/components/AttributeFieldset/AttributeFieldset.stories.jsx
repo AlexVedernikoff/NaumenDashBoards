@@ -1,6 +1,6 @@
 import {action} from '@storybook/addon-actions';
 import AttributeFieldset from './AttributeFieldset';
-import {ATTRIBUTE_TYPES} from 'src/store/sources/attributes/constants';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import React from 'react';
 import {useArgs} from '@storybook/client-api';
 

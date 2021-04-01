@@ -8,7 +8,7 @@ import type {ComputedAttr} from 'store/widgets/data/types';
 import ComputedAttributeEditor from 'DiagramWidgetEditForm/components/ComputedAttributeEditor';
 import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
-import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
