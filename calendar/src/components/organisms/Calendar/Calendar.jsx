@@ -41,6 +41,7 @@ import ruMessages from './ruLocale.json';
 import styles from './Calendar.less';
 import timeZoneNames from 'cldr-dates-full/main/ru/timeZoneNames.json';
 import weekData from 'cldr-core/supplemental/weekData.json';
+import {ZonedDate} from '@progress/kendo-date-math';
 
 const currentDate = new Date();
 const resizer = new Resizer();
@@ -135,8 +136,9 @@ const Calendar = ({
 		setView(event.value);
 	}, []);
 
-	const handleDateChange = useCallback((event: SchedulerEvent<Date>) => {
-		setDate(event.value);
+	const handleDateChange = useCallback(({value}: ZonedDate | Date) => {
+		const newDate = value instanceof ZonedDate ? value.toUTCDate() : value;
+		setDate(newDate);
 	}, []);
 
 	const handleGeneratePDF = useCallback(() => {
