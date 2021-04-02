@@ -4,6 +4,7 @@ import endOfWeek from 'date-fns/endOfWeek';
 import startOfDay from 'date-fns/startOfDay';
 import startOfMonth from 'date-fns/startOfMonth';
 import startOfWeek from 'date-fns/startOfWeek';
+import subDays from 'date-fns/subDays';
 
 /**
  * Функция для получения дат начала и конца месяца переданного дня
@@ -27,6 +28,20 @@ const getWeekDates = (date: Date) => [
 ];
 
 /**
+ * Функция для получения дат начала и конца рабочей недели переданного дня
+ * @param {Date} date - дата, находящаяся в нужной неделе
+ * @returns {[Date, Date]} - кортеж из даты старта и даты конца рабочей недели
+ */
+const getWorkWeekDates = (date: Date) => [
+	startOfWeek(date, {
+		weekStartsOn: 1
+	}),
+	subDays(endOfWeek(date, {
+		weekStartsOn: 1
+	}), 2)
+];
+
+/**
  * Функция для получения начала и конца переданного дня
  * @param {Date} date - дата
  * @returns {[Date, Date]} - кортеж из даты старта и даты конца
@@ -46,7 +61,7 @@ export const getDates = (date: Date, view: string) => {
 		case 'week':
 			return getWeekDates(date);
 		case 'work-week':
-			return getWeekDates(date);
+			return getWorkWeekDates(date);
 		case 'day':
 			return getDate(date);
 		default:
