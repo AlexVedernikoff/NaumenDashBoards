@@ -60,4 +60,4 @@ export const getDates = (date: Date, view: string) => {
  * @returns {string} - форматированная дата строкой
  */
 export const getFormattedDate = (date: Date) =>
-	`${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+	`${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
