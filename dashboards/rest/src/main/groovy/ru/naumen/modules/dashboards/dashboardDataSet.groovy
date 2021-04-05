@@ -1537,7 +1537,8 @@ class DashboardDataSetService
                     }
                     else
                     {
-                        Date minDate = DashboardUtils.getMinDate(attribute.code, attribute.sourceCode)
+                        String attributeCode = "${attribute.code}.deadLineTime"
+                        Date minDate = DashboardUtils.getMinDate(attributeCode, attribute.sourceCode)
                         start = new Date(minDate.time).clearTime()
                     }
                     def end

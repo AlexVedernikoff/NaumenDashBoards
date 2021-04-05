@@ -847,12 +847,34 @@ class Link
                                             return filterBuilder.
                                                 OR(attr.code, 'timerStatusNotContains', [code])
                                         case 'expires_between':
-                                            String dateFormat = 'yyyy-MM-dd'
-                                            def dateSet = it.data as Map
-                                            def start =
-                                                Date.parse(dateFormat, dateSet.startDate as String)
-                                            def end =
-                                                Date.parse(dateFormat, dateSet.endDate as String)
+                                            String dateFormat
+                                            def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
+                                            def start
+                                            if(dateSet.startDate)
+                                            {
+                                                dateFormat = DashboardUtils.getDateFormatByDate(dateSet.startDate as String)
+                                                start = Date.parse(dateFormat, dateSet.startDate as String)
+                                            }
+                                            else
+                                            {
+                                                String attrCode = "${attr.code}.deadLineTime"
+                                                Date minDate = DashboardUtils.getMinDate(
+                                                    attrCode,
+                                                    attr.sourceCode,
+                                                    this.descriptor
+                                                )
+                                                start = new Date(minDate.time).clearTime()
+                                            }
+                                            def end
+                                            if (dateSet.endDate)
+                                            {
+                                                dateFormat = DashboardUtils.getDateFormatByDate(dateSet.endDate as String)
+                                                end = Date.parse(dateFormat, dateSet.endDate as String)
+                                            }
+                                            else
+                                            {
+                                                end = new Date().clearTime()
+                                            }
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'backTimerDeadLineFromTo',
@@ -964,18 +986,18 @@ class Link
         String code = attribute.code
         def(title, state) = StateMarshaller.unmarshal(value, StateMarshaller.valueDelimiter)
 
-        if(attr.ref)
+        if(attribute.ref)
         {
             def values = []
             if(sourceCode.contains('$'))
             {
-                values = findObjects(attr.ref, sourceCode, state)
+                values = findObjects(attribute.ref, sourceCode, state)
             }
             else
             {
                 def cases = api.metainfo.getTypes(sourceCode).code
                 values = cases.collectMany {
-                    return findObjects(attr.ref, it, state)
+                    return findObjects(attribute.ref, it, state)
                 }
             }
             return filterBuilder.AND(filterBuilder.OR(code, 'containsInSet', values))
