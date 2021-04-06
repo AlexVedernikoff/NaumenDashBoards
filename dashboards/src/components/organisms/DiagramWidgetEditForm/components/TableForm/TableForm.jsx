@@ -56,7 +56,6 @@ export class TableForm extends Component<TypedFormProps> {
 
 		const {
 			calcTotalColumn = false,
-			calcTotalRow = false,
 			computedAttrs = [],
 			data,
 			displayMode,
@@ -72,7 +71,6 @@ export class TableForm extends Component<TypedFormProps> {
 
 		return {
 			calcTotalColumn,
-			calcTotalRow,
 			columnsRatioWidth,
 			computedAttrs,
 			data: data.map(this.normalizeDataSet),

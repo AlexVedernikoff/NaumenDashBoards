@@ -47,8 +47,10 @@ const transformGroupFormat = (group?: Group, extendCustom: boolean = true) => {
 };
 
 const getDefaultSystemGroup = (attribute?: Object) => {
-	if (attribute && typeof attribute === 'object') {
-		const {type} = attribute;
+	const target = attribute?.ref || attribute;
+
+	if (target) {
+		const {type} = target;
 
 		if (type === ATTRIBUTE_TYPES.dtInterval) {
 			return createDefaultGroup(DATETIME_SYSTEM_GROUP.WEEK);
