@@ -103,11 +103,20 @@ export class SourceFieldset extends Component<Props> {
 		value: null
 	});
 
-	handleSelect = ({value: newSourceValue}: OnSelectEvent) => {
+	handleSelect = ({value: newRawSourceValue}: OnSelectEvent) => {
 		const {value: source} = this.props;
 		const {value: sourceValue} = source;
-		const {label, value} = newSourceValue;
+		let newSourceValue = newRawSourceValue;
 		let newSource = source;
+
+		if (newSourceValue) {
+			const {label, value} = newSourceValue;
+
+			newSourceValue = {
+				label,
+				value
+			};
+		}
 
 		if ((sourceValue && !newSourceValue) || (newSourceValue && sourceValue && newSourceValue.value !== sourceValue.value)) {
 			newSource = {
@@ -118,10 +127,7 @@ export class SourceFieldset extends Component<Props> {
 
 		this.change({
 			...newSource,
-			value: {
-				label,
-				value
-			}
+			value: newSourceValue
 		});
 	};
 

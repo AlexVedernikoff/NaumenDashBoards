@@ -1,7 +1,7 @@
 // @flow
 import type {ComponentProps as SearchInputComponentProps} from 'components/atoms/SearchInput/types';
 import type {NodeValue, Tree} from './components/Tree/types';
-import type {OnSelectEvent} from 'src/components/types';
+import type {OnSelectEvent} from 'components/types';
 import type {Props as NodeProps} from './components/Node/types';
 
 export type Value = Object;

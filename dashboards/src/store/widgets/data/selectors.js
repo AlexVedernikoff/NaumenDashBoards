@@ -2,7 +2,7 @@
 import type {AppState} from 'store/types';
 import type {BuildData, BuildDataState} from 'store/widgets/buildData/types';
 import {createSelector} from 'reselect';
-import {getMapValues} from 'src/helpers';
+import {getMapValues} from 'helpers';
 import type {Widget, WidgetsDataState} from 'store/widgets/data/types';
 
 /**

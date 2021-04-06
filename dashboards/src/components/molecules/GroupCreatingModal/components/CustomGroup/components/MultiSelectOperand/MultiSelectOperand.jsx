@@ -1,6 +1,6 @@
 // @flow
 import {Component} from 'react';
-import type {OnSelectEvent} from 'src/components/types';
+import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 
 export class MultiSelectOperand extends Component<Props> {

@@ -1,6 +1,6 @@
 import {action} from '@storybook/addon-actions';
 import AutoColorsSettings from './AutoColorsSettings';
-import {DEFAULT_COLORS_SETTINGS} from 'src/store/widgets/data/constants';
+import {DEFAULT_COLORS_SETTINGS} from 'store/widgets/data/constants';
 import React from 'react';
 import {useArgs} from '@storybook/client-api';
 

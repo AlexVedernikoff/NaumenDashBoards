@@ -6,7 +6,7 @@ import type {
 } from 'store/dashboard/customChartColorsSettings/types';
 import type {Props as ComponentProps} from 'DiagramWidgetEditForm/components/ColorsBox/types';
 import type {SetUseGlobalChartSettings, Widget} from 'store/widgets/data/types';
-import type {Values} from 'src/containers/WidgetEditForm/types';
+import type {Values} from 'containers/WidgetEditForm/types';
 
 export type ConnectedProps = {|
 	buildData?: BuildData,

@@ -10,7 +10,7 @@ import Container from 'components/atoms/Container';
 import {debounce} from 'helpers';
 import {getOptionLabel, getOptionValue, getOptions} from './helpers';
 import IconButton from 'components/atoms/IconButton';
-import {ICON_NAMES} from 'src/components/atoms/Icon';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import List from './components/List';
 import Loader from 'components/atoms/Loader';
 import type {OnChangeEvent} from 'components/types';

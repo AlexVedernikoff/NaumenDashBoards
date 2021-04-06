@@ -1,7 +1,7 @@
 // @flow
 import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES} from './constants';
-import type {OnLoadCallback} from 'src/store/sources/types';
-import type {ThunkAction} from 'src/store/types';
+import type {OnLoadCallback} from 'store/sources/types';
+import type {ThunkAction} from 'store/types';
 
 export type Attribute = {
 	code: string,

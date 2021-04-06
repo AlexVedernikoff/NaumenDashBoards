@@ -1,4 +1,3 @@
-// @flow
 'use strict';
 
 const CopyPlugin = require('copy-webpack-plugin');
@@ -8,6 +7,7 @@ const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const {development, license} = require('./define');
 
@@ -29,7 +29,8 @@ const plugins = [
 		title: 'SMP Embedded Application'
 	}),
 	new Dotenv(),
-	new CircularDependencyPlugin()
+	new CircularDependencyPlugin(),
+	// new BundleAnalyzerPlugin()
 ];
 
 if (license === 'use') {
