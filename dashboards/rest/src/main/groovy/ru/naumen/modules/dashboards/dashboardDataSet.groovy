@@ -179,7 +179,7 @@ class DashboardDataSetService
                 return mappingSummaryDiagram(res)
             case TABLE:
                 def (totalColumn, showRowNum) = [widgetSettings.calcTotalColumn,
-                                                 widgetSettings.showRowNum]
+                                                 widgetSettings.table.body.showRowNum]
 
                 return mappingTableDiagram(res, totalColumn as boolean,
                                            showRowNum as boolean, widgetSettings, request, ignoreTableLimits)
@@ -2909,8 +2909,20 @@ class DashboardDataSetService
     {
         String attributeType = attribute.type
         List attrCodesList = attribute.attrChains()*.code
+        if(!attribute.ref && attributeType in AttributeType.LINK_TYPES)
+        {
+            if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
+            {
+                attrCodesList += 'code'
+            }
+            else
+            {
+                attrCodesList += 'title'
+            }
+        }
         if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
         {
+            //если всё же информация пришла с фронта
             attrCodesList = attrCodesList.collect { it == 'title' ? 'code' : it }
         }
         String attrCode = attrCodesList.collect { it == 'UUID' ? 'id' : it.replace('metaClass', 'metaClassFqn') }.join('.')
