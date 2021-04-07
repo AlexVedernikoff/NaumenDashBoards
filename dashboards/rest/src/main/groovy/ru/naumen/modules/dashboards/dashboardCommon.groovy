@@ -360,15 +360,17 @@ class DashboardUtils
      */
     static Date getMinDate(String code, String classFqn, String descriptor = '')
     {
+        def res
         if(descriptor)
         {
             def sc = getApi().selectClause
             def apiDescr = getApi().listdata.createListDescriptor(descriptor)
             def dateCriteria = getApi().listdata.createCriteria(apiDescr)
                                        .addColumn(sc.min(sc.property(code)))
-            return getApi().db.query(dateCriteria).list().head() as Date
+            res = getApi().db.query(dateCriteria).list().head()
         }
-        return getApi().db.query("select min(${code}) from ${classFqn}").list().head() as Date
+        res = getApi().db.query("select min(${code}) from ${classFqn}").list().head()
+        return res instanceof Long ? new Date(res) : res as Date
     }
 
     /**
