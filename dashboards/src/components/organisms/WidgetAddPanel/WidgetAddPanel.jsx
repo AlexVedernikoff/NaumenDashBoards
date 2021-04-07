@@ -2,7 +2,6 @@
 import Button from 'components/atoms/Button';
 import cn from 'classnames';
 import {COPY_WIDGET_ERRORS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {createNewWidget} from 'store/widgets/data/helpers';
 import IconButton, {VARIANTS} from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import Modal from 'components/molecules/Modal';
@@ -28,16 +27,16 @@ export class WidgetAddPanel extends Component<Props, State> {
 	addDiagramWidget = () => {
 		const {layoutMode} = this.props;
 
-		this.addWidget(createNewWidget(layoutMode));
+		this.addWidget(new NewWidget(layoutMode));
 	};
 
 	addTextWidget = () => {
 		const {layoutMode} = this.props;
 
-		this.addWidget(createNewWidget(layoutMode, WIDGET_TYPES.TEXT));
+		this.addWidget(new NewWidget(layoutMode, WIDGET_TYPES.TEXT));
 	};
 
-	addWidget = (widget?: NewWidget) => widget && this.props.addNewWidget(widget);
+	addWidget = (widget: NewWidget) => widget && this.props.addNewWidget(widget);
 
 	handleCloseModal = () => this.setState({invalidCopyData: null});
 

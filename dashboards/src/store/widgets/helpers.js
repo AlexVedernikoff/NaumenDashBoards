@@ -10,10 +10,9 @@ import {
 	INTEGER_AGGREGATION,
 	INTERVALS
 } from './constants';
-import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
-import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
+import NewWidget from 'store/widgets/data/NewWidget';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
@@ -114,7 +113,7 @@ const parseMSInterval = (ms: number) => {
  * @param {object} widget - виджет
  * @returns {boolean}
  */
-const hasBreakdown = (widget: Object): boolean => !!widget.data
+const hasBreakdown = (widget: Object): boolean => widget.id !== NewWidget.id && !!widget.data
 		.find(({breakdown, sourceForCompute}) => !sourceForCompute && Array.isArray(breakdown));
 
 /**
@@ -123,26 +122,6 @@ const hasBreakdown = (widget: Object): boolean => !!widget.data
  * @returns {boolean}
  */
 const isAllowedTopAggregation = (aggregation?: string) => aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE;
-
-/**
- * Сообщает используется ли в наборе данных виджета пользовательская группировка
- * @param {DiagramFormWidget} widget - виджет
- * @param {boolean} checkBreakdown - указывает на необходимость проверки группировки разбивки
- * @returns {boolean}
- */
-const usesCustomGroup = (widget: DiagramFormWidget, checkBreakdown: boolean): boolean => {
-	const groupKeys = [FIELDS.group];
-
-	if (checkBreakdown) {
-		groupKeys.push(FIELDS.breakdownGroup);
-	}
-
-	return !!widget.data.find(dataSet => {
-		const {sourceForCompute} = dataSet;
-
-		return !sourceForCompute && groupKeys.find(key => dataSet[key] && dataSet[key].way === GROUP_WAYS.CUSTOM);
-	});
-};
 
 /**
  * Проверяет принадлежность типа виджета к осевым графикам
@@ -202,6 +181,5 @@ export {
 	isAxisChart,
 	isCircleChart,
 	isHorizontalChart,
-	parseMSInterval,
-	usesCustomGroup
+	parseMSInterval
 };

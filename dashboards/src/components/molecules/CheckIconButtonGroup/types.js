@@ -2,7 +2,7 @@
 import type {IconName} from 'components/atoms/Icon/types';
 import type {InputValue, OnChangeInputEvent} from 'components/types';
 
-export type Icon = {
+export type Option = {
 	active?: boolean,
 	name: IconName,
 	title: string,
@@ -12,8 +12,8 @@ export type Icon = {
 export type Props = {
 	className: string,
 	disabled: boolean,
-	icons: Array<Icon>,
 	name: string,
 	onChange: OnChangeInputEvent => void,
+	options: Array<Option>,
 	value: InputValue
 };

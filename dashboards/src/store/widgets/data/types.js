@@ -167,6 +167,7 @@ export type Legend = {
 };
 
 export type ChartSorting = {
+	dataKey?: string,
 	type: SortingType,
 	value: SortingValue
 };
@@ -277,7 +278,7 @@ export type ComboIndicatorSettings = $Shape<{
 	showDependent: boolean
 }>;
 
-type ComboType = $Keys<typeof COMBO_TYPES>;
+export type ComboType = $Keys<typeof COMBO_TYPES>;
 
 export type ComboData = {
 	...AxisData,
@@ -354,7 +355,7 @@ export type SpeedometerData = SummaryData;
 export type SpeedometerWidget = {
 	...BaseWidget,
 	borders: Borders,
-	data: Array<SummaryData>,
+	data: Array<SpeedometerData>,
 	indicator: SpeedometerIndicatorSettings,
 	ranges: Ranges,
 	type: typeof WIDGET_TYPES.SPEEDOMETER

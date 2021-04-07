@@ -1,23 +1,25 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import AttributeAggregationField from 'DiagramWidgetEditForm/components/AttributeAggregationField';
+import AttributeAggregationField from 'WidgetFormPanel/components/AttributeAggregationField';
 import cn from 'classnames';
 import CreationPanel from 'components/atoms/CreationPanel';
-import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
+import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
+import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Node} from 'react';
+import type {Option, Props, State} from './types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
-import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
 import SearchInput from 'components/atoms/SearchInput';
-import type {SourceOption} from 'components/organisms/AttributeCreatingModal/types';
 import styles from './styles.less';
+import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
 
 export class SourceControl extends PureComponent<Props, State> {
 	state = {
 		expanded: [],
 		foundOptions: [],
+		options: this.getOptions(this.props),
 		searchValue: '',
 		showList: false
 	};
@@ -30,15 +32,48 @@ export class SourceControl extends PureComponent<Props, State> {
 		}
 	}
 
-	countAllAttributes = (options: Array<SourceOption>) => {
+	getOptions (props: Props) {
+		const {attributes: map, fetchAttributes, values} = props;
+		const options = [];
+
+		values.data.forEach(dataSet => {
+			const {value: source} = dataSet.source;
+
+			if (source) {
+				const dataKey = dataSet.dataKey;
+				const classFqn = source.value;
+				let {[classFqn]: sourceData = {
+					error: false,
+					loading: false,
+					options: [],
+					uploaded: false
+				}} = map;
+				const {error, loading, options: attributes, uploaded} = sourceData;
+
+				if ((error || loading || uploaded) === false) {
+					fetchAttributes(classFqn);
+				}
+
+				options.push({
+					attributes,
+					dataKey,
+					source
+				});
+			}
+		});
+
+		return options;
+	}
+
+	countAllAttributes = (options: Array<Option>) => {
 		return options.length > 0 ? options.map(this.countOptionAttributes).reduce(this.reducer) : 0;
 	};
 
-	countOptionAttributes = (option: SourceOption) => option.attributes.length;
+	countOptionAttributes = (option: Option) => option.attributes.length;
 
-	filterEmptySources = (option: SourceOption) => option.attributes.length > 0;
+	filterEmptySources = (option: Option) => option.attributes.length > 0;
 
-	filterNoMatchingAttributes = (searchValue: string) => (option: SourceOption) => {
+	filterNoMatchingAttributes = (searchValue: string) => (option: Option) => {
 		let {attributes} = option;
 
 		attributes = attributes.filter(a => a.title.toLowerCase().includes(searchValue.toLowerCase()));
@@ -47,14 +82,15 @@ export class SourceControl extends PureComponent<Props, State> {
 	};
 
 	handleChangeSearchInput = (searchValue: string) => {
-		const {options} = this.props;
+		const {options} = this.state;
 		const foundOptions = options.map(this.filterNoMatchingAttributes(searchValue)).filter(this.filterEmptySources);
 
 		this.setState({foundOptions, searchValue});
 	};
 
 	handleClickAttribute = (e: SyntheticMouseEvent<HTMLDivElement>) => {
-		const {index, name, onSelect, options, type} = this.props;
+		const {index, name, onSelect, type} = this.props;
+		const {options} = this.state;
 		const {code, key: dataKey} = e.currentTarget.dataset;
 		const option = options.find(o => o.dataKey === dataKey);
 
@@ -139,7 +175,7 @@ export class SourceControl extends PureComponent<Props, State> {
 		);
 	};
 
-	renderAttributes = (option: SourceOption): Array<Node> | null => {
+	renderAttributes = (option: Option): Array<Node> | null => {
 		const {attributes, dataKey} = option;
 		const isExpanded = this.isExpanded(dataKey);
 
@@ -176,7 +212,7 @@ export class SourceControl extends PureComponent<Props, State> {
 		}
 	};
 
-	renderOption = (option: SourceOption) => (
+	renderOption = (option: Option) => (
 		<div className={styles.option} key={option.dataKey}>
 			{this.renderSource(option)}
 			{this.renderAttributes(option)}
@@ -184,8 +220,7 @@ export class SourceControl extends PureComponent<Props, State> {
 	);
 
 	renderOptions = () => {
-		const {options} = this.props;
-		const {foundOptions, searchValue} = this.state;
+		const {foundOptions, options, searchValue} = this.state;
 
 		return (
 			<div className={styles.options}>
@@ -197,8 +232,7 @@ export class SourceControl extends PureComponent<Props, State> {
 	renderSearch = () => <SearchInput onChange={this.handleChangeSearchInput} value={this.state.searchValue} />;
 
 	renderSearchInfo = () => {
-		const {options} = this.props;
-		const {foundOptions, searchValue} = this.state;
+		const {foundOptions, options, searchValue} = this.state;
 
 		if (searchValue) {
 			const countAttributes = this.countAllAttributes(options);
@@ -226,7 +260,7 @@ export class SourceControl extends PureComponent<Props, State> {
 		}
 	};
 
-	renderSource = (option: SourceOption) => {
+	renderSource = (option: Option) => {
 		const {dataKey, source} = option;
 		const {TOGGLE_COLLAPSED, TOGGLE_EXPANDED} = ICON_NAMES;
 		const {label, value} = source;
@@ -288,4 +322,4 @@ export class SourceControl extends PureComponent<Props, State> {
 	}
 }
 
-export default SourceControl;
+export default withValues(DIAGRAM_FIELDS.data)(SourceControl);

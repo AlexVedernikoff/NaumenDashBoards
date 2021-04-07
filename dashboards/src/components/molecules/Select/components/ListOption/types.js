@@ -1,5 +1,4 @@
 // @flow
-import type {InjectedProps} from 'components/HOCs/withGetComponents/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 
 type Option = Object;
@@ -25,7 +24,5 @@ export type Props = {
 	selected: boolean,
 	style: CSSStyleDeclaration
 };
-
-export type ContextProps = InjectedProps & Props;
 
 export type ComponentProps = React$Config<Props, DefaultProps>;

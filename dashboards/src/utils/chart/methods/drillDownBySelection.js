@@ -8,7 +8,6 @@ import {deepClone} from 'helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
 import type {DrillDownMixin} from 'store/widgets/links/types';
-import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
@@ -83,7 +82,7 @@ const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMi
  */
 const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {breakdown} = dataSet;
-	const breakdownSet = breakdown && breakdown.find(attrSet => attrSet[FIELDS.dataKey] === dataSet.dataKey);
+	const breakdownSet = breakdown && breakdown.find(attrSet => attrSet.dataKey === dataSet.dataKey);
 	let newMixin = mixin;
 
 	if (breakdownSet) {

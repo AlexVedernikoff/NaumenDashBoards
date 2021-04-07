@@ -1,7 +1,6 @@
 // @flow
 import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButton/types';
 import type {ComponentProps as ListProps} from './components/List/types';
-import type {InjectedProps} from 'components/HOCs/withGetComponents/types';
 import type {InputRef, OnChangeEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props as ValueProps} from './components/Value/types';
@@ -15,14 +14,6 @@ export type SelectEvent = {
 	value: Value;
 };
 
-export type MenuProps = {
-	className: string,
-	isSearching: boolean,
-	loading: boolean,
-	onSelect: Option => void,
-	options: Array<Option>
-};
-
 export type Components = {
 	Caret: React$ComponentType<IconButtonProps>,
 	IndicatorsContainer: React$ComponentType<ContainerProps>,
@@ -30,7 +21,7 @@ export type Components = {
 	MenuContainer: React$ComponentType<ContainerProps>,
 	Message: React$ComponentType<ContainerProps>,
 	Value: React$ComponentType<ValueProps>,
-	ValueContainer: React$ComponentType<ContainerProps>,
+	ValueContainer: React$ComponentType<ContainerProps>
 };
 
 export type DefaultProps = {|
@@ -52,13 +43,13 @@ export type DefaultProps = {|
 	value: Value
 |};
 
-export type Props = InjectedProps & {
+export type Props = {
 	...DefaultProps,
 	components: Components,
 	fetchOptions?: () => any,
 	forwardedLabelInputRef?: InputRef,
 	onChangeLabel?: OnChangeEvent<string> => void,
-	onSelect?: SelectEvent => void,
+	onSelect: SelectEvent => void,
 };
 
 export type ComponentProps = React$Config<Props, DefaultProps>;

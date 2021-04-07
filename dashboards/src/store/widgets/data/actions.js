@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
-import type {AnyWidget, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
+import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
 import {confirmDialog} from 'store/commonDialogs/actions';
@@ -8,7 +8,6 @@ import {createToast} from 'store/toasts/actions';
 import {deepClone, isObject} from 'helpers';
 import {DEFAULT_BUTTONS} from 'components/molecules/Modal/constants';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
-import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchCustomGroups} from 'store/customGroups/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
@@ -19,6 +18,7 @@ import {getWidgetsBuildData} from './selectors';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
+import {saveCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import {WIDGET_SETS} from 'store/widgets/data/constants';
 
 /**
@@ -71,11 +71,46 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): 
 };
 
 /**
- * Сохраняет изменение данных виджета
- * @param {AnyWidget} settings - данные формы редактирования
+ * Сохраняет виджет
+ * @param {AnyWidget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const saveWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const saveWidget = (widget: AnyWidget): ThunkAction => (dispatch: Dispatch): void => {
+	widget.id === NewWidget.id ? dispatch(createWidget(widget)) : dispatch(editWidget(widget));
+};
+
+/**
+ * Сохраняет график
+ * @param {Chart} widget - данные виджета
+ * @returns {ThunkAction}
+ */
+const saveChartWidget = (widget: Chart): ThunkAction => (dispatch: Dispatch): void => {
+	widget.id === NewWidget.id ? dispatch(createWidget(widget)) : dispatch(editChartWidget(widget));
+};
+
+/**
+ * Редактирует данные графика
+ * @param {Chart} widget - данные графика
+ * @returns {ThunkAction}
+ */
+const editChartWidget = (widget: Chart): ThunkAction => (dispatch: Dispatch): void => {
+	const {colorsSettings} = widget;
+	const {data, useGlobal} = colorsSettings.custom;
+
+	if (useGlobal && data) {
+		dispatch(saveCustomChartColorsSettings(data));
+		dispatch(setUseGlobalChartSettings(data.key, useGlobal, widget.id));
+	}
+
+	dispatch(editWidget(widget));
+};
+
+/**
+ * Редактирует данные виджета
+ * @param {AnyWidget} settings - данные виджета
+ * @returns {ThunkAction}
+ */
+const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
@@ -303,7 +338,6 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
  */
 const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch(setSelectedWidget(payload));
-	dispatch(editDashboard());
 };
 
 /**
@@ -515,5 +549,6 @@ export {
 	setUseGlobalChartSettings,
 	setWidgets,
 	updateWidget,
-	validateWidgetToCopy
+	validateWidgetToCopy,
+	saveChartWidget
 };

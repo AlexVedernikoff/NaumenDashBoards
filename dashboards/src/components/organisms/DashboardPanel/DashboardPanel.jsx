@@ -5,7 +5,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import WidgetAddPanel from 'containers/WidgetAddPanel';
-import WidgetEditForm from 'containers/WidgetEditForm';
+import WidgetFormPanel from 'containers/WidgetFormPanel';
 
 export class DashboardPanel extends PureComponent<Props, State> {
 	state = {
@@ -22,7 +22,7 @@ export class DashboardPanel extends PureComponent<Props, State> {
 
 	renderContent = () => {
 		const {selectedWidget} = this.props;
-		const content = selectedWidget ? <WidgetEditForm key={selectedWidget} /> : <WidgetAddPanel />;
+		const content = selectedWidget ? <WidgetFormPanel /> : <WidgetAddPanel />;
 
 		return (
 			<div className={styles.content}>

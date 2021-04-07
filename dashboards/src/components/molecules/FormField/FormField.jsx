@@ -23,10 +23,9 @@ export class FormField extends PureComponent<Props> {
 	};
 
 	renderField = () => {
-		const {children, className, forwardedRef, label, row, small} = this.props;
+		const {children, className, forwardedRef, row, small} = this.props;
 		const containerCN = cn({
 			[styles.field]: true,
-			[styles.fieldWithLabel]: !!label,
 			[styles.small]: small,
 			[styles.row]: row,
 			[className]: true

@@ -21,11 +21,6 @@ export type OnSelectEvent = {
 	value: SelectValue
 };
 
-export type OnChangeLabelEvent = {
-	label: string,
-	name: string
-};
-
 export type OnChangeEvent<V> = {
 	name: string,
 	value: V

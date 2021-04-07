@@ -7,10 +7,10 @@ import {
 	getSettings,
 	removePersonalDashboard,
 	saveAutoUpdateSettings,
-	seeDashboard
+	seeDashboard,
+	switchDashboard
 } from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {switchDashboard} from 'store/context/actions';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard} = state;

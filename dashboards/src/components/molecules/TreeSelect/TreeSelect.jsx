@@ -1,6 +1,5 @@
 // @flow
 import cn from 'classnames';
-import type {Components, ContextProps as Props, State} from './types';
 import Container from 'components/atoms/Container';
 import {debounce} from 'helpers';
 import IconButton from 'components/atoms/IconButton';
@@ -8,11 +7,11 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
 import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree/types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import Tree from 'components/molecules/MaterialTreeSelect/components/Tree';
-import withGetComponents from 'components/HOCs/withGetComponents';
 
 export class TreeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -36,11 +35,11 @@ export class TreeSelect extends PureComponent<Props, State> {
 		}
 	};
 
-	getComponents = (): Components => this.props.getComponents({
+	components = {
 		IndicatorsContainer: Container,
 		LabelContainer: Container,
 		...this.props.components
-	});
+	};
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
@@ -100,7 +99,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	renderIndicators = () => {
 		const {value} = this.props;
-		const {IndicatorsContainer} = this.getComponents();
+		const {IndicatorsContainer} = this.components;
 
 		if (value) {
 			return (
@@ -114,7 +113,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	renderLabel = () => {
 		const {value} = this.props;
-		const {LabelContainer} = this.getComponents();
+		const {LabelContainer} = this.components;
 		const labelText = this.getOptionLabel(this.props.value);
 
 		return (
@@ -219,4 +218,4 @@ export class TreeSelect extends PureComponent<Props, State> {
 	}
 }
 
-export default withGetComponents(TreeSelect);
+export default TreeSelect;

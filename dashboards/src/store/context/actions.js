@@ -1,8 +1,6 @@
 // @flow
 import {CONTEXT_EVENTS} from './constants';
-import {createNewState} from 'store/dashboard/settings/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {switchState} from 'store/actions';
 import type {UserData} from './types';
 
 /**
@@ -54,35 +52,6 @@ const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	}));
 };
 
-/**
- * Переключает дашборды с общего на персональный и обратно
- * @param {boolean} savePrevState - параметр сообщает, нужно ли сохранять предыдущее состояние дашборда
- * @returns {ThunkAction}
- */
-const switchDashboard = (savePrevState: boolean = true): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
-	const {context, customGroups, dashboard, widgets} = getState();
-	const {personal: personalDashboard} = dashboard.settings;
-	const {temp} = context;
-
-	dispatch(startSwitch());
-
-	savePrevState ? dispatch(setTemp({customGroups, dashboard, widgets})) : dispatch(setTemp(null));
-
-	try {
-		if (temp) {
-			dispatch(switchState(temp));
-		} else {
-			await dispatch(createNewState(!personalDashboard));
-		}
-	} finally {
-		dispatch(endSwitch());
-	}
-};
-
-const endSwitch = () => ({
-	type: CONTEXT_EVENTS.END_SWITCH
-});
-
 const setContext = payload => ({
 	payload,
 	type: CONTEXT_EVENTS.SET_CONTEXT
@@ -98,16 +67,11 @@ const setTemp = (payload: Object | null) => ({
 	type: CONTEXT_EVENTS.SET_TEMP
 });
 
-const startSwitch = () => ({
-	type: CONTEXT_EVENTS.START_SWITCH
-});
-
 export {
 	getContext,
 	getEditableParam,
 	getMetaCLass,
 	getUserData,
 	setTemp,
-	setUserData,
-	switchDashboard
+	setUserData
 };

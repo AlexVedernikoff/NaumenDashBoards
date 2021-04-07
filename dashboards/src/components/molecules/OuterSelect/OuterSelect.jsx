@@ -5,6 +5,10 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class OuterSelect extends PureComponent<Props> {
+	static defaultProps = {
+		name: ''
+	};
+
 	handleClick = (e: SyntheticMouseEvent<HTMLDivElement>) => {
 		const {name, onSelect} = this.props;
 

@@ -14,16 +14,12 @@ import type {
 	Source,
 	UpdateWidget,
 	Widget,
-	WidgetType,
 	WidgetsDataState
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import DiagramWidget from './templates/DiagramWidget';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
-import type {LayoutMode} from 'store/dashboard/settings/types';
 import NewWidget from 'store/widgets/data/NewWidget';
-import TextWidget from './templates/TextWidget';
 import {WIDGET_TYPES} from './constants';
 
 /**
@@ -153,40 +149,6 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
 
 const getBuildSet = ({data}: Object) => data.find(set => !set.sourceForCompute) || data[0];
 
-const createNewWidget = (layoutMode: LayoutMode, type: WidgetType = WIDGET_TYPES.BAR) => {
-	const {
-		BAR,
-		BAR_STACKED,
-		COLUMN,
-		COLUMN_STACKED,
-		COMBO,
-		DONUT,
-		LINE,
-		PIE,
-		SPEEDOMETER,
-		SUMMARY,
-		TABLE,
-		TEXT
-	} = WIDGET_TYPES;
-
-	switch (type) {
-		case BAR:
-		case BAR_STACKED:
-		case COLUMN:
-		case COLUMN_STACKED:
-		case COMBO:
-		case DONUT:
-		case LINE:
-		case PIE:
-		case SPEEDOMETER:
-		case SUMMARY:
-		case TABLE:
-			return new DiagramWidget(layoutMode);
-		case TEXT:
-			return new TextWidget(layoutMode);
-	}
-};
-
 /**
  * Возвращает название оси Y по умолчанию для осевых графиков
  * @param {Source} source - источник
@@ -251,66 +213,29 @@ const createCustomColorsSettingsKey = (source: Source, attribute: Attribute, gro
 };
 
 /**
- * Создает ключ ключ пользовательских настроек цветов основанный на данных виджета для осевых графиков
- * @param {AxisWidget} widget - осевой график
- * @returns {string | null}
- */
-const createCustomAxisChartColorsSettingsKey = (widget: AxisWidget): string | null => {
-	const {breakdown, parameters, source} = getMainDataSet(widget.data);
-	let key = null;
-
-	if (Array.isArray(breakdown)) {
-		const {attribute, group} = breakdown[0];
-
-		key = createCustomColorsSettingsKey(source.value, attribute, group);
-	} else if (widget.type !== WIDGET_TYPES.LINE && Array.isArray(parameters)) {
-		const {attribute, group} = parameters[0];
-
-		key = createCustomColorsSettingsKey(source.value, attribute, group);
-	}
-
-	return key;
-};
-
-/**
- * Создает ключ ключ пользовательских настроек цветов основанный на данных виджета для круговых графиков
- * @param {CircleWidget} widget - осевой график
- * @returns {string | null}
- */
-const createCustomCircleChartColorsSettingsKey = (widget: CircleWidget): string | null => {
-	const {breakdown, source} = getMainDataSet(widget.data);
-	let key = null;
-
-	if (Array.isArray(breakdown)) {
-		const {attribute, group} = breakdown[0];
-
-		key = createCustomColorsSettingsKey(source.value, attribute, group);
-	}
-
-	return key;
-};
-
-/**
  * Возвращает ключ пользовательских настроек цветов основанный на данных виджета
  * @param {AxisWidget | CircleWidget} widget - график
  * @returns {string | null}
  */
-const getCustomColorsSettingsKey = (widget: Widget): string | null => {
-	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, DONUT, LINE, PIE} = WIDGET_TYPES;
+const getCustomColorsSettingsKey = (widget: Widget | NewWidget): string | null => {
+	let key = null;
 
-	switch (widget.type) {
-		case BAR:
-		case BAR_STACKED:
-		case COLUMN:
-		case COLUMN_STACKED:
-		case LINE:
-			return createCustomAxisChartColorsSettingsKey(widget);
-		case DONUT:
-		case PIE:
-			return createCustomCircleChartColorsSettingsKey(widget);
-		default:
-			return null;
+	if (!(widget instanceof NewWidget)) {
+		// $FlowFixMe[prop-missing]
+		const {breakdown, parameters, source} = getMainDataSet(widget.data);
+
+		if (Array.isArray(breakdown)) {
+			const {attribute, group} = breakdown[0];
+
+			key = createCustomColorsSettingsKey(source.value, attribute, group);
+		} else if (widget.type !== WIDGET_TYPES.LINE && Array.isArray(parameters)) {
+			const {attribute, group} = parameters[0];
+
+			key = createCustomColorsSettingsKey(source.value, attribute, group);
+		}
 	}
+
+	return key;
 };
 
 /**
@@ -351,7 +276,6 @@ const clearWidgetWarning = (state: WidgetsDataState, {payload}: ClearMessageWarn
 };
 
 export {
-	createNewWidget,
 	clearWidgetWarning,
 	getBuildSet,
 	getCustomColorsSettingsKey,

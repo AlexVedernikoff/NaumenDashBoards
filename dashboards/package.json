@@ -27,6 +27,7 @@
     "react-redux": "^7.1.1",
     "react-sortablejs": "^2.0.11",
     "react-window": "^1.8.5",
+    "recompose": "^0.30.0",
     "reselect": "^4.0.0",
     "smoothscroll-polyfill": "^0.4.4",
     "sortablejs": "^1.13.0",

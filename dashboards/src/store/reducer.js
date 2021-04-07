@@ -9,6 +9,7 @@ import {ROOT_EVENTS} from './constants';
 import sources from './sources/reducer';
 import toasts from './toasts/reducer';
 import users from './users/reducer';
+import widgetForms from './widgetForms';
 import widgets from './widgets/reducer';
 
 const appReducer = combineReducers({
@@ -20,6 +21,7 @@ const appReducer = combineReducers({
 	sources,
 	toasts,
 	users,
+	widgetForms,
 	widgets
 });
 

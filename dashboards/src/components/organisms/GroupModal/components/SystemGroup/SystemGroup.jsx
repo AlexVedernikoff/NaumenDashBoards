@@ -24,6 +24,7 @@ export class SystemGroup extends PureComponent<Props, State> {
 
 	handleSelect = ({value}: OnSelectEvent) => {
 		const {onChange} = this.props;
+
 		onChange(value.value);
 	};
 

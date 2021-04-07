@@ -3,19 +3,25 @@ import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layou
 import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
+import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from './constants';
-import DiagramWidget from 'store/widgets/data/templates/DiagramWidget';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {fetchAllBuildData} from 'store/widgets/buildData/actions';
-import {getContext, getEditableParam, getMetaCLass, getUserData, setUserData, switchDashboard} from 'store/context/actions';
+import {
+	getContext,
+	getEditableParam,
+	getMetaCLass,
+	getUserData,
+	setTemp,
+	setUserData
+} from 'store/context/actions';
 import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLayoutMode} from 'helpers';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-import {resetState} from 'store/actions';
+import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import StorageSettings from 'utils/storageSettings';
@@ -115,7 +121,6 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 
 	batch(() => {
 		dispatch(setWidgets(widgets));
-		dispatch(fetchAllBuildData(widgets));
 		dispatch(setWebLayouts(widgets, refresh, layouts));
 		dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
 	});
@@ -338,8 +343,8 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 	});
 
 	if (descriptorStr && foundKey) {
-		const newWidget: Object = new DiagramWidget(dashboard.settings.layoutMode);
 		const descriptor = JSON.parse(descriptorStr);
+		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode);
 		let classFqn;
 
 		if (Array.isArray(descriptor.cases) && descriptor.cases.length > 1) {
@@ -438,6 +443,36 @@ const setPersonalValue = (payload: boolean) => (dispatch: Dispatch) => {
 	});
 };
 
+/**
+ * Переключает дашборды с общего на персональный и обратно
+ * @param {boolean} saveState - сообщает о необходимости сохранять состояние дашборда, с которого идет переключение.
+ * Для дальнейшего использования при возврате обратно на дашборд.
+ * @returns {ThunkAction}
+ */
+const switchDashboard = (saveState: boolean = true): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+	const {context, customGroups, dashboard, widgets} = getState();
+	const {personal: personalDashboard} = dashboard.settings;
+	const {temp} = context;
+
+	dispatch({
+		type: CONTEXT_EVENTS.START_SWITCH
+	});
+
+	saveState ? dispatch(setTemp({customGroups, dashboard, widgets})) : dispatch(setTemp(null));
+
+	try {
+		if (temp) {
+			dispatch(switchState(temp));
+		} else {
+			await dispatch(createNewState(!personalDashboard));
+		}
+	} finally {
+		dispatch({
+			type: CONTEXT_EVENTS.END_SWITCH
+		});
+	}
+};
+
 const initLayoutMode = () => ({
 	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.LAYOUT_MODE, getLayoutMode()),
 	type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
@@ -469,5 +504,6 @@ export {
 	removePersonalDashboard,
 	saveAutoUpdateSettings,
 	seeDashboard,
-	sendToEmails
+	sendToEmails,
+	switchDashboard
 };

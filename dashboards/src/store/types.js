@@ -7,6 +7,7 @@ import type {DashboardsState} from './dashboards/types';
 import type {SourcesState} from './sources/types';
 import type {ToastsState} from './toasts/types';
 import type {UsersState} from './users/types';
+import type {WidgetFormsState} from './widgetForms/types';
 import type {WidgetsState} from './widgets/types';
 
 export type ChangingState = {
@@ -34,6 +35,7 @@ export type AppState = {
 	sources: SourcesState,
 	toasts: ToastsState,
 	users: UsersState,
+	widgetForms: WidgetFormsState,
 	widgets: WidgetsState
 };
 

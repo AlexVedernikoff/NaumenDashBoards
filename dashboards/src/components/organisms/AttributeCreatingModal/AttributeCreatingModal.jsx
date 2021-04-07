@@ -1,16 +1,17 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import Button from 'components/atoms/Button';
-import {ConstantControl, OperatorControl, SourceControl} from './components';
+import {ConstantControl, OperatorControl} from './components';
 import type {Control, ControlType, Props, State} from './types';
 import {CONTROL_TYPES, MATH_OPERATORS, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
-import {getAggregationLabel} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
+import {getAggregationLabel} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import {getMapValues, isObject} from 'helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import InfoPanel from 'components/atoms/InfoPanel';
 import Modal from 'components/molecules/Modal';
 import React, {PureComponent} from 'react';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
+import SourceControl from 'containers/SourceControl';
 import styles from './styles.less';
 import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
@@ -363,7 +364,6 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	renderSourceControl = (control: Control, index: number) => {
-		const {sources} = this.props;
 		let {name, value} = control;
 
 		if (typeof value !== 'object') {
@@ -376,7 +376,6 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 				name={name}
 				onClickButton={this.handleChangeType}
 				onSelect={this.handleSelect}
-				options={sources}
 				type={CONTROL_TYPES.SOURCE}
 				value={value}
 			/>

@@ -5,9 +5,9 @@ import {store} from 'app.constants';
 
 export const decorators = [
 	(Story) => <Provider store={store}><Story /></Provider>,
+	(Story) => <div style={{height: '100%', width: '100%', overflowY: 'auto'}}><Story /></div>
 ];
 
 export const parameters = {
-	actions: { argTypesRegex: "^on[A-Z].*" },
-	layout: 'centered'
+	actions: { argTypesRegex: "^on[A-Z].*" }
 }

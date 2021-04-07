@@ -1,9 +1,8 @@
 // @flow
-import type {AnyWidget} from 'store/widgets/data/types';
+import type {AnyWidget, WidgetType} from 'store/widgets/data/types';
 import ChartWidget from 'containers/ChartWidget';
 import cn from 'classnames';
 import ContextMenu from 'components/molecules/ContextMenu';
-import {createNewWidget} from 'store/widgets/data/helpers';
 import {debounce} from 'helpers';
 import {DESKTOP_MK_WIDTH, GRID_PROPS, gridRef} from './constants';
 import type {DivRef} from 'components/types';
@@ -36,17 +35,14 @@ export class WidgetsGrid extends Component<Props, State> {
 	};
 	gridContainerRef: DivRef = createRef();
 
-	addDiagramWidget = () => {
+	addNewDiagram = () => this.addNewWidget(WIDGET_TYPES.COLUMN);
+
+	addNewText = () => this.addNewWidget(WIDGET_TYPES.TEXT);
+
+	addNewWidget = (type: WidgetType) => {
 		const {addNewWidget, layoutMode} = this.props;
 
-		addNewWidget(createNewWidget(layoutMode));
-		this.setState({contextMenu: null});
-	};
-
-	addTextWidget = () => {
-		const {addNewWidget, layoutMode} = this.props;
-
-		addNewWidget(createNewWidget(layoutMode, WIDGET_TYPES.TEXT));
+		addNewWidget(new NewWidget(layoutMode, type));
 		this.setState({contextMenu: null});
 	};
 
@@ -163,8 +159,8 @@ export class WidgetsGrid extends Component<Props, State> {
 		if (contextMenu) {
 			return (
 				<ContextMenu{...contextMenu} hideContextMenu={this.hideContextMenu}>
-					<MenuItem key='widget' onClick={this.addDiagramWidget}>Добавить виджет</MenuItem>
-					<MenuItem key='text' onClick={this.addTextWidget}>Добавить текст</MenuItem>
+					<MenuItem key='widget' onClick={this.addNewDiagram}>Добавить виджет</MenuItem>
+					<MenuItem key='text' onClick={this.addNewText}>Добавить текст</MenuItem>
 				</ContextMenu>
 			);
 		}
@@ -180,7 +176,7 @@ export class WidgetsGrid extends Component<Props, State> {
 				<div className={styles.createButtonPlace}>
 					<div className={styles.creationButtonInfo}>
 						Отсутствуют данные для отображения. Чтобы создать виджет, нажмите
-						<a aria-pressed="false" className={styles.creationButton} onClick={this.addDiagramWidget} role="button">
+						<a aria-pressed="false" className={styles.creationButton} onClick={this.addNewDiagram} role="button">
 							здесь
 						</a>
 						или кликнете правой кнопкой мыши на свободное пространство

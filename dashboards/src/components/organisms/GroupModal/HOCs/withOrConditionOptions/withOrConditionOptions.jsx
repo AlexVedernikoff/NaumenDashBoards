@@ -1,6 +1,6 @@
 // @flow
-import type {Option} from 'GroupModal/types';
 import type {InjectedProps} from './types';
+import type {Option} from 'GroupModal/types';
 import React, {createContext, PureComponent} from 'react';
 
 export const OR_CONDITION_OPTIONS_CONTEXT = createContext<Array<Option>>([]);

@@ -1,5 +1,4 @@
 // @flow
-import type {InjectedProps} from 'components/HOCs/withGetComponents/types';
 import type {OnSelectEvent, SelectValue} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 
@@ -47,5 +46,3 @@ export type State = {
 	showForm: boolean,
 	showMenu: boolean
 };
-
-export type ContextProps = InjectedProps & Props;

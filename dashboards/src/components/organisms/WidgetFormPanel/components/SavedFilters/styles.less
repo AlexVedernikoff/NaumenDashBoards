@@ -1,0 +1,24 @@
+@import '/styles/variables';
+
+:local {
+    .actionButtons {
+        align-self: center;
+        height: 100%;
+    }
+
+    .savedFilters {
+        color: @primary;
+        margin: 0 30px;
+    }
+
+    .selectTransparent {
+		background-color: transparent !important;
+		border-radius: none;
+		border: none;
+		box-sizing: border-box;
+
+        &:focus-within {
+			border: none !important;
+		}
+    }
+}

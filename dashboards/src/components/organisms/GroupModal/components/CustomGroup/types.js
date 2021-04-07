@@ -1,6 +1,6 @@
 // @flow
 import type {CustomGroup, ErrorsMap} from 'GroupModal/types';
-import type {Schema} from 'containers/WidgetEditForm/types';
+import type {Schema} from 'components/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {

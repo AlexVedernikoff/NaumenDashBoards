@@ -9,9 +9,9 @@ export class FieldError extends Component<Props> {
 	};
 
 	render () {
-		const {className, text} = this.props;
+		const {className, forwardedRef, text} = this.props;
 
-		return <div className={className} title={text}>{text}</div>;
+		return <div className={className} ref={forwardedRef} title={text}>{text}</div>;
 	}
 }
 

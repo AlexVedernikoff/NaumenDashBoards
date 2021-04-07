@@ -1,11 +1,10 @@
 // @flow
 import cn from 'classnames';
-import type {Components, ContextProps as Props} from './types';
 import Container from 'components/atoms/Container';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import withGetComponents from 'components/HOCs/withGetComponents';
 
 export class ListOption extends PureComponent<Props> {
 	static defaultProps = {
@@ -21,12 +20,12 @@ export class ListOption extends PureComponent<Props> {
 		});
 	};
 
-	getComponents = (): Components => this.props.getComponents({
+	components = {
 		SelectedIcon: Container,
 		Value: Container,
 		ValueContainer: Container,
 		...this.props.components
-	});
+	};
 
 	getOptionLabel = () => {
 		const {getOptionLabel, option} = this.props;
@@ -39,7 +38,7 @@ export class ListOption extends PureComponent<Props> {
 	};
 
 	renderLabel = () => {
-		const {Value} = this.getComponents();
+		const {Value} = this.components;
 		return (
 			<Value className={styles.label}>
 				{this.getOptionLabel()}
@@ -49,7 +48,7 @@ export class ListOption extends PureComponent<Props> {
 
 	renderSelectedIcon = () => {
 		const {selected} = this.props;
-		const {SelectedIcon} = this.getComponents();
+		const {SelectedIcon} = this.components;
 
 		if (selected) {
 			return (
@@ -62,7 +61,7 @@ export class ListOption extends PureComponent<Props> {
 
 	render () {
 		const {option, style} = this.props;
-		const {ValueContainer} = this.getComponents();
+		const {ValueContainer} = this.components;
 
 		return (
 			<ValueContainer className={this.getClassName()} onClick={this.handleClick} option={option} style={style}>
@@ -73,4 +72,4 @@ export class ListOption extends PureComponent<Props> {
 	}
 }
 
-export default withGetComponents(ListOption);
+export default ListOption;

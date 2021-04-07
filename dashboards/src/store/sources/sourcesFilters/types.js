@@ -73,6 +73,6 @@ export type CheckApplyFilter = (source: string, sourceFilter: SourceFiltersItem)
 
 export type FetchSourcesFilters = (metaClass: string) => ThunkAction;
 
-export type UpdateSourcesFilter = (source: string, filter: SourceFiltersItem) => ThunkAction;
+export type UpdateSourcesFilter = (source: string, filter: SourceFiltersItem) => Promise<UpdateSourcesFilterResult>;
 
 export type DeleteSourcesFilter = (source: string, filterId: string) => ThunkAction;

@@ -2,7 +2,7 @@
 import CheckIconButton from 'components/atoms/CheckIconButton';
 import cn from 'classnames';
 import Icon from 'components/atoms/Icon';
-import type {Icon as IconType, Props} from './types';
+import type {Option, Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
@@ -13,7 +13,7 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 		value: ''
 	};
 
-	renderIcon = (option: IconType) => {
+	renderOption = (option: Option) => {
 		const {name, onChange, value: currentValue} = this.props;
 		const {active, name: iconName, title, value} = option;
 		const checked = active || value === currentValue;
@@ -33,7 +33,7 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, disabled, icons} = this.props;
+		const {className, disabled, options} = this.props;
 		const CN = cn({
 			[styles.container]: true,
 			[styles.disabled]: disabled,
@@ -42,7 +42,7 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 
 		return (
 			<div className={CN}>
-				{icons.map(this.renderIcon)}
+				{options.map(this.renderOption)}
 			</div>
 		);
 	}

@@ -1,8 +1,6 @@
-// @flow
 import {action} from '@storybook/addon-actions';
 import Container from 'components/atoms/Container';
 import {DEFAULT_PROPS} from './constants';
-import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React from 'react';
 import Select from './Select';
 import styles from './styles.story.less';
@@ -58,7 +56,7 @@ const TemplateTransparent = args => {
 
 export const Transparent = TemplateTransparent.bind({});
 
-const renderTransparentValueContainer = (props: ContainerProps) => {
+const renderTransparentValueContainer = props => {
 		const {className, onClick} = props;
 
 		return (
