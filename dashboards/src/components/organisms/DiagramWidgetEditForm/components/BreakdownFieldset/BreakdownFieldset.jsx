@@ -107,7 +107,7 @@ export class BreakdownFieldset extends Component<Props> {
 
 			if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 				usedKeys = getMapValues(indicator.computeData)
-					.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : dataKey, usedKeys);
+					.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : usedKeys, usedKeys);
 			} else if (getUsedDataKeys) {
 				usedKeys = getUsedDataKeys(data);
 			}
