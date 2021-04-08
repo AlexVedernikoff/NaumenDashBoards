@@ -1737,6 +1737,30 @@ class ComputeData
 }
 
 /**
+ * Опция для фильтра на виджете
+ */
+class WidgetFilterOption
+{
+    /**
+     * название фильтра
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String label
+
+    /**
+     * пользовательский фильтр
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String descriptor
+
+    /**
+     * атрибуты для фильтра
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Collection<BaseAttribute> attributes
+}
+
+/**
  * Новый формат источника
  */
 class NewSourceValue
@@ -1745,6 +1769,11 @@ class NewSourceValue
      * фильтрация на источник
      */
     String descriptor
+
+    /**
+     * Опции для фильтрации обычного пользователя на виджете
+     */
+    Collection<WidgetFilterOption> widgetFilterOptions
 
     /**
      * значение источника
@@ -3309,6 +3338,34 @@ class SourceFilter extends ValueWithLabel<String>
      * Уникальный индентификатор
      */
     String id
+}
+
+/**
+ * Объект, который представляет собой сохраняемые пользовательские фильтры на источник
+ */
+class WidgetFilterResponse
+{
+    /**
+     * ключ данных, для которых нужно применить пользовательский фильтр
+     */
+    String dataKey
+
+    /**
+     * пользовательский фильтр на источник
+     */
+    String descriptor
+
+    static Collection<WidgetFilterResponse> getWidgetFiltersCollection(def fields)
+    {
+        if(fields instanceof String)
+        {
+            def slurper = new groovy.json.JsonSlurper()
+            fields =  slurper.parseText(fields)
+        }
+        return fields ? fields.findResults {
+            new WidgetFilterResponse(it)
+        } : []
+    }
 }
 //endregion
 return

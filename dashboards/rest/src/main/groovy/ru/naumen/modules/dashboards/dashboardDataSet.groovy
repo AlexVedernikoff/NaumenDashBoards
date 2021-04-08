@@ -34,19 +34,21 @@ interface DashboardDataSet
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
      * @param cardObjectUuid - идентификатор "текущего объекта"
      * @param ignoreTableLimits - объект, описывающий необходимость игнорирования пределов для таблицы
+     * @param widgetFilters - фильтрация от обычного пользователя на виджете
      * @return данные для построения диаграммы
      */
     @Deprecated
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits, def widgetFilters)
 
     /**
      * Получение данных для диаграмм. С поддержкой вычислений.
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
      * @param cardObjectUuid - идентификатор "текущего объекта"
      * @param ignoreTableLimits - объект, описывающий необходимость игнорирования пределов для таблицы
+     * @param widgetFilters - фильтрация от обычного пользователя на виджете
      * @return данные для построения диаграммы
      */
-    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits)
+    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits, def widgetFilters)
 }
 
 @InjectApi
@@ -61,17 +63,21 @@ class DashboardDataSetImpl implements DashboardDataSet
 
     @Override
     @Deprecated
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits, def widgetFilters)
     {
-        return getDataForDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits)
+        return getDataForDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits, widgetFilters)
     }
 
     @Override
-    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits)
+    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits, def widgetFilters)
     {
         ignoreTableLimits = ignoreTableLimits ? new IgnoreLimits(ignoreTableLimits as Map) : new IgnoreLimits()
+        if(widgetFilters)
+        {
+            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(widgetFilters)
+        }
         return api.tx.call {
-            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits)
+            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits, widgetFilters)
         }.with(JsonOutput.&toJson)
     }
 }
@@ -130,9 +136,10 @@ class DashboardDataSetService
      * @param requestContent - запрос на построение диаграмы
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param ignoreTableLimits - объект, описывающий возможности игнорирования пределов для таблицы
+     * @param widgetFilters - фильтрация от обычного пользователя на виджете
      * @return Типизированниые данные для построения диаграмм
      */
-    private def buildDiagram(String dashboardKey, String widgetKey, String subjectUUID, IgnoreLimits ignoreTableLimits)
+    private def buildDiagram(String dashboardKey, String widgetKey, String subjectUUID, IgnoreLimits ignoreTableLimits, Collection<WidgetFilterResponse> widgetFilters = [])
     {
         def widgetSettings = getWidgetSettingsByDashboardAndWidgetKey(dashboardKey, widgetKey)
         def diagramType = widgetSettings.type as DiagramType
@@ -149,7 +156,7 @@ class DashboardDataSetService
                 //вернём всё из бд, после сагрегируем
                 showTableNulls = true
             }
-            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, showTableNulls, showTableBlank, computationInTableRequest, tableTop)
+            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters ,showTableNulls, showTableBlank, computationInTableRequest, tableTop)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
             }
@@ -164,7 +171,7 @@ class DashboardDataSetService
         }
         else
         {
-            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType)
+            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
             res = getDiagramData(request, diagramType)
         }
         switch (diagramType)
@@ -431,6 +438,7 @@ class DashboardDataSetService
      * @param widgetSettings - настройки виджета на построение диаграммы
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param diagramType - тип диаграммы
+     * @param widgetFilters - фильтрация от обычного пользователя на виджете
      * @param showTableNulls - флаг на отображение пустых значений, если диаграмма типа таблица
      * @param showTableBlank - флаг на отображение незаполненных значений, если диаграмма типа таблица
      * @param computationInTableRequest - флаг на наличие вычислений в запросе, если диаграмма типа таблица
@@ -438,7 +446,7 @@ class DashboardDataSetService
      * @return DiagramRequest
      */
     private DiagramRequest mappingDiagramRequest(def widgetSettings, String subjectUUID,
-                                                 DiagramType diagramType, Boolean showTableNulls = false,  Boolean showTableBlank = false,
+                                                 DiagramType diagramType, Collection<WidgetFilterResponse> widgetFilters, Boolean showTableNulls = false,  Boolean showTableBlank = false,
                                                  Boolean computationInTableRequest = false, Integer tableTop = 0)
     {
         def sorting
@@ -453,7 +461,7 @@ class DashboardDataSetService
         def intermediateData = [:]
         uglyRequestData.each { data ->
             def descriptor = DashboardMarshaller.substitutionCardObject(data.source.descriptor as String, subjectUUID)
-            def source = new Source(classFqn: data.source.value.value, descriptor: descriptor)
+            def source = getCorrectSource(data.dataKey, data.source, descriptor, widgetFilters)
             def sourceForCompute = data.sourceForCompute
             def dynamicGroup = null
 
@@ -677,6 +685,125 @@ class DashboardDataSetService
             intermediateData = updateIntermediateData(intermediateData)
         }
         return buildDiagramRequest(intermediateData, subjectUUID, diagramType)
+    }
+
+    /**
+     * Метод получения корректного источника для виджета
+     * @param dataKey - ключ датасета, где использован источник
+     * @param source - источник из виджета
+     * @param baseDescriptor - базовый дескриптор
+     * @param widgetFilters - возможные фильтры для виджета (для разных датасетов
+     * @return источник с правильным фильтром
+     */
+    private Source getCorrectSource(String dataKey, NewSourceValue source, String baseDescriptor, Collection<WidgetFilterResponse> widgetFilters)
+    {
+        if(dataKey in widgetFilters.dataKey)
+        {
+            WidgetFilterResponse userFilter = widgetFilters.find { it.dataKey == dataKey }
+            String userDescriptor = userFilter.descriptor
+            baseDescriptor = prepareWidgetDescriptor(baseDescriptor, userDescriptor)
+        }
+        return new Source(classFqn: source.value.value, descriptor: baseDescriptor)
+    }
+
+    /**
+     * Метод подготовки фильтра источника в правильному виду
+     * @param baseDescriptor - базовый фильтр источника
+     * @param userDescriptor - фильтр источника со стороны пользователя
+     * @return подготовленный фильтр источника
+     */
+    private String prepareWidgetDescriptor(String baseDescriptor, String userDescriptor)
+    {
+        List baseDescriptorAttributes = baseDescriptor ? getAttributesFqnFromDescriptor(baseDescriptor) : []
+        List userDescriptorAttributes = userDescriptor ? getAttributesFqnFromDescriptor(userDescriptor) : []
+        Boolean descriptorsHaveSameAttrs = baseDescriptorAttributes.any { it in userDescriptorAttributes }
+
+        def slurper = new groovy.json.JsonSlurper()
+        def descriptorMap = baseDescriptor ? slurper.parseText(baseDescriptor) : [:]
+        def userDescriptorMap = userDescriptor ? slurper.parseText(userDescriptor) : [:]
+
+        if(descriptorsHaveSameAttrs)
+        {
+            descriptorMap = updateDescriptorWithTheSameAttrs(descriptorMap, userDescriptorMap, baseDescriptorAttributes, userDescriptorAttributes)
+        }
+        else
+        {
+            if(descriptorMap)
+            {
+                def filters = descriptorMap.filters
+                def userFilters = userDescriptorMap ? userDescriptorMap.filters : []
+
+                filters = filters ? filters + userFilters : userFilters
+                descriptorMap.filters = filters
+            }
+            else
+            {
+                descriptorMap = userDescriptorMap
+            }
+        }
+        return JsonOutput.toJson(descriptorMap)
+    }
+
+    /**
+     * Метод по преобразованию двух фильтров источника в один, если у них есть одинаковые атрибуты в составе
+     * @param descriptorMap - словарь с настройками базового фильтра
+     * @param userDescriptorMap - словарь с настройками основного фильтра
+     * @param baseDescriptorAttributes - атрибуты базового фильтра
+     * @param userDescriptorAttributes - атрибуты пользовательского фильтра
+     * @return комбо-фильтр для источника
+     */
+    private Map updateDescriptorWithTheSameAttrs(Map descriptorMap, Map userDescriptorMap, List baseDescriptorAttributes, List userDescriptorAttributes)
+    {
+        //фильтры основного фильтра  покрывает фильтры от пользовательского целиком -
+        // нужно заменить фильтры основного, где атрибуты одни и те же, на те, что есть в пользовательском фильтре
+        if(baseDescriptorAttributes - userDescriptorAttributes && !(userDescriptorAttributes - baseDescriptorAttributes))
+        {
+            def filters = descriptorMap.filters
+            def userFilters = userDescriptorMap.filters
+
+            filters = filters.collect { filterValue->
+                filterValue.each { filtering ->
+                    def attribute = filtering.properties.attributeFqn
+                    if(attribute in userDescriptorAttributes)
+                    {
+                        def newFilter = userFilters.collectMany {userFilterValue->
+                            userFilterValue.findResults { filter ->
+                                if(filter.properties.attributeFqn == attribute)
+                                {
+                                    return filter
+                                }
+                            }
+                        }
+                        filterValue = newFilter
+                    }
+                }
+                return filterValue
+            }
+            descriptorMap.filters = filters
+        }
+        else if(userDescriptorAttributes - baseDescriptorAttributes && !(baseDescriptorAttributes - userDescriptorAttributes))
+        {
+            //иначе пользовательский покрыл все фильтры основного, то логично применить фильтры от пользовательского целиком
+            descriptorMap = userDescriptorMap
+        }
+        return descriptorMap
+    }
+
+    /**
+     * Метод по получению fqn-кодов атрибутов из фильтра источника
+     * @param descriptor - фильтр источника
+     * @return список fqn-кодов атрибутов
+     */
+    private List<String> getAttributesFqnFromDescriptor(String descriptor)
+    {
+        List descriptorAttributes = []
+        def iDesciptor = DashboardMarshaller.createContext(descriptor)
+        iDesciptor.listFilter.elements.each { orFilter ->
+            orFilter.elements.each { filter ->
+                descriptorAttributes << filter.getAttributeFqn() as String
+            }
+        }
+        return descriptorAttributes
     }
 
     /**
