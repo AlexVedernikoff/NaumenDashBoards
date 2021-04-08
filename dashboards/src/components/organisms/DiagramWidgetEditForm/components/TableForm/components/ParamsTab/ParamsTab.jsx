@@ -22,8 +22,15 @@ import styles from './styles.less';
 import {withDataFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class ParamsTab extends Component<DataBuilderProps> {
-	sourceRefFields = [FIELDS.breakdown, FIELDS.column, FIELDS.row];
 	mainIndex: number = 0;
+
+	componentDidMount () {
+		this.resetTopByIndicators();
+	}
+
+	componentDidUpdate () {
+		this.resetTopByIndicators();
+	}
 
 	getDataSetSources = (index: number) => {
 		let {fetchLinkedDataSources, linkedSources, sources, values} = this.props;
@@ -81,6 +88,17 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 		setDataFieldValue(this.mainIndex, FIELDS.breakdown, undefined);
 		setDataFieldValue(this.mainIndex, FIELDS.withBreakdown, false);
+	};
+
+	resetTopByIndicators = () => {
+		const {data, setFieldValue, top} = this.props.values;
+
+		if (top.show && countIndicators(data) > 1) {
+			setFieldValue(FIELDS.top, {
+				...top,
+				show: false
+			});
+		}
 	};
 
 	renderAddInput = (props: $Shape<IconButtonProps>) => <IconButton {...props} icon={ICON_NAMES.PLUS} round={false} />;

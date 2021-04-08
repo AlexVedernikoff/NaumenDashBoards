@@ -61,8 +61,8 @@ async function checkSourceForParent () {
  * @param {DataSet} data - набор данных виджета
  * @returns {number}
  */
-const countIndicators = (data: Array<DataSet>): number => data.reduce((count, {indicators}) => {
-	return Array.isArray(indicators) ? count + indicators.length : count;
+const countIndicators = (data: Array<DataSet>): number => data.reduce((count, {indicators, sourceForCompute}) => {
+	return !sourceForCompute && Array.isArray(indicators) ? count + indicators.length : count;
 }, 0);
 
 export {
