@@ -23,7 +23,7 @@ class Table {
 		return container.firstChild;
 	};
 
-	createFooter = () => `<tr>${this.columns.map(this.createFooterColumn).join('')}</tr>`;
+	createFooter = () => `<tr>${this.getDataColumns().map(this.createFooterColumn).join('')}</tr>`;
 
 	createFooterColumn = ({footer}: TableColumn) => `<td>${footer}</td>`;
 
