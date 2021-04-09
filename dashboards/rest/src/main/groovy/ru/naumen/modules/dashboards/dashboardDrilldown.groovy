@@ -441,7 +441,7 @@ class Link
                                     getStateFilters(attr, value, filterBuilder)
                                     break
                                 default:
-                                    result << [getOrFilter(attributeType, attr.code, value, filterBuilder)]
+                                    result << [getOrFilter(attributeType, attr, value, filterBuilder)]
                             }
                         }
                     }
@@ -1014,7 +1014,7 @@ class Link
         )
     }
 
-    private def getOrFilter(String type, String code, def value, def filterBuilder)
+    private def getOrFilter(String type, Attribute attr, def value, def filterBuilder)
     {
         //TODO: хорошему нужно вынести все эти методы в enum. Можно прям в этом модуле
         // Список доступных условий фильтрации: "notContainsIncludeEmpty", "nextN", "containsInSet",
@@ -1023,6 +1023,17 @@ class Link
         // "fromTo", "lastN", "today", "timerStatusContains", "timerStatusNotContains", "backTimerDeadLineFromTo",
         // "backTimerDeadLineContains", "titleContains", "titleNotContains", "containsWithRemoved",
         // "notContainsWithRemoved", "containsUser", "containsSubject", "containsUserAttribute", "containsSubjectAttribute"
+        String code = attr.code
+        if(attr.ref)
+        {
+            //пришли из ссылочного атрибута, возможная базовая обработка
+            def values = []
+            if(!(type in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE, AttributeType.TIMER_TYPES, AttributeType.BOOL_TYPE]))
+            {
+                values = findObjects(attr.ref, attr.property, value)
+                return filterBuilder.OR(attr.code, 'containsInSet', values)
+            }
+        }
         if (value == 'Не заполнено' || value == 'EMPTY')
         {
             return filterBuilder.OR(code, 'null', null)
