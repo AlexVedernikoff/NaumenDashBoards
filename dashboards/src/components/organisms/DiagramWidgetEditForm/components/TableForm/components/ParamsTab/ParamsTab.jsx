@@ -93,7 +93,7 @@ export class ParamsTab extends Component<DataBuilderProps> {
 	resetTopByIndicators = () => {
 		const {data, setFieldValue, top} = this.props.values;
 
-		if (top.show && countIndicators(data) > 1) {
+		if (top?.show && countIndicators(data) > 1) {
 			setFieldValue(FIELDS.top, {
 				...top,
 				show: false
