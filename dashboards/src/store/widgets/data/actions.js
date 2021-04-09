@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
-import type {AnyWidget, ValidateWidgetToCopyResult} from './types';
+import type {AnyWidget, SetWidgetWarning, ValidateWidgetToCopyResult} from './types';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
@@ -389,9 +389,19 @@ const setCreatedWidget = (payload: AnyWidget) => ({
 	type: WIDGETS_EVENTS.SET_CREATED_WIDGET
 });
 
-const setWidgets = (payload: Array<AnyWidget>): Object => ({
+const setWidgets = (payload: Array<AnyWidget>) => ({
 	payload,
 	type: WIDGETS_EVENTS.SET_WIDGETS
+});
+
+const setWarningMessage = (payload: SetWidgetWarning) => ({
+	payload,
+	type: WIDGETS_EVENTS.WIDGET_SET_WARNING
+});
+
+const clearWarningMessage = (payload: string) => ({
+	payload,
+	type: WIDGETS_EVENTS.WIDGET_CLEAR_WARNING
 });
 
 const updateWidget = (payload: AnyWidget) => ({
@@ -403,6 +413,7 @@ export {
 	addWidget,
 	cancelForm,
 	copyWidget,
+	clearWarningMessage,
 	createWidget,
 	editWidgetChunkData,
 	focusWidget,
@@ -412,6 +423,7 @@ export {
 	saveWidget,
 	selectWidget,
 	setSelectedWidget,
+	setWarningMessage,
 	setUseGlobalChartSettings,
 	setWidgets,
 	updateWidget,

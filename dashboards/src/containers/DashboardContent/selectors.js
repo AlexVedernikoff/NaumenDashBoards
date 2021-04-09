@@ -1,9 +1,8 @@
 // @flow
 import type {AppState} from 'store/types';
 import {changeLayouts} from 'store/dashboard/layouts/actions';
-import type {ConnectedFunctions, ConnectedProps} from './types';
-import {drillDown, openCardObject, openNavigationLink} from 'store/widgets/links/actions';
 import {
+	clearWarningMessage,
 	editWidgetChunkData,
 	focusWidget,
 	removeWidget,
@@ -11,6 +10,8 @@ import {
 	selectWidget,
 	updateWidget
 } from 'store/widgets/data/actions';
+import type {ConnectedFunctions, ConnectedProps} from './types';
+import {drillDown, openCardObject, openNavigationLink} from 'store/widgets/links/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getMapValues} from 'helpers';
 import {USER_ROLES} from 'store/context/constants';
@@ -41,6 +42,7 @@ export const props = (state: AppState): ConnectedProps => {
 
 export const functions: ConnectedFunctions = {
 	changeLayouts,
+	clearWarningMessage,
 	drillDown,
 	editWidgetChunkData,
 	fetchBuildData,

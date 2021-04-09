@@ -3,11 +3,13 @@ import type {
 	AddWidget,
 	AxisWidget,
 	CircleWidget,
+	ClearMessageWarning,
 	DeleteWidget,
 	Group,
 	Indicator,
 	SelectWidget,
 	SetCreatedWidget,
+	SetMessageWarning,
 	SetWidgets,
 	Source,
 	UpdateWidget,
@@ -296,13 +298,52 @@ const getCustomColorsSettingsKey = (widget: Widget): string | null => {
 	}
 };
 
+/**
+ * Устанавливаем ошибку на виджет
+ * @param {WidgetsDataState} state - хранилище данных виджетов
+ * @param {SetMessageError} payload - данные об ошибке
+ * @returns {WidgetsDataState}
+ */
+const setWidgetWarning = (state: WidgetsDataState, {payload}: SetMessageWarning): WidgetsDataState => {
+	return {
+		...state,
+		map: {
+			...state.map,
+			[payload.id]: {
+				...state.map[payload.id],
+				warningMessage: payload.message
+			}
+		}
+	};
+};
+
+/**
+ * Устанавливаем ошибку на виджет
+ * @param {WidgetsDataState} state - хранилище данных виджетов
+ * @param {ClearMessageWarning} payload - id виджета
+ * @returns {WidgetsDataState}
+ */
+const clearWidgetWarning = (state: WidgetsDataState, {payload}: ClearMessageWarning): WidgetsDataState => {
+	const {warningMessage, ...newPayload} = state.map[payload];
+
+	return {
+		...state,
+		map: {
+			...state.map,
+			[payload]: newPayload
+		}
+	};
+};
+
 export {
 	createNewWidget,
+	clearWidgetWarning,
 	getBuildSet,
 	getCustomColorsSettingsKey,
 	getComboYAxisName,
 	getMainDataSet,
 	getMainDataSetIndex,
+	setWidgetWarning,
 	setWidgets,
 	setSelectedWidget,
 	updateWidget,

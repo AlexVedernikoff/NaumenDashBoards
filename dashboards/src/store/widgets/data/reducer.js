@@ -1,10 +1,12 @@
 // @flow
 import {
 	addWidget,
+	clearWidgetWarning,
 	createWidget,
 	deleteWidget,
 	resetWidget,
 	setSelectedWidget,
+	setWidgetWarning,
 	setWidgets,
 	updateWidget
 } from './helpers';
@@ -113,6 +115,10 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			return setWidgets(state, action);
 		case WIDGETS_EVENTS.UPDATE_WIDGET:
 			return updateWidget(state, action);
+		case WIDGETS_EVENTS.WIDGET_SET_WARNING:
+			return setWidgetWarning(state, action);
+		case WIDGETS_EVENTS.WIDGET_CLEAR_WARNING:
+			return clearWidgetWarning(state, action);
 		default:
 			return state;
 	}
