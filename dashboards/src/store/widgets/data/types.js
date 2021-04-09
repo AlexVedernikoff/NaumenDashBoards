@@ -139,7 +139,8 @@ type BaseWidget = {|
 	id: string,
 	name: string,
 	navigation: NavigationSettings,
-	templateName: string
+	templateName: string,
+	warningMessage?: string
 |};
 
 // Общие параметры графиков
@@ -470,6 +471,11 @@ export type DiagramWidgetDataSet =
 
 export type EditWidgetChunkData = (widget: Widget, chunkData: Object) => ThunkAction;
 
+export type SetWidgetWarning = {
+	id: string,
+	message: string,
+};
+
 export type AddWidget = {
 	payload: NewWidget,
 	type: typeof WIDGETS_EVENTS.ADD_WIDGET
@@ -554,8 +560,19 @@ type UnknownWidgetsAction = {
 	type: typeof WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION
 };
 
+export type SetMessageWarning = {
+	payload: SetWidgetWarning,
+	type: typeof WIDGETS_EVENTS.WIDGET_SET_WARNING
+};
+
+export type ClearMessageWarning = {
+	payload: string,
+	type: typeof WIDGETS_EVENTS.WIDGET_CLEAR_WARNING
+};
+
 export type WidgetsAction =
 	| AddWidget
+	| ClearMessageWarning
 	| DeleteWidget
 	| RecordValidateToCopyError
 	| RecordWidgetCopyError
@@ -573,6 +590,7 @@ export type WidgetsAction =
 	| SetFocusedWidget
 	| SetWidgets
 	| UpdateWidget
+	| SetMessageWarning
 	| UnknownWidgetsAction
 ;
 

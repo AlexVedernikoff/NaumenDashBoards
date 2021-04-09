@@ -19,6 +19,7 @@ type GridProps = {
 export type Props = {
 	...$Exact<GridProps>,
 	buildData: BuildData,
+	clearWarningMessage: (id: string) => ThunkAction,
 	data: Widget,
 	editWidgetChunkData: EditWidgetChunkData,
 	fetchBuildData: (widget: Widget) => ThunkAction,

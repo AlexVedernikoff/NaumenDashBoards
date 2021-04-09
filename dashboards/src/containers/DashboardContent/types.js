@@ -9,6 +9,7 @@ import type {UserData} from 'store/context/types';
 
 export type ConnectedFunctions = {
 	changeLayouts: (payload: LayoutsPayloadForChange) => Object,
+	clearWarningMessage: (payload: string) => void,
 	drillDown: DrillDown,
 	editWidgetChunkData: (widget: Widget, chunkData: Object) => ThunkAction,
 	fetchBuildData: (widget: Widget) => ThunkAction,

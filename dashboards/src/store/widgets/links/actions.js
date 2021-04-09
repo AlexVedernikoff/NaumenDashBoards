@@ -146,5 +146,6 @@ const recordLinkError = (payload: string) => ({
 export {
 	drillDown,
 	openCardObject,
-	openNavigationLink
+	openNavigationLink,
+	recordLinkError
 };

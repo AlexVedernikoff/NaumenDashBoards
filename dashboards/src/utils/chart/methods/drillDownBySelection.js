@@ -2,7 +2,7 @@
 import type {AddFilterProps, AddFiltersProps, ReturnsAddFiltersData} from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboWidget, Group} from 'store/widgets/data/types';
+import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboWidget, Group, MixedAttribute} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {deepClone} from 'helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
@@ -14,6 +14,7 @@ import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {hasUUIDsInLabels, transformGroupFormat} from 'store/widgets/helpers';
+import {setWarningMessage} from 'store/widgets/data/actions';
 import {store} from 'app.constants';
 import type {ThunkAction} from 'store/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -201,6 +202,107 @@ const addFilters = (widget: Chart, props: AddFiltersProps): ReturnsAddFiltersDat
 };
 
 /**
+ * Определяет нужно ли по данному типу аттрибута производить DrillDown
+ * @param {Attribute} attribute - Атрибут
+ * @returns  {boolean} - Разрешение на DrillDown
+ */
+const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
+	if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+		const isReferenceWithMetaClassRef = attribute.type in ATTRIBUTE_SETS.REFERENCE && attribute.ref?.type === ATTRIBUTE_TYPES.metaClass;
+
+		return !isReferenceWithMetaClassRef;
+	}
+
+	return true;
+};
+
+/**
+ * Определяет можно ли в данном Axis-виджете производить DrillDown
+ * @param {AxisWidget} widget - Виджет
+ * @returns  {boolean} - Разрешение на DrillDown
+ */
+const hasDrillDownAxisWidget = (widget: AxisWidget) => {
+	const {data} = widget;
+	const index = getMainDataSetIndex(widget.data);
+	const dataSet = data[index];
+
+	if (dataSet) {
+		const {attribute} = dataSet.parameters[0];
+
+		return hasAttributeDrillDown(attribute);
+	}
+
+	return false;
+};
+
+/**
+ * Определяет можно ли в данном Combo-виджете производить DrillDown
+ * @param {ComboWidget} widget - Виджет
+ * @param {DiagramBuildData} buildData - данные для построения
+ * @param {number} seriesIndex - нндекс массива данных
+ * @returns {boolean} - Разрешение на DrillDown
+ */
+const hasDrillDownComboWidget = (widget: ComboWidget, buildData: DiagramBuildData, seriesIndex) => {
+	const {data} = widget;
+	const index = data.findIndex(dataSet => dataSet.dataKey === buildData.series[seriesIndex].dataKey);
+	const dataSet = data[index];
+
+	if (dataSet) {
+		const {attribute} = dataSet.parameters[0];
+
+		return hasAttributeDrillDown(attribute);
+	}
+
+	return false;
+};
+
+/**
+ * Определяет можно ли в данном Circle-виджете производить DrillDown
+ * @param {CircleWidget} widget - Виджет
+ * @returns {boolean} - Разрешение на DrillDown
+ */
+const hasDrillDownCircleWidget = (widget: CircleWidget) => {
+	const {data} = widget;
+	const index = getMainDataSetIndex(widget.data);
+	const dataSet = data[index];
+
+	if (dataSet) {
+		const {attribute} = dataSet.indicators[0];
+
+		return hasAttributeDrillDown(attribute);
+	}
+
+	return false;
+};
+
+/**
+ * Определяет можно ли в данном виджете производить DrillDown
+ * @param {Chart} widget - Виджет
+ * @param {DiagramBuildData} buildData - данные для построения
+ * @param {number} seriesIndex - нндекс массива данных
+ * @returns {boolean} - Разрешение на DrillDown
+ */
+const hasDrillDownWidget = (widget: Chart, buildData: DiagramBuildData, seriesIndex: number): boolean => {
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = WIDGET_TYPES;
+
+	switch (widget.type) {
+		case BAR:
+		case BAR_STACKED:
+		case COLUMN:
+		case COLUMN_STACKED:
+		case LINE:
+			return hasDrillDownAxisWidget(widget);
+		case COMBO:
+			return hasDrillDownComboWidget(widget, buildData, seriesIndex);
+		case DONUT:
+		case PIE:
+			return hasDrillDownCircleWidget(widget);
+		default:
+			return false;
+	}
+};
+
+/**
  * Обработчик для события выбора конкретной части диаграммы.
  * Добавляет фильтры для перехода на список построения
  * @param {Chart} widget - данные виджета
@@ -209,16 +311,22 @@ const addFilters = (widget: Chart, props: AddFiltersProps): ReturnsAddFiltersDat
  */
 const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) =>
 	(event: MouseEvent, chartContext: Object, config: Object) => {
-	const [index, mixin] = addFilters(widget, {
-		buildData,
-		config,
-		mixin: createDrillDownMixin(widget)
-	});
-
 	event.stopPropagation();
 
-	if (index !== -1) {
-		store.dispatch(drillDown(widget, index, mixin));
+	if (hasDrillDownWidget(widget, buildData, config.seriesIndex)) {
+		const [index, mixin] = addFilters(widget, {
+			buildData,
+			config,
+			mixin: createDrillDownMixin(widget)
+		});
+
+		if (index !== -1) {
+			store.dispatch(drillDown(widget, index, mixin));
+		}
+	} else {
+		const {id} = widget;
+
+		store.dispatch(setWarningMessage({id, message: 'Для данного виджета детализация данных не доступна'}));
 	}
 };
 

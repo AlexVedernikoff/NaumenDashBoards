@@ -70,6 +70,12 @@ export class Widget extends PureComponent<Props, State> {
 		});
 	};
 
+	handleClearWarningMessage = () => {
+		const {clearWarningMessage, data: {id}} = this.props;
+
+		clearWarningMessage(id);
+	};
+
 	handleClick = (e: SyntheticMouseEvent<HTMLDivElement>) => {
 		const {data, onClick} = this.props;
 
@@ -231,6 +237,18 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderTextWidget = (widget: TextWidgetType) => <TextWidget widget={widget} />;
 
+	renderWidgetWarning = () => {
+		const {data: {warningMessage}} = this.props;
+
+		if (warningMessage) {
+			return (
+				<div className={styles.widgetWarning} onMouseLeave={this.handleClearWarningMessage}>
+					<div>{warningMessage}</div>
+				</div>
+			);
+		}
+	};
+
 	render () {
 		const {children, onMouseDown, onMouseUp, onTouchEnd, onTouchStart, style} = this.props;
 		const gridProps = {
@@ -243,6 +261,7 @@ export class Widget extends PureComponent<Props, State> {
 
 		return (
 			<div {...gridProps} className={this.getClassName()} onClick={this.handleClick} ref={this.ref}>
+				{this.renderWidgetWarning()}
 				{this.renderControlPanel()}
 				{this.renderContent()}
 				{this.renderError()}
