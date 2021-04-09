@@ -689,7 +689,7 @@ class DashboardDataSetService
     {
         return groupType?.way == Way.SYSTEM ? new GroupParameter(
             title: title,
-            type: attr.type == AttributeType.DT_INTERVAL_TYPE
+            type: Attribute.getAttributeType(attr) == AttributeType.DT_INTERVAL_TYPE
                 ? getDTIntervalGroupType(groupType.data as String)
                 : groupType.data as GroupType,
             attribute: attr,
