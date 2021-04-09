@@ -394,7 +394,7 @@ class DashboardUtils
             case AxisZero:
                 def dataKey = UUID.randomUUID()
                 return [new DiagramNewData(
-                    indicators: [new NewIndicator(aggregation: dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.yAxis)],
+                    indicators: dataOrZeroWidget.sourceForCompute ? [] : [new NewIndicator(aggregation: dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.yAxis)],
                     parameters: [new NewParameter(group: dataOrZeroWidget.group, attribute: dataOrZeroWidget.xAxis)],
                     breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
                     dataKey: dataKey,
@@ -409,7 +409,7 @@ class DashboardUtils
                 {
                     return dataOrZeroWidget.collect {
                         new DiagramNewData(
-                            indicators: [new NewIndicator(aggregation: it.aggregation, attribute: it.yAxis)],
+                            indicators: it.sourceForCompute ? [] : [new NewIndicator(aggregation: it.aggregation, attribute: it.yAxis)],
                             parameters: [new NewParameter(group: it.group, attribute: it.xAxis)],
                             breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
                             dataKey: it.dataKey,
@@ -421,13 +421,20 @@ class DashboardUtils
                             type: it.type)
                     }
                 }
-                else return dataOrZeroWidget
+                else
+                    return dataOrZeroWidget.collect {
+                        if(it.sourceForCompute)
+                        {
+                            it.indicators = []
+                        }
+                        return it
+                    }
             case CircleZero:
             case SummaryZero:
                 def dataKey = UUID.randomUUID()
                 return [new DiagramNewData(
                     breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
-                    indicators: [new NewIndicator(aggregation:  dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.indicator)],
+                    indicators: dataOrZeroWidget.sourceForCompute ? [] : [new NewIndicator(aggregation:  dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.indicator)],
                     source: new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
                     sourceForCompute: dataOrZeroWidget.sourceForCompute,
                     dataKey: dataKey,
@@ -438,7 +445,7 @@ class DashboardUtils
                 {
                     return dataOrZeroWidget.collect {new DiagramNewData(
                         breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
-                        indicators: [new NewIndicator(aggregation: it.aggregation, attribute: it.indicator)],
+                        indicators: it.sourceForCompute ? [] : [new NewIndicator(aggregation: it.aggregation, attribute: it.indicator)],
                         source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
                         sourceForCompute: it.sourceForCompute,
                         showEmptyData: it.showEmptyData,
@@ -447,7 +454,14 @@ class DashboardUtils
                         top: clazz == CircleCurrentAndNew ? new Top() : null
                     )}
                 }
-                else return dataOrZeroWidget
+                else
+                    return dataOrZeroWidget.collect {
+                        if(it.sourceForCompute)
+                        {
+                            it.indicators = []
+                        }
+                        return it
+                    }
             case TablePrevAndCurrentAndNew:
                 if(dataOrZeroWidget.find() instanceof TablePrevData)
                 {
@@ -457,7 +471,7 @@ class DashboardUtils
                 {
                     return dataOrZeroWidget.collect {
                         new DiagramNewData(
-                            indicators: it.indicators,
+                            indicators: it.sourceForCompute ? [] : it.indicators,
                             parameters: it.parameters,
                             breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
                             dataKey: it.dataKey,
@@ -466,7 +480,14 @@ class DashboardUtils
                             )
                     }
                 }
-                else return dataOrZeroWidget
+                else
+                    return dataOrZeroWidget.collect {
+                        if(it.sourceForCompute)
+                        {
+                            it.indicators = []
+                        }
+                        return it
+                    }
 
         }
     }
@@ -2404,12 +2425,12 @@ abstract class Widget
                 data = fields.order.collect { index ->
                     def dataKey = fields."dataKey_$index"
                     def parameters = [[attribute: fields."xAxis_$index", group: fields."group$index"]]
-                    def indicators = [[aggregation : fields."aggregation_$index", attribute:
-                        fields."yAxis_$index", type: fields."type_$index"]]
 
                     def source = fields."source_$index".value
                     def descriptor = fields."descriptor_$index"
                     def sourceForCompute = fields."sourceForCompute_$index"
+                    def indicators = sourceForCompute ? [] : [[aggregation : fields."aggregation_$index", attribute:
+                        fields."yAxis_$index", type: fields."type_$index"]]
                     def top = fields.top
                     def type = fields."type_$index"
 
@@ -2430,11 +2451,11 @@ abstract class Widget
             {
                 data = fields.order.collect { index ->
                     def dataKey = fields."dataKey_$index"
-                    def indicators = [[aggregation: fields."aggregation_$index", attribute: fields."indicator_$index"]]
 
                     def source =  fields."source_$index".value
                     def descriptor = fields."descriptor_$index"
                     def sourceForCompute = fields."sourceForCompute_$index"
+                    def indicators = sourceForCompute ? [] : [[aggregation: fields."aggregation_$index", attribute: fields."indicator_$index"]]
                     def top = fields.top
 
                     Map dataBody = [descriptor      : descriptor,
@@ -2455,12 +2476,11 @@ abstract class Widget
                 data = fields.order.collect { index ->
                     def dataKey = fields."dataKey_$index"
                     def parameters = [[attribute: fields."row_$index", group: fields."group$index"]]
-                    def indicators = [[aggregation: fields."aggregation_$index", attribute: fields."column_$index"]]
 
                     def source =  fields."source_$index".value
                     def descriptor = fields."descriptor_$index"
                     def sourceForCompute = fields."sourceForCompute_$index"
-
+                    def indicators = sourceForCompute ? [] : [[aggregation: fields."aggregation_$index", attribute: fields."column_$index"]]
                     def top = fields.top
 
                     Map requestContent = [descriptor      : descriptor,

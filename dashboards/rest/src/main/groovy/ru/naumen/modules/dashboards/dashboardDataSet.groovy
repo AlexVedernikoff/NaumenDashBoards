@@ -248,7 +248,13 @@ class DashboardDataSetService
         }
         else
         {
-            return tempData?.parameters?.sum { return it?.count { it?.group?.way == Way.CUSTOM } }
+            return tempData?.parameters?.collectMany { parameters ->
+                return parameters.findResults {
+                    it?.group?.way == Way.CUSTOM
+                        ? it?.group?.data?.id
+                        : null
+                }
+            }?.unique()?.size()
         }
     }
 
@@ -337,11 +343,11 @@ class DashboardDataSetService
                     return group
                 }
             }
-            return groups
+            return it?.sourceforCompute ? [] : groups
         }
 
         List fullAggregations = requestData?.aggregations?.collectMany {
-            computationInRequest ? it : it?.collect { aggr -> prepareAggregation(aggr, mainSource.classFqn)}
+            it?.any {it?.attribute instanceof ComputedAttr } ? it : it?.collect { aggr -> prepareAggregation(aggr, mainSource.classFqn) }
         }
 
         def breakdowns = fullGroups.findAll { it.title == 'breakdown' }
@@ -674,15 +680,36 @@ class DashboardDataSetService
                                                       : comp.find()?.computeData,
                                                   requisite: requisite]]
         }
-        Boolean manySources = isDiagramTypeTable && widgetSettings?.data*.sourceForCompute?.count { !it } > 1
+        Boolean hasTableNotOnlyBaseSources = (widgetSettings?.data*.source.value.value as Set).size() != 1
+        Boolean manySources = isDiagramTypeTable &&
+                              widgetSettings?.data*.sourceForCompute?.count { !it } > 1 &&
+                              hasTableNotOnlyBaseSources
         if(manySources)
         {
             Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(widgetSettings)
             intermediateData = updateIntermediateDataToOneSource(intermediateData, computationInTableRequest, countOfCustomsInFirstSource)
         }
-        if(computationInTableRequest)
+        if(computationInTableRequest && hasTableNotOnlyBaseSources)
         {
             intermediateData = updateIntermediateData(intermediateData)
+            def request = buildDiagramRequest(intermediateData, subjectUUID, diagramType)
+
+            List<RequestData> requestData = prevData.findResults { key, value -> value?.requestData?.aggregations ? value?.requestData : null }
+            def computeData = requestData?.aggregations?.attribute?.flatten()?.collectMany {
+                if(it instanceof ComputedAttr)
+                {
+                    return it?.computeData?.findResults { k, v ->
+                        return [currentKey: k, prevKey: v?.dataKey]
+                    }
+                }
+                else
+                    return []
+            }
+            computeData?.each {
+                def prevDataSource = prevData[it?.prevKey]?.requestData?.source
+                request?.data[it?.currentKey]?.source = prevDataSource
+            }
+            return request
         }
         return buildDiagramRequest(intermediateData, subjectUUID, diagramType)
     }
@@ -918,16 +945,18 @@ class DashboardDataSetService
                 def group = comp.group as GroupParameter
                 def aggregation = comp.aggregation as AggregationParameter
                 aggregation.attribute.title = aggregation.title
-                List computeAggregationIds = []
-                newRequestData.aggregations.eachWithIndex { aggr, id ->
-                    if(aggr?.attribute?.type == 'COMPUTED_ATTR')
-                    {
-                        computeAggregationIds += id
+                if (diagramType == DiagramType.TABLE)
+                {
+                    //убираем всю информацию о вычислении
+                    newRequestData.aggregations -= newRequestData.aggregations.findAll {
+                        !it?.attribute || it?.attribute?.type == 'COMPUTED_ATTR'
                     }
+                    //заменяем нормальным атрибутов агрегации
+                    newRequestData.aggregations.add(0, aggregation)
                 }
-                computeAggregationIds.each { id ->
-                    newRequestData.aggregations -= newRequestData.aggregations[id]
-                    newRequestData.aggregations.add(id, aggregation)
+                else
+                {
+                    newRequestData.aggregations = [aggregation]
                 }
                 // предполагаем что количество агрегаций будет не больше одной
                 newRequestData.groups = (newRequestData.groups || group) ? (newRequestData.groups + group).grep() :
@@ -1821,7 +1850,8 @@ class DashboardDataSetService
                             {
                                 def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
                                 listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
-                                res = [tempRes]
+                                res = [tempRes].with(formatGroup)
+                                               .with(formatAggregation)
                             }
                             def filtersTitle = filters.unique { it.id }.findResults {
                                 if(it.title)
