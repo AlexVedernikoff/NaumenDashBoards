@@ -209,8 +209,9 @@ const addFilters = (widget: Chart, props: AddFiltersProps): ReturnsAddFiltersDat
 const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
 	if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 		const isReferenceWithMetaClassRef = attribute.type in ATTRIBUTE_SETS.REFERENCE && attribute.ref?.type === ATTRIBUTE_TYPES.metaClass;
+		const isReferenceWithDate = attribute.type in ATTRIBUTE_SETS.REFERENCE && (attribute.ref?.type ?? '') in ATTRIBUTE_SETS.DATE;
 
-		return !isReferenceWithMetaClassRef;
+		return !isReferenceWithMetaClassRef && !isReferenceWithDate;
 	}
 
 	return true;
