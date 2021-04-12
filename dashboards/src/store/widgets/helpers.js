@@ -91,10 +91,11 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
  * @returns {boolean}
  */
 const hasUUIDsInLabels = (attribute?: Attribute, group?: Group): boolean => {
-	const {metaClass} = ATTRIBUTE_TYPES;
+	const {dtInterval, metaClass} = ATTRIBUTE_TYPES;
 
 	return (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE)
 		|| attribute?.type === metaClass
+		|| attribute?.type === dtInterval
 		|| group?.way === GROUP_WAYS.CUSTOM;
 };
 
