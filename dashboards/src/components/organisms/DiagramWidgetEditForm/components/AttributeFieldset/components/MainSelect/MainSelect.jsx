@@ -2,7 +2,7 @@
 import AttributeSelect from 'DiagramWidgetEditForm/components/AttributeFieldset/components/AttributeSelect';
 import cn from 'classnames';
 import Label from 'components/atoms/Label';
-import List from 'containers/DiagramWidgetEditForm/components/AttributeFieldSet/components/MainSelectList';
+import List from 'containers/DiagramWidgetEditForm/components/MainSelectList';
 import type {Props} from './types';
 import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
 import React, {PureComponent} from 'react';

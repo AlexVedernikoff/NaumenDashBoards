@@ -8,7 +8,7 @@ import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import Toggle from 'components/atoms/Toggle';
 import TreeList from 'components/molecules/MaterialTreeSelect/components/Tree';
-import withAttributeFieldset from 'containers/DiagramWidgetEditForm/components/AttributeFieldSet/withAttributeFieldset';
+import withAttributeFieldset from 'DiagramWidgetEditForm/components/AttributeFieldset/HOCs/withAttributeFieldset';
 
 export class MainSelectList extends PureComponent<Props, State> {
 	components = null;
