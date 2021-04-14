@@ -2091,6 +2091,7 @@ class DashboardDataSetService
         {
             List notAggregated = data.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }  //ищем агрегации n/a
             List requestGroups = updateNotAggregatedToGroups(notAggregated) + data.groups
+            Source source = data.source
             int dtIntervalAttributeIdx = requestGroups.findIndexOf {Attribute.getAttributeType(it.attribute) == AttributeType.DT_INTERVAL_TYPE}
             dtIntervalAttributeIdx = dtIntervalAttributeIdx > -1 ? dtIntervalAttributeIdx + listIdsOfNormalAggregations.size() : dtIntervalAttributeIdx
             if(dtIntervalAttributeIdx > -1)
@@ -2105,8 +2106,8 @@ class DashboardDataSetService
                 //обрабатываем группы
                 def totalGroupValues = groups.withIndex().collect { group, i ->
                     return formatGroup(requestGroups[i] as GroupParameter,
-                                       requestGroups[i]?.attribute?.attrChains()?.last()?.metaClassFqn, //attributeChains.head().property
-                                       group, diagramType,
+                                       requestGroups[i]?.attribute?.attrChains()?.last()?.metaClassFqn,
+                                       source, group, diagramType,
                                        requestGroups[i]?.title == 'n/a',
                                        requestGroups[i]?.title == 'breakdown')
                 }
@@ -2144,7 +2145,7 @@ class DashboardDataSetService
      * @param fromBreakdown - флаг на обработку атрибута из разбивки
      * @return человеко читаемое значение группировки
      */
-    private String formatGroup(GroupParameter parameter, String fqnClass, def value, DiagramType diagramType, Boolean fromNA = false, Boolean fromBreakdown = false)
+    private String formatGroup(GroupParameter parameter, String fqnClass, Source source, def value, DiagramType diagramType, Boolean fromNA = false, Boolean fromBreakdown = false)
     {
         GroupType type = parameter.type
 
@@ -2299,11 +2300,13 @@ class DashboardDataSetService
                     return getNullValue(diagramType, fromBreakdown)
                 }
                 def russianLocale = new Locale("ru")
-                SimpleDateFormat standardDateFormatter = new SimpleDateFormat("yyyy-MM-dd", russianLocale)
                 SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd.MM.yy", russianLocale)
-                def (star, numberWeek) = value.split("#", 2)
-                def minDate = standardDateFormatter.parse(star as String)
-                def countDays = (numberWeek as int) * 7
+                def minDate = DashboardUtils.getMinDate(
+                    parameter.attribute.attrChains().code.join('.'),
+                    source.classFqn,
+                    source.descriptor
+                )
+                def countDays = (value as int) * 7
                 String startDate = Calendar.instance.with {
                     setTime(minDate)
                     add(DAY_OF_MONTH, countDays)

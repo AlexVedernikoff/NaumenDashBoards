@@ -282,13 +282,13 @@ class QueryWrapper implements CriteriaWrapper
         def sc = api.selectClause
         if(sc.metaClass.respondsTo(sc, 'absDurationInUnits'))
         {
-            return sc.absDurationInUnits(column, sc.constant("'$minDate'"), 'week')
+            return sc.absDurationInUnits(column, sc.constant(minDate), 'week')
         }
         else
         {
             return sc.extract(
                 sc.columnSubtract(
-                    column, sc.constant("'$minDate'") // Вычитаем значение минимальной даты и извлекаем количество дней
+                    column, sc.constant($minDate) // Вычитаем значение минимальной даты и извлекаем количество дней
                 ),
                 'DAY').with(sc.&columnSum.rcurry(sc.constant(DashboardQueryWrapperUtils.ACCURACY))) //прибавляем для точности данных
                      .with(sc.&columnDivide.rcurry(sc.constant(DashboardQueryWrapperUtils.WEEKDAY_COUNT))) // делим на семь дней
@@ -310,7 +310,7 @@ class QueryWrapper implements CriteriaWrapper
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
             Date startMinDate = DashboardUtils.getMinDate(
-                parameter.attribute.code,
+                parameter.attribute.attrChains().code.join('.'),
                 parameter.attribute.sourceCode,
                 source.descriptor
             )
@@ -817,13 +817,10 @@ class QueryWrapper implements CriteriaWrapper
         def attribute = parameter.attribute
         def sc = api.selectClause
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
-        String minDate = new Timestamp(minStartDate.time)// преобразуем дату в понятный ормат для БД
         IApiCriteriaColumn weekNumberColumn = sc.property(attributeCodes)
-                                                .with(sc.&cast.rcurry('timestamp')) // приводим к формату даты
-                                                .with(this.&getWeekNumColumn.rcurry(minDate)) // Получаем номер недели
+                                                .with(this.&getWeekNumColumn.rcurry(minStartDate)) // Получаем номер недели
         criteria.addGroupColumn(weekNumberColumn)
-        def column = sc.concat(sc.constant("'$minDate'"), sc.constant('#'), weekNumberColumn)
-        criteria.addColumn(column)
+        criteria.addColumn(weekNumberColumn)
         String sortingType = parameter.sortingType
         if (sortingType)
         {
