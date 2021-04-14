@@ -1,4 +1,5 @@
 // @flow
+import type {ComponentProps as ListProps} from './components/List/types';
 import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButton/types';
 import type {InputRef, OnChangeEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
@@ -24,6 +25,7 @@ export type MenuProps = {
 export type Components = {
 	Caret: React$ComponentType<IconButtonProps>,
 	IndicatorsContainer: React$ComponentType<ContainerProps>,
+	List: React$ComponentType<ListProps>,
 	MenuContainer: React$ComponentType<ContainerProps>,
 	Message: React$ComponentType<ContainerProps>,
 	Value: React$ComponentType<ValueProps>,

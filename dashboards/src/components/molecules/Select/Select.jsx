@@ -52,6 +52,7 @@ export class Select extends PureComponent<Props, State> {
 		const components: Components = {
 			Caret: IconButton,
 			IndicatorsContainer: Container,
+			List,
 			MenuContainer: Container,
 			Message: Container,
 			Value,
@@ -145,6 +146,7 @@ export class Select extends PureComponent<Props, State> {
 	renderList = () => {
 		const {getOptionLabel, getOptionValue, getOptions, options: allOptions, value} = this.props;
 		const {foundOptions, searchValue} = this.state;
+		const {List} = this.components;
 		const options = searchValue ? foundOptions : allOptions;
 
 		return (
@@ -175,8 +177,7 @@ export class Select extends PureComponent<Props, State> {
 		if (showMenu) {
 			return (
 				<OutsideClickDetector onClickOutside={this.hideMenu}>
-					<MenuContainer className={styles.menu}
-					>
+					<MenuContainer className={styles.menu}>
 						{this.renderSearchInput()}
 						{this.renderNoOptionsMessage()}
 						{this.renderNotFoundMessage()}

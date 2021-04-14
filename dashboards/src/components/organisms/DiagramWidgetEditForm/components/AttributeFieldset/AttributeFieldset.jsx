@@ -1,10 +1,11 @@
 // @flow
 import type {Attribute, Props} from './types';
+import {ATTRIBUTE_FIELDSET_CONTEXT} from './HOCs/withAttributeFieldset/withAttributeFieldset';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import MainSelect from 'containers/DiagramWidgetEditForm/components/AttributeFieldSet/components/MainSelect';
+import MainSelect from 'containers/DiagramWidgetEditForm/components/MainSelect';
 import type {OnSelectEvent} from 'components/types';
-import React, {Fragment, PureComponent} from 'react';
-import RefSelect from 'containers/DiagramWidgetEditForm/components/AttributeFieldSet/components/RefSelect';
+import React, {PureComponent} from 'react';
+import RefSelect from 'containers/DiagramWidgetEditForm/components/RefSelect';
 
 export class AttributeFieldset extends PureComponent<Props> {
 	static defaultProps = {
@@ -129,11 +130,18 @@ export class AttributeFieldset extends PureComponent<Props> {
 	};
 
 	render () {
+		const {dataKey, dataSetIndex, source} = this.props;
+		const context = {
+			dataKey,
+			dataSetIndex,
+			source
+		};
+
 		return (
-			<Fragment>
+			<ATTRIBUTE_FIELDSET_CONTEXT.Provider value={context}>
 				{this.renderMainSelect()}
 				{this.renderRefSelect()}
-			</Fragment>
+			</ATTRIBUTE_FIELDSET_CONTEXT.Provider>
 		);
 	}
 }
