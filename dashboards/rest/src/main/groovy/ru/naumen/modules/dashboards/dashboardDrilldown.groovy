@@ -253,10 +253,15 @@ class Link
                 orFilter.elements.collect { filter ->
                     String attribute = filter.getAttributeFqn() as String
                     String condition = filter.getProperties().conditionCode
+                    Boolean attrTypeIsSet = filter.getProperties().attrTypeCode in AttributeType.LINK_SET_TYPES
                     def value = filter.getValue()
                     if (condition == 'containsSubject')
                     { // костыль. так как дескриптор статичный, а условие должно быть динамичным
                         def uuidSubject = api.utils.get(iDescriptor.clientSettings.formObjectUuid as String)
+                        if(attrTypeIsSet)
+                        {
+                            uuidSubject = [uuidSubject]
+                        }
                         filterBuilder.OR(attribute, 'contains', uuidSubject)
                     }
                     else
