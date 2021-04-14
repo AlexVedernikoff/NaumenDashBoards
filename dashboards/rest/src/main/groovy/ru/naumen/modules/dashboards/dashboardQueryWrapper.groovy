@@ -288,7 +288,7 @@ class QueryWrapper implements CriteriaWrapper
         {
             return sc.extract(
                 sc.columnSubtract(
-                    column, sc.constant($minDate) // Вычитаем значение минимальной даты и извлекаем количество дней
+                    column, sc.constant(minDate) // Вычитаем значение минимальной даты и извлекаем количество дней
                 ),
                 'DAY').with(sc.&columnSum.rcurry(sc.constant(DashboardQueryWrapperUtils.ACCURACY))) //прибавляем для точности данных
                      .with(sc.&columnDivide.rcurry(sc.constant(DashboardQueryWrapperUtils.WEEKDAY_COUNT))) // делим на семь дней
