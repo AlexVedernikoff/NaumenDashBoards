@@ -48,9 +48,10 @@ const getId = (node: RawObjectData): string => node.uuid;
  * @param {Source} source - источник относительно которого нужно производить поиск
  * @param {Attribute} attribute - атрибут источника
  * @param {string} searchValue - название
+ * @param {boolean} includingArchival - сообщает нужно ли учитывать архивные объекты
  * @returns {ThunkAction}
  */
-const searchObjects = (source: Source, attribute: Attribute, searchValue: string): ThunkAction =>
+const searchObjects = (source: Source, attribute: Attribute, searchValue: string, includingArchival: boolean): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState) => {
 		const id = getObjectKey(attribute, source);
 		const {id: foundData} = getState().sources.attributesData.objects.found;
@@ -67,6 +68,7 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 		if (searchValue) {
 			const requestPayload = {
 				attribute,
+				removed: includingArchival,
 				sourceCode: source.value,
 				value: searchValue
 			};
