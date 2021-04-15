@@ -23,13 +23,15 @@ import {OBJECTS_DATA_TYPES} from 'store/sources/attributesData/objects/constants
 import type {OnChangeOperand} from 'CustomGroup/types';
 import {OPERAND_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
-import React, {Component} from 'react';
+import React, {Component, createContext} from 'react';
 import type {RenderProps as SelectRenderProps} from 'CustomGroup/components/SelectOperand/types';
 import type {RenderProps as MultiSelectRenderProps} from 'CustomGroup/components/MultiSelectOperand/types';
 import SearchInput from 'components/atoms/SearchInput';
 import SelectOperand from 'CustomGroup/components/SelectOperand';
 import SimpleOperand from 'CustomGroup/components/SimpleOperand';
 import {STRING_RULE} from 'CustomGroup/schema';
+
+const CONDITION_TYPE_CONTEXT = createContext('');
 
 export class ObjectGroup extends Component<Props, State> {
 	state = {
@@ -79,7 +81,7 @@ export class ObjectGroup extends Component<Props, State> {
 			groups: this.getCustomGroups(),
 			operandData,
 			options: this.getOptions(),
-			renderCondition: this.renderCustomCondition,
+			renderCondition: this.renderCustomConditionWithContext,
 			resolveConditionRule: this.resolveConditionRule,
 			type
 		};
@@ -165,11 +167,12 @@ export class ObjectGroup extends Component<Props, State> {
 		}
 	};
 
-	handleChangeSearchInput = async (searchValue: string) => {
+	handleChangeSearchInput = (type: string) => (searchValue: string) => {
 		const {refAttribute, searchObjects, source} = this.props;
 
 		if (refAttribute) {
-			searchObjects(source, refAttribute, searchValue);
+			const includingArchival = type === OPERAND_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL;
+			searchObjects(source, refAttribute, searchValue, includingArchival);
 		}
 	};
 
@@ -264,6 +267,12 @@ export class ObjectGroup extends Component<Props, State> {
 		}
 	};
 
+	renderCustomConditionWithContext = (condition: RefOrCondition, onChange: OnChangeOperand) => (
+		<CONDITION_TYPE_CONTEXT.Provider value={condition.type}>
+			{this.renderCustomCondition(condition, onChange)}
+		</CONDITION_TYPE_CONTEXT.Provider>
+	);
+
 	renderMultiSelect = (actual: boolean) => (props: MultiSelectRenderProps) => (
 		<MaterialTreeSelect
 			getOptionLabel={this.getOptionLabel}
@@ -301,7 +310,9 @@ export class ObjectGroup extends Component<Props, State> {
 		}} = this.props.objects.found;
 
 		return (
-			<SearchInput onChange={debounce(this.handleChangeSearchInput, 500)} value={foundData.searchValue} />
+			<CONDITION_TYPE_CONTEXT.Consumer>
+				{type => <SearchInput onChange={debounce(this.handleChangeSearchInput(type), 500)} value={foundData.searchValue} />}
+			</CONDITION_TYPE_CONTEXT.Consumer>
 		);
 	};
 
