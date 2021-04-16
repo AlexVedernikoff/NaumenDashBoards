@@ -70,14 +70,7 @@ class QueryWrapper implements CriteriaWrapper
         if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
             aggregationType == Aggregation.AVG)
         {
-            parameter?.attribute?.ref = new Attribute(
-                code: 'code',
-                title: "Код элемента справочника",
-                type: "string"
-            )
-            attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
-            column = sc.property(attributeCodes)
-            column = column.with(sc.&cast.rcurry('integer'))
+            column = sc.property(attributeCodes).with(sc.&cast.rcurry('integer'))
         }
 
         if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
@@ -1078,7 +1071,7 @@ class DashboardQueryWrapperUtils
         wrapper.setCases(requestData.source.classFqn, diagramType, clonedAggregations.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
 
         clonedAggregations.each {
-            prepareAttribute(it.attribute as Attribute)
+            prepareAttribute(it.attribute as Attribute, true)
             wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top, onlyFilled)
         }
 
@@ -1259,16 +1252,14 @@ class DashboardQueryWrapperUtils
     /**
      * Метод подготовки полей атрибута
      * @param parameter - параметр агрегации
+     * @param forAggregation - флаг на подготовку атрибута для агргегации
      */
-    private static def prepareAttribute(Attribute attribute)
+    private static def prepareAttribute(Attribute attribute, Boolean forAggregation)
     {
         String attributeType = Attribute.getAttributeType(attribute)
         String attributeCode = attribute.attrChains().last().code
         switch (attributeType)
         {
-            case AttributeType.LOCALIZED_TEXT_TYPE:
-                attribute.attrChains().last().ref = new Attribute(code: 'ru', type: 'string')
-                break
             case AttributeType.DT_INTERVAL_TYPE:
                 if (!(attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
                 {
@@ -1279,7 +1270,14 @@ class DashboardQueryWrapperUtils
                 attribute.attrChains().last().ref = new Attribute(code: 'statusCode', type: 'string')
                 break
             case AttributeType.LINK_TYPES:
-                attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
+                if(forAggregation && attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
+                {
+                    attribute.attrChains().last().ref = new Attribute(code: 'code', title: 'Код элемента справочника', type: 'string')
+                }
+                else
+                {
+                    attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
+                }
                 break
             default:
                 if (!(attributeType in AttributeType.ALL_ATTRIBUTE_TYPES))
