@@ -1254,7 +1254,7 @@ class DashboardQueryWrapperUtils
      * @param parameter - параметр агрегации
      * @param forAggregation - флаг на подготовку атрибута для агргегации
      */
-    private static def prepareAttribute(Attribute attribute, Boolean forAggregation)
+    private static def prepareAttribute(Attribute attribute, Boolean forAggregation = false)
     {
         String attributeType = Attribute.getAttributeType(attribute)
         String attributeCode = attribute.attrChains().last().code
