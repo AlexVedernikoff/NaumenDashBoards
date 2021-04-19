@@ -12,6 +12,7 @@
 package ru.naumen.modules.dashboards
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import com.fasterxml.jackson.databind.node.DoubleNode
@@ -42,6 +44,7 @@ import groovy.transform.AutoClone
 import groovy.transform.TupleConstructor
 import groovy.transform.Canonical
 import static groovy.json.JsonOutput.toJson
+import static DeserializationHelper.mapper
 import java.lang.reflect.Method
 
 import ru.naumen.core.server.script.api.injection.InjectApi
@@ -659,6 +662,36 @@ class DashboardUtils
 
 //region КЛАССЫ
 /**
+ * Класс, определяющий десериализаторы на основе предикторов для различных классов
+ * @param <T> - класс, для которого будет использована десериализация
+ */
+class PredictorBasedPolymorphicDeserializer<T> extends StdDeserializer<T>
+{
+    Map<Class, Closure<Boolean>> predictors = [:]
+
+    PredictorBasedPolymorphicDeserializer()
+    {
+        this(null)
+    }
+
+    PredictorBasedPolymorphicDeserializer(Class<?> vc)
+    {
+        super(vc)
+    }
+
+    @Override
+    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
+    {
+        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
+        def object = mapper.readTree(jp)
+
+        def clazz = predictors.find { clazz, predictor -> predictor(object)}?.key
+
+        return (T) jp.codec.treeToValue(object, clazz)
+    }
+}
+
+/**
  * Типы атрибутов даннных для диаграмм
  */
 class AttributeType {
@@ -1084,6 +1117,146 @@ class Constants {
     static final String whiteColor = 'white'
     static final String autoSize = 'auto'
     static final String fontStyle = 'BOLD'
+
+    /**
+     * словарь отличительных особенностей виджетов
+     */
+    static final Map<Class, Closure<Boolean>> widgetPredictors = [
+        (AxisZero) : { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'AxisZero' ||
+                (
+                    !value.hasField('data') &&
+                    !value.hasField('order') &&
+                    ((value['type'] as DiagramType) in [*DiagramType.StandardTypes,
+                                                        DiagramType.COMBO])
+                )
+            }
+
+        },
+        (AxisPrev): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'AxisPrev' ||
+                (
+                    value.hasField('order') &&
+                    ((value['type'] as DiagramType) in [*DiagramType.StandardTypes,
+                                                        DiagramType.COMBO])
+                )
+            }
+        },
+        (AxisCurrentAndNew): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'AxisCurrentAndNew' ||
+                (
+                    value.hasField('data') &&
+                    ((value['type'] as DiagramType) in [*DiagramType.StandardTypes, DiagramType.COMBO]) &&
+                    (value['data'].hasField('parameters') || value['data'].hasField('xAxis'))
+                )
+            }
+        },
+        (CircleZero): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'CircleZero' ||
+                (
+                    !value.hasField('data') &&
+                    !value.hasField('order') &&
+                    ((value['type'] as DiagramType) in DiagramType.RoundTypes)
+                )
+            }
+
+        },
+        (CirclePrev): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'CirclePrev' ||
+                (
+                    value.hasField('order') && ((value['type'] as DiagramType) in DiagramType.RoundTypes)
+                )
+            }
+        },
+        (CircleCurrentAndNew): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'CircleCurrentAndNew' ||
+                (
+                    value.hasField('data') &&
+                    ((value['type'] as DiagramType) in DiagramType.RoundTypes) &&
+                    (value['data'].hasField('indicator') || value['data'].hasField('indicators'))
+                )
+            }
+        },
+        (SpeedometerCurrentAndNew): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'SpeedometerCurrentAndNew' ||
+                (value['type'] as DiagramType) == DiagramType.SPEEDOMETER
+            }
+        },
+        (SummaryZero): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'SummaryZero' ||
+                (
+                    !value.hasField('data') && !value.hasField('order') &&
+                    (value['type'] as DiagramType) == DiagramType.SUMMARY
+                )
+            }
+        },
+        (SummaryPrev): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'SummaryPrev' ||
+                (
+                    value.hasField('order') &&
+                    (value['type'] as DiagramType) == DiagramType.SUMMARY
+                )
+            }
+        },
+        (SummaryCurrentAndNew): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'SummaryCurrentAndNew' ||
+                (
+                    value.hasField('data') &&
+                    (value['type'] as DiagramType) == DiagramType.SUMMARY
+                )
+            }
+        },
+        (TablePrevAndCurrentAndNew): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'TablePrevAndCurrentAndNew' ||
+                (value['type'] as DiagramType) == DiagramType.TABLE
+            }
+        },
+        (Text): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'Text' ||
+                value.hasField('textSettings')
+            }
+        }
+    ]
+
+    static final Map<Class, Closure<Boolean>> diagramNowDataPredictors = [
+        (AxisCurrentData): { value ->
+            return use(JacksonUtils) {
+                value.hasField('xAxis')
+            }
+        },
+        (DiagramNewData) : { value ->
+            return use(JacksonUtils) {
+                (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
+            }
+        },
+        (TableCurrentData): { value ->
+            return use(JacksonUtils) {
+                value.hasField('parameters') && value.hasField('descriptor')
+            }
+        },
+        (CircleAndSummaryCurrentData): { value ->
+            return use(JacksonUtils) {
+                (value.hasField('indicator') || value['sourceForCompute']) && value.hasField('descriptor')
+            }
+        },
+        (TablePrevData) : { value ->
+            return use(JacksonUtils) {
+                value.hasField('row') && value.hasField('descriptor')
+            }
+        }
+    ]
 }
 
 /**
@@ -1158,58 +1331,73 @@ class JacksonUtils
 }
 
 /**
- * Класс-десериализатор для настроек дашборда
+ * Класс, в котором зарегестрированы все десериализаторы для objectMapper-а
  */
-class DashboardSettingsDeseializer extends StdDeserializer
+class DeserializationHelper
 {
-    DashboardSettingsDeseializer() {
-        this(null);
-    }
-
-    DashboardSettingsDeseializer(Class<?> vc) {
-        super(vc);
-    }
     /**
-     * Метод по преобразованию излишне экранированных объектов в дашборде к правильному формату(классу)
-     * @param fields - поля настроек дашборда в исходном виде
-     * @param fieldNameToChange - поля, формат которых нужно поменять
-     * @param clazz - класс, в который превратятся исходные настройки
-     * @return поля настроек дашборда, как объекты нужного класса
+     * поле, определяющее маппер для десериализации
      */
-    Map updateMapWithTextFields(Map fields, String fieldNameToChange, TypeReference clazz)
-    {
-        ObjectMapper mapper = new ObjectMapper()
-        if(fields[fieldNameToChange] && (fields[fieldNameToChange].find() instanceof String || fields[fieldNameToChange].find() instanceof TextNode))
-        {
-            fields[fieldNameToChange] = fields[fieldNameToChange].findResults { it ? mapper.readTree(it) : null }
-        }
-        fields[fieldNameToChange] = mapper.convertValue(fields[fieldNameToChange], clazz)
-        return fields
-    }
+    private static final ObjectMapper mapper
 
-    @Override
-    DashboardSettingsClass deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
+    static {
+        mapper = new ObjectMapper()
+        SimpleModule module = new SimpleModule()
 
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
+        def baseAttributeDeserializer = new PredictorBasedPolymorphicDeserializer()
+        baseAttributeDeserializer.predictors = [
+            (Attribute) : { value ->
+                return use(JacksonUtils) {
+                    value.hasField('metaClassFqn')
+                }
+            },
+            (ComputedAttr) : { value ->
+                return use(JacksonUtils) {
+                    value.hasField('computeData')
+                }
+            }
+        ]
+        module.addDeserializer(BaseAttribute, baseAttributeDeserializer)
 
-        updateMapWithTextFields(fields, 'widgets', new TypeReference<Collection<Widget>>() {})
-        updateMapWithTextFields(fields, 'customGroups', new TypeReference<Collection<CustomGroup>>() {})
+        def baseBreakdowndeserializer = new PredictorBasedPolymorphicDeserializer()
+        baseBreakdowndeserializer.predictors = [
+            (BaseBreakdown) : { 'code' in it.fields.keySet() },
+            (NewBreakdown) : { 'attribute' in fields.keySet() || 'value' in fields.keySet() }
+        ]
+        module.addDeserializer(BaseBreakdown, baseBreakdowndeserializer)
 
-        fields.layouts = mapper.convertValue(fields.layouts, Layout)
-        fields.mobileLayouts = mapper.convertValue(fields.mobileLayouts, Layout)
-        fields.customColorsSettings = fields.customColorsSettings ? mapper.convertValue(fields.customColorsSettings,
-                                                                                        new TypeReference<Collection<CustomChartSettingsData>>() {}) : []
-        return DashboardSettingsClass.fromMap(fields)
+        def groupDeserializer = new PredictorBasedPolymorphicDeserializer()
+        groupDeserializer.predictors = [
+            (SystemGroupInfo) : { value ->
+                return use(JacksonUtils) {
+                    value['way'] == 'SYSTEM'
+                }
+            },
+            (CustomGroupInfo): { value ->
+                return use(JacksonUtils) {
+                    value['way'] == 'CUSTOM'
+                }
+            }
+        ]
+        module.addDeserializer(Group, groupDeserializer)
+
+        def widgetBaseDeserializer = new PredictorBasedPolymorphicDeserializer()
+        widgetBaseDeserializer.predictors = widgetPredictors
+        module.addDeserializer(Widget, widgetBaseDeserializer)
+
+        def widgetDataDeserializer = new PredictorBasedPolymorphicDeserializer()
+        widgetDataDeserializer.predictors = diagramNowDataPredictors
+        module.addDeserializer(DiagramNowData, widgetDataDeserializer)
+
+        mapper.registerModule(module)
     }
 }
 
 /**
  * Класс, описывающий настройки дашборда
  */
-@JsonDeserialize(using = DashboardSettingsDeseializer)
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class DashboardSettingsClass
 {
     /**
@@ -1239,16 +1427,9 @@ class DashboardSettingsClass
 
     Collection<CustomChartSettingsData> customColorsSettings = []
 
-    static fromMap(Map fields)
-    {
-        return fields ?
-            new DashboardSettingsClass(autoUpdate: fields.autoUpdate as AutoUpdate,
-                                       widgets: fields.widgets as Collection<Widget>,
-                                       customGroups: fields.customGroups as Collection<CustomGroup>,
-                                       layouts: fields.layouts as Layout,
-                                       mobileLayouts: fields.mobileLayouts as Layout,
-                                       customColorsSettings: fields.customColorsSettings as Collection<CustomChartSettingsData>)
-            : null
+    @JsonCreator
+    static DashboardSettingsClass create(String json) {
+        return mapper.readValue(json, DashboardSettingsClass)
     }
 }
 
@@ -1362,13 +1543,6 @@ class Layout
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Collection<LayoutSettings> sm
-
-    static Layout fromMap(Map fields)
-    {
-        return fields ?
-            new Layout(lg: LayoutSettings.fromListOfMap(fields.lg), sm: LayoutSettings.fromListOfMap(fields.sm))
-            :null
-    }
 }
 
 /**
@@ -1405,24 +1579,6 @@ class LayoutSettings
      */
     @JsonProperty('static')
     Boolean staticMode = false
-
-    static LayoutSettings fromMap(Map fields)
-    {
-        return fields
-            ? new LayoutSettings(h: fields.h,
-                                 i: fields.i,
-                                 w: fields.w,
-                                 x: fields.x,
-                                 y: fields.y,
-                                 moved: fields.moved,
-                                 staticMode: fields.staticMode)
-            : null
-    }
-
-    static Collection<LayoutSettings> fromListOfMap(Collection fields)
-    {
-        return fields ? fields.findResults { fromMap(it) } : []
-    }
 }
 
 /**
@@ -1477,56 +1633,10 @@ class AutoUpdate
 }
 
 /**
- * Класс-десериализатор атрибута показателя
- * @param <T> - класс итогового показателя
- */
-class BaseAttributeCustomDeserializer<T> extends StdDeserializer<T>
-{
-    /**
-     * словарь отличительных особенностей
-     */
-    private Map<Class, Closure<Boolean>> predictors = [
-        (Attribute) : { value ->
-            return use(JacksonUtils) {
-                value.hasField('metaClassFqn')
-            }
-        },
-        (ComputedAttr) : {
-            value ->
-                return use(JacksonUtils) {
-                    value.hasField('computeData')
-                }
-        }
-    ]
-
-    BaseAttributeCustomDeserializer()
-    {
-        this(null);
-    }
-
-    BaseAttributeCustomDeserializer(Class<?> vc)
-    {
-        super(vc);
-    }
-
-    @Override
-    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
-
-        Class clazz = predictors.find{clazz, predictor -> predictor(obj)}.key
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
-        Method fromMapMethod = clazz.getMethod('fromMap', Map)
-        fromMapMethod.invoke(null, fields)
-    }
-}
-
-/**
  * Класс атрибута, содержащего агрегацию
  */
-@JsonDeserialize(using = BaseAttributeCustomDeserializer)
 @Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class BaseAttribute
 {
     /**
@@ -1541,6 +1651,11 @@ class BaseAttribute
      * Тип атрибута
      */
     String type
+
+    @JsonCreator
+    static BaseAttribute create(String json) {
+        return mapper.readValue(json, BaseAttribute)
+    }
 }
 
 /**
@@ -1575,18 +1690,6 @@ class ComputedAttr extends BaseAttribute
      * Формула для вычисления
      */
     String stringForCompute
-
-    static ComputedAttr fromMap(Map fields)
-    {
-        return fields
-            ?  new ComputedAttr(code: fields.code,
-                                title: fields.title,
-                                type: fields.type,
-                                computeData: ComputeData.fromMap(fields.computeData),
-                                state: fields.state,
-                                stringForCompute: fields.stringForCompute)
-            : null
-    }
 }
 
 /**
@@ -1606,18 +1709,6 @@ class ComputeData
      * Ключ данных для построения, откуда взят показатель
      */
     String dataKey
-
-    static Map<String, ComputeData> fromMap(Map fields)
-    {
-        return fields ?
-            fields.collectEntries { k, v ->
-                def data = new ComputeData(aggregation: v.aggregation as Aggregation,
-                                           attr: Attribute.fromMap(v.attr),
-                                           dataKey: v.dataKey)
-                return [(k): data]
-            }
-            : [:]
-    }
 }
 
 /**
@@ -1835,65 +1926,20 @@ class NewBreakdown extends BaseBreakdown
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String dataKey
 
-    static NewBreakdown fromMap(Map fields, String attributeField)
-    {
-        return fields ?
-            new NewBreakdown(group: fields.group as Group,
-                             attribute: fields[attributeField] as Attribute,
-                             dataKey: fields.dataKey)
-            : null
-    }
 }
 
 /**
  * Базовая разбивка
  * @deprecated использовать {@link NewBreakdown} вместо него
  */
-@JsonDeserialize(using = BreakdownCustomDeserializer)
 @Deprecated
+@JsonIgnoreProperties(ignoreUnknown = true)
 class BaseBreakdown extends Attribute
 {
     //разбивка содержала лишь атрибут, поэтому класс лишь наследует класс Attribute
-}
-
-/**
- * Класс-десериализатор для разбивки
- * @param <T> - тип разбивки, в который будет преобразована json-строка
- */
-class BreakdownCustomDeserializer<T> extends StdDeserializer<T>
-{
-    BreakdownCustomDeserializer()
-    {
-        this(null);
-    }
-
-    BreakdownCustomDeserializer(Class<?> vc)
-    {
-        super(vc);
-    }
-
-    @Override
-    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
-
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
-
-        if ('attribute' in fields.keySet() || 'value' in fields.keySet())
-        {
-            fields.group = mapper.convertValue(fields.group, Group)
-            String attributeField = 'attribute' in fields.keySet() ? 'attribute' : 'value'
-            return NewBreakdown.fromMap(fields, attributeField)
-        }
-        else if('code' in fields.keySet())
-        {
-            return Attribute.fromMap(fields)
-        }
-        else
-        {
-            throw new IllegalArgumentException("${fields.keySet()} - Неправильный набор полей!")
-        }
+    @JsonCreator
+    static BaseBreakdown create(String json) {
+        return mapper.readValue(json, BaseBreakdown)
     }
 }
 
@@ -1931,58 +1977,10 @@ class NewParameter
 }
 
 /**
- * Класс-десериализатор для группировок параметра/разбивки
- * @param <T> - класс, в который будет преобразована json-строка
- */
-class GroupCustomDeserializer<T> extends StdDeserializer<T>
-{
-    /**
-     * словарь отличительных особенностей
-     */
-    private Map<Class, Closure<Boolean>> predictors = [
-        (SystemGroupInfo) : { value ->
-            return use(JacksonUtils) {
-                value['way'] == 'SYSTEM'
-            }
-        },
-        (CustomGroupInfo): { value ->
-            return use(JacksonUtils) {
-                value['way'] == 'CUSTOM'
-            }
-        }
-    ]
-
-    GroupCustomDeserializer() {
-        this(null);
-    }
-
-    GroupCustomDeserializer(Class<?> vc) {
-        super(vc);
-    }
-
-    @Override
-    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
-
-        Class<? extends T> clazz = predictors.find{clazz, predictor -> predictor(obj)}?.key
-
-        if(!clazz)
-        {
-            throw ctxt.instantiationException(SystemGroupInfo, "проверьте данные о группе!")
-        }
-
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
-        return clazz.fromMap(fields)
-    }
-}
-
-/**
  * Класс группировки для параметра/разбивки
  */
 @Canonical
-@JsonDeserialize(using = GroupCustomDeserializer)
+@JsonIgnoreProperties(ignoreUnknown = true)
 class Group
 {
     /**
@@ -1994,6 +1992,28 @@ class Group
      * Формат группировки
      */
     String format
+
+    /**
+     * Метод по проверке и преобразованию json-а
+     * (если пришла очень старая группа, она представляла собой
+     * лишь тип группировки строкой)
+     * @param json - json группировки
+     * @return либо старая группировка, преобразованная к новой системной,
+     * либо null, чтобы преобразовать json в системную или кастомную группировку
+     */
+    static Group checkAndUpdateJson(def json)
+    {
+        if(json instanceof TextNode || json instanceof String)
+        {
+            return new SystemGroupInfo(data: json, way: Way.SYSTEM)
+        }
+        else return null
+    }
+
+    @JsonCreator
+    static Group create(String json) {
+        return checkAndUpdateJson(json) ?: mapper.readValue(json, Group)
+    }
 
     /**
      * Метод для подробного описания группировки
@@ -2031,21 +2051,6 @@ class SystemGroupInfo extends Group
      * Тип системной группировки
      */
     GroupType data
-
-    static SystemGroupInfo fromMap(def fields)
-    {
-        if(fields instanceof String)
-        {
-            //в старых форматах была строка, обозначающая тип системной группировки
-            return new SystemGroupInfo(data: fields as GroupType, way: Way.SYSTEM)
-        }
-
-        return fields instanceof Map
-            ? new SystemGroupInfo(data: fields.data as GroupType,
-                                  way: fields.way as Way,
-                                  format: fields.format)
-            : null
-    }
 }
 
 /**
@@ -2058,31 +2063,12 @@ class CustomGroupInfo extends Group
      * Данные группировки (сначала это ключ кастомной группировки, потом это сама кастомная группировка)
      */
     def data
-
-    CustomGroupInfo(def data, def way)
-    {
-        super(way: way as Way)
-        this.data = data
-    }
-    CustomGroupInfo(def map)
-    {
-        this.data = map.data
-        this.way = map.way
-    }
-
-    static CustomGroupInfo fromMap(Map fields)
-    {
-        return fields
-            ? new CustomGroupInfo(fields)
-            : null
-    }
 }
 
 /**
  * Класс позиции легенды
  */
 class LegendPosition extends ValueWithLabel<Position> { }
-
 
 /**
  * Класс информации о параметре/показателе
@@ -2119,17 +2105,6 @@ class IndicatorOrParameter
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean showDependent
-
-    static IndicatorOrParameter fromMap(Map fields)
-    {
-        //необходимо прописать преобразование в Integer, иначе через (int) берется код символа
-        return new IndicatorOrParameter(name: fields.name,
-                                        show: fields.show,
-                                        showName: fields.showName,
-                                        max: fields.max as Integer,
-                                        min: fields.min as Integer,
-                                        showDependent: fields.showDependent as Boolean)
-    }
 }
 
 /**
@@ -2159,35 +2134,8 @@ class Sorting
 }
 
 /**
- * Класс-десириализатор для кастомных группировок дашборда
- */
-class CustomGroupDeserializer extends StdDeserializer
-{
-    CustomGroupDeserializer()
-    {
-        this(null);
-    }
-
-    CustomGroupDeserializer(Class<?> vc)
-    {
-        super(vc);
-    }
-
-    @Override
-    CustomGroup deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
-
-        return CustomGroup.fromMap(fields)
-    }
-}
-
-/**
  * Класс кастомной группировки дашбора
  */
-@JsonDeserialize(using = CustomGroupDeserializer)
 class CustomGroup
 {
     /**
@@ -2207,16 +2155,10 @@ class CustomGroup
      */
     String type
 
-    static CustomGroup fromMap(Map fields)
-    {
-        return fields ?
-            new CustomGroup(id: fields.id,
-                            name: fields.name,
-                            subGroups: SubGroup.fromListOfMap(fields.subGroups),
-                            type: fields.type)
-            :null
+    @JsonCreator
+    static CustomGroup create(String json) {
+        return mapper.readValue(json, CustomGroup)
     }
-
 }
 
 /**
@@ -2227,7 +2169,7 @@ class SubGroup
     /**
      * Данные внутренней группы
      */
-    Collection<Collection<SubGroupData>> data
+    Collection<Collection<SubGroupData>> data = []
     /**
      * Название внутренней группы
      */
@@ -2235,20 +2177,7 @@ class SubGroup
     /**
      * Индекс подгруппы
      */
-    String id
-
-    static SubGroup fromMap(Map fields)
-    {
-        return fields
-            ? new SubGroup(data: SubGroupData.fromListOfMap(fields.data), name: fields.name, id: fields.id ?: UUID.randomUUID())
-            : null
-    }
-
-    static Collection<SubGroup> fromListOfMap(Collection<Map> fields)
-    {
-        return fields ? fields.findResults { return fromMap(it) } : []
-    }
-
+    String id = UUID.randomUUID()
 }
 
 /**
@@ -2264,28 +2193,13 @@ class SubGroupData
      * Тип условия
      */
     String type
-
-    static SubGroupData fromMap(Map fields)
-    {
-        return fields
-            ? new SubGroupData(data: fields.data, type: fields.type)
-            : null
-    }
-
-    static Collection<SubGroupData> fromListOfMap(Collection<Collection<Map>> fields)
-    {
-        return fields ? fields.findResults {
-            return it.findResults {
-                return fromMap(it)
-            }
-        } : []
-    }
 }
 
 /**
  * Класс нулевого формата осевых графиков
  * @deprecated использовать {@link AxisCurrentAndNew} вместо него
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated
 class AxisZero extends OldDiagrams
 {
@@ -2321,34 +2235,6 @@ class AxisZero extends OldDiagrams
      * Показатель
      */
     BaseAttribute yAxis
-
-    static fromMap(Map fields)
-    {
-        return fields ?
-            new AxisZero(
-                colorsSettings: fields.colorsSettings as ColorsSettings,
-                aggregation: fields.aggregation as Aggregation,
-                breakdown: fields.breakdown as Attribute,
-                breakdownGroup: fields.breakdownGroup as Group,
-                descriptor: fields.descriptor,
-                group: fields.group  as Group,
-                source: fields.source as SourceValue,
-                xAxis: fields.xAxis as Attribute,
-                yAxis: fields.yAxis as BaseAttribute,
-                name: fields.name,
-                diagramName: fields.diagramName,
-                id: fields.id,
-                showValue: fields.showValue,
-                showName: fields.showName ,
-                showYAxis: fields.showYAxis ,
-                showXAxis: fields.showXAxis ,
-                showLegend: fields.showLegend ,
-                legendPosition: fields.legendPosition,
-                type: fields.type,
-                diagramType: fields.diagramType
-            )
-            :null
-    }
 }
 
 /**
@@ -2375,158 +2261,44 @@ class DiagramsPrev extends OldDiagrams
 /**
  * Класс предыдущего формата осевых графиков
  */
-class AxisPrev extends DiagramsPrev
-{
-    static AxisPrev fromMap(Map fields)
-    {
-        return fields ?
-            new AxisPrev(
-                colorsSettings: fields.colorsSettings as ColorsSettings,
-                computedAttrs: fields.computedAttrs  as Collection<ComputedAttr>,
-                name: fields.name,
-                diagramName: fields.diagramName,
-                id: fields.id,
-                showValue: fields.showValue,
-                showName: fields.showName,
-                showYAxis: fields.showYAxis,
-                showXAxis: fields.showXAxis,
-                showLegend: fields.showLegend,
-                legendPosition: fields.legendPosition as LegendPosition,
-                order: fields.order,
-                data: fields.data as Collection<DiagramNowData>,
-                type: fields.type,
-                diagramType: fields.diagramType
-            )
-            : null
-    }
-
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+class AxisPrev extends DiagramsPrev{ }
 
 /**
- * Класс-десериализатор для виджетов дашборда
- * @param <T> - класс объекта, в который будет преобразована json-строка
+ * Класс общих настроек для всех виджетов
  */
-class WidgetCustomDeserializer<T> extends StdDeserializer<T>
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+abstract class Widget
 {
     /**
-     * словарь отличительных особенностей
+     * Коллекция цветов диаграммы
      */
-    private Map<Class, Closure<Boolean>> predictors = [
-        (AxisZero) : { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'AxisZero' ||
-                (
-                    !value.hasField('data') &&
-                    !value.hasField('order') &&
-                    ((value['type'] as DiagramType) in [*DiagramType.StandardTypes,
-                                                        DiagramType.COMBO])
-                )
-            }
-
-        },
-        (AxisPrev): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'AxisPrev' ||
-                (
-                    value.hasField('order') &&
-                    ((value['type'] as DiagramType) in [*DiagramType.StandardTypes,
-                                                        DiagramType.COMBO])
-                )
-            }
-        },
-        (AxisCurrentAndNew): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'AxisCurrentAndNew' ||
-                (
-                    value.hasField('data') &&
-                    ((value['type'] as DiagramType) in [*DiagramType.StandardTypes, DiagramType.COMBO]) &&
-                    (value['data'].hasField('parameters') || value['data'].hasField('xAxis'))
-                )
-            }
-        },
-        (CircleZero): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'CircleZero' ||
-                (
-                    !value.hasField('data') &&
-                    !value.hasField('order') &&
-                    ((value['type'] as DiagramType) in DiagramType.RoundTypes)
-                )
-            }
-
-        },
-        (CirclePrev): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'CirclePrev' ||
-                (
-                    value.hasField('order') && ((value['type'] as DiagramType) in DiagramType.RoundTypes)
-                )
-            }
-        },
-        (CircleCurrentAndNew): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'CircleCurrentAndNew' ||
-                (
-                    value.hasField('data') &&
-                    ((value['type'] as DiagramType) in DiagramType.RoundTypes) &&
-                    (value['data'].hasField('indicator') || value['data'].hasField('indicators'))
-                )
-            }
-        },
-        (SpeedometerCurrentAndNew): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'SpeedometerCurrentAndNew' ||
-                (value['type'] as DiagramType) == DiagramType.SPEEDOMETER
-            }
-        },
-        (SummaryZero): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'SummaryZero' ||
-                (
-                    !value.hasField('data') && !value.hasField('order') &&
-                    (value['type'] as DiagramType) == DiagramType.SUMMARY
-                )
-            }
-        },
-        (SummaryPrev): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'SummaryPrev' ||
-                (
-                    value.hasField('order') &&
-                    (value['type'] as DiagramType) == DiagramType.SUMMARY
-                )
-            }
-        },
-        (SummaryCurrentAndNew): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'SummaryCurrentAndNew' ||
-                (
-                    value.hasField('data') &&
-                    (value['type'] as DiagramType) == DiagramType.SUMMARY
-                )
-            }
-        },
-        (TablePrevAndCurrentAndNew): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'TablePrevAndCurrentAndNew' ||
-                (value['type'] as DiagramType) == DiagramType.TABLE
-            }
-        },
-        (Text): { value ->
-            return use(JacksonUtils) {
-                value['diagramType'] == 'Text' ||
-                value.hasField('textSettings')
-            }
-        }
-    ]
-
-    WidgetCustomDeserializer() {
-        this(null);
-    }
-
-    WidgetCustomDeserializer(Class<?> vc) {
-        super(vc);
-    }
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    ColorsSettings colorsSettings
+    /**
+     * Название диаграммы
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String name
+    /**
+     * Уникальный идентификатор виджета
+     */
+    String id
+    /**
+     * Тип диаграммы на построение
+     */
+    DiagramType type
+    /**
+     * Название диаграммы
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String diagramName
+    /**
+     * Тип диаграммы, описывающий класс самого виджета
+     */
+    @JsonIgnore
+    String diagramType
 
     /**
      * Метод по преобразованию данных диаграм с форматом prev к поддерживаемому формату
@@ -2631,34 +2403,31 @@ class WidgetCustomDeserializer<T> extends StdDeserializer<T>
         }
     }
 
-    @Override
-    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
+    /**
+     * Метод по преобразованию json-а в правильный формат, который точно скушает creator
+     * @param json - json виджета
+     * @return json виджета правильного формата
+     */
+    static String updateJsonToCorrectFormat(String json)
     {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
+        ObjectNode obj = (ObjectNode) mapper.readTree(json)
         String widgetId = obj.path('id').asText()
-        Class<? extends T> clazz = predictors.find{clazz, predictor -> predictor(obj)}.key
+        Class clazz = widgetPredictors.find{clazz, predictor -> predictor(obj)}.key
         if(!clazz)
         {
-            throw ctxt.instantiationException(Widget, "проверьте тип виджета ${widgetId}!")
+            throw new IllegalArgumentException(Widget, "проверьте тип виджета ${widgetId}!")
         }
         obj.put('diagramType', clazz.simpleName)
 
         Map<String, Object> fields = mapper.convertValue(obj, Map)
         if(clazz == Text)
         {
-            return Text.fromMap(fields)
+            return Jackson.toJsonString(fields)
         }
         if(clazz in [AxisPrev, CirclePrev, SummaryPrev])
         {
             fields = updatePrevTypes(fields)
         }
-        if(clazz == AxisCurrentAndNew)
-        {
-            fields.indicator = mapper.convertValue(fields.indicator, IndicatorOrParameter)
-        }
-
-        fields.computedAttrs = mapper.convertValue(fields.computedAttrs, new TypeReference<Collection<ComputedAttr>>() {})
 
         //прошлый формат придет в поле colors
         String colorField = 'colors'
@@ -2666,54 +2435,29 @@ class WidgetCustomDeserializer<T> extends StdDeserializer<T>
         {
             colorField = 'colorsSettings'
         }
-        //но новый формат ставим в новое поле
-        fields.colorsSettings = fields[colorField] ? mapper.convertValue(fields[colorField], ColorsSettings) : null
+        //заменим его на новый
+        if(fields[colorField] && colorField == 'colors')
+        {
+            fields.colorsSettings = new ColorsSettings(auto: new AutoColors(colors: fields[colorField]), type: ColorType.AUTO, custom: new CustomColors())
+        }
 
-        fields.data = mapper.convertValue(fields.data, new TypeReference<Collection<DiagramNowData>>() {})
-
-        return clazz.fromMap(fields)
+        return Jackson.toJsonString(fields)
     }
-}
 
-/**
- * Класс общих настроек для всех виджетов
- */
-@JsonDeserialize(using = WidgetCustomDeserializer)
-@Canonical
-abstract class Widget
-{
     /**
-     * Коллекция цветов диаграммы
+     * Метод по преобразованию json-а из хранилища в объект определенного класса виджета
+     * @param json - json из хранилища
+     * @return объект определенного класса виджета
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    /**
-     * Настройки цветов
-     */
-    @JsonAlias(['colors', 'colorsSettings'])
-    ColorsSettings colorsSettings
-    /**
-     * Название диаграммы
-     */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    String name
-    /**
-     * Уникальный идентификатор виджета
-     */
-    String id
-    /**
-     * Тип диаграммы на построение
-     */
-    DiagramType type
-    /**
-     * Название диаграммы
-     */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    String diagramName
-    /**
-     * Тип диаграммы, описывающий класс самого виджета
-     */
-    @JsonIgnore
-    String diagramType
+    @JsonCreator
+    static Widget create(def json) {
+        if(json instanceof Map)
+        {
+            json = Jackson.toJsonString(json)
+        }
+        json = updateJsonToCorrectFormat(json)
+        return mapper.readValue(json, Widget)
+    }
 }
 
 /**
@@ -2799,100 +2543,10 @@ class OldDiagrams extends Widget
 }
 
 /**
- * Класс-десериализатор на преобразование данных на построение
- * @param <T> класс объекта, в которых будет преобразована json-строка
- */
-class DiagramNowDataDeserializer<T> extends StdDeserializer<T>
-{
-    /**
-     * словарь отличительных особенностей
-     */
-    Map<Class, Closure<Boolean>> predictors = [
-        (AxisCurrentData): { value ->
-            return use(JacksonUtils) {
-                value.hasField('xAxis')
-            }
-        },
-        (DiagramNewData) : { value ->
-            return use(JacksonUtils) {
-                (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
-            }
-        },
-        (TableCurrentData): { value ->
-            return use(JacksonUtils) {
-                value.hasField('parameters') && value.hasField('descriptor')
-            }
-        },
-        (CircleAndSummaryCurrentData): { value ->
-            return use(JacksonUtils) {
-                (value.hasField('indicator') || value['sourceForCompute']) && value.hasField('descriptor')
-            }
-        },
-        (TablePrevData) : {
-            value ->
-                return use(JacksonUtils) {
-                    value.hasField('row') && value.hasField('descriptor')
-                }
-        }
-    ]
-
-    DiagramNowDataDeserializer()
-    {
-        this(null);
-    }
-
-    DiagramNowDataDeserializer(Class<?> vc)
-    {
-        super(vc);
-    }
-
-    @Override
-    T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        ObjectNode obj = (ObjectNode) mapper.readTree(jp)
-
-        Class<? extends T> clazz = predictors.find{clazz, predictor -> predictor(obj)}?.key
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
-
-        fields.breakdown = fields.breakdown instanceof Collection
-            ? mapper.convertValue(fields.breakdown, new TypeReference<Collection<BaseBreakdown>>() {})
-            : fields.breakdown ? [mapper.convertValue(fields.breakdown, BaseBreakdown)] : null
-        fields.breakdownGroup = mapper.convertValue(fields.breakdownGroup, Group)
-        if(!clazz)
-        {
-            throw ctxt.instantiationException(AxisCurrentData, "проверьте входные данные в поле data!")
-        }
-        if(clazz in [AxisCurrentData, TablePrevData])
-        {
-            fields.group = mapper.convertValue(fields.group, Group)
-        }
-        if(clazz == AxisCurrentData)
-        {
-            fields.yAxis = mapper.convertValue(fields.yAxis, BaseAttribute)
-
-        }
-        if(clazz == CircleAndSummaryCurrentData)
-        {
-            fields.indicator = mapper.convertValue(fields.indicator, BaseAttribute)
-        }
-        if(clazz in [TableCurrentData, DiagramNewData])
-        {
-            fields.indicators = mapper.convertValue(fields.indicators, new TypeReference<Collection<NewIndicator>>() {})
-            fields.parameters = mapper.convertValue(fields.parameters, new TypeReference<Collection<NewParameter>>() {})
-        }
-
-        if(clazz == TablePrevData)
-        {
-            fields.column = mapper.convertValue(fields.column, BaseAttribute)
-        }
-        return clazz.fromMap(fields)
-    }
-}
-
-/**
  * Класс, описывающий формат для текущих и новых осевых диаграмм
  */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class AxisCurrentAndNew extends NewDiagrams
 {
     /**
@@ -2907,27 +2561,6 @@ class AxisCurrentAndNew extends NewDiagrams
      * Коллекция данных на построение
      */
     Collection<DiagramNowData> data
-
-    static AxisCurrentAndNew fromMap(Map fields)
-    {
-        new AxisCurrentAndNew(
-            indicator: fields.indicator as IndicatorOrParameter,
-            parameter: fields.parameter as IndicatorOrParameter,
-            data:fields.data as Collection<DiagramNowData>,
-            computedAttrs: fields.computedAttrs as Collection<ComputedAttr>,
-            dataLabels: fields.dataLabels as DataLabels,
-            displayMode:fields.displayMode as DisplayMode,
-            header: fields.header as Header,
-            navigation: (fields.navigation as Navigation) ?: new Navigation(),
-            legend: fields.legend as Legend,
-            sorting: fields.sorting as Sorting,
-            templateName: fields.templateName,
-            name:fields.name,
-            id: fields.id,
-            type: fields.type as DiagramType,
-            colorsSettings: fields.colorsSettings as ColorsSettings,
-            diagramType: fields.diagramType)
-    }
 }
 
 
@@ -2935,15 +2568,14 @@ class AxisCurrentAndNew extends NewDiagrams
  * Класс, описывающий общие поля текущих данных на построение
  */
 @Canonical
-@JsonDeserialize(using = DiagramNowDataDeserializer)
-class DiagramNowData
+@JsonIgnoreProperties(ignoreUnknown = true)
+abstract class DiagramNowData
 {
     /**
      * Флаг на отображение пустых значений
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean showEmptyData = false
-
     /**
      * Флаг на использование незаполненных значений
      */
@@ -2971,6 +2603,34 @@ class DiagramNowData
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Group breakdownGroup
+
+    @JsonCreator
+    static DiagramNowData create(def json)
+    {
+        json = updateJsonToCorrectFormat(json)
+        return mapper.readValue(json, DiagramNowData)
+    }
+
+    /**
+     * Метод по преобразованию json-а в правильный формат, который точно скушает creator
+     * @param json - json поля data виджета
+     * @return json поля data виджета правильного формата
+     */
+    static String updateJsonToCorrectFormat(def json)
+    {
+        ObjectNode obj = (ObjectNode) mapper.valueToTree(json)
+        Class clazz = diagramNowDataPredictors.find{clazz, predictor -> predictor(obj)}?.key
+        Map<String, Object> fields = mapper.convertValue(obj, Map)
+
+        fields.breakdown = fields.breakdown instanceof Collection
+            ? fields.breakdown
+            : fields.breakdown ? [fields.breakdown] : null
+        if(!clazz)
+        {
+            throw new IllegalAccessException(DiagramNowData, "проверьте входные данные в поле data!")
+        }
+        return Jackson.toJsonString(fields)
+    }
 }
 
 /**
@@ -3011,27 +2671,6 @@ class AxisCurrentData extends DiagramNowData
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String yAxisName
-
-    static AxisCurrentData fromMap(Map fields)
-    {
-        return fields ?
-            new AxisCurrentData(aggregation: fields.aggregation as Aggregation,
-                                breakdownGroup:fields.breakdownGroup as Group,
-                                breakdown: fields.breakdown as Collection<BaseBreakdown>,
-                                descriptor: fields.descriptor,
-                                showEmptyData: fields.showEmptyData,
-                                showBlankData: fields.showBlankData,
-                                sourceForCompute: fields.sourceForCompute,
-                                dataKey: fields.dataKey,
-                                top: fields.top as Top,
-                                group: fields.group as Group,
-                                source: fields.source as SourceValue,
-                                xAxis: fields.xAxis as Attribute,
-                                yAxis: fields.yAxis as BaseAttribute,
-                                yAxisName: fields.yAxisName,
-                                type: fields.type as ComboType)
-            : null
-    }
 }
 
 /**
@@ -3068,31 +2707,12 @@ class DiagramNewData extends DiagramNowData
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     ComboType type
-
-    static DiagramNewData fromMap(Map fields)
-    {
-        return fields ?
-            new DiagramNewData(
-                breakdown: fields.breakdown as Collection<BaseBreakdown>,
-                indicators: fields.indicators as Collection<NewIndicator>,
-                parameters: fields.parameters as Collection<NewParameter>,
-                source: fields.source as NewSourceValue,
-                dataKey: fields.dataKey,
-                showEmptyData: fields.showEmptyData,
-                showBlankData: fields.showBlankData,
-                sourceForCompute: fields.sourceForCompute,
-                xAxisName: fields.xAxisName,
-                yAxisName: fields.yAxisName,
-                type : fields.type as ComboType,
-                top: fields.top as Top
-            )
-            : null
-    }
 }
 
 /**
  * Класс, описывающий текущие данные для построения таблицы
  */
+@Canonical
 class TableCurrentData extends DiagramNowData
 {
     /**
@@ -3111,22 +2731,6 @@ class TableCurrentData extends DiagramNowData
      * Фильтрация источника
      */
     String descriptor
-
-    static TableCurrentData fromMap(Map fields)
-    {
-        return fields ?
-            new TableCurrentData(
-                dataKey: fields.dataKey,
-                top: fields.top as Top,
-                breakdown: fields.breakdown as Collection<BaseBreakdown>,
-                breakdownGroup: fields.breakdownGroup as Group,
-                indicators: fields.indicators as Collection<NewIndicator>,
-                parameters: fields.parameters as Collection<NewParameter>,
-                descriptor: fields.descriptor,
-                sourceForCompute: fields.sourceForCompute,
-                source: fields.source as SourceValue)
-            : null
-    }
 }
 
 /**
@@ -3159,30 +2763,13 @@ class CircleAndSummaryCurrentData extends DiagramNowData
      * Показатель
      */
     BaseAttribute indicator
-
-    static fromMap(Map fields)
-    {
-        return fields ?
-            new CircleAndSummaryCurrentData(
-                aggregation: fields.aggregation as Aggregation,
-                breakdown: fields.breakdown as Collection<BaseBreakdown>,
-                breakdownGroup: fields.breakdownGroup as Group,
-                dataKey: fields.dataKey,
-                descriptor: fields.descriptor,
-                source: fields.source as SourceValue,
-                showEmptyData: fields.showEmptyData,
-                showBlankData: fields.showBlankData,
-                sourceForCompute: fields.sourceForCompute,
-                indicator: fields.indicator as BaseAttribute,
-                top: fields.top as Top)
-            : null
-    }
 }
 
 /**
  * Класс, описывающий данные для построения таблицы прошлого формата
  */
 @Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class TablePrevData extends DiagramNowData
 {
     /**
@@ -3217,29 +2804,13 @@ class TablePrevData extends DiagramNowData
      * Источник старого формата
      */
     SourceValue source
-
-    static TablePrevData fromMap(Map fields)
-    {
-        return fields ?
-            new TablePrevData(
-                aggregation:  fields.aggregation as Aggregation,
-                breakdown: fields.breakdown as Collection<BaseBreakdown>, // <- Разбивка только у первого источника
-                breakdownGroup: fields.breakdownGroup as Group,
-                calcTotalColumn: fields.calcTotalColumn,
-                column: fields.column as BaseAttribute,
-                group: fields.group as Group,
-                row: Attribute.fromMap(fields.row),
-                sourceForCompute: fields.sourceForCompute,
-                source: fields.source as Source
-            )
-            : null
-    }
 }
 
 /**
  * Класс, описывающий круговые диаграммы старого формата
  * @deprecated использовать {@link CircleCurrentAndNew} вместо него
  */
+@Canonical
 @Deprecated
 class CircleZero extends OldDiagrams
 {
@@ -3267,88 +2838,24 @@ class CircleZero extends OldDiagrams
      * Показатель
      */
     BaseAttribute indicator
-
-    static CircleZero fromMap(Map fields)
-    {
-        return fields ?
-            new CircleZero(
-                colorsSettings: fields.colorsSettings as ColorsSettings,
-                aggregation: fields.aggregation as Aggregation,
-                breakdown: fields.breakdown as Collection<BaseBreakdown>,
-                breakdownGroup: fields.breakdownGroup as Group,
-                descriptor: fields.descriptor,
-                source: fields.source as SourceValue,
-                sourceForCompute: fields.sourceForCompute,
-                indicator: fields.indicator as Attribute,
-                name: fields.name,
-                diagramName: fields.diagramName,
-                id: fields.id,
-                showValue: fields.showValue,
-                showName: fields.showName,
-                showLegend: fields.showLegend,
-                legendPosition: fields.legendPosition as LegendPosition,
-                type: fields.type,
-                diagramType: fields.diagramType)
-            : null
-    }
 }
 
 /**
  * Класс, описывающий круговые диаграммы прошлого формата
  */
-class CirclePrev extends DiagramsPrev
-{
-    static CirclePrev fromMap(Map fields)
-    {
-        return fields ?
-            new CirclePrev(
-                colorsSettings: fields.colorsSettings as ColorsSettings,
-                computedAttrs: fields.computedAttrs as Collection<ComputedAttr>,
-                name: fields.name,
-                diagramName: fields.diagramName,
-                id: fields.id,
-                showValue: fields.showValue,
-                showName: fields.showName,
-                showLegend: fields.showLegend,
-                legendPosition:fields.legendPosition,
-                order: fields.order,
-                data: fields.data as Collection<DiagramNowData>,
-                type: fields.type as DiagramType,
-                diagramType: fields.diagramType
-            ) : null
-    }
-}
+@Canonical
+class CirclePrev extends DiagramsPrev { }
 
 /**
  * Класс, описывающий круговые диаграммы текущего формата
  */
+@Canonical
 class CircleCurrentAndNew extends NewDiagrams
 {
     /**
      * Коллекция данных на построение
      */
     Collection<DiagramNowData> data
-
-    static CircleCurrentAndNew fromMap(fields)
-    {
-        return fields ?
-            new CircleCurrentAndNew(
-                colorsSettings: fields.colorsSettings as ColorsSettings,
-                computedAttrs: fields.computedAttrs as Collection<ComputedAttr>,
-                dataLabels: fields.dataLabels as DataLabels,
-                displayMode: fields.displayMode as DisplayMode,
-                header: fields.header as Header,
-                name: fields.name,
-                id: fields.id,
-                data: fields.data as Collection<DiagramNowData>,
-                navigation: (fields.navigation as Navigation) ?: new Navigation(),
-                legend: fields.legend as Legend,
-                sorting: fields.sorting as Sorting,
-                templateName: fields.templateName,
-                type: fields.type,
-                diagramType: fields.diagramType)
-            : null
-    }
 }
 
 /**
@@ -3434,6 +2941,7 @@ class Ranges
 /**
  * Класс, описывающий диаграммы типа спидометр на построение
  */
+@Canonical
 class SpeedometerCurrentAndNew extends Widget
 {
     /**
@@ -3472,34 +2980,13 @@ class SpeedometerCurrentAndNew extends Widget
      * Шаблон-название
      */
     String templateName
-
-    static fromMap(Map fields)
-    {
-        return fields ?
-            new SpeedometerCurrentAndNew(
-                borders: fields.borders as Borders ,
-                computedAttrs: fields.computedAttrs as Collection<ComputedAttr>,
-                name: fields.name,
-                id: fields.id,
-                indicator: fields.indicator as SpeedometerIndicator ,
-                data: fields.data as Collection<DiagramNowData>,
-                displayMode: fields.displayMode as DisplayMode,
-                header: fields.header as Header,
-                navigation: (fields.navigation as Navigation) ?: new Navigation(),
-                ranges: fields.ranges as Ranges,
-                templateName: fields.templateName,
-                type: fields.type as DiagramType,
-                diagramType: fields.diagramType
-            )
-            :null
-
-    }
 }
 
 /**
  * Класс, описывающий диаграммы-сводки старого формата
  * @deprecated использовать {@link SummaryCurrentAndNew} вместо него
  */
+@Canonical
 @Deprecated
 class SummaryZero extends Widget
 {
@@ -3523,49 +3010,18 @@ class SummaryZero extends Widget
      * Показатель
      */
     BaseAttribute indicator
-
-    static SummaryZero fromMap(Map fields)
-    {
-        return fields ?
-            new SummaryZero(
-                name: fields.name,
-                id: fields.id,
-                aggregation: fields.aggregation as Aggregation,
-                descriptor: fields.descriptor,
-                source: fields.source as SourceValue,
-                sourceForCompute: fields.sourceForCompute,
-                indicator: fields.indicator,
-                type: fields.type,
-                diagramType: fields.diagramType
-            )
-            : null
-    }
 }
 
 /**
  * Класс, описывающий диаграммы-сводки предыдущего формата
  */
-class SummaryPrev extends DiagramsPrev
-{
-    static SummaryPrev fromMap(Map fields)
-    {
-        return fields ?
-            new SummaryPrev(
-                computedAttrs: fields.computedAttrs as Collection<ComputedAttr>,
-                name: fields.name,
-                data: fields.data as Collection<DiagramNowData>,
-                id: fields.id,
-                order: fields.order,
-                type: fields.type,
-                diagramType: fields.diagramType
-            )
-            : null
-    }
-}
+@Canonical
+class SummaryPrev extends DiagramsPrev { }
 
 /**
  * Класс, описывающий диаграммы-сводки текущего формата
  */
+@Canonical
 class SummaryCurrentAndNew extends NewDiagrams
 {
     /**
@@ -3576,30 +3032,12 @@ class SummaryCurrentAndNew extends NewDiagrams
      * Коллекиця данных на построение
      */
     Collection<DiagramNowData> data
-
-    static SummaryCurrentAndNew fromMap(Map fields)
-    {
-        return fields ?
-            new SummaryCurrentAndNew(
-                computedAttrs: fields.computedAttrs as Collection<ComputedAttr>,
-                displayMode: fields.displayMode as DisplayMode,
-                header: fields.header as Header,
-                name: fields.name,
-                id: fields.id,
-                indicator: fields.indicator as SpeedometerIndicator,
-                data: fields.data as Collection<DiagramNowData>,
-                navigation: (fields.navigation as Navigation) ?: new Navigation(),
-                templateName: fields.templateName,
-                type: fields.type as DiagramType,
-                diagramType: fields.diagramType
-            )
-            :null
-    }
 }
 
 /**
  * Класс, описывающий диаграммы-таблицы предыдущего, текущего и нового формата
  */
+@Canonical
 class TablePrevAndCurrentAndNew extends NewDiagrams
 {
     /**
@@ -3640,33 +3078,6 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
      * Настройка игнорирования ограничений
      */
     IgnoreLimits ignoreLimits = new IgnoreLimits()
-
-    static TablePrevAndCurrentAndNew fromMap(Map fields)
-    {
-        return fields ?
-            new TablePrevAndCurrentAndNew(
-                computedAttrs: fields.computedAttrs as Collection<ComputedAttr>,
-                calcTotalColumn: fields.calcTotalColumn,
-                showRowNum: fields.showRowNum,
-                diagramName: fields.diagramName,
-                navigation: (fields.navigation as Navigation) ?: new Navigation(),
-                templateName: fields.templateName,
-                name: fields.name,
-                id: fields.id,
-                displayMode: fields.displayMode as DisplayMode,
-                header: fields.header as Header,
-                columnsRatioWidth: fields.columnsRatioWidth,
-                showEmptyData: fields.showEmptyData,
-                showBlankData: fields.showBlankData,
-                sorting: fields.sorting as Sorting,
-                table: fields.table as TableObject,
-                data: fields.data as Collection<DiagramNowData> ,
-                top: fields.top as Top,
-                ignoreLimits: fields.ignoreLimits as IgnoreLimits,
-                type: fields.type as DiagramType,
-                diagramType: fields.diagramType
-            ) : null
-    }
 }
 
 /**
@@ -3687,6 +3098,7 @@ class IgnoreLimits
 /**
  * Класс, описывающий виджет типа текст
  */
+@Canonical
 class Text extends Widget
 {
     /**
@@ -3709,23 +3121,12 @@ class Text extends Widget
      * Переменные для текста виджета
      */
     Map<String, Object> variables
-
-    static Text fromMap(Map fields)
-    {
-        return fields
-            ? new Text( displayMode: fields.displayMode as DisplayMode,
-                        text: fields.text,
-                        textSettings: TextSettings.fromMap(fields.textSettings),
-                        id: fields.id,
-                        type: fields.type as DiagramType,
-                        variables: fields.variables as Map<String, Object>)
-            :null
-    }
 }
 
 /**
  * Настройки текста для текствого виджета
  */
+@Canonical
 class TextSettings
 {
     /**
@@ -3740,18 +3141,12 @@ class TextSettings
      * Расположение текста
      */
     TextAlign textAlign
-
-    static TextSettings fromMap(Map fields)
-    {
-        return fields
-            ? new TextSettings(fields)
-            : null
-    }
 }
 
 /**
  * Настройки цвета для параметра
  */
+@Canonical
 class ChartColorSettings
 {
     /**
@@ -3763,23 +3158,12 @@ class ChartColorSettings
      */
     String key
 
-    static ChartColorSettings fromMap(Map fields)
-    {
-        return fields ?
-            new ChartColorSettings(fields)
-            : null
-    }
-
-    static Collection<ChartColorSettings> fromColorCollection(Collection colorMapCollection)
-    {
-        return colorMapCollection
-            ? colorMapCollection.findResults { return fromMap(it) } : []
-    }
 }
 
 /**
  * Данные настроек цвета для параметра
  */
+@Canonical
 class CustomChartSettingsData
 {
     /**
@@ -3799,54 +3183,13 @@ class CustomChartSettingsData
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String defaultColor
-
-    static CustomChartSettingsData fromMap(Map fields)
-    {
-        return fields ?
-            new CustomChartSettingsData(colors: ChartColorSettings.fromColorCollection(fields.colors),
-                                        key: fields.key,
-                                        type: fields.type as CustomLabelType,
-                                        defaultColor: fields.defaultColor)
-            :null
-    }
-}
-
-/**
- * Класс по преобразования json-строки в объект класса
- */
-class ColorsSettingsDeserializer extends StdDeserializer
-{
-    ColorsSettingsDeserializer() {
-        this(null);
-    }
-
-    ColorsSettingsDeserializer(Class<?> vc) {
-        super(vc);
-    }
-
-    @Override
-    ColorsSettings deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException
-    {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec()
-        def obj = mapper.readTree(jp)
-
-        if(obj.fieldNames().toList().any { it == 'auto'})
-        {
-            Map<String, Object> fields = mapper.convertValue(obj, Map)
-            return ColorsSettings.fromMap(fields)
-        }
-        else
-        {
-            //если настройки пришли старого формата, переделываем их в объект нового
-            return new ColorsSettings(auto: new AutoColors(colors: obj?.elements()*.textValue()), type: ColorType.AUTO, custom: new CustomColors())
-        }
-    }
 }
 
 /**
  * Данные настроек цвета для параметра
  */
-@JsonDeserialize(using = ColorsSettingsDeserializer)
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class ColorsSettings
 {
     /**
@@ -3856,39 +3199,34 @@ class ColorsSettings
     /**
      * Данные пользовательских цвета
      */
-    CustomColors custom
+    CustomColors custom = new CustomColors()
     /**
      * Тип цвета для применения
      */
     ColorType type
 
-    static ColorsSettings fromMap(Map fields)
-    {
-        return fields ? new ColorsSettings(auto: AutoColors.fromMap(fields.auto),
-                                           custom: fields.custom ? CustomColors.fromMap(fields.custom) : new CustomColors(),
-                                           type: fields.type as ColorType) : null
+    @JsonCreator
+    static ColorsSettings create(String json) {
+        return mapper.readValue(json, ColorsSettings)
     }
 }
 
 /**
  * Автоматические настройки цвета
  */
+@Canonical
 class AutoColors
 {
     /**
      * Список цветов
      */
     Collection<String> colors
-
-    static AutoColors fromMap(Map fields)
-    {
-        return fields ? new AutoColors(colors: fields.colors) : null
-    }
 }
 
 /**
  * Пользовательские настройки цвета
  */
+@Canonical
 class CustomColors
 {
     /**
@@ -3900,13 +3238,6 @@ class CustomColors
      */
     Boolean useGlobal = false
 
-    static CustomColors fromMap(Map fields)
-    {
-        return fields ?
-            new CustomColors(data: CustomChartSettingsData.fromMap(fields.data),
-                             useGlobal: fields.useGlobal)
-            : null
-    }
 }
 //endregion
 return
