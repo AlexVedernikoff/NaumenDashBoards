@@ -1,10 +1,9 @@
 // @flow
+import type {AddNewWidget, ValidateWidgetToCopyResult, WidgetMap} from 'store/widgets/data/types';
 import type {DashboardsState} from 'store/dashboards/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
-import type NewWidget from 'store/widgets/data/NewWidget';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
-import type {ValidateWidgetToCopyResult, WidgetMap} from 'store/widgets/data/types';
 
 export type ConnectedProps = {|
 	dashboards: DashboardsState,
@@ -15,20 +14,14 @@ export type ConnectedProps = {|
 |};
 
 export type ConnectedFunctions = {|
-	addWidget: (widget: NewWidget) => ThunkAction,
+	addNewWidget: AddNewWidget,
 	copyWidget: (dashboardId: string, widgetId: string, ignoreCustomGroups?: boolean) => ThunkAction,
 	fetchDashboards: () => ThunkAction,
 	validateWidgetToCopy: (dashboardId: string, widgetId: string) => ThunkAction
 |};
 
-export type DispatchedConnectedFunctions = {|
-	addWidget: (widget: NewWidget) => void,
-	copyWidget: (dashboardId: string, widgetId: string, ignoreCustomGroups?: boolean) => Promise<void>,
-	fetchDashboards: () => void,
-	validateWidgetToCopy: (dashboardId: string, widgetId: string) => Promise<ValidateWidgetToCopyResult>
-|};
-
 export type Props = {
-	...DispatchedConnectedFunctions,
-	...ConnectedProps
+	...ConnectedFunctions,
+	...ConnectedProps,
+	validateWidgetToCopy: (dashboardId: string, widgetId: string) => Promise<ValidateWidgetToCopyResult>
 };

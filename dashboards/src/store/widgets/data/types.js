@@ -447,7 +447,8 @@ export type TextWidget = {
 	text: string,
 	textSettings: TextSettings,
 	type: typeof WIDGET_TYPES.TEXT,
-	variables: Variables
+	variables: Variables,
+	warningMessage?: string
 };
 
 export type DataSet =
@@ -455,6 +456,7 @@ export type DataSet =
 	| CircleData
 	| ComboData
 	| SummaryData
+	|	SpeedometerData
 	| TableData;
 
 export type Chart =
@@ -473,15 +475,6 @@ export type Widget =
 export type AnyWidget =
 	| Widget
 	| TextWidget
-;
-
-export type DiagramWidgetDataSet =
-	| AxisData
-	| CircleData
-	| ComboData
-	| SummaryData
-	| SpeedometerData
-	| TableData
 ;
 
 export type EditWidgetChunkData = (widget: Widget, chunkData: Object) => ThunkAction;
@@ -628,6 +621,10 @@ export type WidgetsDataState = {
 };
 
 export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
+
+export type SaveWidgetWithNewFilters = (widget: $Shape<Widget>) => ThunkAction;
+
+export type AddNewWidget = (widget: NewWidget) => ThunkAction;
 
 export type CopyWidgetError = $Values<typeof COPY_WIDGET_ERRORS>;
 

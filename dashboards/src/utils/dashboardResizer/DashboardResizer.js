@@ -1,6 +1,6 @@
 // @flow
 import {DASHBOARD_HEADER_HEIGHT} from 'components/organisms/DashboardHeader/constants';
-import {gridRef} from 'components/organisms/DashboardContent/constants';
+import {gridRef} from 'components/organisms/WidgetsGrid/constants';
 import type {Store} from 'store/types';
 
 export class DashboardResizer {

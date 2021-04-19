@@ -6,6 +6,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import TextEditor from 'components/atoms/TextEditor';
+import Widget from 'containers/Widget';
 
 export class TextWidget extends PureComponent<Props, State> {
 	state = {
@@ -76,11 +77,12 @@ export class TextWidget extends PureComponent<Props, State> {
 	}
 
 	render () {
-		const {content, styleMap, textAlign} = this.props.widget.textSettings;
+		const {widget} = this.props;
+		const {content, styleMap, textAlign} = widget.textSettings;
 		const {editorState} = this.state;
 
 		return (
-			<div className={styles.container} >
+			<Widget className={styles.container} widget={widget}>
 				<TextEditor
 					content={content}
 					readOnly={true}
@@ -88,7 +90,7 @@ export class TextWidget extends PureComponent<Props, State> {
 					textAlign={textAlign}
 					value={editorState}
 				/>
-			</div>
+			</Widget>
 		);
 	}
 }

@@ -1,5 +1,5 @@
 // @flow
-import {addWidget, copyWidget, validateWidgetToCopy} from 'store/widgets/data/actions';
+import {addNewWidget, copyWidget, validateWidgetToCopy} from 'store/widgets/data/actions';
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchDashboards} from 'store/dashboards/actions';
@@ -17,7 +17,7 @@ export const props = (state: AppState): ConnectedProps => ({
 });
 
 export const functions: ConnectedFunctions = {
-	addWidget,
+	addNewWidget,
 	copyWidget,
 	fetchDashboards,
 	validateWidgetToCopy

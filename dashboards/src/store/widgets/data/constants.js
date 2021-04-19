@@ -1,5 +1,5 @@
 // @flow
-import type {ChartColorsSettings, DataTopSettings} from './types';
+import type {ChartColorsSettings, DataTopSettings, Header} from './types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 
 const ADD_WIDGET: 'ADD_WIDGET' = 'ADD_WIDGET';
@@ -292,6 +292,21 @@ const COPY_WIDGET_ERRORS = {
 	HAS_SUBJECT_FILTERS
 };
 
+// Настройки заголовка виджета по умолчанию
+const DEFAULT_HEADER_SETTINGS: Header = {
+	fontColor: '#323232',
+	fontFamily: FONT_FAMILIES[0],
+	fontSize: 16,
+	fontStyle: undefined,
+	name: '',
+	position: HEADER_POSITIONS.TOP,
+	show: true,
+	template: '',
+	textAlign: TEXT_ALIGNS.left,
+	textHandler: TEXT_HANDLERS.CROP,
+	useName: true
+};
+
 // Свыше - предлагаем отключить отображение ???
 const DATA_LABELS_LIMIT = 250;
 
@@ -312,6 +327,7 @@ export {
 	DEFAULT_CIRCLE_SORTING_SETTINGS,
 	DEFAULT_CHART_COLORS,
 	DEFAULT_COLORS_SETTINGS,
+	DEFAULT_HEADER_SETTINGS,
 	DEFAULT_NAVIGATION_SETTINGS,
 	DEFAULT_TABLE_VALUE,
 	DEFAULT_TOP_SETTINGS,

@@ -1,8 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP} from 'store/widgets/constants';
-import {DEFAULT_HEADER_SETTINGS} from 'components/molecules/Diagram/constants';
-import {DEFAULT_NAVIGATION_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {DEFAULT_HEADER_SETTINGS, DEFAULT_NAVIGATION_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {NavigationSettings, WidgetType} from 'store/widgets/data/types';
 import NewWidget from 'store/widgets/data/NewWidget';

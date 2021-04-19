@@ -1,12 +1,11 @@
 // @flow
 import type {SpeedometerWidget} from 'store/widgets/data/types';
 
-type SpeedometerData = {
+export type SpeedometerData = {
 	title: string,
 	total: number
 };
 
 export type Props = {
-	data: SpeedometerData,
 	widget: SpeedometerWidget
 };

@@ -1,6 +1,8 @@
 // @flow
 export type Props = {
-	onToggleSwipe: () => void,
-	selectedWidget: string,
+	selectedWidget: string
+};
+
+export type State = {
 	swiped: boolean
 };

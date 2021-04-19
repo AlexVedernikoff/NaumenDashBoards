@@ -1,0 +1,123 @@
+@import "/styles/variables.less";
+
+:local {
+	.createButtonPlace {
+		align-items: center;
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+		left: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+	}
+
+	.creationButtonInfo {
+		width: 300px;
+	}
+
+	.creationButton {
+		color: @primary;
+		cursor: pointer;
+		display:inline-block;
+		&::after,
+		&::before {
+			content: '\00a0 ';
+		}
+	}
+
+	.gridContainer {
+		background-color: @blue;
+		bottom: 0;
+		left: 0;
+		overflow-y: auto;
+		padding-right: 12px;
+		position: absolute;
+		right: 0;
+		top: 0;
+	}
+
+	.MKGridContainer {
+		margin: 0 auto;
+		padding: 0;
+		width: 320px;
+	}
+
+	.grid {
+		height: 100%;
+	}
+
+	.drawnGrid {
+		background:
+			repeating-linear-gradient(180deg, transparent, @steel 1px, transparent 2px, transparent 20px, @steel 21px, transparent 22px, transparent 180px),
+			// на ie repeating-linear-gradient плохо работает с calc
+			repeating-linear-gradient(90deg, transparent, @steel 1px, transparent 2px, transparent 20px, @steel 21px, transparent 22px, transparent 8.22%)
+		;
+	}
+}
+
+.react-grid-layout {
+	min-height: 100%;
+	position: relative;
+}
+
+.react-grid-item {
+	> .react-resizable-handle {
+		bottom: 0;
+		cursor: se-resize;
+		height: 20px;
+		position: absolute;
+		right: 0;
+		width: 20px;
+
+		&::after {
+			border-bottom: 2px solid @grey;
+			border-right: 2px solid @grey;
+			bottom: 3px;
+			content: '';
+			height: 5px;
+			position: absolute;
+			right: 3px;
+			width: 5px;
+		}
+	}
+
+	&.react-draggable-dragging, .resizing  {
+		z-index: 5;
+	}
+
+	&.react-grid-placeholder {
+		background: @grey;
+		opacity: 0.8;
+		transition-duration: 300ms;
+		user-select: none;
+	}
+}
+
+.react-resizable-hide > .react-resizable-handle {
+	display: none;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-sw {
+	bottom: 0;
+	cursor: sw-resize;
+	left: 0;
+	transform: rotate(90deg);
+}
+.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
+	bottom: 0;
+	cursor: se-resize;
+	right: 0;
+}
+.react-grid-item > .react-resizable-handle.react-resizable-handle-nw {
+	cursor: nw-resize;
+	left: 0;
+	top: 0;
+	transform: rotate(180deg);
+}
+.react-grid-item > .react-resizable-handle.react-resizable-handle-ne {
+	cursor: ne-resize;
+	right: 0;
+	top: 0;
+	transform: rotate(270deg);
+}

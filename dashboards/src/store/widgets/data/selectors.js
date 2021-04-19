@@ -20,6 +20,23 @@ const getWidgetsData = (state: AppState): WidgetsDataState => state.widgets.data
 const getWidgetsBuildData = (state: AppState): BuildDataState => state.widgets.buildData;
 
 /**
+ * Возвращает данные для построения виджета
+ * @param {AppState} state - состояние хранилища
+ * @param {Widget} widget - виджет
+ * @returns {BuildDataState}
+ */
+const getWidgetBuildData = (state: AppState, widget: Widget): BuildData => {
+	const {[widget.id]: data = {
+		data: null,
+		error: false,
+		loading: false,
+		type: widget.type
+	}} = getWidgetsBuildData(state);
+
+	return data;
+};
+
+/**
  * Возвращает id редактируемого виджета
  * @param {AppState} state - состояние хранилища
  * @returns {string}
@@ -76,5 +93,7 @@ export {
 	getAllWidgetsWithoutSelected,
 	getSelectedWidget,
 	getSelectedWidgetBuildData,
+	getSelectedWidgetId,
+	getWidgetBuildData,
 	getWidgetsBuildData
 };

@@ -37,7 +37,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 		this.addWidget(createNewWidget(layoutMode, WIDGET_TYPES.TEXT));
 	};
 
-	addWidget = (widget?: NewWidget) => widget && this.props.addWidget(widget);
+	addWidget = (widget?: NewWidget) => widget && this.props.addNewWidget(widget);
 
 	handleCloseModal = () => this.setState({invalidCopyData: null});
 

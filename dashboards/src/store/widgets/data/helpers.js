@@ -19,7 +19,6 @@ import type {
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import type { DataSet, SourceData } from 'store/widgets/data/types';
 import DiagramWidget from './templates/DiagramWidget';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
@@ -315,77 +314,6 @@ const getCustomColorsSettingsKey = (widget: Widget): string | null => {
 };
 
 /**
- * Формирует новый источник с указанным пользовательским фильтром
- *
- * @param {DataSet} dataSet - источник
- * @param {number} filterIndex - порядковый номер фильтра
- * @param {string} descriptor - новый дескриптор
- * @returns {DataSet}
- */
-const generateUpdatedDataSetCustomFilters = (dataSet: DataSet, filterIndex: number, descriptor: string): DataSet => {
-	const {source: oldSource} = dataSet;
-	const {widgetFilterOptions: oldWidgetFilterOptions} = oldSource;
-
-	if (oldWidgetFilterOptions) {
-		const widgetFilterOptions = [
-			...oldWidgetFilterOptions.slice(0, filterIndex),
-			{...oldWidgetFilterOptions[filterIndex], descriptor},
-			...oldWidgetFilterOptions.slice(filterIndex + 1)
-		];
-		const source: SourceData = { ...oldSource, widgetFilterOptions };
-		return { ...dataSet, source };
-	}
-
-	return dataSet;
-};
-
-/**
- * Формирует новый массив источников для виджета с указанным пользовательским фильтром
- * @param {Widget} widget - виджет
- * @param {number} dataSetIndex - индекс источника
- * @param {number} filterIndex - порядковый номер фильтра
- * @param {string} descriptor - новый дескриптор
- * @returns {DataSet}
- */
-const generateUpdatedWidgetCustomFilters = (widget: Widget, dataSetIndex: number, filterIndex: number, descriptor: string): Array<DataSet> => {
-	const {data} = widget;
-	return [
-		...data.slice(0, dataSetIndex),
-		generateUpdatedDataSetCustomFilters(data[dataSetIndex], filterIndex, descriptor),
-		...data.slice(dataSetIndex + 1)
-	];
-};
-
-/**
- * Формирует новый источник с очищенными пользовательскими филльтрами
- * @param {DataSet} dataSet - источник
- * @returns {DataSet} - очищенный источник
- */
-const generateClearedDataSetCustomFilters = (dataSet: DataSet): DataSet => {
-	const {source: oldSource} = dataSet;
-	const {widgetFilterOptions: oldWidgetFilterOptions} = oldSource;
-
-	if (oldWidgetFilterOptions) {
-		const widgetFilterOptions = oldWidgetFilterOptions.map((filter) => ({ ...filter, descriptor: '' }));
-
-		const source: SourceData = { ...oldSource, widgetFilterOptions };
-		return { ...dataSet, source };
-	}
-
-	return dataSet;
-};
-
-/**
- * Сформировать новый массив источников для виджета с очищенными пользовательским филльтром
- * @param {Widget} widget - виджет
- * @returns {Array<DataSet>}
- */
-const generateClearedWidgetCustomFilters = (widget: Widget): Array<DataSet> => {
-	const {data} = widget;
-	return data.map(generateClearedDataSetCustomFilters);
-};
-
-/**
  * Устанавливаем ошибку на виджет
  * @param {WidgetsDataState} state - хранилище данных виджетов
  * @param {SetMessageWarning} payload - данные об ошибке
@@ -430,8 +358,6 @@ export {
 	getComboYAxisName,
 	getMainDataSet,
 	getMainDataSetIndex,
-	generateClearedWidgetCustomFilters,
-	generateUpdatedWidgetCustomFilters,
 	setWidgetWarning,
 	setWidgets,
 	setSelectedWidget,

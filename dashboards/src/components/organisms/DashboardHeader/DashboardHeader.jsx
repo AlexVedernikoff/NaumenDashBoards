@@ -8,7 +8,7 @@ import {DASHBOARD_HEADER_HEIGHT, EXPORT_LIST} from './constants';
 import DropDownButton from './components/DropDownButton';
 import ExportByEmailButton from './components/ExportByEmailButton';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
-import {gridRef} from 'components/organisms/DashboardContent/constants';
+import {gridRef} from 'components/organisms/WidgetsGrid/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from './components/IconButton';
 import isMobile from 'ismobilejs';

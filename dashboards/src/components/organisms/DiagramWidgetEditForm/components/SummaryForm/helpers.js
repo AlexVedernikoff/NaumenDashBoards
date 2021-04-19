@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_LAYOUT_HEIGHT, DEFAULT_LAYOUT_WIDTH} from './constants';
-import {getCountGridColumns} from 'components/organisms/DashboardContent/helpers';
-import {GRID_LAYOUT_HEIGHT} from 'components/organisms/DashboardContent/constants';
+import {getCountGridColumns} from 'components/organisms/WidgetsGrid/helpers';
+import {GRID_LAYOUT_HEIGHT} from 'components/organisms/WidgetsGrid/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 
 const getSummaryLayoutSize = (layoutMode: LayoutMode) => {

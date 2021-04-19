@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
-import {addWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {createToast} from 'store/toasts/actions';
@@ -368,7 +368,7 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 		};
 
 		dispatch(addLayouts(NewWidget.id));
-		dispatch(addWidget(newWidget));
+		dispatch(addNewWidget(newWidget));
 		dispatch(editDashboard());
 		localStorage.removeItem(foundKey);
 	}

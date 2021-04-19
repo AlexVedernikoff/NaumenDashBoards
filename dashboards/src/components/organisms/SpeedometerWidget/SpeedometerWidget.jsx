@@ -1,13 +1,35 @@
 // @flow
 import cn from 'classnames';
 import {FONT_SIZE_AUTO_OPTION, FONT_STYLES} from 'store/widgets/data/constants';
-import type {Props} from './types';
+import {LoadingDiagramWidget} from 'components/organisms/DiagramWidget';
+import type {Props, SpeedometerData} from './types';
 import React, {PureComponent} from 'react';
 import settingsStyles from 'styles/settings.less';
 import Speedometer from 'components/organisms/Speedometer';
 import type {TextValueProps} from 'components/organisms/Speedometer/types';
 
 export class SpeedometerWidget extends PureComponent<Props> {
+	renderSpeedometer = (data: SpeedometerData) => {
+		const {widget} = this.props;
+		const {borders, ranges} = widget;
+		const {max, min} = borders;
+		const {title, total} = data;
+		const components = {
+			TextValue: this.renderTextValue
+		};
+
+		return (
+			<Speedometer
+				components={components}
+				max={Number(max)}
+				min={Number(min)}
+				ranges={ranges}
+				title={title}
+				value={total}
+			/>
+		);
+	};
+
 	renderTextValue = (props: TextValueProps) => {
 		const {fontColor, fontFamily, fontSize: indicatorFontSize, fontStyle, show} = this.props.widget.indicator;
 
@@ -39,23 +61,12 @@ export class SpeedometerWidget extends PureComponent<Props> {
 	};
 
 	render () {
-		const {data, widget} = this.props;
-		const {borders, ranges} = widget;
-		const {max, min} = borders;
-		const {title, total} = data;
-		const components = {
-			TextValue: this.renderTextValue
-		};
+		const {widget} = this.props;
 
 		return (
-			<Speedometer
-				components={components}
-				max={Number(max)}
-				min={Number(min)}
-				ranges={ranges}
-				title={title}
-				value={total}
-			/>
+			<LoadingDiagramWidget widget={widget}>
+				{data => this.renderSpeedometer(data)}
+			</LoadingDiagramWidget>
 		);
 	}
 }

@@ -1,7 +1,7 @@
 // @flow
 import {deepClone} from 'helpers';
 import {DEFAULT_WIDGET_LAYOUT_SIZE} from './constants';
-import {GRID_PROPS} from 'components/organisms/DashboardContent/constants';
+import {GRID_PROPS} from 'components/organisms/WidgetsGrid/constants';
 import type {
 	Layout,
 	LayoutPayloadForChange,

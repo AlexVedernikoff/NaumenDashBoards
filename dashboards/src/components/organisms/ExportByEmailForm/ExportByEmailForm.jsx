@@ -6,7 +6,7 @@ import FormContent from './components/FormContent';
 import FormFooter from './components/FormFooter';
 import FormHeader from './components/FormHeader';
 import {FORMATS} from './constants';
-import {gridRef} from 'components/organisms/DashboardContent/constants';
+import {gridRef} from 'components/organisms/WidgetsGrid/constants';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from 'containers/ExportByEmailForm/types';
 import React, {PureComponent} from 'react';

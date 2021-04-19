@@ -1,44 +1,7 @@
 // @flow
-import type {BuildDataMap} from 'store/widgets/buildData/types';
-import type {CallWidgetFilters, ClearWidgetFilters, EditWidgetChunkData, FocusWidget, ResetFocusedWidget, Widget} from 'store/widgets/data/types';
-import type {DrillDown, OpenCardObject, OpenNavigationLink} from 'store/widgets/links/types';
-import type {LayoutMode} from 'store/dashboard/settings/types';
-import type {Layouts, LayoutsPayloadForChange} from 'store/dashboard/layouts/types';
-import type {ThunkAction} from 'store/types';
-import type {UserData} from 'store/context/types';
-
-export type ConnectedFunctions = {
-	callWidgetFilters: CallWidgetFilters,
-	changeLayouts: (payload: LayoutsPayloadForChange) => Object,
-	clearWarningMessage: (payload: string) => void,
-	clearWidgetFilters: ClearWidgetFilters,
-	createNewTextWidget: (layoutMode: LayoutMode) => ThunkAction,
-	createNewWidget: (layoutMode: LayoutMode) => ThunkAction,
-	drillDown: DrillDown,
-	editWidgetChunkData: EditWidgetChunkData,
-	fetchBuildData: (widget: Widget) => ThunkAction,
-	focusWidget: FocusWidget,
-	openCardObject: OpenCardObject,
-	openNavigationLink: OpenNavigationLink,
-	removeWidget: (widgetId: string) => ThunkAction,
-	resetFocusedWidget: ResetFocusedWidget,
-	selectWidget: (widgetId: string, callback: Function) => ThunkAction,
-	updateWidget: Widget => Object
-};
-
 export type ConnectedProps = {
-	buildData: BuildDataMap,
-	editable: boolean,
-	editableDashboard: boolean,
 	editMode: boolean,
-	focusedWidget: string,
-	layoutMode: LayoutMode,
-	layouts: Layouts,
-	personalDashboard: boolean,
-	selectedWidget: string,
-	showCreationInfo: boolean,
-	user: UserData,
-	widgets: Array<Widget>
+	selectedWidget: string
 };
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props = ConnectedProps;

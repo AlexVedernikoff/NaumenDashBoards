@@ -1,10 +1,9 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
-import type {AnyWidget, SetWidgetWarning, ValidateWidgetToCopyResult} from './types';
+import type {AnyWidget, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
 import {confirmDialog} from 'store/commonDialogs/actions';
-import {createFilterContext, getFilterContext, getParams, parseResponseErrorText} from 'store/helpers';
 import {createToast} from 'store/toasts/actions';
 import {deepClone, isObject} from 'helpers';
 import {DEFAULT_BUTTONS} from 'components/molecules/Modal/constants';
@@ -12,14 +11,15 @@ import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
-import {generateClearedWidgetCustomFilters, generateUpdatedWidgetCustomFilters, getCustomColorsSettingsKey} from './helpers';
 import {getAllWidgets} from 'src/store/widgets/data/selectors';
+import {getCustomColorsSettingsKey} from './helpers';
+import {getParams, parseResponseErrorText} from 'store/helpers';
 import {getWidgetsBuildData} from './selectors';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {refreshCustomGroups} from 'store/customGroups/actions';
-import {WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {WIDGET_SETS} from 'store/widgets/data/constants';
 
 /**
  * Добавляет новый виджет
@@ -43,14 +43,12 @@ const checkWidgetsCount = () => (dispatch: Dispatch, getState: GetState): void =
  * @param {NewWidget} payload - объект нового виджета
  * @returns {ThunkAction}
  */
-const addWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): void => {
+const addNewWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): void => {
 		dispatch(checkWidgetsCount());
+
 		batch(() => {
 			dispatch(focusWidget(payload.id));
-			dispatch({
-				payload,
-				type: WIDGETS_EVENTS.ADD_WIDGET
-			});
+			dispatch({payload, type: WIDGETS_EVENTS.ADD_WIDGET});
 			dispatch(addLayouts(NewWidget.id));
 		});
 };
@@ -176,81 +174,28 @@ const editWidgetChunkData = (widget: AnyWidget, chunkData: Object, refreshData: 
 };
 
 /**
- * Сохраняет изменение части данных виджета
- * @param {AnyWidget} widget - данные виджета
- * @param {boolean} refreshData - указывает на необходимость обновить данные для построения
+ * Сохраняет данные настройки виджета с обновленными пользовательскими фильтрами
+ * @param {Widget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const clearWidgetFilters = (widget: AnyWidget, refreshData: boolean = true): ThunkAction =>
-	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	try {
-		if (widget.type !== WIDGET_TYPES.TEXT) {
-			const {data} = widget;
-
-			if (data && Array.isArray(data)) {
-				const data = generateClearedWidgetCustomFilters(widget);
-				const state = getState();
-				const isPersonal = isPersonalDashboard(state);
-
-				if (isPersonal) {
-					dispatch(editWidgetChunkData(widget, {data}, refreshData));
-				} else {
-					const updatedWidget = deepClone({...widget, data});
-
-					dispatch(updateWidget(updatedWidget));
-					dispatch(fetchBuildData(updatedWidget));
-				}
-			}
-		}
-	} catch (e) {
-		dispatch(recordSaveError());
-	}
-};
-
-/**
- * Установка фильтров виджета через вызов формы фильтрации
- *
- * @param {AnyWidget} widget - виджет
- * @param {number} dataSetIndex - индекс источника
- * @param {number} filterIndex -  индекс фильтра
- * @returns {ThunkAction}
- */
-const callWidgetFilters = (widget: AnyWidget, dataSetIndex: number, filterIndex: number): ThunkAction =>
+const saveWidgetWithNewFilters = (widget: Widget): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		try {
-			if (widget.type !== WIDGET_TYPES.TEXT) {
-				const dataSet = widget.data[dataSetIndex];
-				const {source: {value}} = dataSet;
-				const {value: classFqn} = value;
-				const filter = dataSet.source.widgetFilterOptions?.[filterIndex];
+			const state = getState();
+			const isPersonal = isPersonalDashboard(state);
 
-				if (filter) {
-					const {descriptor} = filter;
-					const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
+			if (isPersonal) {
+				dispatch(editWidgetChunkData(widget, {data: widget.data}));
+			} else {
+				const updatedWidget = deepClone(widget);
 
-					if (context) {
-						context['attrCodes'] = filter.attributes.map(attr => `${attr.metaClassFqn}@${attr.code}`);
-						const {serializedContext} = await window.jsApi.commands.filterForm(context, true);
-
-						const state = getState();
-						const isPersonal = isPersonalDashboard(state);
-						const data = generateUpdatedWidgetCustomFilters(widget, dataSetIndex, filterIndex, serializedContext);
-
-						if (isPersonal) {
-							dispatch(editWidgetChunkData(widget, {data}, true));
-						} else {
-							const updatedWidget = deepClone({...widget, data});
-
-							dispatch(updateWidget(updatedWidget));
-							dispatch(fetchBuildData(updatedWidget));
-						}
-					}
-				}
+				dispatch(updateWidget(updatedWidget));
+				dispatch(fetchBuildData(updatedWidget));
 			}
-		} catch (ex) {
-			console.error('Ошибка формы фильтрации', ex);
+		} catch (e) {
+			dispatch(recordSaveError());
 		}
-	};
+};
 
 /**
  * Создает новый виджет
@@ -354,13 +299,11 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 /**
  * Устанавливает выбранный виджет для последующего редактирования
  * @param {string} payload - id виджета
- * @param {Function} callback - коллбэк-функция, которая будет вызвана после выбора виджета
  * @returns {ThunkAction}
  */
-const selectWidget = (payload: string, callback?: Function): ThunkAction => (dispatch: Dispatch): void => {
+const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch(setSelectedWidget(payload));
 	dispatch(editDashboard());
-	callback && callback();
 };
 
 /**
@@ -555,9 +498,8 @@ const updateWidget = (payload: AnyWidget) => ({
 });
 
 export {
-	addWidget,
+	addNewWidget,
 	cancelForm,
-	clearWidgetFilters,
 	copyWidget,
 	clearWarningMessage,
 	createWidget,
@@ -567,12 +509,12 @@ export {
 	resetFocusedWidget,
 	resetWidget,
 	saveWidget,
+	saveWidgetWithNewFilters,
 	selectWidget,
 	setSelectedWidget,
 	setWarningMessage,
 	setUseGlobalChartSettings,
 	setWidgets,
 	updateWidget,
-	validateWidgetToCopy,
-	callWidgetFilters
+	validateWidgetToCopy
 };
