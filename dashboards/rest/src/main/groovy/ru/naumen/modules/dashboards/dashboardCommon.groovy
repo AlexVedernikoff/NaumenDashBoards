@@ -649,7 +649,6 @@ class DashboardUtils
                     header: oldFormatWidget.header as Header,
                     columnsRatioWidth: oldFormatWidget.columnsRatioWidth,
                     showEmptyData: oldFormatWidget.showEmptyData,
-                    showBlankData: oldFormatWidget.showBlankData,
                     showRowNum: oldFormatWidget.showRowNum,
                     sorting: oldFormatWidget.sorting as Sorting,
                     table: oldFormatWidget.table as TableObject,
@@ -1520,8 +1519,16 @@ class DeserializationHelper
 
         def baseBreakdowndeserializer = new PredictorBasedPolymorphicDeserializer()
         baseBreakdowndeserializer.predictors = [
-            (BaseBreakdown) : { 'code' in it.fields.keySet() },
-            (NewBreakdown) : { 'attribute' in fields.keySet() || 'value' in fields.keySet() }
+            (Attribute) : { value ->
+                return use(JacksonUtils) {
+                    value.hasField('code') && !value.hasField('attribute')
+                }
+            },
+            (NewBreakdown) : { value ->
+                return use(JacksonUtils) {
+                    value.hasField('attribute') || value.hasField('value')
+                }
+            }
         ]
         module.addDeserializer(BaseBreakdown, baseBreakdowndeserializer)
 
@@ -1570,6 +1577,7 @@ class DashboardSettingsClass
     /**
      * Коллекция кастомных группировок дашборда
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Collection<CustomGroup> customGroups = []
     /**
      * Настройка расположений виджетов в основной версии
@@ -1743,6 +1751,7 @@ class LayoutSettings
 /**
  * Автообновление дашборда
  */
+@Canonical
 class AutoUpdate
 {
     /**
@@ -1753,18 +1762,6 @@ class AutoUpdate
      * интервал обновления
      */
     int interval
-
-    AutoUpdate(Map map)
-    {
-        this.enabled = map.enabled as boolean
-        this.interval = map.interval as int
-    }
-
-    AutoUpdate(int interval)
-    {
-        this.enabled = true
-        this.interval = interval
-    }
 
     /**
      * выключить автообновление
@@ -1999,6 +1996,15 @@ class DataLabels implements IHasFontSettings
      * Флаг на тень
      */
     Boolean showShadow = true
+
+    /**
+     * Отображать промежуточные итоги
+     */
+    Boolean showSubTotalAmount = false
+    /**
+     * Отображать общую сумму
+     */
+    Boolean showTotalAmount = false
 }
 
 /**
@@ -2030,6 +2036,7 @@ class Legend implements IHasFontSettings
 /**
  * Заголовок графика
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 class Header implements IHasFontSettings
 {
     /**
@@ -2116,6 +2123,7 @@ class Top
 /**
  * Новый формат разбивки
  */
+@Canonical
 class NewBreakdown extends BaseBreakdown implements IHasGroup
 {
     /**
@@ -2193,6 +2201,20 @@ class NewParameter implements IHasGroup
 interface  IHasGroup
 {
     Group getGroup()
+}
+
+/**
+ * Класс, описывающий состав фильтра для работы drilldown
+ */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+class DrilldownFilter extends NewParameter
+{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Aggregation aggregation
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    def value
 }
 
 /**
@@ -2293,6 +2315,7 @@ class LegendPosition extends ValueWithLabel<Position> { }
  * Класс информации о параметре/показателе
  */
 @Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class IndicatorOrParameter
 {
     /**
@@ -2621,6 +2644,16 @@ abstract class Widget
         }
     }
 
+    static Collection updateDataToCorrectFormat(def fieldsArray)
+    {
+        fieldsArray.each { fields ->
+            fields?.breakdown = fields?.breakdown instanceof Collection
+                ? fields?.breakdown
+                : fields?.breakdown ? [fields?.breakdown] : []
+        }
+        return fieldsArray
+    }
+
     /**
      * Метод по преобразованию json-а в правильный формат, который точно скушает creator
      * @param json - json виджета
@@ -2657,6 +2690,11 @@ abstract class Widget
         if(fields[colorField] && colorField == 'colors')
         {
             fields.colorsSettings = new ColorsSettings(auto: new AutoColors(colors: fields[colorField]), type: ColorType.AUTO, custom: new CustomColors())
+        }
+
+        if(fields.data)
+        {
+            fields.data = updateDataToCorrectFormat(fields.data)
         }
 
         return Jackson.toJsonString(fields)
@@ -2821,34 +2859,6 @@ abstract class DiagramNowData
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Group breakdownGroup
-
-    @JsonCreator
-    static DiagramNowData create(def json)
-    {
-        json = updateJsonToCorrectFormat(json)
-        return mapper.readValue(json, DiagramNowData)
-    }
-
-    /**
-     * Метод по преобразованию json-а в правильный формат, который точно скушает creator
-     * @param json - json поля data виджета
-     * @return json поля data виджета правильного формата
-     */
-    static String updateJsonToCorrectFormat(def json)
-    {
-        ObjectNode obj = (ObjectNode) mapper.valueToTree(json)
-        Class clazz = diagramNowDataPredictors.find{clazz, predictor -> predictor(obj)}?.key
-        Map<String, Object> fields = mapper.convertValue(obj, Map)
-
-        fields.breakdown = fields.breakdown instanceof Collection
-            ? fields.breakdown
-            : fields.breakdown ? [fields.breakdown] : null
-        if(!clazz)
-        {
-            throw new IllegalAccessException(DiagramNowData, "проверьте входные данные в поле data!")
-        }
-        return Jackson.toJsonString(fields)
-    }
 }
 
 /**
@@ -3272,15 +3282,11 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
      * Флаг на использование пустых значений
      */
     Boolean showEmptyData
-
-    /**
-     * Флаг на использование незаполненных значений
-     */
-    Boolean showBlankData
     /**
      * Настройки ширины колонок
      */
-    def columnsRatioWidth = {}
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    def columnsRatioWidth
     /**
      * Внутренности таблицы для фронта
      */
@@ -3288,7 +3294,8 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
     /**
      * Флаг на отображение номера строки
      */
-    Boolean showRowNum = false
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean showRowNum
     /**
      * Настройка топ х
      */

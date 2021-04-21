@@ -120,7 +120,7 @@ class DashboardDataSetService
                     return it
                 }
                 widgetData.breakdown?.findResults {
-                    it.group = Group.mappingGroup(it.group, dbSettings?.customGroups, widgetData.breakdown)
+                    it.group = Group.mappingGroup(it.group, dbSettings?.customGroups, !widgetData?.breakdown?.any())
                     return it
                 }
                 widgetData.source = NewSourceValue.mappingSource(widgetData.source)
@@ -161,7 +161,6 @@ class DashboardDataSetService
         {
             Boolean requestHasBreakdown = checkForBreakdown(widgetSettings)
             Boolean showTableNulls = widgetSettings.showEmptyData
-            Boolean showTableBlank = widgetSettings.showBlankData
             Integer pageSize
             Integer firstElementIndex
             paginationSettings
@@ -186,7 +185,7 @@ class DashboardDataSetService
                 reverseRowCount = tableSorting?.type == SortingType.DESC
             }
             request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType,
-                                            widgetFilters, showTableNulls, showTableBlank,
+                                            widgetFilters, showTableNulls,
                                             computationInTableRequest, tableTop, tableSorting)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
@@ -208,7 +207,7 @@ class DashboardDataSetService
                 ? rowCount
                 : getDiagramData(request, diagramType,
                                  aggregationCnt, widgetSettings,
-                                 tableRequestSettings?.ignoreLimits).find().size() //получаем данные,
+                                 tableRequestSettings?.ignoreLimits)?.find()?.size() //получаем данные,
             //чтобы получить актуальное количество строк для таблицы
 
             if (computationInTableRequest)
@@ -221,7 +220,7 @@ class DashboardDataSetService
                     ? rowCount
                     : prepareDataSet(getDiagramData(request, diagramType, aggregationCnt, widgetSettings,
                                                     tableRequestSettings?.ignoreLimits), widgetSettings,
-                                                    showTableNulls, requestHasBreakdown).find().size()
+                                                    showTableNulls, requestHasBreakdown)?.find()?.size()
             }
         }
         else
@@ -349,8 +348,8 @@ class DashboardDataSetService
     {
         Integer offset = paginationSettings.firstElementIndex
         Integer limit = paginationSettings.pageSize
-        def from = Math.min(offset, list.size()) as int
-        def to = (limit ? Math.min(offset + limit, list.size()) : list.size()) as int
+        def from = Math.min(offset, list?.size()) as int
+        def to = (limit ? Math.min(offset + limit, list?.size()) : list?.size()) as int
         return list.subList(from, to)
     }
 
@@ -564,7 +563,6 @@ class DashboardDataSetService
      * @param diagramType - тип диаграммы
      * @param widgetFilters - фильтрация от обычного пользователя на виджете
      * @param showTableNulls - флаг на отображение пустых значений, если диаграмма типа таблица
-     * @param showTableBlank - флаг на отображение незаполненных значений, если диаграмма типа таблица
      * @param computationInTableRequest - флаг на наличие вычислений в запросе, если диаграмма типа таблица
      * @param tableTop - количество записей, которое нужно вывести, если диаграмма типа таблица
      * @param tableSorting - сортировка на таблице
@@ -572,14 +570,14 @@ class DashboardDataSetService
      */
     private DiagramRequest mappingDiagramRequest(def widgetSettings, String subjectUUID,
                                                  DiagramType diagramType, Collection<WidgetFilterResponse> widgetFilters,
-                                                 Boolean showTableNulls = false,  Boolean showTableBlank = false,
+                                                 Boolean showTableNulls = false,
                                                  Boolean computationInTableRequest = false, Integer tableTop = 0,
                                                  Sorting tableSorting = null)
     {
         def sorting
         def uglyRequestData = widgetSettings.data
         Boolean isDiagramTypeTable = diagramType == DiagramType.TABLE
-        Boolean hasTableNotOnlyBaseSources = (requestContent?.data*.source.value.value as Set).size() > 1
+        Boolean hasTableNotOnlyBaseSources = (widgetSettings?.data*.source.value.value as Set).size() != 1
         Boolean isDiagramTypeNotCount = !(diagramType in [DiagramType.CountTypes, DiagramType.RoundTypes])
         Boolean isDiagramTypeCount = diagramType in DiagramType.CountTypes
         def commonBreakdown
@@ -611,7 +609,7 @@ class DashboardDataSetService
                     attribute: indicator.attribute,
                     sortingType: sortingType
                 )
-            }
+            } : []
             boolean dynamicInAggregate
             aggregationParameters.each { aggregationParameter ->
                 dynamicInAggregate = aggregationParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
@@ -699,7 +697,7 @@ class DashboardDataSetService
 
             if(isDiagramTypeNotCount)
             {
-                if (mayBeBreakdown instanceof Collection)
+                if (mayBeBreakdown instanceof Collection && mayBeBreakdown?.any())
                 {
                     def groupTypes = data.breakdown*.group as Set
                     if (groupTypes.size() == 1)
@@ -807,7 +805,7 @@ class DashboardDataSetService
                         : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: data.dataKey)
                 }
                 Boolean showNulls = isDiagramTypeTable ? showTableNulls : data.showEmptyData as Boolean
-                Boolean showBlank = isDiagramTypeTable ? showTableBlank : data.showBlankData as Boolean
+                Boolean showBlank = isDiagramTypeTable ? false : data.showBlankData as Boolean
                 Integer top = isDiagramTypeTable ? tableTop : data?.top?.show ? data.top?.count as Integer : null
                 requisite = new Requisite(title: 'DEFAULT',
                                           nodes: (computeCheck) ? requisiteNode : [requisiteNode],
@@ -827,7 +825,6 @@ class DashboardDataSetService
                                                       : comp.find()?.computeData,
                                                   requisite: requisite]]
         }
-        Boolean hasTableNotOnlyBaseSources = (widgetSettings?.data*.source.value.value as Set).size() != 1
         Boolean manySources = isDiagramTypeTable &&
                               widgetSettings?.data*.sourceForCompute?.count { !it } > 1 &&
                               hasTableNotOnlyBaseSources
@@ -913,6 +910,7 @@ class DashboardDataSetService
             }
             else
             {
+                userDescriptorMap.remove('attrCodes')
                 descriptorMap = userDescriptorMap
             }
         }
@@ -1968,7 +1966,7 @@ class DashboardDataSetService
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
                             newRequestData.filters = filters
-                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType, ignoreLimits.parameter : false, paginationSettings)
+                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType, ignoreLimits.parameter ?: false, paginationSettings)
                                                                 .with(formatGroup)
                                                                 .with(formatAggregation)
 
@@ -4221,7 +4219,7 @@ class DashboardDataSetService
 
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, true)
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
+                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits?.parameter, paginationSettings)
                                                     .with(formatGroup)
                                                     .with(formatAggregation)
                 def total = res ? [(requisiteNode.title): res] : [:]

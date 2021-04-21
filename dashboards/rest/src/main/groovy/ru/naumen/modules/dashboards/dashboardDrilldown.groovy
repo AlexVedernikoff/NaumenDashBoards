@@ -11,12 +11,13 @@
 package ru.naumen.modules.dashboards
 
 import groovy.transform.Field
-
+import com.fasterxml.jackson.core.type.TypeReference
 import java.text.SimpleDateFormat
 import ru.naumen.core.shared.dto.SimpleDtObject
 import static groovy.json.JsonOutput.toJson
 import com.amazonaws.util.json.Jackson
 import ru.naumen.core.server.script.api.injection.InjectApi
+import static DeserializationHelper.mapper
 
 @Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl()
 
@@ -29,7 +30,7 @@ interface DashboardDrilldown
      * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
 }
 
 class DashboardDrilldownImpl implements DashboardDrilldown
@@ -37,9 +38,9 @@ class DashboardDrilldownImpl implements DashboardDrilldown
     DashboardDrilldownService service = DashboardDrilldownService.instance
 
     @Override
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
     {
-        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest)])
+        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest, dashboardKey)])
     }
 }
 
@@ -55,7 +56,7 @@ class DashboardDrilldownService
      * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
     {
         DiagramType diagramType = diagramTypeFromRequest as DiagramType
         if(requestContent.filterId)
@@ -63,6 +64,20 @@ class DashboardDrilldownService
             requestContent.descriptor = DashboardUtils.getSourceFiltersFromStorage([[key:'id', value: source.filterId]]).find()
         }
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
+        Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
+
+        if(anyFiltersWithCustomGroupKey)
+        {
+            DashboardSettingsService dashboardSettingsService = DashboardSettingsService.instance
+            DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
+            link.filters.each {
+                if(it?.group?.way == Way.CUSTOM)
+                {
+                    it.group = Group.mappingGroup(it.group, dbSettings?.customGroups)
+                }
+
+            }
+        }
         def linkBuilder = link.getBuilder()
         return api.web.list(linkBuilder)
     }
@@ -127,7 +142,7 @@ class Link
     /**
      * список фильтров
      */
-    private Collection<Map<Object, Object>> filters
+    private Collection<DrilldownFilter> filters
 
     /**
      * темплеит
@@ -207,7 +222,7 @@ class Link
         this.descriptor = map.descriptor
         this.cases = map.cases as Collection
         this.attrCodes = map.attrCodes as Collection
-        this.filters = map.filters as Collection
+        this.filters = mapper.convertValue(map.filters, new TypeReference<Collection<DrilldownFilter>>() {})
         this.diagramType = diagramType
         this.template = metaInfo.attributes.find {
             it.code == 'dashboardTemp'
@@ -294,8 +309,7 @@ class Link
         if (filters)
         {
             filters.groupBy {
-                //Видимо, механизм по новому классу группировать не может
-                Jackson.toJsonString(Jackson.fromJsonString(toJson(it.attribute), Attribute) )
+                Jackson.toJsonString(it.attribute)
             }.collect {
                 def attr, Collection<Map> filter ->
                 attr = Jackson.fromJsonString(attr, Attribute)
@@ -316,7 +330,7 @@ class Link
                 }
 
                 def contextValue = filter.findResults { map ->
-                    def group = map.group as Map
+                    def group = map.group
                     def value = map.value
                     def aggregation = map.aggregation
                     if (aggregation)
@@ -324,11 +338,11 @@ class Link
                         result << [filterBuilder.OR(attr.code, 'notNull', null)]
                         return null
                     }
-                    String groupWay = group.way
-                    GroupType groupType = groupWay.toLowerCase() == 'system'
-                        ? attributeType == AttributeType.DT_INTERVAL_TYPE ? GroupType.OVERLAP :
-                        group.data as GroupType
+                    Way groupWay = group.way
+                    GroupType groupType = groupWay == Way.SYSTEM
+                        ? attributeType == AttributeType.DT_INTERVAL_TYPE ? GroupType.OVERLAP : group.data
                         : null
+
                     String format = attributeType == AttributeType.DT_INTERVAL_TYPE ? group.data : group.format
                     def returnValue = null
                     if (groupType)
@@ -336,8 +350,7 @@ class Link
                         if (attributeType in AttributeType.DATE_TYPES
                             || attributeType == AttributeType.DT_INTERVAL_TYPE)
                         {
-                            returnValue = [(groupType):
-                                               attributeType == AttributeType.DT_INTERVAL_TYPE
+                            returnValue = [(groupType): attributeType == AttributeType.DT_INTERVAL_TYPE
                                                    ? [[value, format]]
                                                    : [value, format]
                             ]
@@ -352,16 +365,15 @@ class Link
 
                 //Тут находим нужную подгруппу пользовательской группировки
                 def customSubGroupSet = filter.findResults { map ->
-                    def group = map.group as Map
+                    def group = map.group
                     String value = map.value
-                    if (!map.aggregation && group.way.toLowerCase() == 'custom')
+                    if (!map.aggregation && group.way == Way.CUSTOM)
                     {
-                        def customGroup = group.data as Map
-                        def subGroupSet = customGroup.subGroups as Collection
+                        def customGroup = group.data
+                        def subGroupSet = customGroup.subGroups
                         return subGroupSet.findResult { el ->
-                            def subgroup = el as Map
-                            subgroup.name == value ? subgroup.data as Collection<Collection<Map>> :
-                                null
+                            def subgroup = el
+                            subgroup.name == value ? subgroup.data : null
                         }
                     }
                     else

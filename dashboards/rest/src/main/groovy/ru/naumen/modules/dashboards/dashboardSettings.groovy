@@ -36,6 +36,21 @@ interface DashboardSettings
     String getSettings(Map<String, Object> requestContent)
 
     /**
+     * Получение кастомных группировок для дашборда по ключу дашборда
+     * @param dashboardKey - ключ дашборда
+     * @return список кастомных группировок в json-формате
+     */
+    String getCustomGroups(String dashboardKey)
+
+    /**
+     * Получение кастомной группировки для дашборда по ключу дашборда и группировки
+     * @param dashboardKey - ключ дашборда
+     * @param customGroupKey - ключ группировки на дб
+     * @return кастомная группировка в json-формате
+     */
+    String getCustomGroup(String dashboardKey, String customGroupKey)
+
+    /**
      * Метод обновления состояния автообновления
      * @param requestContent - тело запроса (classFqn, contentCode, autoUpdate)
      * @return true|false
@@ -183,6 +198,27 @@ interface DashboardSettings
      * @return ключ отредактированного виджета
      */
     String editWidgetChunkData(Map<String, Object> requestContent)
+
+    /**
+     * Метод по сохранению настроек фильтров на источник
+     * @param requestContent - тело запроса для построения фильтра на источник
+     * @return словарь с ключом фильтра на источник, если изменение прошло корректно
+     */
+    String saveSourceFilters(def requestContent)
+
+    /**
+     * Метод по получению списка фильтров на источник определенного метакласса
+     * @param metaClass - тело запроса с метаклассом
+     * @return
+     */
+    String getSourceFilters (String metaClass)
+
+    /**
+     * Метод по удалению фильтров из хранилища
+     * @param sourceFilterUUID - ключ дял удаления
+     * @return словарь с успешным удалением
+     */
+    String deleteSourceFilters(String sourceFilterUUID)
 }
 
 @InheritConstructors
@@ -201,6 +237,19 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     {
         return Jackson.toJsonString(service.getSettings(requestContent, user))
     }
+
+    @Override
+    String getCustomGroups(String dashboardKey)
+    {
+        return Jackson.toJsonString(service.getCustomGroups(dashboardKey))
+    }
+
+    @Override
+    String getCustomGroup(String dashboardKey, String customGroupKey)
+    {
+        return Jackson.toJsonString(service.getCustomGroup(dashboardKey, customGroupKey))
+    }
+
     @Override
     String saveAutoUpdateSettings(Map<String, Object> requestContent)
     {
@@ -323,6 +372,21 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     {
         return toJson(service.editWidgetChunkData(requestContent, user))
     }
+    @Override
+    String saveSourceFilters(def requestContent)
+    {
+        return toJson(service.saveSourceFilters(requestContent))
+    }
+    @Override
+    String getSourceFilters(String metaClass)
+    {
+        return toJson(service.getSourceFilters(metaClass))
+    }
+    @Override
+    String deleteSourceFilters(String sourceFilterUUID)
+    {
+        return toJson(service.deleteSourceFilters(sourceFilterUUID))
+    }
 }
 
 @InjectApi
@@ -398,6 +462,27 @@ class DashboardSettingsService
             defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode)
             return defaultDashboard
         }
+    }
+
+    /**
+     * Получение кастомных группировок для дашборда по ключу
+     * @param dashboardKey - ключ дашборда
+     * @return список кастомных группировок
+     */
+    Collection<CustomGroup> getCustomGroups(String dashboardKey)
+    {
+        DashboardSettingsClass dashboardSettings = getDashboardSetting(dashboardKey)
+        return dashboardSettings?.customGroups
+    }
+
+    /**
+     * Получение кастомных группировок для дашборда по ключу
+     * @param dashboardKey - ключ дашборда
+     * @return список кастомных группировок
+     */
+    CustomGroup getCustomGroup(String dashboardKey, String customGroupKey)
+    {
+        return getCustomGroups(dashboardKey)?.find { it?.id == customGroupKey }
     }
 
     /**
@@ -759,7 +844,7 @@ class DashboardSettingsService
         def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
             ?: new DashboardSettingsClass()
         //Этой настройки может и не быть
-        settings.autoUpdate = new AutoUpdate(interval)
+        settings.autoUpdate = new AutoUpdate(enabled: true, interval: interval)
         return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
     }
 
@@ -972,8 +1057,8 @@ class DashboardSettingsService
 
         if (layouts)
         {
-            dashboardSettings.mobileLayouts = Layout.fromMap(mobileLayouts)
-            dashboardSettings.layouts = Layout.fromMap(layouts)
+            dashboardSettings.mobileLayouts = Jackson.fromJsonString(mobileLayouts, Layout)
+            dashboardSettings.layouts = Jackson.fromJsonString(layouts, Layout)
             saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
         }
         else
@@ -1293,7 +1378,7 @@ class DashboardSettingsService
      * @param elements - список элементов
      * @return  список ключей кастомных группировок
      */
-    List<String> getGroupsIds(Collecttion<IHasGroup> elements)
+    List<String> getGroupsIds(Collection<IHasGroup> elements)
     {
         return elements?.findResults {
             if (it?.group?.way == Way.CUSTOM)
@@ -2074,12 +2159,12 @@ class DashboardSettingsService
             {
                 def var = tempWidgetName.dropWhile { it != '{'}.takeWhile { it != '}'}.drop(1)
                 variables += var
-                def varToCheck
+                def varToCheck = var
                 variableMap?.keySet()?.each {
-                    varToCheck -= "${it}."
+                    varToCheck = varToCheck - "${it}."
                 }
                 Boolean updateValue = varToCheck.tokenize('.').any { check ->
-                    return checkAttributeType (check, var.contatins('user') ? userFqn : subjectFqn)
+                    return checkAttributeType (check, var.contains('user') ? userFqn : subjectFqn)
                 }
                 if (updateValue)
                 {
