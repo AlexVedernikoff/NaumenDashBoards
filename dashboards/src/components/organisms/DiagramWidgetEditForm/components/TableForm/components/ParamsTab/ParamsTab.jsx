@@ -77,10 +77,12 @@ export class ParamsTab extends Component<DataBuilderProps> {
 
 	handleExtendBreakdown = () => {
 		const {setDataFieldValue, values} = this.props;
-		const {dataKey} = values.data[this.mainIndex];
+		const {breakdown, dataKey} = values.data[this.mainIndex];
 
-		setDataFieldValue(this.mainIndex, FIELDS.withBreakdown, true);
-		setDataFieldValue(this.mainIndex, FIELDS.breakdown, [getDefaultBreakdown(dataKey)]);
+		if (!Array.isArray(breakdown)) {
+			setDataFieldValue(this.mainIndex, FIELDS.withBreakdown, true);
+			setDataFieldValue(this.mainIndex, FIELDS.breakdown, [getDefaultBreakdown(dataKey)]);
+		}
 	};
 
 	handleRemoveBreakdown = () => {

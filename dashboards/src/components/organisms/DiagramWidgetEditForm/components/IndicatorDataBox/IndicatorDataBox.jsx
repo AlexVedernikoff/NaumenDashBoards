@@ -102,10 +102,12 @@ export class IndicatorDataBox extends PureComponent<Props> {
 
 	handleExtendBreakdown = (index: number) => () => {
 		const {setDataFieldValue, values} = this.props;
-		const {dataKey} = values.data[index];
+		const {breakdown, dataKey} = values.data[index];
 
-		setDataFieldValue(index, FIELDS.withBreakdown, true);
-		setDataFieldValue(index, FIELDS.breakdown, [getDefaultBreakdown(dataKey)]);
+		if (!Array.isArray(breakdown)) {
+			setDataFieldValue(index, FIELDS.withBreakdown, true);
+			setDataFieldValue(index, FIELDS.breakdown, [getDefaultBreakdown(dataKey)]);
+		}
 	};
 
 	handleRemoveBreakdown = () => {
