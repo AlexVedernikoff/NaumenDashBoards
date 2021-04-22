@@ -171,7 +171,9 @@ export class ObjectGroup extends Component<Props, State> {
 		const {refAttribute, searchObjects, source} = this.props;
 
 		if (refAttribute) {
-			const includingArchival = type === OPERAND_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL;
+			const {CONTAINS_INCLUDING_ARCHIVAL, NOT_CONTAINS_INCLUDING_ARCHIVAL} = OPERAND_TYPES;
+			const includingArchival = type === NOT_CONTAINS_INCLUDING_ARCHIVAL || type === CONTAINS_INCLUDING_ARCHIVAL;
+
 			searchObjects(source, refAttribute, searchValue, includingArchival);
 		}
 	};
