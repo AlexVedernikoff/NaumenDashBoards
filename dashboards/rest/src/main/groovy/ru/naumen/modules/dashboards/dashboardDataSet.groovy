@@ -1695,7 +1695,7 @@ class DashboardDataSetService
                                 listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
                                 res = [tempRes]
                             }
-                            def filtersTitle = filters.findResults {
+                            def filtersTitle = filters.unique { it.id }.findResults {
                                 if(it.title)
                                 {
                                     def titleValue = (it.title as Set).find()
