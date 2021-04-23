@@ -67,10 +67,12 @@ const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>,
 	if (group.way === GROUP_WAYS.SYSTEM && group.data === DATETIME_SYSTEM_GROUP.SEVEN_DAYS) {
 		formattedLabels = labels.map(str => {
 			const dates = str.split('-');
-			const startDate = moment(dates[0], 'DD.MM.YY').format('DD MMMM');
-			const endDate = moment(dates[1], 'DD.MM.YY').format('DD MMMM');
+			const startDate = moment(dates[0], 'DD.MM.YY');
+			const endDate = moment(dates[1], 'DD.MM.YY');
 
-			return `${startDate} - ${endDate}`;
+			return startDate.isValid() && endDate.isValid()
+				? `${startDate.format('DD MMMM')} - ${endDate.format('DD MMMM')}`
+				: str;
 		});
 	} else if (wrap) {
 		formattedLabels = labels.map(label => label.split(' '));
