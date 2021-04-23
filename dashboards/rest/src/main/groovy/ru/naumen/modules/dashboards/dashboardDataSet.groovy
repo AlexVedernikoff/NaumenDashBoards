@@ -2295,7 +2295,7 @@ class DashboardDataSetService
                         return value.toString()
                 }
             case GroupType.SEVEN_DAYS:
-                if(!value)
+                if(value == null)
                 {
                     return getNullValue(diagramType, fromBreakdown)
                 }
