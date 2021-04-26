@@ -1259,7 +1259,7 @@ class DashboardSettingsService
         {
             throw new Exception("Dashboard: $dashboardKey not found!")
         }
-        dashboardSettings.widgets.removeAll { it.id in widgets }
+        dashboardSettings.widgets?.removeAll { it?.id in widgets }
         return saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
     }
 
@@ -1433,8 +1433,8 @@ class DashboardSettingsService
         DashboardSettingsClass dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
         if(dashboard)
         {
-            dashboard.widgets = dashboard.widgets.collect { w ->
-                DashboardUtils.convertWidgetToNewFormat(w)
+            dashboard.widgets = dashboard.widgets.findResults { w ->
+                return DashboardUtils.convertWidgetToNewFormat(w)
             }
         }
         return dashboard
@@ -1722,8 +1722,8 @@ class DashboardSettingsService
      */
     private List<String> getWidgetNames(List widgets)
     {
-        return widgets.collect {
-            return it.type != DiagramType.TEXT && it?.templateName ? it?.templateName?.toString() : it?.name?.toString()
+        return widgets?.collect {
+            return it?.type != DiagramType.TEXT && it?.templateName ? it?.templateName?.toString() : it?.name?.toString()
         }
     }
 
