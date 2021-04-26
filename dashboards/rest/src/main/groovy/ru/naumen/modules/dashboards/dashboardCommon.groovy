@@ -1905,7 +1905,7 @@ class Top
 /**
  * Новый формат разбивки
  */
-class NewBreakdown extends BaseBreakdown
+class NewBreakdown extends BaseBreakdown implements IHasGroup
 {
     /**
      * Группировка для разбивки
@@ -1925,7 +1925,6 @@ class NewBreakdown extends BaseBreakdown
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String dataKey
-
 }
 
 /**
@@ -1964,7 +1963,7 @@ class NewIndicator
  * Параметр нового формата
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-class NewParameter
+class NewParameter implements IHasGroup
 {
     /**
      * Группировка параметра
@@ -1974,6 +1973,15 @@ class NewParameter
      * Атрибут - параметр
      */
     Attribute attribute
+}
+
+
+/**
+ * Интерфейс, описывающий взаимодействие с группами в параметрах/разбивках
+ */
+interface  IHasGroup
+{
+    Group getGroup()
 }
 
 /**

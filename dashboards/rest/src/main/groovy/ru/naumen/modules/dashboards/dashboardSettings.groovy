@@ -497,16 +497,6 @@ class DashboardSettingsService
                     throw new Exception("Dashboard settings not saved!")
                 }
             }
-            if (isPersonal && !groupKey.contains(user?.login))
-            {
-                groupKey += "_${ user?.login }"
-                group.name += '_личная'
-                //добавили новый ключ
-                group.id = groupKey
-                dashboard.customGroups += group
-                saveDashboard(personalDashboardKey, dashboard)
-            }
-
             dashboard.customGroups.removeIf { it.id == groupKey }
             dashboard.customGroups += group
             saveDashboard(isPersonal ? personalDashboardKey : defaultDashboardKey, dashboard)
@@ -1014,12 +1004,16 @@ class DashboardSettingsService
 
         Closure<String> generateKey = this.&generateWidgetKey.curry(currentWidgets*.id, classFqn, contentCode)
         Widget newWidgetSettings = editWidgetDescriptor(widgetSettings, destinationDashboardKey)
+        Collection<CustomGroup> correctCustomGroups = []
         if(destinationDashboardKey != sourceDashboardKey)
         {
-            newWidgetSettings = editCustomGroupsFromAnotherDBToSystem(widgetSettings)
+            List<String> customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
+            Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
+            correctCustomGroups = editCustomGroupsToCorrectFormat(currentCustomGroups)
         }
         return prepareWidgetSettings(newWidgetSettings, generateKey).with { widget ->
             dashboardSettings.widgets += widget
+            dashboardSettings.customGroups += correctCustomGroups
             saveJsonSettings(destinationDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
             return widget
         }
@@ -1047,7 +1041,8 @@ class DashboardSettingsService
         if (widgetSettings)
         {
             def filtersHasSubject = []
-            def widgetHasCustomGroups = []
+            Boolean widgetContainsRelativeCriteriaCustomGroups = false
+            Boolean widgetWithOnlyRelativeCriteriaCustomGroups = false
             widgetSettings.data.collect { dataValue ->
                 def descriptor = dataValue.source.descriptor
                 if (descriptor)
@@ -1079,16 +1074,22 @@ class DashboardSettingsService
             if(destinationDashboardKey != sourceDashboardKey)
             {
                 widgetSettings.data.each { dataValue ->
-                    widgetHasCustomGroups << dataValue.parameters?.any { it?.group?.way == Way.CUSTOM }
-                    widgetHasCustomGroups << dataValue.breakdown?.any { it?.group?.way == Way.CUSTOM }
+                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, 'any')
+                    widgetContainsRelativeCriteriaCustomGroups =  widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, 'any')
+
+                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, 'every')
+                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, 'every')
                 }
             }
-            Boolean hasCustomGroups = widgetHasCustomGroups.any { it == true }
-            if(hasCustomGroups)
+            if(widgetWithOnlyRelativeCriteriaCustomGroups)
             {
-                reasons << 'hasCustomGroups'
+                reasons << 'hasOnlyRelativeCriteriaCustomGroups'
             }
-            return [result: [hasSubjectFilters, hasCustomGroups].any {it == true}, reasons: reasons]
+            if(widgetContainsRelativeCriteriaCustomGroups && !widgetWithOnlyRelativeCriteriaCustomGroups)
+            {
+                reasons << 'hasCustomGroupsWithRelativeCriteria'
+            }
+            return [result: [hasSubjectFilters, hasCustomGroupsWithRelativeCriteria, hasOnlyRelativeCriteriaCustomGroups].any {it == true}, reasons: reasons]
         }
         else
         {
@@ -1139,53 +1140,90 @@ class DashboardSettingsService
     }
 
     /**
-     * Метод по изменению кастомных группировок на системные
+     * Метод получения списка ключей кастомных группировок из настроек виджета
      * @param widgetSettings - настройки виджета
-     * @return измененные настройки виджета
+     * @return список всех ключей кастомных группировок для виджета
      */
-    private Widget editCustomGroupsFromAnotherDBToSystem(def widgetSettings)
+    private List<String> getCustomGroupsIdsFromWidget(Widget widgetSettings)
     {
-        widgetSettings.data.each { dataValue ->
-            dataValue.parameters = updateCustomGroupsToSystem(dataValue.parameters)
-            if(dataValue.breakdown)
+        List<String> customGroupsIds = []
+        widgetSettings.data.each { data ->
+            customGroupsIds << getGroupsIds(data.parameters)
+            customGroupsIds << getGroupsIds(data.breakdown)
+        }
+        return customGroupsIds.flatten()
+    }
+
+
+    /**
+     *  Метод для получения ключей кастомных группировок из параметров
+     * @param elements - список элементов
+     * @return  список ключей кастомных группировок
+     */
+    List<String> getGroupsIds(Collecttion<IHasGroup> elements)
+    {
+        return elements?.findResults {
+            if (it?.group?.way == Way.CUSTOM)
             {
-                dataValue.breakdown = updateCustomGroupsToSystem(dataValue.breakdown)
+                return it.group.data
             }
         }
-        return widgetSettings
     }
 
     /**
-     * Метод по замене групп в списке значений с группами
-     * @param valuesWithGroup - список значений с группами
-     * @return значения только с системными группами
+     * Метод преобразования ключей кастомных группировок до пользовательских
+     * @param elements - список элементов
+     * @param userLogin - логин пользователя
+     * @return список элементов, где ключи кастомных группировок - пользовательские
      */
-    private Collection updateCustomGroupsToSystem(Collection valuesWithGroup)
+    Collection<IHasGroup> updateCustomGroupKeysToPersonal(Collection<IHasGroup> elements, String userLogin)
     {
-        return valuesWithGroup.collect {
-            if(it?.group?.way == Way.CUSTOM)
+        return elements.collect {
+            if (it.group.way == Way.CUSTOM)
             {
-                it.group = getSystemGroup(it.attribute)
+                it.group.data += "_${ userLogin }"
             }
             return it
         }
     }
 
     /**
-     * Метод по получению системной группировки для атрибута
-     * @param attribute - атрибут параметра
-     * @return системная группировка для атрибута
+     * Метод по изменению кастомных группировок на системные
+     * @param widgetSettings - настройки виджета
+     * @return измененные настройки виджета
      */
-    private SystemGroupInfo getSystemGroup(def attribute)
+    private Collection<CustomGroup> editCustomGroupsToCorrectFormat(Collection<CustomGroup> groups)
     {
-        switch (attribute?.type)
+        return groups.collect { group->
+            group.subGroups = group.subGroups.findResults {subGroup ->
+                subGroup.data = subGroup.data.findResults { dataValue ->
+                    return dataValue.findResults {
+                        return it.type.toLowerCase().contains('subject') ? null : it
+                    } ?: null
+                } ?: null
+                return subGroup.data ? subGroup : null
+            }
+            return group
+        }
+    }
+
+
+    /**
+     * Метод для получения соответсвия условию для некоторой коллекции элементов
+     * @param elements - коллекция элементов
+     * @param conditionSpread - распространенность условия
+     * @return флаг true/false на соответствие
+     */
+    private Boolean returnParametersOrBreakdownAnswer(Collection elements, String conditionSpread)
+    {
+        switch (conditionSpread)
         {
-            case AttributeType.DT_INTERVAL_TYPE:
-                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.WEEK_INTERVAL)
-            case AttributeType.DATE_TYPES:
-                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.MONTH)
+            case 'any':
+                return elements?.any { it?.group?.way == Way.CUSTOM && it?.group?.subGroups?.data?.type?.any { it.flatten()*.toLowerCase().contains('subject')} }
+            case 'every':
+                return elements?.every { it?.group?.way == Way.CUSTOM && it?.group?.subGroups?.data?.type?.every { it.flatten()*.toLowerCase().contains('subject')} }
             default:
-                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.OVERLAP)
+                throw new IllegalArgumentException('Wrong Argument')
         }
     }
 
@@ -1265,13 +1303,23 @@ class DashboardSettingsService
 
     /**
      * Метод подготовки виджета перед сохранением в ДБ
-     * @param settings     - настройки виджета
+     * @param settings - настройки виджета
      * @param generateCode - метод генерации ключа виджета
+     * @param userLogin - логин пользователя
      * @return сгенерированнй ключ нового виджета
      */
-    private Widget prepareWidgetSettings(Widget settings, Closure<String> generateCode) {
+    private Widget prepareWidgetSettings(Widget widgetSettings, Closure<String> generateCode, String userLogin = '')
+    {
         String key = generateCode()
-        return setUuidInSettings(settings, key)
+        if(userLogin)
+        {
+            widgetSettings.data.each { dataValue ->
+                dataValue.parameters = updateCustomGroupKeysToPersonal(dataValue.parameters, userLogin)
+                dataValue.breakdown = updateCustomGroupKeysToPersonal(dataValue.breakdown, userLogin)
+                return dataValue
+            }
+        }
+        return setUuidInSettings(widgetSettings, key)
     }
 
     /**
@@ -1371,10 +1419,12 @@ class DashboardSettingsService
         {
             settings.widgets = settings.widgets.collect { widgetSettings ->
                 widgetSettings.id += "_${ userLogin }"
-                widgetSettings = prepareWidgetSettings(widgetSettings) {
-                    widgetSettings.id
-                }
+                widgetSettings = prepareWidgetSettings(widgetSettings, { widgetSettings.id } ,userLogin)
                 return widgetSettings
+            }
+            settings.customGroups = settings.customGroups.collect { customGroup ->
+                customGroup.id += "_${ userLogin }"
+                return customGroup
             }
             settings.layouts = prepareLayouts(settings.layouts, userLogin)
             settings.mobileLayouts = prepareLayouts(settings.mobileLayouts, userLogin)
