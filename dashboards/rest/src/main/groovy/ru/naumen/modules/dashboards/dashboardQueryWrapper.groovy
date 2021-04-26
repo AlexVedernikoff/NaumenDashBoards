@@ -80,18 +80,11 @@ class QueryWrapper implements CriteriaWrapper
             criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
         }
         column.with(aggregation).with(criteria.&addColumn)
-        if(top)
+        String sortingType = parameter.sortingType
+        if (sortingType)
         {
-            column.with(aggregation).with(getSorting('DESC')).with(criteria.&addOrder)
-        }
-        else
-        {
-            String sortingType = parameter.sortingType
-            if (sortingType)
-            {
-                Closure sorting = getSorting(sortingType)
-                column.with(aggregation).with(sorting).with(criteria.&addOrder)
-            }
+            Closure sorting = getSorting(sortingType)
+            column.with(aggregation).with(sorting).with(criteria.&addOrder)
         }
         return this
     }
