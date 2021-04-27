@@ -103,13 +103,13 @@ export class BreakdownFieldset extends Component<Props> {
 
 		if (value) {
 			const breakdownKeys = value.map(({dataKey}) => dataKey);
-			let usedKeys = [dataKey];
+			let usedKeys = [];
 
 			if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 				usedKeys = getMapValues(indicator.computeData)
 					.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : usedKeys, usedKeys);
-			} else if (getUsedDataKeys) {
-				usedKeys = getUsedDataKeys(data);
+			} else {
+				usedKeys = getUsedDataKeys ? getUsedDataKeys(data) : [dataKey];
 			}
 
 			if (usedKeys.sort().toString() !== breakdownKeys.sort().toString()) {
