@@ -26,7 +26,7 @@ export type SourceData = {
 };
 
 export type Indicator = {
-	aggregation: string,
+	aggregation?: string,
 	attribute: MixedAttribute | null
 };
 

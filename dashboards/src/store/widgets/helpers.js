@@ -141,7 +141,7 @@ const hasBreakdown = (widget: Object): boolean => !!widget.data
  * @param {string} aggregation - тип агрегации
  * @returns {boolean}
  */
-const isAllowedTopAggregation = (aggregation: string) => aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE;
+const isAllowedTopAggregation = (aggregation?: string) => aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE;
 
 /**
  * Сообщает используется ли в наборе данных виджета пользовательская группировка

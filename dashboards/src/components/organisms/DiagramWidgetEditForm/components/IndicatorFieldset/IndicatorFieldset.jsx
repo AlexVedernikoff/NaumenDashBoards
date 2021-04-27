@@ -141,18 +141,20 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		setFieldValue(FIELDS.computedAttrs, values.computedAttrs.filter(a => a.code !== attribute.code));
 	};
 
-	saveComputedAttribute = (attribute: ComputedAttr) => {
+	saveComputedAttribute = (newAttribute: ComputedAttr) => {
 		const {setFieldValue, values} = this.props;
 		const {computedAttrs} = values;
-		const attrIndex = computedAttrs.findIndex(attr => attr.code === attribute.code);
+		const attrIndex = computedAttrs.findIndex(attr => attr.code === newAttribute.code);
+		let newComputedAttrs = computedAttrs;
 
 		if (attrIndex !== -1) {
-			computedAttrs[attrIndex] = attribute;
+			newComputedAttrs = newComputedAttrs.map((attr, i) => i === attrIndex ? newAttribute : attr);
 		} else {
-			computedAttrs.push(attribute);
+			newComputedAttrs = [...newComputedAttrs, newAttribute];
 		}
 
-		setFieldValue(FIELDS.computedAttrs, computedAttrs);
+		setFieldValue(FIELDS.computedAttrs, newComputedAttrs);
+		this.change({attribute: newAttribute});
 	};
 
 	renderAggregation = (indicator: Indicator) => {
