@@ -550,7 +550,7 @@ class DashboardDataSetService
                             {
                                 dynamicGroup =  mappingDynamicAttributeCustomGroup(el.attribute)
                             }
-                            [(el.dataKey): buildSystemGroup(el.group, el.attribute)]
+                            [(el.dataKey): buildSystemGroup(el.group, el.attribute, diagramType == DiagramType.COMBO ? 'usual_breakdown' : 'breakdown')]
                         }
                     }
                     else
@@ -850,7 +850,7 @@ class DashboardDataSetService
                 }
                 // предполагаем что количество агрегаций будет не больше одной
                 newRequestData.groups = (newRequestData.groups || group)
-                    ? (newRequestData.groups.findAll { it?.title != 'breakdown' } + group).grep()
+                    ? (newRequestData.groups.findAll { it?.title != 'usual_breakdown' } + group).grep()
                     : null
                 // группировку нужно будет добавить к существующим
                 newRequestData.groups = newRequestData.groups as Set
