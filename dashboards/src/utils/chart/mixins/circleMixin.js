@@ -32,7 +32,7 @@ const circleMixin = (widget: CircleWidget, chart: DiagramBuildData, container: H
 			formatter: dataLabelsFormatter(usesMSInterval, usesPercent)
 		},
 		labels: chart.labels,
-		legend: getLegendOptions(legend, container, usesUUIDs),
+		legend: getLegendOptions(legend, container),
 		tooltip: {
 			y: {
 				formatter: valueFormatter(usesMSInterval, usesPercent),

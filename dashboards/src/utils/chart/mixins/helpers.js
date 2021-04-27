@@ -184,19 +184,14 @@ const getLegendWidth = (container: HTMLDivElement, position: LegendPosition): nu
  * Форматирует значение легенды
  * @param {Legend} settings - настройки легенды виджета
  * @param {HTMLDivElement} container - контейнер, где размещен график
- * @param {boolean} usesMetaClass - сообщает используется ли метакласс
  * @returns {Function}
  */
-const legendFormatter = (settings: Legend, container: HTMLDivElement, usesMetaClass: boolean) => (legend: string) => {
+const legendFormatter = (settings: Legend, container: HTMLDivElement) => (legend: string) => {
 	const {fontSize, position, textHandler} = settings;
 	const length = Math.round(getLegendWidth(container, position) / fontSize);
-	let label = legend ? String(legend) : '';
+	let label = legend ? getLabelWithoutUUID(String(legend)) : '';
 
 	if (label) {
-		if (usesMetaClass) {
-			label = getLabelWithoutUUID(label);
-		}
-
 		if (textHandler === TEXT_HANDLERS.CROP && label.length > length) {
 			label = `${label.substr(0, length)}...`;
 		}
@@ -209,10 +204,9 @@ const legendFormatter = (settings: Legend, container: HTMLDivElement, usesMetaCl
  * Возвращает настройки для отображения легенды графика
  * @param {Legend} settings - настройки легенды виджета
  * @param {HTMLDivElement} container - контейнер, где размещен график
- * @param {boolean} usesMetaClass - сообщает используется ли метакласс
  * @returns {ApexLegend}
  */
-const getLegendOptions = (settings: Legend, container: HTMLDivElement, usesMetaClass: boolean = false): ApexLegend => {
+const getLegendOptions = (settings: Legend, container: HTMLDivElement): ApexLegend => {
 	const {fontFamily, fontSize, position, show} = settings;
 	const {bottom, top} = LEGEND_POSITIONS;
 	const options = {
@@ -233,7 +227,7 @@ const getLegendOptions = (settings: Legend, container: HTMLDivElement, usesMetaC
 
 	return {
 		...options,
-		formatter: legendFormatter(settings, container, usesMetaClass),
+		formatter: legendFormatter(settings, container),
 		height,
 		width: getLegendWidth(container, position)
 	};

@@ -232,7 +232,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 			}
 		},
 		labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
-		legend: getLegendOptions(legend, container, breakdownUsesUUIDs),
+		legend: getLegendOptions(legend, container),
 		markers: {
 			hover: {
 				size: 8

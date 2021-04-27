@@ -80,7 +80,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 				}
 			},
 			labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
-			legend: getLegendOptions(legend, container, breakdownUsesUUIDs),
+			legend: getLegendOptions(legend, container),
 			markers: {
 				hover: {
 					size: 8
