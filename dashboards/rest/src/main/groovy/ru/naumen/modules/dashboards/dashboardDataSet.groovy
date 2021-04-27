@@ -1310,7 +1310,7 @@ class DashboardDataSetService
         return mappingFilter(data) { condition ->
             Closure buildFilterParameterFromCondition = { Comparison type ->
                 new FilterParameter(
-                    value: condition.data?.with(valueConverter),
+                    value: condition.data ? condition.data.with(valueConverter) : null,
                     title: title,
                     id: id,
                     type: type,
