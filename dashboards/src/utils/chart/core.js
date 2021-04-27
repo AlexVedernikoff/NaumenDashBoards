@@ -113,7 +113,8 @@ const getOptions = (
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): Options => {
 	const {type: widgetType} = widget;
-	const type = widgetType === WIDGET_TYPES.COMBO ? CHART_TYPES.line : getChartType(widgetType);
+	const series = getSeries(widget, data);
+	const type = widgetType === WIDGET_TYPES.COMBO ? getComboType(series) : getChartType(widgetType);
 	const {bar, line} = CHART_TYPES;
 	const {dataLabels} = widget;
 	const isAxisChart = type === bar || type === line;
@@ -139,7 +140,7 @@ const getOptions = (
 			}
 		},
 		dataLabels: getDataLabelsOptions(dataLabels, data, isAxisChart),
-		series: getSeries(widget, data)
+		series
 	};
 
 	options = setColors(options, widget, data, globalColorsSettings);
@@ -147,6 +148,20 @@ const getOptions = (
 	return extend(options, resolveMixin(widget, data, container));
 };
 
+/**
+ * Возвращает общий тип комбо-графика на основе данных для построения
+ * @param {Series} series - данные построения осей
+ * @returns {string}
+ */
+const getComboType = (series: Series) => {
+	return series.length === 1 ? series[0].type : CHART_TYPES.line;
+};
+
+/**
+ * Возвращает тип графика на основе типа виджета
+ * @param {WidgetType} type - тип виджета
+ * @returns {string}
+ */
 const getChartType = (type: WidgetType) => {
 	const {DONUT, LINE, PIE} = WIDGET_TYPES;
 	const {bar, donut, line, pie} = CHART_TYPES;
