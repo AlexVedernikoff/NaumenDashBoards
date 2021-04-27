@@ -638,7 +638,7 @@ class DashboardDataSetService
                     }
                     requisiteNode = comp
                         ? new ComputationRequisiteNode(
-                        title: null,
+                        title: attributeTitle,
                         type: 'COMPUTATION',
                         formula: comp.formula
                     )
