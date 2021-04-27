@@ -493,8 +493,9 @@ class DashboardsService
             }.unique { it.getFqn()}
         }
 
+        def condition =  removed ? [:] : [removed: false]
         def bottomValues = types.collectMany {
-            api.utils.find(it.toString(), [title: op.like("%${value}%"), removed: removed], sp.ignoreCase())
+            api.utils.find(it.toString(), [title: op.like("%${value}%")] + condition, sp.ignoreCase())
         }.unique { it.UUID }
 
         def withParentsBottoms = []
