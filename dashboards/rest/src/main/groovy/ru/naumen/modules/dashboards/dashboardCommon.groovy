@@ -355,6 +355,11 @@ class DashboardUtils
     static final Integer tableBreakdownLimit = 30
 
     /**
+     * Неймспейс для хранения источников
+     */
+    static final String SOURCE_NAMESPACE = 'sources'
+
+    /**
      * Метод получения минимальной даты из Бд
      * @param code - код атрибута
      * @param classFqn - класс источника
@@ -656,6 +661,26 @@ class DashboardUtils
         else
         {
             throw new IllegalArgumentException('Неправильная дата!')
+        }
+    }
+
+    /**
+     * Метод по получению настроек для фильтров для источника из хранилища
+     * @param queryFilters - возможные фильтры на получаемые данные
+     * @return список фильтров для источника из хранилища
+     */
+    static Collection<SourceFilter> getSourceFiltersFromStorage(Collection<Map> queryFilters = [])
+    {
+        return getApi().keyValue.find(SOURCE_NAMESPACE, '') { key, value -> true }?.values()?.findResults {
+            def filter = Jackson.fromJsonString(it, SourceFilter)
+            if(queryFilters)
+            {
+                Boolean correctObject = queryFilters.every {
+                    filter[it.key] == it.value
+                }
+                filter = correctObject ? filter : null
+            }
+            return filter
         }
     }
 }
@@ -1725,6 +1750,29 @@ class NewSourceValue
      * значение источника
      */
     SourceValue value
+
+    /**
+     * Ключ глобального фильтра
+     */
+    String filterId
+
+    /**
+     * Метод по формированию источника виджета, если для него используется сохраненный источник
+     * @param source - источник виджета
+     * @return сформированный с сохраненным источником источник виджета
+     */
+    static mappingSource(NewSourceValue source)
+    {
+        if(source)
+        {
+            if(source.filterId)
+            {
+                def storageFilter = DashboardUtils.getSourceFiltersFromStorage([[key: 'id', value: source.filterId]]).find()
+                source.descriptor = storageFilter
+            }
+        }
+        return source
+    }
 }
 
 /**
@@ -3246,6 +3294,21 @@ class CustomColors
      */
     Boolean useGlobal = false
 
+}
+
+/**
+ * Объект, описывающий фильтр источника
+ */
+class SourceFilter extends ValueWithLabel<String>
+{
+    /**
+     * Настройки фильтра
+     */
+    String descriptor
+    /**
+     * Уникальный индентификатор
+     */
+    String id
 }
 //endregion
 return

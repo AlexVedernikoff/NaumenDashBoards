@@ -58,6 +58,10 @@ class DashboardDrilldownService
     String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest)
     {
         DiagramType diagramType = diagramTypeFromRequest as DiagramType
+        if(requestContent.filterId)
+        {
+            requestContent.descriptor = DashboardUtils.getSourceFiltersFromStorage([[key:'id', value: source.filterId]]).find()
+        }
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
         def linkBuilder = link.getBuilder()
         return api.web.list(linkBuilder)

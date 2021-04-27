@@ -110,9 +110,10 @@ class DashboardDataSetService
                     return it
                 }
                 widgetData.breakdown?.findResults {
-                    it.group = Group.mappingGroup(it.group, dbSettings?.customGroups, false)
+                    it.group = Group.mappingGroup(it.group, dbSettings?.customGroups, widgetData.breakdown)
                     return it
                 }
+                widgetData.source = NewSourceValue.mappingSource(widgetData.source)
                 return widgetData
             }
             return widget

@@ -171,6 +171,13 @@ interface DashboardSettings
     String widgetIsBadToCopy(requestContent)
 
     /**
+     * Метод для проверки подстановки фильтра с неправильными условиями для метакласса контента
+     * @param requestContent - тело запроса(dashboardKey - ключ дашборда, sourceFilter - подставляемый фильтр)
+     * @return словарь с результатом и новым фильтром, если результат выявил неправильный фильтр
+     */
+    String filterIsBadToApply(requestContent)
+
+    /**
      * Редактирование отдельных полей в виджете
      * @param requestContent - тело запроса ()
      * @return ключ отредактированного виджета
@@ -298,6 +305,12 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     String widgetIsBadToCopy(requestContent)
     {
         return toJson(service.widgetIsBadToCopy(requestContent))
+    }
+
+    @Override
+    String filterIsBadToApply(requestContent)
+    {
+        return toJson(service.filterIsBadToApply(requestContent))
     }
 
     @Override
@@ -641,6 +654,91 @@ class DashboardSettingsService
         else
         {
             throw new Exception("colors not contains in dashboard")
+        }
+    }
+
+    /**
+     * Метод по сохранению настроек фильтров на источник
+     * @param requestContent - тело запроса для построения фильтра на источник
+     * @return словарь с ключом фильтра на источник, если изменение прошло корректно
+     */
+    Map saveSourceFilters(def requestContent)
+    {
+        def dashboard = requestContent.dashboard
+        SourceFilter sourceFilter = new SourceFilter(requestContent.sourceFilter)
+        Collection<SourceFilter> classFqnFilters = DashboardUtils.getSourceFiltersFromStorage()
+        Boolean editFilters = sourceFilter.id //проверка, редактируем ли мы фильтры
+        Boolean notUniqueName = classFqnFilters.any { it.label == sourceFilter.label }
+        if(notUniqueName)
+        {
+            throw new IllegalArgumentException("Фильтр с названием ${sourceFilter.label} не может быть сохранен. Название фильтра должно быть уникально.")
+        }
+        SourceFilter sourceWithTheSameFilters
+        if(!editFilters)
+        {
+            def slurper = new groovy.json.JsonSlurper()
+            //если фильтр не на редактирование, то нужно найти фильтр с похожими настройками
+            sourceWithTheSameFilters = classFqnFilters.find {  slurper.parseText(it.descriptor).filters == slurper.parseText(sourceFilter.descriptor).filters }
+            String dashboardKey = generateDashboardKey(dashboard.classFqn, dashboard.contentCode)
+            //а также фильтр новый, нужно установить ему uuid
+            sourceFilter.id = "${ UUID.randomUUID() }_${ dashboardKey.takeWhile { it!='_' } }"
+        }
+
+        if(sourceWithTheSameFilters)
+        {
+            throw new IllegalArgumentException("Фильтр с текущими параметрами уже существует: ${sourceWithTheSameFilters.label}.")
+        }
+
+        if(saveJsonSettings(sourceFilter.id, toJson(sourceFilter), DashboardUtils.SOURCE_NAMESPACE))
+        {
+            return [result: sourceFilter.id]
+        }
+    }
+
+    /**
+     * Метод по получению списка фильтров на источник определенного метакласса
+     * @param metaClass - тело запроса с метаклассом
+     * @return
+     */
+    Collection getSourceFilters(String metaClass)
+    {
+        Collection<SourceValue> filtersForClassFqn = DashboardUtils.getSourceFiltersFromStorage([[key: 'value', value: metaClass]])
+        return filtersForClassFqn.collect {
+            [label: it.label, descriptor: it.descriptor, id: it.id]
+        }
+    }
+
+    /**
+     * Метод по удалению фильтров из хранилища
+     * @param sourceFilterUUID - ключ дял удаления
+     * @return словарь с успешным удалением
+     */
+    Map deleteSourceFilters(String sourceFilterUUID)
+    {
+        List dashboardKeys = getDashboardKeys()
+        Boolean widgetsUseSourceFilter = dashboardKeys.any { dashboardKey ->
+            def dbSettings = getDashboardSetting(dashboardKey)
+            return dbSettings?.widgets?.any {
+                return it?.type != DiagramType.TEXT ? it?.data?.any {
+                    it.source instanceof NewSourceValue
+                        ? it.source.filterId == sourceFilterUUID
+                        : false
+                } : false
+            }
+        }
+
+        if(widgetsUseSourceFilter)
+        {
+            throw new IllegalArgumentException('Удаление данного сохраненного фильтра невозможно, т.к. он применен в других виджетах.')
+        }
+
+        if(deleteJsonSettings(sourceFilterUUID, DashboardUtils.SOURCE_NAMESPACE))
+        {
+            return [result: true]
+        }
+        else
+        {
+            throw new IllegalArgumentException("Удаление фильтра ${sourceFilterUUID} не прошло.")
         }
     }
 
@@ -1095,6 +1193,38 @@ class DashboardSettingsService
         {
             throw new Exception("Widget settings are empty!")
         }
+    }
+
+    /**
+     * Метод для проверки подстановки фильтра с неправильными условиями для метакласса контента
+     * @param requestContent - тело запроса(dashboardKey - ключ дашборда, sourceFilter - подставляемый фильтр)
+     * @return словарь с результатом и новым фильтром, если результат выявил неправильный фильтр
+     */
+    Map filterIsBadToApply(Map requestContent)
+    {
+        String dashboardKey = requestContent.dashboardKey
+        def sourceFilter = new SourceFilter(requestContent.sourceFilter)
+
+        Boolean filterIsBadToApply = false
+
+        if(sourceFilter.id.tokenize('_').last() != dashboardKey.takeWhile { it!='_' })
+        {
+            Collection filtersHasSubject = []
+            def descriptor = slurper.parseText(sourceFilter.descriptor)
+            def valuesToRemove = descriptor.filters.collectMany { filterValue ->
+                def conditionCodes = filterValue*.properties.conditionCode
+                conditionCodes.collect { conditionCode ->
+                    if (conditionCode.toLowerCase().contains('subject'))
+                    {
+                        return filterValue
+                    }
+                }
+            }.grep()
+            filterIsBadToApply = valuesToRemove.any()
+            descriptor.filters -= valuesToRemove
+            sourceFilter.descriptor = descriptor
+        }
+        return [result: filterIsBadToApply, correctFilter: filterIsBadToApply ? sourceFilter : null]
     }
 
     /**
@@ -1736,6 +1866,21 @@ class DashboardSettingsService
                 return removeWidgetFromDashboard(dashboardKeyByLogin(), widgetId) as boolean
             }
         }
+    }
+
+    /**
+     * Метод получения ключей дашбордов
+     * @param namespace - название неймспейса
+     * @return массив из ключей дашбордов
+     */
+    private List getDashboardKeys()
+    {
+        def slurper = new groovy.json.JsonSlurper()
+
+        return api.keyValue.find(DASHBOARD_NAMESPACE, '') { key, value ->
+            def settings = slurper.parseText(value)
+            settings.containsKey('widgets')
+        }.keySet().toList()
     }
 
     /**
