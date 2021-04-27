@@ -254,7 +254,7 @@ const createCustomAxisChartColorsSettingsKey = (widget: AxisWidget): string | nu
 		const {attribute, group} = breakdown[0];
 
 		key = createCustomColorsSettingsKey(source.value, attribute, group);
-	} else if (widget.type !== WIDGET_TYPES.LINE) {
+	} else if (widget.type !== WIDGET_TYPES.LINE && Array.isArray(parameters)) {
 		const {attribute, group} = parameters[0];
 
 		key = createCustomColorsSettingsKey(source.value, attribute, group);
@@ -270,9 +270,15 @@ const createCustomAxisChartColorsSettingsKey = (widget: AxisWidget): string | nu
  */
 const createCustomCircleChartColorsSettingsKey = (widget: CircleWidget): string | null => {
 	const {breakdown, source} = getMainDataSet(widget.data);
-	const {attribute, group} = (breakdown && breakdown[0]) ?? {};
+	let key = null;
 
-	return createCustomColorsSettingsKey(source.value, attribute, group);
+	if (Array.isArray(breakdown)) {
+		const {attribute, group} = breakdown[0];
+
+		key = createCustomColorsSettingsKey(source.value, attribute, group);
+	}
+
+	return key;
 };
 
 /**
