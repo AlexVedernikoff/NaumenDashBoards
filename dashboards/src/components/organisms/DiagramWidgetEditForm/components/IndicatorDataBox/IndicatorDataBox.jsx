@@ -135,10 +135,11 @@ export class IndicatorDataBox extends PureComponent<Props> {
 	};
 
 	requiredBreakdown = () => {
-		const {values} = this.props;
+		const {dataSet, values} = this.props;
 		const {BAR_STACKED, COLUMN_STACKED, DONUT, PIE} = WIDGET_TYPES;
+		const REQUIRED_TYPES = [BAR_STACKED, COLUMN_STACKED, DONUT, PIE];
 
-		return [BAR_STACKED, COLUMN_STACKED, DONUT, PIE].includes(values.type);
+		return REQUIRED_TYPES.includes(values.type) || REQUIRED_TYPES.includes(dataSet.type);
 	};
 
 	shouldShowBreakdown = (index: number) => {

@@ -5,6 +5,7 @@ import type {BreakdownItem, Parameter, SourceData} from 'containers/DiagramWidge
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {getDefaultBreakdown} from 'DiagramWidgetEditForm/helpers';
 
 const getErrorMessage = (key: string) => {
 	const messages = {
@@ -130,7 +131,7 @@ addMethod(array, 'breakdown', function () {
 		const schema = mixed().requiredAttribute(getErrorMessage(FIELDS.breakdown));
 
 		return parent[0] === item ? schema.group() : schema;
-	}));
+	})).default([getDefaultBreakdown('')]);
 });
 
 /**

@@ -9,6 +9,7 @@ import {
 } from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
 import {extend} from 'helpers';
+import {FIELDS} from 'containers/WidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getComboYAxisName} from 'store/widgets/data/helpers';
 import ParamsTab from './components/ParamsTab';
@@ -21,7 +22,11 @@ export class ComboChartForm extends Component<TypedFormProps> {
 	getSchema = () => object({
 		...baseSchema,
 		data: array().of(object({
-			breakdown: mixed().requiredByCompute(array().breakdown()),
+			breakdown: mixed().when(FIELDS.type, {
+				else: mixed().requiredByCompute(array().conditionalBreakdown()),
+				is: type => type === COMBO_TYPES.COLUMN_STACKED,
+				then: array().breakdown()
+			}),
 			indicators: mixed().requiredByCompute(array().indicators()),
 			parameters: array().parameters(),
 			source: mixed().source(),
