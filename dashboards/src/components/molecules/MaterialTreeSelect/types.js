@@ -12,7 +12,6 @@ export type Components = {
 };
 
 export type Props = {
-	async: boolean,
 	components?: $Shape<Components>,
 	getOptionLabel?: (option: NodeValue) => string,
 	getOptionValue?: (option: NodeValue) => any,
@@ -32,7 +31,6 @@ export type Props = {
 
 export type State = {
 	components: Components,
-	optionsLoaded: boolean,
 	searchValue: string,
 	showMenu: boolean
 };

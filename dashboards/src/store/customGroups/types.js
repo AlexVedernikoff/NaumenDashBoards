@@ -1,36 +1,28 @@
 // @flow
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {CUSTOM_GROUPS_EVENTS, OPERAND_SETS, OPERAND_TYPES} from './constants';
+import {CUSTOM_GROUPS_EVENTS, OR_CONDITION_SETS, OR_CONDITION_TYPES} from './constants';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
 import type {ThunkAction} from 'store/types';
 
-export type OperandType = $Keys<typeof OPERAND_TYPES>;
-
 export type StringSimpleOperand = {|
 	data: string,
-	type: $Keys<typeof OPERAND_SETS.STRING>
+	type: $Keys<typeof OR_CONDITION_SETS.STRING>
 |};
 
 export type DateSimpleOperand = {|
 	data: string,
-	type: $Keys<typeof OPERAND_SETS.SIMPLE_DATE>
+	type: $Keys<typeof OR_CONDITION_SETS.SIMPLE_DATE>
 |};
 
 export type NumberSimpleOperand = {|
 	data: string,
-	type: $Keys<typeof OPERAND_SETS.NUMBER>
+	type: $Keys<typeof OR_CONDITION_SETS.NUMBER>
 |};
 
 export type RefSimpleOperand = {|
 	data: string,
-	type: $Keys<typeof OPERAND_SETS.SIMPLE_REF>
+	type: $Keys<typeof OR_CONDITION_SETS.SIMPLE_REF>
 |};
-
-export type SimpleOperand =
-	| DateSimpleOperand
-	| NumberSimpleOperand
-	| RefSimpleOperand
-	| StringSimpleOperand;
 
 // Группировка для атрибута типа строка
 export type StringOrCondition = StringSimpleOperand;
@@ -72,12 +64,10 @@ export type IntervalData = {
 	value: string
 };
 
-export type IntervalOperand = {|
+export type IntervalOrCondition = {|
 	data: IntervalData,
-	type: $Keys<typeof OPERAND_SETS.INTERVAL>
+	type: $Keys<typeof OR_CONDITION_SETS.INTERVAL>
 |};
-
-export type IntervalOrCondition = IntervalOperand;
 
 export type IntervalAndCondition = Array<IntervalOrCondition>;
 
@@ -99,13 +89,13 @@ export type BetweenData = {
 	startDate: string
 };
 
-export type BetweenOperand = {|
+export type BetweenOrCondition = {
 	data: BetweenData,
-	type: typeof OPERAND_TYPES.BETWEEN | typeof OPERAND_TYPES.EXPIRES_BETWEEN
-|};
+	type: typeof OR_CONDITION_TYPES.BETWEEN | typeof OR_CONDITION_TYPES.EXPIRES_BETWEEN
+};
 
 export type DateOrCondition =
-	| BetweenOperand
+	| BetweenOrCondition
 	| DateSimpleOperand
 ;
 
@@ -126,20 +116,20 @@ export type DateCustomGroup = {|
 // Группировка для ссылочных атрибутов
 export type SelectData = Object;
 
-export type SelectOperand = {|
+export type SelectOrCondition = {
 	data: SelectData | null,
-	type: $Keys<typeof OPERAND_SETS.REF> | $Keys<typeof OPERAND_SETS.TIMER>
-|};
+	type: $Keys<typeof OR_CONDITION_SETS.REF> | $Keys<typeof OR_CONDITION_SETS.TIMER>
+};
 
 export type MultiSelectOperand = {|
 	data: Array<Object>,
-	type: typeof OPERAND_TYPES.CONTAINS_ANY
+	type: typeof OR_CONDITION_TYPES.CONTAINS_ANY
 |};
 
 export type RefOrCondition =
 	| MultiSelectOperand
 	| RefSimpleOperand
-	| SelectOperand
+	| SelectOrCondition
 ;
 
 export type RefAndCondition = Array<RefOrCondition>;
@@ -158,8 +148,8 @@ export type RefCustomGroup = {|
 
 // Группировка для счетчиков
 export type TimerOrCondition =
-	| BetweenOperand
-	| SelectOperand
+	| BetweenOrCondition
+	| SelectOrCondition
 ;
 
 export type TimerAndCondition = Array<TimerOrCondition>;
@@ -189,40 +179,46 @@ export type CustomGroupsMap = {
 	[string]: CustomGroup
 };
 
+type CustomGroupsFulfilled = {
+	payload: CustomGroupsMap,
+	type: typeof CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_FULFILLED
+};
+
+type CustomGroupsPending = {
+	type: typeof CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_PENDING
+};
+
+type CustomGroupsRejected = {
+	type: typeof CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_REJECTED
+};
+
 type RemoveCustomGroup = {
 	payload: string,
 	type: typeof CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP
 };
 
 type SaveCustomGroup = {
-	payload: {
-		group: CustomGroup,
-		remote: boolean
-	},
+	payload: CustomGroup,
 	type: typeof CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP
-};
-
-type SetCustomGroups = {
-	payload: CustomGroupsMap,
-	type: typeof CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS
 };
 
 type UnknownCustomGroupsAction = {
 	type: typeof CUSTOM_GROUPS_EVENTS.UNKNOWN_CUSTOM_GROUPS_ACTION
 };
 
-export type OnCreateCallback = (groupId: string) => void;
-
-export type UpdateCustomGroup = (customGroup: CustomGroup, remote?: boolean, callback?: OnCreateCallback) => ThunkAction;
+export type UpdateCustomGroup = (customGroup: CustomGroup) => ThunkAction;
 
 export type CustomGroupsAction =
+	| CustomGroupsFulfilled
+	| CustomGroupsPending
+	| CustomGroupsRejected
 	| RemoveCustomGroup
 	| SaveCustomGroup
-	| SetCustomGroups
 	| UnknownCustomGroupsAction
 ;
 
 export type CustomGroupsState = {
-	editable: CustomGroupsMap,
-	original: CustomGroupsMap
+	error: boolean,
+	loading: boolean,
+	map: CustomGroupsMap
 };

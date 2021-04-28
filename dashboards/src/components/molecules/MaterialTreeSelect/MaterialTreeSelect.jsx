@@ -13,7 +13,6 @@ import ValueContainer from 'components/molecules/MaterialSelect/components/Value
 
 export class MaterialTreeSelect extends Component<Props, State> {
 	static defaultProps = {
-		async: false,
 		multiple: false,
 		name: '',
 		options: {},
@@ -24,7 +23,6 @@ export class MaterialTreeSelect extends Component<Props, State> {
 
 	state = {
 		components: this.getExtendedComponents(this.props),
-		optionsLoaded: false,
 		searchValue: '',
 		showMenu: false
 	};
@@ -38,6 +36,14 @@ export class MaterialTreeSelect extends Component<Props, State> {
 
 		return customComponents ? {...components, ...customComponents} : components;
 	}
+
+	fetchOptions = () => {
+		const {loading, onLoad, options} = this.props;
+
+		if (!loading && Object.keys(options).length === 0 && typeof onLoad === 'function') {
+			onLoad(null);
+		}
+	};
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
@@ -64,14 +70,9 @@ export class MaterialTreeSelect extends Component<Props, State> {
 	handleChangeSearchInput = (searchValue: string) => this.setState({searchValue});
 
 	handleClickValueContainer = () => {
-		const {async, onLoad} = this.props;
-		const {optionsLoaded, showMenu} = this.state;
+		const {showMenu} = this.state;
 
-		if (async && !optionsLoaded) {
-			this.setState({optionsLoaded: true});
-			onLoad(null);
-		}
-
+		!this.state.showMenu && this.fetchOptions();
 		this.setState({showMenu: !showMenu});
 	};
 

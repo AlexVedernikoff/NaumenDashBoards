@@ -19,7 +19,8 @@ export class Modal extends Component<Props> {
 		notice: false,
 		showCancelButton: true,
 		size: SIZES.NORMAL,
-		submitText: 'Сохранить'
+		submitText: 'Сохранить',
+		submitting: false
 	};
 
 	getContainerCN = () => {
@@ -103,11 +104,11 @@ export class Modal extends Component<Props> {
 	renderModalHeader = () => <div className={styles.header}>{this.props.header}</div>;
 
 	renderSubmitButton = () => {
-		const {defaultButton, onSubmit, submitText} = this.props;
+		const {defaultButton, onSubmit, submitText, submitting} = this.props;
 		const variant = defaultButton === DEFAULT_BUTTONS.SUBMIT_BUTTON ? BUTTON_VARIANTS.INFO : BUTTON_VARIANTS.ADDITIONAL;
 
 		return (
-			<Button onClick={onSubmit} variant={variant}>{submitText}</Button>
+			<Button disabled={submitting} onClick={onSubmit} variant={variant}>{submitText}</Button>
 		);
 	};
 

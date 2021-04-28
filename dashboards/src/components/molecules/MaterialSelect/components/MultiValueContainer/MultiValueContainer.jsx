@@ -10,7 +10,8 @@ import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class MultiValueContainer extends Component<Props, State> {
 	static defaultProps = {
-		displayLimit: 8
+		displayLimit: 8,
+		placeholder: ''
 	};
 
 	state = {
@@ -21,9 +22,9 @@ export class MultiValueContainer extends Component<Props, State> {
 
 	handleClickTag = (e: SyntheticMouseEvent<HTMLDivElement>) => {
 		const {onRemove} = this.props;
-		const {value} = e.currentTarget.dataset;
+		const {index} = e.currentTarget.dataset;
 
-		onRemove && onRemove(value);
+		onRemove && onRemove(Number(index));
 	};
 
 	renderCaret = () => <div className={styles.caret}><Icon name={ICON_NAMES.CARET} /></div>;
@@ -33,16 +34,6 @@ export class MultiValueContainer extends Component<Props, State> {
 			<Button onClick={this.props.onClear} variant={BUTTON_VARIANTS.SIMPLE}>Очистить</Button>
 		</div>
 	);
-
-	renderLabel = () => {
-		const {values} = this.props;
-		const cnLabel = cn({
-			[styles.label]: true,
-			[styles.labelAboveValues]: values.length > 0
-		});
-
-		return <div className={cnLabel}>Выберите значение</div>;
-	};
 
 	renderMoreTagsInfo = () => {
 		const {displayLimit, values} = this.props;
@@ -60,12 +51,22 @@ export class MultiValueContainer extends Component<Props, State> {
 		}
 	};
 
-	renderTag = (option: Option) => {
-		const {getOptionLabel, getOptionValue} = this.props;
+	renderPlaceholder = () => {
+		const {placeholder, values} = this.props;
+		const cnLabel = cn({
+			[styles.label]: true,
+			[styles.labelAboveValues]: values.length > 0
+		});
+
+		return <div className={cnLabel}>{placeholder}</div>;
+	};
+
+	renderTag = (option: Option, index) => {
+		const {getOptionLabel} = this.props;
 		const label = getOptionLabel(option);
 
 		return (
-			<div className={styles.tagContainer} data-value={getOptionValue(option)} onClick={this.handleClickTag} title={label}>
+			<div className={styles.tagContainer} data-index={index} onClick={this.handleClickTag} title={label}>
 				<div className={styles.tagLabel}>{label}</div>
 				<Icon className={styles.clearTagIcon} name={ICON_NAMES.REMOVE} />
 			</div>
@@ -112,7 +113,7 @@ export class MultiValueContainer extends Component<Props, State> {
 		return (
 			<div className={styles.valuesContainer} onClick={onClick}>
 				{this.renderValues()}
-				{this.renderLabel()}
+				{this.renderPlaceholder()}
 				{this.renderCaret()}
 			</div>
 		);

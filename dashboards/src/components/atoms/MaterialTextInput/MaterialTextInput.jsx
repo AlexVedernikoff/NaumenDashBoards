@@ -11,7 +11,8 @@ export class MaterialTextInput extends PureComponent<Props> {
 		maxLength: null,
 		name: '',
 		onlyNumber: false,
-		placeholder: ''
+		placeholder: '',
+		value: ''
 	};
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {

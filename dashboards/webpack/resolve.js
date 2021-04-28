@@ -6,8 +6,8 @@ const {src} = require('./define');
 
 module.exports = {
 	alias: {
-		CustomGroup: resolve(src, 'components/molecules/GroupCreatingModal/components/CustomGroup'),
 		DiagramWidgetEditForm: resolve(src, 'components/organisms/DiagramWidgetEditForm'),
+		GroupModal: resolve(src, 'components/organisms/GroupModal'),
 		src,
 		Table: resolve(src, 'components/organisms/Table')
 	},

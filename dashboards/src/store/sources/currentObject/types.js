@@ -9,7 +9,7 @@ export type ItemsMap = {
 	[string]: Item
 };
 
-export type TypeData = {
+export type CurrentObjectData = {
 	error: boolean,
 	items: ItemsMap,
 	loading: boolean
@@ -76,5 +76,5 @@ export type CurrentObjectAction =
 ;
 
 export type CurrentObjectState = {
-	[attributeType: string]: TypeData
+	[attributeType: string]: CurrentObjectData
 };

@@ -41,3 +41,15 @@ export type TreeNode<V, R = {}> = {
 	uploaded: boolean,
 	value: V
 };
+
+export type ValidateOptions = {
+	abortEarly?: boolean,
+	context?: Object,
+	path?: string,
+	recursive?: boolean,
+	[string]: any
+};
+
+export type Schema = {
+	validate(value: any, options?: ValidateOptions): Promise<void>;
+};

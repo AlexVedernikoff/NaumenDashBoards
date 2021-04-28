@@ -6,6 +6,6 @@ export type Props = {
 	maxLabelLength: number | null,
 	onClear?: () => void,
 	onLoadOptions: () => void,
-	onRemove?: (value: string) => void,
+	onRemove?: (index: number) => void,
 	values: Array<Option>,
 } & SelectProps;

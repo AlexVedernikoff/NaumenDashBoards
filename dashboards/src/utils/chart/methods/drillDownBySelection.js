@@ -13,7 +13,7 @@ import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
-import {hasUUIDsInLabels, transformGroupFormat} from 'store/widgets/helpers';
+import {hasUUIDsInLabels} from 'store/widgets/helpers';
 import {setWarningMessage} from 'store/widgets/data/actions';
 import {store} from 'app.constants';
 import type {ThunkAction} from 'store/types';
@@ -52,7 +52,7 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 
 		newMixin.filters.push({
 			attribute,
-			group: transformGroupFormat(group),
+			group,
 			value: isNeedsClearedValue(attribute, group) ? clearedValue : value
 		});
 	}

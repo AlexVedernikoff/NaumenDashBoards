@@ -14,7 +14,6 @@ import type {DiagramFormWidget} from 'containers/DiagramWidgetEditForm/types';
 import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
-import {store} from 'app.constants';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
@@ -25,25 +24,6 @@ const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 		data,
 		way: GROUP_WAYS.SYSTEM
 	});
-};
-
-const isGroupKey = (key: string) => /group/i.test(key);
-
-const transformGroupFormat = (group?: Group, extendCustom: boolean = true) => {
-	let resultGroup = group;
-
-	if (!group || typeof group !== 'object') {
-		resultGroup = createDefaultGroup(group);
-	} else if (extendCustom && group.way === GROUP_WAYS.CUSTOM) {
-		const {customGroups} = store.getState();
-
-		resultGroup = {
-			...group,
-			data: customGroups.original[group.data]
-		};
-	}
-
-	return resultGroup;
 };
 
 const getDefaultSystemGroup = (attribute?: Object) => {
@@ -222,8 +202,6 @@ export {
 	isAxisChart,
 	isCircleChart,
 	isHorizontalChart,
-	isGroupKey,
 	parseMSInterval,
-	transformGroupFormat,
 	usesCustomGroup
 };

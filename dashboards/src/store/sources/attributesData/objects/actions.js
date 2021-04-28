@@ -117,16 +117,17 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 const fetchObjectData = (params: FetchParams): ThunkAction => async (dispatch: Dispatch) => {
 	const {
 		attribute,
+		includingArchival,
 		offset = 0,
 		parentUUID = null,
-		source,
-		type
+		source
 	} = params;
+	const {ACTUAL, ALL} = OBJECTS_DATA_TYPES;
 	const id = getObjectKey(attribute, source);
 	const payload = {
 		id,
 		parentUUID,
-		type
+		type: includingArchival ? ALL : ACTUAL
 	};
 
 	dispatch({
@@ -140,7 +141,7 @@ const fetchObjectData = (params: FetchParams): ThunkAction => async (dispatch: D
 			count: LIMIT,
 			offset,
 			parentUUID,
-			removed: type === OBJECTS_DATA_TYPES.ALL,
+			removed: includingArchival,
 			sourceCode: source.value
 		};
 		const data = await window.jsApi.restCallModule('dashboards', 'getAttributeObject', requestPayload);

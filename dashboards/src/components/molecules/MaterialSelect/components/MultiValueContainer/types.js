@@ -7,7 +7,8 @@ export type Props = {
 	getOptionValue: (option: Option) => string,
 	onClear?: () => void,
 	onClick: () => void,
-	onRemove?: (value: string) => void,
+	onRemove?: (index: number) => void,
+	placeholder: string,
 	values: Array<Option>
 };
 

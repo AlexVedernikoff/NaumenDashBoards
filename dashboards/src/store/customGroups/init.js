@@ -3,8 +3,9 @@ import type {CustomGroupsAction, CustomGroupsState} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 
 export const initialCustomGroupsState: CustomGroupsState = {
-	editable: {},
-	original: {}
+	error: false,
+	loading: false,
+	map: {}
 };
 
 export const defaultCustomGroupsAction: CustomGroupsAction = {

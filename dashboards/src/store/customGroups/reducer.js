@@ -1,7 +1,6 @@
 // @flow
 import type {CustomGroupsAction, CustomGroupsState} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
-import {deepClone} from 'helpers';
 import {defaultCustomGroupsAction, initialCustomGroupsState} from './init';
 
 const reducer = (
@@ -9,33 +8,38 @@ const reducer = (
 	action: CustomGroupsAction = defaultCustomGroupsAction
 ): CustomGroupsState => {
 	switch (action.type) {
+		case CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_FULFILLED:
+			return {
+				...state,
+				loading: false,
+				map: action.payload
+			};
+		case CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_PENDING:
+			return {
+				...state,
+				error: false,
+				loading: true
+			};
+		case CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_REJECTED:
+			return {
+				...state,
+				error: true,
+				loading: false
+			};
 		case CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP:
-			delete state.editable[action.payload];
-
-			if (action.payload in state.original) {
-				delete state.original[action.payload];
-			}
-
-			return deepClone(state);
-		case CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP:
-			if (action.payload.remote) {
-				state.original = {
-					...state.original,
-					[action.payload.group.id]: action.payload.group
-				};
-			}
+			delete state.map[action.payload];
 
 			return {
 				...state,
-				editable: {
-					...state.editable,
-					[action.payload.group.id]: action.payload.group
-				}
+				map: {...state.map}
 			};
-		case CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS:
+		case CUSTOM_GROUPS_EVENTS.SAVE_CUSTOM_GROUP:
 			return {
-				editable: deepClone(action.payload),
-				original: action.payload
+				...state,
+				map: {
+					...state.map,
+					[action.payload.id]: action.payload
+				}
 			};
 		default:
 			return state;

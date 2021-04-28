@@ -27,9 +27,9 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	fetchOptions = () => {
-		const {fetchOptions, options} = this.props;
+		const {fetchOptions, loading, options} = this.props;
 
-		if (options.length === 0 && typeof fetchOptions === 'function') {
+		if (!loading && options.length === 0 && typeof fetchOptions === 'function') {
 			fetchOptions();
 		}
 	};

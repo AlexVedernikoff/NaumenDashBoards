@@ -45,10 +45,10 @@ type FoundMap = {
 
 export type FetchParams = {
 	attribute: Attribute,
+	includingArchival: boolean,
 	offset: number,
 	parentUUID: string | null,
-	source: Source,
-	type: string
+	source: Source
 };
 
 export type Payload = {

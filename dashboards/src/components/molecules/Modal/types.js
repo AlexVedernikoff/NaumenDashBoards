@@ -16,7 +16,8 @@ export type DefaultProps = {|
 	notice: boolean,
 	showCancelButton: boolean,
 	size: Size | number,
-	submitText: string
+	submitText: string,
+	submitting: boolean
 |};
 
 export type Props = {

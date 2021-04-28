@@ -1,36 +1,67 @@
 // @flow
 import {createToast} from 'store/toasts/actions';
-import type {CustomGroup, OnCreateCallback} from './types';
+import type {CustomGroup} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
-import isMobile from 'ismobilejs';
-import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 
-const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callback: OnCreateCallback): ThunkAction =>
-	async (dispatch: Dispatch): Promise<void> => {
+/**
+ * Получает список пользовательских группировок
+ * @returns {ThunkAction}
+ */
+const fetchCustomGroups = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	dispatch({
+		type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_PENDING
+	});
+
+	try {
+		const {code} = getState().dashboard.settings;
+		let map = {};
+
+		const customGroups = await window.jsApi.restCallModule('dashboardSettings', 'getCustomGroups', code);
+
+		customGroups.forEach(customGroup => {
+			map[customGroup.id] = customGroup;
+		});
+
+		dispatch({
+			payload: map,
+			type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_FULFILLED
+		});
+	} catch (e) {
+		dispatch({
+			type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_REJECTED
+		});
+	}
+};
+
+const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): ThunkAction =>
+	async (dispatch: Dispatch): Promise<string | null> => {
+	let id = null;
+
 	try {
 		const payload = {
 			...getParams(),
 			group: customGroupData
 		};
-		const {id} = await window.jsApi.restCallModule('dashboardSettings', 'saveCustomGroup', payload);
 
-		callback(id);
+		({id} = await window.jsApi.restCallModule('dashboardSettings', 'saveCustomGroup', payload));
 
 		dispatch(removeCustomGroup(localId));
-		dispatch(saveCustomGroup({group: {...customGroupData, id}, remote: true}));
+		dispatch(saveCustomGroup({...customGroupData, id}));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка создания группировки',
 			type: 'error'
 		}));
 	}
+
+	return id;
 };
 
-const deleteCustomGroup = (groupKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const deleteCustomGroup = (groupKey: string, remote: boolean = true): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		if (!groupKey.startsWith(LOCAL_PREFIX_ID)) {
+		if (remote) {
 			const payload = {
 				...getParams(),
 				groupKey
@@ -48,9 +79,7 @@ const deleteCustomGroup = (groupKey: string): ThunkAction => async (dispatch: Di
 	}
 };
 
-const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback?: OnCreateCallback): ThunkAction =>
-	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {original: originalGroups} = getState().customGroups;
+const updateCustomGroup = (group: CustomGroup, remote: boolean = false): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	let updatedGroup = group;
 
 	try {
@@ -61,51 +90,15 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback
 			};
 
 			({group: updatedGroup} = await window.jsApi.restCallModule('dashboardSettings', 'updateCustomGroup', payload));
-
-			if (updatedGroup.id !== group.id) {
-				callback && callback(updatedGroup.id);
-				dispatch(saveCustomGroup({group: originalGroups[group.id], remote: false}));
-			}
 		}
 
-		dispatch(saveCustomGroup({group: updatedGroup, remote}));
+		dispatch(saveCustomGroup(updatedGroup));
 	} catch (e) {
 		dispatch(createToast({
 			text: 'Ошибка сохранения группировки',
 			type: 'error'
 		}));
 	}
-};
-
-const refreshCustomGroups = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {context, dashboard} = getState();
-	const {contentCode, subjectUuid: classFqn} = context;
-	const payload = {
-		classFqn,
-		contentCode,
-		isMobile: isMobile().any,
-		isPersonal: dashboard.settings.personal
-	};
-	const {
-		customGroups
-	} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
-
-	if (customGroups !== null) {
-		dispatch(setCustomGroups(customGroups));
-	}
-};
-
-const setCustomGroups = (customGroups: Array<CustomGroup>) => (dispatch: Dispatch) => {
-	let map = {};
-
-	customGroups.forEach(customGroup => {
-		map[customGroup.id] = customGroup;
-	});
-
-	dispatch({
-		payload: map,
-		type: CUSTOM_GROUPS_EVENTS.SET_CUSTOM_GROUPS
-	});
 };
 
 const saveCustomGroup = payload => ({
@@ -121,7 +114,6 @@ const removeCustomGroup = (payload: string) => ({
 export {
 	createCustomGroup,
 	deleteCustomGroup,
-	setCustomGroups,
-	refreshCustomGroups,
+	fetchCustomGroups,
 	updateCustomGroup
 };

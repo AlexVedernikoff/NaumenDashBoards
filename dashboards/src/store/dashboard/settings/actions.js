@@ -18,7 +18,6 @@ import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
-import {setCustomGroups} from 'store/customGroups/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {User} from 'store/users/types';
 
@@ -101,7 +100,6 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 	const {
 		autoUpdate,
 		customColorsSettings,
-		customGroups,
 		dashboardKey: code,
 		layouts,
 		mobileLayouts,
@@ -110,10 +108,6 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 
 	dispatch(setCode(code));
 	dispatch(setCustomChartsColorsSettings(customColorsSettings));
-
-	if (customGroups !== null) {
-		dispatch(setCustomGroups(customGroups));
-	}
 
 	if (autoUpdate !== null) {
 		dispatch(setAutoUpdateSettings(autoUpdate));
