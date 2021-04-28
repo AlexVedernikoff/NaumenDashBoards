@@ -167,5 +167,5 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
-  "version": "1.0.11"
+  "version": "1.0.12-0"
 }
