@@ -4,7 +4,7 @@ import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {DataSet, Parameter} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES} from 'store/widgets/data/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {filterByAttribute, getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
+import {filterByAttribute, filterByUsedAttributes, getDataErrorKey, getDefaultParameter} from 'DiagramWidgetEditForm/helpers';
 import FormBox from 'components/molecules/FormBox';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
@@ -68,16 +68,22 @@ export class ParameterDataBox extends PureComponent<Props> {
 
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number): Array<Attribute> => {
 		const {values} = this.props;
+		let result = options;
 		const mainSet = values.data[this.mainIndex];
 		const currentSet = values.data[index];
+		let currentParameter = currentSet.parameters?.[index].attribute;
+
+		if (filterByRef) {
+			currentParameter = currentParameter.ref;
+		}
 
 		if (currentSet !== mainSet) {
 			const mainParameter = mainSet.parameters?.[this.mainIndex].attribute;
 
-			return filterByAttribute(options, mainParameter, filterByRef);
+			result = filterByAttribute(options, mainParameter, filterByRef);
 		}
 
-		return options;
+		return filterByUsedAttributes(result, currentParameter, currentSet);
 	};
 
 	getParameters = ({parameters}: DataSet): Array<Parameter> => parameters || [getDefaultParameter()];

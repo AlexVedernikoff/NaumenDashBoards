@@ -10,6 +10,7 @@ import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
+import {filterByUsedAttributes} from 'DiagramWidgetEditForm/helpers';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultAggregation} from 'DiagramWidgetEditForm/components/AttributeAggregationField/helpers';
 import type {Indicator} from 'containers/DiagramWidgetEditForm/types';
@@ -45,7 +46,17 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		MenuContainer: this.renderMenuContainer
 	});
 
-	getMainOptions = (options: Array<Attribute>): Array<Attribute> => [...this.props.values.computedAttrs, ...options];
+	getMainOptions = (options: Array<Attribute>): Array<Attribute> => {
+		const {
+			value: {attribute: currentAttribute} = {},
+			values,
+			dataSetIndex
+		} = this.props;
+		const {computedAttrs, data} = values;
+		const dataSet = data[dataSetIndex];
+
+		return filterByUsedAttributes([...computedAttrs, ...options], currentAttribute, dataSet);
+	};
 
 	getModalSources = () => {
 		const {attributes: map, fetchAttributes, values} = this.props;
