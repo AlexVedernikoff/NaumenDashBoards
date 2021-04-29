@@ -74,11 +74,10 @@ export class WidgetAddPanel extends Component<Props, State> {
 		const {invalidCopyData} = this.state;
 
 		if (invalidCopyData) {
-			const {dashboardId, reasons, widgetId} = invalidCopyData;
-			const ignoreCustomGroups = reasons.includes(COPY_WIDGET_ERRORS.HAS_CUSTOM_GROUPS);
+			const {dashboardId, widgetId} = invalidCopyData;
 
 			this.setState({invalidCopyData: null});
-			copyWidget(dashboardId, widgetId, ignoreCustomGroups);
+			copyWidget(dashboardId, widgetId);
 		}
 	};
 
@@ -112,14 +111,15 @@ export class WidgetAddPanel extends Component<Props, State> {
 			let message = 'Виджет будет скопирован не полностью. Продолжить копирование?';
 			const {reasons} = invalidCopyData;
 			const hasSubjectFilters = reasons.includes(COPY_WIDGET_ERRORS.HAS_SUBJECT_FILTERS);
-			const hasCustomGroups = reasons.includes(COPY_WIDGET_ERRORS.HAS_CUSTOM_GROUPS);
+			const hasCustomGroupsWithRelativeCriteria = reasons.includes(COPY_WIDGET_ERRORS.HAS_CUSTOM_GROUPS_WITH_RELATIVE_CRITERIA);
+			const hasOnlyRelativeCriteriaCustomGroups = reasons.includes(COPY_WIDGET_ERRORS.HAS_ONLY_RELATIVE_CRITERIA_CUSTOM_GROUPS);
 
-			if (hasSubjectFilters && hasCustomGroups) {
+			if (hasSubjectFilters && hasOnlyRelativeCriteriaCustomGroups) {
 				message = 'Виджет будет скопирован без относительных критериев фильтрации. Настроенные пользовательские группировки будут заменены на системные. Продолжить копирование?';
-			} else if (hasSubjectFilters) {
+			} else if (hasSubjectFilters || hasCustomGroupsWithRelativeCriteria) {
 				message = 'Виджет будет скопирован без относительных критериев фильтрации. Продолжить копирование?';
-			} else if (hasCustomGroups) {
-				message = 'Виджет будет скопирован без установленных пользовательских группировок. Продолжить копирование?';
+			} else if (hasOnlyRelativeCriteriaCustomGroups) {
+				message = 'В виджете использована пользовательская настройка группировки и будет изменена на системную. Продолжить копирование?';
 			}
 
 			return (

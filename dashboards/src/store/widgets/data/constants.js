@@ -286,10 +286,12 @@ const DEFAULT_COLORS_SETTINGS: ChartColorsSettings = Object.freeze({
 
 // Ошибки копирования
 const HAS_SUBJECT_FILTERS: 'hasSubjectFilters' = 'hasSubjectFilters';
-const HAS_CUSTOM_GROUPS: 'hasCustomGroups' = 'hasCustomGroups';
+const HAS_CUSTOM_GROUPS_WITH_RELATIVE_CRITERIA: 'hasCustomGroupsWithRelativeCriteria' = 'hasCustomGroupsWithRelativeCriteria';
+const HAS_ONLY_RELATIVE_CRITERIA_CUSTOM_GROUPS: 'hasOnlyRelativeCriteriaCustomGroups' = 'hasOnlyRelativeCriteriaCustomGroups';
 
 const COPY_WIDGET_ERRORS = {
-	HAS_CUSTOM_GROUPS,
+	HAS_CUSTOM_GROUPS_WITH_RELATIVE_CRITERIA,
+	HAS_ONLY_RELATIVE_CRITERIA_CUSTOM_GROUPS,
 	HAS_SUBJECT_FILTERS
 };
 

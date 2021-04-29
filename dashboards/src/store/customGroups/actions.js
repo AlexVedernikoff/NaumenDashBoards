@@ -4,6 +4,7 @@ import type {CustomGroup, OnCreateCallback} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
+import isMobile from 'ismobilejs';
 import {LOCAL_PREFIX_ID} from 'components/molecules/GroupCreatingModal/constants';
 
 const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, callback: OnCreateCallback): ThunkAction =>
@@ -76,6 +77,24 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false, callback
 	}
 };
 
+const refreshCustomGroups = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {context, dashboard} = getState();
+	const {contentCode, subjectUuid: classFqn} = context;
+	const payload = {
+		classFqn,
+		contentCode,
+		isMobile: isMobile().any,
+		isPersonal: dashboard.settings.personal
+	};
+	const {
+		customGroups
+	} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
+
+	if (customGroups !== null) {
+		dispatch(setCustomGroups(customGroups));
+	}
+};
+
 const setCustomGroups = (customGroups: Array<CustomGroup>) => (dispatch: Dispatch) => {
 	let map = {};
 
@@ -103,5 +122,6 @@ export {
 	createCustomGroup,
 	deleteCustomGroup,
 	setCustomGroups,
+	refreshCustomGroups,
 	updateCustomGroup
 };
