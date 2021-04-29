@@ -1,12 +1,14 @@
 // @flow
 import type {AnyWidget, Widget as WidgetType} from 'store/widgets/data/types';
 import cn from 'classnames';
+import ContextMenu from 'components/molecules/ContextMenu';
 import DashboardPanel from 'components/organisms/DashboardPanel';
 import {debounce} from 'helpers';
 import type {DivRef} from 'components/types';
 import {getLayoutWidgets} from 'store/widgets/helpers';
 import {GRID_PROPS, gridRef} from './constants';
 import isMobile from 'ismobilejs';
+import {Item as MenuItem} from 'rc-menu';
 import type {Layout, Layouts} from 'store/dashboard/layouts/types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -23,9 +25,24 @@ import Widget from 'components/molecules/Widget';
 export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
 	state = {
+		contextMenu: null,
 		selectedWidget: '',
 		swipedPanel: false,
 		width: null
+	};
+
+	addDiagramWidget = () => {
+		const {createNewWidget, layoutMode} = this.props;
+
+		createNewWidget(layoutMode);
+		this.setState({contextMenu: null});
+	};
+
+	addTextWidget = () => {
+		const {createNewTextWidget, layoutMode} = this.props;
+
+		createNewTextWidget(layoutMode);
+		this.setState({contextMenu: null});
 	};
 
 	componentDidMount () {
@@ -95,10 +112,29 @@ export class DashboardContent extends Component<Props, State> {
 		selectWidget(id);
 	};
 
+	hideContextMenu = () => this.setState({contextMenu: null});
+
 	isDesktopMK = () => {
 		const {layoutMode} = this.props;
 
 		return !isMobile().any && layoutMode === LAYOUT_MODE.MOBILE;
+	};
+
+	onContextMenu = (e: MouseEvent) => {
+		let {clientX, clientY, target} = e;
+
+		const {current: container} = this.gridContainerRef;
+		const isNeedContainer = target === container || (target instanceof Node && target.parentElement === container);
+
+		if (isNeedContainer) {
+			if (container) {
+				const {top} = container.getBoundingClientRect();
+
+				this.setState({ contextMenu: { x: clientX, y: clientY - top } });
+			}
+
+			e.preventDefault();
+		}
 	};
 
 	setGridWidth = () => {
@@ -111,6 +147,42 @@ export class DashboardContent extends Component<Props, State> {
 			this.setState({width});
 			dashboardResizer.resize();
 		}
+	};
+
+	renderContextMenu = () => {
+		const {contextMenu} = this.state;
+
+		if (contextMenu) {
+			return (
+				<ContextMenu
+					{...contextMenu}
+					hideContextMenu={this.hideContextMenu}
+				>
+					<MenuItem key='widget' onClick={this.addDiagramWidget}>Добавить виджет</MenuItem>
+					<MenuItem key='text' onClick={this.addTextWidget}>Добавить текст</MenuItem>
+				</ContextMenu>
+			);
+		}
+
+		return null;
+	};
+
+	renderCreateButton = () => {
+		const {showCreationInfo} = this.props;
+
+		if (showCreationInfo) {
+			return (
+				<div className={styles.createButtonPlace}>
+					<div>
+						Отсутствуют данные для отображения. Чтобы создать виджет, нажмите
+						<a aria-pressed="false" onClick={this.addDiagramWidget} role="button">здесь</a>
+						или кликнете правой кнопкой мыши на свободное пространство
+					</div>
+				</div>
+			);
+		}
+
+		return null;
 	};
 
 	renderGrid = () => {
@@ -151,8 +223,10 @@ export class DashboardContent extends Component<Props, State> {
 
 		return (
 			<ResizeDetector onResize={this.setGridWidth}>
-				<div className={containerCN} onClick={this.handleClick} ref={this.gridContainerRef}>
+				<div className={containerCN} onClick={this.handleClick} onContextMenu={this.onContextMenu} ref={this.gridContainerRef}>
+					{this.renderContextMenu()}
 					{this.renderGrid()}
+					{this.renderCreateButton()}
 				</div>
 			</ResizeDetector>
 		);

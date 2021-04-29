@@ -1,6 +1,32 @@
 @import "/styles/variables.less";
 
 :local {
+	.createButtonPlace {
+		align-items: center;
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+		left: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+
+		& > div {
+			width: 300px;
+
+			a {
+				color: @primary;
+				cursor: pointer;
+				display:inline-block;
+				&::after,
+				&::before {
+					content: '\00a0 ';
+				}
+			}
+		}
+
+	}
+
 	.content {
 		background-color: @greyBg;
 		height: calc(100% - @top-bar-height);

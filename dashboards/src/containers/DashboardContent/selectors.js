@@ -1,7 +1,6 @@
 // @flow
-import type {AppState} from 'store/types';
-import {changeLayouts} from 'store/dashboard/layouts/actions';
 import {
+	addWidget,
 	clearWarningMessage,
 	editWidgetChunkData,
 	focusWidget,
@@ -10,11 +9,25 @@ import {
 	selectWidget,
 	updateWidget
 } from 'store/widgets/data/actions';
+import type {AppState, Dispatch} from 'store/types';
+import {changeLayouts} from 'store/dashboard/layouts/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
+import {createNewWidget} from 'store/widgets/data/helpers';
 import {drillDown, openCardObject, openNavigationLink} from 'store/widgets/links/actions';
+import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getMapValues} from 'helpers';
+import type {LayoutMode} from 'store/dashboard/settings/types';
 import {USER_ROLES} from 'store/context/constants';
+import type {WidgetType} from 'store/widgets/data/types';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
+
+const createNewWidgetAction = (type?: WidgetType) => (layout: LayoutMode) => (dispatch: Dispatch) => {
+	const newWidget = createNewWidget(layout, type);
+
+	dispatch(addWidget(newWidget));
+	dispatch(editDashboard());
+};
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard, widgets} = state;
@@ -24,6 +37,8 @@ export const props = (state: AppState): ConnectedProps => {
 	const {focusedWidget, selectedWidget} = data;
 	const {editableDashboard, user} = context;
 	const editable = user.role !== USER_ROLES.REGULAR || personalDashboard;
+	const widgetsList = getMapValues(data.map);
+	const showCreationInfo = editable && (widgetsList?.length === 0);
 
 	return {
 		buildData,
@@ -35,14 +50,17 @@ export const props = (state: AppState): ConnectedProps => {
 		layouts: dashboardLayouts[layoutMode],
 		personalDashboard,
 		selectedWidget,
+		showCreationInfo,
 		user,
-		widgets: getMapValues(data.map)
+		widgets: widgetsList
 	};
 };
 
 export const functions: ConnectedFunctions = {
 	changeLayouts,
 	clearWarningMessage,
+	createNewTextWidget: createNewWidgetAction(WIDGET_TYPES.TEXT),
+	createNewWidget: createNewWidgetAction(),
 	drillDown,
 	editWidgetChunkData,
 	fetchBuildData,

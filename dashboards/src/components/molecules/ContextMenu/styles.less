@@ -1,0 +1,31 @@
+@import '/styles/variables';
+
+:local {
+    .referencePoint {
+        background-color: transparent;
+        height: 1px;
+        position: absolute;
+        width: 1px;
+    }
+
+    .contextMenu {
+		background-color: @white;
+		box-shadow: @box-shadow !important;
+		color: @black !important;
+		font-size: 13px;
+		left: 0;
+		margin-top: 3px;
+		padding: 0 !important;
+		position: absolute;
+		z-index: 2;
+
+		li {
+			> div {
+				display: flex;
+				justify-content: space-between;
+				padding: 8px 12px 9px 12px !important;
+			}
+		}
+	}
+
+}

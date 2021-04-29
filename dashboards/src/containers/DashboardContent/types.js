@@ -10,6 +10,8 @@ import type {UserData} from 'store/context/types';
 export type ConnectedFunctions = {
 	changeLayouts: (payload: LayoutsPayloadForChange) => Object,
 	clearWarningMessage: (payload: string) => void,
+	createNewTextWidget: (layoutMode: LayoutMode) => ThunkAction,
+	createNewWidget: (layoutMode: LayoutMode) => ThunkAction,
 	drillDown: DrillDown,
 	editWidgetChunkData: (widget: Widget, chunkData: Object) => ThunkAction,
 	fetchBuildData: (widget: Widget) => ThunkAction,
@@ -32,6 +34,7 @@ export type ConnectedProps = {
 	layouts: Layouts,
 	personalDashboard: boolean,
 	selectedWidget: string,
+	showCreationInfo: boolean,
 	user: UserData,
 	widgets: Array<Widget>
 };
