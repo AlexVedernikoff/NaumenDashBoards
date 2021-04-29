@@ -3,7 +3,7 @@ import cn from 'classnames';
 import type {Components, Option, Props, State} from './types';
 import Container from 'components/atoms/Container';
 import {debounce} from 'helpers';
-import {getOptionLabel, getOptionValue, getOptions} from './helpers';
+import {DEFAULT_PROPS} from './constants';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import List from './components/List';
@@ -18,24 +18,7 @@ import Value from './components/Value';
 import withGetComponents from 'components/HOCs/withGetComponents';
 
 export class Select extends PureComponent<Props, State> {
-	static defaultProps = {
-		className: '',
-		disabled: false,
-		editable: false,
-		getOptionLabel,
-		getOptionValue,
-		getOptions,
-		isSearching: false,
-		loading: false,
-		loadingMessage: 'Загрузка...',
-		multiple: false,
-		name: '',
-		noOptionsMessage: 'Список пуст',
-		notFoundMessage: 'Ничего не найдено',
-		options: [],
-		placeholder: '',
-		value: null
-	};
+	static defaultProps = DEFAULT_PROPS;
 
 	state = {
 		foundOptions: [],
@@ -110,7 +93,7 @@ export class Select extends PureComponent<Props, State> {
 		);
 	};
 
-	renderLabel = () => {
+	renderLabel = (): React$Node => {
 		const {editable, forwardedLabelInputRef, getOptionLabel, placeholder, value} = this.props;
 		const {Value} = this.getComponents();
 		const label = (value && getOptionLabel(value)) ?? placeholder;
@@ -135,7 +118,7 @@ export class Select extends PureComponent<Props, State> {
 		return <Value className={valueCN} label={label} onClick={this.handleClick} />;
 	};
 
-	renderList = () => {
+	renderList = (): React$Node => {
 		const {getOptionLabel, getOptionValue, getOptions, loading, options: allOptions, value} = this.props;
 		const {foundOptions, searchValue} = this.state;
 		const {List} = this.getComponents();
@@ -166,7 +149,7 @@ export class Select extends PureComponent<Props, State> {
 		return loading && <Message className={styles.message}>{loadingMessage}</Message>;
 	};
 
-	renderMenu = () => {
+	renderMenu = (): React$Node => {
 		const {showMenu} = this.state;
 		const {MenuContainer} = this.getComponents();
 
@@ -183,16 +166,18 @@ export class Select extends PureComponent<Props, State> {
 				</OutsideClickDetector>
 			);
 		}
+
+		return null;
 	};
 
-	renderNoOptionsMessage = () => {
+	renderNoOptionsMessage = (): React$Node => {
 		const {loading, noOptionsMessage, options} = this.props;
 		const {Message} = this.getComponents();
 
 		return !loading && options.length === 0 ? <Message className={styles.message}>{noOptionsMessage}</Message> : null;
 	};
 
-	renderNotFoundMessage = () => {
+	renderNotFoundMessage = (): React$Node => {
 		const {loading, notFoundMessage} = this.props;
 		const {foundOptions, searchValue} = this.state;
 		const {Message} = this.getComponents();
@@ -202,7 +187,7 @@ export class Select extends PureComponent<Props, State> {
 			: null;
 	};
 
-	renderSearchInput = () => {
+	renderSearchInput = (): React$Node => {
 		const {isSearching} = this.props;
 		const {searchValue} = this.state;
 

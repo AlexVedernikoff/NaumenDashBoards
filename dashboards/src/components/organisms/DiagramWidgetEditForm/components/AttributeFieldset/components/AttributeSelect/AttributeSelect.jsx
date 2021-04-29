@@ -3,6 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
 import type {Components, Props, State} from './types';
 import Container from 'components/atoms/Container';
+import {DEFAULT_PROPS as SELECT_DEFAULT_PROPS} from 'components/molecules/Select/constants';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
@@ -14,7 +15,7 @@ import styles from './styles.less';
 
 export class AttributeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
-		...Select.defaultProps,
+		...SELECT_DEFAULT_PROPS,
 		droppable: false,
 		removable: false
 	};
@@ -82,7 +83,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		return <div className={styles.fieldContainer}><Field /></div>;
 	};
 
-	renderForm = () => {
+	renderForm = (): React$Node => {
 		const {value} = this.props;
 
 		if (value) {

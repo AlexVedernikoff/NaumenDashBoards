@@ -1,21 +1,21 @@
 // @flow
 import cn from 'classnames';
+import {DEFAULT_PROPS as SELECT_DEFAULT_PROPS} from 'components/molecules/Select/constants';
 import MultiValueContainer from './components/MultiValueContainer';
 import type {Props} from './types';
-import React, {createRef, PureComponent} from 'react';
-import type {Ref} from 'components/types';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import ValueContainer from './components/ValueContainer';
 
 export class MaterialSelect extends PureComponent<Props> {
 	static defaultProps = {
-		...Select.defaultProps,
+		...SELECT_DEFAULT_PROPS,
 		isEditingLabel: false,
 		maxLabelLength: null,
 		values: []
 	};
-	selectRef: Ref<typeof Select> = createRef();
 	components = null;
 
 	getComponents = () => {
@@ -38,34 +38,29 @@ export class MaterialSelect extends PureComponent<Props> {
 		onChangeLabel && onChangeLabel({name, value});
 	};
 
-	handleClick = () => {
-		const {current: select} = this.selectRef;
-
-		select && select.handleClick();
-	};
-
 	onLoadOptions = () => {
 		const {onLoadOptions} = this.props;
 
 		onLoadOptions();
 	};
 
-	renderMultiValueContainer = () => {
+	renderMultiValueContainer = (props: ContainerProps): React$Node => {
 		const {getOptionLabel, getOptionValue, onClear, onRemove, values} = this.props;
+		const {onClick} = props;
 
 		return (
 			<MultiValueContainer
 				getOptionLabel={getOptionLabel}
 				getOptionValue={getOptionValue}
 				onClear={onClear}
-				onClick={this.handleClick}
+				onClick={onClick}
 				onRemove={onRemove}
 				values={values}
 			/>
 		);
 	};
 
-	renderSimpleValueContainer = () => {
+	renderSimpleValueContainer = (props: ContainerProps): React$Node => {
 		const {
 			getOptionLabel,
 			getOptionValue,
@@ -74,6 +69,7 @@ export class MaterialSelect extends PureComponent<Props> {
 			placeholder,
 			value
 		} = this.props;
+		const {onClick} = props;
 
 		return (
 			<ValueContainer
@@ -82,15 +78,15 @@ export class MaterialSelect extends PureComponent<Props> {
 				getOptionValue={getOptionValue}
 				maxLabelLength={maxLabelLength}
 				onChangeLabel={this.handleChangeLabel}
-				onClick={this.handleClick}
+				onClick={onClick}
 				placeholder={placeholder}
 				value={value}
 			/>
 		);
 	};
 
-	renderValueContainer = () => {
-		return this.props.multiple ? this.renderMultiValueContainer() : this.renderSimpleValueContainer();
+	renderValueContainer = (props: ContainerProps): React$Node => {
+		return this.props.multiple ? this.renderMultiValueContainer(props) : this.renderSimpleValueContainer(props);
 	};
 
 	render () {
@@ -102,7 +98,6 @@ export class MaterialSelect extends PureComponent<Props> {
 				{...this.props}
 				className={cn(styles.select, className)}
 				components={this.getComponents()}
-				ref={this.selectRef}
 			/>
 		);
 	}
