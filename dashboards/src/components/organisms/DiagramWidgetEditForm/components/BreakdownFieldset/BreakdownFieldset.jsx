@@ -6,7 +6,7 @@ import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constant
 import type {BreakdownItem} from 'containers/DiagramWidgetEditForm/types';
 import type {FieldContext, Props} from './types';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
-import {filterByAttribute, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
+import {filterByAttribute, filterByUsedAttributes, getDataErrorKey} from 'DiagramWidgetEditForm/helpers';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getMapValues} from 'helpers';
@@ -50,17 +50,21 @@ export class BreakdownFieldset extends Component<Props> {
 		}
 	}
 
-	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number): Array<Attribute> => {
+	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number = 0): Array<Attribute> => {
+		const {data, index: dataSetIndex, value} = this.props;
+		let result = options;
+		const {attribute: currentAttribute} = value[index];
+		const dataSet = data[dataSetIndex];
+
 		if (index > this.mainIndex) {
-			const {value} = this.props;
 			const mainParameter = value[this.mainIndex].attribute;
 
 			if (mainParameter) {
-				return filterByAttribute(options, mainParameter, filterByRef);
+				result = filterByAttribute(options, mainParameter, filterByRef);
 			}
 		}
 
-		return options;
+		return filterByUsedAttributes(result, currentAttribute, dataSet);
 	};
 
 	handleChangeGroup = (breakdownIndex: number) => (name: string, group: Group, attribute: Attribute) => {
@@ -123,9 +127,9 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	renderField = (item: BreakdownItem, breakdownIndex: number) => {
-		const {data, errors, index, onRemove, removable} = this.props;
-		const {attribute, dataKey} = item;
-		const dataSet = data.find(set => set.dataKey === dataKey);
+		const {data, errors, index, index: dataSetIndex, onRemove, removable} = this.props;
+		const {attribute} = item;
+		const dataSet = data[dataSetIndex];
 		const error = errors[getDataErrorKey(index, FIELDS.breakdown, breakdownIndex)];
 
 		if (dataSet) {

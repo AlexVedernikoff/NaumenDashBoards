@@ -1,15 +1,23 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import type {BreakdownItem, DiagramFormWidget, Indicator, Parameter} from 'containers/DiagramWidgetEditForm/types';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {BreakdownItem, DataSet, DiagramFormWidget, Indicator, Parameter} from 'containers/DiagramWidgetEditForm/types';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {FIELDS} from 'DiagramWidgetEditForm/constants';
 import {getDefaultSystemGroup, isCircleChart, usesCustomGroup} from 'store/widgets/helpers';
+import type {MixedAttribute} from 'store/widgets/data/types';
 import {SORTING_OPTIONS} from './components/SortingBox/constants';
 import type {SortingValueOption} from './components/SortingBox/types';
 import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Values} from 'containers/WidgetEditForm/types';
 
+/**
+ * Фильтрация списка атрибутов по типу атрибута
+ * @param {Array<Attribute>} options - Список атрибутов
+ * @param {Attribute}  attribute - Атрибут для фильтрации
+ * @param {boolean} filterByRef - Фильтрация по группировке
+ * @returns {Array<Attribute>} - Отфильтрованный список атрибутов
+ */
 const filterByAttribute = (options: Array<Attribute>, attribute: ?Attribute, filterByRef: boolean): Array<Attribute> => {
 	const {DATE, OBJECT} = ATTRIBUTE_SETS;
 	const targetAttribute = filterByRef ? attribute?.ref : attribute;
@@ -25,6 +33,56 @@ const filterByAttribute = (options: Array<Attribute>, attribute: ?Attribute, fil
 
 		return option.type === targetAttribute.type;
 	}) : options;
+};
+
+/**
+ * Получить использованные атрибуты
+ * @param {Array<Indicator> | Array<Parameter> | Array<BreakdownItem>} items - Список параметров, индикаторов или разбивок
+ * @returns {Array<Attribute>} - использованные атрибуты
+ */
+const getUsedArributes = (items: ?(Array<Indicator> | Array<Parameter> | Array<BreakdownItem>)): Array<MixedAttribute> => {
+	if (!items) return [];
+
+	return items.reduce((used, {attribute}) => {
+		if (attribute) {
+			used.push(attribute);
+		}
+
+		return used;
+	}, []);
+};
+
+/**
+ * Фильтрация атрибутов в зависимости от текущего атрибута и датасета
+ * @param {Array<Attribute>} options - список атрибутов
+ * @param {Attribute} selectedAttribute - выбранный атрибут
+ * @param {DataSet<Attribute>} currentSet -текущий датасет
+ * @returns  {Array<Attribute>} - список отфильтрованнныхатрибутов
+ */
+const filterByUsedAttributes = (options: Array<Attribute>, selectedAttribute: ?MixedAttribute, currentSet: ?DataSet): Array<Attribute> => {
+	let usedAttribute = currentSet
+		? [
+			...getUsedArributes(currentSet.parameters),
+			...getUsedArributes(currentSet.indicators),
+			...getUsedArributes(currentSet.breakdown)
+		]
+		: [];
+
+	return options.filter((option) => {
+		const {code, sourceCode = null, type} = option;
+
+		if (selectedAttribute) {
+			const {code: selectedCode, sourceCode: selectedSourceCode = null} = selectedAttribute;
+
+			if (code === selectedCode && (type === ATTRIBUTE_TYPES.COMPUTED_ATTR || sourceCode === selectedSourceCode)) {
+					return true;
+			}
+		}
+
+		return usedAttribute.findIndex(
+				(used) => used.code === code && (used.type === ATTRIBUTE_TYPES.COMPUTED_ATTR || used.sourceCode === sourceCode)
+			) === -1;
+	});
 };
 
 /**
@@ -102,6 +160,7 @@ const getDefaultBreakdown = (dataKey: string): BreakdownItem => ({
 
 export {
 	filterByAttribute,
+	filterByUsedAttributes,
 	getDataErrorKey,
 	getDefaultBreakdown,
 	getDefaultIndicator,
