@@ -14,6 +14,7 @@ import {getParams, parseResponseErrorText} from 'store/helpers';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isObject} from 'helpers';
 import NewWidget from 'store/widgets/data/NewWidget';
+import {refreshCustomGroups} from 'store/customGroups/actions';
 
 /**
  * Добавляет новый виджет
@@ -160,10 +161,9 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
  *
  * @param {string} dashboardKey - идентификатор дашборда
  * @param {string} widgetKey - идентификатор виджета
- * @param {boolean} ignoreCustomGroups - сбросить кастомные группировки
  * @returns {ThunkAction}
  */
-const copyWidget = (dashboardKey: string, widgetKey: string, ignoreCustomGroups: boolean = false): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch({
 		type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
 	});
@@ -174,7 +174,6 @@ const copyWidget = (dashboardKey: string, widgetKey: string, ignoreCustomGroups:
 		const payload = {
 			...getParams(),
 			dashboardKey,
-			ignoreCustomGroups,
 			widgetKey
 		};
 		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
@@ -185,6 +184,7 @@ const copyWidget = (dashboardKey: string, widgetKey: string, ignoreCustomGroups:
 			dispatch(focusWidget(widget.id));
 		});
 		dispatch(saveNewLayouts());
+		dispatch(refreshCustomGroups());
 		dispatch(fetchBuildData(widget));
 		dispatch({
 			type: WIDGETS_EVENTS.RESPONSE_WIDGET_COPY
