@@ -18,6 +18,7 @@ import type {
 	WidgetsDataState
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
+import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import DiagramWidget from './templates/DiagramWidget';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
@@ -232,7 +233,15 @@ const getMainDataSetIndex = <T: Object>(data: $ReadOnlyArray<T>): number => {
  * @returns {string | null}
  */
 const createCustomColorsSettingsKey = (source: Source, attribute: Attribute, group: Group): string | null => {
-	let key = source && attribute && group ? `${source.value}-${attribute.code}-${group.data}` : null;
+	let key = '';
+
+	if (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE) {
+		const targetAttribute = attribute.ref || attribute;
+
+		key = targetAttribute && group ? `${targetAttribute.property}-${targetAttribute.code}-${group.data}` : null;
+	} else {
+		key = source && attribute && group ? `${source.value}-${attribute.code}-${group.data}` : null;
+	}
 
 	if (key && group.format) {
 		key = `${key}-${group.format}`;
