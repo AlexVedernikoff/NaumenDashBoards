@@ -7,7 +7,8 @@ import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
-import {getAllWidgets} from './selectors';
+import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
+import {getAllWidgets} from 'src/store/widgets/data/selectors';
 import {getCustomColorsSettingsKey} from './helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
@@ -336,11 +337,27 @@ const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidget
  * @returns {ThunkAction}
  */
 const setSelectedWidget = (widgetId: string) => (dispatch: Dispatch, getState: GetState) => {
-	const {selectedWidget} = getState().widgets.data;
+	const state = getState();
+	const {data: widgetsData} = state.widgets;
+	const {selectedWidget} = widgetsData;
 
 	if (selectedWidget === NewWidget.id) {
 		dispatch(deleteWidget(selectedWidget));
 		dispatch(removeLayouts(selectedWidget));
+	}
+
+	if (widgetId !== NewWidget.id) {
+		const widgetData = widgetsData.map[widgetId];
+		const sourcesSet = new Set(
+			widgetData
+				.data
+				.map(dataSet => dataSet.source.value?.value)
+				.filter(e => !!e)
+		);
+
+		sourcesSet.forEach((item) => {
+			dispatch(fetchSourcesFilters(item));
+		});
 	}
 
 	dispatch({

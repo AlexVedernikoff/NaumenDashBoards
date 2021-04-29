@@ -1,4 +1,5 @@
 // @flow
+import {isSourceType} from 'store/sources/data/helpers';
 import {store} from 'app.constants';
 
 /**
@@ -128,8 +129,35 @@ const removeLocalStorageValue = (storageKey: string, key: string) => {
  */
 const getDescriptorCases = (classFqn: string) => [classFqn, ...getSourceTypes(classFqn)];
 
+const createFilterContext = (classFqn: string) => {
+	const context: Object = {};
+
+	if (isSourceType(classFqn)) {
+		context.cases = getDescriptorCases(classFqn);
+	} else {
+		context.clazz = classFqn;
+	}
+
+	return context;
+};
+
+const getFilterContext = (descriptor: string, classFqn: string) => {
+	let context = JSON.parse(descriptor);
+
+	if (!context.clazz) {
+		context = {
+			...context,
+			cases: getDescriptorCases(classFqn)
+		};
+	}
+
+	return context;
+};
+
 export {
+	createFilterContext,
 	getDescriptorCases,
+	getFilterContext,
 	getLocalStorageValue,
 	getParams,
 	getSourceTypes,

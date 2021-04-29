@@ -22,6 +22,7 @@ import type {ThunkAction} from 'store/types';
 
 export type SourceData = {
 	descriptor: string,
+	filterId?: string | null,
 	value: Source | null
 };
 
@@ -81,7 +82,7 @@ export type ConnectedProps = {|
 
 export type FetchAttributes = (classFqn: string, parentClassFqn?: string | null, onLoadCallback?: OnLoadCallback) => ThunkAction;
 
-export type FetchDynamicAttributeGroups = (dataKey: string, descriptor: string) => ThunkAction;
+export type FetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filterId?: string) => ThunkAction;
 
 export type FetchDynamicAttributes = (dataKey: string, groupCode: string) => ThunkAction;
 

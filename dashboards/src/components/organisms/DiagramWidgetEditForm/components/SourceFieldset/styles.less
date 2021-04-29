@@ -7,6 +7,23 @@
 		position: relative;
 	}
 
+	.combinedContainer {
+		align-items: center;
+		display: flex;
+
+		.filterButton {
+			cursor: pointer;
+			flex: 0 1 24px;
+			margin-right: 7px;
+			text-align: center;
+		}
+
+		.sourceSelectLabelEdit,
+		.sourceTreeSelect{
+			flex: 1 1 auto;
+		}
+	}
+
 	.removeButton {
 		color: black;
 		font-size: 12px;
@@ -15,4 +32,19 @@
 		text-decoration: underline;
 		top: calc(@height + 6px);
 	}
+
+	.sourceSelectLabel {
+		display: flex;
+
+		.unsaveMarker {
+			color: @error;
+			margin-right: 7px;
+		}
+	}
+
+	.sourceSelectLabelEdit {
+		height: 28px;
+		padding: 5px 0;
+	}
+
 }

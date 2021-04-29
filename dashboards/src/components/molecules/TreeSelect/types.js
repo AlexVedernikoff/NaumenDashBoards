@@ -1,5 +1,16 @@
 // @flow
+import type {InjectedProps} from 'components/HOCs/withGetComponents/types';
 import type {OnSelectEvent, SelectValue} from 'components/types';
+import type {Props as ContainerProps} from 'components/atoms/Container/types';
+
+export type TreeSelectLabelContainerProps = ContainerProps & {
+	value: SelectValue | null,
+};
+
+export type Components = {
+	IndicatorsContainer: React$ComponentType<ContainerProps>,
+	LabelContainer: React$ComponentType<TreeSelectLabelContainerProps>,
+};
 
 type Options = {
 	[string]: Object
@@ -15,6 +26,8 @@ export type OnRemoveEvent = {
 };
 
 export type Props = {
+	className: string,
+	components: $Shape<Components>,
 	getOptionLabel?: (option: SelectValue) => string,
 	getOptionValue?: (option: SelectValue) => any,
 	initialSelected: Array<string>,
@@ -33,3 +46,5 @@ export type State = {
 	showForm: boolean,
 	showMenu: boolean
 };
+
+export type ContextProps = InjectedProps & Props;

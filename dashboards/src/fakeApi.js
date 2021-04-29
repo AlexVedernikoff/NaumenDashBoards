@@ -1,4 +1,45 @@
 /* eslint-disable */
+
+const filterForm = async ({clazz}) =>  {
+	if (clazz === "serviceCall") {
+		return await {
+			command: "filterForm",
+			serializedContext: JSON.stringify({
+				cardObjectUuid: process.env.CONTEXT_OBJECT_META_CLASS,
+				clazz,
+				contentType: "ObjectList",
+				filters: [
+					[
+						{
+							properties: {
+								conditionCode: "contains",
+								attrTypeCode: "object",
+								attributeFqn: "serviceCall@route",
+								isAttributeOfRelatedObject: "false",
+								isLinkToParent: "false",
+								isWithSemantic: "true"
+							},
+							dtObjectWrapper: {
+								fqn: "catalogs$route",
+								title: "1C СОУ: регистрация пользователей, настройка прав доступа 1С",
+								uuid: "catalogs$1828171"
+							}
+						}
+					]
+				]
+			})
+		};
+	}
+	return await {
+		command: "filterForm",
+		serializedContext: JSON.stringify({
+			cardObjectUuid: process.env.CONTEXT_OBJECT_META_CLASS,
+			clazz,
+			contentType: "ObjectList"
+		})
+	}
+};
+
 const getCurrentContentParameters = async () => await ({
 	editable: true,
 	MinTimeIntervalUpdate: 3
@@ -10,6 +51,7 @@ const getCurrentContextObject = async () => await ({
 });
 
 const commands = {
+	filterForm,
 	getCurrentContentParameters,
 	getCurrentContextObject
 };

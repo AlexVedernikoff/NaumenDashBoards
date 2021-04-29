@@ -102,7 +102,7 @@ export class ColorsBox extends React.Component<Props, State> {
 
 		if (globalColorsSettings) {
 			const {key} = globalColorsSettings;
-			const widgetCustomSettingsData = widget.colorsSettings.custom.data;
+			const widgetCustomSettingsData = widget.colorsSettings.custom?.data;
 
 			setUseGlobalChartSettings(key, false);
 			removeCustomChartColorsSettings(key);

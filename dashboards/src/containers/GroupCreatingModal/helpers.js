@@ -1,5 +1,4 @@
 // @flow
-
 const createCustomGroupType = (...keys: Array<string>) => {
 	let type = keys[0];
 

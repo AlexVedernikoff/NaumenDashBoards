@@ -6,6 +6,7 @@ import type {DataSourcesState} from './data/types';
 import type {DynamicGroupsState} from './dynamicGroups/types';
 import type {LinkedDataSourcesState} from './linkedData/types';
 import type {RefAttributesState} from './refAttributes/types';
+import type {SourcesFiltersState} from './sourcesFilters/types';
 
 export type OnLoadCallback = Array<Attribute> => void;
 
@@ -16,5 +17,6 @@ export type SourcesState = {
 	data: DataSourcesState,
 	dynamicGroups: DynamicGroupsState,
 	linkedData: LinkedDataSourcesState,
-	refAttributes: RefAttributesState
+	refAttributes: RefAttributesState,
+	sourcesFilters: SourcesFiltersState
 };

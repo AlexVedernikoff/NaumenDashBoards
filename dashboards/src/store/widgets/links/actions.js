@@ -25,7 +25,7 @@ const getPartsClassFqn = (code?: string) => {
 const createPostData = (widget: Widget, index: number) => {
 	let postData = {};
 	const {source} = widget.data[index];
-	const {descriptor, value: sourceValue} = source;
+	const {descriptor, filterId, value: sourceValue} = source;
 
 	if (source) {
 		const {label: title, value} = sourceValue;
@@ -35,6 +35,7 @@ const createPostData = (widget: Widget, index: number) => {
 			cases,
 			classFqn,
 			descriptor,
+			filterId,
 			title
 		};
 	}

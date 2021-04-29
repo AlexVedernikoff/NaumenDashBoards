@@ -1,5 +1,4 @@
 // @flow
-
 // Префикс локального ключа для новой группировки
 const LOCAL_PREFIX_ID: 'local_' = 'local_';
 

@@ -6,16 +6,23 @@ type Size = $Keys<typeof SIZES>;
 
 type FooterPosition = $Keys<typeof FOOTER_POSITIONS>;
 
-export type Props = {
+export type DefaultProps = {|
 	cancelText: string,
-	children: Node,
+	children: ?Node,
 	className: string,
 	footerPosition: FooterPosition,
-	header: string,
 	notice: boolean,
+	showCancelButton: boolean,
+	size: Size | number,
+	submitText: string
+|};
+
+export type Props = {
+	...DefaultProps,
+	header: string,
 	onClose?: () => void,
 	onSubmit?: () => void,
 	renderFooter?: () => Node,
-	size: Size | number,
-	submitText: string
 };
+
+export type ComponentProps = React$Config<Props, DefaultProps>;

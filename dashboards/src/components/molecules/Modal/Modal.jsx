@@ -16,6 +16,7 @@ export class Modal extends Component<Props> {
 		className: '',
 		footerPosition: FOOTER_POSITIONS.LEFT,
 		notice: false,
+		showCancelButton: true,
 		size: SIZES.NORMAL,
 		submitText: 'Сохранить'
 	};
@@ -34,13 +35,23 @@ export class Modal extends Component<Props> {
 
 	prevent = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
 
-	renderDefaultFooter = () => {
-		const {cancelText, onClose, onSubmit, submitText} = this.props;
+	renderCancelButton = () => {
+		const {cancelText, onClose, showCancelButton} = this.props;
 
+		if (showCancelButton) {
+			return (
+				<Button className={styles.cancelButton} onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>{cancelText}</Button>
+			);
+		}
+
+		return null;
+	};
+
+	renderDefaultFooter = () => {
 		return (
 			<Fragment>
-				<Button onClick={onSubmit}>{submitText}</Button>
-				<Button className={styles.cancelButton} onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>{cancelText}</Button>
+				{this.renderSubmitButton()}
+				{this.renderCancelButton()}
 			</Fragment>
 		);
 	};
@@ -78,15 +89,24 @@ export class Modal extends Component<Props> {
 			[styles.footer]: true,
 			[styles.rightFooter]: footerPosition === FOOTER_POSITIONS.RIGHT
 		});
+		const footer = renderFooter ? renderFooter() : this.renderDefaultFooter();
 
 		return (
 			<div className={footerCN}>
-				{renderFooter ? renderFooter() : this.renderDefaultFooter()}
+				{footer}
 			</div>
 		);
 	};
 
 	renderModalHeader = () => <div className={styles.header}>{this.props.header}</div>;
+
+	renderSubmitButton = () => {
+		const {onSubmit, submitText} = this.props;
+
+		return (
+			<Button onClick={onSubmit}>{submitText}</Button>
+		);
+	};
 
 	render () {
 		return root ? createPortal(this.renderModal(), root) : null;

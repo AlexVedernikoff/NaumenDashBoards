@@ -1,25 +1,33 @@
 // @flow
 import Button from 'components/atoms/Button';
+import type {Components, ContextProps} from './types';
+import {DEFAULT_ITEM_SIZE, DEFAULT_MAX_HEIGHT} from './constants';
 import {FixedSizeList} from 'react-window';
 import {getOptionLabel, getOptionValue} from 'components/molecules/Select/helpers';
 import ListOption from 'components/molecules/Select/components/ListOption';
-import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
+import withGetComponents from 'components/HOCs/withGetComponents';
 
-export class List extends PureComponent<Props> {
+export class List extends PureComponent<ContextProps> {
 	static defaultProps = {
+		components: {},
 		getOptionLabel,
 		getOptionValue,
-		itemSize: 32,
-		maxHeight: 250,
+		itemSize: DEFAULT_ITEM_SIZE,
+		maxHeight: DEFAULT_MAX_HEIGHT,
 		multiple: false,
 		searchValue: '',
 		showMore: false,
 		value: null,
 		values: []
 	};
+
+	getComponents = (): Components => this.props.getComponents({
+		ListOption,
+		...this.props.components
+	});
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
@@ -42,6 +50,7 @@ export class List extends PureComponent<Props> {
 
 	renderListItem = (data: Object) => {
 		const {getOptionLabel, multiple, onSelect, options, searchValue, value, values} = this.props;
+		const {ListOption} = this.getComponents();
 		const {index, style} = data;
 		const option = options[index];
 		const optionValue = this.getOptionValue(option);
@@ -109,4 +118,4 @@ export class List extends PureComponent<Props> {
 	}
 }
 
-export default List;
+export default withGetComponents(List);

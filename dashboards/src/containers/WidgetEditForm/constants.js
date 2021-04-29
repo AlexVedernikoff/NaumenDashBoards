@@ -23,6 +23,7 @@ const diagramName: 'diagramName' = 'diagramName';
 const displayMode: 'displayMode' = 'displayMode';
 const displayType: 'displayType' = 'displayType';
 const tickAmount: 'tickAmount' = 'tickAmount';
+const filterId: 'filterId' = 'filterId';
 const fontColor: 'fontColor' = 'fontColor';
 const fontFamily: 'fontFamily' = 'fontFamily';
 const fontSize: 'fontSize' = 'fontSize';
@@ -102,6 +103,7 @@ const FIELDS = {
 	diagramName,
 	displayMode,
 	displayType,
+	filterId,
 	fontColor,
 	fontFamily,
 	fontSize,

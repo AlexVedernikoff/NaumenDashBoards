@@ -16,7 +16,7 @@ import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import React from 'react';
 import type {RenderSourceFieldsetProps, SourceInjectedProps} from './types';
-import SourceFieldset from 'DiagramWidgetEditForm/components/SourceFieldset';
+import SourceFieldset from 'containers/DiagramWidgetEditForm/components/SourceFieldset/SourceFieldset';
 import uuid from 'tiny-uuid';
 
 export const withSource = (Component: React$ComponentType<SourceInjectedProps>) => {
@@ -29,6 +29,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 				parameters: [getDefaultParameter()],
 				source: {
 					descriptor: '',
+					filterId: null,
 					value: null
 				},
 				sourceForCompute: true
@@ -37,11 +38,11 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			setFieldValue(FIELDS.data, data);
 		};
 
-		handleChange = (dataSetIndex: number, newSource: SourceData) => {
+		handleChangeDataSet = (dataSetIndex: number, newSource: SourceData) => {
 			const {setDataFieldValue, values} = this.props;
 			const {source} = values.data[dataSetIndex];
 
-			if (newSource.descriptor !== source.descriptor) {
+			if (newSource.filterId !== source.filterId || newSource.descriptor !== source.descriptor) {
 				this.resetDynamicAttributes(dataSetIndex);
 			}
 
@@ -69,11 +70,11 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 			}
 		};
 
-		handleFetchDynamicAttributes = (dataSetIndex: number, descriptor: string) => {
+		handleFetchDynamicAttributes = (dataSetIndex: number, descriptor: string, filterId: string) => {
 			const {fetchDynamicAttributeGroups, values} = this.props;
 			const {dataKey} = values.data[dataSetIndex];
 
-			fetchDynamicAttributeGroups(dataKey, descriptor);
+			fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
 		};
 
 		handleRemoveSource = (index: number) => {
@@ -143,7 +144,7 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 		renderSourceFieldset = (props: RenderSourceFieldsetProps = {}) => (dataSet: DataSet, index: number) => {
 			const {errors, sources: baseSources, values} = this.props;
 			const {sources = baseSources, usesFilter} = props;
-			const {source, sourceForCompute} = dataSet;
+			const {sourceForCompute} = dataSet;
 			const error = errors[getDataErrorKey(index, FIELDS.source)];
 			const computable = values.data.length > 1 || sourceForCompute;
 			const removable = values.data.length > 1;
@@ -155,14 +156,13 @@ export const withSource = (Component: React$ComponentType<SourceInjectedProps>) 
 					dataSetIndex={index}
 					error={error}
 					key={index}
-					onChange={this.handleChange}
+					onChangeDataSet={this.handleChangeDataSet}
 					onChangeForCompute={this.handleChangeForCompute}
 					onFetchDynamicAttributes={this.handleFetchDynamicAttributes}
 					onRemove={this.handleRemoveSource}
 					removable={removable}
 					sources={sources}
 					usesFilter={usesFilter}
-					value={source}
 				/>
 			);
 		};

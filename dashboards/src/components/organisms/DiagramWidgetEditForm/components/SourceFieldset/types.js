@@ -1,23 +1,19 @@
 // @flow
-import type {DataSet, SourceData} from 'containers/DiagramWidgetEditForm/types';
-import type {DataSourceMap} from 'store/sources/data/types';
+import {MODE} from './constraints';
+import type {Props as ComponentProps} from 'containers/DiagramWidgetEditForm/components/SourceFieldset/types';
 
-export type Props = {
-	computable: boolean,
-	dataSet: DataSet,
-	dataSetIndex: number,
-	error: string,
-	onChange: (dataSetIndex: number, source: SourceData) => void,
-	onChangeForCompute: (dataSetIndex: number, value: boolean) => void,
-	onFetchDynamicAttributes: (dataSetIndex: number, descriptor: string) => void,
-	onRemove: (index: number) => void,
-	removable: boolean,
-	sources: DataSourceMap,
-	usesFilter: boolean,
-	value: SourceData
+export type Props = ComponentProps;
+
+export type ConfirmOption = {
+	notice: boolean,
+	resolve: (boolean) => void,
+	text: string,
+	title: string,
 };
 
 export type State = {
-	showForm: boolean,
-	showList: boolean
+	confirmOption: ?ConfirmOption;
+	errorMessage: ?string,
+	mode: ?$Keys<typeof MODE>,
+	showEditForm: boolean,
 };
