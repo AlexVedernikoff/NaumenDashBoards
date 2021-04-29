@@ -35,7 +35,11 @@ export class MainSelectList extends PureComponent<Props, State> {
 	handleLoadDynamicAttributes = (node: DynamicGroupsNode | null) => {
 		const {dataKey, fetchDynamicAttributes, getOptionValue} = this.props;
 
-		node && fetchDynamicAttributes(dataKey, getOptionValue(node.value));
+		if (node) {
+			const {value} = node;
+
+			fetchDynamicAttributes(dataKey, getOptionValue ? getOptionValue((value: Object)) : value.title);
+		}
 	};
 
 	handleSelectDynAttr = (onSelect: Function) => ({value}: DynamicGroupsNode) => onSelect(value);
@@ -46,8 +50,8 @@ export class MainSelectList extends PureComponent<Props, State> {
 		const {dataKey, dynamicGroups, getOptionLabel, getOptionValue, onSelect, searchValue, source, value} = this.props;
 		const {showDynamicAttributes} = this.state;
 
-		if (source.descriptor && showDynamicAttributes) {
-			const initialSelected = [getOptionValue(value)];
+		if ((source.descriptor || source.filterId) && showDynamicAttributes) {
+			const initialSelected = [getOptionValue(value ?? {})];
 			const {[dataKey]: sourceData = {
 				data: {},
 				loading: false
@@ -74,10 +78,10 @@ export class MainSelectList extends PureComponent<Props, State> {
 	};
 
 	renderDynamicAttributesError = () => {
-		const {descriptor} = this.props.source;
+		const {descriptor, filterId} = this.props.source;
 		const {showDynamicAttributesError} = this.state;
 
-		if (!descriptor && showDynamicAttributesError) {
+		if (!descriptor && !filterId && showDynamicAttributesError) {
 			return (
 				<div className={styles.dynamicError}>
 					Для отображения списка, установите, пожалуйста, параметры фильтрации

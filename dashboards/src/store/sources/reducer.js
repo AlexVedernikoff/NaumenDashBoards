@@ -7,6 +7,7 @@ import data from './data/reducer';
 import dynamicGroups from './dynamicGroups/reducer';
 import linkedData from './linkedData/reducer';
 import refAttributes from './refAttributes/reducer';
+import sourcesFilters from './sourcesFilters/reducer';
 
 const sourcesReducer = combineReducers({
 	attributes,
@@ -15,7 +16,8 @@ const sourcesReducer = combineReducers({
 	data,
 	dynamicGroups,
 	linkedData,
-	refAttributes
+	refAttributes,
+	sourcesFilters
 });
 
 export default sourcesReducer;

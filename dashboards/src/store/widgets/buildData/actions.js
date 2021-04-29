@@ -29,6 +29,7 @@ const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Disp
 		try {
 			const {context, dashboard} = getState();
 			const defaultIgnoreDataLimits = {breakdown: false, parameter: false};
+
 			const data = await window.jsApi.restCallModule(
 				'dashboardDataSet',
 				'getDataForCompositeDiagram',

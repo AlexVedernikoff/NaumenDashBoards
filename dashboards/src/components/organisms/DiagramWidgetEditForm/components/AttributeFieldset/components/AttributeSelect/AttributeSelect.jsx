@@ -1,12 +1,12 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import cn from 'classnames';
+import type {Components, Props, State} from './types';
 import Container from 'components/atoms/Container';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
 import Loader from 'components/atoms/Loader';
-import type {Props, State} from './types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
@@ -23,7 +23,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 		showForm: false
 	};
 
-	getComponents = () => {
+	getComponents = (): $Shape<Components> => {
 		const {Field, ...components} = this.props.components;
 
 		if (!this.components) {

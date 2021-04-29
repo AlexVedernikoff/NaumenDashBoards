@@ -1,0 +1,8 @@
+// @flow
+const DEFAULT_ITEM_SIZE = 32;
+const DEFAULT_MAX_HEIGHT = 250;
+
+export {
+	DEFAULT_ITEM_SIZE,
+	DEFAULT_MAX_HEIGHT
+};

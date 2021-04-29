@@ -50,7 +50,7 @@ export class DiagramWidgetEditForm extends Component<Props> {
 			fetchDynamicAttributeGroups,
 			fetchDynamicAttributes,
 			fetchLinkedDataSources,
-			fetchRefAttributes: fetchRefAttributes,
+			fetchRefAttributes,
 			linkedSources,
 			onAddFieldErrorRef,
 			refAttributes,

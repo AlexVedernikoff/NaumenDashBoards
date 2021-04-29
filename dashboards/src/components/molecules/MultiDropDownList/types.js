@@ -1,5 +1,4 @@
 // @flow
-
 export type Node = {
 	label: string,
 	value: string,

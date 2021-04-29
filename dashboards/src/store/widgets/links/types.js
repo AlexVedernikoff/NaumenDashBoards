@@ -14,6 +14,7 @@ export type DrillDownMixin = {
 	cases?: [],
 	classFqn?: string | null,
 	descriptor?: string,
+	filterId?: string,
 	filters: Array<Filter>,
 	title: string
 };

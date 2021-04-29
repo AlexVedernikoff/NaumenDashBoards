@@ -1,11 +1,6 @@
 // @flow
 import cn from 'classnames';
-import type {
-	Components,
-	Option,
-	Props,
-	State
-} from './types';
+import type {Components, Option, Props, State} from './types';
 import Container from 'components/atoms/Container';
 import {debounce} from 'helpers';
 import {getOptionLabel, getOptionValue, getOptions} from './helpers';
@@ -20,6 +15,7 @@ import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
 import Value from './components/Value';
+import withGetComponents from 'components/HOCs/withGetComponents';
 
 export class Select extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -40,27 +36,12 @@ export class Select extends PureComponent<Props, State> {
 		placeholder: '',
 		value: null
 	};
-	components = this.getExtendedComponents(this.props);
+
 	state = {
 		foundOptions: [],
 		searchValue: '',
 		showMenu: false
 	};
-
-	getExtendedComponents (props: Props): Components {
-		const {components: extendedComponents} = props;
-		const components: Components = {
-			Caret: IconButton,
-			IndicatorsContainer: Container,
-			List,
-			MenuContainer: Container,
-			Message: Container,
-			Value,
-			ValueContainer: Container
-		};
-
-		return extendedComponents ? {...components, ...extendedComponents} : components;
-	}
 
 	fetchOptions = () => {
 		const {fetchOptions, options} = this.props;
@@ -69,6 +50,17 @@ export class Select extends PureComponent<Props, State> {
 			fetchOptions();
 		}
 	};
+
+	getComponents = (): Components => this.props.getComponents({
+		Caret: IconButton,
+		IndicatorsContainer: Container,
+		List: List,
+		MenuContainer: Container,
+		Message: Container,
+		Value,
+		ValueContainer: Container,
+		...this.props.components
+	});
 
 	getFoundOptions = (searchValue: string): Array<Option> => {
 		const {getOptionLabel, options} = this.props;
@@ -108,7 +100,7 @@ export class Select extends PureComponent<Props, State> {
 	hideMenu = () => this.setState({showMenu: false});
 
 	renderIndicators = () => {
-		const {Caret, IndicatorsContainer} = this.components;
+		const {Caret, IndicatorsContainer} = this.getComponents();
 
 		return (
 			<IndicatorsContainer className={styles.indicatorsContainer}>
@@ -120,7 +112,7 @@ export class Select extends PureComponent<Props, State> {
 
 	renderLabel = () => {
 		const {editable, forwardedLabelInputRef, getOptionLabel, placeholder, value} = this.props;
-		const {Value} = this.components;
+		const {Value} = this.getComponents();
 		const label = (value && getOptionLabel(value)) ?? placeholder;
 
 		const valueCN = cn({
@@ -144,27 +136,31 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderList = () => {
-		const {getOptionLabel, getOptionValue, getOptions, options: allOptions, value} = this.props;
+		const {getOptionLabel, getOptionValue, getOptions, loading, options: allOptions, value} = this.props;
 		const {foundOptions, searchValue} = this.state;
-		const {List} = this.components;
+		const {List} = this.getComponents();
 		const options = searchValue ? foundOptions : allOptions;
 
-		return (
-			<List
-				getOptionLabel={getOptionLabel}
-				getOptionValue={getOptionValue}
-				onSelect={this.handleSelect}
-				options={getOptions(options)}
-				searchValue={searchValue}
-				value={value}
-			/>
-		);
+		if (!loading) {
+			return (
+				<List
+					getOptionLabel={getOptionLabel}
+					getOptionValue={getOptionValue}
+					onSelect={this.handleSelect}
+					options={getOptions(options)}
+					searchValue={searchValue}
+					value={value}
+				/>
+			);
+		}
+
+		return null;
 	};
 
 	renderLoader = () => this.props.loading ? <Loader className={styles.loader} size={15} /> : null;
 
 	renderLoadingMessage = () => {
-		const {Message} = this.components;
+		const {Message} = this.getComponents();
 		const {loading, loadingMessage} = this.props;
 
 		return loading && <Message className={styles.message}>{loadingMessage}</Message>;
@@ -172,7 +168,7 @@ export class Select extends PureComponent<Props, State> {
 
 	renderMenu = () => {
 		const {showMenu} = this.state;
-		const {MenuContainer} = this.components;
+		const {MenuContainer} = this.getComponents();
 
 		if (showMenu) {
 			return (
@@ -191,7 +187,7 @@ export class Select extends PureComponent<Props, State> {
 
 	renderNoOptionsMessage = () => {
 		const {loading, noOptionsMessage, options} = this.props;
-		const {Message} = this.components;
+		const {Message} = this.getComponents();
 
 		return !loading && options.length === 0 ? <Message className={styles.message}>{noOptionsMessage}</Message> : null;
 	};
@@ -199,7 +195,7 @@ export class Select extends PureComponent<Props, State> {
 	renderNotFoundMessage = () => {
 		const {loading, notFoundMessage} = this.props;
 		const {foundOptions, searchValue} = this.state;
-		const {Message} = this.components;
+		const {Message} = this.getComponents();
 
 		return !loading && searchValue && foundOptions.length === 0
 			? <Message className={styles.message}>{notFoundMessage}</Message>
@@ -224,10 +220,10 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderValueContainer = () => {
-		const {ValueContainer} = this.components;
+		const {ValueContainer} = this.getComponents();
 
 		return (
-			<ValueContainer className={styles.valueContainer}>
+			<ValueContainer className={styles.valueContainer} onClick={this.handleClick}>
 				{this.renderLabel()}
 				{this.renderIndicators()}
 			</ValueContainer>
@@ -253,4 +249,4 @@ export class Select extends PureComponent<Props, State> {
 	}
 }
 
-export default Select;
+export default withGetComponents(Select);

@@ -1,4 +1,6 @@
 // @flow
+import cn from 'classnames';
+import type {Components, ContextProps as Props, State} from './types';
 import Container from 'components/atoms/Container';
 import {debounce} from 'helpers';
 import IconButton from 'components/atoms/IconButton';
@@ -6,14 +8,15 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
 import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree/types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
-import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import Tree from 'components/molecules/MaterialTreeSelect/components/Tree';
+import withGetComponents from 'components/HOCs/withGetComponents';
 
 export class TreeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
+		className: '',
 		initialSelected: [],
 		name: '',
 		placeholder: 'Выберите значение'
@@ -24,6 +27,12 @@ export class TreeSelect extends PureComponent<Props, State> {
 		showForm: false,
 		showMenu: false
 	};
+
+	getComponents = (): Components => this.props.getComponents({
+		IndicatorsContainer: Container,
+		LabelContainer: Container,
+		...this.props.components
+	});
 
 	getOptionLabel = (option: Object) => {
 		const {getOptionLabel} = this.props;
@@ -58,7 +67,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	handleClick = () => this.setState({showMenu: true});
 
-	handleClickIndicators = (e: Event) => e.stopPropagation();
+	handleClickIndicators = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
 
 	handleRemoveValue = () => {
 		const {name, onSelect} = this.props;
@@ -83,21 +92,28 @@ export class TreeSelect extends PureComponent<Props, State> {
 
 	renderIndicators = () => {
 		const {value} = this.props;
+		const {IndicatorsContainer} = this.getComponents();
 
 		if (value) {
 			return (
-				<div className={styles.indicators} onClick={this.handleClickIndicators}>
+				<IndicatorsContainer className={styles.indicators} onClick={this.handleClickIndicators}>
 					<IconButton icon={ICON_NAMES.EDIT} onClick={this.showForm} />
 					<IconButton icon={ICON_NAMES.REMOVE} onClick={this.handleRemoveValue} />
-				</div>
+				</IndicatorsContainer>
 			);
 		}
 	};
 
 	renderLabel = () => {
-		const label = this.getOptionLabel(this.props.value);
+		const {value} = this.props;
+		const {LabelContainer} = this.getComponents();
+		const labelText = this.getOptionLabel(this.props.value);
 
-		return <div className={styles.label} title={label}>{label}</div>;
+		return (
+			<LabelContainer className={styles.label} title={labelText} value={value}>
+				{labelText}
+			</LabelContainer>
+		);
 	};
 
 	renderLabelEditingForm = () => {
@@ -183,14 +199,16 @@ export class TreeSelect extends PureComponent<Props, State> {
 	};
 
 	render () {
+		const {className} = this.props;
 		const content = this.state.showForm ? this.renderLabelEditingForm() : this.renderSelect();
+		const containerClassName = cn([styles.container, className]);
 
 		return (
-			<div className={styles.container}>
+			<div className={containerClassName}>
 				{content}
 			</div>
 		);
 	}
 }
 
-export default TreeSelect;
+export default withGetComponents(TreeSelect);

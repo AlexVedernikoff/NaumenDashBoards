@@ -37,11 +37,11 @@ const INTEGER_AGGREGATION_OPTIONS = [
 ];
 
 const REF_AGGREGATION_OPTIONS = [
-  ...DEFAULT_AGGREGATION_OPTIONS,
-  {
-    label: 'AVG',
-    value: INTEGER_AGGREGATION.AVG
-  }
+	...DEFAULT_AGGREGATION_OPTIONS,
+	{
+		label: 'AVG',
+		value: INTEGER_AGGREGATION.AVG
+	}
 ];
 
 export {

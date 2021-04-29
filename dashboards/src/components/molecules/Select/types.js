@@ -1,6 +1,7 @@
 // @flow
-import type {ComponentProps as ListProps} from './components/List/types';
 import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButton/types';
+import type {ComponentProps as ListProps} from './components/List/types';
+import type {InjectedProps} from 'components/HOCs/withGetComponents/types';
 import type {InputRef, OnChangeEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props as ValueProps} from './components/Value/types';
@@ -29,16 +30,13 @@ export type Components = {
 	MenuContainer: React$ComponentType<ContainerProps>,
 	Message: React$ComponentType<ContainerProps>,
 	Value: React$ComponentType<ValueProps>,
-	ValueContainer: React$ComponentType<ContainerProps>
+	ValueContainer: React$ComponentType<ContainerProps>,
 };
 
-export type Props = {
+export type DefaultProps = {|
 	className: string,
-	components?: $Shape<Components>,
 	disabled: boolean,
 	editable: boolean,
-	fetchOptions?: () => any,
-	forwardedLabelInputRef?: InputRef,
 	getOptionLabel: (option: Option) => string,
 	getOptions: (options: Array<Option>) => Array<Option>,
 	getOptionValue: (option: Option) => any,
@@ -49,12 +47,21 @@ export type Props = {
 	name: string,
 	noOptionsMessage: string,
 	notFoundMessage: string,
-	onChangeLabel?: OnChangeEvent<string> => void,
-	onSelect?: SelectEvent => void,
 	options: Array<Option>,
 	placeholder: string,
 	value: Value
+|};
+
+export type Props = InjectedProps & {
+	...DefaultProps,
+	components: Components,
+	fetchOptions?: () => any,
+	forwardedLabelInputRef?: InputRef,
+	onChangeLabel?: OnChangeEvent<string> => void,
+	onSelect?: SelectEvent => void,
 };
+
+export type ComponentProps = React$Config<Props, DefaultProps>;
 
 export type State = {
 	foundOptions: Array<Option>,

@@ -53,7 +53,8 @@ export type Source = {
 
 export type SourceData = {
 	descriptor: string,
-	value: Source
+	filterId?: string | null,
+	value: Source,
 };
 
 export type Group = {

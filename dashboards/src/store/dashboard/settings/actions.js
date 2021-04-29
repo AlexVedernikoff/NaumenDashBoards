@@ -9,10 +9,10 @@ import DiagramWidget from 'store/widgets/data/templates/DiagramWidget';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchAllBuildData} from 'store/widgets/buildData/actions';
 import {getContext, getEditableParam, getMetaCLass, getUserData, setUserData, switchDashboard} from 'store/context/actions';
+import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLayoutMode} from 'helpers';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
-import isMobile from 'ismobilejs';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState} from 'store/actions';
@@ -96,14 +96,8 @@ const initStorageSettings = () => (dispatch: Dispatch, getState: GetState) => {
  * @returns {ThunkAction}
  */
 const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {context, dashboard} = getState();
-	const {contentCode, subjectUuid: classFqn} = context;
-	const payload = {
-		classFqn,
-		contentCode,
-		isMobile: isMobile().any,
-		isPersonal: dashboard.settings.personal
-	};
+	const state = getState();
+	const payload = getDashboardDescription(state);
 	const {
 		autoUpdate,
 		customColorsSettings,

@@ -1,5 +1,4 @@
 // @flow
-
 export type Props = {
 	duration: number,
 	onChangeDuration: (duration: number) => any,
