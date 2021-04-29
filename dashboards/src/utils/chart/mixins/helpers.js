@@ -254,7 +254,10 @@ const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement,
 
 		const columnHeight = height / labels.length;
 
-		overlapped = !!labels.find(label => columnHeight <= label.split(' ').length * 12);
+		overlapped = !!labels.find(label => {
+			const lines = label.split(' ').length;
+			return columnHeight <= (lines * AXIS_FONT_SIZE + (lines - 1) * 0.5 * AXIS_FONT_SIZE);
+		});
 	} else {
 		if (showLegend && (legendPosition === left || legendPosition === right)) {
 			width -= getLegendWidth(container, legendPosition);
