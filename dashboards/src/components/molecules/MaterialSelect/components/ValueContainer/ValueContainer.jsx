@@ -14,15 +14,17 @@ export class ValueContainer extends Component<Props> {
 
 	renderCaret = () => <Icon className={styles.caret} name={ICON_NAMES.CARET} />;
 
-	renderPlaceholder = () => {
+	renderPlaceholder = (): React$Node => {
 		const {getOptionLabel, placeholder, value} = this.props;
 
 		if (value && placeholder && getOptionLabel(value)) {
 			return <div className={styles.placeholder}>{placeholder}</div>;
 		}
+
+		return null;
 	};
 
-	renderValue = () => {
+	renderValue = (): React$Node => {
 		const {editableLabel, forwardedInputRef, getOptionLabel, maxLabelLength, onChangeLabel, placeholder, value} = this.props;
 		const inputCN = cn({
 			[styles.input]: true,

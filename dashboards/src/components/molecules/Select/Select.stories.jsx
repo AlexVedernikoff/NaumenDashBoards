@@ -1,6 +1,7 @@
 // @flow
 import {action} from '@storybook/addon-actions';
 import Container from 'components/atoms/Container';
+import {DEFAULT_PROPS} from './constants';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React from 'react';
 import Select from './Select';
@@ -33,7 +34,7 @@ const Template = args => {
 export const Simple = Template.bind({});
 
 Simple.args = {
-	...Select.defaultProps,
+	...DEFAULT_PROPS,
 	options: [
 		{
 			label: 'value1',
@@ -68,7 +69,7 @@ const renderTransparentValueContainer = (props: ContainerProps) => {
 };
 
 Transparent.args = {
-	...Select.defaultProps,
+	...DEFAULT_PROPS,
 	components: {
 		ValueContainer: renderTransparentValueContainer
 	},
@@ -99,7 +100,7 @@ export const BigList = BigListTemplate.bind({});
 const bigOptionsList = Array.from(Array(1000)).map((e, i) => ({label: `Option ${i}`, value: i}));
 
 BigList.args = {
-	...Select.defaultProps,
+	...DEFAULT_PROPS,
 	options: bigOptionsList,
 	placeholder: 'Выберите элемент',
 	value: null
