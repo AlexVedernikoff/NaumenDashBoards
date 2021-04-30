@@ -1,5 +1,6 @@
 // @flow
 import {deepClone} from 'helpers';
+import {DEFAULT_WIDGET_LAYOUT_SIZE} from './constants';
 import {GRID_PROPS} from 'components/organisms/DashboardContent/constants';
 import type {
 	Layout,
@@ -36,8 +37,8 @@ const getLastY = (layouts: Array<Layout>, whitelist?: Array<string>): number => 
  * @param {number} w - ширина виджета
  * @returns {Layout}
  */
-const createLayout = (i: string, y: number, w: number = 4): Layout => ({
-	h: 4,
+const createLayout = (i: string, y: number, w: number = DEFAULT_WIDGET_LAYOUT_SIZE.w): Layout => ({
+	h: DEFAULT_WIDGET_LAYOUT_SIZE.h,
 	i,
 	w,
 	x: 0,
