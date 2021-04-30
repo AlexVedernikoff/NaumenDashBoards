@@ -1,10 +1,11 @@
 // @flow
 import cn from 'classnames';
-import {DEFAULT_WIDGET_LAYOUT_SIZE, TABS} from './constants';
+import {DEFAULT_WIDGET_LAYOUT_SIZE} from 'store/dashboard/layouts/constants';
 import type {Node} from 'react';
 import type {Props, State, Tab} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
+import {TABS} from './constants';
 import WidgetForm from 'components/templates/WidgetForm';
 
 export class Form extends Component<Props, State> {

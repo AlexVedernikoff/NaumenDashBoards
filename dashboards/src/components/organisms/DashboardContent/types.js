@@ -1,4 +1,5 @@
 // @flow
+import type {Layout} from 'store/dashboard/layouts/types';
 
 export type ContextMenu = {
 	x: number,
@@ -7,6 +8,7 @@ export type ContextMenu = {
 
 export type State = {
 	contextMenu: ContextMenu | null,
+	lastWebLGLayouts: ?Layout[],
 	selectedWidget: string,
 	swipedPanel: boolean,
 	width: number | null

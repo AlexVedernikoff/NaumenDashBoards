@@ -9,12 +9,6 @@ const TABS = {
 	STYLE
 };
 
-const DEFAULT_WIDGET_LAYOUT_SIZE = {
-	h: 4,
-	w: 4
-};
-
 export {
-	DEFAULT_WIDGET_LAYOUT_SIZE,
 	TABS
 };

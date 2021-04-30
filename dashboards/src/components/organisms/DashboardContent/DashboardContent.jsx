@@ -5,6 +5,7 @@ import ContextMenu from 'components/molecules/ContextMenu';
 import DashboardPanel from 'components/organisms/DashboardPanel';
 import {debounce} from 'helpers';
 import type {DivRef} from 'components/types';
+import {generateWebSMLayout, isEqualsLayouts} from './helpers';
 import {getLayoutWidgets} from 'store/widgets/helpers';
 import {GRID_PROPS, gridRef} from './constants';
 import isMobile from 'ismobilejs';
@@ -26,6 +27,7 @@ export class DashboardContent extends Component<Props, State> {
 	gridContainerRef: DivRef = createRef();
 	state = {
 		contextMenu: null,
+		lastWebLGLayouts: null,
 		selectedWidget: '',
 		swipedPanel: false,
 		width: null
@@ -46,13 +48,19 @@ export class DashboardContent extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {editableDashboard, user} = this.props;
+		const {editableDashboard, layoutMode, layouts, user} = this.props;
 
 		if (editableDashboard && user.role === USER_ROLES.REGULAR) {
 			window.addEventListener('beforeunload', (event) => {
 				event.preventDefault();
 				event.returnValue = '';
 			});
+		}
+
+		if (layoutMode === LAYOUT_MODE.WEB) {
+			const {lg} = layouts;
+
+			this.setState({lastWebLGLayouts: lg});
 		}
 	}
 
@@ -68,6 +76,13 @@ export class DashboardContent extends Component<Props, State> {
 
 	handleLayoutChange = (layout: Layout, layouts: Layouts) => {
 		const {changeLayouts, layoutMode} = this.props;
+		const {lastWebLGLayouts} = this.state;
+		const {lg, sm} = layouts;
+
+		if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
+			layouts.sm = generateWebSMLayout(lg, sm);
+			this.setState({lastWebLGLayouts: lg});
+		}
 
 		changeLayouts({
 			layoutMode,
