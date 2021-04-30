@@ -1,5 +1,6 @@
 // @flow
 import {combineReducers} from 'redux';
+import commonDialogs from './commonDialogs/reducer';
 import context from './context/reducer';
 import customGroups from './customGroups/reducer';
 import dashboard from './dashboard/reducer';
@@ -11,6 +12,7 @@ import users from './users/reducer';
 import widgets from './widgets/reducer';
 
 const appReducer = combineReducers({
+	commonDialogs,
 	context,
 	customGroups,
 	dashboard,

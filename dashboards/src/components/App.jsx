@@ -1,5 +1,6 @@
 // @flow
 import 'styles/app.less';
+import CommonDialogs from 'containers/CommonDialogs';
 import DashboardContent from 'containers/DashboardContent';
 import DashboardHeader from 'containers/DashboardHeader';
 import React from 'react';
@@ -9,8 +10,10 @@ import ToastContainer from 'containers/Toast';
 export const App = () => (
 	<Startup>
 		<ToastContainer />
-		<DashboardHeader />
-		<DashboardContent />
+		<CommonDialogs>
+			<DashboardHeader />
+			<DashboardContent />
+		</CommonDialogs>
 	</Startup>
 );
 

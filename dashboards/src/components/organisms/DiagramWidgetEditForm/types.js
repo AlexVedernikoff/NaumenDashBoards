@@ -43,7 +43,8 @@ export type ContextProps = {|
 	setDataFieldValue: SetDataFieldValue,
 	setFieldValue: SetFieldValue,
 	sources: DataSourceMap,
-	values: Values
+	values: Values,
+	widget: Values
 |};
 
 export type OptionsTabProps = {|

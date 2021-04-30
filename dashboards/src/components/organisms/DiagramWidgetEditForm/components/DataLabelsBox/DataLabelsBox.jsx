@@ -1,14 +1,32 @@
 // @flow
 import Checkbox from 'components/atoms/Checkbox';
+import {compose} from 'redux';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import FormField from 'components/molecules/FormField';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
+import withForm from 'DiagramWidgetEditForm/withForm';
 import {withStyleFormBuilder} from 'DiagramWidgetEditForm/builders';
 
 export class DataLabelsBox extends PureComponent<Props> {
+	componentDidUpdate (prevProps: Props) {
+		const {handleBoolChange, values, widget} = this.props;
+		const {widget: prevWidget} = prevProps;
+
+		// SMRMEXT-11965 после изменения dataLabels.show в виджете редакса, сбрасываем его и в форме редактирования
+		if (!!widget.dataLabels && !!prevWidget.dataLabels) {
+            const {show: curShow} = widget.dataLabels;
+			const {show: prevShow} = prevWidget.dataLabels;
+			const {show: valueShow} = values.dataLabels;
+
+			if (curShow !== prevShow && curShow !== valueShow) {
+                handleBoolChange({name: FIELDS.show, value: valueShow});
+			}
+		}
+	}
+
 	renderShowShadowInput = () => {
 		const {data, handleBoolChange} = this.props;
 		const {showShadow} = data;
@@ -39,4 +57,4 @@ export class DataLabelsBox extends PureComponent<Props> {
 	}
 }
 
-export default withStyleFormBuilder(DataLabelsBox);
+export default compose(withForm, withStyleFormBuilder)(DataLabelsBox);

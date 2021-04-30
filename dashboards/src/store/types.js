@@ -1,4 +1,5 @@
 // @flow
+import type {CommonDialogsState} from './commonDialogs/types';
 import type {ContextState} from './context/types';
 import type {CustomGroupsState} from './customGroups/types';
 import type {DashboardState} from './dashboard/types';
@@ -25,6 +26,7 @@ export type Action = {
 };
 
 export type AppState = {
+	commonDialogs: CommonDialogsState,
 	context: ContextState,
 	customGroups: CustomGroupsState,
 	dashboard: DashboardState,

@@ -2,25 +2,24 @@
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget, SetWidgetWarning, ValidateWidgetToCopyResult} from './types';
 import {batch} from 'react-redux';
-import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
+import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
+import {confirmDialog} from 'store/commonDialogs/actions';
 import {createFilterContext, getFilterContext, getParams, parseResponseErrorText} from 'store/helpers';
 import {createToast} from 'store/toasts/actions';
 import {deepClone, isObject} from 'helpers';
+import {DEFAULT_BUTTONS} from 'components/molecules/Modal/constants';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
-import {
-	generateClearedWidgetCustomFilters,
-	generateUpdatedWidgetCustomFilters,
-	getCustomColorsSettingsKey
-} from './helpers';
+import {generateClearedWidgetCustomFilters, generateUpdatedWidgetCustomFilters, getCustomColorsSettingsKey} from './helpers';
 import {getAllWidgets} from 'src/store/widgets/data/selectors';
+import {getWidgetsBuildData} from './selectors';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {refreshCustomGroups} from 'store/customGroups/actions';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
+import {WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Добавляет новый виджет
@@ -28,6 +27,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  */
 const checkWidgetsCount = () => (dispatch: Dispatch, getState: GetState): void => {
 	const {map} = getState().widgets.data;
+	const {DASHBOARD_WIDGET_COUNT_LIMIT: LIMIT} = LIMITS;
 
 	if (Object.keys(map).length >= LIMIT) {
 		throw dispatch(createToast({
@@ -92,6 +92,7 @@ const saveWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayouts());
 		dispatch(fetchBuildData(widget));
+		dispatch(checkWidgetDataLimits(widget));
 	} catch (e) {
 		validationErrors = getErrors(e);
 
@@ -99,6 +100,50 @@ const saveWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 	}
 
 	return validationErrors;
+};
+
+/**
+ * Проверяет и согласовывает ограничения и вид отображения виджета
+ * @param {AnyWidget} widget - виджет для проверки; данные должны быть загружены в виджет предварительно
+ * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок и согласований с пользователем.
+ */
+const checkWidgetDataLimits = (widget: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	if (widget.type in WIDGET_SETS.AXIS) {
+		if (widget.dataLabels && widget.dataLabels.show) {
+			const state = getState();
+			const buildData = getWidgetsBuildData(state);
+			const {data} = buildData[widget.id];
+			const sumDataValues = data?.series.reduce((sum, s) => sum + s.data.length, 0) ?? 0;
+
+			// SMRMEXT-11660 (SMRMEXT-11965) - если количество меток больше 250 откоючаем отображение меток
+			if (sumDataValues > LIMITS.DATA_LABELS_LIMIT) {
+				if (widget.dataLabels) {
+					const updatedWidgetData: Object = {
+						...widget,
+						dataLabels: {...widget.dataLabels, show: false}
+					};
+
+					dispatch(updateWidget(updatedWidgetData));
+				}
+
+				const show = await dispatch(
+					confirmDialog(
+						'Внимание',
+						'Метки данных были отключены из-за большего кол-ва данных, включить? Внимание - это может замедлить работу дашбордов.',
+						{
+							defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON
+						}
+					)
+				);
+
+				if (widget.dataLabels) {
+					const dataLabels = {...widget.dataLabels, show};
+
+					dispatch(editWidgetChunkData(widget, {dataLabels}, false));
+				}
+			}
+		}
+	}
 };
 
 /**
