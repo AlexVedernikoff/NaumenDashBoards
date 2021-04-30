@@ -29,8 +29,8 @@ const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Disp
 
 		try {
 			const {context, dashboard} = getState();
-			const defaultIgnoreDataLimits = {breakdown: false, parameter: false};
 			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
+			const ignoreDataLimits = {breakdown: false, parameter: false, ...(widget.ignoreDataLimits || {})};
 
 			const data = await window.jsApi.restCallModule(
 				'dashboardDataSet',
@@ -38,7 +38,7 @@ const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Disp
 				dashboard.settings.code,
 				widget.id,
 				context.subjectUuid,
-				{...defaultIgnoreDataLimits, ...(widget.ignoreDataLimits || defaultIgnoreDataLimits)},
+				ignoreDataLimits,
 				widgetFilters
 			);
 

@@ -48,9 +48,6 @@ const WIDGETS_EVENTS = {
 	WIDGET_SET_WARNING
 };
 
-// Лимит виджетов на дашборде
-const LIMIT = 30;
-
 // Типы виджетов
 const BAR: 'BAR' = 'BAR';
 const BAR_STACKED: 'BAR_STACKED' = 'BAR_STACKED';
@@ -295,6 +292,17 @@ const COPY_WIDGET_ERRORS = {
 	HAS_SUBJECT_FILTERS
 };
 
+// Свыше - предлагаем отключить отображение ???
+const DATA_LABELS_LIMIT = 250;
+
+// Лимит виджетов на дашборде
+const DASHBOARD_WIDGET_COUNT_LIMIT = 30;
+
+const LIMITS = {
+	DASHBOARD_WIDGET_COUNT_LIMIT,
+	DATA_LABELS_LIMIT
+};
+
 export {
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
@@ -314,7 +322,7 @@ export {
 	FONT_SIZE_OPTIONS,
 	FONT_STYLES,
 	HEADER_POSITIONS,
-	LIMIT,
+	LIMITS,
 	MAX_FONT_SIZE,
 	RANGES_TYPES,
 	SORTING_TYPES,

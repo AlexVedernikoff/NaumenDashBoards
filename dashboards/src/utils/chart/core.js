@@ -1,7 +1,7 @@
 // @flow
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, WidgetType} from 'store/widgets/data/types';
-import {CHART_TYPES, DATA_LABELS_LIMIT, LOCALES} from './constants';
+import {CHART_TYPES, LOCALES} from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'helpers';
@@ -42,14 +42,6 @@ const resolveMixin = (widget: Chart, data: DiagramBuildData, container: HTMLDivE
 const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAxisChart: boolean) => {
 	const {fontColor, fontFamily, fontSize, show, showShadow} = settings;
 	const {series} = data;
-	let dataLabelsLimitIsExceeded = false;
-
-	if (isAxisChart) {
-		const sumDataValues = series.reduce((sum, s) => sum + s.data.length, 0);
-
-		dataLabelsLimitIsExceeded = sumDataValues > DATA_LABELS_LIMIT;
-	}
-
 	const options: Object = {
 		background: {
 			enabled: false
@@ -57,7 +49,7 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
 		dropShadow: {
 			enabled: false
 		},
-		enabled: show && !dataLabelsLimitIsExceeded,
+		enabled: show,
 		style: {
 			colors: new Array(series.length).fill(fontColor),
 			fontFamily,

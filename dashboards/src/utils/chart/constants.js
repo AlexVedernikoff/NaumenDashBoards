@@ -14,8 +14,6 @@ const CHART_TYPES = {
 	pie
 };
 
-const DATA_LABELS_LIMIT = 250;
-
 const bottom: 'bottom' = 'bottom';
 const left: 'left' = 'left';
 const right: 'right' = 'right';
@@ -106,7 +104,6 @@ const LEGEND_HEIGHT = 100;
 export {
 	AXIS_FONT_SIZE,
 	CHART_TYPES,
-	DATA_LABELS_LIMIT,
 	DEFAULT_COLORS,
 	DEFAULT_CHART_SETTINGS,
 	DEFAULT_DATA_LABEL_COLOR,

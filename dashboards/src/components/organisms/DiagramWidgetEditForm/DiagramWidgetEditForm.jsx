@@ -39,7 +39,8 @@ export class DiagramWidgetEditForm extends Component<Props> {
 			setDataFieldValue,
 			setFieldValue,
 			sources,
-			values
+			values,
+			widget
 		} = this.props;
 
 		return {
@@ -57,7 +58,8 @@ export class DiagramWidgetEditForm extends Component<Props> {
 			setDataFieldValue,
 			setFieldValue,
 			sources,
-			values
+			values,
+			widget
 		};
 	};
 

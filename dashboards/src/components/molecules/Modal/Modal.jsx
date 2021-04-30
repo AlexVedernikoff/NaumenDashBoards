@@ -2,7 +2,7 @@
 import Button from 'components/atoms/Button';
 import cn from 'classnames';
 import {createPortal} from 'react-dom';
-import {FOOTER_POSITIONS, SIZES} from './constants';
+import {DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES} from './constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import {root} from 'app.constants';
@@ -14,6 +14,7 @@ export class Modal extends Component<Props> {
 		cancelText: 'Отмена',
 		children: null,
 		className: '',
+		defaultButton: DEFAULT_BUTTONS.SUBMIT_BUTTON,
 		footerPosition: FOOTER_POSITIONS.LEFT,
 		notice: false,
 		showCancelButton: true,
@@ -36,11 +37,12 @@ export class Modal extends Component<Props> {
 	prevent = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
 
 	renderCancelButton = () => {
-		const {cancelText, onClose, showCancelButton} = this.props;
+		const {cancelText, defaultButton, onClose, showCancelButton} = this.props;
+		const variant = defaultButton === DEFAULT_BUTTONS.CANCEL_BUTTON ? BUTTON_VARIANTS.INFO : BUTTON_VARIANTS.ADDITIONAL;
 
 		if (showCancelButton) {
 			return (
-				<Button className={styles.cancelButton} onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>{cancelText}</Button>
+				<Button className={styles.cancelButton} onClick={onClose} variant={variant}>{cancelText}</Button>
 			);
 		}
 
@@ -101,10 +103,11 @@ export class Modal extends Component<Props> {
 	renderModalHeader = () => <div className={styles.header}>{this.props.header}</div>;
 
 	renderSubmitButton = () => {
-		const {onSubmit, submitText} = this.props;
+		const {defaultButton, onSubmit, submitText} = this.props;
+		const variant = defaultButton === DEFAULT_BUTTONS.SUBMIT_BUTTON ? BUTTON_VARIANTS.INFO : BUTTON_VARIANTS.ADDITIONAL;
 
 		return (
-			<Button onClick={onSubmit}>{submitText}</Button>
+			<Button onClick={onSubmit} variant={variant}>{submitText}</Button>
 		);
 	};
 

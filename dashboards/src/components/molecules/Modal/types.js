@@ -1,15 +1,17 @@
 // @flow
-import {FOOTER_POSITIONS, SIZES} from './constants';
+import {DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES} from './constants';
 import type {Node} from 'react';
 
 type Size = $Keys<typeof SIZES>;
 
 type FooterPosition = $Keys<typeof FOOTER_POSITIONS>;
+type DefaultButtons = $Keys<typeof DEFAULT_BUTTONS>;
 
 export type DefaultProps = {|
 	cancelText: string,
 	children: ?Node,
 	className: string,
+	defaultButton: DefaultButtons,
 	footerPosition: FooterPosition,
 	notice: boolean,
 	showCancelButton: boolean,

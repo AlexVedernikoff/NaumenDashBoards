@@ -4,7 +4,7 @@ import type {LayoutMode} from 'store/dashboard/settings/types';
 import type NewWidget from 'store/widgets/data/NewWidget';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
-import type {WidgetMap} from 'store/widgets/data/types';
+import type {ValidateWidgetToCopyResult, WidgetMap} from 'store/widgets/data/types';
 
 export type ConnectedProps = {|
 	dashboards: DashboardsState,
@@ -21,7 +21,14 @@ export type ConnectedFunctions = {|
 	validateWidgetToCopy: (dashboardId: string, widgetId: string) => ThunkAction
 |};
 
+export type DispatchedConnectedFunctions = {|
+	addWidget: (widget: NewWidget) => void,
+	copyWidget: (dashboardId: string, widgetId: string, ignoreCustomGroups?: boolean) => Promise<void>,
+	fetchDashboards: () => void,
+	validateWidgetToCopy: (dashboardId: string, widgetId: string) => Promise<ValidateWidgetToCopyResult>
+|};
+
 export type Props = {
-	...ConnectedFunctions,
+	...DispatchedConnectedFunctions,
 	...ConnectedProps
 };
