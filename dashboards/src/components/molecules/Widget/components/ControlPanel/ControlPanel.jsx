@@ -15,6 +15,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from 'components/atoms/IconButton/constants';
+import WidgetFilterOptionsButton from './components/WidgetFilterOptionsButton';
 
 export class ControlPanel extends PureComponent<Props, State> {
 	state = {
@@ -35,10 +36,22 @@ export class ControlPanel extends PureComponent<Props, State> {
 		}
 	};
 
+	handleCallWidgetFilters = (dataSetIndex: number, filterIndex: number) => {
+		const {callWidgetFilters, widget} = this.props;
+
+		callWidgetFilters(widget, dataSetIndex, filterIndex);
+	};
+
 	handleChangeDisplayMode = ({value}: Object) => {
 		const {editWidgetChunkData, widget} = this.props;
 
 		editWidgetChunkData(widget, {displayMode: value});
+	};
+
+	handleClearWidgetFilters = () => {
+		const {clearWidgetFilters, widget} = this.props;
+
+		clearWidgetFilters(widget);
 	};
 
 	handleClick = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
@@ -251,6 +264,17 @@ export class ControlPanel extends PureComponent<Props, State> {
 		);
 	};
 
+	renderWidgetFilterOptionsButton = () => {
+		const {widget} = this.props;
+		return (
+			<WidgetFilterOptionsButton
+				onCallWidgetFilters={this.handleCallWidgetFilters }
+				onClearWidgetFilters={this.handleClearWidgetFilters}
+				widget={widget}
+			/>
+		);
+	};
+
 	render () {
 		const {className} = this.props;
 
@@ -259,6 +283,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 				{this.renderNavigationButton()}
 				{this.renderChangeDisplayModeButton()}
 				{this.renderEditButton()}
+				{this.renderWidgetFilterOptionsButton()}
 				{this.renderSubmenuButton()}
 			</div>
 		);

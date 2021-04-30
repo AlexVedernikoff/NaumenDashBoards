@@ -182,6 +182,8 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderControlPanel = () => {
 		const {
+			callWidgetFilters,
+			clearWidgetFilters,
 			data: widget,
 			editWidgetChunkData,
 			isEditable,
@@ -194,7 +196,9 @@ export class Widget extends PureComponent<Props, State> {
 		if (!isNew) {
 			return (
 				<ControlPanel
+					callWidgetFilters={callWidgetFilters}
 					className={styles.controlPanel}
+					clearWidgetFilters={clearWidgetFilters}
 					editWidgetChunkData={editWidgetChunkData}
 					isEditable={isEditable}
 					onDrillDown={onDrillDown}

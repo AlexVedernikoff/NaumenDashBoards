@@ -51,10 +51,17 @@ export type Source = {
 	value: string
 };
 
+export type CustomFilter = {
+	attributes: Attribute[],
+	descriptor?: string,
+	label: string,
+};
+
 export type SourceData = {
 	descriptor: string,
 	filterId?: string | null,
 	value: Source,
+	widgetFilterOptions?: CustomFilter[]
 };
 
 export type Group = {
@@ -443,6 +450,13 @@ export type TextWidget = {
 	variables: Variables
 };
 
+export type DataSet =
+	| AxisData
+	| CircleData
+	| ComboData
+	| SummaryData
+	| TableData;
+
 export type Chart =
 	| AxisWidget
 	| CircleWidget
@@ -476,6 +490,10 @@ export type SetWidgetWarning = {
 	id: string,
 	message: string,
 };
+
+export type ClearWidgetFilters = (widget: Widget) => ThunkAction;
+
+export type CallWidgetFilters = (widget: Widget, dataSetIndex: number, filterIndex: number) => ThunkAction;
 
 export type AddWidget = {
 	payload: NewWidget,

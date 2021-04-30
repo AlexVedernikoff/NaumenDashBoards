@@ -4,8 +4,9 @@ import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/const
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getSummaryLayoutSize} from './helpers';
+import OptionsTab from 'DiagramWidgetEditForm/components/CommonOptionsTab';
+import type {OptionsTabProps, ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import ParamsTab from './components/ParamsTab';
-import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import type {State} from './types';
 import StyleTab from './components/StyleTab';
@@ -65,6 +66,8 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 		};
 	};
 
+	renderOptionsTab = (props: OptionsTabProps) => <OptionsTab {...props} />;
+
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
@@ -74,6 +77,7 @@ export class SummaryForm extends Component<TypedFormProps, State> {
 
 		return this.props.render({
 			layoutSize,
+			renderOptionsTab: this.renderOptionsTab,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

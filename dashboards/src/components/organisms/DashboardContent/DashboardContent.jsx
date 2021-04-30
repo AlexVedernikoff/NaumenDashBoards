@@ -252,7 +252,9 @@ export class DashboardContent extends Component<Props, State> {
 	renderWidget = (widget: WidgetType) => {
 		const {
 			buildData,
+			callWidgetFilters,
 			clearWarningMessage,
+			clearWidgetFilters,
 			drillDown,
 			editWidgetChunkData,
 			editable,
@@ -273,7 +275,9 @@ export class DashboardContent extends Component<Props, State> {
 		return (
 			<Widget
 				buildData={buildData[id]}
+				callWidgetFilters={callWidgetFilters}
 				clearWarningMessage={clearWarningMessage}
+				clearWidgetFilters={clearWidgetFilters}
 				data={widget}
 				editWidgetChunkData={editWidgetChunkData}
 				fetchBuildData={fetchBuildData}

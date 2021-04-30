@@ -8,7 +8,7 @@ import type {SourceData} from 'containers/DiagramWidgetEditForm/types';
 import SourceFieldset from 'DiagramWidgetEditForm/components/SourceFieldset';
 
 export class SourceFieldsetContainer extends Component<Props> {
-	handlerChangeDataSet = (dataSetIndex: number, source: SourceData) => {
+	handleChangeDataSet = (dataSetIndex: number, source: SourceData) => {
 		const {dataSet: {source: oldDataSet}, fetchSourcesFilters, onChangeDataSet} = this.props;
 		const newClassFqn = source.value?.value ?? null;
 		const oldClassFqn = oldDataSet.value?.value ?? null;
@@ -46,7 +46,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 		return (
 			<SourceFieldset
 				{...this.props}
-				onChangeDataSet={this.handlerChangeDataSet}
+				onChangeDataSet={this.handleChangeDataSet}
 				openFilterForm={this.setContext}
 			/>
 		);

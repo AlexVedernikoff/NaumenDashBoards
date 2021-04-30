@@ -4,8 +4,9 @@ import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'components/organism
 import {DEFAULT_TOP_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
+import OptionsTab from 'DiagramWidgetEditForm/components/CommonOptionsTab';
+import type {OptionsTabProps, ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import ParamsTab from './components/ParamsTab';
-import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import StyleTab from './components/StyleTab';
 import type {TableData, TableWidget, Widget} from 'store/widgets/data/types';
@@ -88,12 +89,15 @@ export class TableForm extends Component<TypedFormProps> {
 		};
 	};
 
+	renderOptionsTab = (props: OptionsTabProps) => <OptionsTab {...props} />;
+
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
 		return this.props.render({
+			renderOptionsTab: this.renderOptionsTab,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

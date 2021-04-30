@@ -3,18 +3,24 @@ import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store
 import type {AnyWidget, SetWidgetWarning, ValidateWidgetToCopyResult} from './types';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMIT, WIDGETS_EVENTS} from './constants';
+import {createFilterContext, getFilterContext, getParams, parseResponseErrorText} from 'store/helpers';
 import {createToast} from 'store/toasts/actions';
+import {deepClone, isObject} from 'helpers';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {editDashboard} from 'store/dashboard/settings/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
+import {
+	generateClearedWidgetCustomFilters,
+	generateUpdatedWidgetCustomFilters,
+	getCustomColorsSettingsKey
+} from './helpers';
 import {getAllWidgets} from 'src/store/widgets/data/selectors';
-import {getCustomColorsSettingsKey} from './helpers';
-import {getParams, parseResponseErrorText} from 'store/helpers';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
-import {isObject} from 'helpers';
+import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {refreshCustomGroups} from 'store/customGroups/actions';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Добавляет новый виджет
@@ -123,6 +129,83 @@ const editWidgetChunkData = (widget: AnyWidget, chunkData: Object, refreshData: 
 		dispatch(recordSaveError());
 	}
 };
+
+/**
+ * Сохраняет изменение части данных виджета
+ * @param {AnyWidget} widget - данные виджета
+ * @param {boolean} refreshData - указывает на необходимость обновить данные для построения
+ * @returns {ThunkAction}
+ */
+const clearWidgetFilters = (widget: AnyWidget, refreshData: boolean = true): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	try {
+		if (widget.type !== WIDGET_TYPES.TEXT) {
+			const {data} = widget;
+
+			if (data && Array.isArray(data)) {
+				const data = generateClearedWidgetCustomFilters(widget);
+				const state = getState();
+				const isPersonal = isPersonalDashboard(state);
+
+				if (isPersonal) {
+					dispatch(editWidgetChunkData(widget, {data}, refreshData));
+				} else {
+					const updatedWidget = deepClone({...widget, data});
+
+					dispatch(updateWidget(updatedWidget));
+					dispatch(fetchBuildData(updatedWidget));
+				}
+			}
+		}
+	} catch (e) {
+		dispatch(recordSaveError());
+	}
+};
+
+/**
+ * Установка фильтров виджета через вызов формы фильтрации
+ *
+ * @param {AnyWidget} widget - виджет
+ * @param {number} dataSetIndex - индекс источника
+ * @param {number} filterIndex -  индекс фильтра
+ * @returns {ThunkAction}
+ */
+const callWidgetFilters = (widget: AnyWidget, dataSetIndex: number, filterIndex: number): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		try {
+			if (widget.type !== WIDGET_TYPES.TEXT) {
+				const dataSet = widget.data[dataSetIndex];
+				const {source: {value}} = dataSet;
+				const {value: classFqn} = value;
+				const filter = dataSet.source.widgetFilterOptions?.[filterIndex];
+
+				if (filter) {
+					const {descriptor} = filter;
+					const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
+
+					if (context) {
+						context['attrCodes'] = filter.attributes.map(attr => `${attr.metaClassFqn}@${attr.code}`);
+						const {serializedContext} = await window.jsApi.commands.filterForm(context, true);
+
+						const state = getState();
+						const isPersonal = isPersonalDashboard(state);
+						const data = generateUpdatedWidgetCustomFilters(widget, dataSetIndex, filterIndex, serializedContext);
+
+						if (isPersonal) {
+							dispatch(editWidgetChunkData(widget, {data}, true));
+						} else {
+							const updatedWidget = deepClone({...widget, data});
+
+							dispatch(updateWidget(updatedWidget));
+							dispatch(fetchBuildData(updatedWidget));
+						}
+					}
+				}
+			}
+		} catch (ex) {
+			console.error('Ошибка формы фильтрации', ex);
+		}
+	};
 
 /**
  * Создает новый виджет
@@ -429,6 +512,7 @@ const updateWidget = (payload: AnyWidget) => ({
 export {
 	addWidget,
 	cancelForm,
+	clearWidgetFilters,
 	copyWidget,
 	clearWarningMessage,
 	createWidget,
@@ -444,5 +528,6 @@ export {
 	setUseGlobalChartSettings,
 	setWidgets,
 	updateWidget,
-	validateWidgetToCopy
+	validateWidgetToCopy,
+	callWidgetFilters
 };

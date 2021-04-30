@@ -12,8 +12,9 @@ import {extend} from 'helpers';
 import {FIELDS} from 'containers/WidgetEditForm/constants';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {getComboYAxisName} from 'store/widgets/data/helpers';
+import OptionsTab from 'DiagramWidgetEditForm/components/CommonOptionsTab';
+import type {OptionsTabProps, ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import ParamsTab from './components/ParamsTab';
-import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
@@ -113,12 +114,15 @@ export class ComboChartForm extends Component<TypedFormProps> {
 		};
 	};
 
+	renderOptionsTab = (props: OptionsTabProps) => <OptionsTab {...props} />;
+
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
 		return this.props.render({
+			renderOptionsTab: this.renderOptionsTab,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

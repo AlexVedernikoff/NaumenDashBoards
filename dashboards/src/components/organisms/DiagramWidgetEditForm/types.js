@@ -46,6 +46,13 @@ export type ContextProps = {|
 	values: Values
 |};
 
+export type OptionsTabProps = {|
+	fetchAttributes: FetchAttributes,
+	setDataFieldValue: SetDataFieldValue,
+	setFieldValue: SetFieldValue,
+	values: Values,
+|};
+
 export type ParamsTabProps = {|
 	context: Context,
 	dashboards: DashboardsState,
@@ -71,6 +78,7 @@ export type LayoutSize = {|
 export type RenderFormProps = {|
 	layoutSize?: LayoutSize,
 	onSubmitCallback?: OnSubmitCallback,
+	renderOptionsTab: OptionsTabProps => Node,
 	renderParamsTab: ParamsTabProps => Node,
 	renderStyleTab: StyleTabProps => Node,
 	schema: Object,

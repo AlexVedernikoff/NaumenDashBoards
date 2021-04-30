@@ -13,6 +13,7 @@ const column: 'column' = 'column';
 const columnHeader: 'columnHeader' = 'columnHeader';
 const columnsRatioWidth: 'columnsRatioWidth' = 'columnsRatioWidth';
 const computedAttrs: 'computedAttrs' = 'computedAttrs';
+const customFilters: 'customFilters' = 'customFilters';
 const count: 'count' = 'count';
 const data: 'data' = 'data';
 const dataLabels: 'dataLabels' = 'dataLabels';
@@ -95,6 +96,7 @@ const FIELDS = {
 	columnsRatioWidth,
 	computedAttrs,
 	count,
+	customFilters,
 	data,
 	dataKey,
 	dataLabels,

@@ -9,21 +9,28 @@ const getContext = (state: AppState): ContextState => state.context;
 
 const getDashboard = (state: AppState): DashboardState => state.dashboard;
 
+const isPersonalDashboard = createSelector(
+	getDashboard,
+	(dashboard: DashboardState) => dashboard.settings.personal
+);
+
 const getDashboardDescription = createSelector(
 	getContext,
 	getDashboard,
-	(context, dashboard) => {
+	isPersonalDashboard,
+	(context, dashboard, isPersonal) => {
 		const {contentCode, subjectUuid: classFqn} = context;
 
 		return {
 			classFqn,
 			contentCode,
 			isMobile: isMobile().any,
-			isPersonal: dashboard.settings.personal
+			isPersonal
 		};
 	}
 );
 
 export {
-	getDashboardDescription
+	getDashboardDescription,
+	isPersonalDashboard
 };

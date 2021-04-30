@@ -1,7 +1,9 @@
 // @flow
 import {
 	addWidget,
+	callWidgetFilters,
 	clearWarningMessage,
+	clearWidgetFilters,
 	editWidgetChunkData,
 	focusWidget,
 	removeWidget,
@@ -57,8 +59,10 @@ export const props = (state: AppState): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
+	callWidgetFilters,
 	changeLayouts,
 	clearWarningMessage,
+	clearWidgetFilters,
 	createNewTextWidget: createNewWidgetAction(WIDGET_TYPES.TEXT),
 	createNewWidget: createNewWidgetAction(),
 	drillDown,

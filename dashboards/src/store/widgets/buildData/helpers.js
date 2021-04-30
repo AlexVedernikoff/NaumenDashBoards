@@ -1,6 +1,7 @@
 // @flow
-import type {BuildDataState} from './types';
-import type {Widget} from 'store/widgets/data/types';
+import type {AnyWidget, SourceData, Widget} from 'store/widgets/data/types';
+import type {BuildDataState, DataSetDescriptorRelation} from './types';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Возвращает значение представления без переданного кода
@@ -40,7 +41,40 @@ const updateWidgetData = (state: BuildDataState, widget: Widget): BuildDataState
 	return state;
 };
 
+/**
+ * Получение расширеных дескрипторов для источника
+ * @param {object} dataSet - источник
+ * @returns  {Array<DataSetDescriptorRelation>} - расширеные дескрипторы
+ */
+const getDataSetFilterOptionsDescriptors = (dataSet: {dataKey: string, source: SourceData}): Array<DataSetDescriptorRelation> => {
+	const {dataKey, source: {widgetFilterOptions}} = dataSet;
+	const result = [];
+
+	widgetFilterOptions && widgetFilterOptions.forEach(({descriptor}) => {
+		if (descriptor) {
+			result.push({dataKey, descriptor});
+		}
+	});
+
+	return result;
+};
+
+/**
+ * Получение расширеных дескрипторов для виджета
+ * @param {AnyWidget}  widget - Виджет
+ * @returns  {Array<DataSetDescriptorRelation>} - расширеные дескрипторы
+ */
+const getWidgetFilterOptionsDescriptors = (widget: AnyWidget): Array<DataSetDescriptorRelation> => {
+	if (widget.type !== WIDGET_TYPES.TEXT) {
+		const {data} = widget;
+		return data.map(getDataSetFilterOptionsDescriptors).flat();
+	}
+
+	return [];
+};
+
 export {
 	getSeparatedLabel,
+	getWidgetFilterOptionsDescriptors,
 	updateWidgetData
 };

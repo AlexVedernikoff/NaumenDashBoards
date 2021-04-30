@@ -1,10 +1,12 @@
 // @flow
+import type {CallWidgetFilters, ClearWidgetFilters, EditWidgetChunkData, Widget} from 'store/widgets/data/types';
 import type {DrillDown, OpenNavigationLink} from 'store/widgets/links/types';
-import type {EditWidgetChunkData, Widget} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
 export type Props = {
+	callWidgetFilters: CallWidgetFilters,
 	className: string,
+	clearWidgetFilters: ClearWidgetFilters,
 	editWidgetChunkData: EditWidgetChunkData,
 	isEditable: boolean,
 	onDrillDown: DrillDown,

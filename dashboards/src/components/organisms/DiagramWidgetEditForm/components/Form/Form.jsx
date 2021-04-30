@@ -37,6 +37,25 @@ export class Form extends Component<Props, State> {
 		isNew && onChangeLayoutSize(layoutSize);
 	};
 
+	renderOptionsTabContent = () => {
+		const {
+			fetchAttributes,
+			renderOptionsTab,
+			setDataFieldValue,
+			setFieldValue,
+			values
+		} = this.props;
+
+		const content = renderOptionsTab({
+			fetchAttributes,
+			setDataFieldValue,
+			setFieldValue,
+			values
+		});
+
+		return this.renderTabContent(content, TABS.OPTIONS);
+	};
+
 	renderParamsTabContent = () => {
 		const {
 			context,
@@ -102,6 +121,7 @@ export class Form extends Component<Props, State> {
 		<ul className={styles.tabs}>
 			{this.renderTab('Параметры', TABS.PARAMS)}
 			{this.renderTab('Стиль', TABS.STYLE)}
+			{this.renderTab('Опции', TABS.OPTIONS)}
 		</ul>
 	);
 
@@ -119,6 +139,7 @@ export class Form extends Component<Props, State> {
 				{this.renderTabs()}
 				{this.renderParamsTabContent()}
 				{this.renderStyleTabContent()}
+				{this.renderOptionsTabContent()}
 			</WidgetForm>
 		);
 	}

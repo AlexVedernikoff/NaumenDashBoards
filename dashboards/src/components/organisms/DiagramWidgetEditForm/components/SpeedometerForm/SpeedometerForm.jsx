@@ -4,8 +4,9 @@ import {DEFAULT_SPEEDOMETER_SETTINGS} from 'components/organisms/Speedometer/con
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import {number, object} from 'yup';
+import OptionsTab from 'DiagramWidgetEditForm/components/CommonOptionsTab';
+import type {OptionsTabProps, ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import ParamsTab from './components/ParamsTab';
-import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import type {SpeedometerData, SpeedometerWidget, Widget} from 'store/widgets/data/types';
 import StyleTab from './components/StyleTab';
@@ -88,12 +89,15 @@ export class SpeedometerForm extends Component<TypedFormProps> {
 		};
 	};
 
+	renderOptionsTab = (props: OptionsTabProps) => <OptionsTab {...props} />;
+
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
 
 	render () {
 		return this.props.render({
+			renderOptionsTab: this.renderOptionsTab,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

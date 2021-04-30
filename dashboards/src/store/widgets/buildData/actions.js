@@ -3,6 +3,7 @@ import type {AnyWidget} from 'store/widgets/data/types';
 import {BUILD_DATA_EVENTS} from './constants';
 import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE} from 'store/widgets/data/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {getWidgetFilterOptionsDescriptors} from './helpers';
 import type {ReceiveBuildDataPayload} from './types';
 
 /**
@@ -29,6 +30,7 @@ const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Disp
 		try {
 			const {context, dashboard} = getState();
 			const defaultIgnoreDataLimits = {breakdown: false, parameter: false};
+			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
 
 			const data = await window.jsApi.restCallModule(
 				'dashboardDataSet',
@@ -36,7 +38,8 @@ const fetchBuildData = (widget: AnyWidget): ThunkAction => async (dispatch: Disp
 				dashboard.settings.code,
 				widget.id,
 				context.subjectUuid,
-				{...defaultIgnoreDataLimits, ...(widget.ignoreDataLimits || defaultIgnoreDataLimits)}
+				{...defaultIgnoreDataLimits, ...(widget.ignoreDataLimits || defaultIgnoreDataLimits)},
+				widgetFilters
 			);
 
 			dispatch(

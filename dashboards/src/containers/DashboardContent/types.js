@@ -1,19 +1,21 @@
 // @flow
 import type {BuildDataMap} from 'store/widgets/buildData/types';
+import type {CallWidgetFilters, ClearWidgetFilters, EditWidgetChunkData, FocusWidget, ResetFocusedWidget, Widget} from 'store/widgets/data/types';
 import type {DrillDown, OpenCardObject, OpenNavigationLink} from 'store/widgets/links/types';
-import type {FocusWidget, ResetFocusedWidget, Widget} from 'store/widgets/data/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {Layouts, LayoutsPayloadForChange} from 'store/dashboard/layouts/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 
 export type ConnectedFunctions = {
+	callWidgetFilters: CallWidgetFilters,
 	changeLayouts: (payload: LayoutsPayloadForChange) => Object,
 	clearWarningMessage: (payload: string) => void,
+	clearWidgetFilters: ClearWidgetFilters,
 	createNewTextWidget: (layoutMode: LayoutMode) => ThunkAction,
 	createNewWidget: (layoutMode: LayoutMode) => ThunkAction,
 	drillDown: DrillDown,
-	editWidgetChunkData: (widget: Widget, chunkData: Object) => ThunkAction,
+	editWidgetChunkData: EditWidgetChunkData,
 	fetchBuildData: (widget: Widget) => ThunkAction,
 	focusWidget: FocusWidget,
 	openCardObject: OpenCardObject,

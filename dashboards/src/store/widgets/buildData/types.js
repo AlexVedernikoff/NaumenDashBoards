@@ -59,3 +59,8 @@ export type BuildDataAction =
 ;
 
 export type BuildDataState = BuildDataMap;
+
+export type DataSetDescriptorRelation = {
+	dataKey: string,
+	descriptor: string
+};

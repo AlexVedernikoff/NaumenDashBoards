@@ -10,8 +10,9 @@ import {
 import {extend} from 'helpers';
 import type {FilledDataSet} from 'containers/DiagramWidgetEditForm/types';
 import type {InjectedProps} from 'containers/DiagramWidgetEditForm/HOCs/withChartColorsSettingsSaving/types';
+import OptionsTab from 'DiagramWidgetEditForm/components/CommonOptionsTab';
+import type {OptionsTabProps, ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import ParamsTab from './components/ParamsTab';
-import type {ParamsTabProps, StyleTabProps, TypedFormProps} from 'DiagramWidgetEditForm/types';
 import React, {Component} from 'react';
 import StyleTab from './components/StyleTab';
 import type {Values} from 'containers/WidgetEditForm/types';
@@ -91,6 +92,8 @@ export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 		};
 	};
 
+	renderOptionsTab = (props: OptionsTabProps) => <OptionsTab {...props} />;
+
 	renderParamsTab = (props: ParamsTabProps) => <ParamsTab {...props} />;
 
 	renderStyleTab = (props: StyleTabProps) => <StyleTab {...props} />;
@@ -100,6 +103,7 @@ export class CircleChartForm extends Component<TypedFormProps & InjectedProps> {
 
 		return this.props.render({
 			onSubmitCallback: saveCustomColorsSettings,
+			renderOptionsTab: this.renderOptionsTab,
 			renderParamsTab: this.renderParamsTab,
 			renderStyleTab: this.renderStyleTab,
 			schema: this.getSchema(),

@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, EditWidgetChunkData, Widget} from 'store/widgets/data/types';
+import type {AnyWidget, CallWidgetFilters, ClearWidgetFilters, EditWidgetChunkData, Widget} from 'store/widgets/data/types';
 import type {BuildData} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
 import type {DrillDown, OpenCardObject, OpenNavigationLink} from 'store/widgets/links/types';
@@ -19,7 +19,9 @@ type GridProps = {
 export type Props = {
 	...$Exact<GridProps>,
 	buildData: BuildData,
+	callWidgetFilters: CallWidgetFilters,
 	clearWarningMessage: (id: string) => ThunkAction,
+	clearWidgetFilters: ClearWidgetFilters,
 	data: Widget,
 	editWidgetChunkData: EditWidgetChunkData,
 	fetchBuildData: (widget: Widget) => ThunkAction,
