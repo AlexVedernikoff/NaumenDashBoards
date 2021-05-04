@@ -31,6 +31,7 @@ export type Props = {
 	getOptionLabel?: (option: SelectValue) => string,
 	getOptionValue?: (option: SelectValue) => any,
 	initialSelected: Array<string>,
+	isActive: boolean,
 	name: string,
 	onChangeLabel: OnChangeLabelEvent => void,
 	onRemove: OnRemoveEvent => void,

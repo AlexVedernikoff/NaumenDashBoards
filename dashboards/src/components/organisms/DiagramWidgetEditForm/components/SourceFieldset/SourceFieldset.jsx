@@ -1,6 +1,7 @@
 // @flow
 import Checkbox from 'components/atoms/LegacyCheckbox';
 import type {Components as TreeSelectComponents, TreeSelectLabelContainerProps} from 'components/molecules/TreeSelect/types';
+import type {DivRef, OnSelectEvent} from 'components/types';
 import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
@@ -8,9 +9,8 @@ import IconButton from 'components/atoms/IconButton';
 import LabelEditingForm from 'components/molecules/InputForm';
 import Modal from 'components/molecules/Modal';
 import {MODE} from './constraints';
-import type {OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import SavedFilters from 'DiagramWidgetEditForm/components/SavedFilters';
 import type {SourceData} from 'containers/DiagramWidgetEditForm/types';
 import type {SourceFiltersItem} from 'store/sources/sourcesFilters/types';
@@ -30,6 +30,7 @@ export class SourceFieldset extends Component<Props, State> {
 		showEditForm: false
 	};
 
+	sourceSelectRef: DivRef = createRef();
 	sourceSelectComponents: ?TreeSelectComponents = null;
 
 	callFilterModal = async (): Promise<void> => {
@@ -49,6 +50,14 @@ export class SourceFieldset extends Component<Props, State> {
 		const {dataSetIndex, onChangeDataSet} = this.props;
 
 		onChangeDataSet(dataSetIndex, source);
+	};
+
+	componentDidMount = () => {
+		const {dataSetIndex} = this.props;
+
+		if (dataSetIndex > 0) {
+			this.sourceSelectRef.current && this.sourceSelectRef.current.scrollIntoView({behavior: 'smooth'});
+		}
 	};
 
 	getSourceSelectComponents = (): TreeSelectComponents => {
@@ -401,7 +410,7 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSourceTreeSelect = (): React$Node => {
-		const {dataSet: {source}, sources} = this.props;
+		const {dataSet: {source}, dataSetIndex, sources} = this.props;
 		const {value: sourceValue} = source;
 
 		let initialSelected;
@@ -411,12 +420,14 @@ export class SourceFieldset extends Component<Props, State> {
 		}
 
 		const components = this.getSourceSelectComponents();
+		const isActive = dataSetIndex > 0;
 
 		return (
 			<TreeSelect
 				className={styles.sourceTreeSelect}
 				components={components}
 				initialSelected={initialSelected}
+				isActive={isActive}
 				onSelect={this.handleSelect}
 				options={sources}
 				removable={true}
@@ -427,7 +438,7 @@ export class SourceFieldset extends Component<Props, State> {
 
 	render (): React$Node {
 		return (
-			<div className={styles.container}>
+			<div className={styles.container} ref={this.sourceSelectRef}>
 				{this.renderAlerts()}
 				{this.renderConfirm()}
 				{this.renderSourceSelect()}

@@ -32,5 +32,6 @@ const hasAlphabetOrderError = (currentString, nextString) => simplifyString(curr
 
 module.exports = {
 	createError,
-	hasAlphabetOrderError
+	hasAlphabetOrderError,
+	simplifyString
 };
