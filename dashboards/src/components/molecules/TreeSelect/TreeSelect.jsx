@@ -28,6 +28,14 @@ export class TreeSelect extends PureComponent<Props, State> {
 		showMenu: false
 	};
 
+	componentDidMount = () => {
+		const {isActive} = this.props;
+
+		if (isActive) {
+			this.setState({showMenu: true});
+		}
+	};
+
 	getComponents = (): Components => this.props.getComponents({
 		IndicatorsContainer: Container,
 		LabelContainer: Container,
