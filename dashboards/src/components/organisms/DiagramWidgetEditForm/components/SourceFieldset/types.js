@@ -1,8 +1,9 @@
 // @flow
+import type {CommonDialogContextProps} from 'containers/CommonDialogs/types';
 import {MODE} from './constraints';
 import type {Props as ComponentProps} from 'containers/DiagramWidgetEditForm/components/SourceFieldset/types';
 
-export type Props = ComponentProps;
+export type Props = ComponentProps & CommonDialogContextProps;
 
 export type ConfirmOption = {
 	notice: boolean,
@@ -12,8 +13,7 @@ export type ConfirmOption = {
 };
 
 export type State = {
-	confirmOption: ?ConfirmOption;
-	errorMessage: ?string,
+	error: ?string,
 	mode: ?$Keys<typeof MODE>,
 	showEditForm: boolean,
 };

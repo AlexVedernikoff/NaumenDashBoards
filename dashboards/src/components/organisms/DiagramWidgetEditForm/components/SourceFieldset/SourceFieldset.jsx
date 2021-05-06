@@ -2,12 +2,10 @@
 import Checkbox from 'components/atoms/LegacyCheckbox';
 import type {Components as TreeSelectComponents, TreeSelectLabelContainerProps} from 'components/molecules/TreeSelect/types';
 import type {DivRef, OnSelectEvent} from 'components/types';
-import {FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import FormField from 'DiagramWidgetEditForm/components/FormField';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from 'components/atoms/IconButton';
 import LabelEditingForm from 'components/molecules/InputForm';
-import Modal from 'components/molecules/Modal';
 import {MODE} from './constraints';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
@@ -16,6 +14,7 @@ import type {SourceData} from 'containers/DiagramWidgetEditForm/types';
 import type {SourceFiltersItem} from 'store/sources/sourcesFilters/types';
 import styles from './styles.less';
 import TreeSelect from 'components/molecules/TreeSelect';
+import {withCommonDialog} from 'containers/CommonDialogs/withCommonDialog';
 
 export class SourceFieldset extends Component<Props, State> {
 	static defaultProps = {
@@ -24,8 +23,7 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	state = {
-		confirmOption: null,
-		errorMessage: null,
+		error: null,
 		mode: null,
 		showEditForm: false
 	};
@@ -78,65 +76,42 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	handleChangeFilterLabel = async (label: string): Promise<void> => {
-		// $FlowFixMe
-		const {dataSet: {source}, updateSourcesFilter} = this.props;
+		const {dataSet: {source}, filterList, updateSourcesFilter} = this.props;
 		const {mode} = this.state;
+		let error = null;
 
-		if (source.value) {
-			const {descriptor, filterId, value} = source;
+		if (!filterList.find(filter => filter.label === label)) {
+			if (source.value) {
+				const {descriptor, filterId, value} = source;
 
-			if (descriptor) {
-				const {message = '', payload, result} = await updateSourcesFilter(
-					value.value,
-					{
-						descriptor,
-						id: mode === MODE.SAVE ? null : filterId,
-						label
+				if (descriptor) {
+					const id = mode === MODE.SAVE ? null : filterId;
+					const data = await updateSourcesFilter(value.value, {descriptor, id, label});
+
+					if (data.result) {
+						const {filterId} = data;
+
+						this.changeDataSet({...source, filterId, value: {...value, label}});
+						this.hideEditForm();
+					} else {
+						error = data.message;
 					}
-				);
-
-				if (result) {
-					this.changeDataSet({
-						...source,
-						filterId: payload,
-						value: {
-							...value,
-							label
-						}
-					});
 				} else {
-					this.showErrorForm(message);
+					this.changeDataSet({...source, value: { ...value, label }});
+					this.hideEditForm();
 				}
-			} else {
-				this.changeDataSet({
-					...source,
-					value: {
-						...value,
-						label
-					}
-				});
 			}
+		} else {
+			error = 'Название фильтра должно быть уникально';
 		}
 
-		this.hideEditForm();
+		this.setInnerError(error);
 	};
 
 	handleClickRemoveButton = () => {
 		const {dataSetIndex, onRemove} = this.props;
 
 		onRemove(dataSetIndex);
-	};
-
-	handleCloseConfirmDialog = (isSuccess: boolean) => () => {
-		const {confirmOption} = this.state;
-
-		if (confirmOption) {
-			const {resolve} = confirmOption;
-
-			resolve(isSuccess);
-		}
-
-		this.setState({confirmOption: null});
 	};
 
 	handleDeleteSavedFilters = (id: string) => {
@@ -177,7 +152,7 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	handleSelectFilters = async (sourceFilter: SourceFiltersItem) => {
-		const {checkApplyFilter, dataSet} = this.props;
+		const {checkApplyFilter, confirm, dataSet} = this.props;
 		const {id, label} = sourceFilter;
 		const {value} = dataSet.source;
 
@@ -186,7 +161,7 @@ export class SourceFieldset extends Component<Props, State> {
 
 			if (
 				approvalToApply.result
-				|| await this.showConfirm(
+				|| await confirm(
 						'Ошибка применения фильтра',
 						'Выбранный фильтр не может быть применен полностью, т.к. содержит условия, связанные с текущим объектом. Применить частично?'
 					)
@@ -203,11 +178,7 @@ export class SourceFieldset extends Component<Props, State> {
 		}
 	};
 
-	hideEditForm = () =>
-		this.setState({mode: null, showEditForm: false});
-
-	hideErrorForm = () =>
-		this.setState({errorMessage: null});
+	hideEditForm = () => this.setState({mode: null, showEditForm: false});
 
 	isCurrentFilterChanged = (): boolean => {
 		const {dataSet: {source}, filterList = []} = this.props;
@@ -227,39 +198,11 @@ export class SourceFieldset extends Component<Props, State> {
 		return false;
 	};
 
-	showConfirm = (title: string, text: string, notice: boolean = true): Promise<boolean> => {
-		return new Promise<boolean>((resolve) => {
-			this.setState({confirmOption: {notice, resolve, text, title}});
-		});
-	};
+	setInnerError = (error: ?string) => this.setState({error});
 
 	showEditForm = () => this.setState({mode: MODE.EDIT, showEditForm: true});
 
-	showErrorForm = (errorMessage: string) => this.setState({errorMessage});
-
 	showSaveForm = () => this.setState({mode: MODE.SAVE, showEditForm: true});
-
-	renderAlerts = (): React$Node => {
-		const {errorMessage} = this.state;
-
-		if (errorMessage) {
-			return (
-				<Modal
-					footerPosition={FOOTER_POSITIONS.RIGHT}
-					header="Ошибка"
-					notice={true}
-					onSubmit={this.hideErrorForm}
-					showCancelButton={false}
-					size={SIZES.SMALL}
-					submitText="Ok"
-				>
-					{errorMessage}
-				</Modal>
-			);
-		}
-
-		return null;
-	};
 
 	renderComputeCheckbox = (): React$Node => {
 		const {computable, dataSet} = this.props;
@@ -267,28 +210,6 @@ export class SourceFieldset extends Component<Props, State> {
 
 		if (computable) {
 			return <Checkbox label="Только для вычислений" onClick={this.handleChangeCompute} value={sourceForCompute} />;
-		}
-
-		return null;
-	};
-
-	renderConfirm = (): React$Node => {
-		const {confirmOption} = this.state;
-
-		if (confirmOption) {
-			const {notice = true, text, title} = confirmOption;
-			return (
-				<Modal
-					footerPosition={FOOTER_POSITIONS.RIGHT}
-					header={title}
-					notice={notice}
-					onClose={this.handleCloseConfirmDialog(false)}
-					onSubmit={this.handleCloseConfirmDialog(true)}
-					submitText="Ok"
-				>
-					{text}
-				</Modal>
-			);
 		}
 
 		return null;
@@ -365,8 +286,9 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSourceSelect = (): React$Node => {
-		const {error} = this.props;
-		const {showEditForm} = this.state;
+		const {error: outerError} = this.props;
+		const {error: innerError, showEditForm} = this.state;
+		const error = outerError || innerError;
 
 		const component = showEditForm ? this.renderLabelEditingForm() : this.renderSourceTreeSelect();
 
@@ -439,8 +361,6 @@ export class SourceFieldset extends Component<Props, State> {
 	render (): React$Node {
 		return (
 			<div className={styles.container} ref={this.sourceSelectRef}>
-				{this.renderAlerts()}
-				{this.renderConfirm()}
 				{this.renderSourceSelect()}
 				{this.renderRemoveButton()}
 				{this.renderComputeCheckbox()}
@@ -450,4 +370,4 @@ export class SourceFieldset extends Component<Props, State> {
 	}
 }
 
-export default SourceFieldset;
+export default withCommonDialog(SourceFieldset);

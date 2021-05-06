@@ -67,6 +67,8 @@ export type SourcesFiltersState = {
 
 export type ResultWithMessage = { result: true } | { message: string, result: false };
 
+export type UpdateSourcesFilterResult = { filterId: string, result: true } | { message: string, result: false };
+
 export type CheckApplyFilter = (source: string, sourceFilter: SourceFiltersItem) => ThunkAction;
 
 export type FetchSourcesFilters = (metaClass: string) => ThunkAction;

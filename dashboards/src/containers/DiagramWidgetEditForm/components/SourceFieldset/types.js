@@ -5,7 +5,8 @@ import type {
 	FetchSourcesFilters,
 	ResultWithMessage,
 	SourceFiltersItem,
-	UpdateSourcesFilter
+	UpdateSourcesFilter,
+	UpdateSourcesFilterResult
 } from 'store/sources/sourcesFilters/types';
 import type {DataSet, SourceData} from 'containers/DiagramWidgetEditForm/types';
 import type {DataSourceMap} from 'store/sources/data/types';
@@ -22,19 +23,11 @@ export type ConnectingFunctions = {|
 	updateSourcesFilter: UpdateSourcesFilter
 |};
 
-export type CheckApplyFilterConnected = (source: string, sourceFilter: SourceFiltersItem) => ResultWithMessage;
-
-export type DeleteSourcesFilterConnected = (source: string, filterId: string) => ResultWithMessage;
-
-export type FetchSourcesFiltersConnected = (metaClass: string) => ResultWithMessage;
-
-export type UpdateSourcesFilterConnected = (source: string, filter: SourceFiltersItem) => ResultWithMessage;
-
 export type ConnectedFunctions = {|
-	checkApplyFilter: CheckApplyFilterConnected,
-	deleteSourcesFilter: DeleteSourcesFilterConnected,
-	fetchSourcesFilters: FetchSourcesFiltersConnected,
-	updateSourcesFilter: UpdateSourcesFilterConnected
+	checkApplyFilter: (source: string, sourceFilter: SourceFiltersItem) => ResultWithMessage,
+	deleteSourcesFilter: (source: string, filterId: string) => ResultWithMessage,
+	fetchSourcesFilters: (metaClass: string) => ResultWithMessage,
+	updateSourcesFilter: (source: string, filter: SourceFiltersItem) => Promise<UpdateSourcesFilterResult>
 |};
 
 export type ContainerProps = {
