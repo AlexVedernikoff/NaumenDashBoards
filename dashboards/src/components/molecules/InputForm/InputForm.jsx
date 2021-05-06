@@ -35,6 +35,16 @@ export class InputForm extends Component<Props, State> {
 		}
 	};
 
+	handleSpecialKeysDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+		const {onClose} = this.props;
+
+		if (event.key === 'Enter') {
+			this.handleClick();
+		} else if (event.key === 'Escape') {
+			onClose();
+		}
+	};
+
 	stopPropagation = (e: SyntheticMouseEvent<HTMLElement>) => {
 		e.stopPropagation();
 	};
@@ -49,6 +59,7 @@ export class InputForm extends Component<Props, State> {
 					autoComplete="off"
 					className={styles.input}
 					onChange={this.handleChange}
+					onKeyDown={this.handleSpecialKeysDown}
 					required
 					type="text"
 					value={value}

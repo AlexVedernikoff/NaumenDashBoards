@@ -1,7 +1,7 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getDashboardDescription} from 'store/dashboard/settings/selectors';
-import type {ResultWithMessage, SourceFiltersItem} from './types';
+import type {ResultWithMessage, SourceFiltersItem, UpdateSourcesFilterResult} from './types';
 import {SOURCES_FILTERS_EVENTS} from './constants';
 
 /**
@@ -64,13 +64,12 @@ const fetchSourcesFilters = (metaClass: string): ThunkAction =>
  * @returns {ThunkAction}
  */
 const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): ThunkAction =>
-	async (dispatch: Dispatch, getState: GetState): Promise<ResultWithMessage> => {
+	async (dispatch: Dispatch, getState: GetState): Promise<UpdateSourcesFilterResult> => {
 		const {descriptor, id, label} = sourceFilter;
 		const store = getState();
 		const dashboard = getDashboardDescription(store);
 
 		try {
-			// eslint-disable-next-line no-unused-vars
 			const {result} = await window.jsApi.restCallModule('dashboardSettings', 'saveSourceFilters', {
 				dashboard,
 				sourceFilter: {
@@ -83,7 +82,7 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 
 			dispatch(fetchSourcesFilters(source));
 
-			return {payload: result, result: true};
+			return {filterId: result, result: true};
 		} catch (exception) {
 			dispatch(requestSourceFiltersError());
 
