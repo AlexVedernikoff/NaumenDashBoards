@@ -216,6 +216,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		dispatch(switchDashboard(false));
 		dispatch(setUserData({...user, hasPersonalDashboard: false}));
+		dispatch(setPersonalValue(false));
 		dispatch({
 			type: DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD
 		});
