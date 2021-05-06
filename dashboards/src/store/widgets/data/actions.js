@@ -452,8 +452,7 @@ const recordDeleteError = () => ({
 });
 
 const resetFocusedWidget = () => ({
-	payload: '',
-	type: WIDGETS_EVENTS.SET_FOCUSED_WIDGET
+	type: WIDGETS_EVENTS.RESET_FOCUSED_WIDGET
 });
 
 const recordSaveError = () => ({

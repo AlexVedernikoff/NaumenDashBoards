@@ -557,6 +557,10 @@ export type RecordWidgetDeleteError = {
 	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
 };
 
+export type ResetFocusedWidgetAction = {
+	type: typeof WIDGETS_EVENTS.RESET_FOCUSED_WIDGET
+};
+
 export type SetFocusedWidget = {
 	payload: string,
 	type: typeof WIDGETS_EVENTS.SET_FOCUSED_WIDGET
@@ -594,6 +598,7 @@ export type WidgetsAction =
 	| RequestWidgetCopy
 	| RequestWidgetDelete
 	| RequestWidgetSave
+	| ResetFocusedWidgetAction
 	| ResetWidget
 	| ResponseValidateToCopy
 	| ResponseWidgetCopy

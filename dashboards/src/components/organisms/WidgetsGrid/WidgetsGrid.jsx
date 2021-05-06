@@ -70,7 +70,7 @@ export class WidgetsGrid extends Component<Props, State> {
 	componentDidUpdate (prevProps: Props) {
 		const {focusWidget, selectedWidget} = this.props;
 
-		if (!dashboardResizer.isFullSize() && !prevProps.selectedWidget) {
+		if (!dashboardResizer.isFullSize() && !prevProps.selectedWidget && selectedWidget) {
 			focusWidget(selectedWidget);
 		}
 	}

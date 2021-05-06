@@ -84,6 +84,11 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: true
 				}
 			};
+		case WIDGETS_EVENTS.RESET_FOCUSED_WIDGET:
+			return {
+				...state,
+				focusedWidget: ''
+			};
 		case WIDGETS_EVENTS.RESET_WIDGET:
 			return resetWidget(state);
 		case WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY:
