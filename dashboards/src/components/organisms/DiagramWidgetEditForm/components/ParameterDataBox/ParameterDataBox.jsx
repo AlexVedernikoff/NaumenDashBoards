@@ -71,14 +71,14 @@ export class ParameterDataBox extends PureComponent<Props> {
 		let result = options;
 		const mainSet = values.data[this.mainIndex];
 		const currentSet = values.data[index];
-		let currentParameter = currentSet.parameters?.[index].attribute;
+		let currentParameter = currentSet.parameters?.[index]?.attribute;
 
 		if (filterByRef) {
 			currentParameter = currentParameter.ref;
 		}
 
 		if (currentSet !== mainSet) {
-			const mainParameter = mainSet.parameters?.[this.mainIndex].attribute;
+			const mainParameter = mainSet.parameters?.[this.mainIndex]?.attribute;
 
 			result = filterByAttribute(options, mainParameter, filterByRef);
 		}
