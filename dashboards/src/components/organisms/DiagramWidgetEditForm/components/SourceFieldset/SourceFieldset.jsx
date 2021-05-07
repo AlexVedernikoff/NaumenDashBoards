@@ -51,9 +51,9 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	componentDidMount = () => {
-		const {dataSetIndex} = this.props;
+		const {dataSet: {source}, dataSetIndex} = this.props;
 
-		if (dataSetIndex > 0) {
+		if (!source.value && dataSetIndex > 0) {
 			this.sourceSelectRef.current && this.sourceSelectRef.current.scrollIntoView({behavior: 'smooth'});
 		}
 	};
@@ -342,7 +342,7 @@ export class SourceFieldset extends Component<Props, State> {
 		}
 
 		const components = this.getSourceSelectComponents();
-		const isActive = dataSetIndex > 0;
+		const isActive = !source.value && dataSetIndex > 0;
 
 		return (
 			<TreeSelect
