@@ -3143,6 +3143,7 @@ class SummaryCurrentAndNew extends NewDiagrams
  * Класс, описывающий диаграммы-таблицы предыдущего, текущего и нового формата
  */
 @Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class TablePrevAndCurrentAndNew extends NewDiagrams
 {
     /**
@@ -3179,10 +3180,6 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
      * Настройка топ х
      */
     Top top
-    /**
-     * Настройка игнорирования ограничений
-     */
-    IgnoreLimits ignoreLimits = new IgnoreLimits()
 }
 
 /**
@@ -3387,5 +3384,47 @@ class WidgetFilterResponse
         } : []
     }
 }
+
+/**
+ * Настройки для пагинации
+ */
+class PaginationSettings
+{
+    /**
+     * Количество элементов на странице
+     */
+    Integer pageSize = 20
+    /**
+     * Индекс для первого элемента на странице
+     */
+    Integer firstElementIndex = 0
+}
+
+/**
+ * Настройки для запроса на построение таблицы
+ */
+class TableRequestSettings
+{
+    /**
+     * Количество элементов на странице
+     */
+    Integer pageSize = 20
+
+    /**
+     * Номер страницы для отрисовк
+     */
+    Integer pageNumber = 1
+
+    /**
+     * объект с флагами на игнорирование пределов по параметрам/разбивками
+     */
+    IgnoreLimits ignoreLimits = new IgnoreLimits()
+
+    /**
+     * объект, описывающий настройки сортировки
+     */
+    Sorting sorting = new Sorting()
+}
+
 //endregion
 return

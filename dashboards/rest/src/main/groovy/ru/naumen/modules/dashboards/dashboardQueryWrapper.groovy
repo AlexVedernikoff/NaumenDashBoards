@@ -27,10 +27,14 @@ trait CriteriaWrapper
             : api.db.createCriteria().addSource(source.classFqn) as ApiCriteria
     }
 
-    List execute(ApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false)
+    List execute(ApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
     {
         if(diagramType == DiagramType.TABLE)
         {
+            if(paginationSettings)
+            {
+                return api.db.query(criteria).setFirstResult(paginationSettings.firstElementIndex).setMaxResults(paginationSettings.pageSize).list()
+            }
             if (ignoreParameterLimit)
             {
                 return api.db.query(criteria).list()
@@ -943,9 +947,12 @@ class QueryWrapper implements CriteriaWrapper
         return this
     }
 
-    List<List> getResult(Boolean requestHasOneNoneAggregation = false, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false)
+    List<List> getResult(Boolean requestHasOneNoneAggregation = false,
+                         DiagramType diagramType = DiagramType.COLUMN,
+                         Boolean ignoreParameterLimit = false,
+                         PaginationSettings paginationSettings = null)
     {
-        return execute(criteria, diagramType, ignoreParameterLimit).collect {
+        return execute(criteria, diagramType, ignoreParameterLimit, paginationSettings).collect {
             requestHasOneNoneAggregation ? [it] : it.collect() as List
         }
     }
@@ -1033,7 +1040,7 @@ class DashboardQueryWrapperUtils
      * @return результат выборки
      */
     static List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
-                              Boolean ignoreParameterLimit = false)
+                              Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
     {
         validate(requestData)
         validate(requestData.source)
@@ -1106,7 +1113,7 @@ class DashboardQueryWrapperUtils
         Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
             it?.type == Aggregation.NOT_APPLICABLE
         } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
-        return wrapper.getResult(requestHasOneNoneAggregation, diagramType, ignoreParameterLimit)
+        return wrapper.getResult(requestHasOneNoneAggregation, diagramType, ignoreParameterLimit, paginationSettings)
     }
 
     /**

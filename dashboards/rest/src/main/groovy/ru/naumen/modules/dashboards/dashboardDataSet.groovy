@@ -33,22 +33,21 @@ interface DashboardDataSet
      * Получение данных для диаграмм. Нужен для обратной совместимости.
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
      * @param cardObjectUuid - идентификатор "текущего объекта"
-     * @param ignoreTableLimits - объект, описывающий необходимость игнорирования пределов для таблицы
-     * @param widgetFilters - фильтрация от обычного пользователя на виджете
+     * @param widgetFilters - список пользовательских фильтров для виджетов
      * @return данные для построения диаграммы
      */
-    @Deprecated
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits, def widgetFilters)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def widgetFilters)
 
     /**
-     * Получение данных для диаграмм. С поддержкой вычислений.
-     * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
-     * @param cardObjectUuid - идентификатор "текущего объекта"
-     * @param ignoreTableLimits - объект, описывающий необходимость игнорирования пределов для таблицы
-     * @param widgetFilters - фильтрация от обычного пользователя на виджете
-     * @return данные для построения диаграммы
+     * Получение данных для таблиц. Нужен для обратной совместимости.
+     * @param dashboardKey - ключ дашборда для построения виджета
+     * @param widgetKey - ключ виджета
+     * @param cardObjectUuid - уникальный идентификатор текущего объекта
+     * @param tableRequestSettings - настройки для запроса по таблице
+     * @param widgetFilters - список пользовательских фильтров для виджетов
+     * @return данные для построения таблицы
      */
-    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits, def widgetFilters)
+    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def tableRequestSettings, def widgetFilters)
 }
 
 @InjectApi
@@ -62,22 +61,27 @@ class DashboardDataSetImpl implements DashboardDataSet
     }
 
     @Override
-    @Deprecated
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def ignoreTableLimits, def widgetFilters)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def widgetFilters)
     {
-        return getDataForDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits, widgetFilters)
-    }
-
-    @Override
-    String getDataForDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def ignoreTableLimits, def widgetFilters)
-    {
-        ignoreTableLimits = ignoreTableLimits ? new IgnoreLimits(ignoreTableLimits as Map) : new IgnoreLimits()
         if(widgetFilters)
         {
             widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(widgetFilters)
         }
         return api.tx.call {
-            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, ignoreTableLimits, widgetFilters)
+            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters)
+        }.with(JsonOutput.&toJson)
+    }
+
+    @Override
+    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def tableRequestSettings, def widgetFilters)
+    {
+        tableRequestSettings = new TableRequestSettings(tableRequestSettings)
+        if(widgetFilters)
+        {
+            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(widgetFilters)
+        }
+        return api.tx.call {
+            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, tableRequestSettings)
         }.with(JsonOutput.&toJson)
     }
 }
@@ -130,25 +134,44 @@ class DashboardDataSetService
         }
     }
 
-
     /**
      * Метод построения диаграмм.
-     * @param requestContent - запрос на построение диаграмы
+     * @param dashboardKey - ключ дашборда
+     * @param widgetKey - ключ виджета
      * @param subjectUUID - идентификатор "текущего объекта"
-     * @param ignoreTableLimits - объект, описывающий возможности игнорирования пределов для таблицы
-     * @param widgetFilters - фильтрация от обычного пользователя на виджете
+     * @param widgetFilters - список пользовательских фильтров для виджета
+     * @param tableRequestSettings - настройки для запроса по таблице
      * @return Типизированниые данные для построения диаграмм
      */
-    private def buildDiagram(String dashboardKey, String widgetKey, String subjectUUID, IgnoreLimits ignoreTableLimits, Collection<WidgetFilterResponse> widgetFilters = [])
+    private def buildDiagram(String dashboardKey,
+                             String widgetKey,
+                             String subjectUUID,
+                             Collection<WidgetFilterResponse> widgetFilters = [],
+                             TableRequestSettings tableRequestSettings = null)
     {
         def widgetSettings = getWidgetSettingsByDashboardAndWidgetKey(dashboardKey, widgetKey)
         def diagramType = widgetSettings.type as DiagramType
         def request
         def res
+        Integer rowCount
+        PaginationSettings paginationSettings
+        def tableSorting
+        Boolean reverseRowCount = false
         if (diagramType == DiagramType.TABLE)
         {
+            Boolean requestHasBreakdown = checkForBreakdown(widgetSettings)
             Boolean showTableNulls = widgetSettings.showEmptyData
             Boolean showTableBlank = widgetSettings.showBlankData
+            Integer pageSize
+            Integer firstElementIndex
+            paginationSettings
+
+            if(tableRequestSettings)
+            {
+                pageSize = tableRequestSettings.pageSize
+                firstElementIndex = pageSize * (tableRequestSettings.pageNumber - 1)
+                paginationSettings = new PaginationSettings(pageSize: pageSize, firstElementIndex: firstElementIndex)
+            }
             Boolean computationInTableRequest = widgetSettings?.data?.any { it.indicators?.any { it?.attribute?.any { it.type == 'COMPUTED_ATTR'} } }
             Integer tableTop = widgetSettings.top?.show ? widgetSettings.top?.count as Integer : null
             if (computationInTableRequest && !tableTop)
@@ -156,17 +179,49 @@ class DashboardDataSetService
                 //вернём всё из бд, после сагрегируем
                 showTableNulls = true
             }
-            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters ,showTableNulls, showTableBlank, computationInTableRequest, tableTop)
+            tableSorting = tableRequestSettings?.sorting
+            if(tableSorting?.accessor == 'ID')
+            {
+                tableSorting?.accessor = widgetSettings.data.find().parameters.find().attribute.title
+                reverseRowCount = tableSorting?.type == SortingType.DESC
+            }
+            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType,
+                                            widgetFilters, showTableNulls, showTableBlank,
+                                            computationInTableRequest, tableTop, tableSorting)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
             }
-            res = getDiagramData(request, diagramType, aggregationCnt, widgetSettings, ignoreTableLimits)
+            //при наличии разбивки или кастомных группировок, пагинацию нужно обеспечить своими силами
+            Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(widgetSettings)
+            Boolean sortingValueIsComputationAttribute = false
+            if(tableSorting?.accessor)
+            {
+                List<Map> attributes = getAttributeNamesAndValuesFromRequest(widgetSettings)
+                def attrValue = attributes.find {it?.name?.trim() == tableSorting.accessor.trim()}
+                sortingValueIsComputationAttribute = attrValue?.attribute instanceof ComputedAttr
+            }
+
+            Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute
+            res = getDiagramData(request, diagramType, aggregationCnt, widgetSettings,
+                                 tableRequestSettings?.ignoreLimits, noPaginationInSQL ? null : paginationSettings)
+            rowCount = requestHasBreakdown && computationInTableRequest
+                ? rowCount
+                : getDiagramData(request, diagramType,
+                                 aggregationCnt, widgetSettings,
+                                 tableRequestSettings?.ignoreLimits).find().size() //получаем данные,
+            //чтобы получить актуальное количество строк для таблицы
+
             if (computationInTableRequest)
             {
                 //а здесь уже важно знать, выводить пустые значения или нет
                 showTableNulls = widgetSettings.showEmptyData
-                Boolean requestHasBreakdown = checkForBreakdown(widgetSettings)
                 res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
+
+                rowCount = requestHasBreakdown
+                    ? rowCount
+                    : prepareDataSet(getDiagramData(request, diagramType, aggregationCnt, widgetSettings,
+                                                    tableRequestSettings?.ignoreLimits), widgetSettings,
+                                                    showTableNulls, requestHasBreakdown).find().size()
             }
         }
         else
@@ -190,7 +245,9 @@ class DashboardDataSetService
                                                  widgetSettings.table.body.showRowNum]
 
                 return mappingTableDiagram(res, totalColumn as boolean,
-                                           showRowNum as boolean, widgetSettings, request, ignoreTableLimits)
+                                           showRowNum as boolean, rowCount,
+                                           paginationSettings, tableSorting, reverseRowCount,
+                                           widgetSettings, request, tableRequestSettings?.ignoreLimits)
             case COMBO:
                 Integer sortingDataIndex = getSortingDataIndex(widgetSettings)
                 //нашли источник, по которому должна быть сортировка
@@ -256,6 +313,65 @@ class DashboardDataSetService
                 }
             }?.unique()?.size()
         }
+    }
+
+    /**
+     * Метод, возвращающий датасет с "ручной" пагинацией
+     * @param groups - список объектов
+     * @param paginationSettings - настройки пагинации
+     * @return датасет с "ручной" пагинацией
+     */
+    def getDataSetWithPagination(def groups, PaginationSettings paginationSettings)
+    {
+        if(paginationSettings)
+        {
+            if(groups instanceof Map)
+            {
+                List keys = groups?.keySet()?.toList()
+                keys = sliceCollection(keys, paginationSettings)
+                return groups.findAll { it.key in keys }
+            }
+            else
+            {
+                return sliceCollection(groups, paginationSettings)
+            }
+        }
+        else return groups
+    }
+
+    /**
+     * Метод, возвращающий элементы между индексами
+     * @param elements - элементы
+     * @param paginationSettings - настройки пагинации
+     * @return элементы, подходящие по индексам для страницы
+     */
+    Collection sliceCollection(Collection list, PaginationSettings paginationSettings)
+    {
+        Integer offset = paginationSettings.firstElementIndex
+        Integer limit = paginationSettings.pageSize
+        def from = Math.min(offset, list.size()) as int
+        def to = (limit ? Math.min(offset + limit, list.size()) : list.size()) as int
+        return list.subList(from, to)
+    }
+
+    /**
+     * Метод получения реального количества списков фильтров для таблицы
+     * @param filterListSize - текущий список фильтров
+     * @param requestContent - запрос на построение диаграммы
+     * @param templateUUID - uuid шаблона динамического атрибута
+     * @return  реальное количество списков фильтров для таблицы
+     */
+    private Integer getRealFilterListSizeForTable(Integer filterListSize, def requestContent, String templateUUID)
+    {
+        Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
+        Integer countOfCustomsInFullRequest = countDataForManyCustomGroupsInParameters(requestContent, false)
+        Boolean requestHasDynamicAndCustom = (countOfCustomsInFirstSource > 0  || countOfCustomsInFullRequest > 0) && templateUUID
+
+        if  (countOfCustomsInFirstSource > 1 || countOfCustomsInFullRequest > 1 || requestHasDynamicAndCustom)
+        {
+            filterListSize = 2
+        }
+        return filterListSize
     }
 
     /**
@@ -338,8 +454,10 @@ class DashboardDataSetService
             if (it?.source?.classFqn != mainSource.classFqn)
             {
                 //добавляем привязку к этому источнику - атрибуту
-                return groups.collect { group ->
-                    group.attribute.code = "${it?.source?.classFqn}.${group.attribute.code}"
+                return groups?.collect { group ->
+                    def attr = group.attribute.deepClone()
+                    attr.code = "${it?.source?.classFqn}.${attr.code}"
+                    group.attribute = attr
                     return group
                 }
             }
@@ -440,7 +558,7 @@ class DashboardDataSetService
     }
 
     /**
-     * Метод приведения запроса на построение диаграмм к единому формату
+     Метод приведения запроса на построение диаграмм к единому формату
      * @param widgetSettings - настройки виджета на построение диаграммы
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param diagramType - тип диаграммы
@@ -449,18 +567,23 @@ class DashboardDataSetService
      * @param showTableBlank - флаг на отображение незаполненных значений, если диаграмма типа таблица
      * @param computationInTableRequest - флаг на наличие вычислений в запросе, если диаграмма типа таблица
      * @param tableTop - количество записей, которое нужно вывести, если диаграмма типа таблица
+     * @param tableSorting - сортировка на таблице
      * @return DiagramRequest
      */
     private DiagramRequest mappingDiagramRequest(def widgetSettings, String subjectUUID,
-                                                 DiagramType diagramType, Collection<WidgetFilterResponse> widgetFilters, Boolean showTableNulls = false,  Boolean showTableBlank = false,
-                                                 Boolean computationInTableRequest = false, Integer tableTop = 0)
+                                                 DiagramType diagramType, Collection<WidgetFilterResponse> widgetFilters,
+                                                 Boolean showTableNulls = false,  Boolean showTableBlank = false,
+                                                 Boolean computationInTableRequest = false, Integer tableTop = 0,
+                                                 Sorting tableSorting = null)
     {
         def sorting
         def uglyRequestData = widgetSettings.data
         Boolean isDiagramTypeTable = diagramType == DiagramType.TABLE
+        Boolean hasTableNotOnlyBaseSources = (requestContent?.data*.source.value.value as Set).size() > 1
         Boolean isDiagramTypeNotCount = !(diagramType in [DiagramType.CountTypes, DiagramType.RoundTypes])
         Boolean isDiagramTypeCount = diagramType in DiagramType.CountTypes
-        if(!isDiagramTypeCount)
+        def commonBreakdown
+        if(!isDiagramTypeCount && !isDiagramTypeTable)
         {
             sorting = widgetSettings.sorting
         }
@@ -472,12 +595,21 @@ class DashboardDataSetService
             def dynamicGroup = null
 
             List<BaseAttribute> indicators = data.indicators
-            List<AggregationParameter> aggregationParameters = indicators.collect { indicator ->
+            List<AggregationParameter> aggregationParameters = !(sourceForCompute) ? indicators.collect { indicator ->
+                def sortingType
+                if(isDiagramTypeTable)
+                {
+                    sortingType = tableSorting?.accessor?.trim() == indicator.attribute.title.trim() ? tableSorting?.type : null
+                }
+                else
+                {
+                    sortingType = sorting && sorting?.value == SortingValue.INDICATOR ? sorting?.type : null
+                }
                 return new AggregationParameter(
                     title: 'column',
                     type: indicator.aggregation,
                     attribute: indicator.attribute,
-                    sortingType: sorting?.value == SortingValue.INDICATOR ? sorting?.type : null
+                    sortingType: sortingType
                 )
             }
             boolean dynamicInAggregate
@@ -500,11 +632,22 @@ class DashboardDataSetService
                 parameters.each {
                     Attribute attribute = it.attribute
                     Group group = it.group
+                    def sortingType
+                    if(isDiagramTypeTable)
+                    {
+                        sortingType = tableSorting?.accessor?.trim()  == attribute.title.trim()
+                            ? tableSorting?.type
+                            : null
+                    }
+                    else
+                    {
+                        sortingType = sorting && sorting.value == SortingValue.PARAMETER ? sorting.type : null
+                    }
 
                     if (group.way == Way.SYSTEM)
                     {
                         def groupParameter = buildSystemGroup(group, attribute, 'parameter')
-                        groupParameter?.sortingType = sorting?.value == SortingValue.PARAMETER ? sorting?.type : null
+                        groupParameter?.sortingType = sortingType
                         groupParameters << groupParameter
                     }
                     else
@@ -512,7 +655,7 @@ class DashboardDataSetService
                         def newParameterFilterList = getFilterList(it,
                                                                    subjectUUID,
                                                                    'parameter',
-                                                                   sorting.value == SortingValue.PARAMETER ? sorting.type : null)
+                                                                   sortingType)
                         if (parameterFilters)
                         {
                             List newParameterFilters = newParameterFilterList.filters
@@ -525,7 +668,7 @@ class DashboardDataSetService
                             }
                             def filterList = new FilterList(place: 'parameter',
                                                             filters: parameterListFilters,
-                                                            sortingType: sorting?.value == SortingValue.PARAMETER ? sorting?.type : '')
+                                                            sortingType: sortingType)
                             parameterFilters = [filterList]
                         }
                         else
@@ -549,6 +692,9 @@ class DashboardDataSetService
 
             def mayBeBreakdown = data.breakdown
             def breakdownMap = [:]
+            breakdownMap = isDiagramTypeTable && !hasTableNotOnlyBaseSources && !mayBeBreakdown && commonBreakdown
+                ? [(data.dataKey): commonBreakdown.values().find()]
+                : breakdownMap
             boolean dynamicInBreakdown = false
 
             if(isDiagramTypeNotCount)
@@ -567,6 +713,7 @@ class DashboardDataSetService
                             }
                             [(el.dataKey): buildSystemGroup(el.group, el.attribute, diagramType == DiagramType.COMBO ? 'usual_breakdown' : 'breakdown')]
                         }
+                        commonBreakdown = isDiagramTypeTable && !hasTableNotOnlyBaseSources ? breakdownMap : [:]
                     }
                     else
                     {
@@ -582,7 +729,7 @@ class DashboardDataSetService
                 {
                     def compData = indicator.attribute.computeData as Map
                     def computeData = compData.collectEntries { k, v ->
-                        String dataKey = isDiagramTypeTable ? "сompute-data_${compIndicatorId}" : v.dataKey
+                        String dataKey = isDiagramTypeTable && hasTableNotOnlyBaseSources ? "сompute-data_${compIndicatorId}" : v.dataKey
                         def br = breakdownMap[v.dataKey] as GroupParameter
                         def aggr = new AggregationParameter(
                             title: indicator?.attribute?.title,
@@ -621,7 +768,7 @@ class DashboardDataSetService
                 parameterFilters << getFilterList(dynamicGroup,
                                                   subjectUUID,
                                                   'parameter',
-                                                  sorting.value == SortingValue.PARAMETER ? sorting.type : null)
+                                                  sorting?.value == SortingValue.PARAMETER ? sorting?.type : null)
             }
 
             def requisite
@@ -684,6 +831,7 @@ class DashboardDataSetService
         Boolean manySources = isDiagramTypeTable &&
                               widgetSettings?.data*.sourceForCompute?.count { !it } > 1 &&
                               hasTableNotOnlyBaseSources
+        def prevData = intermediateData
         if(manySources)
         {
             Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(widgetSettings)
@@ -845,37 +993,11 @@ class DashboardDataSetService
         return groupType?.way == Way.SYSTEM ? new GroupParameter(
             title: title,
             type: Attribute.getAttributeType(attr) == AttributeType.DT_INTERVAL_TYPE
-                ? getDTIntervalGroupType(groupType.data as String)
+                ? DashboardUtils.getDTIntervalGroupType(groupType.data as String)
                 : groupType.data as GroupType,
             attribute: attr,
             format: groupType.format
         ) : null
-    }
-
-    /**
-     * Метод определения типа группировки для атрибута типа "временной интервал"
-     * @param groupType - декларируемая группировка временного интервала
-     * @return фактическая группировка временного интервала
-     */
-    private GroupType getDTIntervalGroupType(String groupType)
-    {
-        switch (groupType.toLowerCase())
-        {
-            case 'overlap':
-                return GroupType.OVERLAP
-            case 'second':
-                return GroupType.SECOND_INTERVAL
-            case 'minute':
-                return GroupType.MINUTE_INTERVAL
-            case 'hour':
-                return GroupType.HOUR_INTERVAL
-            case 'day':
-                return GroupType.DAY_INTERVAL
-            case 'week':
-                return GroupType.WEEK_INTERVAL
-            default:
-                throw new IllegalArgumentException("Not supported group type in dateTimeInterval attribute: $groupType")
-        }
     }
 
     /**
@@ -1791,9 +1913,13 @@ class DashboardDataSetService
      * @param aggregationCnt - количество агрегаций
      * @param requestContent - тело запроса
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
+     * @param paginationSettings - настройки для пагинации в таблице
      * @return сырые данные из Бд по запросу
      */
-    private def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT, Integer aggregationCnt = 1, def requestContent = null, IgnoreLimits ignoreLimits = new IgnoreLimits())
+    private def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT,
+                               Integer aggregationCnt = 1, def requestContent = null,
+                               IgnoreLimits ignoreLimits = new IgnoreLimits(),
+                               PaginationSettings paginationSettings = null)
     {
         assert request: "Empty request!"
         return request.requisite.collect { requisite ->
@@ -1816,7 +1942,7 @@ class DashboardDataSetService
                             }
                         } : [0]
                         Map<String, Object> filterMap = getInfoAboutFilters(requisiteNode.dataKey, request)
-                        String parameterSortingType = filterMap.parameterSortingType
+                        String parameterSortingType = diagramType == DiagramType.TABLE ? null : filterMap.parameterSortingType
                         def parameterFilters = filterMap.parameterFilters
                         def breakdownFilters = filterMap.breakdownFilters
                         Integer filterListSize = filterMap.filterListSize
@@ -1835,14 +1961,14 @@ class DashboardDataSetService
                         }
                         if(!filtering)
                         {
-                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits)
+                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits, paginationSettings)
                         }
                         RequestData newRequestData = requestData.clone()
                         Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
                             newRequestData.filters = filters
-                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType)
+                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType, ignoreLimits.parameter : false, paginationSettings)
                                                                 .with(formatGroup)
                                                                 .with(formatAggregation)
 
@@ -1898,7 +2024,7 @@ class DashboardDataSetService
                         def dataSet = calculator.variableNames.collectEntries {
                             Map filterMap = getInfoAboutFilters(it, request)
 
-                            parameterSortingType = filterMap.parameterSortingType
+                            parameterSortingType = diagramType == DiagramType.TABLE ? '' : filterMap.parameterSortingType
                             parameterFilters = filterMap.parameterFilters
                             breakdownFilters = filterMap.breakdownFilters
                             filterListSize = filterMap.filterListSize
@@ -1911,8 +2037,8 @@ class DashboardDataSetService
 
                         if(filterListSize == 0)
                         {
-                            parameterSortingType = dataSet.values().head().groups.find()?.sortingType
-                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits)
+                            parameterSortingType = diagramType == DiagramType.TABLE ?  null : dataSet.values().head().groups.find()?.sortingType
+                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits, paginationSettings)
                         }
 
                         List<Integer> listIdsOfNormalAggregations = [0]
@@ -1924,7 +2050,7 @@ class DashboardDataSetService
                                 RequestData newData = data.clone()
                                 newData.filters = filters
                                 Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType)
+                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType, ignoreLimits.parameter : false, paginationSettings)
                                 if(!res && !onlyFilled)
                                 {
                                     def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
@@ -2736,15 +2862,20 @@ class DashboardDataSetService
      * @param list - список данных из БД
      * @param totalColumn - флаг на подсчёт итоговой колонки
      * @param showRowNum - флаг для вывода номера строки
-     * @param request - запрос
+     * @param rowCount - количество строк в полном запросе
+     * @param pagingSettings -
      * @param requestContent - тело запроса с фронта
-     * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @param request - тело обработанного запроса
+     * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @return сформированная таблица
      */
     private TableDiagram mappingTableDiagram(List list,
                                              boolean totalColumn,
                                              boolean  showRowNum,
+                                             Integer rowCount,
+                                             PaginationSettings paginationSettings,
+                                             Sorting sorting,
+                                             Boolean reverseRowCount,
                                              def requestContent,
                                              DiagramRequest request,
                                              IgnoreLimits ignoreLimits = new IgnoreLimits())
@@ -2781,6 +2912,11 @@ class DashboardDataSetService
                                 attributes,
                                 totalColumn,
                                 showRowNum,
+                                rowCount,
+                                paginationSettings,
+                                sorting,
+                                reverseRowCount,
+                                innerCustomGroupNames,
                                 hasBreakdown,
                                 customValuesInBreakdown,
                                 aggregationCnt,
@@ -3037,7 +3173,7 @@ class DashboardDataSetService
                     def num = listRow.find {
                         it[1..-1].collect { it ?: 0}.sort() == tempRow
                     }.find() //при последующей итерации число агрегаций увеличивается на 1
-                    row.add(indexesOfComputeInRequest[i]  as int, num)
+                    row.add(indexesOfComputeInRequest[i] as int, num)
                 }
             }
         }
@@ -3107,6 +3243,7 @@ class DashboardDataSetService
      * @param attributes - список атрибутов
      * @param totalColumn - флаг на подсчёт итогов в колонках
      * @param showRowNum - флаг на отображение номера строки
+     * @param rowCount - количество строк в полном запросе
      * @param customValuesInBreakdown - значения кастомной группировки в разбивке
      * @param aggregationCnt - количество агрегаций в запросе
      * @param allAggregationAttributes - названия всех атрибутов агрегации
@@ -3115,7 +3252,8 @@ class DashboardDataSetService
      * @return TableDiagram
      */
     private TableDiagram mappingTable(List resultDataSet, List transposeDataSet, List attributes, Boolean totalColumn,
-                                      Boolean showRowNum, Boolean hasBreakdown, List customValuesInBreakdown,
+                                      Boolean showRowNum, Integer rowCount, PaginationSettings paginationSettings, Sorting sorting,
+                                      Boolean reverseRowCount, Set<Map> innerCustomGroupNames, Boolean hasBreakdown, List customValuesInBreakdown,
                                       Integer aggregationCnt, List<String> allAggregationAttributes, IgnoreLimits ignoreLimits,
                                       DiagramRequest request)
     {
@@ -3133,6 +3271,7 @@ class DashboardDataSetService
         Integer notAggregatedAttributeSize = notAggregatedAttributeNames.size()
         List<Map<String, Object>> tempMaps = getTempMaps(resultDataSet, attributeNames, cnt)
         List data = []
+        int id = reverseRowCount ? rowCount - paginationSettings.firstElementIndex : paginationSettings.firstElementIndex
         Integer parameterIndex = aggregationCnt + notAggregatedAttributeSize //индекс,
         // с которого в строке начинаются значения параметров
         //подготовка данных
@@ -3140,7 +3279,9 @@ class DashboardDataSetService
         {
             Integer indexToFind = 2 //берём до предпоследнего значения в строке, на последнем месте - разбивка
             def groups = tempMaps.groupBy { it[parameterIndex..-(indexToFind)] }//группируем данные по параметрам (их значениям)
-            int id = 0
+            rowCount = groups.size()
+            id = reverseRowCount ? rowCount - paginationSettings.firstElementIndex : paginationSettings.firstElementIndex
+            groups = getDataSetWithPagination(groups, paginationSettings)
             data = groups.collect { parameters, group ->
                 if (valuesInBasicBreakdownExceedLimit)
                 {
@@ -3156,7 +3297,7 @@ class DashboardDataSetService
                 def map = [:]
                 if (showRowNum)
                 {
-                    map = [ID: ++id]
+                    map = [ID: reverseRowCount ? id-- : ++id]
                 }
                 (parameters + aggregations).each {
                     map << it
@@ -3166,11 +3307,19 @@ class DashboardDataSetService
         }
         else
         {
-            data = tempMaps.withIndex().collect { map, id ->
+            if(innerCustomGroupNames ||
+               (sorting?.accessor &&
+                attributes.find {it?.name?.trim() == sorting?.accessor?.trim() }
+                          ?.attribute instanceof ComputedAttr ))
+            {
+                tempMaps = sortTableDataSetWithMaps(tempMaps, attributes, sorting)
+                tempMaps = getDataSetWithPagination(tempMaps, paginationSettings)
+            }
+            data = tempMaps.collect { map ->
                 def value = map[aggregationCnt..-1] + map[0..aggregationCnt -1].collect { it.findResult {k,v -> [(k): v ?: "0"]} }
                 if(showRowNum)
                 {
-                    return [ID: ++id, *:value.sum()]
+                    return [ID: reverseRowCount ? id-- : ++id, *:value.sum()]
                 }
                 else
                 {
@@ -3218,7 +3367,7 @@ class DashboardDataSetService
         def source = request.data.findResult { k, v -> v.source }
 
         def parameterAttribute = attributes.attribute[parameterIndex]
-        Boolean limitParameter = !ignoreLimits.parameter &&
+        Boolean limitParameter = !ignoreLimits?.parameter &&
                                  parameterAttribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
             ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
                                                                  parameterAttribute.code.tokenize('_').last()) >
@@ -3246,7 +3395,37 @@ class DashboardDataSetService
 
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
 
-        return new TableDiagram(columns: columns, data: data, limitsExceeded: limitsExceeded)
+        return new TableDiagram(columns: columns, data: data, limitsExceeded: limitsExceeded, total: rowCount)
+    }
+
+    /**
+     * Метод, позволяющий сортировать значения для таблицы по нужному параметру/показателю
+     * @param tempMaps - список временных мап (название параметра/показателя/разбивки:значение)
+     * @param attributes - список атрибутов, участвующих в запросе
+     * @param tableSorting - настройки сортировки в таблице
+     * @return отсортированный список значений
+     */
+    def sortTableDataSetWithMaps(def tempMaps, List attributes, Sorting tableSorting)
+    {
+        def attrValue = tableSorting?.accessor ? attributes.find {it?.name?.trim() == tableSorting.accessor.trim()} : null
+
+        if(attrValue)
+        {
+            def valueType = attrValue?.aggregation != Aggregation.NOT_APPLICABLE && attrValue.type == ColumnType.INDICATOR
+                ? ColumnType.INDICATOR
+                : ColumnType.PARAMETER
+
+            switch(valueType)
+            {
+                case ColumnType.INDICATOR:
+                    def factor = tableSorting.type == SortingType.DESC ? -1 : 1
+                    return tempMaps.sort { factor * it[attrValue.name]?.findResult {it}?.toDouble() }
+                case ColumnType.PARAMETER:
+                    def total = tempMaps.sort { it[attrValue.name]?.find()?.toLowerCase() }
+                    return tableSorting.type == SortingType.DESC ? total.reverse() : total
+            }
+        }
+        else return tempMaps
     }
 
     /**
@@ -3958,7 +4137,7 @@ class DashboardDataSetService
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @return сырые данные для построения диаграм
      */
-    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean notBlank,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits)
+    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean notBlank,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits, PaginationSettings paginationSettings = null)
     {
         String nodeType = node.type
         switch (nodeType.toLowerCase())
@@ -3980,14 +4159,14 @@ class DashboardDataSetService
 
                 String aggregationSortingType = requestData.aggregations.find()?.sortingType
                 def parameter = requestData.groups.find()
-                String parameterSortingType = parameter?.sortingType
+                String parameterSortingType = diagramType == DiagramType.TABLE ? '' : parameter?.sortingType
                 String parameterAttributeType = parameter?.attribute?.type
                 Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, true)
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits.parameter)
+                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                     .with(formatGroup)
                                                     .with(formatAggregation)
                 def total = res ? [(requisiteNode.title): res] : [:]
@@ -4034,7 +4213,7 @@ class DashboardDataSetService
                 def variables = dataSet.collectEntries { key, data ->
                     Closure postProcess =
                         this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, notBlank, diagramType, ignoreLimits.parameter)
+                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, notBlank, diagramType, ignoreLimits.parameter, paginationSettings)
                                                       .with(postProcess)]
                 } as Map<String, List>
 
@@ -4043,7 +4222,7 @@ class DashboardDataSetService
                                    dataSet.values().head().aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE }
                 String aggregationSortingType = dataSet.values().head().aggregations.find()?.sortingType
                 def parameter = dataSet.values().head().groups.find()
-                String parameterSortingType = parameter?.sortingType
+                String parameterSortingType = diagramType == DiagramType.TABLE ? '' : parameter?.sortingType
                 String parameterAttributeType = parameter?.attribute?.type
                 Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
@@ -4163,11 +4342,14 @@ class TableDiagram
      * Список значений строки
      */
     Collection<Map<String, Object>> data = []
-
     /**
      * Объект, отображающий превышения по пределам ограничений
      */
     LimitExceeded limitsExceeded
+    /**
+     * Количество строк в полном запросе
+     */
+    Integer total = 0
 }
 
 /**
