@@ -21,10 +21,10 @@ export class SavedFilters extends Component<Props> {
 		loading: false
 	};
 
-	getComponents = (): SavedFiltersComponents => memoize({
+	getComponents = memoize(() => ({
 		List: this.renderFilterList,
 		ValueContainer: this.renderValueContainer
-	});
+	}));
 
 	getListComponents = (): ListComponents => ({
 		ListOption: this.renderListOption
