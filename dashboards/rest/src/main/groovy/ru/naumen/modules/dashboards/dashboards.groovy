@@ -265,6 +265,8 @@ class DashboardsImpl extends Script implements Dashboards
 class DashboardsService
 {
     private static final String MAIN_FQN = 'abstractBO'
+    private static final String LC_PARENT_FQN = 'abstractSysObj'
+    private static final String LC_FQN = 'abstractEvt'
 
     /**
     * Отдает список источников данных с детьми
@@ -274,7 +276,9 @@ class DashboardsService
     Collection<DataSource> getDataSources(classFqn = MAIN_FQN)
     {
         def children = getMetaClassChildren(classFqn as String)
-        return mappingDataSource(children)
+        return children.collectMany {
+            mappingDataSource(it, false)
+        }
     }
 
     /**
@@ -1021,7 +1025,9 @@ class DashboardsService
         Closure classValidator = { clazz ->
             !clazz.@metaClass.isHidden() && clazz.@metaClass.status.name() != 'REMOVED'
         }
-        return api.metainfo.getMetaClass(fqn)?.children?.collectMany {
+        def  lcMetaClass = api.metainfo.getMetaClass(LC_PARENT_FQN)?.children.find { it?.code == LC_FQN }
+        def fqns = [lcMetaClass]
+        fqns << api.metainfo.getMetaClass(fqn)?.children?.collectMany {
             if (classValidator.call(it))
             {
                 return [it]
@@ -1032,6 +1038,7 @@ class DashboardsService
             }
             return []
         }
+        return fqns
     }
 
     /**
@@ -1045,7 +1052,7 @@ class DashboardsService
         return fqns.collect {
             new DataSource(
                 it.code,
-                it.title,
+                it.title?.replace('Event for ', ''),
                 fromAttribute ? [] : mappingDataSource(it.children),
                 fromAttribute ? false : checkForDynamicAttributes(it.code)
             )
