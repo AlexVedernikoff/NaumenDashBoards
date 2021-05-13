@@ -1,5 +1,6 @@
 // @flow
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
+import {escapeString} from 'helpers';
 import Loader from 'components/atoms/Loader';
 import Node from 'components/molecules/MaterialTreeSelect/components/Node';
 import type {Node as NodeType, Props, State} from './types';
@@ -108,7 +109,7 @@ export class Tree extends Component<Props, State> {
 	};
 
 	setFoundIds = (searchValue: string) => {
-		const reg = new RegExp(searchValue, 'i');
+		const reg = new RegExp(escapeString(searchValue), 'i');
 		const foundIds = [];
 
 		this.getRoots().forEach(node => {

@@ -1,16 +1,16 @@
 // @flow
 import cn from 'classnames';
 import Container from 'components/atoms/Container';
-import {debounce} from 'helpers';
+import {debounce, escapeString} from 'helpers';
 import {DEFAULT_PROPS} from './constants';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import List from './components/List';
 import Loader from 'components/atoms/Loader';
-import type {OnChangeEvent} from 'components/types';
+import type {OnChangeEvent, Ref} from 'components/types';
 import type {Option, Props, State} from './types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
@@ -24,6 +24,8 @@ export class Select extends PureComponent<Props, State> {
 		searchValue: '',
 		showMenu: false
 	};
+
+	searchInputRef: Ref<'input'> = createRef();
 
 	fetchOptions = () => {
 		const {fetchOptions, loading, options} = this.props;
@@ -49,7 +51,7 @@ export class Select extends PureComponent<Props, State> {
 		let foundOptions = options;
 
 		if (searchValue) {
-			const reg = new RegExp(searchValue, 'i');
+			const reg = new RegExp(escapeString(searchValue), 'i');
 
 			foundOptions = options.filter(o => reg.test(getOptionLabel(o)));
 		}
@@ -209,6 +211,7 @@ export class Select extends PureComponent<Props, State> {
 			return (
 				<SearchInput
 					focusOnMount={true}
+					forwardedRef={this.searchInputRef}
 					onChange={debounce(this.handleChangeSearchInput, 500)}
 					value={searchValue}
 				/>

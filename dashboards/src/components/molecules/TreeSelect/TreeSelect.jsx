@@ -8,7 +8,8 @@ import LabelEditingForm from 'components/molecules/InputForm';
 import type {Node} from 'components/molecules/MaterialTreeSelect/components/Tree/types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import Tree from 'components/molecules/MaterialTreeSelect/components/Tree';
@@ -26,6 +27,8 @@ export class TreeSelect extends PureComponent<Props, State> {
 		showForm: false,
 		showMenu: false
 	};
+
+	searchInputRef: Ref<'input'> = createRef();
 
 	componentDidMount = () => {
 		const {isActive} = this.props;
@@ -179,7 +182,14 @@ export class TreeSelect extends PureComponent<Props, State> {
 	renderSearchInput = () => {
 		const {searchValue} = this.state;
 
-		return <SearchInput onChange={debounce(this.handleChangeSearchInput, 500)} value={searchValue} />;
+		return (
+			<SearchInput
+				focusOnMount={true}
+				forwardedRef={this.searchInputRef}
+				onChange={debounce(this.handleChangeSearchInput, 500)}
+				value={searchValue}
+			/>
+		);
 	};
 
 	renderSelect = () => (

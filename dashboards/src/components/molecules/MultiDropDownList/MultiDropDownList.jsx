@@ -1,5 +1,6 @@
 // @flow
 import DropDownList from 'components/molecules/DropDownList';
+import {escapeString} from 'helpers';
 import Loader from 'components/atoms/Loader';
 import type {Props, Root, State} from './types';
 import React, {PureComponent} from 'react';
@@ -19,13 +20,13 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 	getItems = (): Array<Object> => {
 		const {items} = this.props;
 		const {searchValue} = this.state;
-		const reg = new RegExp(searchValue, 'ig');
+		const reg = new RegExp(escapeString(searchValue), 'i');
 
 		return items
 			.map(item => ({
 				...item,
-				children: item.children.filter(child => reg.test(child.label)
-				)}))
+				children: item.children.filter(child => reg.test(child.label))
+			}))
 			.filter(({children, label}) => reg.test(label) || children.length !== 0);
 	};
 

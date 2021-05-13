@@ -1,6 +1,7 @@
 // @flow
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import cn from 'classnames';
+import {escapeString} from 'helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import Loader from 'components/atoms/Loader';
 import type {Props, State} from './types';
@@ -60,10 +61,9 @@ export class Node extends PureComponent<Props, State> {
 		this.setState({expanded: !expanded});
 	};
 
-	isFoundLabel = () => {
+	isFoundLabel = (): boolean => {
 		const {data, getOptionLabel, searchValue} = this.props;
-
-		return searchValue && (new RegExp(searchValue, 'i')).test(getOptionLabel(data.value));
+		return !!searchValue && (new RegExp(escapeString(searchValue), 'i')).test(getOptionLabel(data.value));
 	};
 
 	renderChildren = () => {
