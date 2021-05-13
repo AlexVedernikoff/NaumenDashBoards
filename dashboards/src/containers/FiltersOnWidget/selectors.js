@@ -22,9 +22,7 @@ const mapCustomFilterToValues = (dataSetIndex: number, widgetFilterOptions: Cust
 	const result = [];
 
 	widgetFilterOptions.forEach(({attributes, label}) => {
-		attributes.forEach((attribute) => {
-			result.push(({attribute, dataSetIndex, label}: CustomFilterValue));
-		});
+		result.push(({attributes, dataSetIndex, label}: CustomFilterValue));
 	});
 
 	return result;

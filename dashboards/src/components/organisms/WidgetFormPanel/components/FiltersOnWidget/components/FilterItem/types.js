@@ -6,7 +6,7 @@ import type {CustomFilterDataSet, CustomFilterValue} from 'containers/FiltersOnW
 export type Props = {
 	dataSets: CustomFilterDataSet[],
 	fetchAttributes: (dataSetIndex: number) => void,
-	onChangeAttribute: (newAttribute: Attribute) => void,
+	onChangeAttribute: (newAttributes: Attribute[]) => void,
 	onChangeDataSet: (newDataKey: string) => void,
 	onChangeLabel: (newLabel: string) => void,
 	onDelete: () => void,

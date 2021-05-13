@@ -18,5 +18,6 @@ export const DEFAULT_PROPS: DefaultProps = {
 	notFoundMessage: 'Ничего не найдено',
 	options: [],
 	placeholder: '',
-	value: null
+	value: null,
+	values: []
 };

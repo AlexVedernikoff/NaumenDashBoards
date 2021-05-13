@@ -8,17 +8,25 @@ import TextInput from 'components/atoms/TextInput';
 
 export class FilterItem extends PureComponent<Props> {
 	fetchOptions = () => {
-		const {fetchAttributes, value} = this.props;
+		const {dataSets, fetchAttributes, value} = this.props;
 		const {dataSetIndex} = value;
 
 		if (typeof dataSetIndex === 'number') {
-			fetchAttributes(dataSetIndex);
+			const selectedDataSet = dataSets[dataSetIndex];
+			const { attributes = [], attributesLoading } = selectedDataSet;
+
+			if (!attributesLoading && attributes.length === 0) {
+				fetchAttributes(dataSetIndex);
+			}
 		}
 	};
 
 	handleChangeAttribute = ({value}) => {
 		const {onChangeAttribute} = this.props;
-		return onChangeAttribute(value);
+
+		if (value.length <= 3) {
+			onChangeAttribute(value);
+		}
 	};
 
 	handleChangeDataSet = ({value}) => {
@@ -47,13 +55,14 @@ export class FilterItem extends PureComponent<Props> {
 						<Select
 							fetchOptions={this.fetchOptions}
 							getOptionLabel={(attribute: Attribute) => attribute.title}
-							getOptionValue={(attribute: Attribute) => attribute}
+							getOptionValue={(attribute: Attribute) => `${attribute.property}-${attribute.code}`}
 							isSearching={true}
 							loading={attributesLoading}
+							multiple={true}
 							onSelect={this.handleChangeAttribute}
 							options={attributes}
 							placeholder="Укажите атрибут"
-							value={value.attribute}
+							values={value.attributes}
 						/>
 					</FormField>
 				);

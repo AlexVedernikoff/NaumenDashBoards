@@ -43,6 +43,7 @@ Simple.args = {
 			value: 'value2'
 		}
 	],
+	placeholder: 'Выберите элемент',
 	value: null
 };
 
@@ -95,11 +96,36 @@ const BigListTemplate = args => {
 
 export const BigList = BigListTemplate.bind({});
 
-const bigOptionsList = Array.from(Array(1000)).map((e, i) => ({label: `Option ${i}`, value: i}));
+const bigOptionsList = [...new Array(1000)].map((_, i) => ({label: `Option ${i}`, value: i}));
 
 BigList.args = {
 	...DEFAULT_PROPS,
 	options: bigOptionsList,
 	placeholder: 'Выберите элемент',
 	value: null
+};
+
+const MultipleTemplate = args => {
+	const [{values}, updateArgs] = useArgs();
+	const onSelect = (event) => {
+		const {value} = event;
+
+		action('onSelect')(event);
+		updateArgs({values: value});
+	};
+
+	return (
+		<div style={{width: 300}}>
+			<Select {...args} onSelect={onSelect} value={values} />
+		</div>
+	);
+};
+
+export const Multiple = MultipleTemplate.bind({});
+
+Multiple.args = {
+	...DEFAULT_PROPS,
+	multiple: true,
+	options: bigOptionsList.slice(0, 10),
+	placeholder: 'Выберите элементы'
 };

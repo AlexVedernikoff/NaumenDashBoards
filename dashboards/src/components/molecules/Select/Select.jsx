@@ -72,7 +72,7 @@ export class Select extends PureComponent<Props, State> {
 		this.setState({showMenu: !this.state.showMenu});
 	};
 
-	handleSelect = (value: Option) => {
+	handleSelect = (value: Option | Option[]) => {
 		const {multiple, name, onSelect} = this.props;
 
 		!multiple && this.setState({showMenu: false});
@@ -93,13 +93,26 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderLabel = (): React$Node => {
-		const {editable, forwardedLabelInputRef, getOptionLabel, placeholder, value} = this.props;
+		const {editable, forwardedLabelInputRef, getOptionLabel, multiple, placeholder, value, values = []} = this.props;
 		const {Value} = this.components;
-		const label = (value && getOptionLabel(value)) ?? placeholder;
+		let label = placeholder;
+		let usePlaceholder = true;
+
+		if (multiple) {
+			const text = values && values.map(getOptionLabel).join(', ');
+
+			if (text) {
+				label = text;
+				usePlaceholder = false;
+			}
+		} else if (value) {
+			label = getOptionLabel(value);
+			usePlaceholder = false;
+		}
 
 		const valueCN = cn({
 			[styles.value]: true,
-			[styles.placeholder]: !value
+			[styles.placeholder]: usePlaceholder
 		});
 
 		if (editable) {
@@ -118,7 +131,7 @@ export class Select extends PureComponent<Props, State> {
 	};
 
 	renderList = (): React$Node => {
-		const {getOptionLabel, getOptionValue, getOptions, loading, options: allOptions, value} = this.props;
+		const {getOptionLabel, getOptionValue, getOptions, loading, multiple, options: allOptions, value, values} = this.props;
 		const {foundOptions, searchValue} = this.state;
 		const {List} = this.components;
 		const options = searchValue ? foundOptions : allOptions;
@@ -128,10 +141,12 @@ export class Select extends PureComponent<Props, State> {
 				<List
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
+					multiple={multiple}
 					onSelect={this.handleSelect}
 					options={getOptions(options)}
 					searchValue={searchValue}
 					value={value}
+					values={values || []}
 				/>
 			);
 		}

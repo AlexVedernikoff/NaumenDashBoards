@@ -31,7 +31,7 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 
 	handleAddNewFilterItem = () => {
 		const newValue: CustomFilterValue = {
-			attribute: null,
+			attributes: [],
 			dataSetIndex: null,
 			label: ''
 		};
@@ -62,17 +62,17 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 			const {dataSetIndex} = dataSet;
 			let widgetFilterOptions = null;
 
-			filters.forEach(({attribute, dataSetIndex: filterDataSetIndex, label}) => {
+			filters.forEach(({attributes, dataSetIndex: filterDataSetIndex, label}) => {
 				if (
 					filterDataSetIndex === dataSetIndex
 					&& !!label
-					&& !!attribute
+					&& (attributes?.length ?? 0) > 0
 				) {
 					if (!widgetFilterOptions) {
 						widgetFilterOptions = [];
 					}
 
-					widgetFilterOptions.push({attributes: [attribute], label});
+					widgetFilterOptions.push({attributes, label});
 				}
 			});
 

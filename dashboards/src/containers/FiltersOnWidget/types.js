@@ -6,7 +6,7 @@ import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types'
 export type DataSetTypes = Array<AxisData> | Array<CircleData> | Array<ComboData> | Array<SummaryData> | Array<TableData>;
 
 export type CustomFilterValue = {
-	attribute: ?Attribute,
+	attributes: ?Attribute[],
 	dataSetIndex: ?number,
 	label: string,
 };
