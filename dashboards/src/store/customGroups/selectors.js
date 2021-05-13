@@ -17,6 +17,7 @@ const getCustomGroups = (state: AppState): CustomGroupsMap => state.customGroups
 const getCustomGroupsValues = createSelector(
 	getCustomGroups,
 	(map: CustomGroupsMap): Array<CustomGroup> => getMapValues(map)
+		.reduce((groups, item) => item.data ? [...groups, item.data] : groups, [])
 );
 
 export {

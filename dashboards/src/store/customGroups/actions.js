@@ -6,6 +6,33 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
 
 /**
+ * Получает данные группировки
+ * @param {string} payload - идентификатор группировки
+ * @returns {ThunkAction}
+ */
+const fetchCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	dispatch({
+		payload,
+		type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_PENDING
+	});
+
+	try {
+		const {code} = getState().dashboard.settings;
+		const customGroup = await window.jsApi.restCallModule('dashboardSettings', 'getCustomGroup', code, payload);
+
+		dispatch({
+			payload: customGroup,
+			type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_FULFILLED
+		});
+	} catch (e) {
+		dispatch({
+			payload,
+			type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_REJECTED
+		});
+	}
+};
+
+/**
  * Получает список пользовательских группировок
  * @returns {ThunkAction}
  */
@@ -16,16 +43,10 @@ const fetchCustomGroups = (): ThunkAction => async (dispatch: Dispatch, getState
 
 	try {
 		const {code} = getState().dashboard.settings;
-		let map = {};
-
 		const customGroups = await window.jsApi.restCallModule('dashboardSettings', 'getCustomGroups', code);
 
-		customGroups.forEach(customGroup => {
-			map[customGroup.id] = customGroup;
-		});
-
 		dispatch({
-			payload: map,
+			payload: customGroups,
 			type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_FULFILLED
 		});
 	} catch (e) {
@@ -114,6 +135,7 @@ const removeCustomGroup = (payload: string) => ({
 export {
 	createCustomGroup,
 	deleteCustomGroup,
+	fetchCustomGroup,
 	fetchCustomGroups,
 	updateCustomGroup
 };

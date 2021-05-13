@@ -36,7 +36,7 @@ export class GroupModal extends Component<Props, State> {
 		const {attribute, value} = props;
 		const {data, way} = value;
 		const {CUSTOM, SYSTEM} = GROUP_WAYS;
-		const systemData = way === SYSTEM ? data : getDefaultSystemGroup(attribute);
+		const systemData = way === SYSTEM ? data : getDefaultSystemGroup(attribute).data;
 		const customData = way === CUSTOM ? data : '';
 
 		return {

@@ -5,6 +5,7 @@ import {ERRORS_CONTEXT} from 'GroupModal/HOCs/withErrors';
 import GroupSelect from 'GroupModal/components/CustomGroupSelect';
 import InfoPanel from 'components/atoms/InfoPanel';
 import type {InfoPanelProps, Props, State} from './types';
+import Loader from 'components/atoms/Loader';
 import {LOCAL_PREFIX_ID} from 'GroupModal/constants';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import React, {Component} from 'react';
@@ -17,7 +18,9 @@ import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
 export class CustomGroup extends Component<Props, State> {
 	static defaultProps = {
-		schema: null
+		loading: false,
+		schema: null,
+		value: null
 	};
 
 	state = {
@@ -27,27 +30,19 @@ export class CustomGroup extends Component<Props, State> {
 		showRemovalInfo: false,
 		showSaveInfo: false,
 		showUseInfo: false,
-		usedInWidgets: [],
-		value: null
+		usedInWidgets: []
 	};
 
-	static getDerivedStateFromProps (props: Props) {
-		const {options, value} = props;
-
-		return {
-			value: options.find(o => o.id === value) ?? null
-		};
-	}
-
-	componentDidUpdate (prevProps: Props, prevState: State) {
+	componentDidUpdate (prevProps: Props) {
 		const {submitted, value} = this.props;
+		const {value: prevValue} = prevProps;
 		const {errors} = this.state;
 
-		if (submitted && prevState.value !== this.state.value) {
+		if (submitted && prevValue !== value) {
 			this.validate();
 		}
 
-		if (value !== prevProps.value && Object.keys(errors).length > 0) {
+		if (value?.id !== prevProps.value?.id && Object.keys(errors).length > 0) {
 			this.setState({
 				errors: {}
 			});
@@ -61,8 +56,7 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleChangeName = (event: OnChangeEvent<string>) => {
-		const {onUpdate} = this.props;
-		const {value} = this.state;
+		const {onUpdate, value} = this.props;
 
 		value && onUpdate({...value, name: event.value});
 	};
@@ -100,7 +94,7 @@ export class CustomGroup extends Component<Props, State> {
 		if (value) {
 			this.setState({showRemovalInfo: false});
 
-			onRemove(value, !value.startsWith(LOCAL_PREFIX_ID));
+			onRemove(value.id, !value.id.startsWith(LOCAL_PREFIX_ID));
 			onSelect('');
 		}
 	};
@@ -121,9 +115,7 @@ export class CustomGroup extends Component<Props, State> {
 	handleSubmit = () => this.props.onSubmit(true);
 
 	handleUpdate = (subGroups: Array<SubGroup>) => {
-		const {onUpdate} = this.props;
-		const {value} = this.state;
-
+		const {onUpdate, value} = this.props;
 		value && onUpdate({...value, subGroups});
 	};
 
@@ -133,8 +125,7 @@ export class CustomGroup extends Component<Props, State> {
 	});
 
 	save = async (force: boolean): Promise<string | null> => {
-		const {onCreate, onSelect, onUpdate} = this.props;
-		const {value} = this.state;
+		const {onCreate, onSelect, onUpdate, value} = this.props;
 		const isValid = await this.validate();
 		let id = null;
 
@@ -160,25 +151,26 @@ export class CustomGroup extends Component<Props, State> {
 	testFieldAtUsingGroup = (field?: Breakdown | Array<Parameter>) => {
 		const {value} = this.props;
 
-		return !!field?.find(fieldSet => fieldSet.group.data === value);
+		return !!field?.find(fieldSet => fieldSet.group.data === value?.id);
 	};
 
 	validate = async () => {
-		const {schema} = this.props;
-		const {value} = this.state;
+		const {schema, value} = this.props;
 		let errors = {};
 
-		try {
-			await schema?.validate(value, {
-				abortEarly: false
-			});
-		} catch (e) {
-			e.inner.forEach(({message, path}) => {
-				errors[path] = message;
-			});
-		}
+		if (value) {
+			try {
+				await schema?.validate(value, {
+					abortEarly: false
+				});
+			} catch (e) {
+				e.inner.forEach(({message, path}) => {
+					errors[path] = message;
+				});
+			}
 
-		this.setState({errors});
+			this.setState({errors});
+		}
 
 		return Object.keys(errors).length === 0;
 	};
@@ -204,6 +196,8 @@ export class CustomGroup extends Component<Props, State> {
 			return this.renderInfoPanel(props);
 		}
 	};
+
+	renderLoader = () => this.props.loading && <div className={styles.loaderContainer}><Loader size={50} /></div>;
 
 	renderRemovalInfo = () => {
 		const {showRemovalInfo} = this.state;
@@ -238,15 +232,14 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	renderSelect = () => {
-		const {loading, onFetch, options} = this.props;
-		const {value} = this.state;
+		const {loading, onFetchOptions, options, value} = this.props;
 
 		return (
 			<GroupSelect
 				loading={loading}
 				onChangeName={this.handleChangeName}
 				onCreate={this.handleClickCreate}
-				onFetch={onFetch}
+				onFetch={onFetchOptions}
 				onRemove={this.handleRemove}
 				onSelect={this.handleSelect}
 				options={options}
@@ -256,7 +249,7 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	renderSubGroupSection = () => {
-		const {value} = this.state;
+		const {value} = this.props;
 		return value && <SubGroupSection onUpdate={this.handleUpdate} subGroups={value.subGroups} />;
 	};
 
@@ -286,6 +279,7 @@ export class CustomGroup extends Component<Props, State> {
 				{this.renderUseInfo()}
 				{this.renderTitle()}
 				{this.renderSelect()}
+				{this.renderLoader()}
 				{this.renderSubGroupSection()}
 			</ERRORS_CONTEXT.Provider>
 		);
