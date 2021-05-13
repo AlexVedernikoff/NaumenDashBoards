@@ -96,6 +96,7 @@ const decorateRestCallModule = (restCallModule: Function) => {
 	};
 };
 
+// TODO: RegExp.esacape https://github.com/tc39/proposal-regex-escaping
 /**
  * Экранирует специальные символы строки
  * @param {string} string - строка

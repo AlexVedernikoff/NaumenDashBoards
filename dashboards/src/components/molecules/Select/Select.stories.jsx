@@ -105,6 +105,16 @@ BigList.args = {
 	value: null
 };
 
+export const WithSearching = Template.bind({});
+
+WithSearching.args = {
+	...DEFAULT_PROPS,
+	isSearching: true,
+	options: bigOptionsList,
+	placeholder: 'Выберите элемент',
+	value: null
+};
+
 const MultipleTemplate = args => {
 	const [{values}, updateArgs] = useArgs();
 	const onSelect = (event) => {
