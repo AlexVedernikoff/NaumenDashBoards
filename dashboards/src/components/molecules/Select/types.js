@@ -40,7 +40,8 @@ export type DefaultProps = {|
 	notFoundMessage: string,
 	options: Array<Option>,
 	placeholder: string,
-	value: Value
+	value: Value,
+	values: ?Value[]
 |};
 
 export type Props = {

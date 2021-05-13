@@ -34,11 +34,11 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		onAddNewFilterItem();
 	};
 
-	handleChangeAttribute = (idx: number) => (attribute: Attribute) => {
+	handleChangeAttribute = (idx: number) => (attributes: Attribute[]) => {
 		const {filters, onChangeFilter} = this.props;
 
 		if (idx < filters.length) {
-			onChangeFilter(idx, {...filters[idx], attribute});
+			onChangeFilter(idx, {...filters[idx], attributes});
 		}
 	};
 

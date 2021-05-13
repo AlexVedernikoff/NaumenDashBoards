@@ -1,7 +1,7 @@
 // @flow
 import type {ComponentProps as ListOptionProps} from 'components/molecules/Select/components/ListOption/types';
 
-type Option = {label?: string, value?: string};
+export type Option = {label?: string, value?: string};
 
 export type Components = {
 	ListOption: React$ComponentType<ListOptionProps>,
@@ -23,7 +23,7 @@ export type DefaultProps = {|
 export type Props = {
 	...DefaultProps,
 	onClickShowMore?: () => void,
-	onSelect: (option: Option) => void,
+	onSelect: (option: Option | Option[]) => void,
 	options: Array<Option>,
 };
 

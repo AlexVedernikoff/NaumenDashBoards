@@ -7,6 +7,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import {Item as MenuItem} from 'rc-menu';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import styles from './styles.less';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from 'components/atoms/IconButton/constants';
 
 export class FilterButton extends PureComponent<Props, State> {
@@ -48,6 +49,13 @@ export class FilterButton extends PureComponent<Props, State> {
 		}
 
 		return newDescriptor;
+	};
+
+	handleClearFilters = () => {
+		const {onClear} = this.props;
+
+		this.handleToggleOptionsMenu();
+		onClear();
 	};
 
 	handleItemClick = (option: {dataSetIndex: number, filterIndex: number}) => async () => {
@@ -109,7 +117,7 @@ export class FilterButton extends PureComponent<Props, State> {
 	};
 
 	renderClearWidgetFilter = (): React$Node => (
-		<MenuItem onClick={this.props.onClear}>
+		<MenuItem onClick={this.handleClearFilters}>
 			Очистить фильтры
 		</MenuItem>
 	);
@@ -134,7 +142,7 @@ export class FilterButton extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<div className="header-submenu">
+			<div className={styles.place}>
 				{this.renderShowButton()}
 				{this.renderButtonOptionsMenu()}
 			</div>

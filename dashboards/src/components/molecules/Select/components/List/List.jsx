@@ -4,7 +4,7 @@ import {DEFAULT_ITEM_SIZE, DEFAULT_MAX_HEIGHT} from './constants';
 import {FixedSizeList} from 'react-window';
 import {getOptionLabel, getOptionValue} from 'components/molecules/Select/helpers';
 import ListOption from 'components/molecules/Select/components/ListOption';
-import type {Props} from './types';
+import type {Option, Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
@@ -28,13 +28,13 @@ export class List extends PureComponent<Props> {
 		...this.props.components
 	};
 
-	getOptionLabel = (option: Object) => {
+	getOptionLabel = (option: Option) => {
 		const {getOptionLabel} = this.props;
 
 		return getOptionLabel ? getOptionLabel(option) : option.label;
 	};
 
-	getOptionValue = (option: Object) => {
+	getOptionValue = (option: Option) => {
 		const {getOptionValue} = this.props;
 
 		return getOptionValue ? getOptionValue(option) : option.value;
@@ -47,9 +47,23 @@ export class List extends PureComponent<Props> {
 		onClickShowMore && onClickShowMore();
 	};
 
+	handleSelect = (option: Option) => {
+		const {multiple, onSelect, values} = this.props;
+
+		if (multiple) {
+			const val = this.getOptionValue(option);
+			const foundItem = values.find(item => this.getOptionValue(item) === val);
+			const newValues = foundItem
+				? values.filter(item => foundItem !== item)
+				: [...values, option];
+
+			onSelect(newValues);
+		} else {
+			onSelect(option);
+		}
+	};
+
 	renderListItem = (data: Object) => {
-		const {getOptionLabel, multiple, onSelect, options, searchValue, value, values} = this.props;
-		const {ListOption} = this.components;
 		const {index, style} = data;
 		const option = options[index];
 		const optionValue = this.getOptionValue(option);
@@ -66,7 +80,7 @@ export class List extends PureComponent<Props> {
 				found={!!searchValue}
 				getOptionLabel={getOptionLabel}
 				key={optionValue}
-				onClick={onSelect}
+				onClick={this.handleSelect}
 				option={option}
 				selected={selected}
 				style={style}
@@ -92,7 +106,7 @@ export class List extends PureComponent<Props> {
 	};
 
 	renderVertualizedList = () => {
-		const {itemSize, maxHeight, options} = this.props;
+		const {itemSize, maxHeight, options, value, values} = this.props;
 		const height = Math.min(itemSize * options.length, maxHeight);
 
 		return (
@@ -100,6 +114,8 @@ export class List extends PureComponent<Props> {
 				height={height}
 				itemCount={options.length}
 				itemSize={itemSize}
+				value={value}
+				values={values}
 				width="100%"
 			>
 				{this.renderListItem}
