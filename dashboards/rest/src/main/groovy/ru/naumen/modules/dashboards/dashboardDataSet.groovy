@@ -2626,12 +2626,67 @@ class DashboardDataSetService
             case GroupType.HOUR_INTERVAL:
             case GroupType.DAY_INTERVAL:
             case GroupType.WEEK_INTERVAL:
-                if(!value)
+                if(value == null)
                 {
                     return getNullValue(diagramType, fromBreakdown)
                 }
-                return value.toString().replaceAll("\\<.*?>","")
+                return getCorrectIntervalType(value, type)
             default: throw new IllegalArgumentException("Not supported type: $type")
+        }
+    }
+
+    /**
+     * Метод по получению корректного значения временного интервала для предложенного типа
+     * @param value - значение из БД
+     * @param type - тип, в который нужно привести
+     * @return значение временного интервала для предложенного типа
+     */
+    private String getCorrectIntervalType(def value, GroupType type)
+    {
+        def (millis, baseIntervalType) = DtIntervalMarshaller.unmarshal(value)
+        def tempValue = DashboardUtils.convertValueToInterval(millis as Long, type)
+
+        if(tempValue < 1)
+        {
+            tempValue = getRealValueFromDB(millis as Long, type)
+            //получаем долю
+            def fractionalPart = Double.toString(tempValue).tokenize('.').last() //берем часть после точки
+            def roundIdx = fractionalPart.contains('E') //значение может быть в экспоненциальной записи
+                ? fractionalPart.dropWhile { it != '-' }.toCharArray()[-1].toString() as Long //тогда берем число после нее - ровно столько нулей стоит до числа
+                : fractionalPart.takeWhile{it == '0'}.size() + 1 //иначе идём по числу до тех пор, пока не пройдут все нули и берем + 1 значение
+            roundIdx += 1 //округляем наконец до двух чисел после всех нулей в дробной части
+
+            String formatStr = '#' * roundIdx
+
+            def dtIntervalDecimalFormat = new DecimalFormatSymbols().with {
+                setDecimalSeparator('.' as char)
+                new DecimalFormat("#.${formatStr}", it)
+            }
+            tempValue = dtIntervalDecimalFormat.format(tempValue)
+        }
+        return DtIntervalMarshaller.marshal(tempValue.toString(), type, value)
+    }
+
+    /**
+     * Метод получения реального значение интервала для типа из хранилища
+     * @param value - значение в миллисекундах
+     * @param type - тип, в который нужно перевести
+     * @return дробное значение интервала
+     */
+    Double getRealValueFromDB(def value, def type)
+    {
+        switch (type)
+        {
+            case GroupType.SECOND_INTERVAL:
+                return value/1000
+            case GroupType.MINUTE_INTERVAL:
+                return value/60000
+            case GroupType.HOUR_INTERVAL:
+                return value/3600000
+            case GroupType.DAY_INTERVAL:
+                return value/86400000
+            case GroupType.WEEK_INTERVAL:
+                return value/604800000
         }
     }
 
