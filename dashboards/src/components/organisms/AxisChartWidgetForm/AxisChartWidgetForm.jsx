@@ -1,14 +1,14 @@
 // @flow
+import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
 import DiagramWidgetForm from 'containers/DiagramWidgetForm';
+import {lazy} from 'yup';
+import memoize from 'memoize-one';
 import ParamsTab from './components/ParamsTab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import StyleTab from './components/StyleTab';
-import memoize from 'memoize-one';
-import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
-import {lazy} from 'yup';
-import {WIDGET_TYPES} from 'src/store/widgets/data/constants';
 import type {WidgetType} from 'src/store/widgets/data/types';
+import {WIDGET_TYPES} from 'src/store/widgets/data/constants';
 
 export class AxisChartWidgetForm extends PureComponent<Props> {
 	components = {

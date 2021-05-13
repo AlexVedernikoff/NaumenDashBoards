@@ -28,6 +28,18 @@ export class DashboardResizer {
 		return parentNode;
 	};
 
+	isEditableDashboard = () => {
+		let editable = false;
+
+		if (this.store) {
+			const {dashboard, widgets} = this.store.getState();
+
+			editable = dashboard.settings.editMode || widgets.data.selectedWidget;
+		}
+
+		return editable;
+	};
+
 	isFullSize = () => {
 		let isFullSize = true;
 
@@ -44,11 +56,9 @@ export class DashboardResizer {
 	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setHeight(this.initHeight);
 
 	resize = () => {
-		const editableDashboard = this.store && this.store.getState().dashboard.settings.editMode;
-
 		if (this.isFullSize()) {
 			this.setFullHeight();
-		} else if (editableDashboard) {
+		} else if (this.isEditableDashboard()) {
 			this.setHeight(this.initHeight);
 		} else {
 			const height = this.getContentHeight();

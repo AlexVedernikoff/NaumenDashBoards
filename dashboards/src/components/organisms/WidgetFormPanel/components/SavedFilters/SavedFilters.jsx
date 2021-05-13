@@ -1,6 +1,5 @@
 // @flow
 import cn from 'classnames';
-import type {Components as SavedFiltersComponents, Props, SourceFiltersItem} from './types';
 import type {Components as ListComponents} from 'components/molecules/Select/components/List/types';
 import type {Components as ListOptionComponents} from 'components/molecules/Select/components/ListOption/types';
 import Container from 'components/atoms/Container';
@@ -10,6 +9,7 @@ import List from 'components/molecules/Select/components/List';
 import ListOption from 'components/molecules/Select/components/ListOption';
 import memoize from 'memoize-one';
 import type {OnSelectEvent} from 'components/types';
+import type {Props, SourceFiltersItem} from './types';
 import React, {Component} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';

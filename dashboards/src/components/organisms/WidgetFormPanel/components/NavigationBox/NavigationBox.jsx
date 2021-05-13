@@ -38,12 +38,12 @@ export class NavigationBox extends PureComponent<Props> {
 	};
 
 	handleToggleShow = (event: OnChangeEvent<boolean>) => {
-		const {onChange, value} = this.props;
-		const {name, value: show} = event;
+		const {name, onChange, value} = this.props;
+		const {name: key, value: show} = event;
 
 		onChange(name, {
 			...value,
-			[name]: !show
+			[key]: !show
 		});
 	};
 

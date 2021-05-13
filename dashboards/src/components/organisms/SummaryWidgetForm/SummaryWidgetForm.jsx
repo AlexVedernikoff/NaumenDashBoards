@@ -1,16 +1,16 @@
 // @flow
+import {DEFAULT_LAYOUT_SIZE, schema} from './constants';
+import {DEFAULT_WIDGET_LAYOUT_SIZE} from 'store/dashboard/layouts/constants';
 import DiagramWidgetForm from 'containers/DiagramWidgetForm';
+import {getCountGridColumns} from 'components/organisms/WidgetsGrid/helpers';
+import {GRID_LAYOUT_HEIGHT} from 'components/organisms/WidgetsGrid/constants';
+import type {Layout} from 'store/dashboard/layouts/types';
+import NewWidget from 'store/widgets/data/NewWidget';
 import ParamsTab from './components/ParamsTab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {DEFAULT_LAYOUT_SIZE, schema} from './constants';
 import StyleTab from './components/StyleTab';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
-import NewWidget from 'store/widgets/data/NewWidget';
-import {getCountGridColumns} from 'components/organisms/WidgetsGrid/helpers';
-import {GRID_LAYOUT_HEIGHT} from 'components/organisms/WidgetsGrid/constants';
-import {DEFAULT_WIDGET_LAYOUT_SIZE} from 'store/dashboard/layouts/constants';
-import type {Layout} from 'store/dashboard/layouts/types';
 
 export class SummaryWidgetForm extends PureComponent<Props> {
 	components = {

@@ -1,6 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
+import {functions, props} from './selectors';
 import NavigationBox from 'WidgetFormPanel/components/NavigationBox';
-import {props} from './selectors';
 
-export default connect(props)(NavigationBox);
+export default connect(props, functions)(NavigationBox);

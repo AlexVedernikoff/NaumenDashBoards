@@ -5,19 +5,21 @@ import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
 import {confirmDialog} from 'store/commonDialogs/actions';
 import {createToast} from 'store/toasts/actions';
+import {DASHBOARD_EVENTS} from 'store/dashboard/settings/constants';
 import {deepClone, isObject} from 'helpers';
 import {DEFAULT_BUTTONS} from 'components/molecules/Modal/constants';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchCustomGroups} from 'store/customGroups/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
-import {getAllWidgets} from 'src/store/widgets/data/selectors';
+import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getCustomColorsSettingsKey} from './helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
 import {getWidgetsBuildData} from './selectors';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
+import {resizer as dashboardResizer} from 'app.constants';
 import {saveCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import {WIDGET_SETS} from 'store/widgets/data/constants';
 
@@ -338,6 +340,12 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
  */
 const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
 	dispatch(setSelectedWidget(payload));
+
+	dispatch({
+		type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
+	});
+
+	dashboardResizer.resetHeight();
 };
 
 /**
