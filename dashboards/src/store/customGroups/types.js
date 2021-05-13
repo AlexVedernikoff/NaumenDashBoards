@@ -175,12 +175,32 @@ export type CustomGroup =
 	| TimerCustomGroup
 ;
 
+export type CustomGroupItem = {
+	data: CustomGroup,
+	loading: boolean
+};
+
 export type CustomGroupsMap = {
-	[string]: CustomGroup
+	[string]: CustomGroupItem
+};
+
+type CustomGroupFulfilled = {
+	payload: CustomGroup,
+	type: typeof CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_FULFILLED
+};
+
+type CustomGroupPending = {
+	payload: string,
+	type: typeof CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_PENDING
+};
+
+type CustomGroupRejected = {
+	payload: string,
+	type: typeof CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_REJECTED
 };
 
 type CustomGroupsFulfilled = {
-	payload: CustomGroupsMap,
+	payload: Array<CustomGroup>,
 	type: typeof CUSTOM_GROUPS_EVENTS.CUSTOM_GROUPS_FULFILLED
 };
 
@@ -206,9 +226,10 @@ type UnknownCustomGroupsAction = {
 	type: typeof CUSTOM_GROUPS_EVENTS.UNKNOWN_CUSTOM_GROUPS_ACTION
 };
 
-export type UpdateCustomGroup = (customGroup: CustomGroup) => ThunkAction;
-
 export type CustomGroupsAction =
+	| CustomGroupFulfilled
+	| CustomGroupPending
+	| CustomGroupRejected
 	| CustomGroupsFulfilled
 	| CustomGroupsPending
 	| CustomGroupsRejected

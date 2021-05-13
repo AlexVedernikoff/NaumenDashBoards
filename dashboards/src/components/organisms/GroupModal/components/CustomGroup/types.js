@@ -5,8 +5,9 @@ import type {Widget} from 'store/widgets/data/types';
 
 export type Props = {
 	loading: boolean,
+	loadingOptions: boolean,
 	onCreate: (customGroup: CustomGroup) => Promise<string | null>,
-	onFetch: () => any,
+	onFetchOptions: () => any,
 	onRemove: (groupId: string, remote: boolean) => any,
 	onSelect: (groupId: string) => void,
 	onSubmit: (force: true) => void,
@@ -15,7 +16,7 @@ export type Props = {
 	schema: Schema | null,
 	submitted: boolean,
 	type: string,
-	value: string,
+	value: CustomGroup,
 	widgets: Array<Widget>
 };
 
@@ -25,8 +26,7 @@ export type State = {
 	showRemovalInfo: boolean,
 	showSaveInfo: boolean,
 	showUseInfo: boolean,
-	usedInWidgets: Array<string>,
-	value: CustomGroup | null
+	usedInWidgets: Array<string>
 };
 
 export type InfoPanelProps = {

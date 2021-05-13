@@ -74,13 +74,20 @@ const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): Thunk
  * @returns {ThunkAction}
  */
 const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {context} = getState();
+	const {context, dashboard} = getState();
 	const {subjectUuid} = context;
 	const {id, type} = widget;
 
 	dispatch(requestLink(id));
 	try {
-		const {link} = await window.jsApi.restCallModule('dashboardDrilldown', 'getLink', payload, subjectUuid, type);
+		const {link} = await window.jsApi.restCallModule(
+			'dashboardDrilldown',
+			'getLink',
+			payload,
+			subjectUuid,
+			type,
+			dashboard.settings.code
+		);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));

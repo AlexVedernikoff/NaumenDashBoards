@@ -1,28 +1,32 @@
 // @flow
 import type {AppState} from 'store/types';
-import type {ConnectedFunctions, ConnectedProps} from './types';
-import {createCustomGroup, deleteCustomGroup, fetchCustomGroups, updateCustomGroup} from 'store/customGroups/actions';
+import type {ConnectedFunctions, ConnectedProps, Props} from './types';
+import {createCustomGroup, deleteCustomGroup, fetchCustomGroup, fetchCustomGroups, updateCustomGroup} from 'store/customGroups/actions';
 import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
 import {getMapValues} from 'helpers';
 
-export const props = (state: AppState): ConnectedProps => {
+export const props = (state: AppState, props: Props): ConnectedProps => {
 	const {customGroups, widgets: widgetsState} = state;
 	const {map, selectedWidget} = widgetsState.data;
+	const {loading, map: customGroupsMap} = customGroups;
 	const widgets = getMapValues(map).filter(widget => {
 		const {id, type} = widget;
-
 		return id !== selectedWidget && type in DIAGRAM_WIDGET_TYPES;
 	});
+	const group = customGroupsMap[props.value];
 
 	return {
-		loading: customGroups.loading,
+		group: group?.data,
+		loading: group?.loading,
+		loadingOptions: loading,
 		widgets
 	};
 };
 
 export const functions: ConnectedFunctions = {
 	onCreate: createCustomGroup,
-	onFetch: fetchCustomGroups,
+	onFetch: fetchCustomGroup,
+	onFetchOptions: fetchCustomGroups,
 	onRemove: deleteCustomGroup,
 	onUpdate: updateCustomGroup
 };
