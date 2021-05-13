@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
+import java.util.concurrent.TimeUnit
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -686,6 +687,55 @@ class DashboardUtils
     }
 
     /**
+     * Метод по приведению миллисекунд в нужный формат временного интервала
+     * @param value - значение в миллисекундах
+     * @param format - формат, в который нужно привести
+     * @return данные об интервале в правильном формате
+     */
+    static def convertValueToInterval(Long value, GroupType format)
+    {
+        switch (format)
+        {
+            case GroupType.SECOND_INTERVAL:
+                return TimeUnit.MILLISECONDS.toSeconds(value)
+            case GroupType.MINUTE_INTERVAL:
+                return TimeUnit.MILLISECONDS.toMinutes(value)
+            case GroupType.HOUR_INTERVAL:
+                return TimeUnit.MILLISECONDS.toHours(value)
+            case GroupType.DAY_INTERVAL:
+                return TimeUnit.MILLISECONDS.toDays(value)
+            case GroupType.WEEK_INTERVAL:
+                return TimeUnit.MILLISECONDS.toDays(value)/7
+        }
+    }
+
+    /**
+     * Метод определения типа группировки для атрибута типа "временной интервал"
+     * @param groupType - декларируемая группировка временного интервала
+     * @return фактическая группировка временного интервала
+     */
+    static private GroupType getDTIntervalGroupType(String groupType)
+    {
+        switch (groupType.toLowerCase())
+        {
+            case 'overlap':
+                return GroupType.OVERLAP
+            case 'second':
+                return GroupType.SECOND_INTERVAL
+            case 'minute':
+                return GroupType.MINUTE_INTERVAL
+            case 'hour':
+                return GroupType.HOUR_INTERVAL
+            case 'day':
+                return GroupType.DAY_INTERVAL
+            case 'week':
+                return GroupType.WEEK_INTERVAL
+            default:
+                throw new IllegalArgumentException("Not supported group type in dateTimeInterval attribute: $groupType")
+        }
+    }
+
+    /**
      * Метод по получению настроек для фильтров для источника из хранилища
      * @param queryFilters - возможные фильтры на получаемые данные
      * @return список фильтров для источника из хранилища
@@ -1152,6 +1202,69 @@ class LinksAttributeMarshaller
     static List<String> unmarshal(String value)
     {
         return value ? value.tokenize(delimiter) : []
+    }
+}
+
+/**
+ * Класс для преобразования/получения значения временного интервала
+ */
+class DtIntervalMarshaller
+{
+    /**
+     * делитель для значения для фронта
+     */
+    static String delimiter = '#'
+
+    /**
+     * делитель для значения для исходного датасета
+     */
+    static String dbDelimiter = '$'
+
+    /**
+     * Метод формирования строки со значением временного интервала
+     * @param value - значение(или доля) интервала
+     * @param type - тип группировки, для которого значение получено
+     * @param dbValue - значение из БД
+     * @return значение(доля)_делитель_значение из Бд
+     */
+    static String marshal(String value, GroupType type, String dbValue)
+    {
+        value =  getValueWithFormat(value, type)
+        return "${value}${delimiter}${dbValue}"
+    }
+
+    /**
+     *
+     * @param value
+     * @param type
+     * @return
+     */
+    static String getValueWithFormat(String value, GroupType type)
+    {
+        switch (type)
+        {
+            case GroupType.SECOND_INTERVAL:
+                return "${value} сек"
+            case GroupType.MINUTE_INTERVAL:
+                return "${value} мин"
+            case GroupType.HOUR_INTERVAL:
+                return "${value} час"
+            case GroupType.DAY_INTERVAL:
+                return "${value} д"
+            case GroupType.WEEK_INTERVAL:
+                return "${value} нед"
+        }
+    }
+
+    /**
+     * Метод для парсинга значения
+     * @param value - значение целиком
+     * @return [значение объекта, uuid объекта]
+     */
+    static List<String> unmarshal(String value)
+    {
+        value = value?.tokenize(delimiter)?.last()
+        return value ? value.tokenize(dbDelimiter) : []
     }
 }
 //endregion

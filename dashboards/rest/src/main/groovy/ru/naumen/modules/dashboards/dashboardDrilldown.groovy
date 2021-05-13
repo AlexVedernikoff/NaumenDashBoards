@@ -961,27 +961,6 @@ class Link
         }
     }
 
-    private GroupType getDTIntervalGroupType(String groupType)
-    {
-        switch (groupType.toLowerCase())
-        {
-            case 'overlap':
-                return GroupType.OVERLAP
-            case 'second':
-                return GroupType.SECOND_INTERVAL
-            case 'minute':
-                return GroupType.MINUTE_INTERVAL
-            case 'hour':
-                return GroupType.HOUR_INTERVAL
-            case 'day':
-                return GroupType.DAY_INTERVAL
-            case 'week':
-                return GroupType.WEEK_INTERVAL
-            default:
-                throw new IllegalArgumentException("Not supported group type in dateTimeInterval attribute: $groupType")
-        }
-    }
-
     /**
      * Метод получения фильтров для атрибута типа статус
      * @param attribute - аттрибут
@@ -1056,7 +1035,8 @@ class Link
             case AttributeType.DATE_TYPES:
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
             case AttributeType.DT_INTERVAL_TYPE:
-                def (intervalValue, intervalType) = value
+                def (intervalValue, intervalType) = DtIntervalMarshaller.unmarshal(value.find())
+                intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
                 def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
                 return filterBuilder.OR(code, 'contains', interval)
             case AttributeType.TIMER_TYPES:

@@ -661,91 +661,24 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 break
             case GroupType.SECOND_INTERVAL:
-                def secondInterval = 1000
-                IApiCriteriaColumn groupColumn = sc.columnDivide(
-                    column, sc.constant(
-                    secondInterval
-                )
-                )
-                criteria.addGroupColumn(groupColumn)
-                criteria.addColumn(groupColumn)
-                String sortingType = parameter.sortingType
-                if (sortingType)
-                {
-                    Closure sorting = getSorting(sortingType)
-                    groupColumn.with(sorting).with(criteria.&addOrder)
-                }
-                else
-                {
-                    criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
-                }
-                break
             case GroupType.MINUTE_INTERVAL:
-                def minuteInterval = 1000 * 60
-                IApiCriteriaColumn groupColumn = sc.columnDivide(
-                    column, sc.constant(
-                    minuteInterval
-                )
-                )
-                criteria.addGroupColumn(groupColumn)
-                criteria.addColumn(groupColumn)
-                String sortingType = parameter.sortingType
-                if (sortingType)
-                {
-                    Closure sorting = getSorting(sortingType)
-                    groupColumn.with(sorting).with(criteria.&addOrder)
-                }
-                else
-                {
-                    criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
-                }
-                break
             case GroupType.HOUR_INTERVAL:
-                def hourInterval = 1000 * 60 * 60
-                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(hourInterval))
-                criteria.addGroupColumn(groupColumn)
-                criteria.addColumn(groupColumn)
-                String sortingType = parameter.sortingType
-                if (sortingType)
-                {
-                    Closure sorting = getSorting(sortingType)
-                    groupColumn.with(sorting).with(criteria.&addOrder)
-                }
-                else
-                {
-                    criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
-                }
-                break
             case GroupType.DAY_INTERVAL:
-                def dayInterval = 1000 * 60 * 60 * 24
-                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(dayInterval))
-                criteria.addGroupColumn(groupColumn)
-                criteria.addColumn(groupColumn)
-                String sortingType = parameter.sortingType
-                if (sortingType)
-                {
-                    Closure sorting = getSorting(sortingType)
-                    groupColumn.with(sorting).with(criteria.&addOrder)
-                }
-                else
-                {
-                    criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
-                }
-                break
             case GroupType.WEEK_INTERVAL:
-                def weekInterval = 1000 * 60 * 60 * 24 * 7
-                IApiCriteriaColumn groupColumn = sc.columnDivide(column, sc.constant(weekInterval))
-                criteria.addGroupColumn(groupColumn)
-                criteria.addColumn(groupColumn)
+                String[] intervalTypeColumnCode = prepareIntervalTypeColumnCode(parameter.attribute, attributeCodes)
+                def orderColumn = column
+                column = sc.concat(sc.cast(column, 'string'), sc.constant(DtIntervalMarshaller.dbDelimiter),sc.property(intervalTypeColumnCode))
+                criteria.addGroupColumn(column).addGroupColumn(orderColumn)
+                criteria.addColumn(column)
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
                     Closure sorting = getSorting(sortingType)
-                    groupColumn.with(sorting).with(criteria.&addOrder)
+                    orderColumn.with(sorting).with(criteria.&addOrder)
                 }
                 else
                 {
-                    criteria.addOrder(ApiCriteriaOrders.asc(groupColumn))
+                    criteria.addOrder(ApiCriteriaOrders.asc(orderColumn))
                 }
                 break
             case GroupType.getTimerTypes():
@@ -1021,6 +954,23 @@ class QueryWrapper implements CriteriaWrapper
             }
         }
         return this
+    }
+
+    /**
+     * Метод по получению список кодов для типа интервала из БД
+     * @param attribute - атрибут типа временной интервал
+     * @param attributeCodes - список кодов атрибута для запроса
+     * @return список кодов для типа интервала из БД
+     */
+    String[] prepareIntervalTypeColumnCode(Attribute attribute,String[] attributeCodes)
+    {
+        Boolean attrIsSystem = api.metainfo.getMetaClass(attribute.metaClassFqn).getAttribute(attribute.code).isHardcoded()
+        String typeField = 'intervalName'
+        if(attrIsSystem)
+        {
+            typeField = 'interval'
+        }
+        return attributeCodes - 'ms' + typeField
     }
 }
 
