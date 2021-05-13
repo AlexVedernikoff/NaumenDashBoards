@@ -125,10 +125,10 @@ const isAllowedTopAggregation = (aggregation?: string) => aggregation !== DEFAUL
 
 /**
  * Проверяет принадлежность типа виджета к осевым графикам
- * @param {AnyWidget} type - тип виджета
+ * @param {AnyWidget | string} type - тип виджета
  * @returns {boolean}
  */
-const isAxisChart = (type: WidgetType): boolean => {
+const isAxisChart = (type: WidgetType | string): boolean => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, LINE} = WIDGET_TYPES;
 
 	return [BAR, BAR_STACKED, COMBO, COLUMN, COLUMN_STACKED, LINE].includes(type);
@@ -136,10 +136,10 @@ const isAxisChart = (type: WidgetType): boolean => {
 
 /**
  * Проверяет принадлежность типа виджета к круговым графикам
- * @param {AnyWidget} type - тип виджета
+ * @param {AnyWidget | string} type - тип виджета
  * @returns {boolean}
  */
-const isCircleChart = (type: WidgetType): boolean => {
+const isCircleChart = (type: WidgetType | string): boolean => {
 	const {DONUT, PIE} = WIDGET_TYPES;
 
 	return [DONUT, PIE].includes(type);

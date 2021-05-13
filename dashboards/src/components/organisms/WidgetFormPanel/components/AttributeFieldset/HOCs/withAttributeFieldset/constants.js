@@ -7,6 +7,7 @@ const ATTRIBUTE_FIELDSET_CONTEXT = createContext<Context>({
 	dataSetIndex: 0,
 	source: {
 		descriptor: '',
+		filterId: null,
 		value: null
 	}
 });

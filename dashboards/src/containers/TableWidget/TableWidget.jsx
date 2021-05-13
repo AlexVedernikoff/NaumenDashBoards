@@ -9,7 +9,7 @@ import React, {createContext, PureComponent} from 'react';
 import Table from 'components/organisms/TableWidget';
 import type {TableBuildData} from 'store/widgets/buildData/types';
 
-const UPDATING_CONTEXT = createContext();
+const UPDATING_CONTEXT = createContext(false);
 
 export class TableWidget extends PureComponent<Props> {
 	components = {

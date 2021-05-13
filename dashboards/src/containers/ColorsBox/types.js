@@ -1,5 +1,5 @@
 // @flow
-import type {BuildData} from 'store/widgets/buildData/types';
+import type {DiagramData} from 'store/widgets/buildData/types';
 import type {
 	GlobalCustomChartColorsSettings,
 	RemoveCustomChartColorsSetting
@@ -9,7 +9,7 @@ import type {SetUseGlobalChartSettings, Widget} from 'store/widgets/data/types';
 import type {Values} from 'components/organisms/WidgetForm/types';
 
 export type ConnectedProps = {|
-	buildData?: BuildData,
+	buildData?: DiagramData,
 	globalColorsSettings: GlobalCustomChartColorsSettings
 |};
 

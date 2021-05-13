@@ -96,13 +96,17 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 			globalColorsSettings,
 			removeCustomChartColorsSettings,
 			setUseGlobalChartSettings,
+			/*
+				$FlowFixMe - отображает ошибку отсутствия виджета в пропсах, но на самом деле ошибка в отсутствии colorsSettings
+				в некоторых виджетах. На текущей версии flow[0.145.0] по другому обойти не получается
+			 */
 			widget
 		} = this.props;
 		let newSettings = settings;
 
 		if (globalColorsSettings) {
 			const {key} = globalColorsSettings;
-			const widgetCustomSettingsData = widget.colorsSettings.custom?.data;
+			const widgetCustomSettingsData = widget?.colorsSettings?.custom?.data;
 
 			setUseGlobalChartSettings(key, false);
 			removeCustomChartColorsSettings(key);

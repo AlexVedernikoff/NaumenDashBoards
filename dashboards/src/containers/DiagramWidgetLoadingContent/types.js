@@ -1,5 +1,5 @@
 // @flow
-import type {BuildData, DiagramBuildData, FetchBuildData} from 'store/widgets/buildData/types';
+import type {DiagramBuildData, DiagramData, FetchBuildData} from 'store/widgets/buildData/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedFunctions = {
@@ -7,7 +7,7 @@ export type ConnectedFunctions = {
 };
 
 export type ConnectedProps = {
-	buildData: BuildData
+	buildData: DiagramData
 };
 
 export type Props = ConnectedProps & ConnectedFunctions & {

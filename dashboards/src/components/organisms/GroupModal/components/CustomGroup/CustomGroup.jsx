@@ -116,6 +116,7 @@ export class CustomGroup extends Component<Props, State> {
 
 	handleUpdate = (subGroups: Array<SubGroup>) => {
 		const {onUpdate, value} = this.props;
+
 		value && onUpdate({...value, subGroups});
 	};
 

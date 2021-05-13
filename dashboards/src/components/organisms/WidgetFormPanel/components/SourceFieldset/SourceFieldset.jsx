@@ -41,9 +41,9 @@ export class SourceFieldset extends Component<Props, State> {
 	sourceSelectComponents: ?TreeSelectComponents = null;
 
 	componentDidMount () {
-		const {dataSetIndex, value: {source}} = this.props;
+		const {index, value: {source}} = this.props;
 
-		if (!source.value && dataSetIndex > 0) {
+		if (!source.value && index > 0) {
 			this.sourceSelectRef.current && this.sourceSelectRef.current.scrollIntoView({behavior: 'smooth'});
 		}
 	}

@@ -2,7 +2,6 @@
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {CUSTOM_GROUPS_EVENTS, OR_CONDITION_SETS, OR_CONDITION_TYPES} from './constants';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
-import type {ThunkAction} from 'store/types';
 
 export type StringSimpleOperand = {|
 	data: string,

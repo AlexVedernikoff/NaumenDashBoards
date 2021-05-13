@@ -86,7 +86,7 @@ export type DiagramBuildData = Object;
 export type DiagramData = BuildData<DiagramBuildData>;
 
 export type BuildDataMap = {
-	[key: string]: DiagramData | TableData
+	[key: string]: DiagramData
 };
 
 export type ReceiveBuildDataPayload = {
