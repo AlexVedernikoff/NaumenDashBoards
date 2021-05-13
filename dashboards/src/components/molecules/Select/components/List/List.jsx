@@ -64,6 +64,8 @@ export class List extends PureComponent<Props> {
 	};
 
 	renderListItem = (data: Object) => {
+		const {getOptionLabel, multiple, options, searchValue, value, values} = this.props;
+		const {ListOption} = this.components;
 		const {index, style} = data;
 		const option = options[index];
 		const optionValue = this.getOptionValue(option);
