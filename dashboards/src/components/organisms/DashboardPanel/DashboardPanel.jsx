@@ -22,7 +22,7 @@ export class DashboardPanel extends PureComponent<Props, State> {
 
 	renderContent = () => {
 		const {selectedWidget} = this.props;
-		const content = selectedWidget ? <WidgetFormPanel /> : <WidgetAddPanel />;
+		const content = selectedWidget ? <WidgetFormPanel key={selectedWidget} /> : <WidgetAddPanel />;
 
 		return (
 			<div className={styles.content}>

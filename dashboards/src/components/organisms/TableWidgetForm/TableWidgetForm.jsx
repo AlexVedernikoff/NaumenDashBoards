@@ -1,11 +1,12 @@
 // @flow
-import DiagramWidgetForm from 'src/containers/DiagramWidgetForm';
+import DiagramWidgetForm from 'containers/DiagramWidgetForm';
+import NewWidget from 'store/widgets/data/NewWidget';
 import ParamsTab from './components/ParamsTab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {schema} from './constants';
 import StyleTab from './components/StyleTab';
-import {WIDGET_TYPES} from 'src/store/widgets/data/constants';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class TableWidgetForm extends PureComponent<Props> {
 	components = {
@@ -16,8 +17,13 @@ export class TableWidgetForm extends PureComponent<Props> {
 	handleSubmit = (values) => {
 		const {onSave, widget} = this.props;
 		const {id} = widget;
+		let columnsRatioWidth = {};
 
-		onSave({...values, id, type: WIDGET_TYPES.TABLE});
+		if (widget.type === WIDGET_TYPES.TABLE && !(widget instanceof NewWidget)) {
+			columnsRatioWidth = widget.columnsRatioWidth;
+		}
+
+		onSave({...values, columnsRatioWidth, id, type: WIDGET_TYPES.TABLE});
 	};
 
 	render () {

@@ -67,6 +67,7 @@ export class Table extends PureComponent<Props, State> {
 
 	/**
 	 * Возвращает массив колонок для отрисовки без учёта объединяющих столбцов
+	 * @param {Props} props - пропсы компонента
 	 * @returns {Array<Column>}
 	 */
 	getDataColumns (props: Props) {
@@ -259,6 +260,7 @@ export class Table extends PureComponent<Props, State> {
 
 		if (newWidth !== containerWidth) {
 			let newColumnsWidth = columnsWidth;
+
 			newColumnsWidth = this.getColumnsWidthByTableWidth(newWidth, columns, newColumnsWidth);
 			newColumnsWidth = this.applyColumnsRatioWidth(newWidth, newColumnsWidth);
 

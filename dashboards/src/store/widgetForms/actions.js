@@ -77,8 +77,7 @@ const changeTextFormValues = (payload: TextValues) => ({
 	type: EVENTS.CHANGE_TEXT_FORM_VALUES
 });
 
-const resetForm = (payload) => ({
-	payload,
+const resetForm = () => ({
 	type: EVENTS.RESET_FORM
 });
 

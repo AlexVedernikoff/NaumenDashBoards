@@ -1,7 +1,6 @@
 // @flow
-import type {AnyWidget, SourceData, Widget} from 'store/widgets/data/types';
 import type {BuildDataState, DataSetDescriptorRelation} from './types';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
+import type {SourceData, Widget} from 'store/widgets/data/types';
 
 /**
  * Возвращает значение представления без переданного кода
