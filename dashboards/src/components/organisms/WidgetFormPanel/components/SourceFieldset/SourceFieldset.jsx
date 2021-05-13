@@ -196,7 +196,7 @@ export class SourceFieldset extends Component<Props, State> {
 			) {
 				this.changeSource({
 					...dataSet.source,
-					filterId: id,
+					filterId: id ?? null,
 					value: {
 						...value,
 						label
@@ -359,9 +359,8 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSourceSelect = (): React$Node => {
-		const {error: outerError, index} = this.props;
-		const {error: innerError, showEditForm} = this.state;
-		const error = outerError || innerError;
+		const {index} = this.props;
+		const {error, showEditForm} = this.state;
 
 		const component = showEditForm ? this.renderLabelEditingForm() : this.renderSourceTreeSelect();
 
