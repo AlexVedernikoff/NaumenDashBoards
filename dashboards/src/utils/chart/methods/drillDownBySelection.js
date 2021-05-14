@@ -25,8 +25,8 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns  {boolean} - Необходимость очищать значения для фильтрации
  */
 const isNeedsClearedValue = (attribute: Attribute, group: Group): boolean => {
-	const {metaClass} = ATTRIBUTE_TYPES;
-	const noNeedToCleanTypes = {...ATTRIBUTE_SETS.BO_LINKS, metaClass};
+	const {dtInterval, metaClass} = ATTRIBUTE_TYPES;
+	const noNeedToCleanTypes = {...ATTRIBUTE_SETS.BO_LINKS, dtInterval, metaClass};
 
 	return !(getAttributeValue(attribute, 'type') in noNeedToCleanTypes && group.way === GROUP_WAYS.SYSTEM);
 };
