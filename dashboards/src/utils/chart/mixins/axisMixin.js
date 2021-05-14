@@ -74,11 +74,6 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 			dataLabels: {
 				formatter: valueFormatter(usesMSInterval, usesPercent, showEmptyData)
 			},
-			grid: {
-				padding: {
-					bottom: 20
-				}
-			},
 			labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
 			legend: getLegendOptions(legend, container),
 			markers: {

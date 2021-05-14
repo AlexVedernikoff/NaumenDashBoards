@@ -226,11 +226,6 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		dataLabels: {
 			formatter: dataLabelsFormatter(widget)
 		},
-		grid: {
-			padding: {
-				bottom: 20
-			}
-		},
 		labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
 		legend: getLegendOptions(legend, container),
 		markers: {
