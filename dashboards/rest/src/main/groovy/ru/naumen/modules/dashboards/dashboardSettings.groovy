@@ -342,7 +342,7 @@ class DashboardSettingsService
      */
     DashboardSettingsClass getSettings(Map<String, Object> requestContent, user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         Boolean isPersonal = requestContent.isPersonal
         Boolean isMobile = requestContent.isMobile
@@ -350,37 +350,38 @@ class DashboardSettingsService
         {
             throw new Exception("Login is null, not found personal dashboard")
         }
-        Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
+        Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode)
 
         def defaultDashboard = getSettingByLogin() ?: new DashboardSettingsClass()
         def personalDashboard = getSettingByLogin(user?.login as String)
         def result
+        Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
         if (isPersonal)
         {
             if(personalDashboard)
             {
                 personalDashboard.widgets = personalDashboard?.widgets?.findResults { widget ->
                     widget = widget?.type == DiagramType.TEXT
-                        ? changeTextInTextWidget(widget, classFqn)
-                        : changeTotalWidgetName(widget, classFqn)
+                        ? changeTextInTextWidget(widget, variableMap)
+                        : changeTotalWidgetName(widget, variableMap)
                     return widget
                 } ?: []
 
                 personalDashboard.layouts = isMobile ? null : personalDashboard?.layouts
-                personalDashboard.dashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+                personalDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
                 return personalDashboard
             }
             else
             {
                 defaultDashboard.widgets = defaultDashboard?.widgets?.findResults { widget ->
                     widget = widget?.type == DiagramType.TEXT
-                        ? changeTextInTextWidget(widget, classFqn)
-                        : changeTotalWidgetName(widget, classFqn)
+                        ? changeTextInTextWidget(widget, variableMap)
+                        : changeTotalWidgetName(widget, variableMap)
                     return widget
                 } ?: []
 
                 defaultDashboard?.layouts = isMobile ? null : defaultDashboard?.layouts
-                defaultDashboard.dashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+                defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
                 return defaultDashboard
             }
         }
@@ -388,13 +389,13 @@ class DashboardSettingsService
         {
             defaultDashboard.widgets = defaultDashboard?.widgets?.findResults { widget ->
                 widget = widget?.type == DiagramType.TEXT
-                    ? changeTextInTextWidget(widget, classFqn)
-                    : changeTotalWidgetName(widget, classFqn)
+                    ? changeTextInTextWidget(widget, variableMap)
+                    : changeTotalWidgetName(widget, variableMap)
                 return widget
             } ?: []
 
             defaultDashboard?.layouts = isMobile ? null : defaultDashboard?.layouts
-            defaultDashboard.dashboardKey = generateDashboardKey(classFqn, contentCode)
+            defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode)
             return defaultDashboard
         }
     }
@@ -822,9 +823,10 @@ class DashboardSettingsService
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
+        Map<String, Object> variableMap = [subject: api.utils.get(classFqn), user: user]
         def widgetWithCorrectName = widgetTypeIsNotText
-            ? changeTotalWidgetName(widget, classFqn)
-            : changeTextInTextWidget(widget, classFqn)
+            ? changeTotalWidgetName(widget, variableMap)
+            : changeTextInTextWidget(widget, variableMap)
 
         DashboardSettingsClass dashboardSettings = null
         String dashboardKey = null
@@ -874,9 +876,10 @@ class DashboardSettingsService
             validateName(requestContent, widgetKey, isPersonal, user)
         }
 
+        Map<String, Object> variableMap = [subject: api.utils.get(classFqn), user: user]
         def widgetWithCorrectName = widgetTypeIsNotText
-            ? changeTotalWidgetName(widget, classFqn)
-            : changeTextInTextWidget(widget, classFqn)
+            ? changeTotalWidgetName(widget, variableMap)
+            : changeTextInTextWidget(widget, variableMap)
         String contentCode = requestContent.contentCode
         String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
         if (isPersonal)
@@ -1391,19 +1394,18 @@ class DashboardSettingsService
     /**
      * Метод точечного изменения названия виджета
      * @param widgetName - название виджета
-     * @param classFqn - uuid текущего объекта
+     * @param variableMap - словарь [переменная: значение]
      * @return итоговое название виджета
      */
-    private String replaceWidgetName(String widgetName, def classFqn)
+    private String replaceWidgetName(String widgetName, Map<String, Object> variableMap)
     {
-        if (widgetName?.contains('subject'))
+        if (variableMap?.keySet()?.any { widgetName?.contains(it)})
         {
-            def subject = api.utils.get(classFqn)
             try
             {
                 //пользователь может написать несуществующее поле у subject-а
-                widgetName = checkWidgetName(widgetName, subject)
-                return api.utils.processTemplate(widgetName, [subject: subject])
+                widgetName = checkWidgetName(widgetName, variableMap)
+                return api.utils.processTemplate(widgetName, variableMap)
             }
             catch (Exception ex)
             {
@@ -1489,21 +1491,21 @@ class DashboardSettingsService
     /**
      * Метод полноценного изменения названия виджета
      * @param widgetSettings - настройки виджета
-     * @param classFqn - uuid текущего объекта
+     * @param variableMap - словарь [переменная: значение]
      * @return итоговые настройки виджета
      */
-    private Widget changeTotalWidgetName(def widget, String classFqn)
+    private Widget changeTotalWidgetName(def widget, Map<String, Object> variableMap)
     {
         if (widget)
         {
             widget?.name = widget?.templateName
-                ? replaceWidgetName(widget?.templateName, classFqn)
+                ? replaceWidgetName(widget?.templateName, variableMap)
                 : widget?.name
             if (widget?.header)
             {
                 def header = widget?.header
                 header?.name = header?.template
-                    ? replaceWidgetName(header?.template, classFqn)
+                    ? replaceWidgetName(header?.template, variableMap)
                     : header?.name
                 widget?.header = header
             }
@@ -1515,10 +1517,10 @@ class DashboardSettingsService
     /**
      * Метод по замене переменных в тексте виджета типа "Текст"
      * @param widgetSettings - настройки виджета
-     * @param classFqn - uuid текущего объекта
+     * @param variableMap - словарь [переменная: значение]
      * @return итоговые настройки виджета
      */
-    private Widget changeTextInTextWidget(Widget widget, String classFqn)
+    private Widget changeTextInTextWidget(Widget widget, Map<String, Object> variableMap)
     {
         if (widget)
         {
@@ -1526,7 +1528,7 @@ class DashboardSettingsService
             widget.variables = textInWidget.tokenize().collectEntries { possibleVar ->
                 if (possibleVar.contains('${'))
                 {
-                    def value = replaceWidgetName(possibleVar, classFqn)
+                    def value = replaceWidgetName(possibleVar, variableMap)
                     //условие равенства - значит, такой переменной нет
                     return possibleVar == value ? [:] : [(possibleVar): value]
                 }
@@ -2055,25 +2057,29 @@ class DashboardSettingsService
     /**
      * Метод проверки переменных в названии виджета на наличие вызова атрибута типа caseList
      * @param widgetName - название виджета
-     * @param subject - текущий объект
+     * @param variableMap - словарь [переменная: значение]
      * @return нормализованное название виджета
      */
-    private String checkWidgetName(String widgetName, def subject)
+    private String checkWidgetName(String widgetName, Map<String, Object> variableMap)
     {
         int idsCount = widgetName.findAll { it == '{'}.size()
         if (idsCount > 0)
         {
             String tempWidgetName = widgetName
-            String fqn = subject.getMetaClass().toString()
+            String subjectFqn = variableMap?.subject?.getMetaClass()?.toString()
+            String userFqn = variableMap?.user?.getMetaClass()?.toString()
             List variables = []
             List variableIds = []
             for (int i = 0; i < idsCount; i++)
             {
                 def var = tempWidgetName.dropWhile { it != '{'}.takeWhile { it != '}'}.drop(1)
                 variables += var
-                def varToCheck = var - "subject."
+                def varToCheck
+                variableMap?.keySet()?.each {
+                    varToCheck -= "${it}."
+                }
                 Boolean updateValue = varToCheck.tokenize('.').any { check ->
-                    return checkAttributeType (check, fqn)
+                    return checkAttributeType (check, var.contatins('user') ? userFqn : subjectFqn)
                 }
                 if (updateValue)
                 {
@@ -2085,7 +2091,7 @@ class DashboardSettingsService
             def tempResult = null
             variableIds.collect { idx ->
                 def templateVariable = variables[idx]
-                tempResult = api.utils.processTemplate("\${${templateVariable}}",  [subject: subject])
+                tempResult = api.utils.processTemplate("\${${templateVariable}}",  variableMap)
                 tempResult = tempResult.replace('[', '').replace(']', '').tokenize(',')*.trim()
                 tempResult = tempResult.collect {
                     api.metainfo.getMetaClass(it)?.title
@@ -2120,8 +2126,8 @@ class DashboardSettingsService
      */
     private Boolean checkAttributeType(String code, String classFqn)
     {
-        def attributeType = api.metainfo.getMetaClass(classFqn).getAttribute(code).getType()
-        return attributeType.toString().contains('caseList')
+        def attributeType = api.metainfo.getMetaClass(classFqn)?.getAttribute(code)?.getType()
+        return attributeType?.toString()?.contains('caseList')
     }
 }
 
