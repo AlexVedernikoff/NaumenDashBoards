@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import type {CustomFilterValue, Props, State} from './types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FiltersOnWidget from 'WidgetFormPanel/components/FiltersOnWidget';
-import {props} from './selectors';
+import {functions, props} from './selectors';
 import React, {Component} from 'react';
 
 export class FiltersOnWidgetContainer extends Component<Props, State> {
@@ -113,4 +113,4 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 	}
 }
 
-export default connect(props)(FiltersOnWidgetContainer);
+export default connect(props, functions)(FiltersOnWidgetContainer);
