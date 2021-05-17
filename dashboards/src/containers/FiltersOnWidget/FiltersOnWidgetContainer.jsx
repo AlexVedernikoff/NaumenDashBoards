@@ -81,7 +81,7 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 
 				if (i === dataSetIndex) {
 					newDataSet = {
-						...dataSetIndex,
+						...dataSet,
 						source: {
 							...dataSet.source,
 							widgetFilterOptions
