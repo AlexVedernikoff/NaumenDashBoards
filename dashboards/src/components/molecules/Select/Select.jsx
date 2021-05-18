@@ -25,16 +25,6 @@ export class Select extends PureComponent<Props, State> {
 		showMenu: false
 	};
 
-	searchInputRef: Ref<'input'> = createRef();
-
-	fetchOptions = () => {
-		const {fetchOptions, loading, options} = this.props;
-
-		if (!loading && options.length === 0 && typeof fetchOptions === 'function') {
-			fetchOptions();
-		}
-	};
-
 	components = {
 		Caret: IconButton,
 		IndicatorsContainer: Container,
@@ -44,6 +34,28 @@ export class Select extends PureComponent<Props, State> {
 		Value,
 		ValueContainer: Container,
 		...this.props.components
+	};
+
+	searchInputRef: Ref<'input'> = createRef();
+
+	componentDidUpdate (prevProps: Props) {
+		const {options: prevOptions} = prevProps;
+		const {options} = this.props;
+		const {searchValue} = this.state;
+
+		if (prevOptions !== options && searchValue) {
+			this.setState({
+				foundOptions: this.getFoundOptions(searchValue)
+			});
+		}
+	}
+
+	fetchOptions = () => {
+		const {fetchOptions, loading, options} = this.props;
+
+		if (!loading && options.length === 0 && typeof fetchOptions === 'function') {
+			fetchOptions();
+		}
 	};
 
 	getFoundOptions = (searchValue: string): Array<Option> => {
