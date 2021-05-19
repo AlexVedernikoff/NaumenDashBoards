@@ -26,7 +26,7 @@ export type ContextMenu = {
 };
 
 export type State = {
-	contextMenu: ContextMenu | null,
-	lastWebLGLayouts: Layout[] | null,
-	width: number | null
+	contextMenu: ?ContextMenu,
+	lastWebLGLayouts: ?Layout[],
+	width: ?number
 };

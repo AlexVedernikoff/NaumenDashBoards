@@ -1,5 +1,5 @@
 // @flow
-import type {LayoutMode} from 'store/dashboard/settings/types';
+import type {LayoutBreakpoint, LayoutMode} from 'store/dashboard/settings/types';
 import {LAYOUTS_EVENTS} from './constants';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -11,12 +11,20 @@ export type Layout = {
 	y: number
 };
 
+export type WidgetLayoutPosition = {
+	breakpoint: LayoutBreakpoint,
+	layoutMode: LayoutMode,
+	x: number,
+	y: number
+};
+
 export type Layouts = {
-	[breakpoint: string]: Array<Layout>
+	[breakpoint: LayoutBreakpoint]: Array<Layout>
 };
 
 export type LayoutsPayloadForAdd = {
 	widgetId: string,
+	widgetPosition: ?WidgetLayoutPosition,
 	widgets: Array<Widget>
 };
 

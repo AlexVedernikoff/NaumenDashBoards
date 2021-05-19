@@ -9,9 +9,11 @@ import type {
 	LayoutsPayloadForAdd,
 	LayoutsPayloadForChange,
 	LayoutsState,
-	ReplaceLayoutsIdPayload
+	ReplaceLayoutsIdPayload,
+	WidgetLayoutPosition
 } from './types';
-import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
+import type {LayoutBreakpoint, LayoutMode} from 'store/dashboard/settings/types';
+import {LAYOUT_BREAKPOINTS, LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import type {Widget} from 'store/widgets/data/types';
 
 /**
@@ -33,15 +35,16 @@ const getLastY = (layouts: Array<Layout>, whitelist?: Array<string>): number => 
 /**
  * Создает экземпляр положения виджета
  * @param {string} i - уникальный идентификатор
- * @param {number} y - высота по оси Y
+ * @param {number} x - позиция по оси X
+ * @param {number} y - позиция по оси Y
  * @param {number} w - ширина виджета
  * @returns {Layout}
  */
-const createLayout = (i: string, y: number, w: number = DEFAULT_WIDGET_LAYOUT_SIZE.w): Layout => ({
+const createLayout = (i: string, x: number = 0, y: number = 0, w: number = DEFAULT_WIDGET_LAYOUT_SIZE.w): Layout => ({
 	h: DEFAULT_WIDGET_LAYOUT_SIZE.h,
 	i,
 	w,
-	x: 0,
+	x,
 	y
 });
 
@@ -72,31 +75,60 @@ const getLegacyLayouts = (widgets: Array<Object>): Array<Layout> => {
 	return widgets.map(widget => {
 		const {id, layout} = widget;
 
-		return layout || createLayout(id, getLastY(layouts));
+		return layout || createLayout(id, 0, getLastY(layouts));
 	});
+};
+
+/**
+ * Расчет позиции добавления виджета по сетке
+ * @param {LayoutsState} state - состояние положений виджетов
+ * @param {Array<Widget>} widgets - список виджетоов
+ * @param {LayoutMode} layoutMode - режим отображения сетки
+ * @param {LayoutBreakpoint} breakpoint - режим ширины сетки
+ * @param {WidgetLayoutPosition | null} widgetPosition - запрашиваемая позиция виджета
+ * @returns {object} - позиция в тезаданой сетке
+ */
+const generatePosition = (
+	state: LayoutsState,
+	widgets: Array<Widget>,
+	layoutMode: LayoutMode,
+	breakpoint: LayoutBreakpoint,
+	widgetPosition: ?WidgetLayoutPosition
+): {x: number, y: number} => {
+	if (widgetPosition && widgetPosition.breakpoint === breakpoint && widgetPosition.layoutMode === layoutMode) {
+		return widgetPosition;
+	} else {
+		const layouts = state[layoutMode];
+		const {MOBILE, WEB} = LAYOUT_MODE;
+		const inverseLayoutMode = layoutMode === WEB ? MOBILE : WEB;
+		const widgetsIds = widgets.filter(widget => widget.displayMode !== inverseLayoutMode).map(widget => widget.id);
+		const y = getLastY(layouts[breakpoint], widgetsIds);
+		return {x: 0, y};
+	}
 };
 
 /**
  * Добавляет новое положение виджета
  * @param {LayoutsState} state - состояние положений виджетов
- * @param {LayoutsPayloadForAdd} payload - идентификатор виджета
+ * @param {LayoutsPayloadForAdd} payload - параметры добавления виджета в сетку
  * @returns {LayoutsState}
  */
 const addLayouts = (state: LayoutsState, payload: LayoutsPayloadForAdd): LayoutsState => {
-	const {widgetId, widgets} = payload;
+	const {widgetId, widgetPosition, widgets} = payload;
 	const {MOBILE, WEB} = LAYOUT_MODE;
-	const {[MOBILE]: mobileLayouts, [WEB]: webLayouts} = state;
-	const mobileIds = widgets.filter(widget => widget.displayMode !== WEB).map(widget => widget.id);
-	const webIds = widgets.filter(widget => widget.displayMode !== MOBILE).map(widget => widget.id);
+	const {LG, SM} = LAYOUT_BREAKPOINTS;
+	const webLgPosition = generatePosition(state, widgets, WEB, LG, widgetPosition);
+	const webSmPosition = generatePosition(state, widgets, WEB, SM, widgetPosition);
+	const mobileSmPosition = generatePosition(state, widgets, MOBILE, SM, widgetPosition);
 
 	return {
 		...state,
 		[MOBILE]: {
-			sm: [...state[MOBILE].sm, createLayout(widgetId, getLastY(mobileLayouts.sm, mobileIds), GRID_PROPS[MOBILE].cols.sm)]
+			[SM]: [...state[MOBILE][SM], createLayout(widgetId, mobileSmPosition.x, mobileSmPosition.y, GRID_PROPS[MOBILE].cols[SM])]
 		},
 		[WEB]: {
-			lg: [...state[WEB].lg, createLayout(widgetId, getLastY(webLayouts.lg, webIds))],
-			sm: [...state[WEB].sm, createLayout(widgetId, getLastY(webLayouts.sm, webIds), GRID_PROPS[WEB].cols.sm)]
+			[LG]: [...state[WEB][LG], createLayout(widgetId, webLgPosition.x, webLgPosition.y)],
+			[SM]: [...state[WEB][SM], createLayout(widgetId, webSmPosition.x, webSmPosition.y, GRID_PROPS[WEB].cols[SM])]
 		}
 	};
 };

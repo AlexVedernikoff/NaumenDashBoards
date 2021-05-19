@@ -5,7 +5,7 @@ import {getMapValues} from 'helpers';
 import {getParams} from 'store/helpers';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
-import type {LayoutPayloadForChange, Layouts, LayoutsPayloadForChange} from './types';
+import type {LayoutPayloadForChange, Layouts, LayoutsPayloadForChange, WidgetLayoutPosition} from './types';
 import {LAYOUTS_EVENTS} from './constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 
@@ -120,12 +120,13 @@ const saveNewLayouts = (): ThunkAction => async (dispatch: Dispatch, getState: G
 	}
 };
 
-const addLayouts = (widgetId: string) => (dispatch: Dispatch, getState: GetState) => {
+const addLayouts = (widgetId: string, widgetPosition: ?WidgetLayoutPosition = null) => (dispatch: Dispatch, getState: GetState) => {
 	const {map} = getState().widgets.data;
 
 	dispatch({
 		payload: {
 			widgetId,
+			widgetPosition,
 			widgets: getMapValues(map)
 		},
 		type: LAYOUTS_EVENTS.ADD_LAYOUTS

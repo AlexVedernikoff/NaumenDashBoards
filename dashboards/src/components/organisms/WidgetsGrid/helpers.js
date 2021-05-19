@@ -1,8 +1,8 @@
 // @flow
 import {DEFAULT_COLS_COUNT, GRID_PROPS, gridRef} from './constants';
 import {DEFAULT_WIDGET_LAYOUT_SIZE} from 'store/dashboard/layouts/constants';
-import type {Layout} from 'store/dashboard/layouts/types';
-import type {LayoutMode} from 'store/dashboard/settings/types';
+import type {Layout, WidgetLayoutPosition} from 'store/dashboard/layouts/types';
+import type {LayoutBreakpointsData, LayoutMode} from 'store/dashboard/settings/types';
 
 /**
  * Возвращает количество колонок сетки в соотвествии с текущим модом дашборда и шириной
@@ -89,8 +89,47 @@ const isEqualsLayouts = (firstLayouts: ?Layout[], secondLayouts: ?Layout[]): boo
 	});
 };
 
+/**
+ * Расчитывает позицию клика по параметрам сетки
+ * @param {LayoutMode} layoutMode - режим отображения дашборда (веб/мобильный)
+ * @param {LayoutBreakpointsData<number>} breakpoints - список режимов сетки по ширине элемента
+ * @param {LayoutBreakpointsData<number>} colsCount - количество колонок в зависисмости от режима сетки
+ * @param {number} rowHeight - высота строки сетки
+ * @param {number} width - ширина элемента сетки
+ * @param {number} mouseX - X координата клика
+ * @param {number} mouseY - Y координата клика
+ * @returns {WidgetLayoutPosition} - расчетное положение клика
+ */
+const calculatePosition = (
+	layoutMode: LayoutMode,
+	breakpoints: LayoutBreakpointsData<number>,
+	colsCount: LayoutBreakpointsData<number>,
+	rowHeight: number,
+	width: number,
+	mouseX: number,
+	mouseY: number
+): ?WidgetLayoutPosition => {
+	const keys = Object.keys(breakpoints).sort((bp1, bp2) => breakpoints[bp1] - breakpoints[bp2]);
+	const breakpoint = keys.find((breakpoint, idx) => {
+		const nextBreakpoint = keys[idx + 1];
+		return (nextBreakpoint === undefined
+			|| (breakpoints[breakpoint] <= width && width <= breakpoints[nextBreakpoint]));
+	}) ?? keys[0];
+
+	if (breakpoint in colsCount) {
+		const colWidth = width / colsCount[breakpoint];
+		const x = Math.trunc(mouseX / colWidth);
+		const y = Math.trunc(mouseY / rowHeight);
+
+		return {breakpoint, layoutMode, x, y};
+	}
+
+	return null;
+};
+
 export {
 	getCountGridColumns,
 	generateWebSMLayout,
-	isEqualsLayouts
+	isEqualsLayouts,
+	calculatePosition
 };

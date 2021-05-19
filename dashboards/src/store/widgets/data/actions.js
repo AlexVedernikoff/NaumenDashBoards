@@ -51,7 +51,7 @@ const addNewWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): 
 		batch(() => {
 			dispatch(focusWidget(payload.id));
 			dispatch({payload, type: WIDGETS_EVENTS.ADD_WIDGET});
-			dispatch(addLayouts(NewWidget.id));
+			dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
 		});
 };
 

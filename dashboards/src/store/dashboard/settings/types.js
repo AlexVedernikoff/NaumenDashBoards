@@ -1,9 +1,11 @@
 // @flow
 import type {ChangingState, ThunkAction} from 'store/types';
-import {DASHBOARD_EVENTS, LAYOUT_MODE} from './constants';
+import {DASHBOARD_EVENTS, LAYOUT_BREAKPOINTS, LAYOUT_MODE} from './constants';
 import type {User} from 'store/users/types';
 
 export type LayoutMode = $Keys<typeof LAYOUT_MODE>;
+export type LayoutBreakpoint = $Values<typeof LAYOUT_BREAKPOINTS>;
+export type LayoutBreakpointsData<T> = {[LayoutBreakpoint]: T};
 
 export type SendToEmails = (name: string, type: string, file: Blob, users: Array<User>) => ThunkAction;
 

@@ -1,12 +1,12 @@
 // @flow
 import type {AnyWidget, WidgetType} from 'store/widgets/data/types';
+import {calculatePosition, generateWebSMLayout, isEqualsLayouts} from './helpers';
 import ChartWidget from 'containers/ChartWidget';
 import cn from 'classnames';
 import ContextMenu from 'components/molecules/ContextMenu';
 import {debounce} from 'helpers';
 import {DESKTOP_MK_WIDTH, GRID_PROPS, gridRef} from './constants';
-import type {DivRef} from 'components/types';
-import {generateWebSMLayout, isEqualsLayouts} from './helpers';
+import type {DivRef, Ref} from 'components/types';
 import {getLayoutWidgets} from 'store/widgets/helpers';
 import GridItem from './components/Item';
 import isMobile from 'ismobilejs';
@@ -34,6 +34,7 @@ export class WidgetsGrid extends Component<Props, State> {
 		width: null
 	};
 	gridContainerRef: DivRef = createRef();
+	dashGrid: Ref<typeof Grid> = createRef();
 
 	addNewDiagram = () => this.addNewWidget(WIDGET_TYPES.COLUMN);
 
@@ -41,9 +42,17 @@ export class WidgetsGrid extends Component<Props, State> {
 
 	addNewWidget = (type: WidgetType) => {
 		const {addNewWidget, layoutMode} = this.props;
+		const {contextMenu} = this.state;
 
-		addNewWidget(new NewWidget(layoutMode, type));
-		this.setState({contextMenu: null});
+		if (this.dashGrid.current) {
+			const {breakpoints, cols, rowHeight, width} = this.dashGrid.current.props;
+			const recommendedPosition = contextMenu
+				? calculatePosition(layoutMode, breakpoints, cols, rowHeight, width, contextMenu.x, contextMenu.y)
+				: null;
+
+			addNewWidget(new NewWidget(layoutMode, type, recommendedPosition));
+			this.setState({contextMenu: null});
+		}
 	};
 
 	componentDidMount () {
@@ -133,17 +142,23 @@ export class WidgetsGrid extends Component<Props, State> {
 	onContextMenu = (e: MouseEvent) => {
 		let {clientX, clientY, target} = e;
 
-		const {current: container} = this.gridContainerRef;
-		const isNeedContainer = target === container || (target instanceof Node && target.parentElement === container);
+		if (this.gridContainerRef?.current) {
+			const gridElement = this.gridContainerRef?.current;
+			const scrollTop = this.gridContainerRef?.current?.scrollTop ?? 0;
+			const style = window.getComputedStyle(gridElement);
+			const marginLeft = parseInt(style.marginLeft);
+			const {current: container} = this.gridContainerRef;
+			const isNeedContainer = target === container || (target instanceof Node && target.parentElement === container);
 
-		if (isNeedContainer) {
-			if (container) {
-				const {top} = container.getBoundingClientRect();
+			if (isNeedContainer) {
+				if (container) {
+					const {top} = container.getBoundingClientRect();
 
-				this.setState({ contextMenu: { x: clientX, y: clientY - top } });
+					this.setState({ contextMenu: { x: clientX - marginLeft, y: clientY - top + scrollTop } });
+				}
+
+				e.preventDefault();
 			}
-
-			e.preventDefault();
 		}
 	};
 
@@ -158,7 +173,7 @@ export class WidgetsGrid extends Component<Props, State> {
 
 		if (contextMenu) {
 			return (
-				<ContextMenu{...contextMenu} hideContextMenu={this.hideContextMenu}>
+				<ContextMenu {...contextMenu} hideContextMenu={this.hideContextMenu}>
 					<MenuItem key='widget' onClick={this.addNewDiagram}>Добавить виджет</MenuItem>
 					<MenuItem key='text' onClick={this.addNewText}>Добавить текст</MenuItem>
 				</ContextMenu>
@@ -206,6 +221,7 @@ export class WidgetsGrid extends Component<Props, State> {
 					onDrag={this.handleDrag}
 					onDragStop={this.handleDragStop}
 					onLayoutChange={debounce(this.handleLayoutChange, 1000)}
+					ref={this.dashGrid}
 					resizeHandles={GRID_PROPS.resizeHandles}
 					width={containerWidth}
 					{...GRID_PROPS[layoutMode]}
