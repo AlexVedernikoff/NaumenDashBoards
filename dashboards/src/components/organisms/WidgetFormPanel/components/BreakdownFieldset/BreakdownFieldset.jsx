@@ -109,7 +109,11 @@ export class BreakdownFieldset extends Component<Props> {
 		onChange(newBreakdown);
 	};
 
-	handleClickAddButton = () => !Array.isArray(this.props.value) && this.createNewBreakdown();
+	handleClickAddButton = () => {
+		if (!Array.isArray(this.props.value) || this.props.value.length === 0) {
+			this.createNewBreakdown();
+		}
+	};
 
 	handleSelect = (event: OnSelectEvent, breakdownIndex: number) => {
 		const {onChange, value: breakdown} = this.props;
