@@ -4,6 +4,7 @@ import type {DrillDownMixin} from './types';
 import {getDescriptorCases} from 'store/helpers';
 import {isSourceType} from 'store/sources/data/helpers';
 import {LINKS_EVENTS} from './constants';
+import {setWarningMessage} from 'store/widgets/data/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -92,7 +93,11 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
 	} catch (e) {
-		dispatch(recordLinkError(id));
+		if (e.status === 500 && e.responseText.toLowerCase().includes('слишком большое количество данных')) {
+			dispatch(setWarningMessage({id, message: 'Детализация данных не доступна. Слишком большое количество данных'}));
+		} else {
+			dispatch(recordLinkError(id));
+		}
 	}
 };
 
