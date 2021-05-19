@@ -54,8 +54,18 @@ const LAYOUT_MODE = {
 	WEB
 };
 
+// контрольные точки отображения сетки
+const LG: 'lg' = 'lg';
+const SM: 'sm' = 'sm';
+
+const LAYOUT_BREAKPOINTS = {
+	LG,
+	SM
+};
+
 export {
 	DASHBOARD_EVENTS,
 	DEFAULT_INTERVAL,
+	LAYOUT_BREAKPOINTS,
 	LAYOUT_MODE
 };
