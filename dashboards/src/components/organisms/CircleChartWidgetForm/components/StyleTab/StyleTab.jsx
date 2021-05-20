@@ -26,6 +26,7 @@ export class StyleTab extends Component<Props> {
 
 		return (
 			<ColorsBox
+				disabledCustomSettings={false}
 				name={DIAGRAM_FIELDS.colorsSettings}
 				onChange={onChange}
 				value={colorsSettings}
