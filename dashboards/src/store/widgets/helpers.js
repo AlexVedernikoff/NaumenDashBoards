@@ -12,6 +12,7 @@ import {
 } from './constants';
 import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
+import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
@@ -49,8 +50,8 @@ const getDefaultSystemGroup = (attribute?: Object) => {
  * @param {LayoutMode} mode - режим отображения
  * @returns {Array<Widget>}
  */
-const	getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widget> => {
-	return widgets.filter(item => item.displayMode === mode || item.displayMode === DISPLAY_MODE.ANY);
+const getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widget> => {
+	return widgets.filter(item => (!item.displayMode && mode === LAYOUT_MODE.WEB) || item.displayMode === mode || item.displayMode === DISPLAY_MODE.ANY);
 };
 
 /**
