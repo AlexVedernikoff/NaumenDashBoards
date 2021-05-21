@@ -461,16 +461,19 @@ const setSelectedWidget = (widgetId: string) => (dispatch: Dispatch, getState: G
 
 	if (widgetId !== NewWidget.id) {
 		const widgetData = widgetsData.map[widgetId];
-		const sourcesSet = new Set(
-			widgetData
-				.data
-				.map(dataSet => dataSet.source.value?.value)
-				.filter(e => !!e)
-		);
 
-		sourcesSet.forEach((item) => {
-			dispatch(fetchSourcesFilters(item));
-		});
+		if (widgetData.data) {
+			const sourcesSet = new Set(
+				widgetData
+					.data
+					.map(dataSet => dataSet.source.value?.value)
+					.filter(e => !!e)
+			);
+
+			sourcesSet.forEach((item) => {
+				dispatch(fetchSourcesFilters(item));
+			});
+		}
 	}
 
 	dispatch({

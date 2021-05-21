@@ -42,7 +42,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 		});
 	};
 
-	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, value);
+	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
@@ -67,7 +67,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} value={fontSize} />
 				</FormField>
 				<FormField row={true}>
-					<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleChange} portable={true} value={fontColor} />
+					<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleSelect} portable={true} value={fontColor} />
 					{this.renderShowShadowInput()}
 				</FormField>
 			</ToggableFormBox>

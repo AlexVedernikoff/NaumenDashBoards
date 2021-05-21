@@ -22,7 +22,7 @@ export class LegendBox extends PureComponent<Props> {
 		});
 	};
 
-	handleChange = ({name, value}: OnChangeEvent<string>) => this.change(name, value);
+	handleChange = ({name, value}: OnChangeEvent<string>) => this.change(name, !value);
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
@@ -35,7 +35,7 @@ export class LegendBox extends PureComponent<Props> {
 			<CheckIconButtonGroup
 				disabled={disabled}
 				name={DIAGRAM_FIELDS.displayType}
-				onChange={this.handleChange}
+				onChange={this.handleSelect}
 				options={DISPLAY_TYPE_OPTIONS}
 				value={displayType}
 			/>
@@ -45,7 +45,7 @@ export class LegendBox extends PureComponent<Props> {
 	renderLegendPositionButtons = () => {
 		const {position} = this.props.value;
 
-		return <CheckIconButtonGroup name={DIAGRAM_FIELDS.position} onChange={this.handleChange} options={POSITION_OPTIONS} value={position} />;
+		return <CheckIconButtonGroup name={DIAGRAM_FIELDS.position} onChange={this.handleSelect} options={POSITION_OPTIONS} value={position} />;
 	};
 
 	render () {
@@ -61,7 +61,7 @@ export class LegendBox extends PureComponent<Props> {
 					{this.renderLegendPositionButtons()}
 				</FormField>
 				<FormField row>
-					<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleChange} value={textHandler} />
+					<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleSelect} value={textHandler} />
 					{this.renderLegendDisplayTypeButtons()}
 				</FormField>
 			</ToggableFormBox>

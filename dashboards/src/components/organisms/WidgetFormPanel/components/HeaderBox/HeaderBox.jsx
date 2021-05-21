@@ -24,7 +24,7 @@ export class HeaderBox extends PureComponent<Props> {
 		});
 	};
 
-	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, value);
+	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
@@ -34,7 +34,7 @@ export class HeaderBox extends PureComponent<Props> {
 		return (
 			<CheckIconButtonGroup
 				name={DIAGRAM_FIELDS.position}
-				onChange={this.handleChange}
+				onChange={this.handleSelect}
 				options={POSITION_OPTIONS} value={position}
 			/>
 		);
@@ -51,12 +51,12 @@ export class HeaderBox extends PureComponent<Props> {
 						<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} value={fontSize} />
 					</FormField>
 					<FormField row>
-						<FontStyleControl name={DIAGRAM_FIELDS.fontStyle} onChange={this.handleChange} value={fontStyle} />
-						<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleChange} portable={true} value={fontColor} />
+						<FontStyleControl name={DIAGRAM_FIELDS.fontStyle} onChange={this.handleSelect} value={fontStyle} />
+						<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleSelect} portable={true} value={fontColor} />
 					</FormField>
 					<FormField row>
-						<TextAlignControl name={DIAGRAM_FIELDS.textAlign} onChange={this.handleChange} value={textAlign} />
-						<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleChange} value={textHandler} />
+						<TextAlignControl name={DIAGRAM_FIELDS.textAlign} onChange={this.handleSelect} value={textAlign} />
+						<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleSelect} value={textHandler} />
 						{this.renderPositionControl()}
 					</FormField>
 			</ToggableFormBox>
