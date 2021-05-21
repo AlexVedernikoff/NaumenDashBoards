@@ -67,7 +67,9 @@ export class FilterButton extends PureComponent<Props, State> {
 		if (filter) {
 			const newDescriptor = await this.getNewDescriptor(filter, source.value.value);
 
-			onChange(dataSetIndex, filterIndex, newDescriptor);
+			if (newDescriptor) {
+				onChange(dataSetIndex, filterIndex, newDescriptor);
+			}
 		}
 
 		this.handleToggleOptionsMenu();

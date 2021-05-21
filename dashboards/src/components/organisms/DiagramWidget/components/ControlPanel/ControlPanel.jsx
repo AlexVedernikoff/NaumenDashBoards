@@ -38,7 +38,6 @@ export class ControlPanel extends PureComponent<Props> {
 	renderContainer = ({children, ...props}) => (
 		<Container {...props}>
 			{this.renderNavigationButton()}
-			{this.renderFilterButton()}
 			{children}
 		</Container>
 	);
@@ -78,7 +77,7 @@ export class ControlPanel extends PureComponent<Props> {
 		</MenuItem>
 	);
 
-	renderFilterButton = () => {
+	renderFilterOnWidget = () => {
 		const {onChangeFilter, onClearFilters, widget} = this.props;
 
 		if (this.hasCustomFilters()) {
@@ -121,7 +120,8 @@ export class ControlPanel extends PureComponent<Props> {
 		const {className, widget} = this.props;
 		const components = {
 			Container: this.renderContainer,
-			DropdownMenu: this.renderDropdownMenu
+			DropdownMenu: this.renderDropdownMenu,
+			FilterOnWidget: this.renderFilterOnWidget
 		};
 
 		return <WidgetControlPanel className={className} components={components} widget={widget} />;
