@@ -63,9 +63,12 @@ const LAYOUT_BREAKPOINTS = {
 	SM
 };
 
+const OPEN_PERSONAL_DASHBOARD_ERROR: 'Login is null, not found personal dashboard' = 'Login is null, not found personal dashboard';
+
 export {
 	DASHBOARD_EVENTS,
 	DEFAULT_INTERVAL,
 	LAYOUT_BREAKPOINTS,
-	LAYOUT_MODE
+	LAYOUT_MODE,
+	OPEN_PERSONAL_DASHBOARD_ERROR
 };
