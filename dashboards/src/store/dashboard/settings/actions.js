@@ -5,7 +5,7 @@ import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EVENTS} from './constants';
+import {DASHBOARD_EVENTS, OPEN_PERSONAL_DASHBOARD_ERROR} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {
 	getContext,
@@ -103,27 +103,43 @@ const initStorageSettings = () => (dispatch: Dispatch, getState: GetState) => {
 const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const state = getState();
 	const payload = getDashboardDescription(state);
-	const {
-		autoUpdate,
-		customColorsSettings,
-		dashboardKey: code,
-		layouts,
-		mobileLayouts,
-		widgets
-	} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
 
-	dispatch(setCode(code));
-	dispatch(setCustomChartsColorsSettings(customColorsSettings));
+	try {
+		const {
+			autoUpdate,
+			customColorsSettings,
+			dashboardKey: code,
+			layouts,
+			mobileLayouts,
+			widgets
+		} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
 
-	if (autoUpdate !== null) {
-		dispatch(setAutoUpdateSettings(autoUpdate));
+		batch(() => {
+			dispatch(setCode(code));
+			dispatch(setCustomChartsColorsSettings(customColorsSettings));
+
+			if (autoUpdate !== null) {
+				dispatch(setAutoUpdateSettings(autoUpdate));
+			}
+
+			dispatch(setWidgets(widgets));
+			dispatch(setWebLayouts(widgets, refresh, layouts));
+			dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
+		});
+	} catch (exception) {
+		const {responseText, status} = exception;
+
+		if (status === 500) {
+			// TODO: SMRMEXT-12163
+			if (payload.isPersonal && responseText.includes(OPEN_PERSONAL_DASHBOARD_ERROR)) {
+				dispatch(setPersonalValue(false));
+				dispatch(getSettings(refresh));
+				return;
+			}
+		}
+
+		throw exception;
 	}
-
-	batch(() => {
-		dispatch(setWidgets(widgets));
-		dispatch(setWebLayouts(widgets, refresh, layouts));
-		dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
-	});
 };
 
 /**

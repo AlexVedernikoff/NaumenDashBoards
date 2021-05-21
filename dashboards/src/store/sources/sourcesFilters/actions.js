@@ -89,6 +89,7 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 			const {responseText, status} = exception;
 
 			if (status === 500) {
+				// TODO: SMRMEXT-12163
 				if (/Название фильтра должно быть уникально/.test(responseText)) {
 					return {message: `Фильтр с названием ${label} не может быть сохранен. Название фильтра должно быть уникально.`, result: false};
 				} else if (/Фильтр с текущими параметрами уже существует/.test(responseText)) {
@@ -124,6 +125,7 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 			dispatch(requestSourceFiltersError());
 			const {status} = exception;
 
+			// TODO: SMRMEXT-12163
 			if (status === 500) {
 				return {message: 'Серверная ошибка удаления фильтра', result: false};
 			}
