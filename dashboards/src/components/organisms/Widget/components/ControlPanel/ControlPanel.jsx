@@ -20,7 +20,8 @@ export class ControlPanel extends PureComponent<Props, State> {
 	static defaultProps = {
 		components: {
 			Container,
-			DropdownMenu
+			DropdownMenu,
+			FilterOnWidget: null
 		}
 	};
 
@@ -110,6 +111,17 @@ export class ControlPanel extends PureComponent<Props, State> {
 		return null;
 	};
 
+	renderFilterOnWidget = (): React$Node => {
+		const {components} = this.props;
+		const {FilterOnWidget} = components;
+
+		if (FilterOnWidget) {
+			return <FilterOnWidget />;
+		}
+
+		return null;
+	};
+
 	renderRemoveMenuItem = () => {
 		const {editable} = this.props;
 
@@ -172,6 +184,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 			<Container className={cn(styles.panel, className)} onClick={this.handleClick}>
 				{this.renderChangeDisplayModeButton()}
 				{this.renderEditButton()}
+				{this.renderFilterOnWidget()}
 				{this.renderSubmenuButton()}
 			</Container>
 		);

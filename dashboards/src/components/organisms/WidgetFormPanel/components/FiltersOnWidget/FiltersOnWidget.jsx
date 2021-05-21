@@ -29,9 +29,11 @@ export class FiltersOnWidget extends PureComponent<Props> {
 	};
 
 	handleAddSource = () => {
-		const {onAddNewFilterItem} = this.props;
+		const {filters, onAddNewFilterItem} = this.props;
 
-		onAddNewFilterItem();
+		if (filters?.length < 3) {
+			onAddNewFilterItem();
+		}
 	};
 
 	handleChangeAttribute = (idx: number) => (attributes: Attribute[]) => {
@@ -58,7 +60,15 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		}
 	};
 
-	renderAddSourceFilter = (): React$Node => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleAddSource} />;
+	renderAddSourceFilter = (): React$Node => {
+		const {filters} = this.props;
+
+		if (filters?.length < 3) {
+			return <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleAddSource} />;
+		}
+
+		return null;
+	};
 
 	renderFilterItem = (filterItemIdx: number, value: CustomFilterValue, availibleDataSets: CustomFilterDataSet[]): React$Node => {
 		const {fetchAttributes} = this.props;

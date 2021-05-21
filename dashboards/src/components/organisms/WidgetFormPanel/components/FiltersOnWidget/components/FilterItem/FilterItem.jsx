@@ -23,10 +23,7 @@ export class FilterItem extends PureComponent<Props> {
 
 	handleChangeAttribute = ({value}) => {
 		const {onChangeAttribute} = this.props;
-
-		if (value.length <= 3) {
-			onChangeAttribute(value);
-		}
+		return onChangeAttribute([value]);
 	};
 
 	handleChangeDataSet = ({value}) => {
@@ -49,20 +46,20 @@ export class FilterItem extends PureComponent<Props> {
 			if (typeof dataSetIndex === 'number') {
 				const selectedDataSet = dataSets[dataSetIndex];
 				const { attributes = [], attributesLoading } = selectedDataSet;
+				const attribute = value.attributes && value.attributes.length > 0 ? value.attributes[0] : null;
 
 				return (
 					<FormField>
 						<Select
 							fetchOptions={this.fetchOptions}
 							getOptionLabel={(attribute: Attribute) => attribute.title}
-							getOptionValue={(attribute: Attribute) => `${attribute.property}-${attribute.code}`}
+							getOptionValue={(attribute: Attribute) => attribute}
 							isSearching={true}
 							loading={attributesLoading}
-							multiple={true}
 							onSelect={this.handleChangeAttribute}
 							options={attributes}
 							placeholder="Укажите атрибут"
-							values={value.attributes}
+							value={attribute}
 						/>
 					</FormField>
 				);

@@ -167,7 +167,9 @@ export class SourceFieldset extends Component<Props, State> {
 		if (newSourceValue?.value !== sourceValue?.value) {
 			newSource = {
 				...newSource,
-				descriptor: ''
+				descriptor: '',
+				filterId: null,
+				widgetFilterOptions: []
 			};
 
 			newSourceValue && onFetchAttributes(newSourceValue.value, parentClassFqn, this.setDefaultIndicator);

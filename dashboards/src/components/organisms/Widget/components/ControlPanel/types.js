@@ -7,7 +7,8 @@ export type Components = {
 	Container: React$ComponentType<ContainerProps>,
 	DropdownMenu: React$ComponentType<{
 		children: React$Node
-	}>
+	}>,
+	FilterOnWidget: React$ComponentType<{}>
 };
 
 export type Props = {
