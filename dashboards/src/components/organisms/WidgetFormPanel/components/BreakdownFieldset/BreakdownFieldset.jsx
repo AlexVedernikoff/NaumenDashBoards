@@ -42,12 +42,16 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	componentDidMount () {
-		this.props.required && this.createNewBreakdown();
+		if (this.props.required) {
+			this.createNewBreakdown();
+		} else {
+			this.clearUnusedBreakdowns();
+		}
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {indicator, required} = this.props;
-		const {indicator: prevIndicator, value: prevValue} = prevProps;
+		const {indicator, removable, required} = this.props;
+		const {indicator: prevIndicator, removable: prevRemovable, value: prevValue} = prevProps;
 		const {COMPUTED_ATTR} = ATTRIBUTE_TYPES;
 		const switchToComputedIndicator = prevIndicator && prevIndicator.type !== COMPUTED_ATTR
 			&& indicator && indicator.type === COMPUTED_ATTR;
@@ -57,7 +61,23 @@ export class BreakdownFieldset extends Component<Props> {
 		if ((switchToComputedIndicator || switchFromComputedIndicator) && (prevValue || required)) {
 			this.createNewBreakdown();
 		}
+
+		if (prevRemovable && !removable) {
+			this.createNewBreakdown();
+		}
+
+		if (!prevRemovable && removable) {
+			this.clearUnusedBreakdowns();
+		}
 	}
+
+	clearUnusedBreakdowns = () => {
+		const {onRemove, value} = this.props;
+
+		if (value.length > 0 && !value[0].attribute) {
+			onRemove();
+		}
+	};
 
 	createNewBreakdown = () => {
 		const {dataKey, getUsedDataKeys, indicator, onChange, value, values} = this.props;
