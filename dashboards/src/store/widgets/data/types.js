@@ -632,6 +632,8 @@ export type SaveWidgetWithNewFilters = (widget: $Shape<Widget>) => ThunkAction;
 
 export type AddNewWidget = (widget: NewWidget) => ThunkAction;
 
+export type DispatchAddNewWidget = (widget: NewWidget) => Promise<void>;
+
 export type CopyWidgetError = $Values<typeof COPY_WIDGET_ERRORS>;
 
 export type ValidateWidgetToCopyResult = {
