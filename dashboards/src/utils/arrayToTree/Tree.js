@@ -13,8 +13,8 @@ class Tree {
 		this.options = extend({
 			...this.options,
 			values: {
-				children: this.getChildren,
 				id: this.getId,
+				loading: false,
 				uploaded: true,
 				value: this.getValue
 			}
@@ -28,16 +28,18 @@ class Tree {
 	 * @returns {string} - ключ добавленного узла
 	 */
 	addNode = (arrayNode: InputArrayNode, parent: string | null): string => {
-		const {children, id, uploaded, value} = this.getNodeValues(arrayNode, parent);
+		const {id, loading, uploaded, value} = this.getNodeValues(arrayNode, parent);
+		const {hasChildren, [this.options.keys.children]: arrayChildren} = arrayNode;
+		let children = null;
 
-		if (Array.isArray(children) && children.length > 0) {
-			this.addNodes(arrayNode.children, id);
+		if ((Array.isArray(arrayChildren) && arrayChildren.length > 0) || hasChildren) {
+			children = this.addNodes(arrayChildren, id);
 		}
 
 		this.tree[id] = {
 			children,
 			id,
-			loading: false,
+			loading,
 			parent,
 			uploaded,
 			value
@@ -64,22 +66,10 @@ class Tree {
 
 	createTree = () => this.addNodes(this.array, this.options.parent);
 
-	getChildren = (node: InputArrayNode, parent: string | null): Array<string> | null => {
-		const {keys, values} = this.options;
-		const {[keys.children]: children} = node;
-		let ids = null;
+	getId = (node: InputArrayNode, parent: string): string => {
+		const {[this.options.keys.value]: value} = node;
 
-		if (Array.isArray(children) && children.length > 0) {
-			ids = children.map(child => values.id ? values.id(child, parent) : this.getId(child));
-		}
-
-		return ids;
-	};
-
-	getId = (node: InputArrayNode): string => {
-		const {[this.options.keys.id]: id} = node;
-
-		return id;
+		return parent ? `${parent}$${value}` : value;
 	};
 
 	getNodeValues = (node: InputArrayNode, parent: string | null) => {
@@ -96,7 +86,7 @@ class Tree {
 	getTree = (): TreeMap => this.tree;
 
 	getValue = (node: InputArrayNode): NodeValue => {
-		const {[this.options.keys.children]: children, ...value} = node;
+		const {hasChildren, [this.options.keys.children]: children, ...value} = node;
 
 		return value;
 	};

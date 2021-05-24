@@ -25,9 +25,10 @@ export class MultiSelectOrCondition extends Component<Props> {
 	};
 
 	handleSelect = ({value}: OnSelectEvent) => {
-		const {data, getOptionValue, onChange, type} = this.props;
-		const index = data.findIndex(currentValue => getOptionValue(currentValue) === getOptionValue(value));
-		const newData = index > -1 ? data.filter((o, i) => i !== index) : [...data, value];
+		const {data, getOptionValue, onChange, transform, type} = this.props;
+		const selectData = transform ? transform(value) : value;
+		const index = data.findIndex(currentValue => getOptionValue(currentValue) === getOptionValue(selectData));
+		const newData = index > -1 ? data.filter((o, i) => i !== index) : [...data, selectData];
 
 		onChange({
 			data: newData,

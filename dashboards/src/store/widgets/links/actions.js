@@ -128,7 +128,7 @@ const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch
 const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	const storageSettings = new StorageSettings(dashboardId);
 
-	widgetId ? storageSettings.setTargetWidget(widgetId) : 	storageSettings.setFocus(true);
+	widgetId ? storageSettings.setTargetWidget(widgetId) : storageSettings.setFocus(true);
 	dispatch(requestLink(dashboardId));
 
 	try {

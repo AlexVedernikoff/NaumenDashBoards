@@ -29,7 +29,7 @@ export class CatalogItemGroupModal extends Component<Props> {
 	renderSelect = (props: SelectProps) => (
 		<DATA_CONTEXT.Consumer>
 			{({items, loading}: CatalogItemData) => (
-				<MaterialTreeSelect loading={loading} onLoad={this.handleLoad} options={items} {...props} />
+				<MaterialTreeSelect loading={loading} onFetch={this.handleLoad} options={items} {...props} />
 			)}
 		</DATA_CONTEXT.Consumer>
 	);

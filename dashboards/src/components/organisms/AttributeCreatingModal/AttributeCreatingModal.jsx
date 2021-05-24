@@ -1,17 +1,18 @@
 // @flow
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import Button from 'components/atoms/Button';
-import {ConstantControl, OperatorControl} from './components';
+import ConstantControl from './components/ConstantControl';
 import type {Control, ControlType, Props, State} from './types';
-import {CONTROL_TYPES, MATH_OPERATORS, OPERATORS, TEMPLATE_NAMES, TEMPLATES} from './constants';
+import {CONTROL_TYPES, MATH_OPERATORS, OPERATORS, TEMPLATE_NAME, TEMPLATES} from './constants';
 import {getAggregationLabel} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import {getMapValues, isObject} from 'helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import InfoPanel from 'components/atoms/InfoPanel';
 import Modal from 'components/molecules/Modal';
+import OperatorControl from './components/OperatorControl';
 import React, {PureComponent} from 'react';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
-import SourceControl from 'containers/SourceControl';
+import SourceControl from './components/SourceControl';
 import styles from './styles.less';
 import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
@@ -101,11 +102,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	handleChangeType = (index: number, name: string) => {
-		if (name in TEMPLATE_NAMES) {
-			return this.changeTemplateType();
-		}
-
-		this.changeControlType(index);
+		name === TEMPLATE_NAME ? this.changeTemplateType() : this.changeControlType(index);
 	};
 
 	handleClickClearIcon = () => this.setState({title: ''});
@@ -140,7 +137,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	handleSelect = (index: number, name: string, value: any, type: ControlType) => {
 		const {controls} = this.state;
 
-		if (name in TEMPLATE_NAMES) {
+		if (name === TEMPLATE_NAME) {
 			return this.createNewControl(value, type);
 		}
 
@@ -341,7 +338,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	renderRemoveButton = (control: Control, index: number) => {
 		const {controls} = this.state;
 
-		if (index === controls.length - 1 && !(control.name in TEMPLATE_NAMES)) {
+		if (index === controls.length - 1 && control.name !== TEMPLATE_NAME) {
 			return (
 				<div className={styles.removeIcon}>
 					<Icon name={ICON_NAMES.SQUARE_REMOVE} onClick={this.handleClickRemoveIcon} />
@@ -364,6 +361,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	renderSourceControl = (control: Control, index: number) => {
+		const {onFetch, options} = this.props;
 		let {name, value} = control;
 
 		if (typeof value !== 'object') {
@@ -374,9 +372,10 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 			<SourceControl
 				index={index}
 				name={name}
-				onClickButton={this.handleChangeType}
+				onAddConstant={this.handleChangeType}
+				onFetch={onFetch}
 				onSelect={this.handleSelect}
-				type={CONTROL_TYPES.SOURCE}
+				options={options}
 				value={value}
 			/>
 		);

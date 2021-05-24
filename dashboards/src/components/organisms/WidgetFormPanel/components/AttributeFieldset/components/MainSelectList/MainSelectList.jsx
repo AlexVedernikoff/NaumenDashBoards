@@ -1,13 +1,15 @@
 // @flow
+import {DEFAULT_COMPONENTS} from 'components/molecules/TreeSelect/constants';
 import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import List from 'components/molecules/Select/components/List';
+import type {Node} from 'components/molecules/TreeSelect/types';
 import type {OnChangeEvent, TreeNode} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import Toggle from 'components/atoms/Toggle';
-import TreeList from 'components/molecules/MaterialTreeSelect/components/Tree';
+import TreeList from 'components/molecules/TreeSelect/components/Tree';
 import withAttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withAttributeFieldset';
 
 export class MainSelectList extends PureComponent<Props, State> {
@@ -16,6 +18,10 @@ export class MainSelectList extends PureComponent<Props, State> {
 		showDynamicAttributes: false,
 		showDynamicAttributesError: false
 	};
+
+	getNodeLabel = (node: Node) => this.props.getOptionLabel(node.value);
+
+	getNodeValue = (node: Node) => this.props.getOptionValue(node.value);
 
 	handleChangeShowDynamicAttributes = ({value: show}: OnChangeEvent<boolean>) => {
 		const {dataKey, dynamicGroups, fetchDynamicAttributeGroups, source} = this.props;
@@ -32,7 +38,7 @@ export class MainSelectList extends PureComponent<Props, State> {
 		}
 	};
 
-	handleLoadDynamicAttributes = (node: DynamicGroupsNode | null) => {
+	handleFetchDynamicAttributes = (node: DynamicGroupsNode | null) => {
 		const {dataKey, fetchDynamicAttributes, getOptionValue} = this.props;
 
 		if (node) {
@@ -44,7 +50,7 @@ export class MainSelectList extends PureComponent<Props, State> {
 
 	handleSelectDynAttr = (onSelect: Function) => ({value}: DynamicGroupsNode) => onSelect(value);
 
-	isEnabledDynamicNode = (node: TreeNode<Object>) => !!node.parent;
+	isDisabledDynamicNode = (node: TreeNode<Object>) => !node.parent;
 
 	renderDynamicAttributeList = () => {
 		const {dataKey, dynamicGroups, getOptionLabel, getOptionValue, onSelect, searchValue, source, value} = this.props;
@@ -60,12 +66,15 @@ export class MainSelectList extends PureComponent<Props, State> {
 
 			return (
 				<TreeList
+					components={DEFAULT_COMPONENTS}
+					getNodeLabel={this.getNodeLabel}
+					getNodeValue={this.getNodeValue}
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
 					initialSelected={initialSelected}
-					isEnabledNode={this.isEnabledDynamicNode}
+					isDisabled={this.isDisabledDynamicNode}
 					loading={loading}
-					onLoad={this.handleLoadDynamicAttributes}
+					onFetch={this.handleFetchDynamicAttributes}
 					onSelect={this.handleSelectDynAttr(onSelect)}
 					options={data}
 					searchValue={searchValue}

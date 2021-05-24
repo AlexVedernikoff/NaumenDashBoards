@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import AttributeAggregationField from 'WidgetFormPanel/components/AttributeAggregationField';
-import AttributeCreatingModal from 'components/organisms/AttributeCreatingModal';
+import AttributeCreatingModal from 'containers/AttributeCreatingModal';
 import AttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {compose} from 'recompose';

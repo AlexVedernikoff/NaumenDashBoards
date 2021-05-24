@@ -1,48 +1,61 @@
 // @flow
-import type {OnSelectEvent, SelectValue} from 'components/types';
-import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import type {ComponentProps as TreeProps} from './components/Tree/types';
+import type {OnSelectEvent, TreeNode} from 'components/types';
+import type {Props as NodeProps} from './components/Node/types';
 
-export type TreeSelectLabelContainerProps = ContainerProps & {
-	value: SelectValue | null,
+export type ContainerProps = {
+	children: React$Node,
+	className: string,
+	onClick?: (e: SyntheticMouseEvent<HTMLDivElement>) => void
 };
+
+export type SearchInputProps = {
+	focusOnMount: boolean,
+	onChange: (value: string) => void,
+	value: string
+};
+
+export type Option = Object;
 
 export type Components = {
 	IndicatorsContainer: React$ComponentType<ContainerProps>,
-	LabelContainer: React$ComponentType<TreeSelectLabelContainerProps>,
+	LabelContainer: React$ComponentType<ContainerProps>,
+	MenuContainer: React$ComponentType<ContainerProps>,
+	Node: React$ComponentType<NodeProps>,
+	SearchInput: React$ComponentType<SearchInputProps>,
+	Tree: React$ComponentType<TreeProps>,
+	ValueContainer: React$ComponentType<ContainerProps>,
 };
 
-type Options = {
-	[string]: Object
-};
+export type Node = TreeNode<Option>;
 
-export type OnChangeLabelEvent = {
-	label: string,
-	name: string
-};
-
-export type OnRemoveEvent = {
-	name: string
+export type Tree = {
+	[string]: Node
 };
 
 export type Props = {
 	className: string,
 	components: $Shape<Components>,
-	getOptionLabel?: (option: SelectValue) => string,
-	getOptionValue?: (option: SelectValue) => any,
-	initialSelected: Array<string>,
-	isActive: boolean,
+	getNodeLabel?: (node: Node) => string,
+	getNodeValue?: (node: Node) => string,
+	getOptionLabel: (node: Option | null) => string,
+	getOptionValue: (node: Option | null) => any,
+	isDisabled: (node: Node) => boolean,
+	loading: false,
+	multiple: boolean,
 	name: string,
-	onChangeLabel: OnChangeLabelEvent => void,
-	onRemove: OnRemoveEvent => void,
+	onFetch?: (node: Node | null, offset?: number) => void,
+	onRemove?: (name: string) => void,
 	onSelect: OnSelectEvent => void | Promise<void>,
-	options: Options,
+	options: Tree,
 	placeholder: string,
 	removable: boolean,
-	value: SelectValue | null
+	showMore: boolean,
+	value: Option | null,
+	values: Array<Option>
 };
 
 export type State = {
 	searchValue: string,
-	showForm: boolean,
 	showMenu: boolean
 };

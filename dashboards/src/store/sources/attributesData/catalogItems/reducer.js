@@ -12,7 +12,7 @@ const reducer = (state: CatalogItemsState = initialCatalogItemsState, action: Ca
 				[action.payload.property]: {
 					...state[action.payload.property],
 					items: arrayToTree(action.payload.data, {keys: {
-							id: 'uuid'
+							value: 'uuid'
 						}}),
 					loading: false
 				}

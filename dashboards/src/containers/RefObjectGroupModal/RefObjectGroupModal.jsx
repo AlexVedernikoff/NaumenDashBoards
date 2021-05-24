@@ -4,6 +4,7 @@ import CurrentObjectOrCondition from 'containers/CurrentObjectOrCondition';
 import GroupModal from 'GroupModal';
 import memoize from 'memoize-one';
 import MultiSelectOrCondition from 'GroupModal/components/MultiSelectOrCondition';
+import type {Node} from 'components/molecules/TreeSelect/types';
 import type {Option, Props, RenderProps} from './types';
 import type {OrConditionProps} from 'GroupModal/types';
 import {OR_CONDITION_TYPE_CONTEXT, SCHEMA} from './constants';
@@ -26,9 +27,11 @@ export class RefObjectGroupModal extends Component<Props> {
 		SystemGroup: () => null
 	}));
 
-	getOptionLabel = (option: Option) => option.title;
+	getNodeValue = (node: Node) => node.value;
 
-	getOptionValue = (option: Option) => option.uuid;
+	getOptionLabel = (option: Option | null) => option?.title ?? '';
+
+	getOptionValue = (option: Option | null) => option?.uuid ?? '';
 
 	renderMultiSelectOrCondition = (props: OrConditionProps) => {
 		const {onChange, value} = props;
@@ -40,6 +43,7 @@ export class RefObjectGroupModal extends Component<Props> {
 				getOptionValue={this.getOptionValue}
 				onChange={onChange}
 				render={this.renderSelect(true)}
+				transform={this.getNodeValue}
 				type={type}
 			/>
 		);
@@ -67,7 +71,7 @@ export class RefObjectGroupModal extends Component<Props> {
 			case CONTAINS_INCLUDING_NESTED:
 			case NOT_CONTAINS:
 			case NOT_CONTAINS_INCLUDING_ARCHIVAL:
-				return <SelectOrCondition onChange={onChange} render={this.renderSelect(false)} value={value} />;
+				return this.renderSelectOrCondition(props);
 			case CONTAINS_ANY:
 				return this.renderMultiSelectOrCondition(props);
 			case TITLE_CONTAINS:
@@ -94,6 +98,10 @@ export class RefObjectGroupModal extends Component<Props> {
 			<Select getOptionLabel={this.getOptionLabel} getOptionValue={this.getOptionValue} multiple={multiple} {...props} />
 		);
 	};
+
+	renderSelectOrCondition = (props: OrConditionProps) => (
+		<SelectOrCondition {...props} render={this.renderSelect(false)} transform={this.getNodeValue} />
+	);
 
 	render () {
 		const {attribute, customGroups, customType, onClose, onSubmit, orConditionOptions, value} = this.props;

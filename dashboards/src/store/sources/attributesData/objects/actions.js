@@ -19,24 +19,6 @@ const isUploaded = (node: RawObjectData): boolean => {
 };
 
 /**
- * Возвращает ключи дочерних элементов
- * @param {RawObjectData} node - узел данных
- * @returns {Array<string>}
- */
-const getChildren = (node: RawObjectData): Array<string> | null => {
-	const {children, hasChildren} = node;
-	let ids = null;
-
-	if (Array.isArray(children) && children.length > 0) {
-		ids = children.map(getId);
-	} else if (hasChildren) {
-		ids = [];
-	}
-
-	return ids;
-};
-
-/**
  * Возвращает уникальный идентификатор узла
  * @param {RawObjectData} node - узел данных
  * @returns {string}
@@ -76,10 +58,9 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 			const items = arrayToTree(response, {
 				keys: {
 					children: 'children',
-					id: 'uuid'
+					value: 'uuid'
 				},
 				values: {
-					children: getChildren,
 					id: getId,
 					uploaded: isUploaded
 				}

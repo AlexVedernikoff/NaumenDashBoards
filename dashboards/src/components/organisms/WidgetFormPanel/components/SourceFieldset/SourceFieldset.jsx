@@ -1,10 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import Checkbox from 'components/atoms/LegacyCheckbox';
-import type {Components as TreeSelectComponents, TreeSelectLabelContainerProps} from 'components/molecules/TreeSelect/types';
+import type {ContainerProps} from 'components/molecules/TreeSelect/types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import type {DivRef, OnSelectEvent} from 'components/types';
 import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import FieldError from 'src/components/atoms/FieldError';
 import FormField from 'WidgetFormPanel/components/FormField';
@@ -14,7 +13,9 @@ import {getErrorPath} from 'WidgetFormPanel/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from 'components/atoms/IconButton';
 import LabelEditingForm from 'components/molecules/InputForm';
+import memoize from 'memoize-one';
 import {MODE} from './constraints';
+import type {OnSelectEvent, Ref} from 'components/types';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
 import SavedFilters from 'WidgetFormPanel/components/SavedFilters';
@@ -37,14 +38,18 @@ export class SourceFieldset extends Component<Props, State> {
 		showEditForm: false
 	};
 
-	sourceSelectRef: DivRef = createRef();
-	sourceSelectComponents: ?TreeSelectComponents = null;
+	containerRef: Ref<'div'> = createRef();
+	selectRef: Ref<typeof TreeSelect> = createRef();
 
 	componentDidMount () {
 		const {index, value: {source}} = this.props;
 
 		if (!source.value && index > 0) {
-			this.sourceSelectRef.current && this.sourceSelectRef.current.scrollIntoView({behavior: 'smooth'});
+			const {current: container} = this.containerRef;
+			const {current: select} = this.selectRef;
+
+			container && container.scrollIntoView({behavior: 'smooth'});
+			select && select.setState({showMenu: true});
 		}
 	}
 
@@ -80,16 +85,10 @@ export class SourceFieldset extends Component<Props, State> {
 		onChange(index, {...value, source});
 	};
 
-	getSourceSelectComponents = (): TreeSelectComponents => {
-		if (!this.sourceSelectComponents) {
-			this.sourceSelectComponents = {
-				IndicatorsContainer: this.renderSourceSelectIndicators,
-				LabelContainer: this.renderSourceSelectLabel
-			};
-		}
-
-		return this.sourceSelectComponents;
-	};
+	getSourceSelectComponents = memoize(() => ({
+		IndicatorsContainer: this.renderSourceSelectIndicators,
+		LabelContainer: this.renderSourceSelectLabel
+	}));
 
 	handleChangeCompute = (name: string, sourceForCompute: boolean) => {
 		const {index, onChange, value} = this.props;
@@ -161,15 +160,16 @@ export class SourceFieldset extends Component<Props, State> {
 		value: null
 	});
 
-	handleSelect = ({value: newRawSourceValue}: OnSelectEvent) => {
+	handleSelect = ({value: node}: OnSelectEvent) => {
 		const {onFetchAttributes, parentClassFqn, value} = this.props;
 		const {source} = value;
 		const {value: sourceValue} = source;
+		const {value: nodeValue} = node;
 		let newSource = source;
 
-		const newSourceValue = newRawSourceValue
-			? { label: newRawSourceValue.label, value: newRawSourceValue.value }
-			: newRawSourceValue;
+		const newSourceValue = nodeValue
+			? {label: nodeValue.label, value: nodeValue.value}
+			: nodeValue;
 
 		if (newSourceValue?.value !== sourceValue?.value) {
 			newSource = {
@@ -387,7 +387,7 @@ export class SourceFieldset extends Component<Props, State> {
 
 	renderSourceSelectIndicators = (props): React$Node => {
 		const {isPersonal} = this.props;
-		const {className, onClick} = props;
+		const {children, className, onClick} = props;
 		const isChanged = this.isCurrentFilterChanged();
 
 		const editButton = isChanged && !isPersonal
@@ -397,15 +397,15 @@ export class SourceFieldset extends Component<Props, State> {
 		return (
 			<div className={className} onClick={onClick}>
 				{editButton}
-				<IconButton icon={ICON_NAMES.REMOVE} onClick={this.handleRemoveSource} />
+				{children}
 			</div>
 		);
 	};
 
-	renderSourceSelectLabel = (props: TreeSelectLabelContainerProps): React$Node => {
-		const {isPersonal} = this.props;
-		const {className, value} = props;
-		const {label = ''} = value ?? {};
+	renderSourceSelectLabel = (props: ContainerProps): React$Node => {
+		const {isPersonal, value} = this.props;
+		const {className} = props;
+		const label = value.source.value?.label ?? '';
 		const isChanged = this.isCurrentFilterChanged();
 
 		return (
@@ -417,26 +417,18 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSourceTreeSelect = (): React$Node => {
-		const {index, sources, value: {source}} = this.props;
+		const {sources, value: {source}} = this.props;
 		const {value: sourceValue} = source;
-
-		let initialSelected;
-
-		if (sourceValue) {
-			initialSelected = [sourceValue.value];
-		}
-
 		const components = this.getSourceSelectComponents();
-		const isActive = !source.value && index > 0;
 
 		return (
 			<TreeSelect
 				className={styles.sourceTreeSelect}
 				components={components}
-				initialSelected={initialSelected}
-				isActive={isActive}
+				onRemove={this.handleRemoveSource}
 				onSelect={this.handleSelect}
 				options={sources}
+				ref={this.selectRef}
 				removable={true}
 				value={sourceValue}
 			/>
@@ -445,7 +437,7 @@ export class SourceFieldset extends Component<Props, State> {
 
 	render () {
 		return (
-			<div className={styles.container} ref={this.sourceSelectRef}>
+			<div className={styles.container} ref={this.containerRef}>
 				{this.renderSourceSelect()}
 				{this.renderRemoveButton()}
 				{this.renderComputeCheckbox()}

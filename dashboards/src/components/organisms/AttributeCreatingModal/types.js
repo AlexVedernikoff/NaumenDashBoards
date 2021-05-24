@@ -1,6 +1,7 @@
 // @flow
 import type {ComputedAttr} from 'store/widgets/data/types';
 import {CONTROL_TYPES} from './constants';
+import type {Node, Tree} from 'components/molecules/TreeSelect/types';
 
 export type ControlType = $Keys<typeof CONTROL_TYPES>;
 
@@ -12,8 +13,10 @@ export type Control = {
 
 export type Props = {
 	onClose: () => any,
+	onFetch: (node: Node) => void,
 	onRemove?: (attribute: ComputedAttr) => void,
 	onSubmit: (attribute: ComputedAttr) => void,
+	options: Tree,
 	value: ComputedAttr | null
 };
 

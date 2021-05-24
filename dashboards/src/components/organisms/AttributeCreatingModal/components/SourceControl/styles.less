@@ -18,75 +18,25 @@
 	}
 
 	.control {
+		height: 100%;
 		outline: none;
 	}
 
-	.searchInfo {
-		background-color: @gainsboro;
-		color: @darkgrey;
-		padding: 12px 40px;
+	.menuContainer {
+		width: 300px;
 	}
 
-	.searchValue {
-		background-color: @gainsboro;
-		padding: 12px 40px;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-
-		span {
-			color: @darkgrey;
-		}
-	}
-
-	.listSource {
-		display: flex;
-		margin-bottom: 8px;
-	}
-
-	.listSourceLabel {
-		font-weight: 500;
-	}
-
-	.sourceToggleIcon {
-		color: @grey;
-		cursor: pointer;
-		margin-right: 10px;
-	}
-
-	.attribute {
-		cursor: pointer;
-		margin-left: 4px;
-		padding: 8px 0 8px 36px;
-
-		&:hover {
-			background-color: @silver;
-		}
-	}
-
-	.selectedAttribute {
-		background-color: @gainsboro;
-	}
-
-	.options {
-		height: 350px;
-		overflow-x: hidden;
-		overflow-y: auto;
-	}
-
-	.option {
-		margin: 8px 0 8px 12px;
-	}
-
-	.combinedInput {
+	.valueContainer {
+		align-items: stretch;
+		border-radius: @border-radius;
 		display: flex;
 		flex-direction: row;
+		height: @height;
 	}
 
-	.leftInput {
+	.attributeField {
 		background-color: #EBE4ED;
-		border-radius: @border-radius 0 0 @border-radius;
-		box-sizing: border-box;
-		min-height: 48px;
+		min-height: @height;
 		width: 60px;
 
 		&:hover {
@@ -94,8 +44,7 @@
 		}
 	}
 
-	.activeLeftInput {
-		.leftInput();
+	.activeAttributeField {
 		background-color: @white;
 
 		&:hover {
@@ -103,15 +52,13 @@
 		}
 	}
 
-	.rightInput {
+	.labelContainer {
 		align-items: center;
 		background-color: #DAE4F1;
-		border-radius: 0 @border-radius @border-radius 0;
 		box-sizing: border-box;
 		cursor: pointer;
 		display: flex;
 		flex-direction: column;
-		height: 48px;
 		justify-content: center;
 		padding: 8px 12px;
 		min-width: 80px;
@@ -121,27 +68,27 @@
 		}
 	}
 
-	.emptyInput {
-		.rightInput();
+	.placeholder {
+		.labelContainer();
 		border-radius: @border-radius;
 	}
 
-	.inputLabel {
+	.label {
 		max-width: 200px;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	.inputSourceLabel {
-		.inputLabel();
+	.sourceLabel {
+		.label();
 		color: @darkgrey;
 		font-size: 11px;
 		margin-bottom: 4px;
 	}
 
-	.inputAttributeLabel {
-		.inputLabel();
+	.attributeLabel {
+		.label();
 		color: @black;
 		font-weight: 500;
 	}

@@ -1,5 +1,5 @@
 // @flow
-import AttributeCreatingModal from 'components/organisms/AttributeCreatingModal';
+import AttributeCreatingModal from 'containers/AttributeCreatingModal';
 import type {ComputedAttr} from 'store/widgets/data/types';
 import FieldButton from 'components/atoms/FieldButton';
 import type {Props, State} from './types';

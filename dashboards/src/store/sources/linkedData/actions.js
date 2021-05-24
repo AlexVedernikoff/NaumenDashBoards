@@ -35,7 +35,7 @@ const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatc
 				id: classFqn,
 				sources: arrayToTree(sources, {
 					keys: {
-						id: 'classFqn'
+						value: 'classFqn'
 					},
 					parent: classFqn,
 					values: {

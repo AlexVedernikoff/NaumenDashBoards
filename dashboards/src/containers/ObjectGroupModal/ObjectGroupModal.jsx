@@ -14,12 +14,12 @@ import {functions, props} from './selectors';
 import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
 import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
 import memoize from 'memoize-one';
-import {Node} from 'components/molecules/MaterialTreeSelect/components';
+import Node from 'components/molecules/TreeSelect/components/Node';
 import type {ObjectsState} from 'store/sources/attributesData/objects/types';
 import {OR_CONDITION_TYPE_CONTEXT} from 'containers/RefObjectGroupModal/constants';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 import type {Props, State} from './types';
-import type {Props as NodeProps} from 'components/molecules/MaterialTreeSelect/components/Node/types';
+import type {Props as NodeProps} from 'components/molecules/TreeSelect/components/Node/types';
 import React, {Component} from 'react';
 import RefObjectGroupModal from 'containers/RefObjectGroupModal';
 import SearchInput from 'components/atoms/SearchInput';
@@ -149,7 +149,7 @@ export class ObjectGroupModal extends Component<Props, State> {
 			<MaterialTreeSelect
 				components={this.getSelectComponents()}
 				loading={loading}
-				onLoad={this.handleLoad(type)}
+				onFetch={this.handleLoad(type)}
 				options={options}
 				showMore={showMore}
 				{...props}

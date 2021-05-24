@@ -21,7 +21,7 @@ const getDataSources = (): ThunkAction => async (dispatch: Dispatch) => {
 		dispatch({
 			payload: arrayToTree(data, {
 				keys: {
-					id: 'classFqn'
+					value: 'classFqn'
 				},
 				values: {
 					value: getDataSourceValue

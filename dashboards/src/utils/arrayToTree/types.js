@@ -20,7 +20,7 @@ export type InputArray = Array<InputArrayNode>;
 
 type Keys = $Shape<{
 	children: string,
-	id: string
+	value: string
 }>;
 
 type GetValue<T> = (node: InputArrayNode, parent: string | null) => T;
@@ -28,8 +28,8 @@ type GetValue<T> = (node: InputArrayNode, parent: string | null) => T;
 type OptionValue<T> = GetValue<T> | T;
 
 export type Values = {
-	children: OptionValue<Array<string> | null>,
 	id: GetValue<string>,
+	loading: OptionValue<boolean>,
 	uploaded: OptionValue<boolean>,
 	value: GetValue<NodeValue>
 };

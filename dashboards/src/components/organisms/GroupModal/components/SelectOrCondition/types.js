@@ -19,5 +19,6 @@ export type RenderProps = {|
 export type Props = {
 	onChange: SelectOrCondition => void,
 	render: (props: RenderProps) => Node,
+	transform?: (SelectValue: Object) => SelectData,
 	value: OrCondition | SelectOrCondition
 };

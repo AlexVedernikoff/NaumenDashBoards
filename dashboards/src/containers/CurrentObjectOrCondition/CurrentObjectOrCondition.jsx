@@ -39,9 +39,9 @@ export class CurrentObjectOrCondition extends PureComponent<Props, State> {
 		}, {});
 	}
 
-	getOptionLabel = (option: SelectData) => option.title;
+	getOptionLabel = (option: SelectData | null) => option?.title ?? '';
 
-	getOptionValue = (option: SelectData) => option.code;
+	getOptionValue = (option: SelectData | null) => option?.code;
 
 	handleLoad = (item: Item | null) => {
 		const {attribute, fetchCurrentObjectAttributes} = this.props;
@@ -49,13 +49,13 @@ export class CurrentObjectOrCondition extends PureComponent<Props, State> {
 		fetchCurrentObjectAttributes(item, attribute);
 	};
 
-	handleSelect = ({value: option}: OnSelectEvent) => {
+	handleSelect = ({value: node}: OnSelectEvent) => {
 		const {onChange, value} = this.props;
 
-		onChange({...value, data: option});
+		onChange({...value, data: node.value});
 	};
 
-	isEnabledNode = (node: TreeNode<Attribute>) => this.props.attribute.property === node.value.property;
+	isDisabledNode = (node: TreeNode<Attribute>) => this.props.attribute.property !== node.value.property;
 
 	render () {
 		const {currentObjectData, value} = this.props;
@@ -65,9 +65,9 @@ export class CurrentObjectOrCondition extends PureComponent<Props, State> {
 			<MaterialTreeSelect
 				getOptionLabel={this.getOptionLabel}
 				getOptionValue={this.getOptionValue}
-				isEnabledNode={this.isEnabledNode}
+				isDisabled={this.isDisabledNode}
 				loading={currentObjectData.loading}
-				onLoad={this.handleLoad}
+				onFetch={this.handleLoad}
 				onSelect={this.handleSelect}
 				options={options}
 				value={value.data}

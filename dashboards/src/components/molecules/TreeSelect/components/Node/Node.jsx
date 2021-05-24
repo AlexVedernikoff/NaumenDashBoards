@@ -5,7 +5,7 @@ import {escapeString} from 'helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import Loader from 'components/atoms/Loader';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Node extends PureComponent<Props, State> {
@@ -38,9 +38,9 @@ export class Node extends PureComponent<Props, State> {
 	};
 
 	handleClick = () => {
-		const {data, enabled, onClick} = this.props;
+		const {data, disabled, onClick} = this.props;
 
-		enabled && onClick(data);
+		!disabled && onClick(data);
 	};
 
 	handleClickShowMore = () => {
@@ -61,9 +61,10 @@ export class Node extends PureComponent<Props, State> {
 		this.setState({expanded: !expanded});
 	};
 
-	isFoundLabel = (): boolean => {
-		const {data, getOptionLabel, searchValue} = this.props;
-		return !!searchValue && (new RegExp(escapeString(searchValue), 'i')).test(getOptionLabel(data.value));
+	isFoundLabel = () => {
+		const {data, getNodeLabel, searchValue} = this.props;
+
+		return searchValue && (new RegExp(escapeString(searchValue), 'i')).test(getNodeLabel(data));
 	};
 
 	renderChildren = () => {
@@ -84,12 +85,12 @@ export class Node extends PureComponent<Props, State> {
 	};
 
 	renderLabel = () => {
-		const {data, enabled, getOptionLabel} = this.props;
+		const {data, disabled, getNodeLabel} = this.props;
 		const labelCN = cn({
 			[styles.label]: true,
-			[styles.disabledLabel]: !enabled
+			[styles.disabledLabel]: disabled
 		});
-		const label = getOptionLabel(data.value);
+		const label = getNodeLabel(data);
 
 		return (
 			<div className={labelCN} onClick={this.handleClick} title={label}>
@@ -119,9 +120,10 @@ export class Node extends PureComponent<Props, State> {
 	};
 
 	renderShowMoreButton = () => {
-		const {children, error, loading, uploaded} = this.props.data;
+		const {data, showMore} = this.props;
+		const {children, error, loading, uploaded} = data;
 
-		if (children && !(loading || uploaded || error)) {
+		if (children && showMore && !(loading || uploaded || error)) {
 			return (
 				<Button className={styles.showMoreButton} onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>
 					Показать еще
@@ -151,10 +153,10 @@ export class Node extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<div>
+			<Fragment>
 				{this.renderLabelContainer()}
 				{this.renderChildren()}
-			</div>
+			</Fragment>
 		);
 	}
 }

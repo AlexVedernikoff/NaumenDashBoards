@@ -1,180 +1,53 @@
 // @flow
-import type {Components, Props, State} from './types';
-import {debounce} from 'helpers';
+import type {ContainerProps} from 'components/molecules/TreeSelect/types';
+import memoize from 'memoize-one';
 import MultiValueContainer from 'components/molecules/MaterialSelect/components/MultiValueContainer';
-import Node from './components/Node';
-import type {Node as NodeType} from './components/Tree/types';
-import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
+import type {Props} from './types';
 import React, {Component} from 'react';
-import SearchInput from 'components/atoms/SearchInput';
-import styles from './styles.less';
-import Tree from './components/Tree';
+import TreeSelect from 'components/molecules/TreeSelect';
 import ValueContainer from 'components/molecules/MaterialSelect/components/ValueContainer';
 
-export class MaterialTreeSelect extends Component<Props, State> {
-	static defaultProps = {
-		multiple: false,
-		name: '',
-		options: {},
-		showMore: false,
-		value: null,
-		values: []
-	};
+export class MaterialTreeSelect extends Component<Props> {
+	static defaultProps = TreeSelect.defaultProps;
 
-	state = {
-		components: this.getExtendedComponents(this.props),
-		searchValue: '',
-		showMenu: false
-	};
+	getComponents = memoize(() => ({
+		ValueContainer: this.renderValueContainer
+	}));
 
-	getExtendedComponents (props: Props): Components {
-		const {components: customComponents} = props;
-		const components = {
-			Node,
-			SearchInput
-		};
-
-		return customComponents ? {...components, ...customComponents} : components;
-	}
-
-	fetchOptions = () => {
-		const {loading, onLoad, options} = this.props;
-
-		if (!loading && Object.keys(options).length === 0 && typeof onLoad === 'function') {
-			onLoad(null);
-		}
-	};
-
-	getOptionLabel = (option: Object) => {
-		const {getOptionLabel} = this.props;
-		let label = '';
-
-		if (option) {
-			label = getOptionLabel ? getOptionLabel(option) : option.label;
-		}
-
-		return label;
-	};
-
-	getOptionValue = (option: Object) => {
-		const {getOptionValue} = this.props;
-		let value = '';
-
-		if (option) {
-			value = getOptionValue ? getOptionValue(option) : option.value;
-		}
-
-		return value;
-	};
-
-	handleChangeSearchInput = (searchValue: string) => this.setState({searchValue});
-
-	handleClickValueContainer = () => {
-		const {showMenu} = this.state;
-
-		!this.state.showMenu && this.fetchOptions();
-		this.setState({showMenu: !showMenu});
-	};
-
-	handleSelect = (node: NodeType) => {
-		const {multiple, name, onSelect} = this.props;
-
-		if (!multiple) {
-			this.setState({showMenu: false});
-		}
-
-		onSelect({
-			name,
-			value: node.value
-		});
-	};
-
-	hideMenu = () => this.setState({showMenu: false});
-
-	renderList = () => {
-		const {components, isEnabledNode, loading, multiple, onLoad, options, showMore, value, values} = this.props;
-		const {searchValue} = this.state;
-
-		return (
-			<Tree
-				components={components}
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				isEnabledNode={isEnabledNode}
-				loading={loading}
-				multiple={multiple}
-				onLoad={onLoad}
-				onSelect={this.handleSelect}
-				options={options}
-				searchValue={searchValue}
-				showMore={showMore}
-				value={value}
-				values={values}
-			/>
-		);
-	};
-
-	renderMenu = () => {
-		const {showMenu} = this.state;
-
-		if (showMenu) {
-			return (
-				<div className={styles.menu}>
-					{this.renderSearchInput()}
-					{this.renderList()}
-				</div>
-			);
-		}
-
-		return null;
-	};
-
-	renderMultiValueContainer = () => {
-		const {onClear, onRemove, values} = this.props;
+	renderMultiValueContainer = (props: ContainerProps) => {
+		const {getOptionLabel, getOptionValue, onClear, onRemove, values} = this.props;
 
 		return (
 			<MultiValueContainer
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
+				getOptionLabel={getOptionLabel}
+				getOptionValue={getOptionValue}
 				onClear={onClear}
-				onClick={this.handleClickValueContainer}
+				onClick={props.onClick}
 				onRemove={onRemove}
 				values={values}
 			/>
 		);
 	};
 
-	renderSearchInput = () => {
-		const {components, searchValue} = this.state;
-		const {SearchInput} = components;
-
-		return <SearchInput onChange={debounce(this.handleChangeSearchInput, 1000)} value={searchValue} />;
-	};
-
-	renderSimpleValueContainer = () => {
-		const {value} = this.props;
+	renderSimpleValueContainer = (props: ContainerProps) => {
+		const {getOptionLabel, getOptionValue, value} = this.props;
 
 		return (
 			<ValueContainer
-				getOptionLabel={this.getOptionLabel}
-				getOptionValue={this.getOptionValue}
-				onClick={this.handleClickValueContainer}
+				getOptionLabel={getOptionLabel}
+				getOptionValue={getOptionValue}
+				onClick={props.onClick}
 				value={value}
 			/>
 		);
 	};
 
-	renderValueContainer = () => this.props.multiple ? this.renderMultiValueContainer() : this.renderSimpleValueContainer();
+	renderValueContainer = (props: ContainerProps) => this.props.multiple
+		? this.renderMultiValueContainer(props)
+		: this.renderSimpleValueContainer(props);
 
 	render () {
-		return (
-			<OutsideClickDetector onClickOutside={this.hideMenu}>
-				<div className={styles.container}>
-					{this.renderValueContainer()}
-					{this.renderMenu()}
-				</div>
-			</OutsideClickDetector>
-		);
+		return <TreeSelect {...this.props} components={this.getComponents()} />;
 	}
 }
 

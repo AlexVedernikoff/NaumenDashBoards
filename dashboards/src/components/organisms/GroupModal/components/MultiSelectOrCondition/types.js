@@ -17,5 +17,6 @@ export type Props = {
 	getOptionValue: (option: Object) => string,
 	onChange: MultiSelectOperand => void,
 	render: (props: RenderProps) => Node,
+	transform?: (SelectValue: Object) => SelectData,
 	type: string
 };

@@ -4,10 +4,11 @@ import type {OnSelectEvent} from 'src/components/types';
 import type {Props} from './types';
 
 export class SelectOrCondition extends Component<Props> {
-	handleSelect = ({value: option}: OnSelectEvent) => {
-		const {onChange, value} = this.props;
+	handleSelect = ({value}: OnSelectEvent) => {
+		const {onChange, transform, value: condition} = this.props;
+		const data = transform ? transform(value) : value;
 
-		onChange({...value, data: option});
+		onChange({...condition, data});
 	};
 
 	render () {

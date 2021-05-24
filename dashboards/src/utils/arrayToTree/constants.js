@@ -2,7 +2,7 @@
 const DEFAULT_OPTIONS = Object.freeze({
 	keys: {
 		children: 'children',
-		id: 'id'
+		value: 'value'
 	},
 	parent: null,
 	values: {}
