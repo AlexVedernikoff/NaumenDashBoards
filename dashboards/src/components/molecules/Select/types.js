@@ -19,6 +19,7 @@ export type Components = {
 	IndicatorsContainer: React$ComponentType<ContainerProps>,
 	List: React$ComponentType<ListProps>,
 	MenuContainer: React$ComponentType<ContainerProps>,
+	MenuHeader: React$ComponentType<ContainerProps>,
 	Message: React$ComponentType<ContainerProps>,
 	Value: React$ComponentType<ValueProps>,
 	ValueContainer: React$ComponentType<ContainerProps>
@@ -34,6 +35,7 @@ export type DefaultProps = {|
 	isSearching: boolean,
 	loading: boolean,
 	loadingMessage: string,
+	menuHeaderMessage: ?string,
 	multiple: boolean,
 	name: string,
 	noOptionsMessage: string,

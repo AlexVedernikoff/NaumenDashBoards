@@ -1,9 +1,8 @@
 // @flow
 import {connect} from 'react-redux';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
-import type {DataSet} from 'WidgetFormPanel/components/SourceFieldset/types';
+import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
-import type {Props} from './types';
 import React, {Component} from 'react';
 import SourceFieldset from 'WidgetFormPanel/components/SourceFieldset';
 

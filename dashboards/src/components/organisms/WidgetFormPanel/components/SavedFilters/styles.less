@@ -3,12 +3,34 @@
 :local {
     .actionButtons {
         align-self: center;
-        height: 100%;
+        background-color: transparent !important;
+        cursor: pointer;
+        display: block;
+        height: 24px;
+        margin: -4px;
+        width: 24px;
+
+        .caret {
+            color: @ninegrey;
+            margin: 4px;
+            stroke: @ninegrey;
+            &:hover {
+                color: #666666;
+                stroke: #666666;
+            }
+        }
+
+        &:active {
+            .caret {
+                color: @black;
+                stroke: @black;
+            }
+        }
     }
 
     .savedFilters {
-        color: @primary;
-        margin: 0 30px;
+        color: @black;
+        padding: 0 40px;
     }
 
     .selectTransparent {
@@ -20,5 +42,9 @@
         &:focus-within {
 			border: none !important;
 		}
+    }
+
+    .filterListOption:hover {
+        background-color: #f2f2f2;
     }
 }

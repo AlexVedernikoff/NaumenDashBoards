@@ -3,8 +3,7 @@ import cn from 'classnames';
 import type {Components as ListComponents} from 'components/molecules/Select/components/List/types';
 import type {Components as ListOptionComponents} from 'components/molecules/Select/components/ListOption/types';
 import Container from 'components/atoms/Container';
-import IconButton from 'components/atoms/IconButton';
-import {ICON_NAMES} from 'components/atoms/Icon';
+import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import List from 'components/molecules/Select/components/List';
 import ListOption from 'components/molecules/Select/components/ListOption';
 import memoize from 'memoize-one';
@@ -34,11 +33,10 @@ export class SavedFilters extends Component<Props> {
 		ValueContainer: this.renderListOptionValueContainer
 	});
 
-	handleDeleteFilter = (option: SourceFiltersItem) => (e: SyntheticMouseEvent<HTMLElement>) => {
+	handleDeleteFilter = (id: ?string) => (e: SyntheticMouseEvent<HTMLElement>) => {
 		const {onDelete} = this.props;
-		const {id} = option;
 
-		if (id) {
+		if (id && onDelete) {
 			onDelete(id);
 		}
 
@@ -52,6 +50,20 @@ export class SavedFilters extends Component<Props> {
 		return onSelect(value);
 	};
 
+	renderDeleteFilterButton = (id: ?string): React$Node => {
+		const {isPersonal} = this.props;
+
+		if (!isPersonal) {
+			return (
+				<button className={styles.actionButtons} onClick={this.handleDeleteFilter(id)}>
+					<Icon className={styles.caret} name={ICON_NAMES.BASKET} />
+				</button>
+			);
+		}
+
+		return null;
+	};
+
 	renderFilterList = (props) => {
 		return (
 			<List {...props} components={this.getListComponents()} />
@@ -60,23 +72,18 @@ export class SavedFilters extends Component<Props> {
 
 	renderListOption = (props) => {
 		return (
-			<ListOption {...props} components={this.getListOptionComponents()} />
+			<ListOption {...props} className={styles.filterListOption} components={this.getListOptionComponents()} />
 		);
 	};
 
 	renderListOptionValueContainer = (props) => {
 		const {children, className, onClick, option} = props;
+		const {id} = option;
 
 		return (
 			<Container className={className} onClick={onClick}>
 				{children}
-				<div className={styles.actionButtons}>
-					<IconButton
-						className={styles.caret}
-						icon={ICON_NAMES.BASKET}
-						onClick={this.handleDeleteFilter(option)}
-					/>
-				</div>
+				{this.renderDeleteFilterButton(id)}
 			</Container>
 		);
 	};
@@ -103,6 +110,7 @@ export class SavedFilters extends Component<Props> {
 				getOptionValue={(item: SourceFiltersItem) => item.id}
 				isSearching={true}
 				loading={loading}
+				menuHeaderMessage="Выберите сохраненный фильтр"
 				onSelect={this.handleSelect}
 				options={filters}
 				placeholder="Не выбрано"

@@ -17,6 +17,7 @@ export type SourceFiltersItem =
 export type Props = {
 	className: string,
 	filters: SourceFiltersItem[],
+	isPersonal: boolean,
 	loading: boolean,
 	onDelete: (name: string) => void;
 	onSelect: (value: SourceFiltersItem) => void;
