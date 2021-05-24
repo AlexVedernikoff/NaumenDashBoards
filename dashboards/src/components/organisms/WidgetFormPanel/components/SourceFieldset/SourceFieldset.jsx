@@ -127,7 +127,7 @@ export class SourceFieldset extends Component<Props, State> {
 				}
 			}
 		} else {
-			error = 'Название фильтра должно быть уникально';
+			error = `Фильтр с названием ${label} не может быть сохранен. Название фильтра должно быть уникально`;
 		}
 
 		this.setInnerError(error);
@@ -139,12 +139,19 @@ export class SourceFieldset extends Component<Props, State> {
 		onRemove(index);
 	};
 
-	handleDeleteSavedFilters = (id: string) => {
+	handleDeleteSavedFilters = async (id: string) => {
 		const {onDeleteSourcesFilter, value: {source}} = this.props;
+		let error = null;
 
 		if (source.value) {
-			onDeleteSourcesFilter(source.value.value, id);
+			const data = await onDeleteSourcesFilter(source.value.value, id);
+
+			if (!data.result) {
+				error = `Удаление данного сохраненного фильтра невозможно, т.к. он применен в других виджетах`;
+			}
 		}
+
+		this.setInnerError(error);
 	};
 
 	handleRemoveSource = () => this.changeSource({
@@ -208,7 +215,7 @@ export class SourceFieldset extends Component<Props, State> {
 		}
 	};
 
-	hideEditForm = () => this.setState({mode: null, showEditForm: false});
+	hideEditForm = () => this.setState({error: null, mode: null, showEditForm: false});
 
 	isCurrentFilterChanged = (): boolean => {
 		const {filterList = [], value: {source}} = this.props;
@@ -342,13 +349,14 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSavedFiltersButton = (): React$Node => {
-		const {filterList, filtersListLoading, usesFilter} = this.props;
+		const {filterList, filtersListLoading, isPersonal, usesFilter} = this.props;
 
 		if (usesFilter && filterList && filterList.length > 0) {
 			return (
-				<FormField small>
+				<FormField className={styles.savedFiltersButton}>
 					<SavedFilters
 						filters={filterList}
+						isPersonal={isPersonal}
 						loading={filtersListLoading}
 						onDelete={this.handleDeleteSavedFilters}
 						onSelect={this.handleSelectFilters}
@@ -378,10 +386,11 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSourceSelectIndicators = (props): React$Node => {
+		const {isPersonal} = this.props;
 		const {className, onClick} = props;
 		const isChanged = this.isCurrentFilterChanged();
 
-		const editButton = isChanged
+		const editButton = isChanged && !isPersonal
 			? (<IconButton icon={ICON_NAMES.SAVE} onClick={this.showSaveForm} />)
 			: (<IconButton icon={ICON_NAMES.EDIT} onClick={this.showEditForm} />);
 
@@ -394,13 +403,14 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSourceSelectLabel = (props: TreeSelectLabelContainerProps): React$Node => {
+		const {isPersonal} = this.props;
 		const {className, value} = props;
 		const {label = ''} = value ?? {};
 		const isChanged = this.isCurrentFilterChanged();
 
 		return (
 			<div className={styles.sourceSelectLabel}>
-				{isChanged && <div className={styles.unsaveMarker}>*</div>}
+				{isChanged && !isPersonal && <div className={styles.unsaveMarker}>*</div>}
 				<div className={className} title={label}>{label}</div>
 			</div>
 		);

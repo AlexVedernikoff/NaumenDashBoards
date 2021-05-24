@@ -8,12 +8,14 @@ import styles from './styles.less';
 
 export class ListOption extends PureComponent<Props> {
 	static defaultProps = {
+		className: '',
 		components: {}
 	};
 
 	getClassName = () => {
-		const {found, selected} = this.props;
+		const {className, found, selected} = this.props;
 		return cn({
+			[className]: true,
 			[styles.option]: true,
 			[styles.found]: found,
 			[styles.selected]: selected

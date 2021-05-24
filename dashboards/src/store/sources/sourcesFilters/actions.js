@@ -93,7 +93,13 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 				if (/Название фильтра должно быть уникально/.test(responseText)) {
 					return {message: `Фильтр с названием ${label} не может быть сохранен. Название фильтра должно быть уникально.`, result: false};
 				} else if (/Фильтр с текущими параметрами уже существует/.test(responseText)) {
-					return {message: `Фильтр с текущими параметрами уже существует.`, result: false};
+					const match = responseText.match(/\\n(Фильтр с текущими параметрами уже существует: (.*))"\]/);
+
+					if (match) {
+						return {message: match[1], result: false};
+					} else {
+						return {message: `Фильтр с текущими параметрами уже существует.`, result: false};
+					}
 				}
 			}
 

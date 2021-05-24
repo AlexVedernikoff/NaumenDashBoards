@@ -12,6 +12,7 @@ export type Components = {|
 |};
 
 export type DefaultProps = {|
+	className: string,
 	components: $Shape<Components>,
 |};
 

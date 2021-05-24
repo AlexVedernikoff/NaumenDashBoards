@@ -30,6 +30,7 @@ export class Select extends PureComponent<Props, State> {
 		IndicatorsContainer: Container,
 		List: List,
 		MenuContainer: Container,
+		MenuHeader: Container,
 		Message: Container,
 		Value,
 		ValueContainer: Container,
@@ -185,6 +186,7 @@ export class Select extends PureComponent<Props, State> {
 			return (
 				<OutsideClickDetector onClickOutside={this.hideMenu}>
 					<MenuContainer className={styles.menu}>
+						{this.renderMenuHeader()}
 						{this.renderSearchInput()}
 						{this.renderNoOptionsMessage()}
 						{this.renderNotFoundMessage()}
@@ -192,6 +194,19 @@ export class Select extends PureComponent<Props, State> {
 						{this.renderLoadingMessage()}
 					</MenuContainer>
 				</OutsideClickDetector>
+			);
+		}
+
+		return null;
+	};
+
+	renderMenuHeader = (): React$Node => {
+		const {loading, menuHeaderMessage} = this.props;
+		const {MenuHeader} = this.components;
+
+		if (!loading && menuHeaderMessage) {
+			return (
+				<MenuHeader className={styles.menuHeader}>{menuHeaderMessage}</MenuHeader>
 			);
 		}
 

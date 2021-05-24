@@ -42,7 +42,8 @@ const reducer = (state: SourcesFiltersState = initialSourcesFiltersState, action
 		case SOURCES_FILTERS_EVENTS.REQUEST_SOURCE_FILTERS_ERROR:
 			return {
 				...state,
-				error: true
+				error: true,
+				loading: false
 			};
 		default:
 			return state;

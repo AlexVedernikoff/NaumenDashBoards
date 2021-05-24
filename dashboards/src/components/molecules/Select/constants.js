@@ -12,6 +12,7 @@ export const DEFAULT_PROPS: DefaultProps = {
 	isSearching: false,
 	loading: false,
 	loadingMessage: 'Загрузка...',
+	menuHeaderMessage: null,
 	multiple: false,
 	name: '',
 	noOptionsMessage: 'Список пуст',
