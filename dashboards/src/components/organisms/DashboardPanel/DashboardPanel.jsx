@@ -13,7 +13,10 @@ export class DashboardPanel extends PureComponent<Props, State> {
 	};
 
 	componentDidUpdate (prevProps: Props) {
-		if (!prevProps.selectedWidget && this.props.selectedWidget) {
+		const {selectedWidget} = this.props;
+		const {selectedWidget: prevSelectedWidget} = prevProps;
+
+		if ((!prevSelectedWidget && selectedWidget) || selectedWidget !== prevSelectedWidget) {
 			this.setState({swiped: false});
 		}
 	}
