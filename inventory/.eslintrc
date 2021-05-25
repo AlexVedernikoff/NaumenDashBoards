@@ -1,0 +1,49 @@
+{
+	"env": {
+		"browser": true,
+		"es6": true,
+		"jest": true,
+		"node": true
+	},
+	"extends": [
+		"eslint:recommended",
+		"standard",
+		"plugin:react/recommended",
+		"plugin:promise/recommended",
+		"plugin:flowtype/recommended"
+	],
+	"parser": "babel-eslint",
+	"plugins": [
+		"standard",
+		"react",
+		"promise",
+		"flowtype"
+	],
+	"rules": {
+		"curly": ["error", "all"],
+		"indent": [
+			"error",
+			"tab",
+			{
+				"SwitchCase": 1
+			}
+		],
+		"brace-style": ["error", "1tbs"],
+		"no-extend-native": ["error", {"exceptions":  ["String"]}],
+		"no-param-reassign": "error",
+		"no-tabs": 0,
+		"semi": ["error", "always"],
+		"flowtype/semi": ["error", "always"],
+		"comma-dangle": ["error", "never"],
+		"flowtype/delimiter-dangle": ["error", "never"],
+		"multiline-ternary": ["error", "always-multiline"],
+		"operator-linebreak": ["error", "before"],
+		"object-curly-spacing": ["error", "never"]
+	},
+	"settings": {
+		"react": {
+			"flowVersion": "0.108.0",
+			"version": "16.4.0"
+		}
+	}
+}

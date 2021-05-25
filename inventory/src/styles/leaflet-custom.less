@@ -1,0 +1,181 @@
+body {
+	font-family: Roboto, sans-serif;
+}
+
+.leaflet-tooltip {
+	text-align: center;
+}
+
+.requestPopup .leaflet-popup-content-wrapper {
+	border-radius: 0;
+	width: 320px;
+}
+
+.requestPopup .leaflet-popup-content {
+	margin: 0;
+}
+
+.requestPopup a.leaflet-popup-close-button {
+	color: #5F5F5F;
+	font-weight: 100;
+	font-size: 17px;
+	height: 16px;
+	padding-top: 5px;
+	padding-right: 3px;
+	padding-left: 3px;
+	padding-bottom: 3px;
+	position: absolute;
+	right: 6px;
+	top: 9px;
+}
+
+.requestPopup a.leaflet-popup-close-button:hover {
+	background: #DBDDE1;
+	border-radius: 16px;
+	color: #323232;
+}
+
+.leaflet-top .leaflet-control {
+	height: 45px;
+	margin-top: 0px;
+}
+
+.leaflet-touch .leaflet-bar,
+.leaflet-touch .leaflet-control-layers {
+	border: 0;
+	border-radius: 2px;
+	box-shadow: 0 2px 8px rgba(129, 146, 161, 0.5);
+	margin-top: 5px;
+	mix-blend-mode: normal;
+}
+
+.leaflet-touch .leaflet-bar a {
+	font-size: 20px;
+	height: 36px;
+	line-height: 33px;
+	width: 36px;
+}
+
+.customMarker {
+	outline: none;
+}
+
+.customMarker.active {
+	/**
+	* Для выдвижения активного маркера на первый план используем z-index
+	* По-умолчанию z-index для маркеров задается библиотекой leaflet, причем значения z-index динамические
+	* Путем просмотра значений, было установлено, что z-index для отрисованных маркеров < 1000
+	**/
+	z-index: 1000 !important;
+}
+
+.dynamic {
+	margin-top: -12px;
+	margin-left: -12px;
+}
+
+.static {
+	margin-top: -26px;
+	margin-left: -10px;
+}
+
+.dynamicHover {
+	margin-top: -26px;
+	margin-left: -16px;
+}
+
+.multiple {
+	display: inline-flex;
+	margin-top: -23px;
+	margin-left: -4px;
+}
+
+.multipleHover {
+	display: inline-flex;
+	margin-top: -23px;
+	margin-left: -6px;
+}
+
+.multiple img,
+.multipleHover img {
+	z-index: -1;
+}
+
+.staticHover {
+	margin-top: -32px;
+	margin-left: -12px;
+}
+
+.boxCount {
+	background-color:#ffffff;
+	border-radius: 20px;
+	height:14px;
+	margin-top: -2px;
+	min-width: 12px;
+	-moz-border-radius: 20px;
+	width:100%;
+}
+
+.countMarker {
+	color: #7F7F7F;
+	font-family: Roboto, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 15px;
+	margin-left: -17px;
+	text-align: center;
+}
+
+html, body, #root {
+	height: 100%;
+	overflow: hidden;
+}
+
+.leaflet-bar a {
+	color: #5F5F5F;
+}
+
+.leaflet-control-zoom-in::before {
+	padding: 5px;
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+	border-bottom: none;
+}
+
+.leaflet-bar a:hover {
+	color: #323232;
+}
+
+.leaflet-control-zoom-in[title] {
+	background: #ffffff;
+}
+
+.leaflet-popup {
+	margin-bottom: 48px;
+}
+
+.leaflet-popup-content-wrapper {
+	padding: 0;
+}
+
+.leaflet-div-icon {
+	background: none;
+	border: none;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	box-shadow: 0px 4px 16px rgba(95, 95, 95, 0.2);
+}
+
+.leaflet-touch-zoom > div:nth-child(3),
+.leaflet-touch-zoom > div:nth-child(4) {
+	display: none;
+}
+
+.leaflet-top.leaflet-right {
+	top: 4px;
+}

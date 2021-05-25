@@ -1,0 +1,17 @@
+# IDE
+.idea
+rest/calendar.iml
+
+# Node.js
+node_modules
+
+# builds
+dist
+*.zip
+
+# git
+commiter.sh
+log.sh
+
+# flow
+flow-typed/npm
