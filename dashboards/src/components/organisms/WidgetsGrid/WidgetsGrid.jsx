@@ -140,9 +140,10 @@ export class WidgetsGrid extends Component<Props, State> {
 	};
 
 	onContextMenu = (e: MouseEvent) => {
+		const {hasCreateNewWidget} = this.props;
 		let {clientX, clientY, target} = e;
 
-		if (this.gridContainerRef?.current) {
+		if (hasCreateNewWidget && this.gridContainerRef?.current) {
 			const gridElement = this.gridContainerRef?.current;
 			const scrollTop = this.gridContainerRef?.current?.scrollTop ?? 0;
 			const style = window.getComputedStyle(gridElement);
