@@ -1,0 +1,18 @@
+{
+	"presets": [
+		"react",
+		[
+			"env",
+			{
+				"targets": {
+					"browsers": ["last 3 versions", ">1%"]
+				}
+			}
+		],
+		"stage-0",
+		"flow"
+	],
+	"plugins": [
+		"transform-object-rest-spread"
+	]
+}

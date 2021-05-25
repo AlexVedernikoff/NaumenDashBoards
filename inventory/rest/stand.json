@@ -1,0 +1,12 @@
+{
+    "modules": [
+        {
+            "checksum": "57ad4003058a175bb32fb8b29b649b6c09b7865a29629f4a7e918bdeb9d01007",
+            "code": "mapParams"
+        },
+        {
+            "checksum": "6b0fd22aaaa3d81bf54610612740add2c5ef41b1d95096fcd699e5a94f0722a",
+            "code": "mapRest"
+        }
+    ]
+}
