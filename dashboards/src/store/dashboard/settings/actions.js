@@ -3,6 +3,7 @@ import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layou
 import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
+import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS, OPEN_PERSONAL_DASHBOARD_ERROR} from './constants';
@@ -26,6 +27,7 @@ import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {User} from 'store/users/types';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Получает и устанавливает настройки автообновления
@@ -342,10 +344,10 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
  * @returns {ThunkAction}
  */
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
-	const {context, dashboard, sources} = getState();
+	const {context, dashboard, sources, widgetForms} = getState();
 	const {contentCode} = context;
 	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
-	let descriptorStr;
+	let descriptorStr = '';
 	let foundKey;
 
 	// Данные могут сохраняться как по типу так и по классу
@@ -353,14 +355,14 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 		`widgetContext_${metaClass}_${contentCode}`,
 		`widgetContext_${metaClass.split('$')[0]}_${contentCode}`
 	].every(key => {
-		descriptorStr = localStorage.getItem(key);
+		descriptorStr = localStorage.getItem(key) ?? '';
 		foundKey = key;
 		return !descriptorStr;
 	});
 
 	if (descriptorStr && foundKey) {
 		const descriptor = JSON.parse(descriptorStr);
-		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode);
+		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.BAR);
 		let classFqn;
 
 		if (Array.isArray(descriptor.cases) && descriptor.cases.length > 1) {
@@ -370,19 +372,20 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 		}
 
 		const {label, value} = sources.data.map[classFqn].value;
-
-		newWidget.name = '';
-		newWidget.data[0] = {
-			...newWidget.data[0],
+		const {axisChartForm: values} = widgetForms;
+		const newData = values.data.map((dataSet, i) => i === 0 ? ({
+			...dataSet,
 			source: {
+				...dataSet.source,
 				descriptor: descriptorStr,
 				value: {
 					label,
 					value
 				}
 			}
-		};
+		}) : dataSet);
 
+		dispatch(changeAxisChartFormValues({...values, data: newData}));
 		dispatch(addLayouts(NewWidget.id));
 		dispatch(addNewWidget(newWidget));
 		dispatch(editDashboard());
