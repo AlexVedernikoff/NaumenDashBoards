@@ -151,6 +151,7 @@ class DashboardDataSetService
     {
         def widgetSettings = getWidgetSettingsByDashboardAndWidgetKey(dashboardKey, widgetKey)
         def diagramType = widgetSettings.type as DiagramType
+        String templateUUID = getTemplateUUID(widgetSettings)
         def request
         def res
         Integer rowCount
@@ -201,11 +202,11 @@ class DashboardDataSetService
             }
 
             Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute
-            res = getDiagramData(request, diagramType, aggregationCnt, widgetSettings,
+            res = getDiagramData(request, diagramType, templateUUID, aggregationCnt, widgetSettings,
                                  tableRequestSettings?.ignoreLimits, noPaginationInSQL ? null : paginationSettings)
             rowCount = requestHasBreakdown && computationInTableRequest
                 ? rowCount
-                : getDiagramData(request, diagramType,
+                : getDiagramData(request, diagramType, templateUUID,
                                  aggregationCnt, widgetSettings,
                                  tableRequestSettings?.ignoreLimits)?.find()?.size() //получаем данные,
             //чтобы получить актуальное количество строк для таблицы
@@ -218,7 +219,8 @@ class DashboardDataSetService
 
                 rowCount = requestHasBreakdown
                     ? rowCount
-                    : prepareDataSet(getDiagramData(request, diagramType, aggregationCnt, widgetSettings,
+                    : prepareDataSet(getDiagramData(request, diagramType, templateUUID,
+                                                    aggregationCnt, widgetSettings,
                                                     tableRequestSettings?.ignoreLimits), widgetSettings,
                                                     showTableNulls, requestHasBreakdown)?.find()?.size()
             }
@@ -226,7 +228,7 @@ class DashboardDataSetService
         else
         {
             request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
-            res = getDiagramData(request, diagramType)
+            res = getDiagramData(request, diagramType, templateUUID)
         }
         switch (diagramType)
         {
@@ -371,6 +373,22 @@ class DashboardDataSetService
             filterListSize = 2
         }
         return filterListSize
+    }
+
+    /**
+     * Метод получения uuid-а шаблона динамического атрибута в данных на запрос в БД
+     * @param widgetSettings - настройки виджета
+     * @return  uuid шаблона динамического атрибута
+     */
+    private String getTemplateUUID(Widget widgetSettings)
+    {
+        List places = ['parameters', 'indicators', 'breakdown']
+        def attrCode = places.findResult { place ->
+            return widgetSettings?.data?.findResult { v ->
+                return v[place]?.attribute?.code?.find { it?.contains(AttributeType.TOTAL_VALUE_TYPE) }
+            }
+        }
+        return attrCode ? TotalValueMarshaller.unmarshal(attrCode).last() : ''
     }
 
     /**
@@ -761,7 +779,7 @@ class DashboardDataSetService
                 breakdownCustomGroup = dynamicGroup
             }
             FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
-            if (dynamicInAggregate || dynamicInParameter)
+            if ((dynamicInAggregate || dynamicInParameter) && !parameterFilters)
             {
                 parameterFilters << getFilterList(dynamicGroup,
                                                   subjectUUID,
@@ -1182,6 +1200,29 @@ class DashboardDataSetService
     }
 
     /**
+     * Метод преодбразований настроек группировки для динамических атрибутов
+     * @param subjectUUID - идентификатор "текущего объекта"
+     * @param data - настройки группировки
+     * @param attribute - атрибут к которому привязана группировка
+     * @param title - название группировки
+     * @return настройки группировки в удобном формате
+     */
+    private List<List<FilterParameter>> getDynamicFilter(List<List> data, Attribute attribute, String title, String id)
+    {
+        String templateUUID = TotalValueMarshaller.unmarshal(attribute?.code).last()
+        return mappingFilter(data) { condition ->
+            def value = api.utils.get(templateUUID)
+            return new FilterParameter(
+                value: value,
+                title: title,
+                id: id,
+                type: Comparison.EQUAL,
+                attribute: new Attribute(code: 'linkTemplate', type: AttributeType.OBJECT_TYPE)
+            )
+        }
+    }
+
+    /**
      * Метод преодбразований настроек группировки для каталогов
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param data - настройки группировки
@@ -1191,7 +1232,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
             {
@@ -1305,6 +1354,7 @@ class DashboardDataSetService
                     throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1317,7 +1367,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
             {
@@ -1463,13 +1521,6 @@ class DashboardDataSetService
                     )
                 case ['contains_current_object', 'equal_current_object']:
                     def value = api.utils.get(subjectUUID)
-                    String metaClass = value.metaClass
-                    String subjectType = metaClass.takeWhile { ch -> ch != '$' }
-                    String attributeType = attribute.attrChains().last().property?.takeWhile { ch -> ch != '$' }
-                    if (subjectType != attributeType)
-                    {
-                        throw new IllegalArgumentException( "Does not match subject type: $subjectType and attribute type: ${ attribute.property }" )
-                    }
                     return new FilterParameter(
                         value: value,
                         title: title,
@@ -1495,6 +1546,7 @@ class DashboardDataSetService
                     throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1506,7 +1558,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure<FilterParameter> buildFilterParameterFromCondition = { Comparison type ->
                 def interval = condition.data as Map
@@ -1535,6 +1595,7 @@ class DashboardDataSetService
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1546,7 +1607,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison type ->
                 new FilterParameter(
@@ -1572,6 +1641,7 @@ class DashboardDataSetService
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1584,7 +1654,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             Closure buildFilterParameterFromCondition = { Comparison type ->
                 new FilterParameter(
                     value: condition.data ? condition.data.with(valueConverter) : null,
@@ -1614,6 +1692,7 @@ class DashboardDataSetService
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1626,7 +1705,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
                 return new FilterParameter(
@@ -1718,6 +1805,7 @@ class DashboardDataSetService
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1730,7 +1818,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
                 return new FilterParameter(title: title, id: id, type: comparison, attribute: attr, value: value)
@@ -1764,6 +1860,7 @@ class DashboardDataSetService
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1775,7 +1872,15 @@ class DashboardDataSetService
      */
     private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
                 return new FilterParameter(title: title,
@@ -1832,11 +1937,20 @@ class DashboardDataSetService
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
     {
-        return mappingFilter(data) { condition ->
+        Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+        def dynamicFilter
+        if(attrIsDynamic)
+        {
+            dynamicFilter = getDynamicFilter(data, attribute, title, id)
+            attribute = attribute.deepClone()
+            attribute?.code = AttributeType.VALUE_TYPE
+        }
+        def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
             {
@@ -1891,6 +2005,7 @@ class DashboardDataSetService
                     throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
+        return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
     }
 
     /**
@@ -1908,6 +2023,7 @@ class DashboardDataSetService
      * Метод получения данных для диаграмм
      * @param request - запрос на получение данных
      * @param diagramType - тип диаграммы
+     * @param templateUUID - ключ шаблона для динамических атрибутов
      * @param aggregationCnt - количество агрегаций
      * @param requestContent - тело запроса
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
@@ -1915,6 +2031,7 @@ class DashboardDataSetService
      * @return сырые данные из Бд по запросу
      */
     private def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT,
+                               String templateUUID = '',
                                Integer aggregationCnt = 1, def requestContent = null,
                                IgnoreLimits ignoreLimits = new IgnoreLimits(),
                                PaginationSettings paginationSettings = null)
@@ -1966,7 +2083,7 @@ class DashboardDataSetService
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
                             newRequestData.filters = filters
-                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType, ignoreLimits.parameter ?: false, paginationSettings)
+                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
                                                                 .with(formatGroup)
                                                                 .with(formatAggregation)
 
@@ -2014,6 +2131,7 @@ class DashboardDataSetService
                         def calculator = new FormulaCalculator(requisiteNode.formula)
 
                         Map<String, List> fullFilterList = [:]
+                        Map<String, String> fullTemplateIdList = [:]
                         def parameterFilters  = []
                         def breakdownFilters = []
                         String parameterSortingType = ''
@@ -2025,6 +2143,7 @@ class DashboardDataSetService
                             parameterSortingType = diagramType == DiagramType.TABLE ? '' : filterMap.parameterSortingType
                             parameterFilters = filterMap.parameterFilters
                             breakdownFilters = filterMap.breakdownFilters
+                            fullTemplateIdList.put(it, templateUUID)
                             filterListSize = filterMap.filterListSize
 
                             List filters = filterListSize > 0 ? prepareFilters(filterListSize, diagramType, requestContent, parameterFilters, breakdownFilters) : []
@@ -2048,7 +2167,7 @@ class DashboardDataSetService
                                 RequestData newData = data.clone()
                                 newData.filters = filters
                                 Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType, ignoreLimits.parameter : false, paginationSettings)
+                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType, ignoreLimits.parameter : false, templateUUID, paginationSettings)
                                 if(!res && !onlyFilled)
                                 {
                                     def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
@@ -2435,7 +2554,7 @@ class DashboardDataSetService
         {
             case GroupType.OVERLAP:
                 def uuid = null
-                if (diagramType == DiagramType.TABLE  || Attribute.getAttributeType(parameter.attribute) == AttributeType.META_CLASS_TYPE)
+                if (diagramType == DiagramType.TABLE|| Attribute.getAttributeType(parameter.attribute) == AttributeType.META_CLASS_TYPE)
                 {
                     if (value && !(parameter?.attribute?.type in AttributeType.DATE_TYPES ))
                     {
@@ -2705,6 +2824,56 @@ class DashboardDataSetService
         {
             return "Не заполнено"
         }
+    }
+
+
+    /**
+     * Метод по подготовке данных из Бд после запроса, при наличии дин атрибутов
+     * @param res - результат запроса данных из БД
+     * @param templateUUID - uuid шаблона атрибута
+     * @param requestData - данные, по которым строился запрос в БД
+     * @param diagramType - тип диаграммы, для которой готовим данные
+     * @return итоговый датасет
+     */
+    private List<List> formatSetWithDynamicValues(List<List> res, String templateUUID, RequestData requestData, DiagramType diagramType)
+    {
+        if(templateUUID)
+        {
+            GroupParameter dynInGroups = requestData.groups?.find {
+                it?.attribute?.property == AttributeType.TOTAL_VALUE_TYPE
+            }
+            AggregationParameter dynInAggregations = requestData.aggregations?.find {
+                it?.attribute?.property == AttributeType.TOTAL_VALUE_TYPE
+            }
+
+            //TODO: может понадобиться
+            // Integer groupsCount = requestData?.groups?.size()
+            Integer aggregationsCount = requestData?.aggregations?.size()
+
+            if(dynInGroups)
+            {
+                Integer realDynAttributeIndex = requestData.groups.findIndexOf { it == dynInGroups } + aggregationsCount
+                return res.collect { row ->
+                    def dynValue = row[0]
+                    row.remove(0)
+                    row.add(realDynAttributeIndex, dynValue)
+                    return row
+                }
+            }
+
+            if(dynInAggregations && diagramType == DiagramType.TABLE)
+            {
+                Integer realDynAttributeIndex = requestData.aggregations.findIndexOf { it == dynInAggregations }
+                return res.collect { row ->
+                    def dynValue = row[0]
+                    row.remove(0)
+                    row.add(realDynAttributeIndex, dynValue)
+                    return row
+                }
+            }
+            return res
+        }
+        return res
     }
 
     /**
@@ -3225,7 +3394,7 @@ class DashboardDataSetService
                     tempRow = tempRow.collect { it ?: 0}.sort()
                     def num = listRow.find {
                         it[1..-1].collect { it ?: 0}.sort() == tempRow
-                    }.find() //при последующей итерации число агрегаций увеличивается на 1
+                    }.find() ?: 0 //при последующей итерации число агрегаций увеличивается на 1
                     row.add(indexesOfComputeInRequest[i] as int, num)
                 }
             }
@@ -3296,7 +3465,6 @@ class DashboardDataSetService
      * @param attributes - список атрибутов
      * @param totalColumn - флаг на подсчёт итогов в колонках
      * @param showRowNum - флаг на отображение номера строки
-     * @param rowCount - количество строк в полном запросе
      * @param customValuesInBreakdown - значения кастомной группировки в разбивке
      * @param aggregationCnt - количество агрегаций в запросе
      * @param allAggregationAttributes - названия всех атрибутов агрегации
@@ -4037,18 +4205,14 @@ class DashboardDataSetService
     {
         if (dynamicAttribute?.property == AttributeType.TOTAL_VALUE_TYPE)
         {
-            def (dynAttrCode, uuidForTemplate) = dynamicAttribute.code.split('_', 2)
-            dynamicAttribute.code = dynAttrCode
-            def groupType = 'object'
+            String uuidForTemplate = TotalValueMarshaller.unmarshal(dynamicAttribute.code).last()
+            def groupType = AttributeType.OBJECT_TYPE
             def groupName = 'totalValueGroup'
-            dynamicAttribute.attrChains().head().type = AttributeType.OBJECT_TYPE
-            dynamicAttribute.attrChains().last().ref = new Attribute(code: 'linkTemplate', type: 'object')
+            dynamicAttribute = new Attribute(code: 'linkTemplate', type: AttributeType.OBJECT_TYPE)
 
             def subGroupData = new SubGroupData(data: [title: 'Шаблон атрибута', uuid: uuidForTemplate],
                                                 type: 'CONTAINS')
-
             def subGroup = new SubGroup(data: [[subGroupData]], name: '')
-
             def customGroup = new CustomGroup(name: groupName,
                                               subGroups: [subGroup],
                                               type: groupType,
@@ -4219,7 +4383,7 @@ class DashboardDataSetService
 
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, true)
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits?.parameter, paginationSettings)
+                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                     .with(formatGroup)
                                                     .with(formatAggregation)
                 def total = res ? [(requisiteNode.title): res] : [:]
@@ -4266,7 +4430,7 @@ class DashboardDataSetService
                 def variables = dataSet.collectEntries { key, data ->
                     Closure postProcess =
                         this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, notBlank, diagramType, ignoreLimits.parameter, paginationSettings)
+                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
                                                       .with(postProcess)]
                 } as Map<String, List>
 
