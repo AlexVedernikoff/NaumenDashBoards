@@ -97,7 +97,10 @@ export class DashboardResizer {
 	};
 
 	setFullHeight = () => {
-		if (document.body) document.body.style.height = '100%';
+		if (document.body) {
+			document.body.style.height = '100%';
+			document.body.style.minHeight = `${this.initHeight}px`;
+		}
 	};
 
 	setHeight = (height: number) => {
@@ -105,6 +108,7 @@ export class DashboardResizer {
 
 		if (document.body && document.body.style.height !== height) {
 			document.body.style.height = attrHeight;
+			document.body.style.minHeight = '';
 		}
 	};
 }
