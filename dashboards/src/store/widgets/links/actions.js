@@ -25,19 +25,21 @@ const getPartsClassFqn = (code?: string) => {
 
 const createPostData = (widget: Widget, index: number) => {
 	let postData = {};
-	const {source} = widget.data[index];
-	const {descriptor, filterId, value: sourceValue} = source;
+	const {dataKey, source} = widget.data[index];
+	const {descriptor, filterId, value: sourceValue, widgetFilterOptions} = source;
 
 	if (source) {
 		const {label: title, value} = sourceValue;
 		const {cases, classFqn} = getPartsClassFqn(value);
+		const widgetFilters = widgetFilterOptions?.filter(({descriptor}) => !!descriptor).map(({descriptor}) => ({ dataKey, descriptor })) ?? [];
 
 		postData = {
 			cases,
 			classFqn,
 			descriptor,
 			filterId,
-			title
+			title,
+			widgetFilters
 		};
 	}
 
