@@ -78,6 +78,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 				onChange={this.handleChangeBreakdown}
 				onRemove={this.handleRemoveBreakdown}
 				removable={!requiredBreakdown}
+				required={requiredBreakdown}
 				value={breakdown}
 			/>
 		);
