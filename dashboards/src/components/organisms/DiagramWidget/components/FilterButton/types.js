@@ -12,3 +12,12 @@ export type State = {
 	showOptionsMenu: boolean,
 	usedFilters: boolean
 };
+
+export type MenuItemOption = {
+	dataSetIndex: number,
+	dataSetLabel: string,
+	filterIndex: number,
+	isMultipleSource: boolean,
+	label: string,
+	used: boolean
+};

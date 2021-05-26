@@ -1,11 +1,12 @@
 // @flow
+import cn from 'classnames';
 import {createFilterContext, getFilterContext} from 'store/helpers';
 import type {CustomFilter, Widget} from 'store/widgets/data/types';
 import DropdownMenu from 'components/atoms/DropdownMenu';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {Item as MenuItem} from 'rc-menu';
-import type {Props, State} from './types';
+import type {MenuItemOption, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from 'components/atoms/IconButton/constants';
@@ -86,13 +87,19 @@ export class FilterButton extends PureComponent<Props, State> {
 				const {value, widgetFilterOptions} = dataSet.source;
 
 				if (value.label && widgetFilterOptions) {
-					return widgetFilterOptions.map(({label}, filterIndex) => [dataSetIndex, value.label, label, filterIndex]);
+					return widgetFilterOptions.map(({descriptor, label}, filterIndex) => ({
+						dataSetIndex,
+						dataSetLabel: value.label,
+						filterIndex,
+						label,
+						used: !!descriptor
+					}));
 				}
 
 				return [];
 			}).flat();
-			const isMultipleSource = (new Set(items.map(item => item[0]))).size > 1;
-			const list = items.map((item) => this.renderButtonOptionsMenuItem(...item, isMultipleSource));
+			const isMultipleSource = (new Set(items.map(item => item.dataSetIndex))).size > 1;
+			const list = items.map((item) => this.renderButtonOptionsMenuItem({...item, isMultipleSource}));
 
 			return (
 				<DropdownMenu onSelect={this.handleToggleOptionsMenu} onToggle={this.handleToggleOptionsMenu}>
@@ -105,11 +112,16 @@ export class FilterButton extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderButtonOptionsMenuItem = (dataSetIndex: number, dataSetLabel: string, label: string, filterIndex: number, isMultipleSource: boolean): React$Node => {
+	renderButtonOptionsMenuItem = (option: MenuItemOption): React$Node => {
+		const {dataSetIndex, dataSetLabel, filterIndex, isMultipleSource, label, used} = option;
 		const textLabel = (isMultipleSource) ? `${label} (${dataSetLabel})` : label;
+		const itemClassName = cn({
+			[styles.menuItemUsed]: used
+		});
 
 		return (
 			<MenuItem
+				className={itemClassName}
 				key={`${dataSetIndex}_${label}`}
 				onClick={this.handleItemClick({ dataSetIndex, filterIndex })}
 			>
