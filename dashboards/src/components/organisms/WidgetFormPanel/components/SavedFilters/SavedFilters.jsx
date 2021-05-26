@@ -22,6 +22,7 @@ export class SavedFilters extends Component<Props> {
 
 	getComponents = memoize(() => ({
 		List: this.renderFilterList,
+		Message: this.renderFilterListMessage,
 		ValueContainer: this.renderValueContainer
 	}));
 
@@ -70,6 +71,16 @@ export class SavedFilters extends Component<Props> {
 		);
 	};
 
+	renderFilterListMessage = (props) => {
+		const {children, className} = props;
+		const messageCN = cn([className, styles.filterListMessage]);
+		return (
+			<Container className={messageCN}>
+				{children}
+			</Container>
+		);
+	};
+
 	renderListOption = (props) => {
 		return (
 			<ListOption {...props} className={styles.filterListOption} components={this.getListOptionComponents()} />
@@ -111,6 +122,7 @@ export class SavedFilters extends Component<Props> {
 				isSearching={true}
 				loading={loading}
 				menuHeaderMessage="Выберите сохраненный фильтр"
+				notFoundMessage="Нет совпадений"
 				onSelect={this.handleSelect}
 				options={filters}
 				placeholder="Не выбрано"

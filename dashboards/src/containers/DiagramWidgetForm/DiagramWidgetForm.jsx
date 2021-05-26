@@ -93,13 +93,14 @@ export class DiagramWidgetForm extends PureComponent<Props> {
 	};
 
 	renderTab = (tab: string, props: RenderProps<Values>) => {
-		const {ParamsTab, StyleTab} = this.props.components;
+		const {components, isPersonalDashboard} = this.props;
+		const {ParamsTab, StyleTab} = components;
 		const {setFieldValue: onChange, values} = props;
 		const {OPTIONS, PARAMS, STYLE} = TAB_TYPES;
 
 		switch (tab) {
 			case OPTIONS:
-				return <FiltersOnWidget onChange={onChange} values={values} />;
+				return !isPersonalDashboard && <FiltersOnWidget onChange={onChange} values={values} />;
 			case PARAMS:
 				return <ParamsTab onChange={onChange} values={values} />;
 			case STYLE:
