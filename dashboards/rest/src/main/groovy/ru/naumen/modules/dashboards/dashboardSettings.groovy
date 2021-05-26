@@ -803,7 +803,14 @@ class DashboardSettingsService
     {
         List dashboardKeys = getDashboardKeys()
         Boolean widgetsUseSourceFilter = dashboardKeys.any { dashboardKey ->
-            def dbSettings = getDashboardSetting(dashboardKey)
+            def dbSettings
+            try
+            {
+                dbSettings = getDashboardSetting(dashboardKey)
+            } catch(Exception ex) {
+                logger.error("dashboard ${dashboardKey} is not checked")
+            }
+
             return dbSettings?.widgets?.any {
                 return it?.type != DiagramType.TEXT ? it?.data?.any {
                     it.source instanceof NewSourceValue
@@ -885,7 +892,7 @@ class DashboardSettingsService
         String contentCode = requestContent.contentCode
         String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
         String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
-        def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
+        def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey) ?: new DashboardSettingsClass()
         settings = prepareDashboardSettings(settings, user.login as String)
         return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
     }
@@ -899,7 +906,7 @@ class DashboardSettingsService
     {
         def widget = requestContent.widget
         widget = mapper.convertValue(widget, Widget)
-        Boolean widgetTypeIsNotText = widget.type != DiagramType.TEXT
+        Boolean widgetTypeIsNotText = widget?.type != DiagramType.TEXT
         if (widgetTypeIsNotText)
         {
             validateName(requestContent)
@@ -1057,8 +1064,8 @@ class DashboardSettingsService
 
         if (layouts)
         {
-            dashboardSettings.mobileLayouts = Jackson.fromJsonString(mobileLayouts, Layout)
-            dashboardSettings.layouts = Jackson.fromJsonString(layouts, Layout)
+            dashboardSettings.mobileLayouts = new ObjectMapper().convertValue(mobileLayouts, Layout)
+            dashboardSettings.layouts = new ObjectMapper().convertValue(layouts, Layout)
             saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
         }
         else
@@ -1193,9 +1200,16 @@ class DashboardSettingsService
         Collection<CustomGroup> correctCustomGroups = []
         if(destinationDashboardKey != sourceDashboardKey)
         {
-            List<String> customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
+            List customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
             Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
-            correctCustomGroups = editCustomGroupsToCorrectFormat(currentCustomGroups)
+            Collection<CustomGroup> destinationCustomGroups = dashboardSettings?.customGroups?.findAll { group ->
+                customGroupsIds.any { group.id.contains(it) }
+            }
+            //кастомные группировки на Дб для копирования могут уже существовать, возможно, потребуется сохранить группировку по-новому
+            correctCustomGroups = editCustomGroupsToCorrectFormat(currentCustomGroups, destinationCustomGroups, destinationDashboardKey)
+            List<String> newCustomGroupIds = correctCustomGroups.id
+            newWidgetSettings = editCustomGroupsFromAnotherDBToSystem(newWidgetSettings, currentCustomGroups)
+            newWidgetSettings = editCustomGroupKeys(newWidgetSettings, newCustomGroupIds)
         }
         return prepareWidgetSettings(newWidgetSettings, generateKey).with { widget ->
             dashboardSettings.widgets += widget
@@ -1259,12 +1273,14 @@ class DashboardSettingsService
 
             if(destinationDashboardKey != sourceDashboardKey)
             {
+                List customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
+                Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
                 widgetSettings.data.each { dataValue ->
-                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, 'any')
-                    widgetContainsRelativeCriteriaCustomGroups =  widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, 'any')
+                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, currentCustomGroups, 'any')
+                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, currentCustomGroups, 'any')
 
-                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, 'every')
-                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, 'every')
+                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, currentCustomGroups, 'every')
+                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, currentCustomGroups, 'every')
                 }
             }
             if(widgetWithOnlyRelativeCriteriaCustomGroups)
@@ -1275,7 +1291,7 @@ class DashboardSettingsService
             {
                 reasons << 'hasCustomGroupsWithRelativeCriteria'
             }
-            return [result: [hasSubjectFilters, hasCustomGroupsWithRelativeCriteria, hasOnlyRelativeCriteriaCustomGroups].any {it == true}, reasons: reasons]
+            return [result: [hasSubjectFilters, widgetContainsRelativeCriteriaCustomGroups, widgetWithOnlyRelativeCriteriaCustomGroups].any {it == true}, reasons: reasons]
         }
         else
         {
@@ -1406,40 +1422,168 @@ class DashboardSettingsService
     }
 
     /**
-     * Метод по изменению кастомных группировок на системные
-     * @param widgetSettings - настройки виджета
-     * @return измененные настройки виджета
+     * Метод по преобразованию кастомных группировок при копировании виджета на новый дашборд
+     * @param groups - кастомные группировки на текущем ДБ
+     * @param destinationCustomGroups - кастомные группировки на дб для копирования
+     * @param destinationDashboardKey - ключ ДБ для копирования
+     * @return коллекция подготовленных кастомных группировок
      */
-    private Collection<CustomGroup> editCustomGroupsToCorrectFormat(Collection<CustomGroup> groups)
+    private Collection<CustomGroup> editCustomGroupsToCorrectFormat(Collection<CustomGroup> groups, Collection<CustomGroup> destinationCustomGroups,String destinationDashboardKey)
     {
         return groups.collect { group->
             group.subGroups = group.subGroups.findResults {subGroup ->
                 subGroup.data = subGroup.data.findResults { dataValue ->
                     return dataValue.findResults {
-                        return it.type.toLowerCase().contains('subject') ? null : it
+                        return (it.type.toLowerCase().contains('subject') || it.type.toLowerCase().contains('object')) ? null : it
                     } ?: null
                 } ?: null
                 return subGroup.data ? subGroup : null
             }
-            return group
+            return prepareGroupIdForNewDashboard(group, destinationCustomGroups, destinationDashboardKey)
         }
     }
 
+    /**
+     * Метод по подготовке id кастомной группировки для нового Дб к правильному ключу
+     * @param group - группировка, которую хотят скопировать
+     * @param destinationCustomGroups - группировки в целевом ДБ для копирования
+     * @param destinationDashboardKey - ключ целевого ДБ для копирования
+     */
+    private CustomGroup prepareGroupIdForNewDashboard(CustomGroup group,
+                                                      Collection<CustomGroup> destinationCustomGroups,
+                                                      String destinationDashboardKey)
+    {
+        if(destinationCustomGroups)
+        {
+            def equalDestinationGroup = destinationCustomGroups.find { toJson(it.subGroups) == toJson(group.subGroups) }
+            if(equalDestinationGroup)
+            {
+                //если есть группировка с таким же настройками, берем её ключ
+                group.id = equalDestinationGroup.id
+            }
+            else
+            {
+                //иначе добавляем новую группировку с новым ключом
+                String newId = group.id
+                while(newId in destinationCustomGroups.id)
+                {
+                    newId += "_${destinationDashboardKey}"
+                }
+                group.id = newId
+            }
+        }
+        return group
+    }
+
+    /**
+     * Метод по изменению кастомных группировок на системные
+     * @param widgetSettings - настройки виджета
+     * @return измененные настройки виджета
+     */
+    private Widget editCustomGroupsFromAnotherDBToSystem(def widgetSettings, Collection currentCustomGroups)
+    {
+        widgetSettings.data.each { dataValue ->
+            dataValue.parameters = updateCustomGroupsToSystem(dataValue.parameters, currentCustomGroups)
+            if(dataValue.breakdown)
+            {
+                dataValue.breakdown = updateCustomGroupsToSystem(dataValue.breakdown, currentCustomGroups)
+            }
+        }
+        return widgetSettings
+    }
+
+    /**
+     * Метод по изменению ключей кастомных группировок до новых
+     * @param widgetSettings - настройки виджета
+     * @param currentCustomGroupsIds - ключи кастомных группировок
+     * @return настройки виджета с правильными ключами кастомных группировок
+     */
+    private Widget editCustomGroupKeys(def widgetSettings, Collection<String> currentCustomGroupsIds)
+    {
+        widgetSettings.data.each { dataValue ->
+            dataValue.parameters = updateCustomGroupKeys(dataValue.parameters, currentCustomGroupsIds)
+            if(dataValue.breakdown)
+            {
+                dataValue.breakdown = updateCustomGroupKeys(dataValue.breakdown, currentCustomGroupsIds)
+            }
+        }
+        return widgetSettings
+    }
+
+    /**
+     * Метод по преобразованию ключей кастомных группировок в параметрах/разбивке
+     * @param valuesWithGroup - значения с группами
+     * @param currentCustomGroupsIds - ключи кастомых группировок на дашборде на данный момент
+     * @return значения с группировками  справильными клчюами
+     */
+    private Collection updateCustomGroupKeys(Collection<IHasGroup> valuesWithGroup, Collection<String> currentCustomGroupsIds)
+    {
+        return valuesWithGroup.collect {
+            def groupKey = it?.group?.data
+            //нашли новый ключ, в состав которого входит информация о старом, и подставляем его
+            def currentGroupKey = currentCustomGroupsIds.find {it.contains(groupKey)}
+            if(currentGroupKey != groupKey)
+            {
+                it?.group?.data = currentGroupKey
+            }
+            return it
+        }
+    }
+
+    /**
+     * Метод по замене групп в списке значений с группами
+     * @param valuesWithGroup - список значений с группами
+     * @return значения только с системными группами
+     */
+    private Collection updateCustomGroupsToSystem(Collection valuesWithGroup, Collection currentCustomGroups)
+    {
+        return valuesWithGroup.collect {
+            def groupKey = it?.group?.data
+            if(it?.group?.way == Way.CUSTOM &&
+               currentCustomGroups.find{ it.id == groupKey }*.subGroups
+                                  ?.data
+                                  ?.type?.flatten()*.toLowerCase()
+                                  ?.every { it.contains('subject') || it.contains('object') })
+            {
+                it.group = getSystemGroup(it.attribute)
+            }
+            return it
+        }
+    }
+
+    /**
+     * Метод по получению системной группировки для атрибута
+     * @param attribute - атрибут параметра
+     * @return системная группировка для атрибута
+     */
+    private SystemGroupInfo getSystemGroup(def attribute)
+    {
+        switch (attribute?.type)
+        {
+            case AttributeType.DT_INTERVAL_TYPE:
+                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.WEEK_INTERVAL)
+            case AttributeType.DATE_TYPES:
+                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.MONTH)
+            default:
+                return new  SystemGroupInfo(way: Way.SYSTEM, data: GroupType.OVERLAP)
+        }
+    }
 
     /**
      * Метод для получения соответсвия условию для некоторой коллекции элементов
      * @param elements - коллекция элементов
+     * @param currentCustomGroups - текущие кастомные группировки
      * @param conditionSpread - распространенность условия
      * @return флаг true/false на соответствие
      */
-    private Boolean returnParametersOrBreakdownAnswer(Collection elements, String conditionSpread)
+    private Boolean returnParametersOrBreakdownAnswer(Collection elements, Collection currentCustomGroups, String conditionSpread)
     {
         switch (conditionSpread)
         {
             case 'any':
-                return elements?.any { it?.group?.way == Way.CUSTOM && it?.group?.subGroups?.data?.type?.any { it.flatten()*.toLowerCase().contains('subject')} }
+                return elements?.any { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.any {it.contains('subject') || it.contains('object')} }
             case 'every':
-                return elements?.every { it?.group?.way == Way.CUSTOM && it?.group?.subGroups?.data?.type?.every { it.flatten()*.toLowerCase().contains('subject')} }
+                return elements?.every { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.every {it.contains('subject') || it.contains('object')} }
             default:
                 throw new IllegalArgumentException('Wrong Argument')
         }
@@ -1490,6 +1634,18 @@ class DashboardSettingsService
             {
                 //пользователь может написать несуществующее поле у subject-а
                 widgetName = checkWidgetName(widgetName, variableMap)
+                def stringTokenize = widgetName.tokenize('{}')
+                //находим все части, где есть указание на переменную
+                //и добавляем в них перед вызовом атрибута объекта знак на защиту
+                // от вызова атрибута по нулевому значению
+                List<Map> newValues = stringTokenize.findAll { val ->
+                    variableMap.keySet().any { val.contains(it) }
+                }.collect { return [key: it, value: "{${it.replace('.', '?.')}}"] }
+                //составляем заново строку из измененных значений
+                widgetName = stringTokenize.collect { it in newValues*.key
+                    ? newValues.find {val -> val.key  == it }.value
+                    : it
+                }.join('')
                 return api.utils.processTemplate(widgetName, variableMap)
             }
             catch (Exception ex)
@@ -1528,14 +1684,6 @@ class DashboardSettingsService
     private Widget prepareWidgetSettings(Widget widgetSettings, Closure<String> generateCode, String userLogin = '')
     {
         String key = generateCode()
-        if(userLogin)
-        {
-            widgetSettings.data.each { dataValue ->
-                dataValue.parameters = updateCustomGroupKeysToPersonal(dataValue.parameters, userLogin)
-                dataValue.breakdown = updateCustomGroupKeysToPersonal(dataValue.breakdown, userLogin)
-                return dataValue
-            }
-        }
         return setUuidInSettings(widgetSettings, key)
     }
 
@@ -1638,10 +1786,6 @@ class DashboardSettingsService
                 widgetSettings.id += "_${ userLogin }"
                 widgetSettings = prepareWidgetSettings(widgetSettings, { widgetSettings.id } ,userLogin)
                 return widgetSettings
-            }
-            settings.customGroups = settings.customGroups.collect { customGroup ->
-                customGroup.id += "_${ userLogin }"
-                return customGroup
             }
             settings.layouts = prepareLayouts(settings.layouts, userLogin)
             settings.mobileLayouts = prepareLayouts(settings.mobileLayouts, userLogin)
