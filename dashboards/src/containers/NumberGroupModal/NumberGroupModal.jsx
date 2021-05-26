@@ -35,7 +35,7 @@ export class NumberGroupModal extends Component<Props> {
 	renderOrCondition = (props: OrConditionProps) => {
 		const {attribute} = this.props;
 		const {onChange, value} = props;
-		const {EQUAL, GREATER, LESS, NOT_EQUAL} = OR_CONDITION_TYPES;
+		const {EQUAL, GREATER, LESS, NOT_EQUAL, NOT_EQUAL_NOT_EMPTY} = OR_CONDITION_TYPES;
 		const float = attribute.type === ATTRIBUTE_TYPES.double;
 
 		switch (value.type) {
@@ -43,6 +43,7 @@ export class NumberGroupModal extends Component<Props> {
 			case GREATER:
 			case LESS:
 			case NOT_EQUAL:
+			case NOT_EQUAL_NOT_EMPTY:
 				return <SimpleOrCondition float={float} onChange={onChange} value={value} />;
 			default:
 				return null;
