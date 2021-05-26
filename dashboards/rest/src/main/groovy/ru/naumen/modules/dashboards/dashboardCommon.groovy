@@ -2088,6 +2088,11 @@ class DataLabels implements IHasFontSettings
      * Отображать общую сумму
      */
     Boolean showTotalAmount = false
+
+    /**
+     * Флаг на блокировку данных (управляется количеством элементов)
+     */
+    Boolean disabled = false
 }
 
 /**
@@ -3583,14 +3588,45 @@ class WidgetFilterResponse
 
     static Collection<WidgetFilterResponse> getWidgetFiltersCollection(def fields)
     {
+        def slurper = new groovy.json.JsonSlurper()
         if(fields instanceof String)
         {
-            def slurper = new groovy.json.JsonSlurper()
             fields =  slurper.parseText(fields)
         }
-        return fields ? fields.findResults {
+        def tempWidgetFilters = fields ? fields.findResults {
             new WidgetFilterResponse(it)
         } : []
+
+        def groupedFilters = tempWidgetFilters.groupBy {it.dataKey}
+
+        return groupedFilters.findResults { dataKey, filters ->
+            //пользователь может сначала установить фильтр, а затем заменить настройки на "не указано"
+            filters = filters.findAll{ slurper.parseText(it.descriptor).filters }
+            if(filters?.size() == 0)
+            {
+                //нет ни одного заполненного фильтра
+                return null
+            }
+            if(filters?.size() > 1)
+            {
+                //взяли первый дескриптор за основу
+                def baseFilterDescriptor = filters.find().descriptor
+                if(baseFilterDescriptor)
+                {
+                    def baseFilterDescriptorMap = slurper.parseText(baseFilterDescriptor) //представили словарём
+                    baseFilterDescriptorMap.remove('attrCodes')
+                    //дополнили его фильтры фильтрами из других дескрипторов по этому же источнику через условие "И"
+                    filters[1..-1].each {
+                        def descriptorMap = slurper.parseText(it.descriptor)
+                        baseFilterDescriptorMap.filters += descriptorMap.filters
+                    }
+                    baseFilterDescriptor = toJson(baseFilterDescriptorMap) //вернули обратно к виду строки
+                    return new WidgetFilterResponse(dataKey: dataKey, descriptor: baseFilterDescriptor)
+                }
+            }
+            //фильтр может быть настроен всего 1 - возвращаем его
+            return filters.find()
+        }
     }
 }
 

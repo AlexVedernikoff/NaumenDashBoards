@@ -213,7 +213,7 @@ class QueryWrapper implements CriteriaWrapper
             criteria.addGroupColumn(sc.property(DashboardQueryWrapperUtils.UUID_CODE))
         }
 
-        if (attributeCodes.any { it.contains('state') } && lastParameterAttributeType == AttributeType.STATE_TYPE)
+        if (attributeCodes.any { it.toLowerCase().contains('state') } && lastParameterAttributeType == AttributeType.STATE_TYPE)
         {
             String metaCaseId = getMetaCaseIdCode(attribute.attrChains())
             column = sc.concat(sc.property(attributeCodes),
@@ -454,7 +454,7 @@ class QueryWrapper implements CriteriaWrapper
         switch (groupType)
         {
             case GroupType.OVERLAP:
-                if (attributeCodes.any {it.contains('state')} && lastParameterAttributeType == AttributeType.STATE_TYPE)
+                if (attributeCodes.any {it.toLowerCase().contains('state')} && lastParameterAttributeType == AttributeType.STATE_TYPE)
                 {
                     column = sc.concat(sc.property(attributeCodes),
                                        sc.constant(StateMarshaller.delimiter),
@@ -835,13 +835,17 @@ class QueryWrapper implements CriteriaWrapper
     {
         filters.collect { parameter ->
             def attribute = parameter.attribute as Attribute
+
+            Boolean sourceIsEvt = criteria.currentMetaClass.fqn.code.contains('_Evt')
+            def valueToPut = sourceIsEvt ? 'parent.metaClass' : 'metaClass'
+
             Collection attrChains = attribute.attrChains()
-            String code = attrChains*.code.join('.')
+            String code = attrChains*.code.join('.').replace('metaClass', valueToPut)
             if(attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
             {
                 attribute?.attrChains()?.last()?.ref = new Attribute(code: 'title', type: 'string')
             }
-            String columnCode = attribute.attrChains()*.code.join('.')
+            String columnCode = attribute.attrChains()*.code.join('.').replace('metaClass', valueToPut)
             String parameterFqn = attribute.attrChains().last().metaClassFqn
             if (attribute.attrChains()*.code.any { it == 'id' })
             {
@@ -1028,7 +1032,9 @@ class QueryWrapper implements CriteriaWrapper
      */
     private List<String> replaceMetaClassCode(List<String> list)
     {
-        return 'metaClass' in list ? (list - 'metaClass' + 'metaClassFqn') : list
+        Boolean sourceIsEvt = this.criteria.currentMetaClass.fqn.code.contains('_Evt')
+        def valueToPut = sourceIsEvt ? 'parent.metaClassFqn' : 'metaClassFqn'
+        return 'metaClass' in list ? (list - 'metaClass' + valueToPut) : list
     }
 
     /**
@@ -1381,7 +1387,7 @@ class DashboardQueryWrapperUtils
                 }
                 break
         }
-        if (attributeCode == UUID_CODE)
+        if (attributeCode == UUID_CODE && forAggregation)
         {
             attribute.attrChains().last().code = 'id'
         }

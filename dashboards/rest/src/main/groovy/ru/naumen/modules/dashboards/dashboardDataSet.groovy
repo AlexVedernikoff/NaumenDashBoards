@@ -745,7 +745,7 @@ class DashboardDataSetService
                 {
                     def compData = indicator.attribute.computeData as Map
                     def computeData = compData.collectEntries { k, v ->
-                        String dataKey = isDiagramTypeTable && hasTableNotOnlyBaseSources ? "сompute-data_${compIndicatorId}" : v.dataKey
+                        String dataKey = isDiagramTypeTable ? "сompute-data_${compIndicatorId}" : v.dataKey
                         def br = breakdownMap[v.dataKey] as GroupParameter
                         def aggr = new AggregationParameter(
                             title: indicator?.attribute?.title,
@@ -852,7 +852,7 @@ class DashboardDataSetService
             Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(widgetSettings)
             intermediateData = updateIntermediateDataToOneSource(intermediateData, computationInTableRequest, countOfCustomsInFirstSource)
         }
-        if(computationInTableRequest && hasTableNotOnlyBaseSources)
+        if(computationInTableRequest)
         {
             intermediateData = updateIntermediateData(intermediateData)
             def request = buildDiagramRequest(intermediateData, subjectUUID, diagramType)
@@ -928,7 +928,6 @@ class DashboardDataSetService
             }
             else
             {
-                userDescriptorMap.remove('attrCodes')
                 descriptorMap = userDescriptorMap
             }
         }
@@ -951,33 +950,53 @@ class DashboardDataSetService
         {
             def filters = descriptorMap.filters
             def userFilters = userDescriptorMap.filters
-
-            filters = filters.collect { filterValue->
-                filterValue.each { filtering ->
-                    def attribute = filtering.properties.attributeFqn
-                    if(attribute in userDescriptorAttributes)
-                    {
-                        def newFilter = userFilters.collectMany {userFilterValue->
-                            userFilterValue.findResults { filter ->
-                                if(filter.properties.attributeFqn == attribute)
-                                {
-                                    return filter
-                                }
-                            }
-                        }
-                        filterValue = newFilter
-                    }
-                }
-                return filterValue
-            }
-            descriptorMap.filters = filters
+            descriptorMap.filters = putUserFiltersIntoBase(userFilters, filters, userDescriptorAttributes)
         }
         else if(userDescriptorAttributes - baseDescriptorAttributes && !(baseDescriptorAttributes - userDescriptorAttributes))
         {
             //иначе пользовательский покрыл все фильтры основного, то логично применить фильтры от пользовательского целиком
             descriptorMap = userDescriptorMap
         }
+        else if((userDescriptorAttributes - baseDescriptorAttributes) && (baseDescriptorAttributes - userDescriptorAttributes))
+        {
+            //в обоих случаях остались фильтры помимо пользовательского/основного
+            def filters = descriptorMap.filters
+            def userFilters = userDescriptorMap.filters
+            //помещаем в нужные базовые фильтры значения пользовательского фильтров и смешиваем их с пользовательскими
+            descriptorMap.filters = putUserFiltersIntoBase(userFilters, filters, userDescriptorAttributes) + userFilters
+            //убираем повторы
+            descriptorMap.filters.unique()
+        }
         return descriptorMap
+    }
+
+    /**
+     * Метод по смешению атрибутов базового и пользовательского фильтра
+     * @param userFilters - словарь с настройками базового фильтра
+     * @param filters - словарь с настройками основного фильтра
+     * @param userDescriptorAttributes - атрибуты пользовательского дескриптора
+     * @return базовый фильтр со значениями пользовательского в нужных атрибутах
+     */
+    List<List> putUserFiltersIntoBase(def userFilters, def filters, List userDescriptorAttributes)
+    {
+        return filters.collect { filterValue->
+            filterValue.each { filtering ->
+                def attribute = filtering.properties.attributeFqn
+                if(attribute in userDescriptorAttributes)
+                {
+                    def newFilter = userFilters.collectMany {userFilterValue->
+                        userFilterValue.findResults { filter ->
+                            if(filter.properties.attributeFqn == attribute)
+                            {
+                                return filter
+                            }
+                        }
+                    }
+                    filterValue = newFilter
+                }
+            }
+            return filterValue
+        }
     }
 
     /**
@@ -2524,12 +2543,6 @@ class DashboardDataSetService
             List notAggregated = data.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }  //ищем агрегации n/a
             List requestGroups = updateNotAggregatedToGroups(notAggregated) + data.groups
             Source source = data.source
-            int dtIntervalAttributeIdx = requestGroups.findIndexOf {Attribute.getAttributeType(it.attribute) == AttributeType.DT_INTERVAL_TYPE}
-            dtIntervalAttributeIdx = dtIntervalAttributeIdx > -1 ? dtIntervalAttributeIdx + listIdsOfNormalAggregations.size() : dtIntervalAttributeIdx
-            if(dtIntervalAttributeIdx > -1)
-            {
-                list.removeIf{ !it[dtIntervalAttributeIdx] }
-            }
             return list.collect { el ->
                 def groups = el //резервируем значения для групп
                 def elAggregations = el[listIdsOfNormalAggregations] //резервируем значения для агрегаций
@@ -2646,7 +2659,7 @@ class DashboardDataSetService
                         //прийти в качестве значения может, как UUID, так и просто id
                         if (parameter.attribute?.attrChains()?.last()?.code == 'UUID' && !fromNA)
                         {
-                            value = value.split('\\$', 2).last() ?: value
+                            value = value.toString().split('\\$', 2).last() ?: value
                         }
                         if (diagramType == DiagramType.TABLE)
                         {
@@ -3956,7 +3969,16 @@ class DashboardDataSetService
 
         if (groupFormat && changeLabels)
         {
+            Boolean labelsHaveEmptyValue = 'Не заполнено' in labels
+            if(labelsHaveEmptyValue)
+            {
+                labels -= 'Не заполнено'
+            }
             labels = getLabelsInCorrectOrder(labels, groupFormat, format, reverseLabels)
+            if(labelsHaveEmptyValue)
+            {
+                labels += 'Не заполнено'
+            }
         }
 
         Set diagramLabels = transposeSets.withIndex().collectMany { set, i ->
@@ -4337,10 +4359,20 @@ class DashboardDataSetService
 
         if(parameterWithDate && !aggregationOrderWithDates)
         {
-            tempResult = getLabelsInCorrectOrder(tempResult as Set,
+            def labels = tempResult as Set
+            Boolean labelsHaveEmptyValue = 'Не заполнено' in labels
+            if(labelsHaveEmptyValue)
+            {
+                labels -= 'Не заполнено'
+            }
+            tempResult = getLabelsInCorrectOrder(labels,
                                                  parameterWithDate.type as String,
                                                  parameterWithDate.format,
                                                  parameterOrderWithDates != 'ASC').toList()
+            if(labelsHaveEmptyValue)
+            {
+                tempResult += 'Не заполнено'
+            }
         }
         //находим соответсвия данных с теми группами, что получили, и выводим их
         return tempResult.collectMany { value -> currentRes.findAll {it[paramIndex] == value} }
