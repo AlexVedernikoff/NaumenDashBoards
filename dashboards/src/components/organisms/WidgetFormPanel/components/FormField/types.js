@@ -3,5 +3,6 @@ import type {InjectedProps} from 'components/organisms/WidgetForm/HOCs/withError
 import type {Props as FieldProps} from 'components/molecules/FormField/types';
 
 export type Props = FieldProps & InjectedProps & {
-	path: string
+	path: ?string,
+	paths: ?string[]
 };

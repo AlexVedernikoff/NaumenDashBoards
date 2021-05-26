@@ -8,18 +8,30 @@ export class FormField extends PureComponent<Props> {
 	fieldRef = createRef();
 
 	componentDidUpdate () {
-		const {errors, onSetErrorFocusRef, path} = this.props;
+		const {errors, onSetErrorFocusRef, path, paths} = this.props;
 
-		if (errors[path]) {
+		if (
+			(path && errors[path])
+			|| (paths && paths.some(path => errors[path]))
+		) {
 			onSetErrorFocusRef(this.fieldRef);
 		}
 	}
 
 	render () {
-		const {errors, forwardedRef, path, ...props} = this.props;
+		const {errors, forwardedRef, path, paths, ...props} = this.props;
 		const ref = forwardedRef ?? this.fieldRef;
+		let error = '';
 
-		return <Component {...props} error={errors[path]} forwardedRef={ref} />;
+		if (path) {
+			error = errors[path];
+		}
+
+		if (paths) {
+			error = paths.filter(path => errors[path]).map(path => errors[path]).join('; ');
+		}
+
+		return <Component {...props} error={error} forwardedRef={ref} />;
 	}
 }
 
