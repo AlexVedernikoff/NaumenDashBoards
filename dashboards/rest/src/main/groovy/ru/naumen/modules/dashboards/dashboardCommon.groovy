@@ -162,6 +162,8 @@ enum Comparison
     BETWEEN,
     IN,
     CONTAINS,
+    TODAY,
+    LAST_N_DAYS,
     NOT_CONTAINS,
     NOT_CONTAINS_AND_NOT_NULL,
     NOT_EQUAL_AND_NOT_NULL,
@@ -341,6 +343,13 @@ enum ColorType
     AUTO,
     CUSTOM
 }
+
+enum FontStyle
+{
+    BOLD,
+    ITALIC,
+    UNDERLINE
+}
 //endregion
 
 @InjectApi
@@ -359,6 +368,15 @@ class DashboardUtils
      * Неймспейс для хранения источников
      */
     static final String SOURCE_NAMESPACE = 'sources'
+
+    /**
+     *
+     */
+    static final Integer maxValuesCount = 40000
+    /**
+     *
+     */
+    static final String overflowDataException = 'Слишком большое количество данных'
 
     /**
      * Метод получения минимальной даты из Бд
@@ -753,6 +771,21 @@ class DashboardUtils
             return filter
         }
     }
+
+    /**
+     * Метод для получения ключа формата для шаблона динамического атрибута
+     * @param templateUUID - ключ шаблона
+     * @return ключ формата
+     */
+    static String getFormatKeyForTemplateOfDynamicAttribute(String templateUUID)
+    {
+        def template = getApi().utils.get(templateUUID)
+        String attrFormatToFind = template.visor
+            ? "${template.metaClass}_${template.visor.code}"
+            : "${template.metaClass}"
+        attrFormatToFind = attrFormatToFind.replace('_unitsLinks', '')
+        return getModules().dynamicFields.getAttrToTotalValueMap()[attrFormatToFind]
+    }
 }
 
 //region КЛАССЫ
@@ -844,6 +877,7 @@ class AttributeType {
     static final String LOCALIZED_TEXT_TYPE ='localizedText'
     static final String BOOL_TYPE = 'bool'
     static final String TOTAL_VALUE_TYPE = 'totalValue'
+    static final String VALUE_TYPE = 'value'
 }
 
 /**
@@ -1128,6 +1162,37 @@ class ObjectMarshaller
      * Метод для парсинга значения
      * @param value - значение целиком
      * @return [значение объекта, uuid объекта]
+     */
+    static List<String> unmarshal(String value)
+    {
+        return value ? value.tokenize(delimiter) : []
+    }
+}
+/**
+ * Класс для преобразования/получения значения uuid-а шаблона динамического атрибута для вывода кода дашборда
+ */
+class TotalValueMarshaller
+{
+    /**
+     * делитель для значения (код атрибута _ uuid шаблона)
+     */
+    static String delimiter = '_'
+
+    /**
+     * Метод получения итогового кода для динамического атрибута
+     * @param code - код атрибута, который нужен в запросе
+     * @param uuid - uuid шаблона атрибута
+     * @return  код атрибута delimiter uuid шаблона атрибута
+     */
+    static String marshal(String code, String uuid)
+    {
+        return "${code}${delimiter}${uuid}"
+    }
+
+    /**
+     * Метод для парсинга кода атрибута с шаблоном
+     * @param value - значение целиком
+     * @return [код атрибута, uuid шаблона атрибута]
      */
     static List<String> unmarshal(String value)
     {
@@ -1473,7 +1538,13 @@ class JacksonUtils
      */
     static Collection<String> getFieldNames(TreeNode self)
     {
-        return self.fieldNames().toList()
+        ObjectMapper mapper = new ObjectMapper()
+        if(fields[fieldNameToChange] && (fields[fieldNameToChange].find() instanceof String || fields[fieldNameToChange].find() instanceof TextNode))
+        {
+            fields[fieldNameToChange] = fields[fieldNameToChange].findResults { it ? mapper.readTree(it) : null }
+        }
+        fields[fieldNameToChange] = mapper.convertValue(fields[fieldNameToChange], clazz)
+        return fields
     }
 
     /**
@@ -1904,6 +1975,7 @@ class NewSourceValue
     /**
      * Опции для фильтрации обычного пользователя на виджете
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Collection<WidgetFilterOption> widgetFilterOptions
 
     /**
@@ -2043,6 +2115,11 @@ class Header implements IHasFontSettings
      * Цвет текста
      */
     String fontColor = '#323232'
+    /**
+     * Стиль текста
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    FontStyle fontStyle
     /**
      * Название графика
      */
@@ -2274,7 +2351,7 @@ class Group
             if(group.way == Way.CUSTOM)
             {
                 def groupKey = group.data
-                def groupInfo = customGroups.find { it.id == groupKey }
+                def groupInfo = customGroups?.find { it?.id == groupKey }
                 group.data = groupInfo
             }
         }

@@ -53,23 +53,39 @@ class QueryWrapper implements CriteriaWrapper
 {
     private ApiCriteria criteria
 
-    protected QueryWrapper(Source source)
+    private ApiCriteria totalValueCriteria
+
+    protected QueryWrapper(Source source, String templateUUID)
     {
-        this.criteria = buildCriteria(source)
+        if(templateUUID)
+        {
+            def w = api.whereClause
+            def sc = api.selectClause
+            this.criteria = this.totalValueCriteria = buildCriteria(source)
+            String totalValueFormatKey = DashboardUtils.getFormatKeyForTemplateOfDynamicAttribute(templateUUID)
+            this.totalValueCriteria = this.totalValueCriteria
+                                          .addSource(totalValueFormatKey)
+                                          .add(w.eq(sc.property(this.criteria, 'id'), sc.property('linkedSc.id')))
+        }
+        else
+        {
+            this.criteria = buildCriteria(source)
+        }
     }
 
-    static QueryWrapper build(Source source)
+    static QueryWrapper build(Source source, String templateUUID = '')
     {
-        return new QueryWrapper(source)
+        return new QueryWrapper(source, templateUUID)
     }
 
-    QueryWrapper aggregate(AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null)
+    QueryWrapper aggregate(ApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
         def attribute = parameter.attribute
         Closure aggregation = getAggregation(aggregationType)
         String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+
         IApiCriteriaColumn column = sc.property(attributeCodes)
         if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
             aggregationType == Aggregation.AVG)
@@ -90,11 +106,20 @@ class QueryWrapper implements CriteriaWrapper
             Closure sorting = getSorting(sortingType)
             column.with(aggregation).with(sorting).with(criteria.&addOrder)
         }
+
+        if(totalValueCriteria)
+        {
+            this.totalValueCriteria = criteria
+        }
+        else
+        {
+            this.criteria = criteria
+        }
         return this
     }
 
     //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
-    QueryWrapper percentAggregate(AggregationParameter parameter, int totalCount)
+    QueryWrapper percentAggregate(ApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, int totalCount)
     {
         def attribute = parameter.attribute
         def sc = api.selectClause
@@ -118,6 +143,14 @@ class QueryWrapper implements CriteriaWrapper
                 column.with(sorting).with(criteria.&addOrder)
             }
         }
+        if(totalValueCriteria)
+        {
+            this.totalValueCriteria = criteria
+        }
+        else
+        {
+            this.criteria = criteria
+        }
         return this
     }
 
@@ -127,9 +160,10 @@ class QueryWrapper implements CriteriaWrapper
      * @param diagramType - тип диаграммы
      * @return тело запрос с агрегацией N/A
      */
-    QueryWrapper noneAggregate(parameter, DiagramType diagramType)
+    QueryWrapper noneAggregate(ApiCriteria criteria, Boolean totalValueCriteria, def parameter, DiagramType diagramType)
     {
         def attribute = parameter.attribute
+        String sortingType = parameter.sortingType
         def sc = api.selectClause
         String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(attributeCodes)
@@ -188,6 +222,11 @@ class QueryWrapper implements CriteriaWrapper
             criteria.addGroupColumn(column)
             criteria.addGroupColumn(sc.property(metaCaseId))
             criteria.addColumn(column)
+            if (sortingType)
+            {
+                Closure sorting = getSorting(sortingType)
+                column.with(sorting).with(criteria.&addOrder)
+            }
             return this
         }
 
@@ -198,11 +237,24 @@ class QueryWrapper implements CriteriaWrapper
             column = sc.columnDivide(column, sc.constant(hourInterval))
             criteria.addGroupColumn(column)
             criteria.addColumn(column)
+            if (sortingType)
+            {
+                Closure sorting = getSorting(sortingType)
+                column.with(sorting).with(criteria.&addOrder)
+            }
             return this
         }
 
         criteria.addColumn(column)
         criteria.addGroupColumn(column)
+        if(totalValueCriteria)
+        {
+            this.totalValueCriteria = criteria
+        }
+        else
+        {
+            this.criteria = criteria
+        }
         return this
     }
 
@@ -295,7 +347,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param diagramType - тип диаграммы
      * @return текущий запрос в БД с добавленной группой
      */
-    QueryWrapper processGroup(QueryWrapper wrapper, GroupParameter parameter, DiagramType diagramType, Source source)
+    QueryWrapper processGroup(QueryWrapper wrapper, ApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source)
     {
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
@@ -307,17 +359,17 @@ class QueryWrapper implements CriteriaWrapper
             if(startMinDate)
             {
                 startMinDate = new Date(startMinDate.time).clearTime()
-                wrapper.sevenDaysGroup(parameter, startMinDate)
+                wrapper.sevenDaysGroup(criteria, totalValueCriteria, parameter, startMinDate)
             }
             else
             {
                 parameter.type = GroupType.OVERLAP
-                wrapper.group(parameter, diagramType)
+                wrapper.group(criteria, totalValueCriteria, parameter, diagramType)
             }
         }
         else
         {
-            wrapper.group(parameter, diagramType)
+            wrapper.group(criteria, totalValueCriteria, parameter, diagramType)
         }
         return wrapper
     }
@@ -328,10 +380,11 @@ class QueryWrapper implements CriteriaWrapper
      * @param requestData - данные для запроса
      * @param parameter - параметр с агрегацией для добавления
      * @param diagramType - тип диаграммы
-     * @param onlyFilled - флаг на получение только заполненных данных
      * @return текущий запрос в БД с добавленной агрегацией
      */
-    QueryWrapper processAggregation(QueryWrapper wrapper, RequestData requestData, AggregationParameter parameter, DiagramType diagramType, Integer top, Boolean onlyFilled)
+    QueryWrapper processAggregation(QueryWrapper wrapper, ApiCriteria criteria, Boolean totalValueCriteria,
+                                    RequestData requestData, AggregationParameter parameter,
+                                    DiagramType diagramType, Integer top, Boolean onlyFilled)
     {
         if (parameter.type == Aggregation.PERCENT)
         {
@@ -353,24 +406,24 @@ class QueryWrapper implements CriteriaWrapper
             def wrappedQuery = QueryWrapper.build(requestData.source)
             if (filterParameter && onlyFilled)
             {
-                wrappedQuery.filtering([filterParameter])
+                wrappedQuery.filtering(criteria, totalValueCriteria, [filterParameter])
             }
-            int totalCount = wrappedQuery.aggregate(totalParameter, false, top)
+            int totalCount = wrappedQuery.aggregate(criteria, totalValueCriteria, totalParameter, false, top)
                                          .result.head().head()
 
-            wrapper.percentAggregate(parameter, totalCount)
+            wrapper.percentAggregate(criteria, totalValueCriteria, parameter, totalCount)
         }
         else if (parameter.type == Aggregation.NOT_APPLICABLE)
         {
-            wrapper.noneAggregate(parameter, diagramType)
+            wrapper.noneAggregate(criteria, totalValueCriteria, parameter, diagramType)
         }
         else
         {
-            wrapper.aggregate(parameter, false, top)
+            wrapper.aggregate(criteria, totalValueCriteria, parameter, false, top)
         }
     }
 
-    QueryWrapper group(GroupParameter parameter, DiagramType diagramType)
+    QueryWrapper group(ApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType)
     {
         def sc = api.selectClause
         GroupType groupType = parameter.type
@@ -408,11 +461,13 @@ class QueryWrapper implements CriteriaWrapper
                 {
 
                     def lastColumn =  sc.property(
-                        LinksAttributeMarshaller.marshal(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'),
-                                                         DashboardQueryWrapperUtils.UUID_CODE))
+                        LinksAttributeMarshaller.marshal(
+                            attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'),
+                            DashboardQueryWrapperUtils.UUID_CODE))
                     if(lastParameterAttributeType == AttributeType.META_CLASS_TYPE)
                     {
-                        lastColumn = sc.property(attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'))
+                        lastColumn = sc.property(
+                            attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'))
                     }
                     column = sc.concat(
                         sc.property(attributeCodes),
@@ -731,11 +786,19 @@ class QueryWrapper implements CriteriaWrapper
                 break
             default: throw new IllegalArgumentException("Not supported group type: $groupType")
         }
+        if(totalValueCriteria)
+        {
+            this.totalValueCriteria = criteria
+        }
+        else
+        {
+            this.criteria = criteria
+        }
         return this
     }
 
     //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
-    QueryWrapper sevenDaysGroup(GroupParameter parameter, Date minStartDate)
+    QueryWrapper sevenDaysGroup(ApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, Date minStartDate)
     {
         def attribute = parameter.attribute
         def sc = api.selectClause
@@ -750,21 +813,29 @@ class QueryWrapper implements CriteriaWrapper
             Closure sorting = getSorting(sortingType)
             weekNumberColumn.with(sorting).with(criteria.&addOrder)
         }
+        if(totalValueCriteria)
+        {
+            this.totalValueCriteria = criteria
+        }
+        else
+        {
+            this.criteria = criteria
+        }
         return this
     }
 
-    QueryWrapper filtering(List<FilterParameter> filters)
+    QueryWrapper filtering(ApiCriteria criteria, Boolean totalValueCriteria,List<FilterParameter> filters)
     {
         filters.collect { parameter ->
             def attribute = parameter.attribute as Attribute
             Collection attrChains = attribute.attrChains()
             String code = attrChains*.code.join('.')
-            if(Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
+            if(attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
             {
                 attribute?.attrChains()?.last()?.ref = new Attribute(code: 'title', type: 'string')
             }
             String columnCode = attribute.attrChains()*.code.join('.')
-            String parameterFqn = attribute.metaClassFqn
+            String parameterFqn = attribute.attrChains().last().metaClassFqn
             if (attribute.attrChains()*.code.any { it == 'id' })
             {
                 columnCode = columnCode.replace('id', DashboardQueryWrapperUtils.UUID_CODE)
@@ -823,9 +894,17 @@ class QueryWrapper implements CriteriaWrapper
                               .with(api.filters.&not)
                 case Comparison.STATE_TITLE_CONTAINS:
                     List fqns = getFqns(parameterFqn)
+                    if(attrChains.size() > 1)
+                    {
+                        criteria = criteria.addLeftJoin(attribute.code)
+                    }
                     return api.filters.stateTitleLike(fqns, parameter.value)
                 case Comparison.STATE_TITLE_NOT_CONTAINS:
                     List fqns = getFqns(parameterFqn)
+                    if(attrChains.size() > 1)
+                    {
+                        criteria.addLeftJoin(attribute.code)
+                    }
                     return api.filters.stateTitleLike(fqns, parameter.value).with(api.filters.&not)
                 case Comparison.METACLASS_TITLE_CONTAINS:
                     return api.filters.inCases(api.metainfo.getTypes(parameterFqn).findAll{
@@ -835,12 +914,23 @@ class QueryWrapper implements CriteriaWrapper
                     return api.filters.inCases(api.metainfo.getTypes(parameterFqn).findAll{
                         !it.title.contains(parameter.value)
                     }*.fqnCase as String[])
+                case Comparison.TODAY:
+                    return api.filters.today(columnCode)
+                case Comparison.LAST_N_DAYS:
+                    return api.filters.lastNDays(columnCode, parameter.value)
                 default: throw new IllegalArgumentException("Not supported filter type: $type!")
-
             }
         }.with {
             api.filters.or(*it)
         }.with(criteria.&add)
+        if(totalValueCriteria)
+        {
+            this.totalValueCriteria = criteria
+        }
+        else
+        {
+            this.criteria = criteria
+        }
         return this
     }
 
@@ -964,13 +1054,7 @@ class QueryWrapper implements CriteriaWrapper
      */
     String[] prepareIntervalTypeColumnCode(Attribute attribute,String[] attributeCodes)
     {
-        Boolean attrIsSystem = api.metainfo.getMetaClass(attribute.metaClassFqn).getAttribute(attribute.code).isHardcoded()
-        String typeField = 'intervalName'
-        if(attrIsSystem)
-        {
-            typeField = 'interval'
-        }
-        return attributeCodes - 'ms' + typeField
+        return attributeCodes - 'ms' + 'interval'
     }
 }
 
@@ -990,11 +1074,13 @@ class DashboardQueryWrapperUtils
      * @return результат выборки
      */
     static List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
-                              Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
+                              Boolean ignoreParameterLimit = false, String templateUUID = '', PaginationSettings paginationSettings = null)
     {
         validate(requestData)
         validate(requestData.source)
-        def wrapper = QueryWrapper.build(requestData.source)
+        def wrapper = QueryWrapper.build(requestData.source, templateUUID)
+        def criteria = wrapper.criteria
+        Boolean totalValueCriteria = false
 
         requestData.aggregations.each { validate(it as AggregationParameter) }
         //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
@@ -1018,27 +1104,69 @@ class DashboardQueryWrapperUtils
             )
         }
 
-        wrapper.setCases(requestData.source.classFqn, diagramType, clonedAggregations.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
+        wrapper.setCases(requestData.source.classFqn,
+                         diagramType,
+                         clonedAggregations.attribute?.findAll{!(it.code.contains(AttributeType.TOTAL_VALUE_TYPE) ||
+                                                                 it.code.contains(AttributeType.VALUE_TYPE)) }?.sourceCode?.unique())
 
         clonedAggregations.each {
             prepareAttribute(it.attribute as Attribute, true)
-            wrapper.processAggregation(wrapper, requestData, it as AggregationParameter, diagramType, top, onlyFilled)
+            if(templateUUID && (it.type == Aggregation.PERCENT || it.attribute.code.contains(AttributeType.VALUE_TYPE)))
+            {
+                criteria = wrapper.totalValueCriteria
+                totalValueCriteria = true
+            }
+            else
+            {
+                criteria = wrapper.criteria
+                totalValueCriteria = false
+            }
+            wrapper.processAggregation(wrapper, criteria, totalValueCriteria, requestData, it as AggregationParameter, diagramType, top, onlyFilled)
         }
 
-        wrapper.setCases(requestData.source.classFqn, diagramType, clonedGroups.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode?.unique())
+        wrapper.setCases(requestData.source.classFqn, diagramType,
+                         clonedGroups.attribute?.findAll{ !(it.code.contains(AttributeType.TOTAL_VALUE_TYPE) ||
+                                                            it.code.contains(AttributeType.VALUE_TYPE))}?.sourceCode?.unique())
 
         clonedGroups.each {
             prepareAttribute(it.attribute as Attribute)
-            wrapper.processGroup(wrapper, it as GroupParameter, diagramType, requestData.source)
+            if(templateUUID && it.attribute.code.contains(AttributeType.VALUE_TYPE))
+            {
+                criteria = wrapper.totalValueCriteria
+                totalValueCriteria = true
+            }
+            else
+            {
+                criteria = wrapper.criteria
+                totalValueCriteria = false
+            }
+            wrapper.processGroup(wrapper, criteria, totalValueCriteria, it as GroupParameter, diagramType, requestData.source)
         }
 
         Set filterAttributeSourceCodes = requestData.filters?.collectMany { filters ->
-            return filters*.attribute?.findAll{ !it.code.contains(AttributeType.TOTAL_VALUE_TYPE) }?.sourceCode
+            return filters*.attribute.findAll{ !(it.code.contains(AttributeType.TOTAL_VALUE_TYPE) ||
+                                                 it.code.contains(AttributeType.VALUE_TYPE) ||
+                                                 it.code.contains('linkTemplate'))}?.sourceCode
         }
 
         wrapper.setCases(requestData.source.classFqn, diagramType, filterAttributeSourceCodes?.toList())
 
-        requestData.filters.each { wrapper.filtering(it as List<FilterParameter>) }
+        requestData.filters.each {
+            if(templateUUID &&
+               it.attribute.code.any { it.contains(AttributeType.TOTAL_VALUE_TYPE) ||
+                                       it.contains(AttributeType.VALUE_TYPE) ||
+                                       it.contains('linkTemplate') })
+            {
+                criteria = wrapper.totalValueCriteria
+                totalValueCriteria = true
+            }
+            else
+            {
+                criteria = wrapper.criteria
+                totalValueCriteria = false
+            }
+            wrapper.filtering(criteria, totalValueCriteria, it as List<FilterParameter>)
+        }
 
         //Фильтрация по непустым атрибутам
         Set attributeSet = []
@@ -1056,7 +1184,17 @@ class DashboardQueryWrapperUtils
                 value: null
             )
         }.each {
-            wrapper.filtering([it])
+            if(templateUUID && it.attribute.code.contains(AttributeType.VALUE_TYPE))
+            {
+                criteria = wrapper.totalValueCriteria
+                totalValueCriteria = true
+            }
+            else
+            {
+                criteria = wrapper.criteria
+                totalValueCriteria = false
+            }
+            wrapper.filtering(criteria, totalValueCriteria, [it])
         }
 
         //при таких условиях в запросе придёт массив с 1 уровнем вложенности [v1, v2, v3,..]
@@ -1240,15 +1378,11 @@ class DashboardQueryWrapperUtils
         {
             attribute.attrChains().last().code = 'id'
         }
-        if (attributeCode.contains(AttributeType.TOTAL_VALUE_TYPE))
+        if (attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
         {
-            def (dynAttrCode, templateUUID) = attribute.code.split('_', 2)
-            attribute.code = dynAttrCode
-            attribute.attrChains().last().ref = new Attribute(
-                code: 'textValue',
-                type: 'string',
-                title: templateUUID
-            )
+            def (dynAttrCode, templateUUID) = TotalValueMarshaller.unmarshal(attribute.code)
+            attribute.code = AttributeType.VALUE_TYPE
+            attribute.title = templateUUID
         }
     }
 

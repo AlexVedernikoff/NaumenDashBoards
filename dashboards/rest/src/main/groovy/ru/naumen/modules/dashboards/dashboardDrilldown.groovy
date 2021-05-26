@@ -10,6 +10,7 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend.Attr
 import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
 import java.text.SimpleDateFormat
@@ -48,7 +49,6 @@ class DashboardDrilldownImpl implements DashboardDrilldown
 @Singleton
 class DashboardDrilldownService
 {
-
     /**
      * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
      * @param requestContent - параметры запроса
@@ -315,12 +315,13 @@ class Link
                 attr = Jackson.fromJsonString(attr, Attribute)
                 Collection<Collection> result = []
                 String attributeType = Attribute.getAttributeType(attr)
+                Boolean attrIsDynamic = attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
 
                 //выглядит костыльно, но это необходимо, чтобы обойти ситуацию,
                 // когда основной источник запроса - дочерний к classFqn,
                 // когда у нас сама диаграмма типа таблица
                 //и для дат это неприменимо
-                if (attr?.sourceCode && attr?.sourceCode != classFqn &&
+                if (!attrIsDynamic && attr?.sourceCode && attr?.sourceCode != classFqn &&
                     !(StateMarshaller.unmarshal(attr?.sourceCode, '$')?.last() in cases) &&
                     diagramType == DiagramType.TABLE &&
                     !(attr.type in AttributeType.DATE_TYPES))
@@ -384,7 +385,7 @@ class Link
 
                 def context = createContext(contextValue)
                 context.remove(GroupType.OVERLAP).each { value ->
-                    if (attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
+                    if (attrIsDynamic)
                     {
                         attr.code = AttributeType.TOTAL_VALUE_TYPE
                         result << [filterBuilder.OR(attr.code, 'notNull', null)]
@@ -394,6 +395,7 @@ class Link
                             property: AttributeType.TOTAL_VALUE_TYPE
                         )
                         def objects = findObjects(attr.ref, attr.property, value)
+                        checkValuesSize(objects)
                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
                     }
                     else
@@ -427,7 +429,7 @@ class Link
                                             if(attr.attrChains().count {it.type in AttributeType.LINK_TYPES} > 1)
                                             {
                                                 //двухуровневый ссылочный
-                                                objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last())
+                                                objects = findObjects(attr.ref,attr.property, LinksAttributeMarshaller.unmarshal(value).last())
                                             }
                                             else
                                             {
@@ -479,11 +481,43 @@ class Link
                 }
                 for (customSubGroupCondition in customSubGroupSet)
                 {
+                    if(attrIsDynamic)
+                    {
+                        String templateUUID = TotalValueMarshaller.unmarshal(attr.code).last()
+                        Source source = new Source(classFqn: classFqn, descriptor: descriptor)
+                        def orCondition = customSubGroupCondition.find()
+                        def data = orCondition?.find()?.data
+                        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID)
+                        def filters = mappingFilters(
+                            customSubGroupCondition as List<List>,
+                            attr,
+                            data instanceof Map ? data.title : data,
+                            "test"
+                        )
+                        def filterParam = filters?.find {it?.attribute?.code?.find() == 'value' }
+                        def wrapper = QueryWrapper.build(source, templateUUID)
+
+                        wrapper.totalValueCriteria.add(api.filters.attrValueEq('linkTemplate', templateUUID))
+                               .addColumn(api.selectClause.property('UUID'))
+                        wrapper.filtering(wrapper.totalValueCriteria, true, filterParam)
+
+                        def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                        checkValuesSize(uuids)
+                        filterBuilder.AND(
+                            filterBuilder.OR('totalValue', 'containsInSet', uuids)
+                        )
+                        continue
+                    }
                     switch (attributeType)
                     {
                         case AttributeType.DT_INTERVAL_TYPE:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
+                                    if(attr.ref)
+                                    {
+                                        def uuids = getValuesForRefAttrInCustomGroup(attr, it.data)
+                                        return filterBuilder.OR(attr.code, 'containsInSet', uuids)
+                                    }
                                     String condition = getFilterCondition(it.type as String)
                                     def interval = it.data as Map
                                     def value = interval
@@ -570,6 +604,13 @@ class Link
                             customSubGroupCondition.each { orCondition ->
                                 orCondition.each {
                                     String sourceCode = attr.sourceCode
+                                    if(attr.ref)
+                                    {
+                                        def uuids = getValuesForRefAttrInCustomGroup(attr, it.data)
+                                        return filterBuilder.AND(
+                                            filterBuilder.OR(attr.code, 'containsInSet', uuids)
+                                        )
+                                    }
                                     Closure buildStateFilter = { String code, String condition, String stateCode ->
                                         if(sourceCode.contains('$'))
                                         {
@@ -646,6 +687,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): null])
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -657,6 +699,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(null)])
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -669,6 +712,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -686,6 +730,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -703,6 +748,7 @@ class Link
                                             {
                                                 def lowValues = api.utils.find(lastAttr.property, ['title': op.like("%${value}%")])
                                                 def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
+                                                checkValuesSize(highValues)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -720,6 +766,7 @@ class Link
                                             {
                                                 def lowValues = api.utils.find(lastAttr.property, ['title': op.not("%${value}%")])
                                                 def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
+                                                checkValuesSize(highValues)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -736,6 +783,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -756,6 +804,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -776,6 +825,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -800,6 +850,7 @@ class Link
                                             {
                                                 values = values.collectMany{ value -> findObjects(attr.ref, attr.property, value)}
                                             }
+                                            checkValuesSize(values)
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'containsInSet',
@@ -809,6 +860,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, subjectUUID)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -836,6 +888,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -857,6 +910,11 @@ class Link
                         case AttributeType.TIMER_TYPES:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
+                                    if(attr.ref)
+                                    {
+                                        def uuids = getValuesForRefAttrInCustomGroup(attr, it.data)
+                                        return filterBuilder.OR(attr.code, 'containsInSet', uuids)
+                                    }
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'status_contains':
@@ -917,6 +975,11 @@ class Link
                             //кейс работы с фильтрами для статусов будет переделан, потому для метакласса кейс описан отдельно
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
+                                    if(attr.ref)
+                                    {
+                                        def uuids = getValuesForRefAttrInCustomGroup(attr, it.data)
+                                        return filterBuilder.OR(attr.code, 'containsInSet', uuids)
+                                    }
                                     switch (it.type.toLowerCase())
                                     {
                                         case 'contains':
@@ -983,23 +1046,14 @@ class Link
     private def getStateFilters(Attribute attribute, def value, def filterBuilder)
     {
         String sourceCode = attribute.attrChains().last().sourceCode
+        sourceCode -= '__Evt'
         String code = attribute.code
         def(title, state) = StateMarshaller.unmarshal(value, StateMarshaller.valueDelimiter)
 
         if(attribute.ref)
         {
-            def values = []
-            if(sourceCode.contains('$'))
-            {
-                values = findObjects(attribute.ref, sourceCode, state)
-            }
-            else
-            {
-                def cases = api.metainfo.getTypes(sourceCode).code
-                values = cases.collectMany {
-                    return findObjects(attribute.ref, it, state)
-                }
-            }
+            def values = getValuesForRefAttr(attribute, state)
+            checkValuesSize(values)
             return filterBuilder.AND(filterBuilder.OR(code, 'containsInSet', values))
         }
         if(sourceCode.contains('$'))
@@ -1014,6 +1068,52 @@ class Link
         )
     }
 
+    /**
+     * Метод получения данных из БД по атрибуту второго уровня
+     * @param attr - атрибут целиком
+     * @param DBvalue - значение, для фильтрации в БД
+     * @return список uuid-ов для атрибута первого уровня и фильтрации containsInSet
+     */
+    Collection getValuesForRefAttr(Attribute attr, def DBvalue)
+    {
+        def sc = api.selectClause
+        def criteria = descriptor
+            ? descriptor.with(api.listdata.&createListDescriptor).with(api.listdata.&createCriteria)
+            : api.db.createCriteria().addSource(classFqn)
+        criteria.addColumn(sc.property("${attr.code}.UUID"))
+                .add(api.filters.attrValueEq((Attribute.getAttributeType(attr) in AttributeType.TIMER_TYPES)
+                                                 ?  attr.attrChains().code.join('.') + '.statusCode'
+                                                 : attr.attrChains().code.join('.'), DBvalue))
+        return api.db.query(criteria).list()
+    }
+
+    /**
+     * Метод получения данныз из БД по атрибуту второго уровня, если на него настроена кастомная группировка
+     * @param attr - атрибут целиком
+     * @param data - данные о кастомной группировке
+     * @return список uuid-ов для атрибута первого уровня и фильтрации containsInSet
+     */
+    Collection getValuesForRefAttrInCustomGroup(Attribute attr, def data)
+    {
+        Source source = new Source(classFqn: classFqn, descriptor: descriptor)
+        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID)
+        def filters = mappingFilters(
+            customSubGroupCondition as List<List>,
+            attr,
+            'test',
+            'test'
+        )
+        def filterParam = filters?.find()
+        def wrapper = QueryWrapper.build(source)
+
+        wrapper.criteria.addColumn(api.selectClause.property("${attr.code}.UUID"))
+        wrapper.filtering(wrapper.criteria, false, filterParam)
+
+        def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+        checkValuesSize(uuids)
+        return uuids
+    }
+
     private def getOrFilter(String type, Attribute attr, def value, def filterBuilder)
     {
         //TODO: хорошему нужно вынести все эти методы в enum. Можно прям в этом модуле
@@ -1024,21 +1124,46 @@ class Link
         // "backTimerDeadLineContains", "titleContains", "titleNotContains", "containsWithRemoved",
         // "notContainsWithRemoved", "containsUser", "containsSubject", "containsUserAttribute", "containsSubjectAttribute"
         String code = attr.code
-        if(attr.ref)
-        {
-            //пришли из ссылочного атрибута, возможная базовая обработка
-            def values = []
-            if(!(type in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE, AttributeType.TIMER_TYPES, AttributeType.BOOL_TYPE]))
-            {
-                values = findObjects(attr.ref, attr.property, value)
-                return filterBuilder.OR(attr.code, 'containsInSet', values)
-            }
-        }
         if (value == 'Не заполнено' || value == 'EMPTY')
         {
             return filterBuilder.OR(code, 'null', null)
         }
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        if(attr.ref)
+        {
+            //пришли из ссылочного атрибута
+            def lastAttr = attr.attrChains().last()
+            code = lastAttr.code
+            def values = []
+            switch (type)
+            {
+                case AttributeType.META_CLASS_TYPE:
+                    def DBvalue = MetaClassMarshaller.unmarshal(value).last()
+                    values = getValuesForRefAttr(attr, DBvalue)
+                    break
+                case AttributeType.DT_INTERVAL_TYPE:
+                    def (intervalValue, intervalType) = DtIntervalMarshaller.unmarshal(value.find())
+                    intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
+                    def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
+                    values = getValuesForRefAttr(attr, interval)
+                    break
+                case AttributeType.TIMER_TYPES:
+                    String statusCode = TimerStatus.getByName(value)
+                    values = getValuesForRefAttr(attr, statusCode)
+                    break
+                case AttributeType.BOOL_TYPE:
+                    if (!value.isInteger()) {
+                        value = value.toLowerCase() == 'да' ? '1' : '0'
+                    }
+                    values = findObjects(attr.ref, attr.property, value)
+                    break
+                default:
+                    values = findObjects(attr.ref, attr.property, value)
+                    break
+            }
+            checkValuesSize(values)
+            return filterBuilder.OR(attr.code, 'containsInSet', values)
+        }
         switch (type)
         {
             case AttributeType.META_CLASS_TYPE:
@@ -1062,6 +1187,155 @@ class Link
             default:
                 return filterBuilder.OR(code, 'contains', value)
         }
+    }
+
+    /**
+     * Метод проверки данных на возможный перегруз количества информации для фильтра containsInSet
+     * @param values - данные, полученные при поиске
+     */
+    private void checkValuesSize(def values)
+    {
+        if(values?.size() > DashboardUtils.maxValuesCount)
+        {
+            throw new Exception("${DashboardUtils.overflowDataException}")
+        }
+    }
+
+    /**
+     * Метод подготовки фильтра для запроса в БД
+     * @param filter - исходных фильтр
+     * @param attr - атрибут, по которому будет запрос
+     * @param value - значение фильтрации
+     * @return правильный фильтр для запроса
+     */
+    String prepareFilter(String filter, def attr, def value = null)
+    {
+        switch(filter)
+        {
+            case 'STATUS_CONTAINS':
+            case 'TITLE_CONTAINS': return Attribute.getAttributeType(attr) == AttributeType.STATE_TYPE ? 'STATE_TITLE_CONTAINS' : 'CONTAINS'
+            case 'STATUS_NOT_CONTAINS':
+            case 'TITLE_NOT_CONTAINS': return Attribute.getAttributeType(attr) == AttributeType.STATE_TYPE ? 'STATE_TITLE_NOT_CONTAINS' : 'NOT_CONTAINS'
+            case 'CONTAINS': return Attribute.getAttributeType(attr) == AttributeType.STATE_TYPE ? 'EQUAL': filter
+            case 'NOT_CONTAINS': return Attribute.getAttributeType(attr) == AttributeType.STATE_TYPE ? 'NOT_EQUAL' : filter
+            case 'EMPTY': return 'IS_NULL'
+            case 'NOT_EMPTY': return 'NOT_NULL'
+            case 'CONTAINS_INCLUDING_ARCHIVAL': return 'EQUAL_REMOVED'
+            case 'NOT_CONTAINS_INCLUDING_ARCHIVAL' : return 'NOT_EQUAL_REMOVED'
+            case 'CONTAINS_ANY':
+            case 'CONTAINS_INCLUDING_NESTED': return Attribute.getAttributeType(attr) == AttributeType.META_CLASS_TYPE ? 'CONTAINS' : 'IN'
+            case 'NOT_EQUAL_NOT_EMPTY' : return 'NOT_EQUAL_AND_NOT_NULL'
+            case 'NEAR':
+            case 'EXPIRES_BETWEEN': return 'BETWEEN'
+            case 'EXPIRATION_CONTAINS': return value == 'EXCEED' ? 'CONTAINS' : 'NOT_CONTAINS'
+            case 'LAST': return 'LAST_N_DAYS'
+            case 'EQUAL_CURRENT_OBJECT':
+            case 'CONTAINS_CURRENT_OBJECT': return 'EQUAL'
+            default: return filter
+        }
+    }
+
+    /**
+     * Метод преобразования значения фильтрации к правильному виду
+     * @param data - текущие данные фильтрации
+     * @param attr - атрибут, по которому будет запрос
+     * @param filterType - текущий фильтр
+     * @return правильное значение для запроса
+     */
+    def prepareValue(def data, Attribute attr, String filterType, def subjectUUID)
+    {
+        String attributeType = Attribute.getAttributeType(attr)
+        def value
+
+        def start
+        def end
+
+        if(data instanceof Map)
+        {
+            if(data.uuid)
+            {
+                value = api.utils.get(data.uuid)
+            }
+            else if(data.startDate || data.endDate)
+            {
+                if(data.startDate)
+                {
+                    String dateFormat = DashboardUtils.getDateFormatByDate(data.startDate)
+                    start = Date.parse(dateFormat, data.startDate as String)
+                }
+                else
+                {
+                    Date minDate = DashboardUtils.getMinDate(attr.code, attr.sourceCode)
+                    start = new Date(minDate.time).clearTime()
+                }
+                if (data.endDate)
+                {
+                    String dateFormat = DashboardUtils.getDateFormatByDate(data.endDate)
+                    end = Date.parse(dateFormat, data.endDate as String)
+                }
+                else
+                {
+                    end = new Date().clearTime()
+                }
+                value = attributeType == AttributeType.TIMER_TYPES ? [start.getTime(), end.getTime()] : [start, end]
+            }
+        }
+        else if(data instanceof String)
+        {
+            value = data
+        }
+
+        if(filterType == 'CONTAINS_INCLUDING_NESTED')
+        {
+            def nestedVaues =  api.utils.getNested(value)
+            value = [value, *nestedVaues]
+        }
+        if(filterType in ['EQUAL_CURRENT_OBJECT', 'CONTAINS_CURRENT_OBJECT'])
+        {
+            value = api.utils.get(subjectUUID)
+        }
+        if((attributeType in [AttributeType.INTEGER_TYPE, AttributeType.DOUBLE_TYPE]) || (attributeType in AttributeType.DATE_TYPES && filterType == 'LAST'))
+        {
+            if(attributeType == AttributeType.INTEGER_TYPE || attributeType in AttributeType.DATE_TYPES)
+            {
+                value = value as Long
+            }
+            else
+            {
+                value = value as Double
+            }
+        }
+        if(attributeType == AttributeType.DT_INTERVAL_TYPE)
+        {
+            value = value
+                ? api.types.newDateTimeInterval([value.value as long, value.type as String])
+                : null
+        }
+        if(attributeType == AttributeType.TIMER_TYPES && filterType == 'EXPIRATION_CONTAINS')
+        {
+            value = 'e'
+        }
+        if(attributeType in AttributeType.DATE_TYPES && filterType == 'NEAR')
+        {
+            def count = value
+            start = Calendar.instance.with {
+              set(HOUR_OF_DAY, 0)
+              set(MINUTE, 0)
+              set(SECOND, 0)
+              set(MILLISECOND, 0)
+              getTime()
+            }
+            end = Calendar.instance.with {
+            set(HOUR_OF_DAY, 23)
+            set(MINUTE, 59)
+            set(SECOND, 59)
+            set(MILLISECOND, 999)
+            add(DAY_OF_MONTH, count)
+            getTime()
+            }
+            value = [start, end]
+        }
+        return value
     }
 
     /**
@@ -1335,6 +1609,7 @@ class Link
                                      type: 'string',
                                      property: AttributeType.TOTAL_VALUE_TYPE)
             def objects = findObjects(attr.ref, attr.property, value)
+            checkValuesSize(objects)
             filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', objects))
         }
         else
