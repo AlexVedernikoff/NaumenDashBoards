@@ -4,6 +4,7 @@ import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types'
 import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
+	isPersonalDashboard: boolean,
 	saving: boolean,
 	widgets: Array<Widget>
 };
