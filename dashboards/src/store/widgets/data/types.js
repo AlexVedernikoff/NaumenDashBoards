@@ -173,6 +173,7 @@ export type ChartSorting = {
 };
 
 export type DataLabels = {
+	disabled: boolean,
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number,

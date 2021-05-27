@@ -309,7 +309,7 @@ const DEFAULT_HEADER_SETTINGS: Header = {
 	useName: true
 };
 
-// Свыше - предлагаем отключить отображение ???
+// Лимит на отображение меток на графике
 const DATA_LABELS_LIMIT = 250;
 
 // Лимит виджетов на дашборде

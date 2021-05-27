@@ -61,6 +61,7 @@ const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 		showName: false
 	},
 	dataLabels: {
+		disabled: false,
 		fontColor: DEFAULT_DATA_LABEL_COLOR,
 		fontFamily: FONT_FAMILIES[0],
 		fontSize: 14,

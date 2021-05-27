@@ -13,7 +13,7 @@ import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class DataLabelsBox extends PureComponent<Props> {
 	componentDidUpdate (prevProps: Props) {
-		const {name, onChange, value, widget} = this.props;
+		const {value, widget} = this.props;
 		// $FlowFixMe[prop-missing]
 		const {dataLabels} = widget;
 		// $FlowFixMe[prop-missing]
@@ -21,14 +21,31 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 		// SMRMEXT-11965 после изменения dataLabels.show в виджете редакса, сбрасываем его и в форме редактирования
 		if (dataLabels && prevDataLabels) {
-			const {show: curShow} = dataLabels;
-			const {show: prevShow} = prevDataLabels;
+			const {disabled: currDisabled, show: currShow} = dataLabels;
+			const {disabled: prevDisabled, show: prevShow} = prevDataLabels;
 
-			if (curShow !== prevShow && curShow !== value.show) {
-				onChange(name, {
-					...value,
-					show: curShow
-				});
+			if (currShow !== prevShow && currShow !== value.show) {
+				this.change('show', currShow);
+			}
+
+			if (currDisabled !== prevDisabled && currDisabled !== value.disabled) {
+				this.change('disabled', currDisabled);
+			}
+		}
+	}
+
+	componentDidMount () {
+		const {value, widget} = this.props;
+		// $FlowFixMe[prop-missing]
+		const {dataLabels} = widget;
+
+		if (dataLabels) {
+			if (value.show !== dataLabels.show) {
+				this.change('show', dataLabels.show);
+			}
+
+			if (value.disabled !== dataLabels.disabled) {
+				this.change('disabled', dataLabels.disabled);
 			}
 		}
 	}
@@ -46,6 +63,18 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
+	renderMessage = () => {
+		const {disabled} = this.props.value;
+
+		if (disabled) {
+			return (
+				<div className={styles.isDisabledLabels}>Метки данных отключены из-за большого количества данных</div>
+			);
+		}
+
+		return null;
+	};
+
 	renderShowShadowInput = () => {
 		const {showShadow} = this.props.value;
 
@@ -58,10 +87,17 @@ export class DataLabelsBox extends PureComponent<Props> {
 	};
 
 	render () {
-		const {fontColor, fontFamily, fontSize, show} = this.props.value;
+		const {disabled, fontColor, fontFamily, fontSize, show} = this.props.value;
 
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title="Метки данных">
+			<ToggableFormBox
+				disabled={disabled}
+				message={this.renderMessage()}
+				name={DIAGRAM_FIELDS.show}
+				onToggle={this.handleChange}
+				showContent={show}
+				title="Метки данных"
+			>
 				<FormField row>
 					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
 					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} value={fontSize} />

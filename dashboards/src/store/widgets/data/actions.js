@@ -3,11 +3,9 @@ import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store
 import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
-import {confirmDialog} from 'store/commonDialogs/actions';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from 'store/dashboard/settings/constants';
 import {deepClone, isObject} from 'helpers';
-import {DEFAULT_BUTTONS} from 'components/molecules/Modal/constants';
 import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchCustomGroups} from 'store/customGroups/actions';
@@ -15,13 +13,11 @@ import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getCustomColorsSettingsKey} from './helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
-import {getWidgetsBuildData} from './selectors';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resizer as dashboardResizer} from 'app.constants';
 import {saveCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
-import {WIDGET_SETS} from 'store/widgets/data/constants';
 
 /**
  * Добавляет новый виджет
@@ -127,7 +123,6 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayouts());
 		dispatch(fetchBuildData(widget));
-		dispatch(checkWidgetDataLimits(widget));
 	} catch (e) {
 		validationErrors = getErrors(e);
 
@@ -135,50 +130,6 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 	}
 
 	return validationErrors;
-};
-
-/**
- * Проверяет и согласовывает ограничения и вид отображения виджета
- * @param {AnyWidget} widget - виджет для проверки; данные должны быть загружены в виджет предварительно
- * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок и согласований с пользователем.
- */
-const checkWidgetDataLimits = (widget: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	if (widget.type in WIDGET_SETS.AXIS) {
-		if (widget.dataLabels && widget.dataLabels.show) {
-			const state = getState();
-			const buildData = getWidgetsBuildData(state);
-			const {data} = buildData[widget.id];
-			const sumDataValues = data?.series.reduce((sum, s) => sum + s.data.length, 0) ?? 0;
-
-			// SMRMEXT-11660 (SMRMEXT-11965) - если количество меток больше 250 откоючаем отображение меток
-			if (sumDataValues > LIMITS.DATA_LABELS_LIMIT) {
-				if (widget.dataLabels) {
-					const updatedWidgetData: Object = {
-						...widget,
-						dataLabels: {...widget.dataLabels, show: false}
-					};
-
-					dispatch(updateWidget(updatedWidgetData));
-				}
-
-				const show = await dispatch(
-					confirmDialog(
-						'Внимание',
-						'Метки данных были отключены из-за большего кол-ва данных, включить? Внимание - это может замедлить работу дашбордов.',
-						{
-							defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON
-						}
-					)
-				);
-
-				if (widget.dataLabels) {
-					const dataLabels = {...widget.dataLabels, show};
-
-					dispatch(editWidgetChunkData(widget, {dataLabels}, false));
-				}
-			}
-		}
-	}
 };
 
 /**
