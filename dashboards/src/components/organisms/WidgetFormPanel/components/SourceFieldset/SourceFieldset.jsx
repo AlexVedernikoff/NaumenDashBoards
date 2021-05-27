@@ -294,7 +294,14 @@ export class SourceFieldset extends Component<Props, State> {
 		const {value} = this.props;
 		const {sourceForCompute} = value;
 
-		return <Checkbox label="Только для вычислений" onClick={this.handleChangeCompute} value={sourceForCompute} />;
+		return (
+			<Checkbox
+				className={styles.sourceForCompute}
+				label="Только для вычислений"
+				onClick={this.handleChangeCompute}
+				value={sourceForCompute}
+			/>
+		);
 	};
 
 	renderFilterButton = (): React$Node => {
@@ -373,13 +380,19 @@ export class SourceFieldset extends Component<Props, State> {
 		const {error, showEditForm} = this.state;
 
 		const component = showEditForm ? this.renderLabelEditingForm() : this.renderSourceTreeSelect();
+		const paths = [
+			getErrorPath(DIAGRAM_FIELDS.data, index, DIAGRAM_FIELDS.source),
+			getErrorPath(DIAGRAM_FIELDS.data, index, DIAGRAM_FIELDS.sourceForCompute)
+		];
 
 		return (
-			<FormField path={getErrorPath(DIAGRAM_FIELDS.data, index, DIAGRAM_FIELDS.source)} small>
+			<FormField paths={paths} small>
 				<div className={styles.combinedContainer}>
 					{this.renderFilterButton()}
 					{component}
 				</div>
+				{this.renderRemoveButton()}
+				{this.renderComputeCheckbox()}
 				<FieldError text={error} />
 			</FormField>
 		);
@@ -439,8 +452,6 @@ export class SourceFieldset extends Component<Props, State> {
 		return (
 			<div className={styles.container} ref={this.containerRef}>
 				{this.renderSourceSelect()}
-				{this.renderRemoveButton()}
-				{this.renderComputeCheckbox()}
 				{this.renderSavedFiltersButton()}
 			</div>
 		);

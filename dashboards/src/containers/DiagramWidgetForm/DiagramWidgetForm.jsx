@@ -67,6 +67,7 @@ export class DiagramWidgetForm extends PureComponent<Props> {
 	};
 
 	validate = async (values: Values) => {
+		const environment = process.env.NODE_ENV;
 		const {schema, widgets} = this.props;
 		let errors = {};
 
@@ -76,6 +77,10 @@ export class DiagramWidgetForm extends PureComponent<Props> {
 			errors = err.inner.reduce((errors, innerError) => ({
 				...errors, [innerError.path]: innerError.message
 			}), errors);
+
+			if (environment === 'development') {
+				console.error(errors);
+			}
 		}
 
 		return errors;

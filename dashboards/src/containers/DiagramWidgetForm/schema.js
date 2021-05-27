@@ -39,6 +39,26 @@ addMethod(mixed, 'sourceNumbers', function () {
 		});
 });
 
+addMethod(mixed, 'singleSourceForCompute', function () {
+	return this.test(
+		'check-sources-number',
+		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
+		function () {
+			const {parent, values} = this.options;
+
+			if (values && values.data.length > 1) {
+				const mainSources = values.data.filter(item => !item.sourceForCompute).map(item => item.dataKey);
+
+				if (mainSources.length > 1) {
+					const unnecessarySources = mainSources.slice(1);
+					return !unnecessarySources.includes(parent.dataKey);
+				}
+			}
+
+			return true;
+		});
+});
+
 addMethod(mixed, 'minSourceNumbers', function () {
 	return this.test(
 		'check-min-source-numbers',
