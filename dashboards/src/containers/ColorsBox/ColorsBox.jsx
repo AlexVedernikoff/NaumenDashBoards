@@ -9,13 +9,15 @@ import {
 	DEFAULT_COLORS_SETTINGS
 } from 'store/widgets/data/constants';
 import ColorsBox from 'WidgetFormPanel/components/ColorsBox';
+import {compose} from 'redux';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
-import {getCustomColorsSettingsKey} from 'store/widgets/data/helpers';
+import {getCustomColorsSettingsKey, getCustomColorsSettingsKeyByData} from 'store/widgets/data/helpers';
 import {hasBreakdown, isAxisChart, isCircleChart} from 'store/widgets/helpers';
 import type {Props, State} from './types';
 import React from 'react';
 import type {Values} from 'components/organisms/WidgetForm/types';
+import withType from 'WidgetFormPanel/HOCs/withType';
 
 export class ColorsBoxContainer extends React.Component<Props, State> {
 	static defaultProps = {
@@ -32,10 +34,19 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {buildData: prevBuildData, globalColorsSettings: prevGlobalSettings, values: prevValues} = prevProps;
-		const {buildData, globalColorsSettings, values} = this.props;
+		const {
+			buildData: prevBuildData,
+			globalColorsSettings: prevGlobalSettings,
+			value: prevValue,
+			values: prevValues
+		} = prevProps;
+		const {buildData, globalColorsSettings, value, values} = this.props;
 
-		if (prevValues.data !== values.data || prevGlobalSettings !== globalColorsSettings || prevBuildData?.data !== buildData?.data) {
+		if (prevValues.data !== values.data
+			|| prevGlobalSettings !== globalColorsSettings
+			|| prevBuildData?.data !== buildData?.data
+			|| (value.type === CHART_COLORS_SETTINGS_TYPES.CUSTOM && value.type !== prevValue.type)
+		) {
 			this.setSettingsByActualData();
 			this.setState({labels: this.getLabels(this.props)});
 		}
@@ -75,7 +86,7 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 	};
 
 	getCustomColorsSettingsData = () => {
-		const {globalColorsSettings, values, widget} = this.props;
+		const {globalColorsSettings, type, values, widget} = this.props;
 		const {data: customSettingsData, useGlobal} = values.colorsSettings.custom;
 		const currentKey = getCustomColorsSettingsKey(widget);
 		let settingsData;
@@ -84,7 +95,7 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 			settingsData = globalColorsSettings;
 		} else if (customSettingsData?.key === currentKey) {
 			settingsData = customSettingsData;
-		} else if (getCustomColorsSettingsKey(values) === currentKey) {
+		} else if (getCustomColorsSettingsKeyByData(values.data, type.value) === currentKey) {
 			settingsData = this.createCustomSettings(widget);
 		}
 
@@ -158,8 +169,8 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 	};
 
 	isDisabledCustomSettings = () => {
-		const {disabledCustomSettings, globalColorsSettings, values, widget} = this.props;
-		const currentKey = getCustomColorsSettingsKey(values);
+		const {disabledCustomSettings, globalColorsSettings, type, values, widget} = this.props;
+		const currentKey = getCustomColorsSettingsKeyByData(values.data, type.value);
 
 		return disabledCustomSettings
 			|| (globalColorsSettings?.key !== currentKey && getCustomColorsSettingsKey(widget) !== currentKey);
@@ -211,4 +222,4 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 	}
 }
 
-export default connect(props, functions)(ColorsBoxContainer);
+export default compose(withType, connect(props, functions))(ColorsBoxContainer);

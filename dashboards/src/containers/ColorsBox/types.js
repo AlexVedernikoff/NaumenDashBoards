@@ -4,6 +4,7 @@ import type {
 	GlobalCustomChartColorsSettings,
 	RemoveCustomChartColorsSetting
 } from 'store/dashboard/customChartColorsSettings/types';
+import type {InjectedProps} from 'WidgetFormPanel/HOCs/withType/types';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/ColorsBox/types';
 import type {SetUseGlobalChartSettings, Widget} from 'store/widgets/data/types';
 import type {Values} from 'components/organisms/WidgetForm/types';
@@ -18,7 +19,7 @@ export type ConnectedFunctions = {|
 	setUseGlobalChartSettings: SetUseGlobalChartSettings
 |};
 
-export type ContainerProps = {|
+export type ContainerProps = InjectedProps & {|
 	values: Values,
 	widget: Widget
 |};
