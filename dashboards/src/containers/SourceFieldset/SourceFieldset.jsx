@@ -20,8 +20,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 	};
 
 	setContext = async (): Promise<string | null> => {
-		const {onFetchDynamicAttributes, value} = this.props;
-		const {dataKey, source} = value;
+		const {source} = this.props.value;
 		const {descriptor, value: sourceValue} = source;
 
 		if (sourceValue) {
@@ -31,7 +30,6 @@ export class SourceFieldsetContainer extends Component<Props> {
 			try {
 				const {serializedContext} = await window.jsApi.commands.filterForm(context);
 
-				onFetchDynamicAttributes(dataKey, serializedContext);
 				return serializedContext;
 			} catch (e) {
 				console.error('Ошибка окна фильтрации: ', e);

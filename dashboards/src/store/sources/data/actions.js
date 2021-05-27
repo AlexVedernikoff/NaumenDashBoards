@@ -24,6 +24,7 @@ const getDataSources = (): ThunkAction => async (dispatch: Dispatch) => {
 					value: 'classFqn'
 				},
 				values: {
+					id: node => node.classFqn,
 					value: getDataSourceValue
 				}
 			}),

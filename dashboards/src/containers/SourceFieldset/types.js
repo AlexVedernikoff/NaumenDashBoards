@@ -36,16 +36,11 @@ export type FetchAttributes = (classFqn: string, parentClassFqn?: string | null,
 
 export type DispatchFetchAttributes = (classFqn: string, parentClassFqn?: string | null, onLoadCallback?: OnLoadCallback) => Promise<void>;
 
-export type FetchDynamicAttributes = (dataKey: string, groupCode: string, filterId: ?string) => ThunkAction;
-
-export type DispatchFetchDynamicAttributes = (dataKey: string, groupCode: string, filterId: ?string) => Promise<void>;
-
 export type ConnectedFunctions = {
 	fetchSourcesFilters: FetchSourcesFilters,
 	onCheckApplyFilter: CheckApplyFilter,
 	onDeleteSourcesFilter: DeleteSourcesFilter,
 	onFetchAttributes: FetchAttributes,
-	onFetchDynamicAttributes: FetchDynamicAttributes,
 	onUpdateSourcesFilter: UpdateSourcesFilter
 };
 
@@ -54,7 +49,6 @@ export type DispatchConnectedFunctions = {
 	onCheckApplyFilter: DispatchCheckApplyFilter,
 	onDeleteSourcesFilter: DispatchDeleteSourcesFilter,
 	onFetchAttributes: DispatchFetchAttributes,
-	onFetchDynamicAttributes: DispatchFetchDynamicAttributes,
 	onUpdateSourcesFilter: DispatchUpdateSourcesFilter
 };
 

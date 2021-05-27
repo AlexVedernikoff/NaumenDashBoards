@@ -8,7 +8,6 @@ import {
 } from 'store/sources/sourcesFilters/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchAttributes} from 'store/sources/attributes/actions';
-import {fetchDynamicAttributes} from 'store/sources/dynamicGroups/actions';
 import {getSourceFilters, getSourcesFilters} from 'store/sources/sourcesFilters/selectors';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/SourceFieldset/types';
@@ -35,6 +34,5 @@ export const functions: ConnectedFunctions = {
 	onCheckApplyFilter: checkApplyFilter,
 	onDeleteSourcesFilter: deleteSourcesFilter,
 	onFetchAttributes: fetchAttributes,
-	onFetchDynamicAttributes: fetchDynamicAttributes,
 	onUpdateSourcesFilter: updateSourcesFilter
 };

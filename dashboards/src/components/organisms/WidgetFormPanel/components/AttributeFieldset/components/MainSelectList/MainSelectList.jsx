@@ -28,7 +28,7 @@ export class MainSelectList extends PureComponent<Props, State> {
 		const {descriptor} = source;
 
 		if (descriptor || show) {
-			if (!show && !dynamicGroups[dataKey]) {
+			if (!dynamicGroups[dataKey] && !dynamicGroups[dataKey]?.loading) {
 				fetchDynamicAttributeGroups(dataKey, descriptor);
 			}
 
