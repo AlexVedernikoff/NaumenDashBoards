@@ -1,7 +1,8 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {CustomGroup} from 'store/customGroups/types';
+import type {CustomGroup, SelectData} from 'store/customGroups/types';
 import type {Group} from 'store/widgets/data/types';
+import type {Node} from 'components/molecules/TreeSelect/types';
 import type {RenderProps as SelectRenderProps} from 'GroupModal/components/SelectOrCondition/types';
 import type {RenderProps as MultiSelectRenderProps} from 'GroupModal/components/MultiSelectOrCondition/types';
 
@@ -35,5 +36,6 @@ export type Props = ConnectedProps & {
 	onFetch: (type: string) => void,
 	onSubmit: (value: Group, attribute: Attribute) => void,
 	orConditionOptions: Array<Option>,
+	transform?: (SelectValue: Node | Option) => SelectData,
 	value: Group
 };

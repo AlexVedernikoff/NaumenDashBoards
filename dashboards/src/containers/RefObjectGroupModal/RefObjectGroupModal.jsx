@@ -4,7 +4,6 @@ import CurrentObjectOrCondition from 'containers/CurrentObjectOrCondition';
 import GroupModal from 'GroupModal';
 import memoize from 'memoize-one';
 import MultiSelectOrCondition from 'GroupModal/components/MultiSelectOrCondition';
-import type {Node} from 'components/molecules/TreeSelect/types';
 import type {Option, Props, RenderProps} from './types';
 import type {OrConditionProps} from 'GroupModal/types';
 import {OR_CONDITION_TYPE_CONTEXT, SCHEMA} from './constants';
@@ -27,13 +26,12 @@ export class RefObjectGroupModal extends Component<Props> {
 		SystemGroup: () => null
 	}));
 
-	getNodeValue = (node: Node) => node.value;
-
 	getOptionLabel = (option: Option | null) => option?.title ?? '';
 
 	getOptionValue = (option: Option | null) => option?.uuid ?? '';
 
 	renderMultiSelectOrCondition = (props: OrConditionProps) => {
+		const {transform} = this.props;
 		const {onChange, value} = props;
 		const {data, type} = value;
 
@@ -43,7 +41,7 @@ export class RefObjectGroupModal extends Component<Props> {
 				getOptionValue={this.getOptionValue}
 				onChange={onChange}
 				render={this.renderSelect(true)}
-				transform={this.getNodeValue}
+				transform={transform}
 				type={type}
 			/>
 		);
@@ -100,7 +98,7 @@ export class RefObjectGroupModal extends Component<Props> {
 	};
 
 	renderSelectOrCondition = (props: OrConditionProps) => (
-		<SelectOrCondition {...props} render={this.renderSelect(false)} transform={this.getNodeValue} />
+		<SelectOrCondition {...props} render={this.renderSelect(false)} transform={this.props.transform} />
 	);
 
 	render () {

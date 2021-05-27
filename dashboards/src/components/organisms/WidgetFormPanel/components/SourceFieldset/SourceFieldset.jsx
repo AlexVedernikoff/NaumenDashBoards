@@ -418,7 +418,7 @@ export class SourceFieldset extends Component<Props, State> {
 	renderSourceSelectLabel = (props: ContainerProps): React$Node => {
 		const {isPersonal, value} = this.props;
 		const {className} = props;
-		const label = value.source.value?.label ?? '';
+		const label = value.source.value?.label ?? 'Выберите значение';
 		const isChanged = this.isCurrentFilterChanged();
 
 		return (
