@@ -1,10 +1,11 @@
 // @flow
-import type {AnyWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {AnyWidget, AxisWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import {BUILD_DATA_EVENTS} from './constants';
+import type {DiagramBuildData, ReceiveBuildDataPayload} from './types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {editWidgetChunkData} from 'store/widgets/data/actions';
 import {getWidgetFilterOptionsDescriptors} from './helpers';
-import type {ReceiveBuildDataPayload} from './types';
-import {WIDGET_TYPES} from 'src/store/widgets/data/constants';
+import {LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Получаем данные для таблицы
@@ -63,26 +64,54 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch(requestBuildData(widget));
 
-		try {
-			const {context, dashboard} = getState();
-			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
+	try {
+		const {context, dashboard} = getState();
+		const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
 
-			const data = await window.jsApi.restCallModule(
-				'dashboardDataSet',
-				'getDataForCompositeDiagram',
-				dashboard.settings.code,
-				widget.id,
-				context.subjectUuid,
-				widgetFilters
-			);
-
-		dispatch(
-			receiveBuildData({data, id: widget.id})
+		const data = await window.jsApi.restCallModule(
+			'dashboardDataSet',
+			'getDataForCompositeDiagram',
+			dashboard.settings.code,
+			widget.id,
+			context.subjectUuid,
+			widgetFilters
 		);
+
+		await dispatch(checkDiagramsDataLimits(widget, data));
+		dispatch(receiveBuildData({data, id: widget.id}));
 	} catch (e) {
 		dispatch(recordBuildDataError(widget.id));
 	}
 };
+
+/**
+ * Проверяет и согласовывает ограничения и вид отображения виджета
+ *
+ * @param {AnyWidget} widget - виджет для проверки
+ * @param {DiagramBuildData} data - данные для проверки отображения
+ * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок и согласований с пользователем.
+ */
+const checkDiagramsDataLimits = (widget: AnyWidget, data: DiagramBuildData): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		if (widget.type in WIDGET_SETS.AXIS) {
+			// $FlowFixMe widget.type in WIDGET_SETS.AXIS
+			const axisWidget: AxisWidget = widget;
+			const sumDataValues = data?.series.reduce((sum, s) => sum + s.data.length, 0) ?? 0;
+			let dataLabels = null;
+
+			if (sumDataValues > LIMITS.DATA_LABELS_LIMIT) {
+				dataLabels = {...axisWidget.dataLabels, disabled: true, show: false};
+			} else {
+				if (axisWidget.dataLabels.disabled) {
+					dataLabels = {...axisWidget.dataLabels, disabled: false};
+				}
+			}
+
+			if (dataLabels) {
+				await dispatch(editWidgetChunkData(axisWidget, {dataLabels}, false));
+			}
+		}
+	};
 
 /**
  * Получаем данные построения для конкретного виджета

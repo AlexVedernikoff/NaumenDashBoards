@@ -7,6 +7,8 @@ import Toggle from 'components/atoms/Toggle';
 
 export class ToggableFormBox extends PureComponent<Props> {
 	static defaultProps = {
+		disabled: false,
+		message: null,
 		name: ''
 	};
 
@@ -23,16 +25,19 @@ export class ToggableFormBox extends PureComponent<Props> {
 	};
 
 	renderControl = () => {
-		const {name, showContent} = this.props;
+		const {disabled, name, showContent} = this.props;
 
-		return <Toggle checked={showContent} name={name} onChange={this.handleToggle} value={showContent} />;
+		return <Toggle checked={showContent} disabled={disabled} name={name} onChange={this.handleToggle} value={showContent} />;
 	};
+
+	renderMessage = () => this.props.message;
 
 	render () {
 		const {title} = this.props;
 
 		return (
 			<FormBox rightControl={this.renderControl()} title={title}>
+				{this.renderMessage()}
 				{this.renderContent()}
 			</FormBox>
 		);

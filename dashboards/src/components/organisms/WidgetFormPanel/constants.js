@@ -31,6 +31,7 @@ const count = 'count';
 const data = 'data';
 const dataLabels = 'dataLabels';
 const diagramName = 'diagramName';
+const disabled = 'disabled';
 const displayType = 'displayType';
 const from = 'from';
 const header = 'header';
@@ -78,6 +79,7 @@ const DIAGRAM_FIELDS = {
 	data,
 	dataLabels,
 	diagramName,
+	disabled,
 	displayType,
 	from,
 	header,
