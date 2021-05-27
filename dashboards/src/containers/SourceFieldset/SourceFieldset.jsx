@@ -7,6 +7,22 @@ import React, {Component} from 'react';
 import SourceFieldset from 'WidgetFormPanel/components/SourceFieldset';
 
 export class SourceFieldsetContainer extends Component<Props> {
+	getSourceDescriptor = () => {
+		const {filterList, value: {source}} = this.props;
+		const {descriptor, filterId} = source;
+		let result = descriptor;
+
+		if (filterId) {
+			const filter = filterList.find(item => item.id === filterId);
+
+			if (filter) {
+				result = filter.descriptor;
+			}
+		}
+
+		return result;
+	};
+
 	handleChange = (dataSetIndex: number, dataSet: DataSet) => {
 		const {fetchSourcesFilters, onChange, value: {source: oldDataSet}} = this.props;
 		const newClassFqn = dataSet.source.value?.value ?? null;
@@ -20,11 +36,11 @@ export class SourceFieldsetContainer extends Component<Props> {
 	};
 
 	setContext = async (): Promise<string | null> => {
-		const {source} = this.props.value;
-		const {descriptor, value: sourceValue} = source;
+		const {value: sourceValue} = this.props.value.source;
 
 		if (sourceValue) {
 			const {value: classFqn} = sourceValue;
+			let descriptor = this.getSourceDescriptor();
 			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
 
 			try {

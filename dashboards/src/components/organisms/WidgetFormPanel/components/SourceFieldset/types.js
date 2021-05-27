@@ -7,6 +7,7 @@ export type Props = CommonDialogContextProps & ContainerProps & {
 	index: number,
 	onChange: (index: number, dataSet: DataSet) => void,
 	onOpenFilterForm: () => Promise<string>,
+	value: DataSet,
 };
 
 export type ConfirmOption = {
