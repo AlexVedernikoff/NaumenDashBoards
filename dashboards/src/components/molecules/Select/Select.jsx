@@ -87,7 +87,7 @@ export class Select extends PureComponent<Props, State> {
 		this.setState({showMenu: !this.state.showMenu});
 	};
 
-	handleSelect = (value: Option | Option[]) => {
+	handleSelect = (value: Option) => {
 		const {multiple, name, onSelect} = this.props;
 
 		!multiple && this.setState({showMenu: false});

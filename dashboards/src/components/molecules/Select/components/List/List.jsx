@@ -47,24 +47,8 @@ export class List extends PureComponent<Props> {
 		onClickShowMore && onClickShowMore();
 	};
 
-	handleSelect = (option: Option) => {
-		const {multiple, onSelect, values} = this.props;
-
-		if (multiple) {
-			const val = this.getOptionValue(option);
-			const foundItem = values.find(item => this.getOptionValue(item) === val);
-			const newValues = foundItem
-				? values.filter(item => foundItem !== item)
-				: [...values, option];
-
-			onSelect(newValues);
-		} else {
-			onSelect(option);
-		}
-	};
-
 	renderListItem = (data: Object) => {
-		const {getOptionLabel, multiple, options, searchValue, value, values} = this.props;
+		const {getOptionLabel, multiple, onSelect, options, searchValue, value, values} = this.props;
 		const {ListOption} = this.components;
 		const {index, style} = data;
 		const option = options[index];
@@ -82,7 +66,7 @@ export class List extends PureComponent<Props> {
 				found={!!searchValue}
 				getOptionLabel={getOptionLabel}
 				key={optionValue}
-				onClick={this.handleSelect}
+				onClick={onSelect}
 				option={option}
 				selected={selected}
 				style={style}

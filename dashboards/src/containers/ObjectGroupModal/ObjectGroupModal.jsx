@@ -15,6 +15,7 @@ import {getObjectKey} from 'store/sources/attributesData/objects/helpers';
 import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
 import memoize from 'memoize-one';
 import Node from 'components/molecules/TreeSelect/components/Node';
+import type {Node as NodeType} from 'components/molecules/TreeSelect/types';
 import type {ObjectsState} from 'store/sources/attributesData/objects/types';
 import {OR_CONDITION_TYPE_CONTEXT} from 'containers/RefObjectGroupModal/constants';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
@@ -54,6 +55,8 @@ export class ObjectGroupModal extends Component<Props, State> {
 		Node: this.renderNode,
 		SearchInput: this.renderSearchInput
 	}));
+
+	getNodeValue = (node: NodeType) => node.value;
 
 	getObjectSelectData = (objects: ObjectsState, type: string) => {
 		const {id} = this.state;
@@ -180,6 +183,7 @@ export class ObjectGroupModal extends Component<Props, State> {
 					onClose={onClose}
 					onSubmit={onSubmit}
 					orConditionOptions={this.getOrConditionOptions()}
+					transform={this.getNodeValue}
 					value={value}
 				/>
 			</DATA_CONTEXT.Provider>

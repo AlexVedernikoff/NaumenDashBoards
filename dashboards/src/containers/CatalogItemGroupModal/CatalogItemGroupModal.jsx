@@ -6,6 +6,7 @@ import {DATA_CONTEXT, DEFAULT_DATA, OR_CONDITION_OPTIONS} from './constants';
 import {functions, props} from './selectors';
 import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
 import memoize from 'memoize-one';
+import type {Node} from 'components/molecules/TreeSelect/types';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import RefObjectGroupModal from 'containers/RefObjectGroupModal';
@@ -19,6 +20,8 @@ export class CatalogItemGroupModal extends Component<Props> {
 	getComponents = memoize(() => ({
 		Select: this.renderSelect
 	}));
+
+	getNodeValue = (node: Node) => node.value;
 
 	handleLoad = () => {
 		const {attribute, fetchCatalogItemData} = this.props;
@@ -47,6 +50,7 @@ export class CatalogItemGroupModal extends Component<Props> {
 					onClose={onClose}
 					onSubmit={onSubmit}
 					orConditionOptions={OR_CONDITION_OPTIONS}
+					transform={this.getNodeValue}
 					value={value}
 				/>
 			</DATA_CONTEXT.Provider>
