@@ -117,6 +117,28 @@ addMethod(mixed, 'group', function () {
 	);
 });
 
+/**
+ * Правило валидации для таблиц: в вычисляемых источниках может быть только тот же источник, что и в основном
+ */
+addMethod(mixed, 'computeNotIsReferenceAttribute', function () {
+	return this.test(
+		'compute-not-is-reference-attribute',
+		'Источником для вычисления не может быть ссылочный атрибут',
+		function (sourceForCompute) {
+			if (sourceForCompute) {
+				const {parent: {source}, values: {data = []}} = this.options;
+
+				if (source?.value) {
+					const {value: currentSourceValue} = source.value;
+					return data.some(dataSet => !dataSet.sourceForCompute && dataSet.source?.value?.value === currentSourceValue);
+				}
+			}
+
+			return true;
+		}
+	);
+});
+
 addMethod(object, 'topSettings', function () {
 	return object({
 		count: number().when(
