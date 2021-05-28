@@ -34,7 +34,7 @@ async function checkSourceForParent () {
 	const index = data.findIndex(dataSet => dataSet.dataKey === dataKey);
 	let result = true;
 
-	if (index > 0 && source && mainSource) {
+	if (index > 0 && source?.value && mainSource) {
 		const {value: mainValue} = mainSource.value;
 		const {value} = source.value;
 
