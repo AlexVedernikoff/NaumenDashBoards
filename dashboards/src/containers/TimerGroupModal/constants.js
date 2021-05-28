@@ -70,7 +70,7 @@ const SCHEMA = createSchema((condition: OrCondition) => {
 
 	switch (condition.type) {
 		case EXPIRES_BETWEEN:
-			return object.between();
+			return object().between();
 	}
 });
 
