@@ -91,7 +91,7 @@ const initStorageSettings = () => (dispatch: Dispatch, getState: GetState) => {
 	if (targetWidget) {
 		dispatch(focusWidget(targetWidget));
 	} else if (focused) {
-		dashboardResizer.scrollTo(0, 0);
+		dashboardResizer.focus();
 	}
 
 	storageSettings.clear();
@@ -384,6 +384,8 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 				}
 			}
 		}) : dataSet);
+
+		dashboardResizer.focus();
 
 		dispatch(changeAxisChartFormValues({...values, data: newData}));
 		dispatch(addLayouts(NewWidget.id));

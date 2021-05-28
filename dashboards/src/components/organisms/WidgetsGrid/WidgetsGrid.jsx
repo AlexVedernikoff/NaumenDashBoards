@@ -85,21 +85,9 @@ export class WidgetsGrid extends Component<Props, State> {
 	handleDragStop = () => this.toggleGrid(false);
 
 	handleFocus = (element: HTMLDivElement) => {
-		const {editMode: editableDashboard, resetFocusedWidget} = this.props;
-		const {current: container} = this.gridContainerRef;
-		const {top} = element.getBoundingClientRect();
-		let y = top;
+		const {resetFocusedWidget} = this.props;
 
-		if (dashboardResizer.isFullSize() || editableDashboard) {
-			container && container.scrollTo({
-				behavior: 'smooth',
-				top: Math.max(top - container.getBoundingClientRect().top + container.scrollTop, 0)
-			});
-
-			y = 0;
-		}
-
-		dashboardResizer.scrollTo(0, y);
+		element.scrollIntoView();
 		resetFocusedWidget();
 	};
 
