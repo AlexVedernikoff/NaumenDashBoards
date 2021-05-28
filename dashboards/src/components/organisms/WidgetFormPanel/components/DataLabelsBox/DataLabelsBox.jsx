@@ -1,6 +1,7 @@
 // @flow
 import Checkbox from 'components/atoms/Checkbox';
 import ColorInput from 'components/molecules/ColorInput';
+import type {DataLabels} from 'store/widgets/data/types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
 import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
@@ -13,40 +14,25 @@ import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class DataLabelsBox extends PureComponent<Props> {
 	componentDidUpdate (prevProps: Props) {
-		const {value, widget} = this.props;
+		const {widget} = this.props;
 		// $FlowFixMe[prop-missing]
 		const {dataLabels} = widget;
 		// $FlowFixMe[prop-missing]
 		const {dataLabels: prevDataLabels} = prevProps.widget;
 
 		// SMRMEXT-11965 после изменения dataLabels.show в виджете редакса, сбрасываем его и в форме редактирования
-		if (dataLabels && prevDataLabels) {
-			const {disabled: currDisabled, show: currShow} = dataLabels;
-			const {disabled: prevDisabled, show: prevShow} = prevDataLabels;
-
-			if (currShow !== prevShow && currShow !== value.show) {
-				this.change('show', currShow);
-			}
-
-			if (currDisabled !== prevDisabled && currDisabled !== value.disabled) {
-				this.change('disabled', currDisabled);
-			}
+		if (dataLabels) {
+			this.checkWidgetChanged(dataLabels, prevDataLabels);
 		}
 	}
 
 	componentDidMount () {
-		const {value, widget} = this.props;
+		const {widget} = this.props;
 		// $FlowFixMe[prop-missing]
 		const {dataLabels} = widget;
 
 		if (dataLabels) {
-			if (value.show !== dataLabels.show) {
-				this.change('show', dataLabels.show);
-			}
-
-			if (value.disabled !== dataLabels.disabled) {
-				this.change('disabled', dataLabels.disabled);
-			}
+			this.checkWidgetChanged(dataLabels);
 		}
 	}
 
@@ -57,6 +43,25 @@ export class DataLabelsBox extends PureComponent<Props> {
 			...settings,
 			[key]: value
 		});
+	};
+
+	checkWidgetChanged = (dataLabels: DataLabels, prevDataLabels?: DataLabels) => {
+		const {name, onChange, value} = this.props;
+		const {disabled: currDisabled, show: currShow} = dataLabels;
+		const {disabled: prevDisabled = null, show: prevShow = null} = prevDataLabels ?? {};
+		let newValue = value;
+
+		if (currShow !== prevShow && currShow !== value.show) {
+			newValue = {...newValue, [DIAGRAM_FIELDS.show]: currShow};
+		}
+
+		if (currDisabled !== prevDisabled && currDisabled !== value.disabled) {
+			newValue = {...newValue, [DIAGRAM_FIELDS.disabled]: currDisabled};
+		}
+
+		if (newValue !== value) {
+			onChange(name, newValue);
+		}
 	};
 
 	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
