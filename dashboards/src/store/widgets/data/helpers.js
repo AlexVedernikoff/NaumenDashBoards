@@ -1,8 +1,8 @@
 // @flow
 import type {
 	AddWidget,
-	AxisWidget,
-	CircleWidget,
+	AxisData,
+	CircleData,
 	ClearMessageWarning,
 	DeleteWidget,
 	Group,
@@ -14,13 +14,14 @@ import type {
 	Source,
 	UpdateWidget,
 	Widget,
+	WidgetType,
 	WidgetsDataState
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import NewWidget from 'store/widgets/data/NewWidget';
-import {WIDGET_TYPES} from './constants';
+import {WIDGET_SETS, WIDGET_TYPES} from './constants';
 
 /**
  * Устанавливаем полученные виджеты
@@ -214,25 +215,40 @@ const createCustomColorsSettingsKey = (source: Source, attribute: Attribute, gro
 
 /**
  * Возвращает ключ пользовательских настроек цветов основанный на данных виджета
- * @param {AxisWidget | CircleWidget} widget - график
+ * @param {Array<AxisData | CircleData>} widget - график
  * @returns {string | null}
  */
-const getCustomColorsSettingsKey = (widget: Widget | NewWidget): string | null => {
+const getCustomColorsSettingsKey = (widget: Widget): string | null => {
+	const {AXIS: AXIS_TYPES, CIRCLE: CIRCLE_TYPES} = WIDGET_SETS;
+	const {type} = widget;
 	let key = null;
 
-	if (!(widget instanceof NewWidget)) {
-		// $FlowFixMe[prop-missing]
-		const {breakdown, parameters, source} = getMainDataSet(widget.data);
+	if (!(widget instanceof NewWidget) && (type in AXIS_TYPES || type in CIRCLE_TYPES)) {
+		key = getCustomColorsSettingsKeyByData(widget.data, type);
+	}
 
-		if (Array.isArray(breakdown)) {
-			const {attribute, group} = breakdown[0];
+	return key;
+};
 
-			key = createCustomColorsSettingsKey(source.value, attribute, group);
-		} else if (widget.type !== WIDGET_TYPES.LINE && Array.isArray(parameters)) {
-			const {attribute, group} = parameters[0];
+/**
+ * Возвращает ключ пользовательских настроек цветов
+ * @param {Array<AxisData | CircleData>} data - график
+ * @param {WidgetType} type - тип виджета
+ * @returns {string | null}
+ */
+const getCustomColorsSettingsKeyByData = (data: Array<AxisData | CircleData>, type: WidgetType = WIDGET_TYPES.BAR): string | null => {
+	// $FlowFixMe[prop-missing]
+	const {breakdown, parameters, source} = getMainDataSet(data);
+	let key = null;
 
-			key = createCustomColorsSettingsKey(source.value, attribute, group);
-		}
+	if (Array.isArray(breakdown)) {
+		const {attribute, group} = breakdown[0];
+
+		key = createCustomColorsSettingsKey(source.value, attribute, group);
+	} else if (type !== WIDGET_TYPES.LINE && Array.isArray(parameters)) {
+		const {attribute, group} = parameters[0];
+
+		key = createCustomColorsSettingsKey(source.value, attribute, group);
 	}
 
 	return key;
@@ -279,6 +295,7 @@ export {
 	clearWidgetWarning,
 	getBuildSet,
 	getCustomColorsSettingsKey,
+	getCustomColorsSettingsKeyByData,
 	getComboYAxisName,
 	getMainDataSet,
 	getMainDataSetIndex,

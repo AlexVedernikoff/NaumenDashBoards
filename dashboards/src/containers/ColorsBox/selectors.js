@@ -1,17 +1,18 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps, ContainerProps} from './types';
-import {getWidgetGlobalChartColorsSettings} from 'store/dashboard/customChartColorsSettings/selectors';
+import {getCustomColorsSettingsKeyByData} from 'store/widgets/data/helpers';
 import {getWidgetsBuildData} from 'store/widgets/data/selectors';
 import {removeCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import {setUseGlobalChartSettings} from 'store/widgets/data/actions';
 
 export const props = (state: AppState, props: ContainerProps): ConnectedProps => {
-	const {values, widget} = props;
+	const {type, values, widget} = props;
+	const key = getCustomColorsSettingsKeyByData(values.data, type.value);
 
 	return {
 		buildData: getWidgetsBuildData(state)[widget.id],
-		globalColorsSettings: getWidgetGlobalChartColorsSettings(values)(state)
+		globalColorsSettings: state.dashboard.customChartColorsSettings[key]?.data
 	};
 };
 

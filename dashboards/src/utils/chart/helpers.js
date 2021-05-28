@@ -42,7 +42,7 @@ const equalLabels = (label1: string, label2: string) => label1?.includes(SEPARAT
  * @param {Array<string>} defaultColors - набор цветов по умолчанию
  * @returns {boolean}
  */
-const getBreakdownColors = (settings: CustomChartColorsSettingsData, labels: Array<string>, defaultColors: Array<string>) => {
+const getBreakdownColors = (settings: CustomChartColorsSettingsData, labels: Array<string>, defaultColors: Array<string> = []) => {
 	const colors = Array(labels.length).fill(settings.defaultColor).map((c, i) => defaultColors[i] ?? c);
 	const usedLabels = [];
 
@@ -128,7 +128,7 @@ const setColors = (
 
 		return {
 			...options,
-			colors: getBreakdownColors(settings, colorsLabels, autoSettings.colors)
+			colors: getBreakdownColors(settings, colorsLabels)
 		};
 	};
 
