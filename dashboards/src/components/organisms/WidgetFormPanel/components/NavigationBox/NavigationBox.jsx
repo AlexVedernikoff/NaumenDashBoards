@@ -4,10 +4,10 @@ import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormCheckControl from 'components/molecules/FormCheckControl';
 import FormField from 'components/molecules/FormField';
 import MultiDropDownList from 'components/molecules/MultiDropDownList';
-import type {OnChangeEvent, OnChangeInputEvent} from 'components/types';
+import type {OnChangeEvent, OnChangeInputEvent, Ref} from 'components/types';
 import type {Props} from './types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import TextArea from 'components/atoms/TextArea';
@@ -16,6 +16,8 @@ import {USER_ROLES} from 'store/context/constants';
 import type {Value} from 'components/molecules/MultiDropDownList/types';
 
 export class NavigationBox extends PureComponent<Props> {
+	selectRef: Ref<typeof Select> = createRef();
+
 	handleChangeTip = (event: OnChangeInputEvent) => {
 		const {name, onChange, value} = this.props;
 		const {name: tipName, value: tip} = event;
@@ -29,7 +31,9 @@ export class NavigationBox extends PureComponent<Props> {
 	handleSelect = (selectValue: Value) => {
 		const {name, onChange, value: settings} = this.props;
 		const {parent, ...value} = selectValue;
+		const {current: select} = this.selectRef;
 
+		select && select.setState({showMenu: false});
 		onChange(name, {
 			...settings,
 			dashboard: parent || value,
@@ -81,6 +85,7 @@ export class NavigationBox extends PureComponent<Props> {
 					onSelect={this.handleSelect}
 					options={items}
 					placeholder="Укажите дашборд или виджет"
+					ref={this.selectRef}
 					value={selectValue}
 				/>
 			</FormField>
