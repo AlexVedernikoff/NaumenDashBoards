@@ -63,6 +63,10 @@ class DashboardDrilldownService
         {
             requestContent.descriptor = DashboardUtils.getSourceFiltersFromStorage([[key:'id', value: source.filterId]]).find()
         }
+        if(requestContent.widgetDescriptor)
+        {
+            requestContent.descriptor = DashboardDataSetService.instance.prepareWidgetDescriptor(requestContent.descriptor, requestContent.widgetDescriptor)
+        }
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
@@ -159,52 +163,6 @@ class Link
      */
     private DiagramType diagramType
 
-
-    private Map<String, Integer> genitiveRussianMonth = Calendar.with {
-        [
-            'января'  : JANUARY,
-            'февраля' : FEBRUARY,
-            'марта'   : MARCH,
-            'апреля'  : APRIL,
-            'мая'     : MAY,
-            'июня'    : JUNE,
-            'июля'    : JULY,
-            'августа' : AUGUST,
-            'сентября': SEPTEMBER,
-            'октября' : OCTOBER,
-            'ноября'  : NOVEMBER,
-            'декабря' : DECEMBER
-        ]
-    }
-
-    private Map<String, Integer> nominativeRussianMonth = Calendar.with {
-        [
-            'январь'  : JANUARY,
-            'февраль' : FEBRUARY,
-            'март'    : MARCH,
-            'апрель'  : APRIL,
-            'май'     : MAY,
-            'июнь'    : JUNE,
-            'июль'    : JULY,
-            'август'  : AUGUST,
-            'сентябрь': SEPTEMBER,
-            'октябрь' : OCTOBER,
-            'ноябрь'  : NOVEMBER,
-            'декабрь' : DECEMBER
-        ]
-    }
-
-    private Map<String, Integer> russianWeekDay =
-        [
-            'понедельник': 1,
-            'вторник'    : 2,
-            'среда'      : 3,
-            'четверг'    : 4,
-            'пятница'    : 5,
-            'суббота'    : 6,
-            'воскресенье': 7
-        ]
-
     /**
      * перечень
      */
@@ -228,6 +186,18 @@ class Link
             it.code == 'dashboardTemp'
         }?.with {
             api.utils.findFirst(this.classFqn, [(it.code): op.isNotNull()])?.get(it.code)
+        }
+    }
+
+    /**
+     * Метод проверки данных на возможный перегруз количества информации для фильтра containsInSet
+     * @param values - данные, полученные при поиске
+     */
+    static void checkValuesSize(def values)
+    {
+        if(values?.size() > DashboardUtils.maxValuesCount)
+        {
+            throw new Exception("${DashboardUtils.overflowDataException}")
         }
     }
 
@@ -336,7 +306,10 @@ class Link
                     def aggregation = map.aggregation
                     if (aggregation)
                     {
-                        result << [filterBuilder.OR(attr.code, 'notNull', null)]
+                        if(attr.type != 'COMPUTED_ATTR')
+                        {
+                            result << [filterBuilder.OR(attr.code, 'notNull', null)]
+                        }
                         return null
                     }
                     Way groupWay = group.way
@@ -395,7 +368,7 @@ class Link
                             property: AttributeType.TOTAL_VALUE_TYPE
                         )
                         def objects = findObjects(attr.ref, attr.property, value)
-                        checkValuesSize(objects)
+                        Link.checkValuesSize(objects)
                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
                     }
                     else
@@ -471,12 +444,14 @@ class Link
                 }
                 if (context)
                 {
+                    def filterProvider = new MainDateFilterProvider()
+
                     //Тут обработка только группировок по датам
                     context.keySet().each { groupType ->
                         def value = context.get(groupType)
                         def format = value?.last()
                         String stringValue = value?.head()
-                        getDateFilters(groupType, format, stringValue, filterBuilder, attr)
+                        filterProvider.getFilter(groupType, format, stringValue, filterBuilder, attr, classFqn, descriptor)
                     }
                 }
                 for (customSubGroupCondition in customSubGroupSet)
@@ -502,7 +477,7 @@ class Link
                         wrapper.filtering(wrapper.totalValueCriteria, true, filterParam)
 
                         def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-                        checkValuesSize(uuids)
+                        Link.checkValuesSize(uuids)
                         filterBuilder.AND(
                             filterBuilder.OR('totalValue', 'containsInSet', uuids)
                         )
@@ -687,7 +662,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): null])
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -699,7 +674,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(null)])
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -712,7 +687,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -730,7 +705,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -741,6 +716,7 @@ class Link
                                             {
                                                 value = [value]
                                             }
+                                            filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', value))
                                             return filterBuilder.OR(attr.code, 'notContains', value)
                                         case 'title_contains':
                                             def value = it.data
@@ -748,7 +724,7 @@ class Link
                                             {
                                                 def lowValues = api.utils.find(lastAttr.property, ['title': op.like("%${value}%")])
                                                 def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
-                                                checkValuesSize(highValues)
+                                                Link.checkValuesSize(highValues)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -766,7 +742,7 @@ class Link
                                             {
                                                 def lowValues = api.utils.find(lastAttr.property, ['title': op.not("%${value}%")])
                                                 def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
-                                                checkValuesSize(highValues)
+                                                Link.checkValuesSize(highValues)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -783,7 +759,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -804,7 +780,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -825,7 +801,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -850,7 +826,7 @@ class Link
                                             {
                                                 values = values.collectMany{ value -> findObjects(attr.ref, attr.property, value)}
                                             }
-                                            checkValuesSize(values)
+                                            Link.checkValuesSize(values)
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'containsInSet',
@@ -860,7 +836,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, subjectUUID)
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -888,16 +864,12 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                checkValuesSize(objects)
+                                                Link.checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
                                                     objects
                                                 )
-                                            }
-                                            if (attributeTypeIsSet)
-                                            {
-                                                value = [value]
                                             }
                                             return filterBuilder.OR(attr.code, 'contains', value)
                                         default: throw new IllegalArgumentException(
@@ -1053,7 +1025,7 @@ class Link
         if(attribute.ref)
         {
             def values = getValuesForRefAttr(attribute, state)
-            checkValuesSize(values)
+            Link.checkValuesSize(values)
             return filterBuilder.AND(filterBuilder.OR(code, 'containsInSet', values))
         }
         if(sourceCode.contains('$'))
@@ -1110,7 +1082,7 @@ class Link
         wrapper.filtering(wrapper.criteria, false, filterParam)
 
         def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-        checkValuesSize(uuids)
+        Link.checkValuesSize(uuids)
         return uuids
     }
 
@@ -1161,7 +1133,7 @@ class Link
                     values = findObjects(attr.ref, attr.property, value)
                     break
             }
-            checkValuesSize(values)
+            Link.checkValuesSize(values)
             return filterBuilder.OR(attr.code, 'containsInSet', values)
         }
         switch (type)
@@ -1186,18 +1158,6 @@ class Link
                 return filterBuilder.OR(code, 'contains', value)
             default:
                 return filterBuilder.OR(code, 'contains', value)
-        }
-    }
-
-    /**
-     * Метод проверки данных на возможный перегруз количества информации для фильтра containsInSet
-     * @param values - данные, полученные при поиске
-     */
-    private void checkValuesSize(def values)
-    {
-        if(values?.size() > DashboardUtils.maxValuesCount)
-        {
-            throw new Exception("${DashboardUtils.overflowDataException}")
         }
     }
 
@@ -1370,517 +1330,625 @@ class Link
         return result
     }
 
-    /**
-     * Вспомогательный метод по формированию диапазона дат
-     * @return диапазон дат
-     */
-    private List<List<Date>> getRanges(Map<Object, Object> context, Closure<Date> findMinimum = {
-        null
-    })
+    @InjectApi
+    class MainDateFilterProvider
     {
-        def year = context.get(GroupType.YEAR)?.head()
-        def quarter = context.get(GroupType.QUARTER)?.head()
-        def month = context.get(GroupType.MONTH)?.head()
-        def sevenDays = context.get(GroupType.SEVEN_DAYS)?.head()
-        def week = context.get(GroupType.WEEK)?.head()
-        def day = context.get(GroupType.DAY)?.head()
+        Map<String, FilterProvider> filterProviders
 
-        def dayFormat = context.get(GroupType.DAY)?.last()
-        def weekFormat = context.get(GroupType.WEEK)?.last()
+        private static Map<String, Integer> genitiveRussianMonth = Calendar.with {
+            [
+                'января'  : JANUARY,
+                'февраля' : FEBRUARY,
+                'марта'   : MARCH,
+                'апреля'  : APRIL,
+                'мая'     : MAY,
+                'июня'    : JUNE,
+                'июля'    : JULY,
+                'августа' : AUGUST,
+                'сентября': SEPTEMBER,
+                'октября' : OCTOBER,
+                'ноября'  : NOVEMBER,
+                'декабря' : DECEMBER
+            ]
+        }
 
-        Collection<Calendar> calendars
+        private static Map<String, Integer> nominativeRussianMonth = Calendar.with {
+            [
+                'январь'  : JANUARY,
+                'февраль' : FEBRUARY,
+                'март'    : MARCH,
+                'апрель'  : APRIL,
+                'май'     : MAY,
+                'июнь'    : JUNE,
+                'июль'    : JULY,
+                'август'  : AUGUST,
+                'сентябрь': SEPTEMBER,
+                'октябрь' : OCTOBER,
+                'ноябрь'  : NOVEMBER,
+                'декабрь' : DECEMBER
+            ]
+        }
 
-        if (year)
+        private static Map<String, Integer> russianWeekDay =
+            [
+                'понедельник': 1,
+                'вторник'    : 2,
+                'среда'      : 3,
+                'четверг'    : 4,
+                'пятница'    : 5,
+                'суббота'    : 6,
+                'воскресенье': 7
+            ]
+
+
+        MainDateFilterProvider()
         {
-            def calendar = Calendar.instance
-            calendar.getTime()
-            calendar.set(Calendar.YEAR, year as int)
-            calendars = [calendar]
+            registerFilterProviders()
         }
-        else
+
+        void registerFilterProviders()
         {
-            def minimumYear = Calendar.instance.with {
-                it.setTime(findMinimum())
-                it.get(YEAR)
-            }
-            int currentYear = Calendar.instance.get(Calendar.YEAR)
-            calendars = (minimumYear..currentYear).collect {
-                def calendar = Calendar.instance
-                calendar.set(Calendar.YEAR, it)
-                calendar
-            }
+            filterProviders = [
+                day_dynamic       : new DynamicDayFilterProvider(),
+                day_static        : new StaticDayFilterProvider(),
+                week_dynamic      : new DynamicWeekFilterProvider(),
+                week_static       : new StaticWeekFilterProvider(),
+                month_dynamic     : new DynamicMonthFilterProvider(),
+                month_static      : new StaticMonthFilterProvider(),
+                quarter_dynamic   : new DynamicQuarterFilterProvider(),
+                quarter_static    : new StaticQuarterFilterProvider(),
+                year_dynamic      : new DynamicYearFilterProvider(),
+                year_static       : new StaticYearFilterProvider(),
+                hour_dynamic      : new DynamicHourFilterProvider(),
+                hour_static       : new StaticHourFilterProvider(),
+                minute_dynamic    : new DynamicMinuteFilterProvider(),
+                minute_static     : new StaticMinuteFilterProvider(),
+                seven_days_dynamic: new DynamicSevenDaysFilterProvider(),
+                seven_days_static : new StaticSevenDaysFilterProvider(),
+            ]
         }
 
-        Closure setInterval = { List oldInterval, List newInterval ->
-            if (newInterval[0] > oldInterval[0])
-            {
-                oldInterval[0] = newInterval[0]
-            }
-
-            if (newInterval[1] < oldInterval[1])
-            {
-                oldInterval[1] = newInterval[1]
-            }
+        /**
+         * Метод для получения ключа на соответствующий метод из словаря registerFilterProviders
+         * @param groupType - тип группировки
+         * @param attr - атрибут
+         * @return ключ для словаря registerFilterProviders
+         */
+        String getProviderKey(GroupType groupType, Attribute attr)
+        {
+            def attrIsDynamic = attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+            return "${groupType.toString().toLowerCase()}_${attrIsDynamic ? 'dynamic' : 'static'}"
         }
 
-        def result = calendars.collect { calendar ->
-            def rangeMonth = [Calendar.JANUARY, Calendar.DECEMBER]
-            def rangeDay = [1, 31]
-            def rangeHour = [0, 23]
-            def rangeMinute = [0, 59]
-            def rangeSecond = [0, 59]
+        /**
+         * Метод, подготавливающий заготовку для объекта на запрос в БД по динамическим атрибутам
+         * @param attr - динамический атрибут
+         * @return заготовка для объекта на запрос в БД по динамическим атрибутам
+         */
+        static QueryWrapper getWrapperForDynamicAttr(Attribute attr, String classFqn, String descriptor)
+        {
+            String templateUUID = TotalValueMarshaller.unmarshal(attr.code).last()
+            Source source = new Source(classFqn: classFqn, descriptor: descriptor)
+            def wrapper = QueryWrapper.build(source, templateUUID)
+            wrapper.totalValueCriteria.add(getApi().filters.attrValueEq('linkTemplate', templateUUID)).addColumn(getApi().selectClause.property('UUID'))
+            return wrapper
+        }
 
-            if (quarter)
+        /**
+         * Метод для получения фильтра по дате
+         * @param groupType - тип группировки по дате
+         * @param format - формат данных
+         * @param value - значение
+         * @param filterBuilder - текущий объект с фильтрацией
+         * @param attr - атрибут
+         * @return фильтр по дате
+         */
+        def getFilter(GroupType groupType, String format, String value,
+                      def filterBuilder, Attribute attr, String classFqn, String descriptor)
+        {
+            String providerKey = getProviderKey(groupType, attr)
+            def provider = filterProviders[providerKey]
+            return provider.getFilter(format, value, filterBuilder, attr, classFqn, descriptor)
+        }
+    }
+
+    interface FilterProvider
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
+    }
+
+    @InjectApi
+    class DynamicDayFilterProvider implements FilterProvider
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
+        {
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
+            switch (format)
             {
-                def q = (quarter as String).replace(' кв-л', '').split(' ')
-                int startMonth = ((q[0] as int) - 1) * 3
-                int endMonth = startMonth + 2
-                int necessaryYear = q.size() > 1 ? q[1] as int : null
-                setInterval(rangeMonth, [startMonth, endMonth])
-
-                Calendar monthCalendar = calendar.clone()
-                int endDay = monthCalendar.with {
-                    if (necessaryYear) {
-                        set(Calendar.YEAR, necessaryYear)
+                case 'dd':
+                    int intValue = value.replace('-й', '') as int
+                    wrapper.totalValueCriteria.add(w.eq(s.day(s.property('value')), intValue))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+                case 'WD':
+                    int intValue = MainDateFilterProvider.russianWeekDay.get(value)
+                    wrapper.totalValueCriteria.add(w.eq(s.dayOfWeek(s.property('value')), intValue))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+                case 'dd.mm.YY':
+                    Date date = new SimpleDateFormat("dd.MM.yyyy").parse(value)
+                    if(Attribute.getAttributeType(attr) == AttributeType.DATE_TYPE)
+                    {
+                        wrapper.totalValueCriteria.add(w.eq(s.property('value'), date))
                     }
-                    set(MONTH, endMonth)
-                    getActualMaximum(DAY_OF_MONTH)
-                }
-                setInterval(rangeDay, [1, endDay])
-            }
-
-            if (month)
-            {
-                String[] monthValue = month.split()
-                int m = nominativeRussianMonth.get((monthValue[0] as String).toLowerCase())
-                setInterval(rangeMonth, [m, m])
-
-                Calendar monthCalendar = calendar.clone()
-                int endDay = monthCalendar.with {
-                    if (monthValue.size() > 1) {
-                        set(YEAR, monthValue[1] as int)
+                    else
+                    {
+                        def dateScope = 86399000 //+23 ч 59 мин 59с
+                        Date endDate = new Date(date.getTime() + hourScope)
+                        wrapper.totalValueCriteria.add(w.between(s.property('value'), date, endDate))
                     }
-                    set(MONTH, m)
-                    getActualMaximum(DAY_OF_MONTH)
-                }
-                setInterval(rangeDay, [rangeDay[0], endDay])
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+                case 'dd.mm.YY hh':
+                    Date dateToFind = new SimpleDateFormat('dd.MM.yyyy HH').parse(value.replace('ч', '').replace(',', ''))
+                    long hourScope = 3599000; //+59 мин 59 с
+                    Date anotherDate = new Date(dateToFind.getTime() + hourScope)
+
+                    wrapper.totalValueCriteria.add(w.between(s.property('value'), dateToFind, anotherDate))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+                case 'dd.mm.YY hh:ii':
+                    Date date = new SimpleDateFormat('dd.MM.yyyy HH:mm').parse(value)
+                    wrapper.totalValueCriteria.add(w.eq(s.property('value'), date))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+                case 'dd MM':
+                default:
+                    def (String day, String monthName) = value.split()
+                    int month = MainDateFilterProvider.genitiveRussianMonth.get(monthName.toLowerCase()) + 1
+
+                    wrapper.totalValueCriteria.add(w.eq(s.day(s.property('value')), day as int))
+                           .add(w.eq(s.month(s.property('value')), month as int))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
             }
+        }
+    }
 
-            if (sevenDays)
+    @InjectApi
+    class StaticDayFilterProvider implements FilterProvider
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
+        {
+            switch (format)
             {
-                def (newRangeDay, newRangeMonth) = (sevenDays as String).split(" - ", 2).collect { dayAndMonth ->
-                    def (d, m) = dayAndMonth.split(" ", 2)
-                    [d as int, genitiveRussianMonth.get(m)]
-                }.transpose()
-                setInterval(rangeMonth, newRangeMonth)
-                setInterval(rangeDay, newRangeDay)
+                case 'dd':
+                    int intValue = value.replace('-й', '') as int
+                    def datePoint = api.date.createDateTimePointPredicates(['DAY', intValue, 'EQ'], ['DAY', intValue, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+                case 'WD':
+                    int intValue = MainDateFilterProvider.russianWeekDay.get(value)
+                    def datePoint = api.date.createDateTimePointPredicates(['WEEKDAY', intValue, 'EQ'], ['WEEKDAY', intValue, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+                case 'dd.mm.YY':
+                    List<String> splitDate = value.replace('.', '/').split('/')
+                    def (day, month, year) = splitDate
+                    def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                           ['MONTH', month as int, 'EQ'],
+                                                                           ['YEAR', year as int, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+                case 'dd.mm.YY hh':
+                    List<String> fullDate = value.replace('ч', '').replace(',', '').split()
+                    def (date, hour) = fullDate
+                    String[] splitDate = date.replace('.', '/').split('/')
+                    def (day, month, year) = splitDate
+
+                    def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                           ['MONTH', month as int, 'EQ'],
+                                                                           ['YEAR', year as int, 'EQ'],
+                                                                           ['HOUR', hour as int, 'EQ']
+                    )
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+                case 'dd.mm.YY hh:ii':
+                    List<String> fullDate = value.split()
+                    def(date, dateTime) = fullDate
+                    String[] splitDate = date.replace('.', '/').split('/')
+                    def (day, month, year) = splitDate
+
+                    def(hour, minute) = dateTime.split(':')
+
+                    def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                           ['MONTH', month as int, 'EQ'],
+                                                                           ['YEAR', year as int, 'EQ'],
+                                                                           ['HOUR', hour as int, 'EQ'],
+                                                                           ['MINUTE', minute as int, 'EQ']
+                    )
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+
+                case 'dd MM':
+                default:
+                    def (String day, String monthName) = value.split()
+                    int month = MainDateFilterProvider.genitiveRussianMonth.get(monthName.toLowerCase()) + 1
+                    def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
+                                                                           ['MONTH', month as int, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             }
+        }
+    }
 
-            if (week)
+    abstract class WeekFilterProviderBase implements FilterProvider
+    {
+        Map<String, Integer> prepareValue(def value)
+        {
+            def weekValue = value.contains('-я')
+                ? value.replace('-я', '').split()
+                : value.replace(' неделя', '').split()
+            def week = weekValue[0] as int
+            def year = weekValue.size() > 1 ? weekValue[1] as int : null
+
+            return [week: week, year: year]
+        }
+    }
+
+    @InjectApi
+    class DynamicWeekFilterProvider extends WeekFilterProviderBase
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
+        {
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
+            switch (format)
             {
-                def weekValue = (week as String).contains('-я')
-                    ? week.replace('-я', '').split()
-                    : week.replace(' неделя', '').split()
-                if (weekFormat == 'WW YY') {
-                    int necessaryYear = weekValue[1] as int
-                    calendar.set(Calendar.YEAR, necessaryYear)
-                }
-                Calendar weekCalendar = calendar.clone()
-
-                weekCalendar.set(Calendar.WEEK_OF_YEAR, weekValue[0] as int)
-                int currentMonth = weekCalendar.get(Calendar.MONTH)
-                def range = weekCalendar.with {
-                    Calendar start = it.clone()
-                    Calendar end = it.clone()
-                    if (weekFormat == 'WW YY') {
-                        weekCalendar.set(Calendar.YEAR, weekValue[1] as int)
+                case ['ww', 'WW YY']:
+                default:
+                    Map<String, Integer> valueMap = prepareValue(value)
+                    wrapper.totalValueCriteria.add(w.eq(s.week(s.property('value')), valueMap.week))
+                    if(valueMap.year)
+                    {
+                        wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year))
                     }
-
-                    start.set(DAY_OF_WEEK, MONDAY)
-                    end.set(DAY_OF_WEEK, SUNDAY)
-
-                    [start.get(DAY_OF_MONTH), end.get(DAY_OF_MONTH)]
-                }
-                calendar.set(Calendar.WEEK_OF_YEAR, weekValue[0] as int)
-                setInterval(rangeMonth, [currentMonth, currentMonth])
-                setInterval(rangeDay, range)
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
             }
+        }
+    }
 
-            if (day)
+    @InjectApi
+    class StaticWeekFilterProvider extends WeekFilterProviderBase
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
+        {
+            switch (format)
             {
-                switch (dayFormat) {
-                    case 'dd.mm.YY':
-                        List<String> splitDate = (day as String).replace('.', '/').split('/')
-
-                        int dateDay =  splitDate[0] as int
-                        int dateMonth =  splitDate[1] as int
-                        int dateYear = splitDate[2] as int
-
-                        calendar.set(Calendar.YEAR, dateYear)
-                        setInterval(rangeMonth, [dateMonth - 1, dateMonth - 1])
-                        setInterval(rangeDay, [dateDay, dateDay])
-                        break
-                    case 'dd.mm.YY hh':
-                        List<String> fullDate = (day as String).replace('ч', '')
-                                                               .replace(',', '')
-                                                               .split()
-                        String date = fullDate[0]
-                        String[] splitDate = date.replace('.', '/').split('/')
-
-                        int dateDay =  splitDate[0] as int
-                        int dateMonth =  splitDate[1] as int
-                        int dateYear = splitDate[2] as int
-
-                        int dateHour = fullDate[1] as int
-                        calendar.set(Calendar.YEAR, dateYear)
-
-                        setInterval(rangeMonth, [dateMonth - 1, dateMonth - 1])
-                        setInterval(rangeDay, [dateDay, dateDay])
-                        setInterval(rangeHour, [dateHour, dateHour])
-                        break
-                    case 'dd.mm.YY hh:ii':
-                        List<String> fullDate = (day as String).split()
-                        String date = fullDate[0]
-                        String[] splitDate = date.replace('.', '/').split('/')
-
-                        int dateDay =  splitDate[0] as int
-                        int dateMonth =  splitDate[1] as int
-                        int dateYear = splitDate[2] as int
-
-                        String[] dateTime = fullDate[1].split(':')
-                        int dateHour = dateTime[0] as int
-                        int dateMinute = dateTime[1] as int
-                        calendar.set(Calendar.YEAR, dateYear)
-
-                        setInterval(rangeMonth, [dateMonth-1, dateMonth-1])
-                        setInterval(rangeDay, [dateDay, dateDay])
-                        setInterval(rangeHour, [dateHour, dateHour])
-                        setInterval(rangeMinute, [dateMinute, dateMinute])
-                        break
-                    default:
-                        def (String currentDay, String nameMonth) = (day as String).split()
-                        int currentMonth = genitiveRussianMonth.get(nameMonth.toLowerCase())
-                        setInterval(rangeMonth, [currentMonth, currentMonth])
-                        setInterval(rangeDay, [currentDay as int, currentDay as int])
-                }
+                case ['ww', 'WW YY']:
+                default:
+                    Map<String, Integer> valueMap = prepareValue(value)
+                    def datePoint = year ? api.date.createDateTimePointPredicates(['WEEK', valueMap.week, 'EQ'],
+                                                                                  ['YEAR', valueMap.year, 'EQ'])
+                        : api.date.createDateTimePointPredicates(['WEEK', week, 'EQ'], ['WEEK', valueMap.week, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             }
-
-            Calendar start = calendar.clone()
-            Calendar end = calendar.clone()
-            start.with {
-                set(MONTH, rangeMonth[0])
-                set(DAY_OF_MONTH, rangeDay[0])
-                set(HOUR_OF_DAY, rangeHour[0])
-                set(MINUTE, rangeMinute[0])
-                set(SECOND, rangeSecond[0])
-                set(MILLISECOND, -1) // Это необходимо! иначе не корректно отработают фильтры
-            }
-            end.with {
-                set(MONTH, rangeMonth[1])
-                set(DAY_OF_MONTH, rangeDay[1])
-                set(HOUR_OF_DAY, rangeHour[1])
-                set(MINUTE, rangeMinute[1])
-                set(SECOND, rangeSecond[1])
-                set(MILLISECOND, 999)
-            }
-            [start.getTime(), end.getTime()]
         }
+   }
 
-        return result
+    abstract class MonthFilterProviderBase implements FilterProvider
+    {
+        Map<String, Object> prepareValue(def value)
+        {
+            def monthValue = value.split(' ')
+            def month = MainDateFilterProvider.nominativeRussianMonth.get(monthValue[0]) + 1
+            def year = monthValue.size() > 1 ? monthValue[1] as int : null
+
+            return [month: month, year: year]
+        }
     }
 
-    /**
-     * Метод получения фильтров по дате
-     * @param groupType - тип системной группировки по дате
-     * @param format - формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getDateFilters(GroupType groupType, String format, String value,
-                       def filterBuilder, Attribute attr)
+    @InjectApi
+    class DynamicMonthFilterProvider extends MonthFilterProviderBase
     {
-        if(attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
+        def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
         {
-            attr.code = AttributeType.TOTAL_VALUE_TYPE
-            filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
-            attr.ref = new Attribute(code: 'textValue',
-                                     type: 'string',
-                                     property: AttributeType.TOTAL_VALUE_TYPE)
-            def objects = findObjects(attr.ref, attr.property, value)
-            checkValuesSize(objects)
-            filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', objects))
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
+
+            switch (format)
+            {
+                case ['MM', 'MM YY']:
+                default:
+                    Map<String, Object> valueMap = prepareValue(value)
+                    wrapper.totalValueCriteria.add(w.eq(s.month(s.property('value')), valueMap.month as int))
+                    if(valueMap.year)
+                    {
+                        wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year as int))
+                    }
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+            }
+
         }
-        else
+    }
+
+    @InjectApi
+    class StaticMonthFilterProvider extends MonthFilterProviderBase
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
         {
-            switch (groupType) {
-                case GroupType.DAY:
-                    return getDayFilters(format, value, filterBuilder, attr)
-                case GroupType.WEEK:
-                    return getWeekFilters(format, value, filterBuilder, attr)
-                case GroupType.MONTH:
-                    return getMonthFilters(format, value, filterBuilder, attr)
-                case GroupType.QUARTER:
-                    return getQuarterFilters(format, value, filterBuilder, attr)
-                case GroupType.YEAR:
-                    return getYearFilters(format, value, filterBuilder, attr)
-                case GroupType.SEVEN_DAYS:
-                    return getSevenDaysFilters(format, value, filterBuilder, attr)
-                case GroupType.HOURS:
-                    return getHourFilters(format, value, filterBuilder, attr)
-                case GroupType.MINUTES:
-                    return getMinuteFilters(format, value, filterBuilder, attr)
-                default: throw new IllegalArgumentException("Not supported group type: $groupType")
+            switch (format)
+            {
+                case ['MM', 'MM YY']:
+                default:
+                    Map<String, Object> valueMap = prepareValue(value)
+                    def datePoint = valueMap.year ? api.date.createDateTimePointPredicates(['MONTH', valueMap.month as int, 'EQ'],
+                                                                                  ['YEAR', valueMap.year, 'EQ'])
+                        : api.date.createDateTimePointPredicates(['MONTH', month as int, 'EQ'], ['MONTH', valueMap.month as int, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
             }
         }
     }
 
-    /**
-     * Метод получения фильтра по дням
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getDayFilters(String format, String value, def filterBuilder, Attribute attr)
+    abstract class QuarteFilterProviderBase implements FilterProvider
     {
-        switch (format)
+        Map<String, Object> prepareValue(def value)
         {
-            case 'dd':
-                int intValue = value.replace('-й', '') as int
-                def datePoint = api.date.createDateTimePointPredicates(['DAY', intValue, 'EQ'], ['DAY', intValue, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
-            case 'WD':
-                int intValue = russianWeekDay.get(value)
-                def datePoint = api.date.createDateTimePointPredicates(['WEEKDAY', intValue, 'EQ'], ['WEEKDAY', intValue, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
-            case 'dd.mm.YY':
-                List<String> splitDate = value.replace('.', '/').split('/')
-                def (day, month, year) = splitDate
-                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
-                                                                       ['MONTH', month as int, 'EQ'],
-                                                                       ['YEAR', year as int, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
-            case 'dd.mm.YY hh':
-                List<String> fullDate = value.replace('ч', '').replace(',', '').split()
+            def quarterValue = value.replace(' кв-л', '').split(' ')
+            def quarter = quarterValue[0] as int
+            def year = quarterValue.size() > 1 ? quarterValue[1] as int : null
 
-                def (date, hour) = fullDate
-                String[] splitDate = date.replace('.', '/').split('/')
-                def (day, month, year) = splitDate
-
-                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
-                                                                       ['MONTH', month as int, 'EQ'],
-                                                                       ['YEAR', year as int, 'EQ'],
-                                                                       ['HOUR', hour as int, 'EQ']
-                )
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
-            case 'dd.mm.YY hh:ii':
-                List<String> fullDate = value.split()
-                def(date, dateTime) = fullDate
-                String[] splitDate = date.replace('.', '/').split('/')
-                def (day, month, year) = splitDate
-
-                def(hour, minute) = dateTime.split(':')
-
-                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
-                                                                       ['MONTH', month as int, 'EQ'],
-                                                                       ['YEAR', year as int, 'EQ'],
-                                                                       ['HOUR', hour as int, 'EQ'],
-                                                                       ['MINUTE', minute as int, 'EQ']
-                )
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
-
-            case 'dd MM':
-            default:
-                def (String day, String monthName) = value.split()
-                int month = genitiveRussianMonth.get(monthName.toLowerCase()) + 1
-                def datePoint = api.date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
-                                                                       ['MONTH', month as int, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            return [quarter: quarter, year: year]
         }
     }
 
-    /**
-     * Метод получения фильтра по неделям
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getWeekFilters(String format, String value, def filterBuilder, Attribute attr)
+    @InjectApi
+    class DynamicQuarterFilterProvider extends QuarteFilterProviderBase
     {
-        switch (format)
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
         {
-            case ['ww', 'WW YY']:
-            default:
-                def weekValue = value.contains('-я')
-                    ? value.replace('-я', '').split()
-                    : value.replace(' неделя', '').split()
-                def week = weekValue[0] as int
-                def year = weekValue.size() > 1 ? weekValue[1] as int : null
-                def datePoint = year ? api.date.createDateTimePointPredicates(['WEEK', week, 'EQ'],
-                                                                              ['YEAR', year, 'EQ'])
-                    : api.date.createDateTimePointPredicates(['WEEK', week, 'EQ'], ['WEEK', week, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
+            switch (format)
+            {
+                case ['QQ', 'QQ YY']:
+                default:
+                    Map<String, Object>  valueMap = prepareValue(value)
+                    wrapper.totalValueCriteria.add(w.eq(s.quarter(s.property('value')), valueMap.quarter))
+                    if(valueMap.year)
+                    {
+                        wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year))
+                    }
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+            }
         }
     }
 
-    /**
-     * Метод получения фильтра по месяцам
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getMonthFilters(String format, String value, def filterBuilder, Attribute attr)
+    @InjectApi
+    class StaticQuarterFilterProvider extends QuarteFilterProviderBase
     {
-        switch (format)
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
         {
-            case ['MM', 'MM YY']:
-            default:
-                def monthValue = value.split(' ')
-                def month = nominativeRussianMonth.get(monthValue[0]) + 1
-                def year = monthValue.size() > 1 ? monthValue[1] as int : null
-                def datePoint = year ? api.date.createDateTimePointPredicates(['MONTH', month as int, 'EQ'],
-                                                                              ['YEAR', year, 'EQ'])
-                    : api.date.createDateTimePointPredicates(['MONTH', month as int, 'EQ'], ['MONTH', month as int, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            switch (format)
+            {
+                case ['QQ', 'QQ YY']:
+                default:
+                    Map<String, Object>  valueMap = prepareValue(value)
+                    def datePoint = valueMap.year ? api.date.createDateTimePointPredicates(['QUARTER', valueMap.quarter, 'EQ'],
+                                                                                  ['YEAR', valueMap.year as int, 'EQ'])
+                        : api.date.createDateTimePointPredicates(['QUARTER', quarter, 'EQ'], ['QUARTER', valueMap.quarter, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            }
         }
     }
 
-    /**
-     * Метод получения фильтра по кварталам
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getQuarterFilters(String format, String value, def filterBuilder, Attribute attr)
+    @InjectApi
+    class DynamicYearFilterProvider implements FilterProvider
     {
-        switch (format)
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
         {
-            case ['QQ', 'QQ YY']:
-            default:
-                def quarterValue = value.replace(' кв-л', '').split(' ')
-                def quarter = quarterValue[0] as int
-                def year = quarterValue.size() > 1 ? quarterValue[1] as int : null
-                def datePoint = year ? api.date.createDateTimePointPredicates(['QUARTER', quarter, 'EQ'],
-                                                                              ['YEAR', year as int, 'EQ'])
-                    : api.date.createDateTimePointPredicates(['QUARTER', quarter, 'EQ'], ['QUARTER', quarter, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
+            switch (format)
+            {
+                case 'yyyy':
+                default:
+                    wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), value as int))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+            }
         }
     }
 
-    /**
-     * Метод получения фильтра по годам
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getYearFilters(String format, String value, def filterBuilder, Attribute attr)
+    @InjectApi
+    class StaticYearFilterProvider implements FilterProvider
     {
-        switch (format)
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
         {
-            case 'yyyy':
-            default:
-                def datePoint = api.date.createDateTimePointPredicates(['YEAR', value as int, 'EQ'], ['YEAR', value as int, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            switch (format)
+            {
+                case 'yyyy':
+                default:
+                    def datePoint = api.date.createDateTimePointPredicates(['YEAR', value as int, 'EQ'], ['YEAR', value as int, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            }
         }
     }
 
-    /**
-     * Метод получения фильтра по 7 дней
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getSevenDaysFilters(String format, String value, def filterBuilder, Attribute attr)
+    @InjectApi
+    class DynamicHourFilterProvider implements FilterProvider
     {
-        switch (format)
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
         {
-            case 'dd mm - dd mm':
-            default:
-                def russianLocale = new Locale('ru')
-                def (day,month, year) = value.tokenize('-').collect { dayAndMonth ->
-                    SimpleDateFormat parser = new SimpleDateFormat('dd.MM.yy', russianLocale)
-                    parser.parse(dayAndMonth)
-                    SimpleDateFormat formatter = new SimpleDateFormat('dd.MM.yyyy')
-                    dayAndMonth = formatter.format(parser.parse(dayAndMonth))
-                    def (d, m, y) = dayAndMonth.tokenize('.')
-                    [d as int, m as int, y as int]
-                }.transpose()
-                def datePointStart = api.date.createDateTimePointPredicates(['DAY',  day[0], 'GE'],
-                                                                            ['MONTH', month[0], 'EQ'],
-                                                                            ['YEAR', year[0], 'EQ'])
-                def datePointEnd = api.date.createDateTimePointPredicates(['DAY',  day[1], 'LE'],
-                                                                          ['MONTH',  month[1], 'EQ'],
-                                                                          ['YEAR', year[1], 'EQ'])
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
 
-                if (day[0] > day[1])
-                {
-                    filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointStart),
-                                      filterBuilder.OR(attr.code,'fromToDatePoint', datePointEnd))
-                }
-                else
-                {
-                    filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointStart))
-                                 .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointEnd))
-                }
-                return filterBuilder
+            switch (format)
+            {
+                case 'hh:ii':
+                    def hoursANDmins = value.tokenize(':/')
+                    wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'HOUR'), hoursANDmins[0] as int))
+                           .add(w.eq(s.extract(s.property('value'), 'MINUTE'), hoursANDmins[1] as int))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+                case 'hh':
+                default:
+                    wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'HOUR'), value as int))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+            }
         }
     }
 
-    /**
-     * Метод получения фильтра по часам
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getHourFilters(String format, String value, def filterBuilder, Attribute attr)
+    @InjectApi
+    class StaticHourFilterProvider implements FilterProvider
     {
-        switch (format)
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
         {
-            case 'hh:ii':
-                def hoursANDmins = value.tokenize(':/')
-                def datePoint = api.date.createDateTimePointPredicates(['HOUR', hoursANDmins[0] as int, 'EQ'],
-                                                                       ['MINUTE', hoursANDmins[1] as int, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
-            case 'hh':
-            default:
-                def datePoint = api.date.createDateTimePointPredicates(['HOUR', value as int, 'EQ'], ['HOUR', value as int, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            switch (format)
+            {
+                case 'hh:ii':
+                    def hoursANDmins = value.tokenize(':/')
+                    def datePoint = api.date.createDateTimePointPredicates(['HOUR', hoursANDmins[0] as int, 'EQ'],
+                                                                           ['MINUTE', hoursANDmins[1] as int, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+                case 'hh':
+                default:
+                   def datePoint = api.date.createDateTimePointPredicates(['HOUR', value as int, 'EQ'], ['HOUR', value as int, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            }
         }
     }
 
-    /**
-     * Метод получения фильтра по минутам
-     * @param format -  формат отображения данных
-     * @param value - значение для фильтра
-     * @param filterBuilder - конструктор фильтра
-     * @param attr - атрибут фильтрации
-     * @return - готовые фильтры по дате в Дриллдаун
-     */
-    def getMinuteFilters(String format, String value, def filterBuilder, Attribute attr)
+    @InjectApi
+    class DynamicMinuteFilterProvider implements FilterProvider
     {
-        switch (format)
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
         {
-            case 'ii':
-            default:
-                value = value.replace(' мин', '')
-                def datePoint = api.date.createDateTimePointPredicates(['MINUTE', value as int, 'EQ'], ['MINUTE', value as int, 'EQ'])
-                return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
+
+            switch (format)
+            {
+                case 'ii':
+                default:
+                    value = value.replace(' мин', '')
+                    wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'MINUTE'), value as int))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+            }
+        }
+    }
+
+    @InjectApi
+    class StaticMinuteFilterProvider implements FilterProvider
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
+        {
+            switch (format)
+            {
+                case 'ii':
+                default:
+                    value = value.replace(' мин', '')
+                    def datePoint = api.date.createDateTimePointPredicates(['MINUTE', value as int, 'EQ'], ['MINUTE', value as int, 'EQ'])
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            }
+        }
+    }
+
+    @InjectApi
+    class DynamicSevenDaysFilterProvider implements FilterProvider
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
+        {
+            def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
+            def w = api.whereClause
+            def s = api.selectClause
+
+            switch (format)
+            {
+                case 'dd mm - dd mm':
+                default:
+                    def russianLocale = new Locale('ru')
+                    def(startDate, endDate) = value.tokenize('-').collect { dayAndMonth ->
+                        SimpleDateFormat parser = new SimpleDateFormat('dd.MM.yy', russianLocale)
+                        return parser.parse(dayAndMonth)
+                    }
+                    wrapper.totalValueCriteria.add(w.between(s.property('value'), startDate, endDate))
+                    def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                    Link.checkValuesSize(uuids)
+                    return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+            }
+        }
+    }
+
+    @InjectApi
+    class StaticSevenDaysFilterProvider implements FilterProvider
+    {
+        def getFilter(String format, String value, def filterBuilder, Attribute attr,
+                                     String classFqn, String descriptor)
+        {
+            switch (format)
+            {
+                case 'dd mm - dd mm':
+                default:
+                    def russianLocale = new Locale('ru')
+                    def (day,month, year) = value.tokenize('-').collect { dayAndMonth ->
+                        SimpleDateFormat parser = new SimpleDateFormat('dd.MM.yy', russianLocale)
+                        parser.parse(dayAndMonth)
+                        SimpleDateFormat formatter = new SimpleDateFormat('dd.MM.yyyy')
+                        dayAndMonth = formatter.format(parser.parse(dayAndMonth))
+                        def (d, m, y) = dayAndMonth.tokenize('.')
+                        [d as int, m as int, y as int]
+                    }.transpose()
+                    def datePointStart = api.date.createDateTimePointPredicates(['DAY',  day[0], 'GE'],
+                                                                                ['MONTH', month[0], 'EQ'],
+                                                                                ['YEAR', year[0], 'EQ'])
+                    def datePointEnd = api.date.createDateTimePointPredicates(['DAY',  day[1], 'LE'],
+                                                                              ['MONTH',  month[1], 'EQ'],
+                                                                              ['YEAR', year[1], 'EQ'])
+
+                    if (day[0] > day[1])
+                    {
+                        filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointStart),
+                                          filterBuilder.OR(attr.code,'fromToDatePoint', datePointEnd))
+                    }
+                    else
+                    {
+                        filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointStart))
+                                     .AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePointEnd))
+                    }
+                    return filterBuilder
+            }
         }
     }
 }
+
 //endregion

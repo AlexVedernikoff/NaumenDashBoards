@@ -351,11 +351,18 @@ class QueryWrapper implements CriteriaWrapper
     {
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
-            Date startMinDate = DashboardUtils.getMinDate(
-                parameter.attribute.attrChains().code.join('.'),
-                parameter.attribute.sourceCode,
-                source.descriptor
-            )
+            Date startMinDate
+            if(parameter.attribute.code.contains(AttributeType.VALUE_TYPE))
+            {
+                startMinDate = DashboardUtils.getMinDateDynamic(parameter.attribute, source)
+            }else
+            {
+                startMinDate = DashboardUtils.getMinDate(
+                    parameter.attribute.attrChains().code.join('.'),
+                    parameter.attribute.sourceCode,
+                    source.descriptor
+                )
+            }
             if(startMinDate)
             {
                 startMinDate = new Date(startMinDate.time).clearTime()
