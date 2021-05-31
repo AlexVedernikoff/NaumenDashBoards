@@ -1,6 +1,7 @@
 // @flow
 import ApexCharts from 'apexcharts';
-import {checkLabelsForOverlap, getXAxisLabels} from 'utils/chart/mixins/helpers';
+import type {AxisWidget} from 'store/widgets/data/types';
+import {checkLabelsForOverlap, formatLabels, getXAxisLabels} from 'utils/chart/mixins/helpers';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
 import {getLegendWidth, getOptions} from 'utils/chart';
@@ -73,13 +74,17 @@ export class Chart extends PureComponent<Props> {
 			};
 
 			if (isAxisChart(type)) {
+				// $FlowFixMe
+				const axisWidget: AxisWidget = widget;
 				const {labels} = data;
-				const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend, isHorizontalChart(type));
+
+				// TODO: SMRMEXT-12049 - убрать при реализации
+				const labelsFormated = formatLabels(axisWidget, labels);
+				const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend, isHorizontalChart(type));
 
 				opts = {
 					...opts,
-					// $FlowFixMe
-					labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
+					labels: getXAxisLabels(labelsFormated, !hasOverlappedLabel),
 					xaxis: {
 						labels: {
 							rotate: hasOverlappedLabel ? -60 : 0,

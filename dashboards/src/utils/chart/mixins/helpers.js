@@ -60,7 +60,7 @@ const valueFormatter = (usesMSInterval: boolean, usesPercent: boolean, showZero:
 	return formattedValue;
 };
 
-const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>, wrap: boolean): ApexLabels => {
+const formatLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>): Array<string> => {
 	const {group} = getMainDataSet(widget.data).parameters[0];
 	let formattedLabels = labels;
 
@@ -74,11 +74,13 @@ const getXAxisLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>,
 				? `${startDate.format('DD MMMM')} - ${endDate.format('DD MMMM')}`
 				: str;
 		});
-	} else if (wrap) {
-		formattedLabels = labels.map(label => label.split(' '));
 	}
 
 	return formattedLabels;
+};
+
+const getXAxisLabels = (labels: Array<string>, wrap: boolean): ApexLabels => {
+	return wrap ? labels.map(label => label.split(' ')) : labels;
 };
 
 const getXAxisOptions = (props: AxisProps, rotate: boolean) => {
@@ -275,6 +277,7 @@ const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement,
 export {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
+	formatLabels,
 	getLegendOptions,
 	getLegendWidth,
 	getMaxStackedValue,
