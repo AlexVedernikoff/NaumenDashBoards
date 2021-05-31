@@ -15,8 +15,8 @@ package ru.naumen.modules.inventory
  */
 def trails()
 {
-    return  api.utils.find('link$vols', [:]).collect {
-        createTrail(it).with { mapTrail(it)}
+    return api.utils.find('link$vols', [:]).findResults {
+        createTrail(it)?.with { mapTrail(it)}
     }
 }
 
@@ -27,16 +27,18 @@ def trails()
  */
 private TrailBuilder createTrail(def dbTrail)
 {
-    return modules.mapRestSettings.createTrailBuilder(dbTrail)
-                  .setHeader(dbTrail.title)
-                  .setColor(dbTrail.HEXcolor)
-                  .addOption('Площадка А',
-                             new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID)))
-                  .addOption('Площадка Б',
-                             new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID)))
-                  .setParts(dbTrail.nestSegmVols)
-                  .setEquipments(dbTrail.nestSegmVols)
-                  .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
+    return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
+        ? modules.mapRestSettings.createTrailBuilder(dbTrail)
+                 .setHeader(dbTrail.title)
+                 .setColor(dbTrail.HEXcolor)
+                 .addOption('Площадка А',
+                            new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID)))
+                 .addOption('Площадка Б',
+                            new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID)))
+                 .setParts(dbTrail.nestSegmVols)
+                 .setEquipments(dbTrail.nestSegmVols)
+                 .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
+        : null
 }
 
 /**
@@ -46,10 +48,10 @@ private TrailBuilder createTrail(def dbTrail)
  */
 private def mapTrail(TrailBuilder trailBuilder)
 {
-    return [type: trailBuilder.type,
-            parts: trailBuilder.parts.collect { mapPart(it) },
-            equipments: trailBuilder.equipments.collect { mapEquipment(it) },
-            data: trailBuilder]
+    return trailBuilder ? [type: trailBuilder.type,
+                           parts     : trailBuilder.parts.findResults { mapPart(it)},
+                           equipments: trailBuilder.equipments.findResults { mapEquipment(it)},
+                           data      : trailBuilder] : [:]
 }
 
 /**
@@ -59,9 +61,9 @@ private def mapTrail(TrailBuilder trailBuilder)
  */
 private def mapPart(PartBuilder partBuilder)
 {
-    return [type: partBuilder.type,
-            geopositions: partBuilder.geopositions,
-            data: partBuilder]
+    return partBuilder ? [type        : partBuilder.type,
+                          geopositions: partBuilder.geopositions,
+                          data        : partBuilder] : [:]
 }
 
 /**
@@ -71,8 +73,8 @@ private def mapPart(PartBuilder partBuilder)
  */
 private def mapEquipment(EquipmentBuilder equipmentBuilder)
 {
-    return [type: equipmentBuilder.type,
-            geoposition: equipmentBuilder.geoposition,
-            icon: equipmentBuilder.icon,
-            data: equipmentBuilder]
+    return equipmentBuilder ? [type       : equipmentBuilder?.type,
+                               geoposition: equipmentBuilder?.geoposition,
+                               icon       : equipmentBuilder?.icon,
+                               data       : equipmentBuilder] : [:]
 }

@@ -325,42 +325,56 @@ class TrailBuilder extends MapObjectBuilder
 
     TrailBuilder setParts(Collection<IUUIDIdentifiable> dbParts)
     {
-        this.parts = dbParts.collect {
-            return modules.mapRestSettings.createPartBuilder(it)
-                          .setHeader(it.title)
-                          .setColor(it.HEXcolor)
-                          .addOption('Площадка А',
-                                     new Value(label: it.siteA.title, url: api.web.open(it.siteA.UUID)))
-                          .addOption('Площадка Б',
-                                     new Value(label: it.siteB.title, url: api.web.open(it.siteB.UUID)))
-                          .addOption('Входит в ВОЛС',
-                                     new Value(label: this.object.title, url: api.web.open(this.object.UUID)))
-                          .setGeopositions(it)
-                          .addAction('Перейти на карточку', api.web.open(it.UUID))
+        this.parts = dbParts?.findResults {
+            if(it && it.title && it.siteA && it.siteB)
+            {
+                return modules.mapRestSettings.createPartBuilder(it)
+                              .setHeader(it.title)
+                              .setColor(it.HEXcolor)
+                              .addOption('Площадка А',
+                                         new Value(label: it.siteA.title, url: api.web.open(it.siteA.UUID)))
+                              .addOption('Площадка Б',
+                                         new Value(label: it.siteB.title, url: api.web.open(it.siteB.UUID)))
+                              .addOption('Входит в ВОЛС',
+                                         new Value(label: this.object.title, url: api.web.open(this.object.UUID)))
+                              .setGeopositions(it)
+                              .addAction('Перейти на карточку', api.web.open(it.UUID))
+
+            }
+
         }
         return this
     }
 
     TrailBuilder setEquipments(Collection dbParts)
     {
-        this.equipments = dbParts.collectMany { dbPart ->
-            def dbEquipmetnts = dbPart.siteA.cmdb + dbPart.siteB.cmdb
-            return dbEquipmetnts.collect { equipment ->
-                Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
-                return modules.mapRestSettings.createEquipmentBuilder(equipIsActive
-                                                                          ? MapObjectType.ACTIVE
-                                                                          : MapObjectType.PASSIVE , equipment)
-                              .setHeader(equipment.title)
-                              .setIcon(equipment)
-                              .setEquipType(equipIsActive ? null : equipment)
-                              .setGeoposition(equipment)
-                              .addAction('Перейти на карточку', api.web.open(equipment.UUID))
-                              .addOption('Модель',
-                                         new Value(label: equipment.ciModel.title, url: api.web.open(equipment.ciModel.UUID)))
-                              .addOption('Расположение',
-                                         new Value(label: equipment.location.title, url: api.web.open(equipment.location.UUID)))
+        this.equipments = dbParts?.collectMany { dbPart ->
+            if(dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
+            {
+                def dbEquipmetnts = []
+                dbEquipmetnts = dbEquipmetnts + dbPart.siteA.cmdb + dbPart.siteB.cmdb
+
+                return dbEquipmetnts?.findResults { equipment ->
+                    if(equipment && equipment.title && equipment.ciModel && equipment.location)
+                    {
+                        Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
+                        return modules.mapRestSettings.createEquipmentBuilder(equipIsActive
+                                              ? MapObjectType.ACTIVE
+                                              : MapObjectType.PASSIVE , equipment)
+                                      .setHeader(equipment.title)
+                                      .setIcon(equipment)
+                                      .setEquipType(equipIsActive ? null : equipment)
+                                      .setGeoposition(equipment)
+                                      .addAction('Перейти на карточку', api.web.open(equipment.UUID))
+                                      .addOption('Модель',
+                                                 new Value(label: equipment.ciModel.title, url: api.web.open(equipment.ciModel.UUID)))
+                                      .addOption('Расположение',
+                                                 new Value(label: equipment.location.title, url: api.web.open(equipment.location.UUID)))
+                    }
+                } ?: []
             }
-        }
+            return []
+        }.unique{ it.uuid }
         return this
     }
 }
@@ -394,9 +408,11 @@ class PartBuilder extends MapObjectBuilder
     PartBuilder setGeopositions(def dbPart)
     {
         Collection<Geoposition> geopositions = []
-
-        geopositions.add(new Geoposition(latitude: dbPart.siteA.gradLat, longitude: dbPart.siteA.gradLong))
-        geopositions.add(new Geoposition(latitude: dbPart.siteB.gradLat, longitude: dbPart.siteB.gradLong))
+        if(dbPart && dbPart.siteA && dbPart.siteB)
+        {
+            geopositions.add(new Geoposition(latitude: dbPart.siteA.gradLat, longitude: dbPart.siteA.gradLong))
+            geopositions.add(new Geoposition(latitude: dbPart.siteB.gradLat, longitude: dbPart.siteB.gradLong))
+        }
 
         this.geopositions = geopositions
         return this
@@ -448,13 +464,15 @@ class EquipmentBuilder extends MapObjectBuilder
 
     EquipmentBuilder setGeoposition(def dbEquip)
     {
-        this.geoposition = new Geoposition(latitude: dbEquip.location.gradLat, longitude: dbEquip.location.gradLong)
+        this.geoposition = dbEquip && dbEquip.location
+            ? new Geoposition(latitude: dbEquip.location.gradLat, longitude: dbEquip.location.gradLong)
+            : null
         return this
     }
 
     EquipmentBuilder setIcon(def dbEquip)
     {
-        String fileUuid = dbEquip.classification?.icon?.find()?.UUID ?: ''
+        String fileUuid = dbEquip?.classification?.icon?.find()?.UUID ?: ''
         this.icon = fileUuid ? "/sd/operator/download?uuid=${fileUuid}" : ''
         return this
     }
