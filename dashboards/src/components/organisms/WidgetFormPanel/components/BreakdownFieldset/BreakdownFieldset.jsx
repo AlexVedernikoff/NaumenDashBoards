@@ -115,7 +115,7 @@ export class BreakdownFieldset extends Component<Props> {
 		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex);
 	};
 
-	handleChangeGroup = (breakdownIndex: number) => (name: string, group: Group, attribute: Attribute) => {
+	handleChangeGroup = (breakdownIndex: number) => (group: Group, attribute: Attribute) => {
 		const {onChange, value} = this.props;
 		const newBreakdown = value.map((item, i) => breakdownIndex === i ? {...item, attribute, group} : item);
 
