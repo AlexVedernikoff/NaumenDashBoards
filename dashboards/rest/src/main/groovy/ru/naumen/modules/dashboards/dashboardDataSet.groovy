@@ -1788,7 +1788,16 @@ class DashboardDataSetService
                     }
                     else
                     {
-                        Date minDate = DashboardUtils.getMinDate(attribute.code, attribute.sourceCode)
+                        if(attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
+                        {
+                            def tempAttr = attribute.deepClone()
+                            tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
+                            minDate = DashboardUtils.getMinDateDynamic(tempAttr,source)
+                        }else
+                        {
+                            minDate = DashboardUtils.getMinDate(attribute.code.attrChains().join('.'), attribute.sourceCode)
+                        }
+
                         start = new Date(minDate.time).clearTime()
                     }
                     def end
@@ -1919,8 +1928,20 @@ class DashboardDataSetService
                     }
                     else
                     {
-                        String attributeCode = "${attribute.code}.deadLineTime"
-                        Date minDate = DashboardUtils.getMinDate(attributeCode, attribute.sourceCode)
+
+                        def minDate
+
+                        if(attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
+                        {
+                            def tempAttr = attribute.deepClone()
+                            tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
+                            minDate = DashboardUtils.getMinDateDynamic(tempAttr,source)
+                        }
+                        else
+                        {
+                            String attributeCode = "${attribute.attrChains().code.join('.')}.deadLineTime"
+                            minDate = DashboardUtils.getMinDate(attributeCode, attribute.sourceCode)
+                        }
                         start = new Date(minDate.time).clearTime()
                     }
                     def end
@@ -2121,7 +2142,17 @@ class DashboardDataSetService
                         {
                             res = getTop(res, top, parameterFilters, breakdownFilters)
                         }
-                        if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+                        def dynAttr
+                        if( templateUUID)
+                        {
+                            //на дин атрибуте может не быть кастомной группировки, но будет условие для нефильтрации датасета
+                            dynAttr = requestData?.groups?.find()?.attribute
+                        }
+                        def dynAttrType = dynAttr ? Attribute.getAttributeType(dynAttr) : null
+                        Boolean parameterWithDateOrDtInterval = dynAttrType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
+                        if (!parameterWithDateOrDtInterval &&
+                            (aggregationSortingType || parameterSortingType) &&
+                            diagramType in DiagramType.SortableTypes)
                         {
                             return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
                         }
@@ -2702,11 +2733,21 @@ class DashboardDataSetService
                 }
                 def russianLocale = new Locale("ru")
                 SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd.MM.yy", russianLocale)
-                def minDate = DashboardUtils.getMinDate(
-                    parameter.attribute.attrChains().code.join('.'),
-                    source.classFqn,
-                    source.descriptor
-                )
+                def minDate
+
+                if(parameter.attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
+                {
+                    def tempAttr = parameter.attribute.deepClone()
+                    tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
+                    minDate = DashboardUtils.getMinDateDynamic(tempAttr, source)
+                }else
+                {
+                    minDate = DashboardUtils.getMinDate(
+                        parameter.attribute.attrChains().code.join('.'),
+                        parameter.attribute.sourceCode,
+                        source.descriptor
+                    )
+                }
                 def countDays = (value as int) * 7
                 String startDate = Calendar.instance.with {
                     setTime(minDate)

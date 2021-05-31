@@ -1200,7 +1200,7 @@ class DashboardSettingsService
         Collection<CustomGroup> correctCustomGroups = []
         if(destinationDashboardKey != sourceDashboardKey)
         {
-            List customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
+            List<String> customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
             Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
             Collection<CustomGroup> destinationCustomGroups = dashboardSettings?.customGroups?.findAll { group ->
                 customGroupsIds.any { group.id.contains(it) }
@@ -1581,9 +1581,9 @@ class DashboardSettingsService
         switch (conditionSpread)
         {
             case 'any':
-                return elements?.any { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.any {it.contains('subject') || it.contains('object')} }
+                return elements ? elements?.any { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.any {it.contains('subject') || it.contains('object')} } : false
             case 'every':
-                return elements?.every { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.every {it.contains('subject') || it.contains('object')} }
+                return elements ? elements?.every { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.every {it.contains('subject') || it.contains('object')} } : false
             default:
                 throw new IllegalArgumentException('Wrong Argument')
         }
