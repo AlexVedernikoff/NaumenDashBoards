@@ -8,59 +8,76 @@ import type {
 } from './types';
 import {DYNAMIC_GROUPS_EVENTS} from './constants';
 
-const setDynamicGroups = (state: DynamicGroupsState, payload: ReceiveDynamicAttributeGroupsPayload) => {
+const setDynamicGroups = (
+	state: DynamicGroupsState,
+	payload: ReceiveDynamicAttributeGroupsPayload
+): DynamicGroupsState => {
 	const {dataKey, groups} = payload;
+	const result = {...state};
 
 	groups.forEach(group => {
-		state[dataKey].data[group.code] = {
-			children: [],
-			error: false,
-			id: group.code,
-			loading: false,
-			parent: null,
-			uploaded: false,
-			value: group
+		result[dataKey] = {
+			...result[dataKey],
+			data: {
+				...result[dataKey].data,
+				[group.code]: {
+					children: [],
+					error: false,
+					id: group.code,
+					loading: false,
+					parent: null,
+					uploaded: false,
+					value: group
+				}
+			},
+			loading: false
 		};
 	});
 
-	return {
+	return result;
+};
+
+const setDynamicAttributes = (
+	state: DynamicGroupsState,
+	payload: ReceiveDynamicAttributesPayload
+): DynamicGroupsState => {
+	const {attributes, dataKey, groupCode} = payload;
+
+	const result = {
 		...state,
 		[dataKey]: {
 			...state[dataKey],
-			loading: false
-		}
-	};
-};
-
-const setDynamicAttributes = (state: DynamicGroupsState, payload: ReceiveDynamicAttributesPayload) => {
-	const {attributes, dataKey, groupCode} = payload;
-
-	state[dataKey] = {
-		...state[dataKey],
-		data: {
-			...state[dataKey].data,
-			[groupCode]: {
-				...state[dataKey].data[groupCode],
-				children: attributes.map(attribute => attribute.code),
-				loading: false,
-				uploaded: true
+			data: {
+				...state[dataKey].data,
+				[groupCode]: {
+					...state[dataKey].data[groupCode],
+					children: attributes.map(attribute => attribute.code),
+					loading: false,
+					uploaded: true
+				}
 			}
 		}
 	};
 
 	attributes.forEach(attribute => {
-		state[dataKey].data[attribute.code] = {
-			children: null,
-			error: false,
-			id: attribute.code,
-			loading: false,
-			parent: groupCode,
-			uploaded: true,
-			value: attribute
+		result[dataKey] = {
+			...result[dataKey],
+			data: {
+				...result[dataKey].data,
+				[attribute.code]: {
+					children: null,
+					error: false,
+					id: attribute.code,
+					loading: false,
+					parent: groupCode,
+					uploaded: true,
+					value: attribute
+				}
+			}
 		};
 	});
 
-	return {...state};
+	return result;
 };
 
 const reducer = (
