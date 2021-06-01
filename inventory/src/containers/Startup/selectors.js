@@ -1,7 +1,7 @@
 // @flow
-import {getAppConfig} from 'store/geolocation/actions';
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
+import {getAppConfig} from 'store/geolocation/actions';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния

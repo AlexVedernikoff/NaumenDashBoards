@@ -6,8 +6,7 @@ import {
 	changeState,
 	getContext,
 	getParams,
-	getMap,
-	getLastGeopositions
+	getTrails
 } from './context';
 
 export {
@@ -16,7 +15,6 @@ export {
 	changeState,
 	client,
 	getContext,
-	getMap,
-	getLastGeopositions,
+	getTrails,
 	getParams
 };

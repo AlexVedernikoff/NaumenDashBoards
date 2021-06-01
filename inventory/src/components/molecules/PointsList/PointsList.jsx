@@ -1,27 +1,26 @@
 // @flow
 import {connect} from 'react-redux';
-import type {Point} from 'types/point';
-import PointDynamic from 'components/molecules/PointDynamic';
-import PointMultiple from 'components/molecules/PointMultiple';
+import type {Equipment} from 'types/equipment';
 import PointStatic from 'components/molecules/PointStatic';
-import type {Props, State} from './types';
 import {props} from './selectors';
+import type {Props} from './types';
 import React, {Component} from 'react';
+import Trail from 'components/molecules/Trail';
+import type {Trail as TrailType} from 'types/trail';
 
-export class PointsList extends Component<Props, State> {
-	renderDynamicMarker = (point: Point, key: number) => <PointDynamic point={point} key={key} />;
-
-	renderStaticMarker = (point: Point) => point.data.length === 1 ? <PointStatic point={point} key={point.data[0].uuid} /> : <PointMultiple point={point} key={point.data[0].uuid} />;
+export class PointsList extends Component<Props> {
+	renderEquipments = (equipment: Equipment) => <PointStatic point={equipment} key={equipment.data.uuid} />;
+	renderTrail = (trail: TrailType) => <Trail trail={trail} key={trail.data.uuid} />;
 
 	render () {
-		const {dynamicPoints, staticPoints} = this.props;
-
+		const {trails} = this.props;
 		return (
 			<div>
-				{dynamicPoints.length && dynamicPoints.map(this.renderDynamicMarker)}
-				{staticPoints.length && staticPoints.map(this.renderStaticMarker)}
+				{trails.length && trails.map(this.renderTrail)}
+				{trails.length && trails.map(trail => trail.equipments && trail.equipments.map(this.renderEquipments))}
 			</div>
 		);
 	}
 }
+
 export default connect(props)(PointsList);

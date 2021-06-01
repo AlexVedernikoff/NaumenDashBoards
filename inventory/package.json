@@ -10,7 +10,7 @@
     "url": "https://nordclan.com/"
   },
   "contributors": [],
-  "description": "Embedded aplication 'GeoLocation' for smp",
+  "description": "Embedded application 'Inventory' for SMP",
   "devDependencies": {
     "autoprefixer": "^8.6.0",
     "axios": "^0.19.0",
@@ -24,6 +24,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "bestzip": "^2.1.7",
+    "circular-dependency-plugin": "^5.2.2",
     "classnames": "^2.2.5",
     "copy-webpack-plugin": "^4.5.1",
     "cross-env": "^5.1.6",
@@ -82,11 +83,11 @@
   "keywords": [
     "naumen",
     "embedded",
-    "geolocation",
+    "inventory",
     "react"
   ],
   "license": "ISC",
-  "name": "geolocation",
+  "name": "inventory",
   "repository": {
     "type": "git",
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"

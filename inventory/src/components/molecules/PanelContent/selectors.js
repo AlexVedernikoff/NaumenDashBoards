@@ -1,20 +1,16 @@
 // @flow
 import type {AppState} from 'store/types';
-import type {ConnectedFunctions, ConnectedProps} from './types';
+import type {ConnectedProps} from './types';
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {showSinglePoint} = geolocation;
+	const {showSingleObject} = geolocation;
 
 	return {
-		showSinglePoint
+		showSingleObject
 	};
 };
 
-const functions: ConnectedFunctions = {
-};
-
 export {
-	functions,
 	props
 };

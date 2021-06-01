@@ -12,32 +12,34 @@ import styles from './PanelPoint.less';
 export class PanelPoint extends Component<Props, State> {
 	constructor (props: Object) {
 		super(props);
+
 		this.state = {
 			actionShow: false
 		};
 	}
 
 	showSingle = () => {
-		const {showSinglePoint} = this.props;
+		const {showSingleObject} = this.props;
 
-		if (!showSinglePoint) {
-			const {geoposition, pointData, setSinglePoint, type} = this.props;
+		if (!showSingleObject) {
+			const {geoposition, pointData, setSingleObject, type} = this.props;
 
 			this.setState({actionShow: false});
+
 			if (!geoposition) {
 				const {header} = pointData;
-
 				notify('single', 'info', header);
 			}
+
 			const data = {
 				geoposition,
-				data: [pointData],
+				data: pointData,
 				type
 			};
 
-			setSinglePoint(data);
+			setSingleObject(data);
 		}
-	}
+	};
 
 	showAction = () => this.setState({actionShow: true});
 
@@ -46,24 +48,24 @@ export class PanelPoint extends Component<Props, State> {
 	renderOption = (option: Option, id: number) => <PanelPointContent option={option} key={`option_${id}`} />;
 
 	render () {
-		const {pointData, showSinglePoint, statusColor} = this.props;
+		const {pointData, showSingleObject, statusColor} = this.props;
 		const {actions, header, options, uuid} = pointData;
 		const {actionShow} = this.state;
 		const showKebab = (actionShow && actions.length);
-		const pointContainerCN = showSinglePoint ? styles.pointSingleContent : styles.pointContent;
+		const pointContainerCN = showSingleObject ? styles.pointSingleContent : styles.pointContent;
 
 		return (
 			<div className={styles.pointContainer}>
 				<div
-					onMouseOver={this.showAction}
-					onMouseLeave={this.hideAction}
-					onClick={this.showSingle}
 					className={pointContainerCN}
+					onClick={this.showSingle}
+					onMouseLeave={this.hideAction}
+					onMouseOver={this.showAction}
 					style={{borderLeft: `4px ${statusColor} solid`}}
 				>
-					{header && <PanelPointHeader
-						header={header}
+					{<PanelPointHeader
 						actions={actions}
+						header={header || 'Название отсутствует'}
 						showKebab={showKebab}
 						uuid={uuid}
 					/>}
@@ -73,4 +75,5 @@ export class PanelPoint extends Component<Props, State> {
 		);
 	}
 }
+
 export default connect(props, functions)(PanelPoint);

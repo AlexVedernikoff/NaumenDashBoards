@@ -14,6 +14,4 @@ export type ConnectedFunctions = {
 	selectAllGroups: () => GeolocationAction
 };
 
-export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
-
-export type State = {};
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;

@@ -16,15 +16,14 @@ export type ConnectedProps = {
 
 export type ConnectedFunctions = {
 	fetchGeolocation: () => ThunkAction,
-	reloadGeolocation: () => ThunkAction,
 	toggleFilter: () => GeolocationAction,
 	togglePanel: () => GeolocationAction
 };
 
-export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;
 
 export type State = {
+	filterHover: boolean,
 	panelHover: boolean,
-	reloadHover: boolean,
-	filterHover: boolean
+	reloadHover: boolean
 };

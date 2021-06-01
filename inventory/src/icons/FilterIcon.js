@@ -7,7 +7,7 @@ const PanelIcon = ({color, active}: Object) => (
 			<rect x="8" y="6" width="36" height="36" rx="4" fill="white"/>
 		</g>
 		<rect x="12" y="10" width="28" height="28" rx="2" fill={color}/>
-		<path d="M32 18H20V19.7622C20 20.0306 20.1079 20.2877 20.2994 20.4758L24.4012 24.503C24.7842 24.879 25 25.3933 25 25.9301V31L27 30V25.9301C27 25.3933 27.2158 24.879 27.5988 24.503L31.7006 20.4758C31.8921 20.2877 32 20.0306 32 19.7622V18Z" fill="#5F5F5F"/>
+		<path d="M32 18H20V19.76C20 20.03 20.10 20.27 20.29 20.47L24.40 24.50C24.78 24.87 25 25.39 25 25.93V31L27 30V25.93C27 25.39 27.21 24.87 27.59 24.50L31.70 20.47C31.89 20.28 32 20.03 32 19.76V18Z" fill="#5F5F5F"/>
 		{active && (<circle cx="36" cy="14" r="5" fill="#6FCF97" stroke="white" strokeWidth="2"/>)}
 		<defs>
 			<filter id="filter0_d" x="0" y="0" width="52" height="52" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">

@@ -1,84 +1,11 @@
 // @flow
+import type {Axis, State, ScrollableProps as Props} from './types';
 import cn from 'classnames';
 import {MIN_SLIDER_SIZE, WHEEL_DELTA} from './constants';
-import type {Node} from 'react';
 import React, {Component} from 'react';
 import Slider from './Slider';
 import styles from './Scrollable.less';
 import Track from './Track';
-
-type Axis = 'x' | 'y';
-
-type scrollbarColors = 'grey' | 'white';
-
-export type Props = {
-	/**
-	 * Внутреннее содержимое компонента.
-	 */
-	attachRef?: (HTMLDivElement | null) => void,
-	/**
-	 * Внутреннее содержимое компонента.
-	 */
-	children?: Node,
-
-	/**
-	 * Внешний `css`-класс.
-	 */
-	className?: string,
-
-	/**
-	 * Обработчик клика мыши.
-	 */
-	onClick?: MouseEventHandler,
-
-	/**
-	 * Обработчик события, когда клавиша мыши нажата над компонентом.
-	 */
-	onMouseDown?: MouseEventHandler,
-
-	/**
-	 * Обработчик наведения курсора мыши на компонент.
-	 */
-	onMouseEnter?: MouseEventHandler,
-
-	/**
-	 * Обработчик перемещения курсора мыши за границы компонента.
-	 */
-	onMouseLeave?: MouseEventHandler,
-
-	/**
-	 * Обработчик события, когда клавиша мыши отпущена над компонентом.
-	 */
-	onMouseUp?: MouseEventHandler,
-
-	/**
-	 * Обработчик события прокрутки.
-	 */
-	onScroll?: () => void,
-
-	/**
-	 * Цветовая тема скроллбара.
-	 *
-	 * `type scrollbarColors = 'grey' | 'white'`
-	 */
-	scrollbarColors: scrollbarColors
-};
-
-export type State = {
-	containerHeight: number,
-	containerWidth: number,
-	contentHeight: number,
-	contentWidth: number,
-	mouseDownOnSliderX: boolean,
-	mouseDownOnSliderY: boolean,
-	scrollXIsActive: boolean,
-	scrollYIsActive: boolean,
-	scrollXPosition: number,
-	scrollYPosition: number,
-	shiftIsPressed: boolean,
-	sliderXWidth: number,
-	sliderYHeight: number
-};
 
 export class Scrollable extends Component<Props, State> {
 	props: Props;

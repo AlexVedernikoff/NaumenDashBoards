@@ -1,30 +1,8 @@
 // @flow
 import cn from 'classnames';
+import type {SliderProps as Props} from './types';
 import React, {Component} from 'react';
 import styles from './Scrollable.less';
-
-type Axis = 'x' | 'y';
-
-type scrollbarColors = 'grey' | 'white';
-
-export type Props = {
-	/**
-	 * На какой оси расположен компонент.
-	 */
-	axis: Axis,
-
-	/**
-	 * Обработчик события прокрутки колёсика мышки.
-	 */
-	onWheelScroll: (e: WheelEvent) => any,
-
-	/**
-	 * Цветовая тема скроллбара.
-	 *
-	 * `type scrollbarColors = 'grey' | 'white'`
-	 */
-	scrollbarColors: scrollbarColors
-};
 
 export class Track extends Component<Props> {
 	props: Props;

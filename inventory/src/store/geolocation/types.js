@@ -9,6 +9,7 @@ type SetContext = {
 	type: typeof GEOLOCATION_EVENTS.SET_CONTEXT,
 	payload: Context
 };
+
 type SetParams = {
 	type: typeof GEOLOCATION_EVENTS.SET_PARAMS,
 	payload: Object
@@ -34,12 +35,12 @@ type SetTab = {
 	payload: PointType
 };
 
-type SetSinglePoint = {
+type setSingleObject = {
 	type: typeof GEOLOCATION_EVENTS.SET_SINGLE_POINT,
 	payload: Point
 };
 
-type ResetSinglePoint = {
+type ResetSingleObject = {
 	type: typeof GEOLOCATION_EVENTS.RESET_SINGLE_POINT
 };
 
@@ -73,12 +74,12 @@ export type GeolocationAction =
 	| ReloadActivePoint
 	| RecordGeolocationError
 	| ResetAllGroups
-	| ResetSinglePoint
+	| ResetSingleObject
 	| SelectAllGroups
 	| SetContext
 	| SetDataGeolocation
 	| SetParams
-	| SetSinglePoint
+	| setSingleObject
 	| SetTab
 	| ToggleFilter
 	| ToggleGroup
@@ -89,15 +90,13 @@ export type GeolocationAction =
 export type GeolocationState = {
 	context: Context | Object,
 	controls: Controls,
-	dynamicPoints: Array<Point>,
 	error: boolean,
 	loading: boolean,
 	panelShow: PointType,
 	params: Params,
-	showSinglePoint: boolean,
-	singlePoint: Point | null,
+	showSingleObject: boolean,
+	singleObject: Point | null,
 	staticGroups: Array<StaticGroup>,
-	staticPoints: Array<Point>,
 	success: boolean,
 	timeUpdate: number
 };

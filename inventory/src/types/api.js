@@ -4,8 +4,7 @@ export type Module =
 
 export type Method =
 	| 'getCurrentContextObject'
-	| 'getLastGeopositions'
-	| 'getMap';
+	| 'getTrails';
 
 export type Context = {
 	contentCode: string,

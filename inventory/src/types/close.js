@@ -1,5 +1,5 @@
 // @flow
 export type CloseToast = {
-    type: 'default',
-    closeToast?: () => void
+    closeToast?: () => void,
+    type: 'default'
 };

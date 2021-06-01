@@ -6,12 +6,11 @@ import {setTab} from 'store/geolocation/actions';
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
 	const {panelShow, params} = geolocation;
-	const {dynamicPointsListName, staticPointsListName} = params;
+	const {listName} = params;
 
 	return {
-		dynamicPointsListName,
-		panelShow,
-		staticPointsListName
+		listName,
+		panelShow
 	};
 };
 

@@ -1,30 +1,24 @@
 // @flow
-import type {Props} from './types';
-import React, {Component} from 'react';
+import React from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './Toast.less';
 import ToastClose from 'components/atoms/ToastClose';
 import {ToastContainer} from 'react-toastify';
 
-export class Toast extends Component<Props> {
-	render () {
-		return (
-			<div className='toastMap'>
-				<ToastContainer
-					position="bottom-left"
-					closeButton={<ToastClose type='default'/>}
-					className={styles.toastContainer}
-					hideProgressBar
-					newestOnTop={false}
-					closeOnClick={false}
-					rtl={false}
-					pauseOnVisibilityChange
-					draggable={false}
-					pauseOnHover
-				/>
-			</div>
-		);
-	}
-}
+const Toast = () =>
+	<div className='toastMap'>
+		<ToastContainer
+			className={styles.toastContainer}
+			closeButton={<ToastClose type='default'/>}
+			closeOnClick={false}
+			draggable={false}
+			hideProgressBar
+			newestOnTop={false}
+			pauseOnHover
+			pauseOnVisibilityChange
+			position="bottom-left"
+			rtl={false}
+		/>
+	</div>;
 
 export default Toast;

@@ -1,6 +1,6 @@
 'use strict';
 
-const define = require('./define');
+const {development, dist, mode} = require('./define');
 const loaders = require('./loaders');
 const localIp = require('my-local-ip');
 const optimization = require('./optimization');
@@ -9,17 +9,25 @@ const resolve = require('./resolve');
 
 module.exports = {
 	devServer: {
-		host: localIp()
+		historyApiFallback: true,
+		host: localIp(),
+		proxy: {
+			'/sd/services/rest/*': {
+				changeOrigin: true,
+				target: process.env.API_URL
+			}
+		}
 	},
+	devtool: development ? 'source-map' : false,
 	entry: {
 		'index': ['babel-polyfill', './src/index.js']
 	},
-	mode: define.mode,
+	mode: mode,
 	module: loaders,
 	optimization,
 	output: {
 		filename: '[name].[contenthash].js',
-		path: define.dist
+		path: dist
 	},
 	plugins,
 	resolve

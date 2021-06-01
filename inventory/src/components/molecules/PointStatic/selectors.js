@@ -1,28 +1,25 @@
 // @flow
-import {checkActivePoint, colorGroup} from 'helpers/marker';
+import {checkActivePoint} from 'helpers/marker';
 import type {ConnectedFunctions, ConnectedProps, OwnProps} from './types';
 import type {AppState} from 'store/types';
-import {setSinglePoint} from 'store/geolocation/actions';
+import {setSingleObject} from 'store/geolocation/actions';
 
 const props = (state: AppState, props: OwnProps): ConnectedProps => {
 	const {geolocation} = state;
 	const {point} = props;
-	const {params, showSinglePoint, singlePoint, staticGroups} = geolocation;
-	const active = (showSinglePoint && singlePoint) ? checkActivePoint(point, singlePoint) : false;
-	const {group} = point.data[0];
-	const color = colorGroup(group, staticGroups);
+	const {showSingleObject, singleObject} = geolocation;
+	const active = (showSingleObject && singleObject) ? checkActivePoint(point, singleObject) : false;
 
 	return {
-		active,
-		color: color || params.colorStaticPoint
+		active
 	};
 };
 
 const functions: ConnectedFunctions = {
-	setSinglePoint
+	setSingleObject
 };
 
 export {
-	props,
-	functions
+	functions,
+	props
 };

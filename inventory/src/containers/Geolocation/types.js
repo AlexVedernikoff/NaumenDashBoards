@@ -6,7 +6,7 @@ export type ConnectedProps = {
 	bounds: LatLngBounds
 };
 export type ConnectedFunctions = {
-	resetSinglePoint: () => GeolocationAction
+	resetSingleObject: () => GeolocationAction
 };
 
-export type Props =ConnectedFunctions & ConnectedProps;
+export type Props = ConnectedProps & ConnectedFunctions;

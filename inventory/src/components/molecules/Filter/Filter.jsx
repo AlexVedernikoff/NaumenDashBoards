@@ -2,14 +2,12 @@
 import {connect} from 'react-redux';
 import FilterItem from 'components/atoms/FilterItem';
 import {functions, props} from './selectors';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {Component} from 'react';
 import type {StaticGroup} from 'types/point';
 import styles from './Filter.less';
 
-export class Filter extends Component<Props, State> {
-	renderFilterItem = (filterItem: StaticGroup, key: number) => <FilterItem filterItem={filterItem} key={key} />
-
+export class Filter extends Component<Props> {
 	renderButtons = () => {
 		const {resetAllGroups, selectAllGroups} = this.props;
 
@@ -19,7 +17,9 @@ export class Filter extends Component<Props, State> {
 				<div onClick={resetAllGroups}>Снять выбор</div>
 			</div>
 		);
-	}
+	};
+
+	renderFilterItem = (filterItem: StaticGroup, key: number) => <FilterItem filterItem={filterItem} key={key} />;
 
 	renderFilter = () => {
 		const {staticGroups} = this.props;
@@ -29,7 +29,13 @@ export class Filter extends Component<Props, State> {
 				{staticGroups.map(this.renderFilterItem)}
 			</div>
 		);
-	}
+	};
+
+	renderHead = () =>
+		<div className={styles.filterHead}>
+			<div className={styles.filterLable}>Фильтрация</div>
+			{this.renderButtons()}
+		</div>;
 
 	render () {
 		const {open} = this.props;
@@ -38,17 +44,15 @@ export class Filter extends Component<Props, State> {
 			return (
 				<div className={styles.filterWrap}>
 					<div className={styles.filterContainer}>
-						<div className={styles.filterHead}>
-							<div className={styles.filterLable}>Фильтрация</div>
-							{this.renderButtons()}
-						</div>
+						{this.renderHead()}
 						{this.renderFilter()}
 					</div>
 				</div>
 			);
-		} else {
-			return <div />;
 		}
+
+		return <div />;
 	}
 }
+
 export default connect(props, functions)(Filter);

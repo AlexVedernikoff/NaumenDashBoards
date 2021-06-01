@@ -1,55 +1,8 @@
 // @flow
 import cn from 'classnames';
 import React, {Component} from 'react';
+import type {TrackProps as Props} from './types';
 import styles from './Scrollable.less';
-
-type Axis = 'x' | 'y';
-
-type scrollbarColors = 'grey' | 'white';
-
-export type Props = {
-	/**
-	 * На какой оси расположен компонент.
-	 */
-	axis: Axis,
-
-	/**
-	 * Обработчик события, когда клавиша мыши нажата над компонентом.
-	 */
-	onMouseDown: (e: MouseEvent, axis: Axis) => any,
-
-	/**
-	 * Обработчик нажатия на компонент.
-	 */
-	onTouch: (e: TouchEvent) => any,
-
-	/**
-	 * Обработчик события прокрутки колёсика мышки.
-	 */
-	onWheelScroll: (e: WheelEvent) => any,
-
-	/**
-	 * Состояние нажатого ползунка.
-	 */
-	pressed: boolean,
-
-	/**
-	 * Цветовая тема скроллбара.
-	 *
-	 * `type scrollbarColors = 'grey' | 'white'`
-	 */
-	scrollbarColors: scrollbarColors,
-
-	/**
-	 * Величина отступа ползунка от края.
-	 */
-	scrollPosition: number,
-
-	/**
-	 * Размер ползунка.
-	 */
-	sliderSize: number
-};
 
 export class Slider extends Component<Props> {
 	props: Props;

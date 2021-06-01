@@ -1,6 +1,5 @@
 # IDE
 .idea
-rest/calendar.iml
 
 # Node.js
 node_modules

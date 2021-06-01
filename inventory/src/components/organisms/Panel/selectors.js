@@ -5,8 +5,8 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 const props = (state: AppState): ConnectedProps => {
 	return {
 		open: state.geolocation.controls.panelOpen,
-		showSinglePoint: state.geolocation.showSinglePoint,
-		singlePoint: state.geolocation.singlePoint
+		showSingleObject: state.geolocation.showSingleObject,
+		singleObject: state.geolocation.singleObject
 	};
 };
 
