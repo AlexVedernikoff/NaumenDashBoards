@@ -67,6 +67,15 @@ class DashboardDrilldownService
         {
             requestContent.descriptor = DashboardDataSetService.instance.prepareWidgetDescriptor(requestContent.descriptor, requestContent.widgetDescriptor)
         }
+        if (requestContent.widgetFilters)
+        {
+            def widgetFilters = requestContent.widgetFilters
+            WidgetFilterResponse userFilter = WidgetFilterResponse.getWidgetFiltersCollection(widgetFilters).find()
+            String userDescriptor = userFilter.descriptor
+            def baseDescriptor = requestContent.descriptor
+            baseDescriptor = DashboardDataSetService.instance.prepareWidgetDescriptor(baseDescriptor, userDescriptor)
+            requestContent.descriptor = baseDescriptor
+        }
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
@@ -1115,6 +1124,10 @@ class Link
                     break
                 case AttributeType.DT_INTERVAL_TYPE:
                     def (intervalValue, intervalType) = DtIntervalMarshaller.unmarshal(value.find())
+                    if(intervalValue == 'Не заполнено')
+                    {
+                        return filterBuilder.AND(filterBuilder.OR(attr.code, 'null', null))
+                    }
                     intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
                     def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
                     values = getValuesForRefAttr(attr, interval)
@@ -1145,6 +1158,10 @@ class Link
                 return filterBuilder.OR(code, 'contains', Date.parse(dateFormat, value as String))
             case AttributeType.DT_INTERVAL_TYPE:
                 def (intervalValue, intervalType) = DtIntervalMarshaller.unmarshal(value.find())
+                if(intervalValue == 'Не заполнено')
+                {
+                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'null', null))
+                }
                 intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
                 def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
                 return filterBuilder.OR(code, 'contains', interval)
