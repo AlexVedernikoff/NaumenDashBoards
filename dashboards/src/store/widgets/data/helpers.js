@@ -224,7 +224,10 @@ const getCustomColorsSettingsKey = (widget: Widget): string | null => {
 	let key = null;
 
 	if (!(widget instanceof NewWidget) && (type in AXIS_TYPES || type in CIRCLE_TYPES)) {
-		key = getCustomColorsSettingsKeyByData(widget.data, type);
+		// $FlowFixMe
+		const data: Array<AxisData | CircleData> = widget.data;
+
+		key = getCustomColorsSettingsKeyByData(data, type);
 	}
 
 	return key;
