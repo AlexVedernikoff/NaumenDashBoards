@@ -8,5 +8,3 @@ export type ConnectedProps = {
 };
 
 export type Props = OwnProps & ConnectedProps;
-
-export type State = {};

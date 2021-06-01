@@ -33,8 +33,7 @@ module.exports = {
 							new Autoprefixer({
 								browsers: [
 									'>1%',
-									'last 3 versions',
-									'ie > 8'
+									'last 3 versions'
 								]
 							})
 						],
@@ -51,10 +50,26 @@ module.exports = {
 			]
 		},
 		{
+			test: /\.svg$/,
+			issuer: {
+				include: /\.jsx?$/
+			},
+			use: [
+				{
+					loader: '@svgr/webpack'
+				}
+			]
+		},
+		{
 			test: /\.(gif|png|jpg|jpeg|woff|woff2|ttf|eot|svg)$/,
-			use: {
-				loader: 'file-loader'
-			}
+			issuer: {
+				exclude: /\.jsx?$/
+			},
+			use: [
+				{
+					loader: 'file-loader'
+				}
+			]
 		}
 	]
 };

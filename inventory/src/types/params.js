@@ -1,18 +1,12 @@
 // @flow
-import type {TimeInterval, UpdatePointsMode} from 'types/helper';
+import type {TimeInterval} from 'types/helper';
 
 export type Params = {
 	autoUpdateLocation: boolean,
-	dynamicPointsListName: string,
+	colorPart: string,
 	groupingMethodName: string,
-	command: string,
-	colorStaticPoint: string,
-	colorDynamicActivePoint: string,
-	colorDynamicInactivePoint: string,
-	pointsMethodName: string,
+	listName: string,
 	locationUpdateFrequency: {length: number, interval: TimeInterval},
 	requestCurrentLocation: boolean,
-	staticPointsListName: string,
-	timeIntervalInactivity: {length: number, interval: TimeInterval},
-	updatePointsMode: UpdatePointsMode
+	updatePointsMode: string
 };

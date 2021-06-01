@@ -1,10 +1,10 @@
 // @flow
 import defaultBounds from './defaultBounds';
 import L from 'leaflet';
-import type {Point} from 'types/point';
+import type {Trail} from 'types/trail';
 
-const boundsOneMarker = markers => {
-	const bounds = [Object.assign({}, markers[0].geoposition), Object.assign({}, markers[0].geoposition)];
+const boundsOneMarker = marker => {
+	const bounds = [{...marker.geoposition}, {...marker.geoposition}];
 	const zoom = 0.006;
 	bounds[0].latitude -= zoom;
 	bounds[0].longitude -= zoom;
@@ -13,15 +13,30 @@ const boundsOneMarker = markers => {
 	const latLngs = bounds.map(geoposition => {
 		return L.latLng(geoposition.latitude, geoposition.longitude);
 	});
+
 	return L.latLngBounds(latLngs);
 };
 
-export const getLatLngBounds = (dataMarkers: Array<Point>) => {
-	if (dataMarkers.length === 1) {
-		return boundsOneMarker(dataMarkers);
+export const getLatLngBounds = (dataMarkers: Array<Trail>) => {
+	let bounds = dataMarkers.reduce((acc, curr) => {
+		curr.equipments && acc.push(...curr.equipments);
+		return acc;
+	}, []);
+
+	if (bounds.length < 1) {
+		bounds = dataMarkers.reduce((acc, curr) => {
+			curr.parts && acc.push(...curr.parts);
+			return acc;
+		}, []).map(part => ({
+			geoposition: part.geopositions[0]
+		}));
 	}
 
-	const markers = dataMarkers.length >= 2 ? dataMarkers : defaultBounds;
+	if (bounds.length === 1) {
+		return boundsOneMarker(bounds[0]);
+	}
+
+	const markers = bounds.length >= 2 ? bounds : defaultBounds;
 	const latLngs = markers.map(marker => {
 		if (marker.geoposition) {
 			return L.latLng(marker.geoposition.latitude, marker.geoposition.longitude);

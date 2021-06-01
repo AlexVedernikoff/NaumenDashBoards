@@ -1,16 +1,13 @@
 // @flow
 import type {Point} from 'types/point';
+import type {Trail} from 'types/trail';
 
 type OwnProps = {
 	point: Point
 };
 
 export type ConnectedProps = {
-	dynamicPoints: Array<Point>,
-	staticPoints: Array<Point>
+	trails: Array<Trail>
 };
 
-export type Props = ConnectedProps & OwnProps;
-
-export type State = {
-};
+export type Props = OwnProps & ConnectedProps;

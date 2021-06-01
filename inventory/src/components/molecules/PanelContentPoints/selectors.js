@@ -1,25 +1,22 @@
 // @flow
 import type {AppState} from 'store/types';
-import type {ConnectedFunctions, ConnectedProps} from './types';
-import {filterInSinglePoint, filterByGroupInPanel} from 'helpers/marker';
+import type {ConnectedProps} from './types';
+import {filterInSingleObject} from 'helpers/marker';
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {dynamicPoints, panelShow, params, showSinglePoint, singlePoint, staticGroups, staticPoints, timeUpdate} = geolocation;
+	const {params, showSingleObject, singleObject, staticGroups, timeUpdate, trails} = geolocation;
 	const {groupingMethodName} = params;
-	const pointsAll = panelShow === 'dynamic' ? dynamicPoints : filterByGroupInPanel(staticPoints, staticGroups, groupingMethodName);
-	const points = (showSinglePoint && singlePoint) ? filterInSinglePoint(singlePoint, staticGroups, groupingMethodName) : pointsAll;
+	const points = (showSingleObject && singleObject) ? filterInSingleObject(singleObject, staticGroups, groupingMethodName) : trails;
 
 	return {
 		points,
-		timeUpdate
+		timeUpdate,
+		showSingleObject,
+		singleObject
 	};
 };
 
-const functions: ConnectedFunctions = {
-};
-
 export {
-	functions,
 	props
 };

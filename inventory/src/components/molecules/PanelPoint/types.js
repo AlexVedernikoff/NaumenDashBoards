@@ -6,17 +6,17 @@ import type {Point, PointData, PointType} from 'types/point';
 export type OwnProps = {
 	geoposition: Geoposition,
 	pointData: PointData,
-	showSinglePoint: boolean,
+	showSingleObject: boolean,
 	type: PointType
 };
 
 export type ConnectedProps = {
-	showSinglePoint: boolean,
+	showSingleObject: boolean,
 	statusColor: string
 };
 
 export type ConnectedFunctions = {
-	setSinglePoint: (point: Point) => GeolocationAction
+	setSingleObject: (point: Point) => GeolocationAction
 };
 
 export type Props = OwnProps & ConnectedProps & ConnectedFunctions;

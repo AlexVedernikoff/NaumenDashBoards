@@ -5,12 +5,10 @@ export type OwnProps = {};
 
 export type ConnectedProps = {
 	open: boolean,
-	showSinglePoint: boolean,
-	singlePoint: Point | null
+	showSingleObject: boolean,
+	singleObject: Point | null
 };
 
 export type ConnectedFunctions = {};
 
-export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
-
-export type State = {};
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;

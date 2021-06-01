@@ -1,11 +1,11 @@
 // @flow
 import cn from 'classnames';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './PanelPointContent.less';
 import {truncatedText} from 'components/atoms/TruncatedText';
 
-export class PanelPointContent extends Component<Props, State> {
+export class PanelPointContent extends Component<Props> {
 	render () {
 		const {option} = this.props;
 		const {label, presentation, value} = option;
@@ -32,12 +32,15 @@ export class PanelPointContent extends Component<Props, State> {
 			return (
 				<div className={optionCN}>
 					{label && <div className={optionLableCN}>{truncatedText(label)}</div>}
-					<div className={optionValueCN}>{truncatedText(value)}</div>
+					{value.url
+						? <a className={optionValueCN} rel="noopener noreferrer" target="_blank" href={value.url}>{truncatedText(value.label)}</a>
+						: <div className={optionValueCN}>{truncatedText(value)}</div>}
 				</div>
 			);
-		} else {
-			return null;
 		}
+
+		return null;
 	}
 }
+
 export default PanelPointContent;

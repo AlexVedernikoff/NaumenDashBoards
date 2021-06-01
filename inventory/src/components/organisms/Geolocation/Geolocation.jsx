@@ -3,15 +3,14 @@ import 'leaflet/dist/leaflet.css';
 import 'styles/styles.less';
 import Controls from 'components/atoms/Controls';
 import Copyright from 'components/atoms/Copyright';
-import Filter from 'components/molecules/Filter';
 import PointsList from 'components/molecules/PointsList';
 import {Map as LeafletMap} from 'react-leaflet';
 import Panel from 'components/organisms/Panel';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './Geolocation.less';
 
-export class Geolocation extends Component<Props, State> {
+export class Geolocation extends Component<Props> {
 	mapRef: {current: any};
 
 	constructor (props: Props) {
@@ -20,10 +19,9 @@ export class Geolocation extends Component<Props, State> {
 		this.mapRef = React.createRef();
 	}
 
-	resetSinglePoint = () => () => {
-		const {resetSinglePoint} = this.props;
-
-		resetSinglePoint();
+	resetSingleObject = () => () => {
+		const {resetSingleObject} = this.props;
+		resetSingleObject();
 	};
 
 	componentDidUpdate (prevProps: Props) {
@@ -46,7 +44,7 @@ export class Geolocation extends Component<Props, State> {
 					easeLinearity={0.35}
 					maxZoom={19}
 					minZoom={2}
-					onClick={this.resetSinglePoint()}
+					onClick={this.resetSingleObject()}
 					ref={this.mapRef}
 					scrollWheelZoom={true}
 					zoomControl={false}
@@ -55,7 +53,6 @@ export class Geolocation extends Component<Props, State> {
 					<Controls />
 					<Copyright />
 				</LeafletMap>
-				<Filter />
 				<Panel />
 			</div>
 		);

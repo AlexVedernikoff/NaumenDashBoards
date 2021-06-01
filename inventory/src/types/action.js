@@ -1,11 +1,10 @@
-
 // @flow
 export type ActionType = 'open_link' | 'change_responsible' | 'change_state';
 
 export type Action = {
-	type: ActionType,
+	inPlace?: boolean,
 	link: string,
 	name: string,
-	inPlace?: false,
-	states: Array<string>
+	states?: Array<string>,
+	type: ActionType
 };

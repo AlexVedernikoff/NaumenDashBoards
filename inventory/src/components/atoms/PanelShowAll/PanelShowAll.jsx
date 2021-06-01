@@ -2,16 +2,16 @@
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import ListBtnIcon from 'icons/ListBtnIcon';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './PanelShowAll.less';
 
-export class PanelShowAll extends Component<Props, State> {
+export class PanelShowAll extends Component<Props> {
 	showAll = () => {
 		const {setTab, type} = this.props;
-
 		setTab(type);
 	};
+
 	render () {
 		return (
 			<div className={styles.singleContainerWrap} onClick={this.showAll}>
@@ -25,4 +25,5 @@ export class PanelShowAll extends Component<Props, State> {
 		);
 	}
 }
+
 export default connect(props, functions)(PanelShowAll);

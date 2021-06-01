@@ -11,10 +11,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	resetSinglePoint: () => GeolocationAction
+	resetSingleObject: () => GeolocationAction
 };
 
-export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
-
-export type State = {
-};
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;

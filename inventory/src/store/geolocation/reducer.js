@@ -18,19 +18,16 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION:
 			return {
 				...state,
-				dynamicPoints: action.payload.dynamicPoints,
-				showSinglePoint: false,
-				staticPoints: action.payload.staticPoints,
-				staticGroups: action.payload.firstCall ? action.payload.staticGroups.map(group => ({...group, checked: true})) : [...state.staticGroups],
+				showSingleObject: false,
 				success: true,
-				timeUpdate: new Date().getTime()
+				timeUpdate: new Date().getTime(),
+				trails: action.payload.trails
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {
 				...state,
-				dynamicPoints: action.payload,
 				loading: false,
-				showSinglePoint: false,
+				showSingleObject: false,
 				timeUpdate: new Date().getTime()
 			};
 		case GEOLOCATION_EVENTS.TOGGLE_FILTER:
@@ -41,7 +38,7 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					filterOpen: !state.controls.filterOpen,
 					panelOpen: false
 				},
-				showSinglePoint: false
+				showSingleObject: false
 			};
 		case GEOLOCATION_EVENTS.TOGGLE_PANEL:
 			return {
@@ -51,13 +48,13 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					filterOpen: false,
 					panelOpen: !state.controls.panelOpen
 				},
-				showSinglePoint: false
+				showSingleObject: false
 			};
 		case GEOLOCATION_EVENTS.SET_TAB:
 			return {
 				...state,
 				panelShow: action.payload,
-				showSinglePoint: false
+				showSingleObject: false
 			};
 		case GEOLOCATION_EVENTS.SET_SINGLE_POINT:
 			return {
@@ -68,14 +65,14 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					panelOpen: true
 				},
 				panelShow: action.payload.type,
-				showSinglePoint: true,
-				singlePoint: action.payload
+				showSingleObject: true,
+				singleObject: action.payload
 			};
 		case GEOLOCATION_EVENTS.RESET_SINGLE_POINT:
 			return {
 				...state,
-				singlePoint: initialGeolocationState.singlePoint,
-				showSinglePoint: false
+				showSingleObject: false,
+				singleObject: initialGeolocationState.singleObject
 			};
 		case GEOLOCATION_EVENTS.TOGGLE_GROUP:
 			return {

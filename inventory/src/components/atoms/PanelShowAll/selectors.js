@@ -5,10 +5,10 @@ import {setTab} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {singlePoint} = geolocation;
+	const {singleObject} = geolocation;
 
 	return {
-		type: singlePoint ? singlePoint.type : 'static'
+		type: singleObject ? singleObject.type : 'static'
 	};
 };
 

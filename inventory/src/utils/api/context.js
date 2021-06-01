@@ -1,13 +1,13 @@
 // @flow
 import type {Context} from 'types/api';
-import {notify} from 'helpers/notify';
 import {initialGeolocationState} from 'store/geolocation/init';
+import {notify} from 'helpers/notify';
 
 const injectJsApi = () => top.injectJsApi(top, window);
 
 /**
  * Получаем контекст встроенного приложения.
- * subjectUuid - кода объекта куда встроенно ВП.
+ * subjectUuid - код объекта, куда встроенно ВП.
  * contentCode - код самого ВП.
  * @returns {Context}
  */
@@ -23,8 +23,7 @@ const getContext = (): Context => {
 
 	return {
 		contentCode: jsApi.findContentCode(),
-		subjectUuid: jsApi.extractSubjectUuid(),
-		user: jsApi.getCurrentUser()
+		subjectUuid: jsApi.extractSubjectUuid()
 	};
 };
 
@@ -37,14 +36,10 @@ const getParams = async () => {
 
 	const {jsApi} = window;
 	const paramsApp = await jsApi.commands.getCurrentContentParameters().then(data => data);
-	const {dynamicPointsListName, locationUpdateFrequency, requestCurrentLocation, staticPointsListName} = paramsApp;
+	const {locationUpdateFrequency, requestCurrentLocation, listName, updatePointsMode} = paramsApp;
 
-	if (!dynamicPointsListName) {
-		paramsApp.dynamicPointsListName = params.dynamicPointsListName;
-	}
-
-	if (!staticPointsListName) {
-		paramsApp.staticPointsListName = params.staticPointsListName;
+	if (!listName) {
+		paramsApp.listName = params.listName;
 	}
 
 	if (!requestCurrentLocation) {
@@ -55,22 +50,19 @@ const getParams = async () => {
 		paramsApp.locationUpdateFrequency = params.locationUpdateFrequency;
 	}
 
+	if (!updatePointsMode) {
+		paramsApp.updatePointsMode = params.updatePointsMode;
+	}
+
 	paramsApp.autoUpdateLocation = paramsApp.autoUpdateLocation === 'true';
 	paramsApp.requestCurrentLocation = paramsApp.requestCurrentLocation === 'true';
 
 	return paramsApp;
 };
 
-const getMap = async (contentCode: string, subjectUuid: string) => {
+const getTrails = async (contentCode: string, subjectUuid: string) => {
 	const {jsApi} = window;
-	const data = await jsApi.restCallModule('mapRest', 'getMap', subjectUuid, contentCode);
-
-	return data;
-};
-
-const getLastGeopositions = async (contentCode: string, subjectUuid: string, dynamicPointsUuids: any) => {
-	const {jsApi} = window;
-	const data = await jsApi.restCallModule('mapRest', 'getLastGeopositions', subjectUuid, contentCode, dynamicPointsUuids);
+	const data = await jsApi.restCallModule('mapRestSettings', 'getTrails', subjectUuid, contentCode);
 
 	return data;
 };
@@ -86,6 +78,7 @@ const changeState = async (uuid: string, states: Array<string>): Promise<string 
 
 		notify('common', 'info', message);
 	}
+
 	return result || Promise.resolve(null);
 };
 
@@ -100,6 +93,7 @@ const changeResponsible = async (uuid: string): Promise<string | null> => {
 
 		notify('common', 'info', message);
 	}
+
 	return result || Promise.resolve(null);
 };
 
@@ -107,8 +101,7 @@ export {
 	changeResponsible,
 	changeState,
 	getContext,
-	getMap,
-	getLastGeopositions,
 	getParams,
+	getTrails,
 	injectJsApi
 };

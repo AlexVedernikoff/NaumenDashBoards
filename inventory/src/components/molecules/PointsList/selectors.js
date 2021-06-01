@@ -1,16 +1,15 @@
 // @flow
-import type {ConnectedProps} from './types';
 import type {AppState} from 'store/types';
+import type {ConnectedProps} from './types';
 import {filterByGroup} from 'helpers/marker';
 
 const props = (state: AppState): ConnectedProps => {
-	const {dynamicPoints, params, staticGroups, staticPoints, timeUpdate} = state.geolocation;
+	const {params, staticGroups, timeUpdate, trails} = state.geolocation;
 	const {groupingMethodName} = params;
-	const points = filterByGroup(staticPoints, staticGroups, groupingMethodName);
+	const points = filterByGroup(trails, staticGroups, groupingMethodName);
 
 	return {
-		dynamicPoints: dynamicPoints.filter(point => point.geoposition !== null),
-		staticPoints: points.filter(point => point.geoposition !== null),
+		trails: points,
 		timeUpdate
 	};
 };

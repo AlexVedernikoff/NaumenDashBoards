@@ -7,9 +7,8 @@ type OwnProps = {
 };
 
 export type ConnectedProps = {
-	dynamicPointsListName: string,
 	panelShow: PointType,
-	staticPointsListName: string
+	listName: string
 };
 
 export type ConnectedFunctions = {
@@ -17,5 +16,3 @@ export type ConnectedFunctions = {
 };
 
 export type Props = OwnProps & ConnectedProps & ConnectedFunctions;
-
-export type State = {};

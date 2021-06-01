@@ -15,7 +15,7 @@ export type ConnectedFunctions = {
 	fetchGeolocation: () => ThunkAction
 };
 
-export type Props = ConnectedFunctions & OwnProps & ConnectedProps;
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;
 
 export type State = {
 	openAction: boolean

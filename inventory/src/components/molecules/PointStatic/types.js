@@ -8,7 +8,7 @@ export type OwnProps = {
 };
 
 export type ConnectedFunctions = {
-	setSinglePoint: (point: Point) => GeolocationAction
+	setSingleObject: (point: Point) => GeolocationAction
 };
 
 export type ConnectedProps = {
@@ -16,7 +16,7 @@ export type ConnectedProps = {
 	color: string // '#EB5757'
 };
 
-export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;
 
 export type State = {
 	open: boolean,

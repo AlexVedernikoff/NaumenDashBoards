@@ -1,12 +1,10 @@
 // @flow
-import {getContext, getParams, getMap, getLastGeopositions} from 'utils/api';
-import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import type {Dispatch, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from './constants';
-import {getTimeInSeconds} from 'helpers/time';
-import {notify} from 'helpers/notify';
+import {getContext, getParams, getTrails} from 'utils/api';
 import type {GroupCode, Point, PointType} from 'types/point';
+import {notify} from 'helpers/notify';
 import testData from 'helpers/testData';
-import testData2 from 'helpers/testData2';
 
 const environment = process.env.NODE_ENV;
 
@@ -14,7 +12,6 @@ const environment = process.env.NODE_ENV;
  * Получаем данные, необходимые для работы карты
  * @returns {ThunkAction}
  */
-
 const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any> => {
 	try {
 		const context = getContext();
@@ -23,10 +20,9 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any>
 		dispatch(setContext(context));
 		dispatch(setParams(params))
 			.then(() => dispatch(fetchGeolocation(true)))
-			.then(() => dispatch(reloadGeolocation(true)))
 			.catch(error => error);
 	} catch (error) {
-		dispatch(recordGeolocationdError());
+		dispatch(recordGeolocationdError(error));
 	}
 };
 
@@ -37,70 +33,20 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 		const {contentCode, subjectUuid} = context;
 
 		if (environment !== 'development') {
-			markers = await getMap(contentCode, subjectUuid);
+			markers = await getTrails(contentCode, subjectUuid);
 		}
 
-		const {errors, staticGroups} = markers;
+		const {errors} = markers;
 
-		if (errors.length) {
+		if (errors && errors.length > 0) {
 			const label = errors.join(', ') + '.';
 			notify('common', 'info', label);
 		}
-		if (firstCall) {
-			const {params} = getState().geolocation;
-			const {colorStaticPoint, groupingMethodName} = params;
-			const found = staticGroups.find(group => group.name === 'Без группы');
 
-			if (staticGroups.length && !found && groupingMethodName) {
-				staticGroups.push({name: 'Без группы', color: colorStaticPoint, code: null});
-			}
-		}
 		dispatch(setData(markers, firstCall));
 	} catch (error) {
 		notify('error', 'error');
-		dispatch(recordGeolocationdError());
-	}
-};
-
-const reloadGeolocation = (firstCall: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	try {
-		let refreshDada = testData2;
-		const {dynamicPoints, context, params} = getState().geolocation;
-		const dynamicPointsUuids = dynamicPoints.map(marker => marker.data[0].uuid);
-		const {contentCode, subjectUuid} = context;
-		const {autoUpdateLocation, locationUpdateFrequency} = params;
-
-		if (dynamicPointsUuids && firstCall) {
-			const reloadInterval = autoUpdateLocation ? getTimeInSeconds(locationUpdateFrequency) : 0;
-
-			if (reloadInterval) {
-				setInterval(() => dispatch(reloadGeolocation()), reloadInterval * 1000);
-			} else {
-				notify('common', 'info', 'Отправлен запрос на получение информации о местоположении. Обновите через пару минут.');
-			}
-		}
-		if (environment !== 'development' && dynamicPointsUuids) {
-			refreshDada = await getLastGeopositions(contentCode, subjectUuid, dynamicPointsUuids);
-		}
-		const {geopositions, errors} = refreshDada;
-
-		if (errors.length) {
-			const label = errors.join(', ') + '.';
-
-			notify('common', 'info', label);
-		}
-		Array.isArray(geopositions) && geopositions.map(marker => {
-			if (marker.hasOwnProperty('geoposition')) {
-				const index = dynamicPoints.findIndex(markerTmp => markerTmp.data[0].uuid === marker.uuid);
-				if (index !== -1) {
-					dynamicPoints[index].geoposition = marker.geoposition;
-				}
-			}
-		});
-		dispatch(reloadActivePoint(dynamicPoints));
-	} catch (error) {
-		notify('error', 'error');
-		dispatch(recordGeolocationdError());
+		dispatch(recordGeolocationdError(error));
 	}
 };
 
@@ -125,13 +71,9 @@ const setData = (payload: Object, firstCall) => ({
 	}
 });
 
-const reloadActivePoint = (payload: Object) => ({
-	type: GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT,
-	payload
-});
-
-const recordGeolocationdError = () => ({
-	type: GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR
+const recordGeolocationdError = (error) => ({
+	type: GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR,
+	payload: error
 });
 
 const setTab = (payload: PointType) => ({
@@ -139,12 +81,12 @@ const setTab = (payload: PointType) => ({
 	payload
 });
 
-const setSinglePoint = (data: Point) => ({
+const setSingleObject = (data: Point) => ({
 	type: GEOLOCATION_EVENTS.SET_SINGLE_POINT,
 	payload: data
 });
 
-const resetSinglePoint = () => ({
+const resetSingleObject = () => ({
 	type: GEOLOCATION_EVENTS.RESET_SINGLE_POINT
 });
 
@@ -170,15 +112,14 @@ const selectAllGroups = () => ({
 });
 
 export {
-	getAppConfig,
 	fetchGeolocation,
-	reloadGeolocation,
+	getAppConfig,
 	resetAllGroups,
-	resetSinglePoint,
+	resetSingleObject,
 	selectAllGroups,
-	setSinglePoint,
+	setSingleObject,
 	setTab,
-	toggleGroup,
 	toggleFilter,
+	toggleGroup,
 	togglePanel
 };

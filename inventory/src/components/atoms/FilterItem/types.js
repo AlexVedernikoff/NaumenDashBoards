@@ -12,6 +12,6 @@ export type ConnectedFunctions = {
 	toggleGroup: (code: GroupCode) => GeolocationAction
 };
 
-export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
+export type Props = OwnProps & ConnectedProps & ConnectedFunctions;
 
 export type State = {};

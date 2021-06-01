@@ -1,22 +1,23 @@
 // @flow
 import {connect} from 'react-redux';
-import {functions, props} from './selectors';
 import PanelContentPoints from 'components/molecules/PanelContentPoints';
 import PanelShowAll from 'components/atoms/PanelShowAll';
-import type {Props, State} from './types';
+import {props} from './selectors';
+import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './PanelContent.less';
 
-export class PanelContent extends Component<Props, State> {
+export class PanelContent extends Component<Props> {
 	render () {
-		const {showSinglePoint} = this.props;
+		const {showSingleObject} = this.props;
 
 		return (
 			<div className={styles.contentContainer}>
-				{showSinglePoint && <PanelShowAll />}
+				{showSingleObject && <PanelShowAll />}
 				<PanelContentPoints />
 			</div>
 		);
 	}
 }
-export default connect(props, functions)(PanelContent);
+
+export default connect(props)(PanelContent);

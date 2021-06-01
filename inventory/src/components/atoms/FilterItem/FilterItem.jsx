@@ -11,7 +11,6 @@ import {truncatedText} from 'components/atoms/TruncatedText';
 export class Filter extends Component<Props, State> {
 	toggleGroup = (code: GroupCode) => () => {
 		const {toggleGroup} = this.props;
-
 		toggleGroup(code);
 	}
 
@@ -36,4 +35,5 @@ export class Filter extends Component<Props, State> {
 		);
 	}
 }
+
 export default connect(props, functions)(Filter);

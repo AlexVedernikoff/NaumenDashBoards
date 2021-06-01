@@ -1,36 +1,65 @@
 // @flow
 import {connect} from 'react-redux';
-import {functions, props} from './selectors';
+import type {Equipment} from 'types/equipment';
 import type {Geoposition} from 'types/geoposition';
 import PanelPoint from 'components/molecules/PanelPoint';
+import type {Part} from 'types/part';
 import type {Point, PointData, PointType} from 'types/point';
-import type {Props, State} from './types';
+import {props} from './selectors';
+import type {Props} from './types';
 import React, {Component} from 'react';
-import styles from './PanelContentPoints.less';
+import type {Trail} from 'types/trail';
 
-export class PanelContentPoints extends Component<Props, State> {
+export class PanelContentPoints extends Component<Props> {
 	renderPointData = (pointData: PointData, key: number, type: PointType, geoposition: Geoposition) => {
 		return <PanelPoint key={key} pointData={pointData} type={type} geoposition={geoposition} />;
-	}
+	};
 
-	renderPoint = (point: Point, key: number) => {
-		const {data, geoposition, type} = point;
+	renderEquipments = (object: Point | Equipment, key: number) => {
+		const {data, geoposition, type} = object;
 
 		return (
 			<div key={key}>
-				{data.map((pointData, key) => this.renderPointData(pointData, key, type, geoposition))}
+				{this.renderPointData(data, key, type, geoposition)}
+			</div>
+		);
+	};
+
+	renderParts = (object: Part, key: number) => {
+		const {data, geopositions, type} = object;
+
+		return (
+			<div key={key}>
+				{this.renderPointData(data, key, type, geopositions[0])}
+			</div>
+		);
+	};
+
+	renderTrail = (object: Trail, key: number) => {
+		const {data, type} = object;
+
+		return (
+			<div key={key}>
+				{this.renderPointData(data, key, type, object.parts && object.parts[0] && object.parts[0].geopositions[0])}
+				{object.parts && object.parts.map(this.renderParts)}
+				{object.equipments && object.equipments.map(this.renderEquipments)}
 			</div>
 		);
 	};
 
 	render () {
-		const {points} = this.props;
+		const {points, showSingleObject, singleObject} = this.props;
+
+		if (showSingleObject) {
+			return this.renderPointData(singleObject.data, singleObject.data.uuid, singleObject.type, singleObject.geoposition);
+		}
 
 		return (
-			<div className={styles.content}>
-				{points.map(this.renderPoint)}
+			<div>
+				{points.map(this.renderTrail)}
 			</div>
 		);
 	}
 }
-export default connect(props, functions)(PanelContentPoints);
+
+export default connect(props)(PanelContentPoints);

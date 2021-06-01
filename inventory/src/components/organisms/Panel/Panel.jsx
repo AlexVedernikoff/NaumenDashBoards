@@ -3,12 +3,12 @@ import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import PanelContent from 'components/molecules/PanelContent';
 import PanelHeader from 'components/molecules/PanelHeader';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {Component} from 'react';
 import Scrollable from 'components/atoms/Scrollable';
 import styles from './Panel.less';
 
-export class Panel extends Component<Props, State> {
+export class Panel extends Component<Props> {
 	panelContainerRef: {current: null | HTMLDivElement};
 
 	constructor (props: Props) {
@@ -28,7 +28,7 @@ export class Panel extends Component<Props, State> {
 
 	attachRef = (element: null | HTMLDivElement) => {
 		this.panelContainerRef.current = element;
-	}
+	};
 
 	render () {
 		const {open} = this.props;
@@ -50,9 +50,9 @@ export class Panel extends Component<Props, State> {
 					</div>
 				</div>
 			);
-		} else {
-			return null;
 		}
+		return null;
 	}
 }
+
 export default connect(props, functions)(Panel);

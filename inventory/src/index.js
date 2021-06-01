@@ -1,7 +1,7 @@
 // @flow
 import 'babel-polyfill';
-import Geolocation from 'containers/Geolocation';
 import configureStore from 'store';
+import Geolocation from 'containers/Geolocation';
 import {injectJsApi} from 'utils/api/context';
 import {Provider} from 'react-redux';
 import React from 'react';
@@ -14,15 +14,13 @@ if (process.env.NODE_ENV !== 'development') {
 	injectJsApi();
 }
 
-if (root) {
-	const store = configureStore();
+const store = configureStore();
 
-	render(
-		<Provider store={store}>
-			<Startup>
-				<Geolocation />
-			</Startup>
-		</Provider>,
-		root
-	);
-}
+render(
+	<Provider store={store}>
+		<Startup>
+			<Geolocation />
+		</Startup>
+	</Provider>,
+	root
+);
