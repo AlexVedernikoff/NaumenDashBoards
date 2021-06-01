@@ -10,13 +10,19 @@ type Filter = {
 	value?: string | number
 };
 
+export type WidgetFilters = {
+	dataKey: string,
+	descriptor: string
+};
+
 export type DrillDownMixin = {
 	cases?: [],
 	classFqn?: string | null,
 	descriptor?: string,
 	filterId?: string,
 	filters: Array<Filter>,
-	title: string
+	title: string,
+	widgetFilters?: WidgetFilters[]
 };
 
 export type Link = {

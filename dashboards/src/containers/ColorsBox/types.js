@@ -5,6 +5,7 @@ import type {
 	RemoveCustomChartColorsSetting
 } from 'store/dashboard/customChartColorsSettings/types';
 import type {InjectedProps} from 'WidgetFormPanel/HOCs/withType/types';
+import type {InjectedProps as TypeInjectedProps} from 'components/organisms/WidgetFormPanel/HOCs/withType/types';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/ColorsBox/types';
 import type {SetUseGlobalChartSettings, Widget} from 'store/widgets/data/types';
 import type {Values} from 'components/organisms/WidgetForm/types';
@@ -28,4 +29,6 @@ export type State = {
 	labels: Array<string>
 };
 
-export type Props = ConnectedProps & ComponentProps & ConnectedFunctions & ContainerProps;
+export type OwnerProps = ComponentProps & TypeInjectedProps & ContainerProps;
+
+export type Props = ConnectedProps & ConnectedFunctions & OwnerProps;

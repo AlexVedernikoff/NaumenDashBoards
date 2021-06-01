@@ -1,7 +1,8 @@
 // @flow
+import type {WidgetType} from 'store/widgets/data/types';
 export type Context = {
 	onChange: (type: string) => void,
-	value: string
+	value: WidgetType
 };
 
 export type InjectedProps = {
