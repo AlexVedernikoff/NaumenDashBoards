@@ -89,6 +89,10 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(name, !value);
 	};
 
+	removeBreakdown = () => {
+		this.setBreakdown(undefined);
+	};
+
 	resetTopByIndicators = () => {
 		const {onChange, values} = this.props;
 		const {data, top} = values;
@@ -120,7 +124,7 @@ export class ParamsTab extends PureComponent<Props> {
 				index={this.mainIndex}
 				indicator={indicators[0]}
 				onChange={this.setBreakdown}
-				onRemove={this.setBreakdown}
+				onRemove={this.removeBreakdown}
 				removable={true}
 				value={breakdown}
 			/>
