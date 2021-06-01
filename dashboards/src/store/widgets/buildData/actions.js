@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, AxisWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {AnyWidget, AxisWidget, ComboWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import {BUILD_DATA_EVENTS} from './constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload} from './types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
@@ -93,9 +93,9 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
  */
 const checkDiagramsDataLimits = (widget: AnyWidget, data: DiagramBuildData): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-		if (widget.type in WIDGET_SETS.AXIS) {
+		if (widget.type in WIDGET_SETS.AXIS || widget.type === WIDGET_TYPES.COMBO) {
 			// $FlowFixMe widget.type in WIDGET_SETS.AXIS
-			const axisWidget: AxisWidget = widget;
+			const axisWidget: (AxisWidget | ComboWidget) = widget;
 			const sumDataValues = data?.series.reduce((sum, s) => sum + s.data.length, 0) ?? 0;
 			let dataLabels = null;
 
