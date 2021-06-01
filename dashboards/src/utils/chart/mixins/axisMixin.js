@@ -3,6 +3,7 @@ import type {AxisData, AxisWidget} from 'store/widgets/data/types';
 import {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
+	formatLabels,
 	getLegendOptions,
 	getXAxisLabels,
 	getXAxisOptions,
@@ -51,7 +52,9 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 		};
 		const xAxisProps = horizontal ? yAxisSettings : xAxisSettings;
 		const yAxisProps = horizontal ? xAxisSettings : yAxisSettings;
-		const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend, horizontal);
+		// TODO: SMRMEXT-12049 - убрать при реализации
+		const labelsFormated = formatLabels(widget, labels);
+		const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend, horizontal);
 
 		let xaxis = {
 			labels: {
@@ -74,7 +77,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 			dataLabels: {
 				formatter: valueFormatter(usesMSInterval, usesPercent, showEmptyData)
 			},
-			labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
+			labels: getXAxisLabels(labelsFormated, !hasOverlappedLabel),
 			legend: getLegendOptions(legend, container),
 			markers: {
 				hover: {

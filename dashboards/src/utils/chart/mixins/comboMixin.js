@@ -2,6 +2,7 @@
 import {
 	axisLabelFormatter,
 	checkLabelsForOverlap,
+	formatLabels,
 	getLegendOptions,
 	getMaxStackedValue,
 	getMaxValue,
@@ -211,7 +212,9 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		}
 	});
 
-	const hasOverlappedLabel = checkLabelsForOverlap(labels, container, legend);
+	// TODO: SMRMEXT-12049 - убрать при реализации
+	const labelsFormated = formatLabels(widget, labels);
+	const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend);
 	const xaxis = {
 		labels: {
 			formatter: axisLabelFormatter(parameterUsesUUIDs)
@@ -226,7 +229,7 @@ const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTM
 		dataLabels: {
 			formatter: dataLabelsFormatter(widget)
 		},
-		labels: getXAxisLabels(widget, labels, !hasOverlappedLabel),
+		labels: getXAxisLabels(labelsFormated, !hasOverlappedLabel),
 		legend: getLegendOptions(legend, container),
 		markers: {
 			hover: {
