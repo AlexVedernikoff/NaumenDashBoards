@@ -117,7 +117,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 	};
 
 	renderSelect = () => {
-		const {disabled, fetchOptions, getOptions, loading, onSelect, options, value} = this.props;
+		const {disabled, fetchOptions, getOptions, loading, onSelect, options, removable, value} = this.props;
 
 		return (
 			<Select
@@ -133,6 +133,7 @@ export class AttributeSelect extends PureComponent<Props, State> {
 				onSelect={onSelect}
 				options={options}
 				placeholder="Не выбрано"
+				removable={removable}
 				value={value}
 			/>
 		);

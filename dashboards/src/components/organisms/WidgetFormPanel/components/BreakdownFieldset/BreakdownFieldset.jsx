@@ -170,9 +170,10 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	renderField = (item: BreakdownItem, breakdownIndex: number) => {
-		const {index: dataSetIndex, onRemove, removable, values} = this.props;
+		const {index: dataSetIndex, onRemove, removable, required, values} = this.props;
 		const {attribute} = item;
 		const dataSet = values.data[dataSetIndex];
+		const hasRemove = removable && !required;
 
 		if (dataSet) {
 			const {dataKey, source} = dataSet;
@@ -197,7 +198,7 @@ export class BreakdownFieldset extends Component<Props> {
 							onChangeLabel={this.handleChangeLabel}
 							onRemove={onRemove}
 							onSelect={this.handleSelect}
-							removable={removable}
+							removable={hasRemove}
 							source={source}
 							value={attribute}
 						/>
