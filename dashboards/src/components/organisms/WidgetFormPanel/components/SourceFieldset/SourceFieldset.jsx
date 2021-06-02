@@ -432,12 +432,14 @@ export class SourceFieldset extends Component<Props, State> {
 	renderSourceTreeSelect = (): React$Node => {
 		const {sources, value: {source}} = this.props;
 		const {value: sourceValue} = source;
+		const isChanged = this.isCurrentFilterChanged();
 		const components = this.getSourceSelectComponents();
 
 		return (
 			<TreeSelect
 				className={styles.sourceTreeSelect}
 				components={components}
+				isChanged={isChanged}
 				onRemove={this.handleRemoveSource}
 				onSelect={this.handleSelect}
 				options={sources}
