@@ -478,11 +478,11 @@ class DashboardDataSetService
                     return group
                 }
             }
-            return it?.sourceforCompute ? [] : groups
+            return groups ? groups : []
         }
 
         List fullAggregations = requestData?.aggregations?.collectMany {
-            it?.any {it?.attribute instanceof ComputedAttr } ? it : it?.collect { aggr -> prepareAggregation(aggr, mainSource.classFqn) }
+            it?.any {it?.attribute instanceof ComputedAttr } ? it : it?.collect { aggr -> return prepareAggregation(aggr, mainSource.classFqn)}
         }
 
         def breakdowns = fullGroups.findAll { it.title == 'breakdown' }
@@ -595,7 +595,7 @@ class DashboardDataSetService
         def sorting
         def uglyRequestData = widgetSettings.data
         Boolean isDiagramTypeTable = diagramType == DiagramType.TABLE
-        Boolean hasTableNotOnlyBaseSources = (widgetSettings?.data*.source.value.value as Set).size() != 1
+        Boolean hasTableNotOnlyBaseSources = (widgetSettings?.data*.source.value.value as Set).size() > 1
         Boolean isDiagramTypeNotCount = !(diagramType in [DiagramType.CountTypes, DiagramType.RoundTypes])
         Boolean isDiagramTypeCount = diagramType in DiagramType.CountTypes
         def commonBreakdown
@@ -715,7 +715,7 @@ class DashboardDataSetService
 
             if(isDiagramTypeNotCount)
             {
-                if (mayBeBreakdown instanceof Collection && mayBeBreakdown?.any())
+                if (mayBeBreakdown instanceof Collection)
                 {
                     def groupTypes = data.breakdown*.group as Set
                     if (groupTypes.size() == 1)
@@ -2217,7 +2217,7 @@ class DashboardDataSetService
                                 RequestData newData = data.clone()
                                 newData.filters = filters
                                 Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType, ignoreLimits.parameter : false, templateUUID, paginationSettings)
+                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
                                 if(!res && !onlyFilled)
                                 {
                                     def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())

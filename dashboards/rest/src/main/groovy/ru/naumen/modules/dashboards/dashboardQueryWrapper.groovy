@@ -411,11 +411,12 @@ class QueryWrapper implements CriteriaWrapper
                 : null
 
             def wrappedQuery = QueryWrapper.build(requestData.source)
+            def wrappedCriteria = wrappedQuery.criteria
             if (filterParameter && onlyFilled)
             {
-                wrappedQuery.filtering(criteria, totalValueCriteria, [filterParameter])
+                wrappedQuery.filtering(wrappedCriteria, totalValueCriteria, [filterParameter])
             }
-            int totalCount = wrappedQuery.aggregate(criteria, totalValueCriteria, totalParameter, false, top)
+            int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, false, top)
                                          .result.head().head()
 
             wrapper.percentAggregate(criteria, totalValueCriteria, parameter, totalCount)
