@@ -2161,14 +2161,14 @@ class DashboardDataSetService
                         {
                             res = getTop(res, top, parameterFilters, breakdownFilters)
                         }
-                        def dynAttr
-                        if( templateUUID)
+                        def parameter = requestData.groups.find()
+                        String parameterAttributeType = parameter?.attribute?.type
+                        Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
+                        Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
+                        if(top)
                         {
-                            //на дин атрибуте может не быть кастомной группировки, но будет условие для нефильтрации датасета
-                            dynAttr = requestData?.groups?.find()?.attribute
+                            res = getTop(res, top, parameterFilters, breakdownFilters, false, parameterWithDate ? parameter : null, parameterSortingType, aggregationSortingType )
                         }
-                        def dynAttrType = dynAttr ? Attribute.getAttributeType(dynAttr) : null
-                        Boolean parameterWithDateOrDtInterval = dynAttrType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                         if (!parameterWithDateOrDtInterval &&
                             (aggregationSortingType || parameterSortingType) &&
                             diagramType in DiagramType.SortableTypes)
@@ -2271,11 +2271,17 @@ class DashboardDataSetService
                             filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
                             return prepareResultListListForTop(res, filterListSize, top, parameterFilters, breakdownFilters, j)
                         }
+                        def parameter = dataSet.values().head().groups.find()
+                        String parameterAttributeType = parameter?.attribute?.type
+                        Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
+                        Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
                         if(top)
                         {
-                            res = getTop(res, top, parameterFilters, breakdownFilters)
+                            res = getTop(res, top, parameterFilters, breakdownFiltersfalse, parameterWithDate ? parameter : null,  parameterSortingType, aggregationSortingType)
                         }
-                        if ((aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
+
+                        if (!parameterWithDateOrDtInterval &&
+                            (aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                         {
                             return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
                         }
@@ -2632,6 +2638,10 @@ class DashboardDataSetService
                             return api.utils.formatters.oneZeroFormatter(value.toBoolean())
                         }
                     case AttributeType.TIMER_TYPES:
+                        if(!value)
+                        {
+                            return getNullValue(diagramType, fromBreakdown)
+                        }
                         return (value as TimerStatus).getRussianName()
                     case AttributeType.DATE_TYPES:
                         if(!value)
@@ -4450,7 +4460,7 @@ class DashboardDataSetService
                 String aggregationSortingType = requestData.aggregations.find()?.sortingType
                 def parameter = requestData.groups.find()
                 String parameterSortingType = diagramType == DiagramType.TABLE ? '' : parameter?.sortingType
-                String parameterAttributeType = parameter?.attribute?.type
+                String parameterAttributeType = Attribute.getAttributeType(parameter?.attribute)
                 Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
@@ -4513,7 +4523,7 @@ class DashboardDataSetService
                 String aggregationSortingType = dataSet.values().head().aggregations.find()?.sortingType
                 def parameter = dataSet.values().head().groups.find()
                 String parameterSortingType = diagramType == DiagramType.TABLE ? '' : parameter?.sortingType
-                String parameterAttributeType = parameter?.attribute?.type
+                String parameterAttributeType = Attribute.getAttributeType(parameter?.attribute)
                 Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
