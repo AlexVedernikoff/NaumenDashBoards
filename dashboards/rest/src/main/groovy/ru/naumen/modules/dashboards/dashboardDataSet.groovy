@@ -2157,10 +2157,6 @@ class DashboardDataSetService
                             filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
                             return prepareResultListListForTop(partial, filterListSize, top, parameterFilters, breakdownFilters, i)
                         }
-                        if(top)
-                        {
-                            res = getTop(res, top, parameterFilters, breakdownFilters)
-                        }
                         def parameter = requestData.groups.find()
                         String parameterAttributeType = parameter?.attribute?.type
                         Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
