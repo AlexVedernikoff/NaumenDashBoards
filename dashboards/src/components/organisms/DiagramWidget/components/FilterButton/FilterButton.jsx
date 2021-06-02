@@ -41,7 +41,7 @@ export class FilterButton extends PureComponent<Props, State> {
 			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
 
 			if (context) {
-				context['attrCodes'] = filter.attributes.map(attr => `${attr.metaClassFqn}@${attr.code}`);
+				context['attrCodes'] = filter.attributes.map(attr => `${attr.metaClassFqn.split('$')[0]}@${attr.code}`);
 
 				({serializedContext: newDescriptor} = await window.jsApi.commands.filterForm(context, true));
 			}
