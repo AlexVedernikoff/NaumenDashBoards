@@ -2277,7 +2277,7 @@ class DashboardDataSetService
                         Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
                         if(top)
                         {
-                            res = getTop(res, top, parameterFilters, breakdownFiltersfalse, parameterWithDate ? parameter : null,  parameterSortingType, aggregationSortingType)
+                            res = getTop(res, top, parameterFilters, breakdownFilters, false, parameterWithDate ? parameter : null,  parameterSortingType, aggregationSortingType)
                         }
 
                         if (!parameterWithDateOrDtInterval &&
