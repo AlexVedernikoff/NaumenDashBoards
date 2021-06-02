@@ -1385,9 +1385,8 @@ class DashboardSettingsService
             customGroupsIds << getGroupsIds(data.parameters)
             customGroupsIds << getGroupsIds(data.breakdown)
         }
-        return customGroupsIds.flatten()
+        return customGroupsIds.flatten().grep()
     }
-
 
     /**
      *  Метод для получения ключей кастомных группировок из параметров

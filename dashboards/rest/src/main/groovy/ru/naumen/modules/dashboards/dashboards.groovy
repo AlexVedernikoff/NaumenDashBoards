@@ -1108,7 +1108,7 @@ class DashboardsService
     private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
     {
         return attributes.findResults {
-            !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, sourceName, sourceCode) : null
+            !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, sourceName?.replace('Event for ', ''), sourceCode) : null
         }.sort { it.title }
     }
 
