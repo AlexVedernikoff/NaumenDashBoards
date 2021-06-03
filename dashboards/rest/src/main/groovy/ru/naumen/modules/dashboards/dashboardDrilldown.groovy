@@ -1139,7 +1139,7 @@ class Link
                     def (intervalValue, intervalType) = DtIntervalMarshaller.unmarshal(value.find())
                     if(intervalValue == 'Не заполнено')
                     {
-                        return filterBuilder.AND(filterBuilder.OR(attr.code, 'null', null))
+                        return filterBuilder.OR(attr.code, 'null', null)
                     }
                     intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
                     def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
@@ -1173,7 +1173,7 @@ class Link
                 def (intervalValue, intervalType) = DtIntervalMarshaller.unmarshal(value.find())
                 if(intervalValue == 'Не заполнено')
                 {
-                    return filterBuilder.AND(filterBuilder.OR(attr.code, 'null', null))
+                    return filterBuilder.OR(attr.code, 'null', null)
                 }
                 intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
                 def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
