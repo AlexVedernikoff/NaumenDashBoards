@@ -39,6 +39,14 @@ export class Widget extends PureComponent<Props, State> {
 		clearWarningMessage(widget.id);
 	};
 
+	handleClick = () => {
+		const {editMode, setSelectedWidget, widget} = this.props;
+
+		if (!editMode) {
+			setSelectedWidget(widget.id);
+		}
+	};
+
 	renderChildren = () => {
 		const {children} = this.props;
 		const {hasError} = this.state;
@@ -76,7 +84,7 @@ export class Widget extends PureComponent<Props, State> {
 		const {className, forwardedRef} = this.props;
 
 		return (
-			<div className={cn(styles.widget, className)} ref={forwardedRef}>
+			<div className={cn(styles.widget, className)} onClick={this.handleClick} ref={forwardedRef}>
 				{this.renderWidgetWarning()}
 				{this.renderControlPanel()}
 				{this.renderError()}

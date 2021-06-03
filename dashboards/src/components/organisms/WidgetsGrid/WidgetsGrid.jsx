@@ -80,6 +80,14 @@ export class WidgetsGrid extends Component<Props, State> {
 		}
 	}
 
+	handleClick = () => {
+		const {editMode, resetWidget, selectedWidget} = this.props;
+
+		if (!editMode && selectedWidget) {
+			resetWidget();
+		}
+	};
+
 	handleDrag = () => this.toggleGrid(true);
 
 	handleDragStop = () => this.toggleGrid(false);
@@ -90,6 +98,8 @@ export class WidgetsGrid extends Component<Props, State> {
 		element.scrollIntoView();
 		resetFocusedWidget();
 	};
+
+	handleItemClick = (e) => e.stopPropagation();
 
 	handleLayoutChange = (layout: Layout, layouts: Layouts) => {
 		const {changeLayouts, layoutMode} = this.props;
@@ -229,7 +239,7 @@ export class WidgetsGrid extends Component<Props, State> {
 		const selected = widget.id === selectedWidget;
 
 		return (
-			<GridItem focused={focused} key={widget.id} onFocus={this.handleFocus} selected={selected}>
+			<GridItem focused={focused} key={widget.id} onClick={this.handleItemClick} onFocus={this.handleFocus} selected={selected}>
 				{widget instanceof NewWidget ? null : this.renderWidget(widget)}
 			</GridItem>
 		);
@@ -281,8 +291,8 @@ export class WidgetsGrid extends Component<Props, State> {
 		});
 
 		return (
-			<ResizeDetector onResize={this.handleResize}>
-				<div className={containerCN} onContextMenu={this.onContextMenu} ref={this.gridContainerRef}>
+			<ResizeDetector onResize={this.handleResize} >
+				<div className={containerCN} onClick={this.handleClick} onContextMenu={this.onContextMenu} ref={this.gridContainerRef}>
 					{this.renderContextMenu()}
 					{this.renderGrid()}
 					{this.renderCreateButton()}

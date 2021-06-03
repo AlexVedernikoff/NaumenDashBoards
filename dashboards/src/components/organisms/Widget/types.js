@@ -1,7 +1,7 @@
 // @flow
 import type {AnyWidget} from 'store/widgets/data/types';
+import type {ConnectedFunctions, ConnectedProps} from 'containers/Widget/types';
 import type {Ref} from 'components/types';
-import type {ThunkAction} from 'store/types';
 
 export type ControlPanelProps = {
 	className: string,
@@ -12,10 +12,9 @@ type Components = {
 	ControlPanel: React$ComponentType<ControlPanelProps>
 };
 
-export type Props = {
+export type Props = ConnectedFunctions & ConnectedProps & {
 	children: React$Node,
 	className: string,
-	clearWarningMessage: (widgetId: string) => ThunkAction,
 	components: Components,
 	forwardedRef?: Ref<'div'>,
 	widget: AnyWidget

@@ -47,6 +47,7 @@ const addNewWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): 
 		batch(() => {
 			dispatch(focusWidget(payload.id));
 			dispatch({payload, type: WIDGETS_EVENTS.ADD_WIDGET});
+			dispatch({type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE});
 			dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
 		});
 };
@@ -65,6 +66,9 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): 
 		});
 	}
 
+	dispatch({
+		type: DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
+	});
 	dispatch(resetWidget());
 };
 
@@ -286,12 +290,31 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 
 /**
  * Устанавливает выбранный виджет для последующего редактирования
- * @param {string} payload - id виджета
+ * @param {string} widgetId - id виджета
  * @returns {ThunkAction}
  */
-const selectWidget = (payload: string): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch(setSelectedWidget(payload));
+const selectWidget = (widgetId: string): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
+	const state = getState();
+	const {data: widgetsData} = state.widgets;
 
+	if (widgetId !== NewWidget.id) {
+		const widgetData = widgetsData.map[widgetId];
+
+		if (widgetData.data) {
+			const sourcesSet = new Set(
+				widgetData
+					.data
+					.map(dataSet => dataSet.source.value?.value)
+					.filter(e => !!e)
+			);
+
+			sourcesSet.forEach((item) => {
+				dispatch(fetchSourcesFilters(item));
+			});
+		}
+	}
+
+	dispatch(setSelectedWidget(widgetId));
 	dispatch({
 		type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
 	});
@@ -408,23 +431,6 @@ const setSelectedWidget = (widgetId: string) => (dispatch: Dispatch, getState: G
 	if (selectedWidget === NewWidget.id) {
 		dispatch(deleteWidget(selectedWidget));
 		dispatch(removeLayouts(selectedWidget));
-	}
-
-	if (widgetId !== NewWidget.id) {
-		const widgetData = widgetsData.map[widgetId];
-
-		if (widgetData.data) {
-			const sourcesSet = new Set(
-				widgetData
-					.data
-					.map(dataSet => dataSet.source.value?.value)
-					.filter(e => !!e)
-			);
-
-			sourcesSet.forEach((item) => {
-				dispatch(fetchSourcesFilters(item));
-			});
-		}
 	}
 
 	dispatch({
