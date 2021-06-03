@@ -842,9 +842,11 @@ class QueryWrapper implements CriteriaWrapper
 
             Collection attrChains = attribute.attrChains()
             String code = attrChains*.code.join('.').replace('metaClass', valueToPut)
-            if(attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
+            if(Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
             {
-                attribute?.attrChains()?.last()?.ref = new Attribute(code: 'title', type: 'string')
+                attribute?.attrChains()?.last()?.ref = Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES_WITHOUT_CATALOG
+                    ? new Attribute(code: 'title', type: 'string')
+                    : new Attribute(code: 'code', type: 'string')
             }
             String columnCode = attribute.attrChains()*.code.join('.').replace('metaClass', valueToPut)
             String parameterFqn = attribute.attrChains().last().metaClassFqn
