@@ -1,6 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
-import {functions} from './selectors';
+import {functions, props} from './selectors';
 import Widget from 'components/organisms/Widget';
 
-export default connect(null, functions)(Widget);
+export default connect(props, functions)(Widget);

@@ -9,7 +9,7 @@ export class DashboardContent extends PureComponent<Props> {
 	renderPanel = () => {
 		const {editMode, selectedWidget} = this.props;
 
-		return editMode || selectedWidget ? <DashboardPanel selectedWidget={selectedWidget} /> : null;
+		return editMode && selectedWidget ? <DashboardPanel selectedWidget={selectedWidget} /> : null;
 	};
 
 	render () {
