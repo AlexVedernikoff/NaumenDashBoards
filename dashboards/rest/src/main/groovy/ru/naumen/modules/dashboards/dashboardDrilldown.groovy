@@ -1938,9 +1938,9 @@ class Link
         def getFilter(String format, String value, def filterBuilder, Attribute attr, String classFqn, String descriptor)
         {
             Map<String, Integer> valueMap = prepareValue(value)
-            def datePoint = year ? api.date.createDateTimePointPredicates(['WEEK', valueMap.week, 'EQ'],
+            def datePoint = valueMap.year ? api.date.createDateTimePointPredicates(['WEEK', valueMap.week, 'EQ'],
                                                                           ['YEAR', valueMap.year, 'EQ'])
-                : api.date.createDateTimePointPredicates(['WEEK', week, 'EQ'], ['WEEK', valueMap.week, 'EQ'])
+                : api.date.createDateTimePointPredicates(['WEEK', valueMap.week, 'EQ'], ['WEEK', valueMap.week, 'EQ'])
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
    }
@@ -2008,7 +2008,7 @@ class Link
             Map<String, Object> valueMap = prepareValue(value)
             def datePoint = valueMap.year ? api.date.createDateTimePointPredicates(['MONTH', valueMap.month as int, 'EQ'],
                                                                           ['YEAR', valueMap.year, 'EQ'])
-                : api.date.createDateTimePointPredicates(['MONTH', month as int, 'EQ'], ['MONTH', valueMap.month as int, 'EQ'])
+                : api.date.createDateTimePointPredicates(['MONTH', valueMap.month as int, 'EQ'], ['MONTH', valueMap.month as int, 'EQ'])
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
         }
     }
@@ -2076,7 +2076,7 @@ class Link
             Map<String, Object>  valueMap = prepareValue(value)
             def datePoint = valueMap.year ? api.date.createDateTimePointPredicates(['QUARTER', valueMap.quarter, 'EQ'],
                                                                           ['YEAR', valueMap.year as int, 'EQ'])
-                : api.date.createDateTimePointPredicates(['QUARTER', quarter, 'EQ'], ['QUARTER', valueMap.quarter, 'EQ'])
+                : api.date.createDateTimePointPredicates(['QUARTER', valueMap.quarter, 'EQ'], ['QUARTER', valueMap.quarter, 'EQ'])
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
 
         }
