@@ -6,11 +6,11 @@ import List from 'containers/AttributeMainSelectList';
 import memoize from 'memoize-one';
 import type {Props} from './types';
 import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 import styles from './styles.less';
 import withParentClassFqn from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withParentClassFqn';
 
-export class MainSelect extends PureComponent<Props> {
+export class MainSelect extends Component<Props> {
 	getComponents = memoize(components => {
 		const {Field, ...rest} = components;
 
