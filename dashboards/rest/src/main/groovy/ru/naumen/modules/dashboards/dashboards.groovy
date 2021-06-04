@@ -462,7 +462,9 @@ class DashboardsService
         {
             def trueCount = requestContent.count as int
             def trueOffset = requestContent.offset as int
-            values = values[trueOffset..(trueCount - 1 + trueOffset)]
+            values = DashboardDataSetService.instance.sliceCollection(values,
+                                                                      new PaginationSettings(pageSize:trueCount,
+                                                                                             firstElementIndex:trueOffset))
         }
 
         return values?.collect { object ->
