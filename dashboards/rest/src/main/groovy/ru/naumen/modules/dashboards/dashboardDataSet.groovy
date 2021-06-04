@@ -102,6 +102,8 @@ class DashboardDataSetService
         new DecimalFormat("#.##", it)
     }
 
+    private static final String blankData = 'Не заполнено'
+
     /**
      * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
      * @param dashboardKey - ключ дашборда
@@ -236,7 +238,13 @@ class DashboardDataSetService
                 String key = request.data.keySet().head()
                 String legend = request.data[key].aggregations.attribute.sourceName.head()
                 Boolean reverseGroups = isCustomGroupFromBreakdown(widgetSettings)
-                return mappingStandardDiagram(res, legend, reverseGroups)
+                Boolean changeLabels = widgetSettings?.sorting?.value == SortingValue.PARAMETER
+                Boolean reverseLabels = widgetSettings?.sorting?.type == SortingType.DESC && changeLabels
+
+                String format = getValueFromParameter(widgetSettings, 'format')
+                String groupFormat =  getValueFromParameter(widgetSettings, 'data')
+
+                return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat)
             case DiagramType.RoundTypes:
                 return mappingRoundDiagram(res)
             case DiagramType.CountTypes:
@@ -266,20 +274,9 @@ class DashboardDataSetService
                     }
                 }
                 additionals = sortListsForCombo(additionals, sortingDataIndex)
-                String format = widgetSettings.data.findResult { value ->
-                    def xAxis = value.parameters.find()
-                    if (xAxis.attribute.type in AttributeType.DATE_TYPES && xAxis.group.way == Way.SYSTEM)
-                    {
-                        return xAxis.group.format
-                    }
-                }
-                String groupFormat =  widgetSettings.data.findResult { value ->
-                    def xAxis = value.parameters.find()
-                    if (xAxis.attribute.type in AttributeType.DATE_TYPES && xAxis.group.way == Way.SYSTEM)
-                    {
-                        return xAxis.group.data
-                    }
-                }
+                String format = getValueFromParameter(widgetSettings, 'format')
+                String groupFormat =  getValueFromParameter(widgetSettings, 'data')
+
                 Boolean changeLabels = widgetSettings?.sorting?.value == SortingValue.PARAMETER
                 Boolean reverseLabels = widgetSettings?.sorting?.type == SortingType.DESC && changeLabels
                 List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(widgetSettings, diagramType)
@@ -287,6 +284,23 @@ class DashboardDataSetService
                 return mappingComboDiagram(res, additionals, groupFormat, format,
                                            changeLabels, reverseLabels, customsInBreakdown, sortingDataIndex)
             default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
+        }
+    }
+
+    /**
+     * Метод получения значений в параметре диаграммы по его полю
+     * @param widgetSettings - настройки виджета
+     * @param field - название поля для получения
+     * @return значение из поля
+     */
+    String getValueFromParameter(Widget widgetSettings, String field)
+    {
+        return widgetSettings.data.findResult { value ->
+            def xAxis = value.parameters.find()
+            if (xAxis.attribute.type in AttributeType.DATE_TYPES && xAxis.group.way == Way.SYSTEM)
+            {
+                return xAxis.group[field]
+            }
         }
     }
 
@@ -715,7 +729,7 @@ class DashboardDataSetService
 
             if(isDiagramTypeNotCount)
             {
-                if (mayBeBreakdown instanceof Collection)
+                if (mayBeBreakdown instanceof Collection && mayBeBreakdown?.any())
                 {
                     def groupTypes = data.breakdown*.group as Set
                     if (groupTypes.size() == 1)
@@ -2614,6 +2628,10 @@ class DashboardDataSetService
                         {
                             return value
                         }
+                        if(!value)
+                        {
+                            return getNullValue(diagramType, fromBreakdown)
+                        }
                         return TimeUnit.MILLISECONDS.toHours(value as long)
                     case AttributeType.STATE_TYPE:
                         fqnClass -= '__Evt' //убираем Evt, если источник из ЖЦ
@@ -2878,11 +2896,11 @@ class DashboardDataSetService
         //в таблице важно фронту отправлять пустую строку
         if(diagramType == DiagramType.TABLE && !fromBreakdown)
         {
-            return ""
+            return ''
         }
         else if((diagramType in DiagramType.NullableTypes) || fromBreakdown)
         {
-            return "Не заполнено"
+            return blankData
         }
     }
 
@@ -3042,9 +3060,17 @@ class DashboardDataSetService
     /**
      * Метод преобразования результата выборки к стандартной диаграмме
      * @param list - данные диаграмы
+     * @param legendName - легенда
+     * @param reverseGroups - флаг на изменение выбора групп в датасете
+     * @param changeLabels - флаг на изменение порядка лейблов
+     * @param reverseLabels - флаг на обратный порядок
+     * @param format - формат дат
+     * @param groupFormat - формат группировки для дат
      * @return StandardDiagram
      */
-    private StandardDiagram mappingStandardDiagram(List list, String legendName, Boolean reverseGroups)
+    private StandardDiagram mappingStandardDiagram(List list, String legendName,
+                                                   Boolean reverseGroups, Boolean changeLabels,
+                                                   Boolean reverseLabels, String format, String groupFormat)
     {
         def resultDataSet = list.head() as List<List>
         def transposeDataSet = resultDataSet.transpose()
@@ -3073,6 +3099,7 @@ class DashboardDataSetService
                         }
                         new Series(name: labelsValue, data: data)
                     }
+                    labelsForDiagram = getTotalLabelsForDiagram(labelsForDiagram, groupFormat, format, changeLabels, reverseLabels)
                     standardDiagram = new StandardDiagram(
                         labels: labelsForDiagram,
                         series: seriesForDiagram
@@ -3091,6 +3118,7 @@ class DashboardDataSetService
                             return new Series(name: breakdownValue, data: data)
                         }
                     }
+                    labels = getTotalLabelsForDiagram(labels, groupFormat, format, changeLabels, reverseLabels)
                     standardDiagram = new StandardDiagram(labels: labels, series: series)
                 }
                 return standardDiagram
@@ -3098,6 +3126,32 @@ class DashboardDataSetService
         }
     }
 
+    /**
+     * Метод получения итоговых лейблов для диаграммы
+     * @param labels - текущие лейблы
+     * @param groupFormat - формат группы
+     * @param format - формат
+     * @param changeLabels - флаг на необходимость изменения
+     * @param reverseLabels - флаг на обратный порядок
+     * @return список итоговых лейблов для диаграммы
+     */
+    private List getTotalLabelsForDiagram(def labels, String groupFormat, String format, Boolean changeLabels, Boolean reverseLabels)
+    {
+        if (groupFormat && changeLabels)
+        {
+            Boolean labelsHaveEmptyValue = blankData in labels
+            if(labelsHaveEmptyValue)
+            {
+                labels -= blankData
+            }
+            labels = getLabelsInCorrectOrder(labels, groupFormat, format, reverseLabels)
+            if(labelsHaveEmptyValue)
+            {
+                labels += blankData
+            }
+        }
+        return labels
+    }
     /**
      * Метод преобразования результата выборки к круговой диаграмме
      * @param list - данные диаграмы
@@ -3973,19 +4027,7 @@ class DashboardDataSetService
             }
         }
 
-        if (groupFormat && changeLabels)
-        {
-            Boolean labelsHaveEmptyValue = 'Не заполнено' in labels
-            if(labelsHaveEmptyValue)
-            {
-                labels -= 'Не заполнено'
-            }
-            labels = getLabelsInCorrectOrder(labels, groupFormat, format, reverseLabels)
-            if(labelsHaveEmptyValue)
-            {
-                labels += 'Не заполнено'
-            }
-        }
+        labels = getTotalLabelsForDiagram(labels, groupFormat, format, changeLabels, reverseLabels)
 
         Set diagramLabels = transposeSets.withIndex().collectMany { set, i ->
             if (customsInBreakdown[i])
@@ -4366,10 +4408,10 @@ class DashboardDataSetService
         if(parameterWithDate && !aggregationOrderWithDates)
         {
             def labels = tempResult as Set
-            Boolean labelsHaveEmptyValue = 'Не заполнено' in labels
+            Boolean labelsHaveEmptyValue = blankData in labels
             if(labelsHaveEmptyValue)
             {
-                labels -= 'Не заполнено'
+                labels -= blankData
             }
             tempResult = getLabelsInCorrectOrder(labels,
                                                  parameterWithDate.type as String,
@@ -4377,7 +4419,7 @@ class DashboardDataSetService
                                                  parameterOrderWithDates != 'ASC').toList()
             if(labelsHaveEmptyValue)
             {
-                tempResult += 'Не заполнено'
+                tempResult += blankData
             }
         }
         //находим соответсвия данных с теми группами, что получили, и выводим их
