@@ -104,29 +104,30 @@ export class SourceFieldset extends Component<Props, State> {
 		const {mode} = this.state;
 		let error = null;
 
-		if (!filterList.find(filter => filter.label === label)) {
-			if (source.value) {
-				const {descriptor, filterId, value} = source;
+		if (source.value) {
+			const {descriptor, filterId, value} = source;
 
-				if (descriptor) {
-					const id = mode === MODE.SAVE ? null : filterId;
-					const data = await onUpdateSourcesFilter(value.value, {descriptor, id, label});
+			if (mode === MODE.EDIT && filterId === null) {
+				this.changeSource({...source, value: { ...value, label }});
+				this.hideEditForm();
+			} else {
+				if (!filterList.find(filter => filter.label === label) || mode === MODE.EDIT) {
+					if (descriptor) {
+						const data = await onUpdateSourcesFilter(value.value, {descriptor, id: filterId, label});
 
-					if (data.result) {
-						const {filterId} = data;
+						if (data.result) {
+							const {filterId} = data;
 
-						this.changeSource({...source, filterId, value: {...value, label}});
-						this.hideEditForm();
-					} else {
-						error = data.message;
+							this.changeSource({...source, filterId, value: {...value, label}});
+							this.hideEditForm();
+						} else {
+							error = data.message;
+						}
 					}
 				} else {
-					this.changeSource({...source, value: { ...value, label }});
-					this.hideEditForm();
+					error = `Фильтр с названием ${label} не может быть сохранен. Название фильтра должно быть уникально`;
 				}
 			}
-		} else {
-			error = `Фильтр с названием ${label} не может быть сохранен. Название фильтра должно быть уникально`;
 		}
 
 		this.setInnerError(error);
@@ -218,18 +219,9 @@ export class SourceFieldset extends Component<Props, State> {
 	hideEditForm = () => this.setState({error: null, mode: null, showEditForm: false});
 
 	isCurrentFilterChanged = (): boolean => {
-		const {filterList = [], value: {source}} = this.props;
+		const {value: {source}} = this.props;
 		const {descriptor} = source;
-
-		if (source.filterId) {
-			const usedFilter = filterList.find(filter => filter.id === source.filterId);
-
-			return descriptor === usedFilter?.descriptor;
-		} else if (descriptor) {
-			return !!JSON.parse(descriptor).filters;
-		}
-
-		return false;
+		return source.filterId === null && (descriptor && !!JSON.parse(descriptor).filters);
 	};
 
 	isDynamicAttribute = (attribute: ?Attribute) => attribute?.property === DYNAMIC_ATTRIBUTE_PROPERTY;
@@ -358,12 +350,12 @@ export class SourceFieldset extends Component<Props, State> {
 	renderSavedFiltersButton = (): React$Node => {
 		const {filterList, filtersListLoading, isPersonal, usesFilter} = this.props;
 
-		if (usesFilter && filterList && filterList.length > 0) {
+		if (!isPersonal && usesFilter && filterList && filterList.length > 0) {
 			return (
 				<FormField className={styles.savedFiltersButton}>
 					<SavedFilters
 						filters={filterList}
-						isPersonal={isPersonal}
+						isPersonal={false}
 						loading={filtersListLoading}
 						onDelete={this.handleDeleteSavedFilters}
 						onSelect={this.handleSelectFilters}
@@ -403,13 +395,12 @@ export class SourceFieldset extends Component<Props, State> {
 		const {children, className, onClick} = props;
 		const isChanged = this.isCurrentFilterChanged();
 
-		const editButton = isChanged && !isPersonal
-			? (<IconButton icon={ICON_NAMES.SAVE} onClick={this.showSaveForm} />)
-			: (<IconButton icon={ICON_NAMES.EDIT} onClick={this.showEditForm} />);
+		const saveButton = isChanged && !isPersonal ? (<IconButton icon={ICON_NAMES.SAVE} onClick={this.showSaveForm} />) : null;
 
 		return (
 			<div className={className} onClick={onClick}>
-				{editButton}
+				<IconButton icon={ICON_NAMES.EDIT} onClick={this.showEditForm} />
+				{saveButton}
 				{children}
 			</div>
 		);

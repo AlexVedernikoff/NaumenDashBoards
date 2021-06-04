@@ -9,11 +9,11 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
 import Loader from 'components/atoms/Loader';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 
-export class AttributeSelect extends PureComponent<Props, State> {
+export class AttributeSelect extends Component<Props, State> {
 	static defaultProps = {
 		...SELECT_DEFAULT_PROPS,
 		droppable: false,

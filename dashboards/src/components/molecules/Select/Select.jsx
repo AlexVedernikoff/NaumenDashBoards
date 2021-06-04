@@ -10,13 +10,13 @@ import Loader from 'components/atoms/Loader';
 import type {OnChangeEvent, Ref} from 'components/types';
 import type {Option, Props, State} from './types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
-import React, {createRef, PureComponent} from 'react';
+import React, {Component, createRef} from 'react';
 import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
 import Value from './components/Value';
 
-export class Select extends PureComponent<Props, State> {
+export class Select extends Component<Props, State> {
 	static defaultProps = DEFAULT_PROPS;
 
 	state = {

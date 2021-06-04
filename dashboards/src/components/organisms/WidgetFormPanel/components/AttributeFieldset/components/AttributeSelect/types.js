@@ -5,8 +5,7 @@ export type Components = {|
 	Field: React$ComponentType<{}>
 |} & $Shape<SelectComponents>;
 
-export type Props = {
-	...SelectProps,
+export type OwnProps = {
 	components: $Shape<Components>,
 	droppable: boolean,
 	onChangeLabel: (label: string) => void,
@@ -14,6 +13,8 @@ export type Props = {
 	onRemove?: (name: string) => void,
 	removable: boolean,
 };
+
+export type Props = OwnProps & SelectProps;
 
 export type State = {
 	showForm: boolean
