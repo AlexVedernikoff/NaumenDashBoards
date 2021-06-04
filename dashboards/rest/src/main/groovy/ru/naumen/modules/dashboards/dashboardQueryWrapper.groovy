@@ -84,7 +84,7 @@ class QueryWrapper implements CriteriaWrapper
         def sc = api.selectClause
         def attribute = parameter.attribute
         Closure aggregation = getAggregation(aggregationType)
-        String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode.rcurry(true))
 
         IApiCriteriaColumn column = sc.property(attributeCodes)
         if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
@@ -123,7 +123,7 @@ class QueryWrapper implements CriteriaWrapper
     {
         def attribute = parameter.attribute
         def sc = api.selectClause
-        String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode)
+        String[] attributeCodes = attribute.attrChains()*.code.with(this.&replaceMetaClassCode.rcurry(true))
         if (totalCount <= 0)
         {
             //Всё плохо. Процент невозможно вычислить!
@@ -1031,12 +1031,17 @@ class QueryWrapper implements CriteriaWrapper
     /**
      * Метод подменяющий код атрибута metaClass на metaClassFqn
      * @param list - список кодов
+     * @param forAggregation - использовать для агрегации
      * @return Список кодов
      */
-    private List<String> replaceMetaClassCode(List<String> list)
+    private List<String> replaceMetaClassCode(List<String> list, Boolean forAggregation = false)
     {
         Boolean sourceIsEvt = this.criteria.currentMetaClass.fqn.code.contains('_Evt')
         def valueToPut = sourceIsEvt ? 'parent.metaClassFqn' : 'metaClassFqn'
+        if(forAggregation)
+        {
+            valueToPut = sourceIsEvt ? 'parent.metaCaseId' : 'metaCaseId'
+        }
         return 'metaClass' in list ? (list - 'metaClass' + valueToPut) : list
     }
 
