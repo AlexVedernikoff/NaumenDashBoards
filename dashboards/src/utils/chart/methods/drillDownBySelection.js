@@ -207,7 +207,10 @@ const addFilters = (widget: Chart, props: AddFiltersProps): ReturnsAddFiltersDat
  */
 const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
 	if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-		return attribute.metaClassFqn !== 'serviceCall__Evn';
+		const isDateType = attribute.type === ATTRIBUTE_TYPES.dtInterval;
+		const isServiceCallEvt = attribute.metaClassFqn === 'serviceCall__Evt';
+
+		return !isDateType && !isServiceCallEvt;
 	}
 
 	return true;
