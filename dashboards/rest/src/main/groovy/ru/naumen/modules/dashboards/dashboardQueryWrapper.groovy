@@ -728,10 +728,7 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.HOUR_INTERVAL:
             case GroupType.DAY_INTERVAL:
             case GroupType.WEEK_INTERVAL:
-                String[] intervalTypeColumnCode = prepareIntervalTypeColumnCode(parameter.attribute, attributeCodes)
-                def orderColumn = column
-                column = sc.concat(sc.cast(column, 'string'), sc.constant(DtIntervalMarshaller.dbDelimiter),sc.property(intervalTypeColumnCode))
-                criteria.addGroupColumn(column).addGroupColumn(orderColumn)
+                criteria.addGroupColumn(column)
                 criteria.addColumn(column)
                 String sortingType = parameter.sortingType
                 if (sortingType)

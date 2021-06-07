@@ -2832,13 +2832,12 @@ class DashboardDataSetService
 
     /**
      * Метод по получению корректного значения временного интервала для предложенного типа
-     * @param value - значение из БД
+     * @param millis - значение из БД в миллисекундах
      * @param type - тип, в который нужно привести
      * @return значение временного интервала для предложенного типа
      */
-    private String getCorrectIntervalType(def value, GroupType type)
+    private String getCorrectIntervalType(def millis, GroupType type)
     {
-        def (millis, baseIntervalType) = DtIntervalMarshaller.unmarshal(value)
         def tempValue = DashboardUtils.convertValueToInterval(millis as Long, type)
 
         if(tempValue < 1)
@@ -2859,7 +2858,7 @@ class DashboardDataSetService
             }
             tempValue = dtIntervalDecimalFormat.format(tempValue)
         }
-        return DtIntervalMarshaller.marshal(tempValue.toString(), type, value)
+        return DtIntervalMarshaller.marshal(tempValue.toString(), type, millis.toString())
     }
 
     /**
