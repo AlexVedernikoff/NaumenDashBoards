@@ -2628,7 +2628,7 @@ class DashboardDataSetService
                         {
                             return value
                         }
-                        if(!value)
+                        if(value == null)
                         {
                             return getNullValue(diagramType, fromBreakdown)
                         }
@@ -3134,7 +3134,7 @@ class DashboardDataSetService
      * @param reverseLabels - флаг на обратный порядок
      * @return список итоговых лейблов для диаграммы
      */
-    private List getTotalLabelsForDiagram(def labels, String groupFormat, String format, Boolean changeLabels, Boolean reverseLabels)
+    private def getTotalLabelsForDiagram(def labels, String groupFormat, String format, Boolean changeLabels, Boolean reverseLabels)
     {
         if (groupFormat && changeLabels)
         {

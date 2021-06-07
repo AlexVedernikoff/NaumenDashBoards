@@ -1518,12 +1518,15 @@ class DashboardSettingsService
     private Collection updateCustomGroupKeys(Collection<IHasGroup> valuesWithGroup, Collection<String> currentCustomGroupsIds)
     {
         return valuesWithGroup.collect {
-            def groupKey = it?.group?.data
-            //нашли новый ключ, в состав которого входит информация о старом, и подставляем его
-            def currentGroupKey = currentCustomGroupsIds.find {it.contains(groupKey)}
-            if(currentGroupKey != groupKey)
+            if(it?.group?.way == Way.CUSTOM)
             {
-                it?.group?.data = currentGroupKey
+                def groupKey = it?.group?.data
+                //нашли новый ключ, в состав которого входит информация о старом, и подставляем его
+                def currentGroupKey = currentCustomGroupsIds.find {it.contains(groupKey)}
+                if(currentGroupKey != groupKey)
+                {
+                    it?.group?.data = currentGroupKey
+                }
             }
             return it
         }
