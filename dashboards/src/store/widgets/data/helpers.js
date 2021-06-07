@@ -1,8 +1,11 @@
 // @flow
 import type {
 	AddWidget,
+	AnyWidget,
 	AxisData,
+	AxisWidget,
 	CircleData,
+	CircleWidget,
 	ClearMessageWarning,
 	DeleteWidget,
 	Group,
@@ -17,9 +20,12 @@ import type {
 	WidgetType,
 	WidgetsDataState
 } from './types';
+import type {AppState} from 'store/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
+import {getWidgetGlobalChartColorsSettings} from 'store/dashboard/customChartColorsSettings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {WIDGET_SETS, WIDGET_TYPES} from './constants';
 
@@ -294,20 +300,51 @@ const clearWidgetWarning = (state: WidgetsDataState, {payload}: ClearMessageWarn
 	};
 };
 
+const updateNewWidgetCustomColorsSettings = (awidget: AnyWidget, state: AppState) => {
+	let isChanged = false;
+
+	if (awidget.type !== WIDGET_TYPES.TEXT) {
+		// $FlowFixMe: это не WIDGET_TYPES.TEXT => Widget
+		const widget = (awidget: Widget);
+		const settings = getWidgetGlobalChartColorsSettings(widget)(state);
+
+		if (settings) {
+			// $FlowFixMe: getWidgetGlobalChartColorsSettings проверяет на то что это AxisWidget или CircleWidget
+			const colorWidget = (widget: AxisWidget | CircleWidget);
+			const colorsSettings = colorWidget.colorsSettings;
+
+			if (colorsSettings && !colorsSettings.custom.useGlobal) {
+				colorWidget.colorsSettings = {
+					...colorsSettings,
+					custom: {
+						data: {...settings},
+						useGlobal: true
+					},
+					type: CHART_COLORS_SETTINGS_TYPES.CUSTOM
+				};
+				isChanged = true;
+			}
+		}
+	}
+
+	return isChanged;
+};
+
 export {
-	clearWidgetWarning,
-	getBuildSet,
-	getCustomColorsSettingsKey,
-	getCustomColorsSettingsKeyByData,
-	getComboYAxisName,
-	getMainDataSet,
-	getMainDataSetIndex,
-	setWidgetWarning,
-	setWidgets,
-	setSelectedWidget,
-	updateWidget,
 	addWidget,
+	clearWidgetWarning,
 	createWidget,
 	deleteWidget,
-	resetWidget
+	getBuildSet,
+	getComboYAxisName,
+	getCustomColorsSettingsKey,
+	getCustomColorsSettingsKeyByData,
+	getMainDataSet,
+	getMainDataSetIndex,
+	resetWidget,
+	setSelectedWidget,
+	setWidgets,
+	setWidgetWarning,
+	updateNewWidgetCustomColorsSettings,
+	updateWidget
 };

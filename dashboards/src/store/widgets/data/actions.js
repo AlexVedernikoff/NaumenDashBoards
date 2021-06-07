@@ -11,7 +11,7 @@ import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchCustomGroups} from 'store/customGroups/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
-import {getCustomColorsSettingsKey} from './helpers';
+import {getCustomColorsSettingsKey, updateNewWidgetCustomColorsSettings} from './helpers';
 import {getParams, parseResponseErrorText} from 'store/helpers';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
@@ -95,13 +95,13 @@ const saveChartWidget = (widget: Chart): ThunkAction => (dispatch: Dispatch): vo
  * @param {Chart} widget - данные графика
  * @returns {ThunkAction}
  */
-const editChartWidget = (widget: Chart): ThunkAction => (dispatch: Dispatch): void => {
+const editChartWidget = (widget: Chart): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	const {colorsSettings} = widget;
 	const {data, useGlobal} = colorsSettings.custom;
 
 	if (useGlobal && data) {
-		dispatch(saveCustomChartColorsSettings(data));
-		dispatch(setUseGlobalChartSettings(data.key, useGlobal, widget.id));
+		await dispatch(saveCustomChartColorsSettings(data));
+		await dispatch(setUseGlobalChartSettings(data.key, useGlobal, widget.id));
 	}
 
 	dispatch(editWidget(widget));
@@ -194,12 +194,15 @@ const saveWidgetWithNewFilters = (widget: Widget): ThunkAction =>
  * @param {AnyWidget} settings - данные формы создания виджета
  * @returns {ThunkAction}
  */
-const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const state = getState();
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
 
 	try {
+		updateNewWidgetCustomColorsSettings(settings, state);
+
 		const payload = {
 			...getParams(),
 			widget: settings
@@ -228,7 +231,7 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
  * @param {string} widgetKey - идентификатор виджета
  * @returns {ThunkAction}
  */
-const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	dispatch({
 		type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
 	});
@@ -242,6 +245,13 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 			widgetKey
 		};
 		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
+		const state = getState();
+
+		if (updateNewWidgetCustomColorsSettings(widget, state)) {
+			const {colorsSettings} = widget;
+
+			await dispatch(editWidgetChunkData(widget, {colorsSettings}, false));
+		}
 
 		batch(() => {
 			dispatch(setCreatedWidget(widget));
@@ -389,19 +399,18 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
  * @returns {ThunkAction}
  */
 const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string = ''): ThunkAction =>
-	(dispatch: Dispatch, getState: GetState): void => {
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const widgets = getAllWidgets(getState());
 
-	widgets.forEach(widget => {
-		const {id, type: widgetType} = widget;
+	// eslint-disable-next-line no-unused-vars
+	for (const widget of widgets) {
+		const {colorsSettings, id, type: widgetType} = widget;
 
 		try {
 			const isValidWidget = id !== targetWidgetId && hasChartColorsSettings(widgetType);
 
 			if (isValidWidget && getCustomColorsSettingsKey(widget) === key) {
-				const {colorsSettings} = widget;
-
-				dispatch(editWidgetChunkData(widget, {
+				await dispatch(editWidgetChunkData(widget, {
 					colorsSettings: {
 						...colorsSettings,
 						custom: {
@@ -415,7 +424,7 @@ const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidget
 		} catch (e) {
 			console.log(e);
 		}
-	});
+	}
 };
 
 /**
