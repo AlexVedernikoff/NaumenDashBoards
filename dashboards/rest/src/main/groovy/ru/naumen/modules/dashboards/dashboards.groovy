@@ -1122,6 +1122,7 @@ class DashboardsService
             type: value.type.code as String,
             property: value.type.relatedMetaClass as String,
             metaClassFqn: value.metaClass.code,
+            declaredMetaClass: value.declaredMetaClass,
             sourceName: sourceName,
             sourceCode: sourceCode
         )
