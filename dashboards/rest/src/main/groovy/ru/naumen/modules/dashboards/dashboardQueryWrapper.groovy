@@ -734,11 +734,11 @@ class QueryWrapper implements CriteriaWrapper
                 if (sortingType)
                 {
                     Closure sorting = getSorting(sortingType)
-                    orderColumn.with(sorting).with(criteria.&addOrder)
+                    column.with(sorting).with(criteria.&addOrder)
                 }
                 else
                 {
-                    criteria.addOrder(ApiCriteriaOrders.asc(orderColumn))
+                    criteria.addOrder(ApiCriteriaOrders.asc(column))
                 }
                 break
             case GroupType.getTimerTypes():
