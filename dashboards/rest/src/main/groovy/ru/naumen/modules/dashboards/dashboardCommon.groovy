@@ -909,9 +909,13 @@ class Attribute extends BaseAttribute
      */
     String property
     /**
-     * метакласс атрибута
+     * метакласс атрибута(где к нему идёт обращение)
      */
     String metaClassFqn
+    /**
+     * метакласс атрибута, где он был создан
+     */
+    String declaredMetaClass
     /**
      * Имя источника
      */
@@ -934,6 +938,7 @@ class Attribute extends BaseAttribute
             type: data.type as String,
             property: data.property as String,
             metaClassFqn: data.metaClassFqn as String,
+            declaredMetaClass: data.declaredMetaClass as String,
             sourceName: data.sourceName as String,
             sourceCode: data.sourceCode as String,
             ref: fromMap(data.ref as Map<String, Object>)
@@ -961,6 +966,7 @@ class Attribute extends BaseAttribute
             type: this.type,
             property: this.property,
             metaClassFqn: this.metaClassFqn,
+            declaredMetaClass: this.declaredMetaClass,
             sourceName: this.sourceName,
             sourceCode: this.sourceCode,
             ref: this.ref?.deepClone()
