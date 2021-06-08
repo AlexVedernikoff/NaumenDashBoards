@@ -2,7 +2,7 @@
 import type {AddFilterProps, AddFiltersProps, ReturnsAddFiltersData} from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboWidget, Group, MixedAttribute} from 'store/widgets/data/types';
+import type {AxisData, AxisWidget, Chart, ChartDataSet, CircleWidget, ComboData, ComboWidget, Group, MixedAttribute} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {deepClone} from 'helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
@@ -22,7 +22,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * Определяет нужно ли проводить очистку значений для фильтрации в drilldown
  * @param {Attribute} attribute - Атрибут
  * @param {Group} group - группировка атрибута
- * @returns  {boolean} - Необходимость очищать значения для фильтрации
+ * @returns {boolean} - Необходимость очищать значения для фильтрации
  */
 const isNeedsClearedValue = (attribute: Attribute, group: Group): boolean => {
 	const {dtInterval, metaClass} = ATTRIBUTE_TYPES;
@@ -202,12 +202,14 @@ const addFilters = (widget: Chart, props: AddFiltersProps): ReturnsAddFiltersDat
 
 /**
  * Определяет нужно ли по данному типу аттрибута производить DrillDown
- * @param {Attribute} attribute - Атрибут
- * @returns  {boolean} - Разрешение на DrillDown
+ * @param {Attribute} attribute - атрибут для проверки
+ * @returns {boolean} - возвращает true, если по данному атрибуту данные в дриллдауне будут ожидаемыми.
+ * false - если по этому атрибуту нельзя построить валидную выборку.
  */
 const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
 	if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-		const isDateType = attribute.type === ATTRIBUTE_TYPES.dtInterval;
+		const realAttribute = attribute.ref ?? attribute;
+		const isDateType = realAttribute.type === ATTRIBUTE_TYPES.dtInterval;
 		const isServiceCallEvt = attribute.metaClassFqn === 'serviceCall__Evt';
 
 		return !isDateType && !isServiceCallEvt;
@@ -217,49 +219,51 @@ const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
 };
 
 /**
+ * Определяет можно ли при указанных метаданных для построения виджета производить DrillDown, согласно параметру или разбивке
+ * @param {AxisData | ComboData} dataSet - метаданные для построения виджета с выставленным параметром или разбивкой
+ * @returns {boolean} - возвращает true, если по указанным метаданным для построения виджета данные в дриллдауне будут ожидаемыми.
+ * false - если по указанным метаданным нельзя построить валидную выборку.
+ */
+const hasDrillDownByParameter = (dataSet: AxisData | ComboData) => {
+	const {attribute} = Array.isArray(dataSet.breakdown) ? dataSet.breakdown[0] : dataSet.parameters[0];
+	return hasAttributeDrillDown(attribute);
+};
+
+/**
  * Определяет можно ли в данном Axis-виджете производить DrillDown
- * @param {AxisWidget} widget - Виджет
- * @returns  {boolean} - Разрешение на DrillDown
+ * @param {AxisWidget} widget - виджет для проверки
+ * @returns {boolean} - возвращает true, если по данному осевому виджету данные в дриллдауне будут ожидаемыми
+ * false - если по указанному осевому виджету нельзя построить валидную выборку.
  */
 const hasDrillDownAxisWidget = (widget: AxisWidget) => {
 	const {data} = widget;
 	const index = getMainDataSetIndex(widget.data);
 	const dataSet = data[index];
 
-	if (dataSet) {
-		const {attribute} = dataSet.parameters[0];
-
-		return hasAttributeDrillDown(attribute);
-	}
-
-	return false;
+	return hasDrillDownByParameter(dataSet);
 };
 
 /**
  * Определяет можно ли в данном Combo-виджете производить DrillDown
- * @param {ComboWidget} widget - Виджет
+ * @param {ComboWidget} widget - виджет для проверки
  * @param {DiagramBuildData} buildData - данные для построения
  * @param {number} seriesIndex - нндекс массива данных
- * @returns {boolean} - Разрешение на DrillDown
+ * @returns {boolean} - возвращает true, если по данному комбо-виджету данные в дриллдауне будут ожидаемыми
+ * false - если по указанному комбо-виджету нельзя построить валидную выборку.
  */
 const hasDrillDownComboWidget = (widget: ComboWidget, buildData: DiagramBuildData, seriesIndex) => {
 	const {data} = widget;
 	const index = data.findIndex(dataSet => dataSet.dataKey === buildData.series[seriesIndex].dataKey);
 	const dataSet = data[index];
 
-	if (dataSet) {
-		const {attribute} = dataSet.parameters[0];
-
-		return hasAttributeDrillDown(attribute);
-	}
-
-	return false;
+	return hasDrillDownByParameter(dataSet);
 };
 
 /**
  * Определяет можно ли в данном Circle-виджете производить DrillDown
  * @param {CircleWidget} widget - Виджет
- * @returns {boolean} - Разрешение на DrillDown
+ * @returns {boolean} - возвращает true, если по данному круговому виджету данные в дриллдауне будут ожидаемыми
+ * false - если по указанному круговому виджету нельзя построить валидную выборку.
  */
 const hasDrillDownCircleWidget = (widget: CircleWidget) => {
 	const {data} = widget;
@@ -267,7 +271,7 @@ const hasDrillDownCircleWidget = (widget: CircleWidget) => {
 	const dataSet = data[index];
 
 	if (dataSet) {
-		const {attribute} = dataSet.indicators[0];
+		const {attribute} = dataSet.breakdown[0];
 
 		return hasAttributeDrillDown(attribute);
 	}
@@ -280,7 +284,8 @@ const hasDrillDownCircleWidget = (widget: CircleWidget) => {
  * @param {Chart} widget - Виджет
  * @param {DiagramBuildData} buildData - данные для построения
  * @param {number} seriesIndex - нндекс массива данных
- * @returns {boolean} - Разрешение на DrillDown
+ * @returns {boolean} - возвращает true, если по данному виджету данные в дриллдауне будут ожидаемыми
+ * false - если по указанному виджету нельзя построить валидную выборку.
  */
 const hasDrillDownWidget = (widget: Chart, buildData: DiagramBuildData, seriesIndex: number): boolean => {
 	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE} = WIDGET_TYPES;
