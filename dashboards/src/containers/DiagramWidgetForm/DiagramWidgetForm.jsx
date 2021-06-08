@@ -10,7 +10,7 @@ import memoize from 'memoize-one';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderProps} from 'components/organisms/WidgetForm/types';
-import {TAB_TYPES, TABS} from 'src/containers/DiagramWidgetForm/constants';
+import {TAB_TYPES} from 'src/containers/DiagramWidgetForm/constants';
 import {TabbedWidgetForm} from 'components/templates/WidgetForm';
 import type {Values} from 'store/widgetForms/axisChartForm/types';
 import WidgetForm from 'components/organisms/WidgetForm';
@@ -87,25 +87,26 @@ export class DiagramWidgetForm extends PureComponent<Props> {
 	};
 
 	renderForm = (props: RenderProps<Values>) => {
+		const {tabs} = this.props;
 		const {handleCancel, handleSubmit, values} = props;
 		const title = values.templateName || 'Новый виджет';
 
 		return (
-			<TabbedWidgetForm onCancel={handleCancel} onSubmit={handleSubmit} tabs={TABS} title={title}>
+			<TabbedWidgetForm onCancel={handleCancel} onSubmit={handleSubmit} tabs={tabs} title={title}>
 				{name => this.renderTab(name, props)}
 			</TabbedWidgetForm>
 		);
 	};
 
 	renderTab = (tab: string, props: RenderProps<Values>) => {
-		const {components, isPersonalDashboard} = this.props;
+		const {components} = this.props;
 		const {ParamsTab, StyleTab} = components;
 		const {setFieldValue: onChange, values} = props;
 		const {OPTIONS, PARAMS, STYLE} = TAB_TYPES;
 
 		switch (tab) {
 			case OPTIONS:
-				return !isPersonalDashboard && <FiltersOnWidget onChange={onChange} values={values} />;
+				return <FiltersOnWidget onChange={onChange} values={values} />;
 			case PARAMS:
 				return <ParamsTab onChange={onChange} values={values} />;
 			case STYLE:
