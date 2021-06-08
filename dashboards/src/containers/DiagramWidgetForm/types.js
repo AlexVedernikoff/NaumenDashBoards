@@ -1,11 +1,12 @@
 // @flow
+import {REGULAR_TABS, TABS} from 'src/containers/DiagramWidgetForm/constants';
 import type {Schema} from 'components/types';
 import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types';
 import type {Widget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
-	isPersonalDashboard: boolean,
 	saving: boolean,
+	tabs: typeof REGULAR_TABS | typeof TABS,
 	widgets: Array<Widget>
 };
 

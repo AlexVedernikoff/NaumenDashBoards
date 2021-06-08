@@ -5,6 +5,7 @@ import type {ThunkAction} from 'store/types';
 
 export type Attribute = {
 	code: string,
+	declaredMetaClass: ?string,
 	metaClassFqn: string,
 	property: string,
 	ref: Attribute | null,

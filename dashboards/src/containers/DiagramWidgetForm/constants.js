@@ -24,7 +24,19 @@ const TABS = [
 	}
 ];
 
+const REGULAR_TABS = [
+	{
+		key: PARAMS,
+		title: 'Параметры'
+	},
+	{
+		key: STYLE,
+		title: 'Стиль'
+	}
+];
+
 export {
+	REGULAR_TABS,
 	TAB_TYPES,
 	TABS
 };

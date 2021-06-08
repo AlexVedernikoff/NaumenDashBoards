@@ -1,8 +1,7 @@
 // @flow
 import cn from 'classnames';
-import {createFilterContext, getFilterContext} from 'store/helpers';
-import type {CustomFilter, Widget} from 'store/widgets/data/types';
 import DropdownMenu from 'components/atoms/DropdownMenu';
+import {getNewDescriptor, hasUsedFilters, isNotEmptyDescriptor} from './helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import {Item as MenuItem} from 'rc-menu';
@@ -18,39 +17,16 @@ export class FilterButton extends PureComponent<Props, State> {
 
 	state = {
 		showOptionsMenu: false,
-		usedFilters: this.hasUsedFilters(this.props.widget)
+		usedFilters: hasUsedFilters(this.props.widget)
 	};
 
 	componentDidUpdate (prevProps: Props): * {
 		const {widget} = this.props;
 
 		if (prevProps.widget.data !== widget.data) {
-			this.setState({usedFilters: this.hasUsedFilters(widget)});
+			this.setState({usedFilters: hasUsedFilters(widget)});
 		}
 	}
-
-	hasUsedFilters (widget: Widget) {
-		return widget.data.some(item => item.source.widgetFilterOptions?.some(filter => !!filter.descriptor));
-	}
-
-	getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise<string> => {
-		const {descriptor} = filter;
-		let newDescriptor = '';
-
-		try {
-			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
-
-			if (context) {
-				context['attrCodes'] = filter.attributes.map(attr => `${attr.metaClassFqn.split('$')[0]}@${attr.code}`);
-
-				({serializedContext: newDescriptor} = await window.jsApi.commands.filterForm(context, true));
-			}
-		} catch (ex) {
-			console.error('Ошибка формы фильтрации', ex);
-		}
-
-		return newDescriptor;
-	};
 
 	handleClearFilters = () => {
 		const {onClear} = this.props;
@@ -66,11 +42,10 @@ export class FilterButton extends PureComponent<Props, State> {
 		const filter = source.widgetFilterOptions?.[filterIndex];
 
 		if (filter) {
-			const newDescriptor = await this.getNewDescriptor(filter, source.value.value);
+			const newDescriptor = await getNewDescriptor(filter, source.value.value);
+			const updateDescriptor = isNotEmptyDescriptor(newDescriptor) ? newDescriptor : '';
 
-			if (newDescriptor) {
-				onChange(dataSetIndex, filterIndex, newDescriptor);
-			}
+			onChange(dataSetIndex, filterIndex, updateDescriptor);
 		}
 
 		this.handleToggleOptionsMenu();
@@ -92,7 +67,7 @@ export class FilterButton extends PureComponent<Props, State> {
 						dataSetLabel: value.label,
 						filterIndex,
 						label,
-						used: !!descriptor
+						used: isNotEmptyDescriptor(descriptor)
 					}));
 				}
 
@@ -122,7 +97,7 @@ export class FilterButton extends PureComponent<Props, State> {
 		return (
 			<MenuItem
 				className={itemClassName}
-				key={`${dataSetIndex}_${label}`}
+				key={`${dataSetIndex}_${filterIndex}`}
 				onClick={this.handleItemClick({ dataSetIndex, filterIndex })}
 			>
 				{textLabel}
