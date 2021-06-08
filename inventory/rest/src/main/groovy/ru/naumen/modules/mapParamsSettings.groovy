@@ -13,7 +13,7 @@ package ru.naumen.modules.inventory
  * Метод по получению данных из БД о трассах(их участках и оборудовании на учасках)
  * @return список данных из БД
  */
-def trails()
+def getTrails()
 {
     return api.utils.find('link$vols', [:]).findResults {
         createTrail(it)?.with { mapTrail(it)}
@@ -49,8 +49,8 @@ private TrailBuilder createTrail(def dbTrail)
 private def mapTrail(TrailBuilder trailBuilder)
 {
     return trailBuilder ? [type: trailBuilder.type,
-                           parts     : trailBuilder.parts.findResults { mapPart(it)},
-                           equipments: trailBuilder.equipments.findResults { mapEquipment(it)},
+                           parts     : trailBuilder.parts.findResults { mapPart(it) },
+                           equipments: trailBuilder.equipments.findResults { mapEquipment(it) },
                            data      : trailBuilder] : [:]
 }
 
