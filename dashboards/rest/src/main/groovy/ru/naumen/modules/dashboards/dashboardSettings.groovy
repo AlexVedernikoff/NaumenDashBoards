@@ -1244,6 +1244,10 @@ class DashboardSettingsService
             Boolean widgetContainsRelativeCriteriaCustomGroups = false
             Boolean widgetWithOnlyRelativeCriteriaCustomGroups = false
             widgetSettings.data.collect { dataValue ->
+                if(dataValue.source.filterId)
+                {
+                    dataValue.source = NewSourceValue.mappingSource(dataValue.source)
+                }
                 def descriptor = dataValue.source.descriptor
                 if (descriptor)
                 {
@@ -2245,6 +2249,10 @@ class DashboardSettingsService
 
             String widgetKey = widget.id
             List newWidgetData = widget.data.collect { dataValue ->
+                if(dataValue.source.filterId)
+                {
+                    dataValue.source = NewSourceValue.mappingSource(dataValue.source)
+                }
                 def descriptor = dataValue.source.descriptor
                 if (descriptor)
                 {
@@ -2266,11 +2274,26 @@ class DashboardSettingsService
                             }
                         }.grep()
 
+                        //среди фильтров могут быть значения через ИЛИ, их нужно подчистить от относительных критериев
+                        def changedValues = valuesToRemove.findResults { values->
+                            //если значение изменилось, добавить в список
+                            //данных может не остаться, если было только 1 условие, которое удалили
+                            if(values.removeIf {it.properties.conditionCode.toLowerCase().contains('subject')}) return values ?: null
+                        }
                         filters -= valuesToRemove
+                        //добавить измененные ИЛИ условия
+                        filters += changedValues
                         descriptorMap.filters = filters
                     }
                     descriptor = toJson(descriptorMap)
                     dataValue.source.descriptor = descriptor
+                    //сохраненный источник уже не применяется
+                    if(dataValue.source.filterId)
+                    {
+                        dataValue.source.filterId = null
+                        def metaClass = dataValue.source.value.value
+                        dataValue.source.value.label = api.metainfo.getMetaClass(metaClass)?.getTitle()
+                    }
                 }
                 return dataValue
             }
