@@ -1,27 +1,11 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin} from './types';
-import {getDescriptorCases} from 'store/helpers';
-import {isSourceType} from 'store/sources/data/helpers';
+import {getPartsClassFqn} from './helpers';
 import {LINKS_EVENTS} from './constants';
 import {setWarningMessage} from 'store/widgets/data/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {Widget} from 'store/widgets/data/types';
-
-const getPartsClassFqn = (code?: string) => {
-	const cases = [];
-	let classFqn = code;
-
-	if (classFqn && isSourceType(classFqn)) {
-		cases.push(...getDescriptorCases(classFqn).map(type => type.split('$')[1]));
-		classFqn = classFqn.split('$')[0];
-	}
-
-	return {
-		cases,
-		classFqn
-	};
-};
 
 const createPostData = (widget: Widget, index: number) => {
 	let postData = {};

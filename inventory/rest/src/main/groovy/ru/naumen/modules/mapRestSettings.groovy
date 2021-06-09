@@ -41,9 +41,46 @@ def getTrails(String objectUuid, String contentUuid)
 {
     def object = utils.get(objectUuid)
     def params = api.apps.contentParameters(object.getMetaClass().toString(), UI.WINDOW_KEY, contentUuid)
+    return getMapInfo(user, object, params.trailsMethodName)
+}
 
-    def trails = modules.mapParamsSettings.trails()
-    return new ObjectMapper().writeValueAsString(new Map(trails))
+//СЛУЖЕБНЫЙ БЛОК--------------------------------------------------------------
+/**
+ * Метод, позволяющий получить информацию для вывода на карту
+ * @param user - текущий пользователь
+ * @param object - текущий объект, карточка которого открыта
+ * @param trailsMethodName - название метода для вывода трасс
+ * @return данные о трассах в json формате
+ */
+private def getMapInfo(def user, def object, def trailsMethodName)
+{
+    def errors = []
+    def trails = callParamsSettingsMethod(errors, 'Нет данных для отображения', [], trailsMethodName)
+    return new ObjectMapper().writeValueAsString(new Map(trails, errors))
+}
+
+/**
+ * Метод вызовы метода, заложенного в настройках ВП
+ * @param errors - список ошибок
+ * @param errorText - текст ошибки
+ * @param defaultValue - значение по умолчанию на случай, если произошла ошибка
+ * @param methodName - название метода для вызова
+ * @param objects - список объектов-параметров метода
+ * @return результат вызова метода с названием methodName или значение по умолчанию, ошибку в списке и информацию в логе
+ */
+private def callParamsSettingsMethod(Collection<String> errors, String errorText, def defaultValue, String methodName, Object... objects)
+{
+    try
+    {
+        return modules.mapParamsSettings."${methodName}"(*objects) ?: defaultValue
+    }
+    catch (Exception ex)
+    {
+        errors.add(errorText)
+        logger.error("#mapRestSettings> ${ex.message}", ex)
+    }
+
+    return defaultValue
 }
 
 //БЛОК СКРИПТОВОГО АПИ--------------------------------------------------------
