@@ -11,7 +11,6 @@
 
 package ru.naumen.modules.dashboards
 
-import org.apache.poi.util.IOUtils
 import javax.mail.util.ByteArrayDataSource
 import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.Field

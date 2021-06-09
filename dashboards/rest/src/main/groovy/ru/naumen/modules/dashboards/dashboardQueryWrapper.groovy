@@ -19,15 +19,15 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
 {
-    ApiCriteria buildCriteria(Source source)
+    IApiCriteria buildCriteria(Source source)
     {
         return source.descriptor ? source.descriptor
                                          .with(api.listdata.&createListDescriptor)
-                                         .with(api.listdata.&createCriteria) as ApiCriteria
-            : api.db.createCriteria().addSource(source.classFqn) as ApiCriteria
+                                         .with(api.listdata.&createCriteria)
+            : api.db.createCriteria().addSource(source.classFqn)
     }
 
-    List execute(ApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
+    List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
     {
         if(diagramType == DiagramType.TABLE)
         {
@@ -51,9 +51,9 @@ trait CriteriaWrapper
 
 class QueryWrapper implements CriteriaWrapper
 {
-    private ApiCriteria criteria
+    private IApiCriteria criteria
 
-    private ApiCriteria totalValueCriteria
+    private IApiCriteria totalValueCriteria
 
     protected QueryWrapper(Source source, String templateUUID)
     {
@@ -78,7 +78,7 @@ class QueryWrapper implements CriteriaWrapper
         return new QueryWrapper(source, templateUUID)
     }
 
-    QueryWrapper aggregate(ApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null)
+    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
@@ -119,7 +119,7 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
-    QueryWrapper percentAggregate(ApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, int totalCount)
+    QueryWrapper percentAggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, int totalCount)
     {
         def attribute = parameter.attribute
         def sc = api.selectClause
@@ -160,7 +160,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param diagramType - тип диаграммы
      * @return тело запрос с агрегацией N/A
      */
-    QueryWrapper noneAggregate(ApiCriteria criteria, Boolean totalValueCriteria, def parameter, DiagramType diagramType)
+    QueryWrapper noneAggregate(IApiCriteria criteria, Boolean totalValueCriteria, def parameter, DiagramType diagramType)
     {
         def attribute = parameter.attribute
         String sortingType = parameter.sortingType
@@ -347,7 +347,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param diagramType - тип диаграммы
      * @return текущий запрос в БД с добавленной группой
      */
-    QueryWrapper processGroup(QueryWrapper wrapper, ApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source)
+    QueryWrapper processGroup(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source)
     {
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
@@ -389,7 +389,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param diagramType - тип диаграммы
      * @return текущий запрос в БД с добавленной агрегацией
      */
-    QueryWrapper processAggregation(QueryWrapper wrapper, ApiCriteria criteria, Boolean totalValueCriteria,
+    QueryWrapper processAggregation(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria,
                                     RequestData requestData, AggregationParameter parameter,
                                     DiagramType diagramType, Integer top, Boolean onlyFilled)
     {
@@ -431,7 +431,7 @@ class QueryWrapper implements CriteriaWrapper
         }
     }
 
-    QueryWrapper group(ApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType)
+    QueryWrapper group(IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType)
     {
         def sc = api.selectClause
         GroupType groupType = parameter.type
@@ -803,7 +803,7 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
-    QueryWrapper sevenDaysGroup(ApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, Date minStartDate)
+    QueryWrapper sevenDaysGroup(IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, Date minStartDate)
     {
         def attribute = parameter.attribute
         def sc = api.selectClause
@@ -829,7 +829,7 @@ class QueryWrapper implements CriteriaWrapper
         return this
     }
 
-    QueryWrapper filtering(ApiCriteria criteria, Boolean totalValueCriteria,List<FilterParameter> filters)
+    QueryWrapper filtering(IApiCriteria criteria, Boolean totalValueCriteria,List<FilterParameter> filters)
     {
         filters.collect { parameter ->
             def attribute = parameter.attribute as Attribute
