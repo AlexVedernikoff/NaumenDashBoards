@@ -8,5 +8,6 @@ export type Params = {
 	listName: string,
 	locationUpdateFrequency: {length: number, interval: TimeInterval},
 	requestCurrentLocation: boolean,
+	trailsMethodName: string,
 	updatePointsMode: string
 };

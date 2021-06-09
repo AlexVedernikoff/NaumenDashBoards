@@ -3,19 +3,18 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
+const ParametersXMLWebpackPlugin = require('parameters-xml-webpack-plugin');
 
 const plugins = [
 	new MiniCssExtractPlugin({
 		chunkFilename: '[id].[contenthash].css',
 		filename: '[name].[contenthash].css'
 	}),
-	new CopyPlugin([
-		{
-			from: 'static'
-		}
-	]),
+	new ParametersXMLWebpackPlugin({
+		output: './dist/parameters.xml',
+		path: './src/rest/resources/eaWithParamsMeta.xml',
+	}),
 	new HtmlWebpackPlugin({
 		filename: 'index.html',
 		template: './src/index.html',

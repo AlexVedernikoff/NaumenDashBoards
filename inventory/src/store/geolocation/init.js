@@ -21,6 +21,7 @@ export const initialGeolocationState: GeolocationState = {
 		listName: 'Объекты ВОЛС',
 		locationUpdateFrequency: {length: 60, interval: 'SECOND'},
 		requestCurrentLocation: false,
+		trailsMethodName: 'trailsMethodName',
 		updatePointsMode: 'getTrails'
 	},
 	showSingleObject: false,
