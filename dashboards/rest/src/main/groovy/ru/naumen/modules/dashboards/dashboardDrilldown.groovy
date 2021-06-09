@@ -1410,7 +1410,7 @@ class Link
             else
             {
                 def dateScope = 86399000 //+23 ч 59 мин 59с
-                Date endDate = new Date(date.getTime() + hourScope)
+                Date endDate = new Date(date.getTime() + dateScope)
                 wrapper.totalValueCriteria.add(w.between(s.property('value'), date, endDate))
             }
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
@@ -1442,7 +1442,7 @@ class Link
             else
             {
                 def dateScope = 86399000 //+23 ч 59 мин 59с
-                Date endDate = new Date(date.getTime() + hourScope)
+                Date endDate = new Date(date.getTime() + dateScope)
                 criteria.add(w.between(s.property(attr.attrChains().code.join('.')), date, endDate))
             }
             def uuids = api.db.query(criteria).list()
