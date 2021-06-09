@@ -99,6 +99,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderSourceFieldset = (dataSet: DataSet, index: number, data: Array<DataSet>) => (
 		<SourceFieldset
 			index={index}
+			key={dataSet.dataKey}
 			onChange={this.handleChangeDataSet}
 			onRemove={this.handleRemoveDataSet}
 			removable={data.length > 1}
