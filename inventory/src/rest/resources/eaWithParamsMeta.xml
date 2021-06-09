@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<metainfoContainer>
+	<head>
+		<date>2021-06-08T16:44:42.424+05:00</date>
+		<exportMode>partial</exportMode>
+		<version>4.12.1-SNAPSHOT</version>
+	</head>
+	<tags/>
+	<mail-processor-rules/>
+	<style-templates/>
+	<list-templates/>
+	<user-events>
+		<event seg-detach="true" seg-id="userEvent$FailKonfiguraciiPrilozheniyaInventory" seg-type="user-events">
+			<enabled>false</enabled>
+			<fqn>
+				<id>root</id>
+			</fqn>
+			<title lang="ru">Файл конфигурации приложения Inventory</title>
+			<uuid>userEvent$FailKonfiguraciiPrilozheniyaInventory</uuid>
+		</event>
+	</user-events>
+	<event-actions>
+		<action seg-detach="true" seg-id="eventAction$FailKonfiguraciiPrilozheniyaInventory" seg-type="event_actions">
+			<eventAction seg-detach="false">
+				<script-action>
+					<actionType>ScriptEventAction</actionType>
+					<script><![CDATA[FailKonfiguraciiPrilozheniyaInventory]]></script>
+				</script-action>
+				<code>eventAction$FailKonfiguraciiPrilozheniyaInventory</code>
+				<description lang="ru">Трассы ВОЛС - встроенное приложение для отображения трасс ВОЛС на карте.</description>
+				<user-events>
+					<eventType>userEvent</eventType>
+					<event-code>userEvent$FailKonfiguraciiPrilozheniyaInventory</event-code>
+					<form-code>fb55277f-179e-7181-0004-00006e680b03</form-code>
+				</user-events>
+				<fqn>
+					<id>root</id>
+				</fqn>
+				<on>false</on>
+				<slow>false</slow>
+				<title lang="ru">Файл конфигурации приложения Inventory</title>
+				<txType>NEW_TX</txType>
+			</eventAction>
+		</action>
+	</event-actions>
+	<embedded-applications/>
+	<custom-forms>
+		<form seg-detach="true" seg-id="fb55277f-179e-7181-0004-00006e680b03" seg-type="custom_forms">
+			<code>fb55277f-179e-7181-0004-00006e680b03</code>
+			<parameters>
+				<parameter seg-detach="true" seg-id="trailsMethodName" seg-type="form-parameters">
+					<attrs-for-date-time-restriction-script/>
+					<attrs-in-cof-script/>
+					<code>trailsMethodName</code>
+					<complexRelation>false</complexRelation>
+					<complexRelationAggrAttrGroups>
+						<entry>
+							<key>
+								<id>employee</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>ou</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>team</id>
+							</key>
+						</entry>
+					</complexRelationAggrAttrGroups>
+					<computable-on-form>false</computable-on-form>
+					<default-by-script>false</default-by-script>
+					<description>&lt;pre fr-original-style="" style="white-space: pre-wrap; overflow-wrap: break-word; overflow: visible;"&gt;Название метода из модуля настроек mapParamsSettings, возвращающего список объектов для отображения на карте&lt;/pre&gt;</description>
+					<is-edit-on-complex-form-only>false</is-edit-on-complex-form-only>
+					<edit-presentaion>
+						<code>stringEdit</code>
+					</edit-presentaion>
+					<editable>true</editable>
+					<is-filtered-by-script>false</is-filtered-by-script>
+					<hiddenAttrCaption>false</hiddenAttrCaption>
+					<is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+					<required>true</required>
+					<title lang="ru">Название метода получения объектов</title>
+					<type>
+						<code>string</code>
+						<property code="permittedTypes">[]</property>
+						<property code="string">255</property>
+						<property code="inputMaskMode"/>
+						<property code="inputMask"/>
+					</type>
+					<view-presentaion>
+						<code>stringView</code>
+					</view-presentaion>
+				</parameter>
+				<parameter seg-detach="true" seg-id="listName" seg-type="form-parameters">
+					<attrs-for-date-time-restriction-script/>
+					<attrs-in-cof-script/>
+					<code>listName</code>
+					<complexRelation>false</complexRelation>
+					<complexRelationAggrAttrGroups>
+						<entry>
+							<key>
+								<id>ou</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>employee</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>team</id>
+							</key>
+						</entry>
+					</complexRelationAggrAttrGroups>
+					<computable-on-form>false</computable-on-form>
+					<default-by-script>false</default-by-script>
+					<default-value>
+						<string>Объекты ВОЛС</string>
+					</default-value>
+					<description>Название списка объектов в боковой панели&amp;nbsp;</description>
+					<is-edit-on-complex-form-only>false</is-edit-on-complex-form-only>
+					<edit-presentaion>
+						<code>stringEdit</code>
+					</edit-presentaion>
+					<editable>true</editable>
+					<is-filtered-by-script>false</is-filtered-by-script>
+					<hiddenAttrCaption>false</hiddenAttrCaption>
+					<is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+					<required>false</required>
+					<title lang="ru">Название списка объектов</title>
+					<type>
+						<code>string</code>
+						<property code="permittedTypes">[]</property>
+						<property code="string">255</property>
+						<property code="inputMaskMode"/>
+						<property code="inputMask"/>
+					</type>
+					<view-presentaion>
+						<code>stringView</code>
+					</view-presentaion>
+				</parameter>
+			</parameters>
+		</form>
+	</custom-forms>
+	<advimport/>
+	<script-modules/>
+	<scripts>
+		<script seg-detach="true" seg-id="FailKonfiguraciiPrilozheniyaInventory" seg-type="scripts">
+			<code>FailKonfiguraciiPrilozheniyaInventory</code>
+			<title lang="ru">FailKonfiguraciiPrilozheniyaInventory</title>
+			<mimeType>application/x-groovy</mimeType>
+			<scriptBody><![CDATA[return true]]></scriptBody>
+			<defaultCategories/>
+			<subjectDependencies/>
+		</script>
+	</scripts>
+	<customJSElements/>
+	<fast-link-settings/>
+	<objects/>
+	<transfer-values/>
+	<structured-objects-views/>
+	<libraries/>
+</metainfoContainer>
