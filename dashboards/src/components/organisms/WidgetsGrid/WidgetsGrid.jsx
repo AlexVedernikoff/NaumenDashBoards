@@ -101,21 +101,21 @@ export class WidgetsGrid extends Component<Props, State> {
 
 	handleItemClick = (e) => e.stopPropagation();
 
-	handleLayoutChange = (layout: Layout, layouts: Layouts) => {
-		const {changeLayouts, layoutMode} = this.props;
-		const {lastWebLGLayouts} = this.state;
-		const {lg, sm} = layouts;
+	handleLayoutChange = debounce((layout: Layout, layouts: Layouts) => {
+			const {changeLayouts, layoutMode} = this.props;
+			const {lastWebLGLayouts} = this.state;
+			const {lg, sm} = layouts;
 
-		if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
-			layouts.sm = generateWebSMLayout(lg, sm);
-			this.setState({lastWebLGLayouts: lg});
-		}
+			if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
+				layouts.sm = generateWebSMLayout(lg, sm);
+				this.setState({lastWebLGLayouts: lg});
+			}
 
 		changeLayouts({
 			layoutMode,
-			layouts
-		});
-	};
+				layouts
+			});
+	}, 1000);
 
 	handleResize = () => {
 		const {current} = this.gridContainerRef;
@@ -219,7 +219,7 @@ export class WidgetsGrid extends Component<Props, State> {
 					layouts={layouts}
 					onDrag={this.handleDrag}
 					onDragStop={this.handleDragStop}
-					onLayoutChange={debounce(this.handleLayoutChange, 1000)}
+					onLayoutChange={this.handleLayoutChange}
 					ref={this.dashGrid}
 					resizeHandles={GRID_PROPS.resizeHandles}
 					width={containerWidth}
