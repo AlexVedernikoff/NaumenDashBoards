@@ -35,7 +35,7 @@ export class Controls extends Component<Props, State> {
 
 		toast.dismiss();
 
-		if (updatePointsMode === 'getTrails') {
+		if (updatePointsMode === 'getMapObjects') {
 			fetchGeolocation();
 		}
 	};

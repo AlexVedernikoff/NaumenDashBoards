@@ -22,10 +22,10 @@ const defaultIconMarker = (type: string, isActive: boolean) => {
 			icon = clutchMarker();
 			break;
 		case 'passive':
-			icon = staticMarker('#102132');
+			icon = staticMarker('#3c6d9c');
 			break;
 		default:
-			icon = staticMarker('#e26714');
+			icon = staticMarker('#393e47');
 	}
 
 	const blob = new Blob([icon], {type: 'image/svg+xml'});

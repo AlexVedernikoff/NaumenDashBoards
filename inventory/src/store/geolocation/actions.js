@@ -1,7 +1,7 @@
 // @flow
 import type {Dispatch, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from './constants';
-import {getContext, getParams, getTrails} from 'utils/api';
+import {getContext, getMapObjects, getParams} from 'utils/api';
 import type {GroupCode, Point, PointType} from 'types/point';
 import {notify} from 'helpers/notify';
 import testData from 'helpers/testData';
@@ -33,7 +33,7 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 		const {contentCode, subjectUuid} = context;
 
 		if (environment !== 'development') {
-			markers = await getTrails(contentCode, subjectUuid);
+			markers = await getMapObjects(contentCode, subjectUuid);
 		}
 
 		const {errors} = markers;

@@ -1,4 +1,5 @@
 // @flow
+import {Common} from '../../types/common';
 import type {Context} from 'types/api';
 import type {Controls} from 'types/controls';
 import {GEOLOCATION_EVENTS} from './constants';
@@ -92,6 +93,7 @@ export type GeolocationState = {
 	controls: Controls,
 	error: boolean,
 	loading: boolean,
+	mapObjects: Array<Common>,
 	panelShow: PointType,
 	params: Params,
 	showSingleObject: boolean,

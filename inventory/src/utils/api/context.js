@@ -60,9 +60,9 @@ const getParams = async () => {
 	return paramsApp;
 };
 
-const getTrails = async (contentCode: string, subjectUuid: string) => {
+const getMapObjects = async (contentCode: string, subjectUuid: string) => {
 	const {jsApi} = window;
-	const data = await jsApi.restCallModule('mapRestSettings', 'getTrails', subjectUuid, contentCode);
+	const data = await jsApi.restCallModule('mapRestSettings', 'getMapObjects', subjectUuid, contentCode);
 
 	return data;
 };
@@ -102,6 +102,6 @@ export {
 	changeState,
 	getContext,
 	getParams,
-	getTrails,
+	getMapObjects,
 	injectJsApi
 };

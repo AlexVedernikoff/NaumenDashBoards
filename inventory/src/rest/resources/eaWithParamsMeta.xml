@@ -48,10 +48,10 @@
 		<form seg-detach="true" seg-id="fb55277f-179e-7181-0004-00006e680b03" seg-type="custom_forms">
 			<code>fb55277f-179e-7181-0004-00006e680b03</code>
 			<parameters>
-				<parameter seg-detach="true" seg-id="trailsMethodName" seg-type="form-parameters">
+				<parameter seg-detach="true" seg-id="objectsMethodName" seg-type="form-parameters">
 					<attrs-for-date-time-restriction-script/>
 					<attrs-in-cof-script/>
-					<code>trailsMethodName</code>
+					<code>objectsMethodName</code>
 					<complexRelation>false</complexRelation>
 					<complexRelationAggrAttrGroups>
 						<entry>
