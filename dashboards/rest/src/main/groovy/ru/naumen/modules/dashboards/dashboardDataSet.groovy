@@ -418,7 +418,13 @@ class DashboardDataSetService
         List<RequestData> requestData = intermediateData.findResults { key, value -> value?.requestData?.aggregations ? value?.requestData : null }
         Source mainSource = intermediateData.findResult { key, value -> value.requestData ?: null }.source
         def totalKey = intermediateData.findResult { key, value -> key ?: null }
-        List computationData = intermediateData.collectMany { key, value -> value.computeData ?: []  }
+        List computationData = intermediateData.collectMany { key, value -> value.computeData ?: []  }.findResults {
+            return it?.collectEntries { key, value->
+                value.aggregation = prepareAggregation(value.aggregation, mainSource.classFqn)
+                return [(key):value]
+            }
+        }
+
         Requisite originalRequisite = intermediateData.findResult { key, value ->
             if (computationInRequest && value?.requisite?.nodes?.findAll {it.type == 'COMPUTATION'})
             {
@@ -884,7 +890,10 @@ class DashboardDataSetService
             }
             computeData?.each {
                 def prevDataSource = prevData[it?.prevKey]?.requestData?.source
-                request?.data[it?.currentKey]?.source = prevDataSource
+                if(api.metainfo.checkAttributeExisting(mainSource.classFqn, prevDataSource.classFqn))
+                {
+                    request?.data[it?.currentKey]?.source = prevDataSource
+                }
             }
             return request
         }
@@ -1103,7 +1112,7 @@ class DashboardDataSetService
                 def comp = computeData[variableName].find() as Map<String, Object>
 
                 def attribute = comp?.aggregation?.attribute
-                def attributeType = attribute?.type
+                def attributeType = Attribute.getAttributeType(attribute)
                 if (attributeType in AttributeType.LINK_TYPES)
                 {
                     attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
@@ -1152,7 +1161,7 @@ class DashboardDataSetService
                 def comp = computeData[variableName] as Map<String, Object>
 
                 def attribute = comp?.aggregation?.attribute
-                def attributeType = attribute?.type
+                def attributeType = Attribute.getAttributeType(attribute)
                 if (attributeType in AttributeType.LINK_TYPES)
                 {
                     attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
@@ -2130,7 +2139,7 @@ class DashboardDataSetService
                         }
                         if(!filtering)
                         {
-                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits, paginationSettings)
+                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, onlyFilled, diagramType, requestContent, ignoreLimits, paginationSettings)
                         }
                         RequestData newRequestData = requestData.clone()
                         Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
@@ -2215,7 +2224,7 @@ class DashboardDataSetService
                         if(filterListSize == 0)
                         {
                             parameterSortingType = diagramType == DiagramType.TABLE ?  null : dataSet.values().head().groups.find()?.sortingType
-                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, diagramType, requestContent, ignoreLimits, paginationSettings)
+                            return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, onlyFilled, diagramType, requestContent, ignoreLimits, paginationSettings)
                         }
 
                         List<Integer> listIdsOfNormalAggregations = [0]
@@ -4488,12 +4497,13 @@ class DashboardDataSetService
      * @param aggregationCnt - количество агрегаций
      * @param top - количество записей, которое нужно вывести
      * @param notBlank - флаг на получение только заполненных данных, без null
+     * @param onlyFilled - флаг на отображение данных, в которых пришли/не пришли данные по агрегации
      * @param diagramType  - тип диаграммы
      * @param requestContent - тело запроса
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @return сырые данные для построения диаграм
      */
-    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean notBlank,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits, PaginationSettings paginationSettings = null)
+    private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean notBlank, Boolean onlyFilled,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits, PaginationSettings paginationSettings = null)
     {
         String nodeType = node.type
         switch (nodeType.toLowerCase())
@@ -4520,7 +4530,8 @@ class DashboardDataSetService
                 Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
-                Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, true)
+                //важно для таблицы
+                Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
                 def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                     .with(formatGroup)
@@ -4601,7 +4612,7 @@ class DashboardDataSetService
                     } : [[calculator.execute { key ->
                     variables[key as String].head().head() as Double
                 }]]
-                def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, true)]
+                def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)]
                 total = formatResult(total, aggregationCnt)
                 if (top)
                 {
