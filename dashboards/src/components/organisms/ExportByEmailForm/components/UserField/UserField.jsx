@@ -58,7 +58,13 @@ export class UserField extends PureComponent<Props, State> {
 		onSelect(index, value);
 	};
 
-	renderCaret = (props: IconButtonProps) => <IconButton icon={ICON_NAMES.USER} onClick={props.onClick} round={false} />;
+	renderCaret = (props: IconButtonProps) => {
+		return (
+			<Container className={styles.caret}>
+				<IconButton icon={ICON_NAMES.USER} onClick={props.onClick} round={false} />
+			</Container>
+		);
+	};
 
 	renderIndicatorsContainer = (props: ContainerProps) => {
 		const {children} = props;
