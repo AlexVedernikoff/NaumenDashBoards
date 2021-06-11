@@ -22,7 +22,7 @@ export class PanelPointContent extends Component<Props> {
 			[styles.optionLine]: presentation === 'full_length'
 		});
 
-		const optionLableCN = cn({
+		const optionLabelCN = cn({
 			[styles.optionLeft]: presentation === 'right_of_label',
 			[styles.optionWide]: presentation === 'under_label',
 			[styles.optionHide]: presentation === 'full_length'
@@ -31,10 +31,10 @@ export class PanelPointContent extends Component<Props> {
 		if (value) {
 			return (
 				<div className={optionCN}>
-					{label && <div className={optionLableCN}>{truncatedText(label)}</div>}
+					{label && <div className={optionLabelCN}>{truncatedText(label)}</div>}
 					{value.url
 						? <a className={optionValueCN} rel="noopener noreferrer" target="_blank" href={value.url}>{truncatedText(value.label)}</a>
-						: <div className={optionValueCN}>{truncatedText(value)}</div>}
+						: <div className={optionValueCN}>{truncatedText(value.label)}</div>}
 				</div>
 			);
 		}

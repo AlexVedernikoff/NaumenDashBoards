@@ -42,7 +42,7 @@ export default {
 								'label': 'Площадка А',
 								'value': {
 									'label': 'Подвал Южная',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+									'url': ''
 								},
 								'presentation': 'right_of_label'
 							},
