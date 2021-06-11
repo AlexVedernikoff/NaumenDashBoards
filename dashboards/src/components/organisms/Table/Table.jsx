@@ -346,12 +346,12 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderPagination = () => {
-		const {pageSize, total} = this.props;
+		const {data, pageSize, total} = this.props;
 		const {page, width} = this.state;
 		const pages = Math.max(Math.ceil(total / pageSize), 1);
 		const {current} = this.tableRef;
 
-		if (width > 0 && current) {
+		if (data.length > 0 && width > 0 && current) {
 			return (
 				<Pagination
 					onNextClick={this.handleNextClick}
@@ -367,9 +367,10 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderTable = () => {
+		const {data} = this.props;
 		const {width} = this.state;
 
-		if (width > 0) {
+		if (data.length > 0 && width > 0) {
 			return (
 				<div className={styles.table}>
 					{this.renderHeader()}
