@@ -1720,6 +1720,10 @@ class ColumnHeader
      * Способ обработки текста
      */
     TextHandler textHandler = TextHandler.CROP
+    /**
+     * Стиль текста
+     */
+    FontStyle fontStyle
 }
 
 /**
@@ -1781,6 +1785,10 @@ class IndicatorOrParameterSettings
      * Цвет текста
      */
     String fontColor = blackColor
+    /**
+     * Стиль текста
+     */
+    FontStyle fontStyle
 }
 
 /**
