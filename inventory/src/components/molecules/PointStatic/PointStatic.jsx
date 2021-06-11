@@ -46,7 +46,7 @@ export class PointStatic extends Component<Props, State> {
 
 	render () {
 		const {point, active} = this.props;
-		const {data, icon} = point;
+		const {data, icon, geopositions} = point;
 		const {equipType, type} = data;
 		let iconMarker = getCustomOrDefaultIconMarker(equipType || type, active, icon);
 
@@ -55,7 +55,7 @@ export class PointStatic extends Component<Props, State> {
 				onMouseOver={this.handleMouseOver}
 				onMouseOut={this.handleMouseOut}
 				icon={iconMarker}
-				position={[point.geoposition.latitude, point.geoposition.longitude]}
+				position={[geopositions[0].latitude, geopositions[0].longitude]}
 				onClick={this.showSingle()}
 			>
 				<TooltipPoint title={data.header} />

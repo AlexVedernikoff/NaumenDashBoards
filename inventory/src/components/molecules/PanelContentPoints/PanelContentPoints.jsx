@@ -16,11 +16,11 @@ export class PanelContentPoints extends Component<Props> {
 	};
 
 	renderEquipments = (object: Point | Equipment, key: number) => {
-		const {data, geoposition, type} = object;
+		const {data, geopositions, type} = object;
 
 		return (
 			<div key={key}>
-				{this.renderPointData(data, key, type, geoposition)}
+				{this.renderPointData(data, key, type, geopositions && geopositions[0])}
 			</div>
 		);
 	};
@@ -30,17 +30,17 @@ export class PanelContentPoints extends Component<Props> {
 
 		return (
 			<div key={key}>
-				{this.renderPointData(data, key, type, geopositions[0])}
+				{this.renderPointData(data, key, type, geopositions && geopositions[0])}
 			</div>
 		);
 	};
 
-	renderTrail = (object: Trail, key: number) => {
-		const {data, type} = object;
+	renderObject = (object: Trail, key: number) => {
+		const {data, type, geopositions} = object;
 
 		return (
 			<div key={key}>
-				{this.renderPointData(data, key, type, object.parts && object.parts[0] && object.parts[0].geopositions[0])}
+				{this.renderPointData(data, key, type, geopositions && geopositions[0])}
 				{object.parts && object.parts.map(this.renderParts)}
 				{object.equipments && object.equipments.map(this.renderEquipments)}
 			</div>
@@ -56,7 +56,7 @@ export class PanelContentPoints extends Component<Props> {
 
 		return (
 			<div>
-				{points.map(this.renderTrail)}
+				{points.map(this.renderObject)}
 			</div>
 		);
 	}

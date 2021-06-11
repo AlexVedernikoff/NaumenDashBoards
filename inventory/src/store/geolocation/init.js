@@ -22,14 +22,14 @@ export const initialGeolocationState: GeolocationState = {
 		locationUpdateFrequency: {length: 60, interval: 'SECOND'},
 		requestCurrentLocation: false,
 		trailsMethodName: 'trailsMethodName',
-		updatePointsMode: 'getTrails'
+		updatePointsMode: 'getMapObjects'
 	},
 	showSingleObject: false,
 	singleObject: null,
 	staticGroups: [],
 	success: false,
 	timeUpdate: new Date().getTime(),
-	trails: []
+	mapObjects: []
 };
 
 export const defaultGeolocationAction: GeolocationAction = {

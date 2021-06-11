@@ -1,24 +1,34 @@
 export default {
-	'trails': [
+	'objects': [
 		{
 			'type': 'wols',
+			'geopositions': [
+				{
+					'latitude': 56.79972222222222,
+					'longitude': 61.61527777777778
+				},
+				{
+					'latitude': 56.808611111111105,
+					'longitude': 60.617777777777775
+				}
+			],
 			'parts': [
 				{
-					'type': 'part',
+					'type': 'section',
 					'geopositions': [
 						{
-							'latitude': 56.79972222222222,
+							'latitude': 56.99972222222222,
 							'longitude': 61.61527777777778
 						},
 						{
-							'latitude': 56.808611111111105,
-							'longitude': 60.617777777777775
+							'latitude': 56.804611111111105,
+							'longitude': 60.617779777777775
 						}
 					],
 					'data': {
-						'type': 'part',
+						'type': 'section',
 						'uuid': 'link$4702',
-						'header': 'Участок 1: Подвал Южная >> Щорса-37',
+						'header': 'Участок 2: Подвал Южная >> Щорса-37',
 						'actions': [
 							{
 								'type': 'open_link',
@@ -53,11 +63,11 @@ export default {
 								'presentation': 'right_of_label'
 							}
 						],
-						'color': '#4F4FD9'
+						'color': 'red'
 					}
 				},
 				{
-					'type': 'part',
+					'type': 'section',
 					'geopositions': [
 						{
 							'latitude': 56.808611111111105,
@@ -69,7 +79,7 @@ export default {
 						}
 					],
 					'data': {
-						'type': 'part',
+						'type': 'section',
 						'uuid': 'link$4703',
 						'header': 'Участок 2: Щорса-37 >> ЦОД №1',
 						'actions': [
@@ -112,11 +122,11 @@ export default {
 			],
 			'equipments': [
 				{
-					'type': 'passive',
-					'geoposition': {
-						'latitude': 56.79972222222222,
-						'longitude': 60.61527777777778
-					},
+					'type': 'point',
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
 					'icon': '/sd/operator/download?uuid=file$5801',
 					'data': {
 						'type': 'passive',
@@ -152,11 +162,11 @@ export default {
 					}
 				},
 				{
-					'type': 'passive',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.79972222222222,
-						'longitude': 60.61527777777778
-					},
+						'longitude': 61.61527777777778
+					}],
 					'icon': '/sd/operator/download?uuid=file$5802',
 					'data': {
 						'type': 'passive',
@@ -192,11 +202,11 @@ export default {
 					}
 				},
 				{
-					'type': 'active',
-					'geoposition': {
-						'latitude': 56.79972222222222,
-						'longitude': 60.61527777777778
-					},
+					'type': 'point',
+					'geopositions': [{
+						'latitude': 56.99972222222222,
+						'longitude': 61.61527777777778
+					}],
 					'icon': '',
 					'data': {
 						'type': 'active',
@@ -231,11 +241,11 @@ export default {
 					}
 				},
 				{
-					'type': 'passive',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.808611111111105,
 						'longitude': 60.617777777777775
-					},
+					}],
 					'icon': '/sd/operator/download?uuid=file$5801',
 					'data': {
 						'type': 'passive',
@@ -271,11 +281,11 @@ export default {
 					}
 				},
 				{
-					'type': 'active',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.808611111111105,
 						'longitude': 60.617777777777775
-					},
+					}],
 					'icon': '',
 					'data': {
 						'type': 'active',
@@ -310,11 +320,11 @@ export default {
 					}
 				},
 				{
-					'type': 'active',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.808611111111105,
 						'longitude': 60.617777777777775
-					},
+					}],
 					'icon': '',
 					'data': {
 						'type': 'active',
@@ -349,11 +359,11 @@ export default {
 					}
 				},
 				{
-					'type': 'passive',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.808611111111105,
 						'longitude': 60.617777777777775
-					},
+					}],
 					'icon': '/sd/operator/download?uuid=file$5801',
 					'data': {
 						'type': 'passive',
@@ -389,11 +399,11 @@ export default {
 					}
 				},
 				{
-					'type': 'active',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.808611111111105,
 						'longitude': 60.617777777777775
-					},
+					}],
 					'icon': '',
 					'data': {
 						'type': 'active',
@@ -428,11 +438,11 @@ export default {
 					}
 				},
 				{
-					'type': 'active',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.808611111111105,
 						'longitude': 60.617777777777775
-					},
+					}],
 					'icon': '',
 					'data': {
 						'type': 'active',
@@ -467,11 +477,11 @@ export default {
 					}
 				},
 				{
-					'type': 'passive',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 56.791969277777774,
 						'longitude': 60.621894805555556
-					},
+					}],
 					'icon': 'https://svgsilh.com/svg/1801287.svg',
 					'data': {
 						'type': 'passive',
@@ -548,12 +558,22 @@ export default {
 		},
 		{
 			'type': 'wols',
+			'geopositions': [
+				{
+					'latitude': 56.79972222222222,
+					'longitude': 61.61527777777778
+				},
+				{
+					'latitude': 56.808611111111105,
+					'longitude': 60.617777777777775
+				}
+			],
 			'parts': [
 				{
-					'type': 'part',
+					'type': 'section',
 					'geopositions': [
 						{
-							'latitude': 57.79972222222222,
+							'latitude': 56.79972222222222,
 							'longitude': 61.61527777777778
 						},
 						{
@@ -562,7 +582,7 @@ export default {
 						}
 					],
 					'data': {
-						'type': 'part',
+						'type': 'section',
 						'uuid': 'link$4702',
 						'header': 'Участок 1: Подвал Южная >> Щорса-37',
 						'actions': [
@@ -603,7 +623,7 @@ export default {
 					}
 				},
 				{
-					'type': 'part',
+					'type': 'section',
 					'geopositions': [
 						{
 							'latitude': 57.808611111111105,
@@ -615,7 +635,7 @@ export default {
 						}
 					],
 					'data': {
-						'type': 'part',
+						'type': 'section',
 						'uuid': 'link$4703',
 						'header': 'Участок 2: Щорса-37 >> ЦОД №1',
 						'actions': [
@@ -658,11 +678,11 @@ export default {
 			],
 			'equipments': [
 				{
-					'type': 'passive',
-					'geoposition': {
-						'latitude': 57.79972222222222,
-						'longitude': 60.61527777777778
-					},
+					'type': 'point',
+					'geopositions': [{
+						'latitude': 56.79972222222222,
+						'longitude': 61.61527777777778
+					}],
 					'icon': '/sd/operator/download?uuid=file$5801',
 					'data': {
 						'type': 'passive',
@@ -698,11 +718,11 @@ export default {
 					}
 				},
 				{
-					'type': 'passive',
-					'geoposition': {
+					'type': 'point',
+					'geopositions': [{
 						'latitude': 57.79972222222222,
 						'longitude': 60.61527777777778
-					},
+					}],
 					'icon': '/sd/operator/download?uuid=file$5802',
 					'data': {
 						'type': 'passive',
@@ -769,6 +789,99 @@ export default {
 					}
 				],
 				'color': '#4F4FD9'
+			}
+		},
+		{
+			'type': 'point',
+			'geopositions': [{
+				'latitude': 56.99972222222222,
+				'longitude': 61.91527777777778
+			}],
+			'icon': '',
+			'data': {
+				'type': 'passive',
+				'equipType': 'cross',
+				'uuid': 'cmdb$41083',
+				'header': '!!!!Муфта SNR-FOSC-D 1505',
+				'actions': [
+					{
+						'type': 'open_link',
+						'name': 'Перейти на карточку',
+						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4103',
+						'inPlace': false
+					}
+				],
+				'options': [
+					{
+						'label': 'Модель',
+						'value': {
+							'label': 'SNR-FOSC-D',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
+						},
+						'presentation': 'right_of_label'
+					},
+					{
+						'label': 'Расположение',
+						'value': {
+							'label': 'Подвал Южная',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+						},
+						'presentation': 'right_of_label'
+					}
+				]
+			}
+		},
+		{
+			'type': 'section',
+			'geopositions': [
+				{
+					'latitude': 59.99972222222222,
+					'longitude': 61.61527777777778
+				},
+				{
+					'latitude': 56.804611111111105,
+					'longitude': 61.617779777777775
+				}
+			],
+			'data': {
+				'type': 'section',
+				'uuid': 'link$47052',
+				'header': '!!!Участок 25555: Подвал Южная >> Щорса-37',
+				'actions': [
+					{
+						'type': 'open_link',
+						'name': 'Перейти на карточку',
+						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4702',
+						'inPlace': false
+					}
+				],
+				'options': [
+					{
+						'label': 'Площадка А',
+						'value': {
+							'label': 'Подвал Южная',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+						},
+						'presentation': 'right_of_label'
+					},
+					{
+						'label': 'Площадка Б',
+						'value': {
+							'label': 'Щорса-37',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+						},
+						'presentation': 'right_of_label'
+					},
+					{
+						'label': 'Входит в ВОЛС',
+						'value': {
+							'label': 'Подвал Южная >> ЦОД №1',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
+						},
+						'presentation': 'right_of_label'
+					}
+				],
+				'color': 'pink'
 			}
 		}
 	],

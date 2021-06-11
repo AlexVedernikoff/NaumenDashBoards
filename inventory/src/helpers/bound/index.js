@@ -1,7 +1,8 @@
 // @flow
 import defaultBounds from './defaultBounds';
 import L from 'leaflet';
-import type {Trail} from 'types/trail';
+import {NAME_POINT_TYPE} from 'types/equipment';
+import {NAME_SECTION_TYPE} from 'types/part';
 
 const boundsOneMarker = marker => {
 	const bounds = [{...marker.geoposition}, {...marker.geoposition}];
@@ -21,7 +22,9 @@ export const getLatLngBounds = (dataMarkers: Array<Trail>) => {
 	let bounds = dataMarkers.reduce((acc, curr) => {
 		curr.equipments && acc.push(...curr.equipments);
 		return acc;
-	}, []);
+	}, []).map(equipment => ({
+			geoposition: equipment.geopositions[0]
+		}));
 
 	if (bounds.length < 1) {
 		bounds = dataMarkers.reduce((acc, curr) => {
@@ -30,6 +33,13 @@ export const getLatLngBounds = (dataMarkers: Array<Trail>) => {
 		}, []).map(part => ({
 			geoposition: part.geopositions[0]
 		}));
+	}
+
+	if (bounds.length < 1) {
+		bounds = dataMarkers.filter(marker => marker.type === NAME_POINT_TYPE || marker.type === NAME_SECTION_TYPE)
+			.map(marker => ({
+				geoposition: marker.geopositions[0]
+			}));
 	}
 
 	if (bounds.length === 1) {

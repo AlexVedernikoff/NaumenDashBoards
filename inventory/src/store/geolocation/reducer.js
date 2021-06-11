@@ -18,10 +18,10 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION:
 			return {
 				...state,
+				mapObjects: action.payload.objects,
 				showSingleObject: false,
 				success: true,
-				timeUpdate: new Date().getTime(),
-				trails: action.payload.trails
+				timeUpdate: new Date().getTime()
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {
