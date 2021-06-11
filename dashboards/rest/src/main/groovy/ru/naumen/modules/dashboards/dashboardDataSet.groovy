@@ -3541,24 +3541,14 @@ class DashboardDataSetService
     Integer countDistinct(Attribute attribute, String classFqn)
     {
         String attributeType = attribute.type
+        DashboardQueryWrapperUtils.prepareAttribute(attribute, true)
         List attrCodesList = attribute.attrChains()*.code
-        if(!attribute.ref && attributeType in AttributeType.LINK_TYPES)
-        {
-            if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
-            {
-                attrCodesList += 'code'
-            }
-            else
-            {
-                attrCodesList += 'title'
-            }
-        }
         if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
         {
             //если всё же информация пришла с фронта
             attrCodesList = attrCodesList.collect { it == 'title' ? 'code' : it }
         }
-        String attrCode = attrCodesList.collect { it == 'UUID' ? 'id' : it.replace('metaClass', 'metaClassFqn') }.join('.')
+        String attrCode = attrCodesList.collect { it.replace('metaClass', 'metaClassFqn') }.join('.')
         def s = api.selectClause
         def criteria = api.db.createCriteria().addSource(classFqn)
         if(attributeType == AttributeType.META_CLASS_TYPE)
