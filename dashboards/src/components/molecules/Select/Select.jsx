@@ -32,6 +32,7 @@ export class Select extends Component<Props, State> {
 		MenuContainer: Container,
 		MenuHeader: Container,
 		Message: Container,
+		SearchInput: SearchInput,
 		Value,
 		ValueContainer: Container,
 		...this.props.components
@@ -231,12 +232,14 @@ export class Select extends Component<Props, State> {
 	};
 
 	renderSearchInput = (): React$Node => {
-		const {isSearching} = this.props;
+		const {components, isSearching} = this.props;
+		const {SearchInput} = components;
 		const {searchValue} = this.state;
 
 		if (isSearching) {
 			return (
 				<SearchInput
+					className={styles.searchInput}
 					focusOnMount={true}
 					forwardedRef={this.searchInputRef}
 					onChange={debounce(this.handleChangeSearchInput, 500)}

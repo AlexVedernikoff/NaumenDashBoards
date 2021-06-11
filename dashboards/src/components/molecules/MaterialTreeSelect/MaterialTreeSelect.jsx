@@ -11,7 +11,8 @@ export class MaterialTreeSelect extends Component<Props> {
 	static defaultProps = TreeSelect.defaultProps;
 
 	getComponents = memoize(() => ({
-		ValueContainer: this.renderValueContainer
+		ValueContainer: this.renderValueContainer,
+		...this.props.components
 	}));
 
 	renderMultiValueContainer = (props: ContainerProps) => {

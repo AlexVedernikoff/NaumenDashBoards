@@ -3,6 +3,7 @@ import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButto
 import type {ComponentProps as ListProps} from './components/List/types';
 import type {InputRef, OnChangeEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import type {Props as SearchInputProps} from 'components/atoms/SearchInput/types';
 import type {Props as ValueProps} from './components/Value/types';
 
 export type Option = Object;
@@ -21,6 +22,7 @@ export type Components = {
 	MenuContainer: React$ComponentType<ContainerProps>,
 	MenuHeader: React$ComponentType<ContainerProps>,
 	Message: React$ComponentType<ContainerProps>,
+	SearchInput: React$ComponentType<SearchInputProps>,
 	Value: React$ComponentType<ValueProps>,
 	ValueContainer: React$ComponentType<ContainerProps>
 };
