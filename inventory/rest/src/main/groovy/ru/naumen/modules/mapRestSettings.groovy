@@ -32,16 +32,16 @@ import ru.naumen.metainfo.shared.Constants.UI
 //БЛОК REST АПИ--------------------------------------------------------
 
 /**
- * Метод для получения данных о трассах, оборудовании и их участках
+ * Метод для получения данных об объектах для вывода на карту
  * @param objectUuid - uuid текущего объекта
  * @param contentUuid - uuid карточки объекта
  * @return данные о трассах в json формате
  */
-def getTrails(String objectUuid, String contentUuid)
+def getMapObjects(String objectUuid, String contentUuid)
 {
     def object = utils.get(objectUuid)
     def params = api.apps.contentParameters(object.getMetaClass().toString(), UI.WINDOW_KEY, contentUuid)
-    return getMapInfo(user, object, params.trailsMethodName)
+    return getMapInfo(user, object, params.objectsMethodName)
 }
 
 //СЛУЖЕБНЫЙ БЛОК--------------------------------------------------------------
@@ -49,14 +49,14 @@ def getTrails(String objectUuid, String contentUuid)
  * Метод, позволяющий получить информацию для вывода на карту
  * @param user - текущий пользователь
  * @param object - текущий объект, карточка которого открыта
- * @param trailsMethodName - название метода для вывода трасс
+ * @param objectsMethodName - название метода для вывода объектов
  * @return данные о трассах в json формате
  */
-private def getMapInfo(def user, def object, def trailsMethodName)
+private def getMapInfo(def user, def object, def objectsMethodName)
 {
     def errors = []
-    def trails = callParamsSettingsMethod(errors, 'Нет данных для отображения', [], trailsMethodName)
-    return new ObjectMapper().writeValueAsString(new Map(trails, errors))
+    def objects = callParamsSettingsMethod(errors, 'Нет данных для отображения', [], objectsMethodName)
+    return new ObjectMapper().writeValueAsString(new Map(objects, errors))
 }
 
 /**
@@ -96,13 +96,78 @@ public TrailBuilder createTrailBuilder(def object)
 }
 
 /**
+ * Метод по формированию данных о трассе
+ * @param dbTrail - объект трассы из БД
+ * @return объект с данными о трассе другого формата
+ */
+private TrailBuilder createTrail(def dbTrail)
+{
+    return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
+        ? createTrailBuilder(dbTrail)
+        .setHeader(dbTrail.title)
+        .setColor(dbTrail.HEXcolor)
+        .setGeopositions(dbTrail)
+        .addOption('Площадка А',
+                   new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID)))
+        .addOption('Площадка Б',
+                   new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID)))
+        .setParts(dbTrail.nestSegmVols)
+        .setEquipments(dbTrail.nestSegmVols)
+        .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
+        : null
+}
+
+/**
  * Метод по созданию билдер-объекта участка трассы
  * @param object - объект участка трассы из БД
  * @return билдер-объект участка трассы
  */
-public PartBuilder createPartBuilder(def object)
+public SectionBuilder createSectionBuilder(def object)
 {
-    return new PartBuilder(object)
+    return new SectionBuilder(object)
+}
+
+/**
+ * Метод формирования объекта - участка трассы
+ * @param dbPart - участок трассы из БД
+ * @param wols - трасса, которой он принадлежит
+ * @return сформированный участок трассы
+ */
+public SectionBuilder createPart(def dbPart, def wols)
+{
+    if(dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
+    {
+        return createSectionBuilder(dbPart)
+            .setHeader(dbPart.title)
+            .setColor(dbPart.HEXcolor)
+            .addOption('Площадка А',
+                       new Value(label: dbPart.siteA.title, url: api.web.open(dbPart.siteA.UUID)))
+            .addOption('Площадка Б',
+                       new Value(label: dbPart.siteB.title, url: api.web.open(dbPart.siteB.UUID)))
+            .setGeopositions(dbPart)
+            .addAction('Перейти на карточку', api.web.open(dbPart.UUID))
+    }
+}
+
+/**
+ * Метод формирования объекта отрезка(не связанного с трассами)
+ * @param section - отрезов из БД
+ * @return сформированный объект отрезка
+ */
+public SectionBuilder createSection(def section)
+{
+    if(section && section.title && section.siteA && section.siteB)
+    {
+        return createSectionBuilder(section)
+            .setHeader(section.title)
+            .setColor(section.HEXcolor)
+            .addOption('Площадка А',
+                       new Value(label: section.siteA.title, url: api.web.open(section.siteA.UUID)))
+            .addOption('Площадка Б',
+                       new Value(label: section.siteB.title, url: api.web.open(section.siteB.UUID)))
+            .setGeopositions(section)
+            .addAction('Перейти на карточку', api.web.open(section.UUID))
+    }
 }
 
 /**
@@ -111,9 +176,52 @@ public PartBuilder createPartBuilder(def object)
  * @param object - объект оборудования из БД
  * @return билдер-объект оборудования
  */
-public EquipmentBuilder createEquipmentBuilder(MapObjectType type, def object)
+public BasePointBuilder createPointObjectBuilder(MapObjectType type, def object)
 {
-    return new EquipmentBuilder(type, object)
+    return new BasePointBuilder(type, object)
+}
+
+/**
+ * Метод формирования точечного объекта оборудования
+ * @param equipment - оборудование из БД
+ * @return сформированный объект оборудования
+ */
+BasePointBuilder createEquipmentPoint(def equipment)
+{
+    if(equipment && equipment.title && equipment.ciModel && equipment.location)
+    {
+        Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
+        return createPointObjectBuilder(equipIsActive
+                                            ? MapObjectType.ACTIVE
+                                            : MapObjectType.PASSIVE , equipment)
+            .setHeader(equipment.title)
+            .setIcon(equipment)
+            .setEquipType(equipIsActive ? null : equipment)
+            .setGeopositions(equipment)
+            .addAction('Перейти на карточку', api.web.open(equipment.UUID))
+            .addOption('Модель',
+                       new Value(label: equipment.ciModel.title, url: api.web.open(equipment.ciModel.UUID)))
+            .addOption('Расположение',
+                       new Value(label: equipment.location.title, url: api.web.open(equipment.location.UUID)))
+    }
+}
+
+/**
+ * Метод для формирования объекта точки(не связанного с трассами)
+ * @param pointObject - точенчый объект
+ * @return сформированный объект точки
+ */
+BasePointBuilder createPoint(def pointObject)
+{
+    if(pointObject && pointObject.title && pointObject.cmdb)
+    {
+        return createPointObjectBuilder( MapObjectType.POINT , pointObject)
+            .setHeader(pointObject.title)
+            .setIcon(pointObject)
+            .setGeopositions(pointObject.gradLat, pointObject.gradLong)
+            .addAction('Перейти на карточку', api.web.open(pointObject.UUID))
+            .addOption('Оборудование',new Value(label: pointObject.cmdb?.find()?.title, url: api.web.open(pointObject.cmdb?.find()?.UUID)))
+    }
 }
 
 /**
@@ -144,7 +252,9 @@ enum MapObjectType
     WOLS,
     PART,
     ACTIVE,
-    PASSIVE
+    PASSIVE,
+    POINT,
+    SECTION
 
     @JsonValue
     public String getType()
@@ -198,7 +308,7 @@ class Map
     /**
      * Список трасс
      */
-    Collection<MapObjectBuilder> trails
+    Collection<MapObjectBuilder> objects
     /**
      * Список ошибок
      */
@@ -338,9 +448,9 @@ class Geoposition
 class TrailBuilder extends MapObjectBuilder
 {
     @JsonIgnore
-    Collection<PartBuilder> parts
+    Collection<SectionBuilder> parts
     @JsonIgnore
-    Collection<EquipmentBuilder> equipments
+    Collection<BasePointBuilder> equipments
     @JsonInclude(Include.NON_NULL)
     String color
 
@@ -360,25 +470,26 @@ class TrailBuilder extends MapObjectBuilder
         return this
     }
 
+    TrailBuilder setGeopositions(def dbTrail)
+    {
+        Collection<Geoposition> geopositions = []
+        if(dbTrail && dbTrail.siteA && dbTrail.siteB)
+        {
+            geopositions.add(new Geoposition(latitude: dbTrail.siteA.gradLat, longitude: dbTrail.siteA.gradLong))
+            geopositions.add(new Geoposition(latitude: dbTrail.siteB.gradLat, longitude: dbTrail.siteB.gradLong))
+        }
+
+        this.geopositions = geopositions
+        return this
+    }
+
     TrailBuilder setParts(Collection<IUUIDIdentifiable> dbParts)
     {
         this.parts = dbParts?.findResults {
             if(it && it.title && it.siteA && it.siteB)
             {
-                return modules.mapRestSettings.createPartBuilder(it)
-                              .setHeader(it.title)
-                              .setColor(it.HEXcolor)
-                              .addOption('Площадка А',
-                                         new Value(label: it.siteA.title, url: api.web.open(it.siteA.UUID)))
-                              .addOption('Площадка Б',
-                                         new Value(label: it.siteB.title, url: api.web.open(it.siteB.UUID)))
-                              .addOption('Входит в ВОЛС',
-                                         new Value(label: this.object.title, url: api.web.open(this.object.UUID)))
-                              .setGeopositions(it)
-                              .addAction('Перейти на карточку', api.web.open(it.UUID))
-
+                return modules.mapRestSettings.createPart(it, this)
             }
-
         }
         return this
     }
@@ -392,22 +503,7 @@ class TrailBuilder extends MapObjectBuilder
                 dbEquipmetnts = dbEquipmetnts + dbPart.siteA.cmdb + dbPart.siteB.cmdb
 
                 return dbEquipmetnts?.findResults { equipment ->
-                    if(equipment && equipment.title && equipment.ciModel && equipment.location)
-                    {
-                        Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
-                        return modules.mapRestSettings.createEquipmentBuilder(equipIsActive
-                                              ? MapObjectType.ACTIVE
-                                              : MapObjectType.PASSIVE , equipment)
-                                      .setHeader(equipment.title)
-                                      .setIcon(equipment)
-                                      .setEquipType(equipIsActive ? null : equipment)
-                                      .setGeoposition(equipment)
-                                      .addAction('Перейти на карточку', api.web.open(equipment.UUID))
-                                      .addOption('Модель',
-                                                 new Value(label: equipment.ciModel.title, url: api.web.open(equipment.ciModel.UUID)))
-                                      .addOption('Расположение',
-                                                 new Value(label: equipment.location.title, url: api.web.open(equipment.location.UUID)))
-                    }
+                    return modules.mapRestSettings.createEquipmentPoint(equipment)
                 } ?: []
             }
             return []
@@ -419,22 +515,17 @@ class TrailBuilder extends MapObjectBuilder
 /**
  * Класс, огписывающий билдер-объект участка трассы
  */
-class PartBuilder extends MapObjectBuilder
+class SectionBuilder extends MapObjectBuilder
 {
-    protected PartBuilder()
+    protected SectionBuilder()
     {
-        super(MapObjectType.PART, null)
+        super(MapObjectType.SECTION, null)
     }
 
-    protected PartBuilder(def object)
+    protected SectionBuilder(def object)
     {
-        super(MapObjectType.PART, object)
+        super(MapObjectType.SECTION, object)
     }
-    /**
-     * Геопозиции начала и конца участка
-     */
-    @JsonIgnore
-    Collection<Geoposition> geopositions
 
     /**
      * Цвет отображаемой линии
@@ -442,7 +533,7 @@ class PartBuilder extends MapObjectBuilder
     @JsonInclude(Include.NON_NULL)
     String color
 
-    PartBuilder setGeopositions(def dbPart)
+    SectionBuilder setGeopositions(def dbPart)
     {
         Collection<Geoposition> geopositions = []
         if(dbPart && dbPart.siteA && dbPart.siteB)
@@ -455,7 +546,17 @@ class PartBuilder extends MapObjectBuilder
         return this
     }
 
-    PartBuilder setColor(String color)
+    SectionBuilder setGeopositions(Double latitudeA, Double longitudeA, Double latitudeB, Double longitudeB)
+    {
+        if(latitudeA && latitudeB && longitudeA&& longitudeB)
+        {
+            this.geopositions.add(new Geoposition(latitude:  latitudeA, longitude: longitudeA))
+            this.geopositions.add(new Geoposition(latitude:  latitudeB, longitude: longitudeB))
+        }
+        return this
+    }
+
+    SectionBuilder setColor(String color)
     {
         this.color = color
         return this
@@ -465,28 +566,22 @@ class PartBuilder extends MapObjectBuilder
 /**
  * Класс, описывающий билдер-объект оборудования
  */
-class EquipmentBuilder extends MapObjectBuilder
+class BasePointBuilder extends MapObjectBuilder
 {
-    protected EquipmentBuilder()
+    protected BasePointBuilder()
     {
         super(MapObjectType.ACTIVE, null)
     }
 
-    protected EquipmentBuilder(MapObjectType type)
+    protected BasePointBuilder(MapObjectType type)
     {
         super(type, null)
     }
 
-    protected EquipmentBuilder(MapObjectType type, def object)
+    protected BasePointBuilder(MapObjectType type, def object)
     {
         super(type, object)
     }
-    /**
-     * Геопозиция
-     */
-    @JsonIgnore
-    Geoposition geoposition
-
     /**
      * Тип оборудования
      */
@@ -499,22 +594,38 @@ class EquipmentBuilder extends MapObjectBuilder
     @JsonIgnore
     String icon
 
-    EquipmentBuilder setGeoposition(def dbEquip)
+    BasePointBuilder setGeopositions(def dbEquip)
     {
-        this.geoposition = dbEquip && dbEquip.location
+        def geoposition = dbEquip && dbEquip.location
             ? new Geoposition(latitude: dbEquip.location.gradLat, longitude: dbEquip.location.gradLong)
             : null
+        if(geoposition)
+        {
+            this.geopositions = [geoposition]
+        }
         return this
     }
 
-    EquipmentBuilder setIcon(def dbEquip)
+    BasePointBuilder setGeopositions(Double latitude, Double longitude)
+    {
+        def geoposition = latitude && longitude
+            ? new Geoposition(latitude: latitude, longitude: longitude)
+            : null
+        if(geoposition)
+        {
+            this.geopositions = [geoposition]
+        }
+        return this
+    }
+
+    BasePointBuilder setIcon(def dbEquip)
     {
         String fileUuid = dbEquip?.classification?.icon?.find()?.UUID ?: ''
         this.icon = fileUuid ? "/sd/operator/download?uuid=${fileUuid}" : ''
         return this
     }
 
-    EquipmentBuilder setEquipType(def dbEquip = null)
+    BasePointBuilder setEquipType(def dbEquip = null)
     {
         EquipmentType equipType = null
         if(dbEquip)
@@ -563,11 +674,17 @@ class MapObjectBuilder
     /**
      * Список возможных действий с объектом (для меню справа)
      */
-    List<Action> actions = new ArrayList<>()
+    List<Action> actions = []
     /**
      * Список возможных данных об объекте (для меню справа)
      */
-    List<Option> options = new ArrayList<>()
+    List<Option> options = []
+
+    /**
+     * Геопозиции начала и конца участка
+     */
+    @JsonIgnore
+    List<Geoposition> geopositions = []
 
     protected MapObjectBuilder(MapObjectType type, Object object)
     {

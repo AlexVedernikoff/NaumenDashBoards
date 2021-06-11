@@ -13,32 +13,22 @@ package ru.naumen.modules.inventory
  * Метод по получению данных из БД о трассах(их участках и оборудовании на учасках)
  * @return список данных из БД
  */
-def getTrails()
+def getObjects()
 {
-    return api.utils.find('link$vols', [:]).findResults {
-        createTrail(it)?.with { mapTrail(it)}
+    Collection<MapObjectBuilder> trails = api.utils.find('link$vols', [:]).findResults {
+        modules.mapRestSettings.createTrail(it)?.with(this.&mapTrail)
     }
-}
+    Collection<MapObjectBuilder> additionalEquipment = api.utils.find('cmdb', [:]).findResults {
+        modules.mapRestSettings.createEquipmentPoint(it)?.with(this.&mapPoint)
+    }
 
-/**
- * Метод по формированию данных о трассе
- * @param dbTrail - объект трассы из БД
- * @return объект с данными о трассе другого формата
- */
-private TrailBuilder createTrail(def dbTrail)
-{
-    return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
-        ? modules.mapRestSettings.createTrailBuilder(dbTrail)
-                 .setHeader(dbTrail.title)
-                 .setColor(dbTrail.HEXcolor)
-                 .addOption('Площадка А',
-                            new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID)))
-                 .addOption('Площадка Б',
-                            new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID)))
-                 .setParts(dbTrail.nestSegmVols)
-                 .setEquipments(dbTrail.nestSegmVols)
-                 .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
-        : null
+    Collection<MapObjectBuilder> points = api.utils.find('location', [:]).findResults {
+        modules.mapRestSettings.createPoint(it)?.with(this.&mapPoint)
+    }
+    Collection<MapObjectBuilder> additionalSections = api.utils.find('link$cable', [:]).findResults {
+        modules.mapRestSettings.createSection(it)?.with(this.&mapSection)
+    }
+    return trails + additionalEquipment + points + additionalSections
 }
 
 /**
@@ -48,10 +38,11 @@ private TrailBuilder createTrail(def dbTrail)
  */
 private def mapTrail(TrailBuilder trailBuilder)
 {
-    return trailBuilder ? [type: trailBuilder.type,
-                           parts     : trailBuilder.parts.findResults { mapPart(it) },
-                           equipments: trailBuilder.equipments.findResults { mapEquipment(it) },
-                           data      : trailBuilder] : [:]
+    return trailBuilder ? [type        : trailBuilder.type,
+                           geopositions: trailBuilder.geopositions,
+                           parts       : trailBuilder.parts.findResults { mapSection(it) },
+                           equipments  : trailBuilder.equipments.findResults { mapPoint(it) },
+                           data        : trailBuilder] : [:]
 }
 
 /**
@@ -59,22 +50,22 @@ private def mapTrail(TrailBuilder trailBuilder)
  * @param partBuilder - объект участка трассы собственного формата
  * @return "обрамленный" объект участка трассы
  */
-private def mapPart(PartBuilder partBuilder)
+private def mapSection(SectionBuilder sectionBuilder)
 {
-    return partBuilder ? [type        : partBuilder.type,
-                          geopositions: partBuilder.geopositions,
-                          data        : partBuilder] : [:]
+    return sectionBuilder ? [type        : sectionBuilder.type,
+                             geopositions: sectionBuilder.geopositions,
+                             data        : sectionBuilder] : [:]
 }
 
 /**
  * Метод по "обрамлению" объекта оборудования в правильный формат для фронта
- * @param equipmentBuilder - объект оборудования собственного формата
+ * @param basePointBuilder - объект оборудования собственного формата
  * @return "обрамленный" объект оборудования
  */
-private def mapEquipment(EquipmentBuilder equipmentBuilder)
+private def mapPoint(BasePointBuilder basePointBuilder)
 {
-    return equipmentBuilder ? [type       : equipmentBuilder?.type,
-                               geoposition: equipmentBuilder?.geoposition,
-                               icon       : equipmentBuilder?.icon,
-                               data       : equipmentBuilder] : [:]
+    return basePointBuilder ? [type        : MapObjectType.POINT,
+                               geopositions: basePointBuilder?.geopositions,
+                               icon        : basePointBuilder?.icon,
+                               data        : basePointBuilder] : [:]
 }
