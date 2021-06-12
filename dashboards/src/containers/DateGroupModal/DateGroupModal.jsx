@@ -30,6 +30,11 @@ export class DateGroupModal extends Component<Props, State> {
 		SystemGroup: this.renderSystemGroup
 	}));
 
+	componentDidMount () {
+		const {format} = this.props.value;
+		return format && this.setState({format});
+	}
+
 	getSystemOptions = () => {
 		return this.props.attribute.type === ATTRIBUTE_TYPES.dateTime ? DATETIME_SYSTEM_OPTIONS : SYSTEM_OPTIONS;
 	};
