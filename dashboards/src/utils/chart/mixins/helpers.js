@@ -96,7 +96,6 @@ const getXAxisOptions = (props: AxisProps, rotate: boolean) => {
 			trim: rotate
 		},
 		title: {
-			offsetY: 10
 		}
 	};
 
