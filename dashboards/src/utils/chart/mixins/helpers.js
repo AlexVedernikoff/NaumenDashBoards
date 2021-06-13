@@ -83,7 +83,7 @@ const getXAxisLabels = (labels: Array<string>, wrap: boolean): ApexLabels => {
 	return wrap ? labels.map(label => label.split(' ')) : labels;
 };
 
-const getXAxisOptions = (props: AxisProps, rotate: boolean) => {
+const getXAxisOptions = (props: AxisProps, rotate: boolean, horizontal: boolean = false) => {
 	const {name, show, showName} = props;
 
 	let options: Object = {
@@ -93,7 +93,7 @@ const getXAxisOptions = (props: AxisProps, rotate: boolean) => {
 			minHeight: 50,
 			rotate: rotate ? -60 : 0,
 			show,
-			trim: rotate
+			trim: !horizontal && rotate
 		},
 		title: {
 		}

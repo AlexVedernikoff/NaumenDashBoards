@@ -103,7 +103,7 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 					}
 				}
 			},
-			xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel)),
+			xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel, horizontal)),
 			yaxis: extend(yaxis, getYAxisOptions(yAxisProps))
 		};
 	}
