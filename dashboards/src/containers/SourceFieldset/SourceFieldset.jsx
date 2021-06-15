@@ -3,7 +3,6 @@ import {connect} from 'react-redux';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
-import {getPartsClassFqn} from 'store/widgets/links/helpers';
 import React, {Component} from 'react';
 import SourceFieldset from 'WidgetFormPanel/components/SourceFieldset';
 
@@ -40,8 +39,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 		const {value: sourceValue} = this.props.value.source;
 
 		if (sourceValue) {
-			const {value: metaClassFqn} = sourceValue;
-			const {classFqn} = getPartsClassFqn(metaClassFqn);
+			const {value: classFqn} = sourceValue;
 			let descriptor = this.getSourceDescriptor();
 			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
 
