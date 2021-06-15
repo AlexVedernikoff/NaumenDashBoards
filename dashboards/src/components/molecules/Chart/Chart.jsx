@@ -65,6 +65,7 @@ export class Chart extends PureComponent<Props> {
 		const {data, widget} = this.props;
 		const {legend, type} = widget;
 		const {current: container} = this.containerRef;
+		const horizontal = isHorizontalChart(type);
 
 		if (container) {
 			let opts = {
@@ -80,7 +81,7 @@ export class Chart extends PureComponent<Props> {
 
 				// TODO: SMRMEXT-12049 - убрать при реализации
 				const labelsFormated = formatLabels(axisWidget, labels);
-				const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend, isHorizontalChart(type));
+				const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend, horizontal);
 
 				opts = {
 					...opts,
@@ -88,7 +89,7 @@ export class Chart extends PureComponent<Props> {
 					xaxis: {
 						labels: {
 							rotate: hasOverlappedLabel ? -60 : 0,
-							trim: hasOverlappedLabel
+							trim: !horizontal && hasOverlappedLabel
 						}
 					}
 				};
