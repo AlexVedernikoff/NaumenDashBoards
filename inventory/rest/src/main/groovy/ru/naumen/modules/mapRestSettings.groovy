@@ -343,11 +343,11 @@ class Value
     /**
      * Название объекта
      */
-    String label
+    String label = ''
     /**
      * Ссылка на карточку объекта
      */
-    String url
+    String url = ''
 }
 
 /**
