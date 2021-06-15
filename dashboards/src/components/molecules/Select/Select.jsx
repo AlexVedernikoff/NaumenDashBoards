@@ -232,8 +232,8 @@ export class Select extends Component<Props, State> {
 	};
 
 	renderSearchInput = (): React$Node => {
-		const {components, isSearching} = this.props;
-		const {SearchInput} = components;
+		const {isSearching} = this.props;
+		const {SearchInput} = this.components;
 		const {searchValue} = this.state;
 
 		if (isSearching) {
