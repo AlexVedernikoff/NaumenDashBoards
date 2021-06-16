@@ -3703,10 +3703,9 @@ class DashboardDataSetService
 
         def breakdownAttribute = hasBreakdown ? attributes.attribute.last() : null
         Boolean limitBreakdown = false
-        if(breakdownAttribute)
+        if(breakdownAttribute && !customValuesInBreakdown)
         {
-            limitBreakdown = !customValuesInBreakdown &&
-                             !ignoreLimits.breakdown &&
+            limitBreakdown = !ignoreLimits.breakdown &&
                              breakdownAttribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
                 ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
                                                                      breakdownAttribute.code.tokenize('_').last()) >
