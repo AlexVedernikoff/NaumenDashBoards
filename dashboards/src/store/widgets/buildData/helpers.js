@@ -1,5 +1,10 @@
 // @flow
-import type {BuildDataState, DataSetDescriptorRelation} from './types';
+import type {AttributeColumn, BuildDataState, DataSetDescriptorRelation, DiagramBuildData} from './types';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {COLUMN_TYPES, SEPARATOR} from './constants';
+import {deepClone} from 'helpers';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import type {Row} from 'store/widgets/buildData/types';
 import type {SourceData, Widget} from 'store/widgets/data/types';
 
 /**
@@ -69,8 +74,69 @@ const getWidgetFilterOptionsDescriptors = (widget: Widget): Array<DataSetDescrip
 	return data.map(getDataSetFilterOptionsDescriptors).flat();
 };
 
+/**
+ * Сообщает о том, что текущая колонка содержит вычисленное значение для показателя
+ * @param {AttributeColumn} column - колонка
+ * @returns {boolean} - true - в данной колонке находится значение показателя, false - в данной колонке находится показатель или служебное значение
+ */
+const isIndicatorColumn = (column: AttributeColumn): boolean => {
+	const {type} = column;
+	const {BREAKDOWN, INDICATOR} = COLUMN_TYPES;
+
+	return type === BREAKDOWN || type === INDICATOR;
+};
+
+/**
+ * Сообщает о том, что в колонке содержатся значения, которые открываются как карточки объекта
+ * @param {AttributeColumn} column - колонка
+ * @returns {boolean} - true - открывать как карточки объекта, false - открывать как drillDown
+ */
+const isCardObjectColumn = (column: AttributeColumn): boolean => {
+	let aggregation;
+
+	if (column.type === COLUMN_TYPES.INDICATOR) {
+		({aggregation} = column);
+	}
+
+	if (column.type === COLUMN_TYPES.BREAKDOWN) {
+		({aggregation} = column.indicator);
+	}
+
+	return isIndicatorColumn(column) && aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE;
+};
+
+/**
+ * Очищает коды из меток данных. Платформа для не сгруппированных значений возвращает:
+ * <значение индикатора>#<код для построения карточки объекта>.
+ * Для показа надо оставить только <значение индикатора>
+ * @param {DiagramBuildData} data - данные для очистки
+ * @returns {Array<Row>} - значения с очищенынми для пользователя данными
+ */
+const removeCodesFromRows = (data: DiagramBuildData): Array<Row> => {
+	const {columns, data: originalRows} = data;
+	const rows = deepClone(originalRows);
+
+	columns.forEach(column => {
+		const {accessor, attribute, type} = column;
+		const isMetaClassParameterColumn = type === COLUMN_TYPES.PARAMETER && attribute.type === ATTRIBUTE_TYPES.metaClass;
+
+		if (isMetaClassParameterColumn || isCardObjectColumn(column)) {
+			rows.forEach(row => {
+				const value = row[accessor];
+
+				row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, SEPARATOR) : value;
+			});
+		}
+	});
+
+	return rows;
+};
+
 export {
 	getSeparatedLabel,
 	getWidgetFilterOptionsDescriptors,
+	isCardObjectColumn,
+	isIndicatorColumn,
+	removeCodesFromRows,
 	updateWidgetData
 };

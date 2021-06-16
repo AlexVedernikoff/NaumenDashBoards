@@ -1,6 +1,7 @@
 // @flow
+import type {BaseColumn, Row, TableBuildData} from 'store/widgets/buildData/types';
 import {save} from './helpers';
-import type {TableColumn, TableData, TableRow} from './types';
+import type {TableData} from './types';
 import {TABLE_NAME_LENGTH_LIMIT} from './constants';
 import XLSX from 'xlsx';
 
@@ -23,25 +24,25 @@ class Table {
 		return container.firstChild;
 	};
 
-	createFooter = () => `<tr>${this.getDataColumns().map(this.createFooterColumn).join('')}</tr>`;
+	createFooter = () => `<tr>${this.getDataColumns().map(this.createFootrCell).join('')}</tr>`;
 
-	createFooterColumn = ({footer}: TableColumn) => `<td>${footer}</td>`;
+	createFootrCell = ({footer}: BaseColumn) => `<td>${footer}</td>`;
 
 	createHead = () => (`
-		<tr>${this.columns.map(this.createHeadColumn).join('')}</tr>
+		<tr>${this.columns.map(this.createHeadCell).join('')}</tr>
 		${this.createSubHead()}
 	`);
 
-	createHeadColumn = ({columns, header}: TableColumn) => {
+	createHeadCell = ({columns, header}: BaseColumn) => {
 		let rowspan = this.usesSubColumns && !Array.isArray(columns) ? 2 : 1;
 		let colspan = this.usesSubColumns && Array.isArray(columns) ? columns.length : 1;
 
 		return `<th colspan="${colspan}" rowspan="${rowspan}">${header}</th>`;
 	};
 
-	createRow = (row: TableRow) => `<tr>${this.getDataColumns().map(column => this.createRowColumn(column, row)).join('')}</tr>`;
+	createRow = (row: Row) => `<tr>${this.getDataColumns().map(column => this.createRowCell(column, row)).join('')}</tr>`;
 
-	createRowColumn = (column: TableColumn, row: TableRow) => `<td>${row[column.accessor] || ''}</td>`;
+	createRowCell = (column: BaseColumn, row: Row) => `<td>${row[column.accessor] || ''}</td>`;
 
 	createRows = () => this.data.map(this.createRow).join('');
 
@@ -49,7 +50,7 @@ class Table {
 		return this.usesSubColumns ? `<tr>${this.getSubColumns().map(this.createSubheadColumn).join('')}</tr>` : '';
 	};
 
-	createSubheadColumn = ({header}: TableColumn) => `<th>${header}</th>`;
+	createSubheadColumn = ({header}: BaseColumn) => `<th>${header}</th>`;
 
 	createTable = () => (`
 		<table>
@@ -81,8 +82,17 @@ const stringToArrayBuffer = (s: string) => {
 	return buf;
 };
 
-const exportSheet = (name: string, data: TableData) => {
-	const table = (new Table(data)).create();
+const exportSheet = (name: string, data: TableBuildData) => {
+	const columnsArray: Array<BaseColumn> = [];
+
+	data.columns.forEach((column) => {
+		const {accessor, columns, footer = '', header = ''} = column;
+
+		columnsArray.push({accessor, columns, footer, header});
+	});
+
+	const tableData: TableData = {...data, columns: columnsArray};
+	const table = (new Table(tableData)).create();
 	const workbook = XLSX.utils.book_new();
 	const sheet = XLSX.utils.table_to_sheet(table);
 	let tableName = name;

@@ -1,14 +1,52 @@
 // @flow
 import type {AnyWidget, AxisWidget, ComboWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
 import {BUILD_DATA_EVENTS} from './constants';
-import type {DiagramBuildData, ReceiveBuildDataPayload} from './types';
-import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {createContextName, exportSheet} from 'utils/export';
+import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
 import {editWidgetChunkData} from 'store/widgets/data/actions';
 import {getWidgetFilterOptionsDescriptors} from './helpers';
 import {LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {removeCodesFromRows} from 'store/widgets/buildData/helpers';
 
 /**
  * Получаем данные для таблицы
+ * @param {AppState} state - данные по окружению
+ * @param {TableWidget} widget - данные виджета
+ * @param {number} pageNumber - номер текущей строки
+ * @param {number} pageSize - размер страицы
+ * @returns {Promise<TableBuildData>}
+ */
+const getDataForTableDiagram = async (state: AppState, widget: TableWidget, pageNumber: number, pageSize: number): Promise<TableBuildData> => {
+	const {context, dashboard} = state;
+	const {
+		ignoreDataLimits: ignoreLimits = {
+			breakdown: false,
+			parameter: false
+		},
+		sorting
+	} = widget;
+	const requestData = {
+		ignoreLimits,
+		pageNumber,
+		pageSize,
+		sorting
+	};
+	const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
+	const data = await window.jsApi.restCallModule(
+			'dashboardDataSet',
+			'getDataForTableDiagram',
+			dashboard.settings.code,
+			widget.id,
+			context.subjectUuid,
+			requestData,
+			widgetFilters
+		);
+	return data;
+};
+
+/**
+ * Обновление данные для таблицы
  * @param {TableWidget} widget - данные виджета
  * @param {number} pageNumber - номер текущей строки
  * @param {boolean} update - сообщает о необходимости обновить данные или получить их заново
@@ -21,31 +59,10 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 		: dispatch({payload: widget, type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA});
 
 	try {
-		const {context, dashboard} = getState();
-		const {
-			ignoreDataLimits: ignoreLimits = {
-				breakdown: false,
-				parameter: false
-			},
-			sorting,
-			table
-		} = widget;
-		const requestData = {
-			ignoreLimits,
-			pageNumber,
-			pageSize: table.body.pageSize,
-			sorting
-		};
-		const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
-		const data = await window.jsApi.restCallModule(
-			'dashboardDataSet',
-			'getDataForTableDiagram',
-			dashboard.settings.code,
-			widget.id,
-			context.subjectUuid,
-			requestData,
-			widgetFilters
-		);
+		const state = getState();
+		const {table} = widget;
+		const {pageSize} = table.body;
+		const data = await getDataForTableDiagram(state, widget, pageNumber, pageSize);
 
 		dispatch(
 			receiveBuildData({data: {...data, page: pageNumber}, id: widget.id})
@@ -53,6 +70,21 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 	} catch (e) {
 		dispatch(recordBuildDataError(widget.id));
 	}
+};
+
+/**
+ * Экспортируем таблицу в XLSX
+ * @param {TableWidget} widget - данные виджета
+ * @param {number} rowCount - количество записей для экспорта
+ * @returns {ThunkAction}
+ */
+const exportTableToXLSX = (widget: TableWidget, rowCount: number = 1e4): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const state = getState();
+	const data = await getDataForTableDiagram(state, widget, 1, rowCount);
+	const contextName = await createContextName();
+	const name = `${widget.name}_${contextName}`;
+
+	return exportSheet(name, {...data, data: removeCodesFromRows(data)});
 };
 
 /**
@@ -146,5 +178,6 @@ const requestBuildData = (payload: AnyWidget) => ({
 
 export {
 	fetchBuildData,
-	fetchTableBuildData
+	fetchTableBuildData,
+	exportTableToXLSX
 };
