@@ -102,7 +102,7 @@ export class ObjectGroupModal extends Component<Props, State> {
 	};
 
 	handleLoad = (type: string) => (node?: Object, offset: number = 0) => {
-		const {attribute, fetchObjectData, source} = this.props;
+		const {fetchObjectData, fullAttribute, source} = this.props;
 		let parentUUID = null;
 		let id = null;
 
@@ -112,7 +112,7 @@ export class ObjectGroupModal extends Component<Props, State> {
 		}
 
 		fetchObjectData({
-			attribute,
+			attribute: fullAttribute,
 			id,
 			includingArchival: this.hasIncludingArchivalType(type),
 			offset,
