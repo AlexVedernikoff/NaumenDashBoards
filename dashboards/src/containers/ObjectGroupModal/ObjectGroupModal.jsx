@@ -95,10 +95,10 @@ export class ObjectGroupModal extends Component<Props, State> {
 	};
 
 	handleChangeSearchInput = (type: string) => (searchValue: string) => {
-		const {attribute, searchObjects, source} = this.props;
+		const {fullAttribute, searchObjects, source} = this.props;
 		const includingArchival = type === OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL;
 
-		searchObjects(source, attribute, searchValue, includingArchival);
+		searchObjects(source, fullAttribute, searchValue, includingArchival);
 	};
 
 	handleLoad = (type: string) => (node?: Object, offset: number = 0) => {
