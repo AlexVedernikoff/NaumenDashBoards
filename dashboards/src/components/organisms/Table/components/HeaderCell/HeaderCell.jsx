@@ -47,7 +47,10 @@ export class HeaderCell extends PureComponent<Props> {
 	};
 
 	mouseUp = () => {
-		this.dragStart = false;
+		// Хак. Отключаем вызов handleMouseDownCell сразу после mouseUp
+		setTimeout(() => {
+			this.dragStart = false;
+		}, 0);
 	};
 
 	renderResizer = () => <div className={styles.resizer} onMouseDown={this.mouseDown} />;
@@ -65,7 +68,7 @@ export class HeaderCell extends PureComponent<Props> {
 		});
 
 		return (
-			<div className={cellCN} onMouseDown={this.handleMouseDownCell} style={{left}}>
+			<div className={cellCN} onClick={this.handleMouseDownCell} style={{left}}>
 				<Cell
 					column={column}
 					components={components}
