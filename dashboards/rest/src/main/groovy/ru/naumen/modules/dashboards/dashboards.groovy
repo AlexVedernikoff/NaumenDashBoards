@@ -932,7 +932,7 @@ class DashboardsService
 
     private List getTop(String classFqn, Map condition)
     {
-        return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn)).collect { metaClass ->
+        return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn)).findResults { metaClass ->
             def parentMetaInfo = getAttributeParent(metaClass)
             def additionalCondition = parentMetaInfo ? [parent: op.isNull()] : [:]
             int count = api.utils.count(metaClass.code, condition + additionalCondition)
