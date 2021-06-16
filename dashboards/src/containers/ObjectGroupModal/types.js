@@ -15,6 +15,7 @@ export type ConnectedFunctions = {
 
 export type Props = ConnectedProps & ConnectedFunctions & {
 	attribute: Attribute,
+	fullAttribute: Attribute,
 	onClose: () => void,
 	onSubmit: (value: Group, attribute: Attribute) => void,
 	source: Source,

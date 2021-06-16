@@ -77,13 +77,13 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 		if (showModal && attribute) {
 			const groupAttribute = attribute.ref || attribute;
 
-			return this.renderModalByAttribute(groupAttribute);
+			return this.renderModalByAttribute(groupAttribute, attribute);
 		}
 
 		return null;
 	};
 
-	renderModalByAttribute = (attribute: Attribute) => {
+	renderModalByAttribute = (attribute: Attribute, fullAttribute: Attribute) => {
 		const {source, value} = this.props;
 		const group = value || createDefaultGroup(value, attribute);
 		const {
@@ -106,6 +106,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 		} = ATTRIBUTE_TYPES;
 		const props = {
 			attribute,
+			fullAttribute,
 			onClose: this.handleClose,
 			onSubmit: this.handleSubmit,
 			value: group
