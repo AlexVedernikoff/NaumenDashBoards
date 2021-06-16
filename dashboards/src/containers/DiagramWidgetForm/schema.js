@@ -98,7 +98,7 @@ addMethod(mixed, 'group', function () {
 			const {data} = this.options.values;
 			const {attribute, group} = attributeData;
 			const {DAY, HOURS, MINUTES} = DATETIME_SYSTEM_GROUP;
-			const {dateTime} = ATTRIBUTE_TYPES;
+			const {date, dateTime} = ATTRIBUTE_TYPES;
 			let result = true;
 
 			if (attribute && attribute.type === dateTime && group.way === GROUP_WAYS.SYSTEM) {
@@ -106,8 +106,9 @@ addMethod(mixed, 'group', function () {
 				const useTime = groupData === HOURS || groupData === MINUTES || (groupData === DAY && format && format.includes('hh'));
 
 				if (useTime) {
-					result = data.findIndex(({parameters}) => {
-						return parameters.findIndex(({attribute}) => attribute && attribute.type !== dateTime) !== -1;
+					result = data.slice(1).findIndex(({breakdown, parameters}) => {
+						const isDate = ({atrtribute}) => attribute && (attribute.type === dateTime || attribute.type === date);
+						return parameters.findIndex(isDate) !== -1 || breakdown.findIndex(isDate) !== -1;
 					}) === -1;
 				}
 			}
