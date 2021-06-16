@@ -1,4 +1,6 @@
 // @flow
+import type {BaseColumn, Row} from 'store/widgets/buildData/types';
+
 export type Options = {
 	container: HTMLDivElement,
 	fragment?: boolean,
@@ -7,18 +9,7 @@ export type Options = {
 	type: string
 };
 
-export type TableColumn = {
-	accessor: string,
-	columns?: Array<TableColumn>,
-	footer: string,
-	header: string
-};
-
-export type TableRow = {
-	[string]: string
-};
-
 export type TableData = {
-	columns: Array<TableColumn>,
-	data: Array<TableRow>
+	columns: Array<BaseColumn>,
+	data: Array<Row>
 };
