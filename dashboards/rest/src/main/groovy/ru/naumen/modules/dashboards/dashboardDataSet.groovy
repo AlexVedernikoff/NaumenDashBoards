@@ -3535,30 +3535,46 @@ class DashboardDataSetService
     }
 
     /**
-     * Метод получения количества уникальных значений по атрибуту из Бд
-     * @return - количество уникальных значений по данному атрибуту
+     * Метод получения количества уникальных значений по атрибуту из БД
+     * @param attributeValue - значение арибута с его группировкой и тд
+     * @param classFqn - метакласс источника
+     * @return количество уникальных значений
      */
-    Integer countDistinct(Attribute attribute, String classFqn)
+    Integer countDistinct(def attributeValue, String classFqn)
     {
+        Attribute attribute = attributeValue.attribute
         String attributeType = attribute.type
-        DashboardQueryWrapperUtils.prepareAttribute(attribute, true)
-        List attrCodesList = attribute.attrChains()*.code
-        if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
+        if(Attribute.getAttributeType(attribute) in AttributeType.DATE_TYPES)
         {
-            //если всё же информация пришла с фронта
-            attrCodesList = attrCodesList.collect { it == 'title' ? 'code' : it }
+            //у атрибута типа дата важно учитывать формат, в котором пользователь ожидает его увидеть,
+            //записей может быть много, а по месяцу, например, может быть только 12 значений
+            def wrapper = QueryWrapper.build(new Source(classFqn: classFqn))
+            def parameter = buildSystemGroup(attributeValue.group, attribute)
+            wrapper.group(wrapper.criteria, false, parameter, DiagramType.TABLE)
+
+            return wrapper.getResult(true, DiagramType.TABLE, false)?.unique()?.size()
         }
-        String attrCode = attrCodesList.collect { it.replace('metaClass', 'metaClassFqn') }.join('.')
-        def s = api.selectClause
-        def criteria = api.db.createCriteria().addSource(classFqn)
-        if(attributeType == AttributeType.META_CLASS_TYPE)
+        else
         {
-            criteria.addColumn(s.property(attrCode))
-                    .addGroupColumn(s.property(attrCode))
-            return api.db.query(criteria).list().size()
+            DashboardQueryWrapperUtils.prepareAttribute(attribute, true)
+            List attrCodesList = attribute.attrChains()*.code
+            if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
+            {
+                //если всё же информация пришла с фронта
+                attrCodesList = attrCodesList.collect { it == 'title' ? 'code' : it }
+            }
+            String attrCode = attrCodesList.collect { it.replace('metaClass', 'metaClassFqn') }.join('.')
+            def s = api.selectClause
+            def criteria = api.db.createCriteria().addSource(classFqn)
+            if(attributeType == AttributeType.META_CLASS_TYPE)
+            {
+                criteria.addColumn(s.property(attrCode))
+                        .addGroupColumn(s.property(attrCode))
+                return api.db.query(criteria).list().size()
+            }
+            criteria.addColumn(s.countDistinct(s.property(attrCode)))
+            return api.db.query(criteria).list().head() as Integer
         }
-        criteria.addColumn(s.countDistinct(s.property(attrCode)))
-        return api.db.query(criteria).list().head() as Integer
     }
 
     /**
@@ -3690,30 +3706,39 @@ class DashboardDataSetService
 
         def source = request.data.findResult { k, v -> v.source }
 
-        def parameterAttribute = attributes.attribute[parameterIndex]
+        def parameterAttribute = attributes[parameterIndex]
+        boolean isDynamicParameter = parameterAttribute?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
         Boolean limitParameter = !ignoreLimits?.parameter &&
-                                 parameterAttribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                                 isDynamicParameter
             ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
-                                                                 parameterAttribute.code.tokenize('_').last()) >
+                                                                 parameterAttribute.attribute.code.tokenize('_').last()) >
               DashboardUtils.tableParameterLimit
             : countDistinct(parameterAttribute,
-                            parameterAttribute.sourceCode) >
+                            parameterAttribute.attribute.sourceCode) >
               DashboardUtils.tableParameterLimit
-        limitParameter = checkForDateInAttribute(attributes[parameterIndex], limitParameter)
+        if(isDynamicParameter)
+        {
+            //динамические атрибуты ищутся по-особому, их нужно проверять отдельно
+            limitParameter = checkForDateInAttribute(parameterAttribute, limitParameter)
+        }
 
-        def breakdownAttribute = hasBreakdown ? attributes.attribute.last() : null
+        def breakdownAttribute = hasBreakdown ? attributes.last() : null
         Boolean limitBreakdown = false
+        boolean isDynamicBreakdown = breakdownAttribute?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
         if(breakdownAttribute && !customValuesInBreakdown)
         {
             limitBreakdown = !ignoreLimits.breakdown &&
-                             breakdownAttribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                             isDynamicBreakdown
                 ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
-                                                                     breakdownAttribute.code.tokenize('_').last()) >
+                                                                     breakdownAttribute.attribute.code.tokenize('_').last()) >
                   DashboardUtils.tableBreakdownLimit
                 : countDistinct(breakdownAttribute,
-                                breakdownAttribute.sourceCode) >
+                                breakdownAttribute.attribute.sourceCode) >
                   DashboardUtils.tableBreakdownLimit
-            limitBreakdown = checkForDateInAttribute(attributes.last(), limitBreakdown)
+            if(isDynamicBreakdown)
+            {
+                limitBreakdown = checkForDateInAttribute(breakdownAttribute, limitBreakdown)
+            }
         }
 
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
@@ -3762,7 +3787,7 @@ class DashboardDataSetService
         return (!(attributeValue.attribute.type in AttributeType.DATE_TYPES) ||
                 (attributeValue.group.way == Way.SYSTEM &&
                  attributeValue.group.data as GroupType == GroupType.DAY &&
-                 attributeValue.group.format in ['dd.mm.YY hh:ii', 'dd.mm.YY hh'])) ? flag : false
+                 attributeValue.group.format in ['dd.mm.YY hh:ii', 'dd.mm.YY hh', 'dd', 'dd.mm.YY', 'dd MM'])) ? flag : false
     }
 
     /**
