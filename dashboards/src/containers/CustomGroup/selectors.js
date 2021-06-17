@@ -1,7 +1,14 @@
 // @flow
 import type {AppState} from 'store/types';
+import {
+	clearUnnamedCustomGroup,
+	createCustomGroup,
+	deleteCustomGroup,
+	fetchCustomGroup,
+	fetchCustomGroups,
+	updateCustomGroup
+} from 'store/customGroups/actions';
 import type {ConnectedFunctions, ConnectedProps, Props} from './types';
-import {createCustomGroup, deleteCustomGroup, fetchCustomGroup, fetchCustomGroups, updateCustomGroup} from 'store/customGroups/actions';
 import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
 import {getMapValues} from 'helpers';
 
@@ -24,6 +31,7 @@ export const props = (state: AppState, props: Props): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
+	onClearUnnamed: clearUnnamedCustomGroup,
 	onCreate: createCustomGroup,
 	onFetch: fetchCustomGroup,
 	onFetchOptions: fetchCustomGroups,

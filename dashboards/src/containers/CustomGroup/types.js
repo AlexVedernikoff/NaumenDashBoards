@@ -14,6 +14,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
+	onClearUnnamed: () => ThunkAction,
 	onCreate: (group: CustomGroup) => ThunkAction,
 	onFetch: (id: string) => ThunkAction,
 	onFetchOptions: () => ThunkAction,

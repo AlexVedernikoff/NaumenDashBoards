@@ -7,16 +7,20 @@ import FieldError from 'GroupModal/components/FieldError';
 import {FIELDS} from 'GroupModal/constants';
 import FormField from 'GroupModal/components/FormField';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import type {InputRef, Ref} from 'components/types';
 import mainStyles from 'GroupModal/styles.less';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import memoize from 'memoize-one';
 import type {Props} from './types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 
 export class CustomGroupSelect extends PureComponent<Props> {
+	selectRef: Ref<typeof Select> = createRef();
+	selectLabelInputRef: InputRef = createRef();
+
 	getComponents = memoize(() => ({
 		MenuContainer: this.renderMenuContainer
 	}));
@@ -25,6 +29,21 @@ export class CustomGroupSelect extends PureComponent<Props> {
 
 	getGroupValue = (group: ?CustomGroup): ?string => group?.id;
 
+	handleCreate = () => {
+		const {onCreate} = this.props;
+		const {current: select} = this.selectRef;
+
+		onCreate();
+
+		if (select) {
+			select.setState({showMenu: false}, () => {
+				const {current: input} = this.selectLabelInputRef;
+
+				input && input.focus();
+			});
+		}
+	};
+
 	renderInfoIcon = () => (
 		<div title="Название для сохранения группировки">
 			<Icon className={mainStyles.infoIcon} name={ICON_NAMES.INFO} />
@@ -32,13 +51,12 @@ export class CustomGroupSelect extends PureComponent<Props> {
 	);
 
 	renderMenuContainer = (props: ContainerProps) => {
-		const {onCreate} = this.props;
 		const {children, className} = props;
 
 		return (
 			<Container className={className}>
 				{children}
-				<CreationPanel onClick={onCreate} text="Добавить группировку" />
+				<CreationPanel onClick={this.handleCreate} text="Добавить группировку" />
 			</Container>
 		);
 	};
@@ -59,6 +77,7 @@ export class CustomGroupSelect extends PureComponent<Props> {
 				components={this.getComponents()}
 				editable={editable}
 				fetchOptions={onFetch}
+				forwardedLabelInputRef={this.selectLabelInputRef}
 				getOptionLabel={this.getGroupLabel}
 				getOptionValue={this.getGroupValue}
 				loading={loading}
@@ -66,6 +85,7 @@ export class CustomGroupSelect extends PureComponent<Props> {
 				onChangeLabel={onChangeName}
 				onSelect={onSelect}
 				options={options}
+				ref={this.selectRef}
 				value={value}
 			/>
 		);

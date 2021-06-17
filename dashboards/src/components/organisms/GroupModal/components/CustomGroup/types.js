@@ -6,6 +6,7 @@ import type {Widget} from 'store/widgets/data/types';
 export type Props = {
 	loading: boolean,
 	loadingOptions: boolean,
+	onClearUnnamed: () => any,
 	onCreate: (customGroup: CustomGroup) => Promise<string | null>,
 	onFetchOptions: () => any,
 	onRemove: (groupId: string, remote: boolean) => any,

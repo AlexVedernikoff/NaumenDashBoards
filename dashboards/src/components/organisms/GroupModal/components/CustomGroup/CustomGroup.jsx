@@ -62,7 +62,7 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleClickCreate = () => {
-		const {onSelect, onUpdate, options, type} = this.props;
+		const {onClearUnnamed, onSelect, onUpdate, options, type} = this.props;
 		const id = `${LOCAL_PREFIX_ID}${uuid()}`;
 
 		if (options.length < 30) {
@@ -73,6 +73,7 @@ export class CustomGroup extends Component<Props, State> {
 				type
 			};
 
+			onClearUnnamed();
 			onUpdate(group);
 			onSelect(id);
 		} else {

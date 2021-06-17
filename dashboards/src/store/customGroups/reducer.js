@@ -1,34 +1,8 @@
 // @flow
-import type {CustomGroup, CustomGroupsAction, CustomGroupsState} from './types';
+import type {CustomGroupsAction, CustomGroupsState} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import {defaultCustomGroupsAction, initialCustomGroupsState} from './init';
-
-/**
- * Устанавливает пользовательские группировки
- * @param {CustomGroupsState} state - состояние пользовательских группировок
- * @param {Array<CustomGroup>} groups - массив пользовательских группировок
- * @returns {CustomGroupsState}
- */
-const setCustomGroups = (state: CustomGroupsState, groups: Array<CustomGroup>): CustomGroupsState => {
-	let newMap = state.map;
-
-	groups.forEach(group => {
-		if (!(group.id in newMap)) {
-			const item = {
-				data: group,
-				loading: false
-			};
-
-			newMap = {...newMap, [group.id]: item};
-		}
-	});
-
-	return {
-		...state,
-		loading: false,
-		map: newMap
-	};
-};
+import {removeUnnamedCustomGroup, setCustomGroups} from './helpers';
 
 const reducer = (
 	state: CustomGroupsState = initialCustomGroupsState,
@@ -100,6 +74,8 @@ const reducer = (
 					}
 				}
 			};
+		case CUSTOM_GROUPS_EVENTS.REMOVE_UNNAMED_CUSTOM_GROUP:
+			return removeUnnamedCustomGroup(state);
 		default:
 			return state;
 	}

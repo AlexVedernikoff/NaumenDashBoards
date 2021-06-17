@@ -132,7 +132,12 @@ const removeCustomGroup = (payload: string) => ({
 	type: CUSTOM_GROUPS_EVENTS.REMOVE_CUSTOM_GROUP
 });
 
+const clearUnnamedCustomGroup = () => ({
+	type: CUSTOM_GROUPS_EVENTS.REMOVE_UNNAMED_CUSTOM_GROUP
+});
+
 export {
+	clearUnnamedCustomGroup,
 	createCustomGroup,
 	deleteCustomGroup,
 	fetchCustomGroup,
