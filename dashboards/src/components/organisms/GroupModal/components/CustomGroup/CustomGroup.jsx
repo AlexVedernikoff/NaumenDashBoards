@@ -109,8 +109,11 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleSelect = ({value}: OnSelectEvent) => {
+		const {onClearUnnamed, onSelect} = this.props;
+
 		this.setState({errors: {}});
-		this.props.onSelect(value.id);
+		onClearUnnamed();
+		onSelect(value.id);
 	};
 
 	handleSubmit = () => this.props.onSubmit(true);
