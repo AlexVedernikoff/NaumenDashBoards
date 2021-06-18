@@ -10,7 +10,7 @@ import {getParams} from 'store/helpers';
  * @param {string} payload - идентификатор группировки
  * @returns {ThunkAction}
  */
-const fetchCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const fetchCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<CustomGroup | null> => {
 	dispatch({
 		payload,
 		type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_PENDING
@@ -24,12 +24,33 @@ const fetchCustomGroup = (payload: string): ThunkAction => async (dispatch: Disp
 			payload: customGroup,
 			type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_FULFILLED
 		});
+
+		return customGroup;
 	} catch (e) {
 		dispatch({
 			payload,
 			type: CUSTOM_GROUPS_EVENTS.CUSTOM_GROUP_REJECTED
 		});
 	}
+
+	return null;
+};
+
+/**
+ * Получает информацию о кастомной группировке. В случае, если данные есть в store, то данные берутся из store, иначе, будут загружены с бэка
+ * @param {string} payload - идентификатор группировки
+ * @returns {ThunkAction}
+ */
+const getCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<CustomGroup | null> => {
+	const state = getState();
+	const {map} = state.customGroups;
+	let result: CustomGroup | null = payload in map ? map[payload].data : null;
+
+	if (!result) {
+		result = await dispatch(fetchCustomGroup(payload)) ?? null;
+	}
+
+	return result;
 };
 
 /**
@@ -142,5 +163,6 @@ export {
 	deleteCustomGroup,
 	fetchCustomGroup,
 	fetchCustomGroups,
+	getCustomGroup,
 	updateCustomGroup
 };
