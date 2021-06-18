@@ -26,6 +26,8 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 	};
 
 	state = {
+		attribute: null,
+		groupAttribute: null,
 		showModal: false
 	};
 
@@ -49,7 +51,32 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 		return text;
 	};
 
-	handleClickFieldButton = () => this.setState({showModal: true});
+	handleClickFieldButton = async () => {
+		const {attribute, getCustomGroup, value} = this.props;
+
+		if (attribute) {
+			let groupAttribute = attribute.ref || attribute;
+			let fullAttribute = attribute;
+
+			// В случае когда у нас выставлена ссылка, но кастомная группировка
+			// ввыставлена на основной атрибут (старый формат)
+			if (attribute.ref && value && typeof value !== 'string' && value.way === GROUP_WAYS.CUSTOM) {
+					const groupId = value.data;
+					const customGroup = await getCustomGroup(groupId);
+
+					if (customGroup) {
+						const property = customGroup.type.split('$')[1];
+
+						if (attribute.property === property) {
+							groupAttribute = {...attribute, ref: null};
+							fullAttribute = {...attribute, ref: null};
+						}
+					}
+			}
+
+			this.setState({attribute: fullAttribute, groupAttribute, showModal: true});
+		}
+	};
 
 	handleClose = () => this.setState({showModal: false});
 
@@ -57,7 +84,9 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 		const {attribute, onChange} = this.props;
 
 		if (attribute) {
-			const newAttribute = attribute.ref ? {...attribute, ref: newGroupAttribute} : newGroupAttribute;
+			const newAttribute = attribute.ref && newGroupAttribute.property === attribute.ref.property
+				? {...attribute, ref: newGroupAttribute}
+				: newGroupAttribute;
 
 			onChange(group, newAttribute);
 			this.setState({showModal: false});
@@ -71,12 +100,9 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 	);
 
 	renderModal = () => {
-		const {attribute} = this.props;
-		const {showModal} = this.state;
+		const {attribute, groupAttribute, showModal} = this.state;
 
-		if (showModal && attribute) {
-			const groupAttribute = attribute.ref || attribute;
-
+		if (showModal && groupAttribute && attribute) {
 			return this.renderModalByAttribute(groupAttribute, attribute);
 		}
 

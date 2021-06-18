@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import AttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset';
-import AttributeGroupField from 'WidgetFormPanel/components/AttributeGroupField';
+import AttributeGroupField from 'containers/AttributeGroupField';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {BreakdownItem} from 'store/widgetForms/types';
 import cn from 'classnames';
