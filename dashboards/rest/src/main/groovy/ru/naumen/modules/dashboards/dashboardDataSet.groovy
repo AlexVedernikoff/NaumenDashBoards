@@ -3708,18 +3708,23 @@ class DashboardDataSetService
 
         def parameterAttribute = attributes[parameterIndex]
         boolean isDynamicParameter = parameterAttribute?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-        Boolean limitParameter = !ignoreLimits?.parameter &&
-                                 isDynamicParameter
+        Boolean customValuesInParameter = innerCustomGroupNames.any { it.attributeName == attributeNames[parameterIndex] }
+        Boolean limitParameter = false
+        if(!customValuesInParameter)
+        {
+            limitParameter = !ignoreLimits?.parameter &&
+              isDynamicParameter
             ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
                                                                  parameterAttribute.attribute.code.tokenize('_').last()) >
               DashboardUtils.tableParameterLimit
             : countDistinct(parameterAttribute,
                             parameterAttribute.attribute.sourceCode) >
               DashboardUtils.tableParameterLimit
-        if(isDynamicParameter)
-        {
-            //динамические атрибуты ищутся по-особому, их нужно проверять отдельно
-            limitParameter = checkForDateInAttribute(parameterAttribute, limitParameter)
+            if(isDynamicParameter)
+            {
+                //динамические атрибуты ищутся по-особому, их нужно проверять отдельно
+                limitParameter = checkForDateInAttribute(parameterAttribute, limitParameter)
+            }
         }
 
         def breakdownAttribute = hasBreakdown ? attributes.last() : null
