@@ -93,11 +93,15 @@ export class ParametersDataBox extends PureComponent<Props> {
 		const parameters = value[dataSetIndex].parameters;
 		let newParameterByMain = newParameter;
 
-		if (dataSetIndex !== this.mainIndex && parameterIndex !== this.mainIndex) {
-			newParameterByMain = {
-				...newParameterByMain,
-				group: value[this.mainIndex][0].group
-			};
+		if (dataSetIndex !== this.mainIndex) {
+			const mainParameters = value[this.mainIndex].parameters;
+
+			if (Array.isArray(mainParameters) && mainParameters.length > 0) {
+				newParameterByMain = {
+					...newParameterByMain,
+					group: mainParameters[0].group
+				};
+			}
 		}
 
 		const newParameters = parameters.map((parameter, i) => i === parameterIndex ? newParameterByMain : parameter);
