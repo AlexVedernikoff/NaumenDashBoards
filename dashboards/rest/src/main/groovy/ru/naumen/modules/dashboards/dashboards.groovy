@@ -791,7 +791,15 @@ class DashboardsService
                 it.contentUuid == dashboardUUID
             }
             String usedUUID = (user && user.metaClass?.toString() == subjectFqn) ? user.UUID : api.utils.findFirst(subjectFqn, ['removed': false]).UUID
-            def link = api.web.openTab(usedUUID, db.tabUuid).replace('?anchor=', '#')
+            def webApi = api.web
+            def link
+            if(webApi.metaClass.respondsTo(webApi, 'openContent'))
+            {
+                link = webApi.openContent(usedUUID, db.tabUuid, db.contentUuid)
+            } else
+            {
+                link = webApi.openTab(usedUUID, db.tabUuid).replace('?anchor=', '#')
+            }
             return [link: link]
         }
         throw new Exception('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
