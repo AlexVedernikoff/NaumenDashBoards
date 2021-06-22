@@ -15,7 +15,6 @@ import groovy.transform.Field
 import groovy.transform.TupleConstructor
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
-import ru.naumen.core.shared.IUUIDIdentifiable
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
 
@@ -1425,6 +1424,54 @@ class DashboardSettingsService
     }
 
     /**
+     * Метод по преобразованию значений атрибутов для кастомных группировок сформированных по старым стандартам
+     * @param widget - настройки виджета
+     * @param dashboardSettings - настройки дашборда для виджета
+     * @return
+     */
+    private Widget updateWidgetCustomGroup(Widget widget, DashboardSettingsClass dashboardSettings)
+    {
+        widget.data.each { data ->
+            if(data?.parameters)
+            {
+                data?.parameters = updateAttributeForGroup(data?.parameters, dashboardSettings)
+            }
+            if(data?.breakdown)
+            {
+                data?.breakdown = updateAttributeForGroup(data?.breakdown, dashboardSettings)
+            }
+        }
+        return widget
+    }
+
+    /**
+     * Метод по преобразованию атрибутов, чтобы строилась группировка по новому стандарту
+     * @param valuesWithGroup - значения с группировкой
+     * @param dashboardSettings - настройки дашборда
+     * @return правильные значения с группировкой
+     */
+    private Collection<IHasGroup> updateAttributeForGroup(Collection<IHasGroup> valuesWithGroup, DashboardSettingsClass dashboardSettings)
+    {
+        valuesWithGroup?.each { value ->
+            if(value?.group?.way == Way.CUSTOM)
+            {
+                def groupKey = value?.group?.data
+                if(groupKey)
+                {
+                    def group = dashboardSettings?.customGroups?.find { it?.id == groupKey }
+                    Boolean oldGroupType = AttributeType.LINK_TYPES.any { group?.type?.contains(it) } &&
+                                           !(value?.attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES)
+                    if(oldGroupType)
+                    {
+                        value?.attribute?.ref = null
+                    }
+                }
+            }
+        }
+        return valuesWithGroup
+    }
+
+    /**
      * Метод по преобразованию кастомных группировок при копировании виджета на новый дашборд
      * @param groups - кастомные группировки на текущем ДБ
      * @param destinationCustomGroups - кастомные группировки на дб для копирования
@@ -1851,7 +1898,8 @@ class DashboardSettingsService
         if(dashboard)
         {
             dashboard.widgets = dashboard.widgets.findResults { w ->
-                return DashboardUtils.convertWidgetToNewFormat(w)
+                def widget = DashboardUtils.convertWidgetToNewFormat(w)
+                return widget?.type == DiagramType.TEXT ? widget : updateWidgetCustomGroup(widget, dashboard)
             }
         }
         return dashboard
