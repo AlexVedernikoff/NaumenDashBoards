@@ -235,6 +235,37 @@ enum Position
 }
 
 /**
+ * Тип объекта для изменения формата
+ */
+enum FormatType
+{
+   LABEL_FORMAT,
+   NUMBER_FORMAT,
+   INTEGER_FORMAT
+}
+
+/**
+ * Типы форматов для параметров
+ */
+enum LabelFormatType
+{
+    TITLE,
+    TITLE_CODE,
+    CODE
+}
+
+/**
+ * Типы форматов для нотаций
+ */
+enum NotationType
+{
+    THOUSAND,
+    MILLION,
+    BILLION,
+    TRILLION
+}
+
+/**
  * тип расположения на дисплее
  */
 enum DisplayType
@@ -1103,7 +1134,7 @@ class StateMarshaller
     /**
      * делитель для значения
      */
-    static String valueDelimiter = '()'
+    static String valueDelimiter = '#'
 
     /**
      * Метод получения значения для пользователя
@@ -1113,7 +1144,7 @@ class StateMarshaller
      */
     static String marshal(String localizedTitle, String stateValue)
     {
-        return "${localizedTitle} (${stateValue})"
+        return "${localizedTitle}${valueDelimiter}${stateValue}"
     }
 
     /**
@@ -1643,6 +1674,21 @@ class DeserializationHelper
         widgetDataDeserializer.predictors = diagramNowDataPredictors
         module.addDeserializer(DiagramNowData, widgetDataDeserializer)
 
+        def formatDataWidgetDeserializer = new PredictorBasedPolymorphicDeserializer()
+        formatDataWidgetDeserializer.predictors = [
+            (LabelFormat) : { value ->
+                return use(JacksonUtils) {
+                    value['type'] == 'LABEL_FORMAT'
+                }
+            },
+            (NumberFormat): { value ->
+                return use(JacksonUtils) {
+                    value['type'] in ['NUMBER_FORMAT', 'INTEGER_FORMAT']
+                }
+            }
+        ]
+        module.addDeserializer(Format, formatDataWidgetDeserializer)
+
         mapper.registerModule(module)
     }
 }
@@ -2107,6 +2153,12 @@ class DataLabels implements IHasFontSettings
      * Флаг на блокировку данных (управляется количеством элементов)
      */
     Boolean disabled = false
+
+    /**
+     * Форматирование для меток(данные из показателя)
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    NumberFormat format
 }
 
 /**
@@ -2440,6 +2492,12 @@ class IndicatorOrParameter
     Boolean showName = false
 
     /**
+     * Форматирование для данных
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Format format
+
+    /**
      * Предел максимума
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -2454,6 +2512,60 @@ class IndicatorOrParameter
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean showDependent
+}
+
+/**
+ * Класс, описывающий факторы форматирования для данных
+ */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+abstract class Format
+{
+    /**
+     * тип данных, для которых идёт форматирование
+     */
+    FormatType type
+}
+
+/**
+ * Форматирование для параметров нечисловых атрибутов
+ */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+class LabelFormat extends Format
+{
+    /**
+     * Тип форматирования названия
+     */
+    LabelFormatType labelFormat
+}
+
+/**
+ * Форматирование для параметров числовых атрибутов
+ */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+class NumberFormat extends Format
+{
+    /**
+     * Дополнительное значение
+     */
+    String additional
+
+    /**
+     * Количество знаков после запятой
+     */
+    Integer symbolCount
+
+    /**
+     * Нотация
+     */
+    NotationType notation
+
+    /**
+     * Разделить разряды
+     */
+    Boolean splitDigits
 }
 
 /**
@@ -2838,6 +2950,11 @@ class NewDiagrams extends Widget
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     DataLabels dataLabels
+
+    /**
+     * Формат для разбивки
+     */
+    Format breakdownFormat
     /**
      * Тип отображения на экране
      */
