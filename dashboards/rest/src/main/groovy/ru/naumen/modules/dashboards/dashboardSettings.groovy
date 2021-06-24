@@ -1166,13 +1166,17 @@ class DashboardSettingsService
         return getDashboardsUUIDAndTitle().findResults {
             String dashboardUUID = it.uuid
             String dashboardTitle = it.title
-
-            List widgetsFromDB = getDashboardSetting(dashboardUUID)?.widgets
-            List<WidgetInfo> widgets = widgetsFromDB
-                ? widgetsFromDB.findResults { widget ->
-                return getWidgetInfo(getWidgetSettings(widget))
-            } : []
-            return new DashboardInfo(label: dashboardTitle, value: dashboardUUID, children: widgets)
+            try
+            {
+                List widgetsFromDB = getDashboardSetting(dashboardUUID)?.widgets
+                List<WidgetInfo> widgets = widgetsFromDB
+                    ? widgetsFromDB.findResults { widget ->
+                    return getWidgetInfo(getWidgetSettings(widget))
+                } : []
+                return new DashboardInfo(label: dashboardTitle, value: dashboardUUID, children: widgets)
+            } catch(Exception ex) {
+                logger.error("dashboard ${dashboardUUID} is not checked")
+            }
         }
     }
 
