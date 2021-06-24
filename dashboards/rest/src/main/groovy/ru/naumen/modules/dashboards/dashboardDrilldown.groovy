@@ -417,38 +417,20 @@ class Link
                                     else
                                     {
                                         List objects = []
-                                        if(attributeType in AttributeType.ONLY_LINK_TYPES)
+                                        if(attr.attrChains().count {it.type in AttributeType.LINK_TYPES} > 1)
                                         {
-                                            if(attr.attrChains().count {it.type in AttributeType.LINK_TYPES} > 1)
-                                            {
-                                                //двухуровневый ссылочный
-                                                objects = findObjects(attr.ref,attr.property, LinksAttributeMarshaller.unmarshal(value).last())
-                                            }
-                                            else
-                                            {
-                                                if(!attr.ref)
-                                                {
-                                                    attr.ref = new Attribute(code:'title', type:'string')
-                                                }
-                                                objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
-                                            }
+                                            //двухуровневый ссылочный
+                                            objects = findObjects(attr.ref,attr.property, LinksAttributeMarshaller.unmarshal(value).last())
                                         }
                                         else
                                         {
-                                            if(attr.attrChains().count {it.type in AttributeType.LINK_TYPES} > 1)
+                                            if(!attr.ref)
                                             {
-                                                //двухуровневый ссылочный
-                                                objects = api.utils.find(attr.ref.property, [title: value])
-                                                objects = findObjects(attr.ref, attr.property, objects)
+                                                attr.ref = AttributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE]
+                                                    ? new Attribute(code:'code', type:'string')
+                                                    : new Attribute(code:'title', type:'string')
                                             }
-                                            else
-                                            {
-                                                if(!attr.ref)
-                                                {
-                                                    attr.ref = new Attribute(code:'title', type:'string')
-                                                }
-                                                objects = findObjects(attr.ref, attr.property, value)
-                                            }
+                                            objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
                                         }
                                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
                                     }

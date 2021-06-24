@@ -464,8 +464,7 @@ class QueryWrapper implements CriteriaWrapper
                     criteria.addGroupColumn(sc.property(getMetaCaseIdCode(attributeChains)))
                     criteria.addColumn(column)
                 }
-                else if(lastParameterAttributeType in AttributeType.ONLY_LINK_TYPES ||
-                        (lastParameterAttributeType in AttributeType.HAS_UUID_TYPES && diagramType in DiagramType.SortableTypes))
+                else if(lastParameterAttributeType in AttributeType.HAS_UUID_TYPES)
                 {
 
                     def lastColumn =  sc.property(
