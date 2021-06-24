@@ -79,7 +79,7 @@ export class DateGroupModal extends Component<Props, State> {
 
 	renderOrCondition = (props: OrConditionProps) => {
 		const {onChange, value} = props;
-		const {BETWEEN, LAST, NEAR} = OR_CONDITION_TYPES;
+		const {BETWEEN, LAST, LAST_HOURS, NEAR, NEAR_HOURS} = OR_CONDITION_TYPES;
 		const {data, type} = value;
 
 		switch (type) {
@@ -87,6 +87,8 @@ export class DateGroupModal extends Component<Props, State> {
 				return <BetweenOrCondition data={data} onChange={onChange} type={type} />;
 			case LAST:
 			case NEAR:
+			case LAST_HOURS:
+			case NEAR_HOURS:
 				return <SimpleOrCondition onChange={onChange} onlyNumber={true} value={value} />;
 			default:
 				return null;
