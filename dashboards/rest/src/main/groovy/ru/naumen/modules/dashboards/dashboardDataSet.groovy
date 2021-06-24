@@ -1030,7 +1030,8 @@ class DashboardDataSetService
     private List<String> getAttributesFqnFromDescriptor(String descriptor)
     {
         List descriptorAttributes = []
-        def iDesciptor = DashboardMarshaller.createContext(descriptor)
+        def iDesciptor = api.listdata.createListDescriptor(descriptor).wrapped
+
         iDesciptor.listFilter.elements.each { orFilter ->
             orFilter.elements.each { filter ->
                 descriptorAttributes << filter.getAttributeFqn() as String

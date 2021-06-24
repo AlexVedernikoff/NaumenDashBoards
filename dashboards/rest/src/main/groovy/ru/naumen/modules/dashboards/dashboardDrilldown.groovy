@@ -246,7 +246,7 @@ class Link
     {
         if (descriptor)
         {
-            def iDescriptor = DashboardMarshaller.createContext(descriptor)
+            def iDescriptor = api.listdata.createListDescriptor(descriptor).wrapped
             iDescriptor.listFilter.elements.collect { orFilter ->
                 orFilter.elements.collect { filter ->
                     String attribute = filter.getAttributeFqn() as String
