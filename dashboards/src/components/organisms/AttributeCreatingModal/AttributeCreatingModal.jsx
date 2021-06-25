@@ -10,7 +10,8 @@ import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import InfoPanel from 'components/atoms/InfoPanel';
 import Modal from 'components/molecules/Modal';
 import OperatorControl from './components/OperatorControl';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import SourceControl from './components/SourceControl';
 import styles from './styles.less';
@@ -18,6 +19,8 @@ import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class AttributeCreatingModal extends PureComponent<Props, State> {
+	constantsInputs: Array<Ref<typeof ConstantControl>> = [];
+
 	static defaultProps = {
 		value: null
 	};
@@ -83,6 +86,22 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 		this.setState({templates: [...templates]});
 	};
 
+	checkAndSaveAttribute = () => {
+		const {controls} = this.state;
+		const lastControl = controls[controls.length - 1];
+
+		if (lastControl) {
+			const {type, value} = lastControl;
+
+			if (type !== CONTROL_TYPES.OPERATOR || !getMapValues(MATH_OPERATORS).includes(value)) {
+				this.saveAttribute();
+				return;
+			}
+		}
+
+		this.setState({showFormulaError: true});
+	};
+
 	createNewControl = (value: any, type: ControlType) => {
 		const {controls, templates} = this.state;
 		const control: Control = {name: uuid(), type, value};
@@ -123,15 +142,11 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	handleClickSaveButton = () => {
-		const {controls} = this.state;
-		const lastControl = controls[controls.length - 1];
-		const {type, value} = lastControl;
+		this.constantsInputs.forEach(({current}) => current && current.forceSuccess());
 
-		if (type === CONTROL_TYPES.OPERATOR && getMapValues(MATH_OPERATORS).includes(value)) {
-			return this.setState({showFormulaError: true});
-		}
-
-		this.saveAttribute();
+		this.setState({}, () => { // хак ожидания обновления стейта, который возможно будет изменен через forceSuccess
+			this.checkAndSaveAttribute();
+		});
 	};
 
 	handleSelect = (index: number, name: string, value: any, type: ControlType) => {
@@ -215,10 +230,13 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	renderConstantControl = (control: Control, index: number) => {
 		let {name, value} = control;
+		const ref = createRef();
 
 		if (value && typeof value === 'object') {
 			value = '';
 		}
+
+		this.constantsInputs.push(ref);
 
 		return (
 			<ConstantControl
@@ -226,6 +244,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 				name={name}
 				onCancel={this.handleChangeType}
 				onSubmit={this.handleSelect}
+				ref={ref}
 				type={CONTROL_TYPES.CONSTANT}
 				value={value}
 			/>
@@ -382,6 +401,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	};
 
 	render () {
+		this.constantsInputs = [];
 		return (
 			<Modal header="Создать поле" renderFooter={this.renderFooter} size={MODAL_SIZES.LARGE}>
 				<div className={styles.container}>

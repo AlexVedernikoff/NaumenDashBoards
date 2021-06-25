@@ -31,7 +31,6 @@ const setCustomGroups = (state: CustomGroupsState, groups: Array<CustomGroup>): 
 /**
  * Очищаем неиспользуемые пользовательские группировки
  * @param {CustomGroupsState} state - состояние пользовательских группировок
- * @param {Array<CustomGroup>} groups - массив пользовательских группировок
  * @returns {CustomGroupsState}
  */
 const removeUnnamedCustomGroup = (state: CustomGroupsState): CustomGroupsState => {
