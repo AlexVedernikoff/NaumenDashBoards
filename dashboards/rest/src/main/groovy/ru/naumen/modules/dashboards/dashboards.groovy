@@ -788,7 +788,7 @@ class DashboardsService
             def(subjectFqn, dashboardUUID) = DashboardCodeMarshaller.unmarshal(dashboardCode)
 
             def db = api.apps.listContents(appCode).find {
-                it.contentUuid == dashboardUUID
+                it.contentUuid == dashboardUUID && it.subjectFqn == subjectFqn
             }
             String usedUUID = (user && user.metaClass?.toString() == subjectFqn) ? user.UUID : api.utils.findFirst(subjectFqn, ['removed': false]).UUID
             def webApi = api.web
