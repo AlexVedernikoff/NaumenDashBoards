@@ -536,14 +536,27 @@ class Link
                         case AttributeType.DATE_TYPES:
                             result += customSubGroupCondition.collect { orCondition ->
                                 orCondition.collect {
+                                    if(attr.ref)
+                                    {
+                                        def uuids = getValuesForRefAttrInCustomGroup(attr, it.data, customSubGroupCondition)
+                                        return filterBuilder.OR(attr.code, 'containsInSet', uuids)
+                                    }
                                     switch (it.type.toLowerCase())
                                     {
+                                        case 'empty':
+                                            return filterBuilder.OR(attr.code, 'null', null)
+                                        case 'not_empty':
+                                            return filterBuilder.OR(attr.code, 'notNull', null)
                                         case 'today':
                                             return filterBuilder.OR(attr.code, 'today', null)
                                         case 'last':
                                             return filterBuilder.OR(attr.code, 'lastN', it.data as int)
+                                        case 'last_hours':
+                                            return filterBuilder.OR(attr.code, 'lastNHours', it.data as Double)
                                         case 'near':
                                             return filterBuilder.OR(attr.code, 'nextN', it.data as int)
+                                        case 'near_hours':
+                                            return filterBuilder.OR(attr.code, 'nextNHours', it.data as Double)
                                         case 'between':
                                             String dateFormat
                                             def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
@@ -566,10 +579,15 @@ class Link
                                             {
                                                 dateFormat = DashboardUtils.getDateFormatByDate(dateSet.endDate as String)
                                                 end = Date.parse(dateFormat, dateSet.endDate as String)
+                                                if(Attribute.getAttributeType(attr) == AttributeType.DATE_TIME_TYPE)
+                                                {
+                                                    def dateScope = 86399000 //+23 ч 59 мин 59с
+                                                    end = new Date(end.getTime() + dateScope)
+                                                }
                                             }
                                             else
                                             {
-                                                end = new Date().clearTime()
+                                                end = new Date()
                                             }
                                             return filterBuilder.OR(attr.code, 'fromTo', [start, end])
                                         default: throw new IllegalArgumentException("Not supported")
