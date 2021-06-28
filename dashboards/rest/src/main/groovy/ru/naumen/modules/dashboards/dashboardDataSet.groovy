@@ -890,7 +890,9 @@ class DashboardDataSetService
             }
             computeData?.each {
                 def prevDataSource = prevData[it?.prevKey]?.requestData?.source
-                if(api.metainfo.checkAttributeExisting(mainSource.classFqn, prevDataSource.classFqn))
+                def currentSource = request?.data?.getAt(it?.currentKey)?.source //здесь может быть как ссылочный атрибут,
+                //так и полноценный источник - важен его код(classFqn)
+                if(api.metainfo.checkAttributeExisting(currentSource.classFqn, prevDataSource.classFqn))
                 {
                     request?.data[it?.currentKey]?.source = prevDataSource
                 }
@@ -1758,38 +1760,31 @@ class DashboardDataSetService
         }
         def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
-            Closure<FilterParameter> buildFilterParameterFromCondition = { value ->
+            Closure<FilterParameter> buildFilterParameterFromCondition = { value, type ->
                 return new FilterParameter(
                     title: title,
                     id: id,
-                    type: Comparison.BETWEEN,
+                    type: type,
                     attribute: attribute,
                     value: value
                 )
             }
             switch (conditionType.toLowerCase())
             {
+                case 'empty':
+                    return buildFilterParameterFromCondition(null, Comparison.IS_NULL)
+                case 'not_empty':
+                    return buildFilterParameterFromCondition(null, Comparison.NOT_NULL)
                 case 'today':
-                    def start = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 0)
-                        set(MINUTE, 0)
-                        set(SECOND, 0)
-                        set(MILLISECOND, 0)
-                        getTime()
-                    }
-                    def end = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 23)
-                        set(MINUTE, 59)
-                        set(SECOND, 59)
-                        set(MILLISECOND, 999)
-                        getTime()
-                    }
-                    return buildFilterParameterFromCondition([start, end])
+                    return buildFilterParameterFromCondition(null, Comparison.TODAY)
                 case 'last':
                     def count = condition.data as int
+                    return buildFilterParameterFromCondition(count, Comparison.LAST_N_DAYS)
+                case 'last_hours':
+                    def count  = condition.data as int
                     def start = Calendar.instance.with {
-                        add(DAY_OF_MONTH, -count)
-                        set(HOUR_OF_DAY, 0)
+                        add(DAY_OF_MONTH, 0)
+                        set(HOUR_OF_DAY, -count)
                         set(MINUTE, 0)
                         set(SECOND, 0)
                         set(MILLISECOND, 0)
@@ -1802,7 +1797,7 @@ class DashboardDataSetService
                         set(MILLISECOND, 999)
                         getTime()
                     }
-                    return buildFilterParameterFromCondition([start, end])
+                    return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'near':
                     def count = condition.data as int
                     def start = Calendar.instance.with {
@@ -1820,7 +1815,25 @@ class DashboardDataSetService
                         set(MILLISECOND, 999)
                         getTime()
                     }
-                    return buildFilterParameterFromCondition([start, end])
+                    return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
+                case 'near_hours':
+                    def count = condition.data as int
+                    def start = Calendar.instance.with {
+                        set(HOUR_OF_DAY, 0)
+                        set(MINUTE, 0)
+                        set(SECOND, 0)
+                        set(MILLISECOND, 0)
+                        getTime()
+                    }
+                    def end = Calendar.instance.with {
+                        add(DAY_OF_MONTH, 0)
+                        set(HOUR_OF_DAY, count)
+                        set(MINUTE, 59)
+                        set(SECOND, 59)
+                        set(MILLISECOND, 999)
+                        getTime()
+                    }
+                    return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'between':
                     def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
                     def start
@@ -1848,12 +1861,17 @@ class DashboardDataSetService
                     {
                         String dateFormat = DashboardUtils.getDateFormatByDate(dateSet.endDate)
                         end = Date.parse(dateFormat, dateSet.endDate as String)
+                        if(Attribute.getAttributeType(attribute) == AttributeType.DATE_TIME_TYPE)
+                        {
+                            def dateScope = 86399000 //+23 ч 59 мин 59с
+                            end = new Date(end.getTime() + dateScope)
+                        }
                     }
                     else
                     {
-                        end = new Date().clearTime()
+                        end = new Date()
                     }
-                    return buildFilterParameterFromCondition([start, end])
+                    return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
             }
         }
