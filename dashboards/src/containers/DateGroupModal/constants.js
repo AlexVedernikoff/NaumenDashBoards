@@ -61,7 +61,7 @@ const OR_CONDITION_OPTIONS = [
 		value: OR_CONDITION_TYPES.LAST_HOURS
 	},
 	{
-		label: 'в ближайшие "n" дней',
+		label: 'в ближайшие "n" часов',
 		value: OR_CONDITION_TYPES.NEAR_HOURS
 	},
 	{
