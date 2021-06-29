@@ -605,8 +605,24 @@ class DashboardUtils
         }
         else
         {
-            //если поле data было, обновляем поле data
-            oldFormatWidget.data = updateDataToNewFormat(oldFormatWidget.data, widgetCurrentClazz)
+            if(oldFormatWidget.data.find() instanceof AxisCurrentData && widgetCurrentClazz == CircleCurrentAndNew)
+            {
+                widgetCurrentClazz = AxisCurrentAndNew
+                //обновляем поле data в соотстветсвии со столбчатым типом
+                oldFormatWidget.data = updateDataToNewFormat(oldFormatWidget.data, widgetCurrentClazz)
+                //выставляем сам тип
+                oldFormatWidget.type = DiagramType.COLUMN
+                //получаем объект правильного класса - это больше не CircleCurrentAndNew
+                oldFormatWidget = mapper.convertValue(oldFormatWidget, AxisCurrentAndNew)
+                //прописываем отсутствующие поля, которых нет в круговых, но есть в столбчатых
+                oldFormatWidget.indicator = new IndicatorOrParameter()
+                oldFormatWidget.parameter = new IndicatorOrParameter()
+            }
+            else
+            {
+                //если поле data было, обновляем поле data
+                oldFormatWidget.data = updateDataToNewFormat(oldFormatWidget.data, widgetCurrentClazz)
+            }
         }
 
         switch (widgetCurrentClazz)
@@ -3424,7 +3440,7 @@ class SpeedometerCurrentAndNew extends Widget
     /**
      * Настройки навигации
      */
-    Navigation navigation
+    Navigation navigation = new Navigation()
     /**
      * Данные о диапазонах
      */
