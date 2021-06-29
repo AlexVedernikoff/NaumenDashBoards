@@ -30,8 +30,7 @@ const schema = object({
 			'check-source-for-parent',
 			'Для данного типа выбранный источник не доступен - выберите другой',
 			checkSourceForParent
-		),
-		sourceForCompute: mixed().computeNotIsReferenceAttribute()
+		)
 	})),
 	sources: mixed().minSourceNumbers(),
 	top: object().topSettings()
