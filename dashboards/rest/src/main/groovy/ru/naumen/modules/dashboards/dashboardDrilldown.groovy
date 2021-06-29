@@ -260,18 +260,34 @@ class Link
                         {
                             uuidSubject = [uuidSubject]
                         }
-                        filterBuilder.OR(attribute, 'contains', uuidSubject)
+                        return filterBuilder.OR(attribute, 'contains', uuidSubject)
                     }
                     else
                     {
                         if (condition.toLowerCase().contains('subject'))
                         {
-                            def (metaClass, subjectAttribute) = value?.getUUID()?.split('@')
-                            value = api.metainfo.getMetaClass(metaClass)
-                                       .getAttribute(subjectAttribute)
-                                       .getAttributeFqn()
+                            if(value?.getUUID()?.contains('.'))
+                            {
+                                def values = value?.getUUID()?.tokenize('.')?.collect {
+                                    return it?.tokenize('@')?.last()
+                                }
+                                value = utils.get(subjectUUID)
+                                //проходим по каждому значению из переменной вплоть до последнего уровня
+                                values.each { value = value[it] }
+                                //делаем список значений плоским
+                                value = value.flatten()
+                                Link.checkValuesSize(value)
+                                return filterBuilder.OR(attribute, 'containsInSet', value)
+                            }
+                            else
+                            {
+                                def (metaClass, subjectAttribute) = value?.getUUID()?.split('@')
+                                value = api.metainfo.getMetaClass(metaClass)
+                                           .getAttribute(subjectAttribute)
+                                           .getAttributeFqn()
+                            }
                         }
-                        filterBuilder.OR(attribute, condition, value)
+                        return  filterBuilder.OR(attribute, condition, value)
                     }
                 }
             }.inject(filterBuilder) { first, second -> first.AND(*second)
