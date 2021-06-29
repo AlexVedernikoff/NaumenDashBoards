@@ -220,7 +220,6 @@ export class ParamsTab extends PureComponent<Props> {
 				<WidgetSelectBox />
 				{data.map(this.renderDataSetSettings)}
 				{this.renderBreakdownFieldSet()}
-				{this.renderShowEmptyDataCheckbox()}
 				{this.renderDataTopField()}
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
