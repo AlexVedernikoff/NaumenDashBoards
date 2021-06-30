@@ -1,0 +1,44 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		background-color: @white;
+		border-radius: @border-radius;
+		border: 1px solid @grey;
+		box-sizing: border-box;
+		color: @black;
+		cursor: pointer;
+		display: flex;
+		font-size: 13px;
+		height: 32px;
+		position: relative;
+
+		&:focus-within {
+			border: 1px solid @info;
+		}
+	}
+
+	.disabledContainer {
+		background: @gainsboro;
+		color: @darkgrey;
+		pointer-events: none;
+	}
+
+	.input {
+		border: none !important;
+		box-sizing: border-box;
+		height: 100% !important;
+		padding: 8px 0 8px 6px !important;
+	}
+
+	.contolsContainer {
+		display: flex;
+
+		.button {
+			border-left: 1px solid @grey; ;
+			height: 30px;
+			width: 40px;
+		}
+	}
+
+}

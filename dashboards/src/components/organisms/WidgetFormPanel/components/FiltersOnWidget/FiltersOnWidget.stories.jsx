@@ -14,8 +14,8 @@ const DefaultTemplate = args => {
 	const onAddNewFilterItem = () => {
 		action('onAddNewFilterItem')();
 		updateArgs({
-			values: [
-				...values,
+			filters: [
+				...(values ?? []),
 				{ attribute: null, dataKey: null, label: '' }
 			]
 		});
@@ -31,7 +31,6 @@ const DefaultTemplate = args => {
 export const Default = DefaultTemplate.bind({});
 
 Default.args = {
-	attributes: {},
 	dataSets: [],
-	values: []
+	filters: []
 };

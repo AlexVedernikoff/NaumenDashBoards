@@ -4,7 +4,7 @@ import cn from 'classnames';
 import {COUNT_OPTIONS} from './constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -56,9 +56,9 @@ export class DataTopField extends PureComponent<Props> {
 		const {show} = this.props.value;
 
 		return (
-			<FormCheckControl label="Вывести топ">
+			<FormControl label="Вывести топ">
 				<Checkbox checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleToggleShow} value={show} />
-			</FormCheckControl>
+			</FormControl>
 		);
 	};
 

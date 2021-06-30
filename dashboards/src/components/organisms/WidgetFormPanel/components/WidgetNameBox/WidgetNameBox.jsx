@@ -2,7 +2,7 @@
 import Checkbox from 'components/atoms/Checkbox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormBox from 'components/molecules/FormBox';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import {MAX_TEXT_LENGTH} from 'components/constants';
@@ -92,9 +92,9 @@ export class WidgetNameBox extends PureComponent<Props> {
 		const {useName: value} = this.props.values.header;
 
 		return (
-			<FormCheckControl className={styles.checkbox} label="Использовать для заголовка диаграммы">
+			<FormControl className={styles.checkbox} label="Использовать для заголовка диаграммы">
 				<Checkbox checked={value} name={DIAGRAM_FIELDS.useName} onChange={this.handleChangeUseName} value={value} />
-			</FormCheckControl>
+			</FormControl>
 		);
 	};
 

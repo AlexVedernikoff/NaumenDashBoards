@@ -22,20 +22,16 @@ const resolveMixin = (widget: Chart, data: DiagramBuildData, container: HTMLDivE
 
 	switch (widget.type) {
 		case BAR:
-			return axisMixin(true)(widget, data, container);
 		case BAR_STACKED:
-			return axisMixin(true, true)(widget, data, container);
 		case COLUMN:
-			return axisMixin(false)(widget, data, container);
 		case COLUMN_STACKED:
-			return axisMixin(false, true)(widget, data, container);
+		case LINE:
+			return axisMixin(widget, data, container);
 		case COMBO:
 			return comboMixin(widget, data, container);
 		case DONUT:
 		case PIE:
 			return circleMixin(widget, data, container);
-		case LINE:
-			return axisMixin(false)(widget, data, container);
 	}
 };
 

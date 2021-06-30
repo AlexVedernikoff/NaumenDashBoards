@@ -86,7 +86,7 @@ const getXAxisLabels = (labels: Array<string>, wrap: boolean): ApexLabels => {
 const getXAxisOptions = (props: AxisProps, rotate: boolean, horizontal: boolean = false) => {
 	const {name, show, showName} = props;
 
-	let options: Object = {
+	const options: Object = {
 		labels: {
 			hideOverlappingLabels: false,
 			maxHeight: 100,
@@ -94,13 +94,11 @@ const getXAxisOptions = (props: AxisProps, rotate: boolean, horizontal: boolean 
 			rotate: rotate ? -60 : 0,
 			show,
 			trim: !horizontal && rotate
-		},
-		title: {
 		}
 	};
 
 	if (showName) {
-		options.title.text = name;
+		options.title = {text: name};
 	}
 
 	return options;
@@ -205,9 +203,10 @@ const legendFormatter = (settings: Legend, container: HTMLDivElement) => (legend
  * Возвращает настройки для отображения легенды графика
  * @param {Legend} settings - настройки легенды виджета
  * @param {HTMLDivElement} container - контейнер, где размещен график
+ * @param {Function} formatter - форматирование легенды
  * @returns {ApexLegend}
  */
-const getLegendOptions = (settings: Legend, container: HTMLDivElement): ApexLegend => {
+const getLegendOptions = (settings: Legend, container: HTMLDivElement, formatter = legendFormatter(settings, container)): ApexLegend => {
 	const {fontFamily, fontSize, position, show} = settings;
 	const {bottom, top} = LEGEND_POSITIONS;
 	const options = {
@@ -228,7 +227,7 @@ const getLegendOptions = (settings: Legend, container: HTMLDivElement): ApexLege
 
 	return {
 		...options,
-		formatter: legendFormatter(settings, container),
+		formatter: formatter,
 		height,
 		width: getLegendWidth(container, position)
 	};

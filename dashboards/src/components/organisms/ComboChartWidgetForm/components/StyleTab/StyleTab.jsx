@@ -55,9 +55,13 @@ export class StyleTab extends Component<Props> {
 			<div className={styles.container}>
 				<HeaderBox name={DIAGRAM_FIELDS.header} onChange={this.handleChange} value={header} />
 				<LegendBox name={DIAGRAM_FIELDS.legend} onChange={this.handleChange} value={legend} />
-				<AxisSettingsBox name={DIAGRAM_FIELDS.parameter} onChange={this.handleChange} title="Параметр" value={parameter}>
-					{this.renderXAxisNameField()}
-				</AxisSettingsBox>
+				<AxisSettingsBox
+					name={DIAGRAM_FIELDS.parameter}
+					onChange={this.handleChange}
+					renderNameField={this.renderXAxisNameField}
+					title="Параметр"
+					value={parameter}
+				/>
 				<IndicatorSettingsBox
 					data={data}
 					name={DIAGRAM_FIELDS.indicator}

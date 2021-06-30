@@ -71,10 +71,11 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
  * @returns {boolean}
  */
 const hasUUIDsInLabels = (attribute?: Attribute, group?: Group): boolean => {
-	const {dtInterval, metaClass} = ATTRIBUTE_TYPES;
+	const {dtInterval, metaClass, state} = ATTRIBUTE_TYPES;
 
 	return (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE)
 		|| attribute?.type === metaClass
+		|| attribute?.type === state
 		|| attribute?.type === dtInterval
 		|| group?.way === GROUP_WAYS.CUSTOM;
 };
@@ -158,6 +159,17 @@ const isHorizontalChart = (type: WidgetType): boolean => {
 };
 
 /**
+ * Проверяет принадлежность типа виджета к графикам с накоплением
+ * @param {AnyWidget} type - тип виджета
+ * @returns {boolean}
+ */
+const isStackedChart = (type: WidgetType): boolean => {
+	const {BAR_STACKED, COLUMN_STACKED} = WIDGET_TYPES;
+
+	return [BAR_STACKED, COLUMN_STACKED].includes(type);
+};
+
+/**
  * Проверяет возможность наличия глобальных настроек цветов
  * @param {AnyWidget} type - тип виджета
  * @returns {boolean}
@@ -182,5 +194,6 @@ export {
 	isAxisChart,
 	isCircleChart,
 	isHorizontalChart,
+	isStackedChart,
 	parseMSInterval
 };

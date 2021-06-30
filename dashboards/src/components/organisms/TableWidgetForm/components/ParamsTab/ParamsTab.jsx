@@ -10,7 +10,7 @@ import type {DataTopSettings} from 'store/widgets/data/types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox';
 import FormBox from 'components/molecules/FormBox';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'WidgetFormPanel/components/FormField';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -178,14 +178,14 @@ export class ParamsTab extends PureComponent<Props> {
 
 		return (
 			<FormField>
-				<FormCheckControl label="Показывать нулевые значения" reverse>
+				<FormControl label="Показывать нулевые значения" reverse>
 					<Toggle
 						checked={showEmptyData}
 						name={DIAGRAM_FIELDS.showEmptyData}
 						onChange={this.handleToggleShowEmptyData}
 						value={showEmptyData}
 					/>
-				</FormCheckControl>
+				</FormControl>
 			</FormField>
 		);
 	};

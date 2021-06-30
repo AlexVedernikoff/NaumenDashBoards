@@ -31,7 +31,7 @@ export class FiltersOnWidget extends PureComponent<Props> {
 	handleAddSource = () => {
 		const {filters, onAddNewFilterItem} = this.props;
 
-		if (filters?.length < 3) {
+		if (!filters || filters?.length < 3) {
 			onAddNewFilterItem();
 		}
 	};
@@ -63,7 +63,7 @@ export class FiltersOnWidget extends PureComponent<Props> {
 	renderAddSourceFilter = (): React$Node => {
 		const {filters} = this.props;
 
-		if (filters?.length < 3) {
+		if (!filters || filters?.length < 3) {
 			return <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleAddSource} />;
 		}
 

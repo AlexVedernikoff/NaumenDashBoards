@@ -4,17 +4,17 @@ import type {CustomFilter, Widget} from 'store/widgets/data/types';
 import {getPartsClassFqn} from 'store/widgets/links/helpers';
 
 const isNotEmptyDescriptor = (descriptor: ?string) => {
-    if (descriptor) {
-        try {
-            const {filters} = JSON.parse(descriptor);
-            return Array.isArray(filters) && filters.length > 0;
-        } catch (e) {
-            console.error('Filters on widgets has unparsed descriptor');
-            return false;
-        }
-    }
+	if (descriptor) {
+		try {
+			const {filters} = JSON.parse(descriptor);
+			return Array.isArray(filters) && filters.length > 0;
+		} catch (e) {
+			console.error('Filters on widgets has unparsed descriptor');
+			return false;
+		}
+	}
 
-    return false;
+	return false;
 };
 
 const hasUsedFilters = (widget: Widget) => {
@@ -22,31 +22,31 @@ const hasUsedFilters = (widget: Widget) => {
 };
 
 const getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise<string> => {
-    const {descriptor} = filter;
-    let newDescriptor = '';
+	const {descriptor} = filter;
+	let newDescriptor = '';
 
-    try {
-        const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
+	try {
+		const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
 
-        if (context) {
-            context['attrCodes'] = filter.attributes.map(attr => {
-                const {code, declaredMetaClass, metaClassFqn} = attr;
-                const {classFqn} = getPartsClassFqn(declaredMetaClass ?? metaClassFqn);
+		if (context) {
+			context['attrCodes'] = filter.attributes.map(attr => {
+				const {code, declaredMetaClass, metaClassFqn} = attr;
+				const {classFqn} = getPartsClassFqn(declaredMetaClass ?? metaClassFqn);
 
-                return `${classFqn}@${code}`;
-            });
+				return `${classFqn}@${code}`;
+			});
 
-            ({serializedContext: newDescriptor} = await window.jsApi.commands.filterForm(context, true));
-        }
-    } catch (ex) {
-        console.error('Ошибка формы фильтрации', ex);
-    }
+			({serializedContext: newDescriptor} = await window.jsApi.commands.filterForm(context, true));
+		}
+	} catch (ex) {
+		console.error('Ошибка формы фильтрации', ex);
+	}
 
-    return newDescriptor;
+	return newDescriptor;
 };
 
 export {
-    getNewDescriptor,
-    hasUsedFilters,
-    isNotEmptyDescriptor
+	getNewDescriptor,
+	hasUsedFilters,
+	isNotEmptyDescriptor
 };

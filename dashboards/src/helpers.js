@@ -96,13 +96,31 @@ const decorateRestCallModule = (restCallModule: Function) => {
 	};
 };
 
-// TODO: RegExp.esacape https://github.com/tc39/proposal-regex-escaping
 /**
  * Экранирует специальные символы строки
+ * TODO: RegExp.esacape https://github.com/tc39/proposal-regex-escaping
  * @param {string} string - строка
  * @returns {string}
  */
 const escapeString = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Создает копию объета obj без поля [key]
+ * @param {object} obj - объект для копирования
+ * @param {string} key - ключ объекта obj
+ * @returns {object} - копия obj без ключа key
+ */
+function omit<T: Object> (obj: T, key: string): T {
+	if (key in obj) {
+		const newObj = {...obj};
+
+		delete newObj[key];
+
+		return newObj;
+	}
+
+	return obj;
+}
 
 export {
 	debounce,
@@ -110,8 +128,9 @@ export {
 	deepClone,
 	escapeString,
 	extend,
-	isMacOS,
 	getLayoutMode,
 	getMapValues,
-	isObject
+	isMacOS,
+	isObject,
+	omit
 };

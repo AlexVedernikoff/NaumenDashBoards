@@ -58,13 +58,13 @@ const TemplateTransparent = args => {
 export const Transparent = TemplateTransparent.bind({});
 
 const renderTransparentValueContainer = props => {
-		const {className, onClick} = props;
+	const {className, onClick} = props;
 
-		return (
-			<Container className={className} onClick={onClick}>
-				<div>Выберите значение</div>
-			</Container>
-		);
+	return (
+		<Container className={className} onClick={onClick}>
+			<div>Выберите значение</div>
+		</Container>
+	);
 };
 
 Transparent.args = {
@@ -116,17 +116,17 @@ WithSearching.args = {
 };
 
 const MultipleTemplate = args => {
-	const [{values}, updateArgs] = useArgs();
+	const [{values = []}, updateArgs] = useArgs();
 	const onSelect = (event) => {
 		const {value} = event;
 
 		action('onSelect')(event);
-		updateArgs({values: value});
+		updateArgs({values: [...values, value]});
 	};
 
 	return (
 		<div style={{width: 300}}>
-			<Select {...args} onSelect={onSelect} value={values} />
+			<Select {...args} onSelect={onSelect} values={values} />
 		</div>
 	);
 };

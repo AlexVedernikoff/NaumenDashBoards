@@ -1,5 +1,5 @@
 // @flow
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import type {Props} from './types';
 import RadioButton from 'components/atoms/RadioButton';
 import React, {PureComponent} from 'react';
@@ -21,9 +21,9 @@ export class RadioField extends PureComponent<Props> {
 		const {className, disabled, label, ...radioButtonProps} = this.props;
 
 		return (
-			<FormCheckControl className={className} disabled={disabled} label={label} onClickLabel={this.handleClickLabel}>
+			<FormControl className={className} disabled={disabled} label={label} onClickLabel={this.handleClickLabel}>
 				<RadioButton {...radioButtonProps} setTrigger={this.handleSetTrigger} />
-			</FormCheckControl>
+			</FormControl>
 		);
 	}
 }

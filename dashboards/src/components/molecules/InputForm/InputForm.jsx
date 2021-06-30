@@ -50,7 +50,7 @@ export class InputForm extends Component<Props, State> {
 	};
 
 	render () {
-		const {className, onClose} = this.props;
+		const {className, forwardedRef, onClose} = this.props;
 		const {value} = this.state;
 
 		return (
@@ -60,6 +60,7 @@ export class InputForm extends Component<Props, State> {
 					className={styles.input}
 					onChange={this.handleChange}
 					onKeyDown={this.handleSpecialKeysDown}
+					ref={forwardedRef}
 					required
 					type="text"
 					value={value}

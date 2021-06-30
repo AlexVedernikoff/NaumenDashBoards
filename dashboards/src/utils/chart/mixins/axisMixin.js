@@ -1,84 +1,67 @@
 // @flow
 import type {AxisData, AxisWidget} from 'store/widgets/data/types';
-import {
-	axisLabelFormatter,
-	checkLabelsForOverlap,
-	formatLabels,
-	getLegendOptions,
-	getXAxisLabels,
-	getXAxisOptions,
-	getYAxisOptions,
-	valueFormatter
-} from './helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'helpers';
+import {getAxisFormatter} from 'utils/chart/mixins/formater';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
+import {
+	getLegendOptions,
+	getXAxisOptions,
+	getYAxisOptions
+} from './helpers';
+import {hasPercent} from 'store/widgets/helpers';
 import type {Options} from 'utils/chart/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
- * Примесь графиков по умолчанию (bar, column, line)
- * @param {boolean} horizontal - положение графика
- * @param {boolean} stacked - накопление данных
+ * Создает примесь для осевых графиков
+ * @param {AxisWidget} widget - виджет
+ * @param {DiagramBuildData} data - данные графика
+ * @param {HTMLDivElement} container - контейнер, где размещен график
  * @returns {Options}
  */
-const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
-	(widget: AxisWidget, chart: DiagramBuildData, container: HTMLDivElement): Options => {
+const axisMixin = (widget: AxisWidget, data: DiagramBuildData, container: HTMLDivElement): Options => {
 	const {indicator: indicatorSettings, legend, parameter, type} = widget;
-	const {labels} = chart;
+	const {labels} = data;
 	const buildDataSet: AxisData = getBuildSet(widget);
 
 	if (buildDataSet) {
-		const {breakdown, indicators, parameters, showEmptyData, xAxisName, yAxisName} = buildDataSet;
+		const formatter = getAxisFormatter(widget, labels, container);
+		const {hasOverlappedLabel, horizontal, stacked} = formatter.options;
+		const {indicators, xAxisName, yAxisName} = buildDataSet;
 		const {aggregation, attribute: indicatorAttribute} = indicators[0];
-		const {attribute: parameterAttribute, group: parameterGroup} = parameters[0];
-		const firstBreakdown = (Array.isArray(breakdown) && breakdown[0]) || {attribute: undefined, group: undefined};
-		const {attribute: breakdownAttribute, group: breakdownGroup} = firstBreakdown;
-		const parameterUsesUUIDs = hasUUIDsInLabels(parameterAttribute, parameterGroup);
-		const breakdownUsesUUIDs = Array.isArray(breakdown) && hasUUIDsInLabels(breakdownAttribute, breakdownGroup);
-		const usesUUIDs = parameterUsesUUIDs || breakdownUsesUUIDs;
-		const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
 		const usesPercent = hasPercent(indicatorAttribute, aggregation);
 		const stackType = usesPercent && stacked ? '100%' : 'normal';
 		const strokeWidth = type === WIDGET_TYPES.LINE ? 4 : 0;
-		const xAxisSettings = {
-			...parameter,
-			name: xAxisName
-		};
-		const yAxisSettings = {
-			...indicatorSettings,
-			name: yAxisName
-		};
+		const xAxisSettings = {...parameter, name: xAxisName};
+		const yAxisSettings = {...indicatorSettings, name: yAxisName};
 		const xAxisProps = horizontal ? yAxisSettings : xAxisSettings;
 		const yAxisProps = horizontal ? xAxisSettings : yAxisSettings;
-		// TODO: SMRMEXT-12049 - убрать при реализации
-		const labelsFormated = formatLabels(widget, labels);
-		const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend, horizontal);
 
-		let xaxis = {
+		const xaxis = {
 			labels: {
-				formatter: horizontal ? valueFormatter(usesMSInterval, usesPercent) : axisLabelFormatter(usesUUIDs)
-			}
+				formatter: horizontal ? formatter.indicator : formatter.parameter.overlapped
+			},
+			title: {}
 		};
-		let yaxis = {
+		const yaxis = {
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
-				formatter: horizontal ? axisLabelFormatter(usesUUIDs) : valueFormatter(usesMSInterval, usesPercent),
+				formatter: horizontal ? formatter.parameter.overlapped : formatter.indicator,
 				maxWidth: 140
 			}
 		};
 
-		return {
+		const result = {
 			chart: {
 				stackType,
 				stacked
 			},
 			dataLabels: {
-				formatter: valueFormatter(usesMSInterval, usesPercent, showEmptyData)
+				formatter: formatter.dataLabel
 			},
-			labels: getXAxisLabels(labelsFormated, !hasOverlappedLabel),
-			legend: getLegendOptions(legend, container),
+			labels,
+			legend: getLegendOptions(legend, container, formatter.legend),
 			markers: {
 				hover: {
 					size: 8
@@ -97,15 +80,16 @@ const axisMixin = (horizontal: boolean, stacked: boolean = false) =>
 				intersect: true,
 				shared: false,
 				y: {
-					formatter: valueFormatter(usesMSInterval, usesPercent && !stacked),
+					formatter: formatter.indicator,
 					title: {
-						formatter: axisLabelFormatter(breakdownUsesUUIDs)
+						formatter: stacked ? formatter.legend : formatter.parameter.default
 					}
 				}
 			},
 			xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel, horizontal)),
 			yaxis: extend(yaxis, getYAxisOptions(yAxisProps))
 		};
+		return result;
 	}
 };
 

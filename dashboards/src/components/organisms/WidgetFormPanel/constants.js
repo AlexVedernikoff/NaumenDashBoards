@@ -21,9 +21,24 @@ const FIELDS = {
 	textHandler
 };
 
+const additional = 'additional';
+const labelFormat = 'labelFormat';
+const notation = 'notation';
+const symbolCount = 'symbolCount';
+const splitDigits = 'splitDigits';
+
+const LABEL_FORMAT_FIELDS = {
+	additional,
+	labelFormat,
+	notation,
+	splitDigits,
+	symbolCount
+};
+
 // общие поля виджетов-диаграмм
 const borders = 'borders';
 const breakdown = 'breakdown';
+const breakdownFormat = 'breakdownFormat';
 const calcTotalColumn = 'calcTotalColumn';
 const colorsSettings = 'colorsSettings';
 const computedAttrs = 'computedAttrs';
@@ -33,6 +48,7 @@ const dataLabels = 'dataLabels';
 const diagramName = 'diagramName';
 const disabled = 'disabled';
 const displayType = 'displayType';
+const format = 'format';
 const from = 'from';
 const header = 'header';
 const indicator = 'indicator';
@@ -70,8 +86,10 @@ const yAxisName = 'yAxisName';
 
 const DIAGRAM_FIELDS = {
 	...FIELDS,
+	...LABEL_FORMAT_FIELDS,
 	borders,
 	breakdown,
+	breakdownFormat,
 	calcTotalColumn,
 	colorsSettings,
 	computedAttrs,
@@ -81,6 +99,7 @@ const DIAGRAM_FIELDS = {
 	diagramName,
 	disabled,
 	displayType,
+	format,
 	from,
 	header,
 	indicator,
@@ -119,5 +138,6 @@ const DIAGRAM_FIELDS = {
 
 export {
 	DIAGRAM_FIELDS,
-	FIELDS
+	FIELDS,
+	LABEL_FORMAT_FIELDS
 };

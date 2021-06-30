@@ -47,6 +47,7 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 
 	handleFetch = (node: Node) => {
 		const {fetchAttributes} = this.props;
+
 		fetchAttributes(node.value.value);
 	};
 

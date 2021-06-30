@@ -1,7 +1,7 @@
 // @flow
 import Checkbox from 'components/atoms/Checkbox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import MultiDropDownList from 'components/molecules/MultiDropDownList';
 import type {OnChangeEvent, OnChangeInputEvent, Ref} from 'components/types';
@@ -96,9 +96,9 @@ export class NavigationBox extends PureComponent<Props> {
 		const {showTip} = this.props.value;
 
 		return (
-			<FormCheckControl className={styles.checkbox} label="Отображать всплывающую подсказку">
+			<FormControl className={styles.checkbox} label="Отображать всплывающую подсказку">
 				<Checkbox checked={showTip} name="showTip" onChange={this.handleToggleShow} value={showTip} />
-			</FormCheckControl>
+			</FormControl>
 		);
 	};
 

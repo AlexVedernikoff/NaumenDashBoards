@@ -69,7 +69,7 @@ export const setLinkError = (state: LinksState, {payload}: RecordErrorLink): Lin
  * @param {Widget} widget - виджет
  * @returns {DrillDownMixin}
  */
-const createDrillDownMixin = (widget: Widget) => {
+const createDrillDownMixin = (widget: Widget): DrillDownMixin => {
 	const {header, name} = widget;
 	const {name: headerName, useName} = header;
 

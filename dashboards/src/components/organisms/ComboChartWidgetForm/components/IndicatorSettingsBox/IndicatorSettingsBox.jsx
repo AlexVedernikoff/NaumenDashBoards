@@ -3,7 +3,7 @@ import Checkbox from 'components/atoms/Checkbox';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import type {DataSet} from 'store/widgetForms/comboChartForm/types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import HorizontalLabel from 'components/atoms/HorizontalLabel';
 import LegacyCheckbox from 'components/atoms/LegacyCheckbox';
@@ -129,24 +129,24 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 		return (
 			<CollapsableFormBox title="Показатель">
 				<FormField>
-					<FormCheckControl label="Показать ось">
+					<FormControl label="Показать ось">
 						<Checkbox checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleCheckboxChange} value={show} />
-					</FormCheckControl>
+					</FormControl>
 				</FormField>
 				<FormField>
-					<FormCheckControl label="Выводить название">
+					<FormControl label="Выводить название">
 						<Checkbox checked={showName} name={DIAGRAM_FIELDS.showName} onChange={this.handleCheckboxChange} value={showName} />
-					</FormCheckControl>
+					</FormControl>
 				</FormField>
 				{data.filter(dataSet => !dataSet.sourceForCompute).map(this.renderNameField)}
 				<FormField>
-					<FormCheckControl label="Настроить параметры оси">
+					<FormControl label="Настроить параметры оси">
 						<Checkbox
 							checked={showAdditionalSettings}
 							onChange={this.handleToggleAdditionalSettings}
 							value={show}
 						/>
-					</FormCheckControl>
+					</FormControl>
 				</FormField>
 				{this.renderAdditionalSettings()}
 			</CollapsableFormBox>

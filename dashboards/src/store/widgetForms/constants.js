@@ -30,6 +30,7 @@ const DEFAULT_INDICATOR: Indicator = {
 
 const DEFAULT_PARAMETER: Parameter = {
 	attribute: null,
+	format: null,
 	group: {
 		data: DEFAULT_SYSTEM_GROUP.OVERLAP,
 		way: GROUP_WAYS.SYSTEM

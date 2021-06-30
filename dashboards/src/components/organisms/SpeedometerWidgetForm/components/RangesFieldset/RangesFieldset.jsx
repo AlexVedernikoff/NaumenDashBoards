@@ -3,7 +3,7 @@ import Checkbox from 'components/atoms/Checkbox';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import ExtendButton from 'components/atoms/ExtendButton';
 import FieldDivider from 'components/organisms/SpeedometerWidgetForm/components/FieldDivider';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import Label from 'components/atoms/Label';
 import type {OnChangeEvent} from 'components/types';
@@ -170,9 +170,9 @@ export class RangesFieldset extends PureComponent<Props> {
 
 		return (
 			<FormField>
-				<FormCheckControl label="Использовать диапазоны">
+				<FormControl label="Использовать диапазоны">
 					<Checkbox checked={use} name={DIAGRAM_FIELDS.use} onChange={this.handleChangeUse} value={use} />
-				</FormCheckControl>
+				</FormControl>
 			</FormField>
 		);
 	};
