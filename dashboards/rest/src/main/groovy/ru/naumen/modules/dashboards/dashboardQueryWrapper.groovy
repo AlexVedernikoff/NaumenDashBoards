@@ -446,7 +446,7 @@ class QueryWrapper implements CriteriaWrapper
         //в ином случае, важен тип самого последнего атрибута
         String lastParameterAttributeType = attributeChains.size() > 2 ? attributeChains*.type[-2] : attributeChains*.type.last()
         //если подставили title сами, то нам важно знать тип самого первого атрибута  в цепочке, тк он может повлиять на необходимость вывести uuid
-        if( attributeChains.code.last() == 'title' && parameter.attribute.type in AttributeType.ONLY_LINK_TYPES)
+        if( attributeChains.code.last() == 'title' && parameter.attribute.type in AttributeType.HAS_UUID_TYPES)
         {
             lastParameterAttributeType = parameter.attribute.type
         }
