@@ -2937,6 +2937,22 @@ abstract class Widget
             fields?.header?.fontStyle = null
         }
 
+        if(clazz == TablePrevAndCurrentAndNew)
+        {
+            if(fields?.table?.body?.indicatorSettings?.fontStyle == "")
+            {
+                fields?.table?.body?.indicatorSettings?.fontStyle = null
+            }
+            if(fields?.table?.body?.parameterSettings?.fontStyle == "")
+            {
+                fields?.table?.body?.parameterSettings?.fontStyle= null
+            }
+            if(fields?.table?.columnHeader?.fontStyle == "")
+            {
+                fields?.table?.columnHeader?.fontStyle = null
+            }
+        }
+
         return Jackson.toJsonString(fields)
     }
 
