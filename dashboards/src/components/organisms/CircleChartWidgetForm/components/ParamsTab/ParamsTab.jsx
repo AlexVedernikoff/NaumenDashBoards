@@ -28,7 +28,7 @@ export class ParamsTab extends PureComponent<Props> {
 		const newData = data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 		const newBreakdownGroup = newData[0].breakdown[0].group;
 
-		if (data[0].breakdown[0].group.way !== newBreakdownGroup.way) {
+		if (data[0].breakdown?.[0]?.group?.way !== newBreakdownGroup.way) {
 			const {DEFAULT, INDICATOR} = SORTING_VALUES;
 
 			if (newBreakdownGroup.way === GROUP_WAYS.CUSTOM && sorting.value !== DEFAULT) {
@@ -52,7 +52,7 @@ export class ParamsTab extends PureComponent<Props> {
 		const {values} = this.props;
 
 		if (!dataSet.sourceForCompute) {
-			const hasCustomGroup = !!values.data[0].breakdown[0].group.way === GROUP_WAYS.CUSTOM;
+			const hasCustomGroup = !!(values.data[0].breakdown?.[0]?.group?.way === GROUP_WAYS.CUSTOM);
 
 			return (
 				<DataSetSettings

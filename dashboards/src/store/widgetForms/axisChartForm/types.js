@@ -1,6 +1,7 @@
 // @flow
 import type {
 	AxisData,
+	AxisFormat,
 	AxisSettings,
 	ChartColorsSettings,
 	ChartSorting,
@@ -22,6 +23,7 @@ export type DataSet = $Exact<{
 }>;
 
 export type Values = $Exact<{
+	breakdownFormat: ?AxisFormat,
 	colorsSettings: ChartColorsSettings,
 	computedAttrs: Array<ComputedAttr>,
 	data: Array<DataSet>,

@@ -1,22 +1,20 @@
 // @flow
 import cn from 'classnames';
+import {DEFAULT_PROPS} from './constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import Text from 'components/atoms/Text';
+import {TEXT_TYPES} from 'components/atoms/Text/constants';
 
-export class FormCheckControl extends PureComponent<Props> {
-	static defaultProps = {
-		className: '',
-		disabled: false,
-		reverse: false,
-		tip: ''
-	};
+export class FormControl extends PureComponent<Props> {
+	static defaultProps = DEFAULT_PROPS;
 
 	renderLabel = () => {
-		const {label, onClickLabel} = this.props;
+		const {isTitle, label, onClickLabel, small} = this.props;
+		const type = isTitle ? TEXT_TYPES.TITLE : (small ? TEXT_TYPES.SMALL : TEXT_TYPES.REGULAR);
 
-		return <Text className={styles.label} onClick={onClickLabel}>{label}</Text>;
+		return <Text className={styles.label} onClick={onClickLabel} type={type}>{label}</Text>;
 	};
 
 	render () {
@@ -37,4 +35,4 @@ export class FormCheckControl extends PureComponent<Props> {
 	}
 }
 
-export default FormCheckControl;
+export default FormControl;

@@ -25,8 +25,8 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {boolean} - Необходимость очищать значения для фильтрации
  */
 const isNeedsClearedValue = (attribute: Attribute, group: Group): boolean => {
-	const {dtInterval, metaClass} = ATTRIBUTE_TYPES;
-	const noNeedToCleanTypes = {...ATTRIBUTE_SETS.BO_LINKS, dtInterval, metaClass};
+	const {dtInterval, metaClass, state} = ATTRIBUTE_TYPES;
+	const noNeedToCleanTypes = {...ATTRIBUTE_SETS.REFERENCE, dtInterval, metaClass, state};
 
 	return !(getAttributeValue(attribute, 'type') in noNeedToCleanTypes && group.way === GROUP_WAYS.SYSTEM);
 };
@@ -313,8 +313,7 @@ const hasDrillDownWidget = (widget: Chart, buildData: DiagramBuildData, seriesIn
  * @param {DiagramBuildData} buildData - данные для построения графика
  * @returns {ThunkAction}
  */
-const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) =>
-	(event: MouseEvent, chartContext: Object, config: Object) => {
+const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) => (event: MouseEvent, chartContext: Object, config: Object) => {
 	event.stopPropagation();
 
 	if (hasDrillDownWidget(widget, buildData, config.seriesIndex)) {

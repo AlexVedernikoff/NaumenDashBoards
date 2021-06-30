@@ -29,7 +29,7 @@ const Template = args => {
 				{...args}
 				onChange={onChange}
 				onFocus={onFocus}
-                value={value}
+				value={value}
 			/>
 		</div>
 	);

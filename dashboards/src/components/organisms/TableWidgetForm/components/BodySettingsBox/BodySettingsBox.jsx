@@ -2,7 +2,7 @@
 import CellSettingsBox from 'TableWidgetForm/components/CellSettingsBox';
 import Checkbox from 'components/atoms/Checkbox';
 import {EMPTY_DATA_OPTIONS, PAGE_SIZES} from './constants';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import Label from 'components/atoms/Label';
 import type {OnChangeEvent, OnChangeInputEvent, OnSelectEvent} from 'components/types';
@@ -40,14 +40,14 @@ export class BodySettingsBox extends PureComponent<Props> {
 			<div className={styles.container}>
 				<Label className={styles.label}>Тело таблицы</Label>
 				<FormField>
-					<FormCheckControl label="Отображать номер строки">
+					<FormControl label="Отображать номер строки">
 						<Checkbox
 							checked={showRowNum}
 							name={TABLE_FIELDS.showRowNum}
 							onChange={this.handleBoolChange}
 							value={showRowNum}
 						/>
-					</FormCheckControl>
+					</FormControl>
 				</FormField>
 				<FormField className={styles.pageSizeField}>
 					<Select

@@ -2,5 +2,5 @@
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedFunctions = {
-    getCustomGroup: (payload: string) => ThunkAction,
+	getCustomGroup: (payload: string) => ThunkAction,
 };

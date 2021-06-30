@@ -34,22 +34,22 @@ const setCustomGroups = (state: CustomGroupsState, groups: Array<CustomGroup>): 
  * @returns {CustomGroupsState}
  */
 const removeUnnamedCustomGroup = (state: CustomGroupsState): CustomGroupsState => {
-    const {map} = state;
-    const newMap: typeof map = {};
-    const keys = Object.keys(map);
+	const {map} = state;
+	const newMap: typeof map = {};
+	const keys = Object.keys(map);
 
-    keys.forEach((key) => {
-        const value = map[key];
+	keys.forEach((key) => {
+		const value = map[key];
 
-        if (!key.startsWith('local_') || !!value.data.name) {
-            newMap[key] = value;
-        }
-    });
+		if (!key.startsWith('local_') || !!value.data.name) {
+			newMap[key] = value;
+		}
+	});
 
 	return {...state, map: newMap};
 };
 
 export {
-    removeUnnamedCustomGroup,
-    setCustomGroups
+	removeUnnamedCustomGroup,
+	setCustomGroups
 };

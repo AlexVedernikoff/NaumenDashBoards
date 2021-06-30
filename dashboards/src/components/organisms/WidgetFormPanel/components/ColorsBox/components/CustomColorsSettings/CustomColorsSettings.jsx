@@ -4,7 +4,7 @@ import CustomBreakdownColorsSettings
 	from 'WidgetFormPanel/components/ColorsBox/components/CustomBreakdownColorsSettings';
 import type {CustomChartColorsSettingsData} from 'store/widgets/data/types';
 import CustomLabelColorsSettings from 'WidgetFormPanel/components/ColorsBox/components/CustomLabelColorsSettings';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
@@ -28,9 +28,9 @@ export class CustomColorsSettings extends PureComponent<Props> {
 
 		return (
 			<FormField>
-				<FormCheckControl label="Применить для всех виджетов на дашборде">
+				<FormControl label="Применить для всех виджетов на дашборде">
 					<Checkbox checked={useGlobal} onChange={this.handleChangeApplyToAllCheckbox} value={useGlobal} />
-				</FormCheckControl>
+				</FormControl>
 			</FormField>
 		);
 	};

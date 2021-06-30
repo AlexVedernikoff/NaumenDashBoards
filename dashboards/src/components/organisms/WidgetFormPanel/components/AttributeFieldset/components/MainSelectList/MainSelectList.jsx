@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_COMPONENTS} from 'components/molecules/TreeSelect/constants';
 import type {DynamicGroupsNode} from 'store/sources/dynamicGroups/types';
-import FormCheckControl from 'components/molecules/FormCheckControl';
+import FormControl from 'components/molecules/FormControl';
 import List from 'components/molecules/Select/components/List';
 import type {Node} from 'components/molecules/TreeSelect/types';
 import type {OnChangeEvent, TreeNode} from 'components/types';
@@ -108,13 +108,13 @@ export class MainSelectList extends PureComponent<Props, State> {
 		if (hasDynamic) {
 			return (
 				<Fragment>
-					<FormCheckControl className={styles.dynamicAttributesShowHandler} label="Динамические атрибуты">
+					<FormControl className={styles.dynamicAttributesShowHandler} label="Динамические атрибуты">
 						<Toggle
 							checked={showDynamicAttributes}
 							onChange={this.handleChangeShowDynamicAttributes}
 							value={showDynamicAttributes}
 						/>
-					</FormCheckControl>
+					</FormControl>
 					{this.renderDynamicAttributesError()}
 				</Fragment>
 			);

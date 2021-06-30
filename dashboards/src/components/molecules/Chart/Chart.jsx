@@ -1,11 +1,11 @@
 // @flow
 import ApexCharts from 'apexcharts';
 import type {AxisWidget} from 'store/widgets/data/types';
-import {checkLabelsForOverlap, formatLabels, getXAxisLabels} from 'utils/chart/mixins/helpers';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
+import {getAxisFormatter} from 'utils/chart/mixins/formater';
 import {getLegendWidth, getOptions} from 'utils/chart';
-import {isAxisChart, isHorizontalChart} from 'store/widgets/helpers';
+import {isAxisChart} from 'store/widgets/helpers';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
@@ -65,7 +65,6 @@ export class Chart extends PureComponent<Props> {
 		const {data, widget} = this.props;
 		const {legend, type} = widget;
 		const {current: container} = this.containerRef;
-		const horizontal = isHorizontalChart(type);
 
 		if (container) {
 			let opts = {
@@ -78,18 +77,24 @@ export class Chart extends PureComponent<Props> {
 				// $FlowFixMe
 				const axisWidget: AxisWidget = widget;
 				const {labels} = data;
-
-				// TODO: SMRMEXT-12049 - убрать при реализации
-				const labelsFormated = formatLabels(axisWidget, labels);
-				const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend, horizontal);
+				const formatter = getAxisFormatter(axisWidget, labels, container);
+				const {hasOverlappedLabel, horizontal} = formatter.options;
 
 				opts = {
 					...opts,
-					labels: getXAxisLabels(labelsFormated, !hasOverlappedLabel),
+					legend: {
+						formatter: formatter.legend
+					},
 					xaxis: {
 						labels: {
+							formatter: horizontal ? formatter.indicator : formatter.parameter.overlapped,
 							rotate: hasOverlappedLabel ? -60 : 0,
 							trim: !horizontal && hasOverlappedLabel
+						}
+					},
+					yaxis: {
+						labels: {
+							formatter: horizontal ? formatter.parameter.overlapped : formatter.indicator
 						}
 					}
 				};

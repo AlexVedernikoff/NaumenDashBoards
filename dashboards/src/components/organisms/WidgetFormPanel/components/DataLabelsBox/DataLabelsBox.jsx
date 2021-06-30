@@ -1,18 +1,25 @@
 // @flow
+import {AXIS_FORMAT_TYPE, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
 import Checkbox from 'components/atoms/Checkbox';
 import ColorInput from 'components/molecules/ColorInput';
 import type {DataLabels} from 'store/widgets/data/types';
+import type {DefaultProps, Props} from './types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
 import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
-import type {Props} from './types';
+import ParameterFormat from 'components/molecules/ParameterFormatPanel';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class DataLabelsBox extends PureComponent<Props> {
+	static defaultProps: DefaultProps = {
+		name: '',
+		showForamt: false
+	};
+
 	componentDidUpdate (prevProps: Props) {
 		const {widget} = this.props;
 		// $FlowFixMe[prop-missing]
@@ -66,7 +73,33 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
+	handleChangeFormat = (format) => {
+		const {name, onChange, value} = this.props;
+
+		onChange(name, {
+			...value,
+			[DIAGRAM_FIELDS.format]: format
+		});
+	};
+
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
+
+	renderFormat = () => {
+		const {showForamt, value} = this.props;
+
+		if (showForamt) {
+			const {format = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT]} = value;
+
+			return (
+				<ParameterFormat
+					onChange={this.handleChangeFormat}
+					value={format}
+				/>
+			);
+		}
+
+		return null;
+	};
 
 	renderMessage = () => {
 		const {disabled} = this.props.value;
@@ -111,6 +144,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 					<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleSelect} portable={true} value={fontColor} />
 					{this.renderShowShadowInput()}
 				</FormField>
+				{this.renderFormat()}
 			</ToggableFormBox>
 		);
 	}

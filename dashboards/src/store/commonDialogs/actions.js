@@ -12,14 +12,14 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
  */
 const confirmDialog = (header: string, text: string, options?: $Shape<ConfirmDialogOptions>): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<boolean> => {
-        const dialogOption = {header, text, ...DEFAULT_CONFIRM_DIALOG_OPTION, ...options};
-        return new Promise<boolean>((resolve) => {
-            dispatch({
-                payload: { options: dialogOption, resolve },
-                type: COMMON_DIALOG_EVENTS.SHOW_CONFIRM_DIALOG
-            });
-        });
-    };
+		const dialogOption = {header, text, ...DEFAULT_CONFIRM_DIALOG_OPTION, ...options};
+		return new Promise<boolean>((resolve) => {
+			dispatch({
+				payload: { options: dialogOption, resolve },
+				type: COMMON_DIALOG_EVENTS.SHOW_CONFIRM_DIALOG
+			});
+		});
+	};
 
 /**
  * Открывает информационное диалоговое окно
@@ -30,14 +30,14 @@ const confirmDialog = (header: string, text: string, options?: $Shape<ConfirmDia
  */
 const showAlert = (header: string, text: string, options?: $Shape<AlertDialogOptions>): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<boolean> => {
-        const dialogOption = {header, text, ...DEFAULT_ALERT_OPTION, ...options};
-        return new Promise<boolean>((resolve) => {
-            dispatch({
-                payload: { options: dialogOption, resolve },
-                type: COMMON_DIALOG_EVENTS.SHOW_ALERT
-            });
-        });
-    };
+		const dialogOption = {header, text, ...DEFAULT_ALERT_OPTION, ...options};
+		return new Promise<boolean>((resolve) => {
+			dispatch({
+				payload: { options: dialogOption, resolve },
+				type: COMMON_DIALOG_EVENTS.SHOW_ALERT
+			});
+		});
+	};
 
 /**
  * Закрывает модальное диалоговое окно подтверждения
@@ -45,38 +45,38 @@ const showAlert = (header: string, text: string, options?: $Shape<AlertDialogOpt
  * @returns {ThunkAction}
  */
 const closeConfirmDialog = (status: boolean): ThunkAction =>
-    async (dispatch: Dispatch, getState: GetState) => {
-        const state = getState();
-        const { commonDialogs: {ConfirmModal} } = state;
+	async (dispatch: Dispatch, getState: GetState) => {
+		const state = getState();
+		const { commonDialogs: {ConfirmModal} } = state;
 
-        if (ConfirmModal) {
-            ConfirmModal.resolve(status);
-            dispatch({
-                type: COMMON_DIALOG_EVENTS.CLOSE_CONFIRM_DIALOG
-            });
-        }
-    };
+		if (ConfirmModal) {
+			ConfirmModal.resolve(status);
+			dispatch({
+				type: COMMON_DIALOG_EVENTS.CLOSE_CONFIRM_DIALOG
+			});
+		}
+	};
 
 /**
  * Закрывает информационное диалоговое окно подтверждения
  * @returns {ThunkAction}
  */
 const closeAlert = (): ThunkAction =>
-    async (dispatch: Dispatch, getState: GetState) => {
-        const state = getState();
-        const { commonDialogs: {AlertModal} } = state;
+	async (dispatch: Dispatch, getState: GetState) => {
+		const state = getState();
+		const { commonDialogs: {AlertModal} } = state;
 
-        if (AlertModal) {
-            AlertModal.resolve(true);
-            dispatch({
-                type: COMMON_DIALOG_EVENTS.CLOSE_ALERT
-            });
-        }
-    };
+		if (AlertModal) {
+			AlertModal.resolve(true);
+			dispatch({
+				type: COMMON_DIALOG_EVENTS.CLOSE_ALERT
+			});
+		}
+	};
 
 export {
-    closeAlert,
-    closeConfirmDialog,
-    confirmDialog,
-    showAlert
+	closeAlert,
+	closeConfirmDialog,
+	confirmDialog,
+	showAlert
 };

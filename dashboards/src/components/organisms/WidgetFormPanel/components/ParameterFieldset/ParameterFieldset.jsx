@@ -17,6 +17,7 @@ import withHelpers from 'containers/DiagramWidgetForm/HOCs/withHelpers';
 
 const Context: React$Context<Parameter> = createContext({
 	attribute: null,
+	format: null,
 	group: getDefaultSystemGroup()
 });
 

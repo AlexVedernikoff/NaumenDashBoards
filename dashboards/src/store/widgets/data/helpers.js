@@ -22,10 +22,11 @@ import type {
 } from './types';
 import type {AppState} from 'store/types';
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
-import {CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {AXIS_FORMAT_TYPE, CHART_COLORS_SETTINGS_TYPES, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getWidgetGlobalChartColorsSettings} from 'store/dashboard/customChartColorsSettings/selectors';
+import {GROUP_WAYS} from 'src/store/widgets/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {WIDGET_SETS, WIDGET_TYPES} from './constants';
 
@@ -57,8 +58,8 @@ const setWidgets = (state: WidgetsDataState, {payload}: SetWidgets) => {
  * @returns {WidgetsDataState}
  */
 const setSelectedWidget = (state: WidgetsDataState, {payload}: SelectWidget): WidgetsDataState => ({
-		...state,
-		selectedWidget: payload
+	...state,
+	selectedWidget: payload
 });
 
 /**
@@ -330,6 +331,38 @@ const updateNewWidgetCustomColorsSettings = (awidget: AnyWidget, state: AppState
 	return isChanged;
 };
 
+const getDefaultFormatForAttribute = (attribute: Attribute | null, group: Group | null) => {
+	let format = null;
+
+	const {
+		catalogItem,
+		catalogItemSet,
+		double,
+		integer,
+		state
+	} = ATTRIBUTE_TYPES;
+
+	if (attribute && group?.way === GROUP_WAYS.SYSTEM) {
+		const type = getAttributeValue(attribute, 'type');
+
+		switch (type) {
+			case catalogItem:
+			case catalogItemSet:
+			case state:
+				format = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.LABEL_FORMAT];
+				break;
+			case double:
+				format = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT];
+				break;
+			case integer:
+				format = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.INTEGER_FORMAT];
+				break;
+		}
+	}
+
+	return format;
+};
+
 export {
 	addWidget,
 	clearWidgetWarning,
@@ -339,6 +372,7 @@ export {
 	getComboYAxisName,
 	getCustomColorsSettingsKey,
 	getCustomColorsSettingsKeyByData,
+	getDefaultFormatForAttribute,
 	getMainDataSet,
 	getMainDataSetIndex,
 	resetWidget,

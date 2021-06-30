@@ -44,7 +44,7 @@ export class SavedFilters extends Component<Props> {
 		e.stopPropagation();
 	};
 
-	handleLoadFilters = () => {	};
+	handleLoadFilters = () => { };
 
 	handleSelect = ({value}: OnSelectEvent) => {
 		const {onSelect} = this.props;

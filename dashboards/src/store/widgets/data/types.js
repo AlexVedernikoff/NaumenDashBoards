@@ -3,6 +3,7 @@ import type {Action, ChangingState, ThunkAction} from 'store/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
+	AXIS_FORMAT_TYPE,
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
 	COPY_WIDGET_ERRORS,
@@ -10,6 +11,8 @@ import {
 	DISPLAY_MODE,
 	FONT_STYLES,
 	HEADER_POSITIONS,
+	LABEL_FORMATS,
+	NOTATION_FORMATS,
 	RANGES_TYPES,
 	SORTING_TYPES,
 	SORTING_VALUES,
@@ -90,6 +93,23 @@ export type ComputedAttr = {|
 |};
 
 export type MixedAttribute = ComputedAttr | Attribute;
+
+export type LabelFormat = $Keys<typeof LABEL_FORMATS>;
+
+export type LabelAxisFormat = {
+	labelFormat?: LabelFormat,
+	type: typeof AXIS_FORMAT_TYPE.LABEL_FORMAT,
+};
+
+export type NumberAxisFormat = {
+	additional?: ?string,
+	notation?: ?$Values<typeof NOTATION_FORMATS>,
+	splitDigits?: ?boolean,
+	symbolCount?: ?number,
+	type: typeof AXIS_FORMAT_TYPE.NUMBER_FORMAT | typeof AXIS_FORMAT_TYPE.INTEGER_FORMAT,
+};
+
+export type AxisFormat = LabelAxisFormat | NumberAxisFormat;
 
 export type Parameter = {
 	attribute: Attribute,
@@ -177,6 +197,7 @@ export type DataLabels = {
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number,
+	format?: AxisFormat,
 	show: boolean,
 	showShadow: boolean
 };
@@ -213,6 +234,7 @@ export type ChartColorsSettings = {
 // График с осями
 
 export type AxisSettings = {
+	format?: AxisFormat,
 	show: boolean,
 	showName: boolean
 };
@@ -235,6 +257,7 @@ export type AxisWidgetType = $Keys<typeof WIDGET_SETS.AXIS>;
 
 export type AxisWidget = {
 	...BaseWidget,
+	breakdownFormat?: AxisFormat,
 	colorsSettings: ChartColorsSettings,
 	data: Array<AxisData>,
 	dataLabels: DataLabels,
@@ -458,7 +481,7 @@ export type DataSet =
 	| CircleData
 	| ComboData
 	| SummaryData
-	|	SpeedometerData
+	| SpeedometerData
 	| TableData;
 
 export type Chart =

@@ -2,6 +2,7 @@
 import {COMBO_TYPES} from 'store/widgets/data/constants';
 import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet, State} from './types';
+import {omit} from 'helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
@@ -49,14 +50,14 @@ const changeValuesByAxisChart = (state: State, values: AxisChartValues): State =
 
 			return {...prevDataSet, ...dataSet};
 		}),
-		dataLabels,
+		dataLabels: omit(dataLabels, 'format'),
 		displayMode,
 		header,
 		indicator,
 		legend,
 		name,
 		navigation,
-		parameter,
+		parameter: omit(parameter, 'format'),
 		sorting,
 		templateName
 	};

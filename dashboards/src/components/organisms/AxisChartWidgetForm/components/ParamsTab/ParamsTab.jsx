@@ -2,10 +2,12 @@
 import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet} from 'store/widgetForms/axisChartForm/types';
 import DataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
-import {DEFAULT_AXIS_SORTING_SETTINGS, SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox/DisplayModeSelectBox';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
+import {getDefaultFormatForAttribute} from 'store/widgets/data/helpers';
+import {getSortValue} from './helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import NavigationBox from 'containers/NavigationBox/NavigationBox';
 import type {Parameter} from 'store/widgetForms/types';
@@ -37,19 +39,17 @@ export class ParamsTab extends PureComponent<Props> {
 
 	handleChangeParameters = (index: number, parameters: Array<Parameter>) => {
 		const {onChange, values} = this.props;
-		const {sorting = DEFAULT_AXIS_SORTING_SETTINGS} = values;
-		const {DEFAULT, INDICATOR} = SORTING_VALUES;
+		const {sorting = DEFAULT_AXIS_SORTING_SETTINGS, parameter} = values;
 		const dataSet = values.data[index];
 		const {attribute, group} = parameters[0];
-		let {value} = sorting;
 
-		if (group.way === GROUP_WAYS.CUSTOM && sorting.value !== DEFAULT) {
-			value = DEFAULT;
-		} else if (sorting.value === DEFAULT) {
-			value = INDICATOR;
+		if (!dataSet.sourceForCompute) {
+			const value = getSortValue(parameters, sorting);
+			const format = getDefaultFormatForAttribute(attribute, group);
+
+			onChange(DIAGRAM_FIELDS.sorting, {...sorting, value});
+			onChange(DIAGRAM_FIELDS.parameter, {...parameter, format});
 		}
-
-		onChange(DIAGRAM_FIELDS.sorting, {...sorting, value});
 
 		this.handleChangeDataSet(index, {
 			...dataSet,
