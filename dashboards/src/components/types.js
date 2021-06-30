@@ -7,7 +7,7 @@ export type DivRef = Ref<'div'>;
 
 export type InputRef = Ref<'input'>;
 
-export type InputValue = string | number | boolean;
+export type InputValue = string | number | boolean | null;
 
 export type OnChangeInputEvent = {
 	name: string,

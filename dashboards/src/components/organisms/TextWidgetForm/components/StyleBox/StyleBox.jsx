@@ -97,14 +97,14 @@ export class StyleBox extends PureComponent<Props> {
 	handleChangeColor = (e: OnChangeInputEvent) => {
 		const {name, value} = e;
 
-		this.changeEditorStyle(name, value.toString());
+		this.changeEditorStyle(name, (value ?? '').toString());
 	};
 
 	handleChangeFontStyle = (e: OnChangeInputEvent) => {
 		const {onChangeEditorState} = this.props;
 		const {value} = e;
 
-		onChangeEditorState(RichUtils.toggleInlineStyle(this.getEditorState(), value.toString()));
+		onChangeEditorState(RichUtils.toggleInlineStyle(this.getEditorState(), (value ?? '').toString()));
 	};
 
 	handleChangeTextAlign = ({name, value}: OnChangeEvent<string>) => {

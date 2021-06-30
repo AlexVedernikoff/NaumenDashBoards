@@ -16,7 +16,7 @@ export class FontStyleControl extends PureComponent<Props> {
 
 		onChange({
 			name,
-			value: value === newValue ? '' : newValue
+			value: value === newValue ? null : newValue
 		});
 	};
 
