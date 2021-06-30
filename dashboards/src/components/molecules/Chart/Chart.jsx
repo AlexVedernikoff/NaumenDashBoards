@@ -83,6 +83,7 @@ export class Chart extends PureComponent<Props> {
 				opts = {
 					...opts,
 					legend: {
+						...opts.legend,
 						formatter: formatter.legend
 					},
 					xaxis: {
