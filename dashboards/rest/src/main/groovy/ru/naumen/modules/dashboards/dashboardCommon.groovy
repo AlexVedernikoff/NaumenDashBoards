@@ -2932,6 +2932,11 @@ abstract class Widget
             fields.data = updateDataToCorrectFormat(fields.data)
         }
 
+        if(fields?.header?.fontStyle == "")
+        {
+            fields?.header?.fontStyle = null
+        }
+
         return Jackson.toJsonString(fields)
     }
 
