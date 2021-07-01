@@ -21,9 +21,10 @@ export class LabelParameterFormat extends PureComponent<Props> {
 		const {label, value} = this.props;
 		const labelFormat = value && value.type === AXIS_FORMAT_TYPE.LABEL_FORMAT ? value.labelFormat : LABEL_FORMATS.TITLE;
 		const selectedItem = STATE_FORMAT_OPTIONS.find(item => item.value === labelFormat);
+		const fieldLabel = label ? `${label} (формат)` : '';
 
 		return (
-			<FormField label={label} small>
+			<FormField label={fieldLabel} small>
 				<Select
 					name={LABEL_FORMAT_FIELDS.labelFormat}
 					onSelect={this.handleChange}
