@@ -1,19 +1,27 @@
 // @flow
 import type {AttributeColumn, BuildDataState, DataSetDescriptorRelation, DiagramBuildData} from './types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {COLUMN_TYPES, SEPARATOR} from './constants';
+import {COLUMN_TYPES, SEPARATOR, TITLE_SEPARATOR} from './constants';
 import {deepClone} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {Row} from 'store/widgets/buildData/types';
 import type {SourceData, Widget} from 'store/widgets/data/types';
 
 /**
- * Возвращает значение представления без переданного кода
+ * Возвращает значение представления без переданного кода и uuid
  * @param {string} value - значение представления
- * @param {string} separator - разделитель лейбла и кода
+ * @param {string} separator - разделитель лейбла и uuid
+ * @param {string} titleSeparator - разделитель названия  и кода
  * @returns {string}
  */
-const getSeparatedLabel = (value: string, separator: string): string => value.split(separator)[0];
+const getSeparatedLabel = (
+	value: string,
+	separator: string = SEPARATOR,
+	titleSeparator: string = TITLE_SEPARATOR
+): string => {
+	const titleWithCode = value.split(separator)[0];
+	return titleWithCode.split(titleSeparator)[0];
+};
 
 /**
  * Обновляем/сбрасываем данные по виджету при его редактировании
@@ -124,7 +132,7 @@ const removeCodesFromRows = (data: DiagramBuildData): Array<Row> => {
 			rows.forEach(row => {
 				const value = row[accessor];
 
-				row[accessor] = typeof value === 'string' ? getSeparatedLabel(value, SEPARATOR) : value;
+				row[accessor] = typeof value === 'string' ? getSeparatedLabel(value) : value;
 			});
 		}
 	});

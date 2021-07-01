@@ -4,7 +4,7 @@ import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/d
 import {compose} from 'redux';
 import moment from 'moment';
 import type {NumberFormatter, ValueFormatter} from './types';
-import {SEPARATOR} from 'store/widgets/buildData/constants';
+import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
 
 /**
  * logger
@@ -61,8 +61,13 @@ export const getLabelFormatter = (format: LabelFormat = LABEL_FORMATS.TITLE): Va
 			const lastIndex = value.lastIndexOf(SEPARATOR);
 
 			if (lastIndex !== -1) {
-				const title = value.slice(0, lastIndex);
-				const code = value.slice(lastIndex + 1);
+				let title = value.slice(0, lastIndex);
+				let code = value.slice(lastIndex + 1);
+
+				if (title.includes(TITLE_SEPARATOR)) {
+					[title, code] = title.split(TITLE_SEPARATOR, 2);
+				}
+
 				return internalFormatter(title, code);
 			}
 

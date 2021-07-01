@@ -3,7 +3,7 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import Cell from 'Table/components/Cell';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
 import type {Column, ColumnType, ParameterColumn, Row} from 'store/widgets/buildData/types';
-import {COLUMN_TYPES, IGNORE_TABLE_DATA_LIMITS_SETTINGS, SEPARATOR} from 'store/widgets/buildData/constants';
+import {COLUMN_TYPES, IGNORE_TABLE_DATA_LIMITS_SETTINGS} from 'store/widgets/buildData/constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
@@ -27,7 +27,7 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	initState (props: Props): State {
 		const {data} = props;
-		let {columns} = data;
+		const {columns} = data;
 
 		const fixedColumnsCount = columns.findIndex(column => column.type === COLUMN_TYPES.INDICATOR);
 		const idColumn = columns.find(column => column.accessor === ID_ACCESSOR);
@@ -79,13 +79,13 @@ export class TableWidget extends PureComponent<Props, State> {
 				({[accessor]: rowValue = EMPTY_VALUE} = row);
 			}
 
-			let value = type === BREAKDOWN ? header : rowValue;
+			const value = type === BREAKDOWN ? header : rowValue;
 
 			if (value) {
 				let subTitle: string = value;
 
 				if (attribute.type === ATTRIBUTE_TYPES.metaClass) {
-					subTitle = getSeparatedLabel(subTitle, SEPARATOR);
+					subTitle = getSeparatedLabel(subTitle);
 				}
 
 				mixin.title = `${mixin.title}. ${subTitle}`;
@@ -265,7 +265,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		let {components, value} = props;
 
 		if (type === BREAKDOWN && hasUUIDsInLabels(attribute, group) && typeof value === 'string') {
-			value = getSeparatedLabel(value, SEPARATOR);
+			value = getSeparatedLabel(value);
 		}
 
 		if (type === INDICATOR && breakdownLimitExceeded && !breakdownLimitIgnored) {
@@ -291,7 +291,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		} else if (value && hasPercent(attribute, aggregation)) {
 			cellValue = `${value}%`;
 		} else if (isCardObjectColumn(column)) {
-			cellValue = getSeparatedLabel(value, SEPARATOR);
+			cellValue = getSeparatedLabel(value);
 		}
 
 		return <Cell {...props} components={components} fontColor={fontColor} fontStyle={fontStyle} value={cellValue.toString()} />;
@@ -321,7 +321,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		let {column, value} = props;
 
 		if (hasUUIDsInLabels(column.attribute) && typeof value === 'string') {
-			value = getSeparatedLabel(value, SEPARATOR);
+			value = getSeparatedLabel(value);
 		}
 
 		return (

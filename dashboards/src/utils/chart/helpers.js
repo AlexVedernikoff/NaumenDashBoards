@@ -32,8 +32,8 @@ const getLegendSettings = (widget: Chart) => {
  * @returns {boolean}
  */
 const equalLabels = (label1: string, label2: string) => label1?.includes(SEPARATOR) && label2?.includes(SEPARATOR)
-		? label1.split(SEPARATOR)[1] === label2.split(SEPARATOR)[1]
-		: label1 === label2;
+	? label1.split(SEPARATOR)[1] === label2.split(SEPARATOR)[1]
+	: label1 === label2;
 
 /**
  * Возвращает список цветов для значений разбивки

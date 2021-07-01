@@ -5,7 +5,6 @@ import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
-import {SEPARATOR} from 'store/widgets/buildData/constants';
 
 export class CustomBreakdownColorsSettings extends PureComponent<Props> {
 	componentDidMount () {
@@ -58,7 +57,7 @@ export class CustomBreakdownColorsSettings extends PureComponent<Props> {
 		return (
 			<ColorField
 				key={key}
-				label={getSeparatedLabel(label, SEPARATOR)}
+				label={getSeparatedLabel(label)}
 				name={index.toString()}
 				onChange={this.handleChangeColor}
 				value={value}
