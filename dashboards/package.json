@@ -154,7 +154,7 @@
     "testEnvironment": "enzyme",
     "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.jsx?$",
     "testPathIgnorePatterns": [
-      "(/tests/helpers.*|(\\.|/)(test|spec))\\.jsx?$"
+      "/tests/helpers.*\\.jsx?$"
     ]
   },
   "keywords": [

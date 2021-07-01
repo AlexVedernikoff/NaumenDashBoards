@@ -179,6 +179,7 @@ export const sevenDaysFormatter: ValueFormatter = (value: string): string => {
  * Форматтер-оболочка для описания нотацией
  * @param {string} notation - описание нотацией
  * @param {NumberFormatter} addConverter - внутренний форматер
+ * @param {boolean} spacing - добавлять разбивку после нотаций
  * @returns {NumberFormatter} - функция-форматер
  */
 export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, addConverter: NumberFormatter): NumberFormatter => {
@@ -199,6 +200,7 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
 			[divider, additional] = [1e12, 'трлн'];
 			break;
 	}
+
 	return compose(additionalFormat(additional), addConverter, (value) => value / divider);
 };
 
@@ -225,7 +227,9 @@ export const makeFormatterByNumberFormat = (format: NumberAxisFormat): NumberFor
 	}
 
 	if (format.additional) {
-		formatter = compose(additionalFormat(format.additional), formatter);
+		const additional = format.notation ? ` ${format.additional}` : format.additional;
+
+		formatter = compose(additionalFormat(additional), formatter);
 	}
 
 	return formatter;

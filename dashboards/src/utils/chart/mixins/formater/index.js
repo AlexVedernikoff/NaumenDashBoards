@@ -108,7 +108,7 @@ const getCategoryFormatter = (widget: AxisWidget): NumberFormatter | ValueFormat
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @returns {Formatter} - объект с функциями форматерами и параметрами построения
  */
-export const getAxisFormatter = (widget: AxisWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): Formatter => {
+const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): Formatter => {
 	const {dataLabels, legend} = widget;
 	const horizontal = isHorizontalChart(widget.type);
 	const stacked = isStackedChart(widget.type);
@@ -134,3 +134,46 @@ export const getAxisFormatter = (widget: AxisWidget, labels: Array<string> | Arr
 		}
 	};
 };
+
+const getAxisFormatterDebug = (widget: AxisWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): Formatter => {
+	const {clientWidth} = container;
+	const store = {container: {clientWidth}, labels, widget};
+	const baseFormatter = getAxisFormatterBase(widget, labels, container);
+	const {options} = baseFormatter;
+	const storedFormatter = (
+		stored: Array<[string | number, string]>,
+		formatter: (string => string) | (number => string)
+	) =>
+		(value: string | number): string => {
+			// $FlowFixMe - value зависит от того какой будет formatter
+			const result = formatter(value);
+
+			stored.push([value, result]);
+			return result;
+		};
+	const dataLabel = [];
+	const indicator = [];
+	const legend = [];
+	const parameterDefault = [];
+	const parameterOverlapped = [];
+
+	console.info('getAxisFormatterDebug: ', {...store, dataLabel, indicator, legend, options, parameterDefault, parameterOverlapped});
+	return {
+		dataLabel: storedFormatter(dataLabel, baseFormatter.dataLabel),
+		indicator: storedFormatter(indicator, baseFormatter.indicator),
+		legend: storedFormatter(legend, baseFormatter.legend),
+		options: baseFormatter.options,
+		parameter: {
+			default: storedFormatter(parameterDefault, baseFormatter.parameter.default),
+			overlapped: storedFormatter(parameterOverlapped, baseFormatter.parameter.overlapped)
+		}
+	};
+};
+
+let getAxisFormatter = getAxisFormatterBase;
+
+if (process.env.NODE_ENV === 'development') {
+	getAxisFormatter = getAxisFormatterDebug;
+}
+
+export {getAxisFormatter};
