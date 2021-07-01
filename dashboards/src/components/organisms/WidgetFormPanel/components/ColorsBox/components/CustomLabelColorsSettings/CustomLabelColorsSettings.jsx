@@ -33,7 +33,7 @@ export class CustomLabelColorsSettings extends PureComponent<Props, State> {
 		}
 	}
 
-	getOptionLabel = (label: string) => getSeparatedLabel(label, SEPARATOR);
+	getOptionLabel = (label: string) => getSeparatedLabel(label);
 
 	getOptionValue = (label: string) => label.split(SEPARATOR)[1] ?? label;
 
