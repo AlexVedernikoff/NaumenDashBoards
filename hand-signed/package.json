@@ -1,0 +1,113 @@
+{
+  "author": {
+    "email": "welcome@nordclan.com",
+    "name": "Nord Clan",
+    "url": "https://nordclan.com/"
+  },
+  "bugs": {
+    "email": "welcome@nordclan.com",
+    "url": "https://gitsd.naumen.ru/nordclan/nordclan/issues"
+  },
+  "contributors": [],
+  "description": "Embedded application 'HandSigned' for SMP",
+  "dependencies": {
+    "konva": "8.0.4",
+    "react-device-detect": "^1.17.0",
+    "react-konva": "^17.0.2-4",
+    "react-router-dom": "^5.0.1",
+    "react-truncate": "^2.4.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^8.6.0",
+    "axios": "^0.21.1",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
+    "babel-jest": "^23.0.1",
+    "babel-loader": "^7.1.4",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "bestzip": "^2.2.0",
+    "classnames": "^2.2.5",
+    "cross-env": "^5.1.6",
+    "css-loader": "^0.28.11",
+    "deep-freeze": "0.0.1",
+    "enzyme": "^3.3.0",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-flowtype": "^2.49.3",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-react": "^7.9.1",
+    "eslint-plugin-standard": "^3.1.0",
+    "fetch-mock": "^6.4.3",
+    "file-loader": "^1.1.11",
+    "flow-bin": "^0.74.0",
+    "flow-typed": "^2.4.0",
+    "html-webpack-plugin": "^3.2.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^23.1.0",
+    "jest-cli": "^23.1.0",
+    "less": "^3.0.4",
+    "less-loader": "^4.1.0",
+    "mini-css-extract-plugin": "^0.4.0",
+    "my-local-ip": "^1.0.0",
+    "parameters-xml-webpack-plugin": "^1.0.0",
+    "postcss-loader": "^2.1.5",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "^5.2.0",
+    "react-test-renderer": "^16.4.0",
+    "redux": "^4.0.0",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
+    "rimraf": "^3.0.2",
+    "style-loader": "^0.21.0",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "url-loader": "^1.0.1",
+    "webpack": "^4.11.1",
+    "webpack-cli": "^3.0.2",
+    "webpack-dev-server": "^3.1.4"
+  },
+  "homepage": "https://gitsd.naumen.ru/nordclan/nordclan/",
+  "jest": {
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less)$": "identity-obj-proxy"
+    },
+    "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.jsx?$",
+    "testPathIgnorePatterns": [
+      "(/tests/helpers.*|(\\.|/)(test|spec))\\.jsx?$"
+    ]
+  },
+  "keywords": [
+    "naumen",
+    "embedded",
+    "nordclan",
+    "react"
+  ],
+  "license": "ISC",
+  "name": "hand-signed",
+  "repository": {
+    "type": "git",
+    "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"
+  },
+  "scripts": {
+    "build": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
+    "clear": "node npm-scripts/clear.js",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --config webpack/config.js",
+    "flow": "flow",
+    "lint": "./node_modules/.bin/eslint src",
+    "test": "jest",
+    "test:watch": "npm run test -- --watch",
+    "zip": "node npm-scripts/zip.js"
+  },
+  "version": "1.0.0"
+}

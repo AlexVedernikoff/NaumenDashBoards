@@ -1,0 +1,40 @@
+@import "~styles/colors";
+
+:local {
+	.button {
+		align-content: center;
+		align-items: center;
+		background-color: transparent;
+		border-radius: 2px;
+		border: none;
+		color: @color-main;
+		cursor: pointer;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: center;
+		min-height: 30px;
+		min-width: 110px;
+		overflow: hidden;
+		padding: 0 0 0 16px;
+		text-align: center;
+		text-decoration: none;
+		vertical-align: middle;
+
+		&:active:enabled {
+			opacity: .9;
+		}
+
+		&[disabled] {
+			color: @color-second;
+			cursor: not-allowed;
+		}
+	}
+
+	.label {
+		color: inherit;
+		font-size: 1rem;
+		line-height: 1.3rem;
+		padding-left: 10px;
+	}
+}

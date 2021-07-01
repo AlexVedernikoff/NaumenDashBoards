@@ -1,0 +1,51 @@
+{
+	"env": {
+		"browser": true,
+		"es6": true,
+		"jest": true,
+		"node": true
+	},
+	"extends": [
+		"eslint:recommended",
+		"standard",
+		"plugin:react/recommended",
+		"plugin:promise/recommended",
+		"plugin:flowtype/recommended",
+		"plugin:jsdoc/recommended"
+	],
+	"parser": "babel-eslint",
+	"plugins": [
+		"standard",
+		"react",
+		"promise",
+		"flowtype"
+	],
+	"rules": {
+		"curly": 0,
+		"indent": [
+			0,
+			"tab"
+		],
+		"no-tabs": 0,
+		"semi": [
+			2,
+			"always"
+		],
+		"sort-vars": [
+			"error",
+			{
+				"ignoreCase": true
+			}
+		],
+		"jsdoc/newline-after-description": 0,
+		"jsdoc/require-returns-description": 0
+	},
+	"settings": {
+		"react": {
+			"createClass": "createReactClass",
+			"pragma": "React",
+			"version": "detect",
+			"flowVersion": "0.74"
+		}
+	}
+}

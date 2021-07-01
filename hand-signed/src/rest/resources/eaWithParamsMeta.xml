@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<metainfoContainer>
+	<head>
+		<date>2021-06-30T14:21:14.387+05:00</date>
+		<exportMode>partial</exportMode>
+		<version>4.13.1-SNAPSHOT</version>
+	</head>
+	<tags/>
+	<mail-processor-rules/>
+	<style-templates/>
+	<list-templates/>
+	<content-templates/>
+	<user-events>
+		<event seg-detach="true" seg-id="userEvent$FailKonfiguraciiPrilozheniyaRuchnayaPodpis" seg-type="user-events">
+			<enabled>false</enabled>
+			<fqn>
+				<id>root</id>
+			</fqn>
+			<title lang="ru">Файл конфигурации приложения Ручная подпись</title>
+			<uuid>userEvent$FailKonfiguraciiPrilozheniyaRuchnayaPodpis</uuid>
+		</event>
+	</user-events>
+	<event-actions>
+		<action seg-detach="true" seg-id="eventAction$FailKonfiguraciiPrilozheniyaRuchnayaPodpis" seg-type="event_actions">
+			<eventAction seg-detach="false">
+				<script-action>
+					<actionType>ScriptEventAction</actionType>
+					<script><![CDATA[FailKonfiguraciiPrilozheniyaRuchnayaPodpis]]></script>
+				</script-action>
+				<code>eventAction$FailKonfiguraciiPrilozheniyaRuchnayaPodpis</code>
+				<description lang="ru"/>
+				<user-events>
+					<eventType>userEvent</eventType>
+					<event-code>userEvent$FailKonfiguraciiPrilozheniyaRuchnayaPodpis</event-code>
+					<form-code>fc328c97-17a5-fa6a-002d-0000441119db</form-code>
+				</user-events>
+				<fqn>
+					<id>root</id>
+				</fqn>
+				<on>false</on>
+				<slow>false</slow>
+				<title lang="ru">Файл конфигурации приложения Ручная подпись</title>
+				<txType>NEW_TX</txType>
+			</eventAction>
+		</action>
+	</event-actions>
+	<embedded-applications/>
+	<custom-forms>
+		<form seg-detach="true" seg-id="fc328c97-17a5-fa6a-002d-0000441119db" seg-type="custom_forms">
+			<code>fc328c97-17a5-fa6a-002d-0000441119db</code>
+			<parameters>
+				<parameter seg-detach="true" seg-id="signatureAttributeCode" seg-type="form-parameters">
+					<attrs-for-date-time-restriction-script/>
+					<attrs-in-cof-script/>
+					<code>signatureAttributeCode</code>
+					<complexRelation>false</complexRelation>
+					<complexRelationAggrAttrGroups>
+						<entry>
+							<key>
+								<id>team</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>ou</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>employee</id>
+							</key>
+						</entry>
+					</complexRelationAggrAttrGroups>
+					<computable-on-form>false</computable-on-form>
+					<default-by-script>false</default-by-script>
+					<description>&lt;pre fr-original-style="" style="white-space: pre-wrap; overflow-wrap: break-word; overflow: visible;"&gt;Код атрибута типа "Файл", в который будет сохраняться изображение с подписью.&lt;/pre&gt;</description>
+					<is-edit-on-complex-form-only>false</is-edit-on-complex-form-only>
+					<edit-presentaion>
+						<code>stringEdit</code>
+					</edit-presentaion>
+					<editable>true</editable>
+					<is-filtered-by-script>false</is-filtered-by-script>
+					<hiddenAttrCaption>false</hiddenAttrCaption>
+					<is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+					<hideArchived>false</hideArchived>
+					<required>true</required>
+					<title lang="ru">Код атрибута для подписи</title>
+					<type>
+						<code>string</code>
+						<property code="permittedTypes">[]</property>
+						<property code="string">255</property>
+						<property code="inputMaskMode"/>
+						<property code="inputMask"/>
+					</type>
+					<view-presentaion>
+						<code>stringView</code>
+					</view-presentaion>
+				</parameter>
+				<parameter seg-detach="true" seg-id="drawingStartButtonName" seg-type="form-parameters">
+					<attrs-for-date-time-restriction-script/>
+					<attrs-in-cof-script/>
+					<code>drawingStartButtonName</code>
+					<complexRelation>false</complexRelation>
+					<complexRelationAggrAttrGroups>
+						<entry>
+							<key>
+								<id>employee</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>team</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>ou</id>
+							</key>
+						</entry>
+					</complexRelationAggrAttrGroups>
+					<computable-on-form>false</computable-on-form>
+					<default-by-script>false</default-by-script>
+					<default-value>
+						<string>Добавить подпись</string>
+					</default-value>
+					<description>&lt;pre fr-original-style="" style="white-space: pre-wrap; overflow-wrap: break-word; overflow: visible;"&gt;Название кнопки, после нажатия на которую в приложении можно будет нарисовать подпись.&lt;/pre&gt;</description>
+					<is-edit-on-complex-form-only>false</is-edit-on-complex-form-only>
+					<edit-presentaion>
+						<code>stringEdit</code>
+					</edit-presentaion>
+					<editable>true</editable>
+					<is-filtered-by-script>false</is-filtered-by-script>
+					<hiddenAttrCaption>false</hiddenAttrCaption>
+					<is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+					<hideArchived>false</hideArchived>
+					<required>false</required>
+					<title lang="ru">Название кнопки для перехода к рисованию подписи</title>
+					<type>
+						<code>string</code>
+						<property code="permittedTypes">[]</property>
+						<property code="string">255</property>
+						<property code="inputMaskMode"/>
+						<property code="inputMask"/>
+					</type>
+					<view-presentaion>
+						<code>stringView</code>
+					</view-presentaion>
+				</parameter>
+			</parameters>
+		</form>
+	</custom-forms>
+	<advimport/>
+	<script-modules/>
+	<scripts>
+		<script seg-detach="true" seg-id="FailKonfiguraciiPrilozheniyaRuchnayaPodpis" seg-type="scripts">
+			<code>FailKonfiguraciiPrilozheniyaRuchnayaPodpis</code>
+			<title lang="ru">FailKonfiguraciiPrilozheniyaRuchnayaPodpis</title>
+			<mimeType>application/x-groovy</mimeType>
+			<scriptBody><![CDATA[return true]]></scriptBody>
+			<defaultCategories/>
+			<subjectDependencies/>
+		</script>
+	</scripts>
+	<customJSElements/>
+	<fast-link-settings/>
+	<objects/>
+	<transfer-values/>
+	<structured-objects-views/>
+	<libraries/>
+</metainfoContainer>

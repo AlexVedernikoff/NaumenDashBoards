@@ -1,0 +1,15 @@
+// @flow
+import {SignatureAction} from 'store/signature/types';
+import type {ThunkAction} from 'store/types';
+
+export type ConnectedProps = {
+	data: Array<Array<number>>
+};
+
+export type ConnectedFunctions = {
+	addSignature: () => SignatureAction,
+	sendSignature: () => ThunkAction
+};
+
+export type Props = ConnectedProps & ConnectedFunctions;
+
