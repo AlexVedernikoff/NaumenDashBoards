@@ -21,6 +21,8 @@ const Context: React$Context<Parameter> = createContext({
 	group: getDefaultSystemGroup()
 });
 
+Context.displayName = 'PARAMETER_FIELDSET_CONTEXT';
+
 export class ParameterFieldset extends PureComponent<Props> {
 	static defaultProps = {
 		disabled: false,

@@ -4,7 +4,7 @@ import React from 'react';
 import {TYPE_CONTEXT} from 'components/organisms/WidgetFormPanel/HOCs/withType/constants';
 
 export const withType = <Config: Props & InjectedProps>(Component: React$ComponentType<Config>): React$ComponentType<Config> => {
-	return class WrappedComponent extends React.Component<Props> {
+	return class WithType extends React.Component<Props> {
 		renderComponent = (context: Context) => <Component {...this.props} type={context} />;
 
 		render () {

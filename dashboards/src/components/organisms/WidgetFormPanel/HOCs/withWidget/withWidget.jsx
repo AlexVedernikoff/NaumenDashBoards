@@ -4,7 +4,7 @@ import React from 'react';
 import {WIDGET_CONTEXT} from './constants';
 
 export const withWidget = <Props: {} & InjectedProps>(Component: React$ComponentType<Props>): React$ComponentType<Props> => {
-	return class WrappedComponent extends React.Component<Props> {
+	return class WithWidget extends React.Component<Props> {
 		render () {
 			return (
 				<WIDGET_CONTEXT.Consumer>

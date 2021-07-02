@@ -28,6 +28,8 @@ const Context: React$Context<Indicator> = createContext({
 	attribute: null
 });
 
+Context.displayName = 'INDICATOR_FIELDSET_CONTEXT';
+
 export class IndicatorFieldset extends PureComponent<Props, State> {
 	static defaultProps = {
 		usesNotApplicableAggregation: false

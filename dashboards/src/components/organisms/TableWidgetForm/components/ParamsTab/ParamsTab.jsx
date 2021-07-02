@@ -29,6 +29,8 @@ import WidgetSelectBox from 'WidgetFormPanel/components/WidgetSelectBox';
 
 const CALC_TOTAL_CONTEXT = createContext(false);
 
+CALC_TOTAL_CONTEXT.displayName = 'CALC_TOTAL_CONTEXT';
+
 export class ParamsTab extends PureComponent<Props> {
 	mainIndex: number = 0;
 

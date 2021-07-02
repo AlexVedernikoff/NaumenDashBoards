@@ -6,7 +6,7 @@ import React, {createContext, PureComponent} from 'react';
 export const OR_CONDITION_OPTIONS_CONTEXT = createContext<Array<Option>>([]);
 
 export const withOrConditionOptions = <Props: {} & InjectedProps>(Component: React$ComponentType<Props>): React$ComponentType<Props> => {
-	return class WrappedComponent extends PureComponent<Props> {
+	return class WithOrConditionOptions extends PureComponent<Props> {
 		render (): React$Node {
 			return (
 				<OR_CONDITION_OPTIONS_CONTEXT.Consumer>

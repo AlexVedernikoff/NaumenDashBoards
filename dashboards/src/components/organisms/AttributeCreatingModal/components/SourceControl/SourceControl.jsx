@@ -19,6 +19,8 @@ import TreeSelect from 'components/molecules/TreeSelect';
 
 const AGGREGATION_CONTEXT = createContext();
 
+AGGREGATION_CONTEXT.displayName = 'AGGREGATION_CONTEXT';
+
 export class SourceControl extends PureComponent<Props> {
 	getComponents = memoize(() => ({
 		MenuContainer: this.renderMenuContainer,

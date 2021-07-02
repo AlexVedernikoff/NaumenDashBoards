@@ -6,6 +6,8 @@ import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
 const OR_CONDITION_TYPE_CONTEXT = createContext('');
 
+OR_CONDITION_TYPE_CONTEXT.displayName = 'OR_CONDITION_TYPE_CONTEXT';
+
 const SCHEMA = createSchema((condition: OrCondition) => {
 	const {TITLE_CONTAINS, TITLE_NOT_CONTAINS} = OR_CONDITION_TYPES;
 

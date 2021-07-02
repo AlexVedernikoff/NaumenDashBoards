@@ -4,7 +4,7 @@ import type {Context} from './types';
 import React from 'react';
 
 export const withAttributeFieldset = <Config: {} & Context>(Component: React$ComponentType<Config>): React$ComponentType<Config> => {
-	return class WrappedComponent extends React.Component<Config> {
+	return class WithAttributeFieldset extends React.Component<Config> {
 		renderComponent = (context: Context) => {
 			return <Component {...this.props} {...context} />;
 		};

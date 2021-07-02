@@ -7,6 +7,8 @@ const ERRORS_CONTEXT = createContext<ErrorsContext>({
 	setErrorFocusRef: () => undefined
 });
 
+ERRORS_CONTEXT.displayName = 'ERRORS_CONTEXT';
+
 export {
 	ERRORS_CONTEXT
 };
