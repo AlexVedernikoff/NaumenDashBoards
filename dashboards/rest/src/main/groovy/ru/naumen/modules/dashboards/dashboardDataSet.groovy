@@ -19,6 +19,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
+import static DeserializationHelper.mapper
 import com.amazonaws.util.json.Jackson
 
 import ru.naumen.core.server.script.api.injection.InjectApi
@@ -613,15 +614,17 @@ class DashboardDataSetService
                                                  Sorting tableSorting = null)
     {
         def sorting
-        def uglyRequestData = widgetSettings.data
+        //формируем копию настроек, чтобы не изменять источник
+        def tempWidgetSettings = mapper.convertValue(widgetSettings, widgetSettings.getClass())
+        def uglyRequestData = tempWidgetSettings.data
         Boolean isDiagramTypeTable = diagramType == DiagramType.TABLE
-        Boolean hasTableNotOnlyBaseSources = (widgetSettings?.data*.source.value.value as Set).size() > 1
+        Boolean hasTableNotOnlyBaseSources = (tempWidgetSettings?.data*.source.value.value as Set).size() > 1
         Boolean isDiagramTypeNotCount = !(diagramType in [DiagramType.CountTypes, DiagramType.RoundTypes])
         Boolean isDiagramTypeCount = diagramType in DiagramType.CountTypes
         def commonBreakdown
         if(!isDiagramTypeCount && !isDiagramTypeTable)
         {
-            sorting = widgetSettings.sorting
+            sorting = tempWidgetSettings.sorting
         }
         def intermediateData = [:]
         uglyRequestData.each { data ->
@@ -864,12 +867,12 @@ class DashboardDataSetService
                                                   requisite: requisite]]
         }
         Boolean manySources = isDiagramTypeTable &&
-                              widgetSettings?.data*.sourceForCompute?.count { !it } > 1 &&
+                              tempWidgetSettings?.data*.sourceForCompute?.count { !it } > 1 &&
                               hasTableNotOnlyBaseSources
         def prevData = intermediateData
-        if(manySources)
+        if(manySources || (hasTableNotOnlyBaseSources && computationInTableRequest))
         {
-            Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(widgetSettings)
+            Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(tempWidgetSettings)
             intermediateData = updateIntermediateDataToOneSource(intermediateData, computationInTableRequest, countOfCustomsInFirstSource)
         }
         if(computationInTableRequest)
@@ -2707,6 +2710,14 @@ class DashboardDataSetService
                             }
                         }
                         return value
+                    case [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE]:
+                        if(!value)
+                        {
+                            return getNullValue(diagramType, fromBreakdown)
+                        }
+                        def (tempValue, tempUuid) = diagramType == DiagramType.TABLE ? [value, uuid]: LinksAttributeMarshaller.unmarshal(value)
+                        def code = utils.get(tempUuid).code
+                        return LinksAttributeMarshaller.marshalCatalog(tempValue, code, tempUuid)
                     default:
                         //прийти в качестве значения может, как UUID, так и просто id
                         if (parameter.attribute?.attrChains()?.last()?.code == 'UUID' && !fromNA)
@@ -3570,7 +3581,7 @@ class DashboardDataSetService
      */
     Integer countDistinct(def attributeValue, String classFqn)
     {
-        Attribute attribute = attributeValue.attribute
+        Attribute attribute = attributeValue.attribute.deepClone()
         String attributeType = attribute.type
         if(Attribute.getAttributeType(attribute) in AttributeType.DATE_TYPES)
         {
@@ -3973,19 +3984,22 @@ class DashboardDataSetService
      * @param requestContent - тело запроса
      * @return список названий атрибутов
      */
-    private List<Map> getAttributeNamesAndValuesFromRequest(def requestContent)
+    private List<Map> getAttributeNamesAndValuesFromRequest(def widgetSettings)
     {
-        def aggregations = getSpecificAggregationsList(requestContent)
+        def tempWidgetSettings = mapper.convertValue(widgetSettings, widgetSettings.getClass())
+        def aggregations = getSpecificAggregationsList(widgetSettings)
 
-        def parameterAttributes = requestContent.data.collectMany { value ->
+        def parameterAttributes = tempWidgetSettings.data.collectMany { value ->
             if (!value.sourceForCompute)
             {
                 value.parameters.collect { parameter ->
                     def name = parameter?.group?.way == Way.CUSTOM
                         ? parameter?.group?.data?.name
                         : parameter?.attribute?.title
+                    def group = parameter?.group
+                    group = updateCustomGroupInfo(group)
                     return [name : name, attribute : parameter?.attribute,
-                            type : ColumnType.PARAMETER,group : parameter?.group]
+                            type : ColumnType.PARAMETER,group : group]
                 }
             }
             else
@@ -3994,15 +4008,17 @@ class DashboardDataSetService
             }
         }
 
-        def breakdownAttributes = requestContent.data.collectMany { value ->
+        def breakdownAttributes = tempWidgetSettings.data.collectMany { value ->
             if (!value.sourceForCompute)
             {
                 value.breakdown.collect { breakdown ->
                     def name = breakdown?.group?.way == Way.CUSTOM
                         ? breakdown?.group?.data?.name
                         : breakdown?.attribute?.title
+                    def group = breakdown?.group
+                    group = updateCustomGroupInfo(group)
                     return [name : name, attribute : breakdown?.attribute,
-                            type : ColumnType.BREAKDOWN, group : breakdown?.group]
+                            type : ColumnType.BREAKDOWN, group : group]
                 }
             }
             else
@@ -4012,6 +4028,20 @@ class DashboardDataSetService
         }
 
         return (aggregations + parameterAttributes + breakdownAttributes).grep()
+    }
+
+    /**
+     * Метод обновления настроек для кастомных группировок
+     * @param group - группировка
+     * @return - кастомная группировка в корректном виде
+     */
+    Group updateCustomGroupInfo(Group group)
+    {
+        if(group?.way == Way.CUSTOM)
+        {
+            group.data = group.data.id
+        }
+        return group
     }
 
     /**
