@@ -1318,6 +1318,11 @@ class LinksAttributeMarshaller
     static String valueDelimiter = '.'
 
     /**
+     * делитель для кода
+     */
+    static String codeDelimiter = '◀️▶️'
+
+    /**
      * Метод получения значения для пользователя
      * @param value - название объекта типа boLinks или backBOLinks
      * @param uuid - uuid этого объекта
@@ -1326,6 +1331,18 @@ class LinksAttributeMarshaller
     static String marshal(String value, String uuid)
     {
         return "${value}${valueDelimiter}${uuid}"
+    }
+
+    /**
+     * Метод формирования значения для атрибута типа ЭС и НЭС
+     * @param value - значение (название)
+     * @param code - код
+     * @param uuid - идентификатор
+     * @return название_ codeDelimiter_ код_ valueDelimiter_ уникальный идентификатор
+     */
+    static String marshalCatalog(String value, String code, String uuid)
+    {
+        return "${value}${codeDelimiter}${code}${delimiter}${uuid}"
     }
 
     /**
