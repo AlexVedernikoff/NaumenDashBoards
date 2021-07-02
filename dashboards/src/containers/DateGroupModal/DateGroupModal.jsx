@@ -19,6 +19,8 @@ import SystemDateGroupFormat from 'GroupModal/components/SystemDateGroupFormat';
 
 const FORMAT_CONTEXT = createContext('');
 
+FORMAT_CONTEXT.displayName = 'FORMAT_CONTEXT';
+
 export class DateGroupModal extends Component<Props, State> {
 	state = {
 		format: ''

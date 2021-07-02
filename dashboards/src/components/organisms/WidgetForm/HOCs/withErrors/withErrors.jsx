@@ -4,7 +4,7 @@ import type {ErrorsContext, InjectedProps} from './types';
 import React from 'react';
 
 export const withErrors = <Props: {} & InjectedProps>(Component: React$ComponentType<Props>): React$ComponentType<Props> => {
-	return class WrappedComponent extends React.Component<Props> {
+	return class WithErrors extends React.Component<Props> {
 		renderComponent = ({errors, setErrorFocusRef}: ErrorsContext) => (
 			<Component{...this.props} errors={errors} onSetErrorFocusRef={setErrorFocusRef} />
 		);

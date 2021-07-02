@@ -30,6 +30,8 @@ const Context: React$Context<FieldContext> = createContext({
 	source: null
 });
 
+Context.displayName = 'BREAKDOWN_FIELDSET_CONTEXT';
+
 export class BreakdownFieldset extends Component<Props> {
 	mainIndex = 0;
 

@@ -29,6 +29,8 @@ const DATA_SET_TYPE_CONTEXT = createContext({
 	type: ''
 });
 
+DATA_SET_TYPE_CONTEXT.displayName = 'DATA_SET_TYPE_CONTEXT';
+
 export class ParamsTab extends PureComponent<Props> {
 	getDataSetSettingsComponents = memoize(() => ({
 		IndicatorsFormBox: this.renderIndicatorFormBox

@@ -6,7 +6,7 @@ import React, {createContext, PureComponent} from 'react';
 export const COMPONENTS_CONTEXT = createContext<Components>({});
 
 export const withComponents = <Props: {} & InjectedProps>(Component: React$ComponentType<Props>): React$ComponentType<Props> => {
-	return class WrappedComponent extends PureComponent<Props> {
+	return class WithComponents extends PureComponent<Props> {
 		render (): React$Node {
 			return (
 				<COMPONENTS_CONTEXT.Consumer>
