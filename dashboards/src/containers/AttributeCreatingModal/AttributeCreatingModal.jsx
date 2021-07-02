@@ -14,6 +14,8 @@ import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
 export class AttributeCreatingModalContainer extends PureComponent<Props> {
 	getOptions = memoize((values, attributes): Tree => {
 		const options = [];
+		const mainIndex = values.data.findIndex(dataSet => !dataSet.sourceForCompute);
+		const parentClassFqn = values.data[mainIndex]?.source.value.value ?? null;
 
 		values.data.forEach(dataSet => {
 			const {dataKey, source} = dataSet;
@@ -27,7 +29,7 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 					children,
 					dataKey,
 					hasChildren: true,
-					source: sourceValue
+					source: dataSet.sourceForCompute ? {...sourceValue, parentClassFqn} : sourceValue
 				});
 			}
 		});
@@ -48,7 +50,7 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 	handleFetch = (node: Node) => {
 		const {fetchAttributes} = this.props;
 
-		fetchAttributes(node.value.value);
+		fetchAttributes(node.value.value, node.value.parentClassFqn);
 	};
 
 	render () {
