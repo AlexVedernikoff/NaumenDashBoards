@@ -95,7 +95,7 @@ export class ControlPanel extends PureComponent<Props, State> {
 		const {DropdownMenu} = this.props.components;
 
 		if (showSubmenu) {
-			return <DropdownMenu>{this.renderRemoveMenuItem()}</DropdownMenu>;
+			return <DropdownMenu onToggle={this.handleToggleSubMenu}>{this.renderRemoveMenuItem()}</DropdownMenu>;
 		}
 
 		return null;
@@ -178,10 +178,15 @@ export class ControlPanel extends PureComponent<Props, State> {
 
 	render () {
 		const {className, components} = this.props;
+		const {showSubmenu} = this.state;
 		const {Container} = components;
+		const CN = cn({
+			[styles.panel]: true,
+			[styles.visible]: showSubmenu
+		}, className);
 
 		return (
-			<Container className={cn(styles.panel, className)} onClick={this.handleClick}>
+			<Container className={CN} onClick={this.handleClick}>
 				{this.renderChangeDisplayModeButton()}
 				{this.renderEditButton()}
 				{this.renderFilterOnWidget()}
