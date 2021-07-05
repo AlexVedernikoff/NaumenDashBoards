@@ -52,11 +52,13 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Numb
  */
 const getDataFormatter = (widget: AxisWidget, format: ?NumberAxisFormat, checkShowEmptyData?: boolean = false): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
-	const {indicators, showEmptyData} = dataSet;
+	const {breakdown, indicators, parameters, showEmptyData} = dataSet;
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
 	const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
 	const usesPercent = hasPercent(indicatorAttribute, aggregation);
-	const showZero = checkShowEmptyData && showEmptyData;
+	const {CUSTOM} = GROUP_WAYS;
+	const hasCustomGroup = parameters[0].group.way === CUSTOM || breakdown?.[0].group.way === CUSTOM;
+	const showZero = checkShowEmptyData && hasCustomGroup && showEmptyData;
 	let formatter = null;
 
 	if (usesMSInterval) {
@@ -76,7 +78,7 @@ const getDataFormatter = (widget: AxisWidget, format: ?NumberAxisFormat, checkSh
 
 		formatter = checkInfinity(formatter);
 
-		if (showZero) {
+		if (!showZero) {
 			formatter = checkZero(formatter);
 		}
 	}
