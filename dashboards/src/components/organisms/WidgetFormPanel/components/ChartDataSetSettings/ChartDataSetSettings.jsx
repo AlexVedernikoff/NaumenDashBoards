@@ -18,6 +18,7 @@ import styles from './styles.less';
 export class ChartDataSetSettings extends PureComponent<Props> {
 	static defaultProps = {
 		components: {
+			BreakdownFieldset,
 			IndicatorsFormBox: FormBox
 		}
 	};
@@ -65,12 +66,12 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 	};
 
 	renderBreakdownFieldSet = () => {
-		const {index, requiredBreakdown, value} = this.props;
+		const {components, index, requiredBreakdown, value} = this.props;
 		const {breakdown, dataKey, indicators} = value;
 		const {attribute} = indicators[0];
 
 		return (
-			<BreakdownFieldset
+			<components.BreakdownFieldset
 				dataKey={dataKey}
 				index={index}
 				indicator={attribute}
