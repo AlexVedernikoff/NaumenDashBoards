@@ -2716,7 +2716,7 @@ class DashboardDataSetService
                             return getNullValue(diagramType, fromBreakdown)
                         }
                         def (tempValue, tempUuid) = diagramType == DiagramType.TABLE ? [value, uuid]: LinksAttributeMarshaller.unmarshal(value)
-                        def code = utils.get(tempUuid).code
+                        def code = api.utils.get(tempUuid).code
                         return LinksAttributeMarshaller.marshalCatalog(tempValue, code, tempUuid)
                     default:
                         //прийти в качестве значения может, как UUID, так и просто id
