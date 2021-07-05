@@ -684,6 +684,10 @@ class DashboardUtils
                     oldFormatWidget?.indicator?.name = null
                     oldFormatWidget?.parameter?.name = null
                 }
+                if(widgetCurrentClazz == SpeedometerCurrentAndNew && !oldFormatWidget.navigation)
+                {
+                    oldFormatWidget.navigation = new Navigation()
+                }
                 return oldFormatWidget //здесь формат был стабилен, кроме поле data которе изменили выше
             case [SummaryZero, SummaryPrev, SummaryCurrentAndNew]:
                 return new SummaryCurrentAndNew(
