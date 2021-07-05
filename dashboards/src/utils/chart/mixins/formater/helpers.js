@@ -165,19 +165,20 @@ export const splitFormatter = (split: boolean, splitter: string = ' ') => {
 
 /**
  * Форматтер для группировки SEVEN_DAYS
- * @param {string} value - значение
+ * @param {string | number} value - значение
  * @returns {string} - преобразованое значение для требуемого формата
  */
-export const sevenDaysFormatter: ValueFormatter = (value: string): string => {
-	const dates = value.split('-');
+export const sevenDaysFormatter: ValueFormatter = (value?: string | number): string => {
+	const dates = String(value).split('-');
 	const startDate = moment(dates[0], 'DD.MM.YY');
 	const endDate = moment(dates[1], 'DD.MM.YY');
+	let period = '';
 
 	if (startDate.isValid() && endDate.isValid()) {
-		return `${startDate.format('DD MMMM')} - ${endDate.format('DD MMMM')}`;
+		period = `${startDate.format('DD MMMM')} - ${endDate.format('DD MMMM')}`;
 	}
 
-	return value;
+	return period;
 };
 
 /**
