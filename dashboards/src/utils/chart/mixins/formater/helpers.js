@@ -104,8 +104,8 @@ export const checkZero = (successFormatter: NumberFormatter): NumberFormatter =>
  * @returns {Function} - функция-форматер, возвращаюшая переданное значение, если значение не строка, иначе результат вызова successFormatter
  * в другом случае
  */
-export const checkString = (successFormatter: ValueFormatter) => (value: string | number): string => {
-	const stringValue = typeof value === 'string' ? value : value.toString();
+export const checkString = (successFormatter: ValueFormatter) => (value?: string | number): string => {
+	const stringValue = typeof value === 'string' ? value : value?.toString() ?? '';
 	return successFormatter(stringValue);
 };
 
