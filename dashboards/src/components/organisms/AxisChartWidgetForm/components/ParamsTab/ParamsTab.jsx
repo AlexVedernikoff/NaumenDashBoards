@@ -1,4 +1,6 @@
 // @flow
+import type {Breakdown, Parameter} from 'store/widgetForms/types';
+import type {BreakdownFieldsetProps, Components} from 'WidgetFormPanel/components/ChartDataSetSettings/types';
 import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet} from 'store/widgetForms/axisChartForm/types';
 import DataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
@@ -9,10 +11,10 @@ import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {getDefaultFormatForAttribute} from 'store/widgets/data/helpers';
 import {getSortValue} from './helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
+import memoize from 'memoize-one';
 import NavigationBox from 'containers/NavigationBox/NavigationBox';
-import type {Parameter} from 'store/widgetForms/types';
+import type {OnChangeBreakdown, Props} from './types';
 import ParametersDataBox from 'WidgetFormPanel/components/ParametersDataBox';
-import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
@@ -22,6 +24,26 @@ import WidgetSelectBox from 'WidgetFormPanel/components/WidgetSelectBox';
 import withType from 'WidgetFormPanel/HOCs/withType';
 
 export class ParamsTab extends PureComponent<Props> {
+	getDataSetSettingsComponents = memoize((): Components => ({
+		...DataSetSettings.defaultProps.components,
+		BreakdownFieldset: this.renderBreakdownFieldset
+	}));
+
+	breakdownChangeDecorator = (onChangeBreakdown: OnChangeBreakdown) => (breakdown: Breakdown) => {
+		const {onChange} = this.props;
+		const breakdownItem = breakdown?.[0] ?? null;
+		let format = null;
+
+		if (breakdownItem) {
+			const {attribute, group} = breakdownItem;
+
+			format = getDefaultFormatForAttribute(attribute, group);
+		}
+
+		onChange(DIAGRAM_FIELDS.breakdownFormat, format);
+		onChangeBreakdown(breakdown);
+	};
+
 	handleAddDataSet = () => {
 		const {onChange, values} = this.props;
 
@@ -72,6 +94,13 @@ export class ParamsTab extends PureComponent<Props> {
 		return parameters[0].group.way === CUSTOM || breakdown?.[0].group.way === CUSTOM;
 	};
 
+	renderBreakdownFieldset = (props: BreakdownFieldsetProps) => (
+		<DataSetSettings.defaultProps.components.BreakdownFieldset
+			{...props}
+			onChange={this.breakdownChangeDecorator(props.onChange)}
+		/>
+	);
+
 	renderDataSetSettings = (dataSet: DataSet, index: number) => {
 		const {type} = this.props;
 
@@ -82,6 +111,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 			return (
 				<DataSetSettings
+					components={this.getDataSetSettingsComponents()}
 					index={index}
 					key={dataSet.dataKey}
 					onChange={this.handleChangeDataSet}

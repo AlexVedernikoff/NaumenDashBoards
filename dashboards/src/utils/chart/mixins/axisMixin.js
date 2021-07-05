@@ -82,7 +82,7 @@ const axisMixin = (widget: AxisWidget, data: DiagramBuildData, container: HTMLDi
 				y: {
 					formatter: formatter.indicator,
 					title: {
-						formatter: stacked ? formatter.legend : formatter.parameter.default
+						formatter: formatter.legend
 					}
 				}
 			},

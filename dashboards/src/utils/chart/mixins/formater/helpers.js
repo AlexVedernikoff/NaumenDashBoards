@@ -184,7 +184,6 @@ export const sevenDaysFormatter: ValueFormatter = (value: string): string => {
  * Форматтер-оболочка для описания нотацией
  * @param {string} notation - описание нотацией
  * @param {NumberFormatter} addConverter - внутренний форматер
- * @param {boolean} spacing - добавлять разбивку после нотаций
  * @returns {NumberFormatter} - функция-форматер
  */
 export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, addConverter: NumberFormatter): NumberFormatter => {
