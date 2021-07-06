@@ -1823,6 +1823,7 @@ class DashboardDataSetService
                     }
                     else
                     {
+                        Date minDate
                         if(attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
                         {
                             def tempAttr = attribute.deepClone()
@@ -1830,7 +1831,7 @@ class DashboardDataSetService
                             minDate = DashboardUtils.getMinDateDynamic(tempAttr,source)
                         }else
                         {
-                            minDate = DashboardUtils.getMinDate(attribute.code.attrChains().join('.'), attribute.sourceCode)
+                            minDate = DashboardUtils.getMinDate(attribute.attrChains().code.join('.'), attribute.sourceCode)
                         }
 
                         start = new Date(minDate.time).clearTime()
