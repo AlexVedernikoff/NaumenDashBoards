@@ -493,9 +493,11 @@ class DashboardDataSetService
             {
                 //добавляем привязку к этому источнику - атрибуту
                 return groups?.collect { group ->
-                    def attr = group.attribute.deepClone()
-                    attr.code = "${it?.source?.classFqn}.${attr.code}"
-                    group.attribute = attr
+                    def highLevelAttr = new Attribute(code: it?.source?.classFqn, sourceCode: mainSource.classFqn,
+                                                      type: 'object',
+                                                      title: group.attribute.title,
+                                                      ref: group.attribute)
+                    group.attribute = highLevelAttr
                     return group
                 }
             }
