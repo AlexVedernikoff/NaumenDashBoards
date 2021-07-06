@@ -5,9 +5,8 @@ import {BUILD_DATA_EVENTS} from './constants';
 import {createContextName, exportSheet} from 'utils/export';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
 import {editWidgetChunkData} from 'store/widgets/data/actions';
-import {getWidgetFilterOptionsDescriptors} from './helpers';
+import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
 import {LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
-import {removeCodesFromRows} from 'store/widgets/buildData/helpers';
 
 /**
  * Получаем данные для таблицы
@@ -84,7 +83,7 @@ const exportTableToXLSX = (widget: TableWidget, rowCount: number = 1e4): ThunkAc
 	const contextName = await createContextName();
 	const name = `${widget.name}_${contextName}`;
 
-	return exportSheet(name, {...data, data: removeCodesFromRows(data)});
+	return exportSheet(name, removeCodesFromTableData(data));
 };
 
 /**

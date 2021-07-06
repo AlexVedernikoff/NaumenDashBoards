@@ -1,10 +1,7 @@
 // @flow
 import type {AttributeColumn, BuildDataState, DataSetDescriptorRelation, DiagramBuildData} from './types';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {COLUMN_TYPES, SEPARATOR, TITLE_SEPARATOR} from './constants';
-import {deepClone} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import type {Row} from 'store/widgets/buildData/types';
 import type {SourceData, Widget} from 'store/widgets/data/types';
 
 /**
@@ -117,27 +114,35 @@ const isCardObjectColumn = (column: AttributeColumn): boolean => {
  * Очищает коды из меток данных. Платформа для не сгруппированных значений возвращает:
  * <значение индикатора>#<код для построения карточки объекта>.
  * Для показа надо оставить только <значение индикатора>
- * @param {DiagramBuildData} data - данные для очистки
- * @returns {Array<Row>} - значения с очищенынми для пользователя данными
+ * @param {DiagramBuildData} tableData - данные для очистки
+ * @returns {DiagramBuildData} - данные без кодов
  */
-const removeCodesFromRows = (data: DiagramBuildData): Array<Row> => {
-	const {columns, data: originalRows} = data;
-	const rows = deepClone(originalRows);
+const removeCodesFromTableData = (tableData: DiagramBuildData): DiagramBuildData => {
+	let {data} = tableData;
 
-	columns.forEach(column => {
-		const {accessor, attribute, type} = column;
-		const isMetaClassParameterColumn = type === COLUMN_TYPES.PARAMETER && attribute.type === ATTRIBUTE_TYPES.metaClass;
+	const hasSeparator = value => typeof value === 'string' && value.includes(SEPARATOR);
 
-		if (isMetaClassParameterColumn || isCardObjectColumn(column)) {
-			rows.forEach(row => {
-				const value = row[accessor];
+	const removeCodeFromColumn = column => {
+		const {accessor, columns, header} = column;
+		const newHeader = hasSeparator(header) ? getSeparatedLabel(header) : header;
+		const newColumns = columns?.map(removeCodeFromColumn);
 
-				row[accessor] = typeof value === 'string' ? getSeparatedLabel(value) : value;
-			});
-		}
-	});
+		data = data.map(row => hasSeparator(row[accessor]) ? {...row, [accessor]: getSeparatedLabel(row[accessor])} : row);
 
-	return rows;
+		return {
+			...column,
+			columns: newColumns,
+			header: newHeader
+		};
+	};
+
+	const columns = tableData.columns.map(removeCodeFromColumn);
+
+	return {
+		...tableData,
+		columns,
+		data
+	};
 };
 
 export {
@@ -145,6 +150,6 @@ export {
 	getWidgetFilterOptionsDescriptors,
 	isCardObjectColumn,
 	isIndicatorColumn,
-	removeCodesFromRows,
+	removeCodesFromTableData,
 	updateWidgetData
 };
