@@ -30,6 +30,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 export class WidgetsGrid extends Component<Props, State> {
 	state = {
 		contextMenu: null,
+		gridMounted: false,
 		lastWebLGLayouts: null,
 		width: null
 	};
@@ -70,6 +71,8 @@ export class WidgetsGrid extends Component<Props, State> {
 
 			this.setState({lastWebLGLayouts: lg});
 		}
+
+		this.setWidthByContainer();
 	}
 
 	componentDidUpdate (prevProps: Props) {
@@ -102,31 +105,24 @@ export class WidgetsGrid extends Component<Props, State> {
 	handleItemClick = (e) => e.stopPropagation();
 
 	handleLayoutChange = debounce((layout: Layout, layouts: Layouts) => {
-			const {changeLayouts, layoutMode} = this.props;
-			const {lastWebLGLayouts} = this.state;
-			const {lg, sm} = layouts;
+		const {changeLayouts, layoutMode} = this.props;
+		const {lastWebLGLayouts} = this.state;
+		const {lg, sm} = layouts;
 
-			if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
-				layouts.sm = generateWebSMLayout(lg, sm);
-				this.setState({lastWebLGLayouts: lg});
-			}
+		if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
+			layouts.sm = generateWebSMLayout(lg, sm);
+			this.setState({lastWebLGLayouts: lg});
+		}
 
 		changeLayouts({
 			layoutMode,
-				layouts
-			});
+			layouts
+		});
 	}, 1000);
 
 	handleResize = () => {
-		const {current} = this.gridContainerRef;
-
-		if (current) {
-			const {paddingLeft, paddingRight} = getComputedStyle(current);
-			const width: number = Math.round(current.offsetWidth - parseFloat(paddingLeft) - parseFloat(paddingRight));
-
-			this.setState({width});
-			dashboardResizer.resize();
-		}
+		dashboardResizer.resize(() => this.setState(() => ({gridMounted: true})));
+		this.setWidthByContainer();
 	};
 
 	hideContextMenu = () => this.setState({contextMenu: null});
@@ -139,7 +135,7 @@ export class WidgetsGrid extends Component<Props, State> {
 
 	onContextMenu = (e: MouseEvent) => {
 		const {hasCreateNewWidget} = this.props;
-		let {clientX, clientY, target} = e;
+		const {clientX, clientY, target} = e;
 
 		if (hasCreateNewWidget && this.gridContainerRef?.current) {
 			const gridElement = this.gridContainerRef?.current;
@@ -158,6 +154,17 @@ export class WidgetsGrid extends Component<Props, State> {
 
 				e.preventDefault();
 			}
+		}
+	};
+
+	setWidthByContainer = () => {
+		const {current} = this.gridContainerRef;
+
+		if (current) {
+			const {paddingLeft, paddingRight} = getComputedStyle(current);
+			const width: number = Math.round(current.offsetWidth - parseFloat(paddingLeft) - parseFloat(paddingRight));
+
+			this.setState(() => ({width}));
 		}
 	};
 
@@ -212,21 +219,23 @@ export class WidgetsGrid extends Component<Props, State> {
 			const layoutWidgets = getLayoutWidgets(widgets, layoutMode);
 
 			return (
-				<Grid
-					innerRef={gridRef}
-					isDraggable={isEditable}
-					isResizable={isEditable}
-					layouts={layouts}
-					onDrag={this.handleDrag}
-					onDragStop={this.handleDragStop}
-					onLayoutChange={this.handleLayoutChange}
-					ref={this.dashGrid}
-					resizeHandles={GRID_PROPS.resizeHandles}
-					width={containerWidth}
-					{...GRID_PROPS[layoutMode]}
-				>
-					{layoutWidgets.map(this.renderGridItem)}
-				</Grid>
+				<ResizeDetector forwardedRefKey="innerRef" onResize={this.handleResize}>
+					<Grid
+						innerRef={gridRef}
+						isDraggable={isEditable}
+						isResizable={isEditable}
+						layouts={layouts}
+						onDrag={this.handleDrag}
+						onDragStop={this.handleDragStop}
+						onLayoutChange={this.handleLayoutChange}
+						ref={this.dashGrid}
+						resizeHandles={GRID_PROPS.resizeHandles}
+						width={containerWidth}
+						{...GRID_PROPS[layoutMode]}
+					>
+						{layoutWidgets.map(this.renderGridItem)}
+					</Grid>
+				</ResizeDetector>
 			);
 		}
 
@@ -235,7 +244,8 @@ export class WidgetsGrid extends Component<Props, State> {
 
 	renderGridItem = (widget: AnyWidget | NewWidget) => {
 		const {focusedWidget, selectedWidget} = this.props;
-		const focused = widget.id === focusedWidget;
+		const {gridMounted} = this.state;
+		const focused = gridMounted && widget.id === focusedWidget;
 		const selected = widget.id === selectedWidget;
 
 		return (
@@ -291,13 +301,11 @@ export class WidgetsGrid extends Component<Props, State> {
 		});
 
 		return (
-			<ResizeDetector onResize={this.handleResize} >
-				<div className={containerCN} onClick={this.handleClick} onContextMenu={this.onContextMenu} ref={this.gridContainerRef}>
-					{this.renderContextMenu()}
-					{this.renderGrid()}
-					{this.renderCreateButton()}
-				</div>
-			</ResizeDetector>
+			<div className={containerCN} onClick={this.handleClick} onContextMenu={this.onContextMenu} ref={this.gridContainerRef}>
+				{this.renderContextMenu()}
+				{this.renderGrid()}
+				{this.renderCreateButton()}
+			</div>
 		);
 	}
 }

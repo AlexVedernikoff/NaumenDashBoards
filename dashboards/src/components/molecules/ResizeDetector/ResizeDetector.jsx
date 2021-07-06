@@ -9,6 +9,7 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
 		debounceRate: 500,
+		forwardedRefKey: 'forwardedRef',
 		skipOnMount: false
 	};
 
@@ -33,13 +34,16 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	}
 
 	cloneComponentElement = (child: React$Element<typeof React$Component>) => {
+		const {forwardedRefKey} = this.props;
 		let {props} = child;
 
-		if (!props.forwardedRef) {
+		if (!props[forwardedRefKey]) {
 			props = {
 				...props,
-				forwardedRef: this.elementRef
+				[forwardedRefKey]: this.elementRef
 			};
+		} else {
+			this.elementRef = props[forwardedRefKey];
 		}
 
 		return cloneElement(child, props);
@@ -76,7 +80,7 @@ export class ResizeDetector extends PureComponent<Props, State> {
 		const child = Children.only(this.props.children);
 
 		if (isValidElement(child)) {
-			return child.type === 'function' ? this.cloneComponentElement(child) : this.cloneDOMElement(child);
+			return typeof child.type === 'function' ? this.cloneComponentElement(child) : this.cloneDOMElement(child);
 		}
 
 		return child;

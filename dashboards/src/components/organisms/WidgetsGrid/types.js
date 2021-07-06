@@ -11,6 +11,7 @@ export type ContextMenu = {
 
 export type State = {
 	contextMenu: ?ContextMenu,
+	gridMounted: boolean,
 	lastWebLGLayouts: ?Layout[],
 	width: ?number
 };
