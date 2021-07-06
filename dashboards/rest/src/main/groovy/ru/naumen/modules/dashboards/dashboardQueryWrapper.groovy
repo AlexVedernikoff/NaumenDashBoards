@@ -1389,7 +1389,7 @@ class DashboardQueryWrapperUtils
                 {
                     throw new IllegalArgumentException("Not supported attribute type: $attributeType")
                 }
-                if(forAggregation && (attributeType == AttributeType.LOCALIZED_TEXT_TYPE || attributeType == AttributeType.STRING && attribute.attrChains().code == 'title'))
+                if(forAggregation && (attributeType == AttributeType.LOCALIZED_TEXT_TYPE || attributeType == AttributeType.STRING_TYPE && attribute.attrChains().code == 'title'))
                 {
                     if(attribute.type in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
                     {
