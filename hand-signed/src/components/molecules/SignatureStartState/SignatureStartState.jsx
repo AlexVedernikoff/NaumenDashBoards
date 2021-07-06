@@ -1,7 +1,6 @@
 // @flow
 import Button from 'components/atoms/Button';
 import {connect} from 'react-redux';
-import PenIcon from 'icons/PenIcon';
 import type {Props} from './types';
 import {props, functions} from './selectors';
 import React, {useCallback} from 'react';
@@ -20,7 +19,6 @@ const SignatureStartState = (props: Props) => {
 			<Button
 				nameButton={drawingStartButtonName}
 				onClick={handleStartButton}
-				icon={<PenIcon/>}
 			/>
 		</SignatureTemplate>
 	);

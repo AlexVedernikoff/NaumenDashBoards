@@ -1,9 +1,9 @@
 // @flow
+import {Circle, Layer, Line, Stage} from 'react-konva';
 import {connect} from 'react-redux';
 import type {Props} from './types';
 import {props} from './selectors';
-import React, {useCallback, useEffect, useState} from 'react';
-import {Stage, Layer, Line} from 'react-konva';
+import React, {Fragment, useCallback, useEffect, useState} from 'react';
 import styles from './DrawingStage.less';
 
 const STROKE_COLOR = "#000000";
@@ -26,13 +26,13 @@ const DrawingStage = (props: Props) => {
 			})
 		}
 		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener(handleResize);
+		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
 	const handleMouseDown = useCallback((e: SyntheticEvent<EventTarget>) => {
 		setIsDrawing(true);
 		const pos = e.target.getStage().getPointerPosition();
-		setNewLines([...newLines, [pos.x, pos.y, pos.x, pos.y]]);
+		setNewLines([...newLines, [pos.x, pos.y]]);
 	}, []);
 
 	const handleMouseMove = useCallback((e: SyntheticEvent<EventTarget>) => {
@@ -50,9 +50,9 @@ const DrawingStage = (props: Props) => {
 		if (!isDrawing) {
 			return;
 		}
+		saveNewPartSignature(newLines);
 		setIsDrawing(false);
 		setNewLines([]);
-		saveNewPartSignature(newLines);
 	});
 
 	const addNewPoint = (point) => {
@@ -67,15 +67,25 @@ const DrawingStage = (props: Props) => {
 		</Layer>
 	);
 
-	const renderLine = (line, i) => (
-		<Line
-			key={i}
-			lineCap="round"
-			points={line}
-			stroke={STROKE_COLOR}
-			strokeWidth={STROKE_WIDTH}
-		/>
-	);
+	const renderLine = (line, i) => {
+		const [beginX, beginY] = line;
+		return (
+			<Fragment key={i}>
+				<Circle
+					radius={Math.round(STROKE_WIDTH / 2)}
+					fill={STROKE_COLOR}
+					x={beginX}
+					y={beginY}
+				/>
+				<Line
+					lineCap="round"
+					points={line}
+					stroke={STROKE_COLOR}
+					strokeWidth={STROKE_WIDTH}
+				/>
+			</Fragment>
+		);
+	};
 
 	const renderStage = () => (
 		<Stage

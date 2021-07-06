@@ -1,7 +1,7 @@
 // @flow
 export type OwnProps = {
 	disabled?: boolean
-	icon: Node,
+	icon?: Node,
 	nameButton: string,
 	onClick: Function
 };

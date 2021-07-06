@@ -12,7 +12,7 @@ const Button = (props: Props) => {
 			className={styles.button}
 			onClick={handleClick}
 		>
-			{icon && icon}
+			{icon && <div className={styles.icon}>{icon}</div>}
 			<span className={styles.label}>{nameButton}</span>
 		</button>
     );

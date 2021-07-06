@@ -19,7 +19,7 @@ const SignatureEditState = (props: Props) => {
 			addSignature([])
 		}
 		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener(handleResize);
+		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
 	const handleBackButton = useCallback(() => {
