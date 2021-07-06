@@ -3563,9 +3563,10 @@ class DashboardDataSetService
         {
             //у атрибута типа дата важно учитывать формат, в котором пользователь ожидает его увидеть,
             //записей может быть много, а по месяцу, например, может быть только 12 значений
-            def wrapper = QueryWrapper.build(new Source(classFqn: classFqn))
+            Source source = new Source(classFqn: classFqn)
+            def wrapper = QueryWrapper.build(source)
             def parameter = buildSystemGroup(attributeValue.group, attribute)
-            wrapper.group(wrapper.criteria, false, parameter, DiagramType.TABLE)
+            wrapper.processGroup(wrapper,wrapper.criteria, false, parameter, DiagramType.TABLE, source)
 
             return wrapper.getResult(true, DiagramType.TABLE, false)?.unique()?.size()
         }
