@@ -1389,6 +1389,17 @@ class DashboardQueryWrapperUtils
                 {
                     throw new IllegalArgumentException("Not supported attribute type: $attributeType")
                 }
+                if(forAggregation && (attributeType == AttributeType.LOCALIZED_TEXT_TYPE || attributeType == AttributeType.STRING && attribute.attrChains().code == 'title'))
+                {
+                    if(attribute.type in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
+                    {
+                        attribute.attrChains().takeWhile { it.type != AttributeType.LOCALIZED_TEXT_TYPE }.last().ref = new Attribute(code: 'code', title: 'Код элемента справочника', type: 'string')
+                    }
+                    else
+                    {
+                        attribute.attrChains().takeWhile { it.type != AttributeType.LOCALIZED_TEXT_TYPE }.last().ref = null //убрали строковый атрибут в коцне на подсчет
+                    }
+                }
                 break
         }
         if (attributeCode == UUID_CODE && forAggregation)
