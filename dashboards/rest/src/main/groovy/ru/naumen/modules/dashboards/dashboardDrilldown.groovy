@@ -318,11 +318,21 @@ class Link
                 //и для дат это неприменимо
                 if (!attrIsDynamic && attr?.sourceCode && attr?.sourceCode != classFqn &&
                     !(StateMarshaller.unmarshal(attr?.sourceCode, '$')?.last() in cases) &&
-                    diagramType == DiagramType.TABLE &&
-                    !(attr.type in AttributeType.DATE_TYPES))
+                    diagramType == DiagramType.TABLE)
                 {
-                    //если атрибут из другого источника (атрибута), указываем его код в начале
-                    attr?.code = "${attr?.sourceCode}.${attr?.code}"
+                    if(attr.type in AttributeType.DATE_TYPES)
+                    {
+                        def highLevelAttr = new Attribute(code: attr.sourceCode,
+                                                          sourceCode: classFqn,
+                                                          title: attr?.title,
+                                                          type: 'object', ref: attr)
+                        attr = highLevelAttr
+                    }
+                    else
+                    {
+                        //если атрибут из другого источника (атрибута), указываем его код в начале
+                        attr?.code = "${attr?.sourceCode}.${attr?.code}"
+                    }
                 }
 
                 def contextValue = filter.findResults { map ->
