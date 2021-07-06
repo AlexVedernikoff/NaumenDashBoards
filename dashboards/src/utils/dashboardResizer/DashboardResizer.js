@@ -5,6 +5,7 @@ import type {Store} from 'store/types';
 
 export class DashboardResizer {
 	initHeight: number = window.innerHeight;
+	sizeWillBeChanged = false;
 	store = null;
 
 	constructor (store: Store) {
@@ -42,33 +43,39 @@ export class DashboardResizer {
 		return isFullSize;
 	};
 
-	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setHeight(this.initHeight);
+	listenerCallback = (callback: Function) => window.addEventListener('resize', () => {
+		callback();
+		this.sizeWillBeChanged = false;
+	}, {once: true});
 
-	resize = () => {
+	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setCustomHeight(this.initHeight);
+
+	resize = (callback?: Function) => {
 		if (this.isFullSize()) {
 			this.setFullHeight();
 		} else if (this.isEditableDashboard()) {
-			this.setHeight(this.initHeight);
+			this.setCustomHeight(this.initHeight);
 		} else {
 			const height = this.getContentHeight();
 
-			height && this.setHeight(height);
+			height && this.setCustomHeight(height);
+		}
+
+		if (callback) {
+			this.sizeWillBeChanged ? this.listenerCallback(callback) : callback();
 		}
 	};
 
-	setFullHeight = () => {
-		if (document.body) {
-			document.body.style.height = '100%';
-			document.body.style.minHeight = `${this.initHeight}px`;
-		}
-	};
+	setCustomHeight = (height: number) => this.setHeight(`${height}px`, '');
 
-	setHeight = (height: number) => {
-		const attrHeight = `${height}px`;
+	setFullHeight = () => this.setHeight('100%', `${this.initHeight}px`);
 
+	setHeight = (height: string, minHeight: string) => {
 		if (document.body && document.body.style.height !== height) {
-			document.body.style.height = attrHeight;
-			document.body.style.minHeight = '';
+			document.body.style.height = height;
+			document.body.style.minHeight = minHeight;
+
+			this.sizeWillBeChanged = true;
 		}
 	};
 }
