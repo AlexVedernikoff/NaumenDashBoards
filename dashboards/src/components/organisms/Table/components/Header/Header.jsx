@@ -108,8 +108,10 @@ export class Header extends PureComponent<Props> {
 		const {columns, forwardedRef} = this.props;
 
 		return (
-			<div className={styles.header} ref={forwardedRef}>
-				{columns.map(this.renderColumn)}
+			<div className={styles.headerContainer} ref={forwardedRef}>
+				<div className={styles.header}>
+					{columns.map(this.renderColumn)}
+				</div>
 			</div>
 		);
 	}

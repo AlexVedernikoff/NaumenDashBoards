@@ -1,7 +1,7 @@
 @import '/styles/variables';
 
 :local {
-	.header {
+	.headerContainer {
 		display: flex;
 		flex: 1 0 auto;
 		overflow-x: scroll;
@@ -11,6 +11,11 @@
 		&::-webkit-scrollbar {
 			display: none;
 		}
+	}
+
+	.header {
+		display: flex;
+		flex: 1 0 auto;
 	}
 
 	.cellContainer {
