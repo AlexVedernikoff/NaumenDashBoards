@@ -2695,7 +2695,7 @@ class DashboardDataSetService
                         }
                         if(value instanceof Date)
                         {
-                            return value.format('dd.MM.yyyy hh:mm')
+                            return value.format('dd.MM.yyyy HH:mm')
                         }
                         //данные при таком подходе приходят строкой, поэтому метод format не поможет
                         String[] dateParts = value.split()
@@ -2752,7 +2752,7 @@ class DashboardDataSetService
                         dateParts[1] = dateParts[1].padLeft(2, '0')
                         return "${dateParts[0]}, ${dateParts[1]}ч"
                     case 'dd.mm.YY hh:ii':
-                        return value.format('dd.MM.yyyy hh:mm')
+                        return value.format('dd.MM.yyyy HH:mm')
                     case 'WD':
                         String[] weekDayNames = ['понедельник', 'вторник', 'среда',
                                                  'четверг', 'пятница', 'суббота', 'воскресенье']
