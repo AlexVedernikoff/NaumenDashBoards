@@ -1803,39 +1803,15 @@ class DashboardDataSetService
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'near':
                     def count = condition.data as int
-                    def start = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 0)
-                        set(MINUTE, 0)
-                        set(SECOND, 0)
-                        set(MILLISECOND, 0)
-                        getTime()
-                    }
-                    def end = Calendar.instance.with {
-                        add(DAY_OF_MONTH, count)
-                        set(HOUR_OF_DAY, 23)
-                        set(MINUTE, 59)
-                        set(SECOND, 59)
-                        set(MILLISECOND, 999)
-                        getTime()
-                    }
+                    def start = new Date()
+                    //86400000 - 24*60*60*1000 (день в мс)
+                    def end = new Date(start.getTime() + count * 86400000)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'near_hours':
                     def count = condition.data as int
-                    def start = Calendar.instance.with {
-                        set(HOUR_OF_DAY, 0)
-                        set(MINUTE, 0)
-                        set(SECOND, 0)
-                        set(MILLISECOND, 0)
-                        getTime()
-                    }
-                    def end = Calendar.instance.with {
-                        add(DAY_OF_MONTH, 0)
-                        set(HOUR_OF_DAY, count)
-                        set(MINUTE, 59)
-                        set(SECOND, 59)
-                        set(MILLISECOND, 999)
-                        getTime()
-                    }
+                    def start = new Date()
+                    //3600000 - 60*60*1000 (час в мс)
+                    def end = new Date(start.getTime() + count * 3600000)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'between':
                     def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
