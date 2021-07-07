@@ -21,14 +21,13 @@ export default class Api {
 
 	async postSignature(dataUrl: string, signatureAttributeCode: string, subjectUuid: string)  {
 		const image = await axios.get(dataUrl, {responseType: 'blob'}).then(response => new Blob([response.data]));
-		const url = `${this.jsApi.getAppRestBaseUrl()}/add-file/${subjectUuid}`;
+		const url = `add-file/${subjectUuid}?attrCode=${signatureAttributeCode}`;
 		const formData = new FormData();
 
 		formData.append("content", image, "подпись.png");
-		await axios.post(url, formData, {
-			params: {
-				attrCode: signatureAttributeCode
-			}
+		await this.jsApi.restCall(url, {
+			method: 'POST',
+			body: formData
 		});
 	}
 }
