@@ -3561,8 +3561,8 @@ class DashboardDataSetService
     Integer countDistinct(def attributeValue, String classFqn)
     {
         Attribute attribute = attributeValue.attribute.deepClone()
-        String attributeType = attribute.type
-        if(Attribute.getAttributeType(attribute) in AttributeType.DATE_TYPES)
+        String attributeType = Attribute.getAttributeType(attribute)
+        if(attributeType in AttributeType.DATE_TYPES)
         {
             //у атрибута типа дата важно учитывать формат, в котором пользователь ожидает его увидеть,
             //записей может быть много, а по месяцу, например, может быть только 12 значений
@@ -3577,7 +3577,7 @@ class DashboardDataSetService
         {
             DashboardQueryWrapperUtils.prepareAttribute(attribute, true)
             List attrCodesList = attribute.attrChains()*.code
-            if(attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
+            if(attribute.type in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
             {
                 //если всё же информация пришла с фронта
                 attrCodesList = attrCodesList.collect { it == 'title' ? 'code' : it }
