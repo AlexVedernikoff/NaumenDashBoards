@@ -74,7 +74,7 @@ const sendSignature = (dataUrl: string): ThunkAction => async (dispatch: Dispatc
 		await api.postSignature(dataUrl, signatureAttributeCode, subjectUuid);
 		dispatch(setNewState(SIGNATURE_STATE.FINAL_STATE));
 	} catch (error) {
-		dispatch(setError(String(error)));
+		dispatch(setError(String(error.responseText || error)));
 	} finally {
 		dispatch(hideLoader());
 	}
