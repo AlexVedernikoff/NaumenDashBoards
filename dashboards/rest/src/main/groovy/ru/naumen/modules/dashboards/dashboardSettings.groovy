@@ -94,20 +94,6 @@ interface DashboardSettings
     String deleteCustomColors(Map<String, Object> requestContent)
 
     /**
-     * Метод включение автообновлений дашборда
-     * @param requestContent - параметры запроса (classFqn, contentCode, interval)
-     * @return true|false
-     */
-    String enableAutoUpdate(Map<String, Object> requestContent)
-
-    /**
-     * Метод отключения автообновлений дашборда
-     * @param requestContent - параметры запроса (classFqn, contentCode)
-     * @return true|false
-     */
-    String disableAutoUpdate(Map<String, Object> requestContent)
-
-    /**
      * Метод создания персонального дашборда.
      * @param requestContent - тело запроса (editable, classFqn, contentCode)
      * @return true|false
@@ -281,18 +267,6 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     String deleteCustomColors(Map<String, Object> requestContent)
     {
         return toJson(service.deleteCustomColors(requestContent, user))
-    }
-
-    @Override
-    String enableAutoUpdate(Map<String, Object> requestContent)
-    {
-        return toJson(service.enableAutoUpdate(requestContent, user))
-    }
-
-    @Override
-    String disableAutoUpdate(Map<String, Object> requestContent)
-    {
-        return toJson(service.disableAutoUpdate(requestContent, user))
     }
 
     @Override
