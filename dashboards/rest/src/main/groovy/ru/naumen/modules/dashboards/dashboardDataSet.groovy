@@ -3442,14 +3442,23 @@ class DashboardDataSetService
 
     /**
      * Метод получения агрегаций из запроса
-     * @param requestContent - тело запроса
+     * @param widgetSettings - настройки виджета
      * @param isCompute - флаг на получение всех агрегаций (null), обычных агрегаций (false), агрегаций с вычислениями (true)
      * @return  список агрегаций из запроса
      */
-    List getSpecificAggregationsList (def requestContent, Boolean isCompute = null)
+    List<Map> getSpecificAggregationsList (Widget widgetSettings, Boolean isCompute = null)
     {
-        String mainSource = requestContent?.data?.findResult { value -> if (!value.sourceForCompute) return value.source.value.value }
-        return requestContent?.data?.collectMany { value ->
+        def tempWidgetSettings = mapper.convertValue(widgetSettings, widgetSettings.getClass())
+        def fullIndicatorsList = getFullElementListInWidgetSettings(widgetSettings, 'indicators')
+        SourceValue mainSourceValue = tempWidgetSettings?.data?.findResult { value ->
+            if (!value.sourceForCompute)
+            {
+                return value.source.value
+            }
+        }
+        String mainSource = mainSourceValue.value
+
+        return tempWidgetSettings?.data?.collectMany { value ->
             if (!value.sourceForCompute)
             {
                 return value?.indicators?.findResults { indicator ->
@@ -3463,12 +3472,11 @@ class DashboardDataSetService
                     {
                         BaseAttribute attribute = indicator?.attribute
                         String currentSource = value.source.value.value
+                        String currentSourceName = currentSource != mainSource ? value.source.value.label.trim() : mainSourceValue.label.trim()
 
-                        if (currentSource != mainSource)
+                        if((fullIndicatorsList.count { it?.attribute?.title == attribute?.title } > 1) && !attribute?.title?.contains(currentSourceName))
                         {
-                            String currentSourceName = api.metainfo.getMetaClass(mainSource)
-                                                          .getAttribute(currentSource).title
-                            if(!attribute?.title?.contains(currentSourceName))
+                            if (currentSourceName)
                             {
                                 attribute?.title = "${attribute?.title} (${currentSourceName})"
                             }
@@ -3960,26 +3968,46 @@ class DashboardDataSetService
     }
 
     /**
-     * Метод получения названий и самих основных атрибутов запроса
-     * @param requestContent - тело запроса
+     * Метод получения названий и самих основных атрибутов настроек виджета
+     * @param widgetSettings - настройки виджета
      * @return список названий атрибутов
      */
-    private List<Map> getAttributeNamesAndValuesFromRequest(def widgetSettings)
+    private List<Map> getAttributeNamesAndValuesFromRequest(Widget widgetSettings)
     {
         def tempWidgetSettings = mapper.convertValue(widgetSettings, widgetSettings.getClass())
+        SourceValue mainSourceValue = tempWidgetSettings?.data?.findResult { value ->
+            if (!value.sourceForCompute)
+            {
+                return value.source.value
+            }
+        }
+        String mainSource = mainSourceValue.value
         def aggregations = getSpecificAggregationsList(widgetSettings)
+        def fullParametersList = getFullElementListInWidgetSettings(widgetSettings, 'parameters')
 
         def parameterAttributes = tempWidgetSettings.data.collectMany { value ->
             if (!value.sourceForCompute)
             {
+                String currentSource = value.source.value.value
+                String currentSourceName = currentSource != mainSource ? value.source.value.label.trim() : mainSourceValue.label.trim()
+
                 value.parameters.collect { parameter ->
+                    if(fullParametersList.count { it?.attribute?.title == parameter?.attribute?.title } > 1)
+                    {
+                        if(currentSourceName)
+                        {
+                            parameter?.attribute?.title = "${parameter?.attribute?.title} (${currentSourceName})"
+                        }
+                    }
+
                     def name = parameter?.group?.way == Way.CUSTOM
                         ? parameter?.group?.data?.name
                         : parameter?.attribute?.title
+
                     def group = parameter?.group
                     group = updateCustomGroupInfo(group)
                     return [name : name, attribute : parameter?.attribute,
-                            type : ColumnType.PARAMETER,group : group]
+                            type : ColumnType.PARAMETER, group : group]
                 }
             }
             else
@@ -4008,6 +4036,22 @@ class DashboardDataSetService
         }
 
         return (aggregations + parameterAttributes + breakdownAttributes).grep()
+    }
+
+    /**
+     * Метод получения данных по элементам поля data всех настроек виджета
+     * @param widgetSettings - настройки виджета
+     * @param fieldName - название поля, данные по которому хотим получить
+     * @return данные по полю
+     */
+    def getFullElementListInWidgetSettings(def widgetSettings, String fieldName)
+    {
+        return widgetSettings.data.collectMany { value ->
+            if (!value.sourceForCompute)
+            {
+                return value[fieldName]
+            }
+        }
     }
 
     /**
