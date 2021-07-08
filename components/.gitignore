@@ -1,0 +1,19 @@
+# IDE
+.idea
+
+# Node.js
+node_modules
+
+# git
+commiter.sh
+log.sh
+
+# flow
+flow-typed/npm
+
+#smpsync
+rest/stand.json
+
+.env
+
+.DS_Store
