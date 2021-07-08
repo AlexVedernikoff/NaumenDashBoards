@@ -3446,7 +3446,7 @@ class DashboardDataSetService
      * @param isCompute - флаг на получение всех агрегаций (null), обычных агрегаций (false), агрегаций с вычислениями (true)
      * @return  список агрегаций из запроса
      */
-    List<Map> getSpecificAggregationsList (Widget widgetSettings, Boolean isCompute = null)
+    List<Map<String, Object>> getSpecificAggregationsList (Widget widgetSettings, Boolean isCompute = null)
     {
         def tempWidgetSettings = mapper.convertValue(widgetSettings, widgetSettings.getClass())
         def fullIndicatorsList = getFullElementListInWidgetSettings(widgetSettings, 'indicators')
@@ -3972,7 +3972,7 @@ class DashboardDataSetService
      * @param widgetSettings - настройки виджета
      * @return список названий атрибутов
      */
-    private List<Map> getAttributeNamesAndValuesFromRequest(Widget widgetSettings)
+    private List<Map<String, Object>> getAttributeNamesAndValuesFromRequest(Widget widgetSettings)
     {
         def tempWidgetSettings = mapper.convertValue(widgetSettings, widgetSettings.getClass())
         SourceValue mainSourceValue = tempWidgetSettings?.data?.findResult { value ->
