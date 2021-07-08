@@ -835,47 +835,6 @@ class DashboardSettingsService
     }
 
     /**
-     * Метод включение автообновлений дашборда
-     * @param requestContent - параметры запроса (classFqn, contentCode, interval)
-     * @return true|false
-     */
-    Boolean enableAutoUpdate(Map<String, Object> requestContent, user)
-    {
-        String classFqn = requestContent.classFqn
-        String contentCode = requestContent.contentCode
-        int interval = requestContent.interval as int
-
-        String personalDashboardKey =generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
-        def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-            ?: new DashboardSettingsClass()
-        //Этой настройки может и не быть
-        settings.autoUpdate = new AutoUpdate(enabled: true, interval: interval)
-        return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
-    }
-
-    /**
-     * Метод отключения автообновлений дашборда
-     * @param requestContent - параметры запроса (classFqn, contentCode)
-     * @return true|false
-     */
-    Boolean disableAutoUpdate(Map<String, Object> requestContent, user)
-    {
-        String classFqn = requestContent.classFqn
-        String contentCode = requestContent.contentCode
-
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
-        def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-        if (!settings)
-        {
-            throw new Exception("Not found dashboard settings: $defaultDashboardKey")
-        }
-        settings.autoUpdate?.disable()
-        return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
-    }
-
-    /**
      * Метод создания персонального дашборда.
      * @param requestContent - тело запроса (editable, classFqn, contentCode)
      * @return true|false

@@ -1936,35 +1936,11 @@ class AutoUpdate
     /**
      * флаг на включение автообновления
      */
-    private boolean enabled
+    boolean enabled
     /**
      * интервал обновления
      */
     int interval
-
-    /**
-     * выключить автообновление
-     */
-    void disable()
-    {
-        this.enabled = false
-    }
-
-    /**
-     * включить автообновление
-     */
-    void enable()
-    {
-        this.enabled = true
-    }
-
-    /**
-     * установить автообновление
-     */
-    void setEnabled(boolean enabled)
-    {
-        //NOP
-    }
 }
 
 /**
