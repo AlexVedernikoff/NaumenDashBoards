@@ -1,0 +1,157 @@
+@import '/styles/variables';
+
+:local {
+	.applyOutlineColor(@color) {
+		border: 1px solid @color;
+		color: @color;
+	}
+
+	.disabled {
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
+	.button {
+		align-items: center;
+		border-radius: 2px;
+		display: inline-flex;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 500;
+		justify-content: center;
+		padding: 8px 20px 9px 20px;
+	}
+
+	.block {
+		text-align: center;
+		width: 100%;
+	}
+
+	.info {
+		background-color: @info;
+		color: @white;
+
+		&:hover {
+			background-color: darken(@info, 10%);
+		}
+
+		&:active {
+			background-color: darken(@info, 15%);
+		}
+
+		&:disabled {
+			.disabled();
+			background-color: @silver;
+			color: @grey;
+
+			&:active {
+				background-color: darken(@silver, 10%);
+			}
+		}
+	}
+
+	.outlineInfo {
+		background-color: transparent;
+		color: @white;
+
+		&:hover {
+			background-color: @info;
+		}
+
+		&:active {
+			background-color: darken(@info, 15%);
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
+		}
+	};
+
+	.additional {
+		color: @black;
+
+		&:hover {
+			background: @lightgrey;
+		}
+
+		&:active {
+			background-color: @silver;
+		}
+	}
+
+	.simple {
+		color: @info;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 500;
+
+		&:hover, :active {
+			color: @black
+		}
+
+		&:disabled {
+			.disabled();
+			color: @black;
+		}
+	}
+
+	.gray {
+		background-color: @gainsboro;
+		color: @dimgrey;
+		padding: 4px 12px;
+
+		svg {
+			margin-right: 4px;
+		}
+
+		&:hover {
+			background-color: @silver;
+		}
+
+		&:active {
+			background-color: @steel;
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
+		}
+	}
+
+	.green {
+		background-color: #6FCF97;
+		color: @white;
+
+		&:hover {
+			background-color: #64BA88;
+		}
+
+		&:active {
+			background-color: #50956D;
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
+		}
+	}
+
+	.outlineGreen {
+		.applyOutlineColor(#6FCF97);
+		background-color: transparent;
+
+		&:hover {
+			.applyOutlineColor(#64BA88);
+		}
+
+		&:active {
+			.applyOutlineColor(#50956D);
+		}
+
+		&:disabled {
+			.disabled();
+			opacity: 0.8;
+		}
+	}
+}
