@@ -96,7 +96,7 @@ export class ObjectGroupModal extends Component<Props, State> {
 
 	handleChangeSearchInput = (type: string) => (searchValue: string) => {
 		const {fullAttribute, searchObjects, source} = this.props;
-		const includingArchival = type === OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL;
+		const includingArchival = this.hasIncludingArchivalType(type);
 
 		searchObjects(source, fullAttribute, searchValue, includingArchival);
 	};
