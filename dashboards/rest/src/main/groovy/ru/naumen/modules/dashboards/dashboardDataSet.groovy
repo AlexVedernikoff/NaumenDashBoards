@@ -3826,7 +3826,7 @@ class DashboardDataSetService
                         //остальные повторы по разбивке добавляем отдельно
                         if (showRowNum && (i > 0 || !aggregations))
                         {
-                            tempAggregationMap = [ID: : ++id]
+                            tempAggregationMap = [ID: ++id]
                         }
                         (parameters + val).each { tempAggregationMap << it }
                         return tempAggregationMap
