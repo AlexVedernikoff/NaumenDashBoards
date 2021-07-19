@@ -3646,31 +3646,19 @@ class DashboardDataSetService
         {
             Integer indexToFind = 2 //берём до предпоследнего значения в строке, на последнем месте - разбивка
             def groups = tempMaps.groupBy { it[parameterIndex..-(indexToFind)] }//группируем данные по параметрам (их значениям)
-            rowCount = groups.size()
-            id = reverseRowCount ? rowCount - paginationSettings.firstElementIndex : paginationSettings.firstElementIndex
-            groups = getDataSetWithPagination(groups, paginationSettings)
-            data = groups.collect { parameters, group ->
-                if (valuesInBasicBreakdownExceedLimit)
-                {
-                    //если предел по значениям кастомной группировки превышен,
-                    // то нужно взять лишь те группы значений, где в разбивке значения из ограничения
-                    group = group.findAll { it.last().values().head() in breakdownValues }
+            data =  formatDataForTableWithBreakdown(groups, valuesInBasicBreakdownExceedLimit, breakdownValues,
+                                                    aggregationCnt, notAggregatedAttributeNames, parameterIndex, showRowNum)
+            rowCount = data.size()
+            if(reverseRowCount)
+            {
+                //теперь изначально нам количество данных неизвестно, заменяем вручную
+                Integer reverseId = rowCount
+                data.each {
+                    it.ID = reverseId--
                 }
-                List<Map> aggregations = []
-                if(group)
-                {
-                    aggregations = updateAggregations(group, aggregationCnt, notAggregatedAttributeNames)
-                }
-                def map = [:]
-                if (showRowNum)
-                {
-                    map = [ID: reverseRowCount ? id-- : ++id]
-                }
-                (parameters + aggregations).each {
-                    map << it
-                }
-                return map
             }
+
+            data = getDataSetWithPagination(data, paginationSettings)
         }
         else
         {
@@ -3776,6 +3764,88 @@ class DashboardDataSetService
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
 
         return new TableDiagram(columns: columns, data: data, limitsExceeded: limitsExceeded, total: rowCount)
+    }
+
+    /**
+     * Метод для корректной обработки данных с разбивкой
+     * @param groups - группы словарей данных
+     * @param valuesInBasicBreakdownExceedLimit - флаг на превышение предела
+     * @param breakdownValues - значения разбивки, которые попадают в пределы
+     * @param aggregationCnt - количество агрегаций
+     * @param notAggregatedAttributeNames - названия атрибутов с агрегацией N/A
+     * @param parameterIndex - индекс, с которого в строке начинаются значения параметров
+     * @param showRowNum - флаг на отображение номера строки
+     * @return корректно обработанные данные с разбивкой
+     */
+    private List<Map<String, Object>> formatDataForTableWithBreakdown(def groups, boolean valuesInBasicBreakdownExceedLimit,
+                                                      List breakdownValues, int aggregationCnt, List notAggregatedAttributeNames,
+                                                      int parameterIndex, boolean showRowNum)
+    {
+        int id = 0
+        return groups.collect { parameters, group ->
+            if (valuesInBasicBreakdownExceedLimit)
+            {
+                //если предел по значениям кастомной группировки превышен,
+                // то нужно взять лишь те группы значений, где в разбивке значения из ограничения
+                group = group.findAll { it.last().values().head() in breakdownValues }
+            }
+            List<Map> aggregations = []
+            if (group)
+            {
+                aggregations = updateAggregations(group, aggregationCnt, notAggregatedAttributeNames)
+            }
+
+            Integer attributesCntWithoutParameters = parameterIndex + 1 //parameterIndex - количество агрегаций в запросе + 1 - разбивка, остальное параметры
+            def tempAggregations = aggregations.collate(attributesCntWithoutParameters)
+            def repeatableBreakdowns = tempAggregations.groupBy { it.last() }.findResults { k, v -> v.size() > 1 ? k : null }
+            def listOfAggregations = repeatableBreakdowns.collect { breakdownValue ->
+                return tempAggregations.findAll { it.last() == breakdownValue }
+            }
+
+            if (listOfAggregations)
+            {
+                def baseMap = [:]
+                aggregations -= listOfAggregations.flatten()
+                if (aggregations)
+                {
+                    if (showRowNum)
+                    {
+                        baseMap = [ID: ++id]
+                    }
+                    //могли остаться и не повторяющиеся значения разбивки, готовим для них базовую строку
+                    (parameters + aggregations).each { baseMap << it }
+                }
+                return listOfAggregations.collectMany { list ->
+                    return list.withIndex().collect { val, i ->
+                        def tempAggregationMap = [:]
+                        if (i == 0 && aggregations)
+                        {
+                            //базовая строка должна пополниться первым значением с повтором
+                            tempAggregationMap << baseMap
+                        }
+                        //остальные повторы по разбивке добавляем отдельно
+                        if (showRowNum && (i > 0 || !aggregations))
+                        {
+                            tempAggregationMap = [ID: : ++id]
+                        }
+                        (parameters + val).each { tempAggregationMap << it }
+                        return tempAggregationMap
+                    }
+                }
+            }
+            else
+            {
+                def map = [:]
+                if (showRowNum)
+                {
+                    map = [ID: ++id]
+                }
+                (parameters + aggregations).each {
+                    map << it
+                }
+                return map
+            }
+        }.flatten()
     }
 
     /**
