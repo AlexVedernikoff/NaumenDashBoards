@@ -761,7 +761,7 @@ class DashboardSettingsService
      */
     Collection getSourceFilters(String metaClass)
     {
-        Collection<SourceValue> filtersForClassFqn = DashboardUtils.getSourceFiltersFromStorage([[key: 'value', value: metaClass]])
+        Collection<SourceFilter> filtersForClassFqn = DashboardUtils.getSourceFiltersFromStorage([[key: 'value', value: metaClass]])
         return filtersForClassFqn.collect {
             [label: it.label, descriptor: it.descriptor, id: it.id]
         }
