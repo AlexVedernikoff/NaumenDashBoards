@@ -1,5 +1,4 @@
 // @flow
-import Checkbox from 'components/atoms/Checkbox';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import type {DataSet} from 'store/widgetForms/comboChartForm/types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -13,6 +12,7 @@ import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
+import Toggle from 'components/atoms/Toggle';
 
 export class IndicatorSettingsBox extends PureComponent<Props, State> {
 	state = this.initState(this.props);
@@ -44,7 +44,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 		this.change(name, value);
 	};
 
-	handleCheckboxChange = ({name, value}: OnChangeEvent<boolean>) => this.change(name, value);
+	handleCheckboxChange = ({name, value}: OnChangeEvent<boolean>) => this.change(name, !value);
 
 	handleClickDependentCheckbox = (name: string, value: boolean) => this.change(name, value);
 
@@ -129,19 +129,19 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 		return (
 			<CollapsableFormBox title="Показатель">
 				<FormField>
-					<FormControl label="Показать ось">
-						<Checkbox checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleCheckboxChange} value={show} />
+					<FormControl label="Показать ось" reverse={true}>
+						<Toggle checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleCheckboxChange} value={show} />
 					</FormControl>
 				</FormField>
 				<FormField>
-					<FormControl label="Выводить название">
-						<Checkbox checked={showName} name={DIAGRAM_FIELDS.showName} onChange={this.handleCheckboxChange} value={showName} />
+					<FormControl label="Выводить название" reverse={true}>
+						<Toggle checked={showName} name={DIAGRAM_FIELDS.showName} onChange={this.handleCheckboxChange} value={showName} />
 					</FormControl>
 				</FormField>
 				{data.filter(dataSet => !dataSet.sourceForCompute).map(this.renderNameField)}
 				<FormField>
-					<FormControl label="Настроить параметры оси">
-						<Checkbox
+					<FormControl label="Настроить параметры оси" reverse={true}>
+						<Toggle
 							checked={showAdditionalSettings}
 							onChange={this.handleToggleAdditionalSettings}
 							value={show}

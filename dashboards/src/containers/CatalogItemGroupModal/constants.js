@@ -46,6 +46,8 @@ const DEFAULT_DATA = {
 
 const DATA_CONTEXT = createContext<CatalogItemSetData>(DEFAULT_DATA);
 
+DATA_CONTEXT.displayName = 'DATA_CONTEXT';
+
 export {
 	DATA_CONTEXT,
 	DEFAULT_DATA,

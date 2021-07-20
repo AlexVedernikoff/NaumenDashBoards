@@ -32,5 +32,6 @@ describe('Cases test', () => {
 	it(`общий кейс`, () => makeCase(commonCase));
 	it(`проценты`, () => makeCase(percentCase));
 	it(`нотации с дополнительным обозначением`, () => makeCase(notationAdditionCase));
+	it('SMRMEXT-12451', () => makeCase(line12451Case));
 
 });

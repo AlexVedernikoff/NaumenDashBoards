@@ -8,6 +8,8 @@ const TYPE_CONTEXT = createContext<Context>({
 	value: WIDGET_TYPES.COLUMN
 });
 
+TYPE_CONTEXT.displayName = 'TYPE_CONTEXT';
+
 export {
 	TYPE_CONTEXT
 };

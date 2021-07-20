@@ -11,6 +11,7 @@ import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -62,7 +63,7 @@ export class Chart extends PureComponent<Props> {
 	};
 
 	handleResize = () => {
-		const {data, widget} = this.props;
+		const {data, globalColorsSettings, widget} = this.props;
 		const {legend, type} = widget;
 		const {current: container} = this.containerRef;
 
@@ -99,6 +100,13 @@ export class Chart extends PureComponent<Props> {
 						}
 					}
 				};
+
+				if (type === WIDGET_TYPES.COMBO) {
+					const {current} = this.containerRef;
+					const {xaxis, yaxis} = getOptions(widget, data, current, globalColorsSettings);
+
+					opts = {...opts, xaxis, yaxis};
+				}
 			}
 
 			this.chart && this.chart.updateOptions(opts);

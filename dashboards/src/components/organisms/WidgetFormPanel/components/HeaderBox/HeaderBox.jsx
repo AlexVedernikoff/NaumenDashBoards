@@ -46,19 +46,19 @@ export class HeaderBox extends PureComponent<Props> {
 
 		return (
 			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title="Заголовок">
-					<FormField row>
-						<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
-						<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} value={fontSize} />
-					</FormField>
-					<FormField row>
-						<FontStyleControl name={DIAGRAM_FIELDS.fontStyle} onChange={this.handleSelect} value={fontStyle} />
-						<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleSelect} portable={true} value={fontColor} />
-					</FormField>
-					<FormField row>
-						<TextAlignControl name={DIAGRAM_FIELDS.textAlign} onChange={this.handleSelect} value={textAlign} />
-						<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleSelect} value={textHandler} />
-						{this.renderPositionControl()}
-					</FormField>
+				<FormField row>
+					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
+					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} value={fontSize} />
+				</FormField>
+				<FormField row>
+					<FontStyleControl name={DIAGRAM_FIELDS.fontStyle} onChange={this.handleSelect} value={fontStyle} />
+					<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleSelect} portable={true} value={fontColor} />
+				</FormField>
+				<FormField row>
+					<TextAlignControl name={DIAGRAM_FIELDS.textAlign} onChange={this.handleSelect} value={textAlign} />
+					<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleSelect} value={textHandler} />
+					{this.renderPositionControl()}
+				</FormField>
 			</ToggableFormBox>
 		);
 	}

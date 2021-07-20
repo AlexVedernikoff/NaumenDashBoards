@@ -143,15 +143,15 @@ describe('Formatters test', () => {
 
 	it('sevenDaysFormatter', () => {
 		expect(sevenDaysFormatter('')).toBe('');
-		expect(sevenDaysFormatter('12345')).toBe('12345');
+		expect(sevenDaysFormatter('12345')).toBe('');
 		//TODO: Разобраться с региональными настройками
 		if (process.env.LANGUAGE === 'en_US:en') {
 			expect(sevenDaysFormatter('1.1.2000-1.2.2000')).toBe('01 January - 01 February');
 		} else {
 			expect(sevenDaysFormatter('1.1.2000-1.2.2000')).toBe('01 Января - 01 Февраля');
 		}
-		expect(sevenDaysFormatter('13.13.2000-1.1.2000')).toBe('13.13.2000-1.1.2000');
-		expect(sevenDaysFormatter('1.1.2000-13.13.2000')).toBe('1.1.2000-13.13.2000');
+		expect(sevenDaysFormatter('13.13.2000-1.1.2000')).toBe('');
+		expect(sevenDaysFormatter('1.1.2000-13.13.2000')).toBe('');
 	});
 
 	it('notationConverter', () => {

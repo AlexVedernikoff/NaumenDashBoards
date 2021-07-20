@@ -7,6 +7,8 @@ const VALUES_CONTEXT = createContext<ValuesContext>({
 	values: {}
 });
 
+VALUES_CONTEXT.displayName = 'VALUES_CONTEXT';
+
 export {
 	VALUES_CONTEXT
 };
