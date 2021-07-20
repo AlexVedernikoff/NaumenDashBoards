@@ -26,6 +26,9 @@ import WidgetSelectBox from 'WidgetFormPanel/components/WidgetSelectBox';
 const BORDERS_CONTEXT = createContext<Borders>(DEFAULT_SPEEDOMETER_SETTINGS.borders);
 const RANGES_CONTEXT = createContext<Ranges>(DEFAULT_SPEEDOMETER_SETTINGS.ranges);
 
+BORDERS_CONTEXT.displayName = 'BORDERS_CONTEXT';
+RANGES_CONTEXT.displayName = 'RANGES_CONTEXT';
+
 export class ParamsTab extends PureComponent<Props> {
 	getIndicatorsBoxComponents = memoize(() => ({
 		FormBox: this.renderIndicatorsFormBox

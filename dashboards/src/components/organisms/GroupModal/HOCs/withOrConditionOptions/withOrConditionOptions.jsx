@@ -5,6 +5,8 @@ import React, {createContext, PureComponent} from 'react';
 
 export const OR_CONDITION_OPTIONS_CONTEXT = createContext<Array<Option>>([]);
 
+OR_CONDITION_OPTIONS_CONTEXT.displayName = 'OR_CONDITION_OPTIONS_CONTEXT';
+
 export const withOrConditionOptions = <Props: {} & InjectedProps>(Component: React$ComponentType<Props>): React$ComponentType<Props> => {
 	return class WithOrConditionOptions extends PureComponent<Props> {
 		render (): React$Node {

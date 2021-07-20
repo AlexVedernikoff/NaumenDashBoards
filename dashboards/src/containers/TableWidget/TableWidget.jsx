@@ -11,6 +11,8 @@ import type {TableBuildData} from 'store/widgets/buildData/types';
 
 const UPDATING_CONTEXT = createContext(false);
 
+UPDATING_CONTEXT.displayName = 'UPDATING_CONTEXT';
+
 export class TableWidget extends PureComponent<Props> {
 	components = {
 		...DEFAULT_COMPONENTS,

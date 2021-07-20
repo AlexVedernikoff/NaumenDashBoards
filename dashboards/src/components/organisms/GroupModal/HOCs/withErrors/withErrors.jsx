@@ -5,6 +5,8 @@ import React, {createContext, PureComponent} from 'react';
 
 export const ERRORS_CONTEXT = createContext<ErrorsMap>({});
 
+ERRORS_CONTEXT.displayName = 'ERRORS_CONTEXT';
+
 export const withErrors = <Props: {} & InjectedProps>(Component: React$ComponentType<Props>): React$ComponentType<Props> => {
 	return class WithErrors extends PureComponent<Props> {
 		render (): React$Node {

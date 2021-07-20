@@ -6,6 +6,8 @@ const HELPERS_CONTEXT = createContext<Context>({
 	filterAttributesByUsed: () => []
 });
 
+HELPERS_CONTEXT.displayName = 'HELPERS_CONTEXT';
+
 export {
 	HELPERS_CONTEXT
 };

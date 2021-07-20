@@ -1,0 +1,173 @@
+{
+	"container": {
+		"clientWidth": 1367
+	},
+	"labels": [
+		"Услуга TAE#service$43752501",
+		"Услуга Сакаевой (с согласованием)#service$59157407",
+		"Услуга Сакаевой#service$48808001",
+		"Услуга со всеми дин атрибутами#service$80740501",
+		"Услуги сопровождения баз данных абонентов мобильной связи#service$1811716",
+		"Услуги сопровождения баз данных сервисных запросов#service$1810188",
+		"Услуги установки, тестирования и сопровождения программных средств АРМ#service$1810185",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных КИС 1С: УПП ШР#service$1810189",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных КИС CapitalProject#service$1811737",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных КИС LIMS#service$1811703",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных КИС MES#service$1811704",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных КИС БОСС-Кадровик#service$1810194",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных КИС ЕСМ#service$1810199",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных КИС ЕСУИД#service$1810187",
+		"Услуги установки, тестирования и сопровождения программных средств и баз данных локальных ИС#service$1811720",
+		"Услуги эксплуатации и технической поддержки программно-аппаратных комплексов компьютерных систем фиксированной телефонной связи#service$1811731"
+	],
+	"widget": {
+		"colorsSettings": {
+			"auto": {
+				"colors": [
+					"#EA3223",
+					"#999999",
+					"#2C6FBA",
+					"#4EAD5B",
+					"#DE5D30",
+					"#67369A",
+					"#F6C142",
+					"#4CAEEA",
+					"#A1BA66",
+					"#B02318",
+					"#536130",
+					"#DCA5A2",
+					"#928A5B",
+					"#9BB3D4",
+					"#8C4A1C",
+					"#FFFE55"
+				]
+			},
+			"custom": {
+				"data": {
+					"colors": [
+						{
+							"color": "#4ead5b",
+							"key": "Доступ к корп.системам и ресурсам#service$1577120"
+						},
+						{
+							"color": "#536130",
+							"key": "Компьютер, периферийное оборудование, программное обеспечение#service$1117401"
+						}
+					],
+					"key": "service-slmService-OVERLAP",
+					"type": null,
+					"defaultColor": "#EA3223"
+				},
+				"useGlobal": true
+			},
+			"type": "AUTO"
+		},
+		"name": "123",
+		"id": "root_DH6175_8a397f0f-8002-47c4-98f9-e78cbf279ff1",
+		"type": "LINE",
+		"computedAttrs": [],
+		"dataLabels": {
+			"fontColor": "white",
+			"show": true,
+			"showShadow": true,
+			"showSubTotalAmount": false,
+			"showTotalAmount": false,
+			"disabled": false,
+			"fontFamily": "Roboto",
+			"fontSize": 14
+		},
+		"breakdownFormat": null,
+		"displayMode": "WEB",
+		"header": {
+			"fontColor": "#323232",
+			"name": "123",
+			"position": "TOP",
+			"show": true,
+			"template": "",
+			"textAlign": "left",
+			"textHandler": "CROP",
+			"useName": true,
+			"fontFamily": "Roboto",
+			"fontSize": 16
+		},
+		"navigation": {
+			"dashboard": null,
+			"show": false,
+			"showTip": false,
+			"tip": "",
+			"widget": null
+		},
+		"legend": {
+			"displayType": "BLOCK",
+			"position": "right",
+			"show": true,
+			"textHandler": "CROP",
+			"fontFamily": "Roboto",
+			"fontSize": 14
+		},
+		"sorting": { "type": "ASC", "value": "PARAMETER" },
+		"templateName": "123",
+		"indicator": { "show": true, "showName": false },
+		"parameter": { "show": true, "showName": false },
+		"data": [
+			{
+				"showEmptyData": false,
+				"showBlankData": false,
+				"sourceForCompute": false,
+				"dataKey": "5b63f07e-7f6d-476e-8aaa-5c34645a7ffe",
+				"top": { "count": 5, "show": false },
+				"indicators": [
+					{
+						"aggregation": "COUNT_CNT",
+						"attribute": {
+							"code": "UUID",
+							"title": "Уникальный идентификатор",
+							"type": "string",
+							"metaClassFqn": "serviceCall",
+							"declaredMetaClass": "abstractBO",
+							"sourceName": "Запрос",
+							"sourceCode": "serviceCall"
+						}
+					}
+				],
+				"parameters": [
+					{
+						"group": { "way": "SYSTEM", "data": "OVERLAP" },
+						"attribute": {
+							"code": "slmService",
+							"title": "     Услуга",
+							"type": "object",
+							"property": "service",
+							"metaClassFqn": "serviceCall",
+							"declaredMetaClass": "serviceCall",
+							"sourceName": "Запрос",
+							"sourceCode": "serviceCall"
+						}
+					}
+				],
+				"source": {
+					"descriptor": "",
+					"widgetFilterOptions": [],
+					"value": { "label": "Запрос", "value": "serviceCall" },
+					"filterId": null
+				},
+				"xAxisName": "     Услуга",
+				"yAxisName": ""
+			}
+		]
+	},
+	"indicator": [
+		[0, ""],
+		[1, "1"]
+	],
+	"legend": [["Запрос", "Запрос"]],
+	"options": {
+		"hasOverlappedLabel": true,
+		"horizontal": false,
+		"stacked": false
+	},
+	"parameterDefault": [],
+	"parameterOverlapped": [
+		[null, ""]
+	]
+}
