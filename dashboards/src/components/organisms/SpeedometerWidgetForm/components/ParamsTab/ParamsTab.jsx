@@ -82,24 +82,28 @@ export class ParamsTab extends PureComponent<Props> {
 		data.length > 1 && onChange(DIAGRAM_FIELDS.data, data.filter((dataSet, i) => i !== index));
 	};
 
-	renderIndicatorsBox = ({dataKey, indicators, source}: DataSet, index: number) => {
+	renderIndicatorsBox = ({dataKey, indicators, source, sourceForCompute}: DataSet, index: number) => {
 		const {borders, ranges} = this.props.values;
 
-		return (
-			<BORDERS_CONTEXT.Provider value={borders}>
-				<RANGES_CONTEXT.Provider value={ranges}>
-					<IndicatorsBox
-						components={this.getIndicatorsBoxComponents()}
-						dataKey={dataKey}
-						index={index}
-						key={dataKey}
-						onChange={this.handleChangeIndicators}
-						source={source}
-						value={indicators}
-					/>
-				</RANGES_CONTEXT.Provider>
-			</BORDERS_CONTEXT.Provider>
-		);
+		if (!sourceForCompute) {
+			return (
+				<BORDERS_CONTEXT.Provider value={borders}>
+					<RANGES_CONTEXT.Provider value={ranges}>
+						<IndicatorsBox
+							components={this.getIndicatorsBoxComponents()}
+							dataKey={dataKey}
+							index={index}
+							key={dataKey}
+							onChange={this.handleChangeIndicators}
+							source={source}
+							value={indicators}
+						/>
+					</RANGES_CONTEXT.Provider>
+				</BORDERS_CONTEXT.Provider>
+			);
+		}
+
+		return null;
 	};
 
 	renderIndicatorsFormBox = ({children, ...props}: FormBoxProps) => {
@@ -139,7 +143,7 @@ export class ParamsTab extends PureComponent<Props> {
 				<WidgetNameBox onChange={onChange} values={values} />
 				<WidgetSelectBox />
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
-				{data.filter(dataSet => !dataSet.sourceForCompute).map(this.renderIndicatorsBox)}
+				{data.map(this.renderIndicatorsBox)}
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>

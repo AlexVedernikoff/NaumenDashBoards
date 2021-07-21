@@ -7,3 +7,8 @@ export type Props = InjectedProps & {
 	onChange: OnChange,
 	values: Values
 };
+
+export type XAxisNameContext = {
+	mainIndex: number,
+	xAxisName: string
+};

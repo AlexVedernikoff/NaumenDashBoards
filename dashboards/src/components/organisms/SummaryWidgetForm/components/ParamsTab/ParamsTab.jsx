@@ -42,16 +42,22 @@ export class ParamsTab extends PureComponent<Props> {
 		data.length > 1 && onChange(DIAGRAM_FIELDS.data, data.filter((dataSet, i) => i !== index));
 	};
 
-	renderIndicatorsBox = ({dataKey, indicators, source}: DataSet, index: number) => (
-		<IndicatorsBox
-			dataKey={dataKey}
-			index={index}
-			key={dataKey}
-			onChange={this.handleChangeIndicators}
-			source={source}
-			value={indicators}
-		/>
-	);
+	renderIndicatorsBox = ({dataKey, indicators, source, sourceForCompute}: DataSet, index: number) => {
+		if (!sourceForCompute) {
+			return (
+				<IndicatorsBox
+					dataKey={dataKey}
+					index={index}
+					key={dataKey}
+					onChange={this.handleChangeIndicators}
+					source={source}
+					value={indicators}
+				/>
+			);
+		}
+
+		return null;
+	};
 
 	renderSourceFieldset = (dataSet: DataSet, index: number, data: Array<DataSet>) => (
 		<SourceFieldset
@@ -72,7 +78,7 @@ export class ParamsTab extends PureComponent<Props> {
 				<WidgetNameBox onChange={onChange} values={values} />
 				<WidgetSelectBox />
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
-				{data.filter(dataSet => !dataSet.sourceForCompute).map(this.renderIndicatorsBox)}
+				{data.map(this.renderIndicatorsBox)}
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>
