@@ -16,9 +16,9 @@ scriptService.reloadModules([
     'dashboardMarshaller',
     'dashboardFormulaCalculator',
     'dashboardQueryWrapper',
+    'dashboardSettings',
     'dashboardDataSet',
     'dashboardDrilldown',
     'dashboards',
-    'dashboardSettings',
     'dashboardSendEmail'
 ])
