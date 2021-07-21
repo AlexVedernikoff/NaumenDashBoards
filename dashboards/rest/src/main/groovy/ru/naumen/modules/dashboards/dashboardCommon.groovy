@@ -837,23 +837,6 @@ class DashboardUtils
         attrFormatToFind = attrFormatToFind.replace('_unitsLinks', '')
         return getModules().dynamicFields.getAttrToTotalValueMap()[attrFormatToFind]
     }
-
-    /**
-     * Метод, позволяющий получить минимальную дату у динамического атрибута типа дата/дата время
-     * @param attr - динамический атрибут типа дата/дата время
-     * @param source - источник запроса
-     * @return минимальная дата у динамического атрибута типа дата/дата время
-     */
-    static Date getMinDateDynamic(Attribute attr, Source source)
-    {
-        def sc =  getApi().selectClause
-        String templateUUID = attr.title //после обработки атрибута в модуле queryWrapper, значение uuid-а шаблона хранится в названии
-        def field = 'value'
-        def wrapper = QueryWrapper.build(source, templateUUID)
-        wrapper.totalValueCriteria.add(getApi().filters.attrValueEq('linkTemplate', templateUUID))
-               .addColumn(sc.min(sc.property(field)))
-        return wrapper.getResult(true, DiagramType.TABLE, true).flatten().head() as Date
-    }
 }
 
 //region КЛАССЫ
