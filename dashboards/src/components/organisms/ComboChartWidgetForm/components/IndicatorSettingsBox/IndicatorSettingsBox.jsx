@@ -82,18 +82,22 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 
 	renderNameField = (dataSet: DataSet, index: number) => {
 		const {onChangeYAxisName} = this.props;
-		const {dataKey, yAxisName} = dataSet;
+		const {dataKey, sourceForCompute, yAxisName} = dataSet;
 
-		return (
-			<FormField key={dataKey} small>
-				<TextInput
-					maxLength={MAX_TEXT_LENGTH}
-					name={DIAGRAM_FIELDS.yAxisName}
-					onChange={onChangeYAxisName(index)}
-					value={yAxisName}
-				/>
-			</FormField>
-		);
+		if (!sourceForCompute) {
+			return (
+				<FormField key={dataKey} small>
+					<TextInput
+						maxLength={MAX_TEXT_LENGTH}
+						name={DIAGRAM_FIELDS.yAxisName}
+						onChange={onChangeYAxisName(index)}
+						value={yAxisName}
+					/>
+				</FormField>
+			);
+		}
+
+		return null;
 	};
 
 	renderScaleField = (name: string) => {
@@ -138,7 +142,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 						<Toggle checked={showName} name={DIAGRAM_FIELDS.showName} onChange={this.handleCheckboxChange} value={showName} />
 					</FormControl>
 				</FormField>
-				{data.filter(dataSet => !dataSet.sourceForCompute).map(this.renderNameField)}
+				{data.map(this.renderNameField)}
 				<FormField>
 					<FormControl label="Настроить параметры оси" reverse={true}>
 						<Toggle

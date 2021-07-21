@@ -1,5 +1,6 @@
 // @flow
 import Container from 'components/atoms/Container';
+import type {DataSet} from 'store/widgets/data/types';
 import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
 import DropdownMenu from 'components/atoms/DropdownMenu';
 import FilterButton from 'components/organisms/DiagramWidget/components/FilterButton';
@@ -42,20 +43,23 @@ export class ControlPanel extends PureComponent<Props> {
 		</Container>
 	);
 
-	renderDrillDownItems = (): Array<React$Node> | null => {
-		const {widget} = this.props;
+	renderDrillDownItem = (dataSet: DataSet, index: number): React$Node => {
+		const {dataKey, source, sourceForCompute} = dataSet;
 
-		// $FlowFixMe[incompatible-type]
-		// $FlowFixMe[prop-missing]
-		return widget.data.filter(dataSet => !dataSet.sourceForCompute).map((dataSet, index) => {
-			const {dataKey, source} = dataSet;
-
+		if (!sourceForCompute) {
 			return (
 				<MenuItem key={dataKey} keyEvent={index} onClick={this.handleClickDrillDownButton}>
 					{source.value.label}
 				</MenuItem>
 			);
-		});
+		}
+
+		return null;
+	};
+
+	renderDrillDownItems = (): Array<React$Node> => {
+		const {widget} = this.props;
+		return widget.data.map(this.renderDrillDownItem);
 	};
 
 	renderDropdownMenu = (props: Object) => {

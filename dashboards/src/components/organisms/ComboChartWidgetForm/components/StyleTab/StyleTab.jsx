@@ -10,12 +10,19 @@ import IndicatorSettingsBox from 'components/organisms/ComboChartWidgetForm/comp
 import LegendBox from 'WidgetFormPanel/components/LegendBox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeEvent} from 'components/types';
-import type {Props} from './types';
-import React, {Component} from 'react';
+import type {Props, XAxisNameContext} from './types';
+import React, {Component, createContext} from 'react';
 import SortingBox from 'components/organisms/ComboChartWidgetForm/components/SortingBox';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
 import withWidget from 'WidgetFormPanel/HOCs/withWidget';
+
+const XAXISNAME_CONTEXT = createContext<XAxisNameContext>({
+	mainIndex: 0,
+	xAxisName: ''
+});
+
+XAXISNAME_CONTEXT.displayName = 'XAXISNAME_CONTEXT';
 
 export class StyleTab extends Component<Props> {
 	handleChange = (name: string, data: Object) => {
@@ -31,30 +38,15 @@ export class StyleTab extends Component<Props> {
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
-	renderXAxisNameField = () => {
-		const mainIndex = 0;
-		const {xAxisName} = this.props.values.data[mainIndex];
+	renderAxisSettingsBox = () => {
+		const {values} = this.props;
+		const {data, parameter} = values;
+		const mainIndex = data.findIndex(ds => !ds.sourceForCompute);
+		const xAxisName = data?.[mainIndex]?.xAxisName ?? '';
+		const contextValue = {mainIndex, xAxisName};
 
 		return (
-			<FormField small>
-				<TextInput
-					maxLength={MAX_TEXT_LENGTH}
-					name={DIAGRAM_FIELDS.xAxisName}
-					onChange={this.handleChangeAxisName(mainIndex)}
-					value={xAxisName}
-				/>
-			</FormField>
-		);
-	};
-
-	render () {
-		const {hasCustomGroup, values, widget} = this.props;
-		const {colorsSettings, data, dataLabels, header, indicator, legend, parameter, sorting} = values;
-
-		return (
-			<div className={styles.container}>
-				<HeaderBox name={DIAGRAM_FIELDS.header} onChange={this.handleChange} value={header} />
-				<LegendBox name={DIAGRAM_FIELDS.legend} onChange={this.handleChange} value={legend} />
+			<XAXISNAME_CONTEXT.Provider value={contextValue}>
 				<AxisSettingsBox
 					name={DIAGRAM_FIELDS.parameter}
 					onChange={this.handleChange}
@@ -62,6 +54,34 @@ export class StyleTab extends Component<Props> {
 					title="Параметр"
 					value={parameter}
 				/>
+			</XAXISNAME_CONTEXT.Provider>
+		);
+	};
+
+	renderXAxisNameField = () => (
+		<FormField small>
+			<XAXISNAME_CONTEXT.Consumer>
+				{({mainIndex, xAxisName}) => (
+					<TextInput
+						maxLength={MAX_TEXT_LENGTH}
+						name={DIAGRAM_FIELDS.xAxisName}
+						onChange={this.handleChangeAxisName(mainIndex)}
+						value={xAxisName}
+					/>
+				)}
+			</XAXISNAME_CONTEXT.Consumer>
+		</FormField>
+	);;
+
+	render () {
+		const {hasCustomGroup, values, widget} = this.props;
+		const {colorsSettings, data, dataLabels, header, indicator, legend, sorting} = values;
+
+		return (
+			<div className={styles.container}>
+				<HeaderBox name={DIAGRAM_FIELDS.header} onChange={this.handleChange} value={header} />
+				<LegendBox name={DIAGRAM_FIELDS.legend} onChange={this.handleChange} value={legend} />
+				{this.renderAxisSettingsBox()}
 				<IndicatorSettingsBox
 					data={data}
 					name={DIAGRAM_FIELDS.indicator}
