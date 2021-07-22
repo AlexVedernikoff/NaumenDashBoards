@@ -103,9 +103,12 @@ export class Chart extends PureComponent<Props> {
 
 				if (type === WIDGET_TYPES.COMBO) {
 					const {current} = this.containerRef;
-					const {xaxis, yaxis} = getOptions(widget, data, current, globalColorsSettings);
 
-					opts = {...opts, xaxis, yaxis};
+					if (current) {
+						const {xaxis, yaxis} = getOptions(widget, data, current, globalColorsSettings);
+
+						opts = {...opts, xaxis, yaxis};
+					}
 				}
 			}
 
