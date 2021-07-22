@@ -18,14 +18,14 @@ export class Content extends PureComponent<Props, State> {
 		const {headerHeight} = this.state;
 		const height = `calc(100% - ${headerHeight}px)`;
 
-		return <div style={{height}}>{children}</div>;
+		return <div className={styles.diagram} style={{height}}>{children}</div>;
 	};
 
 	renderHeader = () => {
 		const {header, name} = this.props.widget;
 
 		if (header.show) {
-			return <Header onChangeHeight={this.handleChangeHeaderHeight} settings={header} widgetName={name} />;
+			return <Header className={styles.header} onChangeHeight={this.handleChangeHeaderHeight} settings={header} widgetName={name} />;
 		}
 
 		return null;

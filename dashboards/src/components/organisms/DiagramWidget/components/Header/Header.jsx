@@ -7,6 +7,10 @@ import type {Ref} from 'components/types';
 import settingsStyles from 'styles/settings.less';
 
 export class Header extends PureComponent<Props> {
+	static defaultProps = {
+		className: ''
+	};
+
 	headerRef: Ref<'div'> = createRef();
 
 	componentDidMount () {
@@ -14,11 +18,12 @@ export class Header extends PureComponent<Props> {
 	}
 
 	render () {
-		const {settings, widgetName} = this.props;
+		const {className, settings, widgetName} = this.props;
 		const {fontColor, fontFamily, fontSize, fontStyle, name, textAlign, textHandler, useName} = settings;
 		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 		const {CROP, WRAP} = TEXT_HANDLERS;
 		const nameCN = cn({
+			[className]: true,
 			[settingsStyles.bold]: fontStyle === BOLD,
 			[settingsStyles.italic]: fontStyle === ITALIC,
 			[settingsStyles.underline]: fontStyle === UNDERLINE,
