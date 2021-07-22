@@ -12,6 +12,8 @@
   "description": "common components for projects",
   "dependencies": {
     "memoize-one": "^5.2.1",
+    "moment": "^2.29.1",
+    "rc-menu": "^9.0.12",
     "react-window": "^1.8.5"
   },
   "devDependencies": {

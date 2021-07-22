@@ -13,7 +13,11 @@ export class Loader extends PureComponent<Props> {
 	render () {
 		const {className, size} = this.props;
 
-		return <div className={cn(styles.loader, className)} style={{height: size, width: size}} />;
+		return (
+			<svg className={cn(styles.spinner, className)} style={{height: size, width: size}} viewBox="0 0 50 50">
+				<circle className={styles.path} cx="25" cy="25" fill="none" r="20" strokeWidth="5" />
+			</svg>
+		);
 	}
 }
 

@@ -15,5 +15,3 @@ export type Props = {
 	icon: IconName,
 	onClick?: (event: SyntheticMouseEvent<HTMLButtonElement>) => void
 };
-
-export type ComponentProps = React$Config<Props, DefaultProps>;

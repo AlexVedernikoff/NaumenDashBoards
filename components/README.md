@@ -32,6 +32,21 @@ $ npm run build
 
 Сценарий `build` перед началом сборки выполняет очистку папки `dist` в корне проекта от файлов предыдущей сборки, создает файлы новой сборки в папке `dist`.
 
+## Публикация
+
+1. Сконфигурировать npm для использования группового репозитория:
+	 `npm config set registry http://sd-npm.naumen.ru/repository/npm-group/`
+	 (`npm-group` - объединяет `npm-private` репозиторий и `npm-registry` - proxy репозиторий, указывающий на http://registry.npmjs.org/)
+
+2. Аутентифицироваться:
+	 `npm login --registry=http://sd-npm.naumen.ru/repository/npm-group/`
+	 (Ввести реквизиты учетной записи ldap)
+
+3. Попросить ТПиВИ предоставить доступ для возможности публикации приложений
+
+4. Публикация пакета:
+	 `npm publish --registry http://sd-npm.naumen.ru/repository/npm-private/`
+
 ## Прочие сценарии
 
 Помимо сценариев `storybook` и `build` существуют еще сценарии `flow`, `lint`, `test` и `test:watch`.

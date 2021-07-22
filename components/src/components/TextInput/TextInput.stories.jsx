@@ -26,7 +26,7 @@ const Template = args => {
 
 	const props = {...args, onBlur, onChange, onFocus, value};
 
-	return <div style={{widht: 300}}><TextInput {...props} /></div>;
+	return <div style={{width: 300}}><TextInput {...props} /></div>;
 };
 
 export const Default = Template.bind({});

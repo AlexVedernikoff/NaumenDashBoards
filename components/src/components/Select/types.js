@@ -56,8 +56,6 @@ export type Props = {
 	onSelect: SelectEvent => void,
 };
 
-export type ComponentProps = React$Config<Props, DefaultProps>;
-
 export type State = {
 	foundOptions: Array<Option>,
 	searchValue: string,

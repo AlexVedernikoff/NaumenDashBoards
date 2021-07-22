@@ -18,8 +18,6 @@ export type Props = {
 	...DefaultProps
 };
 
-export type ComponentProps = React$Config<Props, DefaultProps>;
-
 export type State = {
 	value: string
 };

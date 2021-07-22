@@ -52,8 +52,8 @@ export class TextInput extends PureComponent<Props> {
 				ref={forwardedRef}
 				value={value}
 			/>
-		)
-	}
+		);
+	};
 
 	render () {
 		const {className, disabled} = this.props;
