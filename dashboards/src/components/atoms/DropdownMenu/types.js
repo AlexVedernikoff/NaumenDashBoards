@@ -1,4 +1,5 @@
 // @flow
+import {MENU_POSITION} from './constants';
 import type {Node} from 'react';
 
 export type Props = {
@@ -7,4 +8,8 @@ export type Props = {
 	onSelect: () => void,
 	onToggle: () => void,
 	selectable: boolean,
+};
+
+export type State = {
+	position: $Values<typeof MENU_POSITION>
 };

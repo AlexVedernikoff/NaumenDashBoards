@@ -3,6 +3,7 @@ import {DEFAULT_COLS_COUNT, GRID_PROPS, gridRef} from './constants';
 import {DEFAULT_WIDGET_LAYOUT_SIZE} from 'store/dashboard/layouts/constants';
 import type {Layout, WidgetLayoutPosition} from 'store/dashboard/layouts/types';
 import type {LayoutBreakpointsData, LayoutMode} from 'store/dashboard/settings/types';
+import type {Widget} from 'store/widgets/data/types';
 
 /**
  * Возвращает количество колонок сетки в соотвествии с текущим модом дашборда и шириной
@@ -127,9 +128,49 @@ const calculatePosition = (
 	return null;
 };
 
+/**
+ * Формирует список идентификаторов элементов отсортированных по их расположению
+ * @param {Array<Layout>} layouts - макет расположения
+ * @returns  {Array<string>} - отсортированный список идентификаторов элементов
+ */
+const getIndexForLayout = (layouts: Array<Layout>) => {
+	return layouts
+		.map(({i, x, y}) => ({i, val: y * 100 + x}))
+		.sort((a, b) => a.val - b.val)
+		.map(({i}) => i);
+};
+
+/**
+ * Сортирует виджеты в обратном порядке, согласно указанному расположению
+ * @param {Array<Widget>} widgets - список виджетов
+ * @param {Array<Layout>} layout - макет расположения виджетов
+ * @returns {Array<Widget>} - отсортированный список виджетов
+ */
+const getSortedWidgetsByLayout = (widgets: Array<Widget>, layout: Array<Layout>): Array<Widget> => {
+	const result = [];
+	const indexes = layout && layout.length > 0 ? getIndexForLayout(layout) : widgets.map(({id}) => id);
+
+	indexes.reverse().forEach((key) => {
+		const widget = widgets.find((w) => w.id === key);
+
+		if (widget) {
+			result.push(widget);
+		}
+	});
+
+	widgets.forEach(widget => {
+		if (!indexes.includes(widget.id)) {
+			result.push(widget);
+		}
+	});
+
+	return result;
+};
+
 export {
-	getCountGridColumns,
+	calculatePosition,
 	generateWebSMLayout,
-	isEqualsLayouts,
-	calculatePosition
+	getSortedWidgetsByLayout,
+	getCountGridColumns,
+	isEqualsLayouts
 };
