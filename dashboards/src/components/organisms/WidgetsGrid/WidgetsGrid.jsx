@@ -1,6 +1,6 @@
 // @flow
 import type {AnyWidget, WidgetType} from 'store/widgets/data/types';
-import {calculatePosition, generateWebSMLayout, isEqualsLayouts} from './helpers';
+import {calculatePosition, generateWebSMLayout, getSortedWidgetsByLayout, isEqualsLayouts} from './helpers';
 import ChartWidget from 'containers/ChartWidget';
 import cn from 'classnames';
 import ContextMenu from 'components/molecules/ContextMenu';
@@ -12,7 +12,7 @@ import GridItem from './components/Item';
 import isMobile from 'ismobilejs';
 import {Item as MenuItem} from 'rc-menu';
 import type {Layout, Layouts} from 'store/dashboard/layouts/types';
-import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
+import {LAYOUT_BREAKPOINTS, LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
@@ -217,6 +217,7 @@ export class WidgetsGrid extends Component<Props, State> {
 			const isEditable = Boolean(selectedWidget);
 			const containerWidth = this.isDesktopMK() ? DESKTOP_MK_WIDTH : width;
 			const layoutWidgets = getLayoutWidgets(widgets, layoutMode);
+			const sortedLayoutWidgets = getSortedWidgetsByLayout(layoutWidgets, layouts[LAYOUT_BREAKPOINTS.LG]);
 
 			return (
 				<ResizeDetector forwardedRefKey="innerRef" onResize={this.handleResize}>
@@ -233,7 +234,7 @@ export class WidgetsGrid extends Component<Props, State> {
 						width={containerWidth}
 						{...GRID_PROPS[layoutMode]}
 					>
-						{layoutWidgets.map(this.renderGridItem)}
+						{sortedLayoutWidgets.map(this.renderGridItem)}
 					</Grid>
 				</ResizeDetector>
 			);
