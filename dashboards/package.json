@@ -27,7 +27,6 @@
     "react-redux": "^7.1.1",
     "react-sortablejs": "^2.0.11",
     "react-window": "^1.8.5",
-    "recompose": "^0.30.0",
     "reselect": "^4.0.0",
     "smoothscroll-polyfill": "^0.4.4",
     "sortablejs": "^1.13.0",
@@ -120,9 +119,9 @@
     "uglifyjs-webpack-plugin": "^2.2.0",
     "url-loader": "^1.1.2",
     "webpack": "^4.39.3",
-    "webpack-bundle-analyzer": "^4.4.0",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.8.0"
+    "webpack-dev-server": "^3.8.0",
+    "bundle-stats-webpack-plugin": "^3.0.1"
   },
   "resolutions": {
     "eslint": "*"
@@ -172,6 +171,7 @@
     "build": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
     "build-dev": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
     "build-license": "npm run clear && cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
+    "build-stats": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js --json > stats.json",
     "clear": "rm -rf ./dist/*",
     "clear-zip": "rm *.zip",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./webpack/config.js",

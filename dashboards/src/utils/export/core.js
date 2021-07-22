@@ -1,12 +1,7 @@
 // @flow
-import Canvg from 'canvg';
 import {FILE_VARIANTS} from './constants';
-import html2canvas from 'html2canvas';
 import {isLegacyBrowser, save} from './helpers';
-import JsPDF from 'jspdf';
 import type {Options} from './types';
-
-window.html2canvas = html2canvas;
 
 /*
 	Браузеры типа IE и EDGE генерируют svg с невалидными, для работы html2canvas, атрибутами. Поэтому, для отображения графиков
@@ -16,6 +11,8 @@ window.html2canvas = html2canvas;
 	общее изображение контейнера. После этого происходит удаление всех png представлений и возврат svg-графиков на место.
  */
 const createIEImage = async (container: HTMLDivElement, options: Object) => {
+	const Canvg = await import('canvg');
+	const {default: html2canvas} = await import('html2canvas');
 	const charts = container.querySelectorAll('.apexcharts-svg, .speedometer');
 	const serializer = new XMLSerializer();
 	const temp = [];
@@ -86,6 +83,7 @@ const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean)
  * @returns {Promise<Blob>}
  */
 const createImage = async (options: Options) => {
+	const {default: html2canvas} = await import('html2canvas');
 	const {container, fragment, type} = options;
 	const backgroundColor = type === FILE_VARIANTS.PNG ? '#EFF3F8' : '#FFF';
 	let config = {
@@ -114,16 +112,16 @@ const createImage = async (options: Options) => {
  * @param {Options} options - параметры создаваемого файла
  * @returns {Promise<Blob>}
  */
-const createPdf = (image: HTMLCanvasElement, options: Options) => {
+const createPdf = async (image: HTMLCanvasElement, options: Options) => {
 	const {name, toDownload} = options;
 	const {height, width} = image;
 	const orientation = width > height ? 'l' : 'p';
+	const {default: JsPDF} = await import('jspdf');
 	const pdf = new JsPDF({compress: true, orientation, unit: 'pt'});
-
 	const pdfHeight = pdf.internal.pageSize.getHeight();
 	const pdfWidth = pdf.internal.pageSize.getWidth();
 	const imageWidth = width < pdfWidth ? width : pdfWidth;
-	let imageHeight = imageWidth / width * height;
+	const imageHeight = imageWidth / width * height;
 	let countPage = 0;
 
 	pdf.addImage(image, 'PNG', 0, 0, imageWidth, imageHeight);
@@ -193,7 +191,8 @@ const createSnapshot = async (options: Options) => {
 	}
 
 	if (type === PDF) {
-		return createPdf(image, options);
+		const pdfBlob = await createPdf(image, options);
+		return pdfBlob;
 	}
 };
 

@@ -2,10 +2,11 @@
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {PureComponent, Suspense} from 'react';
 import styles from './styles.less';
-import WidgetAddPanel from 'containers/WidgetAddPanel';
-import WidgetFormPanel from 'containers/WidgetFormPanel';
+
+const WidgetAddPanel = React.lazy(() => import('containers/WidgetAddPanel'));
+const WidgetFormPanel = React.lazy(() => import('containers/WidgetFormPanel'));
 
 export class DashboardPanel extends PureComponent<Props, State> {
 	state = {
@@ -29,7 +30,9 @@ export class DashboardPanel extends PureComponent<Props, State> {
 
 		return (
 			<div className={styles.content}>
-				{content}
+				<Suspense fallback={this.renderFallback()}>
+					{content}
+				</Suspense>
 			</div>
 		);
 	};
@@ -45,6 +48,12 @@ export class DashboardPanel extends PureComponent<Props, State> {
 			<div className={CN} onClick={this.handleToggle}>
 				<Icon className={styles.drawerIcon} name={ICON_NAMES.DRAWER} />
 			</div>
+		);
+	};
+
+	renderFallback = () => {
+		return (
+			<div className={styles.fallback}>Загрузка...</div>
 		);
 	};
 

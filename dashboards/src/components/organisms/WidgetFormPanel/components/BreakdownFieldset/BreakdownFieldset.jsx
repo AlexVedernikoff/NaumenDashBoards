@@ -5,7 +5,7 @@ import AttributeGroupField from 'containers/AttributeGroupField';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {BreakdownItem} from 'store/widgetForms/types';
 import cn from 'classnames';
-import {compose} from 'recompose';
+import {compose} from 'redux';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import ExtendButton from 'components/atoms/ExtendButton';
 import type {FieldContext, Props} from './types';

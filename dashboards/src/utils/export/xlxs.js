@@ -3,7 +3,6 @@ import type {BaseColumn, Row, TableBuildData} from 'store/widgets/buildData/type
 import {save} from './helpers';
 import type {TableData} from './types';
 import {TABLE_NAME_LENGTH_LIMIT} from './constants';
-import XLSX from 'xlsx';
 
 class Table {
 	columns = [];
@@ -82,7 +81,7 @@ const stringToArrayBuffer = (s: string) => {
 	return buf;
 };
 
-const exportSheet = (name: string, data: TableBuildData) => {
+const exportSheet = async (name: string, data: TableBuildData) => {
 	const columnsArray: Array<BaseColumn> = [];
 
 	data.columns.forEach((column) => {
@@ -93,6 +92,7 @@ const exportSheet = (name: string, data: TableBuildData) => {
 
 	const tableData: TableData = {...data, columns: columnsArray};
 	const table = (new Table(tableData)).create();
+	const XLSX = await import('xlsx');
 	const workbook = XLSX.utils.book_new();
 	const sheet = XLSX.utils.table_to_sheet(table);
 	let tableName = name;
