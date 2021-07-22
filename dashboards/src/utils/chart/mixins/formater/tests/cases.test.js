@@ -3,6 +3,7 @@ import commonCase from './__cases__/common.json'
 import {getAxisFormatter} from 'utils/chart/mixins/formater';
 import percentCase from './__cases__/percent.json'
 import notationAdditionCase from './__cases__/notation_addition.json'
+import line12451Case from './__cases__/line12451Case.json'
 import type {NumberFormatter, ValueFormatter} from 'utils/chart/mixins/formater/types';
 
 
