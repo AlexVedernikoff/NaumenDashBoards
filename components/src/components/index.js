@@ -1,3 +1,4 @@
+import AbsolutePortal from './AbsolutePortal';
 import AlertModal from './AlertModal';
 import Button from './Button';
 import ButtonGroup from './ButtonGroup';
@@ -5,6 +6,7 @@ import Checkbox from './Checkbox';
 import ConfirmModal from './ConfirmModal';
 import Container from './Container';
 import Datepicker from './Datepicker';
+import DatepickerControl from './DatepickerControl';
 import DropdownMenu from './DropdownMenu';
 import FormBox from './FormBox';
 import FormControl from './FormControl';
@@ -21,6 +23,7 @@ import TextInput from './TextInput';
 import TreeSelect from './TreeSelect';
 
 export {
+	AbsolutePortal,
 	AlertModal,
 	Button,
 	ButtonGroup,
@@ -28,6 +31,7 @@ export {
 	ConfirmModal,
 	Container,
 	Datepicker,
+	DatepickerControl,
 	DropdownMenu,
 	FormBox,
 	FormControl,
