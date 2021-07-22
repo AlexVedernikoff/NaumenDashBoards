@@ -91,8 +91,8 @@ const DrawingStage = (props: Props) => {
 		<Stage
 			ref={stageRef}
 			className={styles.stage}
-			height={area.height - 56}
-			width={area.width - 4}
+			height={area.height - 95}
+			width={area.width - 34}
 			onMouseDown={handleMouseDown}
 			onMouseLeave={handleMouseUp}
 			onMousemove={handleMouseMove}

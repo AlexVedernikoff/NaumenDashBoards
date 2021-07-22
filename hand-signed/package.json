@@ -109,5 +109,5 @@
     "test:watch": "npm run test -- --watch",
     "zip": "node npm-scripts/zip.js"
   },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
