@@ -1,4 +1,5 @@
 // @flow
+import 'moment/locale/ru';
 import cn from 'classnames';
 import DatepickerControl from 'components/atoms/DatepickerControl';
 import {LIMIT_DAYS, WEEK_LABELS, WEEKEND_DAYS} from './constants';

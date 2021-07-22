@@ -61,17 +61,17 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 			// В случае когда у нас выставлена ссылка, но кастомная группировка
 			// ввыставлена на основной атрибут (старый формат)
 			if (attribute.ref && value && typeof value !== 'string' && value.way === GROUP_WAYS.CUSTOM) {
-					const groupId = value.data;
-					const customGroup = await getCustomGroup(groupId);
+				const groupId = value.data;
+				const customGroup = await getCustomGroup(groupId);
 
-					if (customGroup) {
-						const property = customGroup.type.split('$')[1];
+				if (customGroup) {
+					const property = customGroup.type.split('$')[1];
 
-						if (attribute.property === property) {
-							groupAttribute = {...attribute, ref: null};
-							fullAttribute = {...attribute, ref: null};
-						}
+					if (attribute.property === property) {
+						groupAttribute = {...attribute, ref: null};
+						fullAttribute = {...attribute, ref: null};
 					}
+				}
 			}
 
 			this.setState({attribute: fullAttribute, groupAttribute, showModal: true});

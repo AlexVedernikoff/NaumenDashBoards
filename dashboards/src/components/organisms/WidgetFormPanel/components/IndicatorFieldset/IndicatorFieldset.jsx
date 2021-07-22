@@ -4,7 +4,7 @@ import AttributeAggregationField from 'WidgetFormPanel/components/AttributeAggre
 import AttributeCreatingModal from 'containers/AttributeCreatingModal';
 import AttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {compose} from 'recompose';
+import {compose} from 'redux';
 import type {ComputedAttr} from 'store/widgets/data/types';
 import ComputedAttributeEditor from 'WidgetFormPanel/components/ComputedAttributeEditor';
 import Container from 'components/atoms/Container';

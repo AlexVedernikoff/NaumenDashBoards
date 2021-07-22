@@ -7,13 +7,17 @@ const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-
+const { IgnorePlugin } = require('webpack');
 const {development, license} = require('./define');
-
 const packagejson = require('../package.json');
+const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 
 const plugins = [
+	new BundleStatsWebpackPlugin({
+		outDir: '..',
+		silent: true
+	}),
+	new IgnorePlugin(/^\.\/locale$/, /moment$/),
 	new MiniCssExtractPlugin({
 		chunkFilename: development ? '[id].css' : '[id].[hash].css',
 		filename: development ? '[name].css' : '[name].[hash].css'
@@ -29,12 +33,12 @@ const plugins = [
 		title: 'SMP Embedded Application'
 	}),
 	new Dotenv(),
-	new CircularDependencyPlugin(),
-	// new BundleAnalyzerPlugin()
+	new CircularDependencyPlugin()
 ];
 
 if (license === 'use') {
 	const packageReplacer = {};
+
 	packageReplacer.search = `package ru.naumen.modules.${packagejson.name}`;
 	packageReplacer.replacer = packageReplacer.search;
 	packageReplacer.replacer += '_v';
