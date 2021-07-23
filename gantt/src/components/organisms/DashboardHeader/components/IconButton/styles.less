@@ -1,0 +1,51 @@
+@import '/styles/variables';
+
+:local {
+	.button {
+		align-items: center;
+		display: inline-flex;
+		border-radius: @border-radius;
+		justify-content: center;
+		padding: 8px 10px;
+
+		svg {
+			color: @white;
+		}
+	}
+
+	.additional {
+		&:hover {
+			background: @info;
+		}
+
+		&:active {
+			background: @info;
+		}
+	}
+
+	.green {
+		&:hover {
+			background-color: @green;
+		}
+
+		&:active {
+			background-color: @green;
+		}
+	}
+
+	.outlineGreen {
+		background-color: @green;
+
+		&:hover {
+			background-color: @green;
+		}
+
+		&:active {
+			background-color: @green;
+		}
+	}
+
+	.icon {
+		color: @white;
+	}
+}

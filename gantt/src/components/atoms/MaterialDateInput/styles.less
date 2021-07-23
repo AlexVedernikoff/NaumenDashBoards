@@ -1,0 +1,34 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		align-items: center;
+		border-bottom: 1px solid @grey;
+		display: flex;
+		height: 28px;
+		justify-content: space-between;
+		position: relative;
+		width: 100%;
+	}
+
+	.calendarIcon {
+		color: @darkgrey;
+		cursor: pointer;
+		position: absolute;
+		right: 0;
+		top: 5px;
+	}
+
+	.datepickerContainer {
+		position: absolute;
+		right: 0;
+		top: 110%;
+		z-index: 1;
+	}
+
+	.valueContainer {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}

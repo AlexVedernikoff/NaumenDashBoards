@@ -1,0 +1,31 @@
+@import '/styles/variables';
+
+:local {
+	.headerContainer {
+		display: flex;
+		flex: 1 0 auto;
+		overflow-x: scroll;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+
+	.header {
+		display: flex;
+		flex: 1 0 auto;
+	}
+
+	.cellContainer {
+		display: flex;
+		flex: 1 0 auto;
+		flex-direction: column;
+	}
+
+	.subColumnsContainer {
+		display: flex;
+		flex: 1 0 auto;
+	}
+}

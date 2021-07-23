@@ -1,0 +1,44 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		background-color: white;
+		display: flex;
+		height: 100%;
+		flex-direction: column;
+		font-weight: 400;
+		position: relative;
+		user-select: none;
+	}
+
+	.table {
+		border: 1px solid @silver;
+		box-sizing: border-box;
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.noData {
+		align-items: center;
+		background-color: @white;
+		border: 1px solid @silver;
+		display: flex;
+		justify-content: center;
+		padding: 20px;
+	}
+
+	.loading {
+		align-items: center;
+		background-color: rgba(255, 255, 255, 0.7);
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+		left: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+		z-index: 1;
+	}
+}

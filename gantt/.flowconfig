@@ -1,0 +1,34 @@
+[ignore]
+.*/fbjs/.*
+.*/flux/.*
+.*/react-motion/.*
+.*/tests/.*
+.*.stories.*
+.*/webpack/.*
+
+[untyped]
+.*/node_modules/*
+
+[include]
+
+[libs]
+
+[options]
+esproposal.class_instance_fields=enable
+esproposal.optional_chaining=enable
+
+module.system.node.resolve_dirname=node_modules
+module.system.node.resolve_dirname=src
+module.name_mapper.extension='css' -> '<PROJECT_ROOT>/flow/stub/css-modules.js'
+module.name_mapper.extension='less' -> '<PROJECT_ROOT>/flow/stub/css-modules.js'
+module.name_mapper='.*\.\(png\|jpg\|jpeg\|gif\)$' -> '<PROJECT_ROOT>/flow/stub/url-loader.js'
+module.name_mapper='^src\/\(.*\)$' -> '<PROJECT_ROOT>/src/\1'
+module.name_mapper='^src$' -> '<PROJECT_ROOT>/src/index.js'
+module.name_mapper='^Table\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/Table/\1'
+module.name_mapper='^Table' -> '<PROJECT_ROOT>/src/components/organisms/Table/index.js'
+module.name_mapper='^TableWidgetForm\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/TableWidgetForm/\1'
+module.name_mapper='^TableWidgetForm' -> '<PROJECT_ROOT>/src/components/organisms/TableWidgetForm/index.js'
+module.name_mapper='^GroupModal\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/GroupModal/\1'
+module.name_mapper='^GroupModal' -> '<PROJECT_ROOT>/src/components/organisms/GroupModal/index.js'
+module.name_mapper='^WidgetFormPanel\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/WidgetFormPanel/\1'
+module.name_mapper='^WidgetFormPanel' -> '<PROJECT_ROOT>/src/components/organisms/WidgetFormPanel/index.js'

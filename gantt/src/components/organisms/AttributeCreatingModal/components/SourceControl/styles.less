@@ -1,0 +1,95 @@
+@import '/styles/variables';
+
+:local {
+	@height: 48px;
+	@offset: 4px;
+
+	.list {
+		background-color: @white;
+		border-radius: @border-radius;
+		box-shadow: @grey-box-shadow;
+		box-sizing: border-box;
+		left: 0;
+		overflow: hidden;
+		position: absolute;
+		top: @height + @offset;
+		width: 320px;
+		z-index: 1;
+	}
+
+	.control {
+		height: 100%;
+		outline: none;
+	}
+
+	.menuContainer {
+		width: 300px;
+	}
+
+	.valueContainer {
+		align-items: stretch;
+		border-radius: @border-radius;
+		display: flex;
+		flex-direction: row;
+		height: @height;
+	}
+
+	.attributeField {
+		background-color: #EBE4ED;
+		min-height: @height;
+		width: 60px;
+
+		&:hover {
+			background-color: #D1CAD3;
+		}
+	}
+
+	.activeAttributeField {
+		background-color: @white;
+
+		&:hover {
+			background-color: @white;
+		}
+	}
+
+	.labelContainer {
+		align-items: center;
+		background-color: #DAE4F1;
+		box-sizing: border-box;
+		cursor: pointer;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: 8px 12px;
+		min-width: 80px;
+
+		&:hover {
+			background-color: #BACADE;
+		}
+	}
+
+	.placeholder {
+		.labelContainer();
+		border-radius: @border-radius;
+	}
+
+	.label {
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.sourceLabel {
+		.label();
+		color: @darkgrey;
+		font-size: 11px;
+		margin-bottom: 4px;
+	}
+
+	.attributeLabel {
+		.label();
+		color: @black;
+		font-weight: 500;
+	}
+}

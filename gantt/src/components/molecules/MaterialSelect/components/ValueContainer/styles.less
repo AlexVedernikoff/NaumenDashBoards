@@ -1,0 +1,45 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		align-items: center;
+		border-bottom: 1px solid @grey;
+		cursor: pointer;
+		display: flex;
+		height: 28px;
+		justify-content: space-between;
+		position: relative;
+	}
+
+	.editableContainer {
+		border-bottom: 2px solid @black;
+	}
+
+	.placeholder {
+		@height: 13px;
+
+		color: @darkgrey;
+		font-size: @height;
+		position: absolute;
+		top: -@height;
+	}
+
+	.input {
+		cursor: pointer;
+		height: 100%;
+		width: 100%;
+
+		&::placeholder {
+			.placeholder();
+		}
+	}
+
+	.editableInput {
+		cursor: text;
+	}
+
+	.caret {
+		color: @darkgrey;
+		margin: 0 8px;
+	}
+}

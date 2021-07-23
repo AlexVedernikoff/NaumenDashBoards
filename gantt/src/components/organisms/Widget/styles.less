@@ -1,0 +1,53 @@
+@import '/styles/variables';
+
+:local {
+	.error {
+		background-color: @white;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		overflow: hidden;
+		padding: 10px;
+		text-overflow: ellipsis;
+	}
+
+	.widget {
+		height: 100%;
+		overflow: hidden;
+
+		&:hover {
+			z-index: 1;
+
+			.controlPanel {
+				visibility: visible;
+			}
+		}
+	}
+
+	.controlPanel {
+		visibility: hidden;
+	}
+
+	.widgetWarning {
+		align-items: center;
+		background-color: rgba(255, 255, 255, .7);
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+		left: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+		z-index: 4;
+	}
+
+	.widgetWaringContent {
+		background-color: @white;
+		border-radius: 5px;
+		border: 1px solid #e3e3e3;
+		box-shadow: 2px 2px 6px -4px #999;
+		font-size: 14px;
+		padding: 16px;
+	}
+}

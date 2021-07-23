@@ -1,0 +1,102 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		font-size: 13px;
+	}
+
+	.valuesContainer {
+		align-items: center;
+		border-bottom: 1px solid @grey;
+		cursor: pointer;
+		display: flex;
+		height: 28px;
+		position: relative;
+	}
+
+	.caret {
+		color: @darkgrey;
+		margin-left: auto;
+		padding: 0 8px;
+	}
+
+	.values {
+		display: block;
+		overflow: hidden;
+		position: relative;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.label {
+		color: @darkgrey;
+	}
+
+	.labelAboveValues {
+		left: 0;
+		position: absolute;
+		top: -13px;
+	}
+
+	.tagsContainer {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	.tagContainer {
+		align-items: center;
+		background-color: @lightgrey;
+		color: @black;
+		cursor: pointer;
+		display: flex;
+		height: 24px;
+		margin-top: 4px;
+		margin-right: 4px;
+		padding: 0 8px;
+		width: 110px;
+
+		&:hover {
+			background-color: @grey;
+		}
+	}
+
+	.tagLabel {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.clearTagIcon {
+		color: @darkgrey;
+		margin-left: auto;
+		min-width: 16px;
+	}
+
+	.clearButtonContainer {
+		align-items: center;
+		display: flex;
+		height: 24px;
+		margin-right: 4px;
+		margin-top: 4px;
+
+		button {
+			padding: 0 4px 0 0;
+		}
+	}
+
+	.moreTagsInfoContainer {
+		margin: 4px 0;
+		padding: 4px;
+	}
+
+	.moreTagsInfo {
+		color: @darkgrey;
+		margin-right: 16px;
+	}
+
+	.moreTagsButton {
+		color: @black;
+		font-weight: 500;
+	}
+}
