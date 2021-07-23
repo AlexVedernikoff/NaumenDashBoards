@@ -8,4 +8,5 @@ export type ConnectedFunctions = {
 
 export type ConnectedProps = {
 	editMode: boolean,
+	isMobileDevice: boolean,
 };

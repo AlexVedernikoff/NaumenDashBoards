@@ -40,9 +40,9 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	handleClick = () => {
-		const {editMode, setSelectedWidget, widget} = this.props;
+		const {editMode, isMobileDevice, setSelectedWidget, widget} = this.props;
 
-		if (!editMode) {
+		if (!editMode && !isMobileDevice) {
 			setSelectedWidget(widget.id);
 		}
 	};
@@ -55,10 +55,10 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	renderControlPanel = () => {
-		const {components, widget} = this.props;
+		const {components, isMobileDevice, widget} = this.props;
 		const {ControlPanel} = components;
 
-		return <ControlPanel className={styles.controlPanel} widget={widget} />;
+		return isMobileDevice ? null : <ControlPanel className={styles.controlPanel} widget={widget} />;
 	};
 
 	renderError = () => {

@@ -1,6 +1,6 @@
 // @flow
-import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
+import type {LayoutMode} from 'store/dashboard/settings/types';
 
 /**
  * Возвращает функцию, которая не будет срабатывать, пока продолжает вызываться
@@ -74,12 +74,13 @@ const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platfo
 
 /**
  * Возвращает нужный режим отображения с учётом localStorage
+ * @param {boolean} isMobileDevice - признак отображения на мобильном устройстве
  * @returns {string}
  */
-const getLayoutMode = () => {
+const getLayoutMode = (isMobileDevice: boolean): LayoutMode => {
 	const {MOBILE, WEB} = LAYOUT_MODE;
 
-	return isMobile().any ? MOBILE : WEB;
+	return isMobileDevice ? MOBILE : WEB;
 };
 
 /**

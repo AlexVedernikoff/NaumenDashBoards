@@ -9,5 +9,6 @@ export const functions: ConnectedFunctions = {
 };
 
 export const props = (state: AppState): ConnectedProps => ({
-	editMode: state.dashboard.settings.editMode
+	editMode: state.dashboard.settings.editMode,
+	isMobileDevice: state.dashboard.settings.isMobileDevice
 });

@@ -135,6 +135,7 @@ export type SettingsState = {
 	editMode: boolean,
 	error: boolean,
 	exportingFailToEmail: ChangingState,
+	isMobileDevice: boolean,
 	layoutMode: LayoutMode,
 	loading: boolean,
 	personal: boolean,
