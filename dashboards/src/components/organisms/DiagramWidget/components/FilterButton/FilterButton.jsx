@@ -115,6 +115,7 @@ export class FilterButton extends PureComponent<Props, State> {
 		const {className} = this.props;
 		const {showOptionsMenu, usedFilters} = this.state;
 		const icon = usedFilters ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER;
+		const tip = showOptionsMenu ? null : 'Пользовательские фильтры';
 
 		return (
 			<IconButton
@@ -123,7 +124,7 @@ export class FilterButton extends PureComponent<Props, State> {
 				icon={icon}
 				onClick={this.handleToggleOptionsMenu}
 				round={false}
-				tip="Пользовательские фильтры"
+				tip={tip}
 				variant={ICON_BUTTON_VARIANTS.GRAY}
 			/>
 		);
