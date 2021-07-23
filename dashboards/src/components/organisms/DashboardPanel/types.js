@@ -1,8 +1,4 @@
 // @flow
-export type Props = {
-	selectedWidget: string
-};
+import type {ConnectedFunctions, ConnectedProps} from 'containers/DashboardPanel/types';
 
-export type State = {
-	swiped: boolean
-};
+export type Props = ConnectedProps & ConnectedFunctions;

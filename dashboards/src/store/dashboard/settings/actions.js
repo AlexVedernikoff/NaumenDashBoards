@@ -513,11 +513,16 @@ const setCode = payload => ({
 	type: DASHBOARD_EVENTS.SET_CODE
 });
 
+const setHideEditPanel = (payload: boolean) => ({
+	payload,
+	type: DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL
+});
+
 export {
 	changeIntervalRemainder,
 	changeLayoutMode,
-	createPersonalDashboard,
 	createNewState,
+	createPersonalDashboard,
 	editDashboard,
 	fetchDashboard,
 	getSettings,
@@ -525,5 +530,6 @@ export {
 	saveAutoUpdateSettings,
 	seeDashboard,
 	sendToEmails,
+	setHideEditPanel,
 	switchDashboard
 };

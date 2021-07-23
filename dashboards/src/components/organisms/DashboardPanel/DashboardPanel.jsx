@@ -1,28 +1,18 @@
 // @flow
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {PureComponent, Suspense} from 'react';
 import styles from './styles.less';
 
 const WidgetAddPanel = React.lazy(() => import('containers/WidgetAddPanel'));
 const WidgetFormPanel = React.lazy(() => import('containers/WidgetFormPanel'));
 
-export class DashboardPanel extends PureComponent<Props, State> {
-	state = {
-		swiped: false
+export class DashboardPanel extends PureComponent<Props> {
+	handleToggle = () => {
+		const {swiped, updateSwiped} = this.props;
+		return updateSwiped(!swiped);
 	};
-
-	componentDidUpdate (prevProps: Props) {
-		const {selectedWidget} = this.props;
-		const {selectedWidget: prevSelectedWidget} = prevProps;
-
-		if ((!prevSelectedWidget && selectedWidget) || selectedWidget !== prevSelectedWidget) {
-			this.setState({swiped: false});
-		}
-	}
-
-	handleToggle = () => this.setState({swiped: !this.state.swiped});
 
 	renderContent = () => {
 		const {selectedWidget} = this.props;
@@ -38,7 +28,7 @@ export class DashboardPanel extends PureComponent<Props, State> {
 	};
 
 	renderDrawerControl = () => {
-		const {swiped} = this.state;
+		const {swiped} = this.props;
 		const CN = cn({
 			[styles.drawerControl]: true,
 			[styles.activeDrawerControl]: swiped
@@ -58,7 +48,7 @@ export class DashboardPanel extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {swiped} = this.state;
+		const {swiped} = this.props;
 		const CN = cn({
 			[styles.container]: true,
 			[styles.swipedContainer]: swiped

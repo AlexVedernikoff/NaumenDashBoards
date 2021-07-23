@@ -88,6 +88,11 @@ type SetCode= {
 	type: typeof DASHBOARD_EVENTS.SET_CODE
 };
 
+type SetHideEditPanel = {
+	payload: boolean,
+	type: typeof DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL
+};
+
 type SetPersonal = {
 	payload: boolean,
 	type: typeof DASHBOARD_EVENTS.SET_PERSONAL
@@ -123,6 +128,7 @@ export type SettingsAction =
 	| RequestExportingFileToEmail
 	| ResponseExportingFileToEmail
 	| SetCode
+	| SetHideEditPanel
 	| SetPersonal
 	| SwitchOnEditMode
 	| SwitchOffEditMode
@@ -135,6 +141,7 @@ export type SettingsState = {
 	editMode: boolean,
 	error: boolean,
 	exportingFailToEmail: ChangingState,
+	hideEditPanel: boolean,
 	isMobileDevice: boolean,
 	layoutMode: LayoutMode,
 	loading: boolean,

@@ -20,6 +20,7 @@ export const initialDashboardState: SettingsState = {
 		error: false,
 		loading: false
 	},
+	hideEditPanel: false,
 	isMobileDevice,
 	layoutMode: getLayoutMode(isMobileDevice),
 	loading: false,
