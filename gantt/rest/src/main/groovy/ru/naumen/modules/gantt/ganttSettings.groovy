@@ -635,7 +635,7 @@ class ResourceAndWorkSettings
     /**
      * Номер родителя, от которого зависит
      */
-    Ineteger parent
+    Integer parent
 
     /**
      * Тип источника - работа/ресурс
