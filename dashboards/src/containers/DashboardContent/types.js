@@ -1,7 +1,6 @@
 // @flow
 export type ConnectedProps = {
-	editMode: boolean,
-	selectedWidget: string
+	editMode: boolean
 };
 
 export type Props = ConnectedProps;
