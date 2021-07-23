@@ -70,11 +70,11 @@ export class ObjectGroupModal extends Component<Props, State> {
 			const map = this.hasIncludingArchivalType(type) ? allMap : actualMap;
 
 			({[id]: data = {
-					error: false,
-					items: {},
-					loading: false,
-					uploaded: false
-				}} = map);
+				error: false,
+				items: {},
+				loading: false,
+				uploaded: false
+			}} = map);
 		}
 
 		return data;
@@ -99,6 +99,11 @@ export class ObjectGroupModal extends Component<Props, State> {
 		const includingArchival = this.hasIncludingArchivalType(type);
 
 		searchObjects(source, fullAttribute, searchValue, includingArchival);
+	};
+
+	handleClearFound = () => {
+		const {clearSearchObjects, fullAttribute, source} = this.props;
+		return clearSearchObjects(source, fullAttribute);
 	};
 
 	handleLoad = (type: string) => (node?: Object, offset: number = 0) => {
@@ -134,15 +139,11 @@ export class ObjectGroupModal extends Component<Props, State> {
 		return <Node {...props} searchValue={searchValue} />;
 	};
 
-	renderSearchInput = () => {
-		const {[this.state.id]: found} = this.props.objects.found;
-
-		return (
-			<OR_CONDITION_TYPE_CONTEXT.Consumer>
-				{type => <SearchInput onChange={debounce(this.handleChangeSearchInput(type), 500)} value={found?.searchValue} />}
-			</OR_CONDITION_TYPE_CONTEXT.Consumer>
-		);
-	};
+	renderSearchInput = () => (
+		<OR_CONDITION_TYPE_CONTEXT.Consumer>
+			{type => <SearchInput focusOnMount={true} onChange={debounce(this.handleChangeSearchInput(type), 500)} />}
+		</OR_CONDITION_TYPE_CONTEXT.Consumer>
+	);
 
 	renderSelect = (props: SelectProps, objects: ObjectsState, type: string) => {
 		const {error, items: options, loading, uploaded} = this.getObjectSelectData(objects, type);
@@ -152,6 +153,7 @@ export class ObjectGroupModal extends Component<Props, State> {
 			<MaterialTreeSelect
 				components={this.getSelectComponents()}
 				loading={loading}
+				onCloseMenu={this.handleClearFound}
 				onFetch={this.handleLoad(type)}
 				options={options}
 				showMore={showMore}

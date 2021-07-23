@@ -20,6 +20,8 @@ export class TreeSelect extends PureComponent<Props, State> {
 		loading: false,
 		multiple: false,
 		name: '',
+		onCloseMenu: null,
+		onOpenMenu: null,
 		placeholder: 'Выберите значение',
 		removable: false,
 		showMore: false,
@@ -40,7 +42,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 	addFoundNode = (foundTree: Tree, node: Node): Tree => {
 		const {options} = this.props;
 		const {id, parent} = node;
-		let newFoundTree = {
+		const newFoundTree = {
 			...foundTree,
 			[id]: node
 		};
@@ -85,15 +87,36 @@ export class TreeSelect extends PureComponent<Props, State> {
 	};
 
 	handleSelect = (node: Node) => {
-		const {multiple, name, onSelect} = this.props;
+		const {multiple, name, onCloseMenu, onSelect} = this.props;
 
-		!multiple && this.setState({showMenu: false});
+		if (!multiple) {
+			this.setState({showMenu: false});
+			onCloseMenu && onCloseMenu();
+		}
+
 		onSelect({name, value: node});
 	};
 
-	handleToggleList = () => this.setState({showMenu: !this.state.showMenu});
+	handleToggleList = () => {
+		const newValue = !this.state.showMenu;
 
-	hideTree = () => this.setState({showMenu: false});
+		this.setState({showMenu: newValue}, () => {
+			const {onCloseMenu, onOpenMenu} = this.props;
+
+			if (newValue) {
+				onOpenMenu && onOpenMenu();
+			} else {
+				onCloseMenu && onCloseMenu();
+			}
+		});
+	};
+
+	hideTree = () => {
+		const {onCloseMenu} = this.props;
+
+		this.setState({showMenu: false});
+		onCloseMenu && onCloseMenu();
+	};
 
 	renderIndicators = () => {
 		const {removable, value} = this.props;
