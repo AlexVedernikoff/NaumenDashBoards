@@ -105,17 +105,17 @@ export class RefObjectGroupModal extends Component<Props> {
 		const {attribute, customGroups, customType, onClose, onSubmit, orConditionOptions, value} = this.props;
 
 		return (
-				<GroupModal
-					attribute={attribute}
-					components={this.getComponents()}
-					customGroups={customGroups}
-					customType={customType}
-					onClose={onClose}
-					onSubmit={onSubmit}
-					orConditionOptions={orConditionOptions}
-					schema={SCHEMA}
-					value={value}
-				/>
+			<GroupModal
+				attribute={attribute}
+				components={this.getComponents()}
+				customGroups={customGroups}
+				customType={customType}
+				onClose={onClose}
+				onSubmit={onSubmit}
+				orConditionOptions={orConditionOptions}
+				schema={SCHEMA}
+				value={value}
+			/>
 		);
 	}
 }

@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'src/store/sources/attributes/types';
-import type {FetchParams, ObjectsState, SearchObjects} from 'store/sources/attributesData/objects/types';
+import type {ClearSearchObjects, FetchParams, ObjectsState, SearchObjects} from 'store/sources/attributesData/objects/types';
 import type {Group, Source} from 'src/store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
@@ -9,6 +9,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
+	clearSearchObjects: ClearSearchObjects,
 	fetchObjectData: (params: FetchParams) => ThunkAction,
 	searchObjects: SearchObjects
 };

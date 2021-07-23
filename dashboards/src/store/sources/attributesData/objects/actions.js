@@ -38,56 +38,65 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 		const id = getObjectKey(attribute, source);
 		const {id: foundData} = getState().sources.attributesData.objects.found;
 
-	dispatch({
-		payload: {
-			id,
-			searchValue
-		},
-		type: OBJECTS_EVENTS.FOUND_OBJECTS_PENDING
-	});
+		dispatch({
+			payload: {
+				id,
+				searchValue
+			},
+			type: OBJECTS_EVENTS.FOUND_OBJECTS_PENDING
+		});
 
-	try {
-		if (searchValue) {
-			const requestPayload = {
-				attribute,
-				removed: includingArchival,
-				sourceCode: source.value,
-				value: searchValue
-			};
-			const response = await window.jsApi.restCallModule('dashboards', 'searchValue', requestPayload);
-			const items = arrayToTree(response, {
-				keys: {
-					children: 'children',
-					value: 'uuid'
-				},
-				values: {
-					id: getId,
-					uploaded: isUploaded
-				}
-			});
+		try {
+			if (searchValue) {
+				const requestPayload = {
+					attribute,
+					removed: includingArchival,
+					sourceCode: source.value,
+					value: searchValue
+				};
+				const response = await window.jsApi.restCallModule('dashboards', 'searchValue', requestPayload);
+				const items = arrayToTree(response, {
+					keys: {
+						children: 'children',
+						value: 'uuid'
+					},
+					values: {
+						id: getId,
+						uploaded: isUploaded
+					}
+				});
 
+				dispatch({
+					payload: {
+						id,
+						items
+					},
+					type: OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
+				});
+			} else if (foundData && foundData.searchValue) {
+				dispatch({
+					payload: {
+						id,
+						searchValue
+					},
+					type: OBJECTS_EVENTS.CHANGE_SEARCH_VALUE
+				});
+			}
+		} catch (error) {
 			dispatch({
-				payload: {
-					id,
-					items
-				},
-				type: OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
-			});
-		} else if (foundData && foundData.searchValue) {
-			dispatch({
-				payload: {
-					id,
-					searchValue
-				},
-				type: OBJECTS_EVENTS.CHANGE_SEARCH_VALUE
+				payload: id,
+				type: OBJECTS_EVENTS.FOUND_OBJECT_REJECTED
 			});
 		}
-	} catch (error) {
-		dispatch({
-			payload: id,
-			type: OBJECTS_EVENTS.FOUND_OBJECT_REJECTED
-		});
-	}
+	};
+
+const clearSearchObjects = (source: Source, attribute: Attribute): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+	const id = getObjectKey(attribute, source);
+
+	dispatch({
+		payload: id,
+		type: OBJECTS_EVENTS.FOUND_OBJECTS_CLEAR_SEARCH
+	});
 };
 
 /**
@@ -141,6 +150,7 @@ const fetchObjectData = (params: FetchParams): ThunkAction => async (dispatch: D
 };
 
 export {
+	clearSearchObjects,
 	fetchObjectData,
 	searchObjects
 };

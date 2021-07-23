@@ -5,6 +5,8 @@ import type {Source} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 import type {TreeNode} from 'components/types';
 
+export type ClearSearchObjects = (source: Source, attribute: Attribute) => ThunkAction;
+
 export type SearchObjects = (source: Source, attribute: Attribute, value: string, includingArchival: boolean) => ThunkAction;
 
 export type RawObjectData = {
@@ -79,6 +81,11 @@ type FoundObjectsFulfilled = {
 	type: typeof OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
 };
 
+type ClearFoundObjects = {
+	payload: string,
+	type: typeof OBJECTS_EVENTS.FOUND_OBJECTS_CLEAR_SEARCH
+};
+
 type FoundObjectsPending = {
 	payload: {
 		id: string,
@@ -113,6 +120,7 @@ type UnknownObjectsAction = {
 
 export type ObjectsAction =
 	| ChangeSearchValue
+	| ClearFoundObjects
 	| FoundObjectsFulfilled
 	| FoundObjectsPending
 	| FoundObjectsRejected

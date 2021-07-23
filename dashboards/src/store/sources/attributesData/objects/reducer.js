@@ -3,6 +3,7 @@ import {createObjectData, receiveObjectData, recordObjectError, requestObjectDat
 import {defaultObjectsAction, initialObjectsState} from './init';
 import type {ObjectsAction, ObjectsState} from './types';
 import {OBJECTS_EVENTS} from './constants';
+import {omit} from 'helpers';
 
 const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsAction = defaultObjectsAction): ObjectsState => {
 	switch (action.type) {
@@ -44,7 +45,6 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 		case OBJECTS_EVENTS.FOUND_OBJECT_REJECTED:
 			return {
 				...state,
-				...state,
 				found: {
 					...state.found,
 					[action.payload]: {
@@ -77,6 +77,11 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					...state[action.payload.type],
 					[action.payload.id]: recordObjectError(state[action.payload.type], action.payload)
 				}
+			};
+		case OBJECTS_EVENTS.FOUND_OBJECTS_CLEAR_SEARCH:
+			return {
+				...state,
+				found: omit(state.found, action.payload)
 			};
 		default:
 			return state;
