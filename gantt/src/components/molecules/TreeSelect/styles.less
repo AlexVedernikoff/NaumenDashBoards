@@ -1,0 +1,63 @@
+@import '/styles/variables';
+
+:local {
+	@height: 28px;
+
+	.select {
+		position: relative;
+	}
+
+	.indicators {
+		align-items: center;
+		display: flex;
+		margin-left: auto;
+		visibility: hidden;
+	}
+
+	.menu {
+		background-color: @white;
+		border-radius: @border-radius;
+		box-shadow: @grey-box-shadow;
+		left: 0;
+		margin-bottom: 20px;
+		position: absolute;
+		right: 0;
+		top: calc(100% + 10px);
+		z-index: 1;
+	}
+
+	.valueContainer {
+		align-items: center;
+		border-bottom: 2px solid @black;
+		box-sizing: border-box;
+		cursor: pointer;
+		display: flex;
+		height: @height;
+		padding: 5px 0;
+		flex: auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&:hover {
+			.indicators {
+				visibility: visible;
+			}
+		}
+	}
+
+	.value {
+		align-items: center;
+		display: flex;
+		flex: auto;
+	}
+
+	.label {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.placeholder {
+		color: @darkgrey;
+	}
+}

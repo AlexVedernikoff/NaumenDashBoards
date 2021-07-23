@@ -1,0 +1,166 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TreeSelect Node renders "showMore" link when "showMore" property is set to "true" 1`] = `
+<Fragment>
+  <div
+    className="labelContainer"
+  >
+    <div
+      className="toggleIconContainer"
+      onClick={[Function]}
+    >
+      <Icon
+        className="toggleIcon"
+        height={16}
+        name="TOGGLE_EXPANDED"
+        title=""
+        viewBox="0 0 16 16"
+        width={16}
+      />
+    </div>
+    <div
+      className="label"
+      onClick={[Function]}
+      title="label"
+    >
+      label
+    </div>
+  </div>
+  <div
+    className="childrenContainer"
+  >
+    <Button
+      block={false}
+      className="showMoreButton"
+      disabled={false}
+      onClick={[Function]}
+      outline={false}
+      type="button"
+      variant="SIMPLE"
+    >
+      Показать еще
+    </Button>
+  </div>
+</Fragment>
+`;
+
+exports[`TreeSelect Node renders no "showMore" link when "showMore" property is set to "false" 1`] = `
+<Fragment>
+  <div
+    className="labelContainer"
+  >
+    <div
+      className="toggleIconContainer invisibleContainer"
+      onClick={[Function]}
+    >
+      <Icon
+        className="toggleIcon"
+        height={16}
+        name="TOGGLE_COLLAPSED"
+        title=""
+        viewBox="0 0 16 16"
+        width={16}
+      />
+    </div>
+    <div
+      className="label"
+      onClick={[Function]}
+      title="label"
+    >
+      label
+    </div>
+  </div>
+</Fragment>
+`;
+
+exports[`TreeSelect Node renders with children when "expanded" property is set to "false" 1`] = `
+<Fragment>
+  <div
+    className="labelContainer"
+  >
+    <div
+      className="toggleIconContainer"
+      onClick={[Function]}
+    >
+      <Icon
+        className="toggleIcon"
+        height={16}
+        name="TOGGLE_COLLAPSED"
+        title=""
+        viewBox="0 0 16 16"
+        width={16}
+      />
+    </div>
+    <div
+      className="label"
+      onClick={[Function]}
+      title="label"
+    >
+      label
+    </div>
+  </div>
+</Fragment>
+`;
+
+exports[`TreeSelect Node renders with children when "expanded" property is set to "true" 1`] = `
+<Fragment>
+  <div
+    className="labelContainer"
+  >
+    <div
+      className="toggleIconContainer"
+      onClick={[Function]}
+    >
+      <Icon
+        className="toggleIcon"
+        height={16}
+        name="TOGGLE_EXPANDED"
+        title=""
+        viewBox="0 0 16 16"
+        width={16}
+      />
+    </div>
+    <div
+      className="label"
+      onClick={[Function]}
+      title="label"
+    >
+      label
+    </div>
+  </div>
+  <div
+    className="childrenContainer"
+  >
+    child1,child2
+  </div>
+</Fragment>
+`;
+
+exports[`TreeSelect Node renders without children when no child provided 1`] = `
+<Fragment>
+  <div
+    className="labelContainer"
+  >
+    <div
+      className="toggleIconContainer invisibleContainer"
+      onClick={[Function]}
+    >
+      <Icon
+        className="toggleIcon"
+        height={16}
+        name="TOGGLE_COLLAPSED"
+        title=""
+        viewBox="0 0 16 16"
+        width={16}
+      />
+    </div>
+    <div
+      className="label"
+      onClick={[Function]}
+      title="label"
+    >
+      label
+    </div>
+  </div>
+</Fragment>
+`;

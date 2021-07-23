@@ -1,0 +1,55 @@
+@import '/styles/variables';
+
+:local {
+	.toggle {
+		background-color: @grey;
+		border-radius: 12px;
+		bottom: 0;
+		cursor: pointer;
+		display: inline-block;
+		height: 20px;
+		left: 0;
+		position: relative;
+		right: 0;
+		top: 0;
+		transition: .4s;
+		width: 32px;
+
+		&:hover {
+			background-color: #949494;
+		}
+	}
+
+	.toggle:before {
+		background-color: @white;
+		border-radius: 50%;
+		bottom: 2px;
+		content: '';
+		height: 16px;
+		left: 2px;
+		position: absolute;
+		transition: .4s;
+		width: 16px;
+	}
+
+	.checked {
+		background-color: @info;
+
+		&:hover {
+			background-color: #2F6A98;
+		}
+
+		&:active {
+			background-color: #1D415E;
+		}
+
+		&:before {
+			transform: translateX(12px);
+		}
+	}
+
+	.disabled {
+		opacity: 0.8;
+		pointer-events: none;
+	}
+}

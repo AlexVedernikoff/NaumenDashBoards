@@ -1,0 +1,43 @@
+@import '/styles/variables';
+
+:local {
+	@field-width: 80px;
+	@height: 32px;
+
+	.form {
+		background-color: white;
+		box-sizing: border-box;
+		height: @height;
+		padding: 8px 12px;
+	}
+
+	.fieldContainer {
+		height: 100%;
+		width: @field-width;
+	}
+
+	.valueContainerChildren {
+		display: flex;
+		width: calc(100% - @field-width);
+	}
+
+	.select {
+		background-color: white;
+		border: none !important;
+		height: @height;
+
+		&:hover {
+			.indicatorContainer {
+				display: flex;
+			}
+		}
+	}
+
+	.indicatorContainer {
+		display: none;
+	}
+
+	.loader {
+		margin-right: 10px;
+	}
+}

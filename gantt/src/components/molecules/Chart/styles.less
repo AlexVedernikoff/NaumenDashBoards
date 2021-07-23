@@ -1,0 +1,23 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		height: 100%;
+	}
+
+	.blockLegend :global(.apexcharts-legend) {
+		display: block !important;
+	}
+
+	.inlineLegend :global(.apexcharts-legend) {
+		display: flex !important;
+	}
+}
+
+.apexcharts-canvas ::-webkit-scrollbar {
+	height: 6px;
+}
+
+.apexcharts-toolbar {
+	display: none !important;
+}

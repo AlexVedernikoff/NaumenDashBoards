@@ -1,0 +1,17 @@
+// @flow
+import type {AnyWidget, DataLabels} from 'store/widgets/data/types';
+import NewWidget from 'store/widgets/data/NewWidget';
+
+export type DefaultProps = {
+	name: string,
+	showForamt: boolean,
+};
+
+export type Props = {
+	...DefaultProps,
+	onChange: (name: string, value: DataLabels) => void,
+	value: DataLabels,
+	widget: AnyWidget | NewWidget
+};
+
+export type ComponentProps = React$Config<Props, DefaultProps>;

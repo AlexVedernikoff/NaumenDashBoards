@@ -1,0 +1,59 @@
+@import '/styles/variables';
+
+:local {
+	.modal {
+		background-color: rgba(0, 0, 0, 0.1);
+		bottom: 0;
+		left: 0;
+		overflow-y: auto;
+		position: fixed;
+		right: 0;
+		top: 0;
+		z-index: 99900;
+	}
+
+	.container {
+		border-radius: @border-radius;
+		margin: 5% auto;
+		width: 600px;
+	}
+
+	.largeContainer {
+		width: 900px;
+	}
+
+	.smallContainer {
+		width: 460px;
+	}
+
+	.header {
+		background-color: @primary;
+		border-radius: @border-radius @border-radius 0 0;
+		color: white;
+		font-size: 15px;
+		font-weight: 500;
+		line-height: 18px;
+		padding: 15px 24px;
+	}
+
+	.content {
+		background-color: white;
+	}
+
+	.noticeContent {
+		padding: 24px 24px 36px 24px;
+	}
+
+	.footer {
+		background-color: @blue;
+		padding: 16px 24px;
+	}
+
+	.rightFooter {
+		text-align: right;
+	}
+
+	.cancelButton {
+		margin-left: 12px;
+	}
+}

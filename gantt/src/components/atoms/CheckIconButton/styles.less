@@ -1,0 +1,26 @@
+@import '/styles/variables';
+
+:local {
+	.button {
+		align-items: center;
+		background-color: @gainsboro;
+		border-radius: @border-radius;
+		cursor: pointer;
+		display: inline-flex;
+		padding: 4px 8px;
+
+		&:hover,
+		&:active {
+			background-color: @silver;
+		}
+
+		:disabled {
+			opacity: 0.8;
+			pointer-events: none;
+		}
+	}
+
+	.checked {
+		background-color: @silver;
+	}
+}

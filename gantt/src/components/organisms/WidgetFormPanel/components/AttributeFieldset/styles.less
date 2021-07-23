@@ -1,0 +1,41 @@
+@import "/styles/variables.less";
+
+:local {
+	@combined-left-with: 80px;
+
+	.container {
+		background-color: white;
+		position: relative;
+	}
+
+	.select {
+		position: static !important;
+	}
+
+	.combinedContainer {
+		.container();
+		display: flex;
+	}
+
+	.combinedRef {
+		width: @combined-left-with;
+	}
+
+	.combinedAttribute {
+		width: calc(100% - @combined-left-with);
+	}
+
+	.parentInput {
+		.container();
+		margin-bottom: 10px;
+	}
+
+	.dynamicAttributesShowHandler {
+		padding: 10px;
+	}
+
+	.dynamicError {
+		color: @error;
+		padding: 10px;
+	}
+}
