@@ -115,7 +115,7 @@ const getLocalStorageValue = (storageKey: string, key: string, defaultValue: any
  * @param {string} key - ключ
  */
 const removeLocalStorageValue = (storageKey: string, key: string) => {
-	let storage = localStorage.getItem(storageKey);
+	const storage = localStorage.getItem(storageKey);
 
 	if (storage) {
 		localStorage.setItem(storageKey, JSON.stringify({...JSON.parse(storage), [key]: undefined}));

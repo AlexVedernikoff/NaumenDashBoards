@@ -1,6 +1,7 @@
 // @flow
 import {DASHBOARD_EVENTS} from './constants';
 import {defaultDashboardAction, initialDashboardState} from './init';
+import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import type {SettingsAction, SettingsState} from './types';
 
 const reducer = (state: SettingsState = initialDashboardState, action: SettingsAction = defaultDashboardAction): SettingsState => {
@@ -16,7 +17,7 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 		case DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE:
 			return {
 				...state,
-				layoutMode: action.payload
+				layoutMode: state.isMobileDevice ? LAYOUT_MODE.MOBILE : action.payload ?? LAYOUT_MODE.WEB
 			};
 		case DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD:
 			return {

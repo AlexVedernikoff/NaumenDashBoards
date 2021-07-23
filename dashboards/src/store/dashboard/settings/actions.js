@@ -18,7 +18,6 @@ import {
 } from 'store/context/actions';
 import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
-import {getLayoutMode} from 'helpers';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -495,7 +494,7 @@ const switchDashboard = (saveState: boolean = true): ThunkAction => async (dispa
 };
 
 const initLayoutMode = () => ({
-	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.LAYOUT_MODE, getLayoutMode()),
+	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.LAYOUT_MODE),
 	type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
 });
 

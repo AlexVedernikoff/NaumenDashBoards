@@ -1,7 +1,10 @@
 // @flow
 import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
 import {getLayoutMode} from 'helpers';
+import isMobile from 'ismobilejs';
 import type {SettingsAction, SettingsState} from './types';
+
+const isMobileDevice = isMobile().any;
 
 export const initialDashboardState: SettingsState = {
 	autoUpdate: {
@@ -17,7 +20,8 @@ export const initialDashboardState: SettingsState = {
 		error: false,
 		loading: false
 	},
-	layoutMode: getLayoutMode(),
+	isMobileDevice,
+	layoutMode: getLayoutMode(isMobileDevice),
 	loading: false,
 	personal: false,
 	personalCreating: false,
