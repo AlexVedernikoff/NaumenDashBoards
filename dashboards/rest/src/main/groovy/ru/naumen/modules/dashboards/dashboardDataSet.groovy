@@ -4121,6 +4121,10 @@ class DashboardDataSetService
             {
                 return value[fieldName]
             }
+            else
+            {
+                return []
+            }
         }
     }
 
