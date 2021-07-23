@@ -174,7 +174,7 @@ const getAxisFormatterDebug = (widget: AxisWidget, labels: Array<string> | Array
 
 let getAxisFormatter = getAxisFormatterBase;
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && process.env.AXIS_FORMATTER_DEBUG === 'true') {
 	getAxisFormatter = getAxisFormatterDebug;
 }
 
