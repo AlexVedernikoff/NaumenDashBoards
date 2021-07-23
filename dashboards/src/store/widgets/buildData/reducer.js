@@ -13,7 +13,7 @@ const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDat
 			return {
 				...state,
 				[action.payload.id]: {
-					data: null,
+					...state[action.payload.id],
 					error: false,
 					loading: true,
 					type: action.payload.type,
@@ -35,6 +35,7 @@ const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDat
 				...state,
 				[action.payload]: {
 					...state[action.payload],
+					data: null,
 					error: true,
 					loading: false
 				}
