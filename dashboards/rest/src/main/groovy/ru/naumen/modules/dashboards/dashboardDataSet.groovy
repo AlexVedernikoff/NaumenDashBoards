@@ -1830,7 +1830,7 @@ class DashboardDataSetService
                         {
                             def tempAttr = attribute.deepClone()
                             tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
-                            minDate = DashboardUtils.getMinDateDynamic(tempAttr,source)
+                            minDate = DashboardQueryWrapperUtils.getMinDateDynamic(tempAttr,source)
                         }else
                         {
                             minDate = DashboardUtils.getMinDate(attribute.attrChains().code.join('.'), attribute.sourceCode)
@@ -1978,7 +1978,7 @@ class DashboardDataSetService
                         {
                             def tempAttr = attribute.deepClone()
                             tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
-                            minDate = DashboardUtils.getMinDateDynamic(tempAttr,source)
+                            minDate = DashboardQueryWrapperUtils.getMinDateDynamic(tempAttr,source)
                         }
                         else
                         {
@@ -2794,7 +2794,7 @@ class DashboardDataSetService
                 {
                     def tempAttr = parameter.attribute.deepClone()
                     tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
-                    minDate = DashboardUtils.getMinDateDynamic(tempAttr, source)
+                    minDate = DashboardQueryWrapperUtils.getMinDateDynamic(tempAttr, source)
                 }else
                 {
                     minDate = DashboardUtils.getMinDate(
