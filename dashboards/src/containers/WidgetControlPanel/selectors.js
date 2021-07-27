@@ -7,9 +7,11 @@ import {USER_ROLES} from 'store/context/constants';
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard} = state;
 	const editable = context.user.role !== USER_ROLES.REGULAR || dashboard.settings.personal;
+	const personalDashboard = dashboard.settings.personal;
 
 	return {
-		editable
+		editable,
+		personalDashboard
 	};
 };
 
