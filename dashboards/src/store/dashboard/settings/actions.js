@@ -65,6 +65,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 			dispatch(getUserData()),
 			dispatch(getSettings())
 		]);
+		dashboardResizer.resize();
 
 		dispatch(getPassedWidget());
 		dispatch(initStorageSettings());
