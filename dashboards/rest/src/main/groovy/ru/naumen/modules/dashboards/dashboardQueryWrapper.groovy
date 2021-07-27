@@ -898,9 +898,9 @@ class QueryWrapper implements CriteriaWrapper
                     ).with(api.filters.&not)
                     return api.filters.or(notContainsFilter, nullFilter)
                 case Comparison.EQUAL_REMOVED:
-                    return api.filters.attrContains(columnCode, parameter.value, false, false)
+                    return api.filters.attrContains(columnCode.replace('title', DashboardQueryWrapperUtils.UUID_CODE), parameter.value, false, false)
                 case Comparison.NOT_EQUAL_REMOVED:
-                    return api.filters.attrContains(columnCode, parameter.value, false, false)
+                    return api.filters.attrContains(columnCode.replace('title', DashboardQueryWrapperUtils.UUID_CODE), parameter.value, false, false)
                               .with(api.filters.&not)
                 case Comparison.STATE_TITLE_CONTAINS:
                     List fqns = getFqns(parameterFqn)

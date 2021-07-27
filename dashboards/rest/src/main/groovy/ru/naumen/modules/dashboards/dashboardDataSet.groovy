@@ -1517,8 +1517,7 @@ class DashboardDataSetService
                     {
                         throw new IllegalArgumentException("Condition data is null or empty")
                     }
-                    String uuid = condition.data.uuid
-                    def value = api.utils.get(uuid)
+                    def value = condition.data.uuid
                     return new FilterParameter(
                         value: value,
                         title: title,
