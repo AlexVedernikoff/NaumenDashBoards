@@ -564,7 +564,7 @@ class DashboardsService
             }
             else
             {
-                independentBottoms << basicMap(bottom, bottomClassHasParent ? getChildrenTree(bottom, childrenInBottomValues, sourceCode) : [], sourceCode)
+                independentBottoms << basicMap(bottom, bottomClassHasParent ? getChildrenTree(bottom, childrenInBottomValues, sourceCode) : [])
             }
         }
 
