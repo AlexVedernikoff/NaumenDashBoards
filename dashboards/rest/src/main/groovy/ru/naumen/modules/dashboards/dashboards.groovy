@@ -545,11 +545,6 @@ class DashboardsService
         }
         def withParentsBottoms = []
         def independentBottoms = []
-        Boolean attributeClassHasParent = types.every { api.metainfo.getMetaClass(it).hasAttribute('parent') }
-        if(attributeClassHasParent)
-        {
-            bottomValues.removeAll {it.parent == null}
-        }
 
         def childrenInBottomValues = []
         bottomValues.each { bottom ->
