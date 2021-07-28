@@ -835,10 +835,11 @@ class QueryWrapper implements CriteriaWrapper
 
             Boolean sourceIsEvt = criteria.currentMetaClass.fqn.code.contains('_Evt')
             def valueToPut = sourceIsEvt ? 'parent.metaClass' : 'metaClass'
-
+            Boolean attributeIsDynamic = attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
+            attribute = DashboardQueryWrapperUtils.updateRefAttributeCode(attribute)
             Collection attrChains = attribute.attrChains()
             String code = attrChains*.code.join('.').replace('metaClass', valueToPut)
-            if(Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES && attribute?.code != AttributeType.TOTAL_VALUE_TYPE)
+            if(Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES && !attributeIsDynamic)
             {
                 attribute?.attrChains()?.last()?.ref = Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES_WITHOUT_CATALOG
                     ? new Attribute(code: 'title', type: 'string')
@@ -850,7 +851,7 @@ class QueryWrapper implements CriteriaWrapper
             {
                 columnCode = columnCode.replace('id', DashboardQueryWrapperUtils.UUID_CODE)
             }
-            if (code == AttributeType.TOTAL_VALUE_TYPE)
+            if (attributeIsDynamic)
             {
                 code = columnCode
             }
@@ -1363,6 +1364,9 @@ class DashboardQueryWrapperUtils
     {
         String attributeType = Attribute.getAttributeType(attribute)
         String attributeCode = attribute.attrChains().last().code
+        Boolean attributeIsDynamic = attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
+        attribute = updateRefAttributeCode(attribute)
+
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1406,7 +1410,7 @@ class DashboardQueryWrapperUtils
         {
             attribute.attrChains().last().code = 'id'
         }
-        if (attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
+        if (attributeIsDynamic)
         {
             def (dynAttrCode, templateUUID) = TotalValueMarshaller.unmarshal(attribute.code)
             attribute.code = AttributeType.VALUE_TYPE
@@ -1445,6 +1449,31 @@ class DashboardQueryWrapperUtils
         wrapper.totalValueCriteria.add(getApi().filters.attrValueEq('linkTemplate', templateUUID))
                .addColumn(sc.min(sc.property(field)))
         return wrapper.getResult(true, DiagramType.TABLE, true).flatten().head() as Date
+    }
+
+    /**
+     * Метод по изменению кода атрибута второго по уровню, если он есть только в конкретном типе, но его нет в классе
+     * @param attribute - атрибут целиком
+     * @return атрибут с новым кодом
+     */
+    static Attribute updateRefAttributeCode(Attribute attribute)
+    {
+        Boolean attributeIsNotDynamic = !attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
+        Boolean attrRefHasBaseValues = !attribute?.ref?.code?.contains('@')
+        //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута второго уровня для него,
+        //скорей всего атрибут второго уровня есть только в конкретном типе, но его нет в классе
+        //также атрибут должен быть не динамический и в нём уже не проставлен этот код корректно
+        if(attribute.ref && attribute.property && attribute.ref.metaClassFqn && attributeIsNotDynamic && attrRefHasBaseValues)
+        {
+            String attrRefCode = attribute.ref.code
+            def systemAttribute = getApi().metainfo.getMetaClass(attribute.ref.metaClassFqn).getAttribute(attrRefCode)
+            Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
+            if(!attrSignedInClass && attribute.property != attribute.ref.metaClassFqn)
+            {
+               attribute.ref.code = systemAttribute.attributeFqn.toString()
+            }
+        }
+        return attribute
     }
 }
 return

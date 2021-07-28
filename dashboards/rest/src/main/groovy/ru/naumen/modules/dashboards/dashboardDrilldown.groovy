@@ -311,7 +311,7 @@ class Link
                 Collection<Collection> result = []
                 String attributeType = Attribute.getAttributeType(attr)
                 Boolean attrIsDynamic = attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-
+                attr = DashboardQueryWrapperUtils.updateRefAttributeCode(attr)
                 //выглядит костыльно, но это необходимо, чтобы обойти ситуацию,
                 // когда основной источник запроса - дочерний к classFqn,
                 // когда у нас сама диаграмма типа таблица
