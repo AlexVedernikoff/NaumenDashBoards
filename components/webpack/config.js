@@ -16,7 +16,7 @@ module.exports = {
 	optimization,
 	output: {
 		filename: 'index.js',
-		library: 'common-components',
+		library: 'naumen-common-components',
 		libraryTarget: 'umd',
 		path: dist
 	},

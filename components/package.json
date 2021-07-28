@@ -125,14 +125,15 @@
     "react"
   ],
   "license": "ISC",
-  "name": "common-components",
+  "name": "naumen-common-components",
   "repository": {
     "type": "git",
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"
   },
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "scripts": {
-    "build": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js",
+    "build": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js",
     "clear": "rm -rf ./dist/*",
     "flow": "flow",
     "lint": "./node_modules/.bin/eslint --ext .js,.jsx ./src",
@@ -143,5 +144,8 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
-  "version": "1.0.1"
+  "version": "1.0.1",
+  "files": [
+    "dist"
+  ]
 }

@@ -16,4 +16,6 @@ rest/stand.json
 
 .env
 
+dist
+
 .DS_Store
