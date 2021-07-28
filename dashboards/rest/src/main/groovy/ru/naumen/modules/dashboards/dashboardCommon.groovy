@@ -1405,28 +1405,6 @@ class DtIntervalMarshaller
         return value ? value.tokenize(dbDelimiter) : []
     }
 }
-
-/**
- * Класс для преобразования кода атрибута, если он находится только в типе, но его нет в классе
- */
-class RefAttributeCodeMarshaller
-{
-    /**
-     * Делитель для значения
-     */
-    static String delimiter = '@'
-
-    /**
-     * Метод формироания нового кода для атрибута,  если он находится только в типе, но его нет в классе
-     * @param metaClass - код метакласса, откуда сам атрибут
-     * @param attributeCode - код атрибута
-     * @return метакласс атрибута в поре с кодом атрибута
-     */
-    static String marshal(String metaClass, String attributeCode)
-    {
-        return "${metaClass}${delimiter}${attributeCode}"
-    }
-}
 //endregion
 
 //region Dashboards And Widgets Settings
