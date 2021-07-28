@@ -71,10 +71,10 @@ export class ControlPanel extends PureComponent<Props, State> {
 	handleToggleSubMenu = () => this.setState({showSubmenu: !this.state.showSubmenu});
 
 	renderChangeDisplayModeButton = () => {
-		const {editable, widget} = this.props;
+		const {editable, personalDashboard, widget} = this.props;
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === widget.displayMode) || DISPLAY_MODE_OPTIONS[0];
 
-		if (editable) {
+		if (editable && !personalDashboard) {
 			return (
 				<DropDownButton
 					buttonIcon={this.getDisplayModeIcon()}

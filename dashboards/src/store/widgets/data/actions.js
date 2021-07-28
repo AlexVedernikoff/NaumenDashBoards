@@ -42,14 +42,14 @@ const checkWidgetsCount = () => (dispatch: Dispatch, getState: GetState): void =
  * @returns {ThunkAction}
  */
 const addNewWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): void => {
-		dispatch(checkWidgetsCount());
+	dispatch(checkWidgetsCount());
 
-		batch(() => {
-			dispatch(focusWidget(payload.id));
-			dispatch({payload, type: WIDGETS_EVENTS.ADD_WIDGET});
-			dispatch({type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE});
-			dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
-		});
+	batch(() => {
+		dispatch(focusWidget(payload.id));
+		dispatch({payload, type: WIDGETS_EVENTS.ADD_WIDGET});
+		dispatch({type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE});
+		dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
+	});
 };
 
 /**
@@ -145,25 +145,25 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
  */
 const editWidgetChunkData = (widget: AnyWidget, chunkData: Object, refreshData: boolean = true): ThunkAction =>
 	async (dispatch: Dispatch): Promise<void> => {
-	try {
-		const payload = {
-			...getParams(),
-			chunkData,
-			id: widget.id
-		};
-		const updatedWidgetData = {
-			...widget,
-			...chunkData
-		};
+		try {
+			const payload = {
+				...getParams(),
+				chunkData,
+				id: widget.id
+			};
+			const updatedWidgetData = {
+				...widget,
+				...chunkData
+			};
 
-		await window.jsApi.restCallModule('dashboardSettings', 'editWidgetChunkData', payload);
+			await window.jsApi.restCallModule('dashboardSettings', 'editWidgetChunkData', payload);
 
-		dispatch(updateWidget(updatedWidgetData));
-		refreshData && dispatch(fetchBuildData(updatedWidgetData));
-	} catch (e) {
-		dispatch(recordSaveError());
-	}
-};
+			dispatch(updateWidget(updatedWidgetData));
+			refreshData && dispatch(fetchBuildData(updatedWidgetData));
+		} catch (e) {
+			dispatch(recordSaveError());
+		}
+	};
 
 /**
  * Сохраняет данные настройки виджета с обновленными пользовательскими фильтрами
@@ -187,7 +187,7 @@ const saveWidgetWithNewFilters = (widget: Widget): ThunkAction =>
 		} catch (e) {
 			dispatch(recordSaveError());
 		}
-};
+	};
 
 /**
  * Создает новый виджет
@@ -361,35 +361,35 @@ const getErrors = (error: ResponseError) => {
  */
 const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAction =>
 	async (dispatch: Dispatch): Promise<ValidateWidgetToCopyResult> => {
-	let isValid = true;
-	let reasons = [];
-
-	dispatch({
-		type: WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY
-	});
-
-	try {
-		const payload = {
-			...getParams(),
-			dashboardKey,
-			widgetKey
-		};
-		let result = false;
-
-		({reasons, result} = await window.jsApi.restCallModule('dashboardSettings', 'widgetIsBadToCopy', payload));
-		isValid = !result;
+		let isValid = true;
+		let reasons = [];
 
 		dispatch({
-			type: WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY
+			type: WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY
 		});
-	} catch (e) {
-		dispatch({
-			type: WIDGETS_EVENTS.RECORD_VALIDATE_TO_COPY_ERROR
-		});
-	}
 
-	return {isValid, reasons};
-};
+		try {
+			const payload = {
+				...getParams(),
+				dashboardKey,
+				widgetKey
+			};
+			let result = false;
+
+			({reasons, result} = await window.jsApi.restCallModule('dashboardSettings', 'widgetIsBadToCopy', payload));
+			isValid = !result;
+
+			dispatch({
+				type: WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY
+			});
+		} catch (e) {
+			dispatch({
+				type: WIDGETS_EVENTS.RECORD_VALIDATE_TO_COPY_ERROR
+			});
+		}
+
+		return {isValid, reasons};
+	};
 
 /**
  * Устанавливает значение использования глобальной настройки цветов графика для всех подходящих виджетов
@@ -400,32 +400,32 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
  */
 const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string = ''): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const widgets = getAllWidgets(getState());
+		const widgets = getAllWidgets(getState());
 
-	// eslint-disable-next-line no-unused-vars
-	for (const widget of widgets) {
-		const {colorsSettings, id, type: widgetType} = widget;
+		// eslint-disable-next-line no-unused-vars
+		for (const widget of widgets) {
+			const {colorsSettings, id, type: widgetType} = widget;
 
-		try {
-			const isValidWidget = id !== targetWidgetId && hasChartColorsSettings(widgetType);
+			try {
+				const isValidWidget = id !== targetWidgetId && hasChartColorsSettings(widgetType);
 
-			if (isValidWidget && getCustomColorsSettingsKey(widget) === key) {
-				await dispatch(editWidgetChunkData(widget, {
-					colorsSettings: {
-						...colorsSettings,
-						custom: {
-							...colorsSettings.custom,
-							useGlobal
-						},
-						type: CHART_COLORS_SETTINGS_TYPES.CUSTOM
-					}
-				}, false));
+				if (isValidWidget && getCustomColorsSettingsKey(widget) === key) {
+					await dispatch(editWidgetChunkData(widget, {
+						colorsSettings: {
+							...colorsSettings,
+							custom: {
+								...colorsSettings.custom,
+								useGlobal
+							},
+							type: CHART_COLORS_SETTINGS_TYPES.CUSTOM
+						}
+					}, false));
+				}
+			} catch (e) {
+				console.log(e);
 			}
-		} catch (e) {
-			console.log(e);
 		}
-	}
-};
+	};
 
 /**
  * Устанавливает выбранный виджет для редактирования

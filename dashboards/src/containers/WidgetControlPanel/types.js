@@ -9,5 +9,6 @@ export type ConnectedFunctions = {
 };
 
 export type ConnectedProps = {
-	editable: boolean
+	editable: boolean,
+	personalDashboard: boolean
 };
