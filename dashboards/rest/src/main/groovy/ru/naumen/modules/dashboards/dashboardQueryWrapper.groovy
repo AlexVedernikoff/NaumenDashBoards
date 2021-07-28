@@ -841,9 +841,15 @@ class QueryWrapper implements CriteriaWrapper
             String code = attrChains*.code.join('.').replace('metaClass', valueToPut)
             if(Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES && !attributeIsDynamic)
             {
+                //трехуровневый атрибут
                 attribute?.attrChains()?.last()?.ref = Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES_WITHOUT_CATALOG
                     ? new Attribute(code: 'title', type: 'string')
                     : new Attribute(code: 'code', type: 'string')
+            }
+            if(attribute.type in AttributeType.LINK_TYPES && attribute?.ref?.code in ['title', 'code'])
+            {
+                //двухуровневый атрибут, второй уровень которого был добавлен синтетически, обработка для условия EQUAL, NOT_EQUAL
+                code = attribute.code
             }
             String columnCode = attribute.attrChains()*.code.join('.').replace('metaClass', valueToPut)
             String parameterFqn = attribute.attrChains().last().metaClassFqn
