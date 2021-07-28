@@ -3575,6 +3575,7 @@ class DashboardDataSetService
             //записей может быть много, а по месяцу, например, может быть только 12 значений
             Source source = new Source(classFqn: classFqn)
             def wrapper = QueryWrapper.build(source)
+            attribute = DashboardQueryWrapperUtils.updateRefAttributeCode(attribute)
             def parameter = buildSystemGroup(attributeValue.group, attribute)
             wrapper.processGroup(wrapper,wrapper.criteria, false, parameter, DiagramType.TABLE, source)
 
