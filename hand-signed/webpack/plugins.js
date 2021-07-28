@@ -1,6 +1,6 @@
 // @flow
 'use strict';
-
+const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -15,6 +15,11 @@ const plugins = [
 		output: './dist/parameters.xml',
 		path: './src/rest/resources/eaWithParamsMeta.xml',
 	}),
+	new CopyPlugin([
+		{
+			from: 'static'
+		}
+	]),
 	new HtmlWebpackPlugin({
 		filename: 'index.html',
 		template: './src/index.html',
