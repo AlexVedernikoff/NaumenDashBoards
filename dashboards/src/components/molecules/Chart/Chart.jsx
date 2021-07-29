@@ -22,6 +22,16 @@ export class Chart extends PureComponent<Props> {
 		}
 	}
 
+	componentDidUpdate () {
+		this.updateOptions();
+	}
+
+	componentWillUnmount () {
+		if (this.chart && typeof this.chart.destroy === 'function') {
+			this.chart.destroy();
+		}
+	}
+
 	getClassname = () => {
 		const {legend} = this.props.widget;
 		const {BLOCK, INLINE} = LEGEND_DISPLAY_TYPES;
@@ -33,16 +43,6 @@ export class Chart extends PureComponent<Props> {
 			[styles.inlineLegend]: displayType === INLINE
 		});
 	};
-
-	componentDidUpdate () {
-		this.updateOptions();
-	}
-
-	componentWillUnmount () {
-		if (this.chart && typeof this.chart.destroy === 'function') {
-			this.chart.destroy();
-		}
-	}
 
 	getOptions = () => {
 		const {data, globalColorsSettings, widget} = this.props;
