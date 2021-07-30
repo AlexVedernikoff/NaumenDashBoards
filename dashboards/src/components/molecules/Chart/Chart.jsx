@@ -1,17 +1,13 @@
 // @flow
 import ApexCharts from 'apexcharts';
-import type {AxisWidget} from 'store/widgets/data/types';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
-import {getAxisFormatter} from 'utils/chart/mixins/formater';
-import {getLegendWidth, getOptions} from 'utils/chart';
-import {isAxisChart} from 'store/widgets/helpers';
+import {getOptions} from 'utils/chart';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -27,9 +23,7 @@ export class Chart extends PureComponent<Props> {
 	}
 
 	componentDidUpdate () {
-		const options = this.getOptions();
-
-		options && this.chart && this.chart.updateOptions(options);
+		this.updateOptions();
 	}
 
 	componentWillUnmount () {
@@ -63,57 +57,12 @@ export class Chart extends PureComponent<Props> {
 	};
 
 	handleResize = () => {
-		const {data, globalColorsSettings, widget} = this.props;
-		const {legend, type} = widget;
-		const {current: container} = this.containerRef;
+		this.updateOptions();
+	};
 
-		if (container) {
-			let opts = {
-				legend: {
-					width: getLegendWidth(container, legend.position)
-				}
-			};
-
-			if (isAxisChart(type)) {
-				// $FlowFixMe
-				const axisWidget: AxisWidget = widget;
-				const {labels} = data;
-				const formatter = getAxisFormatter(axisWidget, labels, container);
-				const {hasOverlappedLabel, horizontal} = formatter.options;
-
-				opts = {
-					...opts,
-					legend: {
-						...opts.legend,
-						formatter: formatter.legend
-					},
-					xaxis: {
-						labels: {
-							formatter: horizontal ? formatter.indicator : formatter.parameter.overlapped,
-							rotate: hasOverlappedLabel ? -60 : 0,
-							trim: !horizontal && hasOverlappedLabel
-						}
-					},
-					yaxis: {
-						labels: {
-							formatter: horizontal ? formatter.parameter.overlapped : formatter.indicator
-						}
-					}
-				};
-
-				if (type === WIDGET_TYPES.COMBO) {
-					const {current} = this.containerRef;
-
-					if (current) {
-						const {xaxis, yaxis} = getOptions(widget, data, current, globalColorsSettings);
-
-						opts = {...opts, xaxis, yaxis};
-					}
-				}
-			}
-
-			this.chart && this.chart.updateOptions(opts);
-		}
+	updateOptions = () => {
+		const options = this.getOptions();
+		return options && this.chart && this.chart.updateOptions(options);
 	};
 
 	render () {
