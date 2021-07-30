@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {CONTEXT_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {UserData} from './types';
@@ -8,7 +9,7 @@ import type {UserData} from './types';
  * @returns {ThunkAction}
  */
 const getEditableParam = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {editable = true} = await window.jsApi.commands.getCurrentContentParameters();
+	const {editable = true} = await api.frame.getCurrentContentParameters();
 
 	dispatch({
 		// В части случаев значение приходит строкой
@@ -18,15 +19,14 @@ const getEditableParam = (): ThunkAction => async (dispatch: Dispatch): Promise<
 };
 
 const getContext = (): ThunkAction => (dispatch: Dispatch) => {
-	const {jsApi} = window;
-	const contentCode = jsApi.findContentCode();
-	const subjectUuid = jsApi.extractSubjectUuid();
+	const contentCode = api.frame.getContentCode();
+	const subjectUuid = api.frame.getSubjectUuid();
 
 	dispatch(setContext({contentCode, subjectUuid}));
 };
 
 const getMetaCLass = (): ThunkAction => async (dispatch: Dispatch) => {
-	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
+	const {metaClass} = await api.frame.getCurrentContextObject();
 
 	dispatch(setContext({metaClass}));
 };
@@ -37,12 +37,13 @@ const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 		classFqn,
 		contentCode
 	};
+
 	const {
 		email,
 		groupUser: role,
 		hasPersonalDashboard,
 		name
-	} = await window.jsApi.restCallModule('dashboardSettings', 'getUserData', payload);
+	} = await api.dashboardSettings.settings.getUserData(payload);
 
 	dispatch(setUserData({
 		email,
