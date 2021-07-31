@@ -19,6 +19,7 @@ export class OutsideClickDetector extends PureComponent<Props> {
 
 	componentWillUnmount () {
 		document.removeEventListener('mousedown', this.handleClickOutside);
+		document.removeEventListener('click', this.props.onClickOutside);
 	}
 
 	handleClickOutside = (e: MouseEvent) => {
