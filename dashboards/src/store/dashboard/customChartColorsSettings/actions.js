@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import type {CustomChartColorsSettingsData} from 'store/widgets/data/types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {EVENTS} from './constants';
@@ -18,12 +19,7 @@ const saveCustomChartColorsSettings = (colorsSettings: CustomChartColorsSettings
 	});
 
 	try {
-		const request = {
-			...getParams(),
-			colorsSettings
-		};
-
-		await window.jsApi.restCallModule('dashboardSettings', 'saveCustomColors', request);
+		await api.dashboardSettings.customColors.save(getParams(), colorsSettings);
 
 		dispatch({
 			payload: colorsSettings,
@@ -49,12 +45,7 @@ const removeCustomChartColorsSettings = (payload: string) => async (dispatch: Di
 	});
 
 	try {
-		const request = {
-			...getParams(),
-			key: payload
-		};
-
-		await window.jsApi.restCallModule('dashboardSettings', 'deleteCustomColors', request);
+		await api.dashboardSettings.customColors.delete(getParams(), payload);
 
 		dispatch({
 			payload,

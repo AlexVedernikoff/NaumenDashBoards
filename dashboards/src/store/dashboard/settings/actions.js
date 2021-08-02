@@ -1,6 +1,7 @@
 // @flow
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
 import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import api from 'api';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
@@ -33,7 +34,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {ThunkAction}
  */
 const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {MinTimeIntervalUpdate: defaultInterval} = await window.jsApi.commands.getCurrentContentParameters();
+	const {MinTimeIntervalUpdate: defaultInterval} = await api.info.getCurrentContentParameters();
 
 	if (defaultInterval) {
 		dispatch(changeAutoUpdateSettings({
@@ -114,7 +115,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			layouts,
 			mobileLayouts,
 			widgets
-		} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
+		} = await api.dashboardSettings.settings.getSettings(payload);
 
 		batch(() => {
 			dispatch(setCode(code));
@@ -197,13 +198,8 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		const {context} = getState();
 		const {contentCode, editableDashboard: editable, subjectUuid: classFqn, user} = context;
-		const payload = {
-			classFqn,
-			contentCode,
-			editable
-		};
 
-		await window.jsApi.restCallModule('dashboardSettings', 'createPersonalDashboard', payload);
+		await api.dashboardSettings.personalDashboard.create(classFqn, contentCode, editable);
 
 		dispatch(setUserData({...user, hasPersonalDashboard: true}));
 		dispatch({
@@ -235,7 +231,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		const {context} = getState();
 		const {contentCode, subjectUuid, user} = context;
 
-		await window.jsApi.restCallModule('dashboardSettings', 'deletePersonalDashboard', subjectUuid, contentCode);
+		await api.dashboardSettings.personalDashboard.delete(subjectUuid, contentCode);
 
 		dispatch(switchDashboard(false));
 		dispatch(setUserData({...user, hasPersonalDashboard: false}));
@@ -320,7 +316,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 	try {
 		const key = await uploadFile(file, name);
 
-		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type, name, users);
+		await api.fileToMail.send(key, type, name, users);
 
 		dispatch({
 			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
@@ -346,7 +342,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	const {context, dashboard, sources, widgetForms} = getState();
 	const {contentCode} = context;
-	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
+	const {metaClass} = await api.info.getCurrentContextObject();
 	let descriptorStr = '';
 	let foundKey;
 
@@ -414,7 +410,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 			isPersonal
 		};
 
-		await window.jsApi.restCallModule('dashboardSettings', 'saveAutoUpdateSettings', payload);
+		await api.dashboardSettings.settings.saveAutoUpdate(payload);
 
 		dispatch(setAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({

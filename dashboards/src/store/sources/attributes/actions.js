@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {ATTRIBUTES_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {OnLoadCallback} from 'store/sources/types';
@@ -12,21 +13,21 @@ import type {OnLoadCallback} from 'store/sources/types';
  */
 const fetchAttributes = (classFqn: string, parentClassFqn: string | null = null, callback?: OnLoadCallback): ThunkAction =>
 	async (dispatch: Dispatch): Promise<void> => {
-	dispatch(requestAttributes(classFqn));
+		dispatch(requestAttributes(classFqn));
 
-	try {
-		const params = {
-			classFqn,
-			parentClassFqn
-		};
-		const attributes = await window.jsApi.restCallModule('dashboards', 'getDataSourceAttributes', params);
+		try {
+			const params = {
+				classFqn,
+				parentClassFqn
+			};
+			const attributes = await api.dashboards.getDataSourceAttributes(params);
 
-		callback && callback(attributes);
-		dispatch(receiveAttributes(attributes, classFqn));
-	} catch (error) {
-		dispatch(recordAttributesError(classFqn));
-	}
-};
+			callback && callback(attributes);
+			dispatch(receiveAttributes(attributes, classFqn));
+		} catch (error) {
+			dispatch(recordAttributesError(classFqn));
+		}
+	};
 
 const requestAttributes = (payload: string) => ({
 	payload,
