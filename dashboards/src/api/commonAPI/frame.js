@@ -1,4 +1,5 @@
 // @flow
+import type {DTOValue, FilterFormDescriptorDTO} from 'api/types';
 import type {FrameAPI} from 'api/interfaces';
 
 export default class Frame implements FrameAPI {
@@ -20,5 +21,9 @@ export default class Frame implements FrameAPI {
 
 	getSubjectUuid () {
 		return window.jsApi.extractSubjectUuid();
+	}
+
+	restCallModule (module: string, method, ...params: Array<DTOValue>) {
+		return window.jsApi.restCallModule(module, method, ...params);
 	}
 }

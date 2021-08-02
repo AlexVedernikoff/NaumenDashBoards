@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {DrillDownMixin} from './types';
 import {getPartsClassFqn} from './helpers';
@@ -67,14 +68,7 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 
 	dispatch(requestLink(id));
 	try {
-		const {link} = await window.jsApi.restCallModule(
-			'dashboardDrilldown',
-			'getLink',
-			payload,
-			subjectUuid,
-			type,
-			dashboard.settings.code
-		);
+		const {link} = await api.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
@@ -96,7 +90,7 @@ const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch
 	dispatch(requestLink(value));
 
 	try {
-		const {link} = await window.jsApi.restCallModule('dashboards', 'getCardObject', value);
+		const {link} = await api.dashboards.getCardObject(value);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(value));
@@ -118,7 +112,7 @@ const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction 
 	dispatch(requestLink(dashboardId));
 
 	try {
-		const {link} = await window.jsApi.restCallModule('dashboards', 'getDashboardLink', dashboardId);
+		const {link} = await api.dashboards.getDashboardLink(dashboardId);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(dashboardId));

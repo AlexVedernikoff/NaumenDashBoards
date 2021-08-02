@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {createFilterContext, getFilterContext} from 'store/helpers';
 import type {CustomFilter, Widget} from 'store/widgets/data/types';
 import {getPartsClassFqn} from 'store/widgets/links/helpers';
@@ -36,7 +37,7 @@ const getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise
 				return `${classFqn}@${code}`;
 			});
 
-			({serializedContext: newDescriptor} = await window.jsApi.commands.filterForm(context, true));
+			({serializedContext: newDescriptor} = await api.filterForm.openForm(context, true));
 		}
 	} catch (ex) {
 		console.error('Ошибка формы фильтрации', ex);

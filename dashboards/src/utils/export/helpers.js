@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import moment from 'moment';
 
 /**
@@ -9,7 +10,7 @@ const createContextName = async () => {
 	let name;
 
 	try {
-		const context = await window.jsApi.commands.getCurrentContextObject();
+		const context = await api.info.getCurrentContextObject();
 
 		name = context['card_caption'].replace(/(\|\||\|\|\|\|\*:|\*)/g, '');
 	} catch (e) {

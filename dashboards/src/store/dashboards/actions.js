@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARDS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -14,7 +15,7 @@ const fetchDashboards = () => async (dispatch: Dispatch) => {
 	});
 
 	try {
-		const dashboards = await window.jsApi.restCallModule('dashboardSettings', 'getDashboardsAndWidgetsTree');
+		const dashboards = await api.dashboardSettings.settings.getDashboardsAndWidgetsTree();
 
 		dispatch({
 			payload: dashboards,

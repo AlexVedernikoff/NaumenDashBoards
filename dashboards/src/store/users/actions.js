@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {User} from './types';
 import {USERS_EVENTS} from './constants';
@@ -7,7 +8,7 @@ const fetchUsers = (): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch(requestUsers());
 
 	try {
-		const data = await window.jsApi.restCallModule('dashboardSettings', 'getUsers');
+		const data = await api.dashboardSettings.settings.getUsers();
 
 		dispatch(receiveUsers(data));
 	} catch (e) {

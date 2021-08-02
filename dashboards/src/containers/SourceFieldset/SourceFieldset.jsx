@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {connect} from 'react-redux';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import type {DataSet, Props} from './types';
@@ -40,11 +41,11 @@ export class SourceFieldsetContainer extends Component<Props> {
 
 		if (sourceValue) {
 			const {value: classFqn} = sourceValue;
-			let descriptor = this.getSourceDescriptor();
+			const descriptor = this.getSourceDescriptor();
 			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
 
 			try {
-				const {serializedContext} = await window.jsApi.commands.filterForm(context);
+				const {serializedContext} = await api.filterForm.openForm(context);
 
 				return serializedContext;
 			} catch (e) {

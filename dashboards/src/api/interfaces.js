@@ -24,6 +24,7 @@ export interface FrameAPI {
 	getCurrentContextObject (): Promise<ContextObjectDTO>;
 	getCurrentUser (): UserDTO;
 	getSubjectUuid (): string;
+	restCallModule(module: string, method: string, ...params: Array<DTOValue>): Promise<DTOValue>;
 }
 
 export interface WidgetAPI {

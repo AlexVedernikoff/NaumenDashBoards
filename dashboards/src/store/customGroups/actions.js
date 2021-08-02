@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {createToast} from 'store/toasts/actions';
 import type {CustomGroup} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
@@ -18,7 +19,7 @@ const fetchCustomGroup = (payload: string): ThunkAction => async (dispatch: Disp
 
 	try {
 		const {code} = getState().dashboard.settings;
-		const customGroup = await window.jsApi.restCallModule('dashboardSettings', 'getCustomGroup', code, payload);
+		const customGroup = await api.dashboardSettings.customGroup.getItem(code, payload);
 
 		dispatch({
 			payload: customGroup,
@@ -64,7 +65,7 @@ const fetchCustomGroups = (): ThunkAction => async (dispatch: Dispatch, getState
 
 	try {
 		const {code} = getState().dashboard.settings;
-		const customGroups = await window.jsApi.restCallModule('dashboardSettings', 'getCustomGroups', code);
+		const customGroups = await api.dashboardSettings.customGroup.getAll(code);
 
 		dispatch({
 			payload: customGroups,
@@ -79,37 +80,27 @@ const fetchCustomGroups = (): ThunkAction => async (dispatch: Dispatch, getState
 
 const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): ThunkAction =>
 	async (dispatch: Dispatch): Promise<string | null> => {
-	let id = null;
+		let id = null;
 
-	try {
-		const payload = {
-			...getParams(),
-			group: customGroupData
-		};
+		try {
+			({id} = await api.dashboardSettings.customGroup.save(getParams(), customGroupData));
 
-		({id} = await window.jsApi.restCallModule('dashboardSettings', 'saveCustomGroup', payload));
+			dispatch(removeCustomGroup(localId));
+			dispatch(saveCustomGroup({...customGroupData, id}));
+		} catch (e) {
+			dispatch(createToast({
+				text: 'Ошибка создания группировки',
+				type: 'error'
+			}));
+		}
 
-		dispatch(removeCustomGroup(localId));
-		dispatch(saveCustomGroup({...customGroupData, id}));
-	} catch (e) {
-		dispatch(createToast({
-			text: 'Ошибка создания группировки',
-			type: 'error'
-		}));
-	}
-
-	return id;
-};
+		return id;
+	};
 
 const deleteCustomGroup = (groupKey: string, remote: boolean = true): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		if (remote) {
-			const payload = {
-				...getParams(),
-				groupKey
-			};
-
-			await window.jsApi.restCallModule('dashboardSettings', 'deleteCustomGroup', payload);
+			await api.dashboardSettings.customGroup.delete(getParams(), groupKey);
 		}
 
 		dispatch(removeCustomGroup(groupKey));
@@ -126,12 +117,7 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false): ThunkAc
 
 	try {
 		if (remote) {
-			const payload = {
-				...getParams(),
-				group
-			};
-
-			({group: updatedGroup} = await window.jsApi.restCallModule('dashboardSettings', 'updateCustomGroup', payload));
+			({group: updatedGroup} = await api.dashboardSettings.customGroup.update(getParams(), group));
 		}
 
 		dispatch(saveCustomGroup(updatedGroup));

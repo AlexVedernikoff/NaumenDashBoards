@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getDashboardDescription} from 'store/dashboard/settings/selectors';
 import type {ResultWithMessage, SourceFiltersItem, UpdateSourcesFilterResult} from './types';
@@ -43,7 +44,7 @@ const fetchSourcesFilters = (metaClass: string): ThunkAction =>
 		try {
 			dispatch(requestSourceFilters());
 
-			const filters = await window.jsApi.restCallModule('dashboardSettings', 'getSourceFilters', metaClass);
+			const filters = await await api.dashboardSettings.sourceFilters.getAll(metaClass);
 
 			dispatch({
 				payload: {filters, source: metaClass},
@@ -70,15 +71,13 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 		const dashboard = getDashboardDescription(store);
 
 		try {
-			const {result} = await window.jsApi.restCallModule('dashboardSettings', 'saveSourceFilters', {
-				dashboard,
-				sourceFilter: {
-					descriptor,
-					id,
-					label,
-					value: source
-				}
-			});
+			const sourceFilter = {
+				descriptor,
+				id,
+				label,
+				value: source
+			};
+			const {result} = await api.dashboardSettings.sourceFilters.save(dashboard, sourceFilter);
 
 			dispatch(fetchSourcesFilters(source));
 
@@ -119,7 +118,7 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 		try {
 			dispatch(requestSourceFilters());
 
-			const {result} = await window.jsApi.restCallModule('dashboardSettings', 'deleteSourceFilters', filterId);
+			const {result} = await api.dashboardSettings.sourceFilters.delete(filterId);
 
 			if (result) {
 				dispatch(fetchSourcesFilters(source));
@@ -152,7 +151,7 @@ const checkApplyFilter = (source: string, sourceFilter: SourceFiltersItem): Thun
 		const {code: dashboardKey} = store.dashboard.settings;
 
 		try {
-			const {result} = await window.jsApi.restCallModule('dashboardSettings', 'filterIsBadToApply', { dashboardKey, sourceFilter });
+			const {result} = await api.dashboardSettings.sourceFilters.check(dashboardKey, sourceFilter);
 
 			if (!result) {
 				return {result: true};

@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {DYNAMIC_GROUPS_EVENTS} from './constants';
 import {findFilterById} from 'store/sources/sourcesFilters/selectors';
@@ -30,7 +31,7 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filter
 		});
 
 		try {
-			const groups = await window.jsApi.restCallModule('dashboards', 'getDynamicAttributeGroups', actualDescriptor);
+			const groups = await api.dashboards.getDynamicAttributeGroups(actualDescriptor);
 
 			dispatch({
 				payload: {
@@ -60,7 +61,7 @@ const fetchDynamicAttributes = (dataKey: string, groupCode: string): ThunkAction
 	});
 
 	try {
-		const attributes = await window.jsApi.restCallModule('dashboards', 'getDynamicAttributes', groupCode);
+		const attributes = await api.dashboards.getDynamicAttributes(groupCode);
 
 		dispatch({
 			payload: {

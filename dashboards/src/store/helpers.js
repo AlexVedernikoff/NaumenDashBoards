@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {isSourceType} from 'store/sources/data/helpers';
 import {store} from 'app.constants';
 
@@ -63,15 +64,14 @@ const getSourceTypes = (classFqn: string) => {
  * @returns {string}
  */
 const getUserLocalStorageId = () => {
-	const {jsApi} = window;
 	let contentCode = '';
 	let subjectUuid = '';
 	let userId = '';
 
 	try {
-		contentCode = jsApi.findContentCode();
-		subjectUuid = jsApi.extractSubjectUuid();
-		({uuid: userId} = jsApi.getCurrentUser());
+		contentCode = api.info.getContentCode();
+		subjectUuid = api.info.getSubjectUuid();
+		({uuid: userId} = api.info.getCurrentUser());
 	} catch (e) {
 		console.error(e);
 	}

@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {OnLoadCallback} from 'store/sources/types';
@@ -19,7 +20,7 @@ const fetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback)
 	dispatch(requestRefAttributes(key));
 
 	try {
-		const data = await window.jsApi.restCallModule('dashboards', 'getAttributesFromLinkAttribute', {attribute});
+		const data = await api.dashboards.getAttributesFromLinkAttribute({attribute});
 
 		onLoadCallback && onLoadCallback(data);
 		dispatch(receiveRefAttributes(data, key));
