@@ -296,6 +296,32 @@ class Link
     }
 
     /**
+     * Метод по преобразованию атрибута, стоящего на последнем месте для запроса
+     * @param attribute - атрибут для преобразования
+     * @return преобразованный атрибут с корректным кодом
+     */
+    private Attribute updateLastAttributeCode(Attribute attribute)
+    {
+        Boolean attributeIsNotDynamic = !attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
+        Boolean attrChainsLastHasBaseValues = !attribute?.attrChains()?.last()?.code?.contains('@')
+        //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута второго уровня для него,
+        //скорей всего атрибут второго уровня есть только в конкретном типе, но его нет в классе
+        //также атрибут должен быть не динамический и в нём уже не проставлен этот код корректно
+        def attributeToChange = attribute.attrChains().last()
+        if(attributeToChange.metaClassFqn && attributeIsNotDynamic && attrChainsLastHasBaseValues)
+        {
+            String attrLastCode = attributeToChange.code
+            def systemAttribute = api.metainfo.getMetaClass(attributeToChange.metaClassFqn).getAttribute(attrLastCode)
+            Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
+            if(!attrSignedInClass && classFqn != attributeToChange.metaClassFqn)
+            {
+                attribute.attrChains().last().code = systemAttribute.attributeFqn.toString()
+            }
+        }
+        return attribute
+    }
+
+    /**
      * Вспомогательный метод для формирования фильтра
      * @param filterBuilder - билдер для фильтра
      */
@@ -311,7 +337,7 @@ class Link
                 Collection<Collection> result = []
                 String attributeType = Attribute.getAttributeType(attr)
                 Boolean attrIsDynamic = attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                attr = DashboardQueryWrapperUtils.updateRefAttributeCode(attr)
+                attr = updateLastAttributeCode(attr)
                 //выглядит костыльно, но это необходимо, чтобы обойти ситуацию,
                 // когда основной источник запроса - дочерний к classFqn,
                 // когда у нас сама диаграмма типа таблица
@@ -1182,6 +1208,12 @@ class Link
                     values = findObjects(attr.ref, attr.property, value)
                     break
                 default:
+                    if(attr?.attrChains()?.last()?.code == 'title' && value.contains('#'))
+                    {
+                        //пришло значение с uuid-ом, хотя поиск будет идти по строке
+                        //вытаскиваем строку из всего значения c uuid-ом
+                        value = LinksAttributeMarshaller.unmarshal(value).find()
+                    }
                     values = findObjects(attr.ref, attr.property, value)
                     break
             }
@@ -1919,6 +1951,19 @@ class Link
                       def filterBuilder, Attribute attr, String classFqn, String descriptor)
         {
             String providerKey = getProviderKey(groupType, format, attr)
+            if (value == 'Не заполнено' || value == 'EMPTY')
+            {
+                if(providerKey.contains('static_ref'))
+                {
+                    def values = getValuesForRefAttr(attr, null)
+                    Link.checkValuesSize(values)
+                    return filterBuilder.OR(attr.code, 'containsInSet', values)
+                }
+                else if(providerKey.contains('static'))
+                {
+                    return filterBuilder.OR(attr.code, 'null', null)
+                }
+            }
             def provider = filterProviders[providerKey]
             return provider.getFilter(format, value, filterBuilder, attr, classFqn, descriptor)
         }
