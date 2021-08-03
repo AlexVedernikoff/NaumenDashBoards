@@ -10,35 +10,37 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 	}
 
 	getDataForCompositeDiagram (
-		dashboardId: string,
-		widgetId: string,
-		subjectUUID: string,
+		dashboardKey: string,
+		widgetKey: string,
+		cardObjectUuid: string,
 		widgetFilters: Array<DTOValue>
 	) {
 		return this.transport(
 			'dashboardDataSet',
 			'getDataForCompositeDiagram',
-			dashboardId,
-			widgetId,
-			subjectUUID,
+			['dashboardKey', 'widgetKey', 'cardObjectUuid', 'requestContent'],
+			dashboardKey,
+			widgetKey,
+			cardObjectUuid,
 			widgetFilters
 		);
 	}
 
 	getDataForTableDiagram (
-		dashboardId: string,
-		widgetId: string,
-		subjectUUID: string,
-		requestData: DTOValue,
+		dashboardKey: string,
+		widgetKey: string,
+		cardObjectUuid: string,
+		tableRequestSettings: DTOValue,
 		widgetFilters: Array<DTOValue>
 	) {
 		return this.transport(
 			'dashboardDataSet',
 			'getDataForTableDiagram',
-			dashboardId,
-			widgetId,
-			subjectUUID,
-			requestData,
+			['dashboardKey', 'widgetKey', 'cardObjectUuid', 'tableRequestSettings', 'requestContent'],
+			dashboardKey,
+			widgetKey,
+			cardObjectUuid,
+			tableRequestSettings,
 			widgetFilters
 		);
 	}

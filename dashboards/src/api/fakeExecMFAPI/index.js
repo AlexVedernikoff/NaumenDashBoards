@@ -1,10 +1,9 @@
 // @flow
 import CommonAPI from 'api/commonAPI';
 import type {DTOValue, Transport} from 'api/types';
-import FilterForm from './filterForm';
 import Frame from './frame';
 
-const fakeTtransport: Transport = async (module: string, method: string, ...params: Array<DTOValue>) => {
+const fakeTtransport: Transport = async (module: string, method: string, paramNames: Array<string>, ...params: Array<DTOValue>) => {
 	try {
 		const response = await fetch(`/sd/services/rest/execmf?accessKey=${process.env.ACCESS_KEY ?? ''}`, {
 			body: JSON.stringify([{method, module, params}]),
@@ -28,6 +27,5 @@ const fakeTtransport: Transport = async (module: string, method: string, ...para
 export default class FakeAPI extends CommonAPI {
 	constructor () {
 		super(fakeTtransport, new Frame());
-		this.filterForm = new FilterForm();
 	}
 }

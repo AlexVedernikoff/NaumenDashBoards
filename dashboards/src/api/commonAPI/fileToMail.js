@@ -10,6 +10,6 @@ export default class FileToMail implements FileToMailAPI {
 	}
 
 	send (key: string, type: string, name: string, users: Array<EmailUserDTO>) {
-		return this.transport('dashboardSendEmail', 'sendFileToMail', key, type, name, users);
+		return this.transport('dashboardSendEmail', 'sendFileToMail', ['tokenKey', 'format', 'fileName', 'users'], key, type, name, users);
 	}
 }

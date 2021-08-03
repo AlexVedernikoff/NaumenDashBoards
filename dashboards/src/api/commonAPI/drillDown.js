@@ -13,6 +13,7 @@ export default class DrillDown implements DrillDownAPI {
 		return this.transport(
 			'dashboardDrilldown',
 			'getLink',
+			['requestContent', 'cardObjectUuid', 'diagramTypeFromRequest', 'dashboardKey'],
 			payload,
 			subjectUUID,
 			type,

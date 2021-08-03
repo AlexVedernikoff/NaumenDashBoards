@@ -10,22 +10,22 @@ export default class CustomGroup implements CustomGroupAPI {
 	}
 
 	delete (dashboard: DashbordParams, groupKey: string) {
-		return this.transport('dashboardSettings', 'deleteCustomGroup', {...dashboard, groupKey});
+		return this.transport('dashboardSettings', 'deleteCustomGroup', ['requestContent'], {...dashboard, groupKey});
 	}
 
 	getAll (dashboardId: string) {
-		return this.transport('dashboardSettings', 'getCustomGroups', dashboardId);
+		return this.transport('dashboardSettings', 'getCustomGroups', ['dashboardKey'], dashboardId);
 	}
 
 	getItem (dashboardId: string, groupKey: string) {
-		return this.transport('dashboardSettings', 'getCustomGroup', dashboardId, groupKey);
+		return this.transport('dashboardSettings', 'getCustomGroup', ['dashboardKey', 'customGroupKey'], dashboardId, groupKey);
 	}
 
 	save (dashboard: DashbordParams, data: CustomGroupData) {
-		return this.transport('dashboardSettings', 'saveCustomGroup', {...dashboard, group: data});
+		return this.transport('dashboardSettings', 'saveCustomGroup', ['requestContent'], {...dashboard, group: data});
 	}
 
 	update (dashboard: DashbordParams, data: CustomGroupData) {
-		return this.transport('dashboardSettings', 'updateCustomGroup', {...dashboard, group: data});
+		return this.transport('dashboardSettings', 'updateCustomGroup', ['requestContent'], {...dashboard, group: data});
 	}
 }

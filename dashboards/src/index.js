@@ -9,7 +9,6 @@ import {render} from 'react-dom';
 import {root, store} from './app.constants';
 import smoothscroll from 'smoothscroll-polyfill';
 
-top.injectJsApi && top.injectJsApi(top, window);
 smoothscroll.polyfill();
 
 if (root) {

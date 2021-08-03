@@ -10,26 +10,26 @@ export default class Widget implements WidgetAPI {
 	}
 
 	checkToCopy (dashboard: DashbordParams, dashboardKey: string, widgetKey: string) {
-		return this.transport('dashboardSettings', 'widgetIsBadToCopy', {...dashboard, dashboardKey, widgetKey});
+		return this.transport('dashboardSettings', 'widgetIsBadToCopy', ['requestContent'], {...dashboard, dashboardKey, widgetKey});
 	}
 
 	copyWidget (dashboard: DashbordParams, dashboardKey: string, widgetKey: string) {
-		return this.transport('dashboardSettings', 'copyWidgetToDashboard', {...dashboard, dashboardKey, widgetKey});
+		return this.transport('dashboardSettings', 'copyWidgetToDashboard', ['requestContent'], {...dashboard, dashboardKey, widgetKey});
 	}
 
 	create (dashboard: DashbordParams, widget: DTOValue) {
-		return this.transport('dashboardSettings', 'createWidget', {...dashboard, widget});
+		return this.transport('dashboardSettings', 'createWidget', ['requestContent'], {...dashboard, widget});
 	}
 
 	delete (dashboard: DashbordParams, widgetId: string) {
-		return this.transport('dashboardSettings', 'deleteWidget', {...dashboard, widgetId});
+		return this.transport('dashboardSettings', 'deleteWidget', ['requestContent'], {...dashboard, widgetId});
 	}
 
 	edit (dashboard: DashbordParams, widget: DTOValue) {
-		return this.transport('dashboardSettings', 'editWidget', {...dashboard, widget});
+		return this.transport('dashboardSettings', 'editWidget', ['requestContent'], {...dashboard, widget});
 	}
 
 	editChunkData (dashboard: DashbordParams, id: string, widget: DTOValue) {
-		return this.transport('dashboardSettings', 'editWidgetChunkData', {...dashboard, id, widget});
+		return this.transport('dashboardSettings', 'editWidgetChunkData', ['requestContent'], {...dashboard, id, widget});
 	}
 }

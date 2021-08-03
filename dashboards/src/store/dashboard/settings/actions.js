@@ -34,7 +34,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {ThunkAction}
  */
 const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {MinTimeIntervalUpdate: defaultInterval} = await api.info.getCurrentContentParameters();
+	const {MinTimeIntervalUpdate: defaultInterval} = await api.frame.getCurrentContentParameters();
 
 	if (defaultInterval) {
 		dispatch(changeAutoUpdateSettings({
@@ -342,7 +342,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	const {context, dashboard, sources, widgetForms} = getState();
 	const {contentCode} = context;
-	const {metaClass} = await api.info.getCurrentContextObject();
+	const {metaClass} = await api.frame.getCurrentContextObject();
 	let descriptorStr = '';
 	let foundKey;
 
