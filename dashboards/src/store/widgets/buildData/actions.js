@@ -33,14 +33,14 @@ const getDataForTableDiagram = async (state: AppState, widget: TableWidget, page
 	};
 	const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
 	const data = await window.jsApi.restCallModule(
-			'dashboardDataSet',
-			'getDataForTableDiagram',
-			dashboard.settings.code,
-			widget.id,
-			context.subjectUuid,
-			requestData,
-			widgetFilters
-		);
+		'dashboardDataSet',
+		'getDataForTableDiagram',
+		dashboard.settings.code,
+		widget.id,
+		context.subjectUuid,
+		requestData,
+		widgetFilters
+	);
 	return data;
 };
 
@@ -53,23 +53,23 @@ const getDataForTableDiagram = async (state: AppState, widget: TableWidget, page
  */
 const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update: boolean = false): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	update
-		? dispatch({payload: widget.id, type: BUILD_DATA_EVENTS.UPDATE_BUILD_DATA})
-		: dispatch({payload: widget, type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA});
+		update
+			? dispatch({payload: widget.id, type: BUILD_DATA_EVENTS.UPDATE_BUILD_DATA})
+			: dispatch({payload: widget, type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA});
 
-	try {
-		const state = getState();
-		const {table} = widget;
-		const {pageSize} = table.body;
-		const data = await getDataForTableDiagram(state, widget, pageNumber, pageSize);
+		try {
+			const state = getState();
+			const {table} = widget;
+			const {pageSize} = table.body;
+			const data = await getDataForTableDiagram(state, widget, pageNumber, pageSize);
 
-		dispatch(
-			receiveBuildData({data: {...data, page: pageNumber}, id: widget.id})
-		);
-	} catch (e) {
-		dispatch(recordBuildDataError(widget.id));
-	}
-};
+			dispatch(
+				receiveBuildData({data: {...data, page: pageNumber}, id: widget.id})
+			);
+		} catch (e) {
+			dispatch(recordBuildDataError(widget.id));
+		}
+	};
 
 /**
  * Экспортируем таблицу в XLSX
@@ -93,27 +93,28 @@ const exportTableToXLSX = (widget: TableWidget, rowCount: number = 1e4): ThunkAc
  */
 const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	dispatch(requestBuildData(widget));
+		dispatch(requestBuildData(widget));
 
-	try {
-		const {context, dashboard} = getState();
-		const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
+		try {
+			const {context, dashboard} = getState();
+			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
 
-		const data = await window.jsApi.restCallModule(
-			'dashboardDataSet',
-			'getDataForCompositeDiagram',
-			dashboard.settings.code,
-			widget.id,
-			context.subjectUuid,
-			widgetFilters
-		);
+			const data = await window.jsApi.restCallModule(
+				'dashboardDataSet',
+				'getDataForCompositeDiagram',
+				dashboard.settings.code,
+				widget.id,
+				context.subjectUuid,
+				widgetFilters
+			);
 
-		await dispatch(checkDiagramsDataLimits(widget, data));
-		dispatch(receiveBuildData({data, id: widget.id}));
-	} catch (e) {
-		dispatch(recordBuildDataError(widget.id));
-	}
-};
+			await dispatch(checkDiagramsDataLimits(widget, data));
+			dispatch(receiveBuildData({data, id: widget.id}));
+		} catch (e) {
+			console.log(e);
+			dispatch(recordBuildDataError(widget.id));
+		}
+	};
 
 /**
  * Проверяет и согласовывает ограничения и вид отображения виджета

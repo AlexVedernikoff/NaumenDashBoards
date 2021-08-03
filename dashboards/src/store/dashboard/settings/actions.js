@@ -8,6 +8,7 @@ import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS, OPEN_PERSONAL_DASHBOARD_ERROR} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {
 	getContext,
 	getEditableParam,
@@ -127,6 +128,12 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			dispatch(setWidgets(widgets));
 			dispatch(setWebLayouts(widgets, refresh, layouts));
 			dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
+
+			if (refresh) {
+				widgets.forEach((widget) => {
+					dispatch(fetchBuildData(widget));
+				});
+			}
 		});
 	} catch (exception) {
 		const {responseText, status} = exception;
