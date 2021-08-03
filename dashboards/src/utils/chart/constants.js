@@ -53,7 +53,7 @@ const DEFAULT_COLORS = [
 	'#FFFE55'
 ];
 
-const DEFAULT_DATA_LABEL_COLOR = 'white';
+const DEFAULT_DATA_LABEL_COLOR = '#323232';
 
 const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 	axis: {
@@ -66,7 +66,7 @@ const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 		fontFamily: FONT_FAMILIES[0],
 		fontSize: 14,
 		show: true,
-		showShadow: true
+		showShadow: false
 	},
 	legend: {
 		displayType: LEGEND_DISPLAY_TYPES.BLOCK,
