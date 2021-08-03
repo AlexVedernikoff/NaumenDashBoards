@@ -1,15 +1,17 @@
 // @flow
-import type {FilterFormAPI} from 'api/interfaces';
+import type {FilterFormAPI, FrameAPI} from 'api/interfaces';
 import type {FilterFormDescriptorDTO, Transport} from 'api/types';
 
 export default class FilterForm implements FilterFormAPI {
 	transport: Transport;
+	frame: FrameAPI;
 
-	constructor (transport: Transport) {
+	constructor (transport: Transport, frame: FrameAPI) {
 		this.transport = transport;
+		this.frame = frame;
 	}
 
 	openForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean) {
-		return window.jsApi.commands.filterForm(descriptor, useAttrFilter);
+		return this.frame.openFilterForm(descriptor, useAttrFilter);
 	}
 }

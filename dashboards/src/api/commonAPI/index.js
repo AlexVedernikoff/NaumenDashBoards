@@ -35,6 +35,6 @@ export default class CommonAPI implements API {
 		this.dashboards = new Dashboards(this.transport);
 		this.drillDown = new DrillDown(this.transport);
 		this.fileToMail = new FileToMail(this.transport);
-		this.filterForm = new FilterForm(this.transport);
+		this.filterForm = new FilterForm(this.transport, this.frame);
 	}
 }

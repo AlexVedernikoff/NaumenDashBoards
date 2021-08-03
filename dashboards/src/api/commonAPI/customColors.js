@@ -11,10 +11,10 @@ export default class CustomColors implements CustomColorsAPI {
 	}
 
 	delete (dashboard: DashbordParams, customColorKey: string) {
-		return this.transport('dashboardSettings', 'deleteCustomColors', {...dashboard, key: customColorKey});
+		return this.transport('dashboardSettings', 'deleteCustomColors', ['requestContent'], {...dashboard, key: customColorKey});
 	}
 
 	save (dashboard: DashbordParams, colorsSettings: ColorsSettingsDTO) {
-		return this.transport('dashboardSettings', 'saveCustomColors', {...dashboard, colorsSettings});
+		return this.transport('dashboardSettings', 'saveCustomColors', ['requestContent'], {...dashboard, colorsSettings});
 	}
 }

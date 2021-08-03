@@ -19,11 +19,14 @@ export interface FilterFormAPI {
 }
 
 export interface FrameAPI {
+	getApplicationCode (): string;
 	getContentCode (): string;
 	getCurrentContentParameters (): Promise<ContentParametersDTO>;
 	getCurrentContextObject (): Promise<ContextObjectDTO>;
 	getCurrentUser (): UserDTO;
 	getSubjectUuid (): string;
+	openFilterForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean): Promise<DTOValue>;
+	restCallAsJson(url: string, options: DTOValue): Promise<DTOValue>;
 	restCallModule(module: string, method: string, ...params: Array<DTOValue>): Promise<DTOValue>;
 }
 

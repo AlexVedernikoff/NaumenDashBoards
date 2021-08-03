@@ -10,10 +10,10 @@ export default class PersonalDashboardCommon implements PersonalDashboardAPI {
 	}
 
 	create (classFqn: string, contentCode: string, editable: boolean) {
-		return this.transport('dashboardSettings', 'createPersonalDashboard', {classFqn, contentCode, editable});
+		return this.transport('dashboardSettings', 'createPersonalDashboard', ['requestContent'], {classFqn, contentCode, editable});
 	}
 
 	delete (subjectUUID: string, contentCode: string): Promise<DTOValue> {
-		return this.transport('dashboardSettings', 'deletePersonalDashboard', subjectUUID, contentCode);
+		return this.transport('dashboardSettings', 'deletePersonalDashboard', ['classFqn', 'contentCode'], subjectUUID, contentCode);
 	}
 }

@@ -10,18 +10,18 @@ export default class SourceFilters implements SourceFiltersAPI {
 	}
 
 	check (dashboardKey: string, sourceFilter: SourceFilterDTO) {
-		return this.transport('dashboardSettings', 'filterIsBadToApply', { dashboardKey, sourceFilter });
+		return this.transport('dashboardSettings', 'filterIsBadToApply', ['requestContent'], { dashboardKey, sourceFilter });
 	}
 
 	delete (filterId: string) {
-		return this.transport('dashboardSettings', 'deleteSourceFilters', filterId);
+		return this.transport('dashboardSettings', 'deleteSourceFilters', ['sourceFilterUUID'], filterId);
 	}
 
 	getAll (metaClass: string) {
-		return this.transport('dashboardSettings', 'getSourceFilters', metaClass);
+		return this.transport('dashboardSettings', 'getSourceFilters', ['metaClass'], metaClass);
 	}
 
 	save (dashboard: DashbordParams, sourceFilter: SourceFilterDTO) {
-		return this.transport('dashboardSettings', 'saveSourceFilters', {dashboard, sourceFilter});
+		return this.transport('dashboardSettings', 'saveSourceFilters', ['requestContent'], {dashboard, sourceFilter});
 	}
 }
