@@ -18,6 +18,7 @@ export const initialState: State = {
 	header: DEFAULT_HEADER_SETTINGS,
 	name: '',
 	navigation: DEFAULT_NAVIGATION_SETTINGS,
+	showBlankData: false,
 	showEmptyData: false,
 	sorting: DEFAULT_TABLE_SORTING,
 	table: DEFAULT_TABLE_SETTINGS,

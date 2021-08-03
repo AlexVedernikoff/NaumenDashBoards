@@ -68,7 +68,7 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
  * @returns {State}
  */
 const changeValuesByAxisOrComboCharts = (state: State, values: AxisChartValues | ComboChartValues): State => {
-	const {calcTotalColumn, showEmptyData, sorting, table, top} = state;
+	const {calcTotalColumn, showBlankData, showEmptyData, sorting, table, top} = state;
 	const {
 		computedAttrs,
 		data,
@@ -98,6 +98,7 @@ const changeValuesByAxisOrComboCharts = (state: State, values: AxisChartValues |
 		header,
 		name,
 		navigation,
+		showBlankData,
 		showEmptyData,
 		sorting,
 		table,
@@ -113,7 +114,7 @@ const changeValuesByAxisOrComboCharts = (state: State, values: AxisChartValues |
  * @returns {State}
  */
 const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerValues | SummaryValues): State => {
-	const {calcTotalColumn, showEmptyData, sorting, table, top} = state;
+	const {calcTotalColumn, showBlankData, showEmptyData, sorting, table, top} = state;
 	const {
 		computedAttrs,
 		data,
@@ -140,6 +141,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
+		showBlankData,
 		showEmptyData,
 		sorting,
 		table,

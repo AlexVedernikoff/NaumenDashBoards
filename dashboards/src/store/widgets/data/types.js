@@ -447,6 +447,7 @@ export type TableWidget = {
 	columnsRatioWidth?: ColumnsRatioWidth,
 	data: Array<TableData>,
 	ignoreDataLimits?: IgnoreTableDataLimitsSettings,
+	showBlankData: boolean,
 	showEmptyData: boolean,
 	sorting: TableSorting,
 	table: Table,
