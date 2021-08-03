@@ -84,7 +84,7 @@ export class ParamsTab extends PureComponent<Props> {
 		data.length > 1 && onChange(DIAGRAM_FIELDS.data, data.filter((dataSet, i) => i !== index));
 	};
 
-	handleToggleShowEmptyData = (event: OnChangeEvent<boolean>) => {
+	handleToggleShowBlankData = (event: OnChangeEvent<boolean>) => {
 		const {onChange} = this.props;
 		const {name, value} = event;
 
@@ -176,16 +176,16 @@ export class ParamsTab extends PureComponent<Props> {
 	);
 
 	renderShowEmptyDataCheckbox = () => {
-		const {showEmptyData} = this.props.values;
+		const {showBlankData} = this.props.values;
 
 		return (
 			<FormField>
-				<FormControl label="Показывать нулевые значения" reverse>
+				<FormControl label="Показывать незаполненные данные" reverse>
 					<Toggle
-						checked={showEmptyData}
-						name={DIAGRAM_FIELDS.showEmptyData}
-						onChange={this.handleToggleShowEmptyData}
-						value={showEmptyData}
+						checked={showBlankData}
+						name={DIAGRAM_FIELDS.showBlankData}
+						onChange={this.handleToggleShowBlankData}
+						value={showBlankData}
 					/>
 				</FormControl>
 			</FormField>
@@ -222,6 +222,7 @@ export class ParamsTab extends PureComponent<Props> {
 				<WidgetSelectBox />
 				{data.map(this.renderDataSetSettings)}
 				{this.renderBreakdownFieldSet()}
+				{this.renderShowEmptyDataCheckbox()}
 				{this.renderDataTopField()}
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />

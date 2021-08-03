@@ -27,6 +27,7 @@ export type Values = $Exact<{
 	header: Header,
 	name: string,
 	navigation: NavigationSettings,
+	showBlankData: boolean,
 	showEmptyData: boolean,
 	sorting: TableSorting,
 	table: Table,
