@@ -76,6 +76,19 @@ class DashboardDrilldownService
             baseDescriptor = DashboardDataSetService.instance.prepareWidgetDescriptor(baseDescriptor, userDescriptor)
             requestContent.descriptor = baseDescriptor
         }
+
+        def attrCases = requestContent?.filters?.attribute?.findResults { attr ->
+            if(!attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
+            {
+                //если атрибут из типа использован на первом уровне, то нужно привести работу,
+                //аналогично работе при построении диаграмм - подготовить список типов,
+                //которыми должен быть ограничен запрос
+                def metainfo = api.metainfo.getMetaClass(attr.metaClassFqn)
+                return metainfo.getAttribute(attr.code).declaredMetaClass.fqn.isClass() ? null : metainfo.fqnCase
+            }
+        }
+        requestContent.cases += attrCases
+
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
@@ -296,32 +309,6 @@ class Link
     }
 
     /**
-     * Метод по преобразованию атрибута, стоящего на последнем месте для запроса
-     * @param attribute - атрибут для преобразования
-     * @return преобразованный атрибут с корректным кодом
-     */
-    private Attribute updateLastAttributeCode(Attribute attribute)
-    {
-        Boolean attributeIsNotDynamic = !attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
-        Boolean attrChainsLastHasBaseValues = !attribute?.attrChains()?.last()?.code?.contains('@')
-        //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута второго уровня для него,
-        //скорей всего атрибут второго уровня есть только в конкретном типе, но его нет в классе
-        //также атрибут должен быть не динамический и в нём уже не проставлен этот код корректно
-        def attributeToChange = attribute.attrChains().last()
-        if(attributeToChange.metaClassFqn && attributeIsNotDynamic && attrChainsLastHasBaseValues)
-        {
-            String attrLastCode = attributeToChange.code
-            def systemAttribute = api.metainfo.getMetaClass(attributeToChange.metaClassFqn).getAttribute(attrLastCode)
-            Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
-            if(!attrSignedInClass && classFqn != attributeToChange.metaClassFqn)
-            {
-                attribute.attrChains().last().code = systemAttribute.attributeFqn.toString()
-            }
-        }
-        return attribute
-    }
-
-    /**
      * Вспомогательный метод для формирования фильтра
      * @param filterBuilder - билдер для фильтра
      */
@@ -337,7 +324,8 @@ class Link
                 Collection<Collection> result = []
                 String attributeType = Attribute.getAttributeType(attr)
                 Boolean attrIsDynamic = attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                attr = updateLastAttributeCode(attr)
+                //обрабатывается ситуация для атрибута нижнего уровня
+                attr = DashboardQueryWrapperUtils.updateRefAttributeCode(attr)
                 //выглядит костыльно, но это необходимо, чтобы обойти ситуацию,
                 // когда основной источник запроса - дочерний к classFqn,
                 // когда у нас сама диаграмма типа таблица
@@ -1170,10 +1158,6 @@ class Link
         // "backTimerDeadLineContains", "titleContains", "titleNotContains", "containsWithRemoved",
         // "notContainsWithRemoved", "containsUser", "containsSubject", "containsUserAttribute", "containsSubjectAttribute"
         String code = attr.code
-        if (value == 'Не заполнено' || value == 'EMPTY')
-        {
-            return filterBuilder.OR(code, 'null', null)
-        }
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         if(attr.ref)
         {
@@ -1181,6 +1165,12 @@ class Link
             def lastAttr = attr.attrChains().last()
             code = lastAttr.code
             def values = []
+            if (value == 'Не заполнено' || value == 'EMPTY')
+            {
+                values = getValuesForRefAttr(attr, null)
+                Link.checkValuesSize(values)
+                return filterBuilder.OR(attr.code, 'containsInSet', values)
+            }
             switch (type)
             {
                 case AttributeType.META_CLASS_TYPE:
@@ -1219,6 +1209,10 @@ class Link
             }
             Link.checkValuesSize(values)
             return filterBuilder.OR(attr.code, 'containsInSet', values)
+        }
+        if (value == 'Не заполнено' || value == 'EMPTY')
+        {
+            return filterBuilder.OR(code, 'null', null)
         }
         switch (type)
         {
