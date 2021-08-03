@@ -26,7 +26,8 @@ module.exports = {
 	module: loaders,
 	optimization,
 	output: {
-		filename: 'bundle.js',
+		chunkFilename: '[name].[contenthash].js',
+		filename: 'bundle.[contenthash].js',
 		path: define.dist
 	},
 	plugins,
