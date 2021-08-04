@@ -1,7 +1,4 @@
 // @flow
-import isMobile from 'ismobilejs';
-import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
-
 /**
  * Возвращает функцию, которая не будет срабатывать, пока продолжает вызываться
  * @param {Function} func - функция которую необходимо обернуть
@@ -73,16 +70,6 @@ const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
 const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platform);
 
 /**
- * Возвращает нужный режим отображения с учётом localStorage
- * @returns {string}
- */
-const getLayoutMode = () => {
-	const {MOBILE, WEB} = LAYOUT_MODE;
-
-	return isMobile().any ? MOBILE : WEB;
-};
-
-/**
  * На текущий момент у окружения метода нет полифилов к es6. Для стабильной работы на старых браузерах все ответы
  * перепарсиваются согласно окружению внутреннего приложения.
  * @param {Function} restCallModule - метод для осуществления запросов к модулям
@@ -128,7 +115,6 @@ export {
 	deepClone,
 	escapeString,
 	extend,
-	getLayoutMode,
 	getMapValues,
 	isMacOS,
 	isObject,

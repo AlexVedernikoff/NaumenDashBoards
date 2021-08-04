@@ -1,50 +1,18 @@
 // @flow
-import type {CommonDialogsState} from './commonDialogs/types';
-import type {ContextState} from './context/types';
-import type {CustomGroupsState} from './customGroups/types';
-import type {DashboardState} from './dashboard/types';
-import type {DashboardsState} from './dashboards/types';
-import type {SourcesState} from './sources/types';
-import type {ToastsState} from './toasts/types';
-import type {UsersState} from './users/types';
-import type {WidgetFormsState} from './widgetForms/types';
-import type {WidgetsState} from './widgets/types';
+import type {AppState as AppStateType} from './App/types';
 
-export type ChangingState = {
-	error: boolean,
-	loading: boolean
-};
-
-export type ResponseError = {
-	responseText: string,
-	status: number,
-	statusText: string
-};
-
-export type Action = {
+type Action = {
 	data?: any,
 	type: string
 };
 
 export type AppState = {
-	commonDialogs: CommonDialogsState,
-	context: ContextState,
-	customGroups: CustomGroupsState,
-	dashboard: DashboardState,
-	dashboards: DashboardsState,
-	sources: SourcesState,
-	toasts: ToastsState,
-	users: UsersState,
-	widgetForms: WidgetFormsState,
-	widgets: WidgetsState
+	app: AppStateType
 };
 
 /* eslint-disable no-use-before-define */
 export type GetState = () => AppState;
 export type ThunkAction = (dispatch: Dispatch, getState: GetState) => any;
 type PromiseAction = Promise<Action>;
-export type Dispatch = (action: Action | ThunkAction | PromiseAction) => void;
-export type Store = {
-	getState: () => AppState
-};
+export type Dispatch = (action: Action | ThunkAction | PromiseAction) => PromiseAction;
 /* eslint-enable no-use-before-define */

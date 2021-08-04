@@ -9,7 +9,7 @@
     "url": "https://gitsd.naumen.ru/nordclan/nordclan/issues"
   },
   "contributors": [],
-  "description": "Embedded application 'DashBoards' for 'SMP'",
+  "description": "Embedded application 'Gantt' for 'SMP'",
   "dependencies": {
     "apexcharts": "^3.26.2",
     "canvg": "^3.0.2",
@@ -21,6 +21,7 @@
     "jspdf": "^1.5.3",
     "memoize-one": "^5.2.1",
     "moment": "^2.24.0",
+    "naumen-common-components": "^1.0.1",
     "rc-menu": "^8.5.0",
     "react-color": "^2.17.3",
     "react-grid-layout": "1.2.2",
@@ -127,7 +128,7 @@
   "resolutions": {
     "eslint": "*"
   },
-  "homepage": "https://gitsd.naumen.ru/nordclan/nordclan/dashboards",
+  "homepage": "https://gitsd.naumen.ru/nordclan/nordclan/",
   "jest": {
     "moduleDirectories": [
       "node_modules",
@@ -163,7 +164,7 @@
     "react"
   ],
   "license": "ISC",
-  "name": "dashboards",
+  "name": "Gantt",
   "repository": {
     "type": "git",
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"

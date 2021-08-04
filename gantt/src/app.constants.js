@@ -1,13 +1,10 @@
 // @flow
-import {configureStore} from 'store';
-import DashboardResizer from 'utils/dashboardResizer';
+import configureStore from 'store';
 
 const store = configureStore();
-const resizer = new DashboardResizer(store);
 const root = document.getElementById('root');
 
 export {
-	resizer,
 	root,
 	store
 };

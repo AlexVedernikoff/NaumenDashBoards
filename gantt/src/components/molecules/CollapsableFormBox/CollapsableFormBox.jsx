@@ -1,13 +1,12 @@
 // @flow
-import FormBox from 'components/molecules/FormBox';
-import Icon, {ICON_NAMES} from 'components/atoms/Icon';
+import {FormBox, Icon} from 'naumen-common-components';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class CollapsableFormBox extends PureComponent<Props, State> {
 	static defaultProps = {
-		showContent: false
+		showContent: true
 	};
 
 	state = {
@@ -25,8 +24,7 @@ export class CollapsableFormBox extends PureComponent<Props, State> {
 
 	renderControl = () => {
 		const {showContent} = this.state;
-		const {ARROW_BOTTOM, ARROW_TOP} = ICON_NAMES;
-		const iconName = showContent ? ARROW_TOP : ARROW_BOTTOM;
+		const iconName = showContent ? 'ARROW_TOP' : 'ARROW_BOTTOM';
 
 		return <Icon className={styles.icon} name={iconName} onClick={this.handleClick} />;
 	};

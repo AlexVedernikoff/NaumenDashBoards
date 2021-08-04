@@ -13,7 +13,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	fetchDashboard: () => ThunkAction
+	getAppConfig: () => ThunkAction
 };
 
 export type Props = ReceivedProps & ConnectedProps & ConnectedFunctions;
