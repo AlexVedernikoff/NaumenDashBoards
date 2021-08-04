@@ -718,6 +718,7 @@ class DashboardUtils
                     header: oldFormatWidget.header as Header,
                     columnsRatioWidth: oldFormatWidget.columnsRatioWidth,
                     showEmptyData: oldFormatWidget.showEmptyData,
+                    showBlankData: oldFormatWidget.showBlankData,
                     showRowNum: oldFormatWidget.showRowNum,
                     sorting: oldFormatWidget.sorting as Sorting,
                     table: oldFormatWidget.table as TableObject,
@@ -3524,6 +3525,10 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
      * Флаг на использование пустых значений
      */
     Boolean showEmptyData
+    /**
+     * Флаг на использование незаполненных значений
+     */
+    Boolean showBlankData
     /**
      * Настройки ширины колонок
      */
