@@ -1,0 +1,252 @@
+{
+    "container": {
+        "clientWidth": 656
+    },
+    "labels": [
+        "1С#service$1413205",
+        "ВКС/АКС, коллективные мероприятия#service$1413201",
+        "Доступ к корп.системам и ресурсам#service$1577120",
+        "Компьютер, периферийное оборудование, программное обеспечение#service$1117401",
+        "ТЕСТ Пользовательская услуга АРМ#service$1602603"
+    ],
+    "widget": {
+        "colorsSettings": {
+            "auto": {
+                "colors": [
+                    "#EA3223",
+                    "#999999",
+                    "#2C6FBA",
+                    "#4EAD5B",
+                    "#DE5D30",
+                    "#67369A",
+                    "#F6C142",
+                    "#4CAEEA",
+                    "#A1BA66",
+                    "#B02318",
+                    "#536130",
+                    "#DCA5A2",
+                    "#928A5B",
+                    "#9BB3D4",
+                    "#8C4A1C",
+                    "#FFFE55"
+                ]
+            },
+            "custom": {
+                "data": {
+                    "colors": [
+                        {
+                            "color": "#EA3223",
+                            "key": "Учетная запись и пароль#service$9031802"
+                        },
+                        {
+                            "color": "#999999",
+                            "key": "test#service$13150406"
+                        },
+                        {
+                            "color": "#2C6FBA",
+                            "key": "Тестовая услуга с динамическими полями#service$41766202"
+                        },
+                        {
+                            "color": "#4EAD5B",
+                            "key": "1С#service$1413205"
+                        }
+                    ],
+                    "key": "service-slmService-OVERLAP",
+                    "type": null,
+                    "defaultColor": "#EA3223"
+                },
+                "useGlobal": true
+            },
+            "type": "CUSTOM"
+        },
+        "name": "234",
+        "id": "root_TestReliza_ba58870b-92ca-4ce7-b8c7-6294f4ecbbff",
+        "type": "COLUMN",
+        "computedAttrs": [
+            {
+                "code": "6e2b1ad0-e41d-413b-b713-0b215706a830",
+                "title": " Запрос - Уникальный идентификатор (CNT) / 100",
+                "type": "COMPUTED_ATTR",
+                "computeData": {
+                    "05283183-0a25-4cf9-8e8f-5b87b0c7928f": {
+                        "aggregation": "COUNT_CNT",
+                        "attr": {
+                            "code": "UUID",
+                            "title": "Уникальный идентификатор",
+                            "type": "string",
+                            "metaClassFqn": "serviceCall",
+                            "declaredMetaClass": "abstractBO",
+                            "sourceName": "Запрос",
+                            "sourceCode": "serviceCall"
+                        },
+                        "dataKey": "a2d6944f-7767-4081-b1ac-c43f356bdc99"
+                    }
+                },
+                "state": "{\"controls\":[{\"name\":\"05283183-0a25-4cf9-8e8f-5b87b0c7928f\",\"type\":\"SOURCE\",\"value\":{\"aggregation\":\"COUNT_CNT\",\"attribute\":{\"type\":\"string\",\"title\":\"Уникальный идентификатор\",\"property\":null,\"metaClassFqn\":\"serviceCall\",\"code\":\"UUID\",\"sourceName\":\"Запрос\",\"ref\":null,\"sourceCode\":\"serviceCall\",\"declaredMetaClass\":\"abstractBO\"},\"dataKey\":\"a2d6944f-7767-4081-b1ac-c43f356bdc99\",\"source\":{\"label\":\"Запрос\",\"value\":\"serviceCall\"}}},{\"name\":\"122569d3-00ca-4191-a986-909622980029\",\"type\":\"OPERATOR\",\"value\":\"/\"},{\"name\":\"48090737-23c3-4ffa-8078-04a86feb6d89\",\"type\":\"CONSTANT\",\"value\":100}]}",
+                "stringForCompute": "{05283183-0a25-4cf9-8e8f-5b87b0c7928f}/100"
+            }
+        ],
+        "dataLabels": {
+            "fontColor": "white",
+            "show": true,
+            "showShadow": true,
+            "showSubTotalAmount": false,
+            "showTotalAmount": false,
+            "disabled": false,
+            "fontSize": 14,
+            "fontFamily": "Roboto"
+        },
+        "breakdownFormat": null,
+        "displayMode": "WEB",
+        "header": {
+            "fontColor": "#323232",
+            "name": "234",
+            "position": "TOP",
+            "show": true,
+            "template": "",
+            "textAlign": "left",
+            "textHandler": "CROP",
+            "useName": true,
+            "fontSize": 16,
+            "fontFamily": "Roboto"
+        },
+        "navigation": {
+            "dashboard": null,
+            "show": false,
+            "showTip": false,
+            "tip": "",
+            "widget": null
+        },
+        "legend": {
+            "displayType": "BLOCK",
+            "position": "right",
+            "show": true,
+            "textHandler": "CROP",
+            "fontSize": 14,
+            "fontFamily": "Roboto"
+        },
+        "sorting": {
+            "type": "ASC",
+            "value": "PARAMETER"
+        },
+        "templateName": "234",
+        "indicator": {
+            "show": true,
+            "showName": false
+        },
+        "parameter": {
+            "show": true,
+            "showName": false
+        },
+        "data": [
+            {
+                "showEmptyData": false,
+                "showBlankData": false,
+                "sourceForCompute": false,
+                "dataKey": "a2d6944f-7767-4081-b1ac-c43f356bdc99",
+                "top": {
+                    "count": 5,
+                    "show": true
+                },
+                "indicators": [
+                    {
+                        "aggregation": "COUNT_CNT",
+                        "attribute": {
+                            "code": "6e2b1ad0-e41d-413b-b713-0b215706a830",
+                            "title": " Запрос - Уникальный идентификатор (CNT) / 100",
+                            "type": "COMPUTED_ATTR",
+                            "computeData": {
+                                "05283183-0a25-4cf9-8e8f-5b87b0c7928f": {
+                                    "aggregation": "COUNT_CNT",
+                                    "attr": {
+                                        "code": "UUID",
+                                        "title": "Уникальный идентификатор",
+                                        "type": "string",
+                                        "metaClassFqn": "serviceCall",
+                                        "declaredMetaClass": "abstractBO",
+                                        "sourceName": "Запрос",
+                                        "sourceCode": "serviceCall"
+                                    },
+                                    "dataKey": "a2d6944f-7767-4081-b1ac-c43f356bdc99"
+                                }
+                            },
+                            "state": "{\"controls\":[{\"name\":\"05283183-0a25-4cf9-8e8f-5b87b0c7928f\",\"type\":\"SOURCE\",\"value\":{\"aggregation\":\"COUNT_CNT\",\"attribute\":{\"type\":\"string\",\"title\":\"Уникальный идентификатор\",\"property\":null,\"metaClassFqn\":\"serviceCall\",\"code\":\"UUID\",\"sourceName\":\"Запрос\",\"ref\":null,\"sourceCode\":\"serviceCall\",\"declaredMetaClass\":\"abstractBO\"},\"dataKey\":\"a2d6944f-7767-4081-b1ac-c43f356bdc99\",\"source\":{\"label\":\"Запрос\",\"value\":\"serviceCall\"}}},{\"name\":\"122569d3-00ca-4191-a986-909622980029\",\"type\":\"OPERATOR\",\"value\":\"/\"},{\"name\":\"48090737-23c3-4ffa-8078-04a86feb6d89\",\"type\":\"CONSTANT\",\"value\":100}]}",
+                            "stringForCompute": "{05283183-0a25-4cf9-8e8f-5b87b0c7928f}/100"
+                        }
+                    }
+                ],
+                "parameters": [
+                    {
+                        "group": {
+                            "way": "SYSTEM",
+                            "data": "OVERLAP"
+                        },
+                        "attribute": {
+                            "code": "slmService",
+                            "title": "     Услуга",
+                            "type": "object",
+                            "property": "service",
+                            "metaClassFqn": "serviceCall",
+                            "declaredMetaClass": "serviceCall",
+                            "sourceName": "Запрос",
+                            "sourceCode": "serviceCall"
+                        }
+                    }
+                ],
+                "source": {
+                    "descriptor": "",
+                    "widgetFilterOptions": [],
+                    "value": {
+                        "label": "Запрос",
+                        "value": "serviceCall"
+                    },
+                    "filterId": null
+                },
+                "xAxisName": "     Услуга",
+                "yAxisName": ""
+            }
+        ]
+    },
+    "dataLabel": [
+        [149.61, "150"],
+        [237.89, "238"],
+        [34.97, "35"],
+        [38.27, "38"],
+        [52.49, "52"]
+    ],
+    "indicator": [
+        [0,""],
+        [1,"1"],
+        [120,"120"],
+        [149.61,"150"],
+        [180,"180"],
+        [237.89,"238"],
+        [240,"240"],
+        [34.97,"35"],
+        [38.27,"38"],
+        [52.49,"52"],
+        [60,"60"]
+    ],
+    "legend": [
+        ["1С#service$1413205","1С"],
+        ["ВКС/АКС, коллективные мероприятия#service$1413201","ВКС/АКС, ..."],
+        ["Доступ к корп.системам и ресурсам#service$1577120","Доступ к ..."],
+        ["Компьютер, периферийное оборудование, программное обеспечение#service$1117401","Компьютер..."],
+        ["ТЕСТ Пользовательская услуга АРМ#service$1602603","ТЕСТ Поль..."]
+    ],
+    "options": {
+        "hasOverlappedLabel": true,
+        "horizontal": false,
+        "stacked": false
+    },
+    "parameterDefault": [],
+    "parameterOverlapped": [
+        ["Компьютер, периферийное оборудование, программное обеспечение#service$1117401","Компьютер, периферийное оборудование, программное обеспечение"],
+        ["Компьютер, периферийное оборудование, программное обеспечение#service$1117401","Компьютер, периферийное оборудование, программное обеспечение"],
+        ["1С#service$1413205","1С"],
+        ["ВКС/АКС, коллективные мероприятия#service$1413201","ВКС/АКС, коллективные мероприятия"],
+        ["Доступ к корп.системам и ресурсам#service$1577120","Доступ к корп.системам и ресурсам"],
+        ["ТЕСТ Пользовательская услуга АРМ#service$1602603","ТЕСТ Пользовательская услуга АРМ"],
+        ["ТЕСТ Пользовательская услуга АРМ#service$1602603","ТЕСТ Пользовательская услуга АРМ"]
+    ]
+}
