@@ -199,7 +199,7 @@ class GanttSettingsService
         String contentCode = request.contentCode
         GanttSettingsClass ganttSettings = request.diagramSettings
 
-        String ganttSettingsKey = diagramKey ?: generateDiagramKey(subjectUUID, contentCode)
+        String ganttSettingsKey = ganttSettings?.diagramKey ?: generateDiagramKey(subjectUUID, contentCode)
 
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
 
