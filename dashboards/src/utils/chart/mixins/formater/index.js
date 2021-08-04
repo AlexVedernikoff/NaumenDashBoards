@@ -1,5 +1,5 @@
 // @flow
-import {AXIS_FORMAT_TYPE, TEXT_HANDLERS} from 'store/widgets/data/constants';
+import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import type {AxisWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {
 	checkInfinity,
@@ -8,7 +8,6 @@ import {
 	cropFormatter,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
-	percentFormat,
 	sevenDaysFormatter,
 	splitFormatter
 } from './helpers';
@@ -50,7 +49,7 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Numb
  * @param {boolean} checkShowEmptyData - установленный пользователем флаг показывать скрытые данные.
  * @returns {NumberFormatter | ValueFormatter} - функция-форматер
  */
-const getDataFormatter = (widget: AxisWidget, format: ?NumberAxisFormat, checkShowEmptyData?: boolean = false): NumberFormatter => {
+const getDataFormatter = (widget: AxisWidget, format: NumberAxisFormat, checkShowEmptyData?: boolean = false): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {breakdown, indicators, parameters, showEmptyData} = dataSet;
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
@@ -64,18 +63,9 @@ const getDataFormatter = (widget: AxisWidget, format: ?NumberAxisFormat, checkSh
 	if (usesMSInterval) {
 		formatter = parseMSInterval;
 	} else {
-		if (format) {
-			const numberFormat = !format.additional && usesPercent ? {...format, additional: '%'} : format;
+		const numberFormat = !format.additional && usesPercent ? {...format, additional: '%'} : format;
 
-			formatter = makeFormatterByNumberFormat(numberFormat);
-		} else {
-			formatter = (value: number) => Number.isInteger(value) ? value.toString() : value.toFixed(2);
-
-			if (usesPercent) {
-				formatter = compose(percentFormat, formatter);
-			}
-		}
-
+		formatter = makeFormatterByNumberFormat(numberFormat);
 		formatter = checkInfinity(formatter);
 
 		if (!showZero) {
@@ -118,12 +108,13 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 	// $FlowFixMe - getCategoryFormatter должен сам разобраться что он обрабатывает.
 	const formatLabels = labels.map(categoryFormatter);
 	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal);
-	const dataLabelsFormat = dataLabels.format && dataLabels.format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT ? dataLabels.format : null;
+	const defaultLabelFormat: NumberAxisFormat = DEFAULT_NUMBER_AXIS_FORMAT;
+	const dataLabelsFormat = dataLabels.format && dataLabels.format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT ? dataLabels.format : defaultLabelFormat;
 	const categoryOverlappedSplitter = checkString(splitFormatter(!hasOverlappedLabel));
 
 	return {
 		dataLabel: getDataFormatter(widget, dataLabelsFormat, true),
-		indicator: getDataFormatter(widget),
+		indicator: getDataFormatter(widget, defaultLabelFormat),
 		legend: getLegendFormatter(widget, container),
 		options: {
 			hasOverlappedLabel,
