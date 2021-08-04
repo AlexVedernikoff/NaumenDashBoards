@@ -1376,10 +1376,7 @@ class DashboardQueryWrapperUtils
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
-                if (!(attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
-                {
-                    attribute.attrChains().last().ref = new Attribute(code: 'ms', type: 'long')
-                }
+                attribute.attrChains().last().ref = new Attribute(code: 'ms', type: 'long')
                 break
             case AttributeType.TIMER_TYPES:
                 attribute.attrChains().last().ref = new Attribute(code: 'statusCode', type: 'string')

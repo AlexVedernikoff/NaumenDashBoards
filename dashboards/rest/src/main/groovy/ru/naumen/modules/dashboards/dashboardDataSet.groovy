@@ -165,6 +165,7 @@ class DashboardDataSetService
         {
             Boolean requestHasBreakdown = checkForBreakdown(widgetSettings)
             Boolean showTableNulls = widgetSettings.showEmptyData
+            Boolean showTableBlanks = widgetSettings.showBlankData
             Integer pageSize
             Integer firstElementIndex
             paginationSettings
@@ -189,7 +190,7 @@ class DashboardDataSetService
                 reverseRowCount = tableSorting?.type == SortingType.DESC
             }
             request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType,
-                                            widgetFilters, showTableNulls,
+                                            widgetFilters, showTableNulls, showTableBlanks,
                                             computationInTableRequest, tableTop, tableSorting)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
@@ -604,6 +605,7 @@ class DashboardDataSetService
      * @param diagramType - тип диаграммы
      * @param widgetFilters - фильтрация от обычного пользователя на виджете
      * @param showTableNulls - флаг на отображение пустых значений, если диаграмма типа таблица
+     * @param showTableBlanks - флаг на отображение незаполненных значений, если диаграмма типа таблица
      * @param computationInTableRequest - флаг на наличие вычислений в запросе, если диаграмма типа таблица
      * @param tableTop - количество записей, которое нужно вывести, если диаграмма типа таблица
      * @param tableSorting - сортировка на таблице
@@ -611,7 +613,7 @@ class DashboardDataSetService
      */
     private DiagramRequest mappingDiagramRequest(def widgetSettings, String subjectUUID,
                                                  DiagramType diagramType, Collection<WidgetFilterResponse> widgetFilters,
-                                                 Boolean showTableNulls = false,
+                                                 Boolean showTableNulls = false, Boolean showTableBlanks = false,
                                                  Boolean computationInTableRequest = false, Integer tableTop = 0,
                                                  Sorting tableSorting = null)
     {
@@ -696,6 +698,7 @@ class DashboardDataSetService
                         def newParameterFilterList = getFilterList(it,
                                                                    subjectUUID,
                                                                    'parameter',
+                                                                   source,
                                                                    sortingType)
                         if (parameterFilters)
                         {
@@ -803,12 +806,13 @@ class DashboardDataSetService
             {
                 breakdownCustomGroup = dynamicGroup
             }
-            FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown')
+            FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown', source)
             if ((dynamicInAggregate || dynamicInParameter) && !parameterFilters)
             {
                 parameterFilters << getFilterList(dynamicGroup,
                                                   subjectUUID,
                                                   'parameter',
+                                                  source,
                                                   sorting?.value == SortingValue.PARAMETER ? sorting?.type : null)
             }
 
@@ -848,7 +852,7 @@ class DashboardDataSetService
                         : new DefaultRequisiteNode(title: attributeTitle, type: 'DEFAULT', dataKey: data.dataKey)
                 }
                 Boolean showNulls = isDiagramTypeTable ? showTableNulls : data.showEmptyData as Boolean
-                Boolean showBlank = isDiagramTypeTable ? false : data.showBlankData as Boolean
+                Boolean showBlank = isDiagramTypeTable ? showTableBlanks : data.showBlankData as Boolean
                 Integer top = isDiagramTypeTable ? tableTop : data?.top?.show ? data.top?.count as Integer : null
                 requisite = new Requisite(title: 'DEFAULT',
                                           nodes: (computeCheck) ? requisiteNode : [requisiteNode],
@@ -1218,9 +1222,10 @@ class DashboardDataSetService
      * Метод получения функции преобразования пользовательской группировки в удобный формат
      * @param type - тип пользовательской группировки
      * @param subjectUUID - идентификатор "текущего объекта"
+     * @param source - источник запроса
      * @return функция преобразования настроек пользовательской группировки
      */
-    private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID)
+    private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID, Source source)
     {
         switch (type)
         {
@@ -1233,7 +1238,7 @@ class DashboardDataSetService
             case AttributeType.DOUBLE_TYPE:
                 return this.&mappingNumberTypeFilters.curry({ it as double })
             case AttributeType.DATE_TYPES:
-                return this.&mappingDateTypeFilters
+                return this.&mappingDateTypeFilters.curry(source)
             case AttributeType.STATE_TYPE:
                 return this.&mappingStateTypeFilters.curry(subjectUUID)
             case [AttributeType.BO_LINKS_TYPE, AttributeType.BACK_BO_LINKS_TYPE, AttributeType.OBJECT_TYPE]:
@@ -1243,7 +1248,7 @@ class DashboardDataSetService
             case AttributeType.META_CLASS_TYPE:
                 return this.&mappingMetaClassTypeFilters.curry(subjectUUID)
             case AttributeType.TIMER_TYPES:
-                return this.&mappingTimerTypeFilters
+                return this.&mappingTimerTypeFilters.curry(source)
             default:
                 throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
         }
@@ -1752,14 +1757,16 @@ class DashboardDataSetService
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingDateTypeFilters(List<List> data, Attribute attribute, String title, String id)
+    private List<List<FilterParameter>> mappingDateTypeFilters(Source source, List<List> data, Attribute attribute, String title, String id)
     {
         Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
         def dynamicFilter
+        String templateUUID
         if(attrIsDynamic)
         {
             dynamicFilter = getDynamicFilter(data, attribute, title, id)
             attribute = attribute.deepClone()
+            templateUUID = TotalValueMarshaller.unmarshal(attribute.code).last()
             attribute?.code = AttributeType.VALUE_TYPE
         }
         def possibleFilter = mappingFilter(data) { condition ->
@@ -1825,12 +1832,13 @@ class DashboardDataSetService
                     else
                     {
                         Date minDate
-                        if(attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
+                        if(attrIsDynamic)
                         {
                             def tempAttr = attribute.deepClone()
-                            tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
-                            minDate = DashboardQueryWrapperUtils.getMinDateDynamic(tempAttr,source)
-                        }else
+                            tempAttr.title = templateUUID
+                            minDate = DashboardQueryWrapperUtils.getMinDateDynamic(tempAttr, source)
+                        }
+                        else
                         {
                             minDate = DashboardUtils.getMinDate(attribute.attrChains().code.join('.'), attribute.sourceCode)
                         }
@@ -1916,19 +1924,22 @@ class DashboardDataSetService
 
     /**
      * Метод преодбразований настроек группировки для таймеров
+     * @para, source - источник запроса
      * @param data - настройки группировки
      * @param attribute - атрибут к которому привязана группировки
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingTimerTypeFilters(List<List> data, Attribute attribute, String title, String id)
+    private List<List<FilterParameter>> mappingTimerTypeFilters(Source source, List<List> data, Attribute attribute, String title, String id)
     {
         Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
         def dynamicFilter
+        String templateUUID
         if(attrIsDynamic)
         {
             dynamicFilter = getDynamicFilter(data, attribute, title, id)
             attribute = attribute.deepClone()
+            templateUUID = TotalValueMarshaller.unmarshal(attribute.code).last()
             attribute?.code = AttributeType.VALUE_TYPE
         }
         def possibleFilter = mappingFilter(data) { condition ->
@@ -1973,11 +1984,11 @@ class DashboardDataSetService
 
                         def minDate
 
-                        if(attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
+                        if(attrIsDynamic)
                         {
                             def tempAttr = attribute.deepClone()
-                            tempAttr.title = TotalValueMarshaller.unmarshal(tempAttr.code).last()
-                            minDate = DashboardQueryWrapperUtils.getMinDateDynamic(tempAttr,source)
+                            tempAttr.title = templateUUID
+                            minDate = DashboardQueryWrapperUtils.getMinDateDynamic(tempAttr, source)
                         }
                         else
                         {
@@ -4514,10 +4525,11 @@ class DashboardDataSetService
      * @param customGroup - кастомная группировка для построения фильтра
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param place - место, откуда была создана кастомная группировка
+     * @param source - источник запроса
      * @param sortingType - тип сортировки
      * @return - список фильтров
      */
-    private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, SortingType sortingType = null) {
+    private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, Source source, SortingType sortingType = null) {
         if(parameter?.group)
         {
             def customGroup = parameter?.group?.data
@@ -4525,7 +4537,7 @@ class DashboardDataSetService
             def filterList = customGroup?.subGroups?.collect { subGroup ->
                 String attributeType = Attribute.getAttributeType(parameter.attribute).split('\\$', 2).head()
                 parameter.attribute.attrChains().last().type = attributeType
-                Closure<Collection<Collection<FilterParameter>>> mappingFilters = getMappingFilterMethodByType(attributeType, subjectUUID)
+                Closure<Collection<Collection<FilterParameter>>> mappingFilters = getMappingFilterMethodByType(attributeType, subjectUUID, source)
                 def filters = mappingFilters(
                     subGroup.data as List<List>,
                     parameter.attribute,
