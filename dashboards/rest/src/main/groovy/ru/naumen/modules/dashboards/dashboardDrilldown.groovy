@@ -504,7 +504,7 @@ class Link
                         Source source = new Source(classFqn: classFqn, descriptor: descriptor)
                         def orCondition = customSubGroupCondition.find()
                         def data = orCondition?.find()?.data
-                        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID)
+                        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID, source)
                         def filters = mappingFilters(
                             customSubGroupCondition as List<List>,
                             attr,
@@ -1130,7 +1130,7 @@ class Link
     {
         Source source = new Source(classFqn: classFqn, descriptor: descriptor)
         def attributeType = Attribute.getAttributeType(attr)
-        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID)
+        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID, source)
         def filters = mappingFilters(
             customSubGroupCondition,
             attr,
