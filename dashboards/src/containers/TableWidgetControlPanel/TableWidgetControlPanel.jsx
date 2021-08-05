@@ -1,6 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
-import ControlPanel from 'components/organisms/DiagramWidget/components/ControlPanel';
+import ControlPanel from 'containers/DiagramWidgetControlPanel/DiagramWidgetControlPanel';
 import {FILE_VARIANTS} from 'utils/export';
 import {functions, props} from './selectors';
 import memoize from 'memoize-one';

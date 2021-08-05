@@ -68,3 +68,9 @@ export type EmailUserDTO = {
 	email: string,
 	name?: string
 };
+
+export type ExecErrorResponse = {
+	responseText: string,
+	status: number,
+	statusText: string
+};

@@ -119,7 +119,7 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 	dispatch(requestWidgetSave());
 
 	try {
-		const widget = await api.dashboardSettings.widget.edit(getParams, settings);
+		const widget = await api.dashboardSettings.widget.edit(getParams(), settings);
 
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayouts());
@@ -349,7 +349,7 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 		try {
 			let result = false;
 
-			({reasons, result} = await api.dashboardSettings.widget.checkToCopy(getParams, dashboardKey, widgetKey));
+			({reasons, result} = await api.dashboardSettings.widget.checkToCopy(getParams(), dashboardKey, widgetKey));
 			isValid = !result;
 
 			dispatch({

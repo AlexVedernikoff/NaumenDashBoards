@@ -22,7 +22,9 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 			dashboardKey,
 			widgetKey,
 			cardObjectUuid,
-			widgetFilters
+			{
+				widgetFilters
+			}
 		);
 	}
 
@@ -36,12 +38,14 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 		return this.transport(
 			'dashboardDataSet',
 			'getDataForTableDiagram',
-			['dashboardKey', 'widgetKey', 'cardObjectUuid', 'tableRequestSettings', 'requestContent'],
+			['dashboardKey', 'widgetKey', 'cardObjectUuid', 'requestContent'],
 			dashboardKey,
 			widgetKey,
 			cardObjectUuid,
-			tableRequestSettings,
-			widgetFilters
+			{
+				tableRequestSettings,
+				widgetFilters
+			}
 		);
 	}
 }

@@ -29,7 +29,7 @@ export default class Widget implements WidgetAPI {
 		return this.transport('dashboardSettings', 'editWidget', ['requestContent'], {...dashboard, widget});
 	}
 
-	editChunkData (dashboard: DashbordParams, id: string, widget: DTOValue) {
-		return this.transport('dashboardSettings', 'editWidgetChunkData', ['requestContent'], {...dashboard, id, widget});
+	editChunkData (dashboard: DashbordParams, id: string, chunkData: DTOValue) {
+		return this.transport('dashboardSettings', 'editWidgetChunkData', ['requestContent'], {...dashboard, chunkData, id});
 	}
 }

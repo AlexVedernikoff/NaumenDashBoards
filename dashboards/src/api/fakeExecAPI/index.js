@@ -2,12 +2,23 @@
 import CommonAPI from 'api/commonAPI';
 import {execAPITransport} from 'api/execAPI';
 import Frame from './frame';
+import {parseError} from 'api/execAPI/utils';
 import type {Transport} from 'api/types';
 
 const fakeExecAPITransportDecorator = (transport: Transport) => {
 	return async (...params) => {
 		const response = await transport(...params);
-		return response.json();
+
+		if (response.ok) {
+			return response.json();
+		}
+
+		const error = parseError({
+			...response,
+			responseText: await response.text()
+		});
+
+		throw error;
 	};
 };
 
