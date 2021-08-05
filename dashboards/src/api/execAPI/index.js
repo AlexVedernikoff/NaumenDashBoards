@@ -1,5 +1,5 @@
 // @flow
-import {buildRequestParams} from './utils';
+import {buildRequestParams, parseError} from './utils';
 import CommonAPI from 'api/commonAPI';
 import type {DTOValue, Transport} from 'api/types';
 import Frame from 'api/commonAPI/frame';
@@ -20,8 +20,9 @@ export const execAPITransport = (frame: FrameAPI): Transport => {
 			return response;
 		} catch (e) {
 			console.error('Transport: ', e);
-			// TODO:  Обработка ошибок
-			throw e;
+			const error = parseError(e);
+
+			throw error;
 		}
 	};
 };

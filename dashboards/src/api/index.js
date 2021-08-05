@@ -7,18 +7,16 @@ import FakeExecMFAPI from './fakeExecMFAPI';
 
 const configureAPI = (): API => {
 	if (process.env.API_DRIVER === 'exec') {
-		if (process.env.NODE_ENV === 'development') {
-			return new FakeExecAPI();
-		}
-
 		return new ExecAPI();
-	} else {
-		if (process.env.NODE_ENV === 'development') {
-			return new FakeExecMFAPI();
-		}
-
+	} else if (process.env.API_DRIVER === 'exec-dev') {
+		return new FakeExecAPI();
+	} else if (process.env.API_DRIVER === 'execMF') {
 		return new ExecMFAPI();
+	} else if (process.env.API_DRIVER === 'execMF-dev') {
+		return new FakeExecMFAPI();
 	}
+
+	return new ExecAPI();
 };
 
 top.injectJsApi && top.injectJsApi(top, window);

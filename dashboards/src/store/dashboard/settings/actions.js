@@ -7,7 +7,7 @@ import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EVENTS, OPEN_PERSONAL_DASHBOARD_ERROR} from './constants';
+import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {
 	getContext,
@@ -22,6 +22,7 @@ import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
+import {PersonalDashboardNotFound} from 'api/errors';
 import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
@@ -130,11 +131,8 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
 		});
 	} catch (exception) {
-		const {responseText, status} = exception;
-
-		if (status === 500) {
-			// TODO: SMRMEXT-12163
-			if (payload.isPersonal && responseText.includes(OPEN_PERSONAL_DASHBOARD_ERROR)) {
+		if (exception instanceof PersonalDashboardNotFound) {
+			if (payload.isPersonal) {
 				dispatch(setPersonalValue(false));
 				dispatch(getSettings(refresh));
 				return;
