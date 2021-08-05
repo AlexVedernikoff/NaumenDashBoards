@@ -53,10 +53,10 @@ export class FormBox extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className} = this.props;
+		const {className, style} = this.props;
 
 		return (
-			<div className={cn(styles.container, className)}>
+			<div className={cn(styles.container, className)} style={style}>
 				{this.renderHeader()}
 				{this.renderContent()}
 			</div>
