@@ -77,6 +77,10 @@ export class TableWidget extends PureComponent<Props, State> {
 
 			if (row) {
 				({[accessor]: rowValue = EMPTY_VALUE} = row);
+
+				if (rowValue === '') {
+					rowValue = EMPTY_VALUE;
+				}
 			}
 
 			const value = type === BREAKDOWN ? header : rowValue;
