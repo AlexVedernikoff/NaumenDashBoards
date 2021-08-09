@@ -9,7 +9,7 @@ import {USER_ROLES} from 'store/context/constants';
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard, widgets} = state;
 	const {layouts: dashboardLayouts, settings} = dashboard;
-	const {editMode, layoutMode, personal: personalDashboard} = settings;
+	const {editMode, isMobileDevice, layoutMode, personal: personalDashboard} = settings;
 	const {data} = widgets;
 	const {focusedWidget, selectedWidget} = data;
 	const {editableDashboard, user} = context;
@@ -22,6 +22,7 @@ export const props = (state: AppState): ConnectedProps => {
 		editableDashboard,
 		focusedWidget,
 		hasCreateNewWidget,
+		isMobileDevice,
 		layoutMode,
 		layouts: dashboardLayouts[layoutMode],
 		selectedWidget,
