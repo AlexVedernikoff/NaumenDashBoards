@@ -2119,6 +2119,7 @@ trait IHasFontSettings
 /**
  * Метки данных
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 class DataLabels implements IHasFontSettings
 {
     {
