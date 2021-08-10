@@ -86,11 +86,7 @@ export class TableWidget extends PureComponent<Props, State> {
 			const value = type === BREAKDOWN ? header : rowValue;
 
 			if (value) {
-				let subTitle: string = value;
-
-				if (attribute.type === ATTRIBUTE_TYPES.metaClass) {
-					subTitle = getSeparatedLabel(subTitle);
-				}
+				const subTitle: string = getSeparatedLabel(value);
 
 				mixin.title = `${mixin.title}. ${subTitle}`;
 			}
