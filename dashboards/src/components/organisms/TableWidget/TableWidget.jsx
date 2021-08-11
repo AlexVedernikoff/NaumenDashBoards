@@ -1,5 +1,4 @@
 // @flow
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import Cell from 'Table/components/Cell';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
 import type {Column, ColumnType, ParameterColumn, Row} from 'store/widgets/buildData/types';
