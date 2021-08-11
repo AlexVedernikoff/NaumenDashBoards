@@ -9,7 +9,6 @@ import {DESKTOP_MK_WIDTH, GRID_PROPS, gridRef} from './constants';
 import type {DivRef, Ref} from 'components/types';
 import {getLayoutWidgets} from 'store/widgets/helpers';
 import GridItem from './components/Item';
-import isMobile from 'ismobilejs';
 import {Item as MenuItem} from 'rc-menu';
 import type {Layout, Layouts} from 'store/dashboard/layouts/types';
 import {LAYOUT_BREAKPOINTS, LAYOUT_MODE} from 'store/dashboard/settings/constants';
@@ -128,9 +127,9 @@ export class WidgetsGrid extends Component<Props, State> {
 	hideContextMenu = () => this.setState({contextMenu: null});
 
 	isDesktopMK = () => {
-		const {layoutMode} = this.props;
+		const {isMobileDevice, layoutMode} = this.props;
 
-		return !isMobile().any && layoutMode === LAYOUT_MODE.MOBILE;
+		return !isMobileDevice && layoutMode === LAYOUT_MODE.MOBILE;
 	};
 
 	onContextMenu = (e: MouseEvent) => {
@@ -189,25 +188,31 @@ export class WidgetsGrid extends Component<Props, State> {
 		return null;
 	};
 
-	renderCreateButton = () => {
-		const {showCreationInfo} = this.props;
+	renderCreateInfo = () => {
+		const {isMobileDevice, showCreationInfo} = this.props;
 
 		if (showCreationInfo) {
-			return (
-				<div className={styles.createButtonPlace}>
-					<div className={styles.creationButtonInfo}>
-						Отсутствуют данные для отображения. Чтобы создать виджет, нажмите
-						<a aria-pressed="false" className={styles.creationButton} onClick={this.addNewDiagram} role="button">
-							здесь
-						</a>
-						или кликнете правой кнопкой мыши на свободное пространство
-					</div>
-				</div>
-			);
+			if (isMobileDevice) {
+				return this.renderMobileInfo();
+			} else {
+				return this.renderDesktopCreateInfo();
+			}
 		}
 
 		return null;
 	};
+
+	renderDesktopCreateInfo = () => (
+		<div className={styles.createButtonPlace}>
+			<div className={styles.creationButtonInfo}>
+				Отсутствуют данные для отображения. Чтобы создать виджет, нажмите
+				<a aria-pressed="false" className={styles.creationButton} onClick={this.addNewDiagram} role="button">
+					здесь
+				</a>
+				или кликнете правой кнопкой мыши на свободное пространство
+			</div>
+		</div>
+	);
 
 	renderGrid = () => {
 		const {layoutMode, layouts, selectedWidget, widgets} = this.props;
@@ -256,6 +261,14 @@ export class WidgetsGrid extends Component<Props, State> {
 		);
 	};
 
+	renderMobileInfo = () => (
+		<div className={styles.createButtonPlace}>
+			<div className={styles.creationButtonInfo}>
+				Отсутствуют данные для отображения. Для редактирования дашборда необходимо открыть полную версию приложения на компьютере
+			</div>
+		</div>
+	);
+
 	renderWidget = (widget: AnyWidget) => {
 		const {
 			BAR,
@@ -296,16 +309,18 @@ export class WidgetsGrid extends Component<Props, State> {
 	};
 
 	render () {
+		const {isMobileDevice} = this.props;
 		const containerCN = cn({
 			[styles.gridContainer]: true,
 			[styles.MKGridContainer]: this.isDesktopMK()
 		});
+		const onContextMenu = !isMobileDevice ? this.onContextMenu : null;
 
 		return (
-			<div className={containerCN} onClick={this.handleClick} onContextMenu={this.onContextMenu} ref={this.gridContainerRef}>
+			<div className={containerCN} onClick={this.handleClick} onContextMenu={onContextMenu} ref={this.gridContainerRef}>
 				{this.renderContextMenu()}
 				{this.renderGrid()}
-				{this.renderCreateButton()}
+				{this.renderCreateInfo()}
 			</div>
 		);
 	}
