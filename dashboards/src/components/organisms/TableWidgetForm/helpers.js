@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import type {DataSet} from 'store/widgetForms/tableForm/types';
 
 /**
@@ -40,12 +41,7 @@ async function checkSourceForParent () {
 
 		if (mainValue !== value) {
 			try {
-				({result} = await window.jsApi.restCallModule(
-					'dashboards',
-					'checkForParent',
-					mainValue,
-					value
-				));
+				({result} = await api.dashboards.checkForParent(mainValue, value));
 			} catch (e) {
 				result = false;
 			}

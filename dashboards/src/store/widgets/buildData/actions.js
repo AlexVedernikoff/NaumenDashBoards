@@ -1,5 +1,6 @@
 // @flow
 import type {AnyWidget, AxisWidget, ComboWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import api from 'api';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
 import {BUILD_DATA_EVENTS} from './constants';
 import {createContextName, exportSheet} from 'utils/export';
@@ -32,9 +33,7 @@ const getDataForTableDiagram = async (state: AppState, widget: TableWidget, page
 		sorting
 	};
 	const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
-	const data = await window.jsApi.restCallModule(
-		'dashboardDataSet',
-		'getDataForTableDiagram',
+	const data = await api.dashboardDataSet.getDataForTableDiagram(
 		dashboard.settings.code,
 		widget.id,
 		context.subjectUuid,
@@ -99,9 +98,7 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 			const {context, dashboard} = getState();
 			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
 
-			const data = await window.jsApi.restCallModule(
-				'dashboardDataSet',
-				'getDataForCompositeDiagram',
+			const data = await api.dashboardDataSet.getDataForCompositeDiagram(
 				dashboard.settings.code,
 				widget.id,
 				context.subjectUuid,
@@ -111,7 +108,6 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 			await dispatch(checkDiagramsDataLimits(widget, data));
 			dispatch(receiveBuildData({data, id: widget.id}));
 		} catch (e) {
-			console.log(e);
 			dispatch(recordBuildDataError(widget.id));
 		}
 	};

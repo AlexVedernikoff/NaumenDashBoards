@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {arrayToTree} from 'utils/arrayToTree';
 import {DATA_SOURCES_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -16,7 +17,7 @@ const getDataSources = (): ThunkAction => async (dispatch: Dispatch) => {
 	});
 
 	try {
-		const data = await window.jsApi.restCallModule('dashboards', 'getDataSources');
+		const data = await api.dashboards.getDataSources();
 
 		dispatch({
 			payload: arrayToTree(data, {

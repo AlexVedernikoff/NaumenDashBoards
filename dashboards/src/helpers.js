@@ -84,20 +84,6 @@ const getLayoutMode = (isMobileDevice: boolean): LayoutMode => {
 };
 
 /**
- * На текущий момент у окружения метода нет полифилов к es6. Для стабильной работы на старых браузерах все ответы
- * перепарсиваются согласно окружению внутреннего приложения.
- * @param {Function} restCallModule - метод для осуществления запросов к модулям
- * @returns {void}
- */
-const decorateRestCallModule = (restCallModule: Function) => {
-	window.jsApi.restCallModule = async (...params) => {
-		const data = await restCallModule(...params);
-
-		return JSON.parse(JSON.stringify(data));
-	};
-};
-
-/**
  * Экранирует специальные символы строки
  * TODO: RegExp.esacape https://github.com/tc39/proposal-regex-escaping
  * @param {string} string - строка
@@ -125,7 +111,6 @@ function omit<T: Object> (obj: T, key: string): T {
 
 export {
 	debounce,
-	decorateRestCallModule,
 	deepClone,
 	escapeString,
 	extend,

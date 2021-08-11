@@ -16,6 +16,11 @@ export type SourceFilters = {
 	source: string,
 };
 
+export type SourceFilter = {
+	filter: SourceFiltersItem,
+	source: string,
+};
+
 export type DeleteSourceFilter = {
 	id: ?string,
 	source: string,
@@ -28,6 +33,11 @@ type UnknownSourcesFiltersAction = {
 type SetSourcesFiltersAction = {
 	payload: SourceFilters,
 	type: typeof SOURCES_FILTERS_EVENTS.UPDATE_SOURCE_FILTERS
+};
+
+type UpdateSourceFilterAction = {
+	payload: SourceFilter,
+	type: typeof SOURCES_FILTERS_EVENTS.UPDATE_SOURCE_FILTER
 };
 
 type DeleteSourceFilterAction = {
@@ -49,6 +59,7 @@ type RequestSourceFiltersErrorAction = {
 
 export type SourcesFiltersActions =
 	| UnknownSourcesFiltersAction
+	| UpdateSourceFilterAction
 	| SetSourcesFiltersAction
 	| DeleteSourceFilterAction
 	| RequestSourceFiltersAction

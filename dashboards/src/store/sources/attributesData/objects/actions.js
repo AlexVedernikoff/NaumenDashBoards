@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {arrayToTree} from 'utils/arrayToTree';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
@@ -54,7 +55,7 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 					sourceCode: source.value,
 					value: searchValue
 				};
-				const response = await window.jsApi.restCallModule('dashboards', 'searchValue', requestPayload);
+				const response = await api.dashboards.searchValue(requestPayload);
 				const items = arrayToTree(response, {
 					keys: {
 						children: 'children',
@@ -134,7 +135,7 @@ const fetchObjectData = (params: FetchParams): ThunkAction => async (dispatch: D
 			removed: includingArchival,
 			sourceCode: source.value
 		};
-		const data = await window.jsApi.restCallModule('dashboards', 'getAttributeObject', requestPayload);
+		const data = await api.dashboards.getAttributeObject(requestPayload);
 		const uploaded = data.length < LIMIT;
 
 		dispatch({

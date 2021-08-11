@@ -12,7 +12,7 @@ module.exports = {
 		historyApiFallback: true,
 		host: localIp(),
 		proxy: {
-			'/sd/services/rest/*': {
+			'/sd/services/earest/*': {
 				changeOrigin: true,
 				target: process.env.API_URL
 			}

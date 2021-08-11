@@ -200,8 +200,8 @@ export class SourceFieldset extends Component<Props, State> {
 			if (
 				approvalToApply.result
 				|| await confirm(
-				'Ошибка применения фильтра',
-				'Выбранный фильтр не может быть применен полностью, т.к. содержит условия, связанные с текущим объектом. Применить частично?'
+					'Ошибка применения фильтра',
+					'Выбранный фильтр не может быть применен полностью, т.к. содержит условия, связанные с текущим объектом. Применить частично?'
 				)
 			) {
 				this.changeSource({
@@ -268,8 +268,8 @@ export class SourceFieldset extends Component<Props, State> {
 		const newValue = {
 			...value,
 			indicators: [{
-					aggregation: getDefaultAggregation(attribute),
-					attribute
+				aggregation: getDefaultAggregation(attribute),
+				attribute
 			}]
 		};
 

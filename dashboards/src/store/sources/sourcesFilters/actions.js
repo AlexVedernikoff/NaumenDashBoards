@@ -1,5 +1,7 @@
 // @flow
+import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {FilterAlreadyExists, FilterNameNotUnique, RemoveFilterFailed} from 'api/errors';
 import {getDashboardDescription} from 'store/dashboard/settings/selectors';
 import type {ResultWithMessage, SourceFiltersItem, UpdateSourcesFilterResult} from './types';
 import {SOURCES_FILTERS_EVENTS} from './constants';
@@ -43,7 +45,7 @@ const fetchSourcesFilters = (metaClass: string): ThunkAction =>
 		try {
 			dispatch(requestSourceFilters());
 
-			const filters = await window.jsApi.restCallModule('dashboardSettings', 'getSourceFilters', metaClass);
+			const filters = await await api.dashboardSettings.sourceFilters.getAll(metaClass);
 
 			dispatch({
 				payload: {filters, source: metaClass},
@@ -70,15 +72,13 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 		const dashboard = getDashboardDescription(store);
 
 		try {
-			const {result} = await window.jsApi.restCallModule('dashboardSettings', 'saveSourceFilters', {
-				dashboard,
-				sourceFilter: {
-					descriptor,
-					id,
-					label,
-					value: source
-				}
-			});
+			const sourceFilter = {
+				descriptor,
+				id,
+				label,
+				value: source
+			};
+			const {result} = await api.dashboardSettings.sourceFilters.save(dashboard, sourceFilter);
 
 			dispatch(fetchSourcesFilters(source));
 
@@ -86,21 +86,8 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 		} catch (exception) {
 			dispatch(requestSourceFiltersError());
 
-			const {responseText, status} = exception;
-
-			if (status === 500) {
-				// TODO: SMRMEXT-12163
-				if (/Название фильтра должно быть уникально/.test(responseText)) {
-					return {message: `Фильтр с названием ${label} не может быть сохранен. Название фильтра должно быть уникально.`, result: false};
-				} else if (/Фильтр с текущими параметрами уже существует/.test(responseText)) {
-					const match = responseText.match(/\\n(Фильтр с текущими параметрами уже существует: (.*))"\]/);
-
-					if (match) {
-						return {message: match[1], result: false};
-					} else {
-						return {message: `Фильтр с текущими параметрами уже существует.`, result: false};
-					}
-				}
+			if (exception instanceof FilterAlreadyExists || exception instanceof FilterNameNotUnique) {
+				return {message: exception.message, result: false};
 			}
 
 			return {message: 'Ошибка сохранения фильтра', result: false};
@@ -119,7 +106,7 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 		try {
 			dispatch(requestSourceFilters());
 
-			const {result} = await window.jsApi.restCallModule('dashboardSettings', 'deleteSourceFilters', filterId);
+			const {result} = await api.dashboardSettings.sourceFilters.delete(filterId);
 
 			if (result) {
 				dispatch(fetchSourcesFilters(source));
@@ -129,11 +116,9 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 			}
 		} catch (exception) {
 			dispatch(requestSourceFiltersError());
-			const {status} = exception;
 
-			// TODO: SMRMEXT-12163
-			if (status === 500) {
-				return {message: 'Серверная ошибка удаления фильтра', result: false};
+			if (exception instanceof RemoveFilterFailed) {
+				return {message: exception.message, result: false};
 			}
 		}
 		return {message: 'Ошибка удаления фильтра', result: false};
@@ -152,11 +137,16 @@ const checkApplyFilter = (source: string, sourceFilter: SourceFiltersItem): Thun
 		const {code: dashboardKey} = store.dashboard.settings;
 
 		try {
-			const {result} = await window.jsApi.restCallModule('dashboardSettings', 'filterIsBadToApply', { dashboardKey, sourceFilter });
+			const {correctFilter, result} = await api.dashboardSettings.sourceFilters.check(dashboardKey, sourceFilter);
 
 			if (!result) {
 				return {result: true};
 			}
+
+			dispatch({
+				payload: {filter: correctFilter, source},
+				type: SOURCES_FILTERS_EVENTS.UPDATE_SOURCE_FILTER
+			});
 
 			return {message: 'Ошибка применения фильтра', result: false};
 		} catch (ex) {

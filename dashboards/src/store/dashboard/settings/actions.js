@@ -1,12 +1,13 @@
 // @flow
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
 import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
+import api from 'api';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EVENTS, OPEN_PERSONAL_DASHBOARD_ERROR} from './constants';
+import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {
@@ -22,6 +23,7 @@ import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
+import {PersonalDashboardNotFound} from 'api/errors';
 import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
@@ -34,7 +36,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {ThunkAction}
  */
 const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {MinTimeIntervalUpdate: defaultInterval} = await window.jsApi.commands.getCurrentContentParameters();
+	const {MinTimeIntervalUpdate: defaultInterval} = await api.frame.getCurrentContentParameters();
 
 	if (defaultInterval) {
 		dispatch(changeAutoUpdateSettings({
@@ -115,7 +117,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			layouts,
 			mobileLayouts,
 			widgets
-		} = await window.jsApi.restCallModule('dashboardSettings', 'getSettings', payload);
+		} = await api.dashboardSettings.settings.getSettings(payload);
 
 		batch(() => {
 			dispatch(setCode(code));
@@ -136,11 +138,8 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			}
 		});
 	} catch (exception) {
-		const {responseText, status} = exception;
-
-		if (status === 500) {
-			// TODO: SMRMEXT-12163
-			if (payload.isPersonal && responseText.includes(OPEN_PERSONAL_DASHBOARD_ERROR)) {
+		if (exception instanceof PersonalDashboardNotFound) {
+			if (payload.isPersonal) {
 				dispatch(setPersonalValue(false));
 				dispatch(getSettings(refresh));
 				return;
@@ -204,13 +203,8 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		const {context} = getState();
 		const {contentCode, editableDashboard: editable, subjectUuid: classFqn, user} = context;
-		const payload = {
-			classFqn,
-			contentCode,
-			editable
-		};
 
-		await window.jsApi.restCallModule('dashboardSettings', 'createPersonalDashboard', payload);
+		await api.dashboardSettings.personalDashboard.create(classFqn, contentCode, editable);
 
 		dispatch(setUserData({...user, hasPersonalDashboard: true}));
 		dispatch({
@@ -242,7 +236,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		const {context} = getState();
 		const {contentCode, subjectUuid, user} = context;
 
-		await window.jsApi.restCallModule('dashboardSettings', 'deletePersonalDashboard', subjectUuid, contentCode);
+		await api.dashboardSettings.personalDashboard.delete(subjectUuid, contentCode);
 
 		dispatch(switchDashboard(false));
 		dispatch(setUserData({...user, hasPersonalDashboard: false}));
@@ -327,7 +321,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 	try {
 		const key = await uploadFile(file, name);
 
-		await window.jsApi.restCallModule('dashboardSendEmail', 'sendFileToMail', key, type, name, users);
+		await api.fileToMail.send(key, type, name, users);
 
 		dispatch({
 			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
@@ -353,7 +347,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	const {context, dashboard, sources, widgetForms} = getState();
 	const {contentCode} = context;
-	const {metaClass} = await window.jsApi.commands.getCurrentContextObject();
+	const {metaClass} = await api.frame.getCurrentContextObject();
 	let descriptorStr = '';
 	let foundKey;
 
@@ -421,7 +415,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 			isPersonal
 		};
 
-		await window.jsApi.restCallModule('dashboardSettings', 'saveAutoUpdateSettings', payload);
+		await api.dashboardSettings.settings.saveAutoUpdate(payload);
 
 		dispatch(setAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({

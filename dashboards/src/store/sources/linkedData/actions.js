@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {arrayToTree} from 'utils/arrayToTree';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
@@ -28,7 +29,7 @@ const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatc
 			classFqn,
 			types: [backBOLinks, boLinks, object]
 		};
-		const sources = await window.jsApi.restCallModule('dashboards', 'getLinkedDataSources', payload);
+		const sources = await api.dashboards.getLinkedDataSources(payload);
 
 		dispatch({
 			payload: {

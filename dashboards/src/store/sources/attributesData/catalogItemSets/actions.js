@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {CATALOG_ITEM_SETS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {ReceivePayload} from './types';
@@ -12,7 +13,7 @@ const fetchCatalogItemSetData = (property: string): ThunkAction => async (dispat
 	dispatch(requestCatalogItemSetData(property));
 
 	try {
-		const data = await window.jsApi.restCallModule('dashboards', 'getCatalogObject', {property});
+		const data = await api.dashboards.getCatalogObject(property);
 
 		dispatch(receiveCatalogItemSetData({data, property}));
 	} catch (error) {

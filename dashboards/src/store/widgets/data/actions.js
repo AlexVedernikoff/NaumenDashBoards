@@ -1,6 +1,7 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
+import api from 'api';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
@@ -118,11 +119,7 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 	dispatch(requestWidgetSave());
 
 	try {
-		const payload = {
-			...getParams(),
-			widget: settings
-		};
-		const widget = await window.jsApi.restCallModule('dashboardSettings', 'editWidget', payload);
+		const widget = await api.dashboardSettings.widget.edit(getParams(), settings);
 
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayouts());
@@ -146,17 +143,12 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 const editWidgetChunkData = (widget: AnyWidget, chunkData: Object, refreshData: boolean = true): ThunkAction =>
 	async (dispatch: Dispatch): Promise<void> => {
 		try {
-			const payload = {
-				...getParams(),
-				chunkData,
-				id: widget.id
-			};
 			const updatedWidgetData = {
 				...widget,
 				...chunkData
 			};
 
-			await window.jsApi.restCallModule('dashboardSettings', 'editWidgetChunkData', payload);
+			await api.dashboardSettings.widget.editChunkData(getParams(), widget.id, chunkData);
 
 			dispatch(updateWidget(updatedWidgetData));
 			refreshData && dispatch(fetchBuildData(updatedWidgetData));
@@ -203,11 +195,7 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
 	try {
 		updateNewWidgetCustomColorsSettings(settings, state);
 
-		const payload = {
-			...getParams(),
-			widget: settings
-		};
-		const widget = await window.jsApi.restCallModule('dashboardSettings', 'createWidget', payload);
+		const widget = await api.dashboardSettings.widget.create(getParams(), settings);
 
 		batch(() => {
 			dispatch(deleteWidget(NewWidget.id));
@@ -239,12 +227,7 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 	try {
 		dispatch(checkWidgetsCount());
 
-		const payload = {
-			...getParams(),
-			dashboardKey,
-			widgetKey
-		};
-		const widget = await window.jsApi.restCallModule('dashboardSettings', 'copyWidgetToDashboard', payload);
+		const widget = await api.dashboardSettings.widget.copyWidget(getParams(), dashboardKey, widgetKey);
 		const state = getState();
 
 		if (updateNewWidgetCustomColorsSettings(widget, state)) {
@@ -280,12 +263,7 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 	dispatch(requestWidgetDelete());
 
 	try {
-		const payload = {
-			...getParams(),
-			widgetId
-		};
-
-		await window.jsApi.restCallModule('dashboardSettings', 'deleteWidget', payload);
+		await api.dashboardSettings.widget.delete(getParams(), widgetId);
 
 		batch(() => {
 			dispatch(removeLayouts(widgetId));
@@ -369,14 +347,9 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 		});
 
 		try {
-			const payload = {
-				...getParams(),
-				dashboardKey,
-				widgetKey
-			};
 			let result = false;
 
-			({reasons, result} = await window.jsApi.restCallModule('dashboardSettings', 'widgetIsBadToCopy', payload));
+			({reasons, result} = await api.dashboardSettings.widget.checkToCopy(getParams(), dashboardKey, widgetKey));
 			isValid = !result;
 
 			dispatch({
