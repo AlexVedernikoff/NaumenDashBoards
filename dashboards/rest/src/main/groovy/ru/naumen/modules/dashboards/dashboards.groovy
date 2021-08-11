@@ -18,6 +18,7 @@ import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.api.injection.InjectApi
+import static MessageProvider.*
 
 @Field @Lazy @Delegate Dashboards dashboards = new DashboardsImpl(binding)
 
@@ -50,7 +51,7 @@ interface Dashboards
      * @param requestContent - Запрос на получение атрибутов
      * @return json список атрибутов {заголовок, код, тип атрибута}
      */
-    String getAttributesFromLinkAttribute(requestContent)
+    String getAttributesFromLinkAttribute(requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод по получению объектов атридутов типа object
@@ -142,13 +143,14 @@ interface Dashboards
     /**
      * Метод формирования ссылки для перехода на дашборд
      * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
+     * @param user - текущий пользователь
      * @return ссылка на на страницу с дошбордом в json-формате.
      */
-    String getDashboardLink(String dashboardCode)
+    String getDashboardLink(String dashboardCode, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
-class DashboardsImpl extends Script implements Dashboards
+class DashboardsImpl extends BaseController implements Dashboards
 {
     DashboardsService service = DashboardsService.instance
 
@@ -177,9 +179,9 @@ class DashboardsImpl extends Script implements Dashboards
     }
 
     @Override
-    String getAttributesFromLinkAttribute(requestContent)
+    String getAttributesFromLinkAttribute(requestContent, IUUIDIdentifiable user)
     {
-        return toJson(service.getAttributesFromLinkAttribute(requestContent))
+        return toJson(service.getAttributesFromLinkAttribute(requestContent, user))
     }
 
     @Override
@@ -254,7 +256,7 @@ class DashboardsImpl extends Script implements Dashboards
     }
 
     @Override
-    String getDashboardLink(String dashboardCode)
+    String getDashboardLink(String dashboardCode, IUUIDIdentifiable user)
     {
         return toJson(service.getDashboardLink(dashboardCode, user))
     }
@@ -267,6 +269,7 @@ class DashboardsService
     private static final String MAIN_FQN = 'abstractBO'
     private static final String LC_PARENT_FQN = 'abstractSysObj'
     private static final String LC_FQN = 'abstractEvt'
+    MessageProvider messageProvider = MessageProvider.instance
 
     /**
     * Отдает список источников данных с детьми
@@ -340,13 +343,15 @@ class DashboardsService
     * @param requestContent - Запрос на получение атрибутов
     * @return json список атрибутов {заголовок, код, тип атрибута}
     */
-    List<Attribute> getAttributesFromLinkAttribute(requestContent)
+    List<Attribute> getAttributesFromLinkAttribute(requestContent, IUUIDIdentifiable user)
     {
         def linkAttribute = requestContent.attribute as Map
         String attributeType = linkAttribute.type
         if (!(attributeType in AttributeType.LINK_TYPES))
         {
-            throw new Exception( "Not supported type: ${ attributeType }" )
+            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            String message = messageProvider.getMessage(NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR, currentUserLocale, attributeType: attributeType)
+            api.utils.throwReadableException("$message#${NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR}")
         }
 
         String attributeClassFqn = linkAttribute.property
@@ -772,9 +777,10 @@ class DashboardsService
     /**
     * Метод формирования ссылки для перехода на дашборд
     * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
+     * @param user - текущий пользователь
     * @return ссылка на на страницу с дошбордом в json-формате.
     */
-    Map getDashboardLink(String dashboardCode, user)
+    Map getDashboardLink(String dashboardCode, IUUIDIdentifiable user)
     {
         def root = api.utils.findFirst('root', [:])
         if (root.hasProperty('dashboardCode') && root.dashboardCode)
@@ -797,7 +803,9 @@ class DashboardsService
             }
             return [link: link]
         }
-        throw new Exception('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
+        api.utils.throwReadableException("$message#${EMPTY_DASHBOARD_CODE_ERROR}")
     }
 
     /**

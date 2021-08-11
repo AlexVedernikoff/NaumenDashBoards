@@ -14,6 +14,8 @@ package ru.naumen.modules.dashboards
 import javax.mail.util.ByteArrayDataSource
 import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.Field
+import static MessageProvider.*
+import static CurrentUserHolder.*
 
 @Field @Lazy @Delegate DashboardSendEmail dashboardSendEmail = new DashboardSendEmailImpl()
 
@@ -32,7 +34,7 @@ interface DashboardSendEmail
     void sendFileToMail(String tokenKey, String format, String fileName, List users)
 }
 
-class DashboardSendEmailImpl implements DashboardSendEmail
+class DashboardSendEmailImpl extends BaseController implements DashboardSendEmail
 {
     DashboardSendEmailService service = DashboardSendEmailService.instance
 
@@ -47,6 +49,7 @@ class DashboardSendEmailImpl implements DashboardSendEmail
 @Singleton
 class DashboardSendEmailService
 {
+    MessageProvider messageProvider = MessageProvider.instance
     /**
      * Метод отправки сообщений на почту
      * @param tokenKey - ключ на файл в хранилище
@@ -59,7 +62,9 @@ class DashboardSendEmailService
         users.each {user ->
             if (!user?.email)
             {
-                utils.throwReadableException('User email is null or empty!')
+                String locale = DashboardUtils.getUserLocale(CurrentUserHolder.currentUser.get()?.UUID)
+                String message = messageProvider.getConstant(USER_EMAIL_IS_NULL_OR_EMPTY_ERROR, locale)
+                api.utils.throwReadableException("$message#${USER_EMAIL_IS_NULL_OR_EMPTY_ERROR}")
             }
             def file = beanFactory.getBean('uploadServiceImpl').get(tokenKey)
             def ds = new ByteArrayDataSource(file.inputStream, file.contentType)

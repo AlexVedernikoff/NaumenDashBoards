@@ -13,6 +13,7 @@ import ru.naumen.core.server.script.spi.ScriptServiceImpl
 def scriptService = beanFactory.getBean(ScriptServiceImpl)
 scriptService.reloadModules([
     'dashboardCommon',
+    'dashboardErrorHandler',
     'dashboardMarshaller',
     'dashboardFormulaCalculator',
     'dashboardQueryWrapper',
