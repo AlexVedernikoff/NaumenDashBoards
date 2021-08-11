@@ -17,6 +17,9 @@ import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
+import ru.naumen.core.shared.IUUIDIdentifiable
+import static MessageProvider.*
+import static ru.naumen.modules.dashboards.CurrentUserHolder.*
 
 import static groovy.json.JsonOutput.toJson
 
@@ -30,9 +33,10 @@ interface DashboardSettings
     /**
      * Получение настроек дашборда и виджетов
      * @param requestContent - параметры запроса (classFqn, contentCode, isPersonal)
+     * @param user - текущий пользователь
      * @return настройки автообновления вместе с настройками виджетов
      */
-    String getSettings(Map<String, Object> requestContent)
+    String getSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Получение кастомных группировок для дашборда по ключу дашборда
@@ -52,96 +56,109 @@ interface DashboardSettings
     /**
      * Метод обновления состояния автообновления
      * @param requestContent - тело запроса (classFqn, contentCode, autoUpdate)
+     * @param user - текущий пользователь
      * @return true|false
      */
-    String saveAutoUpdateSettings(Map<String, Object> requestContent)
+    String saveAutoUpdateSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод сохранения настроек кастомных группировок.
      * Сохраняет в персональный дашборд.
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return ключь кастомной группировки
      */
-    String saveCustomGroup(Map<String, Object> requestContent)
+    String saveCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод обноления кастомной группировки
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return новая кастомная группировка
      */
-    String updateCustomGroup(Map<String, Object> requestContent)
+    String updateCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод удаления настроек группировки.
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return ключь кастомной группировки
      */
-    String deleteCustomGroup(Map<String, Object> requestContent)
+    String deleteCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод сохранения настроек кастомных цветов.
      * Сохраняет в персональный дашборд.
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return ключь кастомной группировки
      */
-    String saveCustomColors(Map<String, Object> requestContent)
+    String saveCustomColors(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод удаления настроек цветов.
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return ключь кастомной группировки
      */
-    String deleteCustomColors(Map<String, Object> requestContent)
+    String deleteCustomColors(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод создания персонального дашборда.
      * @param requestContent - тело запроса (editable, classFqn, contentCode)
+     * @param user - текущий пользователь
      * @return true|false
      */
-    String createPersonalDashboard(Map<String, Object> requestContent)
+    String createPersonalDashboard(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Создание виджета в дашборде
      * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
+     * @param user - текущий пользователь
      * @return ключ созданного виджета
      */
-    String createWidget(Map<String, Object> requestContent)
+    String createWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Редактирование виджета в дашборде
      * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
+     * @param user - текущий пользователь
      * @return ключ отредактированного виджета
      */
-    String editWidget(Map<String, Object> requestContent)
+    String editWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Массовое редактирование виджетов в дашборде
      * @param requestContent - тело запроса ()
+     * @param user - текущий пользователь
      * @return ключ дашборда
      */
-    String editLayouts(Map<String, Object> requestContent)
+    String editLayouts(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод удаления виджета
      * @param requestContent - тело запроса (classFqn, contentCode, widgetId, editable, isPersonal)
+     * @param user - текущий пользователь
      * @return успех | провал
      */
-    String deleteWidget(Map<String, Object> requestContent)
+    String deleteWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Сброс персонального дашборда в дашборд по умолчанию
      * @param classFqn - код типа куда выведено встроенное приложение
      * @param contentCode - код контента встроенного приложения
+     * @param user - текущий пользователь
      * @return статус сообщение
      */
-    String deletePersonalDashboard(String classFqn, String contentCode)
+    String deletePersonalDashboard(String classFqn, String contentCode, IUUIDIdentifiable user)
 
     /**
      * Получение данных о пользователе для дашборда
      * @param requestContent - параметры запроса (classFqn, contentCode)
+     * @param user - текущий пользователь
      * @return параметры пользователя
      */
-    String getUserData(Map<String, Object> requestContent)
+    String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод получения списка пользователей - ФИО и адрес эл. почты
@@ -154,7 +171,7 @@ interface DashboardSettings
      * @param convertToJson - флаг на преобразование результата в json
      * @return json или List<DashboardInfo>
      */
-    String getDashboardsAndWidgetsTree()
+    String getDashboardsAndWidgetsTree(IUUIDIdentifiable user)
 
     /**
      * Метод копирования виджета в другой дашборд
@@ -166,9 +183,10 @@ interface DashboardSettings
     /**
      * Метод проверки виджета для возможности копирования
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь системы
      * @return флаг на возможность полного копирования в json-формате
      */
-    String widgetIsBadToCopy(requestContent)
+    String widgetIsBadToCopy(def requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод для проверки подстановки фильтра с неправильными условиями для метакласса контента
@@ -180,16 +198,18 @@ interface DashboardSettings
     /**
      * Редактирование отдельных полей в виджете
      * @param requestContent - тело запроса ()
+     * @param user - текущий пользователь
      * @return ключ отредактированного виджета
      */
-    String editWidgetChunkData(Map<String, Object> requestContent)
+    String editWidgetChunkData(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод по сохранению настроек фильтров на источник
      * @param requestContent - тело запроса для построения фильтра на источник
+     * @param user - текущий пользователь системы
      * @return словарь с ключом фильтра на источник, если изменение прошло корректно
      */
-    String saveSourceFilters(def requestContent)
+    String saveSourceFilters(def requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод по получению списка фильтров на источник определенного метакласса
@@ -200,14 +220,15 @@ interface DashboardSettings
 
     /**
      * Метод по удалению фильтров из хранилища
-     * @param sourceFilterUUID - ключ дял удаления
+     * @param sourceFilterUUID - ключ для удаления
+     * @param user - текущий пользователь
      * @return словарь с успешным удалением
      */
-    String deleteSourceFilters(String sourceFilterUUID)
+    String deleteSourceFilters(String sourceFilterUUID, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
-class DashboardSettingsImpl extends Script implements DashboardSettings
+class DashboardSettingsImpl extends BaseController implements DashboardSettings
 {
     DashboardSettingsService service = DashboardSettingsService.instance
 
@@ -218,7 +239,7 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
 
 
     @Override
-    String getSettings(Map<String, Object> requestContent)
+    String getSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return Jackson.toJsonString(service.getSettings(requestContent, user))
     }
@@ -236,69 +257,69 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     }
 
     @Override
-    String saveAutoUpdateSettings(Map<String, Object> requestContent)
+    String saveAutoUpdateSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.saveAutoUpdateSettings(requestContent, user))
     }
     @Override
-    String saveCustomGroup(Map<String, Object> requestContent)
+    String saveCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return Jackson.toJsonString(service.saveCustomGroup(requestContent, user))
     }
     @Override
-    String updateCustomGroup(Map<String, Object> requestContent)
+    String updateCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return Jackson.toJsonString(service.updateCustomGroup(requestContent, user))
     }
 
     @Override
-    String deleteCustomGroup(Map<String, Object> requestContent)
+    String deleteCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.deleteCustomGroup(requestContent, user))
     }
 
     @Override
-    String saveCustomColors(Map<String, Object> requestContent)
+    String saveCustomColors(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.saveCustomColors(requestContent, user))
     }
 
     @Override
-    String deleteCustomColors(Map<String, Object> requestContent)
+    String deleteCustomColors(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.deleteCustomColors(requestContent, user))
     }
 
     @Override
-    String createPersonalDashboard(Map<String, Object> requestContent)
+    String createPersonalDashboard(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.createPersonalDashboard(requestContent, user))
     }
 
     @Override
-    String createWidget(Map<String, Object> requestContent)
+    String createWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return Jackson.toJsonString(service.createWidget(requestContent, user))
     }
     @Override
-    String editWidget(Map<String, Object> requestContent)
+    String editWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return Jackson.toJsonString(service.editWidget(requestContent, user))
     }
 
     @Override
-    String editLayouts(Map<String, Object> requestContent)
+    String editLayouts(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.editLayouts(requestContent, user))
     }
 
     @Override
-    String deleteWidget(Map<String, Object> requestContent)
+    String deleteWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.deleteWidget(requestContent, user))
     }
     @Override
-    String deletePersonalDashboard(String classFqn, String contentCode)
+    String deletePersonalDashboard(String classFqn, String contentCode, IUUIDIdentifiable user)
     {
         return service.deletePersonalDashboard(classFqn, contentCode, user)
             ? toJson([status: "OK", message: "Установлены настройки по умолчанию"])
@@ -306,7 +327,7 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     }
 
     @Override
-    String getUserData(Map<String, Object> requestContent)
+    String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.getUserData(requestContent, user))
     }
@@ -324,9 +345,9 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     }
 
     @Override
-    String widgetIsBadToCopy(requestContent)
+    String widgetIsBadToCopy(def requestContent, IUUIDIdentifiable user)
     {
-        return toJson(service.widgetIsBadToCopy(requestContent))
+        return toJson(service.widgetIsBadToCopy(requestContent, user))
     }
 
     @Override
@@ -336,19 +357,19 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
     }
 
     @Override
-    String getDashboardsAndWidgetsTree()
+    String getDashboardsAndWidgetsTree(IUUIDIdentifiable user)
     {
-        return toJson(service.getDashboardsAndWidgetsTree())
+        return toJson(service.getDashboardsAndWidgetsTree(user))
     }
     @Override
-    String editWidgetChunkData(Map<String, Object> requestContent)
+    String editWidgetChunkData(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.editWidgetChunkData(requestContent, user))
     }
     @Override
-    String saveSourceFilters(def requestContent)
+    String saveSourceFilters(def requestContent, IUUIDIdentifiable user)
     {
-        return toJson(service.saveSourceFilters(requestContent))
+        return toJson(service.saveSourceFilters(requestContent, user))
     }
     @Override
     String getSourceFilters(String metaClass)
@@ -356,9 +377,9 @@ class DashboardSettingsImpl extends Script implements DashboardSettings
         return toJson(service.getSourceFilters(metaClass))
     }
     @Override
-    String deleteSourceFilters(String sourceFilterUUID)
+    String deleteSourceFilters(String sourceFilterUUID, IUUIDIdentifiable user)
     {
-        return toJson(service.deleteSourceFilters(sourceFilterUUID))
+        return toJson(service.deleteSourceFilters(sourceFilterUUID, user))
     }
 }
 
@@ -371,13 +392,15 @@ class DashboardSettingsService
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
     private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
     private static ObjectMapper mapper = new ObjectMapper()
+    MessageProvider messageProvider = MessageProvider.instance
 
     /**
      * Получение настроек дашборда и виджетов
      * @param requestContent - параметры запроса (classFqn, contentCode, isPersonal)
+     * @param user - текущий пользователь
      * @return настройки автообновления вместе с настройками виджетов
      */
-    DashboardSettingsClass getSettings(Map<String, Object> requestContent, user)
+    DashboardSettingsClass getSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
@@ -385,7 +408,8 @@ class DashboardSettingsService
         Boolean isMobile = requestContent.isMobile
         if (isPersonal && !user?.login)
         {
-            throw new Exception("Login is null, not found personal dashboard")
+            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
         Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode)
 
@@ -461,9 +485,10 @@ class DashboardSettingsService
     /**
      * Метод обновления состояния автообновления
      * @param requestContent - тело запроса (classFqn, contentCode, autoUpdate)
+     * @param user - текущий пользователь
      * @return true|false
      */
-    Boolean saveAutoUpdateSettings(Map<String, Object> requestContent, user)
+    Boolean saveAutoUpdateSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
@@ -483,22 +508,25 @@ class DashboardSettingsService
      * Метод сохранения настроек кастомных группировок.
      * Сохраняет в персональный дашборд.
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return ключь кастомной группировки
      */
-    Map saveCustomGroup(Map<String, Object> requestContent, user)
+    Map saveCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
         def group = requestContent.group as Map<String, Object>
         group = mapper.convertValue(group, CustomGroup)
+
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user.login))
         {
-            throw new Exception("Login is null, not found personal dashboard")
+            return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
 
         String keyCustomGroup = UUID.nameUUIDFromBytes(toJson(group).bytes)
         group.id = keyCustomGroup
@@ -510,7 +538,7 @@ class DashboardSettingsService
             }
             else
             {
-                throw new Exception("Dashboard settings not saved!")
+                return throwDashboardSettingsNotSavedException(currentUserLocale)
             }
         }
 
@@ -531,28 +559,31 @@ class DashboardSettingsService
     /**
      * Метод обноления кастомной группировки
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return новая кастомная группировка
      */
-    Map updateCustomGroup(Map<String, Object> requestContent, user)
+    Map updateCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         def group = requestContent.group
         group = mapper.convertValue(group, CustomGroup)
         String groupKey = group.id
         boolean isPersonal = requestContent.isPersonal
 
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
         {
-            throw new Exception("Login is null, not found personal dashboard")
+            return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
         if (!group)
         {
-            throw new IllegalArgumentException("Group settings is null!")
+            String message = messageProvider.getConstant(GROUP_SETTINGS_NULL_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${GROUP_SETTINGS_NULL_ERROR}")
         }
 
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
 
         def dashboard = isPersonal ? getDashboardSetting(personalDashboardKey) : getDashboardSetting(defaultDashboardKey)
 
@@ -566,7 +597,7 @@ class DashboardSettingsService
                 }
                 else
                 {
-                    throw new Exception("Dashboard settings not saved!")
+                    return throwDashboardSettingsNotSavedException(currentUserLocale)
                 }
             }
             dashboard.customGroups.removeIf { it.id == groupKey }
@@ -575,28 +606,30 @@ class DashboardSettingsService
         }
         else
         {
-            throw new Exception("group not contains in dashboard")
+            return throwGroupNotContainsInDashboardException(currentUserLocale)
         }
     }
 
     /**
      * Метод удаления настроек группировки.
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return ключь кастомной группировки
      */
-    Map deleteCustomGroup(Map<String, Object> requestContent, user)
+    Map deleteCustomGroup(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String groupKey = requestContent.groupKey
         boolean isPersonal = requestContent.isPersonal
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
         {
-            throw new Exception("Login is null, not found personal dashboard")
+            return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
 
         def dashboard = isPersonal
             ? getDashboardSetting(personalDashboardKey)
@@ -611,12 +644,12 @@ class DashboardSettingsService
             }
             else
             {
-                throw new Exception("Dashboard settings not saved!")
+                return throwDashboardSettingsNotSavedException(currentUserLocale)
             }
         }
         else
         {
-            throw new Exception("group not contains in dashboard")
+            return throwGroupNotContainsInDashboardException(currentUserLocale)
         }
     }
 
@@ -626,20 +659,21 @@ class DashboardSettingsService
      * @param user - пользователь
      * @return словарь [id]
      */
-    Boolean saveCustomColors(Map<String, Object> requestContent, user)
+    Boolean saveCustomColors(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
         def colorsSettings = requestContent.colorsSettings as Map<String, Object>
         colorsSettings = mapper.convertValue(colorsSettings, CustomChartSettingsData)
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user.login))
         {
-            throw new Exception("Login is null, not found personal dashboard")
+            return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
 
         Closure<Map> saveDashboard = { String dashboardKey, DashboardSettingsClass settings ->
             if (saveJsonSettings(dashboardKey, toJson(settings), DASHBOARD_NAMESPACE))
@@ -648,7 +682,7 @@ class DashboardSettingsService
             }
             else
             {
-                throw new Exception("Dashboard settings not saved!")
+                return throwDashboardSettingsNotSavedException(currentUserLocale)
             }
         }
 
@@ -680,19 +714,21 @@ class DashboardSettingsService
      * @param user - пользователь
      * @return словарь [id]
      */
-    Map deleteCustomColors(Map<String, Object> requestContent, user)
+    Map deleteCustomColors(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String colorsKey = requestContent.key
         boolean isPersonal = requestContent.isPersonal
+
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
         {
-            throw new Exception("Login is null, not found personal dashboard")
+            return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
 
         def dashboard = isPersonal
             ? getDashboardSetting(personalDashboardKey)
@@ -707,30 +743,36 @@ class DashboardSettingsService
             }
             else
             {
-                throw new Exception("Dashboard settings not saved!")
+                return throwDashboardSettingsNotSavedException(currentUserLocale)
             }
         }
         else
         {
-            throw new Exception("colors not contains in dashboard")
+            String message = messageProvider.getConstant(COLORS_NOT_CONTAINS_IN_DASHBOARD_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${COLORS_NOT_CONTAINS_IN_DASHBOARD_ERROR}")
         }
     }
 
     /**
      * Метод по сохранению настроек фильтров на источник
      * @param requestContent - тело запроса для построения фильтра на источник
+     * @param user - текущий пользователь системы
      * @return словарь с ключом фильтра на источник, если изменение прошло корректно
      */
-    Map saveSourceFilters(def requestContent)
+    Map saveSourceFilters(def requestContent, IUUIDIdentifiable user)
     {
         def dashboard = requestContent.dashboard
+        def subjectUUID = dashboard.classFqn
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+
         SourceFilter sourceFilter = new SourceFilter(requestContent.sourceFilter)
         Collection<SourceFilter> classFqnFilters = DashboardUtils.getSourceFiltersFromStorage()
         Boolean editFilters = sourceFilter.id //проверка, редактируем ли мы фильтры
         Boolean notUniqueName = classFqnFilters.any { it.label == sourceFilter.label }
         if(notUniqueName)
         {
-            throw new IllegalArgumentException("Фильтр с названием ${sourceFilter.label} не может быть сохранен. Название фильтра должно быть уникально.")
+            String message = messageProvider.getMessage(FILTER_NAME_NOT_UNIQUE_ERROR, currentUserLocale, label: sourceFilter.label)
+            api.utils.throwReadableException("${message}#${FILTER_NAME_NOT_UNIQUE_ERROR}")
         }
         SourceFilter sourceWithTheSameFilters
         if(!editFilters)
@@ -745,7 +787,8 @@ class DashboardSettingsService
 
         if(sourceWithTheSameFilters)
         {
-            throw new IllegalArgumentException("Фильтр с текущими параметрами уже существует: ${sourceWithTheSameFilters.label}.")
+            String message = messageProvider.getMessage(FILTER_ALREADY_EXISTS_ERROR, currentUserLocale, label: sourceWithTheSameFilters.label)
+            api.utils.throwReadableException("${message}#${FILTER_ALREADY_EXISTS_ERROR}")
         }
 
         if(saveJsonSettings(sourceFilter.id, toJson(sourceFilter), DashboardUtils.SOURCE_NAMESPACE))
@@ -770,11 +813,13 @@ class DashboardSettingsService
     /**
      * Метод по удалению фильтров из хранилища
      * @param sourceFilterUUID - ключ дял удаления
+     * @param user - текущий пользователь
      * @return словарь с успешным удалением
      */
-    Map deleteSourceFilters(String sourceFilterUUID)
+    Map deleteSourceFilters(String sourceFilterUUID, IUUIDIdentifiable user)
     {
         List dashboardKeys = getDashboardKeys()
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         Boolean widgetsUseSourceFilter = dashboardKeys.any { dashboardKey ->
             def dbSettings
             try
@@ -795,7 +840,8 @@ class DashboardSettingsService
 
         if(widgetsUseSourceFilter)
         {
-            throw new IllegalArgumentException('Удаление данного сохраненного фильтра невозможно, т.к. он применен в других виджетах.')
+            String message = messageProvider.getConstant(FILTER_MUST_NOT_BE_REMOVED_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${FILTER_MUST_NOT_BE_REMOVED_ERROR}")
         }
 
         if(deleteJsonSettings(sourceFilterUUID, DashboardUtils.SOURCE_NAMESPACE))
@@ -804,26 +850,30 @@ class DashboardSettingsService
         }
         else
         {
-            throw new IllegalArgumentException("Удаление фильтра ${sourceFilterUUID} не прошло.")
+            String message = messageProvider.getMessage(REMOVE_FILTER_FAILED_ERROR, currentUserLocale, sourceFilterUUID: sourceFilterUUID)
+            api.utils.throwReadableException("${message}#${REMOVE_FILTER_FAILED_ERROR}")
         }
     }
 
     /**
      * Метод создания персонального дашборда.
      * @param requestContent - тело запроса (editable, classFqn, contentCode)
+     * @param user - текущий пользователь
      * @return true|false
      */
-    Boolean createPersonalDashboard(Map<String, Object> requestContent, user)
+    Boolean createPersonalDashboard(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        checkRightsOnEditDashboard(requestContent.editable)
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
+        String subjectUUID = requestContent.classFqn
         if (!user?.login)
         {
-            throw new Exception("Login or user should not be null")
+            String message = messageProvider.getConstant(LOGIN_MUST_NOT_BE_NULL_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${LOGIN_MUST_NOT_BE_NULL_ERROR}")
         }
-        String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user.login as String)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
         def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey) ?: new DashboardSettingsClass()
         settings = prepareDashboardSettings(settings, user.login as String)
         return saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
@@ -832,22 +882,24 @@ class DashboardSettingsService
     /**
      * Создание виджета в дашборде
      * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
+     * @param user - текущий пользователь
      * @return ключ созданного виджета
      */
-    Widget createWidget(Map<String, Object> requestContent, user)
+    Widget createWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         def widget = requestContent.widget
         widget = mapper.convertValue(widget, Widget)
         Boolean widgetTypeIsNotText = widget?.type != DiagramType.TEXT
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (widgetTypeIsNotText)
         {
             validateName(requestContent)
         }
 
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
-        Map<String, Object> variableMap = [subject: api.utils.get(classFqn), user: user]
+        Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
         def widgetWithCorrectName = widgetTypeIsNotText
             ? changeTotalWidgetName(widget, variableMap)
             : changeTextInTextWidget(widget, variableMap)
@@ -856,23 +908,24 @@ class DashboardSettingsService
         String dashboardKey = null
         if (isPersonal)
         {
-            checkRightsOnEditDashboard(requestContent.editable)
+            checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
             if (!user?.login)
             {
-                throw new Exception("Login or user should not be null by personal widget")
+                String message = messageProvider.getConstant(LOGIN_MUST_NOT_BE_NULL_ERROR, currentUserLocale)
+                api.utils.throwReadableException("${message}#${LOGIN_MUST_NOT_BE_NULL_ERROR}")
             }
-            Closure createDashboardKeyFromLogin = this.&generateDashboardKey.curry(classFqn, contentCode)
+            Closure createDashboardKeyFromLogin = this.&generateDashboardKey.curry(subjectUUID, contentCode)
             dashboardKey = createDashboardKeyFromLogin(user.login as String)
             dashboardSettings = getDashboardSetting(dashboardKey) ?: getDashboardSetting(createDashboardKeyFromLogin(null))
         }
         else
         {
             checkRightsOnDashboard(user, "create")
-            dashboardKey = generateDashboardKey(classFqn, contentCode)
+            dashboardKey = generateDashboardKey(subjectUUID, contentCode)
             dashboardSettings = getDashboardSetting(dashboardKey) ?: new DashboardSettingsClass()
         }
 
-        def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets*.id, classFqn,
+        def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets*.id, subjectUUID,
                                                         contentCode, isPersonal ? user?.login as String : null)
 
         return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
@@ -885,11 +938,13 @@ class DashboardSettingsService
     /**
      * Редактирование виджета в дашборде
      * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
+     * @param user - текущий пользователь
      * @return ключ отредактированного виджета
      */
-    Widget editWidget(Map<String, Object> requestContent, user)
+    Widget editWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         def widget = toJson(requestContent.widget)
         widget = Jackson.fromJsonString(widget, Widget)
         String widgetKey = widget.id
@@ -900,16 +955,16 @@ class DashboardSettingsService
             validateName(requestContent, widgetKey, isPersonal, user)
         }
 
-        Map<String, Object> variableMap = [subject: api.utils.get(classFqn), user: user]
+        Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
         def widgetWithCorrectName = widgetTypeIsNotText
             ? changeTotalWidgetName(widget, variableMap)
             : changeTextInTextWidget(widget, variableMap)
         String contentCode = requestContent.contentCode
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
         if (isPersonal)
         {
-            checkRightsOnEditDashboard(requestContent.editable)
-            Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(classFqn, contentCode)
+            checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
+            Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode)
             if (user && isPersonalWidget(widgetKey, user))
             {
                 widgetWithCorrectName = prepareWidgetSettings(widgetWithCorrectName) { widgetKey }
@@ -919,7 +974,7 @@ class DashboardSettingsService
                 def key = widgetWithCorrectName.id
                 if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE))
                 {
-                    throw new Exception("Widget $key not saved in dashboard $personalDashboardKey")
+                    return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                 }
                 return widgetWithCorrectName
             }
@@ -927,7 +982,7 @@ class DashboardSettingsService
             {
                 DashboardSettingsClass dashboardSettings = getSettingByLogin(user?.login as String) ?: getSettingByLogin(null)
                 def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets*.id,
-                                                                classFqn,
+                                                                subjectUUID,
                                                                 contentCode,
                                                                 user?.login as String,
                                                                 widgetKey
@@ -938,7 +993,7 @@ class DashboardSettingsService
                     dashboardSettings.widgets += widgetWithCorrectName
                     if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE))
                     {
-                        throw new Exception("Widget $key not saved in dashboard $personalDashboardKey")
+                        return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                     }
                     return totalWidget
                 }
@@ -952,7 +1007,7 @@ class DashboardSettingsService
                 widgetKey -= "_${ user.login }"
                 def closureReplaceWidgetKey = { String login ->
                     String dashboardKey = generateDashboardKey(
-                        classFqn,
+                        subjectUUID,
                         contentCode,
                         login
                     )
@@ -965,7 +1020,7 @@ class DashboardSettingsService
                 closureReplaceWidgetKey(null)
             }
             def widgetDb = setUuidInSettings(widgetWithCorrectName, widgetKey)
-            String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+            String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
             DashboardSettingsClass dashboardSettings = getDashboardSetting(defaultDashboardKey)
             dashboardSettings.widgets.removeIf { it.id == widgetKey }
             dashboardSettings.widgets += widgetDb
@@ -977,20 +1032,23 @@ class DashboardSettingsService
     /**
      * Массовое редактирование виджетов в дашборде
      * @param requestContent - тело запроса ()
+     * @param user - текущий пользователь
      * @return ключ дашборда
      */
-    Map editLayouts(Map<String, Object> requestContent, user)
+    Map editLayouts(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         def layouts = requestContent.layouts as Map<String, Object>
         def mobileLayouts = requestContent.mobileLayouts as Map<String, Object>
 
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
 
         String dashboardKey = isPersonal
-            ? generateDashboardKey(classFqn, contentCode, user?.login as String)
-            : generateDashboardKey(classFqn, contentCode)
+            ? generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+            : generateDashboardKey(subjectUUID, contentCode)
 
         DashboardSettingsClass dashboardSettings = getDashboardSetting(dashboardKey)
 
@@ -1002,9 +1060,8 @@ class DashboardSettingsService
         }
         else
         {
-            String message = "Empty layout settings from dashboard: $dashboardKey"
-            logger.error(message)
-            throw new IllegalArgumentException(message)
+            String message = messageProvider.getMessage(EMPTY_LAYOUT_SETTINGS_ERROR, currentUserLocale, dashboardKey: dashboardKey)
+            api.utils.throwReadableException("${message}#${EMPTY_LAYOUT_SETTINGS_ERROR}")
         }
         return [dashboardKey: dashboardKey]
     }
@@ -1012,36 +1069,40 @@ class DashboardSettingsService
     /**
      * Метод удаления виджета
      * @param requestContent - тело запроса (classFqn, contentCode, widgetId, editable, isPersonal)
+     * @param user - текущий пользователь
      * @return успех | провал
      */
-    Boolean deleteWidget(Map<String, Object> requestContent, user)
+    Boolean deleteWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String widgetId = requestContent.widgetId
         if (requestContent.isPersonal)
         {
-            return deletePersonalWidget(classFqn, contentCode, widgetId, requestContent.editable as Boolean, user)
+            return deletePersonalWidget(subjectUUID, contentCode, widgetId, requestContent.editable as Boolean, user)
         }
         else
         {
-            return deleteDefaultWidget(classFqn, contentCode, widgetId, user)
+            return deleteDefaultWidget(subjectUUID, contentCode, widgetId, user)
         }
     }
 
     /**
      * Сброс персонального дашборда в дашборд по умолчанию
-     * @param classFqn - код типа куда выведено встроенное приложение
+     * @param subjectUUID - код типа куда выведено встроенное приложение
      * @param contentCode - код контента встроенного приложения
+     * @param user - текущий пользователь
      * @return статус сообщение
      */
-    Boolean deletePersonalDashboard(String classFqn, String contentCode, user)
+    Boolean deletePersonalDashboard(String subjectUUID, String contentCode, IUUIDIdentifiable user)
     {
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (!user)
         {
-            throw new Exception([message: "Super-user can't reset dashboard settings!"])
+            String message = messageProvider.getConstant(SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD_ERROR}")
         }
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
         DashboardSettingsClass personalDashboard = getDashboardSetting(personalDashboardKey)
         return personalDashboard
             ? deleteJsonSettings(personalDashboardKey, DASHBOARD_NAMESPACE).with { resultOfRemoving ->
@@ -1063,9 +1124,10 @@ class DashboardSettingsService
     /**
      * Получение данных о пользователе для дашборда
      * @param requestContent - параметры запроса (classFqn, contentCode)
+     * @param user - текущий пользователь
      * @return параметры пользователя
      */
-    Map getUserData(Map<String, Object> requestContent, user)
+    Map getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
@@ -1094,9 +1156,10 @@ class DashboardSettingsService
      * Метод получения дерева из информации о дашбордах и виджетах
      * @return json или List<DashboardInfo>
      */
-    List<DashboardInfo> getDashboardsAndWidgetsTree()
+    List<DashboardInfo> getDashboardsAndWidgetsTree(IUUIDIdentifiable user)
     {
-        return getDashboardsUUIDAndTitle().findResults {
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        return getDashboardsUUIDAndTitle(currentUserLocale).findResults {
             String dashboardUUID = it.uuid
             String dashboardTitle = it.title
             try
@@ -1158,21 +1221,23 @@ class DashboardSettingsService
     /**
      * Метод проверки виджета для возможности копирования
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь системы
      * @return флаг на возможность полного копирования в json-формате
      */
-    Map widgetIsBadToCopy(requestContent)
+    Map widgetIsBadToCopy(def requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String widgetKey = requestContent.widgetKey
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
 
         String sourceDashboardKey = requestContent.dashboardKey
-        String destinationDashboardKey = generateDashboardKey(classFqn, contentCode)
+        String destinationDashboardKey = generateDashboardKey(subjectUUID, contentCode)
         List reasons = []
         DashboardSettingsClass sourceDashboardSettings = getDashboardSetting(sourceDashboardKey)
         Widget widgetSettings = getWidgetSettings(sourceDashboardSettings.widgets.find { it.id == widgetKey })
 
-        String dashboardKey = generateDashboardKey(classFqn, contentCode)
+        String dashboardKey = generateDashboardKey(subjectUUID, contentCode)
 
         if (widgetSettings)
         {
@@ -1216,11 +1281,11 @@ class DashboardSettingsService
                 List customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
                 Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
                 widgetSettings.data.each { dataValue ->
-                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, currentCustomGroups, 'any')
-                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, currentCustomGroups, 'any')
+                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, currentCustomGroups, 'any', currentUserLocale)
+                    widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, currentCustomGroups, 'any', currentUserLocale)
 
-                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, currentCustomGroups, 'every')
-                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, currentCustomGroups, 'every')
+                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, currentCustomGroups, 'every', currentUserLocale)
+                    widgetWithOnlyRelativeCriteriaCustomGroups = widgetWithOnlyRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, currentCustomGroups, 'every', currentUserLocale)
                 }
             }
             if(widgetWithOnlyRelativeCriteriaCustomGroups)
@@ -1235,7 +1300,8 @@ class DashboardSettingsService
         }
         else
         {
-            throw new Exception("Widget settings are empty!")
+            String message = messageProvider.getConstant(WIDGET_SETTINGS_ARE_EMPTY_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${WIDGET_SETTINGS_ARE_EMPTY_ERROR}")
         }
     }
 
@@ -1254,6 +1320,7 @@ class DashboardSettingsService
         if(sourceFilter.id.tokenize('_').last() != dashboardKey.takeWhile { it!='_' })
         {
             Collection filtersHasSubject = []
+            def slurper = new groovy.json.JsonSlurper()
             def descriptor = slurper.parseText(sourceFilter.descriptor)
             def valuesToRemove = descriptor.filters.collectMany { filterValue ->
                 def conditionCodes = filterValue*.properties.conditionCode
@@ -1265,8 +1332,16 @@ class DashboardSettingsService
                 }
             }.grep()
             filterIsBadToApply = valuesToRemove.any()
+            //среди фильтров могут быть значения через ИЛИ, их нужно подчистить от относительных критериев
+            def changedValues = valuesToRemove.findResults { values->
+                //если значение изменилось, добавить в список
+                //данных может не остаться, если было только 1 условие, которое удалили
+                if(values.removeIf {it.properties.conditionCode.toLowerCase().contains('subject')}) return values ?: null
+            }
             descriptor.filters -= valuesToRemove
-            sourceFilter.descriptor = descriptor
+            //добавить измененные ИЛИ условия
+            descriptor.filters += changedValues
+            sourceFilter.descriptor = toJson(descriptor)
         }
         return [result: filterIsBadToApply, correctFilter: filterIsBadToApply ? sourceFilter : null]
     }
@@ -1274,17 +1349,18 @@ class DashboardSettingsService
     /**
      * Редактирование отдельных полей в виджете
      * @param requestContent - тело запроса ()
+     * @param user - текущий пользователь
      * @return ключ отредактированного виджета
      */
-    Map editWidgetChunkData(Map<String, Object> requestContent, user)
+    Map editWidgetChunkData(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
 
         String dashboardKey = isPersonal
-            ? generateDashboardKey(classFqn, contentCode, user?.login as String)
-            : generateDashboardKey(classFqn, contentCode)
+            ? generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+            : generateDashboardKey(subjectUUID, contentCode)
 
         def dashboardSettings = getDashboardSetting(dashboardKey)
 
@@ -1302,14 +1378,96 @@ class DashboardSettingsService
             dashboardSettings.widgets += widgetSettings
             if (saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)) {
                 return [id:widgetKey]
-            } else {
-                throw new IllegalStateException("Widget $widgetKey not saved in dashboard: $dashboardKey")
+            }
+            else
+            {
+                def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+                return throwWidgetNotSavedException(currentUserLocale, widgetKey, dashboardKey)
             }
         }
         else
         {
             logger.warn("Widget $widgetKey not belongs dashboard $dashboardKey")
             return null
+        }
+    }
+
+    /**
+     * Метод, возвращающий ошибку о том, что личный дашборд нельзя получить без логина пользователя
+     * @param currentUserLocale - текущая локаль пользователя
+     * @return ошибка о том, что личный дашборд нельзя получить без логина пользователя
+     */
+    private throwPersonalDashboardNotFoundException(def currentUserLocale)
+    {
+        String message = messageProvider.getConstant(PERSONAL_DASHBOARD_NOT_FOUND_ERROR, currentUserLocale)
+        api.utils.throwReadableException("${message}#${PERSONAL_DASHBOARD_NOT_FOUND_ERROR}")
+    }
+
+    /**
+     * Метод, возвращающий ошибку о том, что настройки дашборда не были сохранены
+     * @param currentUserLocale - текущая локаль пользователя
+     * @return ошибка о том, что настройки дашборда не были сохранены
+     */
+    private throwDashboardSettingsNotSavedException(def currentUserLocale)
+    {
+        String message = messageProvider.getConstant(DASHBOARD_SETTINGS_NOT_SAVED_ERROR, currentUserLocale)
+        api.utils.throwReadableException("${message}#${DASHBOARD_SETTINGS_NOT_SAVED_ERROR}")
+    }
+
+    /**
+     * Метод, возвращающий ошибку о том, что кастомная группировка на дашборде не найдена
+     * @param currentUserLocale - текущая локаль пользователя
+     * @return ошибка о том, что кастомная группировка на дашборде не найдена
+     */
+    private throwGroupNotContainsInDashboardException(def currentUserLocale)
+    {
+        String message = messageProvider.getConstant(GROUP_NOT_CONTAINS_IN_DASHBOARD_ERROR, currentUserLocale)
+        api.utils.throwReadableException("${message}#${GROUP_NOT_CONTAINS_IN_DASHBOARD_ERROR}")
+    }
+
+    /**
+     * Метод, возвращающий ошибку о том, что виджет не был сохранен на дашборде
+     * @param currentUserLocale - текущая локаль пользователя
+     * @param widgetKey - ключ виджета
+     * @param dashboardKey - ключ дашборда
+     * @return ошибка о том, что виджет не был сохранен на дашборде
+     */
+    private throwWidgetNotSavedException(def currentUserLocale, def widgetKey, def dashboardKey)
+    {
+        String message = messageProvider.getMessage(WIDGET_NOT_SAVED_ERROR, currentUserLocale, widgetKey: widgetKey, dashboardKey: dashboardKey)
+        api.utils.throwReadableException("${message}#${WIDGET_NOT_SAVED_ERROR}")
+    }
+
+    /**
+     * Метод, возвращающий ошибку о том, что у пользователя нет прав на удаление виджета
+     * @param currentUserLocale - текущая локаль пользователя
+     * @return ошибка о том, что у пользователя нет прав на удаление виджета
+     */
+    private throwNoRightsOnRemoveWidget(def currentUserLocale)
+    {
+        String message = messageProvider.getConstant(NO_RIGHTS_TO_REMOVE_WIDGET_ERROR, currentUserLocale)
+        api.utils.throwReadableException("${message}#${NO_RIGHTS_TO_REMOVE_WIDGET_ERROR}")
+    }
+
+    /**
+     * Метод, возвращающий правильную форму глагола, который будет добавлен в сообщение об ошибке
+     * @param messageError - сообщение об ошибке
+     * @param currentUserLocale - текущая локаль пользователя
+     */
+    private getCorrectMessageError(String messageError, def currentUserLocale)
+    {
+        switch (locale.toLowerCase())
+        {
+            case 'en':
+                return messageError
+            case 'de':
+                return messageError == 'create' ? 'erstellen' : 'bearbeiten'
+            case 'pl':
+                return messageError == 'create' ? 'utworzyć' : 'edytować'
+            case 'ru':
+            default:
+                return messageError == 'create' ? 'создавать' : 'редактировать'
+
         }
     }
 
@@ -1564,9 +1722,10 @@ class DashboardSettingsService
      * @param elements - коллекция элементов
      * @param currentCustomGroups - текущие кастомные группировки
      * @param conditionSpread - распространенность условия
+     * @parem currentUserLocale - текущая локаль пользователя
      * @return флаг true/false на соответствие
      */
-    private Boolean returnParametersOrBreakdownAnswer(Collection elements, Collection currentCustomGroups, String conditionSpread)
+    private Boolean returnParametersOrBreakdownAnswer(Collection elements, Collection currentCustomGroups, String conditionSpread, def currentUserLocale)
     {
         switch (conditionSpread)
         {
@@ -1575,7 +1734,8 @@ class DashboardSettingsService
             case 'every':
                 return elements ? elements?.every { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.every {it.contains('subject') || it.contains('object')} } : false
             default:
-                throw new IllegalArgumentException('Wrong Argument')
+                String message = messageProvider.getConstant(WRONG_ARGUMENT_ERROR, currentUserLocale)
+                api.utils.throwReadableException("${message}#${WRONG_ARGUMENT_ERROR}")
         }
     }
 
@@ -1599,13 +1759,15 @@ class DashboardSettingsService
      * Метод удаления виджета с дашборда. Бросает исключение если удаление не удалось.
      * @param dashboardKey - уникальный идентификатор дашборда
      * @param widgetKey    - уникальный идентификатор виджета
+     * @param currentUserLocale - текущая локаль пользователя
      * @return уникальный идентификатор удалённого дашборда
      */
-    private String removeWidgetFromDashboard(String dashboardKey, String widgetKey)
+    private String removeWidgetFromDashboard(String dashboardKey, String widgetKey, def currentUserLocale)
     {
-        if (!excludeWidgetsFromDashboard(dashboardKey, [widgetKey]))
+        if (!excludeWidgetsFromDashboard(dashboardKey, [widgetKey], currentUserLocale))
         {
-            throw new Exception("Widget $widgetKey not removed from dashboard: $dashboardKey!")
+            String message = messageProvider.getMessage(WIDGET_NOT_REMOVED_ERROR, currentUserLocale, widgetKey: widgetKey, dashboardKey: dashboardKey)
+            api.utils.throwReadableException("${message}#${WIDGET_NOT_REMOVED_ERROR}")
         }
         return dashboardKey
     }
@@ -1651,14 +1813,16 @@ class DashboardSettingsService
      * Метод исключение виджетов из настрок дашборда
      * @param dashboardKey - уникальный идентификатор дашборда
      * @param widgets      - уникальные идентификаторы виджетов
+     * @param currentUserLocale - текущая локаль пользователя
      * @return успех|провал
      */
-    private boolean excludeWidgetsFromDashboard(String dashboardKey, Collection<String> widgets)
+    private boolean excludeWidgetsFromDashboard(String dashboardKey, Collection<String> widgets, def currentUserLocale)
     {
         def dashboardSettings = getDashboardSetting(dashboardKey)
         if (!dashboardSettings)
         {
-            throw new Exception("Dashboard: $dashboardKey not found!")
+            String message = messageProvider.getMessage(DASHBOARD_NOT_FOUND_ERROR, currentUserLocale, dashboardKey: dashboardKey)
+            api.utils.throwReadableException("${message}#${DASHBOARD_NOT_FOUND_ERROR}")
         }
         dashboardSettings.widgets?.removeAll { it?.id in widgets }
         return saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
@@ -1862,12 +2026,14 @@ class DashboardSettingsService
      * @param user БО текущего пользователя
      * @param messageError сообщение о ошибке
      */
-    private checkRightsOnDashboard(def user, String messageError)
+    private checkRightsOnDashboard(IUUIDIdentifiable user, String messageError)
     {
         if (!checkUserOnMasterDashboard(user))
         {
-            throw new Exception(toJson([error: "User is not a dashboard master, " +
-                                               "${messageError} default widget is not possible"]))
+            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            messageError = getCorrectMessageError(messageError, currentUserLocale)
+            String message = messageProvider.getMessage(MUST_NOT_ADD_EDIT_WIDGET_ERROR, currentUserLocale,messageError: messageError)
+            api.utils.throwReadableException("${message}#${MUST_NOT_ADD_EDIT_WIDGET_ERROR}")
         }
     }
 
@@ -1876,7 +2042,7 @@ class DashboardSettingsService
      * @param user
      * @return
      */
-    private boolean checkUserOnMasterDashboard(def user)
+    private boolean checkUserOnMasterDashboard(IUUIDIdentifiable user)
     {
         return user?.UUID
             ? ((OLD_GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code) ||
@@ -1888,11 +2054,12 @@ class DashboardSettingsService
      * Проверка на право редактирования настроек дашборда
      * @param editable - переменная разрешения на редактирование настроек пользователю
      */
-    private void checkRightsOnEditDashboard(def editable)
+    private void checkRightsOnEditDashboard(def editable, def currentUserLocale)
     {
         if (!editable)
         {
-            throw new Exception(toJson([error: "Personal settings are disabled!"]))
+            String message = messageProvider.getConstant(PERSONAL_SETTINGS_DISABLED_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${PERSONAL_SETTINGS_DISABLED_ERROR}")
         }
     }
 
@@ -1902,7 +2069,7 @@ class DashboardSettingsService
      * @param user      - пользователь
      * @return true | false
      */
-    private boolean isPersonalWidget(String widgetKey, def user)
+    private boolean isPersonalWidget(String widgetKey, IUUIDIdentifiable user)
     {
         return user ? widgetKey?.endsWith("_${user?.login}") : false
     }
@@ -1991,7 +2158,7 @@ class DashboardSettingsService
      * @param user - пользователь
      * @return группа
      */
-    private String getUserGroup(user)
+    private String getUserGroup(IUUIDIdentifiable user)
     {
         if (!user)
         {
@@ -2020,11 +2187,12 @@ class DashboardSettingsService
                                          String contentCode,
                                          String widgetId,
                                          Boolean editable,
-                                         def user)
+                                         IUUIDIdentifiable user)
     {
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (!(checkUserOnMasterDashboard(user) || editable))
         {
-            throw new Exception("No rights on remove widget")
+            return throwNoRightsOnRemoveWidget(currentUserLocale)
         }
 
         String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
@@ -2032,7 +2200,7 @@ class DashboardSettingsService
 
         if (isPersonalWidget(widgetId, user))
         {
-            return removeWidgetFromDashboard(personalDashboardKey, widgetId) as boolean
+            return removeWidgetFromDashboard(personalDashboardKey, widgetId, currentUserLocale) as boolean
         }
         else
         {
@@ -2041,7 +2209,8 @@ class DashboardSettingsService
             def res = saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
             if (!res)
             {
-                throw new Exception("Widget ${widgetId} not removed from dashboard: $personalDashboardKey!")
+                String message = messageProvider.getMessage(WIDGET_NOT_REMOVED_ERROR, currentUserLocale, widgetKey: widgetKey, dashboardKey: personalDashboardKey)
+                api.utils.throwReadableException("${message}#${WIDGET_NOT_REMOVED_ERROR}")
             }
             return res
         }
@@ -2055,37 +2224,38 @@ class DashboardSettingsService
      * @param user - пользователь
      * @return успех | провал
      */
-    private Boolean deleteDefaultWidget(String classFqn,
+    private Boolean deleteDefaultWidget(String subjectUUID,
                                         String contentCode,
-                                        String widgetId, def user)
+                                        String widgetId, IUUIDIdentifiable user)
     {
-        def dashboardKeyByLogin = this.&generateDashboardKey.curry(classFqn, contentCode)
+        def dashboardKeyByLogin = this.&generateDashboardKey.curry(subjectUUID, contentCode)
+        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (!user)
         {
             // значит это супер пользователь! нет персональных виджетов и персональных дашбордов
-            return removeWidgetFromDashboard(dashboardKeyByLogin(), widgetId) as boolean
+            return removeWidgetFromDashboard(dashboardKeyByLogin(), widgetId, currentUserLocale) as boolean
         }
         else
         {
             if(!checkUserOnMasterDashboard(user))
             {
-                throw new Exception("No rights on remove widget")
+                return throwNoRightsOnRemoveWidget(currentUserLocale)
             }
 
             if (isPersonalWidget(widgetId, user))
             {
                 String personalDashboardKey = dashboardKeyByLogin(user.login as String)
                 String defaultWidget = widgetId - "_${user?.login}"
-                removeWidgetFromDashboard(dashboardKeyByLogin(), defaultWidget)
-                return removeWidgetFromDashboard(personalDashboardKey, widgetId) as boolean
+                removeWidgetFromDashboard(dashboardKeyByLogin(), defaultWidget, currentUserLocale)
+                return removeWidgetFromDashboard(personalDashboardKey, widgetId, currentUserLocale) as boolean
             }
             else
             {
                 // По возможности удалить и персональный виджет, если он есть
                 String personalDashboardKey = dashboardKeyByLogin(user?.login as String)
                 loadJsonSettings(personalDashboardKey, DASHBOARD_NAMESPACE) // проверка на существование персонального дашборда
-                    ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetId) }
-                return removeWidgetFromDashboard(dashboardKeyByLogin(), widgetId) as boolean
+                    ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetId, currentUserLocale) }
+                return removeWidgetFromDashboard(dashboardKeyByLogin(), widgetId, currentUserLocale) as boolean
             }
         }
     }
@@ -2155,7 +2325,7 @@ class DashboardSettingsService
     private void validateName(Map<String, Object> requestContent,
                               String widgetKey = null,
                               Boolean isPersonal = false,
-                              def user = null)
+                              IUUIDIdentifiable user = null)
     {
         String name = requestContent?.widget?.templateName ?: requestContent?.widget?.name
         String dashboardKey = isPersonal
@@ -2164,13 +2334,9 @@ class DashboardSettingsService
         List<String> widgetsNames = getWidgetNamesFromDashboard(dashboardKey, widgetKey)
         if (name in widgetsNames)
         {
-            throw new Exception(
-                toJson([
-                    errors: [
-                        "templateName" : "Виджет с названием \"$name\" не может быть сохранен. " +
-                                         "Название виджета должно быть уникально в рамках дашборда."]
-                ])
-            )
+            String currentUserLocale = DashboardUtils.getUserLocale(user?.UUID) 
+            String message = messageProvider.getMessage(NOT_UNIQUE_WIDGET_NAME_ERROR, currentUserLocale, name: name)
+            api.utils.throwReadableException("${message}#${NOT_UNIQUE_WIDGET_NAME_ERROR}")
         }
     }
 
@@ -2178,7 +2344,7 @@ class DashboardSettingsService
      * Метод получения итогового списка uuid-ов и названий дашбордов
      * @return список ассоциативных массивов
      */
-    private List<Map<String, String>> getDashboardsUUIDAndTitle()
+    private List<Map<String, String>> getDashboardsUUIDAndTitle(def currentUserLocale)
     {
         def root = api.utils.findFirst('root', [:])
         if (root.hasProperty('dashboardCode') && root.dashboardCode)
@@ -2192,7 +2358,8 @@ class DashboardSettingsService
                 }
             }
         }
-        throw new Exception('Для получения списка виджетов заполните корректно атрибут Компании dashboardCode')
+        String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
+        api.utils.throwReadableException("${message}#${EMPTY_DASHBOARD_CODE_ERROR}")
     }
 
     /**

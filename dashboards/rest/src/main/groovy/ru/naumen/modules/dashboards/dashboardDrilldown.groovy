@@ -10,7 +10,6 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend.Attr
 import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
 import java.text.SimpleDateFormat
@@ -19,6 +18,8 @@ import static groovy.json.JsonOutput.toJson
 import com.amazonaws.util.json.Jackson
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static DeserializationHelper.mapper
+import static MessageProvider.*
+import static CurrentUserHolder.*
 
 @Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl()
 
@@ -34,7 +35,7 @@ interface DashboardDrilldown
     String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
 }
 
-class DashboardDrilldownImpl implements DashboardDrilldown
+class DashboardDrilldownImpl extends BaseController implements DashboardDrilldown
 {
     DashboardDrilldownService service = DashboardDrilldownService.instance
 
@@ -190,6 +191,11 @@ class Link
      */
     private String subjectUUID
 
+    /**
+     * Текущая локаль пользователя
+     */
+    private String currentUserLocale
+
     Link(Map<String, Object> map, String cardObjectUuid, DiagramType diagramType)
     {
         this.subjectUUID = cardObjectUuid
@@ -209,7 +215,10 @@ class Link
         }?.with {
             api.utils.findFirst(this.classFqn, [(it.code): op.isNotNull()])?.get(it.code)
         }
+        this.currentUserLocale = DashboardUtils.getUserLocale(CurrentUserHolder.currentUser.get()?.UUID)
     }
+
+    MessageProvider messageProvider = MessageProvider.instance
 
     /**
      * Метод проверки данных на возможный перегруз количества информации для фильтра containsInSet
@@ -630,7 +639,9 @@ class Link
                                                 end = new Date()
                                             }
                                             return filterBuilder.OR(attr.code, 'fromTo', [start, end])
-                                        default: throw new IllegalArgumentException("Not supported")
+                                        default:
+                                            String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
+                                            api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
                                     }
                                 }
                             }
@@ -703,9 +714,9 @@ class Link
                                             return filterBuilder.AND(filterBuilder.OR(attr.code, 'titleNotContains', it.data))
                                         case ['equal_subject_attribute', 'equal_attr_current_object']:
                                             return filterBuilder.AND(filterBuilder.OR(attr.code, 'contains', it.data.uuid))
-                                        default: throw new IllegalArgumentException(
-                                            "Not supported condition type: ${ it.type }"
-                                        )
+                                        default:
+                                            String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
+                                            api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
                                     }
                                 }
                             }
@@ -915,10 +926,8 @@ class Link
                                             def subjectType = subjectAttribute.type
                                             if (subjectType != attributeType)
                                             {
-                                                throw new IllegalArgumentException(
-                                                    "Does not match attribute type: " +
-                                                    "$subjectType and $attributeType"
-                                                )
+                                                String message = messageProvider.getMessage(SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_EROOR, currentUserLocale, subjectType: subjectType, attributeType: attributeType ),
+                                                api.utils.throwReadableException("$message#${SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_EROOR}")
                                             }
                                             def value = api.utils.get(subjectUUID)[code]
                                             if(twoLinkAttrs)
@@ -932,9 +941,9 @@ class Link
                                                 )
                                             }
                                             return filterBuilder.OR(attr.code, 'contains', value)
-                                        default: throw new IllegalArgumentException(
-                                            "Not supported condition type: ${ it.type }"
-                                        )
+                                        default:
+                                            String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
+                                            api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
                                     }
                                 }
                             }
@@ -996,9 +1005,9 @@ class Link
                                                 ? 'timerStatusContains'
                                                 : 'timerStatusNotContains'
                                             return filterBuilder.OR(attr.code, conditionType, ['e'])
-                                        default: throw new IllegalArgumentException(
-                                            "Not supported condition type: ${ it.type }"
-                                        )
+                                        default:
+                                            String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
+                                            api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
                                     }
                                 }
                             }
@@ -1026,16 +1035,16 @@ class Link
                                             return filterBuilder.OR(attr.code, 'titleNotContains', it.data)
                                         case ['equal_subject_attribute', 'equal_attr_current_object']:
                                             return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
-                                        default: throw new IllegalArgumentException(
-                                            "Not supported condition type: ${ it.type }"
-                                        )
+                                        default:
+                                            String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
+                                            api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
                                     }
                                 }
                             }
                             break
-                        default: throw new IllegalArgumentException(
-                            "Not supported attribute type: ${ attributeType }"
-                        )
+                        default:
+                            String message = messageProvider.getMessage(NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR, currentUserLocale, attributeType: attributeType)
+                            api.utils.throwReadableException("$message#${NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR}")
                     }
                 }
                 result
@@ -1064,7 +1073,9 @@ class Link
                 return 'greater'
             case 'less':
                 return 'less'
-            default: throw new IllegalArgumentException("Not Supported condition type $condition")
+            default:
+                String message = messageProvider.getMessage(NOT_SUPPORTED_FILTER_CONDITION_ERROR, currentUserLocale, condition: condition)
+                api.utils.throwReadableException("$message#${NOT_SUPPORTED_FILTER_CONDITION_ERROR}")
         }
     }
 
@@ -1183,7 +1194,7 @@ class Link
                     {
                         return filterBuilder.OR(attr.code, 'null', null)
                     }
-                    intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
+                    intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardDataSetService.instance.getDTIntervalGroupType(intervalType))
                     def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
                     values = getValuesForRefAttr(attr, interval)
                     break
@@ -1227,7 +1238,7 @@ class Link
                 {
                     return filterBuilder.OR(attr.code, 'null', null)
                 }
-                intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardUtils.getDTIntervalGroupType(intervalType))
+                intervalValue = DashboardUtils.convertValueToInterval(intervalValue as Long, DashboardDataSetService.instance.getDTIntervalGroupType(intervalType))
                 def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
                 return filterBuilder.OR(code, 'contains', interval)
             case AttributeType.TIMER_TYPES:

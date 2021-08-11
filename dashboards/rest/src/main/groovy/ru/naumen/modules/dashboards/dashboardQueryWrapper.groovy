@@ -15,6 +15,7 @@ import groovy.transform.Field
 import ru.naumen.core.server.script.api.criteria.*
 import java.sql.Timestamp
 import ru.naumen.core.server.script.api.injection.InjectApi
+import static MessageProvider.*
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -53,7 +54,11 @@ class QueryWrapper implements CriteriaWrapper
 {
     private IApiCriteria criteria
 
+    private String locale
+
     private IApiCriteria totalValueCriteria
+
+    MessageProvider messageProvider = MessageProvider.instance
 
     protected QueryWrapper(Source source, String templateUUID)
     {
@@ -785,10 +790,14 @@ class QueryWrapper implements CriteriaWrapper
                             criteria.addOrder(ApiCriteriaOrders.asc(minuteColumn))
                         }
                         break
-                    default: throw new IllegalArgumentException("Not supported format: $format")
+                    default:
+                        String message = messageProvider.getMessage(NOT_SUPPORTED_DATE_FORMAT_ERROR, locale, format: format)
+                        return api.utils.throwReadableException("$message#${NOT_SUPPORTED_DATE_FORMAT_ERROR}")
                 }
                 break
-            default: throw new IllegalArgumentException("Not supported group type: $groupType")
+            default:
+                String message = messageProvider.getMessage(NOT_SUPPORTED_GROUP_TYPE_ERROR, locale, type: groupType)
+                api.utils.throwReadableException("$message#${NOT_SUPPORTED_GROUP_TYPE_ERROR}")
         }
         if(totalValueCriteria)
         {
@@ -935,7 +944,9 @@ class QueryWrapper implements CriteriaWrapper
                     return api.filters.today(columnCode)
                 case Comparison.LAST_N_DAYS:
                     return api.filters.lastNDays(columnCode, parameter.value)
-                default: throw new IllegalArgumentException("Not supported filter type: $type!")
+                default:
+                    String message = messageProvider.getMessage(NOT_SUPPORTED_FILTER_CONDITION_ERROR, locale, condition: type)
+                    api.utils.throwReadableException("${message}#${NOT_SUPPORTED_FILTER_CONDITION_ERROR}")
             }
         }.with {
             api.filters.or(*it)
@@ -999,6 +1010,7 @@ class QueryWrapper implements CriteriaWrapper
 
     private Closure getAggregation(Aggregation type)
     {
+        Closure getMessage = { String aggregationType -> messageProvider.getMessage(NOT_SUPPORTED_AGGREGATION_TYPE_ERROR, locale, aggregationType: aggregationType)}
         switch (type)
         {
             case Aggregation.COUNT_CNT:
@@ -1012,10 +1024,11 @@ class QueryWrapper implements CriteriaWrapper
             case Aggregation.MIN:
                 return api.selectClause.&min
             case Aggregation.PERCENT:
-                throw new IllegalArgumentException("Still not supported aggregation type: $type")
+                return api.utils.throwReadableException("${getMessage(type)}#${NOT_SUPPORTED_AGGREGATION_TYPE_ERROR}")
             case Aggregation.MDN:
-                throw new IllegalArgumentException("Still not supported aggregation type: $type")
-            default: throw new IllegalArgumentException("Not supported aggregation type: $type")
+                return api.utils.throwReadableException("${getMessage(type)}#${NOT_SUPPORTED_AGGREGATION_TYPE_ERROR}")
+            default:
+                return api.utils.throwReadableException("${getMessage(type)}#${NOT_SUPPORTED_AGGREGATION_TYPE_ERROR}")
         }
     }
 
@@ -1027,7 +1040,9 @@ class QueryWrapper implements CriteriaWrapper
                 return ApiCriteriaOrders.&asc
             case 'DESC':
                 return ApiCriteriaOrders.&desc
-            default: throw new IllegalArgumentException("Not supported aggregation type: $type")
+            default:
+                String message = messageProvider.getMessage(NOT_SUPPORTED_SORTING_TYPE_ERROR, locale, type: type)
+                return api.utils.throwReadableException("${message}#${NOT_SUPPORTED_SORTING_TYPE_ERROR}")
         }
     }
 
@@ -1089,6 +1104,8 @@ class DashboardQueryWrapperUtils
     private static final Double ACCURACY = 0.9
     private static final Double ROUNDING = 0.6
     private static final Integer WEEKDAY_COUNT = 7
+    private static String locale = 'ru'
+    private static final MessageProvider messageProvider = MessageProvider.instance
 
     /**
      * Метод получения данных биаграммы
@@ -1097,7 +1114,7 @@ class DashboardQueryWrapperUtils
      * @param diagramType - тип диаграммы
      * @return результат выборки
      */
-    static List<List> getData(RequestData requestData, Integer top, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
+    static List<List> getData(RequestData requestData, Integer top, String currentUserLocale, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
                               Boolean ignoreParameterLimit = false, String templateUUID = '', PaginationSettings paginationSettings = null)
     {
         validate(requestData)
@@ -1105,6 +1122,8 @@ class DashboardQueryWrapperUtils
         def wrapper = QueryWrapper.build(requestData.source, templateUUID)
         def criteria = wrapper.criteria
         Boolean totalValueCriteria = false
+        wrapper.locale = currentUserLocale
+        locale = currentUserLocale
 
         requestData.aggregations.each { validate(it as AggregationParameter) }
         //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
@@ -1237,7 +1256,8 @@ class DashboardQueryWrapperUtils
     {
         if (!data)
         {
-            throw new IllegalArgumentException("Empty request data")
+            String message = messageProvider.getConstant(EMPTY_REQUEST_DATA_ERROR, locale)
+            getApi().utils.throwReadableException("${message}#${EMPTY_REQUEST_DATA_ERROR}")
         }
 
         def source = data.source
@@ -1246,7 +1266,8 @@ class DashboardQueryWrapperUtils
         def aggregations = data.aggregations
         if (!aggregations)
         {
-            throw new IllegalArgumentException("Empty aggregation")
+            String message = messageProvider.getConstant(EMPTY_AGGREGATION_ERROR, locale)
+            getApi().utils.throwReadableException("${message}#${EMPTY_AGGREGATION_ERROR}")
         }
         aggregations.each {
             validate(it as AggregationParameter)
@@ -1265,11 +1286,13 @@ class DashboardQueryWrapperUtils
     {
         if (!source)
         {
-            throw new IllegalArgumentException("Empty source")
+            String message = messageProvider.getConstant(EMPTY_SOURCE_ERROR, locale)
+            getApi().utils.throwReadableException("${message}#${EMPTY_SOURCE_ERROR}")
         }
         if (!(source.descriptor) && !(source.classFqn))
         {
-            throw new IllegalArgumentException("Invalid source")
+            String message = messageProvider.getConstant(INVALID_SOURCE_ERROR, locale)
+            getApi().utils.throwReadableException("${message}#${INVALID_SOURCE_ERROR}")
         }
     }
 
@@ -1278,14 +1301,16 @@ class DashboardQueryWrapperUtils
      * Бросает исключение.
      * @param parameter - параметр агрегации
      */
-    private static def validate(AggregationParameter parameter) throws IllegalArgumentException
+    private static def validate(AggregationParameter parameter)
     {
         if (!parameter.attribute.attrChains())
         {
-            throw new IllegalArgumentException("Attribute is null or empty!")
+            String message = messageProvider. getConstant(ATTRIBUTE_IS_NULL_ERROR, locale)
+            getApi().utils.throwReadableException("${message}#${ATTRIBUTE_IS_NULL_ERROR}")
         }
         Aggregation type = parameter.type
         String attributeType = Attribute.getAttributeType(parameter.attribute)
+        String message = messageProvider.getMessage(NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1294,7 +1319,7 @@ class DashboardQueryWrapperUtils
                     [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ]
                 }))
                 {
-                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+                    getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             default:
@@ -1303,7 +1328,7 @@ class DashboardQueryWrapperUtils
                     (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
                      !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ] })))
                 {
-                    throw new IllegalArgumentException("Not suitable aggregation type: $type and attribute type: $attributeType")
+                    getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
         }
@@ -1315,13 +1340,16 @@ class DashboardQueryWrapperUtils
      */
     private static def validate(GroupParameter parameter)
     {
+        String message
         if (!parameter.attribute.attrChains())
         {
-            throw new IllegalArgumentException("Attribute is null or empty!")
+            message = messageProvider.getConstant(ATTRIBUTE_IS_NULL_ERROR, locale)
+            return getApi().utils.throwReadableException("${message}#${ATTRIBUTE_IS_NULL_ERROR}")
         }
         GroupType type = parameter.type
         //Смотрим на тип последнего вложенного атрибута
         String attributeType = Attribute.getAttributeType(parameter.attribute)
+        message = messageProvider.getMessage(NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1331,7 +1359,7 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
-                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             case AttributeType.DATE_TYPES:
@@ -1340,7 +1368,7 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
-                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             case AttributeType.TIMER_TYPES:
@@ -1349,13 +1377,13 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
-                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             default:
                 if (type != GroupType.OVERLAP)
                 {
-                    throw new IllegalArgumentException("Not suitable group type: $type and attribute type: $attributeType")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
         }
@@ -1394,7 +1422,8 @@ class DashboardQueryWrapperUtils
             default:
                 if (!(attributeType in AttributeType.ALL_ATTRIBUTE_TYPES))
                 {
-                    throw new IllegalArgumentException("Not supported attribute type: $attributeType")
+                    String message = messageProvider.getMessage(NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR, locale, attributeType: attributeType)
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR}")
                 }
                 if(forAggregation && (attributeType == AttributeType.LOCALIZED_TEXT_TYPE || attributeType == AttributeType.STRING_TYPE && attribute.attrChains().code == 'title'))
                 {
@@ -1473,7 +1502,7 @@ class DashboardQueryWrapperUtils
             Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
             if(!attrSignedInClass && attribute.property != attribute.ref.metaClassFqn)
             {
-               attribute.ref.code = systemAttribute.attributeFqn.toString()
+                attribute.ref.code = systemAttribute.attributeFqn.toString()
             }
         }
         return attribute

@@ -20,13 +20,17 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 import static DeserializationHelper.mapper
+import groovy.transform.InheritConstructors
 import com.amazonaws.util.json.Jackson
+import ru.naumen.core.shared.IUUIDIdentifiable
 
 import ru.naumen.core.server.script.api.injection.InjectApi
 
 import static DiagramType.*
+import static MessageProvider.*
 
-@Field @Lazy @Delegate DashboardDataSet dashboardDataSet = new DashboardDataSetImpl()
+
+@Field @Lazy @Delegate DashboardDataSet dashboardDataSet = new DashboardDataSetImpl(binding)
 
 interface DashboardDataSet
 {
@@ -34,25 +38,28 @@ interface DashboardDataSet
      * Получение данных для диаграмм. Нужен для обратной совместимости.
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
      * @param cardObjectUuid - идентификатор "текущего объекта"
-     * @param widgetFilters - список пользовательских фильтров для виджетов
+     * @param otherSettings - дополнительные настройки со списком пользовательских фильтров для виджетов по ключу widgetFilters
+     * @param user - текущий пользователь системы
      * @return данные для построения диаграммы
      */
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def widgetFilters)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
 
     /**
      * Получение данных для таблиц. Нужен для обратной совместимости.
      * @param dashboardKey - ключ дашборда для построения виджета
      * @param widgetKey - ключ виджета
      * @param cardObjectUuid - уникальный идентификатор текущего объекта
-     * @param tableRequestSettings - настройки для запроса по таблице
-     * @param widgetFilters - список пользовательских фильтров для виджетов
+     * @param otherSettings - дополнительные настройки со списком пользовательских фильтров для виджетов по ключу widgetFilters,
+     * а также настройками для запроса по таблице по ключу tableRequestSettings
+     * @param user - текущий пользователь системы
      * @return данные для построения таблицы
      */
-    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def tableRequestSettings, def widgetFilters)
+    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
 }
 
 @InjectApi
-class DashboardDataSetImpl implements DashboardDataSet
+@InheritConstructors
+class DashboardDataSetImpl extends BaseController implements DashboardDataSet
 {
     DashboardDataSetService service = DashboardDataSetService.instance
 
@@ -62,28 +69,34 @@ class DashboardDataSetImpl implements DashboardDataSet
     }
 
     @Override
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, def widgetFilters)
+    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
     {
-        if(widgetFilters)
+        Collection<WidgetFilterResponse> widgetFilters
+        if(otherSettings.widgetFilters)
         {
-            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(widgetFilters)
+            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(otherSettings.widgetFilters)
         }
-        return api.tx.call {
-            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters)
-        }.with(JsonOutput.&toJson)
+        else
+        {
+            widgetFilters = []
+        }
+        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, user).with(JsonOutput.&toJson)
     }
 
     @Override
-    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid,  def tableRequestSettings, def widgetFilters)
+    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
     {
-        tableRequestSettings = new TableRequestSettings(tableRequestSettings)
-        if(widgetFilters)
+        TableRequestSettings tableRequestSettings = new TableRequestSettings(otherSettings.tableRequestSettings)
+        Collection<WidgetFilterResponse> widgetFilters
+        if(otherSettings.widgetFilters)
         {
-            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(widgetFilters)
+            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(otherSettings.widgetFilters)
         }
-        return api.tx.call {
-            service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, tableRequestSettings)
-        }.with(JsonOutput.&toJson)
+        else
+        {
+            widgetFilters = []
+        }
+        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, user, tableRequestSettings).with(JsonOutput.&toJson)
     }
 }
 
@@ -92,6 +105,7 @@ class DashboardDataSetImpl implements DashboardDataSet
 class DashboardDataSetService
 {
     DashboardSettingsService dashboardSettingsService = DashboardSettingsService.instance
+    MessageProvider messageProvider = MessageProvider.instance
 
     private static final List<String> NOMINATIVE_RUSSIAN_MONTH = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
                                                                   'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
@@ -104,6 +118,8 @@ class DashboardDataSetService
     }
 
     private static final String blankData = 'Не заполнено'
+
+    private String currentUserLocale = 'ru'
 
     /**
      * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
@@ -133,7 +149,8 @@ class DashboardDataSetService
         }
         else
         {
-            throw new IllegalArgumentException('Widget is not found!')
+            String message = messageProvider.getConstant(WIDGET_NOT_FOUND_ERROR, currentUserLocale)
+            api.utils.throwReadableException("${message}#${WIDGET_NOT_FOUND_ERROR}")
         }
     }
 
@@ -150,8 +167,10 @@ class DashboardDataSetService
                              String widgetKey,
                              String subjectUUID,
                              Collection<WidgetFilterResponse> widgetFilters = [],
+                             IUUIDIdentifiable user = null,
                              TableRequestSettings tableRequestSettings = null)
     {
+        currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         def widgetSettings = getWidgetSettingsByDashboardAndWidgetKey(dashboardKey, widgetKey)
         def diagramType = widgetSettings.type as DiagramType
         String templateUUID = getTemplateUUID(widgetSettings)
@@ -226,7 +245,7 @@ class DashboardDataSetService
                     : prepareDataSet(getDiagramData(request, diagramType, templateUUID,
                                                     aggregationCnt, widgetSettings,
                                                     tableRequestSettings?.ignoreLimits), widgetSettings,
-                                                    showTableNulls, requestHasBreakdown)?.find()?.size()
+                                     showTableNulls, requestHasBreakdown)?.find()?.size()
             }
         }
         else
@@ -285,7 +304,9 @@ class DashboardDataSetService
                 customsInBreakdown = sortListsForCombo(customsInBreakdown, sortingDataIndex)
                 return mappingComboDiagram(res, additionals, groupFormat, format,
                                            changeLabels, reverseLabels, customsInBreakdown, sortingDataIndex)
-            default: throw new IllegalArgumentException("Not supported diagram type: $diagramType")
+            default:
+                String message = messageProvider.getMessage(NOT_SUPPORTED_DIAGRAM_TYPE_ERROR, currentUserLocale, diagramType: diagramType)
+                return api.utils.throwReadableException("${message}#${NOT_SUPPORTED_DIAGRAM_TYPE_ERROR}")
         }
     }
 
@@ -761,7 +782,8 @@ class DashboardDataSetService
                     }
                     else
                     {
-                        throw new IllegalArgumentException("Does not match group types: $groupTypes")
+                        String message =messageProvider.getMessage(GROUP_TYPES_DONT_MATCH_ERROR, currentUserLocale, groupTypes: groupTypes)
+                        return api.utils.throwReadableException("${message}#${GROUP_TYPES_DONT_MATCH_ERROR}")
                     }
                 }
             }
@@ -1063,11 +1085,38 @@ class DashboardDataSetService
         return groupType?.way == Way.SYSTEM ? new GroupParameter(
             title: title,
             type: Attribute.getAttributeType(attr) == AttributeType.DT_INTERVAL_TYPE
-                ? DashboardUtils.getDTIntervalGroupType(groupType.data as String)
+                ? getDTIntervalGroupType(groupType.data as String)
                 : groupType.data as GroupType,
             attribute: attr,
             format: groupType.format
         ) : null
+    }
+
+    /**
+     * Метод определения типа группировки для атрибута типа "временной интервал"
+     * @param groupType - декларируемая группировка временного интервала
+     * @return фактическая группировка временного интервала
+     */
+    private GroupType getDTIntervalGroupType(String groupType)
+    {
+        switch (groupType.toLowerCase())
+        {
+            case 'overlap':
+                return GroupType.OVERLAP
+            case 'second':
+                return GroupType.SECOND_INTERVAL
+            case 'minute':
+                return GroupType.MINUTE_INTERVAL
+            case 'hour':
+                return GroupType.HOUR_INTERVAL
+            case 'day':
+                return GroupType.DAY_INTERVAL
+            case 'week':
+                return GroupType.WEEK_INTERVAL
+            default:
+                String message = messageProvider.getMessage(NOT_SUPPORTED_DTINTERVAL_GROUP_TYPE_ERROR, currentUserLocale, groupType: groupType)
+                api.utils.throwReadableException("$message#${NOT_SUPPORTED_DTINTERVAL_GROUP_TYPE_ERROR}")
+        }
     }
 
     /**
@@ -1250,7 +1299,8 @@ class DashboardDataSetService
             case AttributeType.TIMER_TYPES:
                 return this.&mappingTimerTypeFilters.curry(source)
             default:
-                throw new IllegalArgumentException("Not supported attribute type: $type in custom group")
+                String message = messageProvider.getMessage(NOT_SUPPORTED_ATTRIBUTE_TYPE_FOR_CUSTOM_GROUP_ERROR, currentUserLocale, type: type)
+                api.utils.throwReadableException("$message#${NOT_SUPPORTED_ATTRIBUTE_TYPE_FOR_CUSTOM_GROUP_ERROR}")
         }
     }
 
@@ -1295,6 +1345,7 @@ class DashboardDataSetService
             attribute = attribute.deepClone()
             attribute?.code = AttributeType.VALUE_TYPE
         }
+        String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
         def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
@@ -1318,7 +1369,7 @@ class DashboardDataSetService
                 case 'contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     String uuid = condition.data.uuid
                     def value = api.utils.get(uuid)
@@ -1332,7 +1383,7 @@ class DashboardDataSetService
                 case 'not_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     String uuid = condition.data.uuid
                     def value = api.utils.get(uuid)
@@ -1346,7 +1397,7 @@ class DashboardDataSetService
                 case 'contains_any':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def uuids = condition.data*.uuid
                     def values = uuids.collect { uuid -> api.utils.get(uuid)
@@ -1361,7 +1412,7 @@ class DashboardDataSetService
                 case 'title_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     return new FilterParameter(
                         value: condition.data,
@@ -1373,7 +1424,7 @@ class DashboardDataSetService
                 case 'title_not_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     return new FilterParameter(
                         value: condition.data,
@@ -1394,7 +1445,7 @@ class DashboardDataSetService
                 case ['contains_attr_current_object', 'equal_attr_current_object']:
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def code = condition.data.code
                     def value = api.utils.get(subjectUUID)[code]
@@ -1406,7 +1457,8 @@ class DashboardDataSetService
                         attribute: attribute
                     )
                 default:
-                    throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -1430,6 +1482,7 @@ class DashboardDataSetService
             attribute = attribute.deepClone()
             attribute?.code = AttributeType.VALUE_TYPE
         }
+        String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
         def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
@@ -1453,7 +1506,7 @@ class DashboardDataSetService
                 case 'contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     String uuid = condition.data.uuid
                     def value = api.utils.get(uuid)
@@ -1467,7 +1520,7 @@ class DashboardDataSetService
                 case 'not_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     String uuid = condition.data.uuid
                     def value = api.utils.get(uuid)
@@ -1481,7 +1534,7 @@ class DashboardDataSetService
                 case 'in':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def uuids = condition.data*.uuid
                     def values = uuids.collect { uuid -> api.utils.get(uuid)
@@ -1496,7 +1549,7 @@ class DashboardDataSetService
                 case 'title_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     return new FilterParameter(
                         value: condition.data,
@@ -1508,7 +1561,7 @@ class DashboardDataSetService
                 case 'title_not_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     return new FilterParameter(
                         value: condition.data,
@@ -1520,7 +1573,7 @@ class DashboardDataSetService
                 case 'contains_including_archival':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def value = condition.data.uuid
                     return new FilterParameter(
@@ -1533,7 +1586,7 @@ class DashboardDataSetService
                 case 'not_contains_including_archival':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def value = condition.data.uuid
                     return new FilterParameter(
@@ -1546,7 +1599,7 @@ class DashboardDataSetService
                 case 'contains_including_nested':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     String uuid = condition.data.uuid
                     def value = api.utils.get(uuid)
@@ -1561,7 +1614,7 @@ class DashboardDataSetService
                 case 'contains_any':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def uuids = condition.data*.uuid
                     def values = uuids.collect { uuid -> api.utils.get(uuid)
@@ -1585,7 +1638,7 @@ class DashboardDataSetService
                 case ['equal_attr_current_object', 'contains_attr_current_object']:
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def code = condition.data.code
                     def value = api.utils.get(subjectUUID)[code]
@@ -1597,7 +1650,8 @@ class DashboardDataSetService
                         attribute: attribute
                     )
                 default:
-                    throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -1646,7 +1700,9 @@ class DashboardDataSetService
                     return buildFilterParameterFromCondition(Comparison.GREATER)
                 case 'less':
                     return buildFilterParameterFromCondition(Comparison.LESS)
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                default:
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -1692,7 +1748,9 @@ class DashboardDataSetService
                     return buildFilterParameterFromCondition(Comparison.IS_NULL)
                 case 'not_empty':
                     return buildFilterParameterFromCondition(Comparison.NOT_NULL)
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                default:
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -1743,7 +1801,9 @@ class DashboardDataSetService
                     return buildFilterParameterFromCondition(Comparison.IS_NULL) as FilterParameter
                 case 'not_empty':
                     return buildFilterParameterFromCondition(Comparison.NOT_NULL) as FilterParameter
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                default:
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -1861,7 +1921,9 @@ class DashboardDataSetService
                         end = new Date()
                     }
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                default:
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -1904,7 +1966,8 @@ class DashboardDataSetService
                 case ['equal_subject_attribute', 'equal_attr_current_object']:
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def code = condition.data.code
                     def value = api.utils.get(subjectUUID)[code]
@@ -1912,11 +1975,14 @@ class DashboardDataSetService
                     def subjectAttributeType = subjectAttribute.type
                     if (subjectAttributeType != attribute.type)
                     {
-                        throw new IllegalArgumentException("Does not match attribute type: $subjectAttributeType")
+                        String message = messageProvider.getMessage(SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_ERROR, currentUserLocale, subjectType: subjectType, property: attribute.property)
+                        api.utils.throwReadableException("$message#${SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_ERROR}")
                     }
                     return new FilterParameter(value: value, title: title,
                                                id: id, type: Comparison.EQUAL, attribute: attribute)
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                default:
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -2008,7 +2074,9 @@ class DashboardDataSetService
                         end = new Date().clearTime()
                     }
                     return buildFilterParameterFromCondition(Comparison.BETWEEN,temAttribute, [start.getTime(), end.getTime()])
-                default: throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                default:
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -2024,6 +2092,7 @@ class DashboardDataSetService
             attribute = attribute.deepClone()
             attribute?.code = AttributeType.VALUE_TYPE
         }
+        String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
         def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
             switch (conditionType.toLowerCase())
@@ -2031,52 +2100,68 @@ class DashboardDataSetService
                 case 'contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     String uuid = condition.data.uuid
-                    return new FilterParameter(value: uuid, title: title,
-                                               id: id, type: Comparison.CONTAINS, attribute: attribute)
+                    return new FilterParameter(
+                        value: uuid, title: title,
+                        id: id, type: Comparison.CONTAINS, attribute: attribute
+                    )
                 case 'not_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     String uuid = condition.data.uuid
-                    return new FilterParameter(value: uuid, title: title,
-                                               id: id, type: Comparison.NOT_CONTAINS, attribute: attribute)
+                    return new FilterParameter(
+                        value: uuid, title: title,
+                        id: id, type: Comparison.NOT_CONTAINS, attribute: attribute
+                    )
                 case 'contains_any':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def uuids = condition.data*.uuid
-                    return new FilterParameter(value: uuids, title: title,
-                                               id: id, type: Comparison.CONTAINS, attribute: attribute)
+                    return new FilterParameter(
+                        value: uuids, title: title,
+                        id: id, type: Comparison.CONTAINS, attribute: attribute
+                    )
                 case 'title_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
-                    return new FilterParameter(value: condition.data, title: title,
-                                               id: id, type: Comparison.METACLASS_TITLE_CONTAINS, attribute: attribute)
+                    return new FilterParameter(
+                        value: condition.data, title: title,
+                        id: id, type: Comparison.METACLASS_TITLE_CONTAINS, attribute: attribute
+                    )
                 case 'title_not_contains':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
-                    return new FilterParameter(value: condition.data, title: title,
-                                               id: id, type: Comparison.METACLASS_TITLE_NOT_CONTAINS, attribute: attribute)
+                    return new FilterParameter(
+                        value: condition.data,
+                        title: title,
+                        id: id,
+                        type: Comparison.METACLASS_TITLE_NOT_CONTAINS,
+                        attribute: attribute
+                    )
                 case 'equal_attr_current_object':
                     if (!condition.data)
                     {
-                        throw new IllegalArgumentException("Condition data is null or empty")
+                        return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
                     }
                     def code = condition.data.code
                     def value = api.utils.get(subjectUUID)[code]
-                    return new FilterParameter(value: value, title: title,
-                                               id: id, type: Comparison.EQUAL, attribute: attribute)
+                    return new FilterParameter(
+                        value: value, title: title,
+                        id: id, type: Comparison.EQUAL, attribute: attribute
+                    )
                 default:
-                    throw new IllegalArgumentException("Not supported condition type: $conditionType")
+                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
@@ -2157,7 +2242,7 @@ class DashboardDataSetService
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
                             newRequestData.filters = filters
-                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
+                            def res = DashboardQueryWrapperUtils.getData(newRequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
                                                                 .with(formatGroup)
                                                                 .with(formatAggregation)
 
@@ -2247,7 +2332,7 @@ class DashboardDataSetService
                                 RequestData newData = data.clone()
                                 newData.filters = filters
                                 Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
+                                def res = DashboardQueryWrapperUtils.getData(newData as RequestData, top,currentUserLocale, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
                                 if(!res && !onlyFilled)
                                 {
                                     def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
@@ -2854,7 +2939,9 @@ class DashboardDataSetService
                     return getNullValue(diagramType, fromBreakdown)
                 }
                 return getCorrectIntervalType(value, type)
-            default: throw new IllegalArgumentException("Not supported type: $type")
+            default:
+                String message = messageProvider.getMessage(NOT_SUPPORTED_GROUP_TYPE_ERROR, currentUserLocale, type: type)
+                api.utils.throwReadableException("$message#${NOT_SUPPORTED_GROUP_TYPE_ERROR}")
         }
     }
 
@@ -3149,7 +3236,9 @@ class DashboardDataSetService
                     standardDiagram = new StandardDiagram(labels: labels, series: series)
                 }
                 return standardDiagram
-            default: throw new IllegalArgumentException("Invalid format result data set")
+            default:
+                String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
+                api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
         }
     }
 
@@ -3197,7 +3286,9 @@ class DashboardDataSetService
                 return new RoundDiagram(series: (aggregationResult as List).collect {
                     it as Double
                 }, labels: groupResult)
-            default: throw new IllegalArgumentException("Invalid format result data set")
+            default:
+                String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
+                api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
         }
     }
 
@@ -3216,7 +3307,9 @@ class DashboardDataSetService
             case 1:
                 def (value, title) = resultDataSet.head()
                 return new SummaryDiagram(title: title, total: value)
-            default: throw new IllegalArgumentException("Invalid format result data set")
+            default:
+                String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
+                api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
         }
     }
 
@@ -3739,13 +3832,13 @@ class DashboardDataSetService
         if(!customValuesInParameter)
         {
             limitParameter = !ignoreLimits?.parameter &&
-              isDynamicParameter
-            ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
-                                                                 parameterAttribute.attribute.code.tokenize('_').last()) >
-              DashboardUtils.tableParameterLimit
-            : countDistinct(parameterAttribute,
-                            parameterAttribute.attribute.sourceCode) >
-              DashboardUtils.tableParameterLimit
+                             isDynamicParameter
+                ? DashboardQueryWrapperUtils.countDistinctTotalValue(source,
+                                                                     parameterAttribute.attribute.code.tokenize('_').last()) >
+                  DashboardUtils.tableParameterLimit
+                : countDistinct(parameterAttribute,
+                                parameterAttribute.attribute.sourceCode) >
+                  DashboardUtils.tableParameterLimit
             if(isDynamicParameter)
             {
                 //динамические атрибуты ищутся по-особому, их нужно проверять отдельно
@@ -3789,8 +3882,8 @@ class DashboardDataSetService
      * @return корректно обработанные данные с разбивкой
      */
     private List<Map<String, Object>> formatDataForTableWithBreakdown(def groups, boolean valuesInBasicBreakdownExceedLimit,
-                                                      List breakdownValues, int aggregationCnt, List notAggregatedAttributeNames,
-                                                      int parameterIndex, boolean showRowNum)
+                                                                      List breakdownValues, int aggregationCnt, List notAggregatedAttributeNames,
+                                                                      int parameterIndex, boolean showRowNum)
     {
         int id = 0
         return groups.collect { parameters, group ->
@@ -4284,7 +4377,9 @@ class DashboardDataSetService
                             )
                         }
                     }
-                default: throw new IllegalArgumentException('Invalid format result data set')
+                default:
+                    String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
+                    api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
             }
         }
 
@@ -4692,7 +4787,7 @@ class DashboardDataSetService
                 //важно для таблицы
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, diagramType in DiagramType.CountTypes ? false : onlyFilled)
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-                def res = DashboardQueryWrapperUtils.getData(requestData, top, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
+                def res = DashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                     .with(formatGroup)
                                                     .with(formatAggregation)
                 def total = res ? [(requisiteNode.title): res] : [:]
@@ -4722,9 +4817,8 @@ class DashboardDataSetService
                 } as Map<String, RequestData>
                 if (!checkGroupTypes(dataSet.values()))
                 {
-                    throw new IllegalArgumentException(
-                        "Wrong group types in calculation!"
-                    )
+                    String message = messageProvider.getConstant(WRONG_GROUP_TYPES_IN_CALCULATION_ERROR, currentUserLocale)
+                    api.utils.throwReadableException("$message#${WRONG_GROUP_TYPES_IN_CALCULATION_ERROR}")
                 }
 
                 List attributes = []
@@ -4739,7 +4833,7 @@ class DashboardDataSetService
                 def variables = dataSet.collectEntries { key, data ->
                     Closure postProcess =
                         this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
+                    [(key): DashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
                                                       .with(postProcess)]
                 } as Map<String, List>
 
@@ -4758,13 +4852,13 @@ class DashboardDataSetService
                         def resultCalculation = calculator.execute { variable ->
                             hasState
                                 ? (variables[variable as String].sum {
-                                    def value =  it[1..-1]
-                                    group == value ? it[0]  as Double : 0
-                                } ?: 0) as Double
+                                def value =  it[1..-1]
+                                group == value ? it[0]  as Double : 0
+                            } ?: 0) as Double
                                 : (variables[variable as String].findResult {
-                                    def value =  it[1..-1]
-                                    group == value ? it[0] : null
-                                } ?: 0) as Double
+                                def value =  it[1..-1]
+                                group == value ? it[0] : null
+                            } ?: 0) as Double
                         }
                         group.add(0, resultCalculation)
                         return group
@@ -4785,7 +4879,9 @@ class DashboardDataSetService
                     return sortResList(total, aggregationSortingType, parameterSortingType)
                 }
                 return total
-            default: throw new IllegalArgumentException("Not supported requisite type: $nodeType")
+            default:
+                String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)
+                api.utils.throwReadableException("$message#${REQUISITE_IS_NOT_SUPPORTED_ERROR}")
         }
     }
 }

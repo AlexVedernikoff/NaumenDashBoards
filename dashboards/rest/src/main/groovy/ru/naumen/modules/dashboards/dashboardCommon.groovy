@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
+import ru.naumen.core.shared.dto.ISDtObject
+
 import java.util.concurrent.TimeUnit
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -42,11 +44,27 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.databind.node.TextNode
 import com.amazonaws.util.json.Jackson
 import groovy.transform.AutoClone
+import groovy.transform.InheritConstructors
+import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 import groovy.transform.Canonical
 import static groovy.json.JsonOutput.toJson
 import static DeserializationHelper.mapper
 import java.lang.reflect.Method
+import org.apache.commons.lang3.exception.ExceptionUtils
+import org.apache.http.entity.ContentType
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.util.StopWatch
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
+import ru.naumen.core.shared.IUUIDIdentifiable
+
+import javax.transaction.Transaction
+import java.util.stream.Stream
+
+import static org.springframework.web.context.request.RequestContextHolder.getRequestAttributes
 
 import ru.naumen.core.server.script.api.injection.InjectApi
 
@@ -779,32 +797,6 @@ class DashboardUtils
     }
 
     /**
-     * Метод определения типа группировки для атрибута типа "временной интервал"
-     * @param groupType - декларируемая группировка временного интервала
-     * @return фактическая группировка временного интервала
-     */
-    static private GroupType getDTIntervalGroupType(String groupType)
-    {
-        switch (groupType.toLowerCase())
-        {
-            case 'overlap':
-                return GroupType.OVERLAP
-            case 'second':
-                return GroupType.SECOND_INTERVAL
-            case 'minute':
-                return GroupType.MINUTE_INTERVAL
-            case 'hour':
-                return GroupType.HOUR_INTERVAL
-            case 'day':
-                return GroupType.DAY_INTERVAL
-            case 'week':
-                return GroupType.WEEK_INTERVAL
-            default:
-                throw new IllegalArgumentException("Not supported group type in dateTimeInterval attribute: $groupType")
-        }
-    }
-
-    /**
      * Метод по получению настроек для фильтров для источника из хранилища
      * @param queryFilters - возможные фильтры на получаемые данные
      * @return список фильтров для источника из хранилища
@@ -822,6 +814,26 @@ class DashboardUtils
             }
             return filter
         }
+    }
+
+    /**
+     * Метод получения локали текущего пользователя
+     * @param subjectUUID - уникальный идентификатор пользователя
+     * @return локаль для пользователя
+     */
+    static getUserLocale(String userUuid)
+    {
+        def userLocale
+        if (userUuid)
+        {
+            userLocale = getApi().employee.getPersonalSettings(userUuid).locale
+        }
+
+        if (!userLocale)
+        {
+            userLocale = getApi().employee.getPersonalSettings('superUser$naumen').locale ?: 'ru'
+        }
+        return userLocale
     }
 
     /**
@@ -1291,7 +1303,7 @@ class DashboardCodeMarshaller
 }
 
 /**
- * Класс для преобразования/получения значения объекта для атрибута типа НБО и НОБО
+ * Класс для преобразования/получения значения объекта для атрибута типа НБО и НБО
  */
 class LinksAttributeMarshaller
 {
@@ -1341,6 +1353,44 @@ class LinksAttributeMarshaller
     static List<String> unmarshal(String value)
     {
         return value ? value.tokenize(delimiter) : []
+    }
+}
+
+/**
+ * Класс для преобразования/получения значения ошибки вместе с её кодом
+ */
+class ExceptionMessageMarshaller
+{
+    /**
+     * делитель для значения
+     */
+    static String delimiter = '#'
+
+    /**
+     * Метод получения значения для пользователя
+     * @param message - сообщение об ошибке
+     * @param exceptionType - тип исключения
+     * @return  сообщение об ошибке delimiter тип исключения
+     */
+    static String marshal(String message, String exceptionType)
+    {
+        return "${message}${delimiter}${exceptionType}"
+    }
+
+    /**
+     * Метод для парсинга значения
+     * При необходимости метод изменяет текст сообщения
+     * @param value - сооббщение вместе с типом ошибки
+     * @return [ сообщение об ошибке, тип ошибки]
+     */
+    static List<String> unmarshal(String value)
+    {
+        def(message, type) = value ? value.tokenize(delimiter) : []
+        if(message.contains('У Вас нет прав'))
+        {
+            message = 'При построении виджета произошла ошибка. Для решения проблемы необходимо обратиться к администратору системы. Подробная информация содержится в логах приложения.'
+        }
+        return [message, type]
     }
 }
 
@@ -3824,5 +3874,169 @@ class TableRequestSettings
     Sorting sorting = new Sorting()
 }
 
+/**
+ * Базовый контроллер, перехватывает вызываемые другими контроллерами методы, в случае выброса исключения, происходит обработка ошибки
+ */
+@InjectApi
+abstract class BaseController extends Script implements GroovyInterceptable
+{
+    private static final Logger LOG = LoggerFactory.getLogger(BaseController)
+    private static final ThreadLocal<String> entrypointMethod = new ThreadLocal<>()
+
+    @SuppressWarnings('unused')
+    BaseController()
+    {
+        this(new Binding([:]))
+    }
+
+    BaseController(Binding binding)
+    {
+        super(binding)
+    }
+
+    /**
+     * Метод, который перехватывает вызываемые другими контроллерами методы, в случае выброса исключения,
+     * происходит обработка ошибки и преобразование её к стандартному виду
+     * @param name - название метода
+     * @param args - список аргументов
+     * @return результат выполнения метода или преобразованная к единому формату ошибка
+     */
+    def invokeMethod(String name, Object args)
+    {
+        def stopwatch = new StopWatch("Module ${this.class.simpleName}")
+
+        if(!entrypointMethod.get())
+        {
+            entrypointMethod.set(name)
+        }
+
+        LOG.debug("invoke method $name")
+        stopwatch.start(name)
+
+        if(!entrypointMethod.get())
+        {
+            entrypointMethod.set(name)
+            def user = args?.find {
+                it instanceof IUUIDIdentifiable && it.metaClass.toString().startsWith('employee')
+            } as IUUIDIdentifiable
+            CurrentUserHolder.set(user)
+        }
+
+        try
+        {
+            if(entrypointMethod.get() != name)
+            {
+                return super.invokeMethod(name, args)
+            }
+            return api.tx.call{super.invokeMethod(name, args)}
+        }
+        catch (e)
+        {
+            if(entrypointMethod.get() != name || isActionNotFromRest(e))
+            {
+                throw e
+            }
+
+            def msg = "An error occurred at invoke method $name"
+            LOG.error(msg, e)
+
+            def(message, exceptionType) = ExceptionMessageMarshaller.unmarshal(e.message)
+
+            (requestAttributes as ServletRequestAttributes).response.with {
+                status = HttpStatus.INTERNAL_SERVER_ERROR.value()
+                contentType = ContentType.APPLICATION_JSON.mimeType
+                characterEncoding = ContentType.APPLICATION_JSON.charset
+            }
+            return toJson(new ErrorReport(message: message, exceptionType: exceptionType))
+        }
+        finally
+        {
+            if(entrypointMethod.get() == name)
+            {
+                entrypointMethod.remove()
+            }
+            CurrentUserHolder.clear()
+            stopwatch.stop()
+            LOG.debug(stopwatch.prettyPrint())
+        }
+    }
+
+    Object run()
+    {
+        return null
+    }
+    private static boolean isActionNotFromRest(Exception e)
+    {
+        return e.getStackTrace().find{ stackTraceElement ->
+            stackTraceElement.getClassName() == 'ru.naumen.core.server.rest.RestServiceController'
+        } == null
+    }
+}
+
+/**
+ * Отчет об ошибке, содержит отметку времени, код ошибки и информацию об ошибке
+ */
+@Canonical
+class ErrorReport
+{
+    /**
+     * сообщение об ошибке
+     */
+    String message
+    /**
+     * тип ошибки
+     */
+    String exceptionType
+}
+
+/**
+ * Контейнер для хранения ссылки на пользователя для текущего потока
+ * Установка пользователя происходит в {@link BaseController#invokeMethod}
+ */
+class CurrentUserHolder
+{
+    private static final Logger LOG = LoggerFactory.getLogger(CurrentUserHolder)
+    private static final ThreadLocal<ISDtObject> currentUser = new ThreadLocal<>()
+
+    /**
+     * @return текущий пользователь
+     */
+    static ISDtObject get()
+    {
+        if (LOG.isTraceEnabled())
+        {
+            LOG.trace("Get ${currentUser.get()?.UUID}")
+        }
+
+        return currentUser.get()
+    }
+
+    /**
+     * Установить текущего пользователя
+     * @param user текущий пользователь
+     */
+    static void set(IUUIDIdentifiable user)
+    {
+        if (LOG.isTraceEnabled())
+        {
+            LOG.trace("Set ${user?.UUID}")
+        }
+
+        currentUser.set(user)
+    }
+
+    /**
+     * Сбросить информацию о текущем пользователе
+     */
+    static void clear()
+    {
+        if (LOG.isTraceEnabled())
+        {
+            LOG.trace("Clear ${currentUser.get()?.UUID}")
+        }
+
+        currentUser.remove()
+    }
+}
 //endregion
 return
