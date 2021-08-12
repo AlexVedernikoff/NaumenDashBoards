@@ -13,6 +13,7 @@ import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {hasUUIDsInLabels} from 'store/widgets/helpers';
+import isMobile from 'ismobilejs';
 import {setWarningMessage} from 'store/widgets/data/actions';
 import {store} from 'app.constants';
 import type {ThunkAction} from 'store/types';
@@ -316,7 +317,7 @@ const hasDrillDownWidget = (widget: Chart, buildData: DiagramBuildData, seriesIn
 const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) => (event: MouseEvent, chartContext: Object, config: Object) => {
 	event.stopPropagation();
 
-	if (hasDrillDownWidget(widget, buildData, config.seriesIndex)) {
+	if (!isMobile().any && hasDrillDownWidget(widget, buildData, config.seriesIndex)) {
 		const [index, mixin] = addFilters(widget, {
 			buildData,
 			config,
