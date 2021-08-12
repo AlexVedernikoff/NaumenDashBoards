@@ -7,7 +7,7 @@ import {
 	updateSourcesFilter
 } from 'store/sources/sourcesFilters/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {fetchAttributes} from 'store/sources/attributes/actions';
+import {fetchAttributeByCode, fetchAttributes} from 'store/sources/attributes/actions';
 import {getSourceFilters, getSourcesFilters} from 'store/sources/sourcesFilters/selectors';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/SourceFieldset/types';
@@ -30,6 +30,7 @@ export const props = (state: AppState, props: ComponentProps): ConnectedProps =>
 };
 
 export const functions: ConnectedFunctions = {
+	fetchAttributeByCode,
 	fetchSourcesFilters,
 	onCheckApplyFilter: checkApplyFilter,
 	onDeleteSourcesFilter: deleteSourcesFilter,

@@ -54,12 +54,8 @@ export class SourceFieldset extends Component<Props, State> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {descriptor, value: sourceValue} = this.props.value.source;
-		const {descriptor: prevDescriptor, value: prevSourceValue} = prevProps.value.source;
-
-		if (sourceValue && sourceValue.value !== prevSourceValue?.value) {
-			this.resetAttributes();
-		}
+		const {descriptor} = this.props.value.source;
+		const {descriptor: prevDescriptor} = prevProps.value.source;
 
 		if (descriptor !== prevDescriptor) {
 			this.resetDynamicAttributes();
@@ -180,7 +176,7 @@ export class SourceFieldset extends Component<Props, State> {
 				widgetFilterOptions: []
 			};
 
-			newSourceValue && onFetchAttributes(newSourceValue.value, parentClassFqn, this.setDefaultIndicator);
+			newSourceValue && onFetchAttributes(newSourceValue.value, parentClassFqn, (attributes) => { this.updateAttributes(attributes); });
 		}
 
 		this.changeSource({
@@ -226,19 +222,6 @@ export class SourceFieldset extends Component<Props, State> {
 
 	isDynamicAttribute = (attribute: ?Attribute) => attribute?.property === DYNAMIC_ATTRIBUTE_PROPERTY;
 
-	resetAttributes = () => {
-		const {index, onChange, value} = this.props;
-		const {breakdown, dataKey, parameters} = value;
-		const newValue = {
-			...value,
-			breakdown: breakdown ? getDefaultBreakdown(dataKey) : breakdown,
-			indicators: [DEFAULT_INDICATOR],
-			parameters: parameters ? [DEFAULT_PARAMETER] : parameters
-		};
-
-		onChange(index, newValue);
-	};
-
 	resetDynamicAttribute = (data: Object) => {
 		const {attribute, ...rest} = data;
 
@@ -262,25 +245,40 @@ export class SourceFieldset extends Component<Props, State> {
 		onChange(index, newValue);
 	};
 
-	setDefaultIndicator = (attributes: Array<Attribute>) => {
-		const {index, onChange, value} = this.props;
-		const attribute = attributes.find(attribute => attribute.code === 'UUID') ?? null;
-		const newValue = {
-			...value,
-			indicators: [{
-				aggregation: getDefaultAggregation(attribute),
-				attribute
-			}]
-		};
-
-		onChange(index, newValue);
-	};
-
 	setInnerError = (error: ?string) => this.setState({error});
 
 	showEditForm = () => this.setState({mode: MODE.EDIT, showEditForm: true});
 
 	showSaveForm = () => this.setState({mode: MODE.SAVE, showEditForm: true});
+
+	updateAttributes = async (attributes: Array<Attribute>) => {
+		const {fetchAttributesByCode, index, onChange, value} = this.props;
+		const {breakdown, dataKey, parameters, source} = value;
+		const classFqn = source.value?.value;
+		let indicators = DEFAULT_INDICATOR;
+		const attribute = attributes.find(attribute => attribute.code === 'UUID') ?? null;
+
+		if (attribute) {
+			indicators = [{
+				aggregation: getDefaultAggregation(attribute),
+				attribute
+			}];
+		}
+
+		const newValue = {...value, indicators};
+
+		if (breakdown) {
+			const defaultBreakdown = getDefaultBreakdown(dataKey)[0];
+
+			newValue.breakdown = await fetchAttributesByCode(classFqn, breakdown, defaultBreakdown);
+		}
+
+		if (parameters) {
+			newValue.parameters = await fetchAttributesByCode(classFqn, parameters, DEFAULT_PARAMETER);
+		}
+
+		onChange(index, newValue);
+	};
 
 	renderComputeCheckbox = () => {
 		const {value} = this.props;

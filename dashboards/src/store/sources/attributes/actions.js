@@ -1,8 +1,29 @@
 // @flow
 import api from 'api';
+import type {Attribute} from './types';
 import {ATTRIBUTES_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {OnLoadCallback} from 'store/sources/types';
+
+/**
+ * Преобразует атрибут в атрибут с таким же названием, но в классе classFqn
+ * @param {string} classFqn - целевой код класса
+ * @param {Attribute} attribute - исходный атрибут
+ * @returns  {ThunkAction}
+ */
+const fetchAttributeByCode = (classFqn: string, attribute: Attribute): ThunkAction =>
+	async (dispatch: Dispatch): Promise<Attribute | null> => {
+		try {
+			const params = {
+				attribute,
+				classFqn
+			};
+			const newAttribute = await api.dashboards.getAttributeByCode(params);
+			return newAttribute;
+		} catch (error) {
+			return null;
+		}
+	};
 
 /**
  * Получаем атрибуты конкретного класса
@@ -45,5 +66,6 @@ const recordAttributesError = (payload: string) => ({
 });
 
 export {
-	fetchAttributes
+	fetchAttributes,
+	fetchAttributeByCode
 };

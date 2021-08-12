@@ -1,4 +1,5 @@
 // @flow
+import type {Attribute, FetchAttributeByCode, FetchAttributes} from 'store/sources/attributes/types';
 import type {Breakdown, Indicator, Parameter, SourceData} from 'store/widgetForms/types';
 import type {
 	CheckApplyFilter,
@@ -14,7 +15,6 @@ import type {
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {OnLoadCallback} from 'store/sources/types';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/SourceFieldset/types';
-import type {ThunkAction} from 'store/types';
 
 export type DataSet = {
 	breakdown?: Breakdown,
@@ -32,11 +32,12 @@ export type ConnectedProps = {
 	sources: DataSourceMap
 };
 
-export type FetchAttributes = (classFqn: string, parentClassFqn?: string | null, onLoadCallback?: OnLoadCallback) => ThunkAction;
-
 export type DispatchFetchAttributes = (classFqn: string, parentClassFqn?: string | null, onLoadCallback?: OnLoadCallback) => Promise<void>;
 
+export type DispatchFetchAttributeByCode = (classFqn: string, attribute: Attribute) => Promise<Attribute>;
+
 export type ConnectedFunctions = {
+	fetchAttributeByCode: FetchAttributeByCode,
 	fetchSourcesFilters: FetchSourcesFilters,
 	onCheckApplyFilter: CheckApplyFilter,
 	onDeleteSourcesFilter: DeleteSourcesFilter,
@@ -45,6 +46,7 @@ export type ConnectedFunctions = {
 };
 
 export type DispatchConnectedFunctions = {
+	fetchAttributeByCode: DispatchFetchSourcesFilters,
 	fetchSourcesFilters: DispatchFetchSourcesFilters,
 	onCheckApplyFilter: DispatchCheckApplyFilter,
 	onDeleteSourcesFilter: DispatchDeleteSourcesFilter,

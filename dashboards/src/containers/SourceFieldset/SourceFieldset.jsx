@@ -1,13 +1,38 @@
 // @flow
 import api from 'api';
+import type {BreakdownItem, Parameter} from 'store/widgetForms/types';
 import {connect} from 'react-redux';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
+import {GROUP_WAYS} from 'store/widgets/constants';
 import React, {Component} from 'react';
 import SourceFieldset from 'WidgetFormPanel/components/SourceFieldset';
 
 export class SourceFieldsetContainer extends Component<Props> {
+	fetchAttributesByCode = async (classFqn: string | null, parameters: Array<Parameter | BreakdownItem>, defaultItem: Parameter | BreakdownItem) => {
+		const {fetchAttributeByCode} = this.props;
+		const newParameters = [];
+
+		// eslint-disable-next-line no-unused-vars
+		for (const item of parameters) {
+			let newItem = {...defaultItem};
+			const {attribute, group} = item;
+
+			if (classFqn && group.way === GROUP_WAYS.SYSTEM) {
+				const newAttr = await fetchAttributeByCode(classFqn, attribute);
+
+				if (newAttr) {
+					newItem = {...item, attribute: newAttr};
+				}
+			}
+
+			newParameters.push(newItem);
+		}
+
+		return newParameters;
+	};
+
 	getSourceDescriptor = () => {
 		const {filterList, value: {source}} = this.props;
 		const {descriptor, filterId} = source;
@@ -62,6 +87,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 		return (
 			<SourceFieldset
 				{...props}
+				fetchAttributesByCode={this.fetchAttributesByCode}
 				onChange={this.handleChange}
 				onOpenFilterForm={this.setContext}
 			/>
