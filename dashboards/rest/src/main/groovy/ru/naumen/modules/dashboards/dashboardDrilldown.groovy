@@ -16,12 +16,13 @@ import java.text.SimpleDateFormat
 import ru.naumen.core.shared.dto.SimpleDtObject
 import static groovy.json.JsonOutput.toJson
 import com.amazonaws.util.json.Jackson
+import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static DeserializationHelper.mapper
 import static MessageProvider.*
 import static CurrentUserHolder.*
 
-@Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl()
+@Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl(binding)
 
 interface DashboardDrilldown
 {
@@ -35,6 +36,7 @@ interface DashboardDrilldown
     String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
 }
 
+@InheritConstructors
 class DashboardDrilldownImpl extends BaseController implements DashboardDrilldown
 {
     DashboardDrilldownService service = DashboardDrilldownService.instance
@@ -52,13 +54,15 @@ class DashboardDrilldownService
 {
     /**
      * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
-     * @param requestContent - параметры запроса
+     * @param request - параметры запроса
      * @param cardObjectUuid - Uuid карточки текущего объекта
      * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
+    String getLink(Map<String, Object> request, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
     {
+        def requestContent = [:]
+        requestContent.putAll(request)
         DiagramType diagramType = diagramTypeFromRequest as DiagramType
         if(requestContent.filterId)
         {
