@@ -3420,6 +3420,11 @@ class SpeedometerIndicator
      * Флаг на отображение
      */
     Boolean show = true
+    /**
+     * Формат числа
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    NumberFormat format
 }
 
 /**
