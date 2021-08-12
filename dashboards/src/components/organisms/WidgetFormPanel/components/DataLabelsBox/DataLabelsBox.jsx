@@ -17,7 +17,7 @@ import ToggableFormBox from 'components/molecules/ToggableFormBox';
 export class DataLabelsBox extends PureComponent<Props> {
 	static defaultProps: DefaultProps = {
 		name: '',
-		showForamt: false
+		showForamt: true
 	};
 
 	componentDidUpdate (prevProps: Props) {

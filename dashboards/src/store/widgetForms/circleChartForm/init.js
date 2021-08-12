@@ -12,6 +12,7 @@ import {DEFAULT_DATA_KEY} from 'store/widgetForms/constants';
 import type {State} from './types';
 
 export const initialState: State = {
+	breakdownFormat: null,
 	colorsSettings: DEFAULT_COLORS_SETTINGS,
 	computedAttrs: [],
 	data: [createCircleDataSet(DEFAULT_DATA_KEY)],

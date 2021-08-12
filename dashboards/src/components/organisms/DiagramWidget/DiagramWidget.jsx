@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {createContextName, createSnapshot} from 'utils/export';
+import {createSnapshot, getSnapshotName} from 'utils/export';
 import {DEFAULT_COMPONENTS, EXPORT_LIST} from './constants';
 import memoize from 'memoize-one';
 import type {Props, State} from './types';
@@ -11,10 +11,9 @@ import Widget from 'containers/Widget';
 export class DiagramWidget extends PureComponent<Props, State> {
 	static defaultProps = {
 		...Widget.defaultProps,
-		components: DEFAULT_COMPONENTS
+		components: DEFAULT_COMPONENTS,
+		forwardedRef: createRef()
 	};
-
-	widgetRef = createRef();
 
 	getComponents = memoize(() => ({
 		ControlPanel: this.renderControlPanel
@@ -22,18 +21,20 @@ export class DiagramWidget extends PureComponent<Props, State> {
 
 	handleExport = async (type: string) => {
 		const {widget} = this.props;
-		const {current} = this.widgetRef;
-		const contextName = await createContextName();
-		const name = `${widget.name}_${contextName}`;
+		const current = this.props.forwardedRef?.current;
 
 		if (current) {
-			createSnapshot({
-				container: current,
-				fragment: true,
-				name,
-				toDownload: true,
-				type
-			});
+			const name = getSnapshotName(widget.name);
+
+			if (current) {
+				createSnapshot({
+					container: current,
+					fragment: true,
+					name,
+					toDownload: true,
+					type
+				});
+			}
 		}
 	};
 
@@ -51,7 +52,7 @@ export class DiagramWidget extends PureComponent<Props, State> {
 			<Widget
 				className={widgetCN}
 				components={this.getComponents()}
-				forwardedRef={this.widgetRef}
+				forwardedRef={this.props.forwardedRef}
 				widget={widget}
 			>
 				<components.Content widget={widget}>{children}</components.Content>

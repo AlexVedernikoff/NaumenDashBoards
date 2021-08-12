@@ -1,11 +1,11 @@
 // @flow
 import AxisSettingsBox from 'components/organisms/AxisChartWidgetForm/components/AxisSettingsBox';
-import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
+import BreakdownFormat from 'WidgetFormPanel/components/BreakdownFormat';
 import ColorsBox from 'containers/ColorsBox';
 import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormField from 'components/molecules/FormField';
-import {getDefaultFormatForAttribute, getMainDataSet, getMainDataSetIndex} from 'store/widgets/data/helpers';
+import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'WidgetFormPanel/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {hasBreakdown} from 'store/widgets/helpers';
@@ -13,13 +13,13 @@ import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import LegendBox from 'WidgetFormPanel/components/LegendBox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeEvent} from 'components/types';
-import ParameterFormat from 'components/molecules/ParameterFormatPanel';
+import ParameterFormat from 'WidgetFormPanel/components/ParameterFormat';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import SortingBox from 'WidgetFormPanel/components/SortingBox';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
-import {WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withWidget from 'WidgetFormPanel/HOCs/withWidget';
 
 export class StyleTab extends Component<Props> {
@@ -28,12 +28,6 @@ export class StyleTab extends Component<Props> {
 		const newData = values.data.map((dataSet, i) => i === index ? {...dataSet, [name]: value} : dataSet);
 
 		onChange(DIAGRAM_FIELDS.data, newData);
-	};
-
-	handleChangeBreakdownFormat = (format) => {
-		const {onChange} = this.props;
-
-		onChange(DIAGRAM_FIELDS.breakdownFormat, format);
 	};
 
 	handleChangeFormat = (format) => {
@@ -59,30 +53,6 @@ export class StyleTab extends Component<Props> {
 		</FormField>
 	);
 
-	renderBreakdownFormat = () => {
-		const {data} = this.props.values;
-		const {breakdown} = getMainDataSet(data);
-
-		if (Array.isArray(breakdown) && breakdown.length > 0) {
-			const {attribute, group} = breakdown[0];
-			const defaultFormat = getDefaultFormatForAttribute(attribute, group);
-
-			if (defaultFormat) {
-				const format = this.props.values.breakdownFormat ?? defaultFormat;
-				return (
-					<CollapsableFormBox title='Разбивка'>
-						<ParameterFormat
-							onChange={this.handleChangeBreakdownFormat}
-							value={format}
-						/>
-					</CollapsableFormBox>
-				);
-			}
-		}
-
-		return null;
-	};
-
 	renderColorsBox = () => {
 		const {onChange, values, widget} = this.props;
 		const {colorsSettings} = values;
@@ -101,37 +71,16 @@ export class StyleTab extends Component<Props> {
 	};
 
 	renderParameterFormat = () => {
-		const {data} = this.props.values;
-		const {type} = this.props.widget;
+		const {onChange, values} = this.props;
+		const {data, parameter} = values;
 
-		if (type in WIDGET_SETS.AXIS) {
-			const {parameter} = this.props.values;
-			const {parameters} = getMainDataSet(data);
-
-			if (parameters && parameters.length > 0) {
-				const {attribute, group} = parameters[0];
-
-				if (attribute) {
-					const {format = getDefaultFormatForAttribute(attribute, group)} = parameter;
-					const label = attribute.title;
-
-					return (
-						<ParameterFormat
-							label={label}
-							onChange={this.handleChangeFormat}
-							value={format}
-						/>
-					);
-				}
-			}
-		}
-
-		return null;
+		return <ParameterFormat data={data} onChange={onChange} parameter={parameter} />;
 	};
 
 	render () {
 		const {onChange, values, widget} = this.props;
 		const {
+			breakdownFormat,
 			data,
 			dataLabels,
 			header,
@@ -162,14 +111,14 @@ export class StyleTab extends Component<Props> {
 					title="Показатель"
 					value={indicator}
 				/>
-				{this.renderBreakdownFormat()}
+				<BreakdownFormat breakdown={breakdownFormat} data={data} onChange={onChange} />
 				<SortingBox
 					name={DIAGRAM_FIELDS.sorting}
 					onChange={onChange}
 					options={getSortingOptions(!this.hasCustomGroup())}
 					value={sorting}
 				/>
-				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={onChange} showForamt={true} value={dataLabels} widget={widget} />
+				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={onChange} value={dataLabels} widget={widget} />
 				{this.renderColorsBox()}
 			</div>
 		);

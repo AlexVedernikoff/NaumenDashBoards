@@ -10,7 +10,7 @@ export type FormatterParams = {
 	stacked: boolean
 };
 
-export type Formatter = {
+export type AxisFormatter = {
 	dataLabel: NumberFormatter,
 	indicator: NumberFormatter,
 	legend: NumberFormatter | ValueFormatter,
@@ -19,4 +19,11 @@ export type Formatter = {
 		default: NumberFormatter | ValueFormatter,
 		overlapped: NumberFormatter | ValueFormatter
 	},
+};
+
+export type CircleFormatter = {
+	breakdown: NumberFormatter | ValueFormatter,
+	dataLabel: NumberFormatter,
+	legend: NumberFormatter | ValueFormatter,
+	tooltip: NumberFormatter,
 };

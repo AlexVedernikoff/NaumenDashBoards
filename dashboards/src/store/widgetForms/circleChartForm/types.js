@@ -1,6 +1,6 @@
 // @flow
-import type {Breakdown, Indicator, SourceData} from 'store/widgetForms/types';
 import type {
+	AxisFormat,
 	ChartColorsSettings,
 	ChartSorting,
 	CircleData,
@@ -11,6 +11,7 @@ import type {
 	Legend,
 	NavigationSettings
 } from 'store/widgets/data/types';
+import type {Breakdown, Indicator, SourceData} from 'store/widgetForms/types';
 
 export type DataSet = $Exact<{
 	...CircleData,
@@ -20,6 +21,7 @@ export type DataSet = $Exact<{
 }>;
 
 export type Values = $Exact<{
+	breakdownFormat: ?AxisFormat,
 	colorsSettings: ChartColorsSettings,
 	computedAttrs: Array<ComputedAttr>,
 	data: Array<DataSet>,

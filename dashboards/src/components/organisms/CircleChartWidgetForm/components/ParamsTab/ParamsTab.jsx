@@ -57,6 +57,7 @@ export class ParamsTab extends PureComponent<Props> {
 			return (
 				<DataSetSettings
 					index={index}
+					key={`IndicatorBox_${dataSet.dataKey}` }
 					onChange={this.handleChangeDataSet}
 					requiredBreakdown={true}
 					usesBlankData={!hasCustomGroup}
@@ -72,6 +73,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderSourceFieldset = (dataSet: DataSet, index: number, data: Array<DataSet>) => (
 		<SourceFieldset
 			index={index}
+			key={`SourceFieldset_${dataSet.dataKey}` }
 			onChange={this.handleChangeDataSet}
 			onRemove={this.handleRemoveDataSet}
 			removable={data.length > 1}

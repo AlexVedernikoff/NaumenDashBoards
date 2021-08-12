@@ -285,6 +285,7 @@ export type CircleWidgetType = $Keys<typeof WIDGET_SETS.CIRCLE>;
 
 export type CircleWidget = {
 	...BaseWidget,
+	breakdownFormat?: AxisFormat,
 	colorsSettings: ChartColorsSettings,
 	data: Array<CircleData>,
 	dataLabels: DataLabels,
@@ -311,6 +312,7 @@ export type ComboData = {
 
 export type ComboWidget = {
 	...BaseWidget,
+	breakdownFormat?: AxisFormat,
 	colorsSettings: ChartColorsSettings,
 	data: Array<ComboData>,
 	dataLabels: DataLabels,
@@ -336,7 +338,8 @@ export type SummaryIndicator = {
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number | string,
-	fontStyle?: FontStyle
+	fontStyle?: FontStyle,
+	format?: NumberAxisFormat
 };
 
 export type SummaryWidget = {
@@ -352,6 +355,7 @@ export type SpeedometerIndicatorSettings = {
 	fontFamily: string,
 	fontSize: number | string,
 	fontStyle?: FontStyle,
+	format?: NumberAxisFormat,
 	show: boolean
 };
 

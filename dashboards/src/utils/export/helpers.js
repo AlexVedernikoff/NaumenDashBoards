@@ -20,6 +20,11 @@ const createContextName = async () => {
 	return `${name} (${moment().format('DD-MM-YYYY')})`;
 };
 
+const getSnapshotName = async (widgetName) => {
+	const contextName = await createContextName();
+	return `${widgetName}_${contextName}`;
+};
+
 /**
  * Выгружает файл в браузер
  * @param {Blob} blob - файл
@@ -57,6 +62,7 @@ const minimize = (string: string): string => string.replace(/\t|\r|\n|\v|\f/g, '
 
 export {
 	createContextName,
+	getSnapshotName,
 	isLegacyBrowser,
 	minimize,
 	save
