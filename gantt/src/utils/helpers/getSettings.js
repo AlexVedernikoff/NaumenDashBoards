@@ -33,7 +33,8 @@ export default {
 				}
 			],
 			'communicationResourceAttribute': null,
-			'nested': false,
+			'communicationWorkAttribute': null,
+			'nested': true,
 			'source': {
 				'descriptor': '',
 				'value': {
@@ -41,7 +42,8 @@ export default {
 					'value': 'serviceCall'
 				}
 			},
-			'type': 'RESOURCE'
+			'level': 1,
+			'type': 'WORK'
 		},
 		{
 			'attributeSettings': [
@@ -76,10 +78,11 @@ export default {
 			'source': {
 				'descriptor': '',
 				'value': {
-					'label': 'Запрос',
-					'value': 'service'
+					'label': 'Шаблон',
+					'value': 'template'
 				}
 			},
+			'level': 5,
 			'type': 'RESOURCE'
 		},
 		{
@@ -101,11 +104,11 @@ export default {
 				}
 			],
 			'communicationResourceAttribute': {
-				'code': 'test_test',
+				'code': 'template',
 				'declaredMetaClass': null,
 				'property': 'serviceCall',
 				'metaClassFqn': 'service',
-				'title': 'test',
+				'title': 'Шаблон',
 				'ref': null,
 				'type': null,
 				'sourceCode': null,
@@ -122,12 +125,12 @@ export default {
 				'sourceCode': null,
 				'sourceName': null
 			},
-			'nested': false,
+			'nested': true,
 			'source': {
 				'descriptor': '',
 				'value': {
-					'label': 'Запрос',
-					'value': 'service'
+					'label': 'Шаблон задач',
+					'value': 'template$templateTask'
 				}
 			},
 			'startWorkAttribute': {
@@ -141,6 +144,7 @@ export default {
 				'sourceName': null,
 				'type': 'date'
 			},
+			'level': 2,
 			'type': 'WORK'
 		}
 	]

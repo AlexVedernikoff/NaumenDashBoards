@@ -1,10 +1,37 @@
 :local {
+	.border {
+		border-bottom: 1px solid #EBEBEB;
+		position: relative;
+	}
+
+	.button {
+		padding-left: 2px;
+		padding-right: 2px;
+	}
+
+	.margin {
+		margin: 10px 0;
+	}
+
 	.container {
 		align-items: start;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 		padding: 8px 24px;
+	}
+
+	.list {
+		margin: 0;
+		padding: 0;
+	}
+
+	.item {
+		align-items: center;
+		display: flex;
+		padding: 10px 30px;
+		flex-direction: row;
+		justify-content: space-between;
 	}
 
 	.valueField {
@@ -21,11 +48,16 @@
 		cursor: pointer;
 		display: flex;
 		justify-content: center;
+		overflow-x: hidden;
 		padding: 12px 0;
 		text-align: center;
 	}
 
 	.sourceTreeSelect {
+		width: 100%;
+	}
+
+	.width {
 		width: 100%;
 	}
 
