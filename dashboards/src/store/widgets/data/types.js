@@ -193,6 +193,7 @@ export type ChartSorting = {
 };
 
 export type DataLabels = {
+	computedFormat?: AxisFormat,
 	disabled: boolean,
 	fontColor: string,
 	fontFamily: string,

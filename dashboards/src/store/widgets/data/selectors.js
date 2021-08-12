@@ -69,8 +69,7 @@ const getAllWidgetsWithoutSelected = createSelector(
 	getAllWidgets,
 	getSelectedWidgetId,
 	(widgets: Widget[], selected: string): Widget[] => widgets.filter(widget => widget.id !== selected)
-	)
-;
+);
 
 /**
  * Возвращает данные для построения редактируемого виджета

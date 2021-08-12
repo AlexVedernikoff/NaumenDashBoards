@@ -1,13 +1,14 @@
 // @flow
-import type {AnyWidget, AxisWidget, ComboWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {AnyWidget, AxisWidget, Chart, ComboWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import api from 'api';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
 import {BUILD_DATA_EVENTS} from './constants';
+import {DEFAULT_NUMBER_AXIS_FORMAT, LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
-import {editWidgetChunkData} from 'store/widgets/data/actions';
+import {editWidgetChunkData, updateWidget} from 'store/widgets/data/actions';
 import {exportSheet, getSnapshotName} from 'utils/export';
+import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
-import {LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Получаем данные для таблицы
@@ -104,7 +105,8 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 				widgetFilters
 			);
 
-			await dispatch(checkDiagramsDataLimits(widget, data));
+			await dispatch(checkDiagramsDataLimits(widget.id, data));
+			await dispatch(checkComputedFormat(widget.id, data));
 			dispatch(receiveBuildData({data, id: widget.id}));
 		} catch (e) {
 			dispatch(recordBuildDataError(widget.id));
@@ -114,12 +116,15 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 /**
  * Проверяет и согласовывает ограничения и вид отображения виджета
  *
- * @param {AnyWidget} widget - виджет для проверки
+ * @param {string} widgetId - id виджет для проверки
  * @param {DiagramBuildData} data - данные для проверки отображения
  * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок и согласований с пользователем.
  */
-const checkDiagramsDataLimits = (widget: AnyWidget, data: DiagramBuildData): ThunkAction =>
+const checkDiagramsDataLimits = (widgetId: string, data: DiagramBuildData): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		const widgets = getAllWidgets(getState());
+		const widget = widgets.find(item => item.id === widgetId);
+
 		if (widget.type in WIDGET_SETS.AXIS || widget.type === WIDGET_TYPES.COMBO) {
 			// $FlowFixMe widget.type in WIDGET_SETS.AXIS
 			const axisWidget: (AxisWidget | ComboWidget) = widget;
@@ -137,6 +142,50 @@ const checkDiagramsDataLimits = (widget: AnyWidget, data: DiagramBuildData): Thu
 			if (dataLabels) {
 				await dispatch(editWidgetChunkData(axisWidget, {dataLabels}, false));
 			}
+		}
+	};
+
+/**
+ * Проверяет и согласовывает вид меток по умолчанию. Для данных с целочисленным форматом - формат по умолчанию с 0 значений, для нецелочисленных с 2
+ *
+ * @param {string} widgetId - id виджет для проверки
+ * @param {DiagramBuildData} data - данные для проверки отображения
+ * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок
+ */
+const checkComputedFormat = (widgetId: string, data: DiagramBuildData): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		const widgets = getAllWidgets(getState());
+		const widget = widgets.find(item => item.id === widgetId);
+
+		let useDecimal = false;
+
+		if (widget.type in WIDGET_SETS.AXIS || widget.type in WIDGET_SETS.CIRCLE || widget.type === WIDGET_TYPES.COMBO) {
+			// $FlowFixMe проверка типов выше
+			const chart = (widget: Chart);
+
+			if (chart.type in WIDGET_SETS.AXIS || chart.type === WIDGET_TYPES.COMBO) {
+				data.series.forEach(({data: items = []}) => {
+					useDecimal = useDecimal || items.some(val => !Number.isInteger(Number.parseFloat(val)));
+				});
+			}
+
+			if (chart.type in WIDGET_SETS.CIRCLE) {
+				useDecimal = data.series.some(val => !Number.isInteger(val));
+			}
+
+			const dataLabels = {
+				...chart.dataLabels,
+				computedFormat: {
+					...DEFAULT_NUMBER_AXIS_FORMAT,
+					symbolCount: useDecimal ? 2 : 0
+				}
+			};
+			const updatedWidgetData = {
+				...widget,
+				dataLabels
+			};
+
+			await dispatch(updateWidget(updatedWidgetData));
 		}
 	};
 

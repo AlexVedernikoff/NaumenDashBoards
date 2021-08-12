@@ -3,6 +3,7 @@ import {AXIS_FORMAT_TYPE, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constant
 import Checkbox from 'components/atoms/Checkbox';
 import ColorInput from 'components/molecules/ColorInput';
 import type {DataLabels} from 'store/widgets/data/types';
+import deepEqual from 'fast-deep-equal';
 import type {DefaultProps, Props} from './types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
@@ -54,20 +55,9 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 	checkWidgetChanged = (dataLabels: DataLabels, prevDataLabels?: DataLabels) => {
 		const {name, onChange, value} = this.props;
-		const {disabled: currDisabled, show: currShow} = dataLabels;
-		const {disabled: prevDisabled = null, show: prevShow = null} = prevDataLabels ?? {};
-		let newValue = value;
 
-		if (currShow !== prevShow && currShow !== value.show) {
-			newValue = {...newValue, [DIAGRAM_FIELDS.show]: currShow};
-		}
-
-		if (currDisabled !== prevDisabled && currDisabled !== value.disabled) {
-			newValue = {...newValue, [DIAGRAM_FIELDS.disabled]: currDisabled};
-		}
-
-		if (newValue !== value) {
-			onChange(name, newValue);
+		if (!deepEqual(dataLabels, prevDataLabels) && !deepEqual(dataLabels, value)) {
+			onChange(name, {...value, ...dataLabels});
 		}
 	};
 
@@ -88,12 +78,13 @@ export class DataLabelsBox extends PureComponent<Props> {
 		const {showForamt, value} = this.props;
 
 		if (showForamt) {
-			const {format = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT]} = value;
+			const {computedFormat, format} = value;
+			const dataLabelFormat = format ?? computedFormat ?? DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT];
 
 			return (
 				<ParameterFormat
 					onChange={this.handleChangeFormat}
-					value={format}
+					value={dataLabelFormat}
 				/>
 			);
 		}
