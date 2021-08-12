@@ -2,7 +2,7 @@
 import type {AxisFormat, LabelFormat, NumberAxisFormat} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
 import {compose} from 'redux';
-import moment from 'moment';
+import moment from 'utils/moment.config';
 import type {NumberFormatter, ValueFormatter} from './types';
 import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
 

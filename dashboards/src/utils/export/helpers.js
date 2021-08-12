@@ -1,6 +1,6 @@
 // @flow
 import api from 'api';
-import moment from 'moment';
+import moment from 'utils/moment.config';
 
 /**
  * Cоздает имя файла

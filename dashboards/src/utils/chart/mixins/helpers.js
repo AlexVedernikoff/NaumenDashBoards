@@ -5,7 +5,7 @@ import type {AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widget
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getMainDataSet} from 'store/widgets/data/helpers';
 import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
-import moment from 'moment';
+import moment from 'utils/moment.config';
 import {parseMSInterval} from 'store/widgets/helpers';
 import {TEXT_HANDLERS, WIDGET_TYPES} from 'store/widgets/data/constants';
 

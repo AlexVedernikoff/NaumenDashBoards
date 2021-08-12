@@ -3,13 +3,11 @@ import 'moment/locale/ru';
 import cn from 'classnames';
 import DatepickerControl from 'components/atoms/DatepickerControl';
 import {LIMIT_DAYS, WEEK_LABELS, WEEKEND_DAYS} from './constants';
-import moment from 'moment';
+import moment from 'utils/moment.config';
 import type {Props as ControlProps} from 'components/atoms/DatepickerControl/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-
-moment.locale('ru');
 
 export class Datepicker extends PureComponent<Props, State> {
 	state = {

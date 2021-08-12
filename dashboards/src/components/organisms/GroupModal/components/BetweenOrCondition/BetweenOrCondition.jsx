@@ -2,7 +2,7 @@
 import {AVAILABLE_DATE_FORMATS} from './constants';
 import {FIELDS} from 'GroupModal/constants';
 import MaterialDateInput from 'src/components/atoms/MaterialDateInput';
-import moment from 'moment';
+import moment from 'utils/moment.config';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

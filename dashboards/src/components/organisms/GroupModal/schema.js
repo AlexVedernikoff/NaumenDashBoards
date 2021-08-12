@@ -1,7 +1,7 @@
 // @flow
 import {addMethod, array, lazy, number, object, string} from 'yup';
 import {AVAILABLE_DATE_FORMATS} from './components/BetweenOrCondition/constants';
-import moment from 'moment';
+import moment from 'utils/moment.config';
 import type {OrCondition} from 'GroupModal/types';
 import type {Schema} from 'components/types';
 
