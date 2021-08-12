@@ -1,13 +1,21 @@
 // @flow
+import type {BreakdownItem, Parameter} from 'store/widgetForms/types';
 import type {CommonDialogContextProps} from 'containers/CommonDialogs/types';
 import type {DataSet, Props as ContainerProps} from 'containers/SourceFieldset/types';
 import {MODE} from './constraints';
 
+type FetchAttributesByCode = (
+		classFqn: string | null,
+		parameters: Array<Parameter | BreakdownItem>,
+		defaultItem: Parameter | BreakdownItem
+	) => Promise<Array<Parameter | BreakdownItem>>;
+
 export type Props = CommonDialogContextProps & ContainerProps & {
+	fetchAttributesByCode: FetchAttributesByCode,
 	index: number,
 	onChange: (index: number, dataSet: DataSet) => void,
 	onOpenFilterForm: () => Promise<string>,
-	value: DataSet,
+	value: DataSet
 };
 
 export type ConfirmOption = {

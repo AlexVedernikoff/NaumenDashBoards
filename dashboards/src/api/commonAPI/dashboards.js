@@ -13,6 +13,10 @@ export default class Dashboards implements DashboardsAPI {
 		return this.transport('dashboards', 'checkForParent', ['parentClassFqn', 'childClassFqn'], parentClassFqn, childClassFqn);
 	}
 
+	getAttributeByCode (request: DTOValue) {
+		return this.transport('dashboards', 'getAttributeByCode', ['requestContent'], request);
+	}
+
 	getAttributeObject (request: DTOValue) {
 		return this.transport('dashboards', 'getAttributeObject', ['requestContent'], request);
 	}
