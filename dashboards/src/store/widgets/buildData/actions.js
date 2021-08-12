@@ -3,9 +3,9 @@ import type {AnyWidget, AxisWidget, ComboWidget, TableWidget, Widget} from 'stor
 import api from 'api';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
 import {BUILD_DATA_EVENTS} from './constants';
-import {createContextName, exportSheet} from 'utils/export';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
 import {editWidgetChunkData} from 'store/widgets/data/actions';
+import {exportSheet, getSnapshotName} from 'utils/export';
 import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
 import {LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -79,8 +79,7 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 const exportTableToXLSX = (widget: TableWidget, rowCount: number = 1e4): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const state = getState();
 	const data = await getDataForTableDiagram(state, widget, 1, rowCount);
-	const contextName = await createContextName();
-	const name = `${widget.name}_${contextName}`;
+	const name = getSnapshotName(widget.name);
 
 	return exportSheet(name, removeCodesFromTableData(data));
 };

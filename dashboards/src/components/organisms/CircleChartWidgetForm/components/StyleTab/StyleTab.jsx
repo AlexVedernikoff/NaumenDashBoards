@@ -1,4 +1,5 @@
 // @flow
+import BreakdownFormat from 'WidgetFormPanel/components/BreakdownFormat';
 import ColorsBox from 'containers/ColorsBox';
 import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -34,16 +35,17 @@ export class StyleTab extends Component<Props> {
 				widget={widget}
 			/>
 		);
-	};
+	};;
 
 	render () {
 		const {onChange, values, widget} = this.props;
-		const {dataLabels, header, legend, sorting} = values;
+		const {breakdownFormat, data, dataLabels, header, legend, sorting} = values;
 
 		return (
 			<div className={styles.container}>
 				<HeaderBox name={DIAGRAM_FIELDS.header} onChange={onChange} value={header} />
 				<LegendBox name={DIAGRAM_FIELDS.legend} onChange={onChange} value={legend} />
+				<BreakdownFormat breakdown={breakdownFormat} data={data} onChange={onChange} />
 				<SortingBox
 					name={DIAGRAM_FIELDS.sorting}
 					onChange={onChange}
