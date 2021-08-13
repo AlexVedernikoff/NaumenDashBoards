@@ -399,6 +399,15 @@ enum FontStyle
     ITALIC,
     UNDERLINE
 }
+/**
+ * Тип дашборда
+ */
+enum DashboardType
+{
+    BASE,
+    USER,
+    VIEW
+}
 //endregion
 
 @InjectApi
@@ -1798,6 +1807,16 @@ class DashboardSettingsClass
     String dashboardKey
 
     Collection<CustomChartSettingsData> customColorsSettings = []
+
+    /**
+     * Уникальный идентификатор экземпляра дашборда
+     */
+    String dashboardUUID = ''
+
+    /**
+     * Тип дашборда (базово - это обычный дашборд с возможностью редактирования)
+     */
+    DashboardType type = DashboardType.BASE
 
     @JsonCreator
     static DashboardSettingsClass create(String json) {

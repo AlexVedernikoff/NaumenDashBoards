@@ -32,6 +32,14 @@ interface Dashboards
     String getDataSources()
 
     /**
+     * Отдает список из источника для дашборда
+     * @param dashboardUUID - уникальный идентификатор дашборда
+     * @param user - текущий пользователь системы
+     * @return json список из одного источника данных с дескриптором
+     */
+    String getDataSourcesForUser(String dashboardUUID, IUUIDIdentifiable user)
+
+    /**
      * Отдает список атрибутов для источника данных
      * @param requestContent запрос с кодом метакласса и типами атрибутов
      * @return json список атрибутов {заголовок, код, тип атрибута}
@@ -166,6 +174,12 @@ class DashboardsImpl extends BaseController implements Dashboards
     }
 
     @Override
+    String getDataSourcesForUser(String dashboardUUID, IUUIDIdentifiable user)
+    {
+        return toJson(service.getDataSourcesForUser(dashboardUUID, user))
+    }
+
+    @Override
     @Deprecated
     String getAttributesDataSources(requestContent)
     {
@@ -282,6 +296,28 @@ class DashboardsService
         return children.collectMany {
             mappingDataSource(it, false)
         }
+    }
+
+    /**
+     * Отдает список из источника для дашборда
+     * @param dashboardUUID - уникальный идентификатор дашборда
+     * @param user - текущий пользователь системы
+     * @return json список из одного источника данных с дескриптором
+     */
+    Collection<DataSourceDescriptor> getDataSourcesForUser(String dashboardUUID, IUUIDIdentifiable user)
+    {
+        def dashboard = api.utils.get(dashboardUUID)
+        def source = dashboard.dataSourceDash
+        def userUUID = user?.UUID ?: dashboard?.userReports?.UUID
+        String descriptor = api.listdata.createListDescriptor(source.typeCode, source.code, userUUID)
+        def totalSource = new DataSourceDescriptor(
+            source.typeCode,
+            source.title,
+            [],
+            false,
+            toJson(descriptor)
+        )
+        return [totalSource]
     }
 
     /**
@@ -1266,7 +1302,6 @@ class DashboardsService
 /**
  * Модель для источника данных
  */
-@Immutable
 class DataSource
 {
     /**
@@ -1285,5 +1320,15 @@ class DataSource
      * Наличие динамических атрибутов
      */
     boolean hasDynamic
+}
 
+/**
+ *  Модель для источника данных с дескриптором
+ */
+class DataSourceDescriptor extends DataSource
+{
+    /**
+     * Дескриптор
+     */
+    String descriptor
 }

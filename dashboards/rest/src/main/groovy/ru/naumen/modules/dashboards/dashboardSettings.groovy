@@ -406,6 +406,8 @@ class DashboardSettingsService
         String contentCode = requestContent.contentCode
         Boolean isPersonal = requestContent.isPersonal
         Boolean isMobile = requestContent.isMobile
+        Boolean isForUser = requestContent.isForUser
+
         if (isPersonal && !user?.login)
         {
             def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
@@ -413,8 +415,8 @@ class DashboardSettingsService
         }
         Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode)
 
-        def defaultDashboard = getSettingByLogin() ?: new DashboardSettingsClass()
-        def personalDashboard = getSettingByLogin(user?.login as String)
+        def defaultDashboard = getSettingByLogin(null, isForUser ? subjectUUID : null) ?: new DashboardSettingsClass()
+        def personalDashboard = getSettingByLogin(user?.login as String, isForUser ? subjectUUID : null)
         def result
         Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
         if (isPersonal)
@@ -429,7 +431,7 @@ class DashboardSettingsService
                 } ?: []
 
                 personalDashboard.layouts = isMobile ? null : personalDashboard?.layouts
-                personalDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+                personalDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
                 return personalDashboard
             }
             else
@@ -442,7 +444,7 @@ class DashboardSettingsService
                 } ?: []
 
                 defaultDashboard?.layouts = isMobile ? null : defaultDashboard?.layouts
-                defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+                defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
                 return defaultDashboard
             }
         }
@@ -456,7 +458,7 @@ class DashboardSettingsService
             } ?: []
 
             defaultDashboard?.layouts = isMobile ? null : defaultDashboard?.layouts
-            defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode)
+            defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             return defaultDashboard
         }
     }
@@ -1964,12 +1966,13 @@ class DashboardSettingsService
      * Получение настроек дашборда
      * @param classFqn    - код типа куда выведено встроенное приложение
      * @param contentCode - код контента встроенного приложения
+     * @param dashboardUUID - уникальный идентификатор экземпляра дашборда
      * @param login       - логин текущего пользователя
      * @return настройки дашборда
      */
-    private DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, String login = null)
+    private DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, String login = null, String dashboardUUID = '', )
     {
-        return getDashboardSetting(generateDashboardKey(classFqn, contentCode, login))
+        return getDashboardSetting(generateDashboardKey(classFqn, contentCode, login, dashboardUUID))
     }
 
     /**
@@ -1979,11 +1982,12 @@ class DashboardSettingsService
      * @param login логин пользователя или пустое значение если сохранение по умолчанию
      * @return сгенированный ключ для дашборда
      */
-    private String generateDashboardKey(String classFqn, String contentCode, String login = null)
+    private String generateDashboardKey(String classFqn, String contentCode, String login = null, String dashboardUUID = '')
     {
         String type = api.utils.get(classFqn)?.metaClass?.toString()
         String loginKeyPart = login ? "_${login}" : ''
-        return "${type}_${contentCode}${loginKeyPart}"
+        String dashboardKeyPart = dashboardUUID ? "_${dashboardUUID}" : ''
+        return "${type}_${contentCode}${loginKeyPart}${dashboardKeyPart}"
     }
 
     /**
@@ -2001,6 +2005,10 @@ class DashboardSettingsService
             dashboard.widgets = dashboard.widgets.findResults { w ->
                 def widget = DashboardUtils.convertWidgetToNewFormat(w)
                 return widget?.type == DiagramType.TEXT ? widget : updateWidgetCustomGroup(widget, dashboard)
+            }
+            if(dashboard.dashboardUUID)
+            {
+                dashboard.dashoardType = dashboardType.USER
             }
         }
         return dashboard
