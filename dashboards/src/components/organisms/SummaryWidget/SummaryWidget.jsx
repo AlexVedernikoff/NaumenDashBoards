@@ -1,12 +1,33 @@
 // @flow
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
-import {getMainDataSet, getMainDataSetIndex} from 'store/widgets/data/helpers';
-import {hasMSInterval, parseMSInterval} from 'store/widgets/helpers';
-import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import type {DivRef} from 'components/types';
+import {getMainDataSetIndex} from 'store/widgets/data/helpers';
+import type {Props, State} from './types';
+import React, {createRef, PureComponent} from 'react';
 import Summary from 'components/molecules/Summary';
+import {summaryMixin} from 'utils/chart/mixins';
 
-export class SummaryWidget extends PureComponent<Props> {
+export class SummaryWidget extends PureComponent<Props, State> {
+	state = {
+		options: null
+	};
+
+	containerRef: DivRef = createRef();
+
+	componentDidMount () {
+		this.updateOptions();
+	}
+
+	componentDidUpdate (prevProps: Props) {
+		const {widget} = this.props;
+		const {data, indicator} = widget;
+		const {widget: {data: prevData, indicator: prevIndicator}} = prevProps;
+
+		if (indicator.format !== prevIndicator.format || data !== prevData) {
+			this.updateOptions();
+		}
+	}
+
 	handleClickValue = () => {
 		const {onDrillDown, widget} = this.props;
 		const mixin = createDrillDownMixin(widget);
@@ -21,12 +42,26 @@ export class SummaryWidget extends PureComponent<Props> {
 		}
 	};
 
+	updateOptions = () => {
+		const {widget} = this.props;
+		const {current} = this.containerRef;
+
+		if (current) {
+			this.setState({
+				options: summaryMixin(widget, current)
+			});
+		}
+	};
+
 	render () {
 		const {data, widget} = this.props;
 		const {fontColor, fontFamily, fontSize, fontStyle} = widget.indicator;
+		const {options} = this.state;
 		const {total} = data;
-		const {aggregation, attribute} = getMainDataSet(widget.data).indicators[0];
-		const value = hasMSInterval(attribute, aggregation) ? parseMSInterval(total) : total;
+		const value = {
+			...options,
+			value: total
+		};
 
 		return (
 			<Summary
@@ -34,8 +69,9 @@ export class SummaryWidget extends PureComponent<Props> {
 				fontFamily={fontFamily}
 				fontSize={fontSize}
 				fontStyle={fontStyle}
+				forwardedRef={this.containerRef}
 				onClickValue={this.handleClickValue}
-				value={value}
+				options={value}
 			/>
 		);
 	}

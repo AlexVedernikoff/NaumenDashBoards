@@ -1,5 +1,6 @@
 // @flow
 import type {
+	AxisSettings,
 	Borders,
 	ComputedAttr,
 	DisplayMode,
@@ -26,6 +27,7 @@ export type Values = $Exact<{
 	indicator: SpeedometerIndicatorSettings,
 	name: string,
 	navigation: NavigationSettings,
+	parameter: AxisSettings,
 	ranges: Ranges,
 	templateName: string
 }>;

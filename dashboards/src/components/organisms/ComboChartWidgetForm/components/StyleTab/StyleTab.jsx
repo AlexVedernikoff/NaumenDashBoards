@@ -4,12 +4,14 @@ import ColorsBox from 'WidgetFormPanel/components/ColorsBox';
 import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FormField from 'components/molecules/FormField';
+import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'WidgetFormPanel/helpers';
 import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import IndicatorSettingsBox from 'components/organisms/ComboChartWidgetForm/components/IndicatorSettingsBox';
 import LegendBox from 'WidgetFormPanel/components/LegendBox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {OnChangeEvent} from 'components/types';
+import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props, XAxisNameContext} from './types';
 import React, {Component, createContext} from 'react';
 import SortingBox from 'components/organisms/ComboChartWidgetForm/components/SortingBox';
@@ -38,6 +40,14 @@ export class StyleTab extends Component<Props> {
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
+	handleChangeFormat = (format) => {
+		const {onChange, values} = this.props;
+		const {parameter} = values;
+		const newValue = {...parameter, format};
+
+		onChange(DIAGRAM_FIELDS.parameter, newValue);
+	};
+
 	renderAxisSettingsBox = () => {
 		const {values} = this.props;
 		const {data, parameter} = values;
@@ -50,12 +60,37 @@ export class StyleTab extends Component<Props> {
 				<AxisSettingsBox
 					name={DIAGRAM_FIELDS.parameter}
 					onChange={this.handleChange}
+					renderAxisFormat={this.renderParameterFormat}
 					renderNameField={this.renderXAxisNameField}
 					title="Параметр"
 					value={parameter}
 				/>
 			</XAXISNAME_CONTEXT.Provider>
 		);
+	};
+
+	renderParameterFormat = () => {
+		const {data, parameter} = this.props.values;
+		const {parameters} = getMainDataSet(data);
+
+		if (parameters && parameters.length > 0) {
+			const {attribute, group} = parameters[0];
+
+			if (attribute) {
+				const {format = getDefaultFormatForAttribute(attribute, group)} = parameter;
+				const label = attribute.title;
+
+				return (
+					<ParameterFormatPanel
+						label={label}
+						onChange={this.handleChangeFormat}
+						value={format}
+					/>
+				);
+			}
+		}
+
+		return null;
 	};
 
 	renderXAxisNameField = () => (
@@ -96,7 +131,7 @@ export class StyleTab extends Component<Props> {
 					options={getSortingOptions(!hasCustomGroup)}
 					value={sorting}
 				/>
-				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={this.handleChange} value={dataLabels} widget={widget} />
+				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={this.handleChange} showForamt={false} value={dataLabels} widget={widget} />
 				<ColorsBox
 					disabledCustomSettings={true}
 					name={DIAGRAM_FIELDS.colorsSettings}

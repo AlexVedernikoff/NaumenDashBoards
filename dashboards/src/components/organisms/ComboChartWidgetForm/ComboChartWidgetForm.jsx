@@ -38,13 +38,13 @@ export class ComboChartWidgetForm extends PureComponent<Props> {
 		const {onChange, values} = this.props;
 
 		return (
-				<DiagramWidgetForm
-					components={this.getComponents()}
-					onChange={onChange}
-					onSubmit={this.handleSubmit}
-					schema={schema}
-					values={values}
-				/>
+			<DiagramWidgetForm
+				components={this.getComponents()}
+				onChange={onChange}
+				onSubmit={this.handleSubmit}
+				schema={schema}
+				values={values}
+			/>
 		);
 	}
 }

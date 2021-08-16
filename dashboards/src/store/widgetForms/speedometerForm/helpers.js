@@ -26,7 +26,7 @@ const createSpeedometerDataSet = (dataKey: string): DataSet => ({
  * @returns {State}
  */
 const changeValues = (state: State, values: AxisChartValues | CircleChartValues | ComboChartValues | TableValues | SummaryValues): State => {
-	const {borders, indicator, ranges} = state;
+	const {borders, indicator, parameter, ranges} = state;
 	const {
 		computedAttrs,
 		data,
@@ -55,6 +55,7 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 		indicator,
 		name,
 		navigation,
+		parameter,
 		ranges,
 		templateName
 	};

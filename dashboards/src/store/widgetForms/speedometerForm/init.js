@@ -14,6 +14,7 @@ export const initialState: State = {
 	indicator: DEFAULT_SPEEDOMETER_SETTINGS.indicator,
 	name: '',
 	navigation: DEFAULT_NAVIGATION_SETTINGS,
+	parameter: DEFAULT_SPEEDOMETER_SETTINGS.axis,
 	ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges,
 	templateName: ''
 };

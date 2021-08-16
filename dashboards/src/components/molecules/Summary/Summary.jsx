@@ -13,7 +13,7 @@ export class Summary extends PureComponent<Props, State> {
 	};
 
 	getTextWidth = (fontSize: number) => {
-		const {fontFamily, fontStyle, value} = this.props;
+		const {fontFamily, fontStyle} = this.props;
 		const {BOLD, ITALIC} = FONT_STYLES;
 		const container = document.createElement('canvas');
 		const context = container.getContext('2d');
@@ -31,11 +31,17 @@ export class Summary extends PureComponent<Props, State> {
 
 		context.font = font;
 
-		return context.measureText(value.toString()).width;
+		return context.measureText(this.getValue().toString()).width;
+	};
+
+	getValue = () => {
+		const {options} = this.props;
+		const {data, value} = options;
+		return data?.formatter?.(value) ?? value;
 	};
 
 	handleResize = (width: number, height: number) => {
-		const {value} = this.props;
+		const value = this.getValue();
 
 		if (value) {
 			const charWidth = Math.round(width / value.toString().length);
@@ -50,19 +56,20 @@ export class Summary extends PureComponent<Props, State> {
 	};
 
 	renderValue = (fontSize: number) => {
-		const {onClickValue, value} = this.props;
+		const {onClickValue} = this.props;
 		const height = fontSize * 0.8;
 		const lineHeight = `${height}px`;
 
-		return <span className={styles.value} onClick={onClickValue} style={{height, lineHeight}}>{value}</span>;
+		return <span className={styles.value} onClick={onClickValue} style={{height, lineHeight}}>{this.getValue()}</span>;
 	};
 
 	renderWithResize = (className: string, style: Object) => {
+		const {forwardedRef} = this.props;
 		const {fontSize} = this.state;
 
 		return (
 			<ResizeDetector onResize={this.handleResize}>
-				<div className={className} style={{...style, fontSize}}>
+				<div className={className} ref={forwardedRef} style={{...style, fontSize}}>
 					{fontSize && this.renderValue(fontSize)}
 				</div>
 			</ResizeDetector>
@@ -70,7 +77,7 @@ export class Summary extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {color, fontFamily, fontSize, fontStyle} = this.props;
+		const {color, fontFamily, fontSize, fontStyle, forwardedRef} = this.props;
 		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 		const containerCN = cn({
 			[styles.container]: true,
@@ -93,7 +100,7 @@ export class Summary extends PureComponent<Props, State> {
 		style = {...style, fontSize: customFontSize};
 
 		return (
-			<div className={containerCN} style={style}>
+			<div className={containerCN} ref={forwardedRef} style={style}>
 				{this.renderValue(customFontSize)}
 			</div>
 		);

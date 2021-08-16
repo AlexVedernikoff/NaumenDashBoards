@@ -1,66 +1,48 @@
 // @flow
-import {
-	axisLabelFormatter,
-	checkLabelsForOverlap,
-	formatLabels,
-	getLegendOptions,
-	getMaxStackedValue,
-	getMaxValue,
-	getNiceScale,
-	getXAxisLabels,
-	getXAxisOptions,
-	valueFormatter
-} from './helpers';
+
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
-import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import type {ComboNumberFormatter, ComboValueFormatter} from './formater/types';
 import {DEFAULT_Y_AXIS_MIN} from 'utils/chart/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasPercent, hasUUIDsInLabels} from 'store/widgets/helpers';
+import {getComboFormatter} from 'utils/chart/mixins/formater';
+import {
+	getLegendOptions,
+	getMaxStackedValue,
+	getMaxValue,
+	getNiceScale,
+	getXAxisOptions
+} from './helpers';
 import type {Options} from 'utils/chart/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
-const dataLabelsFormatter = (widget: ComboWidget) => (value: number, ctx: Object) => {
-	const {seriesIndex, w} = ctx;
-	const {series} = w.config;
-
-	const buildDataSet = widget.data.find(dataSet => dataSet.dataKey === series[seriesIndex].dataKey);
-	let formattedValue = value;
-
-	if (buildDataSet) {
-		const {indicators, showEmptyData} = buildDataSet;
-		const indicator = indicators[0];
-		const {aggregation, attribute} = indicator;
-		const usesMSInterval = hasMSInterval(attribute, aggregation);
-		const usesPercent = aggregation === DEFAULT_AGGREGATION.PERCENT;
-
-		formattedValue = valueFormatter(usesMSInterval, usesPercent, showEmptyData)(value);
-	}
-
-	return formattedValue;
-};
-
 /**
  * Устанавливает настройки оси Y
+ *
  * @param {Options} options - опции графика
  * @param {ComboWidget} widget - виджет
  * @param {DiagramBuildData} chart - данные конкретного графика
  * @param {ComboData} dataSet - набор данных виджета, относительно которого настраивается ось
  * @param {number} index - индекс набора данных виджета
  * @param {boolean} forceHide - указывает на необходимость скрывать ось.
+ * @param {ComboNumberFormatter} indicatorFormatter - форматер для значений на оси
+ * @param {ComboValueFormatter} indicatorTooltipFormatter - форматер значений индикаторов для tooltips
  * @returns {Options}
  */
-const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData, dataSet: ComboData, index: number, forceHide: boolean): Options => {
+const setYAxis = (
+	options: Options,
+	widget: ComboWidget,
+	chart: DiagramBuildData,
+	dataSet: ComboData,
+	index: number,
+	forceHide: boolean,
+	indicatorFormatter: ComboNumberFormatter | ComboValueFormatter,
+	indicatorTooltipFormatter: ComboNumberFormatter | ComboValueFormatter
+): Options => {
 	const {colorsSettings, indicator} = widget;
 	const {series} = chart;
-	const {breakdown, dataKey, indicators, type, yAxisName: name} = dataSet;
-	const {aggregation, attribute} = indicators[0];
-	const usesMSInterval = hasMSInterval(attribute, aggregation);
-	const usesPercent = hasPercent(attribute, aggregation);
-	const firstBreakdown = (Array.isArray(breakdown) && breakdown[0]) || {attribute: undefined, group: undefined};
-	const {attribute: breakdownAttribute, group} = firstBreakdown;
-	const usesUUIDs = hasUUIDsInLabels(breakdownAttribute, group);
+	const {dataKey, type, yAxisName: name} = dataSet;
 	const color = colorsSettings.auto.colors[index];
 	const stacked = type === WIDGET_TYPES.COLUMN_STACKED;
 	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
@@ -89,6 +71,9 @@ const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData
 		max = getNiceScale(maxValue) * increasingFactor;
 	}
 
+	const ctx = {seriesIndex: index, w: {config: {series}}};
+	const bindIndicatorFormatter = (val) => indicatorFormatter(val, ctx);
+
 	const yaxis = {
 		axisBorder: {
 			color,
@@ -99,7 +84,7 @@ const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData
 		},
 		forceNiceScale: true,
 		labels: {
-			formatter: valueFormatter(usesMSInterval, usesPercent),
+			formatter: bindIndicatorFormatter,
 			maxWidth: 140,
 			style: {
 				colors: color
@@ -119,9 +104,9 @@ const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData
 	};
 
 	const yTooltip = {
-		formatter: valueFormatter(usesMSInterval, usesPercent),
+		formatter: indicatorFormatter,
 		title: {
-			formatter: axisLabelFormatter(usesUUIDs)
+			formatter: indicatorTooltipFormatter
 		}
 	};
 
@@ -141,12 +126,21 @@ const setYAxis = (options: Options, widget: ComboWidget, chart: DiagramBuildData
 
 /**
  * Устанавливает настройки осей Y относительно каждого объекта данных series
+ *
  * @param {Options} options - опции графика
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
+ * @param {ComboNumberFormatter} indicatorFormatter - форматер для значений на оси
+ * @param {ComboValueFormatter} indicatorTooltipFormatter - форматер значений индикаторов для tooltips
  * @returns {Options}
  */
-const setYAxises = (options: Options, widget: ComboWidget, chart: DiagramBuildData): Options => {
+const setYAxises = (
+	options: Options,
+	widget: ComboWidget,
+	chart: DiagramBuildData,
+	indicatorFormatter: ComboNumberFormatter | ComboValueFormatter,
+	indicatorTooltipFormatter: ComboNumberFormatter | ComboValueFormatter
+): Options => {
 	const usedDataKeys = [];
 	let extendedOptions = options;
 
@@ -169,7 +163,7 @@ const setYAxises = (options: Options, widget: ComboWidget, chart: DiagramBuildDa
 				usedDataKeys.push(dataKey);
 			}
 
-			extendedOptions = setYAxis(extendedOptions, widget, chart, dataSet, i, forceHide);
+			extendedOptions = setYAxis(extendedOptions, widget, chart, dataSet, i, forceHide, indicatorFormatter, indicatorTooltipFormatter);
 		}
 	});
 
@@ -179,79 +173,60 @@ const setYAxises = (options: Options, widget: ComboWidget, chart: DiagramBuildDa
 /**
  * Примесь combo-графиков
  * @param {ComboWidget} widget - данные виджета
- * @param {DiagramBuildData} chart - данные конкретного графика
+ * @param {DiagramBuildData} data - данные конкретного графика
  * @param {HTMLDivElement} container - контейнер, где размещен график
  * @returns {Options}
  */
-const comboMixin = (widget: ComboWidget, chart: DiagramBuildData, container: HTMLDivElement): Options => {
+export const comboMixin = (widget: ComboWidget, data: DiagramBuildData, container: HTMLDivElement): Options => {
 	const {legend, parameter} = widget;
-	const {labels, series} = chart;
-	const strokeWidth = series.find(dataSet => dataSet.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
+	const {labels, series} = data;
 	const buildDataSet = getBuildSet(widget);
-	const {xAxisName} = buildDataSet;
-	const xAxisProps = {
-		...parameter,
-		name: xAxisName
-	};
-	let parameterUsesUUIDs = false;
-	let breakdownUsesUUIDs = false;
 
-	widget.data.forEach(dataSet => {
-		if (!dataSet.sourceForCompute) {
-			const {breakdown, parameters} = dataSet;
-			const {attribute: parameterAttribute, group} = parameters[0];
+	if (buildDataSet) {
+		const formatter = getComboFormatter(widget, labels, container);
+		const {hasOverlappedLabel} = formatter.options;
+		const strokeWidth = series.find(dataSet => dataSet.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
+		const {xAxisName} = buildDataSet;
+		const xAxisProps = {...parameter, name: xAxisName};
 
-			parameterUsesUUIDs = !parameterUsesUUIDs || hasUUIDsInLabels(parameterAttribute, group);
-
-			if (breakdown) {
-				const breakdownSanitized = (!Array.isArray(breakdown) && breakdown) || {attribute: undefined, group: undefined};
-				const {attribute: breakdownAttribute = undefined, group = undefined} = breakdownSanitized;
-
-				breakdownUsesUUIDs = !breakdownUsesUUIDs || hasUUIDsInLabels(breakdownAttribute, group);
-			}
-		}
-	});
-
-	// TODO: SMRMEXT-12049 - убрать при реализации
-	const labelsFormated = formatLabels(widget, labels);
-	const hasOverlappedLabel = checkLabelsForOverlap(labelsFormated, container, legend);
-	const xaxis = {
-		labels: {
-			formatter: axisLabelFormatter(parameterUsesUUIDs)
-		},
-		tickPlacement: 'between'
-	};
-
-	let options = {
-		chart: {
-			stacked: false
-		},
-		dataLabels: {
-			formatter: dataLabelsFormatter(widget)
-		},
-		labels: getXAxisLabels(labelsFormated, !hasOverlappedLabel),
-		legend: getLegendOptions(legend, container),
-		markers: {
-			hover: {
-				size: 8
+		const xaxis = {
+			labels: {
+				formatter: formatter.parameter.overlapped
 			},
-			size: 5
-		},
-		stroke: {
-			width: strokeWidth
-		},
-		tooltip: {
-			intersect: true,
-			shared: false,
-			y: []
-		},
-		xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel)),
-		yaxis: []
-	};
+			tickPlacement: 'between'
+		};
 
-	options = setYAxises(options, widget, chart);
+		let options = {
+			chart: {
+				stacked: false
+			},
+			dataLabels: {
+				formatter: formatter.dataLabel
+			},
+			labels: labels,
+			legend: getLegendOptions(legend, container, formatter.legend.cropped),
+			markers: {
+				hover: {
+					size: 8
+				},
+				size: 5
+			},
+			stroke: {
+				width: strokeWidth
+			},
+			tooltip: {
+				intersect: true,
+				shared: false,
+				y: []
+			},
+			xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel)),
+			yaxis: []
+		};
 
-	return options;
+		options = setYAxises(options, widget, data, formatter.indicator, formatter.legend.full);
+
+		return options;
+	}
 };
 
 export default comboMixin;

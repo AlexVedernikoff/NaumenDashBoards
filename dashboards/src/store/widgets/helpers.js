@@ -116,7 +116,7 @@ const parseMSInterval = (ms: number) => {
  * @returns {boolean}
  */
 const hasBreakdown = (widget: Object): boolean => widget.id !== NewWidget.id && !!widget.data
-		.find(({breakdown, sourceForCompute}) => !sourceForCompute && Array.isArray(breakdown));
+	.find(({breakdown, sourceForCompute}) => !sourceForCompute && Array.isArray(breakdown));
 
 /**
  * Проверяет является ли переданный тип агрегации допустимым для выборки топ значений
