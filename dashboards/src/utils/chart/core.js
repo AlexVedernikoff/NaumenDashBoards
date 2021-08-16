@@ -6,6 +6,7 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
+import isMobile from 'ismobilejs';
 import type {Options, Series} from './types';
 import {setColors} from './helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -53,7 +54,7 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
 		}
 	};
 
-	if (showShadow) {
+	if (!isMobile().apple.device && showShadow) {
 		options.dropShadow = {
 			blur: 0.5,
 			enabled: true,
