@@ -317,20 +317,22 @@ const hasDrillDownWidget = (widget: Chart, buildData: DiagramBuildData, seriesIn
 const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) => (event: MouseEvent, chartContext: Object, config: Object) => {
 	event.stopPropagation();
 
-	if (!isMobile().any && hasDrillDownWidget(widget, buildData, config.seriesIndex)) {
-		const [index, mixin] = addFilters(widget, {
-			buildData,
-			config,
-			mixin: createDrillDownMixin(widget)
-		});
+	if (!isMobile().any) {
+		if (hasDrillDownWidget(widget, buildData, config.seriesIndex)) {
+			const [index, mixin] = addFilters(widget, {
+				buildData,
+				config,
+				mixin: createDrillDownMixin(widget)
+			});
 
-		if (index !== -1) {
-			store.dispatch(drillDown(widget, index, mixin));
+			if (index !== -1) {
+				store.dispatch(drillDown(widget, index, mixin));
+			}
+		} else {
+			const {id} = widget;
+
+			store.dispatch(setWarningMessage({id, message: 'Для данного виджета детализация данных не доступна'}));
 		}
-	} else {
-		const {id} = widget;
-
-		store.dispatch(setWarningMessage({id, message: 'Для данного виджета детализация данных не доступна'}));
 	}
 };
 
