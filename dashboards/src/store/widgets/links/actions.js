@@ -45,16 +45,20 @@ const getRelativeLink = (link: string): string => link.replace(/^(.+?)\?/, '/sd/
  * @param {DrillDownMixin} mixin - примесь данных (создается при выборе конкретного элемента графика)
  * @returns {Function}
  */
-const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	let postData = createPostData(widget, index);
+const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		const {isMobileDevice} = getState().dashboard.settings;
 
-	if (mixin && typeof mixin === 'object') {
-		postData = {...postData, ...mixin};
-	}
+		if (!isMobileDevice) {
+			let postData = createPostData(widget, index);
 
-	dispatch(openObjectsList(widget, postData));
-};
+			if (mixin && typeof mixin === 'object') {
+				postData = {...postData, ...mixin};
+			}
 
+			dispatch(openObjectsList(widget, postData));
+		}
+	};
 /**
  * Открывает список объектов
  * @param {Widget} widget - данные виджета
