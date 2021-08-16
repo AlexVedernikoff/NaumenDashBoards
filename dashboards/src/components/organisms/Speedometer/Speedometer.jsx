@@ -9,9 +9,16 @@ import styles from './styles.less';
 export class Speedometer extends PureComponent<Props, State> {
 	static defaultProps = {
 		color: '#c1bdbd',
-		max: 100,
-		min: 0,
-		ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges
+		options: {
+			borders: {
+				max: 100,
+				min: 0
+			},
+			data: {
+				formatter: (value) => value
+			},
+			ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges
+		}
 	};
 
 	components = {
@@ -49,7 +56,8 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	getAngleByValue = (value: number) => {
-		const {max, min} = this.props;
+		const {options} = this.props;
+		const {borders: {max, min}} = options;
 		const angle = Math.round(180 / (max - min) * (Number(value) - min)) - 90;
 
 		return Math.min(Math.max(START_DEGREE, angle), END_DEGREE);
@@ -112,7 +120,7 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	renderNeedle = () => {
-		const {color, value} = this.props;
+		const {color, options: {value}} = this.props;
 		const {height, radius, width} = this.state;
 		const needleWidth = width / 2 - radius / 2 + 100;
 		const x = width / 2 - (needleWidth * 0.5);
@@ -142,7 +150,8 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	renderRange = (range: Object) => {
-		const {max, min, ranges} = this.props;
+		const {options} = this.props;
+		const {borders: {max, min}, ranges} = options;
 		const {type} = ranges;
 		let {color, from, to} = range;
 
@@ -164,27 +173,32 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	renderRanges = (): Array<React$Node> | null => {
-		const {data, use} = this.props.ranges;
+		const {options} = this.props;
+		const {ranges: {data, use} = DEFAULT_SPEEDOMETER_SETTINGS.ranges} = options;
 
 		return use ? data.map(this.renderRange) : null;
 	};
 
 	renderSpeedometer = () => {
-		const {max, min} = this.props;
-		const {arcX, height, radius, width} = this.state;
+		const {options} = this.props;
 
-		if (height > 0 && width > 0) {
-			return (
-				<svg className="speedometer" height={height} width={width} xmlns="http://www.w3.org/2000/svg">
-					{this.renderArc(START_DEGREE, END_DEGREE)}
-					{this.renderRanges()}
-					{this.renderBorderValue(arcX - radius, min)}
-					{this.renderBorderValue(arcX + radius, max)}
-					{this.renderTitle()}
-					{this.renderNeedle()}
-					{this.renderValue()}
-				</svg>
-			);
+		if (options) {
+			const {borders: {max, min}} = options;
+			const {arcX, height, radius, width} = this.state;
+
+			if (height > 0 && width > 0) {
+				return (
+					<svg className="speedometer" height={height} width={width} xmlns="http://www.w3.org/2000/svg">
+						{this.renderArc(START_DEGREE, END_DEGREE)}
+						{this.renderRanges()}
+						{this.renderBorderValue(arcX - radius, min)}
+						{this.renderBorderValue(arcX + radius, max)}
+						{this.renderTitle()}
+						{this.renderNeedle()}
+						{this.renderValue()}
+					</svg>
+				);
+			}
 		}
 
 		return null;
@@ -195,7 +209,7 @@ export class Speedometer extends PureComponent<Props, State> {
 	}
 
 	renderTitle = () => {
-		const {title} = this.props;
+		const {options: {title}} = this.props;
 		const {arcX, arcY, fontSizeScale, radius, width} = this.state;
 		const fontSize = BASE_FONT_SIZES.TITLE_FONT_SIZE * fontSizeScale;
 		const y = arcY + fontSize * 3;
@@ -222,11 +236,13 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	renderValue = () => {
-		const {value} = this.props;
+		const {options: {value, data = {}}} = this.props;
+		const {formatter = (val) => val} = data;
 		const {arcX, arcY, fontSizeScale, radius} = this.state;
 		const fontSize = BASE_FONT_SIZES.VALUE_FONT_SIZE * fontSizeScale;
 		const y = arcY - radius * 0.6;
 		const {TextValue} = this.getComponents();
+		const formatValue = formatter(value);
 
 		return (
 			<TextValue
@@ -236,7 +252,7 @@ export class Speedometer extends PureComponent<Props, State> {
 				x={arcX}
 				y={y}
 			>
-				{value}
+				{formatValue}
 			</TextValue>
 		);
 	};
@@ -244,7 +260,7 @@ export class Speedometer extends PureComponent<Props, State> {
 	render () {
 		return (
 			<ResizeDetector onResize={this.handleResize}>
-				<div className={styles.container}>
+				<div className={styles.container} ref={this.props.forwardedRef}>
 					{this.renderSpeedometer()}
 				</div>
 			</ResizeDetector>

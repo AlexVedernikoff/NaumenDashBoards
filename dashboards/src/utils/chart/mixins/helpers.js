@@ -227,7 +227,7 @@ const getLegendOptions = (settings: Legend, container: HTMLDivElement, formatter
 
 	return {
 		...options,
-		formatter: formatter,
+		formatter,
 		height,
 		width: getLegendWidth(container, position)
 	};

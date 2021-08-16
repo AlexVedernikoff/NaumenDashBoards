@@ -1,17 +1,6 @@
 // @flow
-import type {RangesType} from 'store/widgets/data/types';
-
-type Range = {
-	color: string,
-	from: string | number,
-	to: string | number
-};
-
-type Ranges = {
-	data: Array<Range>,
-	type: RangesType,
-	use: boolean
-};
+import type {DivRef} from 'components/types';
+import type {Options} from 'utils/chart/types';
 
 export type TextValueProps = {
 	alignmentBaseline: string,
@@ -29,11 +18,8 @@ type Components = {
 export type Props = {
 	color: string,
 	components?: Components,
-	max: number,
-	min: number,
-	ranges: Ranges,
-	title: string,
-	value: number
+	forwardedRef: DivRef,
+	options: Options
 };
 
 export type State = {

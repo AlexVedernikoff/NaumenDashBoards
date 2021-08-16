@@ -2,6 +2,10 @@
 import {FONT_FAMILIES, FONT_STYLES, RANGES_TYPES} from 'store/widgets/data/constants';
 
 const DEFAULT_SPEEDOMETER_SETTINGS: Object = {
+	axis: {
+		show: true,
+		showName: false
+	},
 	borders: {
 		max: 100,
 		min: 0

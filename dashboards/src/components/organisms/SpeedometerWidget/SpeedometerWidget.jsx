@@ -1,31 +1,56 @@
 // @flow
 import cn from 'classnames';
+import type {DivRef} from 'components/types';
 import {FONT_SIZE_AUTO_OPTION, FONT_STYLES} from 'store/widgets/data/constants';
 import {LoadingDiagramWidget} from 'components/organisms/DiagramWidget';
-import type {Props, SpeedometerData} from './types';
-import React, {PureComponent} from 'react';
+import type {Props, SpeedometerData, State} from './types';
+import React, {createRef, PureComponent} from 'react';
 import settingsStyles from 'styles/settings.less';
 import Speedometer from 'components/organisms/Speedometer';
+import {speedometerMixin} from 'utils/chart/mixins';
 import type {TextValueProps} from 'components/organisms/Speedometer/types';
 
-export class SpeedometerWidget extends PureComponent<Props> {
-	renderSpeedometer = (data: SpeedometerData) => {
+export class SpeedometerWidget extends PureComponent<Props, State> {
+	state = {
+		options: null
+	};
+	containerRef: DivRef = createRef();
+
+	componentDidMount () {
+		this.updateOptions();
+	}
+
+	componentDidUpdate (prevProps: Props) {
 		const {widget} = this.props;
-		const {borders, ranges} = widget;
-		const {max, min} = borders;
+
+		if (widget !== prevProps.widget) {
+			this.updateOptions();
+		}
+	}
+
+	updateOptions = () => {
+		const {widget} = this.props;
+		const {current} = this.containerRef;
+
+		if (current) {
+			this.setState({
+				options: speedometerMixin(widget, current)
+			});
+		}
+	};
+
+	renderSpeedometer = (data: SpeedometerData) => {
+		const {options} = this.state;
 		const {title, total} = data;
 		const components = {
 			TextValue: this.renderTextValue
 		};
+		const value = {...options, title, value: total};
 
 		return (
 			<Speedometer
 				components={components}
-				max={Number(max)}
-				min={Number(min)}
-				ranges={ranges}
-				title={title}
-				value={total}
+				options={value}
 			/>
 		);
 	};
@@ -64,7 +89,7 @@ export class SpeedometerWidget extends PureComponent<Props> {
 		const {widget} = this.props;
 
 		return (
-			<LoadingDiagramWidget widget={widget}>
+			<LoadingDiagramWidget forwardedRef={this.containerRef} widget={widget}>
 				{data => this.renderSpeedometer(data)}
 			</LoadingDiagramWidget>
 		);

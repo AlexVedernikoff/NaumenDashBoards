@@ -1,6 +1,7 @@
 // @flow
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDown} from 'store/widgets/links/types';
+import type {Options} from 'utils/chart/types';
 import type {SummaryIndicator, SummaryWidget} from 'store/widgets/data/types';
 
 export type Props = {
@@ -11,4 +12,8 @@ export type Props = {
 
 export type DefaultSummarySettings = {
 	indicator: SummaryIndicator
+};
+
+export type State = {
+	options: Options
 };

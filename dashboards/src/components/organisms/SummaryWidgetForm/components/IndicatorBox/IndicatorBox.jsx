@@ -1,12 +1,14 @@
 // @flow
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import ColorInput from 'components/molecules/ColorInput';
+import {DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
 import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FontStyleControl from 'WidgetFormPanel/components/FontStyleControl';
 import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
+import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 
@@ -26,11 +28,13 @@ export class IndicatorBox extends PureComponent<Props> {
 
 	handleChange = ({name, value}: OnChangeEvent<string>) => this.change(name, value);
 
+	handleChangeParameterFormat = (value) => this.change(DIAGRAM_FIELDS.format, value);
+
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
 	render () {
 		const {useAutoFontSize, value} = this.props;
-		const {fontColor, fontFamily, fontSize, fontStyle} = value;
+		const {fontColor, fontFamily, fontSize, fontStyle, format = DEFAULT_NUMBER_AXIS_FORMAT} = value;
 
 		return (
 			<CollapsableFormBox title="Показатель">
@@ -47,6 +51,7 @@ export class IndicatorBox extends PureComponent<Props> {
 					<FontStyleControl name={DIAGRAM_FIELDS.fontStyle} onChange={this.handleChange} value={fontStyle} />
 					<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleChange} portable={true} value={fontColor} />
 				</FormField>
+				<ParameterFormatPanel onChange={this.handleChangeParameterFormat} value={format} />
 			</CollapsableFormBox>
 		);
 	}
