@@ -492,12 +492,13 @@ class DashboardSettingsService
      */
     Boolean saveAutoUpdateSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
+        String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         def autoUpdate = requestContent.autoUpdate as AutoUpdate
         boolean isPersonal = requestContent.isPersonal
-        String personalDashboardKey = generateDashboardKey(classFqn, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(classFqn, contentCode)
+        Boolean isForUser = requestContent.isForUser
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
         def settings = getDashboardSetting(isPersonal ? personalDashboardKey : defaultDashboardKey)
         settings.autoUpdate = autoUpdate
         return saveJsonSettings(isPersonal ? personalDashboardKey : defaultDashboardKey,
@@ -518,6 +519,7 @@ class DashboardSettingsService
         String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
         def group = requestContent.group as Map<String, Object>
         group = mapper.convertValue(group, CustomGroup)
 
@@ -527,8 +529,8 @@ class DashboardSettingsService
             return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
 
         String keyCustomGroup = UUID.nameUUIDFromBytes(toJson(group).bytes)
         group.id = keyCustomGroup
@@ -572,6 +574,7 @@ class DashboardSettingsService
         group = mapper.convertValue(group, CustomGroup)
         String groupKey = group.id
         boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
 
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
@@ -584,8 +587,8 @@ class DashboardSettingsService
             api.utils.throwReadableException("${message}#${GROUP_SETTINGS_NULL_ERROR}")
         }
 
-        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
 
         def dashboard = isPersonal ? getDashboardSetting(personalDashboardKey) : getDashboardSetting(defaultDashboardKey)
 
@@ -624,14 +627,16 @@ class DashboardSettingsService
         String contentCode = requestContent.contentCode
         String groupKey = requestContent.groupKey
         boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
+
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
         {
             return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
 
         def dashboard = isPersonal
             ? getDashboardSetting(personalDashboardKey)
@@ -666,6 +671,8 @@ class DashboardSettingsService
         String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
+
         def colorsSettings = requestContent.colorsSettings as Map<String, Object>
         colorsSettings = mapper.convertValue(colorsSettings, CustomChartSettingsData)
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
@@ -674,8 +681,8 @@ class DashboardSettingsService
             return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
 
         Closure<Map> saveDashboard = { String dashboardKey, DashboardSettingsClass settings ->
             if (saveJsonSettings(dashboardKey, toJson(settings), DASHBOARD_NAMESPACE))
@@ -722,6 +729,7 @@ class DashboardSettingsService
         String contentCode = requestContent.contentCode
         String colorsKey = requestContent.key
         boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
 
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
@@ -729,8 +737,8 @@ class DashboardSettingsService
             return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
-        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
-        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+        String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
 
         def dashboard = isPersonal
             ? getDashboardSetting(personalDashboardKey)
@@ -893,14 +901,15 @@ class DashboardSettingsService
         widget = mapper.convertValue(widget, Widget)
         Boolean widgetTypeIsNotText = widget?.type != DiagramType.TEXT
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        boolean isPersonal = requestContent.isPersonal
         if (widgetTypeIsNotText)
         {
-            validateName(requestContent)
+            validateName(requestContent, null, isPersonal, user)
         }
 
         String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
-        boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
         Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
         def widgetWithCorrectName = widgetTypeIsNotText
             ? changeTotalWidgetName(widget, variableMap)
@@ -917,18 +926,18 @@ class DashboardSettingsService
                 api.utils.throwReadableException("${message}#${LOGIN_MUST_NOT_BE_NULL_ERROR}")
             }
             Closure createDashboardKeyFromLogin = this.&generateDashboardKey.curry(subjectUUID, contentCode)
-            dashboardKey = createDashboardKeyFromLogin(user.login as String)
-            dashboardSettings = getDashboardSetting(dashboardKey) ?: getDashboardSetting(createDashboardKeyFromLogin(null))
+            dashboardKey = createDashboardKeyFromLogin(user?.login as String, isForUser ? subjectUUID : null)
+            dashboardSettings = getDashboardSetting(dashboardKey) ?: getDashboardSetting(createDashboardKeyFromLogin(null, isForUser ? subjectUUID : null))
         }
         else
         {
             checkRightsOnDashboard(user, "create")
-            dashboardKey = generateDashboardKey(subjectUUID, contentCode)
+            dashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             dashboardSettings = getDashboardSetting(dashboardKey) ?: new DashboardSettingsClass()
         }
 
         def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets*.id, subjectUUID,
-                                                        contentCode, isPersonal ? user?.login as String : null)
+                                                        contentCode, isPersonal ? user?.login as String : null, isForUser ? subjectUUID : null)
 
         return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
             dashboardSettings.widgets += totalWidget
@@ -951,6 +960,7 @@ class DashboardSettingsService
         widget = Jackson.fromJsonString(widget, Widget)
         String widgetKey = widget.id
         Boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
         Boolean widgetTypeIsNotText = widget.type != DiagramType.TEXT
         if (widgetTypeIsNotText)
         {
@@ -962,7 +972,7 @@ class DashboardSettingsService
             ? changeTotalWidgetName(widget, variableMap)
             : changeTextInTextWidget(widget, variableMap)
         String contentCode = requestContent.contentCode
-        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
+        String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
         if (isPersonal)
         {
             checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
@@ -970,7 +980,7 @@ class DashboardSettingsService
             if (user && isPersonalWidget(widgetKey, user))
             {
                 widgetWithCorrectName = prepareWidgetSettings(widgetWithCorrectName) { widgetKey }
-                DashboardSettingsClass dashboardSettings = getSettingByLogin(user?.login as String)
+                DashboardSettingsClass dashboardSettings = getSettingByLogin(user?.login as String, isForUser ? subjectUUID : null)
                 dashboardSettings.widgets.removeIf { it?.id == widgetKey }
                 dashboardSettings.widgets += widgetWithCorrectName
                 def key = widgetWithCorrectName.id
@@ -982,11 +992,12 @@ class DashboardSettingsService
             }
             else
             {
-                DashboardSettingsClass dashboardSettings = getSettingByLogin(user?.login as String) ?: getSettingByLogin(null)
+                DashboardSettingsClass dashboardSettings = getSettingByLogin(user?.login as String, isForUser ? subjectUUID : null) ?: getSettingByLogin(null, isForUser ? subjectUUID : null)
                 def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets*.id,
                                                                 subjectUUID,
                                                                 contentCode,
                                                                 user?.login as String,
+                                                                isForUser ? subjectUUID : null,
                                                                 widgetKey
                 )
                 return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
@@ -1022,7 +1033,7 @@ class DashboardSettingsService
                 closureReplaceWidgetKey(null)
             }
             def widgetDb = setUuidInSettings(widgetWithCorrectName, widgetKey)
-            String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode)
+            String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             DashboardSettingsClass dashboardSettings = getDashboardSetting(defaultDashboardKey)
             dashboardSettings.widgets.removeIf { it.id == widgetKey }
             dashboardSettings.widgets += widgetDb
@@ -1047,10 +1058,11 @@ class DashboardSettingsService
 
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
 
         String dashboardKey = isPersonal
-            ? generateDashboardKey(subjectUUID, contentCode, user?.login as String)
-            : generateDashboardKey(subjectUUID, contentCode)
+            ? generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+            : generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
 
         DashboardSettingsClass dashboardSettings = getDashboardSetting(dashboardKey)
 
@@ -1359,10 +1371,11 @@ class DashboardSettingsService
         String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
+        Boolean isForUser = requestContent.isForUser
 
         String dashboardKey = isPersonal
-            ? generateDashboardKey(subjectUUID, contentCode, user?.login as String)
-            : generateDashboardKey(subjectUUID, contentCode)
+            ? generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+            : generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
 
         def dashboardSettings = getDashboardSetting(dashboardKey)
 
@@ -1856,10 +1869,12 @@ class DashboardSettingsService
                                      String classFqn,
                                      String contentCode,
                                      String login = null,
+                                     String dashboardUUID = null,
                                      String oldWidgetKey = null)
     {
         String type = api.utils.get(classFqn)?.metaClass?.toString()
         def loginKeyPart = login ? "_${login}" : ''
+        def dashboardKeyPart = dashboardUUID ? "_${dashboardUUID}": ''
         String uuidWidget
         while ({
             if (oldWidgetKey)
@@ -1870,7 +1885,7 @@ class DashboardSettingsService
             }
             else
             {
-                uuidWidget = "${type}_${contentCode}_${UUID.randomUUID()}${loginKeyPart}"
+                uuidWidget = "${type}_${contentCode}_${UUID.randomUUID()}${loginKeyPart}${dashboardKeyPart}"
             }
             (keys?.contains(uuidWidget))
         }()) continue
@@ -2337,12 +2352,12 @@ class DashboardSettingsService
     {
         String name = requestContent?.widget?.templateName ?: requestContent?.widget?.name
         String dashboardKey = isPersonal
-            ? generateDashboardKey(requestContent.classFqn, requestContent.contentCode, user?.login as String)
-            : generateDashboardKey(requestContent.classFqn, requestContent.contentCode)
+            ? generateDashboardKey(requestContent.classFqn, requestContent.contentCode, user?.login as String, requestContent.isForUser ? requestContent.classFqn : null)
+            : generateDashboardKey(requestContent.classFqn, requestContent.contentCode, null, requestContent.isForUser ? requestContent.classFqn : null)
         List<String> widgetsNames = getWidgetNamesFromDashboard(dashboardKey, widgetKey)
         if (name in widgetsNames)
         {
-            String currentUserLocale = DashboardUtils.getUserLocale(user?.UUID) 
+            String currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
             String message = messageProvider.getMessage(NOT_UNIQUE_WIDGET_NAME_ERROR, currentUserLocale, name: name)
             api.utils.throwReadableException("${message}#${NOT_UNIQUE_WIDGET_NAME_ERROR}")
         }
