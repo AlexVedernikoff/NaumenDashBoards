@@ -52,13 +52,13 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 		case DASHBOARD_EVENTS.RECEIVE_DASHBOARD:
 			return {
 				...state,
-				error: false,
+				error: null,
 				loading: false
 			};
 		case DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR:
 			return {
 				...state,
-				error: true,
+				error: action.payload,
 				loading: false
 			};
 		case DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR:
@@ -73,7 +73,7 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 		case DASHBOARD_EVENTS.REQUEST_DASHBOARD:
 			return {
 				...state,
-				error: false,
+				error: null,
 				loading: true
 			};
 		case DASHBOARD_EVENTS.REQUEST_EXPORTING_FILE_TO_EMAIL:

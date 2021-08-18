@@ -73,7 +73,7 @@ export type FetchTableBuildData = (widget: TableWidget, page?: number, update?: 
 
 export type BuildData<Data> = {
 	data: Data | null,
-	error: boolean,
+	error: string | null,
 	loading: boolean,
 	type: string,
 	updating: boolean
@@ -84,6 +84,11 @@ export type TableData = BuildData<TableBuildData>;
 export type DiagramBuildData = Object;
 
 export type DiagramData = BuildData<DiagramBuildData>;
+
+export type WidgetDataError = {
+	message: string,
+	widgetId: string,
+};
 
 export type BuildDataMap = {
 	[key: string]: DiagramData
@@ -105,7 +110,7 @@ export type ReceiveBuildData = {
 };
 
 export type RecordErrorBuildData = {
-	payload: string,
+	payload: WidgetDataError,
 	type: typeof BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
 };
 
