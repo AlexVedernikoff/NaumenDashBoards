@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 import static DeserializationHelper.mapper
 import groovy.transform.InheritConstructors
-import com.amazonaws.util.json.Jackson
 import ru.naumen.core.shared.IUUIDIdentifiable
 
 import ru.naumen.core.server.script.api.injection.InjectApi
@@ -123,13 +122,12 @@ class DashboardDataSetService
 
     /**
      * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
-     * @param dashboardKey - ключ дашборда
+     * @param dbSettings - настройки дашборда
      * @param widgetKey - ключ виджета
      * @return тело запроса
      */
-    Widget getWidgetSettingsByDashboardAndWidgetKey(String dashboardKey, String widgetKey)
+    Widget getWidgetSettingsByDashboardSettingsAndWidgetKey(DashboardSettingsClass dbSettings, String widgetKey)
     {
-        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
         def widget = dbSettings.widgets.find { it.id == widgetKey }
         if(widget)
         {
@@ -155,6 +153,31 @@ class DashboardDataSetService
     }
 
     /**
+     * Метод получения uuid-а текущего пользователя или uuid-а пользователя, сохраненного в экземпляре дашборда,
+     * если предусмотрен "пользовательский" режим работы
+     * @param dbSettings - настройки дашборда
+     * @param user - текущий пользователь
+     * @return uuid текущего пользователя или uuid пользователя, сохраненного в экземпляре дашборда, если предусмотрен "пользовательский" режим работы
+     */
+    String getCardObjectUUID(DashboardSettingsClass dbSettings, IUUIDIdentifiable user)
+    {
+        String cardObjectUUID
+        if(dbSettings.type == DashboardType.USER && dbSettings.dashboardUUID)
+        {
+            if(user)
+            {
+                cardObjectUUID = user.UUID
+            }
+            else
+            {
+                cardObjectUUID = api.utils.get(dbSettings.dashboardUUID).userReports?.UUID
+            }
+
+        }
+        return cardObjectUUID
+    }
+
+    /**
      * Метод построения диаграмм.
      * @param dashboardKey - ключ дашборда
      * @param widgetKey - ключ виджета
@@ -171,7 +194,9 @@ class DashboardDataSetService
                              TableRequestSettings tableRequestSettings = null)
     {
         currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
-        def widgetSettings = getWidgetSettingsByDashboardAndWidgetKey(dashboardKey, widgetKey)
+        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
+        def widgetSettings = getWidgetSettingsByDashboardSettingsAndWidgetKey(dbSettings, widgetKey, user)
+        subjectUUID = getCardObjectUUID(dbSettings, user) ?: subjectUUID
         def diagramType = widgetSettings.type as DiagramType
         String templateUUID = getTemplateUUID(widgetSettings)
         def request

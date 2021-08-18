@@ -55,6 +55,20 @@ interface Dashboards
     String getDataSourceAttributes(requestContent)
 
     /**
+     * Метод изменения атрибута в зависимости от изменения метакласса (попытка найти атрибут с таким же кодом в новом метаклассе)
+     * @param requestContent - тело запроса - код метакласса,текущий атрибут
+     * @return атрибут по выбранному металклассу или ничего, если атрибут не нашёлся
+     */
+    String getAttributeByCode(requestContent)
+
+    /**
+     * Отдает список атрибутов для источника данных
+     * @param requestContent запрос с кодом метакласса и типами атрибутов
+     * @return json список атрибутов {заголовок, код, тип атрибута}
+     */
+    String getDataSourceAttributesByGroupCode(requestContent)
+
+    /**
      * Отдаёт список атрибутов метакласа ссылочного типа атрибута
      * @param requestContent - Запрос на получение атрибутов
      * @return json список атрибутов {заголовок, код, тип атрибута}
@@ -193,6 +207,18 @@ class DashboardsImpl extends BaseController implements Dashboards
     }
 
     @Override
+    String getAttributeByCode(requestContent)
+    {
+        return toJson(service.getAttributeByCode(requestContent))
+    }
+
+    @Override
+    String getDataSourceAttributesByGroupCode(requestContent)
+    {
+        return toJson(service.getDataSourceAttributesByGroupCode(requestContent))
+    }
+
+    @Override
     String getAttributesFromLinkAttribute(requestContent, IUUIDIdentifiable user)
     {
         return toJson(service.getAttributesFromLinkAttribute(requestContent, user))
@@ -311,11 +337,11 @@ class DashboardsService
         def userUUID = user?.UUID ?: dashboard?.userReports?.UUID
         String descriptor = api.listdata.createListDescriptor(source.typeCode, source.code, userUUID)
         def totalSource = new DataSourceDescriptor(
-            source.typeCode,
-            source.title,
-            [],
-            false,
-            toJson(descriptor)
+            classFqn: source.typeCode,
+            title: source.title,
+            children: [],
+            hasDynamic: false,
+            descriptor: toJson(descriptor)
         )
         return [totalSource]
     }
@@ -372,6 +398,57 @@ class DashboardsService
                 ? mappingAttribute(attributes, attributeTitle ?: mc.title, parentClassFqn ? classFqn : mc.code)
                 : []
         }.unique { it.code }.sort { it.title }
+    }
+
+    /**
+     * Метод изменения атрибута в зависимости от изменения метакласса (попытка найти атрибут с таким же кодом в новом метаклассе)
+     * @param requestContent - тело запроса - код метакласса,текущий атрибут
+     * @return атрибут по выбранному металклассу или ничего, если атрибут не нашёлся
+     */
+    Collection<Attribute> getAttributeByCode(def requestContent)
+    {
+        String classFqn = requestContent.classFqn
+        Attribute currentAttribute = requestContent.attribute
+
+        if (currentAttribute.metaClassFqn != classFqn)
+        {
+            if(api.metainfo.checkAttributeExisting(classFqn, currentAttribute.code).isEmpty())
+            {
+                def metainfo = api.metainfo.getMetaClass(classFqn)
+                def attrByClassFqn = metainfo.getAttribute(currentAttribute.code)
+                def attrRef = currentAttribute.ref
+                currentAttribute = buildAttribute(attrByClassFqn, metainfo.title, classFqn)
+                if(attrRef)
+                {
+                    currentAttribute.ref = attrRef
+                }
+            }
+            else
+            {
+                return null
+            }
+        }
+        return currentAttribute
+    }
+
+    /**
+     * Метод для получения атрибутов по коду группы
+     * @param requestContent - тело запроса [classFqn: код метакласса,groupCode: код группы]
+     * @return список атрибутов по группе
+     */
+    Collection<Attribute> getDataSourceAttributesByGroupCode(def requestContent)
+    {
+        String classFqn = requestContent.classFqn
+        String groupCode = requestContent.groupCode
+        def metainfo = api.metainfo.getMetaClass(classFqn)
+        List listOfSystemAttribute = metainfo.getAttributeGroup(groupCode).attributes
+
+        return listOfSystemAttribute.findResults {
+            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
+            {
+                return buildAttribute(it, metainfo.title, sourceCode)
+            }
+        }
     }
 
     /**
@@ -1142,10 +1219,10 @@ class DashboardsService
     {
         return fqns.collect {
             new DataSource(
-                it.code,
-                it.title?.replace('Event for ', ''),
-                fromAttribute ? [] : mappingDataSource(it.children),
-                fromAttribute ? false : checkForDynamicAttributes(it.code)
+                classFqn: it.code,
+                title: it.title?.replace('Event for ', ''),
+                children: fromAttribute ? [] : mappingDataSource(it.children),
+                hasDynamic: fromAttribute ? false : checkForDynamicAttributes(it.code)
             )
         }.sort { it.title }
     }

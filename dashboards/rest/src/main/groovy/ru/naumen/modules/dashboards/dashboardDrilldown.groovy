@@ -31,9 +31,11 @@ interface DashboardDrilldown
      * @param requestContent - параметры запроса
      * @param cardObjectUuid - Uuid карточки текущего объекта
      * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
+     * @param dashboardKey - ключ дашборда
+     * @param groupCode - код группы
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode)
 }
 
 @InheritConstructors
@@ -42,9 +44,9 @@ class DashboardDrilldownImpl extends BaseController implements DashboardDrilldow
     DashboardDrilldownService service = DashboardDrilldownService.instance
 
     @Override
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode)
     {
-        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest, dashboardKey)])
+        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest, dashboardKey, groupCode)])
     }
 }
 
@@ -57,9 +59,11 @@ class DashboardDrilldownService
      * @param request - параметры запроса
      * @param cardObjectUuid - Uuid карточки текущего объекта
      * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
+     * @param dashboardKey - ключ дашборда
+     * @param groupCode - код группы
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> request, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey)
+    String getLink(Map<String, Object> request, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey,  String groupCode)
     {
         def requestContent = [:]
         requestContent.putAll(request)
@@ -94,7 +98,7 @@ class DashboardDrilldownService
         }
         requestContent.cases += attrCases
 
-        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType)
+        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType, groupCode)
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
         if(anyFiltersWithCustomGroupKey)
@@ -200,15 +204,22 @@ class Link
      */
     private String currentUserLocale
 
-    Link(Map<String, Object> map, String cardObjectUuid, DiagramType diagramType)
+    Link(Map<String, Object> map, String cardObjectUuid, DiagramType diagramType, String groupCode)
     {
         this.subjectUUID = cardObjectUuid
         this.classFqn = map.classFqn
         def metaInfo = api.metainfo.getMetaClass(this.classFqn)
         this.title = map.title ?: "Список элементов '${ this.classFqn }'"
-        this.attrGroup = 'forDashboards' in metaInfo.getAttributeGroupCodes()
-            ? 'forDashboards'
-            : 'system'
+        if(groupCode)
+        {
+            this.attrGroup = groupCode
+        }
+        else
+        {
+            this.attrGroup = 'forDashboards' in metaInfo.getAttributeGroupCodes()
+                ? 'forDashboards'
+                : 'system'
+        }
         this.descriptor = map.descriptor
         this.cases = map.cases as Collection
         this.attrCodes = map.attrCodes as Collection
