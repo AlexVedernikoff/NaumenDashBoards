@@ -1,5 +1,6 @@
 // @flow
 import api from 'api';
+import {ApiError} from 'api/errors';
 import {createToast} from 'store/toasts/actions';
 import type {CustomGroup} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
@@ -88,8 +89,10 @@ const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): Thun
 			dispatch(removeCustomGroup(localId));
 			dispatch(saveCustomGroup({...customGroupData, id}));
 		} catch (e) {
+			const errorMessage = e instanceof ApiError ? e.message : 'Ошибка создания группировки';
+
 			dispatch(createToast({
-				text: 'Ошибка создания группировки',
+				text: errorMessage,
 				type: 'error'
 			}));
 		}
@@ -105,8 +108,10 @@ const deleteCustomGroup = (groupKey: string, remote: boolean = true): ThunkActio
 
 		dispatch(removeCustomGroup(groupKey));
 	} catch (e) {
+		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка удаления группировки';
+
 		dispatch(createToast({
-			text: 'Ошибка удаления группировки',
+			text: errorMessage,
 			type: 'error'
 		}));
 	}
@@ -122,8 +127,10 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false): ThunkAc
 
 		dispatch(saveCustomGroup(updatedGroup));
 	} catch (e) {
+		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка сохранения группировки';
+
 		dispatch(createToast({
-			text: 'Ошибка сохранения группировки',
+			text: errorMessage,
 			type: 'error'
 		}));
 	}

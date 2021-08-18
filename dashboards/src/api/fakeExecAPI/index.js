@@ -2,7 +2,7 @@
 import CommonAPI from 'api/commonAPI';
 import {execAPITransport} from 'api/execAPI';
 import Frame from './frame';
-import {parseError} from 'api/execAPI/utils';
+import {parseError} from 'api/execAPI/parseError';
 import type {Transport} from 'api/types';
 
 const fakeExecAPITransportDecorator = (transport: Transport) => {

@@ -1,9 +1,10 @@
 // @flow
-import {buildRequestParams, parseError} from './utils';
+import {buildRequestParams} from './utils';
 import CommonAPI from 'api/commonAPI';
 import type {DTOValue, Transport} from 'api/types';
 import Frame from 'api/commonAPI/frame';
 import type {FrameAPI} from 'api/interfaces';
+import {parseError} from './parseError';
 
 export const execAPITransport = (frame: FrameAPI): Transport => {
 	const embeddedApplicationCode = frame.getApplicationCode();

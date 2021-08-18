@@ -1,6 +1,7 @@
 // @flow
 import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {DrillDownBigData} from 'api/errors';
 import type {DrillDownMixin} from './types';
 import {getPartsClassFqn} from './helpers';
 import {LINKS_EVENTS} from './constants';
@@ -76,12 +77,13 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
-	} catch (e) {
-		if (e.status === 500 && e.responseText.toLowerCase().includes('слишком большое количество данных')) {
+	} catch (exception) {
+		if (exception instanceof DrillDownBigData) {
 			dispatch(setWarningMessage({id, message: 'Детализация данных не доступна. Слишком большое количество данных'}));
-		} else {
-			dispatch(recordLinkError(id));
+			return;
 		}
+
+		dispatch(recordLinkError(id));
 	}
 };
 
