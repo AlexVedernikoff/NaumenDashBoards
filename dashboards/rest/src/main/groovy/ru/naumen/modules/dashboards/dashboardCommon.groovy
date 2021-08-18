@@ -2845,7 +2845,7 @@ abstract class Widget
             {
                 data = fields.order.collect { index ->
                     def dataKey = fields."dataKey_$index"
-                    def parameters = [[attribute: fields."xAxis_$index", group: fields."group$index"]]
+                    def parameters = [[attribute: fields."xAxis_$index", group: fields."group_$index"]]
 
                     def source = fields."source_$index".value
                     def descriptor = fields."descriptor_$index"
@@ -2896,7 +2896,7 @@ abstract class Widget
             {
                 data = fields.order.collect { index ->
                     def dataKey = fields."dataKey_$index"
-                    def parameters = [[attribute: fields."row_$index", group: fields."group$index"]]
+                    def parameters = [[attribute: fields."row_$index", group: fields."group_$index"]]
 
                     def source =  fields."source_$index".value
                     def descriptor = fields."descriptor_$index"

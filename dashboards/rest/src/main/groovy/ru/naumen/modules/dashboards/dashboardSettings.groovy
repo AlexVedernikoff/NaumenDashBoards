@@ -1985,7 +1985,7 @@ class DashboardSettingsService
      * @param login       - логин текущего пользователя
      * @return настройки дашборда
      */
-    private DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, String login = null, String dashboardUUID = '', )
+    private DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, String login = null, String dashboardUUID = '')
     {
         return getDashboardSetting(generateDashboardKey(classFqn, contentCode, login, dashboardUUID))
     }
