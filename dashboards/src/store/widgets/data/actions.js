@@ -2,18 +2,19 @@
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
 import api from 'api';
+import {ApiError} from 'api/errors';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from 'store/dashboard/settings/constants';
-import {deepClone, isObject} from 'helpers';
-import type {Dispatch, GetState, ResponseError, ThunkAction} from 'store/types';
+import {deepClone} from 'helpers';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchCustomGroups} from 'store/customGroups/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getCustomColorsSettingsKey, updateNewWidgetCustomColorsSettings} from './helpers';
-import {getParams, parseResponseErrorText} from 'store/helpers';
+import {getParams} from 'store/helpers';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -113,7 +114,7 @@ const editChartWidget = (widget: Chart): ThunkAction => async (dispatch: Dispatc
  * @param {AnyWidget} settings - данные виджета
  * @returns {ThunkAction}
  */
-const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch): Promise<string | void> => {
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
@@ -125,7 +126,7 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 		dispatch(saveNewLayouts());
 		dispatch(fetchBuildData(widget));
 	} catch (e) {
-		validationErrors = getErrors(e);
+		validationErrors = e instanceof ApiError ? e.message : 'Ошибка сервера';
 
 		dispatch(recordSaveError());
 	}
@@ -186,7 +187,7 @@ const saveWidgetWithNewFilters = (widget: Widget): ThunkAction =>
  * @param {AnyWidget} settings - данные формы создания виджета
  * @returns {ThunkAction}
  */
-const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<string | void> => {
 	const state = getState();
 	let validationErrors;
 
@@ -205,7 +206,8 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
 		});
 		dispatch(saveNewLayouts());
 	} catch (e) {
-		validationErrors = getErrors(e);
+		validationErrors = e instanceof ApiError ? e.message : 'Ошибка сервера';
+
 		dispatch(recordSaveError());
 	}
 
@@ -308,27 +310,6 @@ const selectWidget = (widgetId: string): ThunkAction => (dispatch: Dispatch, get
 	});
 
 	dashboardResizer.resetHeight();
-};
-
-/**
- * Возвращает объект ошибок из ответа сервера
- * @param {ResponseError} error - серверная ошибка
- * @returns {object | void}
- */
-const getErrors = (error: ResponseError) => {
-	const {responseText, status} = error;
-	let errors;
-
-	if (status === 500) {
-		const data = parseResponseErrorText(responseText);
-
-		if (isObject(data)) {
-			// $FlowFixMe
-			errors = data.errors;
-		}
-	}
-
-	return errors;
 };
 
 /**

@@ -2,6 +2,7 @@
 import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layouts/actions';
 import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import api from 'api';
+import {ApiError, PersonalDashboardNotFound} from 'api/errors';
 import type {AutoUpdateSettings, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
@@ -23,7 +24,7 @@ import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-import {PersonalDashboardNotFound} from 'api/errors';
+
 import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
@@ -215,8 +216,11 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		dispatch({
 			type: DASHBOARD_EVENTS.ERROR_CREATE_PERSONAL_DASHBOARD
 		});
+
+		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка сохранения персонального дашборда';
+
 		dispatch(createToast({
-			text: 'Ошибка сохранения персонального дашборда',
+			text: errorMessage,
 			time: 1500,
 			type: 'error'
 		}));
@@ -248,8 +252,10 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		dispatch({
 			type: DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
 		});
+		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка удаления';
+
 		dispatch(createToast({
-			text: 'Ошибка удаления',
+			text: errorMessage,
 			time: 1500,
 			type: 'error'
 		}));
@@ -333,8 +339,10 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 		dispatch({
 			type: DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR
 		});
+		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка отправки файла';
+
 		dispatch(createToast({
-			text: 'Ошибка отправки файла',
+			text: errorMessage,
 			type: 'error'
 		}));
 	}
@@ -422,8 +430,10 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 			text: 'Настройки успешно изменены!'
 		}));
 	} catch (e) {
+		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка сохранения настроек';
+
 		dispatch(createToast({
-			text: 'Ошибка сохранения настроек',
+			text: errorMessage,
 			type: 'error'
 		}));
 	}

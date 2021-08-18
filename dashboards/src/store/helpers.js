@@ -21,26 +21,6 @@ const getParams = () => {
 };
 
 /**
- * Парсит текст серверной ошибки
- * @param {string} text - текст ошибки
- * @returns {object | string}
- */
-const parseResponseErrorText = (text: string) => {
-	let data = text.split('njava.lang.Exception:')[1];
-
-	data = data.substr(0, data.length - 2).trim();
-	let result;
-
-	try {
-		result = JSON.parse(JSON.parse(`"${data}"`));
-	} catch (e) {
-		result = data;
-	}
-
-	return result;
-};
-
-/**
  * Возвращает подтипы источника
  * @param {string} classFqn - код источника
  * @returns {Array<string>}
@@ -162,7 +142,6 @@ export {
 	getParams,
 	getSourceTypes,
 	getUserLocalStorageId,
-	parseResponseErrorText,
 	removeLocalStorageValue,
 	setLocalStorageValue
 };
