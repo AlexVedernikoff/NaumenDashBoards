@@ -12,3 +12,7 @@ export type Props = {
 	onDelete: () => void,
 	value: CustomFilterValue,
 };
+
+export type State = {
+	isEditLabel: boolean
+};

@@ -8,14 +8,14 @@ export default {
 	title: 'Organisms/WidgetFormPanel/Components/FiltersOnWidget'
 };
 
-const DefaultTemplate = args => {
-	const [{values}, updateArgs] = useArgs();
+const DefaultTemplate = (args) => {
+	const [{filters}, updateArgs] = useArgs();
 
 	const onAddNewFilterItem = () => {
 		action('onAddNewFilterItem')();
 		updateArgs({
 			filters: [
-				...(values ?? []),
+				...(filters ?? []),
 				{ attribute: null, dataKey: null, label: '' }
 			]
 		});

@@ -60,6 +60,14 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		}
 	};
 
+	handleDelete = (idx: number) => () => {
+		const {filters, onDeleteFilter} = this.props;
+
+		if (idx < filters.length) {
+			onDeleteFilter(idx);
+		}
+	};
+
 	renderAddSourceFilter = (): React$Node => {
 		const {filters} = this.props;
 
@@ -80,6 +88,7 @@ export class FiltersOnWidget extends PureComponent<Props> {
 				onChangeAttribute={this.handleChangeAttribute(filterItemIdx)}
 				onChangeDataSet={this.handleChangeDataSet(filterItemIdx)}
 				onChangeLabel={this.handleChangeLabel(filterItemIdx)}
+				onDelete={this.handleDelete(filterItemIdx)}
 				value={value}
 			/>
 		);
