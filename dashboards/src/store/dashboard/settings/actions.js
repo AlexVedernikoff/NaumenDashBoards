@@ -8,7 +8,7 @@ import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EVENTS} from './constants';
+import {DASHBOARD_EVENTS, FETCH_DASHBOARD_ERROR_TEXT} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {
@@ -76,8 +76,15 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		dispatch({
 			type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
 		});
-	} catch (error) {
+	} catch (exception) {
+		let error = FETCH_DASHBOARD_ERROR_TEXT;
+
+		if (exception instanceof ApiError || process.env.NODE_ENV === 'development') {
+			error = exception.message;
+		}
+
 		dispatch({
+			payload: error,
 			type: DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
 		});
 	}

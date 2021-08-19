@@ -1,8 +1,9 @@
 // @flow
 import type {AnyWidget, AxisWidget, Chart, ComboWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import api from 'api';
+import {ApiError} from 'api/errors';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
-import {BUILD_DATA_EVENTS} from './constants';
+import {BUILD_DATA_EVENTS, DEFAULT_RECORD_BUILD_DATA_ERROR, DEFAULT_RECORD_BUILD_DIAGRAM_ERROR} from './constants';
 import {DEFAULT_NUMBER_AXIS_FORMAT, LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
 import {editWidgetChunkData, updateWidget} from 'store/widgets/data/actions';
@@ -67,7 +68,13 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 				receiveBuildData({data: {...data, page: pageNumber}, id: widget.id})
 			);
 		} catch (e) {
-			dispatch(recordBuildDataError(widget.id));
+			let error = DEFAULT_RECORD_BUILD_DATA_ERROR;
+
+			if (e instanceof ApiError) {
+				error = e.message;
+			}
+
+			dispatch(recordBuildDataError(widget.id, error));
 		}
 	};
 
@@ -109,7 +116,13 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 			await dispatch(checkComputedFormat(widget.id, data));
 			dispatch(receiveBuildData({data, id: widget.id}));
 		} catch (e) {
-			dispatch(recordBuildDataError(widget.id));
+			let error = DEFAULT_RECORD_BUILD_DIAGRAM_ERROR;
+
+			if (e instanceof ApiError) {
+				error = e.message;
+			}
+
+			dispatch(recordBuildDataError(widget.id, error));
 		}
 	};
 
@@ -210,8 +223,8 @@ const receiveBuildData = (payload: ReceiveBuildDataPayload) => ({
 	type: BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA
 });
 
-const recordBuildDataError = (payload: string) => ({
-	payload,
+const recordBuildDataError = (widgetId: string, message: string) => ({
+	payload: {message, widgetId},
 	type: BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
 });
 

@@ -18,9 +18,7 @@ export class LoadingContent extends PureComponent<Props> {
 
 	renderError = () => {
 		const {error} = this.props.buildData;
-		const message = 'Ошибка загрузки данных. Измените параметры построения.';
-
-		return error ? <div className={styles.error} title={message}>{message}</div> : null;
+		return error ? <div className={styles.error} title={error}>{error}</div> : null;
 	};
 
 	renderLoading = () => this.props.buildData.loading ? <p>Загрузка...</p> : null;

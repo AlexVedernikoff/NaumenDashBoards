@@ -7,7 +7,7 @@ type ReceivedProps = {
 };
 
 export type ConnectedProps = {
-	error: boolean,
+	error: ?string,
 	loading: boolean,
 	personal: boolean
 };

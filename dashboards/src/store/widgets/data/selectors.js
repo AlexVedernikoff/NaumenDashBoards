@@ -28,7 +28,7 @@ const getWidgetsBuildData = (state: AppState): BuildDataState => state.widgets.b
 const getWidgetBuildData = (state: AppState, widget: Widget): DiagramData => {
 	const {[widget.id]: data = {
 		data: null,
-		error: false,
+		error: null,
 		loading: false,
 		type: widget.type,
 		updating: false

@@ -51,7 +51,7 @@ type ErrorDeletePersonalDashboard = {
 };
 
 type RecordDashboardError = {
-	payload: null,
+	payload: string,
 	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
 };
 
@@ -139,7 +139,7 @@ export type SettingsState = {
 	autoUpdate: AutoUpdateSettings,
 	code: string,
 	editMode: boolean,
-	error: boolean,
+	error: ?string,
 	exportingFailToEmail: ChangingState,
 	hideEditPanel: boolean,
 	isMobileDevice: boolean,

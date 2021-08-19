@@ -1,5 +1,5 @@
 // @flow
-import type {AttributeColumn, BuildDataState, DataSetDescriptorRelation, DiagramBuildData} from './types';
+import type {AttributeColumn, BuildDataState, DataSetDescriptorRelation, DiagramBuildData, WidgetDataError} from './types';
 import {COLUMN_TYPES, SEPARATOR, TITLE_SEPARATOR} from './constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {SourceData, Widget} from 'store/widgets/data/types';
@@ -22,11 +22,9 @@ const getSeparatedLabel = (
 
 /**
  * Обновляем/сбрасываем данные по виджету при его редактировании
- *
- * @param   {BuildDataState}  state  - хранилище данных виджетов
- * @param   {Widget} widget - виджет для редактирования
- *
- * @returns  {BuildDataState} - новое хранилище данных виджетов
+ * @param {BuildDataState} state - хранилище данных виджетов
+ * @param {Widget} widget - виджет для редактирования
+ * @returns {BuildDataState} - новое хранилище данных виджетов
  */
 const updateWidgetData = (state: BuildDataState, widget: Widget): BuildDataState => {
 	const {id} = widget;
@@ -39,7 +37,7 @@ const updateWidgetData = (state: BuildDataState, widget: Widget): BuildDataState
 				...state,
 				[id]: {
 					data: null,
-					error: false,
+					error: null,
 					loading: false,
 					type: widget.type
 				}
@@ -48,6 +46,25 @@ const updateWidgetData = (state: BuildDataState, widget: Widget): BuildDataState
 	}
 
 	return state;
+};
+
+/**
+ * Устанавливает ошибку загрузки данных в виджет
+ * @param {BuildDataState} state - хранилище данных виджетов
+ * @param {WidgetDataError} widgetDataError - запись о ошибке на виджете
+ * @returns {BuildDataState} - новое хранилище данных виджетов
+ */
+const setWidgetError = (state: BuildDataState, widgetDataError: WidgetDataError): BuildDataState => {
+	const {message, widgetId} = widgetDataError;
+	return {
+		...state,
+		[widgetId]: {
+			...state[widgetId],
+			data: null,
+			error: message,
+			loading: false
+		}
+	};
 };
 
 /**
@@ -151,5 +168,6 @@ export {
 	isCardObjectColumn,
 	isIndicatorColumn,
 	removeCodesFromTableData,
+	setWidgetError,
 	updateWidgetData
 };

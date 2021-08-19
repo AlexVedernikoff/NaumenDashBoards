@@ -35,9 +35,14 @@ const COLUMN_TYPES = {
 	PARAMETER
 };
 
+const DEFAULT_RECORD_BUILD_DATA_ERROR = 'Ошибка загрузки данных. Измените параметры построения.';
+const DEFAULT_RECORD_BUILD_DIAGRAM_ERROR = 'По указанным данным невозможно нарисовать диаграмму (недостаточно данных). Измените, пожалуйста, параметры';
+
 export {
 	BUILD_DATA_EVENTS,
 	COLUMN_TYPES,
+	DEFAULT_RECORD_BUILD_DATA_ERROR,
+	DEFAULT_RECORD_BUILD_DIAGRAM_ERROR,
 	IGNORE_TABLE_DATA_LIMITS_SETTINGS,
 	SEPARATOR,
 	TITLE_SEPARATOR

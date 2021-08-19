@@ -15,7 +15,7 @@ export const initialDashboardState: SettingsState = {
 	},
 	code: '',
 	editMode: false,
-	error: false,
+	error: null,
 	exportingFailToEmail: {
 		error: false,
 		loading: false

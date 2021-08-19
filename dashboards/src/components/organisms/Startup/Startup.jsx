@@ -14,7 +14,7 @@ export class Startup extends Component<Props> {
 		const {children, error, loading, personal} = this.props;
 
 		if (error) {
-			return <p>Ошибка загрузки дашборда</p>;
+			return <p>{error}</p>;
 		}
 
 		if (loading) {
