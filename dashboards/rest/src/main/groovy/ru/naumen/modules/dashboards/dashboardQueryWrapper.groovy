@@ -1359,7 +1359,7 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
-                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             case AttributeType.DATE_TYPES:
@@ -1368,7 +1368,7 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
-                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             case AttributeType.TIMER_TYPES:
@@ -1377,13 +1377,13 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
-                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             default:
                 if (type != GroupType.OVERLAP)
                 {
-                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
+                    return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
         }
@@ -1425,7 +1425,7 @@ class DashboardQueryWrapperUtils
                     String message = messageProvider.getMessage(NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR, locale, attributeType: attributeType)
                     return getApi().utils.throwReadableException("${message}#${NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR}")
                 }
-                if(forAggregation && (attributeType == AttributeType.LOCALIZED_TEXT_TYPE || attributeType == AttributeType.STRING_TYPE && attribute.attrChains().code == 'title'))
+                if(forAggregation && (attributeType == AttributeType.LOCALIZED_TEXT_TYPE || attributeType == AttributeType.STRING_TYPE && attribute.attrChains().last().code == 'title'))
                 {
                     if(attribute.type in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
                     {

@@ -605,7 +605,7 @@ class DashboardSettingsService
                     return throwDashboardSettingsNotSavedException(currentUserLocale)
                 }
             }
-            dashboard.customGroups.removeIf { it.id == groupKey }
+            dashboard.customGroups.removeIf { it?.id == groupKey }
             dashboard.customGroups += group
             saveDashboard(isPersonal ? personalDashboardKey : defaultDashboardKey, dashboard)
         }
@@ -644,7 +644,7 @@ class DashboardSettingsService
 
         if (groupKey in dashboard.customGroups.id)
         {
-            dashboard.customGroups.removeIf { it.id == groupKey }
+            dashboard.customGroups.removeIf { it?.id == groupKey }
             if (saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE))
             {
                 return [id: groupKey]
@@ -700,7 +700,7 @@ class DashboardSettingsService
             def dashboard = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
             if(colorsSettings.key in dashboard.customColorsSettings*.key)
             {
-                dashboard.customColorsSettings.removeIf { it.key == colorsSettings.key }
+                dashboard.customColorsSettings.removeIf { it?.key == colorsSettings.key }
             }
             dashboard.customColorsSettings += colorsSettings
             saveDashboard(personalDashboardKey, dashboard)
@@ -710,7 +710,7 @@ class DashboardSettingsService
             def dashboard = getDashboardSetting(defaultDashboardKey) ?: new DashboardSettingsClass()
             if(colorsSettings.key in dashboard.customColorsSettings*.key)
             {
-                dashboard.customColorsSettings.removeIf { it.key == colorsSettings.key }
+                dashboard.customColorsSettings.removeIf { it?.key == colorsSettings.key }
             }
             dashboard.customColorsSettings += colorsSettings
             saveDashboard(defaultDashboardKey, dashboard)
@@ -746,7 +746,7 @@ class DashboardSettingsService
 
         if (colorsKey in dashboard.customColorsSettings*.key)
         {
-            dashboard.customColorsSettings.removeIf { it.key == colorsKey }
+            dashboard.customColorsSettings.removeIf { it?.key == colorsKey }
             if (saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE))
             {
                 return [id: colorsKey]
@@ -1002,7 +1002,7 @@ class DashboardSettingsService
                 )
                 return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
                     def key = totalWidget.id
-                    dashboardSettings.widgets.removeIf { it.id == widgetKey }
+                    dashboardSettings.widgets.removeIf { it?.id == widgetKey }
                     dashboardSettings.widgets += widgetWithCorrectName
                     if (!saveJsonSettings(personalDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE))
                     {
@@ -1025,7 +1025,7 @@ class DashboardSettingsService
                         login
                     )
                     DashboardSettingsClass dashboardSettings = getDashboardSetting(dashboardKey)
-                    dashboardSettings.widgets.removeIf { it.id == widgetKey }
+                    dashboardSettings.widgets.removeIf { it?.id == widgetKey }
                     dashboardSettings.widgets += widgetWithCorrectName
                     saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
                 }
@@ -1035,7 +1035,7 @@ class DashboardSettingsService
             def widgetDb = setUuidInSettings(widgetWithCorrectName, widgetKey)
             String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             DashboardSettingsClass dashboardSettings = getDashboardSetting(defaultDashboardKey)
-            dashboardSettings.widgets.removeIf { it.id == widgetKey }
+            dashboardSettings.widgets.removeIf { it?.id == widgetKey }
             dashboardSettings.widgets += widgetDb
             saveJsonSettings(defaultDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
             return widgetWithCorrectName
@@ -2228,7 +2228,7 @@ class DashboardSettingsService
         else
         {
             def settings = getDashboardSetting(personalDashboardKey) ?: getDashboardSetting(defaultDashboardKey)
-            settings.widgets.removeIf {it.id == widgetId }
+            settings.widgets.removeIf {it?.id == widgetId }
             def res = saveJsonSettings(personalDashboardKey, toJson(settings), DASHBOARD_NAMESPACE)
             if (!res)
             {
@@ -2542,7 +2542,7 @@ class DashboardSettingsService
         def widgets = getDashboardSetting(dashboardKey)?.widgets
         if (widgetKey)
         {
-            widgets.removeIf {it.id == widgetKey}
+            widgets.removeIf {it?.id == widgetKey}
         }
         return widgets ? getWidgetNames(widgets) : null
     }
