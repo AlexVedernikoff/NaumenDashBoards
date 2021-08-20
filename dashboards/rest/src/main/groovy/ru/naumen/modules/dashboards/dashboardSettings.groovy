@@ -2023,7 +2023,7 @@ class DashboardSettingsService
             }
             if(dashboard.dashboardUUID)
             {
-                dashboard.dashoardType = dashboardType.USER
+                dashboard.type = DashboardType.USER
             }
         }
         return dashboard
