@@ -13,7 +13,6 @@ package ru.naumen.modules.dashboards
 import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
 import java.text.SimpleDateFormat
-import ru.naumen.core.shared.dto.SimpleDtObject
 import static groovy.json.JsonOutput.toJson
 import com.amazonaws.util.json.Jackson
 import groovy.transform.InheritConstructors
@@ -675,9 +674,8 @@ class Link
                                     Closure buildStateFilter = { String code, String condition, String stateCode ->
                                         if(sourceCode.contains('$'))
                                         {
-                                            def objectToFilter = new SimpleDtObject("$sourceCode:$stateCode", '')
                                             return filterBuilder.AND(
-                                                filterBuilder.OR(code, condition, objectToFilter)
+                                                filterBuilder.OR(code, condition, "$sourceCode:$stateCode".toString())
                                             )
                                         }
                                         def cases = api.metainfo.getTypes(sourceCode).code
@@ -685,9 +683,7 @@ class Link
                                         {
                                             return filterBuilder.AND(
                                                 *cases.collect {
-                                                    filterBuilder.OR(code,
-                                                                     condition,
-                                                                     new SimpleDtObject("$it:$stateCode", ''))
+                                                    filterBuilder.OR(code, condition, "$it:$stateCode".toString())
                                                 }
                                             )
                                         }
@@ -697,7 +693,7 @@ class Link
                                                 filterBuilder.OR(
                                                     code,
                                                     condition,
-                                                    new SimpleDtObject("$it:$stateCode", '')))
+                                                    "$it:$stateCode".toString()))
                                             }
                                             return filterBuilder
                                         }
@@ -712,13 +708,13 @@ class Link
                                             List objectsToFilter = it.data*.uuid.collectMany { stateCode ->
                                                 if (sourceCode.contains('$'))
                                                 {
-                                                    return [new SimpleDtObject("$sourceCode:$stateCode", '')]
+                                                    return ["$sourceCode:$stateCode".toString()]
                                                 }
                                                 else
                                                 {
                                                     def cases = api.metainfo.getTypes(sourceCode).code
                                                     return cases.collect {
-                                                        new SimpleDtObject("$it:$stateCode", '')
+                                                        "$it:$stateCode".toString()
                                                     }
                                                 }
                                             }
@@ -941,7 +937,7 @@ class Link
                                             def subjectType = subjectAttribute.type
                                             if (subjectType != attributeType)
                                             {
-                                                String message = messageProvider.getMessage(SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_EROOR, currentUserLocale, subjectType: subjectType, attributeType: attributeType ),
+                                                String message = messageProvider.getMessage(SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_EROOR, currentUserLocale, subjectType: subjectType, attributeType: attributeType)
                                                 api.utils.throwReadableException("$message#${SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_EROOR}")
                                             }
                                             def value = api.utils.get(subjectUUID)[code]
@@ -1117,12 +1113,12 @@ class Link
         if(sourceCode.contains('$'))
         {
             return filterBuilder.AND(
-                filterBuilder.OR(code, 'contains', new SimpleDtObject("$sourceCode:$state",''))
+                filterBuilder.OR(code, 'contains', "$sourceCode:$state".toString())
             )
         }
         def cases = api.metainfo.getTypes(sourceCode).code
         return filterBuilder.AND(
-            *cases.collect{filterBuilder.OR(code, 'contains', new SimpleDtObject("$it:$state", ''))}
+            *cases.collect{filterBuilder.OR(code, 'contains', "$it:$state".toString())}
         )
     }
 

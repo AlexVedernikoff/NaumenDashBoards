@@ -56,7 +56,6 @@ import org.apache.http.entity.ContentType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.util.StopWatch
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import ru.naumen.core.shared.IUUIDIdentifiable
@@ -750,7 +749,7 @@ class DashboardUtils
                     sorting: oldFormatWidget.sorting as Sorting,
                     table: oldFormatWidget.table as TableObject,
                     data: oldFormatWidget.data as Collection<DiagramNowData>,
-                    top: oldFormatWidget.top as Top,
+                    top: oldFormatWidget.top as Top ?: new Top(),
                     type: oldFormatWidget.type as DiagramType,
                     diagramType: oldFormatWidget.diagramType
                 )
@@ -3621,7 +3620,7 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
     /**
      * Настройка топ х
      */
-    Top top
+    Top top = new Top()
 }
 
 /**
@@ -3928,15 +3927,12 @@ abstract class BaseController extends Script implements GroovyInterceptable
      */
     def invokeMethod(String name, Object args)
     {
-        def stopwatch = new StopWatch("Module ${this.class.simpleName}")
-
         if(!entrypointMethod.get())
         {
             entrypointMethod.set(name)
         }
 
         LOG.debug("invoke method $name")
-        stopwatch.start(name)
 
         if(!entrypointMethod.get())
         {
@@ -3981,8 +3977,6 @@ abstract class BaseController extends Script implements GroovyInterceptable
                 entrypointMethod.remove()
             }
             CurrentUserHolder.clear()
-            stopwatch.stop()
-            LOG.debug(stopwatch.prettyPrint())
         }
     }
 

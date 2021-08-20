@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.naumen</groupId>
 	<artifactId>dashboards</artifactId>
@@ -26,6 +26,11 @@
 			<url>https://mvnex.nsd.naumen.ru/</url>
 		</repository>
 		<repository>
+			<id>naumen-public</id>
+			<name>Naumen public external repo</name>
+			<url>https://mvnex.nsd.naumen.ru/repository/naumen-public/</url>
+		</repository>
+		<repository>
 			<id>central</id>
 			<name>Maven Central repository</name>
 			<url>https://repo1.maven.org/maven2</url>
@@ -47,8 +52,7 @@
 		<dependency>
 			<groupId>ru.naumen</groupId>
 			<artifactId>script-api-context</artifactId>
-			<version>4.12.5</version>
-			<scope>compile</scope>
+			<version>4.13.0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -79,6 +83,31 @@
 			<artifactId>mail</artifactId>
 			<version>1.4</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>2.0.0-alpha3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>5.1.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>javax.transaction-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
 		</dependency>
 	</dependencies>
 	<build>

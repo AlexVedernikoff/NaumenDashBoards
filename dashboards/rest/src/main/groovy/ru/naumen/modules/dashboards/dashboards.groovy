@@ -767,8 +767,12 @@ class DashboardsService
     List<Map> getStates(String classFqn)
     {
         classFqn -= '__Evt'
-        String maxMetaCase = getMaxMetaCaseId(classFqn)
-        String totalClass = "${classFqn}\$${maxMetaCase}"
+        String totalClass = classFqn
+        if(!classFqn.contains('$'))
+        {
+            String maxMetaCase = getMaxMetaCaseId(classFqn)
+            totalClass = "${classFqn}\$${maxMetaCase}"
+        }
         return api.metainfo.getMetaClass(totalClass)
                         ?.workflow
                         ?.states
