@@ -19,7 +19,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 			let newItem = {...defaultItem};
 			const {attribute, group} = item;
 
-			if (classFqn && group.way === GROUP_WAYS.SYSTEM) {
+			if (classFqn && attribute && group.way === GROUP_WAYS.SYSTEM) {
 				const newAttr = await fetchAttributeByCode(classFqn, attribute);
 
 				if (newAttr) {
