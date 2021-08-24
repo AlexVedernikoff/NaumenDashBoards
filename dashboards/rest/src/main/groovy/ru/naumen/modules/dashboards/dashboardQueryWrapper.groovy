@@ -252,6 +252,13 @@ class QueryWrapper implements CriteriaWrapper
 
         criteria.addColumn(column)
         criteria.addGroupColumn(column)
+
+        if (sortingType && (Attribute.getAttributeType(attribute) in AttributeType.NUMBER_TYPES))
+        {
+            Closure sorting = getSorting(sortingType)
+            column.with(sorting).with(criteria.&addOrder)
+        }
+
         if(totalValueCriteria)
         {
             this.totalValueCriteria = criteria
@@ -1066,14 +1073,13 @@ class QueryWrapper implements CriteriaWrapper
     /**
      *  Метод для установки типов при запросе из основного класса
      * @param sourceClassFqn - код основного класса
-     * @param diagramType - тип диаграммы
      * @param attrSourceCodes - список кодов источников у атрибутов
      * @return тело запроса в БД
      */
-    QueryWrapper setCases(String sourceClassFqn, DiagramType diagramType, List attrSourceCodes = [])
+    QueryWrapper setCases(String sourceClassFqn, List attrSourceCodes = [])
     {
         attrSourceCodes?.each { cases ->
-            if(cases && cases != sourceClassFqn && diagramType != DiagramType.TABLE)
+            if(cases && cases != sourceClassFqn && api.metainfo.checkAttributeExisting(sourceClassFqn, cases))
             {
                 criteria.add(
                     api.filters.inCases(
@@ -1132,7 +1138,7 @@ class DashboardQueryWrapperUtils
                 title: it.title,
                 type: it.type,
                 attribute: it.attribute.deepClone(),
-                sortingType: it.sortingType
+                sortingType: top ? 'DESC' : it.sortingType
             )
         }
 
@@ -1142,13 +1148,12 @@ class DashboardQueryWrapperUtils
                 title: it.title,
                 type: it.type,
                 attribute: it.attribute.deepClone(),
-                sortingType: it.sortingType,
+                sortingType: top && diagramType == DiagramType.TABLE ? '' : it.sortingType,
                 format: it.format
             )
         }
 
         wrapper.setCases(requestData.source.classFqn,
-                         diagramType,
                          clonedAggregations.attribute?.findAll{!(it.code.contains(AttributeType.TOTAL_VALUE_TYPE) ||
                                                                  it.code.contains(AttributeType.VALUE_TYPE)) }?.sourceCode?.unique())
 
@@ -1167,7 +1172,7 @@ class DashboardQueryWrapperUtils
             wrapper.processAggregation(wrapper, criteria, totalValueCriteria, requestData, it as AggregationParameter, diagramType, top, onlyFilled)
         }
 
-        wrapper.setCases(requestData.source.classFqn, diagramType,
+        wrapper.setCases(requestData.source.classFqn,
                          clonedGroups.attribute?.findAll{ !(it.code.contains(AttributeType.TOTAL_VALUE_TYPE) ||
                                                             it.code.contains(AttributeType.VALUE_TYPE))}?.sourceCode?.unique())
 
@@ -1192,7 +1197,7 @@ class DashboardQueryWrapperUtils
                                                  it.code.contains('linkTemplate'))}?.sourceCode
         }
 
-        wrapper.setCases(requestData.source.classFqn, diagramType, filterAttributeSourceCodes?.toList())
+        wrapper.setCases(requestData.source.classFqn, filterAttributeSourceCodes?.toList())
 
         requestData.filters.each {
             if(templateUUID &&
