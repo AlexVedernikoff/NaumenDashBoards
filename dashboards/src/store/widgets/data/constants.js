@@ -233,8 +233,13 @@ const DEFAULT_NAVIGATION_SETTINGS = Object.freeze({
 });
 
 const DEFAULT_TOP_SETTINGS: DataTopSettings = Object.freeze({
-	count: 5,
+	count: null,
 	show: false
+});
+
+const DEFAULT_TOP_SETTINGS_INIT: DataTopSettings = Object.freeze({
+	count: 5,
+	show: true
 });
 
 /**
@@ -400,6 +405,7 @@ export {
 	DEFAULT_NUMBER_AXIS_FORMAT,
 	DEFAULT_TABLE_VALUE,
 	DEFAULT_TOP_SETTINGS,
+	DEFAULT_TOP_SETTINGS_INIT,
 	DIAGRAM_WIDGET_TYPES,
 	DISPLAY_MODE,
 	FONT_FAMILIES,

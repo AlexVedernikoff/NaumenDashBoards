@@ -130,7 +130,7 @@ export type Indicator = {
 };
 
 export type DataTopSettings = {
-	count: number | null,
+	count: ?number,
 	show: boolean
 };
 
