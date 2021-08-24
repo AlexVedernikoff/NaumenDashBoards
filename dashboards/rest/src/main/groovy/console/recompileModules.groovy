@@ -6,20 +6,10 @@
 /**
  * Скрипт для перекомпиляции модулей в нужном порядке
  */
-//Версия: 4.10.0.15
+//Версия: 4.13.0.4
 //Категория: Консольный скрипт
 
-import ru.naumen.core.server.script.spi.ScriptServiceImpl
-def scriptService = beanFactory.getBean(ScriptServiceImpl)
-scriptService.reloadModules([
-    'dashboardCommon',
-    'dashboardErrorHandler',
-    'dashboardMarshaller',
-    'dashboardFormulaCalculator',
-    'dashboardQueryWrapper',
-    'dashboardSettings',
-    'dashboardDataSet',
-    'dashboardDrilldown',
-    'dashboards',
-    'dashboardSendEmail'
-])
+import ru.naumen.modules.dashboards.*
+
+DashboardConfigService service = DashboardConfigService.instance
+service.compileModules()
