@@ -255,7 +255,7 @@ export class SourceFieldset extends Component<Props, State> {
 		const {fetchAttributesByCode, index, onChange, value} = this.props;
 		const {breakdown, dataKey, parameters, source} = value;
 		const classFqn = source.value?.value;
-		let indicators = DEFAULT_INDICATOR;
+		let indicators = [DEFAULT_INDICATOR];
 		const attribute = attributes.find(attribute => attribute.code === 'UUID') ?? null;
 
 		if (attribute) {
