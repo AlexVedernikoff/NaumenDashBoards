@@ -121,12 +121,12 @@ addMethod(mixed, 'group', function () {
 addMethod(object, 'topSettings', function () {
 	return object({
 		count: number().when(
-				'show', {
-					is: true,
-					otherwise: number().typeError('Значение ТОП должно быть числом').nullable(),
-					then: number().required('Укажите значение для ТОП показателя').typeError('Значение ТОП должно быть числом')
-				}
-			),
+			'show', {
+				is: true,
+				otherwise: number().typeError('Значение ТОП должно быть числом').nullable(),
+				then: number().required('Укажите значение для ТОП показателя').typeError('Значение ТОП должно быть числом')
+			}
+		),
 		show: boolean()
 	}).default(DEFAULT_TOP_SETTINGS);
 });
