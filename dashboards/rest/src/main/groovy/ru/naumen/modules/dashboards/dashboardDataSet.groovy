@@ -126,7 +126,7 @@ class DashboardDataSetService
      * @param widgetKey - ключ виджета
      * @return тело запроса
      */
-    Widget getWidgetSettingsByDashboardSettingsAndWidgetKey(DashboardSettingsClass dbSettings, String widgetKey)
+    Widget getWidgetSettingsByDashboardSettingsAndWidgetKey(DashboardSettingsClass dbSettings, String widgetKey, String currentUserLocale)
     {
         def widget = dbSettings.widgets.find { it.id == widgetKey }
         if(widget)
@@ -195,7 +195,7 @@ class DashboardDataSetService
     {
         currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
-        def widgetSettings = getWidgetSettingsByDashboardSettingsAndWidgetKey(dbSettings, widgetKey, user)
+        def widgetSettings = getWidgetSettingsByDashboardSettingsAndWidgetKey(dbSettings, widgetKey, currentUserLocale)
         subjectUUID = getCardObjectUUID(dbSettings, user) ?: subjectUUID
         def diagramType = widgetSettings.type as DiagramType
         String templateUUID = getTemplateUUID(widgetSettings)
