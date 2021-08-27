@@ -120,7 +120,7 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 	dispatch(requestWidgetSave());
 
 	try {
-		const widget = await api.dashboardSettings.widget.edit(getParams(), settings);
+		const widget = await api.instance.dashboardSettings.widget.edit(getParams(), settings);
 
 		dispatch(updateWidget(widget));
 		dispatch(saveNewLayouts());
@@ -149,7 +149,7 @@ const editWidgetChunkData = (widget: AnyWidget, chunkData: Object, refreshData: 
 				...chunkData
 			};
 
-			await api.dashboardSettings.widget.editChunkData(getParams(), widget.id, chunkData);
+			await api.instance.dashboardSettings.widget.editChunkData(getParams(), widget.id, chunkData);
 
 			dispatch(updateWidget(updatedWidgetData));
 			refreshData && dispatch(fetchBuildData(updatedWidgetData));
@@ -196,7 +196,7 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
 	try {
 		updateNewWidgetCustomColorsSettings(settings, state);
 
-		const widget = await api.dashboardSettings.widget.create(getParams(), settings);
+		const widget = await api.instance.dashboardSettings.widget.create(getParams(), settings);
 
 		batch(() => {
 			dispatch(deleteWidget(NewWidget.id));
@@ -229,7 +229,7 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 	try {
 		dispatch(checkWidgetsCount());
 
-		const widget = await api.dashboardSettings.widget.copyWidget(getParams(), dashboardKey, widgetKey);
+		const widget = await api.instance.dashboardSettings.widget.copyWidget(getParams(), dashboardKey, widgetKey);
 		const state = getState();
 
 		if (updateNewWidgetCustomColorsSettings(widget, state)) {
@@ -265,7 +265,7 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
 	dispatch(requestWidgetDelete());
 
 	try {
-		await api.dashboardSettings.widget.delete(getParams(), widgetId);
+		await api.instance.dashboardSettings.widget.delete(getParams(), widgetId);
 
 		batch(() => {
 			dispatch(removeLayouts(widgetId));
@@ -330,7 +330,7 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 		try {
 			let result = false;
 
-			({reasons, result} = await api.dashboardSettings.widget.checkToCopy(getParams(), dashboardKey, widgetKey));
+			({reasons, result} = await api.instance.dashboardSettings.widget.checkToCopy(getParams(), dashboardKey, widgetKey));
 			isValid = !result;
 
 			dispatch({

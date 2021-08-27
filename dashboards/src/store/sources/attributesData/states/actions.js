@@ -13,7 +13,7 @@ const fetchMetaClassStates = (metaClassFqn: string): ThunkAction => async (dispa
 	dispatch(requestMetaClassStates(metaClassFqn));
 
 	try {
-		const data = await api.dashboards.getStates(metaClassFqn);
+		const data = await api.instance.dashboards.getStates(metaClassFqn);
 
 		dispatch(receiveMetaClassStates({data, metaClassFqn}));
 	} catch (error) {

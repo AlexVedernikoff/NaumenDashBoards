@@ -49,9 +49,9 @@ const getUserLocalStorageId = () => {
 	let userId = '';
 
 	try {
-		contentCode = api.frame.getContentCode();
-		subjectUuid = api.frame.getSubjectUuid();
-		({uuid: userId} = api.frame.getCurrentUser());
+		contentCode = api.instance.frame.getContentCode();
+		subjectUuid = api.instance.frame.getSubjectUuid();
+		({uuid: userId} = api.instance.frame.getCurrentUser());
 	} catch (e) {
 		console.error(e);
 	}

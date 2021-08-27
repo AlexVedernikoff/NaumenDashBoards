@@ -25,7 +25,7 @@ const fetchRoots = (attribute: Attribute) => async (dispatch: Dispatch, getState
 			classFqn: metaClass,
 			types: getTypes(attribute)
 		};
-		const attributes = await api.dashboards.getDataSourceAttributes(requestPayload);
+		const attributes = await api.instance.dashboards.getDataSourceAttributes(requestPayload);
 		const payload = {
 			attributes,
 			type
@@ -68,7 +68,7 @@ const fetchNodes = (attribute: Attribute, node: Item) => async (dispatch: Dispat
 			deep: true,
 			types: getTypes(attribute)
 		};
-		const attributes = await api.dashboards.getAttributesFromLinkAttribute(requestPayload);
+		const attributes = await api.instance.dashboards.getAttributesFromLinkAttribute(requestPayload);
 
 		dispatch({
 			payload: {

@@ -35,7 +35,7 @@ const getDataForTableDiagram = async (state: AppState, widget: TableWidget, page
 		sorting
 	};
 	const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
-	const data = await api.dashboardDataSet.getDataForTableDiagram(
+	const data = await api.instance.dashboardDataSet.getDataForTableDiagram(
 		dashboard.settings.code,
 		widget.id,
 		context.subjectUuid,
@@ -105,7 +105,7 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 			const {context, dashboard} = getState();
 			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
 
-			const data = await api.dashboardDataSet.getDataForCompositeDiagram(
+			const data = await api.instance.dashboardDataSet.getDataForCompositeDiagram(
 				dashboard.settings.code,
 				widget.id,
 				context.subjectUuid,

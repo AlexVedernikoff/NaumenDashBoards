@@ -73,7 +73,7 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 
 	dispatch(requestLink(id));
 	try {
-		const {link} = await api.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code);
+		const {link} = await api.instance.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
@@ -96,7 +96,7 @@ const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch
 	dispatch(requestLink(value));
 
 	try {
-		const {link} = await api.dashboards.getCardObject(value);
+		const {link} = await api.instance.dashboards.getCardObject(value);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(value));
@@ -118,7 +118,7 @@ const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction 
 	dispatch(requestLink(dashboardId));
 
 	try {
-		const {link} = await api.dashboards.getDashboardLink(dashboardId);
+		const {link} = await api.instance.dashboards.getDashboardLink(dashboardId);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(dashboardId));

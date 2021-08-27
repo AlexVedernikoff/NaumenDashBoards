@@ -29,10 +29,10 @@ export const execAPITransport = (frame: FrameAPI): Transport => {
 };
 
 export default class ExecAPI extends CommonAPI {
-	constructor () {
-		const frame = new Frame();
-		const transport = execAPITransport(frame);
+	constructor (transport: ?Transport = null, frame: ?FrameAPI = null) {
+		const useFrame = frame ?? new Frame();
+		const useTransport = transport ?? execAPITransport(useFrame);
 
-		super(transport, frame);
+		super(useTransport, useFrame);
 	}
 }

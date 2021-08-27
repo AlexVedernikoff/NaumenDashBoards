@@ -1,5 +1,6 @@
 // @flow
 import type {DTOValue, FilterFormDescriptorDTO} from 'api/types';
+import {DASHBOARD_EDIT_MODE} from './constants';
 import type {FrameAPI} from 'api/interfaces';
 
 export default class Frame implements FrameAPI {
@@ -14,7 +15,8 @@ export default class Frame implements FrameAPI {
 	async getCurrentContentParameters () {
 		const result = await ({
 			MinTimeIntervalUpdate: 3,
-			editable: true
+			editable: [DASHBOARD_EDIT_MODE.USER_SOURCE]
+
 		});
 		return result;
 	}

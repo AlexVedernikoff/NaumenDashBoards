@@ -1,18 +1,22 @@
 'use strict';
 
-const CopyPlugin = require('copy-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
+const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
+const {development, license} = require('./define');
+const Dotenv = require('dotenv-webpack');
 const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { IgnorePlugin } = require('webpack');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { IgnorePlugin } = require('webpack');
-const {development, license} = require('./define');
 const packagejson = require('../package.json');
-const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
+const ParametersXMLWebpackPlugin = require('parameters-xml-webpack-plugin');
 
 const plugins = [
+	new ParametersXMLWebpackPlugin({
+		output: './dist/parameters.xml',
+		path: 'metainfo.xml'
+	}),
 	new BundleStatsWebpackPlugin({
 		outDir: '..',
 		silent: true
@@ -22,11 +26,6 @@ const plugins = [
 		chunkFilename: development ? '[id].css' : '[id].[hash].css',
 		filename: development ? '[name].css' : '[name].[hash].css'
 	}),
-	new CopyPlugin([
-		{
-			from: 'static'
-		}
-	]),
 	new HtmlWebpackPlugin({
 		filename: 'index.html',
 		template: './src/index.html',

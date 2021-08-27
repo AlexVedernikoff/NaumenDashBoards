@@ -8,7 +8,7 @@ const fetchUsers = (): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch(requestUsers());
 
 	try {
-		const data = await api.dashboardSettings.settings.getUsers();
+		const data = await api.instance.dashboardSettings.settings.getUsers();
 
 		dispatch(receiveUsers(data));
 	} catch (e) {
