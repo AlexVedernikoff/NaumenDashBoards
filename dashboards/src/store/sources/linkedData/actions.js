@@ -29,7 +29,7 @@ const fetchLinkedDataSources = (classFqn: string): ThunkAction => async (dispatc
 			classFqn,
 			types: [backBOLinks, boLinks, object]
 		};
-		const sources = await api.dashboards.getLinkedDataSources(payload);
+		const sources = await api.instance.dashboards.getLinkedDataSources(payload);
 
 		dispatch({
 			payload: {

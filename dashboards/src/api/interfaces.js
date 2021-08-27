@@ -91,7 +91,7 @@ export interface DashboardsAPI {
 	getCatalogObject(property: DTOValue): Promise<DTOValue>;
 	getDashboardLink(dashboardId: string): Promise<DTOValue>;
 	getDataSourceAttributes(params: DTOValue): Promise<DTOValue>;
-	getDataSources(): Promise<DTOValue>;
+	getDataSources(dashboardUUID: string): Promise<DTOValue>;
 	getDynamicAttributeGroups(actualDescriptor: DTOValue): Promise<DTOValue>;
 	getDynamicAttributes(groupCode: DTOValue): Promise<DTOValue>;
 	getLinkedDataSources(payload: DTOValue): Promise<DTOValue>;

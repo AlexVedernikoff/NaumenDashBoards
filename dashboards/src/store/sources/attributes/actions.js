@@ -18,7 +18,7 @@ const fetchAttributeByCode = (classFqn: string, attribute: Attribute): ThunkActi
 				attribute,
 				classFqn
 			};
-			const newAttribute = await api.dashboards.getAttributeByCode(params);
+			const newAttribute = await api.instance.dashboards.getAttributeByCode(params);
 			return newAttribute;
 		} catch (error) {
 			return null;
@@ -29,19 +29,21 @@ const fetchAttributeByCode = (classFqn: string, attribute: Attribute): ThunkActi
  * Получаем атрибуты конкретного класса
  * @param {string} classFqn - код класса
  * @param {string | null} parentClassFqn - код класса родителя
+ * @param {string | null} groupCode - фильтрация атрибутов по группе
  * @param {OnLoadCallback} callback - колбэк-функция
  * @returns {ThunkAction}
  */
-const fetchAttributes = (classFqn: string, parentClassFqn: string | null = null, callback?: OnLoadCallback): ThunkAction =>
+const fetchAttributes = (classFqn: string, parentClassFqn: string | null = null, groupCode: ?string, callback?: OnLoadCallback): ThunkAction =>
 	async (dispatch: Dispatch): Promise<void> => {
 		dispatch(requestAttributes(classFqn));
 
 		try {
 			const params = {
 				classFqn,
+				groupCode,
 				parentClassFqn
 			};
-			const attributes = await api.dashboards.getDataSourceAttributes(params);
+			const attributes = await api.instance.dashboards.getDataSourceAttributes(params);
 
 			callback && callback(attributes);
 			dispatch(receiveAttributes(attributes, classFqn));

@@ -15,7 +15,7 @@ const fetchDashboards = () => async (dispatch: Dispatch) => {
 	});
 
 	try {
-		const dashboards = await api.dashboardSettings.settings.getDashboardsAndWidgetsTree();
+		const dashboards = await api.instance.dashboardSettings.settings.getDashboardsAndWidgetsTree();
 
 		dispatch({
 			payload: dashboards,

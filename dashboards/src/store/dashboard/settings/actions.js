@@ -24,7 +24,6 @@ import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-
 import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
@@ -37,7 +36,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {ThunkAction}
  */
 const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {MinTimeIntervalUpdate: defaultInterval} = await api.frame.getCurrentContentParameters();
+	const {MinTimeIntervalUpdate: defaultInterval} = await api.instance.frame.getCurrentContentParameters();
 
 	if (defaultInterval) {
 		dispatch(changeAutoUpdateSettings({
@@ -60,14 +59,14 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		dispatch(getContext());
 		dispatch(getMetaCLass());
 		dispatch(getAutoUpdateSettings());
-		dispatch(getEditableParam());
+		await dispatch(getEditableParam());
 		dispatch(initPersonalValue());
 		dispatch(initLayoutMode());
 
+		await dispatch(getSettings());
 		await Promise.all([
 			dispatch(getDataSources()),
-			dispatch(getUserData()),
-			dispatch(getSettings())
+			dispatch(getUserData())
 		]);
 		dashboardResizer.resize();
 
@@ -122,10 +121,11 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			autoUpdate,
 			customColorsSettings,
 			dashboardKey: code,
+			dashboardUUID,
 			layouts,
 			mobileLayouts,
 			widgets
-		} = await api.dashboardSettings.settings.getSettings(payload);
+		} = await api.instance.dashboardSettings.settings.getSettings(payload);
 
 		batch(() => {
 			dispatch(setCode(code));
@@ -210,9 +210,9 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		});
 
 		const {context} = getState();
-		const {contentCode, editableDashboard: editable, subjectUuid: classFqn, user} = context;
+		const {contentCode, dashboardMode, subjectUuid: classFqn, user} = context;
 
-		await api.dashboardSettings.personalDashboard.create(classFqn, contentCode, editable);
+		await api.instance.dashboardSettings.personalDashboard.create(classFqn, contentCode, dashboardMode === DASHBOARD_EDIT_MODE.EDIT);
 
 		dispatch(setUserData({...user, hasPersonalDashboard: true}));
 		dispatch({
@@ -247,7 +247,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		const {context} = getState();
 		const {contentCode, subjectUuid, user} = context;
 
-		await api.dashboardSettings.personalDashboard.delete(subjectUuid, contentCode);
+		await api.instance.dashboardSettings.personalDashboard.delete(subjectUuid, contentCode);
 
 		dispatch(switchDashboard(false));
 		dispatch(setUserData({...user, hasPersonalDashboard: false}));
@@ -334,7 +334,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 	try {
 		const key = await uploadFile(file, name);
 
-		await api.fileToMail.send(key, type, name, users);
+		await api.instance.fileToMail.send(key, type, name, users);
 
 		dispatch({
 			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
@@ -362,7 +362,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	const {context, dashboard, sources, widgetForms} = getState();
 	const {contentCode} = context;
-	const {metaClass} = await api.frame.getCurrentContextObject();
+	const {metaClass} = await api.instance.frame.getCurrentContextObject();
 	let descriptorStr = '';
 	let foundKey;
 
@@ -430,7 +430,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 			isPersonal
 		};
 
-		await api.dashboardSettings.settings.saveAutoUpdate(payload);
+		await api.instance.dashboardSettings.settings.saveAutoUpdate(payload);
 
 		dispatch(setAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({

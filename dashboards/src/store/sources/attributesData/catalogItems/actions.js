@@ -13,7 +13,7 @@ const fetchCatalogItemData = (property: string): ThunkAction => async (dispatch:
 	dispatch(requestCatalogItemData(property));
 
 	try {
-		const data = await api.dashboards.getCatalogItemObject(property);
+		const data = await api.instance.dashboards.getCatalogItemObject(property);
 
 		dispatch(receiveCatalogItemData({data, property}));
 	} catch (error) {

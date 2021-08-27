@@ -31,7 +31,7 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filter
 		});
 
 		try {
-			const groups = await api.dashboards.getDynamicAttributeGroups(actualDescriptor);
+			const groups = await api.instance.dashboards.getDynamicAttributeGroups(actualDescriptor);
 
 			dispatch({
 				payload: {
@@ -61,7 +61,7 @@ const fetchDynamicAttributes = (dataKey: string, groupCode: string): ThunkAction
 	});
 
 	try {
-		const attributes = await api.dashboards.getDynamicAttributes(groupCode);
+		const attributes = await api.instance.dashboards.getDynamicAttributes(groupCode);
 
 		dispatch({
 			payload: {
