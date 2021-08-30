@@ -15,10 +15,10 @@ const reducer = (state: ContextState = initialContextState, action: ContextActio
 				...state,
 				...action.payload
 			};
-		case CONTEXT_EVENTS.SET_EDITABLE_PARAM:
+		case CONTEXT_EVENTS.SET_DASHBOARD_EDIT_MODE:
 			return {
 				...state,
-				editableDashboard: action.payload
+				dashboardMode: action.payload
 			};
 		case CONTEXT_EVENTS.SET_TEMP:
 			return {

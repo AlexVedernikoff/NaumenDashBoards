@@ -11,6 +11,7 @@ const CHANGE_SUMMARY_FORM_VALUES: 'widgetForms/changeSummaryFormValues' = 'widge
 const CHANGE_TABLE_FORM_VALUES: 'widgetForms/changeTableFormValues' = 'widgetForms/changeTableFormValues';
 const CHANGE_TEXT_FORM_VALUES: 'widgetForms/changeTextFormValues' = 'widgetForms/changeTextFormValues';
 const RESET_FORM: 'widgetForms/resetForm' = 'widgetForms/resetForm';
+const SET_USER_MODE: 'widgetForms/setUserMode' = 'widgetForms/setUserMode';
 
 const EVENTS = {
 	CHANGE_AXIS_CHART_FORM_VALUES,
@@ -20,7 +21,8 @@ const EVENTS = {
 	CHANGE_SUMMARY_FORM_VALUES,
 	CHANGE_TABLE_FORM_VALUES,
 	CHANGE_TEXT_FORM_VALUES,
-	RESET_FORM
+	RESET_FORM,
+	SET_USER_MODE
 };
 
 const DEFAULT_INDICATOR: Indicator = {

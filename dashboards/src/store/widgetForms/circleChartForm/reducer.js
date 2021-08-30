@@ -4,6 +4,7 @@ import {changeValuesByAxisOrComboChart, changeValuesBySpeedometerOrSummary, chan
 import {EVENTS} from 'store/widgetForms/constants';
 import {initialState} from './init';
 import type {State} from './types';
+import {userMode} from './constants';
 
 const reducer = (state: State = initialState, action: Action): State => {
 	switch (action.type) {
@@ -19,6 +20,8 @@ const reducer = (state: State = initialState, action: Action): State => {
 			return changeValuesByTable(state, action.payload);
 		case EVENTS.RESET_FORM:
 			return initialState;
+		case EVENTS.SET_USER_MODE:
+			return {...state, ...userMode};
 		default:
 			return state;
 	}

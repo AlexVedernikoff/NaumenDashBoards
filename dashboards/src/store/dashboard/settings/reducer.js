@@ -98,6 +98,11 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 				...state,
 				code: action.payload
 			};
+		case DASHBOARD_EVENTS.SET_DASHBOARD_UUID:
+			return {
+				...state,
+				dashboardUUID: action.payload
+			};
 		case DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL:
 			return {
 				...state,

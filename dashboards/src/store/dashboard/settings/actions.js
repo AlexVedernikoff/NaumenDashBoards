@@ -8,13 +8,15 @@ import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
+import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {DASHBOARD_EVENTS, FETCH_DASHBOARD_ERROR_TEXT} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
+import {getAllWidgets} from 'store/widgets/data/selectors';
 import {
 	getContext,
 	getEditableParam,
-	getMetaCLass,
+	getMetaClass,
 	getUserData,
 	setTemp,
 	setUserData
@@ -22,6 +24,7 @@ import {
 import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
+import {isRestrictUserModeDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState, switchState} from 'store/actions';
@@ -57,7 +60,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 	try {
 		dispatch(getContext());
-		dispatch(getMetaCLass());
+		dispatch(getMetaClass());
 		dispatch(getAutoUpdateSettings());
 		await dispatch(getEditableParam());
 		dispatch(initPersonalValue());
@@ -71,6 +74,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		dashboardResizer.resize();
 
 		dispatch(getPassedWidget());
+		dispatch(updateUserSourceMode());
 		dispatch(initStorageSettings());
 		dispatch({
 			type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
@@ -130,6 +134,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 		batch(() => {
 			dispatch(setCode(code));
 			dispatch(setCustomChartsColorsSettings(customColorsSettings));
+			dispatch(setDashboardUUID(dashboardUUID));
 
 			if (autoUpdate !== null) {
 				dispatch(setAutoUpdateSettings(autoUpdate));
@@ -412,6 +417,25 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 };
 
 /**
+ * Добавляем первый виджет для дашбордов  userSource
+ * @returns {ThunkAction}
+ */
+const updateUserSourceMode = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+	const state = getState();
+	const {dashboard} = state;
+	const isUserMode = isRestrictUserModeDashboard(state);
+	const widgets = getAllWidgets(state);
+
+	if (isUserMode && widgets.length === 0) {
+		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.BAR);
+
+		dispatch(addLayouts(newWidget.id));
+		dispatch(addNewWidget(newWidget));
+		dispatch(editDashboard());
+	}
+};
+
+/**
  * Сохраняет настройки автообновления
  * @param {boolean} enabled - параметр сообщает включено или выключено автообновление
  * @param {number} interval - интервал автообновления
@@ -419,14 +443,17 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
  */
 const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		const {context, dashboard} = getState();
+		const state = getState();
+		const {context, dashboard} = state;
 		const {contentCode, subjectUuid: classFqn} = context;
 		const {personal: isPersonal} = dashboard.settings;
 		const autoUpdateSetting = {enabled, interval: Number(interval)};
+		const isForUser = isUserModeDashboard(state);
 		const payload = {
 			autoUpdate: autoUpdateSetting,
 			classFqn,
 			contentCode,
+			isForUser,
 			isPersonal
 		};
 
@@ -532,6 +559,11 @@ const setCode = payload => ({
 	type: DASHBOARD_EVENTS.SET_CODE
 });
 
+const setDashboardUUID = payload => ({
+	payload,
+	type: DASHBOARD_EVENTS.SET_DASHBOARD_UUID
+});
+
 const setHideEditPanel = (payload: boolean) => ({
 	payload,
 	type: DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL
@@ -550,5 +582,6 @@ export {
 	seeDashboard,
 	sendToEmails,
 	setHideEditPanel,
-	switchDashboard
+	switchDashboard,
+	updateUserSourceMode
 };

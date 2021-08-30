@@ -42,6 +42,13 @@ const setWidgetValues = (widget: AnyWidget) => (dispatch: Dispatch) => {
 	}
 };
 
+const setWidgetUserMode = (widget: AnyWidget) => (dispatch: Dispatch) => {
+	dispatch({
+		payload: widget.id,
+		type: EVENTS.SET_USER_MODE
+	});
+};
+
 const changeAxisChartFormValues = (payload: AxisValues) => ({
 	payload,
 	type: EVENTS.CHANGE_AXIS_CHART_FORM_VALUES
@@ -90,5 +97,6 @@ export {
 	changeTableFormValues,
 	changeTextFormValues,
 	resetForm,
+	setWidgetUserMode,
 	setWidgetValues
 };

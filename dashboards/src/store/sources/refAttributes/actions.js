@@ -1,5 +1,6 @@
 // @flow
 import api from 'api';
+import type {AttrSetConditions} from 'store/widgetForms/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {OnLoadCallback} from 'store/sources/types';
@@ -10,24 +11,26 @@ const createRefKey = (attribute: Attribute) => `${attribute.metaClassFqn}$${attr
 /**
  * Получаем атрибуты ссылочного атрибута
  * @param {Attribute} refAttr - ссылочный атрибут
+ * @param {AttrSetConditions | null} attrSetConditions - фильтрация атрибутов по группе
  * @param {OnLoadCallback?} onLoadCallback - возвращает полученные атрибуты
  * @returns {ThunkAction}
  */
-const fetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const key = createRefKey(refAttr);
-	const {ref, ...attribute} = refAttr;
+const fetchRefAttributes = (refAttr: Attribute, attrSetConditions: ?AttrSetConditions, onLoadCallback?: OnLoadCallback): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		const key = createRefKey(refAttr);
+		const {ref, ...attribute} = refAttr;
 
-	dispatch(requestRefAttributes(key));
+		dispatch(requestRefAttributes(key));
 
-	try {
-		const data = await api.dashboards.getAttributesFromLinkAttribute({attribute});
+		try {
+			const data = await api.instance.dashboards.getAttributesFromLinkAttribute({...attrSetConditions, attribute});
 
-		onLoadCallback && onLoadCallback(data);
-		dispatch(receiveRefAttributes(data, key));
-	} catch (error) {
-		dispatch(recordRefAttributesError(key));
-	}
-};
+			onLoadCallback && onLoadCallback(data);
+			dispatch(receiveRefAttributes(data, key));
+		} catch (error) {
+			dispatch(recordRefAttributesError(key));
+		}
+	};
 
 const requestRefAttributes = (payload: string) => ({
 	payload,
