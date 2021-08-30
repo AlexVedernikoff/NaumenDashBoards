@@ -56,7 +56,7 @@ interface GanttSettingsController
 
     /**
      * Метод сохранение настроек в хранилища
-     * @param requestContent - тело запроса [subjectUUID:..., contentCode: ..., diagramSettings: {}]
+     * @param requestContent - тело запроса [subjectUUID:..., contentCode: ..., ganttSettings: {}]
      * @return настройки, отправленные в хранилище
      */
     String saveGanttSettings(Map<String, Object> requestContent)
@@ -96,7 +96,7 @@ class GanttSettingsImpl implements GanttSettingsController
     @Override
     String saveGanttSettings(Map<String, Object> requestContent)
     {
-        SaveGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, saveGanttSettings())
+        SaveGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, SaveGanttSettingsRequest)
         return Jackson.toJsonString(service.saveGanttSettings(request))
     }
 }
@@ -197,7 +197,7 @@ class GanttSettingsService
     {
         String subjectUUID = request.subjectUUID
         String contentCode = request.contentCode
-        GanttSettingsClass ganttSettings = request.diagramSettings
+        GanttSettingsClass ganttSettings = request.ganttSettings
 
         String ganttSettingsKey = ganttSettings?.diagramKey ?: generateDiagramKey(subjectUUID, contentCode)
 
@@ -646,6 +646,11 @@ class ResourceAndWorkSettings
      * Настройки для метакласса и фильтрации (работа/ресурс)
      */
     Source source
+
+    /**
+     * Уровень вложенности
+     */
+    Integer level
 
     /**
      * Признак вложенности
