@@ -15,7 +15,6 @@ import FormField from 'WidgetFormPanel/components/FormField';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {IndicatorsFormBoxProps} from 'TableWidgetForm/components/DataSetSettings/types';
-import {isAllowedTopAggregation} from 'store/widgets/helpers';
 import memoize from 'memoize-one';
 import NavigationBox from 'containers/NavigationBox';
 import type {OnChangeEvent} from 'components/types';
@@ -159,8 +158,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderDataTopField = () => {
 		const {values} = this.props;
 		const {data, top} = values;
-		const {indicators} = data[this.mainIndex];
-		const disabled = countIndicators(data) > 1 || !isAllowedTopAggregation(indicators[0].aggregation);
+		const disabled = countIndicators(data) > 1;
 
 		return (
 			<FormField name={DIAGRAM_FIELDS.top}>
