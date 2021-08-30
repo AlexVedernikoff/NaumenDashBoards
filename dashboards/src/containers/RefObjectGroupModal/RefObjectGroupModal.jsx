@@ -1,7 +1,8 @@
 // @flow
 import {connect} from 'react-redux';
 import CurrentObjectOrCondition from 'containers/CurrentObjectOrCondition';
-import GroupModal from 'GroupModal';
+import defaultComponents from 'GroupModal/defaultComponents';
+import GroupModal from 'containers/GroupModal';
 import memoize from 'memoize-one';
 import MultiSelectOrCondition from 'GroupModal/components/MultiSelectOrCondition';
 import type {Option, Props, RenderProps} from './types';
@@ -21,7 +22,7 @@ export class RefObjectGroupModal extends Component<Props> {
 	};
 
 	getComponents = memoize(() => ({
-		...GroupModal.defaultProps.components,
+		...defaultComponents,
 		OrCondition: this.renderOrConditionWithContextType,
 		SystemGroup: () => null
 	}));
@@ -102,7 +103,7 @@ export class RefObjectGroupModal extends Component<Props> {
 	);
 
 	render () {
-		const {attribute, customGroups, customType, onClose, onSubmit, orConditionOptions, value} = this.props;
+		const {attribute, customGroups, customType, isUserMode, onClose, onSubmit, orConditionOptions, value} = this.props;
 
 		return (
 			<GroupModal
@@ -110,6 +111,7 @@ export class RefObjectGroupModal extends Component<Props> {
 				components={this.getComponents()}
 				customGroups={customGroups}
 				customType={customType}
+				isUserMode={isUserMode}
 				onClose={onClose}
 				onSubmit={onSubmit}
 				orConditionOptions={orConditionOptions}

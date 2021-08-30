@@ -34,10 +34,14 @@ export class WidgetFormPanel extends PureComponent<Props, State> {
 	}
 
 	componentDidMount () {
-		const {setWidgetValues, widget} = this.props;
+		const {isUserMode, setWidgetUserMode, setWidgetValues, widget} = this.props;
 
 		this.setState({initialized: true});
 		widget.id !== NewWidget.id && setWidgetValues(widget);
+
+		if (isUserMode) {
+			setWidgetUserMode(widget);
+		}
 	}
 
 	componentWillUnmount () {

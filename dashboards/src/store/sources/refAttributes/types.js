@@ -1,4 +1,5 @@
 // @flow
+import type {AttrSetConditions} from 'store/widgetForms/types';
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {OnLoadCallback} from 'store/sources/types';
 import {REF_ATTRIBUTES_EVENTS} from './constants';
@@ -35,4 +36,4 @@ export type RefAttributesAction =
 
 export type RefAttributesState = AttributesMap;
 
-export type FetchRefAttributes = (refAttr: Attribute, onLoadCallback?: OnLoadCallback) => ThunkAction;
+export type FetchRefAttributes = (refAttr: Attribute, attrSetConditions: ?AttrSetConditions, onLoadCallback?: OnLoadCallback) => ThunkAction;

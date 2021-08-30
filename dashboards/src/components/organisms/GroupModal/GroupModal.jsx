@@ -1,7 +1,7 @@
 // @flow
 import {COMPONENTS_CONTEXT} from './HOCs/withComponents';
 import CustomGroup from './components/CustomGroup';
-import CustomGroupContainer from 'containers/CustomGroup';
+import defaultComponents from './defaultComponents';
 import {FIELDS} from './constants';
 import FormField from './components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
@@ -15,16 +15,11 @@ import type {Props, State} from './types';
 import RadioField from 'components/atoms/RadioField';
 import React, {Component, createRef, Fragment} from 'react';
 import styles from './styles.less';
-import SystemGroup from './components/SystemGroup';
 import TextInput from 'components/atoms/TextInput';
 
 export class GroupModal extends Component<Props, State> {
 	static defaultProps = {
-		components: {
-			CustomGroup: CustomGroupContainer,
-			OrCondition: () => null,
-			SystemGroup
-		},
+		components: defaultComponents,
 		systemOptions: []
 	};
 

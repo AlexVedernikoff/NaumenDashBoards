@@ -6,6 +6,7 @@ import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
 import {GROUP_WAYS} from 'store/widgets/constants';
+import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import React, {Component} from 'react';
 import SourceFieldset from 'WidgetFormPanel/components/SourceFieldset';
 
@@ -62,7 +63,8 @@ export class SourceFieldsetContainer extends Component<Props> {
 	};
 
 	setContext = async (): Promise<string | null> => {
-		const {value: sourceValue} = this.props.value.source;
+		const {isUserMode, value} = this.props;
+		const {value: sourceValue} = value.source;
 
 		if (sourceValue) {
 			const {value: classFqn} = sourceValue;
@@ -70,7 +72,20 @@ export class SourceFieldsetContainer extends Component<Props> {
 			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
 
 			try {
-				const {serializedContext} = await api.filterForm.openForm(context);
+				let useAttrFilter;
+
+				if (isUserMode) {
+					const attrSetConditions = parseAttrSetConditions(value.source);
+
+					if (attrSetConditions) {
+						const {groupCode} = attrSetConditions;
+
+						context['attrGroupCode'] = groupCode;
+						useAttrFilter = true;
+					}
+				}
+
+				const {serializedContext} = await api.instance.filterForm.openForm(context, useAttrFilter);
 
 				return serializedContext;
 			} catch (e) {

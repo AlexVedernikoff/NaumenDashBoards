@@ -4,6 +4,8 @@ import type {InjectedProps} from 'WidgetFormPanel/HOCs/withType/types';
 import type {OnChange, Values} from 'components/organisms/AxisChartWidgetForm/types';
 
 export type Props = InjectedProps & {
+	isRestrictUserMode: boolean,
+	isUserMode: boolean,
 	onChange: OnChange,
 	values: Values
 };
