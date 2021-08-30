@@ -1,10 +1,10 @@
 // @flow
 import type {ContextAction, ContextState} from './types';
-import {CONTEXT_EVENTS, USER_ROLES} from './constants';
+import {CONTEXT_EVENTS, DASHBOARD_EDIT_MODE, USER_ROLES} from './constants';
 
 export const initialContextState: ContextState = {
 	contentCode: '',
-	editableDashboard: false,
+	dashboardMode: DASHBOARD_EDIT_MODE.INIT,
 	metaClass: '',
 	subjectUuid: '',
 	switching: false,

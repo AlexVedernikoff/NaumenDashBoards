@@ -1,6 +1,7 @@
 // @flow
 import api from 'api';
 import {isSourceType} from 'store/sources/data/helpers';
+import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {store} from 'app.constants';
 
 /**
@@ -8,14 +9,17 @@ import {store} from 'app.constants';
  * @returns {void}
  */
 const getParams = () => {
-	const {context, dashboard} = store.getState();
+	const state = store.getState();
+	const {context, dashboard} = state;
 	const {contentCode, editableDashboard: editable, subjectUuid: classFqn} = context;
 	const {personal: isPersonal} = dashboard.settings;
+	const isForUser = isUserModeDashboard(state);
 
 	return {
 		classFqn,
 		contentCode,
 		editable,
+		isForUser,
 		isPersonal
 	};
 };

@@ -1,6 +1,6 @@
 // @flow
 import api from 'api';
-import {CONTEXT_EVENTS} from './constants';
+import {CONTEXT_EVENTS, DASHBOARD_EDIT_MODE} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {UserData} from './types';
 
@@ -9,24 +9,38 @@ import type {UserData} from './types';
  * @returns {ThunkAction}
  */
 const getEditableParam = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {editable = true} = await api.frame.getCurrentContentParameters();
+	const {editable = [DASHBOARD_EDIT_MODE.EDIT]} = await api.instance.frame.getCurrentContentParameters();
+	let mode;
+
+	if (Array.isArray(editable)) {
+		mode = editable[0];
+	} else {
+		// старый режим отображения
+		// В части случаев значение приходит строкой
+		mode = editable.toString() === 'true' ? DASHBOARD_EDIT_MODE.EDIT : DASHBOARD_EDIT_MODE.VIEW_ONLY;
+	}
+
+	if (mode === DASHBOARD_EDIT_MODE.USER || mode === DASHBOARD_EDIT_MODE.USER_SOURCE) {
+		api.reconfigure({
+			driver: process.env.API_DRIVER?.endsWith('-dev') ? 'userExec-dev' : 'userExec'
+		});
+	}
 
 	dispatch({
-		// В части случаев значение приходит строкой
-		payload: editable.toString() === 'true',
-		type: CONTEXT_EVENTS.SET_EDITABLE_PARAM
+		payload: mode,
+		type: CONTEXT_EVENTS.SET_DASHBOARD_EDIT_MODE
 	});
 };
 
 const getContext = (): ThunkAction => (dispatch: Dispatch) => {
-	const contentCode = api.frame.getContentCode();
-	const subjectUuid = api.frame.getSubjectUuid();
+	const contentCode = api.instance.frame.getContentCode();
+	const subjectUuid = api.instance.frame.getSubjectUuid();
 
 	dispatch(setContext({contentCode, subjectUuid}));
 };
 
-const getMetaCLass = (): ThunkAction => async (dispatch: Dispatch) => {
-	const {metaClass} = await api.frame.getCurrentContextObject();
+const getMetaClass = (): ThunkAction => async (dispatch: Dispatch) => {
+	const {metaClass} = await api.instance.frame.getCurrentContextObject();
 
 	dispatch(setContext({metaClass}));
 };
@@ -43,7 +57,7 @@ const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 		groupUser: role,
 		hasPersonalDashboard,
 		name
-	} = await api.dashboardSettings.settings.getUserData(payload);
+	} = await api.instance.dashboardSettings.settings.getUserData(payload);
 
 	dispatch(setUserData({
 		email,
@@ -71,7 +85,7 @@ const setTemp = (payload: Object | null) => ({
 export {
 	getContext,
 	getEditableParam,
-	getMetaCLass,
+	getMetaClass,
 	getUserData,
 	setTemp,
 	setUserData
