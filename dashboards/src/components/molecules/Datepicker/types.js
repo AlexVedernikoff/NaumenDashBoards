@@ -1,5 +1,5 @@
 // @flow
-import type Moment from 'moment';
+import moment from 'utils/moment.config';
 
 export type Props = {
 	onSelect: (date: string) => void,
@@ -7,5 +7,5 @@ export type Props = {
 };
 
 export type State = {
-	currentDate: Moment
+	currentDate: typeof moment;
 };

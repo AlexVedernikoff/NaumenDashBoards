@@ -39,7 +39,7 @@ export class Datepicker extends PureComponent<Props, State> {
 		});
 	};
 
-	getDays = (startDate: moment) => {
+	getDays = (startDate: typeof moment) => {
 		const days = [];
 
 		for (let i = 0; i < LIMIT_DAYS; i++) {
@@ -75,7 +75,7 @@ export class Datepicker extends PureComponent<Props, State> {
 
 	renderControl = (props: ControlProps) => <DatepickerControl {...props} />;
 
-	renderDay = (date: moment) => {
+	renderDay = (date: typeof moment) => {
 		const {value} = this.props;
 		const {currentDate} = this.state;
 		const isToday = moment().isSame(date, 'day');
