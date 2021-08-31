@@ -7,12 +7,6 @@ import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
  * @param {AppState} state - глобальное хранилище состояния
  * @returns {ConnectedProps}
  */
-export const props = (state: AppState): ConnectedProps => {
-	const {context, dashboard} = state;
-
-	return {
-		isUserMode: isUserModeDashboard(state),
-		personalDashboard: dashboard.settings.personal,
-		user: context.user
-	};
-};
+export const props = (state: AppState): ConnectedProps => ({
+	isUserMode: isUserModeDashboard(state)
+});

@@ -29,6 +29,7 @@ export type CustomGroup = {|
 |};
 
 export type Option = {
+	hasReferenceToCurrentObject?: boolean,
 	label: string,
 	value: string
 };

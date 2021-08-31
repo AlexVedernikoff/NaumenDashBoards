@@ -5,14 +5,15 @@ import BetweenOrCondition from 'GroupModal/components/BetweenOrCondition';
 import {connect} from 'react-redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DATETIME_SYSTEM_OPTIONS, FORMATS, OR_CONDITION_OPTIONS, SCHEMA, SYSTEM_OPTIONS} from './constants';
+import defaultComponents from 'GroupModal/defaultComponents';
 import type {Group} from 'store/widgets/data/types';
-import GroupModal from 'components/organisms/GroupModal';
+import GroupModal from 'containers/GroupModal';
 import memoize from 'memoize-one';
 import type {OrConditionProps} from 'components/organisms/GroupModal/types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 import {props} from './selectors';
-import type {Props, State} from './types';
 import type {Props as SystemGroupProps} from 'GroupModal/components/SystemGroup/types';
+import type {Props, State} from './types';
 import React, {Component, createContext, Fragment} from 'react';
 import SimpleOrCondition from 'GroupModal/components/SimpleOrCondition';
 import SystemDateGroupFormat from 'GroupModal/components/SystemDateGroupFormat';
@@ -27,7 +28,7 @@ export class DateGroupModal extends Component<Props, State> {
 	};
 
 	getComponents = memoize(() => ({
-		...GroupModal.defaultProps.components,
+		...defaultComponents,
 		OrCondition: this.renderOrCondition,
 		SystemGroup: this.renderSystemGroup
 	}));
@@ -98,7 +99,7 @@ export class DateGroupModal extends Component<Props, State> {
 	};
 
 	renderSystemGroup = (props: $Shape<SystemGroupProps>) => {
-		const {SystemGroup} = GroupModal.defaultProps.components;
+		const {SystemGroup} = defaultComponents;
 
 		return (
 			<Fragment>

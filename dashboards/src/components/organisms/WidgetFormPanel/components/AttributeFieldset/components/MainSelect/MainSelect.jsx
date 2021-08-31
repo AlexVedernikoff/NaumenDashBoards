@@ -23,10 +23,10 @@ export class MainSelect extends Component<Props> {
 	});
 
 	fetchAttributes = () => {
-		const {fetchAttributes, parentClassFqn, source} = this.props;
+		const {attrSetConditions, fetchAttributes, parentClassFqn, source} = this.props;
 		const classFqn = source?.value;
 
-		classFqn && fetchAttributes(classFqn, parentClassFqn);
+		classFqn && fetchAttributes(classFqn, parentClassFqn, attrSetConditions);
 	};
 
 	getOptionsData = () => {

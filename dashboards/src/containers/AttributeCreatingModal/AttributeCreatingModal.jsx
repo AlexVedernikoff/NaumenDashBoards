@@ -7,6 +7,7 @@ import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import {functions, props} from './selectors';
 import memoize from 'memoize-one';
 import type {Node, Tree} from 'components/molecules/TreeSelect/types';
+import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
@@ -16,20 +17,27 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 		const options = [];
 		const mainIndex = values.data.findIndex(dataSet => !dataSet.sourceForCompute);
 		const parentClassFqn = values.data[mainIndex]?.source.value.value ?? null;
+		const attrSetConditions = parseAttrSetConditions(values.data[mainIndex]?.source);
 
 		values.data.forEach(dataSet => {
 			const {dataKey, source} = dataSet;
-			const {value: sourceValue} = source;
+			let {value: sourceValue} = source;
 
 			if (sourceValue) {
 				const {value: classFqn} = sourceValue;
 				const children = attributes[classFqn]?.options ?? [];
 
+				sourceValue = {
+					...sourceValue,
+					attrSetConditions,
+					parentClassFqn: dataSet.sourceForCompute ? parentClassFqn : null
+				};
+
 				options.push({
 					children,
 					dataKey,
 					hasChildren: true,
-					source: dataSet.sourceForCompute ? {...sourceValue, parentClassFqn} : sourceValue
+					source: sourceValue
 				});
 			}
 		});
@@ -49,8 +57,9 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 
 	handleFetch = (node: Node) => {
 		const {fetchAttributes} = this.props;
+		const {attrSetConditions, parentClassFqn, value} = node.value;
 
-		fetchAttributes(node.value.value, node.value.parentClassFqn);
+		fetchAttributes(value, parentClassFqn, attrSetConditions);
 	};
 
 	render () {
