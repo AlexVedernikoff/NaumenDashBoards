@@ -1,10 +1,10 @@
 // @flow
-import type {SourceItem} from 'store/App/types';
+import type {ResourceSetting, SourceItem} from 'store/App/types';
 
 export type Props = {
-	handleAddNewBlock: Function,
+	handleAddNewBlock: (value: string) => void,
 	level: number,
-	onChange: Function,
+	onChange: (value: ResourceSetting) => void,
 	options: Array<SourceItem>,
 	value: SourceItem
 };

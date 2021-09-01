@@ -1,6 +1,7 @@
 // @flow
 import {api} from './';
 import {arrayToTree} from 'utils/arrayToTree';
+import {FilterFormDescriptorDTO} from './types';
 import type {Params, Settings, Source} from 'store/app/types';
 
 const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
@@ -14,7 +15,10 @@ const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
  * @returns {string} - uuid объекта, на карточке которого выведено ВП.
  */
 const getContext = (): string => {
-	return api.getSubjectUuid();
+	return {
+		contentCode: api.getContentCode(),
+		subjectUuid: api.getSubjectUuid()
+	};
 };
 
 /**
@@ -28,16 +32,51 @@ const getInitialParams = async (): Promise<Params> => {
 
 /**
  * Возвращает сохраненные настройки
- * @returns {Promise<Settings>} - настройки
+ * @returns {Promise<Params>} - настройки
  */
-const getInitialSettings = async (): Promise<Params> => {
-	const settings = await api.getInitialSettings();
+const getInitialSettings = async (contentCode: string, subjectUuid: string): Promise<Params> => {
+	const settings = await api.getInitialSettings(contentCode, subjectUuid);
 	return settings;
 };
 
 /**
+ * Возвращает список атрибутов для источника данных
+ * @returns {Promise<Source>} - атрибуты
+ */
+const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string = null): Promise<Source> => {
+	const attributes = await api.getDataSourceAttributes(classFqn, parentClassFqn);
+	return attributes;
+};
+
+/**
+ * Возвращает список атрибутов для источника данных по типам
+ * @returns {Promise<Source>} - атрибуты
+ */
+const getDataSourceAttributesByTypes = async (classFqn: string, types: string = null): Promise<Source> => {
+	const attributes = await api.getDataSourceAttributesByTypes(classFqn, types);
+	return attributes;
+};
+
+/**
+ * Отправляет сохраненные настройки
+ * @returns {Promise<Params>} - новые настройки
+ */
+const saveData = async (subjectUuid: string, contentCode: string, data: Settings): Promise<Params> => {
+	const res = await api.postData(subjectUuid, contentCode, data);
+	return res;
+};
+
+/**
+ * Открывает окно фильтрации
+ * @returns {string} - JSON объект с настройкой фильтрации
+ */
+const openFilterForm = (context: FilterFormDescriptorDTO): string => {
+	return api.openFilterForm(context);
+};
+
+/**
  * Возвращает список ресурсов и работ, которые могут быть вложены друг в друга
- * @returns {Promise<Source>} - ресурсы и работы
+ * @returns {Promise<Params>} - ресурсы и работы
  */
 const getDataSources = async (): Promise<Params> => {
 	const sources = await api.getDataSources();
@@ -53,8 +92,12 @@ const getDataSources = async (): Promise<Params> => {
 };
 
 export {
+	openFilterForm,
+	saveData,
 	getContext,
+	getDataSources,
+	getDataSourceAttributes,
+	getDataSourceAttributesByTypes,
 	getInitialParams,
-	getInitialSettings,
-	getDataSources
+	getInitialSettings
 };

@@ -4,75 +4,87 @@ export default {
 	'commonSettings': {
 		'columnSettings': [
 			{
-				'code': 'd951f959-640b-4b47-b7ed-6b2f0daf7867',
+				'code': 'd951f959-640b-4b47-b7ed-2f0daf7867',
 				'show': true,
 				'title': 'Название'
+			},
+			{
+				'code': 'd951f7',
+				'show': true,
+				'title': 'Другое'
+			},
+			{
+				'code': 'd951f9',
+				'show': false,
+				'title': 'Дата'
 			}
 		],
 		'rollUp': false,
 		'scale': 'MONTH'
 	},
-	'diagramKey': null,
+	'diagramKey': 'testGantt',
 	'resourceAndWorkSettings': [
 		{
 			'attributeSettings': [
 				{
 					'attribute': {
-						'code': 'title',
+						'code': "removalDate",
+						'declaredMetaClass': "abstractBO",
+						'metaClassFqn': "serviceCall$serviceCall",
 						'property': null,
-						'title': 'test',
-						'declaredMetaClass': null,
-						'type': null,
-						'metaClassFqn': 'serviceCall',
-						'sourceCode': null,
 						'ref': null,
-						'sourceName': null
+						'sourceCode': "serviceCall$serviceCall",
+						'sourceName': "Инцидент",
+						'title': "Дата архивирования",
+						'type': "dateTime"
 					},
-					'code': 'title',
-					'title': 'name'
+					'code': "d951f9",
+				},
+				{
+					'attribute': {
+						'code': "linkedSC",
+						'declaredMetaClass': "serviceCall",
+						'metaClassFqn': "serviceCall$serviceCall",
+						'property': "serviceCall",
+						'ref': null,
+						'sourceCode': "serviceCall$serviceCall",
+						'sourceName': "Инцидент",
+						'title': "Головной запрос"
+					},
+					'code': "d951f7",
+				},
+				{
+					'attribute': null,
+					'code': "d951f959-640b-4b47-b7ed-2f0daf7867",
 				}
 			],
 			'communicationResourceAttribute': null,
-			'communicationWorkAttribute': null,
-			'nested': true,
+			'nested': false,
 			'source': {
 				'descriptor': '',
 				'value': {
-					'label': 'Запрос',
-					'value': 'serviceCall'
+					'label': 'Обращение',
+					'value': 'serviceCall$call'
 				}
 			},
-			'level': 1,
-			'type': 'WORK'
+			'id': '123456789',
+			'parent': '',
+			'level': 0,
+			'type': 'RESOURCE'
 		},
 		{
 			'attributeSettings': [
 				{
 					'attribute': {
 						'code': 'title',
-						'property': null,
-						'title': 'test',
-						'declaredMetaClass': null,
-						'type': null,
-						'metaClassFqn': 'service',
-						'sourceCode': null,
-						'ref': null,
-						'sourceName': null
+						'title': '',
 					},
-					'code': 'title',
-					'title': 'name'
+					'code': 'd951f959-640b-4b47-b7ed-2f0daf7867',
 				}
 			],
 			'communicationResourceAttribute': {
-				'code': 'test_test',
-				'declaredMetaClass': null,
-				'property': 'serviceCall',
-				'metaClassFqn': 'service',
-				'title': 'test',
-				'ref': null,
-				'type': null,
-				'sourceCode': null,
-				'sourceName': null
+				'code': 'd951f7',
+				'title': 'Название'
 			},
 			'nested': true,
 			'source': {
@@ -82,7 +94,9 @@ export default {
 					'value': 'template'
 				}
 			},
-			'level': 5,
+			'id': '567876543456',
+			'parent': '123456789',
+			'level': 1,
 			'type': 'RESOURCE'
 		},
 		{
@@ -99,8 +113,7 @@ export default {
 						'ref': null,
 						'sourceName': null
 					},
-					'code': 'title',
-					'title': 'name'
+					'code': 'd951f7',
 				}
 			],
 			'communicationResourceAttribute': {
@@ -114,17 +127,7 @@ export default {
 				'sourceCode': null,
 				'sourceName': null
 			},
-			'endWorkAttribute': {
-				'code': 'test_end_date',
-				'declaredMetaClass': null,
-				'property': 'serviceCall',
-				'metaClassFqn': 'service',
-				'title': 'test date',
-				'ref': null,
-				'type': 'date',
-				'sourceCode': null,
-				'sourceName': null
-			},
+			'endWorkAttribute': null,
 			'nested': true,
 			'source': {
 				'descriptor': '',
@@ -134,7 +137,7 @@ export default {
 				}
 			},
 			'startWorkAttribute': {
-				'code': 'test_date',
+				'code': 'Атрибут',
 				'declaredMetaClass': null,
 				'metaClassFqn': 'service',
 				'property': 'serviceCall',
@@ -142,8 +145,11 @@ export default {
 				'sourceCode': null,
 				'title': 'test date',
 				'sourceName': null,
-				'type': 'date'
+				'type': 'date',
 			},
+			'communicationWorkAttribute': null,
+			'id': 'a099865',
+			'parent': '567876543456',
 			'level': 2,
 			'type': 'WORK'
 		}

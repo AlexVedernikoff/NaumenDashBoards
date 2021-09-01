@@ -11,7 +11,7 @@ const DropdownMenu = (props: Props) => {
 
 	const handleSelect = (value) => onSelect(value);
 
-	const renderItems = () => items.map((item, index) => <Item key={index} onClick={() => handleSelect(item)}>{item}</Item>);
+	const renderItems = () => items.map((item) => <Item key={item.code} onClick={() => handleSelect(item.code)}>{item.value}</Item>);
 
 	return (
 		<OutsideClickDetector onClickOutside={onToggle}>

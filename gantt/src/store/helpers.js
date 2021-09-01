@@ -9,7 +9,7 @@ const isSourceType = (classFqn: string) => classFqn.includes('$');
  * @returns {Array<string>}
  */
 const getSourceTypes = (classFqn: string) => {
-	const {sources} = store.getState();
+	const {sources} = store.getState().APP;
 	let types = sources[classFqn].children || [];
 
 	if (types.length > 0) {

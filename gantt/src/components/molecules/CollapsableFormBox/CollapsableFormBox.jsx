@@ -15,8 +15,18 @@ export class CollapsableFormBox extends PureComponent<Props, State> {
 
 	handleClick = () => this.setState({showContent: !this.state.showContent});
 
-	renderButton = () => {
-		const {handleAddNewBlock} = this.props;
+	renderButtons = () => {
+		const {handleAddNewBlock, handleDeleteBlock} = this.props;
+
+		if (handleDeleteBlock) {
+			return (
+				<>
+					<IconButton className={styles.icon} icon='BASKET' onClick={handleDeleteBlock} />
+					<IconButton className={styles.icon} icon='PLUS' onClick={handleAddNewBlock} />
+				</>
+			);
+		}
+
 		return <IconButton className={styles.icon} icon='PLUS' onClick={handleAddNewBlock} />;
 	};
 
@@ -38,7 +48,7 @@ export class CollapsableFormBox extends PureComponent<Props, State> {
 		const {title} = this.props;
 
 		return (
-			<FormBox className={styles.border} leftControl={this.renderControl()} rightControl={this.renderButton()} title={title}>
+			<FormBox className={styles.border} leftControl={this.renderControl()} rightControl={this.renderButtons()} title={title}>
 				{this.renderContent()}
 			</FormBox>
 		);

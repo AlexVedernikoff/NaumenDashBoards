@@ -33,6 +33,7 @@
     "smoothscroll-polyfill": "^0.4.4",
     "sortablejs": "^1.13.0",
     "tiny-uuid": "^1.0.0",
+    "uuid": "^8.3.2",
     "whatwg-fetch": "^3.4.1",
     "xlsx": "^0.15.6",
     "yup": "^0.27.0"
@@ -186,5 +187,5 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
-  "version": "2.1.1-0"
+  "version": "1.1.2"
 }

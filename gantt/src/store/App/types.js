@@ -1,8 +1,14 @@
 // @flow
 import {APP_EVENTS, USER_ROLES} from './constants';
 
+export type Column = {
+	code: string,
+	show: boolean,
+	title: string
+};
+
 export type CommonSettings = {
-	columnSettings: Array<Object>,
+	columnSettings: Array<Column>,
 	rollUp: boolean,
 	scale: string
 };
@@ -20,12 +26,19 @@ export type Source = {
 export type ResourceSetting = {
 	attributeSettings: Array<Object>,
 	communicationResourceAttribute: Object,
+	level: number,
 	nested: boolean,
 	source: Source,
 	type: string
 };
 
 export type ResourceSettings = Array<ResourceSetting>;
+
+export type Settings = {
+	commonSettings: CommonSettings,
+	diagramKey: string,
+	resourceAndWorkSettings: ResourceSettings
+};
 
 export type UserRole = $Keys<typeof USER_ROLES>;
 
@@ -48,11 +61,6 @@ type SetError = {
 	type: typeof APP_EVENTS.SET_ERROR
 };
 
-type SetParams = {
-	payload: Params,
-	type: typeof APP_EVENTS.SET_PARAMS
-};
-
 type DefaultAppAction = {
 	payload: null,
 	type: typeof APP_EVENTS.UNKNOWN_APP_ACTION
@@ -61,7 +69,6 @@ type DefaultAppAction = {
 export type AppAction =
 	| ShowLoader
 	| HideLoader
-	| SetParams
 	| SetError
 	| DefaultAppAction
 ;

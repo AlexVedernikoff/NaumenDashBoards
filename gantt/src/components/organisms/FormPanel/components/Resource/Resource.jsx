@@ -1,28 +1,56 @@
 // @flow
 import 'rc-menu/assets/index.css';
+import type {Attribute} from 'store/attributes/types';
 import {Button, Checkbox, ConfirmModal, Container, FormControl, Icon, Select, TreeSelect} from 'naumen-common-components';
 import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
+import {Column, SourceItem} from 'src/store/App/types';
+import {connect} from 'react-redux';
+import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn} from 'components/organisms/FormPanel/utils';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
+import {deepClone} from 'helpers';
+import {defaultAttributeSetting, ITEM_TYPES_FOR_ALL} from 'src/store/App/constants';
 import DropdownMenu from 'components/atoms/DropdownMenu';
-import {ItemTypes, TableColumnNames} from '../../FormPanel';
+import {functions, props} from './selectors';
+import {openFilterForm} from 'utils/api/context';
 import type {Props} from './types';
 import React, {useState} from 'react';
+import ResourceIcon from 'icons/ResourceIcon';
 import styles from './styles.less';
 
 const Resource = (props: Props) => {
-	const {level, onChange, value: resource} = props;
-	const [valueAttribute, setValueAttribute] = useState({});
+	const {columns, index, level, onChange, value: resource} = props;
+	const [attributeSettingsModal, setAttributeSettingsModal] = useState([]);
+	const [valueAttributes, setValueAttributes] = useState({});
+	const [loading, setLoading] = useState({});
 	const [showModal, setShowModal] = useState(false);
 	const [showMenu, setShowMenu] = useState(false);
 
-	const changeSource = (source) => onChange({...resource, 'source': {descriptor: null, value: source}});
+	const changeSource = (source: SourceItem) => {
+		setValueAttributes({});
+		setLoading({});
+		onChange({...resource, attributeSettings: [defaultAttributeSetting], communicationResourceAttribute: null, communicationWorkAttribute: null, source: {descriptor: '', value: source}});
+	};
 
 	const handleRemoveSource = () => changeSource(null);
 
-	const handleSelect = ({value: node}) => changeSource(node.value);
+	const handleSourceSelect = ({value: node}) => changeSource(node.value);
 
-	const handleAddNewBlock = (target) => {
+	const handleAttributeSelect = (target: Attribute, code: string) => {
+		const selectedAttr = attributeSettingsModal.find(attr => attr.code === code);
+
+		if (!selectedAttr) {
+			setAttributeSettingsModal([...attributeSettingsModal, { ...defaultAttributeSetting, attribute: copyWithExclusion(target.value, ['label', 'value']), code: code }]);
+		} else {
+			setAttributeSettingsModal([...attributeSettingsModal, {...selectedAttr, attribute: target.value}]);
+		}
+	};
+
+	const handleAttributeBondWithResource = (target: Attribute) => {
+		onChange({...resource, communicationResourceAttribute: copyWithExclusion(target.value, ['label', 'value'])});
+	};
+
+	const handleAddNewBlock = (target: string) => {
 		const {handleAddNewBlock} = props;
 
 		setShowMenu(!showMenu);
@@ -32,32 +60,38 @@ const Resource = (props: Props) => {
 		}
 	};
 
-	// чекбокс отвечает за вложенность, если он выбран, глубина (вложенность) должна повыситься, если снять - уменьшиться
-	const handleCheckboxChange = () => {
-		onChange({...resource, 'level': getUpdatedLevel(resource.level, resource.nested), 'nested': !resource.nested});
+	const handleDeleteBlock = () => {
+		const {handleDeleteBlock} = props;
+		return handleDeleteBlock();
 	};
 
-	const handleOpenFilterForm = async (): Promise<string | null> => {
-		try {
-			const {value: classFqn} = resource.source.value;
-			const context = resource.source.value ? getFilterContext(resource.source.value, classFqn) : createFilterContext(classFqn);
-			const {serializedContext} = await window.jsApi.commands.filterForm(context);
+	const handleCheckboxChange = () => {
+		const {handleUpdateChildrenLevel} = props;
+		handleUpdateChildrenLevel(!resource.nested);
+	};
 
-			return serializedContext;
+	const handleOpenFilterForm = async () => {
+		try {
+			const {value: classFqn} = resource?.source?.value;
+			const descriptor = resource?.source?.descriptor;
+			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
+			const {serializedContext} = await openFilterForm(context);
+
+			onChange({...resource, source: {...resource.source, descriptor: serializedContext}});
 		} catch (e) {
 			console.error('Ошибка окна фильтрации: ', e);
 		}
 	};
 
 	const renderFilter = () => {
-		const active = false;
+		const active = resource?.source?.descriptor;
 		const iconName = active ? 'FILLED_FILTER' : 'FILTER';
 
 		return (
-			<div className={styles.filterButton} onClick={() => handleOpenFilterForm()}>
+			<button className={styles.filterButton} disabled={!resource?.source?.value} onClick={handleOpenFilterForm}>
 				<Icon name={iconName} />
 				<span className={styles.desc}>Фильтрация</span>
-			</div>
+			</button>
 		);
 	};
 
@@ -68,7 +102,7 @@ const Resource = (props: Props) => {
 			<TreeSelect
 				className={styles.sourceTreeSelect}
 				onRemove={handleRemoveSource}
-				onSelect={handleSelect}
+				onSelect={handleSourceSelect}
 				options={options}
 				removable={true}
 				value={resource.source.value}
@@ -76,11 +110,28 @@ const Resource = (props: Props) => {
 		);
 	};
 
+	const handleAttributesButton = () => {
+		const {fetchAttributes} = props;
+
+		setAttributeSettingsModal(deepClone(resource.attributeSettings));
+
+		if (resource.source.value?.value) {
+			setLoading({attributes: true});
+			fetchAttributes(resource.source.value.value, null, (attributes) => {
+				setValueAttributes({...valueAttributes, attributes: attributes});
+				setLoading({attributes: false});
+			});
+		}
+
+		setShowModal(!showModal);
+	};
+
 	const renderAttributesButton = () => {
 		return (
 			<Button
 				className={styles.button}
-				onClick={() => setShowModal(!showModal)}
+				disabled={!resource.source.value?.value}
+				onClick={handleAttributesButton}
 				variant='ADDITIONAL'
 			>
 				Атрибуты для таблицы
@@ -90,53 +141,114 @@ const Resource = (props: Props) => {
 
 	const renderNestedCheckbox = () => {
 		return (
-			<FormControl
-				className={styles.margin}
-				label='Вложенный ресурс'
-			>
+			<FormControl className={styles.margin} label='Вложенный ресурс'>
 				<Checkbox checked={resource.nested} name='Checkbox' onChange={handleCheckboxChange} value={resource.nested} />
 			</FormControl>
 		);
 	};
 
+	const getOptionsForBondWithResource = () => {
+		const {fetchAttributes} = props;
+
+		if (resource.source.value?.value) {
+			setLoading({bondWithResource: true});
+			fetchAttributes(resource.source.value.value, getParentClassFqn(resource.parent), (attributes) => {
+				setValueAttributes({...valueAttributes, bondWithResource: attributes});
+				setLoading({bondWithResource: false});
+			});
+		}
+	};
+
 	const renderBondWithResource = () => {
-		// пока заглушка resource.communicationResourceAttribute
+		const newValueAttributes: Array<Attribute> = valueAttributes?.bondWithResource && valueAttributes.bondWithResource.map(item => item && getAdditionalFields(item, item.title, item.code));
+		const resourceAttribute = resource?.communicationResourceAttribute;
+		const currentValue: null | Attribute = resourceAttribute ? getAdditionalFields(resourceAttribute, resourceAttribute.title, resourceAttribute.code) : null;
+
 		return (
-			<Select className={cn(styles.margin, styles.width)} onSelect={() => console.log(1)} options={ItemTypes} placeholder='Атрибут связи с ресурсом' value={null} />
+			<Select className={cn(styles.margin, styles.width)}
+				fetchOptions={getOptionsForBondWithResource}
+				isSearching={true}
+				loading={loading?.bondWithResource}
+				onSelect={handleAttributeBondWithResource}
+				options={newValueAttributes}
+				placeholder='Связь с вышестоящим ресурсом'
+				value={currentValue}
+			/>
 		);
 	};
 
-	const getContentModal = () => (
-		// пока заглушка
-		<ul className={styles.list}>
-			{TableColumnNames.map((item) => (
-				<li className={styles.item} key={item}>
-					<span>{item}</span>
-					<Select className={styles.width} notice={false} onSelect={() => setValueAttribute(item)} options={ItemTypes} placeholder='Выберите элемент' value={valueAttribute} />
-				</li>
-			))}
-		</ul>
-	);
+	const getAttribute = (codeColumn: string): null | Array<Attribute> => {
+		const attributeSetting = attributeSettingsModal.find((item) => codeColumn === item.code);
+		const attribute = attributeSetting?.attribute;
 
-	const getUpdatedLevel = (oldLevel, isNested) => oldLevel + (1 - 2 * isNested);
+		if (attribute?.code && !attribute.title && valueAttributes?.attributes) {
+			const defaultAttribute = valueAttributes.attributes.find((item) => attribute.code === item.code);
+			return defaultAttribute ? getAdditionalFields(defaultAttribute, defaultAttribute.title, defaultAttribute.code) : null;
+		}
 
-	const paddingLeftForChildren = {paddingLeft: `${level * 36}px`};
+		return attribute ? getAdditionalFields(attribute, attribute.title, attribute.code) : null;
+	};
+
+	const renderColumn = (column: Column, options: Array<Attribute>) => {
+		return (
+			<li className={styles.item} key={column.code}>
+				<span className={styles.title}>{column.title}</span>
+				<Select className={styles.width}
+					isSearching={true}
+					loading={loading?.attributes}
+					onSelect={(value) => handleAttributeSelect(value, column.code)}
+					options={options} placeholder='Выберите элемент'
+					value={getAttribute(column.code)}
+				/>
+			</li>
+		);
+	};
+
+	const getContentModal = () => {
+		const newValueAttributes: Array<Attribute> = valueAttributes?.attributes && valueAttributes.attributes.map(item => item && getAdditionalFields(item, item.title, item.code));
+
+		return (
+			<ul className={styles.list}>
+				{columns.map((column) => renderColumn(column, newValueAttributes))}
+			</ul>
+		);
+	};
+
+	const getHeaderForm = () => {
+		return (
+			<div className={styles.header}>
+				<ResourceIcon />
+				<span>{resource?.source?.value?.label || 'Ресурс'}</span>
+			</div>
+		);
+	};
+
+	const handleCancelModal = () => {
+		setShowModal(!showModal);
+		setAttributeSettingsModal([]);
+	};
+
+	const handleSaveModal = () => {
+		onChange({...resource, attributeSettings: attributeSettingsModal});
+		setShowModal(!showModal);
+		setAttributeSettingsModal([]);
+	};
 
 	return (
-		<div className={styles.border} style={paddingLeftForChildren}>
-			{showMenu && <DropdownMenu items={ItemTypes} onSelect={(item) => handleAddNewBlock(item)} onToggle={handleAddNewBlock} />}
-			<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} title='Ресурс'>
+		<div className={styles.border} style={getPaddingLeftForChildren(level)}>
+			{showMenu && <DropdownMenu items={ITEM_TYPES_FOR_ALL} onSelect={(item) => handleAddNewBlock(item)} onToggle={() => handleAddNewBlock()} />}
+			<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={handleDeleteBlock} title={getHeaderForm()}>
 				<Container className={styles.container}>
 					{renderTreeSelect()}
 					{renderFilter()}
 					{renderAttributesButton()}
-					{renderNestedCheckbox()}
+					{!!index && renderNestedCheckbox()}
 					{resource.nested && renderBondWithResource()}
 				</Container>
 			</CollapsableFormBox>
-			{showModal && <ConfirmModal header='Атрибуты для таблицы' onClose={() => setShowModal(!showModal)} onSubmit={() => setShowModal(!showModal)} text={getContentModal()} />}
+			{showModal && <ConfirmModal header='Атрибуты для таблицы' notice={false} onClose={handleCancelModal} onSubmit={handleSaveModal} text={columns && getContentModal()} />}
 		</div>
 	);
 };
 
-export default Resource;
+export default connect(props, functions)(Resource);

@@ -1,18 +1,22 @@
 // @flow
 import type {AppState} from 'store/types';
-import {deepClone} from 'src/helpers';
-import {setResourceSettings} from 'store/App/actions';
+import {cancelSettings, saveSettings, setCommonSettings, setResourceSettings} from 'store/App/actions';
 
 const props = (state: AppState) => {
-	const {resources, sources} = state.APP;
+	const {diagramKey, resources, settings, sources} = state.APP;
 
 	return {
-		resources: deepClone(resources),
+		diagramKey,
+		resources,
+		settings,
 		sources
 	};
 };
 
 const functions = {
+	cancelSettings,
+	saveSettings,
+	setCommonSettings,
 	setResourceSettings
 };
 

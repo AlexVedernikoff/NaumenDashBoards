@@ -10,15 +10,8 @@ const resolve = require('./resolve');
 module.exports = {
 	devServer: {
 		historyApiFallback: true,
-		host: localIp(),
-		proxy: {
-			'/sd/services/rest/*': {
-				changeOrigin: true,
-				target: process.env.API_URL
-			}
-		}
+		host: localIp()
 	},
-	devtool: define.development ? 'source-map' : false,
 	entry: {
 		'index': ['babel-polyfill', './src/index.js']
 	},

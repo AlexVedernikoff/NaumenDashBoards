@@ -4,9 +4,12 @@ import {APP_EVENTS, USER_ROLES} from './constants';
 
 export const initialAppState: AppState = {
 	contentCode: '',
+	diagramKey: '',
 	error: false,
 	hideEditPanel: false,
 	loading: true,
+	masterResources: [],
+	masterSettings: {},
 	metaClass: '',
 	resources: [],
 	settings: {},

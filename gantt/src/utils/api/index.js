@@ -3,16 +3,24 @@ import Api from './api';
 import FakeApi from './fakeApi';
 import {
 	getContext,
+	getDataSourceAttributes,
+	getDataSourceAttributesByTypes,
 	getDataSources,
 	getInitialParams,
-	getInitialSettings
+	getInitialSettings,
+	openFilterForm,
+	saveData
 } from './context';
 
 export {
 	getContext,
+	getDataSourceAttributes,
+	getDataSourceAttributesByTypes,
 	getDataSources,
 	getInitialParams,
-	getInitialSettings
+	getInitialSettings,
+	openFilterForm,
+	saveData
 };
 
 export const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();
