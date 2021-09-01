@@ -509,12 +509,21 @@ class DashboardConfigService
         }
         String licInfo = str - NAME_PACKAGE - '_v'
 
+        // Требуемая версия выше 1.0.хх (2.0.0 и выше): проводим обе миграции данных по очереди.
         if (licInfo.substring(0, 4) != VERSION_START_TOKENS)
         {
-            logger.info("Версия сборки значительно отличается от ${ VERSION_START_TOKENS }x.")
-            // Здесь в будущем добавится логика работы на версиях старше 1.0.х
+            if (isVersionLessThan5())
+            {
+                migrateWidgetsSettingsInSeparateNamespaces()
+            }
+            if (isVersionFrom5To8())
+            {
+                migrateWidgetsIntoDashboards()
+            }
             return
         }
+
+        // Вычисляем в строке версии третий токен 1.0.x
         licInfo -= VERSION_START_TOKEN
         def tokens = licInfo.tokenize('_')
         Integer versionDataNeeds = tokens[0].toInteger()
