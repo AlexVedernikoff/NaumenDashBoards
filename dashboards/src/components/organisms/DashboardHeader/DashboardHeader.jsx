@@ -94,11 +94,11 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	renderDisplayModeButton = () => {
-		const {layoutMode, personalDashboard, user} = this.props;
+		const {isUserMode, layoutMode, personalDashboard, user} = this.props;
 		const isMobileLayoutMode = layoutMode === LAYOUT_MODE.MOBILE;
 		const customTip = isMobileLayoutMode ? 'Переключиться в WEB представление' : 'Переключиться в мобильное представление';
 
-		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+		if (!isUserMode && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
 			return (
 				<div className={styles.displayModeContainer}>
 					<IconButton
@@ -197,6 +197,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {
 			createPersonalDashboard,
 			editableDashboard,
+			isUserMode,
 			personalDashboard,
 			personalDashboardCreating,
 			user
@@ -204,16 +205,16 @@ export class DashboardHeader extends Component<Props, State> {
 		const {hasPersonalDashboard, role} = user;
 		const {SUPER} = USER_ROLES;
 
-		if (role !== SUPER && !hasPersonalDashboard && !personalDashboard && editableDashboard) {
+		if (role !== SUPER && !isUserMode && !hasPersonalDashboard && !personalDashboard && editableDashboard) {
 			return this.renderNavButton('Сохранить себе', createPersonalDashboard, personalDashboardCreating);
 		}
 	};
 
 	renderSwitchDashboardButton = () => {
-		const {personalDashboard, switching, user} = this.props;
+		const {isUserMode, personalDashboard, switching, user} = this.props;
 		const {hasPersonalDashboard} = user;
 
-		if (hasPersonalDashboard) {
+		if (!isUserMode && hasPersonalDashboard) {
 			return (
 				<NavItem>
 					<ButtonGroup disabled={switching}>

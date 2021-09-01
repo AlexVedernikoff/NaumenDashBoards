@@ -1,5 +1,6 @@
 // @flow
 import api from 'api';
+import type {AttrSetConditions} from 'store/widgetForms/types';
 import type {Attribute} from './types';
 import {ATTRIBUTES_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -18,7 +19,7 @@ const fetchAttributeByCode = (classFqn: string, attribute: Attribute): ThunkActi
 				attribute,
 				classFqn
 			};
-			const newAttribute = await api.dashboards.getAttributeByCode(params);
+			const newAttribute = await api.instance.dashboards.getAttributeByCode(params);
 			return newAttribute;
 		} catch (error) {
 			return null;
@@ -29,19 +30,21 @@ const fetchAttributeByCode = (classFqn: string, attribute: Attribute): ThunkActi
  * Получаем атрибуты конкретного класса
  * @param {string} classFqn - код класса
  * @param {string | null} parentClassFqn - код класса родителя
+ * @param {AttrSetConditions | null} attrSetConditions - фильтрация атрибутов по выборке
  * @param {OnLoadCallback} callback - колбэк-функция
  * @returns {ThunkAction}
  */
-const fetchAttributes = (classFqn: string, parentClassFqn: string | null = null, callback?: OnLoadCallback): ThunkAction =>
+const fetchAttributes = (classFqn: string, parentClassFqn: ?string = null, attrSetConditions: ?AttrSetConditions = null, callback?: OnLoadCallback): ThunkAction =>
 	async (dispatch: Dispatch): Promise<void> => {
 		dispatch(requestAttributes(classFqn));
 
 		try {
 			const params = {
+				...attrSetConditions,
 				classFqn,
 				parentClassFqn
 			};
-			const attributes = await api.dashboards.getDataSourceAttributes(params);
+			const attributes = await api.instance.dashboards.getDataSourceAttributes(params);
 
 			callback && callback(attributes);
 			dispatch(receiveAttributes(attributes, classFqn));

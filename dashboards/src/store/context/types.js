@@ -1,10 +1,12 @@
 // @flow
-import {CONTEXT_EVENTS, USER_ROLES} from './constants';
+import {CONTEXT_EVENTS, DASHBOARD_EDIT_MODE, USER_ROLES} from './constants';
 import type {CustomGroupsState} from 'store/customGroups/types';
 import type {DashboardState} from 'store/dashboard/types';
 import type {WidgetsState} from 'store/widgets/types';
 
 export type UserRole = $Keys<typeof USER_ROLES>;
+
+export type DashboardEditMode = $Values<typeof DASHBOARD_EDIT_MODE>;
 
 export type Context = {
 	contentCode: string,
@@ -40,8 +42,8 @@ type SetContext = {
 };
 
 type SetEditableParam = {
-	payload: boolean,
-	type: typeof CONTEXT_EVENTS.SET_EDITABLE_PARAM
+	payload: DashboardEditMode,
+	type: typeof CONTEXT_EVENTS.SET_DASHBOARD_EDIT_MODE
 };
 
 type SetTemp = {
@@ -74,7 +76,7 @@ export type ContextAction =
 
 export type ContextState = {
 	contentCode: string,
-	editableDashboard: boolean,
+	dashboardMode: $Values<typeof DASHBOARD_EDIT_MODE>,
 	metaClass: string,
 	subjectUuid: string,
 	switching: boolean,

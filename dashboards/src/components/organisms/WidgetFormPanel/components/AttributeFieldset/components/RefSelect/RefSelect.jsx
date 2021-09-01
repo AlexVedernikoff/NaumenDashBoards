@@ -12,9 +12,9 @@ export class RefSelect extends PureComponent<Props> {
 	components = null;
 
 	fetchAttributes = () => {
-		const {fetchRefAttributes, parent} = this.props;
+		const {attrSetConditions, fetchRefAttributes, parent} = this.props;
 
-		parent && fetchRefAttributes(parent);
+		parent && fetchRefAttributes(parent, attrSetConditions);
 	};
 
 	getComponents = () => {

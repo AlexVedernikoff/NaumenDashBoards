@@ -9,7 +9,8 @@ import {
 } from './constants';
 import BetweenOrCondition from 'GroupModal/components/BetweenOrCondition';
 import {connect} from 'react-redux';
-import GroupModal from 'GroupModal';
+import defaultComponents from 'GroupModal/defaultComponents';
+import GroupModal from 'containers/GroupModal';
 import MaterialSelect from 'components/molecules/MaterialSelect';
 import memoize from 'memoize-one';
 import type {OrConditionProps} from 'GroupModal/types';
@@ -42,7 +43,7 @@ export class TimerGroupModal extends Component<Props, State> {
 	}
 
 	getComponents = memoize(() => ({
-		...GroupModal.defaultProps.components,
+		...defaultComponents,
 		OrCondition: this.renderOrCondition,
 		SystemGroup: () => null
 	}));
@@ -74,17 +75,17 @@ export class TimerGroupModal extends Component<Props, State> {
 		const {orConditionOptions} = this.state;
 
 		return (
-				<GroupModal
-					attribute={attribute}
-					components={this.getComponents()}
-					customGroups={customGroups}
-					customType={attribute.type}
-					onClose={onClose}
-					onSubmit={onSubmit}
-					orConditionOptions={orConditionOptions}
-					schema={SCHEMA}
-					value={value}
-				/>
+			<GroupModal
+				attribute={attribute}
+				components={this.getComponents()}
+				customGroups={customGroups}
+				customType={attribute.type}
+				onClose={onClose}
+				onSubmit={onSubmit}
+				orConditionOptions={orConditionOptions}
+				schema={SCHEMA}
+				value={value}
+			/>
 		);
 	}
 }

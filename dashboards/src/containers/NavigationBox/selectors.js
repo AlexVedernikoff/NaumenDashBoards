@@ -2,6 +2,7 @@
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchDashboards} from 'src/store/dashboards/actions';
+import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
@@ -12,6 +13,7 @@ export const props = (state: AppState): ConnectedProps => {
 
 	return {
 		dashboards: state.dashboards,
+		isUserMode: isUserModeDashboard(state),
 		personalDashboard: dashboard.settings.personal,
 		user: context.user
 	};

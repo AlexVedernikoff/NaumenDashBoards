@@ -14,6 +14,7 @@ import styles from './styles.less';
 export class TreeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
+		disabled: false,
 		getOptionLabel,
 		getOptionValue,
 		isDisabled: () => false,
@@ -98,17 +99,21 @@ export class TreeSelect extends PureComponent<Props, State> {
 	};
 
 	handleToggleList = () => {
-		const newValue = !this.state.showMenu;
+		const {disabled} = this.props;
 
-		this.setState({showMenu: newValue}, () => {
-			const {onCloseMenu, onOpenMenu} = this.props;
+		if (!disabled) {
+			const newValue = !this.state.showMenu;
 
-			if (newValue) {
-				onOpenMenu && onOpenMenu();
-			} else {
-				onCloseMenu && onCloseMenu();
-			}
-		});
+			this.setState({showMenu: newValue}, () => {
+				const {onCloseMenu, onOpenMenu} = this.props;
+
+				if (newValue) {
+					onOpenMenu && onOpenMenu();
+				} else {
+					onCloseMenu && onCloseMenu();
+				}
+			});
+		}
 	};
 
 	hideTree = () => {
@@ -224,10 +229,15 @@ export class TreeSelect extends PureComponent<Props, State> {
 	);
 
 	renderValueContainer = () => {
+		const {disabled} = this.props;
 		const {ValueContainer} = this.components;
+		const className = cn({
+			[styles.valueContainer]: true,
+			[styles.valueContainerDisabled]: disabled
+		});
 
 		return (
-			<ValueContainer className={styles.valueContainer} onClick={this.handleToggleList}>
+			<ValueContainer className={className} disabled={disabled} onClick={this.handleToggleList}>
 				{this.renderValue()}
 			</ValueContainer>
 		);

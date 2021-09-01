@@ -1,6 +1,6 @@
 // @flow
+import type {AttrSetConditions, Breakdown, Indicator, Parameter, SourceData} from 'store/widgetForms/types';
 import type {Attribute, FetchAttributeByCode, FetchAttributes} from 'store/sources/attributes/types';
-import type {Breakdown, Indicator, Parameter, SourceData} from 'store/widgetForms/types';
 import type {
 	CheckApplyFilter,
 	DeleteSourcesFilter,
@@ -26,13 +26,17 @@ export type DataSet = {
 };
 
 export type ConnectedProps = {
+	autoSelectFirstItem: boolean,
+	disabled: boolean,
 	filterList: SourceFiltersItem[],
 	filtersListLoading: boolean,
 	isPersonal: boolean,
+	isUserMode: boolean,
+	showSavedFilters: boolean,
 	sources: DataSourceMap
 };
 
-export type DispatchFetchAttributes = (classFqn: string, parentClassFqn?: string | null, onLoadCallback?: OnLoadCallback) => Promise<void>;
+export type DispatchFetchAttributes = (classFqn: string, parentClassFqn?: ?string, attrSetConditions?: ?AttrSetConditions, onLoadCallback?: OnLoadCallback) => Promise<void>;
 
 export type DispatchFetchAttributeByCode = (classFqn: string, attribute: Attribute) => Promise<Attribute>;
 

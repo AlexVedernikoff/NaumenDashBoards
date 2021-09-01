@@ -2,22 +2,25 @@
 import api from 'api';
 import {arrayToTree} from 'utils/arrayToTree';
 import {DATA_SOURCES_EVENTS} from './constants';
-import type {Dispatch, ThunkAction} from 'store/types';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {RawDataSource} from './types';
 
-const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}: RawDataSource) => ({
+const getDataSourceValue = ({classFqn: value, descriptor, hasDynamic, title: label}: RawDataSource) => ({
+	descriptor,
 	hasDynamic,
 	label,
 	value
 });
 
-const getDataSources = (): ThunkAction => async (dispatch: Dispatch) => {
+const getDataSources = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	dispatch({
 		type: DATA_SOURCES_EVENTS.REQUEST_DATA_SOURCES
 	});
 
 	try {
-		const data = await api.dashboards.getDataSources();
+		const state = getState();
+		const {dashboardUUID} = state.dashboard.settings;
+		const data = await api.instance.dashboards.getDataSources(dashboardUUID);
 
 		dispatch({
 			payload: arrayToTree(data, {

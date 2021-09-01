@@ -45,7 +45,7 @@ export default class Dashboards implements DashboardsAPI {
 		return this.transport('dashboards', 'getDataSourceAttributes', ['requestContent'], params);
 	}
 
-	getDataSources () {
+	getDataSources (dashboardUUID: string) {
 		return this.transport('dashboards', 'getDataSources', []);
 	}
 

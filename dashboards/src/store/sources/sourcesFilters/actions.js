@@ -45,7 +45,7 @@ const fetchSourcesFilters = (metaClass: string): ThunkAction =>
 		try {
 			dispatch(requestSourceFilters());
 
-			const filters = await await api.dashboardSettings.sourceFilters.getAll(metaClass);
+			const filters = await api.instance.dashboardSettings.sourceFilters.getAll(metaClass);
 
 			dispatch({
 				payload: {filters, source: metaClass},
@@ -78,7 +78,7 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 				label,
 				value: source
 			};
-			const {result} = await api.dashboardSettings.sourceFilters.save(dashboard, sourceFilter);
+			const {result} = await api.instance.dashboardSettings.sourceFilters.save(dashboard, sourceFilter);
 
 			dispatch(fetchSourcesFilters(source));
 
@@ -106,7 +106,7 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 		try {
 			dispatch(requestSourceFilters());
 
-			const {result} = await api.dashboardSettings.sourceFilters.delete(filterId);
+			const {result} = await api.instance.dashboardSettings.sourceFilters.delete(filterId);
 
 			if (result) {
 				dispatch(fetchSourcesFilters(source));
@@ -137,7 +137,7 @@ const checkApplyFilter = (source: string, sourceFilter: SourceFiltersItem): Thun
 		const {code: dashboardKey} = store.dashboard.settings;
 
 		try {
-			const {correctFilter, result} = await api.dashboardSettings.sourceFilters.check(dashboardKey, sourceFilter);
+			const {correctFilter, result} = await api.instance.dashboardSettings.sourceFilters.check(dashboardKey, sourceFilter);
 
 			if (!result) {
 				return {result: true};

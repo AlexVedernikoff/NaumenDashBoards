@@ -6,6 +6,10 @@ export type DTOValue = Object;
 
 export type Transport = (module: string, method: string, ...params: Array<DTOValue>) => Promise<DTOValue>;
 
+export type ApiConfig = {
+	driver: string,
+};
+
 export type DashbordParams = {
 	classFqn: string,
 	contentCode: string,
@@ -24,7 +28,7 @@ export type FilterFormDescriptorDTO = {
 };
 
 export type ContentParametersDTO = {
-	editable: boolean,
+	editable: Array<string>,
 	MinTimeIntervalUpdate: number | null
 };
 

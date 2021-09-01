@@ -1,6 +1,7 @@
 // @flow
 import {connect} from 'react-redux';
-import GroupModal from 'GroupModal';
+import defaultComponents from 'GroupModal/defaultComponents';
+import GroupModal from 'containers/GroupModal';
 import memoize from 'memoize-one';
 import {OR_CONDITION_OPTIONS, SCHEMA} from './constants';
 import type {OrConditionProps} from 'GroupModal/types';
@@ -12,7 +13,7 @@ import SimpleOrCondition from 'GroupModal/components/SimpleOrCondition';
 
 export class StringGroupModal extends Component<Props> {
 	getComponents = memoize(() => ({
-		...GroupModal.defaultProps.components,
+		...defaultComponents,
 		OrCondition: this.renderOrCondition,
 		SystemGroup: () => null
 	}));
@@ -35,17 +36,18 @@ export class StringGroupModal extends Component<Props> {
 		const {attribute, customGroups, onClose, onSubmit, value} = this.props;
 
 		return (
-				<GroupModal
-					attribute={attribute}
-					components={this.getComponents()}
-					customGroups={customGroups}
-					customType={attribute.type}
-					onClose={onClose}
-					onSubmit={onSubmit}
-					orConditionOptions={OR_CONDITION_OPTIONS}
-					schema={SCHEMA}
-					value={value}
-				/>
+			<GroupModal
+				attribute={attribute}
+				components={this.getComponents()}
+				customGroups={customGroups}
+				customType={attribute.type}
+				isUserMode={true}
+				onClose={onClose}
+				onSubmit={onSubmit}
+				orConditionOptions={OR_CONDITION_OPTIONS}
+				schema={SCHEMA}
+				value={value}
+			/>
 		);
 	}
 }

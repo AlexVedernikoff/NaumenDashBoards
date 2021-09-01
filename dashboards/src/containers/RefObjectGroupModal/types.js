@@ -25,7 +25,8 @@ export type Components = {
 };
 
 export type ConnectedProps = {
-	customGroups: Array<CustomGroup>
+	customGroups: Array<CustomGroup>,
+	isUserMode: boolean
 };
 
 export type Props = ConnectedProps & {

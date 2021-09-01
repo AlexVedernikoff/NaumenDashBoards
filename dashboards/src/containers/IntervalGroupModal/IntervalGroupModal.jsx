@@ -1,6 +1,7 @@
 // @flow
 import {connect} from 'react-redux';
-import GroupModal from 'GroupModal';
+import defaultComponents from 'GroupModal/defaultComponents';
+import GroupModal from 'containers/GroupModal';
 import IntervalOrCondition from 'GroupModal/components/IntervalOrCondition';
 import memoize from 'memoize-one';
 import {OR_CONDITION_OPTIONS, SCHEMA, SYSTEM_OPTIONS} from './constants';
@@ -12,7 +13,7 @@ import React, {Component} from 'react';
 
 export class IntervalGroupModal extends Component<Props> {
 	getComponents = memoize(() => ({
-		...GroupModal.defaultProps.components,
+		...defaultComponents,
 		OrCondition: this.renderOrCondition
 	}));
 
@@ -36,18 +37,18 @@ export class IntervalGroupModal extends Component<Props> {
 		const {attribute, customGroups, onClose, onSubmit, value} = this.props;
 
 		return (
-				<GroupModal
-					attribute={attribute}
-					components={this.getComponents()}
-					customGroups={customGroups}
-					customType={attribute.type}
-					onClose={onClose}
-					onSubmit={onSubmit}
-					orConditionOptions={OR_CONDITION_OPTIONS}
-					schema={SCHEMA}
-					systemOptions={SYSTEM_OPTIONS}
-					value={value}
-				/>
+			<GroupModal
+				attribute={attribute}
+				components={this.getComponents()}
+				customGroups={customGroups}
+				customType={attribute.type}
+				onClose={onClose}
+				onSubmit={onSubmit}
+				orConditionOptions={OR_CONDITION_OPTIONS}
+				schema={SCHEMA}
+				systemOptions={SYSTEM_OPTIONS}
+				value={value}
+			/>
 		);
 	}
 }

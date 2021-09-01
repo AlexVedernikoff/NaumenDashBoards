@@ -29,6 +29,7 @@ const OR_CONDITION_OPTIONS = [
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Содержит атрибут текущего объекта',
 		value: OR_CONDITION_TYPES.CONTAINS_ATTR_CURRENT_OBJECT
 	}

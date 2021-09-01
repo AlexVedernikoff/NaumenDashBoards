@@ -138,6 +138,7 @@ export type SettingsAction =
 export type SettingsState = {
 	autoUpdate: AutoUpdateSettings,
 	code: string,
+	dashboardUUID: string,
 	editMode: boolean,
 	error: ?string,
 	exportingFailToEmail: ChangingState,

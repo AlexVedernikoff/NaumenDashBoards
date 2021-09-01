@@ -8,7 +8,7 @@ import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import FieldError from 'src/components/atoms/FieldError';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
-import {getDefaultBreakdown} from 'store/widgetForms/helpers';
+import {getDefaultBreakdown, parseAttrSetConditions} from 'store/widgetForms/helpers';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from 'components/atoms/IconButton';
@@ -42,14 +42,24 @@ export class SourceFieldset extends Component<Props, State> {
 	selectRef: Ref<typeof TreeSelect> = createRef();
 
 	componentDidMount () {
-		const {index, value: {source}} = this.props;
+		const {autoSelectFirstItem, index, sources, value: {source}} = this.props;
 
-		if (!source.value && index > 0) {
-			const {current: container} = this.containerRef;
-			const {current: select} = this.selectRef;
+		if (!source.value) {
+			if (autoSelectFirstItem) {
+				const keys = Object.keys(sources);
 
-			container && container.scrollIntoView({behavior: 'smooth'});
-			select && select.setState({showMenu: true});
+				if (keys.length > 0) {
+					const source = sources[keys[0]];
+
+					this.handleSelect({name: '', value: source});
+				}
+			} else if (index > 0) {
+				const {current: container} = this.containerRef;
+				const {current: select} = this.selectRef;
+
+				container && container.scrollIntoView({behavior: 'smooth'});
+				select && select.setState({showMenu: true});
+			}
 		}
 	}
 
@@ -169,14 +179,18 @@ export class SourceFieldset extends Component<Props, State> {
 			: nodeValue;
 
 		if (newSourceValue?.value !== sourceValue?.value) {
+			const attrSetConditions = parseAttrSetConditions(nodeValue);
+
 			newSource = {
 				...newSource,
-				descriptor: '',
+				descriptor: nodeValue.descriptor ?? '',
 				filterId: null,
 				widgetFilterOptions: []
 			};
 
-			newSourceValue && onFetchAttributes(newSourceValue.value, parentClassFqn, (attributes) => { this.updateAttributes(attributes); });
+			if (newSourceValue) {
+				onFetchAttributes(newSourceValue.value, parentClassFqn, attrSetConditions, (attributes) => { this.updateAttributes(attributes); });
+			}
 		}
 
 		this.changeSource({
@@ -346,9 +360,9 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSavedFiltersButton = (): React$Node => {
-		const {filterList, filtersListLoading, isPersonal, usesFilter} = this.props;
+		const {filterList, filtersListLoading, isPersonal, showSavedFilters, usesFilter} = this.props;
 
-		if (!isPersonal && usesFilter && filterList && filterList.length > 0) {
+		if (!isPersonal && showSavedFilters && usesFilter && filterList && filterList.length > 0) {
 			return (
 				<FormField className={styles.savedFiltersButton}>
 					<SavedFilters
@@ -419,7 +433,7 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderSourceTreeSelect = (): React$Node => {
-		const {sources, value: {source}} = this.props;
+		const {disabled, sources, value: {source}} = this.props;
 		const {value: sourceValue} = source;
 		const isChanged = this.isCurrentFilterChanged();
 		const components = this.getSourceSelectComponents();
@@ -428,12 +442,13 @@ export class SourceFieldset extends Component<Props, State> {
 			<TreeSelect
 				className={styles.sourceTreeSelect}
 				components={components}
+				disabled={disabled}
 				isChanged={isChanged}
 				onRemove={this.handleRemoveSource}
 				onSelect={this.handleSelect}
 				options={sources}
 				ref={this.selectRef}
-				removable={true}
+				removable={!disabled}
 				value={sourceValue}
 			/>
 		);

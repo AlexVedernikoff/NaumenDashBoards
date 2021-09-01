@@ -19,7 +19,7 @@ const saveCustomChartColorsSettings = (colorsSettings: CustomChartColorsSettings
 	});
 
 	try {
-		await api.dashboardSettings.customColors.save(getParams(), colorsSettings);
+		await api.instance.dashboardSettings.customColors.save(getParams(), colorsSettings);
 
 		dispatch({
 			payload: colorsSettings,
@@ -45,7 +45,7 @@ const removeCustomChartColorsSettings = (payload: string) => async (dispatch: Di
 	});
 
 	try {
-		await api.dashboardSettings.customColors.delete(getParams(), payload);
+		await api.instance.dashboardSettings.customColors.delete(getParams(), payload);
 
 		dispatch({
 			payload,

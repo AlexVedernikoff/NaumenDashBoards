@@ -10,7 +10,7 @@ const createContextName = async () => {
 	let name;
 
 	try {
-		const context = await api.frame.getCurrentContextObject();
+		const context = await api.instance.frame.getCurrentContextObject();
 
 		name = context['card_caption'].replace(/(\|\||\|\|\|\|\*:|\*)/g, '');
 	} catch (e) {

@@ -4,6 +4,7 @@ import {ATTRIBUTE_FIELDSET_CONTEXT} from './HOCs/withAttributeFieldset/constants
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import MainSelect from 'containers/AttributeMainSelect';
 import type {OnSelectEvent} from 'components/types';
+import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import React, {PureComponent} from 'react';
 import RefSelect from 'containers/AttributeRefSelect';
 
@@ -14,6 +15,8 @@ export class AttributeFieldset extends PureComponent<Props> {
 		name: '',
 		removable: false
 	};
+
+	getAttrSetConditions = () => parseAttrSetConditions(this.props.source);
 
 	getMainOptions = (options: Array<Attribute>): Array<Attribute> => {
 		const {dataSetIndex, getMainOptions} = this.props;
@@ -92,6 +95,7 @@ export class AttributeFieldset extends PureComponent<Props> {
 
 		return (
 			<MainSelect
+				attrSetConditions={this.getAttrSetConditions()}
 				components={components}
 				disabled={disabled}
 				getOptions={this.getMainOptions}
@@ -111,6 +115,7 @@ export class AttributeFieldset extends PureComponent<Props> {
 		if (value && value.type in ATTRIBUTE_SETS.REFERENCE) {
 			return (
 				<RefSelect
+					attrSetConditions={this.getAttrSetConditions()}
 					components={components}
 					disabled={disabled}
 					droppable={true}

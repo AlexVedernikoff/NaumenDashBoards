@@ -18,6 +18,8 @@ const parseParams = (module: string, method: string, names: Array<string>, value
 		if (name === 'requestContent') {
 			params.push(name);
 			body = values[idx];
+		} else if (name === 'user') {
+			params.push('user');
 		} else {
 			let value = values[idx];
 

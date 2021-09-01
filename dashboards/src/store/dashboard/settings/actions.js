@@ -8,13 +8,15 @@ import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
+import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {DASHBOARD_EVENTS, FETCH_DASHBOARD_ERROR_TEXT} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
+import {getAllWidgets} from 'store/widgets/data/selectors';
 import {
 	getContext,
 	getEditableParam,
-	getMetaCLass,
+	getMetaClass,
 	getUserData,
 	setTemp,
 	setUserData
@@ -22,9 +24,9 @@ import {
 import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
+import {isRestrictUserModeDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-
 import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
@@ -37,7 +39,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {ThunkAction}
  */
 const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {MinTimeIntervalUpdate: defaultInterval} = await api.frame.getCurrentContentParameters();
+	const {MinTimeIntervalUpdate: defaultInterval} = await api.instance.frame.getCurrentContentParameters();
 
 	if (defaultInterval) {
 		dispatch(changeAutoUpdateSettings({
@@ -58,20 +60,21 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 	try {
 		dispatch(getContext());
-		dispatch(getMetaCLass());
+		dispatch(getMetaClass());
 		dispatch(getAutoUpdateSettings());
-		dispatch(getEditableParam());
+		await dispatch(getEditableParam());
 		dispatch(initPersonalValue());
 		dispatch(initLayoutMode());
 
+		await dispatch(getSettings());
 		await Promise.all([
 			dispatch(getDataSources()),
-			dispatch(getUserData()),
-			dispatch(getSettings())
+			dispatch(getUserData())
 		]);
 		dashboardResizer.resize();
 
 		dispatch(getPassedWidget());
+		dispatch(updateUserSourceMode());
 		dispatch(initStorageSettings());
 		dispatch({
 			type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
@@ -122,14 +125,16 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			autoUpdate,
 			customColorsSettings,
 			dashboardKey: code,
+			dashboardUUID,
 			layouts,
 			mobileLayouts,
 			widgets
-		} = await api.dashboardSettings.settings.getSettings(payload);
+		} = await api.instance.dashboardSettings.settings.getSettings(payload);
 
 		batch(() => {
 			dispatch(setCode(code));
 			dispatch(setCustomChartsColorsSettings(customColorsSettings));
+			dispatch(setDashboardUUID(dashboardUUID));
 
 			if (autoUpdate !== null) {
 				dispatch(setAutoUpdateSettings(autoUpdate));
@@ -210,9 +215,9 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		});
 
 		const {context} = getState();
-		const {contentCode, editableDashboard: editable, subjectUuid: classFqn, user} = context;
+		const {contentCode, dashboardMode, subjectUuid: classFqn, user} = context;
 
-		await api.dashboardSettings.personalDashboard.create(classFqn, contentCode, editable);
+		await api.instance.dashboardSettings.personalDashboard.create(classFqn, contentCode, dashboardMode === DASHBOARD_EDIT_MODE.EDIT);
 
 		dispatch(setUserData({...user, hasPersonalDashboard: true}));
 		dispatch({
@@ -247,7 +252,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		const {context} = getState();
 		const {contentCode, subjectUuid, user} = context;
 
-		await api.dashboardSettings.personalDashboard.delete(subjectUuid, contentCode);
+		await api.instance.dashboardSettings.personalDashboard.delete(subjectUuid, contentCode);
 
 		dispatch(switchDashboard(false));
 		dispatch(setUserData({...user, hasPersonalDashboard: false}));
@@ -334,7 +339,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 	try {
 		const key = await uploadFile(file, name);
 
-		await api.fileToMail.send(key, type, name, users);
+		await api.instance.fileToMail.send(key, type, name, users);
 
 		dispatch({
 			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
@@ -362,7 +367,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
 	const {context, dashboard, sources, widgetForms} = getState();
 	const {contentCode} = context;
-	const {metaClass} = await api.frame.getCurrentContextObject();
+	const {metaClass} = await api.instance.frame.getCurrentContextObject();
 	let descriptorStr = '';
 	let foundKey;
 
@@ -412,6 +417,25 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 };
 
 /**
+ * Добавляем первый виджет для дашбордов  userSource
+ * @returns {ThunkAction}
+ */
+const updateUserSourceMode = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
+	const state = getState();
+	const {dashboard} = state;
+	const isUserMode = isRestrictUserModeDashboard(state);
+	const widgets = getAllWidgets(state);
+
+	if (isUserMode && widgets.length === 0) {
+		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.BAR);
+
+		dispatch(addLayouts(newWidget.id));
+		dispatch(addNewWidget(newWidget));
+		dispatch(editDashboard());
+	}
+};
+
+/**
  * Сохраняет настройки автообновления
  * @param {boolean} enabled - параметр сообщает включено или выключено автообновление
  * @param {number} interval - интервал автообновления
@@ -419,18 +443,21 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
  */
 const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		const {context, dashboard} = getState();
+		const state = getState();
+		const {context, dashboard} = state;
 		const {contentCode, subjectUuid: classFqn} = context;
 		const {personal: isPersonal} = dashboard.settings;
 		const autoUpdateSetting = {enabled, interval: Number(interval)};
+		const isForUser = isUserModeDashboard(state);
 		const payload = {
 			autoUpdate: autoUpdateSetting,
 			classFqn,
 			contentCode,
+			isForUser,
 			isPersonal
 		};
 
-		await api.dashboardSettings.settings.saveAutoUpdate(payload);
+		await api.instance.dashboardSettings.settings.saveAutoUpdate(payload);
 
 		dispatch(setAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({
@@ -532,6 +559,11 @@ const setCode = payload => ({
 	type: DASHBOARD_EVENTS.SET_CODE
 });
 
+const setDashboardUUID = payload => ({
+	payload,
+	type: DASHBOARD_EVENTS.SET_DASHBOARD_UUID
+});
+
 const setHideEditPanel = (payload: boolean) => ({
 	payload,
 	type: DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL
@@ -550,5 +582,6 @@ export {
 	seeDashboard,
 	sendToEmails,
 	setHideEditPanel,
-	switchDashboard
+	switchDashboard,
+	updateUserSourceMode
 };
