@@ -41,10 +41,12 @@ const OBJECT_OR_CONDITION_OPTIONS = [
 		value: OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Равно текущему объекту',
 		value: OR_CONDITION_TYPES.EQUAL_CURRENT_OBJECT
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Равно атрибуту текущего объекта',
 		value: OR_CONDITION_TYPES.EQUAL_ATTR_CURRENT_OBJECT
 	}
@@ -88,10 +90,12 @@ const BO_LINKS_OR_CONDITION_OPTIONS = [
 		value: OR_CONDITION_TYPES.CONTAINS_INCLUDING_NESTED
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Содержит текущий объект',
 		value: OR_CONDITION_TYPES.CONTAINS_CURRENT_OBJECT
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Содержит атрибут текущего объекта',
 		value: OR_CONDITION_TYPES.CONTAINS_ATTR_CURRENT_OBJECT
 	}
@@ -131,10 +135,12 @@ const BACK_BO_LINKS_OR_CONDITION_OPTIONS = [
 		value: OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Содержит текущий объект',
 		value: OR_CONDITION_TYPES.CONTAINS_CURRENT_OBJECT
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Содержит атрибут текущего объекта',
 		value: OR_CONDITION_TYPES.CONTAINS_ATTR_CURRENT_OBJECT
 	}

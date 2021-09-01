@@ -41,7 +41,7 @@ async function checkSourceForParent () {
 
 		if (mainValue !== value) {
 			try {
-				({result} = await api.dashboards.checkForParent(mainValue, value));
+				({result} = await api.instance.dashboards.checkForParent(mainValue, value));
 			} catch (e) {
 				result = false;
 			}

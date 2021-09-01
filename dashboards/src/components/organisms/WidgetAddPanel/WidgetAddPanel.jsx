@@ -83,10 +83,10 @@ export class WidgetAddPanel extends Component<Props, State> {
 	renderCancelButton = () => null;
 
 	renderDashboardsList = () => {
-		const {dashboards, personalDashboard, user} = this.props;
+		const {dashboards, isUserMode, personalDashboard, user} = this.props;
 		const {items, loading} = dashboards;
 
-		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+		if (user.role !== USER_ROLES.REGULAR && !personalDashboard && !isUserMode) {
 			return (
 				<Fragment>
 					<Text className={styles.field} type={TEXT_TYPES.SMALL}>

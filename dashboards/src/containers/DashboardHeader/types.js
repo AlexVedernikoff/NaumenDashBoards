@@ -7,6 +7,7 @@ export type ConnectedProps = {
 	autoUpdateSettings: AutoUpdateSettings,
 	editableDashboard: boolean,
 	editMode: boolean,
+	isUserMode: boolean,
 	layoutMode: string,
 	personalDashboard: boolean,
 	personalDashboardCreating: boolean,

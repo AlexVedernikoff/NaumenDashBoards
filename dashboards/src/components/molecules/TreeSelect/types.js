@@ -36,6 +36,7 @@ export type Tree = {
 export type Props = {
 	className: string,
 	components: $Shape<Components>,
+	disabled: boolean,
 	getNodeLabel?: (node: Node) => string,
 	getNodeValue?: (node: Node) => string,
 	getOptionLabel: (node: Option | null) => string,

@@ -37,7 +37,7 @@ const getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise
 				return `${classFqn}@${code}`;
 			});
 
-			({serializedContext: newDescriptor} = await api.filterForm.openForm(context, true));
+			({serializedContext: newDescriptor} = await api.instance.filterForm.openForm(context, true));
 		}
 	} catch (ex) {
 		console.error('Ошибка формы фильтрации', ex);

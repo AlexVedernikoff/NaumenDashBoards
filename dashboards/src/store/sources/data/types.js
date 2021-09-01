@@ -5,6 +5,7 @@ import type {TreeNode} from 'components/types';
 export type RawDataSource = {
 	children: Array<RawDataSource>,
 	classFqn: string,
+	descriptor?: string,
 	hasDynamic: boolean,
 	title: string
 };

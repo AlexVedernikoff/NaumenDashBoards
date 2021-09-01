@@ -61,7 +61,7 @@ const generateCustomFiltersValues = (data: DataSetTypes): Array<CustomFilterValu
 const generateCustomFilterItems = (data: DataSetTypes, attributes: AttributesState): Array<CustomFilterDataSet> => {
 	return data.map(({dataKey, source}, dataSetIndex) => {
 		const classFqn = source.value?.value;
-		let {loading: attributesLoading = false, options = []} = attributes?.[classFqn] || {};
+		const {loading: attributesLoading = false, options = []} = attributes?.[classFqn] || {};
 
 		return {
 			attributes: options,
@@ -73,7 +73,7 @@ const generateCustomFilterItems = (data: DataSetTypes, attributes: AttributesSta
 };
 
 export const props = (state: AppState, props: ContainerProps): ConnectedProps => {
-	let {values: {data}} = props;
+	const {values: {data}} = props;
 	const {attributes} = state.sources;
 	const initialCustomFiltersValues = generateCustomFiltersValues(data);
 	const dataSets = generateCustomFilterItems(data, attributes);
