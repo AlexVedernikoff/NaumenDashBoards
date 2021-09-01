@@ -14,6 +14,7 @@ export const initialDashboardState: SettingsState = {
 		remainder: DEFAULT_INTERVAL * 60
 	},
 	code: '',
+	dashboardUUID: '',
 	editMode: false,
 	error: null,
 	exportingFailToEmail: {

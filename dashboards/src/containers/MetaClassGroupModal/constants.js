@@ -25,6 +25,7 @@ const OR_CONDITION_OPTIONS = [
 		value: OR_CONDITION_TYPES.TITLE_NOT_CONTAINS
 	},
 	{
+		hasReferenceToCurrentObject: true,
 		label: 'Равно атрибуту текущего объекта',
 		value: OR_CONDITION_TYPES.EQUAL_ATTR_CURRENT_OBJECT
 	}

@@ -109,7 +109,7 @@ const saveNewLayouts = (): ThunkAction => async (dispatch: Dispatch, getState: G
 			mobileLayouts: filterLayouts(layouts[MOBILE], widgetIds)
 		};
 
-		await api.dashboardSettings.settings.editLayouts(payload);
+		await api.instance.dashboardSettings.settings.editLayouts(payload);
 
 		dispatch({
 			type: LAYOUTS_EVENTS.RESPONSE_SAVE_LAYOUTS

@@ -31,10 +31,10 @@ export class DisplayModeSelectBox extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {personalDashboard, user} = this.props;
+		const {isUserMode, personalDashboard, user} = this.props;
 		const {value} = this.state;
 
-		if (user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+		if (user.role !== USER_ROLES.REGULAR && !personalDashboard && !isUserMode) {
 			return (
 				<FormBox title="Область отображения">
 					<FormField>
