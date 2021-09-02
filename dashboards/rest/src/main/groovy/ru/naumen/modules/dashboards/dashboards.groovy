@@ -335,14 +335,20 @@ class DashboardsService
         def dashboard = api.utils.get(dashboardUUID)
         def source = dashboard.dataSourceDash
         def userUUID = user?.UUID ?: dashboard?.userReports?.UUID
-        String descriptor = api.listdata.createListDescriptor(source.typeCode, source.code, userUUID)
+
+        def descriptor = api.listdata.createListDescriptor(source.typeCode, source.code, userUUID)
+
+        // Из дескриптора по "clazz" и "cases" получается код метакласса.
+        def listContent = descriptor.unwrap().content
+        def clazz = listContent.clazz
+        def cases = listContent.cases
         def totalSource = new DataSourceDescriptor(
-            classFqn: source.typeCode,
+            classFqn: clazz ?: cases?.find().toString().takeWhile { it != '$' },
             title: source.title,
             children: [],
             hasDynamic: false,
-            descriptor: toJson(descriptor)
-        )
+            descriptor: api.listdata.listDescriptorAsJson(descriptor)
+				)
         return [totalSource]
     }
 
@@ -433,20 +439,36 @@ class DashboardsService
 
     /**
      * Метод для получения атрибутов по коду группы
-     * @param requestContent - тело запроса [classFqn: код метакласса,groupCode: код группы]
+     * @param requestContent - тело запроса [classFqn: код метакласса,groupCode: код группы, cases: код типов метакласса]
      * @return список атрибутов по группе
      */
     Collection<Attribute> getDataSourceAttributesByGroupCode(def requestContent)
     {
         String classFqn = requestContent.classFqn
         String groupCode = requestContent.groupCode
-        def metainfo = api.metainfo.getMetaClass(classFqn)
-        List listOfSystemAttribute = metainfo.getAttributeGroup(groupCode).attributes
+        List<String> cases = requestContent.cases
+        List listOfSystemAttribute = []
 
-        return listOfSystemAttribute.findResults {
+        if(cases)
+        {
+            cases = cases.findResults { clazz -> return api.metainfo.getMetaClass(clazz) }
+        }
+        else
+        {
+            if(classFqn)
+            {
+                cases = [api.metainfo.getMetaClass(classFqn)] + api.metainfo.getTypes(classFqn)
+            }
+        }
+
+        cases?.each { metainfo ->
+            listOfSystemAttribute.addAll(getSystemAttributesByGroupCode(metainfo, groupCode))
+        }
+
+        return listOfSystemAttribute?.unique { it?.code }?.findResults {
             if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
             {
-                return buildAttribute(it, metainfo.title, sourceCode)
+                return buildAttribute(it, it.metaClass.title, it.metaClass.code)
             }
         }
     }
@@ -923,6 +945,24 @@ class DashboardsService
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
         api.utils.throwReadableException("$message#${EMPTY_DASHBOARD_CODE_ERROR}")
+    }
+
+    /**
+     * Метод получения атрибутов по коду группы из метакласса
+     * @param metainfo - объект метакласса
+     * @param groupCode - код группы
+     * @return атрибуты по коду группы
+     */
+    private getSystemAttributesByGroupCode(def metainfo, String groupCode)
+    {
+        try
+        {
+            return metainfo?.getAttributeGroup(groupCode)?.attributes
+        }
+        catch (Exception ex)
+        {
+            logger.error("В ${metainfo.title} нет группы атрибутов с кодом ${groupCode}.")
+        }
     }
 
     /**
