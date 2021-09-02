@@ -1,5 +1,6 @@
 // @flow
 import api from 'api';
+import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {isSourceType} from 'store/sources/data/helpers';
 import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {store} from 'app.constants';
@@ -11,9 +12,10 @@ import {store} from 'app.constants';
 const getParams = () => {
 	const state = store.getState();
 	const {context, dashboard} = state;
-	const {contentCode, editableDashboard: editable, subjectUuid: classFqn} = context;
+	const {contentCode, dashboardMode, subjectUuid: classFqn} = context;
 	const {personal: isPersonal} = dashboard.settings;
 	const isForUser = isUserModeDashboard(state);
+	const editable = dashboardMode === DASHBOARD_EDIT_MODE.EDIT;
 
 	return {
 		classFqn,
