@@ -36,6 +36,10 @@ class Tree {
 			children = this.addNodes(arrayChildren, id);
 		}
 
+		if (this.tree[id]) {
+			children = children ? [...this.tree[id].children, ...children] : this.tree[id].children;
+		}
+
 		this.tree[id] = {
 			children,
 			id,
