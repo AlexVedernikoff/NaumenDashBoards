@@ -15,7 +15,7 @@ export default class Frame implements FrameAPI {
 	async getCurrentContentParameters () {
 		const result = await ({
 			MinTimeIntervalUpdate: 3,
-			editable: [DASHBOARD_EDIT_MODE.USER_SOURCE]
+			editable: [process.env.EDITABLE_MODE ?? DASHBOARD_EDIT_MODE.EDIT]
 
 		});
 		return result;
