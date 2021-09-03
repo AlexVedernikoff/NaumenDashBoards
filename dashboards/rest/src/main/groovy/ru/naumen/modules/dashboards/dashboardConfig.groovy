@@ -43,9 +43,9 @@ interface DashboardConfig
 
     /**
      * Посмотреть текущий статус системной группы для приложения "Дашборды"
-     * @return json с ключом "status", значение укажет, включена ли системная группа
+     * @return булевый флаг, включена ли системная группа
      */
-    String isDashboardMasterGroupEnabled()
+    boolean isDashboardMasterGroupEnabled()
 
     /**
      * Настройка обновления значения статуса счетчика в БД
@@ -107,9 +107,9 @@ class DashboardConfigImpl extends BaseController implements DashboardConfig
     }
 
     @Override
-    String isDashboardMasterGroupEnabled()
+		boolean isDashboardMasterGroupEnabled()
     {
-        return toJson(['status': service.isDashboardMasterGroupEnabled()])
+        return service.isDashboardMasterGroupEnabled()
     }
 
     @Override
