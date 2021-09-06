@@ -92,7 +92,7 @@
 					<hideArchived>false</hideArchived>
 					<required>true</required>
 					<script-for-default>selectDefault</script-for-default>
-					<title lang="client">Редактируемый</title>
+					<title lang="client">Режим запуска</title>
 					<type>
 						<code>catalogAnyItem</code>
 						<property code="permittedTypes">[]</property>
