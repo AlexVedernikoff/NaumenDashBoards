@@ -252,7 +252,7 @@ export class SourceFieldset extends Component<Props, State> {
 		const newValue = {
 			...value,
 			breakdown: breakdown?.map(this.resetDynamicAttribute),
-			indicators: indicators.map(this.resetDynamicAttribute),
+			indicators: indicators?.map(this.resetDynamicAttribute) ?? [DEFAULT_INDICATOR],
 			parameters: parameters?.map(this.resetDynamicAttribute)
 		};
 
