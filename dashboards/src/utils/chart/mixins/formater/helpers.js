@@ -212,11 +212,12 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
 /**
  * Преобразует NumberAxisFormat (описание форматирования для числа) в форматер
  * @param {NumberAxisFormat} format - требуемый формат
+ * @param {boolean} hideZero - сообщает нужно ли убирать нулевые (пустые) значения
  * @returns {NumberFormatter} - функция-форматер
  */
-export const makeFormatterByNumberFormat = (format: NumberAxisFormat): NumberFormatter => {
+export const makeFormatterByNumberFormat = (format: NumberAxisFormat, hideZero: boolean = true): NumberFormatter => {
 	let formatter = (value: number): string => {
-		if (value) {
+		if (value || (!hideZero && value === 0)) {
 			return value.toLocaleString(undefined, {
 				maximumFractionDigits: format.symbolCount ?? 0,
 				minimumFractionDigits: format.symbolCount ?? 0,

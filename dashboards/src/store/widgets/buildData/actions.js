@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, AxisWidget, Chart, ComboWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {AnyWidget, AxisWidget, Chart, ComboWidget, SummaryWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import api from 'api';
 import {ApiError} from 'api/errors';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
@@ -10,6 +10,7 @@ import {editWidgetChunkData, updateWidget} from 'store/widgets/data/actions';
 import {exportSheet, getSnapshotName} from 'utils/export';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
+import {INTEGER_AGGREGATION} from 'store/widgets/constants';
 
 /**
  * Получаем данные для таблицы
@@ -199,6 +200,24 @@ const checkComputedFormat = (widgetId: string, data: DiagramBuildData): ThunkAct
 			};
 
 			await dispatch(updateWidget(updatedWidgetData));
+		}
+
+		if (widget.type === WIDGET_TYPES.SUMMARY) {
+			// $FlowFixMe проверка типов выше
+			const summary = (widget: SummaryWidget);
+
+			if (!summary.indicator.format) {
+				const data = summary.data.find(({sourceForCompute}) => !sourceForCompute);
+
+				if (data && data.indicators?.[0]?.aggregation === INTEGER_AGGREGATION.AVG) {
+					let {indicator} = summary;
+
+					indicator = {...indicator, computedFormat: {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: 2}};
+					const updatedWidgetData = {...summary, indicator};
+
+					await dispatch(updateWidget(updatedWidgetData));
+				}
+			}
 		}
 	};
 

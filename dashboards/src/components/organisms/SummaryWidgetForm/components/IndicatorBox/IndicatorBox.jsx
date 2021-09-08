@@ -34,7 +34,8 @@ export class IndicatorBox extends PureComponent<Props> {
 
 	render () {
 		const {useAutoFontSize, value} = this.props;
-		const {fontColor, fontFamily, fontSize, fontStyle, format = DEFAULT_NUMBER_AXIS_FORMAT} = value;
+		const {computedFormat, fontColor, fontFamily, fontSize, fontStyle, format} = value;
+		const parameterFormat = format ?? computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
 
 		return (
 			<CollapsableFormBox title="Показатель">
@@ -51,7 +52,7 @@ export class IndicatorBox extends PureComponent<Props> {
 					<FontStyleControl name={DIAGRAM_FIELDS.fontStyle} onChange={this.handleChange} value={fontStyle} />
 					<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleChange} portable={true} value={fontColor} />
 				</FormField>
-				<ParameterFormatPanel onChange={this.handleChangeParameterFormat} value={format} />
+				<ParameterFormatPanel onChange={this.handleChangeParameterFormat} value={parameterFormat} />
 			</CollapsableFormBox>
 		);
 	}
