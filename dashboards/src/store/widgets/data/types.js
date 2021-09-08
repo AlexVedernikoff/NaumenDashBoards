@@ -336,6 +336,7 @@ export type SummaryData = {
 };
 
 export type SummaryIndicator = {
+	computedFormat?: NumberAxisFormat,
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number | string,
@@ -352,6 +353,7 @@ export type SummaryWidget = {
 
 // Спидометр
 export type SpeedometerIndicatorSettings = {
+	computedFormat?: NumberAxisFormat,
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number | string,
