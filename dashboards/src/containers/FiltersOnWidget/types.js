@@ -32,7 +32,9 @@ export type ContainerProps = {
 	values: Values
 };
 
-export type Props = ConnectedFunctions & ConnectedProps & ContainerProps;
+export type Props = ConnectedFunctions & ConnectedProps & ContainerProps & {
+	raiseErrors: (errors: {[path: string]: string}) => void
+};
 
 export type State = {
 	filters: CustomFilterValue[]

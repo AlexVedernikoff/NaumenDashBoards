@@ -71,11 +71,19 @@ export class SearchInput extends PureComponent<Props, State> {
 		</div>
 	);
 
-	renderRemoveIcon = () => (
-		<div className={styles.removeIconContainer}>
-			<Icon name={ICON_NAMES.REMOVE} onClick={this.handleClickRemoveIcon} />
-		</div>
-	);
+	renderRemoveIcon = () => {
+		const {value} = this.state;
+
+		if (value && value.length) {
+			return (
+				<div className={styles.removeIconContainer}>
+					<Icon name={ICON_NAMES.REMOVE} onClick={this.handleClickRemoveIcon} />
+				</div>
+			);
+		}
+
+		return null;
+	};
 
 	renderSearchIcon = () => <Icon className={styles.searchIcon} name={ICON_NAMES.SEARCH} />;
 

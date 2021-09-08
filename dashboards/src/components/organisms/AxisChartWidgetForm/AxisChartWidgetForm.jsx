@@ -27,7 +27,7 @@ export class AxisChartWidgetForm extends PureComponent<Props> {
 			})),
 			indicators: mixed().requiredByCompute(array().indicators()),
 			parameters: array().parameters(),
-			source: mixed().source(),
+			source: object().source(),
 			top: object().topSettings()
 		})),
 		sources: mixed().minSourceNumbers().sourceNumbers()

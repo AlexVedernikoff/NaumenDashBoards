@@ -28,7 +28,7 @@ const schema = object({
 	}).default({}),
 	data: array().of(object({
 		indicators: mixed().requiredByCompute(array().indicators()),
-		source: mixed().source()
+		source: object().source()
 	})),
 	sources: mixed().minSourceNumbers().sourceNumbers()
 });

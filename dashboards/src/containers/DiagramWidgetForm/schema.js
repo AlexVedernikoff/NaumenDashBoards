@@ -1,7 +1,7 @@
 // @flow
 import {addMethod, array, boolean, lazy, mixed, number, object, string} from 'yup';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import type {BreakdownItem, Parameter, SourceData} from 'store/widgetForms/types';
+import type {BreakdownItem, Parameter} from 'store/widgetForms/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -19,14 +19,6 @@ const getErrorMessage = (key: string) => {
 
 	return messages[key] || 'Ошибка заполнения';
 };
-
-addMethod(mixed, 'source', function () {
-	return this.test(
-		'check-sources',
-		'Укажите источник данных',
-		({value}: SourceData) => !!value
-	);
-});
 
 addMethod(mixed, 'sourceNumbers', function () {
 	return this.test(
@@ -116,6 +108,18 @@ addMethod(mixed, 'group', function () {
 			return result;
 		}
 	);
+});
+
+addMethod(object, 'source', function () {
+	return object({
+		value: mixed().required('Укажите источник данных'),
+		widgetFilterOptions: array().of(
+			object({
+				attributes: array().min(1, 'Укажите атрибут для фильтрации на виджете'),
+				label: string().required('Укажите название фильтра')
+			})
+		).nullable()
+	}).required('Укажите источник данных');
 });
 
 addMethod(object, 'topSettings', function () {
