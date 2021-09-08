@@ -84,6 +84,7 @@ export class FiltersOnWidget extends PureComponent<Props> {
 			<FilterItem
 				dataSets={availibleDataSets}
 				fetchAttributes={fetchAttributes}
+				idx={filterItemIdx}
 				key={filterItemIdx}
 				onChangeAttribute={this.handleChangeAttribute(filterItemIdx)}
 				onChangeDataSet={this.handleChangeDataSet(filterItemIdx)}

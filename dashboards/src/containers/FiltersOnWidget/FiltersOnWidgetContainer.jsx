@@ -5,6 +5,7 @@ import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FiltersOnWidget from 'WidgetFormPanel/components/FiltersOnWidget';
 import {functions, props} from './selectors';
 import React, {Component} from 'react';
+import schema from './scheme';
 
 export class FiltersOnWidgetContainer extends Component<Props, State> {
 	state = {
@@ -38,7 +39,7 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 
 		this.setState(({filters}) => ({
 			filters: [...filters, newValue]
-		}));
+		}), this.updateDataSets);
 	};
 
 	handleChangeFilter = (index: number, newFilter: CustomFilterValue) => {
@@ -53,10 +54,12 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 		}), this.updateDataSets);
 	};
 
-	updateDataSets = () => {
+	updateDataSets = async () => {
 		const {dataSets, onChange, values} = this.props;
 		const {filters} = this.state;
 		let newData = values.data;
+
+		await this.validateFilters();
 
 		dataSets.forEach((dataSet) => {
 			const {dataSetIndex} = dataSet;
@@ -94,6 +97,27 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 		});
 
 		onChange(DIAGRAM_FIELDS.data, newData);
+	};
+
+	validateFilters = async () => {
+		const environment = process.env.NODE_ENV;
+		const {raiseErrors} = this.props;
+		const {filters} = this.state;
+		let errors = {};
+
+		try {
+			await schema.validate(filters, {abortEarly: false});
+		} catch (err) {
+			errors = err.inner.reduce((errors, innerError) => ({
+				...errors, ['filtersOnWidget' + innerError.path]: innerError.message
+			}), errors);
+
+			if (environment === 'development') {
+				console.error(errors);
+			}
+		}
+
+		raiseErrors(errors);
 	};
 
 	render () {

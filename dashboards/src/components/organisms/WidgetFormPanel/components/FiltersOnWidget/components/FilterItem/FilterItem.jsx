@@ -1,12 +1,12 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import FormField from 'components/molecules/FormField';
+import FormField from 'WidgetFormPanel/components/FormField';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {InputRef} from 'components/types';
 import LabelEditingForm from 'components/molecules/InputForm';
 import type {Props, State} from './types';
-import React, {createRef, Fragment, PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 
@@ -70,7 +70,7 @@ export class FilterItem extends PureComponent<Props, State> {
 	});
 
 	renderAttributeSelector = (): React$Node => {
-		const {dataSets, value} = this.props;
+		const {dataSets, idx, value} = this.props;
 
 		if (value) {
 			const {dataSetIndex} = value;
@@ -81,7 +81,7 @@ export class FilterItem extends PureComponent<Props, State> {
 				const attribute = value.attributes && value.attributes.length > 0 ? value.attributes[0] : null;
 
 				return (
-					<FormField className={styles.attributeFormField} label="Атрибут" small>
+					<FormField className={styles.attributeFormField} label="Атрибут" path={`filtersOnWidget[${idx}].attributes`} small>
 						<Select
 							fetchOptions={this.fetchOptions}
 							getOptionLabel={(attribute: Attribute) => attribute.title}
@@ -102,12 +102,12 @@ export class FilterItem extends PureComponent<Props, State> {
 	};
 
 	renderDataSetSelector = (): React$Node => {
-		const {dataSets, value} = this.props;
+		const {dataSets, idx, value} = this.props;
 		const {dataSetIndex} = value;
 		const selected = dataSetIndex !== undefined && dataSetIndex !== null ? dataSets[dataSetIndex] : null;
 
 		return (
-			<FormField label="Источник" small>
+			<FormField label="Источник" path={`filtersOnWidget[${idx}].dataSetIndex`} small>
 				<Select
 					editable={false}
 					getOptionLabel={(dataSet) => dataSet.source.value?.label}
@@ -127,9 +127,9 @@ export class FilterItem extends PureComponent<Props, State> {
 	};
 
 	renderLabelEditor = (): React$Node => {
-		const {value: {label}} = this.props;
+		const {idx, value: {label}} = this.props;
 		return (
-			<FormField className={styles.labelEditorForm}>
+			<FormField className={styles.labelEditorForm} path={`filtersOnWidget[${idx}].label`}>
 				<LabelEditingForm
 					className={styles.form}
 					forwardedRef={this.labelEditRef}
@@ -142,25 +142,27 @@ export class FilterItem extends PureComponent<Props, State> {
 	};
 
 	renderLabelView = (): React$Node => {
-		const {value: {label}} = this.props;
+		const {idx, value: {label}} = this.props;
 		return (
-			<div className={styles.labelView}>
-				<div className={styles.labelViewLabel} onDoubleClick={this.handleShowLabelEditor}>{label}</div>
-				<div className={styles.labelViewButtons}>
-					<IconButton height={13} icon={ICON_NAMES.EDIT} onClick={this.handleShowLabelEditor} />
-					<IconButton icon={ICON_NAMES.BASKET} onClick={this.handleDeleteFilter} />
+			<FormField path={`filtersOnWidget[${idx}].label`}>
+				<div className={styles.labelView} >
+					<div className={styles.labelViewLabel} onDoubleClick={this.handleShowLabelEditor}>{label}</div>
+					<div className={styles.labelViewButtons}>
+						<IconButton height={13} icon={ICON_NAMES.EDIT} onClick={this.handleShowLabelEditor} />
+						<IconButton icon={ICON_NAMES.BASKET} onClick={this.handleDeleteFilter} />
+					</div>
 				</div>
-			</div>
+			</FormField>
 		);
 	};
 
 	render () {
 		return (
-			<Fragment>
+			<div className={styles.filterItem}>
 				{this.renderLabel()}
 				{this.renderDataSetSelector()}
 				{this.renderAttributeSelector()}
-			</Fragment>
+			</div>
 		);
 	}
 }

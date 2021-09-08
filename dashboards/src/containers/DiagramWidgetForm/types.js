@@ -31,3 +31,7 @@ export type Props = {
 	schema: Schema,
 	values: Values
 } & ConnectedProps & ConnectedFunctions;
+
+export type State = {
+	filtersOnWidgetErrors: {[key: string]: string}
+};

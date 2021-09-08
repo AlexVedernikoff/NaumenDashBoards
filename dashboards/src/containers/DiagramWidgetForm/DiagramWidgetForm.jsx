@@ -7,7 +7,7 @@ import FiltersOnWidget from 'containers/FiltersOnWidget';
 import {functions, props} from './selectors';
 import {HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withHelpers/constants';
 import memoize from 'memoize-one';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderProps} from 'components/organisms/WidgetForm/types';
 import {TAB_TYPES} from 'src/containers/DiagramWidgetForm/constants';
@@ -15,12 +15,16 @@ import {TabbedWidgetForm} from 'components/templates/WidgetForm';
 import type {Values} from 'store/widgetForms/axisChartForm/types';
 import WidgetForm from 'components/organisms/WidgetForm';
 
-export class DiagramWidgetForm extends PureComponent<Props> {
+export class DiagramWidgetForm extends PureComponent<Props, State> {
 	static defaultProps = {
 		components: {
 			ParamsTab: () => null,
 			StyleTab: () => null
 		}
+	};
+
+	state = {
+		filtersOnWidgetErrors: {}
 	};
 
 	getHelpers = memoize(() => ({
@@ -66,10 +70,13 @@ export class DiagramWidgetForm extends PureComponent<Props> {
 		}, []) ?? [];
 	};
 
+	handleFiltersOnWidgetErrors = (filtersOnWidgetErrors) => this.setState({filtersOnWidgetErrors});
+
 	validate = async (values: Values) => {
 		const environment = process.env.NODE_ENV;
+		const {filtersOnWidgetErrors} = this.state;
 		const {schema, widgets} = this.props;
-		let errors = {};
+		let errors = {...filtersOnWidgetErrors};
 
 		try {
 			await schema.validate(values, {abortEarly: false, values, widgets});
@@ -106,7 +113,7 @@ export class DiagramWidgetForm extends PureComponent<Props> {
 
 		switch (tab) {
 			case OPTIONS:
-				return <FiltersOnWidget onChange={onChange} values={values} />;
+				return <FiltersOnWidget onChange={onChange} raiseErrors={this.handleFiltersOnWidgetErrors} values={values} />;
 			case PARAMS:
 				return <ParamsTab onChange={onChange} values={values} />;
 			case STYLE:

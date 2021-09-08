@@ -26,7 +26,7 @@ const schema = object({
 		breakdown: mixed().requiredByCompute(array().conditionalBreakdown()),
 		indicators: mixed().requiredByCompute(array().indicators()),
 		parameters: array().parameters(),
-		source: mixed().source().test(
+		source: object().source().test(
 			'check-source-for-parent',
 			'Для данного типа выбранный источник не доступен - выберите другой',
 			checkSourceForParent
