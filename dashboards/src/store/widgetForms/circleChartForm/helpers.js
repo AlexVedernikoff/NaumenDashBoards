@@ -2,7 +2,7 @@
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndecatorsAgregationDataSet, getDefaultBreakdown} from 'store/widgetForms/helpers';
+import {fixIndicatorsAgregationDataSet, getDefaultBreakdown} from 'store/widgetForms/helpers';
 import {omit} from 'helpers';
 import type {Values as AxisValues} from 'src/store/widgetForms/axisChartForm/types';
 import type {Values as ComboValues} from 'src/store/widgetForms/comboChartForm/types';
@@ -128,7 +128,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const prevDataSet = state.data[index] ?? createCircleDataSet(dataSet.dataKey);
-			const {parameters, ...fixDataSet} = fixIndecatorsAgregationDataSet(dataSet);
+			const {parameters, ...fixDataSet} = fixIndicatorsAgregationDataSet(dataSet);
 			return {...prevDataSet, ...fixDataSet};
 		}),
 		displayMode,

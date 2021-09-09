@@ -1,7 +1,7 @@
 // @flow
+import ChartDataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
 import {createCircleDataSet} from 'store/widgetForms/circleChartForm/helpers';
 import type {DataSet} from 'store/widgetForms/circleChartForm/types';
-import DataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox';
 import {GROUP_WAYS} from 'src/store/widgets/constants';
@@ -38,6 +38,13 @@ export class ParamsTab extends PureComponent<Props> {
 			}
 		}
 
+		newData.forEach(dataSet => {
+			if (dataSet.sourceForCompute) {
+				dataSet.indicators = [];
+				dataSet.breakdown = [];
+			}
+		});
+
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
@@ -55,7 +62,7 @@ export class ParamsTab extends PureComponent<Props> {
 			const hasCustomGroup = !!(values.data[0].breakdown?.[0]?.group?.way === GROUP_WAYS.CUSTOM);
 
 			return (
-				<DataSetSettings
+				<ChartDataSetSettings
 					index={index}
 					key={`IndicatorBox_${dataSet.dataKey}` }
 					onChange={this.handleChangeDataSet}

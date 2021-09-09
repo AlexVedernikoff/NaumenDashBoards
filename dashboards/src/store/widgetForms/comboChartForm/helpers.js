@@ -2,7 +2,7 @@
 import {COMBO_TYPES} from 'store/widgets/data/constants';
 import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet, State} from './types';
-import {fixIndecatorsAgregationDataSet} from 'store/widgetForms/helpers';
+import {fixIndicatorsAgregationDataSet} from 'store/widgetForms/helpers';
 import {omit} from 'helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'store/widgetForms/circleChartForm/types';
@@ -161,7 +161,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 
 			return {
 				...prevDataSet,
-				...fixIndecatorsAgregationDataSet(dataSet)
+				...fixIndicatorsAgregationDataSet(dataSet)
 			};
 		}),
 		displayMode,
