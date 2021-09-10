@@ -248,13 +248,19 @@ export class SourceFieldset extends Component<Props, State> {
 	resetDynamicAttributes = () => {
 		const {index, onChange, value} = this.props;
 		const {breakdown, indicators, parameters} = value;
+		const newValue = {...value};
 
-		const newValue = {
-			...value,
-			breakdown: breakdown?.map(this.resetDynamicAttribute),
-			indicators: indicators?.map(this.resetDynamicAttribute) ?? [DEFAULT_INDICATOR],
-			parameters: parameters?.map(this.resetDynamicAttribute)
-		};
+		if (breakdown) {
+			newValue.breakdown = breakdown.map(this.resetDynamicAttribute);
+		}
+
+		if (indicators) {
+			newValue.indicators = indicators.map(this.resetDynamicAttribute) ?? [DEFAULT_INDICATOR];
+		}
+
+		if (parameters) {
+			newValue.parameters = parameters.map(this.resetDynamicAttribute);
+		}
 
 		onChange(index, newValue);
 	};
