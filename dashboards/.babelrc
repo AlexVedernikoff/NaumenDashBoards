@@ -6,8 +6,10 @@
 			{
 				"targets": {
 					"browsers": [
-						"last 3 versions",
-						">1%"
+						"last 2 years",
+						">1%",
+						"not dead",
+						"not IE 11"
 					],
 					"node": "current"
 				}

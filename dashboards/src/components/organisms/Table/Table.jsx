@@ -144,7 +144,7 @@ export class Table extends PureComponent<Props, State> {
 		let newColumnsWidth = {...columnsWidth};
 
 		columns.forEach(column => {
-			let {accessor, columns: subColumns, width: columnWidth} = column;
+			const {accessor, columns: subColumns, width: columnWidth} = column;
 			let width = columnWidth || defaultWidth;
 
 			if (Array.isArray(subColumns)) {
@@ -178,9 +178,10 @@ export class Table extends PureComponent<Props, State> {
 	 * @param {Column} column - колонка
 	 * @param {number} newWidth - новая ширина колонки
 	 * @param {ColumnsWidth} columnsWidth - данные ширины столбцов
+	 * @param {number} minWidth - минимальная ширина всех столбцов
 	 * @returns {ColumnsWidth}
 	 */
-	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth): ColumnsWidth => {
+	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth, minWidth: ?number = null): ColumnsWidth => {
 		const {accessor, columns} = column;
 		let newColumnsWidth = {
 			...columnsWidth,
@@ -195,7 +196,7 @@ export class Table extends PureComponent<Props, State> {
 				const {accessor} = column;
 				const subColumnWidth = columnsWidth[accessor] - deltaSubColumn;
 
-				newColumnsWidth = this.getNewColumnsWidth(column, subColumnWidth, newColumnsWidth);
+				newColumnsWidth = this.getNewColumnsWidth(column, subColumnWidth, newColumnsWidth, minWidth);
 			});
 		}
 
@@ -224,11 +225,11 @@ export class Table extends PureComponent<Props, State> {
 
 		if (container) {
 			const {clientWidth: containerWidth} = container;
-			const newColumnsWidth = getNewColumnsWidth(column, columnWidth, columnsWidth);
+			const newColumnsWidth = getNewColumnsWidth(column, columnWidth, columnsWidth, containerWidth);
 			const fixedPositions = this.getFixedPositions(newColumnsWidth);
 			const width = sumColumnsWidth(newColumnsWidth, columns);
 
-			if (width >= container.clientWidth) {
+			if (width >= containerWidth) {
 				this.setState(() => ({
 					columnsWidth: newColumnsWidth,
 					fixedPositions,
