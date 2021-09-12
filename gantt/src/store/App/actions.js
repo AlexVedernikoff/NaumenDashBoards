@@ -1,8 +1,8 @@
 // @flow
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSettings} from './constants';
+import type {CommonSettings, DiagramData, ResourceSettings, Source} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getDataSources, getInitialSettings, saveData} from 'utils/api';
-import type {Sources} from './types';
+import {getContext, getDataSources, getDiagramData, getInitialSettings, saveData} from 'utils/api';
 
 /**
  * Получает данные, необходимые для работы ВП
@@ -10,11 +10,12 @@ import type {Sources} from './types';
  */
 const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
+		dispatch(showLoader());
+
 		const {contentCode, subjectUuid} = getContext();
 		const sources = await getDataSources();
 		const {commonSettings, diagramKey, resourceAndWorkSettings} = await getInitialSettings(contentCode, subjectUuid);
 
-		dispatch(showLoader());
 		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
@@ -22,6 +23,29 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setResourceSettings(resourceAndWorkSettings || defaultResourceSettings));
 		dispatch(setSources(sources));
 		dispatch(saveMasterSettings());
+	} catch (error) {
+		dispatch(setError(error));
+	} finally {
+		dispatch(hideLoader());
+	}
+};
+
+/**
+ * Получает данные, необходимые для отображения данных ВП
+ * @returns {ThunkAction}
+ */
+const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		dispatch(showLoader());
+
+		const {contentCode, subjectUuid} = getContext();
+		const {commonSettings, diagramKey, tasks} = await getDiagramData(contentCode, subjectUuid);
+
+		dispatch(setContentCode(contentCode));
+		dispatch(setDiagramKey(diagramKey));
+		dispatch(setSubjectUuid(subjectUuid));
+		dispatch(setCommonSettings(commonSettings || defaultCommonSettings));
+		dispatch(setDiagramData(tasks || []));
 	} catch (error) {
 		dispatch(setError(error));
 	} finally {
@@ -38,11 +62,13 @@ const saveSettings = (data): ThunkAction => async (dispatch: Dispatch): Promise<
 	try {
 		const {contentCode, subjectUuid} = getContext();
 		const {commonSettings, resourceAndWorkSettings} = await saveData(subjectUuid, contentCode, data);
+		const {tasks} = await getDiagramData(contentCode, subjectUuid);
 
 		dispatch(showLoader());
 		dispatch(setCommonSettings(commonSettings || defaultCommonSettings));
 		dispatch(setResourceSettings(resourceAndWorkSettings || defaultResourceSettings));
 		dispatch(saveMasterSettings());
+		dispatch(setDiagramData(tasks || []));
 	} catch (error) {
 		dispatch(setError(error));
 	} finally {
@@ -126,10 +152,19 @@ const setResourceSettings = (payload: ResourceSettings) => ({
 });
 
 /**
+ * Сохраняет данные диаграммы
+ * @param payload
+ */
+const setDiagramData = (payload: DiagramData) => ({
+	payload,
+	type: APP_EVENTS.SET_DIAGRAM_DATA
+});
+
+/**
  * Сохраняет источники
  * @param payload
  */
-const setSources = (payload: Sources) => ({
+const setSources = (payload: Array<Source>) => ({
 	payload,
 	type: APP_EVENTS.SET_SOURCES
 });
@@ -147,6 +182,8 @@ export {
 	hideLoader,
 	saveSettings,
 	setCommonSettings,
+	getGanttData,
+	setDiagramData,
 	setResourceSettings,
 	showLoader
 };

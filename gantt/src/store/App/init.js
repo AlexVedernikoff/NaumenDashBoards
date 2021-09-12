@@ -12,9 +12,10 @@ export const initialAppState: AppState = {
 	masterSettings: {},
 	metaClass: '',
 	resources: [],
-	settings: {},
+	settings: {columnSettings: []},
 	sources: {},
 	subjectUuid: '',
+	tasks: [],
 	user: {
 		email: '',
 		name: '',

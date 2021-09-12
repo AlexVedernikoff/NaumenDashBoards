@@ -11,7 +11,7 @@ export default {
 			{
 				'code': 'd951f7',
 				'show': true,
-				'title': 'Другое'
+				'title': 'Другое?'
 			},
 			{
 				'code': 'd951f9',
@@ -20,7 +20,7 @@ export default {
 			}
 		],
 		'rollUp': false,
-		'scale': 'MONTH'
+		'scale': 'DAY'
 	},
 	'diagramKey': 'testGantt',
 	'resourceAndWorkSettings': [

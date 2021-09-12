@@ -23,6 +23,11 @@ export type Source = {
 	value: SourceItem
 };
 
+export type DiagramData = {
+	id: string,
+	parent: string
+};
+
 export type ResourceSetting = {
 	attributeSettings: Array<Object>,
 	communicationResourceAttribute: Object,

@@ -6,7 +6,7 @@ import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {Column, SourceItem} from 'src/store/App/types';
 import {connect} from 'react-redux';
-import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn, getPrevItem} from 'components/organisms/FormPanel/utils';
+import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn, getPrevItem, updateElementInArray} from 'components/organisms/FormPanel/utils';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import {deepClone} from 'helpers';
 import {defaultAttributeSetting, ITEM_TYPES_FOR_WORK} from 'src/store/App/constants';
@@ -30,7 +30,15 @@ const Work = (props: Props) => {
 	const changeSource = (source: SourceItem) => {
 		setValueAttributes({});
 		setLoading({});
-		onChange({...work, attributeSettings: [defaultAttributeSetting], communicationResourceAttribute: null, communicationWorkAttribute: null, source: {descriptor: '', value: source}});
+		onChange({
+			...work,
+			attributeSettings: [defaultAttributeSetting],
+			communicationResourceAttribute: null,
+			communicationWorkAttribute: null,
+			endWorkAttribute: null,
+			source: {descriptor: '', value: source},
+			startWorkAttribute: null
+		});
 	};
 
 	const handleRemoveSource = () => changeSource(null);
@@ -38,17 +46,30 @@ const Work = (props: Props) => {
 	const handleSelectSource = ({value: node}) => changeSource(node.value);
 
 	const handleAttributeSelect = (target: Attribute, code: string) => {
-		const selectedAttr = attributeSettingsModal.find(attr => attr.code === code);
+		const indexSelectedAttr = attributeSettingsModal.findIndex(attr => attr.code === code);
 
-		if (!selectedAttr) {
-			setAttributeSettingsModal([...attributeSettingsModal, { ...defaultAttributeSetting, attribute: copyWithExclusion(target.value, ['label', 'value']), code: code }]);
+		if (indexSelectedAttr === -1) {
+			const newAttribute = {
+				...defaultAttributeSetting,
+				attribute: copyWithExclusion(target.value, ['label', 'value']),
+				code
+			};
+
+			setAttributeSettingsModal([...attributeSettingsModal, newAttribute]);
 		} else {
-			setAttributeSettingsModal([...attributeSettingsModal, {...selectedAttr, attribute: copyWithExclusion(target.value, ['label', 'value'])}]);
+			const newAttribute = {
+				...attributeSettingsModal[indexSelectedAttr],
+				attribute: copyWithExclusion(target.value, ['label', 'value'])
+			};
+
+			setAttributeSettingsModal(updateElementInArray(attributeSettingsModal, newAttribute, indexSelectedAttr));
 		}
 	};
 
 	const handleAttributeBondWithResource = (target: Attribute) => {
-		onChange({...work, communicationResourceAttribute: copyWithExclusion(target.value, ['label', 'value'])});
+		onChange({
+			...work,
+			communicationResourceAttribute: copyWithExclusion(target.value, ['label', 'value'])});
 	};
 
 	const handleAttributeBondWithWork = (target: Attribute) => {
@@ -65,10 +86,7 @@ const Work = (props: Props) => {
 		}
 	};
 
-	const handleDeleteBlock = () => {
-		const {handleDeleteBlock} = props;
-		return handleDeleteBlock();
-	};
+	const handleDeleteBlock = () => this.props.handleDeleteBlock();
 
 	const handleCheckboxChange = () => {
 		const {handleUpdateChildrenLevel} = props;
@@ -122,7 +140,7 @@ const Work = (props: Props) => {
 
 		if (work.source.value?.value) {
 			setLoading({attributes: true});
-			fetchAttributes(work.source.value.value, null, (attributes) => {
+			fetchAttributes(work.source.value.value, null, attributes => {
 				setValueAttributes({...valueAttributes, attributes: attributes});
 				setLoading({attributes: false});
 			});
@@ -157,7 +175,7 @@ const Work = (props: Props) => {
 
 		if (work.source.value?.value) {
 			setLoading({bondWithResource: true});
-			fetchAttributes(work.source.value.value, getParentClassFqn(work.parent), (attributes) => {
+			fetchAttributes(work.source.value.value, getParentClassFqn(work.parent), attributes => {
 				setValueAttributes({...valueAttributes, bondWithResource: attributes});
 				setLoading({bondWithResource: false});
 			});
@@ -187,7 +205,7 @@ const Work = (props: Props) => {
 
 		if (work.source.value?.value) {
 			setLoading({bondWithWork: true});
-			fetchAttributes(work.source.value.value, getParentClassFqn(work.parent), (attributes) => {
+			fetchAttributes(work.source.value.value, getParentClassFqn(work.parent), attributes => {
 				setValueAttributes({...valueAttributes, bondWithWork: attributes});
 				setLoading({bondWithWork: false});
 			});
@@ -213,11 +231,11 @@ const Work = (props: Props) => {
 	};
 
 	const getAttribute = (codeColumn: string): null | Attribute => {
-		const attributeSetting = attributeSettingsModal.find((item) => codeColumn === item.code);
+		const attributeSetting = attributeSettingsModal.find(item => codeColumn === item.code);
 		const attribute = attributeSetting?.attribute;
 
 		if (attribute?.code && !attribute.title && valueAttributes?.attributes) {
-			const defaultAttribute = valueAttributes.attributes.find((item) => attribute.code === item.code);
+			const defaultAttribute = valueAttributes.attributes.find(item => attribute.code === item.code);
 			return defaultAttribute ? getAdditionalFields(defaultAttribute, defaultAttribute.title, defaultAttribute.code) : null;
 		}
 
@@ -240,7 +258,7 @@ const Work = (props: Props) => {
 
 		if (work.source.value?.value) {
 			setLoading({date: true});
-			fetchAttributesByTypes(work.source.value.value, ['date', 'dateTime'], (attributes) => {
+			fetchAttributesByTypes(work.source.value.value, ['date', 'dateTime'], attributes => {
 				setValueAttributes({...valueAttributes, date: attributes});
 				setLoading({date: false});
 			});
@@ -258,7 +276,7 @@ const Work = (props: Props) => {
 				fetchOptions={getOptionsForDate}
 				isSearching={true}
 				loading={loading?.date}
-				onSelect={(value) => handleChangeDate(value, target)}
+				onSelect={value => handleChangeDate(value, target)}
 				options={newValueAttributes}
 				placeholder={label}
 				value={currentValue}
@@ -266,28 +284,26 @@ const Work = (props: Props) => {
 		);
 	};
 
-	const renderColumn = (column: Column, options: Array<Attribute>) => {
-		return (
-			<li className={styles.item} key={column.code}>
-				<span className={styles.title}>{column.title}</span>
-				<Select className={styles.width}
-					isSearching={true}
-					loading={loading?.attributes}
-					onSelect={(value) => handleAttributeSelect(value, column.code)}
-					options={options}
-					placeholder='Выберите элемент'
-					value={getAttribute(column.code)}
-				/>
-			</li>
-		);
-	};
+	const renderColumn = (column: Column, options: Array<Attribute>) => (
+		<li className={styles.item} key={column.code}>
+			<span className={styles.title}>{column.title}</span>
+			<Select className={styles.width}
+				isSearching={true}
+				loading={loading?.attributes}
+				onSelect={value => handleAttributeSelect(value, column.code)}
+				options={options}
+				placeholder='Выберите элемент'
+				value={getAttribute(column.code)}
+			/>
+		</li>
+	);
 
 	const getContentModal = () => {
 		const newValueAttributes: Array<Attribute> = valueAttributes?.attributes && valueAttributes.attributes.map(item => item && getAdditionalFields(item, item.title, item.code));
 
 		return (
 			<ul className={styles.list}>
-				{columns.map((column) => renderColumn(column, newValueAttributes))}
+				{columns.map(column => renderColumn(column, newValueAttributes))}
 			</ul>
 		);
 	};
@@ -312,22 +328,42 @@ const Work = (props: Props) => {
 		setAttributeSettingsModal([]);
 	};
 
+	const renderDropdownMenu = () => {
+		if (showMenu) {
+			return <DropdownMenu items={ITEM_TYPES_FOR_WORK} onSelect={(item) => handleAddNewBlock(item)} onToggle={() => handleAddNewBlock()} />;
+		}
+
+		return null;
+	};
+
+	const renderConfirmModal = () => {
+		if (showModal) {
+			return <ConfirmModal header='Атрибуты для таблицы' notice={false} onClose={handleCancelModal} onSubmit={handleSaveModal} text={getContentModal()} />;
+		}
+
+		return null;
+	};
+
+	const renderCollapsableFormBox = () => (
+		<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={handleDeleteBlock} title={getHeaderForm()}>
+			<Container className={styles.container}>
+				{renderTreeSelect()}
+				{renderFilter()}
+				{renderBondWithResource()}
+				{renderAttributesButton()}
+				{mayBeNested && renderNestedCheckbox()}
+				{work.nested && renderBondWithWork()}
+				{renderDate(work?.startWorkAttribute?.date, 'start')}
+				{renderDate(work?.endWorkAttribute?.date, 'end')}
+			</Container>
+		</CollapsableFormBox>
+	);
+
 	return (
 		<div className={styles.border} style={getPaddingLeftForChildren(level)}>
-			{showMenu && <DropdownMenu items={ITEM_TYPES_FOR_WORK} onSelect={(item) => handleAddNewBlock(item)} onToggle={() => handleAddNewBlock()} />}
-			<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={handleDeleteBlock} title={getHeaderForm()}>
-				<Container className={styles.container}>
-					{renderTreeSelect()}
-					{renderFilter()}
-					{renderBondWithResource()}
-					{renderAttributesButton()}
-					{mayBeNested && renderNestedCheckbox()}
-					{work.nested && renderBondWithWork()}
-					{renderDate(work?.startWorkAttribute?.date, 'start')}
-					{renderDate(work?.endWorkAttribute?.date, 'end')}
-				</Container>
-			</CollapsableFormBox>
-			{showModal && <ConfirmModal header='Атрибуты для таблицы' notice={false} onClose={handleCancelModal} onSubmit={handleSaveModal} text={getContentModal()} />}
+			{renderDropdownMenu()}
+			{renderCollapsableFormBox()}
+			{renderConfirmModal()}
 		</div>
 	);
 };

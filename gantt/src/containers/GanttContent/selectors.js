@@ -4,10 +4,11 @@ import type {ConnectedProps} from './types';
 import {USER_ROLES} from 'store/App/constants';
 
 export const props = (state: AppState): ConnectedProps => {
-	const {user} = state.APP;
+	const {loading, user} = state.APP;
 	const {role} = user;
 
 	return {
-		editMode: role === USER_ROLES.MASTER || role === USER_ROLES.SUPER
+		editMode: role === USER_ROLES.MASTER || role === USER_ROLES.SUPER,
+		loading
 	};
 };

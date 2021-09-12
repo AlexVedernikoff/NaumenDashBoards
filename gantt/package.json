@@ -13,6 +13,7 @@
   "dependencies": {
     "apexcharts": "^3.26.2",
     "canvg": "^3.0.2",
+    "dhtmlx-gantt": "^7.1.4",
     "dom4": "^2.1.5",
     "draft-js": "^0.11.7",
     "html2canvas": "^1.0.0-rc.7",
@@ -187,5 +188,5 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
-  "version": "1.1.2"
+  "version": "1.1.3"
 }

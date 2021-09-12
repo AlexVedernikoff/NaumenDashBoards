@@ -40,6 +40,15 @@ const getInitialSettings = async (contentCode: string, subjectUuid: string): Pro
 };
 
 /**
+ * Возвращает данные с учетом настроек
+ * @returns {Promise<Params>} - данные
+ */
+const getDiagramData = async (contentCode: string, subjectUuid: string): Promise<Params> => {
+	const data = await api.getDiagramData(contentCode, subjectUuid);
+	return data;
+};
+
+/**
  * Возвращает список атрибутов для источника данных
  * @returns {Promise<Source>} - атрибуты
  */
@@ -92,12 +101,13 @@ const getDataSources = async (): Promise<Params> => {
 };
 
 export {
-	openFilterForm,
-	saveData,
 	getContext,
-	getDataSources,
 	getDataSourceAttributes,
 	getDataSourceAttributesByTypes,
+	getDataSources,
+	getDiagramData,
 	getInitialParams,
-	getInitialSettings
+	getInitialSettings,
+	openFilterForm,
+	saveData
 };

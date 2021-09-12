@@ -1,3 +1,4 @@
+import {getDiagramData} from 'utils/mocks/getDiagramData';
 import getSettings from 'utils/mocks/getSettings';
 import getSources from 'utils/mocks/getSources';
 
@@ -8,8 +9,14 @@ export default class FakeApi {
 		};
 	}
 
-	async getInitialSettings () {
+	async getInitialSettings (contentCode, subjectUuid) {
+		await new Promise(resolve => setTimeout(() => resolve(), 1200));
 		return getSettings;
+	}
+
+	async getDiagramData (contentCode, subjectUuid) {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
+		return getDiagramData();
 	}
 
 	async getDataSources () {
@@ -49,6 +56,7 @@ export default class FakeApi {
 	}
 
 	async postData (subjectUuid, contentCode, data) {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
 		return data;
 	}
 

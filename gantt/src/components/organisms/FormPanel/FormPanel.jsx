@@ -1,5 +1,14 @@
 // @flow
-import {Button, Checkbox, ConfirmModal, FormControl, IconButton, Select, TextInput} from 'naumen-common-components';
+import {
+	Button,
+	Checkbox,
+	ConfirmModal,
+	FormControl,
+	IconButton,
+	Loader,
+	Select,
+	TextInput
+} from 'naumen-common-components';
 import cn from 'classnames';
 import type {Column, ResourceSetting} from 'src/store/App/types';
 import {CommonSettings} from 'store/App/types';
@@ -18,7 +27,7 @@ import {v4 as uuidv4} from 'uuid';
 import Work from './components/Work';
 
 const FormPanel = (props: Props) => {
-	const {resources, settings} = props;
+	const {loading, resources, settings} = props;
 	const {columnSettings} = settings;
 	const [showModal, setShowModal] = useState(false);
 	const [columnSettingsModal, setColumnSettingsModal] = useState([]);
@@ -28,7 +37,17 @@ const FormPanel = (props: Props) => {
 		const newLevel = (value === 'WORK' && resources[index].type !== 'WORK') ? resources[index].level + 1 : resources[index].level;
 		const newParent = (value === 'WORK' && resources[index].type !== 'WORK') ? resources[index].id : resources[index].parent;
 
-		setResourceSettings([...resources.slice(0, index + 1), { ...defaultResourceSetting, id: uuidv4(), level: newLevel, parent: newParent, type: value }, ...resources.slice(index + 1)]);
+		setResourceSettings([
+			...resources.slice(0, index + 1),
+			{
+				...defaultResourceSetting,
+				id: uuidv4(),
+				level: newLevel,
+				parent: newParent,
+				type: value
+			},
+			...resources.slice(index + 1)
+		]);
 	};
 
 	const handleDeleteBlock = (index: number) => {
@@ -113,11 +132,13 @@ const FormPanel = (props: Props) => {
 
 	const handleAddNewColumn = () => {
 		const newColumnSettings = deepClone(columnSettingsModal);
+
 		setColumnSettingsModal([...newColumnSettings, { ...defaultColumn, code: uuidv4() }]);
 	};
 
 	const handleDeleteColumn = (index: number) => {
 		const newColumnSettings = deepClone(columnSettingsModal);
+
 		setColumnSettingsModal([...newColumnSettings.slice(0, index), ...newColumnSettings.slice(index + 1)]);
 	};
 
@@ -147,20 +168,46 @@ const FormPanel = (props: Props) => {
 		setShowModal(!showModal);
 	};
 
-	const renderCommonBlock = () => {
+	const renderHeaderCommonBlock = () => (
+		<h3 className={styles.contentTitle}>Общий блок</h3>
+	);
+
+	const renderSelectCommonBlock = () => (
+		<Select onSelect={handleScaleChange} options={ScaleNames} placeholder='Масштаб по умолчанию' value={ScaleNames.find(item => item.value === settings.scale)} />
+	);
+
+	const renderCheckboxCommonBlock = () => {
 		const {settings} = props;
 
 		return (
+			<FormControl className={styles.margin} label='Свернуть работы по умолчанию'>
+				<Checkbox checked={settings.rollUp} name='Checkbox' onChange={handleCheckboxChange} value={settings.rollUp} />
+			</FormControl>
+		);
+	};
+
+	const renderButtonCommonBlock = () => (
+		<Button className={styles.button} onClick={handleOpenColumnSettingsModal} variant='ADDITIONAL'>
+			Настройки столбцов таблицы
+		</Button>
+	);
+
+	const renderConfirmModal = () => {
+		if (showModal) {
+			return <ConfirmModal header={getHeaderModal()} notice={false} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} text={getContentModal()} />;
+		}
+
+		return null;
+	};
+
+	const renderCommonBlock = () => {
+		return (
 			<div className={cn(styles.border, styles.field)}>
-				<h3 className={styles.contentTitle}>Общий блок</h3>
-				<Select onSelect={handleScaleChange} options={ScaleNames} placeholder='Масштаб по умолчанию' value={ScaleNames.find((item) => item.value === settings.scale)} />
-				<FormControl className={styles.margin} label='Свернуть работы по умолчанию'>
-					<Checkbox checked={settings.rollUp} name='Checkbox' onChange={handleCheckboxChange} value={settings.rollUp} />
-				</FormControl>
-				<Button className={styles.button} onClick={handleOpenColumnSettingsModal} variant='ADDITIONAL'>
-					Настройки столбцов таблицы
-				</Button>
-				{showModal && <ConfirmModal header={getHeaderModal()} notice={false} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} text={getContentModal()} />}
+				{renderHeaderCommonBlock()}
+				{renderSelectCommonBlock()}
+				{renderCheckboxCommonBlock()}
+				{renderButtonCommonBlock()}
+				{renderConfirmModal()}
 			</div>
 		);
 	};
@@ -193,7 +240,7 @@ const FormPanel = (props: Props) => {
 				{columnSettingsModal.map((item, index) => (
 					<li className={styles.item} key={item.code}>
 						<Checkbox checked={item.show} name={item.code} onChange={() => handleColumnShowChange(index)} value={item.show} />
-						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={(target) => handleColumnNameChange(target, index)} onlyNumber={false} placeholder='Введите название столбца' value={item.title} />
+						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder='Введите название столбца' value={item.title} />
 						<IconButton icon='BASKET' onClick={() => handleDeleteColumn(index)} />
 					</li>
 				))}
@@ -209,18 +256,26 @@ const FormPanel = (props: Props) => {
 		return (
 			<FormByType
 				columns={columnSettings}
-				handleAddNewBlock={(value) => handleAddNewBlock(index, value)}
+				handleAddNewBlock={value => handleAddNewBlock(index, value)}
 				handleDeleteBlock={() => handleDeleteBlock(index)}
-				handleUpdateChildrenLevel={(isNested) => handleUpdateChildrenLevel(index, isNested)}
+				handleUpdateChildrenLevel={isNested => handleUpdateChildrenLevel(index, isNested)}
 				index={index}
 				key={item.source.value ? item.source.value.value + index : index}
 				level={item.level}
-				onChange={(value) => handleUpdateResourceSettings(value, index)}
+				onChange={value => handleUpdateResourceSettings(value, index)}
 				options={sources}
 				value={item}
 			/>
 		);
 	};
+
+	if (loading && !resources) {
+		return (
+			<div className={styles.center}>
+				<Loader size={50} />
+			</div>
+		);
+	}
 
 	return (
 		<>

@@ -6,12 +6,12 @@ import type {Props} from './types';
 import React from 'react';
 import styles from './styles.less';
 
-const DropdownMenu = (props: Props) => {
-	const {items, onSelect, onToggle} = props;
+const CheckedMenu = (props: Props) => {
+	const {items, onCheck, onToggle} = props;
 
-	const handleSelect = (value) => onSelect(value);
+	const handleCheck = value => onCheck(value);
 
-	const renderItems = () => items.map(item => <Item key={item.code} onClick={handleSelect(item.code)}>{item.value}</Item>);
+	const renderItems = () => items.map(item => <Item key={item.code} onClick={() => handleCheck(item)}>{item.label}</Item>);
 
 	return (
 		<OutsideClickDetector onClickOutside={onToggle}>
@@ -26,4 +26,4 @@ const DropdownMenu = (props: Props) => {
 	);
 };
 
-export default DropdownMenu;
+export default CheckedMenu;

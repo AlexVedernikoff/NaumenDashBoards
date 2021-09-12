@@ -1,0 +1,61 @@
+.gantt_grid_scale, .gantt_task_scale, .gantt_task_vscroll {
+	background-color: #eee;
+}
+.gantt_grid_scale, .gantt_task_scale,
+.gantt_task .gantt_task_scale .gantt_scale_cell,
+.gantt_grid_scale .gantt_grid_head_cell {
+	color: #000;
+	font-size: 12px;
+}
+
+.gantt_grid_head_cell {
+	border: 1px solid #cecece;
+}
+
+.gantt_grid_head_cell {
+	border: 1px solid #cecece;
+}
+
+.gantt_cell {
+	border-left: 1px solid #cecece;
+}
+
+.gantt_task_progress_drag,
+.gantt_link_control {
+	display: none !important;
+}
+
+.gantt_grid_head_cell:not(:first-child) {
+	&:hover,
+	&:focus {
+		background-color: #efefef;
+	}
+}
+
+.gantt_grid_head_cell:not(:first-child):not(:last-child) {
+	cursor: pointer;
+
+	&:hover::before,
+	&:focus::before {
+		display: flex;
+	}
+}
+
+.gantt_grid_head_cell::before {
+	content: "\02DF";
+	cursor: pointer;
+	display: none;
+	font-size: 20px;
+	position: absolute;
+	right: 5px;
+	top: 11px;
+	transform: translateY(-50%);
+}
+
+.gantt_grid_head_button::after {
+	color: #4D92C8;
+	content: "\2795";
+	cursor: pointer;
+	display: block;
+	font-size: 20px;
+}

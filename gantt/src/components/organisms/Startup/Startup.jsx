@@ -1,28 +1,20 @@
 // @flow
-import {Loader} from 'naumen-common-components';
 import type {Props} from 'containers/Startup/types';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class Startup extends Component<Props> {
 	componentDidMount () {
-		const {getAppConfig} = this.props;
+		const {getAppConfig, getGanttData} = this.props;
 		getAppConfig();
+		getGanttData();
 	}
 
 	render () {
-		const {children, error, loading} = this.props;
+		const {children, error} = this.props;
 
 		if (error) {
 			return <p>Ошибка загрузки ${error}</p>;
-		}
-
-		if (loading) {
-			return (
-				<div className={styles.center}>
-					<Loader size={50} />
-				</div>
-			);
 		}
 
 		return (

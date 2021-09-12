@@ -25,6 +25,20 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
+	async getDiagramData (contentCode: string, subjectUuid: string) {
+		const url = `exec-post?func=modules.ganttDataSet.getGanttDiagramData&params=requestContent`;
+		const body = {
+			contentCode: contentCode,
+			subjectUUID: subjectUuid
+		};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
 	async getDataSources () {
 		const url = 'exec?func=modules.ganttSettings.getDataSources&params=';
 		const options = {

@@ -58,7 +58,11 @@ export const getPrevItem = (index: number): ResourceSetting => {
  * @param newValue - значение поля value
  */
 export const getAdditionalFields = (target: ResourceSetting | Attribute, newLabel: string, newValue: string) => {
-	return {...target, label: newLabel, value: newValue};
+	return {
+		...target,
+		label: newLabel,
+		value: newValue
+	};
 };
 
 /**
@@ -69,7 +73,7 @@ export const getAdditionalFields = (target: ResourceSetting | Attribute, newLabe
 export const copyWithExclusion = (target: Object, exclusions: Array<string>) => {
 	const newValue = {...target};
 
-	exclusions.forEach(exc => delete newValue.value[exc]);
+	exclusions.forEach(exc => delete newValue[exc]);
 
 	return newValue;
 };
@@ -80,14 +84,23 @@ export const copyWithExclusion = (target: Object, exclusions: Array<string>) => 
  * @param parentId - id объекта
  */
 export const getParentClassFqn = (parentId: number): string => {
-	if (!parentId) {
-		return null;
+	if (parentId) {
+		const {resources} = store.getState().APP;
+		const parent = resources.find((item) => item.id === parentId);
+		return parent ? parent.source?.value?.value : null;
 	}
 
-	const {resources} = store.getState().APP;
-	const parent = resources.find((item) => item.id === parentId);
-	return parent ? parent.source?.value?.value : null;
+	return '';
 };
+
+/**
+ * Изменение указанного элемента на новый
+ * @returns {string}
+ * @param array - массив
+ * @param el - объект, который нужно изменить
+ * @param index - индекс объекта
+ */
+export const updateElementInArray = (array, el, index): Array<Object> => [...array.slice(0, index), el, ...array.slice(index + 1)];
 
 /**
  * Получаем новый уровень вложенности в зависимости от значения чекбокса.
