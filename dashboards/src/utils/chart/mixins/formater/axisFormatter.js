@@ -46,10 +46,10 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Numb
  * Создает форматер для меток и оси индикатора
  * @param {AxisWidget} widget - виджет
  * @param {NumberAxisFormat} format - установленный пользователем формат, используется только для меток данных
- * @param {boolean} checkShowEmptyData - установленный пользователем флаг показывать скрытые данные.
+ * @param {boolean} checkShowEmptyData - указывает на необходимость показывать скрытые данные
  * @returns {NumberFormatter | ValueFormatter} - функция-форматер
  */
-const getDataFormatter = (widget: AxisWidget, format: NumberAxisFormat, checkShowEmptyData?: boolean = false): NumberFormatter => {
+const getDataFormatter = (widget: AxisWidget, format: NumberAxisFormat, checkShowEmptyData: boolean): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {breakdown, indicators, parameters, showEmptyData} = dataSet;
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
@@ -63,7 +63,7 @@ const getDataFormatter = (widget: AxisWidget, format: NumberAxisFormat, checkSho
 	if (usesMSInterval) {
 		formatter = parseMSInterval;
 	} else {
-		const numberFormat = !format.additional && usesPercent ? {...format, additional: '%'} : format;
+		const numberFormat = !format.additional && format.additional !== '' && usesPercent ? {...format, additional: '%'} : format;
 
 		formatter = makeFormatterByNumberFormat(numberFormat);
 		formatter = checkInfinity(formatter);
@@ -108,13 +108,16 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 	// $FlowFixMe - getCategoryFormatter должен сам разобраться что он обрабатывает.
 	const formatLabels = labels.map(categoryFormatter);
 	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal);
-	const defaultLabelFormat: NumberAxisFormat = DEFAULT_NUMBER_AXIS_FORMAT;
-	const dataLabelsFormat = dataLabels.format && dataLabels.format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT ? dataLabels.format : defaultLabelFormat;
+	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
+	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
+		? dataLabelsFormat
+		: DEFAULT_NUMBER_AXIS_FORMAT;
+	const indicatorsFormat = {...DEFAULT_NUMBER_AXIS_FORMAT, additional: '', symbolCount: 0};
 	const categoryOverlappedSplitter = checkString(splitFormatter(!hasOverlappedLabel));
 
 	return {
-		dataLabel: getDataFormatter(widget, dataLabelsFormat, true),
-		indicator: getDataFormatter(widget, defaultLabelFormat),
+		dataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, true),
+		indicator: getDataFormatter(widget, indicatorsFormat, false),
 		legend: getLegendFormatter(widget, container),
 		options: {
 			hasOverlappedLabel,
