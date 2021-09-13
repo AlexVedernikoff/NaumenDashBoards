@@ -95,7 +95,7 @@ class QueryWrapper implements CriteriaWrapper
         if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
             aggregationType == Aggregation.AVG)
         {
-            column = sc.property(attributeCodes).with(sc.&cast.rcurry('integer'))
+            column = sc.property(attributeCodes).with(sc.&cast.rcurry('float'))
         }
 
         if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
