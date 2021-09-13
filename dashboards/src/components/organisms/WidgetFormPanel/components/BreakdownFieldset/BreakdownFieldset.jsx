@@ -52,17 +52,8 @@ export class BreakdownFieldset extends Component<Props> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {indicator, removable, required} = this.props;
-		const {indicator: prevIndicator, removable: prevRemovable, value: prevValue} = prevProps;
-		const {COMPUTED_ATTR} = ATTRIBUTE_TYPES;
-		const switchToComputedIndicator = prevIndicator && prevIndicator.type !== COMPUTED_ATTR
-			&& indicator && indicator.type === COMPUTED_ATTR;
-		const switchFromComputedIndicator = prevIndicator && prevIndicator.type === COMPUTED_ATTR
-			&& indicator && indicator.type !== COMPUTED_ATTR;
-
-		if ((switchToComputedIndicator || switchFromComputedIndicator) && (prevValue || required)) {
-			this.createNewBreakdown();
-		}
+		const {removable} = this.props;
+		const {removable: prevRemovable} = prevProps;
 
 		if (prevRemovable && !removable) {
 			this.createNewBreakdown();
