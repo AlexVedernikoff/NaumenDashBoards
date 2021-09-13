@@ -26,7 +26,7 @@ export default class Dashboards implements DashboardsAPI {
 	}
 
 	getCardObject (value: DTOValue) {
-		return this.transport('dashboards', 'getCardObject', ['value'], value);
+		return this.transport('dashboards', 'getCardObject', ['requestContent'], {value});
 	}
 
 	getCatalogItemObject (property: DTOValue) {
@@ -49,8 +49,8 @@ export default class Dashboards implements DashboardsAPI {
 		return this.transport('dashboards', 'getDataSources', []);
 	}
 
-	getDynamicAttributeGroups (actualDescriptor: DTOValue) {
-		return this.transport('dashboards', 'getDynamicAttributeGroups', ['descriptor'], actualDescriptor);
+	getDynamicAttributeGroups (descriptor: DTOValue) {
+		return this.transport('dashboards', 'getDynamicAttributeGroups', ['requestContent'], {descriptor});
 	}
 
 	getDynamicAttributes (groupCode: DTOValue) {
