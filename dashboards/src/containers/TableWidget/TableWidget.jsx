@@ -6,14 +6,14 @@ import {functions, props} from './selectors';
 import {LoadingDiagramWidget} from 'components/organisms/DiagramWidget';
 import type {Props} from './types';
 import React, {createContext, PureComponent} from 'react';
-import Table from 'components/organisms/TableWidget';
 import type {TableBuildData} from 'store/widgets/buildData/types';
+import TableWidget from 'components/organisms/TableWidget';
 
 const UPDATING_CONTEXT = createContext(false);
 
 UPDATING_CONTEXT.displayName = 'UPDATING_CONTEXT';
 
-export class TableWidget extends PureComponent<Props> {
+export class TableWidgetContainer extends PureComponent<Props> {
 	components = {
 		...DEFAULT_COMPONENTS,
 		ControlPanel
@@ -25,7 +25,7 @@ export class TableWidget extends PureComponent<Props> {
 		return (
 			<UPDATING_CONTEXT.Consumer>
 				{updating => (
-					<Table
+					<TableWidget
 						data={data}
 						loading={updating}
 						onDrillDown={drillDown}
@@ -52,4 +52,4 @@ export class TableWidget extends PureComponent<Props> {
 	}
 }
 
-export default connect(props, functions)(TableWidget);
+export default connect(props, functions)(TableWidgetContainer);

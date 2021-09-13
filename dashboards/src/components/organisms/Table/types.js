@@ -56,7 +56,7 @@ export type Props = {
 	components?: Components,
 	data: Array<Row>,
 	fixedColumnsCount: number,
-	getNewColumnsWidth: (column: Column, newWidth: number, columnsWidth: ColumnsWidth) => ColumnsWidth,
+	getNewColumnsWidth: (column: Column, newWidth: number, columnsWidth: ColumnsWidth, minWidth?: ?number) => ColumnsWidth,
 	loading: boolean,
 	onChangeColumnWidth?: (columnsWidth: ColumnsWidth) => void,
 	onChangeSorting?: (sorting: TableSorting) => void,

@@ -12,11 +12,12 @@ import {getSeparatedLabel, isCardObjectColumn, isIndicatorColumn} from 'store/wi
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
-import type {Props, State} from './types';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
+import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
+import {sumColumnsWidth} from 'components/organisms/Table/helpers';
 import Table from 'components/organisms/Table';
 import ValueWithLimitWarning from './components/ValueWithLimitWarning';
 
@@ -113,7 +114,7 @@ export class TableWidget extends PureComponent<Props, State> {
 		return column.type === type && (!nextColumn || nextColumn.type !== type);
 	});
 
-	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth): ColumnsWidth => {
+	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth, minWidth: ?number = null): ColumnsWidth => {
 		const {columns} = this.props.data;
 		const {current: table} = this.tableRef;
 		const {accessor} = column;
@@ -130,17 +131,17 @@ export class TableWidget extends PureComponent<Props, State> {
 		}
 
 		if (isLastIndicator || isLastBreakdown) {
-			newColumnsWidth = this.getNewIndicatorsColumnsWidth(column, newColumnsWidth, ratio);
+			newColumnsWidth = this.getNewIndicatorsColumnsWidth(column, newColumnsWidth, ratio, minWidth);
 		} else if (this.isLastTypedColumn(columns, column, PARAMETER)) {
-			newColumnsWidth = this.getNewParametersColumnsWidth(column, newColumnsWidth, ratio);
+			newColumnsWidth = this.getNewParametersColumnsWidth(column, newColumnsWidth, ratio, minWidth);
 		} else if (table) {
-			newColumnsWidth = table.getNewColumnsWidth(column, newWidth, columnsWidth);
+			newColumnsWidth = table.getNewColumnsWidth(column, newWidth, columnsWidth, minWidth);
 		}
 
 		return newColumnsWidth;
 	};
 
-	getNewIndicatorsColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number): ColumnsWidth => {
+	getNewIndicatorsColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number, minWidth: ?number): ColumnsWidth => {
 		const {columns} = this.props.data;
 		const {BREAKDOWN, INDICATOR} = COLUMN_TYPES;
 		const newColumnsWidth = deepClone(columnsWidth);
@@ -165,9 +166,9 @@ export class TableWidget extends PureComponent<Props, State> {
 		return newColumnsWidth;
 	};
 
-	getNewParametersColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number): ColumnsWidth => {
+	getNewParametersColumnsWidth = (column: Column, columnsWidth: ColumnsWidth, ratio: number, minWidth: ?number = null): ColumnsWidth => {
 		const {columns} = this.props.data;
-		const {PARAMETER} = COLUMN_TYPES;
+		const {INDICATOR, PARAMETER} = COLUMN_TYPES;
 		const newColumnsWidth = deepClone(columnsWidth);
 
 		columns.forEach(column => {
@@ -175,6 +176,42 @@ export class TableWidget extends PureComponent<Props, State> {
 				newColumnsWidth[column.accessor] = columnsWidth[column.accessor] / ratio;
 			}
 		});
+		const sumWidth = sumColumnsWidth(newColumnsWidth, columns);
+
+		if (minWidth && minWidth > sumWidth) {
+			const diff = minWidth - sumWidth;
+			const extendColumns = columns.filter(({type}) => type === INDICATOR);
+
+			if (extendColumns.length > 0) {
+				const extendColumnsWidth = extendColumns.reduce((sum, {accessor}) => sum + newColumnsWidth[accessor], 0);
+				const extendRatio = (extendColumnsWidth + diff) / extendColumnsWidth;
+
+				extendColumns.forEach(({accessor, columns: subColumns}) => {
+					let newWidth = newColumnsWidth[accessor];
+
+					if (subColumns && subColumns.length > 0) {
+						let sumSubColumnsWidth = 0;
+
+						subColumns.forEach(({accessor: subColumn}) => {
+							newColumnsWidth[subColumn] *= extendRatio;
+							sumSubColumnsWidth += newColumnsWidth[subColumn];
+						});
+
+						newWidth = sumSubColumnsWidth;
+					} else {
+						newWidth = newWidth * extendRatio;
+					}
+
+					newColumnsWidth[accessor] = newWidth;
+				});
+			}
+
+			const sumWidthAfter = sumColumnsWidth(newColumnsWidth, columns);
+
+			if (sumWidthAfter < minWidth) {
+				newColumnsWidth[column.accessor] += minWidth - sumWidthAfter;
+			}
+		}
 
 		return newColumnsWidth;
 	};
