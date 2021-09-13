@@ -1,7 +1,6 @@
 // @flow
 import type {Breakdown} from 'store/widgetForms/types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
-import {countIndicators, hasDifferentAggregations} from 'TableWidgetForm/helpers';
 import {createTableDataSet} from 'store/widgetForms/tableForm/helpers';
 import type {DataSet} from 'store/widgetForms/tableForm/types';
 import DataSetSettings from 'containers/TableDataSetSettings';
@@ -12,6 +11,7 @@ import DisplayModeSelectBox from 'containers/DisplayModeSelectBox';
 import FormBox from 'components/molecules/FormBox';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'WidgetFormPanel/components/FormField';
+import {hasDifferentAggregations, isDisableDataTopField} from 'TableWidgetForm/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {IndicatorsFormBoxProps} from 'TableWidgetForm/components/DataSetSettings/types';
@@ -98,7 +98,7 @@ export class ParamsTab extends PureComponent<Props> {
 		const {onChange, values} = this.props;
 		const {data, top} = values;
 
-		if (top.show && countIndicators(data) > 1) {
+		if (top.show && isDisableDataTopField(data)) {
 			onChange(DIAGRAM_FIELDS.top, {
 				...top,
 				show: false
@@ -158,7 +158,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderDataTopField = () => {
 		const {values} = this.props;
 		const {data, top} = values;
-		const disabled = countIndicators(data) > 1;
+		const disabled = isDisableDataTopField(data);
 
 		return (
 			<FormField name={DIAGRAM_FIELDS.top}>
