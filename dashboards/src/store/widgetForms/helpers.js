@@ -47,27 +47,27 @@ const parseAttrSetConditions = (data: ?SourceData): ?AttrSetConditions => {
  * @param {Array<Indicator>} indicators - массив индикаторов
  * @returns {Array<Indicator>}
  */
-const fixIndecatorsAgregation = (indicators: Array<Indicator>): Array<Indicator> =>
+const fixIndicatorsAgregation = (indicators: ?Array<Indicator>): Array<Indicator> =>
 	indicators?.map(indicator => {
 		return indicator.aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE
 			? {...indicator, aggregation: DEFAULT_AGGREGATION.COUNT}
 			: indicator;
-	});
+	}) ?? [];
 
 /**
  * Заменяет агрегацию N/A на агрегацию CNT в индикаторах источника данных
  * @param {TableDataSet}  dataSet - изначальный источник данных
  * @returns  {TableDataSet}
  */
-const fixIndecatorsAgregationDataSet = (dataSet: TableDataSet): TableDataSet =>
+const fixIndicatorsAgregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 	({
 		...dataSet,
-		indicators: fixIndecatorsAgregation(dataSet.indicators)
+		indicators: fixIndicatorsAgregation(dataSet.indicators)
 	});
 
 export {
 	getDefaultBreakdown,
-	fixIndecatorsAgregation,
-	fixIndecatorsAgregationDataSet,
+	fixIndicatorsAgregation,
+	fixIndicatorsAgregationDataSet,
 	parseAttrSetConditions
 };

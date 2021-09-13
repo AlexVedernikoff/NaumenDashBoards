@@ -2,7 +2,7 @@
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndecatorsAgregationDataSet} from 'store/widgetForms/helpers';
+import {fixIndicatorsAgregationDataSet} from 'store/widgetForms/helpers';
 import type {Values as CircleValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as ComboValues} from 'store/widgetForms/comboChartForm/types';
 import type {Values as SpeedometerValues} from 'store/widgetForms/speedometerForm/types';
@@ -54,9 +54,11 @@ const changeValuesByCircleChart = (state: State, values: CircleValues): State =>
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const {parameters = [DEFAULT_PARAMETER], xAxisName = '', yAxisName = ''} = state.data[index] || {};
+			const {indicators = []} = dataSet;
 
 			return {
 				...dataSet,
+				indicators,
 				parameters,
 				xAxisName,
 				yAxisName
@@ -172,7 +174,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 
 			return {
 				...prevDataSet,
-				...fixIndecatorsAgregationDataSet(dataSet)
+				...fixIndicatorsAgregationDataSet(dataSet)
 			};
 		}),
 		displayMode,
