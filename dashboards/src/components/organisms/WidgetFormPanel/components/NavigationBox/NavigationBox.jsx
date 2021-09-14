@@ -119,10 +119,10 @@ export class NavigationBox extends PureComponent<Props> {
 	};
 
 	render () {
-		const {isUserMode, personalDashboard, user, value} = this.props;
+		const {isEditableContext, user, value} = this.props;
 		const {show} = value;
 
-		if (user.role !== USER_ROLES.REGULAR && !personalDashboard && !isUserMode) {
+		if (user.role !== USER_ROLES.REGULAR && !isEditableContext) {
 			return (
 				<ToggableFormBox
 					name={DIAGRAM_FIELDS.show}

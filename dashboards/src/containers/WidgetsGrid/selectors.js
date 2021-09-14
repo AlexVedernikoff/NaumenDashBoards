@@ -5,18 +5,21 @@ import {changeLayouts} from 'store/dashboard/layouts/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {DASHBOARD_EDIT_MODE, USER_ROLES} from 'store/context/constants';
 import {getAllWidgets} from 'store/widgets/data/selectors';
+import {isEditableDashboardContext, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard, widgets} = state;
 	const {layouts: dashboardLayouts, settings} = dashboard;
-	const {editMode, isMobileDevice, layoutMode, personal: personalDashboard} = settings;
+	const {editMode, isMobileDevice, layoutMode} = settings;
 	const {data} = widgets;
 	const {focusedWidget, selectedWidget} = data;
 	const {dashboardMode, user} = context;
-	const hasCreateNewWidget = user.role !== USER_ROLES.REGULAR || personalDashboard;
+	const isUserMode = isUserModeDashboard(state);
+	const isEditableContext = isEditableDashboardContext(state);
+	const hasCreateNewWidget = user.role !== USER_ROLES.REGULAR || isEditableContext;
 	const widgetsList = getAllWidgets(state);
 	const showCreationInfo = hasCreateNewWidget && widgetsList?.length === 0;
-	const editableDashboard = dashboardMode === DASHBOARD_EDIT_MODE.EDIT;
+	const editableDashboard = dashboardMode === DASHBOARD_EDIT_MODE.EDIT || isUserMode;
 
 	return {
 		editMode,
@@ -24,6 +27,7 @@ export const props = (state: AppState): ConnectedProps => {
 		focusedWidget,
 		hasCreateNewWidget,
 		isMobileDevice,
+		isUserMode,
 		layoutMode,
 		layouts: dashboardLayouts[layoutMode],
 		selectedWidget,

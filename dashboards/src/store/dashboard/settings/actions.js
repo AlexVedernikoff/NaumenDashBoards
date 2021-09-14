@@ -24,7 +24,7 @@ import {
 import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
-import {isRestrictUserModeDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
+import {isPersonalDashboard, isRestrictUserModeDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resetState, switchState} from 'store/actions';
@@ -427,7 +427,7 @@ const updateUserSourceMode = (): ThunkAction => async (dispatch: Dispatch, getSt
 	const widgets = getAllWidgets(state);
 
 	if (isUserMode && widgets.length === 0) {
-		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.BAR);
+		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.COLUMN);
 
 		dispatch(addLayouts(newWidget.id));
 		dispatch(addNewWidget(newWidget));
@@ -444,10 +444,10 @@ const updateUserSourceMode = (): ThunkAction => async (dispatch: Dispatch, getSt
 const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		const state = getState();
-		const {context, dashboard} = state;
+		const {context} = state;
 		const {contentCode, subjectUuid: classFqn} = context;
-		const {personal: isPersonal} = dashboard.settings;
 		const autoUpdateSetting = {enabled, interval: Number(interval)};
+		const isPersonal = isPersonalDashboard(state);
 		const isForUser = isUserModeDashboard(state);
 		const payload = {
 			autoUpdate: autoUpdateSetting,
@@ -516,8 +516,9 @@ const setPersonalValue = (payload: boolean) => (dispatch: Dispatch) => {
  * @returns {ThunkAction}
  */
 const switchDashboard = (saveState: boolean = true): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
-	const {context, customGroups, dashboard, widgets} = getState();
-	const {personal: personalDashboard} = dashboard.settings;
+	const state = getState();
+	const {context, customGroups, dashboard, widgets} = state;
+	const isPersonal = isPersonalDashboard(state);
 	const {temp} = context;
 
 	dispatch({
@@ -530,7 +531,7 @@ const switchDashboard = (saveState: boolean = true): ThunkAction => async (dispa
 		if (temp) {
 			dispatch(switchState(temp));
 		} else {
-			await dispatch(createNewState(!personalDashboard));
+			await dispatch(createNewState(!isPersonal));
 		}
 	} finally {
 		dispatch({
