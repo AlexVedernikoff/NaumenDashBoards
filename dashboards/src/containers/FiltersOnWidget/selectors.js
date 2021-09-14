@@ -11,6 +11,8 @@ import type {
 } from './types';
 import type {CustomFilter} from 'store/widgets/data/types';
 import {fetchAttributes} from 'store/sources/attributes/actions';
+import {getSelectedWidget} from 'store/widgets/data/selectors';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Преобразует список CustomFilter (хранение) в CustomFilterValue (отображение)
@@ -75,8 +77,15 @@ const generateCustomFilterItems = (data: DataSetTypes, attributes: AttributesSta
 export const props = (state: AppState, props: ContainerProps): ConnectedProps => {
 	const {values: {data}} = props;
 	const {attributes} = state.sources;
+	const widget = getSelectedWidget(state);
 	const initialCustomFiltersValues = generateCustomFiltersValues(data);
-	const dataSets = generateCustomFilterItems(data, attributes);
+	let dataSets = generateCustomFilterItems(data, attributes);
+
+	if (widget.type === WIDGET_TYPES.TABLE && dataSets.length > 0) {
+		const [firstDataSet] = dataSets;
+
+		dataSets = [firstDataSet];
+	}
 
 	return {
 		dataSets,
