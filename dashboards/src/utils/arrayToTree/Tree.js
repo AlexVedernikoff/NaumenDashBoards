@@ -37,7 +37,11 @@ class Tree {
 		}
 
 		if (this.tree[id]) {
-			children = children ? [...this.tree[id].children, ...children] : this.tree[id].children;
+			const treeChildren = this.tree[id].children;
+
+			if (treeChildren && treeChildren.lenght > 0) {
+				children = children ? [...treeChildren, ...children] : treeChildren;
+			}
 		}
 
 		this.tree[id] = {
