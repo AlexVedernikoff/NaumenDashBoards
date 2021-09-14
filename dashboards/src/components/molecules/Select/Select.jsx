@@ -109,7 +109,7 @@ export class Select extends Component<Props, State> {
 	};
 
 	renderLabel = (): React$Node => {
-		const {editable, forwardedLabelInputRef, getOptionLabel, multiple, placeholder, value, values = []} = this.props;
+		const {editable, forwardedLabelInputRef, getOptionLabel, disabled, multiple, placeholder, value, values = []} = this.props;
 		const {Value} = this.components;
 		let label = placeholder;
 		let usePlaceholder = true;
@@ -135,6 +135,7 @@ export class Select extends Component<Props, State> {
 			return (
 				<TextInput
 					className={styles.input}
+					disabled={disabled}
 					forwardedRef={forwardedLabelInputRef}
 					onChange={this.handleChangeLabel}
 					onFocus={this.hideMenu}

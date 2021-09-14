@@ -49,11 +49,12 @@ export class DataTopField extends PureComponent<Props> {
 	};
 
 	renderCountSelect = () => {
-		const {count} = this.props.value;
+		const {count, show} = this.props.value;
 
 		return (
 			<Select
 				className={styles.select}
+				disabled={!show}
 				editable={true}
 				name={DIAGRAM_FIELDS.count}
 				onChangeLabel={this.handleChangeCount}
