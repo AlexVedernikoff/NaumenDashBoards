@@ -74,9 +74,11 @@ const getLegendFormatter = (widget: CircleWidget, container: HTMLDivElement): Nu
 
 const getCircleFormatter = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
 	const {dataLabels} = widget;
-	const defaultDataLabelFormat: NumberAxisFormat = DEFAULT_NUMBER_AXIS_FORMAT;
-	const dataLabelsFormat = dataLabels.format && dataLabels.format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT ? dataLabels.format : defaultDataLabelFormat;
-	const dataLablesFormatter = getDataFormatter(widget, dataLabelsFormat);
+	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
+	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
+		? dataLabelsFormat
+		: DEFAULT_NUMBER_AXIS_FORMAT;
+	const dataLablesFormatter = getDataFormatter(widget, normalizedDataLabelsFormat);
 
 	return {
 		breakdown: getCategoryFormatter(widget),
