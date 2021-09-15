@@ -26,9 +26,11 @@ import java.sql.Clob
 interface DashboardConfig
 {
     /**
-     * Метод компиляции  модулей в нужном порядке.
+     * Метод компиляции  модулей в нужном порядке
+     * @param codeApp - код встроенного приложения (необходимо указать для лицензионной версии)
      */
     void compileModules()
+    void compileModules(String codeApp)
 
     /**
      * Метод проверки и обновления версий хранения данных приложения "Дашборды"
@@ -37,7 +39,7 @@ interface DashboardConfig
 
     /**
      * Включить/выключить системную группу для приложения "Дашборды"
-     * @param isTurnOn флаг установки системной группы (по умолчанию true)
+     * @param isTurnOn - флаг установки системной группы (по умолчанию true)
      */
     void setDashboardMasterGroupEnabled(boolean isTurnOn)
 
@@ -49,7 +51,7 @@ interface DashboardConfig
 
     /**
      * Настройка обновления значения статуса счетчика в БД
-     * @param delayMs время в миллисекундах (если нет нагрузки на стенд, лучше выставить 10 мс)
+     * @param delayMs - время в миллисекундах (если нет нагрузки на стенд, лучше выставить 10 мс)
      */
     void setTimerStatusChangeDelay(Integer delayMs)
 
@@ -60,7 +62,7 @@ interface DashboardConfig
 
     /**
      * Включение настройки обновления счетчиков на стенде
-     * @param isSetTimerRefresh флаг установки режима обновления (по умолчанию "true")
+     * @param isSetTimerRefresh - флаг установки режима обновления (по умолчанию "true")
      */
     void setTimerStatusRefreshEnable(boolean isSetTimerRefresh)
 
@@ -89,9 +91,9 @@ class DashboardConfigImpl extends BaseController implements DashboardConfig
     }
 
     @Override
-    void compileModules()
+    void compileModules(String codeApp = null)
     {
-        service.compileModules()
+        service.compileModules(codeApp)
     }
 
     @Override
@@ -182,26 +184,31 @@ class DashboardConfigService
         """
 
     /**
-     * Метод компиляции  модулей в нужном порядке.
+     * Метод компиляции  модулей в нужном порядке
+     * @param codeApp - код встроенного приложения (необходимо указать для лицензионной версии)
      */
-    void compileModules()
+    void compileModules(String codeApp = null)
     {
         def scriptService = beanFactory.getBean(ScriptServiceImpl)
-        scriptService.reloadModules(
-            [
-                'dashboardCommon',
-                'dashboardErrorHandler',
-                'dashboardMarshaller',
-                'dashboardFormulaCalculator',
-                'dashboardQueryWrapper',
-                'dashboardSettings',
-                'dashboardDataSet',
-                'dashboardDrilldown',
-                'dashboards',
-                'dashboardSendEmail',
-                'dashboardConfig'
-            ]
-        )
+        List<String> modules = [
+            'dashboardCommon',
+            'dashboardErrorHandler',
+            'dashboardMarshaller',
+            'dashboardFormulaCalculator',
+            'dashboardQueryWrapper',
+            'dashboardSettings',
+            'dashboardDataSet',
+            'dashboardDrilldown',
+            'dashboards',
+            'dashboardSendEmail',
+            'dashboardConfig'
+        ]
+        // У встроенного приложения с лицензией код модуля формируется по шаблону: "КодВП_КодМодуля"
+        if (codeApp)
+        {
+            modules = modules.collect { "${codeApp}_${it}".toString() }
+        }
+        scriptService.reloadModules(modules)
     }
 
     /**
@@ -543,7 +550,7 @@ class DashboardConfigService
 
     /**
      * Включить/выключить системную группу для приложения "Дашборды"
-     * @param isTurnOn флаг установки системной группы (по умолчанию true)
+     * @param isTurnOn - флаг установки системной группы (по умолчанию true)
      */
     void setDashboardMasterGroupEnabled(boolean isTurnOn = true)
     {
@@ -579,7 +586,7 @@ class DashboardConfigService
 
     /**
      * Включение настройки обновления счетчиков на стенде
-     * @param isSetTimerRefresh флаг установки режима обновления (по умолчанию "true")
+     * @param isSetTimerRefresh - флаг установки режима обновления (по умолчанию "true")
      */
     void setTimerStatusRefreshEnable(boolean isSetTimerRefresh = true)
     {

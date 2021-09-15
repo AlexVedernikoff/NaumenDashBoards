@@ -4,12 +4,11 @@
 //Код:
 //Назначение:
 /**
- * Скрипт для перекомпиляции модулей в нужном порядке
+ * Команда для перекомпиляции модулей в нужном порядке
  */
 //Версия: 4.13.0.4
 //Категория: Консольный скрипт
 
-import ru.naumen.modules.dashboards.*
-
-DashboardConfigService service = DashboardConfigService.instance
-service.compileModules()
+// Код встроенного приложения
+String codeApp = ''
+modules.dashboardConfig.compileModules(codeApp)
