@@ -52,16 +52,17 @@ async function checkSourceForParent () {
 }
 
 /**
- * Подсчитывает количество показателей
+ * Проверяет запрет на выбор top записей для таблицы
  * @param {DataSet} data - набор данных виджета
  * @returns {number}
  */
-const countIndicators = (data: Array<DataSet>): number => data.reduce((count, {indicators, sourceForCompute}) => {
-	return !sourceForCompute && Array.isArray(indicators) ? count + indicators.length : count;
-}, 0);
+const isDisableDataTopField = (data: Array<DataSet>): boolean =>
+	data.some(
+		({indicators, sourceForCompute}) => !sourceForCompute && Array.isArray(indicators) && indicators.length > 1
+	);
 
 export {
 	checkSourceForParent,
-	countIndicators,
+	isDisableDataTopField,
 	hasDifferentAggregations
 };
