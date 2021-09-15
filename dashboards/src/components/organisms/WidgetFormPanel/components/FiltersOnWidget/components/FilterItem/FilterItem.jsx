@@ -79,6 +79,11 @@ export class FilterItem extends PureComponent<Props, State> {
 				const selectedDataSet = dataSets[dataSetIndex];
 				const { attributes = [], attributesLoading } = selectedDataSet;
 				const attribute = value.attributes && value.attributes.length > 0 ? value.attributes[0] : null;
+				const filterAttributes = attributes.filter(({code, metaClassFqn}) =>
+					code !== 'UUID'
+					&& !(metaClassFqn === 'employee' && code === 'password')
+					&& !(metaClassFqn === 'employee' && code === 'immediateSupervisor')
+				);
 
 				return (
 					<FormField className={styles.attributeFormField} label="Атрибут" path={`filtersOnWidget[${idx}].attributes`} small>
@@ -89,7 +94,7 @@ export class FilterItem extends PureComponent<Props, State> {
 							isSearching={true}
 							loading={attributesLoading}
 							onSelect={this.handleChangeAttribute}
-							options={attributes}
+							options={filterAttributes}
 							placeholder="Укажите атрибут"
 							value={attribute}
 						/>
