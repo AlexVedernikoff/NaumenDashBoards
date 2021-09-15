@@ -3,7 +3,7 @@ import {addNewWidget, copyWidget, validateWidgetToCopy} from 'store/widgets/data
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchDashboards} from 'store/dashboards/actions';
-import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
+import {isEditableDashboardContext} from 'store/dashboard/settings/selectors';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
@@ -11,9 +11,8 @@ import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
  */
 export const props = (state: AppState): ConnectedProps => ({
 	dashboards: state.dashboards,
-	isUserMode: isUserModeDashboard(state),
+	isEditableContext: isEditableDashboardContext(state),
 	layoutMode: state.dashboard.settings.layoutMode,
-	personalDashboard: state.dashboard.settings.personal,
 	user: state.context.user,
 	widgets: state.widgets.data.map
 });

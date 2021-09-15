@@ -27,6 +27,7 @@ export type ConnectedProps = {
 	focusedWidget: string,
 	hasCreateNewWidget: boolean,
 	isMobileDevice: boolean,
+	isUserMode: boolean,
 	layoutMode: LayoutMode,
 	layouts: Layouts,
 	selectedWidget: string,

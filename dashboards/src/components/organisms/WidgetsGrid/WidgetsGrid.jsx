@@ -56,9 +56,9 @@ export class WidgetsGrid extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {editableDashboard, layoutMode, layouts, user} = this.props;
+		const {editableDashboard, isUserMode, layoutMode, layouts, user} = this.props;
 
-		if (editableDashboard && user.role === USER_ROLES.REGULAR) {
+		if (editableDashboard && !isUserMode && user.role === USER_ROLES.REGULAR) {
 			window.addEventListener('beforeunload', (event) => {
 				event.preventDefault();
 				event.returnValue = '';

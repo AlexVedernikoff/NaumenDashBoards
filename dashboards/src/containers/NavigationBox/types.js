@@ -4,8 +4,7 @@ import type {UserData} from 'store/context/types';
 
 export type ConnectedProps = {
 	dashboards: DashboardsState,
-	isUserMode: boolean,
-	personalDashboard: boolean,
+	isEditableContext: boolean,
 	user: UserData
 };
 

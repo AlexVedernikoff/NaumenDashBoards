@@ -25,6 +25,12 @@ const isRestrictUserModeDashboard = createSelector(
 	({dashboardMode}) => dashboardMode === DASHBOARD_EDIT_MODE.USER_SOURCE
 );
 
+const isEditableDashboardContext = createSelector(
+	isUserModeDashboard,
+	isPersonalDashboard,
+	(isUserMode, isPersonal) => isUserMode || isPersonal
+);
+
 const getDashboardDescription = createSelector(
 	getContext,
 	getDashboard,
@@ -45,6 +51,7 @@ const getDashboardDescription = createSelector(
 
 export {
 	isUserModeDashboard,
+	isEditableDashboardContext,
 	isRestrictUserModeDashboard,
 	getDashboardDescription,
 	isPersonalDashboard

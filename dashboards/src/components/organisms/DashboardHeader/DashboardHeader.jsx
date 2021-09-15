@@ -94,11 +94,11 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	renderDisplayModeButton = () => {
-		const {isUserMode, layoutMode, personalDashboard, user} = this.props;
+		const {isEditableContext, layoutMode, user} = this.props;
 		const isMobileLayoutMode = layoutMode === LAYOUT_MODE.MOBILE;
 		const customTip = isMobileLayoutMode ? 'Переключиться в WEB представление' : 'Переключиться в мобильное представление';
 
-		if (!isUserMode && user.role !== USER_ROLES.REGULAR && !personalDashboard) {
+		if (user.role !== USER_ROLES.REGULAR && !isEditableContext) {
 			return (
 				<div className={styles.displayModeContainer}>
 					<IconButton
@@ -154,9 +154,9 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	renderModeButton = () => {
-		const {editDashboard, editMode, personalDashboard, seeDashboard, user} = this.props;
+		const {editDashboard, editMode, isEditableContext, seeDashboard, user} = this.props;
 
-		if (user.role !== USER_ROLES.REGULAR || personalDashboard) {
+		if (user.role !== USER_ROLES.REGULAR || isEditableContext) {
 			return editMode
 				? this.renderNavButton('Просмотреть', seeDashboard)
 				: this.renderNavButton('Редактировать', editDashboard);

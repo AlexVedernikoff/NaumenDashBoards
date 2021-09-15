@@ -12,7 +12,7 @@ import {
 } from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
-import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
+import {isEditableDashboardContext, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard} = state;
@@ -24,6 +24,7 @@ export const props = (state: AppState): ConnectedProps => {
 		autoUpdateSettings: autoUpdate,
 		editMode,
 		editableDashboard,
+		isEditableContext: isEditableDashboardContext(state),
 		isUserMode: isUserModeDashboard(state),
 		layoutMode,
 		personalDashboard: personal,
