@@ -1,5 +1,7 @@
 // @flow
 
+export type CTXValue = Object;
+
 export type NumberFormatter = (value: number) => string;
 
 export type ValueFormatter = (value: string) => string;

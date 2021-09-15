@@ -102,9 +102,20 @@ const AXIS_FONT_SIZE = 12;
 
 const LEGEND_HEIGHT = 100;
 
+const START: 'start' = 'start';
+const MIDDLE: 'middle' = 'middle';
+const END: 'end' = 'end';
+
+const DATA_LABELS_TEXT_ANCHOR = {
+	END,
+	MIDDLE,
+	START
+};
+
 export {
 	AXIS_FONT_SIZE,
 	CHART_TYPES,
+	DATA_LABELS_TEXT_ANCHOR,
 	DEFAULT_COLORS,
 	DEFAULT_CHART_SETTINGS,
 	DEFAULT_DATA_LABEL_COLOR,

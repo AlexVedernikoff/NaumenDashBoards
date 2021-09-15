@@ -144,12 +144,7 @@ describe('Formatters test', () => {
 	it('sevenDaysFormatter', () => {
 		expect(sevenDaysFormatter('')).toBe('');
 		expect(sevenDaysFormatter('12345')).toBe('');
-		//TODO: Разобраться с региональными настройками
-		if (process.env.LANGUAGE === 'en_US:en') {
-			expect(sevenDaysFormatter('1.1.2000-1.2.2000')).toBe('01 January - 01 February');
-		} else {
-			expect(sevenDaysFormatter('1.1.2000-1.2.2000')).toBe('01 Января - 01 Февраля');
-		}
+		expect(sevenDaysFormatter('1.1.2000-1.2.2000')).toBe('01 января - 01 февраля');
 		expect(sevenDaysFormatter('13.13.2000-1.1.2000')).toBe('');
 		expect(sevenDaysFormatter('1.1.2000-13.13.2000')).toBe('');
 	});
@@ -164,17 +159,17 @@ describe('Formatters test', () => {
 		expect(thousandFormatter(1240)).toBe('1тыс.');
 		expect(thousandFormatter(-1240)).toBe('-1тыс.');
 
-		expect(millionFormatter(1)).toBe('0млн');
-		expect(millionFormatter(1240e3)).toBe('1млн');
-		expect(millionFormatter(-1240e3)).toBe('-1млн');
+		expect(millionFormatter(1)).toBe('0млн.');
+		expect(millionFormatter(1240e3)).toBe('1млн.');
+		expect(millionFormatter(-1240e3)).toBe('-1млн.');
 
-		expect(billionFormatter(1)).toBe('0млрд');
-		expect(billionFormatter(1.240e9)).toBe('1млрд');
-		expect(billionFormatter(-1.240e9)).toBe('-1млрд');
+		expect(billionFormatter(1)).toBe('0млрд.');
+		expect(billionFormatter(1.240e9)).toBe('1млрд.');
+		expect(billionFormatter(-1.240e9)).toBe('-1млрд.');
 
-		expect(trillionFormatter(1)).toBe('0трлн');
-		expect(trillionFormatter(1.24e12)).toBe('1трлн');
-		expect(trillionFormatter(-1.24e12)).toBe('-1трлн');
+		expect(trillionFormatter(1)).toBe('0трлн.');
+		expect(trillionFormatter(1.24e12)).toBe('1трлн.');
+		expect(trillionFormatter(-1.24e12)).toBe('-1трлн.');
 	});
 
 	it('getLabelFormatter', () => {

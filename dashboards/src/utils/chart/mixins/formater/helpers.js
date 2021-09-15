@@ -1,9 +1,9 @@
 // @flow
 import type {AxisFormat, LabelFormat, NumberAxisFormat} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
+import type {CTXValue, NumberFormatter, ValueFormatter} from './types';
 import {compose} from 'redux';
 import moment from 'utils/moment.config';
-import type {NumberFormatter, ValueFormatter} from './types';
 import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
 
 /**
@@ -196,13 +196,13 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
 			[divider, additional] = [1e3, 'тыс.'];
 			break;
 		case MILLION:
-			[divider, additional] = [1e6, 'млн'];
+			[divider, additional] = [1e6, 'млн.'];
 			break;
 		case BILLION:
-			[divider, additional] = [1e9, 'млрд'];
+			[divider, additional] = [1e9, 'млрд.'];
 			break;
 		case TRILLION:
-			[divider, additional] = [1e12, 'трлн'];
+			[divider, additional] = [1e12, 'трлн.'];
 			break;
 	}
 
@@ -261,3 +261,26 @@ export const makeFormatterByFormat = (format: AxisFormat): (NumberFormatter | Va
 
 	return result;
 };
+
+/**
+ * Форматтер, который применяет базовый форматер, и добавляет запись
+ * [значение, отформатированное значение, облегчённый контекст] в массив stored.
+ * Накапливает информацию о форматировании для генерации тест-кейсов.
+ * @param {Array<[string | number, string]>} stored - массив для сохранения пар [значение, отформатирование значение]
+ * @param {NumberFormatter | ValueFormatter} formatter - базовый форматер
+ * @param {Function} ctxFormatter - функция экстрактор для облегчения ctx объекта. зависит от реализации базового форматера
+ * @returns {NumberFormatter | ValueFormatter} - функция форматер
+ */
+export const storedFormatter = (
+	stored: Array<[string | number, string, CTXValue | null]>,
+	formatter: NumberFormatter | ValueFormatter,
+	ctxFormatter: ?(ctx: CTXValue) => CTXValue = null
+) =>
+	(value: string | number, ctx: ?CTXValue): string => {
+		// $FlowFixMe - value зависит от того какой будет formatter
+		const result = formatter(value, ctx);
+		const storeCtx = ctxFormatter && ctx ? ctxFormatter(ctx) : null;
+
+		stored.push([value, result, storeCtx]);
+		return result;
+	};

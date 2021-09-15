@@ -180,9 +180,9 @@
     "flow": "flow",
     "lint": "./node_modules/.bin/eslint --ext .js,.jsx ./src",
     "fix": "./node_modules/.bin/eslint --fix --ext .js,.jsx ./src",
-    "test": "jest",
-    "test:update": "jest --updateSnapshot",
-    "test:watch": "npm run test -- --watch",
+    "test": "cross-env API_DRIVER=exec-dev jest",
+    "test:update": "cross-env API_DRIVER=exec-dev jest --updateSnapshot",
+    "test:watch": "cross-env API_DRIVER=exec-dev npm run test -- --watch",
     "zip": "zip -r -j \"$npm_package_name-v$npm_package_version.zip\" ./dist/*",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"

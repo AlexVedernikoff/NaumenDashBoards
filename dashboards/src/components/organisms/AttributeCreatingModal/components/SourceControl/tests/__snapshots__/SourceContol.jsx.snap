@@ -32,6 +32,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is n
         "ValueContainer": [Function],
       }
     }
+    disabled={false}
     getNodeLabel={[Function]}
     getNodeValue={[Function]}
     getOptionLabel={[Function]}
@@ -62,6 +63,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is n
     >
       <Component
         className="valueContainer"
+        disabled={false}
         onClick={[Function]}
       >
         <div
@@ -183,6 +185,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is s
         "ValueContainer": [Function],
       }
     }
+    disabled={false}
     getNodeLabel={[Function]}
     getNodeValue={[Function]}
     getOptionLabel={[Function]}
@@ -208,6 +211,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is s
     >
       <Component
         className="valueContainer"
+        disabled={false}
         onClick={[Function]}
       >
         <div

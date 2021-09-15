@@ -10,7 +10,8 @@ import {
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
-	splitFormatter
+	splitFormatter,
+	storedFormatter
 } from './helpers';
 import {checkLabelsForOverlap, getLegendWidth} from 'utils/chart/mixins/helpers';
 import {compose} from 'redux';
@@ -131,23 +132,20 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 	};
 };
 
+/**
+ * Оболочка для getAxisFormatterBase, предназначенная для сохранения отформатированных значений в блок и вывода его в консоль.
+ * Нужна для формирования тест-кейсов по виджетам
+ * @param {AxisWidget} widget - виджет
+ * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
+ * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
+ */
 // eslint-disable-next-line no-unused-vars
 const getAxisFormatterDebug = (widget: AxisWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): AxisFormatter => {
 	const {clientWidth} = container;
 	const store = {container: {clientWidth}, labels, widget};
 	const baseFormatter = getAxisFormatterBase(widget, labels, container);
 	const {options} = baseFormatter;
-	const storedFormatter = (
-		stored: Array<[string | number, string]>,
-		formatter: (string => string) | (number => string)
-	) =>
-		(value: string | number): string => {
-			// $FlowFixMe - value зависит от того какой будет formatter
-			const result = formatter(value);
-
-			stored.push([value, result]);
-			return result;
-		};
 	const dataLabel = [];
 	const indicator = [];
 	const legend = [];

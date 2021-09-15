@@ -1,13 +1,13 @@
 // @flow
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, WidgetType} from 'store/widgets/data/types';
-import {CHART_TYPES, LOCALES} from './constants';
+import {CHART_TYPES, DATA_LABELS_TEXT_ANCHOR, LOCALES} from './constants';
+import type {DataLabelsTextAnchor, Options, Series} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
 import {extend} from 'helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import isMobile from 'ismobilejs';
-import type {Options, Series} from './types';
 import {setColors} from './helpers';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -36,7 +36,7 @@ const resolveMixin = (widget: Chart, data: DiagramBuildData, container: HTMLDivE
 	}
 };
 
-const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAxisChart: boolean) => {
+const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData) => {
 	const {fontColor, fontFamily, fontSize, show, showShadow} = settings;
 	const {series} = data;
 	const options: Object = {
@@ -65,6 +65,48 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData, isAx
 	}
 
 	return options;
+};
+
+/**
+ * Определяет выравнивание меток для гистограмм
+ * @param {Array<string|number>}  data - данные для определения выравнивания
+ * @returns  {DataLabelsTextAnchor} - выравнивание
+ */
+const getDataLabelsTextAnchor = (data: Array<string | number>): DataLabelsTextAnchor => {
+	const normalizedData = data.map(item => typeof item === 'string' ? parseFloat(item) : item);
+	const maxDataItem = Math.max(...normalizedData);
+	const minDataItem = Math.min(...normalizedData);
+	let result = DATA_LABELS_TEXT_ANCHOR.MIDDLE;
+
+	if (maxDataItem * 0.25 > minDataItem) {
+		result = DATA_LABELS_TEXT_ANCHOR.START;
+	}
+
+	return result;
+};
+
+/**
+ * Получение стиля меток для гистограмм
+ * @param {DataLabels} settings - настройки пользователя
+ * @param {DiagramBuildData} data - данные гистограммы
+ * @returns {Options} - настройки стиля для меток
+ */
+const getBarDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData) => {
+	const {series} = data;
+	const textAnchors = series.map(({data}) => getDataLabelsTextAnchor(data));
+	let textAnchor = DATA_LABELS_TEXT_ANCHOR.MIDDLE;
+
+	if (textAnchors.length > 0) {
+		const firstTextAnchor = textAnchors[0];
+
+		if (textAnchors.every(anchor => anchor === firstTextAnchor)) {
+			textAnchor = firstTextAnchor;
+		}
+	}
+
+	const options = getDataLabelsOptions(settings, data);
+
+	return {...options, textAnchor};
 };
 
 /**
@@ -104,9 +146,10 @@ const getOptions = (
 	const {type: widgetType} = widget;
 	const series = getSeries(widget, data);
 	const type = widgetType === WIDGET_TYPES.COMBO ? getComboType(series) : getChartType(widgetType);
-	const {bar, line} = CHART_TYPES;
-	const {dataLabels} = widget;
-	const isAxisChart = type === bar || type === line;
+	const {dataLabels: widgetDataLabels} = widget;
+	const dataLabels = widgetType === WIDGET_TYPES.BAR
+		? getBarDataLabelsOptions(widgetDataLabels, data)
+		: getDataLabelsOptions(widgetDataLabels, data);
 
 	let options: Options = {
 		chart: {
@@ -128,7 +171,7 @@ const getOptions = (
 				enabled: false
 			}
 		},
-		dataLabels: getDataLabelsOptions(dataLabels, data, isAxisChart),
+		dataLabels,
 		series
 	};
 

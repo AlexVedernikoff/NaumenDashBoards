@@ -9,10 +9,44 @@ import styles from './styles.less';
 
 export class Summary extends PureComponent<Props, State> {
 	state = {
-		fontSize: null
+		fontSize: null,
+		height: 0
 	};
 
-	getTextWidth = (fontSize: number) => {
+	getTextHeight = (value: string, fontSize: number) => {
+		const {fontFamily, fontStyle} = this.props;
+		const {body} = document;
+		let result = fontSize;
+
+		if (body) {
+			const text = document.createElement('span');
+
+			text.style.fontFamily = fontFamily;
+			text.style.fontSize = fontSize + 'px';
+
+			if (fontStyle === FONT_STYLES.BOLD) {
+				text.style.fontWeight = 'bold';
+			}
+
+			if (fontStyle === FONT_STYLES.ITALIC) {
+				text.style.fontStyle = 'italic';
+			}
+
+			if (fontStyle === FONT_STYLES.UNDERLINE) {
+				text.style.textDecoration = 'underline';
+			}
+
+			text.textContent = value;
+			body.appendChild(text);
+			result = text.getBoundingClientRect().height;
+
+			body.removeChild(text);
+		}
+
+		return result;
+	};
+
+	getTextWidth = (value: string, fontSize: number) => {
 		const {fontFamily, fontStyle} = this.props;
 		const {BOLD, ITALIC} = FONT_STYLES;
 		const container = document.createElement('canvas');
@@ -31,7 +65,7 @@ export class Summary extends PureComponent<Props, State> {
 
 		context.font = font;
 
-		return context.measureText(this.getValue().toString()).width;
+		return context.measureText(value).width;
 	};
 
 	getValue = () => {
@@ -46,21 +80,30 @@ export class Summary extends PureComponent<Props, State> {
 		if (value) {
 			const charWidth = Math.round(width / value.toString().length);
 			let fontSize = charWidth > height ? height : charWidth * 1.2;
+			let tw = Number.MAX_VALUE;
+			let th = Number.MAX_VALUE;
 
-			while (this.getTextWidth(fontSize) > width && fontSize > 0) {
+			while (fontSize > 0.01) {
+				tw = this.getTextWidth(value, fontSize);
+				th = this.getTextHeight(value, fontSize);
+
+				if (tw <= width && th <= height) {
+					break;
+				}
+
 				fontSize *= 0.95;
 			}
 
-			this.setState({fontSize});
+			this.setState({fontSize, height: th});
 		}
 	};
 
 	renderValue = (fontSize: number) => {
 		const {onClickValue} = this.props;
-		const height = fontSize * 0.8;
-		const lineHeight = `${height}px`;
+		const {height: textHeight} = this.state;
+		const height = `${textHeight}px`;
 
-		return <span className={styles.value} onClick={onClickValue} style={{height, lineHeight}}>{this.getValue()}</span>;
+		return <span className={styles.value} onClick={onClickValue} style={{height}}>{this.getValue()}</span>;
 	};
 
 	renderWithResize = (className: string, style: Object) => {
