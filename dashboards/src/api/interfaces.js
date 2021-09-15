@@ -122,7 +122,7 @@ export interface DashboardDataSetAPI {
 }
 
 export interface DrillDownAPI {
-	getLink(payload: DTOValue, subjectUUID: string, type: string, dashboardCode: string): Promise<DTOValue>;
+	getLink(payload: DTOValue, subjectUUID: string, type: string, dashboardCode: string, groupCode?: string): Promise<DTOValue>;
 }
 
 export interface API {

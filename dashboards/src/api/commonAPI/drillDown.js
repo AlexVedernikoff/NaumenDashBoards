@@ -9,7 +9,7 @@ export default class DrillDown implements DrillDownAPI {
 		this.transport = transport;
 	}
 
-	getLink (payload: DTOValue, subjectUUID: string, type: string, dashboardCode: string) {
+	getLink (payload: DTOValue, subjectUUID: string, type: string, dashboardCode: string, groupCode: string = '') {
 		return this.transport(
 			'dashboardDrilldown',
 			'getLink',
@@ -17,7 +17,8 @@ export default class DrillDown implements DrillDownAPI {
 			payload,
 			subjectUUID,
 			type,
-			dashboardCode
+			dashboardCode,
+			groupCode
 		);
 	}
 }

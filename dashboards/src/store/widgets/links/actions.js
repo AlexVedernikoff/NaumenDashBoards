@@ -5,6 +5,7 @@ import {DrillDownBigData} from 'api/errors';
 import type {DrillDownMixin} from './types';
 import {getPartsClassFqn} from './helpers';
 import {LINKS_EVENTS} from './constants';
+import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import {setWarningMessage} from 'store/widgets/data/actions';
 import StorageSettings from 'utils/storageSettings';
 import type {Widget} from 'store/widgets/data/types';
@@ -70,10 +71,11 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 	const {context, dashboard} = getState();
 	const {subjectUuid} = context;
 	const {id, type} = widget;
+	const {groupCode = ''} = parseAttrSetConditions(payload) ?? {};
 
 	dispatch(requestLink(id));
 	try {
-		const {link} = await api.instance.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code);
+		const {link} = await api.instance.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code, groupCode);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
