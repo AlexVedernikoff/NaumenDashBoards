@@ -1421,7 +1421,16 @@ class DashboardQueryWrapperUtils
                 }
                 else
                 {
-                    attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
+                    if (forAggregation)
+                    {
+                        Boolean attrFromEmployee = checkIfAttrFromEmployeeClass(attribute)
+                        attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string',
+                                                                          ref: attrFromEmployee ? null : new Attribute(code: 'base', type: 'string'))
+                    }
+                    else
+                    {
+                        attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
+                    }
                 }
                 break
             default:
@@ -1434,11 +1443,17 @@ class DashboardQueryWrapperUtils
                 {
                     if(attribute.type in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])
                     {
-                        attribute.attrChains().takeWhile { it.type != AttributeType.LOCALIZED_TEXT_TYPE }.last().ref = new Attribute(code: 'code', title: 'Код элемента справочника', type: 'string')
+                        attribute.attrChains().takeWhile { it.type != AttributeType.LOCALIZED_TEXT_TYPE }.last().ref = new Attribute(code: 'code',
+                                                                                                                                     title: 'Код элемента справочника',
+                                                                                                                                     type: 'string')
                     }
                     else
                     {
-                        attribute.attrChains().takeWhile { it.type != AttributeType.LOCALIZED_TEXT_TYPE }.last().ref = null //убрали строковый атрибут в коцне на подсчет
+                        Boolean attrFromEmployee = checkIfAttrFromEmployeeClass(attribute)
+                        if(!attrFromEmployee)
+                        {
+                            attribute.attrChains().last().ref = new Attribute(code: 'base', title: 'Базовая локаль', type: 'string')
+                        }
                     }
                 }
                 break
@@ -1452,6 +1467,27 @@ class DashboardQueryWrapperUtils
             def (dynAttrCode, templateUUID) = TotalValueMarshaller.unmarshal(attribute.code)
             attribute.code = AttributeType.VALUE_TYPE
             attribute.title = templateUUID
+        }
+    }
+
+    /**
+     * Метод проверки, пришёл ли атрибут из класса employee или его типа
+     * @param attribute - атрибут
+     * @return флаг на класс-источник employee
+     */
+    private static Boolean checkIfAttrFromEmployeeClass(Attribute attribute)
+    {
+        if(attribute)
+        {
+            def attrChains = attribute.attrChains()
+            Integer attrCount = attrChains.size()
+            Integer attrIndex = attrCount < 2 ? 0 : 1
+            String valueToCheck = 'property'
+            if(attrCount == 1 && !(attribute.type in AttributeType.LINK_TYPES))
+            {
+                valueToCheck = 'metaClassFqn'
+            }
+            return attrChains[attrIndex][valueToCheck]?.contains('employee')
         }
     }
 
