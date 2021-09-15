@@ -429,9 +429,9 @@ class SaveGanttSettingsRequest extends BaseGanttSettingsRequest
 }
 
 /**
- * Настройки диаграммы Ганта
+ * Базовый класс для настроек и данных диаграммы Ганта
  */
-class GanttSettingsClass
+class BaseGanttDiagramData
 {
     /**
      * Настройки общего блока
@@ -439,14 +439,31 @@ class GanttSettingsClass
     CommonSettings commonSettings
 
     /**
-     * Настройки для источников - ресурсов/работ
-     */
-    Collection<ResourceAndWorkSettings> resourceAndWorkSettings
-
-    /**
      * Ключ диаграммы
      */
     String diagramKey
+}
+
+/**
+ * Настройки диаграммы Ганта для настройки технологом
+ */
+class GanttSettingsClass extends BaseGanttDiagramData
+{
+    /**
+     * Настройки для источников - ресурсов/работ
+     */
+    Collection<ResourceAndWorkSettings> resourceAndWorkSettings
+}
+
+/**
+ * Данные диаграммы Ганта для построения табличной части
+ */
+class GanttDiagramData extends BaseGanttDiagramData
+{
+    /**
+     * Данные для построения таблицы
+     */
+    def tasks
 }
 
 /**
