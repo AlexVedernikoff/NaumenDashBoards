@@ -2,5 +2,5 @@
 import moment from 'moment';
 import ruLocale from 'moment/locale/ru';
 
-moment.locale('ru', [ruLocale]);
+moment.updateLocale('ru', ruLocale);
 export default moment;

@@ -1,5 +1,6 @@
 // @flow
 import type {AxisSettings, DataLabels, Legend, LegendPosition} from 'store/widgets/data/types';
+import {DATA_LABELS_TEXT_ANCHOR} from './constants';
 
 export type DefaultChartSettings = {
 	axis: AxisSettings,
@@ -31,3 +32,5 @@ export type AxisProps = {
 export type Options = Object;
 
 export type Series = Array<any>;
+
+export type DataLabelsTextAnchor = $Values<typeof DATA_LABELS_TEXT_ANCHOR>;

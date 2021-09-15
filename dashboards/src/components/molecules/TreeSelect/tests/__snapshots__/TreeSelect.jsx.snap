@@ -6,6 +6,7 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 1`] = `
 >
   <Container
     className="valueContainer"
+    disabled={false}
     onClick={[Function]}
   >
     <div
@@ -28,6 +29,7 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 2`] = `
 >
   <Container
     className="valueContainer"
+    disabled={false}
     onClick={[Function]}
   >
     <div
@@ -170,6 +172,7 @@ exports[`TreeSelect renders when "removable" property is set to "true" 1`] = `
 >
   <Container
     className="valueContainer"
+    disabled={false}
     onClick={[Function]}
   >
     <div
@@ -204,6 +207,7 @@ exports[`TreeSelect renders when no options provided 1`] = `
 >
   <Container
     className="valueContainer"
+    disabled={false}
     onClick={[Function]}
   >
     <div

@@ -14,5 +14,6 @@ export type Props = {
 };
 
 export type State = {
-	fontSize: number | null
+	fontSize: number | null,
+	height: number
 };

@@ -5,7 +5,8 @@ import {
 	cropFormatter,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
-	sevenDaysFormatter
+	sevenDaysFormatter,
+	storedFormatter
 } from './helpers';
 import type {CircleFormatter, NumberFormatter, ValueFormatter} from './types';
 import type {CircleWidget, NumberAxisFormat} from 'store/widgets/data/types';
@@ -72,7 +73,14 @@ const getLegendFormatter = (widget: CircleWidget, container: HTMLDivElement): Nu
 	return formatter;
 };
 
-const getCircleFormatter = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
+/**
+ * Фабрика форматеров для круговой диаграммы
+ * @param {CircleWidget} widget - виджет
+ * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
+ * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
+ */
+const getCircleFormatterBase = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
 	const {dataLabels} = widget;
 	const defaultDataLabelFormat: NumberAxisFormat = DEFAULT_NUMBER_AXIS_FORMAT;
 	const dataLabelsFormat = dataLabels.format && dataLabels.format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT ? dataLabels.format : defaultDataLabelFormat;
@@ -86,4 +94,36 @@ const getCircleFormatter = (widget: CircleWidget, labels: Array<string> | Array<
 	};
 };
 
-export {getCircleFormatter};
+/**
+ * Оболочка для getCircleFormatterBase, предназначенная для сохранения отформатированных значений в блок и вывода его в консоль.
+ * Нужна для формирования тест-кейсов по виджетам
+ * @param {CircleWidget} widget - виджет
+ * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
+ * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
+ */
+// eslint-disable-next-line no-unused-vars
+const getCircleFormatterDebug = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
+	const {clientWidth} = container;
+	const store = {container: {clientWidth}, labels, widget};
+	const baseFormatter = getCircleFormatterBase(widget, labels, container);
+	const breakdown = [];
+	const dataLabel = [];
+	const legend = [];
+	const tooltip = [];
+
+	console.info('getCircleFormatterBase: ', {...store, breakdown, dataLabel, legend, tooltip});
+	const dataLabelCtxExtractor = (ctx) => {
+		const {seriesIndex, w} = ctx;
+		const value = w.config.series[seriesIndex];
+		return {seriesIndex, w: {config: {series: {[seriesIndex]: value}}}};
+	};
+	return {
+		breakdown: storedFormatter(breakdown, baseFormatter.breakdown),
+		dataLabel: storedFormatter(dataLabel, baseFormatter.dataLabel, dataLabelCtxExtractor),
+		legend: storedFormatter(legend, baseFormatter.legend),
+		tooltip: storedFormatter(tooltip, baseFormatter.tooltip)
+	};
+};
+
+export {getCircleFormatterBase as getCircleFormatter};
