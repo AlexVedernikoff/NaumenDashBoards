@@ -849,7 +849,7 @@ class DashboardDataSetService
             def breakdownCustomGroup =  isBreakdownGroupCustom
                 ? new NewParameter(group: breakdownAttribute?.group, attribute: breakdownAttribute?.attribute)
                 : null
-            if (dynamicInBreakdown)
+            if (dynamicInBreakdown && !isBreakdownGroupCustom)
             {
                 breakdownCustomGroup = dynamicGroup
             }
