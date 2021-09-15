@@ -133,11 +133,11 @@ interface Dashboards
 
     /**
      * Метод получения групп динамических атрибутов
-     * @param descriptor - дескриптор из виджета
+     * @param requestContent - [descriptor: дескриптор из виджета]
      * @param aggregateToJson - флаг возврата данных в JSON-формате
      * @return список групп динамических атрибутов
      */
-    String getDynamicAttributeGroups(def descriptor)
+    String getDynamicAttributeGroups(Map<String, Object> requestContent)
 
     /**
      * Метод получения связанных источников
@@ -148,10 +148,10 @@ interface Dashboards
 
     /**
      * Метод получения карточки объекта по UUID-у
-     * @param value - значение объекта типа (значение - UUID)
+     * @param requestContent - [value: значение объекта типа (значение - UUID)]
      * @return ссылка на карточку объекта в Json-формате
      */
-    String getCardObject(String value)
+    String getCardObject(Map<String, Object> requestContent)
 
     /**
      * Метод проверки, является ли первый источник родительским классом для другого
@@ -272,8 +272,9 @@ class DashboardsImpl extends BaseController implements Dashboards
     }
 
     @Override
-    String getDynamicAttributeGroups(def descriptor)
+    String getDynamicAttributeGroups(Map<String, Object> requestContent)
     {
+        def descriptor = requestContent.descriptor
         return toJson(service.getDynamicAttributeGroups(descriptor))
     }
 
@@ -284,8 +285,9 @@ class DashboardsImpl extends BaseController implements Dashboards
     }
 
     @Override
-    String getCardObject(String value)
+    String getCardObject(Map<String, Object> requestContent)
     {
+        String value = requestContent.value
         return toJson(service.getCardObject(value))
     }
 
@@ -448,6 +450,7 @@ class DashboardsService
         String groupCode = requestContent.groupCode
         List<String> cases = requestContent.cases
         List listOfSystemAttribute = []
+        def mainMetaClass = classFqn ? api.metainfo.getMetaClass(classFqn) : null
 
         if(cases)
         {
@@ -466,9 +469,10 @@ class DashboardsService
         }
 
         return listOfSystemAttribute?.unique { it?.code }?.findResults {
+            Boolean attrInMainClass = classFqn ? api.metainfo.checkAttributeExisting(classFqn, it.code).isEmpty() : false
             if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
             {
-                return buildAttribute(it, it.metaClass.title, it.metaClass.code)
+                return buildAttribute(it, attrInMainClass ? mainMetaClass.title : it.metaClass.title, attrInMainClass ? classFqn : it.metaClass.code)
             }
         }
     }

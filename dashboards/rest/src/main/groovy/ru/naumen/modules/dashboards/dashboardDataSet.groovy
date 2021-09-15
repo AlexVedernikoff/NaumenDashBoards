@@ -282,8 +282,7 @@ class DashboardDataSetService
         switch (diagramType)
         {
             case [*DiagramType.StandardTypes]:
-                String key = request.data.keySet().head()
-                String legend = request.data[key].aggregations.attribute.sourceName.head()
+                String legend = widgetSettings?.data?.find()?.source?.value?.label
                 Boolean reverseGroups = isCustomGroupFromBreakdown(widgetSettings)
                 Boolean changeLabels = widgetSettings?.sorting?.value == SortingValue.PARAMETER
                 Boolean reverseLabels = widgetSettings?.sorting?.type == SortingType.DESC && changeLabels
@@ -2980,12 +2979,32 @@ class DashboardDataSetService
     private String getCorrectIntervalType(def millis, GroupType type)
     {
         def tempValue = DashboardUtils.convertValueToInterval(millis as Long, type)
-
-        if(tempValue < 1)
+        Boolean tempValueLessOne = tempValue < 1
+        //число может быть меньше или больше единицы и дробным
+        if(tempValueLessOne || !(tempValue instanceof Integer))
         {
-            tempValue = getRealValueFromDB(millis as Long, type)
+            if(tempValueLessOne)
+            {
+                tempValue = getRealValueFromDB(millis as Long, type)
+            }
+
+            def fullParts = Double.toString(tempValue).tokenize('.')
+
+            String integerPart
+
+            if(tempValueLessOne)
+            {
+                //если значение меньше нуля, то в целой части будет 0
+                integerPart = '#'
+            }
+            else
+            {
+                //иначе получаем количество символов в целой части
+                integerPart = '#' * fullParts?.find()?.size()
+            }
+
             //получаем долю
-            def fractionalPart = Double.toString(tempValue).tokenize('.').last() //берем часть после точки
+            def fractionalPart = fullParts.last() //берем часть после точки
             def roundIdx = fractionalPart.contains('E') //значение может быть в экспоненциальной записи
                 ? fractionalPart.dropWhile { it != '-' }.toCharArray()[-1].toString() as Long //тогда берем число после нее - ровно столько нулей стоит до числа
                 : fractionalPart.takeWhile{it == '0'}.size() + 1 //иначе идём по числу до тех пор, пока не пройдут все нули и берем + 1 значение
@@ -2995,7 +3014,7 @@ class DashboardDataSetService
 
             def dtIntervalDecimalFormat = new DecimalFormatSymbols().with {
                 setDecimalSeparator('.' as char)
-                new DecimalFormat("#.${formatStr}", it)
+                new DecimalFormat("${integerPart}.${formatStr}", it)
             }
             tempValue = dtIntervalDecimalFormat.format(tempValue)
         }
@@ -4847,8 +4866,8 @@ class DashboardDataSetService
                 {
                     total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
                 }
-                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, notAggregatedAttributes, total,
-                    parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
+                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, notAggregatedAttributes, total, parameter,
+                                                      parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
             case 'computation':
                 def requisiteNode = node as ComputationRequisiteNode
                 def calculator = new FormulaCalculator(requisiteNode.formula)
@@ -4909,7 +4928,7 @@ class DashboardDataSetService
                 }]]
                 def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, diagramType in DiagramType.CountTypes ? false : onlyFilled)]
                 total = formatResult(total, aggregationCnt)
-                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, notAggregatedAttributes, total,
+                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, notAggregatedAttributes, total, parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
             default:
                 String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)
@@ -4924,6 +4943,7 @@ class DashboardDataSetService
      * @param tableHasBreakdown - наличие разбивки в таблице
      * @param notAggregatedAttributes - список названий агрегации N/A
      * @param total - итоговый датасет
+     * @param parameter - значение параметра
      * @param parameterWithDate - флаг на наличие параметра с датой
      * @param parameterSortingType - сортировка параметра
      * @param aggregationSortingType - сортировка показателя
@@ -4935,6 +4955,7 @@ class DashboardDataSetService
                                                 Boolean tableHasBreakdown,
                                                 List<String> notAggregatedAttributes,
                                                 List total,
+                                                def parameter,
                                                 Boolean parameterWithDate,
                                                 String parameterSortingType,
                                                 String aggregationSortingType,

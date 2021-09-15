@@ -931,7 +931,7 @@ class DashboardSettingsService
         }
         else
         {
-            checkRightsOnDashboard(user, "create")
+            checkRightsOnDashboard(user, isForUser, "create")
             dashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             dashboardSettings = getDashboardSetting(dashboardKey) ?: new DashboardSettingsClass()
         }
@@ -1014,7 +1014,7 @@ class DashboardSettingsService
         }
         else
         {
-            checkRightsOnDashboard(user, "edit")
+            checkRightsOnDashboard(user, isForUser, "edit")
             if (user && isPersonalWidget(widgetKey, user))
             {
                 widgetKey -= "_${ user.login }"
@@ -1091,13 +1091,14 @@ class DashboardSettingsService
         String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String widgetId = requestContent.widgetId
+        Boolean isForUser = requestContent.isForUser
         if (requestContent.isPersonal)
         {
             return deletePersonalWidget(subjectUUID, contentCode, widgetId, requestContent.editable as Boolean, user)
         }
         else
         {
-            return deleteDefaultWidget(subjectUUID, contentCode, widgetId, user)
+            return deleteDefaultWidget(subjectUUID, contentCode, widgetId, user, isForUser)
         }
     }
 
@@ -2047,11 +2048,12 @@ class DashboardSettingsService
     /**
      * Проверка пользователя на наличие группы мастер дашбордов
      * @param user БО текущего пользователя
+     * @param isForUser - флаг на работу пользовательского режима
      * @param messageError сообщение о ошибке
      */
-    private checkRightsOnDashboard(IUUIDIdentifiable user, String messageError)
+    private checkRightsOnDashboard(IUUIDIdentifiable user, Boolean isForUser, String messageError)
     {
-        if (!checkUserOnMasterDashboard(user))
+        if (!checkUserOnMasterDashboard(user) && !isForUser)
         {
             def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
             messageError = getCorrectMessageError(messageError, currentUserLocale)
@@ -2245,40 +2247,42 @@ class DashboardSettingsService
      * @param contentCode - код контента встроенного приложения
      * @param widgetId - код виджета
      * @param user - пользователь
+     * @param isForUser - флаг на включение пользовательского режима
      * @return успех | провал
      */
     private Boolean deleteDefaultWidget(String subjectUUID,
                                         String contentCode,
-                                        String widgetId, IUUIDIdentifiable user)
+                                        String widgetId, IUUIDIdentifiable user,
+                                        Boolean isForUser)
     {
         def dashboardKeyByLogin = this.&generateDashboardKey.curry(subjectUUID, contentCode)
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         if (!user)
         {
             // значит это супер пользователь! нет персональных виджетов и персональных дашбордов
-            return removeWidgetFromDashboard(dashboardKeyByLogin(), widgetId, currentUserLocale) as boolean
+            return removeWidgetFromDashboard(dashboardKeyByLogin(null, isForUser ? subjectUUID : null), widgetId, currentUserLocale) as boolean
         }
         else
         {
-            if(!checkUserOnMasterDashboard(user))
+            if(!checkUserOnMasterDashboard(user) && !isForUser)
             {
                 return throwNoRightsOnRemoveWidget(currentUserLocale)
             }
 
             if (isPersonalWidget(widgetId, user))
             {
-                String personalDashboardKey = dashboardKeyByLogin(user.login as String)
+                String personalDashboardKey = dashboardKeyByLogin(user.login as String, isForUser ? subjectUUID : null)
                 String defaultWidget = widgetId - "_${user?.login}"
-                removeWidgetFromDashboard(dashboardKeyByLogin(), defaultWidget, currentUserLocale)
+                removeWidgetFromDashboard(dashboardKeyByLogin(null, isForUser ? subjectUUID : null), defaultWidget, currentUserLocale)
                 return removeWidgetFromDashboard(personalDashboardKey, widgetId, currentUserLocale) as boolean
             }
             else
             {
                 // По возможности удалить и персональный виджет, если он есть
-                String personalDashboardKey = dashboardKeyByLogin(user?.login as String)
+                String personalDashboardKey = dashboardKeyByLogin(user?.login as String, isForUser ? subjectUUID : null)
                 loadJsonSettings(personalDashboardKey, DASHBOARD_NAMESPACE) // проверка на существование персонального дашборда
                     ?.with { removeWidgetFromDashboard(personalDashboardKey, widgetId, currentUserLocale) }
-                return removeWidgetFromDashboard(dashboardKeyByLogin(), widgetId, currentUserLocale) as boolean
+                return removeWidgetFromDashboard(dashboardKeyByLogin(null, isForUser ? subjectUUID : null), widgetId, currentUserLocale) as boolean
             }
         }
     }
