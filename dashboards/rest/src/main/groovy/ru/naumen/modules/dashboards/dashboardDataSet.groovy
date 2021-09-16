@@ -542,7 +542,7 @@ class DashboardDataSetService
                 return groups?.collect { group ->
                     def highLevelAttr = new Attribute(code: it?.source?.classFqn, sourceCode: mainSource.classFqn,
                                                       type: 'object',
-                                                      title: group.attribute.title,
+                                                      title: "${group.attribute.title}${DashboardQueryWrapperUtils.FALSE_SOURCE_STRING}",
                                                       ref: group.attribute)
                     group.attribute = highLevelAttr
                     return group
