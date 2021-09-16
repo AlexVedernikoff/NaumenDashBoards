@@ -745,6 +745,8 @@ class DashboardUtils
                     columnsRatioWidth: oldFormatWidget.columnsRatioWidth,
                     showEmptyData: oldFormatWidget.showEmptyData,
                     showBlankData: oldFormatWidget.showBlankData,
+                    showSubTotalAmount: oldFormatWidget.showSubTotalAmount,
+                    showTotalAmount: oldFormatWidget.showTotalAmount,
                     showRowNum: oldFormatWidget.showRowNum,
                     sorting: oldFormatWidget.sorting as Sorting,
                     table: oldFormatWidget.table as TableObject,
@@ -2207,15 +2209,6 @@ class DataLabels implements IHasFontSettings
     Boolean showShadow = true
 
     /**
-     * Отображать промежуточные итоги
-     */
-    Boolean showSubTotalAmount = false
-    /**
-     * Отображать общую сумму
-     */
-    Boolean showTotalAmount = false
-
-    /**
      * Флаг на блокировку данных (управляется количеством элементов)
      */
     Boolean disabled = false
@@ -3147,6 +3140,14 @@ abstract class DiagramNowData
      * Флаг на использование незаполненных значений
      */
     Boolean showBlankData = false
+    /*
+     * Отображать промежуточные итоги
+     */
+    Boolean showSubTotalAmount = false
+    /*
+     * Отображать общую сумму
+     */
+    Boolean showTotalAmount = false
     /**
      * Флаг на данные только для построения
      */
@@ -3603,6 +3604,14 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
      * Флаг на использование незаполненных значений
      */
     Boolean showBlankData
+    /*
+     * Отображать промежуточные итоги
+     */
+    Boolean showSubTotalAmount = false
+    /*
+     * Отображать общую сумму
+     */
+    Boolean showTotalAmount = false
     /**
      * Настройки ширины колонок
      */
