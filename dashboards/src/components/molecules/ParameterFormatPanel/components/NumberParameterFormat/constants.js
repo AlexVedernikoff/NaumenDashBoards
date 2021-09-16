@@ -16,9 +16,9 @@ const ADDITIONAL_OPTIONS = [
 
 const NOTATION_FORMATS_OPTIONS = [
 	{label: 'тыс.', value: NOTATION_FORMATS.THOUSAND},
-	{label: 'млн', value: NOTATION_FORMATS.MILLION},
-	{label: 'млрд', value: NOTATION_FORMATS.BILLION},
-	{label: 'трлн', value: NOTATION_FORMATS.TRILLION}
+	{label: 'млн.', value: NOTATION_FORMATS.MILLION},
+	{label: 'млрд.', value: NOTATION_FORMATS.BILLION},
+	{label: 'трлн.', value: NOTATION_FORMATS.TRILLION}
 ];
 
 export {
