@@ -1426,9 +1426,13 @@ class DashboardQueryWrapperUtils
                 {
                     if (forAggregation)
                     {
+                        attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
                         Boolean attrFromEmployee = checkIfAttrFromEmployeeClass(attribute)
-                        attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string',
-                                                                          ref: attrFromEmployee ? null : new Attribute(code: 'base', type: 'string'))
+                        if(!attrFromEmployee)
+                        {
+                            attribute.attrChains().last().ref = new Attribute(code: 'base', type: 'string')
+                        }
+
                     }
                     else
                     {
@@ -1484,7 +1488,7 @@ class DashboardQueryWrapperUtils
         {
             def attrChains = attribute.attrChains()
             Integer attrCount = attrChains.size()
-            Integer attrIndex = attrCount < 2 ? 0 : 1
+            Integer attrIndex = attrCount <= 2 ? 0 : 1
             String valueToCheck = 'property'
             if(attrCount == 1 && !(attribute.type in AttributeType.LINK_TYPES))
             {
