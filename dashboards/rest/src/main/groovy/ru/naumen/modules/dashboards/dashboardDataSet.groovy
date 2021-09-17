@@ -920,8 +920,7 @@ class DashboardDataSetService
                                                   requisite: requisite]]
         }
         Boolean manySources = isDiagramTypeTable &&
-                              tempWidgetSettings?.data*.sourceForCompute?.count { !it } > 1 &&
-                              hasTableNotOnlyBaseSources
+                              tempWidgetSettings?.data*.sourceForCompute?.count { !it } > 1
         def prevData = intermediateData
         if(manySources || (hasTableNotOnlyBaseSources && computationInTableRequest))
         {
