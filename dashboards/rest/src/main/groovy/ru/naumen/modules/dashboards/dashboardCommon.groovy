@@ -94,6 +94,7 @@ enum DiagramType
     static List<DiagramType> CountTypes = [SUMMARY, SPEEDOMETER]
     static List<DiagramType> NullableTypes = [BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE, COMBO, DONUT, PIE]
     static List<DiagramType> SortableTypes = [*StandardTypes, *RoundTypes, COMBO]
+    static List<DiagramType> CountableTypes = [*StandardTypes, *RoundTypes, COMBO]
 }
 
 /**
@@ -2189,6 +2190,18 @@ trait IHasFontSettings
     Integer fontSize = 16
 }
 
+trait IHasTotalSettings
+{
+    /*
+    * Отображать промежуточные итоги
+    */
+    Boolean showSubTotalAmount = false
+    /*
+     * Отображать общую сумму
+     */
+    Boolean showTotalAmount = false
+}
+
 /**
  * Метки данных
  */
@@ -3110,7 +3123,7 @@ class OldDiagrams extends Widget
  */
 @Canonical
 @JsonIgnoreProperties(ignoreUnknown = true)
-class AxisCurrentAndNew extends NewDiagrams
+class AxisCurrentAndNew extends NewDiagrams implements IHasTotalSettings
 {
     /**
      * Настройки показателя
@@ -3143,14 +3156,6 @@ abstract class DiagramNowData
      * Флаг на использование незаполненных значений
      */
     Boolean showBlankData = false
-    /*
-     * Отображать промежуточные итоги
-     */
-    Boolean showSubTotalAmount = false
-    /*
-     * Отображать общую сумму
-     */
-    Boolean showTotalAmount = false
     /**
      * Флаг на данные только для построения
      */
@@ -3393,7 +3398,7 @@ class CirclePrev extends DiagramsPrev { }
  * Класс, описывающий круговые диаграммы текущего формата
  */
 @Canonical
-class CircleCurrentAndNew extends NewDiagrams
+class CircleCurrentAndNew extends NewDiagrams implements IHasTotalSettings
 {
     /**
      * Коллекция данных на построение
@@ -3588,7 +3593,7 @@ class SummaryCurrentAndNew extends NewDiagrams
  */
 @Canonical
 @JsonIgnoreProperties(ignoreUnknown = true)
-class TablePrevAndCurrentAndNew extends NewDiagrams
+class TablePrevAndCurrentAndNew extends NewDiagrams implements IHasTotalSettings
 {
     /**
      * Флаг на подсчёт в колонках
@@ -3607,14 +3612,6 @@ class TablePrevAndCurrentAndNew extends NewDiagrams
      * Флаг на использование незаполненных значений
      */
     Boolean showBlankData
-    /*
-     * Отображать промежуточные итоги
-     */
-    Boolean showSubTotalAmount = false
-    /*
-     * Отображать общую сумму
-     */
-    Boolean showTotalAmount = false
     /**
      * Настройки ширины колонок
      */
