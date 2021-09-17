@@ -10,19 +10,18 @@
 package ru.naumen.modules.gantt
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.Field
 import groovy.transform.Immutable
-import groovy.transform.TupleConstructor
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
+import ru.naumen.core.shared.IUUIDIdentifiable
 
 import static groovy.json.JsonOutput.toJson
 
-@Field @Lazy @Delegate GanttSettingsController ganttSettings = new GanttSettingsImpl(binding)
+@Field @Lazy @Delegate GanttSettingsController ganttSettings = new GanttSettingsImpl()
 
 interface GanttSettingsController
 {
@@ -50,9 +49,10 @@ interface GanttSettingsController
     /**
      * Метод получения настроек из хранилища
      * @param requestContent - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param user - текущий пользователь
      * @return настройки из хранилища
      */
-    String getGanttSettings(Map<String, Object> requestContent)
+    String getGanttSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод сохранение настроек в хранилища
@@ -60,8 +60,17 @@ interface GanttSettingsController
      * @return настройки, отправленные в хранилище
      */
     String saveGanttSettings(Map<String, Object> requestContent)
+
+    /**
+     * Получение данных о пользователе
+     * @param requestContent - параметры запроса (classFqn, contentCode)
+     * @param user - текущий пользователь
+     * @return параметры пользователя
+     */
+    String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
 }
 
+@InheritConstructors
 class GanttSettingsImpl implements GanttSettingsController
 {
     GanttSettingsService service = GanttSettingsService.instance
@@ -87,9 +96,14 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String getGanttSettings(Map<String, Object> requestContent)
+    String getGanttSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         GetGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, GetGanttSettingsRequest)
+        // Для обычного пользователя шлем пустую строку.
+        if (service.getUserGroup(user) == 'REGULAR')
+        {
+            return ''
+        }
         return Jackson.toJsonString(service.getGanttSettings(request))
     }
 
@@ -98,6 +112,12 @@ class GanttSettingsImpl implements GanttSettingsController
     {
         SaveGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, SaveGanttSettingsRequest)
         return Jackson.toJsonString(service.saveGanttSettings(request))
+    }
+
+    @Override
+    String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    {
+        return toJson(service.getUserData(requestContent, user))
     }
 }
 
@@ -116,7 +136,7 @@ class GanttSettingsService
     Collection<GanttDataSource> getDataSources(String classFqn = MAIN_FQN)
     {
         def children = getMetaClassChildren(classFqn)
-        return children.collectMany { mappingDataSource(it) }
+        return children.collectMany { mappingDataSource(it) }.sort { it.title }
     }
 
     /**
@@ -138,7 +158,7 @@ class GanttSettingsService
 
             if(request.parentClassFqn)
             {
-                attributes = attributes.findAll { it.type.code in AttributeType.LINK_ATTRIBUTE_TYPES &&
+                attributes = attributes.findAll { it.type.code in AttributeType.LINK_TYPES &&
                                                   it.type.relatedMetaClass.code == request.parentClassFqn  ? it : null }
             }
 
@@ -210,6 +230,43 @@ class GanttSettingsService
         else
         {
             throw new Exception('Настройки не были сохранены!')
+        }
+    }
+
+    /**
+     * Получение данных о пользователе
+     * @param requestContent - параметры запроса (classFqn, contentCode)
+     * @param user - текущий пользователь
+     * @return параметры пользователя
+     */
+    Map getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    {
+        String classFqn = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        String groupUser = getUserGroup(user)
+        return [groupUser : groupUser,
+                name: user?.title,
+                email: user?.email]
+    }
+
+    /**
+     * Метод получения группы пользователя
+     * @param user - пользователь
+     * @return группа
+     */
+    private String getUserGroup(IUUIDIdentifiable user)
+    {
+        if (!user)
+        {
+            return "SUPER"
+        }
+        else if (checkUserOnMasterDashboard(user))
+        {
+            return "MASTER"
+        }
+        else
+        {
+            return "REGULAR"
         }
     }
 
@@ -456,12 +513,12 @@ class GanttSettingsClass extends BaseGanttDiagramData
 }
 
 /**
- * Данные диаграммы Ганта для построения табличной части
+ * Данные диаграммы Ганта для построения
  */
 class GanttDiagramData extends BaseGanttDiagramData
 {
     /**
-     * Данные для построения таблицы
+     * Данные для построения диаграммы
      */
     def tasks
 }
@@ -507,7 +564,13 @@ class AttributeType {
                                                            CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, META_CLASS_TYPE, DT_INTERVAL_TYPE, DATE_TYPE,
                                                            DATE_TIME_TYPE, STRING_TYPE, INTEGER_TYPE, DOUBLE_TYPE, STATE_TYPE,
                                                            LOCALIZED_TEXT_TYPE, BOOL_TYPE].asImmutable()
-    static final Collection<String> LINK_ATTRIBUTE_TYPES = [OBJECT_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
+    static final Collection<String> TIMER_TYPES = [TIMER_TYPE, BACK_TIMER_TYPE].asImmutable()
+    static final Collection<String> LINK_TYPES_WITHOUT_CATALOG = [OBJECT_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
+    static final Collection<String> LINK_TYPES = [OBJECT_TYPE,  CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
+    static final Collection<String> LINK_SET_TYPES = [CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
+    static final Collection<String> NUMBER_TYPES = [INTEGER_TYPE, DOUBLE_TYPE].asImmutable()
+    static final Collection<String> DATE_TYPES = [DATE_TYPE, DATE_TIME_TYPE].asImmutable()
+    static final Collection<String> HAS_UUID_TYPES = [*LINK_TYPES, STATE_TYPE, META_CLASS_TYPE]
 
     static final String OBJECT_TYPE = 'object'
 
@@ -647,12 +710,12 @@ class ResourceAndWorkSettings
     /**
      * Номер ресурса/работы
      */
-    Integer id
+    String id
 
     /**
      * Номер родителя, от которого зависит
      */
-    Integer parent
+    String parent
 
     /**
      * Тип источника - работа/ресурс
