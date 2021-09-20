@@ -38,6 +38,7 @@ import {
 	PersonalSettingsDisabled,
 	RemoveFilterFailed,
 	RequisiteIsNotSupported,
+	SourceNotFound,
 	SubjectTypeAndAttributeTypeNotEqual,
 	SuperUserCantResetPersonalDashboard,
 	UndefinedError,
@@ -134,6 +135,8 @@ export const parseError = (response: ExecErrorResponse): Error => {
 				return new RemoveFilterFailed(message);
 			case ERRORS.REQUISITE_IS_NOT_SUPPORTED:
 				return new RequisiteIsNotSupported(message);
+			case ERRORS.SOURCE_NOT_FOUND:
+				return new SourceNotFound(message);
 			case ERRORS.SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL:
 				return new SubjectTypeAndAttributeTypeNotEqual(message);
 			case ERRORS.SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD:

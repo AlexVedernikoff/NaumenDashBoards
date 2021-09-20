@@ -70,6 +70,7 @@ const PERSONAL_DASHBOARD_NOT_FOUND: 'personalDashboardNotFound' = 'personalDashb
 const PERSONAL_SETTINGS_DISABLED: 'personalSettingsDisabled' = 'personalSettingsDisabled';
 const REMOVE_FILTER_FAILED: 'removeFilterFailed' = 'removeFilterFailed';
 const REQUISITE_IS_NOT_SUPPORTED: 'requisiteIsNotSupported' = 'requisiteIsNotSupported';
+const SOURCE_NOT_FOUND: 'sourceNotFound' = 'sourceNotFound';
 const SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL: 'subjectTypeAndAttributeTypeNotEqual' = 'subjectTypeAndAttributeTypeNotEqual';
 const SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD: 'superUserCantResetPersonalDashboard' = 'superUserCantResetPersonalDashboard';
 const USER_EMAIL_IS_NULL_OR_EMPTY: 'userEmailIsNullOrEmpty' = 'userEmailIsNullOrEmpty';
@@ -120,6 +121,7 @@ export const ERRORS = {
 	PERSONAL_SETTINGS_DISABLED,
 	REMOVE_FILTER_FAILED,
 	REQUISITE_IS_NOT_SUPPORTED,
+	SOURCE_NOT_FOUND,
 	SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL,
 	SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD,
 	USER_EMAIL_IS_NULL_OR_EMPTY,

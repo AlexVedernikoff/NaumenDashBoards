@@ -86,6 +86,8 @@ export class RemoveFilterFailed extends ApiError {}
 
 export class RequisiteIsNotSupported extends ApiError {}
 
+export class SourceNotFound extends ApiError {}
+
 export class SubjectTypeAndAttributeTypeNotEqual extends ApiError {}
 
 export class SuperUserCantResetPersonalDashboard extends ApiError {}
