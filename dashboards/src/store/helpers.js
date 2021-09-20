@@ -131,10 +131,11 @@ const getFilterContext = (descriptor: string, classFqn: string) => {
 	let context = JSON.parse(descriptor);
 
 	if (!context.clazz) {
-		context = {
-			...context,
-			cases: getDescriptorCases(classFqn)
-		};
+		const cases = context.cases ?? [];
+
+		getDescriptorCases(classFqn).forEach(item => cases.push(item));
+
+		context = { ...context, cases };
 	}
 
 	return context;
