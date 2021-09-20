@@ -205,7 +205,7 @@ class GanttDataSetService
                 }
 
                 // Если есть настройка-потомок (уровень вложенности следующей в списке настройки выше, чем у текущей).
-                if ((settingsList.size() > 1) && (settingsList[i + 1].level > settings.level))
+                if ((settingsList.size() > (i + 1)) && (settingsList[i + 1].level > settings.level))
                 {
                     // По каждому элементу списка рекурсивно выполняется этот же метод, дополняя список результатов.
                     resMap.any {
