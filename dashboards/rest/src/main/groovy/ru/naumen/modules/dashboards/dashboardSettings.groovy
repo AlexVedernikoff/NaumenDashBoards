@@ -1478,7 +1478,7 @@ class DashboardSettingsService
      */
     private getCorrectMessageError(String messageError, def currentUserLocale)
     {
-        switch (locale.toLowerCase())
+        switch (currentUserLocale.toLowerCase())
         {
             case 'en':
                 return messageError

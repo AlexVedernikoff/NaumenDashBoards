@@ -419,7 +419,7 @@ class DashboardsService
      * @param requestContent - тело запроса - код метакласса,текущий атрибут
      * @return атрибут по выбранному металклассу или ничего, если атрибут не нашёлся
      */
-    Collection<Attribute> getAttributeByCode(def requestContent)
+    Attribute getAttributeByCode(def requestContent)
     {
         String classFqn = requestContent.classFqn
         Attribute currentAttribute = requestContent.attribute

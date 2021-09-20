@@ -453,7 +453,10 @@ class DashboardUtils
                                        .addColumn(sc.min(sc.property(code)))
             res = getApi().db.query(dateCriteria).list().head()
         }
-        res = getApi().db.query("select min(${code}) from ${classFqn}").list().head()
+        else
+        {
+            res = getApi().db.query("select min(${code}) from ${classFqn}").list().head()
+        }
         return res instanceof Long ? new Date(res) : res as Date
     }
 
