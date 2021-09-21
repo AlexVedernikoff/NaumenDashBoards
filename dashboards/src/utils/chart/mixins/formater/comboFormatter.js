@@ -26,10 +26,14 @@ const getDataKeyFromContext = (ctx: Object) => {
 	return series[seriesIndex].dataKey;
 };
 
-const oldValueToNumberFormatter = (value: number): string => {
-	const fixed = Number.isInteger(value) ? 0 : 2;
+const oldValueToNumberFormatter = (value: ?number): string => {
+	if (typeof value === 'number') {
+		const fixed = Number.isInteger(value) ? 0 : 2;
 
-	return value.toFixed(fixed);
+		return value.toFixed(fixed);
+	}
+
+	return '';
 };
 
 const oldValueFormatter = (usesPercent: boolean, showZero: boolean) => {
