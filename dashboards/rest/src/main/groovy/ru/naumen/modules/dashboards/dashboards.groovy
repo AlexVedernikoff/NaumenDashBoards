@@ -336,6 +336,12 @@ class DashboardsService
     {
         def dashboard = api.utils.get(dashboardUUID)
         def source = dashboard.dataSourceDash
+        if(!source)
+        {
+            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            String message = messageProvider.getConstant(SOURCE_NOT_FOUND, currentUserLocale)
+            api.utils.throwReadableException("$message#${SOURCE_NOT_FOUND}")
+        }
         def userUUID = user?.UUID ?: dashboard?.userReports?.UUID
 
         def descriptor = api.listdata.createListDescriptor(source.typeCode, source.code, userUUID)
@@ -468,13 +474,20 @@ class DashboardsService
             listOfSystemAttribute.addAll(getSystemAttributesByGroupCode(metainfo, groupCode))
         }
 
-        return listOfSystemAttribute?.unique { it?.code }?.findResults {
+        def attrs = listOfSystemAttribute?.unique { it?.code }?.findResults {
             Boolean attrInMainClass = classFqn ? api.metainfo.checkAttributeExisting(classFqn, it.code).isEmpty() : false
             if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
             {
                 return buildAttribute(it, attrInMainClass ? mainMetaClass.title : it.metaClass.title, attrInMainClass ? classFqn : it.metaClass.code)
             }
         }
+        if(!attrs.any {it.code == 'UUID'})
+        {
+            def UUIDAttr = api.metainfo.getMetaClass(classFqn).getAttribute('UUID')
+            UUIDAttr = buildAttribute(UUIDAttr, mainMetaClass.title, classFqn)
+            attrs += UUIDAttr
+        }
+        return attrs
     }
 
     /**
@@ -793,21 +806,38 @@ class DashboardsService
     List<Map> getStates(String classFqn)
     {
         classFqn -= '__Evt'
-        String totalClass = classFqn
-        if(!classFqn.contains('$'))
-        {
-            String maxMetaCase = getMaxMetaCaseId(classFqn)
-            totalClass = "${classFqn}\$${maxMetaCase}"
-        }
-        return api.metainfo.getMetaClass(totalClass)
-                        ?.workflow
-                        ?.states
-                        ?.sort {
-                            it.title
+        def types = [api.metainfo.getMetaClass(classFqn)] + api.metainfo.getTypes(classFqn)
+        def states = []
+        types.each { type ->
+            type?.workflow
+                ?.states
+                ?.sort { it.title }
+                ?.each {
+                    def title = it.title
+                    def code = it.code
+                    Boolean sameTitle = states.any { it?.baseTitle == title }
+                    Boolean sameCode = states.any { it?.uuid == code }
+                    Boolean toAdd = !(sameTitle && sameCode)
+                    if (toAdd)
+                    {
+                        if (sameTitle && !sameCode)
+                        {
+                            title = "${it.title} (${type.title})"
                         }
-                        ?.collect {
-                            [title: it.title, uuid: it.code]
-                        } ?: []
+
+                        if (!sameTitle && sameCode)
+                        {
+                            title = "${it.title} (${type.title})"
+                        }
+
+                        states << [title: title, uuid: code, baseTitle: it.title]
+                    }
+                } ?: []
+        }
+        states.sort {
+            it.title
+        }*.remove('baseTitle')
+        return states
     }
 
     List<Map> getTimerStatuses()

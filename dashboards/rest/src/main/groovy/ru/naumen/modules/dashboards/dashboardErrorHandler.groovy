@@ -66,6 +66,7 @@ class MessageProvider
     public static final String MUST_NOT_ADD_EDIT_WIDGET_ERROR = 'mustNotAddEditWidget'
     public static final String PERSONAL_SETTINGS_DISABLED_ERROR = 'personalSettingsDisabled'
     public static final String NOT_UNIQUE_WIDGET_NAME_ERROR = 'notUniqueWidgetName'
+    public static final String SOURCE_NOT_FOUND = 'sourceNotFound'
 
     /**
      * Получение локализованного сообщения
@@ -372,6 +373,12 @@ class MessageProvider
             de: 'Das Widget namens ${name} konnte nicht gespeichert werden. Der Name des Widgets muss innerhalb des Dashboards eindeutig sein.',
             pl: 'Nie można zapisać widżetu o nazwie ${name}. Nazwa widżetu musi być unikalna w panelu.'
         ],
+        (SOURCE_NOT_FOUND): [
+            ru: 'В экземпляре дашборда не указан источник. Заполните атрибут "Источник данных для дашборда" или обратитесь к администратору системы.',
+            en: 'No source is specified in the dashboard instance. Fill in the attribute "Data source for dashboard" or contact your system administrator.',
+            de: 'In der Dashboard-Instanz ist keine Quelle angegeben. Füllen Sie das Attribut "Datenquelle für Dashboard" aus oder wenden Sie sich an Ihren Systemadministrator.',
+            pl: 'W instancji panelu kontrolnego nie określono źródła. Wypełnij atrybut "Źródło danych dla pulpitu nawigacyjnego" lub skontaktuj się z administratorem systemu.'
+        ]
     ]
 }
 
