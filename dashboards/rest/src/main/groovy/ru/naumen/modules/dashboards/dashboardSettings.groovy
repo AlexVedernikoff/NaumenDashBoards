@@ -1179,7 +1179,13 @@ class DashboardSettingsService
             String dashboardTitle = it.title
             try
             {
-                List widgetsFromDB = getDashboardSetting(dashboardUUID)?.widgets
+                def dashboardSettings = getDashboardSetting(dashboardUUID)
+                if (!dashboardSettings)
+                {
+                    return null
+                }
+                List widgetsFromDB = dashboardSettings.widgets
+
                 List<WidgetInfo> widgets = widgetsFromDB
                     ? widgetsFromDB.findResults { widget ->
                     return getWidgetInfo(getWidgetSettings(widget))
@@ -2374,15 +2380,29 @@ class DashboardSettingsService
     private List<Map<String, String>> getDashboardsUUIDAndTitle(def currentUserLocale)
     {
         def root = api.utils.findFirst('root', [:])
+
         if (root.hasProperty('dashboardCode') && root.dashboardCode)
         {
             def appCode = root.dashboardCode
             def contents = api.apps.listContents(appCode)
             if (contents)
             {
-                return contents.collect {
-                    [uuid: (DashboardCodeMarshaller.marshal(it.subjectFqn, it.contentUuid)) , title: it.contentTitle]
+                def res = []
+                contents.each{ content ->
+                    def fqn = content.subjectFqn
+
+                    // Собираем в список типы класса fqn (необходимо для классов, пронаследованных в тип)
+                    List<String> typeFqns = api.metainfo.getTypes(fqn)?.collect { it.code } ?: []
+
+                    // Добавляем сам класс
+                    res << [uuid: (DashboardCodeMarshaller.marshal(content.subjectFqn, content.contentUuid)) , title: content.contentTitle]
+
+                    // Добавляем типы класса
+                    typeFqns.each{
+                        res << [uuid: (DashboardCodeMarshaller.marshal(it, content.contentUuid)) , title: content.contentTitle]
+                    }
                 }
+                return res
             }
         }
         String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
