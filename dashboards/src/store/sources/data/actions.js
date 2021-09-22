@@ -38,6 +38,7 @@ const getDataSources = (): ThunkAction => async (dispatch: Dispatch, getState: G
 		dispatch({
 			type: DATA_SOURCES_EVENTS.RECORD_DATA_SOURCES_ERROR
 		});
+		throw e;
 	}
 };
 
