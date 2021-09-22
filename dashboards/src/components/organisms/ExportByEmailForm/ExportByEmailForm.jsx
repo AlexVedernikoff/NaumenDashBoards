@@ -105,7 +105,7 @@ export class Form extends PureComponent<Props, State> {
 	renderFormFooter = () => {
 		const {sending} = this.props;
 		const {selectedUsers} = this.state;
-		const nothingSelected = selectedUsers.length === 1 && !selectedUsers[0].email;
+		const nothingSelected = selectedUsers.length === 0 || selectedUsers.some(user => user.email === '');
 
 		return (
 			<FormFooter nothingSelected={nothingSelected} onReset={this.handleReset} onSend={this.handleSend} sending={sending} />
