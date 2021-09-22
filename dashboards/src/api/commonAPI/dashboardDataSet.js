@@ -23,6 +23,7 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 			widgetKey,
 			cardObjectUuid,
 			{
+				offsetUTCMinutes: -(new Date()).getTimezoneOffset(),
 				widgetFilters
 			}
 		);
@@ -43,6 +44,7 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 			widgetKey,
 			cardObjectUuid,
 			{
+				offsetUTCMinutes: -(new Date()).getTimezoneOffset(),
 				tableRequestSettings,
 				widgetFilters
 			}
