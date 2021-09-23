@@ -1,5 +1,5 @@
 // @flow
-import {DASHBOARD_EVENTS, DEFAULT_INTERVAL} from './constants';
+import {DASHBOARD_EVENTS, DEFAULT_INTERVAL, EDIT_PANEL_POSITION} from './constants';
 import {getLayoutMode} from 'helpers';
 import isMobile from 'ismobilejs';
 import type {SettingsAction, SettingsState} from './types';
@@ -16,6 +16,7 @@ export const initialDashboardState: SettingsState = {
 	code: '',
 	dashboardUUID: '',
 	editMode: false,
+	editPanelPosition: EDIT_PANEL_POSITION.RIGHT,
 	error: null,
 	exportingFailToEmail: {
 		error: false,
@@ -27,7 +28,8 @@ export const initialDashboardState: SettingsState = {
 	loading: false,
 	personal: false,
 	personalCreating: false,
-	personalDeleting: false
+	personalDeleting: false,
+	widthEditPanel: 320
 };
 
 export const defaultDashboardAction: SettingsAction = {

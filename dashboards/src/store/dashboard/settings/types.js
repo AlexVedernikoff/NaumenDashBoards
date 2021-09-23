@@ -1,6 +1,6 @@
 // @flow
 import type {ChangingState, ThunkAction} from 'store/types';
-import {DASHBOARD_EVENTS, LAYOUT_BREAKPOINTS, LAYOUT_MODE} from './constants';
+import {DASHBOARD_EVENTS, EDIT_PANEL_POSITION, LAYOUT_BREAKPOINTS, LAYOUT_MODE} from './constants';
 import type {User} from 'store/users/types';
 
 export type LayoutMode = $Keys<typeof LAYOUT_MODE>;
@@ -15,6 +15,8 @@ export type AutoUpdateSettings = {
 	interval: number,
 	remainder: number
 };
+
+export type EditPanelPosition = $Keys<typeof EDIT_PANEL_POSITION>;
 
 type ChangeIntervalReminder = {
 	payload: number,
@@ -83,9 +85,14 @@ type ChangeLayoutMode = {
 	type: typeof DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE,
 };
 
-type SetCode= {
+type SetCode = {
 	payload: string,
 	type: typeof DASHBOARD_EVENTS.SET_CODE
+};
+
+type SetEditPanelPosition = {
+	payload: EditPanelPosition,
+	type: typeof DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
 };
 
 type SetHideEditPanel = {
@@ -96,6 +103,11 @@ type SetHideEditPanel = {
 type SetPersonal = {
 	payload: boolean,
 	type: typeof DASHBOARD_EVENTS.SET_PERSONAL
+};
+
+type SetWidthEditPanel = {
+	payload: number,
+	type: typeof DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL
 };
 
 type SwitchOnEditMode = {
@@ -128,8 +140,10 @@ export type SettingsAction =
 	| RequestExportingFileToEmail
 	| ResponseExportingFileToEmail
 	| SetCode
+	| SetEditPanelPosition
 	| SetHideEditPanel
 	| SetPersonal
+	| SetWidthEditPanel
 	| SwitchOnEditMode
 	| SwitchOffEditMode
 	| UnknownDashboardAction
@@ -140,6 +154,7 @@ export type SettingsState = {
 	code: string,
 	dashboardUUID: string,
 	editMode: boolean,
+	editPanelPosition: EditPanelPosition,
 	error: ?string,
 	exportingFailToEmail: ChangingState,
 	hideEditPanel: boolean,
@@ -150,4 +165,5 @@ export type SettingsState = {
 	personalCreating: boolean,
 	personalDeleting: boolean,
 	reloadInterval?: number,
+	widthEditPanel: number
 };

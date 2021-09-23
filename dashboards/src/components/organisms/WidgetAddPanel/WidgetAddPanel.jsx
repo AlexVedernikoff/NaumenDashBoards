@@ -1,6 +1,5 @@
 // @flow
 import Button from 'components/atoms/Button';
-import cn from 'classnames';
 import {COPY_WIDGET_ERRORS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import IconButton, {VARIANTS} from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -14,7 +13,6 @@ import type {State} from './types';
 import styles from './styles.less';
 import Text from 'components/atoms/Text';
 import {TEXT_TYPES} from 'components/atoms/Text/constants';
-import type {TitleProps} from 'components/templates/WidgetForm/types';
 import {USER_ROLES} from 'store/context/constants';
 import type {Value} from 'components/molecules/MultiDropDownList/types';
 import WidgetForm from 'components/templates/WidgetForm';
@@ -80,6 +78,33 @@ export class WidgetAddPanel extends Component<Props, State> {
 		}
 	};
 
+	renderAddButtons = () => {
+		return (
+			<div className={styles.title}>
+				<div className={styles.titleRow}>
+					<span>Добавить текст</span>
+					<IconButton
+						active={true}
+						icon={ICON_NAMES.PLUS}
+						onClick={this.addTextWidget}
+						round={false}
+						variant={VARIANTS.INFO}
+					/>
+				</div>
+				<div className={styles.titleRow}>
+					<span>Добавить виджет</span>
+					<IconButton
+						active={true}
+						icon={ICON_NAMES.PLUS}
+						onClick={this.addDiagramWidget}
+						round={false}
+						variant={VARIANTS.INFO}
+					/>
+				</div>
+			</div>
+		);
+	};
+
 	renderCancelButton = () => null;
 
 	renderDashboardsList = () => {
@@ -141,44 +166,15 @@ export class WidgetAddPanel extends Component<Props, State> {
 		return <Button onClick={onSubmit}>Создать</Button>;
 	};
 
-	renderTitle = (props: TitleProps) => {
-		const {className} = props;
-
-		return (
-			<div className={cn(className, styles.title)}>
-				<div className={styles.titleRow}>
-					<span>Добавить текст</span>
-					<IconButton
-						active={true}
-						icon={ICON_NAMES.PLUS}
-						onClick={this.addTextWidget}
-						round={false}
-						variant={VARIANTS.INFO}
-					/>
-				</div>
-				<div className={styles.titleRow}>
-					<span>Добавить виджет</span>
-					<IconButton
-						active={true}
-						icon={ICON_NAMES.PLUS}
-						onClick={this.addDiagramWidget}
-						round={false}
-						variant={VARIANTS.INFO}
-					/>
-				</div>
-			</div>
-		);
-	};
-
 	render () {
 		const components = {
 			CancelButton: this.renderCancelButton,
-			SubmitButton: this.renderSubmitButton,
-			Title: this.renderTitle
+			SubmitButton: this.renderSubmitButton
 		};
 
 		return (
 			<WidgetForm components={components} onSubmit={this.addDiagramWidget}>
+				{this.renderAddButtons()}
 				<div className={styles.content}>
 					{this.renderDashboardsList()}
 					{this.renderModal()}

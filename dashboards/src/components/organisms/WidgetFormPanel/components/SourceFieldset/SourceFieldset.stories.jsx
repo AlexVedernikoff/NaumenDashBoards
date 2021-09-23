@@ -1,8 +1,8 @@
 // @flow
-import { action } from '@storybook/addon-actions';
+import {action} from '@storybook/addon-actions';
 import React from 'react';
 import SourceFieldset from './SourceFieldset';
-import { useArgs } from '@storybook/client-api';
+import {useArgs} from '@storybook/client-api';
 
 const fullSettings = {
 	computable: false,
