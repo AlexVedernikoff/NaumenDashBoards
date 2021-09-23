@@ -1220,21 +1220,19 @@ class DashboardQueryWrapperUtils
         }
 
         //Фильтрация по непустым атрибутам
-        Set attributeSet = []
+        def attributeSet = []
         if (onlyFilled)
         {
             attributeSet = clonedAggregations.findAll { it?.type == Aggregation.NOT_APPLICABLE }.attribute + clonedGroups*.attribute
         }
-        attributeSet.findResults {
-            it
-        }.collect { attr ->
+        attributeSet?.unique { it?.code }?.findResults { it }?.collect { attr ->
             new FilterParameter(
                 title: 'не пусто',
                 type: Comparison.NOT_NULL,
                 attribute: attr,
                 value: null
             )
-        }.each {
+        }?.each {
             if(templateUUID && it.attribute.code.contains(AttributeType.VALUE_TYPE))
             {
                 criteria = wrapper.totalValueCriteria

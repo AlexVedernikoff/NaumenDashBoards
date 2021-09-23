@@ -202,6 +202,8 @@ class DashboardDataSetService
         def request
         def res
         Integer rowCount
+        Integer countTotals
+        List tableTotals
         PaginationSettings paginationSettings
         def tableSorting
         Integer tableTop
@@ -253,12 +255,6 @@ class DashboardDataSetService
             Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute || tableTop
             res = getDiagramData(request, diagramType, templateUUID, aggregationCnt, widgetSettings,
                                  tableRequestSettings?.ignoreLimits, noPaginationInSQL ? null : paginationSettings)
-            rowCount = requestHasBreakdown && computationInTableRequest
-                ? rowCount
-                : getDiagramData(request, diagramType, templateUUID,
-                                 aggregationCnt, widgetSettings,
-                                 tableRequestSettings?.ignoreLimits)?.find()?.size() //получаем данные,
-            //чтобы получить актуальное количество строк для таблицы
 
             if (computationInTableRequest)
             {
@@ -273,12 +269,47 @@ class DashboardDataSetService
                                                     tableRequestSettings?.ignoreLimits), widgetSettings,
                                      showTableNulls, requestHasBreakdown)?.find()?.size()
             }
+            countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings,
+                                         tableRequestSettings?.ignoreLimits)
+            if(!(requestHasBreakdown && computationInTableRequest))
+            {
+                def fullRes = getDiagramData(
+                    request, diagramType, templateUUID,
+                    aggregationCnt, widgetSettings,
+                    tableRequestSettings?.ignoreLimits
+                )
+                rowCount = fullRes?.find()?.size()
+                def listIdsOfNormalAggregations = request?.data?.findResult { key, value ->
+                    value?.aggregations?.withIndex()?.findResults { val, i ->
+                        if (val.type != Aggregation.NOT_APPLICABLE)
+                            return i
+                    }
+                }
+                List aggregations = getSpecificAggregationsList(widgetSettings)
+                def aggregationsSize = aggregations.size()
+                def transposeRes = fullRes?.find()?.transpose()[0..aggregationsSize - 1]
+
+                tableTotals = transposeRes?.withIndex()?.collect { val, i ->
+                    if (i in listIdsOfNormalAggregations)
+                    {
+                        return val.sum {
+                            it as Double
+                        }
+                    }
+                    else
+                    {
+                        return val.size()
+                    }
+                }
+            }
         }
         else
         {
             request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
             res = getDiagramData(request, diagramType, templateUUID)
+            countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings)
         }
+
         switch (diagramType)
         {
             case [*DiagramType.StandardTypes]:
@@ -290,9 +321,9 @@ class DashboardDataSetService
                 String format = getValueFromParameter(widgetSettings, 'format')
                 String groupFormat =  getValueFromParameter(widgetSettings, 'data')
 
-                return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat)
+                return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat, countTotals)
             case DiagramType.RoundTypes:
-                return mappingRoundDiagram(res)
+                return mappingRoundDiagram(res, countTotals)
             case DiagramType.CountTypes:
                 return mappingSummaryDiagram(res)
             case TABLE:
@@ -302,7 +333,8 @@ class DashboardDataSetService
                 return mappingTableDiagram(res, totalColumn as boolean,
                                            showRowNum as boolean, rowCount, tableTop,
                                            paginationSettings, tableSorting, reverseRowCount,
-                                           widgetSettings, request, tableRequestSettings?.ignoreLimits)
+                                           widgetSettings, request, tableRequestSettings?.ignoreLimits,
+                                           countTotals, tableTotals)
             case COMBO:
                 Integer sortingDataIndex = getSortingDataIndex(widgetSettings)
                 //нашли источник, по которому должна быть сортировка
@@ -328,11 +360,245 @@ class DashboardDataSetService
                 List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(widgetSettings, diagramType)
                 customsInBreakdown = sortListsForCombo(customsInBreakdown, sortingDataIndex)
                 return mappingComboDiagram(res, additionals, groupFormat, format,
-                                           changeLabels, reverseLabels, customsInBreakdown, sortingDataIndex)
+                                           changeLabels, reverseLabels, customsInBreakdown, sortingDataIndex, countTotals)
             default:
                 String message = messageProvider.getMessage(NOT_SUPPORTED_DIAGRAM_TYPE_ERROR, currentUserLocale, diagramType: diagramType)
                 return api.utils.throwReadableException("${message}#${NOT_SUPPORTED_DIAGRAM_TYPE_ERROR}")
         }
+    }
+
+    /**
+     * Метод получения итогов по виджету
+     * @param request - запрос на построение
+     * @param res - датасет по запросу
+     * @param diagramType - тип диаграммы
+     * @param templateUUID - код шаблона динамического атрибута
+     * @param widgetSettings - настройки виджета
+     * @param ignoreLimits - объект с флагами игнорирования пределов
+     * @return итог по количеству данных на виджете
+     */
+    Integer getTotalAmount(DiagramRequest request, def res, DiagramType diagramType, String templateUUID, Widget widgetSettings = null,
+                           IgnoreLimits ignoreLimits = null)
+    {
+        Integer total = 0
+        if(widgetSettings.type in [*DiagramType.CountableTypes, DiagramType.TABLE] && widgetSettings.showTotalAmount)
+        {
+            //флаг на проверку, что пришедший датасет уже правильно построен
+            def dataAndResultAlreadyOk = request.data.every{ key, value ->
+                value.aggregations.type.every { it == Aggregation.COUNT_CNT }
+            } && diagramType in DiagramType.CountableTypes  &&
+                                         request.requisite.every {it.nodes.every {it.type == 'DEFAULT'}}
+
+            //иначе датасет получается по-новому
+            if(!dataAndResultAlreadyOk)
+            {
+                request = updateAggregationsInRequest(request, diagramType)
+                Integer aggregationCnt = request?.data?.findResult { key, value ->
+                    value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
+                }
+                res = diagramType in DiagramType.CountableTypes
+                    ? getDiagramData(request, diagramType, templateUUID)
+                    : getDiagramData(request, diagramType, templateUUID,
+                                     aggregationCnt, widgetSettings,
+                                     ignoreLimits)
+            }
+
+            //проверка на наличии агрегации N/A в таблице
+            Boolean tableWithNA = diagramType == DiagramType.TABLE &&
+                                                request?.data?.any { key, value ->
+                                                    value.aggregations.type.any { it == Aggregation.NOT_APPLICABLE }
+                                                }
+            if(tableWithNA)
+            {
+                def NAIndex = request?.data?.findResult { key, value ->
+                    value?.aggregations?.withIndex()?.findResult { val, i ->
+                        if (val.type == Aggregation.NOT_APPLICABLE)
+                            return i
+                    }
+                }
+                total = res?.find()?.transpose()?.get(NAIndex)?.count {it != '' }
+            }
+            else
+            {
+                //подсчет для комбо будет суммой для всех показателей диаграммы
+                if(diagramType == DiagramType.COMBO)
+                {
+                    total = res.grep()*.transpose()*.get(0).flatten().sum { it as Integer }
+                }
+                else
+                {
+                    total = res?.find()?.transpose()?.find()?.sum { it as Integer }
+                }
+            }
+        }
+        return total
+    }
+
+    /**
+     * Метод преобразования настроек агрегаций в запросе для получения нужного датасета на подсчет итогов
+     * @param request - текущий запрос на построение
+     * @param diagramType - тип диаграммы
+     * @return обновленный запрос на построение
+     */
+    DiagramRequest updateAggregationsInRequest(DiagramRequest request, DiagramType diagramType)
+    {
+        Boolean noCalculation = request.requisite.every { it.nodes.every { it.type == 'DEFAULT' } }
+        if(diagramType in DiagramType.CountableTypes)
+        {
+            if(noCalculation)
+            {
+                request = updateAggregationsInBaseDiagramWithoutCalculation(request)
+            }
+            else
+            {
+                request = updateAggregationsInBaseDiagramWithCalculation(request, diagramType)
+            }
+        }
+        else
+        {
+            request = updateAggregationsInTableDiagram(request, !noCalculation)
+        }
+        return request
+    }
+
+    /**
+     * Метод преобразования настроек агрегаций в запросе для таблицы, где есть вычисления
+     * @param request - текущий запрос на построение
+     * @return обновленный запрос на построение
+     */
+    private DiagramRequest updateAggregationsInTableDiagram(DiagramRequest request, Boolean withCalculation)
+    {
+        def tempData = request.data.find { key, value -> value.aggregations }
+        if(!withCalculation)
+        {
+            def originalRequisite = request.requisite.find()
+            Requisite defaultRequisite = createBaseRequisite(tempData.key, originalRequisite)
+            request.requisite = [defaultRequisite]
+        }
+
+        if (tempData.value.aggregations.any { it.type != Aggregation.NOT_APPLICABLE })
+        {
+            AggregationParameter aggregationParameter = new AggregationParameter(
+                type: Aggregation.COUNT_CNT, attribute: new Attribute(code: 'id', type: 'string')
+            )
+            tempData.value.aggregations = [aggregationParameter]
+            
+        }
+        request.data = [(tempData.key): tempData.value]
+        return request
+    }
+
+    /**
+     * Метод преобразования настроек агрегаций в запросе для диаграмм, где есть вычисления
+     * @param request - текущий запрос на построение
+     * @param diagramType - тип диаграммы
+     * @return обновленный запрос на построение
+     */
+    private DiagramRequest updateAggregationsInBaseDiagramWithCalculation(DiagramRequest request, DiagramType diagramType)
+    {
+        if(diagramType == DiagramType.COMBO)
+        {
+            def requisites = request.requisite
+            def normalRequisites = requisites.findAll {it.nodes.every {it.type == 'DEFAULT'}}
+            def compRequisites = requisites - normalRequisites
+
+            def totalData = [:]
+            def totalRequisites = normalRequisites
+
+            normalRequisites.each { requisite ->
+                requisite.nodes.each { node ->
+                    totalData << request.data.find {it.key == node.dataKey }
+                }
+            }
+
+            compRequisites.each { requisite ->
+                requisite.nodes.each { node ->
+                    def calculator = new FormulaCalculator(node.formula)
+                    def dataKeys = calculator.variableNames
+                    dataKeys -= dataKeys.findAll {it in totalData.keySet() }
+
+                    def additionalData = dataKeys.collect { key -> request.data.find {it.key == key } }
+                    additionalData.each { tempData ->
+                        if (tempData.value.aggregations)
+                        {
+                            tempData.value.aggregations.each {
+                                it.type = Aggregation.COUNT_CNT
+                                it.attribute = new Attribute(code: 'id', type: 'string')
+                            }
+                        }
+                        totalData << [(tempData.key): tempData.value]
+                    }
+
+                    dataKeys.each { key ->
+                        totalRequisites += createBaseRequisite(key, requisite)
+                    }
+                }
+            }
+
+            request.data = totalData
+            request.requisite = totalRequisites
+        }
+        else
+        {
+            def tempData = request.data.find { k, v -> v.aggregations }
+            def originalRequisite = request.requisite.find()
+            Requisite defaultRequisite = createBaseRequisite(tempData.key, originalRequisite)
+            request.requisite = [defaultRequisite]
+
+            def value = tempData.value
+
+            if (value.aggregations)
+            {
+                value.aggregations.each {
+                    it.type = Aggregation.COUNT_CNT
+                    it.attribute = new Attribute(code: 'id', type: 'string')
+                }
+            }
+            request.data = [(tempData.key): value]
+        }
+        return request
+    }
+
+    /**
+     * Метод формирования базового реквизита на основе изначального
+     * @param key - ключ для датасета
+     * @param originalRequisite - изначальный реквизит
+     * @return базовый реквизит на основе изначального
+     */
+    private Requisite createBaseRequisite(String key, Requisite originalRequisite)
+    {
+        DefaultRequisiteNode defaultRequisiteNode = new DefaultRequisiteNode(
+            title: null,
+            type: 'DEFAULT',
+            dataKey: key)
+
+        return new Requisite(
+            title: 'DEFAULT',
+            nodes: [defaultRequisiteNode],
+            showNulls: originalRequisite.showNulls,
+            showBlank: originalRequisite.showBlank,
+            top: originalRequisite.top)
+    }
+
+    /**
+     * Метод преобразования настроек агрегаций в запросе для диаграмм, где нет вычислений
+     * @param request - текущий запрос на построение
+     * @return обновленный запрос на построение
+     */
+    private DiagramRequest updateAggregationsInBaseDiagramWithoutCalculation(DiagramRequest request)
+    {
+        def tempData = request.data
+        tempData.each { k, v ->
+            if (v.aggregations)
+            {
+                v.aggregations.each {
+                    it.type = Aggregation.COUNT_CNT
+                    it.attribute = new Attribute(code: 'id', type: 'string')
+                }
+            }
+        }
+        request.data = tempData
+        return request
     }
 
     /**
@@ -3235,7 +3501,8 @@ class DashboardDataSetService
      */
     private StandardDiagram mappingStandardDiagram(List list, String legendName,
                                                    Boolean reverseGroups, Boolean changeLabels,
-                                                   Boolean reverseLabels, String format, String groupFormat)
+                                                   Boolean reverseLabels, String format, String groupFormat,
+                                                   Integer countTotals)
     {
         def resultDataSet = list.head() as List<List>
         def transposeDataSet = resultDataSet.transpose()
@@ -3246,7 +3513,7 @@ class DashboardDataSetService
             case 2:
                 def (aggregationResult, groupResult) = transposeDataSet
                 def series = [new Series(name: legendName, data: aggregationResult as List)]
-                return new StandardDiagram(labels: groupResult, series: series)
+                return new StandardDiagram(labels: groupResult, series: series, countTotals: countTotals)
             case 3:
                 def (groupResult, breakdownResult) = transposeDataSet.tail()
                 def labels = groupResult?.findAll() as Set
@@ -3284,7 +3551,7 @@ class DashboardDataSetService
                         }
                     }
                     labels = getTotalLabelsForDiagram(labels, groupFormat, format, changeLabels, reverseLabels)
-                    standardDiagram = new StandardDiagram(labels: labels, series: series)
+                    standardDiagram = new StandardDiagram(labels: labels, series: series, countTotals: countTotals)
                 }
                 return standardDiagram
             default:
@@ -3324,7 +3591,7 @@ class DashboardDataSetService
      * @param list - данные диаграмы
      * @return RoundDiagram
      */
-    private RoundDiagram mappingRoundDiagram(List list)
+    private RoundDiagram mappingRoundDiagram(List list, Integer countTotals)
     {
         def resultDataSet = list.head() as List<List>
         def transposeDataSet = resultDataSet.transpose()
@@ -3336,7 +3603,7 @@ class DashboardDataSetService
                 def (aggregationResult, groupResult) = transposeDataSet
                 return new RoundDiagram(series: (aggregationResult as List).collect {
                     it as Double
-                }, labels: groupResult)
+                }, labels: groupResult, countTotals: countTotals)
             default:
                 String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
                 api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
@@ -3387,7 +3654,9 @@ class DashboardDataSetService
                                              Boolean reverseRowCount,
                                              def requestContent,
                                              DiagramRequest request,
-                                             IgnoreLimits ignoreLimits = new IgnoreLimits())
+                                             IgnoreLimits ignoreLimits = new IgnoreLimits(),
+                                             Integer countTotals = 0,
+                                             List tableTotals = [])
     {
         def resultDataSet = list.head() as List<List>
         def transposeDataSet = resultDataSet.transpose()
@@ -3432,7 +3701,7 @@ class DashboardDataSetService
                                 aggregationCnt,
                                 allAggregationAttributes,
                                 ignoreLimits,
-                                request)
+                                request, countTotals, tableTotals)
         }
     }
 
@@ -3787,7 +4056,7 @@ class DashboardDataSetService
                                       Boolean showRowNum, Integer rowCount, Integer tableTop, PaginationSettings paginationSettings, Sorting sorting,
                                       Boolean reverseRowCount, Set<Map> innerCustomGroupNames, Boolean hasBreakdown, List customValuesInBreakdown,
                                       Integer aggregationCnt, List<String> allAggregationAttributes, IgnoreLimits ignoreLimits,
-                                      DiagramRequest request)
+                                      DiagramRequest request, Integer countTotals, List tableTotals = [])
     {
         List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
         Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > DashboardUtils.tableBreakdownLimit && !ignoreLimits.breakdown
@@ -3828,8 +4097,6 @@ class DashboardDataSetService
                     it.ID = reverseId--
                 }
             }
-
-            data = getDataSetWithPagination(data, paginationSettings)
         }
         else
         {
@@ -3861,7 +4128,7 @@ class DashboardDataSetService
         if (totalColumn)
         {
             columns[-1].footer = 'Итого'
-            aggregationColumns.each { aggrCol ->
+            aggregationColumns.withIndex().each { aggrCol, i ->
                 def totalCount = 0
                 if (hasBreakdown)
                 {
@@ -3876,15 +4143,28 @@ class DashboardDataSetService
                 }
                 else
                 {
-                    totalCount = aggrCol.aggregation == 'NOT_APPLICABLE'
-                        ? data.count { it[aggrCol.header] != "" }
-                        : data.sum { it[aggrCol.header] as Double }
+                    if(tableTotals)
+                    {
+                        totalCount = tableTotals[i]
+                    }
+                    else
+                    {
+                        totalCount = aggrCol.aggregation == 'NOT_APPLICABLE'
+                            ? data.count { it[aggrCol.header] != "" }
+                            : data.sum { it[aggrCol.header] as Double }
+                    }
                     aggrCol.footer = DECIMAL_FORMAT.format(totalCount)
                 }
             }
         }
         //агрегация всегда стоит в конце
         columns += aggregationColumns
+
+        if(hasBreakdown)
+        {
+            data = getDataSetWithPagination(data, paginationSettings)
+        }
+
         if(showRowNum)
         {
             columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
@@ -3934,7 +4214,7 @@ class DashboardDataSetService
 
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
 
-        return new TableDiagram(columns: columns, data: data, limitsExceeded: limitsExceeded, total: rowCount)
+        return new TableDiagram(columns: columns, data: data, limitsExceeded: limitsExceeded, total: rowCount, countTotals: countTotals)
     }
 
     /**
@@ -4357,7 +4637,8 @@ class DashboardDataSetService
      */
     private ComboDiagram mappingComboDiagram(List list, List<Map> additionals, String groupFormat,
                                              String format, Boolean changeLabels, Boolean reverseLabels,
-                                             List<Boolean> customsInBreakdown, Integer sortingDataIndex)
+                                             List<Boolean> customsInBreakdown, Integer sortingDataIndex,
+                                             Integer countTotals)
     {
         List transposeSets = list.collect { (it as List<List>)?.transpose() ?: [] }
 
@@ -4462,7 +4743,7 @@ class DashboardDataSetService
             fullSeries -= moveBack
             fullSeries.add(sortingDataIndex, moveBack)
         }
-        return new ComboDiagram(labels: labels, series: fullSeries)
+        return new ComboDiagram(labels: labels, series: fullSeries, countTotals: countTotals)
     }
 
     /**
@@ -4998,7 +5279,7 @@ class DashboardDataSetService
  * Модель данных для диаграмм BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE
  */
 @TupleConstructor
-class StandardDiagram
+class StandardDiagram implements IHasTotals
 {
     /**
      * список значений для оси x
@@ -5030,7 +5311,7 @@ class Series
  * Модель данных для диаграмм DONUT, PIE
  */
 @TupleConstructor
-class RoundDiagram
+class RoundDiagram implements IHasTotals
 {
     /**
      * список меток для построения диаграммы
@@ -5062,7 +5343,7 @@ class SummaryDiagram
  * Модель данных для диаграммы TABLE
  */
 @TupleConstructor
-class TableDiagram
+class TableDiagram implements IHasTotals
 {
     /**
      * Список значений Column
@@ -5174,7 +5455,7 @@ class Indicator
  * Модель данных для диаграммы COMBO
  */
 @TupleConstructor
-class ComboDiagram
+class ComboDiagram implements IHasTotals
 {
     /**
      * список меток для построения диаграммы
@@ -5232,4 +5513,12 @@ class ResRow
      * родитель
      */
     ResRow parent
+}
+
+trait IHasTotals
+{
+    /**
+     *
+     */
+    Integer countTotals = 0
 }
