@@ -18,9 +18,7 @@ export class WidgetForm extends PureComponent<Props> {
 		Container: this.renderContainer,
 		Content: this.renderContent,
 		Footer: this.renderFooter,
-		Header: this.renderHeader,
-		SubmitButton: this.renderSubmitButton,
-		Title: this.renderTitle
+		SubmitButton: this.renderSubmitButton
 	};
 
 	getComponents = () => {
@@ -98,8 +96,8 @@ export class WidgetForm extends PureComponent<Props> {
 	}
 
 	render () {
-		const {children, forwardedRef, onCancel, onSubmit, title, updating} = this.props;
-		const {CancelButton, Container, Content, Footer, Header, SubmitButton, Title} = this.getComponents();
+		const {children, forwardedRef, onCancel, onSubmit, updating} = this.props;
+		const {CancelButton, Container, Content, Footer, SubmitButton} = this.getComponents();
 		const formCN = cn({
 			[styles.form]: true,
 			[styles.ieForm]: isLegacyBrowser(false)
@@ -107,9 +105,6 @@ export class WidgetForm extends PureComponent<Props> {
 
 		return (
 			<Container className={formCN} forwardedRef={forwardedRef}>
-				<Header className={styles.header}>
-					<Title className={styles.title}>{title}</Title>
-				</Header>
 				<Content className={styles.content}>{children}</Content>
 				<Footer className={styles.footer}>
 					<SubmitButton onSubmit={onSubmit} updating={updating}>Сохранить</SubmitButton>

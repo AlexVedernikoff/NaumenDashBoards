@@ -3,7 +3,7 @@ import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layou
 import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import api from 'api';
 import {ApiError, PersonalDashboardNotFound} from 'api/errors';
-import type {AutoUpdateSettings, LayoutMode} from './types';
+import type {AutoUpdateSettings, EditPanelPosition, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
@@ -565,9 +565,19 @@ const setDashboardUUID = payload => ({
 	type: DASHBOARD_EVENTS.SET_DASHBOARD_UUID
 });
 
+const setEditPanelPosition = (payload: EditPanelPosition) => ({
+	payload,
+	type: DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
+});
+
 const setHideEditPanel = (payload: boolean) => ({
 	payload,
 	type: DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL
+});
+
+const setWidthEditPanel = (payload: number) => ({
+	payload,
+	type: DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL
 });
 
 export {
@@ -582,7 +592,9 @@ export {
 	saveAutoUpdateSettings,
 	seeDashboard,
 	sendToEmails,
+	setEditPanelPosition,
 	setHideEditPanel,
 	switchDashboard,
+	setWidthEditPanel,
 	updateUserSourceMode
 };

@@ -5,42 +5,103 @@
 		bottom: 0;
 		box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
 		position: absolute;
-		right: 0;
 		top: 0;
-		width: 320px;
+		user-select: none;
 		z-index: 1;
+
+		&.leftPosition {
+			left: 0
+		}
+
+		&.rightPosition {
+			right: 0;
+		}
 	}
 
 	.swipedContainer {
-		left: 100%;
+		&.leftPosition {
+			right: 100%;
+			left: auto;
+		}
+		&.rightPosition {
+			left: 100%;
+		}
 	}
 
 	.drawerControl {
 		background-color: @steel;
 		bottom: 0;
 		cursor: pointer;
-		left: -20px;
+		opacity: 0;
 		padding: 15px 0;
 		position: absolute;
 		top: 0;
 		width: 20px;
 		z-index: 3;
 
-		&:hover {
-			background-color: @grey;
+		&.drawerControlLeft {
+			left: 0px;
+		}
 
-			.drawerIcon {
-				color: white;
+		&.drawerControlRight {
+			right: 0px;
+		}
+
+		&:hover {
+			opacity: 100;
+		}
+
+		&.activeDrawerControl {
+			opacity: 100;
+
+			&.drawerControlLeft {
+				left: auto;
+				right: -20px;
+			}
+
+			&.drawerControlRight {
+				left: -20px;
+				right: auto;
 			}
 		}
+
 	}
 
-	.activeDrawerControl {
-		bottom: auto;
-	}
 
 	.drawerIcon {
 		padding: 2px;
+	}
+
+	.fallback {
+		background-color: @gainsboro;
+		height: 100%;
+		overflow-y: auto;
+		padding-top: 2em;
+		text-align: center;
+	}
+
+	.resizer {
+		background-color: @white;
+		bottom: 0;
+		cursor: col-resize;
+		padding: 15px 0;
+		position: absolute;
+		top: 0;
+		width: 2px;
+		z-index: 3;
+
+		&.leftPosition {
+			right: 0;
+		}
+
+		&.rightPosition{
+			left: 0;
+		}
+	}
+
+	.content {
+		display: flex;
+		flex-direction: column;
 	}
 
 	.content {
@@ -51,11 +112,43 @@
 		top: 0;
 	}
 
-	.fallback {
+	.title {
+		align-content: center;
+		align-items: center;
 		background-color: @gainsboro;
+		color: @black;
+		display: flex;
+		font-size: 15px;
+		font-weight: 500;
+		justify-content: center;
+		padding: 14px 20px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		:nth-child(1) {
+			flex: 1 1 auto;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		:last-child {
+			margin-left: 2px;
+		}
+	}
+
+	.positionButton {
+		height: 24px;
+		padding-top: 5px;
+		width: 32px;
+
+		&.active {
+			background-color: @lightgrey;
+		}
+	}
+
+
+	.contentPlace {
 		height: 100%;
 		overflow-y: auto;
-		padding-top: 2em;
-		text-align: center;
 	}
 }

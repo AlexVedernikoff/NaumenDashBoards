@@ -47,7 +47,7 @@ const showAlert = (header: string, text: string, options?: $Shape<AlertDialogOpt
 const closeConfirmDialog = (status: boolean): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState) => {
 		const state = getState();
-		const { commonDialogs: {ConfirmModal} } = state;
+		const {commonDialogs: {ConfirmModal}} = state;
 
 		if (ConfirmModal) {
 			ConfirmModal.resolve(status);
@@ -64,7 +64,7 @@ const closeConfirmDialog = (status: boolean): ThunkAction =>
 const closeAlert = (): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState) => {
 		const state = getState();
-		const { commonDialogs: {AlertModal} } = state;
+		const {commonDialogs: {AlertModal}} = state;
 
 		if (AlertModal) {
 			AlertModal.resolve(true);

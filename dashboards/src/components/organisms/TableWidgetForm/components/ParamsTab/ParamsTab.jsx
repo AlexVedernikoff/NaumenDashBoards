@@ -139,7 +139,7 @@ export class ParamsTab extends PureComponent<Props> {
 		const parentClassFqn = !isMain ? data[this.mainIndex].source.value?.value : '';
 
 		return (
-			<CALC_TOTAL_CONTEXT.Provider value={calcTotalColumn}>
+			<CALC_TOTAL_CONTEXT.Provider key={`DataSetSettings_${dataSet.dataKey}`} value={calcTotalColumn}>
 				<DataSetSettings
 					components={this.getDataSetSettingsComponents()}
 					index={index}

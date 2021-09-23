@@ -35,7 +35,7 @@ export class StyleTab extends Component<Props> {
 				widget={widget}
 			/>
 		);
-	};;
+	};
 
 	render () {
 		const {onChange, values, widget} = this.props;

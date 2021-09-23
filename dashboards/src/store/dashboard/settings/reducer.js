@@ -103,6 +103,11 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 				...state,
 				dashboardUUID: action.payload
 			};
+		case DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION:
+			return {
+				...state,
+				editPanelPosition: action.payload
+			};
 		case DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL:
 			return {
 				...state,
@@ -112,6 +117,11 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 			return {
 				...state,
 				personal: action.payload
+			};
+		case DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL:
+			return {
+				...state,
+				widthEditPanel: action.payload
 			};
 		case DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE:
 			return {

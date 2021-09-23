@@ -31,7 +31,7 @@ export class FilterItem extends PureComponent<Props, State> {
 
 		if (typeof dataSetIndex === 'number') {
 			const selectedDataSet = dataSets[dataSetIndex];
-			const { attributes = [], attributesLoading } = selectedDataSet;
+			const {attributes = [], attributesLoading} = selectedDataSet;
 
 			if (!attributesLoading && attributes.length === 0) {
 				fetchAttributes(dataSetIndex);
@@ -77,7 +77,7 @@ export class FilterItem extends PureComponent<Props, State> {
 
 			if (typeof dataSetIndex === 'number') {
 				const selectedDataSet = dataSets[dataSetIndex];
-				const { attributes = [], attributesLoading } = selectedDataSet;
+				const {attributes = [], attributesLoading} = selectedDataSet;
 				const attribute = value.attributes && value.attributes.length > 0 ? value.attributes[0] : null;
 				const filterAttributes = attributes.filter(({code, metaClassFqn}) =>
 					code !== 'UUID'
