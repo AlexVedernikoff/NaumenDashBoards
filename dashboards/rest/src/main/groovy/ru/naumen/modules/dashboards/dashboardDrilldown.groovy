@@ -64,6 +64,11 @@ class DashboardDrilldownService
      */
     String getLink(Map<String, Object> request, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey,  String groupCode)
     {
+        // Вычисляем смещение часового пояса по настройкам пользователя системы и настройкам клиента у фронта.
+        Integer frontOffsetMinutes = request.offsetUTCMinutes
+        String userUUID = CurrentUserHolder.currentUser.get()?.UUID
+        def offsetMinutes = DashboardUtils.getOffsetUTCMinutes(userUUID, frontOffsetMinutes)
+
         def requestContent = [:]
         requestContent.putAll(request)
         DiagramType diagramType = diagramTypeFromRequest as DiagramType
@@ -112,7 +117,7 @@ class DashboardDrilldownService
 
             }
         }
-        def linkBuilder = link.getBuilder()
+        def linkBuilder = link.getBuilder(offsetMinutes)
         return api.web.list(linkBuilder)
     }
 
@@ -250,9 +255,10 @@ class Link
     /**
      * Метод получения сконструированного билдера
      * @param api - интерфейс формирования ссылок
+     * @param offsetMinutes - интерфейс формирования ссылок
      * @return сконструированный билдер
      */
-    def getBuilder()
+    def getBuilder(Integer offsetMinutes)
     {
         def builder = api.web.defineListLink(false)
                          .setTitle(title)
@@ -270,7 +276,7 @@ class Link
         template?.with(builder.&setTemplate)
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, descriptor)
-        formatFilter(filterBuilder)
+        formatFilter(filterBuilder, offsetMinutes)
         return builder
     }
 
@@ -335,8 +341,9 @@ class Link
     /**
      * Вспомогательный метод для формирования фильтра
      * @param filterBuilder - билдер для фильтра
+     * @param offsetMinutes - смещение часового пояса пользователя относительно серверного времени
      */
-    private void formatFilter(def filterBuilder)
+    private void formatFilter(def filterBuilder, Integer offsetMinutes)
     {
         if (filters)
         {
@@ -625,11 +632,14 @@ class Link
                                         case 'last':
                                             return filterBuilder.OR(attr.code, 'lastN', it.data as int)
                                         case 'last_hours':
-                                            return filterBuilder.OR(attr.code, 'lastNHours', it.data as Double)
+                                            Date date = DateUtils.addMinutes(it.data, offsetMinutes)
+                                            return filterBuilder.OR(attr.code, 'lastNHours', date as Double)
                                         case 'near':
-                                            return filterBuilder.OR(attr.code, 'nextN', it.data as int)
+                                            Date date = DateUtils.addMinutes(it.data, offsetMinutes)
+                                            return filterBuilder.OR(attr.code, 'nextN', date as int)
                                         case 'near_hours':
-                                            return filterBuilder.OR(attr.code, 'nextNHours', it.data as Double)
+                                            Date date = DateUtils.addMinutes(it.data, offsetMinutes)
+                                            return filterBuilder.OR(attr.code, 'nextNHours', date as Double)
                                         case 'between':
                                             String dateFormat
                                             def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
@@ -662,6 +672,9 @@ class Link
                                             {
                                                 end = new Date()
                                             }
+                                            // Сдвиг для учета часового пояса пользователя.
+                                            start = DateUtils.addMinutes(start, offsetMinutes)
+                                            end = DateUtils.addMinutes(end, offsetMinutes)
                                             return filterBuilder.OR(attr.code, 'fromTo', [start, end])
                                         default:
                                             String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)

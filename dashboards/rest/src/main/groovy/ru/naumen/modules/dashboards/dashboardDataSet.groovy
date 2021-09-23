@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit
 import static DeserializationHelper.mapper
 import groovy.transform.InheritConstructors
 import ru.naumen.core.shared.IUUIDIdentifiable
+import org.apache.commons.lang3.time.DateUtils
 
 import ru.naumen.core.server.script.api.injection.InjectApi
 
@@ -79,7 +80,8 @@ class DashboardDataSetImpl extends BaseController implements DashboardDataSet
         {
             widgetFilters = []
         }
-        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, user).with(JsonOutput.&toJson)
+        Integer frontOffsetMinutes = otherSettings.offsetUTCMinutes
+        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user).with(JsonOutput.&toJson)
     }
 
     @Override
@@ -95,7 +97,8 @@ class DashboardDataSetImpl extends BaseController implements DashboardDataSet
         {
             widgetFilters = []
         }
-        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, user, tableRequestSettings).with(JsonOutput.&toJson)
+        Integer frontOffsetMinutes = otherSettings.offsetUTCMinutes
+        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user, tableRequestSettings).with(JsonOutput.&toJson)
     }
 }
 
@@ -177,12 +180,14 @@ class DashboardDataSetService
         return cardObjectUUID
     }
 
+
     /**
      * Метод построения диаграмм.
      * @param dashboardKey - ключ дашборда
      * @param widgetKey - ключ виджета
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param widgetFilters - список пользовательских фильтров для виджета
+     * @param frontOffsetMinutes - смещение в минутах относительно 0 часового пояса, полученное с фронта
      * @param tableRequestSettings - настройки для запроса по таблице
      * @return Типизированниые данные для построения диаграмм
      */
@@ -190,6 +195,7 @@ class DashboardDataSetService
                              String widgetKey,
                              String subjectUUID,
                              Collection<WidgetFilterResponse> widgetFilters = [],
+                             Integer frontOffsetMinutes,
                              IUUIDIdentifiable user = null,
                              TableRequestSettings tableRequestSettings = null)
     {
@@ -208,6 +214,7 @@ class DashboardDataSetService
         def tableSorting
         Integer tableTop
         Boolean reverseRowCount = false
+        def offsetUTCMinutes = getOffsetUTCMinutes(user?.UUID, frontOffsetMinutes)
         String minValue
         String maxValue
 
@@ -308,7 +315,7 @@ class DashboardDataSetService
         }
         else
         {
-            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
+            request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters, offsetUTCMinutes)
             res = getDiagramData(request, diagramType, templateUUID)
             countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings)
             if(diagramType == DiagramType.SPEEDOMETER)
@@ -333,7 +340,7 @@ class DashboardDataSetService
             case DiagramType.RoundTypes:
                 return mappingRoundDiagram(res, countTotals)
             case DiagramType.CountTypes:
-                return mappingSummaryDiagram(res, diagramType, minValue, maxValue)
+                return mappingSummaryDiagram(res)
             case TABLE:
                 def (totalColumn, showRowNum) = [widgetSettings.calcTotalColumn,
                                                  widgetSettings.table.body.showRowNum]
@@ -373,39 +380,6 @@ class DashboardDataSetService
                 String message = messageProvider.getMessage(NOT_SUPPORTED_DIAGRAM_TYPE_ERROR, currentUserLocale, diagramType: diagramType)
                 return api.utils.throwReadableException("${message}#${NOT_SUPPORTED_DIAGRAM_TYPE_ERROR}")
         }
-    }
-
-    /**
-     * Метод получения данных о границах для спидометра
-     * @param widgetSettings - настройки виджета
-     * @param subjectUUID -  идентификатор карточки "текущего объекта"
-     * @param diagramType - тип диаграммы
-     * @param widgetFilters - фильтрация на виджете
-     * @param templateUUID - уникальный идентификатор шаблона динамического атрибута
-     * @param request - тело запроса
-     * @param fieldName - название поля для обработки
-     * @return данные о  границах для спидометра
-     */
-    private String getValueForBorder(SpeedometerCurrentAndNew widgetSettings,
-                                     String subjectUUID,
-                                     DiagramType diagramType,
-                                     Collection<WidgetFilterResponse> widgetFilters,
-                                     String templateUUID,
-                                     DiagramRequest request,
-                                     String fieldName)
-    {
-
-        MinMaxBorder field = widgetSettings.borders[fieldName]
-        if (!(field.isNumber))
-        {
-            def fieldAggregation = field.indicator
-            widgetSettings?.data?.find { !it.sourceForCompute }?.indicators = [fieldAggregation]
-
-            request =  mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
-            Double result = getDiagramData(request, diagramType, templateUUID).find().find().find() as Double ?: 0
-            return DECIMAL_FORMAT.format(result)
-        }
-        return field.value
     }
 
     /**
@@ -523,7 +497,7 @@ class DashboardDataSetService
                 type: Aggregation.COUNT_CNT, attribute: new Attribute(code: 'id', type: 'string')
             )
             tempData.value.aggregations = [aggregationParameter]
-
+            
         }
         request.data = [(tempData.key): tempData.value]
         return request
@@ -957,6 +931,7 @@ class DashboardDataSetService
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param diagramType - тип диаграммы
      * @param widgetFilters - фильтрация от обычного пользователя на виджете
+     * @param offsetUTCMinutes - смещение часового пояса пользователя относительно серверного времени
      * @param showTableNulls - флаг на отображение пустых значений, если диаграмма типа таблица
      * @param showTableBlanks - флаг на отображение незаполненных значений, если диаграмма типа таблица
      * @param computationInTableRequest - флаг на наличие вычислений в запросе, если диаграмма типа таблица
@@ -966,6 +941,7 @@ class DashboardDataSetService
      */
     private DiagramRequest mappingDiagramRequest(def widgetSettings, String subjectUUID,
                                                  DiagramType diagramType, Collection<WidgetFilterResponse> widgetFilters,
+                                                 Integer offsetUTCMinutes = 0,
                                                  Boolean showTableNulls = false, Boolean showTableBlanks = false,
                                                  Boolean computationInTableRequest = false, Integer tableTop = 0,
                                                  Sorting tableSorting = null)
@@ -1052,6 +1028,7 @@ class DashboardDataSetService
                                                                    subjectUUID,
                                                                    'parameter',
                                                                    source,
+                                                                   offsetUTCMinutes,
                                                                    sortingType)
                         if (parameterFilters)
                         {
@@ -1160,13 +1137,14 @@ class DashboardDataSetService
             {
                 breakdownCustomGroup = dynamicGroup
             }
-            FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown', source)
+            FilterList breakdownFilter = getFilterList(breakdownCustomGroup, subjectUUID, 'breakdown', source, offsetUTCMinutes)
             if ((dynamicInAggregate || dynamicInParameter) && !parameterFilters)
             {
                 parameterFilters << getFilterList(dynamicGroup,
                                                   subjectUUID,
                                                   'parameter',
                                                   source,
+                                                  offsetUTCMinutes,
                                                   sorting?.value == SortingValue.PARAMETER ? sorting?.type : null)
             }
 
@@ -1603,9 +1581,10 @@ class DashboardDataSetService
      * @param type - тип пользовательской группировки
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param source - источник запроса
+     * @param offsetUTCMinutes - смещение часового пояса пользователя относительно серверного времени
      * @return функция преобразования настроек пользовательской группировки
      */
-    private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID, Source source)
+    private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID, Source source, Integer offsetUTCMinutes)
     {
         switch (type)
         {
@@ -1618,7 +1597,7 @@ class DashboardDataSetService
             case AttributeType.DOUBLE_TYPE:
                 return this.&mappingNumberTypeFilters.curry({ it as double })
             case AttributeType.DATE_TYPES:
-                return this.&mappingDateTypeFilters.curry(source)
+                return this.&mappingDateTypeFilters.curry(source, offsetUTCMinutes)
             case AttributeType.STATE_TYPE:
                 return this.&mappingStateTypeFilters.curry(subjectUUID)
             case [AttributeType.BO_LINKS_TYPE, AttributeType.BACK_BO_LINKS_TYPE, AttributeType.OBJECT_TYPE]:
@@ -2143,12 +2122,13 @@ class DashboardDataSetService
     /**
      * Метод преодбразований настроек группировки для dateTime типов
      * @param valueConverter - функция преодразования строки в число
+     * @param offsetMinutes - смещение часового пояса пользователя относительно серверного времени
      * @param data - настройки группировки
      * @param attribute - атрибут к которому привязана группировки
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingDateTypeFilters(Source source, List<List> data, Attribute attribute, String title, String id)
+    private List<List<FilterParameter>> mappingDateTypeFilters(Source source, Integer offsetMinutes, List<List> data, Attribute attribute, String title, String id)
     {
         Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
         def dynamicFilter
@@ -2199,18 +2179,25 @@ class DashboardDataSetService
                         set(MILLISECOND, 999)
                         getTime()
                     }
+                    // Сдвиг для учета часового пояса пользователя.
+                    start = DateUtils.addMinutes(start, offsetMinutes)
+                    end = DateUtils.addMinutes(end, offsetMinutes)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'near':
                     def count = condition.data as int
                     def start = new Date()
                     //86400000 - 24*60*60*1000 (день в мс)
                     def end = new Date(start.getTime() + count * 86400000)
+                    start = DateUtils.addMinutes(start, offsetMinutes)
+                    end = DateUtils.addMinutes(end, offsetMinutes)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'near_hours':
                     def count = condition.data as int
                     def start = new Date()
                     //3600000 - 60*60*1000 (час в мс)
                     def end = new Date(start.getTime() + count * 3600000)
+                    start = DateUtils.addMinutes(start, offsetMinutes)
+                    end = DateUtils.addMinutes(end, offsetMinutes)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 case 'between':
                     def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
@@ -2251,6 +2238,8 @@ class DashboardDataSetService
                     {
                         end = new Date()
                     }
+                    start = DateUtils.addMinutes(start, offsetMinutes)
+                    end = DateUtils.addMinutes(end, offsetMinutes)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
                 default:
                     message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
@@ -3654,12 +3643,9 @@ class DashboardDataSetService
     /**
      * Метод преобразования результата выборки к сводке
      * @param list - данные диаграмы
-     * @param diagramType - тип диаграммы
-     * @param minValue - минимальное значение
-     * @param maxValue - максимальное значение
      * @return SummaryDiagram
      */
-    private SummaryDiagram mappingSummaryDiagram(List list, DiagramType diagramType, String minValue, String maxValue)
+    private SummaryDiagram mappingSummaryDiagram(List list)
     {
         List<List> resultDataSet = list.head() as List<List>
         switch (resultDataSet.size())
@@ -3668,15 +3654,7 @@ class DashboardDataSetService
                 return new SummaryDiagram()
             case 1:
                 def (value, title) = resultDataSet.head()
-                if(diagramType == DiagramType.SPEEDOMETER)
-                {
-                    return new SpeedometerDiagram(title: title,
-                                                  total: value,
-                                                  min: minValue,
-                                                  max: maxValue)
-                }
-                return new SummaryDiagram(title: title,
-                                          total: value)
+                return new SummaryDiagram(title: title, total: value)
             default:
                 String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
                 api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
@@ -5021,10 +4999,11 @@ class DashboardDataSetService
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param place - место, откуда была создана кастомная группировка
      * @param source - источник запроса
+     * @param offsetUTCMinutes - смещение часового пояса пользователя относительно серверного времени
      * @param sortingType - тип сортировки
      * @return - список фильтров
      */
-    private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, Source source, SortingType sortingType = null) {
+    private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, Source source, Integer offsetUTCMinutes, SortingType sortingType = null) {
         if(parameter?.group)
         {
             def customGroup = parameter?.group?.data
@@ -5032,7 +5011,7 @@ class DashboardDataSetService
             def filterList = customGroup?.subGroups?.collect { subGroup ->
                 String attributeType = Attribute.getAttributeType(parameter.attribute).split('\\$', 2).head()
                 parameter.attribute.attrChains().last().type = attributeType
-                Closure<Collection<Collection<FilterParameter>>> mappingFilters = getMappingFilterMethodByType(attributeType, subjectUUID, source)
+                Closure<Collection<Collection<FilterParameter>>> mappingFilters = getMappingFilterMethodByType(attributeType, subjectUUID, source, offsetUTCMinutes)
                 def filters = mappingFilters(
                     subGroup.data as List<List>,
                     parameter.attribute,
@@ -5389,24 +5368,6 @@ class SummaryDiagram
      * Значение атрибута с учетом выбранной агрегации
      */
     Object total
-}
-
-/**
- * Модель данных для диаграммы SPEEDOMETER
- */
-class SpeedometerDiagram extends SummaryDiagram
-{
-    /**
-     * Значение атрибута с учетом выбранной агрегации
-     */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Object min
-
-    /**
-     * Значение атрибута с учетом выбранной агрегации
-     */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Object max
 }
 
 /**

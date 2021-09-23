@@ -442,6 +442,49 @@ class DashboardUtils
     static final Integer maxValuesCount = 40000
 
     /**
+     * Метод возвращает смещение часового пояса пользователя относительно серверного времени
+     * @param userUUID - уникальный идентификатор пользователя
+     * @param offsetUTCMinutesFromBrowser - смещение в минутах относительно 0 часового пояса, полученное с фронта
+     * @return смещение в минутах для вычисления запросов в БД
+     */
+    static Integer getOffsetUTCMinutes(String userUUID, Integer offsetUTCMinutesFromBrowser)
+    {
+        final Integer MS_IN_MINUTES = 60000
+        Integer offset
+
+        TimeZone tzServer = TimeZone.getDefault()        // Серверный ЧП (базы данных).
+        TimeZone tzUTC = TimeZone.getTimeZone("UTC")
+
+        // Настройка пользователя на платформе.
+        def tzUserAPI = getApi().employee.getTimeZone(userUUID)
+        TimeZone tzUser = tzUserAPI ? TimeZone.getTimeZone(tzUserAPI?.code) : null
+
+        // Если на платформе не задан часовой пояс у пользователя, получаем смещение по ЧП с фронта.
+        if (!tzUser)
+        {
+            // Если с фронта не пришло смещение, то используется серверный ЧП (смещение 0).
+            if (!offsetUTCMinutesFromBrowser)
+            {
+                offset = 0
+            }
+            else
+            {
+                // Вычисляем смещение серверного ЧП относительно 0 часового пояса.
+                Long timeDifference = tzServer.getRawOffset() - tzUTC.getRawOffset()
+                offset = offsetUTCMinutesFromBrowser - (timeDifference / MS_IN_MINUTES)
+            }
+        }
+        else
+        {
+            Long timeDifference = tzUser.getRawOffset() - tzServer.getRawOffset()
+            offset = timeDifference / MS_IN_MINUTES
+        }
+        /* Полученное смещение возвращается с отрицательным знаком,
+           чтобы можно было прибавлять его методом DateUtils.addMinutes. */
+        return -offset
+    }
+
+    /**
      * Метод получения минимальной даты из Бд
      * @param code - код атрибута
      * @param classFqn - класс источника
