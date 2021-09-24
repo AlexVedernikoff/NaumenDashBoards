@@ -570,7 +570,7 @@ class DashboardsService
         String attributeCode = requestContent.attribute.code
         def metaClass = api.metainfo.getMetaClass(sourceCode)
         Boolean attrIsDynamic = attr.metaClassFqn.contains(AttributeType.TOTAL_VALUE_TYPE)
-        List types
+        Set types
         if (attr.ref)
         {
             String firstAttributeCode = attr.code
@@ -583,7 +583,6 @@ class DashboardsService
         }
         else
         {
-
             //получили списки типов
             types = attrIsDynamic
                 ? getPermittedTypes(metaClass, AttributeType.TOTAL_VALUE_TYPE).toList()
@@ -597,7 +596,11 @@ class DashboardsService
             condition.put('linkTemplate', TotalValueMarshaller.unmarshal(attributeCode).last())
         }
         //на первом месте стоит тип, по которому будет поиск значений
-        def intermediateData = uuid ?: types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }.unique { it.find() }
+        def intermediateData = types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }.unique { it.find() }
+        if(uuid)
+        {
+            types += intermediateData*.get(0).findResults {api.metainfo.getMetaClass(it)?.fqn}
+        }
         List values = uuid
             ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }.unique { it?.UUID }
             : getObjects(intermediateData, count, offset)
@@ -736,7 +739,64 @@ class DashboardsService
             }
             return childrenList
         }
-        return independentBottoms + withParentsBottoms
+        def totalBottoms = independentBottoms + withParentsBottoms
+
+        def repeateableLists = totalBottoms.findAll {tempBottom -> totalBottoms.count {it.uuid == tempBottom.uuid} > 1}.groupBy { it.uuid }
+
+        def keysToDelete = repeateableLists.keySet()
+        totalBottoms.removeIf {it.uuid in keysToDelete}
+
+        totalBottoms += repeateableLists.collect { k, rep ->
+            //здесь важно получить начало списка - с какого элемента будут отображены все дети
+            def base = rep[0]
+            def children = rep*.children
+            base.children = getChildrenList(children)
+            return base
+        }
+
+        return totalBottoms
+    }
+
+    /**
+     * Метод получения "цельного" списка детей на всех уровнях
+     * @param notToChangeChildren - списки детей с разными детьми на разных уровнях, но одним родителем
+     * @return итоговый список всех детей для одного родителя
+     */
+    def getChildrenList(def notToChangeChildren)
+    {
+        if(notToChangeChildren)
+        {
+            def children = notToChangeChildren.collect {
+                return it.collect { return [*:it] }
+            }
+
+            def tempChildren = children.collect {
+                return it.collect { return [*:it] }
+            }
+
+            def firstLevel = children.collect {
+                if(it)
+                {
+                    def withChildren = it.findAll { it.children }
+                    it -= withChildren
+                    withChildren.each {it.children = [] }
+                    it+= withChildren
+                }
+                return it
+            }.unique()
+
+            //сформировали уровень
+            def currentChildren = firstLevel.flatten()
+            return currentChildren.findResults { tempParent ->
+                def possibleChildren = getChildrenList(tempChildren.findAll{tempParent.uuid in it.uuid }.collectMany {it.children})
+                if(possibleChildren)
+                {
+                    tempParent.children = possibleChildren
+                }
+                return tempParent
+            }
+        }
+        return []
     }
 
     /**
