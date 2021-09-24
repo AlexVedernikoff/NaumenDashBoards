@@ -14,7 +14,7 @@ export default class DrillDown implements DrillDownAPI {
 			'dashboardDrilldown',
 			'getLink',
 			['requestContent', 'cardObjectUuid', 'diagramTypeFromRequest', 'dashboardKey'],
-			payload,
+			{...payload, offsetUTCMinutes: -(new Date()).getTimezoneOffset()},
 			subjectUUID,
 			type,
 			dashboardCode,
