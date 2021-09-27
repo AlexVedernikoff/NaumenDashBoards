@@ -253,6 +253,15 @@ enum Position
 }
 
 /**
+ * Позиция числа
+ */
+enum NumberPosition
+{
+    LEGEND,
+    CURVE
+}
+
+/**
  * Тип объекта для изменения формата
  */
 enum FormatType
@@ -431,10 +440,6 @@ class DashboardUtils
      *
      */
     static final Integer maxValuesCount = 40000
-    /**
-     *
-     */
-    static final String overflowDataException = 'Слишком большое количество данных'
 
     /**
      * Метод получения минимальной даты из Бд
@@ -2202,6 +2207,30 @@ trait IHasTotalSettings
     Boolean showTotalAmount = false
 }
 
+trait IHasSpeedometerStyle
+{
+    /**
+     * Цвет текста
+     */
+    String fontColor = '#323232'
+    /**
+     * Шрифт
+     */
+    String fontFamily = defaultFontFamily
+    /**
+     * Размер шрифта
+     */
+    def fontSize = autoSize
+    /**
+     * Стиль шрифта
+     */
+    String fontStyle = fontStyle
+    /**
+     * Флаг на отображение
+     */
+    Boolean show = true
+}
+
 /**
  * Метки данных
  */
@@ -3012,6 +3041,15 @@ abstract class Widget
             }
         }
 
+        if(clazz == SpeedometerCurrentAndNew)
+        {
+            if(!(fields.borders.min instanceof Map || fields.borders.max instanceof Map))
+            {
+                fields.borders.min = new MinMaxBorder(value: fields.borders.min as Float)
+                fields.borders.max = new MinMaxBorder(value: fields.borders.max as Float)
+            }
+        }
+
         return Jackson.toJsonString(fields)
     }
 
@@ -3414,45 +3452,58 @@ class Borders
     /**
      * Максимальное значение
      */
-    String max
+    MinMaxBorder max
     /**
      * Минимальное значение
      */
-    String min
+    MinMaxBorder min
+
+    /**
+     * Стиль границ
+     */
+    BorderStyle style = new BorderStyle()
+}
+
+/**
+ * Минимальная/максимальная граница спидометра
+ */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+class MinMaxBorder
+{
+    /**
+     * Значение атрибута (если есть)
+     */
+    NewIndicator indicator
+
+    /**
+     * Флаг на использование чисел для границ
+     */
+    Boolean isNumber = true
+
+    /**
+     * Число для границы
+     */
+    def value
 }
 
 /**
  * Показатель на виджете типа спидометр
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-class SpeedometerIndicator
+class SpeedometerIndicator implements  IHasSpeedometerStyle
 {
-    /**
-     * Цвет текста
-     */
-    String fontColor = '#323232'
-    /**
-     * Шрифт
-     */
-    String fontFamily = defaultFontFamily
-    /**
-     * Размер шрифта
-     */
-    def fontSize = autoSize
-    /**
-     * Стиль шрифта
-     */
-    String fontStyle = fontStyle
-    /**
-     * Флаг на отображение
-     */
-    Boolean show = true
     /**
      * Формат числа
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     NumberFormat format
 }
+
+/**
+ * Стиль границ
+ */
+class BorderStyle implements IHasSpeedometerStyle { }
 
 /**
  * Данные о диапазонах
@@ -3490,6 +3541,40 @@ class Ranges
      * Флаг на использование
      */
     Boolean use
+    /**
+     * Стиль для данных на диапазонах
+     */
+    RangesStyle style = new RangesStyle()
+}
+
+/**
+ * Стиль для данных на диапазонах
+ */
+class RangesStyle implements IHasFontSettings
+{
+    {
+        fontSize = 16
+    }
+    /**
+     * Расположение на дисплее
+     */
+    DisplayType displayType = DisplayType.BLOCK
+    /**
+     * Позиция легенды
+     */
+    Position legendPosition = Position.right
+    /**
+     * Позиция числа
+     */
+    NumberPosition position = NumberPosition.LEGEND
+    /**
+     * Флаг на отображение
+     */
+    Boolean show = true
+    /**
+     * Способ отображения
+     */
+    TextHandler textHandler = TextHandler.CROP
 }
 
 /**

@@ -67,6 +67,7 @@ class MessageProvider
     public static final String PERSONAL_SETTINGS_DISABLED_ERROR = 'personalSettingsDisabled'
     public static final String NOT_UNIQUE_WIDGET_NAME_ERROR = 'notUniqueWidgetName'
     public static final String SOURCE_NOT_FOUND = 'sourceNotFound'
+    public static final String OVERFLOW_DATA = 'overflowData'
 
     /**
      * Получение локализованного сообщения
@@ -378,6 +379,12 @@ class MessageProvider
             en: 'No source is specified in the dashboard instance. Fill in the attribute "Data source for dashboard" or contact your system administrator.',
             de: 'In der Dashboard-Instanz ist keine Quelle angegeben. Füllen Sie das Attribut "Datenquelle für Dashboard" aus oder wenden Sie sich an Ihren Systemadministrator.',
             pl: 'W instancji panelu kontrolnego nie określono źródła. Wypełnij atrybut "Źródło danych dla pulpitu nawigacyjnego" lub skontaktuj się z administratorem systemu.'
+        ],
+        (OVERFLOW_DATA): [
+            ru: 'Слишком большое количество данных',
+            en: 'Too much data',
+            de: 'Zu viele Daten',
+            pl: 'Za dużo danych'
         ]
     ]
 }
