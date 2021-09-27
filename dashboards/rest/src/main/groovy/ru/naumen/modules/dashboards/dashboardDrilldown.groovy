@@ -242,7 +242,8 @@ class Link
     {
         if(values?.size() > DashboardUtils.maxValuesCount)
         {
-            throw new Exception("${DashboardUtils.overflowDataException}")
+            String message = messageProvider.getConstant(OVERFLOW_DATA, currentUserLocale)
+            getApi().utils.throwReadableException("${message}#${OVERFLOW_DATA}")
         }
     }
 
@@ -475,7 +476,16 @@ class Link
                                 case AttributeType.LINK_TYPES:
                                     if (value == 'Не заполнено')
                                     {
-                                        result << [filterBuilder.OR(attr.code, 'null', null)]
+                                        if(attr.ref)
+                                        {
+                                            def values = getValuesForRefAttr(attr, null)
+                                            Link.checkValuesSize(values)
+                                            result << [filterBuilder.OR(attr.code, 'containsInSet', values)]
+                                        }
+                                        else
+                                        {
+                                            result << [filterBuilder.OR(attr.code, 'null', null)]
+                                        }
                                     }
                                     else
                                     {
