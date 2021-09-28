@@ -17,6 +17,7 @@ export const IS_USER_NEEDED_LIST = [
 	{method: 'getDashboardsAndWidgetsTree', module: 'dashboardSettings'},
 	{method: 'getDataForCompositeDiagram', module: 'dashboardDataSet'},
 	{method: 'getDataForTableDiagram', module: 'dashboardDataSet'},
+	{method: 'getLink', module: 'dashboardDrilldown'},
 	{method: 'getSettings', module: 'dashboardSettings'},
 	{method: 'getUserData', module: 'dashboardSettings'},
 	{method: 'saveAutoUpdateSettings', module: 'dashboardSettings'},
