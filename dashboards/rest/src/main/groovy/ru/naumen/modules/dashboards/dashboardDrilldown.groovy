@@ -34,7 +34,7 @@ interface DashboardDrilldown
      * @param groupCode - код группы
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode)
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -43,9 +43,9 @@ class DashboardDrilldownImpl extends BaseController implements DashboardDrilldow
     DashboardDrilldownService service = DashboardDrilldownService.instance
 
     @Override
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode)
+    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode, IUUIDIdentifiable user)
     {
-        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest, dashboardKey, groupCode)])
+        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest, dashboardKey, groupCode, user)])
     }
 }
 
@@ -62,11 +62,11 @@ class DashboardDrilldownService
      * @param groupCode - код группы
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> request, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey,  String groupCode)
+    String getLink(Map<String, Object> request, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey,  String groupCode, IUUIDIdentifiable user)
     {
         // Вычисляем смещение часового пояса по настройкам пользователя системы и настройкам клиента у фронта.
         Integer frontOffsetMinutes = request.offsetUTCMinutes
-        String userUUID = CurrentUserHolder.currentUser.get()?.UUID
+        String userUUID = user?.UUID
         def offsetMinutes = DashboardUtils.getOffsetUTCMinutes(userUUID, frontOffsetMinutes)
 
         def requestContent = [:]

@@ -247,7 +247,7 @@ class DashboardDataSetService
                 reverseRowCount = tableSorting?.type == SortingType.DESC
             }
             request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType,
-                                            widgetFilters, showTableNulls, showTableBlanks,
+                                            widgetFilters, offsetUTCMinutes, showTableNulls, showTableBlanks,
                                             computationInTableRequest, tableTop, tableSorting)
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
