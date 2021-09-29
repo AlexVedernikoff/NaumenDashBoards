@@ -18,6 +18,7 @@ import com.amazonaws.util.json.Jackson
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static DeserializationHelper.mapper
+import ru.naumen.core.shared.IUUIDIdentifiable
 import static MessageProvider.*
 import static CurrentUserHolder.*
 
