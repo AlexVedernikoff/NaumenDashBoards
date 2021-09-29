@@ -214,7 +214,7 @@ class DashboardDataSetService
         def tableSorting
         Integer tableTop
         Boolean reverseRowCount = false
-        def offsetUTCMinutes = getOffsetUTCMinutes(user?.UUID, frontOffsetMinutes)
+        def offsetUTCMinutes = DashboardUtils.getOffsetUTCMinutes(user?.UUID, frontOffsetMinutes)
         String minValue
         String maxValue
 
