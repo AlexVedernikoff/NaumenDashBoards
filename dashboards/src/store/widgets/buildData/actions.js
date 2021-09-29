@@ -3,7 +3,7 @@ import type {AnyWidget, AxisWidget, Chart, ComboWidget, SummaryWidget, TableWidg
 import api from 'api';
 import {ApiError} from 'api/errors';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
-import {BUILD_DATA_EVENTS, DEFAULT_RECORD_BUILD_DATA_ERROR, DEFAULT_RECORD_BUILD_DIAGRAM_ERROR} from './constants';
+import {BUILD_DATA_EVENTS} from './constants';
 import {DEFAULT_NUMBER_AXIS_FORMAT, LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
 import {editWidgetChunkData, updateWidget} from 'store/widgets/data/actions';
@@ -11,6 +11,7 @@ import {exportSheet, getSnapshotName} from 'utils/export';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
 import {INTEGER_AGGREGATION} from 'store/widgets/constants';
+import t from 'localization';
 
 /**
  * Получаем данные для таблицы
@@ -69,7 +70,7 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 				receiveBuildData({data: {...data, page: pageNumber}, id: widget.id})
 			);
 		} catch (e) {
-			let error = DEFAULT_RECORD_BUILD_DATA_ERROR;
+			let error = t('store::buildData::DEFAULT_RECORD_BUILD_DATA_ERROR');
 
 			if (e instanceof ApiError) {
 				error = e.message;
@@ -117,7 +118,7 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 			await dispatch(checkComputedFormat(widget.id, data));
 			dispatch(receiveBuildData({data, id: widget.id}));
 		} catch (e) {
-			let error = DEFAULT_RECORD_BUILD_DIAGRAM_ERROR;
+			let error = t('store::buildData::DEFAULT_RECORD_BUILD_DIAGRAM_ERROR');
 
 			if (e instanceof ApiError) {
 				error = e.message;

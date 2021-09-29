@@ -23,6 +23,7 @@ export interface FrameAPI {
 	getContentCode (): string;
 	getCurrentContentParameters (): Promise<ContentParametersDTO>;
 	getCurrentContextObject (): Promise<ContextObjectDTO>;
+	getCurrentLocale (): string;
 	getCurrentUser (): UserDTO;
 	getSubjectUuid (): string;
 	openFilterForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean): Promise<DTOValue>;

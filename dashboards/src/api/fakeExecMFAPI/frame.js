@@ -32,6 +32,20 @@ export default class Frame implements FrameAPI {
 		return result;
 	}
 
+	getCurrentLocale () {
+		if (!process.env.USER_LANG) {
+			let lang = navigator.language;
+
+			if (navigator.languages) {
+				lang = navigator.languages[0];
+			}
+
+			return lang?.split('-', 2)[0] ?? 'ru';
+		}
+
+		return process.env.USER_LANG;
+	}
+
 	getCurrentUser () {
 		return {
 			admin: true,

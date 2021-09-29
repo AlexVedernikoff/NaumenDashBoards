@@ -184,7 +184,8 @@
     "test:watch": "cross-env API_DRIVER=exec-dev npm run test -- --watch",
     "zip": "zip -r -j \"$npm_package_name-v$npm_package_version.zip\" ./dist/*",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "generate-localalize": "node ./utils/generate-localization.js"
   },
   "version": "2.2.0-0"
 }
