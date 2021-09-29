@@ -19,6 +19,10 @@ export default class Frame implements FrameAPI {
 		return window.jsApi.commands.getCurrentContextObject();
 	}
 
+	getCurrentLocale () {
+		return window.jsApi.commands.getCurrentLocale();
+	}
+
 	getCurrentUser () {
 		return window.jsApi.getCurrentUser();
 	}

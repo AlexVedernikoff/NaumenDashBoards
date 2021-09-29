@@ -1,0 +1,6 @@
+{
+	"LoadingContent::Loading": "Ładowanie...",
+	"Startup::Loading": "Ładowanie...",
+	"store::buildData::DEFAULT_RECORD_BUILD_DATA_ERROR": "Błąd ładowania danych. Zmienić ustawienie.",
+	"store::buildData::DEFAULT_RECORD_BUILD_DIAGRAM_ERROR": "Nie jest możliwe narysowanie diagramu w podanej konfiguracji. Proszę zmienić ustawienia."
+}

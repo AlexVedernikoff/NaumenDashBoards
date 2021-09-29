@@ -2,6 +2,7 @@
 import type {Props} from 'containers/Startup/types';
 import React, {Component} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class Startup extends Component<Props> {
 	componentDidMount () {
@@ -18,7 +19,7 @@ export class Startup extends Component<Props> {
 		}
 
 		if (loading) {
-			return <p>Загрузка...</p>;
+			return (<p><T>Startup::Loading</T></p>);
 		}
 
 		return (

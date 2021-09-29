@@ -8,14 +8,17 @@ import React from 'react';
 import {render} from 'react-dom';
 import {root, store} from './app.constants';
 import smoothscroll from 'smoothscroll-polyfill';
+import TranslationProvider from 'components/templates/TranslationProvider';
 
 smoothscroll.polyfill();
 
 if (root) {
 	const renderApp = () => (
-		<Provider store={store}>
-			<App />
-		</Provider>
+		<TranslationProvider>
+			<Provider store={store}>
+				<App />
+			</Provider>
+		</TranslationProvider>
 	);
 
 	render(renderApp(), root);

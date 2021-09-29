@@ -3,6 +3,7 @@ import Content from 'components/organisms/DiagramWidget/components/Content';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class LoadingContent extends PureComponent<Props> {
 	renderContent = () => {
@@ -21,7 +22,7 @@ export class LoadingContent extends PureComponent<Props> {
 		return error ? <div className={styles.error} title={error}>{error}</div> : null;
 	};
 
-	renderLoading = () => this.props.buildData.loading ? <p>Загрузка...</p> : null;
+	renderLoading = () => this.props.buildData.loading ? <p><T>LoadingContent::Loading</T></p> : null;
 
 	render () {
 		return (
