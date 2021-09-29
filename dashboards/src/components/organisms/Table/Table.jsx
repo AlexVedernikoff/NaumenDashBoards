@@ -3,6 +3,7 @@ import Body from './components/Body';
 import Cell from './components/Cell';
 import cn from 'classnames';
 import type {Column, ColumnsWidth, Components, FixedPositions, Props, State, ValueProps} from './types';
+import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import {DEFAULT_TABLE_SETTINGS} from './constants';
 import Footer from './components/Footer';
@@ -197,6 +198,28 @@ export class Table extends PureComponent<Props, State> {
 				const subColumnWidth = columnsWidth[accessor] - deltaSubColumn;
 
 				newColumnsWidth = this.getNewColumnsWidth(column, subColumnWidth, newColumnsWidth, minWidth);
+			});
+		}
+
+		const sumWidth = sumColumnsWidth(newColumnsWidth, this.props.columns);
+		const diff = minWidth - sumWidth;
+
+		if (minWidth && diff > 0) {
+			const {type} = column;
+			const {INDICATOR, PARAMETER} = COLUMN_TYPES;
+			const targetType = type === PARAMETER ? INDICATOR : PARAMETER;
+			const targetColumns = this.props.columns.filter(({type}) => type === targetType);
+			const targetColumnsWidth = sumColumnsWidth(newColumnsWidth, targetColumns);
+			const addRatio = 1 + diff / targetColumnsWidth;
+
+			targetColumns.forEach(({accessor, columns}) => {
+				newColumnsWidth[accessor] *= addRatio;
+
+				if (columns?.length > 0) {
+					columns.forEach(({accessor}) => {
+						newColumnsWidth[accessor] *= addRatio;
+					});
+				}
 			});
 		}
 
