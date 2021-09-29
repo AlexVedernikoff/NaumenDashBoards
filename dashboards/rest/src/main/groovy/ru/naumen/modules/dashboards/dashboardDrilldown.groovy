@@ -12,6 +12,7 @@ package ru.naumen.modules.dashboards
 
 import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
+import ru.naumen.metainfo.shared.IAttrReference
 import java.text.SimpleDateFormat
 import static groovy.json.JsonOutput.toJson
 import com.amazonaws.util.json.Jackson
@@ -101,7 +102,7 @@ class DashboardDrilldownService
                 def metainfo = api.metainfo.getMetaClass(attr.metaClassFqn)
                 return metainfo.getAttribute(attr.code).declaredMetaClass.fqn.isClass() ? null : metainfo.fqnCase
             }
-        }
+        } ?: []
         requestContent.cases += attrCases
 
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType, groupCode)
@@ -245,12 +246,12 @@ class Link
      * Метод проверки данных на возможный перегруз количества информации для фильтра containsInSet
      * @param values - данные, полученные при поиске
      */
-    static void checkValuesSize(def values)
+    void checkValuesSize(def values)
     {
         if(values?.size() > DashboardUtils.maxValuesCount)
         {
-            String message = messageProvider.getConstant(OVERFLOW_DATA, currentUserLocale)
-            getApi().utils.throwReadableException("${message}#${OVERFLOW_DATA}")
+            String message = messageProvider.getConstant(OVERFLOW_DATA_ERROR, currentUserLocale)
+            getApi().utils.throwReadableException("${message}#${OVERFLOW_DATA_ERROR}")
         }
     }
 
@@ -321,7 +322,7 @@ class Link
                                 values.each { value = value[it] }
                                 //делаем список значений плоским
                                 value = value.flatten()
-                                Link.checkValuesSize(value)
+                                checkValuesSize(value)
                                 return filterBuilder.OR(attribute, 'containsInSet', value)
                             }
                             else
@@ -335,9 +336,79 @@ class Link
                         return  filterBuilder.OR(attribute, condition, value)
                     }
                 }
-            }.inject(filterBuilder) { first, second -> first.AND(*second)
+            }.inject(filterBuilder) { first, second -> first.AND(*second) }
+
+            if(iDescriptor?.content?.getProperties()?.keySet()?.any {it.toString() == 'attrsChain'})
+            {
+                String value = iDescriptor.clientSettings.formObjectUuid
+                iDescriptor?.content?.attrsChain?.findResults { descriptorAttr ->
+                    return [getFilterForAttrChain(descriptorAttr, value, filterBuilder)]
+                }?.inject(filterBuilder) { first, second -> first.AND(*second) }
             }
         }
+    }
+
+    /**
+     * Метод получения фильтра по атрибуту из цепочки связанных атрибутов
+     * @param descriptorAttr - атрибут из цепочки связанных атрибутов (обозначен в дескрипторе)
+     * @param value - значение для подстановки
+     * @param filterBuilder - текущий filterBuilder (список фильтров)
+     * @return измененный filterBuilder (список фильтров)
+     */
+    private def getFilterForAttrChain(IAttrReference descriptorAttr, def value, def filterBuilder)
+    {
+        if(descriptorAttr)
+        {
+            def attrCode = descriptorAttr.attrCode
+            def clazz = descriptorAttr.classFqn
+            def systemAttr = api.metainfo.getMetaClass(clazz).getAttribute(attrCode)
+            def totalAttributeMap = getAttributeForAttrChain(systemAttr)
+
+            if (totalAttributeMap)
+            {
+                if (totalAttributeMap.attribute.type.code in AttributeType.LINK_SET_TYPES)
+                {
+                    value = [value]
+                }
+                return filterBuilder.OR(totalAttributeMap.fqn, 'contains', value)
+            }
+            else
+            {
+                String message = messageProvider.getConstant(NO_DETAIL_DATA_ERROR, currentUserLocale)
+                api.utils.throwReadableException("${message}#${NO_DETAIL_DATA_ERROR}")
+            }
+        }
+    }
+
+    /**
+     * Метод получения связанного атрибута
+     * @param systemAttr - системный атрибут
+     * @return атрибут, связанный с системным в текущем классе
+     */
+    private Map getAttributeForAttrChain(def systemAttr)
+    {
+        def totalAttribute
+        def fqn
+        if (systemAttr.type.code == AttributeType.BACK_BO_LINKS_TYPE)
+        {
+            systemAttr = systemAttr.@attribute
+            totalAttribute = beanFactory.getBean('flexHelper').getBackLinkRelatedAttribute(systemAttr)
+            fqn = totalAttribute?.fqn
+        }
+        else
+        {
+            def sourceMC = systemAttr?.type?.relatedMetaClass
+            def attrFqn = systemAttr?.attributeFqn
+            if (sourceMC)
+            {
+                totalAttribute = api.metainfo.getMetaClass(sourceMC?.code).attributes.find { attr ->
+                    attr.type.code == AttributeType.BACK_BO_LINKS_TYPE &&
+                    beanFactory.getBean('flexHelper').getBackLinkRelatedAttribute(attr.@attribute).fqn == attrFqn
+                }
+                fqn = totalAttribute?.attributeFqn
+            }
+        }
+        return totalAttribute ? ['attribute': totalAttribute, 'fqn': fqn.toString()] : [:]
     }
 
     /**
@@ -459,7 +530,7 @@ class Link
                             )
                             objects = findObjects(attr.ref, attr.property, value)
                         }
-                        Link.checkValuesSize(objects)
+                        checkValuesSize(objects)
                         attr.code = AttributeType.TOTAL_VALUE_TYPE
                         result << [filterBuilder.OR(attr.code, 'notNull', null)]
                         result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
@@ -488,7 +559,7 @@ class Link
                                         if(attr.ref)
                                         {
                                             def values = getValuesForRefAttr(attr, null)
-                                            Link.checkValuesSize(values)
+                                            checkValuesSize(values)
                                             result << [filterBuilder.OR(attr.code, 'containsInSet', values)]
                                         }
                                         else
@@ -561,7 +632,7 @@ class Link
                         wrapper.filtering(wrapper.totalValueCriteria, true, filterParam)
 
                         def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-                        Link.checkValuesSize(uuids)
+                        checkValuesSize(uuids)
                         filterBuilder.AND(
                             filterBuilder.OR('totalValue', 'containsInSet', uuids)
                         )
@@ -769,7 +840,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): null])
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -781,7 +852,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(null)])
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -794,7 +865,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -812,7 +883,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -831,7 +902,7 @@ class Link
                                             {
                                                 def lowValues = api.utils.find(lastAttr.property, ['title': op.like("%${value}%")])
                                                 def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
-                                                Link.checkValuesSize(highValues)
+                                                checkValuesSize(highValues)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -849,7 +920,7 @@ class Link
                                             {
                                                 def lowValues = api.utils.find(lastAttr.property, ['title': op.not("%${value}%")])
                                                 def highValues = api.utils.find(attr.property, [(lastAttr.code) : op.in(lowValues)])
-                                                Link.checkValuesSize(highValues)
+                                                checkValuesSize(highValues)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -866,7 +937,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -887,7 +958,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(value)])
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -908,7 +979,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -933,7 +1004,7 @@ class Link
                                             {
                                                 values = values.collectMany{ value -> findObjects(attr.ref, attr.property, value)}
                                             }
-                                            Link.checkValuesSize(values)
+                                            checkValuesSize(values)
                                             return filterBuilder.OR(
                                                 attr.code,
                                                 'containsInSet',
@@ -943,7 +1014,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, subjectUUID)
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -969,7 +1040,7 @@ class Link
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, value)
-                                                Link.checkValuesSize(objects)
+                                                checkValuesSize(objects)
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
@@ -1132,7 +1203,7 @@ class Link
         if(attribute.ref)
         {
             def values = getValuesForRefAttr(attribute, state)
-            Link.checkValuesSize(values)
+            checkValuesSize(values)
             return filterBuilder.AND(filterBuilder.OR(code, 'containsInSet', values))
         }
         if(sourceCode.contains('$'))
@@ -1191,7 +1262,7 @@ class Link
         wrapper.filtering(wrapper.criteria, false, filterParam)
 
         def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-        Link.checkValuesSize(uuids)
+        checkValuesSize(uuids)
         return uuids
     }
 
@@ -1215,7 +1286,7 @@ class Link
             if (value == 'Не заполнено' || value == 'EMPTY')
             {
                 values = getValuesForRefAttr(attr, null)
-                Link.checkValuesSize(values)
+                checkValuesSize(values)
                 return filterBuilder.OR(attr.code, 'containsInSet', values)
             }
             switch (type)
@@ -1254,7 +1325,7 @@ class Link
                     values = findObjects(attr.ref, attr.property, value)
                     break
             }
-            Link.checkValuesSize(values)
+            checkValuesSize(values)
             return filterBuilder.OR(attr.code, 'containsInSet', values)
         }
         if (value == 'Не заполнено' || value == 'EMPTY')
@@ -1438,7 +1509,7 @@ class Link
             int intValue = value.replace('-й', '') as int
             wrapper.totalValueCriteria.add(w.eq(s.day(s.property('value')), intValue))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1457,7 +1528,7 @@ class Link
             def criteria = MainDateFilterProvider.getCriteria(attr, classFqn, descriptor)
                 .add(w.eq(s.day(s.property(attr.attrChains().code.join('.'))),intValue))
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1472,7 +1543,7 @@ class Link
             int intValue = MainDateFilterProvider.russianWeekDay.get(value)
             wrapper.totalValueCriteria.add(w.eq(s.dayOfWeek(s.property('value')), intValue))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1491,7 +1562,7 @@ class Link
             def criteria = MainDateFilterProvider.getCriteria(attr, classFqn, descriptor)
                                                  .add(w.eq(s.dayOfWeek(s.property(attr.attrChains().code.join('.'))),intValue))
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1513,7 +1584,7 @@ class Link
                 wrapper.totalValueCriteria.add(w.between(s.property('value'), date, endDate))
             }
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1545,7 +1616,7 @@ class Link
                 criteria.add(w.between(s.property(attr.attrChains().code.join('.')), date, endDate))
             }
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1561,7 +1632,7 @@ class Link
 
             wrapper.totalValueCriteria.add(w.between(s.property('value'), dateToFind, anotherDate))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1593,7 +1664,7 @@ class Link
             criteria.add(w.between(s.property(attr.attrChains().code.join('.')), dateToFind, anotherDate))
 
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1606,7 +1677,7 @@ class Link
             Date date = new SimpleDateFormat('dd.MM.yyyy HH:mm').parse(value)
             wrapper.totalValueCriteria.add(w.eq(s.property('value'), date))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1638,7 +1709,7 @@ class Link
             criteria.add(w.eq(s.property(attr.attrChains().code.join('.')), date))
 
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1654,7 +1725,7 @@ class Link
             wrapper.totalValueCriteria.add(w.eq(s.day(s.property('value')), day as int))
                    .add(w.eq(s.month(s.property('value')), month as int))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1680,7 +1751,7 @@ class Link
                    .add(w.eq(s.month(s.property(attr.attrChains().code.join('.'))), month as int))
 
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1691,7 +1762,7 @@ class Link
             def s = api.selectClause
             wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), value as int))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1708,7 +1779,7 @@ class Link
             def criteria = MainDateFilterProvider.getCriteria(attr, classFqn, descriptor)
             criteria.add(w.eq(s.year(s.property(attr.attrChains().code.join('.'))), value as int))
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1722,7 +1793,7 @@ class Link
             wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'HOUR'), hoursANDmins[0] as int))
                    .add(w.eq(s.extract(s.property('value'), 'MINUTE'), hoursANDmins[1] as int))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1743,7 +1814,7 @@ class Link
             criteria.add(w.eq(s.extract(s.property(attr.attrChains().code.join('.')), 'HOUR'), hoursANDmins[0] as int))
                     .add(w.eq(s.extract(s.property(attr.attrChains().code.join('.')), 'MINUTE'), hoursANDmins[1] as int))
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1755,7 +1826,7 @@ class Link
 
             wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'HOUR'), value as int))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1773,7 +1844,7 @@ class Link
 
             criteria.add(w.eq(s.extract(s.property(attr.attrChains().code.join('.')), 'HOUR'), value as int))
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1786,7 +1857,7 @@ class Link
             value = value.replace(' мин', '')
             wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'MINUTE'), value as int))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1806,7 +1877,7 @@ class Link
             value = value.replace(' мин', '')
             criteria.add(w.eq(s.extract(s.property(attr.attrChains().code.join('.')), 'MINUTE'), value as int))
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1823,7 +1894,7 @@ class Link
             }
             wrapper.totalValueCriteria.add(w.between(s.property('value'), startDate, endDate))
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
 
@@ -1871,7 +1942,7 @@ class Link
             }
             criteria.add(w.between(s.property(attr.attrChains().code.join('.')), startDate, endDate))
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
 
@@ -1997,7 +2068,7 @@ class Link
                 if(providerKey.contains('static_ref'))
                 {
                     def values = getValuesForRefAttr(attr, null)
-                    Link.checkValuesSize(values)
+                    checkValuesSize(values)
                     return filterBuilder.OR(attr.code, 'containsInSet', values)
                 }
                 else if(providerKey.contains('static'))
@@ -2039,7 +2110,7 @@ class Link
                 wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year))
             }
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
     }
@@ -2074,7 +2145,7 @@ class Link
             }
 
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
     }
@@ -2107,7 +2178,7 @@ class Link
                 wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year as int))
             }
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
     }
@@ -2141,7 +2212,7 @@ class Link
                 criteria.add(w.eq(s.year(s.property(attr.attrChains().code.join('.'))), valueMap.year))
             }
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
     }
@@ -2174,7 +2245,7 @@ class Link
                 wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year))
             }
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
     }
@@ -2210,7 +2281,7 @@ class Link
                 criteria.add(w.eq(s.year(s.property(attr.attrChains().code.join('.'))), valueMap.year))
             }
             def uuids = api.db.query(criteria).list()
-            Link.checkValuesSize(uuids)
+            checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', uuids))
         }
     }

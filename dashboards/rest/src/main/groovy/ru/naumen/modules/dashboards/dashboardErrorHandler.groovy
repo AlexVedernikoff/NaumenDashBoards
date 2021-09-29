@@ -66,8 +66,9 @@ class MessageProvider
     public static final String MUST_NOT_ADD_EDIT_WIDGET_ERROR = 'mustNotAddEditWidget'
     public static final String PERSONAL_SETTINGS_DISABLED_ERROR = 'personalSettingsDisabled'
     public static final String NOT_UNIQUE_WIDGET_NAME_ERROR = 'notUniqueWidgetName'
-    public static final String SOURCE_NOT_FOUND = 'sourceNotFound'
-    public static final String OVERFLOW_DATA = 'overflowData'
+    public static final String SOURCE_NOT_FOUND_ERROR = 'sourceNotFound'
+    public static final String OVERFLOW_DATA_ERROR = 'overflowData'
+    public static final String NO_DETAIL_DATA_ERROR = 'noDetailData'
 
     /**
      * Получение локализованного сообщения
@@ -374,18 +375,25 @@ class MessageProvider
             de: 'Das Widget namens ${name} konnte nicht gespeichert werden. Der Name des Widgets muss innerhalb des Dashboards eindeutig sein.',
             pl: 'Nie można zapisać widżetu o nazwie ${name}. Nazwa widżetu musi być unikalna w panelu.'
         ],
-        (SOURCE_NOT_FOUND): [
+        (SOURCE_NOT_FOUND_ERROR): [
             ru: 'В экземпляре дашборда не указан источник. Заполните атрибут "Источник данных для дашборда" или обратитесь к администратору системы.',
             en: 'No source is specified in the dashboard instance. Fill in the attribute "Data source for dashboard" or contact your system administrator.',
             de: 'In der Dashboard-Instanz ist keine Quelle angegeben. Füllen Sie das Attribut "Datenquelle für Dashboard" aus oder wenden Sie sich an Ihren Systemadministrator.',
             pl: 'W instancji panelu kontrolnego nie określono źródła. Wypełnij atrybut "Źródło danych dla pulpitu nawigacyjnego" lub skontaktuj się z administratorem systemu.'
         ],
-        (OVERFLOW_DATA): [
+        (OVERFLOW_DATA_ERROR): [
             ru: 'Слишком большое количество данных',
             en: 'Too much data',
             de: 'Zu viele Daten',
             pl: 'Za dużo danych'
+        ],
+        (NO_DETAIL_DATA_ERROR):[
+            ru: 'Для данного виджета детализация данных не доступна',
+            en: 'No data detail is provided for this widget',
+            de: 'Für dieses Widget werden keine Datendetails bereitgestellt',
+            pl: 'Brak szczegółów danych dla tego widżetu'
         ]
+
     ]
 }
 
