@@ -28,7 +28,7 @@ trait CriteriaWrapper
             : api.db.createCriteria().addSource(source.classFqn)
     }
 
-    List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
+    List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean hasBreakdown = false, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
     {
         if(diagramType == DiagramType.TABLE)
         {
@@ -46,7 +46,7 @@ trait CriteriaWrapper
             }
 
         }
-        return api.db.query(criteria).setMaxResults(100).list()
+        return api.db.query(criteria).setMaxResults(hasBreakdown ? 1000 : 100).list()
     }
 }
 
@@ -1009,10 +1009,11 @@ class QueryWrapper implements CriteriaWrapper
 
     List<List> getResult(Boolean requestHasOneNoneAggregation = false,
                          DiagramType diagramType = DiagramType.COLUMN,
+                         Boolean hasBreakdown = false,
                          Boolean ignoreParameterLimit = false,
                          PaginationSettings paginationSettings = null)
     {
-        return execute(criteria, diagramType, ignoreParameterLimit, paginationSettings).collect {
+        return execute(criteria, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings).collect {
             requestHasOneNoneAggregation ? [it] : it.collect() as List
         }
     }
@@ -1155,6 +1156,7 @@ class DashboardQueryWrapperUtils
                 format: it.format
             )
         }
+        Boolean hasBreakdown = clonedGroups?.any {it?.title?.contains('breakdown') }
 
         wrapper.setCases(requestData.source.classFqn,
                          clonedAggregations.attribute?.findAll{!(it.code.contains(AttributeType.TOTAL_VALUE_TYPE) ||
@@ -1250,7 +1252,7 @@ class DashboardQueryWrapperUtils
         Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
             it?.type == Aggregation.NOT_APPLICABLE
         } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
-        return wrapper.getResult(requestHasOneNoneAggregation, diagramType, ignoreParameterLimit, paginationSettings)
+        return wrapper.getResult(requestHasOneNoneAggregation, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings)
     }
 
     /**
