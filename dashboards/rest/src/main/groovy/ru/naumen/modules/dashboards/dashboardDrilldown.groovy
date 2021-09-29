@@ -397,16 +397,14 @@ class Link
         }
         else
         {
-            def sourceMC = systemAttr?.type?.relatedMetaClass
             def attrFqn = systemAttr?.attributeFqn
-            if (sourceMC)
-            {
-                totalAttribute = api.metainfo.getMetaClass(sourceMC?.code).attributes.find { attr ->
-                    attr.type.code == AttributeType.BACK_BO_LINKS_TYPE &&
-                    beanFactory.getBean('flexHelper').getBackLinkRelatedAttribute(attr.@attribute).fqn == attrFqn
-                }
-                fqn = totalAttribute?.attributeFqn
+
+            totalAttribute = api.metainfo.getMetaClass(classFqn).attributes.find { attr ->
+                attr.type.code == AttributeType.BACK_BO_LINKS_TYPE &&
+                beanFactory.getBean('flexHelper').getBackLinkRelatedAttribute(attr.@attribute).fqn == attrFqn
             }
+            fqn = totalAttribute?.attributeFqn
+
         }
         return totalAttribute ? ['attribute': totalAttribute, 'fqn': fqn.toString()] : [:]
     }
