@@ -180,7 +180,6 @@ class DashboardDataSetService
         return cardObjectUUID
     }
 
-
     /**
      * Метод построения диаграмм.
      * @param dashboardKey - ключ дашборда
@@ -340,7 +339,7 @@ class DashboardDataSetService
             case DiagramType.RoundTypes:
                 return mappingRoundDiagram(res, countTotals)
             case DiagramType.CountTypes:
-                return mappingSummaryDiagram(res)
+                return mappingSummaryDiagram(res, diagramType, minValue, maxValue)
             case TABLE:
                 def (totalColumn, showRowNum) = [widgetSettings.calcTotalColumn,
                                                  widgetSettings.table.body.showRowNum]
@@ -380,6 +379,39 @@ class DashboardDataSetService
                 String message = messageProvider.getMessage(NOT_SUPPORTED_DIAGRAM_TYPE_ERROR, currentUserLocale, diagramType: diagramType)
                 return api.utils.throwReadableException("${message}#${NOT_SUPPORTED_DIAGRAM_TYPE_ERROR}")
         }
+    }
+
+    /**
+     * Метод получения данных о границах для спидометра
+     * @param widgetSettings - настройки виджета
+     * @param subjectUUID -  идентификатор карточки "текущего объекта"
+     * @param diagramType - тип диаграммы
+     * @param widgetFilters - фильтрация на виджете
+     * @param templateUUID - уникальный идентификатор шаблона динамического атрибута
+     * @param request - тело запроса
+     * @param fieldName - название поля для обработки
+     * @return данные о  границах для спидометра
+     */
+    private String getValueForBorder(SpeedometerCurrentAndNew widgetSettings,
+                                     String subjectUUID,
+                                     DiagramType diagramType,
+                                     Collection<WidgetFilterResponse> widgetFilters,
+                                     String templateUUID,
+                                     DiagramRequest request,
+                                     String fieldName)
+    {
+
+        MinMaxBorder field = widgetSettings.borders[fieldName]
+        if (!(field.isNumber))
+        {
+            def fieldAggregation = field.indicator
+            widgetSettings?.data?.find { !it.sourceForCompute }?.indicators = [fieldAggregation]
+
+            request =  mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
+            Double result = getDiagramData(request, diagramType, templateUUID).find().find().find() as Double ?: 0
+            return DECIMAL_FORMAT.format(result)
+        }
+        return field.value
     }
 
     /**
@@ -497,7 +529,7 @@ class DashboardDataSetService
                 type: Aggregation.COUNT_CNT, attribute: new Attribute(code: 'id', type: 'string')
             )
             tempData.value.aggregations = [aggregationParameter]
-            
+
         }
         request.data = [(tempData.key): tempData.value]
         return request
@@ -3643,9 +3675,12 @@ class DashboardDataSetService
     /**
      * Метод преобразования результата выборки к сводке
      * @param list - данные диаграмы
+     * @param diagramType - тип диаграммы
+     * @param minValue - минимальное значение
+     * @param maxValue - максимальное значение
      * @return SummaryDiagram
      */
-    private SummaryDiagram mappingSummaryDiagram(List list)
+    private SummaryDiagram mappingSummaryDiagram(List list, DiagramType diagramType, String minValue, String maxValue)
     {
         List<List> resultDataSet = list.head() as List<List>
         switch (resultDataSet.size())
@@ -3654,7 +3689,15 @@ class DashboardDataSetService
                 return new SummaryDiagram()
             case 1:
                 def (value, title) = resultDataSet.head()
-                return new SummaryDiagram(title: title, total: value)
+                if(diagramType == DiagramType.SPEEDOMETER)
+                {
+                    return new SpeedometerDiagram(title: title,
+                                                  total: value,
+                                                  min: minValue,
+                                                  max: maxValue)
+                }
+                return new SummaryDiagram(title: title,
+                                          total: value)
             default:
                 String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
                 api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
@@ -5368,6 +5411,24 @@ class SummaryDiagram
      * Значение атрибута с учетом выбранной агрегации
      */
     Object total
+}
+
+/**
+ * Модель данных для диаграммы SPEEDOMETER
+ */
+class SpeedometerDiagram extends SummaryDiagram
+{
+    /**
+     * Значение атрибута с учетом выбранной агрегации
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Object min
+
+    /**
+     * Значение атрибута с учетом выбранной агрегации
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Object max
 }
 
 /**
