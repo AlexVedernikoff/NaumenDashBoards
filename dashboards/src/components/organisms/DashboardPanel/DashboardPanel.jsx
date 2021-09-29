@@ -104,10 +104,11 @@ export class DashboardPanel extends PureComponent<Props, State> {
 			[styles.drawerControlLeft]: position === LEFT,
 			[styles.drawerControlRight]: position === RIGHT
 		});
+		const iconName = swiped ? ICON_NAMES.DRAWER_OPEN : ICON_NAMES.DRAWER_CLOSE;
 
 		return (
 			<div className={CN} onClick={this.handleToggle}>
-				<Icon className={styles.drawerIcon} name={ICON_NAMES.DRAWER} />
+				<Icon className={styles.drawerIcon} name={iconName} />
 			</div>
 		);
 	};
