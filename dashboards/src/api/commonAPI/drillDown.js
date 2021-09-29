@@ -13,7 +13,7 @@ export default class DrillDown implements DrillDownAPI {
 		return this.transport(
 			'dashboardDrilldown',
 			'getLink',
-			['requestContent', 'cardObjectUuid', 'diagramTypeFromRequest', 'dashboardKey'],
+			['requestContent', 'cardObjectUuid', 'diagramTypeFromRequest', 'dashboardKey', 'groupCode'],
 			{...payload, offsetUTCMinutes: -(new Date()).getTimezoneOffset()},
 			subjectUUID,
 			type,
