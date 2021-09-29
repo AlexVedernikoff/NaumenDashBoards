@@ -11,7 +11,6 @@
 package ru.naumen.modules.dashboards
 
 import groovy.transform.Field
-import groovy.transform.Immutable
 import groovy.transform.InheritConstructors
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
@@ -339,8 +338,8 @@ class DashboardsService
         if(!source)
         {
             def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
-            String message = messageProvider.getConstant(SOURCE_NOT_FOUND, currentUserLocale)
-            api.utils.throwReadableException("$message#${SOURCE_NOT_FOUND}")
+            String message = messageProvider.getConstant(SOURCE_NOT_FOUND_ERROR, currentUserLocale)
+            api.utils.throwReadableException("$message#${SOURCE_NOT_FOUND_ERROR}")
         }
         def userUUID = user?.UUID ?: dashboard?.userReports?.UUID
 
