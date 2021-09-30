@@ -78,6 +78,8 @@ export class NotSupportedSortingType extends ApiError {}
 
 export class NotUniqueWidgetName extends ApiError {}
 
+export class OverflowData extends ApiError {}
+
 export class PersonalDashboardNotFound extends ApiError {}
 
 export class PersonalSettingsDisabled extends ApiError {}

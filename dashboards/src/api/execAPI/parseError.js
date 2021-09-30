@@ -34,6 +34,7 @@ import {
 	NotSupportedGroupType,
 	NotSupportedSortingType,
 	NotUniqueWidgetName,
+	OverflowData,
 	PersonalDashboardNotFound,
 	PersonalSettingsDisabled,
 	RemoveFilterFailed,
@@ -126,6 +127,8 @@ export const parseError = (response: ExecErrorResponse): Error => {
 				return new NotSupportedSortingType(message);
 			case ERRORS.NOT_UNIQUE_WIDGET_NAME:
 				return new NotUniqueWidgetName(message);
+			case ERRORS.OVERFLOW_DATA:
+				return new OverflowData(message);
 			case ERRORS.PERSONAL_DASHBOARD_NOT_FOUND:
 				return new PersonalDashboardNotFound(message);
 			case ERRORS.PERSONAL_SETTINGS_DISABLED:

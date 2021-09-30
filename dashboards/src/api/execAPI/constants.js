@@ -67,6 +67,7 @@ const NOT_SUPPORTED_FILTER_CONDITION: 'notSupportedFilterCondition' = 'notSuppor
 const NOT_SUPPORTED_GROUP_TYPE: 'notSupportedGroupType' = 'notSupportedGroupType';
 const NOT_SUPPORTED_SORTING_TYPE: 'notSupportedSortingType' = 'notSupportedSortingType';
 const NOT_UNIQUE_WIDGET_NAME: 'notUniqueWidgetName' = 'notUniqueWidgetName';
+const OVERFLOW_DATA: 'overflowData' = 'overflowData';
 const PERSONAL_DASHBOARD_NOT_FOUND: 'personalDashboardNotFound' = 'personalDashboardNotFound';
 const PERSONAL_SETTINGS_DISABLED: 'personalSettingsDisabled' = 'personalSettingsDisabled';
 const REMOVE_FILTER_FAILED: 'removeFilterFailed' = 'removeFilterFailed';
@@ -118,6 +119,7 @@ export const ERRORS = {
 	NOT_UNIQUE_WIDGET_NAME,
 	NO_DATA_FOR_CONDITION,
 	NO_RIGHTS_TO_REMOVE_WIDGET,
+	OVERFLOW_DATA,
 	PERSONAL_DASHBOARD_NOT_FOUND,
 	PERSONAL_SETTINGS_DISABLED,
 	REMOVE_FILTER_FAILED,
