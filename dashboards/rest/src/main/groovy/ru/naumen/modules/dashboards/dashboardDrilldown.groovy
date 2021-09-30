@@ -107,7 +107,7 @@ class DashboardDrilldownService
 
         DashboardSettingsService dashboardSettingsService = DashboardSettingsService.instance
         DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
-        cardObjectUuid = DashboardDataSetService.instance.getCardObjectUUID(dbSettings, user)
+        cardObjectUuid = DashboardDataSetService.instance.getCardObjectUUID(dbSettings, user) ?: cardObjectUuid
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType, groupCode)
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
@@ -388,9 +388,9 @@ class Link
                         {
                             if (totalAttributeMap.attribute.type.code in AttributeType.LINK_SET_TYPES)
                             {
-                                value = [value]
+                                startValue = [startValue]
                             }
-                            return [filterBuilder.OR(totalAttributeMap.fqn, 'contains', value)]
+                            return [filterBuilder.OR(totalAttributeMap.fqn, 'contains', startValue)]
                         }
                     }?.inject(filterBuilder) { first, second -> first.AND(*second) }
                 }
