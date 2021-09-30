@@ -156,10 +156,16 @@ sprite.add(ICON_NAMES.DOWNLOAD, `
 	<path d="M2 7H4V12H12V7H14V14H2V7Z" />
 `);
 
-sprite.add(ICON_NAMES.DRAWER, `
+sprite.add(ICON_NAMES.DRAWER_OPEN, `
 	<path d="M9 1H7V15H9V1Z" />
 	<path d="M0 8L4 5V11L0 8Z" />
 	<path d="M16 8L12 5V11L16 8Z" />
+`);
+
+sprite.add(ICON_NAMES.DRAWER_CLOSE, `
+	<path d="M9 1H7V15H9V1Z" />
+	<path d="M5 8L1 11V5L5 8Z" />
+	<path d="M15 5L11 8L15 11V5Z" />
 `);
 
 sprite.add(ICON_NAMES.EDIT, `

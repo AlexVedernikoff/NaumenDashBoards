@@ -3,17 +3,18 @@
 :local {
 	.container {
 		bottom: 0;
-		box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
 		position: absolute;
 		top: 0;
 		user-select: none;
 		z-index: 1;
 
 		&.leftPosition {
+			box-shadow: 2px 2px 12px rgba(129, 146, 161, 0.2);
 			left: 0
 		}
 
 		&.rightPosition {
+			box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
 			right: 0;
 		}
 	}
@@ -29,47 +30,69 @@
 	}
 
 	.drawerControl {
-		background-color: @steel;
-		bottom: 0;
+		background-color: @white;
+		border-radius: 4px;
+		box-shadow: 0px 2px 8px rgba(95, 95, 95, 0.2);
 		cursor: pointer;
-		opacity: 0;
-		padding: 15px 0;
+		height: 20px;
+		padding: 3px 3px;
 		position: absolute;
-		top: 0;
+		top: 6px;
 		width: 20px;
 		z-index: 3;
 
 		&.drawerControlLeft {
-			left: 0px;
+			right: -36px;
 		}
 
 		&.drawerControlRight {
-			right: 0px;
+			left: -36px
+		}
+	}
+
+	.activeDrawerControl {
+		background-color: @steel;
+		bottom: 0;
+		height: auto;
+		padding: 15px 0;
+		top: 0;
+
+		&.drawerControlLeft {
+			left: auto;
+			right: -20px;
 		}
 
-		&:hover {
-			opacity: 100;
+		&.drawerControlRight {
+			left: -20px;
+			right: auto;
 		}
 
-		&.activeDrawerControl {
-			opacity: 100;
+		.drawerIcon {
+			color: @darkgrey;
+			stroke: @darkgrey;
 
-			&.drawerControlLeft {
-				left: auto;
-				right: -20px;
+			&:hover {
+				color: @black;
+				stroke: @black;
 			}
-
-			&.drawerControlRight {
-				left: -20px;
-				right: auto;
-			}
 		}
-
 	}
 
 
 	.drawerIcon {
+		color: @grey;
 		padding: 2px;
+		stroke: @grey;
+
+		&:hover {
+			color: @darkgrey;
+			stroke: @darkgrey;
+		}
+
+		&:active {
+			color: @black;
+			stroke: @black;
+		}
 	}
 
 	.fallback {
