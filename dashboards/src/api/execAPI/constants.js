@@ -53,6 +53,7 @@ const INVALID_SOURCE: 'invalidSource' = 'invalidSource';
 const LOGIN_MUST_NOT_BE_NULL: 'loginMustNotBeNull' = 'loginMustNotBeNull';
 const MUST_NOT_ADD_EDIT_WIDGET: 'mustNotAddEditWidget' = 'mustNotAddEditWidget';
 const NO_DATA_FOR_CONDITION: 'noDataForCondition' = 'noDataForCondition';
+const NO_DETAIL_DATA: 'noDetailData' = 'noDetailData';
 const NO_RIGHTS_TO_REMOVE_WIDGET: 'noRightsToRemoveWidget' = 'noRightsToRemoveWidget';
 const NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE: 'notSuitableAggregationAndAttributeType' = 'notSuitableAggregationAndAttributeType';
 const NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE: 'notSuitableGroupAndAttributeType' = 'notSuitableGroupAndAttributeType';
@@ -118,6 +119,7 @@ export const ERRORS = {
 	NOT_SUPPORTED_SORTING_TYPE,
 	NOT_UNIQUE_WIDGET_NAME,
 	NO_DATA_FOR_CONDITION,
+	NO_DETAIL_DATA,
 	NO_RIGHTS_TO_REMOVE_WIDGET,
 	OVERFLOW_DATA,
 	PERSONAL_DASHBOARD_NOT_FOUND,

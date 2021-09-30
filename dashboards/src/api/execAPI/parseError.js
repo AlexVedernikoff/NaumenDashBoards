@@ -20,6 +20,7 @@ import {
 	LoginMustNotBeNull,
 	MustNotAddEditWidget,
 	NoDataForCondition,
+	NoDetailData,
 	NoRightsToRemoveWidget,
 	NotSuitableAggregationAndAttributeType,
 	NotSuitableGroupAndAttributeType,
@@ -99,6 +100,8 @@ export const parseError = (response: ExecErrorResponse): Error => {
 				return new MustNotAddEditWidget(message);
 			case ERRORS.NO_DATA_FOR_CONDITION:
 				return new NoDataForCondition(message);
+			case ERRORS.NO_DETAIL_DATA:
+				return new NoDetailData(message);
 			case ERRORS.NO_RIGHTS_TO_REMOVE_WIDGET:
 				return new NoRightsToRemoveWidget(message);
 			case ERRORS.NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE:
