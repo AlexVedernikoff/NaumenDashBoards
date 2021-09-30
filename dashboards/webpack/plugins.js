@@ -10,10 +10,10 @@ const {IgnorePlugin} = require('webpack');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packagejson = require('../package.json');
-// const ParametersXMLWebpackPlugin = require('parameters-xml-webpack-plugin');
+const ParametersXMLWebpackPlugin = require('parameters-xml-webpack-plugin');
 
 const plugins = [
-	// new ParametersXMLWebpackPlugin({output: './dist/parameters.xml', path: 'metainfo.xml'}),
+	new ParametersXMLWebpackPlugin({output: './dist/parameters.xml', path: 'metainfo.xml'}),
 	// new BundleStatsWebpackPlugin({outDir: '..', silent: true}),
 	new IgnorePlugin(/^\.\/locale$/, /moment$/),
 	new MiniCssExtractPlugin({
