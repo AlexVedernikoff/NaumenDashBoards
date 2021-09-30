@@ -105,13 +105,14 @@ class DashboardDrilldownService
         } ?: []
         requestContent.cases += attrCases
 
+        DashboardSettingsService dashboardSettingsService = DashboardSettingsService.instance
+        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
+        cardObjectUuid = DashboardDataSetService.instance.getCardObjectUUID(dbSettings, user)
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType, groupCode)
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
         if(anyFiltersWithCustomGroupKey)
         {
-            DashboardSettingsService dashboardSettingsService = DashboardSettingsService.instance
-            DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
             link.filters.each {
                 if(it?.group?.way == Way.CUSTOM)
                 {
@@ -337,40 +338,62 @@ class Link
                     }
                 }
             }.inject(filterBuilder) { first, second -> first.AND(*second) }
-
-            if(iDescriptor?.content?.getProperties()?.keySet()?.any {it.toString() == 'attrsChain'})
-            {
-                String value = iDescriptor.clientSettings.formObjectUuid
-                iDescriptor?.content?.attrsChain?.findResults { descriptorAttr ->
-                    return [getFilterForAttrChain(descriptorAttr, value, filterBuilder)]
-                }?.inject(filterBuilder) { first, second -> first.AND(*second) }
-            }
+            filterBuilder = addChainFilters(iDescriptor, filterBuilder)
         }
     }
 
     /**
-     * Метод получения фильтра по атрибуту из цепочки связанных атрибутов
-     * @param descriptorAttr - атрибут из цепочки связанных атрибутов (обозначен в дескрипторе)
-     * @param value - значение для подстановки
-     * @param filterBuilder - текущий filterBuilder (список фильтров)
-     * @return измененный filterBuilder (список фильтров)
+     * Метод формирования фильтров на цепочку атрибутов
+     * @param iDescriptor - настройки дескриптора
+     * @param filterBuilder - текущие настройки фильтрации
+     * @return измененные настройки фильтрации
      */
-    private def getFilterForAttrChain(IAttrReference descriptorAttr, def value, def filterBuilder)
+    private def addChainFilters(def iDescriptor, def filterBuilder)
     {
-        if(descriptorAttr)
+        if(iDescriptor?.content?.getProperties()?.keySet()?.any {it.toString() == 'attrsChain'})
         {
-            def attrCode = descriptorAttr.attrCode
-            def clazz = descriptorAttr.classFqn
-            def systemAttr = api.metainfo.getMetaClass(clazz).getAttribute(attrCode)
-            def totalAttributeMap = getAttributeForAttrChain(systemAttr)
+            def startValue = api.utils.get(iDescriptor.clientSettings.formObjectUuid)
+            def descriptorAttrs = iDescriptor?.content?.attrsChain
+            def attrsForChain = iDescriptor?.content?.attrsChain?.findResults { descriptorAttr ->
+                def attrCode = descriptorAttr.attrCode
+                def clazz = descriptorAttr.classFqn
+                def systemAttr = api.metainfo.getMetaClass(clazz).getAttribute(attrCode)
+                return getAttributeForAttrChain(systemAttr)
+            }
 
-            if (totalAttributeMap)
+            if(descriptorAttrs.size() == attrsForChain.size())
             {
-                if (totalAttributeMap.attribute.type.code in AttributeType.LINK_SET_TYPES)
+                def dataAttrs = attrsForChain.findAll {it.attrForData}
+                def baseAttrs = attrsForChain.findAll { it.attrForData == null }
+                if(dataAttrs)
                 {
-                    value = [value]
+                    List values = getDataForAttrs(dataAttrs, startValue)
+
+                    def filters = values.collectMany { value ->
+                        return baseAttrs.findResults { totalAttributeMap ->
+                            if (totalAttributeMap.attribute.type.code in AttributeType.LINK_SET_TYPES)
+                            {
+                                value = [value]
+                            }
+                            return filterBuilder.OR(totalAttributeMap.fqn, 'contains', value)
+                        } ?: []
+                    }
+
+                    filterBuilder.AND(*filters)
                 }
-                return filterBuilder.OR(totalAttributeMap.fqn, 'contains', value)
+                else
+                {
+                    baseAttrs.findResults { totalAttributeMap ->
+                        if (totalAttributeMap)
+                        {
+                            if (totalAttributeMap.attribute.type.code in AttributeType.LINK_SET_TYPES)
+                            {
+                                value = [value]
+                            }
+                            return [filterBuilder.OR(totalAttributeMap.fqn, 'contains', value)]
+                        }
+                    }?.inject(filterBuilder) { first, second -> first.AND(*second) }
+                }
             }
             else
             {
@@ -378,12 +401,26 @@ class Link
                 api.utils.throwReadableException("${message}#${NO_DETAIL_DATA_ERROR}")
             }
         }
+        return filterBuilder
     }
 
     /**
-     * Метод получения связанного атрибута
+     * Получение данных для фильтра
+     * @param dataAttrs - атрибуты для получения данных
+     * @param value - значение, к которому может быть применен атрибут
+     * @return данные по атрибуту
+     */
+    private List getDataForAttrs(List dataAttrs, def value)
+    {
+        return dataAttrs.collect {
+            return value[it.attrForData.code]
+        }.flatten().unique()
+    }
+
+    /**
+     * Получение словаря с атрибутом для фильтрации в списке связанных объектов
      * @param systemAttr - системный атрибут
-     * @return атрибут, связанный с системным в текущем классе
+     * @return словарь с атрибутом для фильтрации в списке связанных объектов
      */
     private Map getAttributeForAttrChain(def systemAttr)
     {
@@ -397,16 +434,19 @@ class Link
         }
         else
         {
+            def sourceMC = systemAttr?.type?.relatedMetaClass
             def attrFqn = systemAttr?.attributeFqn
-
-            totalAttribute = api.metainfo.getMetaClass(classFqn).attributes.find { attr ->
-                attr.type.code == AttributeType.BACK_BO_LINKS_TYPE &&
-                beanFactory.getBean('flexHelper').getBackLinkRelatedAttribute(attr.@attribute).fqn == attrFqn
+            if (sourceMC)
+            {
+                totalAttribute = api.metainfo.getMetaClass(sourceMC?.code).attributes.find { attr ->
+                    attr.type.code == AttributeType.BACK_BO_LINKS_TYPE &&
+                    beanFactory.getBean('flexHelper').getBackLinkRelatedAttribute(attr.@attribute).fqn == attrFqn
+                }
             }
-            fqn = totalAttribute?.attributeFqn
-
         }
-        return totalAttribute ? ['attribute': totalAttribute, 'fqn': fqn.toString()] : [:]
+        return totalAttribute ? ['attribute': totalAttribute,
+                                 'fqn': fqn.toString(),
+                                 'attrForData': systemAttr.type.code != AttributeType.BACK_BO_LINKS_TYPE ? systemAttr : null] : [:]
     }
 
     /**
