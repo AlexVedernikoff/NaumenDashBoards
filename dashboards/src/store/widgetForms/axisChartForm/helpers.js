@@ -44,6 +44,7 @@ const changeValuesByCircleChart = (state: State, values: CircleValues): State =>
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		sorting,
 		templateName
 	} = values;
@@ -70,6 +71,7 @@ const changeValuesByCircleChart = (state: State, values: CircleValues): State =>
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		sorting,
 		templateName
 	};
@@ -92,6 +94,7 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		sorting,
 		templateName
 	} = values;
@@ -111,6 +114,7 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		sorting,
 		templateName
 	};
@@ -163,6 +167,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		header,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	} = values;
 
@@ -181,6 +186,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		header,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	};
 };

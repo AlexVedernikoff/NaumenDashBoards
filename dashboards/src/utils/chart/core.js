@@ -1,7 +1,7 @@
 // @flow
+import {ANNOTATION_POINT, CHART_TYPES, DATA_LABELS_TEXT_ANCHOR, LOCALES} from './constants';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, WidgetType} from 'store/widgets/data/types';
-import {CHART_TYPES, DATA_LABELS_TEXT_ANCHOR, LOCALES} from './constants';
 import type {DataLabelsTextAnchor, Options, Series} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDownBySelection} from './methods';
@@ -65,6 +65,27 @@ const getDataLabelsOptions = (settings: DataLabels, data: DiagramBuildData) => {
 	}
 
 	return options;
+};
+
+/**
+ * Формирует аннотации для диаграмм с накоплениями, которые содержат промежуточные итоги по столбцам
+ * @param {DiagramBuildData} data - данные графика
+ * @returns {Options} - блок аннотаций для объекта конфигурации построения графика
+ */
+const getAnnotationsOptions = (data: DiagramBuildData): Options => {
+	const {labels = [], series} = data;
+	const points = labels.map((label, labelIndex) => {
+		let value = 0;
+
+		series.forEach(({data = []}) => { value += parseFloat(data[labelIndex] ?? 0); });
+		return extend(ANNOTATION_POINT, {
+			label: {text: value},
+			x: label,
+			y: value
+		});
+	});
+
+	return {points};
 };
 
 /**
@@ -150,8 +171,10 @@ const getOptions = (
 	const dataLabels = widgetType === WIDGET_TYPES.BAR
 		? getBarDataLabelsOptions(widgetDataLabels, data)
 		: getDataLabelsOptions(widgetDataLabels, data);
+	const annotations = widget.showSubTotalAmount && (widgetType === WIDGET_TYPES.COLUMN_STACKED) ? getAnnotationsOptions(data) : {};
 
 	let options: Options = {
+		annotations,
 		chart: {
 			animations: {
 				enabled: false

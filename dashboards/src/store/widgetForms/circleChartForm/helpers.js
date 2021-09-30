@@ -43,6 +43,7 @@ const changeValuesByAxisOrComboChart = (state: State, values: AxisValues | Combo
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	} = values;
 
@@ -70,6 +71,7 @@ const changeValuesByAxisOrComboChart = (state: State, values: AxisValues | Combo
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	};
 };

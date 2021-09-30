@@ -22,6 +22,7 @@ export const initialState: State = {
 	legend: DEFAULT_CHART_SETTINGS.legend,
 	name: '',
 	navigation: DEFAULT_NAVIGATION_SETTINGS,
+	showTotalAmount: false,
 	sorting: DEFAULT_AXIS_SORTING_SETTINGS,
 	templateName: ''
 };

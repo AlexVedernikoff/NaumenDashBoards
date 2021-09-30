@@ -28,14 +28,14 @@ export class OuterSelect extends PureComponent<Props> {
 	};
 
 	renderOption = (option: Option) => {
-		let {icon, tip, value} = option;
+		const {icon, tip, value} = option;
 
 		return (
 			<div className={styles.optionContainer} key={value} title={tip}>
-					<div className={styles.option} data-value={value} onClick={this.handleClick}>
-						<Icon height={24} name={icon} viewBox="0 0 24 24" width={24} />
-						{this.renderCheckedIcon(value)}
-					</div>
+				<div className={styles.option} data-value={value} onClick={this.handleClick}>
+					<Icon height={24} name={icon} viewBox="0 0 24 24" width={24} />
+					{this.renderCheckedIcon(value)}
+				</div>
 			</div>
 		);
 	};

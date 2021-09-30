@@ -16,6 +16,7 @@ import type {Parameter} from 'store/widgetForms/types';
 import ParametersDataBox from 'WidgetFormPanel/components/ParametersDataBox';
 import type {Props} from './types';
 import React, {createContext, Fragment, PureComponent} from 'react';
+import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
 import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
@@ -137,7 +138,7 @@ export class ParamsTab extends PureComponent<Props> {
 			};
 
 			return (
-				<DATA_SET_TYPE_CONTEXT.Provider value={context}>
+				<DATA_SET_TYPE_CONTEXT.Provider key={`DataSetSettings_${dataSet.dataKey}`} value={context}>
 					<DataSetSettings
 						components={this.getDataSetSettingsComponents()}
 						index={index}
@@ -145,6 +146,7 @@ export class ParamsTab extends PureComponent<Props> {
 						requiredBreakdown={requiredBreakdown}
 						usesBlankData={usesBlankData}
 						usesEmptyData={usesEmptyData}
+						usesTotalAmount={true}
 						value={dataSet}
 					/>
 				</DATA_SET_TYPE_CONTEXT.Provider>
@@ -163,6 +165,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderSourceFieldset = (dataSet: DataSet, index: number, data: Array<DataSet>) => (
 		<SourceFieldset
 			index={index}
+			key={`SourceFieldset_${dataSet.dataKey}`}
 			onChange={this.handleChangeDataSet}
 			onRemove={this.handleRemoveDataSet}
 			removable={data.length > 1}
@@ -172,7 +175,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 	render () {
 		const {onChange, values} = this.props;
-		const {data, displayMode, navigation} = values;
+		const {data, displayMode, navigation, showTotalAmount} = values;
 
 		return (
 			<Fragment>
@@ -181,6 +184,7 @@ export class ParamsTab extends PureComponent<Props> {
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
 				<ParametersDataBox onChange={this.handleChangeData} onChangeParameters={this.handleChangeParameters} value={data} />
 				{data.map(this.renderDataSetSettings)}
+				<ShowTotalAmountBox onChange={onChange} showTotalAmount={showTotalAmount} />
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>

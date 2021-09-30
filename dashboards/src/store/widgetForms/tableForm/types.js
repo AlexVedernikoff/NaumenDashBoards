@@ -29,6 +29,7 @@ export type Values = $Exact<{
 	navigation: NavigationSettings,
 	showBlankData: boolean,
 	showEmptyData: boolean,
+	showTotalAmount: boolean,
 	sorting: TableSorting,
 	table: Table,
 	templateName: string,

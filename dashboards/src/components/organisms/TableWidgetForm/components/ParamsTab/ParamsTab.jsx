@@ -20,6 +20,7 @@ import NavigationBox from 'containers/NavigationBox';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {createContext, Fragment, PureComponent} from 'react';
+import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
 import styles from './styles.less';
 import Toggle from 'components/atoms/Toggle';
 import uuid from 'tiny-uuid';
@@ -83,7 +84,7 @@ export class ParamsTab extends PureComponent<Props> {
 		data.length > 1 && onChange(DIAGRAM_FIELDS.data, data.filter((dataSet, i) => i !== index));
 	};
 
-	handleToggleShowBlankData = (event: OnChangeEvent<boolean>) => {
+	handleToggleChange = (event: OnChangeEvent<boolean>) => {
 		const {onChange} = this.props;
 		const {name, value} = event;
 
@@ -123,7 +124,7 @@ export class ParamsTab extends PureComponent<Props> {
 				disabled={hasDifferentAggregations(values.data)}
 				getUsedDataKeys={this.getUsedDataKeys}
 				index={this.mainIndex}
-				indicator={indicators[0]}
+				indicator={indicators?.[0]}
 				onChange={this.setBreakdown}
 				onRemove={this.removeBreakdown}
 				removable={true}
@@ -182,7 +183,7 @@ export class ParamsTab extends PureComponent<Props> {
 					<Toggle
 						checked={showBlankData}
 						name={DIAGRAM_FIELDS.showBlankData}
-						onChange={this.handleToggleShowBlankData}
+						onChange={this.handleToggleChange}
 						value={showBlankData}
 					/>
 				</FormControl>
@@ -212,7 +213,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 	render () {
 		const {onChange, values} = this.props;
-		const {data, displayMode, navigation} = values;
+		const {data, displayMode, navigation, showTotalAmount} = values;
 
 		return (
 			<Fragment>
@@ -222,6 +223,7 @@ export class ParamsTab extends PureComponent<Props> {
 				{this.renderBreakdownFieldSet()}
 				{this.renderShowEmptyDataCheckbox()}
 				{this.renderDataTopField()}
+				<ShowTotalAmountBox onChange={onChange} showTotalAmount={showTotalAmount} />
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>

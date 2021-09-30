@@ -112,7 +112,22 @@ const DATA_LABELS_TEXT_ANCHOR = {
 	START
 };
 
+const ANNOTATION_POINT = {
+	label: {
+		borderWidth: 0,
+		offsetY: 0,
+		style: {
+			backgroud: 'transparent'
+		},
+		textAnchor: 'middle'
+	},
+	marker: {
+		size: 0
+	}
+};
+
 export {
+	ANNOTATION_POINT,
 	AXIS_FONT_SIZE,
 	CHART_TYPES,
 	DATA_LABELS_TEXT_ANCHOR,

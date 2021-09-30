@@ -35,6 +35,8 @@ export type Values = $Exact<{
 	name: string,
 	navigation: NavigationSettings,
 	parameter: AxisSettings,
+	showSubTotalAmount: boolean,
+	showTotalAmount: boolean,
 	sorting: ChartSorting,
 	templateName: string
 }>;

@@ -31,6 +31,7 @@ export type Values = $Exact<{
 	legend: Legend,
 	name: string,
 	navigation: NavigationSettings,
+	showTotalAmount: boolean,
 	sorting: ChartSorting,
 	templateName: string
 }>;

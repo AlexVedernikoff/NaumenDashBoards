@@ -2,12 +2,14 @@
 import ChartDataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
 import {createCircleDataSet} from 'store/widgetForms/circleChartForm/helpers';
 import type {DataSet} from 'store/widgetForms/circleChartForm/types';
+import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox';
 import {GROUP_WAYS} from 'src/store/widgets/constants';
 import NavigationBox from 'containers/NavigationBox';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
 import {SORTING_VALUES} from 'src/store/widgets/data/constants';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
@@ -42,6 +44,10 @@ export class ParamsTab extends PureComponent<Props> {
 			if (dataSet.sourceForCompute) {
 				dataSet.indicators = [];
 				dataSet.breakdown = [];
+			}
+
+			if (!dataSet.sourceForCompute && (!dataSet.indicators || dataSet.indicators.length === 0)) {
+				dataSet.indicators = [DEFAULT_INDICATOR];
 			}
 		});
 
@@ -90,7 +96,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 	render () {
 		const {onChange, values} = this.props;
-		const {data, displayMode, navigation} = values;
+		const {data, displayMode, navigation, showTotalAmount} = values;
 
 		return (
 			<Fragment>
@@ -98,6 +104,7 @@ export class ParamsTab extends PureComponent<Props> {
 				<WidgetSelectBox />
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
 				{data.map(this.renderIndicatorBox)}
+				<ShowTotalAmountBox onChange={onChange} showTotalAmount={showTotalAmount} />
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>

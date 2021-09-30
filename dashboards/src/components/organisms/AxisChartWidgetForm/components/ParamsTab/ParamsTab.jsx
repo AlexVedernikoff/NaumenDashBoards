@@ -1,10 +1,11 @@
 // @flow
 import type {Breakdown, Parameter} from 'store/widgetForms/types';
 import type {BreakdownFieldsetProps, Components} from 'WidgetFormPanel/components/ChartDataSetSettings/types';
+import ChartDataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
 import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet} from 'store/widgetForms/axisChartForm/types';
-import DataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
 import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import DefaultComponents from 'WidgetFormPanel/components/ChartDataSetSettings/defaultComponents';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox/DisplayModeSelectBox';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
@@ -16,6 +17,7 @@ import NavigationBox from 'containers/NavigationBox/NavigationBox';
 import type {OnChangeBreakdown, Props} from './types';
 import ParametersDataBox from 'WidgetFormPanel/components/ParametersDataBox';
 import React, {Fragment, PureComponent} from 'react';
+import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
 import uuid from 'tiny-uuid';
@@ -25,7 +27,7 @@ import withType from 'WidgetFormPanel/HOCs/withType';
 
 export class ParamsTab extends PureComponent<Props> {
 	getDataSetSettingsComponents = memoize((): Components => ({
-		...DataSetSettings.defaultProps.components,
+		...DefaultComponents,
 		BreakdownFieldset: this.renderBreakdownFieldset
 	}));
 
@@ -95,7 +97,7 @@ export class ParamsTab extends PureComponent<Props> {
 	};
 
 	renderBreakdownFieldset = (props: BreakdownFieldsetProps) => (
-		<DataSetSettings.defaultProps.components.BreakdownFieldset
+		<DefaultComponents.BreakdownFieldset
 			{...props}
 			onChange={this.breakdownChangeDecorator(props.onChange)}
 		/>
@@ -110,7 +112,7 @@ export class ParamsTab extends PureComponent<Props> {
 			const hasCustomGroup = this.hasCustomGroup();
 
 			return (
-				<DataSetSettings
+				<ChartDataSetSettings
 					components={this.getDataSetSettingsComponents()}
 					index={index}
 					key={dataSet.dataKey}
@@ -138,8 +140,9 @@ export class ParamsTab extends PureComponent<Props> {
 	);
 
 	render () {
-		const {onChange, values} = this.props;
-		const {data, displayMode, navigation} = values;
+		const {onChange, type, values} = this.props;
+		const {data, displayMode, navigation, showSubTotalAmount, showTotalAmount} = values;
+		const subTotalAmountView = type.value === WIDGET_TYPES.COLUMN_STACKED;
 
 		return (
 			<Fragment>
@@ -148,6 +151,12 @@ export class ParamsTab extends PureComponent<Props> {
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
 				<ParametersDataBox onChange={this.handleChangeData} onChangeParameters={this.handleChangeParameters} value={data} />
 				{data.map(this.renderDataSetSettings)}
+				<ShowTotalAmountBox
+					onChange={onChange}
+					showSubTotalAmount={showSubTotalAmount}
+					showTotalAmount={showTotalAmount}
+					subTotalAmountView={subTotalAmountView}
+				/>
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>

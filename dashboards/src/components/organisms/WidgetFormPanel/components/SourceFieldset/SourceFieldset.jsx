@@ -1,11 +1,12 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import Checkbox from 'components/atoms/LegacyCheckbox';
+import Checkbox from 'components/atoms/Checkbox';
 import type {ContainerProps} from 'components/molecules/TreeSelect/types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import FieldError from 'src/components/atoms/FieldError';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import {getDefaultBreakdown, parseAttrSetConditions} from 'store/widgetForms/helpers';
@@ -15,7 +16,7 @@ import IconButton from 'components/atoms/IconButton';
 import LabelEditingForm from 'components/molecules/InputForm';
 import memoize from 'memoize-one';
 import {MODE} from './constraints';
-import type {OnSelectEvent, Ref} from 'components/types';
+import type {OnChangeEvent, OnSelectEvent, Ref} from 'components/types';
 import type {Props, State} from './types';
 import React, {Component, createRef} from 'react';
 import SavedFilters from 'WidgetFormPanel/components/SavedFilters';
@@ -96,12 +97,12 @@ export class SourceFieldset extends Component<Props, State> {
 		LabelContainer: this.renderSourceSelectLabel
 	}));
 
-	handleChangeCompute = (name: string, sourceForCompute: boolean) => {
+	handleChangeCompute = ({name, value: sourceForCompute}: OnChangeEvent<boolean>) => {
 		const {index, onChange, value} = this.props;
 
 		onChange(index, {
 			...value,
-			sourceForCompute
+			sourceForCompute: !sourceForCompute
 		});
 	};
 
@@ -305,12 +306,14 @@ export class SourceFieldset extends Component<Props, State> {
 		const {sourceForCompute} = value;
 
 		return (
-			<Checkbox
-				className={styles.sourceForCompute}
-				label="Только для вычислений"
-				onClick={this.handleChangeCompute}
-				value={sourceForCompute}
-			/>
+			<FormControl label="Только для вычислений">
+				<Checkbox
+					checked={sourceForCompute}
+					className={styles.sourceForCompute}
+					onChange={this.handleChangeCompute}
+					value={sourceForCompute}
+				/>
+			</FormControl>
 		);
 	};
 

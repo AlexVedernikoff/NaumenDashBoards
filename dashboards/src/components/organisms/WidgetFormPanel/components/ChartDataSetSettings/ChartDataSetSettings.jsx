@@ -1,26 +1,24 @@
 // @flow
 import type {Breakdown, Indicator} from 'store/widgetForms/types';
-import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
-import Checkbox from 'components/atoms/LegacyCheckbox';
+import Checkbox from 'components/atoms/Checkbox';
 import DataTopField from 'WidgetFormPanel/components/DataTopField';
 import type {DataTopSettings} from 'store/widgets/data/types';
+import DefaultComponents from './defaultComponents';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import FormBox from 'components/molecules/FormBox';
 import type {FormBoxProps} from 'WidgetFormPanel/components/IndicatorsBox/types';
+import FormControl from 'components/molecules/FormControl';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import IndicatorDataBox from 'WidgetFormPanel/components/IndicatorsBox';
 import {isAllowedTopAggregation} from 'store/widgets/helpers';
+import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
 export class ChartDataSetSettings extends PureComponent<Props> {
 	static defaultProps = {
-		components: {
-			BreakdownFieldset,
-			IndicatorsFormBox: FormBox
-		}
+		components: DefaultComponents
 	};
 
 	handleChangeBreakdown = (breakdown: Breakdown) => {
@@ -29,10 +27,9 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		onChange(index, {...value, breakdown});
 	};
 
-	handleChangeCheckbox = (name: string, value: boolean) => {
+	handleChangeCheckbox = ({name, value}: OnChangeEvent<boolean>) => {
 		const {index, onChange, value: dataSet} = this.props;
-
-		onChange(index, {...dataSet, [name]: value});
+		return onChange(index, {...dataSet, [name]: !value});
 	};
 
 	handleChangeIndicators = (index: number, newIndicators: Array<Indicator>) => {
@@ -88,6 +85,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 	renderDataTopField = () => {
 		const {index, value} = this.props;
 		const {indicators, top} = value;
+
 		const disabled = !isAllowedTopAggregation(indicators[0].aggregation);
 
 		return (
@@ -133,13 +131,17 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 
 		if (usesBlankData) {
 			return (
-				<Checkbox
-					className={styles.checkbox}
-					label="Показывать незаполненные данные"
-					name={DIAGRAM_FIELDS.showBlankData}
-					onClick={this.handleChangeCheckbox}
-					value={showBlankData}
-				/>
+				<FormField>
+					<FormControl label="Показывать незаполненные данные">
+						<Checkbox
+							checked={showBlankData}
+							className={styles.checkbox}
+							name={DIAGRAM_FIELDS.showBlankData}
+							onChange={this.handleChangeCheckbox}
+							value={showBlankData}
+						/>
+					</FormControl>
+				</FormField>
 			);
 		}
 
@@ -152,13 +154,17 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 
 		if (usesEmptyData) {
 			return (
-				<Checkbox
-					className={styles.checkbox}
-					label="Показывать нулевые значения"
-					name={DIAGRAM_FIELDS.showEmptyData}
-					onClick={this.handleChangeCheckbox}
-					value={showEmptyData}
-				/>
+				<FormField>
+					<FormControl label="Показывать нулевые значения">
+						<Checkbox
+							checked={showEmptyData}
+							className={styles.checkbox}
+							name={DIAGRAM_FIELDS.showEmptyData}
+							onChange={this.handleChangeCheckbox}
+							value={showEmptyData}
+						/>
+					</FormControl>
+				</FormField>
 			);
 		}
 
@@ -169,6 +175,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		return (
 			<Fragment>
 				{this.renderIndicatorsBox()}
+				{this.renderShowEmptyDataCheckbox()}
 				{this.renderShowEmptyDataCheckbox()}
 				{this.renderShowBlankDataCheckbox()}
 			</Fragment>

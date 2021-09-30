@@ -167,6 +167,8 @@ type BaseWidget = {|
 	id: string,
 	name: string,
 	navigation: NavigationSettings,
+	showSubTotalAmount: boolean,
+	showTotalAmount: boolean,
 	templateName: string,
 	warningMessage?: string
 |};

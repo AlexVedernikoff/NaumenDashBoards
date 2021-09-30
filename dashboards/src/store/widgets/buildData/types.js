@@ -59,6 +59,7 @@ export type Row = {
 
 export type TableBuildData = {
 	columns: Array<Column>,
+	countTotals: number,
 	data: Array<Row>,
 	limitsExceeded: {
 		breakdown: boolean,

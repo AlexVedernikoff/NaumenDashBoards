@@ -24,6 +24,8 @@ export const initialState: State = {
 	name: '',
 	navigation: DEFAULT_NAVIGATION_SETTINGS,
 	parameter: DEFAULT_CHART_SETTINGS.axis,
+	showSubTotalAmount: false,
+	showTotalAmount: false,
 	sorting: DEFAULT_AXIS_SORTING_SETTINGS,
 	templateName: ''
 };

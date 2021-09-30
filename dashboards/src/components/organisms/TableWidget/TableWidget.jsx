@@ -384,12 +384,13 @@ export class TableWidget extends PureComponent<Props, State> {
 		const {data: tableData, loading, widget} = this.props;
 		const {fixedColumnsCount} = this.state;
 		const {columns, data, total} = tableData;
-		const {columnsRatioWidth, sorting, table} = widget;
+		const {columnsRatioWidth, showTotalAmount, sorting, table} = widget;
 		const {pageSize} = table.body;
 		const components = {
 			BodyCell: this.renderBodyCell,
 			HeaderCell: this.renderHeaderCell
 		};
+		const countTotals = showTotalAmount ? tableData.countTotals : null;
 
 		return (
 			<Table
@@ -397,6 +398,7 @@ export class TableWidget extends PureComponent<Props, State> {
 				columns={columns}
 				columnsRatioWidth={columnsRatioWidth}
 				components={components}
+				countTotals={countTotals}
 				data={data}
 				fixedColumnsCount={fixedColumnsCount}
 				getNewColumnsWidth={this.getNewColumnsWidth}

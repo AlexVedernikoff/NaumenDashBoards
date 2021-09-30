@@ -8,6 +8,7 @@ import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
+import {WIDGET_SETS} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
 	chart = null;
@@ -65,10 +66,37 @@ export class Chart extends PureComponent<Props> {
 		return options && this.chart && this.chart.updateOptions(options);
 	};
 
+	renderTotal = () => {
+		const {data, widget} = this.props;
+		const {dataLabels, showTotalAmount} = widget;
+		const {fontFamily, fontSize} = dataLabels;
+
+		if (showTotalAmount) {
+			const style = {fontFamily, fontSize, height: fontSize};
+
+			const {countTotals = 0} = data;
+			return (
+				<div className={styles.total} style={style}>
+					Итого: {countTotals}
+				</div>
+			);
+		}
+	};
+
 	render () {
+		const {widget} = this.props;
+		const className = cn({
+			[styles.chart]: true,
+			[styles.circleChart]: widget.type in WIDGET_SETS.CIRCLE
+		});
 		return (
 			<ResizeDetector onResize={this.handleResize} skipOnMount={true}>
-				<div className={this.getClassname()} ref={this.containerRef} />
+				<div className={className}>
+					<div className={this.getClassname()} >
+						<div ref={this.containerRef} />
+					</div>
+					{this.renderTotal()}
+				</div>
 			</ResizeDetector>
 		);
 	}

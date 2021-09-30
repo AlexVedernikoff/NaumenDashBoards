@@ -39,6 +39,7 @@ const changeValuesByAxisChart = (state: State, values: AxisChartValues): State =
 		name,
 		navigation,
 		parameter,
+		showTotalAmount,
 		sorting,
 		templateName
 	} = values;
@@ -59,6 +60,7 @@ const changeValuesByAxisChart = (state: State, values: AxisChartValues): State =
 		name,
 		navigation,
 		parameter: omit(parameter, 'format'),
+		showTotalAmount,
 		sorting,
 		templateName
 	};
@@ -81,6 +83,7 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	} = values;
 
@@ -99,6 +102,7 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		legend,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	};
 };
@@ -150,6 +154,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		header,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	} = values;
 
@@ -168,6 +173,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		header,
 		name,
 		navigation,
+		showTotalAmount,
 		templateName
 	};
 };

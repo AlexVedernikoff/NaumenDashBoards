@@ -23,5 +23,6 @@ export type Props = {
 	onRemove: (index: number) => void,
 	parentClassFqn: string,
 	sources: DataSourceMap,
+	usesTotalAmount: boolean,
 	value: DataSet
 };

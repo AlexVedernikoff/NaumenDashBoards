@@ -18,6 +18,7 @@ import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 import {sumColumnsWidth} from './helpers';
 import type {TableSorting} from 'store/widgets/data/types';
+import Total from './components/Total';
 
 export class Table extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -38,11 +39,13 @@ export class Table extends PureComponent<Props, State> {
 		FooterCell: Cell,
 		HeaderCell,
 		Row,
+		TotalCell: Cell,
 		Value: this.renderValue
 	};
 	tableRef: Ref<'div'> = createRef();
 	headerRef: Ref<'div'> = createRef();
 	footerRef: Ref<'div'> = createRef();
+	totalRef: Ref<'div'> = createRef();
 
 	state = {
 		columnsWidth: {},
@@ -207,14 +210,13 @@ export class Table extends PureComponent<Props, State> {
 		const {scrollLeft} = e.currentTarget;
 		const {current: header} = this.headerRef;
 		const {current: footer} = this.footerRef;
+		const {current: total} = this.totalRef;
 
-		if (header) {
-			header.scrollLeft = scrollLeft;
-		}
-
-		if (footer) {
-			footer.scrollLeft = scrollLeft;
-		}
+		[header, footer, total].forEach(element => {
+			if (element) {
+				element.scrollLeft = scrollLeft;
+			}
+		});
 	};
 
 	handleChangeColumnWidth = (columnWidth: number, column: Column) => {
@@ -377,7 +379,30 @@ export class Table extends PureComponent<Props, State> {
 					{this.renderHeader()}
 					{this.renderBody()}
 					{this.renderFooter()}
+					{this.renderTotal()}
 				</div>
+			);
+		}
+
+		return null;
+	};
+
+	renderTotal = () => {
+		const {countTotals} = this.props;
+		const {columnsWidth, components, dataColumns, fixedPositions, scrollBarWidth, width} = this.state;
+
+		if (countTotals) {
+			return (
+				<Total
+					columns={dataColumns}
+					columnsWidth={columnsWidth}
+					components={components}
+					countTotals={countTotals}
+					fixedPositions={fixedPositions}
+					forwardedRef={this.totalRef}
+					scrollBarWidth={scrollBarWidth}
+					width={width}
+				/>
 			);
 		}
 

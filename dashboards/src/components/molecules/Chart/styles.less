@@ -1,8 +1,35 @@
 @import '/styles/variables';
 
 :local {
-	.container {
+	.chart {
+		display: flex;
+		flex-direction: column;
 		height: 100%;
+
+		&.circleChart {
+			position: relative;
+
+			.container {
+				height: 100%;
+			}
+
+			.total {
+				bottom: 0;
+				flex: auto;
+				left: 0;
+				position: absolute;
+			}
+		}
+	}
+
+	.container {
+		flex: 1 1 auto;
+	}
+
+	.total {
+		flex: 0 0 auto;
+		font-weight: bold;
+		margin: 6px 0 0 0;
 	}
 
 	.blockLegend :global(.apexcharts-legend) {

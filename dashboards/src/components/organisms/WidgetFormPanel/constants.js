@@ -68,6 +68,8 @@ const showDependent = 'showDependent';
 const showEmptyData = 'showEmptyData';
 const showName = 'showName';
 const showShadow = 'showShadow';
+const showSubTotalAmount = 'showSubTotalAmount';
+const showTotalAmount = 'showTotalAmount';
 const sorting = 'sorting';
 const source = 'source';
 const sources = 'sources';
@@ -119,6 +121,8 @@ const DIAGRAM_FIELDS = {
 	showEmptyData,
 	showName,
 	showShadow,
+	showSubTotalAmount,
+	showTotalAmount,
 	sorting,
 	source,
 	sourceForCompute,

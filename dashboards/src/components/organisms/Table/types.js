@@ -30,6 +30,7 @@ export type Components = $Shape<{
 	FooterCell: React$ComponentType<CellConfigProps>,
 	HeaderCell: React$ComponentType<HeaderProps>,
 	Row: React$ComponentType<RowProps>,
+	TotalCell: React$ComponentType<CellConfigProps>,
 	Value: React$ComponentType<ValueProps>,
 }>;
 
@@ -54,6 +55,7 @@ export type Props = {
 	columns: Array<Column>,
 	columnsRatioWidth: ColumnsWidth,
 	components?: Components,
+	countTotals: number,
 	data: Array<Row>,
 	fixedColumnsCount: number,
 	getNewColumnsWidth: (column: Column, newWidth: number, columnsWidth: ColumnsWidth, minWidth?: ?number) => ColumnsWidth,
