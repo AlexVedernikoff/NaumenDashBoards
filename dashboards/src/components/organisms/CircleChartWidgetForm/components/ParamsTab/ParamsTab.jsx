@@ -28,9 +28,9 @@ export class ParamsTab extends PureComponent<Props> {
 		const {onChange, values} = this.props;
 		const {data, sorting} = values;
 		const newData = data.map((dataSet, i) => i === index ? newDataSet : dataSet);
-		const newBreakdownGroup = newData[0].breakdown[0].group;
+		const newBreakdownGroup = newData[0].breakdown?.[0]?.group;
 
-		if (data[0].breakdown?.[0]?.group?.way !== newBreakdownGroup.way) {
+		if (newBreakdownGroup && data[0].breakdown?.[0]?.group?.way !== newBreakdownGroup.way) {
 			const {DEFAULT, INDICATOR} = SORTING_VALUES;
 
 			if (newBreakdownGroup.way === GROUP_WAYS.CUSTOM && sorting.value !== DEFAULT) {
