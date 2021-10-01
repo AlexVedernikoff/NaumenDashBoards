@@ -4789,7 +4789,7 @@ class DashboardDataSetService
                     )
                     return [result]
                 case 3:
-                    checkAggregationAndBreakdownListSize(groupResult as Set, breakdownResult as Set, listSize)
+                    checkAggregationAndBreakdownListSize(labelSet, labelDiagramSet, listSize)
                     if (customGroupFromBreak) {
                         return labelSet.collect { label ->
                             new SeriesCombo(
