@@ -453,7 +453,6 @@ class DashboardUtils
         Integer offset
 
         TimeZone tzServer = TimeZone.getDefault()        // Серверный ЧП (базы данных).
-        TimeZone tzUTC = TimeZone.getTimeZone("UTC")
 
         // Настройка пользователя на платформе.
         def tzUserAPI = getApi().employee.getTimeZone(userUUID)
@@ -463,15 +462,14 @@ class DashboardUtils
         if (!tzUser)
         {
             // Если с фронта не пришло смещение, то используется серверный ЧП (смещение 0).
-            if (!offsetUTCMinutesFromBrowser)
+            // (offsetUTCMinutesFromBrowser == null) в данном случае не тождественно (!offsetUTCMinutesFromBrowser)
+            if (offsetUTCMinutesFromBrowser == null)
             {
                 offset = 0
             }
             else
             {
-                // Вычисляем смещение серверного ЧП относительно 0 часового пояса.
-                Long timeDifference = tzServer.getRawOffset() - tzUTC.getRawOffset()
-                offset = offsetUTCMinutesFromBrowser - (timeDifference / MS_IN_MINUTES)
+                offset = offsetUTCMinutesFromBrowser - (tzServer.getRawOffset() / MS_IN_MINUTES)
             }
         }
         else
