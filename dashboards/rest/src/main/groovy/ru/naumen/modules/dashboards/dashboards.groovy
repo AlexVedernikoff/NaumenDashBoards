@@ -430,9 +430,11 @@ class DashboardsService
                 def metainfo = api.metainfo.getMetaClass(classFqn)
                 def attrByClassFqn = metainfo.getAttribute(currentAttribute.code)
                 def attrRef = currentAttribute.ref
-                currentAttribute = buildAttribute(attrByClassFqn, metainfo.title, classFqn)
+                Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(classFqn, currentAttribute.code, currentAttribute.type)
+                currentAttribute = buildAttribute(attrByClassFqn, metainfo.title, classFqn, ableForAvg)
                 if(attrRef)
                 {
+                    attrRef.ableForAvg = DashboardUtils.checkIfAbleForAvg(attrRef.sourceCode, attrRef.code, attrRef.type)
                     currentAttribute.ref = attrRef
                 }
             }
@@ -477,13 +479,15 @@ class DashboardsService
             Boolean attrInMainClass = classFqn ? api.metainfo.checkAttributeExisting(classFqn, it.code).isEmpty() : false
             if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
             {
-                return buildAttribute(it, attrInMainClass ? mainMetaClass.title : it.metaClass.title, attrInMainClass ? classFqn : it.metaClass.code)
+                Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(attrInMainClass ? classFqn : it.metaClass.code, it.code, it.type.code)
+                return buildAttribute(it, attrInMainClass ? mainMetaClass.title : it.metaClass.title, attrInMainClass ? classFqn : it.metaClass.code, ableForAvg)
             }
         }
         if(!attrs.any {it.code == 'UUID'})
         {
             def UUIDAttr = api.metainfo.getMetaClass(classFqn).getAttribute('UUID')
-            UUIDAttr = buildAttribute(UUIDAttr, mainMetaClass.title, classFqn)
+            Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(classFqn, UUIDAttr.code, UUIDAttr.type.code)
+            UUIDAttr = buildAttribute(UUIDAttr, mainMetaClass.title, classFqn, ableForAvg)
             attrs += UUIDAttr
         }
         return attrs
@@ -523,9 +527,11 @@ class DashboardsService
 
         Collection<Attribute> result = [metaInfo, *metaInfos].collectMany { meta ->
             return meta ? meta.attributes.findResults {
-                !it.computable && it.type.code in types
-                    ? buildAttribute(it, metaInfo.title, metaInfo.code)
-                    : null
+                if(!it.computable && it.type.code in types)
+                {
+                    Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(metaInfo.code, it.code, it.type.code)
+                    return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
+                }
             } : []
         }.unique{ it.code }.sort { it.title }
 
@@ -539,13 +545,15 @@ class DashboardsService
                 def attributes = metainfo?.attributes
                 attributeList += attributes
                     ? attributes.findResults {
-                        !(it.code in result*.code) &&
-                        !(it.code in attributeList*.code) &&
-                        !it.computable && it.type.code in types
-                            ? buildAttribute(it, metaInfo.title, metaInfo.code)
-                        : null
+                        if (!(it.code in result*.code) &&
+                            !(it.code in attributeList*.code) &&
+                            !it.computable && it.type.code in types)
+                        {
+                            Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(metaInfo.code, it.code, it.type.code)
+                            return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
+                        }
                     }
-                : []
+                    : []
             }
             result += attributeList
             result.sort {
@@ -1374,11 +1382,15 @@ class DashboardsService
     private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
     {
         return attributes.findResults {
-            !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, sourceName?.replace('Event for ', ''), sourceCode) : null
+            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
+            {
+                Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(sourceCode, it.code, it.type.code)
+                buildAttribute(it, sourceName?.replace('Event for ', ''), sourceCode, ableForAvg)
+            }
         }.sort { it.title }
     }
 
-    private Attribute buildAttribute(def value, String sourceName, String sourceCode)
+    private Attribute buildAttribute(def value, String sourceName, String sourceCode, Boolean ableForAvg)
     {
         return new Attribute(
             code: value.code,
@@ -1388,7 +1400,8 @@ class DashboardsService
             metaClassFqn: value.metaClass.code,
             declaredMetaClass: value.declaredMetaClass,
             sourceName: sourceName,
-            sourceCode: sourceCode
+            sourceCode: sourceCode,
+            ableForAvg: ableForAvg
         )
     }
 

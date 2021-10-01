@@ -1548,7 +1548,7 @@ class DashboardSettingsService
      */
     private Widget updateWidgetCustomGroup(Widget widget, DashboardSettingsClass dashboardSettings)
     {
-        widget.data.each { data ->
+        widget?.data?.each { data ->
             if(data?.parameters)
             {
                 data?.parameters = updateAttributeForGroup(data?.parameters, dashboardSettings)
@@ -1558,6 +1558,40 @@ class DashboardSettingsService
                 data?.breakdown = updateAttributeForGroup(data?.breakdown, dashboardSettings)
             }
         }
+        return widget
+    }
+
+    /**
+     * Метод преобразования индикаторов в настройках для датасета виджета
+     * @param widget - настройки виджета
+     * @return измененные настройки виджета
+     */
+    private Widget updateWidgetIndicators(Widget widget)
+    {
+        widget?.data?.each { data ->
+            if(!data?.sourceForCompute)
+            {
+                data?.indicators?.each {
+                    if(it.attribute instanceof ComputedAttr)
+                    {
+                        it.attribute.computeData.each { k, v ->
+                            v.attr.ableForAvg = DashboardUtils.checkIfAbleForAvg(v.attr.sourceCode, v.attr.code, v.attr.type)
+                        }
+                    }
+                    else
+                    {
+                        it.attribute.ableForAvg = DashboardUtils.checkIfAbleForAvg(it.attribute.sourceCode, it.attribute.code, it.attribute.type)
+                    }
+                }
+            }
+        }
+
+        widget?.computedAttrs?.each {
+            it?.computeData?.each { k, v ->
+                v?.attr?.ableForAvg = DashboardUtils.checkIfAbleForAvg(v.attr.sourceCode, v.attr.code, v.attr.type)
+            }
+        }
+
         return widget
     }
 
@@ -2026,7 +2060,15 @@ class DashboardSettingsService
         {
             dashboard.widgets = dashboard.widgets.findResults { w ->
                 def widget = DashboardUtils.convertWidgetToNewFormat(w)
-                return widget?.type == DiagramType.TEXT ? widget : updateWidgetCustomGroup(widget, dashboard)
+                if(widget?.type == DiagramType.TEXT)
+                {
+                    return widget
+                }
+                else
+                {
+                    widget = updateWidgetCustomGroup(widget, dashboard)
+                    widget = updateWidgetIndicators(widget)
+                }
             }
             if(dashboard.dashboardUUID)
             {
