@@ -123,6 +123,8 @@ class DashboardDataSetService
 
     private String currentUserLocale = 'ru'
 
+    private static final Integer maxDiagramDataSize = 1000
+
     /**
      * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
      * @param dbSettings - настройки дашборда
@@ -3578,6 +3580,7 @@ class DashboardDataSetService
                 return new StandardDiagram(labels: groupResult, series: series, countTotals: countTotals)
             case 3:
                 def (groupResult, breakdownResult) = transposeDataSet.tail()
+                checkAggregationAndBreakdownListSize(groupResult as Set, breakdownResult as Set)
                 def labels = groupResult?.findAll() as Set
                 StandardDiagram standardDiagram = new StandardDiagram()
                 if (reverseGroups)
@@ -3619,6 +3622,22 @@ class DashboardDataSetService
             default:
                 String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
                 api.utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
+        }
+    }
+
+    /**
+     * Метод проверки пришедших данных на превышение по количеству
+     * @param groupResult - данные по группам
+     * @param breakdownResult - данные по разбивкам
+     * @param dataSetNum - количество датасетов, участвующих в проверке
+     */
+    private void checkAggregationAndBreakdownListSize(Set groupResult, Set breakdownResult, Integer dataSetNum = 1)
+    {
+        def maxSize = maxDiagramDataSize * dataSetNum
+        if ((groupResult.size() * breakdownResult.size()) > maxSize)
+        {
+            String message = messageProvider.getConstant(OVERFLOW_DATA_ERROR, currentUserLocale)
+            api.utils.throwReadableException("$message#${ OVERFLOW_DATA_ERROR }")
         }
     }
 
@@ -4739,7 +4758,8 @@ class DashboardDataSetService
         }
         //максимальный размер транспонированных датасетов из всех, что пришли из БД
         Integer globalMaxSize = transposeSets.collect{ it?.size() }?.max()
-        Closure getsSeries = { Set labelSet, List<List> dataSet, Map additionalData, Set labelDiagramSet, boolean customGroupFromBreak ->
+        Closure getsSeries = { Set labelSet, List<List> dataSet, Map additionalData, Set labelDiagramSet, boolean customGroupFromBreak,
+            Integer listSize ->
             def transposeData = dataSet?.transpose() ?: []
             switch (transposeData.size()) {
                 case 0:
@@ -4769,6 +4789,7 @@ class DashboardDataSetService
                     )
                     return [result]
                 case 3:
+                    checkAggregationAndBreakdownListSize(groupResult as Set, breakdownResult as Set, listSize)
                     if (customGroupFromBreak) {
                         return labelSet.collect { label ->
                             new SeriesCombo(
@@ -4805,10 +4826,11 @@ class DashboardDataSetService
         }
 
         List fullSeries = []
+        Integer listCount = list.size()
         list.eachWithIndex { dataSet, i ->
             fullSeries += getsSeries(customsInBreakdown[i] ? diagramLabels : labels,
                                      dataSet, additionals[i], customsInBreakdown[i] ? labels : diagramLabels,
-                                     customsInBreakdown[i])
+                                     customsInBreakdown[i], listCount)
         }
         if (sortingDataIndex > 0)
         {
