@@ -176,7 +176,6 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 			<Fragment>
 				{this.renderIndicatorsBox()}
 				{this.renderShowEmptyDataCheckbox()}
-				{this.renderShowEmptyDataCheckbox()}
 				{this.renderShowBlankDataCheckbox()}
 			</Fragment>
 		);

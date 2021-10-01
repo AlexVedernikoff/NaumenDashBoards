@@ -16,7 +16,7 @@ export class Total extends PureComponent<Props> {
 		let value = '';
 
 		if (index === lastParameterIdx) {
-			value = 'Итого';
+			value = 'Всего';
 		} else if (index === lastParameterIdx + 1) {
 			value = countTotals.toString();
 		}
