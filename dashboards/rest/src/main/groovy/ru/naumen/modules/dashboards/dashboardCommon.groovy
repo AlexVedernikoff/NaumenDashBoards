@@ -3572,7 +3572,12 @@ class SpeedometerIndicator implements  IHasSpeedometerStyle
 /**
  * Стиль границ
  */
-class BorderStyle implements IHasSpeedometerStyle { }
+class BorderStyle implements IHasSpeedometerStyle {
+    /**
+     * Формат числа
+     */
+    NumberFormat format
+}
 
 /**
  * Данные о диапазонах
@@ -3644,6 +3649,10 @@ class RangesStyle implements IHasFontSettings
      * Способ отображения
      */
     TextHandler textHandler = TextHandler.CROP
+    /**
+     * Формат числа
+     */
+    NumberFormat format
 }
 
 /**
