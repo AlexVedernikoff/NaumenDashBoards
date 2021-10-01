@@ -910,6 +910,27 @@ class DashboardUtils
         attrFormatToFind = attrFormatToFind.replace('_unitsLinks', '')
         return getModules().dynamicFields.getAttrToTotalValueMap()[attrFormatToFind]
     }
+
+    /**
+     * Метод проверки на возможность включения для атрибута агрегации AVG
+     * @param sourceCode - код источника
+     * @param attributeCode - код атрибута
+     * @param attributeType - тип атрибута
+     * @return флаг на возможность включения агрегации AVG
+     */
+    static boolean checkIfAbleForAvg(String sourceCode, String attributeCode, String attributeType)
+    {
+        switch (attributeType)
+        {
+            case AttributeType.NUMBER_TYPES:
+                return true
+            case AttributeType.DT_INTERVAL_TYPE:
+                return true
+            case AttributeType.CATALOG_ITEM_TYPE:
+                return api.utils.findFirst(sourceCode, [(attributeCode): op.isNotNull()])?.get(attributeCode)?.code?.isNumber()
+            default: return false
+        }
+    }
 }
 
 //region КЛАССЫ
@@ -1037,6 +1058,11 @@ class Attribute extends BaseAttribute
      */
     Attribute ref
 
+    /**
+     * Флаг на возможность включения агрегации AVG
+     */
+    Boolean ableForAvg = false
+
     static Attribute fromMap(Map<String, Object> data)
     {
         return data ? new Attribute(
@@ -1048,6 +1074,7 @@ class Attribute extends BaseAttribute
             declaredMetaClass: data.declaredMetaClass as String,
             sourceName: data.sourceName as String,
             sourceCode: data.sourceCode as String,
+            ableForAvg: data.ableForAvg as Boolean,
             ref: fromMap(data.ref as Map<String, Object>)
         ) : null
     }
@@ -1076,6 +1103,7 @@ class Attribute extends BaseAttribute
             declaredMetaClass: this.declaredMetaClass,
             sourceName: this.sourceName,
             sourceCode: this.sourceCode,
+            ableForAvg: this.ableForAvg,
             ref: this.ref?.deepClone()
         )
     }
@@ -1446,7 +1474,7 @@ class ExceptionMessageMarshaller
     static List<String> unmarshal(String value)
     {
         def(message, type) = value ? value.tokenize(delimiter) : []
-        if(message.contains('У Вас нет прав'))
+        if(message?.contains('У Вас нет прав'))
         {
             message = 'При построении виджета произошла ошибка. Для решения проблемы необходимо обратиться к администратору системы. Подробная информация содержится в логах приложения.'
         }
@@ -4065,18 +4093,13 @@ abstract class BaseController extends Script implements GroovyInterceptable
         if(!entrypointMethod.get())
         {
             entrypointMethod.set(name)
-        }
-
-        LOG.debug("invoke method $name")
-
-        if(!entrypointMethod.get())
-        {
-            entrypointMethod.set(name)
             def user = args?.find {
                 it instanceof IUUIDIdentifiable && it.metaClass.toString().startsWith('employee')
             } as IUUIDIdentifiable
             CurrentUserHolder.set(user)
         }
+
+        LOG.debug("invoke method $name")
 
         try
         {

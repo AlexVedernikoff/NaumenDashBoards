@@ -102,7 +102,7 @@ class MessageProvider
         (WIDGET_NOT_FOUND_ERROR): [
             ru: 'Виджет не найден',
             en: 'Widget is not found',
-            de: 'Das Widget wurde nicht gefunden',
+            de: 'Widget nicht gefunden',
             pl: 'Nie znaleziono widżetu'
         ],
         (NOT_SUPPORTED_DIAGRAM_TYPE_ERROR): [
@@ -119,32 +119,32 @@ class MessageProvider
         ],
         (NOT_SUPPORTED_DTINTERVAL_GROUP_TYPE_ERROR): [
             ru: 'Тип группировки не поддерживается в атрибуте временной интервал: ${groupType}',
-            en: 'Group type is not supported  in dateTimeInterval attribute: ${groupType}',
+            en: 'Group type is not supported in dateTimeInterval attribute: ${groupType}',
             de: 'Der Gruppierungstyp wird im Zeitintervallattribut nicht unterstützt: ${groupType}',
             pl: 'Typ grupowania nie jest obsługiwany w atrybucie przedziału czasu: ${groupType}'
         ],
         (NOT_SUPPORTED_ATTRIBUTE_TYPE_FOR_CUSTOM_GROUP_ERROR): [
-            ru: 'Тип атрибута ${type} не поддерживается для формирования кастомной группировки',
-            en: 'The ${type} attribute is not supported to form a custom grouping',
-            de: 'Der Attributtyp ${type} wird zum Bilden einer benutzerdefinierten Gruppierung nicht unterstützt',
+            ru: 'Неподдерживаемый тип атрибута: ${type} в пользовательской группировке',
+            en: 'Not supported attribute type: ${type} in custom group',
+            de: 'Nicht unterstützter Attributtyp: $type in benutzerdefinierter Gruppe',
             pl: 'Typ atrybutu ${type} nie jest obsługiwany przy tworzeniu niestandardowego grupowania'
         ],
         (NO_DATA_FOR_CONDITION_ERROR): [
-            ru: "Данные о группировке отстутствуют",
+            ru: "Данные условия являются нулевыми или пустыми",
             en: "Condition data is null or empty",
-            de: "Keine Daten zur Gruppierung",
+            de: "Bedingungsdaten sind null oder leer",
             pl: "Brak danych o grupowaniu"
         ],
         (NOT_SUPPORTED_CONDITION_TYPE_ERROR): [
             ru: 'Неподдерживаемый тип условия: ${conditionType}',
-            en: 'Condition type is not supported: ${conditionType}',
+            en: 'Not supported condition type: ${conditionType}',
             de: 'Nicht unterstützte Konditionsart: ${conditionType}',
             pl: 'Nieobsługiwany typ warunku: ${conditionType}'
         ],
         (SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_ERROR): [
-            ru: 'Тип объекта ${subjectType} и тип атрибута не идентичны ${property}',
-            en: 'Subject type: ${subjectType} does not match with attribute type: ${property}',
-            de: 'Der Objekttyp ${subjectType} und der Attributtyp ${property} sind nicht identisch mit',
+            ru: 'Не соответствует типу объекта: ${subjectType} и типу атрибута: ${property}',
+            en: 'Does not match subject type: ${subjectType} and attribute type: ${property}',
+            de: 'Entspricht nicht dem Betrefftyp: ${subjectType} und dem Attributtyp: ${property}',
             pl: 'Typ obiektu ${subjectType} i typ atrybutu ${property} nie są identyczn'
         ],
         (NOT_SUPPORTED_GROUP_TYPE_ERROR): [
@@ -154,40 +154,40 @@ class MessageProvider
             pl: 'Nieobsługiwany typ grupowania: ${type}'
         ],
         (INVALID_RESULT_DATA_SET_ERROR): [
-            ru: 'Неверный формат результирующего набора данных',
+            ru: 'Неверный формат набора данных результата',
             en: 'Invalid format result data set',
-            de: 'Ungültiges Ergebnisdatensatzformat',
+            de: 'Ergebnisdatensatz im ungültigen Format',
             pl: 'Nieprawidłowy format zbioru danych wyników'
         ],
         (WRONG_GROUP_TYPES_IN_CALCULATION_ERROR): [
-            ru: 'Типы группировок атрибутов, участвующих в вычислении, не совпадают!',
+            ru: 'Неправильные типы группировок в расчете!',
             en: 'The types of attribute groupings involved in the calculation are not the same!',
-            de: 'Die Arten der Attributgruppierungen, die an der Berechnung beteiligt sind, sind nicht dieselben!',
+            de: 'Falsche Gruppentypen in der Berechnung!',
             pl: 'Rodzaje grup atrybutów biorących udział w obliczeniach nie są takie same!'
         ],
         (REQUISITE_IS_NOT_SUPPORTED_ERROR): [
             ru: 'Тип ревкизита не поддерживается: ${nodeType}',
-            en: 'Requisite type is nNot supported: ${nodeType}',
-            de: 'Der Revkizit-Typ wird nicht unterstützt: ${nodeType}',
+            en: 'Not supported requisite type: ${nodeType}',
+            de: 'Nicht unterstützter Typ: ${nodeType}',
             pl: 'Typ Revkizit nie jest obsługiwany: ${nodeType}'
         ],
         (NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR): [
-            ru: 'Неподдерживаемый тип атрибута: ${attributeType}',
+            ru: 'Неподдерживаемый тип: ${attributeType}',
             en: 'Not supported type: ${attributeType}',
-            de: 'Nicht unterstützter Attributtyp: ${attributeType}',
-            pl: 'Nieobsługiwany typ atrybutu: ${attributeType}'
+            de: 'Nicht unterstützter Typ: ${attributeType}',
+            pl: 'Nieobsługiwany typ: ${attributeType}'
         ],
         (NOT_SUPPORTED_FILTER_CONDITION_ERROR): [
             ru: 'Неподдерживаемый тип условия: ${condition}',
-            en: 'Condition type is not supported: ${condition}',
-            de: 'Nicht unterstützte Konditionsart: ${condition}',
+            en: 'Not supported condition type: ${condition}',
+            de: 'Nicht unterstützter Bedingungstyp: ${condition}',
             pl: 'Nieobsługiwany typ warunku: ${condition}'
         ],
         (SUBJECT_TYPE_AND_ATTRIBUTE_TYPE_NOT_EQUAL_EROOR): [
-            ru: 'Тип объекта ${subjectType} и тип атрибута не идентичны ${attributeType}',
-            en: 'Subject type ${subjectType} does not match with attribute type: ${attributeType}',
-            de: 'Der Objekttyp ${subjectType} und der Attributtyp ${attributeType} sind nicht identisch mit',
-            pl: '"Typ obiektu ${subjectType} i typ atrybutu ${attributeType} nie są identyczne'
+            ru: 'Не соответствует типу атрибута: ${subjectType} и ${attributeType}',
+            en: 'Does not match attribute type: ${subjectType} and ${attributeType}',
+            de: 'Stimmt nicht mit dem Attributtyp überein: ${subjectType} und ${attributeType}',
+            pl: 'Typ obiektu ${subjectType} i typ atrybutu ${attributeType} nie są identyczne'
         ],
         (NOT_SUPPORTED_DATE_FORMAT_ERROR): [
             ru: 'Неподдерживаемый формат даты: ${format}',
@@ -198,13 +198,25 @@ class MessageProvider
         (EMPTY_REQUEST_DATA_ERROR): [
             ru: 'Данных для запроса нет',
             en: 'Empty request data',
-            de: 'Leere Aggregation',
+            de: 'Anfragedaten leeren',
             pl: 'Puste dane żądania'
+        ],
+        (EMPTY_SOURCE_ERROR): [
+            ru: 'Пустой источник',
+            en: 'Empty source',
+            de: 'Leere Quelle',
+            pl: 'Puste źródło'
+        ],
+        (INVALID_SOURCE_ERROR): [
+            ru: 'Неверный источник',
+            en: 'Invalid source',
+            de: 'Ungültige Quelle',
+            pl: 'Nieprawidłowe źródło'
         ],
         (EMPTY_AGGREGATION_ERROR): [
             ru: 'Пустая агрегация',
             en: 'Empty aggregation',
-            de: 'Das Widget wurde nicht gefunden',
+            de: 'Leere Aggregation',
             pl: 'Pusta agregacja'
         ],
         (ATTRIBUTE_IS_NULL_ERROR): [
@@ -214,19 +226,19 @@ class MessageProvider
             pl: 'Atrybut nie został wybrany'
         ],
         (NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR): [
-            ru: 'Тип агрегации: ${type} и тип атрибута: ${attributeType} не совместимы',
+            ru: 'Неподходящий тип агрегирования: ${type} и тип атрибута: ${attributeType}',
             en: 'Not suitable aggergation type: ${type} and attribute type: ${attributeType}',
-            de: 'Aggregationstyp: ${type} und Attributtyp: ${attributeType} sind nicht kompatibel',
+            de: 'Nicht geeigneter Aggregationstyp: ${type} und Attributtyp: ${attributeType}',
             pl: 'Typ agregacji: ${type} i typ atrybutu: ${attributeType} nie są zgodne'
         ],
         (NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR): [
-            ru: 'Тип группировки: ${type} и тип атрибута: ${attributeType} не совместимы',
+            ru: 'Неподходящий тип группы: ${type} и тип атрибута: ${attributeType}',
             en: 'Not suitable group type: ${type} and attribute type: ${attributeType}',
-            de: 'Gruppierungstyp: ${type} und Attributtyp: ${attributeType} sind nicht kompatibel',
+            de: 'Nicht geeigneter Gruppentyp: ${type} und Attributtyp: ${attributeType}',
             pl: 'Typ grupowania: ${type} i typ atrybutu: ${attributeType} nie są zgodne'
         ],
         (NOT_SUPPORTED_AGGREGATION_TYPE_ERROR): [
-            ru: 'Неподдерживаемый тип агрегации: ${aggregationType}',
+            ru: 'Неподдерживаемый тип агрегирования: ${aggregationType}',
             en: 'Not supported aggregation type: ${aggregationType}',
             de: 'Nicht unterstützter Aggregationstyp: ${aggregationType}',
             pl: 'Nieobsługiwany typ agregacji: ${aggregationType}'
@@ -239,7 +251,7 @@ class MessageProvider
         ],
         (EMPTY_DASHBOARD_CODE_ERROR): [
             ru: "Для получения списка виджетов заполните корректно атрибут Компании dashboardCode",
-            en: "Fill in the correct Company attribute dashboardCode to get a list of widgets",
+            en: "To get a list of widgets, fill in the correct Company attribute dashboardCode",
             de: "Um eine Liste der Widgets zu erhalten, geben Sie das richtige Unternehmensattribut dashboardCode ein",
             pl: "Aby uzyskać listę widżetów, wprowadź poprawny kod dashboardCode atrybutu firmy"
         ],
@@ -256,9 +268,9 @@ class MessageProvider
             pl :'Niestandardowe ustawienia grupowania są puste.'
         ],
         (COLORS_NOT_CONTAINS_IN_DASHBOARD_ERROR): [
-            ru: 'Данные настройки цветов не найдены среди настроек цветов дашборда.',
-            en: 'Color settings data not found among dashboard color settings.',
-            de: 'Farbeinstellungsdaten wurden in den Dashboard-Farbeinstellungen nicht gefunden.',
+            ru: 'Цвета не указаны на дашборде.',
+            en: 'Colors do not contain in dashboard\n.',
+            de: 'Farben nicht im Dashboard enthalten.',
             pl: 'Nie znaleziono danych ustawień kolorów wśród ustawień kolorów pulpitu nawigacyjnego.'
         ],
         (FILTER_NAME_NOT_UNIQUE_ERROR): [
@@ -281,14 +293,14 @@ class MessageProvider
         ],
         (REMOVE_FILTER_FAILED_ERROR): [
             ru: 'Удаление фильтра ${sourceFilterUUID} не прошло.',
-            en: 'Removing the filter ${sourceFilterUUID} failed.',
+            en: 'Failed to remove filter ${sourceFilterUUID}.',
             de: 'Das Entfernen des Filters ${sourceFilterUUID} ist fehlgeschlagen.',
             pl: 'Usunięcie filtra ${sourceFilterUUID} nie powiodło się.'
         ],
         (LOGIN_MUST_NOT_BE_NULL_ERROR): [
-            ru: 'Логин или данные о пользователе не должны быть пустыми.',
-            en: 'Login or user must not be null',
-            de: 'Login- oder Benutzerdaten sollten nicht leer sein.',
+            ru: 'Логин или пользователь не должны быть нулевыми.',
+            en: 'Login or user should not be null',
+            de: 'Login oder Benutzerdaten sollten nicht leer sein.',
             pl: 'Dane logowania lub użytkownika nie powinny być puste.'
         ],
         (EMPTY_LAYOUT_SETTINGS_ERROR): [
@@ -310,21 +322,21 @@ class MessageProvider
             pl: 'Ustawienia widżetu są puste!'
         ],
         (PERSONAL_DASHBOARD_NOT_FOUND_ERROR): [
-            ru: 'Поле логин не заполнено, личный дашборд не найдён.',
+            ru: 'Логин недействителен, личный дашборд не найден.',
             en: 'The "Login" field is not filled in, the personal dashboard is not found.',
             de: 'Das Feld "Login" ist nicht ausgefüllt, das persönliche Dashboard wurde nicht gefunden.',
             pl: 'Pole „Login” nie jest wypełnione, nie znaleziono osobistego pulpitu nawigacyjnego.'
         ],
         (DASHBOARD_SETTINGS_NOT_SAVED_ERROR): [
-            ru: 'Настройки дашборда не сохранены!',
+            ru: 'Настройки дашборда не сохраняются!',
             en: 'Dashboard settings not saved!',
             de: 'Dashboard-Einstellungen nicht gespeichert!',
             pl: 'Ustawienia panelu nie zostały zapisane!'
         ],
         (GROUP_NOT_CONTAINS_IN_DASHBOARD_ERROR): [
-            ru: 'Данная группировка не найдена среди группировок дашборда.',
-            en: 'This grouping was not found among the groupings of the dashboard.',
-            de: 'Diese Gruppierung wurde unter den Gruppierungen auf dem Dashboard nicht gefunden.',
+            ru: 'Группировка не содержится на дашборде.',
+            en: 'Group does not contain in dashboard.',
+            de: 'Gruppe nicht im Dashboard enthalten.',
             pl: 'Ta grupa nie została znaleziona wśród grup na pulpicie nawigacyjnym.'
         ],
         (WIDGET_NOT_SAVED_ERROR): [
@@ -358,10 +370,10 @@ class MessageProvider
             pl: 'Pulpit nawigacyjny: nie znaleziono klucza ${dashboardKey}!'
         ],
         (MUST_NOT_ADD_EDIT_WIDGET_ERROR): [
-            ru: 'Роль пользователя не мастер дашбордов,${messageError} обычный виджет нельзя',
+            ru: 'Пользователь не является мастером дашбордов,${messageError} обычный виджет нельзя',
             en: 'User is not a dashboard master, ${messageError} default widget is not possible',
-            de: 'Die Rolle des Benutzers ist kein Dashboard-Master, Sie können kein reguläres Widget ${messageError}',
-            pl: 'Rola użytkownika nie jest kreatorem pulpitu nawigacyjnego, nie można ${messageError} zwykłego widżetu'
+            de: 'Benutzer ist kein Dashboard-Master, ${messageError} Standard-Widget ist nicht möglich',
+            pl: 'Użytkownik nie jest administratorem pulpitu nawigacyjnego, domyślny widżet ${messageError} nie jest możliwy'
         ],
         (PERSONAL_SETTINGS_DISABLED_ERROR): [
             ru: 'У Вас нет прав на редактирование дашборда.',
