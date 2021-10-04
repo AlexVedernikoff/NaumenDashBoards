@@ -5,6 +5,7 @@ import type {OnLoadCallback} from 'store/sources/types';
 import type {ThunkAction} from 'store/types';
 
 export type Attribute = {
+	ableForAvg: ?boolean,
 	code: string,
 	declaredMetaClass: ?string,
 	metaClassFqn: string,
