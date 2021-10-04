@@ -3653,6 +3653,14 @@ class RangesStyle implements IHasFontSettings
      * Формат числа
      */
     NumberFormat format
+    /**
+     * Цвет текста
+     */
+    String fontColor = '#323232'
+    /**
+     * Стиль текста
+     */
+    String fontStyle
 }
 
 /**
