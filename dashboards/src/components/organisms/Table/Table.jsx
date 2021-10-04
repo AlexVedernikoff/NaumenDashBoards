@@ -204,26 +204,28 @@ export class Table extends PureComponent<Props, State> {
 			});
 		}
 
-		const sumWidth = sumColumnsWidth(newColumnsWidth, this.props.columns);
-		const diff = minWidth - sumWidth;
+		if (minWidth) {
+			const sumWidth = sumColumnsWidth(newColumnsWidth, this.props.columns);
+			const diff = minWidth - sumWidth;
 
-		if (minWidth && diff > 0) {
-			const {type} = column;
-			const {INDICATOR, PARAMETER} = COLUMN_TYPES;
-			const targetType = type === PARAMETER ? INDICATOR : PARAMETER;
-			const targetColumns = this.props.columns.filter(({type}) => type === targetType);
-			const targetColumnsWidth = sumColumnsWidth(newColumnsWidth, targetColumns);
-			const addRatio = 1 + diff / targetColumnsWidth;
+			if (minWidth && diff > 0) {
+				const {type} = column;
+				const {INDICATOR, PARAMETER} = COLUMN_TYPES;
+				const targetType = type === PARAMETER ? INDICATOR : PARAMETER;
+				const targetColumns = this.props.columns.filter(({type}) => type === targetType);
+				const targetColumnsWidth = sumColumnsWidth(newColumnsWidth, targetColumns);
+				const addRatio = 1 + diff / targetColumnsWidth;
 
-			targetColumns.forEach(({accessor, columns}) => {
-				newColumnsWidth[accessor] *= addRatio;
+				targetColumns.forEach(({accessor, columns}) => {
+					newColumnsWidth[accessor] *= addRatio;
 
-				if (columns?.length > 0) {
-					columns.forEach(({accessor}) => {
-						newColumnsWidth[accessor] *= addRatio;
-					});
-				}
-			});
+					if (columns && columns.length > 0) {
+						columns.forEach(({accessor}) => {
+							newColumnsWidth[accessor] *= addRatio;
+						});
+					}
+				});
+			}
 		}
 
 		return newColumnsWidth;
