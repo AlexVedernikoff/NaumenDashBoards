@@ -99,9 +99,11 @@ export class SourceFieldset extends Component<Props, State> {
 
 	handleChangeCompute = ({name, value: sourceForCompute}: OnChangeEvent<boolean>) => {
 		const {index, onChange, value} = this.props;
+		const {indicators} = value;
 
 		onChange(index, {
 			...value,
+			indicators: sourceForCompute ? indicators || [DEFAULT_INDICATOR] : indicators,
 			sourceForCompute: !sourceForCompute
 		});
 	};
