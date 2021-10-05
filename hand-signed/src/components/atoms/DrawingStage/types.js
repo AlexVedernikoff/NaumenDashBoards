@@ -5,7 +5,9 @@ export type ConnectedProps = {
 
 export type OwnProps = {
 	saveNewPartSignature: Function,
-	stageRef: Object
+	layerRef: {
+		current: React$Node
+	}
 };
 
 export type Props = OwnProps & ConnectedProps;

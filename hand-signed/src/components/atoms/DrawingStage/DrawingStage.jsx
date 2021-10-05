@@ -6,25 +6,26 @@ import {props} from './selectors';
 import React, {Fragment, useCallback, useEffect, useState} from 'react';
 import styles from './DrawingStage.less';
 
-const STROKE_COLOR = "#000000";
-const STROKE_WIDTH = 2;
+const STROKE_COLOR = '#000000';
+export const STROKE_WIDTH = 2;
 
 const DrawingStage = (props: Props) => {
-	const {data, saveNewPartSignature, stageRef} = props;
+	const {data, layerRef, saveNewPartSignature} = props;
 	const [newLines, setNewLines] = useState([...data]);
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [area, setArea] = useState({
 		height: window.innerHeight,
-		width: window.innerWidth,
+		width: window.innerWidth
 	});
 
 	useEffect(() => {
 		const handleResize = () => {
 			setArea({
 				height: window.innerHeight,
-				width: window.innerWidth,
-			})
-		}
+				width: window.innerWidth
+			});
+		};
+
 		window.addEventListener('resize', handleResize);
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
@@ -62,7 +63,7 @@ const DrawingStage = (props: Props) => {
 	};
 
 	const renderLayer = () => (
-		<Layer className={styles.layer}>
+		<Layer className={styles.layer} ref={layerRef}>
 			{[...data, ...newLines].map(renderLine)}
 		</Layer>
 	);
@@ -89,7 +90,6 @@ const DrawingStage = (props: Props) => {
 
 	const renderStage = () => (
 		<Stage
-			ref={stageRef}
 			className={styles.stage}
 			height={area.height - 95}
 			width={area.width - 34}

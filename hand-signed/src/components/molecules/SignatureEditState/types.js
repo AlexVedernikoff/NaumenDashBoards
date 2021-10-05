@@ -7,9 +7,15 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	addSignature: () => SignatureAction,
-	sendSignature: () => ThunkAction
+	addSignature: (Array<Array<number>>) => SignatureAction,
+	sendSignature: (dataUrl: string) => ThunkAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;
 
+export type SizesAndCoords = {
+	height: number,
+	minY: number,
+	minX: number,
+	width: number
+};

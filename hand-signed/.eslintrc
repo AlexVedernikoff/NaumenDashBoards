@@ -10,8 +10,7 @@
 		"standard",
 		"plugin:react/recommended",
 		"plugin:promise/recommended",
-		"plugin:flowtype/recommended",
-		"plugin:jsdoc/recommended"
+		"plugin:flowtype/recommended"
 	],
 	"parser": "babel-eslint",
 	"plugins": [
