@@ -212,7 +212,7 @@ class QueryWrapper implements CriteriaWrapper
             criteria.addGroupColumn(sc.property("${attributeCode}.${DashboardQueryWrapperUtils.UUID_CODE}"))
         }
         //атрибут связанного типа
-        if(attribute.type == AttributeType.STRING_TYPE)
+        if(attribute.type in [AttributeType.STRING_TYPE, *AttributeType.NUMBER_TYPES, AttributeType.CATALOG_ITEM_TYPE])
         {
             column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(DashboardQueryWrapperUtils.UUID_CODE))
             criteria.addGroupColumn(sc.property(DashboardQueryWrapperUtils.UUID_CODE))
@@ -253,7 +253,7 @@ class QueryWrapper implements CriteriaWrapper
         criteria.addColumn(column)
         criteria.addGroupColumn(column)
 
-        if (sortingType && (Attribute.getAttributeType(attribute) in AttributeType.NUMBER_TYPES))
+        if (sortingType)
         {
             Closure sorting = getSorting(sortingType)
             column.with(sorting).with(criteria.&addOrder)
