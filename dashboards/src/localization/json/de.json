@@ -1,6 +1,6 @@
 {
 	"LoadingContent::Loading": "Wird geladen...",
 	"Startup::Loading": "Wird geladen...",
-	"store::buildData::DEFAULT_RECORD_BUILD_DATA_ERROR": "Fehler beim Laden von Daten. Ändern Sie die Einstellung.",
-	"store::buildData::DEFAULT_RECORD_BUILD_DIAGRAM_ERROR": "Es ist nicht möglich, ein Diagramm mit der angegebenen Konfiguration zu zeichnen. Bitte ändern Sie die Einstellungen."
+	"store::buildData::DEFAULT_RECORD_BUILD_DATA_ERROR": "Es ist unmöglich, aus den angegebenen Daten eine Tabelle zu zeichnen (unzureichende Daten). Bitte ändern Sie die Parameter.",
+	"store::buildData::DEFAULT_RECORD_BUILD_DIAGRAM_ERROR": "Es ist unmöglich, aus den angegebenen Daten ein Diagramm zu zeichnen (unzureichende Daten). Bitte ändern Sie die Parameter."
 }

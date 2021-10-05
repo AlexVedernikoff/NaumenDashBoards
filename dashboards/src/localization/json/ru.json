@@ -1,6 +1,6 @@
 {
 	"LoadingContent::Loading": "Загрузка...",
 	"Startup::Loading": "Загрузка...",
-	"store::buildData::DEFAULT_RECORD_BUILD_DATA_ERROR": "Ошибка загрузки данных. Измените параметры построения.",
+	"store::buildData::DEFAULT_RECORD_BUILD_DATA_ERROR": "По указанным данным невозможно построить таблицу (недостаточно данных). Измените, пожалуйста, параметры.",
 	"store::buildData::DEFAULT_RECORD_BUILD_DIAGRAM_ERROR": "По указанным данным невозможно нарисовать диаграмму (недостаточно данных). Измените, пожалуйста, параметры."
 }
