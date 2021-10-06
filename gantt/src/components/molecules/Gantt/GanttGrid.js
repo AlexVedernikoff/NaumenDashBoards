@@ -9,7 +9,7 @@ import styles from './styles.less';
 const GanttGrid = (props: Props) => {
 	const {columns, loading, rollUp, scale, tasks} = props;
 
-	if (loading && (!tasks.length || !columns.length)) {
+	if (loading) {
 		return (
 			<div className={styles.center}>
 				<Loader size={50} />

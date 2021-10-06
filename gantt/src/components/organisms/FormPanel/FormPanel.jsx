@@ -17,20 +17,24 @@ import {deepClone} from 'src/helpers';
 import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
 import {functions, props} from './selectors';
-import {getNeighbor, getParent, getUpdatedLevel} from './utils';
+import {getChild, getNeighbor, getParent, getUpdatedLevel} from './utils';
+import GridLayout from 'react-grid-layout';
 import type {Props} from './types';
 import React, {useState} from 'react';
 import Resource from './components/Resource';
 import {ScaleNames} from './consts';
+import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
 import {v4 as uuidv4} from 'uuid';
 import Work from './components/Work';
 
 const FormPanel = (props: Props) => {
-	const {loading, resources, settings} = props;
+	const {errorSettings, loading, resources, settings} = props;
 	const {columnSettings} = settings;
 	const [showModal, setShowModal] = useState(false);
 	const [columnSettingsModal, setColumnSettingsModal] = useState([]);
+	const [layout, setLayout] = useState([]);
+	const [error, setError] = useState('');
 
 	const handleAddNewBlock = (index: number, value: string) => {
 		const {setResourceSettings} = props;
@@ -112,7 +116,6 @@ const FormPanel = (props: Props) => {
 
 	const handleCheckboxChange = () => {
 		const {settings} = props;
-
 		handleUpdateCommonSettings('rollUp', !settings.rollUp);
 	};
 
@@ -132,18 +135,24 @@ const FormPanel = (props: Props) => {
 
 	const handleAddNewColumn = () => {
 		const newColumnSettings = deepClone(columnSettingsModal);
-
 		setColumnSettingsModal([...newColumnSettings, { ...defaultColumn, code: uuidv4() }]);
 	};
 
 	const handleDeleteColumn = (index: number) => {
 		const newColumnSettings = deepClone(columnSettingsModal);
-
 		setColumnSettingsModal([...newColumnSettings.slice(0, index), ...newColumnSettings.slice(index + 1)]);
 	};
 
 	const handleSaveColumnSettings = () => {
-		handleUpdateCommonSettings('columnSettings', columnSettingsModal);
+		const newColumnSettings = Array(columnSettingsModal.length);
+
+		layout.forEach((item, index) => { newColumnSettings[item.y] = columnSettingsModal[index]; });
+
+		if (!newColumnSettings[0].title) {
+			newColumnSettings[0].title = 'Название';
+		}
+
+		handleUpdateCommonSettings('columnSettings', newColumnSettings.filter(item => !!item.title));
 		setShowModal(!showModal);
 		setColumnSettingsModal([]);
 	};
@@ -155,7 +164,13 @@ const FormPanel = (props: Props) => {
 
 	const handleSave = () => {
 		const {diagramKey, saveSettings, settings} = props;
-		saveSettings({commonSettings: settings, diagramKey: diagramKey, resourceAndWorkSettings: resources});
+		const newError = checkingSettings();
+
+		setError(newError);
+
+		if (!newError) {
+			saveSettings({commonSettings: settings, diagramKey: diagramKey, resourceAndWorkSettings: resources});
+		}
 	};
 
 	const handleCancel = () => {
@@ -173,7 +188,10 @@ const FormPanel = (props: Props) => {
 	);
 
 	const renderSelectCommonBlock = () => (
-		<Select onSelect={handleScaleChange} options={ScaleNames} placeholder='Масштаб по умолчанию' value={ScaleNames.find(item => item.value === settings.scale)} />
+		<>
+			<span className={styles.label}>Масштаб по умолчанию</span>
+			<Select className={styles.top} onSelect={handleScaleChange} options={ScaleNames} placeholder='Масштаб по умолчанию' value={ScaleNames.find(item => item.value === settings.scale)} />
+		</>
 	);
 
 	const renderCheckboxCommonBlock = () => {
@@ -194,7 +212,7 @@ const FormPanel = (props: Props) => {
 
 	const renderConfirmModal = () => {
 		if (showModal) {
-			return <ConfirmModal header={getHeaderModal()} notice={false} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} text={getContentModal()} />;
+			return <ConfirmModal className={styles.height} header={getHeaderModal()} notice={false} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} text={getContentModal()} />;
 		}
 
 		return null;
@@ -225,6 +243,38 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
+	const renderError = () => error && <p className={styles.errorField}>{error}</p>;
+
+	const checkingSettings = () => {
+		for (let i = 0; i < resources.length; i++) {
+			if (!resources[i]?.source?.value?.label) {
+				return `Заполните метакласс у ${resources[i].type === 'WORK' ? 'добавленной работы' : 'добавленного ресурса'}`;
+			}
+
+			if (resources[i].type === 'RESOURCE' && resources[i].nested && !resources[i].communicationResourceAttribute) {
+				return `У ресурса "${resources[i]?.source?.value?.label}" не заполнен обязательный параметр связи с родительским ресурсом`;
+			}
+
+			if (resources[i].type === 'RESOURCE' && !getChild(i, resources[i].level)) {
+				return `Для ресурса "${resources[i]?.source?.value?.label}" не добавлено ни одной работы`;
+			}
+
+			if (resources[i].type === 'WORK' && !resources[i].communicationResourceAttribute) {
+				return `У работы "${resources[i]?.source?.value?.label}" не заполнен обязательный параметр связи c родительским ресурсом`;
+			}
+
+			if (resources[i].type === 'WORK' && resources[i].nested && !resources[i].communicationWorkAttribute) {
+				return `У работы "${resources[i]?.source?.value?.label}" не заполнен обязательный параметр связи с родительской работой`;
+			}
+
+			if (resources[i].type === 'WORK' && (!resources[i].startWorkAttribute || !resources[i].endWorkAttribute)) {
+				return `Заполните у работы "${resources[i]?.source?.value?.label}" атрибуты начала/окончания`;
+			}
+		}
+
+		return '';
+	};
+
 	const getHeaderModal = () => {
 		return (
 			<div className={styles.header}>
@@ -236,15 +286,15 @@ const FormPanel = (props: Props) => {
 
 	const getContentModal = () => {
 		return (
-			<ul className={styles.list}>
+			<GridLayout className="layout" cols={1} layouts={layout} onLayoutChange={layout => setLayout(layout)} rowHeight={35} width={300}>
 				{columnSettingsModal.map((item, index) => (
-					<li className={styles.item} key={item.code}>
-						<Checkbox checked={item.show} name={item.code} onChange={() => handleColumnShowChange(index)} value={item.show} />
+					<div className={styles.item} data-grid={{h: 1, static: !index, w: 1, x: 0, y: index}} key={item.code}>
+						<ShowBox checked={item.show} className={!index && styles.disabled} name={item.code} onChange={() => index && handleColumnShowChange(index)} value={item.show} />
 						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder='Введите название столбца' value={item.title} />
-						<IconButton icon='BASKET' onClick={() => handleDeleteColumn(index)} />
-					</li>
+						<IconButton className={!index && styles.disabled} icon='BASKET' onClick={() => index && handleDeleteColumn(index)} />
+					</div>
 				))}
-			</ul>
+			</GridLayout>
 		);
 	};
 
@@ -269,18 +319,19 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
-	if (loading && !resources) {
-		return (
-			<div className={styles.center}>
-				<Loader size={50} />
-			</div>
-		);
+	if (loading) {
+		return <div className={styles.center}><Loader size={50} /></div>;
+	}
+
+	if (errorSettings) {
+		return <p className={styles.center}>Ошибка загрузки панели настроек</p>;
 	}
 
 	return (
 		<>
 			{renderCommonBlock()}
 			{resources.map((item, index) => getFormByType(item, index))}
+			{renderError()}
 			{renderBottom()}
 		</>
 	);

@@ -54,27 +54,31 @@ const data = {
 
 export const getDiagramData = () => {
   const a = deepClone(data);
-	data.tasks.push(
-		{
-			'id': '4567fghgfd891' + Math.random(),
-			'd951f959-640b-4b47-b7ed-2f0daf7867': 'Второе2' + Math.random(),
-			'parent': '4567890',
-			'd951f7': '4556',
-			'text': 'Название на календарной сетке1' ,
-			'start_date': '2021-04-14T00:00:50+0000',
-			'end_date': '2021-04-14T00:01:50+0000',
-		},
-		{
-			'id': '456789jk2' + Math.random(),
-			'd951f959-640b-4b47-b7ed-2f0daf7867': 'Другое23456789' + Math.random(),
-			'd951f7': '4577777776',
-			'd951f9': '16-04-2019',
-			'duration': 480,
-			'start_date': null
-		});
-	if (Math.random() < 0.3) {
-		data.tasks.splice(1, 1)
-		console.log(data.tasks)
+
+  if (data && data.tasks) {
+		data.tasks.push(
+			{
+				'id': '4567fghgfd891' + Math.random(),
+				'd951f959-640b-4b47-b7ed-2f0daf7867': 'Второе2' + Math.random(),
+				'parent': '4567890',
+				'd951f7': '4556',
+				'text': 'Название на календарной сетке1',
+				'start_date': '2021-04-14T00:00:50+0000',
+				'end_date': '2021-04-14T00:01:50+0000',
+			},
+			{
+				'id': '456789jk2' + Math.random(),
+				'd951f959-640b-4b47-b7ed-2f0daf7867': 'Другое23456789' + Math.random(),
+				'd951f7': '4577777776',
+				'd951f9': '16-04-2019',
+				'duration': 480,
+				'start_date': null
+			});
+
+		if (Math.random() < 0.3) {
+			data.tasks.splice(1, 1)
+		}
 	}
+
 	return a;
 };

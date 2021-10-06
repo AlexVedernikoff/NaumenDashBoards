@@ -5,9 +5,13 @@ import {APP_EVENTS, USER_ROLES} from './constants';
 export const initialAppState: AppState = {
 	contentCode: '',
 	diagramKey: '',
-	error: false,
+	errorCommon: false,
+	errorData: false,
+	errorSettings: false,
 	hideEditPanel: false,
-	loading: true,
+	loadingCommon: true,
+	loadingData: true,
+	loadingSettings: true,
 	masterResources: [],
 	masterSettings: {},
 	metaClass: '',
@@ -19,7 +23,7 @@ export const initialAppState: AppState = {
 	user: {
 		email: '',
 		name: '',
-		role: USER_ROLES.SUPER
+		role: USER_ROLES.REGULAR
 	}
 };
 

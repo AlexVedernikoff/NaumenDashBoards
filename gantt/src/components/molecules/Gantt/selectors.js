@@ -2,13 +2,13 @@
 import type {AppState} from 'store/types';
 
 const props = (state: AppState) => {
-	const {diagramKey, loading, settings, tasks} = state.APP;
+	const {diagramKey, loadingData, settings, tasks} = state.APP;
 	const {columnSettings, rollUp, scale} = settings;
 
 	return {
 		columns: columnSettings,
 		diagramKey,
-		loading,
+		loading: loadingData,
 		rollUp,
 		scale,
 		tasks

@@ -61,7 +61,7 @@ export default {
 			'communicationResourceAttribute': null,
 			'nested': false,
 			'source': {
-				'descriptor': '',
+				'descriptor': '123',
 				'value': {
 					'label': 'Обращение',
 					'value': 'serviceCall$call'
@@ -128,7 +128,7 @@ export default {
 				'sourceName': null
 			},
 			'endWorkAttribute': null,
-			'nested': true,
+			'nested': false,
 			'source': {
 				'descriptor': '',
 				'value': {

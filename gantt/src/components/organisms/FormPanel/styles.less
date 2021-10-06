@@ -1,3 +1,5 @@
+@import '/styles/variables';
+
 :local {
 	.contentTitle {
 		font-size: 13px;
@@ -21,9 +23,20 @@
 	.item {
 		align-items: center;
 		display: flex;
-		padding: 10px 30px;
 		flex-direction: row;
+		flex-grow: 1;
+		min-width: 90%;
 		justify-content: space-between;
+
+		&.react-draggable-dragging, .resizing  {
+			z-index: 50;
+		}
+	}
+
+	.disabled button,
+	.disabled svg {
+		cursor: not-allowed;
+		opacity: .5;
 	}
 
 	.header {
@@ -32,6 +45,10 @@
 		padding: 8px;
 		flex-direction: row;
 		justify-content: space-between;
+	}
+
+	.top {
+		margin-top: 5px;
 	}
 
 	.bottom {
@@ -57,12 +74,28 @@
 		margin: 10px 0;
 	}
 
+	.label {
+		color: @grey;
+		font-size: 13px;
+	}
+
+	.height > div {
+		max-height: 300px;
+		position: relative;
+		overflow-y: scroll;
+		overflow-x: hidden;
+	}
+
 	.field {
 		padding: 8px 24px;
 	}
 
 	.content {
 		padding: 12px 0;
+	}
+
+	.react-resizable-handle {
+		max-width: 1px;
 	}
 
 	.input {

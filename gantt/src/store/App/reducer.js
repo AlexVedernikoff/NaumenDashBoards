@@ -6,16 +6,27 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
-		case APP_EVENTS.HIDE_LOADER:
+		case APP_EVENTS.HIDE_LOADER_DATA:
 			return {
 				...state,
-				loading: false
+				loadingData: false
 			};
-		case APP_EVENTS.SHOW_LOADER:
+		case APP_EVENTS.SHOW_LOADER_DATA:
 			return {
 				...state,
-				error: '',
-				loading: true
+				errorData: '',
+				loadingData: true
+			};
+		case APP_EVENTS.HIDE_LOADER_SETTINGS:
+			return {
+				...state,
+				loadingSettings: false
+			};
+		case APP_EVENTS.SHOW_LOADER_SETTINGS:
+			return {
+				...state,
+				errorSettings: '',
+				loadingSettings: true
 			};
 		case APP_EVENTS.SET_CONTENT_CODE:
 			return {
@@ -35,10 +46,22 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				loading: true,
 				subjectUuid: action.payload
 			};
-		case APP_EVENTS.SET_ERROR:
+		case APP_EVENTS.SET_ERROR_COMMON:
 			return {
 				...state,
-				error: action.payload,
+				errorCommon: action.payload,
+				loading: false
+			};
+		case APP_EVENTS.SET_ERROR_DATA:
+			return {
+				...state,
+				errorData: action.payload,
+				loading: false
+			};
+		case APP_EVENTS.SET_ERROR_SETTINGS:
+			return {
+				...state,
+				errorSettings: action.payload,
 				loading: false
 			};
 		case APP_EVENTS.SET_COMMON_SETTINGS:
@@ -46,6 +69,12 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				...state,
 				loading: true,
 				settings: action.payload
+			};
+		case APP_EVENTS.SET_USER_DATA:
+			return {
+				...state,
+				loading: true,
+				user: action.payload
 			};
 		case APP_EVENTS.SET_RESOURCE_SETTINGS:
 			return {

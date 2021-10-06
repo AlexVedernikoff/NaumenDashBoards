@@ -1,6 +1,7 @@
 import {getDiagramData} from 'utils/mocks/getDiagramData';
 import getSettings from 'utils/mocks/getSettings';
 import getSources from 'utils/mocks/getSources';
+import {USER_ROLES} from 'store/App/constants';
 
 export default class FakeApi {
 	async getParams () {
@@ -12,6 +13,16 @@ export default class FakeApi {
 	async getInitialSettings (contentCode, subjectUuid) {
 		await new Promise(resolve => setTimeout(() => resolve(), 1200));
 		return getSettings;
+	}
+
+	async getUserData (contentCode, subjectUuid) {
+		await new Promise(resolve => setTimeout(() => resolve(), 500));
+
+		if (Math.random() < 0) {
+			return {groupUser: USER_ROLES.REGULAR};
+		}
+
+		return {email: 'test@d.ru', groupUser: USER_ROLES.MASTER, name: 'test'};
 	}
 
 	async getDiagramData (contentCode, subjectUuid) {

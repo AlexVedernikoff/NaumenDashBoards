@@ -1,3 +1,5 @@
+@import '/styles/variables';
+
 :local {
 	.border {
 		border-bottom: 1px solid #EBEBEB;
@@ -40,8 +42,9 @@
 	}
 
 	.title {
-		overflow: hidden;
 		max-width: 50%;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		width: 50%;
 	}
 
@@ -77,11 +80,41 @@
 	}
 
 	.sourceTreeSelect {
+		background-color: @white;
+		border-radius: @border-radius;
+		border: 1px solid @grey;
+		box-sizing: border-box;
+		color: @black;
+		cursor: pointer;
+		font-size: 13px;
+		height: 32px;
+		margin-top: 5px;
+		padding: 1px 12px;
+		position: relative;
 		width: 100%;
+
+		&:hover {
+			.clearLabelIcon {
+				display: block;
+			}
+		}
+
+		&:focus-within {
+			border: 1px solid @info;
+		}
+
+		& > div {
+			border-bottom: none;
+		}
+	}
+
+	.label {
+		color: @grey;
+		font-size: 13px;
 	}
 
 	.margin {
-		margin: 10px 0;
+		margin: 5px 0 12px;
 	}
 
 	.width {

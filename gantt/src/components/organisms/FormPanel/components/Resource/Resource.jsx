@@ -6,7 +6,7 @@ import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {Column, SourceItem} from 'src/store/App/types';
 import {connect} from 'react-redux';
-import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn, updateElementInArray} from 'components/organisms/FormPanel/utils';
+import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn, replaceElementInArray} from 'components/organisms/FormPanel/utils';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import {deepClone} from 'helpers';
 import {defaultAttributeSetting, ITEM_TYPES_FOR_ALL} from 'src/store/App/constants';
@@ -19,11 +19,12 @@ import ResourceIcon from 'icons/ResourceIcon';
 import styles from './styles.less';
 
 const Resource = (props: Props) => {
-	const {columns, index, level, onChange, value: resource} = props;
+	const {columns, hasMainResource, index, level, onChange, value: resource} = props;
 	const [attributeSettingsModal, setAttributeSettingsModal] = useState([]);
 	const [valueAttributes, setValueAttributes] = useState({});
 	const [loading, setLoading] = useState({});
 	const [showModal, setShowModal] = useState(false);
+	const [showModalRemoving, setShowModalRemoving] = useState(false);
 	const [showMenu, setShowMenu] = useState(false);
 
 	const changeSource = (source: SourceItem) => {
@@ -61,7 +62,7 @@ const Resource = (props: Props) => {
 				attribute: copyWithExclusion(target.value, ['label', 'value'])
 			};
 
-			setAttributeSettingsModal(updateElementInArray(attributeSettingsModal, newAttribute, indexSelectedAttr));
+			setAttributeSettingsModal(replaceElementInArray(attributeSettingsModal, newAttribute, indexSelectedAttr));
 		}
 	};
 
@@ -82,7 +83,13 @@ const Resource = (props: Props) => {
 		}
 	};
 
-	const handleDeleteBlock = () => this.props.handleDeleteBlock();
+	const handleDeleteBlock = () => {
+		setShowModalRemoving(false);
+
+		const {handleDeleteBlock} = props;
+
+		return handleDeleteBlock();
+	};
 
 	const handleCheckboxChange = () => {
 		const {handleUpdateChildrenLevel} = props;
@@ -118,14 +125,17 @@ const Resource = (props: Props) => {
 		const {options} = props;
 
 		return (
-			<TreeSelect
-				className={styles.sourceTreeSelect}
-				onRemove={handleRemoveSource}
-				onSelect={handleSourceSelect}
-				options={options}
-				removable={true}
-				value={resource.source.value}
-			/>
+			<>
+				<span className={styles.label}>Ресурс</span>
+				<TreeSelect
+					className={styles.sourceTreeSelect}
+					onRemove={handleRemoveSource}
+					onSelect={handleSourceSelect}
+					options={options}
+					removable={true}
+					value={resource.source.value}
+				/>
+			</>
 		);
 	};
 
@@ -184,15 +194,18 @@ const Resource = (props: Props) => {
 		const currentValue: null | Attribute = resourceAttribute ? getAdditionalFields(resourceAttribute, resourceAttribute.title, resourceAttribute.code) : null;
 
 		return (
-			<Select className={cn(styles.margin, styles.width)}
-				fetchOptions={getOptionsForBondWithResource}
-				isSearching={true}
-				loading={loading?.bondWithResource}
-				onSelect={handleAttributeBondWithResource}
-				options={newValueAttributes}
-				placeholder='Связь с вышестоящим ресурсом'
-				value={currentValue}
-			/>
+			<>
+				<span className={styles.label}>Связь с вышестоящим ресурсом</span>
+				<Select className={cn(styles.margin, styles.width)}
+					fetchOptions={getOptionsForBondWithResource}
+					isSearching={true}
+					loading={loading?.bondWithResource}
+					onSelect={handleAttributeBondWithResource}
+					options={newValueAttributes}
+					placeholder='Связь с вышестоящим ресурсом'
+					value={currentValue}
+				/>
+			</>
 		);
 	};
 
@@ -253,7 +266,7 @@ const Resource = (props: Props) => {
 
 	const renderDropdownMenu = () => {
 		if (showMenu) {
-			return <DropdownMenu items={ITEM_TYPES_FOR_ALL} onSelect={(item) => handleAddNewBlock(item)} onToggle={() => handleAddNewBlock()} />;
+			return <DropdownMenu items={ITEM_TYPES_FOR_ALL} onSelect={item => handleAddNewBlock(item)} onToggle={() => handleAddNewBlock()} />;
 		}
 
 		return null;
@@ -261,14 +274,40 @@ const Resource = (props: Props) => {
 
 	const renderConfirmModal = () => {
 		if (showModal) {
-			return <ConfirmModal header='Атрибуты для таблицы' notice={false} onClose={handleCancelModal} onSubmit={handleSaveModal} text={columns && getContentModal()} />;
+			return (
+				<ConfirmModal
+					className={styles.height}
+					header='Атрибуты для таблицы'
+					notice={false}
+					onClose={handleCancelModal}
+					onSubmit={handleSaveModal}
+					text={columns && getContentModal()}
+				/>
+			);
+		}
+
+		return null;
+	};
+
+	const renderRemovingModal = () => {
+		if (showModalRemoving) {
+			return (
+				<ConfirmModal
+					header='Вы желаете удалить ресурс?'
+					notice={true}
+					onClose={() => setShowModalRemoving(false)}
+					onSubmit={handleDeleteBlock}
+					submitText="Удалить"
+					text="При удалении ресурса также удалятся и все вложенные в него ресурсы и работы"
+				/>
+			);
 		}
 
 		return null;
 	};
 
 	const renderCollapsableFormBox = () => (
-		<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={!!index && handleDeleteBlock} title={getHeaderForm()}>
+		<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={(resource.level || hasMainResource) && (() => setShowModalRemoving(true))} title={getHeaderForm()}>
 			<Container className={styles.container}>
 				{renderTreeSelect()}
 				{renderFilter()}
@@ -284,6 +323,7 @@ const Resource = (props: Props) => {
 			{renderDropdownMenu()}
 			{renderCollapsableFormBox()}
 			{renderConfirmModal()}
+			{renderRemovingModal()}
 		</div>
 	);
 };

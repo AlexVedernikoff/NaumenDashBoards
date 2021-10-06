@@ -6,7 +6,7 @@ import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {Column, SourceItem} from 'src/store/App/types';
 import {connect} from 'react-redux';
-import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn, getPrevItem, updateElementInArray} from 'components/organisms/FormPanel/utils';
+import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn, getPrevItem, replaceElementInArray} from 'components/organisms/FormPanel/utils';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import {deepClone} from 'helpers';
 import {defaultAttributeSetting, ITEM_TYPES_FOR_WORK} from 'src/store/App/constants';
@@ -24,6 +24,7 @@ const Work = (props: Props) => {
 	const [valueAttributes, setValueAttributes] = useState({});
 	const [loading, setLoading] = useState({});
 	const [showModal, setShowModal] = useState(false);
+	const [showModalRemoving, setShowModalRemoving] = useState(false);
 	const [showMenu, setShowMenu] = useState(false);
 	const mayBeNested = getPrevItem(index)?.type === 'WORK';
 
@@ -62,14 +63,15 @@ const Work = (props: Props) => {
 				attribute: copyWithExclusion(target.value, ['label', 'value'])
 			};
 
-			setAttributeSettingsModal(updateElementInArray(attributeSettingsModal, newAttribute, indexSelectedAttr));
+			setAttributeSettingsModal(replaceElementInArray(attributeSettingsModal, newAttribute, indexSelectedAttr));
 		}
 	};
 
 	const handleAttributeBondWithResource = (target: Attribute) => {
 		onChange({
 			...work,
-			communicationResourceAttribute: copyWithExclusion(target.value, ['label', 'value'])});
+			communicationResourceAttribute: copyWithExclusion(target.value, ['label', 'value'])
+		});
 	};
 
 	const handleAttributeBondWithWork = (target: Attribute) => {
@@ -86,7 +88,13 @@ const Work = (props: Props) => {
 		}
 	};
 
-	const handleDeleteBlock = () => this.props.handleDeleteBlock();
+	const handleDeleteBlock = () => {
+		setShowModalRemoving(false);
+
+		const {handleDeleteBlock} = props;
+
+		return handleDeleteBlock();
+	};
 
 	const handleCheckboxChange = () => {
 		const {handleUpdateChildrenLevel} = props;
@@ -122,14 +130,17 @@ const Work = (props: Props) => {
 		const {options} = props;
 
 		return (
-			<TreeSelect
-				className={styles.sourceTreeSelect}
-				onRemove={handleRemoveSource}
-				onSelect={handleSelectSource}
-				options={options}
-				removable={true}
-				value={work.source.value}
-			/>
+			<>
+				<span className={styles.label}>Работа</span>
+				<TreeSelect
+					className={styles.sourceTreeSelect}
+					onRemove={handleRemoveSource}
+					onSelect={handleSelectSource}
+					options={options}
+					removable={true}
+					value={work.source.value}
+				/>
+			</>
 		);
 	};
 
@@ -188,15 +199,18 @@ const Work = (props: Props) => {
 		const currentValue: Attribute = workAttribute ? getAdditionalFields(workAttribute, workAttribute.title, workAttribute.code) : null;
 
 		return (
-			<Select className={cn(styles.margin, styles.width)}
-				fetchOptions={getOptionsForBondWithResource}
-				isSearching={true}
-				loading={loading?.bondWithResource}
-				onSelect={handleAttributeBondWithResource}
-				options={newValueAttributes}
-				placeholder='Атрибут связи с ресурсом'
-				value={currentValue}
-			/>
+			<>
+				<span className={styles.label}>Атрибут связи с ресурсом</span>
+				<Select className={cn(styles.margin, styles.width)}
+					fetchOptions={getOptionsForBondWithResource}
+					isSearching={true}
+					loading={loading?.bondWithResource}
+					onSelect={handleAttributeBondWithResource}
+					options={newValueAttributes}
+					placeholder='Атрибут связи с ресурсом'
+					value={currentValue}
+				/>
+			</>
 		);
 	};
 
@@ -218,15 +232,18 @@ const Work = (props: Props) => {
 		const currentValue: Attribute = workAttribute ? getAdditionalFields(workAttribute, workAttribute.title, workAttribute.code) : null;
 
 		return (
-			<Select className={cn(styles.margin, styles.width)}
-				fetchOptions={getOptionsForBondWithWork}
-				isSearching={true}
-				loading={loading?.bondWithWork}
-				onSelect={handleAttributeBondWithWork}
-				options={newValueAttributes}
-				placeholder='Связь с вышестоящей работой'
-				value={currentValue}
-			/>
+			<>
+				<span className={styles.label}>Связь с вышестоящей работой</span>
+				<Select className={cn(styles.margin, styles.width)}
+					fetchOptions={getOptionsForBondWithWork}
+					isSearching={true}
+					loading={loading?.bondWithWork}
+					onSelect={handleAttributeBondWithWork}
+					options={newValueAttributes}
+					placeholder='Связь с вышестоящей работой'
+					value={currentValue}
+				/>
+			</>
 		);
 	};
 
@@ -272,15 +289,18 @@ const Work = (props: Props) => {
 		const currentValue: Attribute = attribute ? getAdditionalFields(attribute, attribute.title, attribute.code) : null;
 
 		return (
-			<Select className={cn(styles.margin, styles.width)}
-				fetchOptions={getOptionsForDate}
-				isSearching={true}
-				loading={loading?.date}
-				onSelect={value => handleChangeDate(value, target)}
-				options={newValueAttributes}
-				placeholder={label}
-				value={currentValue}
-			/>
+			<>
+				<span className={styles.label}>{label}</span>
+				<Select className={cn(styles.margin, styles.width)}
+					fetchOptions={getOptionsForDate}
+					isSearching={true}
+					loading={loading?.date}
+					onSelect={value => handleChangeDate(value, target)}
+					options={newValueAttributes}
+					placeholder={label}
+					value={currentValue}
+				/>
+			</>
 		);
 	};
 
@@ -330,7 +350,7 @@ const Work = (props: Props) => {
 
 	const renderDropdownMenu = () => {
 		if (showMenu) {
-			return <DropdownMenu items={ITEM_TYPES_FOR_WORK} onSelect={(item) => handleAddNewBlock(item)} onToggle={() => handleAddNewBlock()} />;
+			return <DropdownMenu items={ITEM_TYPES_FOR_WORK} onSelect={item => handleAddNewBlock(item)} onToggle={() => handleAddNewBlock()} />;
 		}
 
 		return null;
@@ -338,14 +358,39 @@ const Work = (props: Props) => {
 
 	const renderConfirmModal = () => {
 		if (showModal) {
-			return <ConfirmModal header='Атрибуты для таблицы' notice={false} onClose={handleCancelModal} onSubmit={handleSaveModal} text={getContentModal()} />;
+			return (
+				<ConfirmModal
+					className={styles.height}
+					header='Атрибуты для таблицы'
+					notice={false}
+					onClose={handleCancelModal}
+					onSubmit={handleSaveModal}
+					text={getContentModal()} />
+			);
+		}
+
+		return null;
+	};
+
+	const renderRemovingModal = () => {
+		if (showModalRemoving) {
+			return (
+				<ConfirmModal
+					header='Вы желаете удалить работу?'
+					notice={true}
+					onClose={() => setShowModalRemoving(false)}
+					onSubmit={handleDeleteBlock}
+					submitText="Удалить"
+					text="При удалении работы также удалятся и все вложенные в нее работы"
+				/>
+			);
 		}
 
 		return null;
 	};
 
 	const renderCollapsableFormBox = () => (
-		<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={handleDeleteBlock} title={getHeaderForm()}>
+		<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={() => setShowModalRemoving(true)} title={getHeaderForm()}>
 			<Container className={styles.container}>
 				{renderTreeSelect()}
 				{renderFilter()}
@@ -364,6 +409,7 @@ const Work = (props: Props) => {
 			{renderDropdownMenu()}
 			{renderCollapsableFormBox()}
 			{renderConfirmModal()}
+			{renderRemovingModal()}
 		</div>
 	);
 };

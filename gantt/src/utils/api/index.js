@@ -9,6 +9,7 @@ import {
 	getDiagramData,
 	getInitialParams,
 	getInitialSettings,
+	getUserData,
 	openFilterForm,
 	saveData
 } from './context';
@@ -21,6 +22,7 @@ export {
 	getDiagramData,
 	getInitialParams,
 	getInitialSettings,
+	getUserData,
 	openFilterForm,
 	saveData
 };

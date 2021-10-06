@@ -1,8 +1,8 @@
 // @flow
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSettings} from './constants';
-import type {CommonSettings, DiagramData, ResourceSettings, Source} from './types';
+import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getDataSources, getDiagramData, getInitialSettings, saveData} from 'utils/api';
+import {getContext, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData} from 'utils/api';
 
 /**
  * Получает данные, необходимые для работы ВП
@@ -10,23 +10,25 @@ import {getContext, getDataSources, getDiagramData, getInitialSettings, saveData
  */
 const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		dispatch(showLoader());
+		dispatch(showLoaderSettings());
 
 		const {contentCode, subjectUuid} = getContext();
+		const {email, groupUser: role, name} = await getUserData();
 		const sources = await getDataSources();
 		const {commonSettings, diagramKey, resourceAndWorkSettings} = await getInitialSettings(contentCode, subjectUuid);
 
-		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));
+		dispatch(setContentCode(contentCode));
 		dispatch(setSubjectUuid(subjectUuid));
-		dispatch(setCommonSettings(commonSettings || defaultCommonSettings));
-		dispatch(setResourceSettings(resourceAndWorkSettings || defaultResourceSettings));
+		dispatch(setUserData({email, name, role}));
+		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
+		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : defaultResourceSettings));
 		dispatch(setSources(sources));
 		dispatch(saveMasterSettings());
 	} catch (error) {
-		dispatch(setError(error));
+		dispatch(setErrorCommon(error));
 	} finally {
-		dispatch(hideLoader());
+		dispatch(hideLoaderSettings());
 	}
 };
 
@@ -36,7 +38,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
  */
 const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		dispatch(showLoader());
+		dispatch(showLoaderData());
 
 		const {contentCode, subjectUuid} = getContext();
 		const {commonSettings, diagramKey, tasks} = await getDiagramData(contentCode, subjectUuid);
@@ -44,35 +46,34 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
-		dispatch(setCommonSettings(commonSettings || defaultCommonSettings));
+		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
 		dispatch(setDiagramData(tasks || []));
 	} catch (error) {
-		dispatch(setError(error));
+		dispatch(setErrorData(error));
 	} finally {
-		dispatch(hideLoader());
+		dispatch(hideLoaderData());
 	}
 };
 
 /**
  * Отправляет обновленные данные
+ * @param {Settings} data - сохраняемые пользователем настройки
  * @returns {ThunkAction}
- * @param data
  */
-const saveSettings = (data): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const {contentCode, subjectUuid} = getContext();
 		const {commonSettings, resourceAndWorkSettings} = await saveData(subjectUuid, contentCode, data);
-		const {tasks} = await getDiagramData(contentCode, subjectUuid);
 
-		dispatch(showLoader());
+		await dispatch(getGanttData());
+		dispatch(showLoaderSettings());
 		dispatch(setCommonSettings(commonSettings || defaultCommonSettings));
 		dispatch(setResourceSettings(resourceAndWorkSettings || defaultResourceSettings));
 		dispatch(saveMasterSettings());
-		dispatch(setDiagramData(tasks || []));
 	} catch (error) {
-		dispatch(setError(error));
+		dispatch(setErrorSettings(error));
 	} finally {
-		dispatch(hideLoader());
+		dispatch(hideLoaderSettings());
 	}
 };
 
@@ -84,22 +85,36 @@ const saveMasterSettings = () => ({
 });
 
 /**
- * Скрывает лоадер
+ * Скрывает индикатор загрузки диаграммы
  */
-const hideLoader = () => ({
-	type: APP_EVENTS.HIDE_LOADER
+const hideLoaderData = () => ({
+	type: APP_EVENTS.HIDE_LOADER_DATA
 });
 
 /**
- * Показывает лоадер
+ * Показывает индикатор загрузки диаграммы
  */
-const showLoader = () => ({
-	type: APP_EVENTS.SHOW_LOADER
+const showLoaderData = () => ({
+	type: APP_EVENTS.SHOW_LOADER_DATA
+});
+
+/**
+ * Скрывает индикатор загрузки панели настроек
+ */
+const hideLoaderSettings = () => ({
+	type: APP_EVENTS.HIDE_LOADER_SETTINGS
+});
+
+/**
+ * Показывает индикатор загрузки панели настроек
+ */
+const showLoaderSettings = () => ({
+	type: APP_EVENTS.SHOW_LOADER_SETTINGS
 });
 
 /**
  * Сохраняет contentCode - код самого ВП
- * @param payload
+ * @param {string} payload - contentCode
  */
 const setContentCode = (payload: string) => ({
 	payload,
@@ -108,7 +123,7 @@ const setContentCode = (payload: string) => ({
 
 /**
  * Сохраняет ключ диаграммы
- * @param payload
+ * @param {string} payload - ключ диаграммы
  */
 const setDiagramKey = (payload: string) => ({
 	payload,
@@ -117,7 +132,7 @@ const setDiagramKey = (payload: string) => ({
 
 /**
  * Сохраняет subjectUuid - код объекта, куда встроенно ВП
- * @param payload
+ * @param {string} payload - subjectUuid
  */
 const setSubjectUuid = (payload: string) => ({
 	payload,
@@ -125,17 +140,44 @@ const setSubjectUuid = (payload: string) => ({
 });
 
 /**
- * Сохраняет ошибку
- * @param payload
+ * Сохраняет данные о пользователе
+ * @param {UserData} payload - данные пользователя
  */
-const setError = (payload: string) => ({
+const setUserData = (payload: UserData) => ({
 	payload,
-	type: APP_EVENTS.SET_ERROR
+	type: APP_EVENTS.SET_USER_DATA
+});
+
+/**
+ * Сохраняет ошибку загрузки данных
+ * @param {string} payload - сообщение об ошибке
+ */
+const setErrorData = (payload: string) => ({
+	payload,
+	type: APP_EVENTS.SET_ERROR_DATA
+});
+
+/**
+ * Сохраняет ошибку настроек
+ * @param {string} payload - сообщение об ошибке
+ */
+const setErrorSettings = (payload: string) => ({
+	payload,
+	type: APP_EVENTS.SET_ERROR_SETTINGS
+});
+
+/**
+ * Сохраняет общую ошибку приложения
+ * @param {string} payload - сообщение об ошибке
+ */
+const setErrorCommon = (payload: string) => ({
+	payload,
+	type: APP_EVENTS.SET_ERROR_COMMON
 });
 
 /**
  * Сохраняет общие настройки
- * @param payload
+ * @param {CommonSettings} payload - общие настройки
  */
 const setCommonSettings = (payload: CommonSettings) => ({
 	payload,
@@ -144,7 +186,7 @@ const setCommonSettings = (payload: CommonSettings) => ({
 
 /**
  * Сохраняет настройки ресурсов
- * @param payload
+ * @param {ResourceSettings} payload - настройки ресурсов
  */
 const setResourceSettings = (payload: ResourceSettings) => ({
 	payload,
@@ -153,7 +195,7 @@ const setResourceSettings = (payload: ResourceSettings) => ({
 
 /**
  * Сохраняет данные диаграммы
- * @param payload
+ * @param {DiagramData} payload - данные диаграммы
  */
 const setDiagramData = (payload: DiagramData) => ({
 	payload,
@@ -162,7 +204,7 @@ const setDiagramData = (payload: DiagramData) => ({
 
 /**
  * Сохраняет источники
- * @param payload
+ * @param {Array<Source>} payload - массив из источников
  */
 const setSources = (payload: Array<Source>) => ({
 	payload,
@@ -179,11 +221,13 @@ const cancelSettings = () => ({
 export {
 	cancelSettings,
 	getAppConfig,
-	hideLoader,
+	hideLoaderData,
+	hideLoaderSettings,
 	saveSettings,
 	setCommonSettings,
 	getGanttData,
 	setDiagramData,
 	setResourceSettings,
-	showLoader
+	showLoaderData,
+	showLoaderSettings
 };

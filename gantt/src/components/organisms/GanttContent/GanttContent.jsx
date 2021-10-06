@@ -6,9 +6,10 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class GanttContent extends PureComponent<Props> {
-	renderGanttGrid = () => (
-		<GanttGrid style={{ height: '100%', width: '100%' }} />
-	);
+	renderGanttGrid = () => {
+		const {errorData} = this.props;
+		return errorData ? <p>Ошибка загрузки данных</p> : <GanttGrid style={{height: '100%', width: '100%'}} />;
+	};
 
 	renderPanel = () => {
 		const {editMode} = this.props;

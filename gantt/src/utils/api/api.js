@@ -12,7 +12,21 @@ export default class Api {
 	}
 
 	async getInitialSettings (contentCode: string, subjectUuid: string) {
-		const url = `exec-post?func=modules.ganttSettings.getGanttSettings&params=requestContent`;
+		const url = `exec-post?func=modules.ganttSettings.getGanttSettings&params=requestContent,user`;
+		const body = {
+			contentCode: contentCode,
+			subjectUUID: subjectUuid
+		};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
+	async getUserData (contentCode: string, subjectUuid: string) {
+		const url = `exec-post?func=modules.ganttSettings.getUserData&params=requestContent,user`;
 		const body = {
 			contentCode: contentCode,
 			subjectUUID: subjectUuid

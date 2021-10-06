@@ -22,6 +22,15 @@ const getContext = (): string => {
 };
 
 /**
+ * Получает данные о пользователе (в тч и его права)
+ * @returns {string} - uuid объекта, на карточке которого выведено ВП.
+ */
+const getUserData = async (contentCode: string, subjectUuid: string): Promise<UserData> => {
+	const userData = await api.getUserData(contentCode, subjectUuid);
+	return userData;
+};
+
+/**
  * Возвращает параметры, переданные ВП
  * @returns {Promise<Params>} - параметры
  */
@@ -109,5 +118,6 @@ export {
 	getInitialParams,
 	getInitialSettings,
 	openFilterForm,
+	getUserData,
 	saveData
 };

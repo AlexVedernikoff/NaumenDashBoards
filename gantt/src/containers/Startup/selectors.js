@@ -8,11 +8,10 @@ import {getAppConfig, getGanttData} from 'store/App/actions';
  * @returns {ConnectedProps}
  */
 export const props = (state: AppState): ConnectedProps => {
-	const {error, loading} = state.APP;
+	const {errorCommon} = state.APP;
 
 	return {
-		error,
-		loading
+		error: errorCommon
 	};
 };
 

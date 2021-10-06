@@ -5,17 +5,19 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {gantt} from 'dhtmlx-gantt';
 import React, {useEffect, useRef, useState} from 'react';
 
+const HEIGHT_HEADER = 70;
+
 const Gantt = (props: Props) => {
 	const {columns, rollUp, scale, tasks} = props;
 	const [showMenu, setShowMenu] = useState(false);
-	const [adaptedColumns, setAdaptedColumns] = useState([]);
+	const [position, setPosition] = useState({left: 0, top: 0});
 	const ganttContainer = useRef(null);
 	const zoomConfig = {
 		levels: [
 			{
 				min_column_width: 80,
 				name: 'day',
-				scale_height: 50,
+				scale_height: HEIGHT_HEADER,
 				scales: [
 					{format: '%H:%i', unit: 'hour'},
 					{format: '%j %M', unit: 'day'}
@@ -24,7 +26,7 @@ const Gantt = (props: Props) => {
 			{
 				min_column_width: 50,
 				name: 'week',
-				scale_height: 50,
+				scale_height: HEIGHT_HEADER,
 				scales: [
 					{format: function (date) {
 						const dateToStr = gantt.date.date_to_str('%d %M');
@@ -40,7 +42,7 @@ const Gantt = (props: Props) => {
 			{
 				min_column_width: 30,
 				name: 'year',
-				scale_height: 50,
+				scale_height: HEIGHT_HEADER,
 				scales: [
 					{format: '%Y', unit: 'year'}
 				]
@@ -48,7 +50,7 @@ const Gantt = (props: Props) => {
 			{
 				min_column_width: 120,
 				name: 'month',
-				scale_height: 50,
+				scale_height: HEIGHT_HEADER,
 				scales: [
 					{format: '%F', unit: 'month'},
 					{format: '%Y', unit: 'year'}
@@ -58,13 +60,13 @@ const Gantt = (props: Props) => {
 	};
 
 	useEffect(() => {
-		configureAdaptedColumns();
+		handleHeaderClick();
 
 		gantt.config.open_tree_initially = true;
 		gantt.config.resize_rows = true;
 		gantt.config.grid_resize = true;
 		gantt.config.keep_grid_width = true;
-		gantt.config.columns = adaptedColumns;
+		gantt.config.columns = configureAdaptedColumns();
 
 		gantt.templates.parse_date = (dateStr) => gantt.date.convert_to_utc(new Date(dateStr));
 		gantt.ext.zoom.init(zoomConfig);
@@ -87,9 +89,9 @@ const Gantt = (props: Props) => {
 	}, [rollUp]);
 
 	useEffect(() => {
-		gantt.config.columns = adaptedColumns;
+		gantt.config.columns = configureAdaptedColumns();
 		gantt.render();
-	}, [adaptedColumns]);
+	}, [columns]);
 
 	useEffect(() => {
 		gantt.clearAll();
@@ -97,47 +99,51 @@ const Gantt = (props: Props) => {
 		gantt.render();
 	}, [tasks]);
 
-	gantt.attachEvent('onGridHeaderClick', function (name, e) {
-		const column = gantt.getGridColumn(name);
+	const handleHeaderClick = () => {
+		gantt.attachEvent('onGridHeaderClick', function (name, e) {
+			const column = gantt.getGridColumn(name);
 
-		if (column && !column.tree && column.name !== 'button') {
-			column.hide = true;
-			column.show = false;
-			gantt.render();
-		} else if (column.name === 'button') {
-			console.log(name);
-			// e.clientX
-			// e.clientY
-			console.log(e);
-			setShowMenu(!showMenu);
-		}
-	});
-
-	const configureAdaptedColumns = () => {
-		columns.forEach(item => adaptedColumns.push({
-			...item,
-			hide: !item.show,
-			label: item.title,
-			name: item.code,
-			resize: true,
-			width: 180
-		}));
-		adaptedColumns[0].tree = true;
-		adaptedColumns.push({hide: false, name: 'button', resize: true, width: 44});
-		adaptedColumns[0].template = task => {
-			if (!task.parent || task.type === 'RESOURCE') {
-				return '<b>' + task[adaptedColumns[0].name] + '</b>';
+			if (column && !column.tree && column.name !== 'button') {
+				gantt.getGridColumn('button').hide = false;
+				column.hide = true;
+				column.show = false;
+				gantt.render();
+			} else if (column.name === 'button') {
+				setPosition({left: e.x, top: e.y - 52});
+				setShowMenu(!showMenu);
 			}
-
-			return task[adaptedColumns[0].name];
-		};
-
-		setAdaptedColumns(adaptedColumns);
+		});
 	};
 
-	const checkItemMenuHide = column => {
-		gantt.getGridColumn(column.name).hide = false;
-		gantt.getGridColumn(column.name).show = true;
+	const configureAdaptedColumns = () => {
+		const adaptedColumns = [];
+
+		if (columns && columns.length) {
+			columns.forEach(item => adaptedColumns.push({
+				...item,
+				hide: !item.show,
+				label: item.title,
+				name: item.code,
+				resize: true,
+				width: 180
+			}));
+			adaptedColumns[0].tree = true;
+			adaptedColumns.push({hide: !columns.find(item => !item.show), name: 'button', resize: true, width: 44});
+			adaptedColumns[0].template = task => {
+				if (!task.parent || task.type === 'RESOURCE') {
+					return '<b>' + task[adaptedColumns[0].name] + '</b>';
+				}
+
+				return task[adaptedColumns[0].name];
+			};
+			return adaptedColumns;
+		}
+	};
+
+	const checkItemMenuHide = (column, value) => {
+		gantt.getGridColumn(column.name).hide = !value;
+		gantt.getGridColumn(column.name).show = value;
+		gantt.getGridColumn('button').hide = value && !gantt.config.columns.find(item => item.hide);
 		gantt.render();
 	};
 
@@ -151,7 +157,7 @@ const Gantt = (props: Props) => {
 			}
 		}
 
-		return <CheckedMenu items={items} onCheck={checkItemMenuHide} onToggle={() => setShowMenu(!showMenu)} />;
+		return <CheckedMenu items={items} onCheck={checkItemMenuHide} onToggle={() => setShowMenu(!showMenu)} position={position} />;
 	};
 
 	return (

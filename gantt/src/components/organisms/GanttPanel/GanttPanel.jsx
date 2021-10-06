@@ -41,7 +41,7 @@ export class GanttPanel extends PureComponent<Props, State> {
 	renderFallback = () => {
 		return (
 			<div className={styles.fallback}>
-				<Loader />
+				<Loader size={50} />
 			</div>
 		);
 	};

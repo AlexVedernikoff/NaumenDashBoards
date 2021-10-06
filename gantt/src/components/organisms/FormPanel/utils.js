@@ -5,9 +5,9 @@ import {store} from 'app.constants';
 
 /**
  * Получаем родителя у ребенка
- * @returns {ResourceSetting}
  * @param indexChild - индекс ребенка
  * @param levelChild - уровень (глубина) ребенка
+ * @returns {ResourceSetting}
  */
 export const getParent = (indexChild: number, levelChild: number): ResourceSetting => {
 	const {resources} = store.getState().APP;
@@ -25,9 +25,9 @@ export const getParent = (indexChild: number, levelChild: number): ResourceSetti
 
 /**
  * Получаем ближайшего соседа с такой же глубиной (уровнем)
- * @returns {ResourceSetting}
  * @param index - индекс
  * @param level - уровень (глубина)
+ * @returns {ResourceSetting}
  */
 export const getNeighbor = (index: number, level: number): ResourceSetting => {
 	const {resources} = store.getState().APP;
@@ -42,9 +42,35 @@ export const getNeighbor = (index: number, level: number): ResourceSetting => {
 };
 
 /**
- * Получаем ближайшего соседа без учета глубины (уровня)
- * @returns {ResourceSetting}
+ * Получаем ближайшего ребенка с отличным от родителя типом
  * @param index - индекс
+ * @param level - уровень (глубина)
+ * @returns {ResourceSetting}
+ */
+export const getChild = (index: number, level: number): ResourceSetting => {
+	const {resources} = store.getState().APP;
+
+	if (index === resources.length - 1) {
+		return null;
+	}
+
+	for (let i = index + 1; i < resources.length; i++) {
+		if (resources[i].level > level && resources[index].type !== resources[i].type) {
+			return resources[i];
+		}
+
+		if (resources[i].level <= level) {
+			return null;
+		}
+	}
+
+	return null;
+};
+
+/**
+ * Получаем ближайшего соседа без учета глубины (уровня)
+ * @param index - индекс
+ * @returns {ResourceSetting}
  */
 export const getPrevItem = (index: number): ResourceSetting => {
 	const {resources} = store.getState().APP;
@@ -56,6 +82,7 @@ export const getPrevItem = (index: number): ResourceSetting => {
  * @param target - изначальный объекта
  * @param newLabel - значение поля label
  * @param newValue - значение поля value
+ * @returns {Object}
  */
 export const getAdditionalFields = (target: ResourceSetting | Attribute, newLabel: string, newValue: string) => {
 	return {
@@ -69,6 +96,7 @@ export const getAdditionalFields = (target: ResourceSetting | Attribute, newLabe
  * Обновляем объект, удаляя поля, перечисленные в exclusions
  * @param target - изначальный объекта
  * @param exclusions - массив полей, которые нужно удалить
+ * @returns {Object}
  */
 export const copyWithExclusion = (target: Object, exclusions: Array<string>) => {
 	const newValue = {...target};
@@ -80,8 +108,8 @@ export const copyWithExclusion = (target: Object, exclusions: Array<string>) => 
 
 /**
  * Получаем classFqn
- * @returns {string}
  * @param parentId - id объекта
+ * @returns {string}
  */
 export const getParentClassFqn = (parentId: number): string => {
 	if (parentId) {
@@ -94,27 +122,27 @@ export const getParentClassFqn = (parentId: number): string => {
 };
 
 /**
- * Изменение указанного элемента на новый
- * @returns {string}
+ * Заменяет элемент массива
  * @param array - массив
  * @param el - объект, который нужно изменить
  * @param index - индекс объекта
+ * @returns {Array<Object>}
  */
-export const updateElementInArray = (array, el, index): Array<Object> => [...array.slice(0, index), el, ...array.slice(index + 1)];
+export const replaceElementInArray = (array, el, index): Array<Object> => [...array.slice(0, index), el, ...array.slice(index + 1)];
 
 /**
  * Получаем новый уровень вложенности в зависимости от значения чекбокса.
  * Новый уровень зависит от старого значения - если isNested, то добавляем 1.
  * Если !isNested, то из старого уровня вычитается 1.
- * @returns {number}
  * @param oldLevel - старый уровень объекта
  * @param isNested - значение чекбокса - является ли данный объект вложенным
+ * @returns {number}
  */
 export const getUpdatedLevel = (oldLevel: number, isNested: boolean): number => oldLevel + (1 - 2 * (isNested ? 0 : 1));
 
 /**
  * Получаем размер отступа для объекта в зависимости от его уровня вложенности
- * @returns {string}
  * @param level - уровень вложенности (глубины)
+ * @returns {Object}
  */
 export const getPaddingLeftForChildren = (level: number): Object => ({'paddingLeft': `${level * 36}px`});
