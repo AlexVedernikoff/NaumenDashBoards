@@ -89,7 +89,7 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 const exportTableToXLSX = (widget: TableWidget, rowCount: number = 1e4): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const state = getState();
 	const data = await getDataForTableDiagram(state, widget, 1, rowCount);
-	const name = getSnapshotName(widget.name);
+	const name = await getSnapshotName(widget.name);
 
 	return exportSheet(name, removeCodesFromTableData(data));
 };
