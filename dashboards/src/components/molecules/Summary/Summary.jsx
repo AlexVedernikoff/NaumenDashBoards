@@ -101,9 +101,11 @@ export class Summary extends PureComponent<Props, State> {
 	renderValue = (fontSize: number) => {
 		const {onClickValue} = this.props;
 		const {height: textHeight} = this.state;
-		const height = `${textHeight}px`;
+		const style = {
+			height: textHeight > 0 ? `${textHeight}px` : 'auto'
+		};
 
-		return <span className={styles.value} onClick={onClickValue} style={{height}}>{this.getValue()}</span>;
+		return <span className={styles.value} onClick={onClickValue} style={style}>{this.getValue()}</span>;
 	};
 
 	renderWithResize = (className: string, style: Object) => {
