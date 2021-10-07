@@ -65,7 +65,7 @@ export class BorderFieldSet extends PureComponent<Props> {
 						dataKey={dataKey}
 						onChange={this.handleChangeIndicator(name)}
 						source={source}
-						value={indicator}
+						value={indicator ?? DEFAULT_INDICATOR}
 					/>
 				</HELPERS_CONTEXT.Provider>
 			);

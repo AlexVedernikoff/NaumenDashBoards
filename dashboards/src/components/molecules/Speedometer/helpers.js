@@ -1,7 +1,7 @@
 // @flow
 import {BASE_RADIUS, CURVE_HEIGHT, END_DEGREE, START_DEGREE} from './constants';
+import {FONT_SIZE_AUTO_OPTION, RANGES_TYPES} from 'store/widgets/data/constants';
 import type {Range, RangesTypes} from 'store/widgets/data/types';
-import {RANGES_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Расчитывает координаты из полярных координат
@@ -102,7 +102,7 @@ const normalizingRanges = (ranges: Array<Range>, type: RangesTypes, min: number,
 
 	if (type === RANGES_TYPES.ABSOLUTE) {
 		const diff = max - min;
-		const calcProcent = (value) => (value - min) * 100 / diff;
+		const calcProcent = value => (value - min) * 100 / diff;
 
 		normalizingResult = result.map(({from, to, ...data}) => ({from: calcProcent(from), to: calcProcent(to), ...data}));
 	}
@@ -144,8 +144,29 @@ const calcLayout = (width: number, height: number, curveFontSize: number, border
 	return {arcX, arcY, fontSizeScale, radius};
 };
 
+const checkFontSize = (fontSize: null | string | number, defaultValue: number): number => {
+	let result = defaultValue;
+
+	if (fontSize !== null) {
+		if (fontSize !== FONT_SIZE_AUTO_OPTION) {
+			if (typeof fontSize === 'string') {
+				result = Number.parseFloat(fontSize);
+
+				if (isNaN(result)) {
+					result = defaultValue;
+				}
+			} else {
+				result = fontSize;
+			}
+		}
+	}
+
+	return result;
+};
+
 export {
 	calcLayout,
+	checkFontSize,
 	getAngleByValue,
 	normalizingRanges,
 	polarToCartesian

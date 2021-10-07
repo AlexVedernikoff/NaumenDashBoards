@@ -7,6 +7,7 @@ const END_DEGREE = 90;
 // Радиус спидометра, относительно которого заданы базовые размеры шрифтов
 const BASE_RADIUS = 130;
 
+const BASE_BORDER_FONT_SIZE = 18;
 const BASE_VALUE_FONT_SIZE = 24;
 
 const TITLE_STYLE = {
@@ -22,6 +23,7 @@ const CURVE_HEIGHT = 0.3;
 export {
 	CURVE_HEIGHT,
 	BASE_RADIUS,
+	BASE_BORDER_FONT_SIZE,
 	BASE_VALUE_FONT_SIZE,
 	END_DEGREE,
 	START_DEGREE,
