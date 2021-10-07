@@ -6,7 +6,6 @@ import type {
 	RecordErrorLink,
 	RequestLink
 } from './types';
-import {getDescriptorCases} from 'store/helpers';
 import {isSourceType} from 'store/sources/data/helpers';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -79,11 +78,11 @@ const createDrillDownMixin = (widget: Widget): DrillDownMixin => {
 	};
 };
 
-const getPartsClassFqn = (code?: string) => {
+const getPartsClassFqn = (code?: string, getDescriptorCases: ?(classFqn: string) => Array<string> = null) => {
 	const cases = [];
 	let classFqn = code;
 
-	if (classFqn && isSourceType(classFqn)) {
+	if (classFqn && getDescriptorCases && isSourceType(classFqn)) {
 		cases.push(...getDescriptorCases(classFqn).map(type => type.split('$')[1]));
 		classFqn = classFqn.split('$')[0];
 	}

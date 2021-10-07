@@ -1,13 +1,13 @@
 // @flow
-import type {Attribute} from 'src/store/sources/attributes/types';
+import type {Attribute} from 'store/sources/attributes/types';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
-import type {Item, ItemsMap} from 'src/store/sources/currentObject/types';
-import MaterialTreeSelect from 'src/components/molecules/MaterialTreeSelect';
-import type {OnSelectEvent, TreeNode} from 'src/components/types';
+import type {Item, ItemsMap} from 'store/sources/currentObject/types';
+import MaterialTreeSelect from 'components/molecules/MaterialTreeSelect';
+import type {OnSelectEvent, TreeNode} from 'components/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import type {SelectData} from 'src/store/customGroups/types';
+import type {SelectData} from 'store/customGroups/types';
 
 export class CurrentObjectOrCondition extends PureComponent<Props, State> {
 	static defaultProps = {

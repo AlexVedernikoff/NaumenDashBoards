@@ -3,6 +3,7 @@ import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {DrillDownBigData, NoDetailData} from 'api/errors';
 import type {DrillDownMixin} from './types';
+import {getDescriptorCases} from 'store/helpers';
 import {getPartsClassFqn} from './helpers';
 import {LINKS_EVENTS} from './constants';
 import {parseAttrSetConditions} from 'store/widgetForms/helpers';
@@ -17,7 +18,7 @@ const createPostData = (widget: Widget, index: number) => {
 
 	if (source) {
 		const {label: title, value} = sourceValue;
-		const {cases, classFqn} = getPartsClassFqn(value);
+		const {cases, classFqn} = getPartsClassFqn(value, getDescriptorCases);
 		const widgetFilters = widgetFilterOptions?.filter(({descriptor}) => !!descriptor).map(({descriptor}) => ({ dataKey, descriptor })) ?? [];
 
 		postData = {

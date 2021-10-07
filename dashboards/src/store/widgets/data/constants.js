@@ -207,6 +207,15 @@ const RANGES_TYPES = {
 	PERCENT
 };
 
+// типы диапазонов спидометра
+const CURVE: 'CURVE' = 'CURVE';
+const LEGEND: 'LEGEND' = 'LEGEND';
+
+const RANGES_POSITION = {
+	CURVE,
+	LEGEND
+};
+
 // Режимы отображения
 const ANY: 'ANY' = 'ANY';
 
@@ -418,6 +427,7 @@ export {
 	MAX_FONT_SIZE,
 	NOTATION_FORMATS,
 	RANGES_TYPES,
+	RANGES_POSITION,
 	SORTING_TYPES,
 	SORTING_VALUES,
 	TEXT_ALIGNS,

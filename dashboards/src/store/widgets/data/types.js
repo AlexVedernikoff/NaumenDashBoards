@@ -13,6 +13,7 @@ import {
 	HEADER_POSITIONS,
 	LABEL_FORMATS,
 	NOTATION_FORMATS,
+	RANGES_POSITION,
 	RANGES_TYPES,
 	SORTING_TYPES,
 	SORTING_VALUES,
@@ -370,16 +371,48 @@ export type Range = {
 	to: string | number
 };
 
-export type Borders = {
-	max: string,
-	min: string
+export type Border = {
+	indicator: ?Indicator,
+	isNumber: boolean,
+	value: number
 };
 
-export type RangesType = $Keys<typeof RANGES_TYPES>;
+export type BordersStyle = {
+	fontColor: string,
+	fontFamily: string,
+	fontSize: number | string,
+	fontStyle?: FontStyle,
+	format: ?NumberAxisFormat,
+	show: boolean
+};
+
+export type Borders = {
+	max: Border,
+	min: Border,
+	style: BordersStyle
+};
+
+export type RangesTypes = $Keys<typeof RANGES_TYPES>;
+
+export type RangesPosition = $Keys<typeof RANGES_POSITION>;
+
+export type RangesStyle = {
+	displayType: LegendDisplayType,
+	fontColor: string,
+	fontFamily: string,
+	fontSize: number | string,
+	fontStyle: FontStyle,
+	format: ?NumberAxisFormat,
+	legendPosition: LegendPosition,
+	position: RangesPosition,
+	show: boolean,
+	textHandler: TextHandler
+};
 
 export type Ranges = {
 	data: Array<Range>,
-	type: RangesType,
+	style: RangesStyle,
+	type: RangesTypes,
 	use: boolean
 };
 

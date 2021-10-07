@@ -1,6 +1,5 @@
 'use strict';
-
-// const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
+const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const {development, license} = require('./define');
 const Dotenv = require('dotenv-webpack');
@@ -12,9 +11,23 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packagejson = require('../package.json');
 const ParametersXMLWebpackPlugin = require('parameters-xml-webpack-plugin');
 
+const devPlugins = [
+	new BundleStatsWebpackPlugin({
+		outDir: '..',
+		silent: true
+	}),
+	new CircularDependencyPlugin()
+];
+
+const prodPlugins = [
+	new ParametersXMLWebpackPlugin({
+		output: './dist/parameters.xml',
+		path: 'metainfo.xml'
+	})
+];
+
 const plugins = [
-	new ParametersXMLWebpackPlugin({output: './dist/parameters.xml', path: 'metainfo.xml'}),
-	// new BundleStatsWebpackPlugin({outDir: '..', silent: true}),
+	...(development ? devPlugins : prodPlugins),
 	new IgnorePlugin(/^\.\/locale$/, /moment$/),
 	new MiniCssExtractPlugin({
 		chunkFilename: development ? '[id].css' : '[id].[hash].css',
@@ -25,8 +38,7 @@ const plugins = [
 		template: './src/index.html',
 		title: 'SMP Embedded Application'
 	}),
-	new Dotenv(),
-	new CircularDependencyPlugin()
+	new Dotenv()
 ];
 
 if (license === 'use') {

@@ -8,55 +8,36 @@ import FormField from 'components/molecules/FormField';
 import Label from 'components/atoms/Label';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
-import RadioField from 'components/atoms/RadioField';
-import type {Range, RangesType} from 'store/widgets/data/types';
+import type {Range, RangesTypes} from 'store/widgets/data/types';
 import RangeField from 'components/organisms/SpeedometerWidgetForm/components/RangeField';
+import RangesTypeFieldset from 'components/organisms/SpeedometerWidgetForm/components/RangesTypeFieldset';
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 
 export class RangesFieldset extends PureComponent<Props> {
 	handleChangeRange = (index: number, newRange: Range) => {
-		const {name, onChange, value} = this.props;
-		const newData = value.data.map((range, i) => i === index ? newRange : range);
+		const {name, onChange, value: ranges} = this.props;
+		const newData = ranges.data.map((range, i) => i === index ? newRange : range);
 
-		onChange(name, {...value, data: newData});
+		onChange(name, {...ranges, data: newData});
 	};
 
-	handleChangeToRange = (index: number, to: string) => {
-		const {name, onChange, value} = this.props;
-		const newData = value.data.map((range, i) => {
-			let newRange = range;
+	handleChangeType = (typeName: string, type: RangesTypes) => {
+		const {name, onChange, value: ranges} = this.props;
 
-			if (i === index) {
-				newRange = {...newRange, to};
-			}
-
-			if (i === index + 1) {
-				newRange = {...newRange, from: String(Number(to) + 1)};
-			}
-
-			return newRange;
-		});
-
-		onChange(name, {...value, data: newData});
-	};
-
-	handleChangeType = ({value: type}: OnChangeEvent<RangesType>) => {
-		const {name, onChange, value} = this.props;
-
-		onChange(name, {...value, type});
+		onChange(name, {...ranges, type: type});
 	};
 
 	handleChangeUse = ({value: use}: OnChangeEvent<boolean>) => {
-		const {name, onChange, value} = this.props;
+		const {name, onChange, value: ranges} = this.props;
 
-		onChange(name, {...value, use: !use});
+		onChange(name, {...ranges, use: !use});
 	};
 
 	handleClickAddButton = () => {
-		const {name, onChange, value} = this.props;
-		const {data, type} = value;
+		const {name, onChange, value: ranges} = this.props;
+		const {data, type} = ranges;
 		const lastTo = data[data.length - 1].to;
 
 		if (lastTo && (type !== RANGES_TYPES.PERCENT || Number(lastTo) < 99)) {
@@ -66,20 +47,18 @@ export class RangesFieldset extends PureComponent<Props> {
 				to: ''
 			};
 
-			onChange(name, {
-				...value,
-				data: [...value.data, newRange]
-			});
+			onChange(name, {...ranges, data: [...data, newRange]});
 		}
 	};
 
 	handleRemoveRange = (index: number) => {
-		const {name, onChange, value} = this.props;
+		const {name, onChange, value: ranges} = this.props;
+		const {data} = ranges;
 
-		if (value.data.length > 1) {
+		if (data.length > 1) {
 			onChange(name, {
-				...value,
-				data: value.data.filter((r, i) => i !== index)
+				...ranges,
+				data: data.filter((r, i) => i !== index)
 			});
 		}
 	};
@@ -99,7 +78,7 @@ export class RangesFieldset extends PureComponent<Props> {
 		if (use) {
 			return (
 				<Fragment>
-					{this.renderTypeFields()}
+					{this.renderRangesTypeFieldset()}
 					{this.renderFieldDivider()}
 					{this.renderRangesFields()}
 					{this.renderAddRangeButton()}
@@ -119,8 +98,8 @@ export class RangesFieldset extends PureComponent<Props> {
 		return (
 			<RangeField
 				index={index}
+				key={index}
 				onChange={this.handleChangeRange}
-				onChangeToRange={this.handleChangeToRange}
 				onRemove={this.handleRemoveRange}
 				range={range}
 				removable={removable}
@@ -129,47 +108,23 @@ export class RangesFieldset extends PureComponent<Props> {
 		);
 	};
 
-	renderRangesFields = () => (
-		<Fragment>
-			{this.renderLabel('Диапазоны')}
-			{this.props.value.data.map(this.renderRangeField)}
-		</Fragment>
-	);
-
-	renderTypeFields = () => {
-		const {ABSOLUTE, PERCENT} = RANGES_TYPES;
-		const {type} = this.props.value;
-
+	renderRangesFields = () => {
+		const {data} = this.props.value;
 		return (
 			<Fragment>
-				{this.renderLabel('Тип шкалы')}
-				<FormField>
-					<RadioField
-						checked={type === PERCENT}
-						label="Проценты"
-						name={DIAGRAM_FIELDS.type}
-						onChange={this.handleChangeType}
-						value={PERCENT}
-					/>
-				</FormField>
-				<FormField>
-					<RadioField
-						checked={type === ABSOLUTE}
-						label="Абсолютное значение"
-						name={DIAGRAM_FIELDS.type}
-						onChange={this.handleChangeType}
-						value={ABSOLUTE}
-					/>
-				</FormField>
+				{this.renderLabel('Диапазоны')}
+				{data.map(this.renderRangeField)}
 			</Fragment>
 		);
 	};
+
+	renderRangesTypeFieldset = () => <RangesTypeFieldset name={DIAGRAM_FIELDS.type} onChange={this.handleChangeType} value={this.props.value.type} />;
 
 	renderUseCheckbox = () => {
 		const {use} = this.props.value;
 
 		return (
-			<FormField>
+			<FormField small>
 				<FormControl label="Использовать диапазоны">
 					<Checkbox checked={use} name={DIAGRAM_FIELDS.use} onChange={this.handleChangeUse} value={use} />
 				</FormControl>

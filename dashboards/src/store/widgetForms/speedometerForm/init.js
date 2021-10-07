@@ -2,7 +2,7 @@
 import {createSpeedometerDataSet} from './helpers';
 import {DEFAULT_DATA_KEY} from 'store/widgetForms/constants';
 import {DEFAULT_HEADER_SETTINGS, DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
-import {DEFAULT_SPEEDOMETER_SETTINGS} from 'src/components/organisms/Speedometer/constants';
+import {DEFAULT_SPEEDOMETER_SETTINGS} from './constants';
 import type {State} from './types';
 
 export const initialState: State = {

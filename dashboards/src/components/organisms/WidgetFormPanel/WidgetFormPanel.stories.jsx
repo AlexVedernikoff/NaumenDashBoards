@@ -46,3 +46,10 @@ TextForm.args = {
 	...AxisChartForm.args,
 	widget: new NewWidget(undefined, WIDGET_TYPES.TEXT)
 };
+
+export const SpeedometerForm = Template.bind({});
+
+SpeedometerForm.args = {
+	...AxisChartForm.args,
+	widget: new NewWidget(undefined, WIDGET_TYPES.SPEEDOMETER)
+};

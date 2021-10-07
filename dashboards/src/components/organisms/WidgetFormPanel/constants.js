@@ -53,7 +53,9 @@ const from = 'from';
 const header = 'header';
 const indicator = 'indicator';
 const indicators = 'indicators';
+const isNumber = 'isNumber';
 const legend = 'legend';
+const legendPosition = 'legendPosition';
 const name = 'name';
 const navigation = 'navigation';
 const max = 'max';
@@ -62,6 +64,7 @@ const parameter = 'parameter';
 const parameters = 'parameters';
 const position = 'position';
 const ranges = 'ranges';
+const scale = 'scale';
 const show = 'show';
 const showBlankData = 'showBlankData';
 const showDependent = 'showDependent';
@@ -74,6 +77,7 @@ const sorting = 'sorting';
 const source = 'source';
 const sources = 'sources';
 const sourceForCompute = 'sourceForCompute';
+const style = 'style';
 const template = 'template';
 const templateName = 'templateName';
 const tip = 'tip';
@@ -106,7 +110,9 @@ const DIAGRAM_FIELDS = {
 	header,
 	indicator,
 	indicators,
+	isNumber,
 	legend,
+	legendPosition,
 	max,
 	min,
 	name,
@@ -115,6 +121,7 @@ const DIAGRAM_FIELDS = {
 	parameters,
 	position,
 	ranges,
+	scale,
 	show,
 	showBlankData,
 	showDependent,
@@ -127,6 +134,7 @@ const DIAGRAM_FIELDS = {
 	source,
 	sourceForCompute,
 	sources,
+	style,
 	template,
 	templateName,
 	tip,
