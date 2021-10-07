@@ -1,14 +1,14 @@
 // @flow
-import {BASE_VALUE_FONT_SIZE, CURVE_HEIGHT, TITLE_STYLE} from './constants';
-import {calcLayout, getAngleByValue, normalizingRanges} from './helpers';
+import {BASE_BORDER_FONT_SIZE, BASE_VALUE_FONT_SIZE, CURVE_HEIGHT, TITLE_STYLE} from './constants';
+import {calcLayout, checkFontSize, getAngleByValue, normalizingRanges} from './helpers';
 import cn from 'classnames';
 import type {Components, Props, State} from './types';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'store/widgetForms/speedometerForm/constants';
-import {FONT_SIZE_AUTO_OPTION, RANGES_POSITION, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import {LEGEND_POSITIONS} from 'utils/chart';
 import Needle from './components/Needle';
 import Range from './components/Range';
+import {RANGES_POSITION, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import React, {Fragment, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
@@ -92,7 +92,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		const hasCurveText = rangesUse && rangesStyles.show && rangesStyles.position === RANGES_POSITION.CURVE;
 		const curveFontSize = hasCurveText ? rangesStyles.fontSize : 0;
-		const borderFontSize = borderStyle.show ? borderStyle.fontSize : 0;
+		const borderFontSize = borderStyle.show ? checkFontSize(borderStyle.fontSize, BASE_BORDER_FONT_SIZE) : 0;
 		const layout = calcLayout(graphWidth, graphHeight, curveFontSize, borderFontSize, TITLE_STYLE.fontSize);
 		const {arcX: baseArcX, arcY: baseArcY, fontSizeScale, radius} = layout;
 		const arcX = baseArcX + offsetArcX;
@@ -107,6 +107,8 @@ export class Speedometer extends PureComponent<Props, State> {
 		const {Text} = this.getComponents();
 		const {formatter, style} = borders;
 		const text = formatter(value);
+
+		style.fontSize = checkFontSize(style.fontSize, BASE_BORDER_FONT_SIZE);
 
 		return (
 			<Text
@@ -245,7 +247,7 @@ export class Speedometer extends PureComponent<Props, State> {
 	renderRanges = (): React$Node => {
 		const {color, options} = this.props;
 		const {ranges: {data, type, use} = DEFAULT_SPEEDOMETER_SETTINGS.ranges, borders: {max, min}} = options;
-		const formatter = options.ranges?.formatter ?? ((val) => val?.toString() ?? '');
+		const formatter = options.ranges?.formatter ?? (val => val?.toString() ?? '');
 		const ranges = use ? data : [];
 		const normalizeRanges = normalizingRanges(ranges, type, Number.parseFloat(min), Number.parseFloat(max), color, formatter);
 
@@ -275,7 +277,10 @@ export class Speedometer extends PureComponent<Props, State> {
 		const {arcX, arcY, fontSizeScale, graphWidth, radius} = this.state;
 		const fontSize = TITLE_STYLE.fontSize * fontSizeScale;
 		const {Text} = this.getComponents();
-		const borderFontSize = borders.style.show ? borders.style.fontSize * fontSizeScale : 0;
+		const borderFontSize = borders.style.show
+			? checkFontSize(borders.style.fontSize, BASE_BORDER_FONT_SIZE) * fontSizeScale
+			: 0;
+
 		const y = arcY + borderFontSize + fontSize;
 		let displayTitle = title;
 
@@ -302,24 +307,19 @@ export class Speedometer extends PureComponent<Props, State> {
 
 	renderValue = () => {
 		const {options: {data}} = this.props;
-		const {total, formatter = (val) => val, style} = data;
+		const {total, formatter = val => val, style} = data;
 		const {arcX, arcY, fontSizeScale, radius} = this.state;
-		let fontSize = style.fontSize;
-
-		if (!fontSize || fontSize === FONT_SIZE_AUTO_OPTION) {
-			fontSize = BASE_VALUE_FONT_SIZE;
-		}
-
 		const y = arcY - radius * 0.6;
 		const {Text} = this.getComponents();
 		const formatValue = formatter(total);
-		const textStyle = {...style, fontSize};
+
+		style.fontSize = checkFontSize(style.fontSize, BASE_VALUE_FONT_SIZE);
 
 		return (
 			<Text
 				alignmentBaseline="text-before-edge"
 				fontSizeScale={fontSizeScale}
-				style={textStyle}
+				style={style}
 				textAnchor="middle"
 				x={arcX}
 				y={y}
