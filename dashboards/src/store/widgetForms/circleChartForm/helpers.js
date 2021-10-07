@@ -1,12 +1,13 @@
 // @flow
+import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndicatorsAgregationDataSet, getDefaultBreakdown} from 'store/widgetForms/helpers';
+import {fixIndicatorsAgregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters, getDefaultBreakdown} from 'store/widgetForms/helpers';
 import {omit} from 'helpers';
+import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as AxisValues} from 'src/store/widgetForms/axisChartForm/types';
 import type {Values as ComboValues} from 'src/store/widgetForms/comboChartForm/types';
-import type {Values as TableValues} from 'src/store/widgetForms/tableForm/types';
 import type {Values as SpeedometerValues} from 'src/store/widgetForms/speedometerForm/types';
 import type {Values as SummaryValues} from 'src/store/widgetForms/summaryForm/types';
 
@@ -124,13 +125,15 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		navigation,
 		templateName
 	} = values;
+	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAgregationDataSet);
 
 	return {
 		...state,
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const prevDataSet = state.data[index] ?? createCircleDataSet(dataSet.dataKey);
-			const {parameters, ...fixDataSet} = fixIndicatorsAgregationDataSet(dataSet);
+			const {parameters, ...fixDataSet} = transformDataSet(dataSet);
+
 			return {...prevDataSet, ...fixDataSet};
 		}),
 		displayMode,

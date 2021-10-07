@@ -56,8 +56,8 @@ const fixIndicatorsAgregation = (indicators: ?Array<Indicator>): Array<Indicator
 
 /**
  * Заменяет агрегацию N/A на агрегацию CNT в индикаторах источника данных
- * @param {TableDataSet}  dataSet - изначальный источник данных
- * @returns  {TableDataSet}
+ * @param {TableDataSet} dataSet - изначальный источник данных
+ * @returns {TableDataSet}
  */
 const fixIndicatorsAgregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 	({
@@ -65,9 +65,47 @@ const fixIndicatorsAgregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 		indicators: fixIndicatorsAgregation(dataSet.indicators)
 	});
 
+/**
+ * Оставляет только один показатель в источнике
+ * @param {TableDataSet} dataSet - изначальный источник данных
+ * @returns {TableDataSet}
+ */
+const fixLeaveOneParameters = (dataSet: TableDataSet): TableDataSet => {
+	let result = dataSet;
+
+	if (dataSet.parameters && dataSet.parameters.length > 1) {
+		result = {
+			...dataSet,
+			parameters: dataSet.parameters.slice(0, 1)
+		};
+	}
+
+	return result;
+};
+
+/**
+ * Оставляет только один индикатор в источнике
+ * @param {TableDataSet} dataSet - изначальный источник данных
+ * @returns {TableDataSet}
+ */
+const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
+	let result = dataSet;
+
+	if (dataSet.indicators && dataSet.indicators.length > 1) {
+		result = {
+			...dataSet,
+			indicators: dataSet.indicators.slice(0, 1)
+		};
+	}
+
+	return result;
+};
+
 export {
 	getDefaultBreakdown,
+	fixLeaveOneParameters,
 	fixIndicatorsAgregation,
 	fixIndicatorsAgregationDataSet,
+	fixLeaveOneIndicator,
 	parseAttrSetConditions
 };
