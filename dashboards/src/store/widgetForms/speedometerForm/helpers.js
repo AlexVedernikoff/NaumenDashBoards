@@ -46,7 +46,7 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 
 			return {
 				dataKey,
-				indicators: fixIndicatorsAgregation(indicators),
+				indicators: fixIndicatorsAgregation(indicators).slice(0, 1),
 				source,
 				sourceForCompute
 			};

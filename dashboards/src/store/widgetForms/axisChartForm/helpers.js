@@ -1,13 +1,14 @@
 // @flow
+import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndicatorsAgregationDataSet} from 'store/widgetForms/helpers';
+import {fixIndicatorsAgregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters} from 'store/widgetForms/helpers';
+import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as CircleValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as ComboValues} from 'store/widgetForms/comboChartForm/types';
 import type {Values as SpeedometerValues} from 'store/widgetForms/speedometerForm/types';
 import type {Values as SummaryValues} from 'store/widgetForms/summaryForm/types';
-import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 
 /**
  * Создает базовый объект данных осевого графика
@@ -170,6 +171,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		showTotalAmount,
 		templateName
 	} = values;
+	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAgregationDataSet);
 
 	return {
 		...state,
@@ -179,7 +181,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 
 			return {
 				...prevDataSet,
-				...fixIndicatorsAgregationDataSet(dataSet)
+				...transformDataSet(dataSet)
 			};
 		}),
 		displayMode,
