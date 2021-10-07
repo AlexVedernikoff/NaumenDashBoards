@@ -51,3 +51,9 @@ export type ComboFormatter = {
 export type TotalFormatter = {
 	data: NumberFormatter
 };
+
+export type SpeedometerFormatter = {
+	borders: NumberFormatter,
+	ranges: NumberFormatter,
+	total: NumberFormatter
+};

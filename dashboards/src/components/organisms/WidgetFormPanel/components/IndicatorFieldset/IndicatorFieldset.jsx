@@ -213,12 +213,12 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {dataKey, dataSetIndex, index, onRemove, removable, source, value} = this.props;
+		const {className, dataKey, dataSetIndex, index, onRemove, removable, source, value} = this.props;
 		const {attribute} = value;
 
 		return (
 			<Context.Provider value={value}>
-				<FormField path={getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.indicators, index)}>
+				<FormField className={className} path={getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.indicators, index)}>
 					<AttributeFieldset
 						components={this.getComponents()}
 						dataKey={dataKey}

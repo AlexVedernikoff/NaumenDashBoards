@@ -33,8 +33,8 @@ class Table {
 	`);
 
 	createHeadCell = ({columns, header}: BaseColumn) => {
-		let rowspan = this.usesSubColumns && !Array.isArray(columns) ? 2 : 1;
-		let colspan = this.usesSubColumns && Array.isArray(columns) ? columns.length : 1;
+		const rowspan = this.usesSubColumns && !Array.isArray(columns) ? 2 : 1;
+		const colspan = this.usesSubColumns && Array.isArray(columns) ? columns.length : 1;
 
 		return `<th colspan="${colspan}" rowspan="${rowspan}">${header}</th>`;
 	};

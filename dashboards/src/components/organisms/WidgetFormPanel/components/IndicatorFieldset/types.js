@@ -6,6 +6,7 @@ import type {InjectedProps as HelpersProps} from 'containers/DiagramWidgetForm/H
 import type {OnSelectEvent} from 'components/types';
 
 export type Props = ValuesProps<{computedAttrs: Array<ComputedAttr>}> & HelpersProps & {
+	className: ?string,
 	dataKey: string,
 	dataSetIndex: number,
 	index: number,

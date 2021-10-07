@@ -1,45 +1,104 @@
 // @flow
+import type {Border} from 'store/widgets/data/types';
+import Checkbox from 'components/atoms/LegacyCheckbox';
+import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import FieldError from 'WidgetFormPanel/components/FieldError';
-import FormField from 'components/molecules/FormField';
+import FormField from 'WidgetFormPanel/components/FormField';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
-import HorizontalLabel from 'components/atoms/HorizontalLabel';
+import {HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withHelpers/constants';
+import type {Indicator} from 'store/widgetForms/types';
+import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import Label from 'components/atoms/Label';
+import memoize from 'memoize-one';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import TextInput from 'components/atoms/TextInput';
 
 export class BorderFieldSet extends PureComponent<Props> {
-	handleChangeBorder = ({name: key, value: inputValue}: Object) => {
-		const {name, onChange, value: settings} = this.props;
-		const value = inputValue.replace(',', '.');
+	getEmptyHelpers = memoize(() => ({
+		filterAttributesByUsed: (options, dataSetIndex) => options
+	}));
 
-		if (!value || /^-?(\d+)?(\.)?(\d{1,4})?$/.test(value)) {
-			onChange(name, {...settings, [key]: value});
-		}
+	handleChange = (borderName: string) => (name: string, value) => {
+		const {name: propName, onChange, value: borders} = this.props;
+		const newData = {...borders, [borderName]: {...borders[borderName], [name]: value}};
+
+		onChange(propName, newData);
 	};
 
-	renderScaleBorderField = (name: string, value: string) => (
-		<Fragment>
-			<FormField row small>
-				<HorizontalLabel>{name}</HorizontalLabel>
-				<TextInput name={name} onChange={this.handleChangeBorder} value={value} />
-			</FormField>
-			<FieldError className={styles.scaleBorderField} path={getErrorPath(DIAGRAM_FIELDS.borders, name)} />
-		</Fragment>
-	);
+	handleChangeIndicator = (borderName: string) => (index: number, indicator: Indicator) => {
+		this.handleChange(borderName)(DIAGRAM_FIELDS.indicator, indicator);
+	};
 
-	renderScaleBorderLabel = () => <Label className={styles.scaleBorderField}>Границы шкал</Label>;
+	handleChangeValue = (borderName: string) => ({name, value}) => {
+		this.handleChange(borderName)(name, value);
+	};
+
+	renderAbsoluteEdit = (name: string, isNumber: boolean, value: number, indicator: ?Indicator) => {
+		const content = isNumber ? this.renderValueEdit(name, value) : this.renderIndicatorSelect(name, indicator);
+
+		return (
+			<Fragment>
+				<Checkbox
+					className={styles.isNumber}
+					label="Использовать числовое значение"
+					name={DIAGRAM_FIELDS.isNumber}
+					onClick={this.handleChange(name)}
+					value={isNumber}
+				/>
+				{content}
+			</Fragment>
+		);
+	};
+
+	renderIndicatorSelect = (name: string, indicator: ?Indicator = DEFAULT_INDICATOR) => {
+		const {dataSet} = this.props;
+
+		if (dataSet) {
+			const {dataKey, source} = dataSet;
+
+			return (
+				<HELPERS_CONTEXT.Provider value={this.getEmptyHelpers()}>
+					<IndicatorFieldset
+						className={styles.indicatorSelect}
+						dataKey={dataKey}
+						onChange={this.handleChangeIndicator(name)}
+						source={source}
+						value={indicator}
+					/>
+				</HELPERS_CONTEXT.Provider>
+			);
+		}
+
+		return null;
+	};
+
+	renderScaleBorderField = (label: string, name: string, border: Border) => {
+		const {indicator, isNumber, value} = border;
+		const paths = [
+			getErrorPath(DIAGRAM_FIELDS.borders, name),
+			getErrorPath(DIAGRAM_FIELDS.borders, name, DIAGRAM_FIELDS.value),
+			getErrorPath(DIAGRAM_FIELDS.borders, name, DIAGRAM_FIELDS.indicator)
+		];
+
+		return (
+			<FormField label={label} paths={paths} small>
+				{this.renderAbsoluteEdit(name, isNumber, value, indicator)}
+			</FormField>
+		);
+	};
+
+	renderValueEdit = (name: string, value: number) => <TextInput name={DIAGRAM_FIELDS.value} onChange={this.handleChangeValue(name)} value={value} />;
 
 	render () {
 		const {max, min} = this.props.value;
 
 		return (
 			<Fragment>
-				{this.renderScaleBorderLabel()}
-				{this.renderScaleBorderField('min', min)}
-				{this.renderScaleBorderField('max', max)}
+				<Label className={styles.scaleBorderField}>Границы шкал</Label>
+				{this.renderScaleBorderField('Минимум', DIAGRAM_FIELDS.min, min)}
+				{this.renderScaleBorderField('Максимум', DIAGRAM_FIELDS.max, max)}
 			</Fragment>
 		);
 	}

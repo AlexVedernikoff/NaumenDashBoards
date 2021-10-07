@@ -1,8 +1,12 @@
 // @flow
+import BorderStyleBox from 'components/organisms/SpeedometerWidgetForm/components/BorderStyleBox';
+import type {BordersStyle, RangesStyle} from 'store/widgets/data/types';
+import {DEFAULT_SPEEDOMETER_SETTINGS} from 'store/widgetForms/speedometerForm/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import IndicatorBox from 'components/organisms/SummaryWidgetForm/components/IndicatorBox';
 import type {Props} from './types';
+import RangesStyleBox from 'components/organisms/SpeedometerWidgetForm/components/RangesStyleBox';
 import React, {Component} from 'react';
 import styles from './styles.less';
 
@@ -13,8 +17,27 @@ export class StyleTab extends Component<Props> {
 		onChange(name, data);
 	};
 
+	handleChangeBorderStyle = (name: string, style: BordersStyle) => {
+		const {onChange, values: {borders}} = this.props;
+		const newBorders = {...borders, style};
+
+		onChange(DIAGRAM_FIELDS.borders, newBorders);
+	};
+
+	handleChangeRangesStyle = (name: string, style: RangesStyle) => {
+		const {onChange, values: {ranges}} = this.props;
+		const newRanges = {...ranges, style};
+
+		onChange(DIAGRAM_FIELDS.ranges, newRanges);
+	};
+
 	render () {
-		const {header, indicator} = this.props.values;
+		const {
+			borders: {style: bordersStyle = DEFAULT_SPEEDOMETER_SETTINGS.borders.style},
+			header,
+			indicator,
+			ranges: {style: rangesStyle = DEFAULT_SPEEDOMETER_SETTINGS.ranges.style}
+		} = this.props.values;
 
 		return (
 			<div className={styles.container}>
@@ -25,6 +48,8 @@ export class StyleTab extends Component<Props> {
 					useAutoFontSize={true}
 					value={indicator}
 				/>
+				<BorderStyleBox name={DIAGRAM_FIELDS.style} onChange={this.handleChangeBorderStyle} value={bordersStyle} />
+				<RangesStyleBox name={DIAGRAM_FIELDS.style} onChange={this.handleChangeRangesStyle} value={rangesStyle} />
 			</div>
 		);
 	}

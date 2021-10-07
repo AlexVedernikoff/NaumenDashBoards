@@ -1,6 +1,6 @@
 'use strict';
 require('dotenv').config();
-const define = require('./define');
+const {development, dist, mode} = require('./define');
 const loaders = require('./loaders');
 const localIp = require('my-local-ip');
 const optimization = require('./optimization');
@@ -18,17 +18,17 @@ module.exports = {
 			}
 		}
 	},
-	devtool: define.development ? 'source-map' : false,
+	devtool: development ? 'source-map' : false,
 	entry: {
-		'index': ['babel-polyfill', './src/index.js']
+		'index': ['babel-polyfill', './src/index.jsx']
 	},
-	mode: define.mode,
+	mode: mode,
 	module: loaders,
 	optimization,
 	output: {
-		chunkFilename: '[name].[contenthash].js',
-		filename: 'bundle.[contenthash].js',
-		path: define.dist
+		chunkFilename: development ? '[name].js' : '[name].[contenthash].js',
+		filename: development ? 'bundle.js' : 'bundle.[contenthash].js',
+		path: dist
 	},
 	plugins,
 	resolve

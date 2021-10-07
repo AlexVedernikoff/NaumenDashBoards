@@ -1,31 +1,58 @@
 // @flow
+import {addMethod, number} from 'yup';
 import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
-import {number} from 'yup';
+import type {Border} from 'src/store/widgets/data/types';
 
-const borderRequiredMessage = 'В поле границы шкал необходимо указать число';
+const borderRequiredMessage = 'В поле границы шкал необходимо указать либо число либо атрибут';
+const borderValueRequiredMessage = 'В поле границы шкал необходимо указать число';
+const borderRequiredAttributeMessage = 'В поле границы шкал необходимо указать атрибут';
+const borderMinMaxMessage = 'Значение в поле min не может превышать значение в поле max';
+
+/**
+ * Проверяет числовые значения границ
+ * @param {Border} max -значение
+ * @returns {boolean} - результат проверки того, что минимальная граница меньше максимальной
+ */
+function checkBorderMinMax (max: Border) {
+	const {parent: {min}} = this;
+	let result = true;
+
+	if (max.isNumber && min.isNumber && min.value >= max.value) {
+		result = false;
+	}
+
+	return result;
+}
+
+addMethod(object, 'bordersMinMax', function () {
+	return object({
+		indicator: mixed().when(
+			'isNumber', {
+				is: false,
+				then: mixed().requiredAttribute(borderRequiredAttributeMessage).typeError(borderRequiredAttributeMessage)
+			}),
+		value: number().when(
+			'isNumber', {
+				is: true,
+				then: number().required(borderValueRequiredMessage).typeError(borderValueRequiredMessage)
+			})
+	});
+});
+
+addMethod(object, 'borders', function () {
+	return object({
+		max: object().bordersMinMax().test(
+			'check-border-min-max',
+			borderMinMaxMessage,
+			checkBorderMinMax
+		).typeError(borderRequiredMessage),
+		min: object().bordersMinMax().typeError(borderRequiredMessage)
+	});
+});
 
 const schema = object({
 	...baseSchema,
-	borders: object({
-		max: number().test(
-			'check-border-max',
-			'значение в поле max не может быть меньше значения в поле min',
-			function (value: string) {
-				const {min} = this.options.parent;
-
-				return isNaN(parseFloat(min)) || Number(value) > Number(min);
-			}
-		).required(borderRequiredMessage).typeError(borderRequiredMessage),
-		min: number().test(
-			'check-border-min',
-			'значение в поле min не может превышать значение в поле max',
-			function (value: string) {
-				const {max} = this.options.parent;
-
-				return isNaN(parseFloat(max)) || Number(value) < Number(max);
-			}
-		).required(borderRequiredMessage).typeError(borderRequiredMessage)
-	}).default({}),
+	borders: object().borders().default({}),
 	data: array().of(object({
 		indicators: mixed().requiredByCompute(array().indicators()),
 		source: object().source()

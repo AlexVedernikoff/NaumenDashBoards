@@ -106,7 +106,7 @@ export class StyleTab extends Component<Props> {
 				)}
 			</XAXISNAME_CONTEXT.Consumer>
 		</FormField>
-	);;
+	);
 
 	render () {
 		const {hasCustomGroup, values, widget} = this.props;

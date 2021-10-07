@@ -14,7 +14,7 @@ import TextInput from 'components/atoms/TextInput';
 
 export class RangeField extends PureComponent<Props> {
 	getColorBrightness = (color: string) => Math.round(
-			0.2126 * this.getColorNumber(color, 0)
+		0.2126 * this.getColorNumber(color, 0)
 		+ 0.7152 * this.getColorNumber(color, 2)
 		+ 0.0722 * this.getColorNumber(color, 4)
 	);
@@ -32,7 +32,7 @@ export class RangeField extends PureComponent<Props> {
 	};
 
 	handleChangeAbsoluteRange = (event: OnChangeEvent<string>) => {
-		let value = String(event.value);
+		const value = String(event.value);
 
 		if (/^-?(\d+)?(\.)?(\d{1,4})?$/.test(value)) {
 			this.handleChange(event);

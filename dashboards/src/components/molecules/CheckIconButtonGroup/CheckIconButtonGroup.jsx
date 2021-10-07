@@ -17,6 +17,7 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 		const {name, onChange, value: currentValue} = this.props;
 		const {active, name: iconName, title, value} = option;
 		const checked = active || value === currentValue;
+		const content = iconName ? <Icon name={iconName} /> : title;
 
 		return (
 			<CheckIconButton
@@ -27,7 +28,7 @@ export class CheckIconButtonGroup extends PureComponent<Props> {
 				title={title}
 				value={value}
 			>
-				<Icon name={iconName} />
+				{content}
 			</CheckIconButton>
 		);
 	};

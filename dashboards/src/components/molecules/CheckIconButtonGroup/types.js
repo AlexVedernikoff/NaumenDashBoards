@@ -4,7 +4,7 @@ import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Option = {
 	active?: boolean,
-	name: IconName,
+	name?: IconName,
 	title: string,
 	value: string
 };

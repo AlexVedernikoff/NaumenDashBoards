@@ -44,7 +44,7 @@ export class TimerButton extends PureComponent<Props> {
 			}
 
 			if (--timer < 0) {
-					timer = duration;
+				timer = duration;
 			}
 
 			onChangeDuration(timer);
