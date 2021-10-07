@@ -11,6 +11,7 @@
 
 package ru.naumen.modules.dashboards
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import groovy.json.JsonOutput
 import groovy.transform.Field
 import groovy.transform.TupleConstructor
