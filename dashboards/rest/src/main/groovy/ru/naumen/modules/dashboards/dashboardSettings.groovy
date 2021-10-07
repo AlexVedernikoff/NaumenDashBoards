@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
 import ru.naumen.core.shared.IUUIDIdentifiable
 import static MessageProvider.*
-import static ru.naumen.modules.dashboards.CurrentUserHolder.*
+import static CurrentUserHolder.*
 
 import static groovy.json.JsonOutput.toJson
 
