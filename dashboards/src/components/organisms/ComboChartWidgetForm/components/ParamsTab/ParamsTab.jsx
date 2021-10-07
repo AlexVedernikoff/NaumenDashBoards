@@ -50,7 +50,7 @@ export class ParamsTab extends PureComponent<Props> {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
-		if (values.data[index].indicators[0].attribute !== newDataSet.indicators[0].attribute) {
+		if (values.data[index].indicators?.[0].attribute !== newDataSet.indicators[0].attribute) {
 			newData[index] = {
 				...newData[index],
 				yAxisName: getAttributeValue(newDataSet.indicators[0].attribute, 'title')
