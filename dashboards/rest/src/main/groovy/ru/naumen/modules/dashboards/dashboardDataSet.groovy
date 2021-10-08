@@ -202,7 +202,7 @@ class DashboardDataSetService
                              TableRequestSettings tableRequestSettings = null)
     {
         currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
-        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
+        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey, true)
         def widgetSettings = getWidgetSettingsByDashboardSettingsAndWidgetKey(dbSettings, widgetKey, currentUserLocale)
         subjectUUID = getCardObjectUUID(dbSettings, user) ?: subjectUUID
         def diagramType = widgetSettings.type as DiagramType
